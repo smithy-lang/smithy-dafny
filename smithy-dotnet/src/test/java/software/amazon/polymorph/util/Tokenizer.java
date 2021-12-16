@@ -1,12 +1,13 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-package software.amazon.polymorph.smithydotnet.util;
+package software.amazon.polymorph.util;
 
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.Token;
+import software.amazon.polymorph.antlr.CSharpLexer;
 
 import java.util.List;
 

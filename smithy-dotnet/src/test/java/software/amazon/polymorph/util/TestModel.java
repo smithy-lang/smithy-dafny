@@ -1,7 +1,7 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-package software.amazon.polymorph.smithydotnet.util;
+package software.amazon.polymorph.util;
 
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.smithy.model.Model;

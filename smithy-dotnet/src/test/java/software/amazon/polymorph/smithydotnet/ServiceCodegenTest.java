@@ -7,11 +7,10 @@ import org.junit.Test;
 import software.amazon.polymorph.traits.ClientConfigTrait;
 import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
-import software.amazon.polymorph.smithydotnet.util.TestModel;
-import software.amazon.polymorph.smithydotnet.util.Tokenizer;
-import software.amazon.polymorph.smithydotnet.util.Tokenizer.ParseToken;
+import software.amazon.polymorph.util.TestModel;
+import software.amazon.polymorph.util.Tokenizer;
+import software.amazon.polymorph.util.Tokenizer.ParseToken;
 import software.amazon.smithy.model.Model;
-import software.amazon.smithy.model.shapes.IntegerShape;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ResourceShape;
@@ -21,7 +20,6 @@ import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.EnumDefinition;
 import software.amazon.smithy.model.traits.EnumTrait;
-import software.amazon.smithy.model.traits.Trait;
 import software.amazon.smithy.model.traits.TraitDefinition;
 
 import java.nio.file.Path;
@@ -31,8 +29,8 @@ import java.util.Objects;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static software.amazon.polymorph.smithydotnet.util.TestModel.SERVICE_NAMESPACE;
-import static software.amazon.polymorph.smithydotnet.util.TestModel.SERVICE_SHAPE_ID;
+import static software.amazon.polymorph.util.TestModel.SERVICE_NAMESPACE;
+import static software.amazon.polymorph.util.TestModel.SERVICE_SHAPE_ID;
 
 public class ServiceCodegenTest {
     @Test

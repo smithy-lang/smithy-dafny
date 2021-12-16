@@ -6,10 +6,10 @@ package software.amazon.polymorph.smithydotnet;
 import org.junit.Test;
 import software.amazon.polymorph.smithydotnet.TypeConversionCodegen.TypeConverter;
 import software.amazon.polymorph.traits.ClientConfigTrait;
-import software.amazon.polymorph.smithydotnet.util.CSharpLexer;
-import software.amazon.polymorph.smithydotnet.util.TestModel;
-import software.amazon.polymorph.smithydotnet.util.Tokenizer;
-import software.amazon.polymorph.smithydotnet.util.Tokenizer.ParseToken;
+import software.amazon.polymorph.antlr.CSharpLexer;
+import software.amazon.polymorph.util.TestModel;
+import software.amazon.polymorph.util.Tokenizer;
+import software.amazon.polymorph.util.Tokenizer.ParseToken;
 import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.loader.ModelAssembler;
@@ -40,8 +40,8 @@ import static org.junit.Assert.*;
 import static software.amazon.polymorph.smithydotnet.TypeConversionCodegen.TYPE_CONVERSION_CLASS_PATH;
 import static software.amazon.polymorph.smithydotnet.TypeConversionDirection.FROM_DAFNY;
 import static software.amazon.polymorph.smithydotnet.TypeConversionDirection.TO_DAFNY;
-import static software.amazon.polymorph.smithydotnet.util.TestModel.SERVICE_NAMESPACE;
-import static software.amazon.polymorph.smithydotnet.util.TestModel.SERVICE_SHAPE_ID;
+import static software.amazon.polymorph.util.TestModel.SERVICE_NAMESPACE;
+import static software.amazon.polymorph.util.TestModel.SERVICE_SHAPE_ID;
 
 public class TypeConversionCodegenTest {
     private static TypeConversionCodegen setupCodegen(final BiConsumer<ServiceShape.Builder, ModelAssembler> updater) {

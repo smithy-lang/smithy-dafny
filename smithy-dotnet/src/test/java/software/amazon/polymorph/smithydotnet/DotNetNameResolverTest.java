@@ -8,7 +8,7 @@ import software.amazon.polymorph.smithydafny.DafnyNameResolver;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
-import software.amazon.polymorph.smithydotnet.util.TestModel;
+import software.amazon.polymorph.util.TestModel;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.loader.ModelAssembler;
 import software.amazon.smithy.model.shapes.ListShape;
@@ -23,8 +23,8 @@ import software.amazon.smithy.model.traits.EnumTrait;
 import java.util.function.BiConsumer;
 
 import static org.junit.Assert.assertEquals;
-import static software.amazon.polymorph.smithydotnet.util.TestModel.SERVICE_NAMESPACE;
-import static software.amazon.polymorph.smithydotnet.util.TestModel.SERVICE_SHAPE_ID;
+import static software.amazon.polymorph.util.TestModel.SERVICE_NAMESPACE;
+import static software.amazon.polymorph.util.TestModel.SERVICE_SHAPE_ID;
 
 public class DotNetNameResolverTest {
     private DotNetNameResolver setupNameResolver(final BiConsumer<ServiceShape.Builder, ModelAssembler> updater) {

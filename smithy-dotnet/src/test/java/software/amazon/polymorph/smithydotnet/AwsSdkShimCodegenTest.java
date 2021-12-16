@@ -4,9 +4,9 @@
 package software.amazon.polymorph.smithydotnet;
 
 import org.junit.Test;
-import software.amazon.polymorph.smithydotnet.util.TestModel;
-import software.amazon.polymorph.smithydotnet.util.Tokenizer;
-import software.amazon.polymorph.smithydotnet.util.Tokenizer.ParseToken;
+import software.amazon.polymorph.util.TestModel;
+import software.amazon.polymorph.util.Tokenizer;
+import software.amazon.polymorph.util.Tokenizer.ParseToken;
 import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.loader.ModelAssembler;

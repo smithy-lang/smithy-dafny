@@ -5,9 +5,9 @@ package software.amazon.polymorph.smithydotnet;
 
 import org.junit.Test;
 import software.amazon.polymorph.traits.ClientConfigTrait;
-import software.amazon.polymorph.smithydotnet.util.TestModel;
-import software.amazon.polymorph.smithydotnet.util.Tokenizer;
-import software.amazon.polymorph.smithydotnet.util.Tokenizer.ParseToken;
+import software.amazon.polymorph.util.TestModel;
+import software.amazon.polymorph.util.Tokenizer;
+import software.amazon.polymorph.util.Tokenizer.ParseToken;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.loader.ModelAssembler;
 import software.amazon.smithy.model.shapes.OperationShape;
@@ -23,8 +23,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.junit.Assert.*;
-import static software.amazon.polymorph.smithydotnet.util.TestModel.SERVICE_NAMESPACE;
-import static software.amazon.polymorph.smithydotnet.util.TestModel.SERVICE_SHAPE_ID;
+import static software.amazon.polymorph.util.TestModel.SERVICE_NAMESPACE;
+import static software.amazon.polymorph.util.TestModel.SERVICE_SHAPE_ID;
 
 public class ShimCodegenTest {
     private static ShimCodegen setupCodegen(final BiConsumer<ServiceShape.Builder, ModelAssembler> updater) {

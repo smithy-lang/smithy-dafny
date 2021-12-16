@@ -4,9 +4,9 @@
 package software.amazon.polymorph.smithydafny;
 
 import org.junit.Test;
-import software.amazon.polymorph.smithydotnet.util.TestModel;
-import software.amazon.polymorph.smithydotnet.util.Tokenizer;
-import software.amazon.polymorph.smithydotnet.util.Tokenizer.ParseToken;
+import software.amazon.polymorph.util.TestModel;
+import software.amazon.polymorph.util.Tokenizer;
+import software.amazon.polymorph.util.Tokenizer.ParseToken;
 import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.loader.ModelAssembler;
@@ -20,8 +20,8 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 
 import static org.junit.Assert.*;
-import static software.amazon.polymorph.smithydotnet.util.TestModel.SERVICE_NAMESPACE;
-import static software.amazon.polymorph.smithydotnet.util.TestModel.SERVICE_SHAPE_ID;
+import static software.amazon.polymorph.util.TestModel.SERVICE_NAMESPACE;
+import static software.amazon.polymorph.util.TestModel.SERVICE_SHAPE_ID;
 
 // TODO: use Dafny tokenizer instead of C# tokenizer
 public class DafnyApiCodegenTest {
