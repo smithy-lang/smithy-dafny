@@ -281,10 +281,8 @@ public class DafnyApiCodegen {
         final TokenTree params = operationParams.parenthesized();
         final TokenTree returns = TokenTree.of("returns ").append(wrappedReply.parenthesized());
 
-        // The Formal Dafny name for this section of a method is "specification"
-        // However, for the ESDK and Crypto Tools team,
-        // "specification" means our actual RFC/Markdown specs
-        // So we instead use the term Conditions.
+        // The formal Dafny name for this section of a method is "specification".
+        // To avoid confusion with RFC-style "specifications", instead use the term "conditions".
         TokenTree conditions = TokenTree.empty();
 
         TokenTree ensureCalledWith = TokenTree.of(
