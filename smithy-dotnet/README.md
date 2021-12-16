@@ -9,7 +9,7 @@ This project requires Java 16 or above.
 ```bash
 $ # start in project root
 $ pwd
-~/Polymorph-smithy-dotnet/smithy-dotnet
+~/src/polymorph/smithy-dotnet
 
 $ # build
 $ ./gradlew build
@@ -35,9 +35,9 @@ Soon this will be replaced by a real Polymorph build process.
 First export some variables indicating where your ESDK model and .NET ESDK live:
 
 ```bash
-export MODEL_ROOT=  # e.g. ~/brazil/PolymorphDemo/src/AWSEncryptionSDKModel/model
-export DOTNET_ROOT= # e.g. ~/workspace/esdk/dafny/aws-encryption-sdk-net-formally-verified
-export DAFNY_ROOT=  # e.g. ~/workspace/esdk/dafny
+export MODEL_ROOT=  # e.g. ~/src/aws-encryption-sdk-dafny/model
+export DOTNET_ROOT= # e.g. ~/src/aws-encryption-sdk-dafny/aws-encryption-sdk-net-formally-verified
+export DAFNY_ROOT=  # e.g. ~/src/aws-encryption-sdk-dafny
 ```
 
 Then, run the following. You'll likely see a bunch of warnings about "Overwriting existing file".
