@@ -146,11 +146,6 @@ public class ServiceCodegen {
 
     /**
      * Generates the config field and constructor for our base client classes.
-     * TODO: we may eventually want to use a builder pattern or static creation methods for this like we do with our
-     *  other structures. However, for now all of our code to generate those assumes the shape exists in the model,
-     *  which is not true of this client object. Plus the AWS SDK for .NET uses basic constructor patterns like this,
-     *  and we generally want to closely match how they generate code.
-     *  (see e.g. https://tiny.amazon.com/ywxgb47g/githawsawssblobmastsdksrc)
      */
     public TokenTree generateClientConstructor(final ServiceShape serviceShape) {
         final Optional<ClientConfigTrait> configTraitOptional = serviceShape.getTrait(ClientConfigTrait.class);
