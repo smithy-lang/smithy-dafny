@@ -44,6 +44,7 @@ Then, run the following. You'll likely see a bunch of warnings about "Overwritin
 
 ```bash
 # Generate code for material providers
+# NOTE: No Dafny code will be generated, since Dafny codegen doesn't currently support non-AWS-SDK models
 ./gradlew run --args="\
     --output-dotnet $DOTNET_ROOT/Source/API/Generated/Crypto \
     --output-dafny $DAFNY_ROOT/src/Generated \
@@ -57,6 +58,7 @@ Then, run the following. You'll likely see a bunch of warnings about "Overwritin
     -m $MODEL_ROOT -s com.amazonaws.kms#KeyManagementService"
 
 # Generate code for ESDK
+# NOTE: No Dafny code will be generated, since Dafny codegen doesn't currently support non-AWS-SDK models
 ./gradlew run --args="\
     --output-dotnet $DOTNET_ROOT/Source/API/Generated/Esdk \
     --output-dafny $DAFNY_ROOT/src/Generated \
