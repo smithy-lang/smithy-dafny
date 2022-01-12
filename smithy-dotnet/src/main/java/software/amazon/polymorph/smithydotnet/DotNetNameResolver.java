@@ -436,13 +436,10 @@ public class DotNetNameResolver {
         final String baseType = dafnyTypeForShape(memberShape.getTarget());
         final boolean isOptional = memberShapeIsOptional(memberShape);
 
-        // Entity references are represented as Dafny traits, and Dafny traits can't be type parameters. So in the
-        // Dafny implementation of the model, an optional entity reference member is represented as a nullable type T?
-        // instead of an Optional<T>. This works around the limitation.
-        // TODO: remove workaround when https://github.com/dafny-lang/dafny/issues/1499 is resolved
         if (isOptional && !ModelUtils.memberShapeTargetsEntityReference(model, memberShape)) {
-            return "Wrappers_Compile.Option<%s>".formatted(baseType);
+            return "Wrappers_Compile._IOption<%s>".formatted(baseType);
         }
+        // TODO: replace with Option<T>
         return baseType;
     }
 
@@ -475,13 +472,33 @@ public class DotNetNameResolver {
      * as determined above.
      */
     public String dafnyTypeForServiceOperationOutput(final OperationShape operationShape) {
+        return dafnyTypeForServiceOperationOutput(operationShape, false);
+    }
+
+    /**
+     * Like {@link DotNetNameResolver#dafnyTypeForServiceOperationOutput(OperationShape)}, but if the {@code concrete}
+     * parameter is {@code true}, then the concrete compiled-Dafny {@code Result} is returned instead of the abstract
+     * compiled-Dafny {@code Result} ("_IResult").
+     * <p>
+     * The difference is that the abstract {@code Result} is emitted by the Dafny compiler when specifying contracts
+     * (such as method parameter and return types),
+     * whereas the concrete {@code Result} must be used to invoke the {@code create_Success} and
+     * {@code create_Failure} constructors.
+     */
+    public String dafnyTypeForServiceOperationOutput(final OperationShape operationShape, final boolean concrete) {
         final String outputType = operationShape.getOutput()
                 .map(this::dafnyTypeForShape)
                 .orElse(dafnyTypeForUnit());
+        final String errorType = dafnyTypeForServiceError(serviceShape);
         return operationShape.getErrors().isEmpty()
                 ? outputType
-                : "Wrappers_Compile.Result<%s, %s>".formatted(outputType, dafnyTypeForServiceError(serviceShape));
+                : dafnyTypeForResult(outputType, errorType, concrete);
     };
+
+    private String dafnyTypeForResult(final String valueType, final String errorType, final boolean concrete) {
+        final String resultType = concrete ? "Result" : "_IResult";
+        return "Wrappers_Compile.%s<%s, %s>".formatted(resultType, valueType, errorType);
+    }
 
     public String dafnyTypeForUnit() {
         return "_System.Tuple0";

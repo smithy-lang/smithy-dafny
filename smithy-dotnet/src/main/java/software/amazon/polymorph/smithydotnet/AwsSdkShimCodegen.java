@@ -81,7 +81,7 @@ public class AwsSdkShimCodegen {
 
     public TokenTree generateOperationShim(final ShapeId operationShapeId) {
         final OperationShape operationShape = model.expectShape(operationShapeId, OperationShape.class);
-        final String dafnyOutputType = nameResolver.dafnyTypeForServiceOperationOutput(operationShape);
+        final String dafnyOutputType = nameResolver.dafnyTypeForServiceOperationOutput(operationShape, true);
         final String implOperationName = nameResolver.methodForOperation(operationShapeId) + "Async";
 
         final TokenTree sdkRequest = Token.of(operationShape.getInput()
