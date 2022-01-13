@@ -51,7 +51,8 @@ public class AwsSdkTypeConversionCodegenTest {
         final String structureFromDafnyConverterName = AwsSdkDotNetNameResolver.typeConverterForShape(shapeId, FROM_DAFNY);
         final String stringFromDafnyConverterName = AwsSdkDotNetNameResolver.typeConverterForShape(stringShapeId, FROM_DAFNY);
         final List<Tokenizer.ParseToken> expectedTokensFromDafny = Tokenizer.tokenize("""
-                public static Amazon.FoobarService.Model.OopsException %s(Dafny.Com.Amazonaws.Foobar.OopsException value) {
+                public static Amazon.FoobarService.Model.OopsException
+                        %s(Dafny.Com.Amazonaws.Foobar._IOopsException value) {
                     string message = value.message.is_Some ? null : %s(value.message.Extract());
                     return new Amazon.FoobarService.Model.OopsException(message);
                 }""".formatted(
@@ -63,7 +64,8 @@ public class AwsSdkTypeConversionCodegenTest {
         final String structureToDafnyConverterName = AwsSdkDotNetNameResolver.typeConverterForShape(shapeId, TO_DAFNY);
         final String stringToDafnyConverterName = AwsSdkDotNetNameResolver.typeConverterForShape(stringShapeId, TO_DAFNY);
         final List<Tokenizer.ParseToken> expectedTokensToDafny = Tokenizer.tokenize("""
-                public static Dafny.Com.Amazonaws.Foobar.OopsException %s(Amazon.FoobarService.Model.OopsException value) {
+                public static Dafny.Com.Amazonaws.Foobar._IOopsException
+                        %s(Amazon.FoobarService.Model.OopsException value) {
                     Wrappers_Compile.Option<Dafny.ISequence<char>> message = System.String.IsNullOrEmpty(value.Message)
                         ? Wrappers_Compile.Option<Dafny.ISequence<char>>.create_None()
                         : Wrappers_Compile.Option<Dafny.ISequence<char>>.create_Some(%s(value.Message));

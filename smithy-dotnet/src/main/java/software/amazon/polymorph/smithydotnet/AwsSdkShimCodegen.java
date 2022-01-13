@@ -103,8 +103,8 @@ public class AwsSdkShimCodegen {
                 .map(responseShapeId -> "return %s.create_Success(%s(sdkResponse));".formatted(
                         dafnyOutputType,
                         AwsSdkDotNetNameResolver.qualifiedTypeConverter(responseShapeId, TO_DAFNY)))
-                .orElse("return %s.create_Success(new %s());".formatted(
-                        dafnyOutputType, nameResolver.dafnyTypeForUnit())));
+                .orElse("return %s.create_Success(%s);".formatted(
+                        dafnyOutputType, nameResolver.dafnyValueForUnit())));
 
         final TokenTree tryBody = TokenTree.of(assignSdkResponse, callImpl, returnResponse).lineSeparated();
         final TokenTree tryBlock = Token.of("try").append(tryBody.braced());
@@ -139,7 +139,8 @@ public class AwsSdkShimCodegen {
      * model; it's only used here in the shims.
      */
     public TokenTree generateErrorTypeShim() {
-        final String dafnyErrorType = nameResolver.dafnyTypeForServiceError(serviceShape);
+        final String dafnyErrorAbstractType = nameResolver.dafnyAbstractTypeForServiceError(serviceShape);
+        final String dafnyErrorConcreteType = nameResolver.dafnyConcreteTypeForServiceError(serviceShape);
 
         // Collect into TreeSet so that we generate code in a deterministic order (lexicographic, in particular)
         final TreeSet<StructureShape> errorShapes = ModelUtils.streamServiceErrors(model, serviceShape)
@@ -154,7 +155,7 @@ public class AwsSdkShimCodegen {
                     final String errorConverter = DotNetNameResolver.qualifiedTypeConverter(errorShapeId, TO_DAFNY);
                     final TokenTree condition = Token.of("if (error is %s)".formatted(sdkErrorType));
                     final TokenTree body = Token.of("return %s.create_%s(%s((%s) error));".formatted(
-                            dafnyErrorType, dafnyErrorCtor, errorConverter, sdkErrorType));
+                            dafnyErrorConcreteType, dafnyErrorCtor, errorConverter, sdkErrorType));
                     return condition.append(body.braced());
                 })).lineSeparated();
 
@@ -163,10 +164,10 @@ public class AwsSdkShimCodegen {
         final String dafnyUnknownErrorCtor = DotNetNameResolver.dafnyCompiledNameForEnumDefinitionName(
                 dafnyNameResolver.nameForServiceErrorUnknownConstructor(serviceShape));
         final TokenTree convertUnknownError = Token.of("return %s.create_%s(%s(error.Message));".formatted(
-                dafnyErrorType, dafnyUnknownErrorCtor, stringConverter));
+                dafnyErrorConcreteType, dafnyUnknownErrorCtor, stringConverter));
 
         final TokenTree signature = Token.of("private %s %s(%s error)".formatted(
-                dafnyErrorType, CONVERT_ERROR_METHOD, nameResolver.baseExceptionForService()));
+                dafnyErrorAbstractType, CONVERT_ERROR_METHOD, nameResolver.baseExceptionForService()));
         final TokenTree body = TokenTree.of(convertKnownErrors, convertUnknownError).lineSeparated();
         return signature.append(body.braced());
     }

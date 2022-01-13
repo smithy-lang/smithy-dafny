@@ -389,15 +389,23 @@ public class DotNetNameResolver {
         };
     }
 
-    // We explicitly specify the Dafny namespace just in case of collisions.
-    private String dafnyTypeForShapeWithExplicitDatatype(final ShapeId shapeId) {
-        return "%s.%s".formatted(DafnyNameResolver.dafnyExternNamespaceForShapeId(shapeId), shapeId.getName(serviceShape));
+    public String dafnyConcreteTypeForEnum(final ShapeId shapeId) {
+        return dafnyTypeForEnum(shapeId, true);
+    }
+
+    private String dafnyTypeForEnum(final ShapeId shapeId, final boolean concrete) {
+        final String typePrefix = concrete ? "" : "_I";
+        // We explicitly specify the Dafny namespace just in case of collisions.
+        return "%s.%s%s".formatted(
+                DafnyNameResolver.dafnyExternNamespaceForShapeId(shapeId),
+                typePrefix,
+                shapeId.getName(serviceShape));
     }
 
     private String dafnyTypeForString(final StringShape stringShape) {
         final ShapeId shapeId = stringShape.getId();
         if (stringShape.hasTrait(EnumTrait.class)) {
-            return dafnyTypeForShapeWithExplicitDatatype(shapeId);
+            return dafnyTypeForEnum(shapeId, false);
         }
         if (stringShape.hasTrait(DafnyUtf8BytesTrait.class)) {
             return "Dafny.ISequence<byte>";
@@ -429,18 +437,49 @@ public class DotNetNameResolver {
         }
 
         // The Dafny type of other structures is simply the structure's name.
-        return dafnyTypeForShapeWithExplicitDatatype(structureShape.getId());
+        // We explicitly specify the Dafny namespace just in case of collisions.
+        final ShapeId shapeId = structureShape.getId();
+        return "%s._I%s".formatted(
+                DafnyNameResolver.dafnyExternNamespaceForShapeId(shapeId),
+                shapeId.getName(serviceShape));
+    }
+
+    /**
+     * Returns the name of the concrete Dafny type for the given regular (i.e. not an enum or reference) structure.
+     *
+     * This should only be used to access members absent from the abstract type, e.g. the constructor.
+     */
+    public String dafnyConcreteTypeForRegularStructure(final StructureShape structureShape) {
+        final ShapeId shapeId = structureShape.getId();
+        return "%s.%s".formatted(
+                DafnyNameResolver.dafnyExternNamespaceForShapeId(shapeId),
+                shapeId.getName(serviceShape));
     }
 
     private String dafnyTypeForMember(final MemberShape memberShape) {
-        final String baseType = dafnyTypeForShape(memberShape.getTarget());
         final boolean isOptional = memberShapeIsOptional(memberShape);
 
-        if (isOptional && !ModelUtils.memberShapeTargetsEntityReference(model, memberShape)) {
-            return "Wrappers_Compile._IOption<%s>".formatted(baseType);
+        if (isOptional
+                // TODO remove this condition to use Option<T> instead of T? for entity types T
+                && !ModelUtils.memberShapeTargetsEntityReference(model, memberShape)) {
+            return dafnyTypeForOptionalMember(memberShape, false);
         }
-        // TODO: replace with Option<T>
-        return baseType;
+
+        return dafnyTypeForShape(memberShape.getTarget());
+    }
+
+    public String dafnyConcreteTypeForOptionalMember(final MemberShape memberShape) {
+        return dafnyTypeForOptionalMember(memberShape, true);
+    }
+
+    private String dafnyTypeForOptionalMember(final MemberShape memberShape, final boolean concrete) {
+        if (!memberShapeIsOptional(memberShape)) {
+            throw new IllegalArgumentException("memberShape must be optional");
+        }
+
+        final String baseType = dafnyTypeForShape(memberShape.getTarget());
+        final String prefix = concrete ? "" : "_I";
+        return "Wrappers_Compile.%sOption<%s>".formatted(prefix, baseType);
     }
 
     private String dafnyTypeForService(final ServiceShape serviceShape) {
@@ -453,7 +492,26 @@ public class DotNetNameResolver {
         return "%s.%s".formatted(DafnyNameResolver.dafnyExternNamespaceForShapeId(resourceShapeId), interfaceForResource(resourceShapeId));
     }
 
-    public String dafnyTypeForServiceError(final ServiceShape serviceShape) {
+    /**
+     * Returns the abstract Dafny type representing errors for the given service.
+     * <p>
+     * This should generally be preferred to using the concrete Dafny type;
+     * see {@link DotNetNameResolver#dafnyConcreteTypeForServiceError(ServiceShape)}.
+     */
+    public String dafnyAbstractTypeForServiceError(final ServiceShape serviceShape) {
+        return "%s._I%sError".formatted(
+                DafnyNameResolver.dafnyExternNamespaceForShapeId(serviceShape.getId()),
+                serviceShape.getContextualName(serviceShape));
+    }
+
+    /**
+     * Returns the concrete Dafny type representing errors for the given service.
+     * <p>
+     * This must be used for accessing particular error constructors;
+     * otherwise, prefer to use the abstract Dafny type
+     * ({@link DotNetNameResolver#dafnyAbstractTypeForServiceError(ServiceShape)}).
+     */
+    public String dafnyConcreteTypeForServiceError(final ServiceShape serviceShape) {
         return "%s.%sError".formatted(
                 DafnyNameResolver.dafnyExternNamespaceForShapeId(serviceShape.getId()),
                 serviceShape.getContextualName(serviceShape));
@@ -489,7 +547,7 @@ public class DotNetNameResolver {
         final String outputType = operationShape.getOutput()
                 .map(this::dafnyTypeForShape)
                 .orElse(dafnyTypeForUnit());
-        final String errorType = dafnyTypeForServiceError(serviceShape);
+        final String errorType = dafnyAbstractTypeForServiceError(serviceShape);
         return operationShape.getErrors().isEmpty()
                 ? outputType
                 : dafnyTypeForResult(outputType, errorType, concrete);
@@ -501,7 +559,11 @@ public class DotNetNameResolver {
     }
 
     public String dafnyTypeForUnit() {
-        return "_System.Tuple0";
+        return "_System._ITuple0";
+    }
+
+    public String dafnyValueForUnit() {
+        return "_System.Tuple0.Default()";
     }
 
     /**

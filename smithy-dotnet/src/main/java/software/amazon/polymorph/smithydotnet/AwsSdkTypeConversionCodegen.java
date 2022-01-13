@@ -86,9 +86,9 @@ public class AwsSdkTypeConversionCodegen extends TypeConversionCodegen {
                     : %1$s.create_Some(%2$s(value.Message));
                 return new %3$s(message);
                 """.formatted(
-                nameResolver.dafnyTypeForShape(messageMember.getId()),
-                AwsSdkDotNetNameResolver.typeConverterForShape(messageTarget.getId(), TO_DAFNY),
-                nameResolver.dafnyTypeForShape(structureShape.getId())));
+                        nameResolver.dafnyConcreteTypeForOptionalMember(messageMember),
+                        AwsSdkDotNetNameResolver.typeConverterForShape(messageTarget.getId(), TO_DAFNY),
+                        nameResolver.dafnyConcreteTypeForRegularStructure(structureShape)));
 
         return buildConverterFromMethodBodies(structureShape, fromDafnyBody, toDafnyBody);
     }

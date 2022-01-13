@@ -383,7 +383,7 @@ public class TypeConversionCodegen {
         ).separated(Token.of(','));
         final TokenTree toDafnyBody = TokenTree.of(
                 Token.of("return new"),
-                Token.of(nameResolver.dafnyTypeForShape(structureShape.getId())),
+                Token.of(nameResolver.dafnyConcreteTypeForRegularStructure(structureShape)),
                 constructorArgs.parenthesized(),
                 Token.of(';')
         );
@@ -411,7 +411,7 @@ public class TypeConversionCodegen {
 
         final String cSharpType = nameResolver.baseTypeForShape(targetShape.getId());
         final String cSharpOptionType = nameResolver.baseTypeForShape(memberShape.getId());
-        final String dafnyOptionType = nameResolver.dafnyTypeForShape(memberShape.getId());
+        final String dafnyOptionType = nameResolver.dafnyConcreteTypeForOptionalMember(memberShape);
         final TokenTree fromDafnyBody = Token.of("return value.is_None ? (%s) null : %s(value.Extract());"
                 .formatted(cSharpOptionType, targetFromDafnyConverterName));
         final TokenTree toDafnyBody = Token.of(
@@ -513,7 +513,7 @@ public class TypeConversionCodegen {
                 .map(name -> new EnumDefNames(name, DotNetNameResolver.dafnyCompiledNameForEnumDefinitionName(name)))
                 .toList();
         final String enumClass = nameResolver.baseTypeForShape(stringShape.getId());
-        final String dafnyEnumBaseClass = nameResolver.dafnyTypeForShape(stringShape.getId());
+        final String dafnyEnumConcreteType = nameResolver.dafnyConcreteTypeForEnum(stringShape.getId());
         final Token throwInvalidEnumValue = Token.of("\nthrow new System.ArgumentException(\"Invalid %s value\");"
                 .formatted(enumClass));
 
@@ -526,11 +526,11 @@ public class TypeConversionCodegen {
         final TokenTree toDafnyBody = TokenTree.of(defNames.stream()
                 .map(names -> {
                     final String condition = "%s.%s.Equals(value)".formatted(enumClass, names.defName);
-                    // Dafny doesn't generate a "create_FOOBAR" ctor if there's only one ctor
-                    final String construct = defNames.size() == 1
-                        ? "new %s()".formatted(dafnyEnumBaseClass)
-                        : "%s.create_%s()".formatted(dafnyEnumBaseClass, names.dafnyName);
-                    return "if (%s) return %s;".formatted(condition, construct);
+                    // Dafny generates just "create" instead of "create_FOOBAR" if there's only one ctor
+                    final String createSuffix = defNames.size() == 1
+                        ? ""
+                        : "_%s".formatted(names.dafnyName);
+                    return "if (%s) return %s.create%s();".formatted(condition, dafnyEnumConcreteType, createSuffix);
                 })
                 .map(Token::of))
                 .lineSeparated()
