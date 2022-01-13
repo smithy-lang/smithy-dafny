@@ -60,7 +60,7 @@ public class AwsSdkShimCodegenTest {
                             this._impl = impl;
                         }
                         
-                        private Dafny.Com.Amazonaws.Foobar.FoobarServiceError ConvertError(
+                        private Dafny.Com.Amazonaws.Foobar._IFoobarServiceError ConvertError(
                                 Amazon.FoobarService.AmazonFoobarServiceException error) {
                             return Dafny.Com.Amazonaws.Foobar.FoobarServiceError.create_FoobarService__Unknown(
                                     %s(error.Message));
@@ -142,24 +142,25 @@ public class AwsSdkShimCodegenTest {
         final List<ParseToken> actualTokens = Tokenizer.tokenize(
                 codegen.generateOperationShim(operationShapeId).toString());
 
-        final String resultType = "Wrappers_Compile.Result<%s, %s>"
-                .formatted("Dafny.Com.Amazonaws.Foobar.GoResponse", "Dafny.Com.Amazonaws.Foobar.FoobarServiceError");
+        final String resultTypeParams = "%s, %s".formatted(
+                "Dafny.Com.Amazonaws.Foobar._IGoResponse", "Dafny.Com.Amazonaws.Foobar._IFoobarServiceError");
         final String requestFromDafnyConverter =
                 AwsSdkDotNetNameResolver.qualifiedTypeConverter(requestShapeId, FROM_DAFNY);
-        final String responseToDafnyConverter = AwsSdkDotNetNameResolver.qualifiedTypeConverter(responseShapeId, TO_DAFNY);
+        final String responseToDafnyConverter =
+                AwsSdkDotNetNameResolver.qualifiedTypeConverter(responseShapeId, TO_DAFNY);
         final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
-                public %1$s Go(Dafny.Com.Amazonaws.Foobar.GoRequest request) {
+                public Wrappers_Compile._IResult<%1$s> Go(Dafny.Com.Amazonaws.Foobar._IGoRequest request) {
                     Amazon.FoobarService.Model.GoRequest sdkRequest = %2$s(request);
                     try {
                         Amazon.FoobarService.Model.GoResponse sdkResponse =
                             this._impl.GoAsync(sdkRequest).Result;
-                        return %1$s.create_Success(%3$s(sdkResponse));
+                        return Wrappers_Compile.Result<%1$s>.create_Success(%3$s(sdkResponse));
                     }
                     catch (Amazon.FoobarService.AmazonFoobarServiceException ex) {
-                        return %1$s.create_Failure(this.ConvertError(ex));
+                        return Wrappers_Compile.Result<%1$s>.create_Failure(this.ConvertError(ex));
                     }
                 }
-                """.formatted(resultType, requestFromDafnyConverter, responseToDafnyConverter));
+                """.formatted(resultTypeParams, requestFromDafnyConverter, responseToDafnyConverter));
 
         assertEquals(expectedTokens, actualTokens);
     }
@@ -190,7 +191,7 @@ public class AwsSdkShimCodegenTest {
         final String stringConverter = AwsSdkDotNetNameResolver.qualifiedTypeConverter(
                 ShapeId.from("smithy.api#String"), TO_DAFNY);
         final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
-                private Dafny.Com.Amazonaws.Foobar.FoobarServiceError ConvertError(
+                private Dafny.Com.Amazonaws.Foobar._IFoobarServiceError ConvertError(
                         Amazon.FoobarService.AmazonFoobarServiceException error) {
                     if (error is Amazon.FoobarService.Model.Bang) {
                         return Dafny.Com.Amazonaws.Foobar.FoobarServiceError.create_FoobarService__Bang(

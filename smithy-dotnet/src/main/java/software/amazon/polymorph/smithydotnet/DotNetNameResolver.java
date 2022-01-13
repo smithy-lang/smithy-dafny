@@ -389,15 +389,23 @@ public class DotNetNameResolver {
         };
     }
 
-    // We explicitly specify the Dafny namespace just in case of collisions.
-    private String dafnyTypeForShapeWithExplicitDatatype(final ShapeId shapeId) {
-        return "%s.%s".formatted(DafnyNameResolver.dafnyExternNamespaceForShapeId(shapeId), shapeId.getName(serviceShape));
+    public String dafnyConcreteTypeForEnum(final ShapeId shapeId) {
+        return dafnyTypeForEnum(shapeId, true);
+    }
+
+    private String dafnyTypeForEnum(final ShapeId shapeId, final boolean concrete) {
+        final String typePrefix = concrete ? "" : "_I";
+        // We explicitly specify the Dafny namespace just in case of collisions.
+        return "%s.%s%s".formatted(
+                DafnyNameResolver.dafnyExternNamespaceForShapeId(shapeId),
+                typePrefix,
+                shapeId.getName(serviceShape));
     }
 
     private String dafnyTypeForString(final StringShape stringShape) {
         final ShapeId shapeId = stringShape.getId();
         if (stringShape.hasTrait(EnumTrait.class)) {
-            return dafnyTypeForShapeWithExplicitDatatype(shapeId);
+            return dafnyTypeForEnum(shapeId, false);
         }
         if (stringShape.hasTrait(DafnyUtf8BytesTrait.class)) {
             return "Dafny.ISequence<byte>";
@@ -429,21 +437,49 @@ public class DotNetNameResolver {
         }
 
         // The Dafny type of other structures is simply the structure's name.
-        return dafnyTypeForShapeWithExplicitDatatype(structureShape.getId());
+        // We explicitly specify the Dafny namespace just in case of collisions.
+        final ShapeId shapeId = structureShape.getId();
+        return "%s._I%s".formatted(
+                DafnyNameResolver.dafnyExternNamespaceForShapeId(shapeId),
+                shapeId.getName(serviceShape));
+    }
+
+    /**
+     * Returns the name of the concrete Dafny type for the given regular (i.e. not an enum or reference) structure.
+     *
+     * This should only be used to access members absent from the abstract type, e.g. the constructor.
+     */
+    public String dafnyConcreteTypeForRegularStructure(final StructureShape structureShape) {
+        final ShapeId shapeId = structureShape.getId();
+        return "%s.%s".formatted(
+                DafnyNameResolver.dafnyExternNamespaceForShapeId(shapeId),
+                shapeId.getName(serviceShape));
     }
 
     private String dafnyTypeForMember(final MemberShape memberShape) {
-        final String baseType = dafnyTypeForShape(memberShape.getTarget());
         final boolean isOptional = memberShapeIsOptional(memberShape);
 
-        // Entity references are represented as Dafny traits, and Dafny traits can't be type parameters. So in the
-        // Dafny implementation of the model, an optional entity reference member is represented as a nullable type T?
-        // instead of an Optional<T>. This works around the limitation.
-        // TODO: remove workaround when https://github.com/dafny-lang/dafny/issues/1499 is resolved
-        if (isOptional && !ModelUtils.memberShapeTargetsEntityReference(model, memberShape)) {
-            return "Wrappers_Compile.Option<%s>".formatted(baseType);
+        if (isOptional
+                // TODO remove this condition to use Option<T> instead of T? for entity types T
+                && !ModelUtils.memberShapeTargetsEntityReference(model, memberShape)) {
+            return dafnyTypeForOptionalMember(memberShape, false);
         }
-        return baseType;
+
+        return dafnyTypeForShape(memberShape.getTarget());
+    }
+
+    public String dafnyConcreteTypeForOptionalMember(final MemberShape memberShape) {
+        return dafnyTypeForOptionalMember(memberShape, true);
+    }
+
+    private String dafnyTypeForOptionalMember(final MemberShape memberShape, final boolean concrete) {
+        if (!memberShapeIsOptional(memberShape)) {
+            throw new IllegalArgumentException("memberShape must be optional");
+        }
+
+        final String baseType = dafnyTypeForShape(memberShape.getTarget());
+        final String prefix = concrete ? "" : "_I";
+        return "Wrappers_Compile.%sOption<%s>".formatted(prefix, baseType);
     }
 
     private String dafnyTypeForService(final ServiceShape serviceShape) {
@@ -456,7 +492,26 @@ public class DotNetNameResolver {
         return "%s.%s".formatted(DafnyNameResolver.dafnyExternNamespaceForShapeId(resourceShapeId), interfaceForResource(resourceShapeId));
     }
 
-    public String dafnyTypeForServiceError(final ServiceShape serviceShape) {
+    /**
+     * Returns the abstract Dafny type representing errors for the given service.
+     * <p>
+     * This should generally be preferred to using the concrete Dafny type;
+     * see {@link DotNetNameResolver#dafnyConcreteTypeForServiceError(ServiceShape)}.
+     */
+    public String dafnyAbstractTypeForServiceError(final ServiceShape serviceShape) {
+        return "%s._I%sError".formatted(
+                DafnyNameResolver.dafnyExternNamespaceForShapeId(serviceShape.getId()),
+                serviceShape.getContextualName(serviceShape));
+    }
+
+    /**
+     * Returns the concrete Dafny type representing errors for the given service.
+     * <p>
+     * This must be used for accessing particular error constructors;
+     * otherwise, prefer to use the abstract Dafny type
+     * ({@link DotNetNameResolver#dafnyAbstractTypeForServiceError(ServiceShape)}).
+     */
+    public String dafnyConcreteTypeForServiceError(final ServiceShape serviceShape) {
         return "%s.%sError".formatted(
                 DafnyNameResolver.dafnyExternNamespaceForShapeId(serviceShape.getId()),
                 serviceShape.getContextualName(serviceShape));
@@ -475,16 +530,40 @@ public class DotNetNameResolver {
      * as determined above.
      */
     public String dafnyTypeForServiceOperationOutput(final OperationShape operationShape) {
+        return dafnyTypeForServiceOperationOutput(operationShape, false);
+    }
+
+    /**
+     * Like {@link DotNetNameResolver#dafnyTypeForServiceOperationOutput(OperationShape)}, but if the {@code concrete}
+     * parameter is {@code true}, then the concrete compiled-Dafny {@code Result} is returned instead of the abstract
+     * compiled-Dafny {@code Result} ("_IResult").
+     * <p>
+     * The difference is that the abstract {@code Result} is emitted by the Dafny compiler when specifying contracts
+     * (such as method parameter and return types),
+     * whereas the concrete {@code Result} must be used to invoke the {@code create_Success} and
+     * {@code create_Failure} constructors.
+     */
+    public String dafnyTypeForServiceOperationOutput(final OperationShape operationShape, final boolean concrete) {
         final String outputType = operationShape.getOutput()
                 .map(this::dafnyTypeForShape)
                 .orElse(dafnyTypeForUnit());
+        final String errorType = dafnyAbstractTypeForServiceError(serviceShape);
         return operationShape.getErrors().isEmpty()
                 ? outputType
-                : "Wrappers_Compile.Result<%s, %s>".formatted(outputType, dafnyTypeForServiceError(serviceShape));
+                : dafnyTypeForResult(outputType, errorType, concrete);
     };
 
+    private String dafnyTypeForResult(final String valueType, final String errorType, final boolean concrete) {
+        final String resultType = concrete ? "Result" : "_IResult";
+        return "Wrappers_Compile.%s<%s, %s>".formatted(resultType, valueType, errorType);
+    }
+
     public String dafnyTypeForUnit() {
-        return "_System.Tuple0";
+        return "_System._ITuple0";
+    }
+
+    public String dafnyValueForUnit() {
+        return "_System.Tuple0.Default()";
     }
 
     /**

@@ -183,7 +183,7 @@ public class ShimCodegenTest {
 
         final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
                 protected override void _DoIt(Test.Foobar.Input input) {
-                    Dafny.Test.Foobar.Input internalInput = %s(input);
+                    Dafny.Test.Foobar._IInput internalInput = %s(input);
                     this._impl.DoIt(internalInput);
                 }
                 """.formatted(DotNetNameResolver.qualifiedTypeConverter(inputShapeId, TypeConversionDirection.TO_DAFNY)));
@@ -206,7 +206,7 @@ public class ShimCodegenTest {
 
         final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
                 protected override Test.Foobar.Output _DoIt() {
-                    Dafny.Test.Foobar.Output internalOutput =
+                    Dafny.Test.Foobar._IOutput internalOutput =
                     this._impl.DoIt();
                     return %s(internalOutput);
                 }
@@ -234,8 +234,8 @@ public class ShimCodegenTest {
 
         final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
                 protected override Test.Foobar.Output _DoIt(Test.Foobar.Input input) {
-                    Dafny.Test.Foobar.Input internalInput = %s(input);
-                    Dafny.Test.Foobar.Output internalOutput =
+                    Dafny.Test.Foobar._IInput internalInput = %s(input);
+                    Dafny.Test.Foobar._IOutput internalOutput =
                     this._impl.DoIt(internalInput);
                     return %s(internalOutput);
                 }

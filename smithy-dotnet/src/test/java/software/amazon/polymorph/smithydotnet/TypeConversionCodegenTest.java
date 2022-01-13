@@ -228,7 +228,7 @@ public class TypeConversionCodegenTest {
         final List<ParseToken> actualTokensFromDafny = Tokenizer.tokenize(converter.fromDafny().toString());
         final String fromDafnyConverterName = DotNetNameResolver.typeConverterForShape(shapeId, FROM_DAFNY);
         final List<ParseToken> expectedTokensFromDafny = Tokenizer.tokenize("""
-                public static Test.Foobar.AnEnum %s(Dafny.Test.Foobar.AnEnum value) {
+                public static Test.Foobar.AnEnum %s(Dafny.Test.Foobar._IAnEnum value) {
                     if (value.is_VERSION__A) return Test.Foobar.AnEnum.VERSION_A;
                     if (value.is_VERSION__B) return Test.Foobar.AnEnum.VERSION_B;
                     throw new System.ArgumentException("Invalid Test.Foobar.AnEnum value");
@@ -238,7 +238,7 @@ public class TypeConversionCodegenTest {
         final List<ParseToken> actualTokensToDafny = Tokenizer.tokenize(converter.toDafny().toString());
         final String toDafnyConverterName = DotNetNameResolver.typeConverterForShape(shapeId, TO_DAFNY);
         final List<ParseToken> expectedTokensToDafny = Tokenizer.tokenize("""
-                public static Dafny.Test.Foobar.AnEnum %s(Test.Foobar.AnEnum value) {
+                public static Dafny.Test.Foobar._IAnEnum %s(Test.Foobar.AnEnum value) {
                     if (Test.Foobar.AnEnum.VERSION_A.Equals(value)) return Dafny.Test.Foobar.AnEnum.create_VERSION__A();
                     if (Test.Foobar.AnEnum.VERSION_B.Equals(value)) return Dafny.Test.Foobar.AnEnum.create_VERSION__B();
                     throw new System.ArgumentException("Invalid Test.Foobar.AnEnum value");
@@ -268,7 +268,7 @@ public class TypeConversionCodegenTest {
         final List<ParseToken> actualTokensFromDafny = Tokenizer.tokenize(converter.fromDafny().toString());
         final String fromDafnyConverterName = DotNetNameResolver.typeConverterForShape(shapeId, FROM_DAFNY);
         final List<ParseToken> expectedTokensFromDafny = Tokenizer.tokenize("""
-                public static Test.Foobar.AnEnum %s(Dafny.Test.Foobar.AnEnum value) {
+                public static Test.Foobar.AnEnum %s(Dafny.Test.Foobar._IAnEnum value) {
                     if (value.is_VERSION__A) return Test.Foobar.AnEnum.VERSION_A;
                     throw new System.ArgumentException("Invalid Test.Foobar.AnEnum value");
                 }""".formatted(fromDafnyConverterName));
@@ -277,8 +277,8 @@ public class TypeConversionCodegenTest {
         final List<ParseToken> actualTokensToDafny = Tokenizer.tokenize(converter.toDafny().toString());
         final String toDafnyConverterName = DotNetNameResolver.typeConverterForShape(shapeId, TO_DAFNY);
         final List<ParseToken> expectedTokensToDafny = Tokenizer.tokenize("""
-                public static Dafny.Test.Foobar.AnEnum %s(Test.Foobar.AnEnum value) {
-                    if (Test.Foobar.AnEnum.VERSION_A.Equals(value)) return new Dafny.Test.Foobar.AnEnum();
+                public static Dafny.Test.Foobar._IAnEnum %s(Test.Foobar.AnEnum value) {
+                    if (Test.Foobar.AnEnum.VERSION_A.Equals(value)) return Dafny.Test.Foobar.AnEnum.create();
                     throw new System.ArgumentException("Invalid Test.Foobar.AnEnum value");
                 }""".formatted(toDafnyConverterName));
         assertEquals(expectedTokensToDafny, actualTokensToDafny);
@@ -492,11 +492,12 @@ public class TypeConversionCodegenTest {
         final String boolFromDafnyConverterName = DotNetNameResolver.typeConverterForShape(boolMemberId, FROM_DAFNY);
         final String stringFromDafnyConverterName = DotNetNameResolver.typeConverterForShape(stringMemberId, FROM_DAFNY);
         final List<ParseToken> expectedTokensFromDafny = Tokenizer.tokenize("""
-                public static Test.Foobar.IntAndBool %s(Dafny.Test.Foobar.IntAndBool value) {
+                public static Test.Foobar.IntAndBool %s(Dafny.Test.Foobar._IIntAndBool value) {
+                    Dafny.Test.Foobar.IntAndBool concrete = (Dafny.Test.Foobar.IntAndBool)value;
                     Test.Foobar.IntAndBool converted = new Test.Foobar.IntAndBool();
-                    if (value.someInt.is_Some) converted.SomeInt = (int) %s(value.someInt);
-                    converted.SomeBool = (bool) %s(value.someBool);
-                    if (value.someString.is_Some) converted.SomeString = (string) %s(value.someString);
+                    if (concrete.someInt.is_Some) converted.SomeInt = (int) %s(concrete.someInt);
+                    converted.SomeBool = (bool) %s(concrete.someBool);
+                    if (concrete.someString.is_Some) converted.SomeString = (string) %s(concrete.someString);
                     return converted;
                 }""".formatted(
                         structureFromDafnyConverterName,
@@ -511,7 +512,7 @@ public class TypeConversionCodegenTest {
         final String boolToDafnyConverterName = DotNetNameResolver.typeConverterForShape(boolMemberId, TO_DAFNY);
         final String stringToDafnyConverterName = DotNetNameResolver.typeConverterForShape(stringMemberId, TO_DAFNY);
         final List<ParseToken> expectedTokensToDafny = Tokenizer.tokenize("""
-                public static Dafny.Test.Foobar.IntAndBool %s(Test.Foobar.IntAndBool value) {
+                public static Dafny.Test.Foobar._IIntAndBool %s(Test.Foobar.IntAndBool value) {
                     return new Dafny.Test.Foobar.IntAndBool(
                         %s(value.SomeInt),
                         %s(value.SomeBool),
@@ -655,7 +656,7 @@ public class TypeConversionCodegenTest {
         final String memberFromDafnyConverterName = DotNetNameResolver.typeConverterForShape(memberShapeId, FROM_DAFNY);
         final String targetFromDafnyConverterName = DotNetNameResolver.typeConverterForShape(targetShapeId, FROM_DAFNY);
         final List<ParseToken> expectedTokensFromDafny = Tokenizer.tokenize("""
-                public static int? %s(Wrappers_Compile.Option<int> value) {
+                public static int? %s(Wrappers_Compile._IOption<int> value) {
                     return value.is_None ? (int?) null : %s(value.Extract());
                 }""".formatted(memberFromDafnyConverterName, targetFromDafnyConverterName));
         assertEquals(expectedTokensFromDafny, actualTokensFromDafny);
@@ -664,7 +665,7 @@ public class TypeConversionCodegenTest {
         final String memberToDafnyConverterName = DotNetNameResolver.typeConverterForShape(memberShapeId, TO_DAFNY);
         final String targetToDafnyConverterName = DotNetNameResolver.typeConverterForShape(targetShapeId, TO_DAFNY);
         final List<ParseToken> expectedTokensToDafny = Tokenizer.tokenize("""
-                public static Wrappers_Compile.Option<int> %s(int? value) {
+                public static Wrappers_Compile._IOption<int> %s(int? value) {
                     return value == null
                         ? Wrappers_Compile.Option<int>.create_None()
                         : Wrappers_Compile.Option<int>.create_Some(%s((int) value));

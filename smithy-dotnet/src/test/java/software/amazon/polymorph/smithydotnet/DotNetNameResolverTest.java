@@ -97,7 +97,7 @@ public class DotNetNameResolverTest {
                 .build();
         final DotNetNameResolver nameResolver = setupNameResolver(
                 (builder, modelAssembler) -> modelAssembler.addShape(enumStringShape));
-        assertEquals("Dafny.Test.Foobar.EnumString", nameResolver.dafnyTypeForShape(enumStringShape.getId()));
+        assertEquals("Dafny.Test.Foobar._IEnumString", nameResolver.dafnyTypeForShape(enumStringShape.getId()));
     }
 
     @Test
@@ -137,7 +137,7 @@ public class DotNetNameResolverTest {
         final StructureShape foobarStructureShape = TestModel.setupFoobarStructureShape();
         final DotNetNameResolver nameResolver = setupNameResolver(
                 (builder, modelAssembler) -> modelAssembler.addShape(foobarStructureShape));
-        assertEquals("Dafny.Test.Foobar.Foobar", nameResolver.dafnyTypeForShape(foobarStructureShape.getId()));
+        assertEquals("Dafny.Test.Foobar._IFoobar", nameResolver.dafnyTypeForShape(foobarStructureShape.getId()));
     }
 
     @Test
@@ -173,9 +173,9 @@ public class DotNetNameResolverTest {
         final StructureShape foobarStructureShape = TestModel.setupFoobarStructureShape();
         final DotNetNameResolver nameResolver = setupNameResolver(
                 (builder, modelAssembler) -> modelAssembler.addShape(foobarStructureShape));
-        assertEquals("Wrappers_Compile.Option<int>",
+        assertEquals("Wrappers_Compile._IOption<int>",
                 nameResolver.dafnyTypeForShape(ShapeId.fromParts(SERVICE_NAMESPACE, "Foobar", "someInt")));
-        assertEquals("Wrappers_Compile.Option<Dafny.ISequence<char>>",
+        assertEquals("Wrappers_Compile._IOption<Dafny.ISequence<char>>",
                 nameResolver.dafnyTypeForShape(ShapeId.fromParts(SERVICE_NAMESPACE, "Foobar", "someString")));
         assertEquals("bool",
                 nameResolver.dafnyTypeForShape(ShapeId.fromParts(SERVICE_NAMESPACE, "Foobar", "someBool")));
