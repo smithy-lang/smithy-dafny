@@ -168,6 +168,9 @@ public class CodegenCli {
             }
             final FileWriter fileWriter = new FileWriter(file);
             fileWriter.write(text);
+            if (!text.endsWith("\n")) {
+                fileWriter.write("\n");
+            }
             fileWriter.close();
         } catch (IOException e) {
             logger.error("Could not write to file {}", file);
