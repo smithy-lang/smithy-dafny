@@ -493,10 +493,11 @@ public class TypeConversionCodegenTest {
         final String stringFromDafnyConverterName = DotNetNameResolver.typeConverterForShape(stringMemberId, FROM_DAFNY);
         final List<ParseToken> expectedTokensFromDafny = Tokenizer.tokenize("""
                 public static Test.Foobar.IntAndBool %s(Dafny.Test.Foobar._IIntAndBool value) {
+                    Dafny.Test.Foobar.IntAndBool concrete = (Dafny.Test.Foobar.IntAndBool)value;
                     Test.Foobar.IntAndBool converted = new Test.Foobar.IntAndBool();
-                    if (value.someInt.is_Some) converted.SomeInt = (int) %s(value.someInt);
-                    converted.SomeBool = (bool) %s(value.someBool);
-                    if (value.someString.is_Some) converted.SomeString = (string) %s(value.someString);
+                    if (concrete.someInt.is_Some) converted.SomeInt = (int) %s(concrete.someInt);
+                    converted.SomeBool = (bool) %s(concrete.someBool);
+                    if (concrete.someString.is_Some) converted.SomeString = (string) %s(concrete.someString);
                     return converted;
                 }""".formatted(
                         structureFromDafnyConverterName,

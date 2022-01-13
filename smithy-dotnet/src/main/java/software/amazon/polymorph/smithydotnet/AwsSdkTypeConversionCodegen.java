@@ -74,11 +74,13 @@ public class AwsSdkTypeConversionCodegen extends TypeConversionCodegen {
                 .orElseThrow(() -> new IllegalArgumentException("An error structure's 'message' member must be a string"));
 
         final TokenTree fromDafnyBody = Token.of("""
-                string message = value.message.is_Some ? null : %s(value.message.Extract());
-                return new %s(message);
+                %1$s concrete = (%1$s)value;
+                string message = concrete.message.is_Some ? null : %2$s(concrete.message.Extract());
+                return new %3$s(message);
                 """.formatted(
-                AwsSdkDotNetNameResolver.typeConverterForShape(messageTarget.getId(), FROM_DAFNY),
-                nameResolver.baseTypeForShape(structureShape.getId())));
+                        nameResolver.dafnyConcreteTypeForRegularStructure(structureShape),
+                        AwsSdkDotNetNameResolver.typeConverterForShape(messageTarget.getId(), FROM_DAFNY),
+                        nameResolver.baseTypeForShape(structureShape.getId())));
 
         final TokenTree toDafnyBody = Token.of("""
                 %1$s message = System.String.IsNullOrEmpty(value.Message)

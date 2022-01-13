@@ -53,7 +53,8 @@ public class AwsSdkTypeConversionCodegenTest {
         final List<Tokenizer.ParseToken> expectedTokensFromDafny = Tokenizer.tokenize("""
                 public static Amazon.FoobarService.Model.OopsException
                         %s(Dafny.Com.Amazonaws.Foobar._IOopsException value) {
-                    string message = value.message.is_Some ? null : %s(value.message.Extract());
+                    Dafny.Com.Amazonaws.Foobar.OopsException concrete = (Dafny.Com.Amazonaws.Foobar.OopsException)value;
+                    string message = concrete.message.is_Some ? null : %s(concrete.message.Extract());
                     return new Amazon.FoobarService.Model.OopsException(message);
                 }""".formatted(
                 structureFromDafnyConverterName,

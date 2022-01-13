@@ -347,6 +347,8 @@ public class TypeConversionCodegen {
      * {@link TypeConversionCodegen#generateStructureConverter(StructureShape)}.
      */
     private TypeConverter generateRegularStructureConverter(final StructureShape structureShape) {
+        final TokenTree concreteVar = Token.of("%1$s concrete = (%1$s)value;".formatted(
+                nameResolver.dafnyConcreteTypeForRegularStructure(structureShape)));
         final TokenTree assignments = TokenTree.of(ModelUtils.streamStructureMembers(structureShape)
                 .map(memberShape -> {
                     final String dafnyMemberName = memberShape.getMemberName();
@@ -360,16 +362,17 @@ public class TypeConversionCodegen {
                         final String isPresent = ModelUtils.memberShapeTargetsEntityReference(model, memberShape)
                                 ? "!= null"
                                 : ".is_Some";
-                        checkIfPresent = Token.of("if (value.%s %s)".formatted(dafnyMemberName, isPresent));
+                        checkIfPresent = Token.of("if (concrete.%s %s)".formatted(dafnyMemberName, isPresent));
                     } else {
                         checkIfPresent = TokenTree.empty();
                     }
-                    final TokenTree assign = Token.of("converted.%s = (%s) %s(value.%s);".formatted(
+                    final TokenTree assign = Token.of("converted.%s = (%s) %s(concrete.%s);".formatted(
                             propertyName, propertyType, memberFromDafnyConverterName, dafnyMemberName));
                     return TokenTree.of(checkIfPresent, assign);
                 })).lineSeparated();
         final String structureType = nameResolver.baseTypeForShape(structureShape.getId());
         final TokenTree fromDafnyBody = TokenTree.of(
+                concreteVar,
                 Token.of("%1$s converted = new %1$s();".formatted(structureType)),
                 assignments,
                 Token.of("return converted;")
