@@ -84,10 +84,11 @@ public class AwsSdkTypeConversionCodegen extends TypeConversionCodegen {
 
         final TokenTree toDafnyBody = Token.of("""
                 %1$s message = System.String.IsNullOrEmpty(value.Message)
-                    ? %1$s.create_None()
-                    : %1$s.create_Some(%2$s(value.Message));
-                return new %3$s(message);
+                    ? %2$s.create_None()
+                    : %2$s.create_Some(%3$s(value.Message));
+                return new %4$s(message);
                 """.formatted(
+                        nameResolver.dafnyTypeForShape(messageMember.getId()),
                         nameResolver.dafnyConcreteTypeForOptionalMember(messageMember),
                         AwsSdkDotNetNameResolver.typeConverterForShape(messageTarget.getId(), TO_DAFNY),
                         nameResolver.dafnyConcreteTypeForRegularStructure(structureShape)));

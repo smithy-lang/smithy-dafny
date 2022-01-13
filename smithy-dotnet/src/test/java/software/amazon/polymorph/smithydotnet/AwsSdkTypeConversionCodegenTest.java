@@ -67,7 +67,7 @@ public class AwsSdkTypeConversionCodegenTest {
         final List<Tokenizer.ParseToken> expectedTokensToDafny = Tokenizer.tokenize("""
                 public static Dafny.Com.Amazonaws.Foobar._IOopsException
                         %s(Amazon.FoobarService.Model.OopsException value) {
-                    Wrappers_Compile.Option<Dafny.ISequence<char>> message = System.String.IsNullOrEmpty(value.Message)
+                    Wrappers_Compile._IOption<Dafny.ISequence<char>> message = System.String.IsNullOrEmpty(value.Message)
                         ? Wrappers_Compile.Option<Dafny.ISequence<char>>.create_None()
                         : Wrappers_Compile.Option<Dafny.ISequence<char>>.create_Some(%s(value.Message));
                     return new Dafny.Com.Amazonaws.Foobar.OopsException(message);
