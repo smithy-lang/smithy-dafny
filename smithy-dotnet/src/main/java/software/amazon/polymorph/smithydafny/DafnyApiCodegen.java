@@ -69,7 +69,7 @@ public class DafnyApiCodegen {
         final TokenTree generatedTypes = TokenTree.of(model.shapes()
                 .filter(shape -> ModelUtils.isInServiceNamespace(shape.getId(), serviceShape))
                 // Sort by shape ID for deterministic generated code
-                .collect(Collectors.toCollection(() -> new TreeSet<>(new ShapeIdComparator())))
+                .collect(Collectors.toCollection(TreeSet::new))
                 .stream()
                 .map(this::generateCodeForShape)
                 .flatMap(Optional::stream)
@@ -80,13 +80,6 @@ public class DafnyApiCodegen {
         final Path path = Path.of("%s.dfy".formatted(serviceName));
         final TokenTree fullCode = TokenTree.of(includeDirectives, moduleHeader, moduleBody);
         return Map.of(path, fullCode);
-    }
-
-    private static class ShapeIdComparator implements Comparator<Shape> {
-        @Override
-        public int compare(Shape o1, Shape o2) {
-            return o1.getId().compareTo(o2.getId());
-        }
     }
 
     private Optional<TokenTree> generateCodeForShape(final Shape shape) {
@@ -353,7 +346,7 @@ public class DafnyApiCodegen {
     /**
      * Generates a sum type for the error shapes of operations in the service.
      */
-     // TODO: once traits can be used as type parameters, make this a trait instead so that we don't
+     // TODO: remove for KMS error type refactoring
      // need to exhaustively specify the error shapes of operations
     public TokenTree generateServiceErrorTypeDefinition() {
         // Collect into TreeSet so that the error shapes are lexicographically sorted, ordering them deterministically

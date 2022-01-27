@@ -92,11 +92,11 @@ public class DotNetNameResolver {
         return "I" + serviceShapeId.getName(serviceShape);
     }
 
-    public String commonExceptionClassForService() {
+    public String classForCommonServiceException() {
         return "%sException".formatted(serviceShape.getId().getName(serviceShape));
     }
 
-    public String classForSpecificException(final ShapeId structureShapeId) {
+    public String classForSpecificServiceException(final ShapeId structureShapeId) {
         final StructureShape shape = model.expectShape(structureShapeId, StructureShape.class);
         // Sanity check
         assert shape.hasTrait(ErrorTrait.class);
@@ -121,6 +121,9 @@ public class DotNetNameResolver {
         // Sanity check that we aren't using this method for non-generated structures
         assert !structureShape.hasTrait(ReferenceTrait.class);
         assert !structureShape.hasTrait(PositionalTrait.class);
+
+        // Sanity check that we aren't using this method for generated error structures
+        assert !structureShape.hasTrait(ErrorTrait.class);
 
         return model.expectShape(structureShapeId, StructureShape.class).getId().getName(serviceShape);
     }
@@ -217,8 +220,14 @@ public class DotNetNameResolver {
             return baseTypeForShape(positionalMember.get());
         }
 
-        // The base type of any other structure is the name of the corresponding generated class
         final String structureNamespace = namespaceForShapeId(structureShape.getId());
+
+        // The base type of an error structure is the corresponding generated exception class
+        if (structureShape.hasTrait(ErrorTrait.class)) {
+            return "%s.%s".formatted(structureNamespace, classForSpecificServiceException(structureShape.getId()));
+        }
+
+        // The base type of any other structure is the name of the corresponding generated class
         return "%s.%s".formatted(structureNamespace, classForStructure(structureShape.getId()));
     }
 
@@ -436,6 +445,8 @@ public class DotNetNameResolver {
     }
 
     private String dafnyTypeForStructure(final StructureShape structureShape) {
+        final ShapeId shapeId = structureShape.getId();
+
         // The Dafny type of a reference structure is the Dafny trait for its referent
         final Optional<ReferenceTrait> referenceTrait = structureShape.getTrait(ReferenceTrait.class);
         if (referenceTrait.isPresent()) {
@@ -448,9 +459,15 @@ public class DotNetNameResolver {
             return dafnyTypeForShape(positionalMember.get());
         }
 
+        // The Dafny type of an error structure is the corresponding generated Dafny class
+        if (structureShape.hasTrait(ErrorTrait.class)) {
+            return "%s.%s".formatted(
+                    DafnyNameResolver.dafnyExternNamespaceForShapeId(shapeId),
+                    shapeId.getName(serviceShape));
+        }
+
         // The Dafny type of other structures is simply the structure's name.
         // We explicitly specify the Dafny namespace just in case of collisions.
-        final ShapeId shapeId = structureShape.getId();
         return "%s._I%s".formatted(
                 DafnyNameResolver.dafnyExternNamespaceForShapeId(shapeId),
                 shapeId.getName(serviceShape));
@@ -509,6 +526,8 @@ public class DotNetNameResolver {
      * <p>
      * This should generally be preferred to using the concrete Dafny type;
      * see {@link DotNetNameResolver#dafnyConcreteTypeForServiceError(ServiceShape)}.
+     *
+     * TODO remove this for error refactoring
      */
     public String dafnyAbstractTypeForServiceError(final ServiceShape serviceShape) {
         return "%s._I%sError".formatted(
@@ -522,11 +541,27 @@ public class DotNetNameResolver {
      * This must be used for accessing particular error constructors;
      * otherwise, prefer to use the abstract Dafny type
      * ({@link DotNetNameResolver#dafnyAbstractTypeForServiceError(ServiceShape)}).
+     *
+     * TODO remove this for error refactoring
      */
     public String dafnyConcreteTypeForServiceError(final ServiceShape serviceShape) {
         return "%s.%sError".formatted(
                 DafnyNameResolver.dafnyExternNamespaceForShapeId(serviceShape.getId()),
                 serviceShape.getContextualName(serviceShape));
+    }
+
+    /**
+     * Returns the Dafny trait implemented by all errors in the given service.
+     * <p>
+     * This is distinct from the specific Dafny error classes, since the trait / common error shape is not modeled.
+     * To get the type for a specific Dafny error class, pass the corresponding structure shape to
+     * {@link DotNetNameResolver#dafnyTypeForShape(ShapeId)}.
+     */
+    public String dafnyTypeForCommonServiceError(final ServiceShape serviceShape) {
+        return "%s.%sException".formatted(
+                DafnyNameResolver.dafnyExternNamespaceForShapeId(serviceShape.getId()),
+                serviceShape.getContextualName(serviceShape)
+        );
     }
 
     /**

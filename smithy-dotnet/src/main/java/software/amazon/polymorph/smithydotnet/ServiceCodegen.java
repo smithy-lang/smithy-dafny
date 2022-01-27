@@ -116,7 +116,7 @@ public class ServiceCodegen {
                 });
 
         // Common exception class
-        final Path commonExceptionPath = Path.of(String.format("%s.cs", nameResolver.commonExceptionClassForService()));
+        final Path commonExceptionPath = Path.of(String.format("%s.cs", nameResolver.classForCommonServiceException()));
         final TokenTree commonExceptionPathCode = generateCommonExceptionClass();
         codeByPath.put(commonExceptionPath, commonExceptionPathCode.prepend(prelude));
 
@@ -126,7 +126,7 @@ public class ServiceCodegen {
                 .filter(shape -> shape.hasTrait(ErrorTrait.class))
                 .filter(shape -> ModelUtils.isInServiceNamespace(shape.getId(), serviceShape))
                 .forEach(shape -> {
-                    final Path exceptionClassPath = Path.of(String.format("%s.cs", nameResolver.classForSpecificException(shape.getId())));
+                    final Path exceptionClassPath = Path.of(String.format("%s.cs", nameResolver.classForSpecificServiceException(shape.getId())));
                     final TokenTree exceptionClass = generateSpecificExceptionClass(shape);
                     codeByPath.put(exceptionClassPath, exceptionClass.prepend(prelude));
                 });
@@ -260,7 +260,7 @@ public class ServiceCodegen {
      * @return a common exception class for this service, from which all other service exception classes extend
      */
     public TokenTree generateCommonExceptionClass() {
-        final String exceptionName = nameResolver.commonExceptionClassForService();
+        final String exceptionName = nameResolver.classForCommonServiceException();
 
         final TokenTree classHeader = Token.of("public class %s : Exception".formatted(exceptionName));
         final TokenTree emptyCtor = Token.of("public %s() : base() {}".formatted(exceptionName));
@@ -283,8 +283,8 @@ public class ServiceCodegen {
             throw new IllegalArgumentException("Unsupported error shape");
         }
 
-        final String commonExceptionName = nameResolver.commonExceptionClassForService();
-        final String exceptionName = nameResolver.classForSpecificException(structureShape.getId());
+        final String commonExceptionName = nameResolver.classForCommonServiceException();
+        final String exceptionName = nameResolver.classForSpecificServiceException(structureShape.getId());
 
         final TokenTree classHeader = Token.of("public class %s : %s".formatted(exceptionName, commonExceptionName));
         final TokenTree messageCtor = Token.of("public %s(string message) : base(message) {}".formatted(exceptionName));

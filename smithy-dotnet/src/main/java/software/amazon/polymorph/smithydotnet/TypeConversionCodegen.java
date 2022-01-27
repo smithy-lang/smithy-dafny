@@ -29,6 +29,7 @@ import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.TimestampShape;
 import software.amazon.smithy.model.traits.EnumTrait;
+import software.amazon.smithy.model.traits.ErrorTrait;
 
 import java.nio.file.Path;
 import java.util.HashSet;
@@ -38,6 +39,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -111,15 +113,20 @@ public class TypeConversionCodegen {
                 getDependencyShapeIds(currentShape).forEach(toTraverse::add);
             }
         }
+
         return shapesToConvert;
     }
 
     /**
      * Returns a set of shape IDs for which to start generating type converter pairs, by recursively traversing
      * services, resources, and operations defined in the model.
-     *
-     * Since type converters are only necessary when calling API operations, it suffices to find the shape IDs of all
-     * operation input and output structures.
+     * <p>
+     * Since type converters are only necessary when calling API operations, it suffices to find the shape IDs of:
+     * <ul>
+     *     <li>operation input and output structures</li>
+     *     <li>client configuration structures</li>
+     *     <li>specific (modeled) error structures</li>
+     * </ul>
      */
     private Set<ShapeId> findInitialShapeIdsToConvert() {
         // Collect services
@@ -153,15 +160,11 @@ public class TypeConversionCodegen {
                 .flatMap(Function.identity())
                 .collect(Collectors.toSet());
 
-        // Collect inputs/output/error structures for collected operations
+        // Collect inputs/output structures for collected operations
         final Set<ShapeId> operationStructures = operationShapes.stream()
-                .flatMap(operationShape -> {
-                    final Stream<ShapeId> inputOutput = Stream
-                            .of(operationShape.getInput(), operationShape.getOutput())
-                            .flatMap(Optional::stream);
-                    final Stream<ShapeId> errors = operationShape.getErrors().stream();
-                    return Stream.concat(inputOutput, errors);
-                })
+                .flatMap(operationShape -> Stream
+                        .of(operationShape.getInput(), operationShape.getOutput())
+                        .flatMap(Optional::stream))
                 .collect(Collectors.toSet());
         // Collect service client config structures
         final Set<ShapeId> clientConfigStructures = serviceShapes.stream()
@@ -169,7 +172,14 @@ public class TypeConversionCodegen {
                 .flatMap(Optional::stream)
                 .map(ClientConfigTrait::getClientConfigId)
                 .collect(Collectors.toSet());
-        return Sets.union(operationStructures, clientConfigStructures);
+
+        // Collect all specific error structures
+        final Set<ShapeId> errorStructures = ModelUtils.streamServiceErrors(model, serviceShape)
+                .map(Shape::getId)
+                .collect(Collectors.toSet());
+
+        return Stream.of(operationStructures, clientConfigStructures, errorStructures)
+                .reduce(Sets::union).get();
     }
 
     private boolean isInServiceNamespace(final ShapeId shapeId) {
@@ -337,6 +347,10 @@ public class TypeConversionCodegen {
         final Optional<PositionalTrait> positionalTraitOptional = structureShape.getTrait(PositionalTrait.class);
         if (positionalTraitOptional.isPresent()) {
             return generatePositionalStructureConverter(structureShape);
+        }
+
+        if (structureShape.hasTrait(ErrorTrait.class)) {
+            return generateSpecificExceptionConverter(structureShape);
         }
 
         return generateRegularStructureConverter(structureShape);
@@ -553,6 +567,70 @@ public class TypeConversionCodegen {
                 System.Text.UTF8Encoding utf8 = new System.Text.UTF8Encoding(false, true);
                 return Dafny.Sequence<byte>.FromArray(utf8.GetBytes(value));""");
         return buildConverterFromMethodBodies(stringShape, fromDafnyBody, toDafnyBody);
+    }
+
+    public TypeConverter generateCommonExceptionConverter() {
+        // Collecting into a TreeSet sorts the set by shape ID, making the order deterministic w.r.t the model
+        final TreeSet<StructureShape> errorShapes = ModelUtils.streamServiceErrors(model, serviceShape)
+                .collect(Collectors.toCollection(TreeSet::new));
+        final String commonExceptionName = nameResolver.classForCommonServiceException();
+        final String cSharpType = "%s.%s".formatted(nameResolver.namespaceForService(), nameResolver.classForCommonServiceException());
+        final String dafnyType = nameResolver.dafnyTypeForCommonServiceError(serviceShape);
+
+        final TokenTree knownErrorsFromDafny = TokenTree.of(errorShapes.stream().map(errorShape -> {
+            final ShapeId specificErrorShapeId = errorShape.getId();
+            return Token.of("if (value is %1$s) return %2$s((%1$s) value);".formatted(
+                    nameResolver.dafnyTypeForShape(specificErrorShapeId),
+                    DotNetNameResolver.typeConverterForShape(specificErrorShapeId, FROM_DAFNY)
+            ));
+        })).lineSeparated();
+        final TokenTree knownErrorsToDafny = TokenTree.of(errorShapes.stream().map(errorShape -> {
+            final ShapeId specificErrorShapeId = errorShape.getId();
+            return Token.of("if (value is %1$s) return %2$s((%1$s) value);".formatted(
+                    nameResolver.baseTypeForShape(specificErrorShapeId),
+                    DotNetNameResolver.typeConverterForShape(specificErrorShapeId, TO_DAFNY)
+            ));
+        })).lineSeparated();
+        final TokenTree handleUnknownError = Token.of("throw new System.ArgumentException(\"Unknown exception type\");");
+
+        final TokenTree fromDafnyBody = TokenTree.of(knownErrorsFromDafny, handleUnknownError).lineSeparated();
+        final TokenTree fromDafnyConverterSignature = Token.of("public static %s FromDafny_CommonError_%s(%s value)"
+                .formatted(cSharpType, commonExceptionName, dafnyType));
+        final TokenTree fromDafnyConverterMethod = TokenTree.of(fromDafnyConverterSignature, fromDafnyBody.braced());
+
+        final TokenTree toDafnyBody = TokenTree.of(knownErrorsToDafny, handleUnknownError).lineSeparated();
+        final TokenTree toDafnyConverterSignature = Token.of("public static %s ToDafny_CommonError_%s(%s value)"
+                .formatted(dafnyType, commonExceptionName, cSharpType));
+        final TokenTree toDafnyConverterMethod = TokenTree.of(toDafnyConverterSignature, toDafnyBody.braced());
+
+        // We just need a shape ID that doesn't conflict with anything else
+        final ShapeId syntheticShapeId = ShapeId.fromParts(serviceShape.getId().getNamespace(), "__SYNTHETIC_COMMON_ERROR");
+        return new TypeConverter(syntheticShapeId, fromDafnyConverterMethod, toDafnyConverterMethod);
+    }
+
+    /**
+     * Returns a type converter for an {@code @error} structure.
+     * <p>
+     * This requires special-casing because a System.Exception's {@code message} field cannot be set by property, but
+     * instead must be passed to the constructor.
+     */
+    public TypeConverter generateSpecificExceptionConverter(final StructureShape errorShape) {
+        assert errorShape.hasTrait(ErrorTrait.class);
+
+        final ShapeId smithyStringId = ShapeId.from("smithy.api#String");
+        final String stringFromDafny = DotNetNameResolver.typeConverterForShape(smithyStringId, FROM_DAFNY);
+        final String stringToDafny = DotNetNameResolver.typeConverterForShape(smithyStringId, TO_DAFNY);
+
+        final Token fromDafnyBody = Token.of("return new %s(%s(value.message));".formatted(
+                nameResolver.baseTypeForShape(errorShape.getId()),
+                stringFromDafny
+        ));
+        final Token toDafnyBody = Token.of("return %s.__ctor(%s(value.Message));".formatted(
+                nameResolver.dafnyTypeForShape(errorShape.getId()),
+                stringToDafny
+        ));
+
+        return buildConverterFromMethodBodies(errorShape, fromDafnyBody, toDafnyBody);
     }
 
     /**
