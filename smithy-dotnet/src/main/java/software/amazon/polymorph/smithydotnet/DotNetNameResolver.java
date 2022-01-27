@@ -24,6 +24,7 @@ import software.amazon.smithy.model.shapes.ShapeType;
 import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.EnumTrait;
+import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.utils.StringUtils;
 
 import javax.annotation.Nullable;
@@ -89,6 +90,17 @@ public class DotNetNameResolver {
 
     public String interfaceForService(final ShapeId serviceShapeId) {
         return "I" + serviceShapeId.getName(serviceShape);
+    }
+
+    public String commonExceptionClassForService() {
+        return "%sException".formatted(serviceShape.getId().getName(serviceShape));
+    }
+
+    public String classForSpecificException(final ShapeId structureShapeId) {
+        final StructureShape shape = model.expectShape(structureShapeId, StructureShape.class);
+        // Sanity check
+        assert shape.hasTrait(ErrorTrait.class);
+        return structureShapeId.getName(serviceShape);
     }
 
     public String methodForOperation(final ShapeId operationShapeId) {

@@ -656,4 +656,51 @@ public class ServiceCodegenTest {
         );
     }
 
+    @Test
+    public void testGenerateCommonExceptionClass() {
+        final Model model = TestModel.setupModel();
+        final ServiceCodegen codegen = new ServiceCodegen(model, SERVICE_SHAPE_ID);
+        final String actualCode = codegen.generateCommonExceptionClass().toString();
+        final List<ParseToken> actualTokens = Tokenizer.tokenize(actualCode);
+
+        final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
+                namespace Test.Foobar {
+                    public class FoobarServiceException : Exception {
+                        public FoobarServiceException() : base() {}
+                        public FoobarServiceException(string message) : base(message) {}
+                    }
+                }
+                """);
+
+        assertEquals(expectedTokens, actualTokens);
+    }
+
+    @Test
+    public void testGenerateSpecificExceptionClass() {
+        final Model model = TestModel.setupModel(((builder, modelAssembler) ->
+                modelAssembler.addUnparsedModel("test.smithy", """
+                        namespace %s
+                        @error("client")
+                        structure UnfortunateException {
+                            @required
+                            message: String,
+                        }
+                        """.formatted(SERVICE_NAMESPACE))));
+        final ShapeId exceptionShapeId = ShapeId.fromParts(SERVICE_NAMESPACE, "UnfortunateException");
+
+        final ServiceCodegen codegen = new ServiceCodegen(model, SERVICE_SHAPE_ID);
+        final String actualCode = codegen.generateSpecificExceptionClass(
+                model.expectShape(exceptionShapeId, StructureShape.class)).toString();
+        final List<ParseToken> actualTokens = Tokenizer.tokenize(actualCode);
+
+        final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
+                namespace Test.Foobar {
+                    public class UnfortunateException : FoobarServiceException {
+                        public UnfortunateException(string message) : base(message) {}
+                    }
+                }
+                """);
+
+        assertEquals(expectedTokens, actualTokens);
+    }
 }

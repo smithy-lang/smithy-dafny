@@ -64,5 +64,6 @@ structure SetElementInput {
 
 @error("client")
 structure IndexOutOfBoundsException {
+    @required
     message: String
 }

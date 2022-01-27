@@ -42,6 +42,7 @@ public class ServiceCodegenSmokeTest {
                 "GetElementInput",
                 "GetElementOutput",
                 "SetElementInput",
+                "StringListsException",
                 "IndexOutOfBoundsException"
         ).map(name -> Path.of(name + ".cs")).collect(Collectors.toSet());
         assertEquals(expectedPaths, codeByPath.keySet());
