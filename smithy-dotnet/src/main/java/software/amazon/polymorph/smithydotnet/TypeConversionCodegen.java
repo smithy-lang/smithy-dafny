@@ -83,10 +83,12 @@ public class TypeConversionCodegen {
                 // TODO: fully qualify types to avoid needing this
                 "using Aws.Crypto;"
                 );
-        final Stream<TypeConverter> converters = findShapeIdsToConvert()
+        final Stream<TypeConverter> modeledConverters = findShapeIdsToConvert()
                 .stream()
                 .map(model::expectShape)
                 .map(this::generateConverter);
+        final Stream<TypeConverter> unmodeledConverters = Stream.of(generateCommonExceptionConverter());
+        final Stream<TypeConverter> converters = Stream.concat(modeledConverters, unmodeledConverters);
         final TokenTree conversionClassBody = TokenTree.of(converters
                 .flatMap(typeConverter -> Stream.of(typeConverter.fromDafny, typeConverter.toDafny)))
                 .lineSeparated()
@@ -594,13 +596,13 @@ public class TypeConversionCodegen {
         final TokenTree handleUnknownError = Token.of("throw new System.ArgumentException(\"Unknown exception type\");");
 
         final TokenTree fromDafnyBody = TokenTree.of(knownErrorsFromDafny, handleUnknownError).lineSeparated();
-        final TokenTree fromDafnyConverterSignature = Token.of("public static %s FromDafny_CommonError_%s(%s value)"
-                .formatted(cSharpType, commonExceptionName, dafnyType));
+        final TokenTree fromDafnyConverterSignature = Token.of("public static %s %s(%s value)".formatted(
+                cSharpType, DotNetNameResolver.typeConverterForCommonError(serviceShape, FROM_DAFNY), dafnyType));
         final TokenTree fromDafnyConverterMethod = TokenTree.of(fromDafnyConverterSignature, fromDafnyBody.braced());
 
         final TokenTree toDafnyBody = TokenTree.of(knownErrorsToDafny, handleUnknownError).lineSeparated();
-        final TokenTree toDafnyConverterSignature = Token.of("public static %s ToDafny_CommonError_%s(%s value)"
-                .formatted(dafnyType, commonExceptionName, cSharpType));
+        final TokenTree toDafnyConverterSignature = Token.of("public static %s %s(%s value)".formatted(
+                dafnyType, DotNetNameResolver.typeConverterForCommonError(serviceShape, TO_DAFNY), cSharpType));
         final TokenTree toDafnyConverterMethod = TokenTree.of(toDafnyConverterSignature, toDafnyBody.braced());
 
         // We just need a shape ID that doesn't conflict with anything else
@@ -616,18 +618,20 @@ public class TypeConversionCodegen {
      */
     public TypeConverter generateSpecificExceptionConverter(final StructureShape errorShape) {
         assert errorShape.hasTrait(ErrorTrait.class);
-
-        final ShapeId smithyStringId = ShapeId.from("smithy.api#String");
-        final String stringFromDafny = DotNetNameResolver.typeConverterForShape(smithyStringId, FROM_DAFNY);
-        final String stringToDafny = DotNetNameResolver.typeConverterForShape(smithyStringId, TO_DAFNY);
+        assert errorShape.getMember("message").isPresent();
+        final ShapeId messageShapeId = errorShape.getId().withMember("message");
 
         final Token fromDafnyBody = Token.of("return new %s(%s(value.message));".formatted(
                 nameResolver.baseTypeForShape(errorShape.getId()),
-                stringFromDafny
+                DotNetNameResolver.typeConverterForShape(messageShapeId, FROM_DAFNY)
         ));
-        final Token toDafnyBody = Token.of("return %s.__ctor(%s(value.Message));".formatted(
-                nameResolver.dafnyTypeForShape(errorShape.getId()),
-                stringToDafny
+        final Token toDafnyBody = Token.of("""
+                %1$s converted = new %1$s();
+                converted.message = %2$s(value.Message);
+                return converted;
+                """.formatted(
+                        nameResolver.dafnyTypeForShape(errorShape.getId()),
+                        DotNetNameResolver.typeConverterForShape(messageShapeId, TO_DAFNY)
         ));
 
         return buildConverterFromMethodBodies(errorShape, fromDafnyBody, toDafnyBody);

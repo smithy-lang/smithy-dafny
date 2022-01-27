@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.junit.Assert.*;
+import static software.amazon.polymorph.smithydotnet.TypeConversionDirection.*;
 import static software.amazon.polymorph.util.TestModel.SERVICE_NAMESPACE;
 import static software.amazon.polymorph.util.TestModel.SERVICE_SHAPE_ID;
 
@@ -53,6 +54,7 @@ public class ShimCodegenTest {
             modelAssembler.addShape(OperationShape.builder().id(operationShapeId).build());
             builder.addOperation(operationShapeId);
         });
+        final ServiceShape serviceShape = codegen.getModel().expectShape(SERVICE_SHAPE_ID, ServiceShape.class);
 
         final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
                 namespace Test.Foobar {
@@ -61,10 +63,14 @@ public class ShimCodegenTest {
                         public FoobarServiceClient() {
                             this._impl = new Dafny.Test.Foobar.FoobarServiceClient.FoobarServiceClient();
                         }
-                        protected override void _DoIt() { this._impl.DoIt(); }
+                        protected override void _DoIt() {
+                            Wrappers_Compile._IResult<_System._ITuple0, Dafny.Test.Foobar.IFoobarServiceException> result =
+                                    this._impl.DoIt();
+                            if (result.is_Failure) throw %s(result.dtor_error);
+                        }
                     }
                 }
-                """);
+                """.formatted(DotNetNameResolver.qualifiedTypeConverterForCommonError(serviceShape, FROM_DAFNY)));
 
         final String actualCode = codegen.generateServiceShim().toString();
         final List<ParseToken> actualTokens = Tokenizer.tokenize(actualCode);
@@ -84,7 +90,7 @@ public class ShimCodegenTest {
                 public FoobarServiceClient(Test.Foobar.Config config) : base(config) {
                     this._impl = new Dafny.Test.Foobar.FoobarServiceClient.FoobarServiceClient(%s(config));
                 }
-                """.formatted(DotNetNameResolver.qualifiedTypeConverter(configShapeId, TypeConversionDirection.TO_DAFNY)));
+                """.formatted(DotNetNameResolver.qualifiedTypeConverter(configShapeId, TO_DAFNY)));
 
         final String actualCode = codegen.generateServiceConstructor().toString();
         final List<ParseToken> actualTokens = Tokenizer.tokenize(actualCode);
@@ -115,6 +121,7 @@ public class ShimCodegenTest {
                     resource Doer { operations: [DoIt] }
                     operation DoIt {}
                     """.formatted(SERVICE_NAMESPACE)));
+        final ServiceShape serviceShape = codegen.getModel().expectShape(SERVICE_SHAPE_ID, ServiceShape.class);
         final ShapeId resourceShapeId = ShapeId.fromParts(SERVICE_NAMESPACE, "Doer");
 
         final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
@@ -122,10 +129,14 @@ public class ShimCodegenTest {
                     internal class Doer : DoerBase {
                         internal Dafny.Test.Foobar.IDoer _impl { get; }
                         internal Doer(Dafny.Test.Foobar.IDoer impl) { this._impl = impl; }
-                        protected override void _DoIt() { this._impl.DoIt(); }
+                        protected override void _DoIt() {
+                            Wrappers_Compile._IResult<_System._ITuple0, Dafny.Test.Foobar.IFoobarServiceException> result =
+                                    this._impl.DoIt();
+                            if (result.is_Failure) throw %s(result.dtor_error);
+                        }
                     }
                 }
-                """);
+                """.formatted(DotNetNameResolver.qualifiedTypeConverterForCommonError(serviceShape, FROM_DAFNY)));
 
         final String actualCode = codegen.generateResourceShim(resourceShapeId).toString();
         final List<ParseToken> actualTokens = Tokenizer.tokenize(actualCode);
@@ -158,12 +169,21 @@ public class ShimCodegenTest {
                     operation DoThis {}
                     operation DoThat {}
                     """.formatted(SERVICE_NAMESPACE)));
+        final ServiceShape serviceShape = codegen.getModel().expectShape(SERVICE_SHAPE_ID, ServiceShape.class);
         final ShapeId resourceShapeId = ShapeId.fromParts(SERVICE_NAMESPACE, "Doer");
 
         final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
-                protected override void _DoThis() { this._impl.DoThis(); }
-                protected override void _DoThat() { this._impl.DoThat(); }
-                """);
+                protected override void _DoThis() {
+                    Wrappers_Compile._IResult<_System._ITuple0, Dafny.Test.Foobar.IFoobarServiceException> result =
+                            this._impl.DoThis();
+                    if (result.is_Failure) throw %1$s(result.dtor_error);
+                }
+                protected override void _DoThat() {
+                    Wrappers_Compile._IResult<_System._ITuple0, Dafny.Test.Foobar.IFoobarServiceException> result =
+                            this._impl.DoThat();
+                    if (result.is_Failure) throw %1$s(result.dtor_error);
+                }
+                """.formatted(DotNetNameResolver.qualifiedTypeConverterForCommonError(serviceShape, FROM_DAFNY)));
 
         final String actualCode = codegen.generateOperationShims(resourceShapeId).toString();
         final List<ParseToken> actualTokens = Tokenizer.tokenize(actualCode);
@@ -178,15 +198,20 @@ public class ShimCodegenTest {
                     operation DoIt { input: Input }
                     structure Input {}
                     """.formatted(SERVICE_NAMESPACE)));
+        final ServiceShape serviceShape = codegen.getModel().expectShape(SERVICE_SHAPE_ID, ServiceShape.class);
         final ShapeId operationShapeId = ShapeId.fromParts(SERVICE_NAMESPACE, "DoIt");
         final ShapeId inputShapeId = ShapeId.fromParts(SERVICE_NAMESPACE, "Input");
 
         final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
                 protected override void _DoIt(Test.Foobar.Input input) {
                     Dafny.Test.Foobar._IInput internalInput = %s(input);
-                    this._impl.DoIt(internalInput);
+                    Wrappers_Compile._IResult<_System._ITuple0, Dafny.Test.Foobar.IFoobarServiceException>
+                            result = this._impl.DoIt(internalInput);
+                    if (result.is_Failure) throw %s(result.dtor_error);
                 }
-                """.formatted(DotNetNameResolver.qualifiedTypeConverter(inputShapeId, TypeConversionDirection.TO_DAFNY)));
+                """.formatted(
+                DotNetNameResolver.qualifiedTypeConverter(inputShapeId, TO_DAFNY),
+                DotNetNameResolver.qualifiedTypeConverterForCommonError(serviceShape, FROM_DAFNY)));
 
         final String actualCode = codegen.generateOperationShim(operationShapeId).toString();
         final List<ParseToken> actualTokens = Tokenizer.tokenize(actualCode);
@@ -201,16 +226,20 @@ public class ShimCodegenTest {
                     operation DoIt { output: Output }
                     structure Output {}
                     """.formatted(SERVICE_NAMESPACE)));
+        final ServiceShape serviceShape = codegen.getModel().expectShape(SERVICE_SHAPE_ID, ServiceShape.class);
         final ShapeId operationShapeId = ShapeId.fromParts(SERVICE_NAMESPACE, "DoIt");
         final ShapeId outputShapeId = ShapeId.fromParts(SERVICE_NAMESPACE, "Output");
 
         final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
                 protected override Test.Foobar.Output _DoIt() {
-                    Dafny.Test.Foobar._IOutput internalOutput =
-                    this._impl.DoIt();
-                    return %s(internalOutput);
+                    Wrappers_Compile._IResult<Dafny.Test.Foobar._IOutput, Dafny.Test.Foobar.IFoobarServiceException>
+                            result = this._impl.DoIt();
+                    if (result.is_Failure) throw %s(result.dtor_error);
+                    return %s(result.dtor_value);
                 }
-                """.formatted(DotNetNameResolver.qualifiedTypeConverter(outputShapeId, TypeConversionDirection.FROM_DAFNY)));
+                """.formatted(
+                        DotNetNameResolver.qualifiedTypeConverterForCommonError(serviceShape, FROM_DAFNY),
+                        DotNetNameResolver.qualifiedTypeConverter(outputShapeId, FROM_DAFNY)));
 
         final String actualCode = codegen.generateOperationShim(operationShapeId).toString();
         final List<ParseToken> actualTokens = Tokenizer.tokenize(actualCode);
@@ -228,6 +257,7 @@ public class ShimCodegenTest {
                         structure Output {}
                         """.formatted(SERVICE_NAMESPACE));
         });
+        final ServiceShape serviceShape = codegen.getModel().expectShape(SERVICE_SHAPE_ID, ServiceShape.class);
         final ShapeId operationShapeId = ShapeId.fromParts(SERVICE_NAMESPACE, "DoIt");
         final ShapeId inputShapeId = ShapeId.fromParts(SERVICE_NAMESPACE, "Input");
         final ShapeId outputShapeId = ShapeId.fromParts(SERVICE_NAMESPACE, "Output");
@@ -235,13 +265,15 @@ public class ShimCodegenTest {
         final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
                 protected override Test.Foobar.Output _DoIt(Test.Foobar.Input input) {
                     Dafny.Test.Foobar._IInput internalInput = %s(input);
-                    Dafny.Test.Foobar._IOutput internalOutput =
-                    this._impl.DoIt(internalInput);
-                    return %s(internalOutput);
+                    Wrappers_Compile._IResult<Dafny.Test.Foobar._IOutput, Dafny.Test.Foobar.IFoobarServiceException>
+                            result = this._impl.DoIt(internalInput);
+                    if (result.is_Failure) throw %s(result.dtor_error);
+                    return %s(result.dtor_value);
                 }
                 """.formatted(
-                        DotNetNameResolver.qualifiedTypeConverter(inputShapeId, TypeConversionDirection.TO_DAFNY),
-                        DotNetNameResolver.qualifiedTypeConverter(outputShapeId, TypeConversionDirection.FROM_DAFNY)));
+                        DotNetNameResolver.qualifiedTypeConverter(inputShapeId, TO_DAFNY),
+                        DotNetNameResolver.qualifiedTypeConverterForCommonError(serviceShape, FROM_DAFNY),
+                        DotNetNameResolver.qualifiedTypeConverter(outputShapeId, FROM_DAFNY)));
 
         final String actualCode = codegen.generateOperationShim(operationShapeId).toString();
         final List<ParseToken> actualTokens = Tokenizer.tokenize(actualCode);
