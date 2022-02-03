@@ -276,11 +276,11 @@ public class ServiceCodegen {
         // Sanity check
         assert structureShape.hasTrait(ErrorTrait.class);
 
-        // For now, we only support error structures with the special "message" string member, and it must be @required
         boolean hasMessage = structureShape.getMember("message").filter(member -> member.hasTrait(RequiredTrait.class)).isPresent();
         boolean hasOtherMembers = structureShape.getMemberNames().size() > 1;
+        // TODO support other members
         if (!hasMessage || hasOtherMembers) {
-            throw new IllegalArgumentException("Unsupported error shape");
+            throw new IllegalArgumentException("Only error shapes with a sole @required message member are supported");
         }
 
         final String commonExceptionName = nameResolver.classForCommonServiceException();
