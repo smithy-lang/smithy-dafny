@@ -22,6 +22,8 @@ import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.EnumDefinition;
 import software.amazon.smithy.model.traits.EnumTrait;
+import software.amazon.smithy.model.traits.ErrorTrait;
+import software.amazon.smithy.model.traits.RequiredTrait;
 import software.amazon.smithy.model.traits.TraitDefinition;
 
 import java.nio.file.Path;
@@ -113,6 +115,22 @@ public class ServiceCodegen {
                     codeByPath.put(resourceClassPath, resourceClass.prepend(prelude));
                 });
 
+        // Common exception class
+        final Path commonExceptionPath = Path.of(String.format("%s.cs", nameResolver.classForCommonServiceException()));
+        final TokenTree commonExceptionPathCode = generateCommonExceptionClass();
+        codeByPath.put(commonExceptionPath, commonExceptionPathCode.prepend(prelude));
+
+        // Specific exception classes
+        model.getStructureShapes()
+                .stream()
+                .filter(shape -> shape.hasTrait(ErrorTrait.class))
+                .filter(shape -> ModelUtils.isInServiceNamespace(shape.getId(), serviceShape))
+                .forEach(shape -> {
+                    final Path exceptionClassPath = Path.of(String.format("%s.cs", nameResolver.classForSpecificServiceException(shape.getId())));
+                    final TokenTree exceptionClass = generateSpecificExceptionClass(shape);
+                    codeByPath.put(exceptionClassPath, exceptionClass.prepend(prelude));
+                });
+
         return codeByPath;
     }
 
@@ -125,7 +143,9 @@ public class ServiceCodegen {
                 && !structureShape.hasTrait(ReferenceTrait.class)
                 // Structures marked with positional are intended to be unwrapped, so we don't need
                 // to generate the wrapper structure
-                && !structureShape.hasTrait(PositionalTrait.class);
+                && !structureShape.hasTrait(PositionalTrait.class)
+                // We generate exception classes (instead of typical data classes) for error structures
+                && !structureShape.hasTrait(ErrorTrait.class);
     }
 
     /**
@@ -234,6 +254,41 @@ public class ServiceCodegen {
                 generateOperationSignature(operationShapeId),
                 Token.of(';')
         );
+    }
+
+    /**
+     * @return a common exception class for this service, from which all other service exception classes extend
+     */
+    public TokenTree generateCommonExceptionClass() {
+        final String exceptionName = nameResolver.classForCommonServiceException();
+
+        final TokenTree classHeader = Token.of("public class %s : Exception".formatted(exceptionName));
+        final TokenTree emptyCtor = Token.of("public %s() : base() {}".formatted(exceptionName));
+        final TokenTree messageCtor = Token.of("public %s(string message) : base(message) {}".formatted(exceptionName));
+        final TokenTree classBody = TokenTree.of(emptyCtor, messageCtor);
+        return TokenTree.of(classHeader, classBody.braced()).namespaced(Token.of(nameResolver.namespaceForService()));
+    }
+
+    /**
+     * @return an exception class for the given error structure shape, which extends from the common exception class
+     */
+    public TokenTree generateSpecificExceptionClass(final StructureShape structureShape) {
+        // Sanity check
+        assert structureShape.hasTrait(ErrorTrait.class);
+
+        boolean hasMessage = structureShape.getMember("message").filter(member -> member.hasTrait(RequiredTrait.class)).isPresent();
+        boolean hasOtherMembers = structureShape.getMemberNames().size() > 1;
+        // TODO support other members
+        if (!hasMessage || hasOtherMembers) {
+            throw new IllegalArgumentException("Only error shapes with a sole @required message member are supported");
+        }
+
+        final String commonExceptionName = nameResolver.classForCommonServiceException();
+        final String exceptionName = nameResolver.classForSpecificServiceException(structureShape.getId());
+
+        final TokenTree classHeader = Token.of("public class %s : %s".formatted(exceptionName, commonExceptionName));
+        final TokenTree messageCtor = Token.of("public %s(string message) : base(message) {}".formatted(exceptionName));
+        return TokenTree.of(classHeader, messageCtor.braced()).namespaced(Token.of(nameResolver.namespaceForService()));
     }
 
     /**

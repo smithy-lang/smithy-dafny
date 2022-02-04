@@ -3,6 +3,7 @@
 
 package software.amazon.polymorph.smithydotnet;
 
+import com.google.common.annotations.VisibleForTesting;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.polymorph.traits.ClientConfigTrait;
 import software.amazon.polymorph.utils.Token;
@@ -18,6 +19,8 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+
+import static software.amazon.polymorph.smithydotnet.TypeConversionDirection.*;
 
 public class ShimCodegen {
     private final Model model;
@@ -95,7 +98,7 @@ public class ShimCodegen {
         final TokenTree baseCtorCall = configShapeIdOptional.isPresent()
                 ? Token.of(": base(config)") : TokenTree.empty();
         final TokenTree configArg = configShapeIdOptional.map(shapeId -> TokenTree.of(
-                DotNetNameResolver.qualifiedTypeConverter(shapeId, TypeConversionDirection.TO_DAFNY),
+                DotNetNameResolver.qualifiedTypeConverter(shapeId, TO_DAFNY),
                 "(config)"
         )).orElse(TokenTree.empty());
         return Token.of("public %s(%s) %s { this.%s = new %s(%s); }".formatted(
@@ -160,24 +163,29 @@ public class ShimCodegen {
         final TokenTree convertInput = Token.of(operationShape.getInput()
                 .map(inputShapeId -> "%s internalInput = %s(input);".formatted(
                         nameResolver.dafnyTypeForShape(inputShapeId),
-                        DotNetNameResolver.qualifiedTypeConverter(inputShapeId, TypeConversionDirection.TO_DAFNY)))
+                        DotNetNameResolver.qualifiedTypeConverter(inputShapeId, TO_DAFNY)))
                 .orElse(""));
-        final TokenTree assignInternalOutput = operationShape.getOutput()
-                .map(outputShapeId -> TokenTree.of(nameResolver.dafnyTypeForShape(outputShapeId), "internalOutput ="))
-                .orElse(TokenTree.empty());
-        final TokenTree callImpl = Token.of("this.%s.%s(%s);".formatted(
+        final TokenTree callImpl = Token.of("%s result = this.%s.%s(%s);".formatted(
+                nameResolver.dafnyTypeForServiceOperationOutput(operationShape),
                 IMPL_NAME,
                 nameResolver.methodForOperation(operationShapeId),
                 operationShape.getInput().isPresent() ? "internalInput" : ""
         ));
+        final TokenTree checkAndConvertFailure = Token.of("if (result.is_Failure) throw %s(result.dtor_error);"
+                .formatted(DotNetNameResolver.qualifiedTypeConverterForCommonError(serviceShape, FROM_DAFNY)));
         final TokenTree convertAndReturnOutput = Token.of(operationShape.getOutput()
-                .map(outputShapeId -> "return %s(internalOutput);".formatted(
-                        DotNetNameResolver.qualifiedTypeConverter(outputShapeId, TypeConversionDirection.FROM_DAFNY)))
+                .map(outputShapeId -> "return %s(result.dtor_value);".formatted(
+                        DotNetNameResolver.qualifiedTypeConverter(outputShapeId, FROM_DAFNY)))
                 .orElse(""));
 
-        return TokenTree.of(convertInput, assignInternalOutput, callImpl, convertAndReturnOutput)
+        return TokenTree.of(convertInput, callImpl, checkAndConvertFailure, convertAndReturnOutput)
                 .lineSeparated()
                 .braced()
                 .prepend(signature);
+    }
+
+    @VisibleForTesting
+    public Model getModel() {
+        return model;
     }
 }

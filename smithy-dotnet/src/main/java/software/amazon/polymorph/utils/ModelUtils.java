@@ -16,6 +16,7 @@ import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
+import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.utils.StringUtils;
 
 import java.util.Arrays;
@@ -56,11 +57,9 @@ public class ModelUtils {
      * @return a stream of error structures in the given service shape
      */
     public static Stream<StructureShape> streamServiceErrors(final Model model, final ServiceShape serviceShape) {
-        return serviceShape.getAllOperations()
+        return model.getStructureShapesWithTrait(ErrorTrait.class)
                 .stream()
-                .map(shapeId -> model.expectShape(shapeId, OperationShape.class))
-                .flatMap(operationShape -> operationShape.getErrors().stream())
-                .map(errorShapeId -> model.expectShape(errorShapeId, StructureShape.class));
+                .filter(structureShape -> isInServiceNamespace(structureShape.getId(), serviceShape));
     }
 
     /**

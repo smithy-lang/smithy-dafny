@@ -10,6 +10,7 @@ import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.polymorph.util.TestModel;
 import software.amazon.smithy.model.Model;
+import software.amazon.smithy.model.SourceLocation;
 import software.amazon.smithy.model.loader.ModelAssembler;
 import software.amazon.smithy.model.shapes.ListShape;
 import software.amazon.smithy.model.shapes.MapShape;
@@ -19,6 +20,7 @@ import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.EnumDefinition;
 import software.amazon.smithy.model.traits.EnumTrait;
+import software.amazon.smithy.model.traits.ErrorTrait;
 
 import java.util.function.BiConsumer;
 
@@ -166,6 +168,19 @@ public class DotNetNameResolverTest {
         final DotNetNameResolver nameResolver = setupNameResolver(
                 (builder, modelAssembler) -> modelAssembler.addShape(positionalShape));
         assertEquals("bool", nameResolver.dafnyTypeForShape(positionalShape.getId()));
+    }
+
+    @Test
+    public void testDafnyTypeForErrorStructure() {
+        final ErrorTrait errorTrait = new ErrorTrait("client", new SourceLocation("test.smithy"));
+        final StructureShape errorShape = StructureShape.builder()
+                .id(ShapeId.fromParts(SERVICE_NAMESPACE, "ErrorShape"))
+                .addMember("message", ShapeId.from("smithy.api#String"))
+                .addTrait(errorTrait)
+                .build();
+        final DotNetNameResolver nameResolver = setupNameResolver(
+                (builder, modelAssembler) -> modelAssembler.addShape(errorShape));
+        assertEquals("Dafny.Test.Foobar.ErrorShape", nameResolver.dafnyTypeForShape(errorShape.getId()));
     }
 
     @Test

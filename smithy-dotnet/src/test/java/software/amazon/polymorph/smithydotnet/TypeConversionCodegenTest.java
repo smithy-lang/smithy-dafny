@@ -64,7 +64,16 @@ public class TypeConversionCodegenTest {
                 using System.Linq;
                 using Aws.Crypto;
                 namespace Test.Foobar {
-                    internal static class TypeConversion {}
+                    internal static class TypeConversion {
+                        public static Test.Foobar.FoobarServiceException FromDafny_CommonError_FoobarServiceException
+                                (Dafny.Test.Foobar.IFoobarServiceException value) {
+                            throw new System.ArgumentException("Unknown exception type");
+                        }
+                        public static Dafny.Test.Foobar.IFoobarServiceException ToDafny_CommonError_FoobarServiceException
+                                (Test.Foobar.FoobarServiceException value) {
+                            throw new System.ArgumentException("Unknown exception type");
+                        }
+                    }
                 }
                 """);
         assertEquals(expectedTokens, actualTokens);
@@ -111,12 +120,14 @@ public class TypeConversionCodegenTest {
                         namespace %s
                         structure FoobarConfig {}
                         resource FooResource { operations: [DoBaz] }
-                        operation DoBar { input: DoBarInput }
+                        operation DoBar { input: DoBarInput, errors: [UsedError] }
                         operation DoBaz { output: DoBazOutput }
                         structure DoBarInput { qux: Qux }
                         structure DoBazOutput { xyzzy: Xyzzy }
                         map Qux { key: String, value: Integer }
                         list Xyzzy { member: Blob }
+                        @error("client") structure UsedError { @required message: String }
+                        @error("client") structure UnusedError { @required message: String }
                         """.formatted(SERVICE_NAMESPACE));
         });
         final Set<ShapeId> expectedShapeIds = Stream.of(
@@ -130,6 +141,12 @@ public class TypeConversionCodegenTest {
                 SERVICE_NAMESPACE + "#Qux$value",
                 SERVICE_NAMESPACE + "#Xyzzy",
                 SERVICE_NAMESPACE + "#Xyzzy$member",
+                SERVICE_NAMESPACE + "#UsedError",
+                SERVICE_NAMESPACE + "#UsedError$message",
+                // Unused errors must also have type converters, since the common error shape converter depends on all
+                // specific errors in the model (even if unused in operations)
+                SERVICE_NAMESPACE + "#UnusedError",
+                SERVICE_NAMESPACE + "#UnusedError$message",
                 "smithy.api#String",
                 "smithy.api#Integer",
                 "smithy.api#Blob"
@@ -670,6 +687,91 @@ public class TypeConversionCodegenTest {
                         ? Wrappers_Compile.Option<int>.create_None()
                         : Wrappers_Compile.Option<int>.create_Some(%s((int) value));
                 }""".formatted(memberToDafnyConverterName, targetToDafnyConverterName));
+        assertEquals(expectedTokensToDafny, actualTokensToDafny);
+    }
+
+    @Test
+    public void testGenerateSpecificExceptionConverter() {
+        final ShapeId errorShapeId = ShapeId.fromParts(SERVICE_NAMESPACE, "UnfortunateError");
+        final TypeConversionCodegen codegen = setupCodegen((builder, modelAssembler) ->
+                modelAssembler.addUnparsedModel("test.smithy", """
+                        namespace %s
+                        @error("client")
+                        structure UnfortunateError {
+                            @required
+                            message: String
+                        }
+                        """.formatted(SERVICE_NAMESPACE)));
+        final TypeConverter converter = codegen.generateSpecificExceptionConverter(
+                codegen.getModel().expectShape(errorShapeId, StructureShape.class));
+        assertEquals(errorShapeId, converter.shapeId());
+
+        final String messageFromDafnyConverterName = DotNetNameResolver.typeConverterForShape(errorShapeId.withMember("message"), FROM_DAFNY);
+        final String messageToDafnyConverterName = DotNetNameResolver.typeConverterForShape(errorShapeId.withMember("message"), TO_DAFNY);
+        final String errorFromDafnyConverterName = DotNetNameResolver.typeConverterForShape(errorShapeId, FROM_DAFNY);
+        final String errorToDafnyConverterName = DotNetNameResolver.typeConverterForShape(errorShapeId, TO_DAFNY);
+
+        final List<ParseToken> actualTokensFromDafny = Tokenizer.tokenize(converter.fromDafny().toString());
+        final List<ParseToken> expectedTokensFromDafny = Tokenizer.tokenize("""
+                public static Test.Foobar.UnfortunateError %s(Dafny.Test.Foobar.UnfortunateError value) {
+                    return new Test.Foobar.UnfortunateError(%s(value.message));
+                }""".formatted(errorFromDafnyConverterName, messageFromDafnyConverterName));
+        assertEquals(expectedTokensFromDafny, actualTokensFromDafny);
+
+        final List<ParseToken> actualTokensToDafny = Tokenizer.tokenize(converter.toDafny().toString());
+        final List<ParseToken> expectedTokensToDafny = Tokenizer.tokenize("""
+                public static Dafny.Test.Foobar.UnfortunateError %s(Test.Foobar.UnfortunateError value) {
+                    Dafny.Test.Foobar.UnfortunateError converted = new Dafny.Test.Foobar.UnfortunateError();
+                    converted.message = %s(value.Message);
+                    return converted;
+                }""".formatted(errorToDafnyConverterName, messageToDafnyConverterName));
+        assertEquals(expectedTokensToDafny, actualTokensToDafny);
+    }
+
+    @Test
+    public void testGenerateCommonExceptionConverter() {
+        final ShapeId exc1ShapeId = ShapeId.fromParts(SERVICE_NAMESPACE, "Exception1");
+        final ShapeId exc2ShapeId = ShapeId.fromParts(SERVICE_NAMESPACE, "Exception2");
+        final TypeConversionCodegen codegen = setupCodegen((builder, modelAssembler) ->
+                modelAssembler.addUnparsedModel("test.smithy", """
+                        namespace %s
+                        @error("client")
+                        structure Exception1 { @required message: String }
+                        @error("server")
+                        structure Exception2 { @required message: String }
+                        """.formatted(SERVICE_NAMESPACE)));
+        final TypeConverter converter = codegen.generateCommonExceptionConverter();
+        assertTrue("Common exception converter must use a shape ID not in the model",
+            codegen.getModel().getShape(converter.shapeId()).isEmpty());
+
+        final List<ParseToken> actualTokensFromDafny = Tokenizer.tokenize(converter.fromDafny().toString());
+        final List<ParseToken> expectedTokensFromDafny = Tokenizer.tokenize("""
+                public static Test.Foobar.FoobarServiceException
+                        FromDafny_CommonError_FoobarServiceException(Dafny.Test.Foobar.IFoobarServiceException value) {
+                    if (value is Dafny.Test.Foobar.Exception1)
+                        return %s((Dafny.Test.Foobar.Exception1) value);
+                    if (value is Dafny.Test.Foobar.Exception2)
+                        return %s((Dafny.Test.Foobar.Exception2) value);
+                    throw new System.ArgumentException("Unknown exception type");
+                }""".formatted(
+                DotNetNameResolver.typeConverterForShape(exc1ShapeId, FROM_DAFNY),
+                DotNetNameResolver.typeConverterForShape(exc2ShapeId, FROM_DAFNY)
+        ));
+        assertEquals(expectedTokensFromDafny, actualTokensFromDafny);
+
+        final List<ParseToken> actualTokensToDafny = Tokenizer.tokenize(converter.toDafny().toString());
+        final List<ParseToken> expectedTokensToDafny = Tokenizer.tokenize("""
+                public static Dafny.Test.Foobar.IFoobarServiceException
+                        ToDafny_CommonError_FoobarServiceException(Test.Foobar.FoobarServiceException value) {
+                    if (value is Test.Foobar.Exception1)
+                        return %s((Test.Foobar.Exception1) value);
+                    if (value is Test.Foobar.Exception2)
+                        return %s((Test.Foobar.Exception2) value);
+                    throw new System.ArgumentException("Unknown exception type");
+                }""".formatted(
+            DotNetNameResolver.typeConverterForShape(exc1ShapeId, TO_DAFNY),
+            DotNetNameResolver.typeConverterForShape(exc2ShapeId, TO_DAFNY)
+        ));
         assertEquals(expectedTokensToDafny, actualTokensToDafny);
     }
 }

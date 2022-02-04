@@ -24,6 +24,7 @@ import software.amazon.smithy.model.shapes.ShapeType;
 import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.EnumTrait;
+import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.utils.StringUtils;
 
 import javax.annotation.Nullable;
@@ -91,6 +92,21 @@ public class DotNetNameResolver {
         return "I" + serviceShapeId.getName(serviceShape);
     }
 
+    public static String classForCommonServiceException(final ServiceShape serviceShape) {
+        return "%sException".formatted(serviceShape.getId().getName(serviceShape));
+    }
+
+    public String classForCommonServiceException() {
+        return DotNetNameResolver.classForCommonServiceException(serviceShape);
+    }
+
+    public String classForSpecificServiceException(final ShapeId structureShapeId) {
+        final StructureShape shape = model.expectShape(structureShapeId, StructureShape.class);
+        // Sanity check
+        assert shape.hasTrait(ErrorTrait.class);
+        return structureShapeId.getName(serviceShape);
+    }
+
     public String methodForOperation(final ShapeId operationShapeId) {
         return model.expectShape(operationShapeId, OperationShape.class).getId().getName(serviceShape);
     }
@@ -109,6 +125,9 @@ public class DotNetNameResolver {
         // Sanity check that we aren't using this method for non-generated structures
         assert !structureShape.hasTrait(ReferenceTrait.class);
         assert !structureShape.hasTrait(PositionalTrait.class);
+
+        // Sanity check that we aren't using this method for generated error structures
+        assert !structureShape.hasTrait(ErrorTrait.class);
 
         return model.expectShape(structureShapeId, StructureShape.class).getId().getName(serviceShape);
     }
@@ -205,8 +224,14 @@ public class DotNetNameResolver {
             return baseTypeForShape(positionalMember.get());
         }
 
-        // The base type of any other structure is the name of the corresponding generated class
         final String structureNamespace = namespaceForShapeId(structureShape.getId());
+
+        // The base type of an error structure is the corresponding generated exception class
+        if (structureShape.hasTrait(ErrorTrait.class)) {
+            return "%s.%s".formatted(structureNamespace, classForSpecificServiceException(structureShape.getId()));
+        }
+
+        // The base type of any other structure is the name of the corresponding generated class
         return "%s.%s".formatted(structureNamespace, classForStructure(structureShape.getId()));
     }
 
@@ -338,12 +363,8 @@ public class DotNetNameResolver {
      * converter methods must also be one-to-one.
      */
     public static String typeConverterForShape(final ShapeId shapeId, final TypeConversionDirection direction) {
-        final String directionStr = switch (direction) {
-            case TO_DAFNY -> "ToDafny";
-            case FROM_DAFNY -> "FromDafny";
-        };
         final String encodedShapeId = encodedIdentForShapeId(shapeId);
-        return String.format("%s_%s", directionStr, encodedShapeId);
+        return String.format("%s_%s", direction.toString(), encodedShapeId);
     }
 
     /**
@@ -352,6 +373,22 @@ public class DotNetNameResolver {
      */
     public static String qualifiedTypeConverter(final ShapeId shapeId, final TypeConversionDirection direction) {
         final String methodName = DotNetNameResolver.typeConverterForShape(shapeId, direction);
+        return "%s.%s".formatted(DotNetNameResolver.TYPE_CONVERSION_CLASS_NAME, methodName);
+    }
+
+    /**
+     * Returns the type converter method name for the given service's common error shape and the given direction.
+     */
+    public static String typeConverterForCommonError(final ServiceShape serviceShape, final TypeConversionDirection direction) {
+        return String.format("%s_CommonError_%s", direction.toString(), DotNetNameResolver.classForCommonServiceException(serviceShape));
+    }
+
+    /**
+     * Like {@link DotNetNameResolver#typeConverterForCommonError(ServiceShape, TypeConversionDirection)}, but
+     * qualified with the type conversion class name.
+     */
+    public static String qualifiedTypeConverterForCommonError(final ServiceShape serviceShape, final TypeConversionDirection direction) {
+        final String methodName = DotNetNameResolver.typeConverterForCommonError(serviceShape, direction);
         return "%s.%s".formatted(DotNetNameResolver.TYPE_CONVERSION_CLASS_NAME, methodName);
     }
 
@@ -424,6 +461,8 @@ public class DotNetNameResolver {
     }
 
     private String dafnyTypeForStructure(final StructureShape structureShape) {
+        final ShapeId shapeId = structureShape.getId();
+
         // The Dafny type of a reference structure is the Dafny trait for its referent
         final Optional<ReferenceTrait> referenceTrait = structureShape.getTrait(ReferenceTrait.class);
         if (referenceTrait.isPresent()) {
@@ -436,9 +475,15 @@ public class DotNetNameResolver {
             return dafnyTypeForShape(positionalMember.get());
         }
 
+        // The Dafny type of an error structure is the corresponding generated Dafny class
+        if (structureShape.hasTrait(ErrorTrait.class)) {
+            return "%s.%s".formatted(
+                    DafnyNameResolver.dafnyExternNamespaceForShapeId(shapeId),
+                    shapeId.getName(serviceShape));
+        }
+
         // The Dafny type of other structures is simply the structure's name.
         // We explicitly specify the Dafny namespace just in case of collisions.
-        final ShapeId shapeId = structureShape.getId();
         return "%s._I%s".formatted(
                 DafnyNameResolver.dafnyExternNamespaceForShapeId(shapeId),
                 shapeId.getName(serviceShape));
@@ -497,6 +542,8 @@ public class DotNetNameResolver {
      * <p>
      * This should generally be preferred to using the concrete Dafny type;
      * see {@link DotNetNameResolver#dafnyConcreteTypeForServiceError(ServiceShape)}.
+     *
+     * TODO remove this for error refactoring
      */
     public String dafnyAbstractTypeForServiceError(final ServiceShape serviceShape) {
         return "%s._I%sError".formatted(
@@ -510,6 +557,8 @@ public class DotNetNameResolver {
      * This must be used for accessing particular error constructors;
      * otherwise, prefer to use the abstract Dafny type
      * ({@link DotNetNameResolver#dafnyAbstractTypeForServiceError(ServiceShape)}).
+     *
+     * TODO remove this for error refactoring
      */
     public String dafnyConcreteTypeForServiceError(final ServiceShape serviceShape) {
         return "%s.%sError".formatted(
@@ -518,16 +567,28 @@ public class DotNetNameResolver {
     }
 
     /**
+     * Returns the Dafny trait implemented by all errors in the given service.
+     * <p>
+     * This is distinct from the specific Dafny error classes, since the trait / common error shape is not modeled.
+     * To get the type for a specific Dafny error class, pass the corresponding structure shape to
+     * {@link DotNetNameResolver#dafnyTypeForShape(ShapeId)}.
+     */
+    public String dafnyTypeForCommonServiceError(final ServiceShape serviceShape) {
+        return "%s.I%sException".formatted(
+                DafnyNameResolver.dafnyExternNamespaceForShapeId(serviceShape.getId()),
+                serviceShape.getContextualName(serviceShape)
+        );
+    }
+
+    /**
      * Returns the compiled-Dafny return type for an operation of this service.
-     * If the operation has no associated errors...
+     * This is the compiled-Dafny {@code Result<T, E>},
+     * where {@code T} is the corresponding Dafny-compiled value type as determined below,
+     * and where {@code E} is the Dafny-compiled common error type for this service.
      * <ul>
-     *     <li>... and the operation has output, this is the corresponding compiled-Dafny output type.</li>
-     *     <li>... and the operation has no output, this is the compiled-Dafny {@code ()} ("unit").</li>
+     *     <li>If the operation has output, the value type is the corresponding compiled-Dafny output type.</li>
+     *     <li>If the operation has no output, the value type is the compiled-Dafny {@code ()} ("unit").</li>
      * </ul>
-     * Otherwise, if the operation does have associated errors,
-     * then the this is the compiled-Dafny {@code Result<T, errorType>},
-     * where {@code T} is either {@code ()} or the corresponding Dafny-compiled output type,
-     * as determined above.
      */
     public String dafnyTypeForServiceOperationOutput(final OperationShape operationShape) {
         return dafnyTypeForServiceOperationOutput(operationShape, false);
@@ -547,10 +608,8 @@ public class DotNetNameResolver {
         final String outputType = operationShape.getOutput()
                 .map(this::dafnyTypeForShape)
                 .orElse(dafnyTypeForUnit());
-        final String errorType = dafnyAbstractTypeForServiceError(serviceShape);
-        return operationShape.getErrors().isEmpty()
-                ? outputType
-                : dafnyTypeForResult(outputType, errorType, concrete);
+        final String errorType = dafnyTypeForCommonServiceError(serviceShape);
+        return dafnyTypeForResult(outputType, errorType, concrete);
     };
 
     private String dafnyTypeForResult(final String valueType, final String errorType, final boolean concrete) {
