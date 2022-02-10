@@ -100,13 +100,6 @@ public class ModelUtils {
                 && !memberShape.isRequired();
     }
 
-    public static boolean memberShapeTargetsEntityReference(final Model model, final MemberShape memberShape) {
-        return Optional.of(memberShape.getTarget())
-                .flatMap(model::getShape)
-                .flatMap(targetShape -> targetShape.getTrait(ReferenceTrait.class))
-                .isPresent();
-    }
-
     /**
      * Returns true if the given shape ID is in the {@code smithy.api} namespace, or false otherwise.
      */

@@ -489,14 +489,21 @@ public class TypeConversionCodegenTest {
         final ShapeId intMemberId = shapeId.withMember("someInt");
         final ShapeId boolMemberId = shapeId.withMember("someBool");
         final ShapeId stringMemberId = shapeId.withMember("someString");
+        final ShapeId refMemberId = shapeId.withMember("someRef");
         final TypeConversionCodegen codegen = setupCodegen((builder, modelAssembler) ->
                 modelAssembler.addUnparsedModel("test.smithy", """
                         namespace %s
+                        use aws.polymorph#reference
+                        resource Thing {}
+                        @reference(resource: Thing)
+                        structure ThingReference {}
+                        
                         structure IntAndBool {
                             someInt: Integer,
                             @required
                             someBool: Boolean,
                             someString: String,
+                            someRef: ThingReference,
                         }
                         """.formatted(SERVICE_NAMESPACE)));
         final TypeConverter converter = codegen.generateStructureConverter(
@@ -508,6 +515,8 @@ public class TypeConversionCodegenTest {
         final String intFromDafnyConverterName = DotNetNameResolver.typeConverterForShape(intMemberId, FROM_DAFNY);
         final String boolFromDafnyConverterName = DotNetNameResolver.typeConverterForShape(boolMemberId, FROM_DAFNY);
         final String stringFromDafnyConverterName = DotNetNameResolver.typeConverterForShape(stringMemberId, FROM_DAFNY);
+        final String refFromDafnyConverterName = DotNetNameResolver
+            .typeConverterForShape(refMemberId, FROM_DAFNY);
         final List<ParseToken> expectedTokensFromDafny = Tokenizer.tokenize("""
                 public static Test.Foobar.IntAndBool %s(Dafny.Test.Foobar._IIntAndBool value) {
                     Dafny.Test.Foobar.IntAndBool concrete = (Dafny.Test.Foobar.IntAndBool)value;
@@ -515,12 +524,14 @@ public class TypeConversionCodegenTest {
                     if (concrete.someInt.is_Some) converted.SomeInt = (int) %s(concrete.someInt);
                     converted.SomeBool = (bool) %s(concrete.someBool);
                     if (concrete.someString.is_Some) converted.SomeString = (string) %s(concrete.someString);
+                    if (concrete.someRef.is_Some) converted.SomeRef = (Test.Foobar.IThing) %s(concrete.someRef);
                     return converted;
                 }""".formatted(
                         structureFromDafnyConverterName,
                         intFromDafnyConverterName,
                         boolFromDafnyConverterName,
-                        stringFromDafnyConverterName));
+                        stringFromDafnyConverterName,
+                        refFromDafnyConverterName));
         assertEquals(expectedTokensFromDafny, actualTokensFromDafny);
 
         final List<ParseToken> actualTokensToDafny = Tokenizer.tokenize(converter.toDafny().toString());
@@ -528,18 +539,22 @@ public class TypeConversionCodegenTest {
         final String intToDafnyConverterName = DotNetNameResolver.typeConverterForShape(intMemberId, TO_DAFNY);
         final String boolToDafnyConverterName = DotNetNameResolver.typeConverterForShape(boolMemberId, TO_DAFNY);
         final String stringToDafnyConverterName = DotNetNameResolver.typeConverterForShape(stringMemberId, TO_DAFNY);
+        final String refToDafnyConverterName = DotNetNameResolver
+                .typeConverterForShape(refMemberId, TO_DAFNY);
         final List<ParseToken> expectedTokensToDafny = Tokenizer.tokenize("""
                 public static Dafny.Test.Foobar._IIntAndBool %s(Test.Foobar.IntAndBool value) {
                     return new Dafny.Test.Foobar.IntAndBool(
                         %s(value.SomeInt),
                         %s(value.SomeBool),
-                        %s(value.SomeString)
+                        %s(value.SomeString),
+                        %s(value.SomeRef)
                     );
                 }""".formatted(
                         structureToDafnyConverterName,
                         intToDafnyConverterName,
                         boolToDafnyConverterName,
-                        stringToDafnyConverterName));
+                        stringToDafnyConverterName,
+                        refToDafnyConverterName));
         assertEquals(expectedTokensToDafny, actualTokensToDafny);
     }
 
