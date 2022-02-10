@@ -416,13 +416,7 @@ public class TypeConversionCodegen {
         final String targetFromDafnyConverterName = DotNetNameResolver.typeConverterForShape(targetShape.getId(), FROM_DAFNY);
         final String targetToDafnyConverterName = DotNetNameResolver.typeConverterForShape(targetShape.getId(), TO_DAFNY);
 
-        // Entity references are represented as Dafny traits, and Dafny traits can't be type parameters. So in the
-        // Dafny implementation of the model, an optional entity reference member is represented as a nullable type T?
-        // instead of an Optional<T>. This works around the limitation.
-        // TODO: remove workaround when https://github.com/dafny-lang/dafny/issues/1499 is resolved
-        final boolean targetIsEntityReference = targetShape.hasTrait(ReferenceTrait.class);
-
-        if (!nameResolver.memberShapeIsOptional(memberShape) || targetIsEntityReference) {
+        if (!nameResolver.memberShapeIsOptional(memberShape)) {
             final TokenTree fromDafnyBody = Token.of("return %s(value);".formatted(targetFromDafnyConverterName));
             final TokenTree toDafnyBody = Token.of("return %s(value);".formatted(targetToDafnyConverterName));
             return buildConverterFromMethodBodies(memberShape, fromDafnyBody, toDafnyBody);

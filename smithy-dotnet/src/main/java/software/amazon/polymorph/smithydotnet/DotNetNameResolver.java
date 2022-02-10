@@ -502,15 +502,10 @@ public class DotNetNameResolver {
     }
 
     private String dafnyTypeForMember(final MemberShape memberShape) {
-        final boolean isOptional = memberShapeIsOptional(memberShape);
+        return memberShapeIsOptional(memberShape)
+                ? dafnyTypeForOptionalMember(memberShape, false)
+                : dafnyTypeForShape(memberShape.getTarget());
 
-        if (isOptional
-                // TODO remove this condition to use Option<T> instead of T? for entity types T
-                && !ModelUtils.memberShapeTargetsEntityReference(model, memberShape)) {
-            return dafnyTypeForOptionalMember(memberShape, false);
-        }
-
-        return dafnyTypeForShape(memberShape.getTarget());
     }
 
     public String dafnyConcreteTypeForOptionalMember(final MemberShape memberShape) {
