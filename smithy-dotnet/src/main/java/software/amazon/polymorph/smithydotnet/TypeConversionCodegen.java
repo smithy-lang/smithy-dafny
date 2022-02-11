@@ -375,10 +375,7 @@ public class TypeConversionCodegen {
 
                     final TokenTree checkIfPresent;
                     if (nameResolver.memberShapeIsOptional(memberShape)) {
-                        final String isPresent = ModelUtils.memberShapeTargetsEntityReference(model, memberShape)
-                                ? "!= null"
-                                : ".is_Some";
-                        checkIfPresent = Token.of("if (concrete.%s %s)".formatted(dafnyMemberName, isPresent));
+                        checkIfPresent = Token.of("if (concrete.%s.is_Some)".formatted(dafnyMemberName));
                     } else {
                         checkIfPresent = TokenTree.empty();
                     }
