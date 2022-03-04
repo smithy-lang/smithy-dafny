@@ -391,24 +391,12 @@ public class TypeConversionCodegen {
                 Token.of("return converted;")
         );
 
-        // TONY this is where we will need to inject the logic for handling nullable fields
-        // We will need logic to construct the ternary
-          // Optional arguments will need to be identified; a variable name will need to be determined
-          // varName
-          // (presumably classPropertyForStructureMember) for each optional property
-          // The .NET type will need to be identified (baseTypeForShape is a start, but these are not nullable)
-          // nullableType
-          // Then the ternary can be constructed with the above ingredients:
-          // nullableType varName = value.IsSetVarName() ? value.VarName : (nullableType) null;
         final TokenTree isSetTernaries = TokenTree.of(
                 ModelUtils.streamStructureMembers(structureShape)
                         .filter(memberShape -> nameResolver.isValueType(memberShape.getTarget()))
                         .filter(nameResolver::memberShapeIsOptional)
                         .map(this::generateIsSetTernary)
         ).lineSeparated();
-
-        // constructorArgs will need to be modified.
-          // Optional arguments will need to be identified; a variable name will need to be determined
 
         final TokenTree constructorArgs = TokenTree.of(ModelUtils.streamStructureMembers(structureShape)
                 .map(this::generateConstructorArg)
