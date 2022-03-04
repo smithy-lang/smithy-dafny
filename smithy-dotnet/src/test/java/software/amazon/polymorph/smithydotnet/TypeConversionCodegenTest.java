@@ -543,8 +543,9 @@ public class TypeConversionCodegenTest {
                 .typeConverterForShape(refMemberId, TO_DAFNY);
         final List<ParseToken> expectedTokensToDafny = Tokenizer.tokenize("""
                 public static Dafny.Test.Foobar._IIntAndBool %s(Test.Foobar.IntAndBool value) {
+                    int? someInt = value.IsSetSomeInt() ? value.SomeInt : (int?) null;
                     return new Dafny.Test.Foobar.IntAndBool(
-                        %s(value.SomeInt),
+                        %s(someInt),
                         %s(value.SomeBool),
                         %s(value.SomeString),
                         %s(value.SomeRef)
