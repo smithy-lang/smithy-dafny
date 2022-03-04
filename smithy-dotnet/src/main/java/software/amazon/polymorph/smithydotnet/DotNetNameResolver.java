@@ -328,7 +328,7 @@ public class DotNetNameResolver {
      */
     public String variableNameForClassProperty(final MemberShape memberShape) {
         String classProperty = StringUtils.capitalize(memberShape.getMemberName());
-        return "%s%s".formatted(
+        return "var_%s%s".formatted(
                 StringUtils.uncapitalize(classProperty.substring(0,1)),
                 classProperty.substring(1));
     }

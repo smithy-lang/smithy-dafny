@@ -393,7 +393,6 @@ public class TypeConversionCodegen {
 
         final TokenTree isSetTernaries = TokenTree.of(
                 ModelUtils.streamStructureMembers(structureShape)
-                        .filter(memberShape -> nameResolver.isValueType(memberShape.getTarget()))
                         .filter(nameResolver::memberShapeIsOptional)
                         .map(this::generateIsSetTernary)
         ).lineSeparated();

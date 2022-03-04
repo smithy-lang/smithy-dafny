@@ -342,15 +342,11 @@ public class ServiceCodegen {
         final String propertyName = nameResolver.classPropertyForStructureMember(memberShape);
         final TokenTree body = TokenTree.of(getter, setter).lineSeparated();
         final TokenTree accessors = TokenTree.of("public", type, propertyName).append(body.braced());
-        if (isValueType) {
-            // IsSet is only generated for value types, not all optional types
-            return TokenTree.of(accessors, generateIsSetStructureClassProperty(memberShape)).lineSeparated();
-        }
-        return accessors;
+        return TokenTree.of(accessors, generateIsSetStructureClassProperty(memberShape)).lineSeparated();
     }
 
     /**
-     * @return IsSet method for either class values or type values
+     * @return IsSet method for either reference types or value types
      */
     private TokenTree generateIsSetStructureClassProperty(final MemberShape memberShape) {
         final String methodName = "IsSet%s()".formatted(
