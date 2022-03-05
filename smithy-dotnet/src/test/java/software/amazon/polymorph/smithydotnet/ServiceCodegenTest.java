@@ -280,6 +280,11 @@ public class ServiceCodegenTest {
                             set { this._someString = value; }
                         }
                         
+                        internal bool IsSetSomeString()
+                        {
+                            return this._someString != null;
+                        }
+                        
                         public void Validate() {
                         }
                     }

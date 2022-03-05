@@ -422,7 +422,7 @@ public class TypeConversionCodegen {
      * "ToDafny_memberShape(propertyName)"
      */
     public String generateConstructorArg(final MemberShape memberShape) {
-        if (nameResolver.memberShapeIsOptional(memberShape) && nameResolver.isValueType(memberShape.getTarget())) {
+        if (nameResolver.memberShapeIsOptional(memberShape)) {
             return "%s(%s)".formatted(
                     DotNetNameResolver.typeConverterForShape(memberShape.getId(), TO_DAFNY),
                     nameResolver.variableNameForClassProperty(memberShape));
@@ -434,18 +434,18 @@ public class TypeConversionCodegen {
 
     /**
      * Returns:
-     * "type? varName = value.IsSetPropertyName() ? value.PropertyName : (type?) null;"
+     * "type varName = value.IsSetPropertyName() ? value.PropertyName : (type) null;"
      */
     public TokenTree generateIsSetTernary(final MemberShape memberShape) {
-        final String nullableType = "%s?".formatted(nameResolver.classPropertyTypeForStructureMember(memberShape));
+        final String type = nameResolver.baseTypeForShape(memberShape.getId());
         final String varName = nameResolver.variableNameForClassProperty(memberShape);
         final String propertyName = nameResolver.classPropertyForStructureMember(memberShape);
         return TokenTree.of(
-                nullableType,
+                type,
                 varName,
                 "= value.IsSet%s()".formatted(propertyName),
                 "? value.%s :".formatted(propertyName),
-                "(%s) null;".formatted(nullableType)
+                "(%s) null;".formatted(type)
         );
     }
 

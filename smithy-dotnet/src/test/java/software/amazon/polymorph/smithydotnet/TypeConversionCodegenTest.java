@@ -543,12 +543,14 @@ public class TypeConversionCodegenTest {
                 .typeConverterForShape(refMemberId, TO_DAFNY);
         final List<ParseToken> expectedTokensToDafny = Tokenizer.tokenize("""
                 public static Dafny.Test.Foobar._IIntAndBool %s(Test.Foobar.IntAndBool value) {
-                    int? someInt = value.IsSetSomeInt() ? value.SomeInt : (int?) null;
+                    int? var_someInt = value.IsSetSomeInt() ? value.SomeInt : (int?) null;
+                    string var_someString = value.IsSetSomeString() ? value.SomeString : (string) null;
+                    Test.Foobar.IThing var_someRef = value.IsSetSomeRef() ? value.SomeRef : (Test.Foobar.IThing) null;
                     return new Dafny.Test.Foobar.IntAndBool(
-                        %s(someInt),
+                        %s(var_someInt),
                         %s(value.SomeBool),
-                        %s(value.SomeString),
-                        %s(value.SomeRef)
+                        %s(var_someString),
+                        %s(var_someRef)
                     );
                 }""".formatted(
                         structureToDafnyConverterName,
