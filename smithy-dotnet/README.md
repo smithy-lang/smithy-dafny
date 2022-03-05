@@ -71,3 +71,10 @@ Confirm the files were generated as expected:
 ls $DOTNET_ROOT/Source/API/Generated/Crypto
 ls $DAFNY_ROOT/src/Generated
 ```
+
+## Useful Debugging expressions:
+
+To print a `List<ParseToken>`:
+```
+<listVariable>.stream().map(ParseToken::text).collect(Collectors.joining(" "))
+```

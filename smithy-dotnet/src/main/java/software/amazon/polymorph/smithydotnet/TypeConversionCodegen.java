@@ -391,20 +391,62 @@ public class TypeConversionCodegen {
                 Token.of("return converted;")
         );
 
+        final TokenTree isSetTernaries = TokenTree.of(
+                ModelUtils.streamStructureMembers(structureShape)
+                        .filter(nameResolver::memberShapeIsOptional)
+                        .map(this::generateIsSetTernary)
+        ).lineSeparated();
+
         final TokenTree constructorArgs = TokenTree.of(ModelUtils.streamStructureMembers(structureShape)
-                .map(memberShape -> "%s(value.%s)".formatted(
-                        DotNetNameResolver.typeConverterForShape(memberShape.getId(), TO_DAFNY),
-                        nameResolver.classPropertyForStructureMember(memberShape)))
+                .map(this::generateConstructorArg)
                 .map(Token::of)
         ).separated(Token.of(','));
-        final TokenTree toDafnyBody = TokenTree.of(
-                Token.of("return new"),
-                Token.of(nameResolver.dafnyConcreteTypeForRegularStructure(structureShape)),
+        final TokenTree constructor = TokenTree.of(
+                TokenTree.of("return new"),
+                TokenTree.of(nameResolver.dafnyConcreteTypeForRegularStructure(structureShape)),
                 constructorArgs.parenthesized(),
                 Token.of(';')
         );
+        final TokenTree toDafnyBody = TokenTree.of(
+                isSetTernaries,
+                constructor
+        ).lineSeparated();
 
         return buildConverterFromMethodBodies(structureShape, fromDafnyBody, toDafnyBody);
+    }
+
+    /**
+     * Returns either:
+     * "ToDafny_memberShape(value.PropertyName)"
+     * OR :
+     * "ToDafny_memberShape(propertyName)"
+     */
+    public String generateConstructorArg(final MemberShape memberShape) {
+        if (nameResolver.memberShapeIsOptional(memberShape)) {
+            return "%s(%s)".formatted(
+                    DotNetNameResolver.typeConverterForShape(memberShape.getId(), TO_DAFNY),
+                    nameResolver.variableNameForClassProperty(memberShape));
+        }
+        return "%s(value.%s)".formatted(
+                DotNetNameResolver.typeConverterForShape(memberShape.getId(), TO_DAFNY),
+                nameResolver.classPropertyForStructureMember(memberShape));
+    }
+
+    /**
+     * Returns:
+     * "type varName = value.IsSetPropertyName() ? value.PropertyName : (type) null;"
+     */
+    public TokenTree generateIsSetTernary(final MemberShape memberShape) {
+        final String type = nameResolver.baseTypeForShape(memberShape.getId());
+        final String varName = nameResolver.variableNameForClassProperty(memberShape);
+        final String propertyName = nameResolver.classPropertyForStructureMember(memberShape);
+        return TokenTree.of(
+                type,
+                varName,
+                "= value.IsSet%s()".formatted(propertyName),
+                "? value.%s :".formatted(propertyName),
+                "(%s) null;".formatted(type)
+        );
     }
 
     public TypeConverter generateMemberConverter(final MemberShape memberShape) {

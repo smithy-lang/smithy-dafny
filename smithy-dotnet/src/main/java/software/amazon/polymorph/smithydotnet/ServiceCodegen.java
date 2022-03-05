@@ -326,7 +326,7 @@ public class ServiceCodegen {
     }
 
     /**
-     * @return property for the given structure member, with a getter and setter
+     * @return property for the given structure member, with a getter, setter, and IsSet for valueTypes
      */
     public TokenTree generateStructureClassProperty(final MemberShape memberShape) {
         final String fieldName = nameResolver.classFieldForStructureMember(memberShape);
@@ -341,7 +341,25 @@ public class ServiceCodegen {
         final String type = nameResolver.classPropertyTypeForStructureMember(memberShape);
         final String propertyName = nameResolver.classPropertyForStructureMember(memberShape);
         final TokenTree body = TokenTree.of(getter, setter).lineSeparated();
-        return TokenTree.of("public", type, propertyName).append(body.braced());
+        final TokenTree accessors = TokenTree.of("public", type, propertyName).append(body.braced());
+        return TokenTree.of(accessors, generateIsSetStructureClassProperty(memberShape)).lineSeparated();
+    }
+
+    /**
+     * @return IsSet method for either reference types or value types
+     */
+    private TokenTree generateIsSetStructureClassProperty(final MemberShape memberShape) {
+        final String methodName = "IsSet%s()".formatted(
+                nameResolver.classPropertyForStructureMember(memberShape));
+        TokenTree body;
+        if (nameResolver.isValueType(memberShape.getTarget())) {
+            body = TokenTree.of("return this.%s.HasValue;".formatted(
+                    nameResolver.classFieldForStructureMember(memberShape)));
+        } else {
+            body = TokenTree.of("return this.%s != null;".formatted(
+                    nameResolver.classFieldForStructureMember(memberShape)));
+        }
+        return TokenTree.of("internal bool", methodName).append(body.braced());
     }
 
     public TokenTree generateResourceInterface(final ShapeId resourceShapeId) {

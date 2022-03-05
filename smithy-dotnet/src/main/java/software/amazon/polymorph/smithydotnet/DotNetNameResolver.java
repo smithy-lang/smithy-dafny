@@ -323,6 +323,16 @@ public class DotNetNameResolver {
         return StringUtils.capitalize(memberShape.getMemberName());
     }
 
+    /**
+     * Returns the name of the class property fur use as a variable name, i.e. the first letter is lower case
+     */
+    public String variableNameForClassProperty(final MemberShape memberShape) {
+        String classProperty = StringUtils.capitalize(memberShape.getMemberName());
+        return "var_%s%s".formatted(
+                StringUtils.uncapitalize(classProperty.substring(0,1)),
+                classProperty.substring(1));
+    }
+
     public String interfaceForResource(final ShapeId resourceShapeId) {
         return String.format("I%s", StringUtils.capitalize(resourceShapeId.getName(serviceShape)));
     }

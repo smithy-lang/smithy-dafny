@@ -259,13 +259,30 @@ public class ServiceCodegenTest {
                             get { return this._someBool.GetValueOrDefault(); }
                             set { this._someBool = value; }
                         }
+                        
+                        internal bool IsSetSomeBool()
+                        {
+                            return this._someBool.HasValue;
+                        }
+                        
                         public int SomeInt {
                             get { return this._someInt.GetValueOrDefault(); }
                             set { this._someInt = value; }
                         }
+                        
+                        internal bool IsSetSomeInt()
+                        {
+                            return this._someInt.HasValue;
+                        }
+                        
                         public string SomeString {
                             get { return this._someString; }
                             set { this._someString = value; }
+                        }
+                        
+                        internal bool IsSetSomeString()
+                        {
+                            return this._someString != null;
                         }
                         
                         public void Validate() {
