@@ -92,12 +92,35 @@ public class DotNetNameResolver {
         return "I" + serviceShapeId.getName(serviceShape);
     }
 
+    // TODO For the factory we want the name to match the modeled service name exactly.
+    // Alternatively we could consider modelling the service name more generally and then appending "Factory",
+    // however that might make the smithy model hard to understand if it isn't explicit that the service is a factory
+    // via its name.
+    public String staticFactoryForService() {
+        return serviceShape.getId().getName(serviceShape);
+    }
+
     public static String classForCommonServiceException(final ServiceShape serviceShape) {
         return "%sException".formatted(serviceShape.getId().getName(serviceShape));
     }
 
     public String classForCommonServiceException() {
         return DotNetNameResolver.classForCommonServiceException(serviceShape);
+    }
+
+    // TODO How to specify a specific top level exception that's different than the service name?
+    // Do we need to specify via a new trait, or is there another approach?
+    public static String classForCommonStaticFactoryException(final ServiceShape serviceShape) {
+        if (serviceShape.getId().getName(serviceShape).equals("AwsEncryptionSdkClientFactory")) {
+            return "AwsEncryptionSdkException";
+        } else if (serviceShape.getId().getName(serviceShape).equals("AwsCryptographicMaterialProvidersClientFactory")) {
+            return "AwsCryptographicMaterialProvidersException";
+        }
+        return "%sException".formatted(serviceShape.getId().getName(serviceShape));
+    }
+
+    public String classForCommonStaticFactoryException() {
+        return DotNetNameResolver.classForCommonStaticFactoryException(serviceShape);
     }
 
     public String classForSpecificServiceException(final ShapeId structureShapeId) {
@@ -134,6 +157,7 @@ public class DotNetNameResolver {
 
     private static final Map<String, String> NATIVE_TYPES_BY_SMITHY_PRELUDE_SHAPE_NAME;
     private static final Map<ShapeType, String> NATIVE_TYPES_BY_SIMPLE_SHAPE_TYPE;
+
     static {
         NATIVE_TYPES_BY_SMITHY_PRELUDE_SHAPE_NAME = Map.ofEntries(
                 Map.entry("String", "string"),
@@ -170,7 +194,7 @@ public class DotNetNameResolver {
 
     /**
      * Returns the C# type used to store values of the given member shape within a structure class.
-     *
+     * <p>
      * This is always nullable, so it can represent uninitialized values.
      */
     public String classFieldTypeForStructureMember(final MemberShape memberShape) {
@@ -179,7 +203,7 @@ public class DotNetNameResolver {
 
     /**
      * Returns the C# type used to expose values of the given member shape as a property of its structure class.
-     *
+     * <p>
      * This is always non-nullable.
      */
     public String classPropertyTypeForStructureMember(final MemberShape memberShape) {
@@ -397,7 +421,7 @@ public class DotNetNameResolver {
      * Returns the type converter method name for the given service's common error shape and the given direction.
      */
     public static String typeConverterForCommonError(final ServiceShape serviceShape, final TypeConversionDirection direction) {
-        return String.format("%s_CommonError_%s", direction.toString(), DotNetNameResolver.classForCommonServiceException(serviceShape));
+        return String.format("%s_CommonError_%s", direction.toString(), DotNetNameResolver.classForCommonStaticFactoryException(serviceShape));
     }
 
     /**
@@ -508,7 +532,7 @@ public class DotNetNameResolver {
 
     /**
      * Returns the name of the concrete Dafny type for the given regular (i.e. not an enum or reference) structure.
-     *
+     * <p>
      * This should only be used to access members absent from the abstract type, e.g. the constructor.
      */
     public String dafnyConcreteTypeForRegularStructure(final StructureShape structureShape) {
@@ -554,7 +578,7 @@ public class DotNetNameResolver {
      * <p>
      * This should generally be preferred to using the concrete Dafny type;
      * see {@link DotNetNameResolver#dafnyConcreteTypeForServiceError(ServiceShape)}.
-     *
+     * <p>
      * TODO remove this for error refactoring
      */
     public String dafnyAbstractTypeForServiceError(final ServiceShape serviceShape) {
@@ -569,7 +593,7 @@ public class DotNetNameResolver {
      * This must be used for accessing particular error constructors;
      * otherwise, prefer to use the abstract Dafny type
      * ({@link DotNetNameResolver#dafnyAbstractTypeForServiceError(ServiceShape)}).
-     *
+     * <p>
      * TODO remove this for error refactoring
      */
     public String dafnyConcreteTypeForServiceError(final ServiceShape serviceShape) {
@@ -586,6 +610,11 @@ public class DotNetNameResolver {
      * {@link DotNetNameResolver#dafnyTypeForShape(ShapeId)}.
      */
     public String dafnyTypeForCommonServiceError(final ServiceShape serviceShape) {
+        if (serviceShape.getId().getName(serviceShape).equals("AwsEncryptionSdkClientFactory")) {
+            return "%s.IAwsEncryptionSdkException".formatted(DafnyNameResolver.dafnyExternNamespaceForShapeId(serviceShape.getId()));
+        } else if (serviceShape.getId().getName(serviceShape).equals("AwsCryptographicMaterialProvidersClientFactory")) {
+            return "%s.IAwsCryptographicMaterialProvidersException".formatted(DafnyNameResolver.dafnyExternNamespaceForShapeId(serviceShape.getId()));
+        }
         return "%s.I%sException".formatted(
                 DafnyNameResolver.dafnyExternNamespaceForShapeId(serviceShape.getId()),
                 serviceShape.getContextualName(serviceShape)
@@ -622,7 +651,9 @@ public class DotNetNameResolver {
                 .orElse(dafnyTypeForUnit());
         final String errorType = dafnyTypeForCommonServiceError(serviceShape);
         return dafnyTypeForResult(outputType, errorType, concrete);
-    };
+    }
+
+    ;
 
     private String dafnyTypeForResult(final String valueType, final String errorType, final boolean concrete) {
         final String resultType = concrete ? "Result" : "_IResult";
@@ -639,15 +670,19 @@ public class DotNetNameResolver {
 
     /**
      * Returns the name of the compiled-Dafny implementation of the service client.
-     *
+     * <p>
      * Note that the service client lives in a sub-namespace of the same name. This is because the generated Dafny API
      * skeleton uses the plain "Dafny.(service namespace)" namespace, and implementations cannot use the same extern
      * namespace.
-     *
+     * <p>
      * FIXME: remove this workaround once Dafny allows duplicate extern namespaces
      */
     public String dafnyImplForServiceClient() {
         return "%1$s.%2$s.%2$s".formatted(DafnyNameResolver.dafnyExternNamespaceForShapeId(serviceShape.getId()), clientForService());
+    }
+
+    public String dafnyImplForFactory() {
+        return "%1$s.%2$s.%2$s".formatted(DafnyNameResolver.dafnyExternNamespaceForShapeId(serviceShape.getId()), staticFactoryForService());
     }
 
     public boolean memberShapeIsOptional(final MemberShape memberShape) {
@@ -702,7 +737,7 @@ public class DotNetNameResolver {
         if (obj == null || obj.getClass() != this.getClass()) return false;
         var that = (DotNetNameResolver) obj;
         return Objects.equals(this.model, that.model) &&
-               Objects.equals(this.serviceShape, that.serviceShape);
+                Objects.equals(this.serviceShape, that.serviceShape);
     }
 
     @Override
@@ -713,7 +748,7 @@ public class DotNetNameResolver {
     @Override
     public String toString() {
         return "CSharpNameResolver[" +
-               "model=" + model + ", " +
-               "serviceShape=" + serviceShape + ']';
+                "model=" + model + ", " +
+                "serviceShape=" + serviceShape + ']';
     }
 }

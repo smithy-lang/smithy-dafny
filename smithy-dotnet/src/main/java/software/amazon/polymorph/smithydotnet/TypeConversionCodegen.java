@@ -609,8 +609,8 @@ public class TypeConversionCodegen {
         // Collecting into a TreeSet sorts the set by shape ID, making the order deterministic w.r.t the model
         final TreeSet<StructureShape> errorShapes = ModelUtils.streamServiceErrors(model, serviceShape)
                 .collect(Collectors.toCollection(TreeSet::new));
-        final String commonExceptionName = nameResolver.classForCommonServiceException();
-        final String cSharpType = "%s.%s".formatted(nameResolver.namespaceForService(), nameResolver.classForCommonServiceException());
+        final String commonExceptionName = nameResolver.classForCommonStaticFactoryException();
+        final String cSharpType = "%s.%s".formatted(nameResolver.namespaceForService(), nameResolver.classForCommonStaticFactoryException());
         final String dafnyType = nameResolver.dafnyTypeForCommonServiceError(serviceShape);
 
         final TokenTree knownErrorsFromDafny = TokenTree.of(errorShapes.stream().map(errorShape -> {

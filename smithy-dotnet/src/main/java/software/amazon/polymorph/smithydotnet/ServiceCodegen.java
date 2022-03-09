@@ -68,15 +68,54 @@ public class ServiceCodegen {
                 ";"
         ).lineSeparated();
 
-        // Service interface
-        final Path serviceInterfacePath = Path.of(String.format("%s.cs", nameResolver.interfaceForService()));
-        final TokenTree serviceInterfaceCode = generateServiceInterface();
-        codeByPath.put(serviceInterfacePath, serviceInterfaceCode.prepend(prelude));
+        // TODO hardcoding our Factory services to be static for now.
+        if (serviceShape.getId().getName(serviceShape).equals("AwsEncryptionSdkClientFactory")
+                || serviceShape.getId().getName(serviceShape).equals("AwsCryptographicMaterialProvidersClientFactory"))
+        {
+            // TODO a trait to name the common service exception something specific?
+            // Common exception class, but named less awkwardly
+            final Path commonExceptionPath = Path.of(String.format("%s.cs", nameResolver.classForCommonStaticFactoryException()));
+            final TokenTree commonExceptionPathCode = generateCommonStaticFactoryExceptionClass();
+            codeByPath.put(commonExceptionPath, commonExceptionPathCode.prepend(prelude));
 
-        // Service client base
-        final Path serviceClientBasePath = Path.of(String.format("%s.cs", nameResolver.baseClientForService()));
-        final TokenTree serviceClientBaseCode = generateServiceClientBase(serviceShape);
-        codeByPath.put(serviceClientBasePath, serviceClientBaseCode.prepend(prelude));
+            // Specific exception classes
+            model.getStructureShapes()
+                    .stream()
+                    .filter(shape -> shape.hasTrait(ErrorTrait.class))
+                    .filter(shape -> ModelUtils.isInServiceNamespace(shape.getId(), serviceShape))
+                    .forEach(shape -> {
+                        final Path exceptionClassPath = Path.of(String.format("%s.cs", nameResolver.classForSpecificServiceException(shape.getId())));
+                        final TokenTree exceptionClass = generateSpecificStaticFactoryExceptionClass(shape);
+                        codeByPath.put(exceptionClassPath, exceptionClass.prepend(prelude));
+                    });
+        } else {
+            // Service interface
+            final Path serviceInterfacePath = Path.of(String.format("%s.cs", nameResolver.interfaceForService()));
+            final TokenTree serviceInterfaceCode = generateServiceInterface();
+            codeByPath.put(serviceInterfacePath, serviceInterfaceCode.prepend(prelude));
+
+            // Service client base
+            final Path serviceClientBasePath = Path.of(String.format("%s.cs", nameResolver.baseClientForService()));
+            final TokenTree serviceClientBaseCode = generateServiceClientBase(serviceShape);
+            codeByPath.put(serviceClientBasePath, serviceClientBaseCode.prepend(prelude));
+
+            // TODO a trait to name the common service exception something specific?
+            // Common exception class
+            final Path commonExceptionPath = Path.of(String.format("%s.cs", nameResolver.classForCommonServiceException()));
+            final TokenTree commonExceptionPathCode = generateCommonExceptionClass();
+            codeByPath.put(commonExceptionPath, commonExceptionPathCode.prepend(prelude));
+
+            // Specific exception classes
+            model.getStructureShapes()
+                    .stream()
+                    .filter(shape -> shape.hasTrait(ErrorTrait.class))
+                    .filter(shape -> ModelUtils.isInServiceNamespace(shape.getId(), serviceShape))
+                    .forEach(shape -> {
+                        final Path exceptionClassPath = Path.of(String.format("%s.cs", nameResolver.classForSpecificServiceException(shape.getId())));
+                        final TokenTree exceptionClass = generateSpecificExceptionClass(shape);
+                        codeByPath.put(exceptionClassPath, exceptionClass.prepend(prelude));
+                    });
+        }
 
         // Structures
         model.getStructureShapes()
@@ -115,21 +154,7 @@ public class ServiceCodegen {
                     codeByPath.put(resourceClassPath, resourceClass.prepend(prelude));
                 });
 
-        // Common exception class
-        final Path commonExceptionPath = Path.of(String.format("%s.cs", nameResolver.classForCommonServiceException()));
-        final TokenTree commonExceptionPathCode = generateCommonExceptionClass();
-        codeByPath.put(commonExceptionPath, commonExceptionPathCode.prepend(prelude));
 
-        // Specific exception classes
-        model.getStructureShapes()
-                .stream()
-                .filter(shape -> shape.hasTrait(ErrorTrait.class))
-                .filter(shape -> ModelUtils.isInServiceNamespace(shape.getId(), serviceShape))
-                .forEach(shape -> {
-                    final Path exceptionClassPath = Path.of(String.format("%s.cs", nameResolver.classForSpecificServiceException(shape.getId())));
-                    final TokenTree exceptionClass = generateSpecificExceptionClass(shape);
-                    codeByPath.put(exceptionClassPath, exceptionClass.prepend(prelude));
-                });
 
         return codeByPath;
     }
@@ -270,6 +295,21 @@ public class ServiceCodegen {
     }
 
     /**
+     * @return a common exception class for this service, from which all other service exception classes extend
+     */
+    public TokenTree generateCommonStaticFactoryExceptionClass() {
+        final String exceptionName = nameResolver.classForCommonStaticFactoryException();
+        System.out.println("foo");
+        System.out.println(exceptionName);
+
+        final TokenTree classHeader = Token.of("public class %s : Exception".formatted(exceptionName));
+        final TokenTree emptyCtor = Token.of("public %s() : base() {}".formatted(exceptionName));
+        final TokenTree messageCtor = Token.of("public %s(string message) : base(message) {}".formatted(exceptionName));
+        final TokenTree classBody = TokenTree.of(emptyCtor, messageCtor);
+        return TokenTree.of(classHeader, classBody.braced()).namespaced(Token.of(nameResolver.namespaceForService()));
+    }
+
+    /**
      * @return an exception class for the given error structure shape, which extends from the common exception class
      */
     public TokenTree generateSpecificExceptionClass(final StructureShape structureShape) {
@@ -284,6 +324,28 @@ public class ServiceCodegen {
         }
 
         final String commonExceptionName = nameResolver.classForCommonServiceException();
+        final String exceptionName = nameResolver.classForSpecificServiceException(structureShape.getId());
+
+        final TokenTree classHeader = Token.of("public class %s : %s".formatted(exceptionName, commonExceptionName));
+        final TokenTree messageCtor = Token.of("public %s(string message) : base(message) {}".formatted(exceptionName));
+        return TokenTree.of(classHeader, messageCtor.braced()).namespaced(Token.of(nameResolver.namespaceForService()));
+    }
+
+    /**
+     * @return an exception class for the given error structure shape, which extends from the common exception class
+     */
+    public TokenTree generateSpecificStaticFactoryExceptionClass(final StructureShape structureShape) {
+        // Sanity check
+        assert structureShape.hasTrait(ErrorTrait.class);
+
+        boolean hasMessage = structureShape.getMember("message").filter(member -> member.hasTrait(RequiredTrait.class)).isPresent();
+        boolean hasOtherMembers = structureShape.getMemberNames().size() > 1;
+        // TODO support other members
+        if (!hasMessage || hasOtherMembers) {
+            throw new IllegalArgumentException("Only error shapes with a sole @required message member are supported");
+        }
+
+        final String commonExceptionName = nameResolver.classForCommonStaticFactoryException();
         final String exceptionName = nameResolver.classForSpecificServiceException(structureShape.getId());
 
         final TokenTree classHeader = Token.of("public class %s : %s".formatted(exceptionName, commonExceptionName));

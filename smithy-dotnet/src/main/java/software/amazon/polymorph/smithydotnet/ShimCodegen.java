@@ -54,7 +54,17 @@ public class ShimCodegen {
         ).lineSeparated();
 
         // Service shim
-        final Path serviceShimPath = Path.of(String.format("%s.cs", nameResolver.clientForService()));
+        // TODO hardcoded to our explicit services right now, but this behavior should change via some new trait
+        // that indicates the service vends it's operations statically.
+        Path serviceShimPath;
+        if (serviceShape.getId().getName(serviceShape).equals("AwsEncryptionSdkClientFactory")
+                || serviceShape.getId().getName(serviceShape).equals("AwsCryptographicMaterialProvidersClientFactory"))
+        {
+            serviceShimPath = Path.of(String.format("%s.cs", nameResolver.staticFactoryForService()));
+        } else {
+            serviceShimPath = Path.of(String.format("%s.cs", nameResolver.clientForService()));
+        }
+
         final TokenTree serviceShimCode = generateServiceShim();
         codeByPath.put(serviceShimPath, serviceShimCode.prepend(prelude));
 
@@ -74,17 +84,33 @@ public class ShimCodegen {
     }
 
     public TokenTree generateServiceShim() {
-        final TokenTree header = Token.of("public class %s : %s".formatted(
-                nameResolver.clientForService(),
-                nameResolver.baseClientForService()));
-        final TokenTree body = TokenTree.of(
-                generateServiceImplDeclaration(),
-                generateServiceConstructor(),
-                generateOperationShims(serviceShape.getId())
-        ).lineSeparated();
-        return header
-                .append(body.braced())
-                .namespaced(Token.of(nameResolver.namespaceForService()));
+        // TODO hardcoded to our explicit services right now, but this behavior should change via some new trait
+        // that indicates the service vends it's operations statically
+        if (serviceShape.getId().getName(serviceShape).equals("AwsEncryptionSdkClientFactory")
+            || serviceShape.getId().getName(serviceShape).equals("AwsCryptographicMaterialProvidersClientFactory"))
+        {
+            final TokenTree header = Token.of("public static class %s".formatted(
+                    nameResolver.staticFactoryForService()));
+            final TokenTree body = TokenTree.of(
+                    generateStaticFactoryImplDeclaration(),
+                    generateStaticFactoryOperationShims(serviceShape.getId())
+            ).lineSeparated();
+            return header
+                    .append(body.braced())
+                    .namespaced(Token.of(nameResolver.namespaceForService()));
+        } else {
+            final TokenTree header = Token.of("public class %s : %s".formatted(
+                    nameResolver.clientForService(),
+                    nameResolver.baseClientForService()));
+            final TokenTree body = TokenTree.of(
+                    generateServiceImplDeclaration(),
+                    generateServiceConstructor(),
+                    generateOperationShims(serviceShape.getId())
+            ).lineSeparated();
+            return header
+                    .append(body.braced())
+                    .namespaced(Token.of(nameResolver.namespaceForService()));
+        }
     }
 
     public TokenTree generateServiceConstructor() {
@@ -112,6 +138,21 @@ public class ShimCodegen {
 
     public TokenTree generateServiceImplDeclaration() {
         return Token.of("private %s %s;".formatted(nameResolver.dafnyImplForServiceClient(), IMPL_NAME));
+    }
+
+    // TODO mirrors generateResourceImplDeclaration, but declares _impl static and constructs it here.
+    public TokenTree generateStaticFactoryImplDeclaration() {
+        final Optional<ShapeId> configShapeIdOptional = serviceShape.getTrait(ClientConfigTrait.class)
+                .map(ClientConfigTrait::getClientConfigId);
+        final TokenTree configArg = configShapeIdOptional.map(shapeId -> TokenTree.of(
+                DotNetNameResolver.qualifiedTypeConverter(shapeId, TO_DAFNY),
+                "(config)"
+        )).orElse(TokenTree.empty());
+        return Token.of("static %s %s = new %s(%s);".formatted(
+                nameResolver.dafnyImplForFactory(),
+                IMPL_NAME,
+                nameResolver.dafnyImplForFactory(),
+                configArg));
     }
 
     /**
@@ -143,6 +184,47 @@ public class ShimCodegen {
     public TokenTree generateResourceImplDeclaration(final ShapeId entityShapeId) {
         return Token.of("internal %s %s { get; }".formatted(
                 nameResolver.dafnyTypeForShape(entityShapeId), IMPL_NAME));
+    }
+
+    // TODO this behavior mirrors generateOperationShims but for building the static methods we want
+    public TokenTree generateStaticFactoryOperationShims(final ShapeId entityShapeId) {
+        final EntityShape entityShape = model.expectShape(entityShapeId, EntityShape.class);
+        return TokenTree.of(entityShape.getAllOperations().stream().map(this::generateStaticFactoryOperationShim)).lineSeparated();
+    }
+
+    // TODO this behavior mirrors generateOperationShims but for building the static methods we want
+    public TokenTree generateStaticFactoryOperationShim(final ShapeId operationShapeId) {
+        final OperationShape operationShape = model.expectShape(operationShapeId, OperationShape.class);
+
+        final String outputType = operationShape.getOutput().map(nameResolver::baseTypeForShape).orElse("void");
+        final String methodName = nameResolver.methodForOperation(operationShapeId);
+        final String param = operationShape.getInput()
+                .map(inputShapeId -> nameResolver.baseTypeForShape(inputShapeId) + " input")
+                .orElse("");
+        final TokenTree signature = Token.of("public static %s %s(%s)".formatted(outputType, methodName, param));
+
+        final TokenTree convertInput = Token.of(operationShape.getInput()
+                .map(inputShapeId -> "%s internalInput = %s(input);".formatted(
+                        nameResolver.dafnyTypeForShape(inputShapeId),
+                        DotNetNameResolver.qualifiedTypeConverter(inputShapeId, TO_DAFNY)))
+                .orElse(""));
+        final TokenTree callImpl = Token.of("%s result = %s.%s(%s);".formatted(
+                nameResolver.dafnyTypeForServiceOperationOutput(operationShape),
+                IMPL_NAME,
+                nameResolver.methodForOperation(operationShapeId),
+                operationShape.getInput().isPresent() ? "internalInput" : ""
+        ));
+        final TokenTree checkAndConvertFailure = Token.of("if (result.is_Failure) throw %s(result.dtor_error);"
+                .formatted(DotNetNameResolver.qualifiedTypeConverterForCommonError(serviceShape, FROM_DAFNY)));
+        final TokenTree convertAndReturnOutput = Token.of(operationShape.getOutput()
+                .map(outputShapeId -> "return %s(result.dtor_value);".formatted(
+                        DotNetNameResolver.qualifiedTypeConverter(outputShapeId, FROM_DAFNY)))
+                .orElse(""));
+
+        return TokenTree.of(convertInput, callImpl, checkAndConvertFailure, convertAndReturnOutput)
+                .lineSeparated()
+                .braced()
+                .prepend(signature);
     }
 
     public TokenTree generateOperationShims(final ShapeId entityShapeId) {
