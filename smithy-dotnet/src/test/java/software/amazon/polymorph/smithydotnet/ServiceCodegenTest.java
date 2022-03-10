@@ -286,6 +286,9 @@ public class ServiceCodegenTest {
                         }
                         
                         public void Validate() {
+                            if (!IsSetSomeInt()) throw new System.ArgumentException(
+                                "Missing value for required member 'SomeInt'"
+                            );
                         }
                     }
                 }

@@ -324,6 +324,13 @@ public class DotNetNameResolver {
     }
 
     /**
+     * Returns the name of the given member shape's IsSet method.
+     */
+    public String isSetMethodForStructureMember(final MemberShape memberShape) {
+        return "IsSet%s".formatted(classPropertyForStructureMember(memberShape));
+    }
+
+    /**
      * Returns the name of the class property fur use as a variable name, i.e. the first letter is lower case
      */
     public String variableNameForClassProperty(final MemberShape memberShape) {

@@ -301,12 +301,7 @@ public class ServiceCodegen {
                 .map(this::generateStructureClassField)).lineSeparated();
         final TokenTree properties = TokenTree.of(ModelUtils.streamStructureMembers(structureShape)
                 .map(this::generateStructureClassProperty)).lineSeparated();
-
-        // This is a no-op for now, because the only constraint trait we're currently using is @required, and that's
-        // checked upon construction (in the corresponding Builder).
-        // TODO: support other constraint traits as needed
-        final TokenTree validateMethod = Token.of("public void Validate() {}");
-
+        final TokenTree validateMethod = generateStructureValidateMethod(structureShape);
         final TokenTree bodyTokens = TokenTree.of(fields, properties, validateMethod).lineSeparated().braced();
 
         final TokenTree namespace = Token.of(nameResolver.namespaceForService());
@@ -349,8 +344,7 @@ public class ServiceCodegen {
      * @return IsSet method for either reference types or value types
      */
     private TokenTree generateIsSetStructureClassProperty(final MemberShape memberShape) {
-        final String methodName = "IsSet%s()".formatted(
-                nameResolver.classPropertyForStructureMember(memberShape));
+        final String methodName = nameResolver.isSetMethodForStructureMember(memberShape);
         TokenTree body;
         if (nameResolver.isValueType(memberShape.getTarget())) {
             body = TokenTree.of("return this.%s.HasValue;".formatted(
@@ -359,7 +353,37 @@ public class ServiceCodegen {
             body = TokenTree.of("return this.%s != null;".formatted(
                     nameResolver.classFieldForStructureMember(memberShape)));
         }
-        return TokenTree.of("internal bool", methodName).append(body.braced());
+        return TokenTree.of("internal bool", methodName, "()").append(body.braced());
+    }
+
+    /**
+     * Generates a validation method for structures. Note that not all Smithy constraint traits are supported.
+     * <p>
+     * Supported constraint traits:
+     * <ul>
+     *     <li>{@code @required}</li>
+     * </ul>
+     * TODO:
+     * <ul>
+     *     <li>{@code @range}</li>
+     *     <li>{@code @length}</li>
+     * </ul>
+     *
+     * @return Validate() method for generated structure classes
+     */
+    private TokenTree generateStructureValidateMethod(final StructureShape structureShape) {
+        final Token signature = Token.of("public void Validate()");
+        final TokenTree checks = TokenTree.of(structureShape.members().stream()
+                .filter(MemberShape::isRequired)
+                .map(memberShape -> {
+                    final String isSetMethod = nameResolver.isSetMethodForStructureMember(memberShape);
+                    final String memberName = memberShape.getMemberName();
+                    return Token.of("""
+                            if (!%s()) throw new System.ArgumentException("Missing value for required member '%s'");
+                            """.formatted(isSetMethod, memberName));
+                })).braced();
+
+        return TokenTree.of(signature, checks);
     }
 
     public TokenTree generateResourceInterface(final ShapeId resourceShapeId) {
