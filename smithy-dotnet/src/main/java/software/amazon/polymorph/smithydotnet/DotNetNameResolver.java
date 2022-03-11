@@ -111,10 +111,10 @@ public class DotNetNameResolver {
     // TODO How to specify a specific top level exception that's different than the service name?
     // Do we need to specify via a new trait, or is there another approach?
     public static String classForCommonStaticFactoryException(final ServiceShape serviceShape) {
-        if (serviceShape.getId().getName(serviceShape).equals("AwsEncryptionSdkClientFactory")) {
-            return "AwsEncryptionSdkException";
-        } else if (serviceShape.getId().getName(serviceShape).equals("AwsCryptographicMaterialProvidersClientFactory")) {
-            return "AwsCryptographicMaterialProvidersException";
+        if (serviceShape.getId().getName(serviceShape).equals("AwsEncryptionSdkFactory")) {
+            return "AwsEncryptionSdkBaseException";
+        } else if (serviceShape.getId().getName(serviceShape).equals("AwsCryptographicMaterialProvidersFactory")) {
+            return "AwsCryptographicMaterialProvidersBaseException";
         }
         return "%sException".formatted(serviceShape.getId().getName(serviceShape));
     }
@@ -610,9 +610,9 @@ public class DotNetNameResolver {
      * {@link DotNetNameResolver#dafnyTypeForShape(ShapeId)}.
      */
     public String dafnyTypeForCommonServiceError(final ServiceShape serviceShape) {
-        if (serviceShape.getId().getName(serviceShape).equals("AwsEncryptionSdkClientFactory")) {
+        if (serviceShape.getId().getName(serviceShape).equals("AwsEncryptionSdkFactory")) {
             return "%s.IAwsEncryptionSdkException".formatted(DafnyNameResolver.dafnyExternNamespaceForShapeId(serviceShape.getId()));
-        } else if (serviceShape.getId().getName(serviceShape).equals("AwsCryptographicMaterialProvidersClientFactory")) {
+        } else if (serviceShape.getId().getName(serviceShape).equals("AwsCryptographicMaterialProvidersFactory")) {
             return "%s.IAwsCryptographicMaterialProvidersException".formatted(DafnyNameResolver.dafnyExternNamespaceForShapeId(serviceShape.getId()));
         }
         return "%s.I%sException".formatted(

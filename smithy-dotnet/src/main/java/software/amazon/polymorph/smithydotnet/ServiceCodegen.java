@@ -69,8 +69,8 @@ public class ServiceCodegen {
         ).lineSeparated();
 
         // TODO hardcoding our Factory services to be static for now.
-        if (serviceShape.getId().getName(serviceShape).equals("AwsEncryptionSdkClientFactory")
-                || serviceShape.getId().getName(serviceShape).equals("AwsCryptographicMaterialProvidersClientFactory"))
+        if (serviceShape.getId().getName(serviceShape).equals("AwsEncryptionSdkFactory")
+                || serviceShape.getId().getName(serviceShape).equals("AwsCryptographicMaterialProvidersFactory"))
         {
             // TODO a trait to name the common service exception something specific?
             // Common exception class, but named less awkwardly

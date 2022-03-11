@@ -57,8 +57,8 @@ public class ShimCodegen {
         // TODO hardcoded to our explicit services right now, but this behavior should change via some new trait
         // that indicates the service vends it's operations statically.
         Path serviceShimPath;
-        if (serviceShape.getId().getName(serviceShape).equals("AwsEncryptionSdkClientFactory")
-                || serviceShape.getId().getName(serviceShape).equals("AwsCryptographicMaterialProvidersClientFactory"))
+        if (serviceShape.getId().getName(serviceShape).equals("AwsEncryptionSdkFactory")
+                || serviceShape.getId().getName(serviceShape).equals("AwsCryptographicMaterialProvidersFactory"))
         {
             serviceShimPath = Path.of(String.format("%s.cs", nameResolver.staticFactoryForService()));
         } else {
@@ -86,8 +86,8 @@ public class ShimCodegen {
     public TokenTree generateServiceShim() {
         // TODO hardcoded to our explicit services right now, but this behavior should change via some new trait
         // that indicates the service vends it's operations statically
-        if (serviceShape.getId().getName(serviceShape).equals("AwsEncryptionSdkClientFactory")
-            || serviceShape.getId().getName(serviceShape).equals("AwsCryptographicMaterialProvidersClientFactory"))
+        if (serviceShape.getId().getName(serviceShape).equals("AwsEncryptionSdkFactory")
+            || serviceShape.getId().getName(serviceShape).equals("AwsCryptographicMaterialProvidersqgitqFactory"))
         {
             final TokenTree header = Token.of("public static class %s".formatted(
                     nameResolver.staticFactoryForService()));
