@@ -77,11 +77,7 @@ public class DotNetNameResolver {
     }
 
     public String clientForService() {
-        return serviceShape.getId().getName(serviceShape) + "Client";
-    }
-
-    public String baseClientForService() {
-        return clientForService() + "Base";
+        return serviceShape.getId().getName(serviceShape);
     }
 
     public String interfaceForService() {
@@ -89,38 +85,26 @@ public class DotNetNameResolver {
     }
 
     public String interfaceForService(final ShapeId serviceShapeId) {
-        return "I" + serviceShapeId.getName(serviceShape);
-    }
+        if (isAwsSdkServiceId(serviceShapeId)) {
+            return "I" + serviceShapeId.getName(serviceShape);
+        }
 
-    // TODO For the factory we want the name to match the modeled service name exactly.
-    // Alternatively we could consider modelling the service name more generally and then appending "Factory",
-    // however that might make the smithy model hard to understand if it isn't explicit that the service is a factory
-    // via its name.
-    public String staticFactoryForService() {
-        return serviceShape.getId().getName(serviceShape);
+        throw new UnsupportedOperationException("Interface types not supported for Shape %s".formatted(serviceShapeId));
     }
 
     public static String classForCommonServiceException(final ServiceShape serviceShape) {
-        return "%sException".formatted(serviceShape.getId().getName(serviceShape));
+        // TODO Currently we have this hardcoded to remove 'Factory' from service names
+        // that include it, however this should likely be controlled via a custom trait
+        final String serviceName = serviceShape.getId().getName(serviceShape);
+        if (serviceName.endsWith("Factory")) {
+            return "%sBaseException".formatted(serviceName.substring(0, serviceName.lastIndexOf("Factory")));
+        }
+
+        return "%sBaseException".formatted(serviceName);
     }
 
     public String classForCommonServiceException() {
         return DotNetNameResolver.classForCommonServiceException(serviceShape);
-    }
-
-    // TODO How to specify a specific top level exception that's different than the service name?
-    // Do we need to specify via a new trait, or is there another approach?
-    public static String classForCommonStaticFactoryException(final ServiceShape serviceShape) {
-        if (serviceShape.getId().getName(serviceShape).equals("AwsEncryptionSdkFactory")) {
-            return "AwsEncryptionSdkBaseException";
-        } else if (serviceShape.getId().getName(serviceShape).equals("AwsCryptographicMaterialProvidersFactory")) {
-            return "AwsCryptographicMaterialProvidersBaseException";
-        }
-        return "%sException".formatted(serviceShape.getId().getName(serviceShape));
-    }
-
-    public String classForCommonStaticFactoryException() {
-        return DotNetNameResolver.classForCommonStaticFactoryException(serviceShape);
     }
 
     public String classForSpecificServiceException(final ShapeId structureShapeId) {
@@ -277,13 +261,11 @@ public class DotNetNameResolver {
     protected String baseTypeForService(final ServiceShape serviceShape) {
         final ShapeId shapeId = serviceShape.getId();
 
-        // TODO better way to determine if AWS SDK
-        if (shapeId.getNamespace().startsWith("com.amazonaws.")) {
+        if (isAwsSdkServiceId(shapeId)) {
             return new AwsSdkDotNetNameResolver(model, serviceShape).baseTypeForService(serviceShape);
         }
 
-        return "%s.%s".formatted(
-                namespaceForShapeId(shapeId), interfaceForService(shapeId));
+        throw new UnsupportedOperationException("Base types not supported for Shape %s".formatted(shapeId));
     }
 
     protected String baseTypeForResource(final ResourceShape resourceShape) {
@@ -421,7 +403,7 @@ public class DotNetNameResolver {
      * Returns the type converter method name for the given service's common error shape and the given direction.
      */
     public static String typeConverterForCommonError(final ServiceShape serviceShape, final TypeConversionDirection direction) {
-        return String.format("%s_CommonError_%s", direction.toString(), DotNetNameResolver.classForCommonStaticFactoryException(serviceShape));
+        return String.format("%s_CommonError_%s", direction.toString(), DotNetNameResolver.classForCommonServiceException(serviceShape));
     }
 
     /**
@@ -565,7 +547,12 @@ public class DotNetNameResolver {
 
     private String dafnyTypeForService(final ServiceShape serviceShape) {
         final ShapeId serviceShapeId = serviceShape.getId();
-        return "%s.%sClient".formatted(DafnyNameResolver.dafnyExternNamespaceForShapeId(serviceShapeId), interfaceForService(serviceShapeId));
+
+        if (isAwsSdkServiceId(serviceShapeId)) {
+            return "%s.%sClient".formatted(DafnyNameResolver.dafnyExternNamespaceForShapeId(serviceShapeId), interfaceForService(serviceShapeId));
+        }
+
+        throw new UnsupportedOperationException("Dafny types not supported for Shape %s".formatted(serviceShapeId));
     }
 
     private String dafnyTypeForResource(final ResourceShape resourceShape) {
@@ -681,10 +668,6 @@ public class DotNetNameResolver {
         return "%1$s.%2$s.%2$s".formatted(DafnyNameResolver.dafnyExternNamespaceForShapeId(serviceShape.getId()), clientForService());
     }
 
-    public String dafnyImplForFactory() {
-        return "%1$s.%2$s.%2$s".formatted(DafnyNameResolver.dafnyExternNamespaceForShapeId(serviceShape.getId()), staticFactoryForService());
-    }
-
     public boolean memberShapeIsOptional(final MemberShape memberShape) {
         return ModelUtils.memberShapeIsOptional(model, memberShape);
     }
@@ -729,6 +712,11 @@ public class DotNetNameResolver {
 
     public ServiceShape getServiceShape() {
         return serviceShape;
+    }
+
+    // TODO better way to determine if AWS SDK
+    private static boolean isAwsSdkServiceId(ShapeId serviceShapeId) {
+        return serviceShapeId.getNamespace().startsWith("com.amazonaws.");
     }
 
     @Override
