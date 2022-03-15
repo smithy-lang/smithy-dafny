@@ -10,6 +10,7 @@ import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.polymorph.util.TestModel;
 import software.amazon.polymorph.util.Tokenizer;
 import software.amazon.polymorph.util.Tokenizer.ParseToken;
+import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
@@ -24,7 +25,10 @@ import software.amazon.smithy.model.traits.TraitDefinition;
 
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import java.util.Collections;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -37,116 +41,10 @@ public class ServiceCodegenTest {
     public void testGenerateEmptyService() {
         final Model model = TestModel.setupModel();
         final ServiceCodegen codegen = new ServiceCodegen(model, SERVICE_SHAPE_ID);
-        final Path expectedPath = Path.of("IFoobarService.cs");
-        final String actualCode = Objects.requireNonNull(codegen.generate().get(expectedPath)).toString();
-        final List<ParseToken> actualTokens = Tokenizer.tokenize(actualCode);
+        final Map<Path, TokenTree> codeByPath = codegen.generate();
 
-        final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
-                namespace Test.Foobar {
-                    public interface IFoobarService {
-                    }
-                }
-                """);
-
-        // Ignore the prelude
-        final List<ParseToken> lastActualTokens = actualTokens.subList(
-                actualTokens.size() - expectedTokens.size(), actualTokens.size());
-        assertEquals(expectedTokens, lastActualTokens);
-    }
-
-    @Test
-    public void testGenerateServiceClientBaseWithoutClientConfig() {
-        final StructureShape inputShape = StructureShape.builder()
-                .id(ShapeId.fromParts(SERVICE_NAMESPACE, "DoSomethingInput"))
-                .build();
-        final StructureShape outputShape = StructureShape.builder()
-                .id(ShapeId.fromParts(SERVICE_NAMESPACE, "DoSomethingOutput"))
-                .build();
-        final OperationShape operationShape = OperationShape.builder()
-                .id(ShapeId.fromParts(SERVICE_NAMESPACE, "DoSomething"))
-                .input(inputShape.getId())
-                .output(outputShape.getId())
-                .build();
-        final Model model = TestModel.setupModel((builder, modelAssembler) -> {
-            modelAssembler.addShape(inputShape);
-            modelAssembler.addShape(outputShape);
-            builder.addOperation(operationShape.getId());
-            modelAssembler.addShape(operationShape);
-        });
-        final ServiceCodegen codegen = new ServiceCodegen(model, SERVICE_SHAPE_ID);
-        final ServiceShape serviceShape = model.expectShape(SERVICE_SHAPE_ID, ServiceShape.class);
-        final String actualCode = codegen.generateServiceClientBase(serviceShape).toString();
-        final List<ParseToken> actualTokens = Tokenizer.tokenize(actualCode);
-
-        final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
-                namespace Test.Foobar {
-                    public abstract class FoobarServiceClientBase : IFoobarService {
-                        protected FoobarServiceClientBase() {}
-                        
-                        public Test.Foobar.DoSomethingOutput DoSomething(Test.Foobar.DoSomethingInput input) {
-                            input.Validate();
-                            return _DoSomething(input);
-                        }
-                        protected abstract Test.Foobar.DoSomethingOutput _DoSomething(
-                            Test.Foobar.DoSomethingInput input);
-                    }
-                }
-                """);
-
-        assertEquals(expectedTokens, actualTokens);
-    }
-
-    @Test
-    public void testGenerateServiceClientBaseWithClientConfig() {
-        final StructureShape configShape = StructureShape.builder()
-                .id(ShapeId.fromParts(SERVICE_NAMESPACE, "FoobarServiceClientConfig"))
-                .build();
-        final ClientConfigTrait configTrait = ClientConfigTrait.builder()
-                .clientConfigId(configShape.getId())
-                .build();
-        final StructureShape inputShape = StructureShape.builder()
-                .id(ShapeId.fromParts(SERVICE_NAMESPACE, "DoSomethingInput"))
-                .build();
-        final StructureShape outputShape = StructureShape.builder()
-                .id(ShapeId.fromParts(SERVICE_NAMESPACE, "DoSomethingOutput"))
-                .build();
-        final OperationShape operationShape = OperationShape.builder()
-                .id(ShapeId.fromParts(SERVICE_NAMESPACE, "DoSomething"))
-                .input(inputShape.getId())
-                .output(outputShape.getId())
-                .build();
-        final Model model = TestModel.setupModel((builder, modelAssembler) -> {
-            modelAssembler.addShape(configShape);
-            modelAssembler.addShape(inputShape);
-            modelAssembler.addShape(outputShape);
-            builder.addOperation(operationShape.getId());
-            modelAssembler.addShape(operationShape);
-            modelAssembler.addTrait(SERVICE_SHAPE_ID, configTrait);
-        });
-        final ServiceCodegen codegen = new ServiceCodegen(model, SERVICE_SHAPE_ID);
-        final ServiceShape serviceShape = model.expectShape(SERVICE_SHAPE_ID, ServiceShape.class);
-        final String actualCode = codegen.generateServiceClientBase(serviceShape).toString();
-        final List<ParseToken> actualTokens = Tokenizer.tokenize(actualCode);
-        final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
-                namespace Test.Foobar {
-                    public abstract class FoobarServiceClientBase : IFoobarService {
-                        public Test.Foobar.FoobarServiceClientConfig Config { get ; private set; }
-
-                        protected FoobarServiceClientBase(Test.Foobar.FoobarServiceClientConfig Config) {
-                            this.Config = Config;
-                        }
-                        
-                        public Test.Foobar.DoSomethingOutput DoSomething(Test.Foobar.DoSomethingInput input) {
-                            input.Validate();
-                            return _DoSomething(input);
-                        }
-                        protected abstract Test.Foobar.DoSomethingOutput _DoSomething(
-                            Test.Foobar.DoSomethingInput input);
-                    }
-                }
-                """);
-
-        assertEquals(expectedTokens, actualTokens);
+        final Set<Path> expectedPaths = Collections.singleton(Path.of("FoobarServiceException.cs"));
+        assertEquals(expectedPaths, codeByPath.keySet());
     }
 
     @Test
@@ -174,57 +72,6 @@ public class ServiceCodegenTest {
 
         final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
                 Test.Foobar.DoSomethingOutput DoSomething(Test.Foobar.DoSomethingInput input);
-                """);
-
-        assertEquals(expectedTokens, actualTokens);
-    }
-
-    @Test
-    public void testGenerateServiceInterface() {
-        final StructureShape inputShape = StructureShape.builder()
-                .id(ShapeId.fromParts(SERVICE_NAMESPACE, "DoSomethingInput"))
-                .build();
-        final StructureShape outputShape = StructureShape.builder()
-                .id(ShapeId.fromParts(SERVICE_NAMESPACE, "DoSomethingOutput"))
-                .build();
-        final OperationShape operationShape = OperationShape.builder()
-                .id(ShapeId.fromParts(SERVICE_NAMESPACE, "DoSomething"))
-                .input(inputShape.getId())
-                .output(outputShape.getId())
-                .build();
-        final StructureShape inputShape2 = StructureShape.builder()
-                .id(ShapeId.fromParts(SERVICE_NAMESPACE, "DoSomethingInput2"))
-                .build();
-        final StructureShape outputShape2 = StructureShape.builder()
-                .id(ShapeId.fromParts(SERVICE_NAMESPACE, "DoSomethingOutput2"))
-                .build();
-        final OperationShape operationShape2 = OperationShape.builder()
-                .id(ShapeId.fromParts(SERVICE_NAMESPACE, "DoSomething2"))
-                .input(inputShape2.getId())
-                .output(outputShape2.getId())
-                .build();
-        final Model model = TestModel.setupModel((builder, modelAssembler) -> {
-            modelAssembler.addShape(inputShape);
-            modelAssembler.addShape(outputShape);
-            builder.addOperation(operationShape.getId());
-            modelAssembler.addShape(operationShape);
-
-            modelAssembler.addShape(inputShape2);
-            modelAssembler.addShape(outputShape2);
-            builder.addOperation(operationShape2.getId());
-            modelAssembler.addShape(operationShape2);
-        });
-        final ServiceCodegen codegen = new ServiceCodegen(model, SERVICE_SHAPE_ID);
-        final String actualCode = codegen.generateServiceInterface().toString();
-        final List<ParseToken> actualTokens = Tokenizer.tokenize(actualCode);
-
-        final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
-                namespace Test.Foobar {
-                    public interface IFoobarService {
-                        Test.Foobar.DoSomethingOutput  DoSomething (Test.Foobar.DoSomethingInput  input);
-                        Test.Foobar.DoSomethingOutput2 DoSomething2(Test.Foobar.DoSomethingInput2 input);
-                    }
-                }
                 """);
 
         assertEquals(expectedTokens, actualTokens);

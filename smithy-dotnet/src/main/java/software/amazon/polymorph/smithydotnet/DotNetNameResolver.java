@@ -100,7 +100,7 @@ public class DotNetNameResolver {
             return "%sBaseException".formatted(serviceName.substring(0, serviceName.lastIndexOf("Factory")));
         }
 
-        return "%sBaseException".formatted(serviceName);
+        return "%sException".formatted(serviceName);
     }
 
     public String classForCommonServiceException() {

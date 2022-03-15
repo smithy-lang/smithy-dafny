@@ -85,29 +85,6 @@ public class ShimCodegen {
                 .namespaced(Token.of(nameResolver.namespaceForService()));
     }
 
-    public TokenTree generateServiceConstructor() {
-        final Optional<ShapeId> configShapeIdOptional = serviceShape.getTrait(ClientConfigTrait.class)
-                .map(ClientConfigTrait::getClientConfigId);
-
-        final TokenTree configParam = configShapeIdOptional.map(shapeId -> TokenTree.of(
-                nameResolver.baseTypeForShape(shapeId),
-                "config"
-        )).orElse(TokenTree.empty());
-        final TokenTree baseCtorCall = configShapeIdOptional.isPresent()
-                ? Token.of(": base(config)") : TokenTree.empty();
-        final TokenTree configArg = configShapeIdOptional.map(shapeId -> TokenTree.of(
-                DotNetNameResolver.qualifiedTypeConverter(shapeId, TO_DAFNY),
-                "(config)"
-        )).orElse(TokenTree.empty());
-        return Token.of("public %s(%s) %s { this.%s = new %s(%s); }".formatted(
-                nameResolver.clientForService(),
-                configParam,
-                baseCtorCall,
-                IMPL_NAME,
-                nameResolver.dafnyImplForServiceClient(),
-                configArg));
-    }
-
     public TokenTree generateServiceImplDeclaration() {
         final Optional<ShapeId> configShapeIdOptional = serviceShape.getTrait(ClientConfigTrait.class)
                 .map(ClientConfigTrait::getClientConfigId);

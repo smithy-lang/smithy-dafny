@@ -14,6 +14,7 @@ import software.amazon.smithy.model.SourceLocation;
 import software.amazon.smithy.model.loader.ModelAssembler;
 import software.amazon.smithy.model.shapes.ListShape;
 import software.amazon.smithy.model.shapes.MapShape;
+import software.amazon.smithy.model.shapes.ResourceShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StringShape;
@@ -143,18 +144,27 @@ public class DotNetNameResolverTest {
     }
 
     @Test
-    public void testDafnyTypeForReferenceStructure() {
+    public void testDafnyTypeForResourceReferenceStructure() {
+        final ShapeId resourceShapeId = ShapeId.fromParts(SERVICE_NAMESPACE, "TestResource");
+        final ResourceShape resourceShape = ResourceShape.builder()
+                .id(resourceShapeId)
+                .build();
+
         final ReferenceTrait referenceTrait = ReferenceTrait.builder()
-                .referentType(ReferenceTrait.ReferentType.SERVICE)
-                .referentId(SERVICE_SHAPE_ID)
+                .referentType(ReferenceTrait.ReferentType.RESOURCE)
+                .referentId(resourceShapeId)
                 .build();
         final StructureShape referenceShape = StructureShape.builder()
-                .id(ShapeId.fromParts(SERVICE_NAMESPACE, "ServiceReference"))
+                .id(ShapeId.fromParts(SERVICE_NAMESPACE, "ResourceReference"))
                 .addTrait(referenceTrait)
                 .build();
+
         final DotNetNameResolver nameResolver = setupNameResolver(
-                (builder, modelAssembler) -> modelAssembler.addShape(referenceShape));
-        assertEquals("Dafny.Test.Foobar.IFoobarServiceClient", nameResolver.dafnyTypeForShape(referenceShape.getId()));
+                (builder, modelAssembler) -> {
+                    modelAssembler.addShape(referenceShape);
+                    modelAssembler.addShape(resourceShape);
+                });
+        assertEquals("Dafny.Test.Foobar.ITestResource", nameResolver.dafnyTypeForShape(referenceShape.getId()));
     }
 
     @Test
@@ -200,7 +210,7 @@ public class DotNetNameResolverTest {
     public void testDafnyImplForServiceClient() {
         final DotNetNameResolver nameResolver = setupNameResolver((_builder, _modelAssembler) -> {});
         final String actualName = nameResolver.dafnyImplForServiceClient();
-        final String expectedName = "Dafny.Test.Foobar.FoobarServiceClient.FoobarServiceClient";
+        final String expectedName = "Dafny.Test.Foobar.FoobarService.FoobarService";
         assertEquals(expectedName, actualName);
     }
 }
