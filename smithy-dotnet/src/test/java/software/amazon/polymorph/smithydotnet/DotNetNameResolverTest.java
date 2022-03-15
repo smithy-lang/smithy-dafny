@@ -210,7 +210,7 @@ public class DotNetNameResolverTest {
     public void testDafnyImplForServiceClient() {
         final DotNetNameResolver nameResolver = setupNameResolver((_builder, _modelAssembler) -> {});
         final String actualName = nameResolver.dafnyImplForServiceClient();
-        final String expectedName = "Dafny.Test.Foobar.FoobarService.FoobarService";
+        final String expectedName = "Dafny.Test.Foobar.FoobarServiceFactory.FoobarServiceFactory";
         assertEquals(expectedName, actualName);
     }
 }

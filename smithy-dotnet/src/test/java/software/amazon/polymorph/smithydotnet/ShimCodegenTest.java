@@ -41,7 +41,7 @@ public class ShimCodegenTest {
                         resource Thing {}
                         """.formatted(SERVICE_NAMESPACE)));
 
-        final Set<Path> expectedPaths = Stream.of("FoobarService", "Thing")
+        final Set<Path> expectedPaths = Stream.of("FoobarServiceFactory", "Thing")
                 .map(name -> Path.of(name + ".cs")).collect(Collectors.toSet());
         final Set<Path> actualPaths = codegen.generate().keySet();
         assertEquals(expectedPaths, actualPaths);
@@ -58,9 +58,9 @@ public class ShimCodegenTest {
 
         final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
                 namespace Test.Foobar {
-                    public static class FoobarService {
-                        static Dafny.Test.Foobar.FoobarService.FoobarService _impl
-                                = new Dafny.Test.Foobar.FoobarService.FoobarService();
+                    public static class FoobarServiceFactory {
+                        static Dafny.Test.Foobar.FoobarServiceFactory.FoobarServiceFactory _impl
+                                = new Dafny.Test.Foobar.FoobarServiceFactory.FoobarServiceFactory();
                         public static void DoIt() {
                             Wrappers_Compile._IResult<_System._ITuple0, Dafny.Test.Foobar.IFoobarServiceException> result =
                                     _impl.DoIt();

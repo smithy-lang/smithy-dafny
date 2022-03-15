@@ -15,7 +15,7 @@ import java.util.function.BiConsumer;
 
 public class TestModel {
     public static final String SERVICE_NAMESPACE = "test.foobar";
-    public static final String SERVICE_NAME = "FoobarService";
+    public static final String SERVICE_NAME = "FoobarServiceFactory";
     public static final ShapeId SERVICE_SHAPE_ID = ShapeId.fromParts(SERVICE_NAMESPACE, SERVICE_NAME);
 
     /**

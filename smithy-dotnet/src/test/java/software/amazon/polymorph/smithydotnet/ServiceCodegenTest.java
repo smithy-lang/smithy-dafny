@@ -43,7 +43,7 @@ public class ServiceCodegenTest {
         final ServiceCodegen codegen = new ServiceCodegen(model, SERVICE_SHAPE_ID);
         final Map<Path, TokenTree> codeByPath = codegen.generate();
 
-        final Set<Path> expectedPaths = Collections.singleton(Path.of("FoobarServiceException.cs"));
+        final Set<Path> expectedPaths = Collections.singleton(Path.of("FoobarServiceBaseException.cs"));
         assertEquals(expectedPaths, codeByPath.keySet());
     }
 
@@ -532,9 +532,9 @@ public class ServiceCodegenTest {
 
         final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
                 namespace Test.Foobar {
-                    public class FoobarServiceException : Exception {
-                        public FoobarServiceException() : base() {}
-                        public FoobarServiceException(string message) : base(message) {}
+                    public class FoobarServiceBaseException : Exception {
+                        public FoobarServiceBaseException() : base() {}
+                        public FoobarServiceBaseException(string message) : base(message) {}
                     }
                 }
                 """);
@@ -562,7 +562,7 @@ public class ServiceCodegenTest {
 
         final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
                 namespace Test.Foobar {
-                    public class UnfortunateException : FoobarServiceException {
+                    public class UnfortunateException : FoobarServiceBaseException {
                         public UnfortunateException(string message) : base(message) {}
                     }
                 }
