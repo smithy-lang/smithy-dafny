@@ -210,8 +210,9 @@ public class ShimCodegen {
         final TokenTree signature = Token.of("protected override %s %s(%s)".formatted(outputType, methodName, param));
 
         final TokenTree convertInput = generateConvertInput(operationShapeId);
-        final TokenTree callImpl = Token.of("%s result = this.%s.%s(%s);".formatted(
+        final TokenTree callImpl = Token.of("%s %s = this.%s.%s(%s);".formatted(
                 nameResolver.dafnyTypeForServiceOperationOutput(operationShape),
+                RESULT_NAME,
                 IMPL_NAME,
                 nameResolver.methodForOperation(operationShapeId),
                 operationShape.getInput().isPresent() ? INTERNAL_INPUT_NAME : ""
