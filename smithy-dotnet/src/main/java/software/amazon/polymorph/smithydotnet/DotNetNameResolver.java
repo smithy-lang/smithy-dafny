@@ -597,14 +597,16 @@ public class DotNetNameResolver {
      * {@link DotNetNameResolver#dafnyTypeForShape(ShapeId)}.
      */
     public String dafnyTypeForCommonServiceError(final ServiceShape serviceShape) {
-        if (serviceShape.getId().getName(serviceShape).equals("AwsEncryptionSdkFactory")) {
-            return "%s.IAwsEncryptionSdkException".formatted(DafnyNameResolver.dafnyExternNamespaceForShapeId(serviceShape.getId()));
-        } else if (serviceShape.getId().getName(serviceShape).equals("AwsCryptographicMaterialProvidersFactory")) {
-            return "%s.IAwsCryptographicMaterialProvidersException".formatted(DafnyNameResolver.dafnyExternNamespaceForShapeId(serviceShape.getId()));
+        // TODO Currently we have this hardcoded to remove 'Factory' from service names
+        // that include it, however this should likely be controlled via a custom trait
+        String serviceName = serviceShape.getId().getName(serviceShape);
+        if (serviceName.endsWith("Factory")) {
+            serviceName = serviceName.substring(0, serviceName.lastIndexOf("Factory"));
         }
+
         return "%s.I%sException".formatted(
                 DafnyNameResolver.dafnyExternNamespaceForShapeId(serviceShape.getId()),
-                serviceShape.getContextualName(serviceShape)
+                serviceName
         );
     }
 
@@ -639,8 +641,6 @@ public class DotNetNameResolver {
         final String errorType = dafnyTypeForCommonServiceError(serviceShape);
         return dafnyTypeForResult(outputType, errorType, concrete);
     }
-
-    ;
 
     private String dafnyTypeForResult(final String valueType, final String errorType, final boolean concrete) {
         final String resultType = concrete ? "Result" : "_IResult";
