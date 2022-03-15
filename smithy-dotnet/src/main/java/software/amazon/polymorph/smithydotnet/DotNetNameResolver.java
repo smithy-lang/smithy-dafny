@@ -77,11 +77,7 @@ public class DotNetNameResolver {
     }
 
     public String clientForService() {
-        return serviceShape.getId().getName(serviceShape) + "Client";
-    }
-
-    public String baseClientForService() {
-        return clientForService() + "Base";
+        return serviceShape.getId().getName(serviceShape);
     }
 
     public String interfaceForService() {
@@ -89,11 +85,22 @@ public class DotNetNameResolver {
     }
 
     public String interfaceForService(final ShapeId serviceShapeId) {
-        return "I" + serviceShapeId.getName(serviceShape);
+        if (isAwsSdkServiceId(serviceShapeId)) {
+            return "I" + serviceShapeId.getName(serviceShape);
+        }
+
+        throw new UnsupportedOperationException("Interface types not supported for Shape %s".formatted(serviceShapeId));
     }
 
     public static String classForCommonServiceException(final ServiceShape serviceShape) {
-        return "%sException".formatted(serviceShape.getId().getName(serviceShape));
+        // TODO Currently we have this hardcoded to remove 'Factory' from service names
+        // that include it, however this should likely be controlled via a custom trait
+        final String serviceName = serviceShape.getId().getName(serviceShape);
+        if (serviceName.endsWith("Factory")) {
+            return "%sBaseException".formatted(serviceName.substring(0, serviceName.lastIndexOf("Factory")));
+        }
+
+        return "%sException".formatted(serviceName);
     }
 
     public String classForCommonServiceException() {
@@ -134,6 +141,7 @@ public class DotNetNameResolver {
 
     private static final Map<String, String> NATIVE_TYPES_BY_SMITHY_PRELUDE_SHAPE_NAME;
     private static final Map<ShapeType, String> NATIVE_TYPES_BY_SIMPLE_SHAPE_TYPE;
+
     static {
         NATIVE_TYPES_BY_SMITHY_PRELUDE_SHAPE_NAME = Map.ofEntries(
                 Map.entry("String", "string"),
@@ -170,7 +178,7 @@ public class DotNetNameResolver {
 
     /**
      * Returns the C# type used to store values of the given member shape within a structure class.
-     *
+     * <p>
      * This is always nullable, so it can represent uninitialized values.
      */
     public String classFieldTypeForStructureMember(final MemberShape memberShape) {
@@ -179,7 +187,7 @@ public class DotNetNameResolver {
 
     /**
      * Returns the C# type used to expose values of the given member shape as a property of its structure class.
-     *
+     * <p>
      * This is always non-nullable.
      */
     public String classPropertyTypeForStructureMember(final MemberShape memberShape) {
@@ -253,13 +261,11 @@ public class DotNetNameResolver {
     protected String baseTypeForService(final ServiceShape serviceShape) {
         final ShapeId shapeId = serviceShape.getId();
 
-        // TODO better way to determine if AWS SDK
-        if (shapeId.getNamespace().startsWith("com.amazonaws.")) {
+        if (isAwsSdkServiceId(shapeId)) {
             return new AwsSdkDotNetNameResolver(model, serviceShape).baseTypeForService(serviceShape);
         }
 
-        return "%s.%s".formatted(
-                namespaceForShapeId(shapeId), interfaceForService(shapeId));
+        throw new UnsupportedOperationException("Base types not supported for Shape %s".formatted(shapeId));
     }
 
     protected String baseTypeForResource(final ResourceShape resourceShape) {
@@ -508,7 +514,7 @@ public class DotNetNameResolver {
 
     /**
      * Returns the name of the concrete Dafny type for the given regular (i.e. not an enum or reference) structure.
-     *
+     * <p>
      * This should only be used to access members absent from the abstract type, e.g. the constructor.
      */
     public String dafnyConcreteTypeForRegularStructure(final StructureShape structureShape) {
@@ -541,7 +547,12 @@ public class DotNetNameResolver {
 
     private String dafnyTypeForService(final ServiceShape serviceShape) {
         final ShapeId serviceShapeId = serviceShape.getId();
-        return "%s.%sClient".formatted(DafnyNameResolver.dafnyExternNamespaceForShapeId(serviceShapeId), interfaceForService(serviceShapeId));
+
+        if (isAwsSdkServiceId(serviceShapeId)) {
+            return "%s.%sClient".formatted(DafnyNameResolver.dafnyExternNamespaceForShapeId(serviceShapeId), interfaceForService(serviceShapeId));
+        }
+
+        throw new UnsupportedOperationException("Dafny types not supported for Shape %s".formatted(serviceShapeId));
     }
 
     private String dafnyTypeForResource(final ResourceShape resourceShape) {
@@ -554,7 +565,7 @@ public class DotNetNameResolver {
      * <p>
      * This should generally be preferred to using the concrete Dafny type;
      * see {@link DotNetNameResolver#dafnyConcreteTypeForServiceError(ServiceShape)}.
-     *
+     * <p>
      * TODO remove this for error refactoring
      */
     public String dafnyAbstractTypeForServiceError(final ServiceShape serviceShape) {
@@ -569,7 +580,7 @@ public class DotNetNameResolver {
      * This must be used for accessing particular error constructors;
      * otherwise, prefer to use the abstract Dafny type
      * ({@link DotNetNameResolver#dafnyAbstractTypeForServiceError(ServiceShape)}).
-     *
+     * <p>
      * TODO remove this for error refactoring
      */
     public String dafnyConcreteTypeForServiceError(final ServiceShape serviceShape) {
@@ -586,9 +597,16 @@ public class DotNetNameResolver {
      * {@link DotNetNameResolver#dafnyTypeForShape(ShapeId)}.
      */
     public String dafnyTypeForCommonServiceError(final ServiceShape serviceShape) {
+        // TODO Currently we have this hardcoded to remove 'Factory' from service names
+        // that include it, however this should likely be controlled via a custom trait
+        String serviceName = serviceShape.getId().getName(serviceShape);
+        if (serviceName.endsWith("Factory")) {
+            serviceName = serviceName.substring(0, serviceName.lastIndexOf("Factory"));
+        }
+
         return "%s.I%sException".formatted(
                 DafnyNameResolver.dafnyExternNamespaceForShapeId(serviceShape.getId()),
-                serviceShape.getContextualName(serviceShape)
+                serviceName
         );
     }
 
@@ -622,7 +640,7 @@ public class DotNetNameResolver {
                 .orElse(dafnyTypeForUnit());
         final String errorType = dafnyTypeForCommonServiceError(serviceShape);
         return dafnyTypeForResult(outputType, errorType, concrete);
-    };
+    }
 
     private String dafnyTypeForResult(final String valueType, final String errorType, final boolean concrete) {
         final String resultType = concrete ? "Result" : "_IResult";
@@ -639,11 +657,11 @@ public class DotNetNameResolver {
 
     /**
      * Returns the name of the compiled-Dafny implementation of the service client.
-     *
+     * <p>
      * Note that the service client lives in a sub-namespace of the same name. This is because the generated Dafny API
      * skeleton uses the plain "Dafny.(service namespace)" namespace, and implementations cannot use the same extern
      * namespace.
-     *
+     * <p>
      * FIXME: remove this workaround once Dafny allows duplicate extern namespaces
      */
     public String dafnyImplForServiceClient() {
@@ -696,13 +714,18 @@ public class DotNetNameResolver {
         return serviceShape;
     }
 
+    // TODO better way to determine if AWS SDK
+    private static boolean isAwsSdkServiceId(ShapeId serviceShapeId) {
+        return serviceShapeId.getNamespace().startsWith("com.amazonaws.");
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
         var that = (DotNetNameResolver) obj;
         return Objects.equals(this.model, that.model) &&
-               Objects.equals(this.serviceShape, that.serviceShape);
+                Objects.equals(this.serviceShape, that.serviceShape);
     }
 
     @Override
@@ -713,7 +736,7 @@ public class DotNetNameResolver {
     @Override
     public String toString() {
         return "CSharpNameResolver[" +
-               "model=" + model + ", " +
-               "serviceShape=" + serviceShape + ']';
+                "model=" + model + ", " +
+                "serviceShape=" + serviceShape + ']';
     }
 }

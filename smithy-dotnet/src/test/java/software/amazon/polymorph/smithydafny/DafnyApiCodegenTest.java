@@ -49,7 +49,7 @@ public class DafnyApiCodegenTest {
                     """.formatted(SERVICE_NAMESPACE));
         });
         final Map<Path, TokenTree> codeByPath = codegen.generate();
-        final String actualCode = codeByPath.get(Path.of("FoobarService.dfy")).toString();
+        final String actualCode = codeByPath.get(Path.of("FoobarServiceFactory.dfy")).toString();
         final List<ParseToken> actualTokens = Tokenizer.tokenize(actualCode);
 
         final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
@@ -62,18 +62,18 @@ public class DafnyApiCodegenTest {
                     type EncryptionContextKey = ValidUTF8Bytes
                     type EncryptionContextType = map<EncryptionContextKey, EncryptionContextValue>
                     type EncryptionContextValue = ValidUTF8Bytes
-                    trait IFoobarServiceClient {
+                    trait IFoobarServiceFactoryClient {
                         predicate {:opaque} DoItCalledWith() {true}
                         predicate {:opaque} DoItSucceededWith() {true}
-                        method DoIt() returns (output: Result<(), FoobarServiceError>)
+                        method DoIt() returns (output: Result<(), FoobarServiceFactoryError>)
                            ensures DoItCalledWith()
                            ensures output.Success? ==> DoItSucceededWith()
                     }
-                    datatype FoobarServiceError =
-                        | FoobarService_Unknown(unknownMessage: string)
-                    function method CastFoobarServiceErrorToString (error: FoobarServiceError): string {
+                    datatype FoobarServiceFactoryError =
+                        | FoobarServiceFactory_Unknown(unknownMessage: string)
+                    function method CastFoobarServiceFactoryErrorToString (error: FoobarServiceFactoryError): string {
                         match error
-                        case FoobarService_Unknown(arg) => "Unexpected Exception from AWS FoobarService: " + arg
+                        case FoobarServiceFactory_Unknown(arg) => "Unexpected Exception from AWS FoobarServiceFactory: " + arg
                     }
                     type SomeBool = bool
                     datatype SomeEnum = | A | B
@@ -267,15 +267,15 @@ public class DafnyApiCodegenTest {
         final List<ParseToken> actualTokens = Tokenizer.tokenize(actualCode);
 
         final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
-                trait IFoobarServiceClient {
+                trait IFoobarServiceFactoryClient {
                     predicate {:opaque} DoThisCalledWith() {true}
                     predicate {:opaque} DoThisSucceededWith() {true}
-                    method DoThis() returns (output: Result<(), FoobarServiceError>)
+                    method DoThis() returns (output: Result<(), FoobarServiceFactoryError>)
                       ensures DoThisCalledWith()
                       ensures output.Success? ==> DoThisSucceededWith()
                     predicate {:opaque} DoThatCalledWith() {true}
                     predicate {:opaque} DoThatSucceededWith() {true}
-                    method DoThat() returns (output: Result<(), FoobarServiceError>)
+                    method DoThat() returns (output: Result<(), FoobarServiceFactoryError>)
                       ensures DoThatCalledWith()
                       ensures output.Success? ==> DoThatSucceededWith()
                 }""");
@@ -306,7 +306,7 @@ public class DafnyApiCodegenTest {
                   input: Foo,
                   output: Bar
                 ) {true}
-                method DoIt(input: Foo) returns (output: Result<Bar, FoobarServiceError>)
+                method DoIt(input: Foo) returns (output: Result<Bar, FoobarServiceFactoryError>)
                   ensures DoItCalledWith(input)
                   ensures output.Success? ==> DoItSucceededWith(input, output.value)
                 """);
@@ -329,17 +329,17 @@ public class DafnyApiCodegenTest {
         final List<ParseToken> actualTokens = Tokenizer.tokenize(actualCode);
 
         final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
-                datatype FoobarServiceError =
-                    | FoobarService_Unknown(unknownMessage: string)
-                    | FoobarService_OhNo(OhNo: OhNo)
-                    | FoobarService_Oops(Oops: Oops)
-                    | FoobarService_Whoops(Whoops: Whoops)
-                function method CastFoobarServiceErrorToString (error: FoobarServiceError): string {
+                datatype FoobarServiceFactoryError =
+                    | FoobarServiceFactory_Unknown(unknownMessage: string)
+                    | FoobarServiceFactory_OhNo(OhNo: OhNo)
+                    | FoobarServiceFactory_Oops(Oops: Oops)
+                    | FoobarServiceFactory_Whoops(Whoops: Whoops)
+                function method CastFoobarServiceFactoryErrorToString (error: FoobarServiceFactoryError): string {
                     match error
-                    case FoobarService_OhNo(arg) => arg.CastToString()
-                    case FoobarService_Oops(arg) => arg.CastToString()
-                    case FoobarService_Whoops(arg) => arg.CastToString()
-                    case FoobarService_Unknown(arg) => "Unexpected Exception from AWS FoobarService: " + arg
+                    case FoobarServiceFactory_OhNo(arg) => arg.CastToString()
+                    case FoobarServiceFactory_Oops(arg) => arg.CastToString()
+                    case FoobarServiceFactory_Whoops(arg) => arg.CastToString()
+                    case FoobarServiceFactory_Unknown(arg) => "Unexpected Exception from AWS FoobarServiceFactory: " + arg
                 }
                 """);
         assertEquals(expectedTokens, actualTokens);

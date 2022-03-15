@@ -33,8 +33,6 @@ public class ServiceCodegenSmokeTest {
         final Map<Path, TokenTree> codeByPath = serviceCodegen.generate();
 
         final Set<Path> expectedPaths = Stream.of(
-                "IStringLists",
-                "StringListsClientBase",
                 "CreateArrayListInput",
                 "CreateArrayListOutput",
                 "IListOfStrings",

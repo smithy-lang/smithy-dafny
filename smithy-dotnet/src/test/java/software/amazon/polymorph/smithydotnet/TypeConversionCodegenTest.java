@@ -65,12 +65,12 @@ public class TypeConversionCodegenTest {
                 using Aws.Crypto;
                 namespace Test.Foobar {
                     internal static class TypeConversion {
-                        public static Test.Foobar.FoobarServiceException FromDafny_CommonError_FoobarServiceException
+                        public static Test.Foobar.FoobarServiceBaseException FromDafny_CommonError_FoobarServiceBaseException
                                 (Dafny.Test.Foobar.IFoobarServiceException value) {
                             throw new System.ArgumentException("Unknown exception type");
                         }
-                        public static Dafny.Test.Foobar.IFoobarServiceException ToDafny_CommonError_FoobarServiceException
-                                (Test.Foobar.FoobarServiceException value) {
+                        public static Dafny.Test.Foobar.IFoobarServiceException ToDafny_CommonError_FoobarServiceBaseException
+                                (Test.Foobar.FoobarServiceBaseException value) {
                             throw new System.ArgumentException("Unknown exception type");
                         }
                     }
@@ -805,8 +805,8 @@ public class TypeConversionCodegenTest {
 
         final List<ParseToken> actualTokensFromDafny = Tokenizer.tokenize(converter.fromDafny().toString());
         final List<ParseToken> expectedTokensFromDafny = Tokenizer.tokenize("""
-                public static Test.Foobar.FoobarServiceException
-                        FromDafny_CommonError_FoobarServiceException(Dafny.Test.Foobar.IFoobarServiceException value) {
+                public static Test.Foobar.FoobarServiceBaseException
+                        FromDafny_CommonError_FoobarServiceBaseException(Dafny.Test.Foobar.IFoobarServiceException value) {
                     if (value is Dafny.Test.Foobar.Exception1)
                         return %s((Dafny.Test.Foobar.Exception1) value);
                     if (value is Dafny.Test.Foobar.Exception2)
@@ -821,7 +821,7 @@ public class TypeConversionCodegenTest {
         final List<ParseToken> actualTokensToDafny = Tokenizer.tokenize(converter.toDafny().toString());
         final List<ParseToken> expectedTokensToDafny = Tokenizer.tokenize("""
                 public static Dafny.Test.Foobar.IFoobarServiceException
-                        ToDafny_CommonError_FoobarServiceException(Test.Foobar.FoobarServiceException value) {
+                        ToDafny_CommonError_FoobarServiceBaseException(Test.Foobar.FoobarServiceBaseException value) {
                     if (value is Test.Foobar.Exception1)
                         return %s((Test.Foobar.Exception1) value);
                     if (value is Test.Foobar.Exception2)

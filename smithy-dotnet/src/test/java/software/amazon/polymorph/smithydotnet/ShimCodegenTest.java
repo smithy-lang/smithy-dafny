@@ -41,7 +41,7 @@ public class ShimCodegenTest {
                         resource Thing {}
                         """.formatted(SERVICE_NAMESPACE)));
 
-        final Set<Path> expectedPaths = Stream.of("FoobarServiceClient", "Thing")
+        final Set<Path> expectedPaths = Stream.of("FoobarServiceFactory", "Thing")
                 .map(name -> Path.of(name + ".cs")).collect(Collectors.toSet());
         final Set<Path> actualPaths = codegen.generate().keySet();
         assertEquals(expectedPaths, actualPaths);
@@ -58,14 +58,12 @@ public class ShimCodegenTest {
 
         final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
                 namespace Test.Foobar {
-                    public class FoobarServiceClient : FoobarServiceClientBase {
-                        private Dafny.Test.Foobar.FoobarServiceClient.FoobarServiceClient _impl;
-                        public FoobarServiceClient() {
-                            this._impl = new Dafny.Test.Foobar.FoobarServiceClient.FoobarServiceClient();
-                        }
-                        protected override void _DoIt() {
+                    public static class FoobarServiceFactory {
+                        static Dafny.Test.Foobar.FoobarServiceFactory.FoobarServiceFactory _impl
+                                = new Dafny.Test.Foobar.FoobarServiceFactory.FoobarServiceFactory();
+                        public static void DoIt() {
                             Wrappers_Compile._IResult<_System._ITuple0, Dafny.Test.Foobar.IFoobarServiceException> result =
-                                    this._impl.DoIt();
+                                    _impl.DoIt();
                             if (result.is_Failure) throw %s(result.dtor_error);
                         }
                     }
@@ -73,42 +71,6 @@ public class ShimCodegenTest {
                 """.formatted(DotNetNameResolver.qualifiedTypeConverterForCommonError(serviceShape, FROM_DAFNY)));
 
         final String actualCode = codegen.generateServiceShim().toString();
-        final List<ParseToken> actualTokens = Tokenizer.tokenize(actualCode);
-
-        assertEquals(expectedTokens, actualTokens);
-    }
-
-    @Test
-    public void testGenerateServiceConstructorWithConfig() {
-        final ShapeId configShapeId = ShapeId.fromParts(SERVICE_NAMESPACE, "Config");
-        final ShimCodegen codegen = setupCodegen((builder, modelAssembler) -> {
-            modelAssembler.addShape(StructureShape.builder().id(configShapeId).build());
-            builder.addTrait(ClientConfigTrait.builder().clientConfigId(configShapeId).build());
-        });
-
-        final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
-                public FoobarServiceClient(Test.Foobar.Config config) : base(config) {
-                    this._impl = new Dafny.Test.Foobar.FoobarServiceClient.FoobarServiceClient(%s(config));
-                }
-                """.formatted(DotNetNameResolver.qualifiedTypeConverter(configShapeId, TO_DAFNY)));
-
-        final String actualCode = codegen.generateServiceConstructor().toString();
-        final List<ParseToken> actualTokens = Tokenizer.tokenize(actualCode);
-
-        assertEquals(expectedTokens, actualTokens);
-    }
-
-    @Test
-    public void testGenerateServiceConstructorWithoutConfig() {
-        final ShimCodegen codegen = setupCodegen((_builder, _modelAssembler) -> {});
-
-        final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
-                public FoobarServiceClient() {
-                    this._impl = new Dafny.Test.Foobar.FoobarServiceClient.FoobarServiceClient();
-                }
-                """);
-
-        final String actualCode = codegen.generateServiceConstructor().toString();
         final List<ParseToken> actualTokens = Tokenizer.tokenize(actualCode);
 
         assertEquals(expectedTokens, actualTokens);

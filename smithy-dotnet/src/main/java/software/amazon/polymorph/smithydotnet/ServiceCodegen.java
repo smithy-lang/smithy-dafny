@@ -68,15 +68,21 @@ public class ServiceCodegen {
                 ";"
         ).lineSeparated();
 
-        // Service interface
-        final Path serviceInterfacePath = Path.of(String.format("%s.cs", nameResolver.interfaceForService()));
-        final TokenTree serviceInterfaceCode = generateServiceInterface();
-        codeByPath.put(serviceInterfacePath, serviceInterfaceCode.prepend(prelude));
+        // Common exception class
+        final Path commonExceptionPath = Path.of(String.format("%s.cs", nameResolver.classForCommonServiceException()));
+        final TokenTree commonExceptionPathCode = generateCommonExceptionClass();
+        codeByPath.put(commonExceptionPath, commonExceptionPathCode.prepend(prelude));
 
-        // Service client base
-        final Path serviceClientBasePath = Path.of(String.format("%s.cs", nameResolver.baseClientForService()));
-        final TokenTree serviceClientBaseCode = generateServiceClientBase(serviceShape);
-        codeByPath.put(serviceClientBasePath, serviceClientBaseCode.prepend(prelude));
+        // Specific exception classes
+        model.getStructureShapes()
+                .stream()
+                .filter(shape -> shape.hasTrait(ErrorTrait.class))
+                .filter(shape -> ModelUtils.isInServiceNamespace(shape.getId(), serviceShape))
+                .forEach(shape -> {
+                    final Path exceptionClassPath = Path.of(String.format("%s.cs", nameResolver.classForSpecificServiceException(shape.getId())));
+                    final TokenTree exceptionClass = generateSpecificExceptionClass(shape);
+                    codeByPath.put(exceptionClassPath, exceptionClass.prepend(prelude));
+                });
 
         // Structures
         model.getStructureShapes()
@@ -115,21 +121,7 @@ public class ServiceCodegen {
                     codeByPath.put(resourceClassPath, resourceClass.prepend(prelude));
                 });
 
-        // Common exception class
-        final Path commonExceptionPath = Path.of(String.format("%s.cs", nameResolver.classForCommonServiceException()));
-        final TokenTree commonExceptionPathCode = generateCommonExceptionClass();
-        codeByPath.put(commonExceptionPath, commonExceptionPathCode.prepend(prelude));
 
-        // Specific exception classes
-        model.getStructureShapes()
-                .stream()
-                .filter(shape -> shape.hasTrait(ErrorTrait.class))
-                .filter(shape -> ModelUtils.isInServiceNamespace(shape.getId(), serviceShape))
-                .forEach(shape -> {
-                    final Path exceptionClassPath = Path.of(String.format("%s.cs", nameResolver.classForSpecificServiceException(shape.getId())));
-                    final TokenTree exceptionClass = generateSpecificExceptionClass(shape);
-                    codeByPath.put(exceptionClassPath, exceptionClass.prepend(prelude));
-                });
 
         return codeByPath;
     }
@@ -146,83 +138,6 @@ public class ServiceCodegen {
                 && !structureShape.hasTrait(PositionalTrait.class)
                 // We generate exception classes (instead of typical data classes) for error structures
                 && !structureShape.hasTrait(ErrorTrait.class);
-    }
-
-    /**
-     * Generates the interface (skeleton) for a service shape, which includes a method stub for each of its operations.
-     */
-    public TokenTree generateServiceInterface() {
-        final TokenTree methodsTokens = TokenTree.of(serviceShape.getOperations()
-                .stream()
-                .map(this::generateInterfaceMethod))
-                .lineSeparated();
-        final TokenTree interfaceTokens = TokenTree.of(
-                Token.of("public interface"),
-                Token.of(nameResolver.interfaceForService()),
-                methodsTokens.braced()
-        );
-        return interfaceTokens.namespaced(Token.of(nameResolver.namespaceForService()));
-    }
-
-    /**
-     * Generates the config field and constructor for our base client classes.
-     */
-    public TokenTree generateClientConstructor(final ServiceShape serviceShape) {
-        final Optional<ClientConfigTrait> configTraitOptional = serviceShape.getTrait(ClientConfigTrait.class);
-
-        final String configFieldName = "Config";
-        final Optional<String> configTypeOptional = configTraitOptional
-                .map(ClientConfigTrait::getClientConfigId)
-                .map(nameResolver::baseTypeForShape);
-
-        final TokenTree configFieldVariable = configTypeOptional
-                .map(configType -> TokenTree.of("public", configType, configFieldName, "{ get; private set; }"))
-                .orElse(TokenTree.empty());
-
-        final TokenTree constructorParams = configTypeOptional
-                .map(configType -> TokenTree.of(configType, configFieldName))
-                .orElse(TokenTree.empty());
-        final TokenTree constructorSignature = TokenTree
-                .of("protected", nameResolver.baseClientForService())
-                .append(constructorParams.parenthesized());
-
-        final TokenTree constructorBody;
-        if (!configTraitOptional.isPresent()) {
-            constructorBody = TokenTree.empty();
-        } else {
-            constructorBody = TokenTree.of(
-                    "this." + configFieldName,
-                    "=",
-                    configFieldName,
-                    ";");
-        }
-
-        return TokenTree.of(
-                configFieldVariable,
-                constructorSignature,
-                constructorBody.braced()
-        ).lineSeparated();
-    }
-
-    /**
-     * Generates the abstract client base class for the service
-     */
-    public TokenTree generateServiceClientBase(final ServiceShape serviceShape) {
-        final TokenTree constructor = generateClientConstructor(serviceShape);
-        final TokenTree operationBody = generateEntityClassBody(serviceShape.toShapeId());
-
-        final TokenTree completeBody = TokenTree.of(constructor, operationBody).lineSeparated().braced();
-
-        final TokenTree classDeclaration = TokenTree.of(
-                "public abstract class",
-                nameResolver.baseClientForService(),
-                ":",
-                nameResolver.interfaceForService()
-        );
-
-        return classDeclaration
-                .append(completeBody)
-                .namespaced(Token.of(nameResolver.namespaceForService()));
     }
 
     /**
