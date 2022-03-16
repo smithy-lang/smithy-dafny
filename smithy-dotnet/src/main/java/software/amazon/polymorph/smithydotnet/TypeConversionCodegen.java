@@ -81,7 +81,7 @@ public class TypeConversionCodegen {
                 // needed for LINQ operators like Select
                 "using System.Linq;",
                 // TODO: fully qualify types to avoid needing this
-                "using Aws.Crypto;"
+                "using Aws.EncryptionSdk.Core;"
                 );
         final Stream<TypeConverter> modeledConverters = findShapeIdsToConvert()
                 .stream()
