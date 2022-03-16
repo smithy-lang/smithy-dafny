@@ -48,7 +48,7 @@ Then, run the following. You'll likely see a bunch of warnings about "Overwritin
 ./gradlew run --args="\
     --output-dotnet $DOTNET_ROOT/Source/API/Generated/Crypto \
     --output-dafny $DAFNY_ROOT/src/Generated \
-    -m $MODEL_ROOT -s aws.crypto#AwsCryptographicMaterialProvidersFactory"
+    -m $MODEL_ROOT -s aws.encryptionSdk.core#AwsCryptographicMaterialProvidersFactory"
 
 # Generate code for KMS
 ./gradlew run --args="\
@@ -62,7 +62,7 @@ Then, run the following. You'll likely see a bunch of warnings about "Overwritin
 ./gradlew run --args="\
     --output-dotnet $DOTNET_ROOT/Source/API/Generated/Esdk \
     --output-dafny $DAFNY_ROOT/src/Generated \
-     -m $MODEL_ROOT -s aws.esdk#AwsEncryptionSdkFactory"
+     -m $MODEL_ROOT -s aws.encryptionSdk#AwsEncryptionSdkFactory"
 ```
 
 Confirm the files were generated as expected:
