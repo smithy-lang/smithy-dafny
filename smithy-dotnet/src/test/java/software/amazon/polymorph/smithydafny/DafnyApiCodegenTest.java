@@ -69,11 +69,20 @@ public class DafnyApiCodegenTest {
                            ensures DoItCalledWith()
                            ensures output.Success? ==> DoItSucceededWith()
                     }
-                    datatype FoobarServiceFactoryError =
-                        | FoobarServiceFactory_Unknown(unknownMessage: string)
-                    function method CastFoobarServiceFactoryErrorToString (error: FoobarServiceFactoryError): string {
-                        match error
-                        case FoobarServiceFactory_Unknown(arg) => "Unexpected Exception from AWS FoobarServiceFactory: " + arg
+                    trait FoobarServiceFactoryError {
+                        function method GetMessage(): (message: string)
+                            reads this
+                    }
+                    class UnknownFoobarServiceFactoryError extends FoobarServiceFactoryError {
+                        var message: string
+                        constructor(message: string) {
+                            this.message := message;
+                        }
+                        function method GetMessage(): (message: string)
+                            reads this
+                        {
+                            this.message
+                        }
                     }
                     type SomeBool = bool
                     datatype SomeEnum = | A | B
@@ -314,7 +323,7 @@ public class DafnyApiCodegenTest {
     }
 
     @Test
-    public void testGenerateServiceErrorTypeDefinition() {
+    public void testGenerateServiceErrorTraitDefinition() {
         final DafnyApiCodegen codegen = setupCodegen((builder, modelAssembler) -> {
             builder.addOperation(ShapeId.fromParts(SERVICE_NAMESPACE, "DoIt"));
             modelAssembler.addUnparsedModel("test.smithy", """
@@ -325,21 +334,13 @@ public class DafnyApiCodegenTest {
                     @error("server") structure Whoops {}
                     """.formatted(SERVICE_NAMESPACE));
         });
-        final String actualCode = codegen.generateServiceErrorTypeDefinition().toString();
+        final String actualCode = codegen.generateServiceErrorTraitDefinition().toString();
         final List<ParseToken> actualTokens = Tokenizer.tokenize(actualCode);
 
         final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
-                datatype FoobarServiceFactoryError =
-                    | FoobarServiceFactory_Unknown(unknownMessage: string)
-                    | FoobarServiceFactory_OhNo(OhNo: OhNo)
-                    | FoobarServiceFactory_Oops(Oops: Oops)
-                    | FoobarServiceFactory_Whoops(Whoops: Whoops)
-                function method CastFoobarServiceFactoryErrorToString (error: FoobarServiceFactoryError): string {
-                    match error
-                    case FoobarServiceFactory_OhNo(arg) => arg.CastToString()
-                    case FoobarServiceFactory_Oops(arg) => arg.CastToString()
-                    case FoobarServiceFactory_Whoops(arg) => arg.CastToString()
-                    case FoobarServiceFactory_Unknown(arg) => "Unexpected Exception from AWS FoobarServiceFactory: " + arg
+                trait FoobarServiceFactoryError {
+                    function method GetMessage(): (message: string)
+                        reads this
                 }
                 """);
         assertEquals(expectedTokens, actualTokens);

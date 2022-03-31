@@ -3,10 +3,6 @@
 
 package software.amazon.polymorph.utils;
 
-import java.util.Optional;
-import java.util.regex.Pattern;
-import java.util.stream.Stream;
-
 import software.amazon.polymorph.traits.ClientConfigTrait;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.polymorph.traits.ExtendableTrait;
@@ -20,6 +16,11 @@ import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.ErrorTrait;
+import software.amazon.smithy.model.traits.RequiredTrait;
+
+import java.util.Optional;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 public class ModelUtils {
     // Require title-case alphanumeric names, so we don't need to check for keyword conflicts.
@@ -105,5 +106,27 @@ public class ModelUtils {
 
     public static boolean isValidEnumDefinitionName(final String name) {
         return ENUM_NAME_PATTERN.matcher(name).matches();
+    }
+
+    /**
+     * Throws {@link IllegalArgumentException} if the given structure shape is not an @error structure
+     * that fits code-generation constraints.
+     */
+    public static void validateErrorStructure(final StructureShape structureShape) {
+        if (!structureShape.hasTrait(ErrorTrait.class)) {
+            throw new IllegalArgumentException("%s is not an @error structure".formatted(structureShape.getId()));
+        }
+
+        // TODO allow omitting message
+        boolean hasMessage = structureShape.getMember("message")
+                .filter(member -> member.hasTrait(RequiredTrait.class)).isPresent();
+        if (!hasMessage) {
+            throw new IllegalArgumentException("Error structure %s is missing a required 'message' member");
+        }
+
+        // TODO support other members
+        if (structureShape.getMemberNames().size() > 1) {
+            throw new IllegalArgumentException("Error structure %s cannot have members other than 'message'");
+        }
     }
 }

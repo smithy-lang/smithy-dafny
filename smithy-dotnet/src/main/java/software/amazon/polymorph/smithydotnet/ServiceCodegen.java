@@ -206,15 +206,7 @@ public class ServiceCodegen {
      * @return an exception class for the given error structure shape, which extends from the common exception class
      */
     public TokenTree generateSpecificExceptionClass(final StructureShape structureShape) {
-        // Sanity check
-        assert structureShape.hasTrait(ErrorTrait.class);
-
-        boolean hasMessage = structureShape.getMember("message").filter(member -> member.hasTrait(RequiredTrait.class)).isPresent();
-        boolean hasOtherMembers = structureShape.getMemberNames().size() > 1;
-        // TODO support other members
-        if (!hasMessage || hasOtherMembers) {
-            throw new IllegalArgumentException("Only error shapes with a sole @required message member are supported");
-        }
+        ModelUtils.validateErrorStructure(structureShape);
 
         final String commonExceptionName = nameResolver.classForCommonServiceException();
         final String exceptionName = nameResolver.classForSpecificServiceException(structureShape.getId());

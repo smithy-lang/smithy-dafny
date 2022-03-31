@@ -165,7 +165,7 @@ public class AwsSdkShimCodegen {
         final String stringConverter = AwsSdkDotNetNameResolver.qualifiedTypeConverter(
                 ShapeId.from("smithy.api#String"), TO_DAFNY);
         final String dafnyUnknownErrorCtor = DotNetNameResolver.dafnyCompiledNameForEnumDefinitionName(
-                dafnyNameResolver.nameForServiceErrorUnknownConstructor(serviceShape));
+                dafnyNameResolver.classForUnknownError(serviceShape));
         final TokenTree convertUnknownError = Token.of("return %s.create_%s(%s(error.Message));".formatted(
                 dafnyErrorConcreteType, dafnyUnknownErrorCtor, stringConverter));
 
