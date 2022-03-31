@@ -183,10 +183,15 @@ public class CodegenCli {
             // SPDX-License-Identifier: Apache-2.0
             """;
 
+    public static final String GENERATED_HEADER = """
+            // Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
+            """;
+
     private static void writeTokenTreesIntoDir(final Map<Path, TokenTree> tokenTreeMap, final Path outputDir) {
         tokenTreeMap.forEach((Path localPath, TokenTree tokens) -> {
             final Path outputPath = Path.of(outputDir.toString(), localPath.toString());
-            writeToFile(COPYRIGHT_HEADER + tokens.toString(), outputPath.toFile());
+            final String content = COPYRIGHT_HEADER + GENERATED_HEADER + tokens.toString();
+            writeToFile(content, outputPath.toFile());
         });
     }
 }
