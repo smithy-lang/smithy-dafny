@@ -303,7 +303,6 @@ public class DotNetNameResolver {
         // We annotate C# value types with `?` to make them nullable.
         // We cannot do the same for C# reference types since those types are already nullable by design.
         // TODO: nullable reference types appear to be supported in C# 8.0+. Maybe revisit this.
-        //  https://issues.amazon.com/issues/CrypTool-4156
         return isValueType(memberShape.getTarget()) ? baseType + "?" : baseType;
     }
 
