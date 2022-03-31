@@ -61,7 +61,7 @@ public class ServiceCodegen {
                 // TODO: not all files will need these, and some of them result in duplicates (e.g. "Core"
                 //  must be imported in the Esdk module, but is obviously not necessary in the Core module).
                 //  Get smarter about generating imports.
-                "using Aws.EncryptionSdk.Core;",
+                "using AWS.EncryptionSDK.Core;",
                 // end conditional imports
                 "using",
                 nameResolver.namespaceForService(),

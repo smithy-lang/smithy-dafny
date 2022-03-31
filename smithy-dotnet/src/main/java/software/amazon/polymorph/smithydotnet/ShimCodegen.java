@@ -49,7 +49,7 @@ public class ShimCodegen {
                 // TODO: get smarter about imports. maybe just fully qualify all model-agnostic types?
                 "using System.IO;",
                 "using System.Collections.Generic;",
-                "using Aws.EncryptionSdk.Core;",
+                "using AWS.EncryptionSDK.Core;",
                 // end conditional imports
                 "using",
                 nameResolver.namespaceForService(),
