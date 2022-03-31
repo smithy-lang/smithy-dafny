@@ -82,10 +82,10 @@ public class ServiceCodegenTest {
         final Model model = TestModel.setupModel((builder, modelAssembler) -> modelAssembler.addUnparsedModel("test.smithy", """
                 namespace %s
                 structure Foobar {
-                    SomeBool: Boolean,
+                    someBool: Boolean,
                     @required
-                    SomeInt: Integer,
-                    SomeString: String,
+                    someInt: Integer,
+                    someString: String,
                 }
                 """.formatted(SERVICE_NAMESPACE)));
 
@@ -134,7 +134,7 @@ public class ServiceCodegenTest {
                         
                         public void Validate() {
                             if (!IsSetSomeInt()) throw new System.ArgumentException(
-                                "Missing value for required member 'SomeInt'"
+                                "Missing value for required property 'SomeInt'"
                             );
                         }
                     }

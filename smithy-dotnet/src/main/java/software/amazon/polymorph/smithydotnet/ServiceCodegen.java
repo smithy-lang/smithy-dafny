@@ -292,10 +292,10 @@ public class ServiceCodegen {
                 .filter(MemberShape::isRequired)
                 .map(memberShape -> {
                     final String isSetMethod = nameResolver.isSetMethodForStructureMember(memberShape);
-                    final String memberName = memberShape.getMemberName();
+                    final String propertyName = nameResolver.classPropertyForStructureMember(memberShape);
                     return Token.of("""
-                            if (!%s()) throw new System.ArgumentException("Missing value for required member '%s'");
-                            """.formatted(isSetMethod, memberName));
+                            if (!%s()) throw new System.ArgumentException("Missing value for required property '%s'");
+                            """.formatted(isSetMethod, propertyName));
                 })).braced();
 
         return TokenTree.of(signature, checks);
