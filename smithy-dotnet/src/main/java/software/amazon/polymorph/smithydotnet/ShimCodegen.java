@@ -95,7 +95,7 @@ public class ShimCodegen {
                 DotNetNameResolver.qualifiedTypeConverter(shapeId, TO_DAFNY),
                 "(config)"
         )).orElse(TokenTree.empty());
-        return Token.of("static %s %s = new %s(%s);".formatted(
+        return Token.of("static readonly %s %s = new %s(%s);".formatted(
                 nameResolver.dafnyImplForServiceClient(),
                 IMPL_NAME,
                 nameResolver.dafnyImplForServiceClient(),
@@ -190,7 +190,7 @@ public class ShimCodegen {
     }
 
     public TokenTree generateResourceImplDeclaration(final ShapeId entityShapeId) {
-        return Token.of("internal %s %s { get; }".formatted(
+        return Token.of("internal readonly %s %s;".formatted(
                 nameResolver.dafnyTypeForShape(entityShapeId), IMPL_NAME));
     }
 
