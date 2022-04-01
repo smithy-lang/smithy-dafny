@@ -29,6 +29,8 @@ import software.amazon.smithy.model.traits.TraitDefinition;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -50,22 +52,23 @@ public class ServiceCodegen {
         this.nameResolver = new DotNetNameResolver(model, serviceShape);
     }
 
+    // TODO: get smarter about imports. maybe just fully qualify all model-agnostic types?
+    private final static List<String> UNCONDITIONAL_IMPORTS = List.of(
+            "System",
+            "AWS.EncryptionSDK.Core"
+    );
+
     /**
      * @return map of skeleton's file paths to generated ASTs
      */
     public Map<Path, TokenTree> generate() {
         final Map<Path, TokenTree> codeByPath = new HashMap<>();
+
+        // Use LinkedHashSet to dedupe while maintaining insertion order
+        final LinkedHashSet<String> importNamespaces = new LinkedHashSet<>(UNCONDITIONAL_IMPORTS);
+        importNamespaces.add(nameResolver.namespaceForService());
         final TokenTree prelude = TokenTree.of(
-                "using System;",
-                // Conditional imports.
-                // TODO: not all files will need these, and some of them result in duplicates (e.g. "Core"
-                //  must be imported in the Esdk module, but is obviously not necessary in the Core module).
-                //  Get smarter about generating imports.
-                "using Aws.EncryptionSdk.Core;",
-                // end conditional imports
-                "using",
-                nameResolver.namespaceForService(),
-                ";"
+                importNamespaces.stream().map("using %s;"::formatted).map(Token::of)
         ).lineSeparated();
 
         // Common exception class
@@ -292,10 +295,10 @@ public class ServiceCodegen {
                 .filter(MemberShape::isRequired)
                 .map(memberShape -> {
                     final String isSetMethod = nameResolver.isSetMethodForStructureMember(memberShape);
-                    final String memberName = memberShape.getMemberName();
+                    final String propertyName = nameResolver.classPropertyForStructureMember(memberShape);
                     return Token.of("""
-                            if (!%s()) throw new System.ArgumentException("Missing value for required member '%s'");
-                            """.formatted(isSetMethod, memberName));
+                            if (!%s()) throw new System.ArgumentException("Missing value for required property '%s'");
+                            """.formatted(isSetMethod, propertyName));
                 })).braced();
 
         return TokenTree.of(signature, checks);

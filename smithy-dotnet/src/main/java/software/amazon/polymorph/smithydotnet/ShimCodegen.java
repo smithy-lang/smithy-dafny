@@ -17,6 +17,8 @@ import software.amazon.smithy.model.shapes.ShapeId;
 
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -38,22 +40,25 @@ public class ShimCodegen {
         this.nameResolver = new DotNetNameResolver(model, serviceShape);
     }
 
+    // TODO: get smarter about imports. maybe just fully qualify all model-agnostic types?
+    private final static List<String> UNCONDITIONAL_IMPORTS = List.of(
+            "System",
+            "System.IO",
+            "System.Collections.Generic",
+            "AWS.EncryptionSDK.Core"
+    );
+
     /**
      * Returns a map of service's and all resources' shim file paths to their generated ASTs.
      */
     public Map<Path, TokenTree> generate() {
         final Map<Path, TokenTree> codeByPath = new HashMap<>();
+
+        // Use LinkedHashSet to dedupe while maintaining insertion order
+        final LinkedHashSet<String> importNamespaces = new LinkedHashSet<>(UNCONDITIONAL_IMPORTS);
+        importNamespaces.add(nameResolver.namespaceForService());
         final TokenTree prelude = TokenTree.of(
-                "using System;",
-                // Conditional imports.
-                // TODO: get smarter about imports. maybe just fully qualify all model-agnostic types?
-                "using System.IO;",
-                "using System.Collections.Generic;",
-                "using Aws.EncryptionSdk.Core;",
-                // end conditional imports
-                "using",
-                nameResolver.namespaceForService(),
-                ";"
+                importNamespaces.stream().map("using %s;"::formatted).map(Token::of)
         ).lineSeparated();
 
         // Service shim
@@ -95,7 +100,7 @@ public class ShimCodegen {
                 DotNetNameResolver.qualifiedTypeConverter(shapeId, TO_DAFNY),
                 "(config)"
         )).orElse(TokenTree.empty());
-        return Token.of("static %s %s = new %s(%s);".formatted(
+        return Token.of("static readonly %s %s = new %s(%s);".formatted(
                 nameResolver.dafnyImplForServiceClient(),
                 IMPL_NAME,
                 nameResolver.dafnyImplForServiceClient(),
@@ -190,7 +195,7 @@ public class ShimCodegen {
     }
 
     public TokenTree generateResourceImplDeclaration(final ShapeId entityShapeId) {
-        return Token.of("internal %s %s { get; }".formatted(
+        return Token.of("internal readonly %s %s;".formatted(
                 nameResolver.dafnyTypeForShape(entityShapeId), IMPL_NAME));
     }
 

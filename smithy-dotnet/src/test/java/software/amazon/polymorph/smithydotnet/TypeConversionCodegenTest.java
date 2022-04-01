@@ -62,7 +62,7 @@ public class TypeConversionCodegenTest {
         final List<ParseToken> actualTokens = generateAndTokenize(codegen);
         final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
                 using System.Linq;
-                using Aws.Crypto;
+                using AWS.EncryptionSDK.Core;
                 namespace Test.Foobar {
                     internal static class TypeConversion {
                         public static Test.Foobar.FoobarServiceBaseException FromDafny_CommonError_FoobarServiceBaseException

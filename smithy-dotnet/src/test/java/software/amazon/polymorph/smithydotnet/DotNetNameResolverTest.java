@@ -3,6 +3,7 @@
 
 package software.amazon.polymorph.smithydotnet;
 
+import org.junit.Assert;
 import org.junit.Test;
 import software.amazon.polymorph.smithydafny.DafnyNameResolver;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
@@ -212,5 +213,25 @@ public class DotNetNameResolverTest {
         final String actualName = nameResolver.dafnyImplForServiceClient();
         final String expectedName = "Dafny.Test.Foobar.FoobarServiceFactory.FoobarServiceFactory";
         assertEquals(expectedName, actualName);
+    }
+
+    @Test
+    public void testCapitalizeNamespaceSegment() {
+        assertEquals("FooBar", DotNetNameResolver.capitalizeNamespaceSegment("fooBar"));
+        assertEquals("EncryptionSDK", DotNetNameResolver.capitalizeNamespaceSegment("encryptionSdk"));
+        assertEquals("KMSKeyring", DotNetNameResolver.capitalizeNamespaceSegment("KmsKeyring"));
+        assertEquals("RSAOaepSha512Mgf1", DotNetNameResolver.capitalizeNamespaceSegment("rsaOaepSha512Mgf1"));
+        assertEquals("ALLCAPS", DotNetNameResolver.capitalizeNamespaceSegment("ALLCAPS"));
+
+        // all together now
+        assertEquals("AWSKMSSDKAESRSA", DotNetNameResolver.capitalizeNamespaceSegment("awsKmsSdkAesRsa"));
+    }
+
+    @Test
+    public void testCapitalizeNamespaceSegmentFailsOnInvalidSegment() {
+        Assert.assertThrows(IllegalArgumentException.class,
+                () -> DotNetNameResolver.capitalizeNamespaceSegment("sausage-case"));
+        Assert.assertThrows(IllegalArgumentException.class,
+                () -> DotNetNameResolver.capitalizeNamespaceSegment("snake_Case"));
     }
 }

@@ -59,7 +59,7 @@ public class ShimCodegenTest {
         final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
                 namespace Test.Foobar {
                     public static class FoobarServiceFactory {
-                        static Dafny.Test.Foobar.FoobarServiceFactory.FoobarServiceFactory _impl
+                        static readonly Dafny.Test.Foobar.FoobarServiceFactory.FoobarServiceFactory _impl
                                 = new Dafny.Test.Foobar.FoobarServiceFactory.FoobarServiceFactory();
                         public static void DoIt() {
                             Wrappers_Compile._IResult<_System._ITuple0, Dafny.Test.Foobar.IFoobarServiceException> result =
@@ -89,7 +89,7 @@ public class ShimCodegenTest {
         final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
                 namespace Test.Foobar {
                     internal class Doer : DoerBase {
-                        internal Dafny.Test.Foobar.IDoer _impl { get; }
+                        internal readonly Dafny.Test.Foobar.IDoer _impl;
                         internal Doer(Dafny.Test.Foobar.IDoer impl) { this._impl = impl; }
                         protected override void _DoIt() {
                             Wrappers_Compile._IResult<_System._ITuple0, Dafny.Test.Foobar.IFoobarServiceException> result =

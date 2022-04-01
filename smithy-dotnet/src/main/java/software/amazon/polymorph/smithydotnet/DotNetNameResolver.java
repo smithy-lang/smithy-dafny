@@ -34,6 +34,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 /**
@@ -65,12 +68,64 @@ public class DotNetNameResolver {
      * Returns the C# namespace containing the C# implementation/interface for the given shape ID.
      */
     public String namespaceForShapeId(final ShapeId shapeId) {
+        // TODO remove special AWS SDK special-case when https://github.com/awslabs/polymorph/issues/7 is resolved
+        final Function<String, String> segmentMapper = isAwsSdkServiceId(shapeId)
+                ? StringUtils::capitalize
+                : DotNetNameResolver::capitalizeNamespaceSegment;
+
         Stream<String> parts = Splitter.on('.')
                 .splitToList(shapeId.getNamespace())
                 .stream()
-                .map(StringUtils::capitalize);
+                .map(segmentMapper);
         return Joiner.on('.').join(parts.iterator());
     }
+
+    /**
+     * Returns the correctly-capitalized form of the given namespace segment.
+     * This is PascalCase except that known acronyms are UPPERCASE.
+     * The input segment must be strict PascalCase; only
+     * <p>
+     * Examples:
+     * <ul>
+     *     <li>"fooBar" becomes "FooBar"</li>
+     *     <li>"encryptionSdk" becomes "EncryptionSDK"</li>
+     *     <li>"KmsKeyring" becomes "KMSKeyring"</li>
+     * </ul>
+     */
+    @VisibleForTesting
+    public static String capitalizeNamespaceSegment(final String segment) {
+        final StringBuilder result = new StringBuilder(segment.length());
+        final Matcher matcher = NAMESPACE_SEGMENT_WORD.matcher(segment);
+        // Invariant: offset is either 0, or one more than the end index of a word
+        int offset = 0;
+        while (offset < segment.length()) {
+            if (!(matcher.find(offset) && (matcher.start() == offset))) {
+                // No characters allowed between words
+                throw new IllegalArgumentException("No namespace segment found starting at index %s".formatted(offset));
+            }
+            final String uppercased = matcher.group().toUpperCase();
+            if (KNOWN_ACRONYMS.contains(uppercased)) {
+                result.append(uppercased);
+            } else {
+                result.append(StringUtils.capitalize(matcher.group()));
+            }
+            offset = matcher.end();
+        }
+        assert offset == segment.length();
+        return result.toString();
+    }
+
+    // A "word" is either a nonempty sequence of digits,
+    // or a nonempty sequence of letters of which only the first may be uppercase.
+    private static final Pattern NAMESPACE_SEGMENT_WORD = Pattern.compile("\\d+|\\p{Alpha}\\p{Lower}*");
+
+    private static final Set<String> KNOWN_ACRONYMS = Set.of(
+            "AWS",
+            "KMS",
+            "SDK",
+            "AES",
+            "RSA"
+    );
 
     public String namespaceForService() {
         return namespaceForShapeId(serviceShape.getId());
@@ -254,7 +309,6 @@ public class DotNetNameResolver {
         // We annotate C# value types with `?` to make them nullable.
         // We cannot do the same for C# reference types since those types are already nullable by design.
         // TODO: nullable reference types appear to be supported in C# 8.0+. Maybe revisit this.
-        //  https://issues.amazon.com/issues/CrypTool-4156
         return isValueType(memberShape.getTarget()) ? baseType + "?" : baseType;
     }
 
