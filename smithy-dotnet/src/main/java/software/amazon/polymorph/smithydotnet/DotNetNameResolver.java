@@ -34,6 +34,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -67,10 +68,15 @@ public class DotNetNameResolver {
      * Returns the C# namespace containing the C# implementation/interface for the given shape ID.
      */
     public String namespaceForShapeId(final ShapeId shapeId) {
+        // TODO remove special AWS SDK special-case when https://github.com/awslabs/polymorph/issues/7 is resolved
+        final Function<String, String> segmentMapper = isAwsSdkServiceId(shapeId)
+                ? StringUtils::capitalize
+                : DotNetNameResolver::capitalizeNamespaceSegment;
+
         Stream<String> parts = Splitter.on('.')
                 .splitToList(shapeId.getNamespace())
                 .stream()
-                .map(DotNetNameResolver::capitalizeNamespaceSegment);
+                .map(segmentMapper);
         return Joiner.on('.').join(parts.iterator());
     }
 
