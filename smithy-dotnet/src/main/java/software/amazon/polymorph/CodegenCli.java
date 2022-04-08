@@ -62,27 +62,25 @@ public class CodegenCli {
         final ModelAssembler assembler = new ModelAssembler();
         final Model model = assembler.addImport(cliArguments.modelPath).assemble().unwrap();
 
-        if (!cliArguments.awsSdkStyle) {
+
+        if (cliArguments.awsSdkStyle) {
+            final AwsSdkShimCodegen shimCodegen = new AwsSdkShimCodegen(model, cliArguments.serviceShapeId);
+            writeTokenTreesIntoDir(shimCodegen.generate(), outputDotnetDir);
+        } else {
             final ServiceCodegen serviceCodegen = new ServiceCodegen(model, cliArguments.serviceShapeId);
             writeTokenTreesIntoDir(serviceCodegen.generate(), outputDotnetDir);
-
+            
             final ShimCodegen shimCodegen = new ShimCodegen(model, cliArguments.serviceShapeId);
             writeTokenTreesIntoDir(shimCodegen.generate(), outputDotnetDir);
         }
+        
+        final DafnyApiCodegen dafnyApiCodegen = new DafnyApiCodegen(model, cliArguments.serviceShapeId);
+        writeTokenTreesIntoDir(dafnyApiCodegen.generate(), outputDafnyDir);
 
         final TypeConversionCodegen typeConversionCodegen = cliArguments.awsSdkStyle
                 ? new AwsSdkTypeConversionCodegen(model, cliArguments.serviceShapeId)
                 : new TypeConversionCodegen(model, cliArguments.serviceShapeId);
         writeTokenTreesIntoDir(typeConversionCodegen.generate(), outputDotnetDir);
-
-        if (cliArguments.awsSdkStyle) {
-            // TODO generate Dafny API for regular models too
-            final DafnyApiCodegen dafnyApiCodegen = new DafnyApiCodegen(model, cliArguments.serviceShapeId);
-            writeTokenTreesIntoDir(dafnyApiCodegen.generate(), outputDafnyDir);
-
-            final AwsSdkShimCodegen shimCodegen = new AwsSdkShimCodegen(model, cliArguments.serviceShapeId);
-            writeTokenTreesIntoDir(shimCodegen.generate(), outputDotnetDir);
-        }
 
         logger.info(".NET code generated in {}", cliArguments.outputDotnetDir);
         logger.info("Dafny code generated in {}", cliArguments.outputDafnyDir);
