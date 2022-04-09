@@ -77,7 +77,12 @@ public record DafnyNameResolver(Model model, ServiceShape serviceShape) {
     }
 
     private String baseTypeForMember(final MemberShape memberShape) {
-        final String targetType = baseTypeForShape(memberShape.getTarget());
+        final Optional<ShapeId> referentId = Optional.of(memberShape.getTarget())
+                    .flatMap(model::getShape)
+                    .flatMap(targetShape -> targetShape.getTrait(ReferenceTrait.class))
+                    .map(referenceTrait -> referenceTrait.getReferentId());
+                            
+        final String targetType = baseTypeForShape(referentId.orElse(memberShape.getTarget()));
         if (!ModelUtils.memberShapeIsOptional(model, memberShape)) {
             return targetType;
         }
