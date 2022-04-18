@@ -1,20 +1,13 @@
 package software.amazon.polymorph.smithydotnet;
 
 import java.util.List;
-import java.util.Optional;
 
 import software.amazon.polymorph.utils.Token;
 import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.smithy.model.Model;
-import software.amazon.smithy.model.shapes.EntityShape;
-import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ResourceShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.ShapeId;
-
-import static software.amazon.polymorph.smithydotnet.DotNetNameResolver.classForCommonServiceException;
-import static software.amazon.polymorph.smithydotnet.DotNetNameResolver.qualifiedTypeConverterForCommonError;
-import static software.amazon.polymorph.smithydotnet.TypeConversionDirection.*;
 
 /**
  * NativeWrapperCodegen is called to generate a native (i.e.: in the target
@@ -26,12 +19,6 @@ import static software.amazon.polymorph.smithydotnet.TypeConversionDirection.*;
  * - CryptographicMaterialsManager
  *
  * Ideally, this would be done by adding a trait.
- *
- * It should generate two classes, one concreate, one abstract, in separate files:
- * - NativeWrapper_resource.cs :: concreate class
- * - NativeWrapper_resourceBase.cs :: abstract class
- *
- *
  */
 public class NativeWrapperCodegen {
     public final Model model;
@@ -40,10 +27,9 @@ public class NativeWrapperCodegen {
     public final DotNetNameResolver nameResolver;
     public final ShapeId resourceShapeId;
 
-    protected static final String CLASS_PREFIX = "NativeWrapper_";
-    protected static final String BASE_SUFFIX = "Base";
-    protected static final String IMPL_NAME = "_impl";
-    protected static final String NATIVE_IMPL = "nativeImpl";
+    protected static final String CLASS_PREFIX = "NativeWrapper";
+    protected static final String NATIVE_BASE_PROPERTY = "_impl";
+    protected static final String NATIVE_IMPL_INPUT = "nativeImpl";
     protected static final String NATIVE_INPUT = "nativeInput";
     protected static final String NATIVE_OUTPUT = "nativeOutput";
     protected static final String INPUT = "input";
@@ -52,8 +38,10 @@ public class NativeWrapperCodegen {
             // SPDX-License-Identifier: Apache-2.0
             // Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
             """;
-    protected static final String IGNORE_IMPORT = "// ReSharper disable thrice RedundantUsingDirective";
-    protected static final String IGNORE_NAME = "// ReSharper disable once RedundantNameQualifier\n";
+    protected static final String IGNORE_IMPORT =
+            "// ReSharper disable thrice RedundantUsingDirective";
+    protected static final String IGNORE_NAME =
+            "// ReSharper disable once RedundantNameQualifier\n";
     protected static final List<String> UNCONDITIONAL_IMPORTS = List.of(
             "System",
             "AWS.EncryptionSDK.Core", //TODO refactor to be based on service

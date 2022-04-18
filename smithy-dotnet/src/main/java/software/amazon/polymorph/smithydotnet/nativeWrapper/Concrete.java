@@ -2,7 +2,6 @@ package software.amazon.polymorph.smithydotnet.nativeWrapper;
 
 import java.util.Optional;
 
-import software.amazon.polymorph.smithydotnet.DotNetNameResolver;
 import software.amazon.polymorph.smithydotnet.NativeWrapperCodegen;
 import software.amazon.polymorph.utils.Token;
 import software.amazon.polymorph.utils.TokenTree;
@@ -28,37 +27,57 @@ public class Concrete extends NativeWrapperCodegen {
      * and import statements.
      */
     public TokenTree generateConcrete() {
-        String className = nameResolver.nativeWrapperClassForResource(resourceShapeId);
-        final TokenTree header = Token.of("internal class %s : %s ".formatted(
-                className,
-                nameResolver.nativeWrapperBaseForResource(resourceShapeId)
-        ));
-        final String constructor = "public %s(%s %s) : base(%s) { }".formatted(
-                className,
-                nameResolver.interfaceForResource(resourceShapeId),
-                NATIVE_IMPL,
-                NATIVE_IMPL
-        );
-        final TokenTree operationWrappers = TokenTree.of(
-                model.expectShape(resourceShapeId, EntityShape.class)
-                        .getAllOperations().stream()
-                        .map(this::generateOperationWrapper));
-        final TokenTree body = TokenTree.
-                of(constructor)
-                .append(operationWrappers)
-                .lineSeparated()
-                .braced();
-        final TokenTree clazz = header
-                .append(body)
-                .lineSeparated()
-                .namespaced(Token.of(nameResolver.namespaceForService()));
+        TokenTree clazz = generateClass();
         return TokenTree
                 .of(getPrelude())
                 .append(TokenTree.of("\n"))
-                .append(clazz);
+                .append(clazz)
+                .lineSeparated();
     }
 
-    public TokenTree generateOperationWrapper(final ShapeId operationShapeId) {
+    TokenTree generateClass() {
+        String className = nameResolver.nativeWrapperClassForResource(resourceShapeId);
+        final TokenTree header = Token.of("internal class %s : %s ".formatted(
+                className,
+                nameResolver.dafnyTypeForShape(resourceShapeId)
+        ));
+        final TokenTree nativeBaseProperty = TokenTree.of(
+                "internal readonly %s %s;".formatted(
+                        nameResolver.baseClassForResource(resourceShapeId),
+                        NATIVE_BASE_PROPERTY
+                ));
+        final TokenTree constructor = generateConstructor(className);
+        final TokenTree operationWrappers = TokenTree.of(
+                model.expectShape(resourceShapeId, EntityShape.class)
+                        .getAllOperations().stream()
+                        .map(this::generateOperationWrapper))
+                .lineSeparated();
+        final TokenTree body = TokenTree
+                .of(nativeBaseProperty, constructor, operationWrappers)
+                .lineSeparated()
+                .braced();
+        return header
+                .append(body)
+                .lineSeparated()
+                .namespaced(Token.of(nameResolver.namespaceForService()));
+    }
+
+    TokenTree generateConstructor(String className) {
+        final String methodName = "public %s(%s %s)".formatted(
+                className,
+                nameResolver.baseClassForResource(resourceShapeId),
+                NATIVE_IMPL_INPUT
+        );
+        final String body = "%s = %s;".formatted(
+                NATIVE_BASE_PROPERTY,
+                NATIVE_IMPL_INPUT
+        );
+        return TokenTree.of(methodName)
+                .append(TokenTree.of(body).braced())
+                .lineSeparated();
+    }
+
+     TokenTree generateOperationWrapper(final ShapeId operationShapeId) {
         final OperationShape operationShape = model.expectShape(operationShapeId, OperationShape.class);
         final String abstractDafnyOutput = nameResolver.dafnyTypeForServiceOperationOutput(operationShape);
         final String concreteDafnyOutput = nameResolver.dafnyTypeForServiceOperationOutput(operationShape, true);
@@ -75,7 +94,26 @@ public class Concrete extends NativeWrapperCodegen {
                         NATIVE_INPUT,
                         qualifiedTypeConverter(shapeId, FROM_DAFNY),
                         INPUT));
-        // Start Try
+        final TokenTree tryBlock = generateTryNativeCall(
+                operationShape,
+                methodName,
+                input,
+                concreteDafnyOutput);
+        final TokenTree body = TokenTree.of(
+                        TokenTree.of(inputConversion.orElse("")),
+                        tryBlock,
+                        generateCatchServiceException(concreteDafnyOutput),
+                        generateCatchGeneralException(concreteDafnyOutput))
+                .lineSeparated().braced();
+        return TokenTree.of(TokenTree.of(signature), body).lineSeparated();
+    }
+
+    TokenTree generateTryNativeCall(
+            OperationShape operationShape,
+            String methodName,
+            Optional<String> input,
+            String concreteDafnyOutput
+    ) {
         final Optional<String> nativeCallPrefix = operationShape.getOutput()
                 .map(shapeId -> "%s %s = ".formatted(
                         nameResolver.baseTypeForShape(shapeId),
@@ -83,7 +121,7 @@ public class Concrete extends NativeWrapperCodegen {
         final String nativeCall = "%s%s %s.%s(%s);".formatted(
                 nativeCallPrefix.isPresent() ? IGNORE_NAME : "",
                 nativeCallPrefix.orElse(""),
-                IMPL_NAME,
+                NATIVE_BASE_PROPERTY,
                 methodName,
                 input.isPresent() ? NATIVE_INPUT : "");
         final Optional<String> returnSuccessConversion = operationShape
@@ -93,22 +131,13 @@ public class Concrete extends NativeWrapperCodegen {
                         NATIVE_OUTPUT));
         final String returnSuccess = "return %s.create_Success(%s);".formatted(
                 concreteDafnyOutput, returnSuccessConversion.orElse(""));
-        final TokenTree tryBlock = TokenTree.of("try").append(
+        return TokenTree.of("try").append(
                 TokenTree.of(nativeCall, returnSuccess).lineSeparated().braced()
         );
-        // End Try
-
-        final TokenTree body = TokenTree.of(
-                        TokenTree.of(inputConversion.orElse("")),
-                        tryBlock,
-                        generateCatchServiceException(concreteDafnyOutput), // catch service exception
-                        generateCatchGeneralException(concreteDafnyOutput)) // catch general exception
-                .lineSeparated().braced();
-        return TokenTree.of(TokenTree.of(signature), body).lineSeparated();
     }
 
 
-    public TokenTree generateCatchServiceException(final String dafnyOutput) {
+     TokenTree generateCatchServiceException(final String dafnyOutput) {
         final String catchStatement = "catch(%s e)".formatted(
                 classForCommonServiceException(serviceShape)
         );
@@ -122,7 +151,7 @@ public class Concrete extends NativeWrapperCodegen {
                 .lineSeparated();
     }
 
-    public TokenTree generateCatchGeneralException(final String dafnyOutput) {
+    TokenTree generateCatchGeneralException(final String dafnyOutput) {
         final String catchStatement = "catch(Exception e)";
         final String castStatement = "new %s(e.Message)".formatted(
                 classForCommonServiceException(serviceShape)

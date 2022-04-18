@@ -412,6 +412,13 @@ public class DotNetNameResolver {
         return StringUtils.capitalize(resourceShapeId.getName(serviceShape));
     }
 
+    public String nativeWrapperClassForResource(final ShapeId resourceShapeId) {
+        return "%s_%s".formatted(
+                NativeWrapperCodegen.CLASS_PREFIX,
+                shimClassForResource(resourceShapeId)
+        );
+    }
+
     public String classForEnum(final ShapeId enumShapeId) {
         return StringUtils.capitalize(enumShapeId.getName(serviceShape));
     }
