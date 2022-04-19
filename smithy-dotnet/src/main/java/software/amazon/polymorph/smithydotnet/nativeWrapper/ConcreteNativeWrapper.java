@@ -96,8 +96,7 @@ public class ConcreteNativeWrapper extends NativeWrapperCodegen {
         final String signature = "public %s %s(%s)".formatted(
                 abstractDafnyOutput, methodName, input.orElse(""));
         final Optional<String> inputConversion = operationShape.getInput()
-                .map(shapeId -> "%s%s %s = %s(%s);".formatted(
-                        IGNORE_NAME,
+                .map(shapeId -> "%s %s = %s(%s);".formatted(
                         nameResolver.baseTypeForShape(shapeId),
                         NATIVE_INPUT,
                         qualifiedTypeConverter(shapeId, FROM_DAFNY),
@@ -126,8 +125,7 @@ public class ConcreteNativeWrapper extends NativeWrapperCodegen {
                 .map(shapeId -> "%s %s = ".formatted(
                         nameResolver.baseTypeForShape(shapeId),
                         NATIVE_OUTPUT));
-        final String nativeCall = "%s%s %s.%s(%s);".formatted(
-                nativeCallPrefix.isPresent() ? IGNORE_NAME : "",
+        final String nativeCall = "%s %s.%s(%s);".formatted(
                 nativeCallPrefix.orElse(""),
                 NATIVE_BASE_PROPERTY,
                 methodName,

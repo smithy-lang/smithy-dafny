@@ -68,8 +68,6 @@ class ConcreteNativeWrapperTestConstants {
             {
                 try
                 {
-                    // ReSharper disable once RedundantNameQualifier
-                    // ReSharper disable once SuggestVarOrType_SimpleTypes
                     Test.Foobar.DoSomethingOutput nativeOutput = _impl.DoSomethingWithOutput();
                     return Wrappers_Compile.Result<
                         Dafny.Test.Foobar._IDoSomethingOutput,
@@ -94,8 +92,6 @@ class ConcreteNativeWrapperTestConstants {
                 Dafny.Test.Foobar.IFoobarServiceException
             > DoSomethingWithInput(Dafny.Test.Foobar._IDoSomethingInput input)
             {
-                // ReSharper disable once RedundantNameQualifier
-                // ReSharper disable once SuggestVarOrType_SimpleTypes
                 Test.Foobar.DoSomethingInput nativeInput =
                     TypeConversion.FromDafny_N4_test__N6_foobar__S16_DoSomethingInput(
                         input);
@@ -114,7 +110,7 @@ class ConcreteNativeWrapperTestConstants {
 
     static String DO =
             """
-            public override Wrappers_Compile._IResult<
+            public Wrappers_Compile._IResult<
                 _System._ITuple0,
                 Dafny.Test.Foobar.IFoobarServiceException
             > Do()
@@ -168,7 +164,10 @@ class ConcreteNativeWrapperTestConstants {
 
     static String PRELUDE =
             """                        
-            // ReSharper disable thrice RedundantUsingDirective
+            // ReSharper disable RedundantUsingDirective
+            // ReSharper disable RedundantNameQualifier
+            // ReSharper disable SuggestVarOrType_SimpleTypes
+            
             using System;
             using AWS.EncryptionSDK.Core;
             using Wrappers_Compile;

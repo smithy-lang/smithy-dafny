@@ -35,12 +35,11 @@ public abstract class NativeWrapperCodegen {
     protected static final String NATIVE_OUTPUT = "nativeOutput";
     protected static final String INPUT = "input";
     protected static final String IGNORE_IMPORT =
-            "// ReSharper disable thrice RedundantUsingDirective\n";
-    protected static final String IGNORE_NAME =
             """
-                    // ReSharper disable once RedundantNameQualifier
-                    // ReSharper disable once SuggestVarOrType_SimpleTypes
-                    """;
+            // ReSharper disable RedundantUsingDirective
+            // ReSharper disable RedundantNameQualifier
+            // ReSharper disable SuggestVarOrType_SimpleTypes
+            """;
     protected static final List<String> UNCONDITIONAL_IMPORTS = List.of(
             "System",
             "AWS.EncryptionSDK.Core", //TODO refactor to be based on service
