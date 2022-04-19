@@ -4,8 +4,10 @@
 package software.amazon.polymorph.smithydotnet;
 
 import com.google.common.annotations.VisibleForTesting;
+
+import software.amazon.polymorph.smithydotnet.nativeWrapper.ConcreteNativeWrapper;
+import software.amazon.polymorph.traits.ExtendableTrait;
 import software.amazon.polymorph.utils.ModelUtils;
-import software.amazon.polymorph.traits.ClientConfigTrait;
 import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.polymorph.utils.Token;
@@ -122,11 +124,24 @@ public class ServiceCodegen {
                     final Path resourceClassPath = Path.of(String.format("%s.cs", nameResolver.baseClassForResource(resourceShapeId)));
                     final TokenTree resourceClass = generateResourceClass(resourceShapeId);
                     codeByPath.put(resourceClassPath, resourceClass.prepend(prelude));
+
+                    if (shouldGenerateNativeWrapper(resourceShapeId)) {
+                        final NativeWrapperCodegen nativeWrapperCodegen = new ConcreteNativeWrapper(
+                                model, serviceShape.getId(), resourceShapeId, nameResolver);
+                        final Path nativeWrapperPath = Path.of(
+                                String.format("%s.cs",
+                                        nameResolver.nativeWrapperClassForResource(
+                                                resourceShapeId)));
+                        final TokenTree nativeWrapperClass = nativeWrapperCodegen.generate();
+                        codeByPath.put(nativeWrapperPath, nativeWrapperClass);
+                    }
                 });
-
-
-
         return codeByPath;
+    }
+
+    boolean shouldGenerateNativeWrapper(ShapeId shapeId) {
+        ResourceShape resourceShape = model.expectShape(shapeId, ResourceShape.class);
+        return resourceShape.hasTrait(ExtendableTrait.class);
     }
 
     @VisibleForTesting
