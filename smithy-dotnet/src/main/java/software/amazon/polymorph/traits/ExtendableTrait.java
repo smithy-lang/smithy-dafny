@@ -55,12 +55,12 @@ public class ExtendableTrait extends AbstractTrait implements ToSmithyBuilder<Ex
     }
 
     public static Shape getDefinition() {
-        final Trait positionalTraitDefinition = TraitDefinition.builder()
+        final Trait extendableTraitDefinition = TraitDefinition.builder()
                 .selector(Selector.parse("resource"))
                 .build();
         return StructureShape.builder()
                 .id(ExtendableTrait.ID)
-                .addTrait(positionalTraitDefinition)
+                .addTrait(extendableTraitDefinition)
                 .build();
     }
 }

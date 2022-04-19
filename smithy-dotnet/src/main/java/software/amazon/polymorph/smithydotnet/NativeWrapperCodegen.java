@@ -1,3 +1,6 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
+
 package software.amazon.polymorph.smithydotnet;
 
 import java.util.List;
@@ -10,15 +13,13 @@ import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.ShapeId;
 
 /**
- * NativeWrapperCodegen is called to generate a native (i.e.: in the target
+ * NativeWrapperCodegen is called to generate a Native (i.e.: in the target
  * langauge, not Dafny) Wrapper for a resource implemented in the native language.
  *
  * To be concreate, at this time, it should be called for:
  * - ClientSupplier
  * - Keyring
  * - CryptographicMaterialsManager
- *
- * Ideally, this would be done by adding a trait.
  */
 public abstract class NativeWrapperCodegen {
     public final Model model;
@@ -33,15 +34,13 @@ public abstract class NativeWrapperCodegen {
     protected static final String NATIVE_INPUT = "nativeInput";
     protected static final String NATIVE_OUTPUT = "nativeOutput";
     protected static final String INPUT = "input";
-    protected static final String COPYRIGHT = """
-            // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
-            // SPDX-License-Identifier: Apache-2.0
-            // Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
-            """;
     protected static final String IGNORE_IMPORT =
-            "// ReSharper disable thrice RedundantUsingDirective";
+            "// ReSharper disable thrice RedundantUsingDirective\n";
     protected static final String IGNORE_NAME =
-            "// ReSharper disable once RedundantNameQualifier\n";
+            """
+                    // ReSharper disable once RedundantNameQualifier
+                    // ReSharper disable once SuggestVarOrType_SimpleTypes
+                    """;
     protected static final List<String> UNCONDITIONAL_IMPORTS = List.of(
             "System",
             "AWS.EncryptionSDK.Core", //TODO refactor to be based on service
@@ -62,17 +61,15 @@ public abstract class NativeWrapperCodegen {
     }
 
     /**
-     * Returns Copyright and Import statement
+     * Returns Import statement
      */
     public static TokenTree getPrelude() {
         final TokenTree imports = TokenTree.of(UNCONDITIONAL_IMPORTS
                 .stream()
                 .map("using %s;"::formatted)
                 .map(Token::of)).lineSeparated();
-        return TokenTree.of(COPYRIGHT)
-                .append(TokenTree.of(IGNORE_IMPORT))
-                .append(imports)
-                .lineSeparated();
+        return TokenTree.of(IGNORE_IMPORT)
+                .append(imports);
     }
 
     public TokenTree generate() {

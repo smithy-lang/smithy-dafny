@@ -1,3 +1,6 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
+
 package software.amazon.polymorph.smithydotnet.nativeWrapper;
 
 class ConcreteNativeWrapperTestConstants {
@@ -58,7 +61,7 @@ class ConcreteNativeWrapperTestConstants {
 
     static String DO_OUTPUT =
             """
-            public override Wrappers_Compile._IResult<
+            public Wrappers_Compile._IResult<
                 Dafny.Test.Foobar._IDoSomethingOutput,
                 Dafny.Test.Foobar.IFoobarServiceException
             > DoSomethingWithOutput()
@@ -66,6 +69,7 @@ class ConcreteNativeWrapperTestConstants {
                 try
                 {
                     // ReSharper disable once RedundantNameQualifier
+                    // ReSharper disable once SuggestVarOrType_SimpleTypes
                     Test.Foobar.DoSomethingOutput nativeOutput = _impl.DoSomethingWithOutput();
                     return Wrappers_Compile.Result<
                         Dafny.Test.Foobar._IDoSomethingOutput,
@@ -85,12 +89,13 @@ class ConcreteNativeWrapperTestConstants {
 
     static String DO_INPUT =
             """
-            public override Wrappers_Compile._IResult<
+            public Wrappers_Compile._IResult<
                 _System._ITuple0,
                 Dafny.Test.Foobar.IFoobarServiceException
             > DoSomethingWithInput(Dafny.Test.Foobar._IDoSomethingInput input)
             {
                 // ReSharper disable once RedundantNameQualifier
+                // ReSharper disable once SuggestVarOrType_SimpleTypes
                 Test.Foobar.DoSomethingInput nativeInput =
                     TypeConversion.FromDafny_N4_test__N6_foobar__S16_DoSomethingInput(
                         input);
@@ -162,11 +167,7 @@ class ConcreteNativeWrapperTestConstants {
                     "%s\n%s".formatted(DO_INPUT, DO_OUTPUT));
 
     static String PRELUDE =
-            """
-            // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
-            // SPDX-License-Identifier: Apache-2.0
-            // Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
-                        
+            """                        
             // ReSharper disable thrice RedundantUsingDirective
             using System;
             using AWS.EncryptionSDK.Core;

@@ -1,3 +1,6 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
+
 package software.amazon.polymorph.smithydotnet.nativeWrapper;
 
 import java.util.Optional;
@@ -90,7 +93,7 @@ public class ConcreteNativeWrapper extends NativeWrapperCodegen {
         final Optional<String> input = operationShape.getInput()
                 .map(shapeId -> "%s %s".formatted(
                         nameResolver.dafnyTypeForShape(shapeId), INPUT));
-        final String signature = "public override %s %s(%s)".formatted(
+        final String signature = "public %s %s(%s)".formatted(
                 abstractDafnyOutput, methodName, input.orElse(""));
         final Optional<String> inputConversion = operationShape.getInput()
                 .map(shapeId -> "%s%s %s = %s(%s);".formatted(
@@ -143,28 +146,33 @@ public class ConcreteNativeWrapper extends NativeWrapperCodegen {
 
 
      TokenTree generateCatchServiceException(final String dafnyOutput) {
-        final String catchStatement = "catch(%s e)".formatted(
-                classForCommonServiceException(serviceShape)
-        );
-        final String returnError = "return %s.create_Failure(%s(e));".formatted(
+        return generateCatch(
                 dafnyOutput,
-                qualifiedTypeConverterForCommonError(serviceShape, TO_DAFNY)
+                classForCommonServiceException(serviceShape),
+                Optional.empty()
         );
-        return TokenTree
-                .of(catchStatement)
-                .append(TokenTree.of(returnError).braced())
-                .lineSeparated();
     }
 
     TokenTree generateCatchGeneralException(final String dafnyOutput) {
-        final String catchStatement = "catch(Exception e)";
-        final String castStatement = "new %s(e.Message)".formatted(
-                classForCommonServiceException(serviceShape)
+        return generateCatch(
+                dafnyOutput,
+                "Exception",
+                Optional.of("new %s(e.Message)".formatted(
+                        classForCommonServiceException(serviceShape)
+                ))
         );
+    }
+
+    TokenTree generateCatch(
+            final String dafnyOutput,
+            final String caughtException,
+            final Optional<String> castStatement
+    ) {
+        final String catchStatement = "catch(%s e)".formatted(caughtException);
         final String returnError = "return %s.create_Failure(%s(%s));".formatted(
                 dafnyOutput,
                 qualifiedTypeConverterForCommonError(serviceShape, TO_DAFNY),
-                castStatement
+                castStatement.orElse("e")
         );
         return TokenTree
                 .of(catchStatement)
