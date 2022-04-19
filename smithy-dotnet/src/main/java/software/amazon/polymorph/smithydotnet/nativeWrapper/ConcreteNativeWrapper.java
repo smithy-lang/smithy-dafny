@@ -2,6 +2,7 @@ package software.amazon.polymorph.smithydotnet.nativeWrapper;
 
 import java.util.Optional;
 
+import software.amazon.polymorph.smithydotnet.DotNetNameResolver;
 import software.amazon.polymorph.smithydotnet.NativeWrapperCodegen;
 import software.amazon.polymorph.utils.Token;
 import software.amazon.polymorph.utils.TokenTree;
@@ -16,14 +17,18 @@ import static software.amazon.polymorph.smithydotnet.DotNetNameResolver.qualifie
 import static software.amazon.polymorph.smithydotnet.TypeConversionDirection.FROM_DAFNY;
 import static software.amazon.polymorph.smithydotnet.TypeConversionDirection.TO_DAFNY;
 
-public class Concrete extends NativeWrapperCodegen {
+public class ConcreteNativeWrapper extends NativeWrapperCodegen {
 
-    public Concrete(Model model, ShapeId serviceShapeId, ShapeId resourceShapeId) {
-        super(model, serviceShapeId, resourceShapeId);
+    public ConcreteNativeWrapper(Model model, ShapeId serviceShapeId, ShapeId resourceShapeId, DotNetNameResolver nameResolver) {
+        super(model, serviceShapeId, resourceShapeId, nameResolver);
+    }
+
+    public TokenTree generate() {
+        return generateConcrete();
     }
 
     /**
-     * Generates concreate NativeWrapper class, complete with copyright
+     * Generates concrete NativeWrapper class, complete with copyright
      * and import statements.
      */
     public TokenTree generateConcrete() {

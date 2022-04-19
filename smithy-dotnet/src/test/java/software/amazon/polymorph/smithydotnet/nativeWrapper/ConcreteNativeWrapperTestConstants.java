@@ -1,6 +1,6 @@
 package software.amazon.polymorph.smithydotnet.nativeWrapper;
 
-class ConcreteTestConstants {
+class ConcreteNativeWrapperTestConstants {
 
     static String CATCH_SERVICE_DO_OUTPUT =
             """

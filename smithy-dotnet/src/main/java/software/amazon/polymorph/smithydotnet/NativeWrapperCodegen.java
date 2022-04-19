@@ -20,7 +20,7 @@ import software.amazon.smithy.model.shapes.ShapeId;
  *
  * Ideally, this would be done by adding a trait.
  */
-public class NativeWrapperCodegen {
+public abstract class NativeWrapperCodegen {
     public final Model model;
     public final ServiceShape serviceShape;
     public final ResourceShape resourceShape;
@@ -51,12 +51,13 @@ public class NativeWrapperCodegen {
     public NativeWrapperCodegen(
             final Model model,
             final ShapeId serviceShapeId,
-            final ShapeId resourceShapeId
+            final ShapeId resourceShapeId,
+            final DotNetNameResolver nameResolver
     ) {
         this.model = model;
         this.serviceShape = model.expectShape(serviceShapeId, ServiceShape.class);
         this.resourceShape = model.expectShape(resourceShapeId, ResourceShape.class);
-        this.nameResolver = new DotNetNameResolver(model, serviceShape);
+        this.nameResolver = nameResolver;
         this.resourceShapeId = resourceShapeId;
     }
 
@@ -72,5 +73,9 @@ public class NativeWrapperCodegen {
                 .append(TokenTree.of(IGNORE_IMPORT))
                 .append(imports)
                 .lineSeparated();
+    }
+
+    public TokenTree generate() {
+        throw new UnsupportedOperationException("Not supported by abstract");
     }
 }
