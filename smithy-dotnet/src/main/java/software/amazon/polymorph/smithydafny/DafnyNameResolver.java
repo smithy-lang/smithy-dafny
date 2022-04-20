@@ -18,14 +18,22 @@ import software.amazon.smithy.model.shapes.ShapeType;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.utils.StringUtils;
 
+import java.nio.file.Path;
 import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
+import java.util.HashSet;
 
-public record DafnyNameResolver(Model model, ServiceShape serviceShape) {
+public record DafnyNameResolver(
+  Model model,
+  ServiceShape serviceShape,
+  HashSet<DependentSmithyModel> dependentModels,
+  Path[] dependentModelPaths
+) {
+
     public static final Map<ShapeType, String> DAFNY_TYPES_BY_SIMPLE_SHAPE_TYPE = Map.ofEntries(
             Map.entry(ShapeType.BLOB, "seq<uint8>"),
             Map.entry(ShapeType.BOOLEAN, "bool"),
@@ -38,7 +46,7 @@ public record DafnyNameResolver(Model model, ServiceShape serviceShape) {
     );
 
     public String nameForService(final ServiceShape serviceShape) {
-        return StringUtils.capitalize(serviceShape.getContextualName(this.serviceShape));
+        return StringUtils.capitalize(serviceShape.getId().getName());
     }
 
     public String nameForService() {
@@ -65,9 +73,17 @@ public record DafnyNameResolver(Model model, ServiceShape serviceShape) {
                     // currently unused in model and unsupported in StandardLibrary.UInt
                     // BYTE, SHORT
                     INTEGER, LONG,
-                    LIST, MAP, STRUCTURE -> shapeName;
+                    LIST, MAP -> dafnyModulePrefixForShapeId(shape) + shapeName;
+            case STRUCTURE -> {
+                if (shape.hasTrait(ReferenceTrait.class)) {
+                    yield baseTypeForShape(shape.expectTrait(ReferenceTrait.class).getReferentId());
+                } else {
+                    yield dafnyModulePrefixForShapeId(shape) + shapeName;
+                }
+            }
             case SERVICE -> traitForServiceClient(shape.asServiceShape().get());
             case RESOURCE -> traitForResource(shape.asResourceShape().get());
+            // Member calls baseTypeForShape...
             case MEMBER -> baseTypeForMember(shape.asMemberShape().get());
             // TODO create/use better timestamp type in Dafny libraries
             case TIMESTAMP -> "string";
@@ -77,18 +93,13 @@ public record DafnyNameResolver(Model model, ServiceShape serviceShape) {
     }
 
     private String baseTypeForMember(final MemberShape memberShape) {
-        final Optional<ShapeId> referentId = Optional.of(memberShape.getTarget())
-                    .flatMap(model::getShape)
-                    .flatMap(targetShape -> targetShape.getTrait(ReferenceTrait.class))
-                    .map(referenceTrait -> referenceTrait.getReferentId());
-                            
-        final String targetType = baseTypeForShape(referentId.orElse(memberShape.getTarget()));
+        final String targetType = baseTypeForShape(memberShape.getTarget());
+
         if (!ModelUtils.memberShapeIsOptional(model, memberShape)) {
             return targetType;
         }
 
         return ("Option<%s>").formatted(targetType);
-
     }
 
     public String generatedTypeForShape(final ShapeId shapeId) {
@@ -96,12 +107,13 @@ public record DafnyNameResolver(Model model, ServiceShape serviceShape) {
     }
 
     public String traitForServiceClient(final ServiceShape serviceShape) {
-        return "I%sClient".formatted(nameForService(serviceShape));
+        return dafnyModulePrefixForShapeId(serviceShape) + "I%sClient".formatted(nameForService(serviceShape));
     }
 
     public String traitForResource(final ResourceShape resourceShape) {
-        final String resourceName = StringUtils.capitalize(resourceShape.getId().getName(this.serviceShape));
-        return "I%s".formatted(resourceName);
+        final ShapeId shapeId = resourceShape.getId();
+        final String resourceName = StringUtils.capitalize(shapeId.getName(this.serviceShape));
+        return dafnyModulePrefixForShapeId(resourceShape) + "I%s".formatted(resourceName);
     }
 
     public String traitForServiceError(final ServiceShape serviceShape) {
@@ -155,11 +167,46 @@ public record DafnyNameResolver(Model model, ServiceShape serviceShape) {
     /**
      * Returns the Dafny module corresponding to the namespace of the given shape ID.
      */
-    public static String dafnyModuleForShapeId(final ShapeId shapeId) {
+
+    public static String dafnyModuleForNamespace(final String namespace) {
         final Stream<String> namespaceParts = Arrays
-                .stream(shapeId.getNamespace().split("\\."))
-                .map(StringUtils::capitalize);
+          .stream(namespace.split("\\."))
+          .map(StringUtils::capitalize);
         return Joiner.on('.').join(namespaceParts.iterator());
+    }
+
+    public static String dafnyModuleForShapeId(final ShapeId shapeId) {
+        return  dafnyModuleForNamespace(shapeId.getNamespace());
+    }
+
+    public static String dafnyAbstractModuleForNamespace(final String namespace) {
+        return dafnyModuleForNamespace(namespace) + "Abstract";
+    }
+
+    public String localDafnyModuleName(final String namespace) {
+        // Don't want to `open` everything,
+        // so I need the module name prefix
+        final String[] tmp = dafnyModuleForNamespace(namespace).split("\\.");
+        return tmp[tmp.length - 1 ];
+    }
+
+    public String dafnyModulePrefixForShapeId(final Shape shape) {
+        final String namespace = shape.getId().getNamespace();
+        if (!serviceShape.toShapeId().getNamespace().equals(namespace)) {
+
+            // Unfortunate side effect
+            // Need to add these so that they can be included
+            // because we are obviously using them!
+            dependentModels
+              .add(DependentSmithyModel.of(shape, dependentModelPaths));
+
+            // Append `.` so that it is easy to use.
+            // If you only want the name use localDafnyModuleName
+            return localDafnyModuleName(namespace) + ".";
+        } else {
+            // This is "local" and so does not need any Module name...
+            return "";
+        }
     }
 
     /**

@@ -68,14 +68,14 @@ public class TypeConversionCodegen {
     protected final ServiceShape serviceShape;
     protected final DotNetNameResolver nameResolver;
 
-    public TypeConversionCodegen(final Model model, final ShapeId serviceShapeId) {
-        this(model, serviceShapeId,
-                new DotNetNameResolver(model, model.expectShape(serviceShapeId, ServiceShape.class)));
+    public TypeConversionCodegen(final Model model, final ServiceShape serviceShape) {
+        this(model, serviceShape,
+                new DotNetNameResolver(model, serviceShape));
     }
 
-    public TypeConversionCodegen(final Model model, final ShapeId serviceShapeId, final DotNetNameResolver nameResolver) {
+    public TypeConversionCodegen(final Model model, final ServiceShape serviceShape, final DotNetNameResolver nameResolver) {
         this.model = model;
-        this.serviceShape = model.expectShape(serviceShapeId, ServiceShape.class);
+        this.serviceShape = serviceShape;
         this.nameResolver = nameResolver;
     }
 
@@ -512,7 +512,7 @@ public class TypeConversionCodegen {
         }
 
         final AwsSdkTypeConversionCodegen awsSdkTypeConversionCodegen =
-                new AwsSdkTypeConversionCodegen(model, serviceShape.getId());
+                new AwsSdkTypeConversionCodegen(model, serviceShape);
         return awsSdkTypeConversionCodegen.generateAwsSdkServiceReferenceStructureConverter(structureShape);
     }
 

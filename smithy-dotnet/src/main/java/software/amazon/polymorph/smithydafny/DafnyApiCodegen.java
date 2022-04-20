@@ -23,6 +23,7 @@ import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.ShapeType;
 import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
+import software.amazon.smithy.model.shapes.ResourceShape;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.LengthTrait;
@@ -38,47 +39,110 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
+import java.util.HashSet;
+import java.util.stream.Stream;
 
 public class DafnyApiCodegen {
     private final Model model;
     private final ServiceShape serviceShape;
     private final DafnyNameResolver nameResolver;
+    private final Path modelPath;
 
-    public DafnyApiCodegen(final Model model, final ShapeId serviceShapeId) {
+    public DafnyApiCodegen(
+      final Model model,
+      final ServiceShape serviceShape,
+      final Path modelPath,
+      final Path[] dependentModelPaths
+    ) {
         this.model = model;
-        this.serviceShape = model.expectShape(serviceShapeId, ServiceShape.class);
-        this.nameResolver = new DafnyNameResolver(model, serviceShape);
+        this.serviceShape = serviceShape;
+        this.modelPath = modelPath;
+        this.nameResolver = new DafnyNameResolver(
+          model,
+          this.serviceShape,
+          new HashSet(),
+          dependentModelPaths.clone()
+        );
     }
 
     public Map<Path, TokenTree> generate() {
-        final TokenTree includeDirectives = Token.of("""
-                include "../StandardLibrary/StandardLibrary.dfy"
-                include "../Util/UTF8.dfy"
-                """);
 
-        final String serviceName = nameResolver.nameForService();
-        final String externNamespace = DafnyNameResolver.dafnyExternNamespaceForShapeId(serviceShape.getId());
-        final String moduleName = DafnyNameResolver.dafnyModuleForShapeId(serviceShape.getId());
-        final TokenTree moduleHeader = Token.of("module {:extern \"%s\"} %s".formatted(externNamespace, moduleName));
-
-        final TokenTree modulePrelude = Token.of("""
-                import opened Wrappers
-                import opened StandardLibrary.UInt
-                import opened UTF8
-                """);
+        // I generate the types *first*
+        // This is because the generated types
+        // MAY depend on other models.
+        // In this case I need these modules
+        // so that I can include them.
         final TokenTree generatedTypes = TokenTree.of(model.shapes()
-                .filter(shape -> ModelUtils.isInServiceNamespace(shape.getId(), serviceShape))
-                // Sort by shape ID for deterministic generated code
-                .collect(Collectors.toCollection(TreeSet::new))
-                .stream()
-                .map(this::generateCodeForShape)
-                .flatMap(Optional::stream)
+          .filter(shape -> ModelUtils.isInServiceNamespace(shape.getId(), serviceShape))
+          // Sort by shape ID for deterministic generated code
+          .collect(Collectors.toCollection(TreeSet::new))
+          .stream()
+          .map(this::generateCodeForShape)
+          .flatMap(Optional::stream)
         ).lineSeparated();
 
-        final TokenTree moduleBody = TokenTree.of(modulePrelude, generatedTypes).braced();
+        final String serviceName = nameResolver.nameForService();
+        // The generated module MUST be abstract.
+        // Because can never have a concrete implementation
+        final String moduleName = DafnyNameResolver
+          .dafnyAbstractModuleForNamespace(serviceShape.getId().getNamespace());
+        final TokenTree moduleHeader = Token.of("abstract module %s".formatted(moduleName));
 
-        final Path path = Path.of("%s.dfy".formatted(serviceName));
-        final TokenTree fullCode = TokenTree.of(includeDirectives, moduleHeader, moduleBody);
+        // A smithy model may reference a model in a different package.
+        // In which case we need to include it.
+        final TokenTree includeDirectives = TokenTree
+          .of(Stream
+            .concat(
+              Stream
+                .of(
+                  // These are Obviously wrong #JustHardCodedThings...
+                  "../../StandardLibrary/StandardLibrary.dfy",
+                  "../../Util/UTF8.dfy"
+                ),
+              nameResolver
+                .dependentModels()
+                .stream()
+                .map(d -> modelPath
+                  .relativize(d.modelPath().resolve(nameResolver.dafnyAbstractModuleForNamespace(d.namespace()) + ".dfy"))
+                )
+                .map(Path::toString)
+            )
+            .map(p -> "include \"" + p + "\"")
+            .map(Token::of)
+          )
+          .lineSeparated();
+
+        // A smithy model may reference a model in a different package.
+        // In which case we need to import it.
+        final TokenTree modulePrelude = TokenTree
+          .of(Stream
+            .concat(
+                Stream
+                .of(
+                  "import opened Wrappers",
+                  "import opened StandardLibrary.UInt",
+                  "import opened UTF8"
+                ),
+              nameResolver
+                .dependentModels()
+                .stream()
+                .map(d ->
+                  "import "
+                    + nameResolver.localDafnyModuleName(d.namespace())
+                    + ": "
+                    + nameResolver.dafnyAbstractModuleForNamespace(d.namespace())))
+            .map(i -> Token.of(i)))
+          .lineSeparated();
+
+        final TokenTree moduleBody = TokenTree
+            .of(modulePrelude, generatedTypes)
+            .lineSeparated()
+            .braced();
+
+        final Path path = Path.of("%s.dfy".formatted(moduleName));
+        final TokenTree fullCode = TokenTree
+          .of(includeDirectives, moduleHeader, moduleBody)
+          .lineSeparated();
         return Map.of(path, fullCode);
     }
 
@@ -109,10 +173,12 @@ public class DafnyApiCodegen {
             case LIST -> generateListTypeDefinition(shapeId);
             case MAP -> generateMapTypeDefinition(shapeId);
             case STRUCTURE -> {
-                if (shape.hasTrait(TraitDefinition.class)
-                    || shape.hasTrait(ReferenceTrait.class)
-                    || shape.hasTrait(PositionalTrait.class)) {
+                if (shape.hasTrait(TraitDefinition.class)) {
                     yield null;
+                } else if (shape.hasTrait(PositionalTrait.class)) {
+                    yield null;
+                } else if (shape.hasTrait(ReferenceTrait.class)) {
+                    yield generateReferenceTraitDefinition(shapeId);
                 } else if (shape.hasTrait(ErrorTrait.class)) {
                     yield generateSpecificErrorClass((StructureShape) shape);
                 } else {
@@ -214,10 +280,43 @@ public class DafnyApiCodegen {
     }
 
     public TokenTree generateServiceTraitDefinition() {
-        final TokenTree trait = TokenTree.of("trait", nameResolver.traitForServiceClient(serviceShape));
+
+        final TokenTree trait = TokenTree.of("trait {:termination false}", nameResolver.traitForServiceClient(serviceShape));
         final TokenTree predicatesAndMethods = TokenTree.of(
                 serviceShape.getAllOperations().stream().map(this::generateOperationPredicatesAndMethod))
                 .lineSeparated();
+        return TokenTree.of(trait, predicatesAndMethods.braced());
+    }
+    
+    public TokenTree generateReferenceTraitDefinition(final ShapeId shapeWithReference) {
+        final ReferenceTrait referenceTrait = model
+          .getShape(shapeWithReference)
+          .orElseThrow()
+          .expectTrait(ReferenceTrait.class);
+
+        // This is a reference structure for returning a service
+        // As such, there is no need to build any code here.
+        // The acutal implementation of the service
+        // would be in that services abstract module.
+        if (referenceTrait.isService()) {
+            return null;
+        }
+
+        final ResourceShape resource = model
+          .getShape(referenceTrait.getReferentId())
+          .orElseThrow()
+          .asResourceShape()
+          .orElseThrow();
+    
+        final TokenTree trait = TokenTree.of("trait {:termination false}", nameResolver.baseTypeForShape(shapeWithReference));
+        final TokenTree predicatesAndMethods = TokenTree
+          .of(
+              resource
+                .getAllOperations()
+                .stream()
+                .map(this::generateOperationPredicatesAndMethod)
+          )
+          .lineSeparated();
         return TokenTree.of(trait, predicatesAndMethods.braced());
     }
 

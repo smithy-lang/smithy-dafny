@@ -30,9 +30,9 @@ import static software.amazon.polymorph.smithydotnet.TypeConversionDirection.TO_
 public class AwsSdkTypeConversionCodegen extends TypeConversionCodegen {
     private static final ShapeId SMITHY_STRING_SHAPE_ID = ShapeId.from("smithy.api#String");
 
-    public AwsSdkTypeConversionCodegen(final Model model, final ShapeId serviceShapeId) {
-        super(model, serviceShapeId,
-                new AwsSdkDotNetNameResolver(model, model.expectShape(serviceShapeId, ServiceShape.class)));
+    public AwsSdkTypeConversionCodegen(final Model model, final ServiceShape serviceShape) {
+        super(model, serviceShape,
+                new AwsSdkDotNetNameResolver(model, serviceShape));
     }
 
     @Override

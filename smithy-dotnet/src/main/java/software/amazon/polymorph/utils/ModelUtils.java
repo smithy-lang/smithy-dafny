@@ -124,6 +124,23 @@ public class ModelUtils {
     }
 
     /**
+     * @return a stream of error structures in the given service shape
+     */
+    public static ServiceShape serviceFromNamespace(final Model model, final String namespace) {
+        final ServiceShape[] tmp = model
+          .getServiceShapes()
+          .stream()
+          .filter(s -> s.toShapeId().getNamespace().equals(namespace))
+          .toArray(ServiceShape[]::new);
+
+        if (tmp.length != 1 ) {
+            throw new IllegalStateException();
+        }
+
+        return tmp[0];
+    }
+
+    /**
      * Throws {@link IllegalArgumentException} unless the given structure shape satisfies code-generation constraints:
      * <ul>
      *     <li>The structure must have the {@code @error} trait applied</li>

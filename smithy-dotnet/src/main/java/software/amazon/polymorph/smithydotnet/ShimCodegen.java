@@ -34,9 +34,9 @@ public class ShimCodegen {
     private static final String INTERNAL_INPUT_NAME = "internalInput";
     private static final String RESULT_NAME = "result";
 
-    public ShimCodegen(final Model model, final ShapeId serviceShapeId) {
+    public ShimCodegen(final Model model, final ServiceShape serviceShape) {
         this.model = model;
-        this.serviceShape = model.expectShape(serviceShapeId, ServiceShape.class);
+        this.serviceShape = serviceShape;
         this.nameResolver = new DotNetNameResolver(model, serviceShape);
     }
 

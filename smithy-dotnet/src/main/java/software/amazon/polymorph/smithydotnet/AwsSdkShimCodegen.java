@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
+import java.util.HashSet;
 
 import static software.amazon.polymorph.smithydotnet.TypeConversionDirection.FROM_DAFNY;
 import static software.amazon.polymorph.smithydotnet.TypeConversionDirection.TO_DAFNY;
@@ -31,11 +32,15 @@ public class AwsSdkShimCodegen {
     private static final String IMPL_NAME = "_impl";
     private static final String CONVERT_ERROR_METHOD = "ConvertError";
 
-    public AwsSdkShimCodegen(final Model model, final ShapeId serviceShapeId) {
+    public AwsSdkShimCodegen(
+      final Model model,
+      final ServiceShape serviceShape,
+      final Path[] dependentModelPaths
+    ) {
         this.model = model;
-        this.serviceShape = model.expectShape(serviceShapeId, ServiceShape.class);
+        this.serviceShape = serviceShape;
         this.nameResolver = new AwsSdkDotNetNameResolver(model, serviceShape);
-        this.dafnyNameResolver = new DafnyNameResolver(model, serviceShape);
+        this.dafnyNameResolver = new DafnyNameResolver(model, serviceShape, new HashSet(), dependentModelPaths);
     }
 
     public Map<Path, TokenTree> generate() {

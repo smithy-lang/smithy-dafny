@@ -46,10 +46,10 @@ public class ServiceCodegen {
     private final ServiceShape serviceShape;
     private final DotNetNameResolver nameResolver;
 
-    public ServiceCodegen(final Model model, final ShapeId serviceShapeId) {
+    public ServiceCodegen(final Model model, final ServiceShape serviceShape) {
         this.model = model;
 
-        this.serviceShape = model.expectShape(serviceShapeId, ServiceShape.class);
+        this.serviceShape = serviceShape;
         this.nameResolver = new DotNetNameResolver(model, serviceShape);
     }
 

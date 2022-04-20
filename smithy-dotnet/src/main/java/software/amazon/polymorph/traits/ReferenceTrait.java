@@ -69,6 +69,8 @@ public class ReferenceTrait extends AbstractTrait implements ToSmithyBuilder<Ref
         return referentType;
     }
 
+    public boolean isService() { return referentType == ReferentType.SERVICE; }
+
     public ShapeId getReferentId() {
         return referentId;
     }
