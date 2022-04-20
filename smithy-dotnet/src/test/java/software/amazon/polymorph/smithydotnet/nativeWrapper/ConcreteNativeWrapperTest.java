@@ -69,6 +69,7 @@ public class ConcreteNativeWrapperTest extends NativeWrapperCodegenTest {
     public void testGenerateOperationWrapperWithOutput() {
         String rawModel = """
                 namespace test.foobar
+                use aws.polymorph#positional
                 resource Baz { operations: [DoSomethingWithOutput] }
                 operation DoSomethingWithOutput { output: DoSomethingOutput }
                 structure DoSomethingOutput {}
@@ -77,7 +78,29 @@ public class ConcreteNativeWrapperTest extends NativeWrapperCodegenTest {
         final String actual = localUnderTest.generateOperationWrapper(
                 ShapeId.fromParts(SERVICE_NAMESPACE, "DoSomethingWithOutput")
         ).toString();
-        final String expected = ConcreteNativeWrapperTestConstants.DO_OUTPUT;
+        final String expected = ConcreteNativeWrapperTestConstants.DO_OUTPUT_NOT_POSITIONAL;
+        parseAndAssert(actual, expected);
+    }
+
+    @Test
+    public void testGenerateOperationWrapperWithOutputPositional() {
+        String rawModel = """
+                namespace test.foobar
+                use aws.polymorph#positional
+                use aws.polymorph#reference
+                resource Thing {}
+                @reference(resource: Thing)
+                structure ThingReference {}
+                resource Baz { operations: [DoSomethingWithOutput] }
+                operation DoSomethingWithOutput { output: DoSomethingOutput }
+                @positional
+                structure DoSomethingOutput { thing: ThingReference }
+                """;
+        ConcreteNativeWrapper localUnderTest = setupLocalModel(rawModel);
+        final String actual = localUnderTest.generateOperationWrapper(
+                ShapeId.fromParts(SERVICE_NAMESPACE, "DoSomethingWithOutput")
+        ).toString();
+        final String expected = ConcreteNativeWrapperTestConstants.DO_OUTPUT_POSITIONAL;
         parseAndAssert(actual, expected);
     }
 

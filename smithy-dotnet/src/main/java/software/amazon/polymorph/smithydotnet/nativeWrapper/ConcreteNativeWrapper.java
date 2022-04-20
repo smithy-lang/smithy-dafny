@@ -7,12 +7,14 @@ import java.util.Optional;
 
 import software.amazon.polymorph.smithydotnet.DotNetNameResolver;
 import software.amazon.polymorph.smithydotnet.NativeWrapperCodegen;
+import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.utils.Token;
 import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.EntityShape;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ShapeId;
+import software.amazon.smithy.model.shapes.StructureShape;
 
 import static software.amazon.polymorph.smithydotnet.DotNetNameResolver.classForCommonServiceException;
 import static software.amazon.polymorph.smithydotnet.DotNetNameResolver.qualifiedTypeConverter;
@@ -121,25 +123,52 @@ public class ConcreteNativeWrapper extends NativeWrapperCodegen {
             Optional<String> input,
             String concreteDafnyOutput
     ) {
-        final Optional<String> nativeCallPrefix = operationShape.getOutput()
-                .map(shapeId -> "%s %s = ".formatted(
-                        nameResolver.baseTypeForShape(shapeId),
-                        NATIVE_OUTPUT));
+        final Optional<String> nativeOutputType = operationShape.getOutput()
+                .map(nameResolver::baseTypeForShape);
+        final Optional<String> nativeCallPrefix =
+                nativeOutputType.map(s -> "%s %s =".formatted(
+                        s, NATIVE_OUTPUT));
         final String nativeCall = "%s %s.%s(%s);".formatted(
                 nativeCallPrefix.orElse(""),
                 NATIVE_BASE_PROPERTY,
                 methodName,
                 input.isPresent() ? NATIVE_INPUT : "");
-        final Optional<String> returnSuccessConversion = operationShape
+        // TODO Check nativeOutput for null
+        final Optional<String> isNativeOutputNull = generateIsNativeOutputNull(methodName, nativeOutputType);
+        // TODO Validate nativeOutput
+        final Optional<String> validateNativeOutput = generateValidateNativeOutput(operationShape.getOutput());
+        final Optional<String> successConversion = operationShape
                 .getOutput()
                 .map(shapeId -> "%s(%s)".formatted(
                         qualifiedTypeConverter(shapeId, TO_DAFNY),
                         NATIVE_OUTPUT));
         final String returnSuccess = "return %s.create_Success(%s);".formatted(
-                concreteDafnyOutput, returnSuccessConversion.orElse(""));
+                concreteDafnyOutput, successConversion.orElse(""));
         return TokenTree.of("try").append(
-                TokenTree.of(nativeCall, returnSuccess).lineSeparated().braced()
+                TokenTree.of(nativeCall, isNativeOutputNull.orElse(""), validateNativeOutput.orElse(""), returnSuccess)
+                    .lineSeparated().braced()
         );
+    }
+
+    Optional<String> generateIsNativeOutputNull(
+            String methodName,
+            Optional<String> nativeOutputType
+    ) {
+        if (nativeOutputType.isEmpty()) return Optional.empty();
+        final String message_one = "$\"Output of {%s}._%s is invalid. \""
+                .formatted(NATIVE_BASE_PROPERTY, methodName);
+        final String message_two = "$\"Should be {typeof(%s)} but is {null}.\""
+                .formatted(nativeOutputType.get());
+        final String nullCheck = "_ = %s ?? throw new ArgumentNullException(%s +\n%s);"
+                .formatted(NATIVE_OUTPUT, message_one, message_two);
+        return Optional.of(nullCheck);
+    }
+
+    Optional<String> generateValidateNativeOutput(Optional<ShapeId> shapeId) {
+        if (shapeId.isEmpty()) return Optional.empty();
+        StructureShape structureShape = model.expectShape(shapeId.get(), StructureShape.class);
+        if (structureShape.hasTrait(PositionalTrait.class)) return Optional.empty();
+        return Optional.of("%s.Validate();".formatted(NATIVE_OUTPUT));
     }
 
 

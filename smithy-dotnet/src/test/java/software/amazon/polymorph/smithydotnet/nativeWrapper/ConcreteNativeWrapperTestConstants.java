@@ -5,85 +5,93 @@ package software.amazon.polymorph.smithydotnet.nativeWrapper;
 
 class ConcreteNativeWrapperTestConstants {
 
-    static String CATCH_SERVICE_DO_OUTPUT =
+    static String CATCH_SERVICE =
             """
             catch (FoobarServiceBaseException e)
             {
                 return Wrappers_Compile.Result<
-                    Dafny.Test.Foobar._IDoSomethingOutput,
+                    %s,
                     Dafny.Test.Foobar.IFoobarServiceException
                 >.create_Failure(
                     TypeConversion.ToDafny_CommonError_FoobarServiceBaseException(e)
                 );
             }
             """;
+
+    static String CATCH_GENERAL =
+            """
+            catch (Exception e)
+            {
+                return Wrappers_Compile.Result<
+                    %s,
+                    Dafny.Test.Foobar.IFoobarServiceException
+                >.create_Failure(
+                    TypeConversion.ToDafny_CommonError_FoobarServiceBaseException(
+                        new FoobarServiceBaseException(e.Message))
+                );
+            }
+            """;
+
+    static String CATCH_SERVICE_DO_OUTPUT =
+            CATCH_SERVICE.formatted("Dafny.Test.Foobar._IDoSomethingOutput");
 
     static String CATCH_GENERAL_DO_OUTPUT =
-            """
-            catch (Exception e)
-            {
-                return Wrappers_Compile.Result<
-                    Dafny.Test.Foobar._IDoSomethingOutput,
-                    Dafny.Test.Foobar.IFoobarServiceException
-                >.create_Failure(
-                    TypeConversion.ToDafny_CommonError_FoobarServiceBaseException(
-                        new FoobarServiceBaseException(e.Message))
-                );
-            }
-            """;
+            CATCH_GENERAL.formatted("Dafny.Test.Foobar._IDoSomethingOutput");
 
     static String CATCH_SERVICE_DO_VOID =
-            """
-            catch (FoobarServiceBaseException e)
-            {
-                return Wrappers_Compile.Result<
-                    _System._ITuple0,
-                    Dafny.Test.Foobar.IFoobarServiceException
-                >.create_Failure(
-                    TypeConversion.ToDafny_CommonError_FoobarServiceBaseException(e)
-                );
-            }
-            """;
+            CATCH_SERVICE.formatted("_System._ITuple0");
 
     static String CATCH_GENERAL_DO_VOID =
-            """
-            catch (Exception e)
-            {
-                return Wrappers_Compile.Result<
-                    _System._ITuple0,
-                    Dafny.Test.Foobar.IFoobarServiceException
-                >.create_Failure(
-                    TypeConversion.ToDafny_CommonError_FoobarServiceBaseException(
-                        new FoobarServiceBaseException(e.Message))
-                );
-            }
-            """;
+            CATCH_GENERAL.formatted("_System._ITuple0");
 
     static String DO_OUTPUT =
             """
             public Wrappers_Compile._IResult<
-                Dafny.Test.Foobar._IDoSomethingOutput,
+                %s,
                 Dafny.Test.Foobar.IFoobarServiceException
             > DoSomethingWithOutput()
             {
                 try
                 {
-                    Test.Foobar.DoSomethingOutput nativeOutput = _impl.DoSomethingWithOutput();
+                    %s nativeOutput = _impl.DoSomethingWithOutput();
+                    _ = nativeOutput ?? throw new ArgumentNullException(
+                        $"Output of {_impl}._DoSomethingWithOutput is invalid. " +
+                        $"Should be {typeof(%s)} but is {null}."
+                    );
+                    %s
                     return Wrappers_Compile.Result<
-                        Dafny.Test.Foobar._IDoSomethingOutput,
+                        %s,
                         Dafny.Test.Foobar.IFoobarServiceException
                     >.create_Success(
-                        TypeConversion.ToDafny_N4_test__N6_foobar__S17_DoSomethingOutput(
+                        TypeConversion.%s(
                             nativeOutput)
                     );
                 }
                 %s
                 %s
             }
-            """.formatted(
-                    CATCH_SERVICE_DO_OUTPUT,
-                    CATCH_GENERAL_DO_OUTPUT
-            );
+            """;
+
+    static String DO_OUTPUT_POSITIONAL = DO_OUTPUT.formatted(
+            "Dafny.Test.Foobar.IThing", // abstract output or interface
+            "Test.Foobar.IThing", // type of native output
+            "Test.Foobar.IThing", // type of native output
+            "", // validate native output
+            "Dafny.Test.Foobar.IThing", // abstract output or interface
+            "ToDafny_N4_test__N6_foobar__S17_DoSomethingOutput", // to dafny output converter
+            CATCH_SERVICE.formatted("Dafny.Test.Foobar.IThing"),
+            CATCH_GENERAL.formatted("Dafny.Test.Foobar.IThing"));
+
+    static String DO_OUTPUT_NOT_POSITIONAL = DO_OUTPUT.formatted(
+            "Dafny.Test.Foobar._IDoSomethingOutput",
+            "Test.Foobar.DoSomethingOutput",
+            "Test.Foobar.DoSomethingOutput",
+            "nativeOutput.Validate();",
+            "Dafny.Test.Foobar._IDoSomethingOutput",
+            "ToDafny_N4_test__N6_foobar__S17_DoSomethingOutput", // to dafny output converter
+            CATCH_SERVICE_DO_OUTPUT,
+            CATCH_GENERAL_DO_OUTPUT
+    );
 
     static String DO_INPUT =
             """
@@ -160,7 +168,7 @@ class ConcreteNativeWrapperTestConstants {
     static String COMPLETE_CLASS =
             getNameSpacedNativeWrapper(
                     CONSTRUCTOR,
-                    "%s\n%s".formatted(DO_INPUT, DO_OUTPUT));
+                    "%s\n%s".formatted(DO_INPUT, DO_OUTPUT_NOT_POSITIONAL));
 
     static String PRELUDE =
             """                        
