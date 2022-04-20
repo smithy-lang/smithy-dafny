@@ -5,6 +5,8 @@ package software.amazon.polymorph.smithydotnet;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
+
+import software.amazon.polymorph.traits.ExtendableTrait;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.polymorph.traits.ClientConfigTrait;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
@@ -509,26 +511,55 @@ public class TypeConversionCodegen {
     /**
      * This should not be called directly, instead call
      * {@link TypeConversionCodegen#generateStructureConverter(StructureShape)}.
-     *
-     * Note that this currently only allows for Dafny-compiled implementations of the resource interface.
-     *
-     * TODO: allow for native C# implementations (i.e. customer-implemented) of resources
      */
     protected TypeConverter generateResourceReferenceStructureConverter(
             final StructureShape structureShape, final ResourceShape resourceShape) {
         final ShapeId resourceShapeId = resourceShape.getId();
-
-        final TokenTree fromDafnyBody = Token.of("return new %s(value);"
-                .formatted(nameResolver.shimClassForResource(resourceShapeId)));
+        if (!resourceShape.hasTrait(ExtendableTrait.class)) {
+            final TokenTree fromDafnyBody = Token.of("return new %s(value);"
+                    .formatted(nameResolver.shimClassForResource(resourceShapeId)));
+            final TokenTree toDafnyBody = Token.of("""
+                    if (value is %s valueWithImpl) {
+                        return valueWithImpl._impl;
+                    }
+                    throw new System.ArgumentException("Custom implementations of %s are not supported yet");
+                    """.formatted(
+                    nameResolver.shimClassForResource(resourceShapeId),
+                    nameResolver.baseTypeForShape(resourceShapeId)));
+            return buildConverterFromMethodBodies(structureShape, fromDafnyBody, toDafnyBody);
+        }
+        final TokenTree fromDafnyBody = Token.of("""
+                if (value is %s nativeWrapper) return nativeWrapper._impl;
+                return new %s(value);
+                """
+                .formatted(
+                        nameResolver.nativeWrapperClassForResource(resourceShapeId),
+                        nameResolver.shimClassForResource(resourceShapeId))
+        );
         final TokenTree toDafnyBody = Token.of("""
-                if (value is %s valueWithImpl) {
-                    return valueWithImpl._impl;
+                switch (value)
+                {
+                    case %s valueWithImpl:
+                        return valueWithImpl._impl;
+                    case %s nativeImpl:
+                        return new %s(nativeImpl);
+                    case %s _:
+                        throw new System.ArgumentException(
+                            "Custom implementations of %s should extend %s.");
+                    default:
+                       throw new System.ArgumentException(
+                           $"{value} does not inherit from {typeof(%s)} or {typeof(%s)}.");
                 }
-                throw new System.ArgumentException(\"Custom implementations of %s are not supported yet\");
                 """.formatted(
-                nameResolver.shimClassForResource(resourceShapeId),
-                nameResolver.baseTypeForShape(resourceShapeId)));
-
+                nameResolver.shimClassForResource(resourceShapeId),          // case %s valueWithImpl:
+                nameResolver.baseClassForResource(resourceShapeId),          // case %s nativeImpl:
+                nameResolver.nativeWrapperClassForResource(resourceShapeId), // return new %s(nativeImpl);
+                nameResolver.baseTypeForResource(resourceShape),             // case %s _:
+                nameResolver.shimClassForResource(resourceShapeId),          // "Custom implementations of %s
+                nameResolver.baseClassForResource(resourceShapeId),          // should extend %s.");
+                nameResolver.baseClassForResource(resourceShapeId),          // $"{value} does not inherit from {typeof(%s))}
+                nameResolver.shimClassForResource(resourceShapeId))          //or {typeof(%s)}.");
+        );
         return buildConverterFromMethodBodies(structureShape, fromDafnyBody, toDafnyBody);
     }
 

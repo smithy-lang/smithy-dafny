@@ -598,6 +598,57 @@ public class TypeConversionCodegenTest {
     }
 
     @Test
+    public void testGenerateStructureConverterExtendableStructure() {
+        final ShapeId shapeId = ShapeId.fromParts(SERVICE_NAMESPACE, "ThingReference");
+        final TypeConversionCodegen codegen = setupCodegen((builder, modelAssembler) ->
+                modelAssembler.addUnparsedModel("test.smithy", """
+                namespace %s
+                use aws.polymorph#extendable
+                use aws.polymorph#reference
+                @extendable
+                resource Thing {}
+                @reference(resource: Thing)
+                structure ThingReference {}
+                """.formatted(SERVICE_NAMESPACE)));
+        final TypeConverter converter = codegen.generateStructureConverter(
+                codegen.getModel().expectShape(shapeId, StructureShape.class));
+        assertEquals(shapeId, converter.shapeId());
+        final String actualFromDafny = converter.fromDafny().toString();
+        final List<ParseToken> actualTokensFromDafny = Tokenizer.tokenize(actualFromDafny);
+        final String structureFromDafnyConverterName = DotNetNameResolver.typeConverterForShape(shapeId, FROM_DAFNY);
+        final String expectedFromDafny = """
+                public static Test.Foobar.IThing %s(Dafny.Test.Foobar.IThing value) {
+                    if (value is NativeWrapper_Thing nativeWrapper) return nativeWrapper._impl;
+                    return new Thing(value);
+                }
+                """.formatted(structureFromDafnyConverterName);
+        final List<ParseToken> expectedTokensFromDafny = Tokenizer.tokenize(expectedFromDafny);
+        assertEquals(expectedTokensFromDafny, actualTokensFromDafny);
+
+        final String actualToDafny = converter.toDafny().toString();
+        final List<ParseToken> actualTokensToDafny = Tokenizer.tokenize(actualToDafny);
+        final String structureToDafnyConverterName = DotNetNameResolver.typeConverterForShape(shapeId, TO_DAFNY);
+        final String expectedToDafny = """
+                public static Dafny.Test.Foobar.IThing %s(Test.Foobar.IThing value) {
+                    switch (value)
+                    {
+                        case Thing valueWithImpl:
+                            return valueWithImpl._impl;
+                        case ThingBase nativeImpl:
+                            return new NativeWrapper_Thing(nativeImpl);
+                        case Test.Foobar.IThing _:
+                            throw new System.ArgumentException(
+                                 "Custom implementations of Thing should extend ThingBase.");
+                        default:
+                            throw new System.ArgumentException(
+                                $"{value} does not inherit from {typeof(ThingBase)} or {typeof(Thing)}.");
+                    }
+                }""".formatted(structureToDafnyConverterName);
+        final List<ParseToken> expectedTokensToDafny = Tokenizer.tokenize(expectedToDafny);
+        assertEquals(expectedTokensToDafny, actualTokensToDafny);
+    }
+
+    @Test
     public void testGenerateStructureConverterPositionalStructure() {
         final ShapeId shapeId = ShapeId.fromParts(SERVICE_NAMESPACE, "CreateThingOutput");
         final ShapeId memberShapeId = shapeId.withMember("thing");
