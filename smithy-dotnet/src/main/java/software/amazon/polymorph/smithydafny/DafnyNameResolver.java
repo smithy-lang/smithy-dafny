@@ -5,6 +5,7 @@ package software.amazon.polymorph.smithydafny;
 
 import com.google.common.base.Joiner;
 
+import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.smithy.model.Model;
@@ -77,6 +78,15 @@ public record DafnyNameResolver(
             case STRUCTURE -> {
                 if (shape.hasTrait(ReferenceTrait.class)) {
                     yield baseTypeForShape(shape.expectTrait(ReferenceTrait.class).getReferentId());
+                } else if (shape.hasTrait(PositionalTrait.class)) {
+                    final StructureShape structure = shape.asStructureShape().get();
+                    if (structure.getMemberNames().size() != 1) {
+                        throw new IllegalStateException("Positional trait only supports a single member.");
+                    }
+                    final MemberShape member = structure
+                      .getMember(structure.getMemberNames().get(0))
+                      .get();
+                    yield baseTypeForShape(member.getTarget());
                 } else {
                     yield dafnyModulePrefixForShapeId(shape) + shapeName;
                 }

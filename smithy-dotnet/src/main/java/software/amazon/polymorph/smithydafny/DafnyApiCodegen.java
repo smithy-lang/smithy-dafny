@@ -197,6 +197,28 @@ public class DafnyApiCodegen {
         return generateSubsetType(shapeId, "ValidUTF8Bytes", lengthConstraint);
     }
 
+    public TokenTree generateCastToStringForAnErrorStructure(final ShapeId shapeId, final StructureShape errorStructure) {
+        Optional<MemberShape> message = errorStructure.getMember("message");
+        final String castToStringSignature = "\tfunction method CastToString(): string {\n\t%1$s\n\t}";
+        String body;
+        if (message.isPresent()) {
+            final MemberShape member = message.get();
+            if (model.expectShape(member.getTarget()).getType() != ShapeType.STRING) {
+                throw new IllegalStateException("Only string type for message members on error shapes are supported.");
+            }
+            if (member.isOptional()) {
+                body = "\tif message.Some? then \"%1$s: \" + message.value else \"%1$s\"";
+            } else {
+                body = "\t\"%1$s: \" + message";
+            }
+        } else {
+            body = "\"%1$s\"";
+        }
+        body = body.formatted(shapeId.getName(serviceShape));
+        TokenTree castMethod = TokenTree.of(castToStringSignature.formatted(body));
+        return castMethod;
+    }
+
     public TokenTree generateBlobTypeDefinition(final ShapeId blobShapeId) {
         final BlobShape blobShape = model.expectShape(blobShapeId, BlobShape.class);
         final Optional<TokenTree> lengthConstraint = blobShape.getTrait(LengthTrait.class)
