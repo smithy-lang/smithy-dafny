@@ -158,6 +158,21 @@ public class DotNetNameResolver {
         return "%sException".formatted(serviceName);
     }
 
+    /**
+     * Returns the concrete service exception, as compared to
+     * {@link DotNetNameResolver#classForCommonServiceException(ServiceShape)},
+     * which returns the abstract base Exception.
+     */
+    public static String classForConcreteServiceException(final ServiceShape serviceShape) {
+        // TODO Currently we have this hardcoded to remove 'Factory' from service names
+        // that include it, however this should likely be controlled via a custom trait
+        String serviceName = serviceShape.getId().getName(serviceShape);
+        if (serviceName.endsWith("Factory")) {
+            serviceName = serviceName.substring(0, serviceName.lastIndexOf("Factory"));
+        }
+        return "%sException".formatted(serviceName);
+    }
+
     public String classForCommonServiceException() {
         return DotNetNameResolver.classForCommonServiceException(serviceShape);
     }
@@ -653,11 +668,12 @@ public class DotNetNameResolver {
     /**
      * Returns the Dafny trait implemented by all errors in the given service.
      * <p>
-     * This is distinct from the specific Dafny error classes, since the trait / common error shape is not modeled.
+     * This is distinct from the specific Dafny error classes,
+     * since the trait / common error shape is not modeled.
      * To get the type for a specific Dafny error class, pass the corresponding structure shape to
      * {@link DotNetNameResolver#dafnyTypeForShape(ShapeId)}.
      */
-    public String dafnyTypeForCommonServiceError(final ServiceShape serviceShape) {
+    public static String dafnyTypeForCommonServiceError(final ServiceShape serviceShape) {
         // TODO Currently we have this hardcoded to remove 'Factory' from service names
         // that include it, however this should likely be controlled via a custom trait
         String serviceName = serviceShape.getId().getName(serviceShape);

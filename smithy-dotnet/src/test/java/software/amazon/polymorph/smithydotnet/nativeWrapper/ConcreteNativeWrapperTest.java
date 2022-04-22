@@ -7,6 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.List;
+import java.util.Optional;
 
 import software.amazon.polymorph.smithydotnet.NativeWrapperCodegenTest;
 import software.amazon.polymorph.util.TestModel;
@@ -19,6 +20,11 @@ import static org.junit.Assert.assertEquals;
 import static software.amazon.polymorph.util.TestModel.SERVICE_NAMESPACE;
 import static software.amazon.polymorph.util.TestModel.SERVICE_SHAPE_ID;
 
+// Debugging Guidance: These tests are arranged from Simplest to Most Complete.
+// Generally, the simplest unit test have shorter durations.
+// As such, if you sort the failed unit tests by duration, you can find
+// the simplest unit test that is failing.
+// Addressing that unit test will often resolve the more complex failures.
 public class ConcreteNativeWrapperTest extends NativeWrapperCodegenTest {
 
     protected ConcreteNativeWrapper underTest;
@@ -36,32 +42,31 @@ public class ConcreteNativeWrapperTest extends NativeWrapperCodegenTest {
     }
 
     @Test
-    public void testGenerateCatchGeneralException() {
-        final String dafnyOutput =
-                """
-                Wrappers_Compile.Result<
-                  Dafny.Test.Foobar._IDoSomethingOutput,
-                  Dafny.Test.Foobar.IFoobarServiceException
-                >""";
+    public void testGenerateValidateNativeOutput() {
+        ShapeId outputShapeId = ShapeId.fromParts(SERVICE_NAMESPACE, "DoSomethingOutput");
+        String nativeOutputType = "Test.Foobar.DoSomethingOutput";
         final String actual = this.underTest
-                .generateCatchGeneralException(dafnyOutput)
+                .generateValidateNativeOutputMethod(
+                        Optional.of(outputShapeId),
+                        Optional.of(nativeOutputType),
+                        "DoSomethingWithOutput")
                 .toString();
-        final String expected = ConcreteNativeWrapperTestConstants.CATCH_GENERAL_DO_OUTPUT;
+        final String expected = ConcreteNativeWrapperTestConstants.VALIDATE_NATIVE_OUTPUT
+                .formatted(nativeOutputType, "DoSomethingWithOutput");
+        parseAndAssert(actual, expected);
+    }
+
+    @Test
+    public void testGenerateCatchGeneralException() {
+        final String actual = this.underTest.generateCatchGeneralException().toString();
+        final String expected = ConcreteNativeWrapperTestConstants.CATCH_GENERAL;
         parseAndAssert(actual, expected);
     }
 
     @Test
     public void testGenerateCatchServiceException() {
-        final String dafnyOutput =
-                """
-                Wrappers_Compile.Result<
-                    Dafny.Test.Foobar._IDoSomethingOutput,
-                    Dafny.Test.Foobar.IFoobarServiceException
-                >""";
-        final String actual = this.underTest
-                .generateCatchServiceException(dafnyOutput)
-                .toString();
-        final String expected = ConcreteNativeWrapperTestConstants.CATCH_SERVICE_DO_OUTPUT;
+        final String actual = this.underTest.generateCatchServiceException().toString();
+        final String expected = ConcreteNativeWrapperTestConstants.CATCH_SERVICE;
         parseAndAssert(actual, expected);
     }
 
