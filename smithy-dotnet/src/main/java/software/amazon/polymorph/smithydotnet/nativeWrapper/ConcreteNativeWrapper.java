@@ -16,6 +16,7 @@ import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
 
+import static software.amazon.polymorph.smithydotnet.DotNetNameResolver.classForCommonServiceException;
 import static software.amazon.polymorph.smithydotnet.DotNetNameResolver.classForConcreteServiceException;
 import static software.amazon.polymorph.smithydotnet.DotNetNameResolver.qualifiedTypeConverter;
 import static software.amazon.polymorph.smithydotnet.DotNetNameResolver.qualifiedTypeConverterForCommonError;
@@ -112,10 +113,9 @@ public class ConcreteNativeWrapper extends NativeWrapperCodegen {
                         operationShape.getOutput(), nativeOutputType,methodName),
                 inputConversion,
                 TokenTree.of("%s finalException = null;"
-                        .formatted(classForConcreteServiceException(serviceShape))),
+                        .formatted(classForCommonServiceException(serviceShape))),
                 tryBlock,
                 generateCatchServiceException(),
-                generateCatchGeneralException(),
                 generateReturnFailure(concreteDafnyOutput)
                 )
                 .lineSeparated().braced();
@@ -211,17 +211,8 @@ public class ConcreteNativeWrapper extends NativeWrapperCodegen {
 
      TokenTree generateCatchServiceException() {
         return generateCatch(
-                classForConcreteServiceException(serviceShape),
+                classForCommonServiceException(serviceShape),
                 Optional.empty()
-        );
-    }
-
-    TokenTree generateCatchGeneralException() {
-        return generateCatch(
-                "Exception",
-                Optional.of("new %s(e.Message)".formatted(
-                        classForConcreteServiceException(serviceShape)
-                ))
         );
     }
 

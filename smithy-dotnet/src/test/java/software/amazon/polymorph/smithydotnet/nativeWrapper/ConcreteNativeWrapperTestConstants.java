@@ -29,19 +29,11 @@ class ConcreteNativeWrapperTestConstants {
 
     static String CATCH_SERVICE =
             """
-            catch (FoobarServiceException e)
+            catch (FoobarServiceBaseException e)
             {
                 finalException = e;
             }
             """;
-
-    static String CATCH_GENERAL =
-            """
-            catch (Exception e)
-            {
-                finalException = new %s(e.Message);
-            }
-            """.formatted("FoobarServiceException");
 
     static String DO_OUTPUT =
             """
@@ -51,7 +43,7 @@ class ConcreteNativeWrapperTestConstants {
             > DoSomethingWithOutput()
             {
                 %s
-                FoobarServiceException finalException = null;
+                FoobarServiceBaseException finalException = null;
                 try
                 {
                     %s nativeOutput = _impl.DoSomethingWithOutput();
@@ -70,7 +62,6 @@ class ConcreteNativeWrapperTestConstants {
                 }
                 %s
                 %s
-                %s
             }
             """;
 
@@ -83,7 +74,6 @@ class ConcreteNativeWrapperTestConstants {
             "Dafny.Test.Foobar.IThing", // abstract output or interface
             "ToDafny_N4_test__N6_foobar__S17_DoSomethingOutput", // to dafny output converter
             CATCH_SERVICE,
-            CATCH_GENERAL,
             RETURN_FAILURE.formatted("Dafny.Test.Foobar.IThing")// return failure
     );
 
@@ -96,7 +86,6 @@ class ConcreteNativeWrapperTestConstants {
             "Dafny.Test.Foobar._IDoSomethingOutput",
             "ToDafny_N4_test__N6_foobar__S17_DoSomethingOutput", // to dafny output converter
             CATCH_SERVICE,
-            CATCH_GENERAL,
             RETURN_FAILURE.formatted("Dafny.Test.Foobar._IDoSomethingOutput")// return failure
     );
 
@@ -110,7 +99,7 @@ class ConcreteNativeWrapperTestConstants {
                 Test.Foobar.DoSomethingInput nativeInput =
                     TypeConversion.FromDafny_N4_test__N6_foobar__S16_DoSomethingInput(
                         input);
-                FoobarServiceException finalException = null;
+                FoobarServiceBaseException finalException = null;
                 try
                 {
                     _impl.DoSomethingWithInput(nativeInput);
@@ -121,9 +110,8 @@ class ConcreteNativeWrapperTestConstants {
                 }
                 %s
                 %s
-                %s
             }
-            """.formatted(CATCH_SERVICE, CATCH_GENERAL, RETURN_FAILURE.formatted("_System._ITuple0"));
+            """.formatted(CATCH_SERVICE, RETURN_FAILURE.formatted("_System._ITuple0"));
 
     static String DO =
             """
@@ -132,7 +120,7 @@ class ConcreteNativeWrapperTestConstants {
                 Dafny.Test.Foobar.IFoobarServiceException
             > Do()
             {
-                FoobarServiceException finalException = null;
+                FoobarServiceBaseException finalException = null;
                 try
                 {
                     _impl.Do();
@@ -143,9 +131,8 @@ class ConcreteNativeWrapperTestConstants {
                 }
                 %s
                 %s
-                %s
             }
-            """.formatted(CATCH_SERVICE, CATCH_GENERAL, RETURN_FAILURE.formatted("_System._ITuple0"));
+            """.formatted(CATCH_SERVICE, RETURN_FAILURE.formatted("_System._ITuple0"));
 
     static String CONSTRUCTOR =
             """

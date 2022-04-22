@@ -57,13 +57,6 @@ public class ConcreteNativeWrapperTest extends NativeWrapperCodegenTest {
     }
 
     @Test
-    public void testGenerateCatchGeneralException() {
-        final String actual = this.underTest.generateCatchGeneralException().toString();
-        final String expected = ConcreteNativeWrapperTestConstants.CATCH_GENERAL;
-        parseAndAssert(actual, expected);
-    }
-
-    @Test
     public void testGenerateCatchServiceException() {
         final String actual = this.underTest.generateCatchServiceException().toString();
         final String expected = ConcreteNativeWrapperTestConstants.CATCH_SERVICE;
