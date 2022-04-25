@@ -648,8 +648,8 @@ public class TypeConversionCodegen {
         final String anyMessage =
                 """
                 var message = $"%s encountered an Exception of type: {value.GetType()}" +
-                              $" with message of: {value.Message}";
-                """.formatted(nameResolver.serviceNameWithOutFactory());
+                              $" with message of: {value.Message}";"""
+                        .formatted(nameResolver.serviceNameWithOutFactory());
         final TokenTree handleAnyException = Token.of(
                 "default:\n%1$s\nrtn = new %2$s();\nrtn.message = %3$s(message);\nreturn rtn;"
                         .formatted(anyMessage, nameResolver.dafnyBaseTypeForServiceError(),
