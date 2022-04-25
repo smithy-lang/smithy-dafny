@@ -45,6 +45,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static software.amazon.polymorph.smithydotnet.DotNetNameResolver.TYPE_CONVERSION_CLASS_NAME;
+import static software.amazon.polymorph.smithydotnet.DotNetNameResolver.typeConverterForCommonError;
+import static software.amazon.polymorph.smithydotnet.DotNetNameResolver.typeConverterForShape;
 import static software.amazon.polymorph.smithydotnet.TypeConversionDirection.FROM_DAFNY;
 import static software.amazon.polymorph.smithydotnet.TypeConversionDirection.TO_DAFNY;
 
@@ -289,8 +291,8 @@ public class TypeConversionCodegen {
         final String memberDafnyType = nameResolver.dafnyTypeForShape(memberShape.getId());
         final String memberCSharpType = nameResolver.baseTypeForMember(memberShape);;
 
-        final String memberToDafnyConverterName = DotNetNameResolver.typeConverterForShape(memberShape.getId(), TO_DAFNY);
-        final String memberFromDafnyConverterName = DotNetNameResolver.typeConverterForShape(memberShape.getId(), FROM_DAFNY);
+        final String memberToDafnyConverterName = typeConverterForShape(memberShape.getId(), TO_DAFNY);
+        final String memberFromDafnyConverterName = typeConverterForShape(memberShape.getId(), FROM_DAFNY);
 
         final boolean convertMemberEnumToString = enumListMembersAreStringsInCSharp()
             && model.expectShape(memberShape.getTarget()).hasTrait(EnumTrait.class);
@@ -322,10 +324,10 @@ public class TypeConversionCodegen {
         final String keyDafnyType = nameResolver.dafnyTypeForShape(keyShape.getId());
         final String valueDafnyType = nameResolver.dafnyTypeForShape(valueShape.getId());
 
-        final String keyToDafnyConverterName = DotNetNameResolver.typeConverterForShape(keyShape.getId(), TO_DAFNY);
-        final String keyFromDafnyConverterName = DotNetNameResolver.typeConverterForShape(keyShape.getId(), FROM_DAFNY);
-        final String valueToDafnyConverterName = DotNetNameResolver.typeConverterForShape(valueShape.getId(), TO_DAFNY);
-        final String valueFromDafnyConverterName = DotNetNameResolver.typeConverterForShape(valueShape.getId(), FROM_DAFNY);
+        final String keyToDafnyConverterName = typeConverterForShape(keyShape.getId(), TO_DAFNY);
+        final String keyFromDafnyConverterName = typeConverterForShape(keyShape.getId(), FROM_DAFNY);
+        final String valueToDafnyConverterName = typeConverterForShape(valueShape.getId(), TO_DAFNY);
+        final String valueFromDafnyConverterName = typeConverterForShape(valueShape.getId(), FROM_DAFNY);
 
         final TokenTree fromDafnyBody = Token.of(
                 "return value.ItemEnumerable.ToDictionary(pair => %s(pair.Car), pair => %s(pair.Cdr));"
@@ -370,7 +372,7 @@ public class TypeConversionCodegen {
                     final String dafnyMemberName = memberShape.getMemberName();
                     final String propertyName = nameResolver.classPropertyForStructureMember(memberShape);
                     final String propertyType = nameResolver.classPropertyTypeForStructureMember(memberShape);
-                    final String memberFromDafnyConverterName = DotNetNameResolver.typeConverterForShape(
+                    final String memberFromDafnyConverterName = typeConverterForShape(
                             memberShape.getId(), FROM_DAFNY);
 
                     final TokenTree checkIfPresent;
@@ -424,11 +426,11 @@ public class TypeConversionCodegen {
     public String generateConstructorArg(final MemberShape memberShape) {
         if (nameResolver.memberShapeIsOptional(memberShape)) {
             return "%s(%s)".formatted(
-                    DotNetNameResolver.typeConverterForShape(memberShape.getId(), TO_DAFNY),
+                    typeConverterForShape(memberShape.getId(), TO_DAFNY),
                     nameResolver.variableNameForClassProperty(memberShape));
         }
         return "%s(value.%s)".formatted(
-                DotNetNameResolver.typeConverterForShape(memberShape.getId(), TO_DAFNY),
+                typeConverterForShape(memberShape.getId(), TO_DAFNY),
                 nameResolver.classPropertyForStructureMember(memberShape));
     }
 
@@ -453,8 +455,8 @@ public class TypeConversionCodegen {
     public TypeConverter generateMemberConverter(final MemberShape memberShape) {
         final Shape targetShape = model.expectShape(memberShape.getTarget());
 
-        final String targetFromDafnyConverterName = DotNetNameResolver.typeConverterForShape(targetShape.getId(), FROM_DAFNY);
-        final String targetToDafnyConverterName = DotNetNameResolver.typeConverterForShape(targetShape.getId(), TO_DAFNY);
+        final String targetFromDafnyConverterName = typeConverterForShape(targetShape.getId(), FROM_DAFNY);
+        final String targetToDafnyConverterName = typeConverterForShape(targetShape.getId(), TO_DAFNY);
 
         if (!nameResolver.memberShapeIsOptional(memberShape)) {
             final TokenTree fromDafnyBody = Token.of("return %s(value);".formatted(targetFromDafnyConverterName));
@@ -539,8 +541,8 @@ public class TypeConversionCodegen {
     private TypeConverter generatePositionalStructureConverter(final StructureShape structureShape) {
         final ShapeId memberShapeId = ModelUtils.getPositionalStructureMember(structureShape).orElseThrow();
 
-        final String memberFromDafnyConverterName = DotNetNameResolver.typeConverterForShape(memberShapeId, FROM_DAFNY);
-        final String memberToDafnyConverterName = DotNetNameResolver.typeConverterForShape(memberShapeId, TO_DAFNY);
+        final String memberFromDafnyConverterName = typeConverterForShape(memberShapeId, FROM_DAFNY);
+        final String memberToDafnyConverterName = typeConverterForShape(memberShapeId, TO_DAFNY);
         final TokenTree fromDafnyBody = Token.of("return %s(value);".formatted(memberFromDafnyConverterName));
         final TokenTree toDafnyBody = Token.of("return %s(value);".formatted(memberToDafnyConverterName));
 
