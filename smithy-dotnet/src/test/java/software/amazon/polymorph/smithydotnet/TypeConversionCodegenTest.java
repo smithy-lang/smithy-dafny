@@ -69,16 +69,32 @@ public class TypeConversionCodegenTest {
                     internal static class TypeConversion {
                         public static Test.Foobar.FoobarServiceBaseException FromDafny_CommonError_FoobarServiceBaseException
                                 (Dafny.Test.Foobar.IFoobarServiceException value) {
-                            throw new System.ArgumentException("Unknown exception type");
+                            TODO
                         }
-                        public static Dafny.Test.Foobar.IFoobarServiceException ToDafny_CommonError_FoobarServiceBaseException
-                                (Test.Foobar.FoobarServiceBaseException value) {
-                            throw new System.ArgumentException("Unknown exception type");
+                        public static Dafny.Test.Foobar.IFoobarServiceException ToDafny_CommonError
+                                (System.Exception value) {
+                            Dafny.Test.Foobar.FoobarServiceBaseException rtn;
+                            switch (value)
+                            {
+                                case Test.Foobar.FoobarServiceBaseException exception:
+                                    rtn = new Dafny.Test.Foobar.FoobarServiceBaseException();
+                                    rtn.message = %s(exception.Message);
+                                    return rtn;
+                                default:
+                                    var message = $"FoobarService encountered an Exception of type: {value.GetType()}" +
+                                                  $" with message of: {value.Message}";
+                                    rtn = new Dafny.Test.Foobar.FoobarServiceBaseException();
+                                    rtn.message = %s(message);
+                                    return rtn;
+                            }
                         }
                     }
                 }
-                """);
-        assertEquals(expectedTokens, actualTokens);
+                """.formatted(
+                DotNetNameResolver.typeConverterForShape(ShapeId.from("smithy.api#String"), TO_DAFNY), //ToDafny_String
+                DotNetNameResolver.typeConverterForShape(ShapeId.from("smithy.api#String"), TO_DAFNY)  //ToDafny_String
+        );
+        tokenizeAndAssert(expected, actual);
     }
 
     @Test
@@ -806,8 +822,8 @@ public class TypeConversionCodegenTest {
         assertTrue("Common exception converter must use a shape ID not in the model",
             codegen.getModel().getShape(converter.shapeId()).isEmpty());
 
-        final List<ParseToken> actualTokensFromDafny = Tokenizer.tokenize(converter.fromDafny().toString());
-        final List<ParseToken> expectedTokensFromDafny = Tokenizer.tokenize("""
+/*        final String actualFromDafny = converter.fromDafny().toString();
+        final String expectedFromDafny = """
                 public static Test.Foobar.FoobarServiceBaseException
                         FromDafny_CommonError_FoobarServiceBaseException(Dafny.Test.Foobar.IFoobarServiceException value) {
                     if (value is Dafny.Test.Foobar.Exception1)
@@ -818,22 +834,40 @@ public class TypeConversionCodegenTest {
                 }""".formatted(
                 DotNetNameResolver.typeConverterForShape(exc1ShapeId, FROM_DAFNY),
                 DotNetNameResolver.typeConverterForShape(exc2ShapeId, FROM_DAFNY)
-        ));
-        assertEquals(expectedTokensFromDafny, actualTokensFromDafny);
+        );
+        tokenizeAndAssert(expectedFromDafny, actualFromDafny);*/
 
-        final List<ParseToken> actualTokensToDafny = Tokenizer.tokenize(converter.toDafny().toString());
-        final List<ParseToken> expectedTokensToDafny = Tokenizer.tokenize("""
+        final String actualToDafny = converter.toDafny().toString();
+        final String expectedToDafny = """
                 public static Dafny.Test.Foobar.IFoobarServiceException
-                        ToDafny_CommonError_FoobarServiceBaseException(Test.Foobar.FoobarServiceBaseException value) {
-                    if (value is Test.Foobar.Exception1)
-                        return %s((Test.Foobar.Exception1) value);
-                    if (value is Test.Foobar.Exception2)
-                        return %s((Test.Foobar.Exception2) value);
-                    throw new System.ArgumentException("Unknown exception type");
+                        ToDafny_CommonError(System.Exception value) {
+                    Dafny.Test.Foobar.FoobarServiceBaseException rtn;
+                    switch (value)
+                    {
+                        case Test.Foobar.Exception1 exception:
+                            return %s(exception);
+                        case Test.Foobar.Exception2 exception:
+                            return %s(exception);
+                        case Test.Foobar.FoobarServiceBaseException exception:
+                            rtn = new %s();
+                            rtn.message = %s(exception.Message);
+                            return rtn;
+                        default:
+                            var message = $"%s encountered an Exception of type: {value.GetType()}" +
+                                  $" with message of: {value.Message}";
+                            rtn = new %s();
+                            rtn.message = %s(message);
+                            return rtn;
+                    }
                 }""".formatted(
             DotNetNameResolver.typeConverterForShape(exc1ShapeId, TO_DAFNY),
-            DotNetNameResolver.typeConverterForShape(exc2ShapeId, TO_DAFNY)
-        ));
-        assertEquals(expectedTokensToDafny, actualTokensToDafny);
+            DotNetNameResolver.typeConverterForShape(exc2ShapeId, TO_DAFNY),
+            "Dafny.Test.Foobar.FoobarServiceBaseException", // Dafny Base Exception type
+            DotNetNameResolver.typeConverterForShape(ShapeId.from("smithy.api#String"), TO_DAFNY), // ToDafny String
+            codegen.nameResolver.serviceNameWithOutFactory(), //"FoobarService"
+            "Dafny.Test.Foobar.FoobarServiceBaseException", // Dafny Base Exception type
+            DotNetNameResolver.typeConverterForShape(ShapeId.from("smithy.api#String"), TO_DAFNY) // ToDafny String
+        );
+        tokenizeAndAssert(expectedToDafny, actualToDafny);
     }
 }
