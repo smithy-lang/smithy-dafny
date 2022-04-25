@@ -69,7 +69,12 @@ public class TypeConversionCodegenTest {
                     internal static class TypeConversion {
                         public static Test.Foobar.FoobarServiceBaseException FromDafny_CommonError_FoobarServiceBaseException
                                 (Dafny.Test.Foobar.IFoobarServiceException value) {
-                            TODO
+                            switch(value)
+                            {
+                                default:
+                                    return new Test.Foobar.FoobarServiceBaseException(
+                                        %s(value.GetMessage()));
+                            }
                         }
                         public static Dafny.Test.Foobar.IFoobarServiceException ToDafny_CommonError
                                 (System.Exception value) {
@@ -91,6 +96,7 @@ public class TypeConversionCodegenTest {
                     }
                 }
                 """.formatted(
+                DotNetNameResolver.typeConverterForShape(ShapeId.from("smithy.api#String"), FROM_DAFNY),
                 DotNetNameResolver.typeConverterForShape(ShapeId.from("smithy.api#String"), TO_DAFNY), //ToDafny_String
                 DotNetNameResolver.typeConverterForShape(ShapeId.from("smithy.api#String"), TO_DAFNY)  //ToDafny_String
         );
@@ -822,20 +828,26 @@ public class TypeConversionCodegenTest {
         assertTrue("Common exception converter must use a shape ID not in the model",
             codegen.getModel().getShape(converter.shapeId()).isEmpty());
 
-/*        final String actualFromDafny = converter.fromDafny().toString();
+        final String actualFromDafny = converter.fromDafny().toString();
         final String expectedFromDafny = """
                 public static Test.Foobar.FoobarServiceBaseException
                         FromDafny_CommonError_FoobarServiceBaseException(Dafny.Test.Foobar.IFoobarServiceException value) {
-                    if (value is Dafny.Test.Foobar.Exception1)
-                        return %s((Dafny.Test.Foobar.Exception1) value);
-                    if (value is Dafny.Test.Foobar.Exception2)
-                        return %s((Dafny.Test.Foobar.Exception2) value);
-                    throw new System.ArgumentException("Unknown exception type");
+                    switch (value)
+                    {
+                        case Dafny.Test.Foobar.Exception1 dafnyVal:
+                            return %s(dafnyVal);
+                        case Dafny.Test.Foobar.Exception2 dafnyVal:
+                            return %s(dafnyVal);
+                        default:
+                            return new Test.Foobar.FoobarServiceBaseException(
+                                %s(value.GetMessage()));
+                    }
                 }""".formatted(
                 DotNetNameResolver.typeConverterForShape(exc1ShapeId, FROM_DAFNY),
-                DotNetNameResolver.typeConverterForShape(exc2ShapeId, FROM_DAFNY)
+                DotNetNameResolver.typeConverterForShape(exc2ShapeId, FROM_DAFNY),
+                DotNetNameResolver.typeConverterForShape(ShapeId.from("smithy.api#String"), FROM_DAFNY)
         );
-        tokenizeAndAssert(expectedFromDafny, actualFromDafny);*/
+        tokenizeAndAssert(expectedFromDafny, actualFromDafny);
 
         final String actualToDafny = converter.toDafny().toString();
         final String expectedToDafny = """

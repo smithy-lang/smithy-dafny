@@ -614,13 +614,26 @@ public class TypeConversionCodegen {
         final String cSharpType = "%s.%s".formatted(nameResolver.namespaceForService(), nameResolver.classForCommonServiceException());
         final String dafnyType = nameResolver.dafnyTypeForCommonServiceError(serviceShape);
 
-        final TokenTree knownErrorsFromDafny = TokenTree.of(errorShapes.stream().map(errorShape -> {
+        final TokenTree specificExceptionsFromDafny = TokenTree.of(errorShapes.stream().map(errorShape -> {
             final ShapeId specificErrorShapeId = errorShape.getId();
-            return Token.of("if (value is %1$s) return %2$s((%1$s) value);".formatted(
+            return Token.of("case %1$s dafnyVal:\nreturn %2$s(dafnyVal);".formatted(
                     nameResolver.dafnyTypeForShape(specificErrorShapeId),
                     typeConverterForShape(specificErrorShapeId, FROM_DAFNY)
             ));
         })).lineSeparated();
+        final TokenTree handleBaseFromDafny = Token.of(
+                "default:\nreturn new %s(\n%s(value.GetMessage()));".formatted(
+                        cSharpType, typeConverterForShape(ShapeId.from("smithy.api#String"), FROM_DAFNY))
+        );
+
+        final TokenTree fromDafnySwitchCases = TokenTree.of(specificExceptionsFromDafny, handleBaseFromDafny)
+                .lineSeparated().braced();
+        final TokenTree fromDafnyBody = TokenTree.of(
+                TokenTree.of("switch(value)"), fromDafnySwitchCases).lineSeparated();
+        final TokenTree fromDafnyConverterSignature = Token.of("public static %s %s(%s value)".formatted(
+                cSharpType, typeConverterForCommonError(serviceShape, FROM_DAFNY), dafnyType));
+        final TokenTree fromDafnyConverterMethod = TokenTree.of(fromDafnyConverterSignature, fromDafnyBody.braced());
+
         final TokenTree specificExceptionsToDafny = TokenTree.of(errorShapes.stream().map(errorShape -> {
             final ShapeId specificErrorShapeId = errorShape.getId();
             return Token.of("case %1$s exception:\n return %2$s(exception);".formatted(
@@ -628,7 +641,7 @@ public class TypeConversionCodegen {
                     typeConverterForShape(specificErrorShapeId, TO_DAFNY)
             ));
         })).lineSeparated();
-        final TokenTree handleBase = Token.of(
+        final TokenTree handleBaseToDafny = Token.of(
                 "case %1$s exception:\nrtn = new %2$s();\nrtn.message = %3$s(exception.Message);\nreturn rtn;"
                 .formatted(cSharpType, nameResolver.dafnyBaseTypeForServiceError(),
                         typeConverterForShape(ShapeId.from("smithy.api#String"), TO_DAFNY)));
@@ -642,12 +655,7 @@ public class TypeConversionCodegen {
                         .formatted(anyMessage, nameResolver.dafnyBaseTypeForServiceError(),
                                 typeConverterForShape(ShapeId.from("smithy.api#String"), TO_DAFNY)));
 
-        final TokenTree fromDafnyBody = TokenTree.of(knownErrorsFromDafny, TokenTree.of("TODO")).lineSeparated();
-        final TokenTree fromDafnyConverterSignature = Token.of("public static %s %s(%s value)".formatted(
-                cSharpType, typeConverterForCommonError(serviceShape, FROM_DAFNY), dafnyType));
-        final TokenTree fromDafnyConverterMethod = TokenTree.of(fromDafnyConverterSignature, fromDafnyBody.braced());
-
-        final TokenTree toDafnySwitchCases = TokenTree.of(specificExceptionsToDafny, handleBase, handleAnyException)
+        final TokenTree toDafnySwitchCases = TokenTree.of(specificExceptionsToDafny, handleBaseToDafny, handleAnyException)
                 .lineSeparated().braced();
         final TokenTree toDafnyBody = TokenTree.of(
                 TokenTree.of("%s rtn;\nswitch (value)\n".formatted(nameResolver.dafnyBaseTypeForServiceError())),
