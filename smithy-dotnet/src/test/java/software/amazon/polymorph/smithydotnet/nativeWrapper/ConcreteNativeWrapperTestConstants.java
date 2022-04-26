@@ -23,7 +23,7 @@ class ConcreteNativeWrapperTestConstants {
                 %s,
                 Dafny.Test.Foobar.IFoobarServiceException
             >.create_Failure(
-                TypeConversion.ToDafny_CommonError_FoobarServiceBaseException(finalException)
+                TypeConversion.ToDafny_CommonError(finalException)
             );
             """; // Format: dafnyOutputType
 
@@ -34,6 +34,15 @@ class ConcreteNativeWrapperTestConstants {
                 finalException = e;
             }
             """;
+
+    static String CATCH_GENERAL =
+            """
+            catch (Exception e)
+            {
+                var message = $"{_impl}._%s threw unexpected: {e.GetType()}: \\"{e.Message}\\"";
+                finalException = new FoobarServiceBaseException(message);
+            }
+            """; // Format: method name
 
     static String DO_OUTPUT =
             """
@@ -62,6 +71,7 @@ class ConcreteNativeWrapperTestConstants {
                 }
                 %s
                 %s
+                %s
             }
             """;
 
@@ -74,6 +84,7 @@ class ConcreteNativeWrapperTestConstants {
             "Dafny.Test.Foobar.IThing", // abstract output or interface
             "ToDafny_N4_test__N6_foobar__S17_DoSomethingOutput", // to dafny output converter
             CATCH_SERVICE,
+            CATCH_GENERAL.formatted("DoSomethingWithOutput"),
             RETURN_FAILURE.formatted("Dafny.Test.Foobar.IThing")// return failure
     );
 
@@ -86,6 +97,7 @@ class ConcreteNativeWrapperTestConstants {
             "Dafny.Test.Foobar._IDoSomethingOutput",
             "ToDafny_N4_test__N6_foobar__S17_DoSomethingOutput", // to dafny output converter
             CATCH_SERVICE,
+            CATCH_GENERAL.formatted("DoSomethingWithOutput"),
             RETURN_FAILURE.formatted("Dafny.Test.Foobar._IDoSomethingOutput")// return failure
     );
 
@@ -110,8 +122,9 @@ class ConcreteNativeWrapperTestConstants {
                 }
                 %s
                 %s
+                %s
             }
-            """.formatted(CATCH_SERVICE, RETURN_FAILURE.formatted("_System._ITuple0"));
+            """.formatted(CATCH_SERVICE, CATCH_GENERAL.formatted("DoSomethingWithInput"), RETURN_FAILURE.formatted("_System._ITuple0"));
 
     static String DO =
             """
@@ -131,8 +144,9 @@ class ConcreteNativeWrapperTestConstants {
                 }
                 %s
                 %s
+                %s
             }
-            """.formatted(CATCH_SERVICE, RETURN_FAILURE.formatted("_System._ITuple0"));
+            """.formatted(CATCH_SERVICE, CATCH_GENERAL.formatted("Do"), RETURN_FAILURE.formatted("_System._ITuple0"));
 
     static String CONSTRUCTOR =
             """
