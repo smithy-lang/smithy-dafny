@@ -479,7 +479,11 @@ public class DotNetNameResolver {
      * Returns the type converter method name for the given service's common error shape and the given direction.
      */
     public static String typeConverterForCommonError(final ServiceShape serviceShape, final TypeConversionDirection direction) {
-        return String.format("%s_CommonError_%s", direction.toString(), DotNetNameResolver.classForCommonServiceException(serviceShape));
+        return switch (direction) {
+            case TO_DAFNY -> "%s_CommonError".formatted(direction.toString());
+            case FROM_DAFNY -> "%s_CommonError_%s".formatted(
+                    direction.toString(), DotNetNameResolver.classForCommonServiceException(serviceShape));
+        };
     }
 
     /**
@@ -648,6 +652,43 @@ public class DotNetNameResolver {
         return "%s._I%sError".formatted(
                 DafnyNameResolver.dafnyExternNamespaceForShapeId(serviceShape.getId()),
                 serviceShape.getContextualName(serviceShape));
+    }
+
+    /**
+     * Returns the most abstract concrete type representing errors for the given service.
+     * <p>
+     *     This will return "%s.%sBaseException", formatted with the Dafny service
+     *     namespace and service name.
+     *     It should ONLY be used by the TypeConversionCodegen.
+     * </p>
+     */
+    public static String dafnyBaseTypeForServiceError(final ServiceShape serviceShape) {
+        String serviceName = serviceNameWithOutFactory(serviceShape);
+        return "%s.%sBaseException".formatted(
+                DafnyNameResolver.dafnyExternNamespaceForShapeId(serviceShape.getId()),
+                serviceName
+        );
+    }
+
+    public String dafnyBaseTypeForServiceError() {
+        return dafnyBaseTypeForServiceError(this.serviceShape);
+    }
+
+    /**
+     * Returns the Namespace, without the Suffix "Factory" if present
+     */
+    public static String serviceNameWithOutFactory(final ServiceShape serviceShape) {
+        // TODO Currently we have this hardcoded to remove 'Factory' from service names
+        // that include it, however this should likely be controlled via a custom trait
+        String serviceName = serviceShape.getId().getName(serviceShape);
+        if (serviceName.endsWith("Factory")) {
+            serviceName = serviceName.substring(0, serviceName.lastIndexOf("Factory"));
+        }
+        return serviceName;
+    }
+
+    public String serviceNameWithOutFactory() {
+        return serviceNameWithOutFactory(serviceShape);
     }
 
     /**

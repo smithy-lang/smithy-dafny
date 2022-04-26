@@ -4,11 +4,21 @@
 package software.amazon.polymorph.smithydotnet;
 
 import org.junit.Test;
+
+import java.nio.file.Path;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.function.BiConsumer;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import software.amazon.polymorph.antlr.CSharpLexer;
 import software.amazon.polymorph.smithydotnet.TypeConversionCodegen.TypeConverter;
 import software.amazon.polymorph.traits.ClientConfigTrait;
-import software.amazon.polymorph.antlr.CSharpLexer;
 import software.amazon.polymorph.util.TestModel;
-import software.amazon.polymorph.util.Tokenizer;
 import software.amazon.polymorph.util.Tokenizer.ParseToken;
 import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.smithy.model.Model;
@@ -26,22 +36,15 @@ import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.TimestampShape;
 
-import java.nio.file.Path;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.function.BiConsumer;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static software.amazon.polymorph.smithydotnet.TypeConversionCodegen.TYPE_CONVERSION_CLASS_PATH;
 import static software.amazon.polymorph.smithydotnet.TypeConversionDirection.FROM_DAFNY;
 import static software.amazon.polymorph.smithydotnet.TypeConversionDirection.TO_DAFNY;
 import static software.amazon.polymorph.util.TestModel.SERVICE_NAMESPACE;
 import static software.amazon.polymorph.util.TestModel.SERVICE_SHAPE_ID;
+import static software.amazon.polymorph.util.Tokenizer.tokenize;
+import static software.amazon.polymorph.util.Tokenizer.tokenizeAndAssert;
 
 public class TypeConversionCodegenTest {
     private static TypeConversionCodegen setupCodegen(final BiConsumer<ServiceShape.Builder, ModelAssembler> updater) {
@@ -49,34 +52,54 @@ public class TypeConversionCodegenTest {
         return new TypeConversionCodegen(model, SERVICE_SHAPE_ID);
     }
 
-    private static List<ParseToken> generateAndTokenize(final TypeConversionCodegen codegen) {
+    private static String generate(final TypeConversionCodegen codegen) {
         final Map<Path, TokenTree> generatedCode = codegen.generate();
         assertTrue(generatedCode.containsKey(TYPE_CONVERSION_CLASS_PATH));
-        final String actualCode = Objects.requireNonNull(generatedCode.get(TYPE_CONVERSION_CLASS_PATH)).toString();
-        return Tokenizer.tokenize(actualCode);
+        return Objects.requireNonNull(generatedCode.get(TYPE_CONVERSION_CLASS_PATH)).toString();
     }
 
     @Test
     public void testGenerateEmptyModel() {
         final TypeConversionCodegen codegen = setupCodegen((_builder, _modelAssembler) -> {});
-        final List<ParseToken> actualTokens = generateAndTokenize(codegen);
-        final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
+        final String actual = generate(codegen);
+        final String expected = """
                 using System.Linq;
                 using AWS.EncryptionSDK.Core;
                 namespace Test.Foobar {
                     internal static class TypeConversion {
                         public static Test.Foobar.FoobarServiceBaseException FromDafny_CommonError_FoobarServiceBaseException
                                 (Dafny.Test.Foobar.IFoobarServiceException value) {
-                            throw new System.ArgumentException("Unknown exception type");
+                            switch(value)
+                            {
+                                default:
+                                    return new Test.Foobar.FoobarServiceBaseException(
+                                        %s(value.GetMessage()));
+                            }
                         }
-                        public static Dafny.Test.Foobar.IFoobarServiceException ToDafny_CommonError_FoobarServiceBaseException
-                                (Test.Foobar.FoobarServiceBaseException value) {
-                            throw new System.ArgumentException("Unknown exception type");
+                        public static Dafny.Test.Foobar.IFoobarServiceException ToDafny_CommonError
+                                (System.Exception value) {
+                            Dafny.Test.Foobar.FoobarServiceBaseException rtn;
+                            switch (value)
+                            {
+                                case Test.Foobar.FoobarServiceBaseException exception:
+                                    rtn = new Dafny.Test.Foobar.FoobarServiceBaseException();
+                                    rtn.message = %s(exception.Message);
+                                    return rtn;
+                                default:
+                                    var message = $"FoobarService encountered unexpected: {value.GetType()}: \\"{value.Message}\\"";
+                                    rtn = new Dafny.Test.Foobar.FoobarServiceBaseException();
+                                    rtn.message = %s(message);
+                                    return rtn;
+                            }
                         }
                     }
                 }
-                """);
-        assertEquals(expectedTokens, actualTokens);
+                """.formatted(
+                DotNetNameResolver.typeConverterForShape(ShapeId.from("smithy.api#String"), FROM_DAFNY),
+                DotNetNameResolver.typeConverterForShape(ShapeId.from("smithy.api#String"), TO_DAFNY), //ToDafny_String
+                DotNetNameResolver.typeConverterForShape(ShapeId.from("smithy.api#String"), TO_DAFNY)  //ToDafny_String
+        );
+        tokenizeAndAssert(expected, actual);
     }
 
     @Test
@@ -90,7 +113,8 @@ public class TypeConversionCodegenTest {
                         structure DoBarOutput { int: Integer }
                         """.formatted(SERVICE_NAMESPACE));
         });
-        final Set<ParseToken> actualTokens = new HashSet<>(generateAndTokenize(codegen));
+        final String actual = generate(codegen);
+        final Set<ParseToken> actualTokens = new HashSet<>(tokenize(actual));
 
         final Stream<ParseToken> expectedConverterMethods = Stream.of(
                 SERVICE_NAMESPACE + "#DoBarInput",
@@ -163,23 +187,23 @@ public class TypeConversionCodegenTest {
         final TypeConverter converter = codegen.generateBlobConverter(BlobShape.builder().id(shapeId).build());
         assertEquals(shapeId, converter.shapeId());
 
-        final List<ParseToken> actualTokensFromDafny = Tokenizer.tokenize(converter.fromDafny().toString());
+        final String actualFromDafny = converter.fromDafny().toString();
         final String fromDafnyConverterName = DotNetNameResolver.typeConverterForShape(shapeId, FROM_DAFNY);
-        final List<ParseToken> expectedTokensFromDafny = Tokenizer.tokenize("""
+        final String expectedFromDafny = """
                 public static System.IO.MemoryStream %s(Dafny.ISequence<byte> value) {
                     return new System.IO.MemoryStream(value.Elements);
                 }
-                """.formatted(fromDafnyConverterName));
-        assertEquals(expectedTokensFromDafny, actualTokensFromDafny);
+                """.formatted(fromDafnyConverterName);
+        tokenizeAndAssert(expectedFromDafny, actualFromDafny);
 
-        final List<ParseToken> actualTokensToDafny = Tokenizer.tokenize(converter.toDafny().toString());
+        final String actualToDafny = converter.toDafny().toString();
         final String toDafnyConverterName = DotNetNameResolver.typeConverterForShape(shapeId, TO_DAFNY);
-        final List<ParseToken> expectedTokensToDafny = Tokenizer.tokenize("""
+        final String expectedToDafny = """
                 public static Dafny.ISequence<byte> %s(System.IO.MemoryStream value) {
                     return Dafny.Sequence<byte>.FromArray(value.ToArray());
                 }
-                """.formatted(toDafnyConverterName));
-        assertEquals(expectedTokensToDafny, actualTokensToDafny);
+                """.formatted(toDafnyConverterName);
+        tokenizeAndAssert(expectedToDafny, actualToDafny);
     }
 
     @Test
@@ -189,17 +213,17 @@ public class TypeConversionCodegenTest {
         final TypeConverter converter = codegen.generateBooleanConverter(BooleanShape.builder().id(shapeId).build());
         assertEquals(shapeId, converter.shapeId());
 
-        final List<ParseToken> actualTokensFromDafny = Tokenizer.tokenize(converter.fromDafny().toString());
+        final String actualFromDafny = converter.fromDafny().toString();
         final String fromDafnyConverterName = DotNetNameResolver.typeConverterForShape(shapeId, FROM_DAFNY);
-        final List<ParseToken> expectedTokensFromDafny = Tokenizer.tokenize(
-                "public static bool %s(bool value) { return value; }".formatted(fromDafnyConverterName));
-        assertEquals(expectedTokensFromDafny, actualTokensFromDafny);
+        final String expectedFromDafny =
+                "public static bool %s(bool value) { return value; }".formatted(fromDafnyConverterName);
+        tokenizeAndAssert(expectedFromDafny, actualFromDafny);
 
-        final List<ParseToken> actualTokensToDafny = Tokenizer.tokenize(converter.toDafny().toString());
+        final String actualToDafny = converter.toDafny().toString();
         final String toDafnyConverterName = DotNetNameResolver.typeConverterForShape(shapeId, TO_DAFNY);
-        final List<ParseToken> expectedTokensToDafny = Tokenizer.tokenize(
-                "public static bool %s(bool value) { return value; }".formatted(toDafnyConverterName));
-        assertEquals(expectedTokensToDafny, actualTokensToDafny);
+        final String expectedToDafny =
+                "public static bool %s(bool value) { return value; }".formatted(toDafnyConverterName);
+        tokenizeAndAssert(expectedToDafny, actualToDafny);
     }
 
     @Test
@@ -209,21 +233,21 @@ public class TypeConversionCodegenTest {
         final TypeConverter converter = codegen.generateStringConverter(StringShape.builder().id(shapeId).build());
         assertEquals(shapeId, converter.shapeId());
 
-        final List<ParseToken> actualTokensFromDafny = Tokenizer.tokenize(converter.fromDafny().toString());
+        final String actualFromDafny = converter.fromDafny().toString();
         final String fromDafnyConverterName = DotNetNameResolver.typeConverterForShape(shapeId, FROM_DAFNY);
-        final List<ParseToken> expectedTokensFromDafny = Tokenizer.tokenize("""
+        final String expectedFromDafny = """
                 public static string %s(Dafny.ISequence<char> value) {
                     return new string(value.Elements);
-                }""".formatted(fromDafnyConverterName));
-        assertEquals(expectedTokensFromDafny, actualTokensFromDafny);
+                }""".formatted(fromDafnyConverterName);
+        tokenizeAndAssert(expectedFromDafny, actualFromDafny);
 
-        final List<ParseToken> actualTokensToDafny = Tokenizer.tokenize(converter.toDafny().toString());
+        final String actualToDafny = converter.toDafny().toString();
         final String toDafnyConverterName = DotNetNameResolver.typeConverterForShape(shapeId, TO_DAFNY);
-        final List<ParseToken> expectedTokensToDafny = Tokenizer.tokenize("""
+        final String expectedToDafny = """
                 public static Dafny.ISequence<char> %s(string value) {
                     return Dafny.Sequence<char>.FromString(value);
-                }""".formatted(toDafnyConverterName));
-        assertEquals(expectedTokensToDafny, actualTokensToDafny);
+                }""".formatted(toDafnyConverterName);
+        tokenizeAndAssert(expectedToDafny, actualToDafny);
     }
 
     @Test
@@ -242,9 +266,9 @@ public class TypeConversionCodegenTest {
                 codegen.getModel().expectShape(shapeId, StringShape.class));
         assertEquals(shapeId, converter.shapeId());
 
-        final List<ParseToken> actualTokensFromDafny = Tokenizer.tokenize(converter.fromDafny().toString());
+        final List<ParseToken> actualTokensFromDafny = tokenize(converter.fromDafny().toString());
         final String fromDafnyConverterName = DotNetNameResolver.typeConverterForShape(shapeId, FROM_DAFNY);
-        final List<ParseToken> expectedTokensFromDafny = Tokenizer.tokenize("""
+        final List<ParseToken> expectedTokensFromDafny = tokenize("""
                 public static Test.Foobar.AnEnum %s(Dafny.Test.Foobar._IAnEnum value) {
                     if (value.is_VERSION__A) return Test.Foobar.AnEnum.VERSION_A;
                     if (value.is_VERSION__B) return Test.Foobar.AnEnum.VERSION_B;
@@ -252,9 +276,9 @@ public class TypeConversionCodegenTest {
                 }""".formatted(fromDafnyConverterName));
         assertEquals(expectedTokensFromDafny, actualTokensFromDafny);
 
-        final List<ParseToken> actualTokensToDafny = Tokenizer.tokenize(converter.toDafny().toString());
+        final List<ParseToken> actualTokensToDafny = tokenize(converter.toDafny().toString());
         final String toDafnyConverterName = DotNetNameResolver.typeConverterForShape(shapeId, TO_DAFNY);
-        final List<ParseToken> expectedTokensToDafny = Tokenizer.tokenize("""
+        final List<ParseToken> expectedTokensToDafny = tokenize("""
                 public static Dafny.Test.Foobar._IAnEnum %s(Test.Foobar.AnEnum value) {
                     if (Test.Foobar.AnEnum.VERSION_A.Equals(value)) return Dafny.Test.Foobar.AnEnum.create_VERSION__A();
                     if (Test.Foobar.AnEnum.VERSION_B.Equals(value)) return Dafny.Test.Foobar.AnEnum.create_VERSION__B();
@@ -282,18 +306,18 @@ public class TypeConversionCodegenTest {
                 codegen.getModel().expectShape(shapeId, StringShape.class));
         assertEquals(shapeId, converter.shapeId());
 
-        final List<ParseToken> actualTokensFromDafny = Tokenizer.tokenize(converter.fromDafny().toString());
+        final List<ParseToken> actualTokensFromDafny = tokenize(converter.fromDafny().toString());
         final String fromDafnyConverterName = DotNetNameResolver.typeConverterForShape(shapeId, FROM_DAFNY);
-        final List<ParseToken> expectedTokensFromDafny = Tokenizer.tokenize("""
+        final List<ParseToken> expectedTokensFromDafny = tokenize("""
                 public static Test.Foobar.AnEnum %s(Dafny.Test.Foobar._IAnEnum value) {
                     if (value.is_VERSION__A) return Test.Foobar.AnEnum.VERSION_A;
                     throw new System.ArgumentException("Invalid Test.Foobar.AnEnum value");
                 }""".formatted(fromDafnyConverterName));
         assertEquals(expectedTokensFromDafny, actualTokensFromDafny);
 
-        final List<ParseToken> actualTokensToDafny = Tokenizer.tokenize(converter.toDafny().toString());
+        final List<ParseToken> actualTokensToDafny = tokenize(converter.toDafny().toString());
         final String toDafnyConverterName = DotNetNameResolver.typeConverterForShape(shapeId, TO_DAFNY);
-        final List<ParseToken> expectedTokensToDafny = Tokenizer.tokenize("""
+        final List<ParseToken> expectedTokensToDafny = tokenize("""
                 public static Dafny.Test.Foobar._IAnEnum %s(Test.Foobar.AnEnum value) {
                     if (Test.Foobar.AnEnum.VERSION_A.Equals(value)) return Dafny.Test.Foobar.AnEnum.create();
                     throw new System.ArgumentException("Invalid Test.Foobar.AnEnum value");
@@ -315,18 +339,18 @@ public class TypeConversionCodegenTest {
                 codegen.getModel().expectShape(shapeId, StringShape.class));
         assertEquals(shapeId, converter.shapeId());
 
-        final List<ParseToken> actualTokensFromDafny = Tokenizer.tokenize(converter.fromDafny().toString());
+        final List<ParseToken> actualTokensFromDafny = tokenize(converter.fromDafny().toString());
         final String fromDafnyConverterName = DotNetNameResolver.typeConverterForShape(shapeId, FROM_DAFNY);
-        final List<ParseToken> expectedTokensFromDafny = Tokenizer.tokenize("""
+        final List<ParseToken> expectedTokensFromDafny = tokenize("""
                 public static string %s(Dafny.ISequence<byte> value) {
                     System.Text.UTF8Encoding utf8 = new System.Text.UTF8Encoding(false, true);
                     return utf8.GetString(value.Elements);
                 }""".formatted(fromDafnyConverterName));
         assertEquals(expectedTokensFromDafny, actualTokensFromDafny);
 
-        final List<ParseToken> actualTokensToDafny = Tokenizer.tokenize(converter.toDafny().toString());
+        final List<ParseToken> actualTokensToDafny = tokenize(converter.toDafny().toString());
         final String toDafnyConverterName = DotNetNameResolver.typeConverterForShape(shapeId, TO_DAFNY);
-        final List<ParseToken> expectedTokensToDafny = Tokenizer.tokenize("""
+        final List<ParseToken> expectedTokensToDafny = tokenize("""
                 public static Dafny.ISequence<byte> %s(string value) {
                     System.Text.UTF8Encoding utf8 = new System.Text.UTF8Encoding(false, true);
                     return Dafny.Sequence<byte>.FromArray(utf8.GetBytes(value));
@@ -341,15 +365,15 @@ public class TypeConversionCodegenTest {
         final TypeConverter converter = codegen.generateIntegerConverter(IntegerShape.builder().id(shapeId).build());
         assertEquals(shapeId, converter.shapeId());
 
-        final List<ParseToken> actualTokensFromDafny = Tokenizer.tokenize(converter.fromDafny().toString());
+        final List<ParseToken> actualTokensFromDafny = tokenize(converter.fromDafny().toString());
         final String fromDafnyConverterName = DotNetNameResolver.typeConverterForShape(shapeId, FROM_DAFNY);
-        final List<ParseToken> expectedTokensFromDafny = Tokenizer.tokenize(
+        final List<ParseToken> expectedTokensFromDafny = tokenize(
                 "public static int %s(int value) { return value; }".formatted(fromDafnyConverterName));
         assertEquals(expectedTokensFromDafny, actualTokensFromDafny);
 
-        final List<ParseToken> actualTokensToDafny = Tokenizer.tokenize(converter.toDafny().toString());
+        final List<ParseToken> actualTokensToDafny = tokenize(converter.toDafny().toString());
         final String toDafnyConverterName = DotNetNameResolver.typeConverterForShape(shapeId, TO_DAFNY);
-        final List<ParseToken> expectedTokensToDafny = Tokenizer.tokenize(
+        final List<ParseToken> expectedTokensToDafny = tokenize(
                 "public static int %s(int value) { return value; }".formatted(toDafnyConverterName));
         assertEquals(expectedTokensToDafny, actualTokensToDafny);
     }
@@ -361,15 +385,15 @@ public class TypeConversionCodegenTest {
         final TypeConverter converter = codegen.generateLongConverter(LongShape.builder().id(shapeId).build());
         assertEquals(shapeId, converter.shapeId());
 
-        final List<ParseToken> actualTokensFromDafny = Tokenizer.tokenize(converter.fromDafny().toString());
+        final List<ParseToken> actualTokensFromDafny = tokenize(converter.fromDafny().toString());
         final String fromDafnyConverterName = DotNetNameResolver.typeConverterForShape(shapeId, FROM_DAFNY);
-        final List<ParseToken> expectedTokensFromDafny = Tokenizer.tokenize(
+        final List<ParseToken> expectedTokensFromDafny = tokenize(
                 "public static long %s(long value) { return value; }".formatted(fromDafnyConverterName));
         assertEquals(expectedTokensFromDafny, actualTokensFromDafny);
 
-        final List<ParseToken> actualTokensToDafny = Tokenizer.tokenize(converter.toDafny().toString());
+        final List<ParseToken> actualTokensToDafny = tokenize(converter.toDafny().toString());
         final String toDafnyConverterName = DotNetNameResolver.typeConverterForShape(shapeId, TO_DAFNY);
-        final List<ParseToken> expectedTokensToDafny = Tokenizer.tokenize(
+        final List<ParseToken> expectedTokensToDafny = tokenize(
                 "public static long %s(long value) { return value; }".formatted(toDafnyConverterName));
         assertEquals(expectedTokensToDafny, actualTokensToDafny);
     }
@@ -382,9 +406,9 @@ public class TypeConversionCodegenTest {
                 TimestampShape.builder().id(shapeId).build());
         assertEquals(shapeId, converter.shapeId());
 
-        final List<ParseToken> actualTokensFromDafny = Tokenizer.tokenize(converter.fromDafny().toString());
+        final List<ParseToken> actualTokensFromDafny = tokenize(converter.fromDafny().toString());
         final String fromDafnyConverterName = DotNetNameResolver.typeConverterForShape(shapeId, FROM_DAFNY);
-        final List<ParseToken> expectedTokensFromDafny = Tokenizer.tokenize("""
+        final List<ParseToken> expectedTokensFromDafny = tokenize("""
                 public static System.DateTime %s(Dafny.ISequence<char> value) {
                     System.Globalization.CultureInfo culture = new System.Globalization.CultureInfo("");
                     string timestampString = new string(value.Elements);
@@ -393,9 +417,9 @@ public class TypeConversionCodegenTest {
                 """.formatted(fromDafnyConverterName));
         assertEquals(expectedTokensFromDafny, actualTokensFromDafny);
 
-        final List<ParseToken> actualTokensToDafny = Tokenizer.tokenize(converter.toDafny().toString());
+        final List<ParseToken> actualTokensToDafny = tokenize(converter.toDafny().toString());
         final String toDafnyConverterName = DotNetNameResolver.typeConverterForShape(shapeId, TO_DAFNY);
-        final List<ParseToken> expectedTokensToDafny = Tokenizer.tokenize("""
+        final List<ParseToken> expectedTokensToDafny = tokenize("""
                 public static Dafny.ISequence<char> %s(System.DateTime value) {
                     System.Globalization.CultureInfo culture = new System.Globalization.CultureInfo("");
                     string timestampString = value.ToString("s", culture);
@@ -420,19 +444,19 @@ public class TypeConversionCodegenTest {
                 codegen.getModel().expectShape(shapeId, ListShape.class));
         assertEquals(shapeId, converter.shapeId());
 
-        final List<ParseToken> actualTokensFromDafny = Tokenizer.tokenize(converter.fromDafny().toString());
+        final List<ParseToken> actualTokensFromDafny = tokenize(converter.fromDafny().toString());
         final String listFromDafnyConverterName = DotNetNameResolver.typeConverterForShape(shapeId, FROM_DAFNY);
         final String intFromDafnyConverterName = DotNetNameResolver.typeConverterForShape(memberShapeId, FROM_DAFNY);
-        final List<ParseToken> expectedTokensFromDafny = Tokenizer.tokenize("""
+        final List<ParseToken> expectedTokensFromDafny = tokenize("""
                 public static System.Collections.Generic.List<int> %s(Dafny.ISequence<int> value) {
                     return new System.Collections.Generic.List<int>(value.Elements.Select(%s));
                 }""".formatted(listFromDafnyConverterName, intFromDafnyConverterName));
         assertEquals(expectedTokensFromDafny, actualTokensFromDafny);
 
-        final List<ParseToken> actualTokensToDafny = Tokenizer.tokenize(converter.toDafny().toString());
+        final List<ParseToken> actualTokensToDafny = tokenize(converter.toDafny().toString());
         final String listToDafnyConverterName = DotNetNameResolver.typeConverterForShape(shapeId, TO_DAFNY);
         final String intToDafnyConverterName = DotNetNameResolver.typeConverterForShape(memberShapeId, TO_DAFNY);
-        final List<ParseToken> expectedTokensToDafny = Tokenizer.tokenize("""
+        final List<ParseToken> expectedTokensToDafny = tokenize("""
                 public static Dafny.ISequence<int> %s(System.Collections.Generic.List<int> value) {
                     return Dafny.Sequence<int>.FromArray(value.Select(%s).ToArray());
                 }""".formatted(listToDafnyConverterName, intToDafnyConverterName));
@@ -456,22 +480,22 @@ public class TypeConversionCodegenTest {
                 codegen.getModel().expectShape(shapeId, MapShape.class));
         assertEquals(shapeId, converter.shapeId());
 
-        final List<ParseToken> actualTokensFromDafny = Tokenizer.tokenize(converter.fromDafny().toString());
+        final List<ParseToken> actualTokensFromDafny = tokenize(converter.fromDafny().toString());
         final String mapFromDafnyConverterName = DotNetNameResolver.typeConverterForShape(shapeId, FROM_DAFNY);
         final String keyFromDafnyConverterName = DotNetNameResolver.typeConverterForShape(keyMemberId, FROM_DAFNY);
         final String valueFromDafnyConverterName = DotNetNameResolver.typeConverterForShape(valueMemberId, FROM_DAFNY);
-        final List<ParseToken> expectedTokensFromDafny = Tokenizer.tokenize("""
+        final List<ParseToken> expectedTokensFromDafny = tokenize("""
                 public static System.Collections.Generic.Dictionary<string, bool> %s(
                         Dafny.IMap<Dafny.ISequence<char>, bool> value) {
                     return value.ItemEnumerable.ToDictionary(pair => %s(pair.Car), pair => %s(pair.Cdr));
                 }""".formatted(mapFromDafnyConverterName, keyFromDafnyConverterName, valueFromDafnyConverterName));
         assertEquals(expectedTokensFromDafny, actualTokensFromDafny);
 
-        final List<ParseToken> actualTokensToDafny = Tokenizer.tokenize(converter.toDafny().toString());
+        final List<ParseToken> actualTokensToDafny = tokenize(converter.toDafny().toString());
         final String mapToDafnyConverterName = DotNetNameResolver.typeConverterForShape(shapeId, TO_DAFNY);
         final String keyToDafnyConverterName = DotNetNameResolver.typeConverterForShape(keyMemberId, TO_DAFNY);
         final String valueToDafnyConverterName = DotNetNameResolver.typeConverterForShape(valueMemberId, TO_DAFNY);
-        final List<ParseToken> expectedTokensToDafny = Tokenizer.tokenize("""
+        final List<ParseToken> expectedTokensToDafny = tokenize("""
                 public static Dafny.IMap<Dafny.ISequence<char>, bool> %s(
                         System.Collections.Generic.Dictionary<string, bool> value) {
                     return Dafny.Map<Dafny.ISequence<char>, bool>.FromCollection(
@@ -510,14 +534,14 @@ public class TypeConversionCodegenTest {
                 codegen.getModel().expectShape(shapeId, StructureShape.class));
         assertEquals(shapeId, converter.shapeId());
 
-        final List<ParseToken> actualTokensFromDafny = Tokenizer.tokenize(converter.fromDafny().toString());
+        final List<ParseToken> actualTokensFromDafny = tokenize(converter.fromDafny().toString());
         final String structureFromDafnyConverterName = DotNetNameResolver.typeConverterForShape(shapeId, FROM_DAFNY);
         final String intFromDafnyConverterName = DotNetNameResolver.typeConverterForShape(intMemberId, FROM_DAFNY);
         final String boolFromDafnyConverterName = DotNetNameResolver.typeConverterForShape(boolMemberId, FROM_DAFNY);
         final String stringFromDafnyConverterName = DotNetNameResolver.typeConverterForShape(stringMemberId, FROM_DAFNY);
         final String refFromDafnyConverterName = DotNetNameResolver
             .typeConverterForShape(refMemberId, FROM_DAFNY);
-        final List<ParseToken> expectedTokensFromDafny = Tokenizer.tokenize("""
+        final List<ParseToken> expectedTokensFromDafny = tokenize("""
                 public static Test.Foobar.IntAndBool %s(Dafny.Test.Foobar._IIntAndBool value) {
                     Dafny.Test.Foobar.IntAndBool concrete = (Dafny.Test.Foobar.IntAndBool)value;
                     Test.Foobar.IntAndBool converted = new Test.Foobar.IntAndBool();
@@ -534,14 +558,14 @@ public class TypeConversionCodegenTest {
                         refFromDafnyConverterName));
         assertEquals(expectedTokensFromDafny, actualTokensFromDafny);
 
-        final List<ParseToken> actualTokensToDafny = Tokenizer.tokenize(converter.toDafny().toString());
+        final List<ParseToken> actualTokensToDafny = tokenize(converter.toDafny().toString());
         final String structureToDafnyConverterName = DotNetNameResolver.typeConverterForShape(shapeId, TO_DAFNY);
         final String intToDafnyConverterName = DotNetNameResolver.typeConverterForShape(intMemberId, TO_DAFNY);
         final String boolToDafnyConverterName = DotNetNameResolver.typeConverterForShape(boolMemberId, TO_DAFNY);
         final String stringToDafnyConverterName = DotNetNameResolver.typeConverterForShape(stringMemberId, TO_DAFNY);
         final String refToDafnyConverterName = DotNetNameResolver
                 .typeConverterForShape(refMemberId, TO_DAFNY);
-        final List<ParseToken> expectedTokensToDafny = Tokenizer.tokenize("""
+        final List<ParseToken> expectedTokensToDafny = tokenize("""
                 public static Dafny.Test.Foobar._IIntAndBool %s(Test.Foobar.IntAndBool value) {
                     int? var_someInt = value.IsSetSomeInt() ? value.SomeInt : (int?) null;
                     string var_someString = value.IsSetSomeString() ? value.SomeString : (string) null;
@@ -576,17 +600,17 @@ public class TypeConversionCodegenTest {
                 codegen.getModel().expectShape(shapeId, StructureShape.class));
         assertEquals(shapeId, converter.shapeId());
 
-        final List<ParseToken> actualTokensFromDafny = Tokenizer.tokenize(converter.fromDafny().toString());
+        final List<ParseToken> actualTokensFromDafny = tokenize(converter.fromDafny().toString());
         final String structureFromDafnyConverterName = DotNetNameResolver.typeConverterForShape(shapeId, FROM_DAFNY);
-        final List<ParseToken> expectedTokensFromDafny = Tokenizer.tokenize("""
+        final List<ParseToken> expectedTokensFromDafny = tokenize("""
                 public static Test.Foobar.IThing %s(Dafny.Test.Foobar.IThing value) {
                     return new Thing(value);
                 }""".formatted(structureFromDafnyConverterName));
         assertEquals(expectedTokensFromDafny, actualTokensFromDafny);
 
-        final List<ParseToken> actualTokensToDafny = Tokenizer.tokenize(converter.toDafny().toString());
+        final List<ParseToken> actualTokensToDafny = tokenize(converter.toDafny().toString());
         final String structureToDafnyConverterName = DotNetNameResolver.typeConverterForShape(shapeId, TO_DAFNY);
-        final List<ParseToken> expectedTokensToDafny = Tokenizer.tokenize("""
+        final List<ParseToken> expectedTokensToDafny = tokenize("""
                 public static Dafny.Test.Foobar.IThing %s(Test.Foobar.IThing value) {
                     if (value is Thing valueWithImpl) {
                         return valueWithImpl._impl;
@@ -667,19 +691,19 @@ public class TypeConversionCodegenTest {
                 codegen.getModel().expectShape(shapeId, StructureShape.class));
         assertEquals(shapeId, converter.shapeId());
 
-        final List<ParseToken> actualTokensFromDafny = Tokenizer.tokenize(converter.fromDafny().toString());
+        final List<ParseToken> actualTokensFromDafny = tokenize(converter.fromDafny().toString());
         final String structureFromDafnyConverterName = DotNetNameResolver.typeConverterForShape(shapeId, FROM_DAFNY);
         final String memberFromDafnyConverterName = DotNetNameResolver.typeConverterForShape(memberShapeId, FROM_DAFNY);
-        final List<ParseToken> expectedTokensFromDafny = Tokenizer.tokenize("""
+        final List<ParseToken> expectedTokensFromDafny = tokenize("""
                 public static Test.Foobar.IThing %s(Dafny.Test.Foobar.IThing value) {
                     return %s(value);
                 }""".formatted(structureFromDafnyConverterName, memberFromDafnyConverterName));
         assertEquals(expectedTokensFromDafny, actualTokensFromDafny);
 
-        final List<ParseToken> actualTokensToDafny = Tokenizer.tokenize(converter.toDafny().toString());
+        final List<ParseToken> actualTokensToDafny = tokenize(converter.toDafny().toString());
         final String structureToDafnyConverterName = DotNetNameResolver.typeConverterForShape(shapeId, TO_DAFNY);
         final String memberToDafnyConverterName = DotNetNameResolver.typeConverterForShape(memberShapeId, TO_DAFNY);
-        final List<ParseToken> expectedTokensToDafny = Tokenizer.tokenize("""
+        final List<ParseToken> expectedTokensToDafny = tokenize("""
                 public static Dafny.Test.Foobar.IThing %s(Test.Foobar.IThing value) {
                     return %s(value);
                 }""".formatted(structureToDafnyConverterName, memberToDafnyConverterName));
@@ -703,19 +727,19 @@ public class TypeConversionCodegenTest {
                 codegen.getModel().expectShape(memberShapeId, MemberShape.class));
         assertEquals(memberShapeId, converter.shapeId());
 
-        final List<ParseToken> actualTokensFromDafny = Tokenizer.tokenize(converter.fromDafny().toString());
+        final List<ParseToken> actualTokensFromDafny = tokenize(converter.fromDafny().toString());
         final String memberFromDafnyConverterName = DotNetNameResolver.typeConverterForShape(memberShapeId, FROM_DAFNY);
         final String targetFromDafnyConverterName = DotNetNameResolver.typeConverterForShape(targetShapeId, FROM_DAFNY);
-        final List<ParseToken> expectedTokensFromDafny = Tokenizer.tokenize("""
+        final List<ParseToken> expectedTokensFromDafny = tokenize("""
                 public static int %s(int value) {
                     return %s(value);
                 }""".formatted(memberFromDafnyConverterName, targetFromDafnyConverterName));
         assertEquals(expectedTokensFromDafny, actualTokensFromDafny);
 
-        final List<ParseToken> actualTokensToDafny = Tokenizer.tokenize(converter.toDafny().toString());
+        final List<ParseToken> actualTokensToDafny = tokenize(converter.toDafny().toString());
         final String memberToDafnyConverterName = DotNetNameResolver.typeConverterForShape(memberShapeId, TO_DAFNY);
         final String targetToDafnyConverterName = DotNetNameResolver.typeConverterForShape(targetShapeId, TO_DAFNY);
-        final List<ParseToken> expectedTokensToDafny = Tokenizer.tokenize("""
+        final List<ParseToken> expectedTokensToDafny = tokenize("""
                 public static int %s(int value) {
                     return %s(value);
                 }""".formatted(memberToDafnyConverterName, targetToDafnyConverterName));
@@ -738,19 +762,19 @@ public class TypeConversionCodegenTest {
                 codegen.getModel().expectShape(memberShapeId, MemberShape.class));
         assertEquals(memberShapeId, converter.shapeId());
 
-        final List<ParseToken> actualTokensFromDafny = Tokenizer.tokenize(converter.fromDafny().toString());
+        final List<ParseToken> actualTokensFromDafny = tokenize(converter.fromDafny().toString());
         final String memberFromDafnyConverterName = DotNetNameResolver.typeConverterForShape(memberShapeId, FROM_DAFNY);
         final String targetFromDafnyConverterName = DotNetNameResolver.typeConverterForShape(targetShapeId, FROM_DAFNY);
-        final List<ParseToken> expectedTokensFromDafny = Tokenizer.tokenize("""
+        final List<ParseToken> expectedTokensFromDafny = tokenize("""
                 public static int? %s(Wrappers_Compile._IOption<int> value) {
                     return value.is_None ? (int?) null : %s(value.Extract());
                 }""".formatted(memberFromDafnyConverterName, targetFromDafnyConverterName));
         assertEquals(expectedTokensFromDafny, actualTokensFromDafny);
 
-        final List<ParseToken> actualTokensToDafny = Tokenizer.tokenize(converter.toDafny().toString());
+        final List<ParseToken> actualTokensToDafny = tokenize(converter.toDafny().toString());
         final String memberToDafnyConverterName = DotNetNameResolver.typeConverterForShape(memberShapeId, TO_DAFNY);
         final String targetToDafnyConverterName = DotNetNameResolver.typeConverterForShape(targetShapeId, TO_DAFNY);
-        final List<ParseToken> expectedTokensToDafny = Tokenizer.tokenize("""
+        final List<ParseToken> expectedTokensToDafny = tokenize("""
                 public static Wrappers_Compile._IOption<int> %s(int? value) {
                     return value == null
                         ? Wrappers_Compile.Option<int>.create_None()
@@ -779,19 +803,19 @@ public class TypeConversionCodegenTest {
                 codegen.getModel().expectShape(memberShapeId, MemberShape.class));
         assertEquals(memberShapeId, converter.shapeId());
 
-        final List<ParseToken> actualTokensFromDafny = Tokenizer.tokenize(converter.fromDafny().toString());
+        final List<ParseToken> actualTokensFromDafny = tokenize(converter.fromDafny().toString());
         final String memberFromDafnyConverterName = DotNetNameResolver.typeConverterForShape(memberShapeId, FROM_DAFNY);
         final String targetFromDafnyConverterName = DotNetNameResolver.typeConverterForShape(targetShapeId, FROM_DAFNY);
-        final List<ParseToken> expectedTokensFromDafny = Tokenizer.tokenize("""
+        final List<ParseToken> expectedTokensFromDafny = tokenize("""
                 public static Test.Foobar.IThing %s(Wrappers_Compile._IOption<Dafny.Test.Foobar.IThing> value) {
                     return value.is_None ? (Test.Foobar.IThing) null : %s(value.Extract());
                 }""".formatted(memberFromDafnyConverterName, targetFromDafnyConverterName));
         assertEquals(expectedTokensFromDafny, actualTokensFromDafny);
 
-        final List<ParseToken> actualTokensToDafny = Tokenizer.tokenize(converter.toDafny().toString());
+        final List<ParseToken> actualTokensToDafny = tokenize(converter.toDafny().toString());
         final String memberToDafnyConverterName = DotNetNameResolver.typeConverterForShape(memberShapeId, TO_DAFNY);
         final String targetToDafnyConverterName = DotNetNameResolver.typeConverterForShape(targetShapeId, TO_DAFNY);
-        final List<ParseToken> expectedTokensToDafny = Tokenizer.tokenize("""
+        final List<ParseToken> expectedTokensToDafny = tokenize("""
                 public static Wrappers_Compile._IOption<Dafny.Test.Foobar.IThing> %s(Test.Foobar.IThing value) {
                     return value == null
                         ? Wrappers_Compile.Option<Dafny.Test.Foobar.IThing>.create_None()
@@ -821,15 +845,15 @@ public class TypeConversionCodegenTest {
         final String errorFromDafnyConverterName = DotNetNameResolver.typeConverterForShape(errorShapeId, FROM_DAFNY);
         final String errorToDafnyConverterName = DotNetNameResolver.typeConverterForShape(errorShapeId, TO_DAFNY);
 
-        final List<ParseToken> actualTokensFromDafny = Tokenizer.tokenize(converter.fromDafny().toString());
-        final List<ParseToken> expectedTokensFromDafny = Tokenizer.tokenize("""
+        final List<ParseToken> actualTokensFromDafny = tokenize(converter.fromDafny().toString());
+        final List<ParseToken> expectedTokensFromDafny = tokenize("""
                 public static Test.Foobar.UnfortunateError %s(Dafny.Test.Foobar.UnfortunateError value) {
                     return new Test.Foobar.UnfortunateError(%s(value.message));
                 }""".formatted(errorFromDafnyConverterName, messageFromDafnyConverterName));
         assertEquals(expectedTokensFromDafny, actualTokensFromDafny);
 
-        final List<ParseToken> actualTokensToDafny = Tokenizer.tokenize(converter.toDafny().toString());
-        final List<ParseToken> expectedTokensToDafny = Tokenizer.tokenize("""
+        final List<ParseToken> actualTokensToDafny = tokenize(converter.toDafny().toString());
+        final List<ParseToken> expectedTokensToDafny = tokenize("""
                 public static Dafny.Test.Foobar.UnfortunateError %s(Test.Foobar.UnfortunateError value) {
                     Dafny.Test.Foobar.UnfortunateError converted = new Dafny.Test.Foobar.UnfortunateError();
                     converted.message = %s(value.Message);
@@ -854,34 +878,57 @@ public class TypeConversionCodegenTest {
         assertTrue("Common exception converter must use a shape ID not in the model",
             codegen.getModel().getShape(converter.shapeId()).isEmpty());
 
-        final List<ParseToken> actualTokensFromDafny = Tokenizer.tokenize(converter.fromDafny().toString());
-        final List<ParseToken> expectedTokensFromDafny = Tokenizer.tokenize("""
+        final String actualFromDafny = converter.fromDafny().toString();
+        final String expectedFromDafny = """
                 public static Test.Foobar.FoobarServiceBaseException
                         FromDafny_CommonError_FoobarServiceBaseException(Dafny.Test.Foobar.IFoobarServiceException value) {
-                    if (value is Dafny.Test.Foobar.Exception1)
-                        return %s((Dafny.Test.Foobar.Exception1) value);
-                    if (value is Dafny.Test.Foobar.Exception2)
-                        return %s((Dafny.Test.Foobar.Exception2) value);
-                    throw new System.ArgumentException("Unknown exception type");
+                    switch (value)
+                    {
+                        case Dafny.Test.Foobar.Exception1 dafnyVal:
+                            return %s(dafnyVal);
+                        case Dafny.Test.Foobar.Exception2 dafnyVal:
+                            return %s(dafnyVal);
+                        default:
+                            return new Test.Foobar.FoobarServiceBaseException(
+                                %s(value.GetMessage()));
+                    }
                 }""".formatted(
                 DotNetNameResolver.typeConverterForShape(exc1ShapeId, FROM_DAFNY),
-                DotNetNameResolver.typeConverterForShape(exc2ShapeId, FROM_DAFNY)
-        ));
-        assertEquals(expectedTokensFromDafny, actualTokensFromDafny);
+                DotNetNameResolver.typeConverterForShape(exc2ShapeId, FROM_DAFNY),
+                DotNetNameResolver.typeConverterForShape(ShapeId.from("smithy.api#String"), FROM_DAFNY)
+        );
+        tokenizeAndAssert(expectedFromDafny, actualFromDafny);
 
-        final List<ParseToken> actualTokensToDafny = Tokenizer.tokenize(converter.toDafny().toString());
-        final List<ParseToken> expectedTokensToDafny = Tokenizer.tokenize("""
+        final String actualToDafny = converter.toDafny().toString();
+        final String expectedToDafny = """
                 public static Dafny.Test.Foobar.IFoobarServiceException
-                        ToDafny_CommonError_FoobarServiceBaseException(Test.Foobar.FoobarServiceBaseException value) {
-                    if (value is Test.Foobar.Exception1)
-                        return %s((Test.Foobar.Exception1) value);
-                    if (value is Test.Foobar.Exception2)
-                        return %s((Test.Foobar.Exception2) value);
-                    throw new System.ArgumentException("Unknown exception type");
+                        ToDafny_CommonError(System.Exception value) {
+                    Dafny.Test.Foobar.FoobarServiceBaseException rtn;
+                    switch (value)
+                    {
+                        case Test.Foobar.Exception1 exception:
+                            return %s(exception);
+                        case Test.Foobar.Exception2 exception:
+                            return %s(exception);
+                        case Test.Foobar.FoobarServiceBaseException exception:
+                            rtn = new %s();
+                            rtn.message = %s(exception.Message);
+                            return rtn;
+                        default:
+                            var message = $"%s encountered unexpected: {value.GetType()}: \\"{value.Message}\\"";
+                            rtn = new %s();
+                            rtn.message = %s(message);
+                            return rtn;
+                    }
                 }""".formatted(
             DotNetNameResolver.typeConverterForShape(exc1ShapeId, TO_DAFNY),
-            DotNetNameResolver.typeConverterForShape(exc2ShapeId, TO_DAFNY)
-        ));
-        assertEquals(expectedTokensToDafny, actualTokensToDafny);
+            DotNetNameResolver.typeConverterForShape(exc2ShapeId, TO_DAFNY),
+            "Dafny.Test.Foobar.FoobarServiceBaseException", // Dafny Base Exception type
+            DotNetNameResolver.typeConverterForShape(ShapeId.from("smithy.api#String"), TO_DAFNY), // ToDafny String
+            codegen.nameResolver.serviceNameWithOutFactory(), //"FoobarService"
+            "Dafny.Test.Foobar.FoobarServiceBaseException", // Dafny Base Exception type
+            DotNetNameResolver.typeConverterForShape(ShapeId.from("smithy.api#String"), TO_DAFNY) // ToDafny String
+        );
+        tokenizeAndAssert(expectedToDafny, actualToDafny);
     }
 }
