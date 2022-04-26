@@ -638,7 +638,6 @@ public class TypeConversionCodegenTest {
                 codegen.getModel().expectShape(shapeId, StructureShape.class));
         assertEquals(shapeId, converter.shapeId());
         final String actualFromDafny = converter.fromDafny().toString();
-        final List<ParseToken> actualTokensFromDafny = Tokenizer.tokenize(actualFromDafny);
         final String structureFromDafnyConverterName = DotNetNameResolver.typeConverterForShape(shapeId, FROM_DAFNY);
         final String expectedFromDafny = """
                 public static Test.Foobar.IThing %s(Dafny.Test.Foobar.IThing value) {
@@ -646,11 +645,9 @@ public class TypeConversionCodegenTest {
                     return new Thing(value);
                 }
                 """.formatted(structureFromDafnyConverterName);
-        final List<ParseToken> expectedTokensFromDafny = Tokenizer.tokenize(expectedFromDafny);
-        assertEquals(expectedTokensFromDafny, actualTokensFromDafny);
+        tokenizeAndAssert(expectedFromDafny, actualFromDafny);
 
         final String actualToDafny = converter.toDafny().toString();
-        final List<ParseToken> actualTokensToDafny = Tokenizer.tokenize(actualToDafny);
         final String structureToDafnyConverterName = DotNetNameResolver.typeConverterForShape(shapeId, TO_DAFNY);
         final String expectedToDafny = """
                 public static Dafny.Test.Foobar.IThing %s(Test.Foobar.IThing value) {
@@ -668,8 +665,7 @@ public class TypeConversionCodegenTest {
                                 $"{value} does not inherit from {typeof(ThingBase)} or {typeof(Thing)}.");
                     }
                 }""".formatted(structureToDafnyConverterName);
-        final List<ParseToken> expectedTokensToDafny = Tokenizer.tokenize(expectedToDafny);
-        assertEquals(expectedTokensToDafny, actualTokensToDafny);
+        tokenizeAndAssert(expectedToDafny, actualToDafny);
     }
 
     @Test
