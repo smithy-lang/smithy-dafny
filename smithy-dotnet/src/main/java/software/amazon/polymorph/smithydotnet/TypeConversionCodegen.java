@@ -607,26 +607,72 @@ public class TypeConversionCodegen {
         return buildConverterFromMethodBodies(stringShape, fromDafnyBody, toDafnyBody);
     }
 
+    /**
+     * Generates Converters From/To Dafny/dotnet for Exceptions.
+     * <p>
+     *     In Polymorph, all of a Service's Exceptions descend from a root Service Exception.<br>
+     *     On the C# side, this is represented by <code>ServiceBaseException</code>,
+     *     which extends from <code>System.Exception</code>.<br>
+     *     On the Dafny side, this is represented by <code>IServiceException</code>,
+     *     which is a <code>trait</code>.<br>
+     *
+     *     Specific Exceptions, which come from the Smithy Model, extend these Exception roots
+     *     and are modeled in both C# and Dafny explicitly.
+     *     Polymorph generates converters for these specific, concrete, exceptions;
+     *     these converters are utilized by this general converter.<br>
+     *
+     *     There are two special cases:<br>
+     *
+     *     1. Exceptions that extend the root exception but that are not in the Smithy Model.<br>
+     *
+     *     2. C# Exceptions that extend <code>System.Exception</code>.<br>
+     *
+     *     An Example of (1): a Customer implemented Keyring returns a Customer created Exception that extends form the root.<br>
+     *
+     *     An Example of (2): During execution, a C# interrupt exception is thrown.<br>
+     *
+     *     To protect the soundness of our GeneratedFromDafny code,
+     *     we need to convert these special cases into objects that Dafny expects.
+     *     Dafny does not have a native concept of Exceptions.
+     *     So we must convert these into the only Dafny exception available to us: The root service exception.
+     *
+     *     This allows our Dafny code to wrap these exceptions into the <code>_IResult&lt;Success_type,Failure_type></code>
+     *     it expects to handle, preserving Dafny's soundness.
+     *
+     *     As such, the generated methods are named distinctively:<br>
+     *     - TO_DAFNY is named <code>ToDafny_CommonError</code>,
+     *     as it will except any <code>System.Exception</code>.<br>
+     *
+     *     - FROM_DAFNY is named <code>FromDafny_CommonError_ServiceBaseException</code>,
+     *     as it will only yield descends of <code>ServiceBaseException</code> or <code>ServiceBaseException</code> itself.<br>
+     * </p>
+     */
     public TypeConverter generateCommonExceptionConverter() {
-        // Collecting into a TreeSet sorts the set by shape ID, making the order deterministic w.r.t the model
+        // Gather the Smithy Modeled specific exceptions by collecting them into a TreeSet.
+        // This sorts the set by shape ID, making the order deterministic w.r.t the model.
         final TreeSet<StructureShape> errorShapes = ModelUtils.streamServiceErrors(model, serviceShape)
                 .collect(Collectors.toCollection(TreeSet::new));
         final String cSharpType = "%s.%s".formatted(nameResolver.namespaceForService(), nameResolver.classForCommonServiceException());
         final String dafnyType = nameResolver.dafnyTypeForCommonServiceError(serviceShape);
 
-        final TokenTree specificExceptionsFromDafny = TokenTree.of(errorShapes.stream().map(errorShape -> {
-            final ShapeId specificErrorShapeId = errorShape.getId();
+        // Generate the FROM_DAFNY method
+        // Handle the modeled exceptions.
+        final TokenTree modeledExceptionsFromDafny = TokenTree.of(errorShapes.stream().map(errorShape -> {
+            final ShapeId modeledErrorShapeId = errorShape.getId();
             return Token.of("case %1$s dafnyVal:\nreturn %2$s(dafnyVal);".formatted(
-                    nameResolver.dafnyTypeForShape(specificErrorShapeId),
-                    typeConverterForShape(specificErrorShapeId, FROM_DAFNY)
+                    nameResolver.dafnyTypeForShape(modeledErrorShapeId),
+                    typeConverterForShape(modeledErrorShapeId, FROM_DAFNY)
             ));
         })).lineSeparated();
+
+        // Handle the special cases that were cast to the root service exception.
         final TokenTree handleBaseFromDafny = Token.of(
                 "default:\nreturn new %s(\n%s(value.GetMessage()));".formatted(
                         cSharpType, typeConverterForShape(ShapeId.from("smithy.api#String"), FROM_DAFNY))
         );
 
-        final TokenTree fromDafnySwitchCases = TokenTree.of(specificExceptionsFromDafny, handleBaseFromDafny)
+        // Wrap all the converters into a switch statement.
+        final TokenTree fromDafnySwitchCases = TokenTree.of(modeledExceptionsFromDafny, handleBaseFromDafny)
                 .lineSeparated().braced();
         final TokenTree fromDafnyBody = TokenTree.of(
                 TokenTree.of("switch(value)"), fromDafnySwitchCases).lineSeparated();
@@ -634,6 +680,8 @@ public class TypeConversionCodegen {
                 cSharpType, typeConverterForCommonError(serviceShape, FROM_DAFNY), dafnyType));
         final TokenTree fromDafnyConverterMethod = TokenTree.of(fromDafnyConverterSignature, fromDafnyBody.braced());
 
+        // Generate the TO_DAFNY method
+        // Handle the modeled exceptions.
         final TokenTree specificExceptionsToDafny = TokenTree.of(errorShapes.stream().map(errorShape -> {
             final ShapeId specificErrorShapeId = errorShape.getId();
             return Token.of("case %1$s exception:\n return %2$s(exception);".formatted(
@@ -641,20 +689,25 @@ public class TypeConversionCodegen {
                     typeConverterForShape(specificErrorShapeId, TO_DAFNY)
             ));
         })).lineSeparated();
+        // Handle the first special case; extensions of the service root exception that are not in the smithy model.
         final TokenTree handleBaseToDafny = Token.of(
                 "case %1$s exception:\nrtn = new %2$s();\nrtn.message = %3$s(exception.Message);\nreturn rtn;"
                 .formatted(cSharpType, nameResolver.dafnyBaseTypeForServiceError(),
                         typeConverterForShape(ShapeId.from("smithy.api#String"), TO_DAFNY)));
+        // Handle the second special case; extensions of System.Exception.
+        // Construct a custom message that details the Exception's type and message.
         final String anyMessage =
                 """
                 var message = $"%s encountered an Exception of type: {value.GetType()}" +
                               $" with message of: {value.Message}";"""
                         .formatted(nameResolver.serviceNameWithOutFactory());
+        // Return the root service exception with the custom message.
         final TokenTree handleAnyException = Token.of(
                 "default:\n%1$s\nrtn = new %2$s();\nrtn.message = %3$s(message);\nreturn rtn;"
                         .formatted(anyMessage, nameResolver.dafnyBaseTypeForServiceError(),
                                 typeConverterForShape(ShapeId.from("smithy.api#String"), TO_DAFNY)));
 
+        // Wrap all the converters into a switch statement.
         final TokenTree toDafnySwitchCases = TokenTree.of(specificExceptionsToDafny, handleBaseToDafny, handleAnyException)
                 .lineSeparated().braced();
         final TokenTree toDafnyBody = TokenTree.of(
@@ -664,7 +717,8 @@ public class TypeConversionCodegen {
                 dafnyType, typeConverterForCommonError(serviceShape, TO_DAFNY)));
         final TokenTree toDafnyConverterMethod = TokenTree.of(toDafnyConverterSignature, toDafnyBody.braced());
 
-        // We just need a shape ID that doesn't conflict with anything else
+        // The Common Exception Converter is novel to Polymorph, it is not native to smithy.
+        // As such, it needs a shape ID. That shape ID must not conflict with anything else.
         final ShapeId syntheticShapeId = ShapeId.fromParts(serviceShape.getId().getNamespace(), "__SYNTHETIC_COMMON_ERROR");
         return new TypeConverter(syntheticShapeId, fromDafnyConverterMethod, toDafnyConverterMethod);
     }
