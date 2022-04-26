@@ -698,8 +698,7 @@ public class TypeConversionCodegen {
         // Construct a custom message that details the Exception's type and message.
         final String anyMessage =
                 """
-                var message = $"%s encountered an Exception of type: {value.GetType()}" +
-                              $" with message of: {value.Message}";"""
+                var message = $"%s encountered unexpected: {value.GetType()}: \\"{value.Message}\\"";"""
                         .formatted(nameResolver.serviceNameWithOutFactory());
         // Return the root service exception with the custom message.
         final TokenTree handleAnyException = Token.of(

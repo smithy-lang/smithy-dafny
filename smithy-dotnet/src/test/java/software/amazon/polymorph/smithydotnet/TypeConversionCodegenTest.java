@@ -86,8 +86,7 @@ public class TypeConversionCodegenTest {
                                     rtn.message = %s(exception.Message);
                                     return rtn;
                                 default:
-                                    var message = $"FoobarService encountered an Exception of type: {value.GetType()}" +
-                                                  $" with message of: {value.Message}";
+                                    var message = $"FoobarService encountered unexpected: {value.GetType()}: \\"{value.Message}\\"";
                                     rtn = new Dafny.Test.Foobar.FoobarServiceBaseException();
                                     rtn.message = %s(message);
                                     return rtn;
@@ -865,8 +864,7 @@ public class TypeConversionCodegenTest {
                             rtn.message = %s(exception.Message);
                             return rtn;
                         default:
-                            var message = $"%s encountered an Exception of type: {value.GetType()}" +
-                                  $" with message of: {value.Message}";
+                            var message = $"%s encountered unexpected: {value.GetType()}: \\"{value.Message}\\"";
                             rtn = new %s();
                             rtn.message = %s(message);
                             return rtn;
