@@ -18,6 +18,7 @@ import software.amazon.smithy.model.shapes.StructureShape;
 
 import static software.amazon.polymorph.smithydotnet.DotNetNameResolver.classForCommonServiceException;
 import static software.amazon.polymorph.smithydotnet.DotNetNameResolver.classForConcreteServiceException;
+import static software.amazon.polymorph.smithydotnet.DotNetNameResolver.dafnyBaseTypeForServiceError;
 import static software.amazon.polymorph.smithydotnet.DotNetNameResolver.qualifiedTypeConverter;
 import static software.amazon.polymorph.smithydotnet.DotNetNameResolver.qualifiedTypeConverterForCommonError;
 import static software.amazon.polymorph.smithydotnet.TypeConversionDirection.FROM_DAFNY;
@@ -34,8 +35,8 @@ public class ConcreteNativeWrapper extends NativeWrapperCodegen {
     }
 
     /**
-     * Generates concrete NativeWrapper class, complete with copyright
-     * and import statements.
+     * Generates concrete NativeWrapper class,
+     * complete with import statements.
      */
     public TokenTree generateConcrete() {
         TokenTree clazz = generateClass();
@@ -116,6 +117,7 @@ public class ConcreteNativeWrapper extends NativeWrapperCodegen {
                         .formatted(classForCommonServiceException(serviceShape))),
                 tryBlock,
                 generateCatchServiceException(),
+                generateCatchGeneralException(methodName),
                 generateReturnFailure(concreteDafnyOutput)
                 )
                 .lineSeparated().braced();
@@ -208,25 +210,30 @@ public class ConcreteNativeWrapper extends NativeWrapperCodegen {
         return TokenTree.of(signature).append(body);
     }
 
-
      TokenTree generateCatchServiceException() {
         return generateCatch(
                 classForCommonServiceException(serviceShape),
-                Optional.empty()
+                "finalException = e;"
         );
+    }
+
+    TokenTree generateCatchGeneralException(String methodName) {
+        String messageStatement = """
+                var message = $"{%s}._%s threw unexpected: {e.GetType()}: \\"{e.Message}\\"";"""
+                .formatted(NATIVE_BASE_PROPERTY, methodName);
+        String castStatement = "finalException = new %s(message);"
+                .formatted(nameResolver.classForCommonServiceException());
+        return generateCatch("Exception", "%s\n%s".formatted(messageStatement, castStatement));
     }
 
     TokenTree generateCatch(
             final String caughtException,
-            final Optional<String> castStatement
+            final String caughtStatement
     ) {
         final String catchStatement = "catch(%s e)".formatted(caughtException);
-        final String setFinalException = "finalException = %s;".formatted(
-                castStatement.orElse("e")
-        );
         return TokenTree
                 .of(catchStatement)
-                .append(TokenTree.of(setFinalException).braced())
+                .append(TokenTree.of(caughtStatement).braced())
                 .lineSeparated();
     }
 
