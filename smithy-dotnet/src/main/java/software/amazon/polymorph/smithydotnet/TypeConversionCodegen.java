@@ -545,12 +545,9 @@ public class TypeConversionCodegen {
                         return valueWithImpl._impl;
                     case %s nativeImpl:
                         return new %s(nativeImpl);
-                    case %s _:
-                        throw new System.ArgumentException(
-                            "Custom implementations of %s should extend %s.");
                     default:
-                       throw new System.ArgumentException(
-                           $"{value} does not inherit from {typeof(%s)} or {typeof(%s)}.");
+                        throw new System.ArgumentException(
+                            "Custom implementations of %s must extend %s.");
                 }
                 """.formatted(
                 nameResolver.shimClassForResource(resourceShapeId),          // case %s valueWithImpl:
