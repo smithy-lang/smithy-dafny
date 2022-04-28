@@ -524,7 +524,7 @@ public class TypeConversionCodegen {
                     if (value is %s valueWithImpl) {
                         return valueWithImpl._impl;
                     }
-                    throw new System.ArgumentException("Custom implementations of %s are not supported yet");
+                    throw new System.ArgumentException("Custom implementations of %s are not supported");
                     """.formatted(
                     nameResolver.shimClassForResource(resourceShapeId),
                     nameResolver.baseTypeForShape(resourceShapeId)));
