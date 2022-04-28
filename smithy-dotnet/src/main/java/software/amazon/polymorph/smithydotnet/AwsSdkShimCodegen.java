@@ -108,14 +108,16 @@ public class AwsSdkShimCodegen {
 
         final TokenTree tryBody = TokenTree.of(assignSdkResponse, callImpl, returnResponse).lineSeparated();
         final TokenTree tryBlock = Token.of("try").append(tryBody.braced());
+        final String baseExceptionForService = nameResolver.baseExceptionForService();
         final TokenTree catchBlock = Token.of("""
-                catch (%s ex) {
-                    return %s.create_Failure(this.%s(ex));
+                catch (System.AggregateException ex) when (ex.InnerException is %s) {
+                    return %s.create_Failure(this.%s((%s)ex.InnerException));
                 }
                 """.formatted(
-                        nameResolver.baseExceptionForService(),
+                        baseExceptionForService,
                         dafnyOutputType,
-                        CONVERT_ERROR_METHOD));
+                        CONVERT_ERROR_METHOD,
+                        baseExceptionForService));
 
         final TokenTree methodSignature = generateOperationShimSignature(operationShape);
         final TokenTree methodBody = TokenTree.of(sdkRequest, tryBlock, catchBlock);
