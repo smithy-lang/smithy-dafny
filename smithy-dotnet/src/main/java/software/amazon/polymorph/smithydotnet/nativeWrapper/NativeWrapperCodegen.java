@@ -26,13 +26,9 @@ import static software.amazon.polymorph.smithydotnet.TypeConversionDirection.FRO
 import static software.amazon.polymorph.smithydotnet.TypeConversionDirection.TO_DAFNY;
 
 /**
- * NativeWrapperCodegen generates a Native Wrapper
- * for a resource implemented in the native language.
- *
- * To be concreate, at this time, it should be called for:
- * - ClientSupplier
- * - Keyring
- * - CryptographicMaterialsManager
+ * NativeWrapperCodegen generates a Native Wrapper for a resource implemented in the native language.
+ * <p>
+ * To be concreate, at this time, it should be called for: - ClientSupplier - Keyring - CryptographicMaterialsManager
  */
 public class NativeWrapperCodegen {
     public final Model model;
@@ -49,10 +45,10 @@ public class NativeWrapperCodegen {
     protected static final String INPUT = "input";
     protected static final String IGNORE_IMPORT =
             """
-            // ReSharper disable RedundantUsingDirective
-            // ReSharper disable RedundantNameQualifier
-            // ReSharper disable SuggestVarOrType_SimpleTypes
-            """;
+                    // ReSharper disable RedundantUsingDirective
+                    // ReSharper disable RedundantNameQualifier
+                    // ReSharper disable SuggestVarOrType_SimpleTypes
+                    """;
     protected static final List<String> UNCONDITIONAL_IMPORTS = List.of(
             "System",
             "AWS.EncryptionSDK.Core", //TODO refactor to be based on service
@@ -73,8 +69,7 @@ public class NativeWrapperCodegen {
     }
 
     /**
-     * Generates concrete NativeWrapper class,
-     * complete with import statements.
+     * Generates concrete NativeWrapper class, complete with import statements.
      */
     public TokenTree generate() {
         TokenTree clazz = generateClass();
@@ -161,7 +156,7 @@ public class NativeWrapperCodegen {
                 concreteDafnyOutput);
         final TokenTree body = TokenTree.of(
                         generateValidateNativeOutputMethod(
-                                operationShape.getOutput(), nativeOutputType,methodName),
+                                operationShape.getOutput(), nativeOutputType, methodName),
                         inputConversion,
                         TokenTree.of("%s finalException = null;"
                                 .formatted(classForCommonServiceException(serviceShape))),

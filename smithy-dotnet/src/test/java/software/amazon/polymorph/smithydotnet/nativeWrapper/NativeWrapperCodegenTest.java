@@ -31,7 +31,7 @@ public class NativeWrapperCodegenTest {
     protected NativeWrapperCodegen underTest;
 
     @Before
-    public void setup(){
+    public void setup() {
         String rawModel = """
                 namespace test.foobar
                 resource Baz { operations: [DoSomethingWithInput, DoSomethingWithOutput] }
@@ -132,7 +132,7 @@ public class NativeWrapperCodegenTest {
     }
 
     @Test
-    public void testGenerateConstructor(){
+    public void testGenerateConstructor() {
         final String className = "NativeWrapper_Baz";
         final String actual = this.underTest.generateConstructor(className)
                 .toString();
@@ -141,7 +141,7 @@ public class NativeWrapperCodegenTest {
     }
 
     @Test
-    public void testGenerateClassSimple(){
+    public void testGenerateClassSimple() {
         String rawModel = """
                 namespace test.foobar
                 resource Baz {}
@@ -153,7 +153,7 @@ public class NativeWrapperCodegenTest {
     }
 
     @Test
-    public void testGenerateClassVoid(){
+    public void testGenerateClassVoid() {
         String rawModel = """
                 namespace test.foobar
                 resource Baz {operations: [Do]}
@@ -166,7 +166,7 @@ public class NativeWrapperCodegenTest {
     }
 
     @Test
-    public void testGenerateClassComplete(){
+    public void testGenerateClassComplete() {
         final String actual = this.underTest.generateClass().toString();
         final String expected = NativeWrapperCodegenTestConstants.COMPLETE_CLASS;
         tokenizeAndAssert(actual, expected);
