@@ -57,8 +57,7 @@ class NativeWrapperCodegenTestConstants {
                 {
                     %s nativeOutput = _impl.DoSomethingWithOutput();
                     _ = nativeOutput ?? throw new FoobarServiceException(
-                        $"Output of {_impl}._DoSomethingWithOutput is invalid. " +
-                        $"Should be {typeof(%s)} but is null."
+                        $"{_impl}._DoSomethingWithOutput returned null, should be {typeof(%s)}"
                     );
                     %s
                     return Wrappers_Compile.Result<
