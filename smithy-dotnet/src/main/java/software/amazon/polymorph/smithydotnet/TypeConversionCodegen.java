@@ -553,11 +553,8 @@ public class TypeConversionCodegen {
                 nameResolver.shimClassForResource(resourceShapeId),          // case %s valueWithImpl:
                 nameResolver.baseClassForResource(resourceShapeId),          // case %s nativeImpl:
                 nameResolver.nativeWrapperClassForResource(resourceShapeId), // return new %s(nativeImpl);
-                nameResolver.baseTypeForResource(resourceShape),             // case %s _:
                 nameResolver.shimClassForResource(resourceShapeId),          // "Custom implementations of %s
-                nameResolver.baseClassForResource(resourceShapeId),          // should extend %s.");
-                nameResolver.baseClassForResource(resourceShapeId),          // $"{value} does not inherit from {typeof(%s))}
-                nameResolver.shimClassForResource(resourceShapeId))          //or {typeof(%s)}.");
+                nameResolver.baseClassForResource(resourceShapeId))          // must extend %s.");
         );
         return buildConverterFromMethodBodies(structureShape, fromDafnyBody, toDafnyBody);
     }

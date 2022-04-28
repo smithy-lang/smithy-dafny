@@ -657,12 +657,9 @@ public class TypeConversionCodegenTest {
                             return valueWithImpl._impl;
                         case ThingBase nativeImpl:
                             return new NativeWrapper_Thing(nativeImpl);
-                        case Test.Foobar.IThing _:
-                            throw new System.ArgumentException(
-                                 "Custom implementations of Thing should extend ThingBase.");
                         default:
                             throw new System.ArgumentException(
-                                $"{value} does not inherit from {typeof(ThingBase)} or {typeof(Thing)}.");
+                                 "Custom implementations of Thing must extend ThingBase.");
                     }
                 }""".formatted(structureToDafnyConverterName);
         tokenizeAndAssert(expectedToDafny, actualToDafny);
