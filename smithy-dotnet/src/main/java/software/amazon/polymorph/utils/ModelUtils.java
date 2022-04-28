@@ -3,28 +3,23 @@
 
 package software.amazon.polymorph.utils;
 
-import com.google.common.base.Joiner;
+import java.util.Optional;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
+
 import software.amazon.polymorph.traits.ClientConfigTrait;
+import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
+import software.amazon.polymorph.traits.ExtendableTrait;
 import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
-import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.loader.ModelAssembler;
 import software.amazon.smithy.model.shapes.MemberShape;
-import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.ErrorTrait;
-import software.amazon.smithy.utils.StringUtils;
-
-import java.util.Arrays;
-import java.util.Optional;
-import java.util.TreeSet;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class ModelUtils {
     // Require title-case alphanumeric names, so we don't need to check for keyword conflicts.
@@ -44,6 +39,7 @@ public class ModelUtils {
         assembler.addShape(PositionalTrait.getDefinition());
         assembler.addShape(ClientConfigTrait.getDefinition());
         assembler.addShape(DafnyUtf8BytesTrait.getDefinition());
+        assembler.addShape(ExtendableTrait.getDefinition());
     }
 
     /**

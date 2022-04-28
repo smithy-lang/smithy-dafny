@@ -7,6 +7,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import software.amazon.polymorph.smithydafny.DafnyNameResolver;
+import software.amazon.polymorph.smithydotnet.nativeWrapper.NativeWrapperCodegen;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.polymorph.traits.PositionalTrait;
@@ -155,6 +156,21 @@ public class DotNetNameResolver {
             return "%sBaseException".formatted(serviceName.substring(0, serviceName.lastIndexOf("Factory")));
         }
 
+        return "%sException".formatted(serviceName);
+    }
+
+    /**
+     * Returns the concrete service exception, as compared to
+     * {@link DotNetNameResolver#classForCommonServiceException(ServiceShape)},
+     * which returns the abstract base Exception.
+     */
+    public static String classForConcreteServiceException(final ServiceShape serviceShape) {
+        // TODO Currently we have this hardcoded to remove 'Factory' from service names
+        // that include it, however this should likely be controlled via a custom trait
+        String serviceName = serviceShape.getId().getName(serviceShape);
+        if (serviceName.endsWith("Factory")) {
+            serviceName = serviceName.substring(0, serviceName.lastIndexOf("Factory"));
+        }
         return "%sException".formatted(serviceName);
     }
 
@@ -410,6 +426,13 @@ public class DotNetNameResolver {
 
     public String shimClassForResource(final ShapeId resourceShapeId) {
         return StringUtils.capitalize(resourceShapeId.getName(serviceShape));
+    }
+
+    public String nativeWrapperClassForResource(final ShapeId resourceShapeId) {
+        return "%s_%s".formatted(
+                NativeWrapperCodegen.CLASS_PREFIX,
+                shimClassForResource(resourceShapeId)
+        );
     }
 
     public String classForEnum(final ShapeId enumShapeId) {
@@ -687,11 +710,12 @@ public class DotNetNameResolver {
     /**
      * Returns the Dafny trait implemented by all errors in the given service.
      * <p>
-     * This is distinct from the specific Dafny error classes, since the trait / common error shape is not modeled.
+     * This is distinct from the specific Dafny error classes,
+     * since the trait / common error shape is not modeled.
      * To get the type for a specific Dafny error class, pass the corresponding structure shape to
      * {@link DotNetNameResolver#dafnyTypeForShape(ShapeId)}.
      */
-    public String dafnyTypeForCommonServiceError(final ServiceShape serviceShape) {
+    public static String dafnyTypeForCommonServiceError(final ServiceShape serviceShape) {
         // TODO Currently we have this hardcoded to remove 'Factory' from service names
         // that include it, however this should likely be controlled via a custom trait
         String serviceName = serviceShape.getId().getName(serviceShape);

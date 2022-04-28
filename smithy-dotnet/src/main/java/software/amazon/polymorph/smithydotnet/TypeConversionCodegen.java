@@ -5,6 +5,8 @@ package software.amazon.polymorph.smithydotnet;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
+
+import software.amazon.polymorph.traits.ExtendableTrait;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.polymorph.traits.ClientConfigTrait;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
@@ -511,26 +513,46 @@ public class TypeConversionCodegen {
     /**
      * This should not be called directly, instead call
      * {@link TypeConversionCodegen#generateStructureConverter(StructureShape)}.
-     *
-     * Note that this currently only allows for Dafny-compiled implementations of the resource interface.
-     *
-     * TODO: allow for native C# implementations (i.e. customer-implemented) of resources
      */
     protected TypeConverter generateResourceReferenceStructureConverter(
             final StructureShape structureShape, final ResourceShape resourceShape) {
         final ShapeId resourceShapeId = resourceShape.getId();
-
-        final TokenTree fromDafnyBody = Token.of("return new %s(value);"
-                .formatted(nameResolver.shimClassForResource(resourceShapeId)));
-        final TokenTree toDafnyBody = Token.of("""
-                if (value is %s valueWithImpl) {
+        final String shimClass = nameResolver.shimClassForResource(resourceShapeId);
+        final String baseType = nameResolver.baseTypeForShape(resourceShapeId);
+        if (!resourceShape.hasTrait(ExtendableTrait.class)) {
+            final TokenTree fromDafnyBody = Token.of("return new %s(value);"
+                    .formatted(nameResolver.shimClassForResource(resourceShapeId)));
+            final TokenTree toDafnyBody = Token.of("""
+                    if (value is %s valueWithImpl) {
+                        return valueWithImpl._impl;
+                    }
+                    throw new System.ArgumentException("Custom implementations of %s are not supported");
+                    """.formatted(shimClass, baseType));
+            return buildConverterFromMethodBodies(structureShape, fromDafnyBody, toDafnyBody);
+        }
+        final String nativeWrapperClass = nameResolver.nativeWrapperClassForResource(resourceShapeId);
+        final String baseClass = nameResolver.baseClassForResource(resourceShapeId);
+        final TokenTree fromDafnyBody = Token.of("""
+                if (value is %s nativeWrapper) return nativeWrapper._impl;
+                return new %s(value);
+                """
+                .formatted(nativeWrapperClass, shimClass)
+        );
+        TokenTree cases = TokenTree.of("""
+                case %s valueWithImpl:
                     return valueWithImpl._impl;
-                }
-                throw new System.ArgumentException(\"Custom implementations of %s are not supported yet\");
-                """.formatted(
-                nameResolver.shimClassForResource(resourceShapeId),
-                nameResolver.baseTypeForShape(resourceShapeId)));
-
+                """.formatted(shimClass));
+        cases = cases.append(TokenTree.of("""
+                case %s nativeImpl:
+                    return new %s(nativeImpl);
+                """.formatted(baseClass, nativeWrapperClass)));
+        cases = cases.append(TokenTree.of("""
+                default:
+                    throw new System.ArgumentException(
+                        "Custom implementations of %s must extend %s.");"""
+                .formatted(shimClass, baseClass)));
+        final TokenTree toDafnyBody = Token.of("switch (value)")
+                .append(cases.braced()).lineSeparated();
         return buildConverterFromMethodBodies(structureShape, fromDafnyBody, toDafnyBody);
     }
 
