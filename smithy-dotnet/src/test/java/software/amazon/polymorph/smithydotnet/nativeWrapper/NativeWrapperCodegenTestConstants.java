@@ -3,7 +3,7 @@
 
 package software.amazon.polymorph.smithydotnet.nativeWrapper;
 
-class ConcreteNativeWrapperTestConstants {
+class NativeWrapperCodegenTestConstants {
 
     static String VALIDATE_NATIVE_OUTPUT =
             """

@@ -5,7 +5,7 @@ package software.amazon.polymorph.smithydotnet;
 
 import com.google.common.annotations.VisibleForTesting;
 
-import software.amazon.polymorph.smithydotnet.nativeWrapper.ConcreteNativeWrapper;
+import software.amazon.polymorph.smithydotnet.nativeWrapper.NativeWrapperCodegen;
 import software.amazon.polymorph.traits.ExtendableTrait;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.polymorph.traits.PositionalTrait;
@@ -126,7 +126,7 @@ public class ServiceCodegen {
                     codeByPath.put(resourceClassPath, resourceClass.prepend(prelude));
 
                     if (shouldGenerateNativeWrapper(resourceShapeId)) {
-                        final NativeWrapperCodegen nativeWrapperCodegen = new ConcreteNativeWrapper(
+                        final NativeWrapperCodegen nativeWrapperCodegen = new NativeWrapperCodegen(
                                 model, serviceShape.getId(), resourceShapeId, nameResolver);
                         final Path nativeWrapperPath = Path.of(
                                 String.format("%s.cs",

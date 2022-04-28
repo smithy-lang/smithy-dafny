@@ -3,48 +3,98 @@
 
 package software.amazon.polymorph.smithydotnet.nativeWrapper;
 
+import java.util.List;
 import java.util.Optional;
 
 import software.amazon.polymorph.smithydotnet.DotNetNameResolver;
-import software.amazon.polymorph.smithydotnet.NativeWrapperCodegen;
 import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.utils.Token;
 import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.EntityShape;
 import software.amazon.smithy.model.shapes.OperationShape;
+import software.amazon.smithy.model.shapes.ResourceShape;
+import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
 
 import static software.amazon.polymorph.smithydotnet.DotNetNameResolver.classForCommonServiceException;
 import static software.amazon.polymorph.smithydotnet.DotNetNameResolver.classForConcreteServiceException;
-import static software.amazon.polymorph.smithydotnet.DotNetNameResolver.dafnyBaseTypeForServiceError;
 import static software.amazon.polymorph.smithydotnet.DotNetNameResolver.qualifiedTypeConverter;
 import static software.amazon.polymorph.smithydotnet.DotNetNameResolver.qualifiedTypeConverterForCommonError;
 import static software.amazon.polymorph.smithydotnet.TypeConversionDirection.FROM_DAFNY;
 import static software.amazon.polymorph.smithydotnet.TypeConversionDirection.TO_DAFNY;
 
-public class ConcreteNativeWrapper extends NativeWrapperCodegen {
+/**
+ * NativeWrapperCodegen generates a Native Wrapper
+ * for a resource implemented in the native language.
+ *
+ * To be concreate, at this time, it should be called for:
+ * - ClientSupplier
+ * - Keyring
+ * - CryptographicMaterialsManager
+ */
+public class NativeWrapperCodegen {
+    public final Model model;
+    public final ServiceShape serviceShape;
+    public final ResourceShape resourceShape;
+    public final DotNetNameResolver nameResolver;
+    public final ShapeId resourceShapeId;
 
-    public ConcreteNativeWrapper(Model model, ShapeId serviceShapeId, ShapeId resourceShapeId, DotNetNameResolver nameResolver) {
-        super(model, serviceShapeId, resourceShapeId, nameResolver);
-    }
+    public static final String CLASS_PREFIX = "NativeWrapper";
+    protected static final String NATIVE_BASE_PROPERTY = "_impl";
+    protected static final String NATIVE_IMPL_INPUT = "nativeImpl";
+    protected static final String NATIVE_INPUT = "nativeInput";
+    protected static final String NATIVE_OUTPUT = "nativeOutput";
+    protected static final String INPUT = "input";
+    protected static final String IGNORE_IMPORT =
+            """
+            // ReSharper disable RedundantUsingDirective
+            // ReSharper disable RedundantNameQualifier
+            // ReSharper disable SuggestVarOrType_SimpleTypes
+            """;
+    protected static final List<String> UNCONDITIONAL_IMPORTS = List.of(
+            "System",
+            "AWS.EncryptionSDK.Core", //TODO refactor to be based on service
+            "Wrappers_Compile"
+    );
 
-    public TokenTree generate() {
-        return generateConcrete();
+    public NativeWrapperCodegen(
+            final Model model,
+            final ShapeId serviceShapeId,
+            final ShapeId resourceShapeId,
+            final DotNetNameResolver nameResolver
+    ) {
+        this.model = model;
+        this.serviceShape = model.expectShape(serviceShapeId, ServiceShape.class);
+        this.resourceShape = model.expectShape(resourceShapeId, ResourceShape.class);
+        this.nameResolver = nameResolver;
+        this.resourceShapeId = resourceShapeId;
     }
 
     /**
      * Generates concrete NativeWrapper class,
      * complete with import statements.
      */
-    public TokenTree generateConcrete() {
+    public TokenTree generate() {
         TokenTree clazz = generateClass();
         return TokenTree
                 .of(getPrelude())
                 .append(TokenTree.of("\n"))
                 .append(clazz)
                 .lineSeparated();
+    }
+
+    /**
+     * Returns Import statement
+     */
+    static TokenTree getPrelude() {
+        final TokenTree imports = TokenTree.of(UNCONDITIONAL_IMPORTS
+                .stream()
+                .map("using %s;"::formatted)
+                .map(Token::of)).lineSeparated();
+        return TokenTree.of(IGNORE_IMPORT)
+                .append(imports);
     }
 
     TokenTree generateClass() {
@@ -60,9 +110,9 @@ public class ConcreteNativeWrapper extends NativeWrapperCodegen {
                 ));
         final TokenTree constructor = generateConstructor(className);
         final TokenTree operationWrappers = TokenTree.of(
-                model.expectShape(resourceShapeId, EntityShape.class)
-                        .getAllOperations().stream()
-                        .map(this::generateOperationWrapper))
+                        model.expectShape(resourceShapeId, EntityShape.class)
+                                .getAllOperations().stream()
+                                .map(this::generateOperationWrapper))
                 .lineSeparated();
         final TokenTree body = TokenTree
                 .of(nativeBaseProperty, constructor, operationWrappers)
@@ -89,7 +139,7 @@ public class ConcreteNativeWrapper extends NativeWrapperCodegen {
                 .lineSeparated();
     }
 
-     TokenTree generateOperationWrapper(final ShapeId operationShapeId) {
+    TokenTree generateOperationWrapper(final ShapeId operationShapeId) {
         final OperationShape operationShape = model.expectShape(operationShapeId, OperationShape.class);
         final String abstractDafnyOutput = nameResolver.dafnyTypeForServiceOperationOutput(operationShape);
         final String concreteDafnyOutput = nameResolver.dafnyTypeForServiceOperationOutput(operationShape, true);
@@ -110,15 +160,15 @@ public class ConcreteNativeWrapper extends NativeWrapperCodegen {
                 nativeOutputType,
                 concreteDafnyOutput);
         final TokenTree body = TokenTree.of(
-                generateValidateNativeOutputMethod(
-                        operationShape.getOutput(), nativeOutputType,methodName),
-                inputConversion,
-                TokenTree.of("%s finalException = null;"
-                        .formatted(classForCommonServiceException(serviceShape))),
-                tryBlock,
-                generateCatchServiceException(),
-                generateCatchGeneralException(methodName),
-                generateReturnFailure(concreteDafnyOutput)
+                        generateValidateNativeOutputMethod(
+                                operationShape.getOutput(), nativeOutputType,methodName),
+                        inputConversion,
+                        TokenTree.of("%s finalException = null;"
+                                .formatted(classForCommonServiceException(serviceShape))),
+                        tryBlock,
+                        generateCatchServiceException(),
+                        generateCatchGeneralException(methodName),
+                        generateReturnFailure(concreteDafnyOutput)
                 )
                 .lineSeparated().braced();
         return TokenTree.of(TokenTree.of(signature), body).lineSeparated();
@@ -159,7 +209,7 @@ public class ConcreteNativeWrapper extends NativeWrapperCodegen {
                 concreteDafnyOutput, successConversion.orElse("")));
         return TokenTree.of("try").append(
                 TokenTree.of(nativeCall, isNativeOutputNull, validateNativeOutput, returnSuccess)
-                    .lineSeparated().braced()
+                        .lineSeparated().braced()
         );
     }
 
@@ -197,10 +247,10 @@ public class ConcreteNativeWrapper extends NativeWrapperCodegen {
         final String tryCatch = "try { %s.Validate(); } catch (ArgumentException e)"
                 .formatted(NATIVE_OUTPUT);
         final TokenTree catchBlock = TokenTree.of(
-                "var message = $\"Output of {%s}._%s is invalid. {e.Message}\";"
-                    .formatted(NATIVE_BASE_PROPERTY, methodName),
-                "throw new %s(message);"
-                    .formatted(classForConcreteServiceException(serviceShape))
+                        "var message = $\"Output of {%s}._%s is invalid. {e.Message}\";"
+                                .formatted(NATIVE_BASE_PROPERTY, methodName),
+                        "throw new %s(message);"
+                                .formatted(classForConcreteServiceException(serviceShape))
                 )
                 .lineSeparated().braced();
         final TokenTree body = TokenTree.of(TokenTree.of(tryCatch), catchBlock)
@@ -208,7 +258,7 @@ public class ConcreteNativeWrapper extends NativeWrapperCodegen {
         return TokenTree.of(signature).append(body);
     }
 
-     TokenTree generateCatchServiceException() {
+    TokenTree generateCatchServiceException() {
         return generateCatch(
                 classForCommonServiceException(serviceShape),
                 "finalException = e;"
@@ -240,6 +290,6 @@ public class ConcreteNativeWrapper extends NativeWrapperCodegen {
                 formatted(
                         dafnyOutput,
                         qualifiedTypeConverterForCommonError(serviceShape, TO_DAFNY)
-        ));
+                ));
     }
 }

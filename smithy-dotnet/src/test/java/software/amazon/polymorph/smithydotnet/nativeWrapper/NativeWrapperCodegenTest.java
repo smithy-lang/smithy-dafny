@@ -9,32 +9,48 @@ import org.junit.Test;
 import java.util.List;
 import java.util.Optional;
 
-import software.amazon.polymorph.smithydotnet.NativeWrapperCodegenTest;
+import software.amazon.polymorph.smithydotnet.DotNetNameResolver;
 import software.amazon.polymorph.util.TestModel;
 import software.amazon.polymorph.util.Tokenizer;
 import software.amazon.polymorph.util.Tokenizer.ParseToken;
 import software.amazon.smithy.model.Model;
+import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.ShapeId;
 
 import static org.junit.Assert.assertEquals;
 import static software.amazon.polymorph.util.TestModel.SERVICE_NAMESPACE;
 import static software.amazon.polymorph.util.TestModel.SERVICE_SHAPE_ID;
 
-// Debugging Guidance: These tests are arranged from Simplest to Most Complete.
+// Debugging Guidance:
+// These tests are arranged from Simplest to Most Complete.
 // Generally, the simplest unit test have shorter durations.
-// As such, if you sort the failed unit tests by duration, you can find
-// the simplest unit test that is failing.
+// As such, if you sort the failed unit tests by duration,
+// you can find the simplest unit test that is failing.
 // Addressing that unit test will often resolve the more complex failures.
-public class ConcreteNativeWrapperTest extends NativeWrapperCodegenTest {
+public class NativeWrapperCodegenTest {
 
-    protected ConcreteNativeWrapper underTest;
+    protected Model model;
+    protected DotNetNameResolver nameResolver;
+    protected NativeWrapperCodegen underTest;
 
     @Before
-    @Override
     public void setup(){
-        super.setup();
+        String rawModel = """
+                namespace test.foobar
+                resource Baz { operations: [DoSomethingWithInput, DoSomethingWithOutput] }
+                operation DoSomethingWithInput { input: DoSomethingInput }
+                structure DoSomethingInput {}
+                operation DoSomethingWithOutput { output: DoSomethingOutput }
+                structure DoSomethingOutput {}
+                """;
 
-        this.underTest = new ConcreteNativeWrapper(
+        this.model = TestModel.setupModel(
+                (builder, modelAssembler) -> modelAssembler
+                        .addUnparsedModel("test.smithy", rawModel));
+
+        this.nameResolver = getNameResolver(model, SERVICE_SHAPE_ID);
+
+        this.underTest = new NativeWrapperCodegen(
                 this.model,
                 SERVICE_SHAPE_ID,
                 ShapeId.fromParts(SERVICE_NAMESPACE, "Baz"),
@@ -51,7 +67,7 @@ public class ConcreteNativeWrapperTest extends NativeWrapperCodegenTest {
                         Optional.of(nativeOutputType),
                         "DoSomethingWithOutput")
                 .toString();
-        final String expected = ConcreteNativeWrapperTestConstants.VALIDATE_NATIVE_OUTPUT
+        final String expected = NativeWrapperCodegenTestConstants.VALIDATE_NATIVE_OUTPUT
                 .formatted(nativeOutputType, "DoSomethingWithOutput");
         parseAndAssert(actual, expected);
     }
@@ -59,7 +75,7 @@ public class ConcreteNativeWrapperTest extends NativeWrapperCodegenTest {
     @Test
     public void testGenerateCatchServiceException() {
         final String actual = this.underTest.generateCatchServiceException().toString();
-        final String expected = ConcreteNativeWrapperTestConstants.CATCH_SERVICE;
+        final String expected = NativeWrapperCodegenTestConstants.CATCH_SERVICE;
         parseAndAssert(actual, expected);
     }
 
@@ -72,11 +88,11 @@ public class ConcreteNativeWrapperTest extends NativeWrapperCodegenTest {
                 operation DoSomethingWithOutput { output: DoSomethingOutput }
                 structure DoSomethingOutput {}
                 """;
-        ConcreteNativeWrapper localUnderTest = setupLocalModel(rawModel);
+        NativeWrapperCodegen localUnderTest = setupLocalModel(rawModel);
         final String actual = localUnderTest.generateOperationWrapper(
                 ShapeId.fromParts(SERVICE_NAMESPACE, "DoSomethingWithOutput")
         ).toString();
-        final String expected = ConcreteNativeWrapperTestConstants.DO_OUTPUT_NOT_POSITIONAL;
+        final String expected = NativeWrapperCodegenTestConstants.DO_OUTPUT_NOT_POSITIONAL;
         parseAndAssert(actual, expected);
     }
 
@@ -94,11 +110,11 @@ public class ConcreteNativeWrapperTest extends NativeWrapperCodegenTest {
                 @positional
                 structure DoSomethingOutput { thing: ThingReference }
                 """;
-        ConcreteNativeWrapper localUnderTest = setupLocalModel(rawModel);
+        NativeWrapperCodegen localUnderTest = setupLocalModel(rawModel);
         final String actual = localUnderTest.generateOperationWrapper(
                 ShapeId.fromParts(SERVICE_NAMESPACE, "DoSomethingWithOutput")
         ).toString();
-        final String expected = ConcreteNativeWrapperTestConstants.DO_OUTPUT_POSITIONAL;
+        final String expected = NativeWrapperCodegenTestConstants.DO_OUTPUT_POSITIONAL;
         parseAndAssert(actual, expected);
     }
 
@@ -110,11 +126,11 @@ public class ConcreteNativeWrapperTest extends NativeWrapperCodegenTest {
                 operation DoSomethingWithInput { input: DoSomethingInput }
                 structure DoSomethingInput {}
                 """;
-        ConcreteNativeWrapper localUnderTest = setupLocalModel(rawModel);
+        NativeWrapperCodegen localUnderTest = setupLocalModel(rawModel);
         final String actual = localUnderTest.generateOperationWrapper(
                 ShapeId.fromParts(SERVICE_NAMESPACE, "DoSomethingWithInput")
         ).toString();
-        final String expected = ConcreteNativeWrapperTestConstants.DO_INPUT;
+        final String expected = NativeWrapperCodegenTestConstants.DO_INPUT;
         parseAndAssert(actual, expected);
     }
 
@@ -123,7 +139,7 @@ public class ConcreteNativeWrapperTest extends NativeWrapperCodegenTest {
         final String className = "NativeWrapper_Baz";
         final String actual = this.underTest.generateConstructor(className)
                 .toString();
-        final String expected = ConcreteNativeWrapperTestConstants.CONSTRUCTOR;
+        final String expected = NativeWrapperCodegenTestConstants.CONSTRUCTOR;
         parseAndAssert(actual, expected);
     }
 
@@ -133,9 +149,9 @@ public class ConcreteNativeWrapperTest extends NativeWrapperCodegenTest {
                 namespace test.foobar
                 resource Baz {}
                 """;
-        ConcreteNativeWrapper localUnderTest = setupLocalModel(rawModel);
+        NativeWrapperCodegen localUnderTest = setupLocalModel(rawModel);
         final String actual = localUnderTest.generateClass().toString();
-        final String expected = ConcreteNativeWrapperTestConstants.SIMPLE_CLASS;
+        final String expected = NativeWrapperCodegenTestConstants.SIMPLE_CLASS;
         parseAndAssert(actual, expected);
     }
 
@@ -146,31 +162,31 @@ public class ConcreteNativeWrapperTest extends NativeWrapperCodegenTest {
                 resource Baz {operations: [Do]}
                 operation Do {}
                 """;
-        ConcreteNativeWrapper localUnderTest = setupLocalModel(rawModel);
+        NativeWrapperCodegen localUnderTest = setupLocalModel(rawModel);
         final String actual = localUnderTest.generateClass().toString();
-        final String expected = ConcreteNativeWrapperTestConstants.VOID_CLASS;
+        final String expected = NativeWrapperCodegenTestConstants.VOID_CLASS;
         parseAndAssert(actual, expected);
     }
 
     @Test
     public void testGenerateClassComplete(){
         final String actual = this.underTest.generateClass().toString();
-        final String expected = ConcreteNativeWrapperTestConstants.COMPLETE_CLASS;
+        final String expected = NativeWrapperCodegenTestConstants.COMPLETE_CLASS;
         parseAndAssert(actual, expected);
     }
 
     @Test
-    public void testGenerateConcrete() {
-        final String actual = this.underTest.generateConcrete().toString();
-        final String expected = ConcreteNativeWrapperTestConstants.COMPLETE;
+    public void testGenerate() {
+        final String actual = this.underTest.generate().toString();
+        final String expected = NativeWrapperCodegenTestConstants.COMPLETE;
         parseAndAssert(actual, expected);
     }
 
-    ConcreteNativeWrapper setupLocalModel(String rawModel) {
+    NativeWrapperCodegen setupLocalModel(String rawModel) {
         Model localModel = TestModel.setupModel(
                 (builder, modelAssembler) -> modelAssembler
                         .addUnparsedModel("test.smithy", rawModel));
-        return new ConcreteNativeWrapper(
+        return new NativeWrapperCodegen(
                 localModel,
                 SERVICE_SHAPE_ID,
                 ShapeId.fromParts(SERVICE_NAMESPACE, "Baz"),
@@ -181,5 +197,11 @@ public class ConcreteNativeWrapperTest extends NativeWrapperCodegenTest {
         final List<ParseToken> actualTokens = Tokenizer.tokenize(actual);
         final List<ParseToken> expectedTokens = Tokenizer.tokenize(expected);
         assertEquals(expectedTokens, actualTokens);
+    }
+
+    @SuppressWarnings("SameParameterValue")
+    protected static DotNetNameResolver getNameResolver(Model model, ShapeId shapeId) {
+        return new DotNetNameResolver(model,
+                model.expectShape(shapeId, ServiceShape.class));
     }
 }
