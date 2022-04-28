@@ -517,6 +517,8 @@ public class TypeConversionCodegen {
     protected TypeConverter generateResourceReferenceStructureConverter(
             final StructureShape structureShape, final ResourceShape resourceShape) {
         final ShapeId resourceShapeId = resourceShape.getId();
+        final String shimClass = nameResolver.shimClassForResource(resourceShapeId);
+        final String baseType = nameResolver.baseTypeForShape(resourceShapeId);
         if (!resourceShape.hasTrait(ExtendableTrait.class)) {
             final TokenTree fromDafnyBody = Token.of("return new %s(value);"
                     .formatted(nameResolver.shimClassForResource(resourceShapeId)));
@@ -525,37 +527,32 @@ public class TypeConversionCodegen {
                         return valueWithImpl._impl;
                     }
                     throw new System.ArgumentException("Custom implementations of %s are not supported");
-                    """.formatted(
-                    nameResolver.shimClassForResource(resourceShapeId),
-                    nameResolver.baseTypeForShape(resourceShapeId)));
+                    """.formatted(shimClass, baseType));
             return buildConverterFromMethodBodies(structureShape, fromDafnyBody, toDafnyBody);
         }
+        final String nativeWrapperClass = nameResolver.nativeWrapperClassForResource(resourceShapeId);
+        final String baseClass = nameResolver.baseClassForResource(resourceShapeId);
         final TokenTree fromDafnyBody = Token.of("""
                 if (value is %s nativeWrapper) return nativeWrapper._impl;
                 return new %s(value);
                 """
-                .formatted(
-                        nameResolver.nativeWrapperClassForResource(resourceShapeId),
-                        nameResolver.shimClassForResource(resourceShapeId))
+                .formatted(nativeWrapperClass, shimClass)
         );
-        final TokenTree toDafnyBody = Token.of("""
-                switch (value)
-                {
-                    case %s valueWithImpl:
-                        return valueWithImpl._impl;
-                    case %s nativeImpl:
-                        return new %s(nativeImpl);
-                    default:
-                        throw new System.ArgumentException(
-                            "Custom implementations of %s must extend %s.");
-                }
-                """.formatted(
-                nameResolver.shimClassForResource(resourceShapeId),          // case %s valueWithImpl:
-                nameResolver.baseClassForResource(resourceShapeId),          // case %s nativeImpl:
-                nameResolver.nativeWrapperClassForResource(resourceShapeId), // return new %s(nativeImpl);
-                nameResolver.shimClassForResource(resourceShapeId),          // "Custom implementations of %s
-                nameResolver.baseClassForResource(resourceShapeId))          // must extend %s.");
-        );
+        TokenTree cases = TokenTree.of("""
+                case %s valueWithImpl:
+                    return valueWithImpl._impl;
+                """.formatted(shimClass));
+        cases = cases.append(TokenTree.of("""
+                case %s nativeImpl:
+                    return new %s(nativeImpl);
+                """.formatted(baseClass, nativeWrapperClass)));
+        cases = cases.append(TokenTree.of("""
+                default:
+                    throw new System.ArgumentException(
+                        "Custom implementations of %s must extend %s.");"""
+                .formatted(shimClass, baseClass)));
+        final TokenTree toDafnyBody = Token.of("switch (value)")
+                .append(cases.braced()).lineSeparated();
         return buildConverterFromMethodBodies(structureShape, fromDafnyBody, toDafnyBody);
     }
 
