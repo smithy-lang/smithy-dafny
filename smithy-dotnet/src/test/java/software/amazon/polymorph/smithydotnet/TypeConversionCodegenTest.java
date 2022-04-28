@@ -616,7 +616,7 @@ public class TypeConversionCodegenTest {
                         return valueWithImpl._impl;
                     }
                     throw new System.ArgumentException(
-                        "Custom implementations of Test.Foobar.IThing are not supported yet");
+                        "Custom implementations of Test.Foobar.IThing are not supported");
                 }""".formatted(structureToDafnyConverterName));
         assertEquals(expectedTokensToDafny, actualTokensToDafny);
     }
