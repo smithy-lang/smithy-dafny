@@ -28,7 +28,12 @@ import static software.amazon.polymorph.smithydotnet.TypeConversionDirection.TO_
 /**
  * NativeWrapperCodegen generates a Native Wrapper for a resource implemented in the native language.
  * <p>
- * To be concreate, at this time, it should be called for: - ClientSupplier - Keyring - CryptographicMaterialsManager
+ * To be concrete, at this time, it should be called for:
+ * <ul>
+ *   <li>ClientSupplier</li>
+ *   <li>Keyring</li>
+ *   <li>CryptographicMaterialsManager</li>
+ * </ul>
  */
 public class NativeWrapperCodegen {
     public final Model model;
