@@ -74,30 +74,46 @@ class NativeWrapperCodegenTestConstants {
             }
             """;
 
-    static String DO_OUTPUT_POSITIONAL = DO_OUTPUT.formatted(
+    static String getOutput(
+            String abstractOutput,
+            String validateOutputMethod,
+            String nativeOutput,
+            String invokeValidateOutput,
+            String toDafnyOutputConverter,
+            String catchService,
+            String catchGeneral) {
+        return DO_OUTPUT.formatted(
+                abstractOutput,
+                validateOutputMethod,
+                nativeOutput,
+                nativeOutput,
+                invokeValidateOutput,
+                abstractOutput,
+                toDafnyOutputConverter,
+                catchService,
+                catchGeneral,
+                RETURN_FAILURE.formatted(abstractOutput)
+        );
+    }
+
+    static String DO_OUTPUT_POSITIONAL = getOutput(
             "Dafny.Test.Foobar.IThing", // abstract output or interface
             "", // validateOutput method
             "Test.Foobar.IThing", // type of native output
-            "Test.Foobar.IThing", // type of native output
             "", // validate native output
-            "Dafny.Test.Foobar.IThing", // abstract output or interface
             "ToDafny_N4_test__N6_foobar__S17_DoSomethingOutput", // to dafny output converter
             CATCH_SERVICE,
-            CATCH_GENERAL.formatted("DoSomethingWithOutput"),
-            RETURN_FAILURE.formatted("Dafny.Test.Foobar.IThing")// return failure
+            CATCH_GENERAL.formatted("DoSomethingWithOutput")
     );
 
-    static String DO_OUTPUT_NOT_POSITIONAL = DO_OUTPUT.formatted(
+    static String DO_OUTPUT_NOT_POSITIONAL = getOutput(
             "Dafny.Test.Foobar._IDoSomethingOutput",
             VALIDATE_NATIVE_OUTPUT.formatted("Test.Foobar.DoSomethingOutput", "DoSomethingWithOutput"),
             "Test.Foobar.DoSomethingOutput",
-            "Test.Foobar.DoSomethingOutput",
             "validateOutput(nativeOutput);",
-            "Dafny.Test.Foobar._IDoSomethingOutput",
             "ToDafny_N4_test__N6_foobar__S17_DoSomethingOutput", // to dafny output converter
             CATCH_SERVICE,
-            CATCH_GENERAL.formatted("DoSomethingWithOutput"),
-            RETURN_FAILURE.formatted("Dafny.Test.Foobar._IDoSomethingOutput")// return failure
+            CATCH_GENERAL.formatted("DoSomethingWithOutput")
     );
 
     static String DO_INPUT =

@@ -6,20 +6,17 @@ package software.amazon.polymorph.smithydotnet.nativeWrapper;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.List;
 import java.util.Optional;
 
 import software.amazon.polymorph.smithydotnet.DotNetNameResolver;
 import software.amazon.polymorph.util.TestModel;
-import software.amazon.polymorph.util.Tokenizer;
-import software.amazon.polymorph.util.Tokenizer.ParseToken;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.ShapeId;
 
-import static org.junit.Assert.assertEquals;
 import static software.amazon.polymorph.util.TestModel.SERVICE_NAMESPACE;
 import static software.amazon.polymorph.util.TestModel.SERVICE_SHAPE_ID;
+import static software.amazon.polymorph.util.Tokenizer.tokenizeAndAssert;
 
 // Debugging Guidance:
 // These tests are arranged from Simplest to Most Complete.
@@ -69,14 +66,14 @@ public class NativeWrapperCodegenTest {
                 .toString();
         final String expected = NativeWrapperCodegenTestConstants.VALIDATE_NATIVE_OUTPUT
                 .formatted(nativeOutputType, "DoSomethingWithOutput");
-        parseAndAssert(actual, expected);
+        tokenizeAndAssert(actual, expected);
     }
 
     @Test
     public void testGenerateCatchServiceException() {
         final String actual = this.underTest.generateCatchServiceException().toString();
         final String expected = NativeWrapperCodegenTestConstants.CATCH_SERVICE;
-        parseAndAssert(actual, expected);
+        tokenizeAndAssert(actual, expected);
     }
 
     @Test
@@ -93,7 +90,7 @@ public class NativeWrapperCodegenTest {
                 ShapeId.fromParts(SERVICE_NAMESPACE, "DoSomethingWithOutput")
         ).toString();
         final String expected = NativeWrapperCodegenTestConstants.DO_OUTPUT_NOT_POSITIONAL;
-        parseAndAssert(actual, expected);
+        tokenizeAndAssert(actual, expected);
     }
 
     @Test
@@ -115,7 +112,7 @@ public class NativeWrapperCodegenTest {
                 ShapeId.fromParts(SERVICE_NAMESPACE, "DoSomethingWithOutput")
         ).toString();
         final String expected = NativeWrapperCodegenTestConstants.DO_OUTPUT_POSITIONAL;
-        parseAndAssert(actual, expected);
+        tokenizeAndAssert(actual, expected);
     }
 
     @Test
@@ -131,7 +128,7 @@ public class NativeWrapperCodegenTest {
                 ShapeId.fromParts(SERVICE_NAMESPACE, "DoSomethingWithInput")
         ).toString();
         final String expected = NativeWrapperCodegenTestConstants.DO_INPUT;
-        parseAndAssert(actual, expected);
+        tokenizeAndAssert(actual, expected);
     }
 
     @Test
@@ -140,7 +137,7 @@ public class NativeWrapperCodegenTest {
         final String actual = this.underTest.generateConstructor(className)
                 .toString();
         final String expected = NativeWrapperCodegenTestConstants.CONSTRUCTOR;
-        parseAndAssert(actual, expected);
+        tokenizeAndAssert(actual, expected);
     }
 
     @Test
@@ -152,7 +149,7 @@ public class NativeWrapperCodegenTest {
         NativeWrapperCodegen localUnderTest = setupLocalModel(rawModel);
         final String actual = localUnderTest.generateClass().toString();
         final String expected = NativeWrapperCodegenTestConstants.SIMPLE_CLASS;
-        parseAndAssert(actual, expected);
+        tokenizeAndAssert(actual, expected);
     }
 
     @Test
@@ -165,21 +162,21 @@ public class NativeWrapperCodegenTest {
         NativeWrapperCodegen localUnderTest = setupLocalModel(rawModel);
         final String actual = localUnderTest.generateClass().toString();
         final String expected = NativeWrapperCodegenTestConstants.VOID_CLASS;
-        parseAndAssert(actual, expected);
+        tokenizeAndAssert(actual, expected);
     }
 
     @Test
     public void testGenerateClassComplete(){
         final String actual = this.underTest.generateClass().toString();
         final String expected = NativeWrapperCodegenTestConstants.COMPLETE_CLASS;
-        parseAndAssert(actual, expected);
+        tokenizeAndAssert(actual, expected);
     }
 
     @Test
     public void testGenerate() {
         final String actual = this.underTest.generate().toString();
         final String expected = NativeWrapperCodegenTestConstants.COMPLETE;
-        parseAndAssert(actual, expected);
+        tokenizeAndAssert(actual, expected);
     }
 
     NativeWrapperCodegen setupLocalModel(String rawModel) {
@@ -191,12 +188,6 @@ public class NativeWrapperCodegenTest {
                 SERVICE_SHAPE_ID,
                 ShapeId.fromParts(SERVICE_NAMESPACE, "Baz"),
                 getNameResolver(localModel, SERVICE_SHAPE_ID));
-    }
-
-    void parseAndAssert(String actual, String expected) {
-        final List<ParseToken> actualTokens = Tokenizer.tokenize(actual);
-        final List<ParseToken> expectedTokens = Tokenizer.tokenize(expected);
-        assertEquals(expectedTokens, actualTokens);
     }
 
     @SuppressWarnings("SameParameterValue")
