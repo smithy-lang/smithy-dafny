@@ -168,13 +168,11 @@ public class ConcreteNativeWrapper extends NativeWrapperCodegen {
             Optional<String> nativeOutputType
     ) {
         if (nativeOutputType.isEmpty()) return TokenTree.empty();
-        final String message_one = "$\"Output of {%s}._%s is invalid. \""
-                .formatted(NATIVE_BASE_PROPERTY, methodName);
-        final String message_two = "$\"Should be {typeof(%s)} but is null.\""
-                .formatted(nativeOutputType.get());
+        final String nullMessage = "$\"{%s}._%s returned null, should be {typeof(%s)}\""
+                .formatted(NATIVE_BASE_PROPERTY, methodName, nativeOutputType.get());
         final String exception = classForConcreteServiceException(serviceShape);
-        final String nullCheck = "_ = %s ?? throw new %s(\n%s +\n%s);"
-                .formatted(NATIVE_OUTPUT, exception, message_one, message_two);
+        final String nullCheck = "_ = %s ?? throw new %s(%s);"
+                .formatted(NATIVE_OUTPUT, exception, nullMessage);
         return TokenTree.of(nullCheck);
     }
 
