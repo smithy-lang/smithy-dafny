@@ -108,6 +108,7 @@ public class AwsSdkShimCodegen {
 
         final TokenTree tryBody = TokenTree.of(assignSdkResponse, callImpl, returnResponse).lineSeparated();
         final TokenTree tryBlock = Token.of("try").append(tryBody.braced());
+        // TODO fix tests
         final String baseExceptionForService = nameResolver.baseExceptionForService();
         final TokenTree catchBlock = Token.of("""
                 catch (System.AggregateException ex) when (ex.InnerException is %s) {
