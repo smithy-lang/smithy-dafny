@@ -109,24 +109,43 @@ public class ModelUtils {
     }
 
     /**
-     * Throws {@link IllegalArgumentException} if the given structure shape is not an @error structure
-     * that fits code-generation constraints.
+     * Like {@link ModelUtils#validateErrorStructureMessageNotRequired(StructureShape)} (StructureShape)}, but with the
+     * added constraint that the {@code message} member must have the {@code @required} trait applied.
      */
-    public static void validateErrorStructure(final StructureShape structureShape) {
+    public static void validateErrorStructureMessageRequired(final StructureShape structureShape) {
+        validateErrorStructureMessageNotRequired(structureShape);
+
+        boolean messageRequired = structureShape.getMember("message")
+                .filter(member -> member.hasTrait(RequiredTrait.class)).isPresent();
+        if (!messageRequired) {
+            throw new IllegalArgumentException("The 'message' member of %s must be @required"
+                    .formatted(structureShape.getId()));
+        }
+    }
+
+    /**
+     * Throws {@link IllegalArgumentException} unless the given structure shape satisfies code-generation constraints:
+     * <ul>
+     *     <li>The structure must have the {@code @error} trait applied</li>
+     *     <li>The structure must have a {@code message} member</li>
+     *     <li>The structure must not have any members except {@code message}</li>
+     * </ul>
+     */
+    public static void validateErrorStructureMessageNotRequired(final StructureShape structureShape) {
         if (!structureShape.hasTrait(ErrorTrait.class)) {
             throw new IllegalArgumentException("%s is not an @error structure".formatted(structureShape.getId()));
         }
 
-        // TODO allow omitting message
-        boolean hasMessage = structureShape.getMember("message")
-                .filter(member -> member.hasTrait(RequiredTrait.class)).isPresent();
+        boolean hasMessage = structureShape.getMember("message").isPresent();
         if (!hasMessage) {
-            throw new IllegalArgumentException("Error structure %s is missing a required 'message' member");
+            throw new IllegalArgumentException("Error structure %s is missing a 'message' member"
+                    .formatted(structureShape.getId()));
         }
 
         // TODO support other members
         if (structureShape.getMemberNames().size() > 1) {
-            throw new IllegalArgumentException("Error structure %s cannot have members other than 'message'");
+            throw new IllegalArgumentException("Error structure %s cannot have members other than 'message'"
+                    .formatted(structureShape.getId()));
         }
     }
 }

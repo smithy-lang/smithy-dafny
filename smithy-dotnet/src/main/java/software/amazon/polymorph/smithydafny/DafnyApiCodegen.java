@@ -390,7 +390,7 @@ public class DafnyApiCodegen {
      * Generates a class for the given error structure that extends from the service error trait.
      */
     public TokenTree generateSpecificErrorClass(final StructureShape structureShape) {
-        ModelUtils.validateErrorStructure(structureShape);
+        ModelUtils.validateErrorStructureMessageNotRequired(structureShape);
         return Token.of(ERROR_CLASS_TEMPLATE.formatted(
                 nameResolver.classForSpecificError(structureShape), nameResolver.traitForServiceError(serviceShape)));
     }

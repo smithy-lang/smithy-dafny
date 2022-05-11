@@ -193,20 +193,18 @@ public class AwsSdkShimCodegenTest {
         final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
                 private Dafny.Com.Amazonaws.Foobar._IFoobarServiceError ConvertError(
                         Amazon.FoobarService.AmazonFoobarServiceException error) {
-                    if (error is Amazon.FoobarService.Model.Bang) {
-                        return Dafny.Com.Amazonaws.Foobar.FoobarServiceError.create_FoobarService__Bang(
-                                %1$s((Amazon.FoobarService.Model.Bang) error));
+                    switch (error) {
+                        case Amazon.FoobarService.Model.Bang e:
+                            return %s(e);
+                        case Amazon.FoobarService.Model.Boom e:
+                            return %s(e);
+                        case Amazon.FoobarService.Model.Crash e:
+                            return %s(e);
+                        default:
+                            return new Dafny.Com.Amazonaws.Foobar.UnknownFoobarServiceError {
+                                message = %s(error.Message)
+                            };
                     }
-                    if (error is Amazon.FoobarService.Model.Boom) {
-                        return Dafny.Com.Amazonaws.Foobar.FoobarServiceError.create_FoobarService__Boom(
-                                %2$s((Amazon.FoobarService.Model.Boom) error));
-                    }
-                    if (error is Amazon.FoobarService.Model.Crash) {
-                        return Dafny.Com.Amazonaws.Foobar.FoobarServiceError.create_FoobarService__Crash(
-                                %3$s((Amazon.FoobarService.Model.Crash) error));
-                    }
-                    return Dafny.Com.Amazonaws.Foobar.FoobarServiceError.create_FoobarService__Unknown(
-                            %4$s(error.Message));
                 }
                 """.formatted(bangConverter, boomConverter, crashConverter, stringConverter));
 

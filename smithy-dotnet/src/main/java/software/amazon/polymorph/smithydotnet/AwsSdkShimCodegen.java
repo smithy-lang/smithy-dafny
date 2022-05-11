@@ -135,43 +135,40 @@ public class AwsSdkShimCodegen {
     }
 
     /**
-     * Generates a shim for converting from an AWS SDK-defined exception to the corresponding constructor of the Dafny
-     * error sum type.
+     * Generates a shim for converting from an AWS SDK-defined exception to the corresponding Dafny exception.
      * <p>
-     * We define this here instead of in {@link AwsSdkTypeConversionCodegen} because the error sum type isn't in the
-     * model; it's only used here in the shims.
+     * We define this here instead of in {@link AwsSdkTypeConversionCodegen} because the base error type isn't modeled.
      */
     public TokenTree generateErrorTypeShim() {
         final String dafnyErrorAbstractType = nameResolver.dafnyAbstractTypeForServiceError(serviceShape);
-        final String dafnyErrorConcreteType = nameResolver.dafnyConcreteTypeForServiceError(serviceShape);
 
         // Collect into TreeSet so that we generate code in a deterministic order (lexicographic, in particular)
         final TreeSet<StructureShape> errorShapes = ModelUtils.streamServiceErrors(model, serviceShape)
                 .collect(Collectors.toCollection(TreeSet::new));
-        final TokenTree convertKnownErrors = TokenTree.of(errorShapes.stream()
+        final TokenTree knownErrorCases = TokenTree.of(errorShapes.stream()
                 .map(errorShape -> {
                     final ShapeId errorShapeId = errorShape.getId();
                     final String sdkErrorType = nameResolver.baseTypeForShape(errorShapeId);
-                    final String dafnyErrorCtor = DotNetNameResolver.dafnyCompiledNameForEnumDefinitionName(
-                            dafnyNameResolver.nameForServiceErrorConstructor(errorShapeId));
-
                     final String errorConverter = DotNetNameResolver.qualifiedTypeConverter(errorShapeId, TO_DAFNY);
-                    final TokenTree condition = Token.of("if (error is %s)".formatted(sdkErrorType));
-                    final TokenTree body = Token.of("return %s.create_%s(%s((%s) error));".formatted(
-                            dafnyErrorConcreteType, dafnyErrorCtor, errorConverter, sdkErrorType));
-                    return condition.append(body.braced());
+                    return Token.of("""
+                            case %s e:
+                                return %s(e);
+                            """.formatted(sdkErrorType, errorConverter));
                 })).lineSeparated();
 
         final String stringConverter = AwsSdkDotNetNameResolver.qualifiedTypeConverter(
                 ShapeId.from("smithy.api#String"), TO_DAFNY);
-        final String dafnyUnknownErrorCtor = DotNetNameResolver.dafnyCompiledNameForEnumDefinitionName(
-                dafnyNameResolver.classForUnknownError(serviceShape));
-        final TokenTree convertUnknownError = Token.of("return %s.create_%s(%s(error.Message));".formatted(
-                dafnyErrorConcreteType, dafnyUnknownErrorCtor, stringConverter));
+        final TokenTree unknownErrorCase = Token.of("""
+                default:
+                    return new %s() {
+                        message = %s(error.Message ?? "")
+                    };
+                """.formatted(null, stringConverter));
 
         final TokenTree signature = Token.of("private %s %s(%s error)".formatted(
                 dafnyErrorAbstractType, CONVERT_ERROR_METHOD, nameResolver.baseExceptionForService()));
-        final TokenTree body = TokenTree.of(convertKnownErrors, convertUnknownError).lineSeparated();
+        final TokenTree cases = TokenTree.of(knownErrorCases, unknownErrorCase).lineSeparated();
+        final TokenTree body = Token.of("switch (error)").append(cases.braced());
         return signature.append(body.braced());
     }
 }

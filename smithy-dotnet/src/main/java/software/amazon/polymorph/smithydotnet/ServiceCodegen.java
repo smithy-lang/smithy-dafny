@@ -206,7 +206,7 @@ public class ServiceCodegen {
      * @return an exception class for the given error structure shape, which extends from the common exception class
      */
     public TokenTree generateSpecificExceptionClass(final StructureShape structureShape) {
-        ModelUtils.validateErrorStructure(structureShape);
+        ModelUtils.validateErrorStructureMessageRequired(structureShape);
 
         final String commonExceptionName = nameResolver.classForCommonServiceException();
         final String exceptionName = nameResolver.classForSpecificServiceException(structureShape.getId());

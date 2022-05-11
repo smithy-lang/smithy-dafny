@@ -647,7 +647,6 @@ public class DotNetNameResolver {
      * This should generally be preferred to using the concrete Dafny type;
      * see {@link DotNetNameResolver#dafnyConcreteTypeForServiceError(ServiceShape)}.
      * <p>
-     * TODO remove this for error refactoring
      */
     public String dafnyAbstractTypeForServiceError(final ServiceShape serviceShape) {
         return "%s._I%sError".formatted(
@@ -690,21 +689,6 @@ public class DotNetNameResolver {
 
     public String serviceNameWithOutFactory() {
         return serviceNameWithOutFactory(serviceShape);
-    }
-
-    /**
-     * Returns the concrete Dafny type representing errors for the given service.
-     * <p>
-     * This must be used for accessing particular error constructors;
-     * otherwise, prefer to use the abstract Dafny type
-     * ({@link DotNetNameResolver#dafnyAbstractTypeForServiceError(ServiceShape)}).
-     * <p>
-     * TODO remove this for error refactoring
-     */
-    public String dafnyConcreteTypeForServiceError(final ServiceShape serviceShape) {
-        return "%s.%sError".formatted(
-                DafnyNameResolver.dafnyExternNamespaceForShapeId(serviceShape.getId()),
-                serviceShape.getContextualName(serviceShape));
     }
 
     /**
