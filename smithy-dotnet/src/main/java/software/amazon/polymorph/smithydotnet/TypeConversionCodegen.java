@@ -397,7 +397,7 @@ public class TypeConversionCodegen {
         final TokenTree isSetTernaries = TokenTree.of(
                 ModelUtils.streamStructureMembers(structureShape)
                         .filter(nameResolver::memberShapeIsOptional)
-                        .map(this::generateIsSetTernary)
+                        .map(this::generateExtractOptionalMember)
         ).lineSeparated();
 
         final TokenTree constructorArgs = TokenTree.of(ModelUtils.streamStructureMembers(structureShape)
@@ -424,7 +424,7 @@ public class TypeConversionCodegen {
      * OR :
      * "ToDafny_memberShape(propertyName)"
      */
-    public String generateConstructorArg(final MemberShape memberShape) {
+    private String generateConstructorArg(final MemberShape memberShape) {
         if (nameResolver.memberShapeIsOptional(memberShape)) {
             return "%s(%s)".formatted(
                     typeConverterForShape(memberShape.getId(), TO_DAFNY),
@@ -439,7 +439,7 @@ public class TypeConversionCodegen {
      * Returns:
      * "type varName = value.IsSetPropertyName() ? value.PropertyName : (type) null;"
      */
-    public TokenTree generateIsSetTernary(final MemberShape memberShape) {
+    public TokenTree generateExtractOptionalMember(final MemberShape memberShape) {
         final String type = nameResolver.baseTypeForShape(memberShape.getId());
         final String varName = nameResolver.variableNameForClassProperty(memberShape);
         final String isSetMethod = nameResolver.isSetMethodForStructureMember(memberShape);
