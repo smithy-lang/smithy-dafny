@@ -113,7 +113,7 @@ public class AwsSdkTypeConversionCodegenTest {
                     Dafny.ISequence<char> message = System.String.IsNullOrEmpty(value.Message)
                         ? Dafny.Sequence<char>.Empty
                         : %s(value.Message);
-                    return new Dafny.Com.Amazonaws.Foobar.OopsException(message);
+                    return new Dafny.Com.Amazonaws.Foobar.OopsException { message = message };
                 }""".formatted(
                 structureToDafnyConverterName,
                 stringToDafnyConverterName));

@@ -95,7 +95,7 @@ public class AwsSdkTypeConversionCodegen extends TypeConversionCodegen {
                 %s message = System.String.IsNullOrEmpty(value.Message)
                     ? Dafny.Sequence<char>.Empty
                     : %s(value.Message);
-                return new %s(message);
+                return new %s { message = message };
                 """.formatted(
                         nameResolver.dafnyTypeForShape(messageTarget.getId()),
                         AwsSdkDotNetNameResolver.typeConverterForShape(messageTarget.getId(), TO_DAFNY),
