@@ -108,17 +108,16 @@ public class AwsSdkShimCodegen {
 
         final TokenTree tryBody = TokenTree.of(assignSdkResponse, callImpl, returnResponse).lineSeparated();
         final TokenTree tryBlock = Token.of("try").append(tryBody.braced());
-        // TODO fix tests
+
         final String baseExceptionForService = nameResolver.baseExceptionForService();
         final TokenTree catchBlock = Token.of("""
-                catch (System.AggregateException ex) when (ex.InnerException is %s) {
-                    return %s.create_Failure(this.%s((%s)ex.InnerException));
+                catch (System.AggregateException aggregate) when (aggregate.InnerException is %s ex) {
+                    return %s.create_Failure(this.%s(ex));
                 }
                 """.formatted(
                         baseExceptionForService,
                         dafnyOutputType,
-                        CONVERT_ERROR_METHOD,
-                        baseExceptionForService));
+                        CONVERT_ERROR_METHOD));
 
         final TokenTree methodSignature = generateOperationShimSignature(operationShape);
         final TokenTree methodBody = TokenTree.of(sdkRequest, tryBlock, catchBlock);
@@ -140,7 +139,8 @@ public class AwsSdkShimCodegen {
      * We define this here instead of in {@link AwsSdkTypeConversionCodegen} because the base error type isn't modeled.
      */
     public TokenTree generateErrorTypeShim() {
-        final String dafnyErrorAbstractType = nameResolver.dafnyAbstractTypeForServiceError(serviceShape);
+        final String dafnyErrorAbstractType = DotNetNameResolver.dafnyTypeForCommonServiceError(serviceShape);
+        final String dafnyUnknownErrorType = nameResolver.dafnyTypeForUnknownServiceError(serviceShape);
 
         // Collect into TreeSet so that we generate code in a deterministic order (lexicographic, in particular)
         final TreeSet<StructureShape> errorShapes = ModelUtils.streamServiceErrors(model, serviceShape)
@@ -160,10 +160,10 @@ public class AwsSdkShimCodegen {
                 ShapeId.from("smithy.api#String"), TO_DAFNY);
         final TokenTree unknownErrorCase = Token.of("""
                 default:
-                    return new %s() {
+                    return new %s {
                         message = %s(error.Message ?? "")
                     };
-                """.formatted(null, stringConverter));
+                """.formatted(dafnyUnknownErrorType, stringConverter));
 
         final TokenTree signature = Token.of("private %s %s(%s error)".formatted(
                 dafnyErrorAbstractType, CONVERT_ERROR_METHOD, nameResolver.baseExceptionForService()));

@@ -642,19 +642,6 @@ public class DotNetNameResolver {
     }
 
     /**
-     * Returns the abstract Dafny type representing errors for the given service.
-     * <p>
-     * This should generally be preferred to using the concrete Dafny type;
-     * see {@link DotNetNameResolver#dafnyConcreteTypeForServiceError(ServiceShape)}.
-     * <p>
-     */
-    public String dafnyAbstractTypeForServiceError(final ServiceShape serviceShape) {
-        return "%s._I%sError".formatted(
-                DafnyNameResolver.dafnyExternNamespaceForShapeId(serviceShape.getId()),
-                serviceShape.getContextualName(serviceShape));
-    }
-
-    /**
      * Returns the most abstract concrete type representing errors for the given service.
      * <p>
      *     This will return "%s.%sBaseException", formatted with the Dafny service
@@ -707,9 +694,20 @@ public class DotNetNameResolver {
             serviceName = serviceName.substring(0, serviceName.lastIndexOf("Factory"));
         }
 
+        // TODO this should really end with "error"...
         return "%s.I%sException".formatted(
                 DafnyNameResolver.dafnyExternNamespaceForShapeId(serviceShape.getId()),
                 serviceName
+        );
+    }
+
+    /**
+     * Returns the Dafny class for the unknown-error class of the given service.
+     */
+    public String dafnyTypeForUnknownServiceError(final ServiceShape serviceShape) {
+        return "%s.%s".formatted(
+                DafnyNameResolver.dafnyExternNamespaceForShapeId(serviceShape.getId()),
+                new DafnyNameResolver(this.model, serviceShape).classForUnknownError(serviceShape)
         );
     }
 
