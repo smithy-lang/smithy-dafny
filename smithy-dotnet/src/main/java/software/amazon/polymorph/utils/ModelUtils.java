@@ -161,4 +161,12 @@ public class ModelUtils {
                 .region(1, s.length())
                 .replaceFirst("");
     }
+
+    /**
+     * Returns the given service's name without the trailing "Factory", if it exists; otherwise returns the service's
+     * name unmodified.
+     */
+    public static String serviceNameWithoutTrailingFactory(final ServiceShape serviceShape) {
+        return stripTrailingFactory(serviceShape.getId().getName());
+    }
 }
