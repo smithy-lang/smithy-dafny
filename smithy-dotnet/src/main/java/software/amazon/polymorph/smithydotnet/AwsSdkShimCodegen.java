@@ -69,7 +69,7 @@ public class AwsSdkShimCodegen {
         final TokenTree classBody = TokenTree.of(impl, constructor, operationShims, errorTypeShim).lineSeparated();
         return header
                 .append(classBody.braced())
-                .namespaced(Token.of(nameResolver.namespaceForService()));
+                .namespaced(Token.of(nameResolver.syntheticNamespaceForService()));
     }
 
     public TokenTree generateServiceShimConstructor() {
@@ -165,8 +165,11 @@ public class AwsSdkShimCodegen {
                     };
                 """.formatted(dafnyUnknownErrorType, stringConverter));
 
-        final TokenTree signature = Token.of("private %s %s(%s error)".formatted(
-                dafnyErrorAbstractType, CONVERT_ERROR_METHOD, nameResolver.classForBaseServiceException()));
+        final TokenTree signature = Token.of("private %s %s(%s.%s error)".formatted(
+                dafnyErrorAbstractType,
+                CONVERT_ERROR_METHOD,
+                nameResolver.namespaceForService(),
+                nameResolver.classForBaseServiceException()));
         final TokenTree cases = TokenTree.of(knownErrorCases, unknownErrorCase).lineSeparated();
         final TokenTree body = Token.of("switch (error)").append(cases.braced());
         return signature.append(body.braced());

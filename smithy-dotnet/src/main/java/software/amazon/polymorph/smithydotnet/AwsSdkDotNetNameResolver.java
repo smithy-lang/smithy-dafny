@@ -82,6 +82,10 @@ public class AwsSdkDotNetNameResolver extends DotNetNameResolver {
         return "Amazon.%s".formatted(getServiceName());
     }
 
+    public String syntheticNamespaceForService() {
+        return super.namespaceForService();
+    }
+
     public String shimClassForService() {
         return "%sShim".formatted(getServiceName());
     }

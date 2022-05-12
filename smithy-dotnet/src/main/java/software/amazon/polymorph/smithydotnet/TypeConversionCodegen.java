@@ -98,7 +98,7 @@ public class TypeConversionCodegen {
                 .braced();
         final TokenTree conversionClass = conversionClassBody
                 .prepend(TokenTree.of("internal static class", TYPE_CONVERSION_CLASS_NAME))
-                .namespaced(Token.of(nameResolver.namespaceForService()));
+                .namespaced(Token.of(getTypeConversionNamespace()));
         return Map.of(TYPE_CONVERSION_CLASS_PATH, conversionClass.prepend(prelude));
     }
 
@@ -790,6 +790,16 @@ public class TypeConversionCodegen {
         final TokenTree toDafnyConverterMethod = TokenTree.of(toDafnyConverterSignature, toDafnyBody.braced());
 
         return new TypeConverter(shape.getId(), fromDafnyConverterMethod, toDafnyConverterMethod);
+    }
+
+    /**
+     * Returns the namespace in which to generate the type conversion class.
+     *
+     * Subclasses can override this in case it differs from the service's "main" namespace, e.g. in the case of AWS SDK
+     * type conversion.
+     */
+    protected String getTypeConversionNamespace() {
+        return nameResolver.namespaceForService();
     }
 
     @VisibleForTesting
