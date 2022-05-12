@@ -25,7 +25,6 @@ import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.EnumDefinition;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
-import software.amazon.smithy.model.traits.RequiredTrait;
 import software.amazon.smithy.model.traits.TraitDefinition;
 
 import java.nio.file.Path;
@@ -74,7 +73,7 @@ public class ServiceCodegen {
         ).lineSeparated();
 
         // Common exception class
-        final Path commonExceptionPath = Path.of(String.format("%s.cs", nameResolver.classForCommonServiceException()));
+        final Path commonExceptionPath = Path.of(String.format("%s.cs", nameResolver.classForBaseServiceException()));
         final TokenTree commonExceptionPathCode = generateCommonExceptionClass();
         codeByPath.put(commonExceptionPath, commonExceptionPathCode.prepend(prelude));
 
@@ -193,7 +192,7 @@ public class ServiceCodegen {
      * @return a common exception class for this service, from which all other service exception classes extend
      */
     public TokenTree generateCommonExceptionClass() {
-        final String exceptionName = nameResolver.classForCommonServiceException();
+        final String exceptionName = nameResolver.classForBaseServiceException();
 
         final TokenTree classHeader = Token.of("public class %s : Exception".formatted(exceptionName));
         final TokenTree emptyCtor = Token.of("public %s() : base() {}".formatted(exceptionName));
@@ -208,7 +207,7 @@ public class ServiceCodegen {
     public TokenTree generateSpecificExceptionClass(final StructureShape structureShape) {
         ModelUtils.validateErrorStructureMessageRequired(structureShape);
 
-        final String commonExceptionName = nameResolver.classForCommonServiceException();
+        final String commonExceptionName = nameResolver.classForBaseServiceException();
         final String exceptionName = nameResolver.classForSpecificServiceException(structureShape.getId());
 
         final TokenTree classHeader = Token.of("public class %s : %s".formatted(exceptionName, commonExceptionName));

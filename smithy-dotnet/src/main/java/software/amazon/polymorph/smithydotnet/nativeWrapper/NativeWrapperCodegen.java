@@ -18,7 +18,7 @@ import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
 
-import static software.amazon.polymorph.smithydotnet.DotNetNameResolver.classForCommonServiceException;
+import static software.amazon.polymorph.smithydotnet.DotNetNameResolver.classForBaseServiceException;
 import static software.amazon.polymorph.smithydotnet.DotNetNameResolver.classForConcreteServiceException;
 import static software.amazon.polymorph.smithydotnet.DotNetNameResolver.qualifiedTypeConverter;
 import static software.amazon.polymorph.smithydotnet.DotNetNameResolver.qualifiedTypeConverterForCommonError;
@@ -164,7 +164,7 @@ public class NativeWrapperCodegen {
                                 operationShape.getOutput(), nativeOutputType, methodName),
                         inputConversion,
                         TokenTree.of("%s finalException = null;"
-                                .formatted(classForCommonServiceException(serviceShape))),
+                                .formatted(classForBaseServiceException(serviceShape))),
                         tryBlock,
                         generateCatchServiceException(),
                         generateCatchGeneralException(methodName),
@@ -260,7 +260,7 @@ public class NativeWrapperCodegen {
 
     TokenTree generateCatchServiceException() {
         return generateCatch(
-                classForCommonServiceException(serviceShape),
+                classForBaseServiceException(serviceShape),
                 "finalException = e;"
         );
     }
@@ -270,7 +270,7 @@ public class NativeWrapperCodegen {
                 var message = $"{%s}._%s threw unexpected: {e.GetType()}: \\"{e.Message}\\"";"""
                 .formatted(NATIVE_BASE_PROPERTY, methodName);
         String castStatement = "finalException = new %s(message);"
-                .formatted(nameResolver.classForCommonServiceException());
+                .formatted(nameResolver.classForBaseServiceException());
         return generateCatch("Exception", "%s\n%s".formatted(messageStatement, castStatement));
     }
 

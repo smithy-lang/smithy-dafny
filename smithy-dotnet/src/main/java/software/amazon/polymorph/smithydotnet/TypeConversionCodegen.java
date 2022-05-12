@@ -674,7 +674,7 @@ public class TypeConversionCodegen {
         // This sorts the set by shape ID, making the order deterministic w.r.t the model.
         final TreeSet<StructureShape> errorShapes = ModelUtils.streamServiceErrors(model, serviceShape)
                 .collect(Collectors.toCollection(TreeSet::new));
-        final String cSharpType = "%s.%s".formatted(nameResolver.namespaceForService(), nameResolver.classForCommonServiceException());
+        final String cSharpType = "%s.%s".formatted(nameResolver.namespaceForService(), nameResolver.classForBaseServiceException());
         final String dafnyType = nameResolver.dafnyTypeForCommonServiceError(serviceShape);
 
         // Generate the FROM_DAFNY method
@@ -721,7 +721,7 @@ public class TypeConversionCodegen {
         final String anyMessage =
                 """
                 var message = $"%s encountered unexpected: {value.GetType()}: \\"{value.Message}\\"";"""
-                        .formatted(nameResolver.serviceNameWithOutFactory());
+                        .formatted(nameResolver.serviceNameWithoutFactory());
         // Return the root service exception with the custom message.
         final TokenTree handleAnyException = Token.of(
                 "default:\n%1$s\nrtn = new %2$s();\nrtn.message = %3$s(message);\nreturn rtn;"

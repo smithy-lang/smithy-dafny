@@ -148,4 +148,17 @@ public class ModelUtils {
                     .formatted(structureShape.getId()));
         }
     }
+
+    private static final Pattern TRAILING_FACTORY_PATTERN = Pattern.compile("Factory$");
+
+    /**
+     * If the given string ends with "Factory" and has at least one character prior, returns a copy of the string
+     * without the trailing "Factory". Otherwise, returns a copy of the string with no modifications.
+     */
+    public static String stripTrailingFactory(final CharSequence s) {
+        return TRAILING_FACTORY_PATTERN.matcher(s)
+                // exclude the first char
+                .region(1, s.length())
+                .replaceFirst("");
+    }
 }
