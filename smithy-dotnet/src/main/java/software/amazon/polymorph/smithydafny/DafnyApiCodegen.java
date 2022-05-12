@@ -3,6 +3,7 @@
 
 package software.amazon.polymorph.smithydafny;
 
+import com.google.common.annotations.VisibleForTesting;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
@@ -90,8 +91,7 @@ public class DafnyApiCodegen {
                 }
                 yield TokenTree.of(
                         generateServiceTraitDefinition(),
-                        generateServiceErrorTraitDefinition(),
-                        generateUnknownErrorClass()
+                        generateErrorTraitAndClasses()
                 ).lineSeparated();
             }
             case BLOB -> generateBlobTypeDefinition(shapeId);
@@ -129,29 +129,6 @@ public class DafnyApiCodegen {
                 .getTrait(LengthTrait.class)
                 .map(DafnyApiCodegen::generateLengthConstraint);
         return generateSubsetType(shapeId, "ValidUTF8Bytes", lengthConstraint);
-    }
-
-    public TokenTree generateErrorStructureTypeDefinition(final ShapeId shapeId) {
-        TokenTree datatype = this.generateStructureTypeDefinition(shapeId);
-        StructureShape errorStructure = model.expectShape(shapeId, StructureShape.class);
-        final TokenTree castMethod = generateCastToStringForAnErrorStructure(shapeId, errorStructure);
-        datatype = datatype.append(castMethod.surround(TokenTree.of("{\n"), TokenTree.of("\n }")));
-        return datatype;
-    }
-
-    public TokenTree generateCastToStringForAnErrorStructure(final ShapeId shapeId, final StructureShape errorStructure) {
-        Optional<MemberShape> message = errorStructure.getMember("message");
-        final String castToStringSignature = "\tfunction method CastToString(): string {\n\t%1$s\n\t}";
-        String body;
-        if (message.isPresent()
-                && model.expectShape(message.get().getTarget()).getType() == ShapeType.STRING) {
-            body = "\tif message.Some? then \"%1$s: \" + message.value else \"%1$s\"";
-        } else {
-            body = "\"%1$s\"";
-        }
-        body = body.formatted(shapeId.getName(serviceShape));
-        TokenTree castMethod = TokenTree.of(castToStringSignature.formatted(body));
-        return castMethod;
     }
 
     public TokenTree generateBlobTypeDefinition(final ShapeId blobShapeId) {
@@ -464,5 +441,10 @@ public class DafnyApiCodegen {
     private TokenTree generateTypeSynonym(
             final ShapeId shapeId, final String baseType) {
         return generateSubsetType(shapeId, baseType, Optional.empty());
+    }
+
+    @VisibleForTesting
+    public Model getModel() {
+        return model;
     }
 }
