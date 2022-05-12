@@ -91,7 +91,7 @@ public class DafnyApiCodegen {
                 }
                 yield TokenTree.of(
                         generateServiceTraitDefinition(),
-                        generateErrorTraitAndClasses()
+                        generateUnmodeledErrorTypes()
                 ).lineSeparated();
             }
             case BLOB -> generateBlobTypeDefinition(shapeId);
@@ -323,15 +323,15 @@ public class DafnyApiCodegen {
     }
 
     /**
-     * Generates the service error trait, a specific error class for each error structure, and an unknown error class.
+     * Generates the service's error types that are not modeled directly. These include:
+     * <ul>
+     *     <li>the error trait</li>
+     *     <li>an "unknown error" class</li>
+     * </ul>
      */
-    public TokenTree generateErrorTraitAndClasses() {
-        final TokenTree specificErrorClasses = TokenTree.of(
-                ModelUtils.streamServiceErrors(model, serviceShape).map(this::generateSpecificErrorClass)
-        ).lineSeparated();
+    public TokenTree generateUnmodeledErrorTypes() {
         return TokenTree.of(
                 generateServiceErrorTraitDefinition(),
-                specificErrorClasses,
                 generateUnknownErrorClass()
         ).lineSeparated();
     }
