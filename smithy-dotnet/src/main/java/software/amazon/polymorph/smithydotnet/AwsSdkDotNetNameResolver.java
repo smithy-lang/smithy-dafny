@@ -29,7 +29,7 @@ public class AwsSdkDotNetNameResolver extends DotNetNameResolver {
     @Override
     protected String baseTypeForString(final StringShape stringShape) {
         if (isGeneratedInSdk(stringShape.getId()) && stringShape.hasTrait(EnumTrait.class)) {
-            return "%s.%s".formatted(getSdkServiceNamespace(), classForEnum(stringShape.getId()));
+            return "%s.%s".formatted(namespaceForService(), classForEnum(stringShape.getId()));
         }
 
         return super.baseTypeForString(stringShape);
@@ -54,7 +54,7 @@ public class AwsSdkDotNetNameResolver extends DotNetNameResolver {
                 throw new IllegalArgumentException("Trait definition structures have no corresponding generated type");
             }
 
-            return "%s.Model.%s".formatted(getSdkServiceNamespace(), structureShape.getId().getName());
+            return "%s.Model.%s".formatted(namespaceForService(), structureShape.getId().getName());
         }
 
         return super.baseTypeForStructure(structureShape);
@@ -63,21 +63,22 @@ public class AwsSdkDotNetNameResolver extends DotNetNameResolver {
     @Override
     protected String baseTypeForService(final ServiceShape serviceShape) {
         if (isGeneratedInSdk(serviceShape.getId())) {
-            return "%s.IAmazon%s".formatted(getSdkServiceNamespace(), getServiceName());
+            return "%s.IAmazon%s".formatted(namespaceForService(), getServiceName());
         }
 
         return super.baseTypeForService(serviceShape);
     }
 
     public String implForServiceClient() {
-        return "%s.Amazon%sClient".formatted(getSdkServiceNamespace(), getServiceName());
+        return "%s.Amazon%sClient".formatted(namespaceForService(), getServiceName());
     }
 
     private String getServiceName() {
         return StringUtils.capitalize(getServiceShape().getId().getName());
     }
 
-    private String getSdkServiceNamespace() {
+    @Override
+    public String namespaceForService() {
         return "Amazon.%s".formatted(getServiceName());
     }
 
@@ -85,7 +86,8 @@ public class AwsSdkDotNetNameResolver extends DotNetNameResolver {
         return "%sShim".formatted(getServiceName());
     }
 
-    public String baseExceptionForService() {
-        return "%s.Amazon%sException".formatted(getSdkServiceNamespace(), getServiceName());
+    @Override
+    public String classForBaseServiceException() {
+        return "Amazon%sException".formatted(getServiceName());
     }
 }

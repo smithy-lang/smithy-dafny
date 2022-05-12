@@ -109,7 +109,7 @@ public class AwsSdkShimCodegen {
         final TokenTree tryBody = TokenTree.of(assignSdkResponse, callImpl, returnResponse).lineSeparated();
         final TokenTree tryBlock = Token.of("try").append(tryBody.braced());
 
-        final String baseExceptionForService = nameResolver.baseExceptionForService();
+        final String baseExceptionForService = nameResolver.classForBaseServiceException();
         final TokenTree catchBlock = Token.of("""
                 catch (System.AggregateException aggregate) when (aggregate.InnerException is %s ex) {
                     return %s.create_Failure(this.%s(ex));
@@ -166,7 +166,7 @@ public class AwsSdkShimCodegen {
                 """.formatted(dafnyUnknownErrorType, stringConverter));
 
         final TokenTree signature = Token.of("private %s %s(%s error)".formatted(
-                dafnyErrorAbstractType, CONVERT_ERROR_METHOD, nameResolver.baseExceptionForService()));
+                dafnyErrorAbstractType, CONVERT_ERROR_METHOD, nameResolver.classForBaseServiceException()));
         final TokenTree cases = TokenTree.of(knownErrorCases, unknownErrorCase).lineSeparated();
         final TokenTree body = Token.of("switch (error)").append(cases.braced());
         return signature.append(body.braced());

@@ -65,15 +65,15 @@ public class DafnyApiCodegenTest {
                     trait IFoobarServiceFactoryClient {
                         predicate {:opaque} DoItCalledWith() {true}
                         predicate {:opaque} DoItSucceededWith() {true}
-                        method DoIt() returns (output: Result<(), FoobarServiceFactoryError>)
+                        method DoIt() returns (output: Result<(), IFoobarServiceFactoryException>)
                            ensures DoItCalledWith()
                            ensures output.Success? ==> DoItSucceededWith()
                     }
-                    trait FoobarServiceFactoryError {
+                    trait IFoobarServiceFactoryException {
                         function method GetMessage(): (message: string)
                             reads this
                     }
-                    class UnknownFoobarServiceFactoryError extends FoobarServiceFactoryError {
+                    class UnknownFoobarServiceFactoryError extends IFoobarServiceFactoryException {
                         var message: string
                         constructor(message: string) {
                             this.message := message;
@@ -279,12 +279,12 @@ public class DafnyApiCodegenTest {
                 trait IFoobarServiceFactoryClient {
                     predicate {:opaque} DoThisCalledWith() {true}
                     predicate {:opaque} DoThisSucceededWith() {true}
-                    method DoThis() returns (output: Result<(), FoobarServiceFactoryError>)
+                    method DoThis() returns (output: Result<(), IFoobarServiceFactoryException>)
                       ensures DoThisCalledWith()
                       ensures output.Success? ==> DoThisSucceededWith()
                     predicate {:opaque} DoThatCalledWith() {true}
                     predicate {:opaque} DoThatSucceededWith() {true}
-                    method DoThat() returns (output: Result<(), FoobarServiceFactoryError>)
+                    method DoThat() returns (output: Result<(), IFoobarServiceFactoryException>)
                       ensures DoThatCalledWith()
                       ensures output.Success? ==> DoThatSucceededWith()
                 }""");
@@ -315,7 +315,7 @@ public class DafnyApiCodegenTest {
                   input: Foo,
                   output: Bar
                 ) {true}
-                method DoIt(input: Foo) returns (output: Result<Bar, FoobarServiceFactoryError>)
+                method DoIt(input: Foo) returns (output: Result<Bar, IFoobarServiceFactoryException>)
                   ensures DoItCalledWith(input)
                   ensures output.Success? ==> DoItSucceededWith(input, output.value)
                 """);
@@ -338,7 +338,7 @@ public class DafnyApiCodegenTest {
         final List<ParseToken> actualTokens = Tokenizer.tokenize(actualCode);
 
         final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
-                trait FoobarServiceFactoryError {
+                trait IFoobarServiceFactoryException {
                     function method GetMessage(): (message: string)
                         reads this
                 }
@@ -361,7 +361,7 @@ public class DafnyApiCodegenTest {
         final String actualCode = codegen.generateSpecificErrorClass(codegen.getModel().expectShape(shapeId, StructureShape.class)).toString();
         final List<ParseToken> actualTokens = Tokenizer.tokenize(actualCode);
         final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
-                class OopsException extends FoobarServiceFactoryError {
+                class OopsException extends IFoobarServiceFactoryException {
                     var message: string
                     
                     constructor (message: string) {

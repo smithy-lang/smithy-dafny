@@ -47,7 +47,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static software.amazon.polymorph.smithydotnet.DotNetNameResolver.TYPE_CONVERSION_CLASS_NAME;
-import static software.amazon.polymorph.smithydotnet.DotNetNameResolver.typeConverterForCommonError;
 import static software.amazon.polymorph.smithydotnet.DotNetNameResolver.typeConverterForShape;
 import static software.amazon.polymorph.smithydotnet.TypeConversionDirection.FROM_DAFNY;
 import static software.amazon.polymorph.smithydotnet.TypeConversionDirection.TO_DAFNY;
@@ -699,7 +698,7 @@ public class TypeConversionCodegen {
         final TokenTree fromDafnyBody = TokenTree.of(
                 TokenTree.of("switch(value)"), fromDafnySwitchCases).lineSeparated();
         final TokenTree fromDafnyConverterSignature = Token.of("public static %s %s(%s value)".formatted(
-                cSharpType, typeConverterForCommonError(serviceShape, FROM_DAFNY), dafnyType));
+                cSharpType, nameResolver.typeConverterForCommonError(serviceShape, FROM_DAFNY), dafnyType));
         final TokenTree fromDafnyConverterMethod = TokenTree.of(fromDafnyConverterSignature, fromDafnyBody.braced());
 
         // Generate the TO_DAFNY method
@@ -735,7 +734,7 @@ public class TypeConversionCodegen {
                 TokenTree.of("%s rtn;\nswitch (value)\n".formatted(nameResolver.dafnyBaseTypeForServiceError())),
                 toDafnySwitchCases);
         final TokenTree toDafnyConverterSignature = Token.of("public static %s %s(System.Exception value)".formatted(
-                dafnyType, typeConverterForCommonError(serviceShape, TO_DAFNY)));
+                dafnyType, nameResolver.typeConverterForCommonError(serviceShape, TO_DAFNY)));
         final TokenTree toDafnyConverterMethod = TokenTree.of(toDafnyConverterSignature, toDafnyBody.braced());
 
         // The Common Exception Converter is novel to Polymorph, it is not native to smithy.

@@ -154,7 +154,7 @@ public class ShimCodegen {
         return Token.of("if (%s.is_Failure) throw %s(%s.dtor_error);"
                 .formatted(
                         RESULT_NAME,
-                        DotNetNameResolver.qualifiedTypeConverterForCommonError(serviceShape, FROM_DAFNY),
+                        nameResolver.qualifiedTypeConverterForCommonError(serviceShape, FROM_DAFNY),
                         RESULT_NAME
                 ));
     }
@@ -234,5 +234,10 @@ public class ShimCodegen {
     @VisibleForTesting
     public Model getModel() {
         return model;
+    }
+
+    @VisibleForTesting
+    public DotNetNameResolver getNameResolver() {
+        return nameResolver;
     }
 }
