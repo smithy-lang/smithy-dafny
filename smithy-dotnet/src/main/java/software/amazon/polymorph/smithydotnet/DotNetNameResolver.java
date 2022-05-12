@@ -662,7 +662,7 @@ public class DotNetNameResolver {
      * Returns this service name, without the trailing "Factory" if it's present.
      */
     public String serviceNameWithoutFactory() {
-        return ModelUtils.stripTrailingFactory(serviceShape.getId().getName());
+        return ModelUtils.serviceNameWithoutTrailingFactory(serviceShape);
     }
 
     /**
