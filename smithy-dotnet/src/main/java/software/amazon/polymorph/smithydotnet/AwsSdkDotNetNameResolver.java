@@ -13,6 +13,7 @@ import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.EnumTrait;
+import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.TraitDefinition;
 import software.amazon.smithy.utils.StringUtils;
 
@@ -48,8 +49,12 @@ public class AwsSdkDotNetNameResolver extends DotNetNameResolver {
 
     @Override
     protected String baseTypeForStructure(final StructureShape structureShape) {
-        if (isGeneratedInSdk(structureShape.getId()) && !structureShape.hasTrait(TraitDefinition.class)) {
-            return "%s.Model.%s".formatted(getSdkServiceNamespace(), classForStructure(structureShape.getId()));
+        if (isGeneratedInSdk(structureShape.getId())) {
+            if (structureShape.hasTrait(TraitDefinition.class)) {
+                throw new IllegalArgumentException("Trait definition structures have no corresponding generated type");
+            }
+
+            return "%s.Model.%s".formatted(getSdkServiceNamespace(), structureShape.getId().getName());
         }
 
         return super.baseTypeForStructure(structureShape);

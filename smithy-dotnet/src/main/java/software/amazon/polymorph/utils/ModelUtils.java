@@ -3,10 +3,6 @@
 
 package software.amazon.polymorph.utils;
 
-import java.util.Optional;
-import java.util.regex.Pattern;
-import java.util.stream.Stream;
-
 import software.amazon.polymorph.traits.ClientConfigTrait;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.polymorph.traits.ExtendableTrait;
@@ -20,6 +16,11 @@ import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.ErrorTrait;
+import software.amazon.smithy.model.traits.RequiredTrait;
+
+import java.util.Optional;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 public class ModelUtils {
     // Require title-case alphanumeric names, so we don't need to check for keyword conflicts.
@@ -105,5 +106,67 @@ public class ModelUtils {
 
     public static boolean isValidEnumDefinitionName(final String name) {
         return ENUM_NAME_PATTERN.matcher(name).matches();
+    }
+
+    /**
+     * Like {@link ModelUtils#validateErrorStructureMessageNotRequired(StructureShape)} (StructureShape)}, but with the
+     * added constraint that the {@code message} member must have the {@code @required} trait applied.
+     */
+    public static void validateErrorStructureMessageRequired(final StructureShape structureShape) {
+        validateErrorStructureMessageNotRequired(structureShape);
+
+        boolean messageRequired = structureShape.getMember("message")
+                .filter(member -> member.hasTrait(RequiredTrait.class)).isPresent();
+        if (!messageRequired) {
+            throw new IllegalArgumentException("The 'message' member of %s must be @required"
+                    .formatted(structureShape.getId()));
+        }
+    }
+
+    /**
+     * Throws {@link IllegalArgumentException} unless the given structure shape satisfies code-generation constraints:
+     * <ul>
+     *     <li>The structure must have the {@code @error} trait applied</li>
+     *     <li>The structure must have a {@code message} member</li>
+     *     <li>The structure must not have any members except {@code message}</li>
+     * </ul>
+     */
+    public static void validateErrorStructureMessageNotRequired(final StructureShape structureShape) {
+        if (!structureShape.hasTrait(ErrorTrait.class)) {
+            throw new IllegalArgumentException("%s is not an @error structure".formatted(structureShape.getId()));
+        }
+
+        boolean hasMessage = structureShape.getMember("message").isPresent();
+        if (!hasMessage) {
+            throw new IllegalArgumentException("Error structure %s is missing a 'message' member"
+                    .formatted(structureShape.getId()));
+        }
+
+        // TODO support other members
+        if (structureShape.getMemberNames().size() > 1) {
+            throw new IllegalArgumentException("Error structure %s cannot have members other than 'message'"
+                    .formatted(structureShape.getId()));
+        }
+    }
+
+    private static final Pattern TRAILING_FACTORY_PATTERN = Pattern.compile("Factory$");
+
+    /**
+     * If the given string ends with "Factory" and has at least one character prior, returns a copy of the string
+     * without the trailing "Factory". Otherwise, returns a copy of the string with no modifications.
+     */
+    private static String stripTrailingFactory(final CharSequence s) {
+        return TRAILING_FACTORY_PATTERN.matcher(s)
+                // exclude the first char
+                .region(1, s.length())
+                .replaceFirst("");
+    }
+
+    /**
+     * Returns the given service's name without the trailing "Factory", if it exists; otherwise returns the service's
+     * name unmodified.
+     */
+    public static String serviceNameWithoutTrailingFactory(final ServiceShape serviceShape) {
+        return stripTrailingFactory(serviceShape.getId().getName());
     }
 }

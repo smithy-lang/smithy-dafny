@@ -60,10 +60,14 @@ public class AwsSdkShimCodegenTest {
                             this._impl = impl;
                         }
                         
-                        private Dafny.Com.Amazonaws.Foobar._IFoobarServiceError ConvertError(
+                        private Dafny.Com.Amazonaws.Foobar.IFoobarServiceException ConvertError(
                                 Amazon.FoobarService.AmazonFoobarServiceException error) {
-                            return Dafny.Com.Amazonaws.Foobar.FoobarServiceError.create_FoobarService__Unknown(
-                                    %s(error.Message));
+                            switch (error) {
+                                default:
+                                    return new Dafny.Com.Amazonaws.Foobar.UnknownFoobarServiceError {
+                                        message = %s(error.Message ?? "")
+                                    };
+                            }
                         }
                     }
                 }
@@ -143,7 +147,7 @@ public class AwsSdkShimCodegenTest {
                 codegen.generateOperationShim(operationShapeId).toString());
 
         final String resultTypeParams = "%s, %s".formatted(
-                "Dafny.Com.Amazonaws.Foobar._IGoResponse", "Dafny.Com.Amazonaws.Foobar._IFoobarServiceError");
+                "Dafny.Com.Amazonaws.Foobar._IGoResponse", "Dafny.Com.Amazonaws.Foobar.IFoobarServiceException");
         final String requestFromDafnyConverter =
                 AwsSdkDotNetNameResolver.qualifiedTypeConverter(requestShapeId, FROM_DAFNY);
         final String responseToDafnyConverter =
@@ -156,7 +160,8 @@ public class AwsSdkShimCodegenTest {
                             this._impl.GoAsync(sdkRequest).Result;
                         return Wrappers_Compile.Result<%1$s>.create_Success(%3$s(sdkResponse));
                     }
-                    catch (Amazon.FoobarService.AmazonFoobarServiceException ex) {
+                    catch (System.AggregateException aggregate)
+                        when (aggregate.InnerException is Amazon.FoobarService.AmazonFoobarServiceException ex) {
                         return Wrappers_Compile.Result<%1$s>.create_Failure(this.ConvertError(ex));
                     }
                 }
@@ -191,22 +196,20 @@ public class AwsSdkShimCodegenTest {
         final String stringConverter = AwsSdkDotNetNameResolver.qualifiedTypeConverter(
                 ShapeId.from("smithy.api#String"), TO_DAFNY);
         final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
-                private Dafny.Com.Amazonaws.Foobar._IFoobarServiceError ConvertError(
+                private Dafny.Com.Amazonaws.Foobar.IFoobarServiceException ConvertError(
                         Amazon.FoobarService.AmazonFoobarServiceException error) {
-                    if (error is Amazon.FoobarService.Model.Bang) {
-                        return Dafny.Com.Amazonaws.Foobar.FoobarServiceError.create_FoobarService__Bang(
-                                %1$s((Amazon.FoobarService.Model.Bang) error));
+                    switch (error) {
+                        case Amazon.FoobarService.Model.Bang e:
+                            return %s(e);
+                        case Amazon.FoobarService.Model.Boom e:
+                            return %s(e);
+                        case Amazon.FoobarService.Model.Crash e:
+                            return %s(e);
+                        default:
+                            return new Dafny.Com.Amazonaws.Foobar.UnknownFoobarServiceError {
+                                message = %s(error.Message ?? "")
+                            };
                     }
-                    if (error is Amazon.FoobarService.Model.Boom) {
-                        return Dafny.Com.Amazonaws.Foobar.FoobarServiceError.create_FoobarService__Boom(
-                                %2$s((Amazon.FoobarService.Model.Boom) error));
-                    }
-                    if (error is Amazon.FoobarService.Model.Crash) {
-                        return Dafny.Com.Amazonaws.Foobar.FoobarServiceError.create_FoobarService__Crash(
-                                %3$s((Amazon.FoobarService.Model.Crash) error));
-                    }
-                    return Dafny.Com.Amazonaws.Foobar.FoobarServiceError.create_FoobarService__Unknown(
-                            %4$s(error.Message));
                 }
                 """.formatted(bangConverter, boomConverter, crashConverter, stringConverter));
 

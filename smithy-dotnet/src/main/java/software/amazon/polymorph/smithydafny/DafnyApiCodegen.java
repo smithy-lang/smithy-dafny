@@ -3,6 +3,7 @@
 
 package software.amazon.polymorph.smithydafny;
 
+import com.google.common.annotations.VisibleForTesting;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
@@ -31,7 +32,6 @@ import software.amazon.smithy.model.traits.TraitDefinition;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -89,8 +89,10 @@ public class DafnyApiCodegen {
                 if (shape != serviceShape) {
                     throw new IllegalStateException("Unexpected service shape found");
                 }
-                yield TokenTree.of(generateServiceTraitDefinition(), generateServiceErrorTypeDefinition())
-                        .lineSeparated();
+                yield TokenTree.of(
+                        generateServiceTraitDefinition(),
+                        generateUnmodeledErrorTypes()
+                ).lineSeparated();
             }
             case BLOB -> generateBlobTypeDefinition(shapeId);
             case BOOLEAN -> generateBoolTypeDefinition(shapeId);
@@ -112,7 +114,7 @@ public class DafnyApiCodegen {
                     || shape.hasTrait(PositionalTrait.class)) {
                     yield null;
                 } else if (shape.hasTrait(ErrorTrait.class)) {
-                    yield generateErrorStructureTypeDefinition(shapeId);
+                    yield generateSpecificErrorClass((StructureShape) shape);
                 } else {
                     yield generateStructureTypeDefinition(shapeId);
                 }
@@ -127,29 +129,6 @@ public class DafnyApiCodegen {
                 .getTrait(LengthTrait.class)
                 .map(DafnyApiCodegen::generateLengthConstraint);
         return generateSubsetType(shapeId, "ValidUTF8Bytes", lengthConstraint);
-    }
-
-    public TokenTree generateErrorStructureTypeDefinition(final ShapeId shapeId) {
-        TokenTree datatype = this.generateStructureTypeDefinition(shapeId);
-        StructureShape errorStructure = model.expectShape(shapeId, StructureShape.class);
-        final TokenTree castMethod = generateCastToStringForAnErrorStructure(shapeId, errorStructure);
-        datatype = datatype.append(castMethod.surround(TokenTree.of("{\n"), TokenTree.of("\n }")));
-        return datatype;
-    }
-
-    public TokenTree generateCastToStringForAnErrorStructure(final ShapeId shapeId, final StructureShape errorStructure) {
-        Optional<MemberShape> message = errorStructure.getMember("message");
-        final String castToStringSignature = "\tfunction method CastToString(): string {\n\t%1$s\n\t}";
-        String body;
-        if (message.isPresent()
-                && model.expectShape(message.get().getTarget()).getType() == ShapeType.STRING) {
-            body = "\tif message.Some? then \"%1$s: \" + message.value else \"%1$s\"";
-        } else {
-            body = "\"%1$s\"";
-        }
-        body = body.formatted(shapeId.getName(serviceShape));
-        TokenTree castMethod = TokenTree.of(castToStringSignature.formatted(body));
-        return castMethod;
     }
 
     public TokenTree generateBlobTypeDefinition(final ShapeId blobShapeId) {
@@ -344,52 +323,63 @@ public class DafnyApiCodegen {
     }
 
     /**
-     * Generates a sum type for the error shapes of operations in the service.
+     * Generates the service's error types that are not modeled directly. These include:
+     * <ul>
+     *     <li>the error trait</li>
+     *     <li>an "unknown error" class</li>
+     * </ul>
      */
-     // TODO: remove for KMS error type refactoring
-     // need to exhaustively specify the error shapes of operations
-    public TokenTree generateServiceErrorTypeDefinition() {
-        // Collect into TreeSet so that the error shapes are lexicographically sorted, ordering them deterministically
-        final TreeSet<ShapeId> errorShapeIds = ModelUtils.streamServiceErrors(model, serviceShape)
-                .map(Shape::getId)
-                .collect(Collectors.toCollection(TreeSet::new));
-
-        final TokenTree unknownConstructor = Token.of("| %s(unknownMessage: string)".formatted(
-                nameResolver.nameForServiceErrorUnknownConstructor(serviceShape)));
-        final TokenTree knownConstructors = TokenTree.of(errorShapeIds.stream()
-                .map(errorShapeId -> Token.of("| %1$s(%2$s: %2$s)".formatted(
-                    nameResolver.nameForServiceErrorConstructor(errorShapeId), nameResolver.baseTypeForShape(errorShapeId)))))
-                .lineSeparated();
-        final TokenTree allConstructors = TokenTree.of(unknownConstructor, knownConstructors).lineSeparated();
-        TokenTree serviceErrorDatatype = TokenTree.of("datatype", nameResolver.errorTypeForService(serviceShape), "=\n")
-                .append(allConstructors);
-
-        return serviceErrorDatatype
-                .append(generateCastToStringForErrorStructure(errorShapeIds))
-                .lineSeparated();
+    public TokenTree generateUnmodeledErrorTypes() {
+        return TokenTree.of(
+                generateServiceErrorTraitDefinition(),
+                generateUnknownErrorClass()
+        ).lineSeparated();
     }
 
     /**
-     * Generates a function method to cast all subtypes of generated Service Error
-     * to a string.
+     * Generates a trait representing errors in this service, which specific error classes will extend.
      */
-    public TokenTree generateCastToStringForErrorStructure(final TreeSet<ShapeId> errorShapeIds) {
-        String castToStringFunctionMethodName = "Cast"
-                + nameResolver.errorTypeForService(serviceShape)
-                + "ToString";
-        TokenTree castToStringSignature = TokenTree.of("function method %1$s(error: %2$s): string".formatted(
-                castToStringFunctionMethodName, nameResolver.errorTypeForService(serviceShape)));
-        final String commonCaseBody = "\n\tcase %1$s(arg) => arg.CastToString()";
-        final TokenTree body = TokenTree.of(errorShapeIds.stream()
-                        .map(errorShapeId -> TokenTree.of(commonCaseBody.formatted(
-                                nameResolver.nameForServiceErrorConstructor(errorShapeId)))))
-                .surround(
-                        TokenTree.of("\tmatch error"),
-                        TokenTree.of("\n\tcase %1$s(arg) => \"Unexpected Exception from AWS %2$s: \" + arg".formatted(
-                                nameResolver.nameForServiceErrorUnknownConstructor(serviceShape),
-                                nameResolver.nameForService())))
-                .braced();
-        return castToStringSignature.append(body);
+    public TokenTree generateServiceErrorTraitDefinition() {
+        return Token.of("""
+                trait %s {
+                    function method GetMessage(): (message: string) reads this
+                }
+                """.formatted(nameResolver.traitForServiceError(serviceShape)));
+    }
+
+    private static final String ERROR_CLASS_TEMPLATE = """
+            class %s extends %s {
+                var message: string
+                
+                constructor (message: string) {
+                    this.message := message;
+                }
+                
+                function method GetMessage(): (message: string)
+                    reads this
+                {
+                    this.message
+                }
+            }
+            """;
+
+    /**
+     * Generates a class for the given error structure that extends from the service error trait.
+     */
+    public TokenTree generateSpecificErrorClass(final StructureShape structureShape) {
+        ModelUtils.validateErrorStructureMessageNotRequired(structureShape);
+        return Token.of(ERROR_CLASS_TEMPLATE.formatted(
+                nameResolver.classForSpecificError(structureShape), nameResolver.traitForServiceError(serviceShape)));
+    }
+
+    /**
+     * Generates a class for unknown errors that extends from the service error trait.
+     * This class should only be instantiated by type conversion
+     * when attempting to convert an unrecognized error value from the native language to Dafny.
+     */
+    public TokenTree generateUnknownErrorClass() {
+        return Token.of(ERROR_CLASS_TEMPLATE.formatted(
+                nameResolver.classForUnknownError(serviceShape), nameResolver.traitForServiceError(serviceShape)));
     }
 
     private static TokenTree generateLengthConstraint(final LengthTrait lengthTrait) {
@@ -451,5 +441,10 @@ public class DafnyApiCodegen {
     private TokenTree generateTypeSynonym(
             final ShapeId shapeId, final String baseType) {
         return generateSubsetType(shapeId, baseType, Optional.empty());
+    }
+
+    @VisibleForTesting
+    public Model getModel() {
+        return model;
     }
 }

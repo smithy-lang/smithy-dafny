@@ -69,11 +69,20 @@ public class DafnyApiCodegenTest {
                            ensures DoItCalledWith()
                            ensures output.Success? ==> DoItSucceededWith()
                     }
-                    datatype FoobarServiceFactoryError =
-                        | FoobarServiceFactory_Unknown(unknownMessage: string)
-                    function method CastFoobarServiceFactoryErrorToString (error: FoobarServiceFactoryError): string {
-                        match error
-                        case FoobarServiceFactory_Unknown(arg) => "Unexpected Exception from AWS FoobarServiceFactory: " + arg
+                    trait FoobarServiceFactoryError {
+                        function method GetMessage(): (message: string)
+                            reads this
+                    }
+                    class UnknownFoobarServiceFactoryError extends FoobarServiceFactoryError {
+                        var message: string
+                        constructor(message: string) {
+                            this.message := message;
+                        }
+                        function method GetMessage(): (message: string)
+                            reads this
+                        {
+                            this.message
+                        }
                     }
                     type SomeBool = bool
                     datatype SomeEnum = | A | B
@@ -314,7 +323,7 @@ public class DafnyApiCodegenTest {
     }
 
     @Test
-    public void testGenerateServiceErrorTypeDefinition() {
+    public void testGenerateServiceErrorTraitDefinition() {
         final DafnyApiCodegen codegen = setupCodegen((builder, modelAssembler) -> {
             builder.addOperation(ShapeId.fromParts(SERVICE_NAMESPACE, "DoIt"));
             modelAssembler.addUnparsedModel("test.smithy", """
@@ -325,71 +334,44 @@ public class DafnyApiCodegenTest {
                     @error("server") structure Whoops {}
                     """.formatted(SERVICE_NAMESPACE));
         });
-        final String actualCode = codegen.generateServiceErrorTypeDefinition().toString();
+        final String actualCode = codegen.generateServiceErrorTraitDefinition().toString();
         final List<ParseToken> actualTokens = Tokenizer.tokenize(actualCode);
 
         final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
-                datatype FoobarServiceFactoryError =
-                    | FoobarServiceFactory_Unknown(unknownMessage: string)
-                    | FoobarServiceFactory_OhNo(OhNo: OhNo)
-                    | FoobarServiceFactory_Oops(Oops: Oops)
-                    | FoobarServiceFactory_Whoops(Whoops: Whoops)
-                function method CastFoobarServiceFactoryErrorToString (error: FoobarServiceFactoryError): string {
-                    match error
-                    case FoobarServiceFactory_OhNo(arg) => arg.CastToString()
-                    case FoobarServiceFactory_Oops(arg) => arg.CastToString()
-                    case FoobarServiceFactory_Whoops(arg) => arg.CastToString()
-                    case FoobarServiceFactory_Unknown(arg) => "Unexpected Exception from AWS FoobarServiceFactory: " + arg
+                trait FoobarServiceFactoryError {
+                    function method GetMessage(): (message: string)
+                        reads this
                 }
                 """);
         assertEquals(expectedTokens, actualTokens);
     }
 
     @Test
-    public void testGenerateErrorStructureTypeDefinition_WithMessage() {
-        final ShapeId shapeId = ShapeId.fromParts(SERVICE_NAMESPACE, "Oops");
+    public void testGenerateSpecificErrorClass() {
+        final ShapeId shapeId = ShapeId.fromParts(SERVICE_NAMESPACE, "OopsException");
         final DafnyApiCodegen codegen = setupCodegen((builder, modelAssembler) -> {
             builder.addOperation(ShapeId.fromParts(SERVICE_NAMESPACE, "DoIt"));
             modelAssembler.addUnparsedModel("test.smithy", """
                     namespace %s
                     string ErrorMessageType
-                    operation DoIt { errors: [Oops, OhNo] }
-                    @error("client") structure Oops { message: ErrorMessageType,}
-                    @error("server") structure OhNo {}
+                    operation DoIt { errors: [OopsException] }
+                    @error("client") structure OopsException { message: ErrorMessageType }
                     """.formatted(SERVICE_NAMESPACE));
         });
-        final String actualCode = codegen.generateErrorStructureTypeDefinition(shapeId).toString();
+        final String actualCode = codegen.generateSpecificErrorClass(codegen.getModel().expectShape(shapeId, StructureShape.class)).toString();
         final List<ParseToken> actualTokens = Tokenizer.tokenize(actualCode);
         final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
-                datatype Oops = Oops (
-                    nameonly message: Option<ErrorMessageType> ) {
-                    function method CastToString(): string {
-                        if message.Some? then "Oops: " + message.value else "Oops"
+                class OopsException extends FoobarServiceFactoryError {
+                    var message: string
+                    
+                    constructor (message: string) {
+                        this.message := message;
                     }
-                }
-                """);
-        assertEquals(expectedTokens, actualTokens);
-    }
-
-    @Test
-    public void testGenerateErrorStructureTypeDefinition_WithOutMessage() {
-        final ShapeId shapeId = ShapeId.fromParts(SERVICE_NAMESPACE, "OhNo");
-        final DafnyApiCodegen codegen = setupCodegen((builder, modelAssembler) -> {
-            builder.addOperation(ShapeId.fromParts(SERVICE_NAMESPACE, "DoIt"));
-            modelAssembler.addUnparsedModel("test.smithy", """
-                    namespace %s
-                    string ErrorMessageType
-                    operation DoIt { errors: [Oops, OhNo] }
-                    @error("client") structure Oops { message: ErrorMessageType,}
-                    @error("server") structure OhNo {}
-                    """.formatted(SERVICE_NAMESPACE));
-        });
-        final String actualCode = codegen.generateErrorStructureTypeDefinition(shapeId).toString();
-        final List<ParseToken> actualTokens = Tokenizer.tokenize(actualCode);
-        final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
-                datatype OhNo = OhNo () {
-                    function method CastToString(): string {
-                        "OhNo"
+                    
+                    function method GetMessage(): (message: string)
+                        reads this
+                    {
+                        this.message
                     }
                 }
                 """);

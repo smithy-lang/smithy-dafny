@@ -3,6 +3,7 @@
 
 package software.amazon.polymorph.smithydotnet;
 
+import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.polymorph.utils.Token;
 import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.smithy.model.Model;
@@ -55,41 +56,31 @@ public class AwsSdkTypeConversionCodegen extends TypeConversionCodegen {
     }
 
     private TypeConverter generateErrorStructureConverter(final StructureShape structureShape) {
-        // KMS error structures all include a 'message' member and nothing else
-        // TODO support members other than 'message'
-        if (!List.of("message").equals(structureShape.getMemberNames())) {
-            throw new UnsupportedOperationException(
-                    "Error structures must include a 'message' member and no others");
-        }
+        ModelUtils.validateErrorStructureMessageNotRequired(structureShape);
         final MemberShape messageMember = structureShape.getMember("message").orElseThrow();
 
-        // KMS error structures' 'message' member are always optional
-        // TODO support required 'message' members
-        if (messageMember.hasTrait(RequiredTrait.class)) {
-            throw new UnsupportedOperationException("An error structure's 'message' member must be optional");
-        }
-
+        // This is also enforced by Smithy, but this serves as an extra sanity check
         final StringShape messageTarget = model.getShape(messageMember.getTarget())
                 .flatMap(Shape::asStringShape)
                 .orElseThrow(() -> new IllegalArgumentException("An error structure's 'message' member must be a string"));
 
+        // Since our Dafny error traits currently require an error message, we treat empty sequences as equivalent to
+        // "no message".
+
         final TokenTree fromDafnyBody = Token.of("""
-                %1$s concrete = (%1$s)value;
-                string message = concrete.message.is_Some ? null : %2$s(concrete.message.Extract());
-                return new %3$s(message);
+                string message = value.message.Count == 0 ? null : %s(value.message);
+                return new %s(message);
                 """.formatted(
-                        nameResolver.dafnyConcreteTypeForRegularStructure(structureShape),
                         AwsSdkDotNetNameResolver.typeConverterForShape(messageTarget.getId(), FROM_DAFNY),
                         nameResolver.baseTypeForShape(structureShape.getId())));
 
         final TokenTree toDafnyBody = Token.of("""
-                %1$s message = System.String.IsNullOrEmpty(value.Message)
-                    ? %2$s.create_None()
-                    : %2$s.create_Some(%3$s(value.Message));
-                return new %4$s(message);
+                %s message = System.String.IsNullOrEmpty(value.Message)
+                    ? Dafny.Sequence<char>.Empty
+                    : %s(value.Message);
+                return new %s(message);
                 """.formatted(
-                        nameResolver.dafnyTypeForShape(messageMember.getId()),
-                        nameResolver.dafnyConcreteTypeForOptionalMember(messageMember),
+                        nameResolver.dafnyTypeForShape(messageTarget.getId()),
                         AwsSdkDotNetNameResolver.typeConverterForShape(messageTarget.getId(), TO_DAFNY),
                         nameResolver.dafnyConcreteTypeForRegularStructure(structureShape)));
 

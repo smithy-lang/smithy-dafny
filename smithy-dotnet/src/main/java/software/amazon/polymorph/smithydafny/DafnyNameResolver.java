@@ -15,6 +15,7 @@ import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.ShapeType;
+import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.utils.StringUtils;
 
 import javax.annotation.Nullable;
@@ -46,10 +47,6 @@ public record DafnyNameResolver(Model model, ServiceShape serviceShape) {
 
     public String nameForServiceErrorConstructor(final ShapeId errorShapeId) {
         return "%1$s_%2$s".formatted(this.nameForService(), this.baseTypeForShape(errorShapeId));
-    }
-
-    public String nameForServiceErrorUnknownConstructor(final ServiceShape serviceShape) {
-        return "%s_Unknown".formatted(nameForService(serviceShape));
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")
@@ -110,8 +107,16 @@ public record DafnyNameResolver(Model model, ServiceShape serviceShape) {
         return "I%s".formatted(resourceName);
     }
 
-    public String errorTypeForService(final ServiceShape serviceShape) {
+    public String traitForServiceError(final ServiceShape serviceShape) {
         return "%sError".formatted(nameForService(serviceShape));
+    }
+
+    public String classForSpecificError(final StructureShape structureShape) {
+        return StringUtils.capitalize(structureShape.getId().getName());
+    }
+
+    public String classForUnknownError(final ServiceShape serviceShape) {
+        return "Unknown%sError".formatted(nameForService(serviceShape));
     }
 
     public String methodForOperation(final OperationShape operationShape) {
@@ -135,7 +140,7 @@ public record DafnyNameResolver(Model model, ServiceShape serviceShape) {
         final String outputType = operationShape.getOutput()
                 .map(this::baseTypeForShape)
                 .orElse("()");
-        return "Result<%s, %s>".formatted(outputType, errorTypeForService(serviceShape));
+        return "Result<%s, %s>".formatted(outputType, traitForServiceError(serviceShape));
     }
 
     public Optional<String> returnTypeForResult(final OperationShape operationShape) {

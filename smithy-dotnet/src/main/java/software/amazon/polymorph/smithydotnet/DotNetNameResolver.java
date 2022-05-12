@@ -148,34 +148,31 @@ public class DotNetNameResolver {
         throw new UnsupportedOperationException("Interface types not supported for Shape %s".formatted(serviceShapeId));
     }
 
-    public static String classForCommonServiceException(final ServiceShape serviceShape) {
+    /**
+     * Returns the name for the service's base exception class. This exception class does not appear in the model, but
+     * instead serves as the parent class of all modeled (concrete) exception classes.
+     */
+    public static String classForBaseServiceException(final ServiceShape serviceShape) {
         // TODO Currently we have this hardcoded to remove 'Factory' from service names
         // that include it, however this should likely be controlled via a custom trait
-        final String serviceName = serviceShape.getId().getName(serviceShape);
-        if (serviceName.endsWith("Factory")) {
-            return "%sBaseException".formatted(serviceName.substring(0, serviceName.lastIndexOf("Factory")));
-        }
-
-        return "%sException".formatted(serviceName);
+        final String serviceName = ModelUtils.serviceNameWithoutTrailingFactory(serviceShape);
+        return "%sBaseException".formatted(serviceName);
     }
 
     /**
      * Returns the concrete service exception, as compared to
-     * {@link DotNetNameResolver#classForCommonServiceException(ServiceShape)},
-     * which returns the abstract base Exception.
+     * {@link DotNetNameResolver#classForBaseServiceException(ServiceShape)},
+     * which returns the service's common Exception.
      */
     public static String classForConcreteServiceException(final ServiceShape serviceShape) {
         // TODO Currently we have this hardcoded to remove 'Factory' from service names
         // that include it, however this should likely be controlled via a custom trait
-        String serviceName = serviceShape.getId().getName(serviceShape);
-        if (serviceName.endsWith("Factory")) {
-            serviceName = serviceName.substring(0, serviceName.lastIndexOf("Factory"));
-        }
+        final String serviceName = ModelUtils.serviceNameWithoutTrailingFactory(serviceShape);
         return "%sException".formatted(serviceName);
     }
 
-    public String classForCommonServiceException() {
-        return DotNetNameResolver.classForCommonServiceException(serviceShape);
+    public String classForBaseServiceException() {
+        return DotNetNameResolver.classForBaseServiceException(serviceShape);
     }
 
     public String classForSpecificServiceException(final ShapeId structureShapeId) {
@@ -483,7 +480,7 @@ public class DotNetNameResolver {
         return switch (direction) {
             case TO_DAFNY -> "%s_CommonError".formatted(direction.toString());
             case FROM_DAFNY -> "%s_CommonError_%s".formatted(
-                    direction.toString(), DotNetNameResolver.classForCommonServiceException(serviceShape));
+                    direction.toString(), DotNetNameResolver.classForBaseServiceException(serviceShape));
         };
     }
 
@@ -642,20 +639,6 @@ public class DotNetNameResolver {
     }
 
     /**
-     * Returns the abstract Dafny type representing errors for the given service.
-     * <p>
-     * This should generally be preferred to using the concrete Dafny type;
-     * see {@link DotNetNameResolver#dafnyConcreteTypeForServiceError(ServiceShape)}.
-     * <p>
-     * TODO remove this for error refactoring
-     */
-    public String dafnyAbstractTypeForServiceError(final ServiceShape serviceShape) {
-        return "%s._I%sError".formatted(
-                DafnyNameResolver.dafnyExternNamespaceForShapeId(serviceShape.getId()),
-                serviceShape.getContextualName(serviceShape));
-    }
-
-    /**
      * Returns the most abstract concrete type representing errors for the given service.
      * <p>
      *     This will return "%s.%sBaseException", formatted with the Dafny service
@@ -664,7 +647,7 @@ public class DotNetNameResolver {
      * </p>
      */
     public static String dafnyBaseTypeForServiceError(final ServiceShape serviceShape) {
-        String serviceName = serviceNameWithOutFactory(serviceShape);
+        final String serviceName = ModelUtils.serviceNameWithoutTrailingFactory(serviceShape);
         return "%s.%sBaseException".formatted(
                 DafnyNameResolver.dafnyExternNamespaceForShapeId(serviceShape.getId()),
                 serviceName
@@ -676,35 +659,10 @@ public class DotNetNameResolver {
     }
 
     /**
-     * Returns the Namespace, without the Suffix "Factory" if present
+     * Returns this service name, without the trailing "Factory" if it's present.
      */
-    public static String serviceNameWithOutFactory(final ServiceShape serviceShape) {
-        // TODO Currently we have this hardcoded to remove 'Factory' from service names
-        // that include it, however this should likely be controlled via a custom trait
-        String serviceName = serviceShape.getId().getName(serviceShape);
-        if (serviceName.endsWith("Factory")) {
-            serviceName = serviceName.substring(0, serviceName.lastIndexOf("Factory"));
-        }
-        return serviceName;
-    }
-
-    public String serviceNameWithOutFactory() {
-        return serviceNameWithOutFactory(serviceShape);
-    }
-
-    /**
-     * Returns the concrete Dafny type representing errors for the given service.
-     * <p>
-     * This must be used for accessing particular error constructors;
-     * otherwise, prefer to use the abstract Dafny type
-     * ({@link DotNetNameResolver#dafnyAbstractTypeForServiceError(ServiceShape)}).
-     * <p>
-     * TODO remove this for error refactoring
-     */
-    public String dafnyConcreteTypeForServiceError(final ServiceShape serviceShape) {
-        return "%s.%sError".formatted(
-                DafnyNameResolver.dafnyExternNamespaceForShapeId(serviceShape.getId()),
-                serviceShape.getContextualName(serviceShape));
+    public String serviceNameWithoutFactory() {
+        return ModelUtils.serviceNameWithoutTrailingFactory(serviceShape);
     }
 
     /**
@@ -723,9 +681,20 @@ public class DotNetNameResolver {
             serviceName = serviceName.substring(0, serviceName.lastIndexOf("Factory"));
         }
 
+        // TODO this should really end with "error"...
         return "%s.I%sException".formatted(
                 DafnyNameResolver.dafnyExternNamespaceForShapeId(serviceShape.getId()),
                 serviceName
+        );
+    }
+
+    /**
+     * Returns the Dafny class for the unknown-error class of the given service.
+     */
+    public String dafnyTypeForUnknownServiceError(final ServiceShape serviceShape) {
+        return "%s.%s".formatted(
+                DafnyNameResolver.dafnyExternNamespaceForShapeId(serviceShape.getId()),
+                new DafnyNameResolver(this.model, serviceShape).classForUnknownError(serviceShape)
         );
     }
 

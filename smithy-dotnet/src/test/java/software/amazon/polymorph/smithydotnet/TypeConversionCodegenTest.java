@@ -918,7 +918,7 @@ public class TypeConversionCodegenTest {
             DotNetNameResolver.typeConverterForShape(exc2ShapeId, TO_DAFNY),
             "Dafny.Test.Foobar.FoobarServiceBaseException", // Dafny Base Exception type
             DotNetNameResolver.typeConverterForShape(ShapeId.from("smithy.api#String"), TO_DAFNY), // ToDafny String
-            codegen.nameResolver.serviceNameWithOutFactory(), //"FoobarService"
+            codegen.nameResolver.serviceNameWithoutFactory(), //"FoobarService"
             "Dafny.Test.Foobar.FoobarServiceBaseException", // Dafny Base Exception type
             DotNetNameResolver.typeConverterForShape(ShapeId.from("smithy.api#String"), TO_DAFNY) // ToDafny String
         );
