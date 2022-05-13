@@ -18,6 +18,7 @@ import software.amazon.smithy.model.traits.RequiredTrait;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import static software.amazon.polymorph.smithydotnet.TypeConversionDirection.FROM_DAFNY;
 import static software.amazon.polymorph.smithydotnet.TypeConversionDirection.TO_DAFNY;
@@ -127,5 +128,13 @@ public class AwsSdkTypeConversionCodegen extends TypeConversionCodegen {
     @Override
     protected String getTypeConversionNamespace() {
         return ((AwsSdkDotNetNameResolver)nameResolver).syntheticNamespaceForService();
+    }
+
+    /**
+     * No unmodeled converters are needed for the AWS SDK shims.
+     */
+    @Override
+    protected Stream<TypeConverter> generateUnmodeledConverters() {
+        return Stream.empty();
     }
 }

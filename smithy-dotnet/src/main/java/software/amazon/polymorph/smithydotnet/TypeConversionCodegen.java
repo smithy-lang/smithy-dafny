@@ -90,7 +90,7 @@ public class TypeConversionCodegen {
                 .stream()
                 .map(model::expectShape)
                 .map(this::generateConverter);
-        final Stream<TypeConverter> unmodeledConverters = Stream.of(generateCommonExceptionConverter());
+        final Stream<TypeConverter> unmodeledConverters = generateUnmodeledConverters();
         final Stream<TypeConverter> converters = Stream.concat(modeledConverters, unmodeledConverters);
         final TokenTree conversionClassBody = TokenTree.of(converters
                 .flatMap(typeConverter -> Stream.of(typeConverter.fromDafny, typeConverter.toDafny)))
@@ -100,6 +100,13 @@ public class TypeConversionCodegen {
                 .prepend(TokenTree.of("internal static class", TYPE_CONVERSION_CLASS_NAME))
                 .namespaced(Token.of(getTypeConversionNamespace()));
         return Map.of(TYPE_CONVERSION_CLASS_PATH, conversionClass.prepend(prelude));
+    }
+
+    /**
+     * Returns a stream of type converters for synthetic types (types that aren't defined in the model).
+     */
+    protected Stream<TypeConverter> generateUnmodeledConverters() {
+        return Stream.of(generateCommonExceptionConverter());
     }
 
     /**
