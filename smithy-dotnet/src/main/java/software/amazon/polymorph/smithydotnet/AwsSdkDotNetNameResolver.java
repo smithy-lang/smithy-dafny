@@ -94,4 +94,8 @@ public class AwsSdkDotNetNameResolver extends DotNetNameResolver {
     public String classForBaseServiceException() {
         return "Amazon%sException".formatted(getServiceName());
     }
+
+    public String qualifiedClassForBaseServiceException() {
+        return "%s.%s".formatted(namespaceForService(), classForBaseServiceException());
+    }
 }
