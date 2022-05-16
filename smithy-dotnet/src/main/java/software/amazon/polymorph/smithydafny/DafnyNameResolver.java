@@ -46,7 +46,7 @@ public record DafnyNameResolver(
             Map.entry(ShapeType.LONG, "int64")
     );
 
-    public String nameForService(final ServiceShape serviceShape) {
+    public static String nameForService(final ServiceShape serviceShape) {
         return StringUtils.capitalize(serviceShape.getId().getName());
     }
 
@@ -134,7 +134,7 @@ public record DafnyNameResolver(
         return StringUtils.capitalize(structureShape.getId().getName());
     }
 
-    public String classForUnknownError(final ServiceShape serviceShape) {
+    public static String classForUnknownError(final ServiceShape serviceShape) {
         return "Unknown%sError".formatted(nameForService(serviceShape));
     }
 

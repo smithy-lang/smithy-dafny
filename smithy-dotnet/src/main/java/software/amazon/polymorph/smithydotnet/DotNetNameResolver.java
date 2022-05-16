@@ -691,7 +691,7 @@ public class DotNetNameResolver {
     public String dafnyTypeForUnknownServiceError(final ServiceShape serviceShape) {
         return "%s.%s".formatted(
                 DafnyNameResolver.dafnyExternNamespaceForShapeId(serviceShape.getId()),
-                new DafnyNameResolver(this.model, serviceShape).classForUnknownError(serviceShape)
+                DafnyNameResolver.classForUnknownError(serviceShape)
         );
     }
 
