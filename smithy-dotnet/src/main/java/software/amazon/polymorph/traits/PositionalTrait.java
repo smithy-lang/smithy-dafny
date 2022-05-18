@@ -15,7 +15,7 @@ import software.amazon.smithy.model.traits.TraitDefinition;
 import software.amazon.smithy.utils.SmithyBuilder;
 import software.amazon.smithy.utils.ToSmithyBuilder;
 
-// TODO: Add paramaters that are the order of the positional paramaters.
+// TODO: Add parameters that are the order of the positional parameters.
 
 /**
  * A trait representing that a structure should be "unwrapped" to its member whenever it is referenced.
