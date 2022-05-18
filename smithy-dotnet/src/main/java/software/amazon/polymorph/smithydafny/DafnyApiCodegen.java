@@ -290,7 +290,7 @@ public class DafnyApiCodegen {
                 .map(this::generateStructureTypeParameter)
         ).separated(Token.of(",")).parenthesized();
 
-        final String typeName = structureShapeId.getName(serviceShape);
+        final String typeName = structureShapeId.getName();
         return TokenTree.of(
                 Token.of("datatype %1$s = %1$s".formatted(typeName)),
                 params);

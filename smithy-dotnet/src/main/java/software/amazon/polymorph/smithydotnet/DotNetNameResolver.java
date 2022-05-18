@@ -133,7 +133,7 @@ public class DotNetNameResolver {
     }
 
     public String clientForService() {
-        return serviceShape.getId().getName(serviceShape);
+        return serviceShape.getId().getName();
     }
 
     public String interfaceForService() {
@@ -142,7 +142,7 @@ public class DotNetNameResolver {
 
     public String interfaceForService(final ShapeId serviceShapeId) {
         if (isAwsSdkServiceId(serviceShapeId)) {
-            return "I" + serviceShapeId.getName(serviceShape);
+            return "I" + serviceShapeId.getName();
         }
 
         throw new UnsupportedOperationException("Interface types not supported for Shape %s".formatted(serviceShapeId));
@@ -179,11 +179,11 @@ public class DotNetNameResolver {
         final StructureShape shape = model.expectShape(structureShapeId, StructureShape.class);
         // Sanity check
         assert shape.hasTrait(ErrorTrait.class);
-        return structureShapeId.getName(serviceShape);
+        return structureShapeId.getName();
     }
 
     public String methodForOperation(final ShapeId operationShapeId) {
-        return model.expectShape(operationShapeId, OperationShape.class).getId().getName(serviceShape);
+        return model.expectShape(operationShapeId, OperationShape.class).getId().getName();
     }
 
     public String abstractMethodForOperation(final ShapeId operationShapeId) {
@@ -204,7 +204,7 @@ public class DotNetNameResolver {
         // Sanity check that we aren't using this method for generated error structures
         assert !structureShape.hasTrait(ErrorTrait.class);
 
-        return model.expectShape(structureShapeId, StructureShape.class).getId().getName(serviceShape);
+        return model.expectShape(structureShapeId, StructureShape.class).getId().getName();
     }
 
     private static final Map<String, String> NATIVE_TYPES_BY_SMITHY_PRELUDE_SHAPE_NAME;
@@ -352,7 +352,7 @@ public class DotNetNameResolver {
 
         // First check if this is a built-in Smithy shape. If so, we just map it to the native type and return
         if (ModelUtils.isSmithyApiShape(shapeId)) {
-            @Nullable final String nativeTypeName = NATIVE_TYPES_BY_SMITHY_PRELUDE_SHAPE_NAME.get(shapeId.getName(serviceShape));
+            @Nullable final String nativeTypeName = NATIVE_TYPES_BY_SMITHY_PRELUDE_SHAPE_NAME.get(shapeId.getName());
             return Objects.requireNonNull(nativeTypeName,
                     () -> String.format("No native type for prelude shape %s", shapeId));
         }
@@ -414,15 +414,15 @@ public class DotNetNameResolver {
     }
 
     public String interfaceForResource(final ShapeId resourceShapeId) {
-        return String.format("I%s", StringUtils.capitalize(resourceShapeId.getName(serviceShape)));
+        return String.format("I%s", StringUtils.capitalize(resourceShapeId.getName()));
     }
 
     public String baseClassForResource(final ShapeId resourceShapeId) {
-        return String.format("%sBase", StringUtils.capitalize(resourceShapeId.getName(serviceShape)));
+        return String.format("%sBase", StringUtils.capitalize(resourceShapeId.getName()));
     }
 
     public String shimClassForResource(final ShapeId resourceShapeId) {
-        return StringUtils.capitalize(resourceShapeId.getName(serviceShape));
+        return StringUtils.capitalize(resourceShapeId.getName());
     }
 
     public String nativeWrapperClassForResource(final ShapeId resourceShapeId) {
@@ -433,7 +433,7 @@ public class DotNetNameResolver {
     }
 
     public String classForEnum(final ShapeId enumShapeId) {
-        return StringUtils.capitalize(enumShapeId.getName(serviceShape));
+        return StringUtils.capitalize(enumShapeId.getName());
     }
 
     /**
@@ -537,7 +537,7 @@ public class DotNetNameResolver {
         return "%s.%s%s".formatted(
                 DafnyNameResolver.dafnyExternNamespaceForShapeId(shapeId),
                 typePrefix,
-                shapeId.getName(serviceShape));
+                shapeId.getName());
     }
 
     private String dafnyTypeForString(final StringShape stringShape) {
@@ -580,14 +580,14 @@ public class DotNetNameResolver {
         if (structureShape.hasTrait(ErrorTrait.class)) {
             return "%s.%s".formatted(
                     DafnyNameResolver.dafnyExternNamespaceForShapeId(shapeId),
-                    shapeId.getName(serviceShape));
+                    shapeId.getName());
         }
 
         // The Dafny type of other structures is simply the structure's name.
         // We explicitly specify the Dafny namespace just in case of collisions.
         return "%s._I%s".formatted(
                 DafnyNameResolver.dafnyExternNamespaceForShapeId(shapeId),
-                shapeId.getName(serviceShape));
+                shapeId.getName());
     }
 
     /**
@@ -599,7 +599,7 @@ public class DotNetNameResolver {
         final ShapeId shapeId = structureShape.getId();
         return "%s.%s".formatted(
                 DafnyNameResolver.dafnyExternNamespaceForShapeId(shapeId),
-                shapeId.getName(serviceShape));
+                shapeId.getName());
     }
 
     private String dafnyTypeForMember(final MemberShape memberShape) {

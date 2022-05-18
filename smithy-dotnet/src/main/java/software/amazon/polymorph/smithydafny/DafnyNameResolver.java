@@ -54,14 +54,10 @@ public record DafnyNameResolver(
         return nameForService(serviceShape);
     }
 
-    public String nameForServiceErrorConstructor(final ShapeId errorShapeId) {
-        return "%1$s_%2$s".formatted(this.nameForService(), this.baseTypeForShape(errorShapeId));
-    }
-
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     public String baseTypeForShape(final ShapeId shapeId) {
         final Shape shape = model.expectShape(shapeId);
-        final String shapeName = shapeId.getName(serviceShape);
+        final String shapeName = shapeId.getName();
 
         if (ModelUtils.isSmithyApiShape(shapeId)) {
             @Nullable final String simpleShapeType = DAFNY_TYPES_BY_SIMPLE_SHAPE_TYPE.get(shape.getType());
@@ -113,7 +109,7 @@ public record DafnyNameResolver(
     }
 
     public String generatedTypeForShape(final ShapeId shapeId) {
-        return StringUtils.capitalize(shapeId.getName(serviceShape));
+        return StringUtils.capitalize(shapeId.getName());
     }
 
     public String traitForServiceClient(final ServiceShape serviceShape) {
@@ -122,7 +118,7 @@ public record DafnyNameResolver(
 
     public String traitForResource(final ResourceShape resourceShape) {
         final ShapeId shapeId = resourceShape.getId();
-        final String resourceName = StringUtils.capitalize(shapeId.getName(this.serviceShape));
+        final String resourceName = StringUtils.capitalize(shapeId.getName());
         return dafnyModulePrefixForShapeId(resourceShape) + "I%s".formatted(resourceName);
     }
 
@@ -139,7 +135,7 @@ public record DafnyNameResolver(
     }
 
     public String methodForOperation(final OperationShape operationShape) {
-        return StringUtils.capitalize(operationShape.getId().getName(serviceShape));
+        return StringUtils.capitalize(operationShape.getId().getName());
     }
 
     public String predicateCalledWith(final OperationShape operationShape) {
