@@ -12,7 +12,7 @@ repositories {
 }
 
 dependencies {
-    implementation("software.amazon.smithy:smithy-model:1.10.0")
+    implementation("software.amazon.smithy:smithy-model:1.21.0")
     implementation("software.amazon.smithy:smithy-codegen-core:[1.0.2,1.1.0[")
     implementation("software.amazon.smithy:smithy-protocol-test-traits:[1.0.2,1.1.0[")
 
