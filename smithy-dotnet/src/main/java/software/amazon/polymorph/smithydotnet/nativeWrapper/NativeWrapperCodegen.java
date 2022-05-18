@@ -3,9 +3,6 @@
 
 package software.amazon.polymorph.smithydotnet.nativeWrapper;
 
-import java.util.List;
-import java.util.Optional;
-
 import software.amazon.polymorph.smithydotnet.DotNetNameResolver;
 import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.utils.Token;
@@ -18,10 +15,10 @@ import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
 
-import static software.amazon.polymorph.smithydotnet.DotNetNameResolver.classForBaseServiceException;
-import static software.amazon.polymorph.smithydotnet.DotNetNameResolver.classForConcreteServiceException;
-import static software.amazon.polymorph.smithydotnet.DotNetNameResolver.qualifiedTypeConverter;
-import static software.amazon.polymorph.smithydotnet.DotNetNameResolver.qualifiedTypeConverterForCommonError;
+import java.util.List;
+import java.util.Optional;
+
+import static software.amazon.polymorph.smithydotnet.DotNetNameResolver.*;
 import static software.amazon.polymorph.smithydotnet.TypeConversionDirection.FROM_DAFNY;
 import static software.amazon.polymorph.smithydotnet.TypeConversionDirection.TO_DAFNY;
 
@@ -164,7 +161,7 @@ public class NativeWrapperCodegen {
                                 operationShape.getOutput(), nativeOutputType, methodName),
                         inputConversion,
                         TokenTree.of("%s finalException = null;"
-                                .formatted(classForBaseServiceException(serviceShape))),
+                                .formatted(nameResolver.classForBaseServiceException())),
                         tryBlock,
                         generateCatchServiceException(),
                         generateCatchGeneralException(methodName),
@@ -260,7 +257,7 @@ public class NativeWrapperCodegen {
 
     TokenTree generateCatchServiceException() {
         return generateCatch(
-                classForBaseServiceException(serviceShape),
+                nameResolver.classForBaseServiceException(),
                 "finalException = e;"
         );
     }
@@ -289,7 +286,7 @@ public class NativeWrapperCodegen {
         return TokenTree.of("return %s.create_Failure(%s(finalException));".
                 formatted(
                         dafnyOutput,
-                        qualifiedTypeConverterForCommonError(serviceShape, TO_DAFNY)
+                        nameResolver.qualifiedTypeConverterForCommonError(serviceShape, TO_DAFNY)
                 ));
     }
 }

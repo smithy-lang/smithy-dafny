@@ -108,7 +108,7 @@ public record DafnyNameResolver(Model model, ServiceShape serviceShape) {
     }
 
     public String traitForServiceError(final ServiceShape serviceShape) {
-        return "%sError".formatted(nameForService(serviceShape));
+        return "I%sException".formatted(nameForService(serviceShape));
     }
 
     public String classForSpecificError(final StructureShape structureShape) {

@@ -152,7 +152,7 @@ public class DotNetNameResolver {
      * Returns the name for the service's base exception class. This exception class does not appear in the model, but
      * instead serves as the parent class of all modeled (concrete) exception classes.
      */
-    public static String classForBaseServiceException(final ServiceShape serviceShape) {
+    public String classForBaseServiceException(final ServiceShape serviceShape) {
         // TODO Currently we have this hardcoded to remove 'Factory' from service names
         // that include it, however this should likely be controlled via a custom trait
         final String serviceName = ModelUtils.serviceNameWithoutTrailingFactory(serviceShape);
@@ -172,7 +172,7 @@ public class DotNetNameResolver {
     }
 
     public String classForBaseServiceException() {
-        return DotNetNameResolver.classForBaseServiceException(serviceShape);
+        return classForBaseServiceException(serviceShape);
     }
 
     public String classForSpecificServiceException(final ShapeId structureShapeId) {
@@ -476,11 +476,11 @@ public class DotNetNameResolver {
     /**
      * Returns the type converter method name for the given service's common error shape and the given direction.
      */
-    public static String typeConverterForCommonError(final ServiceShape serviceShape, final TypeConversionDirection direction) {
+    public String typeConverterForCommonError(final ServiceShape serviceShape, final TypeConversionDirection direction) {
         return switch (direction) {
             case TO_DAFNY -> "%s_CommonError".formatted(direction.toString());
             case FROM_DAFNY -> "%s_CommonError_%s".formatted(
-                    direction.toString(), DotNetNameResolver.classForBaseServiceException(serviceShape));
+                    direction.toString(), classForBaseServiceException(serviceShape));
         };
     }
 
@@ -488,8 +488,8 @@ public class DotNetNameResolver {
      * Like {@link DotNetNameResolver#typeConverterForCommonError(ServiceShape, TypeConversionDirection)}, but
      * qualified with the type conversion class name.
      */
-    public static String qualifiedTypeConverterForCommonError(final ServiceShape serviceShape, final TypeConversionDirection direction) {
-        final String methodName = DotNetNameResolver.typeConverterForCommonError(serviceShape, direction);
+    public String qualifiedTypeConverterForCommonError(final ServiceShape serviceShape, final TypeConversionDirection direction) {
+        final String methodName = typeConverterForCommonError(serviceShape, direction);
         return "%s.%s".formatted(DotNetNameResolver.TYPE_CONVERSION_CLASS_NAME, methodName);
     }
 
@@ -676,10 +676,7 @@ public class DotNetNameResolver {
     public static String dafnyTypeForCommonServiceError(final ServiceShape serviceShape) {
         // TODO Currently we have this hardcoded to remove 'Factory' from service names
         // that include it, however this should likely be controlled via a custom trait
-        String serviceName = serviceShape.getId().getName(serviceShape);
-        if (serviceName.endsWith("Factory")) {
-            serviceName = serviceName.substring(0, serviceName.lastIndexOf("Factory"));
-        }
+        final String serviceName = ModelUtils.serviceNameWithoutTrailingFactory(serviceShape);
 
         // TODO this should really end with "error"...
         return "%s.I%sException".formatted(

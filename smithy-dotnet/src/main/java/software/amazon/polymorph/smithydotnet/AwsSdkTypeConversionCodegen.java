@@ -18,6 +18,7 @@ import software.amazon.smithy.model.traits.RequiredTrait;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import static software.amazon.polymorph.smithydotnet.TypeConversionDirection.FROM_DAFNY;
 import static software.amazon.polymorph.smithydotnet.TypeConversionDirection.TO_DAFNY;
@@ -50,6 +51,23 @@ public class AwsSdkTypeConversionCodegen extends TypeConversionCodegen {
         return super.generateStructureConverter(structureShape);
     }
 
+    /**
+     * We can't call the {@code IsSet} methods on AWS SDK classes' member properties because they're internal.
+     * The best we can do is to call the properties' getters, which calls {@code GetValueOrDefault}, which in turn may
+     * improperly coalesce absent optional values to 0 (for example).
+     */
+    @Override
+    public TokenTree generateExtractOptionalMember(MemberShape memberShape) {
+        final String type = nameResolver.baseTypeForShape(memberShape.getId());
+        final String varName = nameResolver.variableNameForClassProperty(memberShape);
+        final String propertyName = nameResolver.classPropertyForStructureMember(memberShape);
+        return TokenTree.of(
+                type,
+                varName,
+                "= value.%s;".formatted(propertyName)
+        );
+    }
+
     @Override
     protected boolean enumListMembersAreStringsInCSharp() {
         return true;
@@ -78,7 +96,7 @@ public class AwsSdkTypeConversionCodegen extends TypeConversionCodegen {
                 %s message = System.String.IsNullOrEmpty(value.Message)
                     ? Dafny.Sequence<char>.Empty
                     : %s(value.Message);
-                return new %s(message);
+                return new %s { message = message };
                 """.formatted(
                         nameResolver.dafnyTypeForShape(messageTarget.getId()),
                         AwsSdkDotNetNameResolver.typeConverterForShape(messageTarget.getId(), TO_DAFNY),
@@ -105,5 +123,18 @@ public class AwsSdkTypeConversionCodegen extends TypeConversionCodegen {
                 throwCustomImplException);
 
         return buildConverterFromMethodBodies(structureShape, fromDafnyBody, toDafnyBody);
+    }
+
+    @Override
+    protected String getTypeConversionNamespace() {
+        return ((AwsSdkDotNetNameResolver)nameResolver).syntheticNamespaceForService();
+    }
+
+    /**
+     * No unmodeled converters are needed for the AWS SDK shims.
+     */
+    @Override
+    protected Stream<TypeConverter> generateUnmodeledConverters() {
+        return Stream.empty();
     }
 }

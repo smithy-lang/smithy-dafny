@@ -47,7 +47,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static software.amazon.polymorph.smithydotnet.DotNetNameResolver.TYPE_CONVERSION_CLASS_NAME;
-import static software.amazon.polymorph.smithydotnet.DotNetNameResolver.typeConverterForCommonError;
 import static software.amazon.polymorph.smithydotnet.DotNetNameResolver.typeConverterForShape;
 import static software.amazon.polymorph.smithydotnet.TypeConversionDirection.FROM_DAFNY;
 import static software.amazon.polymorph.smithydotnet.TypeConversionDirection.TO_DAFNY;
@@ -91,7 +90,7 @@ public class TypeConversionCodegen {
                 .stream()
                 .map(model::expectShape)
                 .map(this::generateConverter);
-        final Stream<TypeConverter> unmodeledConverters = Stream.of(generateCommonExceptionConverter());
+        final Stream<TypeConverter> unmodeledConverters = generateUnmodeledConverters();
         final Stream<TypeConverter> converters = Stream.concat(modeledConverters, unmodeledConverters);
         final TokenTree conversionClassBody = TokenTree.of(converters
                 .flatMap(typeConverter -> Stream.of(typeConverter.fromDafny, typeConverter.toDafny)))
@@ -99,8 +98,15 @@ public class TypeConversionCodegen {
                 .braced();
         final TokenTree conversionClass = conversionClassBody
                 .prepend(TokenTree.of("internal static class", TYPE_CONVERSION_CLASS_NAME))
-                .namespaced(Token.of(nameResolver.namespaceForService()));
+                .namespaced(Token.of(getTypeConversionNamespace()));
         return Map.of(TYPE_CONVERSION_CLASS_PATH, conversionClass.prepend(prelude));
+    }
+
+    /**
+     * Returns a stream of type converters for synthetic types (types that aren't defined in the model).
+     */
+    protected Stream<TypeConverter> generateUnmodeledConverters() {
+        return Stream.of(generateCommonExceptionConverter());
     }
 
     /**
@@ -398,7 +404,7 @@ public class TypeConversionCodegen {
         final TokenTree isSetTernaries = TokenTree.of(
                 ModelUtils.streamStructureMembers(structureShape)
                         .filter(nameResolver::memberShapeIsOptional)
-                        .map(this::generateIsSetTernary)
+                        .map(this::generateExtractOptionalMember)
         ).lineSeparated();
 
         final TokenTree constructorArgs = TokenTree.of(ModelUtils.streamStructureMembers(structureShape)
@@ -425,7 +431,7 @@ public class TypeConversionCodegen {
      * OR :
      * "ToDafny_memberShape(propertyName)"
      */
-    public String generateConstructorArg(final MemberShape memberShape) {
+    private String generateConstructorArg(final MemberShape memberShape) {
         if (nameResolver.memberShapeIsOptional(memberShape)) {
             return "%s(%s)".formatted(
                     typeConverterForShape(memberShape.getId(), TO_DAFNY),
@@ -440,7 +446,7 @@ public class TypeConversionCodegen {
      * Returns:
      * "type varName = value.IsSetPropertyName() ? value.PropertyName : (type) null;"
      */
-    public TokenTree generateIsSetTernary(final MemberShape memberShape) {
+    public TokenTree generateExtractOptionalMember(final MemberShape memberShape) {
         final String type = nameResolver.baseTypeForShape(memberShape.getId());
         final String varName = nameResolver.variableNameForClassProperty(memberShape);
         final String isSetMethod = nameResolver.isSetMethodForStructureMember(memberShape);
@@ -699,7 +705,7 @@ public class TypeConversionCodegen {
         final TokenTree fromDafnyBody = TokenTree.of(
                 TokenTree.of("switch(value)"), fromDafnySwitchCases).lineSeparated();
         final TokenTree fromDafnyConverterSignature = Token.of("public static %s %s(%s value)".formatted(
-                cSharpType, typeConverterForCommonError(serviceShape, FROM_DAFNY), dafnyType));
+                cSharpType, nameResolver.typeConverterForCommonError(serviceShape, FROM_DAFNY), dafnyType));
         final TokenTree fromDafnyConverterMethod = TokenTree.of(fromDafnyConverterSignature, fromDafnyBody.braced());
 
         // Generate the TO_DAFNY method
@@ -735,7 +741,7 @@ public class TypeConversionCodegen {
                 TokenTree.of("%s rtn;\nswitch (value)\n".formatted(nameResolver.dafnyBaseTypeForServiceError())),
                 toDafnySwitchCases);
         final TokenTree toDafnyConverterSignature = Token.of("public static %s %s(System.Exception value)".formatted(
-                dafnyType, typeConverterForCommonError(serviceShape, TO_DAFNY)));
+                dafnyType, nameResolver.typeConverterForCommonError(serviceShape, TO_DAFNY)));
         final TokenTree toDafnyConverterMethod = TokenTree.of(toDafnyConverterSignature, toDafnyBody.braced());
 
         // The Common Exception Converter is novel to Polymorph, it is not native to smithy.
@@ -791,6 +797,16 @@ public class TypeConversionCodegen {
         final TokenTree toDafnyConverterMethod = TokenTree.of(toDafnyConverterSignature, toDafnyBody.braced());
 
         return new TypeConverter(shape.getId(), fromDafnyConverterMethod, toDafnyConverterMethod);
+    }
+
+    /**
+     * Returns the namespace in which to generate the type conversion class.
+     *
+     * Subclasses can override this in case it differs from the service's "main" namespace, e.g. in the case of AWS SDK
+     * type conversion.
+     */
+    protected String getTypeConversionNamespace() {
+        return nameResolver.namespaceForService();
     }
 
     @VisibleForTesting
