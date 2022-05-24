@@ -20,7 +20,6 @@ import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
-import software.amazon.smithy.model.shapes.ShapeType;
 import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.ResourceShape;
@@ -59,7 +58,7 @@ public class DafnyApiCodegen {
         this.modelPath = modelPath;
         this.nameResolver = new DafnyNameResolver(
           model,
-          this.serviceShape,
+          this.serviceShape.toShapeId().getNamespace(),
           new HashSet(),
           dependentModelPaths.clone()
         );
@@ -72,21 +71,25 @@ public class DafnyApiCodegen {
         // MAY depend on other models.
         // In this case I need these modules
         // so that I can include them.
-        final TokenTree generatedTypes = TokenTree.of(model.shapes()
-          .filter(shape -> ModelUtils.isInServiceNamespace(shape.getId(), serviceShape))
-          // Sort by shape ID for deterministic generated code
-          .collect(Collectors.toCollection(TreeSet::new))
-          .stream()
-          .map(this::generateCodeForShape)
-          .flatMap(Optional::stream)
-        ).lineSeparated();
+        final TokenTree generatedTypes = TokenTree
+          .of(
+            model
+              .shapes()
+              .filter(shape -> ModelUtils.isInServiceNamespace(shape.getId(), serviceShape))
+              // Sort by shape ID for deterministic generated code
+              .collect(Collectors.toCollection(TreeSet::new))
+              .stream()
+              .map(this::generateCodeForShape)
+              .flatMap(Optional::stream)
+            )
+          .lineSeparated();
 
-        final String serviceName = nameResolver.nameForService();
         // The generated module MUST be abstract.
-        // Because can never have a concrete implementation
+        // Because can never have a concrete implementation.
+        // TODO: Resolve the above :(
         final String moduleName = DafnyNameResolver
-          .dafnyAbstractModuleForNamespace(serviceShape.getId().getNamespace());
-        final TokenTree moduleHeader = Token.of("abstract module %s".formatted(moduleName));
+          .dafnyTypesModuleForNamespace(serviceShape.getId().getNamespace());
+        final TokenTree moduleHeader = Token.of("module %s".formatted(moduleName));
 
         // A smithy model may reference a model in a different package.
         // In which case we need to include it.
@@ -103,7 +106,7 @@ public class DafnyApiCodegen {
                 .dependentModels()
                 .stream()
                 .map(d -> modelPath
-                  .relativize(d.modelPath().resolve(nameResolver.dafnyAbstractModuleForNamespace(d.namespace()) + ".dfy"))
+                  .relativize(d.modelPath().resolve(nameResolver.dafnyTypesModuleForNamespace(d.namespace()) + ".dfy"))
                 )
                 .map(Path::toString)
             )
@@ -127,15 +130,19 @@ public class DafnyApiCodegen {
                 .dependentModels()
                 .stream()
                 .map(d ->
-                  "import "
-                    + nameResolver.localDafnyModuleName(d.namespace())
-                    + ": "
-                    + nameResolver.dafnyAbstractModuleForNamespace(d.namespace())))
+                  "import " +  nameResolver.dependentModuleLocalName(d)))
             .map(i -> Token.of(i)))
           .lineSeparated();
 
         final TokenTree moduleBody = TokenTree
-            .of(modulePrelude, generatedTypes)
+            .of(
+              modulePrelude,
+              generatedTypes,
+              // Error types are generates *after*
+              // all other types to account
+              // for any dependant modules
+              generateModeledErrorDataType()
+            )
             .lineSeparated()
             .braced();
 
@@ -153,10 +160,9 @@ public class DafnyApiCodegen {
                 if (shape != serviceShape) {
                     throw new IllegalStateException("Unexpected service shape found");
                 }
-                yield TokenTree.of(
-                        generateServiceTraitDefinition(),
-                        generateUnmodeledErrorTypes()
-                ).lineSeparated();
+                yield TokenTree
+                  .of(generateServiceTraitDefinition())
+                  .lineSeparated();
             }
             case BLOB -> generateBlobTypeDefinition(shapeId);
             case BOOLEAN -> generateBoolTypeDefinition(shapeId);
@@ -180,7 +186,8 @@ public class DafnyApiCodegen {
                 } else if (shape.hasTrait(ReferenceTrait.class)) {
                     yield generateReferenceTraitDefinition(shapeId);
                 } else if (shape.hasTrait(ErrorTrait.class)) {
-                    yield generateSpecificErrorClass((StructureShape) shape);
+                    // All error shapes are a single integrated data type
+                    yield null;
                 } else {
                     yield generateStructureTypeDefinition(shapeId);
                 }
@@ -195,28 +202,6 @@ public class DafnyApiCodegen {
                 .getTrait(LengthTrait.class)
                 .map(DafnyApiCodegen::generateLengthConstraint);
         return generateSubsetType(shapeId, "ValidUTF8Bytes", lengthConstraint);
-    }
-
-    public TokenTree generateCastToStringForAnErrorStructure(final ShapeId shapeId, final StructureShape errorStructure) {
-        Optional<MemberShape> message = errorStructure.getMember("message");
-        final String castToStringSignature = "\tfunction method CastToString(): string {\n\t%1$s\n\t}";
-        String body;
-        if (message.isPresent()) {
-            final MemberShape member = message.get();
-            if (model.expectShape(member.getTarget()).getType() != ShapeType.STRING) {
-                throw new IllegalStateException("Only string type for message members on error shapes are supported.");
-            }
-            if (member.isOptional()) {
-                body = "\tif message.Some? then \"%1$s: \" + message.value else \"%1$s\"";
-            } else {
-                body = "\t\"%1$s: \" + message";
-            }
-        } else {
-            body = "\"%1$s\"";
-        }
-        body = body.formatted(shapeId.getName(serviceShape));
-        TokenTree castMethod = TokenTree.of(castToStringSignature.formatted(body));
-        return castMethod;
     }
 
     public TokenTree generateBlobTypeDefinition(final ShapeId blobShapeId) {
@@ -318,8 +303,8 @@ public class DafnyApiCodegen {
 
         // This is a reference structure for returning a service
         // As such, there is no need to build any code here.
-        // The acutal implementation of the service
-        // would be in that services abstract module.
+        // The actual implementation of the service
+        // would be in that services Smithy module.
         if (referenceTrait.isService()) {
             return null;
         }
@@ -443,6 +428,7 @@ public class DafnyApiCodegen {
         return TokenTree.of(name, params, body);
     }
 
+
     /**
      * Generates the service's error types that are not modeled directly. These include:
      * <ul>
@@ -450,58 +436,57 @@ public class DafnyApiCodegen {
      *     <li>an "unknown error" class</li>
      * </ul>
      */
-    public TokenTree generateUnmodeledErrorTypes() {
+    public TokenTree generateModeledErrorDataType() {
+    // TODO need to add dependent errors...
         return TokenTree.of(
-                generateServiceErrorTraitDefinition(),
-                generateUnknownErrorClass()
+          Token.of("datatype Error ="),
+          Token.of("// Local Error structures are listed here"),
+          TokenTree.of(
+            ModelUtils
+              .streamNamespaceErrors(model, serviceShape.getId().getNamespace())
+              .map(this::generateErrorDataTypeConstructor)
+          ),
+          Token.of("// Any dependent models are listed here"),
+          TokenTree.of(
+            nameResolver
+              .dependentModels()
+              .stream()
+              .map(this::generateDependantErrorDataTypeConstructor)
+          ),
+          Token.of("// The Opaque error, used for native, extern, wrapped or unknown errors"),
+          Token.of("| Opaque(obj: object)"),
+          // Helper error for use with `Externs`
+          Token.of("type OpaqueError = e: Error | e.Opaque? witness *")
         ).lineSeparated();
     }
 
-    /**
-     * Generates a trait representing errors in this service, which specific error classes will extend.
-     */
-    public TokenTree generateServiceErrorTraitDefinition() {
-        return Token.of("""
-                trait %s {
-                    function method GetMessage(): (message: string) reads this
-                }
-                """.formatted(nameResolver.traitForServiceError(serviceShape)));
+    public TokenTree generateErrorDataTypeConstructor(final Shape shape) {
+        final ShapeId structureShapeId = shape.getId();
+        final StructureShape structureShape = model.expectShape(structureShapeId, StructureShape.class);
+        final TokenTree params = TokenTree.of(ModelUtils.streamStructureMembers(structureShape)
+          .map(this::generateStructureTypeParameter)
+        ).separated(Token.of(",")).parenthesized();
+
+        final String typeName = structureShapeId.getName();
+        return TokenTree.of(
+          Token.of("| %1$s".formatted(typeName)),
+          params);
     }
 
-    private static final String ERROR_CLASS_TEMPLATE = """
-            class %s extends %s {
-                var message: string
-                
-                constructor (message: string) {
-                    this.message := message;
-                }
-                
-                function method GetMessage(): (message: string)
-                    reads this
-                {
-                    this.message
-                }
-            }
-            """;
-
-    /**
-     * Generates a class for the given error structure that extends from the service error trait.
-     */
-    public TokenTree generateSpecificErrorClass(final StructureShape structureShape) {
-        ModelUtils.validateErrorStructureMessageNotRequired(structureShape);
-        return Token.of(ERROR_CLASS_TEMPLATE.formatted(
-                nameResolver.classForSpecificError(structureShape), nameResolver.traitForServiceError(serviceShape)));
+    public TokenTree generateDependantErrorDataTypeConstructor(final DependentSmithyModel dependentSmithyModel) {
+        final String dependentErrorDataType = nameResolver.dependentModuleLocalName(dependentSmithyModel) + ".Error";
+        return TokenTree.of(
+          Token.of("| %s(err: %s)"
+            .formatted(
+              dependentErrorDataType
+                // I included the `.` to avoid other modules with "Types" in the name
+                .replace(".Types.", "")
+                .replace(".", ""),
+              dependentErrorDataType
+            ))
+        );
     }
 
-    /**
-     * Generates a class for unknown errors that extends from the service error trait.
-     * This class should only be instantiated by type conversion
-     * when attempting to convert an unrecognized error value from the native language to Dafny.
-     */
-    public TokenTree generateUnknownErrorClass() {
-        return Token.of(ERROR_CLASS_TEMPLATE.formatted(
-                nameResolver.classForUnknownError(serviceShape), nameResolver.traitForServiceError(serviceShape)));
-    }
 
     private static TokenTree generateLengthConstraint(final LengthTrait lengthTrait) {
         final String min = lengthTrait.getMin().map("%s <="::formatted).orElse("");

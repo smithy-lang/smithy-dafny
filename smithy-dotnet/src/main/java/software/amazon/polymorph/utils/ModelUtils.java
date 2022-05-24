@@ -60,6 +60,15 @@ public class ModelUtils {
     }
 
     /**
+     * @return a stream of error structures in the given service shape
+     */
+    public static Stream<StructureShape> streamNamespaceErrors(final Model model, final String namespace) {
+        return model.getStructureShapesWithTrait(ErrorTrait.class)
+          .stream()
+          .filter(structureShape -> structureShape.getId().getNamespace().equals(namespace));
+    }
+
+    /**
      * @return true if the given shape ID is in the given service's namespace
      */
     public static boolean isInServiceNamespace(final ShapeId shapeId, final ServiceShape serviceShape) {

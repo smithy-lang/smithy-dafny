@@ -25,12 +25,14 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.HashSet;
 
 public record DafnyNameResolver(
   Model model,
-  ServiceShape serviceShape,
+  String namespace,
   HashSet<DependentSmithyModel> dependentModels,
   Path[] dependentModelPaths
 ) {
@@ -48,10 +50,6 @@ public record DafnyNameResolver(
 
     public static String nameForService(final ServiceShape serviceShape) {
         return StringUtils.capitalize(serviceShape.getId().getName());
-    }
-
-    public String nameForService() {
-        return nameForService(serviceShape);
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")
@@ -122,18 +120,6 @@ public record DafnyNameResolver(
         return dafnyModulePrefixForShapeId(resourceShape) + "I%s".formatted(resourceName);
     }
 
-    public String traitForServiceError(final ServiceShape serviceShape) {
-        return "I%sException".formatted(nameForService(serviceShape));
-    }
-
-    public String classForSpecificError(final StructureShape structureShape) {
-        return StringUtils.capitalize(structureShape.getId().getName());
-    }
-
-    public static String classForUnknownError(final ServiceShape serviceShape) {
-        return "Unknown%sError".formatted(nameForService(serviceShape));
-    }
-
     public String methodForOperation(final OperationShape operationShape) {
         return StringUtils.capitalize(operationShape.getId().getName());
     }
@@ -155,7 +141,7 @@ public record DafnyNameResolver(
         final String outputType = operationShape.getOutput()
                 .map(this::baseTypeForShape)
                 .orElse("()");
-        return "Result<%s, %s>".formatted(outputType, traitForServiceError(serviceShape));
+        return "Result<%s, %s>".formatted(outputType, "Error");
     }
 
     public Optional<String> returnTypeForResult(final OperationShape operationShape) {
@@ -185,8 +171,8 @@ public record DafnyNameResolver(
         return  dafnyModuleForNamespace(shapeId.getNamespace());
     }
 
-    public static String dafnyAbstractModuleForNamespace(final String namespace) {
-        return dafnyModuleForNamespace(namespace) + "Abstract";
+    public static String dafnyTypesModuleForNamespace(final String namespace) {
+        return (dafnyModuleForNamespace(namespace) + ".Types").replace(".", "");
     }
 
     public String localDafnyModuleName(final String namespace) {
@@ -197,8 +183,8 @@ public record DafnyNameResolver(
     }
 
     public String dafnyModulePrefixForShapeId(final Shape shape) {
-        final String namespace = shape.getId().getNamespace();
-        if (!serviceShape.toShapeId().getNamespace().equals(namespace)) {
+        final String shapeNamespace = shape.getId().getNamespace();
+        if (!namespace.equals(shapeNamespace)) {
 
             // Unfortunate side effect
             // Need to add these so that they can be included
@@ -208,7 +194,7 @@ public record DafnyNameResolver(
 
             // Append `.` so that it is easy to use.
             // If you only want the name use localDafnyModuleName
-            return localDafnyModuleName(namespace) + ".";
+            return localDafnyModuleName(shapeNamespace) + ".";
         } else {
             // This is "local" and so does not need any Module name...
             return "";
@@ -224,5 +210,16 @@ public record DafnyNameResolver(
 
     public String predicateSucceededWith(OperationShape operationShape) {
         return "%sSucceededWith".formatted(this.methodForOperation(operationShape));
+    }
+
+    public String dependentModuleLocalName(DependentSmithyModel dependentModel) {
+        final String[] n = namespace.split(".");
+        final String[] d = dependentModel.namespace().split(".");
+
+        return dafnyTypesModuleForNamespace(IntStream
+          .range(0, d.length)
+          .filter( i -> n.length < i && n[i].equals(d[i]))
+          .mapToObj(i -> d[i])
+          .collect(Collectors.joining(".")));
     }
 }

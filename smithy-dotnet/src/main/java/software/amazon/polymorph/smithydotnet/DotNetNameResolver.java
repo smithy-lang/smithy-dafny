@@ -686,16 +686,6 @@ public class DotNetNameResolver {
     }
 
     /**
-     * Returns the Dafny class for the unknown-error class of the given service.
-     */
-    public String dafnyTypeForUnknownServiceError(final ServiceShape serviceShape) {
-        return "%s.%s".formatted(
-                DafnyNameResolver.dafnyExternNamespaceForShapeId(serviceShape.getId()),
-                DafnyNameResolver.classForUnknownError(serviceShape)
-        );
-    }
-
-    /**
      * Returns the compiled-Dafny return type for an operation of this service.
      * This is the compiled-Dafny {@code Result<T, E>},
      * where {@code T} is the corresponding Dafny-compiled value type as determined below,

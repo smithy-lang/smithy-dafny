@@ -40,7 +40,7 @@ public class AwsSdkShimCodegen {
         this.model = model;
         this.serviceShape = serviceShape;
         this.nameResolver = new AwsSdkDotNetNameResolver(model, serviceShape);
-        this.dafnyNameResolver = new DafnyNameResolver(model, serviceShape, new HashSet(), dependentModelPaths);
+        this.dafnyNameResolver = new DafnyNameResolver(model, serviceShape.toShapeId().getNamespace(), new HashSet(), dependentModelPaths);
     }
 
     public Map<Path, TokenTree> generate() {
@@ -145,7 +145,8 @@ public class AwsSdkShimCodegen {
      */
     public TokenTree generateErrorTypeShim() {
         final String dafnyErrorAbstractType = DotNetNameResolver.dafnyTypeForCommonServiceError(serviceShape);
-        final String dafnyUnknownErrorType = nameResolver.dafnyTypeForUnknownServiceError(serviceShape);
+        // TODO: Fix me
+        final String dafnyUnknownErrorType = "Error";
 
         // Collect into TreeSet so that we generate code in a deterministic order (lexicographic, in particular)
         final TreeSet<StructureShape> errorShapes = ModelUtils.streamServiceErrors(model, serviceShape)
