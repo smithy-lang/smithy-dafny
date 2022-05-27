@@ -3,11 +3,7 @@
 
 package software.amazon.polymorph.utils;
 
-import software.amazon.polymorph.traits.ClientConfigTrait;
-import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
-import software.amazon.polymorph.traits.ExtendableTrait;
-import software.amazon.polymorph.traits.PositionalTrait;
-import software.amazon.polymorph.traits.ReferenceTrait;
+import software.amazon.polymorph.traits.*;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.loader.ModelAssembler;
 import software.amazon.smithy.model.shapes.MemberShape;
@@ -41,6 +37,7 @@ public class ModelUtils {
         assembler.addShape(ClientConfigTrait.getDefinition());
         assembler.addShape(DafnyUtf8BytesTrait.getDefinition());
         assembler.addShape(ExtendableTrait.getDefinition());
+        assembler.addShape(DataTypeUnionTrait.getDefinition());
     }
 
     /**

@@ -9,14 +9,7 @@ import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.smithy.model.Model;
-import software.amazon.smithy.model.shapes.MemberShape;
-import software.amazon.smithy.model.shapes.OperationShape;
-import software.amazon.smithy.model.shapes.ResourceShape;
-import software.amazon.smithy.model.shapes.ServiceShape;
-import software.amazon.smithy.model.shapes.Shape;
-import software.amazon.smithy.model.shapes.ShapeId;
-import software.amazon.smithy.model.shapes.ShapeType;
-import software.amazon.smithy.model.shapes.StructureShape;
+import software.amazon.smithy.model.shapes.*;
 import software.amazon.smithy.utils.StringUtils;
 
 import java.nio.file.Path;
@@ -82,13 +75,14 @@ public record DafnyNameResolver(
                       .get();
                     yield baseTypeForShape(member.getTarget());
                 } else {
-                    yield dafnyModulePrefixForShapeId(shape) + shapeName;
+                    yield dafnyTypeNameShape(shape);
                 }
             }
             case SERVICE -> traitForServiceClient(shape.asServiceShape().get());
             case RESOURCE -> traitForResource(shape.asResourceShape().get());
             // Member calls baseTypeForShape...
             case MEMBER -> baseTypeForMember(shape.asMemberShape().get());
+            case UNION -> dafnyTypeNameShape(shape);
             // TODO create/use better timestamp type in Dafny libraries
             case TIMESTAMP -> "string";
             default -> throw new UnsupportedOperationException(
@@ -104,6 +98,10 @@ public record DafnyNameResolver(
         }
 
         return ("Option<%s>").formatted(targetType);
+    }
+
+    private String dafnyTypeNameShape(final Shape shape) {
+        return dafnyModulePrefixForShapeId(shape) + shape.getId().getName();
     }
 
     public String generatedTypeForShape(final ShapeId shapeId) {
@@ -194,7 +192,7 @@ public record DafnyNameResolver(
 
             // Append `.` so that it is easy to use.
             // If you only want the name use localDafnyModuleName
-            return localDafnyModuleName(shapeNamespace) + ".";
+            return dafnyTypesModuleForNamespace(shapeNamespace) + ".";
         } else {
             // This is "local" and so does not need any Module name...
             return "";

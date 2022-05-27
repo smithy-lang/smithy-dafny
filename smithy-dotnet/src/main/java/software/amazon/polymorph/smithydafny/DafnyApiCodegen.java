@@ -5,29 +5,15 @@ package software.amazon.polymorph.smithydafny;
 
 import com.google.common.annotations.VisibleForTesting;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
+import software.amazon.polymorph.traits.DataTypeUnionTrait;
 import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.polymorph.utils.Token;
 import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.smithy.model.Model;
-import software.amazon.smithy.model.shapes.BlobShape;
-import software.amazon.smithy.model.shapes.ListShape;
-import software.amazon.smithy.model.shapes.MapShape;
-import software.amazon.smithy.model.shapes.MemberShape;
-import software.amazon.smithy.model.shapes.NumberShape;
-import software.amazon.smithy.model.shapes.OperationShape;
-import software.amazon.smithy.model.shapes.ServiceShape;
-import software.amazon.smithy.model.shapes.Shape;
-import software.amazon.smithy.model.shapes.ShapeId;
-import software.amazon.smithy.model.shapes.StringShape;
-import software.amazon.smithy.model.shapes.StructureShape;
-import software.amazon.smithy.model.shapes.ResourceShape;
-import software.amazon.smithy.model.traits.EnumTrait;
-import software.amazon.smithy.model.traits.ErrorTrait;
-import software.amazon.smithy.model.traits.LengthTrait;
-import software.amazon.smithy.model.traits.RangeTrait;
-import software.amazon.smithy.model.traits.TraitDefinition;
+import software.amazon.smithy.model.shapes.*;
+import software.amazon.smithy.model.traits.*;
 
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -130,7 +116,7 @@ public class DafnyApiCodegen {
                 .dependentModels()
                 .stream()
                 .map(d ->
-                  "import " +  nameResolver.dependentModuleLocalName(d)))
+                  "import " + nameResolver.dafnyTypesModuleForNamespace(d.namespace())))
             .map(i -> Token.of(i)))
           .lineSeparated();
 
@@ -188,10 +174,14 @@ public class DafnyApiCodegen {
                 } else if (shape.hasTrait(ErrorTrait.class)) {
                     // All error shapes are a single integrated data type
                     yield null;
+                } else if (shape.hasTrait(DataTypeUnionTrait.class)) {
+                    // Such structures only exist within the datatype formed by the union
+                    yield null;
                 } else {
                     yield generateStructureTypeDefinition(shapeId);
                 }
             }
+            case UNION -> generateUnionTypeDefinition(shapeId);
             default -> null;
         });
     }
@@ -271,18 +261,35 @@ public class DafnyApiCodegen {
 
     public TokenTree generateStructureTypeDefinition(final ShapeId structureShapeId) {
         final StructureShape structureShape = model.expectShape(structureShapeId, StructureShape.class);
-        final TokenTree params = TokenTree.of(ModelUtils.streamStructureMembers(structureShape)
-                .map(this::generateStructureTypeParameter)
-        ).separated(Token.of(",")).parenthesized();
 
         final String typeName = structureShapeId.getName();
         return TokenTree.of(
-                Token.of("datatype %1$s = %1$s".formatted(typeName)),
-                params);
+          Token.of("datatype %1$s =".formatted(typeName)),
+          generateDataTypeConstructorFromStructure(structureShapeId)
+        );
+    }
+
+    public TokenTree generateUnionTypeDefinition(final ShapeId unionShapeId) {
+        final UnionShape unionShape = model.expectShape(unionShapeId, UnionShape.class);
+
+        return TokenTree.of(
+          Token.of("datatype %s =".formatted(nameResolver.baseTypeForShape(unionShapeId))),
+          TokenTree.of(
+            unionShape
+              .members()
+              .stream()
+                .map(member -> {
+                    if (member.getMemberName().equals(member.getTarget().getName())) {
+                        return generateDataTypeConstructorFromStructure(member.getTarget());
+                    } else {
+                        throw new UnsupportedOperationException("for now, they MUST match");
+                    }
+                })).lineSeparated()
+          ).lineSeparated();
     }
 
     private TokenTree generateStructureTypeParameter(final MemberShape memberShape) {
-        return Token.of("\n\tnameonly %s: %s".formatted(
+        return Token.of("nameonly %s: %s".formatted(
                 memberShape.getMemberName(), nameResolver.baseTypeForShape(memberShape.getId())));
     }
 
@@ -444,46 +451,62 @@ public class DafnyApiCodegen {
           TokenTree.of(
             ModelUtils
               .streamNamespaceErrors(model, serviceShape.getId().getNamespace())
-              .map(this::generateErrorDataTypeConstructor)
-          ),
+              .map(Shape::getId)
+              .map(this::generateDataTypeConstructorFromStructure)
+          ).lineSeparated(),
           Token.of("// Any dependent models are listed here"),
           TokenTree.of(
             nameResolver
               .dependentModels()
               .stream()
-              .map(this::generateDependantErrorDataTypeConstructor)
-          ),
+              .map(this::generateDependantWrappedDataTypeConstructor)
+          ).lineSeparated(),
           Token.of("// The Opaque error, used for native, extern, wrapped or unknown errors"),
           Token.of("| Opaque(obj: object)"),
-          // Helper error for use with `Externs`
+          // Helper error for use with `extern`
           Token.of("type OpaqueError = e: Error | e.Opaque? witness *")
         ).lineSeparated();
     }
 
-    public TokenTree generateErrorDataTypeConstructor(final Shape shape) {
-        final ShapeId structureShapeId = shape.getId();
-        final StructureShape structureShape = model.expectShape(structureShapeId, StructureShape.class);
-        final TokenTree params = TokenTree.of(ModelUtils.streamStructureMembers(structureShape)
-          .map(this::generateStructureTypeParameter)
-        ).separated(Token.of(",")).parenthesized();
+    public TokenTree generateDataTypeConstructorFromStructure(final ShapeId shapeId) {
+        final StructureShape structureShape = model.expectShape(shapeId, StructureShape.class);
+        final String typeName = shapeId.getName();
 
-        final String typeName = structureShapeId.getName();
+        final TokenTree params = TokenTree
+          .of(ModelUtils
+            .streamStructureMembers(structureShape)
+            .map(this::generateStructureTypeParameter)
+          )
+          // This combines the trees
+          .separated(TokenTree.of(Token.of(","), Token.NEWLINE))
+          .parenthesized()
+          // Because `separated` combined things, this works nicely
+          .lineSeparated();
+
         return TokenTree.of(
           Token.of("| %1$s".formatted(typeName)),
           params);
     }
 
-    public TokenTree generateDependantErrorDataTypeConstructor(final DependentSmithyModel dependentSmithyModel) {
-        final String dependentErrorDataType = nameResolver.dependentModuleLocalName(dependentSmithyModel) + ".Error";
+    public TokenTree generateWrappedDataTypeConstructorFromUnionMember(final MemberShape memberShape) {
+        final String name = memberShape.getMemberName();
+        final String wrappedType = nameResolver.baseTypeForShape(memberShape.getTarget());
+
+
+        return TokenTree.empty();
+    }
+
+
+
+    public TokenTree generateDependantWrappedDataTypeConstructor(final DependentSmithyModel dependentSmithyModel) {
+        final String errorType = nameResolver.dafnyTypesModuleForNamespace(dependentSmithyModel.namespace()) + ".Error";
+        final String errorConstructorName = errorType
+          .replace("Types.Error", "");
+        final String errorDestructorsName = Character.toLowerCase(errorConstructorName.charAt(0)) + errorConstructorName.substring(1);
+
         return TokenTree.of(
-          Token.of("| %s(err: %s)"
-            .formatted(
-              dependentErrorDataType
-                // I included the `.` to avoid other modules with "Types" in the name
-                .replace(".Types.", "")
-                .replace(".", ""),
-              dependentErrorDataType
-            ))
+          Token.of("| %s(%s: %s)"
+            .formatted(errorConstructorName, errorDestructorsName, errorType))
         );
     }
 
