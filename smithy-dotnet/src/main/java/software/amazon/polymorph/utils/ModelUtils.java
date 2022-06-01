@@ -38,6 +38,7 @@ public class ModelUtils {
         assembler.addShape(DafnyUtf8BytesTrait.getDefinition());
         assembler.addShape(ExtendableTrait.getDefinition());
         assembler.addShape(DataTypeUnionTrait.getDefinition());
+        assembler.addShape(LocalServiceTrait.getDefinition());
     }
 
     /**

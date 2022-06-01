@@ -136,10 +136,12 @@ public record DafnyNameResolver(
      * </ul>
      */
     public String returnTypeForOperation(final OperationShape operationShape) {
-        final String outputType = operationShape.getOutput()
-                .map(this::baseTypeForShape)
-                .orElse("()");
-        return "Result<%s, %s>".formatted(outputType, "Error");
+        final String outputType = operationShape
+          .getOutput()
+          .map(this::baseTypeForShape)
+          .orElse("()");
+        return "Result<%s, %s>"
+          .formatted(outputType, "Error");
     }
 
     public Optional<String> returnTypeForResult(final OperationShape operationShape) {
@@ -170,7 +172,13 @@ public record DafnyNameResolver(
     }
 
     public static String dafnyTypesModuleForNamespace(final String namespace) {
+        // The namespace has dots
         return (dafnyModuleForNamespace(namespace) + ".Types").replace(".", "");
+    }
+
+    public static String dafnyAbstractModuleForNamespace(final String namespace) {
+        // The namespace has dots
+        return (dafnyModuleForNamespace(namespace) + ".Abstract").replace(".", "");
     }
 
     public String localDafnyModuleName(final String namespace) {

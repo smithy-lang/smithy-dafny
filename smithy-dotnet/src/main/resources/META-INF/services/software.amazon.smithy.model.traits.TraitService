@@ -1,6 +1,7 @@
 software.amazon.polymorph.traits.ReferenceTrait$Provider
 software.amazon.polymorph.traits.PositionalTrait$Provider
 software.amazon.polymorph.traits.DataTypeUnionTrait$Provider
+software.amazon.polymorph.traits.LocalServiceTrait$Provider
 software.amazon.polymorph.traits.ClientConfigTrait$Provider
 software.amazon.polymorph.traits.DafnyUtf8BytesTrait$Provider
 software.amazon.polymorph.traits.ExtendableTrait$Provider

@@ -6,6 +6,7 @@ package software.amazon.polymorph.smithydafny;
 import com.google.common.annotations.VisibleForTesting;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.polymorph.traits.DataTypeUnionTrait;
+import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.polymorph.utils.ModelUtils;
@@ -14,6 +15,7 @@ import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.*;
 import software.amazon.smithy.model.traits.*;
+import software.amazon.smithy.aws.traits.*;
 
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -70,13 +72,6 @@ public class DafnyApiCodegen {
             )
           .lineSeparated();
 
-        // The generated module MUST be abstract.
-        // Because can never have a concrete implementation.
-        // TODO: Resolve the above :(
-        final String moduleName = DafnyNameResolver
-          .dafnyTypesModuleForNamespace(serviceShape.getId().getNamespace());
-        final TokenTree moduleHeader = Token.of("module %s".formatted(moduleName));
-
         // A smithy model may reference a model in a different package.
         // In which case we need to include it.
         final TokenTree includeDirectives = TokenTree
@@ -101,9 +96,13 @@ public class DafnyApiCodegen {
           )
           .lineSeparated();
 
+        final String typesModuleName = DafnyNameResolver
+          .dafnyTypesModuleForNamespace(serviceShape.getId().getNamespace());
+        final TokenTree typesModuleHeader = Token.of("module %s".formatted(typesModuleName));
+
         // A smithy model may reference a model in a different package.
         // In which case we need to import it.
-        final TokenTree modulePrelude = TokenTree
+        final TokenTree typesModulePrelude = TokenTree
           .of(Stream
             .concat(
                 Stream
@@ -120,9 +119,9 @@ public class DafnyApiCodegen {
             .map(i -> Token.of(i)))
           .lineSeparated();
 
-        final TokenTree moduleBody = TokenTree
+        final TokenTree typesModuleBody = TokenTree
             .of(
-              modulePrelude,
+              typesModulePrelude,
               generatedTypes,
               // Error types are generates *after*
               // all other types to account
@@ -132,9 +131,23 @@ public class DafnyApiCodegen {
             .lineSeparated()
             .braced();
 
-        final Path path = Path.of("%s.dfy".formatted(moduleName));
+
+      final String abstractModuleName = DafnyNameResolver
+        .dafnyAbstractModuleForNamespace(serviceShape.getId().getNamespace());
+      final TokenTree abstractModuleHeader = Token.of("abstract module %s".formatted(abstractModuleName));
+
+      final TokenTree abstractModuleBody = TokenTree
+        .of(generateAbstractBody())
+        .lineSeparated()
+        .braced();
+
+        final Path path = Path.of("%s.dfy".formatted(typesModuleName));
         final TokenTree fullCode = TokenTree
-          .of(includeDirectives, moduleHeader, moduleBody)
+          .of(
+            includeDirectives,
+            typesModuleHeader, typesModuleBody,
+            abstractModuleHeader, abstractModuleBody
+          )
           .lineSeparated();
         return Map.of(path, fullCode);
     }
@@ -336,35 +349,39 @@ public class DafnyApiCodegen {
 
     public TokenTree generateOperationPredicatesAndMethod(final ShapeId operationShapeId) {
 
-        final OperationShape operationShape = model.expectShape(operationShapeId, OperationShape.class);
-        final TokenTree operationParams = operationShape.getInput()
-                .map(nameResolver::baseTypeForShape)
-                .map(inputType -> TokenTree.of("input:", inputType))
-                .orElse(TokenTree.empty())
-                ;
-        final Optional<String> outputType = this.nameResolver.returnTypeForResult(operationShape);
-        TokenTree returnType = TokenTree.empty();
-        if (outputType.isPresent()) {
-            returnType = TokenTree.of("output: %s".formatted(outputType.get()));
-        }
+        final TokenTree calledWithPredicate = this.generatePredicateCalledWith(operationShapeId);
+        final TokenTree succeededWithPredicate = this.generatePredicateSucceededWith(operationShapeId);
+        final TokenTree method = this.generateOperationMethod(operationShapeId);
 
-        final TokenTree wrappedReply = Token.of("output: %s"
-                .formatted(nameResolver.returnTypeForOperation(operationShape)));
-        final TokenTree calledWithPredicate = this.generatePredicateCalledWith(operationShape, operationParams);
-        final TokenTree succeededWithPredicate = this.generatePredicateSucceededWith(operationShape, operationParams, returnType);
-        final TokenTree method = this.generateOperationMethod(operationShape, operationParams, wrappedReply);
-
-        return TokenTree.of(calledWithPredicate, succeededWithPredicate, method).lineSeparated().append(TokenTree.of("\n"));
+        return TokenTree
+          .of(
+            calledWithPredicate,
+            succeededWithPredicate,
+            method
+          )
+          .lineSeparated()
+          .append(Token.NEWLINE);
     }
 
-    private TokenTree generateOperationMethod(
-            final OperationShape operationShape,
-            final TokenTree operationParams,
-            final TokenTree wrappedReply
-    ) {
-        final TokenTree name = TokenTree.of("method", nameResolver.methodForOperation(operationShape));
-        final TokenTree params = operationParams.parenthesized();
-        final TokenTree returns = TokenTree.of("returns ").append(wrappedReply.parenthesized());
+    public TokenTree generateOperationParams(final OperationShape operationShape) {
+        return operationShape.getInput()
+          .map(nameResolver::baseTypeForShape)
+          .map(inputType -> TokenTree.of("input:", inputType))
+          .orElse(TokenTree.empty());
+    }
+
+
+    private TokenTree generateOperationMethod(final ShapeId operationShapeId) {
+        return _generateOperationMethod(operationShapeId).prepend(Token.of("method"));
+    }
+
+    private TokenTree _generateOperationMethod(final ShapeId operationShapeId) {
+        final OperationShape operationShape = model.expectShape(operationShapeId, OperationShape.class);
+
+        final TokenTree name = TokenTree.of(nameResolver.methodForOperation(operationShape));
+        final TokenTree operationParams = generateOperationParams(operationShape).parenthesized();
+        final TokenTree returns = TokenTree
+          .of("returns (output: %s)".formatted(nameResolver.returnTypeForOperation(operationShape)));
 
         // The formal Dafny name for this section of a method is "specification".
         // To avoid confusion with RFC-style "specifications", instead use the term "conditions".
@@ -397,13 +414,14 @@ public class DafnyApiCodegen {
         ensureSucceededWith = ensureSucceededWith.append(ensureSucceededWithParams);
         conditions = conditions.append(ensureCalledWith);
         conditions = conditions.append(ensureSucceededWith);
-        return TokenTree.of(name, params, returns, conditions);
+        return TokenTree.of(name, operationParams, returns, conditions);
     }
 
     private TokenTree generatePredicateCalledWith(
-            final OperationShape operationShape,
-            final TokenTree operationParams
+      final ShapeId operationShapeId
     ) {
+        final OperationShape operationShape = model.expectShape(operationShapeId, OperationShape.class);
+        final TokenTree operationParams = generateOperationParams(operationShape);
         final TokenTree name = TokenTree.of("predicate {:opaque}", nameResolver.predicateCalledWith(operationShape));
         TokenTree params = TokenTree.of("(");
         if (operationShape.getInput().isPresent()) {
@@ -415,10 +433,11 @@ public class DafnyApiCodegen {
     }
 
     private TokenTree generatePredicateSucceededWith(
-            final OperationShape operationShape,
-            final TokenTree operationParams,
-            final TokenTree returnType
+      final ShapeId operationShapeId
     ) {
+        final OperationShape operationShape = model.expectShape(operationShapeId, OperationShape.class);
+        final TokenTree operationParams = generateOperationParams(operationShape);
+
         TokenTree params = TokenTree.empty();
         if (operationShape.getInput().isPresent()) {
             params = TokenTree.of(params, operationParams);
@@ -427,7 +446,12 @@ public class DafnyApiCodegen {
             params = params.append(TokenTree.of(","));
         }
         if (operationShape.getOutput().isPresent()) {
-            params = params.append(returnType);
+            final String returnType = operationShape
+              .getOutput()
+              .map(nameResolver::baseTypeForShape)
+              .get();
+
+            params = params.append(TokenTree.of("output: %s".formatted(returnType)));
         }
         params = params.parenthesized();
         final TokenTree name = TokenTree.of("predicate {:opaque}", nameResolver.predicateSucceededWith(operationShape));
@@ -497,6 +521,132 @@ public class DafnyApiCodegen {
     }
 
 
+//    Abstract Body goes here...
+    public TokenTree generateAbstractBody() {
+        final String typesModuleName = DafnyNameResolver
+          .dafnyTypesModuleForNamespace(serviceShape.getId().getNamespace());
+
+        final TokenTree abstractModulePrelude = TokenTree
+          .of(Stream
+            .of(
+              "import opened Wrappers",
+              "import opened StandardLibrary.UInt",
+              "import opened UTF8",
+              "import opened Types = %s".formatted(typesModuleName)
+            )
+            .map(i -> Token.of(i)))
+          .lineSeparated();
+
+      if (serviceShape.hasTrait(ServiceTrait.class)) {
+        return TokenTree
+          .of(
+            abstractModulePrelude,
+            generateAbstractAwsServiceClass(serviceShape)
+          )
+          .lineSeparated();
+      } else if (serviceShape.hasTrait(LocalServiceTrait.class)) {
+          return TokenTree
+            .of(
+              abstractModulePrelude,
+              generateAbstractLocalService(serviceShape)
+            )
+            .lineSeparated();
+      } else {
+        throw new IllegalStateException("Service does not have supported trait");
+      }
+    }
+
+    public TokenTree generateAbstractLocalService(ServiceShape serviceShape)  {
+        if (!serviceShape.hasTrait(LocalServiceTrait.class)) throw new IllegalStateException("MUST be an LocalService");
+        final LocalServiceTrait localServiceTrait = serviceShape.expectTrait(LocalServiceTrait.class);
+
+        final String configTypeName = localServiceTrait.getConfigId().getName();
+        final String defaultFunctionMethodName = "Default%s".formatted(configTypeName);
+
+        final TokenTree defaultConfig = TokenTree
+          .of("function method %s(): %s".formatted(defaultFunctionMethodName, configTypeName));
+
+
+        final TokenTree serviceMethod = TokenTree
+          .of(
+            "method %s(config: %s := %s())"
+              .formatted(
+                localServiceTrait.getSdkId(),
+                configTypeName,
+                defaultFunctionMethodName
+              ),
+            // Yes, Error is hard coded
+            // this can work because we need to be able Errors from other modules...
+            "returns (res: Result<%s, Error>)".formatted(nameResolver.traitForServiceClient(serviceShape))
+            )
+          .lineSeparated();
+
+        return TokenTree
+          .of(
+            defaultConfig,
+            serviceMethod
+          )
+          .lineSeparated();
+    }
+
+    public TokenTree generateAbstractAwsServiceClass(ServiceShape serviceShape) {
+        if (!serviceShape.hasTrait(ServiceTrait.class)) throw new IllegalStateException("MUST be an AWS Service API");
+        final ServiceTrait serviceTrait = serviceShape.expectTrait(ServiceTrait.class);
+        final String sdkId = serviceTrait.getSdkId();
+
+        final String configTypeName = "%sClientConfigType".formatted(sdkId);
+        final TokenTree configType = TokenTree
+          .of("datatype %s = %s".formatted(configTypeName, configTypeName)
+        );
+        final String defaultFunctionMethodName = "Default%s".formatted(configTypeName);
+
+        final TokenTree defaultConfig = TokenTree
+          .of("function method %s(): %s".formatted(defaultFunctionMethodName, configTypeName));
+
+        final TokenTree className = TokenTree
+          .of(
+            "class {:extern} ",
+            serviceTrait.getSdkId(),
+            "extends %s".formatted(nameResolver.traitForServiceClient(serviceShape))
+          );
+
+        final TokenTree config = TokenTree.of(
+          "const config: %s".formatted(configTypeName)
+        );
+
+        final TokenTree constructor = TokenTree.of(
+            "constructor(config: %s := %s())"
+              .formatted(configTypeName, defaultFunctionMethodName),
+          "ensures config == this.config",
+          "{this.config := config;}"
+        );
+
+        final TokenTree predicatesAndMethods = TokenTree
+          .of(
+            serviceShape
+              .getAllOperations()
+              .stream()
+              .map(this::_generateOperationMethod)
+              .map(method -> method.prepend(Token.of("method {:extern}")))
+          )
+          .lineSeparated();
+
+        return TokenTree
+          .of(
+            configType,
+            defaultConfig,
+            className,
+            TokenTree
+              .of(
+                config,
+                constructor,
+                predicatesAndMethods
+              )
+              .lineSeparated()
+              .braced()
+          )
+          .lineSeparated();
+    }
 
     public TokenTree generateDependantWrappedDataTypeConstructor(final DependentSmithyModel dependentSmithyModel) {
         final String errorType = nameResolver.dafnyTypesModuleForNamespace(dependentSmithyModel.namespace()) + ".Error";
