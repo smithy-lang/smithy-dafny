@@ -13,17 +13,7 @@ import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.model.Model;
-import software.amazon.smithy.model.shapes.ListShape;
-import software.amazon.smithy.model.shapes.MapShape;
-import software.amazon.smithy.model.shapes.MemberShape;
-import software.amazon.smithy.model.shapes.OperationShape;
-import software.amazon.smithy.model.shapes.ResourceShape;
-import software.amazon.smithy.model.shapes.ServiceShape;
-import software.amazon.smithy.model.shapes.Shape;
-import software.amazon.smithy.model.shapes.ShapeId;
-import software.amazon.smithy.model.shapes.ShapeType;
-import software.amazon.smithy.model.shapes.StringShape;
-import software.amazon.smithy.model.shapes.StructureShape;
+import software.amazon.smithy.model.shapes.*;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.utils.StringUtils;
@@ -311,6 +301,14 @@ public class DotNetNameResolver {
         return "%s.%s".formatted(structureNamespace, classForStructure(structureShape.getId()));
     }
 
+    protected String baseTypeForUnion(final UnionShape unionShape) {
+        final ShapeId unionId = unionShape.getId();
+        final String namespace = namespaceForShapeId(unionId);
+
+        return "%s.%s".formatted(namespace, unionId.getName());
+    }
+
+
     protected String baseTypeForMember(final MemberShape memberShape) {
         final String baseType = baseTypeForShape(memberShape.getTarget());
         final boolean isOptional = memberShapeIsOptional(memberShape);
@@ -372,6 +370,7 @@ public class DotNetNameResolver {
             case MEMBER -> baseTypeForMember(shape.asMemberShape().get());
             case SERVICE -> baseTypeForService(shape.asServiceShape().get());
             case RESOURCE -> baseTypeForResource(shape.asResourceShape().get());
+            case UNION -> baseTypeForUnion(shape.asUnionShape().get());
 
             default -> throw new UnsupportedOperationException("Shape %s has unsupported type %s"
                     .formatted(shapeId, shape.getType()));
@@ -523,6 +522,7 @@ public class DotNetNameResolver {
             case MEMBER -> dafnyTypeForMember(shape.asMemberShape().get());
             case SERVICE -> dafnyTypeForService(shape.asServiceShape().get());
             case RESOURCE -> dafnyTypeForResource(shape.asResourceShape().get());
+            case UNION -> dafnyTypeForUnion(shape.asUnionShape().get());
             default -> throw new UnsupportedOperationException("Unsupported shape " + shapeId);
         };
     }
@@ -589,6 +589,16 @@ public class DotNetNameResolver {
                 DafnyNameResolver.dafnyExternNamespaceForShapeId(shapeId),
                 shapeId.getName());
     }
+
+    private String dafnyTypeForUnion(final UnionShape unionShape) {
+        final ShapeId unionId = unionShape.getId();
+
+        // TODO is this adequate
+        return "%s._I%s".formatted(
+          DafnyNameResolver.dafnyExternNamespaceForShapeId(unionId),
+          unionId.getName());
+    }
+
 
     /**
      * Returns the name of the concrete Dafny type for the given regular (i.e. not an enum or reference) structure.

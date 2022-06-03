@@ -83,11 +83,11 @@ public class CodegenCli {
             );
             writeTokenTreesIntoDir(shimCodegen.generate(), outputDotnetDir);
         } else {
-            final ServiceCodegen serviceCodegen = new ServiceCodegen(model, serviceShape);
-            writeTokenTreesIntoDir(serviceCodegen.generate(), outputDotnetDir);
-            
-            final ShimCodegen shimCodegen = new ShimCodegen(model, serviceShape);
-            writeTokenTreesIntoDir(shimCodegen.generate(), outputDotnetDir);
+//            final ServiceCodegen serviceCodegen = new ServiceCodegen(model, serviceShape);
+//            writeTokenTreesIntoDir(serviceCodegen.generate(), outputDotnetDir);
+//
+//            final ShimCodegen shimCodegen = new ShimCodegen(model, serviceShape);
+//            writeTokenTreesIntoDir(shimCodegen.generate(), outputDotnetDir);
         }
         
         final DafnyApiCodegen dafnyApiCodegen = new DafnyApiCodegen(

@@ -15,21 +15,7 @@ import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.polymorph.utils.Token;
 import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.smithy.model.Model;
-import software.amazon.smithy.model.shapes.BlobShape;
-import software.amazon.smithy.model.shapes.BooleanShape;
-import software.amazon.smithy.model.shapes.IntegerShape;
-import software.amazon.smithy.model.shapes.ListShape;
-import software.amazon.smithy.model.shapes.LongShape;
-import software.amazon.smithy.model.shapes.MapShape;
-import software.amazon.smithy.model.shapes.MemberShape;
-import software.amazon.smithy.model.shapes.OperationShape;
-import software.amazon.smithy.model.shapes.ResourceShape;
-import software.amazon.smithy.model.shapes.ServiceShape;
-import software.amazon.smithy.model.shapes.Shape;
-import software.amazon.smithy.model.shapes.ShapeId;
-import software.amazon.smithy.model.shapes.StringShape;
-import software.amazon.smithy.model.shapes.StructureShape;
-import software.amazon.smithy.model.shapes.TimestampShape;
+import software.amazon.smithy.model.shapes.*;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
 
@@ -214,6 +200,7 @@ public class TypeConversionCodegen {
             case MAP -> generateMapConverter(shape.asMapShape().get());
             case STRUCTURE -> generateStructureConverter(shape.asStructureShape().get());
             case MEMBER -> generateMemberConverter(shape.asMemberShape().get());
+            case UNION -> generateUnionConverter(shape.asUnionShape().get());
             default -> throw new IllegalStateException();
         };
     }
@@ -481,6 +468,14 @@ public class TypeConversionCodegen {
                 "return value == null ? %s.create_None() : %s.create_Some(%s((%s) value));"
                 .formatted(dafnyOptionType, dafnyOptionType, targetToDafnyConverterName, cSharpType));
         return buildConverterFromMethodBodies(memberShape, fromDafnyBody, toDafnyBody);
+    }
+
+    // TODO need to implement Union converter
+    public TypeConverter generateUnionConverter(final UnionShape unionShape) {
+        final TokenTree fromDafnyBody = TokenTree.empty();
+        final TokenTree toDafnyBody = TokenTree.empty();
+
+        return buildConverterFromMethodBodies(unionShape, fromDafnyBody, toDafnyBody);
     }
 
     /**

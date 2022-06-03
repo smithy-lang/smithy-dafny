@@ -5,7 +5,6 @@ package software.amazon.polymorph.smithydafny;
 
 import com.google.common.annotations.VisibleForTesting;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
-import software.amazon.polymorph.traits.DataTypeUnionTrait;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
@@ -187,9 +186,6 @@ public class DafnyApiCodegen {
                 } else if (shape.hasTrait(ErrorTrait.class)) {
                     // All error shapes are a single integrated data type
                     yield null;
-                } else if (shape.hasTrait(DataTypeUnionTrait.class)) {
-                    // Such structures only exist within the datatype formed by the union
-                    yield null;
                 } else {
                     yield generateStructureTypeDefinition(shapeId);
                 }
@@ -291,14 +287,17 @@ public class DafnyApiCodegen {
             unionShape
               .members()
               .stream()
-                .map(member -> {
-                    if (member.getMemberName().equals(member.getTarget().getName())) {
-                        return generateDataTypeConstructorFromStructure(member.getTarget());
-                    } else {
-                        throw new UnsupportedOperationException("for now, they MUST match");
-                    }
-                })).lineSeparated()
+              .map(this::generateWrappedDataTypeConstructorFromUnionMember)).lineSeparated()
           ).lineSeparated();
+    }
+
+    public TokenTree generateWrappedDataTypeConstructorFromUnionMember(final MemberShape memberShape) {
+        final String name = memberShape.getMemberName();
+        final String wrappedType = nameResolver.baseTypeForShape(memberShape.getTarget());
+
+        return TokenTree.of(
+          "| %s(%s: %s)".formatted(name, wrappedType.replace(".", ""), wrappedType)
+        );
     }
 
     private TokenTree generateStructureTypeParameter(final MemberShape memberShape) {
@@ -308,11 +307,41 @@ public class DafnyApiCodegen {
 
     public TokenTree generateServiceTraitDefinition() {
 
-        final TokenTree trait = TokenTree.of("trait {:termination false}", nameResolver.traitForServiceClient(serviceShape));
-        final TokenTree predicatesAndMethods = TokenTree.of(
-                serviceShape.getAllOperations().stream().map(this::generateOperationPredicatesAndMethod))
-                .lineSeparated();
-        return TokenTree.of(trait, predicatesAndMethods.braced());
+        final TokenTree trait = TokenTree
+          .of(
+            "trait {:termination false}",
+            nameResolver.traitForServiceClient(serviceShape)
+          );
+        // See generateOperationPredicatesAndMethod, when updated, change me back
+        final TokenTree methods = TokenTree
+          .of(
+            serviceShape
+              .getAllOperations()
+              .stream()
+              .map(this::generateOperationMethod))
+          .lineSeparated();
+        final TokenTree predicates = TokenTree
+          .of(
+            serviceShape
+              .getAllOperations()
+              .stream()
+              .flatMap(operation ->
+                Stream.of(
+                  generatePredicateCalledWith(operation),
+                  generatePredicateSucceededWith(operation)
+                )
+              )
+          )
+          .lineSeparated();
+
+        return TokenTree
+          .of(
+            trait,
+            methods.braced(),
+            TokenTree.of("// Predicates are separated from the trait. This is temporary."),
+            predicates
+          )
+          .lineSeparated();
     }
     
     public TokenTree generateReferenceTraitDefinition(final ShapeId shapeWithReference) {
@@ -335,18 +364,47 @@ public class DafnyApiCodegen {
           .asResourceShape()
           .orElseThrow();
     
-        final TokenTree trait = TokenTree.of("trait {:termination false}", nameResolver.baseTypeForShape(shapeWithReference));
-        final TokenTree predicatesAndMethods = TokenTree
+        final TokenTree trait = TokenTree
+          .of(
+            "trait {:termination false}",
+            nameResolver.baseTypeForShape(shapeWithReference)
+          );
+        // See generateOperationPredicatesAndMethod, when updated, change me back
+        final TokenTree methods = TokenTree
           .of(
               resource
                 .getAllOperations()
                 .stream()
-                .map(this::generateOperationPredicatesAndMethod)
+                .map(this::generateOperationMethod)
           )
           .lineSeparated();
-        return TokenTree.of(trait, predicatesAndMethods.braced());
+
+        final TokenTree predicates = TokenTree
+          .of(
+            resource
+              .getAllOperations()
+              .stream()
+              .flatMap(operation ->
+                Stream.of(
+                  generatePredicateCalledWith(operation),
+                  generatePredicateSucceededWith(operation)
+                )
+              )
+          )
+          .lineSeparated();
+
+        return TokenTree
+          .of(
+            trait,
+            methods.braced(),
+            TokenTree.of("// Predicates are separated from the trait. This is temporary."),
+            predicates
+          )
+          .lineSeparated();
     }
 
+    // TODO see: https://github.com/dafny-lang/dafny/issues/2150
+    // So the predicates can't be in the trait until that is fixed
     public TokenTree generateOperationPredicatesAndMethod(final ShapeId operationShapeId) {
 
         final TokenTree calledWithPredicate = this.generatePredicateCalledWith(operationShapeId);
@@ -483,7 +541,7 @@ public class DafnyApiCodegen {
             nameResolver
               .dependentModels()
               .stream()
-              .map(this::generateDependantWrappedDataTypeConstructor)
+              .map(this::generateDependantErrorDataTypeConstructor)
           ).lineSeparated(),
           Token.of("// The Opaque error, used for native, extern, wrapped or unknown errors"),
           Token.of("| Opaque(obj: object)"),
@@ -512,16 +570,17 @@ public class DafnyApiCodegen {
           params);
     }
 
-    public TokenTree generateWrappedDataTypeConstructorFromUnionMember(final MemberShape memberShape) {
-        final String name = memberShape.getMemberName();
-        final String wrappedType = nameResolver.baseTypeForShape(memberShape.getTarget());
+    public TokenTree generateDependantErrorDataTypeConstructor(final DependentSmithyModel dependentSmithyModel) {
+        final String errorType = nameResolver.dafnyTypesModuleForNamespace(dependentSmithyModel.namespace()) + ".Error";
+        final String errorConstructorName = errorType
+          .replace("Types.Error", "");
 
-
-        return TokenTree.empty();
+        return TokenTree.of(
+          Token.of("| %s(%s: %s)"
+            .formatted(errorConstructorName, errorConstructorName, errorType))
+        );
     }
 
-
-//    Abstract Body goes here...
     public TokenTree generateAbstractBody() {
         final String typesModuleName = DafnyNameResolver
           .dafnyTypesModuleForNamespace(serviceShape.getId().getNamespace());
@@ -610,15 +669,9 @@ public class DafnyApiCodegen {
             "extends %s".formatted(nameResolver.traitForServiceClient(serviceShape))
           );
 
-        final TokenTree config = TokenTree.of(
-          "const config: %s".formatted(configTypeName)
-        );
-
         final TokenTree constructor = TokenTree.of(
-            "constructor(config: %s := %s())"
-              .formatted(configTypeName, defaultFunctionMethodName),
-          "ensures config == this.config",
-          "{this.config := config;}"
+            "constructor {:extern} (config: %s := %s())"
+              .formatted(configTypeName, defaultFunctionMethodName)
         );
 
         final TokenTree predicatesAndMethods = TokenTree
@@ -638,7 +691,6 @@ public class DafnyApiCodegen {
             className,
             TokenTree
               .of(
-                config,
                 constructor,
                 predicatesAndMethods
               )
@@ -647,19 +699,6 @@ public class DafnyApiCodegen {
           )
           .lineSeparated();
     }
-
-    public TokenTree generateDependantWrappedDataTypeConstructor(final DependentSmithyModel dependentSmithyModel) {
-        final String errorType = nameResolver.dafnyTypesModuleForNamespace(dependentSmithyModel.namespace()) + ".Error";
-        final String errorConstructorName = errorType
-          .replace("Types.Error", "");
-        final String errorDestructorsName = Character.toLowerCase(errorConstructorName.charAt(0)) + errorConstructorName.substring(1);
-
-        return TokenTree.of(
-          Token.of("| %s(%s: %s)"
-            .formatted(errorConstructorName, errorDestructorsName, errorType))
-        );
-    }
-
 
     private static TokenTree generateLengthConstraint(final LengthTrait lengthTrait) {
         final String min = lengthTrait.getMin().map("%s <="::formatted).orElse("");
