@@ -771,6 +771,13 @@ public class DotNetNameResolver {
      */
     @VisibleForTesting
     public static String encodedIdentForShapeId(final ShapeId shapeId) {
+        // TODO We should make these methods more discoverable
+        // I suggest that instead of something like this
+        // FromDafny_N3_com__N9_amazonaws__N3_kms__S26_InvalidGrantTokenException(
+        // Something like this:
+        // InvalidGrantTokenException_FromDafny_N3_com__N9_amazonaws__N3_kms__S26(
+        // The advantage here is that is moves the human information to the front of the line.
+
         final String namespace = shapeId.getNamespace();
         final String relativeShape = shapeId.getName();
         final Optional<String> memberOptional = shapeId.getMember();
