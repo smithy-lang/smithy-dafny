@@ -146,7 +146,8 @@ public class AwsSdkShimCodegen {
     public TokenTree generateErrorTypeShim() {
         final String dafnyErrorAbstractType = DotNetNameResolver.dafnyTypeForCommonServiceError(serviceShape);
         // TODO: Fix me
-        final String dafnyUnknownErrorType = "Error";
+        final String dafnyUnknownErrorType = "%s.Error_Opaque"
+          .formatted(DafnyNameResolver.dafnyExternNamespaceForShapeId(serviceShape.getId()));
 
         // Collect into TreeSet so that we generate code in a deterministic order (lexicographic, in particular)
         final TreeSet<StructureShape> errorShapes = ModelUtils.streamServiceErrors(model, serviceShape)
@@ -166,10 +167,8 @@ public class AwsSdkShimCodegen {
                 ShapeId.from("smithy.api#String"), TO_DAFNY);
         final TokenTree unknownErrorCase = Token.of("""
                 default:
-                    return new %s {
-                        message = %s(error.Message ?? "")
-                    };
-                """.formatted(dafnyUnknownErrorType, stringConverter));
+                    return new %s(error);
+                """.formatted(dafnyUnknownErrorType));
 
         final TokenTree signature = Token.of("private %s %s(%s.%s error)".formatted(
                 dafnyErrorAbstractType,

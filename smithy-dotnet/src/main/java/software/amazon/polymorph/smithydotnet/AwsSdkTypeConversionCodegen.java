@@ -45,7 +45,7 @@ public class AwsSdkTypeConversionCodegen extends TypeConversionCodegen {
     @Override
     public TypeConverter generateStructureConverter(final StructureShape structureShape) {
         if (structureShape.hasTrait(ErrorTrait.class)) {
-            return generateErrorStructureConverter(structureShape);
+            return generateSpecificModeledErrorConverter(structureShape);
         }
 
         return super.generateStructureConverter(structureShape);

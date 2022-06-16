@@ -578,7 +578,8 @@ public class DotNetNameResolver {
 
         // The Dafny type of an error structure is the corresponding generated Dafny class
         if (structureShape.hasTrait(ErrorTrait.class)) {
-            return "%s.%s".formatted(
+            // TODO: This Error_ should be consolidated
+            return "%s.Error_%s".formatted(
                     DafnyNameResolver.dafnyExternNamespaceForShapeId(shapeId),
                     shapeId.getName());
         }
@@ -668,6 +669,15 @@ public class DotNetNameResolver {
         return dafnyBaseTypeForServiceError(this.serviceShape);
     }
 
+    public String dafnyConcreteTypeForErrorStructure(final StructureShape errorShape) {
+        assert errorShape.hasTrait(ErrorTrait.class);
+        final ShapeId errorShapeId = errorShape.getId();
+        // TODO: This Error_ string is unfortunate, move it somewhere
+        return "%s.Error_%s".formatted(
+          DafnyNameResolver.dafnyExternNamespaceForShapeId(errorShapeId),
+          errorShapeId.getName());
+    }
+
     /**
      * Returns this service name, without the trailing "Factory" if it's present.
      */
@@ -684,14 +694,9 @@ public class DotNetNameResolver {
      * {@link DotNetNameResolver#dafnyTypeForShape(ShapeId)}.
      */
     public static String dafnyTypeForCommonServiceError(final ServiceShape serviceShape) {
-        // TODO Currently we have this hardcoded to remove 'Factory' from service names
-        // that include it, however this should likely be controlled via a custom trait
-        final String serviceName = ModelUtils.serviceNameWithoutTrailingFactory(serviceShape);
-
-        // TODO this should really end with "error"...
-        return "%s.I%sException".formatted(
-                DafnyNameResolver.dafnyExternNamespaceForShapeId(serviceShape.getId()),
-                serviceName
+        // TODO The Error string should be consolidated
+        return "%s._IError".formatted(
+                DafnyNameResolver.dafnyExternNamespaceForShapeId(serviceShape.getId())
         );
     }
 
