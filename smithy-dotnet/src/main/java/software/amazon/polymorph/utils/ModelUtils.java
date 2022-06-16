@@ -52,9 +52,7 @@ public class ModelUtils {
      * @return a stream of error structures in the given service shape
      */
     public static Stream<StructureShape> streamServiceErrors(final Model model, final ServiceShape serviceShape) {
-        return model.getStructureShapesWithTrait(ErrorTrait.class)
-                .stream()
-                .filter(structureShape -> isInServiceNamespace(structureShape.getId(), serviceShape));
+        return streamNamespaceErrors(model, serviceShape.getId().getNamespace());
     }
 
     /**
