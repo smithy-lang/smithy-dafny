@@ -164,7 +164,7 @@ public record DafnyNameResolver(
         final Stream<String> namespaceParts = Arrays
           .stream(namespace.split("\\."))
           .map(StringUtils::capitalize);
-        return Joiner.on('.').join(namespaceParts.iterator());
+        return Joiner.on('.').join(namespaceParts.iterator()) + ".Types";
     }
 
     public static String dafnyModuleForShapeId(final ShapeId shapeId) {
@@ -173,12 +173,14 @@ public record DafnyNameResolver(
 
     public static String dafnyTypesModuleForNamespace(final String namespace) {
         // The namespace has dots
-        return (dafnyModuleForNamespace(namespace) + ".Types").replace(".", "");
+        return (dafnyModuleForNamespace(namespace)).replace(".", "");
     }
 
     public static String dafnyAbstractModuleForNamespace(final String namespace) {
         // The namespace has dots
-        return (dafnyModuleForNamespace(namespace) + ".Abstract").replace(".", "");
+        return (dafnyModuleForNamespace(namespace))
+          .replace(".Types", "Abstract")
+          .replace(".", "");
     }
 
     public String localDafnyModuleName(final String namespace) {
@@ -211,7 +213,7 @@ public record DafnyNameResolver(
      * Returns the Dafny {@code {:extern}} namespace corresponding to the namespace of the given shape ID.
      */
     public static String dafnyExternNamespaceForShapeId(final ShapeId shapeId) {
-        return "Dafny." + dafnyModuleForShapeId(shapeId);
+        return "Dafny." + dafnyModuleForNamespace(shapeId.getNamespace());
     }
 
     public String predicateSucceededWith(OperationShape operationShape) {

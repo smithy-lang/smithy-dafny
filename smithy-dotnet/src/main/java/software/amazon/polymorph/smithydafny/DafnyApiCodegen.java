@@ -95,9 +95,13 @@ public class DafnyApiCodegen {
           )
           .lineSeparated();
 
-        final String typesModuleName = DafnyNameResolver
-          .dafnyTypesModuleForNamespace(serviceShape.getId().getNamespace());
-        final TokenTree typesModuleHeader = Token.of("module %s".formatted(typesModuleName));
+        final String namespace = serviceShape.getId().getNamespace();
+        final String typesModuleName = DafnyNameResolver.dafnyTypesModuleForNamespace(namespace);
+        final TokenTree typesModuleHeader = Token.of("module {:extern \"%s\" } %s"
+          .formatted(
+            DafnyNameResolver.dafnyExternNamespaceForShapeId(serviceShape.getId()),
+            typesModuleName
+          ));
 
         // A smithy model may reference a model in a different package.
         // In which case we need to import it.
