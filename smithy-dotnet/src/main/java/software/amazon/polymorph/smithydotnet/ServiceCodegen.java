@@ -55,8 +55,7 @@ public class ServiceCodegen {
 
     // TODO: get smarter about imports. maybe just fully qualify all model-agnostic types?
     private final static List<String> UNCONDITIONAL_IMPORTS = List.of(
-            "System",
-            "AWS.EncryptionSDK.Core"
+            "System"
     );
 
     /**

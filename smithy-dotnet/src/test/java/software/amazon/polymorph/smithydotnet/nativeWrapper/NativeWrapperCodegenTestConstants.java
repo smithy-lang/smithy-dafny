@@ -204,7 +204,6 @@ class NativeWrapperCodegenTestConstants {
                     // ReSharper disable SuggestVarOrType_SimpleTypes
                                 
                     using System;
-                    using AWS.EncryptionSDK.Core;
                     using Wrappers_Compile;
                     """;
 

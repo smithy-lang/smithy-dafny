@@ -44,8 +44,7 @@ public class ShimCodegen {
     private final static List<String> UNCONDITIONAL_IMPORTS = List.of(
             "System",
             "System.IO",
-            "System.Collections.Generic",
-            "AWS.EncryptionSDK.Core"
+            "System.Collections.Generic"
     );
 
     /**

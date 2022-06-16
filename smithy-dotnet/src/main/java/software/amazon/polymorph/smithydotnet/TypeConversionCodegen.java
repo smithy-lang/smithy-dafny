@@ -68,9 +68,7 @@ public class TypeConversionCodegen {
     public Map<Path, TokenTree> generate() {
         final TokenTree prelude = TokenTree.of(
                 // needed for LINQ operators like Select
-                "using System.Linq;",
-                // TODO: fully qualify types to avoid needing this
-                "using AWS.EncryptionSDK.Core;"
+                "using System.Linq;"
                 );
         final Stream<TypeConverter> modeledConverters = findShapeIdsToConvert()
                 .stream()
