@@ -782,63 +782,60 @@ public class TypeConversionCodegen {
      */
     public TypeConverter generateSpecificModeledErrorConverter(final StructureShape errorShape) {
         assert errorShape.hasTrait(ErrorTrait.class);
-        final TokenTree concreteVar = Token
-          .of("%1$s concrete = (%1$s)value;"
-            .formatted(
-              nameResolver.dafnyConcreteTypeForErrorStructure(errorShape))
-          );
-        final TokenTree assignments = TokenTree.of(ModelUtils
-          .streamStructureMembers(errorShape)
-          .map(memberShape -> {
-              final String dafnyMemberName = memberShape.getMemberName();
-              final String propertyName = nameResolver.classPropertyForStructureMember(memberShape);
-              final String propertyType = nameResolver.classPropertyTypeForStructureMember(memberShape);
-              final String memberFromDafnyConverterName = typeConverterForShape(
-                memberShape.getId(), FROM_DAFNY);
-
-              final TokenTree checkIfPresent;
-              if (nameResolver.memberShapeIsOptional(memberShape)) {
-                  checkIfPresent = Token.of("if (concrete.%s.is_Some)".formatted(dafnyMemberName));
-              } else {
-                  checkIfPresent = TokenTree.empty();
-              }
-              final TokenTree assign = Token.of("converted.%s = (%s) %s(concrete.%s);".formatted(
-                propertyName, propertyType, memberFromDafnyConverterName, dafnyMemberName));
-              return TokenTree.of(checkIfPresent, assign);
-          }))
-          .lineSeparated();
         final String structureType = nameResolver.baseTypeForShape(errorShape.getId());
 
+        final TokenTree fromDafnyConstructorArgs = TokenTree
+          .of(ModelUtils
+            .streamStructureMembers(errorShape)
+            .map( memberShape -> {
+                final String dafnyMemberName = memberShape.getMemberName();
+                final String memberFromDafnyConverterName = typeConverterForShape(
+                  memberShape.getId(), FROM_DAFNY);
+
+                return Token.of("%s(value.%s)".formatted(
+                  memberFromDafnyConverterName,
+                  dafnyMemberName
+                ));
+            }))
+          .separated(Token.of(','))
+          .lineSeparated();
+
         final TokenTree fromDafnyBody = TokenTree.of(
-          concreteVar,
-          Token.of("%1$s converted = new %1$s();".formatted(structureType)),
-          assignments,
-          Token.of("return converted;")
-        );
-
-        final TokenTree isSetTernaries = TokenTree.of(
-          ModelUtils.streamStructureMembers(errorShape)
-            .filter(nameResolver::memberShapeIsOptional)
-            .map(this::generateExtractOptionalMember)
-        ).lineSeparated();
-
-        final TokenTree constructorArgs = TokenTree.of(ModelUtils
-          .streamStructureMembers(errorShape)
-          .map(this::generateConstructorArg)
-          .map(Token::of)
-        ).separated(Token.of(','));
-        final TokenTree constructor = TokenTree.of(
-          TokenTree.of("return new"),
-          TokenTree.of(nameResolver.dafnyConcreteTypeForErrorStructure(errorShape)),
-          constructorArgs.parenthesized(),
+          Token.of("return new"),
+          Token.of(structureType),
+          fromDafnyConstructorArgs.parenthesized().lineSeparated(),
           Token.of(';')
         );
 
+        final TokenTree toDafnyIsSetTernaries = TokenTree
+          .of(
+            ModelUtils
+              .streamStructureMembers(errorShape)
+              .filter(nameResolver::memberShapeIsOptional)
+              .map(this::generateExtractOptionalMember))
+          .lineSeparated();
+        final TokenTree toDafnyConstructorArgs = TokenTree
+          .of(ModelUtils
+            .streamStructureMembers(errorShape)
+            .map(this::generateConstructorArg)
+            .map(Token::of))
+          .separated(Token.of(','))
+          .lineSeparated();
+        final TokenTree toDafnyConstructor = TokenTree
+          .of(
+            TokenTree.of("return new"),
+            TokenTree.of(nameResolver.dafnyConcreteTypeForErrorStructure(errorShape)),
+            toDafnyConstructorArgs.parenthesized().lineSeparated(),
+            Token.of(';')
+          );
 
-        final TokenTree toDafnyBody = TokenTree.of(
-          isSetTernaries,
-          constructor
-        ).lineSeparated();
+
+        final TokenTree toDafnyBody = TokenTree
+          .of(
+            toDafnyIsSetTernaries,
+            toDafnyConstructor
+          )
+          .lineSeparated();
 
         return buildConverterFromMethodBodies(errorShape, fromDafnyBody, toDafnyBody);
     }
