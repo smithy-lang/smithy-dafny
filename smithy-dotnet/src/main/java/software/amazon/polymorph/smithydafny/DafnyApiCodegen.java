@@ -430,27 +430,39 @@ public class DafnyApiCodegen {
 
 
     private TokenTree generateOperationMethod(final ShapeId operationShapeId) {
-        return _generateOperationMethod(operationShapeId).prepend(Token.of("method"));
+        return generateOperationMethod(operationShapeId, TokenTree.empty());
     }
 
-    private TokenTree _generateOperationMethod(final ShapeId operationShapeId) {
+    private TokenTree generateOperationMethod(final ShapeId operationShapeId, final TokenTree attributeAnnotation) {
         final OperationShape operationShape = model.expectShape(operationShapeId, OperationShape.class);
 
-        final TokenTree name = TokenTree.of(nameResolver.methodForOperation(operationShape));
+        // If an operation is @readonly,
+        // then it is treated as a Dafny function
+        // TODO: This is only true for local services...
+        final boolean isReadOnly = operationShape.hasTrait(ReadonlyTrait.class);
+
+        final TokenTree name = TokenTree
+          .of(isReadOnly ? "function method" : "method")
+          .append(attributeAnnotation)
+          .append(TokenTree.of(nameResolver.methodForOperation(operationShape)));
         final TokenTree operationParams = generateOperationParams(operationShape).parenthesized();
         final TokenTree returns = TokenTree
-          .of("returns (output: %s)".formatted(nameResolver.returnTypeForOperation(operationShape)));
+          .of("%s (output: %s)"
+            .formatted(
+              isReadOnly ? ":" : "returns",
+              nameResolver.returnTypeForOperation(operationShape)
+            ));
 
         // The formal Dafny name for this section of a method is "specification".
         // To avoid confusion with RFC-style "specifications", instead use the term "conditions".
         TokenTree conditions = TokenTree.empty();
 
         TokenTree ensureCalledWith = TokenTree.of(
-                "\n\tensures "
+                "ensures "
                         + nameResolver.predicateCalledWith(operationShape)
         );
         TokenTree ensureSucceededWith = TokenTree.of(
-                "\n\tensures output.Success? ==> "
+                "ensures output.Success? ==> "
                         + nameResolver.predicateSucceededWith(operationShape)
         );
         TokenTree ensureCalledWithParams = TokenTree.empty();
@@ -472,7 +484,14 @@ public class DafnyApiCodegen {
         ensureSucceededWith = ensureSucceededWith.append(ensureSucceededWithParams);
         conditions = conditions.append(ensureCalledWith);
         conditions = conditions.append(ensureSucceededWith);
-        return TokenTree.of(name, operationParams, returns, conditions);
+        return TokenTree
+          .of(
+            name,
+            operationParams,
+            returns,
+            conditions.lineSeparated()
+          )
+          .lineSeparated();
     }
 
     private TokenTree generatePredicateCalledWith(
@@ -662,40 +681,46 @@ public class DafnyApiCodegen {
         final TokenTree defaultConfig = TokenTree
           .of("function method %s(): %s".formatted(defaultFunctionMethodName, configTypeName));
 
-        final TokenTree className = TokenTree
+        final TokenTree factory = TokenTree
           .of(
-            "class {:extern} ",
-            serviceTrait.getSdkId(),
-            "extends %s".formatted(nameResolver.traitForServiceClient(serviceShape))
-          );
+            "method {:extern} %sClient()".formatted(serviceTrait.getSdkId()),
+            "returns (res: Result<%s, Error>)".formatted(nameResolver.traitForServiceClient(serviceShape))
+          ).lineSeparated();
 
-        final TokenTree constructor = TokenTree.of(
-            "constructor {:extern} (config: %s := %s())"
-              .formatted(configTypeName, defaultFunctionMethodName)
-        );
-
-        final TokenTree predicatesAndMethods = TokenTree
-          .of(
-            serviceShape
-              .getAllOperations()
-              .stream()
-              .map(this::_generateOperationMethod)
-              .map(method -> method.prepend(Token.of("method {:extern}")))
-          )
-          .lineSeparated();
+//        final TokenTree className = TokenTree
+//          .of(
+//            "class {:extern} ",
+//            serviceTrait.getSdkId(),
+//            "extends %s".formatted(nameResolver.traitForServiceClient(serviceShape))
+//          );
+//
+//        final TokenTree constructor = TokenTree.of(
+//            "constructor {:extern} (config: %s := %s())"
+//              .formatted(configTypeName, defaultFunctionMethodName)
+//        );
+//
+//        final TokenTree predicatesAndMethods = TokenTree
+//          .of(
+//            serviceShape
+//              .getAllOperations()
+//              .stream()
+//              .map(operation -> this.generateOperationMethod(operation, TokenTree.of("{:extern}")))
+//          )
+//          .lineSeparated();
 
         return TokenTree
           .of(
             configType,
             defaultConfig,
-            className,
-            TokenTree
-              .of(
-                constructor,
-                predicatesAndMethods
-              )
-              .lineSeparated()
-              .braced()
+            factory
+//            className,
+//            TokenTree
+//              .of(
+//                constructor,
+//                predicatesAndMethods
+//              )
+//              .lineSeparated()
+//              .braced()
           )
           .lineSeparated();
     }
