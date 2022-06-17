@@ -527,7 +527,7 @@ public class DafnyApiCodegen {
         // Build the predicate that can be used as a simple mock
         final TokenTree predicate = TokenTree
           .of(
-            Token.of("predicate"),
+            Token.of("predicate {:axiom}"),
             Token.of(name),
             params // Without a body. This way it can not be assumed or revealed
           );
@@ -577,7 +577,7 @@ public class DafnyApiCodegen {
         // Build the predicate that can be used as a simple mock
         final TokenTree predicate = TokenTree
           .of(
-            Token.of("predicate"),
+            Token.of("predicate {:axiom}"),
             Token.of(name),
             params  // Without a body. This way it can not be assumed or revealed
           );
