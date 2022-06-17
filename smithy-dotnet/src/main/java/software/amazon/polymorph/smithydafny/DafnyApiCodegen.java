@@ -342,7 +342,15 @@ public class DafnyApiCodegen {
           .of(
             trait,
             methods.braced(),
-            TokenTree.of("// Predicates are separated from the trait. This is temporary."),
+            TokenTree
+              .of(
+                "// Predicates are separated from the trait.",
+                "// This is intentional, otherwise they would need to be reDefined in the concrete class.",
+                "// In the concrete method you MUST use `assume` for the `ensures` clause to verify.",
+                "// However you MUST NOT use `assume` anywhere else.",
+                "// Otherwise any such proof will be unsound."
+              )
+              .lineSeparated(),
             predicates
           )
           .lineSeparated();
@@ -401,7 +409,15 @@ public class DafnyApiCodegen {
           .of(
             trait,
             methods.braced(),
-            TokenTree.of("// Predicates are separated from the trait. This is temporary."),
+            TokenTree
+              .of(
+                "// Predicates are separated from the trait.",
+                "// This is intentional, otherwise they would need to be reDefined in the concrete class.",
+                "// In the concrete method you MUST use the `lemma` for the `ensures` clause to verify.",
+                "// However you MUST NOT use `lemma` anywhere else.",
+                "// Otherwise any such proof will be unsound."
+              )
+              .lineSeparated(),
             predicates
           )
           .lineSeparated();
@@ -426,12 +442,12 @@ public class DafnyApiCodegen {
     }
 
     public TokenTree generateOperationParams(final OperationShape operationShape) {
-        return operationShape.getInput()
+        return operationShape
+          .getInput()
           .map(nameResolver::baseTypeForShape)
           .map(inputType -> TokenTree.of("input:", inputType))
           .orElse(TokenTree.empty());
     }
-
 
     private TokenTree generateOperationMethod(final ShapeId operationShapeId) {
         return generateOperationMethod(operationShapeId, TokenTree.empty());
@@ -502,42 +518,100 @@ public class DafnyApiCodegen {
       final ShapeId operationShapeId
     ) {
         final OperationShape operationShape = model.expectShape(operationShapeId, OperationShape.class);
-        final TokenTree operationParams = generateOperationParams(operationShape);
-        final TokenTree name = TokenTree.of("predicate {:opaque}", nameResolver.predicateCalledWith(operationShape));
-        TokenTree params = TokenTree.of("(");
-        if (operationShape.getInput().isPresent()) {
-            params = TokenTree.of(params, operationParams);
-        }
-        params = params.append(TokenTree.of(")"));
-        final TokenTree body = TokenTree.of("{true}");
-        return TokenTree.of(name, params, body);
+        final String name = nameResolver.predicateCalledWith(operationShape);
+
+        // First get the parameters
+        final TokenTree params = generateOperationParams(operationShape)
+          .parenthesized();
+
+        // Build the predicate that can be used as a simple mock
+        final TokenTree predicate = TokenTree
+          .of(
+            Token.of("predicate"),
+            Token.of(name),
+            params // Without a body. This way it can not be assumed or revealed
+          );
+
+        // A lemma that is used to ensure the bodiless predicate above
+        final TokenTree lemma = TokenTree
+          .of(
+            Token.of("lemma {:axiom}"),
+            Token.of("Assume%s".formatted(name)),
+            params,
+            Token.NEWLINE,
+            Token.of("ensures"),
+            Token.of(name),
+            // Simplify? Need to call the predicate
+            operationShape
+              .getInput()
+              // This can be hard coded because we are calling "getInput"
+              .map(member ->  TokenTree.of("input"))
+              .orElse(TokenTree.empty())
+              .parenthesized()
+          );
+
+        return TokenTree
+          .of(predicate, lemma)
+          .lineSeparated();
     }
 
     private TokenTree generatePredicateSucceededWith(
       final ShapeId operationShapeId
     ) {
         final OperationShape operationShape = model.expectShape(operationShapeId, OperationShape.class);
-        final TokenTree operationParams = generateOperationParams(operationShape);
+        final String name = nameResolver.predicateSucceededWith(operationShape);
 
-        TokenTree params = TokenTree.empty();
-        if (operationShape.getInput().isPresent()) {
-            params = TokenTree.of(params, operationParams);
-        }
-        if (operationShape.getInput().isPresent() && operationShape.getOutput().isPresent()) {
-            params = params.append(TokenTree.of(","));
-        }
-        if (operationShape.getOutput().isPresent()) {
-            final String returnType = operationShape
+        // Build the parameters. Need input and output
+        final TokenTree params = TokenTree
+          .of(
+            generateOperationParams(operationShape),
+            operationShape
               .getOutput()
               .map(nameResolver::baseTypeForShape)
-              .get();
+              .map(outputType -> TokenTree.of("output:", outputType))
+              .orElse(TokenTree.empty())
+          )
+          .separated(Token.of(","))
+          .parenthesized();
 
-            params = params.append(TokenTree.of("output: %s".formatted(returnType)));
-        }
-        params = params.parenthesized();
-        final TokenTree name = TokenTree.of("predicate {:opaque}", nameResolver.predicateSucceededWith(operationShape));
-        final TokenTree body = TokenTree.of("{true}");
-        return TokenTree.of(name, params, body);
+        // Build the predicate that can be used as a simple mock
+        final TokenTree predicate = TokenTree
+          .of(
+            Token.of("predicate"),
+            Token.of(name),
+            params  // Without a body. This way it can not be assumed or revealed
+          );
+
+        // A lemma that is used to ensure the bodiless predicate above
+        final TokenTree lemma = TokenTree
+          .of(
+            Token.of("lemma {:axiom}"),
+            Token.of("Assume%s".formatted(name)),
+            params,
+            Token.NEWLINE,
+            Token.of("ensures"),
+            Token.of(name),
+            // Simplify? Need to call the predicate
+            TokenTree
+              .of(
+                operationShape
+                  .getInput()
+                  // This can be hard coded because we are calling "getInput"
+                  .map(member ->  TokenTree.of("input"))
+                  .orElse(TokenTree.empty()),
+                operationShape
+                  .getOutput()
+                  // This can be hard coded because we are calling "getInput"
+                  .map(member ->  TokenTree.of("output"))
+                  .orElse(TokenTree.empty())
+              )
+              .separated(Token.of(","))
+              .parenthesized()
+          );
+
+        return TokenTree
+          .of(predicate, lemma)
+          .lineSeparated();
     }
 
 
