@@ -130,7 +130,7 @@ public class DotNetNameResolver {
         return interfaceForService(serviceShape.getId());
     }
 
-    public String interfaceForService(final ShapeId serviceShapeId) {
+    public static String interfaceForService(final ShapeId serviceShapeId) {
         if (isAwsSdkServiceId(serviceShapeId)) {
             return "I" + serviceShapeId.getName();
         }
@@ -476,11 +476,8 @@ public class DotNetNameResolver {
      * Returns the type converter method name for the given service's common error shape and the given direction.
      */
     public String typeConverterForCommonError(final ServiceShape serviceShape, final TypeConversionDirection direction) {
-        return switch (direction) {
-            case TO_DAFNY -> "%s_CommonError".formatted(direction.toString());
-            case FROM_DAFNY -> "%s_CommonError_%s".formatted(
-                    direction.toString(), classForBaseServiceException(serviceShape));
-        };
+        // TODO remove the service shape
+        return "%s_CommonError".formatted(direction.toString());
     }
 
     /**
@@ -581,14 +578,20 @@ public class DotNetNameResolver {
             // TODO: This Error_ should be consolidated
             return "%s.Error_%s".formatted(
                     DafnyNameResolver.dafnyExternNamespaceForShapeId(shapeId),
-                    shapeId.getName());
+                    dafnyCompilesExtra_(shapeId));
         }
 
         // The Dafny type of other structures is simply the structure's name.
         // We explicitly specify the Dafny namespace just in case of collisions.
         return "%s._I%s".formatted(
                 DafnyNameResolver.dafnyExternNamespaceForShapeId(shapeId),
-                shapeId.getName());
+                dafnyCompilesExtra_(shapeId));
+    }
+
+    private String dafnyCompilesExtra_(final ShapeId shapeId) {
+        return shapeId
+          .getName()
+          .replace("_", "__");
     }
 
     private String dafnyTypeForUnion(final UnionShape unionShape) {
@@ -610,7 +613,7 @@ public class DotNetNameResolver {
         final ShapeId shapeId = structureShape.getId();
         return "%s.%s".formatted(
                 DafnyNameResolver.dafnyExternNamespaceForShapeId(shapeId),
-                shapeId.getName());
+                dafnyCompilesExtra_(shapeId));
     }
 
     private String dafnyTypeForMember(final MemberShape memberShape) {
@@ -641,7 +644,7 @@ public class DotNetNameResolver {
             return "%s.%sClient".formatted(DafnyNameResolver.dafnyExternNamespaceForShapeId(serviceShapeId), interfaceForService(serviceShapeId));
         }
 
-        throw new UnsupportedOperationException("Dafny types not supported for Shape %s".formatted(serviceShapeId));
+        return DafnyNameResolver.traitNameForServiceClient(serviceShape);
     }
 
     private String dafnyTypeForResource(final ResourceShape resourceShape) {
@@ -747,15 +750,13 @@ public class DotNetNameResolver {
 
     /**
      * Returns the name of the compiled-Dafny implementation of the service client.
-     * <p>
-     * Note that the service client lives in a sub-namespace of the same name. This is because the generated Dafny API
-     * skeleton uses the plain "Dafny.(service namespace)" namespace, and implementations cannot use the same extern
-     * namespace.
-     * <p>
-     * FIXME: remove this workaround once Dafny allows duplicate extern namespaces
      */
     public String dafnyImplForServiceClient() {
-        return "%1$s.%2$s.%2$s".formatted(DafnyNameResolver.dafnyExternNamespaceForShapeId(serviceShape.getId()), clientForService());
+        return "%1$s.%2$s"
+          .formatted(
+            DafnyNameResolver.dafnyExternNamespaceForShapeId(serviceShape.getId()),
+            clientForService()
+          );
     }
 
     public boolean memberShapeIsOptional(final MemberShape memberShape) {
