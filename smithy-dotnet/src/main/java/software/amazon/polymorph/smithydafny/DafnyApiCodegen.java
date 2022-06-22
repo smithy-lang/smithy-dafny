@@ -568,10 +568,9 @@ public class DafnyApiCodegen {
             operationShape
               .getOutput()
               .map(nameResolver::baseTypeForShape)
-              .map(outputType -> TokenTree.of("output:", outputType))
+              .map(outputType -> TokenTree.of("," ,"output:", outputType))
               .orElse(TokenTree.empty())
           )
-          .separated(Token.of(","))
           .parenthesized();
 
         // Build the predicate that can be used as a simple mock
@@ -602,10 +601,9 @@ public class DafnyApiCodegen {
                 operationShape
                   .getOutput()
                   // This can be hard coded because we are calling "getInput"
-                  .map(member ->  TokenTree.of("output"))
+                  .map(member ->  TokenTree.of(",", "output"))
                   .orElse(TokenTree.empty())
               )
-              .separated(Token.of(","))
               .parenthesized()
           );
 
