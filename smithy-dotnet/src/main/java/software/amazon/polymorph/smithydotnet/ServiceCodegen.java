@@ -190,15 +190,15 @@ public class ServiceCodegen {
     /**
      * @return a common exception class for this service, from which all other service exception classes extend
      */
-    public TokenTree generateCommonExceptionClass() {
-        final String exceptionName = nameResolver.classForBaseServiceException();
-
-        final TokenTree classHeader = Token.of("public class %s : Exception".formatted(exceptionName));
-        final TokenTree emptyCtor = Token.of("public %s() : base() {}".formatted(exceptionName));
-        final TokenTree messageCtor = Token.of("public %s(string message) : base(message) {}".formatted(exceptionName));
-        final TokenTree classBody = TokenTree.of(emptyCtor, messageCtor);
-        return TokenTree.of(classHeader, classBody.braced()).namespaced(Token.of(nameResolver.namespaceForService()));
-    }
+//    public TokenTree generateCommonExceptionClass() {
+//        final String exceptionName = nameResolver.classForBaseServiceException();
+//
+//        final TokenTree classHeader = Token.of("public class %s : Exception".formatted(exceptionName));
+//        final TokenTree emptyCtor = Token.of("public %s() : base() {}".formatted(exceptionName));
+//        final TokenTree messageCtor = Token.of("public %s(string message) : base(message) {}".formatted(exceptionName));
+//        final TokenTree classBody = TokenTree.of(emptyCtor, messageCtor);
+//        return TokenTree.of(classHeader, classBody.braced()).namespaced(Token.of(nameResolver.namespaceForService()));
+//    }
 
     /**
      * @return an exception class for the given error structure shape, which extends from System.Exception
@@ -208,6 +208,7 @@ public class ServiceCodegen {
 
         final String exceptionName = nameResolver.classForSpecificServiceException(structureShape.getId());
 
+        // TODO Need to extend for a common class for this namespace
         final TokenTree classHeader = Token.of("public class %s : Exception".formatted(exceptionName));
         // TODO need to model _all_ possible members here...
         final TokenTree messageCtor = Token.of("public %s(string message) : base(message) {}".formatted(exceptionName));

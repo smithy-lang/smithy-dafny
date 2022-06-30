@@ -8,6 +8,7 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import software.amazon.polymorph.smithydafny.DafnyNameResolver;
 import software.amazon.polymorph.smithydotnet.nativeWrapper.NativeWrapperCodegen;
+import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.polymorph.traits.PositionalTrait;
@@ -123,7 +124,9 @@ public class DotNetNameResolver {
     }
 
     public String clientForService() {
-        return serviceShape.getId().getName();
+        return serviceShape.hasTrait(LocalServiceTrait.class)
+          ? serviceShape.expectTrait(LocalServiceTrait.class).getSdkId()
+          : serviceShape.getId().getName();
     }
 
     public String interfaceForService() {
@@ -735,6 +738,12 @@ public class DotNetNameResolver {
         return dafnyTypeForResult(outputType, errorType, concrete);
     }
 
+    public String dafnyTypeForStructure(final ShapeId shapeId, final boolean concrete) {
+        final String outputType = dafnyTypeForShape(shapeId);
+        final String errorType = dafnyTypeForCommonServiceError(serviceShape);
+        return dafnyTypeForResult(outputType, errorType, concrete);
+    }
+
     private String dafnyTypeForResult(final String valueType, final String errorType, final boolean concrete) {
         final String resultType = concrete ? "Result" : "_IResult";
         return "Wrappers_Compile.%s<%s, %s>".formatted(resultType, valueType, errorType);
@@ -754,7 +763,10 @@ public class DotNetNameResolver {
     public String dafnyImplForServiceClient() {
         return "%1$s.%2$s"
           .formatted(
-            DafnyNameResolver.dafnyExternNamespaceForShapeId(serviceShape.getId()),
+            DafnyNameResolver
+              .dafnyExternNamespaceForShapeId(serviceShape.getId())
+              // TODO this replace is a bit of a HACK
+              .replace(".Types", ".__default"),
             clientForService()
           );
     }

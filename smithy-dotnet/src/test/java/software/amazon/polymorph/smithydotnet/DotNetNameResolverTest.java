@@ -208,14 +208,6 @@ public class DotNetNameResolverTest {
     }
 
     @Test
-    public void testDafnyImplForServiceClient() {
-        final DotNetNameResolver nameResolver = setupNameResolver((_builder, _modelAssembler) -> {});
-        final String actualName = nameResolver.dafnyImplForServiceClient();
-        final String expectedName = "Dafny.Test.Foobar.FoobarServiceFactory.FoobarServiceFactory";
-        assertEquals(expectedName, actualName);
-    }
-
-    @Test
     public void testCapitalizeNamespaceSegment() {
         assertEquals("FooBar", DotNetNameResolver.capitalizeNamespaceSegment("fooBar"));
         assertEquals("EncryptionSDK", DotNetNameResolver.capitalizeNamespaceSegment("encryptionSdk"));

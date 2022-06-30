@@ -423,8 +423,6 @@ public class DafnyApiCodegen {
           .lineSeparated();
     }
 
-    // TODO see: https://github.com/dafny-lang/dafny/issues/2150
-    // So the predicates can't be in the trait until that is fixed
     public TokenTree generateOperationPredicatesAndMethod(final ShapeId operationShapeId) {
 
         final TokenTree calledWithPredicate = this.generatePredicateCalledWith(operationShapeId);
@@ -456,20 +454,25 @@ public class DafnyApiCodegen {
     private TokenTree generateOperationMethod(final ShapeId operationShapeId, final TokenTree attributeAnnotation) {
         final OperationShape operationShape = model.expectShape(operationShapeId, OperationShape.class);
 
-        // If an operation is @readonly,
-        // then it is treated as a Dafny function
-        // TODO: This is only true for local services...
-        final boolean isReadOnly = operationShape.hasTrait(ReadonlyTrait.class);
+        // Operations that are declared as `@readOnly`
+        // on services that are `@localService`
+        // are treated as Dafny functions.
+        // This is useful for proof.
+        // Most languages do not have such a strict
+        // no side effects mathematical construct.
+        final boolean isFunction = serviceShape.getOperations().contains(operationShape)
+          && serviceShape.hasTrait(LocalServiceTrait.class)
+          && operationShape.hasTrait(ReadonlyTrait.class);
 
         final TokenTree name = TokenTree
-          .of(isReadOnly ? "function method" : "method")
+          .of(isFunction ? "function method" : "method")
           .append(attributeAnnotation)
           .append(TokenTree.of(nameResolver.methodForOperation(operationShape)));
         final TokenTree operationParams = generateOperationParams(operationShape).parenthesized();
         final TokenTree returns = TokenTree
           .of("%s (output: %s)"
             .formatted(
-              isReadOnly ? ":" : "returns",
+              isFunction ? ":" : "returns",
               nameResolver.returnTypeForOperation(operationShape)
             ));
 
@@ -621,7 +624,6 @@ public class DafnyApiCodegen {
      * </ul>
      */
     public TokenTree generateModeledErrorDataType() {
-    // TODO need to add dependent errors...
         return TokenTree.of(
           Token.of("datatype Error ="),
           Token.of("// Local Error structures are listed here"),
@@ -638,6 +640,30 @@ public class DafnyApiCodegen {
               .stream()
               .map(this::generateDependantErrorDataTypeConstructor)
           ).lineSeparated(),
+          Token.of("// The Collection error is used to collect several errors together"),
+          Token.of("// This is useful when composing OR logic."),
+          Token.of("// Consider the following method:"),
+          Token.of("// "),
+          Token.of("// method FN<I, O>(n:I)"),
+          Token.of("//   returns (res: Result<O, Types.Error>)"),
+          Token.of("//   ensures A(I).Success? ==> res.Success?"),
+          Token.of("//   ensures B(I).Success? ==> res.Success?"),
+          Token.of("//   ensures A(I).Failure? && B(I).Failure? ==> res.Failure?"),
+          Token.of("// "),
+          Token.of("// If either A || B is successful then FN is successful."),
+          Token.of("// And if A && B fail then FN will fail."),
+          Token.of("// But what information should FN transmit back to the caller?"),
+          Token.of("// While it may be correct to hide these details from the caller,"),
+          Token.of("// this can not be the globally correct option."),
+          Token.of("// Suppose that A and B can be blocked by different ACLs,"),
+          Token.of("// and that their representation of I is only eventually consistent."),
+          Token.of("// How can the caller distinguish, at a minimum for logging,"),
+          Token.of("// the difference between the four failure modes?"),
+          Token.of("// || (!access(A(I)) && !access(B(I)))"),
+          Token.of("// || (!exit(A(I)) && !exit(B(I)))"),
+          Token.of("// || (!access(A(I)) && !exit(B(I)))"),
+          Token.of("// || (!exit(A(I)) && !access(B(I)))"),
+          Token.of("| Collection(message: string, list: seq<Error>)"),
           Token.of("// The Opaque error, used for native, extern, wrapped or unknown errors"),
           Token.of("| Opaque(obj: object)"),
           // Helper error for use with `extern`

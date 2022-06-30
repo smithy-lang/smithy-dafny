@@ -7,12 +7,8 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
 
 import software.amazon.polymorph.smithydafny.DafnyNameResolver;
-import software.amazon.polymorph.traits.ExtendableTrait;
+import software.amazon.polymorph.traits.*;
 import software.amazon.polymorph.utils.ModelUtils;
-import software.amazon.polymorph.traits.ClientConfigTrait;
-import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
-import software.amazon.polymorph.traits.PositionalTrait;
-import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.polymorph.utils.Token;
 import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.smithy.model.Model;
@@ -165,9 +161,9 @@ public class TypeConversionCodegen {
                 .collect(Collectors.toSet());
         // Collect service client config structures
         final Set<ShapeId> clientConfigStructures = serviceShapes.stream()
-                .map(serviceShape -> serviceShape.getTrait(ClientConfigTrait.class))
+                .map(serviceShape -> serviceShape.getTrait(LocalServiceTrait.class))
                 .flatMap(Optional::stream)
-                .map(ClientConfigTrait::getClientConfigId)
+                .map(LocalServiceTrait::getConfigId)
                 .collect(Collectors.toSet());
 
         // TODO: Need to add union shapes?
