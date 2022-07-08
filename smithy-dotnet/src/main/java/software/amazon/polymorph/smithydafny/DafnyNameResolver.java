@@ -5,11 +5,13 @@ package software.amazon.polymorph.smithydafny;
 
 import com.google.common.base.Joiner;
 
+import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.*;
+import software.amazon.smithy.model.traits.ReadonlyTrait;
 import software.amazon.smithy.utils.StringUtils;
 
 import java.nio.file.Path;
@@ -122,13 +124,61 @@ public record DafnyNameResolver(
         return dafnyModulePrefixForShapeId(resourceShape) + "I%s".formatted(resourceName);
     }
 
-    public String methodForOperation(final OperationShape operationShape) {
+    public String publicMethodNameForOperation(final OperationShape operationShape) {
         return StringUtils.capitalize(operationShape.getId().getName());
     }
 
-    public String predicateCalledWith(final OperationShape operationShape) {
-        return "%sCalledWith".formatted(this.methodForOperation(operationShape));
+    public String methodNameToImplementForResourceOperation(final OperationShape operationShape) {
+        return "%s'".formatted(publicMethodNameForOperation(operationShape));
     }
+
+    public String historicalCallEventsForOperation(final OperationShape operationShape) {
+        return "%sHistoricalCallEvents".formatted(publicMethodNameForOperation(operationShape));
+    }
+
+    public Boolean isFunction(
+      final ServiceShape serviceShape,
+      final OperationShape operationShape
+    ) {
+        // Operations that are declared as `@readOnly`
+        // on services that are `@localService`
+        // are treated as Dafny functions.
+        // This is useful for proof.
+        // Most languages do not have such a strict
+        // no side effects mathematical construct.
+        return serviceShape.hasTrait(LocalServiceTrait.class)
+          && operationShape.hasTrait(ReadonlyTrait.class);
+    }
+
+    public String executableType(
+      final ServiceShape serviceShape,
+      final OperationShape operationShape
+    ) {
+        return isFunction(serviceShape, operationShape)
+          ? "function method"
+          : "method";
+    }
+
+    public String ensuresPubliclyPredicate(final OperationShape operationShape) {
+        return "%sEnsuresPublicly".formatted(publicMethodNameForOperation(operationShape));
+    }
+
+    public String predicateCalledWith(final OperationShape operationShape) {
+        return "%sCalledWith".formatted(this.publicMethodNameForOperation(operationShape));
+    }
+
+    public String predicateSucceededWith(OperationShape operationShape) {
+        return "%sSucceededWith".formatted(this.publicMethodNameForOperation(operationShape));
+    }
+
+    public String predicateFailed(OperationShape operationShape) {
+        return "%sFailed".formatted(this.publicMethodNameForOperation(operationShape));
+    }
+
+    public String predicateFailedWith(OperationShape operationShape) {
+        return "%sFailedWith".formatted(this.publicMethodNameForOperation(operationShape));
+    }
+
 
     /**
      * Returns the return type for an operation of this service.
@@ -220,10 +270,6 @@ public record DafnyNameResolver(
         return "Dafny." + dafnyModuleForNamespace(shapeId.getNamespace());
     }
 
-    public String predicateSucceededWith(OperationShape operationShape) {
-        return "%sSucceededWith".formatted(this.methodForOperation(operationShape));
-    }
-
     public String dependentModuleLocalName(DependentSmithyModel dependentModel) {
         final String[] n = namespace.split(".");
         final String[] d = dependentModel.namespace().split(".");
@@ -233,5 +279,9 @@ public record DafnyNameResolver(
           .filter( i -> n.length < i && n[i].equals(d[i]))
           .mapToObj(i -> d[i])
           .collect(Collectors.joining(".")));
+    }
+
+    public String callEventTypeName() {
+        return "DafnyCallHistory";
     }
 }
