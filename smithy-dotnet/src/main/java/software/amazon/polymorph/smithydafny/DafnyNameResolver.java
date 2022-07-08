@@ -282,6 +282,6 @@ public record DafnyNameResolver(
     }
 
     public String callEventTypeName() {
-        return "DafnyCallHistory";
+        return "DafnyCallEvent";
     }
 }

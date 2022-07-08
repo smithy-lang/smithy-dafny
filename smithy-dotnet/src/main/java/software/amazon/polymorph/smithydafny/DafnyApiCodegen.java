@@ -118,9 +118,13 @@ public class DafnyApiCodegen {
         final TokenTree typesModuleBody = TokenTree
             .of(
               typesModulePrelude,
-              // These are just put here to faciliate nice formating...
+              // These are just put here to facilitate nice formatting...
               TokenTree.of("// Generic helpers for verification of mock/unit tests."),
-              TokenTree.of("datatype DafnyCallHistory<I, O> = DafnyCallHistory(input: I, output: O)"),
+              TokenTree.of("datatype %s<I, O> = %s(input: I, output: O)"
+                .formatted(
+                  nameResolver.callEventTypeName(),
+                  nameResolver.callEventTypeName()
+                )),
               TokenTree.of("function Last<T>(s: seq<T>): T requires |s| > 0 { s[|s|-1] }"),
               TokenTree.empty(),
               TokenTree.of("// Begin Generated Types"),
@@ -946,7 +950,8 @@ public class DafnyApiCodegen {
               ),
             // Yes, Error is hard coded
             // this can work because we need to be able Errors from other modules...
-            "returns (res: Result<%s, Error>)".formatted(nameResolver.traitForServiceClient(serviceShape))
+            "returns (res: Result<%s, Error>)".formatted(nameResolver.traitForServiceClient(serviceShape)),
+            "ensures res.Success? ==> fresh(res.value)"
             )
           .lineSeparated();
 
