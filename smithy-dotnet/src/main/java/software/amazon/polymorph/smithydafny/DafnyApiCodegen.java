@@ -79,7 +79,7 @@ public class DafnyApiCodegen {
                 .dependentModels()
                 .stream()
                 .map(d -> modelPath
-                  .relativize(d.modelPath().resolve(nameResolver.dafnyTypesModuleForNamespace(d.namespace()) + ".dfy"))
+                  .relativize(d.modelPath().resolve("../src/Index.dfy"))
                 )
                 .map(Path::toString)
             )
@@ -332,7 +332,10 @@ public class DafnyApiCodegen {
         return TokenTree
           .of(
             trait,
-            methods.braced()
+            methods
+              .prepend(generateMutableStateFunction())
+              .lineSeparated()
+              .braced()
           )
           .lineSeparated();
     }
@@ -378,7 +381,10 @@ public class DafnyApiCodegen {
         return TokenTree
           .of(
             trait,
-            methods.braced()
+            methods
+              .prepend(generateMutableStateFunction())
+              .lineSeparated()
+              .braced()
           )
           .lineSeparated();
     }
@@ -410,6 +416,37 @@ public class DafnyApiCodegen {
             ));
     }
 
+    private TokenTree generateOperationModifiesClause(
+      final ServiceShape serviceShape,
+      final OperationShape operationShape
+    ) {
+      return TokenTree
+        .of("%s %s()"
+          .formatted(
+            nameResolver.isFunction(serviceShape, operationShape)
+              ? "reads"
+              : "modifies",
+            nameResolver.mutableStateFunctionName()
+          ));
+    }
+
+    private TokenTree generateMutableStateFunction() {
+      final String mutationFunctionSignature = "function %s() : set<object>"
+        .formatted(nameResolver.mutableStateFunctionName());
+      return TokenTree
+        .of(
+          "// Helper to define any additional modifies/reads clauses",
+          "// If your operations need to mutate state add it to this function:",
+          "// %s{ {your, fields, here} }".formatted(mutationFunctionSignature),
+          "// If you do not need to mutate anything:",
+          "// %s{ {} }".formatted(mutationFunctionSignature),
+          mutationFunctionSignature
+        )
+        .lineSeparated()
+        .append(TokenTree.empty())
+        .lineSeparated();
+    }
+
     private TokenTree generateBodilessOperationMethodThatEnsuresCallEvents(
       final ServiceShape serviceShape,
       final ShapeId operationShapeId
@@ -429,7 +466,7 @@ public class DafnyApiCodegen {
             ? TokenTree.of("// Functions that are transparent do not need ensures")
             : TokenTree
             .of(
-              generateModifiesHistoricalCallEvents(operationShapeId),
+              generateModifiesHistoricalCallEvents(serviceShape, operationShapeId),
               generateEnsuresForEnsuresPubliclyPredicate(operationShapeId),
               generateEnsuresHistoricalCallEvents(operationShapeId)
             )
@@ -487,139 +524,13 @@ public class DafnyApiCodegen {
                   .append(Token.of(nameResolver.methodNameToImplementForResourceOperation(operationShape)))
                   .append(generateOperationParams(operationShape).parenthesized()),
                 generateOperationReturnsClause(serviceShape, operationShape),
+                generateOperationModifiesClause(serviceShape, operationShape),
                 generateEnsuresForEnsuresPubliclyPredicate(operationShapeId)
               )
               .lineSeparated()
           )
           .lineSeparated();
     }
-
-    private TokenTree generatePredicateCalledWith(
-      final ShapeId thisShape,
-      final ShapeId operationShapeId
-    ) {
-        final OperationShape operationShape = model.expectShape(operationShapeId, OperationShape.class);
-        final String name = nameResolver.predicateCalledWith(operationShape);
-
-        final String thisType = nameResolver.baseTypeForShape(thisShape);
-
-        // First get the parameters
-        final TokenTree params = generateOperationParams(operationShape)
-          .append(TokenTree.of("obj:%s,".formatted(thisType)))
-          .parenthesized();
-
-        // Build the predicate that can be used as a simple mock
-        final TokenTree predicate = TokenTree
-          .of(
-            Token.of("predicate {:axiom}"),
-            Token.of(name),
-            params // Without a body. This way it can not be assumed or revealed
-          );
-
-        // A lemma that is used to ensure the bodiless predicate above
-        final TokenTree lemma = TokenTree
-          .of(
-            Token.of("lemma {:axiom}"),
-            Token.of("Assume%s".formatted(name)),
-            params,
-            Token.NEWLINE,
-            Token.of("ensures"),
-            Token.of(name),
-            // Simplify? Need to call the predicate
-            operationShape
-              .getInput()
-              // This can be hard coded because we are calling "getInput"
-              .map(member ->  TokenTree.of("input"))
-              .orElse(TokenTree.empty())
-              .parenthesized()
-          );
-
-        return TokenTree
-          .of(predicate, lemma)
-          .lineSeparated();
-    }
-
-
-
-
-    private TokenTree generatePredicates(
-      final ShapeId thisShape,
-      final ShapeId operationShapeId
-    ) {
-        final OperationShape operationShape = model.expectShape(operationShapeId, OperationShape.class);
-        final String thisType = nameResolver.baseTypeForShape(thisShape);
-
-        // First get the parameters
-        final TokenTree baseParams = generateOperationParams(operationShape)
-          .prepend(TokenTree.of("obj:%s,".formatted(thisType)));
-
-        final TokenTree calledParameters = baseParams.parenthesized();
-
-        final TokenTree succeededWithParameters = TokenTree
-          .of(
-            baseParams,
-            operationShape
-              .getOutput()
-              .map(nameResolver::baseTypeForShape)
-              .map(outputType -> TokenTree.of("," ,"output:", outputType))
-              .orElse(TokenTree.empty())
-          )
-          .parenthesized();
-
-        final TokenTree failedWithParameters = TokenTree
-          .of(
-            baseParams,
-            TokenTree.of("," ,"error: Error")
-          )
-          .parenthesized();
-
-        final TokenTree predicates = TokenTree.of(
-          Stream.of(
-            new AbstractMap.SimpleEntry<String, TokenTree>(
-              nameResolver.predicateCalledWith(operationShape),
-              calledParameters),
-            new AbstractMap.SimpleEntry<String, TokenTree>(
-              nameResolver.predicateSucceededWith(operationShape),
-              succeededWithParameters),
-            new AbstractMap.SimpleEntry<String, TokenTree>(
-              nameResolver.predicateFailed(operationShape),
-              calledParameters),
-            new AbstractMap.SimpleEntry<String, TokenTree>(
-              nameResolver.predicateFailedWith(operationShape),
-              failedWithParameters)
-          )
-          .map(pair -> TokenTree
-            .of(
-              Token.of("predicate {:axiom}"),
-              Token.of(pair.getKey()),
-              pair.getValue() // Without a body. This way it can not be assumed or revealed
-            )
-          ))
-          .lineSeparated();
-
-        final TokenTree lemmaEnsures = generateEnsuresMockInformation(operationShapeId, "obj");
-        final TokenTree lemmaParams = TokenTree
-          .of(
-            baseParams,
-            TokenTree.of("output:%s".formatted(nameResolver.returnTypeForOperation(operationShape)))
-          )
-          .separated(Token.of(","))
-          .parenthesized();
-
-        // A lemma that is used to ensure the bodiless predicate above
-        final TokenTree lemma = TokenTree
-          .of(
-            Token.of("lemma {:axiom} Assume%s".formatted(operationShape.getId().getName())),
-            lemmaParams,
-            lemmaEnsures
-          )
-          .lineSeparated();
-
-        return TokenTree
-          .of(predicates, lemma)
-          .lineSeparated();
-    }
-
 
     private  TokenTree generateHistoricalCallEvents(
       final ShapeId operationShapeId
@@ -645,13 +556,18 @@ public class DafnyApiCodegen {
     }
 
     private TokenTree generateModifiesHistoricalCallEvents(
+      final ServiceShape serviceShape,
       final ShapeId operationShapeId
     ) {
         final OperationShape operationShape = model.expectShape(operationShapeId, OperationShape.class);
+
         return TokenTree
           .of(
-            "modifies this`%s"
-              .formatted(nameResolver.historicalCallEventsForOperation(operationShape))
+            "modifies this`%s, %s()"
+              .formatted(
+                nameResolver.historicalCallEventsForOperation(operationShape),
+                nameResolver.mutableStateFunctionName()
+              )
           );
     }
 
@@ -665,12 +581,26 @@ public class DafnyApiCodegen {
         return TokenTree
           .of(
             Token.of("ensures"),
-            Token.of("&& 0 < |%s|".formatted(historicalCallEventsForOperation)),
+            Token.of("&& 0 < |%s|"
+                  .formatted(historicalCallEventsForOperation)),
+//            Token.of("&& |old(%s)| + 1 == |%s|"
+//              .formatted(
+//                historicalCallEventsForOperation,
+//                historicalCallEventsForOperation)),
             Token.of("&& Last(%s) == %s(input, output)"
-              .formatted(
-                historicalCallEventsForOperation,
-                nameResolver.callEventTypeName()
-              ))
+                .formatted(
+                  historicalCallEventsForOperation,
+                  nameResolver.callEventTypeName()
+                )
+
+
+
+//            Token.of("&& %s == old(%s) + [%s(input, output)]"
+//              .formatted(
+//                historicalCallEventsForOperation,
+//                historicalCallEventsForOperation,
+//                nameResolver.callEventTypeName())
+            )
           )
           .lineSeparated();
     }
@@ -717,97 +647,6 @@ public class DafnyApiCodegen {
             "ensures %s(input, output)".formatted(nameResolver.ensuresPubliclyPredicate(operationShape))
           );
     }
-
-    private TokenTree generateEnsuresMockInformation(
-      final ShapeId operationShapeId,
-      final String thisObjName
-    ) {
-        final OperationShape operationShape = model.expectShape(operationShapeId, OperationShape.class);
-
-        final String calledName = nameResolver.predicateCalledWith(operationShape);
-        final String succeededWithName = nameResolver.predicateSucceededWith(operationShape);
-        final String failedName = nameResolver.predicateFailed(operationShape);
-        final String failedWithName = nameResolver.predicateFailedWith(operationShape);
-
-        return TokenTree
-          .of(
-            Token.of("ensures"),
-            Token.of("&& %s( %s, input )".formatted(calledName, thisObjName)),
-            Token.of("&& if output.Success? then"),
-            Token.of("&& %s( %s, input %s )"
-              .formatted(
-                succeededWithName,
-                thisObjName,
-                operationShape.getOutput().isPresent()
-                  ? ", output.value"
-                  : ""
-              )),
-            Token.of("&& !%s( %s, input )".formatted(failedName, thisObjName)),
-            Token.of("else"),
-            Token.of("&& output.Failure?"),
-            Token.of("&& %s( %s, input )".formatted(failedName, thisObjName)),
-            Token.of("&& %s( %s, input, output.error )".formatted(failedWithName, thisObjName))
-          )
-          .lineSeparated();
-    }
-
-    private TokenTree generatePredicateSucceededWith(
-      final ShapeId operationShapeId
-    ) {
-        final OperationShape operationShape = model.expectShape(operationShapeId, OperationShape.class);
-        final String name = nameResolver.predicateSucceededWith(operationShape);
-
-        // Build the parameters. Need input and output
-        final TokenTree params = TokenTree
-          .of(
-            generateOperationParams(operationShape),
-            operationShape
-              .getOutput()
-              .map(nameResolver::baseTypeForShape)
-              .map(outputType -> TokenTree.of("," ,"output:", outputType))
-              .orElse(TokenTree.empty())
-          )
-          .parenthesized();
-
-        // Build the predicate that can be used as a simple mock
-        final TokenTree predicate = TokenTree
-          .of(
-            Token.of("predicate {:axiom}"),
-            Token.of(name),
-            params  // Without a body. This way it can not be assumed or revealed
-          );
-
-        // A lemma that is used to ensure the bodiless predicate above
-        final TokenTree lemma = TokenTree
-          .of(
-            Token.of("lemma {:axiom}"),
-            Token.of("Assume%s".formatted(name)),
-            params,
-            Token.NEWLINE,
-            Token.of("ensures"),
-            Token.of(name),
-            // Simplify? Need to call the predicate
-            TokenTree
-              .of(
-                operationShape
-                  .getInput()
-                  // This can be hard coded because we are calling "getInput"
-                  .map(member ->  TokenTree.of("input"))
-                  .orElse(TokenTree.empty()),
-                operationShape
-                  .getOutput()
-                  // This can be hard coded because we are calling "getInput"
-                  .map(member ->  TokenTree.of(",", "output"))
-                  .orElse(TokenTree.empty())
-              )
-              .parenthesized()
-          );
-
-        return TokenTree
-          .of(predicate, lemma)
-          .lineSeparated();
-    }
-
 
     /**
      * Generates the service's error types that are not modeled directly. These include:
@@ -950,8 +789,10 @@ public class DafnyApiCodegen {
               ),
             // Yes, Error is hard coded
             // this can work because we need to be able Errors from other modules...
-            "returns (res: Result<%s, Error>)".formatted(nameResolver.traitForServiceClient(serviceShape)),
-            "ensures res.Success? ==> fresh(res.value)"
+            "returns (res: Result<%s, Error>)"
+              .formatted(nameResolver.traitForServiceClient(serviceShape)),
+            "ensures res.Success? ==> fresh(res.value) && fresh(res.value.%s())"
+              .formatted(nameResolver.mutableStateFunctionName())
             )
           .lineSeparated();
 

@@ -284,4 +284,8 @@ public record DafnyNameResolver(
     public String callEventTypeName() {
         return "DafnyCallEvent";
     }
+
+    public String mutableStateFunctionName() {
+        return "MutableStateForConcreteClass";
+    }
 }

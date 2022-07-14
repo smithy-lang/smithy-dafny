@@ -261,120 +261,120 @@ public class DafnyApiCodegenTest {
         assertEquals(expectedTokens, actualTokens);
     }
 
-    @Test
-    public void testGenerateServiceTraitDefinition() {
-        final DafnyApiCodegen codegen = setupCodegen((builder, modelAssembler) -> {
-            builder.addOperation(ShapeId.fromParts(SERVICE_NAMESPACE, "DoThis"));
-            builder.addOperation(ShapeId.fromParts(SERVICE_NAMESPACE, "DoThat"));
-            modelAssembler.addUnparsedModel("test.smithy", """
-                    namespace %s
-                    operation DoThis {}
-                    operation DoThat {}
-                    """.formatted(SERVICE_NAMESPACE));
-        });
-        final String actualCode = codegen.generateServiceTraitDefinition().toString();
-        final List<ParseToken> actualTokens = Tokenizer.tokenize(actualCode);
+//    @Test
+//    public void testGenerateServiceTraitDefinition() {
+//        final DafnyApiCodegen codegen = setupCodegen((builder, modelAssembler) -> {
+//            builder.addOperation(ShapeId.fromParts(SERVICE_NAMESPACE, "DoThis"));
+//            builder.addOperation(ShapeId.fromParts(SERVICE_NAMESPACE, "DoThat"));
+//            modelAssembler.addUnparsedModel("test.smithy", """
+//                    namespace %s
+//                    operation DoThis {}
+//                    operation DoThat {}
+//                    """.formatted(SERVICE_NAMESPACE));
+//        });
+//        final String actualCode = codegen.generateServiceTraitDefinition().toString();
+//        final List<ParseToken> actualTokens = Tokenizer.tokenize(actualCode);
+//
+//        final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
+//                trait IFoobarServiceFactoryClient {
+//                    predicate {:opaque} DoThisCalledWith() {true}
+//                    predicate {:opaque} DoThisSucceededWith() {true}
+//                    method DoThis() returns (output: Result<(), IFoobarServiceFactoryException>)
+//                      ensures DoThisCalledWith()
+//                      ensures output.Success? ==> DoThisSucceededWith()
+//                    predicate {:opaque} DoThatCalledWith() {true}
+//                    predicate {:opaque} DoThatSucceededWith() {true}
+//                    method DoThat() returns (output: Result<(), IFoobarServiceFactoryException>)
+//                      ensures DoThatCalledWith()
+//                      ensures output.Success? ==> DoThatSucceededWith()
+//                }""");
+//        assertEquals(expectedTokens, actualTokens);
+//    }
 
-        final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
-                trait IFoobarServiceFactoryClient {
-                    predicate {:opaque} DoThisCalledWith() {true}
-                    predicate {:opaque} DoThisSucceededWith() {true}
-                    method DoThis() returns (output: Result<(), IFoobarServiceFactoryException>)
-                      ensures DoThisCalledWith()
-                      ensures output.Success? ==> DoThisSucceededWith()
-                    predicate {:opaque} DoThatCalledWith() {true}
-                    predicate {:opaque} DoThatSucceededWith() {true}
-                    method DoThat() returns (output: Result<(), IFoobarServiceFactoryException>)
-                      ensures DoThatCalledWith()
-                      ensures output.Success? ==> DoThatSucceededWith()
-                }""");
-        assertEquals(expectedTokens, actualTokens);
-    }
+//    @Test
+//    public void testGenerateOperationPredicatesAndMethod() {
+//        final ShapeId operationShapeId = ShapeId.fromParts(SERVICE_NAMESPACE, "DoIt");
+//        final DafnyApiCodegen codegen = setupCodegen((builder, modelAssembler) -> {
+//            builder.addOperation(operationShapeId);
+//            modelAssembler.addUnparsedModel("test.smithy", """
+//                    namespace %s
+//                    operation DoIt { input: Foo, output: Bar, errors: [Oops] }
+//                    structure Foo {}
+//                    structure Bar {}
+//                    @error("client") structure Oops {}
+//                    """.formatted(SERVICE_NAMESPACE));
+//        });
+//        final String actualCode = codegen.generateOperationPredicatesAndMethod(operationShapeId).toString();
+//        final List<ParseToken> actualTokens = Tokenizer.tokenize(actualCode);
+//
+//        final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
+//                predicate {:opaque} DoItCalledWith(
+//                  input: Foo
+//                ) {true}
+//                predicate {:opaque} DoItSucceededWith(
+//                  input: Foo,
+//                  output: Bar
+//                ) {true}
+//                method DoIt(input: Foo) returns (output: Result<Bar, IFoobarServiceFactoryException>)
+//                  ensures DoItCalledWith(input)
+//                  ensures output.Success? ==> DoItSucceededWith(input, output.value)
+//                """);
+//        assertEquals(expectedTokens, actualTokens);
+//    }
 
-    @Test
-    public void testGenerateOperationPredicatesAndMethod() {
-        final ShapeId operationShapeId = ShapeId.fromParts(SERVICE_NAMESPACE, "DoIt");
-        final DafnyApiCodegen codegen = setupCodegen((builder, modelAssembler) -> {
-            builder.addOperation(operationShapeId);
-            modelAssembler.addUnparsedModel("test.smithy", """
-                    namespace %s
-                    operation DoIt { input: Foo, output: Bar, errors: [Oops] }
-                    structure Foo {}
-                    structure Bar {}
-                    @error("client") structure Oops {}
-                    """.formatted(SERVICE_NAMESPACE));
-        });
-        final String actualCode = codegen.generateOperationPredicatesAndMethod(operationShapeId).toString();
-        final List<ParseToken> actualTokens = Tokenizer.tokenize(actualCode);
+//    @Test
+//    public void testGenerateServiceErrorTraitDefinition() {
+//        final DafnyApiCodegen codegen = setupCodegen((builder, modelAssembler) -> {
+//            builder.addOperation(ShapeId.fromParts(SERVICE_NAMESPACE, "DoIt"));
+//            modelAssembler.addUnparsedModel("test.smithy", """
+//                    namespace %s
+//                    operation DoIt { errors: [Oops, OhNo, Whoops] }
+//                    @error("client") structure Oops {}
+//                    @error("client") structure OhNo {}
+//                    @error("server") structure Whoops {}
+//                    """.formatted(SERVICE_NAMESPACE));
+//        });
+//        final String actualCode = codegen.generateServiceErrorTraitDefinition().toString();
+//        final List<ParseToken> actualTokens = Tokenizer.tokenize(actualCode);
+//
+//        final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
+//                trait IFoobarServiceFactoryException {
+//                    function method GetMessage(): (message: string)
+//                        reads this
+//                }
+//                """);
+//        assertEquals(expectedTokens, actualTokens);
+//    }
 
-        final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
-                predicate {:opaque} DoItCalledWith(
-                  input: Foo
-                ) {true}
-                predicate {:opaque} DoItSucceededWith(
-                  input: Foo,
-                  output: Bar
-                ) {true}
-                method DoIt(input: Foo) returns (output: Result<Bar, IFoobarServiceFactoryException>)
-                  ensures DoItCalledWith(input)
-                  ensures output.Success? ==> DoItSucceededWith(input, output.value)
-                """);
-        assertEquals(expectedTokens, actualTokens);
-    }
-
-    @Test
-    public void testGenerateServiceErrorTraitDefinition() {
-        final DafnyApiCodegen codegen = setupCodegen((builder, modelAssembler) -> {
-            builder.addOperation(ShapeId.fromParts(SERVICE_NAMESPACE, "DoIt"));
-            modelAssembler.addUnparsedModel("test.smithy", """
-                    namespace %s
-                    operation DoIt { errors: [Oops, OhNo, Whoops] }
-                    @error("client") structure Oops {}
-                    @error("client") structure OhNo {}
-                    @error("server") structure Whoops {}
-                    """.formatted(SERVICE_NAMESPACE));
-        });
-        final String actualCode = codegen.generateServiceErrorTraitDefinition().toString();
-        final List<ParseToken> actualTokens = Tokenizer.tokenize(actualCode);
-
-        final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
-                trait IFoobarServiceFactoryException {
-                    function method GetMessage(): (message: string)
-                        reads this
-                }
-                """);
-        assertEquals(expectedTokens, actualTokens);
-    }
-
-    @Test
-    public void testGenerateSpecificErrorClass() {
-        final ShapeId shapeId = ShapeId.fromParts(SERVICE_NAMESPACE, "OopsException");
-        final DafnyApiCodegen codegen = setupCodegen((builder, modelAssembler) -> {
-            builder.addOperation(ShapeId.fromParts(SERVICE_NAMESPACE, "DoIt"));
-            modelAssembler.addUnparsedModel("test.smithy", """
-                    namespace %s
-                    string ErrorMessageType
-                    operation DoIt { errors: [OopsException] }
-                    @error("client") structure OopsException { message: ErrorMessageType }
-                    """.formatted(SERVICE_NAMESPACE));
-        });
-        final String actualCode = codegen.generateSpecificErrorClass(codegen.getModel().expectShape(shapeId, StructureShape.class)).toString();
-        final List<ParseToken> actualTokens = Tokenizer.tokenize(actualCode);
-        final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
-                class OopsException extends IFoobarServiceFactoryException {
-                    var message: string
-                    
-                    constructor (message: string) {
-                        this.message := message;
-                    }
-                    
-                    function method GetMessage(): (message: string)
-                        reads this
-                    {
-                        this.message
-                    }
-                }
-                """);
-        assertEquals(expectedTokens, actualTokens);
-    }
+//    @Test
+//    public void testGenerateSpecificErrorClass() {
+//        final ShapeId shapeId = ShapeId.fromParts(SERVICE_NAMESPACE, "OopsException");
+//        final DafnyApiCodegen codegen = setupCodegen((builder, modelAssembler) -> {
+//            builder.addOperation(ShapeId.fromParts(SERVICE_NAMESPACE, "DoIt"));
+//            modelAssembler.addUnparsedModel("test.smithy", """
+//                    namespace %s
+//                    string ErrorMessageType
+//                    operation DoIt { errors: [OopsException] }
+//                    @error("client") structure OopsException { message: ErrorMessageType }
+//                    """.formatted(SERVICE_NAMESPACE));
+//        });
+//        final String actualCode = codegen.generateSpecificErrorClass(codegen.getModel().expectShape(shapeId, StructureShape.class)).toString();
+//        final List<ParseToken> actualTokens = Tokenizer.tokenize(actualCode);
+//        final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
+//                class OopsException extends IFoobarServiceFactoryException {
+//                    var message: string
+//
+//                    constructor (message: string) {
+//                        this.message := message;
+//                    }
+//
+//                    function method GetMessage(): (message: string)
+//                        reads this
+//                    {
+//                        this.message
+//                    }
+//                }
+//                """);
+//        assertEquals(expectedTokens, actualTokens);
+//    }
 }
