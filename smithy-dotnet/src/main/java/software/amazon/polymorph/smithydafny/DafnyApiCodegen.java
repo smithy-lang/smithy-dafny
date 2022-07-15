@@ -333,7 +333,10 @@ public class DafnyApiCodegen {
           .of(
             trait,
             methods
-              .prepend(generateMutableStateFunction())
+              .prepend(generateMutableStateFunction()
+                .append(serviceShape.hasTrait(ServiceTrait.class)
+                  ? TokenTree.of("{{}}")
+                  : TokenTree.empty()))
               .lineSeparated()
               .braced()
           )
@@ -420,18 +423,20 @@ public class DafnyApiCodegen {
       final ServiceShape serviceShape,
       final OperationShape operationShape
     ) {
-      return TokenTree
-        .of("%s %s()"
-          .formatted(
-            nameResolver.isFunction(serviceShape, operationShape)
-              ? "reads"
-              : "modifies",
-            nameResolver.mutableStateFunctionName()
-          ));
+        final String functionOrMethod = nameResolver.isFunction(serviceShape, operationShape)
+          ? "reads"
+          : "modifies";
+        return TokenTree
+          .of(
+            "%s %s()".formatted(functionOrMethod, nameResolver.mutableStateFunctionName()),
+            "// Dafny will skip type parameters when generating a default decreases clause.",
+            "decreases %s()".formatted(nameResolver.mutableStateFunctionName())
+          )
+          .lineSeparated();
     }
 
     private TokenTree generateMutableStateFunction() {
-      final String mutationFunctionSignature = "function %s() : set<object>"
+      final String mutationFunctionSignature = "function %s() : (ret: set<object>)"
         .formatted(nameResolver.mutableStateFunctionName());
       return TokenTree
         .of(
@@ -440,7 +445,8 @@ public class DafnyApiCodegen {
           "// %s{ {your, fields, here} }".formatted(mutationFunctionSignature),
           "// If you do not need to mutate anything:",
           "// %s{ {} }".formatted(mutationFunctionSignature),
-          mutationFunctionSignature
+          mutationFunctionSignature,
+          "ensures this !in ret"
         )
         .lineSeparated()
         .append(TokenTree.empty())
@@ -567,8 +573,11 @@ public class DafnyApiCodegen {
               .formatted(
                 nameResolver.historicalCallEventsForOperation(operationShape),
                 nameResolver.mutableStateFunctionName()
-              )
-          );
+              ),
+            "// Dafny will skip type parameters when generating a default decreases clause.",
+            "decreases %s()".formatted(nameResolver.mutableStateFunctionName())
+          )
+          .lineSeparated();
     }
 
     private TokenTree generateEnsuresHistoricalCallEvents(
@@ -581,25 +590,25 @@ public class DafnyApiCodegen {
         return TokenTree
           .of(
             Token.of("ensures"),
-            Token.of("&& 0 < |%s|"
-                  .formatted(historicalCallEventsForOperation)),
-//            Token.of("&& |old(%s)| + 1 == |%s|"
-//              .formatted(
-//                historicalCallEventsForOperation,
-//                historicalCallEventsForOperation)),
-            Token.of("&& Last(%s) == %s(input, output)"
-                .formatted(
-                  historicalCallEventsForOperation,
-                  nameResolver.callEventTypeName()
-                )
+//            Token.of("&& 0 < |%s|"
+//                  .formatted(historicalCallEventsForOperation)),
+////            Token.of("&& |old(%s)| + 1 == |%s|"
+////              .formatted(
+////                historicalCallEventsForOperation,
+////                historicalCallEventsForOperation)),
+//            Token.of("&& Last(%s) == %s(input, output)"
+//                .formatted(
+//                  historicalCallEventsForOperation,
+//                  nameResolver.callEventTypeName()
+//                )
 
 
 
-//            Token.of("&& %s == old(%s) + [%s(input, output)]"
-//              .formatted(
-//                historicalCallEventsForOperation,
-//                historicalCallEventsForOperation,
-//                nameResolver.callEventTypeName())
+            Token.of("&& %s == old(%s) + [%s(input, output)]"
+              .formatted(
+                historicalCallEventsForOperation,
+                historicalCallEventsForOperation,
+                nameResolver.callEventTypeName())
             )
           )
           .lineSeparated();
