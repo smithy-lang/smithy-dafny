@@ -445,8 +445,7 @@ public class DafnyApiCodegen {
           "// %s{ {your, fields, here} }".formatted(mutationFunctionSignature),
           "// If you do not need to mutate anything:",
           "// %s{ {} }".formatted(mutationFunctionSignature),
-          mutationFunctionSignature,
-          "ensures this !in ret"
+          mutationFunctionSignature
         )
         .lineSeparated()
         .append(TokenTree.empty())
@@ -531,7 +530,8 @@ public class DafnyApiCodegen {
                   .append(generateOperationParams(operationShape).parenthesized()),
                 generateOperationReturnsClause(serviceShape, operationShape),
                 generateOperationModifiesClause(serviceShape, operationShape),
-                generateEnsuresForEnsuresPubliclyPredicate(operationShapeId)
+                generateEnsuresForEnsuresPubliclyPredicate(operationShapeId),
+                generateEnsuresUnchangedCallHistory(operationShapeId)
               )
               .lineSeparated()
           )
@@ -590,20 +590,6 @@ public class DafnyApiCodegen {
         return TokenTree
           .of(
             Token.of("ensures"),
-//            Token.of("&& 0 < |%s|"
-//                  .formatted(historicalCallEventsForOperation)),
-////            Token.of("&& |old(%s)| + 1 == |%s|"
-////              .formatted(
-////                historicalCallEventsForOperation,
-////                historicalCallEventsForOperation)),
-//            Token.of("&& Last(%s) == %s(input, output)"
-//                .formatted(
-//                  historicalCallEventsForOperation,
-//                  nameResolver.callEventTypeName()
-//                )
-
-
-
             Token.of("&& %s == old(%s) + [%s(input, output)]"
               .formatted(
                 historicalCallEventsForOperation,
@@ -654,6 +640,17 @@ public class DafnyApiCodegen {
         return TokenTree
           .of(
             "ensures %s(input, output)".formatted(nameResolver.ensuresPubliclyPredicate(operationShape))
+          );
+    }
+
+    private TokenTree generateEnsuresUnchangedCallHistory(
+      final ShapeId operationShapeId
+    ) {
+        final OperationShape operationShape = model.expectShape(operationShapeId, OperationShape.class);
+
+        return TokenTree
+          .of(
+            "ensures unchanged(this`%s)".formatted(nameResolver.historicalCallEventsForOperation(operationShape))
           );
     }
 

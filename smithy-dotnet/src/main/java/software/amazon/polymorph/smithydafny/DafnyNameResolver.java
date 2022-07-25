@@ -163,23 +163,6 @@ public record DafnyNameResolver(
         return "%sEnsuresPublicly".formatted(publicMethodNameForOperation(operationShape));
     }
 
-    public String predicateCalledWith(final OperationShape operationShape) {
-        return "%sCalledWith".formatted(this.publicMethodNameForOperation(operationShape));
-    }
-
-    public String predicateSucceededWith(OperationShape operationShape) {
-        return "%sSucceededWith".formatted(this.publicMethodNameForOperation(operationShape));
-    }
-
-    public String predicateFailed(OperationShape operationShape) {
-        return "%sFailed".formatted(this.publicMethodNameForOperation(operationShape));
-    }
-
-    public String predicateFailedWith(OperationShape operationShape) {
-        return "%sFailedWith".formatted(this.publicMethodNameForOperation(operationShape));
-    }
-
-
     /**
      * Returns the return type for an operation of this service.
      * This is {@code Result<T, errorType>},
