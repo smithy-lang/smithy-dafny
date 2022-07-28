@@ -133,7 +133,24 @@ public record DafnyNameResolver(
     }
 
     public String historicalCallEventsForOperation(final OperationShape operationShape) {
-        return "%sHistoricalCallEvents".formatted(publicMethodNameForOperation(operationShape));
+        // This works because the history is stored in its own object
+        return publicMethodNameForOperation(operationShape);
+    }
+
+    public String historicalCallHistoryClassForResource(final ResourceShape resource) {
+        return "%s%s"
+          .formatted(
+            baseTypeForShape(resource.getId()),
+            historicalCallHistoryPostfix()
+          );
+    }
+
+    public String historicalCallHistoryClassForResource(final ServiceShape service) {
+        return "%s%s"
+          .formatted(
+            baseTypeForShape(service.getId()),
+            historicalCallHistoryPostfix()
+          );
     }
 
     public Boolean isFunction(
@@ -269,6 +286,18 @@ public record DafnyNameResolver(
     }
 
     public String mutableStateFunctionName() {
-        return "MutableStateForConcreteClass";
+        return "Modifies";
+    }
+
+    public String validStateInvariantName() {
+        return "ValidState";
+    }
+
+    public String callHistoryFieldName() {
+        return "History";
+    }
+
+    public String historicalCallHistoryPostfix() {
+        return "CallHistory";
     }
 }

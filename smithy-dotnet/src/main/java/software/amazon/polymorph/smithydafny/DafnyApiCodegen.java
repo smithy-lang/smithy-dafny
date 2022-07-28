@@ -331,12 +331,14 @@ public class DafnyApiCodegen {
 
         return TokenTree
           .of(
+            generateHistoricalCallEventsForService(serviceShape),
             trait,
             methods
-              .prepend(generateMutableStateFunction()
-                .append(serviceShape.hasTrait(ServiceTrait.class)
-                  ? TokenTree.of("{{}}")
-                  : TokenTree.empty()))
+              .prepend(generateMutableInvariantInterface()
+                .append(Token.of("ghost const %s: %s"
+                  .formatted(
+                    nameResolver.callHistoryFieldName(),
+                    nameResolver.historicalCallHistoryClassForResource(serviceShape)))))
               .lineSeparated()
               .braced()
           )
@@ -383,13 +385,88 @@ public class DafnyApiCodegen {
 
         return TokenTree
           .of(
+            generateHistoricalCallEventsForResource(resource),
             trait,
             methods
-              .prepend(generateMutableStateFunction())
+              .prepend(generateMutableInvariantInterface()
+                .append(Token.of("ghost const %s: %s"
+                  .formatted(
+                    nameResolver.callHistoryFieldName(),
+                    nameResolver.historicalCallHistoryClassForResource(resource)))))
               .lineSeparated()
               .braced()
           )
           .lineSeparated();
+    }
+
+
+    public TokenTree generateHistoricalCallEventsForService(final ServiceShape service) {
+
+        final TokenTree className = TokenTree
+          .of("class %s"
+            .formatted(nameResolver.historicalCallHistoryClassForResource(service))
+          );
+        final TokenTree constructor = TokenTree
+          .of(
+            service
+              .getAllOperations()
+              .stream()
+              .map(operation -> model.expectShape(operation, OperationShape.class))
+              .map(operation -> TokenTree.of(
+                "%s := [];".formatted(nameResolver.historicalCallEventsForOperation(operation))
+              ))
+          )
+          .lineSeparated()
+          .braced()
+          .prepend(Token.of("ghost constructor()"));
+        final TokenTree fields = TokenTree
+          .of(
+            service
+              .getAllOperations()
+              .stream()
+              .map(operation -> generateHistoricalCallEvents(operation))
+          )
+          .lineSeparated();
+
+        return className
+          .append(TokenTree
+            .of(constructor, fields)
+            .lineSeparated()
+            .braced());
+    }
+    public TokenTree generateHistoricalCallEventsForResource(final ResourceShape resource) {
+
+        final TokenTree className = TokenTree
+          .of("class %s"
+            .formatted(nameResolver.historicalCallHistoryClassForResource(resource))
+          );
+        final TokenTree constructor = TokenTree
+          .of(
+            resource
+              .getAllOperations()
+              .stream()
+              .map(operation -> model.expectShape(operation, OperationShape.class))
+              .map(operation -> TokenTree.of(
+                "%s := [];".formatted(nameResolver.historicalCallEventsForOperation(operation))
+                ))
+          )
+          .lineSeparated()
+          .braced()
+          .prepend(Token.of("ghost constructor()"));
+        final TokenTree fields = TokenTree
+          .of(
+            resource
+              .getAllOperations()
+              .stream()
+              .map(operation -> generateHistoricalCallEvents(operation))
+          )
+          .lineSeparated();
+
+        return className
+          .append(TokenTree
+            .of(constructor, fields)
+            .lineSeparated()
+            .braced());
     }
 
     public TokenTree generateOperationParams(final OperationShape operationShape) {
@@ -419,33 +496,42 @@ public class DafnyApiCodegen {
             ));
     }
 
-    private TokenTree generateOperationModifiesClause(
-      final ServiceShape serviceShape,
-      final OperationShape operationShape
-    ) {
-        final String functionOrMethod = nameResolver.isFunction(serviceShape, operationShape)
-          ? "reads"
-          : "modifies";
-        return TokenTree
-          .of(
-            "%s %s()".formatted(functionOrMethod, nameResolver.mutableStateFunctionName()),
-            "// Dafny will skip type parameters when generating a default decreases clause.",
-            "decreases %s()".formatted(nameResolver.mutableStateFunctionName())
-          )
-          .lineSeparated();
-    }
-
-    private TokenTree generateMutableStateFunction() {
-      final String mutationFunctionSignature = "function %s() : (ret: set<object>)"
-        .formatted(nameResolver.mutableStateFunctionName());
+    private TokenTree generateMutableInvariantInterface() {
       return TokenTree
         .of(
           "// Helper to define any additional modifies/reads clauses",
-          "// If your operations need to mutate state add it to this function:",
-          "// %s{ {your, fields, here} }".formatted(mutationFunctionSignature),
+          "// If your operations need to mutate state add it",
+          "// in your constructor function:",
+          "// %s := {your, fields, here, %s};".formatted(
+            nameResolver.mutableStateFunctionName(),
+            nameResolver.callHistoryFieldName()),
           "// If you do not need to mutate anything:",
-          "// %s{ {} }".formatted(mutationFunctionSignature),
-          mutationFunctionSignature
+          "// %s := {History};".formatted(
+            nameResolver.mutableStateFunctionName(),
+            nameResolver.callHistoryFieldName()
+          ),
+          "ghost const %s: set<object>".formatted(nameResolver.mutableStateFunctionName()),
+          "// For an unassigned const field defined in a trait,",
+          "// Dafny can only assign a value in the constructor.",
+          "// This means that for Dafny to reason about this value,",
+          "// it needs some way to know (an invariant),",
+          "// about the state of the object.",
+          "// This builds on the Valid/Repr paradigm",
+          "// To make this kind requires is safe to add",
+          "// to methods called from unverified code",
+          "// the predicate MUST NOT take any arguments.",
+          "// This means that the correctness of this requires",
+          "// MUST only be evaluated by the class itself.",
+          "// If you require any additional mutation,",
+          "// Then you MUST ensure everything you need in %s.".formatted(nameResolver.validStateInvariantName()),
+          "// You MUST also ensure %s in your constructor.".formatted(nameResolver.validStateInvariantName()),
+          "predicate %s()".formatted(nameResolver.validStateInvariantName()),
+          "ensures %s() ==> %s in %s"
+            .formatted(
+              nameResolver.validStateInvariantName(),
+              nameResolver.callHistoryFieldName(),
+              nameResolver.mutableStateFunctionName()
+            )
         )
         .lineSeparated()
         .append(TokenTree.empty())
@@ -471,7 +557,7 @@ public class DafnyApiCodegen {
             ? TokenTree.of("// Functions that are transparent do not need ensures")
             : TokenTree
             .of(
-              generateModifiesHistoricalCallEvents(serviceShape, operationShapeId),
+              generateMutableInvariantForMethod(serviceShape, operationShapeId),
               generateEnsuresForEnsuresPubliclyPredicate(operationShapeId),
               generateEnsuresHistoricalCallEvents(operationShapeId)
             )
@@ -485,7 +571,6 @@ public class DafnyApiCodegen {
             .of("// Functions are deterministic, no need for historical call events or ensures indirection")
             : TokenTree
             .of(
-              generateHistoricalCallEvents(operationShapeId),
               generateEnsuresPubliclyPredicate(operationShapeId)
             )
             .lineSeparated(),
@@ -529,7 +614,7 @@ public class DafnyApiCodegen {
                   .append(Token.of(nameResolver.methodNameToImplementForResourceOperation(operationShape)))
                   .append(generateOperationParams(operationShape).parenthesized()),
                 generateOperationReturnsClause(serviceShape, operationShape),
-                generateOperationModifiesClause(serviceShape, operationShape),
+                generateMutableInvariantForMethod(serviceShape, operationShapeId),
                 generateEnsuresForEnsuresPubliclyPredicate(operationShapeId),
                 generateEnsuresUnchangedCallHistory(operationShapeId)
               )
@@ -561,21 +646,23 @@ public class DafnyApiCodegen {
           );
     }
 
-    private TokenTree generateModifiesHistoricalCallEvents(
+    private TokenTree generateMutableInvariantForMethod(
       final ServiceShape serviceShape,
       final ShapeId operationShapeId
     ) {
-        final OperationShape operationShape = model.expectShape(operationShapeId, OperationShape.class);
-
         return TokenTree
           .of(
-            "modifies this`%s, %s()"
+            "requires %s()".formatted(nameResolver.validStateInvariantName()),
+            "modifies %s - {%s}, %s`%s"
               .formatted(
-                nameResolver.historicalCallEventsForOperation(operationShape),
-                nameResolver.mutableStateFunctionName()
+                nameResolver.mutableStateFunctionName(),
+                nameResolver.callHistoryFieldName(),
+                nameResolver.callHistoryFieldName(),
+                operationShapeId.getName()
               ),
             "// Dafny will skip type parameters when generating a default decreases clause.",
-            "decreases %s()".formatted(nameResolver.mutableStateFunctionName())
+            "decreases %s".formatted(nameResolver.mutableStateFunctionName()),
+            "ensures %s()".formatted(nameResolver.validStateInvariantName())
           )
           .lineSeparated();
     }
@@ -585,26 +672,31 @@ public class DafnyApiCodegen {
     ) {
         final OperationShape operationShape = model.expectShape(operationShapeId, OperationShape.class);
 
-        final String historicalCallEventsForOperation = nameResolver.historicalCallEventsForOperation(operationShape);
+        final String historicalCallEventsForOperation = "%s.%s"
+          .formatted(
+            nameResolver.callHistoryFieldName(),
+            nameResolver.historicalCallEventsForOperation(operationShape));
 
         return TokenTree
           .of(
             Token.of("ensures"),
-            Token.of("&& %s == old(%s) + [%s(input, output)]"
+            Token.of("%s == old(%s) + [%s(input, output)]"
               .formatted(
                 historicalCallEventsForOperation,
                 historicalCallEventsForOperation,
                 nameResolver.callEventTypeName())
             )
-          )
-          .lineSeparated();
+          );
     }
 
     private TokenTree generateAccumulateHistoricalCallEvents(
       final ShapeId operationShapeId
     ) {
         final OperationShape operationShape = model.expectShape(operationShapeId, OperationShape.class);
-        final String historicalCallEvents = nameResolver.historicalCallEventsForOperation(operationShape);
+        final String historicalCallEvents = "%s.%s"
+          .formatted(
+            nameResolver.callHistoryFieldName(),
+            nameResolver.historicalCallEventsForOperation(operationShape));
         return TokenTree
           .of(
             "%s := %s + [%s(input, output)];"
@@ -650,7 +742,7 @@ public class DafnyApiCodegen {
 
         return TokenTree
           .of(
-            "ensures unchanged(this`%s)".formatted(nameResolver.historicalCallEventsForOperation(operationShape))
+            "ensures unchanged(%s)".formatted(nameResolver.callHistoryFieldName())
           );
     }
 
@@ -797,8 +889,11 @@ public class DafnyApiCodegen {
             // this can work because we need to be able Errors from other modules...
             "returns (res: Result<%s, Error>)"
               .formatted(nameResolver.traitForServiceClient(serviceShape)),
-            "ensures res.Success? ==> fresh(res.value) && fresh(res.value.%s())"
-              .formatted(nameResolver.mutableStateFunctionName())
+            "ensures res.Success? ==> ",
+            "&& fresh(res.value)",
+            "&& fresh(res.value.%s)".formatted(nameResolver.mutableStateFunctionName()),
+            "&& fresh(res.value.%s)".formatted(nameResolver.callHistoryFieldName()),
+            "&& res.value.%s()".formatted(nameResolver.validStateInvariantName())
             )
           .lineSeparated();
 
