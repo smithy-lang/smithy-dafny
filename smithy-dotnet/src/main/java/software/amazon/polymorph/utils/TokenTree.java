@@ -69,6 +69,13 @@ public class TokenTree {
         return TokenTree.of(Token.of("namespace"), namespace, this.braced());
     }
 
+    public TokenTree prependSeperated(final TokenTree separator) {
+        Stream<TokenTree> separatedTokens = children
+          .stream()
+          .flatMap(tokenTree -> Stream.of(separator, tokenTree));
+        return new TokenTree(ImmutableList.copyOf(separatedTokens.iterator()));
+    }
+
     public TokenTree separated(final TokenTree separator) {
         if (children.size() < 2) {
             return this;
@@ -77,6 +84,26 @@ public class TokenTree {
                 .stream()
                 .flatMap(tokenTree -> Stream.of(separator, tokenTree))
                 .skip(1);
+        return new TokenTree(ImmutableList.copyOf(separatedTokens.iterator()));
+    }
+
+    protected Stream<TokenTree> streamChildren() {
+        return children.stream();
+    }
+
+    public TokenTree flatten() {
+        Stream<TokenTree> flattenChildren = children.stream().flatMap(c -> c.streamChildren());
+        return new TokenTree(ImmutableList.copyOf(flattenChildren.iterator()));
+    }
+
+    public Boolean isEmpty() {
+        return 0 == this.children.size();
+    }
+
+    public TokenTree dropEmpty() {
+        Stream<TokenTree> separatedTokens = children
+          .stream()
+          .filter(tree -> !tree.isEmpty());
         return new TokenTree(ImmutableList.copyOf(separatedTokens.iterator()));
     }
 

@@ -315,7 +315,6 @@ public class DafnyApiCodegen {
             "trait {:termination false}",
             nameResolver.traitForServiceClient(serviceShape)
           );
-        // See generateOperationPredicatesAndMethod, when updated, change me back
         final TokenTree methods = TokenTree
           .of(
             serviceShape
@@ -557,7 +556,7 @@ public class DafnyApiCodegen {
             ? TokenTree.of("// Functions that are transparent do not need ensures")
             : TokenTree
             .of(
-              generateMutableInvariantForMethod(serviceShape, operationShapeId),
+              generateMutableInvariantForMethod(serviceShape, operationShapeId, ImplementationType.CODEGEN),
               generateEnsuresForEnsuresPubliclyPredicate(operationShapeId),
               generateEnsuresHistoricalCallEvents(operationShapeId)
             )
@@ -614,7 +613,7 @@ public class DafnyApiCodegen {
                   .append(Token.of(nameResolver.methodNameToImplementForResourceOperation(operationShape)))
                   .append(generateOperationParams(operationShape).parenthesized()),
                 generateOperationReturnsClause(serviceShape, operationShape),
-                generateMutableInvariantForMethod(serviceShape, operationShapeId),
+                generateMutableInvariantForMethod(serviceShape, operationShapeId, ImplementationType.DEVELOPER),
                 generateEnsuresForEnsuresPubliclyPredicate(operationShapeId),
                 generateEnsuresUnchangedCallHistory(operationShapeId)
               )
@@ -646,26 +645,337 @@ public class DafnyApiCodegen {
           );
     }
 
+    /*
+        The purpose of this ENUM is to distinguish who is writing the body of the method.
+        In the case of a Resource we wrap the call history into the implemented method `MethodName`
+        and leave a `MethodName'` for the developer to write.
+        This means that there is a relationship between specification of these two methods
+        but that this relationship is not exactly the same.
+     */
+    public enum ImplementationType {
+        DEVELOPER, CODEGEN
+    }
+
     private TokenTree generateMutableInvariantForMethod(
       final ServiceShape serviceShape,
-      final ShapeId operationShapeId
+      final ShapeId operationShapeId,
+      final ImplementationType implementationType
     ) {
+      final String hack = implementationType == ImplementationType.CODEGEN
+          ? "%s`%s".formatted(nameResolver.callHistoryFieldName(), operationShapeId.getName())
+          : "";
+
+      final OperationShape operationShape = model.expectShape(operationShapeId, OperationShape.class);
+      final TokenTree requires = OperationMemberRequires(operationShapeId);
+      final TokenTree ensures = OperationMemberEnsures(operationShapeId);
+      final TokenTree modifiesSet = OperationModifiesSet(operationShapeId);
+
+      final TokenTree modifies = TokenTree
+        .of(
+          Token
+            .of("modifies")
+            .append(TokenTree
+              .of(
+                Token.of("%s - {%s}"
+                  .formatted(
+                    nameResolver.mutableStateFunctionName(),
+                    nameResolver.callHistoryFieldName()
+                  )
+                ),
+                Token.of(hack),
+                modifiesSet
+              )
+              .flatten()
+              .dropEmpty()
+              .separated(Token.of(",\n"))
+            ),
+          Token.of("// Dafny will skip type parameters when generating a default decreases clause."),
+          Token
+            .of("decreases")
+            .append(TokenTree
+              .of(
+                Token.of("%s".formatted(nameResolver.mutableStateFunctionName())),
+                modifiesSet
+              )
+              .flatten()
+              .dropEmpty()
+              .separated(Token.of(",\n"))
+            )
+        )
+        .lineSeparated();
+
+      return TokenTree.of(requires, modifies, ensures).lineSeparated();
+    }
+
+    private TokenTree OperationMemberRequires(final ShapeId operationShapeId) {
+      final String validStateInvariantName = nameResolver.validStateInvariantName();
+      final OperationShape operationShape = model.expectShape(operationShapeId, OperationShape.class);
+
+      final TokenTree inputReferencesThatNeedValidState = operationShape
+        .getInput()
+        .map(shapeId -> TokenTree
+          .of(ModelUtils
+            .streamStructureMembers(model.expectShape(shapeId, StructureShape.class))
+            // Input members with a ReferenceTrait will have a `ValidState` predicate
+            // This invariant needs to be maintained across all method calls
+            .filter(this::OnlyReferenceStructures)
+            .map(member -> OperationMemberValidState(member, operationShape, InputOutput.INPUT))
+            .map(TokenTree::of)
+          )
+        )
+        .orElse(TokenTree.empty());
+
+      return TokenTree
+        .of(
+          Token.of("requires"),
+          Token.of("&& %s()".formatted(validStateInvariantName))
+            .append(inputReferencesThatNeedValidState)
+        )
+        .dropEmpty()
+        .lineSeparated();
+    }
+
+  private TokenTree OperationMemberEnsures(final ShapeId operationShapeId) {
+    final OperationShape operationShape = model.expectShape(operationShapeId, OperationShape.class);
+    final String validStateInvariantName = nameResolver.validStateInvariantName();
+
+    final TokenTree outputReferencesThatNeedValidState = operationShape
+      .getOutput()
+      .map(shapeId -> model.expectShape(shapeId, StructureShape.class))
+      .map(structureShape -> ModelUtils
+        .streamStructureMembers(structureShape)
+        // Input members with a ReferenceTrait will have a `ValidState` predicate
+        // This invariant needs to be maintained across all method calls
+        .filter(this::OnlyReferenceStructures)
+        .map(member -> OperationMemberValidState(member, operationShape, InputOutput.OUTPUT))
+      )
+      .map(TokenTree::of)
+      .map(memberTokens -> {
+        if (memberTokens.isEmpty()) return memberTokens;
         return TokenTree
           .of(
-            "requires %s()".formatted(nameResolver.validStateInvariantName()),
-            "modifies %s - {%s}, %s`%s"
-              .formatted(
-                nameResolver.mutableStateFunctionName(),
-                nameResolver.callHistoryFieldName(),
-                nameResolver.callHistoryFieldName(),
-                operationShapeId.getName()
-              ),
-            "// Dafny will skip type parameters when generating a default decreases clause.",
-            "decreases %s".formatted(nameResolver.mutableStateFunctionName()),
-            "ensures %s()".formatted(nameResolver.validStateInvariantName())
+            Token.of("output.Success? ==> "),
+            memberTokens
+          )
+          .parenthesized()
+          .prepend(Token.of("&&"));
+      })
+      .orElse(TokenTree.empty());
+    return TokenTree
+      .of(
+        Token.of("ensures"),
+        TokenTree
+          .of(
+            Token.of("&& %s()".formatted(validStateInvariantName)),
+            outputReferencesThatNeedValidState
+          )
+          .dropEmpty()
+          .lineSeparated()
+      )
+      .lineSeparated();
+  }
+
+    private Boolean OnlyReferenceStructures(MemberShape member) {
+        final Shape target = model.expectShape(member.getTarget());
+
+        return
+          // If the member is a reference type
+          (
+            target.getType() == ShapeType.STRUCTURE)
+            && target.hasTrait(ReferenceTrait.class)
+          // If the member is a LIST of a reference type
+          || (
+            target.getType() == ShapeType.LIST
+              && model
+              .expectShape(
+                  target
+                    .asListShape()
+                    .get()
+                    .getMember()
+                    .getTarget())
+              .hasTrait(ReferenceTrait.class)
+            );
+    }
+
+    public enum InputOutput {
+      INPUT, OUTPUT
+    }
+    private TokenTree OperationMemberValidState(MemberShape member, OperationShape operationShape, final InputOutput direction) {
+      final String validStateInvariantName = nameResolver.validStateInvariantName();
+      final boolean isOutput = direction == InputOutput.OUTPUT;
+
+      final ShapeId directionShape = direction == InputOutput.INPUT
+        // The member MUST be a member of input or output
+        // so there MUST be such a shape.
+        ? operationShape.getInput().get()
+        : operationShape.getOutputShape();
+
+      if (member.getId() == directionShape.withMember(member.getMemberName())) {
+        throw new IllegalStateException("Member not on operation");
+      }
+
+      final boolean isList = model.expectShape(member.getTarget()).getType() == ShapeType.LIST;
+      // This is tricky, given where we are, there MUST be an output shape.
+      // If this output is @positional,
+      // then we need to drop the member name
+      final String memberName = model.expectShape(directionShape).hasTrait(PositionalTrait.class)
+        ? ""
+        : ".%s".formatted(member.getMemberName());
+
+      final String varName = direction == InputOutput.INPUT
+        ? "input" + memberName
+        : "output.value" + memberName; // These all expect to be appended to "output.Success? ==> "
+
+      // Inputs can not be fresh
+      // so if they are added to our output
+      // then we can not prove freshness of these items
+      final TokenTree removeInputs = direction == InputOutput.OUTPUT
+        ? OperationModifiesSet(operationShape.getId()).prependSeperated(Token.of("-"))
+        : TokenTree.empty();
+
+      // We need to do 3 things here
+      // first, we need the member to have ValidState
+      // second, its Modifies set MUST NOT be shared.
+      // This second claim is to ensure that state can be reasoned about
+      // third, everything MUST be fresh. This will make using things _much_ simpler
+      // you may hate me now, but you will come around
+      if (member.isRequired() && !isList) {
+        // Required single item
+        return TokenTree
+          .of(
+            Token.of("%s.%s()".formatted(varName, validStateInvariantName)),
+            Token.of("%s.Modifies !! Modifies".formatted(varName)),
+            Token.of(isOutput ? "fresh(%s)".formatted(varName) : ""),
+            isOutput
+              ? Token
+              .of("fresh")
+              .append(TokenTree
+                .of(Token.of("%s.Modifies".formatted(varName)), removeInputs)
+                .parenthesized())
+              : TokenTree.empty()
+          )
+          .dropEmpty()
+          .prependSeperated(Token.of("\n &&"));
+      } else if (!member.isRequired() && !isList) {
+        // Optional single item
+        return TokenTree
+          .of(
+            "&& ( %s.Some? ==>".formatted(varName),
+            "&& %s.value.%s()".formatted(varName, validStateInvariantName),
+            "&& %s.value.Modifies !! Modifies".formatted(varName),
+            isOutput ? "&& fresh(%s.value)".formatted(varName) : "",
+            isOutput ? "&& fresh(%s.value.Modifies)".formatted(varName) : "",
+            ")"
+          )
+          .dropEmpty()
+          .lineSeparated();
+      } else if (isList && member.isRequired()) {
+        // Required list item
+        return TokenTree
+          .of(
+            "&& ( forall i <- %s ::".formatted(varName),
+            "&& i.%s()".formatted(validStateInvariantName),
+            "&& i.Modifies !! Modifies",
+            isOutput ? "&& fresh(i)" : "",
+            isOutput ? " && fresh(i.Modifies)" : "",
+            ")"
+          )
+          .dropEmpty()
+          .lineSeparated();
+      } else if (isList && !member.isRequired()) {
+        // Optional list item
+        return TokenTree
+          .of(
+            "&& ( %s.Some? ==>".formatted(varName),
+            "&& ( forall i <- %s.value ::".formatted(varName),
+            "&& i.%s()".formatted(validStateInvariantName),
+            "&& i.Modifies !! Modifies",
+            isOutput ? "&& fresh(i)" : "",
+            isOutput ? " && fresh(i.Modifies)" : "",
+            "))"
+          )
+          .dropEmpty()
+          .lineSeparated();
+      } else {
+        throw new IllegalStateException("Unsupported shape type");
+      }
+    }
+
+    private TokenTree OperationModifiesSet(final ShapeId operationShapeId){
+      final OperationShape operationShape = model.expectShape(operationShapeId, OperationShape.class);
+      return operationShape
+        .getInput()
+        .map(shapeId -> model.expectShape(shapeId, StructureShape.class))
+        .map(structureShape -> ModelUtils
+          .streamStructureMembers(structureShape)
+          // Input members with a ReferenceTrait will have mutable state
+          // This state needs to be maintained across all method calls
+          .filter(this::OnlyReferenceStructures)
+          .map(member -> OperationMemberModifies(member, operationShape))
+        )
+        .map(TokenTree::of)
+        .orElse(TokenTree.empty());
+    }
+
+    private TokenTree OperationMemberModifies(final MemberShape member, final OperationShape operationShape) {
+      final ShapeId directionShape = operationShape.getInput().get();
+
+      if (member.getId() == directionShape.withMember(member.getMemberName())) {
+        throw new IllegalStateException("Member not on operation");
+      }
+
+      final boolean isList = model.expectShape(member.getTarget()).getType() == ShapeType.LIST;
+      // This is tricky, given where we are, there MUST be an output shape.
+      // If this output is @positional,
+      // then we need to drop the member name
+      final String memberName = model.expectShape(directionShape).hasTrait(PositionalTrait.class)
+        ? ""
+        : ".%s".formatted(member.getMemberName());
+
+      final String varName = "input" + memberName;
+
+      // If we have a reference input,
+      // then we MAY modify that input.
+      // This means we will need both
+      // a modifies and a decreases' clause.
+      // The decreases clause is because
+      // Dafny will skip type parameters
+      // when generating a default decreases clause.
+      if (member.isRequired() && !isList) {
+        // Required single item
+        return TokenTree
+          .of(
+            "%s.Modifies".formatted(varName)
+          );
+      } else if (!member.isRequired() && !isList) {
+        // Optional single item
+        return TokenTree
+          .of(
+            "(if %s.Some? then %s.value.Modifies else {})"
+              .formatted(varName, varName)
           )
           .lineSeparated();
+      } else if (isList && member.isRequired()) {
+        // Required list item
+        return TokenTree
+          .of(
+            "(set m: object, i | i in %s && m in i.Modifies :: m)"
+              .formatted(varName)
+          )
+          .lineSeparated();
+      } else if (isList && !member.isRequired()) {
+        // Optional list item
+        return TokenTree
+          .of(
+            "(if %s.Some? then (set m: object, i | i in %s.value && m in i.Modifies :: m) else {})"
+              .formatted(varName, varName)
+          )
+          .lineSeparated();
+      } else {
+        throw new IllegalStateException("Unsupported shape type");
+      }
     }
+
 
     private TokenTree generateEnsuresHistoricalCallEvents(
         final ShapeId operationShapeId
@@ -922,7 +1232,12 @@ public class DafnyApiCodegen {
         final TokenTree factory = TokenTree
           .of(
             "method {:extern} %sClient()".formatted(serviceTrait.getSdkId()),
-            "returns (res: Result<%s, Error>)".formatted(nameResolver.traitForServiceClient(serviceShape))
+            "returns (res: Result<%s, Error>)".formatted(nameResolver.traitForServiceClient(serviceShape)),
+            "ensures res.Success? ==> ",
+            "&& fresh(res.value)",
+            "&& fresh(res.value.%s)".formatted(nameResolver.mutableStateFunctionName()),
+            "&& fresh(res.value.%s)".formatted(nameResolver.callHistoryFieldName()),
+            "&& res.value.%s()".formatted(nameResolver.validStateInvariantName())
           ).lineSeparated();
 
         return TokenTree
