@@ -355,7 +355,13 @@ public class DafnyApiCodegen {
         // The actual implementation of the service
         // would be in that services Smithy module.
         if (referenceTrait.isService()) {
-            return null;
+          // TODO: This is a hack to make the side effect happen
+          // While there is no code to generate,
+          // the module needs to be included
+          // because we are obviously using it!
+          final String sideEffect = nameResolver
+            .dafnyModulePrefixForShapeId(model.expectShape(referenceTrait.getReferentId()));
+          return null;
         }
 
         final ResourceShape resource = model
