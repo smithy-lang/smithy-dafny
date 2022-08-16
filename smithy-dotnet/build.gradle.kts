@@ -6,6 +6,12 @@ plugins {
 group = "software.amazon.polymorph"
 version = "0.1.0"
 
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(16))
+    }
+}
+
 repositories {
     mavenLocal()
     mavenCentral()
