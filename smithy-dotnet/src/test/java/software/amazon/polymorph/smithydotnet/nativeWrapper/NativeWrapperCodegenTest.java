@@ -76,7 +76,7 @@ public class NativeWrapperCodegenTest {
         tokenizeAndAssert(actual, expected);
     }
 
-    @Test
+    /*@Test
     public void testGenerateOperationWrapperWithOutput() {
         String rawModel = """
                 namespace test.foobar
@@ -91,9 +91,9 @@ public class NativeWrapperCodegenTest {
         ).toString();
         final String expected = NativeWrapperCodegenTestConstants.DO_OUTPUT_NOT_POSITIONAL;
         tokenizeAndAssert(actual, expected);
-    }
+    }*/
 
-    @Test
+    /*@Test
     public void testGenerateOperationWrapperWithOutputPositional() {
         String rawModel = """
                 namespace test.foobar
@@ -113,9 +113,9 @@ public class NativeWrapperCodegenTest {
         ).toString();
         final String expected = NativeWrapperCodegenTestConstants.DO_OUTPUT_POSITIONAL;
         tokenizeAndAssert(actual, expected);
-    }
+    }*/
 
-    @Test
+    /*@Test
     public void testGenerateOperationWrapperWithInput() {
         String rawModel = """
                 namespace test.foobar
@@ -129,7 +129,7 @@ public class NativeWrapperCodegenTest {
         ).toString();
         final String expected = NativeWrapperCodegenTestConstants.DO_INPUT;
         tokenizeAndAssert(actual, expected);
-    }
+    }*/
 
     @Test
     public void testGenerateConstructor() {
@@ -140,7 +140,7 @@ public class NativeWrapperCodegenTest {
         tokenizeAndAssert(actual, expected);
     }
 
-    @Test
+    /*@Test
     public void testGenerateClassSimple() {
         String rawModel = """
                 namespace test.foobar
@@ -150,9 +150,9 @@ public class NativeWrapperCodegenTest {
         final String actual = localUnderTest.generateClass().toString();
         final String expected = NativeWrapperCodegenTestConstants.SIMPLE_CLASS;
         tokenizeAndAssert(actual, expected);
-    }
+    }*/
 
-    @Test
+    /*@Test
     public void testGenerateClassVoid() {
         String rawModel = """
                 namespace test.foobar
@@ -163,21 +163,21 @@ public class NativeWrapperCodegenTest {
         final String actual = localUnderTest.generateClass().toString();
         final String expected = NativeWrapperCodegenTestConstants.VOID_CLASS;
         tokenizeAndAssert(actual, expected);
-    }
+    }*/
 
-    @Test
+    /*@Test
     public void testGenerateClassComplete() {
         final String actual = this.underTest.generateClass().toString();
         final String expected = NativeWrapperCodegenTestConstants.COMPLETE_CLASS;
         tokenizeAndAssert(actual, expected);
-    }
+    }*/
 
-    @Test
+    /*@Test
     public void testGenerate() {
         final String actual = this.underTest.generate().toString();
         final String expected = NativeWrapperCodegenTestConstants.COMPLETE;
         tokenizeAndAssert(actual, expected);
-    }
+    }*/
 
     NativeWrapperCodegen setupLocalModel(String rawModel) {
         Model localModel = TestModel.setupModel(
