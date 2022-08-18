@@ -30,7 +30,7 @@ public class Tokenizer {
 
     public static record ParseToken(String text, int type) {}
 
-    public static void tokenizeAndAssert(String expected, String actual) {
+    public static void tokenizeAndAssertEqual(String expected, String actual) {
         final List<ParseToken> actualTokens = tokenize(actual);
         final List<ParseToken> expectedTokens = tokenize(expected);
         assertEquals(expectedTokens, actualTokens);

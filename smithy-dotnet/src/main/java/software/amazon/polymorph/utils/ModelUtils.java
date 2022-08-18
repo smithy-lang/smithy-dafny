@@ -10,7 +10,9 @@ import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
+import software.amazon.smithy.model.shapes.ShapeType;
 import software.amazon.smithy.model.shapes.StructureShape;
+import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.RequiredTrait;
 
@@ -190,5 +192,12 @@ public class ModelUtils {
      */
     public static String serviceNameWithoutTrailingFactory(final ServiceShape serviceShape) {
         return stripTrailingFactory(serviceShape.getId().getName());
+    }
+
+    public static boolean isSmithyApiOrSimpleShape(Shape shape) {
+        // Special Enum case
+        if (shape.hasTrait(EnumTrait.class)) { return false; }
+        if (isSmithyApiShape(shape.getId())) { return true; }
+        return shape.getType().getCategory().equals(ShapeType.Category.SIMPLE);
     }
 }

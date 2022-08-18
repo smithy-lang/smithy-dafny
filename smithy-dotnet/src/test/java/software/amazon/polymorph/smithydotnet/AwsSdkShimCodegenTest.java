@@ -3,26 +3,16 @@
 
 package software.amazon.polymorph.smithydotnet;
 
-import org.junit.Test;
 import software.amazon.polymorph.util.TestModel;
-import software.amazon.polymorph.util.Tokenizer;
-import software.amazon.polymorph.util.Tokenizer.ParseToken;
-import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.loader.ModelAssembler;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.ShapeId;
 
 import java.nio.file.Path;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.function.BiConsumer;
 
 import static org.junit.Assert.assertEquals;
-import static software.amazon.polymorph.smithydotnet.TypeConversionDirection.FROM_DAFNY;
-import static software.amazon.polymorph.smithydotnet.TypeConversionDirection.TO_DAFNY;
-import static software.amazon.polymorph.util.Tokenizer.tokenizeAndAssert;
 
 public class AwsSdkShimCodegenTest {
     private static final String SERVICE_NAMESPACE = "com.amazonaws.foobar";

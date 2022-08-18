@@ -3,48 +3,8 @@
 
 package software.amazon.polymorph.smithydotnet;
 
-import org.junit.Test;
-
-import java.nio.file.Path;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.function.BiConsumer;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import software.amazon.polymorph.antlr.CSharpLexer;
-import software.amazon.polymorph.smithydotnet.TypeConversionCodegen.TypeConverter;
-import software.amazon.polymorph.traits.ClientConfigTrait;
-import software.amazon.polymorph.util.TestModel;
-import software.amazon.polymorph.util.Tokenizer.ParseToken;
-import software.amazon.polymorph.utils.TokenTree;
-import software.amazon.smithy.model.Model;
-import software.amazon.smithy.model.loader.ModelAssembler;
-import software.amazon.smithy.model.shapes.BlobShape;
-import software.amazon.smithy.model.shapes.BooleanShape;
-import software.amazon.smithy.model.shapes.IntegerShape;
-import software.amazon.smithy.model.shapes.ListShape;
-import software.amazon.smithy.model.shapes.LongShape;
-import software.amazon.smithy.model.shapes.MapShape;
-import software.amazon.smithy.model.shapes.MemberShape;
-import software.amazon.smithy.model.shapes.ServiceShape;
-import software.amazon.smithy.model.shapes.ShapeId;
-import software.amazon.smithy.model.shapes.StringShape;
-import software.amazon.smithy.model.shapes.StructureShape;
-import software.amazon.smithy.model.shapes.TimestampShape;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static software.amazon.polymorph.smithydotnet.TypeConversionCodegen.TYPE_CONVERSION_CLASS_PATH;
-import static software.amazon.polymorph.smithydotnet.TypeConversionDirection.FROM_DAFNY;
-import static software.amazon.polymorph.smithydotnet.TypeConversionDirection.TO_DAFNY;
-import static software.amazon.polymorph.util.TestModel.SERVICE_NAMESPACE;
-import static software.amazon.polymorph.util.TestModel.SERVICE_SHAPE_ID;
-import static software.amazon.polymorph.util.Tokenizer.tokenize;
-import static software.amazon.polymorph.util.Tokenizer.tokenizeAndAssert;
 
 public class TypeConversionCodegenTest {
     // TODO: Apply TypeConversionCodegen refactor to tests

@@ -16,7 +16,7 @@ import software.amazon.smithy.model.shapes.ShapeId;
 
 import static software.amazon.polymorph.util.TestModel.SERVICE_NAMESPACE;
 import static software.amazon.polymorph.util.TestModel.SERVICE_SHAPE_ID;
-import static software.amazon.polymorph.util.Tokenizer.tokenizeAndAssert;
+import static software.amazon.polymorph.util.Tokenizer.tokenizeAndAssertEqual;
 
 // Debugging Guidance:
 // These tests are arranged from Simplest to Most Complete.
@@ -66,14 +66,14 @@ public class NativeWrapperCodegenTest {
                 .toString();
         final String expected = NativeWrapperCodegenTestConstants.VALIDATE_NATIVE_OUTPUT
                 .formatted(nativeOutputType, "DoSomethingWithOutput");
-        tokenizeAndAssert(actual, expected);
+        tokenizeAndAssertEqual(actual, expected);
     }
 
     @Test
     public void testGenerateCatchServiceException() {
         final String actual = this.underTest.generateCatchServiceException().toString();
         final String expected = NativeWrapperCodegenTestConstants.CATCH_SERVICE;
-        tokenizeAndAssert(actual, expected);
+        tokenizeAndAssertEqual(actual, expected);
     }
 
     /*@Test
@@ -137,7 +137,7 @@ public class NativeWrapperCodegenTest {
         final String actual = this.underTest.generateConstructor(className)
                 .toString();
         final String expected = NativeWrapperCodegenTestConstants.CONSTRUCTOR;
-        tokenizeAndAssert(actual, expected);
+        tokenizeAndAssertEqual(actual, expected);
     }
 
     /*@Test
