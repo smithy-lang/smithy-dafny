@@ -7,6 +7,10 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.lang.model.element.Modifier;
@@ -23,6 +27,7 @@ import software.amazon.smithy.utils.StringUtils;
  * exposing an AWS Service's operations to Dafny Generated Java.
  */
 public class Shim extends Generator {
+    private static final Logger LOGGER = LoggerFactory.getLogger(Shim.class);
 
     public Shim(ServiceShape serviceShape, Model model) {
         super(serviceShape, model);
@@ -53,6 +58,8 @@ public class Shim extends Generator {
                         serviceShape.getAllOperations()
                                 .stream()
                                 .map(this::operation)
+                                .filter(Optional::isPresent)
+                                .map(Optional::get)
                                 .collect(Collectors.toList()))
                 .build();
     }
@@ -68,8 +75,13 @@ public class Shim extends Generator {
                 .build();
     }
 
-    MethodSpec operation(final ShapeId operationShapeId) {
+    Optional<MethodSpec> operation(final ShapeId operationShapeId) {
         final OperationShape operationShape = model.expectShape(operationShapeId, OperationShape.class);
+        if (operationShape.getOutput().isEmpty()) {
+            // TODO: handle empty returns via dafny tuple_0
+            LOGGER.error("This Operation returns `smithy.api#Unit, which is currently unsupported: %s".formatted(operationShapeId));
+            return Optional.empty();
+        }
         ShapeId inputShapeId = operationShape.getInputShape();
         ShapeId outputShapeId = operationShape.getOutputShape();
         TypeName dafnyOutput = dafnyNameResolver.typeForShape(outputShapeId);
@@ -88,6 +100,7 @@ public class Shim extends Generator {
                         nativeNameResolver.typeForShape(inputShapeId),
                         StringUtils.capitalize(inputShapeId.getName()))
                 .beginControlFlow("try")
+                // TODO: This assumes the operation has an output
                 .addStatement("$T result = _impl.$L(converted)",
                         nativeNameResolver.typeForOperationOutput(outputShapeId),
                         StringUtils.uncapitalize(operationName))
@@ -101,11 +114,11 @@ public class Shim extends Generator {
                         .nextControlFlow("catch ($T ex)", nativeNameResolver.typeForShape(shapeId))
                         .addStatement("return Result.create_Failure(ToDafny.Error(ex))")
         );
-        return builder
+        return Optional.of(builder
                 .nextControlFlow("catch ($T ex)", nativeNameResolver.baseErrorForService())
                 .addStatement("return Result.create_Failure(ToDafny.Error(ex))")
                 .endControlFlow()
-                .build();
+                .build());
     }
 
     private TypeName asDafnyResult(TypeName success, TypeName failure) {

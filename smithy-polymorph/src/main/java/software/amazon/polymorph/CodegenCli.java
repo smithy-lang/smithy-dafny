@@ -81,7 +81,7 @@ public class CodegenCli {
             );
             final AwsSdk javaShimCodegen = new AwsSdk(serviceShape, model);
             writeTokenTreesIntoDir(shimCodegen.generate(), outputDotnetDir);
-            writeTokenTreesIntoDir(javaShimCodegen.generate(), outputDotnetDir);
+            writeTokenTreesIntoDir(javaShimCodegen.generate(), outputJavaDir);
             logger.info("Java code generated in {}", cliArguments.outputJavaDir);
         } else {
             final ServiceCodegen serviceCodegen = new ServiceCodegen(model, serviceShape);
@@ -223,10 +223,19 @@ public class CodegenCli {
             """;
 
     private static void writeTokenTreesIntoDir(final Map<Path, TokenTree> tokenTreeMap, final Path outputDir) {
-        tokenTreeMap.forEach((Path localPath, TokenTree tokens) -> {
+        for (Map.Entry<Path, TokenTree> entry : tokenTreeMap.entrySet()) {
+            Path localPath = entry.getKey();
+            TokenTree tokens = entry.getValue();
             final Path outputPath = Path.of(outputDir.toString(), localPath.toString());
+            try {
+                if (!Files.exists(outputPath.getParent())) {
+                    Files.createDirectories(outputPath.getParent());
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             final String content = COPYRIGHT_HEADER + GENERATED_HEADER + tokens.toString();
             writeToFile(content, outputPath.toFile());
-        });
+        }
     }
 }

@@ -84,7 +84,7 @@ public class ToNative extends Generator {
 
         return TypeSpec
                 .classBuilder(
-                        ClassName.get(dafnyNameResolver.packageName(), "ToDafny"))
+                        ClassName.get(dafnyNameResolver.packageName(), "ToNative"))
                 .addModifiers(Modifier.PUBLIC)
                 .addMethods(convertOperationInputs)
                 .addMethods(convertAdditional)

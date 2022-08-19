@@ -3,6 +3,9 @@ package software.amazon.polymorph.smithyjava.nameresolver;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Map;
 
 import software.amazon.smithy.model.Model;
@@ -18,6 +21,7 @@ import software.amazon.smithy.utils.StringUtils;
  * Types from the AWS SDK for Java libraries.
  */
 public class AwsSdkNative extends Native {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AwsSdkNative.class);
     private final String modelPackage;
     private final String awsServiceName;
 

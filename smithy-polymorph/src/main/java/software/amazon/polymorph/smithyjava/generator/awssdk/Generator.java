@@ -5,6 +5,9 @@ import com.google.common.base.Joiner;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
@@ -22,6 +25,8 @@ import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.ShapeType;
 
 public abstract class Generator {
+    private static final Logger LOGGER = LoggerFactory.getLogger(Generator.class);
+
     AwsSdkDafny dafnyNameResolver;
     AwsSdkNative nativeNameResolver;
     Model model;

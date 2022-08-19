@@ -39,7 +39,7 @@ public class ShimTest {
     public void operation() {
         final MethodSpec actual = underTest.operation(
                 ShapeId.fromParts("com.amazonaws.kms", "DoSomething")
-        );
+        ).orElseThrow(AssertionError::new);
         // By wrapping the actual method spec with a
         // TypeSpec and JavaFile,
         // Javapoet does not fully qualify every type name.
