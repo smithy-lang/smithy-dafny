@@ -1,10 +1,17 @@
 plugins {
     java
     application
+    `maven-publish`
 }
 
 group = "software.amazon.polymorph"
 version = "0.1.0"
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    }
+}
 
 repositories {
     mavenLocal()
@@ -29,4 +36,14 @@ dependencies {
 
 application {
     mainClass.set("software.amazon.polymorph.CodegenCli")
+}
+
+
+publishing {
+    publications {
+        create<MavenPublication>("smithy-dotnet") {
+            from(components["java"])
+        }
+    }
+    repositories{ mavenLocal() }
 }
