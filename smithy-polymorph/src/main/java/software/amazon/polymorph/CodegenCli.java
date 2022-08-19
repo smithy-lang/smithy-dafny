@@ -4,8 +4,6 @@
 package software.amazon.polymorph;
 import software.amazon.polymorph.utils.ModelUtils;
 
-import com.google.common.base.Joiner;
-
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
@@ -20,10 +18,10 @@ import software.amazon.polymorph.smithydotnet.AwsSdkTypeConversionCodegen;
 import software.amazon.polymorph.smithydotnet.ServiceCodegen;
 import software.amazon.polymorph.smithydotnet.ShimCodegen;
 import software.amazon.polymorph.smithydotnet.TypeConversionCodegen;
+import software.amazon.polymorph.smithyjava.generator.awssdk.AwsSdk;
 import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.loader.ModelAssembler;
-import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.ServiceShape;
 
 import java.io.File;
@@ -32,8 +30,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Arrays;
@@ -55,8 +51,10 @@ public class CodegenCli {
         final CliArguments cliArguments = cliArgumentsOptional.get();
 
         final Path outputDotnetDir = cliArguments.outputDotnetDir;
+        final Path outputJavaDir = cliArguments.outputJavaDir;
         try {
             Files.createDirectories(outputDotnetDir);
+            Files.createDirectories(outputJavaDir);
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(1);
@@ -81,13 +79,18 @@ public class CodegenCli {
               serviceShape,
               cliArguments.dependentModelPaths
             );
+            final AwsSdk javaShimCodegen = new AwsSdk(serviceShape, model);
             writeTokenTreesIntoDir(shimCodegen.generate(), outputDotnetDir);
+            writeTokenTreesIntoDir(javaShimCodegen.generate(), outputDotnetDir);
+            logger.info("Java code generated in {}", cliArguments.outputJavaDir);
         } else {
             final ServiceCodegen serviceCodegen = new ServiceCodegen(model, serviceShape);
             writeTokenTreesIntoDir(serviceCodegen.generate(), outputDotnetDir);
 
             final ShimCodegen shimCodegen = new ShimCodegen(model, serviceShape);
             writeTokenTreesIntoDir(shimCodegen.generate(), outputDotnetDir);
+
+            logger.warn("Smithy-Polymorph only supports Java code generation for AWS-SDK Style code");
         }
         
         final DafnyApiCodegen dafnyApiCodegen = new DafnyApiCodegen(
@@ -140,6 +143,12 @@ public class CodegenCli {
             .required()
             .build())
           .addOption(Option.builder()
+            .longOpt("output-java")
+            .desc("output directory for generated Java files")
+            .hasArg()
+            .required()
+            .build())
+          .addOption(Option.builder()
             .longOpt("aws-sdk")
             .desc("generate AWS SDK-style API and shims")
             .build());
@@ -149,12 +158,12 @@ public class CodegenCli {
         new HelpFormatter().printHelp("smithy-polymorph", getCliOptions());
     }
 
-    private static record CliArguments(
+    private record CliArguments(
             Path modelPath,
             Path[] dependentModelPaths,
             String namespace,
             Path outputDotnetDir,
-            boolean awsSdkStyle
+            Path outputJavaDir, boolean awsSdkStyle
     ) {
         /**
          * @param args arguments to parse
@@ -178,10 +187,12 @@ public class CodegenCli {
             final String namespace = commandLine.getOptionValue('n');
             final Path outputDotnetDir = Paths.get(commandLine.getOptionValue("output-dotnet"))
                     .toAbsolutePath().normalize();
+            final Path outputJavaDir = Paths.get(commandLine.getOptionValue("output-java"))
+                    .toAbsolutePath().normalize();
             final boolean awsSdkStyle = commandLine.hasOption("aws-sdk");
 
             return Optional.of(new CliArguments(
-              modelPath, dependentModelPaths, namespace, outputDotnetDir, awsSdkStyle));
+              modelPath, dependentModelPaths, namespace, outputDotnetDir, outputJavaDir, awsSdkStyle));
         }
     }
 
