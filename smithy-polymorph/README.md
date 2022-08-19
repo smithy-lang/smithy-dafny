@@ -1,15 +1,15 @@
-# smithy-dotnet
+# smithy-polymorph
 
-C#/.NET code generation for Smithy models
+C#/.NET, Dafny, & Java code generation for Smithy models
 
 ## How to use
 
-This project requires Java 16 or above.
+This project requires Java 17 or above.
 
 ```bash
 $ # start in project root
 $ pwd
-~/src/polymorph/smithy-dotnet
+~/src/polymorph/smithy-polymorph
 
 $ # build
 $ ./gradlew build
@@ -17,10 +17,11 @@ BUILD SUCCESSFUL in 507ms
 
 $ # generate code
 $ OUTPUT_DOTNET=/path/to/generated_dotnet
+$ OUTPUT_JAVA=/path/to/generated_java
 $ OUTPUT_DAFNY=/path/to/generated_dafny
 $ MODEL=src/test/resources/model.smithy
 $ SERVICE='polymorph.demo#StringLists'
-$ ./gradlew run --args="--output-dotnet $OUTPUT_DOTNET --output-dafny $OUTPUT_DAFNY -m $MODEL -s $SERVICE"
+$ ./gradlew run --args="--output-dotnet $OUTPUT_DOTNET --output-java $OUTPUT_JAVA --output-dafny $OUTPUT_DAFNY -m $MODEL -s $SERVICE"
 [main] INFO software.amazon.polymorph.CodegenCli - .NET code generated in /.../generated-dotnet
 [main] INFO software.amazon.polymorph.CodegenCli - Dafny code generated in /.../generated-dafny
 ```

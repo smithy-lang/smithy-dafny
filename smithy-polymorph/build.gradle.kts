@@ -44,7 +44,7 @@ application {
 
 publishing {
     publications {
-        create<MavenPublication>("smithy-dotnet") {
+        create<MavenPublication>("smithy-polymorph") {
             from(components["java"])
         }
     }

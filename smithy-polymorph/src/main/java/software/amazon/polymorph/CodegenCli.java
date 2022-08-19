@@ -146,7 +146,7 @@ public class CodegenCli {
     }
 
     private static void printHelpMessage() {
-        new HelpFormatter().printHelp("smithy-dotnet", getCliOptions());
+        new HelpFormatter().printHelp("smithy-polymorph", getCliOptions());
     }
 
     private static record CliArguments(
