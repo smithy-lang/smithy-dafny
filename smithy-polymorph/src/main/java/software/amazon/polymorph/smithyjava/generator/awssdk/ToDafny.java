@@ -417,25 +417,37 @@ public class ToDafny extends Generator {
 
 
     /**  */
+    // TODO: Unit tests for generateConvertError
     MethodSpec generateConvertError(final StructureShape shape) {
         MethodSpec structure = generateConvertStructure(shape.getId());
         MethodSpec.Builder builder = structure.toBuilder();
         builder.setName("Error");
+        builder.returns(dafnyNameResolver.getDafnyAbstractServiceError());
         return builder.build();
     }
 
+    // TODO: Unit tests for generateConvertOpaqueError
     MethodSpec generateConvertOpaqueError() {
+        //TODO: refactor memberAssignment to use awssdk.ToDafny.memberAssignment
+        CodeBlock memberAssignment = CodeBlock.of(
+                "$L = $T.nonNull($L) ?\n$T.create_Some($T.$L($L))\n: $T.create_None()",
+                "message",
+                ClassName.get(Objects.class),
+                "nativeValue.getMessage()",
+                ClassName.get("Wrappers_Compile", "Option"),
+                COMMON_TO_DAFNY_SIMPLE,
+                SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(ShapeType.STRING).methodName(),
+                "nativeValue.getMessage()",
+                ClassName.get("Wrappers_Compile", "Option")
+        );
         // TODO: This is a hack, but so are opaque errors, they are not in our smithy models!!
         return MethodSpec.methodBuilder("Error")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .returns(dafnyNameResolver.getDafnyAbstractServiceError())
                 .addParameter(nativeNameResolver.baseErrorForService(), "nativeValue")
                 .addStatement("Option<DafnySequence<? extends Character>> message")
-                .addStatement("""
-                        message = Objects.nonNull(nativeValue.getMessage()) ?
-                                        create_Some(CharacterSequence(nativeValue.getMessage()))
-                                        : create_None()""")
-                .addStatement("return new $T(message)", dafnyNameResolver.getDafnyAbstractServiceError())
+                .addStatement(memberAssignment)
+                .addStatement("return new $T(message)", dafnyNameResolver.getDafnyOpaqueServiceError())
                 .build();
     }
 

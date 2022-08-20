@@ -135,6 +135,10 @@ public class Dafny {
         return ClassName.get(modelPackage, "Error");
     }
 
+    public TypeName getDafnyOpaqueServiceError() {
+        return ClassName.get(modelPackage, "Error_Opaque");
+    }
+
     // Because we want a ClassName instead of a TypeName
     // This needs to be public.
     public ClassName classForShape(Shape shape) {
