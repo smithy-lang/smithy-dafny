@@ -267,7 +267,7 @@ public class ToDafny extends Generator {
         );
         builder.addStatement("return new $T($L)",
                 dafnyNameResolver.typeForShape(shapeId),
-                CodeBlock.join(variables, ",")
+                CodeBlock.join(variables, ", ")
         );
         return builder.build();
     }
