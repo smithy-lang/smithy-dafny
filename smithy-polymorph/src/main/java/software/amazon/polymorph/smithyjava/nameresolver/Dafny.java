@@ -69,29 +69,14 @@ public class Dafny {
             );
             case BOOLEAN -> TypeName.BOOLEAN.box();
             case STRING -> typeForString(shape.asStringShape().get());
-            case TIMESTAMP -> ParameterizedTypeName.get(
-                    ClassName.get(DafnySequence.class),
-                    ClassName.get(Character.class)
-            );
+            case TIMESTAMP -> typeForCharacterSequence();
             case BYTE -> TypeName.BYTE.box();
             case SHORT -> TypeName.SHORT.box();
             case INTEGER -> TypeName.INT.box();
             case LONG -> TypeName.LONG.box();
             case BIG_DECIMAL -> ClassName.get(BigDecimal.class);
             case BIG_INTEGER -> ClassName.get(BigInteger.class);
-            case LIST -> ParameterizedTypeName.get(
-                    ClassName.get(DafnySequence.class),
-                    typeForShape(shape.asListShape().get().getMember().getTarget())
-            );
-            case SET -> ParameterizedTypeName.get(
-                    ClassName.get(DafnySet.class),
-                    typeForShape(shape.asSetShape().get().getMember().getTarget())
-            );
-            case MAP -> ParameterizedTypeName.get(
-                    ClassName.get(DafnyMap.class),
-                    typeForShape(shape.asMapShape().get().getKey().getTarget()),
-                    typeForShape(shape.asMapShape().get().getValue().getTarget())
-            );
+            case LIST, SET, MAP -> typeForAggregateWithWildcard(shapeId);
             case MEMBER -> typeForShape(shape.asMemberShape().get().getTarget());
             case STRUCTURE -> typeForStructure(shape.asStructureShape().get());
             case SERVICE -> typeForService(shape.asServiceShape().get());
@@ -174,12 +159,16 @@ public class Dafny {
 
     TypeName typeForString(StringShape shape) {
         if (!shape.hasTrait(EnumTrait.class)) {
-            return ParameterizedTypeName.get(
-                    ClassName.get(DafnySequence.class),
-                    WildcardTypeName.subtypeOf(Character.class)
-            );
+            return typeForCharacterSequence();
         }
         return classForShape(shape);
+    }
+
+    TypeName typeForCharacterSequence() {
+        return ParameterizedTypeName.get(
+                ClassName.get(DafnySequence.class),
+                WildcardTypeName.subtypeOf(Character.class)
+        );
     }
 
     ClassName typeForStructure(StructureShape shape) {

@@ -71,7 +71,7 @@ public class DafnyTest {
 
     @Test
     public void typeForShapeTimestamp() {
-        final String expected = "dafny.DafnySequence<java.lang.Character>";
+        final String expected = "dafny.DafnySequence<? extends java.lang.Character>";
         final TypeName actual = underTest.typeForShape(ShapeId.fromParts("smithy.api", "Timestamp"));
         final String actualString = actual.toString();
         assertEquals(expected, actualString);
@@ -79,7 +79,7 @@ public class DafnyTest {
 
     @Test
     public void typeForShapeListOfStrings() {
-        final String expected = "dafny.DafnySequence<dafny.DafnySequence<? extends java.lang.Character>>";
+        final String expected = "dafny.DafnySequence<? extends dafny.DafnySequence<? extends java.lang.Character>>";
         final TypeName actual = underTest.typeForShape(ShapeId.fromParts("smithy.example", "MyList"));
         final String actualString = actual.toString();
         assertEquals(expected, actualString);
@@ -88,8 +88,8 @@ public class DafnyTest {
     @Test
     public void typeForShapeMapKeyStringValueString() {
         final String expected = "dafny.DafnyMap<" +
-                "dafny.DafnySequence<? extends java.lang.Character>, " +
-                "dafny.DafnySequence<? extends java.lang.Character>" +
+                "? extends dafny.DafnySequence<? extends java.lang.Character>, " +
+                "? extends dafny.DafnySequence<? extends java.lang.Character>" +
                 ">";
         final TypeName actual = underTest.typeForShape(ShapeId.fromParts("smithy.example", "MyMap"));
         final String actualString = actual.toString();
