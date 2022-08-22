@@ -108,10 +108,8 @@ public class ToDafny extends Generator {
         // since more "shapes" may be discovered on each pass
         List<MethodSpec> convertAdditional = new ArrayList<>();
         while(additionalShapes.size() > 0) {
-            LOGGER.error(
-                    "Adding %d additional shapes; already done %d; methods %d ".formatted(
-                            additionalShapes.size(), convertAdditional.size(), convertAdditional.size()));
             LinkedHashSet<Shape> this_pass_shapes = new LinkedHashSet<>(additionalShapes);
+            convertedShapes.addAll(this_pass_shapes);
             additionalShapes.clear();
             convertAdditional.addAll(this_pass_shapes
                     .stream()
@@ -119,7 +117,6 @@ public class ToDafny extends Generator {
                     .map(this::generateConvert)
                     .filter(Optional::isPresent)
                     .map(Optional::get).toList());
-            convertedShapes.addAll(this_pass_shapes);
         }
 
         // For enums, we generate overloaded methods,
