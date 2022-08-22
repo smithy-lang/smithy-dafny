@@ -41,7 +41,6 @@ import software.amazon.smithy.model.traits.BoxTrait;
 import software.amazon.smithy.model.traits.EnumDefinition;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.RequiredTrait;
-import software.amazon.smithy.utils.StringUtils;
 
 import static software.amazon.smithy.utils.StringUtils.capitalize;
 import static software.amazon.smithy.utils.StringUtils.uncapitalize;
@@ -88,6 +87,7 @@ public class ToDafny extends Generator {
         return builder.build();
     }
 
+    @SuppressWarnings("DuplicatedCode")
     TypeSpec toDafny(final ShapeId serviceShapeId) {
         final ServiceShape serviceShape = model.expectShape(serviceShapeId, ServiceShape.class);
         final List<MethodSpec> convertOperationOutputs = serviceShape
@@ -329,6 +329,7 @@ public class ToDafny extends Generator {
      * If in namespace and Shape is not simple,
      * adds Shape to additional converters.
      */
+    @SuppressWarnings("DuplicatedCode")
     MethodReference memberConversionMethodReference(final MemberShape memberShape) {
         Shape target = model.getShape(memberShape.getTarget()).get();
         // If the target is simple, use SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE
@@ -370,7 +371,7 @@ public class ToDafny extends Generator {
                 .builder(nativeNameResolver.typeForShape(shape.getId()), "nativeValue")
                 .build();
         return MethodSpec
-                .methodBuilder(StringUtils.capitalize(shape.getId().getName()))
+                .methodBuilder(capitalize(shape.getId().getName()))
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .returns(dafnyNameResolver.typeForAggregateWithWildcard(shape.getId()))
                 .addParameter(parameterSpec)
@@ -388,7 +389,7 @@ public class ToDafny extends Generator {
                 .builder(nativeNameResolver.typeForShape(shape.getId()), "nativeValue")
                 .build();
         return MethodSpec
-                .methodBuilder(StringUtils.capitalize(shape.getId().getName()))
+                .methodBuilder(capitalize(shape.getId().getName()))
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .returns(dafnyNameResolver.typeForAggregateWithWildcard(shape.getId()))
                 .addParameter(parameterSpec)
@@ -408,7 +409,7 @@ public class ToDafny extends Generator {
                 .builder(nativeNameResolver.typeForShape(shape.getId()), "nativeValue")
                 .build();
         return MethodSpec
-                .methodBuilder(StringUtils.capitalize(shape.getId().getName()))
+                .methodBuilder(capitalize(shape.getId().getName()))
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .returns(dafnyNameResolver.typeForAggregateWithWildcard(shape.getId()))
                 .addParameter(parameterSpec)

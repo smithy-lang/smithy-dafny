@@ -118,11 +118,6 @@ public class ShimTest {
     }
 
     static Shim setupLocalModel(String rawModel, String awsName) {
-        Model localModel = TestModel.setupModel(
-                (builder, modelAssembler) -> modelAssembler
-                        .addUnparsedModel("test.smithy", rawModel));
-        ServiceShape serviceShape = serviceFromNamespace(
-                localModel, namespaceForService(awsName));
-        return new Shim(serviceShape, localModel);
+        return new Shim(TestSetupUtils.setupAwsSdk(rawModel, awsName));
     }
 }

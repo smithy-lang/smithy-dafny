@@ -17,15 +17,15 @@ import software.amazon.smithy.utils.StringUtils;
 
 import static org.junit.Assert.assertEquals;
 import static software.amazon.polymorph.smithyjava.ModelConstants.KMS_SIMPLE_SHAPES;
-import static software.amazon.polymorph.smithyjava.generator.awssdk.Constants.DO_SOMETHING_REQUEST;
-import static software.amazon.polymorph.smithyjava.generator.awssdk.Constants.DO_SOMETHING_RESPONSE;
-import static software.amazon.polymorph.smithyjava.generator.awssdk.Constants.IDENTITY_NORMAL_REFERENCE;
-import static software.amazon.polymorph.smithyjava.generator.awssdk.Constants.MESSAGE_ASSIGNMENT_OPTIONAL;
-import static software.amazon.polymorph.smithyjava.generator.awssdk.Constants.MESSAGE_ASSIGNMENT_REQUIRED;
-import static software.amazon.polymorph.smithyjava.generator.awssdk.Constants.MESSAGE_DECLARATION_OPTIONAL;
-import static software.amazon.polymorph.smithyjava.generator.awssdk.Constants.MESSAGE_DECLARATION_REQUIRED;
-import static software.amazon.polymorph.smithyjava.generator.awssdk.Constants.TO_DAFNY_BLOB_CONVERSION;
-import static software.amazon.polymorph.smithyjava.generator.awssdk.Constants.TO_DAFNY_STRING_CONVERSION;
+import static software.amazon.polymorph.smithyjava.generator.awssdk.ToDafnyConstants.DO_SOMETHING_REQUEST;
+import static software.amazon.polymorph.smithyjava.generator.awssdk.ToDafnyConstants.DO_SOMETHING_RESPONSE;
+import static software.amazon.polymorph.smithyjava.generator.awssdk.ToDafnyConstants.IDENTITY_NORMAL_REFERENCE;
+import static software.amazon.polymorph.smithyjava.generator.awssdk.ToDafnyConstants.MESSAGE_ASSIGNMENT_OPTIONAL;
+import static software.amazon.polymorph.smithyjava.generator.awssdk.ToDafnyConstants.MESSAGE_ASSIGNMENT_REQUIRED;
+import static software.amazon.polymorph.smithyjava.generator.awssdk.ToDafnyConstants.MESSAGE_DECLARATION_OPTIONAL;
+import static software.amazon.polymorph.smithyjava.generator.awssdk.ToDafnyConstants.MESSAGE_DECLARATION_REQUIRED;
+import static software.amazon.polymorph.smithyjava.generator.awssdk.ToDafnyConstants.TO_DAFNY_BLOB_CONVERSION;
+import static software.amazon.polymorph.smithyjava.generator.awssdk.ToDafnyConstants.TO_DAFNY_STRING_CONVERSION;
 import static software.amazon.polymorph.smithyjava.nameresolver.AwsSdkHelpers.namespaceForService;
 import static software.amazon.polymorph.utils.ModelUtils.serviceFromNamespace;
 
@@ -39,13 +39,7 @@ public class ToDafnyTest {
     }
 
     static ToDafny setupLocalModel(String rawModel, String awsName) {
-        Model localModel = TestModel.setupModel(
-                (builder, modelAssembler) -> modelAssembler
-                        .addUnparsedModel("test.smithy", rawModel));
-        ServiceShape serviceShape = serviceFromNamespace(
-                localModel, namespaceForService(awsName));
-        AwsSdk temp = new AwsSdk(serviceShape, localModel);
-        return new ToDafny(temp);
+        return new ToDafny(TestSetupUtils.setupAwsSdk(rawModel, awsName));
     }
 
     @Test
