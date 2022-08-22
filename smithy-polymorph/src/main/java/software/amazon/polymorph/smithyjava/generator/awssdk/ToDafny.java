@@ -108,6 +108,7 @@ public class ToDafny extends Generator {
         // since more "shapes" may be discovered on each pass
         List<MethodSpec> convertAdditional = new ArrayList<>();
         while(additionalShapes.size() > 0) {
+            // TODO: Unit tests for shape conversion discovery
             LinkedHashSet<Shape> this_pass_shapes = new LinkedHashSet<>(additionalShapes);
             convertedShapes.addAll(this_pass_shapes);
             additionalShapes.clear();
@@ -230,6 +231,7 @@ public class ToDafny extends Generator {
         };
     }
 
+    // TODO: unit tests for generateConvertResponse
     /**
      * Should be called for all of a service's operations' outputs.
      */
@@ -241,7 +243,7 @@ public class ToDafny extends Generator {
         return builder.build();
     }
 
-
+    // TODO: unit tests for generateConvertStructure
     MethodSpec generateConvertStructure(final ShapeId shapeId) {
         final StructureShape structureShape = model.expectShape(shapeId, StructureShape.class);
         String methodName = capitalize(shapeId.getName());
@@ -355,6 +357,7 @@ public class ToDafny extends Generator {
         return new MethodReference(otherNamespaceToDafny, methodName);
     }
 
+    // TODO: unit tests for generateConvertList
     MethodSpec generateConvertList(ListShape shape) {
         MemberShape memberShape = shape.getMember();
         CodeBlock memberConverter = memberConversionMethodReference(memberShape).asFunctionalReference();
@@ -376,6 +379,7 @@ public class ToDafny extends Generator {
                 .build();
     }
 
+    // TODO: unit tests for generateConvertSet
     MethodSpec generateConvertSet(SetShape shape) {
         MemberShape memberShape = shape.getMember();
         CodeBlock memberConverter = memberConversionMethodReference(memberShape).asFunctionalReference();
@@ -393,6 +397,7 @@ public class ToDafny extends Generator {
                 .build();
     }
 
+    // TODO: unit tests for generateConvertMap
     MethodSpec generateConvertMap(MapShape shape) {
         MemberShape keyShape = shape.getKey().asMemberShape().get();
         CodeBlock keyConverter = memberConversionMethodReference(keyShape).asFunctionalReference();
@@ -414,7 +419,7 @@ public class ToDafny extends Generator {
 
 
     /**  */
-    // TODO: Unit tests for generateConvertError
+    // TODO: Unit tests and doc for generateConvertError
     MethodSpec generateConvertError(final StructureShape shape) {
         MethodSpec structure = generateConvertStructure(shape.getId());
         MethodSpec.Builder builder = structure.toBuilder();
