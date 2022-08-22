@@ -17,11 +17,27 @@ public class Constants {
               }
             """;
 
+    static String DoVoidOperation = """
+              @Override
+              public Result<Tuple0, Error> DoVoid(DoVoidRequest input) {
+                com.amazonaws.services.kms.model.DoVoidRequest converted = ToNative.DoVoidRequest(input);
+                try {
+                  _impl.doVoid(converted);
+                  return Result.create_Success(Tuple0.create());
+                } catch (DependencyTimeoutException ex) {
+                  return Result.create_Failure(ToDafny.Error(ex));
+                } catch (AWSKMSException ex) {
+                  return Result.create_Failure(ToDafny.Error(ex));
+                }
+              }
+            """;
+
     static String MockKmsShim = """
             package Dafny.Com.Amazonaws.Kms;
             
             import Dafny.Com.Amazonaws.Kms.Types.DoSomethingRequest;
             import Dafny.Com.Amazonaws.Kms.Types.DoSomethingResponse;
+            import Dafny.Com.Amazonaws.Kms.Types.DoVoidRequest;
             import Dafny.Com.Amazonaws.Kms.Types.Error;
             import Dafny.Com.Amazonaws.Kms.Types.IKeyManagementServiceClient;
             
@@ -31,6 +47,7 @@ public class Constants {
             import com.amazonaws.services.kms.model.AWSKMSException;
             import com.amazonaws.services.kms.model.DependencyTimeoutException;
             import com.amazonaws.services.kms.model.DoSomethingResult;
+            import dafny.Tuple0;
             
             import java.lang.Override;
             
@@ -42,8 +59,9 @@ public class Constants {
               }
               
               %s
+              %s
             }
-            """.formatted(DoSomethingOperation);
+            """.formatted(DoSomethingOperation, DoVoidOperation);
 
     static String MESSAGE_DECLARATION_REQUIRED =
             "dafny.DafnySequence<? extends java.lang.Character> message";

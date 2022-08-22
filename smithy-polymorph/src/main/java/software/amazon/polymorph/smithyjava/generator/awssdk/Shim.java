@@ -21,6 +21,10 @@ import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.utils.StringUtils;
 
+import static software.amazon.polymorph.smithyjava.nameresolver.Constants.DAFNY_RESULT_CLASS_NAME;
+import static software.amazon.polymorph.smithyjava.nameresolver.Constants.DAFNY_TUPLE0_CLASS_NAME;
+import static software.amazon.polymorph.smithyjava.nameresolver.Constants.SMITHY_API_UNIT;
+
 
 /**
  * Generates an AWS SDK Shim
@@ -77,11 +81,6 @@ public class Shim extends Generator {
 
     Optional<MethodSpec> operation(final ShapeId operationShapeId) {
         final OperationShape operationShape = model.expectShape(operationShapeId, OperationShape.class);
-        if (operationShape.getOutput().isEmpty()) {
-            // TODO: handle empty returns via dafny tuple_0
-            LOGGER.error("This Operation returns `smithy.api#Unit, which is currently unsupported: %s".formatted(operationShapeId));
-            return Optional.empty();
-        }
         ShapeId inputShapeId = operationShape.getInputShape();
         ShapeId outputShapeId = operationShape.getOutputShape();
         TypeName dafnyOutput = dafnyNameResolver.typeForShape(outputShapeId);
@@ -99,31 +98,40 @@ public class Shim extends Generator {
                 .addStatement("$T converted = ToNative.$L(input)",
                         nativeNameResolver.typeForShape(inputShapeId),
                         StringUtils.capitalize(inputShapeId.getName()))
-                .beginControlFlow("try")
-                // TODO: This assumes the operation has an output
-                .addStatement("$T result = _impl.$L(converted)",
-                        nativeNameResolver.typeForOperationOutput(outputShapeId),
-                        StringUtils.uncapitalize(operationName))
-                .addStatement("$T dafnyResponse = ToDafny.$L(result)",
-                        dafnyOutput,
-                        StringUtils.capitalize(outputShapeId.getName()))
-                .addStatement("return Result.create_Success(dafnyResponse)");
+                .beginControlFlow("try");
+        if (outputShapeId.equals(SMITHY_API_UNIT)) {
+            builder.addStatement("_impl.$L(converted)",
+                            StringUtils.uncapitalize(operationName))
+                    .addStatement("return $T.create_Success($T.create())",
+                            DAFNY_RESULT_CLASS_NAME, DAFNY_TUPLE0_CLASS_NAME);
+        } else {
+            builder.addStatement("$T result = _impl.$L(converted)",
+                            nativeNameResolver.typeForOperationOutput(outputShapeId),
+                            StringUtils.uncapitalize(operationName))
+                    .addStatement("$T dafnyResponse = ToDafny.$L(result)",
+                            dafnyOutput,
+                            StringUtils.capitalize(outputShapeId.getName()))
+                    .addStatement("return $T.create_Success(dafnyResponse)",
+                            DAFNY_RESULT_CLASS_NAME);
+        }
 
         operationShape.getErrors().forEach(shapeId ->
                 builder
                         .nextControlFlow("catch ($T ex)", nativeNameResolver.typeForShape(shapeId))
-                        .addStatement("return Result.create_Failure(ToDafny.Error(ex))")
+                        .addStatement("return $T.create_Failure(ToDafny.Error(ex))",
+                                DAFNY_RESULT_CLASS_NAME)
         );
         return Optional.of(builder
                 .nextControlFlow("catch ($T ex)", nativeNameResolver.baseErrorForService())
-                .addStatement("return Result.create_Failure(ToDafny.Error(ex))")
+                .addStatement("return $T.create_Failure(ToDafny.Error(ex))",
+                        DAFNY_RESULT_CLASS_NAME)
                 .endControlFlow()
                 .build());
     }
 
     private TypeName asDafnyResult(TypeName success, TypeName failure) {
         return ParameterizedTypeName.get(
-                ClassName.get("Wrappers_Compile", "Result"),
+                DAFNY_RESULT_CLASS_NAME,
                 success,
                 failure
         );

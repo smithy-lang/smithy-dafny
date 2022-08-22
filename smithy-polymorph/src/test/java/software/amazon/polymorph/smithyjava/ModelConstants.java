@@ -2,18 +2,23 @@ package software.amazon.polymorph.smithyjava;
 
 public class ModelConstants {
      public static String MOCK_KMS = """
-                namespace com.amazonaws.kms
-                service KeyManagementService { operations: [DoSomething] }
-                operation DoSomething {
-                    input: DoSomethingRequest,
-                    output: DoSomethingResponse,
-                    errors: [DependencyTimeoutException]
-                }
-                @error("server")
-                structure DependencyTimeoutException { message: String }
-                structure DoSomethingRequest {}
-                structure DoSomethingResponse {}
-            """;
+                 namespace com.amazonaws.kms
+                 service KeyManagementService { operations: [DoSomething, DoVoid] }
+                 operation DoSomething {
+                     input: DoSomethingRequest,
+                     output: DoSomethingResponse,
+                     errors: [DependencyTimeoutException]
+                 }
+                 operation DoVoid {
+                     input: DoVoidRequest,
+                     errors: [DependencyTimeoutException]
+                 }
+                 @error("server")
+                 structure DependencyTimeoutException { message: String }
+                 structure DoSomethingRequest {}
+                 structure DoSomethingResponse {}
+                 structure DoVoidRequest {}
+             """;
 
      public static String KMS_A_STRING_OPERATION = """
                 namespace com.amazonaws.kms

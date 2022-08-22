@@ -16,6 +16,7 @@ import java.util.stream.Stream;
 import dafny.DafnyMap;
 import dafny.DafnySequence;
 import dafny.DafnySet;
+import dafny.Tuple0;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.ResourceShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
@@ -29,6 +30,7 @@ import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.utils.StringUtils;
 
 import static software.amazon.polymorph.smithyjava.generator.awssdk.Generator.Constants.SUPPORTED_CONVERSION_AGGREGATE_SHAPES;
+import static software.amazon.polymorph.smithyjava.nameresolver.Constants.SMITHY_API_UNIT;
 
 /**
  * Provides a consistent mapping between names of
@@ -174,6 +176,9 @@ public class Dafny {
     ClassName typeForStructure(StructureShape shape) {
         if (shape.hasTrait(ErrorTrait.class)) {
             return typeForError(shape);
+        }
+        if (shape.getId().equals(SMITHY_API_UNIT)) {
+            return ClassName.get(Tuple0.class);
         }
         return classForShape(shape);
     }

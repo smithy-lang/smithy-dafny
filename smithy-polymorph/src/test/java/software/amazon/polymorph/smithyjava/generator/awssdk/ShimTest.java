@@ -23,6 +23,7 @@ import software.amazon.smithy.model.shapes.ShapeId;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static software.amazon.polymorph.smithyjava.generator.awssdk.Constants.DoSomethingOperation;
+import static software.amazon.polymorph.smithyjava.generator.awssdk.Constants.DoVoidOperation;
 import static software.amazon.polymorph.smithyjava.generator.awssdk.Constants.MockKmsShim;
 import static software.amazon.polymorph.smithyjava.nameresolver.AwsSdkHelpers.namespaceForService;
 import static software.amazon.polymorph.utils.ModelUtils.serviceFromNamespace;
@@ -66,6 +67,40 @@ public class ShimTest {
                         actualString, DoSomethingOperation
                 ),
                 actualString.contains(DoSomethingOperation)
+        );
+    }
+
+    @Test
+    public void operationVoid() {
+        final MethodSpec actual = underTest.operation(
+                ShapeId.fromParts("com.amazonaws.kms", "DoVoid")
+        ).orElseThrow(AssertionError::new);
+        // By wrapping the actual method spec with a
+        // TypeSpec and JavaFile,
+        // Javapoet does not fully qualify every type name.
+        // Which is nice.
+        TypeSpec shim = TypeSpec.classBuilder("Shim")
+                .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+                .addMethod(actual)
+                .build();
+
+        JavaFile javaFile = JavaFile
+                .builder(
+                        underTest.dafnyNameResolver.packageName(),
+                        shim)
+                .build();
+        final String actualString = javaFile.toString();
+        assertTrue(
+                ("""
+                        Expected actual to contain excepted.
+                        Actual:
+                        %s
+
+                        Expected:
+                        %s""").formatted(
+                        actualString, DoVoidOperation
+                ),
+                actualString.contains(DoVoidOperation)
         );
     }
 
