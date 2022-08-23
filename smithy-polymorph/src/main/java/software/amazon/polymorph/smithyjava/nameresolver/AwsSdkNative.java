@@ -22,14 +22,13 @@ import software.amazon.smithy.utils.StringUtils;
  */
 public class AwsSdkNative extends Native {
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsSdkNative.class);
-    private final String modelPackage;
     private final String awsServiceName;
 
     public AwsSdkNative(final ServiceShape serviceShape,
                         final Model model) {
-        super(packageNameForServiceShape(serviceShape), serviceShape, model);
+        super(packageNameForServiceShape(serviceShape), serviceShape, model,
+                defaultModelPackageName(packageNameForServiceShape(serviceShape)));
         awsServiceName = awsServiceNameFromServiceShape(serviceShape);
-        modelPackage = modelPackageNameForService(awsServiceName);
     }
 
     private static final Map<String, String> AWS_SERVICE_NAMESPACE_TO_CLIENT_IMPL;
@@ -78,11 +77,6 @@ public class AwsSdkNative extends Native {
             throw new IllegalArgumentException(
                     "Trait definition structures have no corresponding generated type");
         }
-        checkInServiceNamespace(shape.getId());
-        return ClassName.get(modelPackage, StringUtils.capitalize(shape.getId().getName()));
-    }
-
-    public ClassName classForEnum(final Shape shape) {
         checkInServiceNamespace(shape.getId());
         return ClassName.get(modelPackage, StringUtils.capitalize(shape.getId().getName()));
     }
@@ -140,10 +134,6 @@ public class AwsSdkNative extends Native {
         return "com.amazonaws.services.%s".formatted(rtn);
     }
 
-    public static String modelPackageNameForService(final String awsServiceName) {
-        return "%s.model".formatted(packageNameForService(awsServiceName));
-    }
-
     static String awsServiceNameFromServiceShape(final ServiceShape serviceShape) {
         String[] namespaceParts = serviceShape.getId().getNamespace().split("\\.");
         return namespaceParts[namespaceParts.length - 1];
@@ -152,6 +142,10 @@ public class AwsSdkNative extends Native {
     static String packageNameForServiceShape(final ServiceShape serviceShape) {
         String awsServiceName = awsServiceNameFromServiceShape(serviceShape);
         return packageNameForService(awsServiceName);
+    }
+
+    public static String defaultModelPackageName(final String packageName) {
+        return "%s.model".formatted(packageName);
     }
 
 }

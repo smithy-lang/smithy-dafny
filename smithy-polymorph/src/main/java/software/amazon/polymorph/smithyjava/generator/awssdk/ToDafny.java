@@ -6,6 +6,7 @@ import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
+import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 
 import org.slf4j.Logger;
@@ -154,8 +155,7 @@ public class ToDafny extends Generator {
                 .methodBuilder(methodName)
                 .addModifiers(Modifier.STATIC, Modifier.PUBLIC)
                 .returns(dafnyEnumClass)
-                //should be String nativeValue
-                .addParameter(nativeNameResolver.typeForShape(shapeId), "nativeValue");
+                .addParameter(nativeNameResolver.classForString(), "nativeValue");
         builder.addStatement(
                 "return $L($T.fromValue(nativeValue))",
                 methodName,
@@ -367,15 +367,16 @@ public class ToDafny extends Generator {
         MethodReference getTypeDescriptor = new MethodReference(
                 dafnyNameResolver.classForShape(memberShape.getTarget()),
                 "_typeDescriptor");
+
         ParameterSpec parameterSpec = ParameterSpec
-                .builder(nativeNameResolver.typeForShape(shape.getId()), "nativeValue")
+                .builder(nativeNameResolver.typeForShapeNoEnum(shape.getId()), "nativeValue")
                 .build();
         return MethodSpec
                 .methodBuilder(capitalize(shape.getId().getName()))
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .returns(dafnyNameResolver.typeForAggregateWithWildcard(shape.getId()))
                 .addParameter(parameterSpec)
-                .addStatement("return $L(nativeValue, $L, $L())",
+                .addStatement("return $L(\nnativeValue, \n$L, \n$L())",
                         genericCall, memberConverter, getTypeDescriptor.asNormalReference())
                 .build();
     }
@@ -386,14 +387,14 @@ public class ToDafny extends Generator {
         CodeBlock memberConverter = memberConversionMethodReference(memberShape).asFunctionalReference();
         CodeBlock genericCall = AGGREGATE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(shape.getType()).asNormalReference();
         ParameterSpec parameterSpec = ParameterSpec
-                .builder(nativeNameResolver.typeForShape(shape.getId()), "nativeValue")
+                .builder(nativeNameResolver.typeForShapeNoEnum(shape.getId()), "nativeValue")
                 .build();
         return MethodSpec
                 .methodBuilder(capitalize(shape.getId().getName()))
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .returns(dafnyNameResolver.typeForAggregateWithWildcard(shape.getId()))
                 .addParameter(parameterSpec)
-                .addStatement("return $L(nativeValue, $L)",
+                .addStatement("return $L(\nnativeValue, \n$L)",
                         genericCall, memberConverter)
                 .build();
     }
@@ -406,14 +407,14 @@ public class ToDafny extends Generator {
         CodeBlock valueConverter = memberConversionMethodReference(valueShape).asFunctionalReference();
         CodeBlock genericCall = AGGREGATE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(shape.getType()).asNormalReference();
         ParameterSpec parameterSpec = ParameterSpec
-                .builder(nativeNameResolver.typeForShape(shape.getId()), "nativeValue")
+                .builder(nativeNameResolver.typeForShapeNoEnum(shape.getId()), "nativeValue")
                 .build();
         return MethodSpec
                 .methodBuilder(capitalize(shape.getId().getName()))
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .returns(dafnyNameResolver.typeForAggregateWithWildcard(shape.getId()))
                 .addParameter(parameterSpec)
-                .addStatement("return $L(nativeValue, $L, $L)",
+                .addStatement("return $L(\nnativeValue, \n$L, \n$L)",
                         genericCall, keyConverter, valueConverter)
                 .build();
     }

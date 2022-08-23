@@ -9,6 +9,7 @@ import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.time.Instant;
 import java.util.Date;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -23,8 +24,13 @@ import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.ShapeType;
+import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.BoxTrait;
+import software.amazon.smithy.model.traits.EnumTrait;
+
+import static software.amazon.polymorph.smithyjava.nameresolver.Constants.SHAPE_TYPES_LIST_MAP_SET;
+import static software.amazon.smithy.utils.StringUtils.capitalize;
 
 
 /**
@@ -36,6 +42,7 @@ public class Native {
     protected final String packageName;
     protected final Model model;
     protected final ServiceShape serviceShape;
+    protected final String modelPackage;
 
     public Native(
             final String packageName,
@@ -45,6 +52,19 @@ public class Native {
         this.packageName = packageName;
         this.model = model;
         this.serviceShape = serviceShape;
+        this.modelPackage = defaultModelPackageName(packageName);
+    }
+
+    public Native(
+            final String packageName,
+            final ServiceShape serviceShape,
+            final Model model,
+            final String modelPackageName
+    ) {
+        this.packageName = packageName;
+        this.model = model;
+        this.serviceShape = serviceShape;
+        this.modelPackage = modelPackageName;
     }
 
 
@@ -74,13 +94,13 @@ public class Native {
         NATIVE_TYPES_BY_SIMPLE_SHAPE_TYPE = Map.ofEntries(
                 Map.entry(ShapeType.BLOB, ClassName.get(ByteBuffer.class)),
                 Map.entry(ShapeType.BOOLEAN, TypeName.BOOLEAN),
-                Map.entry(ShapeType.STRING, ClassName.get(String.class)),
                 Map.entry(ShapeType.BYTE, TypeName.BYTE),
                 Map.entry(ShapeType.SHORT, TypeName.SHORT),
                 Map.entry(ShapeType.INTEGER, TypeName.INT),
                 Map.entry(ShapeType.LONG, TypeName.LONG),
                 Map.entry(ShapeType.FLOAT, TypeName.FLOAT),
                 Map.entry(ShapeType.DOUBLE, TypeName.DOUBLE),
+                // TODO: AWS SDK V2 uses Instant, not Date
                 Map.entry(ShapeType.TIMESTAMP, ClassName.get(Date.class)),
                 Map.entry(ShapeType.BIG_DECIMAL, ClassName.get(BigDecimal.class)),
                 Map.entry(ShapeType.BIG_INTEGER, ClassName.get(BigInteger.class))
@@ -116,7 +136,8 @@ public class Native {
                 yield shape.hasTrait(BoxTrait.class) ? typeName.box() : typeName;
             }
             // For supported simple shapes, just map to native types
-            case BLOB, STRING, TIMESTAMP, BIG_DECIMAL, BIG_INTEGER -> NATIVE_TYPES_BY_SIMPLE_SHAPE_TYPE.get(shape.getType());
+            case BLOB, TIMESTAMP, BIG_DECIMAL, BIG_INTEGER -> NATIVE_TYPES_BY_SIMPLE_SHAPE_TYPE.get(shape.getType());
+            case STRING -> classForStringOrEnum(shape.asStringShape().get());
             case LIST -> ParameterizedTypeName.get(
                     ClassName.get(List.class),
                     typeForShape(shape.asListShape().get().getMember().getTarget())
@@ -125,6 +146,10 @@ public class Native {
                     ClassName.get(Map.class),
                     typeForShape(shape.asMapShape().get().getKey().getTarget()),
                     typeForShape(shape.asMapShape().get().getValue().getTarget())
+            );
+            case SET -> ParameterizedTypeName.get(
+                    ClassName.get(LinkedHashSet.class),
+                    typeForShape(shape.asSetShape().get().getMember().getTarget())
             );
             case MEMBER -> typeForShape(shape.asMemberShape().get().getTarget());
             case STRUCTURE -> typeForStructure(shape.asStructureShape().get());
@@ -143,6 +168,70 @@ public class Native {
         UNSUPPORTED_SHAPES = Set.of(
                 ShapeType.DOCUMENT, ShapeType.UNION
         );
+    }
+
+    public ClassName classForStringOrEnum(final StringShape shape) {
+        if (shape.hasTrait(EnumTrait.class)) {
+            return classForEnum(shape);
+        }
+        return classForString();
+    }
+
+    public ClassName classForEnum(final Shape shape) {
+        return ClassName.get(modelPackage, capitalize(shape.getId().getName()));
+    }
+
+    public ClassName classForString() {
+        return ClassName.get(String.class);
+    }
+
+    ParameterizedTypeName typeForAggregateNoEnum(final ShapeId shapeId) {
+        final Shape shape = model.getShape(shapeId)
+                .orElseThrow(() -> new IllegalStateException("Cannot find shape " + shapeId));
+        return switch (shape.getType()) {
+            case LIST -> ParameterizedTypeName.get(
+                    ClassName.get(List.class),
+                    typeForShapeNoEnum(shape.asListShape().get().getMember().getTarget())
+            );
+            case MAP -> ParameterizedTypeName.get(
+                    ClassName.get(Map.class),
+                    typeForShapeNoEnum(shape.asMapShape().get().getKey().getTarget()),
+                    typeForShapeNoEnum(shape.asMapShape().get().getValue().getTarget())
+            );
+            case SET -> ParameterizedTypeName.get(
+                    ClassName.get(LinkedHashSet.class),
+                    typeForShapeNoEnum(shape.asSetShape().get().getMember().getTarget())
+            );
+            default -> throw new IllegalStateException("Unexpected value: " + shape.getType());
+        };
+    }
+
+    /**
+     * <p>In the AWS SDK Java V1,
+     * structures never return Enums, only their string representation.
+     * Thus, any methods that handle the result of a get Enum value
+     * must handle String, not the Enum reference.</p>
+     *
+     * <p>At this time, we believe that is only needs to be called
+     * for aggregates other than structure or union,
+     * as only Aggregate converters will indirectly deal with enums.</p>
+     *
+     * <p>Any direct involvement with Enums are safe,
+     * since we overload the enum converter methods.</p>
+     **/
+    public TypeName typeForShapeNoEnum(ShapeId shapeId) {
+        final Shape shape = model.expectShape(shapeId);
+        if (shape.hasTrait(EnumTrait.class)) {
+            return classForString();
+        }
+        if (SHAPE_TYPES_LIST_MAP_SET.contains(shape.getType())) {
+            return typeForAggregateNoEnum(shapeId);
+        }
+        return typeForShape(shapeId);
+    }
+
+    public static String defaultModelPackageName(final String packageName) {
+        return "%s.types".formatted(packageName);
     }
 
     public TypeName typeForStructure(StructureShape shape) {
