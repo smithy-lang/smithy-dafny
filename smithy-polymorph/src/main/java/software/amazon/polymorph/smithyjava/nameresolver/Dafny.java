@@ -152,6 +152,11 @@ public class Dafny {
         return "create_" + dafnyEnumName;
     }
 
+    public static String enumIsName(String name) {
+        String dafnyEnumName = enumFormatter(name);
+        return "is_" + dafnyEnumName;
+    }
+
     public static final Set<ShapeType> UNSUPPORTED_SHAPES;
     static {
         UNSUPPORTED_SHAPES = Set.of(

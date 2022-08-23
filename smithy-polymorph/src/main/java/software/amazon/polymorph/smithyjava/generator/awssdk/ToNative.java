@@ -4,9 +4,15 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
 
-import java.util.HashSet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -15,15 +21,26 @@ import java.util.Set;
 import javax.lang.model.element.Modifier;
 
 import software.amazon.polymorph.smithyjava.MethodReference;
+import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
+import software.amazon.polymorph.utils.ModelUtils;
+import software.amazon.smithy.model.shapes.ListShape;
+import software.amazon.smithy.model.shapes.MapShape;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
+import software.amazon.smithy.model.shapes.SetShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.ShapeType;
+import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
+import software.amazon.smithy.model.traits.EnumDefinition;
+import software.amazon.smithy.model.traits.EnumTrait;
 
+import static software.amazon.polymorph.smithyjava.nameresolver.Constants.SMITHY_API_UNIT;
 import static software.amazon.smithy.utils.StringUtils.capitalize;
+import static software.amazon.smithy.utils.StringUtils.uncapitalize;
+import static software.amazon.polymorph.smithyjava.generator.awssdk.Generator.Constants.IDENTITY_FUNCTION;
 
 /**
  * ToNative is a helper class for the AwsSdk Shim.<p>
@@ -38,8 +55,16 @@ import static software.amazon.smithy.utils.StringUtils.capitalize;
  */
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 public class ToNative extends Generator {
+    final static String VAR_INPUT = "dafnyValue";
+    final static String VAR_OUTPUT = "converted";
+    final static String TO_NATIVE = "ToNative";
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ToNative.class);
     /** Additional Shapes to generate ToNative converters for. */
     final Set<Shape> additionalShapes;
+    final Set<Shape> convertedShapes;
+    /** Enums are a special case */
+    final Set<Shape> enumShapes;
     /** Static imports to be added to generated code. */
     final Set<MethodReference> additionalStaticImports;
     /** The class name of the AWS SDK's Service's Shim's ToNative class. */
@@ -47,9 +72,11 @@ public class ToNative extends Generator {
 
     public ToNative(AwsSdk awsSdk) {
         super(awsSdk);
-        additionalShapes = new HashSet<>();
-        additionalStaticImports = new HashSet<>();
-        thisClassName = ClassName.get(dafnyNameResolver.packageName(), "ToNative");
+        additionalShapes = Collections.synchronizedSet(new LinkedHashSet<>());
+        convertedShapes = Collections.synchronizedSet(new LinkedHashSet<>());
+        additionalStaticImports = Collections.synchronizedSet(new LinkedHashSet<>());
+        enumShapes = Collections.synchronizedSet(new LinkedHashSet<>());
+        thisClassName = ClassName.get(dafnyNameResolver.packageName(), TO_NATIVE);
     }
 
     @Override
@@ -61,41 +88,130 @@ public class ToNative extends Generator {
         return builder.build();
     }
 
+    @SuppressWarnings("DuplicatedCode")
     TypeSpec toNative(final ShapeId serviceShapeId) {
         final ServiceShape serviceShape = model.expectShape(serviceShapeId, ServiceShape.class);
 
         final List<MethodSpec> convertOperationInputs = serviceShape
-                .members()
-                .stream()
-                .filter(MemberShape::isOperationShape)
-                .map(MemberShape::asOperationShape)
-                .map(Optional::get)
+                .getOperations().stream()
+                .map(shapeId -> model.expectShape(shapeId, OperationShape.class))
                 .map(OperationShape::getInputShape)
                 .map(this::generateConvertStructure)
-                .toList();
-
-        final List<MethodSpec> convertAdditional = additionalShapes
-                .stream()
-                .map(Shape::toShapeId)
-                .map(this::generateConvert)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .toList();
 
+        // We will have to make multiple passes of additionalShapes,
+        // since more "shapes" may be discovered on each pass
+        List<MethodSpec> convertAdditional = new ArrayList<>();
+        while(additionalShapes.size() > 0) {
+            // TODO: Unit tests for shape conversion discovery
+            LinkedHashSet<Shape> this_pass_shapes = new LinkedHashSet<>(additionalShapes);
+            convertedShapes.addAll(this_pass_shapes);
+            additionalShapes.clear();
+            convertAdditional.addAll(this_pass_shapes
+                    .stream()
+                    .map(Shape::toShapeId)
+                    .map(this::generateConvert)
+                    .filter(Optional::isPresent)
+                    .map(Optional::get).toList());
+        }
+
+        final List<MethodSpec> convertEnum = enumShapes
+                .stream()
+                .map(Shape::toShapeId)
+                .map(this::generateConvertEnum)
+                .toList();
+
         return TypeSpec
                 .classBuilder(
-                        ClassName.get(dafnyNameResolver.packageName(), "ToNative"))
+                        ClassName.get(dafnyNameResolver.packageName(), TO_NATIVE))
                 .addModifiers(Modifier.PUBLIC)
                 .addMethods(convertOperationInputs)
                 .addMethods(convertAdditional)
+                .addMethods(convertEnum)
                 .build();
     }
 
     private Optional<MethodSpec> generateConvert(ShapeId shapeId) {
-        throw new UnsupportedOperationException("TODO");
+        final Shape shape = model.getShape(shapeId)
+                .orElseThrow(() -> new IllegalStateException("Cannot find shape " + shapeId));
+        // Special Enum Case
+        if (shape.hasTrait(EnumTrait.class)) {
+            enumShapes.add(shape);
+            return Optional.empty();
+        }
+        return switch (shape.getType()) {
+            case LIST -> Optional.of(generateConvertList(shape.asListShape().get()));
+            case MAP -> Optional.of(generateConvertMap(shape.asMapShape().get()));
+            case SET -> Optional.of(generateConvertSet(shape.asSetShape().get()));
+            case STRUCTURE -> generateConvertStructure(shapeId);
+            default -> throw new UnsupportedOperationException(
+                    "ShapeId %s is of Type %s, which is not yet supported for ToDafny"
+                            .formatted(shapeId, shape.getType()));
+        };
     }
 
-    private MethodSpec generateConvertStructure(ShapeId shapeId) {
+    private MethodSpec generateConvertSet(SetShape shape) {
+        MemberShape memberShape = shape.getMember();
+        CodeBlock memberConverter = memberConversionMethodReference(memberShape).asFunctionalReference();
+        CodeBlock genericCall = AGGREGATE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(shape.getType()).asNormalReference();
+        ParameterSpec parameterSpec = ParameterSpec
+                .builder(dafnyNameResolver.typeForShape(shape.getId()), VAR_INPUT)
+                .build();
+        return MethodSpec
+                .methodBuilder(capitalize(shape.getId().getName()))
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                .returns(nativeNameResolver.typeForShape(shape.getId()))
+                .addParameter(parameterSpec)
+                .addStatement("return $L($L, $L)",
+                        genericCall, VAR_INPUT, memberConverter)
+                .build();
+    }
+
+    private MethodSpec generateConvertMap(MapShape shape) {
+        MemberShape keyShape = shape.getKey().asMemberShape().get();
+        CodeBlock keyConverter = memberConversionMethodReference(keyShape).asFunctionalReference();
+        MemberShape valueShape = shape.getValue().asMemberShape().get();
+        CodeBlock valueConverter = memberConversionMethodReference(valueShape).asFunctionalReference();
+        CodeBlock genericCall = AGGREGATE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(shape.getType()).asNormalReference();
+        ParameterSpec parameterSpec = ParameterSpec
+                .builder(dafnyNameResolver.typeForShape(shape.getId()), VAR_INPUT)
+                .build();
+        return MethodSpec
+                .methodBuilder(capitalize(shape.getId().getName()))
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                .returns(nativeNameResolver.typeForShape(shape.getId()))
+                .addParameter(parameterSpec)
+                .addStatement("return $L($L, $L, $L)",
+                        genericCall, VAR_INPUT, keyConverter, valueConverter)
+                .build();
+    }
+
+    private MethodSpec generateConvertList(ListShape shape) {
+        MemberShape memberShape = shape.getMember();
+        CodeBlock memberConverter = memberConversionMethodReference(memberShape).asFunctionalReference();
+        CodeBlock genericCall = AGGREGATE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(shape.getType()).asNormalReference();
+        ParameterSpec parameterSpec = ParameterSpec
+                .builder(dafnyNameResolver.typeForShape(shape.getId()), VAR_INPUT)
+                .build();
+        return MethodSpec
+                .methodBuilder(capitalize(shape.getId().getName()))
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                .returns(nativeNameResolver.typeForShape(shape.getId()))
+                .addParameter(parameterSpec)
+                .addStatement("return $L(\n$L, \n$L)",
+                        genericCall, VAR_INPUT, memberConverter)
+                .build();
+
+    }
+
+    private Optional<MethodSpec> generateConvertStructure(ShapeId shapeId) {
+        if (shapeId.equals(SMITHY_API_UNIT)) {
+            // TODO: handle no input
+            LOGGER.error("This Operation takes `smithy.api#Unit, which is currently unsupported: %s".formatted(shapeId));
+            return Optional.empty();
+        }
         final StructureShape structureShape = model.expectShape(shapeId, StructureShape.class);
         String methodName = capitalize(shapeId.getName());
         ClassName nativeClassName = nativeNameResolver.typeForStructure(structureShape);
@@ -103,54 +219,124 @@ public class ToNative extends Generator {
                 .methodBuilder(methodName)
                 .addModifiers(Modifier.STATIC, Modifier.PUBLIC)
                 .returns(nativeClassName)
-                .addParameter(dafnyNameResolver.typeForShape(shapeId), "dafnyValue");
+                .addParameter(dafnyNameResolver.typeForShape(shapeId), VAR_INPUT);
 
         if (structureShape.members().size() == 0) {
-            builder.addStatement("return new $T()", dafnyNameResolver.typeForShape(shapeId));
-            return builder.build();
+            builder.addStatement("return new $T()", nativeClassName);
+            return Optional.of(builder.build());
         }
-        builder.addStatement("$T converted = new $T()", nativeClassName, nativeClassName);
+        builder.addStatement("$T $L = new $T()", nativeClassName, VAR_OUTPUT, nativeClassName);
 
-        // For each member
-        // // if not optional, set with conversion call, get via Field
+        // For each member required member
         structureShape.members().stream().filter(MemberShape::isRequired)
                 .forEach(requiredMember ->
+                        // set with conversion call, get via Field
                         builder.addStatement(setWithConversionCall(requiredMember)));
 
-        // // if optional
-        // // // if present, set with conversion call, get via dtor_values()
+        // For each optional member
         structureShape.members().stream().filter(MemberShape::isOptional)
                 .forEach(optionalMember -> {
-                    builder.beginControlFlow("if (dafnyValue.$L.is_Some()");
+                    // check if present
+                    builder.beginControlFlow("if ($L.$L.is_Some())", VAR_INPUT, getMemberField(optionalMember));
+                    // set with conversion call, get via dtor_values()
                     builder.addStatement(setWithConversionCall(optionalMember));
                     builder.endControlFlow();
                 });
-        return builder.addStatement("return converted").build();
+        return Optional.of(builder.addStatement("return $L", VAR_OUTPUT).build());
+    }
+
+    private CodeBlock getMemberField(MemberShape shape) {
+        return CodeBlock.of("$L", capitalize(shape.getMemberName()));
+    }
+
+    private CodeBlock getMemberFieldValue(MemberShape shape) {
+        // if required, get via Field
+        if (shape.isRequired()) {
+            return getMemberField(shape);
+        }
+        // if optional, get via dtor_value()
+        return CodeBlock.of("$L.dtor_value()", getMemberField(shape));
     }
 
     private CodeBlock setWithConversionCall(MemberShape member) {
-        return CodeBlock.of("converted.$L($L($L))",
+        return CodeBlock.of("$L.$L($L($L.$L))",
+                VAR_OUTPUT,
                 setMemberField(member),
                 memberConversionMethodReference(member).asNormalReference(),
-                getMemberField(member));
+                VAR_INPUT,
+                getMemberFieldValue(member));
     }
 
-    private CodeBlock getMemberField(MemberShape requiredMember) {
-        // if required, get via Field
-        // if optional, get via dtor_values()
-        throw new UnsupportedOperationException("TODO");
+    private CodeBlock setMemberField(MemberShape shape) {
+        // In AWS SDK Java v1, using `with` allows for enums or strings
+        // while `set` only allows for strings.
+        return CodeBlock.of("with$L", capitalize(shape.getMemberName()));
     }
 
-    private MethodReference memberConversionMethodReference(MemberShape requiredMember) {
-        throw new UnsupportedOperationException("TODO");
-    }
-
-    private CodeBlock setMemberField(MemberShape requiredMember) {
-        throw new UnsupportedOperationException("TODO");
+    /**
+     * Returns MethodReference that converts from
+     * the Java Dafny memberShape to
+     * the Java Native memberShape.
+     * Side Effects:
+     * If in namespace and Shape is not simple,
+     * adds Shape to additional converters.
+     */
+    @SuppressWarnings("DuplicatedCode")
+    MethodReference memberConversionMethodReference(MemberShape memberShape) {
+        Shape target = model.getShape(memberShape.getTarget()).get();
+        // If the target is simple, use SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE
+        if (ModelUtils.isSmithyApiOrSimpleShape(target)) {
+            return SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(target.getType());
+        }
+        final String methodName = capitalize(target.getId().getName());
+        // if in namespace
+        if (nativeNameResolver.isInServiceNameSpace(target.getId())) {
+            // add to additionalShapes,
+            synchronized (additionalShapes) {
+                if (!convertedShapes.contains(target)) {
+                    additionalShapes.add(target);
+                }
+            }
+            // and reference to be created converter
+            return new MethodReference(thisClassName, methodName);
+        }
+        // Otherwise, this target must be in another namespace
+        ClassName otherNamespaceToDafny = ClassName.get(target.getId().getNamespace(), TO_NATIVE);
+        return new MethodReference(otherNamespaceToDafny, methodName);
     }
 
     private MethodSpec generateConvertEnum(ShapeId shapeId) {
-        throw new UnsupportedOperationException("TODO");
+        final StringShape shape = model.expectShape(shapeId, StringShape.class);
+        String methodName = capitalize(shapeId.getName());
+        final EnumTrait enumTrait = shape.getTrait(EnumTrait.class).orElseThrow();
+        if (!enumTrait.hasNames()) {
+            throw new UnsupportedOperationException("Unnamed enums not supported");
+        }
+        ClassName nativeEnumClass = nativeNameResolver.classForEnum(shape);
+
+        MethodSpec.Builder builder = MethodSpec
+                .methodBuilder(methodName)
+                .addModifiers(Modifier.STATIC, Modifier.PUBLIC)
+                .returns(nativeEnumClass)
+                .addParameter(dafnyNameResolver.classForShape(shape), VAR_INPUT);
+
+        enumTrait.getValues().stream()
+                .map(EnumDefinition::getName)
+                .map(Optional::get)
+                .peek(name -> {
+                    if (!ModelUtils.isValidEnumDefinitionName(name)) {
+                        throw new UnsupportedOperationException(
+                                "Invalid enum definition name: %s".formatted(name));
+                    }
+                })
+                .forEach(name -> builder
+                        .beginControlFlow("if ($L.$L())", VAR_INPUT, Dafny.enumIsName(name))
+                        .addStatement("return $T.$L", nativeEnumClass, name)
+                        .endControlFlow()
+                );
+
+        builder.addStatement("return $T.fromValue($L.toString())", nativeEnumClass, VAR_INPUT);
+        return builder.build();
     }
 
     /**
@@ -171,16 +357,16 @@ public class ToNative extends Generator {
         );
         SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE = Map.ofEntries(
                 Map.entry(ShapeType.BLOB, new MethodReference(COMMON_TO_NATIVE_SIMPLE, "ByteBuffer")),
-                Map.entry(ShapeType.BOOLEAN, Constants.IDENTITY_FUNCTION),
+                Map.entry(ShapeType.BOOLEAN, IDENTITY_FUNCTION),
                 Map.entry(ShapeType.STRING, new MethodReference(COMMON_TO_NATIVE_SIMPLE, "String")),
                 // TODO: Timestamp should be service specific
                 Map.entry(ShapeType.TIMESTAMP, new MethodReference(COMMON_TO_NATIVE_SIMPLE, "Date")),
-                Map.entry(ShapeType.BYTE, Constants.IDENTITY_FUNCTION),
-                Map.entry(ShapeType.SHORT, Constants.IDENTITY_FUNCTION),
-                Map.entry(ShapeType.INTEGER, Constants.IDENTITY_FUNCTION),
-                Map.entry(ShapeType.LONG, Constants.IDENTITY_FUNCTION),
-                Map.entry(ShapeType.BIG_DECIMAL, Constants.IDENTITY_FUNCTION),
-                Map.entry(ShapeType.BIG_INTEGER, Constants.IDENTITY_FUNCTION)
+                Map.entry(ShapeType.BYTE, IDENTITY_FUNCTION),
+                Map.entry(ShapeType.SHORT, IDENTITY_FUNCTION),
+                Map.entry(ShapeType.INTEGER, IDENTITY_FUNCTION),
+                Map.entry(ShapeType.LONG, IDENTITY_FUNCTION),
+                Map.entry(ShapeType.BIG_DECIMAL, IDENTITY_FUNCTION),
+                Map.entry(ShapeType.BIG_INTEGER, IDENTITY_FUNCTION)
         );
     }
 }
