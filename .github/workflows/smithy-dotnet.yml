@@ -10,7 +10,7 @@ jobs:
       - uses: actions/setup-java@v3
         with:
           distribution: 'corretto'
-          java-version: '16'
+          java-version: '17'
       - name: Execute tests
         uses: gradle/gradle-build-action@v2
         with:
