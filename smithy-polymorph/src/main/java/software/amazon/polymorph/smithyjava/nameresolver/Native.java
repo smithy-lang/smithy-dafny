@@ -4,6 +4,9 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
@@ -29,7 +32,7 @@ import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.BoxTrait;
 import software.amazon.smithy.model.traits.EnumTrait;
 
-import static software.amazon.polymorph.smithyjava.nameresolver.Constants.SHAPE_TYPES_LIST_MAP_SET;
+import static software.amazon.polymorph.smithyjava.nameresolver.Constants.SHAPE_TYPES_LIST_SET;
 import static software.amazon.smithy.utils.StringUtils.capitalize;
 
 
@@ -39,6 +42,7 @@ import static software.amazon.smithy.utils.StringUtils.capitalize;
  * for the native Java code.
  */
 public class Native {
+    private static final Logger LOGGER = LoggerFactory.getLogger(Native.class);
     protected final String packageName;
     protected final Model model;
     protected final ServiceShape serviceShape;
@@ -185,7 +189,7 @@ public class Native {
         return ClassName.get(String.class);
     }
 
-    ParameterizedTypeName typeForAggregateNoEnum(final ShapeId shapeId) {
+    ParameterizedTypeName typeForListOrSetNoEnum(final ShapeId shapeId) {
         final Shape shape = model.getShape(shapeId)
                 .orElseThrow(() -> new IllegalStateException("Cannot find shape " + shapeId));
         return switch (shape.getType()) {
@@ -193,16 +197,13 @@ public class Native {
                     ClassName.get(List.class),
                     typeForShapeNoEnum(shape.asListShape().get().getMember().getTarget())
             );
-            case MAP -> ParameterizedTypeName.get(
-                    ClassName.get(Map.class),
-                    typeForShapeNoEnum(shape.asMapShape().get().getKey().getTarget()),
-                    typeForShapeNoEnum(shape.asMapShape().get().getValue().getTarget())
-            );
             case SET -> ParameterizedTypeName.get(
                     ClassName.get(LinkedHashSet.class),
                     typeForShapeNoEnum(shape.asSetShape().get().getMember().getTarget())
             );
-            default -> throw new IllegalStateException("Unexpected value: " + shape.getType());
+            default -> throw new IllegalStateException(
+                    "typeForListOrSetNoEnum only accepts LIST or SET. Got: " + shape.getType()
+                            + " for ShapeId: " + shapeId);
         };
     }
 
@@ -224,10 +225,35 @@ public class Native {
         if (shape.hasTrait(EnumTrait.class)) {
             return classForString();
         }
-        if (SHAPE_TYPES_LIST_MAP_SET.contains(shape.getType())) {
-            return typeForAggregateNoEnum(shapeId);
+        if (SHAPE_TYPES_LIST_SET.contains(shape.getType())) {
+            return typeForListOrSetNoEnum(shapeId);
         }
         return typeForShape(shapeId);
+    }
+
+    public boolean isListOrSetOfEnums(ShapeId shapeId) {
+        Shape shape = model.expectShape(shapeId);
+        return switch (shape.getType()) {
+            case LIST -> isEnum(shape.asListShape().get().getMember().getTarget());
+            case SET -> isEnum(shape.asSetShape().get().getMember().getTarget());
+            default -> false;
+        };
+    }
+
+    boolean isEnum(ShapeId shapeId) {
+        Shape shape = model.expectShape(shapeId);
+        return shape.hasTrait(EnumTrait.class);
+    }
+
+    public TypeName typeForListOrSetMember(ShapeId shapeId) {
+        Shape shape = model.expectShape(shapeId);
+        return switch (shape.getType()) {
+            case MEMBER -> typeForShape(shape.getId());
+            case LIST -> typeForShape(shape.asListShape().get().getMember().getTarget());
+            case SET -> typeForShape(shape.asSetShape().get().getMember().getTarget());
+            default -> throw new IllegalStateException(
+                    "typeForListOrSetMember only accepts MEMBER, LIST, or SET. Got: " + shape.getType());
+        };
     }
 
     public static String defaultModelPackageName(final String packageName) {

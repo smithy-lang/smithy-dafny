@@ -157,6 +157,15 @@ public class Dafny {
         return "is_" + dafnyEnumName;
     }
 
+    public static String aggregateSizeMethod(ShapeType shapeType) {
+        return switch (shapeType) {
+            case LIST -> "length()";
+            case SET, MAP -> "size();";
+            default -> throw new IllegalStateException(
+                    "aggregateSizeMethod only accepts LIST, SET, or MAP. Got : " + shapeType);
+        };
+    }
+
     public static final Set<ShapeType> UNSUPPORTED_SHAPES;
     static {
         UNSUPPORTED_SHAPES = Set.of(

@@ -38,9 +38,9 @@ import software.amazon.smithy.model.traits.EnumDefinition;
 import software.amazon.smithy.model.traits.EnumTrait;
 
 import static software.amazon.polymorph.smithyjava.nameresolver.Constants.SMITHY_API_UNIT;
+import static software.amazon.polymorph.smithyjava.generator.awssdk.Generator.Constants.IDENTITY_FUNCTION;
 import static software.amazon.smithy.utils.StringUtils.capitalize;
 import static software.amazon.smithy.utils.StringUtils.uncapitalize;
-import static software.amazon.polymorph.smithyjava.generator.awssdk.Generator.Constants.IDENTITY_FUNCTION;
 
 /**
  * ToNative is a helper class for the AwsSdk Shim.<p>
@@ -55,9 +55,10 @@ import static software.amazon.polymorph.smithyjava.generator.awssdk.Generator.Co
  */
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 public class ToNative extends Generator {
-    final static String VAR_INPUT = "dafnyValue";
-    final static String VAR_OUTPUT = "converted";
-    final static String TO_NATIVE = "ToNative";
+    private final static String VAR_INPUT = "dafnyValue";
+    private final static String VAR_OUTPUT = "converted";
+    private final static String VAR_TEMP = "temp";
+    private final static String TO_NATIVE = "ToNative";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ToNative.class);
     /** Additional Shapes to generate ToNative converters for. */
@@ -227,20 +228,30 @@ public class ToNative extends Generator {
         }
         builder.addStatement("$T $L = new $T()", nativeClassName, VAR_OUTPUT, nativeClassName);
 
-        // For each member required member
-        structureShape.members().stream().filter(MemberShape::isRequired)
-                .forEach(requiredMember ->
-                        // set with conversion call, get via Field
-                        builder.addStatement(setWithConversionCall(requiredMember)));
-
-        // For each optional member
-        structureShape.members().stream().filter(MemberShape::isOptional)
-                .forEach(optionalMember -> {
-                    // check if present
-                    builder.beginControlFlow("if ($L.$L.is_Some())", VAR_INPUT, getMemberField(optionalMember));
-                    // set with conversion call, get via dtor_values()
-                    builder.addStatement(setWithConversionCall(optionalMember));
-                    builder.endControlFlow();
+        // For each member
+        structureShape.members()
+                .forEach(member -> {
+                    // if optional, check if present
+                    if (member.isOptional()) {
+                        builder.beginControlFlow("if ($L.$L.is_Some())", VAR_INPUT, getMemberField(member));
+                    }
+                    // if converting a LIST or SET of enums
+                    if (nativeNameResolver.isListOrSetOfEnums(member.getTarget())) {
+                        // create temp array
+                        builder.addStatement("$T[] $L_$L = new $T[$L.$L.$L]",
+                                nativeNameResolver.typeForListOrSetMember(member.getTarget()),
+                                uncapitalize(member.getMemberName()), VAR_TEMP,
+                                nativeNameResolver.typeForListOrSetMember(member.getTarget()),
+                                VAR_INPUT, getMemberFieldValue(member),
+                                Dafny.aggregateSizeMethod(model.expectShape(member.getTarget()).getType()));
+                        // set with conversion call and toArray
+                        builder.addStatement(setWithConversionCallAndToArray(member));
+                    }
+                    else {
+                        // set with conversion call
+                        builder.addStatement(setWithConversionCall(member));
+                    }
+                    if (member.isOptional()) builder.endControlFlow();
                 });
         return Optional.of(builder.addStatement("return $L", VAR_OUTPUT).build());
     }
@@ -265,6 +276,16 @@ public class ToNative extends Generator {
                 memberConversionMethodReference(member).asNormalReference(),
                 VAR_INPUT,
                 getMemberFieldValue(member));
+    }
+
+    private CodeBlock setWithConversionCallAndToArray(MemberShape member) {
+        return CodeBlock.of("$L.$L($L($L.$L).toArray($L_$L))",
+                VAR_OUTPUT,
+                setMemberField(member),
+                memberConversionMethodReference(member).asNormalReference(),
+                VAR_INPUT,
+                getMemberFieldValue(member),
+                uncapitalize(member.getMemberName()), VAR_TEMP);
     }
 
     private CodeBlock setMemberField(MemberShape shape) {
