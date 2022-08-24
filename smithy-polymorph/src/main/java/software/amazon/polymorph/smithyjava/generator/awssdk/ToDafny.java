@@ -6,7 +6,6 @@ import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
-import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 
 import org.slf4j.Logger;
@@ -59,7 +58,35 @@ import static software.amazon.smithy.utils.StringUtils.uncapitalize;
  */
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 public class ToDafny extends Generator {
+    /**
+     * The keys are the input type, the values are the method that converts from that input to the Dafny type
+     */
+    static final Map<ShapeType, MethodReference> AGGREGATE_CONVERSION_METHOD_FROM_SHAPE_TYPE;
+    static final Map<ShapeType, MethodReference> SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE;
+    static final ClassName COMMON_TO_DAFNY_SIMPLE = ClassName.get(software.amazon.dafny.conversion.ToDafny.Simple.class);
+    static final ClassName COMMON_TO_DAFNY_AGGREGATE = ClassName.get(software.amazon.dafny.conversion.ToDafny.Aggregate.class);
     private static final Logger LOGGER = LoggerFactory.getLogger(ToDafny.class);
+
+    static {
+        AGGREGATE_CONVERSION_METHOD_FROM_SHAPE_TYPE = Map.ofEntries(
+                Map.entry(ShapeType.LIST, new MethodReference(COMMON_TO_DAFNY_AGGREGATE, "GenericToSequence")),
+                Map.entry(ShapeType.SET, new MethodReference(COMMON_TO_DAFNY_AGGREGATE, "GenericToSet")),
+                Map.entry(ShapeType.MAP, new MethodReference(COMMON_TO_DAFNY_AGGREGATE, "GenericToMap"))
+        );
+        SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE = Map.ofEntries(
+                Map.entry(ShapeType.BLOB, new MethodReference(COMMON_TO_DAFNY_SIMPLE, "ByteSequence")),
+                Map.entry(ShapeType.BOOLEAN, Constants.IDENTITY_FUNCTION),
+                Map.entry(ShapeType.STRING, new MethodReference(COMMON_TO_DAFNY_SIMPLE, "CharacterSequence")),
+                Map.entry(ShapeType.TIMESTAMP, new MethodReference(COMMON_TO_DAFNY_SIMPLE, "CharacterSequence")),
+                Map.entry(ShapeType.BYTE, Constants.IDENTITY_FUNCTION),
+                Map.entry(ShapeType.SHORT, Constants.IDENTITY_FUNCTION),
+                Map.entry(ShapeType.INTEGER, Constants.IDENTITY_FUNCTION),
+                Map.entry(ShapeType.LONG, Constants.IDENTITY_FUNCTION),
+                Map.entry(ShapeType.BIG_DECIMAL, Constants.IDENTITY_FUNCTION),
+                Map.entry(ShapeType.BIG_INTEGER, Constants.IDENTITY_FUNCTION)
+        );
+    }
+
     /** Additional Shapes to generate ToDafny converters for. */
     final Set<Shape> additionalShapes;
     final Set<Shape> convertedShapes;
@@ -108,7 +135,7 @@ public class ToDafny extends Generator {
         // We will have to make multiple passes of additionalShapes,
         // since more "shapes" may be discovered on each pass
         List<MethodSpec> convertAdditional = new ArrayList<>();
-        while(additionalShapes.size() > 0) {
+        while (additionalShapes.size() > 0) {
             // TODO: Unit tests for shape conversion discovery
             LinkedHashSet<Shape> this_pass_shapes = new LinkedHashSet<>(additionalShapes);
             convertedShapes.addAll(this_pass_shapes);
@@ -231,11 +258,11 @@ public class ToDafny extends Generator {
         };
     }
 
-    // TODO: unit tests for generateConvertResponse
     /**
      * Should be called for all of a service's operations' outputs.
      */
     MethodSpec generateConvertResponse(final ShapeId shapeId) {
+        // TODO: unit tests for generateConvertResponse
         MethodSpec structure = generateConvertStructure(shapeId);
         MethodSpec.Builder builder = structure.toBuilder();
         builder.parameters.clear();
@@ -419,8 +446,6 @@ public class ToDafny extends Generator {
                 .build();
     }
 
-
-    /**  */
     // TODO: Unit tests and doc for generateConvertError
     MethodSpec generateConvertError(final StructureShape shape) {
         MethodSpec structure = generateConvertStructure(shape.getId());
@@ -454,35 +479,4 @@ public class ToDafny extends Generator {
                 .addStatement("return new $T(message)", dafnyNameResolver.getDafnyOpaqueServiceError())
                 .build();
     }
-
-    /**
-     * The keys are the input type,
-     * the values are the method that converts
-     * from that input to the Dafny type
-     */
-    static final Map<ShapeType, MethodReference> AGGREGATE_CONVERSION_METHOD_FROM_SHAPE_TYPE;
-    static final Map<ShapeType, MethodReference> SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE;
-    static final ClassName COMMON_TO_DAFNY_SIMPLE = ClassName.get(software.amazon.dafny.conversion.ToDafny.Simple.class);
-    static final ClassName COMMON_TO_DAFNY_AGGREGATE = ClassName.get(software.amazon.dafny.conversion.ToDafny.Aggregate.class);
-
-    static {
-        AGGREGATE_CONVERSION_METHOD_FROM_SHAPE_TYPE = Map.ofEntries(
-                Map.entry(ShapeType.LIST, new MethodReference(COMMON_TO_DAFNY_AGGREGATE, "GenericToSequence")),
-                Map.entry(ShapeType.SET, new MethodReference(COMMON_TO_DAFNY_AGGREGATE,"GenericToSet")),
-                Map.entry(ShapeType.MAP, new MethodReference(COMMON_TO_DAFNY_AGGREGATE,"GenericToMap"))
-        );
-        SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE = Map.ofEntries(
-                Map.entry(ShapeType.BLOB, new MethodReference(COMMON_TO_DAFNY_SIMPLE, "ByteSequence")),
-                Map.entry(ShapeType.BOOLEAN, Constants.IDENTITY_FUNCTION),
-                Map.entry(ShapeType.STRING, new MethodReference(COMMON_TO_DAFNY_SIMPLE, "CharacterSequence")),
-                Map.entry(ShapeType.TIMESTAMP, new MethodReference(COMMON_TO_DAFNY_SIMPLE, "CharacterSequence")),
-                Map.entry(ShapeType.BYTE, Constants.IDENTITY_FUNCTION),
-                Map.entry(ShapeType.SHORT, Constants.IDENTITY_FUNCTION),
-                Map.entry(ShapeType.INTEGER, Constants.IDENTITY_FUNCTION),
-                Map.entry(ShapeType.LONG, Constants.IDENTITY_FUNCTION),
-                Map.entry(ShapeType.BIG_DECIMAL, Constants.IDENTITY_FUNCTION),
-                Map.entry(ShapeType.BIG_INTEGER, Constants.IDENTITY_FUNCTION)
-        );
-    }
-
 }

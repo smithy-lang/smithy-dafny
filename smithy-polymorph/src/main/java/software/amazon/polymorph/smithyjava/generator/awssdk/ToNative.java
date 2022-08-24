@@ -37,8 +37,8 @@ import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.EnumDefinition;
 import software.amazon.smithy.model.traits.EnumTrait;
 
-import static software.amazon.polymorph.smithyjava.nameresolver.Constants.SMITHY_API_UNIT;
 import static software.amazon.polymorph.smithyjava.generator.awssdk.Generator.Constants.IDENTITY_FUNCTION;
+import static software.amazon.polymorph.smithyjava.nameresolver.Constants.SMITHY_API_UNIT;
 import static software.amazon.smithy.utils.StringUtils.capitalize;
 import static software.amazon.smithy.utils.StringUtils.uncapitalize;
 
@@ -55,12 +55,42 @@ import static software.amazon.smithy.utils.StringUtils.uncapitalize;
  */
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 public class ToNative extends Generator {
+    /**
+     * The keys are the Dafny generated java input type,
+     * the values are the method that converts from that input to
+     * the idiomatic java type.
+     */
+    static final Map<ShapeType, MethodReference> AGGREGATE_CONVERSION_METHOD_FROM_SHAPE_TYPE;
+    static final Map<ShapeType, MethodReference> SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE;
+    static final ClassName COMMON_TO_NATIVE_SIMPLE = ClassName.get(software.amazon.dafny.conversion.ToNative.Simple.class);
+    static final ClassName COMMON_TO_NATIVE_AGGREGATE = ClassName.get(software.amazon.dafny.conversion.ToNative.Aggregate.class);
     private final static String VAR_INPUT = "dafnyValue";
     private final static String VAR_OUTPUT = "converted";
     private final static String VAR_TEMP = "temp";
     private final static String TO_NATIVE = "ToNative";
-
     private static final Logger LOGGER = LoggerFactory.getLogger(ToNative.class);
+
+    static {
+        AGGREGATE_CONVERSION_METHOD_FROM_SHAPE_TYPE = Map.ofEntries(
+                Map.entry(ShapeType.LIST, new MethodReference(COMMON_TO_NATIVE_AGGREGATE, "GenericToList")),
+                Map.entry(ShapeType.SET, new MethodReference(COMMON_TO_NATIVE_AGGREGATE, "GenericToSet")),
+                Map.entry(ShapeType.MAP, new MethodReference(COMMON_TO_NATIVE_AGGREGATE, "GenericToMap"))
+        );
+        SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE = Map.ofEntries(
+                Map.entry(ShapeType.BLOB, new MethodReference(COMMON_TO_NATIVE_SIMPLE, "ByteBuffer")),
+                Map.entry(ShapeType.BOOLEAN, IDENTITY_FUNCTION),
+                Map.entry(ShapeType.STRING, new MethodReference(COMMON_TO_NATIVE_SIMPLE, "String")),
+                // TODO: Timestamp should be service specific
+                Map.entry(ShapeType.TIMESTAMP, new MethodReference(COMMON_TO_NATIVE_SIMPLE, "Date")),
+                Map.entry(ShapeType.BYTE, IDENTITY_FUNCTION),
+                Map.entry(ShapeType.SHORT, IDENTITY_FUNCTION),
+                Map.entry(ShapeType.INTEGER, IDENTITY_FUNCTION),
+                Map.entry(ShapeType.LONG, IDENTITY_FUNCTION),
+                Map.entry(ShapeType.BIG_DECIMAL, IDENTITY_FUNCTION),
+                Map.entry(ShapeType.BIG_INTEGER, IDENTITY_FUNCTION)
+        );
+    }
+
     /** Additional Shapes to generate ToNative converters for. */
     final Set<Shape> additionalShapes;
     final Set<Shape> convertedShapes;
@@ -105,7 +135,7 @@ public class ToNative extends Generator {
         // We will have to make multiple passes of additionalShapes,
         // since more "shapes" may be discovered on each pass
         List<MethodSpec> convertAdditional = new ArrayList<>();
-        while(additionalShapes.size() > 0) {
+        while (additionalShapes.size() > 0) {
             // TODO: Unit tests for shape conversion discovery
             LinkedHashSet<Shape> this_pass_shapes = new LinkedHashSet<>(additionalShapes);
             convertedShapes.addAll(this_pass_shapes);
@@ -246,8 +276,7 @@ public class ToNative extends Generator {
                                 Dafny.aggregateSizeMethod(model.expectShape(member.getTarget()).getType()));
                         // set with conversion call and toArray
                         builder.addStatement(setWithConversionCallAndToArray(member));
-                    }
-                    else {
+                    } else {
                         // set with conversion call
                         builder.addStatement(setWithConversionCall(member));
                     }
@@ -358,36 +387,5 @@ public class ToNative extends Generator {
 
         builder.addStatement("return $T.fromValue($L.toString())", nativeEnumClass, VAR_INPUT);
         return builder.build();
-    }
-
-    /**
-     * The keys are the Dafny generated java input type,
-     * the values are the method that converts
-     * from that input to the idiomatic java type.
-     */
-    static final Map<ShapeType, MethodReference> AGGREGATE_CONVERSION_METHOD_FROM_SHAPE_TYPE;
-    static final Map<ShapeType, MethodReference> SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE;
-    static final ClassName COMMON_TO_NATIVE_SIMPLE = ClassName.get(software.amazon.dafny.conversion.ToNative.Simple.class);
-    static final ClassName COMMON_TO_NATIVE_AGGREGATE = ClassName.get(software.amazon.dafny.conversion.ToNative.Aggregate.class);
-
-    static {
-        AGGREGATE_CONVERSION_METHOD_FROM_SHAPE_TYPE = Map.ofEntries(
-                Map.entry(ShapeType.LIST, new MethodReference(COMMON_TO_NATIVE_AGGREGATE, "GenericToList")),
-                Map.entry(ShapeType.SET, new MethodReference(COMMON_TO_NATIVE_AGGREGATE,"GenericToSet")),
-                Map.entry(ShapeType.MAP, new MethodReference(COMMON_TO_NATIVE_AGGREGATE,"GenericToMap"))
-        );
-        SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE = Map.ofEntries(
-                Map.entry(ShapeType.BLOB, new MethodReference(COMMON_TO_NATIVE_SIMPLE, "ByteBuffer")),
-                Map.entry(ShapeType.BOOLEAN, IDENTITY_FUNCTION),
-                Map.entry(ShapeType.STRING, new MethodReference(COMMON_TO_NATIVE_SIMPLE, "String")),
-                // TODO: Timestamp should be service specific
-                Map.entry(ShapeType.TIMESTAMP, new MethodReference(COMMON_TO_NATIVE_SIMPLE, "Date")),
-                Map.entry(ShapeType.BYTE, IDENTITY_FUNCTION),
-                Map.entry(ShapeType.SHORT, IDENTITY_FUNCTION),
-                Map.entry(ShapeType.INTEGER, IDENTITY_FUNCTION),
-                Map.entry(ShapeType.LONG, IDENTITY_FUNCTION),
-                Map.entry(ShapeType.BIG_DECIMAL, IDENTITY_FUNCTION),
-                Map.entry(ShapeType.BIG_INTEGER, IDENTITY_FUNCTION)
-        );
     }
 }

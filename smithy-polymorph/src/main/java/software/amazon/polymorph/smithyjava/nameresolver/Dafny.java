@@ -38,6 +38,14 @@ import static software.amazon.polymorph.smithyjava.nameresolver.Constants.SMITHY
  * for the Dafny generated Java code.
  */
 public class Dafny {
+    public static final Set<ShapeType> UNSUPPORTED_SHAPES;
+
+    static {
+        UNSUPPORTED_SHAPES = Set.of(
+                ShapeType.FLOAT, ShapeType.DOUBLE, ShapeType.DOCUMENT, ShapeType.UNION
+        );
+    }
+
     protected final String packageName;
     protected final Model model;
     protected final ServiceShape serviceShape;
@@ -54,7 +62,57 @@ public class Dafny {
         this.modelPackage = modelPackageNameForServiceShape(serviceShape);
     }
 
-    public String packageName() { return this.packageName; }
+    /**
+     * Dafny generated Java enums replace '_' with '__'.
+     * ex: SYMMETRIC_DEFAULT -> SYMMETRIC__DEFAULT
+     */
+    public static String enumFormatter(String name) {
+        return name.replace("_", "__");
+    }
+
+    public static String enumCreate(String name) {
+        String dafnyEnumName = enumFormatter(name);
+        return "create_" + dafnyEnumName;
+    }
+
+    public static String enumIsName(String name) {
+        String dafnyEnumName = enumFormatter(name);
+        return "is_" + dafnyEnumName;
+    }
+
+    public static String aggregateSizeMethod(ShapeType shapeType) {
+        return switch (shapeType) {
+            case LIST -> "length()";
+            case SET, MAP -> "size();";
+            default -> throw new IllegalStateException(
+                    "aggregateSizeMethod only accepts LIST, SET, or MAP. Got : " + shapeType);
+        };
+    }
+
+    // TODO: replace with method from DafnyNameResolver
+    static String packageNameForNamespace(final String namespace) {
+        final Stream<String> namespaceParts = Arrays
+                .stream(namespace.split("\\."))
+                .map(StringUtils::capitalize);
+        return "Dafny." + Joiner.on('.').join(namespaceParts.iterator());
+    }
+
+    // TODO: replace with method from DafnyNameResolver
+    static String modelPackageNameForNamespace(final String namespace) {
+        return packageNameForNamespace(namespace) + ".Types";
+    }
+
+    static String packageNameForServiceShape(ServiceShape serviceShape) {
+        return packageNameForNamespace(serviceShape.getId().getNamespace());
+    }
+
+    static String modelPackageNameForServiceShape(ServiceShape serviceShape) {
+        return modelPackageNameForNamespace(serviceShape.getId().getNamespace());
+    }
+
+    public String packageName() {
+        return this.packageName;
+    }
 
     /**
      * Returns the Dafny-compiled-Java type corresponding to the given shape.
@@ -139,40 +197,6 @@ public class Dafny {
         );
     }
 
-    /**
-     * Dafny generated Java enums replace '_' with '__'.
-     * ex: SYMMETRIC_DEFAULT -> SYMMETRIC__DEFAULT
-     */
-    public static String enumFormatter(String name) {
-        return name.replace("_", "__");
-    }
-
-    public static String enumCreate(String name) {
-        String dafnyEnumName = enumFormatter(name);
-        return "create_" + dafnyEnumName;
-    }
-
-    public static String enumIsName(String name) {
-        String dafnyEnumName = enumFormatter(name);
-        return "is_" + dafnyEnumName;
-    }
-
-    public static String aggregateSizeMethod(ShapeType shapeType) {
-        return switch (shapeType) {
-            case LIST -> "length()";
-            case SET, MAP -> "size();";
-            default -> throw new IllegalStateException(
-                    "aggregateSizeMethod only accepts LIST, SET, or MAP. Got : " + shapeType);
-        };
-    }
-
-    public static final Set<ShapeType> UNSUPPORTED_SHAPES;
-    static {
-        UNSUPPORTED_SHAPES = Set.of(
-                ShapeType.FLOAT, ShapeType.DOUBLE, ShapeType.DOCUMENT, ShapeType.UNION
-        );
-    }
-
     TypeName typeForString(StringShape shape) {
         if (!shape.hasTrait(EnumTrait.class)) {
             return typeForCharacterSequence();
@@ -209,26 +233,5 @@ public class Dafny {
 
     TypeName typeForResource(ResourceShape shape) {
         throw new UnsupportedOperationException("Not yet implemented for generic");
-    }
-
-    // TODO: replace with method from DafnyNameResolver
-    static String packageNameForNamespace(final String namespace) {
-        final Stream<String> namespaceParts = Arrays
-                .stream(namespace.split("\\."))
-                .map(StringUtils::capitalize);
-        return "Dafny." + Joiner.on('.').join(namespaceParts.iterator());
-    }
-
-    // TODO: replace with method from DafnyNameResolver
-    static String modelPackageNameForNamespace(final String namespace) {
-        return packageNameForNamespace(namespace) + ".Types";
-    }
-
-    static String packageNameForServiceShape(ServiceShape serviceShape) {
-        return packageNameForNamespace(serviceShape.getId().getNamespace());
-    }
-
-    static String modelPackageNameForServiceShape(ServiceShape serviceShape) {
-        return modelPackageNameForNamespace(serviceShape.getId().getNamespace());
     }
 }
