@@ -10,6 +10,11 @@ import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.ServiceShape;
 
+/**
+ * Generates all the Java Classes needed for
+ * Dafny Generated Java to call AWS Services via
+ * the AWS SDK for Java V1.
+ */
 public class AwsSdk {
     AwsSdkDafny dafnyNameResolver;
     AwsSdkNative nativeNameResolver;

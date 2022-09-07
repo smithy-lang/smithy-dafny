@@ -46,7 +46,7 @@ import static software.amazon.smithy.utils.StringUtils.capitalize;
 import static software.amazon.smithy.utils.StringUtils.uncapitalize;
 
 /**
- * ToDafny is a helper class for the AwsSdk Shim.<p>
+ * ToDafny is a helper class for the AwsSdk's {@link Shim}.<p>
  * It holds methods to convert
  * a subset of an AWS SDK Service's types to Dafny types.<p>
  * The subset is composed of the:

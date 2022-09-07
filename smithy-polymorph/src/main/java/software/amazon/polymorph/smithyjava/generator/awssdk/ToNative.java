@@ -43,7 +43,7 @@ import static software.amazon.smithy.utils.StringUtils.capitalize;
 import static software.amazon.smithy.utils.StringUtils.uncapitalize;
 
 /**
- * ToNative is a helper class for the AwsSdk Shim.<p>
+ * ToNative is a helper class for the AwsSdk's {@link Shim}.<p>
  * It contains methods to convert
  * a subset of an AWS SDK Service's types
  * from Dafny generated Java to native Java.<p>
