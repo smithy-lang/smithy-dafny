@@ -3,9 +3,25 @@
 
 package software.amazon.polymorph.utils;
 
-import software.amazon.polymorph.traits.*;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.Optional;
+import java.util.Queue;
+import java.util.Set;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
+
+import software.amazon.polymorph.traits.ClientConfigTrait;
+import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
+import software.amazon.polymorph.traits.DataTypeUnionTrait;
+import software.amazon.polymorph.traits.ExtendableTrait;
+import software.amazon.polymorph.traits.LocalServiceTrait;
+import software.amazon.polymorph.traits.PositionalTrait;
+import software.amazon.polymorph.traits.ReferenceTrait;
+
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.loader.ModelAssembler;
+import software.amazon.smithy.model.shapes.MapShape;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
@@ -15,10 +31,6 @@ import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.RequiredTrait;
-
-import java.util.Optional;
-import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 public class ModelUtils {
     // Require title-case alphanumeric names, so we don't need to check for keyword conflicts.
@@ -199,5 +211,46 @@ public class ModelUtils {
         if (shape.hasTrait(EnumTrait.class)) { return false; }
         if (isSmithyApiShape(shape.getId())) { return true; }
         return shape.getType().getCategory().equals(ShapeType.Category.SIMPLE);
+    }
+
+    /**
+     * For every ShapeId in {@code initialShapes},
+     * with the given {@code model},
+     * find all the shapes that ShapeId depends on.
+     */
+    public static Set<ShapeId> findAllDependentShapes(
+            Set<ShapeId> initialShapes,
+            Model model
+    ) {
+        final Set<ShapeId> shapes = new LinkedHashSet<>();
+        // Breadth-first search via getDependencyShapeIds
+        final Queue<ShapeId> toTraverse = new LinkedList<>(initialShapes);
+        while (!toTraverse.isEmpty()) {
+            final ShapeId currentShapeId = toTraverse.remove();
+            if (shapes.add(currentShapeId)) {
+                final Shape currentShape = model.expectShape(currentShapeId);
+                getDependencyShapeIds(currentShape).forEach(toTraverse::add);
+            }
+        }
+        return shapes;
+    }
+
+    /**
+     * Returns dependency shape IDs for the given shape.
+     * A shape {@code S} has a dependency shape {@code D} if a type
+     * for {@code S} requires the existence of a type for {@code D}.
+     */
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
+    static Stream<ShapeId> getDependencyShapeIds(final Shape shape) {
+        return switch (shape.getType()) {
+            case LIST -> Stream.of(shape.asListShape().get().getMember().getId());
+            case MAP -> {
+                final MapShape mapShape = shape.asMapShape().get();
+                yield Stream.of(mapShape.getKey().getId(), mapShape.getValue().getId());
+            }
+            case STRUCTURE -> streamStructureMembers(shape.asStructureShape().get()).map(Shape::getId);
+            case MEMBER -> Stream.of(shape.asMemberShape().get().getTarget());
+            default -> Stream.empty();
+        };
     }
 }

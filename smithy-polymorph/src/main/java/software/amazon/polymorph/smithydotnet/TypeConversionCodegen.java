@@ -6,28 +6,45 @@ package software.amazon.polymorph.smithydotnet;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
 
-import software.amazon.polymorph.smithydafny.DafnyNameResolver;
-import software.amazon.polymorph.traits.*;
-import software.amazon.polymorph.utils.ModelUtils;
-import software.amazon.polymorph.utils.Token;
-import software.amazon.polymorph.utils.TokenTree;
-import software.amazon.smithy.model.Model;
-import software.amazon.smithy.model.shapes.*;
-import software.amazon.smithy.model.traits.EnumTrait;
-import software.amazon.smithy.model.traits.ErrorTrait;
-
 import java.nio.file.Path;
-import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Queue;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import software.amazon.polymorph.smithydafny.DafnyNameResolver;
+import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
+import software.amazon.polymorph.traits.ExtendableTrait;
+import software.amazon.polymorph.traits.LocalServiceTrait;
+import software.amazon.polymorph.traits.PositionalTrait;
+import software.amazon.polymorph.traits.ReferenceTrait;
+import software.amazon.polymorph.utils.ModelUtils;
+import software.amazon.polymorph.utils.Token;
+import software.amazon.polymorph.utils.TokenTree;
+
+import software.amazon.smithy.model.Model;
+import software.amazon.smithy.model.shapes.BlobShape;
+import software.amazon.smithy.model.shapes.BooleanShape;
+import software.amazon.smithy.model.shapes.IntegerShape;
+import software.amazon.smithy.model.shapes.ListShape;
+import software.amazon.smithy.model.shapes.LongShape;
+import software.amazon.smithy.model.shapes.MapShape;
+import software.amazon.smithy.model.shapes.MemberShape;
+import software.amazon.smithy.model.shapes.OperationShape;
+import software.amazon.smithy.model.shapes.ResourceShape;
+import software.amazon.smithy.model.shapes.ServiceShape;
+import software.amazon.smithy.model.shapes.Shape;
+import software.amazon.smithy.model.shapes.ShapeId;
+import software.amazon.smithy.model.shapes.StringShape;
+import software.amazon.smithy.model.shapes.StructureShape;
+import software.amazon.smithy.model.shapes.TimestampShape;
+import software.amazon.smithy.model.shapes.UnionShape;
+import software.amazon.smithy.model.traits.EnumTrait;
+import software.amazon.smithy.model.traits.ErrorTrait;
 
 import static software.amazon.polymorph.smithydotnet.DotNetNameResolver.TYPE_CONVERSION_CLASS_NAME;
 import static software.amazon.polymorph.smithydotnet.DotNetNameResolver.typeConverterForShape;
@@ -95,19 +112,8 @@ public class TypeConversionCodegen {
      */
     @VisibleForTesting
     public Set<ShapeId> findShapeIdsToConvert() {
-        final Set<ShapeId> shapesToConvert = new HashSet<>();
-
-        // Breadth-first search via getDependencyShapeIds
-        final Queue<ShapeId> toTraverse = new LinkedList<>(findInitialShapeIdsToConvert());
-        while (!toTraverse.isEmpty()) {
-            final ShapeId currentShapeId = toTraverse.remove();
-            if (shapesToConvert.add(currentShapeId)) {
-                final Shape currentShape = model.expectShape(currentShapeId);
-                getDependencyShapeIds(currentShape).forEach(toTraverse::add);
-            }
-        }
-
-        return shapesToConvert;
+        Set<ShapeId> initialShapes = findInitialShapeIdsToConvert();
+        return ModelUtils.findAllDependentShapes(initialShapes, model);
     }
 
     /**
@@ -199,24 +205,6 @@ public class TypeConversionCodegen {
             case MEMBER -> generateMemberConverter(shape.asMemberShape().get());
             case UNION -> generateUnionConverter(shape.asUnionShape().get());
             default -> throw new IllegalStateException();
-        };
-    }
-
-    /**
-     * Returns dependency shape IDs for the given shape. A shape {@code S} has a dependency shape {@code D} if a type
-     * converter for {@code S} requires the existence of a type converter for {@code D}.
-     */
-    @SuppressWarnings("OptionalGetWithoutIsPresent")
-    private Stream<ShapeId> getDependencyShapeIds(final Shape shape) {
-        return switch (shape.getType()) {
-            case LIST -> Stream.of(shape.asListShape().get().getMember().getId());
-            case MAP -> {
-                final MapShape mapShape = shape.asMapShape().get();
-                yield Stream.of(mapShape.getKey().getId(), mapShape.getValue().getId());
-            }
-            case STRUCTURE -> ModelUtils.streamStructureMembers(shape.asStructureShape().get()).map(Shape::getId);
-            case MEMBER -> Stream.of(shape.asMemberShape().get().getTarget());
-            default -> Stream.empty();
         };
     }
 
