@@ -74,21 +74,21 @@ public class CodegenCli {
         final ServiceShape serviceShape = ModelUtils.serviceFromNamespace(model, cliArguments.namespace);
 
         if (cliArguments.awsSdkStyle) {
-            final AwsSdkShimCodegen shimCodegen = new AwsSdkShimCodegen(
+            final AwsSdkShimCodegen dotnetShimCodegen = new AwsSdkShimCodegen(
               model,
               serviceShape,
               cliArguments.dependentModelPaths
             );
             final AwsSdk javaShimCodegen = new AwsSdk(serviceShape, model);
-            writeTokenTreesIntoDir(shimCodegen.generate(), outputDotnetDir);
+            writeTokenTreesIntoDir(dotnetShimCodegen.generate(), outputDotnetDir);
             writeTokenTreesIntoDir(javaShimCodegen.generate(), outputJavaDir);
             logger.info("Java code generated in {}", cliArguments.outputJavaDir);
         } else {
-            final ServiceCodegen serviceCodegen = new ServiceCodegen(model, serviceShape);
-            writeTokenTreesIntoDir(serviceCodegen.generate(), outputDotnetDir);
+            final ServiceCodegen dotnetServiceCodegen = new ServiceCodegen(model, serviceShape);
+            writeTokenTreesIntoDir(dotnetServiceCodegen.generate(), outputDotnetDir);
 
-            final ShimCodegen shimCodegen = new ShimCodegen(model, serviceShape);
-            writeTokenTreesIntoDir(shimCodegen.generate(), outputDotnetDir);
+            final ShimCodegen dotnetShimCodegen = new ShimCodegen(model, serviceShape);
+            writeTokenTreesIntoDir(dotnetShimCodegen.generate(), outputDotnetDir);
 
             logger.warn("Smithy-Polymorph only supports Java code generation for AWS-SDK Style code");
         }
@@ -103,10 +103,10 @@ public class CodegenCli {
         // This simplifies the process of including the various Dafny files.
         writeTokenTreesIntoDir(dafnyApiCodegen.generate(), cliArguments.modelPath);
 
-        final TypeConversionCodegen typeConversionCodegen = cliArguments.awsSdkStyle
+        final TypeConversionCodegen dotnetTypeConversionCodegen = cliArguments.awsSdkStyle
                 ? new AwsSdkTypeConversionCodegen(model, serviceShape)
                 : new TypeConversionCodegen(model, serviceShape);
-        writeTokenTreesIntoDir(typeConversionCodegen.generate(), outputDotnetDir);
+        writeTokenTreesIntoDir(dotnetTypeConversionCodegen.generate(), outputDotnetDir);
 
         logger.info(".NET code generated in {}", cliArguments.outputDotnetDir);
         logger.info("Dafny code generated in {}", cliArguments.modelPath);
