@@ -261,14 +261,14 @@ public class Native {
     }
 
     public TypeName typeForStructure(StructureShape shape) {
-        throw new UnsupportedOperationException("Not yet implemented for generic");
+        throw new UnsupportedOperationException("Not yet implemented for not AWS-SDK Style");
     }
 
     public TypeName typeForService(ServiceShape shape) {
-        throw new UnsupportedOperationException("Not yet implemented for generic");
+        throw new UnsupportedOperationException("Not yet implemented for not AWS-SDK Style");
     }
 
     public TypeName typeForResource(ResourceShape shape) {
-        throw new UnsupportedOperationException("Not yet implemented for generic");
+        throw new UnsupportedOperationException("Not yet implemented for not AWS-SDK Style");
     }
 }
