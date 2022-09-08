@@ -244,6 +244,7 @@ public class ModelUtils {
     static Stream<ShapeId> getDependencyShapeIds(final Shape shape) {
         return switch (shape.getType()) {
             case LIST -> Stream.of(shape.asListShape().get().getMember().getId());
+            case SET -> Stream.of(shape.asSetShape().get().getMember().getId());
             case MAP -> {
                 final MapShape mapShape = shape.asMapShape().get();
                 yield Stream.of(mapShape.getKey().getId(), mapShape.getValue().getId());

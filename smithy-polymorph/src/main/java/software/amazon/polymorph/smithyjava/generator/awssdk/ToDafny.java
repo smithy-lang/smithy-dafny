@@ -8,11 +8,7 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -56,7 +52,6 @@ import static software.amazon.smithy.utils.StringUtils.uncapitalize;
  *   <li>All the fields contained by the above
  * </ul>
  */
-@SuppressWarnings("OptionalGetWithoutIsPresent")
 public class ToDafny extends Generator {
     /**
      * The keys are the input type, the values are the method that converts from that input to the Dafny type
@@ -65,7 +60,6 @@ public class ToDafny extends Generator {
     static final Map<ShapeType, MethodReference> SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE;
     static final ClassName COMMON_TO_DAFNY_SIMPLE = ClassName.get(software.amazon.dafny.conversion.ToDafny.Simple.class);
     static final ClassName COMMON_TO_DAFNY_AGGREGATE = ClassName.get(software.amazon.dafny.conversion.ToDafny.Aggregate.class);
-    private static final Logger LOGGER = LoggerFactory.getLogger(ToDafny.class);
 
     static {
         AGGREGATE_CONVERSION_METHOD_FROM_SHAPE_TYPE = Map.ofEntries(
@@ -87,22 +81,11 @@ public class ToDafny extends Generator {
         );
     }
 
-    /** Additional Shapes to generate ToDafny converters for. */
-    final Set<Shape> additionalShapes;
-    final Set<Shape> convertedShapes;
-    /** Static imports to be added to generated code. */
-    final Set<MethodReference> additionalStaticImports;
-    /** Enums need two Methods; a string converter and an Enum converter. */
-    final Set<Shape> enumShapes;
     /** The class name of the AWS SDK's Service's Shim's ToDafny class. */
     final ClassName thisClassName;
 
     public ToDafny(AwsSdk awsSdk) {
         super(awsSdk);
-        additionalShapes = Collections.synchronizedSet(new LinkedHashSet<>());
-        convertedShapes = Collections.synchronizedSet(new LinkedHashSet<>());
-        additionalStaticImports = Collections.synchronizedSet(new LinkedHashSet<>());
-        enumShapes = Collections.synchronizedSet(new LinkedHashSet<>());
         thisClassName = ClassName.get(dafnyNameResolver.packageName(), "ToDafny");
     }
 
@@ -110,67 +93,76 @@ public class ToDafny extends Generator {
     public JavaFile javaFile(final ShapeId serviceShapeId) {
         JavaFile.Builder builder = JavaFile
                 .builder(dafnyNameResolver.packageName(), toDafny(serviceShapeId));
-        additionalStaticImports.forEach(methodReference ->
-                builder.addStaticImport(methodReference.className(), methodReference.methodName()));
         return builder.build();
     }
 
-    @SuppressWarnings("DuplicatedCode")
     TypeSpec toDafny(final ShapeId serviceShapeId) {
         final ServiceShape serviceShape = model.expectShape(serviceShapeId, ServiceShape.class);
-        final List<MethodSpec> convertOperationOutputs = serviceShape
+        LinkedHashSet<ShapeId> operationOutputs = serviceShape
                 .getOperations().stream()
                 .map(shapeId -> model.expectShape(shapeId, OperationShape.class))
-                .map(OperationShape::getOutput)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .map(this::generateConvertResponse)
-                .toList();
+                .map(OperationShape::getOutput).filter(Optional::isPresent).map(Optional::get)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+        Set<ShapeId> allRelevantShapeIds = ModelUtils.findAllDependentShapes(operationOutputs, model);
 
+        // In the AWS SDK for Java V1, Operation Outputs are special
+        allRelevantShapeIds.removeAll(operationOutputs);
+        // Enums are also a special case
+        LinkedHashSet<ShapeId> enumShapeIds = new LinkedHashSet<>();
+        allRelevantShapeIds.forEach(shapeId -> {
+            Shape shape = model.expectShape(shapeId);
+            if (shape.hasTrait(EnumTrait.class)) {
+                enumShapeIds.add(shapeId);
+            }
+        });
+        allRelevantShapeIds.removeAll(enumShapeIds);
+
+        final List<MethodSpec> convertOutputs = operationOutputs.stream()
+                .map(this::generateConvertResponse).toList();
+        final List<MethodSpec> convertAllRelevant = allRelevantShapeIds.stream()
+                .map(this::generateConvert).filter(Objects::nonNull).toList();
         final List<MethodSpec> convertServiceErrors = ModelUtils.streamServiceErrors(model, serviceShape)
-                .map(this::generateConvertError)
-                .collect(Collectors.toList());
+                .map(this::generateConvertError).collect(Collectors.toList());
         convertServiceErrors.add(generateConvertOpaqueError());
-
-        // We will have to make multiple passes of additionalShapes,
-        // since more "shapes" may be discovered on each pass
-        List<MethodSpec> convertAdditional = new ArrayList<>();
-        while (additionalShapes.size() > 0) {
-            // TODO: Unit tests for shape conversion discovery
-            LinkedHashSet<Shape> this_pass_shapes = new LinkedHashSet<>(additionalShapes);
-            convertedShapes.addAll(this_pass_shapes);
-            additionalShapes.clear();
-            convertAdditional.addAll(this_pass_shapes
-                    .stream()
-                    .map(Shape::toShapeId)
-                    .map(this::generateConvert)
-                    .filter(Optional::isPresent)
-                    .map(Optional::get).toList());
-        }
-
         // For enums, we generate overloaded methods,
         // one to convert instances of the Enum
-        final List<MethodSpec> convertEnumEnum = enumShapes
-                .stream()
-                .map(Shape::toShapeId)
-                .map(this::generateConvertEnumEnum)
-                .toList();
+        final List<MethodSpec> convertEnumEnum = enumShapeIds
+                .stream().map(this::generateConvertEnumEnum).toList();
         // The other to convert String representatives of the enum
-        final List<MethodSpec> convertEnumString = enumShapes
-                .stream()
-                .map(Shape::toShapeId)
-                .map(this::generateConvertEnumString)
-                .toList();
+        final List<MethodSpec> convertEnumString = enumShapeIds
+                .stream().map(this::generateConvertEnumString).toList();
+
         return TypeSpec
                 .classBuilder(
                         ClassName.get(dafnyNameResolver.packageName(), "ToDafny"))
                 .addModifiers(Modifier.PUBLIC)
-                .addMethods(convertOperationOutputs)
+                .addMethods(convertOutputs)
+                .addMethods(convertAllRelevant)
                 .addMethods(convertServiceErrors)
-                .addMethods(convertAdditional)
                 .addMethods(convertEnumEnum)
                 .addMethods(convertEnumString)
                 .build();
+    }
+
+    /** This method:
+     * 1. Determines the Shape Type
+     * 2. invokes the correct generate for that shape type
+     */
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
+    MethodSpec generateConvert(final ShapeId shapeId) {
+        final Shape shape = model.getShape(shapeId)
+                .orElseThrow(() -> new IllegalStateException("Cannot find shape " + shapeId));
+        return switch (shape.getType()) {
+            // For the AWS SDK for Java V1, we do not generate converters for simple shapes
+            case BLOB, BOOLEAN, STRING, INTEGER, LONG, TIMESTAMP, MEMBER -> null;
+            case LIST -> generateConvertList(shape.asListShape().get());
+            case MAP -> generateConvertMap(shape.asMapShape().get());
+            case SET -> generateConvertSet(shape.asSetShape().get());
+            case STRUCTURE -> generateConvertStructure(shapeId);
+            default -> throw new UnsupportedOperationException(
+                    "ShapeId %s is of Type %s, which is not yet supported for ToDafny"
+                            .formatted(shapeId, shape.getType()));
+        };
     }
 
     MethodSpec generateConvertEnumString(ShapeId shapeId) {
@@ -192,6 +184,7 @@ public class ToDafny extends Generator {
         return builder.build();
     }
 
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
     MethodSpec generateConvertEnumEnum(ShapeId shapeId) {
         final StringShape shape = model.expectShape(shapeId, StringShape.class);
         String methodName = capitalize(shapeId.getName());
@@ -233,29 +226,6 @@ public class ToDafny extends Generator {
                 .endControlFlow();
         builder.endControlFlow();
         return builder.build();
-    }
-
-    /** This method:
-     * 1. Determines the Shape Type
-     * 2. invokes the correct generate for that shape type
-     **/
-    Optional<MethodSpec> generateConvert(final ShapeId shapeId) {
-        final Shape shape = model.getShape(shapeId)
-                .orElseThrow(() -> new IllegalStateException("Cannot find shape " + shapeId));
-        // Special Enum Case
-        if (shape.hasTrait(EnumTrait.class)) {
-            enumShapes.add(shape);
-            return Optional.empty();
-        }
-        return switch (shape.getType()) {
-            case LIST -> Optional.of(generateConvertList(shape.asListShape().get()));
-            case MAP -> Optional.of(generateConvertMap(shape.asMapShape().get()));
-            case SET -> Optional.of(generateConvertSet(shape.asSetShape().get()));
-            case STRUCTURE -> Optional.of(generateConvertStructure(shapeId));
-            default -> throw new UnsupportedOperationException(
-                    "ShapeId %s is of Type %s, which is not yet supported for ToDafny"
-                            .formatted(shapeId, shape.getType()));
-        };
     }
 
     /**
@@ -352,11 +322,8 @@ public class ToDafny extends Generator {
      * Returns MethodReference that converts from
      * the Java Native memberShape to
      * the Java Dafny memberShape.
-     * Side Effects:
-     * If in namespace and Shape is not simple,
-     * adds Shape to additional converters.
      */
-    @SuppressWarnings("DuplicatedCode")
+    @SuppressWarnings({"DuplicatedCode", "OptionalGetWithoutIsPresent"})
     MethodReference memberConversionMethodReference(final MemberShape memberShape) {
         Shape target = model.getShape(memberShape.getTarget()).get();
         // If the target is simple, use SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE
@@ -371,12 +338,6 @@ public class ToDafny extends Generator {
         final String methodName = capitalize(target.getId().getName());
         // if in namespace
         if (nativeNameResolver.isInServiceNameSpace(target.getId())) {
-            // add to additionalShapes,
-            synchronized (additionalShapes) {
-                if (!convertedShapes.contains(target)) {
-                    additionalShapes.add(target);
-                }
-            }
             // and reference to be created converter
             return new MethodReference(thisClassName, methodName);
         }
@@ -427,6 +388,7 @@ public class ToDafny extends Generator {
     }
 
     // TODO: unit tests for generateConvertMap
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
     MethodSpec generateConvertMap(MapShape shape) {
         MemberShape keyShape = shape.getKey().asMemberShape().get();
         CodeBlock keyConverter = memberConversionMethodReference(keyShape).asFunctionalReference();
