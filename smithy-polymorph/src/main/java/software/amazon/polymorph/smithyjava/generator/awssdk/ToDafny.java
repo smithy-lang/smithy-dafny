@@ -328,11 +328,6 @@ public class ToDafny extends Generator {
         Shape target = model.getShape(memberShape.getTarget()).get();
         // If the target is simple, use SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE
         if (ModelUtils.isSmithyApiOrSimpleShape(target)) {
-            if (Dafny.UNSUPPORTED_SHAPES.contains(target.getType())) {
-                throw new UnsupportedOperationException(
-                        "No converter for %s written yet.".formatted(target.getType())
-                );
-            }
             return SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(target.getType());
         }
         final String methodName = capitalize(target.getId().getName());

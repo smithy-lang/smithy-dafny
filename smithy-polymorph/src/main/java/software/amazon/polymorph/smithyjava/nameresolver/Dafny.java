@@ -10,7 +10,6 @@ import com.squareup.javapoet.WildcardTypeName;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Arrays;
-import java.util.Set;
 import java.util.stream.Stream;
 
 import dafny.DafnyMap;
@@ -38,14 +37,6 @@ import static software.amazon.polymorph.smithyjava.nameresolver.Constants.SMITHY
  * for the Dafny generated Java code.
  */
 public class Dafny {
-    public static final Set<ShapeType> UNSUPPORTED_SHAPES;
-
-    static {
-        UNSUPPORTED_SHAPES = Set.of(
-                ShapeType.FLOAT, ShapeType.DOUBLE, ShapeType.DOCUMENT, ShapeType.UNION
-        );
-    }
-
     protected final String packageName;
     protected final Model model;
     protected final ServiceShape serviceShape;
