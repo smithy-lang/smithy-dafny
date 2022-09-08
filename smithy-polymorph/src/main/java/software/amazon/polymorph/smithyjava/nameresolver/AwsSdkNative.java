@@ -3,14 +3,10 @@ package software.amazon.polymorph.smithyjava.nameresolver;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.Map;
 
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.ServiceShape;
-import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.TraitDefinition;
@@ -21,32 +17,48 @@ import software.amazon.smithy.utils.StringUtils;
  * Types from the AWS SDK for Java libraries.
  */
 public class AwsSdkNative extends Native {
-    private static final Logger LOGGER = LoggerFactory.getLogger(AwsSdkNative.class);
-    private final String awsServiceName;
 
     public AwsSdkNative(final ServiceShape serviceShape,
                         final Model model) {
         super(packageNameForServiceShape(serviceShape), serviceShape, model,
                 defaultModelPackageName(packageNameForServiceShape(serviceShape)));
-        awsServiceName = awsServiceNameFromServiceShape(serviceShape);
+        checkForAwsServiceConstants();
     }
 
+    // The values of these maps are NOT in smithy models and thus must be hard-coded
     private static final Map<String, String> AWS_SERVICE_NAMESPACE_TO_CLIENT_INTERFACE;
     private static final Map<String, String> AWS_SERVICE_NAMESPACE_TO_BASE_EXCEPTION;
 
     static {
         // These are NOT in the service's model package
+        // i.e: kms : com.amazonaws.kms.AWSKMS
         AWS_SERVICE_NAMESPACE_TO_CLIENT_INTERFACE = Map.ofEntries(
                 Map.entry("com.amazonaws.kms", "AWSKMS"),
                 Map.entry("com.amazonaws.dynamodb", "AmazonDynamoDB"),
                 Map.entry("com.amazonaws.s3", "AmazonS3")
         );
         // These are in the service's model package
+        // i.e.: kms : com.amazonaws.kms.model.AWSKMSException
         AWS_SERVICE_NAMESPACE_TO_BASE_EXCEPTION = Map.ofEntries(
                 Map.entry("com.amazonaws.kms", "AWSKMSException"),
                 Map.entry("com.amazonaws.dynamodb", "AmazonDynamoDBException"),
                 Map.entry("com.amazonaws.s3", "AmazonS3Exception")
         );
+    }
+
+    /** Validates that Polymorph knows non-smithy modeled constants for an AWS Service */
+    private void checkForAwsServiceConstants() {
+        String namespace = serviceShape.getId().getNamespace();
+        boolean knowBaseException = AWS_SERVICE_NAMESPACE_TO_BASE_EXCEPTION.containsKey(namespace);
+        if (!knowBaseException) {
+            throw new IllegalArgumentException(
+                    "Polymorph does not know this service's Base Exception: %s".formatted(namespace));
+        }
+        boolean knowClientInterface = AWS_SERVICE_NAMESPACE_TO_CLIENT_INTERFACE.containsKey(namespace);
+        if (!knowClientInterface) {
+            throw new IllegalArgumentException(
+                    "Polymorph does not know this service's Client Interface: %s".formatted(namespace));
+        }
     }
 
     /**
