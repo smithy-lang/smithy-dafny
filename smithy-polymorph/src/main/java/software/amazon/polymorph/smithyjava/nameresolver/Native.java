@@ -4,9 +4,6 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
@@ -16,7 +13,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 
 import javax.annotation.Nullable;
 
@@ -42,36 +38,6 @@ import static software.amazon.smithy.utils.StringUtils.capitalize;
  * for the native Java code.
  */
 public class Native {
-    private static final Logger LOGGER = LoggerFactory.getLogger(Native.class);
-    protected final String packageName;
-    protected final Model model;
-    protected final ServiceShape serviceShape;
-    protected final String modelPackage;
-
-    public Native(
-            final String packageName,
-            final ServiceShape serviceShape,
-            final Model model
-    ) {
-        this.packageName = packageName;
-        this.model = model;
-        this.serviceShape = serviceShape;
-        this.modelPackage = defaultModelPackageName(packageName);
-    }
-
-    public Native(
-            final String packageName,
-            final ServiceShape serviceShape,
-            final Model model,
-            final String modelPackageName
-    ) {
-        this.packageName = packageName;
-        this.model = model;
-        this.serviceShape = serviceShape;
-        this.modelPackage = modelPackageName;
-    }
-
-
     protected static final Map<String, TypeName> NATIVE_TYPES_BY_SMITHY_PRELUDE_SHAPE_NAME;
     protected static final Map<ShapeType, TypeName> NATIVE_TYPES_BY_SIMPLE_SHAPE_TYPE;
 
@@ -109,6 +75,23 @@ public class Native {
                 Map.entry(ShapeType.BIG_DECIMAL, ClassName.get(BigDecimal.class)),
                 Map.entry(ShapeType.BIG_INTEGER, ClassName.get(BigInteger.class))
         );
+    }
+
+    protected final String packageName;
+    protected final Model model;
+    protected final ServiceShape serviceShape;
+    protected final String modelPackage;
+
+    public Native(
+            final String packageName,
+            final ServiceShape serviceShape,
+            final Model model,
+            final String modelPackageName
+    ) {
+        this.packageName = packageName;
+        this.model = model;
+        this.serviceShape = serviceShape;
+        this.modelPackage = modelPackageName;
     }
 
     /**
@@ -167,13 +150,6 @@ public class Native {
         };
     }
 
-    public static final Set<ShapeType> UNSUPPORTED_SHAPES;
-    static {
-        UNSUPPORTED_SHAPES = Set.of(
-                ShapeType.DOCUMENT, ShapeType.UNION
-        );
-    }
-
     public ClassName classForStringOrEnum(final StringShape shape) {
         if (shape.hasTrait(EnumTrait.class)) {
             return classForEnum(shape);
@@ -189,6 +165,7 @@ public class Native {
         return ClassName.get(String.class);
     }
 
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
     ParameterizedTypeName typeForListOrSetNoEnum(final ShapeId shapeId) {
         final Shape shape = model.getShape(shapeId)
                 .orElseThrow(() -> new IllegalStateException("Cannot find shape " + shapeId));
@@ -231,6 +208,7 @@ public class Native {
         return typeForShape(shapeId);
     }
 
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
     public boolean isListOrSetOfEnums(ShapeId shapeId) {
         Shape shape = model.expectShape(shapeId);
         return switch (shape.getType()) {
@@ -245,6 +223,7 @@ public class Native {
         return shape.hasTrait(EnumTrait.class);
     }
 
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
     public TypeName typeForListOrSetMember(ShapeId shapeId) {
         Shape shape = model.expectShape(shapeId);
         return switch (shape.getType()) {
@@ -256,10 +235,6 @@ public class Native {
         };
     }
 
-    public static String defaultModelPackageName(final String packageName) {
-        return "%s.types".formatted(packageName);
-    }
-
     public TypeName typeForStructure(StructureShape shape) {
         throw new UnsupportedOperationException("Not yet implemented for not AWS-SDK Style");
     }
@@ -268,7 +243,8 @@ public class Native {
         throw new UnsupportedOperationException("Not yet implemented for not AWS-SDK Style");
     }
 
+    @SuppressWarnings("unused")
     public TypeName typeForResource(ResourceShape shape) {
-        throw new UnsupportedOperationException("Not yet implemented for not AWS-SDK Style");
+        throw new UnsupportedOperationException("Not yet implemented.");
     }
 }
