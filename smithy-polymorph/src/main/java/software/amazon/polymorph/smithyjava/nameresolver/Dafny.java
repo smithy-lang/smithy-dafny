@@ -228,10 +228,10 @@ public class Dafny {
     }
 
     TypeName typeForService(ServiceShape shape) {
-        throw new UnsupportedOperationException("Not yet implemented for generic");
+        throw new UnsupportedOperationException("Not yet implemented for not AWS-SDK Style");
     }
 
     TypeName typeForResource(ResourceShape shape) {
-        throw new UnsupportedOperationException("Not yet implemented for generic");
+        throw new UnsupportedOperationException("Not yet implemented for not AWS-SDK Style");
     }
 }
