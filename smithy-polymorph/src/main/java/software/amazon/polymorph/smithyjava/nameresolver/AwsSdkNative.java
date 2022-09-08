@@ -31,17 +31,10 @@ public class AwsSdkNative extends Native {
         awsServiceName = awsServiceNameFromServiceShape(serviceShape);
     }
 
-    private static final Map<String, String> AWS_SERVICE_NAMESPACE_TO_CLIENT_IMPL;
     private static final Map<String, String> AWS_SERVICE_NAMESPACE_TO_CLIENT_INTERFACE;
     private static final Map<String, String> AWS_SERVICE_NAMESPACE_TO_BASE_EXCEPTION;
 
     static {
-        // These are NOT in the service's model package
-        AWS_SERVICE_NAMESPACE_TO_CLIENT_IMPL = Map.ofEntries(
-                Map.entry("com.amazonaws.kms", "AWSKMSClient"),
-                Map.entry("com.amazonaws.dynamodb", "AmazonDynamoDBClient"),
-                Map.entry("com.amazonaws.s3", "AmazonS3Client")
-        );
         // These are NOT in the service's model package
         AWS_SERVICE_NAMESPACE_TO_CLIENT_INTERFACE = Map.ofEntries(
                 Map.entry("com.amazonaws.kms", "AWSKMS"),
