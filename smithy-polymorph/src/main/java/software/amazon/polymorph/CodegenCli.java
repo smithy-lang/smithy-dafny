@@ -228,14 +228,12 @@ public class CodegenCli {
             TokenTree tokens = entry.getValue();
             final Path outputPath = Path.of(outputDir.toString(), localPath.toString());
             try {
-                if (!Files.exists(outputPath.getParent())) {
-                    Files.createDirectories(outputPath.getParent());
-                }
+                Files.createDirectories(outputPath.getParent());
+                final String content = COPYRIGHT_HEADER + GENERATED_HEADER + tokens.toString();
+                writeToFile(content, outputPath.toFile());
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            final String content = COPYRIGHT_HEADER + GENERATED_HEADER + tokens.toString();
-            writeToFile(content, outputPath.toFile());
         }
     }
 }
