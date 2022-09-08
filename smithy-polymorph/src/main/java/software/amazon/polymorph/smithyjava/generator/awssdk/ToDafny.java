@@ -148,7 +148,7 @@ public class ToDafny extends Generator {
      * 1. Determines the Shape Type
      * 2. invokes the correct generate for that shape type
      */
-    @SuppressWarnings("OptionalGetWithoutIsPresent")
+    @SuppressWarnings({"OptionalGetWithoutIsPresent", "DuplicatedCode"})
     MethodSpec generateConvert(final ShapeId shapeId) {
         final Shape shape = model.getShape(shapeId)
                 .orElseThrow(() -> new IllegalStateException("Cannot find shape " + shapeId));

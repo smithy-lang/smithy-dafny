@@ -10,13 +10,13 @@ import com.squareup.javapoet.TypeSpec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.lang.model.element.Modifier;
 
@@ -53,7 +53,6 @@ import static software.amazon.smithy.utils.StringUtils.uncapitalize;
  *   <li>All the fields contained by the above
  * </ul>
  */
-@SuppressWarnings("OptionalGetWithoutIsPresent")
 public class ToNative extends Generator {
     /**
      * The keys are the Dafny generated java input type,
@@ -91,22 +90,11 @@ public class ToNative extends Generator {
         );
     }
 
-    /** Additional Shapes to generate ToNative converters for. */
-    final Set<Shape> additionalShapes;
-    final Set<Shape> convertedShapes;
-    /** Enums are a special case */
-    final Set<Shape> enumShapes;
-    /** Static imports to be added to generated code. */
-    final Set<MethodReference> additionalStaticImports;
     /** The class name of the AWS SDK's Service's Shim's ToNative class. */
     final ClassName thisClassName;
 
     public ToNative(AwsSdk awsSdk) {
         super(awsSdk);
-        additionalShapes = Collections.synchronizedSet(new LinkedHashSet<>());
-        convertedShapes = Collections.synchronizedSet(new LinkedHashSet<>());
-        additionalStaticImports = Collections.synchronizedSet(new LinkedHashSet<>());
-        enumShapes = Collections.synchronizedSet(new LinkedHashSet<>());
         thisClassName = ClassName.get(dafnyNameResolver.packageName(), TO_NATIVE);
     }
 
@@ -114,68 +102,38 @@ public class ToNative extends Generator {
     public JavaFile javaFile(ShapeId serviceShapeId) {
         JavaFile.Builder builder = JavaFile
                 .builder(dafnyNameResolver.packageName(), toNative(serviceShapeId));
-        additionalStaticImports.forEach(methodReference ->
-                builder.addStaticImport(methodReference.className(), methodReference.methodName()));
         return builder.build();
     }
 
     @SuppressWarnings("DuplicatedCode")
     TypeSpec toNative(final ShapeId serviceShapeId) {
         final ServiceShape serviceShape = model.expectShape(serviceShapeId, ServiceShape.class);
-
-        final List<MethodSpec> convertOperationInputs = serviceShape
-                .getOperations().stream()
+        LinkedHashSet<ShapeId> operationInputs = serviceShape.getOperations().stream()
                 .map(shapeId -> model.expectShape(shapeId, OperationShape.class))
                 .map(OperationShape::getInputShape)
-                .map(this::generateConvertStructure)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .toList();
-
-        // We will have to make multiple passes of additionalShapes,
-        // since more "shapes" may be discovered on each pass
-        List<MethodSpec> convertAdditional = new ArrayList<>();
-        while (additionalShapes.size() > 0) {
-            // TODO: Unit tests for shape conversion discovery
-            LinkedHashSet<Shape> this_pass_shapes = new LinkedHashSet<>(additionalShapes);
-            convertedShapes.addAll(this_pass_shapes);
-            additionalShapes.clear();
-            convertAdditional.addAll(this_pass_shapes
-                    .stream()
-                    .map(Shape::toShapeId)
-                    .map(this::generateConvert)
-                    .filter(Optional::isPresent)
-                    .map(Optional::get).toList());
-        }
-
-        final List<MethodSpec> convertEnum = enumShapes
-                .stream()
-                .map(Shape::toShapeId)
-                .map(this::generateConvertEnum)
-                .toList();
-
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+        Set<ShapeId> allRelevantShapeIds = ModelUtils.findAllDependentShapes(operationInputs, model);
+        List<MethodSpec> convertRelevant = allRelevantShapeIds.stream()
+                .map(this::generateConvert).filter(Objects::nonNull).toList();
         return TypeSpec
                 .classBuilder(
                         ClassName.get(dafnyNameResolver.packageName(), TO_NATIVE))
                 .addModifiers(Modifier.PUBLIC)
-                .addMethods(convertOperationInputs)
-                .addMethods(convertAdditional)
-                .addMethods(convertEnum)
+                .addMethods(convertRelevant)
                 .build();
     }
 
-    private Optional<MethodSpec> generateConvert(ShapeId shapeId) {
+    @SuppressWarnings({"OptionalGetWithoutIsPresent", "DuplicatedCode"})
+    private MethodSpec generateConvert(ShapeId shapeId) {
         final Shape shape = model.getShape(shapeId)
                 .orElseThrow(() -> new IllegalStateException("Cannot find shape " + shapeId));
-        // Special Enum Case
-        if (shape.hasTrait(EnumTrait.class)) {
-            enumShapes.add(shape);
-            return Optional.empty();
-        }
         return switch (shape.getType()) {
-            case LIST -> Optional.of(generateConvertList(shape.asListShape().get()));
-            case MAP -> Optional.of(generateConvertMap(shape.asMapShape().get()));
-            case SET -> Optional.of(generateConvertSet(shape.asSetShape().get()));
+            // For the AWS SDK for Java V1, we do not generate converters for simple shapes
+            case BLOB, BOOLEAN, INTEGER, LONG, TIMESTAMP, MEMBER -> null;
+            case STRING -> generateConvertString(shapeId); // STRING handles enums
+            case LIST -> generateConvertList(shape.asListShape().get());
+            case MAP -> generateConvertMap(shape.asMapShape().get());
+            case SET -> generateConvertSet(shape.asSetShape().get());
             case STRUCTURE -> generateConvertStructure(shapeId);
             default -> throw new UnsupportedOperationException(
                     "ShapeId %s is of Type %s, which is not yet supported for ToDafny"
@@ -200,6 +158,7 @@ public class ToNative extends Generator {
                 .build();
     }
 
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
     private MethodSpec generateConvertMap(MapShape shape) {
         MemberShape keyShape = shape.getKey().asMemberShape().get();
         CodeBlock keyConverter = memberConversionMethodReference(keyShape).asFunctionalReference();
@@ -237,11 +196,11 @@ public class ToNative extends Generator {
 
     }
 
-    private Optional<MethodSpec> generateConvertStructure(ShapeId shapeId) {
+    private MethodSpec generateConvertStructure(ShapeId shapeId) {
         if (shapeId.equals(SMITHY_API_UNIT)) {
             // TODO: handle no input
             LOGGER.error("This Operation takes `smithy.api#Unit, which is currently unsupported: %s".formatted(shapeId));
-            return Optional.empty();
+            return null;
         }
         final StructureShape structureShape = model.expectShape(shapeId, StructureShape.class);
         String methodName = capitalize(shapeId.getName());
@@ -254,7 +213,7 @@ public class ToNative extends Generator {
 
         if (structureShape.members().size() == 0) {
             builder.addStatement("return new $T()", nativeClassName);
-            return Optional.of(builder.build());
+            return builder.build();
         }
         builder.addStatement("$T $L = new $T()", nativeClassName, VAR_OUTPUT, nativeClassName);
 
@@ -268,12 +227,7 @@ public class ToNative extends Generator {
                     // if converting a LIST or SET of enums
                     if (nativeNameResolver.isListOrSetOfEnums(member.getTarget())) {
                         // create temp array
-                        builder.addStatement("$T[] $L_$L = new $T[$L.$L.$L]",
-                                nativeNameResolver.typeForListOrSetMember(member.getTarget()),
-                                uncapitalize(member.getMemberName()), VAR_TEMP,
-                                nativeNameResolver.typeForListOrSetMember(member.getTarget()),
-                                VAR_INPUT, getMemberFieldValue(member),
-                                Dafny.aggregateSizeMethod(model.expectShape(member.getTarget()).getType()));
+                        builder.addStatement(initTempArray(member));
                         // set with conversion call and toArray
                         builder.addStatement(setWithConversionCallAndToArray(member));
                     } else {
@@ -282,7 +236,20 @@ public class ToNative extends Generator {
                     }
                     if (member.isOptional()) builder.endControlFlow();
                 });
-        return Optional.of(builder.addStatement("return $L", VAR_OUTPUT).build());
+        return builder.addStatement("return $L", VAR_OUTPUT).build();
+    }
+
+    /**
+     * Generates an Array of member's type with size of input's field.
+     * i.e:<p> {@code MemberType[] member_temp = new MemberType[dafnyValue.Member.length()];}
+     */
+    private CodeBlock initTempArray(MemberShape member) {
+        return CodeBlock.of("$T[] $L_$L = new $T[$L.$L.$L]",
+                nativeNameResolver.typeForListOrSetMember(member.getTarget()),
+                uncapitalize(member.getMemberName()), VAR_TEMP,
+                nativeNameResolver.typeForListOrSetMember(member.getTarget()),
+                VAR_INPUT, getMemberFieldValue(member),
+                Dafny.aggregateSizeMethod(model.expectShape(member.getTarget()).getType()));
     }
 
     private CodeBlock getMemberField(MemberShape shape) {
@@ -327,11 +294,8 @@ public class ToNative extends Generator {
      * Returns MethodReference that converts from
      * the Java Dafny memberShape to
      * the Java Native memberShape.
-     * Side Effects:
-     * If in namespace and Shape is not simple,
-     * adds Shape to additional converters.
      */
-    @SuppressWarnings("DuplicatedCode")
+    @SuppressWarnings({"DuplicatedCode", "OptionalGetWithoutIsPresent"})
     MethodReference memberConversionMethodReference(MemberShape memberShape) {
         Shape target = model.getShape(memberShape.getTarget()).get();
         // If the target is simple, use SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE
@@ -339,15 +303,8 @@ public class ToNative extends Generator {
             return SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(target.getType());
         }
         final String methodName = capitalize(target.getId().getName());
-        // if in namespace
+        // if in namespace reference to be created converter
         if (nativeNameResolver.isInServiceNameSpace(target.getId())) {
-            // add to additionalShapes,
-            synchronized (additionalShapes) {
-                if (!convertedShapes.contains(target)) {
-                    additionalShapes.add(target);
-                }
-            }
-            // and reference to be created converter
             return new MethodReference(thisClassName, methodName);
         }
         // Otherwise, this target must be in another namespace
@@ -355,6 +312,15 @@ public class ToNative extends Generator {
         return new MethodReference(otherNamespaceToDafny, methodName);
     }
 
+    private MethodSpec generateConvertString(ShapeId shapeId) {
+        final StringShape shape = model.expectShape(shapeId, StringShape.class);
+        if (shape.hasTrait(EnumTrait.class)) {
+            return generateConvertEnum(shapeId);
+        }
+        return null;
+    }
+
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
     private MethodSpec generateConvertEnum(ShapeId shapeId) {
         final StringShape shape = model.expectShape(shapeId, StringShape.class);
         String methodName = capitalize(shapeId.getName());
