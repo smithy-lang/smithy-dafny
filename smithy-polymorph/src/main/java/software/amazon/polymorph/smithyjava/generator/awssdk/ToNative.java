@@ -124,7 +124,7 @@ public class ToNative extends Generator {
     }
 
     @SuppressWarnings({"OptionalGetWithoutIsPresent", "DuplicatedCode"})
-    private MethodSpec generateConvert(ShapeId shapeId) {
+    MethodSpec generateConvert(ShapeId shapeId) {
         final Shape shape = model.getShape(shapeId)
                 .orElseThrow(() -> new IllegalStateException("Cannot find shape " + shapeId));
         return switch (shape.getType()) {
@@ -141,7 +141,7 @@ public class ToNative extends Generator {
         };
     }
 
-    private MethodSpec generateConvertSet(SetShape shape) {
+    MethodSpec generateConvertSet(SetShape shape) {
         MemberShape memberShape = shape.getMember();
         CodeBlock memberConverter = memberConversionMethodReference(memberShape).asFunctionalReference();
         CodeBlock genericCall = AGGREGATE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(shape.getType()).asNormalReference();
@@ -159,7 +159,7 @@ public class ToNative extends Generator {
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")
-    private MethodSpec generateConvertMap(MapShape shape) {
+    MethodSpec generateConvertMap(MapShape shape) {
         MemberShape keyShape = shape.getKey().asMemberShape().get();
         CodeBlock keyConverter = memberConversionMethodReference(keyShape).asFunctionalReference();
         MemberShape valueShape = shape.getValue().asMemberShape().get();
@@ -178,7 +178,7 @@ public class ToNative extends Generator {
                 .build();
     }
 
-    private MethodSpec generateConvertList(ListShape shape) {
+    MethodSpec generateConvertList(ListShape shape) {
         MemberShape memberShape = shape.getMember();
         CodeBlock memberConverter = memberConversionMethodReference(memberShape).asFunctionalReference();
         CodeBlock genericCall = AGGREGATE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(shape.getType()).asNormalReference();
@@ -196,7 +196,7 @@ public class ToNative extends Generator {
 
     }
 
-    private MethodSpec generateConvertStructure(ShapeId shapeId) {
+    MethodSpec generateConvertStructure(ShapeId shapeId) {
         if (shapeId.equals(SMITHY_API_UNIT)) {
             // TODO: handle no input
             LOGGER.error("This Operation takes `smithy.api#Unit, which is currently unsupported: %s".formatted(shapeId));
@@ -239,24 +239,11 @@ public class ToNative extends Generator {
         return builder.addStatement("return $L", VAR_OUTPUT).build();
     }
 
-    /**
-     * Generates an Array of member's type with size of input's field.
-     * i.e:<p> {@code MemberType[] member_temp = new MemberType[dafnyValue.Member.length()];}
-     */
-    private CodeBlock initTempArray(MemberShape member) {
-        return CodeBlock.of("$T[] $L_$L = new $T[$L.$L.$L]",
-                nativeNameResolver.typeForListOrSetMember(member.getTarget()),
-                uncapitalize(member.getMemberName()), VAR_TEMP,
-                nativeNameResolver.typeForListOrSetMember(member.getTarget()),
-                VAR_INPUT, getMemberFieldValue(member),
-                Dafny.aggregateSizeMethod(model.expectShape(member.getTarget()).getType()));
-    }
-
-    private CodeBlock getMemberField(MemberShape shape) {
+    CodeBlock getMemberField(MemberShape shape) {
         return CodeBlock.of("$L", capitalize(shape.getMemberName()));
     }
 
-    private CodeBlock getMemberFieldValue(MemberShape shape) {
+    CodeBlock getMemberFieldValue(MemberShape shape) {
         // if required, get via Field
         if (shape.isRequired()) {
             return getMemberField(shape);
@@ -265,7 +252,20 @@ public class ToNative extends Generator {
         return CodeBlock.of("$L.dtor_value()", getMemberField(shape));
     }
 
-    private CodeBlock setWithConversionCall(MemberShape member) {
+    /**
+     * Generates an Array of member's type with size of input's field.
+     * i.e:<p> {@code MemberType[] member_temp = new MemberType[dafnyValue.Member.length()];}
+     */
+    CodeBlock initTempArray(MemberShape member) {
+        return CodeBlock.of("$T[] $L_$L = new $T[$L.$L.$L]",
+                nativeNameResolver.typeForListOrSetMember(member.getTarget()),
+                uncapitalize(member.getMemberName()), VAR_TEMP,
+                nativeNameResolver.typeForListOrSetMember(member.getTarget()),
+                VAR_INPUT, getMemberFieldValue(member),
+                Dafny.aggregateSizeMethod(model.expectShape(member.getTarget()).getType()));
+    }
+
+    CodeBlock setWithConversionCall(MemberShape member) {
         return CodeBlock.of("$L.$L($L($L.$L))",
                 VAR_OUTPUT,
                 setMemberField(member),
@@ -274,7 +274,7 @@ public class ToNative extends Generator {
                 getMemberFieldValue(member));
     }
 
-    private CodeBlock setWithConversionCallAndToArray(MemberShape member) {
+    CodeBlock setWithConversionCallAndToArray(MemberShape member) {
         return CodeBlock.of("$L.$L($L($L.$L).toArray($L_$L))",
                 VAR_OUTPUT,
                 setMemberField(member),
@@ -284,7 +284,7 @@ public class ToNative extends Generator {
                 uncapitalize(member.getMemberName()), VAR_TEMP);
     }
 
-    private CodeBlock setMemberField(MemberShape shape) {
+    CodeBlock setMemberField(MemberShape shape) {
         // In AWS SDK Java v1, using `with` allows for enums or strings
         // while `set` only allows for strings.
         return CodeBlock.of("with$L", capitalize(shape.getMemberName()));
@@ -303,16 +303,19 @@ public class ToNative extends Generator {
             return SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(target.getType());
         }
         final String methodName = capitalize(target.getId().getName());
-        // if in namespace reference to be created converter
+        // if in namespace reference created converter
         if (nativeNameResolver.isInServiceNameSpace(target.getId())) {
             return new MethodReference(thisClassName, methodName);
         }
         // Otherwise, this target must be in another namespace
-        ClassName otherNamespaceToDafny = ClassName.get(target.getId().getNamespace(), TO_NATIVE);
+        ClassName otherNamespaceToDafny = ClassName.get(
+                Dafny.packageNameForNamespace(target.getId().getNamespace()),
+                TO_NATIVE
+        );
         return new MethodReference(otherNamespaceToDafny, methodName);
     }
 
-    private MethodSpec generateConvertString(ShapeId shapeId) {
+    MethodSpec generateConvertString(ShapeId shapeId) {
         final StringShape shape = model.expectShape(shapeId, StringShape.class);
         if (shape.hasTrait(EnumTrait.class)) {
             return generateConvertEnum(shapeId);
@@ -321,7 +324,7 @@ public class ToNative extends Generator {
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")
-    private MethodSpec generateConvertEnum(ShapeId shapeId) {
+    MethodSpec generateConvertEnum(ShapeId shapeId) {
         final StringShape shape = model.expectShape(shapeId, StringShape.class);
         String methodName = capitalize(shapeId.getName());
         final EnumTrait enumTrait = shape.getTrait(EnumTrait.class).orElseThrow();

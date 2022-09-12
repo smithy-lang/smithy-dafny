@@ -81,7 +81,7 @@ public class Dafny {
     }
 
     // TODO: replace with method from DafnyNameResolver
-    static String packageNameForNamespace(final String namespace) {
+    public static String packageNameForNamespace(final String namespace) {
         final Stream<String> namespaceParts = Arrays
                 .stream(namespace.split("\\."))
                 .map(StringUtils::capitalize);

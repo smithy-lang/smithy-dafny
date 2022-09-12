@@ -46,20 +46,38 @@ public class ModelConstants {
                 @box @range(min: 1, max: 1000) integer LimitType
             """;
 
-    public static String KMS_SIMPLE_SHAPES = """
+    public static String KMS_KITCHEN = """
                 namespace com.amazonaws.kms
+                use com.amazonaws.other#OtherNamespace
                 service KeyManagementService {}
                 blob CiphertextType
                 boolean BooleanType
                 string TagKeyType
                 timestamp DateType
                 integer LimitType
+                @enum([
+                  { name: "SIGN_VERIFY", value: "SIGN_VERIFY" },
+                  { name: "ENCRYPT_DECRYPT", value: "ENCRYPT_DECRYPT" },
+                ])
+                string KeyUsageType
+                list KeyUsageTypes { member: KeyUsageType }
+                string OptionalString
                 structure Kitchen {
                   @required ciphertext: CiphertextType,
                   @required isTrue: BooleanType,
                   @required name: TagKeyType,
                   @required creationDate: DateType,
-                  @required limit: LimitType
+                  @required limit: LimitType,
+                  @required keyUsage: KeyUsageType,
+                  @required otherNamespace: OtherNamespace,
+                  optionalString: OptionalString,
+                  @required listEnum: KeyUsageTypes
                 }
+            """;
+
+    public static String OTHER_NAMESPACE = """
+            namespace com.amazonaws.other
+            structure OtherNamespace {}
+            service OtherService {}
             """;
 }

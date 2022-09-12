@@ -13,11 +13,9 @@ import java.util.Map;
 import javax.lang.model.element.Modifier;
 
 import software.amazon.polymorph.smithyjava.ModelConstants;
-import software.amazon.polymorph.util.TestModel;
 import software.amazon.polymorph.util.Tokenizer;
 import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.smithy.model.Model;
-import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.ShapeId;
 
 import static org.junit.Assert.assertEquals;
@@ -25,15 +23,15 @@ import static org.junit.Assert.assertTrue;
 import static software.amazon.polymorph.smithyjava.generator.awssdk.Constants.DoSomethingOperation;
 import static software.amazon.polymorph.smithyjava.generator.awssdk.Constants.DoVoidOperation;
 import static software.amazon.polymorph.smithyjava.generator.awssdk.Constants.MockKmsShim;
-import static software.amazon.polymorph.smithyjava.nameresolver.AwsSdkHelpers.namespaceForService;
-import static software.amazon.polymorph.utils.ModelUtils.serviceFromNamespace;
 
 public class ShimTest {
     protected Shim underTest;
+    protected Model model;
 
     @Before
     public void setup() {
-        this.underTest = setupLocalModel(ModelConstants.MOCK_KMS, "kms");
+        model = TestSetupUtils.setupLocalModel(ModelConstants.MOCK_KMS);
+        underTest = new Shim(TestSetupUtils.setupAwsSdk(model, "kms"));
     }
 
     @Test
@@ -115,9 +113,5 @@ public class ShimTest {
         assertEquals(expectedPath, actualPath);
         final String actualSource = actual.get(actualPath).toString();
         Tokenizer.tokenizeAndAssertEqual(MockKmsShim, actualSource);
-    }
-
-    static Shim setupLocalModel(String rawModel, String awsName) {
-        return new Shim(TestSetupUtils.setupAwsSdk(rawModel, awsName));
     }
 }

@@ -6,17 +6,17 @@ import com.squareup.javapoet.MethodSpec;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Optional;
+
 import software.amazon.polymorph.smithyjava.ModelConstants;
-import software.amazon.polymorph.util.TestModel;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.MemberShape;
-import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.utils.StringUtils;
 
 import static org.junit.Assert.assertEquals;
-import static software.amazon.polymorph.smithyjava.ModelConstants.KMS_SIMPLE_SHAPES;
+import static software.amazon.polymorph.smithyjava.ModelConstants.KMS_KITCHEN;
 import static software.amazon.polymorph.smithyjava.generator.awssdk.ToDafnyConstants.DO_SOMETHING_REQUEST;
 import static software.amazon.polymorph.smithyjava.generator.awssdk.ToDafnyConstants.DO_SOMETHING_RESPONSE;
 import static software.amazon.polymorph.smithyjava.generator.awssdk.ToDafnyConstants.IDENTITY_NORMAL_REFERENCE;
@@ -26,20 +26,26 @@ import static software.amazon.polymorph.smithyjava.generator.awssdk.ToDafnyConst
 import static software.amazon.polymorph.smithyjava.generator.awssdk.ToDafnyConstants.MESSAGE_DECLARATION_REQUIRED;
 import static software.amazon.polymorph.smithyjava.generator.awssdk.ToDafnyConstants.TO_DAFNY_BLOB_CONVERSION;
 import static software.amazon.polymorph.smithyjava.generator.awssdk.ToDafnyConstants.TO_DAFNY_STRING_CONVERSION;
-import static software.amazon.polymorph.smithyjava.nameresolver.AwsSdkHelpers.namespaceForService;
-import static software.amazon.polymorph.utils.ModelUtils.serviceFromNamespace;
 
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 public class ToDafnyTest {
     protected ToDafny underTest;
+    protected Model model;
 
     @Before
     public void setup() {
-        underTest = setupLocalModel(ModelConstants.KMS_A_STRING_OPERATION, "kms");
+        model = TestSetupUtils.setupLocalModel(ModelConstants.KMS_A_STRING_OPERATION);
+        underTest = new ToDafny(TestSetupUtils.setupAwsSdk(model, "kms"));
     }
 
-    static ToDafny setupLocalModel(String rawModel, String awsName) {
-        return new ToDafny(TestSetupUtils.setupAwsSdk(rawModel, awsName));
+    static ToDafny setupLocal(String rawModel, String awsName, Optional<String> rawOtherModel) {
+        Model model;
+        if (rawOtherModel.isEmpty()) {
+            model = TestSetupUtils.setupLocalModel(rawModel);
+        } else {
+            model = TestSetupUtils.setupTwoLocalModel(rawModel, rawOtherModel.get());
+        }
+        return new ToDafny(TestSetupUtils.setupAwsSdk(model, awsName));
     }
 
     @Test
@@ -64,7 +70,7 @@ public class ToDafnyTest {
 
     @Test
     public void memberConversionBlob() {
-        underTest = setupLocalModel(KMS_SIMPLE_SHAPES, "kms");
+        underTest = setupLocal(KMS_KITCHEN, "kms", Optional.of(ModelConstants.OTHER_NAMESPACE));
         MemberShape memberShape = getMemberShape(
                 ShapeId.fromParts("com.amazonaws.kms", "Kitchen"),
                 underTest, "ciphertext");
@@ -77,7 +83,7 @@ public class ToDafnyTest {
 
     @Test
     public void memberConversionBoolean() {
-        underTest = setupLocalModel(KMS_SIMPLE_SHAPES, "kms");
+        underTest = setupLocal(KMS_KITCHEN, "kms", Optional.of(ModelConstants.OTHER_NAMESPACE));
         MemberShape memberShape = getMemberShape(
                 ShapeId.fromParts("com.amazonaws.kms", "Kitchen"),
                 underTest, "isTrue");
@@ -90,7 +96,7 @@ public class ToDafnyTest {
 
     @Test
     public void memberConversionString() {
-        underTest = setupLocalModel(KMS_SIMPLE_SHAPES, "kms");
+        underTest = setupLocal(KMS_KITCHEN, "kms", Optional.of(ModelConstants.OTHER_NAMESPACE));
         MemberShape memberShape = getMemberShape(
                 ShapeId.fromParts("com.amazonaws.kms", "Kitchen"),
                 underTest, "name");
@@ -103,7 +109,7 @@ public class ToDafnyTest {
 
     @Test
     public void memberConversionTimestamp() {
-        underTest = setupLocalModel(KMS_SIMPLE_SHAPES, "kms");
+        underTest = setupLocal(KMS_KITCHEN, "kms", Optional.of(ModelConstants.OTHER_NAMESPACE));
         MemberShape memberShape = getMemberShape(
                 ShapeId.fromParts("com.amazonaws.kms", "Kitchen"),
                 underTest, "creationDate");
@@ -116,7 +122,7 @@ public class ToDafnyTest {
 
     @Test
     public void memberConversionInteger() {
-        underTest = setupLocalModel(KMS_SIMPLE_SHAPES, "kms");
+        underTest = setupLocal(KMS_KITCHEN, "kms", Optional.of(ModelConstants.OTHER_NAMESPACE));
         MemberShape memberShape = getMemberShape(
                 ShapeId.fromParts("com.amazonaws.kms", "Kitchen"),
                 underTest, "limit");
