@@ -100,6 +100,18 @@ public class TokenTree {
         return 0 == this.children.size();
     }
 
+    public TokenTree prependToNonEmpty(final TokenTree toPrepend) {
+        return this.isEmpty()
+          ? this
+          : this.prepend(toPrepend);
+    }
+
+    public TokenTree appendToNonEmpty(final TokenTree toPrepend) {
+        return this.isEmpty()
+          ? this
+          : this.append(toPrepend);
+    }
+
     public TokenTree dropEmpty() {
         Stream<TokenTree> separatedTokens = children
           .stream()

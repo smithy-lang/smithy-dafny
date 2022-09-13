@@ -9,6 +9,8 @@ import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.polymorph.utils.ModelUtils;
+import software.amazon.polymorph.utils.Token;
+import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.*;
 import software.amazon.smithy.model.traits.ReadonlyTrait;
@@ -213,16 +215,15 @@ public record DafnyNameResolver(
     /**
      * Returns the Dafny module corresponding to the namespace of the given shape ID.
      */
-
     public static String dafnyModuleForNamespace(final String namespace) {
+        return dafnyNamespace(namespace) + ".Types";
+    }
+
+    public static String dafnyNamespace(final String namespace) {
         final Stream<String> namespaceParts = Arrays
           .stream(namespace.split("\\."))
           .map(StringUtils::capitalize);
-        return Joiner.on('.').join(namespaceParts.iterator()) + ".Types";
-    }
-
-    public static String dafnyModuleForShapeId(final ShapeId shapeId) {
-        return  dafnyModuleForNamespace(shapeId.getNamespace());
+        return Joiner.on('.').join(namespaceParts.iterator());
     }
 
     public static String dafnyTypesModuleForNamespace(final String namespace) {
@@ -237,12 +238,11 @@ public record DafnyNameResolver(
           .replace(".", "");
     }
 
-    public String localDafnyModuleName(final String namespace) {
-        // Don't want to `open` everything,
-        // so I need the module name prefix
-        final String[] tmp = dafnyModuleForNamespace(namespace).split("\\.");
-        return tmp[tmp.length - 1 ];
+    public static String dafnyInternalConfigModuleForNamespace(final String namespace) {
+        return "%sInternalConfig"
+          .formatted(dafnyNamespace(namespace).replace(".", ""));
     }
+
 
     public String dafnyModulePrefixForShapeId(final Shape shape) {
         final String shapeNamespace = shape.getId().getNamespace();
@@ -270,17 +270,6 @@ public record DafnyNameResolver(
         return "Dafny." + dafnyModuleForNamespace(shapeId.getNamespace());
     }
 
-    public String dependentModuleLocalName(DependentSmithyModel dependentModel) {
-        final String[] n = namespace.split(".");
-        final String[] d = dependentModel.namespace().split(".");
-
-        return dafnyTypesModuleForNamespace(IntStream
-          .range(0, d.length)
-          .filter( i -> n.length < i && n[i].equals(d[i]))
-          .mapToObj(i -> d[i])
-          .collect(Collectors.joining(".")));
-    }
-
     public String callEventTypeName() {
         return "DafnyCallEvent";
     }
@@ -299,5 +288,30 @@ public record DafnyNameResolver(
 
     public String historicalCallHistoryPostfix() {
         return "CallHistory";
+    }
+
+    public static Stream<String> modulePreludeStandardImports() {
+        return Stream
+          .of(
+            "import opened Wrappers",
+            "import opened StandardLibrary.UInt",
+            "import opened UTF8"
+          );
+    }
+
+    public static Stream<TokenTree> abstractModulePrelude(ServiceShape serviceShape)
+    {
+        final String typesModuleName = dafnyTypesModuleForNamespace(serviceShape.getId().getNamespace());
+
+        return Stream
+          .concat(
+            modulePreludeStandardImports(),
+            Stream.of("import opened Types = %s".formatted(typesModuleName))
+          )
+          .map(i -> Token.of(i));
+    }
+
+    public static String internalConfigType(ServiceShape serviceShape) {
+        return "InternalConfig";
     }
 }
