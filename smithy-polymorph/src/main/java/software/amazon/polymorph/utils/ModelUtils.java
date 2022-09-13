@@ -254,4 +254,19 @@ public class ModelUtils {
             default -> Stream.empty();
         };
     }
+
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
+    static public boolean isListOrSetOfEnums(ShapeId shapeId, Model model) {
+        Shape shape = model.expectShape(shapeId);
+        return switch (shape.getType()) {
+            case LIST -> isEnum(shape.asListShape().get().getMember().getTarget(), model);
+            case SET -> isEnum(shape.asSetShape().get().getMember().getTarget(), model);
+            default -> false;
+        };
+    }
+
+    public static boolean isEnum(ShapeId shapeId, Model model) {
+        Shape shape = model.expectShape(shapeId);
+        return shape.hasTrait(EnumTrait.class);
+    }
 }

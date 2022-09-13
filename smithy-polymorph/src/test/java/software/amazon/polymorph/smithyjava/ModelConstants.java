@@ -62,6 +62,8 @@ public class ModelConstants {
                 string KeyUsageType
                 list KeyUsageTypes { member: KeyUsageType }
                 string OptionalString
+                set Names { member: String }
+                map EncryptionContextType { key: String, value: String }
                 structure Kitchen {
                   @required ciphertext: CiphertextType,
                   @required isTrue: BooleanType,
@@ -73,6 +75,10 @@ public class ModelConstants {
                   optionalString: OptionalString,
                   @required listEnum: KeyUsageTypes
                 }
+                structure Simple {}
+                structure AOptional { optionalString: OptionalString }
+                structure RequiredListEnum { @required listEnum: KeyUsageTypes }
+                double NotSupported
             """;
 
     public static String OTHER_NAMESPACE = """

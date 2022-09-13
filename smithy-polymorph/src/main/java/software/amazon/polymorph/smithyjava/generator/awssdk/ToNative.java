@@ -38,7 +38,6 @@ import software.amazon.smithy.model.traits.EnumDefinition;
 import software.amazon.smithy.model.traits.EnumTrait;
 
 import static software.amazon.polymorph.smithyjava.generator.awssdk.Generator.Constants.IDENTITY_FUNCTION;
-import static software.amazon.polymorph.smithyjava.nameresolver.Constants.SMITHY_API_UNIT;
 import static software.amazon.smithy.utils.StringUtils.capitalize;
 import static software.amazon.smithy.utils.StringUtils.uncapitalize;
 
@@ -132,9 +131,9 @@ public class ToNative extends Generator {
             case BLOB, BOOLEAN, INTEGER, LONG, TIMESTAMP, MEMBER -> null;
             case STRING -> generateConvertString(shapeId); // STRING handles enums
             case LIST -> generateConvertList(shape.asListShape().get());
-            case MAP -> generateConvertMap(shape.asMapShape().get());
             case SET -> generateConvertSet(shape.asSetShape().get());
-            case STRUCTURE -> generateConvertStructure(shapeId);
+            case MAP -> generateConvertMap(shape.asMapShape().get());
+            case STRUCTURE -> generateConvertStructure(shape.asStructureShape().get());
             default -> throw new UnsupportedOperationException(
                     "ShapeId %s is of Type %s, which is not yet supported for ToDafny"
                             .formatted(shapeId, shape.getType()));
@@ -142,18 +141,25 @@ public class ToNative extends Generator {
     }
 
     MethodSpec generateConvertSet(SetShape shape) {
-        MemberShape memberShape = shape.getMember();
+        return generateConvertListOrSet(shape.getMember(), shape.getId(), shape.getType());
+    }
+
+    MethodSpec generateConvertList(ListShape shape) {
+        return generateConvertListOrSet(shape.getMember(), shape.getId(), shape.getType());
+    }
+
+    MethodSpec generateConvertListOrSet(MemberShape memberShape, ShapeId shapeId, ShapeType shapeType) {
         CodeBlock memberConverter = memberConversionMethodReference(memberShape).asFunctionalReference();
-        CodeBlock genericCall = AGGREGATE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(shape.getType()).asNormalReference();
+        CodeBlock genericCall = AGGREGATE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(shapeType).asNormalReference();
         ParameterSpec parameterSpec = ParameterSpec
-                .builder(dafnyNameResolver.typeForShape(shape.getId()), VAR_INPUT)
+                .builder(dafnyNameResolver.typeForShape(shapeId), VAR_INPUT)
                 .build();
         return MethodSpec
-                .methodBuilder(capitalize(shape.getId().getName()))
+                .methodBuilder(capitalize(shapeId.getName()))
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                .returns(nativeNameResolver.typeForShape(shape.getId()))
+                .returns(nativeNameResolver.typeForShape(shapeId))
                 .addParameter(parameterSpec)
-                .addStatement("return $L($L, $L)",
+                .addStatement("return $L(\n$L, \n$L)",
                         genericCall, VAR_INPUT, memberConverter)
                 .build();
     }
@@ -173,43 +179,19 @@ public class ToNative extends Generator {
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .returns(nativeNameResolver.typeForShape(shape.getId()))
                 .addParameter(parameterSpec)
-                .addStatement("return $L($L, $L, $L)",
+                .addStatement("return $L(\n$L, \n$L, \n$L)",
                         genericCall, VAR_INPUT, keyConverter, valueConverter)
                 .build();
     }
 
-    MethodSpec generateConvertList(ListShape shape) {
-        MemberShape memberShape = shape.getMember();
-        CodeBlock memberConverter = memberConversionMethodReference(memberShape).asFunctionalReference();
-        CodeBlock genericCall = AGGREGATE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(shape.getType()).asNormalReference();
-        ParameterSpec parameterSpec = ParameterSpec
-                .builder(dafnyNameResolver.typeForShape(shape.getId()), VAR_INPUT)
-                .build();
-        return MethodSpec
-                .methodBuilder(capitalize(shape.getId().getName()))
-                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                .returns(nativeNameResolver.typeForShape(shape.getId()))
-                .addParameter(parameterSpec)
-                .addStatement("return $L(\n$L, \n$L)",
-                        genericCall, VAR_INPUT, memberConverter)
-                .build();
-
-    }
-
-    MethodSpec generateConvertStructure(ShapeId shapeId) {
-        if (shapeId.equals(SMITHY_API_UNIT)) {
-            // TODO: handle no input
-            LOGGER.error("This Operation takes `smithy.api#Unit, which is currently unsupported: %s".formatted(shapeId));
-            return null;
-        }
-        final StructureShape structureShape = model.expectShape(shapeId, StructureShape.class);
-        String methodName = capitalize(shapeId.getName());
+    MethodSpec generateConvertStructure(StructureShape structureShape) {
+        String methodName = capitalize(structureShape.getId().getName());
         ClassName nativeClassName = nativeNameResolver.typeForStructure(structureShape);
         MethodSpec.Builder builder = MethodSpec
                 .methodBuilder(methodName)
                 .addModifiers(Modifier.STATIC, Modifier.PUBLIC)
                 .returns(nativeClassName)
-                .addParameter(dafnyNameResolver.typeForShape(shapeId), VAR_INPUT);
+                .addParameter(dafnyNameResolver.typeForShape(structureShape.getId()), VAR_INPUT);
 
         if (structureShape.members().size() == 0) {
             builder.addStatement("return new $T()", nativeClassName);
@@ -225,7 +207,7 @@ public class ToNative extends Generator {
                         builder.beginControlFlow("if ($L.$L.is_Some())", VAR_INPUT, getMemberField(member));
                     }
                     // if converting a LIST or SET of enums
-                    if (nativeNameResolver.isListOrSetOfEnums(member.getTarget())) {
+                    if (ModelUtils.isListOrSetOfEnums(member.getTarget(), model)) {
                         // create temp array
                         builder.addStatement(initTempArray(member));
                         // set with conversion call and toArray

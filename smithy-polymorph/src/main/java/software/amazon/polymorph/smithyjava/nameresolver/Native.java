@@ -9,10 +9,10 @@ import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.time.Instant;
 import java.util.Date;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 import javax.annotation.Nullable;
 
@@ -135,7 +135,7 @@ public class Native {
                     typeForShape(shape.asMapShape().get().getValue().getTarget())
             );
             case SET -> ParameterizedTypeName.get(
-                    ClassName.get(LinkedHashSet.class),
+                    ClassName.get(Set.class),
                     typeForShape(shape.asSetShape().get().getMember().getTarget())
             );
             case MEMBER -> typeForShape(shape.asMemberShape().get().getTarget());
@@ -175,7 +175,7 @@ public class Native {
                     typeForShapeNoEnum(shape.asListShape().get().getMember().getTarget())
             );
             case SET -> ParameterizedTypeName.get(
-                    ClassName.get(LinkedHashSet.class),
+                    ClassName.get(Set.class),
                     typeForShapeNoEnum(shape.asSetShape().get().getMember().getTarget())
             );
             default -> throw new IllegalStateException(
@@ -206,21 +206,6 @@ public class Native {
             return typeForListOrSetNoEnum(shapeId);
         }
         return typeForShape(shapeId);
-    }
-
-    @SuppressWarnings("OptionalGetWithoutIsPresent")
-    public boolean isListOrSetOfEnums(ShapeId shapeId) {
-        Shape shape = model.expectShape(shapeId);
-        return switch (shape.getType()) {
-            case LIST -> isEnum(shape.asListShape().get().getMember().getTarget());
-            case SET -> isEnum(shape.asSetShape().get().getMember().getTarget());
-            default -> false;
-        };
-    }
-
-    boolean isEnum(ShapeId shapeId) {
-        Shape shape = model.expectShape(shapeId);
-        return shape.hasTrait(EnumTrait.class);
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")
