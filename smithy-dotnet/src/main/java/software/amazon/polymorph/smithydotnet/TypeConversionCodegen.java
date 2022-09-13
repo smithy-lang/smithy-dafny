@@ -361,7 +361,7 @@ public class TypeConversionCodegen {
                 nameResolver.dafnyConcreteTypeForRegularStructure(structureShape)));
         final TokenTree assignments = TokenTree.of(ModelUtils.streamStructureMembers(structureShape)
                 .map(memberShape -> {
-                    final String dafnyMemberName = memberShape.getMemberName();
+                    final String dafnyMemberName = DotNetNameResolver.memberName(memberShape);
                     final String propertyName = nameResolver.classPropertyForStructureMember(memberShape);
                     final String propertyType = nameResolver.classPropertyTypeForStructureMember(memberShape);
                     final String memberFromDafnyConverterName = typeConverterForShape(
@@ -695,7 +695,7 @@ public class TypeConversionCodegen {
           .of(
             "case %1$s.Error_Opaque dafnyVal:"
               .formatted(DafnyNameResolver.dafnyExternNamespaceForShapeId(serviceShape.getId())),
-            "return new OpaqueError(dafnyVal.obj);",
+            "return new OpaqueError(dafnyVal._obj);",
             "default:",
             "// The switch MUST be complete for _IError, so `value` MUST NOT be an _IError. (How did you get here?) ",
             "return new OpaqueError();"
@@ -807,7 +807,7 @@ public class TypeConversionCodegen {
           .of(ModelUtils
             .streamStructureMembers(errorShape)
             .map( memberShape -> {
-                final String dafnyMemberName = memberShape.getMemberName();
+                final String dafnyMemberName = DotNetNameResolver.memberName(memberShape);
                 final String memberFromDafnyConverterName = typeConverterForShape(
                   memberShape.getId(), FROM_DAFNY);
 
