@@ -15,6 +15,7 @@ import software.amazon.smithy.model.shapes.ShapeId;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
 public class AwsSdkNativeTest {
@@ -70,6 +71,17 @@ public class AwsSdkNativeTest {
                 "com.amazonaws.services.kms.model.AWSKMSException");
         final TypeName actual = underTest.baseErrorForService();
         assertEquals(expected, actual);
+    }
+
+    @Test
+    public void checkForAwsServiceConstants() {
+        Model localModel = TestModel.setupModel(
+                (builder, modelAssembler) -> modelAssembler
+                        .addUnparsedModel("test.smithy", ModelConstants.OTHER_NAMESPACE));
+        ServiceShape serviceShape = ModelUtils.serviceFromNamespace(
+                localModel, AwsSdkHelpers.namespaceForService("other"));
+        assertThrows(IllegalArgumentException.class,
+                () -> new AwsSdkNative(serviceShape, localModel));
     }
 
     static AwsSdkNative setupLocalModel(
