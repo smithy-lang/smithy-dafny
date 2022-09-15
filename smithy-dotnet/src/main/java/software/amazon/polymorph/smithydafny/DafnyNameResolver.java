@@ -311,7 +311,11 @@ public record DafnyNameResolver(
           .map(i -> Token.of(i));
     }
 
-    public static String internalConfigType(ServiceShape serviceShape) {
+    public static String internalConfigType() {
         return "InternalConfig";
+    }
+
+    public static String validConfigPredicate() {
+        return "Valid%s?".formatted(internalConfigType());
     }
 }

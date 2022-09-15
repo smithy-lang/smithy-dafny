@@ -134,16 +134,6 @@ public class DafnyApiCodegen {
             .lineSeparated()
             .braced();
 
-
-      final String abstractModuleName = DafnyNameResolver
-        .dafnyAbstractModuleForNamespace(serviceShape.getId().getNamespace());
-      final TokenTree abstractModuleHeader = Token.of("abstract module %s".formatted(abstractModuleName));
-
-      final TokenTree abstractModuleBody = TokenTree
-        .of(generateAbstractBody())
-        .lineSeparated()
-        .braced();
-
         final Path path = Path.of("%s.dfy".formatted(typesModuleName));
         final TokenTree fullCode = TokenTree
           .of(
@@ -551,7 +541,7 @@ public class DafnyApiCodegen {
 
       final TokenTree config = implementationType.equals(ImplementationType.ABSTRACT)
         ? TokenTree.of("config: %s, ".formatted(
-          DafnyNameResolver.internalConfigType(serviceShape)))
+          DafnyNameResolver.internalConfigType()))
         : TokenTree.empty();
 
       final TokenTree operationMethod = TokenTree
@@ -559,9 +549,6 @@ public class DafnyApiCodegen {
           TokenTree
             .of(nameResolver.executableType(serviceShape, operationShape))
             .append(Token.of(nameResolver.publicMethodNameForOperation(operationShape)))
-//            .append(implementationType.equals(ImplementationType.ABSTRACT)
-//              ? TokenTree.of("<%s>".formatted(DafnyNameResolver.internalConfigType(serviceShape)))
-//              : TokenTree.empty())
             .append(generateOperationParams(operationShape)
               .prepend(config)
               .dropEmpty()
@@ -686,7 +673,6 @@ public class DafnyApiCodegen {
           ? "%s`%s".formatted(nameResolver.callHistoryFieldName(), operationShapeId.getName())
           : "";
 
-      final OperationShape operationShape = model.expectShape(operationShapeId, OperationShape.class);
       final TokenTree requires = OperationMemberRequires(operationShapeId, implementationType);
       final TokenTree ensures = OperationMemberEnsures(operationShapeId, implementationType);
       final TokenTree modifiesSet = OperationModifiesSet(operationShapeId);
@@ -753,7 +739,7 @@ public class DafnyApiCodegen {
         .orElse(TokenTree.empty());
       return Token.of(!implementationType.equals(ImplementationType.ABSTRACT)
           ? "\n && %s()".formatted(validStateInvariantName)
-          : "")
+          : "\n && %s(config)".formatted(nameResolver.validConfigPredicate()))
         .append(inputReferencesThatNeedValidState)
         .dropEmpty()
         .prependToNonEmpty(Token.of("requires"));
@@ -793,7 +779,7 @@ public class DafnyApiCodegen {
       .of(
         Token.of(!implementationType.equals(ImplementationType.ABSTRACT)
           ? "&& %s()".formatted(validStateInvariantName)
-          : ""),
+          : "&& %s(config)".formatted(nameResolver.validConfigPredicate())),
         outputReferencesThatNeedValidState
       )
       .dropEmpty()
@@ -1301,7 +1287,7 @@ public class DafnyApiCodegen {
           .lineSeparated();
 
         final String clientName = serviceShape.expectTrait(LocalServiceTrait.class).getSdkId();
-        final String internalConfig = DafnyNameResolver.internalConfigType(serviceShape);
+        final String internalConfig = DafnyNameResolver.internalConfigType();
 
         final TokenTree body =  TokenTree
           .of(
@@ -1318,6 +1304,8 @@ public class DafnyApiCodegen {
               TokenTree.of("&& this.config == config"),
               TokenTree.of("const config: Operations.%s".formatted(internalConfig)),
               TokenTree.of("predicate %s()".formatted(nameResolver.validStateInvariantName())),
+              TokenTree.of("ensures %s() ==> Operations.%s(config)"
+                .formatted(nameResolver.validStateInvariantName(), nameResolver.validConfigPredicate())),
               methods
             ).lineSeparated().braced()
           )
@@ -1408,27 +1396,6 @@ public class DafnyApiCodegen {
           .lineSeparated();
     }
 
-    public TokenTree generateAbstractInternalConfig(ServiceShape serviceShape) {
-      if (serviceShape.hasTrait(ServiceTrait.class)) {
-        return TokenTree.empty();
-      } else if (serviceShape.hasTrait(LocalServiceTrait.class)) {
-
-        final String internalConfig = DafnyNameResolver
-          .dafnyInternalConfigModuleForNamespace(serviceShape.getId().getNamespace());
-        final String internalConfigTypeName = DafnyNameResolver.internalConfigType(serviceShape);
-
-        return TokenTree
-          .of(
-            "abstract module Abstract%s {".formatted(internalConfig),
-            "type %s".formatted(internalConfigTypeName),
-            "}"
-          )
-          .lineSeparated();
-      } else {
-        throw new IllegalStateException("Service does not have supported trait");
-      }
-    }
-
     private static TokenTree generateLengthConstraint(final LengthTrait lengthTrait) {
         final String min = lengthTrait.getMin().map("%s <="::formatted).orElse("");
         final String max = lengthTrait.getMax().map("<= %s"::formatted).orElse("");
@@ -1495,27 +1462,33 @@ public class DafnyApiCodegen {
         return model;
     }
 
-
-
-
-
-
-
     private TokenTree generateAbstractOperationsModule(final ServiceShape serviceShape) {
       final TokenTree header = TokenTree.of("abstract module Abstract%sOperations"
         .formatted(DafnyNameResolver.dafnyTypesModuleForNamespace(serviceShape.getId().getNamespace()))
       );
+      final String internalConfigType = DafnyNameResolver.internalConfigType();
 
       final TokenTree body = TokenTree
         .of(
           TokenTree.of(DafnyNameResolver.abstractModulePrelude(serviceShape)),
-          TokenTree
-            .of("type %s".formatted(DafnyNameResolver.internalConfigType(serviceShape))),
+          TokenTree.of("type %s".formatted(internalConfigType)),
+          TokenTree.of("predicate %s(config: %s)"
+            .formatted(DafnyNameResolver.validConfigPredicate(), internalConfigType)),
           TokenTree.of(
               serviceShape
                 .getAllOperations()
                 .stream()
-                .flatMap(operation -> Stream.of(generateAbstractOperation(serviceShape, operation))
+                .map(operation -> TokenTree
+                    .of(
+                      generateEnsuresPubliclyPredicate(serviceShape, operation),
+                      generateBodilessOperationMethodThatEnsuresCallEvents(
+                        serviceShape,
+                        operation,
+                        ImplementationType.ABSTRACT
+                      )
+                    )
+                    .flatten()
+                    .lineSeparated()
                 )
             )
             .lineSeparated()
@@ -1531,14 +1504,14 @@ public class DafnyApiCodegen {
       final ServiceShape serviceShape,
       final ShapeId operationShapeId
     ) {
-
-      final String internalConfig = DafnyNameResolver
-        .dafnyInternalConfigModuleForNamespace(serviceShape.getId().getNamespace());
-
       return TokenTree
         .of(
           generateEnsuresPubliclyPredicate(serviceShape, operationShapeId),
-          generateBodilessOperationMethodThatEnsuresCallEvents(serviceShape, operationShapeId, ImplementationType.ABSTRACT)
+          generateBodilessOperationMethodThatEnsuresCallEvents(
+            serviceShape,
+            operationShapeId,
+            ImplementationType.ABSTRACT
+          )
         )
         .flatten()
         .lineSeparated();
