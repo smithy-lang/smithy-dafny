@@ -1235,8 +1235,7 @@ public class DafnyApiCodegen {
       } else if (serviceShape.hasTrait(LocalServiceTrait.class)) {
         final TokenTree operationsPrelude = TokenTree
           .of(
-            "import Operations : Abstract%sOperations"
-              .formatted(DafnyNameResolver.dafnyTypesModuleForNamespace(serviceShape.getId().getNamespace()))
+            "import Operations : Abstract%sOperations".formatted(moduleNamespace)
           )
           .lineSeparated();
 
@@ -1302,27 +1301,6 @@ public class DafnyApiCodegen {
               TokenTree.of("&& %s()".formatted(nameResolver.validStateInvariantName())),
               TokenTree.of("&& fresh(%s)".formatted(nameResolver.callHistoryFieldName())),
               TokenTree.of("&& this.config == config"),
-
-//              TokenTree
-//                .of(
-//                  Token.of("this.config := config;"),
-//                  Token.of("%s := new %s();"
-//                    .formatted(
-//                      nameResolver.callHistoryFieldName(),
-//                      nameResolver.historicalCallHistoryClassForResource(serviceShape)
-//                    )
-//                  ),
-//                  Token.of("%s := Operations.%s(config) + {%s};"
-//                    .formatted(
-//                      nameResolver.mutableStateFunctionName(),
-//                      nameResolver.modifiesInternalConfig(),
-//                      nameResolver.callHistoryFieldName()
-//                    )
-//                  )
-//                )
-//                .lineSeparated()
-//                .braced(),
-
               TokenTree.of("const config: Operations.%s".formatted(internalConfig)),
               TokenTree.of("predicate %s()".formatted(nameResolver.validStateInvariantName())),
               TokenTree.of("ensures %s() ==>".formatted(nameResolver.validStateInvariantName())),
@@ -1489,11 +1467,17 @@ public class DafnyApiCodegen {
     public Model getModel() {
         return model;
     }
+    private TokenTree generateAbstractOperationsModule(final ServiceShape serviceShape)
+    {
 
-    private TokenTree generateAbstractOperationsModule(final ServiceShape serviceShape) {
+      final String moduleNamespace = DafnyNameResolver
+        .dafnyNamespace(serviceShape.getId().getNamespace())
+        .replace(".", "");
       final TokenTree header = TokenTree.of("abstract module Abstract%sOperations"
-        .formatted(DafnyNameResolver.dafnyTypesModuleForNamespace(serviceShape.getId().getNamespace()))
+        .formatted(moduleNamespace)
       );
+
+
       final String internalConfigType = DafnyNameResolver.internalConfigType();
 
       final TokenTree body = TokenTree
