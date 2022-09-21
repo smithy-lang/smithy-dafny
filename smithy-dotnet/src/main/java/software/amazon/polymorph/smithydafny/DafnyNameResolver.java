@@ -318,4 +318,8 @@ public record DafnyNameResolver(
     public static String validConfigPredicate() {
         return "Valid%s?".formatted(internalConfigType());
     }
+
+    public static String modifiesInternalConfig() {
+        return "ModifiesInternalConfig";
+    }
 }

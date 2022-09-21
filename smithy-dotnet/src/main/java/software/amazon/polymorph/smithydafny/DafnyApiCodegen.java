@@ -653,6 +653,7 @@ public class DafnyApiCodegen {
         but that this relationship is not exactly the same.
      */
     public enum ImplementationType {
+        // TODO, this is too complicated, please simplify
         DEVELOPER, CODEGEN, ABSTRACT
     }
 
@@ -662,39 +663,24 @@ public class DafnyApiCodegen {
       final ImplementationType implementationType
     ) {
 
-      final String doesNotModifyHistory = !implementationType.equals(ImplementationType.ABSTRACT)
-        ? "%s - {%s}"
-        .formatted(
-          nameResolver.mutableStateFunctionName(),
-          nameResolver.callHistoryFieldName()
-        )
-        : "";
       final String historySeq = implementationType == ImplementationType.CODEGEN
           ? "%s`%s".formatted(nameResolver.callHistoryFieldName(), operationShapeId.getName())
           : "";
 
       final TokenTree requires = OperationMemberRequires(operationShapeId, implementationType);
       final TokenTree ensures = OperationMemberEnsures(operationShapeId, implementationType);
-      final TokenTree modifiesSet = OperationModifiesSet(operationShapeId);
+      final TokenTree modifiesSet = OperationModifiesInputs(operationShapeId, implementationType);
 
       final TokenTree modifies = TokenTree
         .of(
-          Token.of(doesNotModifyHistory),
-          Token.of(historySeq),
-          modifiesSet
+          modifiesSet,
+          Token.of(historySeq)
         )
         .flatten()
         .dropEmpty()
         .separated(Token.of(",\n"))
         .prependToNonEmpty(Token.of("modifies"));
-      final TokenTree decreases = TokenTree
-        .of(
-          Token.of(
-            !implementationType.equals(ImplementationType.ABSTRACT)
-              ? "%s".formatted(nameResolver.mutableStateFunctionName())
-              : ""),
-          modifiesSet
-        )
+      final TokenTree decreases = modifiesSet
         .flatten()
         .dropEmpty()
         .separated(Token.of(",\n"))
@@ -848,7 +834,8 @@ public class DafnyApiCodegen {
       // so if they are added to our output
       // then we can not prove freshness of these items
       final TokenTree removeInputs = direction == InputOutput.OUTPUT
-        ? OperationModifiesSet(operationShape.getId()).prependSeperated(Token.of("-"))
+        ? OperationModifiesInputs(operationShape.getId(), implementationType)
+            .prependSeperated(Token.of("-"))
         : TokenTree.empty();
 
       // We need to do 3 things here
@@ -936,8 +923,9 @@ public class DafnyApiCodegen {
       }
     }
 
-    private TokenTree OperationModifiesSet(
-      final ShapeId operationShapeId
+    private TokenTree OperationModifiesInputs(
+      final ShapeId operationShapeId,
+      final ImplementationType implementationType
     ){
       final OperationShape operationShape = model.expectShape(operationShapeId, OperationShape.class);
       return operationShape
@@ -951,7 +939,17 @@ public class DafnyApiCodegen {
           .map(member -> OperationMemberModifies(member, operationShape))
         )
         .map(TokenTree::of)
-        .orElse(TokenTree.empty());
+        .orElse(TokenTree.empty())
+        .prepend(
+          // This lets us keep track of any additional modifications
+          implementationType == ImplementationType.ABSTRACT
+            // The abstract operations do not have a class with a `Modifies` property
+            ? Token.of("%s(config)".formatted(nameResolver.modifiesInternalConfig()))
+            // The class has a `Modifies` property
+            : Token.of("%s"
+                .formatted(nameResolver.mutableStateFunctionName()))
+        )
+        .flatten();
     }
 
     private TokenTree OperationMemberModifies(
@@ -1298,14 +1296,44 @@ public class DafnyApiCodegen {
               .formatted(clientName, nameResolver.traitForServiceClient(serviceShape))),
             TokenTree.of(
               TokenTree.of("constructor(config: Operations.%s)".formatted(internalConfig)),
+              TokenTree.of("requires Operations.%s(config)"
+                .formatted(nameResolver.validConfigPredicate())),
               TokenTree.of("ensures"),
               TokenTree.of("&& %s()".formatted(nameResolver.validStateInvariantName())),
               TokenTree.of("&& fresh(%s)".formatted(nameResolver.callHistoryFieldName())),
               TokenTree.of("&& this.config == config"),
+
+//              TokenTree
+//                .of(
+//                  Token.of("this.config := config;"),
+//                  Token.of("%s := new %s();"
+//                    .formatted(
+//                      nameResolver.callHistoryFieldName(),
+//                      nameResolver.historicalCallHistoryClassForResource(serviceShape)
+//                    )
+//                  ),
+//                  Token.of("%s := Operations.%s(config) + {%s};"
+//                    .formatted(
+//                      nameResolver.mutableStateFunctionName(),
+//                      nameResolver.modifiesInternalConfig(),
+//                      nameResolver.callHistoryFieldName()
+//                    )
+//                  )
+//                )
+//                .lineSeparated()
+//                .braced(),
+
               TokenTree.of("const config: Operations.%s".formatted(internalConfig)),
               TokenTree.of("predicate %s()".formatted(nameResolver.validStateInvariantName())),
-              TokenTree.of("ensures %s() ==> Operations.%s(config)"
-                .formatted(nameResolver.validStateInvariantName(), nameResolver.validConfigPredicate())),
+              TokenTree.of("ensures %s() ==>".formatted(nameResolver.validStateInvariantName())),
+              TokenTree.of("&& Operations.%s(config)".formatted(nameResolver.validConfigPredicate())),
+              TokenTree.of("&& %s !in Operations.%s(config)"
+                .formatted(nameResolver.callHistoryFieldName(), nameResolver.modifiesInternalConfig())),
+              TokenTree.of("&& %s == Operations.%s(config) + {%s}"
+                .formatted(
+                  nameResolver.mutableStateFunctionName(),
+                  nameResolver.modifiesInternalConfig(),
+                  nameResolver.callHistoryFieldName())),
               methods
             ).lineSeparated().braced()
           )
@@ -1474,6 +1502,8 @@ public class DafnyApiCodegen {
           TokenTree.of("type %s".formatted(internalConfigType)),
           TokenTree.of("predicate %s(config: %s)"
             .formatted(DafnyNameResolver.validConfigPredicate(), internalConfigType)),
+          TokenTree.of("function %s(config: %s): set<object>"
+            .formatted(DafnyNameResolver.modifiesInternalConfig(), internalConfigType)),
           TokenTree.of(
               serviceShape
                 .getAllOperations()
