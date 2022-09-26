@@ -101,18 +101,14 @@ public class DafnyApiCodegen {
         final TokenTree typesModulePrelude = TokenTree
           .of(Stream
             .concat(
-                Stream
-                .of(
-                  "import opened Wrappers",
-                  "import opened StandardLibrary.UInt",
-                  "import opened UTF8"
-                ),
+              nameResolver.modulePreludeStandardImports(),
               nameResolver
                 .dependentModels()
                 .stream()
                 .map(d ->
                   "import " + nameResolver.dafnyTypesModuleForNamespace(d.namespace())))
-            .map(i -> Token.of(i)))
+            .map(i -> Token.of(i))
+          )
           .lineSeparated();
 
         final TokenTree typesModuleBody = TokenTree
@@ -138,22 +134,13 @@ public class DafnyApiCodegen {
             .lineSeparated()
             .braced();
 
-
-      final String abstractModuleName = DafnyNameResolver
-        .dafnyAbstractModuleForNamespace(serviceShape.getId().getNamespace());
-      final TokenTree abstractModuleHeader = Token.of("abstract module %s".formatted(abstractModuleName));
-
-      final TokenTree abstractModuleBody = TokenTree
-        .of(generateAbstractBody())
-        .lineSeparated()
-        .braced();
-
         final Path path = Path.of("%s.dfy".formatted(typesModuleName));
         final TokenTree fullCode = TokenTree
           .of(
             includeDirectives,
             typesModuleHeader, typesModuleBody,
-            abstractModuleHeader, abstractModuleBody
+            generateAbstractServiceModule(serviceShape),
+            generateAbstractOperationsModule(serviceShape)
           )
           .lineSeparated();
         return Map.of(path, fullCode);
@@ -321,7 +308,8 @@ public class DafnyApiCodegen {
               .getAllOperations()
               .stream()
               .flatMap(operation -> Stream.of(
-                generateBodilessOperationMethodThatEnsuresCallEvents(serviceShape, operation),
+                generateEnsuresPubliclyPredicate(serviceShape, operation),
+                generateBodilessOperationMethodThatEnsuresCallEvents(serviceShape, operation, ImplementationType.CODEGEN),
                 TokenTree.empty()
                 )
               )
@@ -545,46 +533,51 @@ public class DafnyApiCodegen {
 
     private TokenTree generateBodilessOperationMethodThatEnsuresCallEvents(
       final ServiceShape serviceShape,
-      final ShapeId operationShapeId
+      final ShapeId operationShapeId,
+      final ImplementationType implementationType
     ) {
       final OperationShape operationShape = model.expectShape(operationShapeId, OperationShape.class);
-
       final Boolean isFunction = nameResolver.isFunction(serviceShape, operationShape);
 
-      final TokenTree publicOperationMethod = TokenTree
+      final TokenTree config = implementationType.equals(ImplementationType.ABSTRACT)
+        ? TokenTree.of("config: %s, ".formatted(
+          DafnyNameResolver.internalConfigType()))
+        : TokenTree.empty();
+
+      final TokenTree operationMethod = TokenTree
         .of(
           TokenTree
             .of(nameResolver.executableType(serviceShape, operationShape))
             .append(Token.of(nameResolver.publicMethodNameForOperation(operationShape)))
-            .append(generateOperationParams(operationShape).parenthesized()),
+            .append(generateOperationParams(operationShape)
+              .prepend(config)
+              .dropEmpty()
+              .parenthesized()),
           generateOperationReturnsClause(serviceShape, operationShape),
           isFunction
             ? TokenTree.of("// Functions that are transparent do not need ensures")
             : TokenTree
             .of(
-              generateMutableInvariantForMethod(serviceShape, operationShapeId, ImplementationType.CODEGEN),
+              generateMutableInvariantForMethod(serviceShape, operationShapeId, implementationType),
               generateEnsuresForEnsuresPubliclyPredicate(operationShapeId),
-              generateEnsuresHistoricalCallEvents(operationShapeId)
+              !implementationType.equals(ImplementationType.ABSTRACT)
+                ? generateEnsuresHistoricalCallEvents(operationShapeId)
+                : TokenTree.empty()
             )
+            .dropEmpty()
             .lineSeparated()
         )
         .lineSeparated();
       return TokenTree
         .of(
-          isFunction
-            ? TokenTree
-            .of("// Functions are deterministic, no need for historical call events or ensures indirection")
-            : TokenTree
-            .of(
-              generateEnsuresPubliclyPredicate(operationShapeId)
-            )
-            .lineSeparated(),
           // This function returns the bodiless method
           // at the end of the TokenTree
           // so that other callers can compose
           // and add bodies.
-          TokenTree.of("// The public method to be called by library consumers"),
-          publicOperationMethod
+          TokenTree.of(!implementationType.equals(ImplementationType.ABSTRACT)
+            ? "// The public method to be called by library consumers"
+            : "// The private method to be refined by the library developer"),
+          operationMethod
         )
         .lineSeparated();
     }
@@ -596,7 +589,8 @@ public class DafnyApiCodegen {
 
         return TokenTree
           .of(
-            generateBodilessOperationMethodThatEnsuresCallEvents(serviceShape, operationShapeId),
+            generateEnsuresPubliclyPredicate(serviceShape, operationShapeId),
+            generateBodilessOperationMethodThatEnsuresCallEvents(serviceShape, operationShapeId, ImplementationType.CODEGEN),
             // Implement this for library developer
             // This implementation will record the call outcome
             // and return the result
@@ -659,7 +653,8 @@ public class DafnyApiCodegen {
         but that this relationship is not exactly the same.
      */
     public enum ImplementationType {
-        DEVELOPER, CODEGEN
+        // TODO, this is too complicated, please simplify
+        DEVELOPER, CODEGEN, ABSTRACT
     }
 
     private TokenTree generateMutableInvariantForMethod(
@@ -667,53 +662,51 @@ public class DafnyApiCodegen {
       final ShapeId operationShapeId,
       final ImplementationType implementationType
     ) {
-      final String hack = implementationType == ImplementationType.CODEGEN
+
+      final String historySeq = implementationType == ImplementationType.CODEGEN
           ? "%s`%s".formatted(nameResolver.callHistoryFieldName(), operationShapeId.getName())
           : "";
 
-      final OperationShape operationShape = model.expectShape(operationShapeId, OperationShape.class);
-      final TokenTree requires = OperationMemberRequires(operationShapeId);
-      final TokenTree ensures = OperationMemberEnsures(operationShapeId);
-      final TokenTree modifiesSet = OperationModifiesSet(operationShapeId);
+      final TokenTree requires = OperationMemberRequires(operationShapeId, implementationType);
+      final TokenTree ensures = OperationMemberEnsures(operationShapeId, implementationType);
+      final TokenTree modifiesSet = OperationModifiesInputs(operationShapeId, implementationType);
 
       final TokenTree modifies = TokenTree
         .of(
-          Token
-            .of("modifies")
-            .append(TokenTree
-              .of(
-                Token.of("%s - {%s}"
-                  .formatted(
-                    nameResolver.mutableStateFunctionName(),
-                    nameResolver.callHistoryFieldName()
-                  )
-                ),
-                Token.of(hack),
-                modifiesSet
-              )
-              .flatten()
-              .dropEmpty()
-              .separated(Token.of(",\n"))
-            ),
-          Token.of("// Dafny will skip type parameters when generating a default decreases clause."),
-          Token
-            .of("decreases")
-            .append(TokenTree
-              .of(
-                Token.of("%s".formatted(nameResolver.mutableStateFunctionName())),
-                modifiesSet
-              )
-              .flatten()
-              .dropEmpty()
-              .separated(Token.of(",\n"))
-            )
+          modifiesSet,
+          Token.of(historySeq)
         )
-        .lineSeparated();
+        .flatten()
+        .dropEmpty()
+        .separated(Token.of(",\n"))
+        .prependToNonEmpty(Token.of("modifies"));
+      final TokenTree decreases = modifiesSet
+        .flatten()
+        .dropEmpty()
+        .separated(Token.of(",\n"))
+        .prependToNonEmpty(TokenTree
+          .of(
+            "// Dafny will skip type parameters when generating a default decreases clause.",
+            "decreases"
+          )
+          .lineSeparated()
+        );
 
-      return TokenTree.of(requires, modifies, ensures).lineSeparated();
+      return TokenTree
+        .of(
+          requires,
+          modifies,
+          decreases,
+          ensures
+        )
+        .dropEmpty()
+        .lineSeparated();
     }
 
-    private TokenTree OperationMemberRequires(final ShapeId operationShapeId) {
+    private TokenTree OperationMemberRequires(
+      final ShapeId operationShapeId,
+      final ImplementationType implementationType
+    ) {
       final String validStateInvariantName = nameResolver.validStateInvariantName();
       final OperationShape operationShape = model.expectShape(operationShapeId, OperationShape.class);
 
@@ -725,23 +718,23 @@ public class DafnyApiCodegen {
             // Input members with a ReferenceTrait will have a `ValidState` predicate
             // This invariant needs to be maintained across all method calls
             .filter(this::OnlyReferenceStructures)
-            .map(member -> OperationMemberValidState(member, operationShape, InputOutput.INPUT))
+            .map(member -> OperationMemberValidState(member, operationShape, InputOutput.INPUT, implementationType))
             .map(TokenTree::of)
           )
         )
         .orElse(TokenTree.empty());
-
-      return TokenTree
-        .of(
-          Token.of("requires"),
-          Token.of("&& %s()".formatted(validStateInvariantName))
-            .append(inputReferencesThatNeedValidState)
-        )
+      return Token.of(!implementationType.equals(ImplementationType.ABSTRACT)
+          ? "\n && %s()".formatted(validStateInvariantName)
+          : "\n && %s(config)".formatted(nameResolver.validConfigPredicate()))
+        .append(inputReferencesThatNeedValidState)
         .dropEmpty()
-        .lineSeparated();
+        .prependToNonEmpty(Token.of("requires"));
     }
 
-  private TokenTree OperationMemberEnsures(final ShapeId operationShapeId) {
+  private TokenTree OperationMemberEnsures(
+    final ShapeId operationShapeId,
+    final ImplementationType implementationType
+  ) {
     final OperationShape operationShape = model.expectShape(operationShapeId, OperationShape.class);
     final String validStateInvariantName = nameResolver.validStateInvariantName();
 
@@ -753,7 +746,7 @@ public class DafnyApiCodegen {
         // Input members with a ReferenceTrait will have a `ValidState` predicate
         // This invariant needs to be maintained across all method calls
         .filter(this::OnlyReferenceStructures)
-        .map(member -> OperationMemberValidState(member, operationShape, InputOutput.OUTPUT))
+        .map(member -> OperationMemberValidState(member, operationShape, InputOutput.OUTPUT, implementationType))
       )
       .map(TokenTree::of)
       .map(memberTokens -> {
@@ -767,17 +760,17 @@ public class DafnyApiCodegen {
           .prepend(Token.of("&&"));
       })
       .orElse(TokenTree.empty());
+
     return TokenTree
       .of(
-        Token.of("ensures"),
-        TokenTree
-          .of(
-            Token.of("&& %s()".formatted(validStateInvariantName)),
-            outputReferencesThatNeedValidState
-          )
-          .dropEmpty()
-          .lineSeparated()
+        Token.of(!implementationType.equals(ImplementationType.ABSTRACT)
+          ? "&& %s()".formatted(validStateInvariantName)
+          : "&& %s(config)".formatted(nameResolver.validConfigPredicate())),
+        outputReferencesThatNeedValidState
       )
+      .dropEmpty()
+      .lineSeparated()
+      .prependToNonEmpty(Token.of("ensures"))
       .lineSeparated();
   }
 
@@ -806,7 +799,12 @@ public class DafnyApiCodegen {
     public enum InputOutput {
       INPUT, OUTPUT
     }
-    private TokenTree OperationMemberValidState(MemberShape member, OperationShape operationShape, final InputOutput direction) {
+    private TokenTree OperationMemberValidState(
+      final MemberShape member,
+      final OperationShape operationShape,
+      final InputOutput direction,
+      final ImplementationType implementationType
+    ) {
       final String validStateInvariantName = nameResolver.validStateInvariantName();
       final boolean isOutput = direction == InputOutput.OUTPUT;
 
@@ -836,7 +834,8 @@ public class DafnyApiCodegen {
       // so if they are added to our output
       // then we can not prove freshness of these items
       final TokenTree removeInputs = direction == InputOutput.OUTPUT
-        ? OperationModifiesSet(operationShape.getId()).prependSeperated(Token.of("-"))
+        ? OperationModifiesInputs(operationShape.getId(), implementationType)
+            .prependSeperated(Token.of("-"))
         : TokenTree.empty();
 
       // We need to do 3 things here
@@ -850,7 +849,12 @@ public class DafnyApiCodegen {
         return TokenTree
           .of(
             Token.of("%s.%s()".formatted(varName, validStateInvariantName)),
-            Token.of("%s.Modifies !! Modifies".formatted(varName)),
+            Token.of(
+              // If we are putting the method in an abstract module
+              // then there is no object to share state with
+              !implementationType.equals(ImplementationType.ABSTRACT)
+              ? "%s.Modifies !! {%s}".formatted(varName, nameResolver.callHistoryFieldName())
+              : ""),
             Token.of(isOutput ? "fresh(%s)".formatted(varName) : ""),
             isOutput
               ? Token
@@ -868,7 +872,11 @@ public class DafnyApiCodegen {
           .of(
             "&& ( %s.Some? ==>".formatted(varName),
             "&& %s.value.%s()".formatted(varName, validStateInvariantName),
-            "&& %s.value.Modifies !! Modifies".formatted(varName),
+            // If we are putting the method in an abstract module
+            // then there is no object to share state with
+            !implementationType.equals(ImplementationType.ABSTRACT)
+            ? "&& %s.value.Modifies !! {%s}".formatted(varName, nameResolver.callHistoryFieldName())
+            : "",
             isOutput ? "&& fresh(%s.value)".formatted(varName) : "",
             isOutput ? "&& fresh(%s.value.Modifies)".formatted(varName) : "",
             ")"
@@ -881,7 +889,11 @@ public class DafnyApiCodegen {
           .of(
             "&& ( forall i <- %s ::".formatted(varName),
             "&& i.%s()".formatted(validStateInvariantName),
-            "&& i.Modifies !! Modifies",
+            // If we are putting the method in an abstract module
+            // then there is no object to share state with
+            !implementationType.equals(ImplementationType.ABSTRACT)
+            ? "&& i.Modifies !! {%s}".formatted(nameResolver.callHistoryFieldName())
+            : "",
             isOutput ? "&& fresh(i)" : "",
             isOutput ? " && fresh(i.Modifies)" : "",
             ")"
@@ -895,7 +907,11 @@ public class DafnyApiCodegen {
             "&& ( %s.Some? ==>".formatted(varName),
             "&& ( forall i <- %s.value ::".formatted(varName),
             "&& i.%s()".formatted(validStateInvariantName),
-            "&& i.Modifies !! Modifies",
+            // If we are putting the method in an abstract module
+            // then there is no object to share state with
+            !implementationType.equals(ImplementationType.ABSTRACT)
+            ? "&& i.Modifies !! {%s}".formatted(nameResolver.callHistoryFieldName())
+            : "",
             isOutput ? "&& fresh(i)" : "",
             isOutput ? " && fresh(i.Modifies)" : "",
             "))"
@@ -907,7 +923,10 @@ public class DafnyApiCodegen {
       }
     }
 
-    private TokenTree OperationModifiesSet(final ShapeId operationShapeId){
+    private TokenTree OperationModifiesInputs(
+      final ShapeId operationShapeId,
+      final ImplementationType implementationType
+    ){
       final OperationShape operationShape = model.expectShape(operationShapeId, OperationShape.class);
       return operationShape
         .getInput()
@@ -920,10 +939,23 @@ public class DafnyApiCodegen {
           .map(member -> OperationMemberModifies(member, operationShape))
         )
         .map(TokenTree::of)
-        .orElse(TokenTree.empty());
+        .orElse(TokenTree.empty())
+        .prepend(
+          // This lets us keep track of any additional modifications
+          implementationType == ImplementationType.ABSTRACT
+            // The abstract operations do not have a class with a `Modifies` property
+            ? Token.of("%s(config)".formatted(nameResolver.modifiesInternalConfig()))
+            // The class has a `Modifies` property
+            : Token.of("%s"
+                .formatted(nameResolver.mutableStateFunctionName()))
+        )
+        .flatten();
     }
 
-    private TokenTree OperationMemberModifies(final MemberShape member, final OperationShape operationShape) {
+    private TokenTree OperationMemberModifies(
+      final MemberShape member,
+      final OperationShape operationShape
+    ) {
       final ShapeId directionShape = operationShape.getInput().get();
 
       if (member.getId() == directionShape.withMember(member.getMemberName())) {
@@ -1025,19 +1057,29 @@ public class DafnyApiCodegen {
     }
 
     private TokenTree generateEnsuresPubliclyPredicate(
+      final ServiceShape serviceShape,
       final ShapeId operationShapeId
     ) {
-        final OperationShape operationShape = model.expectShape(operationShapeId, OperationShape.class);
+      final OperationShape operationShape = model.expectShape(operationShapeId, OperationShape.class);
+      final Boolean isFunction = nameResolver.isFunction(serviceShape, operationShape);
 
-        return TokenTree
-          .of(
-            "predicate %s(%s, %s)"
-              .formatted(
-                nameResolver.ensuresPubliclyPredicate(operationShape),
-                generateOperationParams(operationShape),
-                generateOperationOutputParams(operationShape)
-              )
-          );
+      return isFunction
+        ? TokenTree
+        .of("// Functions are deterministic, no need for historical call events or ensures indirection")
+        : TokenTree
+        .of(
+          TokenTree
+            .of(
+              "predicate %s(%s, %s)"
+                .formatted(
+                  nameResolver.ensuresPubliclyPredicate(operationShape),
+                  generateOperationParams(operationShape),
+                  generateOperationOutputParams(operationShape)
+                )
+            )
+        )
+        .lineSeparated();
+
     }
 
     private TokenTree generateEnsuresForEnsuresPubliclyPredicate(
@@ -1149,18 +1191,8 @@ public class DafnyApiCodegen {
     }
 
     public TokenTree generateAbstractBody() {
-        final String typesModuleName = DafnyNameResolver
-          .dafnyTypesModuleForNamespace(serviceShape.getId().getNamespace());
-
         final TokenTree abstractModulePrelude = TokenTree
-          .of(Stream
-            .of(
-              "import opened Wrappers",
-              "import opened StandardLibrary.UInt",
-              "import opened UTF8",
-              "import opened Types = %s".formatted(typesModuleName)
-            )
-            .map(i -> Token.of(i)))
+          .of(DafnyNameResolver.abstractModulePrelude(serviceShape))
           .lineSeparated();
 
       if (serviceShape.hasTrait(ServiceTrait.class)) {
@@ -1173,10 +1205,126 @@ public class DafnyApiCodegen {
       } else if (serviceShape.hasTrait(LocalServiceTrait.class)) {
           return TokenTree
             .of(
-              abstractModulePrelude,
-              generateAbstractLocalService(serviceShape)
+              abstractModulePrelude, generateAbstractLocalService(serviceShape)
             )
             .lineSeparated();
+      } else {
+        throw new IllegalStateException("Service does not have supported trait");
+      }
+    }
+
+    public TokenTree generateAbstractServiceModule(ServiceShape serviceShape) {
+      final String moduleNamespace = DafnyNameResolver
+        .dafnyNamespace(serviceShape.getId().getNamespace())
+        .replace(".", "");
+      final TokenTree abstractModulePrelude = TokenTree
+        .of(DafnyNameResolver.abstractModulePrelude(serviceShape))
+        .lineSeparated();
+      final TokenTree moduleHeader = TokenTree.of("abstract module Abstract%sService".formatted(moduleNamespace));
+
+      if (serviceShape.hasTrait(ServiceTrait.class)) {
+        return moduleHeader
+          .append(Token
+            .of(
+              abstractModulePrelude,
+              generateAbstractAwsServiceClass(serviceShape)
+            )
+            .lineSeparated()
+            .braced()
+          );
+      } else if (serviceShape.hasTrait(LocalServiceTrait.class)) {
+        final TokenTree operationsPrelude = TokenTree
+          .of(
+            "import Operations : Abstract%sOperations".formatted(moduleNamespace)
+          )
+          .lineSeparated();
+
+        final TokenTree methods = TokenTree
+          .of(
+            serviceShape
+              .getAllOperations()
+              .stream()
+              .flatMap(operation -> Stream.of(
+                nameResolver.isFunction(serviceShape, model.expectShape(operation, OperationShape.class))
+                  ? Token.empty()
+                  : TokenTree
+                  .of(
+                    generateEnsuresPubliclyPredicate(serviceShape, operation),
+                    TokenTree
+                      .of(
+                        "{Operations.%s(input, output)}"
+                          .formatted(
+                            nameResolver.ensuresPubliclyPredicate(model.expectShape(operation, OperationShape.class))
+                          )
+                      )
+                  )
+                  .lineSeparated(),
+                generateBodilessOperationMethodThatEnsuresCallEvents(serviceShape, operation, ImplementationType.CODEGEN),
+                TokenTree
+                  .of(
+                    nameResolver.isFunction(serviceShape, model.expectShape(operation, OperationShape.class))
+                    ? TokenTree.of("Operations.%s(config, input)".formatted(
+                      operation.getName()
+                    ))
+                    : TokenTree.of(
+                      Token.of("output := Operations.%s(config, input);"
+                        .formatted(
+                          operation.getName()
+                        )),
+                        generateAccumulateHistoricalCallEvents(operation)
+                    )
+                      .lineSeparated()
+                  )
+                  .lineSeparated()
+                  .braced(),
+                  TokenTree.empty()
+                )
+              )
+          )
+          .lineSeparated();
+
+        final String clientName = serviceShape.expectTrait(LocalServiceTrait.class).getSdkId();
+        final String internalConfig = DafnyNameResolver.internalConfigType();
+
+        final TokenTree body =  TokenTree
+          .of(
+            abstractModulePrelude,
+            operationsPrelude,
+            generateAbstractLocalService(serviceShape),
+            TokenTree.of("class %sClient extends %s"
+              .formatted(clientName, nameResolver.traitForServiceClient(serviceShape))),
+            TokenTree.of(
+              TokenTree.of("constructor(config: Operations.%s)".formatted(internalConfig)),
+              TokenTree.of("requires Operations.%s(config)"
+                .formatted(nameResolver.validConfigPredicate())),
+              TokenTree.of("ensures"),
+              TokenTree.of("&& %s()".formatted(nameResolver.validStateInvariantName())),
+              TokenTree.of("&& fresh(%s)".formatted(nameResolver.callHistoryFieldName())),
+              TokenTree.of("&& this.config == config"),
+              TokenTree.of("const config: Operations.%s".formatted(internalConfig)),
+              TokenTree.of("predicate %s()".formatted(nameResolver.validStateInvariantName())),
+              TokenTree.of("ensures %s() ==>".formatted(nameResolver.validStateInvariantName())),
+              TokenTree.of("&& Operations.%s(config)".formatted(nameResolver.validConfigPredicate())),
+              TokenTree.of("&& %s !in Operations.%s(config)"
+                .formatted(nameResolver.callHistoryFieldName(), nameResolver.modifiesInternalConfig())),
+              TokenTree.of("&& %s == Operations.%s(config) + {%s}"
+                .formatted(
+                  nameResolver.mutableStateFunctionName(),
+                  nameResolver.modifiesInternalConfig(),
+                  nameResolver.callHistoryFieldName())),
+              methods
+            ).lineSeparated().braced()
+          )
+          .lineSeparated()
+          .braced();
+
+
+        return TokenTree
+          .of(
+            Token.of("abstract module Abstract%sService".formatted(moduleNamespace)),
+            body
+          )
+          .lineSeparated();
       } else {
         throw new IllegalStateException("Service does not have supported trait");
       }
@@ -1191,8 +1339,7 @@ public class DafnyApiCodegen {
 
         final TokenTree defaultConfig = TokenTree
           .of("function method %s(): %s".formatted(defaultFunctionMethodName, configTypeName));
-
-
+        
         final TokenTree serviceMethod = TokenTree
           .of(
             "method %s(config: %s := %s())"
@@ -1203,8 +1350,8 @@ public class DafnyApiCodegen {
               ),
             // Yes, Error is hard coded
             // this can work because we need to be able Errors from other modules...
-            "returns (res: Result<%s, Error>)"
-              .formatted(nameResolver.traitForServiceClient(serviceShape)),
+            "returns (res: Result<%sClient, Error>)"
+              .formatted(localServiceTrait.getSdkId()),
             "ensures res.Success? ==> ",
             "&& fresh(res.value)",
             "&& fresh(res.value.%s)".formatted(nameResolver.mutableStateFunctionName()),
@@ -1319,5 +1466,68 @@ public class DafnyApiCodegen {
     @VisibleForTesting
     public Model getModel() {
         return model;
+    }
+    private TokenTree generateAbstractOperationsModule(final ServiceShape serviceShape)
+    {
+
+      final String moduleNamespace = DafnyNameResolver
+        .dafnyNamespace(serviceShape.getId().getNamespace())
+        .replace(".", "");
+      final TokenTree header = TokenTree.of("abstract module Abstract%sOperations"
+        .formatted(moduleNamespace)
+      );
+
+
+      final String internalConfigType = DafnyNameResolver.internalConfigType();
+
+      final TokenTree body = TokenTree
+        .of(
+          TokenTree.of(DafnyNameResolver.abstractModulePrelude(serviceShape)),
+          TokenTree.of("type %s".formatted(internalConfigType)),
+          TokenTree.of("predicate %s(config: %s)"
+            .formatted(DafnyNameResolver.validConfigPredicate(), internalConfigType)),
+          TokenTree.of("function %s(config: %s): set<object>"
+            .formatted(DafnyNameResolver.modifiesInternalConfig(), internalConfigType)),
+          TokenTree.of(
+              serviceShape
+                .getAllOperations()
+                .stream()
+                .map(operation -> TokenTree
+                    .of(
+                      generateEnsuresPubliclyPredicate(serviceShape, operation),
+                      generateBodilessOperationMethodThatEnsuresCallEvents(
+                        serviceShape,
+                        operation,
+                        ImplementationType.ABSTRACT
+                      )
+                    )
+                    .flatten()
+                    .lineSeparated()
+                )
+            )
+            .lineSeparated()
+        )
+        .flatten()
+        .lineSeparated()
+        .braced();
+
+      return TokenTree.of(header, body);
+    }
+
+    private TokenTree generateAbstractOperation(
+      final ServiceShape serviceShape,
+      final ShapeId operationShapeId
+    ) {
+      return TokenTree
+        .of(
+          generateEnsuresPubliclyPredicate(serviceShape, operationShapeId),
+          generateBodilessOperationMethodThatEnsuresCallEvents(
+            serviceShape,
+            operationShapeId,
+            ImplementationType.ABSTRACT
+          )
+        )
+        .flatten()
+        .lineSeparated();
     }
 }

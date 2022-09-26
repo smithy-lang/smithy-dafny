@@ -849,4 +849,11 @@ public class DotNetNameResolver {
                 "model=" + model + ", " +
                 "serviceShape=" + serviceShape + ']';
     }
+
+    // The member name of something converted from Dafny
+    // will not exactly match the member name in Dafny.
+    // See: https://github.com/dafny-lang/dafny/pull/2525
+    public static String memberName(final MemberShape memberShape) {
+        return "_%s".formatted(memberShape.getMemberName());
+    }
 }
