@@ -167,13 +167,6 @@ public class ShimCodegen {
             body
           )
           .lineSeparated();
-
-//        return Token.of("public %s(%s config) { this.%s = impl; }"
-//          .formatted(
-//            ,
-//          nameResolver.shimClassForResource(serviceShape.getId()),
-//          nameResolver.dafnyTypeForShape(serviceShape.getId()),
-//          IMPL_NAME));
     }
 
     public TokenTree generateConvertInput(final ShapeId operationShapeId) {

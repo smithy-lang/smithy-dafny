@@ -121,7 +121,6 @@ public class DafnyApiCodegen {
                   nameResolver.callEventTypeName(),
                   nameResolver.callEventTypeName()
                 )),
-              TokenTree.of("function Last<T>(s: seq<T>): T requires |s| > 0 { s[|s|-1] }"),
               TokenTree.empty(),
               TokenTree.of("// Begin Generated Types"),
               TokenTree.empty(),
@@ -428,6 +427,7 @@ public class DafnyApiCodegen {
             .lineSeparated()
             .braced());
     }
+
     // This is basically a duplicate of generateHistoricalCallEventsForService
     // however Java does not do well with Union types
     // so I do not know of an elegant way to dedupe the code
@@ -1517,22 +1517,5 @@ public class DafnyApiCodegen {
         .braced();
 
       return TokenTree.of(header, body);
-    }
-
-    private TokenTree generateAbstractOperation(
-      final ServiceShape serviceShape,
-      final ShapeId operationShapeId
-    ) {
-      return TokenTree
-        .of(
-          generateEnsuresPubliclyPredicate(serviceShape, operationShapeId),
-          generateBodilessOperationMethodThatEnsuresCallEvents(
-            serviceShape,
-            operationShapeId,
-            ImplementationType.ABSTRACT
-          )
-        )
-        .flatten()
-        .lineSeparated();
     }
 }
