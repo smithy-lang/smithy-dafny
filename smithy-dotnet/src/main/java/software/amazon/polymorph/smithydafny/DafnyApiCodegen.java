@@ -128,7 +128,7 @@ public class DafnyApiCodegen {
               generatedTypes,
               // Error types are generated *after*
               // all other types to account
-              // for any dependant modules
+              // for any dependent modules
               generateModeledErrorDataType()
             )
             .lineSeparated()
