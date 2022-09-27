@@ -126,7 +126,7 @@ public class DafnyApiCodegen {
               TokenTree.of("// Begin Generated Types"),
               TokenTree.empty(),
               generatedTypes,
-              // Error types are generates *after*
+              // Error types are generated *after*
               // all other types to account
               // for any dependant modules
               generateModeledErrorDataType()
