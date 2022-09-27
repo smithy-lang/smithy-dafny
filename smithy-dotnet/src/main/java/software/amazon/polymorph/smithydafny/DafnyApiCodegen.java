@@ -138,7 +138,8 @@ public class DafnyApiCodegen {
         final TokenTree fullCode = TokenTree
           .of(
             includeDirectives,
-            typesModuleHeader, typesModuleBody,
+            typesModuleHeader,
+            typesModuleBody,
             generateAbstractServiceModule(serviceShape),
             generateAbstractOperationsModule(serviceShape)
           )
