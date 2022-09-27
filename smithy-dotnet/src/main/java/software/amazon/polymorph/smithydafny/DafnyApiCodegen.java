@@ -504,7 +504,7 @@ public class DafnyApiCodegen {
             nameResolver.mutableStateFunctionName(),
             nameResolver.callHistoryFieldName()),
           "// If you do not need to mutate anything:",
-          "// %s := {History};".formatted(
+          "// %s := {%s};".formatted(
             nameResolver.mutableStateFunctionName(),
             nameResolver.callHistoryFieldName()
           ),
