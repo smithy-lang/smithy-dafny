@@ -493,9 +493,9 @@ public class DafnyApiCodegen {
     private TokenTree generateMutableInvariantInterface() {
       return TokenTree
         .of(
-          "// Helper to define any additional modifies/reads clauses",
-          "// If your operations need to mutate state add it",
-          "// in your constructor function:",
+          "// Helper to define any additional modifies/reads clauses.",
+          "// If your operations need to mutate state,",
+          "// add it in your constructor function:",
           "// %s := {your, fields, here, %s};".formatted(
             nameResolver.mutableStateFunctionName(),
             nameResolver.callHistoryFieldName()),
