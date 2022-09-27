@@ -145,7 +145,7 @@ public class AwsSdkShimCodegen {
      */
     public TokenTree generateErrorTypeShim() {
         final String dafnyErrorAbstractType = DotNetNameResolver.dafnyTypeForCommonServiceError(serviceShape);
-        // TODO: Fix me
+        // TODO: Add the hard coded value `Error_Opaque` DafnyNameResolver
         final String dafnyUnknownErrorType = "%s.Error_Opaque"
           .formatted(DafnyNameResolver.dafnyExternNamespaceForShapeId(serviceShape.getId()));
 

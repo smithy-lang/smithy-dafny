@@ -84,7 +84,7 @@ public record DafnyNameResolver(
             }
             case SERVICE -> traitForServiceClient(shape.asServiceShape().get());
             case RESOURCE -> traitForResource(shape.asResourceShape().get());
-            // Member calls baseTypeForShape...
+            // Member calls baseTypeForShape on their type
             case MEMBER -> baseTypeForMember(shape.asMemberShape().get());
             case UNION -> dafnyTypeNameShape(shape);
             // TODO create/use better timestamp type in Dafny libraries
