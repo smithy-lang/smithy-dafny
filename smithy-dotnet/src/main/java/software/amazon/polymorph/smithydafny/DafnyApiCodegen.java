@@ -428,6 +428,10 @@ public class DafnyApiCodegen {
             .lineSeparated()
             .braced());
     }
+    // This is basically a duplicate of generateHistoricalCallEventsForService
+    // however Java does not do well with Union types
+    // so I do not know of an elegant way to dedupe the code
+    // since they have to take different arguments.
     public TokenTree generateHistoricalCallEventsForResource(final ResourceShape resource) {
 
         final TokenTree className = TokenTree
