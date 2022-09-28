@@ -9,6 +9,8 @@ import com.google.common.base.Splitter;
 import software.amazon.polymorph.smithydafny.DafnyNameResolver;
 import software.amazon.polymorph.smithydotnet.nativeWrapper.NativeWrapperCodegen;
 import software.amazon.polymorph.traits.LocalServiceTrait;
+import software.amazon.polymorph.utils.AwsSdkNameResolverHelpers;
+import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.polymorph.traits.PositionalTrait;
@@ -61,7 +63,7 @@ public class DotNetNameResolver {
      */
     public String namespaceForShapeId(final ShapeId shapeId) {
         // TODO remove special AWS SDK special-case when https://github.com/awslabs/polymorph/issues/7 is resolved
-        final Function<String, String> segmentMapper = isAwsSdkServiceId(shapeId)
+        final Function<String, String> segmentMapper = AwsSdkNameResolverHelpers.isAwsSdkServiceId(shapeId)
                 ? StringUtils::capitalize
                 : DotNetNameResolver::capitalizeNamespaceSegment;
 
@@ -134,7 +136,7 @@ public class DotNetNameResolver {
     }
 
     public static String interfaceForService(final ShapeId serviceShapeId) {
-        if (isAwsSdkServiceId(serviceShapeId)) {
+        if (AwsSdkNameResolverHelpers.isAwsSdkServiceId(serviceShapeId)) {
             return "I" + serviceShapeId.getName();
         }
 
@@ -329,7 +331,7 @@ public class DotNetNameResolver {
     protected String baseTypeForService(final ServiceShape serviceShape) {
         final ShapeId shapeId = serviceShape.getId();
 
-        if (isAwsSdkServiceId(shapeId)) {
+        if (AwsSdkNameResolverHelpers.isAwsSdkServiceId(shapeId)) {
             return new AwsSdkDotNetNameResolver(model, serviceShape).baseTypeForService(serviceShape);
         }
 
@@ -535,7 +537,7 @@ public class DotNetNameResolver {
         final String typePrefix = concrete ? "" : "_I";
         // We explicitly specify the Dafny namespace just in case of collisions.
         return "%s.%s%s".formatted(
-                DafnyNameResolver.dafnyExternNamespaceForShapeId(shapeId),
+                DafnyNameResolverHelpers.dafnyExternNamespaceForShapeId(shapeId),
                 typePrefix,
                 shapeId.getName());
     }
@@ -580,14 +582,14 @@ public class DotNetNameResolver {
         if (structureShape.hasTrait(ErrorTrait.class)) {
             // TODO: This Error_ should be consolidated
             return "%s.Error_%s".formatted(
-                    DafnyNameResolver.dafnyExternNamespaceForShapeId(shapeId),
+                    DafnyNameResolverHelpers.dafnyExternNamespaceForShapeId(shapeId),
                     dafnyCompilesExtra_(shapeId));
         }
 
         // The Dafny type of other structures is simply the structure's name.
         // We explicitly specify the Dafny namespace just in case of collisions.
         return "%s._I%s".formatted(
-                DafnyNameResolver.dafnyExternNamespaceForShapeId(shapeId),
+                DafnyNameResolverHelpers.dafnyExternNamespaceForShapeId(shapeId),
                 dafnyCompilesExtra_(shapeId));
     }
 
@@ -602,7 +604,7 @@ public class DotNetNameResolver {
 
         // TODO is this adequate
         return "%s._I%s".formatted(
-          DafnyNameResolver.dafnyExternNamespaceForShapeId(unionId),
+          DafnyNameResolverHelpers.dafnyExternNamespaceForShapeId(unionId),
           unionId.getName());
     }
 
@@ -615,7 +617,7 @@ public class DotNetNameResolver {
     public String dafnyConcreteTypeForRegularStructure(final StructureShape structureShape) {
         final ShapeId shapeId = structureShape.getId();
         return "%s.%s".formatted(
-                DafnyNameResolver.dafnyExternNamespaceForShapeId(shapeId),
+                DafnyNameResolverHelpers.dafnyExternNamespaceForShapeId(shapeId),
                 dafnyCompilesExtra_(shapeId));
     }
 
@@ -643,8 +645,8 @@ public class DotNetNameResolver {
     private String dafnyTypeForService(final ServiceShape serviceShape) {
         final ShapeId serviceShapeId = serviceShape.getId();
 
-        if (isAwsSdkServiceId(serviceShapeId)) {
-            return "%s.%sClient".formatted(DafnyNameResolver.dafnyExternNamespaceForShapeId(serviceShapeId), interfaceForService(serviceShapeId));
+        if (AwsSdkNameResolverHelpers.isAwsSdkServiceId(serviceShapeId)) {
+            return "%s.%sClient".formatted(DafnyNameResolverHelpers.dafnyExternNamespaceForShapeId(serviceShapeId), interfaceForService(serviceShapeId));
         }
 
         return DafnyNameResolver.traitNameForServiceClient(serviceShape);
@@ -652,7 +654,7 @@ public class DotNetNameResolver {
 
     private String dafnyTypeForResource(final ResourceShape resourceShape) {
         final ShapeId resourceShapeId = resourceShape.getId();
-        return "%s.%s".formatted(DafnyNameResolver.dafnyExternNamespaceForShapeId(resourceShapeId), interfaceForResource(resourceShapeId));
+        return "%s.%s".formatted(DafnyNameResolverHelpers.dafnyExternNamespaceForShapeId(resourceShapeId), interfaceForResource(resourceShapeId));
     }
 
     /**
@@ -666,7 +668,7 @@ public class DotNetNameResolver {
     public static String dafnyBaseTypeForServiceError(final ServiceShape serviceShape) {
         final String serviceName = ModelUtils.serviceNameWithoutTrailingFactory(serviceShape);
         return "%s.%sBaseException".formatted(
-                DafnyNameResolver.dafnyExternNamespaceForShapeId(serviceShape.getId()),
+                DafnyNameResolverHelpers.dafnyExternNamespaceForShapeId(serviceShape.getId()),
                 serviceName
         );
     }
@@ -680,7 +682,7 @@ public class DotNetNameResolver {
         final ShapeId errorShapeId = errorShape.getId();
         // TODO: This Error_ string is unfortunate, move it somewhere
         return "%s.Error_%s".formatted(
-          DafnyNameResolver.dafnyExternNamespaceForShapeId(errorShapeId),
+          DafnyNameResolverHelpers.dafnyExternNamespaceForShapeId(errorShapeId),
           errorShapeId.getName());
     }
 
@@ -702,7 +704,7 @@ public class DotNetNameResolver {
     public static String dafnyTypeForCommonServiceError(final ServiceShape serviceShape) {
         // TODO The Error string should be consolidated
         return "%s._IError".formatted(
-                DafnyNameResolver.dafnyExternNamespaceForShapeId(serviceShape.getId())
+                DafnyNameResolverHelpers.dafnyExternNamespaceForShapeId(serviceShape.getId())
         );
     }
 
@@ -763,7 +765,7 @@ public class DotNetNameResolver {
     public String dafnyImplForServiceClient() {
         return "%1$s.%2$s"
           .formatted(
-            DafnyNameResolver
+            DafnyNameResolverHelpers
               .dafnyExternNamespaceForShapeId(serviceShape.getId())
               // TODO this replace is a bit of a HACK
               .replace(".Types", ".__default"),
@@ -822,11 +824,6 @@ public class DotNetNameResolver {
 
     public ServiceShape getServiceShape() {
         return serviceShape;
-    }
-
-    // TODO better way to determine if AWS SDK
-    private static boolean isAwsSdkServiceId(ShapeId serviceShapeId) {
-        return serviceShapeId.getNamespace().startsWith("com.amazonaws.");
     }
 
     @Override

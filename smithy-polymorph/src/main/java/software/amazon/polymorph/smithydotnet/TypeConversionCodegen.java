@@ -16,12 +16,12 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import software.amazon.polymorph.smithydafny.DafnyNameResolver;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.polymorph.traits.ExtendableTrait;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
+import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.polymorph.utils.Token;
 import software.amazon.polymorph.utils.TokenTree;
@@ -682,7 +682,7 @@ public class TypeConversionCodegen {
         final TokenTree handleBaseFromDafny = TokenTree
           .of(
             "case %1$s.Error_Opaque dafnyVal:"
-              .formatted(DafnyNameResolver.dafnyExternNamespaceForShapeId(serviceShape.getId())),
+              .formatted(DafnyNameResolverHelpers.dafnyExternNamespaceForShapeId(serviceShape.getId())),
             "return new OpaqueError(dafnyVal.obj);",
             "default:",
             "// The switch MUST be complete for _IError, so `value` MUST NOT be an _IError. (How did you get here?) ",
@@ -722,14 +722,14 @@ public class TypeConversionCodegen {
             "// OpaqueError is redundant, but listed for completeness.",
             "case OpaqueError exception:",
             "return new %1$s.Error_Opaque(exception);"
-              .formatted(DafnyNameResolver.dafnyExternNamespaceForShapeId(serviceShape.getId())),
+              .formatted(DafnyNameResolverHelpers.dafnyExternNamespaceForShapeId(serviceShape.getId())),
             "case %1$s exception:".formatted(cSharpType),
             "return new %1$s.Error_Opaque(exception);"
-              .formatted(DafnyNameResolver.dafnyExternNamespaceForShapeId(serviceShape.getId())),
+              .formatted(DafnyNameResolverHelpers.dafnyExternNamespaceForShapeId(serviceShape.getId())),
             "default:",
             "// The switch MUST be complete for System.Exception, so `value` MUST NOT be an System.Exception. (How did you get here?) ",
             "return new %1$s.Error_Opaque(value);"
-              .formatted(DafnyNameResolver.dafnyExternNamespaceForShapeId(serviceShape.getId()))
+              .formatted(DafnyNameResolverHelpers.dafnyExternNamespaceForShapeId(serviceShape.getId()))
           )
           .lineSeparated();
 

@@ -8,6 +8,7 @@ import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
+import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.polymorph.utils.Token;
 import software.amazon.polymorph.utils.TokenTree;
@@ -92,7 +93,7 @@ public class DafnyApiCodegen {
         final String typesModuleName = DafnyNameResolver.dafnyTypesModuleForNamespace(namespace);
         final TokenTree typesModuleHeader = Token.of("module {:extern \"%s\" } %s"
           .formatted(
-            DafnyNameResolver.dafnyExternNamespaceForShapeId(serviceShape.getId()),
+            DafnyNameResolverHelpers.dafnyExternNamespaceForShapeId(serviceShape.getId()),
             typesModuleName
           ));
 

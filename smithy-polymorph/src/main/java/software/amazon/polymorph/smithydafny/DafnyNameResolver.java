@@ -3,11 +3,10 @@
 
 package software.amazon.polymorph.smithydafny;
 
-import com.google.common.base.Joiner;
-
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
+import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.*;
@@ -16,13 +15,12 @@ import software.amazon.smithy.utils.StringUtils;
 
 import java.nio.file.Path;
 import javax.annotation.Nullable;
-import java.util.Arrays;
+
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 import java.util.HashSet;
 
 public record DafnyNameResolver(
@@ -210,29 +208,18 @@ public record DafnyNameResolver(
         return "IsValid_%s".formatted(unqualifiedTypeName);
     }
 
-    /**
-     * Returns the Dafny module corresponding to the namespace of the given shape ID.
-     */
-
-    public static String dafnyModuleForNamespace(final String namespace) {
-        final Stream<String> namespaceParts = Arrays
-          .stream(namespace.split("\\."))
-          .map(StringUtils::capitalize);
-        return Joiner.on('.').join(namespaceParts.iterator()) + ".Types";
-    }
-
     public static String dafnyModuleForShapeId(final ShapeId shapeId) {
-        return  dafnyModuleForNamespace(shapeId.getNamespace());
+        return  DafnyNameResolverHelpers.dafnyModuleForNamespace(shapeId.getNamespace());
     }
 
     public static String dafnyTypesModuleForNamespace(final String namespace) {
         // The namespace has dots
-        return (dafnyModuleForNamespace(namespace)).replace(".", "");
+        return (DafnyNameResolverHelpers.dafnyModuleForNamespace(namespace)).replace(".", "");
     }
 
     public static String dafnyAbstractModuleForNamespace(final String namespace) {
         // The namespace has dots
-        return (dafnyModuleForNamespace(namespace))
+        return (DafnyNameResolverHelpers.dafnyModuleForNamespace(namespace))
           .replace(".Types", "Abstract")
           .replace(".", "");
     }
@@ -240,7 +227,7 @@ public record DafnyNameResolver(
     public String localDafnyModuleName(final String namespace) {
         // Don't want to `open` everything,
         // so I need the module name prefix
-        final String[] tmp = dafnyModuleForNamespace(namespace).split("\\.");
+        final String[] tmp = DafnyNameResolverHelpers.dafnyModuleForNamespace(namespace).split("\\.");
         return tmp[tmp.length - 1 ];
     }
 
@@ -261,13 +248,6 @@ public record DafnyNameResolver(
             // This is "local" and so does not need any Module name...
             return "";
         }
-    }
-
-    /**
-     * Returns the Dafny {@code {:extern}} namespace corresponding to the namespace of the given shape ID.
-     */
-    public static String dafnyExternNamespaceForShapeId(final ShapeId shapeId) {
-        return "Dafny." + dafnyModuleForNamespace(shapeId.getNamespace());
     }
 
     public String dependentModuleLocalName(DependentSmithyModel dependentModel) {

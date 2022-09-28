@@ -4,6 +4,7 @@
 package software.amazon.polymorph.smithydotnet;
 
 import software.amazon.polymorph.smithydafny.DafnyNameResolver;
+import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.polymorph.utils.Token;
 import software.amazon.polymorph.utils.TokenTree;
@@ -147,7 +148,7 @@ public class AwsSdkShimCodegen {
         final String dafnyErrorAbstractType = DotNetNameResolver.dafnyTypeForCommonServiceError(serviceShape);
         // TODO: Fix me
         final String dafnyUnknownErrorType = "%s.Error_Opaque"
-          .formatted(DafnyNameResolver.dafnyExternNamespaceForShapeId(serviceShape.getId()));
+          .formatted(DafnyNameResolverHelpers.dafnyExternNamespaceForShapeId(serviceShape.getId()));
 
         // Collect into TreeSet so that we generate code in a deterministic order (lexicographic, in particular)
         final TreeSet<StructureShape> errorShapes = ModelUtils.streamServiceErrors(model, serviceShape)

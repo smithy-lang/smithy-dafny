@@ -4,8 +4,9 @@
 package software.amazon.polymorph.smithydotnet;
 
 import com.google.common.annotations.VisibleForTesting;
-import software.amazon.polymorph.smithydafny.DafnyNameResolver;
+
 import software.amazon.polymorph.traits.LocalServiceTrait;
+import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.polymorph.utils.Token;
 import software.amazon.polymorph.utils.TokenTree;
@@ -52,7 +53,7 @@ public class ShimCodegen {
         // Use LinkedHashSet to dedupe while maintaining insertion order
         final LinkedHashSet<String> importNamespaces = new LinkedHashSet<>(UNCONDITIONAL_IMPORTS);
         importNamespaces.add(nameResolver.namespaceForService());
-        importNamespaces.add(DafnyNameResolver.dafnyExternNamespaceForShapeId(serviceShape.getId()));
+        importNamespaces.add(DafnyNameResolverHelpers.dafnyExternNamespaceForShapeId(serviceShape.getId()));
         final TokenTree prelude = TokenTree.of(
                 importNamespaces.stream().map("using %s;"::formatted).map(Token::of)
         ).lineSeparated();
