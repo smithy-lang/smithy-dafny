@@ -27,7 +27,6 @@ public class AwsSdkShimCodegenTest {
     private static final String SERVICE_NAMESPACE = "com.amazonaws.foobar";
     private static final String SERVICE_NAME = "FoobarService";
     private static final ShapeId SERVICE_SHAPE_ID = ShapeId.fromParts(SERVICE_NAMESPACE, SERVICE_NAME);
-    private static final Path[] ASDF = {Path.of("")};
 
     private static AwsSdkShimCodegen setupCodegen(final BiConsumer<ServiceShape.Builder, ModelAssembler> updater) {
         final Model model = TestModel.setupModel((builder, assembler) -> {
@@ -35,7 +34,7 @@ public class AwsSdkShimCodegenTest {
             updater.accept(builder, assembler);
         });
         final ServiceShape serviceShape = model.expectShape(SERVICE_SHAPE_ID, ServiceShape.class);
-        return new AwsSdkShimCodegen(model, serviceShape, ASDF);
+        return new AwsSdkShimCodegen(model, serviceShape, new Path[0]);
     }
 
     @Test

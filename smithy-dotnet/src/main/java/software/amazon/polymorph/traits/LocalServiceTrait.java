@@ -20,23 +20,9 @@ import software.amazon.smithy.utils.ToSmithyBuilder;
 import java.util.Optional;
 
 /**
- * A trait indicating the structure is *only* used in a union.
- * // A trait indicating that a structure is a members of a union
- * // and MUST NOT be used independently of the union.
- * // This is syntactic sugar for
- * //  union Foo {
- * //    Bar: structure Bar { baz: String }
- * //  }
- * //
- * // It is used like this
- * //  union Foo {
- * //    Bar: Bar
- * //  }
- * //  structure Bar { baz: String }
- * // This is especially useful in Dafny.
- * // Because it results in a single datatype
- * // who's constructors are the member structures.
- * // datatypes Foo = Bar( baz: String )
+ * A trait that configures code generation for the creation of the client that provides the modeled API.
+ * 'sdkId' is the name for the client that vends the API.
+ * 'config' is the structure that customers provide to construct the client.
  */
 public class LocalServiceTrait extends AbstractTrait implements ToSmithyBuilder<LocalServiceTrait> {
     public static final ShapeId ID = ShapeId.from("aws.polymorph#localService");

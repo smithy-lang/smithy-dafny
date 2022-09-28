@@ -55,7 +55,7 @@ public class ModelUtils {
     }
 
     /**
-     * @return a stream of error structures in the given service shape
+     * @return a stream of error structures in the given namespace
      */
     public static Stream<StructureShape> streamNamespaceErrors(final Model model, final String namespace) {
         return model.getStructureShapesWithTrait(ErrorTrait.class)
@@ -128,7 +128,7 @@ public class ModelUtils {
     }
 
     /**
-     * @return a stream of error structures in the given service shape
+     * @return the service in a given namespace
      */
     public static ServiceShape serviceFromNamespace(final Model model, final String namespace) {
         final ServiceShape[] tmp = model

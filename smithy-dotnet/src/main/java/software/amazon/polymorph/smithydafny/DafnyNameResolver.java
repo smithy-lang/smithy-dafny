@@ -147,7 +147,7 @@ public record DafnyNameResolver(
           );
     }
 
-    public String historicalCallHistoryClassForResource(final ServiceShape service) {
+    public String historicalCallHistoryClassForService(final ServiceShape service) {
         return "%s%s"
           .formatted(
             baseTypeForShape(service.getId()),

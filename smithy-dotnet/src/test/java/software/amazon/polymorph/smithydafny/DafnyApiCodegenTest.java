@@ -28,7 +28,7 @@ public class DafnyApiCodegenTest {
     private static DafnyApiCodegen setupCodegen(final BiConsumer<ServiceShape.Builder, ModelAssembler> updater) {
         final Model model = TestModel.setupModel(updater);
         final ServiceShape serviceShape = model.expectShape(SERVICE_SHAPE_ID, ServiceShape.class);
-        return new DafnyApiCodegen(model, serviceShape, Path.of(""), new Path[]{Path.of("")});
+        return new DafnyApiCodegen(model, serviceShape, Path.of(""), new Path[0]);
     }
 
     @Test

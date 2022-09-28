@@ -325,7 +325,7 @@ public class DafnyApiCodegen {
                 .append(Token.of("ghost const %s: %s"
                   .formatted(
                     nameResolver.callHistoryFieldName(),
-                    nameResolver.historicalCallHistoryClassForResource(serviceShape)))))
+                    nameResolver.historicalCallHistoryClassForService(serviceShape)))))
               .lineSeparated()
               .braced()
           )
@@ -397,7 +397,7 @@ public class DafnyApiCodegen {
 
         final TokenTree className = TokenTree
           .of("class %s"
-            .formatted(nameResolver.historicalCallHistoryClassForResource(service))
+            .formatted(nameResolver.historicalCallHistoryClassForService(service))
           );
         final TokenTree constructor = TokenTree
           .of(
@@ -651,11 +651,11 @@ public class DafnyApiCodegen {
     }
 
     /*
-        The purpose of this ENUM is to distinguish who is writing the body of the method.
-        In the case of a Resource we wrap the call history into the implemented method `MethodName`
-        and leave a `MethodName'` for the developer to write.
-        This means that there is a relationship between specification of these two methods
-        but that this relationship is not exactly the same.
+        The purpose of this ENUM is to distinguish who is writing the body of the method:
+          DEVELOPER ==> This is for the method on a Resource that a Developer should implement.
+          CODEGEN   ==> This is for the method that is completely generated.
+                        This may be the "public" method in the trait or the public method in the service.
+          ABSTRACT  ==> This is for the method on the Service that should be implemented by the developer.
      */
     public enum ImplementationType {
         // TODO, this is too complicated, please simplify
