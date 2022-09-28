@@ -3,7 +3,7 @@ package software.amazon.polymorph.smithyjava;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 
-import software.amazon.polymorph.smithyjava.generator.awssdk.Generator;
+import software.amazon.polymorph.smithyjava.generator.Generator;
 
 public record MethodReference(ClassName className, String methodName) {
     public CodeBlock asNormalReference() {

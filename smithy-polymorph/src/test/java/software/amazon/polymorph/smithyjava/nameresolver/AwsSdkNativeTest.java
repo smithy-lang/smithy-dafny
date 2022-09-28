@@ -8,6 +8,7 @@ import org.junit.Test;
 
 import software.amazon.polymorph.smithyjava.ModelConstants;
 import software.amazon.polymorph.util.TestModel;
+import software.amazon.polymorph.utils.AwsSdkNameResolverHelpers;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.ServiceShape;
@@ -19,7 +20,7 @@ import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
 public class AwsSdkNativeTest {
-    AwsSdkNative underTest;
+    AwsSdkNativeV1 underTest;
 
     @Before
     public void setup() {
@@ -79,12 +80,12 @@ public class AwsSdkNativeTest {
                 (builder, modelAssembler) -> modelAssembler
                         .addUnparsedModel("test.smithy", ModelConstants.OTHER_NAMESPACE));
         ServiceShape serviceShape = ModelUtils.serviceFromNamespace(
-                localModel, AwsSdkHelpers.namespaceForService("other"));
+                localModel, AwsSdkNameResolverHelpers.namespaceForService("other"));
         assertThrows(IllegalArgumentException.class,
-                () -> new AwsSdkNative(serviceShape, localModel));
+                () -> new AwsSdkNativeV1(serviceShape, localModel));
     }
 
-    static AwsSdkNative setupLocalModel(
+    static AwsSdkNativeV1 setupLocalModel(
             String rawModel,
             String awsServiceName
     ) {
@@ -92,7 +93,7 @@ public class AwsSdkNativeTest {
                 (builder, modelAssembler) -> modelAssembler
                         .addUnparsedModel("test.smithy", rawModel));
         ServiceShape serviceShape = ModelUtils.serviceFromNamespace(
-                localModel, AwsSdkHelpers.namespaceForService(awsServiceName));
-        return new AwsSdkNative(serviceShape, localModel);
+                localModel, AwsSdkNameResolverHelpers.namespaceForService(awsServiceName));
+        return new AwsSdkNativeV1(serviceShape, localModel);
     }
 }

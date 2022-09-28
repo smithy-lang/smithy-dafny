@@ -1,7 +1,5 @@
 package software.amazon.polymorph.smithyjava.nameresolver;
 
-import com.google.common.base.Joiner;
-
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
@@ -9,13 +7,12 @@ import com.squareup.javapoet.WildcardTypeName;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.Arrays;
-import java.util.stream.Stream;
 
 import dafny.DafnyMap;
 import dafny.DafnySequence;
 import dafny.DafnySet;
 import dafny.Tuple0;
+import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.ResourceShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
@@ -28,7 +25,7 @@ import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.utils.StringUtils;
 
-import static software.amazon.polymorph.smithyjava.generator.awssdk.Generator.Constants.SUPPORTED_CONVERSION_AGGREGATE_SHAPES;
+import static software.amazon.polymorph.smithyjava.generator.Generator.Constants.SUPPORTED_CONVERSION_AGGREGATE_SHAPES;
 import static software.amazon.polymorph.smithyjava.nameresolver.Constants.SMITHY_API_UNIT;
 
 /**
@@ -36,21 +33,19 @@ import static software.amazon.polymorph.smithyjava.nameresolver.Constants.SMITHY
  * model Shapes and generated identifiers in Java
  * for the Dafny generated Java code.
  */
-public class Dafny {
-    protected final String packageName;
-    protected final Model model;
-    protected final ServiceShape serviceShape;
-    protected final String modelPackage;
+public class Dafny extends NameResolver {
 
     public Dafny(
             final String packageName,
-            final ServiceShape serviceShape,
-            final Model model
+            final Model model,
+            final ServiceShape serviceShape
     ) {
-        this.packageName = packageName;
-        this.model = model;
-        this.serviceShape = serviceShape;
-        this.modelPackage = modelPackageNameForServiceShape(serviceShape);
+        super(
+                packageName,
+                serviceShape,
+                model,
+                modelPackageNameForServiceShape(serviceShape)
+        );
     }
 
     /**
@@ -80,21 +75,12 @@ public class Dafny {
         };
     }
 
-    // TODO: replace with method from DafnyNameResolver
-    public static String packageNameForNamespace(final String namespace) {
-        final Stream<String> namespaceParts = Arrays
-                .stream(namespace.split("\\."))
-                .map(StringUtils::capitalize);
-        return "Dafny." + Joiner.on('.').join(namespaceParts.iterator());
-    }
-
-    // TODO: replace with method from DafnyNameResolver
     static String modelPackageNameForNamespace(final String namespace) {
-        return packageNameForNamespace(namespace) + ".Types";
+        return DafnyNameResolverHelpers.packageNameForNamespace(namespace) + ".Types";
     }
 
     static String packageNameForServiceShape(ServiceShape serviceShape) {
-        return packageNameForNamespace(serviceShape.getId().getNamespace());
+        return DafnyNameResolverHelpers.packageNameForNamespace(serviceShape.getId().getNamespace());
     }
 
     static String modelPackageNameForServiceShape(ServiceShape serviceShape) {
@@ -182,8 +168,10 @@ public class Dafny {
     }
 
     public ClassName classForShape(ShapeId shapeId) {
+        // Assume class will be in model package
+        // i.e.: Dafny.<Namespace>.Types.Shape
         return ClassName.get(
-                modelPackage,
+                modelPackageNameForNamespace(shapeId.getNamespace()),
                 StringUtils.capitalize(shapeId.getName())
         );
     }

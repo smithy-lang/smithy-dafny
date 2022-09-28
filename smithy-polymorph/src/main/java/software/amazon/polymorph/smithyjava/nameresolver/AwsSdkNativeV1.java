@@ -5,8 +5,10 @@ import com.squareup.javapoet.TypeName;
 
 import java.util.Map;
 
+import software.amazon.polymorph.utils.AwsSdkNameResolverHelpers;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.ServiceShape;
+import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.TraitDefinition;
@@ -14,14 +16,17 @@ import software.amazon.smithy.utils.StringUtils;
 
 /**
  * There are certain assumptions we can/have to make about
- * Types from the AWS SDK for Java libraries.
+ * Types from the AWS SDK for Java V1 libraries.
  */
-public class AwsSdkNative extends Native {
+public class AwsSdkNativeV1 extends Native {
 
-    public AwsSdkNative(final ServiceShape serviceShape,
-                        final Model model) {
-        super(packageNameForServiceShape(serviceShape), serviceShape, model,
-                defaultModelPackageName(packageNameForServiceShape(serviceShape)));
+    public AwsSdkNativeV1(final ServiceShape serviceShape,
+                          final Model model) {
+        super(packageNameForAwsSdkV1Shape(serviceShape),
+                serviceShape,
+                model,
+                defaultModelPackageName(packageNameForAwsSdkV1Shape(serviceShape))
+        );
         checkForAwsServiceConstants();
     }
 
@@ -72,21 +77,23 @@ public class AwsSdkNative extends Native {
         }
     }
 
-    public boolean isInServiceNameSpace(final ShapeId shapeId) {
-        return shapeId.getNamespace().contains(serviceShape.getId().getNamespace());
-    }
-
     @Override
     public ClassName typeForStructure(final StructureShape shape) {
         if (shape.hasTrait(TraitDefinition.class)) {
             throw new IllegalArgumentException(
                     "Trait definition structures have no corresponding generated type");
         }
-        checkInServiceNamespace(shape.getId());
-        return ClassName.get(modelPackage, StringUtils.capitalize(shape.getId().getName()));
+        // check if this Shape is in AWS SDK for Java V1 package
+        if (AwsSdkNameResolverHelpers.isAwsSdkServiceId(shape.getId())) {
+            // Assume that the shape is in the model package
+            return ClassName.get(
+                    defaultModelPackageName(packageNameForAwsSdkV1Shape(shape)),
+                    StringUtils.capitalize(shape.getId().getName()));
+        }
+        return super.typeForStructure(shape);
     }
 
-    /** The AWS SDK for Java replaces
+    /** The AWS SDK for Java V1 replaces
      *  the last 'Response' with 'Result'
      *  in operation outputs.
      */
@@ -110,7 +117,10 @@ public class AwsSdkNative extends Native {
      * Returns the TypeName for an AWS Service's Client Interface.
      */
     @Override
-    public TypeName typeForService(final ServiceShape shape) {
+    public ClassName typeForService(final ServiceShape shape) {
+        //TODO: refactor to not throw error on other namespace,
+        // but instead check AWS_SERVICE_NAMESPACE_TO_CLIENT_INTERFACE for
+        // namespace, and throw exception if not found.
         checkInServiceNamespace(shape.getId());
         return ClassName.get(
                 packageName,
@@ -139,13 +149,8 @@ public class AwsSdkNative extends Native {
         return "com.amazonaws.services.%s".formatted(rtn);
     }
 
-    static String awsServiceNameFromServiceShape(final ServiceShape serviceShape) {
-        String[] namespaceParts = serviceShape.getId().getNamespace().split("\\.");
-        return namespaceParts[namespaceParts.length - 1];
-    }
-
-    static String packageNameForServiceShape(final ServiceShape serviceShape) {
-        String awsServiceName = awsServiceNameFromServiceShape(serviceShape);
+    static String packageNameForAwsSdkV1Shape(final Shape shape) {
+        String awsServiceName = AwsSdkNameResolverHelpers.awsServiceNameFromShape(shape);
         return packageNameForService(awsServiceName);
     }
 

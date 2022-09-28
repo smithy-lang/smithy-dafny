@@ -18,7 +18,7 @@ import software.amazon.polymorph.smithydotnet.AwsSdkTypeConversionCodegen;
 import software.amazon.polymorph.smithydotnet.ServiceCodegen;
 import software.amazon.polymorph.smithydotnet.ShimCodegen;
 import software.amazon.polymorph.smithydotnet.TypeConversionCodegen;
-import software.amazon.polymorph.smithyjava.generator.awssdk.AwsSdk;
+import software.amazon.polymorph.smithyjava.generator.awssdk.AwsSdkV1;
 import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.loader.ModelAssembler;
@@ -79,7 +79,7 @@ public class CodegenCli {
               serviceShape,
               cliArguments.dependentModelPaths
             );
-            final AwsSdk javaShimCodegen = new AwsSdk(serviceShape, model);
+            final AwsSdkV1 javaShimCodegen = new AwsSdkV1(serviceShape, model);
             writeTokenTreesIntoDir(dotnetShimCodegen.generate(), outputDotnetDir);
             writeTokenTreesIntoDir(javaShimCodegen.generate(), outputJavaDir);
             logger.info("Java code generated in {}", cliArguments.outputJavaDir);

@@ -129,6 +129,6 @@ public class DafnyTest {
                 (builder, modelAssembler) -> modelAssembler
                         .addUnparsedModel("test.smithy", rawModel));
         ServiceShape serviceShape = ModelUtils.serviceFromNamespace(localModel, nameSpace);
-        return new Dafny(packageName, serviceShape, localModel);
+        return new Dafny(packageName, localModel, serviceShape);
     }
 }

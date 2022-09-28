@@ -27,6 +27,7 @@ import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.BoxTrait;
 import software.amazon.smithy.model.traits.EnumTrait;
+import software.amazon.smithy.utils.StringUtils;
 
 import static software.amazon.polymorph.smithyjava.nameresolver.Constants.SHAPE_TYPES_LIST_SET;
 import static software.amazon.smithy.utils.StringUtils.capitalize;
@@ -37,7 +38,7 @@ import static software.amazon.smithy.utils.StringUtils.capitalize;
  * model Shapes and generated identifiers in Java
  * for the native Java code.
  */
-public class Native {
+public class Native extends NameResolver{
     protected static final Map<String, TypeName> NATIVE_TYPES_BY_SMITHY_PRELUDE_SHAPE_NAME;
     protected static final Map<ShapeType, TypeName> NATIVE_TYPES_BY_SIMPLE_SHAPE_TYPE;
 
@@ -77,21 +78,18 @@ public class Native {
         );
     }
 
-    protected final String packageName;
-    protected final Model model;
-    protected final ServiceShape serviceShape;
-    protected final String modelPackage;
-
     public Native(
             final String packageName,
             final ServiceShape serviceShape,
             final Model model,
             final String modelPackageName
     ) {
-        this.packageName = packageName;
-        this.model = model;
-        this.serviceShape = serviceShape;
-        this.modelPackage = modelPackageName;
+        super(
+                packageName,
+                serviceShape,
+                model,
+                modelPackageName
+        );
     }
 
     /**
@@ -220,16 +218,24 @@ public class Native {
         };
     }
 
-    public TypeName typeForStructure(StructureShape shape) {
-        throw new UnsupportedOperationException("Not yet implemented for not AWS-SDK Style");
+    public ClassName typeForStructure(StructureShape shape) {
+        //TODO handle traits on structures
+        if (isInServiceNameSpace(shape.getId())) {
+            return ClassName.get(modelPackage, shape.getId().getName());
+        }
+        // Assume that structure is in the package's root;
+        // This is a VERY BOLD assumption.
+        return ClassName.get(
+                shape.getId().getNamespace(),
+                StringUtils.capitalize(shape.getId().getName()));
     }
 
-    public TypeName typeForService(ServiceShape shape) {
+    public ClassName typeForService(ServiceShape shape) {
         throw new UnsupportedOperationException("Not yet implemented for not AWS-SDK Style");
     }
 
     @SuppressWarnings("unused")
-    public TypeName typeForResource(ResourceShape shape) {
-        throw new UnsupportedOperationException("Not yet implemented.");
+    public ClassName typeForResource(ResourceShape shape) {
+        throw new UnsupportedOperationException("Not yet implemented for not AWS-SDK Style");
     }
 }
