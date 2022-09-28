@@ -30,7 +30,8 @@ public class AwsSdkTypeConversionCodegenTest {
             builder.id(SERVICE_SHAPE_ID);
             updater.accept(builder, assembler);
         });
-        return new AwsSdkTypeConversionCodegen(model, SERVICE_SHAPE_ID);
+        final ServiceShape serviceShape = model.expectShape(SERVICE_SHAPE_ID, ServiceShape.class);
+        return new AwsSdkTypeConversionCodegen(model, serviceShape);
     }
 
     /**
@@ -55,10 +56,10 @@ public class AwsSdkTypeConversionCodegenTest {
         final String memberFromDafnyConverterName = AwsSdkDotNetNameResolver.typeConverterForShape(memberId, FROM_DAFNY);
         final List<Tokenizer.ParseToken> expectedTokensFromDafny = Tokenizer.tokenize("""
                 public static Amazon.FoobarService.Model.OptionalInt
-                        %s(Dafny.Com.Amazonaws.Foobar._IOptionalInt value) {
-                    Dafny.Com.Amazonaws.Foobar.OptionalInt concrete = (Dafny.Com.Amazonaws.Foobar.OptionalInt)value;
+                        %s(Dafny.Com.Amazonaws.Foobar.Types._IOptionalInt value) {
+                    Dafny.Com.Amazonaws.Foobar.Types.OptionalInt concrete = (Dafny.Com.Amazonaws.Foobar.Types.OptionalInt)value;
                     Amazon.FoobarService.Model.OptionalInt converted = new Amazon.FoobarService.Model.OptionalInt();
-                    if (concrete.int.is_Some) converted.Int = (int) %s(concrete.int);
+                    if (concrete._int.is_Some) converted.Int = (int) %s(concrete._int);
                     return converted;
                 }
                 """.formatted(structureFromDafnyConverterName, memberFromDafnyConverterName));
@@ -68,10 +69,10 @@ public class AwsSdkTypeConversionCodegenTest {
         final String structureToDafnyConverterName = AwsSdkDotNetNameResolver.typeConverterForShape(shapeId, TO_DAFNY);
         final String memberToDafnyConverterName = AwsSdkDotNetNameResolver.typeConverterForShape(memberId, TO_DAFNY);
         final List<Tokenizer.ParseToken> expectedTokensToDafny = Tokenizer.tokenize("""
-                public static Dafny.Com.Amazonaws.Foobar._IOptionalInt
+                public static Dafny.Com.Amazonaws.Foobar.Types._IOptionalInt
                         %s(Amazon.FoobarService.Model.OptionalInt value) {
                     int? var_int = value.Int;
-                    return new Dafny.Com.Amazonaws.Foobar.OptionalInt(%s(var_int));
+                    return new Dafny.Com.Amazonaws.Foobar.Types.OptionalInt(%s(var_int));
                 }
                 """.formatted(structureToDafnyConverterName, memberToDafnyConverterName));
         assertEquals(expectedTokensToDafny, actualTokensToDafny);
@@ -96,9 +97,10 @@ public class AwsSdkTypeConversionCodegenTest {
         final String stringFromDafnyConverterName = AwsSdkDotNetNameResolver.typeConverterForShape(stringShapeId, FROM_DAFNY);
         final List<Tokenizer.ParseToken> expectedTokensFromDafny = Tokenizer.tokenize("""
                 public static Amazon.FoobarService.Model.OopsException
-                        %s(Dafny.Com.Amazonaws.Foobar.OopsException value) {
-                    string message = value.message.Count == 0 ? null : %s(value.message);
-                    return new Amazon.FoobarService.Model.OopsException(message);
+                        %s(Dafny.Com.Amazonaws.Foobar.Types.Error_OopsException value) {
+                    return new Amazon.FoobarService.Model.OopsException(
+                        FromDafny_N3_com__N9_amazonaws__N6_foobar__S13_OopsException__M7_message(value._message)
+                    );
                 }""".formatted(
                 structureFromDafnyConverterName,
                 stringFromDafnyConverterName));
@@ -108,12 +110,12 @@ public class AwsSdkTypeConversionCodegenTest {
         final String structureToDafnyConverterName = AwsSdkDotNetNameResolver.typeConverterForShape(shapeId, TO_DAFNY);
         final String stringToDafnyConverterName = AwsSdkDotNetNameResolver.typeConverterForShape(stringShapeId, TO_DAFNY);
         final List<Tokenizer.ParseToken> expectedTokensToDafny = Tokenizer.tokenize("""
-                public static Dafny.Com.Amazonaws.Foobar.OopsException
+                public static Dafny.Com.Amazonaws.Foobar.Types.Error_OopsException
                         %s(Amazon.FoobarService.Model.OopsException value) {
-                    Dafny.ISequence<char> message = System.String.IsNullOrEmpty(value.Message)
-                        ? Dafny.Sequence<char>.Empty
-                        : %s(value.Message);
-                    return new Dafny.Com.Amazonaws.Foobar.OopsException { message = message };
+                    string var_message = value.Message;
+                    return new Dafny.Com.Amazonaws.Foobar.Types.Error_OopsException(
+                        ToDafny_N3_com__N9_amazonaws__N6_foobar__S13_OopsException__M7_message(var_message)
+                    );
                 }""".formatted(
                 structureToDafnyConverterName,
                 stringToDafnyConverterName));

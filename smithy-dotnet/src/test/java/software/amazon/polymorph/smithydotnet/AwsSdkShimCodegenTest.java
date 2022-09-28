@@ -55,20 +55,18 @@ public class AwsSdkShimCodegenTest {
                 using System.Collections.Generic;
                 
                 namespace Com.Amazonaws.Foobar {
-                    internal class FoobarServiceShim : Dafny.Com.Amazonaws.Foobar.IFoobarServiceClient {
+                    internal class FoobarServiceShim : Dafny.Com.Amazonaws.Foobar.Types.IFoobarServiceClient {
                         internal Amazon.FoobarService.AmazonFoobarServiceClient _impl;
                         
                         internal FoobarServiceShim(Amazon.FoobarService.AmazonFoobarServiceClient impl) {
                             this._impl = impl;
                         }
                         
-                        private Dafny.Com.Amazonaws.Foobar.IFoobarServiceException ConvertError(
+                        private Dafny.Com.Amazonaws.Foobar.Types._IError ConvertError(
                                 Amazon.FoobarService.AmazonFoobarServiceException error) {
                             switch (error) {
                                 default:
-                                    return new Dafny.Com.Amazonaws.Foobar.UnknownFoobarServiceError {
-                                        message = %s(error.Message ?? "")
-                                    };
+                                    return new Dafny.Com.Amazonaws.Foobar.Types.Error_Opaque(error);
                             }
                         }
                     }
@@ -108,7 +106,7 @@ public class AwsSdkShimCodegenTest {
         final String expectedErrorTypeShim = codegen.generateErrorTypeShim().toString();
         final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
                 namespace Com.Amazonaws.Foobar {
-                    internal class FoobarServiceShim : Dafny.Com.Amazonaws.Foobar.IFoobarServiceClient {
+                    internal class FoobarServiceShim : Dafny.Com.Amazonaws.Foobar.Types.IFoobarServiceClient {
                         internal Amazon.FoobarService.AmazonFoobarServiceClient _impl;
                         %s
                         %s
@@ -149,13 +147,13 @@ public class AwsSdkShimCodegenTest {
                 codegen.generateOperationShim(operationShapeId).toString());
 
         final String resultTypeParams = "%s, %s".formatted(
-                "Dafny.Com.Amazonaws.Foobar._IGoResponse", "Dafny.Com.Amazonaws.Foobar.IFoobarServiceException");
+                "Dafny.Com.Amazonaws.Foobar.Types._IGoResponse", "Dafny.Com.Amazonaws.Foobar.Types._IError");
         final String requestFromDafnyConverter =
                 AwsSdkDotNetNameResolver.qualifiedTypeConverter(requestShapeId, FROM_DAFNY);
         final String responseToDafnyConverter =
                 AwsSdkDotNetNameResolver.qualifiedTypeConverter(responseShapeId, TO_DAFNY);
         final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
-                public Wrappers_Compile._IResult<%1$s> Go(Dafny.Com.Amazonaws.Foobar._IGoRequest request) {
+                public Wrappers_Compile._IResult<%1$s> Go(Dafny.Com.Amazonaws.Foobar.Types._IGoRequest request) {
                     Amazon.FoobarService.Model.GoRequest sdkRequest = %2$s(request);
                     try {
                         Amazon.FoobarService.Model.GoResponse sdkResponse =
@@ -198,7 +196,7 @@ public class AwsSdkShimCodegenTest {
         final String stringConverter = AwsSdkDotNetNameResolver.qualifiedTypeConverter(
                 ShapeId.from("smithy.api#String"), TO_DAFNY);
         final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
-                private Dafny.Com.Amazonaws.Foobar.IFoobarServiceException ConvertError(
+                private Dafny.Com.Amazonaws.Foobar.Types._IError ConvertError(
                         Amazon.FoobarService.AmazonFoobarServiceException error) {
                     switch (error) {
                         case Amazon.FoobarService.Model.Bang e:
@@ -208,9 +206,7 @@ public class AwsSdkShimCodegenTest {
                         case Amazon.FoobarService.Model.Crash e:
                             return %s(e);
                         default:
-                            return new Dafny.Com.Amazonaws.Foobar.UnknownFoobarServiceError {
-                                message = %s(error.Message ?? "")
-                            };
+                            return new Dafny.Com.Amazonaws.Foobar.Types.Error_Opaque(error);
                     }
                 }
                 """.formatted(bangConverter, boomConverter, crashConverter, stringConverter));

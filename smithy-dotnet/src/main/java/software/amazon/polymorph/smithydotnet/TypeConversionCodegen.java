@@ -697,7 +697,7 @@ public class TypeConversionCodegen {
               .formatted(DafnyNameResolver.dafnyExternNamespaceForShapeId(serviceShape.getId())),
             "return new OpaqueError(dafnyVal._obj);",
             "default:",
-            "// The switch MUST be complete for _IError, so `value` MUST NOT be an _IError. (How did you get here?) ",
+            "// The switch MUST be complete for _IError, so `value` MUST NOT be an _IError. (How did you get here?)",
             "return new OpaqueError();"
           )
           .lineSeparated();
@@ -739,7 +739,7 @@ public class TypeConversionCodegen {
             "return new %1$s.Error_Opaque(exception);"
               .formatted(DafnyNameResolver.dafnyExternNamespaceForShapeId(serviceShape.getId())),
             "default:",
-            "// The switch MUST be complete for System.Exception, so `value` MUST NOT be an System.Exception. (How did you get here?) ",
+            "// The switch MUST be complete for System.Exception, so `value` MUST NOT be an System.Exception. (How did you get here?)",
             "return new %1$s.Error_Opaque(value);"
               .formatted(DafnyNameResolver.dafnyExternNamespaceForShapeId(serviceShape.getId()))
           )

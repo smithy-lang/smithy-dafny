@@ -17,7 +17,6 @@ import software.amazon.smithy.model.shapes.ShapeId;
 import static software.amazon.polymorph.util.TestModel.SERVICE_NAMESPACE;
 import static software.amazon.polymorph.util.TestModel.SERVICE_SHAPE_ID;
 import static software.amazon.polymorph.util.Tokenizer.tokenizeAndAssert;
-
 // Debugging Guidance:
 // These tests are arranged from Simplest to Most Complete.
 // Generally, the simplest unit test have shorter durations.

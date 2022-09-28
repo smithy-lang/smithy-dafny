@@ -9,6 +9,7 @@ import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.loader.ModelAssembler;
 import software.amazon.smithy.model.shapes.ShapeId;
+import software.amazon.smithy.model.shapes.ServiceShape;
 
 import java.net.URL;
 import java.nio.file.Path;
@@ -29,10 +30,12 @@ public class ServiceCodegenSmokeTest {
         final Model model = assembler.addImport(modelUrl).assemble().unwrap();
 
         final ShapeId serviceShapeId = ShapeId.fromParts("polymorph.demo", "StringLists");
-        final ServiceCodegen serviceCodegen = new ServiceCodegen(model, serviceShapeId);
+        final ServiceShape serviceShape = model.expectShape(serviceShapeId, ServiceShape.class);
+        final ServiceCodegen serviceCodegen = new ServiceCodegen(model, serviceShape);
         final Map<Path, TokenTree> codeByPath = serviceCodegen.generate();
 
         final Set<Path> expectedPaths = Stream.of(
+                "OpaqueError",
                 "CreateArrayListInput",
                 "CreateArrayListOutput",
                 "IListOfStrings",
@@ -40,7 +43,6 @@ public class ServiceCodegenSmokeTest {
                 "GetElementInput",
                 "GetElementOutput",
                 "SetElementInput",
-                "StringListsBaseException",
                 "IndexOutOfBoundsException"
         ).map(name -> Path.of(name + ".cs")).collect(Collectors.toSet());
         assertEquals(expectedPaths, codeByPath.keySet());
