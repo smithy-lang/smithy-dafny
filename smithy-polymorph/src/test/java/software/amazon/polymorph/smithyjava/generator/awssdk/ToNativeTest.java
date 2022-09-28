@@ -1,7 +1,6 @@
 package software.amazon.polymorph.smithyjava.generator.awssdk;
 
 import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 
 import org.junit.Before;
@@ -58,9 +57,9 @@ public class ToNativeTest {
         String expectedRequired = "Name";
         tokenizeAndAssertEqual(expectedRequired, actualRequired.toString());
         // if optional, get via dtor_value()
-        MemberShape optionalField = structureShape.getMember("optionalString").get();
+        MemberShape optionalField = structureShape.getMember("message").get();
         CodeBlock actualOptional = underTest.getMemberFieldValue(optionalField);
-        String expectedOptional = "OptionalString.dtor_value()";
+        String expectedOptional = "Message.dtor_value()";
         tokenizeAndAssertEqual(expectedOptional, actualOptional.toString());
     }
 
@@ -170,7 +169,7 @@ public class ToNativeTest {
         // structureShape.members().size() == 0
         ShapeId simpleId = ShapeId.fromParts("com.amazonaws.kms", "Simple");
         StructureShape simpleShape = model.expectShape(simpleId, StructureShape.class);
-        MethodSpec simpleActual = underTest.generateConvertStructure(simpleShape);
+        MethodSpec simpleActual = underTest.generateConvertStructureV1(simpleShape);
         tokenizeAndAssertEqual(ToNativeConstants.SIMPLE_STRUCTURE, simpleActual.toString());
         // if optional, check if present
         ShapeId aOptionalId = ShapeId.fromParts("com.amazonaws.kms", "AOptional");

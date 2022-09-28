@@ -7,6 +7,7 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
+import com.squareup.javapoet.WildcardTypeName;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -19,8 +20,13 @@ import java.util.stream.Collectors;
 
 import javax.lang.model.element.Modifier;
 
+import dafny.DafnySequence;
 import software.amazon.polymorph.smithyjava.MethodReference;
+import software.amazon.polymorph.smithyjava.generator.Generator;
+import software.amazon.polymorph.smithyjava.nameresolver.AwsSdkDafnyV1;
+import software.amazon.polymorph.smithyjava.nameresolver.AwsSdkNativeV1;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
+import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.smithy.model.shapes.ListShape;
 import software.amazon.smithy.model.shapes.MapShape;
@@ -42,7 +48,7 @@ import static software.amazon.smithy.utils.StringUtils.capitalize;
 import static software.amazon.smithy.utils.StringUtils.uncapitalize;
 
 /**
- * ToDafny is a helper class for the AwsSdk's {@link Shim}.<p>
+ * ToDafny is a helper class for the AwsSdk's {@link ShimV1}.<p>
  * It holds methods to convert
  * a subset of an AWS SDK Service's types to Dafny types.<p>
  * The subset is composed of the:
@@ -80,12 +86,17 @@ public class ToDafny extends Generator {
                 Map.entry(ShapeType.BIG_INTEGER, Constants.IDENTITY_FUNCTION)
         );
     }
-
+    // TODO: for V2 support, use abstract AwsSdk name resolvers and sub class for V1 or V2.
+    // These overrides Generator's nameResolvers to be AwsSdk specific name resolvers
+    AwsSdkDafnyV1 dafnyNameResolver;
+    AwsSdkNativeV1 nativeNameResolver;
     /** The class name of the AWS SDK's Service's Shim's ToDafny class. */
     final ClassName thisClassName;
 
-    public ToDafny(AwsSdk awsSdk) {
+    public ToDafny(AwsSdkV1 awsSdk) {
         super(awsSdk);
+        dafnyNameResolver = awsSdk.dafnyNameResolver;
+        nativeNameResolver = awsSdk.nativeNameResolver;
         thisClassName = ClassName.get(dafnyNameResolver.packageName(), "ToDafny");
     }
 
@@ -118,7 +129,7 @@ public class ToDafny extends Generator {
         allRelevantShapeIds.removeAll(enumShapeIds);
 
         final List<MethodSpec> convertOutputs = operationOutputs.stream()
-                .map(this::generateConvertResponse).toList();
+                .map(this::generateConvertResponseV1).toList();
         final List<MethodSpec> convertAllRelevant = allRelevantShapeIds.stream()
                 .map(this::generateConvert).filter(Objects::nonNull).toList();
         final List<MethodSpec> convertServiceErrors = ModelUtils.streamServiceErrors(model, serviceShape)
@@ -153,8 +164,9 @@ public class ToDafny extends Generator {
         final Shape shape = model.getShape(shapeId)
                 .orElseThrow(() -> new IllegalStateException("Cannot find shape " + shapeId));
         return switch (shape.getType()) {
-            // For the AWS SDK for Java V1, we do not generate converters for simple shapes
-            case BLOB, BOOLEAN, STRING, INTEGER, LONG, TIMESTAMP, MEMBER -> null;
+            // For the AWS SDK for Java, we do not generate converters for simple shapes
+            case BLOB, BOOLEAN, STRING, TIMESTAMP, BYTE, SHORT,
+                    INTEGER, LONG, BIG_DECIMAL, BIG_INTEGER, MEMBER -> null;
             case LIST -> generateConvertList(shape.asListShape().get());
             case MAP -> generateConvertMap(shape.asMapShape().get());
             case SET -> generateConvertSet(shape.asSetShape().get());
@@ -231,8 +243,7 @@ public class ToDafny extends Generator {
     /**
      * Should be called for all of a service's operations' outputs.
      */
-    MethodSpec generateConvertResponse(final ShapeId shapeId) {
-        // TODO: unit tests for generateConvertResponse
+    MethodSpec generateConvertResponseV1(final ShapeId shapeId) {
         MethodSpec structure = generateConvertStructure(shapeId);
         MethodSpec.Builder builder = structure.toBuilder();
         builder.parameters.clear();
@@ -240,7 +251,6 @@ public class ToDafny extends Generator {
         return builder.build();
     }
 
-    // TODO: unit tests for generateConvertStructure
     MethodSpec generateConvertStructure(final ShapeId shapeId) {
         final StructureShape structureShape = model.expectShape(shapeId, StructureShape.class);
         String methodName = capitalize(shapeId.getName());
@@ -331,17 +341,17 @@ public class ToDafny extends Generator {
             return SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(target.getType());
         }
         final String methodName = capitalize(target.getId().getName());
-        // if in namespace
+        // if in namespace, reference to be created converter
         if (nativeNameResolver.isInServiceNameSpace(target.getId())) {
-            // and reference to be created converter
             return new MethodReference(thisClassName, methodName);
         }
         // Otherwise, this target must be in another namespace
-        ClassName otherNamespaceToDafny = ClassName.get(target.getId().getNamespace(), "ToDafny");
+        ClassName otherNamespaceToDafny = ClassName.get(
+                DafnyNameResolverHelpers.packageNameForNamespace(target.getId().getNamespace()),
+                "ToDafny");
         return new MethodReference(otherNamespaceToDafny, methodName);
     }
 
-    // TODO: unit tests for generateConvertList
     MethodSpec generateConvertList(ListShape shape) {
         MemberShape memberShape = shape.getMember();
         CodeBlock memberConverter = memberConversionMethodReference(memberShape).asFunctionalReference();
@@ -350,7 +360,6 @@ public class ToDafny extends Generator {
         MethodReference getTypeDescriptor = new MethodReference(
                 dafnyNameResolver.classForShape(memberShape.getTarget()),
                 "_typeDescriptor");
-
         ParameterSpec parameterSpec = ParameterSpec
                 .builder(nativeNameResolver.typeForShapeNoEnum(shape.getId()), "nativeValue")
                 .build();
@@ -364,7 +373,6 @@ public class ToDafny extends Generator {
                 .build();
     }
 
-    // TODO: unit tests for generateConvertSet
     MethodSpec generateConvertSet(SetShape shape) {
         MemberShape memberShape = shape.getMember();
         CodeBlock memberConverter = memberConversionMethodReference(memberShape).asFunctionalReference();
@@ -382,7 +390,6 @@ public class ToDafny extends Generator {
                 .build();
     }
 
-    // TODO: unit tests for generateConvertMap
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     MethodSpec generateConvertMap(MapShape shape) {
         MemberShape keyShape = shape.getKey().asMemberShape().get();
@@ -403,7 +410,6 @@ public class ToDafny extends Generator {
                 .build();
     }
 
-    // TODO: Unit tests and doc for generateConvertError
     MethodSpec generateConvertError(final StructureShape shape) {
         MethodSpec structure = generateConvertStructure(shape.getId());
         MethodSpec.Builder builder = structure.toBuilder();
@@ -412,9 +418,24 @@ public class ToDafny extends Generator {
         return builder.build();
     }
 
-    // TODO: Unit tests for generateConvertOpaqueError
     MethodSpec generateConvertOpaqueError() {
-        //TODO: refactor memberAssignment to use awssdk.ToDafny.memberAssignment
+        // Opaque Errors are not in the model,
+        // so we cannot use any of our helper methods for this method.
+
+        // This is memberDeclaration from above,
+        // but with calls to dafnyNameResolver replaced with their expected response.
+        CodeBlock memberDeclaration = CodeBlock.of(
+                "$T $L",
+                ParameterizedTypeName.get(
+                        ClassName.get("Wrappers_Compile", "Option"),
+                        ParameterizedTypeName.get(
+                                ClassName.get(DafnySequence.class),
+                                WildcardTypeName.subtypeOf(Character.class))
+                ),
+                "message"
+        );
+        // This is memberAssignment from above,
+        // but with calls to dafnyNameResolver replaced with their expected response.
         CodeBlock memberAssignment = CodeBlock.of(
                 "$L = $T.nonNull($L) ?\n$T.create_Some($T.$L($L))\n: $T.create_None()",
                 "message",
@@ -426,12 +447,11 @@ public class ToDafny extends Generator {
                 "nativeValue.getMessage()",
                 ClassName.get("Wrappers_Compile", "Option")
         );
-        // TODO: This is a hack, but so are opaque errors, they are not in our smithy models!!
         return MethodSpec.methodBuilder("Error")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .returns(dafnyNameResolver.getDafnyAbstractServiceError())
                 .addParameter(nativeNameResolver.baseErrorForService(), "nativeValue")
-                .addStatement("Option<DafnySequence<? extends Character>> message")
+                .addStatement(memberDeclaration)
                 .addStatement(memberAssignment)
                 .addStatement("return new $T(message)", dafnyNameResolver.getDafnyOpaqueServiceError())
                 .build();

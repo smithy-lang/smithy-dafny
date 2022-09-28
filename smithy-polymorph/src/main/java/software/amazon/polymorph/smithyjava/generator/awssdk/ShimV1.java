@@ -15,7 +15,9 @@ import java.util.stream.Collectors;
 
 import javax.lang.model.element.Modifier;
 
-import software.amazon.smithy.model.Model;
+import software.amazon.polymorph.smithyjava.generator.Generator;
+import software.amazon.polymorph.smithyjava.nameresolver.AwsSdkDafnyV1;
+import software.amazon.polymorph.smithyjava.nameresolver.AwsSdkNativeV1;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.ShapeId;
@@ -27,18 +29,18 @@ import static software.amazon.polymorph.smithyjava.nameresolver.Constants.SMITHY
 
 
 /**
- * Generates an AWS SDK Shim
+ * Generates an AWS SDK Shim for the AWS SKD for Java V1
  * exposing an AWS Service's operations to Dafny Generated Java.
  */
-public class Shim extends Generator {
-    private static final Logger LOGGER = LoggerFactory.getLogger(Shim.class);
-
-    public Shim(ServiceShape serviceShape, Model model) {
-        super(serviceShape, model);
-    }
-
-    public Shim(AwsSdk awsSdk) {
+public class ShimV1 extends Generator {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ShimV1.class);
+    // These overrides Generator's nameResolvers to be AwsSdk specific name resolvers
+    AwsSdkDafnyV1 dafnyNameResolver;
+    AwsSdkNativeV1 nativeNameResolver;
+    public ShimV1(AwsSdkV1 awsSdk) {
         super(awsSdk);
+        dafnyNameResolver = awsSdk.dafnyNameResolver;
+        nativeNameResolver = awsSdk.nativeNameResolver;
     }
 
     @Override

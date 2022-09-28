@@ -21,7 +21,11 @@ import java.util.stream.Collectors;
 import javax.lang.model.element.Modifier;
 
 import software.amazon.polymorph.smithyjava.MethodReference;
+import software.amazon.polymorph.smithyjava.generator.Generator;
+import software.amazon.polymorph.smithyjava.nameresolver.AwsSdkDafnyV1;
+import software.amazon.polymorph.smithyjava.nameresolver.AwsSdkNativeV1;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
+import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.smithy.model.shapes.ListShape;
 import software.amazon.smithy.model.shapes.MapShape;
@@ -37,12 +41,12 @@ import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.EnumDefinition;
 import software.amazon.smithy.model.traits.EnumTrait;
 
-import static software.amazon.polymorph.smithyjava.generator.awssdk.Generator.Constants.IDENTITY_FUNCTION;
+import static software.amazon.polymorph.smithyjava.generator.Generator.Constants.IDENTITY_FUNCTION;
 import static software.amazon.smithy.utils.StringUtils.capitalize;
 import static software.amazon.smithy.utils.StringUtils.uncapitalize;
 
 /**
- * ToNative is a helper class for the AwsSdk's {@link Shim}.<p>
+ * ToNative is a helper class for the AwsSdk's {@link ShimV1}.<p>
  * It contains methods to convert
  * a subset of an AWS SDK Service's types
  * from Dafny generated Java to native Java.<p>
@@ -88,12 +92,17 @@ public class ToNative extends Generator {
                 Map.entry(ShapeType.BIG_INTEGER, IDENTITY_FUNCTION)
         );
     }
-
+    // TODO: for V2 support, use abstract AwsSdk name resolvers and sub class for V1 or V2.
+    // These overrides Generator's nameResolvers to be AwsSdk specific name resolvers
+    AwsSdkDafnyV1 dafnyNameResolver;
+    AwsSdkNativeV1 nativeNameResolver;
     /** The class name of the AWS SDK's Service's Shim's ToNative class. */
     final ClassName thisClassName;
 
-    public ToNative(AwsSdk awsSdk) {
+    public ToNative(AwsSdkV1 awsSdk) {
         super(awsSdk);
+        dafnyNameResolver = awsSdk.dafnyNameResolver;
+        nativeNameResolver = awsSdk.nativeNameResolver;
         thisClassName = ClassName.get(dafnyNameResolver.packageName(), TO_NATIVE);
     }
 
@@ -128,12 +137,13 @@ public class ToNative extends Generator {
                 .orElseThrow(() -> new IllegalStateException("Cannot find shape " + shapeId));
         return switch (shape.getType()) {
             // For the AWS SDK for Java V1, we do not generate converters for simple shapes
-            case BLOB, BOOLEAN, INTEGER, LONG, TIMESTAMP, MEMBER -> null;
+            case BLOB, BOOLEAN, TIMESTAMP, BYTE, SHORT,
+                    INTEGER, LONG, BIG_DECIMAL, BIG_INTEGER, MEMBER -> null;
             case STRING -> generateConvertString(shapeId); // STRING handles enums
             case LIST -> generateConvertList(shape.asListShape().get());
             case SET -> generateConvertSet(shape.asSetShape().get());
             case MAP -> generateConvertMap(shape.asMapShape().get());
-            case STRUCTURE -> generateConvertStructure(shape.asStructureShape().get());
+            case STRUCTURE -> generateConvertStructureV1(shape.asStructureShape().get());
             default -> throw new UnsupportedOperationException(
                     "ShapeId %s is of Type %s, which is not yet supported for ToDafny"
                             .formatted(shapeId, shape.getType()));
@@ -184,7 +194,7 @@ public class ToNative extends Generator {
                 .build();
     }
 
-    MethodSpec generateConvertStructure(StructureShape structureShape) {
+    MethodSpec generateConvertStructureV1(StructureShape structureShape) {
         String methodName = capitalize(structureShape.getId().getName());
         ClassName nativeClassName = nativeNameResolver.typeForStructure(structureShape);
         MethodSpec.Builder builder = MethodSpec
@@ -291,7 +301,7 @@ public class ToNative extends Generator {
         }
         // Otherwise, this target must be in another namespace
         ClassName otherNamespaceToDafny = ClassName.get(
-                Dafny.packageNameForNamespace(target.getId().getNamespace()),
+                DafnyNameResolverHelpers.packageNameForNamespace(target.getId().getNamespace()),
                 TO_NATIVE
         );
         return new MethodReference(otherNamespaceToDafny, methodName);

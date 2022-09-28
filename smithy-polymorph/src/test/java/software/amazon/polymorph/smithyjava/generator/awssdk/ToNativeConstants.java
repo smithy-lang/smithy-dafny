@@ -61,8 +61,8 @@ public class ToNativeConstants {
               Dafny.Com.Amazonaws.Kms.Types.AOptional dafnyValue
             ) {
               com.amazonaws.services.kms.model.AOptional converted = new com.amazonaws.services.kms.model.AOptional();
-              if (dafnyValue.OptionalString.is_Some()) {
-                converted.withOptionalString(software.amazon.dafny.conversion.ToNative.Simple.String(dafnyValue.OptionalString.dtor_value()));
+              if (dafnyValue.Message.is_Some()) {
+                converted.withMessage(software.amazon.dafny.conversion.ToNative.Simple.String(dafnyValue.Message.dtor_value()));
               }
               return converted;
             }

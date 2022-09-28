@@ -37,46 +37,32 @@ public class ModelConstants {
                 structure DoSomethingResponse { message: String }
             """;
 
-     public static String KMS_CONSTRAINED_SIMPLE_SHAPES = """
-                namespace com.amazonaws.kms
-                service KeyManagementService
-                @length(min: 1, max: 6144) blob CiphertextType
-                @box boolean NullableBooleanType
-                @length(min:1, max:128) string TagKeyType
-                @box @range(min: 1, max: 1000) integer LimitType
-            """;
-
     public static String KMS_KITCHEN = """
                 namespace com.amazonaws.kms
                 use com.amazonaws.other#OtherNamespace
                 service KeyManagementService {}
                 blob CiphertextType
-                boolean BooleanType
                 string TagKeyType
-                timestamp DateType
-                integer LimitType
                 @enum([
                   { name: "SIGN_VERIFY", value: "SIGN_VERIFY" },
                   { name: "ENCRYPT_DECRYPT", value: "ENCRYPT_DECRYPT" },
                 ])
                 string KeyUsageType
                 list KeyUsageTypes { member: KeyUsageType }
+                list OtherNamespaces { member: OtherNamespace }
                 string OptionalString
                 set Names { member: String }
                 map EncryptionContextType { key: String, value: String }
                 structure Kitchen {
                   @required ciphertext: CiphertextType,
-                  @required isTrue: BooleanType,
                   @required name: TagKeyType,
-                  @required creationDate: DateType,
-                  @required limit: LimitType,
                   @required keyUsage: KeyUsageType,
                   @required otherNamespace: OtherNamespace,
-                  optionalString: OptionalString,
+                  message: OptionalString,
                   @required listEnum: KeyUsageTypes
                 }
                 structure Simple {}
-                structure AOptional { optionalString: OptionalString }
+                structure AOptional { message: OptionalString }
                 structure RequiredListEnum { @required listEnum: KeyUsageTypes }
                 double NotSupported
             """;

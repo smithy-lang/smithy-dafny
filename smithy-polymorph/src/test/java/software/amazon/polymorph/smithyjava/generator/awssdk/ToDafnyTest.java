@@ -6,26 +6,21 @@ import com.squareup.javapoet.MethodSpec;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Optional;
+import java.nio.file.Path;
+import java.util.Map;
 
+import software.amazon.polymorph.smithyjava.MethodReference;
 import software.amazon.polymorph.smithyjava.ModelConstants;
+import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
-import software.amazon.smithy.utils.StringUtils;
 
 import static org.junit.Assert.assertEquals;
-import static software.amazon.polymorph.smithyjava.ModelConstants.KMS_KITCHEN;
-import static software.amazon.polymorph.smithyjava.generator.awssdk.ToDafnyConstants.DO_SOMETHING_REQUEST;
-import static software.amazon.polymorph.smithyjava.generator.awssdk.ToDafnyConstants.DO_SOMETHING_RESPONSE;
-import static software.amazon.polymorph.smithyjava.generator.awssdk.ToDafnyConstants.IDENTITY_NORMAL_REFERENCE;
-import static software.amazon.polymorph.smithyjava.generator.awssdk.ToDafnyConstants.MESSAGE_ASSIGNMENT_OPTIONAL;
-import static software.amazon.polymorph.smithyjava.generator.awssdk.ToDafnyConstants.MESSAGE_ASSIGNMENT_REQUIRED;
-import static software.amazon.polymorph.smithyjava.generator.awssdk.ToDafnyConstants.MESSAGE_DECLARATION_OPTIONAL;
-import static software.amazon.polymorph.smithyjava.generator.awssdk.ToDafnyConstants.MESSAGE_DECLARATION_REQUIRED;
-import static software.amazon.polymorph.smithyjava.generator.awssdk.ToDafnyConstants.TO_DAFNY_BLOB_CONVERSION;
-import static software.amazon.polymorph.smithyjava.generator.awssdk.ToDafnyConstants.TO_DAFNY_STRING_CONVERSION;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
+import static software.amazon.polymorph.util.Tokenizer.tokenizeAndAssertEqual;
 
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 public class ToDafnyTest {
@@ -34,158 +29,150 @@ public class ToDafnyTest {
 
     @Before
     public void setup() {
-        model = TestSetupUtils.setupLocalModel(ModelConstants.KMS_A_STRING_OPERATION);
-        underTest = new ToDafny(TestSetupUtils.setupAwsSdk(model, "kms"));
-    }
-
-    static ToDafny setupLocal(String rawModel, String awsName, Optional<String> rawOtherModel) {
-        Model model;
-        if (rawOtherModel.isEmpty()) {
-            model = TestSetupUtils.setupLocalModel(rawModel);
-        } else {
-            model = TestSetupUtils.setupTwoLocalModel(rawModel, rawOtherModel.get());
-        }
-        return new ToDafny(TestSetupUtils.setupAwsSdk(model, awsName));
+        model = TestSetupUtils.setupTwoLocalModel(ModelConstants.KMS_KITCHEN, ModelConstants.OTHER_NAMESPACE);
+        underTest  = new ToDafny(TestSetupUtils.setupAwsSdk(model, "kms"));
     }
 
     @Test
-    public void memberDeclarationStringRequired() {
-        MemberShape memberShape = getMessageMemberShape(ShapeId.fromParts(
-                "com.amazonaws.kms", "DoSomethingRequest"), underTest);
-        CodeBlock variable = getMessageVariable(memberShape);
-        String expected = MESSAGE_DECLARATION_REQUIRED;
-        CodeBlock actual = this.underTest.memberDeclaration(memberShape, variable);
-        assertEquals(expected, actual.toString());
+    public void memberConversionMethodReference() {
+        ShapeId structureId = ShapeId.fromParts("com.amazonaws.kms", "Kitchen");
+        StructureShape structureShape = model.expectShape(structureId, StructureShape.class);
+        // If the target is simple, use SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE
+        MemberShape stringMember = structureShape.getMember("name").get();
+        MethodReference simpleActual = underTest.memberConversionMethodReference(stringMember);
+        String simpleExpected = ToDafnyConstants.STRING_CONVERSION;
+        tokenizeAndAssertEqual(simpleExpected, simpleActual.asNormalReference().toString());
+        // if in namespace reference created converter
+        MemberShape enumMember = structureShape.getMember("keyUsage").get();
+        MethodReference enumActual = underTest.memberConversionMethodReference(enumMember);
+        String enumExpected = ToDafnyConstants.KEY_USAGE_TYPE_CONVERSION;
+        tokenizeAndAssertEqual(enumExpected, enumActual.asNormalReference().toString());
+        // Otherwise, this target must be in another namespace
+        MemberShape otherNamespaceMember = structureShape.getMember("otherNamespace").get();
+        MethodReference otherNamespaceActual = underTest.memberConversionMethodReference(otherNamespaceMember);
+        String otherNamespaceExpected = ToDafnyConstants.OTHER_NAMESPACE_CONVERSION;
+        tokenizeAndAssertEqual(otherNamespaceExpected, otherNamespaceActual.asNormalReference().toString());
     }
 
     @Test
-    public void memberDeclarationStringOption() {
-        MemberShape memberShape = getMessageMemberShape(ShapeId.fromParts(
-                "com.amazonaws.kms", "DoSomethingResponse"), underTest);
-        CodeBlock variable = getMessageVariable(memberShape);
-        String expected = MESSAGE_DECLARATION_OPTIONAL;
-        CodeBlock actual = this.underTest.memberDeclaration(memberShape, variable);
-        assertEquals(expected, actual.toString());
+    public void memberAssignment() {
+        ShapeId structureId = ShapeId.fromParts("com.amazonaws.kms", "Kitchen");
+        StructureShape structureShape = model.expectShape(structureId, StructureShape.class);
+        // if required
+        MemberShape memberRequired = structureShape.getMember("name").get();
+        CodeBlock actualRequired = underTest.memberAssignment(memberRequired, CodeBlock.of("name"));
+        String expectedRequired = ToDafnyConstants.MEMBER_ASSIGNMENT_REQUIRED;
+        tokenizeAndAssertEqual(expectedRequired, actualRequired.toString());
+        // if optional
+        MemberShape memberOptional = structureShape.getMember("message").get();
+        CodeBlock actualOptional = underTest.memberAssignment(memberOptional, CodeBlock.of("message"));
+        String expectedOptional = ToDafnyConstants.MEMBER_ASSIGNMENT_OPTIONAL;
+        tokenizeAndAssertEqual(expectedOptional, actualOptional.toString());
     }
 
     @Test
-    public void memberConversionBlob() {
-        underTest = setupLocal(KMS_KITCHEN, "kms", Optional.of(ModelConstants.OTHER_NAMESPACE));
-        MemberShape memberShape = getMemberShape(
-                ShapeId.fromParts("com.amazonaws.kms", "Kitchen"),
-                underTest, "ciphertext");
-        String expected = TO_DAFNY_BLOB_CONVERSION;
-        CodeBlock actual = underTest
-                .memberConversionMethodReference(memberShape)
-                .asNormalReference();
-        assertEquals(expected, actual.toString());
+    public void memberDeclaration() {
+        ShapeId structureId = ShapeId.fromParts("com.amazonaws.kms", "Kitchen");
+        StructureShape structureShape = model.expectShape(structureId, StructureShape.class);
+        // if required
+        MemberShape memberRequired = structureShape.getMember("name").get();
+        CodeBlock actualRequired = underTest.memberDeclaration(memberRequired, CodeBlock.of("name"));
+        String expectedRequired = ToDafnyConstants.MEMBER_DECLARATION_REQUIRED;
+        tokenizeAndAssertEqual(expectedRequired, actualRequired.toString());
+        // optional
+        MemberShape memberOptional = structureShape.getMember("message").get();
+        CodeBlock actualOptional = underTest.memberDeclaration(memberOptional, CodeBlock.of("message"));
+        String expectedOptional = ToDafnyConstants.MEMBER_DECLARATION_OPTIONAL;
+        tokenizeAndAssertEqual(expectedOptional, actualOptional.toString());
     }
 
     @Test
-    public void memberConversionBoolean() {
-        underTest = setupLocal(KMS_KITCHEN, "kms", Optional.of(ModelConstants.OTHER_NAMESPACE));
-        MemberShape memberShape = getMemberShape(
-                ShapeId.fromParts("com.amazonaws.kms", "Kitchen"),
-                underTest, "isTrue");
-        String expected = IDENTITY_NORMAL_REFERENCE;
-        CodeBlock actual = underTest
-                .memberConversionMethodReference(memberShape)
-                .asNormalReference();
-        assertEquals(expected, actual.toString());
+    public void generateConvertStructure() {
+        // structureShape.members().size() == 0
+        ShapeId simpleId = ShapeId.fromParts("com.amazonaws.kms", "Simple");
+        MethodSpec simpleActual = underTest.generateConvertStructure(simpleId);
+        String simpleExpected = ToDafnyConstants.SIMPLE_STRUCTURE;
+        tokenizeAndAssertEqual(simpleExpected, simpleActual.toString());
+        // structureShape.members().size() != 0
+        ShapeId aOptionalId = ShapeId.fromParts("com.amazonaws.kms", "AOptional");
+        MethodSpec aOptionalActual = underTest.generateConvert(aOptionalId);
+        tokenizeAndAssertEqual(ToDafnyConstants.A_OPTIONAL_STRUCTURE, aOptionalActual.toString());
     }
 
     @Test
-    public void memberConversionString() {
-        underTest = setupLocal(KMS_KITCHEN, "kms", Optional.of(ModelConstants.OTHER_NAMESPACE));
-        MemberShape memberShape = getMemberShape(
-                ShapeId.fromParts("com.amazonaws.kms", "Kitchen"),
-                underTest, "name");
-        String expected = TO_DAFNY_STRING_CONVERSION;
-        CodeBlock actual = underTest
-                .memberConversionMethodReference(memberShape)
-                .asNormalReference();
-        assertEquals(expected, actual.toString());
+    public void generateConvertResponseV1() {
+        Model localModel = TestSetupUtils.setupLocalModel(ModelConstants.KMS_A_STRING_OPERATION);
+        ToDafny localUnderTest = new ToDafny(TestSetupUtils.setupAwsSdk(localModel, "kms"));
+        ShapeId responseId = ShapeId.fromParts("com.amazonaws.kms", "DoSomethingResponse");
+        MethodSpec actual = localUnderTest.generateConvertResponseV1(responseId);
+        tokenizeAndAssertEqual(ToDafnyConstants.DO_SOMETHING_RESPONSE, actual.toString());
     }
 
     @Test
-    public void memberConversionTimestamp() {
-        underTest = setupLocal(KMS_KITCHEN, "kms", Optional.of(ModelConstants.OTHER_NAMESPACE));
-        MemberShape memberShape = getMemberShape(
-                ShapeId.fromParts("com.amazonaws.kms", "Kitchen"),
-                underTest, "creationDate");
-        String expected = TO_DAFNY_STRING_CONVERSION;
-        CodeBlock actual = underTest
-                .memberConversionMethodReference(memberShape)
-                .asNormalReference();
-        assertEquals(expected, actual.toString());
+    public void generateConvertEnumEnum() {
+        ShapeId enumId = ShapeId.fromParts("com.amazonaws.kms", "KeyUsageType");
+        MethodSpec actual = underTest.generateConvertEnumEnum(enumId);
+        tokenizeAndAssertEqual(ToDafnyConstants.KEY_USAGE_TYPE, actual.toString());
     }
 
     @Test
-    public void memberConversionInteger() {
-        underTest = setupLocal(KMS_KITCHEN, "kms", Optional.of(ModelConstants.OTHER_NAMESPACE));
-        MemberShape memberShape = getMemberShape(
-                ShapeId.fromParts("com.amazonaws.kms", "Kitchen"),
-                underTest, "limit");
-        String expected = IDENTITY_NORMAL_REFERENCE;
-        CodeBlock actual = underTest
-                .memberConversionMethodReference(memberShape)
-                .asNormalReference();
-        assertEquals(expected, actual.toString());
+    public void generateConvertEnumString() {
+        ShapeId enumId = ShapeId.fromParts("com.amazonaws.kms", "KeyUsageType");
+        MethodSpec actual = underTest.generateConvertEnumString(enumId);
+        tokenizeAndAssertEqual(ToDafnyConstants.KEY_USAGE_TYPE_STRING, actual.toString());
     }
 
     @Test
-    public void memberAssignmentStringRequired() {
-        MemberShape memberShape = getMessageMemberShape(ShapeId.fromParts(
-                "com.amazonaws.kms", "DoSomethingRequest"), underTest);
-        CodeBlock variable = getMessageVariable(memberShape);
-        String expected = MESSAGE_ASSIGNMENT_REQUIRED;
-        CodeBlock actual = this.underTest.memberAssignment(memberShape, variable);
-        assertEquals(expected, actual.toString());
+    public void generateConvert() {
+        // case Simple
+        ShapeId CiphertextTypeId = ShapeId.fromParts("com.amazonaws.kms", "CiphertextType");
+        assertNull(underTest.generateConvert(CiphertextTypeId));
+        // case LIST of Enums (which will take a list of Strings for AWS SDK for Java V1)
+        ShapeId listEnumId = ShapeId.fromParts("com.amazonaws.kms", "KeyUsageTypes");
+        tokenizeAndAssertEqual(ToDafnyConstants.GENERATE_CONVERT_LIST, underTest.generateConvert(listEnumId).toString());
+        // case LIST of Structures from other AWS SDK namespace
+        ShapeId listStructureId = ShapeId.fromParts("com.amazonaws.kms", "OtherNamespaces");
+        tokenizeAndAssertEqual(ToDafnyConstants.GENERATE_CONVERT_LIST_STRUCTURES, underTest.generateConvert(listStructureId).toString());
+        // case MAP
+        ShapeId mapId = ShapeId.fromParts("com.amazonaws.kms", "EncryptionContextType");
+        tokenizeAndAssertEqual(ToDafnyConstants.GENERATE_CONVERT_MAP_STRING, underTest.generateConvert(mapId).toString());
+        // case SET
+        ShapeId setId = ShapeId.fromParts("com.amazonaws.kms", "Names");
+        tokenizeAndAssertEqual(ToDafnyConstants.GENERATE_CONVERT_SET_STRING, underTest.generateConvert(setId).toString());
+        // case Structure
+        ShapeId simpleId = ShapeId.fromParts("com.amazonaws.kms", "Simple");
+        tokenizeAndAssertEqual(ToDafnyConstants.SIMPLE_STRUCTURE, underTest.generateConvert(simpleId).toString());
+        // default
+        ShapeId doubleId = ShapeId.fromParts("com.amazonaws.kms", "NotSupported");
+        assertThrows(UnsupportedOperationException.class, () -> underTest.generateConvert(doubleId));
     }
 
     @Test
-    public void memberAssignmentStringOptional() {
-        MemberShape memberShape = getMessageMemberShape(ShapeId.fromParts(
-                "com.amazonaws.kms", "DoSomethingResponse"), underTest);
-        CodeBlock variable = getMessageVariable(memberShape);
-        String expected = MESSAGE_ASSIGNMENT_OPTIONAL;
-        CodeBlock actual = this.underTest.memberAssignment(memberShape, variable);
-        assertEquals(expected, actual.toString());
-    }
-
-    private static StructureShape getStructureByShapeId(ShapeId shapeId, ToDafny localUnderTest) {
-        return localUnderTest.model.expectShape(shapeId, StructureShape.class);
-    }
-
-    private static MemberShape getMessageMemberShape(ShapeId shapeId, ToDafny localUnderTest) {
-        return getMemberShape(shapeId, localUnderTest, "message");
-    }
-
-    private static MemberShape getMemberShape(ShapeId structureShapeId, ToDafny localUnderTest, String memberName) {
-        StructureShape structureShape = getStructureByShapeId(structureShapeId, localUnderTest);
-        return structureShape.getMember(memberName).get();
-    }
-
-    private static CodeBlock getMessageVariable(MemberShape memberShape) {
-        return CodeBlock.of("$L", StringUtils.uncapitalize(memberShape.getMemberName()));
+    public void generateConvertError() {
+        Model localModel = TestSetupUtils.setupLocalModel(ModelConstants.KMS_A_STRING_OPERATION);
+        ToDafny localUnderTest = new ToDafny(TestSetupUtils.setupAwsSdk(localModel, "kms"));
+        ShapeId errorId = ShapeId.fromParts("com.amazonaws.kms", "DependencyTimeoutException");
+        StructureShape errorShape = localModel.expectShape(errorId, StructureShape.class);
+        MethodSpec errorActual = localUnderTest.generateConvertError(errorShape);
+        String errorExpected = ToDafnyConstants.GENERATE_CONVERT_ERROR;
+        tokenizeAndAssertEqual(errorExpected, errorActual.toString());
     }
 
     @Test
-    public void responseStringRequired() {
-        StructureShape structureShape = getStructureByShapeId(ShapeId.fromParts(
-                "com.amazonaws.kms", "DoSomethingRequest"), underTest);
-        String expected = DO_SOMETHING_REQUEST;
-        MethodSpec actual = underTest.generateConvertResponse(structureShape.toShapeId());
-        assertEquals(expected, actual.toString());
+    public void generateConvertOpaqueError() {
+        tokenizeAndAssertEqual(ToDafnyConstants.GENERATE_CONVERT_OPAQUE_ERROR, underTest.generateConvertOpaqueError().toString());
     }
 
     @Test
-    public void responseStringOptional() {
-        StructureShape structureShape = getStructureByShapeId(ShapeId.fromParts(
-                "com.amazonaws.kms", "DoSomethingResponse"), underTest);
-        String expected = DO_SOMETHING_RESPONSE;
-        MethodSpec actual = underTest.generateConvertResponse(structureShape.toShapeId());
-        assertEquals(expected, actual.toString());
+    public void generate() {
+        Model localModel = TestSetupUtils.setupLocalModel(ModelConstants.KMS_A_STRING_OPERATION);
+        ToDafny localUnderTest = new ToDafny(TestSetupUtils.setupAwsSdk(localModel, "kms"));
+        final Map<Path, TokenTree> actual = localUnderTest.generate();
+        final Path expectedPath = Path.of("Dafny/Com/Amazonaws/Kms/ToDafny.java");
+        Path[] temp = new Path[1];
+        final Path actualPath = actual.keySet().toArray(temp)[0];
+        assertEquals(expectedPath, actualPath);
+        final String actualSource = actual.get(actualPath).toString();
+        tokenizeAndAssertEqual(ToDafnyConstants.KMS_A_STRING_OPERATION_JAVA_FILE, actualSource);
     }
-
 }

@@ -7,7 +7,7 @@ import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.loader.ModelAssembler;
 import software.amazon.smithy.model.shapes.ServiceShape;
 
-import static software.amazon.polymorph.smithyjava.nameresolver.AwsSdkHelpers.namespaceForService;
+import static software.amazon.polymorph.utils.AwsSdkNameResolverHelpers.namespaceForService;
 import static software.amazon.polymorph.utils.ModelUtils.serviceFromNamespace;
 
 public class TestSetupUtils {
@@ -21,9 +21,9 @@ public class TestSetupUtils {
         updater = ((builder, modelAssembler) -> modelAssembler.addUnparsedModel("testOne.smithy", rawModelOne).addUnparsedModel("testTwo.smithy", rawModelTwo));
         return TestModel.setupModel(updater);
     }
-    public static AwsSdk setupAwsSdk(Model localModel, String awsName) {
+    public static AwsSdkV1 setupAwsSdk(Model localModel, String awsName) {
         ServiceShape serviceShape = serviceFromNamespace(
                 localModel, namespaceForService(awsName));
-        return new AwsSdk(serviceShape, localModel);
+        return new AwsSdkV1(serviceShape, localModel);
     }
 }

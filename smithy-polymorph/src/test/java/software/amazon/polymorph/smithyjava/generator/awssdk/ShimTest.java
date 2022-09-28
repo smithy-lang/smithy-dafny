@@ -25,13 +25,13 @@ import static software.amazon.polymorph.smithyjava.generator.awssdk.Constants.Do
 import static software.amazon.polymorph.smithyjava.generator.awssdk.Constants.MockKmsShim;
 
 public class ShimTest {
-    protected Shim underTest;
+    protected ShimV1 underTest;
     protected Model model;
 
     @Before
     public void setup() {
         model = TestSetupUtils.setupLocalModel(ModelConstants.MOCK_KMS);
-        underTest = new Shim(TestSetupUtils.setupAwsSdk(model, "kms"));
+        underTest = new ShimV1(TestSetupUtils.setupAwsSdk(model, "kms"));
     }
 
     @Test
