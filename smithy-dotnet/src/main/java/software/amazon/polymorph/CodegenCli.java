@@ -2,6 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 package software.amazon.polymorph;
+import software.amazon.polymorph.utils.ModelUtils;
+
+import com.google.common.base.Joiner;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
@@ -21,6 +24,7 @@ import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.loader.ModelAssembler;
 import software.amazon.smithy.model.shapes.ShapeId;
+import software.amazon.smithy.model.shapes.ServiceShape;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -32,6 +36,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Arrays;
 
 public class CodegenCli {
     private static final Logger logger = LoggerFactory.getLogger(CodegenCli.class);
@@ -50,79 +55,94 @@ public class CodegenCli {
         final CliArguments cliArguments = cliArgumentsOptional.get();
 
         final Path outputDotnetDir = cliArguments.outputDotnetDir;
-        final Path outputDafnyDir = cliArguments.outputDafnyDir;
         try {
             Files.createDirectories(outputDotnetDir);
-            Files.createDirectories(outputDafnyDir);
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(1);
         }
 
         final ModelAssembler assembler = new ModelAssembler();
-        final Model model = assembler.addImport(cliArguments.modelPath).assemble().unwrap();
 
-        if (!cliArguments.awsSdkStyle) {
-            final ServiceCodegen serviceCodegen = new ServiceCodegen(model, cliArguments.serviceShapeId);
-            writeTokenTreesIntoDir(serviceCodegen.generate(), outputDotnetDir);
+        assembler.addImport(cliArguments.modelPath);
+        Arrays
+          .stream(cliArguments.dependentModelPaths)
+          .forEach(path -> assembler.addImport(path));
 
-            final ShimCodegen shimCodegen = new ShimCodegen(model, cliArguments.serviceShapeId);
-            writeTokenTreesIntoDir(shimCodegen.generate(), outputDotnetDir);
-        }
+        final Model model = assembler
+          .assemble()
+          .unwrap();
 
-        final TypeConversionCodegen typeConversionCodegen = cliArguments.awsSdkStyle
-                ? new AwsSdkTypeConversionCodegen(model, cliArguments.serviceShapeId)
-                : new TypeConversionCodegen(model, cliArguments.serviceShapeId);
-        writeTokenTreesIntoDir(typeConversionCodegen.generate(), outputDotnetDir);
+        final ServiceShape serviceShape = ModelUtils.serviceFromNamespace(model, cliArguments.namespace);
 
         if (cliArguments.awsSdkStyle) {
-            // TODO generate Dafny API for regular models too
-            final DafnyApiCodegen dafnyApiCodegen = new DafnyApiCodegen(model, cliArguments.serviceShapeId);
-            writeTokenTreesIntoDir(dafnyApiCodegen.generate(), outputDafnyDir);
+            final AwsSdkShimCodegen shimCodegen = new AwsSdkShimCodegen(
+              model,
+              serviceShape,
+              cliArguments.dependentModelPaths
+            );
+            writeTokenTreesIntoDir(shimCodegen.generate(), outputDotnetDir);
+        } else {
+            final ServiceCodegen serviceCodegen = new ServiceCodegen(model, serviceShape);
+            writeTokenTreesIntoDir(serviceCodegen.generate(), outputDotnetDir);
 
-            final AwsSdkShimCodegen shimCodegen = new AwsSdkShimCodegen(model, cliArguments.serviceShapeId);
+            final ShimCodegen shimCodegen = new ShimCodegen(model, serviceShape);
             writeTokenTreesIntoDir(shimCodegen.generate(), outputDotnetDir);
         }
+        
+        final DafnyApiCodegen dafnyApiCodegen = new DafnyApiCodegen(
+          model,
+          serviceShape,
+          cliArguments.modelPath,
+          cliArguments.dependentModelPaths
+        );
+        // The Smithy model and the Dafny code are expected to be in the same location.
+        // This simplifies the process of including the various Dafny files.
+        writeTokenTreesIntoDir(dafnyApiCodegen.generate(), cliArguments.modelPath);
+
+        final TypeConversionCodegen typeConversionCodegen = cliArguments.awsSdkStyle
+                ? new AwsSdkTypeConversionCodegen(model, serviceShape)
+                : new TypeConversionCodegen(model, serviceShape);
+        writeTokenTreesIntoDir(typeConversionCodegen.generate(), outputDotnetDir);
 
         logger.info(".NET code generated in {}", cliArguments.outputDotnetDir);
-        logger.info("Dafny code generated in {}", cliArguments.outputDafnyDir);
+        logger.info("Dafny code generated in {}", cliArguments.modelPath);
     }
 
     private static Options getCliOptions() {
-        final Options cliOptions = new Options();
-        cliOptions.addOption(Option.builder("h")
-                .longOpt("help")
-                .desc("print help message")
-                .build());
-        cliOptions.addOption(Option.builder("m")
-                .longOpt("model")
-                .desc("model file (.smithy format)")
-                .hasArg()
-                .required()
-                .build());
-        cliOptions.addOption(Option.builder("s")
-                .longOpt("service-id")
-                .desc("service ID to generate code for, such as 'com.foo#BarService'")
-                .hasArg()
-                .required()
-                .build());
-        cliOptions.addOption(Option.builder()
-                .longOpt("output-dotnet")
-                .desc("output directory for generated .NET files")
-                .hasArg()
-                .required()
-                .build());
-        cliOptions.addOption(Option.builder()
-                .longOpt("output-dafny")
-                .desc("output directory for generated Dafny files")
-                .hasArg()
-                .required()
-                .build());
-        cliOptions.addOption(Option.builder()
-                .longOpt("aws-sdk")
-                .desc("generate AWS SDK-style API and shims")
-                .build());
-        return cliOptions;
+        return new Options()
+          .addOption(Option.builder("h")
+            .longOpt("help")
+            .desc("print help message")
+            .build())
+          .addOption(Option.builder("m")
+            .longOpt("model")
+            .desc("directory for the model file[s] (.smithy format). Also the Dafny output directory.")
+            .hasArg()
+            .required()
+            .build())
+          .addOption(Option.builder("d")
+            .longOpt("dependent-model")
+            .desc("directory for dependent the model file[s] (.smithy format)")
+            .hasArg()
+            .required()
+            .build())
+          .addOption(Option.builder("n")
+            .longOpt("namespace")
+            .desc("smithy namespace to generate code for, such as 'com.foo'")
+            .hasArg()
+            .required()
+            .build())
+          .addOption(Option.builder()
+            .longOpt("output-dotnet")
+            .desc("output directory for generated .NET files")
+            .hasArg()
+            .required()
+            .build())
+          .addOption(Option.builder()
+            .longOpt("aws-sdk")
+            .desc("generate AWS SDK-style API and shims")
+            .build());
     }
 
     private static void printHelpMessage() {
@@ -131,9 +151,9 @@ public class CodegenCli {
 
     private static record CliArguments(
             Path modelPath,
-            ShapeId serviceShapeId,
+            Path[] dependentModelPaths,
+            String namespace,
             Path outputDotnetDir,
-            Path outputDafnyDir,
             boolean awsSdkStyle
     ) {
         /**
@@ -149,15 +169,19 @@ public class CodegenCli {
             }
 
             final Path modelPath = Path.of(commandLine.getOptionValue('m'));
-            final ShapeId serviceShapeId = ShapeId.from(commandLine.getOptionValue('s'));
+
+            final Path[] dependentModelPaths = Arrays
+              .stream(commandLine.getOptionValues('d'))
+              .map(Path::of)
+              .toArray(Path[]::new);
+
+            final String namespace = commandLine.getOptionValue('n');
             final Path outputDotnetDir = Paths.get(commandLine.getOptionValue("output-dotnet"))
-                    .toAbsolutePath().normalize();
-            final Path outputDafnyDir = Paths.get(commandLine.getOptionValue("output-dafny"))
                     .toAbsolutePath().normalize();
             final boolean awsSdkStyle = commandLine.hasOption("aws-sdk");
 
             return Optional.of(new CliArguments(
-                    modelPath, serviceShapeId, outputDotnetDir, outputDafnyDir, awsSdkStyle));
+              modelPath, dependentModelPaths, namespace, outputDotnetDir, awsSdkStyle));
         }
     }
 

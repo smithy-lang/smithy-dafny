@@ -8,22 +8,13 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import software.amazon.polymorph.smithydafny.DafnyNameResolver;
 import software.amazon.polymorph.smithydotnet.nativeWrapper.NativeWrapperCodegen;
+import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.model.Model;
-import software.amazon.smithy.model.shapes.ListShape;
-import software.amazon.smithy.model.shapes.MapShape;
-import software.amazon.smithy.model.shapes.MemberShape;
-import software.amazon.smithy.model.shapes.OperationShape;
-import software.amazon.smithy.model.shapes.ResourceShape;
-import software.amazon.smithy.model.shapes.ServiceShape;
-import software.amazon.smithy.model.shapes.Shape;
-import software.amazon.smithy.model.shapes.ShapeId;
-import software.amazon.smithy.model.shapes.ShapeType;
-import software.amazon.smithy.model.shapes.StringShape;
-import software.amazon.smithy.model.shapes.StructureShape;
+import software.amazon.smithy.model.shapes.*;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.utils.StringUtils;
@@ -133,16 +124,18 @@ public class DotNetNameResolver {
     }
 
     public String clientForService() {
-        return serviceShape.getId().getName(serviceShape);
+        return serviceShape.hasTrait(LocalServiceTrait.class)
+          ? serviceShape.expectTrait(LocalServiceTrait.class).getSdkId()
+          : serviceShape.getId().getName();
     }
 
     public String interfaceForService() {
         return interfaceForService(serviceShape.getId());
     }
 
-    public String interfaceForService(final ShapeId serviceShapeId) {
+    public static String interfaceForService(final ShapeId serviceShapeId) {
         if (isAwsSdkServiceId(serviceShapeId)) {
-            return "I" + serviceShapeId.getName(serviceShape);
+            return "I" + serviceShapeId.getName();
         }
 
         throw new UnsupportedOperationException("Interface types not supported for Shape %s".formatted(serviceShapeId));
@@ -179,11 +172,11 @@ public class DotNetNameResolver {
         final StructureShape shape = model.expectShape(structureShapeId, StructureShape.class);
         // Sanity check
         assert shape.hasTrait(ErrorTrait.class);
-        return structureShapeId.getName(serviceShape);
+        return structureShapeId.getName();
     }
 
     public String methodForOperation(final ShapeId operationShapeId) {
-        return model.expectShape(operationShapeId, OperationShape.class).getId().getName(serviceShape);
+        return model.expectShape(operationShapeId, OperationShape.class).getId().getName();
     }
 
     public String abstractMethodForOperation(final ShapeId operationShapeId) {
@@ -204,7 +197,7 @@ public class DotNetNameResolver {
         // Sanity check that we aren't using this method for generated error structures
         assert !structureShape.hasTrait(ErrorTrait.class);
 
-        return model.expectShape(structureShapeId, StructureShape.class).getId().getName(serviceShape);
+        return model.expectShape(structureShapeId, StructureShape.class).getId().getName();
     }
 
     private static final Map<String, String> NATIVE_TYPES_BY_SMITHY_PRELUDE_SHAPE_NAME;
@@ -311,6 +304,14 @@ public class DotNetNameResolver {
         return "%s.%s".formatted(structureNamespace, classForStructure(structureShape.getId()));
     }
 
+    protected String baseTypeForUnion(final UnionShape unionShape) {
+        final ShapeId unionId = unionShape.getId();
+        final String namespace = namespaceForShapeId(unionId);
+
+        return "%s.%s".formatted(namespace, unionId.getName());
+    }
+
+
     protected String baseTypeForMember(final MemberShape memberShape) {
         final String baseType = baseTypeForShape(memberShape.getTarget());
         final boolean isOptional = memberShapeIsOptional(memberShape);
@@ -352,7 +353,7 @@ public class DotNetNameResolver {
 
         // First check if this is a built-in Smithy shape. If so, we just map it to the native type and return
         if (ModelUtils.isSmithyApiShape(shapeId)) {
-            @Nullable final String nativeTypeName = NATIVE_TYPES_BY_SMITHY_PRELUDE_SHAPE_NAME.get(shapeId.getName(serviceShape));
+            @Nullable final String nativeTypeName = NATIVE_TYPES_BY_SMITHY_PRELUDE_SHAPE_NAME.get(shapeId.getName());
             return Objects.requireNonNull(nativeTypeName,
                     () -> String.format("No native type for prelude shape %s", shapeId));
         }
@@ -372,6 +373,7 @@ public class DotNetNameResolver {
             case MEMBER -> baseTypeForMember(shape.asMemberShape().get());
             case SERVICE -> baseTypeForService(shape.asServiceShape().get());
             case RESOURCE -> baseTypeForResource(shape.asResourceShape().get());
+            case UNION -> baseTypeForUnion(shape.asUnionShape().get());
 
             default -> throw new UnsupportedOperationException("Shape %s has unsupported type %s"
                     .formatted(shapeId, shape.getType()));
@@ -414,15 +416,15 @@ public class DotNetNameResolver {
     }
 
     public String interfaceForResource(final ShapeId resourceShapeId) {
-        return String.format("I%s", StringUtils.capitalize(resourceShapeId.getName(serviceShape)));
+        return String.format("I%s", StringUtils.capitalize(resourceShapeId.getName()));
     }
 
     public String baseClassForResource(final ShapeId resourceShapeId) {
-        return String.format("%sBase", StringUtils.capitalize(resourceShapeId.getName(serviceShape)));
+        return String.format("%sBase", StringUtils.capitalize(resourceShapeId.getName()));
     }
 
     public String shimClassForResource(final ShapeId resourceShapeId) {
-        return StringUtils.capitalize(resourceShapeId.getName(serviceShape));
+        return StringUtils.capitalize(resourceShapeId.getName());
     }
 
     public String nativeWrapperClassForResource(final ShapeId resourceShapeId) {
@@ -433,7 +435,7 @@ public class DotNetNameResolver {
     }
 
     public String classForEnum(final ShapeId enumShapeId) {
-        return StringUtils.capitalize(enumShapeId.getName(serviceShape));
+        return StringUtils.capitalize(enumShapeId.getName());
     }
 
     /**
@@ -477,11 +479,8 @@ public class DotNetNameResolver {
      * Returns the type converter method name for the given service's common error shape and the given direction.
      */
     public String typeConverterForCommonError(final ServiceShape serviceShape, final TypeConversionDirection direction) {
-        return switch (direction) {
-            case TO_DAFNY -> "%s_CommonError".formatted(direction.toString());
-            case FROM_DAFNY -> "%s_CommonError_%s".formatted(
-                    direction.toString(), classForBaseServiceException(serviceShape));
-        };
+        // TODO remove the service shape
+        return "%s_CommonError".formatted(direction.toString());
     }
 
     /**
@@ -523,6 +522,7 @@ public class DotNetNameResolver {
             case MEMBER -> dafnyTypeForMember(shape.asMemberShape().get());
             case SERVICE -> dafnyTypeForService(shape.asServiceShape().get());
             case RESOURCE -> dafnyTypeForResource(shape.asResourceShape().get());
+            case UNION -> dafnyTypeForUnion(shape.asUnionShape().get());
             default -> throw new UnsupportedOperationException("Unsupported shape " + shapeId);
         };
     }
@@ -537,7 +537,7 @@ public class DotNetNameResolver {
         return "%s.%s%s".formatted(
                 DafnyNameResolver.dafnyExternNamespaceForShapeId(shapeId),
                 typePrefix,
-                shapeId.getName(serviceShape));
+                shapeId.getName());
     }
 
     private String dafnyTypeForString(final StringShape stringShape) {
@@ -578,17 +578,34 @@ public class DotNetNameResolver {
 
         // The Dafny type of an error structure is the corresponding generated Dafny class
         if (structureShape.hasTrait(ErrorTrait.class)) {
-            return "%s.%s".formatted(
+            // TODO: This Error_ should be consolidated
+            return "%s.Error_%s".formatted(
                     DafnyNameResolver.dafnyExternNamespaceForShapeId(shapeId),
-                    shapeId.getName(serviceShape));
+                    dafnyCompilesExtra_(shapeId));
         }
 
         // The Dafny type of other structures is simply the structure's name.
         // We explicitly specify the Dafny namespace just in case of collisions.
         return "%s._I%s".formatted(
                 DafnyNameResolver.dafnyExternNamespaceForShapeId(shapeId),
-                shapeId.getName(serviceShape));
+                dafnyCompilesExtra_(shapeId));
     }
+
+    private String dafnyCompilesExtra_(final ShapeId shapeId) {
+        return shapeId
+          .getName()
+          .replace("_", "__");
+    }
+
+    private String dafnyTypeForUnion(final UnionShape unionShape) {
+        final ShapeId unionId = unionShape.getId();
+
+        // TODO is this adequate
+        return "%s._I%s".formatted(
+          DafnyNameResolver.dafnyExternNamespaceForShapeId(unionId),
+          unionId.getName());
+    }
+
 
     /**
      * Returns the name of the concrete Dafny type for the given regular (i.e. not an enum or reference) structure.
@@ -599,7 +616,7 @@ public class DotNetNameResolver {
         final ShapeId shapeId = structureShape.getId();
         return "%s.%s".formatted(
                 DafnyNameResolver.dafnyExternNamespaceForShapeId(shapeId),
-                shapeId.getName(serviceShape));
+                dafnyCompilesExtra_(shapeId));
     }
 
     private String dafnyTypeForMember(final MemberShape memberShape) {
@@ -630,7 +647,7 @@ public class DotNetNameResolver {
             return "%s.%sClient".formatted(DafnyNameResolver.dafnyExternNamespaceForShapeId(serviceShapeId), interfaceForService(serviceShapeId));
         }
 
-        throw new UnsupportedOperationException("Dafny types not supported for Shape %s".formatted(serviceShapeId));
+        return DafnyNameResolver.traitNameForServiceClient(serviceShape);
     }
 
     private String dafnyTypeForResource(final ResourceShape resourceShape) {
@@ -658,6 +675,15 @@ public class DotNetNameResolver {
         return dafnyBaseTypeForServiceError(this.serviceShape);
     }
 
+    public String dafnyConcreteTypeForErrorStructure(final StructureShape errorShape) {
+        assert errorShape.hasTrait(ErrorTrait.class);
+        final ShapeId errorShapeId = errorShape.getId();
+        // TODO: This Error_ string is unfortunate, move it somewhere
+        return "%s.Error_%s".formatted(
+          DafnyNameResolver.dafnyExternNamespaceForShapeId(errorShapeId),
+          errorShapeId.getName());
+    }
+
     /**
      * Returns this service name, without the trailing "Factory" if it's present.
      */
@@ -674,24 +700,9 @@ public class DotNetNameResolver {
      * {@link DotNetNameResolver#dafnyTypeForShape(ShapeId)}.
      */
     public static String dafnyTypeForCommonServiceError(final ServiceShape serviceShape) {
-        // TODO Currently we have this hardcoded to remove 'Factory' from service names
-        // that include it, however this should likely be controlled via a custom trait
-        final String serviceName = ModelUtils.serviceNameWithoutTrailingFactory(serviceShape);
-
-        // TODO this should really end with "error"...
-        return "%s.I%sException".formatted(
-                DafnyNameResolver.dafnyExternNamespaceForShapeId(serviceShape.getId()),
-                serviceName
-        );
-    }
-
-    /**
-     * Returns the Dafny class for the unknown-error class of the given service.
-     */
-    public String dafnyTypeForUnknownServiceError(final ServiceShape serviceShape) {
-        return "%s.%s".formatted(
-                DafnyNameResolver.dafnyExternNamespaceForShapeId(serviceShape.getId()),
-                new DafnyNameResolver(this.model, serviceShape).classForUnknownError(serviceShape)
+        // TODO The Error string should be consolidated
+        return "%s._IError".formatted(
+                DafnyNameResolver.dafnyExternNamespaceForShapeId(serviceShape.getId())
         );
     }
 
@@ -727,6 +738,12 @@ public class DotNetNameResolver {
         return dafnyTypeForResult(outputType, errorType, concrete);
     }
 
+    public String dafnyTypeForStructure(final ShapeId shapeId, final boolean concrete) {
+        final String outputType = dafnyTypeForShape(shapeId);
+        final String errorType = dafnyTypeForCommonServiceError(serviceShape);
+        return dafnyTypeForResult(outputType, errorType, concrete);
+    }
+
     private String dafnyTypeForResult(final String valueType, final String errorType, final boolean concrete) {
         final String resultType = concrete ? "Result" : "_IResult";
         return "Wrappers_Compile.%s<%s, %s>".formatted(resultType, valueType, errorType);
@@ -742,15 +759,16 @@ public class DotNetNameResolver {
 
     /**
      * Returns the name of the compiled-Dafny implementation of the service client.
-     * <p>
-     * Note that the service client lives in a sub-namespace of the same name. This is because the generated Dafny API
-     * skeleton uses the plain "Dafny.(service namespace)" namespace, and implementations cannot use the same extern
-     * namespace.
-     * <p>
-     * FIXME: remove this workaround once Dafny allows duplicate extern namespaces
      */
     public String dafnyImplForServiceClient() {
-        return "%1$s.%2$s.%2$s".formatted(DafnyNameResolver.dafnyExternNamespaceForShapeId(serviceShape.getId()), clientForService());
+        return "%1$s.%2$s"
+          .formatted(
+            DafnyNameResolver
+              .dafnyExternNamespaceForShapeId(serviceShape.getId())
+              // TODO this replace is a bit of a HACK
+              .replace(".Types", ".__default"),
+            clientForService()
+          );
     }
 
     public boolean memberShapeIsOptional(final MemberShape memberShape) {
@@ -771,6 +789,13 @@ public class DotNetNameResolver {
      */
     @VisibleForTesting
     public static String encodedIdentForShapeId(final ShapeId shapeId) {
+        // TODO We should make these methods more discoverable
+        // I suggest that instead of something like this
+        // FromDafny_N3_com__N9_amazonaws__N3_kms__S26_InvalidGrantTokenException(
+        // Something like this:
+        // InvalidGrantTokenException_FromDafny_N3_com__N9_amazonaws__N3_kms__S26(
+        // The advantage here is that is moves the human information to the front of the line.
+
         final String namespace = shapeId.getNamespace();
         final String relativeShape = shapeId.getName();
         final Optional<String> memberOptional = shapeId.getMember();
@@ -823,5 +848,12 @@ public class DotNetNameResolver {
         return "CSharpNameResolver[" +
                 "model=" + model + ", " +
                 "serviceShape=" + serviceShape + ']';
+    }
+
+    // The member name of something converted from Dafny
+    // will not exactly match the member name in Dafny.
+    // See: https://github.com/dafny-lang/dafny/pull/2525
+    public static String memberName(final MemberShape memberShape) {
+        return "_%s".formatted(memberShape.getMemberName());
     }
 }

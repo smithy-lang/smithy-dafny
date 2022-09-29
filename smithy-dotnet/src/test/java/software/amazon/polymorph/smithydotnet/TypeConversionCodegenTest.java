@@ -49,7 +49,8 @@ import static software.amazon.polymorph.util.Tokenizer.tokenizeAndAssert;
 public class TypeConversionCodegenTest {
     private static TypeConversionCodegen setupCodegen(final BiConsumer<ServiceShape.Builder, ModelAssembler> updater) {
         final Model model = TestModel.setupModel(updater);
-        return new TypeConversionCodegen(model, SERVICE_SHAPE_ID);
+        final ServiceShape serviceShape = model.expectShape(SERVICE_SHAPE_ID, ServiceShape.class);
+        return new TypeConversionCodegen(model, serviceShape);
     }
 
     private static String generate(final TypeConversionCodegen codegen) {
@@ -64,34 +65,30 @@ public class TypeConversionCodegenTest {
         final String actual = generate(codegen);
         final String expected = """
                 using System.Linq;
-                using AWS.EncryptionSDK.Core;
                 namespace Test.Foobar {
                     internal static class TypeConversion {
-                        public static Test.Foobar.FoobarServiceBaseException FromDafny_CommonError_FoobarServiceBaseException
-                                (Dafny.Test.Foobar.IFoobarServiceException value) {
-                            switch(value)
-                            {
-                                default:
-                                    return new Test.Foobar.FoobarServiceBaseException(
-                                        %s(value.GetMessage()));
-                            }
-                        }
-                        public static Dafny.Test.Foobar.IFoobarServiceException ToDafny_CommonError
-                                (System.Exception value) {
-                            Dafny.Test.Foobar.FoobarServiceBaseException rtn;
-                            switch (value)
-                            {
-                                case Test.Foobar.FoobarServiceBaseException exception:
-                                    rtn = new Dafny.Test.Foobar.FoobarServiceBaseException();
-                                    rtn.message = %s(exception.Message);
-                                    return rtn;
-                                default:
-                                    var message = $"FoobarService encountered unexpected: {value.GetType()}: \\"{value.Message}\\"";
-                                    rtn = new Dafny.Test.Foobar.FoobarServiceBaseException();
-                                    rtn.message = %s(message);
-                                    return rtn;
-                            }
-                        }
+                       public static System.Exception FromDafny_CommonError(Dafny.Test.Foobar.Types._IError value) {
+                           switch (value) {
+                               case Dafny.Test.Foobar.Types.Error_Opaque dafnyVal:
+                                   return new OpaqueError(dafnyVal._obj);
+                               default:
+                                   // The switch MUST be complete for _IError, so `value` MUST NOT be an _IError. (How did you get here?) 
+                                   return new OpaqueError();
+                           }
+                       }
+                       
+                       public static Dafny.Test.Foobar.Types._IError ToDafny_CommonError(System.Exception value) {
+                           switch (value) {
+                               // OpaqueError is redundant, but listed for completeness.
+                               case OpaqueError exception:
+                                   return new Dafny.Test.Foobar.Types.Error_Opaque(exception);
+                               case System.Exception exception:
+                                   return new Dafny.Test.Foobar.Types.Error_Opaque(exception);
+                               default:
+                                   // The switch MUST be complete for System.Exception, so `value` MUST NOT be an System.Exception. (How did you get here?) 
+                                   return new Dafny.Test.Foobar.Types.Error_Opaque(value);
+                           }
+                       } 
                     }
                 }
                 """.formatted(
@@ -155,7 +152,6 @@ public class TypeConversionCodegenTest {
                         """.formatted(SERVICE_NAMESPACE));
         });
         final Set<ShapeId> expectedShapeIds = Stream.of(
-                SERVICE_NAMESPACE + "#FoobarConfig",
                 SERVICE_NAMESPACE + "#DoBarInput",
                 SERVICE_NAMESPACE + "#DoBarInput$qux",
                 SERVICE_NAMESPACE + "#DoBazOutput",
@@ -269,7 +265,7 @@ public class TypeConversionCodegenTest {
         final List<ParseToken> actualTokensFromDafny = tokenize(converter.fromDafny().toString());
         final String fromDafnyConverterName = DotNetNameResolver.typeConverterForShape(shapeId, FROM_DAFNY);
         final List<ParseToken> expectedTokensFromDafny = tokenize("""
-                public static Test.Foobar.AnEnum %s(Dafny.Test.Foobar._IAnEnum value) {
+                public static Test.Foobar.AnEnum %s(Dafny.Test.Foobar.Types._IAnEnum value) {
                     if (value.is_VERSION__A) return Test.Foobar.AnEnum.VERSION_A;
                     if (value.is_VERSION__B) return Test.Foobar.AnEnum.VERSION_B;
                     throw new System.ArgumentException("Invalid Test.Foobar.AnEnum value");
@@ -279,9 +275,9 @@ public class TypeConversionCodegenTest {
         final List<ParseToken> actualTokensToDafny = tokenize(converter.toDafny().toString());
         final String toDafnyConverterName = DotNetNameResolver.typeConverterForShape(shapeId, TO_DAFNY);
         final List<ParseToken> expectedTokensToDafny = tokenize("""
-                public static Dafny.Test.Foobar._IAnEnum %s(Test.Foobar.AnEnum value) {
-                    if (Test.Foobar.AnEnum.VERSION_A.Equals(value)) return Dafny.Test.Foobar.AnEnum.create_VERSION__A();
-                    if (Test.Foobar.AnEnum.VERSION_B.Equals(value)) return Dafny.Test.Foobar.AnEnum.create_VERSION__B();
+                public static Dafny.Test.Foobar.Types._IAnEnum %s(Test.Foobar.AnEnum value) {
+                    if (Test.Foobar.AnEnum.VERSION_A.Equals(value)) return Dafny.Test.Foobar.Types.AnEnum.create_VERSION__A();
+                    if (Test.Foobar.AnEnum.VERSION_B.Equals(value)) return Dafny.Test.Foobar.Types.AnEnum.create_VERSION__B();
                     throw new System.ArgumentException("Invalid Test.Foobar.AnEnum value");
                 }""".formatted(toDafnyConverterName));
         assertEquals(expectedTokensToDafny, actualTokensToDafny);
@@ -309,7 +305,7 @@ public class TypeConversionCodegenTest {
         final List<ParseToken> actualTokensFromDafny = tokenize(converter.fromDafny().toString());
         final String fromDafnyConverterName = DotNetNameResolver.typeConverterForShape(shapeId, FROM_DAFNY);
         final List<ParseToken> expectedTokensFromDafny = tokenize("""
-                public static Test.Foobar.AnEnum %s(Dafny.Test.Foobar._IAnEnum value) {
+                public static Test.Foobar.AnEnum %s(Dafny.Test.Foobar.Types._IAnEnum value) {
                     if (value.is_VERSION__A) return Test.Foobar.AnEnum.VERSION_A;
                     throw new System.ArgumentException("Invalid Test.Foobar.AnEnum value");
                 }""".formatted(fromDafnyConverterName));
@@ -318,8 +314,8 @@ public class TypeConversionCodegenTest {
         final List<ParseToken> actualTokensToDafny = tokenize(converter.toDafny().toString());
         final String toDafnyConverterName = DotNetNameResolver.typeConverterForShape(shapeId, TO_DAFNY);
         final List<ParseToken> expectedTokensToDafny = tokenize("""
-                public static Dafny.Test.Foobar._IAnEnum %s(Test.Foobar.AnEnum value) {
-                    if (Test.Foobar.AnEnum.VERSION_A.Equals(value)) return Dafny.Test.Foobar.AnEnum.create();
+                public static Dafny.Test.Foobar.Types._IAnEnum %s(Test.Foobar.AnEnum value) {
+                    if (Test.Foobar.AnEnum.VERSION_A.Equals(value)) return Dafny.Test.Foobar.Types.AnEnum.create();
                     throw new System.ArgumentException("Invalid Test.Foobar.AnEnum value");
                 }""".formatted(toDafnyConverterName));
         assertEquals(expectedTokensToDafny, actualTokensToDafny);
@@ -542,13 +538,13 @@ public class TypeConversionCodegenTest {
         final String refFromDafnyConverterName = DotNetNameResolver
             .typeConverterForShape(refMemberId, FROM_DAFNY);
         final List<ParseToken> expectedTokensFromDafny = tokenize("""
-                public static Test.Foobar.IntAndBool %s(Dafny.Test.Foobar._IIntAndBool value) {
-                    Dafny.Test.Foobar.IntAndBool concrete = (Dafny.Test.Foobar.IntAndBool)value;
+                public static Test.Foobar.IntAndBool %s(Dafny.Test.Foobar.Types._IIntAndBool value) {
+                    Dafny.Test.Foobar.Types.IntAndBool concrete = (Dafny.Test.Foobar.Types.IntAndBool)value;
                     Test.Foobar.IntAndBool converted = new Test.Foobar.IntAndBool();
-                    if (concrete.someInt.is_Some) converted.SomeInt = (int) %s(concrete.someInt);
-                    converted.SomeBool = (bool) %s(concrete.someBool);
-                    if (concrete.someString.is_Some) converted.SomeString = (string) %s(concrete.someString);
-                    if (concrete.someRef.is_Some) converted.SomeRef = (Test.Foobar.IThing) %s(concrete.someRef);
+                    if (concrete._someInt.is_Some) converted.SomeInt = (int) %s(concrete._someInt);
+                    converted.SomeBool = (bool) %s(concrete._someBool);
+                    if (concrete._someString.is_Some) converted.SomeString = (string) %s(concrete._someString);
+                    if (concrete._someRef.is_Some) converted.SomeRef = (Test.Foobar.IThing) %s(concrete._someRef);
                     return converted;
                 }""".formatted(
                         structureFromDafnyConverterName,
@@ -566,11 +562,11 @@ public class TypeConversionCodegenTest {
         final String refToDafnyConverterName = DotNetNameResolver
                 .typeConverterForShape(refMemberId, TO_DAFNY);
         final List<ParseToken> expectedTokensToDafny = tokenize("""
-                public static Dafny.Test.Foobar._IIntAndBool %s(Test.Foobar.IntAndBool value) {
+                public static Dafny.Test.Foobar.Types._IIntAndBool %s(Test.Foobar.IntAndBool value) {
                     int? var_someInt = value.IsSetSomeInt() ? value.SomeInt : (int?) null;
                     string var_someString = value.IsSetSomeString() ? value.SomeString : (string) null;
                     Test.Foobar.IThing var_someRef = value.IsSetSomeRef() ? value.SomeRef : (Test.Foobar.IThing) null;
-                    return new Dafny.Test.Foobar.IntAndBool(
+                    return new Dafny.Test.Foobar.Types.IntAndBool(
                         %s(var_someInt),
                         %s(value.SomeBool),
                         %s(var_someString),
@@ -603,7 +599,7 @@ public class TypeConversionCodegenTest {
         final List<ParseToken> actualTokensFromDafny = tokenize(converter.fromDafny().toString());
         final String structureFromDafnyConverterName = DotNetNameResolver.typeConverterForShape(shapeId, FROM_DAFNY);
         final List<ParseToken> expectedTokensFromDafny = tokenize("""
-                public static Test.Foobar.IThing %s(Dafny.Test.Foobar.IThing value) {
+                public static Test.Foobar.IThing %s(Dafny.Test.Foobar.Types.IThing value) {
                     return new Thing(value);
                 }""".formatted(structureFromDafnyConverterName));
         assertEquals(expectedTokensFromDafny, actualTokensFromDafny);
@@ -611,7 +607,7 @@ public class TypeConversionCodegenTest {
         final List<ParseToken> actualTokensToDafny = tokenize(converter.toDafny().toString());
         final String structureToDafnyConverterName = DotNetNameResolver.typeConverterForShape(shapeId, TO_DAFNY);
         final List<ParseToken> expectedTokensToDafny = tokenize("""
-                public static Dafny.Test.Foobar.IThing %s(Test.Foobar.IThing value) {
+                public static Dafny.Test.Foobar.Types.IThing %s(Test.Foobar.IThing value) {
                     if (value is Thing valueWithImpl) {
                         return valueWithImpl._impl;
                     }
@@ -640,7 +636,7 @@ public class TypeConversionCodegenTest {
         final String actualFromDafny = converter.fromDafny().toString();
         final String structureFromDafnyConverterName = DotNetNameResolver.typeConverterForShape(shapeId, FROM_DAFNY);
         final String expectedFromDafny = """
-                public static Test.Foobar.IThing %s(Dafny.Test.Foobar.IThing value) {
+                public static Test.Foobar.IThing %s(Dafny.Test.Foobar.Types.IThing value) {
                     if (value is NativeWrapper_Thing nativeWrapper) return nativeWrapper._impl;
                     return new Thing(value);
                 }
@@ -650,7 +646,7 @@ public class TypeConversionCodegenTest {
         final String actualToDafny = converter.toDafny().toString();
         final String structureToDafnyConverterName = DotNetNameResolver.typeConverterForShape(shapeId, TO_DAFNY);
         final String expectedToDafny = """
-                public static Dafny.Test.Foobar.IThing %s(Test.Foobar.IThing value) {
+                public static Dafny.Test.Foobar.Types.IThing %s(Test.Foobar.IThing value) {
                     switch (value)
                     {
                         case Thing valueWithImpl:
@@ -688,7 +684,7 @@ public class TypeConversionCodegenTest {
         final String structureFromDafnyConverterName = DotNetNameResolver.typeConverterForShape(shapeId, FROM_DAFNY);
         final String memberFromDafnyConverterName = DotNetNameResolver.typeConverterForShape(memberShapeId, FROM_DAFNY);
         final List<ParseToken> expectedTokensFromDafny = tokenize("""
-                public static Test.Foobar.IThing %s(Dafny.Test.Foobar.IThing value) {
+                public static Test.Foobar.IThing %s(Dafny.Test.Foobar.Types.IThing value) {
                     return %s(value);
                 }""".formatted(structureFromDafnyConverterName, memberFromDafnyConverterName));
         assertEquals(expectedTokensFromDafny, actualTokensFromDafny);
@@ -697,7 +693,7 @@ public class TypeConversionCodegenTest {
         final String structureToDafnyConverterName = DotNetNameResolver.typeConverterForShape(shapeId, TO_DAFNY);
         final String memberToDafnyConverterName = DotNetNameResolver.typeConverterForShape(memberShapeId, TO_DAFNY);
         final List<ParseToken> expectedTokensToDafny = tokenize("""
-                public static Dafny.Test.Foobar.IThing %s(Test.Foobar.IThing value) {
+                public static Dafny.Test.Foobar.Types.IThing %s(Test.Foobar.IThing value) {
                     return %s(value);
                 }""".formatted(structureToDafnyConverterName, memberToDafnyConverterName));
         assertEquals(expectedTokensToDafny, actualTokensToDafny);
@@ -800,7 +796,7 @@ public class TypeConversionCodegenTest {
         final String memberFromDafnyConverterName = DotNetNameResolver.typeConverterForShape(memberShapeId, FROM_DAFNY);
         final String targetFromDafnyConverterName = DotNetNameResolver.typeConverterForShape(targetShapeId, FROM_DAFNY);
         final List<ParseToken> expectedTokensFromDafny = tokenize("""
-                public static Test.Foobar.IThing %s(Wrappers_Compile._IOption<Dafny.Test.Foobar.IThing> value) {
+                public static Test.Foobar.IThing %s(Wrappers_Compile._IOption<Dafny.Test.Foobar.Types.IThing> value) {
                     return value.is_None ? (Test.Foobar.IThing) null : %s(value.Extract());
                 }""".formatted(memberFromDafnyConverterName, targetFromDafnyConverterName));
         assertEquals(expectedTokensFromDafny, actualTokensFromDafny);
@@ -809,10 +805,10 @@ public class TypeConversionCodegenTest {
         final String memberToDafnyConverterName = DotNetNameResolver.typeConverterForShape(memberShapeId, TO_DAFNY);
         final String targetToDafnyConverterName = DotNetNameResolver.typeConverterForShape(targetShapeId, TO_DAFNY);
         final List<ParseToken> expectedTokensToDafny = tokenize("""
-                public static Wrappers_Compile._IOption<Dafny.Test.Foobar.IThing> %s(Test.Foobar.IThing value) {
+                public static Wrappers_Compile._IOption<Dafny.Test.Foobar.Types.IThing> %s(Test.Foobar.IThing value) {
                     return value == null
-                        ? Wrappers_Compile.Option<Dafny.Test.Foobar.IThing>.create_None()
-                        : Wrappers_Compile.Option<Dafny.Test.Foobar.IThing>.create_Some(%s((Test.Foobar.IThing) value));
+                        ? Wrappers_Compile.Option<Dafny.Test.Foobar.Types.IThing>.create_None()
+                        : Wrappers_Compile.Option<Dafny.Test.Foobar.Types.IThing>.create_Some(%s((Test.Foobar.IThing) value));
                 }""".formatted(memberToDafnyConverterName, targetToDafnyConverterName));
         assertEquals(expectedTokensToDafny, actualTokensToDafny);
     }
@@ -840,15 +836,15 @@ public class TypeConversionCodegenTest {
 
         final List<ParseToken> actualTokensFromDafny = tokenize(converter.fromDafny().toString());
         final List<ParseToken> expectedTokensFromDafny = tokenize("""
-                public static Test.Foobar.UnfortunateError %s(Dafny.Test.Foobar.UnfortunateError value) {
+                public static Test.Foobar.UnfortunateError %s(Dafny.Test.Foobar.Types.Error_UnfortunateError value) {
                     return new Test.Foobar.UnfortunateError(%s(value.message));
                 }""".formatted(errorFromDafnyConverterName, messageFromDafnyConverterName));
         assertEquals(expectedTokensFromDafny, actualTokensFromDafny);
 
         final List<ParseToken> actualTokensToDafny = tokenize(converter.toDafny().toString());
         final List<ParseToken> expectedTokensToDafny = tokenize("""
-                public static Dafny.Test.Foobar.UnfortunateError %s(Test.Foobar.UnfortunateError value) {
-                    Dafny.Test.Foobar.UnfortunateError converted = new Dafny.Test.Foobar.UnfortunateError();
+                public static Dafny.Test.Foobar.Types.Error_UnfortunateError %s(Test.Foobar.UnfortunateError value) {
+                    Dafny.Test.Foobar.Types.Error_UnfortunateError converted = new Dafny.Test.Foobar.Types.Error_UnfortunateError();
                     converted.message = %s(value.Message);
                     return converted;
                 }""".formatted(errorToDafnyConverterName, messageToDafnyConverterName));
@@ -873,55 +869,47 @@ public class TypeConversionCodegenTest {
 
         final String actualFromDafny = converter.fromDafny().toString();
         final String expectedFromDafny = """
-                public static Test.Foobar.FoobarServiceBaseException
-                        FromDafny_CommonError_FoobarServiceBaseException(Dafny.Test.Foobar.IFoobarServiceException value) {
-                    switch (value)
-                    {
-                        case Dafny.Test.Foobar.Exception1 dafnyVal:
+                public static System.Exception FromDafny_CommonError(Dafny.Test.Foobar.Types._IError value) {
+                    switch (value) {
+                        case Dafny.Test.Foobar.Types.Error_Exception1 dafnyVal:
                             return %s(dafnyVal);
-                        case Dafny.Test.Foobar.Exception2 dafnyVal:
+                        case Dafny.Test.Foobar.Types.Error_Exception2 dafnyVal:
                             return %s(dafnyVal);
+                        case Dafny.Test.Foobar.Types.Error_Opaque dafnyVal:
+                            return new OpaqueError(dafnyVal._obj);
                         default:
-                            return new Test.Foobar.FoobarServiceBaseException(
-                                %s(value.GetMessage()));
-                    }
+                            // The switch MUST be complete for _IError, so `value` MUST NOT be an _IError. (How did you get here?)
+                            return new OpaqueError();
+                    } 
                 }""".formatted(
                 DotNetNameResolver.typeConverterForShape(exc1ShapeId, FROM_DAFNY),
-                DotNetNameResolver.typeConverterForShape(exc2ShapeId, FROM_DAFNY),
-                DotNetNameResolver.typeConverterForShape(ShapeId.from("smithy.api#String"), FROM_DAFNY)
+                DotNetNameResolver.typeConverterForShape(exc2ShapeId, FROM_DAFNY)
         );
         tokenizeAndAssert(expectedFromDafny, actualFromDafny);
 
+
         final String actualToDafny = converter.toDafny().toString();
         final String expectedToDafny = """
-                public static Dafny.Test.Foobar.IFoobarServiceException
-                        ToDafny_CommonError(System.Exception value) {
-                    Dafny.Test.Foobar.FoobarServiceBaseException rtn;
-                    switch (value)
-                    {
+                public static Dafny.Test.Foobar.Types._IError ToDafny_CommonError(System.Exception value) {
+                    switch (value) {
                         case Test.Foobar.Exception1 exception:
                             return %s(exception);
                         case Test.Foobar.Exception2 exception:
                             return %s(exception);
-                        case Test.Foobar.FoobarServiceBaseException exception:
-                            rtn = new %s();
-                            rtn.message = %s(exception.Message);
-                            return rtn;
+                        // OpaqueError is redundant, but listed for completeness.
+                        case OpaqueError exception:
+                            return new Dafny.Test.Foobar.Types.Error_Opaque(exception);
+                        case System.Exception exception:
+                            return new Dafny.Test.Foobar.Types.Error_Opaque(exception);
                         default:
-                            var message = $"%s encountered unexpected: {value.GetType()}: \\"{value.Message}\\"";
-                            rtn = new %s();
-                            rtn.message = %s(message);
-                            return rtn;
-                    }
+                            // The switch MUST be complete for System.Exception, so `value` MUST NOT be an System.Exception. (How did you get here?)
+                            return new Dafny.Test.Foobar.Types.Error_Opaque(value);
+                    } 
                 }""".formatted(
             DotNetNameResolver.typeConverterForShape(exc1ShapeId, TO_DAFNY),
-            DotNetNameResolver.typeConverterForShape(exc2ShapeId, TO_DAFNY),
-            "Dafny.Test.Foobar.FoobarServiceBaseException", // Dafny Base Exception type
-            DotNetNameResolver.typeConverterForShape(ShapeId.from("smithy.api#String"), TO_DAFNY), // ToDafny String
-            codegen.nameResolver.serviceNameWithoutFactory(), //"FoobarService"
-            "Dafny.Test.Foobar.FoobarServiceBaseException", // Dafny Base Exception type
-            DotNetNameResolver.typeConverterForShape(ShapeId.from("smithy.api#String"), TO_DAFNY) // ToDafny String
+            DotNetNameResolver.typeConverterForShape(exc2ShapeId, TO_DAFNY)
         );
+
         tokenizeAndAssert(expectedToDafny, actualToDafny);
     }
 }

@@ -1,10 +1,17 @@
 plugins {
     java
     application
+    `maven-publish`
 }
 
 group = "software.amazon.polymorph"
 version = "0.1.0"
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    }
+}
 
 repositories {
     mavenLocal()
@@ -12,9 +19,10 @@ repositories {
 }
 
 dependencies {
-    implementation("software.amazon.smithy:smithy-model:1.10.0")
+    implementation("software.amazon.smithy:smithy-model:1.21.0")
     implementation("software.amazon.smithy:smithy-codegen-core:[1.0.2,1.1.0[")
     implementation("software.amazon.smithy:smithy-protocol-test-traits:[1.0.2,1.1.0[")
+    implementation("software.amazon.smithy:smithy-aws-traits:1.21.0")
 
     implementation("com.google.guava:guava:30.1-jre")
     implementation("commons-cli:commons-cli:1.4")
@@ -28,4 +36,14 @@ dependencies {
 
 application {
     mainClass.set("software.amazon.polymorph.CodegenCli")
+}
+
+
+publishing {
+    publications {
+        create<MavenPublication>("smithy-dotnet") {
+            from(components["java"])
+        }
+    }
+    repositories{ mavenLocal() }
 }

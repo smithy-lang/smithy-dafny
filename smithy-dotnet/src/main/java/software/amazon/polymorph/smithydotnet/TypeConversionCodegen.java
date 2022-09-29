@@ -6,30 +6,13 @@ package software.amazon.polymorph.smithydotnet;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
 
-import software.amazon.polymorph.traits.ExtendableTrait;
+import software.amazon.polymorph.smithydafny.DafnyNameResolver;
+import software.amazon.polymorph.traits.*;
 import software.amazon.polymorph.utils.ModelUtils;
-import software.amazon.polymorph.traits.ClientConfigTrait;
-import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
-import software.amazon.polymorph.traits.PositionalTrait;
-import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.polymorph.utils.Token;
 import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.smithy.model.Model;
-import software.amazon.smithy.model.shapes.BlobShape;
-import software.amazon.smithy.model.shapes.BooleanShape;
-import software.amazon.smithy.model.shapes.IntegerShape;
-import software.amazon.smithy.model.shapes.ListShape;
-import software.amazon.smithy.model.shapes.LongShape;
-import software.amazon.smithy.model.shapes.MapShape;
-import software.amazon.smithy.model.shapes.MemberShape;
-import software.amazon.smithy.model.shapes.OperationShape;
-import software.amazon.smithy.model.shapes.ResourceShape;
-import software.amazon.smithy.model.shapes.ServiceShape;
-import software.amazon.smithy.model.shapes.Shape;
-import software.amazon.smithy.model.shapes.ShapeId;
-import software.amazon.smithy.model.shapes.StringShape;
-import software.amazon.smithy.model.shapes.StructureShape;
-import software.amazon.smithy.model.shapes.TimestampShape;
+import software.amazon.smithy.model.shapes.*;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
 
@@ -68,23 +51,21 @@ public class TypeConversionCodegen {
     protected final ServiceShape serviceShape;
     protected final DotNetNameResolver nameResolver;
 
-    public TypeConversionCodegen(final Model model, final ShapeId serviceShapeId) {
-        this(model, serviceShapeId,
-                new DotNetNameResolver(model, model.expectShape(serviceShapeId, ServiceShape.class)));
+    public TypeConversionCodegen(final Model model, final ServiceShape serviceShape) {
+        this(model, serviceShape,
+                new DotNetNameResolver(model, serviceShape));
     }
 
-    public TypeConversionCodegen(final Model model, final ShapeId serviceShapeId, final DotNetNameResolver nameResolver) {
+    public TypeConversionCodegen(final Model model, final ServiceShape serviceShape, final DotNetNameResolver nameResolver) {
         this.model = model;
-        this.serviceShape = model.expectShape(serviceShapeId, ServiceShape.class);
+        this.serviceShape = serviceShape;
         this.nameResolver = nameResolver;
     }
 
     public Map<Path, TokenTree> generate() {
         final TokenTree prelude = TokenTree.of(
                 // needed for LINQ operators like Select
-                "using System.Linq;",
-                // TODO: fully qualify types to avoid needing this
-                "using AWS.EncryptionSDK.Core;"
+                "using System.Linq;"
                 );
         final Stream<TypeConverter> modeledConverters = findShapeIdsToConvert()
                 .stream()
@@ -180,10 +161,12 @@ public class TypeConversionCodegen {
                 .collect(Collectors.toSet());
         // Collect service client config structures
         final Set<ShapeId> clientConfigStructures = serviceShapes.stream()
-                .map(serviceShape -> serviceShape.getTrait(ClientConfigTrait.class))
+                .map(serviceShape -> serviceShape.getTrait(LocalServiceTrait.class))
                 .flatMap(Optional::stream)
-                .map(ClientConfigTrait::getClientConfigId)
+                .map(LocalServiceTrait::getConfigId)
                 .collect(Collectors.toSet());
+
+        // TODO: Need to add union shapes?
 
         // Collect all specific error structures
         final Set<ShapeId> errorStructures = ModelUtils.streamServiceErrors(model, serviceShape)
@@ -214,6 +197,7 @@ public class TypeConversionCodegen {
             case MAP -> generateMapConverter(shape.asMapShape().get());
             case STRUCTURE -> generateStructureConverter(shape.asStructureShape().get());
             case MEMBER -> generateMemberConverter(shape.asMemberShape().get());
+            case UNION -> generateUnionConverter(shape.asUnionShape().get());
             default -> throw new IllegalStateException();
         };
     }
@@ -362,7 +346,7 @@ public class TypeConversionCodegen {
         }
 
         if (structureShape.hasTrait(ErrorTrait.class)) {
-            return generateSpecificExceptionConverter(structureShape);
+            return generateSpecificModeledErrorConverter(structureShape);
         }
 
         return generateRegularStructureConverter(structureShape);
@@ -377,7 +361,7 @@ public class TypeConversionCodegen {
                 nameResolver.dafnyConcreteTypeForRegularStructure(structureShape)));
         final TokenTree assignments = TokenTree.of(ModelUtils.streamStructureMembers(structureShape)
                 .map(memberShape -> {
-                    final String dafnyMemberName = memberShape.getMemberName();
+                    final String dafnyMemberName = DotNetNameResolver.memberName(memberShape);
                     final String propertyName = nameResolver.classPropertyForStructureMember(memberShape);
                     final String propertyType = nameResolver.classPropertyTypeForStructureMember(memberShape);
                     final String memberFromDafnyConverterName = typeConverterForShape(
@@ -483,6 +467,14 @@ public class TypeConversionCodegen {
         return buildConverterFromMethodBodies(memberShape, fromDafnyBody, toDafnyBody);
     }
 
+    // TODO need to implement Union converter
+    public TypeConverter generateUnionConverter(final UnionShape unionShape) {
+        final TokenTree fromDafnyBody = TokenTree.empty();
+        final TokenTree toDafnyBody = TokenTree.empty();
+
+        return buildConverterFromMethodBodies(unionShape, fromDafnyBody, toDafnyBody);
+    }
+
     /**
      * This should not be called directly, instead call
      * {@link TypeConversionCodegen#generateStructureConverter(StructureShape)}.
@@ -512,7 +504,7 @@ public class TypeConversionCodegen {
         }
 
         final AwsSdkTypeConversionCodegen awsSdkTypeConversionCodegen =
-                new AwsSdkTypeConversionCodegen(model, serviceShape.getId());
+                new AwsSdkTypeConversionCodegen(model, serviceShape);
         return awsSdkTypeConversionCodegen.generateAwsSdkServiceReferenceStructureConverter(structureShape);
     }
 
@@ -678,14 +670,19 @@ public class TypeConversionCodegen {
     public TypeConverter generateCommonExceptionConverter() {
         // Gather the Smithy Modeled specific exceptions by collecting them into a TreeSet.
         // This sorts the set by shape ID, making the order deterministic w.r.t the model.
-        final TreeSet<StructureShape> errorShapes = ModelUtils.streamServiceErrors(model, serviceShape)
-                .collect(Collectors.toCollection(TreeSet::new));
-        final String cSharpType = "%s.%s".formatted(nameResolver.namespaceForService(), nameResolver.classForBaseServiceException());
+        final TreeSet<StructureShape> errorShapes = ModelUtils
+          .streamServiceErrors(model, serviceShape)
+          .collect(Collectors.toCollection(TreeSet::new));
+
+        // TODO: Is a raw exception really the right thing to be returning?
+        final String cSharpType = "System.Exception";
         final String dafnyType = nameResolver.dafnyTypeForCommonServiceError(serviceShape);
 
         // Generate the FROM_DAFNY method
         // Handle the modeled exceptions.
-        final TokenTree modeledExceptionsFromDafny = TokenTree.of(errorShapes.stream().map(errorShape -> {
+        final TokenTree modeledExceptionsFromDafny = TokenTree.of(errorShapes
+          .stream()
+          .map(errorShape -> {
             final ShapeId modeledErrorShapeId = errorShape.getId();
             return Token.of("case %1$s dafnyVal:\nreturn %2$s(dafnyVal);".formatted(
                     nameResolver.dafnyTypeForShape(modeledErrorShapeId),
@@ -694,18 +691,30 @@ public class TypeConversionCodegen {
         })).lineSeparated();
 
         // Handle the special cases that were cast to the root service exception.
-        final TokenTree handleBaseFromDafny = Token.of(
-                "default:\nreturn new %s(\n%s(value.GetMessage()));".formatted(
-                        cSharpType, typeConverterForShape(ShapeId.from("smithy.api#String"), FROM_DAFNY))
-        );
+        final TokenTree handleBaseFromDafny = TokenTree
+          .of(
+            "case %1$s.Error_Opaque dafnyVal:"
+              .formatted(DafnyNameResolver.dafnyExternNamespaceForShapeId(serviceShape.getId())),
+            "return new OpaqueError(dafnyVal._obj);",
+            "default:",
+            "// The switch MUST be complete for _IError, so `value` MUST NOT be an _IError. (How did you get here?)",
+            "return new OpaqueError();"
+          )
+          .lineSeparated();
 
         // Wrap all the converters into a switch statement.
-        final TokenTree fromDafnySwitchCases = TokenTree.of(modeledExceptionsFromDafny, handleBaseFromDafny)
-                .lineSeparated().braced();
+        final TokenTree fromDafnySwitchCases = TokenTree
+          .of(modeledExceptionsFromDafny, handleBaseFromDafny)
+          .lineSeparated()
+          .braced();
         final TokenTree fromDafnyBody = TokenTree.of(
                 TokenTree.of("switch(value)"), fromDafnySwitchCases).lineSeparated();
-        final TokenTree fromDafnyConverterSignature = Token.of("public static %s %s(%s value)".formatted(
-                cSharpType, nameResolver.typeConverterForCommonError(serviceShape, FROM_DAFNY), dafnyType));
+        final TokenTree fromDafnyConverterSignature = Token.of("public static %s %s(%s value)"
+          .formatted(
+            cSharpType,
+            nameResolver.typeConverterForCommonError(serviceShape, FROM_DAFNY),
+            dafnyType
+          ));
         final TokenTree fromDafnyConverterMethod = TokenTree.of(fromDafnyConverterSignature, fromDafnyBody.braced());
 
         // Generate the TO_DAFNY method
@@ -717,29 +726,34 @@ public class TypeConversionCodegen {
                     typeConverterForShape(specificErrorShapeId, TO_DAFNY)
             ));
         })).lineSeparated();
-        // Handle the first special case; extensions of the service root exception that are not in the smithy model.
-        final TokenTree handleBaseToDafny = Token.of(
-                "case %1$s exception:\nrtn = new %2$s();\nrtn.message = %3$s(exception.Message);\nreturn rtn;"
-                .formatted(cSharpType, nameResolver.dafnyBaseTypeForServiceError(),
-                        typeConverterForShape(ShapeId.from("smithy.api#String"), TO_DAFNY)));
-        // Handle the second special case; extensions of System.Exception.
-        // Construct a custom message that details the Exception's type and message.
-        final String anyMessage =
-                """
-                var message = $"%s encountered unexpected: {value.GetType()}: \\"{value.Message}\\"";"""
-                        .formatted(nameResolver.serviceNameWithoutFactory());
+
+
         // Return the root service exception with the custom message.
-        final TokenTree handleAnyException = Token.of(
-                "default:\n%1$s\nrtn = new %2$s();\nrtn.message = %3$s(message);\nreturn rtn;"
-                        .formatted(anyMessage, nameResolver.dafnyBaseTypeForServiceError(),
-                                typeConverterForShape(ShapeId.from("smithy.api#String"), TO_DAFNY)));
+        final TokenTree handleAnyException = TokenTree
+          .of(
+            "// OpaqueError is redundant, but listed for completeness.",
+            "case OpaqueError exception:",
+            "return new %1$s.Error_Opaque(exception);"
+              .formatted(DafnyNameResolver.dafnyExternNamespaceForShapeId(serviceShape.getId())),
+            "case %1$s exception:".formatted(cSharpType),
+            "return new %1$s.Error_Opaque(exception);"
+              .formatted(DafnyNameResolver.dafnyExternNamespaceForShapeId(serviceShape.getId())),
+            "default:",
+            "// The switch MUST be complete for System.Exception, so `value` MUST NOT be an System.Exception. (How did you get here?)",
+            "return new %1$s.Error_Opaque(value);"
+              .formatted(DafnyNameResolver.dafnyExternNamespaceForShapeId(serviceShape.getId()))
+          )
+          .lineSeparated();
 
         // Wrap all the converters into a switch statement.
-        final TokenTree toDafnySwitchCases = TokenTree.of(specificExceptionsToDafny, handleBaseToDafny, handleAnyException)
+        final TokenTree toDafnySwitchCases = TokenTree.of(specificExceptionsToDafny, handleAnyException)
                 .lineSeparated().braced();
-        final TokenTree toDafnyBody = TokenTree.of(
-                TokenTree.of("%s rtn;\nswitch (value)\n".formatted(nameResolver.dafnyBaseTypeForServiceError())),
-                toDafnySwitchCases);
+        final TokenTree toDafnyBody = TokenTree
+          .of(
+            TokenTree.of("switch (value)"),
+            toDafnySwitchCases
+          )
+          .lineSeparated();
         final TokenTree toDafnyConverterSignature = Token.of("public static %s %s(System.Exception value)".formatted(
                 dafnyType, nameResolver.typeConverterForCommonError(serviceShape, TO_DAFNY)));
         final TokenTree toDafnyConverterMethod = TokenTree.of(toDafnyConverterSignature, toDafnyBody.braced());
@@ -777,12 +791,86 @@ public class TypeConversionCodegen {
         return buildConverterFromMethodBodies(errorShape, fromDafnyBody, toDafnyBody);
     }
 
+
+
+    /**
+     * Returns a type converter for an {@code @error} structure.
+     * <p>
+     * This requires special-casing because a System.Exception's {@code message} field cannot be set by property, but
+     * instead must be passed to the constructor.
+     */
+    public TypeConverter generateSpecificModeledErrorConverter(final StructureShape errorShape) {
+        assert errorShape.hasTrait(ErrorTrait.class);
+        final String structureType = nameResolver.baseTypeForShape(errorShape.getId());
+
+        final TokenTree fromDafnyConstructorArgs = TokenTree
+          .of(ModelUtils
+            .streamStructureMembers(errorShape)
+            .map( memberShape -> {
+                final String dafnyMemberName = DotNetNameResolver.memberName(memberShape);
+                final String memberFromDafnyConverterName = typeConverterForShape(
+                  memberShape.getId(), FROM_DAFNY);
+
+                return Token.of("%s(value.%s)".formatted(
+                  memberFromDafnyConverterName,
+                  dafnyMemberName
+                ));
+            }))
+          .separated(Token.of(','))
+          .lineSeparated();
+
+        final TokenTree fromDafnyBody = TokenTree.of(
+          Token.of("return new"),
+          Token.of(structureType),
+          fromDafnyConstructorArgs.parenthesized().lineSeparated(),
+          Token.of(';')
+        );
+
+        final TokenTree toDafnyIsSetTernaries = TokenTree
+          .of(
+            ModelUtils
+              .streamStructureMembers(errorShape)
+              .filter(nameResolver::memberShapeIsOptional)
+              .map(this::generateExtractOptionalMember))
+          .lineSeparated();
+        final TokenTree toDafnyConstructorArgs = TokenTree
+          .of(ModelUtils
+            .streamStructureMembers(errorShape)
+            .map(this::generateConstructorArg)
+            .map(Token::of))
+          .separated(Token.of(','))
+          .lineSeparated();
+        final TokenTree toDafnyConstructor = TokenTree
+          .of(
+            TokenTree.of("return new"),
+            TokenTree.of(nameResolver.dafnyConcreteTypeForErrorStructure(errorShape)),
+            toDafnyConstructorArgs.parenthesized().lineSeparated(),
+            Token.of(';')
+          );
+
+
+        final TokenTree toDafnyBody = TokenTree
+          .of(
+            toDafnyIsSetTernaries,
+            toDafnyConstructor
+          )
+          .lineSeparated();
+
+        return buildConverterFromMethodBodies(errorShape, fromDafnyBody, toDafnyBody);
+    }
+
+
+
+
     /**
      * Build a {@link TypeConverter} by surrounding the given type converter method bodies with appropriate method
      * signatures. Each method body should assume the sole argument (the value to convert) is named {@code value}.
      */
     protected TypeConverter buildConverterFromMethodBodies(
-            final Shape shape, final TokenTree fromDafnyBody, final TokenTree toDafnyBody) {
+        final Shape shape,
+        final TokenTree fromDafnyBody,
+        final TokenTree toDafnyBody
+    ) {
         final String dafnyType = nameResolver.dafnyTypeForShape(shape.getId());
         final String cSharpType = nameResolver.baseTypeForShape(shape.getId());
 

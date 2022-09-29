@@ -27,71 +27,8 @@ import static software.amazon.polymorph.util.TestModel.SERVICE_SHAPE_ID;
 public class DafnyApiCodegenTest {
     private static DafnyApiCodegen setupCodegen(final BiConsumer<ServiceShape.Builder, ModelAssembler> updater) {
         final Model model = TestModel.setupModel(updater);
-        return new DafnyApiCodegen(model, SERVICE_SHAPE_ID);
-    }
-
-    @Test
-    public void testGenerate() {
-        final ShapeId operationShapeId = ShapeId.fromParts(SERVICE_NAMESPACE, "DoIt");
-        final DafnyApiCodegen codegen = setupCodegen((builder, modelAssembler) -> {
-            builder.addOperation(operationShapeId);
-            modelAssembler.addUnparsedModel("test.smithy", """
-                    namespace %s
-                    operation DoIt {}
-                    boolean SomeBool
-                    @enum([{name: "A", value: "A"}, {name: "B", value: "B"}]) string SomeEnum
-                    long SomeLong
-                    list SomeList { member: String }
-                    structure SomeStructure { someInt: Integer }
-                    map EncryptionContextType { key: EncryptionContextKey, value: EncryptionContextValue }
-                    @aws.polymorph#dafnyUtf8Bytes string EncryptionContextKey
-                    @aws.polymorph#dafnyUtf8Bytes string EncryptionContextValue
-                    """.formatted(SERVICE_NAMESPACE));
-        });
-        final Map<Path, TokenTree> codeByPath = codegen.generate();
-        final String actualCode = codeByPath.get(Path.of("FoobarServiceFactory.dfy")).toString();
-        final List<ParseToken> actualTokens = Tokenizer.tokenize(actualCode);
-
-        final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
-                include "../StandardLibrary/StandardLibrary.dfy"
-                include "../Util/UTF8.dfy"
-                module {:extern "Dafny.Test.Foobar"} Test.Foobar {
-                    import opened Wrappers
-                    import opened StandardLibrary.UInt
-                    import opened UTF8
-                    type EncryptionContextKey = ValidUTF8Bytes
-                    type EncryptionContextType = map<EncryptionContextKey, EncryptionContextValue>
-                    type EncryptionContextValue = ValidUTF8Bytes
-                    trait IFoobarServiceFactoryClient {
-                        predicate {:opaque} DoItCalledWith() {true}
-                        predicate {:opaque} DoItSucceededWith() {true}
-                        method DoIt() returns (output: Result<(), IFoobarServiceFactoryException>)
-                           ensures DoItCalledWith()
-                           ensures output.Success? ==> DoItSucceededWith()
-                    }
-                    trait IFoobarServiceFactoryException {
-                        function method GetMessage(): (message: string)
-                            reads this
-                    }
-                    class UnknownFoobarServiceFactoryError extends IFoobarServiceFactoryException {
-                        var message: string
-                        constructor(message: string) {
-                            this.message := message;
-                        }
-                        function method GetMessage(): (message: string)
-                            reads this
-                        {
-                            this.message
-                        }
-                    }
-                    type SomeBool = bool
-                    datatype SomeEnum = | A | B
-                    type SomeList = seq<string>
-                    type SomeLong = int64
-                    datatype SomeStructure = SomeStructure(nameonly someInt: Option<int32>)
-                }
-                """);
-        assertEquals(expectedTokens, actualTokens);
+        final ServiceShape serviceShape = model.expectShape(SERVICE_SHAPE_ID, ServiceShape.class);
+        return new DafnyApiCodegen(model, serviceShape, Path.of(""), new Path[0]);
     }
 
     @Test
@@ -252,128 +189,11 @@ public class DafnyApiCodegenTest {
         final List<ParseToken> actualTokens = Tokenizer.tokenize(actualCode);
 
         final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
-                datatype Foobar = Foobar(
+                datatype Foobar = | Foobar(
                     nameonly someInt: Option<int32>,
                     nameonly someString: Option<string>,
                     nameonly someBool: bool
                 )
-                """);
-        assertEquals(expectedTokens, actualTokens);
-    }
-
-    @Test
-    public void testGenerateServiceTraitDefinition() {
-        final DafnyApiCodegen codegen = setupCodegen((builder, modelAssembler) -> {
-            builder.addOperation(ShapeId.fromParts(SERVICE_NAMESPACE, "DoThis"));
-            builder.addOperation(ShapeId.fromParts(SERVICE_NAMESPACE, "DoThat"));
-            modelAssembler.addUnparsedModel("test.smithy", """
-                    namespace %s
-                    operation DoThis {}
-                    operation DoThat {}
-                    """.formatted(SERVICE_NAMESPACE));
-        });
-        final String actualCode = codegen.generateServiceTraitDefinition().toString();
-        final List<ParseToken> actualTokens = Tokenizer.tokenize(actualCode);
-
-        final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
-                trait IFoobarServiceFactoryClient {
-                    predicate {:opaque} DoThisCalledWith() {true}
-                    predicate {:opaque} DoThisSucceededWith() {true}
-                    method DoThis() returns (output: Result<(), IFoobarServiceFactoryException>)
-                      ensures DoThisCalledWith()
-                      ensures output.Success? ==> DoThisSucceededWith()
-                    predicate {:opaque} DoThatCalledWith() {true}
-                    predicate {:opaque} DoThatSucceededWith() {true}
-                    method DoThat() returns (output: Result<(), IFoobarServiceFactoryException>)
-                      ensures DoThatCalledWith()
-                      ensures output.Success? ==> DoThatSucceededWith()
-                }""");
-        assertEquals(expectedTokens, actualTokens);
-    }
-
-    @Test
-    public void testGenerateOperationPredicatesAndMethod() {
-        final ShapeId operationShapeId = ShapeId.fromParts(SERVICE_NAMESPACE, "DoIt");
-        final DafnyApiCodegen codegen = setupCodegen((builder, modelAssembler) -> {
-            builder.addOperation(operationShapeId);
-            modelAssembler.addUnparsedModel("test.smithy", """
-                    namespace %s
-                    operation DoIt { input: Foo, output: Bar, errors: [Oops] }
-                    structure Foo {}
-                    structure Bar {}
-                    @error("client") structure Oops {}
-                    """.formatted(SERVICE_NAMESPACE));
-        });
-        final String actualCode = codegen.generateOperationPredicatesAndMethod(operationShapeId).toString();
-        final List<ParseToken> actualTokens = Tokenizer.tokenize(actualCode);
-
-        final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
-                predicate {:opaque} DoItCalledWith(
-                  input: Foo
-                ) {true}
-                predicate {:opaque} DoItSucceededWith(
-                  input: Foo,
-                  output: Bar
-                ) {true}
-                method DoIt(input: Foo) returns (output: Result<Bar, IFoobarServiceFactoryException>)
-                  ensures DoItCalledWith(input)
-                  ensures output.Success? ==> DoItSucceededWith(input, output.value)
-                """);
-        assertEquals(expectedTokens, actualTokens);
-    }
-
-    @Test
-    public void testGenerateServiceErrorTraitDefinition() {
-        final DafnyApiCodegen codegen = setupCodegen((builder, modelAssembler) -> {
-            builder.addOperation(ShapeId.fromParts(SERVICE_NAMESPACE, "DoIt"));
-            modelAssembler.addUnparsedModel("test.smithy", """
-                    namespace %s
-                    operation DoIt { errors: [Oops, OhNo, Whoops] }
-                    @error("client") structure Oops {}
-                    @error("client") structure OhNo {}
-                    @error("server") structure Whoops {}
-                    """.formatted(SERVICE_NAMESPACE));
-        });
-        final String actualCode = codegen.generateServiceErrorTraitDefinition().toString();
-        final List<ParseToken> actualTokens = Tokenizer.tokenize(actualCode);
-
-        final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
-                trait IFoobarServiceFactoryException {
-                    function method GetMessage(): (message: string)
-                        reads this
-                }
-                """);
-        assertEquals(expectedTokens, actualTokens);
-    }
-
-    @Test
-    public void testGenerateSpecificErrorClass() {
-        final ShapeId shapeId = ShapeId.fromParts(SERVICE_NAMESPACE, "OopsException");
-        final DafnyApiCodegen codegen = setupCodegen((builder, modelAssembler) -> {
-            builder.addOperation(ShapeId.fromParts(SERVICE_NAMESPACE, "DoIt"));
-            modelAssembler.addUnparsedModel("test.smithy", """
-                    namespace %s
-                    string ErrorMessageType
-                    operation DoIt { errors: [OopsException] }
-                    @error("client") structure OopsException { message: ErrorMessageType }
-                    """.formatted(SERVICE_NAMESPACE));
-        });
-        final String actualCode = codegen.generateSpecificErrorClass(codegen.getModel().expectShape(shapeId, StructureShape.class)).toString();
-        final List<ParseToken> actualTokens = Tokenizer.tokenize(actualCode);
-        final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
-                class OopsException extends IFoobarServiceFactoryException {
-                    var message: string
-                    
-                    constructor (message: string) {
-                        this.message := message;
-                    }
-                    
-                    function method GetMessage(): (message: string)
-                        reads this
-                    {
-                        this.message
-                    }
-                }
                 """);
         assertEquals(expectedTokens, actualTokens);
     }

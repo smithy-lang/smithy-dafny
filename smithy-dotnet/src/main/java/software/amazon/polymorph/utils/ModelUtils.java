@@ -3,11 +3,7 @@
 
 package software.amazon.polymorph.utils;
 
-import software.amazon.polymorph.traits.ClientConfigTrait;
-import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
-import software.amazon.polymorph.traits.ExtendableTrait;
-import software.amazon.polymorph.traits.PositionalTrait;
-import software.amazon.polymorph.traits.ReferenceTrait;
+import software.amazon.polymorph.traits.*;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.loader.ModelAssembler;
 import software.amazon.smithy.model.shapes.MemberShape;
@@ -41,6 +37,7 @@ public class ModelUtils {
         assembler.addShape(ClientConfigTrait.getDefinition());
         assembler.addShape(DafnyUtf8BytesTrait.getDefinition());
         assembler.addShape(ExtendableTrait.getDefinition());
+        assembler.addShape(LocalServiceTrait.getDefinition());
     }
 
     /**
@@ -54,9 +51,16 @@ public class ModelUtils {
      * @return a stream of error structures in the given service shape
      */
     public static Stream<StructureShape> streamServiceErrors(final Model model, final ServiceShape serviceShape) {
+        return streamNamespaceErrors(model, serviceShape.getId().getNamespace());
+    }
+
+    /**
+     * @return a stream of error structures in the given namespace
+     */
+    public static Stream<StructureShape> streamNamespaceErrors(final Model model, final String namespace) {
         return model.getStructureShapesWithTrait(ErrorTrait.class)
-                .stream()
-                .filter(structureShape -> isInServiceNamespace(structureShape.getId(), serviceShape));
+          .stream()
+          .filter(structureShape -> structureShape.getId().getNamespace().equals(namespace));
     }
 
     /**
@@ -121,6 +125,23 @@ public class ModelUtils {
             throw new IllegalArgumentException("The 'message' member of %s must be @required"
                     .formatted(structureShape.getId()));
         }
+    }
+
+    /**
+     * @return the service in a given namespace
+     */
+    public static ServiceShape serviceFromNamespace(final Model model, final String namespace) {
+        final ServiceShape[] tmp = model
+          .getServiceShapes()
+          .stream()
+          .filter(s -> s.toShapeId().getNamespace().equals(namespace))
+          .toArray(ServiceShape[]::new);
+
+        if (tmp.length != 1 ) {
+            throw new IllegalStateException();
+        }
+
+        return tmp[0];
     }
 
     /**

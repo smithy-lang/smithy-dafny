@@ -46,17 +46,16 @@ public class ServiceCodegen {
     private final ServiceShape serviceShape;
     private final DotNetNameResolver nameResolver;
 
-    public ServiceCodegen(final Model model, final ShapeId serviceShapeId) {
+    public ServiceCodegen(final Model model, final ServiceShape serviceShape) {
         this.model = model;
 
-        this.serviceShape = model.expectShape(serviceShapeId, ServiceShape.class);
+        this.serviceShape = serviceShape;
         this.nameResolver = new DotNetNameResolver(model, serviceShape);
     }
 
     // TODO: get smarter about imports. maybe just fully qualify all model-agnostic types?
     private final static List<String> UNCONDITIONAL_IMPORTS = List.of(
-            "System",
-            "AWS.EncryptionSDK.Core"
+            "System"
     );
 
     /**
@@ -72,10 +71,10 @@ public class ServiceCodegen {
                 importNamespaces.stream().map("using %s;"::formatted).map(Token::of)
         ).lineSeparated();
 
-        // Common exception class
-        final Path commonExceptionPath = Path.of(String.format("%s.cs", nameResolver.classForBaseServiceException()));
-        final TokenTree commonExceptionPathCode = generateCommonExceptionClass();
-        codeByPath.put(commonExceptionPath, commonExceptionPathCode.prepend(prelude));
+        // Opaque exception class
+        final Path opaqueExceptionPath = Path.of("OpaqueError.cs");
+        final TokenTree opaqueExceptionPathCode = generateOpaqueExceptionClass();
+        codeByPath.put(opaqueExceptionPath, opaqueExceptionPathCode.prepend(prelude));
 
         // Specific exception classes
         model.getStructureShapes()
@@ -189,30 +188,34 @@ public class ServiceCodegen {
     }
 
     /**
-     * @return a common exception class for this service, from which all other service exception classes extend
-     */
-    public TokenTree generateCommonExceptionClass() {
-        final String exceptionName = nameResolver.classForBaseServiceException();
-
-        final TokenTree classHeader = Token.of("public class %s : Exception".formatted(exceptionName));
-        final TokenTree emptyCtor = Token.of("public %s() : base() {}".formatted(exceptionName));
-        final TokenTree messageCtor = Token.of("public %s(string message) : base(message) {}".formatted(exceptionName));
-        final TokenTree classBody = TokenTree.of(emptyCtor, messageCtor);
-        return TokenTree.of(classHeader, classBody.braced()).namespaced(Token.of(nameResolver.namespaceForService()));
-    }
-
-    /**
-     * @return an exception class for the given error structure shape, which extends from the common exception class
+     * @return an exception class for the given error structure shape, which extends from System.Exception
      */
     public TokenTree generateSpecificExceptionClass(final StructureShape structureShape) {
         ModelUtils.validateErrorStructureMessageRequired(structureShape);
 
-        final String commonExceptionName = nameResolver.classForBaseServiceException();
         final String exceptionName = nameResolver.classForSpecificServiceException(structureShape.getId());
 
-        final TokenTree classHeader = Token.of("public class %s : %s".formatted(exceptionName, commonExceptionName));
+        // TODO Need to extend for a common class for this namespace
+        final TokenTree classHeader = Token.of("public class %s : Exception".formatted(exceptionName));
+        // TODO need to model _all_ possible members here...
         final TokenTree messageCtor = Token.of("public %s(string message) : base(message) {}".formatted(exceptionName));
         return TokenTree.of(classHeader, messageCtor.braced()).namespaced(Token.of(nameResolver.namespaceForService()));
+    }
+
+    /**
+     * @return an Opaque exception class that can wrap any given System.Exception,
+     * which extends from System.Exception
+     */
+    public TokenTree generateOpaqueExceptionClass() {
+        return TokenTree.of("""
+        public class OpaqueError : Exception {
+          public readonly object obj;
+          public OpaqueError(Exception ex) : base("OpaqueError:", ex) { this.obj = ex; }
+          public OpaqueError() : base("Unknown Unexpected Error") { }
+          public OpaqueError(object obj) : base("Opaque obj is not an Exception.") { this.obj = obj;}
+        }
+          """
+        ).namespaced(Token.of(nameResolver.namespaceForService()));
     }
 
     /**

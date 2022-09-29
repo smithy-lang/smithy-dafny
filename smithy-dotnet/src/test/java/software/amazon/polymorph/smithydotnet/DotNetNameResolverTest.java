@@ -77,7 +77,7 @@ public class DotNetNameResolverTest {
     public void testDafnyNamespaceForShapeId() {
         final ShapeId shapeId = ShapeId.fromParts("test.foobar.baz", "Whatever");
         final String dafnyNamespace = DafnyNameResolver.dafnyExternNamespaceForShapeId(shapeId);
-        assertEquals("Dafny.Test.Foobar.Baz", dafnyNamespace);
+        assertEquals("Dafny.Test.Foobar.Baz.Types", dafnyNamespace);
     }
 
     @Test
@@ -101,7 +101,7 @@ public class DotNetNameResolverTest {
                 .build();
         final DotNetNameResolver nameResolver = setupNameResolver(
                 (builder, modelAssembler) -> modelAssembler.addShape(enumStringShape));
-        assertEquals("Dafny.Test.Foobar._IEnumString", nameResolver.dafnyTypeForShape(enumStringShape.getId()));
+        assertEquals("Dafny.Test.Foobar.Types._IEnumString", nameResolver.dafnyTypeForShape(enumStringShape.getId()));
     }
 
     @Test
@@ -141,7 +141,7 @@ public class DotNetNameResolverTest {
         final StructureShape foobarStructureShape = TestModel.setupFoobarStructureShape();
         final DotNetNameResolver nameResolver = setupNameResolver(
                 (builder, modelAssembler) -> modelAssembler.addShape(foobarStructureShape));
-        assertEquals("Dafny.Test.Foobar._IFoobar", nameResolver.dafnyTypeForShape(foobarStructureShape.getId()));
+        assertEquals("Dafny.Test.Foobar.Types._IFoobar", nameResolver.dafnyTypeForShape(foobarStructureShape.getId()));
     }
 
     @Test
@@ -165,7 +165,7 @@ public class DotNetNameResolverTest {
                     modelAssembler.addShape(referenceShape);
                     modelAssembler.addShape(resourceShape);
                 });
-        assertEquals("Dafny.Test.Foobar.ITestResource", nameResolver.dafnyTypeForShape(referenceShape.getId()));
+        assertEquals("Dafny.Test.Foobar.Types.ITestResource", nameResolver.dafnyTypeForShape(referenceShape.getId()));
     }
 
     @Test
@@ -191,7 +191,7 @@ public class DotNetNameResolverTest {
                 .build();
         final DotNetNameResolver nameResolver = setupNameResolver(
                 (builder, modelAssembler) -> modelAssembler.addShape(errorShape));
-        assertEquals("Dafny.Test.Foobar.ErrorShape", nameResolver.dafnyTypeForShape(errorShape.getId()));
+        assertEquals("Dafny.Test.Foobar.Types.Error_ErrorShape", nameResolver.dafnyTypeForShape(errorShape.getId()));
     }
 
     @Test
@@ -211,7 +211,7 @@ public class DotNetNameResolverTest {
     public void testDafnyImplForServiceClient() {
         final DotNetNameResolver nameResolver = setupNameResolver((_builder, _modelAssembler) -> {});
         final String actualName = nameResolver.dafnyImplForServiceClient();
-        final String expectedName = "Dafny.Test.Foobar.FoobarServiceFactory.FoobarServiceFactory";
+        final String expectedName = "Dafny.Test.Foobar.__default.FoobarServiceFactory";
         assertEquals(expectedName, actualName);
     }
 

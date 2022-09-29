@@ -53,7 +53,6 @@ public class NativeWrapperCodegen {
                     """;
     protected static final List<String> UNCONDITIONAL_IMPORTS = List.of(
             "System",
-            "AWS.EncryptionSDK.Core", //TODO refactor to be based on service
             "Wrappers_Compile"
     );
 

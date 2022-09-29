@@ -3,6 +3,8 @@
 
 package software.amazon.polymorph.utils;
 
+import java.util.stream.Stream;
+
 public class Token extends TokenTree {
     public static final Token NEWLINE = Token.of("\n");
 
@@ -18,6 +20,14 @@ public class Token extends TokenTree {
 
     public static Token of(final CharSequence chars) {
         return new Token(chars);
+    }
+
+    protected Stream<TokenTree> streamChildren() {
+        return Stream.of(this);
+    }
+
+    public Boolean isEmpty() {
+        return "" == chars || null == chars;
     }
 
     @Override

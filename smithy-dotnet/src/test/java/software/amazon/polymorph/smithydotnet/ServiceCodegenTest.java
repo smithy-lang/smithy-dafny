@@ -40,10 +40,11 @@ public class ServiceCodegenTest {
     @Test
     public void testGenerateEmptyService() {
         final Model model = TestModel.setupModel();
-        final ServiceCodegen codegen = new ServiceCodegen(model, SERVICE_SHAPE_ID);
+        final ServiceShape serviceShape = model.expectShape(SERVICE_SHAPE_ID, ServiceShape.class);
+        final ServiceCodegen codegen = new ServiceCodegen(model, serviceShape);
         final Map<Path, TokenTree> codeByPath = codegen.generate();
 
-        final Set<Path> expectedPaths = Collections.singleton(Path.of("FoobarServiceBaseException.cs"));
+        final Set<Path> expectedPaths = Collections.singleton(Path.of("OpaqueError.cs"));
         assertEquals(expectedPaths, codeByPath.keySet());
     }
 
@@ -66,7 +67,8 @@ public class ServiceCodegenTest {
             builder.addOperation(operationShape.getId());
             modelAssembler.addShape(operationShape);
         });
-        final ServiceCodegen codegen = new ServiceCodegen(model, SERVICE_SHAPE_ID);
+        final ServiceShape serviceShape = model.expectShape(SERVICE_SHAPE_ID, ServiceShape.class);
+        final ServiceCodegen codegen = new ServiceCodegen(model, serviceShape);
         final String actualCode = codegen.generateInterfaceMethod(operationShape.getId()).toString();
         final List<ParseToken> actualTokens = Tokenizer.tokenize(actualCode);
 
@@ -89,7 +91,8 @@ public class ServiceCodegenTest {
                 }
                 """.formatted(SERVICE_NAMESPACE)));
 
-        final ServiceCodegen codegen = new ServiceCodegen(model, SERVICE_SHAPE_ID);
+        final ServiceShape serviceShape = model.expectShape(SERVICE_SHAPE_ID, ServiceShape.class);
+        final ServiceCodegen codegen = new ServiceCodegen(model, serviceShape);
         final ShapeId shapeId = ShapeId.fromParts(SERVICE_NAMESPACE, "Foobar");
         final StructureShape structureShape = model.expectShape(shapeId, StructureShape.class);
         final String actualCode = codegen.generateStructureClass(structureShape).toString();
@@ -178,7 +181,8 @@ public class ServiceCodegenTest {
             modelAssembler.addShape(resourceShape);
         });
 
-        final ServiceCodegen codegen = new ServiceCodegen(model, SERVICE_SHAPE_ID);
+        final ServiceShape serviceShape = model.expectShape(SERVICE_SHAPE_ID, ServiceShape.class);
+        final ServiceCodegen codegen = new ServiceCodegen(model, serviceShape);
         final String actualCode = codegen.generateResourceInterface(resourceShape.getId()).toString();
         final List<ParseToken> actualTokens = Tokenizer.tokenize(actualCode);
         final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
@@ -227,7 +231,8 @@ public class ServiceCodegenTest {
             modelAssembler.addShape(resourceShape);
         });
 
-        final ServiceCodegen codegen = new ServiceCodegen(model, SERVICE_SHAPE_ID);
+        final ServiceShape serviceShape = model.expectShape(SERVICE_SHAPE_ID, ServiceShape.class);
+        final ServiceCodegen codegen = new ServiceCodegen(model, serviceShape);
         final String actualCode = codegen.generateResourceClass(resourceShape.getId()).toString();
         final List<ParseToken> actualTokens = Tokenizer.tokenize(actualCode);
         final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
@@ -281,7 +286,8 @@ public class ServiceCodegenTest {
             modelAssembler.addShape(resourceShape);
         });
 
-        final ServiceCodegen codegen = new ServiceCodegen(model, SERVICE_SHAPE_ID);
+        final ServiceShape serviceShape = model.expectShape(SERVICE_SHAPE_ID, ServiceShape.class);
+        final ServiceCodegen codegen = new ServiceCodegen(model, serviceShape);
         final String actualCode = codegen.generateResourceClass(resourceShape.getId()).toString();
         final List<ParseToken> actualTokens = Tokenizer.tokenize(actualCode);
         final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
@@ -333,7 +339,8 @@ public class ServiceCodegenTest {
             modelAssembler.addShape(resourceShape);
         });
 
-        final ServiceCodegen codegen = new ServiceCodegen(model, SERVICE_SHAPE_ID);
+        final ServiceShape serviceShape = model.expectShape(SERVICE_SHAPE_ID, ServiceShape.class);
+        final ServiceCodegen codegen = new ServiceCodegen(model, serviceShape);
         try {
             codegen.generateResourceClass(resourceShape.getId()).toString();
         } catch (IllegalStateException e) {
@@ -357,7 +364,8 @@ public class ServiceCodegenTest {
                     """.formatted(SERVICE_NAMESPACE));
         });
 
-        final ServiceCodegen codegen = new ServiceCodegen(model, SERVICE_SHAPE_ID);
+        final ServiceShape serviceShape = model.expectShape(SERVICE_SHAPE_ID, ServiceShape.class);
+        final ServiceCodegen codegen = new ServiceCodegen(model, serviceShape);
         final ShapeId memberId = ShapeId.fromParts(SERVICE_NAMESPACE, "Container", "dummy");
         final MemberShape memberShape = model.expectShape(memberId, MemberShape.class);
         final String actualCode = codegen.generateStructureClassField(memberShape).toString();
@@ -394,7 +402,8 @@ public class ServiceCodegenTest {
                 .build();
         final Model model = TestModel.setupModel((builder, modelAssembler) -> modelAssembler.addShape(instanceTypeShape));
 
-        final ServiceCodegen codegen = new ServiceCodegen(model, SERVICE_SHAPE_ID);
+        final ServiceShape serviceShape = model.expectShape(SERVICE_SHAPE_ID, ServiceShape.class);
+        final ServiceCodegen codegen = new ServiceCodegen(model, serviceShape);
         final String actualCode = codegen.generateEnumClass(instanceTypeShape.getId()).toString();
         final List<ParseToken> actualTokens = Tokenizer.tokenize(actualCode);
         final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
@@ -437,7 +446,8 @@ public class ServiceCodegenTest {
                 .build();
         final Model model = TestModel.setupModel((builder, modelAssembler) -> modelAssembler.addShape(instanceTypeShape));
 
-        final ServiceCodegen codegen = new ServiceCodegen(model, SERVICE_SHAPE_ID);
+        final ServiceShape serviceShape = model.expectShape(SERVICE_SHAPE_ID, ServiceShape.class);
+        final ServiceCodegen codegen = new ServiceCodegen(model, serviceShape);
         final String actualCode = codegen.generateEnumClass(instanceTypeShape.getId()).toString();
         final List<ParseToken> actualTokens = Tokenizer.tokenize(actualCode);
         final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
@@ -465,7 +475,8 @@ public class ServiceCodegenTest {
                 .build();
 
         final Model model = TestModel.setupModel((builder, modelAssembler) -> modelAssembler.addShape(foobarStructureShape));
-        final ServiceCodegen codegen = new ServiceCodegen(model, SERVICE_SHAPE_ID);
+        final ServiceShape serviceShape = model.expectShape(SERVICE_SHAPE_ID, ServiceShape.class);
+        final ServiceCodegen codegen = new ServiceCodegen(model, serviceShape);
 
         assertFalse(
             "Should not try to generate class for structure marked with @reference",
@@ -482,7 +493,8 @@ public class ServiceCodegenTest {
                 .build();
 
         final Model model = TestModel.setupModel((builder, modelAssembler) -> modelAssembler.addShape(foobarStructureShape));
-        final ServiceCodegen codegen = new ServiceCodegen(model, SERVICE_SHAPE_ID);
+        final ServiceShape serviceShape = model.expectShape(SERVICE_SHAPE_ID, ServiceShape.class);
+        final ServiceCodegen codegen = new ServiceCodegen(model, serviceShape);
 
         assertFalse(
                 "Should not try to generate class for structure marked with @positional",
@@ -499,7 +511,8 @@ public class ServiceCodegenTest {
                 .build();
 
         final Model model = TestModel.setupModel((builder, modelAssembler) -> modelAssembler.addShape(foobarStructureShape));
-        final ServiceCodegen codegen = new ServiceCodegen(model, SERVICE_SHAPE_ID);
+        final ServiceShape serviceShape = model.expectShape(SERVICE_SHAPE_ID, ServiceShape.class);
+        final ServiceCodegen codegen = new ServiceCodegen(model, serviceShape);
 
         assertFalse(
                 "Should not try to generate class for structure marked with @trait",
@@ -515,31 +528,13 @@ public class ServiceCodegenTest {
                 .build();
 
         final Model model = TestModel.setupModel((builder, modelAssembler) -> modelAssembler.addShape(foobarStructureShape));
-        final ServiceCodegen codegen = new ServiceCodegen(model, SERVICE_SHAPE_ID);
+        final ServiceShape serviceShape = model.expectShape(SERVICE_SHAPE_ID, ServiceShape.class);
+        final ServiceCodegen codegen = new ServiceCodegen(model, serviceShape);
 
         assertTrue(
                 "Should have generated class for structure",
                 codegen.shouldGenerateStructure(foobarStructureShape)
         );
-    }
-
-    @Test
-    public void testGenerateCommonExceptionClass() {
-        final Model model = TestModel.setupModel();
-        final ServiceCodegen codegen = new ServiceCodegen(model, SERVICE_SHAPE_ID);
-        final String actualCode = codegen.generateCommonExceptionClass().toString();
-        final List<ParseToken> actualTokens = Tokenizer.tokenize(actualCode);
-
-        final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
-                namespace Test.Foobar {
-                    public class FoobarServiceBaseException : Exception {
-                        public FoobarServiceBaseException() : base() {}
-                        public FoobarServiceBaseException(string message) : base(message) {}
-                    }
-                }
-                """);
-
-        assertEquals(expectedTokens, actualTokens);
     }
 
     @Test
@@ -555,14 +550,15 @@ public class ServiceCodegenTest {
                         """.formatted(SERVICE_NAMESPACE))));
         final ShapeId exceptionShapeId = ShapeId.fromParts(SERVICE_NAMESPACE, "UnfortunateException");
 
-        final ServiceCodegen codegen = new ServiceCodegen(model, SERVICE_SHAPE_ID);
+        final ServiceShape serviceShape = model.expectShape(SERVICE_SHAPE_ID, ServiceShape.class);
+        final ServiceCodegen codegen = new ServiceCodegen(model, serviceShape);
         final String actualCode = codegen.generateSpecificExceptionClass(
                 model.expectShape(exceptionShapeId, StructureShape.class)).toString();
         final List<ParseToken> actualTokens = Tokenizer.tokenize(actualCode);
 
         final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
                 namespace Test.Foobar {
-                    public class UnfortunateException : FoobarServiceBaseException {
+                    public class UnfortunateException : Exception {
                         public UnfortunateException(string message) : base(message) {}
                     }
                 }

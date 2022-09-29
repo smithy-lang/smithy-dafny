@@ -4,23 +4,19 @@
 package software.amazon.polymorph.smithydotnet;
 
 import com.google.common.annotations.VisibleForTesting;
+import software.amazon.polymorph.smithydafny.DafnyNameResolver;
+import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.utils.ModelUtils;
-import software.amazon.polymorph.traits.ClientConfigTrait;
 import software.amazon.polymorph.utils.Token;
 import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.smithy.model.Model;
-import software.amazon.smithy.model.shapes.EntityShape;
-import software.amazon.smithy.model.shapes.OperationShape;
-import software.amazon.smithy.model.shapes.ResourceShape;
-import software.amazon.smithy.model.shapes.ServiceShape;
-import software.amazon.smithy.model.shapes.ShapeId;
+import software.amazon.smithy.model.shapes.*;
 
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static software.amazon.polymorph.smithydotnet.TypeConversionDirection.*;
 
@@ -34,9 +30,9 @@ public class ShimCodegen {
     private static final String INTERNAL_INPUT_NAME = "internalInput";
     private static final String RESULT_NAME = "result";
 
-    public ShimCodegen(final Model model, final ShapeId serviceShapeId) {
+    public ShimCodegen(final Model model, final ServiceShape serviceShape) {
         this.model = model;
-        this.serviceShape = model.expectShape(serviceShapeId, ServiceShape.class);
+        this.serviceShape = serviceShape;
         this.nameResolver = new DotNetNameResolver(model, serviceShape);
     }
 
@@ -44,8 +40,7 @@ public class ShimCodegen {
     private final static List<String> UNCONDITIONAL_IMPORTS = List.of(
             "System",
             "System.IO",
-            "System.Collections.Generic",
-            "AWS.EncryptionSDK.Core"
+            "System.Collections.Generic"
     );
 
     /**
@@ -57,6 +52,7 @@ public class ShimCodegen {
         // Use LinkedHashSet to dedupe while maintaining insertion order
         final LinkedHashSet<String> importNamespaces = new LinkedHashSet<>(UNCONDITIONAL_IMPORTS);
         importNamespaces.add(nameResolver.namespaceForService());
+        importNamespaces.add(DafnyNameResolver.dafnyExternNamespaceForShapeId(serviceShape.getId()));
         final TokenTree prelude = TokenTree.of(
                 importNamespaces.stream().map("using %s;"::formatted).map(Token::of)
         ).lineSeparated();
@@ -82,37 +78,36 @@ public class ShimCodegen {
     }
 
     public TokenTree generateServiceShim() {
-        final TokenTree header = Token.of("public static class %s".formatted(
-                nameResolver.clientForService()));
-        final TokenTree body = TokenTree.of(
-                generateStaticImplDeclaration(),
-                generateStaticOperationShims(serviceShape.getId())
-        ).lineSeparated();
+        final TokenTree header = Token
+          .of("public class %s".formatted(nameResolver.clientForService()));
+
+        final TokenTree body = TokenTree
+          .of(
+            generateServiceImplDeclaration(serviceShape),
+            generateServiceConstructor(serviceShape),
+            generateServiceOperationShims(serviceShape.getId())
+          )
+          .lineSeparated();
         return header
                 .append(body.braced())
                 .namespaced(Token.of(nameResolver.namespaceForService()));
     }
 
-    public TokenTree generateStaticImplDeclaration() {
-        final Optional<ShapeId> configShapeIdOptional = serviceShape.getTrait(ClientConfigTrait.class)
-                .map(ClientConfigTrait::getClientConfigId);
-        final TokenTree configArg = configShapeIdOptional.map(shapeId -> TokenTree.of(
-                DotNetNameResolver.qualifiedTypeConverter(shapeId, TO_DAFNY),
-                "(config)"
-        )).orElse(TokenTree.empty());
-        return Token.of("static readonly %s %s = new %s(%s);".formatted(
-                nameResolver.dafnyImplForServiceClient(),
-                IMPL_NAME,
-                nameResolver.dafnyImplForServiceClient(),
-                configArg));
+    public TokenTree generateServiceImplDeclaration(ServiceShape serviceShape) {
+        return Token.of("private readonly %s %s;"
+          .formatted(
+                nameResolver.dafnyTypeForShape(serviceShape.getId()),
+                IMPL_NAME
+          )
+        );
     }
 
-    public TokenTree generateStaticOperationShims(final ShapeId entityShapeId) {
+    public TokenTree generateServiceOperationShims(final ShapeId entityShapeId) {
         final EntityShape entityShape = model.expectShape(entityShapeId, EntityShape.class);
-        return TokenTree.of(entityShape.getAllOperations().stream().map(this::generateStaticOperationShim)).lineSeparated();
+        return TokenTree.of(entityShape.getAllOperations().stream().map(this::generateServiceOperationShim)).lineSeparated();
     }
 
-    public TokenTree generateStaticOperationShim(final ShapeId operationShapeId) {
+    public TokenTree generateServiceOperationShim(final ShapeId operationShapeId) {
         final OperationShape operationShape = model.expectShape(operationShapeId, OperationShape.class);
 
         final String outputType = operationShape.getOutput().map(nameResolver::baseTypeForShape).orElse("void");
@@ -120,7 +115,7 @@ public class ShimCodegen {
         final String param = operationShape.getInput()
                 .map(inputShapeId -> nameResolver.baseTypeForShape(inputShapeId) + " " + INPUT_NAME)
                 .orElse("");
-        final TokenTree signature = Token.of("public static %s %s(%s)".formatted(outputType, methodName, param));
+        final TokenTree signature = Token.of("public %s %s(%s)".formatted(outputType, methodName, param));
 
         final TokenTree convertInput = generateConvertInput(operationShapeId);
         final TokenTree callImpl = Token.of("%s %s = %s.%s(%s);".formatted(
@@ -139,24 +134,65 @@ public class ShimCodegen {
                 .prepend(signature);
     }
 
+    public TokenTree generateServiceConstructor(final ServiceShape serviceShape) {
+        final LocalServiceTrait localServiceTrait = serviceShape.expectTrait(LocalServiceTrait.class);
+        final StructureShape configShape = model.expectShape(localServiceTrait.getConfigId(), StructureShape.class);
+        final TokenTree signature = TokenTree.of("public %s(%s %s)"
+          .formatted(
+            nameResolver.clientForService(),
+            nameResolver.baseTypeForStructure(configShape),
+            INPUT_NAME
+          ));
+
+        final TokenTree body = TokenTree
+          .of(
+            generateConvertShape(localServiceTrait.getConfigId()),
+            Token.of("%s %s = %s(%s);"
+              .formatted(
+                // TODO really type me plz
+                "var",
+                RESULT_NAME,
+                nameResolver.dafnyImplForServiceClient(),
+                INTERNAL_INPUT_NAME
+              )),
+            generateCheckAndConvertFailure(),
+            Token.of("this._impl = %s.dtor_value;".formatted(RESULT_NAME))
+          )
+          .lineSeparated()
+          .braced();
+
+        return TokenTree
+          .of(
+            signature,
+            body
+          )
+          .lineSeparated();
+    }
+
     public TokenTree generateConvertInput(final ShapeId operationShapeId) {
         final OperationShape operationShape = model.expectShape(operationShapeId, OperationShape.class);
-        return Token.of(operationShape.getInput()
-                .map(inputShapeId -> "%s %s = %s(%s);".formatted(
-                        nameResolver.dafnyTypeForShape(inputShapeId),
-                        INTERNAL_INPUT_NAME,
-                        DotNetNameResolver.qualifiedTypeConverter(inputShapeId, TO_DAFNY),
-                        INPUT_NAME))
-                .orElse(""));
+        return TokenTree
+          .of(operationShape.getInput()
+            .map(this::generateConvertShape)
+            .orElse(TokenTree.empty()));
+    }
+
+    public TokenTree generateConvertShape(final ShapeId shapeId) {
+        return Token
+          .of("%s %s = %s(%s);"
+            .formatted(
+              nameResolver.dafnyTypeForShape(shapeId),
+              INTERNAL_INPUT_NAME,
+              DotNetNameResolver.qualifiedTypeConverter(shapeId, TO_DAFNY),
+              INPUT_NAME));
     }
 
     public TokenTree generateCheckAndConvertFailure() {
-        return Token.of("if (%s.is_Failure) throw %s(%s.dtor_error);"
-                .formatted(
-                        RESULT_NAME,
-                        nameResolver.qualifiedTypeConverterForCommonError(serviceShape, FROM_DAFNY),
-                        RESULT_NAME
-                ));
+        return Token.of("if (%s.is_Failure) throw TypeConversion.FromDafny_CommonError(%s.dtor_error);"
+          .formatted(
+            RESULT_NAME,
+            RESULT_NAME
+          ));
     }
 
     public TokenTree generateConvertAndReturnOutput(final ShapeId operationShapeId) {

@@ -21,7 +21,7 @@ class NativeWrapperCodegenTestConstants {
             """
                     return Wrappers_Compile.Result<
                         %s,
-                        Dafny.Test.Foobar.IFoobarServiceException
+                        Dafny.Test.Foobar.Types._IError
                     >.create_Failure(
                         TypeConversion.ToDafny_CommonError(finalException)
                     );
@@ -48,7 +48,7 @@ class NativeWrapperCodegenTestConstants {
             """
                     public Wrappers_Compile._IResult<
                         %s,
-                        Dafny.Test.Foobar.IFoobarServiceException
+                        Dafny.Test.Foobar.Types._IError
                     > DoSomethingWithOutput()
                     {
                         %s
@@ -62,7 +62,7 @@ class NativeWrapperCodegenTestConstants {
                             %s
                             return Wrappers_Compile.Result<
                                 %s,
-                                Dafny.Test.Foobar.IFoobarServiceException
+                                Dafny.Test.Foobar.Types._IError
                             >.create_Success(
                                 TypeConversion.%s(
                                     nativeOutput)
@@ -97,7 +97,7 @@ class NativeWrapperCodegenTestConstants {
     }
 
     static String DO_OUTPUT_POSITIONAL = getOutput(
-            "Dafny.Test.Foobar.IThing", // abstract output or interface
+            "Dafny.Test.Foobar.Types.IThing", // abstract output or interface
             "", // validateOutput method
             "Test.Foobar.IThing", // type of native output
             "", // validate native output
@@ -107,7 +107,7 @@ class NativeWrapperCodegenTestConstants {
     );
 
     static String DO_OUTPUT_NOT_POSITIONAL = getOutput(
-            "Dafny.Test.Foobar._IDoSomethingOutput",
+            "Dafny.Test.Foobar.Types._IDoSomethingOutput",
             VALIDATE_NATIVE_OUTPUT.formatted("Test.Foobar.DoSomethingOutput", "DoSomethingWithOutput"),
             "Test.Foobar.DoSomethingOutput",
             "validateOutput(nativeOutput);",
@@ -120,8 +120,8 @@ class NativeWrapperCodegenTestConstants {
             """
                     public Wrappers_Compile._IResult<
                         _System._ITuple0,
-                        Dafny.Test.Foobar.IFoobarServiceException
-                    > DoSomethingWithInput(Dafny.Test.Foobar._IDoSomethingInput input)
+                        Dafny.Test.Foobar.Types._IError
+                    > DoSomethingWithInput(Dafny.Test.Foobar.Types._IDoSomethingInput input)
                     {
                         Test.Foobar.DoSomethingInput nativeInput =
                             TypeConversion.FromDafny_N4_test__N6_foobar__S16_DoSomethingInput(
@@ -132,7 +132,7 @@ class NativeWrapperCodegenTestConstants {
                             _impl.DoSomethingWithInput(nativeInput);
                             return Wrappers_Compile.Result<
                                 _System._ITuple0,
-                                Dafny.Test.Foobar.IFoobarServiceException
+                                Dafny.Test.Foobar.Types._IError
                             >.create_Success();
                         }
                         %s
@@ -145,7 +145,7 @@ class NativeWrapperCodegenTestConstants {
             """
                     public Wrappers_Compile._IResult<
                         _System._ITuple0,
-                        Dafny.Test.Foobar.IFoobarServiceException
+                        Dafny.Test.Foobar.Types._IError
                     > Do()
                     {
                         FoobarServiceBaseException finalException = null;
@@ -154,7 +154,7 @@ class NativeWrapperCodegenTestConstants {
                             _impl.Do();
                             return Wrappers_Compile.Result<
                                 _System._ITuple0,
-                                Dafny.Test.Foobar.IFoobarServiceException
+                                Dafny.Test.Foobar.Types._IError
                             >.create_Success();
                         }
                         %s
@@ -176,7 +176,7 @@ class NativeWrapperCodegenTestConstants {
                 """
                         namespace Test.Foobar
                         {
-                            internal class NativeWrapper_Baz : Dafny.Test.Foobar.IBaz
+                            internal class NativeWrapper_Baz : Dafny.Test.Foobar.Types.IBaz
                             {
                                 internal readonly BazBase _impl;
                                     
@@ -204,7 +204,6 @@ class NativeWrapperCodegenTestConstants {
                     // ReSharper disable SuggestVarOrType_SimpleTypes
                                 
                     using System;
-                    using AWS.EncryptionSDK.Core;
                     using Wrappers_Compile;
                     """;
 
