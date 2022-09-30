@@ -52,10 +52,8 @@ public class CodegenCli {
         final CliArguments cliArguments = cliArgumentsOptional.get();
 
         final Path outputDotnetDir = cliArguments.outputDotnetDir;
-        final Path outputJavaDir = cliArguments.outputJavaDir;
         try {
             Files.createDirectories(outputDotnetDir);
-            Files.createDirectories(outputJavaDir);
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(1);
@@ -74,24 +72,27 @@ public class CodegenCli {
 
         final ServiceShape serviceShape = ModelUtils.serviceFromNamespace(model, cliArguments.namespace);
 
+        if (cliArguments.outputJavaDir.isPresent() && cliArguments.awsSdkStyle) {
+            final Path outputJavaDir = cliArguments.outputJavaDir.get();
+            javaAwsSdkV1(outputJavaDir, serviceShape, model);
+        }
+        else if (cliArguments.outputJavaDir.isPresent()) {
+          logger.error("Smithy-Polymorph only supports Java code generation for AWS-SDK Style code");
+        }
+
         if (cliArguments.awsSdkStyle) {
             final AwsSdkShimCodegen dotnetShimCodegen = new AwsSdkShimCodegen(
               model,
               serviceShape,
               cliArguments.dependentModelPaths
             );
-            final AwsSdkV1 javaShimCodegen = new AwsSdkV1(serviceShape, model);
             writeTokenTreesIntoDir(dotnetShimCodegen.generate(), outputDotnetDir);
-            writeTokenTreesIntoDir(javaShimCodegen.generate(), outputJavaDir);
-            logger.info("Java code generated in {}", cliArguments.outputJavaDir);
         } else {
             final ServiceCodegen dotnetServiceCodegen = new ServiceCodegen(model, serviceShape);
             writeTokenTreesIntoDir(dotnetServiceCodegen.generate(), outputDotnetDir);
 
             final ShimCodegen dotnetShimCodegen = new ShimCodegen(model, serviceShape);
             writeTokenTreesIntoDir(dotnetShimCodegen.generate(), outputDotnetDir);
-
-            logger.warn("Smithy-Polymorph only supports Java code generation for AWS-SDK Style code");
         }
         
         final DafnyApiCodegen dafnyApiCodegen = new DafnyApiCodegen(
@@ -111,6 +112,20 @@ public class CodegenCli {
 
         logger.info(".NET code generated in {}", cliArguments.outputDotnetDir);
         logger.info("Dafny code generated in {}", cliArguments.modelPath);
+    }
+
+    //TODO: Figure out a nice way to differentiate AWS SDK Java V1 from AWS SDK Java V2
+    // Or maybe we just hard code one or the other and call that good enough
+    static void javaAwsSdkV1(Path outputJavaDir, ServiceShape serviceShape, Model model) {
+        try {
+            Files.createDirectories(outputJavaDir);
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
+        final AwsSdkV1 javaShimCodegen = new AwsSdkV1(serviceShape, model);
+        writeTokenTreesIntoDir(javaShimCodegen.generate(), outputJavaDir);
+        logger.info("Java code generated in {}", outputJavaDir);
     }
 
     private static Options getCliOptions() {
@@ -147,7 +162,7 @@ public class CodegenCli {
             .longOpt("output-java")
             .desc("output directory for generated Java files")
             .hasArg()
-            .required()
+            .required(false)
             .build())
           .addOption(Option.builder()
             .longOpt("aws-sdk")
@@ -164,7 +179,8 @@ public class CodegenCli {
             Path[] dependentModelPaths,
             String namespace,
             Path outputDotnetDir,
-            Path outputJavaDir, boolean awsSdkStyle
+            Optional<Path> outputJavaDir,
+            boolean awsSdkStyle
     ) {
         /**
          * @param args arguments to parse
@@ -188,8 +204,11 @@ public class CodegenCli {
             final String namespace = commandLine.getOptionValue('n');
             final Path outputDotnetDir = Paths.get(commandLine.getOptionValue("output-dotnet"))
                     .toAbsolutePath().normalize();
-            final Path outputJavaDir = Paths.get(commandLine.getOptionValue("output-java"))
-                    .toAbsolutePath().normalize();
+            Optional<Path> outputJavaDir = Optional.empty();
+            if (commandLine.hasOption("output-java")) {
+                 outputJavaDir = Optional.of(Paths.get(commandLine.getOptionValue("output-java"))
+                         .toAbsolutePath().normalize());
+            }
             final boolean awsSdkStyle = commandLine.hasOption("aws-sdk");
 
             return Optional.of(new CliArguments(
