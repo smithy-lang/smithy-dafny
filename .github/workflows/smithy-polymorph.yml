@@ -15,4 +15,4 @@ jobs:
         uses: gradle/gradle-build-action@v2
         with:
           arguments: test
-          build-root-directory: smithy-dotnet
+          build-root-directory: smithy-polymorph
