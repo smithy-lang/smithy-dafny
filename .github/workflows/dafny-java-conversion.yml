@@ -19,7 +19,7 @@ jobs:
         shell: bash
         run: |
           mvn install:install-file \
-          -Dfile=$(pwd)/DafnyRuntime.jar \
+          -Dfile=$HOME/dafny/DafnyRuntime.jar \
           -DgroupId=dafny.lang \
           -DartifactId=DafnyRuntime \
           -Dversion=3.8.1 \
