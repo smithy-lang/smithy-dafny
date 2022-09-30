@@ -214,7 +214,7 @@ public class ToNative extends Generator {
                 .forEach(member -> {
                     // if optional, check if present
                     if (member.isOptional()) {
-                        builder.beginControlFlow("if ($L.$L.is_Some())", VAR_INPUT, getMemberField(member));
+                        builder.beginControlFlow("if ($L.$L.is_Some())", VAR_INPUT, Dafny.getMemberField(member));
                     }
                     // if converting a LIST or SET of enums
                     if (ModelUtils.isListOrSetOfEnums(member.getTarget(), model)) {
@@ -231,19 +231,6 @@ public class ToNative extends Generator {
         return builder.addStatement("return $L", VAR_OUTPUT).build();
     }
 
-    CodeBlock getMemberField(MemberShape shape) {
-        return CodeBlock.of("$L", capitalize(shape.getMemberName()));
-    }
-
-    CodeBlock getMemberFieldValue(MemberShape shape) {
-        // if required, get via Field
-        if (shape.isRequired()) {
-            return getMemberField(shape);
-        }
-        // if optional, get via dtor_value()
-        return CodeBlock.of("$L.dtor_value()", getMemberField(shape));
-    }
-
     /**
      * Generates an Array of member's type with size of input's field.
      * i.e:<p> {@code MemberType[] member_temp = new MemberType[dafnyValue.Member.length()];}
@@ -253,7 +240,7 @@ public class ToNative extends Generator {
                 nativeNameResolver.typeForListOrSetMember(member.getTarget()),
                 uncapitalize(member.getMemberName()), VAR_TEMP,
                 nativeNameResolver.typeForListOrSetMember(member.getTarget()),
-                VAR_INPUT, getMemberFieldValue(member),
+                VAR_INPUT, Dafny.getMemberFieldValue(member),
                 Dafny.aggregateSizeMethod(model.expectShape(member.getTarget()).getType()));
     }
 
@@ -263,7 +250,7 @@ public class ToNative extends Generator {
                 setMemberField(member),
                 memberConversionMethodReference(member).asNormalReference(),
                 VAR_INPUT,
-                getMemberFieldValue(member));
+                Dafny.getMemberFieldValue(member));
     }
 
     CodeBlock setWithConversionCallAndToArray(MemberShape member) {
@@ -272,7 +259,7 @@ public class ToNative extends Generator {
                 setMemberField(member),
                 memberConversionMethodReference(member).asNormalReference(),
                 VAR_INPUT,
-                getMemberFieldValue(member),
+                Dafny.getMemberFieldValue(member),
                 uncapitalize(member.getMemberName()), VAR_TEMP);
     }
 

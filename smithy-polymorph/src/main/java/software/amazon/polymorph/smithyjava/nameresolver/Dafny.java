@@ -1,6 +1,7 @@
 package software.amazon.polymorph.smithyjava.nameresolver;
 
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.WildcardTypeName;
@@ -14,6 +15,7 @@ import dafny.DafnySet;
 import dafny.Tuple0;
 import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 import software.amazon.smithy.model.Model;
+import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.ResourceShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
@@ -27,6 +29,7 @@ import software.amazon.smithy.utils.StringUtils;
 
 import static software.amazon.polymorph.smithyjava.generator.Generator.Constants.SUPPORTED_CONVERSION_AGGREGATE_SHAPES;
 import static software.amazon.polymorph.smithyjava.nameresolver.Constants.SMITHY_API_UNIT;
+import static software.amazon.smithy.utils.StringUtils.capitalize;
 
 /**
  * Provides a consistent mapping between names of
@@ -85,6 +88,19 @@ public class Dafny extends NameResolver {
 
     static String modelPackageNameForServiceShape(ServiceShape serviceShape) {
         return modelPackageNameForNamespace(serviceShape.getId().getNamespace());
+    }
+
+    public static CodeBlock getMemberField(MemberShape shape) {
+        return CodeBlock.of("_$L", capitalize(shape.getMemberName()));
+    }
+
+    public static CodeBlock getMemberFieldValue(MemberShape shape) {
+        // if required, get via Field
+        if (shape.isRequired()) {
+            return getMemberField(shape);
+        }
+        // if optional, get via dtor_value()
+        return CodeBlock.of("$L.dtor_value()", getMemberField(shape));
     }
 
     public String packageName() {
