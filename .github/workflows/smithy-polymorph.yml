@@ -1,6 +1,6 @@
-name: smithy-dotnet workflows
+name: smithy-polymorph workflows
 
-on: ['push']
+on: ["pull_request", "push"]
 
 jobs:
   gradle-build:
@@ -11,6 +11,25 @@ jobs:
         with:
           distribution: 'corretto'
           java-version: '17'
+      - name: Setup Dafny
+        uses: dafny-lang/setup-dafny-action@v1
+        with:
+          dafny-version: "3.8.1"
+      - name: Setup dafny/DafnyRuntime.jar
+        shell: bash
+        run: |
+          mvn install:install-file \
+          -Dfile=$HOME/dafny/DafnyRuntime.jar \
+          -DgroupId=dafny.lang \
+          -DartifactId=DafnyRuntime \
+          -Dversion=3.8.1 \
+          -DgeneratePom=true \
+          -Dpackaging=jar
+      - name: Setup dafny-java-conversion
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: publishToMavenLocal
+          build-root-directory: dafny-java-conversion          
       - name: Execute tests
         uses: gradle/gradle-build-action@v2
         with:
