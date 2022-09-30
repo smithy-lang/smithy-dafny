@@ -1,0 +1,32 @@
+name: dafny-java-conversion workflows
+
+on: ["pull_request", "push"]
+
+jobs:
+  gradle-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'corretto'
+          java-version: '17'
+      - name: Setup Dafny
+        uses: dafny-lang/setup-dafny-action@v1
+        with:
+          dafny-version: "3.8.1"
+      - name: Setup dafny/DafnyRuntime.jar
+        shell: bash
+        run: |
+          mvn install:install-file \
+          -Dfile=$(pwd)/DafnyRuntime.jar \
+          -DgroupId=dafny.lang \
+          -DartifactId=DafnyRuntime \
+          -Dversion=3.8.1 \
+          -DgeneratePom=true \
+          -Dpackaging=jar
+      - name: Execute tests
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: test
+          build-root-directory: dafny-java-conversion
