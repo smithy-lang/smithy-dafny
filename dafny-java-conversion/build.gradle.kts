@@ -25,6 +25,8 @@ dependencies {
 publishing {
     publications {
         create<MavenPublication>("conversion") {
+            groupId = "software.amazon.dafny"
+            artifactId = "conversion"
             from(components["java"])
         }
     }
