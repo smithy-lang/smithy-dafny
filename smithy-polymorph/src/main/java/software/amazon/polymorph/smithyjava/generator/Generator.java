@@ -16,34 +16,22 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import software.amazon.polymorph.smithyjava.MethodReference;
-import software.amazon.polymorph.smithyjava.generator.awssdk.AwsSdkV1;
-import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
-import software.amazon.polymorph.smithyjava.nameresolver.Native;
 import software.amazon.polymorph.utils.TokenTree;
-import software.amazon.smithy.model.Model;
-import software.amazon.smithy.model.shapes.ServiceShape;
-import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.ShapeType;
 
 public abstract class Generator {
     private static final Logger LOGGER = LoggerFactory.getLogger(Generator.class);
 
-    protected Dafny dafnyNameResolver;
-    protected Native nativeNameResolver;
-    protected Model model;
-    protected ServiceShape serviceShape;
+    public CodegenSubject subject;
 
     public Generator(
-            AwsSdkV1 awsSdk
+        CodegenSubject subject
     ) {
-        this.serviceShape = awsSdk.serviceShape;
-        this.dafnyNameResolver = awsSdk.dafnyNameResolver;
-        this.nativeNameResolver = awsSdk.nativeNameResolver;
-        this.model = awsSdk.model;
+        this.subject = subject;
     }
 
     public Map<Path, TokenTree> generate() {
-        final JavaFile javaFile = javaFile(serviceShape.toShapeId());
+        final JavaFile javaFile = javaFile();
         List<String> pathPieces = Arrays
                 .stream(javaFile.packageName.split("\\."))
                 .collect(Collectors.toList());
@@ -53,7 +41,7 @@ public abstract class Generator {
         return Map.of(path, tokenTree);
     }
 
-    public abstract JavaFile javaFile(final ShapeId serviceShapeId);
+    public abstract JavaFile javaFile();
 
      public static class Constants {
         public static final MethodReference IDENTITY_FUNCTION = new MethodReference(

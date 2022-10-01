@@ -238,4 +238,12 @@ public class Native extends NameResolver{
     public ClassName typeForResource(ResourceShape shape) {
         throw new UnsupportedOperationException("Not yet implemented for not AWS-SDK Style");
     }
+
+    public TypeName typeForOperationOutput(ShapeId outputShapeId) {
+        throw new UnsupportedOperationException("Not yet implemented for not AWS-SDK Style");
+    }
+
+    public TypeName baseErrorForService() {
+        throw new UnsupportedOperationException("Not yet implemented for not AWS-SDK Style");
+    }
 }
