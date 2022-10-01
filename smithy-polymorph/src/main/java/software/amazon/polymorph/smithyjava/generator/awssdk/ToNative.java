@@ -10,6 +10,7 @@ import com.squareup.javapoet.TypeSpec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -99,10 +100,10 @@ public class ToNative extends Generator {
     }
 
     @Override
-    public JavaFile javaFile() {
+    public Set<JavaFile> javaFiles() {
         JavaFile.Builder builder = JavaFile
                 .builder(subject.dafnyNameResolver.packageName(), toNative());
-        return builder.build();
+        return Collections.singleton(builder.build());
     }
 
     @SuppressWarnings("DuplicatedCode")

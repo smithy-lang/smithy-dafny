@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -31,17 +32,21 @@ public abstract class Generator {
     }
 
     public Map<Path, TokenTree> generate() {
-        final JavaFile javaFile = javaFile();
-        List<String> pathPieces = Arrays
-                .stream(javaFile.packageName.split("\\."))
-                .collect(Collectors.toList());
-        pathPieces.add(javaFile.typeSpec.name + ".java");
-        final Path path = Path.of(Joiner.on('/').join(pathPieces));
-        final TokenTree tokenTree = TokenTree.of(javaFile.toString());
-        return Map.of(path, tokenTree);
+        final LinkedHashMap<Path, TokenTree> rtn = new LinkedHashMap<>();
+        final Set<JavaFile> javaFiles = javaFiles();
+        for (JavaFile javaFile : javaFiles) {
+            List<String> pathPieces = Arrays
+                    .stream(javaFile.packageName.split("\\."))
+                    .collect(Collectors.toList());
+            pathPieces.add(javaFile.typeSpec.name + ".java");
+            final Path path = Path.of(Joiner.on('/').join(pathPieces));
+            final TokenTree tokenTree = TokenTree.of(javaFile.toString());
+            rtn.put(path, tokenTree);
+        }
+        return rtn;
     }
 
-    public abstract JavaFile javaFile();
+    public abstract Set<JavaFile> javaFiles();
 
      public static class Constants {
         public static final MethodReference IDENTITY_FUNCTION = new MethodReference(

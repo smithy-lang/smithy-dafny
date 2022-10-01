@@ -10,6 +10,7 @@ import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.WildcardTypeName;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -93,10 +94,10 @@ public class ToDafny extends Generator {
     }
 
     @Override
-    public JavaFile javaFile() {
+    public Set<JavaFile> javaFiles() {
         JavaFile.Builder builder = JavaFile
                 .builder(subject.dafnyNameResolver.packageName(), toDafny());
-        return builder.build();
+        return Collections.singleton(builder.build());
     }
 
     TypeSpec toDafny() {

@@ -10,7 +10,9 @@ import com.squareup.javapoet.TypeSpec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collections;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.lang.model.element.Modifier;
@@ -36,11 +38,10 @@ public class ShimV1 extends Generator {
     }
 
     @Override
-    public JavaFile javaFile() {
-        return JavaFile.builder(
-                        subject.dafnyNameResolver.packageName(),
-                        shim())
-                .build();
+    public Set<JavaFile> javaFiles() {
+        JavaFile.Builder builder = JavaFile
+                .builder(subject.dafnyNameResolver.packageName(), shim());
+        return Collections.singleton(builder.build());
     }
 
     TypeSpec shim() {
