@@ -72,4 +72,28 @@ public class ModelConstants {
             structure OtherNamespace {}
             service OtherService {}
             """;
+
+    public static String CRYPTOGRAPHY_A_STRING_OPERATION = """
+                namespace aws.cryptography.test
+                service Test {
+                  operations: [DoSomething],
+                  errors: [TestError]
+                }
+                operation DoSomething {
+                    input: DoSomethingRequest,
+                    output: DoSomethingResponse,
+                    errors: [TestError]
+                }
+                @error("client")
+                structure TestError {
+                  @required
+                  message: String
+                }
+                structure DoSomethingRequest {
+                    @required
+                    message: String
+                }
+                structure DoSomethingResponse { message: String }
+            """;
+
 }

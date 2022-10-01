@@ -2,6 +2,7 @@ package software.amazon.polymorph.smithyjava.generator.awssdk;
 
 import java.util.function.BiConsumer;
 
+import software.amazon.polymorph.smithyjava.generator.library.Library;
 import software.amazon.polymorph.util.TestModel;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.loader.ModelAssembler;
@@ -25,5 +26,9 @@ public class TestSetupUtils {
         ServiceShape serviceShape = serviceFromNamespace(
                 localModel, namespaceForService(awsName));
         return new AwsSdkV1(serviceShape, localModel);
+    }
+    public static Library setupLibrary(Model localModel, String namespace) {
+        ServiceShape serviceShape = serviceFromNamespace(localModel, namespace);
+        return new Library(localModel, serviceShape);
     }
 }
