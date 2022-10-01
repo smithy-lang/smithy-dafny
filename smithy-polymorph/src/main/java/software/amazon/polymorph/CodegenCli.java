@@ -31,6 +31,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Arrays;
@@ -51,9 +53,13 @@ public class CodegenCli {
         }
         final CliArguments cliArguments = cliArgumentsOptional.get();
 
-        final Path outputDotnetDir = cliArguments.outputDotnetDir;
         try {
-            Files.createDirectories(outputDotnetDir);
+            if (cliArguments.outputDotnetDir.isPresent()) {
+                Files.createDirectories(cliArguments.outputDotnetDir.get());
+            }
+            if (cliArguments.outputJavaDir.isPresent()) {
+                Files.createDirectories(cliArguments.outputJavaDir.get());
+            }
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(1);
@@ -63,69 +69,76 @@ public class CodegenCli {
 
         assembler.addImport(cliArguments.modelPath);
         Arrays
-          .stream(cliArguments.dependentModelPaths)
-          .forEach(path -> assembler.addImport(path));
+                .stream(cliArguments.dependentModelPaths)
+                .forEach(assembler::addImport);
 
         final Model model = assembler
-          .assemble()
-          .unwrap();
+                .assemble()
+                .unwrap();
 
         final ServiceShape serviceShape = ModelUtils.serviceFromNamespace(model, cliArguments.namespace);
+        final List<String> messages = new ArrayList<>(3);
 
         if (cliArguments.outputJavaDir.isPresent() && cliArguments.awsSdkStyle) {
             final Path outputJavaDir = cliArguments.outputJavaDir.get();
-            javaAwsSdkV1(outputJavaDir, serviceShape, model);
-        }
-        else if (cliArguments.outputJavaDir.isPresent()) {
-          logger.error("Smithy-Polymorph only supports Java code generation for AWS-SDK Style code");
+            messages.add(javaAwsSdkV1(outputJavaDir, serviceShape, model));
+        } else if (cliArguments.outputJavaDir.isPresent()) {
+            logger.error("Smithy-Polymorph only supports Java code generation for AWS-SDK Style code");
         }
 
-        if (cliArguments.awsSdkStyle) {
-            final AwsSdkShimCodegen dotnetShimCodegen = new AwsSdkShimCodegen(
-              model,
-              serviceShape,
-              cliArguments.dependentModelPaths
+        if (cliArguments.outputDotnetDir.isPresent()) {
+            final Path outputDotnetDir = cliArguments.outputDotnetDir.get();
+            if (cliArguments.awsSdkStyle) {
+                messages.add(netAwsSdk(outputDotnetDir, serviceShape, model, cliArguments.dependentModelPaths));
+            } else {
+                messages.add(netLocalService(outputDotnetDir, serviceShape, model));
+            }
+        }
+
+        if (cliArguments.outputDafny) {
+            final DafnyApiCodegen dafnyApiCodegen = new DafnyApiCodegen(
+                    model,
+                    serviceShape,
+                    cliArguments.modelPath,
+                    cliArguments.dependentModelPaths
             );
-            writeTokenTreesIntoDir(dotnetShimCodegen.generate(), outputDotnetDir);
-        } else {
-            final ServiceCodegen dotnetServiceCodegen = new ServiceCodegen(model, serviceShape);
-            writeTokenTreesIntoDir(dotnetServiceCodegen.generate(), outputDotnetDir);
-
-            final ShimCodegen dotnetShimCodegen = new ShimCodegen(model, serviceShape);
-            writeTokenTreesIntoDir(dotnetShimCodegen.generate(), outputDotnetDir);
+            // The Smithy model and the Dafny code are expected to be in the same location.
+            // This simplifies the process of including the various Dafny files.
+            writeTokenTreesIntoDir(dafnyApiCodegen.generate(), cliArguments.modelPath);
+            messages.add("Dafny code generated in %s".formatted(cliArguments.modelPath));
         }
-        
-        final DafnyApiCodegen dafnyApiCodegen = new DafnyApiCodegen(
-          model,
-          serviceShape,
-          cliArguments.modelPath,
-          cliArguments.dependentModelPaths
-        );
-        // The Smithy model and the Dafny code are expected to be in the same location.
-        // This simplifies the process of including the various Dafny files.
-        writeTokenTreesIntoDir(dafnyApiCodegen.generate(), cliArguments.modelPath);
 
-        final TypeConversionCodegen dotnetTypeConversionCodegen = cliArguments.awsSdkStyle
-                ? new AwsSdkTypeConversionCodegen(model, serviceShape)
-                : new TypeConversionCodegen(model, serviceShape);
-        writeTokenTreesIntoDir(dotnetTypeConversionCodegen.generate(), outputDotnetDir);
-
-        logger.info(".NET code generated in {}", cliArguments.outputDotnetDir);
-        logger.info("Dafny code generated in {}", cliArguments.modelPath);
+        logger.info("\n");
+        messages.forEach(logger::info);
     }
 
     //TODO: Figure out a nice way to differentiate AWS SDK Java V1 from AWS SDK Java V2
     // Or maybe we just hard code one or the other and call that good enough
-    static void javaAwsSdkV1(Path outputJavaDir, ServiceShape serviceShape, Model model) {
-        try {
-            Files.createDirectories(outputJavaDir);
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.exit(1);
-        }
+    static String javaAwsSdkV1(Path outputJavaDir, ServiceShape serviceShape, Model model) {
         final AwsSdkV1 javaShimCodegen = new AwsSdkV1(serviceShape, model);
         writeTokenTreesIntoDir(javaShimCodegen.generate(), outputJavaDir);
-        logger.info("Java code generated in {}", outputJavaDir);
+        return "Java code generated in %s".formatted(outputJavaDir);
+    }
+
+    static String netLocalService(Path outputNetDir, ServiceShape serviceShape, Model model) {
+        final ServiceCodegen service = new ServiceCodegen(model, serviceShape);
+        writeTokenTreesIntoDir(service.generate(), outputNetDir);
+
+        final ShimCodegen shim = new ShimCodegen(model, serviceShape);
+        writeTokenTreesIntoDir(shim.generate(), outputNetDir);
+
+        final TypeConversionCodegen conversion = new TypeConversionCodegen(model, serviceShape);
+        writeTokenTreesIntoDir(conversion.generate(), outputNetDir);
+        return ".NET code generated in %s".formatted(outputNetDir);
+    }
+    static String netAwsSdk(Path outputNetDir, ServiceShape serviceShape, Model model, Path[] dependentModelPaths) {
+        final AwsSdkShimCodegen dotnetShimCodegen = new AwsSdkShimCodegen(
+                model, serviceShape, dependentModelPaths);
+        writeTokenTreesIntoDir(dotnetShimCodegen.generate(), outputNetDir);
+
+        final TypeConversionCodegen conversion = new AwsSdkTypeConversionCodegen(model, serviceShape);
+        writeTokenTreesIntoDir(conversion.generate(), outputNetDir);
+        return ".NET code generated in %s".formatted(outputNetDir);
     }
 
     private static Options getCliOptions() {
@@ -142,7 +155,7 @@ public class CodegenCli {
             .build())
           .addOption(Option.builder("d")
             .longOpt("dependent-model")
-            .desc("directory for dependent the model file[s] (.smithy format)")
+            .desc("directory for dependent model file[s] (.smithy format)")
             .hasArg()
             .required()
             .build())
@@ -154,20 +167,23 @@ public class CodegenCli {
             .build())
           .addOption(Option.builder()
             .longOpt("output-dotnet")
-            .desc("output directory for generated .NET files")
+            .desc("<optional> output directory for generated .NET files")
             .hasArg()
-            .required()
             .build())
           .addOption(Option.builder()
             .longOpt("output-java")
-            .desc("output directory for generated Java files")
+            .desc("<optional> output directory for generated Java files")
             .hasArg()
-            .required(false)
             .build())
           .addOption(Option.builder()
             .longOpt("aws-sdk")
-            .desc("generate AWS SDK-style API and shims")
-            .build());
+            .desc("<optional> generate AWS SDK-style API and shims")
+            .build())
+          .addOption(Option.builder()
+            .longOpt("output-dafny")
+            .desc("<optional> generate Dafny code")
+            .build()
+          );
     }
 
     private static void printHelpMessage() {
@@ -178,9 +194,10 @@ public class CodegenCli {
             Path modelPath,
             Path[] dependentModelPaths,
             String namespace,
-            Path outputDotnetDir,
+            Optional<Path> outputDotnetDir,
             Optional<Path> outputJavaDir,
-            boolean awsSdkStyle
+            boolean awsSdkStyle,
+            boolean outputDafny
     ) {
         /**
          * @param args arguments to parse
@@ -202,17 +219,21 @@ public class CodegenCli {
               .toArray(Path[]::new);
 
             final String namespace = commandLine.getOptionValue('n');
-            final Path outputDotnetDir = Paths.get(commandLine.getOptionValue("output-dotnet"))
-                    .toAbsolutePath().normalize();
+            Optional<Path> outputDotnetDir = Optional.empty();
+            if (commandLine.hasOption("output-dotnet")) {
+                outputDotnetDir = Optional.of(Paths.get(commandLine.getOptionValue("output-dotnet"))
+                        .toAbsolutePath().normalize());
+            }
             Optional<Path> outputJavaDir = Optional.empty();
             if (commandLine.hasOption("output-java")) {
                  outputJavaDir = Optional.of(Paths.get(commandLine.getOptionValue("output-java"))
                          .toAbsolutePath().normalize());
             }
             final boolean awsSdkStyle = commandLine.hasOption("aws-sdk");
+            final boolean outputDafny = commandLine.hasOption("output-dafny");
 
             return Optional.of(new CliArguments(
-              modelPath, dependentModelPaths, namespace, outputDotnetDir, outputJavaDir, awsSdkStyle));
+              modelPath, dependentModelPaths, namespace, outputDotnetDir, outputJavaDir, awsSdkStyle, outputDafny));
         }
     }
 
