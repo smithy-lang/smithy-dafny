@@ -1,4 +1,4 @@
-package software.amazon.polymorph.smithyjava.common;
+package software.amazon.polymorph.smithyjava.common.staticErrors;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.FieldSpec;
@@ -8,6 +8,8 @@ import com.squareup.javapoet.TypeSpec;
 
 import java.util.Collections;
 import java.util.List;
+
+import software.amazon.polymorph.smithyjava.common.BuilderSpecs;
 
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PROTECTED;
@@ -21,9 +23,12 @@ public class NativeError {
             FieldSpec.builder(Throwable.class, "cause").build()
     );
 
+    public static ClassName className(String packageName) {
+        return ClassName.get(packageName, NATIVE_ERROR);
+    }
 
     public static JavaFile javaFile(String packageName) {
-        ClassName className = ClassName.get(packageName, NATIVE_ERROR);
+        ClassName className = className(packageName);
         ClassName superName = ClassName.get(RuntimeException.class);
         BuilderSpecs builderSpecs = new BuilderSpecs(
                 className, null, THROWABLE_ARGS, Collections.emptyList());

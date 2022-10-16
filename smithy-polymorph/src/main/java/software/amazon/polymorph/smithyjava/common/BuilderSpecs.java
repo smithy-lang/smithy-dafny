@@ -31,7 +31,7 @@ public class BuilderSpecs {
     @Nonnull private final List<FieldSpec> localFields;
     @Nonnull private final List<FieldSpec> superFields;
 
-    BuilderSpecs(
+    public BuilderSpecs(
             @Nonnull String packageName,
             @Nonnull StructureShape classShape,
             @Nullable StructureShape superShape,
@@ -41,9 +41,7 @@ public class BuilderSpecs {
         Set<String> superFieldNames;
         if (superShape != null) {
             this.superName = ClassName.get(packageName, superShape.getId().getName());
-            this.superFields = superShape.members().stream()
-                    .map(shape -> fieldSpecFromMemberShape(shape, nameResolver))
-                    .collect(Collectors.toList());
+            this.superFields = shapeToArgs(superShape, nameResolver);
             superFieldNames = this.superFields.stream()
                     .map(field -> field.name)
                     .collect(Collectors.toSet());
@@ -59,7 +57,13 @@ public class BuilderSpecs {
                 .collect(Collectors.toList());
     }
 
-    BuilderSpecs(
+    public static List<FieldSpec> shapeToArgs(StructureShape shape, NameResolver nameResolver) {
+        return shape.members().stream()
+                .map(member -> fieldSpecFromMemberShape(member, nameResolver))
+                .collect(Collectors.toList());
+    }
+
+    public BuilderSpecs(
             @Nonnull ClassName className,
             @Nullable ClassName superName,
             @Nonnull List<FieldSpec> localFields,
@@ -67,11 +71,16 @@ public class BuilderSpecs {
     ) {
         this.className = className;
         this.superName = superName;
-        this.localFields = localFields;
         this.superFields = superFields;
+        Set<String> superFieldNames = this.superFields.stream()
+                .map(field -> field.name)
+                .collect(Collectors.toSet());
+        this.localFields = localFields.stream()
+                .filter(field -> !superFieldNames.contains(field.name))
+                .collect(Collectors.toList());
     }
 
-    static FieldSpec fieldSpecFromMemberShape(
+    public static FieldSpec fieldSpecFromMemberShape(
             MemberShape memberShape,
             NameResolver nameResolver
     ) {
@@ -89,11 +98,11 @@ public class BuilderSpecs {
         return aClassName.nestedClass("BuilderImpl");
     }
 
-    ClassName builderInterfaceName() { return builderInterfaceName(className); }
+    public ClassName builderInterfaceName() { return builderInterfaceName(className); }
 
-    ClassName builderImplName() { return builderImplName(className); }
+    public ClassName builderImplName() { return builderImplName(className); }
 
-    TypeSpec builderInterface() {
+    public TypeSpec builderInterface() {
         TypeSpec.Builder builder = TypeSpec
                 .interfaceBuilder(builderInterfaceName());
         if (superName != null) { builder.addSuperinterface(builderInterfaceName(superName)); }
@@ -125,11 +134,11 @@ public class BuilderSpecs {
                 .build();
     }
 
-    TypeSpec builderImpl(boolean overrideSuper) {
+    public TypeSpec builderImpl(boolean overrideSuper) {
         return builderImpl(overrideSuper, null);
     }
 
-    TypeSpec builderImpl(boolean overrideSuper, MethodSpec modelConstructor) {
+    public TypeSpec builderImpl(boolean overrideSuper, MethodSpec modelConstructor) {
         if (overrideSuper && superName == null) {
             throw new IllegalArgumentException("Cannot overrideSuper if there is no super");
         }
@@ -201,7 +210,7 @@ public class BuilderSpecs {
         return builder.build();
     }
 
-    MethodSpec toBuilderMethod(boolean override) {
+    public MethodSpec toBuilderMethod(boolean override) {
         MethodSpec.Builder method = MethodSpec
                 .methodBuilder("toBuilder")
                 .addModifiers(PUBLIC)
@@ -213,7 +222,7 @@ public class BuilderSpecs {
         return method.build();
     }
 
-    MethodSpec builderMethod() {
+    public MethodSpec builderMethod() {
         MethodSpec.Builder method = MethodSpec
                 .methodBuilder("builder")
                 .addModifiers(PUBLIC, STATIC)

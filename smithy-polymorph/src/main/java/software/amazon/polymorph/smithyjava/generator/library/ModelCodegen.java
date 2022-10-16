@@ -1,27 +1,17 @@
 package software.amazon.polymorph.smithyjava.generator.library;
 
-import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
-import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.TypeName;
-import com.squareup.javapoet.TypeSpec;
 
-import java.util.ArrayList;
 import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
 
-import javax.lang.model.element.Modifier;
-
-import software.amazon.polymorph.smithyjava.common.NativeError;
-import software.amazon.polymorph.smithyjava.common.OpaqueError;
+import software.amazon.polymorph.smithyjava.common.staticErrors.CollectionOfErrors;
+import software.amazon.polymorph.smithyjava.common.staticErrors.NativeError;
+import software.amazon.polymorph.smithyjava.common.staticErrors.OpaqueError;
 import software.amazon.polymorph.smithyjava.generator.Generator;
-import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.ResourceShape;
 import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
-import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.utils.StringUtils;
 
 
@@ -46,7 +36,7 @@ class ModelCodegen extends Generator {
         // Opaque Exception Class
         rtn.add(OpaqueError.javaFile(modelPackageName));
         // Collection of Errors class
-        /*rtn.add(CollectionOfErrors(modelPackageName));*/
+        rtn.add(CollectionOfErrors.javaFile(modelPackageName));
         // Modeled exception classes
         /*subject.model.getStructureShapes().stream()
                 .filter(shape -> shape.hasTrait(ErrorTrait.class))
