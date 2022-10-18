@@ -15,18 +15,49 @@ $ # build
 $ ./gradlew build
 BUILD SUCCESSFUL in 507ms
 
+$ # run help
+$ ./gradlew run --args="-h"
+usage: smithy-polymorph
+ --aws-sdk                 <optional> generate AWS SDK-style API and shims
+ -d,--dependent-model <arg>   directory for dependent model file[s]
+                              (.smithy format)
+ -h,--help                    print help message
+ -m,--model <arg>             directory for the model file[s] (.smithy
+                              format). Also the Dafny output directory.
+ -n,--namespace <arg>         smithy namespace to generate code for, such
+                              as 'com.foo'
+ --output-dafny            <optional> generate Dafny code
+ --output-dotnet <arg>     <optional> output directory for generated
+                           .NET files
+ --output-java <arg>       <optional> output directory for generated
+                           Java files
+
+
+BUILD SUCCESSFUL in 839ms
+3 actionable tasks: 1 executed, 2 up-to-date
+
+
 $ # generate code
 $ OUTPUT_DOTNET=/path/to/generated_dotnet
 $ OUTPUT_JAVA=/path/to/generated_java
 $ OUTPUT_DAFNY=/path/to/generated_dafny
 $ MODEL=src/test/resources/model.smithy
+$ DEPENDENT=src/test/resources/
 $ SERVICE='polymorph.demo#StringLists'
-$ ./gradlew run --args="--output-dotnet $OUTPUT_DOTNET --output-java $OUTPUT_JAVA --output-dafny $OUTPUT_DAFNY -m $MODEL -s $SERVICE"
+$ ./gradlew run --args="--output-dotnet $OUTPUT_DOTNET --output-java $OUTPUT_JAVA --output-dafny -m $MODEL -d $DEPENDENT"
+...<warn logs and other junk>
+[main] INFO software.amazon.polymorph.CodegenCli - Java code generated in /.../generated-java
 [main] INFO software.amazon.polymorph.CodegenCli - .NET code generated in /.../generated-dotnet
-[main] INFO software.amazon.polymorph.CodegenCli - Dafny code generated in /.../generated-dafny
+[main] INFO software.amazon.polymorph.CodegenCli - Dafny code generated in /.../model
 ```
 
 You can also look at the [ServiceCodegenSmokeTest](./src/test/java/software/amazon/polymorph/smithydotnet/ServiceCodegenSmokeTest.java) as a reference for how to use the library. It reads and generates code for the [test model](./src/test/resources/model.smithy), then prints the generated code to stdout.
+
+## Arguments
+By default, nothing is generated.  
+Language generation is enabled by the language's `output` argument.  
+For `dotnet` and `java`, this argument also determines the directory code will be written.  
+For `dafny`, the code will always be written to the `model` directory.
 
 ## Manual build steps for .NET
 
