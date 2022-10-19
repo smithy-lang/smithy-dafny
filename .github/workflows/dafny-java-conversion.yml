@@ -22,12 +22,15 @@ jobs:
         uses: dafny-lang/setup-dafny-action@v1
         with:
           dafny-version: ${{ matrix.dafny }}
-      - name: debug
-        shell: bash
-        run: which dafny
       - name: Setup dafny/DafnyRuntime.jar
         shell: bash
         run: |
+          # The location of the dafny binary
+          # and by extension DafnyRuntime.jar
+          # should not be something that dafny-lang/setup-dafny-action
+          # worries about, this works for now...
+          # The `which dafny` is there to make sure they match
+          which dafny
           mvn install:install-file \
           -Dfile=/opt/hostedtoolcache/dafny/${{ matrix.dafny }}/x64/DafnyRuntime.jar \
           -DgroupId=dafny.lang \
