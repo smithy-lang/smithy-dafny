@@ -4,6 +4,9 @@ on: ["pull_request", "push"]
 
 jobs:
   gradle-build:
+    strategy:
+      matrix:
+        dafny: [ 3.9.0 ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -14,7 +17,7 @@ jobs:
       - name: Setup Dafny
         uses: dafny-lang/setup-dafny-action@v1
         with:
-          dafny-version: "3.9.0"
+          dafny-version: ${{ matrix.dafny }}
       - name: Setup dafny/DafnyRuntime.jar
         shell: bash
         run: |
@@ -22,7 +25,7 @@ jobs:
           -Dfile=$HOME/dafny/DafnyRuntime.jar \
           -DgroupId=dafny.lang \
           -DartifactId=DafnyRuntime \
-          -Dversion=3.8.1 \
+          -Dversion=${{ matrix.dafny }} \
           -DgeneratePom=true \
           -Dpackaging=jar
       - name: Setup dafny-java-conversion
