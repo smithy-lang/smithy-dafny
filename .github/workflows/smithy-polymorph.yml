@@ -1,9 +1,16 @@
 name: smithy-polymorph workflows
 
-on: ["pull_request", "push"]
+on: 
+  pull_request:
+  push:
+    branches:
+      - main
 
 jobs:
   gradle-build:
+    strategy:
+      matrix:
+        dafny: [ 3.9.0 ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -14,15 +21,21 @@ jobs:
       - name: Setup Dafny
         uses: dafny-lang/setup-dafny-action@v1
         with:
-          dafny-version: "3.8.1"
+          dafny-version: ${{ matrix.dafny }}
       - name: Setup dafny/DafnyRuntime.jar
         shell: bash
         run: |
+          # The location of the dafny binary
+          # and by extension DafnyRuntime.jar
+          # should not be something that dafny-lang/setup-dafny-action
+          # worries about, this works for now...
+          # The `which dafny` is there to make sure they match
+          which dafny
           mvn install:install-file \
-          -Dfile=$HOME/dafny/DafnyRuntime.jar \
+          -Dfile=/opt/hostedtoolcache/dafny/${{ matrix.dafny }}/x64/DafnyRuntime.jar \
           -DgroupId=dafny.lang \
           -DartifactId=DafnyRuntime \
-          -Dversion=3.8.1 \
+          -Dversion=${{ matrix.dafny }} \
           -DgeneratePom=true \
           -Dpackaging=jar
       - name: Setup dafny-java-conversion

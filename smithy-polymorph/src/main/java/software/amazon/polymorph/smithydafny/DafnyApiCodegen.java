@@ -27,16 +27,19 @@ public class DafnyApiCodegen {
     private final ServiceShape serviceShape;
     private final DafnyNameResolver nameResolver;
     private final Path modelPath;
+    private final Path includeDafnyFile;
 
     public DafnyApiCodegen(
       final Model model,
       final ServiceShape serviceShape,
       final Path modelPath,
+      final Path includeDafnyFile,
       final Path[] dependentModelPaths
     ) {
         this.model = model;
         this.serviceShape = serviceShape;
         this.modelPath = modelPath;
+        this.includeDafnyFile = includeDafnyFile;
         this.nameResolver = new DafnyNameResolver(
           model,
           this.serviceShape.toShapeId().getNamespace(),
@@ -72,9 +75,7 @@ public class DafnyApiCodegen {
             .concat(
               Stream
                 .of(
-                  // These are Obviously wrong #JustHardCodedThings...
-                  "../../StandardLibrary/StandardLibrary.dfy",
-                  "../../Util/UTF8.dfy"
+                  modelPath.relativize(includeDafnyFile)
                 ),
               nameResolver
                 .dependentModels()
