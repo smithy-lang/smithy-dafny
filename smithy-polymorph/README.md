@@ -27,6 +27,8 @@ usage: smithy-polymorph
  -n,--namespace <arg>         smithy namespace to generate code for, such
                               as 'com.foo'
  --output-dafny            <optional> generate Dafny code
+ --include-dafny           <optional> include file for the Dafny generated model
+                            Required if generating Dafny code
  --output-dotnet <arg>     <optional> output directory for generated
                            .NET files
  --output-java <arg>       <optional> output directory for generated

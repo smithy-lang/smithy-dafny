@@ -100,6 +100,7 @@ public class CodegenCli {
                     model,
                     serviceShape,
                     cliArguments.modelPath,
+                    cliArguments.includeDafnyFile.get(),
                     cliArguments.dependentModelPaths
             );
             // The Smithy model and the Dafny code are expected to be in the same location.
@@ -182,8 +183,12 @@ public class CodegenCli {
           .addOption(Option.builder()
             .longOpt("output-dafny")
             .desc("<optional> generate Dafny code")
-            .build()
-          );
+            .build())
+          .addOption(Option.builder()
+            .longOpt("include-dafny")
+            .desc("<optional> file to be include in the Dafny model file")
+            .hasArg()
+            .build());
     }
 
     private static void printHelpMessage() {
@@ -197,7 +202,8 @@ public class CodegenCli {
             Optional<Path> outputDotnetDir,
             Optional<Path> outputJavaDir,
             boolean awsSdkStyle,
-            boolean outputDafny
+            boolean outputDafny,
+            Optional<Path> includeDafnyFile
     ) {
         /**
          * @param args arguments to parse
@@ -231,9 +237,18 @@ public class CodegenCli {
             }
             final boolean awsSdkStyle = commandLine.hasOption("aws-sdk");
             final boolean outputDafny = commandLine.hasOption("output-dafny");
+            Optional<Path> includeDafnyFile = Optional.empty();
+            if (outputDafny) {
+                if (!commandLine.hasOption("include-dafny")) {
+                    // if outputing dafny, an include file is required
+                    throw new ParseException("Dafny requires an include file.");
+                }
+                includeDafnyFile = Optional.of(Paths.get(commandLine.getOptionValue("include-dafny"))
+                        .toAbsolutePath().normalize());
+            }
 
             return Optional.of(new CliArguments(
-              modelPath, dependentModelPaths, namespace, outputDotnetDir, outputJavaDir, awsSdkStyle, outputDafny));
+              modelPath, dependentModelPaths, namespace, outputDotnetDir, outputJavaDir, awsSdkStyle, outputDafny, includeDafnyFile));
         }
     }
 
