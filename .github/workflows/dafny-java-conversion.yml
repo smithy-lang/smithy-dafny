@@ -22,6 +22,9 @@ jobs:
         uses: dafny-lang/setup-dafny-action@v1
         with:
           dafny-version: ${{ matrix.dafny }}
+      - name: debug
+        shell: bash
+        run: which dafny
       - name: Setup dafny/DafnyRuntime.jar
         shell: bash
         run: |
