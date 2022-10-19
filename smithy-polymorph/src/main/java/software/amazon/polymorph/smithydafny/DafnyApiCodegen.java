@@ -27,7 +27,7 @@ public class DafnyApiCodegen {
     private final ServiceShape serviceShape;
     private final DafnyNameResolver nameResolver;
     private final Path modelPath;
-    private final Path includePath;
+    private final Path includeDafnyFile;
 
     public DafnyApiCodegen(
       final Model model,
@@ -75,7 +75,7 @@ public class DafnyApiCodegen {
             .concat(
               Stream
                 .of(
-                  modelPath.relativize(includeDafnyFile),
+                  modelPath.relativize(includeDafnyFile)
                 ),
               nameResolver
                 .dependentModels()

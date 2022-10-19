@@ -14,7 +14,7 @@ jobs:
       - name: Setup Dafny
         uses: dafny-lang/setup-dafny-action@v1
         with:
-          dafny-version: "3.8.1"
+          dafny-version: "3.9.0"
       - name: Setup dafny/DafnyRuntime.jar
         shell: bash
         run: |

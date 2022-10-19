@@ -183,12 +183,12 @@ public class CodegenCli {
           .addOption(Option.builder()
             .longOpt("output-dafny")
             .desc("<optional> generate Dafny code")
-            .build()
+            .build())
           .addOption(Option.builder()
             .longOpt("include-dafny")
             .desc("<optional> file to be include in the Dafny model file")
-            .build())
-          );
+            .hasArg()
+            .build());
     }
 
     private static void printHelpMessage() {
