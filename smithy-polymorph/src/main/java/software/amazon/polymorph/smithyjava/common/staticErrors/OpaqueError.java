@@ -33,7 +33,11 @@ public class OpaqueError {
                 .addModifiers(PUBLIC)
                 .superclass(superName)
                 .addType(builderSpecs.builderInterface())
-                .addType(builderSpecs.builderImpl(true))
+                .addType(builderSpecs.builderImpl(
+                        true,
+                        builderSpecs.implModelConstructor(),
+                        builderSpecs.implBuildMethod(true))
+                )
                 .addMethod(superBuilder(builderSpecs))
                 .addMethod(builderSpecs.toBuilderMethod(true))
                 .addMethod(builderSpecs.builderMethod());

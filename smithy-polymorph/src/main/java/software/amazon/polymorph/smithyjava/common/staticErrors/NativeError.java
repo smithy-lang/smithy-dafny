@@ -40,7 +40,11 @@ public class NativeError {
                 .addMethod(builderSpecs.toBuilderMethod(false))
                 .addMethod(superBuilder(builderSpecs))
                 .addMethod(messageFromBuilder(builderSpecs))
-                .addType(builderSpecs.builderImpl(false, builderImplConstructor(packageName)))
+                .addType(builderSpecs.builderImpl(
+                        false,
+                        builderImplConstructor(packageName),
+                        builderSpecs.implBuildMethod(false))
+                )
                 .addType(builderSpecs.builderInterface())
                 .build();
         return JavaFile.builder(packageName, spec)

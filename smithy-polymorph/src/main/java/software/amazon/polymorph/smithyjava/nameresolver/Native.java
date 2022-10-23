@@ -92,6 +92,21 @@ public class Native extends NameResolver{
         );
     }
 
+    public static String aggregateSizeMethod(ShapeType shapeType) {
+        return switch (shapeType) {
+            case LIST, SET, MAP -> "size()";
+            case STRING -> "length()";
+            // This is complicated: A (Byte)Buffer has four landmark indexes:
+            // mark <= position <= limit <= capacity
+            // Let us ASSUME that we are validating a buffer that has been
+            // written to but not read from, and thus the `remaining` bytes
+            // (limit - position) is the length.
+            case BLOB -> "remaining()";
+            default -> throw new IllegalStateException(
+                    "aggregateSizeMethod only accepts LIST, SET, MAP, STRING, or BLOB. Got : " + shapeType);
+        };
+    }
+
     /**
      * Returns the Native type corresponding to the given shape.
      */

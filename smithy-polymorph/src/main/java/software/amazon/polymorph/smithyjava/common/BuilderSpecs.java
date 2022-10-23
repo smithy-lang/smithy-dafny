@@ -69,6 +69,10 @@ public class BuilderSpecs {
             @Nonnull List<FieldSpec> localFields,
             @Nonnull List<FieldSpec> superFields
     ) {
+        if (superName == null && superFields.size() != 0) {
+            throw new IllegalArgumentException(
+                    "Cannot provide a populated superFields but no superName");
+        }
         this.className = className;
         this.superName = superName;
         this.superFields = superFields;
@@ -80,6 +84,17 @@ public class BuilderSpecs {
                 .collect(Collectors.toList());
     }
 
+    static ClassName builderInterfaceName(ClassName aClassName) {
+        return aClassName.nestedClass("Builder");
+    }
+
+    static ClassName builderImplName(ClassName aClassName) {
+        return aClassName.nestedClass("BuilderImpl");
+    }
+
+    /**
+     * @return Converts a Smithy representation of a shape to java-poet representation of a field.
+     */
     public static FieldSpec fieldSpecFromMemberShape(
             MemberShape memberShape,
             NameResolver nameResolver
@@ -90,18 +105,18 @@ public class BuilderSpecs {
                 .build();
     }
 
-    static ClassName builderInterfaceName(ClassName aClassName) {
-        return aClassName.nestedClass("Builder");
-    }
-
-    static ClassName builderImplName(ClassName aClassName) {
-        return aClassName.nestedClass("BuilderImpl");
-    }
-
     public ClassName builderInterfaceName() { return builderInterfaceName(className); }
 
     public ClassName builderImplName() { return builderImplName(className); }
 
+    /**
+     * @return Get only the fields unique to the class, not those held by the super class.
+     */
+    public List<FieldSpec> getLocalFields() { return this.localFields; }
+
+    /**
+     * @return The nested public interface Builder.
+     */
     public TypeSpec builderInterface() {
         TypeSpec.Builder builder = TypeSpec
                 .interfaceBuilder(builderInterfaceName());
@@ -134,11 +149,20 @@ public class BuilderSpecs {
                 .build();
     }
 
-    public TypeSpec builderImpl(boolean overrideSuper) {
-        return builderImpl(overrideSuper, null);
-    }
-
-    public TypeSpec builderImpl(boolean overrideSuper, MethodSpec modelConstructor) {
+    /**
+     * @param overrideSuper If True, add Override annotation to `build` and "builder setter" methods from superFields
+     * @param modelConstructor The Constructor for the BuilderImpl that takes an instance of the class and
+     *                         uses the instance's fields to initialize the builder.
+     * @param buildMethod  The `build` method of a Builder(Impl) returns a new instance of the class.
+     *                     For modeled shapes, use {@link software.amazon.polymorph.smithyjava.common.BuildMethod#implBuildMethod}
+     *                     to generate a method that respects smithy constraint traits.
+     * @return The nested public class that implements the Builder Interface.
+     */
+    public TypeSpec builderImpl(
+            boolean overrideSuper,
+            MethodSpec modelConstructor,
+            MethodSpec buildMethod
+    ) {
         if (overrideSuper && superName == null) {
             throw new IllegalArgumentException("Cannot overrideSuper if there is no super");
         }
@@ -154,20 +178,7 @@ public class BuilderSpecs {
         builder.addMethod(MethodSpec.constructorBuilder()
                 .addModifiers(PROTECTED)
                 .build());
-        if (modelConstructor == null) {
-            MethodSpec.Builder _modelConstructor = MethodSpec
-                    .constructorBuilder()
-                    .addModifiers(PROTECTED)
-                    .addParameter(className, "model");
-            if (superName != null ) { _modelConstructor.addStatement("super(model)"); }
-            localFields.forEach(field ->
-                    _modelConstructor.addStatement(
-                            "this.$L = model.$L()", field.name, field.name)
-            );
-            builder.addMethod(_modelConstructor.build());
-        } else {
-            builder.addMethod(modelConstructor);
-        }
+        builder.addMethod(modelConstructor);
         // for local fields
         localFields.forEach(field -> {
             // Builder Setter Method
@@ -200,13 +211,7 @@ public class BuilderSpecs {
             builder.addMethod(method.build());
         });
         // build
-        MethodSpec.Builder buildMethod = MethodSpec
-                .methodBuilder("build")
-                .addModifiers(Modifier.PUBLIC)
-                .returns(className)
-                .addStatement("return new $T(this)", className);
-        if (overrideSuper) { buildMethod.addAnnotation(Override.class); }
-        builder.addMethod(buildMethod.build());
+        builder.addMethod(buildMethod);
         return builder.build();
     }
 
@@ -222,6 +227,10 @@ public class BuilderSpecs {
         return method.build();
     }
 
+    /**
+     *  Provides the `builder` method for a class;
+     *  The `builder` method returns a new Builder(Impl) for the class.
+     */
     public MethodSpec builderMethod() {
         MethodSpec.Builder method = MethodSpec
                 .methodBuilder("builder")
@@ -229,5 +238,43 @@ public class BuilderSpecs {
                 .returns(builderInterfaceName())
                 .addStatement("return new $T()", builderImplName());
         return method.build();
+    }
+
+    /**
+     * Provides the default Builder Impl model constructor.
+     * That is, the Constructor for the BuilderImpl that takes an instance of
+     * the class and uses the instance's fields to initialize the builder.
+     * <p>
+     * The only reason to not use this is if the super class should not be called,
+     * but there is a super (i.e.: NativeError).
+     */
+    public MethodSpec implModelConstructor() {
+        MethodSpec.Builder modelConstructor = MethodSpec
+                .constructorBuilder()
+                .addModifiers(PROTECTED)
+                .addParameter(className, "model");
+        if (superName != null ) { modelConstructor.addStatement("super(model)"); }
+        localFields.forEach(field ->
+                modelConstructor.addStatement(
+                        "this.$L = model.$L()", field.name, field.name)
+        );
+        return modelConstructor.build();
+    }
+
+    /**
+     * Provides a BuilderImpl build method for un-modeled objects
+     * (i.e.: staticErrors).
+     * The `build` method of a Builder(Impl) returns a new instance of the class.
+     * <p>For modeled shapes, use {@link software.amazon.polymorph.smithyjava.common.BuildMethod#implBuildMethod}
+     * to generate a method that respects smithy constraint traits.
+     */
+    public MethodSpec implBuildMethod(boolean overrideSuper) {
+        MethodSpec.Builder buildMethod = MethodSpec
+                .methodBuilder("build")
+                .addModifiers(Modifier.PUBLIC)
+                .returns(className)
+                .addStatement("return new $T(this)", className);
+        if (overrideSuper) { buildMethod.addAnnotation(Override.class); }
+        return buildMethod.build();
     }
 }

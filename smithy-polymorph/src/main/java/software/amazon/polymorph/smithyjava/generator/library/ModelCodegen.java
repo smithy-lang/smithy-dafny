@@ -3,15 +3,19 @@ package software.amazon.polymorph.smithyjava.generator.library;
 import com.squareup.javapoet.JavaFile;
 
 import java.util.LinkedHashSet;
+import java.util.List;
 
+import software.amazon.polymorph.smithyjava.common.ModeledError;
 import software.amazon.polymorph.smithyjava.common.staticErrors.CollectionOfErrors;
 import software.amazon.polymorph.smithyjava.common.staticErrors.NativeError;
 import software.amazon.polymorph.smithyjava.common.staticErrors.OpaqueError;
 import software.amazon.polymorph.smithyjava.generator.Generator;
+import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.ResourceShape;
 import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
+import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.utils.StringUtils;
 
 
@@ -38,10 +42,8 @@ class ModelCodegen extends Generator {
         // Collection of Errors class
         rtn.add(CollectionOfErrors.javaFile(modelPackageName));
         // Modeled exception classes
-        /*subject.model.getStructureShapes().stream()
-                .filter(shape -> shape.hasTrait(ErrorTrait.class))
-                .filter(shape -> ModelUtils.isInServiceNamespace(shape.getId(), subject.serviceShape))
-                .map(this::modeledException).forEachOrdered(rtn::add);*/
+        List<StructureShape> errorShapes = getErrorsInServiceNamespace();
+        errorShapes.stream().map(this::modeledError).forEachOrdered(rtn::add);
         // Structures
         /*subject.model.getStructureShapes().stream()
                 .filter(Generator::shouldGenerateStructure)
@@ -64,49 +66,15 @@ class ModelCodegen extends Generator {
         return rtn;
     }
 
-    JavaFile modeledException(StructureShape shape) {
-        /*TypeSpec.Builder spec = TypeSpec
-                .classBuilder(ClassName.get(modelPackageName, shape.getId().getName()))
-                .addModifiers(Modifier.PUBLIC)
-                .superclass(ClassName.get(modelPackageName, NATIVE_ERROR));
-        List<MemberShape> requiredArgs = new ArrayList<>();
-        shape.getAllMembers().forEach((name, memberShape) -> {
-            TypeName fieldType = subject.nativeNameResolver.typeForShape(memberShape.getId());
-            String fieldName = StringUtils.lowerCase(name);
-            spec.addField(fieldType, fieldName);
-            if (memberShape.isRequired()) {
-                requiredArgs.add(memberShape);
-            }
-            // getter method
-            spec.addMethod(
-                    MethodSpec.methodBuilder(getFieldMethodName(memberShape))
-                            .addModifiers(Modifier.PUBLIC)
-                            .returns(fieldType)
-                            .addCode("return this.$L", fieldName)
-                            .build());
-            // setter method
-            spec.addMethod(
-                    MethodSpec.methodBuilder(setFieldMethodName(memberShape))
-                            .addModifiers(Modifier.PUBLIC)
-                            .addParameter(fieldType, fieldName)
-                            .addCode("this.$L = $L", fieldName, fieldName)
-                            .build());
-        });*/
-
-        /*        .addMethod(MethodSpec.constructorBuilder()
-                        .addParameter(String.class, "message")
-                        .addCode("super(message)").build())
-                .build();*/
-        /*return JavaFile.builder(modelPackageName, spec).build();*/
-        return null;
+    List<StructureShape> getErrorsInServiceNamespace() {
+        return subject.model.getStructureShapes().stream()
+                .filter(shape -> shape.hasTrait(ErrorTrait.class))
+                .filter(shape -> ModelUtils.isInServiceNamespace(shape.getId(), subject.serviceShape))
+                .toList();
     }
 
-    static String getFieldMethodName(MemberShape shape) {
-        return "get" + StringUtils.capitalize(shape.getMemberName());
-    }
-
-    static String setFieldMethodName(MemberShape shape) {
-        return "set" + StringUtils.capitalize(shape.getMemberName());
+    JavaFile modeledError(StructureShape shape) {
+        return ModeledError.javaFile(modelPackageName, shape, subject);
     }
 
     JavaFile generateStructure(StructureShape structureShape) {
