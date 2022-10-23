@@ -34,4 +34,34 @@ public class ModelCodegenTest {
         tokenizeAndAssertEqual(Constants.TEST_ERROR_EXPECTED, actualString);
     }
 
+    @Test
+    public void StructureWithRangeTraitTest() {
+        ShapeId structureId = ShapeId.fromParts("aws.cryptography.test", "TestRangeMinMaxInteger");
+        StructureShape structureShape = model.expectShape(structureId, StructureShape.class);
+        JavaFile actual = underTest.modeledStructure(structureShape);
+        String actualString = actual.toString();
+        int startBuildMethod = actualString.indexOf(Constants.RANGE_TRAIT_INTEGER_BUILD_METHOD_START);
+        int endBuildMethod = actualString.indexOf(Constants.RANGE_TRAIT_INTEGER_BUILD_METHOD_RETURN)
+                             + Constants.RANGE_TRAIT_INTEGER_BUILD_METHOD_RETURN.length()
+                             + Constants.BUILD_METHOD_END_OFFSET;
+        tokenizeAndAssertEqual(Constants.RANGE_TRAIT_INTEGER_BUILD_EXPECTED,
+                actualString.substring(startBuildMethod, endBuildMethod));
+    }
+
+    @Test
+    public void StructureWithLengthTraitTest() {
+        ShapeId structureId = ShapeId.fromParts("aws.cryptography.test", "TestLengthMinMaxBlob");
+        StructureShape structureShape = model.expectShape(structureId, StructureShape.class);
+        JavaFile actual = underTest.modeledStructure(structureShape);
+        String actualString = actual.toString();
+        int startBuildMethod = actualString.indexOf(Constants.LENGTH_TRAIT_BLOB_BUILD_METHOD_START);
+        int endBuildMethod = actualString.indexOf(Constants.LENGTH_TRAIT_BLOB_BUILD_METHOD_RETURN)
+                             + Constants.LENGTH_TRAIT_BLOB_BUILD_METHOD_RETURN.length()
+                             + Constants.BUILD_METHOD_END_OFFSET;
+        tokenizeAndAssertEqual(Constants.LENGTH_TRAIT_BLOB_BUILD_METHOD_EXPECTED,
+                actualString.substring(startBuildMethod, endBuildMethod));
+    }
+
+    // TODO: Test structure with Enum member
+
 }

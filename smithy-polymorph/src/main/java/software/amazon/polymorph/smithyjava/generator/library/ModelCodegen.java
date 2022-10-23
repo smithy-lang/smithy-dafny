@@ -45,11 +45,9 @@ class ModelCodegen extends Generator {
         getErrorsInServiceNamespace().stream()
                 .map(this::modeledError).forEachOrdered(rtn::add);
         // Structures
-        /*subject.model.getStructureShapes().stream()
-                .filter(Generator::shouldGenerateStructure)
-                .filter(shape -> ModelUtils.isInServiceNamespace(shape.getId(), subject.serviceShape))
-                .map(this::generateStructure).forEachOrdered(rtn::add);
-        // Enums
+        getStructuresInServiceNamespace().stream()
+                .map(this::modeledStructure).forEachOrdered(rtn::add);
+        /*// Enums
         subject.model.getStringShapesWithTrait(EnumTrait.class).stream()
                 .filter(shape -> ModelUtils.isInServiceNamespace(shape.getId(), subject.serviceShape))
                 .map(this::generateEnum).forEachOrdered(rtn::add);
@@ -77,8 +75,16 @@ class ModelCodegen extends Generator {
         return ModeledError.javaFile(modelPackageName, shape, subject);
     }
 
-    JavaFile generateStructure(StructureShape structureShape) {
-        throw new RuntimeException("TODO");
+    List<StructureShape> getStructuresInServiceNamespace() {
+        return subject.model.getStructureShapes().stream()
+                .filter(shape -> !shape.hasTrait(ErrorTrait.class))
+                .filter(shape -> !shape.hasTrait(TraitDefinition.class))
+                .filter(shape -> ModelUtils.isInServiceNamespace(shape.getId(), subject.serviceShape))
+                .toList();
+    }
+
+    JavaFile modeledStructure(StructureShape shape) {
+        return ModeledStructure.javaFile(modelPackageName, shape, subject);
     }
 
     JavaFile generateEnum(StringShape stringShape) {

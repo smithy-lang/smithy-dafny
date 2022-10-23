@@ -94,6 +94,14 @@ public class ModelConstants {
                     message: String
                 }
                 structure DoSomethingResponse { message: String }
+                @range(min: 0, max: 10) integer ZeroToTenInteger
+                structure TestRangeMinMaxInteger {
+                   zeroToTen: ZeroToTenInteger
+                }
+                @length(min:256, max:256) blob Aes256Key
+                structure TestLengthMinMaxBlob {
+                  key: Aes256Key
+                }
             """;
 
 }
