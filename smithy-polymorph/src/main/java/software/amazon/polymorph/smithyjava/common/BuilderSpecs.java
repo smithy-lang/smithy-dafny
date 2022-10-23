@@ -5,7 +5,6 @@ import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeSpec;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -30,32 +29,6 @@ public class BuilderSpecs {
     @Nullable private final ClassName superName;
     @Nonnull private final List<FieldSpec> localFields;
     @Nonnull private final List<FieldSpec> superFields;
-
-    public BuilderSpecs(
-            @Nonnull String packageName,
-            @Nonnull StructureShape classShape,
-            @Nullable StructureShape superShape,
-            @Nonnull NameResolver nameResolver
-    ) {
-        this.className = ClassName.get(packageName, classShape.getId().getName());
-        Set<String> superFieldNames;
-        if (superShape != null) {
-            this.superName = ClassName.get(packageName, superShape.getId().getName());
-            this.superFields = shapeToArgs(superShape, nameResolver);
-            superFieldNames = this.superFields.stream()
-                    .map(field -> field.name)
-                    .collect(Collectors.toSet());
-        } else {
-            this.superName = null;
-            this.superFields = Collections.emptyList();
-            superFieldNames = Collections.emptySet();
-        }
-        this.localFields = classShape.members().stream()
-                // check the local field Name is not contained by Super Fields
-                .filter(shape -> !superFieldNames.contains(shape.getMemberName()))
-                .map(shape -> fieldSpecFromMemberShape(shape, nameResolver))
-                .collect(Collectors.toList());
-    }
 
     public static List<FieldSpec> shapeToArgs(StructureShape shape, NameResolver nameResolver) {
         return shape.members().stream()
@@ -112,6 +85,7 @@ public class BuilderSpecs {
     /**
      * @return Get only the fields unique to the class, not those held by the super class.
      */
+    @Nonnull
     public List<FieldSpec> getLocalFields() { return this.localFields; }
 
     /**
@@ -150,7 +124,7 @@ public class BuilderSpecs {
     }
 
     /**
-     * @param overrideSuper If True, add Override annotation to `build` and "builder setter" methods from superFields
+     * @param overrideSuper If True, add Override annotation to `build` and to "builder setter" methods from superFields
      * @param modelConstructor The Constructor for the BuilderImpl that takes an instance of the class and
      *                         uses the instance's fields to initialize the builder.
      * @param buildMethod  The `build` method of a Builder(Impl) returns a new instance of the class.
@@ -215,6 +189,10 @@ public class BuilderSpecs {
         return builder.build();
     }
 
+    /**
+     * @param override If True, add Override annotation
+     * @return Method that converts the class to an instance of it's Builder
+     */
     public MethodSpec toBuilderMethod(boolean override) {
         MethodSpec.Builder method = MethodSpec
                 .methodBuilder("toBuilder")

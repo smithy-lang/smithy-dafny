@@ -39,6 +39,7 @@ public class ConstrainTraitUtils {
             return asShapeType(shape, trait.getMax().get());
         }
 
+        // TODO: Only INTEGER has been tested
         private static String asShapeType(Shape shape, BigDecimal value) {
             return switch (shape.getType()) {
                 case BYTE -> "%d".formatted(value.byteValue());
@@ -49,6 +50,13 @@ public class ConstrainTraitUtils {
                 case FLOAT -> "%g".formatted(value.floatValue());
                 case DOUBLE -> "%g".formatted(value.doubleValue());
                 case BIG_DECIMAL -> "%g".formatted(value);
+                case MEMBER -> throw new IllegalArgumentException(
+                        """
+                        RangeTrait's are not defined on MemberShapes but on their target.
+                        The target MUST be looked up with the model.
+                        See software.amazon.polymorph.smithyjava.PolymorphFieldSpec.getTargetShape.
+                        """
+                );
                 default -> throw new IllegalArgumentException(
                         "RangeTrait cannot apply to shape of type `%s`".formatted(shape.getType())
                 );

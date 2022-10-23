@@ -6,17 +6,17 @@ import java.util.LinkedHashSet;
 import java.util.List;
 
 import software.amazon.polymorph.smithyjava.common.ModeledError;
+import software.amazon.polymorph.smithyjava.common.ModeledStructure;
 import software.amazon.polymorph.smithyjava.common.staticErrors.CollectionOfErrors;
 import software.amazon.polymorph.smithyjava.common.staticErrors.NativeError;
 import software.amazon.polymorph.smithyjava.common.staticErrors.OpaqueError;
 import software.amazon.polymorph.smithyjava.generator.Generator;
 import software.amazon.polymorph.utils.ModelUtils;
-import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.ResourceShape;
 import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.ErrorTrait;
-import software.amazon.smithy.utils.StringUtils;
+import software.amazon.smithy.model.traits.TraitDefinition;
 
 
 class ModelCodegen extends Generator {
@@ -42,8 +42,8 @@ class ModelCodegen extends Generator {
         // Collection of Errors class
         rtn.add(CollectionOfErrors.javaFile(modelPackageName));
         // Modeled exception classes
-        List<StructureShape> errorShapes = getErrorsInServiceNamespace();
-        errorShapes.stream().map(this::modeledError).forEachOrdered(rtn::add);
+        getErrorsInServiceNamespace().stream()
+                .map(this::modeledError).forEachOrdered(rtn::add);
         // Structures
         /*subject.model.getStructureShapes().stream()
                 .filter(Generator::shouldGenerateStructure)

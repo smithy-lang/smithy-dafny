@@ -48,6 +48,10 @@ public class PolymorphFieldSpec {
         return this.shape.isRequired();
     }
 
+    public Shape getTargetShape() {
+        return this.subject.model.expectShape(this.shape.getTarget());
+    }
+
     public Optional<RangeTrait> rangeTrait() {
         return this.shape.getMemberTrait(subject.model, RangeTrait.class);
     }
@@ -70,7 +74,7 @@ public class PolymorphFieldSpec {
 
     /** Returns the Java method for getting the length of the field's type. */
     public String getLengthMethod() {
-        return Native.aggregateSizeMethod(this.shape.getType());
+        return Native.aggregateSizeMethod(getTargetShape().getType());
     }
 
 }

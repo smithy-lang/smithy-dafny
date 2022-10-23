@@ -10,6 +10,7 @@ import java.util.List;
 import software.amazon.polymorph.smithyjava.ModelConstants;
 import software.amazon.polymorph.smithyjava.generator.awssdk.TestSetupUtils;
 import software.amazon.smithy.model.Model;
+import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
 
 import static software.amazon.polymorph.util.Tokenizer.tokenizeAndAssertEqual;
@@ -26,8 +27,9 @@ public class ModelCodegenTest {
 
     @Test
     public void ModeledErrorTest() {
-        List<StructureShape> errorShapes = underTest.getErrorsInServiceNamespace();
-        JavaFile actual = underTest.modeledError(errorShapes.get(0));
+        ShapeId structureId = ShapeId.fromParts("aws.cryptography.test", "TestError");
+        StructureShape structureShape = model.expectShape(structureId, StructureShape.class);
+        JavaFile actual = underTest.modeledError(structureShape);
         String actualString = actual.toString();
         tokenizeAndAssertEqual(Constants.TEST_ERROR_EXPECTED, actualString);
     }

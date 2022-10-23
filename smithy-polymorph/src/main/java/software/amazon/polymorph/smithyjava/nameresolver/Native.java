@@ -102,6 +102,13 @@ public class Native extends NameResolver{
             // written to but not read from, and thus the `remaining` bytes
             // (limit - position) is the length.
             case BLOB -> "remaining()";
+            case MEMBER -> throw new IllegalArgumentException(
+                    """
+                    ShapeType is not defined on MemberShapes but on their target.
+                    The target MUST be looked up with the model.
+                    See software.amazon.polymorph.smithyjava.PolymorphFieldSpec.getTargetShape.
+                    """
+            );
             default -> throw new IllegalStateException(
                     "aggregateSizeMethod only accepts LIST, SET, MAP, STRING, or BLOB. Got : " + shapeType);
         };

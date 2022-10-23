@@ -24,9 +24,9 @@ public class BuildMethod {
      * so a sub-class will not invoke the super's trait validation.
      * This is OK, as:
      * <ul>
-     *   <li>1. We only intend to use super/class-hierarchy for exceptions
-     *   <li>2. This method takes in the shape only, not the super shape, so it only knows about the local fields
-     *   <li>3. For smithy-modeled shapes, all the fields should be defined on the shape anyhow.
+     *   <li> We only intend to use super/class-hierarchy for exceptions
+     *   <li> This method takes in the shape only, not the super shape, so it only knows about the local fields
+     *   <li> For smithy-modeled shapes, all the fields should be defined on the shape anyhow.
      * </ul>
      */
     public static MethodSpec implBuildMethod(
@@ -87,7 +87,7 @@ public class BuildMethod {
     }
 
     static CodeBlock rangeMinCheck(PolymorphFieldSpec polyField, RangeTrait trait) {
-        String min = ConstrainTraitUtils.RangeTraitUtils.minAsShapeType(polyField.shape, trait);
+        String min = ConstrainTraitUtils.RangeTraitUtils.minAsShapeType(polyField.getTargetShape(), trait);
         return CodeBlock.builder()
                 .beginControlFlow("if (this.$L() < $L)", polyField.name, min)
                 .addStatement(
@@ -98,7 +98,7 @@ public class BuildMethod {
     }
 
     static CodeBlock rangeMaxCheck(PolymorphFieldSpec polyField, RangeTrait trait) {
-        String max = ConstrainTraitUtils.RangeTraitUtils.maxAsShapeType(polyField.shape, trait);
+        String max = ConstrainTraitUtils.RangeTraitUtils.maxAsShapeType(polyField.getTargetShape(), trait);
         return CodeBlock.builder()
                 .beginControlFlow("if (this.$L() > $L)", polyField.name, max)
                 .addStatement(
