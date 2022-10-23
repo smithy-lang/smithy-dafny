@@ -38,7 +38,7 @@ public class OpaqueError {
                         builderSpecs.implModelConstructor(),
                         builderSpecs.implBuildMethod(true))
                 )
-                .addMethod(superBuilder(builderSpecs))
+                .addMethod(constructor(builderSpecs))
                 .addMethod(builderSpecs.toBuilderMethod(true))
                 .addMethod(builderSpecs.builderMethod());
         OPAQUE_ARGS.forEach(field -> {
@@ -55,7 +55,7 @@ public class OpaqueError {
                 .build();
     }
 
-    static MethodSpec superBuilder(BuilderSpecs builderSpecs) {
+    static MethodSpec constructor(BuilderSpecs builderSpecs) {
         MethodSpec.Builder method =  MethodSpec
                 .constructorBuilder()
                 .addModifiers(PROTECTED)

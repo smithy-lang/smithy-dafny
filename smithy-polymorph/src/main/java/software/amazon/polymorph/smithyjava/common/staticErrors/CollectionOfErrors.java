@@ -46,7 +46,7 @@ public class CollectionOfErrors {
                     .addStatement("return this.$L", field.name)
                     .build());
         });
-        spec.addMethod(superBuilder(builderSpecs, packageName))
+        spec.addMethod(constructor(builderSpecs, packageName))
                 .addMethod(builderSpecs.toBuilderMethod(true))
                 .addMethod(builderSpecs.builderMethod());
 
@@ -66,7 +66,7 @@ public class CollectionOfErrors {
         );
     }
 
-    private static MethodSpec superBuilder(BuilderSpecs builderSpecs, String packageName) {
+    private static MethodSpec constructor(BuilderSpecs builderSpecs, String packageName) {
         MethodSpec.Builder method =  MethodSpec
                 .constructorBuilder()
                 .addModifiers(PROTECTED)

@@ -38,7 +38,7 @@ public class NativeError {
                 .superclass(superName)
                 .addMethod(builderSpecs.builderMethod())
                 .addMethod(builderSpecs.toBuilderMethod(false))
-                .addMethod(superBuilder(builderSpecs))
+                .addMethod(constructor(builderSpecs))
                 .addMethod(messageFromBuilder(builderSpecs))
                 .addType(builderSpecs.builderImpl(
                         false,
@@ -52,7 +52,7 @@ public class NativeError {
                 .build();
     }
 
-    static MethodSpec superBuilder(BuilderSpecs builderSpecs) {
+    static MethodSpec constructor(BuilderSpecs builderSpecs) {
         return MethodSpec
                 .constructorBuilder()
                 .addModifiers(PROTECTED)

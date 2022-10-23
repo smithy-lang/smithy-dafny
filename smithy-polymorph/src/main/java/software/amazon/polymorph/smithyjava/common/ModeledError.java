@@ -53,7 +53,7 @@ public class ModeledError {
                     .addStatement("return this.$L", field.name)
                     .build());
         });
-        spec.addMethod(superBuilder(builderSpecs, localFields))
+        spec.addMethod(constructor(builderSpecs, localFields))
                 .addMethod(builderSpecs.toBuilderMethod(true))
                 .addMethod(builderSpecs.builderMethod());
 
@@ -62,7 +62,7 @@ public class ModeledError {
                 .build();
     }
 
-    private static MethodSpec superBuilder(BuilderSpecs builderSpecs, List<FieldSpec> localFields) {
+    private static MethodSpec constructor(BuilderSpecs builderSpecs, List<FieldSpec> localFields) {
         MethodSpec.Builder method =  MethodSpec
                 .constructorBuilder()
                 .addModifiers(PROTECTED)
