@@ -5,6 +5,7 @@ import com.squareup.javapoet.JavaFile;
 import java.util.LinkedHashSet;
 import java.util.List;
 
+import software.amazon.polymorph.smithyjava.common.ModeledEnum;
 import software.amazon.polymorph.smithyjava.common.ModeledError;
 import software.amazon.polymorph.smithyjava.common.ModeledStructure;
 import software.amazon.polymorph.smithyjava.common.staticErrors.CollectionOfErrors;
@@ -48,12 +49,11 @@ class ModelCodegen extends Generator {
         // Structures
         getStructuresInServiceNamespace().stream()
                 .map(this::modeledStructure).forEachOrdered(rtn::add);
-        /*// Enums
-        subject.model.getStringShapesWithTrait(EnumTrait.class).stream()
-                .filter(shape -> ModelUtils.isInServiceNamespace(shape.getId(), subject.serviceShape))
-                .map(this::generateEnum).forEachOrdered(rtn::add);
+        // Enums
+        getEnumsInServiceNamespace().stream()
+                .map(this::modeledEnum).forEachOrdered(rtn::add);
         // Resources
-        subject.model.getResourceShapes().stream()
+        /*subject.model.getResourceShapes().stream()
                 .filter(shape -> ModelUtils.isInServiceNamespace(shape.getId(), subject.serviceShape))
                 .forEachOrdered(shape -> {
                     rtn.add(generateResourceInterface(shape));
@@ -89,8 +89,14 @@ class ModelCodegen extends Generator {
         return ModeledStructure.javaFile(modelPackageName, shape, subject);
     }
 
-    JavaFile generateEnum(StringShape stringShape) {
-        throw new RuntimeException("TODO");
+    List<StringShape> getEnumsInServiceNamespace() {
+        return subject.model.getStringShapesWithTrait(EnumTrait.class).stream()
+                .filter(shape -> ModelUtils.isInServiceNamespace(shape.getId(), subject.serviceShape))
+                .toList();
+    }
+
+    JavaFile modeledEnum(StringShape stringShape) {
+        return ModeledEnum.javaFile(modelPackageName, stringShape);
     }
 
     JavaFile generateResourceInterface(ResourceShape shape) {
