@@ -5,6 +5,7 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 
 import java.util.List;
+import java.util.Objects;
 
 import javax.lang.model.element.Modifier;
 
@@ -77,7 +78,7 @@ public class BuildMethod {
 
     static CodeBlock requiredCheck(PolymorphFieldSpec polyField) {
         return CodeBlock.builder()
-                .beginControlFlow("if (this.$L() == null) ", polyField.name)
+                .beginControlFlow("if ($T.isNull(this.$L())) ", Objects.class, polyField.name)
                 .addStatement(
                         "throw new $T($S)",
                         IllegalArgumentException.class,

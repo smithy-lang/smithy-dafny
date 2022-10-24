@@ -3,6 +3,8 @@ package software.amazon.polymorph.smithyjava.generator.library;
 class Constants {
     static String TEST_ERROR_EXPECTED = """
             package software.amazon.cryptography.test.model;
+            
+            import java.util.Objects;
                         
             public class TestError extends NativeError {
               protected TestError(BuilderImpl builder) {
@@ -48,7 +50,7 @@ class Constants {
                         
                 @Override
                 public TestError build() {
-                  if (this.message() == null)  {
+                  if (Objects.isNull(this.message()))  {
                     throw new IllegalArgumentException("Missing value for required field `message`");
                   }
                   return new TestError(this);
