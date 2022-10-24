@@ -1,4 +1,4 @@
-package software.amazon.polymorph.smithyjava.common;
+package software.amazon.polymorph.smithyjava;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.FieldSpec;
@@ -128,7 +128,7 @@ public class BuilderSpecs {
      * @param modelConstructor The Constructor for the BuilderImpl that takes an instance of the class and
      *                         uses the instance's fields to initialize the builder.
      * @param buildMethod  The `build` method of a Builder(Impl) returns a new instance of the class.
-     *                     For modeled shapes, use {@link software.amazon.polymorph.smithyjava.common.BuildMethod#implBuildMethod}
+     *                     For modeled shapes, use {@link BuildMethod#implBuildMethod}
      *                     to generate a method that respects smithy constraint traits.
      * @return The nested public class that implements the Builder Interface.
      */
@@ -243,7 +243,7 @@ public class BuilderSpecs {
      * Provides a BuilderImpl build method for un-modeled objects
      * (i.e.: staticErrors).
      * The `build` method of a Builder(Impl) returns a new instance of the class.
-     * <p>For modeled shapes, use {@link software.amazon.polymorph.smithyjava.common.BuildMethod#implBuildMethod}
+     * <p>For modeled shapes, use {@link BuildMethod#implBuildMethod}
      * to generate a method that respects smithy constraint traits.
      */
     public MethodSpec implBuildMethod(boolean overrideSuper) {

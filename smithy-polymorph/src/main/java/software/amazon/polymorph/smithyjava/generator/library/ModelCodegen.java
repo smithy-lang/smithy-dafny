@@ -5,12 +5,12 @@ import com.squareup.javapoet.JavaFile;
 import java.util.LinkedHashSet;
 import java.util.List;
 
-import software.amazon.polymorph.smithyjava.common.ModeledEnum;
-import software.amazon.polymorph.smithyjava.common.ModeledError;
-import software.amazon.polymorph.smithyjava.common.ModeledStructure;
-import software.amazon.polymorph.smithyjava.common.staticErrors.CollectionOfErrors;
-import software.amazon.polymorph.smithyjava.common.staticErrors.NativeError;
-import software.amazon.polymorph.smithyjava.common.staticErrors.OpaqueError;
+import software.amazon.polymorph.smithyjava.modeled.ModeledEnum;
+import software.amazon.polymorph.smithyjava.modeled.ModeledError;
+import software.amazon.polymorph.smithyjava.modeled.ModeledStructure;
+import software.amazon.polymorph.smithyjava.unmodeled.CollectionOfErrors;
+import software.amazon.polymorph.smithyjava.unmodeled.NativeError;
+import software.amazon.polymorph.smithyjava.unmodeled.OpaqueError;
 import software.amazon.polymorph.smithyjava.generator.Generator;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.smithy.model.shapes.ResourceShape;

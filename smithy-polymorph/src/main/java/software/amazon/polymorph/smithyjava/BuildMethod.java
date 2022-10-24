@@ -1,4 +1,4 @@
-package software.amazon.polymorph.smithyjava.common;
+package software.amazon.polymorph.smithyjava;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;

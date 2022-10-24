@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import software.amazon.polymorph.smithyjava.common.BuilderSpecs;
 import software.amazon.polymorph.smithyjava.generator.CodegenSubject;
 import software.amazon.polymorph.smithyjava.nameresolver.Native;
 import software.amazon.polymorph.utils.ConstrainTraitUtils;

@@ -1,4 +1,4 @@
-package software.amazon.polymorph.smithyjava.common;
+package software.amazon.polymorph.smithyjava.modeled;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.FieldSpec;
@@ -10,14 +10,16 @@ import java.util.List;
 
 import javax.lang.model.element.Modifier;
 
-import software.amazon.polymorph.smithyjava.common.staticErrors.NativeError;
+import software.amazon.polymorph.smithyjava.BuildMethod;
+import software.amazon.polymorph.smithyjava.BuilderSpecs;
+import software.amazon.polymorph.smithyjava.unmodeled.NativeError;
 import software.amazon.polymorph.smithyjava.generator.CodegenSubject;
 import software.amazon.smithy.model.shapes.StructureShape;
 
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PROTECTED;
-import static software.amazon.polymorph.smithyjava.common.staticErrors.NativeError.THROWABLE_ARGS;
+import static software.amazon.polymorph.smithyjava.unmodeled.NativeError.THROWABLE_ARGS;
 
 public class ModeledError {
 

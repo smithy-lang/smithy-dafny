@@ -1,4 +1,4 @@
-package software.amazon.polymorph.smithyjava.common.staticErrors;
+package software.amazon.polymorph.smithyjava.unmodeled;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.FieldSpec;
@@ -8,14 +8,14 @@ import com.squareup.javapoet.TypeSpec;
 
 import java.util.List;
 
-import software.amazon.polymorph.smithyjava.common.BuilderSpecs;
+import software.amazon.polymorph.smithyjava.BuilderSpecs;
 
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PROTECTED;
 import static javax.lang.model.element.Modifier.PUBLIC;
-import static software.amazon.polymorph.smithyjava.common.staticErrors.NativeError.NATIVE_ERROR;
-import static software.amazon.polymorph.smithyjava.common.staticErrors.NativeError.THROWABLE_ARGS;
+import static software.amazon.polymorph.smithyjava.unmodeled.NativeError.NATIVE_ERROR;
+import static software.amazon.polymorph.smithyjava.unmodeled.NativeError.THROWABLE_ARGS;
 
 public class OpaqueError {
     public final static String OPAQUE_ERROR = "OpaqueError";

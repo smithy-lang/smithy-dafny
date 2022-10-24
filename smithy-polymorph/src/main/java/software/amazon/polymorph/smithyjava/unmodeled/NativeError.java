@@ -1,4 +1,4 @@
-package software.amazon.polymorph.smithyjava.common.staticErrors;
+package software.amazon.polymorph.smithyjava.unmodeled;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.FieldSpec;
@@ -9,7 +9,7 @@ import com.squareup.javapoet.TypeSpec;
 import java.util.Collections;
 import java.util.List;
 
-import software.amazon.polymorph.smithyjava.common.BuilderSpecs;
+import software.amazon.polymorph.smithyjava.BuilderSpecs;
 
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PROTECTED;

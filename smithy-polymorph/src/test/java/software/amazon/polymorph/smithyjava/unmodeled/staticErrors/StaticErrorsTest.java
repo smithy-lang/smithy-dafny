@@ -1,8 +1,12 @@
-package software.amazon.polymorph.smithyjava.common.staticErrors;
+package software.amazon.polymorph.smithyjava.unmodeled.staticErrors;
 
 import com.squareup.javapoet.JavaFile;
 
 import org.junit.Test;
+
+import software.amazon.polymorph.smithyjava.unmodeled.CollectionOfErrors;
+import software.amazon.polymorph.smithyjava.unmodeled.NativeError;
+import software.amazon.polymorph.smithyjava.unmodeled.OpaqueError;
 
 import static software.amazon.polymorph.util.Tokenizer.tokenizeAndAssertEqual;
 

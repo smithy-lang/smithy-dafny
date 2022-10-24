@@ -1,4 +1,4 @@
-package software.amazon.polymorph.smithyjava.common.staticErrors;
+package software.amazon.polymorph.smithyjava.unmodeled.staticErrors;
 
 class Constants {
     static String NATIVE_ERROR_EXPECTED = """
