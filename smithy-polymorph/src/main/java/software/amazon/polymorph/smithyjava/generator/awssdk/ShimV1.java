@@ -33,7 +33,7 @@ import static software.amazon.polymorph.smithyjava.nameresolver.Constants.SMITHY
  */
 public class ShimV1 extends Generator {
     private static final Logger LOGGER = LoggerFactory.getLogger(ShimV1.class);
-    public ShimV1(AwsSdkV1 awsSdk) {
+    public ShimV1(JavaAwsSdkV1 awsSdk) {
         super(awsSdk);
     }
 

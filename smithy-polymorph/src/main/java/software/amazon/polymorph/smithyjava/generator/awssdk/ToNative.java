@@ -94,7 +94,7 @@ public class ToNative extends Generator {
     /** The class name of the AWS SDK's Service's Shim's ToNative class. */
     final ClassName thisClassName;
 
-    public ToNative(AwsSdkV1 awsSdk) {
+    public ToNative(JavaAwsSdkV1 awsSdk) {
         super(awsSdk);
         thisClassName = ClassName.get(subject.dafnyNameResolver.packageName(), TO_NATIVE);
     }

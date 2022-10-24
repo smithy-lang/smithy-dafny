@@ -13,14 +13,14 @@ import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.ServiceShape;
 
-public class Library extends CodegenSubject {
+public class JavaLibrary extends CodegenSubject {
 
     /** Public Java Interfaces will go here. */
     public final String packageName;
     /** Public POJOs will go here. */
     public final String modelPackageName;
 
-    public Library(Model model, ServiceShape serviceShape) {
+    public JavaLibrary(Model model, ServiceShape serviceShape) {
         super(model, serviceShape, initDafny(model, serviceShape), initNative(model, serviceShape));
         packageName = NamespaceHelper.standardize(serviceShape.getId().getNamespace());
         modelPackageName = packageName + ".model";

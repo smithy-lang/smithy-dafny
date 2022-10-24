@@ -16,9 +16,9 @@ import software.amazon.smithy.model.shapes.ServiceShape;
  * Dafny Generated Java to call AWS Services via
  * the AWS SDK for Java V1.
  */
-public class AwsSdkV1 extends CodegenSubject {
+public class JavaAwsSdkV1 extends CodegenSubject {
 
-    public AwsSdkV1(ServiceShape serviceShape, Model model) {
+    public JavaAwsSdkV1(ServiceShape serviceShape, Model model) {
         super(
                 model,
                 serviceShape,

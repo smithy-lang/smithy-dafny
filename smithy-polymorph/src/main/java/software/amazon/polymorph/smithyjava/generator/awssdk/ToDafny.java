@@ -88,7 +88,7 @@ public class ToDafny extends Generator {
     /** The class name of the AWS SDK's Service's Shim's ToDafny class. */
     final ClassName thisClassName;
 
-    public ToDafny(AwsSdkV1 awsSdk) {
+    public ToDafny(JavaAwsSdkV1 awsSdk) {
         super(awsSdk);
         thisClassName = ClassName.get(subject.dafnyNameResolver.packageName(), "ToDafny");
     }

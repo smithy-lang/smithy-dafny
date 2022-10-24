@@ -15,6 +15,7 @@ import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.smithy.model.shapes.ResourceShape;
 import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
+import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.TraitDefinition;
 
@@ -26,7 +27,7 @@ class ModelCodegen extends Generator {
     /** Public POJOs will go here. */
     public final String modelPackageName;
 
-    public ModelCodegen(Library subject) {
+    public ModelCodegen(JavaLibrary subject) {
         super(subject);
         packageName = subject.packageName;
         modelPackageName = subject.modelPackageName;
@@ -79,6 +80,7 @@ class ModelCodegen extends Generator {
         return subject.model.getStructureShapes().stream()
                 .filter(shape -> !shape.hasTrait(ErrorTrait.class))
                 .filter(shape -> !shape.hasTrait(TraitDefinition.class))
+                .filter(shape -> !shape.hasTrait(EnumTrait.class))
                 .filter(shape -> ModelUtils.isInServiceNamespace(shape.getId(), subject.serviceShape))
                 .toList();
     }
