@@ -199,7 +199,20 @@ public class DotNetNameResolver {
         // Sanity check that we aren't using this method for generated error structures
         assert !structureShape.hasTrait(ErrorTrait.class);
 
-        return model.expectShape(structureShapeId, StructureShape.class).getId().getName();
+        return structureShape.getId().getName();
+    }
+
+    public String classForUnion(final ShapeId unionShapeId) {
+        final UnionShape unionShape = model.expectShape(unionShapeId, UnionShape.class);
+
+        // Sanity check that we aren't using this method for non-generated structures
+        assert !unionShape.hasTrait(ReferenceTrait.class);
+        assert !unionShape.hasTrait(PositionalTrait.class);
+
+        // Sanity check that we aren't using this method for generated error structures
+        assert !unionShape.hasTrait(ErrorTrait.class);
+
+        return unionShape.getId().getName();
     }
 
     private static final Map<String, String> NATIVE_TYPES_BY_SMITHY_PRELUDE_SHAPE_NAME;

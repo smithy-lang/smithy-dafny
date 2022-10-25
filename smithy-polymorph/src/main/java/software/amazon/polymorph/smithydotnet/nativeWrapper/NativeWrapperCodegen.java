@@ -149,7 +149,7 @@ public class NativeWrapperCodegen {
         final String signature = "public %s %s(%s)".formatted(
                 abstractDafnyOutput, methodName, input.orElse(""));
         final TokenTree inputConversion = generateInputConversion(operationShape.getInput());
-        final TokenTree tryBlock = generateTryNativeCall(
+        final TokenTree nativeCall = generateNativeCall(
                 operationShape,
                 methodName,
                 input,
@@ -159,15 +159,23 @@ public class NativeWrapperCodegen {
                         generateValidateNativeOutputMethod(
                                 operationShape.getOutput(), nativeOutputType, methodName),
                         inputConversion,
-                        TokenTree.of("%s finalException = null;"
-                                .formatted(nameResolver.classForBaseServiceException())),
-                        tryBlock,
-                        generateCatchServiceException(),
-                        generateCatchGeneralException(methodName),
-                        generateReturnFailure(concreteDafnyOutput)
+                        nativeCall
                 )
                 .lineSeparated().braced();
-        return TokenTree.of(TokenTree.of(signature), body).lineSeparated();
+
+        // The current Dafny generates a public method and `method'`.
+        // This means that Dafny can hook this function
+        // and provide a clean interface for validated mocks.
+        // However, this exposes this name publicly.
+        // TODO migrate the internal construction to abstract modules
+        final String signature_K = "public %s %s_k(%s)".formatted(
+                abstractDafnyOutput, methodName, input.orElse(""));
+        final TokenTree body_k = TokenTree
+                .of("throw new %s(\"Not supported at this time.\");"
+                        .formatted(classForConcreteServiceException(serviceShape)))
+                .braced();
+
+        return TokenTree.of(TokenTree.of(signature), body, TokenTree.of(signature_K), body_k).lineSeparated();
     }
 
     TokenTree generateInputConversion(Optional<ShapeId> inputShapeId) {
@@ -179,7 +187,7 @@ public class NativeWrapperCodegen {
                 INPUT));
     }
 
-    TokenTree generateTryNativeCall(
+    TokenTree generateNativeCall(
             OperationShape operationShape,
             String methodName,
             Optional<String> input,
@@ -203,10 +211,10 @@ public class NativeWrapperCodegen {
                         NATIVE_OUTPUT));
         final TokenTree returnSuccess = TokenTree.of("return %s.create_Success(%s);".formatted(
                 concreteDafnyOutput, successConversion.orElse("")));
-        return TokenTree.of("try").append(
-                TokenTree.of(nativeCall, isNativeOutputNull, validateNativeOutput, returnSuccess)
-                        .lineSeparated().braced()
-        );
+
+        return TokenTree
+                .of(nativeCall, isNativeOutputNull, validateNativeOutput, returnSuccess)
+                .lineSeparated();
     }
 
     TokenTree generateIsNativeOutputNull(

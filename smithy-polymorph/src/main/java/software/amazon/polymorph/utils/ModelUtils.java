@@ -20,13 +20,7 @@ import software.amazon.polymorph.traits.ReferenceTrait;
 
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.loader.ModelAssembler;
-import software.amazon.smithy.model.shapes.MapShape;
-import software.amazon.smithy.model.shapes.MemberShape;
-import software.amazon.smithy.model.shapes.ServiceShape;
-import software.amazon.smithy.model.shapes.Shape;
-import software.amazon.smithy.model.shapes.ShapeId;
-import software.amazon.smithy.model.shapes.ShapeType;
-import software.amazon.smithy.model.shapes.StructureShape;
+import software.amazon.smithy.model.shapes.*;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.RequiredTrait;
@@ -58,6 +52,10 @@ public class ModelUtils {
      */
     public static Stream<MemberShape> streamStructureMembers(final StructureShape structureShape) {
         return structureShape.getAllMembers().values().stream();
+    }
+
+    public static Stream<MemberShape> streamUnionMembers(final UnionShape unionShape) {
+        return unionShape.getAllMembers().values().stream();
     }
 
     /**
