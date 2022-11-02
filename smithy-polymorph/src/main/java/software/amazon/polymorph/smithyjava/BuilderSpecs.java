@@ -18,6 +18,7 @@ import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 
 import static javax.lang.model.element.Modifier.ABSTRACT;
+import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PROTECTED;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
@@ -93,7 +94,8 @@ public class BuilderSpecs {
      */
     public TypeSpec builderInterface() {
         TypeSpec.Builder builder = TypeSpec
-                .interfaceBuilder(builderInterfaceName());
+                .interfaceBuilder(builderInterfaceName())
+                .addModifiers(PUBLIC);
         if (superName != null) { builder.addSuperinterface(builderInterfaceName(superName)); }
         superFields.forEach(field ->
                 builder.addMethod(MethodSpec.methodBuilder(field.name)
@@ -143,7 +145,7 @@ public class BuilderSpecs {
         TypeSpec.Builder builder = TypeSpec
                 .classBuilder(builderImplName())
                 .addSuperinterface(builderInterfaceName())
-                .addModifiers(STATIC, PROTECTED);
+                .addModifiers(STATIC);
         if (superName != null) { builder.superclass(builderImplName(superName)); }
         // Add Fields
         localFields.forEach(field ->

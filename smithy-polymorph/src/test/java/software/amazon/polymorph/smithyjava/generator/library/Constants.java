@@ -20,7 +20,7 @@ class Constants {
                 return new BuilderImpl();
               }
                         
-              interface Builder extends NativeError.Builder {
+              public interface Builder extends NativeError.Builder {
                 Builder message(String message);
                         
                 Builder cause(Throwable cause);
@@ -28,7 +28,7 @@ class Constants {
                 TestError build();
               }
                         
-              protected static class BuilderImpl extends NativeError.BuilderImpl implements Builder {
+              static class BuilderImpl extends NativeError.BuilderImpl implements Builder {
                 protected BuilderImpl() {
                 }
                         

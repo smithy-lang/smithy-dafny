@@ -18,7 +18,7 @@ class Constants {
                 }
                 return null;
               }
-              protected static class BuilderImpl implements Builder {
+              static class BuilderImpl implements Builder {
                 protected String message;
                 protected Throwable cause;
                 protected BuilderImpl() {}
@@ -38,7 +38,7 @@ class Constants {
                 public Throwable cause() {return this.cause;}
                 public NativeError build() {return new NativeError(this);}
               }
-              interface Builder {
+              public interface Builder {
                 Builder message(String message);
                 String message();
                 Builder cause(Throwable cause);
@@ -59,14 +59,14 @@ class Constants {
               public Builder toBuilder() {return new BuilderImpl(this);}
               public static Builder builder() {return new BuilderImpl();}
               public Object obj() {return this.obj;}
-              interface Builder extends NativeError.Builder {
+              public interface Builder extends NativeError.Builder {
                 Builder message(String message);
                 Builder cause(Throwable cause);
                 Builder obj(Object obj);
                 Object obj();
                 OpaqueError build();
               }
-              protected static class BuilderImpl extends NativeError.BuilderImpl implements Builder {
+              static class BuilderImpl extends NativeError.BuilderImpl implements Builder {
                 protected Object obj;
                 protected BuilderImpl() {}
                 protected BuilderImpl(OpaqueError model) {
@@ -106,14 +106,14 @@ class Constants {
               @Override
               public Builder toBuilder() {return new BuilderImpl(this);}
               public static Builder builder() {return new BuilderImpl();}
-              interface Builder extends NativeError.Builder {
+              public interface Builder extends NativeError.Builder {
                 Builder message(String message);
                 Builder cause(Throwable cause);
                 Builder list(List<NativeError> list);
                 List<NativeError> list();
                 CollectionOfErrors build();
               }
-              protected static class BuilderImpl extends NativeError.BuilderImpl implements Builder {
+              static class BuilderImpl extends NativeError.BuilderImpl implements Builder {
                 protected List<NativeError> list;
                 protected BuilderImpl() {}
                 protected BuilderImpl(CollectionOfErrors model) {
