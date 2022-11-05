@@ -152,14 +152,26 @@ public class TypeConversionCodegen {
                 .map(LocalServiceTrait::getConfigId)
                 .collect(Collectors.toSet());
 
-        // TODO: Need to add union shapes?
+        // Collect union shapes
+        final Set<ShapeId> unionShapes = model.getUnionShapes().stream()
+                .filter(unionShape -> isInServiceNamespace(unionShape.getId()))
+                .map(unionShape -> unionShape.getId())
+                .collect(Collectors.toSet());
+
+        // TODO add smithy v2 Enums
+        // Collect enum shapes
+        final Set<ShapeId> enumShapes = model.getStringShapes().stream()
+                .filter(unionShape -> isInServiceNamespace(unionShape.getId()))
+                .filter(serviceShape -> serviceShape.hasTrait(EnumTrait.class))
+                .map(unionShape -> unionShape.getId())
+                .collect(Collectors.toSet());
 
         // Collect all specific error structures
         final Set<ShapeId> errorStructures = ModelUtils.streamServiceErrors(model, serviceShape)
                 .map(Shape::getId)
                 .collect(Collectors.toSet());
 
-        return Stream.of(operationStructures, clientConfigStructures, errorStructures)
+        return Stream.of(operationStructures, clientConfigStructures, unionShapes, errorStructures, enumShapes)
                 .reduce(Sets::union).get();
     }
 
@@ -437,8 +449,85 @@ public class TypeConversionCodegen {
 
     // TODO need to implement Union converter
     public TypeConverter generateUnionConverter(final UnionShape unionShape) {
-        final TokenTree fromDafnyBody = TokenTree.empty();
-        final TokenTree toDafnyBody = TokenTree.empty();
+        final List<MemberShape> defNames = ModelUtils.streamUnionMembers(unionShape).toList();
+        final String unionClass = nameResolver.baseTypeForShape(unionShape.getId());
+        final String dafnyUnionConcreteType = nameResolver.dafnyConcreteTypeForUnion(unionShape);
+        final Token throwInvalidUnionState = Token.of("\nthrow new System.ArgumentException(\"Invalid %s state\");"
+                .formatted(unionClass));
+
+        final TokenTree concreteVar = Token.of("%1$s concrete = (%1$s)value;"
+                .formatted(dafnyUnionConcreteType));
+        final TokenTree convertedVar = Token.of("var converted = new %s();".formatted(unionClass));
+
+        final TokenTree fromDafnyBody = TokenTree
+            .of(defNames
+                .stream()
+                .map(memberShape -> {
+                    final String propertyName = nameResolver.classPropertyForStructureMember(memberShape);
+                    final String propertyType = nameResolver.classPropertyTypeForStructureMember(memberShape);
+                    final String dafnyMemberName = nameResolver.unionMemberName(memberShape);
+                    final String memberFromDafnyConverterName = typeConverterForShape(
+                            memberShape.getId(), FROM_DAFNY);
+                    return TokenTree
+                        .of("if (value.is_%s)".formatted(propertyName))
+                        .append(TokenTree
+                            .of(
+                                "converted.%s = %s(concrete.dtor%s);"
+                                    .formatted(
+                                        propertyName,
+                                        memberFromDafnyConverterName,
+                                        dafnyMemberName
+                                    ),
+                                "return converted;"
+                            )
+                            .lineSeparated()
+                            .braced()
+                        );
+                        }
+                )
+            )
+            .prepend(TokenTree.of(concreteVar, convertedVar))
+            .append(throwInvalidUnionState);
+
+/*
+        public static Dafny.Aws.Cryptography.MaterialProviders.Types._IAlgorithmSuiteId
+            ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S16_AlgorithmSuiteId(
+                AWS.Cryptography.MaterialProviders.AlgorithmSuiteId value)
+        {
+            if (value.IsSetESDK())
+            {
+                return Dafny.Aws.Cryptography.MaterialProviders.Types.AlgorithmSuiteId.create(
+                    ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S20_ESDKAlgorithmSuiteId(value.ESDK)
+                );
+            }
+        }
+ */
+
+        final TokenTree toDafnyBody = TokenTree
+                .of(defNames.stream().map(memberShape -> {
+                    final String propertyName = nameResolver.classPropertyForStructureMember(memberShape);
+                    final String propertyType = nameResolver.classPropertyTypeForStructureMember(memberShape);
+                    final String dafnyMemberName = nameResolver.unionMemberName(memberShape);
+                    final String memberFromDafnyConverterName = typeConverterForShape(
+                            memberShape.getId(), TO_DAFNY);
+
+                    // Dafny generates just "create" instead of "create_FOOBAR" if there's only one ctor
+                    final String createSuffix = defNames.size() == 1
+                            ? ""
+                            : dafnyMemberName;
+                    return TokenTree
+                            .of("if (value.IsSet%s())".formatted(propertyName))
+                            .append(TokenTree.of("return %s.create%s(%s(value.%s));"
+                                            .formatted(
+                                                    dafnyUnionConcreteType,
+                                                    createSuffix,
+                                                    memberFromDafnyConverterName,
+                                                    propertyName
+                                            ))
+                                    .lineSeparated()
+                                    .braced());
+                }))
+                .append(throwInvalidUnionState);
 
         return buildConverterFromMethodBodies(unionShape, fromDafnyBody, toDafnyBody);
     }

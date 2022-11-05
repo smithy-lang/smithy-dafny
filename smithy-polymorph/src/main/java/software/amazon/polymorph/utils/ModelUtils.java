@@ -247,6 +247,7 @@ public class ModelUtils {
             }
             case STRUCTURE -> streamStructureMembers(shape.asStructureShape().get()).map(Shape::getId);
             case MEMBER -> Stream.of(shape.asMemberShape().get().getTarget());
+            case UNION -> streamUnionMembers(shape.asUnionShape().get()).map(Shape::getId);
             default -> Stream.empty();
         };
     }
