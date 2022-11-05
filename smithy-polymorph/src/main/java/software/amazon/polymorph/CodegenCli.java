@@ -21,9 +21,11 @@ import software.amazon.polymorph.smithydotnet.ShimCodegen;
 import software.amazon.polymorph.smithydotnet.TypeConversionCodegen;
 import software.amazon.polymorph.smithyjava.generator.awssdk.AwsSdkV1;
 import software.amazon.polymorph.utils.TokenTree;
+import software.amazon.smithy.aws.traits.protocols.AwsQueryErrorTrait;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.loader.ModelAssembler;
 import software.amazon.smithy.model.shapes.ServiceShape;
+import software.amazon.smithy.aws.traits.*;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -66,6 +68,11 @@ public class CodegenCli {
         }
 
         final ModelAssembler assembler = new ModelAssembler();
+
+        // TODO Fix this
+        // Without this you get
+        // Unable to resolve trait `aws.protocols#awsQueryError`. If this is a custom trait, then it must be defined before it can be used in a model.
+        assembler.putProperty(ModelAssembler.ALLOW_UNKNOWN_TRAITS, true);
 
         assembler.addImport(cliArguments.modelPath);
         Arrays
