@@ -16,6 +16,13 @@ import static javax.lang.model.element.Modifier.PROTECTED;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 
+/**
+ * NativeError is a concrete allegory to smithy-dafny's
+ * {@code datatype Error}<p>
+ * Therefore, it is un-modeled.<p>
+ * NativeError allows the entries of {@code datatype Error} to extend
+ * {@code RuntimeException}.<p>
+ */
 public class NativeError {
     public static String NATIVE_ERROR = "NativeError";
     public final static List<FieldSpec> THROWABLE_ARGS = List.of(
@@ -52,6 +59,11 @@ public class NativeError {
                 .build();
     }
 
+    /**
+     * @return Constructor that explicitly call's {@code RuntimeException}'s
+     * constructor.<p>
+     * Looks for a valid message via {@code messageFromBuilder}.
+     */
     static MethodSpec constructor(BuilderSpecs builderSpecs) {
         return MethodSpec
                 .constructorBuilder()
@@ -63,17 +75,11 @@ public class NativeError {
                 ).build();
     }
 
+    /**
+     * @return MethodSpec that checks the message field and cause's
+     * message field for a valid message.
+     */
     static MethodSpec messageFromBuilder(BuilderSpecs builderSpecs) {
-        /*
-        private static String messageFromBuilder(Builder builder) {
-          if (builder.message() != null) {
-            return builder.message();
-          }
-          if (builder.cause() != null) {
-            return builder.cause().getMessage();
-          }
-          return null;
-        }*/
         return MethodSpec.methodBuilder("messageFromBuilder")
                 .returns(String.class)
                 .addModifiers(PRIVATE, STATIC)
@@ -88,6 +94,10 @@ public class NativeError {
                 .build();
     }
 
+    /**
+     * @return Constructor that that uses {@code RuntimeException}'s getter
+     * methods to initialize builder.
+     */
     static MethodSpec builderImplConstructor(String packageName) {
         return MethodSpec.constructorBuilder()
                 .addModifiers(PROTECTED)
