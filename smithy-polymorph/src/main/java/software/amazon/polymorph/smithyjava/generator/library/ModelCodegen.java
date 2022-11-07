@@ -5,15 +5,14 @@ import com.squareup.javapoet.JavaFile;
 import java.util.LinkedHashSet;
 import java.util.List;
 
+import software.amazon.polymorph.smithyjava.generator.Generator;
 import software.amazon.polymorph.smithyjava.modeled.ModeledEnum;
 import software.amazon.polymorph.smithyjava.modeled.ModeledError;
 import software.amazon.polymorph.smithyjava.modeled.ModeledStructure;
 import software.amazon.polymorph.smithyjava.unmodeled.CollectionOfErrors;
 import software.amazon.polymorph.smithyjava.unmodeled.NativeError;
 import software.amazon.polymorph.smithyjava.unmodeled.OpaqueError;
-import software.amazon.polymorph.smithyjava.generator.Generator;
 import software.amazon.polymorph.utils.ModelUtils;
-import software.amazon.smithy.model.shapes.ResourceShape;
 import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.EnumTrait;
@@ -53,15 +52,7 @@ class ModelCodegen extends Generator {
         getEnumsInServiceNamespace().stream()
                 .map(this::modeledEnum).forEachOrdered(rtn::add);
         // Resources
-        /*subject.model.getResourceShapes().stream()
-                .filter(shape -> ModelUtils.isInServiceNamespace(shape.getId(), subject.serviceShape))
-                .forEachOrdered(shape -> {
-                    rtn.add(generateResourceInterface(shape));
-                    rtn.add(generateResourceClass(shape));
-                    if (shape.hasTrait(ExtendableTrait.class)) {
-                        rtn.add(generateNativeWrapper(shape));
-                    }
-                });*/
+        // TODO: Resources
         return rtn;
     }
 
@@ -97,17 +88,5 @@ class ModelCodegen extends Generator {
 
     JavaFile modeledEnum(StringShape stringShape) {
         return ModeledEnum.javaFile(modelPackageName, stringShape);
-    }
-
-    JavaFile generateResourceInterface(ResourceShape shape) {
-        throw new RuntimeException("TODO");
-    }
-
-    JavaFile generateResourceClass(ResourceShape shape) {
-        throw new RuntimeException("TODO");
-    }
-
-    JavaFile generateNativeWrapper(ResourceShape shape) {
-        throw new RuntimeException("TODO");
     }
 }
