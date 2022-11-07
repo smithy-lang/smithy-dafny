@@ -22,6 +22,7 @@ public class ModeledEnum {
     public static JavaFile javaFile(String packageName, StringShape shape) {
         ClassName className = ClassName.get(packageName, shape.getId().getName());
         TypeSpec.Builder enumSpec = TypeSpec.enumBuilder(className);
+        enumSpec.addModifiers(PUBLIC);
         EnumTrait enumTrait = shape.expectTrait(EnumTrait.class);
         for (EnumDefinition value : enumTrait.getValues()) {
             if (value.getName().isEmpty()) {
