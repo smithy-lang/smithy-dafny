@@ -953,8 +953,11 @@ public class DafnyApiCodegen {
             // The abstract operations do not have a class with a `Modifies` property
             ? Token.of("%s(config)".formatted(nameResolver.modifiesInternalConfig()))
             // The class has a `Modifies` property
-            : Token.of("%s"
-                .formatted(nameResolver.mutableStateFunctionName()))
+            // The `- {History} is important for consumers
+            // otherwise if they use multiple APIs
+            // Dafny will assume that each API can modify _any_ other History.
+            : Token.of("%s - {%s}"
+                .formatted(nameResolver.mutableStateFunctionName(), nameResolver.callHistoryFieldName()))
         )
         .flatten();
     }
