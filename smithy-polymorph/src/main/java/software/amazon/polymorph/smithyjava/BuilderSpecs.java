@@ -18,7 +18,6 @@ import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 
 import static javax.lang.model.element.Modifier.ABSTRACT;
-import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PROTECTED;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
@@ -58,12 +57,12 @@ public class BuilderSpecs {
                 .collect(Collectors.toList());
     }
 
-    static ClassName builderInterfaceName(ClassName aClassName) {
-        return aClassName.nestedClass("Builder");
+    static ClassName builderInterfaceName(ClassName className) {
+        return className.nestedClass("Builder");
     }
 
-    static ClassName builderImplName(ClassName aClassName) {
-        return aClassName.nestedClass("BuilderImpl");
+    static ClassName builderImplName(ClassName className) {
+        return className.nestedClass("BuilderImpl");
     }
 
     /**
@@ -96,7 +95,9 @@ public class BuilderSpecs {
         TypeSpec.Builder builder = TypeSpec
                 .interfaceBuilder(builderInterfaceName())
                 .addModifiers(PUBLIC);
-        if (superName != null) { builder.addSuperinterface(builderInterfaceName(superName)); }
+        if (superName != null) {
+            builder.addSuperinterface(builderInterfaceName(superName));
+        }
         superFields.forEach(field ->
                 builder.addMethod(MethodSpec.methodBuilder(field.name)
                         .addParameter(field.type, field.name)
@@ -118,10 +119,14 @@ public class BuilderSpecs {
                                     .addModifiers(PUBLIC, ABSTRACT)
                                     .build());
                 });
-        return builder.addMethod(MethodSpec.methodBuilder("build")
-                        .returns(className)
-                        .addModifiers(PUBLIC, ABSTRACT)
-                        .build())
+        builder.addMethod(builderInterfaceBuildMethod());
+        return builder.build();
+    }
+
+    private MethodSpec builderInterfaceBuildMethod() {
+        return MethodSpec.methodBuilder("build")
+                .returns(className)
+                .addModifiers(PUBLIC, ABSTRACT)
                 .build();
     }
 
