@@ -4,6 +4,7 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
+import software.amazon.polymorph.smithyjava.generator.CodegenSubject;
 import software.amazon.polymorph.smithyjava.nameresolver.AwsSdkDafnyV1;
 import software.amazon.polymorph.smithyjava.nameresolver.AwsSdkNativeV1;
 import software.amazon.polymorph.utils.TokenTree;
@@ -15,17 +16,15 @@ import software.amazon.smithy.model.shapes.ServiceShape;
  * Dafny Generated Java to call AWS Services via
  * the AWS SDK for Java V1.
  */
-public class AwsSdkV1 {
-    public AwsSdkDafnyV1 dafnyNameResolver;
-    public AwsSdkNativeV1 nativeNameResolver;
-    public Model model;
-    public ServiceShape serviceShape;
+public class JavaAwsSdkV1 extends CodegenSubject {
 
-    public AwsSdkV1(ServiceShape serviceShape, Model model) {
-        this.serviceShape = serviceShape;
-        this.dafnyNameResolver = new AwsSdkDafnyV1(serviceShape, model);
-        this.nativeNameResolver = new AwsSdkNativeV1(serviceShape, model);
-        this.model = model;
+    public JavaAwsSdkV1(ServiceShape serviceShape, Model model) {
+        super(
+                model,
+                serviceShape,
+                new AwsSdkDafnyV1(serviceShape, model),
+                new AwsSdkNativeV1(serviceShape, model)
+        );
     }
 
     public Map<Path, TokenTree> generate() {

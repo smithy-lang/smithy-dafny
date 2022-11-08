@@ -92,6 +92,28 @@ public class Native extends NameResolver{
         );
     }
 
+    public static String aggregateSizeMethod(ShapeType shapeType) {
+        return switch (shapeType) {
+            case LIST, SET, MAP -> "size()";
+            case STRING -> "length()";
+            // This is complicated: A (Byte)Buffer has four landmark indexes:
+            // mark <= position <= limit <= capacity
+            // Let us ASSUME that we are validating a buffer that has been
+            // written to but not read from, and thus the `remaining` bytes
+            // (limit - position) is the length.
+            case BLOB -> "remaining()";
+            case MEMBER -> throw new IllegalArgumentException(
+                    """
+                    ShapeType is not defined on MemberShapes but on their target.
+                    The target MUST be looked up with the model.
+                    See software.amazon.polymorph.smithyjava.PolymorphFieldSpec.getTargetShape.
+                    """
+            );
+            default -> throw new IllegalStateException(
+                    "aggregateSizeMethod only accepts LIST, SET, MAP, STRING, or BLOB. Got : " + shapeType);
+        };
+    }
+
     /**
      * Returns the Native type corresponding to the given shape.
      */
@@ -236,6 +258,14 @@ public class Native extends NameResolver{
 
     @SuppressWarnings("unused")
     public ClassName typeForResource(ResourceShape shape) {
+        throw new UnsupportedOperationException("Not yet implemented for not AWS-SDK Style");
+    }
+
+    public TypeName typeForOperationOutput(ShapeId outputShapeId) {
+        throw new UnsupportedOperationException("Not yet implemented for not AWS-SDK Style");
+    }
+
+    public TypeName baseErrorForService() {
         throw new UnsupportedOperationException("Not yet implemented for not AWS-SDK Style");
     }
 }

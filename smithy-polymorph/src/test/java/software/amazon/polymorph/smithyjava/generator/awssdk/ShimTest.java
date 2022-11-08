@@ -50,7 +50,7 @@ public class ShimTest {
 
         JavaFile javaFile = JavaFile
                 .builder(
-                        underTest.dafnyNameResolver.packageName(),
+                        underTest.subject.dafnyNameResolver.packageName(),
                         shim)
                 .build();
         final String actualString = javaFile.toString();
@@ -84,7 +84,7 @@ public class ShimTest {
 
         JavaFile javaFile = JavaFile
                 .builder(
-                        underTest.dafnyNameResolver.packageName(),
+                        underTest.subject.dafnyNameResolver.packageName(),
                         shim)
                 .build();
         final String actualString = javaFile.toString();

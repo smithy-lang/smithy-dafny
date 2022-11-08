@@ -10,50 +10,43 @@ import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import software.amazon.polymorph.smithyjava.MethodReference;
-import software.amazon.polymorph.smithyjava.generator.awssdk.AwsSdkV1;
-import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
-import software.amazon.polymorph.smithyjava.nameresolver.Native;
 import software.amazon.polymorph.utils.TokenTree;
-import software.amazon.smithy.model.Model;
-import software.amazon.smithy.model.shapes.ServiceShape;
-import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.ShapeType;
 
 public abstract class Generator {
     private static final Logger LOGGER = LoggerFactory.getLogger(Generator.class);
 
-    protected Dafny dafnyNameResolver;
-    protected Native nativeNameResolver;
-    protected Model model;
-    protected ServiceShape serviceShape;
+    public CodegenSubject subject;
 
     public Generator(
-            AwsSdkV1 awsSdk
+        CodegenSubject subject
     ) {
-        this.serviceShape = awsSdk.serviceShape;
-        this.dafnyNameResolver = awsSdk.dafnyNameResolver;
-        this.nativeNameResolver = awsSdk.nativeNameResolver;
-        this.model = awsSdk.model;
+        this.subject = subject;
     }
 
     public Map<Path, TokenTree> generate() {
-        final JavaFile javaFile = javaFile(serviceShape.toShapeId());
-        List<String> pathPieces = Arrays
-                .stream(javaFile.packageName.split("\\."))
-                .collect(Collectors.toList());
-        pathPieces.add(javaFile.typeSpec.name + ".java");
-        final Path path = Path.of(Joiner.on('/').join(pathPieces));
-        final TokenTree tokenTree = TokenTree.of(javaFile.toString());
-        return Map.of(path, tokenTree);
+        final LinkedHashMap<Path, TokenTree> rtn = new LinkedHashMap<>();
+        final Set<JavaFile> javaFiles = javaFiles();
+        for (JavaFile javaFile : javaFiles) {
+            List<String> pathPieces = Arrays
+                    .stream(javaFile.packageName.split("\\."))
+                    .collect(Collectors.toList());
+            pathPieces.add(javaFile.typeSpec.name + ".java");
+            final Path path = Path.of(Joiner.on('/').join(pathPieces));
+            final TokenTree tokenTree = TokenTree.of(javaFile.toString());
+            rtn.put(path, tokenTree);
+        }
+        return rtn;
     }
 
-    public abstract JavaFile javaFile(final ShapeId serviceShapeId);
+    public abstract Set<JavaFile> javaFiles();
 
      public static class Constants {
         public static final MethodReference IDENTITY_FUNCTION = new MethodReference(
