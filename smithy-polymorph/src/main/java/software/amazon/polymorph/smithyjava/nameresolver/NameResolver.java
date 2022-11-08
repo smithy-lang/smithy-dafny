@@ -7,10 +7,10 @@ import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.ShapeId;
 
 public abstract class NameResolver {
-    protected final String packageName;
+    public final String packageName;
     protected final Model model;
     protected final ServiceShape serviceShape;
-    protected final String modelPackage;
+    public final String modelPackage;
 
     public NameResolver(
             final String packageName,

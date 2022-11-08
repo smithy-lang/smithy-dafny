@@ -24,13 +24,13 @@ import static software.amazon.polymorph.util.Tokenizer.tokenizeAndAssertEqual;
 
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 public class ToDafnyTest {
-    protected ToDafny underTest;
+    protected ToDafnyAwsV1 underTest;
     protected Model model;
 
     @Before
     public void setup() {
         model = TestSetupUtils.setupTwoLocalModel(ModelConstants.KMS_KITCHEN, ModelConstants.OTHER_NAMESPACE);
-        underTest  = new ToDafny(TestSetupUtils.setupAwsSdk(model, "kms"));
+        underTest  = new ToDafnyAwsV1(TestSetupUtils.setupAwsSdk(model, "kms"));
     }
 
     @Test
@@ -102,7 +102,7 @@ public class ToDafnyTest {
     @Test
     public void generateConvertResponseV1() {
         Model localModel = TestSetupUtils.setupLocalModel(ModelConstants.KMS_A_STRING_OPERATION);
-        ToDafny localUnderTest = new ToDafny(TestSetupUtils.setupAwsSdk(localModel, "kms"));
+        ToDafnyAwsV1 localUnderTest = new ToDafnyAwsV1(TestSetupUtils.setupAwsSdk(localModel, "kms"));
         ShapeId responseId = ShapeId.fromParts("com.amazonaws.kms", "DoSomethingResponse");
         MethodSpec actual = localUnderTest.generateConvertResponseV1(responseId);
         tokenizeAndAssertEqual(ToDafnyConstants.DO_SOMETHING_RESPONSE, actual.toString());
@@ -150,7 +150,7 @@ public class ToDafnyTest {
     @Test
     public void generateConvertError() {
         Model localModel = TestSetupUtils.setupLocalModel(ModelConstants.KMS_A_STRING_OPERATION);
-        ToDafny localUnderTest = new ToDafny(TestSetupUtils.setupAwsSdk(localModel, "kms"));
+        ToDafnyAwsV1 localUnderTest = new ToDafnyAwsV1(TestSetupUtils.setupAwsSdk(localModel, "kms"));
         ShapeId errorId = ShapeId.fromParts("com.amazonaws.kms", "DependencyTimeoutException");
         StructureShape errorShape = localModel.expectShape(errorId, StructureShape.class);
         MethodSpec errorActual = localUnderTest.generateConvertError(errorShape);
@@ -166,7 +166,7 @@ public class ToDafnyTest {
     @Test
     public void generate() {
         Model localModel = TestSetupUtils.setupLocalModel(ModelConstants.KMS_A_STRING_OPERATION);
-        ToDafny localUnderTest = new ToDafny(TestSetupUtils.setupAwsSdk(localModel, "kms"));
+        ToDafnyAwsV1 localUnderTest = new ToDafnyAwsV1(TestSetupUtils.setupAwsSdk(localModel, "kms"));
         final Map<Path, TokenTree> actual = localUnderTest.generate();
         final Path expectedPath = Path.of("Dafny/Com/Amazonaws/Kms/ToDafny.java");
         Path[] temp = new Path[1];

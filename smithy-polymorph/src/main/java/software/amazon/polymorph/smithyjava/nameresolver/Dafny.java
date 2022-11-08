@@ -169,11 +169,11 @@ public class Dafny extends NameResolver {
         };
     }
 
-    public TypeName getDafnyAbstractServiceError() {
+    public ClassName getDafnyAbstractServiceError() {
         return ClassName.get(modelPackage, "Error");
     }
 
-    public TypeName getDafnyOpaqueServiceError() {
+    public ClassName getDafnyOpaqueServiceError() {
         return ClassName.get(modelPackage, "Error_Opaque");
     }
 

@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -23,7 +22,7 @@ import javax.lang.model.element.Modifier;
 
 import dafny.DafnySequence;
 import software.amazon.polymorph.smithyjava.MethodReference;
-import software.amazon.polymorph.smithyjava.generator.Generator;
+import software.amazon.polymorph.smithyjava.generator.ToDafny;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 import software.amazon.polymorph.utils.ModelUtils;
@@ -56,41 +55,10 @@ import static software.amazon.smithy.utils.StringUtils.uncapitalize;
  *   <li>All the fields contained by the above
  * </ul>
  */
-public class ToDafny extends Generator {
-    /**
-     * The keys are the input type, the values are the method that converts from that input to the Dafny type
-     */
-    static final Map<ShapeType, MethodReference> AGGREGATE_CONVERSION_METHOD_FROM_SHAPE_TYPE;
-    static final Map<ShapeType, MethodReference> SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE;
-    static final ClassName COMMON_TO_DAFNY_SIMPLE = ClassName.get(software.amazon.dafny.conversion.ToDafny.Simple.class);
-    static final ClassName COMMON_TO_DAFNY_AGGREGATE = ClassName.get(software.amazon.dafny.conversion.ToDafny.Aggregate.class);
+public class ToDafnyAwsV1 extends ToDafny {
 
-    static {
-        AGGREGATE_CONVERSION_METHOD_FROM_SHAPE_TYPE = Map.ofEntries(
-                Map.entry(ShapeType.LIST, new MethodReference(COMMON_TO_DAFNY_AGGREGATE, "GenericToSequence")),
-                Map.entry(ShapeType.SET, new MethodReference(COMMON_TO_DAFNY_AGGREGATE, "GenericToSet")),
-                Map.entry(ShapeType.MAP, new MethodReference(COMMON_TO_DAFNY_AGGREGATE, "GenericToMap"))
-        );
-        SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE = Map.ofEntries(
-                Map.entry(ShapeType.BLOB, new MethodReference(COMMON_TO_DAFNY_SIMPLE, "ByteSequence")),
-                Map.entry(ShapeType.BOOLEAN, Constants.IDENTITY_FUNCTION),
-                Map.entry(ShapeType.STRING, new MethodReference(COMMON_TO_DAFNY_SIMPLE, "CharacterSequence")),
-                Map.entry(ShapeType.TIMESTAMP, new MethodReference(COMMON_TO_DAFNY_SIMPLE, "CharacterSequence")),
-                Map.entry(ShapeType.BYTE, Constants.IDENTITY_FUNCTION),
-                Map.entry(ShapeType.SHORT, Constants.IDENTITY_FUNCTION),
-                Map.entry(ShapeType.INTEGER, Constants.IDENTITY_FUNCTION),
-                Map.entry(ShapeType.LONG, Constants.IDENTITY_FUNCTION),
-                Map.entry(ShapeType.BIG_DECIMAL, Constants.IDENTITY_FUNCTION),
-                Map.entry(ShapeType.BIG_INTEGER, Constants.IDENTITY_FUNCTION)
-        );
-    }
-
-    /** The class name of the AWS SDK's Service's Shim's ToDafny class. */
-    final ClassName thisClassName;
-
-    public ToDafny(JavaAwsSdkV1 awsSdk) {
+    public ToDafnyAwsV1(JavaAwsSdkV1 awsSdk) {
         super(awsSdk);
-        thisClassName = ClassName.get(subject.dafnyNameResolver.packageName(), "ToDafny");
     }
 
     @Override
