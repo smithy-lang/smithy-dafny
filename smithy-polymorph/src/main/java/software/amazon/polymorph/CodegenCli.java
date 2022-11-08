@@ -3,6 +3,7 @@
 
 package software.amazon.polymorph;
 
+import software.amazon.polymorph.smithyjava.generator.library.JavaLibrary;
 import software.amazon.polymorph.utils.ModelUtils;
 
 import org.apache.commons.cli.CommandLine;
@@ -19,7 +20,7 @@ import software.amazon.polymorph.smithydotnet.AwsSdkTypeConversionCodegen;
 import software.amazon.polymorph.smithydotnet.ServiceCodegen;
 import software.amazon.polymorph.smithydotnet.ShimCodegen;
 import software.amazon.polymorph.smithydotnet.TypeConversionCodegen;
-import software.amazon.polymorph.smithyjava.generator.awssdk.AwsSdkV1;
+import software.amazon.polymorph.smithyjava.generator.awssdk.JavaAwsSdkV1;
 import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.loader.ModelAssembler;
@@ -79,11 +80,13 @@ public class CodegenCli {
         final ServiceShape serviceShape = ModelUtils.serviceFromNamespace(model, cliArguments.namespace);
         final List<String> messages = new ArrayList<>(3);
 
-        if (cliArguments.outputJavaDir.isPresent() && cliArguments.awsSdkStyle) {
+        if (cliArguments.outputJavaDir.isPresent()) {
             final Path outputJavaDir = cliArguments.outputJavaDir.get();
-            messages.add(javaAwsSdkV1(outputJavaDir, serviceShape, model));
-        } else if (cliArguments.outputJavaDir.isPresent()) {
-            logger.error("Smithy-Polymorph only supports Java code generation for AWS-SDK Style code");
+            if (cliArguments.awsSdkStyle) {
+                messages.add(javaAwsSdkV1(outputJavaDir, serviceShape, model));
+            } else {
+                messages.add(javaLocalService(outputJavaDir, serviceShape, model));
+            }
         }
 
         if (cliArguments.outputDotnetDir.isPresent()) {
@@ -113,10 +116,16 @@ public class CodegenCli {
         messages.forEach(logger::info);
     }
 
+    private static String javaLocalService(Path outputJavaDir, ServiceShape serviceShape, Model model) {
+        final JavaLibrary javaLibrary = new JavaLibrary(model, serviceShape);
+        writeTokenTreesIntoDir(javaLibrary.generate(), outputJavaDir);
+        return "Java code generated in %s".formatted(outputJavaDir);
+    }
+
     //TODO: Figure out a nice way to differentiate AWS SDK Java V1 from AWS SDK Java V2
     // Or maybe we just hard code one or the other and call that good enough
     static String javaAwsSdkV1(Path outputJavaDir, ServiceShape serviceShape, Model model) {
-        final AwsSdkV1 javaShimCodegen = new AwsSdkV1(serviceShape, model);
+        final JavaAwsSdkV1 javaShimCodegen = new JavaAwsSdkV1(serviceShape, model);
         writeTokenTreesIntoDir(javaShimCodegen.generate(), outputJavaDir);
         return "Java code generated in %s".formatted(outputJavaDir);
     }

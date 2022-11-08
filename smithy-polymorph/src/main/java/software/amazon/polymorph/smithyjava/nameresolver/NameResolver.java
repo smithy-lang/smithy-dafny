@@ -1,5 +1,7 @@
 package software.amazon.polymorph.smithyjava.nameresolver;
 
+import com.squareup.javapoet.TypeName;
+
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.ShapeId;
@@ -25,4 +27,6 @@ public abstract class NameResolver {
     public boolean isInServiceNameSpace(final ShapeId shapeId) {
         return shapeId.getNamespace().contains(serviceShape.getId().getNamespace());
     }
+
+    public abstract TypeName typeForShape(final ShapeId shapeId);
 }
