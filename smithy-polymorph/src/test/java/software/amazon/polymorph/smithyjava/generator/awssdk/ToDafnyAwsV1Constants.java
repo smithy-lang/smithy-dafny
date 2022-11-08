@@ -1,35 +1,10 @@
 package software.amazon.polymorph.smithyjava.generator.awssdk;
 
-public class ToDafnyConstants {
-    static String MEMBER_DECLARATION_REQUIRED =
-            "dafny.DafnySequence<? extends java.lang.Character> name";
-    static String MEMBER_DECLARATION_OPTIONAL =
-            "Wrappers_Compile.Option<dafny.DafnySequence<? extends java.lang.Character>> message";
-    static String MEMBER_ASSIGNMENT_REQUIRED =
-            "name = software.amazon.dafny.conversion.ToDafny.Simple.CharacterSequence(nativeValue.getName())";
-    static String STRING_CONVERSION = "software.amazon.dafny.conversion.ToDafny.Simple.CharacterSequence";
-    static String KEY_USAGE_TYPE_CONVERSION = "Dafny.Com.Amazonaws.Kms.ToDafny.KeyUsageType";
-    static String OTHER_NAMESPACE_CONVERSION = "Dafny.Com.Amazonaws.Other.ToDafny.OtherNamespace";
-    static String MEMBER_ASSIGNMENT_OPTIONAL = """
-                    message = java.util.Objects.nonNull(nativeValue.getMessage()) ?
-                          Wrappers_Compile.Option.create_Some(software.amazon.dafny.conversion.ToDafny.Simple.CharacterSequence(nativeValue.getMessage()))
-                          : Wrappers_Compile.Option.create_None()""";
-    static String RETURN_A_OPTIONAL = "return new Dafny.Com.Amazonaws.Kms.Types.AOptional(message)";
-    static String SIMPLE_STRUCTURE = """
-            public static Dafny.Com.Amazonaws.Kms.Types.Simple Simple(
-                com.amazonaws.services.kms.model.Simple nativeValue) {
-              return new Dafny.Com.Amazonaws.Kms.Types.Simple();
-            }
-            """;
-    static String A_OPTIONAL_STRUCTURE = """
-            public static Dafny.Com.Amazonaws.Kms.Types.AOptional AOptional(
-                com.amazonaws.services.kms.model.AOptional nativeValue) {
-              %s;
-              %s;
-              %s;
-            }
-            """.formatted(MEMBER_DECLARATION_OPTIONAL, MEMBER_ASSIGNMENT_OPTIONAL, RETURN_A_OPTIONAL);
-    static String DO_SOMETHING_RESPONSE = """
+import static software.amazon.polymorph.smithyjava.generator.ToDafnyConstants.MEMBER_ASSIGNMENT_OPTIONAL;
+import static software.amazon.polymorph.smithyjava.generator.ToDafnyConstants.MEMBER_DECLARATION_OPTIONAL;
+
+public class ToDafnyAwsV1Constants {
+    protected static String DO_SOMETHING_RESPONSE = """
             public static Dafny.Com.Amazonaws.Kms.Types.DoSomethingResponse DoSomethingResponse(
                 com.amazonaws.services.kms.model.DoSomethingResult nativeValue) {
               %s;
@@ -37,7 +12,8 @@ public class ToDafnyConstants {
               return new Dafny.Com.Amazonaws.Kms.Types.DoSomethingResponse(message);
             }
             """.formatted(MEMBER_DECLARATION_OPTIONAL, MEMBER_ASSIGNMENT_OPTIONAL);
-    static String KEY_USAGE_TYPE = """
+
+    protected static String KEY_USAGE_TYPE = """
             public static Dafny.Com.Amazonaws.Kms.Types.KeyUsageType KeyUsageType(
                 com.amazonaws.services.kms.model.KeyUsageType nativeValue
             ) {
@@ -54,13 +30,15 @@ public class ToDafnyConstants {
               }
             }
             """;
-    static String KEY_USAGE_TYPE_STRING = """
+
+    protected static String KEY_USAGE_TYPE_STRING = """
             public static Dafny.Com.Amazonaws.Kms.Types.KeyUsageType KeyUsageType(
                 java.lang.String nativeValue
             ) {
               return KeyUsageType(com.amazonaws.services.kms.model.KeyUsageType.fromValue(nativeValue));
             }""";
-    static String GENERATE_CONVERT_LIST = """
+
+    protected static String GENERATE_CONVERT_LIST = """
             public static dafny.DafnySequence<? extends Dafny.Com.Amazonaws.Kms.Types.KeyUsageType> KeyUsageTypes (
                 java.util.List<java.lang.String> nativeValue
             ) {
@@ -71,7 +49,7 @@ public class ToDafnyConstants {
               );
             }
             """;
-    static String GENERATE_CONVERT_LIST_STRUCTURES = """
+    protected static String GENERATE_CONVERT_LIST_STRUCTURES = """
             public static dafny.DafnySequence<? extends Dafny.Com.Amazonaws.Other.Types.OtherNamespace> OtherNamespaces (
                 java.util.List<com.amazonaws.services.other.model.OtherNamespace> nativeValue
             ) {
@@ -82,7 +60,7 @@ public class ToDafnyConstants {
               );
             }
             """;
-    static String GENERATE_CONVERT_MAP_STRING = """
+    protected static String GENERATE_CONVERT_MAP_STRING = """
             public static dafny.DafnyMap<
                     ? extends dafny.DafnySequence<? extends java.lang.Character>,
                     ? extends dafny.DafnySequence<? extends java.lang.Character>>
@@ -96,7 +74,7 @@ public class ToDafnyConstants {
               );
             }
             """;
-    static String GENERATE_CONVERT_SET_STRING = """
+    protected static String GENERATE_CONVERT_SET_STRING = """
             public static dafny.DafnySet<
                    ? extends dafny.DafnySequence<? extends java.lang.Character>>
             Names(
@@ -108,18 +86,8 @@ public class ToDafnyConstants {
               );
             }
             """;
-    static String GENERATE_CONVERT_ERROR = """
-            public static Dafny.Com.Amazonaws.Kms.Types.Error Error(
-                    com.amazonaws.services.kms.model.DependencyTimeoutException nativeValue
-            ) {
-              Wrappers_Compile.Option<dafny.DafnySequence<? extends java.lang.Character>> message;
-              message = java.util.Objects.nonNull(nativeValue.getMessage()) ?
-                    Wrappers_Compile.Option.create_Some(software.amazon.dafny.conversion.ToDafny.Simple.CharacterSequence(nativeValue.getMessage()))
-                  : Wrappers_Compile.Option.create_None();
-              return new Dafny.Com.Amazonaws.Kms.Types.Error_DependencyTimeoutException(message);
-            }
-            """;
-    static String GENERATE_CONVERT_OPAQUE_ERROR = """
+
+    protected static String GENERATE_CONVERT_OPAQUE_ERROR = """
             public static Dafny.Com.Amazonaws.Kms.Types.Error Error(
                     com.amazonaws.services.kms.model.AWSKMSException nativeValue
             ) {
@@ -130,7 +98,8 @@ public class ToDafnyConstants {
               return new Dafny.Com.Amazonaws.Kms.Types.Error_Opaque(message);
             }
             """;
-    public static final String KMS_A_STRING_OPERATION_JAVA_FILE = """
+
+    protected static final String KMS_A_STRING_OPERATION_JAVA_FILE = """
             package Dafny.Com.Amazonaws.Kms;
                         
             import Dafny.Com.Amazonaws.Kms.Types.DoSomethingResponse;

@@ -9,7 +9,6 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.WildcardTypeName;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -24,7 +23,6 @@ import dafny.DafnySequence;
 import software.amazon.polymorph.smithyjava.MethodReference;
 import software.amazon.polymorph.smithyjava.generator.ToDafny;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
-import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.smithy.model.shapes.ListShape;
 import software.amazon.smithy.model.shapes.MapShape;
@@ -36,13 +34,10 @@ import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.ShapeType;
 import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
-import software.amazon.smithy.model.traits.BoxTrait;
 import software.amazon.smithy.model.traits.EnumDefinition;
 import software.amazon.smithy.model.traits.EnumTrait;
-import software.amazon.smithy.model.traits.RequiredTrait;
 
 import static software.amazon.smithy.utils.StringUtils.capitalize;
-import static software.amazon.smithy.utils.StringUtils.uncapitalize;
 
 /**
  * ToDafny is a helper class for the AwsSdk's {@link ShimV1}.<p>
@@ -213,103 +208,13 @@ public class ToDafnyAwsV1 extends ToDafny {
 
     MethodSpec generateConvertStructure(final ShapeId shapeId) {
         final StructureShape structureShape = subject.model.expectShape(shapeId, StructureShape.class);
-        String methodName = capitalize(shapeId.getName());
-        MethodSpec.Builder builder = MethodSpec
-                .methodBuilder(methodName)
-                .addModifiers(Modifier.STATIC, Modifier.PUBLIC)
-                .returns(subject.dafnyNameResolver.typeForShape(shapeId))
-                .addParameter(subject.nativeNameResolver.typeForStructure(structureShape), "nativeValue");
-
-        if (structureShape.members().size() == 0) {
-            builder.addStatement("return new $T()", subject.dafnyNameResolver.typeForShape(shapeId));
-            return builder.build();
-        }
-
-        List<CodeBlock> variables = new ArrayList<>(structureShape.members().size());
-        structureShape.members().forEach(memberShape ->
-                {
-                    CodeBlock variable = CodeBlock.of("$L", uncapitalize(memberShape.getMemberName()));
-                    builder.addStatement(memberDeclaration(memberShape, variable));
-                    builder.addStatement(memberAssignment(memberShape, variable));
-                    variables.add(variable);
-                }
-        );
-        builder.addStatement("return new $T($L)",
-                subject.dafnyNameResolver.typeForShape(shapeId),
-                CodeBlock.join(variables, ", ")
-        );
-        return builder.build();
-    }
-
-    CodeBlock memberDeclaration(final MemberShape memberShape, CodeBlock variable) {
-        if (memberShape.hasTrait(RequiredTrait.class) && !memberShape.hasTrait(BoxTrait.class)) {
-            return CodeBlock.of("$T $L",
-                    subject.dafnyNameResolver.typeForShape(memberShape.getId()),
-                    variable
-            );
-        }
-        return CodeBlock.of("$T $L",
-                ParameterizedTypeName.get(
-                        ClassName.get("Wrappers_Compile", "Option"),
-                        subject.dafnyNameResolver.typeForShape(memberShape.getId())),
-                variable);
-    }
-
-    CodeBlock memberAssignment(final MemberShape memberShape, CodeBlock variable) {
-        CodeBlock getMember = getMember(CodeBlock.of("nativeValue"), memberShape);
-        if (memberShape.hasTrait(RequiredTrait.class) && !memberShape.hasTrait(BoxTrait.class)) {
-            return CodeBlock.of(
-                    "$L = $L",
-                    variable,
-                    memberConversion(memberShape, getMember)
-            );
-        }
-        return CodeBlock.of(
-                "$L = $T.nonNull($L) ?\n$T.create_Some($L)\n: $T.create_None()",
-                variable,
-                ClassName.get(Objects.class),
-                getMember,
-                ClassName.get("Wrappers_Compile", "Option"),
-                memberConversion(memberShape, getMember),
-                ClassName.get("Wrappers_Compile", "Option")
-        );
+        return super.modeledStructure(structureShape);
     }
 
     /** For AWS SDK structure members, the getter is `get + capitalized member name`. */
-    CodeBlock getMember(CodeBlock variableName, MemberShape memberShape) {
+    @Override
+    protected CodeBlock getMember(CodeBlock variableName, MemberShape memberShape) {
         return CodeBlock.of("$L.get$L()", variableName, capitalize(memberShape.getMemberName()));
-    }
-
-    /** CodeBlock invoking the member conversion method. */
-    CodeBlock memberConversion(MemberShape memberShape, CodeBlock getMemberCall) {
-        return CodeBlock.of("$L($L)",
-                memberConversionMethodReference(memberShape).asNormalReference(),
-                getMemberCall
-        );
-    }
-
-    /**
-     * Returns MethodReference that converts from
-     * the Java Native memberShape to
-     * the Java Dafny memberShape.
-     */
-    @SuppressWarnings({"DuplicatedCode", "OptionalGetWithoutIsPresent"})
-    MethodReference memberConversionMethodReference(final MemberShape memberShape) {
-        Shape targetShape = subject.model.getShape(memberShape.getTarget()).get();
-        // If the target is simple, use SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE
-        if (ModelUtils.isSmithyApiOrSimpleShape(targetShape)) {
-            return SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(targetShape.getType());
-        }
-        final String methodName = capitalize(targetShape.getId().getName());
-        // if in namespace, reference to be created converter
-        if (subject.nativeNameResolver.isInServiceNameSpace(targetShape.getId())) {
-            return new MethodReference(thisClassName, methodName);
-        }
-        // Otherwise, this target must be in another namespace
-        ClassName otherNamespaceToDafny = ClassName.get(
-                DafnyNameResolverHelpers.packageNameForNamespace(targetShape.getId().getNamespace()),
-                "ToDafny");
-        return new MethodReference(otherNamespaceToDafny, methodName);
     }
 
     MethodSpec generateConvertList(ListShape shape) {

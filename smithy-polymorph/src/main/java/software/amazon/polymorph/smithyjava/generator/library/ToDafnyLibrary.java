@@ -23,16 +23,18 @@ import software.amazon.polymorph.smithyjava.generator.ToDafny;
 import software.amazon.polymorph.smithyjava.unmodeled.CollectionOfErrors;
 import software.amazon.polymorph.smithyjava.unmodeled.NativeError;
 import software.amazon.polymorph.smithyjava.unmodeled.OpaqueError;
+import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.ShapeType;
+import software.amazon.smithy.model.shapes.StructureShape;
+
+import static software.amazon.smithy.utils.StringUtils.capitalize;
+import static software.amazon.smithy.utils.StringUtils.uncapitalize;
 
 /**
  * ToDafny is a helper class for the JavaLibrary's Shim.<p>
  * It holds methods to convert Native Java types to Dafny Java types.<p>
  */
 public class ToDafnyLibrary extends ToDafny {
-    private final static String VAR_INPUT = "nativeValue";
-    private static final String TO_DAFNY = "ToDafny";
-    private static final Modifier[] PUBLIC_STATIC = new Modifier[]{Modifier.PUBLIC, Modifier.STATIC};
     // Hack to override CodegenSubject
     final JavaLibrary subject;
     final ClassName thisClassName;
@@ -63,6 +65,7 @@ public class ToDafnyLibrary extends ToDafny {
                 .addMethods(toDafnyMethods)
                 .build();
     }
+
 
     // Converts any subclass of NativeError to the correct Dafny Error,
     // or casts it as an OpaqueError.
@@ -120,5 +123,11 @@ public class ToDafnyLibrary extends ToDafny {
                         )
                 .addStatement("return $T.create_Collection(list)", dafnyError)
                 .build();
+    }
+
+    /** For Library structure members, the getter is `un-capitalized member name`. */
+    @Override
+    protected CodeBlock getMember(CodeBlock variableName, MemberShape memberShape) {
+        return CodeBlock.of("$L.$L()", variableName, uncapitalize(memberShape.getMemberName()));
     }
 }
