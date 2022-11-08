@@ -18,6 +18,12 @@ class Constants {
                 }
                 return null;
               }
+              public String message() {
+                return this.getMessage();
+              }
+              public Throwable cause() {
+                return this.getCause();
+              }
               static class BuilderImpl implements Builder {
                 protected String message;
                 protected Throwable cause;
