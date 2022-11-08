@@ -40,13 +40,13 @@ public class ToDafnyLibrary extends ToDafny {
     public ToDafnyLibrary(JavaLibrary javaLibrary) {
         super(javaLibrary);
         this.subject = javaLibrary;
-        this.thisClassName = ClassName.get(subject.dafnyNameResolver.packageName(), TO_DAFNY);
+        this.thisClassName = ClassName.get(subject.packageName, TO_DAFNY);
     }
 
     @Override
     public Set<JavaFile> javaFiles() {
         JavaFile.Builder builder = JavaFile
-                .builder(subject.dafnyNameResolver.packageName(), toDafny());
+                .builder(thisClassName.packageName(), toDafny());
         return Collections.singleton(builder.build());
     }
 
@@ -59,6 +59,7 @@ public class ToDafnyLibrary extends ToDafny {
         // CollectionError
         toDafnyMethods.add(collectionError());
         return TypeSpec.classBuilder(thisClassName)
+                .addModifiers(Modifier.PUBLIC)
                 .addMethods(toDafnyMethods)
                 .build();
     }
