@@ -116,4 +116,15 @@ public class ToDafnyTest {
         String otherNamespaceExpected = ToDafnyConstants.OTHER_NAMESPACE_CONVERSION;
         tokenizeAndAssertEqual(otherNamespaceExpected, otherNamespaceActual.asNormalReference().toString());
     }
+
+    @Test
+    public void modeledError() {
+        Model localModel = TestSetupUtils.setupLocalModel(ModelConstants.KMS_A_STRING_OPERATION);
+        ToDafnyTestImpl localUnderTest = new ToDafnyTestImpl(TestSetupUtils.setupAwsSdk(localModel, "kms"));
+        ShapeId errorId = ShapeId.fromParts("com.amazonaws.kms", "DependencyTimeoutException");
+        StructureShape errorShape = localModel.expectShape(errorId, StructureShape.class);
+        MethodSpec errorActual = localUnderTest.modeledError(errorShape);
+        String errorExpected = ToDafnyConstants.GENERATE_CONVERT_ERROR;
+        tokenizeAndAssertEqual(errorExpected, errorActual.toString());
+    }
 }

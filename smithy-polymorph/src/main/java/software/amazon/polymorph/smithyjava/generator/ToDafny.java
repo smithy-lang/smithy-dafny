@@ -167,4 +167,12 @@ public abstract class ToDafny extends Generator {
                 TO_DAFNY);
         return new MethodReference(otherNamespaceToDafny, methodName);
     }
+
+    protected MethodSpec modeledError(final StructureShape shape) {
+        MethodSpec structure = modeledStructure(shape);
+        MethodSpec.Builder builder = structure.toBuilder();
+        builder.setName("Error");
+        builder.returns(subject.dafnyNameResolver.getDafnyAbstractServiceError());
+        return builder.build();
+    }
 }

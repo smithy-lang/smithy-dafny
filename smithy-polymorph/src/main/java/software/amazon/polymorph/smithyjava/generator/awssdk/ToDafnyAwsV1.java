@@ -88,7 +88,7 @@ public class ToDafnyAwsV1 extends ToDafny {
         final List<MethodSpec> convertAllRelevant = allRelevantShapeIds.stream()
                 .map(this::generateConvert).filter(Objects::nonNull).toList();
         final List<MethodSpec> convertServiceErrors = ModelUtils.streamServiceErrors(subject.model, subject.serviceShape)
-                .map(this::generateConvertError).collect(Collectors.toList());
+                .map(this::modeledError).collect(Collectors.toList());
         convertServiceErrors.add(generateConvertOpaqueError());
         // For enums, we generate overloaded methods,
         // one to convert instances of the Enum
@@ -273,14 +273,6 @@ public class ToDafnyAwsV1 extends ToDafny {
                 .addStatement("return $L(\nnativeValue, \n$L, \n$L)",
                         genericCall, keyConverter, valueConverter)
                 .build();
-    }
-
-    MethodSpec generateConvertError(final StructureShape shape) {
-        MethodSpec structure = generateConvertStructure(shape.getId());
-        MethodSpec.Builder builder = structure.toBuilder();
-        builder.setName("Error");
-        builder.returns(subject.dafnyNameResolver.getDafnyAbstractServiceError());
-        return builder.build();
     }
 
     MethodSpec generateConvertOpaqueError() {

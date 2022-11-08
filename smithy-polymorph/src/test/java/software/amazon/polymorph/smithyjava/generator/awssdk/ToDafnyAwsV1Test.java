@@ -79,17 +79,6 @@ public class ToDafnyAwsV1Test {
     }
 
     @Test
-    public void generateConvertError() {
-        Model localModel = TestSetupUtils.setupLocalModel(ModelConstants.KMS_A_STRING_OPERATION);
-        ToDafnyAwsV1 localUnderTest = new ToDafnyAwsV1(TestSetupUtils.setupAwsSdk(localModel, "kms"));
-        ShapeId errorId = ShapeId.fromParts("com.amazonaws.kms", "DependencyTimeoutException");
-        StructureShape errorShape = localModel.expectShape(errorId, StructureShape.class);
-        MethodSpec errorActual = localUnderTest.generateConvertError(errorShape);
-        String errorExpected = ToDafnyConstants.GENERATE_CONVERT_ERROR;
-        tokenizeAndAssertEqual(errorExpected, errorActual.toString());
-    }
-
-    @Test
     public void generateConvertOpaqueError() {
         tokenizeAndAssertEqual(ToDafnyAwsV1Constants.GENERATE_CONVERT_OPAQUE_ERROR, underTest.generateConvertOpaqueError().toString());
     }
