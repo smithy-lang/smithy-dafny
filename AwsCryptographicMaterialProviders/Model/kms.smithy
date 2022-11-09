@@ -1,4 +1,4 @@
-namespace aws.encryptionSdk.core
+namespace aws.cryptography.materialProviders
 
 use aws.polymorph#reference
 use aws.polymorph#positional
@@ -12,19 +12,19 @@ use com.amazonaws.kms#KeyManagementService
 string KmsKeyId
 
 list KmsKeyIdList {
-    member: KmsKeyId
+  member: KmsKeyId
 }
 
 string Region
 
 list RegionList {
-    member: Region
+  member: Region
 }
 
 string AccountId
 
 list AccountIdList {
-    member: AccountId
+  member: AccountId
 }
 
 //////////
@@ -38,31 +38,38 @@ structure KmsClientReference {}
 
 @extendable
 resource ClientSupplier {
-    operations: [GetClient],
+  operations: [GetClient],
 }
 
 @reference(resource: ClientSupplier)
 structure ClientSupplierReference {}
 
 operation GetClient {
-    input: GetClientInput,
-    output: GetClientOutput,
+  input: GetClientInput,
+  output: GetClientOutput,
 }
 
 structure GetClientInput {
-    @required
-    region: Region,
+  @required
+  region: Region,
 }
 
 @positional
 structure GetClientOutput {
-    client: KmsClientReference,
+  @required
+  client: KmsClientReference,
 }
 
 operation CreateDefaultClientSupplier {
-    input: CreateDefaultClientSupplierInput,
-    output: ClientSupplierReference
+  input: CreateDefaultClientSupplierInput,
+  output: CreateDefaultClientSupplierOutput
 }
 
 structure CreateDefaultClientSupplierInput {
+}
+
+@positional
+structure CreateDefaultClientSupplierOutput {
+  @required
+  client: ClientSupplierReference
 }
