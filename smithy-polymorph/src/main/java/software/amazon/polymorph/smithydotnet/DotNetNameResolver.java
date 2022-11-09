@@ -205,13 +205,6 @@ public class DotNetNameResolver {
     public String classForUnion(final ShapeId unionShapeId) {
         final UnionShape unionShape = model.expectShape(unionShapeId, UnionShape.class);
 
-        // Sanity check that we aren't using this method for non-generated structures
-        assert !unionShape.hasTrait(ReferenceTrait.class);
-        assert !unionShape.hasTrait(PositionalTrait.class);
-
-        // Sanity check that we aren't using this method for generated error structures
-        assert !unionShape.hasTrait(ErrorTrait.class);
-
         return unionShape.getId().getName();
     }
 
