@@ -161,9 +161,9 @@ public class TypeConversionCodegen {
         // TODO add smithy v2 Enums
         // Collect enum shapes
         final Set<ShapeId> enumShapes = model.getStringShapes().stream()
-                .filter(unionShape -> isInServiceNamespace(unionShape.getId()))
-                .filter(serviceShape -> serviceShape.hasTrait(EnumTrait.class))
-                .map(unionShape -> unionShape.getId())
+                .filter(stringShape -> isInServiceNamespace(stringShape.getId()))
+                .filter(stringShape -> stringShape.hasTrait(EnumTrait.class))
+                .map(stringShape -> stringShape.getId())
                 .collect(Collectors.toSet());
 
         // Collect all specific error structures
