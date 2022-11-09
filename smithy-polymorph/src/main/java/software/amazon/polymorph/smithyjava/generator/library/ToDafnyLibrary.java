@@ -25,9 +25,7 @@ import software.amazon.polymorph.smithyjava.unmodeled.NativeError;
 import software.amazon.polymorph.smithyjava.unmodeled.OpaqueError;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.ShapeType;
-import software.amazon.smithy.model.shapes.StructureShape;
 
-import static software.amazon.smithy.utils.StringUtils.capitalize;
 import static software.amazon.smithy.utils.StringUtils.uncapitalize;
 
 /**
@@ -37,12 +35,10 @@ import static software.amazon.smithy.utils.StringUtils.uncapitalize;
 public class ToDafnyLibrary extends ToDafny {
     // Hack to override CodegenSubject
     final JavaLibrary subject;
-    final ClassName thisClassName;
 
     public ToDafnyLibrary(JavaLibrary javaLibrary) {
-        super(javaLibrary);
+        super(javaLibrary, ClassName.get(javaLibrary.packageName, TO_DAFNY));
         this.subject = javaLibrary;
-        this.thisClassName = ClassName.get(subject.packageName, TO_DAFNY);
     }
 
     @Override

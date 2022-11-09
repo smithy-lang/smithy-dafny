@@ -53,7 +53,10 @@ import static software.amazon.smithy.utils.StringUtils.capitalize;
 public class ToDafnyAwsV1 extends ToDafny {
 
     public ToDafnyAwsV1(JavaAwsSdkV1 awsSdk) {
-        super(awsSdk);
+        super(
+                awsSdk,
+                //TODO: JavaAwsSdkV1 should really have a declared packageName, not rely on the name resolver
+                ClassName.get(awsSdk.dafnyNameResolver.packageName(), TO_DAFNY));
     }
 
     @Override

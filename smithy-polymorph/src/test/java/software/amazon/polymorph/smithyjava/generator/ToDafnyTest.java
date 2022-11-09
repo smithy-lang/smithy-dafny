@@ -1,5 +1,6 @@
 package software.amazon.polymorph.smithyjava.generator;
 
+import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
@@ -28,7 +29,7 @@ public class ToDafnyTest {
     static class ToDafnyTestImpl extends ToDafny {
 
         public ToDafnyTestImpl(CodegenSubject subject) {
-            super(subject);
+            super(subject, ClassName.get(subject.dafnyNameResolver.packageName(), TO_DAFNY));
         }
 
         /** For AWS SDK structure members, the getter is `get + capitalized member name`. */

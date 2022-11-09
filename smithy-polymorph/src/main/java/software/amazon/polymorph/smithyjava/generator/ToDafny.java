@@ -20,8 +20,6 @@ import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.ShapeType;
 import software.amazon.smithy.model.shapes.StructureShape;
-import software.amazon.smithy.model.traits.BoxTrait;
-import software.amazon.smithy.model.traits.RequiredTrait;
 
 import static software.amazon.smithy.utils.StringUtils.capitalize;
 import static software.amazon.smithy.utils.StringUtils.uncapitalize;
@@ -42,9 +40,9 @@ public abstract class ToDafny extends Generator {
      */
     protected final ClassName thisClassName;
 
-    public ToDafny(CodegenSubject subject) {
+    public ToDafny(CodegenSubject subject, ClassName className) {
         super(subject);
-        thisClassName = ClassName.get(subject.dafnyNameResolver.packageName(), "ToDafny");
+        thisClassName = className;
     }
 
     static {
