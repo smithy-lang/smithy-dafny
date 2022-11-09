@@ -22,7 +22,6 @@ import software.amazon.polymorph.smithydotnet.ShimCodegen;
 import software.amazon.polymorph.smithydotnet.TypeConversionCodegen;
 import software.amazon.polymorph.smithyjava.generator.awssdk.JavaAwsSdkV1;
 import software.amazon.polymorph.utils.TokenTree;
-import software.amazon.smithy.aws.traits.protocols.AwsQueryErrorTrait;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.loader.ModelAssembler;
 import software.amazon.smithy.model.shapes.ServiceShape;
