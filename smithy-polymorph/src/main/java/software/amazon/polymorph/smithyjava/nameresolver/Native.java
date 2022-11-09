@@ -245,10 +245,8 @@ public class Native extends NameResolver{
         if (isInServiceNameSpace(shape.getId())) {
             return ClassName.get(modelPackage, shape.getId().getName());
         }
-        // Assume that structure is in the package's root;
-        // This is a VERY BOLD assumption.
         return ClassName.get(
-                shape.getId().getNamespace(),
+                shape.getId().getNamespace() + ".model",
                 StringUtils.capitalize(shape.getId().getName()));
     }
 
