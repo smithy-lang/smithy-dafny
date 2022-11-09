@@ -70,11 +70,6 @@ public class CodegenCli {
 
         final ModelAssembler assembler = new ModelAssembler();
 
-        // TODO Fix this
-        // Without this you get
-        // Unable to resolve trait `aws.protocols#awsQueryError`. If this is a custom trait, then it must be defined before it can be used in a model.
-        assembler.putProperty(ModelAssembler.ALLOW_UNKNOWN_TRAITS, true);
-
         assembler.addImport(cliArguments.modelPath);
         Arrays
                 .stream(cliArguments.dependentModelPaths)
