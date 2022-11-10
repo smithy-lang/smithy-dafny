@@ -9,17 +9,22 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 import javax.lang.model.element.Modifier;
 
 import software.amazon.polymorph.smithyjava.MethodReference;
+import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.ShapeType;
+import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
+import software.amazon.smithy.model.traits.EnumDefinition;
+import software.amazon.smithy.model.traits.EnumTrait;
 
 import static software.amazon.smithy.utils.StringUtils.capitalize;
 import static software.amazon.smithy.utils.StringUtils.uncapitalize;
@@ -129,6 +134,51 @@ public abstract class ToDafny extends Generator {
                 memberConversion(memberShape, getMember),
                 ClassName.get("Wrappers_Compile", "Option")
         );
+    }
+
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
+    protected MethodSpec modeledEnum(StringShape shape) {
+        final ShapeId shapeId = shape.getId();
+        String methodName = capitalize(shapeId.getName());
+        final EnumTrait enumTrait = shape.getTrait(EnumTrait.class).orElseThrow();
+        if (!enumTrait.hasNames()) {
+            throw new UnsupportedOperationException("Unnamed enums not supported");
+        }
+        ClassName dafnyEnumClass = subject.dafnyNameResolver.classForShape(shape);
+
+        MethodSpec.Builder builder = MethodSpec
+                .methodBuilder(methodName)
+                .addModifiers(Modifier.STATIC, Modifier.PUBLIC)
+                .returns(dafnyEnumClass)
+                .addParameter(subject.nativeNameResolver.classForEnum(shape), VAR_INPUT)
+                .beginControlFlow("switch ($L)", VAR_INPUT);
+
+        enumTrait.getValues().stream()
+                .map(EnumDefinition::getName)
+                .map(Optional::get)
+                .peek(name -> {
+                    if (!ModelUtils.isValidEnumDefinitionName(name)) {
+                        throw new UnsupportedOperationException(
+                                "Invalid enum definition name: %s".formatted(name));
+                    }
+                })
+                .forEach(name -> builder
+                        .beginControlFlow("case $L:", name)
+                        .addStatement(
+                                "return $T.$L()", dafnyEnumClass, Dafny.enumCreate(name))
+                        .endControlFlow()
+                );
+
+        builder.beginControlFlow("default:")
+                .addStatement(
+                        "throw new $T($S + $L + $S)",
+                        RuntimeException.class,
+                        "Cannot convert ",
+                        VAR_INPUT,
+                        " to %s.".formatted(dafnyEnumClass.canonicalName()))
+                .endControlFlow();
+        builder.endControlFlow();
+        return builder.build();
     }
 
     /** AWS SDK V1 uses a different getter pattern than Library (or, possibly, SDK V2) */

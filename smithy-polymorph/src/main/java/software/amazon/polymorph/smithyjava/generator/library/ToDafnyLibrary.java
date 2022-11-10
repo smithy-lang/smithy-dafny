@@ -59,6 +59,9 @@ public class ToDafnyLibrary extends ToDafny {
         // Modeled exception classes
         subject.getErrorsInServiceNamespace().stream()
                 .map(this::modeledError).forEachOrdered(toDafnyMethods::add);
+        // Enums
+        subject.getEnumsInServiceNamespace().stream()
+                .map(this::modeledEnum).forEachOrdered(toDafnyMethods::add);
         return TypeSpec.classBuilder(thisClassName)
                 .addModifiers(Modifier.PUBLIC)
                 .addMethods(toDafnyMethods)

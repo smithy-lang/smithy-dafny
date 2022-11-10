@@ -22,7 +22,6 @@ import javax.lang.model.element.Modifier;
 import dafny.DafnySequence;
 import software.amazon.polymorph.smithyjava.MethodReference;
 import software.amazon.polymorph.smithyjava.generator.ToDafny;
-import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.smithy.model.shapes.ListShape;
 import software.amazon.smithy.model.shapes.MapShape;
@@ -34,7 +33,6 @@ import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.ShapeType;
 import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
-import software.amazon.smithy.model.traits.EnumDefinition;
 import software.amazon.smithy.model.traits.EnumTrait;
 
 import static software.amazon.smithy.utils.StringUtils.capitalize;
@@ -150,52 +148,12 @@ public class ToDafnyAwsV1 extends ToDafny {
                 methodName,
                 subject.nativeNameResolver.classForEnum(shape)
         );
-
         return builder.build();
     }
 
-    @SuppressWarnings("OptionalGetWithoutIsPresent")
-    MethodSpec generateConvertEnumEnum(ShapeId shapeId) {
+    protected MethodSpec generateConvertEnumEnum(ShapeId shapeId) {
         final StringShape shape = subject.model.expectShape(shapeId, StringShape.class);
-        String methodName = capitalize(shapeId.getName());
-        final EnumTrait enumTrait = shape.getTrait(EnumTrait.class).orElseThrow();
-        if (!enumTrait.hasNames()) {
-            throw new UnsupportedOperationException("Unnamed enums not supported");
-        }
-        ClassName dafnyEnumClass = subject.dafnyNameResolver.classForShape(shape);
-
-        MethodSpec.Builder builder = MethodSpec
-                .methodBuilder(methodName)
-                .addModifiers(Modifier.STATIC, Modifier.PUBLIC)
-                .returns(dafnyEnumClass)
-                .addParameter(subject.nativeNameResolver.classForEnum(shape), "nativeValue")
-                .beginControlFlow("switch (nativeValue)");
-
-        enumTrait.getValues().stream()
-                .map(EnumDefinition::getName)
-                .map(Optional::get)
-                .peek(name -> {
-                    if (!ModelUtils.isValidEnumDefinitionName(name)) {
-                        throw new UnsupportedOperationException(
-                                "Invalid enum definition name: %s".formatted(name));
-                    }
-                })
-                .forEach(name -> builder
-                        .beginControlFlow("case $L:", name)
-                        .addStatement(
-                                "return $T.$L()", dafnyEnumClass, Dafny.enumCreate(name))
-                        .endControlFlow()
-                );
-
-        builder.beginControlFlow("default:")
-                .addStatement(
-                        "throw new $T($S + nativeValue + $S)",
-                        RuntimeException.class,
-                        "Cannot convert ",
-                        " to %s.".formatted(dafnyEnumClass.canonicalName()))
-                .endControlFlow();
-        builder.endControlFlow();
-        return builder.build();
+        return super.modeledEnum(shape);
     }
 
     /**

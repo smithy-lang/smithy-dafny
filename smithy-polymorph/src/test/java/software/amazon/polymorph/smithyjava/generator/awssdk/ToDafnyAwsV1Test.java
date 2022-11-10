@@ -13,7 +13,6 @@ import software.amazon.polymorph.smithyjava.generator.ToDafnyConstants;
 import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.ShapeId;
-import software.amazon.smithy.model.shapes.StructureShape;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
