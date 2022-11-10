@@ -149,7 +149,7 @@ public class NativeWrapperCodegen {
         final String signature = "public %s %s(%s)".formatted(
                 abstractDafnyOutput, methodName, input.orElse(""));
         final TokenTree inputConversion = generateInputConversion(operationShape.getInput());
-        final TokenTree nativeCall = generateNativeCall(
+        final TokenTree tryBlock = generateTryNativeCall(
                 operationShape,
                 methodName,
                 input,
@@ -159,7 +159,9 @@ public class NativeWrapperCodegen {
                         generateValidateNativeOutputMethod(
                                 operationShape.getOutput(), nativeOutputType, methodName),
                         inputConversion,
-                        nativeCall
+                        tryBlock,
+                        // See generateTryNativeCall for details on why we MUST try/catch here.
+                        generateCatchThatReturnsFailure("Exception", concreteDafnyOutput)
                 )
                 .lineSeparated().braced();
 
@@ -187,7 +189,20 @@ public class NativeWrapperCodegen {
                 INPUT));
     }
 
-    TokenTree generateNativeCall(
+    // This is calling the underlying native implementation
+    // of a Dafny interface.
+    // This means we are leaving the verified boundary
+    // and crossing into the native runtime.
+    // This is problematic because Dafny expect
+    // to be able to reason about this component.
+    // Dafny expects that this will return a Result.
+    // But more importantly, that it MUST NOT throw.
+    // This is because Dafny does not have throw/try/catch semantics.
+    // If a natively implemented resource throws unexpectedly,
+    // this can introduce unsoundness into our Dafny model.
+    // Therefore, we MUST try and then wrap the error
+    // so that we can return a Dafny result.
+    TokenTree generateTryNativeCall(
             OperationShape operationShape,
             String methodName,
             Optional<String> input,
@@ -212,9 +227,10 @@ public class NativeWrapperCodegen {
         final TokenTree returnSuccess = TokenTree.of("return %s.create_Success(%s);".formatted(
                 concreteDafnyOutput, successConversion.orElse("")));
 
-        return TokenTree
-                .of(nativeCall, isNativeOutputNull, validateNativeOutput, returnSuccess)
-                .lineSeparated();
+        return TokenTree.of("try").append(
+                TokenTree.of(nativeCall, isNativeOutputNull, validateNativeOutput, returnSuccess)
+                        .lineSeparated().braced()
+        );
     }
 
     TokenTree generateIsNativeOutputNull(
@@ -262,38 +278,19 @@ public class NativeWrapperCodegen {
         return TokenTree.of(signature).append(body);
     }
 
-    TokenTree generateCatchServiceException() {
-        return generateCatch(
-                nameResolver.classForBaseServiceException(),
-                "finalException = e;"
-        );
-    }
-
-    TokenTree generateCatchGeneralException(String methodName) {
-        String messageStatement = """
-                var message = $"{%s}._%s threw unexpected: {e.GetType()}: \\"{e.Message}\\"";"""
-                .formatted(NATIVE_BASE_PROPERTY, methodName);
-        String castStatement = "finalException = new %s(message);"
-                .formatted(nameResolver.classForBaseServiceException());
-        return generateCatch("Exception", "%s\n%s".formatted(messageStatement, castStatement));
-    }
-
-    TokenTree generateCatch(
+    TokenTree generateCatchThatReturnsFailure(
             final String caughtException,
-            final String caughtStatement
+            final String dafnyOutput
     ) {
         final String catchStatement = "catch(%s e)".formatted(caughtException);
-        return TokenTree
-                .of(catchStatement)
-                .append(TokenTree.of(caughtStatement).braced())
-                .lineSeparated();
-    }
-
-    TokenTree generateReturnFailure(String dafnyOutput) {
-        return TokenTree.of("return %s.create_Failure(%s(finalException));".
+        final TokenTree caughtStatement = TokenTree.of("return %s.create_Failure(%s(e));".
                 formatted(
                         dafnyOutput,
                         nameResolver.qualifiedTypeConverterForCommonError(serviceShape, TO_DAFNY)
                 ));
+        return TokenTree
+                .of(catchStatement)
+                .append(TokenTree.of(caughtStatement).braced())
+                .lineSeparated();
     }
 }
