@@ -319,15 +319,15 @@ public class ServiceCodegen {
 
     private TokenTree generateUnionValidateMethod(final UnionShape unionShape) {
         final Token signature = Token.of("public void Validate()");
+
         final TokenTree numberOfPropertiesSet = TokenTree
-                .of(ModelUtils.streamUnionMembers(unionShape)
-                        .map(memberShape -> nameResolver.isSetMethodForStructureMember(memberShape))
-                        .map(isSet -> Token.of("%s()".formatted(isSet)))
-                )
-                .separated(Token.of(","))
-                .braced()
-                .prepend(Token.of("var numberOfPropertiesSet = new[]"))
-                .append(Token.of(".Count(x => x);"));
+                .of("var numberOfPropertiesSet =")
+                .append(TokenTree
+                        .of( ModelUtils.streamUnionMembers(unionShape)
+                                .map(memberShape -> nameResolver.isSetMethodForStructureMember(memberShape))
+                                .map(isSet -> TokenTree.of("Convert.ToUInt16(%s())".formatted(isSet))))
+                        .separated(Token.of("+\n")))
+                .append(Token.of(";"));
 
         final TokenTree mustHaveAtLeastOneValue =  TokenTree.of("""
                             if (numberOfPropertiesSet == 0) throw new System.ArgumentException("No union value set");
