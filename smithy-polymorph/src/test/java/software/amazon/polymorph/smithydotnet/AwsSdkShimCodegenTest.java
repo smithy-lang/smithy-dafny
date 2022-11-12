@@ -55,10 +55,10 @@ public class AwsSdkShimCodegenTest {
                 using System.Collections.Generic;
                 
                 namespace Com.Amazonaws.Foobar {
-                    internal class FoobarServiceShim : Dafny.Com.Amazonaws.Foobar.Types.IFoobarServiceClient {
-                        internal Amazon.FoobarService.AmazonFoobarServiceClient _impl;
+                    public class FoobarServiceShim : Dafny.Com.Amazonaws.Foobar.Types.IFoobarServiceClient {
+                        public Amazon.FoobarService.AmazonFoobarServiceClient _impl;
                         
-                        internal FoobarServiceShim(Amazon.FoobarService.AmazonFoobarServiceClient impl) {
+                        public FoobarServiceShim(Amazon.FoobarService.AmazonFoobarServiceClient impl) {
                             this._impl = impl;
                         }
                         
@@ -106,8 +106,8 @@ public class AwsSdkShimCodegenTest {
         final String expectedErrorTypeShim = codegen.generateErrorTypeShim().toString();
         final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
                 namespace Com.Amazonaws.Foobar {
-                    internal class FoobarServiceShim : Dafny.Com.Amazonaws.Foobar.Types.IFoobarServiceClient {
-                        internal Amazon.FoobarService.AmazonFoobarServiceClient _impl;
+                    public class FoobarServiceShim : Dafny.Com.Amazonaws.Foobar.Types.IFoobarServiceClient {
+                        public Amazon.FoobarService.AmazonFoobarServiceClient _impl;
                         %s
                         %s
                         %s

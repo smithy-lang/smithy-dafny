@@ -17,30 +17,13 @@ class NativeWrapperCodegenTestConstants {
                     }
                     """; // Format: nativeOutputType, methodName
 
-    static String RETURN_FAILURE =
-            """
-                    return Wrappers_Compile.Result<
-                        %s,
-                        Dafny.Test.Foobar.Types._IError
-                    >.create_Failure(
-                        TypeConversion.ToDafny_CommonError(finalException)
-                    );
-                    """; // Format: dafnyOutputType
-
-    static String CATCH_SERVICE =
-            """
-                    catch (FoobarServiceBaseException e)
-                    {
-                        finalException = e;
-                    }
-                    """;
-
     static String CATCH_GENERAL =
             """
                     catch (Exception e)
                     {
-                        var message = $"{_impl}._%s threw unexpected: {e.GetType()}: \\"{e.Message}\\"";
-                        finalException = new FoobarServiceBaseException(message);
+                        return Wrappers_Compile
+                            .Result<%s, Dafny.Test.Foobar.Types._IError>
+                            .create_Failure(TypeConversion.ToDafny_CommonError(e));
                     }
                     """; // Format: method name
 
@@ -52,7 +35,6 @@ class NativeWrapperCodegenTestConstants {
                     > DoSomethingWithOutput()
                     {
                         %s
-                        FoobarServiceBaseException finalException = null;
                         try
                         {
                             %s nativeOutput = _impl.DoSomethingWithOutput();
@@ -69,8 +51,12 @@ class NativeWrapperCodegenTestConstants {
                             );
                         }
                         %s
-                        %s
-                        %s
+                    }
+                    
+                    public Wrappers_Compile._IResult<%s, Dafny.Test.Foobar.Types._IError>
+                        DoSomethingWithOutput_k()
+                    {
+                        throw new FoobarServiceException("Not supported at this time.");
                     }
                     """;
 
@@ -80,7 +66,6 @@ class NativeWrapperCodegenTestConstants {
             String nativeOutput,
             String invokeValidateOutput,
             String toDafnyOutputConverter,
-            String catchService,
             String catchGeneral) {
         return DO_OUTPUT.formatted(
                 abstractOutput,
@@ -90,9 +75,8 @@ class NativeWrapperCodegenTestConstants {
                 invokeValidateOutput,
                 abstractOutput,
                 toDafnyOutputConverter,
-                catchService,
-                catchGeneral,
-                RETURN_FAILURE.formatted(abstractOutput)
+                catchGeneral.formatted(abstractOutput),
+                abstractOutput
         );
     }
 
@@ -102,8 +86,7 @@ class NativeWrapperCodegenTestConstants {
             "Test.Foobar.IThing", // type of native output
             "", // validate native output
             "ToDafny_N4_test__N6_foobar__S17_DoSomethingOutput", // to dafny output converter
-            CATCH_SERVICE,
-            CATCH_GENERAL.formatted("DoSomethingWithOutput")
+            CATCH_GENERAL
     );
 
     static String DO_OUTPUT_NOT_POSITIONAL = getOutput(
@@ -112,8 +95,7 @@ class NativeWrapperCodegenTestConstants {
             "Test.Foobar.DoSomethingOutput",
             "validateOutput(nativeOutput);",
             "ToDafny_N4_test__N6_foobar__S17_DoSomethingOutput", // to dafny output converter
-            CATCH_SERVICE,
-            CATCH_GENERAL.formatted("DoSomethingWithOutput")
+            CATCH_GENERAL
     );
 
     static String DO_INPUT =
@@ -126,7 +108,6 @@ class NativeWrapperCodegenTestConstants {
                         Test.Foobar.DoSomethingInput nativeInput =
                             TypeConversion.FromDafny_N4_test__N6_foobar__S16_DoSomethingInput(
                                 input);
-                        FoobarServiceBaseException finalException = null;
                         try
                         {
                             _impl.DoSomethingWithInput(nativeInput);
@@ -136,10 +117,12 @@ class NativeWrapperCodegenTestConstants {
                             >.create_Success();
                         }
                         %s
-                        %s
-                        %s
                     }
-                    """.formatted(CATCH_SERVICE, CATCH_GENERAL.formatted("DoSomethingWithInput"), RETURN_FAILURE.formatted("_System._ITuple0"));
+                    public Wrappers_Compile._IResult<_System._ITuple0, Dafny.Test.Foobar.Types._IError> DoSomethingWithInput_k(Dafny.Test.Foobar.Types._IDoSomethingInput input)
+                    {
+                        throw new FoobarServiceException("Not supported at this time.");
+                    }
+                    """.formatted(CATCH_GENERAL.formatted("_System._ITuple0"));
 
     static String DO =
             """
@@ -148,7 +131,6 @@ class NativeWrapperCodegenTestConstants {
                         Dafny.Test.Foobar.Types._IError
                     > Do()
                     {
-                        FoobarServiceBaseException finalException = null;
                         try
                         {
                             _impl.Do();
@@ -158,10 +140,13 @@ class NativeWrapperCodegenTestConstants {
                             >.create_Success();
                         }
                         %s
-                        %s
-                        %s
                     }
-                    """.formatted(CATCH_SERVICE, CATCH_GENERAL.formatted("Do"), RETURN_FAILURE.formatted("_System._ITuple0"));
+                    
+                    public Wrappers_Compile._IResult<_System._ITuple0, Dafny.Test.Foobar.Types._IError> Do_k()
+                    {
+                        throw new FoobarServiceException("Not supported at this time.");
+                    }
+                    """.formatted(CATCH_GENERAL.formatted("_System._ITuple0"));
 
     static String CONSTRUCTOR =
             """

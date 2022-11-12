@@ -489,20 +489,6 @@ public class TypeConversionCodegen {
             .prepend(TokenTree.of(concreteVar, convertedVar))
             .append(throwInvalidUnionState);
 
-/*
-        public static Dafny.Aws.Cryptography.MaterialProviders.Types._IAlgorithmSuiteId
-            ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S16_AlgorithmSuiteId(
-                AWS.Cryptography.MaterialProviders.AlgorithmSuiteId value)
-        {
-            if (value.IsSetESDK())
-            {
-                return Dafny.Aws.Cryptography.MaterialProviders.Types.AlgorithmSuiteId.create(
-                    ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S20_ESDKAlgorithmSuiteId(value.ESDK)
-                );
-            }
-        }
- */
-
         final TokenTree toDafnyBody = TokenTree
                 .of(defNames.stream().map(memberShape -> {
                     final String propertyName = nameResolver.classPropertyForStructureMember(memberShape);
