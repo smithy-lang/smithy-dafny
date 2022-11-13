@@ -56,6 +56,9 @@ public class ToDafnyLibrary extends ToDafny {
         toDafnyMethods.add(opaqueError());
         // CollectionError
         toDafnyMethods.add(collectionError());
+        // Structures
+        subject.getStructuresInServiceNamespace().stream()
+                .map(this::modeledStructure).forEachOrdered(toDafnyMethods::add);
         // Modeled exception classes
         subject.getErrorsInServiceNamespace().stream()
                 .map(this::modeledError).forEachOrdered(toDafnyMethods::add);
