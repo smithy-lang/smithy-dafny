@@ -13,6 +13,7 @@ import java.util.Optional;
 
 import javax.lang.model.element.Modifier;
 
+import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.smithyjava.MethodReference;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
@@ -75,10 +76,18 @@ public abstract class ToDafny extends Generator {
     ) {
         final ShapeId shapeId = structureShape.getId();
         String methodName = capitalize(structureShape.getId().getName());
+        ShapeId returnId = shapeId;
+        if (structureShape.hasTrait(PositionalTrait.class)) {
+            PositionalTrait.validateUse(structureShape);
+            //validateUse ensures there will be 1 member;
+            //thus we know `Optional.get()` will succeed.
+            //noinspection OptionalGetWithoutIsPresent
+            returnId = structureShape.members().stream().findFirst().get().toShapeId();
+        }
         MethodSpec.Builder builder = MethodSpec
                 .methodBuilder(methodName)
                 .addModifiers(PUBLIC_STATIC)
-                .returns(subject.dafnyNameResolver.typeForShape(shapeId))
+                .returns(subject.dafnyNameResolver.typeForShape(returnId))
                 .addParameter(subject.nativeNameResolver.typeForStructure(structureShape), VAR_INPUT);
 
         if (structureShape.members().size() == 0) {
@@ -95,6 +104,10 @@ public abstract class ToDafny extends Generator {
                     variables.add(variable);
                 }
         );
+        if (structureShape.hasTrait(PositionalTrait.class)) {
+            builder.addStatement("return $L", variables.get(0));
+            return builder.build();
+        }
         builder.addStatement("return new $T($L)",
                 subject.dafnyNameResolver.typeForShape(shapeId),
                 CodeBlock.join(variables, ", ")
