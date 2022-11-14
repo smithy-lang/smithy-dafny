@@ -69,12 +69,6 @@ public class NativeWrapperCodegenTest {
         tokenizeAndAssertEqual(actual, expected);
     }
 
-//    @Test
-//    public void testGenerateCatchServiceException() {
-//        final String actual = this.underTest.generateCatchServiceException().toString();
-//        final String expected = NativeWrapperCodegenTestConstants.CATCH_SERVICE;
-//        tokenizeAndAssertEqual(actual, expected);
-//    }
 
     @Test
     public void testGenerateOperationWrapperWithOutput() {
