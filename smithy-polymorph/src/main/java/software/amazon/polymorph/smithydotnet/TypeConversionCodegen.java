@@ -486,7 +486,7 @@ public class TypeConversionCodegen {
                         }
                 )
             )
-            .prepend(TokenTree.of(concreteVar, convertedVar))
+            .prepend(TokenTree.of(concreteVar, convertedVar).lineSeparated())
             .append(throwInvalidUnionState);
 
         final TokenTree toDafnyBody = TokenTree
