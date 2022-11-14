@@ -56,12 +56,18 @@ public class AwsSdkShimCodegen {
         return codeByPath;
     }
 
+    // Why are these constructors public?
+    // Because the underlying implementation is a replica
+    // of the Dafny wrapper.
+    // There is no _safety_ introduced here per se,
+    // so making is `internal` or `private`
+    // just complicates other Dafny libraries working with the wrapper.
     public TokenTree generateServiceShim() {
-        final TokenTree header = Token.of("internal class %s : %s".formatted(
+        final TokenTree header = Token.of("public class %s : %s".formatted(
                 nameResolver.shimClassForService(),
                 nameResolver.dafnyTypeForShape(serviceShape.getId())));
 
-        final TokenTree impl = Token.of("internal %s %s;".formatted(nameResolver.implForServiceClient(), IMPL_NAME));
+        final TokenTree impl = Token.of("public %s %s;".formatted(nameResolver.implForServiceClient(), IMPL_NAME));
         final TokenTree constructor = generateServiceShimConstructor();
         final TokenTree operationShims = TokenTree.of(serviceShape.getAllOperations()
                 .stream()
@@ -76,7 +82,7 @@ public class AwsSdkShimCodegen {
 
     public TokenTree generateServiceShimConstructor() {
         return Token.of("""
-                internal %s(%s impl) {
+                public %s(%s impl) {
                     this.%s = impl;
                 }""".formatted(nameResolver.shimClassForService(), nameResolver.implForServiceClient(), IMPL_NAME));
     }
@@ -160,9 +166,6 @@ public class AwsSdkShimCodegen {
                             """.formatted(sdkErrorType, errorConverter));
                 })).lineSeparated();
 
-        // TODO: Why is stringConverter never used? Did we break something?
-        final String stringConverter = AwsSdkDotNetNameResolver.qualifiedTypeConverter(
-                ShapeId.from("smithy.api#String"), TO_DAFNY);
         final TokenTree unknownErrorCase = Token.of("""
                 default:
                     return new %s(error);

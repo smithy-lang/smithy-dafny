@@ -25,6 +25,7 @@ import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.loader.ModelAssembler;
 import software.amazon.smithy.model.shapes.ServiceShape;
+import software.amazon.smithy.aws.traits.*;
 
 import java.io.File;
 import java.io.FileWriter;
