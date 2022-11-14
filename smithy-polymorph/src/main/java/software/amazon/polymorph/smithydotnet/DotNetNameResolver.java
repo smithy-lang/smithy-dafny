@@ -874,6 +874,7 @@ public class DotNetNameResolver {
     public static String memberName(final MemberShape memberShape) {
         return "_%s".formatted(memberShape.getMemberName());
     }
+    /** Return the DotNet Type for a Union Member */
     public String unionMemberName(final MemberShape memberShape) {
         if (ModelUtils.isInServiceNamespace(memberShape.getTarget(), serviceShape)) {
             String[] qualifiedName = classPropertyTypeForStructureMember(memberShape).split("[.]");
