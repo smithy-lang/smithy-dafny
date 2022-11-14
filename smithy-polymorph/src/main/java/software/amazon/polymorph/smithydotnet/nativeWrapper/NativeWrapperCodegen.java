@@ -193,7 +193,7 @@ public class NativeWrapperCodegen {
     // of a Dafny interface.
     // This means we are leaving the verified boundary
     // and crossing into the native runtime.
-    // This is problematic because Dafny expect
+    // This is problematic because Dafny expects
     // to be able to reason about this component.
     // Dafny expects that this will return a Result.
     // But more importantly, that it MUST NOT throw.
