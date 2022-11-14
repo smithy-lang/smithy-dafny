@@ -447,7 +447,6 @@ public class TypeConversionCodegen {
         return buildConverterFromMethodBodies(memberShape, fromDafnyBody, toDafnyBody);
     }
 
-    // TODO need to implement Union converter
     public TypeConverter generateUnionConverter(final UnionShape unionShape) {
         final List<MemberShape> defNames = ModelUtils.streamUnionMembers(unionShape).toList();
         final String unionClass = nameResolver.baseTypeForShape(unionShape.getId());
