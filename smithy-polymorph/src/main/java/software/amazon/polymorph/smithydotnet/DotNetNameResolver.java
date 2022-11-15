@@ -199,7 +199,13 @@ public class DotNetNameResolver {
         // Sanity check that we aren't using this method for generated error structures
         assert !structureShape.hasTrait(ErrorTrait.class);
 
-        return model.expectShape(structureShapeId, StructureShape.class).getId().getName();
+        return structureShape.getId().getName();
+    }
+
+    public String classForUnion(final ShapeId unionShapeId) {
+        final UnionShape unionShape = model.expectShape(unionShapeId, UnionShape.class);
+
+        return unionShape.getId().getName();
     }
 
     private static final Map<String, String> NATIVE_TYPES_BY_SMITHY_PRELUDE_SHAPE_NAME;
@@ -397,7 +403,7 @@ public class DotNetNameResolver {
      * Returns the name of the (public) structure class property for the given member shape.
      */
     public String classPropertyForStructureMember(final MemberShape memberShape) {
-        return StringUtils.capitalize(memberShape.getMemberName());
+        return StringUtils.capitalize(dafnyCompilesExtra_(memberShape.getMemberName()));
     }
 
     /**
@@ -453,7 +459,7 @@ public class DotNetNameResolver {
 
         // We only allow uppercase ASCII letters and underscores in enum definition names, so it suffices to replace
         // each underscore with two underscores.
-        return name.replace("_", "__");
+        return  dafnyCompilesExtra_(name);
     }
 
     /**
@@ -593,10 +599,11 @@ public class DotNetNameResolver {
                 dafnyCompilesExtra_(shapeId));
     }
 
-    private String dafnyCompilesExtra_(final ShapeId shapeId) {
-        return shapeId
-          .getName()
-          .replace("_", "__");
+    private static String dafnyCompilesExtra_(final ShapeId shapeId) {
+        return dafnyCompilesExtra_(shapeId.getName());
+    }
+    private static String dafnyCompilesExtra_(final String name) {
+        return name.replace("_", "__");
     }
 
     private String dafnyTypeForUnion(final UnionShape unionShape) {
@@ -616,6 +623,20 @@ public class DotNetNameResolver {
      */
     public String dafnyConcreteTypeForRegularStructure(final StructureShape structureShape) {
         final ShapeId shapeId = structureShape.getId();
+        return "%s.%s".formatted(
+                DafnyNameResolverHelpers.dafnyExternNamespaceForShapeId(shapeId),
+                dafnyCompilesExtra_(shapeId));
+    }
+
+    public String dafnyConcreteTypeForUnion(final UnionShape unionShape) {
+        final ShapeId shapeId = unionShape.getId();
+        return "%s.%s".formatted(
+                DafnyNameResolverHelpers.dafnyExternNamespaceForShapeId(shapeId),
+                dafnyCompilesExtra_(shapeId));
+    }
+
+    public String dafnyConcreteTypeForUnionMember(final MemberShape memberShape) {
+        final ShapeId shapeId = memberShape.getTarget();
         return "%s.%s".formatted(
                 DafnyNameResolverHelpers.dafnyExternNamespaceForShapeId(shapeId),
                 dafnyCompilesExtra_(shapeId));
@@ -852,5 +873,18 @@ public class DotNetNameResolver {
     // See: https://github.com/dafny-lang/dafny/pull/2525
     public static String memberName(final MemberShape memberShape) {
         return "_%s".formatted(memberShape.getMemberName());
+    }
+    /** Return the DotNet Type for a Union Member */
+    public String unionMemberName(final MemberShape memberShape) {
+        if (ModelUtils.isInServiceNamespace(memberShape.getTarget(), serviceShape)) {
+            String[] qualifiedName = classPropertyTypeForStructureMember(memberShape).split("[.]");
+            return "_%s".formatted(dafnyCompilesExtra_(qualifiedName[qualifiedName.length - 1]));
+        } else {
+            final String name = dafnyConcreteTypeForUnionMember(memberShape)
+                    // TODO Hack to remove Dafny "namespace"
+                    .replace("Dafny.", "")
+                    .replace(".", "");
+            return "_%s".formatted(name);
+        }
     }
 }

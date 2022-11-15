@@ -13,15 +13,7 @@ import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.polymorph.utils.Token;
 import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.smithy.model.Model;
-import software.amazon.smithy.model.shapes.EntityShape;
-import software.amazon.smithy.model.shapes.MemberShape;
-import software.amazon.smithy.model.shapes.OperationShape;
-import software.amazon.smithy.model.shapes.ResourceShape;
-import software.amazon.smithy.model.shapes.ServiceShape;
-import software.amazon.smithy.model.shapes.Shape;
-import software.amazon.smithy.model.shapes.ShapeId;
-import software.amazon.smithy.model.shapes.StringShape;
-import software.amazon.smithy.model.shapes.StructureShape;
+import software.amazon.smithy.model.shapes.*;
 import software.amazon.smithy.model.traits.EnumDefinition;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
@@ -134,6 +126,18 @@ public class ServiceCodegen {
                         codeByPath.put(nativeWrapperPath, nativeWrapperClass);
                     }
                 });
+
+        // Unions
+        model.getUnionShapes()
+                .stream()
+                .filter(shape -> ModelUtils.isInServiceNamespace(shape.getId(), serviceShape))
+                .forEach(shape -> {
+                    final Path unionClassPath = Path.of(String.format("%s.cs", nameResolver.classForUnion(shape.getId())));
+                    final TokenTree structureCode = generateUnionClass(shape);
+                    codeByPath.put(unionClassPath, structureCode.prepend(prelude));
+                });
+
+
         return codeByPath;
     }
 
@@ -300,7 +304,7 @@ public class ServiceCodegen {
      */
     private TokenTree generateStructureValidateMethod(final StructureShape structureShape) {
         final Token signature = Token.of("public void Validate()");
-        final TokenTree checks = TokenTree.of(structureShape.members().stream()
+        final TokenTree checks = TokenTree.of(ModelUtils.streamStructureMembers(structureShape)
                 .filter(MemberShape::isRequired)
                 .map(memberShape -> {
                     final String isSetMethod = nameResolver.isSetMethodForStructureMember(memberShape);
@@ -309,6 +313,32 @@ public class ServiceCodegen {
                             if (!%s()) throw new System.ArgumentException("Missing value for required property '%s'");
                             """.formatted(isSetMethod, propertyName));
                 })).braced();
+
+        return TokenTree.of(signature, checks);
+    }
+
+    private TokenTree generateUnionValidateMethod(final UnionShape unionShape) {
+        final Token signature = Token.of("public void Validate()");
+
+        final TokenTree numberOfPropertiesSet = TokenTree
+                .of("var numberOfPropertiesSet =")
+                .append(TokenTree
+                        .of( ModelUtils.streamUnionMembers(unionShape)
+                                .map(memberShape -> nameResolver.isSetMethodForStructureMember(memberShape))
+                                .map(isSet -> TokenTree.of("Convert.ToUInt16(%s())".formatted(isSet))))
+                        .separated(Token.of("+\n")))
+                .append(Token.of(";"));
+
+        final TokenTree mustHaveAtLeastOneValue =  TokenTree.of("""
+                            if (numberOfPropertiesSet == 0) throw new System.ArgumentException("No union value set");
+                            """);
+        final TokenTree mustHaveAtMostOneValue =  TokenTree.of("""
+                            if (numberOfPropertiesSet > 1) throw new System.ArgumentException("Multiple union values set");
+                            """);
+        final TokenTree checks = TokenTree
+                .of(numberOfPropertiesSet, mustHaveAtLeastOneValue, mustHaveAtMostOneValue)
+                .lineSeparated()
+                .braced();
 
         return TokenTree.of(signature, checks);
     }
@@ -525,6 +555,26 @@ public class ServiceCodegen {
                 valuesArrayLiteral,
                 Token.of(';')
         );
+    }
+
+    /**
+     * @return a data class for the given union shape
+     */
+    public TokenTree generateUnionClass(final UnionShape unionShape) {
+        final Token unionClassName = Token.of(nameResolver.classForUnion(unionShape.getId()));
+
+        final TokenTree fields = TokenTree.of(ModelUtils.streamUnionMembers(unionShape)
+                // While this is a union, the private field are the same as for structures
+                .map(this::generateStructureClassField)).lineSeparated();
+        final TokenTree properties = TokenTree.of(ModelUtils.streamUnionMembers(unionShape)
+                // While this is a union, the public properties are the same as for structures
+                .map(this::generateStructureClassProperty)).lineSeparated();
+        final TokenTree validateMethod = generateUnionValidateMethod(unionShape);
+
+        final TokenTree bodyTokens = TokenTree.of(fields, properties, validateMethod).lineSeparated().braced();
+
+        final TokenTree namespace = Token.of(nameResolver.namespaceForService());
+        return TokenTree.of(Token.of("public class"), unionClassName, bodyTokens).namespaced(namespace);
     }
 
     private TokenTree formatDocComment(final String docComment) {

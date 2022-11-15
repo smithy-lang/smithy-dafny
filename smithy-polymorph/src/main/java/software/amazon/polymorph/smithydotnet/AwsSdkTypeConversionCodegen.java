@@ -10,12 +10,7 @@ import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.polymorph.utils.Token;
 import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.smithy.model.Model;
-import software.amazon.smithy.model.shapes.MemberShape;
-import software.amazon.smithy.model.shapes.ServiceShape;
-import software.amazon.smithy.model.shapes.Shape;
-import software.amazon.smithy.model.shapes.ShapeId;
-import software.amazon.smithy.model.shapes.StringShape;
-import software.amazon.smithy.model.shapes.StructureShape;
+import software.amazon.smithy.model.shapes.*;
 import software.amazon.smithy.model.traits.ErrorTrait;
 
 import static software.amazon.polymorph.smithydotnet.TypeConversionDirection.FROM_DAFNY;
@@ -71,42 +66,12 @@ public class AwsSdkTypeConversionCodegen extends TypeConversionCodegen {
         return true;
     }
 
-    private TypeConverter generateErrorStructureConverter(final StructureShape structureShape) {
-        ModelUtils.validateErrorStructureMessageNotRequired(structureShape);
-        final MemberShape messageMember = structureShape.getMember("message").orElseThrow();
-
-        // This is also enforced by Smithy, but this serves as an extra sanity check
-        final StringShape messageTarget = model.getShape(messageMember.getTarget())
-                .flatMap(Shape::asStringShape)
-                .orElseThrow(() -> new IllegalArgumentException("An error structure's 'message' member must be a string"));
-
-        // Since our Dafny error traits currently require an error message, we treat empty sequences as equivalent to
-        // "no message".
-
-        final TokenTree fromDafnyBody = Token.of("""
-                string message = value.message.Count == 0 ? null : %s(value.message);
-                return new %s(message);
-                """.formatted(
-                        AwsSdkDotNetNameResolver.typeConverterForShape(messageTarget.getId(), FROM_DAFNY),
-                        nameResolver.baseTypeForShape(structureShape.getId())));
-
-        final TokenTree toDafnyBody = Token.of("""
-                %s message = System.String.IsNullOrEmpty(value.Message)
-                    ? Dafny.Sequence<char>.Empty
-                    : %s(value.Message);
-                return new %s { message = message };
-                """.formatted(
-                        nameResolver.dafnyTypeForShape(messageTarget.getId()),
-                        AwsSdkDotNetNameResolver.typeConverterForShape(messageTarget.getId(), TO_DAFNY),
-                        nameResolver.dafnyConcreteTypeForRegularStructure(structureShape)));
-
-        return buildConverterFromMethodBodies(structureShape, fromDafnyBody, toDafnyBody);
-    }
-
     TypeConverter generateAwsSdkServiceReferenceStructureConverter(final StructureShape structureShape) {
         final String sdkServiceImpl = ((AwsSdkDotNetNameResolver) nameResolver).implForServiceClient();
+
+
         final String serviceClientShim = "%s.%s".formatted(
-                nameResolver.namespaceForService(),
+                ((AwsSdkDotNetNameResolver) nameResolver).syntheticNamespaceForService(),
                 ((AwsSdkDotNetNameResolver) nameResolver).shimClassForService());
         final String serviceInterfaceType = nameResolver.baseTypeForShape(serviceShape.getId());
 
