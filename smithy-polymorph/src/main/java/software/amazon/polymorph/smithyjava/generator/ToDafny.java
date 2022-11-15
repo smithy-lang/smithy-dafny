@@ -40,9 +40,8 @@ public abstract class ToDafny extends Generator {
     protected static final ClassName COMMON_TO_DAFNY_AGGREGATE = ClassName.get(software.amazon.dafny.conversion.ToDafny.Aggregate.class);
     protected final static String VAR_INPUT = "nativeValue";
     protected static final String TO_DAFNY = "ToDafny";
-    protected static final Modifier[] PUBLIC_STATIC = new Modifier[]{Modifier.PUBLIC, Modifier.STATIC};
     /**
-     * The class name of the AWS SDK's Service's Shim's ToDafny class.
+     * The class name of the Subject's Shim's ToDafny class.
      */
     protected final ClassName thisClassName;
 
@@ -178,7 +177,7 @@ public abstract class ToDafny extends Generator {
                 .forEach(name -> builder
                         .beginControlFlow("case $L:", name)
                         .addStatement(
-                                "return $T.$L()", dafnyEnumClass, Dafny.enumCreate(name))
+                                "return $T.$L()", dafnyEnumClass, Dafny.datatypeConstructorCreate(name))
                         .endControlFlow()
                 );
 
@@ -234,7 +233,7 @@ public abstract class ToDafny extends Generator {
         MethodSpec structure = modeledStructure(shape);
         MethodSpec.Builder builder = structure.toBuilder();
         builder.setName("Error");
-        builder.returns(subject.dafnyNameResolver.getDafnyAbstractServiceError());
+        builder.returns(subject.dafnyNameResolver.classForError());
         return builder.build();
     }
 }

@@ -16,11 +16,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.lang.model.element.Modifier;
+
 import software.amazon.polymorph.smithyjava.MethodReference;
 import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.smithy.model.shapes.ShapeType;
 
 public abstract class Generator {
+    protected static final Modifier[] PUBLIC_STATIC = new Modifier[]{Modifier.PUBLIC, Modifier.STATIC};
     private static final Logger LOGGER = LoggerFactory.getLogger(Generator.class);
 
     public CodegenSubject subject;

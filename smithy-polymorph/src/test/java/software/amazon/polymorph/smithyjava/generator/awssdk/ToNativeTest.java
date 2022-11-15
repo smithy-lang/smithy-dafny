@@ -29,13 +29,13 @@ import static software.amazon.polymorph.util.Tokenizer.tokenizeAndAssertEqual;
 
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 public class ToNativeTest {
-    protected ToNative underTest;
+    protected ToNativeAwsV1 underTest;
     protected Model model;
 
     @Before
     public void setup() {
         model = TestSetupUtils.setupTwoLocalModel(ModelConstants.KMS_KITCHEN, ModelConstants.OTHER_NAMESPACE);
-        underTest  = new ToNative(TestSetupUtils.setupAwsSdk(model, "kms"));
+        underTest  = new ToNativeAwsV1(TestSetupUtils.setupAwsSdk(model, "kms"));
     }
 
     //TODO: should be in nameresolver.DafnyTest
@@ -212,7 +212,7 @@ public class ToNativeTest {
     @Test
     public void generate() {
         Model model = TestSetupUtils.setupLocalModel(ModelConstants.KMS_A_STRING_OPERATION);
-        ToNative underTest = new ToNative(TestSetupUtils.setupAwsSdk(model, "kms"));
+        ToNativeAwsV1 underTest = new ToNativeAwsV1(TestSetupUtils.setupAwsSdk(model, "kms"));
         final Map<Path, TokenTree> actual = underTest.generate();
         final Path expectedPath = Path.of("Dafny/Com/Amazonaws/Kms/ToNative.java");
         Path[] temp = new Path[1];

@@ -7,13 +7,9 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -22,7 +18,7 @@ import java.util.stream.Collectors;
 import javax.lang.model.element.Modifier;
 
 import software.amazon.polymorph.smithyjava.MethodReference;
-import software.amazon.polymorph.smithyjava.generator.Generator;
+import software.amazon.polymorph.smithyjava.generator.ToNative;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 import software.amazon.polymorph.utils.ModelUtils;
@@ -39,7 +35,6 @@ import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.EnumDefinition;
 import software.amazon.smithy.model.traits.EnumTrait;
 
-import static software.amazon.polymorph.smithyjava.generator.Generator.Constants.IDENTITY_FUNCTION;
 import static software.amazon.smithy.utils.StringUtils.capitalize;
 import static software.amazon.smithy.utils.StringUtils.uncapitalize;
 
@@ -54,49 +49,16 @@ import static software.amazon.smithy.utils.StringUtils.uncapitalize;
  *   <li>All the fields contained by the above
  * </ul>
  */
-public class ToNative extends Generator {
-    /**
-     * The keys are the Dafny generated java input type,
-     * the values are the method that converts from that input to
-     * the idiomatic java type.
-     */
-    static final Map<ShapeType, MethodReference> AGGREGATE_CONVERSION_METHOD_FROM_SHAPE_TYPE;
-    static final Map<ShapeType, MethodReference> SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE;
-    static final ClassName COMMON_TO_NATIVE_SIMPLE = ClassName.get(software.amazon.dafny.conversion.ToNative.Simple.class);
-    static final ClassName COMMON_TO_NATIVE_AGGREGATE = ClassName.get(software.amazon.dafny.conversion.ToNative.Aggregate.class);
-    private final static String VAR_INPUT = "dafnyValue";
-    private final static String VAR_OUTPUT = "converted";
-    private final static String VAR_TEMP = "temp";
-    private final static String TO_NATIVE = "ToNative";
-    private static final Logger LOGGER = LoggerFactory.getLogger(ToNative.class);
+public class ToNativeAwsV1 extends ToNative {
 
-    static {
-        AGGREGATE_CONVERSION_METHOD_FROM_SHAPE_TYPE = Map.ofEntries(
-                Map.entry(ShapeType.LIST, new MethodReference(COMMON_TO_NATIVE_AGGREGATE, "GenericToList")),
-                Map.entry(ShapeType.SET, new MethodReference(COMMON_TO_NATIVE_AGGREGATE, "GenericToSet")),
-                Map.entry(ShapeType.MAP, new MethodReference(COMMON_TO_NATIVE_AGGREGATE, "GenericToMap"))
-        );
-        SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE = Map.ofEntries(
-                Map.entry(ShapeType.BLOB, new MethodReference(COMMON_TO_NATIVE_SIMPLE, "ByteBuffer")),
-                Map.entry(ShapeType.BOOLEAN, IDENTITY_FUNCTION),
-                Map.entry(ShapeType.STRING, new MethodReference(COMMON_TO_NATIVE_SIMPLE, "String")),
-                // TODO: Timestamp should be service specific
-                Map.entry(ShapeType.TIMESTAMP, new MethodReference(COMMON_TO_NATIVE_SIMPLE, "Date")),
-                Map.entry(ShapeType.BYTE, IDENTITY_FUNCTION),
-                Map.entry(ShapeType.SHORT, IDENTITY_FUNCTION),
-                Map.entry(ShapeType.INTEGER, IDENTITY_FUNCTION),
-                Map.entry(ShapeType.LONG, IDENTITY_FUNCTION),
-                Map.entry(ShapeType.BIG_DECIMAL, IDENTITY_FUNCTION),
-                Map.entry(ShapeType.BIG_INTEGER, IDENTITY_FUNCTION)
-        );
-    }
     // TODO: for V2 support, use abstract AwsSdk name resolvers and sub class for V1 or V2.
-    /** The class name of the AWS SDK's Service's Shim's ToNative class. */
-    final ClassName thisClassName;
 
-    public ToNative(JavaAwsSdkV1 awsSdk) {
-        super(awsSdk);
-        thisClassName = ClassName.get(subject.dafnyNameResolver.packageName(), TO_NATIVE);
+    public ToNativeAwsV1(JavaAwsSdkV1 awsSdk) {
+        super(
+                awsSdk,
+                //TODO: JavaAwsSdkV1 should really have a declared packageName, not rely on the name resolver
+                ClassName.get(awsSdk.dafnyNameResolver.packageName(), TO_NATIVE)
+        );
     }
 
     @Override
