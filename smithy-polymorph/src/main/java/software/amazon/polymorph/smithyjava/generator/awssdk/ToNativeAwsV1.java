@@ -320,7 +320,7 @@ public class ToNative extends Generator {
                     }
                 })
                 .forEach(name -> builder
-                        .beginControlFlow("if ($L.$L())", VAR_INPUT, Dafny.enumIsName(name))
+                        .beginControlFlow("if ($L.$L())", VAR_INPUT, Dafny.datatypeConstructorIs(name))
                         .addStatement("return $T.$L", nativeEnumClass, name)
                         .endControlFlow()
                 );

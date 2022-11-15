@@ -267,11 +267,11 @@ public class ToDafnyAwsV1 extends ToDafny {
         );
         return MethodSpec.methodBuilder("Error")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                .returns(subject.dafnyNameResolver.getDafnyAbstractServiceError())
+                .returns(subject.dafnyNameResolver.classForError())
                 .addParameter(subject.nativeNameResolver.baseErrorForService(), "nativeValue")
                 .addStatement(memberDeclaration)
                 .addStatement(memberAssignment)
-                .addStatement("return new $T(message)", subject.dafnyNameResolver.getDafnyOpaqueServiceError())
+                .addStatement("return new $T(message)", subject.dafnyNameResolver.classForOpaqueError())
                 .build();
     }
 }

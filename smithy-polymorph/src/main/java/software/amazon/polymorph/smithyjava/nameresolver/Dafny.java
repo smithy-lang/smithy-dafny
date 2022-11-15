@@ -25,7 +25,6 @@ import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
-import software.amazon.smithy.utils.StringUtils;
 
 import static software.amazon.polymorph.smithyjava.generator.Generator.Constants.SUPPORTED_CONVERSION_AGGREGATE_SHAPES;
 import static software.amazon.polymorph.smithyjava.nameresolver.Constants.SMITHY_API_UNIT;
@@ -52,12 +51,12 @@ public class Dafny extends NameResolver {
         );
     }
 
-    public static String enumCreate(String name) {
+    public static String datatypeConstructorCreate(String name) {
         String dafnyEnumName = dafnyCompilesExtra_(name);
         return "create_" + dafnyEnumName;
     }
 
-    public static String enumIsName(String name) {
+    public static String datatypeConstructorIs(String name) {
         String dafnyEnumName = dafnyCompilesExtra_(name);
         return "is_" + dafnyEnumName;
     }
@@ -162,12 +161,26 @@ public class Dafny extends NameResolver {
         };
     }
 
-    public ClassName getDafnyAbstractServiceError() {
+    public ClassName classForError() {
         return ClassName.get(modelPackage, "Error");
     }
 
-    public ClassName getDafnyOpaqueServiceError() {
-        return ClassName.get(modelPackage, "Error_Opaque");
+    public ClassName classForOpaqueError() {
+        return classForDatatypeConstructor("Error", "Opaque");
+        /*return ClassName.get(modelPackage, "Error_Opaque");*/
+    }
+
+    /*
+    For Datatypes, the destructor (thing) is the left Hand ,
+    and the constructors (x, y) are the right hand of:
+    datatype thing = x | y
+
+    Outside the Dafny world,
+    Datatype constructors are sometimes called variants.
+    */
+    public ClassName classForDatatypeConstructor(String dataTypeName, String constructorName) {
+        return ClassName.get(modelPackage, "%s_%s".formatted(
+                dafnyCompilesExtra_(dataTypeName), dafnyCompilesExtra_(constructorName)));
     }
 
     // Because we want a ClassName instead of a TypeName
