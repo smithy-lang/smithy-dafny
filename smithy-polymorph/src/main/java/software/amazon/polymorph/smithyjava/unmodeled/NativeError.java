@@ -33,12 +33,12 @@ public class NativeError {
             FieldSpec.builder(Throwable.class, "cause").build()
     );
 
-    public static ClassName className(String packageName) {
+    public static ClassName nativeClassName(String packageName) {
         return ClassName.get(packageName, NATIVE_ERROR);
     }
 
     public static JavaFile javaFile(String packageName) {
-        ClassName className = className(packageName);
+        ClassName className = nativeClassName(packageName);
         ClassName superName = ClassName.get(RuntimeException.class);
         BuilderSpecs builderSpecs = new BuilderSpecs(
                 className, null, THROWABLE_ARGS, Collections.emptyList());

@@ -51,6 +51,8 @@ public class JavaLibrary extends CodegenSubject {
         rtn.putAll(serviceCodegen.generate());
         ToDafnyLibrary toDafny = new ToDafnyLibrary(this);
         rtn.putAll(toDafny.generate());
+        ToNativeLibrary toNative = new ToNativeLibrary(this);
+        rtn.putAll(toNative.generate());
         return rtn;
     }
 

@@ -51,7 +51,7 @@ public class ToDafnyLibrary extends ToDafny {
 
     TypeSpec toDafny() {
         ArrayList<MethodSpec> toDafnyMethods = new ArrayList<>();
-        // NativeError
+        // NativeError (really, any Error in the service)
         toDafnyMethods.add(nativeError());
         // OpaqueError
         toDafnyMethods.add(opaqueError());
@@ -76,18 +76,18 @@ public class ToDafnyLibrary extends ToDafny {
     // Converts any subclass of NativeError to the correct Dafny Error,
     // or casts it as an OpaqueError.
     MethodSpec nativeError() {
-        TypeName dafnyError = subject.dafnyNameResolver.getDafnyAbstractServiceError();
-        ClassName nativeError = NativeError.className(subject.nativeNameResolver.modelPackage);
+        TypeName dafnyError = subject.dafnyNameResolver.classForError();
+        ClassName nativeError = NativeError.nativeClassName(subject.nativeNameResolver.modelPackage);
         MethodSpec.Builder method = MethodSpec.methodBuilder("Error")
                 .returns(dafnyError)
                 .addModifiers(PUBLIC_STATIC)
                 .addParameter(nativeError, VAR_INPUT);
-        List<ClassName> allErrors = subject.getErrorsInServiceNamespace().stream()
+        List<ClassName> allNativeErrors = subject.getErrorsInServiceNamespace().stream()
                 .map(subject.nativeNameResolver::typeForStructure)
                 .collect(Collectors.toCollection(ArrayList::new));
-        allErrors.add(OpaqueError.className(subject.nativeNameResolver.modelPackage));
-        allErrors.add(CollectionOfErrors.className(subject.nativeNameResolver.modelPackage));
-        allErrors.forEach(errorClassName ->
+        allNativeErrors.add(OpaqueError.nativeClassName(subject.nativeNameResolver.modelPackage));
+        allNativeErrors.add(CollectionOfErrors.nativeClassName(subject.nativeNameResolver.modelPackage));
+        allNativeErrors.forEach(errorClassName ->
                 method.beginControlFlow("if ($L instanceof $T)", VAR_INPUT, errorClassName)
                         .addStatement("return $T.Error(($T) $L)", thisClassName, errorClassName, VAR_INPUT)
                         .endControlFlow()
@@ -98,8 +98,8 @@ public class ToDafnyLibrary extends ToDafny {
     }
 
     MethodSpec opaqueError() {
-        TypeName dafnyError = subject.dafnyNameResolver.getDafnyAbstractServiceError();
-        ClassName opaqueError = OpaqueError.className(subject.nativeNameResolver.modelPackage);
+        TypeName dafnyError = subject.dafnyNameResolver.classForError();
+        ClassName opaqueError = OpaqueError.nativeClassName(subject.nativeNameResolver.modelPackage);
         return MethodSpec.methodBuilder("Error")
                 .returns(dafnyError)
                 .addModifiers(PUBLIC_STATIC)
@@ -109,8 +109,8 @@ public class ToDafnyLibrary extends ToDafny {
     }
 
     MethodSpec collectionError() {
-        ClassName dafnyError = subject.dafnyNameResolver.getDafnyAbstractServiceError();
-        ClassName collectionError = CollectionOfErrors.className(subject.nativeNameResolver.modelPackage);
+        ClassName dafnyError = subject.dafnyNameResolver.classForError();
+        ClassName collectionError = CollectionOfErrors.nativeClassName(subject.nativeNameResolver.modelPackage);
         ParameterizedTypeName listArg = ParameterizedTypeName.get(
                 ClassName.get(DafnySequence.class),
                 WildcardTypeName.subtypeOf(dafnyError)

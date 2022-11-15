@@ -1,9 +1,11 @@
 package software.amazon.polymorph.smithyjava.generator;
 
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.MethodSpec;
 
 import java.util.Map;
 
+import software.amazon.polymorph.smithyjava.BuilderSpecs;
 import software.amazon.polymorph.smithyjava.MethodReference;
 import software.amazon.smithy.model.shapes.ShapeType;
 
@@ -53,5 +55,35 @@ public abstract class ToNative extends Generator {
     public ToNative(CodegenSubject subject, ClassName className) {
         super(subject);
         thisClassName = className;
+    }
+
+    /** Signature of an Error conversion method. */
+    protected MethodSpec.Builder initializeErrorMethodSpec(
+            ClassName inputType,
+            ClassName returnType
+    ) {
+        return MethodSpec.methodBuilder("Error")
+                .returns(returnType)
+                .addModifiers(PUBLIC_STATIC)
+                .addParameter(inputType, VAR_INPUT);
+    }
+
+    /** Declare and assign the native value's builder. */
+    protected MethodSpec.Builder createNativeBuilder(
+            MethodSpec.Builder method,
+            ClassName returnType
+    ) {
+        return method.addStatement("$T $L = $T.$L()",
+                BuilderSpecs.builderInterfaceName(returnType),
+                NATIVE_BUILDER,
+                returnType,
+                BuilderSpecs.BUILDER_VAR
+        );
+    }
+
+    /** Return invocation of nativeBuilder's build method. */
+    protected MethodSpec buildAndReturn(MethodSpec.Builder method) {
+        method.addStatement("return $L.build()", NATIVE_BUILDER);
+        return method.build();
     }
 }
