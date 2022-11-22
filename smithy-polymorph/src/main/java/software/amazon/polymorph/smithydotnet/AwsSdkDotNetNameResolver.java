@@ -4,6 +4,7 @@
 package software.amazon.polymorph.smithydotnet;
 
 import software.amazon.polymorph.utils.ModelUtils;
+import software.amazon.smithy.aws.traits.ServiceTrait;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.ListShape;
 import software.amazon.smithy.model.shapes.MemberShape;
@@ -13,8 +14,13 @@ import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.EnumTrait;
+import software.amazon.smithy.model.traits.Trait;
 import software.amazon.smithy.model.traits.TraitDefinition;
 import software.amazon.smithy.utils.StringUtils;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Stream;
 
 public class AwsSdkDotNetNameResolver extends DotNetNameResolver {
     public AwsSdkDotNetNameResolver(final Model model, final ServiceShape serviceShape) {
@@ -52,7 +58,16 @@ public class AwsSdkDotNetNameResolver extends DotNetNameResolver {
             if (structureShape.hasTrait(TraitDefinition.class)) {
                 throw new IllegalArgumentException("Trait definition structures have no corresponding generated type");
             }
-
+            if (StringUtils.equals(structureShape.getId().getNamespace(), "com.amazonaws.dynamodb") &&
+                    structureShape.getId().getName().endsWith("Input")) {
+                String newRequestString = structureShape.getId().getName().replace("Input", "Request");
+                return "%s.Model.%s".formatted(namespaceForService(), newRequestString);
+            }
+            if (StringUtils.equals(structureShape.getId().getNamespace(), "com.amazonaws.dynamodb") &&
+                    structureShape.getId().getName().endsWith("Output")) {
+                String newResponseString = structureShape.getId().getName().replace("Output", "Response");
+                return "%s.Model.%s".formatted(namespaceForService(), newResponseString);
+            }
             return "%s.Model.%s".formatted(namespaceForService(), structureShape.getId().getName());
         }
 
@@ -69,10 +84,16 @@ public class AwsSdkDotNetNameResolver extends DotNetNameResolver {
     }
 
     public String implForServiceClient() {
+        if (StringUtils.equals(getServiceName(), "DynamoDBv2")) {
+            return "%s.Amazon%sClient".formatted(namespaceForService(), "DynamoDB");
+        }
         return "%s.Amazon%sClient".formatted(namespaceForService(), getServiceName());
     }
 
     private String getServiceName() {
+        if (StringUtils.equals(getServiceShape().getId().getName(), "DynamoDB_20120810")) {
+            return StringUtils.capitalize("DynamoDBv2");
+        }
         return StringUtils.capitalize(getServiceShape().getId().getName());
     }
 
@@ -91,7 +112,9 @@ public class AwsSdkDotNetNameResolver extends DotNetNameResolver {
 
     @Override
     public String classForBaseServiceException() {
-        return "Amazon%sException".formatted(getServiceName());
+        return StringUtils.equals(getServiceName(), "DynamoDBv2")
+                ? "Amazon%sException".formatted("DynamoDB")
+                : "Amazon%sException".formatted(getServiceName());
     }
 
     public String qualifiedClassForBaseServiceException() {

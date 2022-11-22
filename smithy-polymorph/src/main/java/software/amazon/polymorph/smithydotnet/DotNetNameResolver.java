@@ -137,7 +137,9 @@ public class DotNetNameResolver {
 
     public static String interfaceForService(final ShapeId serviceShapeId) {
         if (AwsSdkNameResolverHelpers.isAwsSdkServiceId(serviceShapeId)) {
-            return "I" + serviceShapeId.getName();
+            return StringUtils.equals(serviceShapeId.getName(), "DynamoDB_20120810")
+                ? "IDynamoDB"
+                : "I" + serviceShapeId.getName();
         }
 
         throw new UnsupportedOperationException("Interface types not supported for Shape %s".formatted(serviceShapeId));
@@ -346,6 +348,7 @@ public class DotNetNameResolver {
 
     protected String baseTypeForResource(final ResourceShape resourceShape) {
         final ShapeId shapeId = resourceShape.getId();
+        System.out.println(interfaceForResource(shapeId));
         return "%s.%s".formatted(
                 namespaceForShapeId(shapeId), interfaceForResource(shapeId));
     }
@@ -365,7 +368,7 @@ public class DotNetNameResolver {
             return Objects.requireNonNull(nativeTypeName,
                     () -> String.format("No native type for prelude shape %s", shapeId));
         }
-
+//        System.out.println("ShapeID: " + shapeId.getName() + " Shape Type: " + shape.getType());
         return switch (shape.getType()) {
             // For supported simple shapes, just map to native types
             case BLOB, BOOLEAN, INTEGER, LONG, TIMESTAMP -> {
@@ -594,6 +597,22 @@ public class DotNetNameResolver {
 
         // The Dafny type of other structures is simply the structure's name.
         // We explicitly specify the Dafny namespace just in case of collisions.
+        // For DynamoDB model output needs to be changed to response.
+        // Input needs to be changed to request.
+        if (StringUtils.equals(shapeId.getNamespace(), "com.amazonaws.dynamodb")
+            && shapeId.getName().endsWith("Input")) {
+            String newRequestString = dafnyCompilesExtra_(shapeId).replace("Input", "Request");
+            return "%s._I%s".formatted(
+                    DafnyNameResolverHelpers.dafnyExternNamespaceForShapeId(shapeId),
+                    newRequestString);
+        }
+        if (StringUtils.equals(shapeId.getNamespace(), "com.amazonaws.dynamodb")
+                && shapeId.getName().endsWith("Output")) {
+            String newResponseString = dafnyCompilesExtra_(shapeId).replace("Output", "Response");
+            return "%s._I%s".formatted(
+                    DafnyNameResolverHelpers.dafnyExternNamespaceForShapeId(shapeId),
+                    newResponseString);
+        }
         return "%s._I%s".formatted(
                 DafnyNameResolverHelpers.dafnyExternNamespaceForShapeId(shapeId),
                 dafnyCompilesExtra_(shapeId));
@@ -667,6 +686,7 @@ public class DotNetNameResolver {
         final ShapeId serviceShapeId = serviceShape.getId();
 
         if (AwsSdkNameResolverHelpers.isAwsSdkServiceId(serviceShapeId)) {
+            System.out.println("Interface for Service: " + interfaceForService(serviceShapeId));
             return "%s.%sClient".formatted(DafnyNameResolverHelpers.dafnyExternNamespaceForShapeId(serviceShapeId), interfaceForService(serviceShapeId));
         }
 
