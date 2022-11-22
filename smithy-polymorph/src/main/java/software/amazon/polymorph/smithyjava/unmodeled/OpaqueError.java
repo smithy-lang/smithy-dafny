@@ -14,7 +14,6 @@ import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PROTECTED;
 import static javax.lang.model.element.Modifier.PUBLIC;
-import static software.amazon.polymorph.smithyjava.unmodeled.NativeError.NATIVE_ERROR;
 import static software.amazon.polymorph.smithyjava.unmodeled.NativeError.THROWABLE_ARGS;
 
 public class OpaqueError {
@@ -23,9 +22,13 @@ public class OpaqueError {
             FieldSpec.builder(Object.class, "obj").build()
     );
 
+    public static ClassName className(String packageName) {
+        return ClassName.get(packageName, OPAQUE_ERROR);
+    }
+
     public static JavaFile javaFile(String packageName) {
-        ClassName className = ClassName.get(packageName, OPAQUE_ERROR);
-        ClassName superName = ClassName.get(packageName, NATIVE_ERROR);
+        ClassName className = className(packageName);
+        ClassName superName = NativeError.className(packageName);
         BuilderSpecs builderSpecs = new BuilderSpecs(
                 className, superName, OPAQUE_ARGS, THROWABLE_ARGS);
         TypeSpec.Builder spec = TypeSpec

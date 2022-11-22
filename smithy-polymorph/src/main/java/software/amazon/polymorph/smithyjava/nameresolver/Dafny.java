@@ -29,6 +29,7 @@ import software.amazon.smithy.utils.StringUtils;
 
 import static software.amazon.polymorph.smithyjava.generator.Generator.Constants.SUPPORTED_CONVERSION_AGGREGATE_SHAPES;
 import static software.amazon.polymorph.smithyjava.nameresolver.Constants.SMITHY_API_UNIT;
+import static software.amazon.polymorph.utils.DafnyNameResolverHelpers.dafnyCompilesExtra_;
 import static software.amazon.smithy.utils.StringUtils.capitalize;
 
 /**
@@ -51,21 +52,13 @@ public class Dafny extends NameResolver {
         );
     }
 
-    /**
-     * Dafny generated Java enums replace '_' with '__'.
-     * ex: SYMMETRIC_DEFAULT -> SYMMETRIC__DEFAULT
-     */
-    public static String enumFormatter(String name) {
-        return name.replace("_", "__");
-    }
-
     public static String enumCreate(String name) {
-        String dafnyEnumName = enumFormatter(name);
+        String dafnyEnumName = dafnyCompilesExtra_(name);
         return "create_" + dafnyEnumName;
     }
 
     public static String enumIsName(String name) {
-        String dafnyEnumName = enumFormatter(name);
+        String dafnyEnumName = dafnyCompilesExtra_(name);
         return "is_" + dafnyEnumName;
     }
 
@@ -169,11 +162,11 @@ public class Dafny extends NameResolver {
         };
     }
 
-    public TypeName getDafnyAbstractServiceError() {
+    public ClassName getDafnyAbstractServiceError() {
         return ClassName.get(modelPackage, "Error");
     }
 
-    public TypeName getDafnyOpaqueServiceError() {
+    public ClassName getDafnyOpaqueServiceError() {
         return ClassName.get(modelPackage, "Error_Opaque");
     }
 
@@ -188,7 +181,7 @@ public class Dafny extends NameResolver {
         // i.e.: Dafny.<Namespace>.Types.Shape
         return ClassName.get(
                 modelPackageNameForNamespace(shapeId.getNamespace()),
-                StringUtils.capitalize(shapeId.getName())
+                dafnyCompilesExtra_(capitalize(shapeId.getName()))
         );
     }
 
@@ -219,7 +212,7 @@ public class Dafny extends NameResolver {
     ClassName typeForError(Shape shape) {
         // AwsCryptographicMaterialProvidersException -> Error_AwsCryptographicMaterialProvidersException
         ClassName className = classForShape(shape);
-        return ClassName.get(className.packageName(), "Error_" + className.simpleName());
+        return ClassName.get(className.packageName(), "Error_" + dafnyCompilesExtra_(className.simpleName()));
     }
 
     TypeName typeForService(ServiceShape shape) {

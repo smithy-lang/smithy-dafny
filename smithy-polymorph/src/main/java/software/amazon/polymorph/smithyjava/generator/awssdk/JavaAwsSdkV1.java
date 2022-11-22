@@ -30,7 +30,7 @@ public class JavaAwsSdkV1 extends CodegenSubject {
     public Map<Path, TokenTree> generate() {
         Map<Path, TokenTree> rtn = new HashMap<>();
         ShimV1 shimGenerator = new ShimV1(this);
-        ToDafny toDafnyGenerator = new ToDafny(this);
+        ToDafnyAwsV1 toDafnyGenerator = new ToDafnyAwsV1(this);
         ToNative toNativeGenerator = new ToNative(this);
         rtn.putAll(shimGenerator.generate());
         rtn.putAll(toDafnyGenerator.generate());

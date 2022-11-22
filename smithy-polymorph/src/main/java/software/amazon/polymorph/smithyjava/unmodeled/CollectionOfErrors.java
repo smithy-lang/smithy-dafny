@@ -21,9 +21,13 @@ import static software.amazon.polymorph.smithyjava.unmodeled.NativeError.THROWAB
 public class CollectionOfErrors {
     public final static String COLLECTION_ERROR = "CollectionOfErrors";
 
+    public static ClassName className(String packageName) {
+        return ClassName.get(packageName, COLLECTION_ERROR);
+    }
+
     public static JavaFile javaFile(String packageName) {
-        ClassName className = ClassName.get(packageName, COLLECTION_ERROR);
-        ClassName superName = ClassName.get(packageName, NATIVE_ERROR);
+        ClassName className = className(packageName);
+        ClassName superName = NativeError.className(packageName);
         List<FieldSpec> collectionArgs = getArgs(packageName);
         BuilderSpecs builderSpecs = new BuilderSpecs(
                 className, superName, collectionArgs, THROWABLE_ARGS);
@@ -56,13 +60,13 @@ public class CollectionOfErrors {
     }
 
     private static List<FieldSpec> getArgs(String packageName) {
-        return List.of(
-                FieldSpec.builder(
-                        ParameterizedTypeName.get(
-                                ClassName.get(List.class),
-                                ClassName.get(packageName, NATIVE_ERROR)),
-                        "list"
-                ).build()
+        return List.of(FieldSpec.builder(getArg(packageName), "list").build());
+    }
+
+    public static ParameterizedTypeName getArg(String packageName) {
+        return ParameterizedTypeName.get(
+                ClassName.get(List.class),
+                ClassName.get(packageName, NATIVE_ERROR)
         );
     }
 

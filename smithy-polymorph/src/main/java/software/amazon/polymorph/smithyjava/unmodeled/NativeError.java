@@ -8,8 +8,11 @@ import com.squareup.javapoet.TypeSpec;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import software.amazon.polymorph.smithyjava.BuilderSpecs;
+
+import static software.amazon.smithy.utils.StringUtils.capitalize;
 
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PROTECTED;
@@ -53,6 +56,7 @@ public class NativeError {
                         builderSpecs.implBuildMethod(false))
                 )
                 .addType(builderSpecs.builderInterface())
+                .addMethods(getters())
                 .build();
         return JavaFile.builder(packageName, spec)
                 .skipJavaLangImports(true)
@@ -105,5 +109,19 @@ public class NativeError {
                 .addStatement("this.cause = model.getCause()")
                 .addStatement("this.message = model.getMessage()")
                 .build();
+    }
+
+    /**
+     * RuntimeException's fields are retrieved by `get + capitalize-field-name`,
+     * but our generated Java just uses the field name.
+     */
+    static Iterable<MethodSpec> getters() {
+        return THROWABLE_ARGS.stream().map(field ->
+                MethodSpec.methodBuilder(field.name)
+                        .returns(field.type)
+                        .addModifiers(PUBLIC)
+                        .addStatement("return this.$L()",
+                                String.format("get%s", capitalize(field.name)))
+                        .build()).collect(Collectors.toList());
     }
 }
