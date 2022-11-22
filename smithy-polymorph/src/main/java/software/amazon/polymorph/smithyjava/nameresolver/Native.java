@@ -245,6 +245,11 @@ public class Native extends NameResolver{
         if (isInServiceNameSpace(shape.getId())) {
             return ClassName.get(modelPackage, shape.getId().getName());
         }
+        // For every AWS SDK Java Library and every Library Polymorph generates,
+        // POJOs (smithy structures),
+        // most Exceptions (also structures),
+        // and interfaces (smithy resources or services)
+        // are placed in a model sub-package.
         return ClassName.get(
                 shape.getId().getNamespace() + ".model",
                 StringUtils.capitalize(shape.getId().getName()));
