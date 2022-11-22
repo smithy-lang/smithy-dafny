@@ -50,16 +50,7 @@ class ModelCodegen extends Generator {
         // Enums
         subject.getEnumsInServiceNamespace().stream()
                 .map(this::modeledEnum).forEachOrdered(rtn::add);
-        // Resources
-        /*subject.model.getResourceShapes().stream()
-                .filter(shape -> ModelUtils.isInServiceNamespace(shape.getId(), subject.serviceShape))
-                .forEachOrdered(shape -> {
-                    rtn.add(generateResourceInterface(shape));
-                    rtn.add(generateResourceClass(shape));
-                    if (shape.hasTrait(ExtendableTrait.class)) {
-                        rtn.add(generateNativeWrapper(shape));
-                    }
-                });*/
+        // TODO Resources
         return rtn;
     }
 
