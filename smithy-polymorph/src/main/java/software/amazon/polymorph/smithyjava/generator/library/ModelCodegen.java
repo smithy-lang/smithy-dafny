@@ -16,6 +16,14 @@ import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 
 
+/**
+ * ModelCodegen generates the content of the Subject's Model package.
+ * i.e.: Any POJOs, Enums, Exceptions, or Interfaces that are needed by the Subject.
+ * We are following the AWS SDK Java's pattern of placing all of these in
+ * a "sub-package", called Model.<p>
+ * AWS SDK subject's do NOT need this,
+ * as the SDK Library already has all of this defined.<p>
+ */
 class ModelCodegen extends Generator {
     // Hack to override CodegenSubject
     // Why override? Generator takes any CodegenSubject,
