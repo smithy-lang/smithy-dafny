@@ -348,7 +348,6 @@ public class DotNetNameResolver {
 
     protected String baseTypeForResource(final ResourceShape resourceShape) {
         final ShapeId shapeId = resourceShape.getId();
-        System.out.println(interfaceForResource(shapeId));
         return "%s.%s".formatted(
                 namespaceForShapeId(shapeId), interfaceForResource(shapeId));
     }
@@ -368,7 +367,6 @@ public class DotNetNameResolver {
             return Objects.requireNonNull(nativeTypeName,
                     () -> String.format("No native type for prelude shape %s", shapeId));
         }
-//        System.out.println("ShapeID: " + shapeId.getName() + " Shape Type: " + shape.getType());
         return switch (shape.getType()) {
             // For supported simple shapes, just map to native types
             case BLOB, BOOLEAN, INTEGER, LONG, TIMESTAMP -> {
@@ -642,6 +640,20 @@ public class DotNetNameResolver {
      */
     public String dafnyConcreteTypeForRegularStructure(final StructureShape structureShape) {
         final ShapeId shapeId = structureShape.getId();
+        if (StringUtils.equals(shapeId.getNamespace(), "com.amazonaws.dynamodb")
+                && shapeId.getName().endsWith("Input")) {
+            String newRequestString = dafnyCompilesExtra_(shapeId).replace("Input", "Request");
+            return "%s.%s".formatted(
+                    DafnyNameResolverHelpers.dafnyExternNamespaceForShapeId(shapeId),
+                    newRequestString);
+        }
+        if (StringUtils.equals(shapeId.getNamespace(), "com.amazonaws.dynamodb")
+                && shapeId.getName().endsWith("Output")) {
+            String newResponseString = dafnyCompilesExtra_(shapeId).replace("Output", "Response");
+            return "%s.%s".formatted(
+                    DafnyNameResolverHelpers.dafnyExternNamespaceForShapeId(shapeId),
+                    newResponseString);
+        }
         return "%s.%s".formatted(
                 DafnyNameResolverHelpers.dafnyExternNamespaceForShapeId(shapeId),
                 dafnyCompilesExtra_(shapeId));
@@ -686,7 +698,6 @@ public class DotNetNameResolver {
         final ShapeId serviceShapeId = serviceShape.getId();
 
         if (AwsSdkNameResolverHelpers.isAwsSdkServiceId(serviceShapeId)) {
-            System.out.println("Interface for Service: " + interfaceForService(serviceShapeId));
             return "%s.%sClient".formatted(DafnyNameResolverHelpers.dafnyExternNamespaceForShapeId(serviceShapeId), interfaceForService(serviceShapeId));
         }
 
@@ -840,7 +851,15 @@ public class DotNetNameResolver {
         // The advantage here is that is moves the human information to the front of the line.
 
         final String namespace = shapeId.getNamespace();
-        final String relativeShape = shapeId.getName();
+        String shapeName = shapeId.getName();
+        if (StringUtils.equals(namespace, "com.amazonaws.dynamodb") && shapeId.getName().endsWith("Input")) {
+            shapeName = shapeName.replace("Input", "Request");
+        }
+        if (StringUtils.equals(namespace, "com.amazonaws.dynamodb") && shapeId.getName().endsWith("Output")) {
+            shapeName = shapeName.replace("Output", "Response");
+        }
+        final String relativeShape = shapeName;
+
         final Optional<String> memberOptional = shapeId.getMember();
 
         // "N" for namespace

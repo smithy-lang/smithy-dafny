@@ -5,6 +5,7 @@ package software.amazon.polymorph.smithydafny;
 
 import com.google.common.base.Joiner;
 
+import java.io.PrintStream;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -104,6 +105,16 @@ public record DafnyNameResolver(
     }
 
     private String dafnyTypeNameShape(final Shape shape) {
+        if (StringUtils.equals(shape.getId().getNamespace(), "com.amazonaws.dynamodb") &&
+            shape.getId().getName().endsWith("Input")) {
+            String newRequestString = shape.getId().getName().replace("Input", "Request");
+            return dafnyModulePrefixForShapeId(shape) + newRequestString;
+        }
+        if (StringUtils.equals(shape.getId().getNamespace(), "com.amazonaws.dynamodb") &&
+                shape.getId().getName().endsWith("Output")) {
+            String newResponseString = shape.getId().getName().replace("Output", "Response");
+            return dafnyModulePrefixForShapeId(shape) + newResponseString;
+        }
         return dafnyModulePrefixForShapeId(shape) + shape.getId().getName();
     }
 

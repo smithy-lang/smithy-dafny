@@ -16,6 +16,7 @@ import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.*;
 import software.amazon.smithy.model.traits.*;
 import software.amazon.smithy.aws.traits.*;
+import software.amazon.smithy.utils.StringUtils;
 
 import java.nio.file.Path;
 import java.util.*;
@@ -264,6 +265,22 @@ public class DafnyApiCodegen {
         final StructureShape structureShape = model.expectShape(structureShapeId, StructureShape.class);
 
         final String typeName = structureShapeId.getName();
+        if (StringUtils.equals(structureShapeId.getNamespace(), "com.amazonaws.dynamodb") &&
+            structureShapeId.getName().endsWith("Input")) {
+            String newRequestString = structureShapeId.getName().replace("Input", "Request");
+            return TokenTree.of(
+                    Token.of("datatype %1$s =".formatted(newRequestString)),
+                    generateDataTypeConstructorFromStructure(structureShapeId)
+            );
+        }
+        if (StringUtils.equals(structureShapeId.getNamespace(), "com.amazonaws.dynamodb") &&
+                structureShapeId.getName().endsWith("Output")) {
+            String newResponseString = structureShapeId.getName().replace("Output", "Response");
+            return TokenTree.of(
+                    Token.of("datatype %1$s =".formatted(newResponseString)),
+                    generateDataTypeConstructorFromStructure(structureShapeId)
+            );
+        }
         return TokenTree.of(
           Token.of("datatype %1$s =".formatted(typeName)),
           generateDataTypeConstructorFromStructure(structureShapeId)
@@ -284,7 +301,18 @@ public class DafnyApiCodegen {
     }
 
     public TokenTree generateWrappedDataTypeConstructorFromUnionMember(final MemberShape memberShape) {
-        final String name = memberShape.getMemberName();
+        final String name;
+        if (StringUtils.equals(memberShape.getContainer().getNamespace(), "com.amazonaws.dynamodb")
+            && memberShape.getContainer().getNamespace().endsWith("Input")) {
+            name = memberShape.getMemberName().replace("Input", "Request");
+        }
+        else if (StringUtils.equals(memberShape.getContainer().getNamespace(), "com.amazonaws.dynamodb")
+                && memberShape.getContainer().getNamespace().endsWith("Output")) {
+            name = memberShape.getMemberName().replace("Output", "Response");
+        } else {
+            name = memberShape.getMemberName();
+        }
+
         final String wrappedType = nameResolver.baseTypeForShape(memberShape.getTarget());
 
         return TokenTree.of(
@@ -1171,7 +1199,17 @@ public class DafnyApiCodegen {
 
     public TokenTree generateDataTypeConstructorFromStructure(final ShapeId shapeId) {
         final StructureShape structureShape = model.expectShape(shapeId, StructureShape.class);
-        final String typeName = shapeId.getName();
+        final String typeName;
+        if (StringUtils.equals(shapeId.getNamespace(), "com.amazonaws.dynamodb") &&
+                shapeId.getName().endsWith("Input")) {
+            typeName = shapeId.getName().replace("Input", "Request");
+        }
+        else if (StringUtils.equals(shapeId.getNamespace(), "com.amazonaws.dynamodb") &&
+                shapeId.getName().endsWith("Output")) {
+            typeName = shapeId.getName().replace("Output", "Response");
+        } else {
+            typeName = shapeId.getName();
+        }
 
         final TokenTree params = TokenTree
           .of(ModelUtils
