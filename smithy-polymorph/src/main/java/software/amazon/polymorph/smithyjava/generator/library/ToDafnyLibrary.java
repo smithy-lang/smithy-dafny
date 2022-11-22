@@ -34,6 +34,7 @@ import static software.amazon.smithy.utils.StringUtils.uncapitalize;
  */
 public class ToDafnyLibrary extends ToDafny {
     // Hack to override CodegenSubject
+    // See code comment on ModelCodegen for details.
     final JavaLibrary subject;
 
     public ToDafnyLibrary(JavaLibrary javaLibrary) {

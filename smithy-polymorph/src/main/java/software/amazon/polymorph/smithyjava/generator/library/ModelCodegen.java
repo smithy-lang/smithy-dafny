@@ -18,6 +18,11 @@ import software.amazon.smithy.model.shapes.StructureShape;
 
 class ModelCodegen extends Generator {
     // Hack to override CodegenSubject
+    // Why override? Generator takes any CodegenSubject,
+    // but we want the particular subclass JavaLibrary.
+    // If we did not hack this,
+    // Java would down cast `subject` to CodegenSubject,
+    // and we would lose access to any subclass specific APIs or Fields.
     final JavaLibrary subject;
     /** Public Java Interfaces will go here. */
     public final String packageName;
