@@ -218,11 +218,12 @@ public abstract class ToDafny extends Generator {
             return SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(targetShape.getType());
         }
         final String methodName = capitalize(targetShape.getId().getName());
-        // if in namespace, reference to be created converter
+        // if in namespace, reference converter from this ToDafny class
         if (subject.nativeNameResolver.isInServiceNameSpace(targetShape.getId())) {
             return new MethodReference(thisClassName, methodName);
         }
-        // Otherwise, this target must be in another namespace
+        // Otherwise, this target must be in another namespace,
+        // reference converter from that namespace's ToDafny class
         ClassName otherNamespaceToDafny = ClassName.get(
                 DafnyNameResolverHelpers.packageNameForNamespace(targetShape.getId().getNamespace()),
                 TO_DAFNY);
