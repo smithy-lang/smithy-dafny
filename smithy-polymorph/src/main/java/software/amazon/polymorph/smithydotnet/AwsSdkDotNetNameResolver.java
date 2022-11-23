@@ -4,7 +4,6 @@
 package software.amazon.polymorph.smithydotnet;
 
 import software.amazon.polymorph.utils.ModelUtils;
-import software.amazon.smithy.aws.traits.ServiceTrait;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.ListShape;
 import software.amazon.smithy.model.shapes.MemberShape;
@@ -14,13 +13,8 @@ import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.EnumTrait;
-import software.amazon.smithy.model.traits.Trait;
 import software.amazon.smithy.model.traits.TraitDefinition;
 import software.amazon.smithy.utils.StringUtils;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Stream;
 
 public class AwsSdkDotNetNameResolver extends DotNetNameResolver {
     public AwsSdkDotNetNameResolver(final Model model, final ServiceShape serviceShape) {

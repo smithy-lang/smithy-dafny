@@ -5,7 +5,6 @@ package software.amazon.polymorph.smithydafny;
 
 import com.google.common.base.Joiner;
 
-import java.io.PrintStream;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashSet;
