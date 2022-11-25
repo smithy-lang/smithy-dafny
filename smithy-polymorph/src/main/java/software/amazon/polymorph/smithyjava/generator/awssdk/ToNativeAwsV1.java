@@ -11,7 +11,6 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -32,7 +31,6 @@ import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.ShapeType;
 import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
-import software.amazon.smithy.model.traits.EnumDefinition;
 import software.amazon.smithy.model.traits.EnumTrait;
 
 import static software.amazon.smithy.utils.StringUtils.capitalize;
@@ -256,38 +254,12 @@ public class ToNativeAwsV1 extends ToNative {
         return null;
     }
 
-    @SuppressWarnings("OptionalGetWithoutIsPresent")
     MethodSpec generateConvertEnum(ShapeId shapeId) {
         final StringShape shape = subject.model.expectShape(shapeId, StringShape.class);
-        String methodName = capitalize(shapeId.getName());
-        final EnumTrait enumTrait = shape.getTrait(EnumTrait.class).orElseThrow();
-        if (!enumTrait.hasNames()) {
-            throw new UnsupportedOperationException("Unnamed enums not supported");
-        }
-        ClassName nativeEnumClass = subject.nativeNameResolver.classForEnum(shape);
-
-        MethodSpec.Builder builder = MethodSpec
-                .methodBuilder(methodName)
-                .addModifiers(Modifier.STATIC, Modifier.PUBLIC)
-                .returns(nativeEnumClass)
-                .addParameter(subject.dafnyNameResolver.classForShape(shape), VAR_INPUT);
-
-        enumTrait.getValues().stream()
-                .map(EnumDefinition::getName)
-                .map(Optional::get)
-                .peek(name -> {
-                    if (!ModelUtils.isValidEnumDefinitionName(name)) {
-                        throw new UnsupportedOperationException(
-                                "Invalid enum definition name: %s".formatted(name));
-                    }
-                })
-                .forEach(name -> builder
-                        .beginControlFlow("if ($L.$L())", VAR_INPUT, Dafny.datatypeConstructorIs(name))
-                        .addStatement("return $T.$L", nativeEnumClass, name)
-                        .endControlFlow()
-                );
-
-        builder.addStatement("return $T.fromValue($L.toString())", nativeEnumClass, VAR_INPUT);
-        return builder.build();
+        final ClassName returnType = subject.nativeNameResolver.classForEnum(shape);
+        MethodSpec.Builder method = modeledEnumCommon(shape, returnType);
+        // fromValue is an AWS SDK specific feature
+        method.addStatement("return $T.fromValue($L.toString())", returnType, VAR_INPUT);
+        return method.build();
     }
 }

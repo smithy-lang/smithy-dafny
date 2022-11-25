@@ -52,6 +52,9 @@ public class ToNativeLibrary extends ToNative {
         toNativeMethods.add(collectionError());
         // Any Error
         toNativeMethods.add(dafnyError());
+        // Enums
+        subject.getEnumsInServiceNamespace().stream()
+                .map(this::modeledEnum).forEachOrdered(toNativeMethods::add);
         return TypeSpec.classBuilder(thisClassName)
                 .addModifiers(Modifier.PUBLIC)
                 .addMethods(toNativeMethods)

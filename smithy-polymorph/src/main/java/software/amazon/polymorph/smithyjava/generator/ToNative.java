@@ -2,14 +2,22 @@ package software.amazon.polymorph.smithyjava.generator;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.TypeName;
 
 import java.util.Map;
 
 import software.amazon.polymorph.smithyjava.BuilderSpecs;
 import software.amazon.polymorph.smithyjava.MethodReference;
+import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
+import software.amazon.polymorph.utils.ModelUtils;
+import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.ShapeType;
+import software.amazon.smithy.model.shapes.StringShape;
+import software.amazon.smithy.model.traits.EnumDefinition;
+import software.amazon.smithy.model.traits.EnumTrait;
 
 import static software.amazon.polymorph.smithyjava.generator.Generator.Constants.IDENTITY_FUNCTION;
+import static software.amazon.smithy.utils.StringUtils.capitalize;
 
 public abstract class ToNative extends Generator {
     protected final static String VAR_INPUT = "dafnyValue";
@@ -62,7 +70,16 @@ public abstract class ToNative extends Generator {
             ClassName inputType,
             ClassName returnType
     ) {
-        return MethodSpec.methodBuilder("Error")
+        return initializeMethodSpec("Error", inputType, returnType);
+    }
+
+    /** Signature of a ToNative conversion method. */
+    protected MethodSpec.Builder initializeMethodSpec(
+            String methodName,
+            TypeName inputType,
+            TypeName returnType
+    ) {
+        return MethodSpec.methodBuilder(methodName)
                 .returns(returnType)
                 .addModifiers(PUBLIC_STATIC)
                 .addParameter(inputType, VAR_INPUT);
@@ -85,5 +102,49 @@ public abstract class ToNative extends Generator {
     protected MethodSpec buildAndReturn(MethodSpec.Builder method) {
         method.addStatement("return $L.build()", NATIVE_BUILDER);
         return method.build();
+    }
+
+    protected MethodSpec modeledEnum(StringShape shape) {
+        final ClassName returnType = subject.nativeNameResolver.classForEnum(shape);
+        MethodSpec.Builder method = modeledEnumCommon(shape, returnType);
+        // No Enum value matched, throw an Exception
+        method.addStatement("throw new $T($S + $L)",
+                IllegalArgumentException.class,
+                "No entry of %s matches the input : ".formatted(returnType),
+                VAR_INPUT);
+        return method.build();
+    }
+
+    protected MethodSpec.Builder modeledEnumCommon(
+            StringShape shape, ClassName returnType
+    ) {
+        final ShapeId shapeId = shape.getId();
+        final String methodName = capitalize(shapeId.getName());
+        final TypeName inputType = subject.dafnyNameResolver.typeForShape(shapeId);
+        MethodSpec.Builder method = initializeMethodSpec(methodName, inputType, returnType);
+        final EnumTrait enumTrait = shape.getTrait(EnumTrait.class).orElseThrow();
+        if (!enumTrait.hasNames()) {
+            throw new UnsupportedOperationException(
+                    "Unnamed enums not supported. ShapeId: %s".formatted(shapeId));
+        }
+
+        enumTrait.getValues().stream()
+                .map(EnumDefinition::getName)
+                .map(maybeName -> maybeName.orElseThrow(
+                        () -> new IllegalArgumentException(
+                                "Unnamed enums not supported. ShapeId: %s".formatted(shapeId))
+                ))
+                .peek(name -> {
+                    if (!ModelUtils.isValidEnumDefinitionName(name)) {
+                        throw new UnsupportedOperationException(
+                                "Invalid enum definition name: %s".formatted(name));
+                    }
+                })
+                .forEach(name -> method
+                        .beginControlFlow("if ($L.$L())", VAR_INPUT, Dafny.datatypeConstructorIs(name))
+                        .addStatement("return $T.$L", returnType, name)
+                        .endControlFlow()
+                );
+        return method;
     }
 }
