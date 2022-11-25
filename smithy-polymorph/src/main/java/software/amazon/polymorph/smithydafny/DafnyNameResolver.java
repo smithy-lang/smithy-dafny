@@ -104,16 +104,6 @@ public record DafnyNameResolver(
     }
 
     private String dafnyTypeNameShape(final Shape shape) {
-        if (StringUtils.equals(shape.getId().getNamespace(), "com.amazonaws.dynamodb") &&
-            shape.getId().getName().endsWith("Input")) {
-            String newRequestString = shape.getId().getName().replace("Input", "Request");
-            return dafnyModulePrefixForShapeId(shape) + newRequestString;
-        }
-        if (StringUtils.equals(shape.getId().getNamespace(), "com.amazonaws.dynamodb") &&
-                shape.getId().getName().endsWith("Output")) {
-            String newResponseString = shape.getId().getName().replace("Output", "Response");
-            return dafnyModulePrefixForShapeId(shape) + newResponseString;
-        }
         return dafnyModulePrefixForShapeId(shape) + shape.getId().getName();
     }
 
@@ -122,9 +112,7 @@ public record DafnyNameResolver(
     }
 
     public static String traitNameForServiceClient(final ServiceShape serviceShape) {
-        return StringUtils.equals(nameForService(serviceShape), "DynamoDB_20120810")
-                ? "IDynamoDBClient"
-                : "I%sClient".formatted(nameForService(serviceShape));
+        return "I%sClient".formatted(nameForService(serviceShape));
     }
 
     public String traitForServiceClient(final ServiceShape serviceShape) {
