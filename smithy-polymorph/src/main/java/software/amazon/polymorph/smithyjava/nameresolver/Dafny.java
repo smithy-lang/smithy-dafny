@@ -83,7 +83,7 @@ public class Dafny extends NameResolver {
     }
 
     public static CodeBlock getMemberField(MemberShape shape) {
-        return CodeBlock.of("_$L", capitalize(shape.getMemberName()));
+        return CodeBlock.of("_$L", shape.getMemberName());
     }
 
     public static CodeBlock getMemberFieldValue(MemberShape shape) {

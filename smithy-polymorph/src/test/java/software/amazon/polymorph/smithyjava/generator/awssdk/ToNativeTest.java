@@ -1,6 +1,7 @@
 package software.amazon.polymorph.smithyjava.generator.awssdk;
 
 import com.squareup.javapoet.CodeBlock;
+import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 
 import org.junit.Before;
@@ -11,7 +12,6 @@ import java.util.Map;
 
 import software.amazon.polymorph.smithyjava.MethodReference;
 import software.amazon.polymorph.smithyjava.ModelConstants;
-import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.ListShape;
@@ -36,34 +36,6 @@ public class ToNativeTest {
     public void setup() {
         model = TestSetupUtils.setupTwoLocalModel(ModelConstants.KMS_KITCHEN, ModelConstants.OTHER_NAMESPACE);
         underTest  = new ToNativeAwsV1(TestSetupUtils.setupAwsSdk(model, "kms"));
-    }
-
-    //TODO: should be in nameresolver.DafnyTest
-    @Test
-    public void getMemberField() {
-        ShapeId structureId = ShapeId.fromParts("com.amazonaws.kms", "Kitchen");
-        StructureShape structureShape = model.expectShape(structureId, StructureShape.class);
-        MemberShape stringMember = structureShape.getMember("name").get();
-        CodeBlock actual = Dafny.getMemberField(stringMember);
-        String expected = "_Name";
-        tokenizeAndAssertEqual(expected, actual.toString());
-    }
-
-    //TODO: should be in nameresolver.DafnyTest
-    @Test
-    public void getMemberFieldValue() {
-        ShapeId structureId = ShapeId.fromParts("com.amazonaws.kms", "Kitchen");
-        StructureShape structureShape = model.expectShape(structureId, StructureShape.class);
-        // if required, get via Field
-        MemberShape requiredMember = structureShape.getMember("name").get();
-        CodeBlock actualRequired = Dafny.getMemberFieldValue(requiredMember);
-        String expectedRequired = "_Name";
-        tokenizeAndAssertEqual(expectedRequired, actualRequired.toString());
-        // if optional, get via dtor_value()
-        MemberShape optionalField = structureShape.getMember("message").get();
-        CodeBlock actualOptional = Dafny.getMemberFieldValue(optionalField);
-        String expectedOptional = "_Message.dtor_value()";
-        tokenizeAndAssertEqual(expectedOptional, actualOptional.toString());
     }
 
     @Test

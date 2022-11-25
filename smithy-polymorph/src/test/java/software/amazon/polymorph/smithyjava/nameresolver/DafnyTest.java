@@ -1,21 +1,28 @@
 package software.amazon.polymorph.smithyjava.nameresolver;
 
+import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.TypeName;
 
 import org.junit.Before;
 import org.junit.Test;
 
+import software.amazon.polymorph.smithyjava.ModelConstants;
+import software.amazon.polymorph.smithyjava.generator.awssdk.TestSetupUtils;
 import software.amazon.polymorph.util.TestModel;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.smithy.model.Model;
+import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.ShapeId;
+import software.amazon.smithy.model.shapes.StructureShape;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
+import static software.amazon.polymorph.util.Tokenizer.tokenizeAndAssertEqual;
 
 public class DafnyTest {
     Dafny underTest;
+    protected Model model;
 
     @Before
     public void setup() {
@@ -27,7 +34,11 @@ public class DafnyTest {
                 map MyMap { key: String, value: String }
                 structure MyStructure {}
                 """;
-        underTest = setupLocalModel(rawModel, "Dafny.Smithy.Example", "smithy.example");
+        model = TestModel.setupModel(
+                (builder, modelAssembler) -> modelAssembler
+                        .addUnparsedModel("test.smithy", rawModel));
+        ServiceShape serviceShape = ModelUtils.serviceFromNamespace(model, "smithy.example");
+        underTest = new Dafny("Dafny.Smithy.Example", model, serviceShape);
     }
 
     @Test
@@ -97,6 +108,42 @@ public class DafnyTest {
     }
 
     @Test
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
+    public void getMemberField() {
+        Model localModel = TestSetupUtils.setupTwoLocalModel(
+                ModelConstants.KMS_KITCHEN,
+                ModelConstants.OTHER_NAMESPACE
+        );
+        ShapeId structureId = ShapeId.fromParts("com.amazonaws.kms", "Kitchen");
+        StructureShape structureShape = localModel.expectShape(structureId, StructureShape.class);
+        MemberShape stringMember = structureShape.getMember("name").get();
+        CodeBlock actual = Dafny.getMemberField(stringMember);
+        String expected = "_name";
+        tokenizeAndAssertEqual(expected, actual.toString());
+    }
+
+    @Test
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
+    public void getMemberFieldValue() {
+        Model localModel = TestSetupUtils.setupTwoLocalModel(
+                ModelConstants.KMS_KITCHEN,
+                ModelConstants.OTHER_NAMESPACE
+        );
+        ShapeId structureId = ShapeId.fromParts("com.amazonaws.kms", "Kitchen");
+        StructureShape structureShape = localModel.expectShape(structureId, StructureShape.class);
+        // if required, get via Field
+        MemberShape requiredMember = structureShape.getMember("name").get();
+        CodeBlock actualRequired = Dafny.getMemberFieldValue(requiredMember);
+        String expectedRequired = "_name";
+        tokenizeAndAssertEqual(expectedRequired, actualRequired.toString());
+        // if optional, get via dtor_value()
+        MemberShape optionalField = structureShape.getMember("message").get();
+        CodeBlock actualOptional = Dafny.getMemberFieldValue(optionalField);
+        String expectedOptional = "_message.dtor_value()";
+        tokenizeAndAssertEqual(expectedOptional, actualOptional.toString());
+    }
+
+    @Test
     public void typeForShapeMember() {
     }
 
@@ -120,15 +167,4 @@ public class DafnyTest {
                 () -> underTest.typeForShape(ShapeId.fromParts("smithy.example", "MyResource")));
     }
 
-    static Dafny setupLocalModel(
-            String rawModel,
-            String packageName,
-            String nameSpace
-    ) {
-        Model localModel = TestModel.setupModel(
-                (builder, modelAssembler) -> modelAssembler
-                        .addUnparsedModel("test.smithy", rawModel));
-        ServiceShape serviceShape = ModelUtils.serviceFromNamespace(localModel, nameSpace);
-        return new Dafny(packageName, localModel, serviceShape);
-    }
 }
