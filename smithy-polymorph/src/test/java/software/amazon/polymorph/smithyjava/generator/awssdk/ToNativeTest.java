@@ -181,7 +181,7 @@ public class ToNativeTest {
         // structureShape.members().size() == 0
         ShapeId simpleId = ShapeId.fromParts("com.amazonaws.kms", "Simple");
         StructureShape simpleShape = model.expectShape(simpleId, StructureShape.class);
-        MethodSpec simpleActual = underTest.generateConvertStructureV1(simpleShape);
+        MethodSpec simpleActual = underTest.modeledStructure(simpleShape);
         tokenizeAndAssertEqual(ToNativeConstants.SIMPLE_STRUCTURE, simpleActual.toString());
         // if optional, check if present
         ShapeId aOptionalId = ShapeId.fromParts("com.amazonaws.kms", "AOptional");

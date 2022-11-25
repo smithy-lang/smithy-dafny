@@ -95,7 +95,7 @@ public class ToNativeAwsV1 extends ToNative {
             case LIST -> generateConvertList(shape.asListShape().get());
             case SET -> generateConvertSet(shape.asSetShape().get());
             case MAP -> generateConvertMap(shape.asMapShape().get());
-            case STRUCTURE -> generateConvertStructureV1(shape.asStructureShape().get());
+            case STRUCTURE -> modeledStructure(shape.asStructureShape().get());
             default -> throw new UnsupportedOperationException(
                     "ShapeId %s is of Type %s, which is not yet supported for ToDafny"
                             .formatted(shapeId, shape.getType()));
@@ -146,7 +146,8 @@ public class ToNativeAwsV1 extends ToNative {
                 .build();
     }
 
-    MethodSpec generateConvertStructureV1(StructureShape structureShape) {
+    @Override
+    protected MethodSpec modeledStructure(StructureShape structureShape) {
         String methodName = capitalize(structureShape.getId().getName());
         ClassName nativeClassName = subject.nativeNameResolver.typeForStructure(structureShape);
         MethodSpec.Builder builder = MethodSpec

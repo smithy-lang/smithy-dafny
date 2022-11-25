@@ -20,8 +20,15 @@ import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.polymorph.smithyjava.unmodeled.CollectionOfErrors;
 import software.amazon.polymorph.smithyjava.unmodeled.NativeError;
 import software.amazon.polymorph.smithyjava.unmodeled.OpaqueError;
+import software.amazon.polymorph.traits.PositionalTrait;
+
+import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.Shape;
+import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.ShapeType;
+import software.amazon.smithy.model.shapes.StructureShape;
+
+import static software.amazon.smithy.utils.StringUtils.capitalize;
 
 /**
  * ToNative is a helper class for the JavaLibrary's Shim.<p>
@@ -52,6 +59,9 @@ public class ToNativeLibrary extends ToNative {
         toNativeMethods.add(collectionError());
         // Any Error
         toNativeMethods.add(dafnyError());
+        // Structures
+        subject.getStructuresInServiceNamespace().stream()
+                .map(this::modeledStructure).forEachOrdered(toNativeMethods::add);
         // Enums
         subject.getEnumsInServiceNamespace().stream()
                 .map(this::modeledEnum).forEachOrdered(toNativeMethods::add);
@@ -114,5 +124,54 @@ public class ToNativeLibrary extends ToNative {
         super.createNativeBuilder(method, OpaqueError.nativeClassName(subject.modelPackageName));
         method.addStatement("$L.obj($L)", NATIVE_BUILDER, VAR_INPUT);
         return super.buildAndReturn(method);
+    }
+
+    @Override
+    protected MethodSpec modeledStructure(StructureShape structureShape) {
+        if (structureShape.hasTrait(PositionalTrait.class)) {
+            return positionalStructure(structureShape);
+        }
+        // if this structure does NOT have a positional trait,
+        // then we can use the abstract's modeledStructure.
+        return super.modeledStructure(structureShape);
+    }
+
+    protected MethodSpec positionalStructure(StructureShape structureShape) {
+        PositionalTrait.validateUse(structureShape);
+        // validateUse ensures there will be 1 member;
+        // thus we know `Optional.get()` will succeed.
+        //noinspection OptionalGetWithoutIsPresent
+        final MemberShape onlyMember = structureShape.members().stream().findFirst().get();
+        final ShapeId onlyMemberId = onlyMember.toShapeId();
+        final String methodName = capitalize(structureShape.getId().getName());
+        final TypeName inputType = subject.dafnyNameResolver.typeForShape(onlyMemberId);
+        final TypeName returnType = subject.nativeNameResolver.typeForShape(onlyMemberId);
+        MethodSpec.Builder method = initializeMethodSpec(methodName, inputType, returnType);
+
+        // Optional and Positional are a weird combo,
+        // particularly in Java,
+        // for now, a non-set optional will return null
+
+        if (onlyMember.isOptional()) {
+            // if optional, check if present
+            method.beginControlFlow("if ($L.is_Some())", VAR_INPUT);
+        }
+        // return result of conversion call of member
+        method.addStatement(returnWithConversionCall(onlyMember));
+        if (onlyMember.isOptional()) {
+            method.endControlFlow();
+            // else, optional is empty, return null
+            method.addStatement(returnNull());
+        }
+        return method.build();
+    }
+
+    protected CodeBlock returnWithConversionCall(final MemberShape shape) {
+        CodeBlock memberConversionMethod = memberConversionMethodReference(shape).asNormalReference();
+        return CodeBlock.of("return $L($L)", memberConversionMethod, VAR_INPUT);
+    }
+
+    protected static CodeBlock returnNull() {
+        return CodeBlock.of("return null");
     }
 }

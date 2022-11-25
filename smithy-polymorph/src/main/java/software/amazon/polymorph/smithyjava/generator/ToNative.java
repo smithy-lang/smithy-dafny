@@ -12,11 +12,13 @@ import software.amazon.polymorph.smithyjava.MethodReference;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 import software.amazon.polymorph.utils.ModelUtils;
+
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.ShapeType;
 import software.amazon.smithy.model.shapes.StringShape;
+import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.EnumDefinition;
 import software.amazon.smithy.model.traits.EnumTrait;
 
@@ -106,6 +108,32 @@ public abstract class ToNative extends Generator {
         return method.build();
     }
 
+    /** Uses a Builder to build the native value of Structure. */
+    protected MethodSpec modeledStructure(StructureShape structureShape) {
+        final ShapeId shapeId = structureShape.getId();
+        final String methodName = capitalize(shapeId.getName());
+        final TypeName inputType = subject.dafnyNameResolver.typeForShape(shapeId);
+        final ClassName returnType = subject.nativeNameResolver.typeForStructure(structureShape);
+        MethodSpec.Builder method = initializeMethodSpec(methodName, inputType, returnType);
+        createNativeBuilder(method, returnType);
+        // For each member
+        structureShape.members()
+                .forEach(member -> {
+                    // if optional, check if present
+                    if (member.isOptional()) {
+                        method.beginControlFlow(
+                                "if ($L.$L.is_Some())",
+                                VAR_INPUT,
+                                Dafny.getMemberField(member));
+                    }
+                    method.addStatement(setWithConversionCall(member));
+                    if (member.isOptional()) {
+                        method.endControlFlow();
+                    }
+                });
+        return buildAndReturn(method);
+    }
+
     protected MethodSpec modeledEnum(StringShape shape) {
         final ClassName returnType = subject.nativeNameResolver.classForEnum(shape);
         MethodSpec.Builder method = modeledEnumCommon(shape, returnType);
@@ -117,7 +145,8 @@ public abstract class ToNative extends Generator {
         return method.build();
     }
 
-    protected MethodSpec.Builder modeledEnumCommon(
+    /** @return MethodSpec.Builder with an If-Return for every known enum value.*/
+    protected final MethodSpec.Builder modeledEnumCommon(
             StringShape shape, ClassName returnType
     ) {
         final ShapeId shapeId = shape.getId();
@@ -130,7 +159,7 @@ public abstract class ToNative extends Generator {
                     "Unnamed enums not supported. ShapeId: %s".formatted(shapeId));
         }
 
-        enumTrait.getValues().stream()
+        enumTrait.getValues().stream().sequential()
                 .map(EnumDefinition::getName)
                 .map(maybeName -> maybeName.orElseThrow(
                         () -> new IllegalArgumentException(
@@ -142,7 +171,7 @@ public abstract class ToNative extends Generator {
                                 "Invalid enum definition name: %s".formatted(name));
                     }
                 })
-                .forEach(name -> method
+                .forEachOrdered(name -> method
                         .beginControlFlow("if ($L.$L())", VAR_INPUT, Dafny.datatypeConstructorIs(name))
                         .addStatement("return $T.$L", returnType, name)
                         .endControlFlow()
