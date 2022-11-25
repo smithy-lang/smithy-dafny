@@ -128,6 +128,7 @@ public abstract class ToDafny extends Generator {
                 variable);
     }
 
+    /** @return CodeBlock assigning result of member conversion to variable. */
     protected CodeBlock memberAssignment(final MemberShape memberShape, CodeBlock variable) {
         CodeBlock getMember = getMember(CodeBlock.of(VAR_INPUT), memberShape);
         if (memberShape.isRequired()) {
@@ -152,9 +153,13 @@ public abstract class ToDafny extends Generator {
     protected MethodSpec modeledEnum(StringShape shape) {
         final ShapeId shapeId = shape.getId();
         String methodName = capitalize(shapeId.getName());
-        final EnumTrait enumTrait = shape.getTrait(EnumTrait.class).orElseThrow();
+        final EnumTrait enumTrait = shape.getTrait(EnumTrait.class).orElseThrow(
+                () -> new IllegalArgumentException(
+                        "Shape must have the enum trait. ShapeId: %s".formatted(shapeId))
+        );
         if (!enumTrait.hasNames()) {
-            throw new UnsupportedOperationException("Unnamed enums not supported");
+            throw new UnsupportedOperationException(
+                    "Unnamed enums not supported. ShapeId: %s".formatted(shapeId));
         }
         ClassName dafnyEnumClass = subject.dafnyNameResolver.classForShape(shape);
 
