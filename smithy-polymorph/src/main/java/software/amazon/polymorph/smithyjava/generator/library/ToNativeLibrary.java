@@ -52,11 +52,13 @@ public class ToNativeLibrary extends ToNative {
 
     TypeSpec toNative() {
         ArrayList<MethodSpec> toNativeMethods = new ArrayList<>();
-        // NativeError is skipped as there is no Dafny allegory of NativeError
         // OpaqueError
         toNativeMethods.add(opaqueError());
         // CollectionError
         toNativeMethods.add(collectionError());
+        // Modeled exception classes
+        subject.getErrorsInServiceNamespace().stream()
+                .map(this::modeledError).forEachOrdered(toNativeMethods::add);
         // Any Error
         toNativeMethods.add(dafnyError());
         // Structures
@@ -116,9 +118,14 @@ public class ToNativeLibrary extends ToNative {
                 .collect(Collectors.toCollection(ArrayList::new));
         allDafnyErrorConstructors.add("Opaque");
         allDafnyErrorConstructors.add("Collection");
-        allDafnyErrorConstructors.forEach(constructorName -> method.beginControlFlow("if ($L.$L())", VAR_INPUT, Dafny.datatypeConstructorIs(constructorName))
-                .addStatement("return $T.Error(($T) $L)", thisClassName, subject.dafnyNameResolver.classForDatatypeConstructor("Error", constructorName), VAR_INPUT)
-                .endControlFlow()
+        allDafnyErrorConstructors.forEach(constructorName ->
+                method.beginControlFlow("if ($L.$L())", VAR_INPUT, Dafny.datatypeConstructorIs(constructorName))
+                        .addStatement(
+                                "return $T.Error(($T) $L)",
+                                thisClassName,
+                                subject.dafnyNameResolver.classForDatatypeConstructor("Error", constructorName),
+                                VAR_INPUT)
+                        .endControlFlow()
         );
         // If the Error cannot be placed into one of the above, call it opaque and move on
         super.createNativeBuilder(method, OpaqueError.nativeClassName(subject.modelPackageName));

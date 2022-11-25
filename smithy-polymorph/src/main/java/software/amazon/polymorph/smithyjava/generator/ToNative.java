@@ -134,6 +134,15 @@ public abstract class ToNative extends Generator {
         return buildAndReturn(method);
     }
 
+    /** Uses a Builder to build the native value of Error. */
+    protected MethodSpec modeledError(final StructureShape shape) {
+        MethodSpec structure = modeledStructure(shape);
+        MethodSpec.Builder builder = structure.toBuilder();
+        builder.setName("Error");
+        builder.returns(subject.nativeNameResolver.typeForStructure(shape));
+        return builder.build();
+    }
+
     protected MethodSpec modeledEnum(StringShape shape) {
         final ClassName returnType = subject.nativeNameResolver.classForEnum(shape);
         MethodSpec.Builder method = modeledEnumCommon(shape, returnType);
