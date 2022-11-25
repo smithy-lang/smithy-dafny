@@ -16,11 +16,10 @@ import java.util.stream.Collectors;
 
 import javax.lang.model.element.Modifier;
 
-import software.amazon.polymorph.smithyjava.MethodReference;
 import software.amazon.polymorph.smithyjava.generator.ToNative;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
-import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 import software.amazon.polymorph.utils.ModelUtils;
+
 import software.amazon.smithy.model.shapes.ListShape;
 import software.amazon.smithy.model.shapes.MapShape;
 import software.amazon.smithy.model.shapes.MemberShape;
@@ -48,6 +47,8 @@ import static software.amazon.smithy.utils.StringUtils.uncapitalize;
  * </ul>
  */
 public class ToNativeAwsV1 extends ToNative {
+    protected final static String VAR_OUTPUT = "converted";
+    protected final static String VAR_TEMP = "temp";
 
     // TODO: for V2 support, use abstract AwsSdk name resolvers and sub class for V1 or V2.
 
@@ -66,7 +67,6 @@ public class ToNativeAwsV1 extends ToNative {
         return Collections.singleton(builder.build());
     }
 
-    @SuppressWarnings("DuplicatedCode")
     TypeSpec toNative() {
         LinkedHashSet<ShapeId> operationInputs = subject.serviceShape.getOperations().stream()
                 .map(shapeId -> subject.model.expectShape(shapeId, OperationShape.class))
@@ -83,7 +83,7 @@ public class ToNativeAwsV1 extends ToNative {
                 .build();
     }
 
-    @SuppressWarnings({"OptionalGetWithoutIsPresent", "DuplicatedCode"})
+    @SuppressWarnings({"OptionalGetWithoutIsPresent"})
     MethodSpec generateConvert(ShapeId shapeId) {
         final Shape shape = subject.model.getShape(shapeId)
                 .orElseThrow(() -> new IllegalStateException("Cannot find shape " + shapeId));
@@ -196,7 +196,8 @@ public class ToNativeAwsV1 extends ToNative {
                 Dafny.aggregateSizeMethod(subject.model.expectShape(member.getTarget()).getType()));
     }
 
-    CodeBlock setWithConversionCall(MemberShape member) {
+    @Override
+    protected CodeBlock setWithConversionCall(MemberShape member) {
         return CodeBlock.of("$L.$L($L($L.$L))",
                 VAR_OUTPUT,
                 setMemberField(member),
@@ -215,35 +216,12 @@ public class ToNativeAwsV1 extends ToNative {
                 uncapitalize(member.getMemberName()), VAR_TEMP);
     }
 
-    CodeBlock setMemberField(MemberShape shape) {
+    /** @return CodeBlock of Method to set a member field. */
+    @Override
+    protected CodeBlock setMemberField(MemberShape shape) {
         // In AWS SDK Java v1, using `with` allows for enums or strings
         // while `set` only allows for strings.
         return CodeBlock.of("with$L", capitalize(shape.getMemberName()));
-    }
-
-    /**
-     * Returns MethodReference that converts from
-     * the Java Dafny memberShape to
-     * the Java Native memberShape.
-     */
-    @SuppressWarnings({"DuplicatedCode", "OptionalGetWithoutIsPresent"})
-    MethodReference memberConversionMethodReference(MemberShape memberShape) {
-        Shape targetShape = subject.model.getShape(memberShape.getTarget()).get();
-        // If the target is simple, use SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE
-        if (ModelUtils.isSmithyApiOrSimpleShape(targetShape)) {
-            return SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(targetShape.getType());
-        }
-        final String methodName = capitalize(targetShape.getId().getName());
-        // if in namespace reference created converter
-        if (subject.nativeNameResolver.isInServiceNameSpace(targetShape.getId())) {
-            return new MethodReference(thisClassName, methodName);
-        }
-        // Otherwise, this target must be in another namespace
-        ClassName otherNamespaceToDafny = ClassName.get(
-                DafnyNameResolverHelpers.packageNameForNamespace(targetShape.getId().getNamespace()),
-                TO_NATIVE
-        );
-        return new MethodReference(otherNamespaceToDafny, methodName);
     }
 
     MethodSpec generateConvertString(ShapeId shapeId) {
