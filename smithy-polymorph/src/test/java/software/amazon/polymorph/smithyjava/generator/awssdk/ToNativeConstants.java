@@ -4,9 +4,9 @@ public class ToNativeConstants {
     static String STRING_CONVERSION = "software.amazon.dafny.conversion.ToNative.Simple.String";
     static String KEY_USAGE_TYPE_CONVERSION = "Dafny.Com.Amazonaws.Kms.ToNative.KeyUsageType";
     static String OTHER_NAMESPACE_CONVERSION = "Dafny.Com.Amazonaws.Other.ToNative.OtherNamespace";
-    static String INIT_TEMP_ARRAY = "com.amazonaws.services.kms.model.KeyUsageType[] listEnum_temp = new com.amazonaws.services.kms.model.KeyUsageType[dafnyValue._ListEnum.length()]";
-    static String SET_WITH_CONVERSION_CALL = "converted.withCiphertext(software.amazon.dafny.conversion.ToNative.Simple.ByteBuffer(dafnyValue._Ciphertext))";
-    static String SET_WITH_CONVERSION_CALL_AND_TO_ARRAY = "converted.withListEnum(Dafny.Com.Amazonaws.Kms.ToNative.KeyUsageTypes(dafnyValue._ListEnum).toArray(listEnum_temp))";
+    static String INIT_TEMP_ARRAY = "com.amazonaws.services.kms.model.KeyUsageType[] listEnum_temp = new com.amazonaws.services.kms.model.KeyUsageType[dafnyValue._listEnum.length()]";
+    static String SET_WITH_CONVERSION_CALL = "converted.withCiphertext(software.amazon.dafny.conversion.ToNative.Simple.ByteBuffer(dafnyValue._ciphertext))";
+    static String SET_WITH_CONVERSION_CALL_AND_TO_ARRAY = "converted.withListEnum(Dafny.Com.Amazonaws.Kms.ToNative.KeyUsageTypes(dafnyValue._listEnum).toArray(listEnum_temp))";
     static String KEY_USAGE_TYPE = """
               public static com.amazonaws.services.kms.model.KeyUsageType KeyUsageType(
                       Dafny.Com.Amazonaws.Kms.Types.KeyUsageType dafnyValue
@@ -61,8 +61,8 @@ public class ToNativeConstants {
               Dafny.Com.Amazonaws.Kms.Types.AOptional dafnyValue
             ) {
               com.amazonaws.services.kms.model.AOptional converted = new com.amazonaws.services.kms.model.AOptional();
-              if (dafnyValue._Message.is_Some()) {
-                converted.withMessage(software.amazon.dafny.conversion.ToNative.Simple.String(dafnyValue._Message.dtor_value()));
+              if (dafnyValue._message.is_Some()) {
+                converted.withMessage(software.amazon.dafny.conversion.ToNative.Simple.String(dafnyValue._message.dtor_value()));
               }
               return converted;
             }
@@ -87,7 +87,7 @@ public class ToNativeConstants {
                   Dafny.Com.Amazonaws.Kms.Types.DoSomethingRequest dafnyValue
               ) {
                 DoSomethingRequest converted = new DoSomethingRequest();
-                converted.withMessage(%s(dafnyValue._Message));
+                converted.withMessage(%s(dafnyValue._message));
                 return converted;
               }
             }

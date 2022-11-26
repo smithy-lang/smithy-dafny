@@ -22,13 +22,13 @@ public class OpaqueError {
             FieldSpec.builder(Object.class, "obj").build()
     );
 
-    public static ClassName className(String packageName) {
+    public static ClassName nativeClassName(String packageName) {
         return ClassName.get(packageName, OPAQUE_ERROR);
     }
 
     public static JavaFile javaFile(String packageName) {
-        ClassName className = className(packageName);
-        ClassName superName = NativeError.className(packageName);
+        ClassName className = nativeClassName(packageName);
+        ClassName superName = NativeError.nativeClassName(packageName);
         BuilderSpecs builderSpecs = new BuilderSpecs(
                 className, superName, OPAQUE_ARGS, THROWABLE_ARGS);
         TypeSpec.Builder spec = TypeSpec

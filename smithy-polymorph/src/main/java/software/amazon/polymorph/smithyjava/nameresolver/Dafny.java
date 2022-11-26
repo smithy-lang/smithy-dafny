@@ -13,6 +13,7 @@ import dafny.DafnyMap;
 import dafny.DafnySequence;
 import dafny.DafnySet;
 import dafny.Tuple0;
+import software.amazon.polymorph.smithyjava.MethodReference;
 import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.MemberShape;
@@ -25,7 +26,6 @@ import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
-import software.amazon.smithy.utils.StringUtils;
 
 import static software.amazon.polymorph.smithyjava.generator.Generator.Constants.SUPPORTED_CONVERSION_AGGREGATE_SHAPES;
 import static software.amazon.polymorph.smithyjava.nameresolver.Constants.SMITHY_API_UNIT;
@@ -52,12 +52,12 @@ public class Dafny extends NameResolver {
         );
     }
 
-    public static String enumCreate(String name) {
+    public static String datatypeConstructorCreate(String name) {
         String dafnyEnumName = dafnyCompilesExtra_(name);
         return "create_" + dafnyEnumName;
     }
 
-    public static String enumIsName(String name) {
+    public static String datatypeConstructorIs(String name) {
         String dafnyEnumName = dafnyCompilesExtra_(name);
         return "is_" + dafnyEnumName;
     }
@@ -84,7 +84,7 @@ public class Dafny extends NameResolver {
     }
 
     public static CodeBlock getMemberField(MemberShape shape) {
-        return CodeBlock.of("_$L", capitalize(shape.getMemberName()));
+        return CodeBlock.of("_$L", shape.getMemberName());
     }
 
     public static CodeBlock getMemberFieldValue(MemberShape shape) {
@@ -124,7 +124,7 @@ public class Dafny extends NameResolver {
             case BIG_INTEGER -> ClassName.get(BigInteger.class);
             case LIST, SET, MAP -> typeForAggregateWithWildcard(shapeId);
             case MEMBER -> typeForShape(shape.asMemberShape().get().getTarget());
-            case STRUCTURE -> typeForStructure(shape.asStructureShape().get());
+            case STRUCTURE -> classForStructure(shape.asStructureShape().get());
             case SERVICE -> typeForService(shape.asServiceShape().get());
             case RESOURCE -> typeForResource(shape.asResourceShape().get());
             /* TODO: Handle Unions
@@ -162,23 +162,51 @@ public class Dafny extends NameResolver {
         };
     }
 
-    public ClassName getDafnyAbstractServiceError() {
+    public ClassName classForError() {
         return ClassName.get(modelPackage, "Error");
     }
 
-    public ClassName getDafnyOpaqueServiceError() {
-        return ClassName.get(modelPackage, "Error_Opaque");
+    public ClassName classForOpaqueError() {
+        return classForDatatypeConstructor("Error", "Opaque");
     }
 
-    // Because we want a ClassName instead of a TypeName
-    // This needs to be public.
-    public ClassName classForShape(Shape shape) {
-        return classForShape(shape.toShapeId());
+    public MethodReference typeDescriptor(ShapeId shapeId) {
+        final Shape shape = model.getShape(shapeId)
+                .orElseThrow(() -> new IllegalStateException("Cannot find shape " + shapeId));
+        ClassName className;
+        if (shape.hasTrait(ErrorTrait.class)) {
+            className = classForError(shape);
+        }
+        if (shape.getId().equals(SMITHY_API_UNIT)) {
+            className = ClassName.get(Tuple0.class);
+        }
+        className = classForNotErrorNotUnitShape(shape);
+        return new MethodReference(className, "_typeDescriptor");
     }
 
-    public ClassName classForShape(ShapeId shapeId) {
+    /*
+    For Datatypes, the destructor (thing) is the left Hand ,
+    and the constructors (x, y) are the right hand of:
+    datatype thing = x | y
+
+    Outside the Dafny world,
+    Datatype constructors are sometimes called variants.
+    */
+    public ClassName classForDatatypeConstructor(String dataTypeName, String constructorName) {
+        return ClassName.get(modelPackage, "%s_%s".formatted(
+                dafnyCompilesExtra_(dataTypeName), dafnyCompilesExtra_(constructorName)));
+    }
+
+    // This method assumes the shape is not an Error nor a Unit
+    ClassName classForNotErrorNotUnitShape(Shape shape) {
+        return classForNotErrorNotUnitShape(shape.toShapeId());
+    }
+
+    // This method assumes the shape is not an Error nor a Unit
+    ClassName classForNotErrorNotUnitShape(ShapeId shapeId) {
         // Assume class will be in model package
         // i.e.: Dafny.<Namespace>.Types.Shape
+        // And that Shape is not an Error
         return ClassName.get(
                 modelPackageNameForNamespace(shapeId.getNamespace()),
                 dafnyCompilesExtra_(capitalize(shapeId.getName()))
@@ -189,7 +217,7 @@ public class Dafny extends NameResolver {
         if (!shape.hasTrait(EnumTrait.class)) {
             return typeForCharacterSequence();
         }
-        return classForShape(shape);
+        return classForNotErrorNotUnitShape(shape);
     }
 
     TypeName typeForCharacterSequence() {
@@ -199,19 +227,19 @@ public class Dafny extends NameResolver {
         );
     }
 
-    ClassName typeForStructure(StructureShape shape) {
+    public ClassName classForStructure(StructureShape shape) {
         if (shape.hasTrait(ErrorTrait.class)) {
-            return typeForError(shape);
+            return classForError(shape);
         }
         if (shape.getId().equals(SMITHY_API_UNIT)) {
             return ClassName.get(Tuple0.class);
         }
-        return classForShape(shape);
+        return classForNotErrorNotUnitShape(shape);
     }
 
-    ClassName typeForError(Shape shape) {
+    ClassName classForError(Shape shape) {
         // AwsCryptographicMaterialProvidersException -> Error_AwsCryptographicMaterialProvidersException
-        ClassName className = classForShape(shape);
+        ClassName className = classForNotErrorNotUnitShape(shape);
         return ClassName.get(className.packageName(), "Error_" + dafnyCompilesExtra_(className.simpleName()));
     }
 

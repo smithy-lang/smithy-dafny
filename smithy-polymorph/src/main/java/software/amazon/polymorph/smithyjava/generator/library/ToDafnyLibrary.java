@@ -29,8 +29,17 @@ import software.amazon.smithy.model.shapes.ShapeType;
 import static software.amazon.smithy.utils.StringUtils.uncapitalize;
 
 /**
- * ToDafny is a helper class for the JavaLibrary's Shim.<p>
- * It holds methods to convert Native Java types to Dafny Java types.<p>
+ * ToDafnyLibrary generates ToDafny,
+ * a helper class for the Java Library's Shim.<p>
+ * ToDafny holds methods to convert Native Java types to Dafny Java types.<p>
+ * As such,
+ * ToDafnyLibrary holds the logic to generate these methods based on:
+ * <ul>
+ *     <li>a smithy model</li>
+ *     <li>knowledge of how smithy-dafny generates Dafny</li>
+ *     <li>knowledge of how Dafny compiles Java</li>
+ *     <li>knowledge of how smithy-java Library generates Java</li>
+ * </ul>
  */
 public class ToDafnyLibrary extends ToDafny {
     // Hack to override CodegenSubject
@@ -51,7 +60,7 @@ public class ToDafnyLibrary extends ToDafny {
 
     TypeSpec toDafny() {
         ArrayList<MethodSpec> toDafnyMethods = new ArrayList<>();
-        // NativeError
+        // NativeError (really, any Error in the service)
         toDafnyMethods.add(nativeError());
         // OpaqueError
         toDafnyMethods.add(opaqueError());
@@ -76,18 +85,18 @@ public class ToDafnyLibrary extends ToDafny {
     // Converts any subclass of NativeError to the correct Dafny Error,
     // or casts it as an OpaqueError.
     MethodSpec nativeError() {
-        TypeName dafnyError = subject.dafnyNameResolver.getDafnyAbstractServiceError();
-        ClassName nativeError = NativeError.className(subject.nativeNameResolver.modelPackage);
+        TypeName dafnyError = subject.dafnyNameResolver.classForError();
+        ClassName nativeError = NativeError.nativeClassName(subject.nativeNameResolver.modelPackage);
         MethodSpec.Builder method = MethodSpec.methodBuilder("Error")
                 .returns(dafnyError)
                 .addModifiers(PUBLIC_STATIC)
                 .addParameter(nativeError, VAR_INPUT);
-        List<ClassName> allErrors = subject.getErrorsInServiceNamespace().stream()
+        List<ClassName> allNativeErrors = subject.getErrorsInServiceNamespace().stream()
                 .map(subject.nativeNameResolver::typeForStructure)
                 .collect(Collectors.toCollection(ArrayList::new));
-        allErrors.add(OpaqueError.className(subject.nativeNameResolver.modelPackage));
-        allErrors.add(CollectionOfErrors.className(subject.nativeNameResolver.modelPackage));
-        allErrors.forEach(errorClassName ->
+        allNativeErrors.add(OpaqueError.nativeClassName(subject.nativeNameResolver.modelPackage));
+        allNativeErrors.add(CollectionOfErrors.nativeClassName(subject.nativeNameResolver.modelPackage));
+        allNativeErrors.forEach(errorClassName ->
                 method.beginControlFlow("if ($L instanceof $T)", VAR_INPUT, errorClassName)
                         .addStatement("return $T.Error(($T) $L)", thisClassName, errorClassName, VAR_INPUT)
                         .endControlFlow()
@@ -98,8 +107,8 @@ public class ToDafnyLibrary extends ToDafny {
     }
 
     MethodSpec opaqueError() {
-        TypeName dafnyError = subject.dafnyNameResolver.getDafnyAbstractServiceError();
-        ClassName opaqueError = OpaqueError.className(subject.nativeNameResolver.modelPackage);
+        TypeName dafnyError = subject.dafnyNameResolver.classForError();
+        ClassName opaqueError = OpaqueError.nativeClassName(subject.nativeNameResolver.modelPackage);
         return MethodSpec.methodBuilder("Error")
                 .returns(dafnyError)
                 .addModifiers(PUBLIC_STATIC)
@@ -109,8 +118,8 @@ public class ToDafnyLibrary extends ToDafny {
     }
 
     MethodSpec collectionError() {
-        ClassName dafnyError = subject.dafnyNameResolver.getDafnyAbstractServiceError();
-        ClassName collectionError = CollectionOfErrors.className(subject.nativeNameResolver.modelPackage);
+        ClassName dafnyError = subject.dafnyNameResolver.classForError();
+        ClassName collectionError = CollectionOfErrors.nativeClassName(subject.nativeNameResolver.modelPackage);
         ParameterizedTypeName listArg = ParameterizedTypeName.get(
                 ClassName.get(DafnySequence.class),
                 WildcardTypeName.subtypeOf(dafnyError)

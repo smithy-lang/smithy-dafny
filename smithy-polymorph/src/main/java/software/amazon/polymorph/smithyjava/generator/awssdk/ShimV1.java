@@ -88,7 +88,7 @@ public class ShimV1 extends Generator {
                 .returns(
                         asDafnyResult(
                                 dafnyOutput,
-                                subject.dafnyNameResolver.getDafnyAbstractServiceError()
+                                subject.dafnyNameResolver.classForError()
                         ))
                 .addParameter(subject.dafnyNameResolver.typeForShape(inputShapeId), "input")
                 .addStatement("$T converted = ToNative.$L(input)",

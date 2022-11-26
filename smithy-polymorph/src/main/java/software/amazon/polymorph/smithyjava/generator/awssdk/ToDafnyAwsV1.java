@@ -6,6 +6,7 @@ import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
+import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.WildcardTypeName;
 
@@ -38,14 +39,23 @@ import software.amazon.smithy.model.traits.EnumTrait;
 import static software.amazon.smithy.utils.StringUtils.capitalize;
 
 /**
+ * ToDafnyAwsV1 generates ToDafny.
  * ToDafny is a helper class for the AwsSdk's {@link ShimV1}.<p>
  * It holds methods to convert
  * a subset of an AWS SDK Service's types to Dafny types.<p>
- * The subset is composed of the:
+ * The subset is composed of:
  * <ul>
  *   <li>All the Service's Operations' outputs
  *   <li>All the Service's Errors
  *   <li>All the fields contained by the above
+ * </ul>
+ * As such,
+ * ToDafnyAwsV1 holds the logic to generate these methods based on:
+ * <ul>
+ *     <li>a smithy model</li>
+ *     <li>knowledge of how smithy-dafny generates Dafny for AWS SDK</li>
+ *     <li>knowledge of how Dafny compiles Java</li>
+ *     <li>knowledge of the patterns of the AWS SDK V1 for Java</li>
  * </ul>
  */
 public class ToDafnyAwsV1 extends ToDafny {
@@ -136,7 +146,7 @@ public class ToDafnyAwsV1 extends ToDafny {
     MethodSpec generateConvertEnumString(ShapeId shapeId) {
         final StringShape shape = subject.model.expectShape(shapeId, StringShape.class);
         String methodName = capitalize(shapeId.getName());
-        ClassName dafnyEnumClass = subject.dafnyNameResolver.classForShape(shape);
+        TypeName dafnyEnumClass = subject.dafnyNameResolver.typeForShape(shapeId);
 
         MethodSpec.Builder builder = MethodSpec
                 .methodBuilder(methodName)
@@ -182,10 +192,7 @@ public class ToDafnyAwsV1 extends ToDafny {
         MemberShape memberShape = shape.getMember();
         CodeBlock memberConverter = memberConversionMethodReference(memberShape).asFunctionalReference();
         CodeBlock genericCall = AGGREGATE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(shape.getType()).asNormalReference();
-        // I am not sure that this typeDescriptor look up logic will always work
-        MethodReference getTypeDescriptor = new MethodReference(
-                subject.dafnyNameResolver.classForShape(memberShape.getTarget()),
-                "_typeDescriptor");
+        MethodReference getTypeDescriptor = subject.dafnyNameResolver.typeDescriptor(memberShape.getTarget());
         ParameterSpec parameterSpec = ParameterSpec
                 .builder(subject.nativeNameResolver.typeForShapeNoEnum(shape.getId()), "nativeValue")
                 .build();
@@ -267,11 +274,11 @@ public class ToDafnyAwsV1 extends ToDafny {
         );
         return MethodSpec.methodBuilder("Error")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                .returns(subject.dafnyNameResolver.getDafnyAbstractServiceError())
+                .returns(subject.dafnyNameResolver.classForError())
                 .addParameter(subject.nativeNameResolver.baseErrorForService(), "nativeValue")
                 .addStatement(memberDeclaration)
                 .addStatement(memberAssignment)
-                .addStatement("return new $T(message)", subject.dafnyNameResolver.getDafnyOpaqueServiceError())
+                .addStatement("return new $T(message)", subject.dafnyNameResolver.classForOpaqueError())
                 .build();
     }
 }

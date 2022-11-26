@@ -4,6 +4,7 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
+import com.squareup.javapoet.TypeName;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,9 +41,8 @@ public abstract class ToDafny extends Generator {
     protected static final ClassName COMMON_TO_DAFNY_AGGREGATE = ClassName.get(software.amazon.dafny.conversion.ToDafny.Aggregate.class);
     protected final static String VAR_INPUT = "nativeValue";
     protected static final String TO_DAFNY = "ToDafny";
-    protected static final Modifier[] PUBLIC_STATIC = new Modifier[]{Modifier.PUBLIC, Modifier.STATIC};
     /**
-     * The class name of the AWS SDK's Service's Shim's ToDafny class.
+     * The class name of the Subject's Shim's ToDafny class.
      */
     protected final ClassName thisClassName;
 
@@ -129,6 +129,7 @@ public abstract class ToDafny extends Generator {
                 variable);
     }
 
+    /** @return CodeBlock assigning result of member conversion to variable. */
     protected CodeBlock memberAssignment(final MemberShape memberShape, CodeBlock variable) {
         CodeBlock getMember = getMember(CodeBlock.of(VAR_INPUT), memberShape);
         if (memberShape.isRequired()) {
@@ -153,11 +154,15 @@ public abstract class ToDafny extends Generator {
     protected MethodSpec modeledEnum(StringShape shape) {
         final ShapeId shapeId = shape.getId();
         String methodName = capitalize(shapeId.getName());
-        final EnumTrait enumTrait = shape.getTrait(EnumTrait.class).orElseThrow();
+        final EnumTrait enumTrait = shape.getTrait(EnumTrait.class).orElseThrow(
+                () -> new IllegalArgumentException(
+                        "Shape must have the enum trait. ShapeId: %s".formatted(shapeId))
+        );
         if (!enumTrait.hasNames()) {
-            throw new UnsupportedOperationException("Unnamed enums not supported");
+            throw new UnsupportedOperationException(
+                    "Unnamed enums not supported. ShapeId: %s".formatted(shapeId));
         }
-        ClassName dafnyEnumClass = subject.dafnyNameResolver.classForShape(shape);
+        TypeName dafnyEnumClass = subject.dafnyNameResolver.typeForShape(shapeId);
 
         MethodSpec.Builder builder = MethodSpec
                 .methodBuilder(methodName)
@@ -178,7 +183,7 @@ public abstract class ToDafny extends Generator {
                 .forEach(name -> builder
                         .beginControlFlow("case $L:", name)
                         .addStatement(
-                                "return $T.$L()", dafnyEnumClass, Dafny.enumCreate(name))
+                                "return $T.$L()", dafnyEnumClass, Dafny.datatypeConstructorCreate(name))
                         .endControlFlow()
                 );
 
@@ -188,7 +193,7 @@ public abstract class ToDafny extends Generator {
                         RuntimeException.class,
                         "Cannot convert ",
                         VAR_INPUT,
-                        " to %s.".formatted(dafnyEnumClass.canonicalName()))
+                        " to %s.".formatted(dafnyEnumClass))
                 .endControlFlow();
         builder.endControlFlow();
         return builder.build();
@@ -234,7 +239,7 @@ public abstract class ToDafny extends Generator {
         MethodSpec structure = modeledStructure(shape);
         MethodSpec.Builder builder = structure.toBuilder();
         builder.setName("Error");
-        builder.returns(subject.dafnyNameResolver.getDafnyAbstractServiceError());
+        builder.returns(subject.dafnyNameResolver.classForError());
         return builder.build();
     }
 }
