@@ -13,6 +13,7 @@ import dafny.DafnyMap;
 import dafny.DafnySequence;
 import dafny.DafnySet;
 import dafny.Tuple0;
+import software.amazon.polymorph.smithyjava.MethodReference;
 import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.MemberShape;
@@ -170,6 +171,20 @@ public class Dafny extends NameResolver {
         /*return ClassName.get(modelPackage, "Error_Opaque");*/
     }
 
+    public MethodReference typeDescriptor(ShapeId shapeId) {
+        final Shape shape = model.getShape(shapeId)
+                .orElseThrow(() -> new IllegalStateException("Cannot find shape " + shapeId));
+        ClassName className;
+        if (shape.hasTrait(ErrorTrait.class)) {
+            className = classForError(shape);
+        }
+        if (shape.getId().equals(SMITHY_API_UNIT)) {
+            className = ClassName.get(Tuple0.class);
+        }
+        className = classForNotErrorNotUnitShape(shape);
+        return new MethodReference(className, "_typeDescriptor");
+    }
+
     /*
     For Datatypes, the destructor (thing) is the left Hand ,
     and the constructors (x, y) are the right hand of:
@@ -183,15 +198,16 @@ public class Dafny extends NameResolver {
                 dafnyCompilesExtra_(dataTypeName), dafnyCompilesExtra_(constructorName)));
     }
 
-    // Because we want a ClassName instead of a TypeName
-    // This needs to be public.
-    public ClassName classForShape(Shape shape) {
-        return classForShape(shape.toShapeId());
+    // This method assumes the shape is not an Error nor a Unit
+    ClassName classForNotErrorNotUnitShape(Shape shape) {
+        return classForNotErrorNotUnitShape(shape.toShapeId());
     }
 
-    public ClassName classForShape(ShapeId shapeId) {
+    // This method assumes the shape is not an Error nor a Unit
+    ClassName classForNotErrorNotUnitShape(ShapeId shapeId) {
         // Assume class will be in model package
         // i.e.: Dafny.<Namespace>.Types.Shape
+        // And that Shape is not an Error
         return ClassName.get(
                 modelPackageNameForNamespace(shapeId.getNamespace()),
                 dafnyCompilesExtra_(capitalize(shapeId.getName()))
@@ -202,7 +218,7 @@ public class Dafny extends NameResolver {
         if (!shape.hasTrait(EnumTrait.class)) {
             return typeForCharacterSequence();
         }
-        return classForShape(shape);
+        return classForNotErrorNotUnitShape(shape);
     }
 
     TypeName typeForCharacterSequence() {
@@ -214,17 +230,17 @@ public class Dafny extends NameResolver {
 
     public ClassName classForStructure(StructureShape shape) {
         if (shape.hasTrait(ErrorTrait.class)) {
-            return typeForError(shape);
+            return classForError(shape);
         }
         if (shape.getId().equals(SMITHY_API_UNIT)) {
             return ClassName.get(Tuple0.class);
         }
-        return classForShape(shape);
+        return classForNotErrorNotUnitShape(shape);
     }
 
-    ClassName typeForError(Shape shape) {
+    ClassName classForError(Shape shape) {
         // AwsCryptographicMaterialProvidersException -> Error_AwsCryptographicMaterialProvidersException
-        ClassName className = classForShape(shape);
+        ClassName className = classForNotErrorNotUnitShape(shape);
         return ClassName.get(className.packageName(), "Error_" + dafnyCompilesExtra_(className.simpleName()));
     }
 

@@ -6,6 +6,7 @@ import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
+import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.WildcardTypeName;
 
@@ -136,7 +137,7 @@ public class ToDafnyAwsV1 extends ToDafny {
     MethodSpec generateConvertEnumString(ShapeId shapeId) {
         final StringShape shape = subject.model.expectShape(shapeId, StringShape.class);
         String methodName = capitalize(shapeId.getName());
-        ClassName dafnyEnumClass = subject.dafnyNameResolver.classForShape(shape);
+        TypeName dafnyEnumClass = subject.dafnyNameResolver.typeForShape(shapeId);
 
         MethodSpec.Builder builder = MethodSpec
                 .methodBuilder(methodName)
@@ -182,10 +183,7 @@ public class ToDafnyAwsV1 extends ToDafny {
         MemberShape memberShape = shape.getMember();
         CodeBlock memberConverter = memberConversionMethodReference(memberShape).asFunctionalReference();
         CodeBlock genericCall = AGGREGATE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(shape.getType()).asNormalReference();
-        // I am not sure that this typeDescriptor look up logic will always work
-        MethodReference getTypeDescriptor = new MethodReference(
-                subject.dafnyNameResolver.classForShape(memberShape.getTarget()),
-                "_typeDescriptor");
+        MethodReference getTypeDescriptor = subject.dafnyNameResolver.typeDescriptor(memberShape.getTarget());
         ParameterSpec parameterSpec = ParameterSpec
                 .builder(subject.nativeNameResolver.typeForShapeNoEnum(shape.getId()), "nativeValue")
                 .build();

@@ -4,6 +4,7 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
+import com.squareup.javapoet.TypeName;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -161,7 +162,7 @@ public abstract class ToDafny extends Generator {
             throw new UnsupportedOperationException(
                     "Unnamed enums not supported. ShapeId: %s".formatted(shapeId));
         }
-        ClassName dafnyEnumClass = subject.dafnyNameResolver.classForShape(shape);
+        TypeName dafnyEnumClass = subject.dafnyNameResolver.typeForShape(shapeId);
 
         MethodSpec.Builder builder = MethodSpec
                 .methodBuilder(methodName)
@@ -192,7 +193,7 @@ public abstract class ToDafny extends Generator {
                         RuntimeException.class,
                         "Cannot convert ",
                         VAR_INPUT,
-                        " to %s.".formatted(dafnyEnumClass.canonicalName()))
+                        " to %s.".formatted(dafnyEnumClass))
                 .endControlFlow();
         builder.endControlFlow();
         return builder.build();
