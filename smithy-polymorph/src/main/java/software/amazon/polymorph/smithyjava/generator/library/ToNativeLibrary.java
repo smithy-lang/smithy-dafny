@@ -23,7 +23,6 @@ import software.amazon.polymorph.smithyjava.unmodeled.OpaqueError;
 import software.amazon.polymorph.traits.PositionalTrait;
 
 import software.amazon.smithy.model.shapes.MemberShape;
-import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.ShapeType;
 import software.amazon.smithy.model.shapes.StructureShape;
@@ -101,19 +100,15 @@ public class ToNativeLibrary extends ToNative {
         ClassName inputType = subject.dafnyNameResolver.classForError();
         ClassName returnType = NativeError.nativeClassName(subject.modelPackageName);
         MethodSpec.Builder method = super.initializeErrorMethodSpec(inputType, returnType);
-        // Ok... this is silly complicated... but:
-        // we need a list of `<datatypeConstructor>`,
-        // but we only have the logic exposed to look up the TypeName,
-        // which, as a string, will be <modelPackage>.Error_<datatypeConstructor>,
-        // so we "cast that" to a class name
-        // (which is valid, as Dafny does generate a class for these)
-        // and get just the "simpleName" (i.e.: Error_<datatypeConstructor>)
+        // We need a list of `<datatypeConstructor>`.
+        // We have the logic exposed to look up the ClassName,
+        // which, as a string, will be <modelPackage>.Error_<datatypeConstructor>.
+        // We get the "simpleName" (i.e.: Error_<datatypeConstructor>),
         // and, finally, replace "Error_" with nothing, thus getting just "<datatypeConstructor>".
         List<String> allDafnyErrorConstructors = subject.getErrorsInServiceNamespace().stream()
-                .map(Shape::getId)
-                .map(subject.dafnyNameResolver::typeForShape)
-                .map(TypeName::toString)
-                .map(typeName -> ClassName.bestGuess(typeName).simpleName())
+                .sequential()
+                .map(subject.dafnyNameResolver::classForStructure)
+                .map(ClassName::simpleName)
                 .map(simpleName -> simpleName.replaceFirst("Error_", ""))
                 .collect(Collectors.toCollection(ArrayList::new));
         allDafnyErrorConstructors.add("Opaque");

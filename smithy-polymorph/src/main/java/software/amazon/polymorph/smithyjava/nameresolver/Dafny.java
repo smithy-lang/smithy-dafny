@@ -123,7 +123,7 @@ public class Dafny extends NameResolver {
             case BIG_INTEGER -> ClassName.get(BigInteger.class);
             case LIST, SET, MAP -> typeForAggregateWithWildcard(shapeId);
             case MEMBER -> typeForShape(shape.asMemberShape().get().getTarget());
-            case STRUCTURE -> typeForStructure(shape.asStructureShape().get());
+            case STRUCTURE -> classForStructure(shape.asStructureShape().get());
             case SERVICE -> typeForService(shape.asServiceShape().get());
             case RESOURCE -> typeForResource(shape.asResourceShape().get());
             /* TODO: Handle Unions
@@ -212,7 +212,7 @@ public class Dafny extends NameResolver {
         );
     }
 
-    ClassName typeForStructure(StructureShape shape) {
+    public ClassName classForStructure(StructureShape shape) {
         if (shape.hasTrait(ErrorTrait.class)) {
             return typeForError(shape);
         }
