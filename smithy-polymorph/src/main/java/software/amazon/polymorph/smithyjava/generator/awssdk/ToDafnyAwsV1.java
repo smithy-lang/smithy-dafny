@@ -39,14 +39,23 @@ import software.amazon.smithy.model.traits.EnumTrait;
 import static software.amazon.smithy.utils.StringUtils.capitalize;
 
 /**
+ * ToDafnyAwsV1 generates ToDafny.
  * ToDafny is a helper class for the AwsSdk's {@link ShimV1}.<p>
  * It holds methods to convert
  * a subset of an AWS SDK Service's types to Dafny types.<p>
- * The subset is composed of the:
+ * The subset is composed of:
  * <ul>
  *   <li>All the Service's Operations' outputs
  *   <li>All the Service's Errors
  *   <li>All the fields contained by the above
+ * </ul>
+ * As such,
+ * ToDafnyAwsV1 holds the logic to generate these methods based on:
+ * <ul>
+ *     <li>a smithy model</li>
+ *     <li>knowledge of how smithy-dafny generates Dafny for AWS SDK</li>
+ *     <li>knowledge of how Dafny compiles Java</li>
+ *     <li>knowledge of the patterns of the AWS SDK V1 for Java</li>
  * </ul>
  */
 public class ToDafnyAwsV1 extends ToDafny {
