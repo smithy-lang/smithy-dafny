@@ -36,14 +36,23 @@ import static software.amazon.smithy.utils.StringUtils.capitalize;
 import static software.amazon.smithy.utils.StringUtils.uncapitalize;
 
 /**
+ * ToNativeAwsV1 generates ToNative.
  * ToNative is a helper class for the AwsSdk's {@link ShimV1}.<p>
- * It contains methods to convert
+ * ToNative contains methods to convert
  * a subset of an AWS SDK Service's types
  * from Dafny generated Java to native Java.<p>
- * The subset is composed of the:
+ * The subset is composed of:
  * <ul>
  *   <li>All the Service's Operations' inputs
  *   <li>All the fields contained by the above
+ * </ul>
+ * As such,
+ * ToNativeAwsV1 holds the logic to generate these methods based on:
+ * <ul>
+ *     <li>a smithy model</li>
+ *     <li>knowledge of how smithy-dafny generates Dafny for AWS SDK</li>
+ *     <li>knowledge of how Dafny compiles Java</li>
+ *     <li>knowledge of the patterns of the AWS SDK V1 for Java</li>
  * </ul>
  */
 public class ToNativeAwsV1 extends ToNative {
