@@ -87,12 +87,14 @@ public class ToDafnyTest {
         StructureShape structureShape = model.expectShape(structureId, StructureShape.class);
         // if required
         MemberShape memberRequired = structureShape.getMember("name").get();
-        CodeBlock actualRequired = underTest.memberAssignment(memberRequired, CodeBlock.of("name"));
+        CodeBlock actualRequired = underTest.memberAssignment(
+                memberRequired, CodeBlock.of("name"), CodeBlock.of("nativeValue.getName()"));
         String expectedRequired = ToDafnyConstants.MEMBER_ASSIGNMENT_REQUIRED;
         tokenizeAndAssertEqual(expectedRequired, actualRequired.toString());
         // if optional
         MemberShape memberOptional = structureShape.getMember("message").get();
-        CodeBlock actualOptional = underTest.memberAssignment(memberOptional, CodeBlock.of("message"));
+        CodeBlock actualOptional = underTest.memberAssignment(
+                memberOptional, CodeBlock.of("message"), CodeBlock.of("nativeValue.getMessage()"));
         String expectedOptional = ToDafnyConstants.MEMBER_ASSIGNMENT_OPTIONAL;
         tokenizeAndAssertEqual(expectedOptional, actualOptional.toString());
     }

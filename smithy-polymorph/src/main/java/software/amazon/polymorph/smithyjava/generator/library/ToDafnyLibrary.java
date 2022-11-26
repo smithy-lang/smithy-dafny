@@ -23,9 +23,14 @@ import software.amazon.polymorph.smithyjava.generator.ToDafny;
 import software.amazon.polymorph.smithyjava.unmodeled.CollectionOfErrors;
 import software.amazon.polymorph.smithyjava.unmodeled.NativeError;
 import software.amazon.polymorph.smithyjava.unmodeled.OpaqueError;
-import software.amazon.smithy.model.shapes.MemberShape;
-import software.amazon.smithy.model.shapes.ShapeType;
+import software.amazon.polymorph.traits.PositionalTrait;
 
+import software.amazon.smithy.model.shapes.MemberShape;
+import software.amazon.smithy.model.shapes.ShapeId;
+import software.amazon.smithy.model.shapes.ShapeType;
+import software.amazon.smithy.model.shapes.StructureShape;
+
+import static software.amazon.smithy.utils.StringUtils.capitalize;
 import static software.amazon.smithy.utils.StringUtils.uncapitalize;
 
 /**
@@ -138,6 +143,38 @@ public class ToDafnyLibrary extends ToDafny {
                         )
                 .addStatement("return $T.create_Collection(list)", dafnyError)
                 .build();
+    }
+
+    @Override
+    protected MethodSpec modeledStructure(
+            final StructureShape structureShape
+    ) {
+        if (structureShape.hasTrait(PositionalTrait.class)) {
+            return positionalStructure(structureShape);
+        }
+        return super.modeledStructure(structureShape);
+    }
+
+    protected MethodSpec positionalStructure(StructureShape shape) {
+        PositionalTrait.validateUse(shape);
+        //validateUse ensures there will be 1 member;
+        //thus we know `Optional.get()` will succeed.
+        //noinspection OptionalGetWithoutIsPresent
+        final MemberShape onlyMember = shape.members().stream().findFirst().get();
+        final ShapeId onlyMemberId = onlyMember.toShapeId();
+        final String methodName = capitalize(shape.getId().getName());
+        final TypeName inputType = subject.nativeNameResolver.typeForShape(onlyMemberId);
+        final TypeName outputType = subject.dafnyNameResolver.typeForShape(onlyMemberId);
+        MethodSpec.Builder builder = MethodSpec
+                .methodBuilder(methodName)
+                .addModifiers(PUBLIC_STATIC)
+                .returns(outputType)
+                .addParameter(inputType, VAR_INPUT);
+        CodeBlock variable = CodeBlock.of("$L", uncapitalize(onlyMember.getMemberName()));
+        builder.addStatement(memberDeclaration(onlyMember, variable));
+        builder.addStatement(memberAssignment(onlyMember, variable, CodeBlock.of("$L", VAR_INPUT)));
+        builder.addStatement("return $L", variable);
+        return builder.build();
     }
 
     /** For Library structure members, the getter is `un-capitalized member name`. */
