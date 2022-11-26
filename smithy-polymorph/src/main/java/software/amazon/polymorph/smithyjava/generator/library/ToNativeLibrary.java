@@ -30,11 +30,21 @@ import software.amazon.smithy.model.shapes.StructureShape;
 import static software.amazon.smithy.utils.StringUtils.capitalize;
 
 /**
- * ToNative is a helper class for the JavaLibrary's Shim.<p>
- * It holds methods to convert Dafny Java types to Native Java types.<p>
+ * ToNativeLibrary generates ToNative,
+ * a helper class for the Java Library's Shim.<p>
+ * ToNative holds methods to convert Dafny Java types to Native Java types.<p>
+ * As such,
+ * ToNativeLibrary holds the logic to generate these methods based on:
+ * <ul>
+ *     <li>a smithy model</li>
+ *     <li>knowledge of how smithy-dafny generates Dafny</li>
+ *     <li>knowledge of how Dafny compiles Java</li>
+ *     <li>knowledge of how smithy-java Library generates Java</li>
+ * </ul>
  */
 public class ToNativeLibrary extends ToNative {
     // Hack to override CodegenSubject
+    // See code comment on ModelCodegen for details.
     final JavaLibrary subject;
 
     public ToNativeLibrary(JavaLibrary javaLibrary) {
