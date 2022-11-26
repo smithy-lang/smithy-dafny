@@ -14,11 +14,11 @@ import java.util.Optional;
 
 import javax.lang.model.element.Modifier;
 
-import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.smithyjava.MethodReference;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 import software.amazon.polymorph.utils.ModelUtils;
+
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
@@ -76,38 +76,26 @@ public abstract class ToDafny extends Generator {
     ) {
         final ShapeId shapeId = structureShape.getId();
         String methodName = capitalize(structureShape.getId().getName());
-        ShapeId returnId = shapeId;
-        if (structureShape.hasTrait(PositionalTrait.class)) {
-            PositionalTrait.validateUse(structureShape);
-            //validateUse ensures there will be 1 member;
-            //thus we know `Optional.get()` will succeed.
-            //noinspection OptionalGetWithoutIsPresent
-            returnId = structureShape.members().stream().findFirst().get().toShapeId();
-        }
         MethodSpec.Builder builder = MethodSpec
                 .methodBuilder(methodName)
                 .addModifiers(PUBLIC_STATIC)
-                .returns(subject.dafnyNameResolver.typeForShape(returnId))
+                .returns(subject.dafnyNameResolver.typeForShape(shapeId))
                 .addParameter(subject.nativeNameResolver.typeForStructure(structureShape), VAR_INPUT);
 
         if (structureShape.members().size() == 0) {
             builder.addStatement("return new $T()", subject.dafnyNameResolver.typeForShape(shapeId));
             return builder.build();
         }
-
         List<CodeBlock> variables = new ArrayList<>(structureShape.members().size());
         structureShape.members().forEach(memberShape ->
                 {
-                    CodeBlock variable = CodeBlock.of("$L", uncapitalize(memberShape.getMemberName()));
-                    builder.addStatement(memberDeclaration(memberShape, variable));
-                    builder.addStatement(memberAssignment(memberShape, variable));
-                    variables.add(variable);
+                    CodeBlock varOut = CodeBlock.of("$L", uncapitalize(memberShape.getMemberName()));
+                    CodeBlock varIn = getMember(CodeBlock.of(VAR_INPUT), memberShape);
+                    builder.addStatement(memberDeclaration(memberShape, varOut));
+                    builder.addStatement(memberAssignment(memberShape, varOut, varIn));
+                    variables.add(varOut);
                 }
         );
-        if (structureShape.hasTrait(PositionalTrait.class)) {
-            builder.addStatement("return $L", variables.get(0));
-            return builder.build();
-        }
         builder.addStatement("return new $T($L)",
                 subject.dafnyNameResolver.typeForShape(shapeId),
                 CodeBlock.join(variables, ", ")
@@ -130,22 +118,25 @@ public abstract class ToDafny extends Generator {
     }
 
     /** @return CodeBlock assigning result of member conversion to variable. */
-    protected CodeBlock memberAssignment(final MemberShape memberShape, CodeBlock variable) {
-        CodeBlock getMember = getMember(CodeBlock.of(VAR_INPUT), memberShape);
+    protected CodeBlock memberAssignment(
+            final MemberShape memberShape,
+            CodeBlock outputVar,
+            CodeBlock inputVar
+    ) {
         if (memberShape.isRequired()) {
             return CodeBlock.of(
                     "$L = $L",
-                    variable,
-                    memberConversion(memberShape, getMember)
+                    outputVar,
+                    memberConversion(memberShape, inputVar)
             );
         }
         return CodeBlock.of(
                 "$L = $T.nonNull($L) ?\n$T.create_Some($L)\n: $T.create_None()",
-                variable,
+                outputVar,
                 ClassName.get(Objects.class),
-                getMember,
+                inputVar,
                 ClassName.get("Wrappers_Compile", "Option"),
-                memberConversion(memberShape, getMember),
+                memberConversion(memberShape, inputVar),
                 ClassName.get("Wrappers_Compile", "Option")
         );
     }
@@ -203,10 +194,10 @@ public abstract class ToDafny extends Generator {
     abstract protected CodeBlock getMember(CodeBlock variableName, MemberShape memberShape);
 
     /** CodeBlock invoking the member conversion method. */
-    CodeBlock memberConversion(MemberShape memberShape, CodeBlock getMemberCall) {
+    protected CodeBlock memberConversion(MemberShape memberShape, CodeBlock inputVar) {
         return CodeBlock.of("$L($L)",
                 memberConversionMethodReference(memberShape).asNormalReference(),
-                getMemberCall
+                inputVar
         );
     }
 
