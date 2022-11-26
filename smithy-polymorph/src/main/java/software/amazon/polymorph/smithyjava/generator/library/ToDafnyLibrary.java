@@ -29,8 +29,17 @@ import software.amazon.smithy.model.shapes.ShapeType;
 import static software.amazon.smithy.utils.StringUtils.uncapitalize;
 
 /**
- * ToDafny is a helper class for the JavaLibrary's Shim.<p>
- * It holds methods to convert Native Java types to Dafny Java types.<p>
+ * ToDafnyLibrary generates ToDafny,
+ * a helper class for the Java Library's Shim.<p>
+ * ToDafny holds methods to convert Native Java types to Dafny Java types.<p>
+ * As such,
+ * ToDafnyLibrary holds the logic to generate these methods based on:
+ * <ul>
+ *     <li>a smithy model</li>
+ *     <li>knowledge of how smithy-dafny generates Dafny</li>
+ *     <li>knowledge of how Dafny compiles Java</li>
+ *     <li>knowledge of how smithy-java Library generates Java</li>
+ * </ul>
  */
 public class ToDafnyLibrary extends ToDafny {
     // Hack to override CodegenSubject
