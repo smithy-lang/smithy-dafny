@@ -168,7 +168,6 @@ public class Dafny extends NameResolver {
 
     public ClassName classForOpaqueError() {
         return classForDatatypeConstructor("Error", "Opaque");
-        /*return ClassName.get(modelPackage, "Error_Opaque");*/
     }
 
     public MethodReference typeDescriptor(ShapeId shapeId) {
