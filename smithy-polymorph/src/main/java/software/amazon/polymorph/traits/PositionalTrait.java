@@ -75,4 +75,16 @@ public class PositionalTrait extends AbstractTrait implements ToSmithyBuilder<Po
                 .addTrait(positionalTraitDefinition)
                 .build();
     }
+
+    public static void validateUse(StructureShape shape) {
+        if (!shape.hasTrait(PositionalTrait.class)) {
+            return;
+        }
+        if (shape.members().size() == 1) {
+            return;
+        }
+        String msg = "Structures with Positional Trait MUST have one and ONLY one member."
+                + " Structure: %s".formatted(shape.getId());
+        throw new IllegalArgumentException(msg);
+    }
 }

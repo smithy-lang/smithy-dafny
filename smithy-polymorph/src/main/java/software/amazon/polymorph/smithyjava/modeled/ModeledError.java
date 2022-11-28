@@ -25,7 +25,7 @@ public class ModeledError {
 
     public static JavaFile javaFile(String packageName, StructureShape shape, CodegenSubject subject) {
         ClassName className = ClassName.get(packageName, shape.getId().getName());
-        ClassName superName = NativeError.className(packageName);
+        ClassName superName = NativeError.nativeClassName(packageName);
         List<FieldSpec> modelFields = BuilderSpecs.shapeToArgs(shape, subject.nativeNameResolver);
         BuilderSpecs builderSpecs = new BuilderSpecs(
                 className, superName, modelFields, THROWABLE_ARGS);

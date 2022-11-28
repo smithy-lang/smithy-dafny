@@ -23,6 +23,7 @@ import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 
 public class BuilderSpecs {
+    /** Also the name of the method to initialize a builder. */
     public static String BUILDER_VAR = "builder";
 
     @Nonnull private final ClassName className;
@@ -57,7 +58,7 @@ public class BuilderSpecs {
                 .collect(Collectors.toList());
     }
 
-    static ClassName builderInterfaceName(ClassName className) {
+    public static ClassName builderInterfaceName(ClassName className) {
         return className.nestedClass("Builder");
     }
 

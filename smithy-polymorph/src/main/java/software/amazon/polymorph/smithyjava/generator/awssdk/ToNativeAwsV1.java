@@ -7,25 +7,19 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.lang.model.element.Modifier;
 
-import software.amazon.polymorph.smithyjava.MethodReference;
-import software.amazon.polymorph.smithyjava.generator.Generator;
+import software.amazon.polymorph.smithyjava.generator.ToNative;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
-import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 import software.amazon.polymorph.utils.ModelUtils;
+
 import software.amazon.smithy.model.shapes.ListShape;
 import software.amazon.smithy.model.shapes.MapShape;
 import software.amazon.smithy.model.shapes.MemberShape;
@@ -36,67 +30,43 @@ import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.ShapeType;
 import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
-import software.amazon.smithy.model.traits.EnumDefinition;
 import software.amazon.smithy.model.traits.EnumTrait;
 
-import static software.amazon.polymorph.smithyjava.generator.Generator.Constants.IDENTITY_FUNCTION;
 import static software.amazon.smithy.utils.StringUtils.capitalize;
 import static software.amazon.smithy.utils.StringUtils.uncapitalize;
 
 /**
+ * ToNativeAwsV1 generates ToNative.
  * ToNative is a helper class for the AwsSdk's {@link ShimV1}.<p>
- * It contains methods to convert
+ * ToNative contains methods to convert
  * a subset of an AWS SDK Service's types
  * from Dafny generated Java to native Java.<p>
- * The subset is composed of the:
+ * The subset is composed of:
  * <ul>
  *   <li>All the Service's Operations' inputs
  *   <li>All the fields contained by the above
  * </ul>
+ * As such,
+ * ToNativeAwsV1 holds the logic to generate these methods based on:
+ * <ul>
+ *     <li>a smithy model</li>
+ *     <li>knowledge of how smithy-dafny generates Dafny for AWS SDK</li>
+ *     <li>knowledge of how Dafny compiles Java</li>
+ *     <li>knowledge of the patterns of the AWS SDK V1 for Java</li>
+ * </ul>
  */
-public class ToNative extends Generator {
-    /**
-     * The keys are the Dafny generated java input type,
-     * the values are the method that converts from that input to
-     * the idiomatic java type.
-     */
-    static final Map<ShapeType, MethodReference> AGGREGATE_CONVERSION_METHOD_FROM_SHAPE_TYPE;
-    static final Map<ShapeType, MethodReference> SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE;
-    static final ClassName COMMON_TO_NATIVE_SIMPLE = ClassName.get(software.amazon.dafny.conversion.ToNative.Simple.class);
-    static final ClassName COMMON_TO_NATIVE_AGGREGATE = ClassName.get(software.amazon.dafny.conversion.ToNative.Aggregate.class);
-    private final static String VAR_INPUT = "dafnyValue";
-    private final static String VAR_OUTPUT = "converted";
-    private final static String VAR_TEMP = "temp";
-    private final static String TO_NATIVE = "ToNative";
-    private static final Logger LOGGER = LoggerFactory.getLogger(ToNative.class);
+public class ToNativeAwsV1 extends ToNative {
+    protected final static String VAR_OUTPUT = "converted";
+    protected final static String VAR_TEMP = "temp";
 
-    static {
-        AGGREGATE_CONVERSION_METHOD_FROM_SHAPE_TYPE = Map.ofEntries(
-                Map.entry(ShapeType.LIST, new MethodReference(COMMON_TO_NATIVE_AGGREGATE, "GenericToList")),
-                Map.entry(ShapeType.SET, new MethodReference(COMMON_TO_NATIVE_AGGREGATE, "GenericToSet")),
-                Map.entry(ShapeType.MAP, new MethodReference(COMMON_TO_NATIVE_AGGREGATE, "GenericToMap"))
-        );
-        SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE = Map.ofEntries(
-                Map.entry(ShapeType.BLOB, new MethodReference(COMMON_TO_NATIVE_SIMPLE, "ByteBuffer")),
-                Map.entry(ShapeType.BOOLEAN, IDENTITY_FUNCTION),
-                Map.entry(ShapeType.STRING, new MethodReference(COMMON_TO_NATIVE_SIMPLE, "String")),
-                // TODO: Timestamp should be service specific
-                Map.entry(ShapeType.TIMESTAMP, new MethodReference(COMMON_TO_NATIVE_SIMPLE, "Date")),
-                Map.entry(ShapeType.BYTE, IDENTITY_FUNCTION),
-                Map.entry(ShapeType.SHORT, IDENTITY_FUNCTION),
-                Map.entry(ShapeType.INTEGER, IDENTITY_FUNCTION),
-                Map.entry(ShapeType.LONG, IDENTITY_FUNCTION),
-                Map.entry(ShapeType.BIG_DECIMAL, IDENTITY_FUNCTION),
-                Map.entry(ShapeType.BIG_INTEGER, IDENTITY_FUNCTION)
-        );
-    }
     // TODO: for V2 support, use abstract AwsSdk name resolvers and sub class for V1 or V2.
-    /** The class name of the AWS SDK's Service's Shim's ToNative class. */
-    final ClassName thisClassName;
 
-    public ToNative(JavaAwsSdkV1 awsSdk) {
-        super(awsSdk);
-        thisClassName = ClassName.get(subject.dafnyNameResolver.packageName(), TO_NATIVE);
+    public ToNativeAwsV1(JavaAwsSdkV1 awsSdk) {
+        super(
+                awsSdk,
+                //TODO: JavaAwsSdkV1 should really have a declared packageName, not rely on the name resolver
+                ClassName.get(awsSdk.dafnyNameResolver.packageName(), TO_NATIVE)
+        );
     }
 
     @Override
@@ -106,7 +76,6 @@ public class ToNative extends Generator {
         return Collections.singleton(builder.build());
     }
 
-    @SuppressWarnings("DuplicatedCode")
     TypeSpec toNative() {
         LinkedHashSet<ShapeId> operationInputs = subject.serviceShape.getOperations().stream()
                 .map(shapeId -> subject.model.expectShape(shapeId, OperationShape.class))
@@ -123,7 +92,7 @@ public class ToNative extends Generator {
                 .build();
     }
 
-    @SuppressWarnings({"OptionalGetWithoutIsPresent", "DuplicatedCode"})
+    @SuppressWarnings({"OptionalGetWithoutIsPresent"})
     MethodSpec generateConvert(ShapeId shapeId) {
         final Shape shape = subject.model.getShape(shapeId)
                 .orElseThrow(() -> new IllegalStateException("Cannot find shape " + shapeId));
@@ -135,7 +104,7 @@ public class ToNative extends Generator {
             case LIST -> generateConvertList(shape.asListShape().get());
             case SET -> generateConvertSet(shape.asSetShape().get());
             case MAP -> generateConvertMap(shape.asMapShape().get());
-            case STRUCTURE -> generateConvertStructureV1(shape.asStructureShape().get());
+            case STRUCTURE -> modeledStructure(shape.asStructureShape().get());
             default -> throw new UnsupportedOperationException(
                     "ShapeId %s is of Type %s, which is not yet supported for ToDafny"
                             .formatted(shapeId, shape.getType()));
@@ -186,7 +155,8 @@ public class ToNative extends Generator {
                 .build();
     }
 
-    MethodSpec generateConvertStructureV1(StructureShape structureShape) {
+    @Override
+    protected MethodSpec modeledStructure(StructureShape structureShape) {
         String methodName = capitalize(structureShape.getId().getName());
         ClassName nativeClassName = subject.nativeNameResolver.typeForStructure(structureShape);
         MethodSpec.Builder builder = MethodSpec
@@ -236,7 +206,8 @@ public class ToNative extends Generator {
                 Dafny.aggregateSizeMethod(subject.model.expectShape(member.getTarget()).getType()));
     }
 
-    CodeBlock setWithConversionCall(MemberShape member) {
+    @Override
+    protected CodeBlock setWithConversionCall(MemberShape member) {
         return CodeBlock.of("$L.$L($L($L.$L))",
                 VAR_OUTPUT,
                 setMemberField(member),
@@ -255,35 +226,12 @@ public class ToNative extends Generator {
                 uncapitalize(member.getMemberName()), VAR_TEMP);
     }
 
-    CodeBlock setMemberField(MemberShape shape) {
+    /** @return CodeBlock of Method to set a member field. */
+    @Override
+    protected CodeBlock setMemberField(MemberShape shape) {
         // In AWS SDK Java v1, using `with` allows for enums or strings
         // while `set` only allows for strings.
         return CodeBlock.of("with$L", capitalize(shape.getMemberName()));
-    }
-
-    /**
-     * Returns MethodReference that converts from
-     * the Java Dafny memberShape to
-     * the Java Native memberShape.
-     */
-    @SuppressWarnings({"DuplicatedCode", "OptionalGetWithoutIsPresent"})
-    MethodReference memberConversionMethodReference(MemberShape memberShape) {
-        Shape targetShape = subject.model.getShape(memberShape.getTarget()).get();
-        // If the target is simple, use SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE
-        if (ModelUtils.isSmithyApiOrSimpleShape(targetShape)) {
-            return SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(targetShape.getType());
-        }
-        final String methodName = capitalize(targetShape.getId().getName());
-        // if in namespace reference created converter
-        if (subject.nativeNameResolver.isInServiceNameSpace(targetShape.getId())) {
-            return new MethodReference(thisClassName, methodName);
-        }
-        // Otherwise, this target must be in another namespace
-        ClassName otherNamespaceToDafny = ClassName.get(
-                DafnyNameResolverHelpers.packageNameForNamespace(targetShape.getId().getNamespace()),
-                TO_NATIVE
-        );
-        return new MethodReference(otherNamespaceToDafny, methodName);
     }
 
     MethodSpec generateConvertString(ShapeId shapeId) {
@@ -294,38 +242,12 @@ public class ToNative extends Generator {
         return null;
     }
 
-    @SuppressWarnings("OptionalGetWithoutIsPresent")
     MethodSpec generateConvertEnum(ShapeId shapeId) {
         final StringShape shape = subject.model.expectShape(shapeId, StringShape.class);
-        String methodName = capitalize(shapeId.getName());
-        final EnumTrait enumTrait = shape.getTrait(EnumTrait.class).orElseThrow();
-        if (!enumTrait.hasNames()) {
-            throw new UnsupportedOperationException("Unnamed enums not supported");
-        }
-        ClassName nativeEnumClass = subject.nativeNameResolver.classForEnum(shape);
-
-        MethodSpec.Builder builder = MethodSpec
-                .methodBuilder(methodName)
-                .addModifiers(Modifier.STATIC, Modifier.PUBLIC)
-                .returns(nativeEnumClass)
-                .addParameter(subject.dafnyNameResolver.classForShape(shape), VAR_INPUT);
-
-        enumTrait.getValues().stream()
-                .map(EnumDefinition::getName)
-                .map(Optional::get)
-                .peek(name -> {
-                    if (!ModelUtils.isValidEnumDefinitionName(name)) {
-                        throw new UnsupportedOperationException(
-                                "Invalid enum definition name: %s".formatted(name));
-                    }
-                })
-                .forEach(name -> builder
-                        .beginControlFlow("if ($L.$L())", VAR_INPUT, Dafny.enumIsName(name))
-                        .addStatement("return $T.$L", nativeEnumClass, name)
-                        .endControlFlow()
-                );
-
-        builder.addStatement("return $T.fromValue($L.toString())", nativeEnumClass, VAR_INPUT);
-        return builder.build();
+        final ClassName returnType = subject.nativeNameResolver.classForEnum(shape);
+        MethodSpec.Builder method = modeledEnumCommon(shape, returnType);
+        // fromValue is an AWS SDK specific feature
+        method.addStatement("return $T.fromValue($L.toString())", returnType, VAR_INPUT);
+        return method.build();
     }
 }

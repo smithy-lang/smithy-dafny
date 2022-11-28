@@ -1,6 +1,7 @@
 package software.amazon.polymorph.smithyjava.generator.awssdk;
 
 import com.squareup.javapoet.CodeBlock;
+import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 
 import org.junit.Before;
@@ -8,10 +9,10 @@ import org.junit.Test;
 
 import java.nio.file.Path;
 import java.util.Map;
+import java.util.Set;
 
 import software.amazon.polymorph.smithyjava.MethodReference;
 import software.amazon.polymorph.smithyjava.ModelConstants;
-import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.ListShape;
@@ -29,41 +30,49 @@ import static software.amazon.polymorph.util.Tokenizer.tokenizeAndAssertEqual;
 
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 public class ToNativeTest {
-    protected ToNative underTest;
+    // Why two underTests?
+    // As we refactor ToNativeAwsV1 and abstract ToNative,
+    // we are going to bump into permission issues in unit tests
+    // for protected methods.
+    // ToNativeTestImpl exposes the abstract classes protected methods
+    // to this test class,
+    // b/c ToNativeTestImpl is defined INSIDE the test class.
+    // But we still need to test the yet to be refactored logic.
+    // TODO: Clean up this test class by creating test class for ToNativeAwsV1
+    // and moving AwsV1 specific tests there.
+    protected ToNativeAwsV1 underTest;
+    protected ToNativeTestImpl underTestAbstract;
     protected Model model;
+
+    static class ToNativeTestImpl extends ToNativeAwsV1 {
+
+        public ToNativeTestImpl(JavaAwsSdkV1 awsSdk) {
+            super(awsSdk);
+        }
+
+        @Override
+        public Set<JavaFile> javaFiles() {
+            return null;
+        }
+
+        @Override
+        // This allows the test class to call the otherwise protected method.
+        protected MethodReference memberConversionMethodReference(MemberShape memberShape) {
+            return super.memberConversionMethodReference(memberShape);
+        }
+
+        @Override
+        // This allows the test class to call the otherwise protected method.
+        protected CodeBlock setWithConversionCall(MemberShape member) {
+            return super.setWithConversionCall(member);
+        }
+    }
 
     @Before
     public void setup() {
         model = TestSetupUtils.setupTwoLocalModel(ModelConstants.KMS_KITCHEN, ModelConstants.OTHER_NAMESPACE);
-        underTest  = new ToNative(TestSetupUtils.setupAwsSdk(model, "kms"));
-    }
-
-    //TODO: should be in nameresolver.DafnyTest
-    @Test
-    public void getMemberField() {
-        ShapeId structureId = ShapeId.fromParts("com.amazonaws.kms", "Kitchen");
-        StructureShape structureShape = model.expectShape(structureId, StructureShape.class);
-        MemberShape stringMember = structureShape.getMember("name").get();
-        CodeBlock actual = Dafny.getMemberField(stringMember);
-        String expected = "_Name";
-        tokenizeAndAssertEqual(expected, actual.toString());
-    }
-
-    //TODO: should be in nameresolver.DafnyTest
-    @Test
-    public void getMemberFieldValue() {
-        ShapeId structureId = ShapeId.fromParts("com.amazonaws.kms", "Kitchen");
-        StructureShape structureShape = model.expectShape(structureId, StructureShape.class);
-        // if required, get via Field
-        MemberShape requiredMember = structureShape.getMember("name").get();
-        CodeBlock actualRequired = Dafny.getMemberFieldValue(requiredMember);
-        String expectedRequired = "_Name";
-        tokenizeAndAssertEqual(expectedRequired, actualRequired.toString());
-        // if optional, get via dtor_value()
-        MemberShape optionalField = structureShape.getMember("message").get();
-        CodeBlock actualOptional = Dafny.getMemberFieldValue(optionalField);
-        String expectedOptional = "_Message.dtor_value()";
-        tokenizeAndAssertEqual(expectedOptional, actualOptional.toString());
+        underTest  = new ToNativeAwsV1(TestSetupUtils.setupAwsSdk(model, "kms"));
+        underTestAbstract  = new ToNativeTestImpl(TestSetupUtils.setupAwsSdk(model, "kms"));
     }
 
     @Test
@@ -91,17 +100,17 @@ public class ToNativeTest {
         StructureShape structureShape = model.expectShape(structureId, StructureShape.class);
         // If the target is simple, use SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE
         MemberShape stringMember = structureShape.getMember("name").get();
-        MethodReference simpleActual = underTest.memberConversionMethodReference(stringMember);
+        MethodReference simpleActual = underTestAbstract.memberConversionMethodReference(stringMember);
         String simpleExpected = ToNativeConstants.STRING_CONVERSION;
         tokenizeAndAssertEqual(simpleExpected, simpleActual.asNormalReference().toString());
         // if in namespace reference created converter
         MemberShape enumMember = structureShape.getMember("keyUsage").get();
-        MethodReference enumActual = underTest.memberConversionMethodReference(enumMember);
+        MethodReference enumActual = underTestAbstract.memberConversionMethodReference(enumMember);
         String enumExpected = ToNativeConstants.KEY_USAGE_TYPE_CONVERSION;
         tokenizeAndAssertEqual(enumExpected, enumActual.asNormalReference().toString());
         // Otherwise, this target must be in another namespace
         MemberShape otherNamespaceMember = structureShape.getMember("otherNamespace").get();
-        MethodReference otherNamespaceActual = underTest.memberConversionMethodReference(otherNamespaceMember);
+        MethodReference otherNamespaceActual = underTestAbstract.memberConversionMethodReference(otherNamespaceMember);
         String otherNamespaceExpected = ToNativeConstants.OTHER_NAMESPACE_CONVERSION;
         tokenizeAndAssertEqual(otherNamespaceExpected, otherNamespaceActual.asNormalReference().toString());
     }
@@ -111,7 +120,7 @@ public class ToNativeTest {
         ShapeId structureId = ShapeId.fromParts("com.amazonaws.kms", "Kitchen");
         StructureShape structureShape = model.expectShape(structureId, StructureShape.class);
         MemberShape ciphertextMember = structureShape.getMember("ciphertext").get();
-        CodeBlock actual = underTest.setWithConversionCall(ciphertextMember);
+        CodeBlock actual = underTestAbstract.setWithConversionCall(ciphertextMember);
         tokenizeAndAssertEqual(ToNativeConstants.SET_WITH_CONVERSION_CALL, actual.toString());
     }
 
@@ -172,7 +181,7 @@ public class ToNativeTest {
         // structureShape.members().size() == 0
         ShapeId simpleId = ShapeId.fromParts("com.amazonaws.kms", "Simple");
         StructureShape simpleShape = model.expectShape(simpleId, StructureShape.class);
-        MethodSpec simpleActual = underTest.generateConvertStructureV1(simpleShape);
+        MethodSpec simpleActual = underTest.modeledStructure(simpleShape);
         tokenizeAndAssertEqual(ToNativeConstants.SIMPLE_STRUCTURE, simpleActual.toString());
         // if optional, check if present
         ShapeId aOptionalId = ShapeId.fromParts("com.amazonaws.kms", "AOptional");
@@ -212,7 +221,7 @@ public class ToNativeTest {
     @Test
     public void generate() {
         Model model = TestSetupUtils.setupLocalModel(ModelConstants.KMS_A_STRING_OPERATION);
-        ToNative underTest = new ToNative(TestSetupUtils.setupAwsSdk(model, "kms"));
+        ToNativeAwsV1 underTest = new ToNativeAwsV1(TestSetupUtils.setupAwsSdk(model, "kms"));
         final Map<Path, TokenTree> actual = underTest.generate();
         final Path expectedPath = Path.of("Dafny/Com/Amazonaws/Kms/ToNative.java");
         Path[] temp = new Path[1];

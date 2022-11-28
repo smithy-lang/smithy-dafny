@@ -23,4 +23,7 @@ public class DafnyNameResolverHelpers {
         return "Dafny." + DafnyNameResolver.dafnyNamespace(namespace);
     }
 
+    public static String dafnyCompilesExtra_(final String name) {
+        return name.replace("_", "__");
+    }
 }
