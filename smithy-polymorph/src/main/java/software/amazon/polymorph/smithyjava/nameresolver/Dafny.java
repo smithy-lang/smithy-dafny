@@ -162,7 +162,7 @@ public class Dafny extends NameResolver {
         };
     }
 
-    public ClassName classForError() {
+    public ClassName abstractClassForError() {
         return ClassName.get(modelPackage, "Error");
     }
 
@@ -175,7 +175,7 @@ public class Dafny extends NameResolver {
                 .orElseThrow(() -> new IllegalStateException("Cannot find shape " + shapeId));
         ClassName className;
         if (shape.hasTrait(ErrorTrait.class)) {
-            className = classForError(shape);
+            className = abstractClassForError();
         }
         if (shape.getId().equals(SMITHY_API_UNIT)) {
             className = ClassName.get(Tuple0.class);

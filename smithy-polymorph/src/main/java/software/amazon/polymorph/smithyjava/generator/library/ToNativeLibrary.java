@@ -107,7 +107,7 @@ public class ToNativeLibrary extends ToNative {
     }
 
     MethodSpec dafnyError() {
-        ClassName inputType = subject.dafnyNameResolver.classForError();
+        ClassName inputType = subject.dafnyNameResolver.abstractClassForError();
         ClassName returnType = NativeError.nativeClassName(subject.modelPackageName);
         MethodSpec.Builder method = super.initializeErrorMethodSpec(inputType, returnType);
         // We need a list of `<datatypeConstructor>`.

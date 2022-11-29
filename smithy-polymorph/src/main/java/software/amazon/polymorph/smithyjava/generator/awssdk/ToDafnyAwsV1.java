@@ -274,7 +274,7 @@ public class ToDafnyAwsV1 extends ToDafny {
         );
         return MethodSpec.methodBuilder("Error")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                .returns(subject.dafnyNameResolver.classForError())
+                .returns(subject.dafnyNameResolver.abstractClassForError())
                 .addParameter(subject.nativeNameResolver.baseErrorForService(), "nativeValue")
                 .addStatement(memberDeclaration)
                 .addStatement(memberAssignment)
