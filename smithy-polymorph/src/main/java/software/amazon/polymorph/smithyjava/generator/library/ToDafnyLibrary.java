@@ -51,8 +51,12 @@ public class ToDafnyLibrary extends ToDafny {
     // See code comment on ModelCodegen for details.
     final JavaLibrary subject;
 
+    public static ClassName className(JavaLibrary javaLibrary) {
+        return ClassName.get(javaLibrary.packageName, TO_DAFNY);
+    }
+
     public ToDafnyLibrary(JavaLibrary javaLibrary) {
-        super(javaLibrary, ClassName.get(javaLibrary.packageName, TO_DAFNY));
+        super(javaLibrary, className(javaLibrary));
         this.subject = javaLibrary;
     }
 

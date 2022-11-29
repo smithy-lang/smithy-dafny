@@ -47,8 +47,12 @@ public class ToNativeLibrary extends ToNative {
     // See code comment on ModelCodegen for details.
     final JavaLibrary subject;
 
+    public static ClassName className(JavaLibrary javaLibrary) {
+        return ClassName.get(javaLibrary.packageName, TO_NATIVE);
+    }
+
     public ToNativeLibrary(JavaLibrary javaLibrary) {
-        super(javaLibrary, ClassName.get(javaLibrary.packageName, TO_NATIVE));
+        super(javaLibrary, className(javaLibrary));
         this.subject = javaLibrary;
     }
 
