@@ -2,6 +2,7 @@ package software.amazon.polymorph.smithyjava;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
+import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 
 import java.util.List;
@@ -46,7 +47,7 @@ public class BuildMethod {
         polyFieldSpecs.forEach(polyField -> {
             // Required Trait
             if (polyField.isRequired()) {
-                buildMethod.addCode(requiredCheck(polyField));
+                buildMethod.addCode(requiredCheck(polyField.fieldSpec));
             }
 
             // Range Trait
@@ -76,13 +77,14 @@ public class BuildMethod {
         return buildMethod.build();
     }
 
-    static CodeBlock requiredCheck(PolymorphFieldSpec polyField) {
+
+    public static CodeBlock requiredCheck(FieldSpec field) {
         return CodeBlock.builder()
-                .beginControlFlow("if ($T.isNull(this.$L())) ", Objects.class, polyField.name)
+                .beginControlFlow("if ($T.isNull(this.$L())) ", Objects.class, field.name)
                 .addStatement(
                         "throw new $T($S)",
                         IllegalArgumentException.class,
-                        "Missing value for required field `%s`".formatted(polyField.name))
+                        "Missing value for required field `%s`".formatted(field.name))
                 .endControlFlow()
                 .build();
     }
