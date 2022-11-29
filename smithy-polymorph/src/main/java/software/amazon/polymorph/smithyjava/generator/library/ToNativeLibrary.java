@@ -149,11 +149,7 @@ public class ToNativeLibrary extends ToNative {
     }
 
     protected MethodSpec positionalStructure(StructureShape structureShape) {
-        PositionalTrait.validateUse(structureShape);
-        // validateUse ensures there will be 1 member;
-        // thus we know `Optional.get()` will succeed.
-        //noinspection OptionalGetWithoutIsPresent
-        final MemberShape onlyMember = structureShape.members().stream().findFirst().get();
+        final MemberShape onlyMember = PositionalTrait.onlyMember(structureShape);
         final ShapeId onlyMemberId = onlyMember.toShapeId();
         final String methodName = capitalize(structureShape.getId().getName());
         final TypeName inputType = subject.dafnyNameResolver.typeForShape(onlyMemberId);

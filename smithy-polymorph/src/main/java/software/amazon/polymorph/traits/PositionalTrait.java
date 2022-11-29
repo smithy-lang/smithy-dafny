@@ -5,6 +5,7 @@ package software.amazon.polymorph.traits;
 
 import software.amazon.smithy.model.node.Node;
 import software.amazon.smithy.model.selector.Selector;
+import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
@@ -86,5 +87,13 @@ public class PositionalTrait extends AbstractTrait implements ToSmithyBuilder<Po
         String msg = "Structures with Positional Trait MUST have one and ONLY one member."
                 + " Structure: %s".formatted(shape.getId());
         throw new IllegalArgumentException(msg);
+    }
+
+    public static MemberShape onlyMember(StructureShape shape) {
+        validateUse(shape);
+        // validateUse ensures there will be 1 member;
+        // thus we know `Optional.get()` will succeed.
+        //noinspection OptionalGetWithoutIsPresent
+        return shape.members().stream().findFirst().get();
     }
 }

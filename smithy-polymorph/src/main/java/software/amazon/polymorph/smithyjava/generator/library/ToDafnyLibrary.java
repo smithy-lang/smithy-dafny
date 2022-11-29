@@ -156,11 +156,7 @@ public class ToDafnyLibrary extends ToDafny {
     }
 
     protected MethodSpec positionalStructure(StructureShape shape) {
-        PositionalTrait.validateUse(shape);
-        //validateUse ensures there will be 1 member;
-        //thus we know `Optional.get()` will succeed.
-        //noinspection OptionalGetWithoutIsPresent
-        final MemberShape onlyMember = shape.members().stream().findFirst().get();
+        final MemberShape onlyMember = PositionalTrait.onlyMember(shape);
         final ShapeId onlyMemberId = onlyMember.toShapeId();
         final String methodName = capitalize(shape.getId().getName());
         final TypeName inputType = subject.nativeNameResolver.typeForShape(onlyMemberId);
