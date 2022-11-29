@@ -6,6 +6,7 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeSpec;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -90,7 +91,13 @@ public class BuilderSpecs {
     public List<FieldSpec> getLocalFields() { return this.localFields; }
 
     /**
-     * @return The nested public interface Builder.
+     * The Builder Interface defines the builder's
+     * getter, setters, and build method.<p>
+     * Note: The method that takes an instance of the class and
+     * returns a builder derived from that an instance,
+     * (here, called the modelConstructor)
+     * is NOT defined in the interface.
+     * @return The nested public interface "Builder".
      */
     public TypeSpec builderInterface() {
         TypeSpec.Builder builder = TypeSpec
@@ -134,7 +141,8 @@ public class BuilderSpecs {
     /**
      * @param overrideSuper If True, add Override annotation to `build` and to "builder setter" methods from superFields
      * @param modelConstructor The Constructor for the BuilderImpl that takes an instance of the class and
-     *                         uses the instance's fields to initialize the builder.
+     *                         uses the instance's fields to initialize the builder.<p>
+     *                         If null, no modelConstructor is generated.
      * @param buildMethod  The `build` method of a Builder(Impl) returns a new instance of the class.
      *                     For modeled shapes, use {@link BuildMethod#implBuildMethod}
      *                     to generate a method that respects smithy constraint traits.
@@ -142,8 +150,8 @@ public class BuilderSpecs {
      */
     public TypeSpec builderImpl(
             boolean overrideSuper,
-            MethodSpec modelConstructor,
-            MethodSpec buildMethod
+            @Nullable MethodSpec modelConstructor,
+            @Nonnull MethodSpec buildMethod
     ) {
         if (overrideSuper && superName == null) {
             throw new IllegalArgumentException("Cannot overrideSuper if there is no super");
@@ -160,7 +168,9 @@ public class BuilderSpecs {
         builder.addMethod(MethodSpec.constructorBuilder()
                 .addModifiers(PROTECTED)
                 .build());
-        builder.addMethod(modelConstructor);
+        if (Objects.nonNull(modelConstructor)) {
+            builder.addMethod(modelConstructor);
+        }
         // for local fields
         localFields.forEach(field -> {
             // Builder Setter Method
