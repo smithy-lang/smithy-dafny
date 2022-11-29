@@ -4,6 +4,7 @@ import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import software.amazon.polymorph.smithyjava.NamespaceHelper;
 import software.amazon.polymorph.smithyjava.generator.CodegenSubject;
@@ -73,6 +74,8 @@ public class JavaLibrary extends CodegenSubject {
         rtn.putAll(toDafny.generate());
         ToNativeLibrary toNative = new ToNativeLibrary(this);
         rtn.putAll(toNative.generate());
+        ShimLibrary shim = new ShimLibrary(this);
+        rtn.putAll(shim.generate());
         return rtn;
     }
 
@@ -96,5 +99,23 @@ public class JavaLibrary extends CodegenSubject {
         return this.model.getStringShapesWithTrait(EnumTrait.class).stream()
                 .filter(shape -> ModelUtils.isInServiceNamespace(shape.getId(), this.serviceShape))
                 .toList();
+    }
+
+    public List<OperationShape> getOperationsInServiceNamespace() {
+        return this.model.getOperationShapes().stream().sequential()
+                .filter(shape -> ModelUtils.isInServiceNamespace(shape.getId(), this.serviceShape))
+                .collect(Collectors.toList());
+    }
+
+    protected ShapeId checkForPositional(ShapeId originalId) {
+        Shape originalShape = model.expectShape(originalId);
+        if (originalShape.hasTrait(PositionalTrait.class)) {
+            // Positional traits can only be on structures,
+            // asStructureShape cannot return an empty optional
+            //noinspection OptionalGetWithoutIsPresent
+            MemberShape onlyMember = PositionalTrait.onlyMember(originalShape.asStructureShape().get());
+            return onlyMember.getTarget();
+        }
+        return originalId;
     }
 }
