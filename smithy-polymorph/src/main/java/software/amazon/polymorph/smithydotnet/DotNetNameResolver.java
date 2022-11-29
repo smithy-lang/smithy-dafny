@@ -786,10 +786,8 @@ public class DotNetNameResolver {
     public String dafnyImplForServiceClient() {
         return "%1$s.%2$s"
           .formatted(
-            DafnyNameResolverHelpers
-              .dafnyExternNamespaceForShapeId(serviceShape.getId())
-              // TODO this replace is a bit of a HACK
-              .replace(".Types", ".__default"),
+            DafnyNameResolverHelpers.defaultForNamespace(
+                    serviceShape.getId().getNamespace()),
             clientForService()
           );
     }
