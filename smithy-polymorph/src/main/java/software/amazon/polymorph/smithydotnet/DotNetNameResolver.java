@@ -137,7 +137,9 @@ public class DotNetNameResolver {
 
     public static String interfaceForService(final ShapeId serviceShapeId) {
         if (AwsSdkNameResolverHelpers.isAwsSdkServiceId(serviceShapeId)) {
-            return StringUtils.equals(serviceShapeId.getName(), "DynamoDB_20120810")
+            // Resolve DynamoDB_20120810 to just DynamoDB. There is no reference to the version string
+            // in the NET SDK.
+            return StringUtils.equals(serviceShapeId.getName(), AwsSdkDotNetNameResolver.DDB_SMITHY_SERVICE_NAME)
                 ? "IDynamoDB"
                 : "I" + serviceShapeId.getName();
         }

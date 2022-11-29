@@ -17,6 +17,17 @@ import software.amazon.smithy.model.traits.TraitDefinition;
 import software.amazon.smithy.utils.StringUtils;
 
 public class AwsSdkDotNetNameResolver extends DotNetNameResolver {
+    // The following are used to resolve namespace errors when generating
+    // code that uses the DynamoDBv2 service model
+    public static final String DDB_NAMESPACE = "com.amazonaws.dynamodb";
+    public static final String DDB_SERVICE_NAME = "DynamoDB";
+    public static final String DDB_SERVICE_NAME_V2 = "DynamoDBv2";
+    public static final String DDB_SMITHY_SERVICE_NAME = "DynamoDB_20120810";
+    public static final String DDB_INPUT = "Input";
+    public static final String DDB_OUTPUT = "Output";
+    public static final String DDB_REQUEST = "Request";
+    public static final String DDB_RESPONSE = "Response";
+
     public AwsSdkDotNetNameResolver(final Model model, final ServiceShape serviceShape) {
         super(model, serviceShape);
     }
@@ -52,14 +63,18 @@ public class AwsSdkDotNetNameResolver extends DotNetNameResolver {
             if (structureShape.hasTrait(TraitDefinition.class)) {
                 throw new IllegalArgumentException("Trait definition structures have no corresponding generated type");
             }
-            if (StringUtils.equals(structureShape.getId().getNamespace(), "com.amazonaws.dynamodb") &&
-                    structureShape.getId().getName().endsWith("Input")) {
-                String newRequestString = structureShape.getId().getName().replace("Input", "Request");
+            // Structures for the DynamoDB NET SDK MUST be resolved from input to request
+            // The actual NET SDK uses Request/Response
+            if (StringUtils.equals(structureShape.getId().getNamespace(), DDB_NAMESPACE) &&
+                    structureShape.getId().getName().endsWith(DDB_INPUT)) {
+                String newRequestString = structureShape.getId().getName().replace(DDB_INPUT, DDB_REQUEST);
                 return "%s.Model.%s".formatted(namespaceForService(), newRequestString);
             }
-            if (StringUtils.equals(structureShape.getId().getNamespace(), "com.amazonaws.dynamodb") &&
-                    structureShape.getId().getName().endsWith("Output")) {
-                String newResponseString = structureShape.getId().getName().replace("Output", "Response");
+            // Structures for the DynamoDB NET SDK MUST be resolved from output to response
+            // The actual NET SDK uses Request/Response
+            if (StringUtils.equals(structureShape.getId().getNamespace(), DDB_NAMESPACE) &&
+                    structureShape.getId().getName().endsWith(DDB_OUTPUT)) {
+                String newResponseString = structureShape.getId().getName().replace(DDB_OUTPUT, DDB_RESPONSE);
                 return "%s.Model.%s".formatted(namespaceForService(), newResponseString);
             }
             return "%s.Model.%s".formatted(namespaceForService(), structureShape.getId().getName());
@@ -78,15 +93,19 @@ public class AwsSdkDotNetNameResolver extends DotNetNameResolver {
     }
 
     public String implForServiceClient() {
-        if (StringUtils.equals(getServiceName(), "DynamoDBv2")) {
-            return "%s.Amazon%sClient".formatted(namespaceForService(), "DynamoDB");
+        // The Client Implementation MUST be DynamoDB - although the NET SDK is using DynamoDBv2
+        // It does not append v2 in the client for backwards compatability purposes.
+        if (StringUtils.equals(getServiceName(), DDB_SERVICE_NAME_V2)) {
+            return "%s.Amazon%sClient".formatted(namespaceForService(), DDB_SERVICE_NAME);
         }
         return "%s.Amazon%sClient".formatted(namespaceForService(), getServiceName());
     }
 
     private String getServiceName() {
-        if (StringUtils.equals(getServiceShape().getId().getName(), "DynamoDB_20120810")) {
-            return StringUtils.capitalize("DynamoDBv2");
+        // The smithy model appends a version number in the name of the service
+        // This version number does not appear in the NET SDK and resolves it to DynamoDBv2
+        if (StringUtils.equals(getServiceShape().getId().getName(), DDB_SMITHY_SERVICE_NAME)) {
+            return StringUtils.capitalize(DDB_SERVICE_NAME_V2);
         }
         return StringUtils.capitalize(getServiceShape().getId().getName());
     }
@@ -106,8 +125,9 @@ public class AwsSdkDotNetNameResolver extends DotNetNameResolver {
 
     @Override
     public String classForBaseServiceException() {
-        return StringUtils.equals(getServiceName(), "DynamoDBv2")
-                ? "Amazon%sException".formatted("DynamoDB")
+        // Although using V2 of the DynamoDB Client Exceptions MUST use DynamoDB as opposed to DynamoDBv2
+        return StringUtils.equals(getServiceName(), DDB_SERVICE_NAME_V2)
+                ? "Amazon%sException".formatted(DDB_SERVICE_NAME)
                 : "Amazon%sException".formatted(getServiceName());
     }
 
