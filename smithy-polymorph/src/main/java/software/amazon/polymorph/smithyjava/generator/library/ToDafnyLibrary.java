@@ -90,7 +90,7 @@ public class ToDafnyLibrary extends ToDafny {
     // Converts any subclass of NativeError to the correct Dafny Error,
     // or casts it as an OpaqueError.
     MethodSpec nativeError() {
-        TypeName dafnyError = subject.dafnyNameResolver.classForError();
+        TypeName dafnyError = subject.dafnyNameResolver.abstractClassForError();
         ClassName nativeError = NativeError.nativeClassName(subject.nativeNameResolver.modelPackage);
         MethodSpec.Builder method = MethodSpec.methodBuilder("Error")
                 .returns(dafnyError)
@@ -112,7 +112,7 @@ public class ToDafnyLibrary extends ToDafny {
     }
 
     MethodSpec opaqueError() {
-        TypeName dafnyError = subject.dafnyNameResolver.classForError();
+        TypeName dafnyError = subject.dafnyNameResolver.abstractClassForError();
         ClassName opaqueError = OpaqueError.nativeClassName(subject.nativeNameResolver.modelPackage);
         return MethodSpec.methodBuilder("Error")
                 .returns(dafnyError)
@@ -123,7 +123,7 @@ public class ToDafnyLibrary extends ToDafny {
     }
 
     MethodSpec collectionError() {
-        ClassName dafnyError = subject.dafnyNameResolver.classForError();
+        ClassName dafnyError = subject.dafnyNameResolver.abstractClassForError();
         ClassName collectionError = CollectionOfErrors.nativeClassName(subject.nativeNameResolver.modelPackage);
         ParameterizedTypeName listArg = ParameterizedTypeName.get(
                 ClassName.get(DafnySequence.class),
