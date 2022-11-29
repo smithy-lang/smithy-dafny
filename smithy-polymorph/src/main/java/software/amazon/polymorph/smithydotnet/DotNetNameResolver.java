@@ -139,9 +139,10 @@ public class DotNetNameResolver {
         if (AwsSdkNameResolverHelpers.isAwsSdkServiceId(serviceShapeId)) {
             // Resolve DynamoDB_20120810 to just DynamoDB. There is no reference to the version string
             // in the NET SDK.
-            return StringUtils.equals(serviceShapeId.getName(), AwsSdkDotNetNameResolver.DDB_SMITHY_SERVICE_NAME)
-                ? "IDynamoDB"
-                : "I" + serviceShapeId.getName();
+            final String serviceName = StringUtils.equals(serviceShapeId.getName(), AwsSdkDotNetNameResolver.DDB_SMITHY_SERVICE_NAME)
+                ? AwsSdkDotNetNameResolver.DDB_SERVICE_NAME
+                : serviceShapeId.getName();
+            return "I" + serviceName;
         }
 
         throw new UnsupportedOperationException("Interface types not supported for Shape %s".formatted(serviceShapeId));
