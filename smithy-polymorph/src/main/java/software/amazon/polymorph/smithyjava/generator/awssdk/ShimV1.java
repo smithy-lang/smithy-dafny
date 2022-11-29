@@ -3,7 +3,6 @@ package software.amazon.polymorph.smithyjava.generator.awssdk;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 
@@ -18,6 +17,7 @@ import java.util.stream.Collectors;
 import javax.lang.model.element.Modifier;
 
 import software.amazon.polymorph.smithyjava.generator.Generator;
+import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.utils.StringUtils;
@@ -86,7 +86,7 @@ public class ShimV1 extends Generator {
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
                 .returns(
-                        asDafnyResult(
+                        Dafny.asDafnyResult(
                                 dafnyOutput,
                                 subject.dafnyNameResolver.abstractClassForError()
                         ))
@@ -125,11 +125,4 @@ public class ShimV1 extends Generator {
                 .build());
     }
 
-    private TypeName asDafnyResult(TypeName success, TypeName failure) {
-        return ParameterizedTypeName.get(
-                DAFNY_RESULT_CLASS_NAME,
-                success,
-                failure
-        );
-    }
 }

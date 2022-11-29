@@ -28,6 +28,7 @@ import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
 
 import static software.amazon.polymorph.smithyjava.generator.Generator.Constants.SUPPORTED_CONVERSION_AGGREGATE_SHAPES;
+import static software.amazon.polymorph.smithyjava.nameresolver.Constants.DAFNY_RESULT_CLASS_NAME;
 import static software.amazon.polymorph.smithyjava.nameresolver.Constants.SMITHY_API_UNIT;
 import static software.amazon.polymorph.utils.DafnyNameResolverHelpers.dafnyCompilesExtra_;
 import static software.amazon.smithy.utils.StringUtils.capitalize;
@@ -94,6 +95,14 @@ public class Dafny extends NameResolver {
         }
         // if optional, get via dtor_value()
         return CodeBlock.of("$L.dtor_value()", getMemberField(shape));
+    }
+
+    public static TypeName asDafnyResult(TypeName success, TypeName failure) {
+        return ParameterizedTypeName.get(
+                DAFNY_RESULT_CLASS_NAME,
+                success,
+                failure
+        );
     }
 
     public String packageName() {
