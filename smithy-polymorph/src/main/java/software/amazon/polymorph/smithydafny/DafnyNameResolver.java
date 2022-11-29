@@ -119,6 +119,15 @@ public record DafnyNameResolver(
         return dafnyModulePrefixForShapeId(serviceShape) + traitNameForServiceClient(serviceShape);
     }
 
+    public static String classNameForServiceClient(ServiceShape shape) {
+        String serviceName = nameForService(shape);
+        if (shape.hasTrait(LocalServiceTrait.class)) {
+            LocalServiceTrait trait = shape.expectTrait(LocalServiceTrait.class);
+            serviceName = trait.getSdkId();
+        }
+        return "%sClient".formatted(serviceName);
+    }
+
     public String traitForResource(final ResourceShape resourceShape) {
         final ShapeId shapeId = resourceShape.getId();
         final String resourceName = StringUtils.capitalize(shapeId.getName());

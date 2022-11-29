@@ -1293,7 +1293,6 @@ public class DafnyApiCodegen {
           )
           .lineSeparated();
 
-        final String clientName = serviceShape.expectTrait(LocalServiceTrait.class).getSdkId();
         final String internalConfig = DafnyNameResolver.internalConfigType();
 
         final TokenTree body =  TokenTree
@@ -1301,8 +1300,8 @@ public class DafnyApiCodegen {
             abstractModulePrelude,
             operationsPrelude,
             generateAbstractLocalService(serviceShape),
-            TokenTree.of("class %sClient extends %s"
-              .formatted(clientName, nameResolver.traitForServiceClient(serviceShape))),
+            TokenTree.of("class %s extends %s"
+              .formatted(DafnyNameResolver.classNameForServiceClient(serviceShape), nameResolver.traitForServiceClient(serviceShape))),
             TokenTree.of(
               TokenTree.of("constructor(config: Operations.%s)".formatted(internalConfig)),
               TokenTree.of("requires Operations.%s(config)"
