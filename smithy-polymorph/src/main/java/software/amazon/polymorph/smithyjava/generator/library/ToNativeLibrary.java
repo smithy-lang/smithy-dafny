@@ -47,8 +47,12 @@ public class ToNativeLibrary extends ToNative {
     // See code comment on ModelCodegen for details.
     final JavaLibrary subject;
 
+    public static ClassName className(JavaLibrary javaLibrary) {
+        return ClassName.get(javaLibrary.packageName, TO_NATIVE);
+    }
+
     public ToNativeLibrary(JavaLibrary javaLibrary) {
-        super(javaLibrary, ClassName.get(javaLibrary.packageName, TO_NATIVE));
+        super(javaLibrary, className(javaLibrary));
         this.subject = javaLibrary;
     }
 
@@ -107,7 +111,7 @@ public class ToNativeLibrary extends ToNative {
     }
 
     MethodSpec dafnyError() {
-        ClassName inputType = subject.dafnyNameResolver.classForError();
+        ClassName inputType = subject.dafnyNameResolver.abstractClassForError();
         ClassName returnType = NativeError.nativeClassName(subject.modelPackageName);
         MethodSpec.Builder method = super.initializeErrorMethodSpec(inputType, returnType);
         // We need a list of `<datatypeConstructor>`.
@@ -149,11 +153,7 @@ public class ToNativeLibrary extends ToNative {
     }
 
     protected MethodSpec positionalStructure(StructureShape structureShape) {
-        PositionalTrait.validateUse(structureShape);
-        // validateUse ensures there will be 1 member;
-        // thus we know `Optional.get()` will succeed.
-        //noinspection OptionalGetWithoutIsPresent
-        final MemberShape onlyMember = structureShape.members().stream().findFirst().get();
+        final MemberShape onlyMember = PositionalTrait.onlyMember(structureShape);
         final ShapeId onlyMemberId = onlyMember.toShapeId();
         final String methodName = capitalize(structureShape.getId().getName());
         final TypeName inputType = subject.dafnyNameResolver.typeForShape(onlyMemberId);

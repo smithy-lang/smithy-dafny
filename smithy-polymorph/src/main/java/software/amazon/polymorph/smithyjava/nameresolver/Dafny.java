@@ -13,8 +13,8 @@ import dafny.DafnyMap;
 import dafny.DafnySequence;
 import dafny.DafnySet;
 import dafny.Tuple0;
+import software.amazon.polymorph.smithydafny.DafnyNameResolver;
 import software.amazon.polymorph.smithyjava.MethodReference;
-import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.ResourceShape;
@@ -28,8 +28,11 @@ import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
 
 import static software.amazon.polymorph.smithyjava.generator.Generator.Constants.SUPPORTED_CONVERSION_AGGREGATE_SHAPES;
+import static software.amazon.polymorph.smithyjava.nameresolver.Constants.DAFNY_RESULT_CLASS_NAME;
 import static software.amazon.polymorph.smithyjava.nameresolver.Constants.SMITHY_API_UNIT;
 import static software.amazon.polymorph.utils.DafnyNameResolverHelpers.dafnyCompilesExtra_;
+import static software.amazon.polymorph.utils.DafnyNameResolverHelpers.dafnyExternNamespaceForShapeId;
+import static software.amazon.polymorph.utils.DafnyNameResolverHelpers.packageNameForNamespace;
 import static software.amazon.smithy.utils.StringUtils.capitalize;
 
 /**
@@ -72,11 +75,11 @@ public class Dafny extends NameResolver {
     }
 
     static String modelPackageNameForNamespace(final String namespace) {
-        return DafnyNameResolverHelpers.packageNameForNamespace(namespace) + ".Types";
+        return packageNameForNamespace(namespace) + ".Types";
     }
 
     static String packageNameForServiceShape(ServiceShape serviceShape) {
-        return DafnyNameResolverHelpers.packageNameForNamespace(serviceShape.getId().getNamespace());
+        return packageNameForNamespace(serviceShape.getId().getNamespace());
     }
 
     static String modelPackageNameForServiceShape(ServiceShape serviceShape) {
@@ -94,6 +97,14 @@ public class Dafny extends NameResolver {
         }
         // if optional, get via dtor_value()
         return CodeBlock.of("$L.dtor_value()", getMemberField(shape));
+    }
+
+    public static TypeName asDafnyResult(TypeName success, TypeName failure) {
+        return ParameterizedTypeName.get(
+                DAFNY_RESULT_CLASS_NAME,
+                success,
+                failure
+        );
     }
 
     public String packageName() {
@@ -162,7 +173,7 @@ public class Dafny extends NameResolver {
         };
     }
 
-    public ClassName classForError() {
+    public ClassName abstractClassForError() {
         return ClassName.get(modelPackage, "Error");
     }
 
@@ -175,7 +186,7 @@ public class Dafny extends NameResolver {
                 .orElseThrow(() -> new IllegalStateException("Cannot find shape " + shapeId));
         ClassName className;
         if (shape.hasTrait(ErrorTrait.class)) {
-            className = classForError(shape);
+            className = abstractClassForError();
         }
         if (shape.getId().equals(SMITHY_API_UNIT)) {
             className = ClassName.get(Tuple0.class);
@@ -243,8 +254,23 @@ public class Dafny extends NameResolver {
         return ClassName.get(className.packageName(), "Error_" + dafnyCompilesExtra_(className.simpleName()));
     }
 
-    TypeName typeForService(ServiceShape shape) {
-        throw new UnsupportedOperationException("Not yet implemented for not AWS-SDK Style");
+    /** @return The interface for a service client. */
+     TypeName typeForService(ServiceShape shape) {
+        String packageName = dafnyExternNamespaceForShapeId(shape.getId());
+        String interfaceName = DafnyNameResolver.traitNameForServiceClient(shape);
+        return ClassName.get(packageName, interfaceName);
+    }
+
+    /** @return The concrete class for a service client. */
+    public ClassName classNameForConcreteServiceClient(ServiceShape shape) {
+        String packageName = packageNameForNamespace(shape.getId().getNamespace());
+        String concreteClass = DafnyNameResolver.classNameForServiceClient(shape);
+        return ClassName.get(packageName, concreteClass);
+    }
+
+    public ClassName classNameForNamespaceDefault() {
+        String packageName = packageNameForNamespace(this.serviceShape.getId().getNamespace());
+        return ClassName.get(packageName, "__default");
     }
 
     TypeName typeForResource(ResourceShape shape) {

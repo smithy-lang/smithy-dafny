@@ -75,10 +75,15 @@ public class ModelConstants {
 
     public static String CRYPTOGRAPHY_A_STRING_OPERATION = """
                 namespace aws.cryptography.test
+                @aws.polymorph#localService(
+                  sdkId: "Test",
+                  config: TestConfig,
+                )
                 service Test {
                   operations: [DoSomething],
                   errors: [TestError]
                 }
+                structure TestConfig {}
                 operation DoSomething {
                     input: DoSomethingRequest,
                     output: DoSomethingResponse,

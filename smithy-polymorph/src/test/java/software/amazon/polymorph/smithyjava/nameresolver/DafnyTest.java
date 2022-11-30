@@ -157,8 +157,10 @@ public class DafnyTest {
 
     @Test
     public void typeForShapeService() {
-        assertThrows(UnsupportedOperationException.class,
-                () -> underTest.typeForShape(ShapeId.fromParts("smithy.example", "Example")));
+        final String expected = "Dafny.Smithy.Example.Types.IExampleClient";
+        TypeName actual = underTest.typeForShape(ShapeId.fromParts("smithy.example", "Example"));
+        final String actualString = actual.toString();
+        assertEquals(expected, actualString);
     }
 
     @Test

@@ -1,6 +1,7 @@
 package software.amazon.polymorph.utils;
 
 import software.amazon.polymorph.smithydafny.DafnyNameResolver;
+import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.ShapeId;
 
 /**
@@ -9,7 +10,8 @@ import software.amazon.smithy.model.shapes.ShapeId;
 public class DafnyNameResolverHelpers {
 
     /**
-     * Returns the Dafny {@code {:extern}} namespace corresponding to the namespace of the given shape ID.
+     * Returns the Dafny {@code {:extern}} namespace corresponding to the given shape ID,
+     * assuming it was generated into a "Types" module.
      */
     public static String dafnyExternNamespaceForShapeId(final ShapeId shapeId) {
         return "Dafny." + DafnyNameResolver.dafnyModuleForNamespace(shapeId.getNamespace());
@@ -21,6 +23,11 @@ public class DafnyNameResolverHelpers {
      */
     public static String packageNameForNamespace(final String namespace) {
         return "Dafny." + DafnyNameResolver.dafnyNamespace(namespace);
+    }
+
+    /** @return The __default for a namespace.*/
+    public static String defaultForNamespace(final String namespace){
+        return packageNameForNamespace(namespace) + ".__default";
     }
 
     public static String dafnyCompilesExtra_(final String name) {
