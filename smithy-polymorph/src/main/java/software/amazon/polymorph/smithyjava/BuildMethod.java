@@ -77,6 +77,9 @@ public class BuildMethod {
         return buildMethod.build();
     }
 
+    static CodeBlock fieldNonNull(FieldSpec field) {
+        return CodeBlock.of("$T.nonNull(this.$L())", Objects.class, field.name);
+    }
 
     public static CodeBlock requiredCheck(FieldSpec field) {
         return CodeBlock.builder()
@@ -92,7 +95,7 @@ public class BuildMethod {
     static CodeBlock rangeMinCheck(PolymorphFieldSpec polyField, RangeTrait trait) {
         String min = ConstrainTraitUtils.RangeTraitUtils.minAsShapeType(polyField.getTargetShape(), trait);
         return CodeBlock.builder()
-                .beginControlFlow("if (this.$L() < $L)", polyField.name, min)
+                .beginControlFlow("if ($L && this.$L() < $L)", fieldNonNull(polyField.fieldSpec), polyField.name, min)
                 .addStatement(
                         "throw new $T($S)",
                         IllegalArgumentException.class,
@@ -103,7 +106,7 @@ public class BuildMethod {
     static CodeBlock rangeMaxCheck(PolymorphFieldSpec polyField, RangeTrait trait) {
         String max = ConstrainTraitUtils.RangeTraitUtils.maxAsShapeType(polyField.getTargetShape(), trait);
         return CodeBlock.builder()
-                .beginControlFlow("if (this.$L() > $L)", polyField.name, max)
+                .beginControlFlow("if ($L && this.$L() > $L)", fieldNonNull(polyField.fieldSpec), polyField.name, max)
                 .addStatement(
                         "throw new $T($S)",
                         IllegalArgumentException.class,
@@ -114,7 +117,9 @@ public class BuildMethod {
     static CodeBlock lengthMinCheck(PolymorphFieldSpec polyField, LengthTrait trait) {
         String min = ConstrainTraitUtils.LengthTraitUtils.min(trait);
         return CodeBlock.builder()
-                .beginControlFlow("if (this.$L().$L < $L)", polyField.name, polyField.getLengthMethod(), min)
+                .beginControlFlow("if ($L && this.$L().$L < $L)",
+                        fieldNonNull(polyField.fieldSpec),
+                        polyField.name, polyField.getLengthMethod(), min)
                 .addStatement(
                         "throw new $T($S)",
                         IllegalArgumentException.class,
@@ -125,7 +130,9 @@ public class BuildMethod {
     static CodeBlock lengthMaxCheck(PolymorphFieldSpec polyField, LengthTrait trait) {
         String max = ConstrainTraitUtils.LengthTraitUtils.max(trait);
         return CodeBlock.builder()
-                .beginControlFlow("if (this.$L().$L > $L)", polyField.name, polyField.getLengthMethod(), max)
+                .beginControlFlow("if ($L && this.$L().$L > $L)",
+                        fieldNonNull(polyField.fieldSpec),
+                        polyField.name, polyField.getLengthMethod(), max)
                 .addStatement(
                         "throw new $T($S)",
                         IllegalArgumentException.class,
