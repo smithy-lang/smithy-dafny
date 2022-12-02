@@ -879,15 +879,7 @@ public class DotNetNameResolver {
     }
     /** Return the DotNet Type for a Union Member */
     public String unionMemberName(final MemberShape memberShape) {
-        if (ModelUtils.isInServiceNamespace(memberShape.getTarget(), serviceShape)) {
             String[] qualifiedName = classPropertyTypeForStructureMember(memberShape).split("[.]");
             return "_%s".formatted(dafnyCompilesExtra_(qualifiedName[qualifiedName.length - 1]));
-        } else {
-            final String name = dafnyConcreteTypeForUnionMember(memberShape)
-                    // TODO Hack to remove Dafny "namespace"
-                    .replace("Dafny.", "")
-                    .replace(".", "");
-            return "_%s".formatted(name);
-        }
     }
 }
