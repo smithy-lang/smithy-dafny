@@ -287,9 +287,7 @@ public class DafnyApiCodegen {
         final String name = memberShape.getMemberName();
         final String wrappedType = nameResolver.baseTypeForShape(memberShape.getTarget());
 
-        return TokenTree.of(
-          "| %s(%s: %s)".formatted(name, wrappedType.replace(".", ""), wrappedType)
-        );
+        return TokenTree.of("| %s(%s: %s)".formatted(name, name, wrappedType));
     }
 
     private TokenTree generateStructureTypeParameter(final MemberShape memberShape) {

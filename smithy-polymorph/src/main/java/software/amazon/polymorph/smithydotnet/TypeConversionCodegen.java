@@ -29,6 +29,7 @@ import static software.amazon.polymorph.smithydotnet.DotNetNameResolver.TYPE_CON
 import static software.amazon.polymorph.smithydotnet.DotNetNameResolver.typeConverterForShape;
 import static software.amazon.polymorph.smithydotnet.TypeConversionDirection.FROM_DAFNY;
 import static software.amazon.polymorph.smithydotnet.TypeConversionDirection.TO_DAFNY;
+import static software.amazon.polymorph.utils.DafnyNameResolverHelpers.dafnyCompilesExtra_;
 import static software.amazon.polymorph.utils.DafnyNameResolverHelpers.dafnyExternNamespaceForShapeId;
 
 /**
@@ -463,19 +464,17 @@ public class TypeConversionCodegen {
                 .stream()
                 .map(memberShape -> {
                     final String propertyName = nameResolver.classPropertyForStructureMember(memberShape);
-                    final String propertyType = nameResolver.classPropertyTypeForStructureMember(memberShape);
-                    final String dafnyMemberName = nameResolver.unionMemberName(memberShape);
                     final String memberFromDafnyConverterName = typeConverterForShape(
                             memberShape.getId(), FROM_DAFNY);
                     return TokenTree
                         .of("if (value.is_%s)".formatted(propertyName))
                         .append(TokenTree
                             .of(
-                                "converted.%s = %s(concrete.dtor%s);"
+                                "converted.%s = %s(concrete.dtor_%s);"
                                     .formatted(
                                         propertyName,
                                         memberFromDafnyConverterName,
-                                        dafnyMemberName
+                                        dafnyCompilesExtra_(memberShape.getMemberName())
                                     ),
                                 "return converted;"
                             )
