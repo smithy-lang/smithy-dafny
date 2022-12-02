@@ -118,7 +118,7 @@ public class DafnyTest {
         StructureShape structureShape = localModel.expectShape(structureId, StructureShape.class);
         MemberShape stringMember = structureShape.getMember("name").get();
         CodeBlock actual = Dafny.getMemberField(stringMember);
-        String expected = "_name";
+        String expected = "dtor_name()";
         tokenizeAndAssertEqual(expected, actual.toString());
     }
 
@@ -134,12 +134,12 @@ public class DafnyTest {
         // if required, get via Field
         MemberShape requiredMember = structureShape.getMember("name").get();
         CodeBlock actualRequired = Dafny.getMemberFieldValue(requiredMember);
-        String expectedRequired = "_name";
+        String expectedRequired = "dtor_name()";
         tokenizeAndAssertEqual(expectedRequired, actualRequired.toString());
         // if optional, get via dtor_value()
         MemberShape optionalField = structureShape.getMember("message").get();
         CodeBlock actualOptional = Dafny.getMemberFieldValue(optionalField);
-        String expectedOptional = "_message.dtor_value()";
+        String expectedOptional = "dtor_message().dtor_value()";
         tokenizeAndAssertEqual(expectedOptional, actualOptional.toString());
     }
 
