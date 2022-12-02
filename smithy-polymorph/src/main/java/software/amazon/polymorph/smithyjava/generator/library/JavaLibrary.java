@@ -24,6 +24,7 @@ import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
+import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.TraitDefinition;
@@ -103,6 +104,12 @@ public class JavaLibrary extends CodegenSubject {
 
     public List<OperationShape> getOperationsInServiceNamespace() {
         return this.model.getOperationShapes().stream().sequential()
+                .filter(shape -> ModelUtils.isInServiceNamespace(shape.getId(), this.serviceShape))
+                .collect(Collectors.toList());
+    }
+
+    public List<UnionShape> getUnionsInServiceNamespace() {
+        return this.model.getUnionShapes().stream().sequential()
                 .filter(shape -> ModelUtils.isInServiceNamespace(shape.getId(), this.serviceShape))
                 .collect(Collectors.toList());
     }

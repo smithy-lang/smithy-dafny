@@ -16,7 +16,7 @@ import javax.lang.model.element.Modifier;
 
 import software.amazon.polymorph.smithyjava.nameresolver.NameResolver;
 import software.amazon.smithy.model.shapes.MemberShape;
-import software.amazon.smithy.model.shapes.StructureShape;
+import software.amazon.smithy.model.shapes.Shape;
 
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.element.Modifier.PROTECTED;
@@ -32,7 +32,7 @@ public class BuilderSpecs {
     @Nonnull private final List<FieldSpec> localFields;
     @Nonnull private final List<FieldSpec> superFields;
 
-    public static List<FieldSpec> shapeToArgs(StructureShape shape, NameResolver nameResolver) {
+    public static List<FieldSpec> shapeToArgs(Shape shape, NameResolver nameResolver) {
         return shape.members().stream()
                 .map(member -> fieldSpecFromMemberShape(member, nameResolver))
                 .collect(Collectors.toList());

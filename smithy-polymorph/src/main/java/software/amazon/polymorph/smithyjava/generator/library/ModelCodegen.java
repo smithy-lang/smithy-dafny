@@ -8,12 +8,14 @@ import software.amazon.polymorph.smithyjava.generator.Generator;
 import software.amazon.polymorph.smithyjava.modeled.ModeledEnum;
 import software.amazon.polymorph.smithyjava.modeled.ModeledError;
 import software.amazon.polymorph.smithyjava.modeled.ModeledStructure;
+import software.amazon.polymorph.smithyjava.modeled.ModeledUnion;
 import software.amazon.polymorph.smithyjava.unmodeled.CollectionOfErrors;
 import software.amazon.polymorph.smithyjava.unmodeled.NativeError;
 import software.amazon.polymorph.smithyjava.unmodeled.OpaqueError;
 import software.amazon.smithy.model.shapes.ResourceShape;
 import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
+import software.amazon.smithy.model.shapes.UnionShape;
 
 
 /**
@@ -63,6 +65,9 @@ class ModelCodegen extends Generator {
         // Enums
         subject.getEnumsInServiceNamespace().stream()
                 .map(this::modeledEnum).forEachOrdered(rtn::add);
+        // Unions
+        subject.getUnionsInServiceNamespace().stream()
+                .map(this::modeledUnion).forEachOrdered(rtn::add);
         // TODO Resources
         return rtn;
     }
@@ -77,6 +82,10 @@ class ModelCodegen extends Generator {
 
     JavaFile modeledEnum(StringShape stringShape) {
         return ModeledEnum.javaFile(modelPackageName, stringShape);
+    }
+
+    JavaFile modeledUnion(UnionShape shape) {
+        return ModeledUnion.javaFile(modelPackageName, shape, subject);
     }
 
     JavaFile generateResourceInterface(ResourceShape shape) {
