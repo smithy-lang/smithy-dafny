@@ -186,7 +186,7 @@ public class ToNativeAwsV1 extends ToNative {
                         builder.addStatement(setWithConversionCallAndToArray(member));
                     } else {
                         // set with conversion call
-                        builder.addStatement(setWithConversionCall(member));
+                        builder.addStatement(setWithConversionCall(member, Dafny.getMemberFieldValue(member)));
                     }
                     if (member.isOptional()) builder.endControlFlow();
                 });
@@ -207,7 +207,7 @@ public class ToNativeAwsV1 extends ToNative {
     }
 
     @Override
-    protected CodeBlock setWithConversionCall(MemberShape member) {
+    protected CodeBlock setWithConversionCall(MemberShape member, CodeBlock getMember) {
         return CodeBlock.of("$L.$L($L($L.$L))",
                 VAR_OUTPUT,
                 setMemberField(member),

@@ -20,6 +20,7 @@ import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.ShapeType;
 import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
+import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumDefinition;
 import software.amazon.smithy.model.traits.EnumTrait;
 
@@ -127,7 +128,7 @@ public abstract class ToNative extends Generator {
                                 VAR_INPUT,
                                 Dafny.getMemberField(member));
                     }
-                    method.addStatement(setWithConversionCall(member));
+                    method.addStatement(setWithConversionCall(member, Dafny.getMemberFieldValue(member)));
                     if (member.isOptional()) {
                         method.endControlFlow();
                     }
@@ -189,13 +190,30 @@ public abstract class ToNative extends Generator {
         return method;
     }
 
-    protected CodeBlock setWithConversionCall(MemberShape member) {
+    protected MethodSpec modeledUnion(final UnionShape shape) {
+        final ShapeId shapeId = shape.getId();
+        final String methodName = capitalize(shapeId.getName());
+        final TypeName inputType = subject.dafnyNameResolver.typeForShape(shapeId);
+        final ClassName returnType = subject.nativeNameResolver.typeForStructure(shape);
+        MethodSpec.Builder method = initializeMethodSpec(methodName, inputType, returnType);
+        createNativeBuilder(method, returnType);
+        shape.members()
+                .forEach(member -> {
+                    method.beginControlFlow("if ($L.$L())", VAR_INPUT, Dafny.datatypeConstructorIs(member.getMemberName()))
+                            .addStatement(setWithConversionCall(member, Dafny.getMemberField(member)))
+                            .endControlFlow();
+                });
+        return buildAndReturn(method);
+    }
+
+    /** @param getMember can be a Variable or a method call that returns the member value.*/
+    protected CodeBlock setWithConversionCall(MemberShape member, CodeBlock getMember) {
         return CodeBlock.of("$L.$L($L($L.$L))",
                 NATIVE_BUILDER,
                 setMemberField(member),
                 memberConversionMethodReference(member).asNormalReference(),
                 VAR_INPUT,
-                Dafny.getMemberFieldValue(member));
+                getMember);
     }
 
     /**
