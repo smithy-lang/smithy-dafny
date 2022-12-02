@@ -3,7 +3,7 @@ package software.amazon.polymorph.smithyjava.generator.awssdk;
 public class ToNativeConstants {
     static String STRING_CONVERSION = "software.amazon.dafny.conversion.ToNative.Simple.String";
     static String KEY_USAGE_TYPE_CONVERSION = "Dafny.Com.Amazonaws.Kms.ToNative.KeyUsageType";
-    static String OTHER_NAMESPACE_CONVERSION = "Dafny.Com.Amazonaws.Other.ToNative.OtherNamespace";
+    static String OTHER_NAMESPACE_CONVERSION = "com.amazonaws.other.ToNative.OtherNamespace";
     static String INIT_TEMP_ARRAY = "com.amazonaws.services.kms.model.KeyUsageType[] listEnum_temp = new com.amazonaws.services.kms.model.KeyUsageType[dafnyValue.dtor_listEnum().length()]";
     static String SET_WITH_CONVERSION_CALL = "converted.withCiphertext(software.amazon.dafny.conversion.ToNative.Simple.ByteBuffer(dafnyValue.dtor_ciphertext()))";
     static String SET_WITH_CONVERSION_CALL_AND_TO_ARRAY = "converted.withListEnum(Dafny.Com.Amazonaws.Kms.ToNative.KeyUsageTypes(dafnyValue.dtor_listEnum()).toArray(listEnum_temp))";

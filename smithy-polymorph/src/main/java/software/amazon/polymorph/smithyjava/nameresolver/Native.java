@@ -16,6 +16,7 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
+import software.amazon.polymorph.smithyjava.NamespaceHelper;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.ResourceShape;
@@ -178,7 +179,17 @@ public class Native extends NameResolver{
     }
 
     public ClassName classForEnum(final Shape shape) {
-        return ClassName.get(modelPackage, capitalize(shape.getId().getName()));
+        if (isInServiceNameSpace(shape.getId())) {
+            return ClassName.get(modelPackage, shape.getId().getName());
+        }
+        // For every AWS SDK Java Library and every Library Polymorph generates,
+        // POJOs (smithy structures),
+        // most Exceptions (also structures),
+        // and interfaces (smithy resources or services)
+        // are placed in a model sub-package.
+        return ClassName.get(
+                NamespaceHelper.standardize(shape.getId().getNamespace()) + ".model",
+                shape.getId().getName());
     }
 
     public ClassName classForString() {
@@ -251,8 +262,8 @@ public class Native extends NameResolver{
         // and interfaces (smithy resources or services)
         // are placed in a model sub-package.
         return ClassName.get(
-                shape.getId().getNamespace() + ".model",
-                StringUtils.capitalize(shape.getId().getName()));
+                NamespaceHelper.standardize(shape.getId().getNamespace()) + ".model",
+                shape.getId().getName());
     }
 
     public ClassName typeForService(ServiceShape shape) {

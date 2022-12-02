@@ -15,6 +15,7 @@ import java.util.Optional;
 import javax.lang.model.element.Modifier;
 
 import software.amazon.polymorph.smithyjava.MethodReference;
+import software.amazon.polymorph.smithyjava.NamespaceHelper;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 import software.amazon.polymorph.utils.ModelUtils;
@@ -221,7 +222,7 @@ public abstract class ToDafny extends Generator {
         // Otherwise, this target must be in another namespace,
         // reference converter from that namespace's ToDafny class
         ClassName otherNamespaceToDafny = ClassName.get(
-                DafnyNameResolverHelpers.packageNameForNamespace(targetShape.getId().getNamespace()),
+                NamespaceHelper.standardize(targetShape.getId().getNamespace()),
                 TO_DAFNY);
         return new MethodReference(otherNamespaceToDafny, methodName);
     }

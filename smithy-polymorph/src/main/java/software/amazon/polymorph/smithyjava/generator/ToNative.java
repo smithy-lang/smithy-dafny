@@ -9,6 +9,7 @@ import java.util.Map;
 
 import software.amazon.polymorph.smithyjava.BuilderSpecs;
 import software.amazon.polymorph.smithyjava.MethodReference;
+import software.amazon.polymorph.smithyjava.NamespaceHelper;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 import software.amazon.polymorph.utils.ModelUtils;
@@ -225,7 +226,7 @@ public abstract class ToNative extends Generator {
         // Otherwise, this target must be in another namespace,
         // reference converter from that namespace's ToNative class
         ClassName otherNamespaceToDafny = ClassName.get(
-                DafnyNameResolverHelpers.packageNameForNamespace(targetShape.getId().getNamespace()),
+                NamespaceHelper.standardize(targetShape.getId().getNamespace()),
                 TO_NATIVE
         );
         return new MethodReference(otherNamespaceToDafny, methodName);
