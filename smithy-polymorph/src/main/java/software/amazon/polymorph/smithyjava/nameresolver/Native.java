@@ -163,9 +163,8 @@ public class Native extends NameResolver{
             case STRUCTURE -> typeForStructure(shape.asStructureShape().get());
             case SERVICE -> typeForService(shape.asServiceShape().get());
             case RESOURCE -> typeForResource(shape.asResourceShape().get());
-            /* TODO: Handle Unions
-            case UNION -> baseTypeForUnion(shape.asUnionShape().get());
-            */
+            // Unions are identical to Structures (in this context)
+            case UNION -> typeForStructure(shape.asUnionShape().get());
             default -> throw new UnsupportedOperationException("Shape %s has unsupported type %s"
                     .formatted(shapeId, shape.getType()));
         };
@@ -251,8 +250,12 @@ public class Native extends NameResolver{
         };
     }
 
-    public ClassName typeForStructure(StructureShape shape) {
-        //TODO handle traits on structures
+    public ClassName typeForStructure(Shape shape) {
+        if (!(shape.isUnionShape() || shape.isStructureShape())) {
+            throw new IllegalArgumentException(
+                    "typeForStructure should only be called for Structures or Unions. ShapeId: %s"
+                            .formatted(shape.getId()));
+        }
         if (isInServiceNameSpace(shape.getId())) {
             return ClassName.get(modelPackage, shape.getId().getName());
         }
