@@ -55,7 +55,7 @@ public class ToDafnyAwsV1Constants {
             ) {
               return software.amazon.dafny.conversion.ToDafny.Aggregate.GenericToSequence(
                   nativeValue,
-                  Dafny.Com.Amazonaws.Other.ToDafny::OtherNamespace,
+                  com.amazonaws.other.ToDafny::OtherNamespace,
                   Dafny.Com.Amazonaws.Other.Types.OtherNamespace._typeDescriptor()
               );
             }

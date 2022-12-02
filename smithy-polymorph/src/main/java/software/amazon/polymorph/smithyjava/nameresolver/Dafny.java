@@ -87,9 +87,11 @@ public class Dafny extends NameResolver {
     }
 
     public static CodeBlock getMemberField(MemberShape shape) {
-        return CodeBlock.of("_$L", shape.getMemberName());
+        return CodeBlock.of("dtor_$L()", dafnyCompilesExtra_(shape.getMemberName()));
     }
 
+    /** If not optional, get via {@code dtor_<memberName>()}.
+     * Otherwise, get via {@code dtor_<memberName>().dtor_value()}*/
     public static CodeBlock getMemberFieldValue(MemberShape shape) {
         // if required, get via Field
         if (shape.isRequired()) {
@@ -138,9 +140,8 @@ public class Dafny extends NameResolver {
             case STRUCTURE -> classForStructure(shape.asStructureShape().get());
             case SERVICE -> typeForService(shape.asServiceShape().get());
             case RESOURCE -> typeForResource(shape.asResourceShape().get());
-            /* TODO: Handle Unions
-            case UNION -> dafnyTypeForUnion(shape.asUnionShape().get());
-            */
+            // Unions are identical to Structures (in this context).
+            case UNION -> classForNotErrorNotUnitShape(shape.asUnionShape().get());
             default -> throw new UnsupportedOperationException("Unsupported shape " + shapeId);
         };
     }

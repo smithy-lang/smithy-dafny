@@ -15,6 +15,7 @@ import java.util.Optional;
 import javax.lang.model.element.Modifier;
 
 import software.amazon.polymorph.smithyjava.MethodReference;
+import software.amazon.polymorph.smithyjava.NamespaceHelper;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 import software.amazon.polymorph.utils.ModelUtils;
@@ -25,6 +26,7 @@ import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.ShapeType;
 import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
+import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumDefinition;
 import software.amazon.smithy.model.traits.EnumTrait;
 
@@ -101,6 +103,42 @@ public abstract class ToDafny extends Generator {
                 CodeBlock.join(variables, ", ")
         );
         return builder.build();
+    }
+
+    protected MethodSpec modeledUnion(final UnionShape shape) {
+        final ShapeId shapeId = shape.getId();
+        String methodName = capitalize(shape.getId().getName());
+        TypeName returnType = subject.dafnyNameResolver.typeForShape(shapeId);
+        MethodSpec.Builder method = MethodSpec
+                .methodBuilder(methodName)
+                .addModifiers(PUBLIC_STATIC)
+                .returns(returnType)
+                .addParameter(subject.nativeNameResolver.typeForStructure(shape), VAR_INPUT);
+        // TODO: Once dafny always generates create_<datatypeConstructor>, remove this if block
+        if (shape.members().size() == 1) {
+            // There is one, stream().findFirst will return a value
+            //noinspection OptionalGetWithoutIsPresent
+            MemberShape onlyMember = shape.members().stream().findFirst().get();
+            CodeBlock getField = CodeBlock.of("$L.$L()", VAR_INPUT, onlyMember.getMemberName());
+            CodeBlock memberConversion = memberConversion(onlyMember, getField);
+            method.addStatement("return $T.create($L)", returnType, memberConversion);
+            return method.build();
+        }
+        shape.members().forEach(member -> {
+            CodeBlock getField = CodeBlock.of("$L.$L()", VAR_INPUT, member.getMemberName());
+            CodeBlock memberConversion = memberConversion(member, getField);
+            String datatypeConstructorCreate = Dafny.datatypeConstructorCreate(member.getMemberName());
+            method.beginControlFlow("if ($T.nonNull($L))", Objects.class, getField)
+                    .addStatement("return $T.$L($L)", returnType, datatypeConstructorCreate, memberConversion)
+                    .endControlFlow();
+        });
+        method.addStatement(
+                "throw new $T($S + $L + $S)",
+                IllegalArgumentException.class,
+                "Cannot convert ",
+                VAR_INPUT,
+                " to %s.".formatted(returnType));
+        return method.build();
     }
 
     protected CodeBlock memberDeclaration(final MemberShape memberShape, CodeBlock variable) {
@@ -221,7 +259,7 @@ public abstract class ToDafny extends Generator {
         // Otherwise, this target must be in another namespace,
         // reference converter from that namespace's ToDafny class
         ClassName otherNamespaceToDafny = ClassName.get(
-                DafnyNameResolverHelpers.packageNameForNamespace(targetShape.getId().getNamespace()),
+                NamespaceHelper.standardize(targetShape.getId().getNamespace()),
                 TO_DAFNY);
         return new MethodReference(otherNamespaceToDafny, methodName);
     }

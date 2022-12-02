@@ -84,6 +84,9 @@ public class ToDafnyLibrary extends ToDafny {
         // Enums
         subject.getEnumsInServiceNamespace().stream()
                 .map(this::modeledEnum).forEachOrdered(toDafnyMethods::add);
+        // Unions
+        subject.getUnionsInServiceNamespace().stream()
+                .map(this::modeledUnion).forEachOrdered(toDafnyMethods::add);
         return TypeSpec.classBuilder(thisClassName)
                 .addModifiers(Modifier.PUBLIC)
                 .addMethods(toDafnyMethods)

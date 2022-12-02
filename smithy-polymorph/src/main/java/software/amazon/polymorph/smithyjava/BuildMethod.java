@@ -10,9 +10,10 @@ import java.util.Objects;
 
 import javax.lang.model.element.Modifier;
 
-import software.amazon.polymorph.smithyjava.PolymorphFieldSpec;
 import software.amazon.polymorph.smithyjava.generator.CodegenSubject;
+import software.amazon.polymorph.smithyjava.modeled.ModeledUnion;
 import software.amazon.polymorph.utils.ConstrainTraitUtils;
+
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.traits.LengthTrait;
 import software.amazon.smithy.model.traits.RangeTrait;
@@ -51,7 +52,6 @@ public class BuildMethod {
             }
 
             // Range Trait
-            // TODO: Test range trait generation
             RangeTrait rangeTrait = polyField.rangeTrait().isPresent() ?
                     polyField.rangeTrait().get() : null;
             if (rangeTrait != null && polyField.rangeMin().isPresent()) {
@@ -62,7 +62,6 @@ public class BuildMethod {
             }
 
             // Length Trait
-            // TODO: Test length trait generation
             LengthTrait lengthTrait = polyField.lengthTrait().isPresent() ?
                     polyField.lengthTrait().get() : null;
             if (lengthTrait != null && polyField.lengthMin().isPresent()) {
@@ -72,6 +71,11 @@ public class BuildMethod {
                 buildMethod.addCode(lengthMaxCheck(polyField, lengthTrait));
             }
         });
+
+        // Union check
+        if (shape.isUnionShape()) {
+            buildMethod.addCode(unionCheck(shape.getId().getName()));
+        }
 
         buildMethod.addStatement("return new $T(this)", className);
         return buildMethod.build();
@@ -137,6 +141,16 @@ public class BuildMethod {
                         "throw new $T($S)",
                         IllegalArgumentException.class,
                         "The size of `%s` must be less than or equal to %s".formatted(polyField.name, max))
+                .endControlFlow().build();
+    }
+
+    static CodeBlock unionCheck(String className) {
+        return CodeBlock.builder()
+                .beginControlFlow("if (!$L())", ModeledUnion.UNION_VALIDATE_METHOD_NAME)
+                .addStatement(
+                        "throw new $T($S)",
+                        IllegalArgumentException.class,
+                        "`%s` is a Union. A Union MUST have one and only one value set.".formatted(className))
                 .endControlFlow().build();
     }
 }

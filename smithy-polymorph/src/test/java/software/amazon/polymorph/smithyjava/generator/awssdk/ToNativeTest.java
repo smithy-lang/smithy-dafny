@@ -13,6 +13,7 @@ import java.util.Set;
 
 import software.amazon.polymorph.smithyjava.MethodReference;
 import software.amazon.polymorph.smithyjava.ModelConstants;
+import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.ListShape;
@@ -63,8 +64,8 @@ public class ToNativeTest {
 
         @Override
         // This allows the test class to call the otherwise protected method.
-        protected CodeBlock setWithConversionCall(MemberShape member) {
-            return super.setWithConversionCall(member);
+        protected CodeBlock setWithConversionCall(MemberShape member, CodeBlock getMember) {
+            return super.setWithConversionCall(member, getMember);
         }
     }
 
@@ -120,7 +121,7 @@ public class ToNativeTest {
         ShapeId structureId = ShapeId.fromParts("com.amazonaws.kms", "Kitchen");
         StructureShape structureShape = model.expectShape(structureId, StructureShape.class);
         MemberShape ciphertextMember = structureShape.getMember("ciphertext").get();
-        CodeBlock actual = underTestAbstract.setWithConversionCall(ciphertextMember);
+        CodeBlock actual = underTestAbstract.setWithConversionCall(ciphertextMember, Dafny.getMemberFieldValue(ciphertextMember));
         tokenizeAndAssertEqual(ToNativeConstants.SET_WITH_CONVERSION_CALL, actual.toString());
     }
 

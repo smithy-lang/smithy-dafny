@@ -78,7 +78,12 @@ public class AwsSdkNativeV1 extends Native {
     }
 
     @Override
-    public ClassName typeForStructure(final StructureShape shape) {
+    public ClassName typeForStructure(final Shape shape) {
+        if (!(shape.isUnionShape() || shape.isStructureShape())) {
+            throw new IllegalArgumentException(
+                    "typeForStructure should only be called for Structures or Unions. ShapeId: %s"
+                            .formatted(shape.getId()));
+        }
         if (shape.hasTrait(TraitDefinition.class)) {
             throw new IllegalArgumentException(
                     "Trait definition structures have no corresponding generated type");

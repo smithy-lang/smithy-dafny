@@ -16,6 +16,7 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
+import software.amazon.polymorph.smithyjava.NamespaceHelper;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.ResourceShape;
@@ -162,9 +163,8 @@ public class Native extends NameResolver{
             case STRUCTURE -> typeForStructure(shape.asStructureShape().get());
             case SERVICE -> typeForService(shape.asServiceShape().get());
             case RESOURCE -> typeForResource(shape.asResourceShape().get());
-            /* TODO: Handle Unions
-            case UNION -> baseTypeForUnion(shape.asUnionShape().get());
-            */
+            // Unions are identical to Structures (in this context)
+            case UNION -> typeForStructure(shape.asUnionShape().get());
             default -> throw new UnsupportedOperationException("Shape %s has unsupported type %s"
                     .formatted(shapeId, shape.getType()));
         };
@@ -178,7 +178,17 @@ public class Native extends NameResolver{
     }
 
     public ClassName classForEnum(final Shape shape) {
-        return ClassName.get(modelPackage, capitalize(shape.getId().getName()));
+        if (isInServiceNameSpace(shape.getId())) {
+            return ClassName.get(modelPackage, shape.getId().getName());
+        }
+        // For every AWS SDK Java Library and every Library Polymorph generates,
+        // POJOs (smithy structures),
+        // most Exceptions (also structures),
+        // and interfaces (smithy resources or services)
+        // are placed in a model sub-package.
+        return ClassName.get(
+                NamespaceHelper.standardize(shape.getId().getNamespace()) + ".model",
+                shape.getId().getName());
     }
 
     public ClassName classForString() {
@@ -240,8 +250,12 @@ public class Native extends NameResolver{
         };
     }
 
-    public ClassName typeForStructure(StructureShape shape) {
-        //TODO handle traits on structures
+    public ClassName typeForStructure(Shape shape) {
+        if (!(shape.isUnionShape() || shape.isStructureShape())) {
+            throw new IllegalArgumentException(
+                    "typeForStructure should only be called for Structures or Unions. ShapeId: %s"
+                            .formatted(shape.getId()));
+        }
         if (isInServiceNameSpace(shape.getId())) {
             return ClassName.get(modelPackage, shape.getId().getName());
         }
@@ -251,8 +265,8 @@ public class Native extends NameResolver{
         // and interfaces (smithy resources or services)
         // are placed in a model sub-package.
         return ClassName.get(
-                shape.getId().getNamespace() + ".model",
-                StringUtils.capitalize(shape.getId().getName()));
+                NamespaceHelper.standardize(shape.getId().getNamespace()) + ".model",
+                shape.getId().getName());
     }
 
     public ClassName typeForService(ServiceShape shape) {

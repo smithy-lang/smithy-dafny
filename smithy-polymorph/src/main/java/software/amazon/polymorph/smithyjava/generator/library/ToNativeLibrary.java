@@ -80,6 +80,9 @@ public class ToNativeLibrary extends ToNative {
         // Enums
         subject.getEnumsInServiceNamespace().stream()
                 .map(this::modeledEnum).forEachOrdered(toNativeMethods::add);
+        // Unions
+        subject.getUnionsInServiceNamespace().stream()
+                .map(this::modeledUnion).forEachOrdered(toNativeMethods::add);
         return TypeSpec.classBuilder(thisClassName)
                 .addModifiers(Modifier.PUBLIC)
                 .addMethods(toNativeMethods)
