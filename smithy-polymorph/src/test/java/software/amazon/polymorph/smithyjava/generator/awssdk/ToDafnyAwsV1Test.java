@@ -59,7 +59,8 @@ public class ToDafnyAwsV1Test {
         assertNull(underTest.generateConvert(CiphertextTypeId));
         // case LIST of Enums (which will take a list of Strings for AWS SDK for Java V1)
         ShapeId listEnumId = ShapeId.fromParts("com.amazonaws.kms", "KeyUsageTypes");
-        tokenizeAndAssertEqual(ToDafnyAwsV1Constants.GENERATE_CONVERT_LIST, underTest.generateConvert(listEnumId).toString());
+        String actualListEnum = underTest.generateConvert(listEnumId).toString();
+        tokenizeAndAssertEqual(ToDafnyAwsV1Constants.GENERATE_CONVERT_LIST, actualListEnum);
         // case LIST of Structures from other AWS SDK namespace
         ShapeId listStructureId = ShapeId.fromParts("com.amazonaws.kms", "OtherNamespaces");
         tokenizeAndAssertEqual(ToDafnyAwsV1Constants.GENERATE_CONVERT_LIST_STRUCTURES, underTest.generateConvert(listStructureId).toString());

@@ -204,7 +204,7 @@ public class ToDafnyAwsV1 extends ToDafny {
         MemberShape memberShape = shape.getMember();
         CodeBlock memberConverter = memberConversionMethodReference(memberShape).asFunctionalReference();
         CodeBlock genericCall = AGGREGATE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(shape.getType()).asNormalReference();
-        MethodReference getTypeDescriptor = subject.dafnyNameResolver.typeDescriptor(memberShape.getTarget());
+        CodeBlock getTypeDescriptor = subject.dafnyNameResolver.typeDescriptor(memberShape.getTarget());
         ParameterSpec parameterSpec = ParameterSpec
                 .builder(subject.nativeNameResolver.typeForListSetOrMapNoEnum(shape.getId()), "nativeValue")
                 .build();
@@ -213,8 +213,8 @@ public class ToDafnyAwsV1 extends ToDafny {
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .returns(subject.dafnyNameResolver.typeForAggregateWithWildcard(shape.getId()))
                 .addParameter(parameterSpec)
-                .addStatement("return $L(\nnativeValue, \n$L, \n$L())",
-                        genericCall, memberConverter, getTypeDescriptor.asNormalReference())
+                .addStatement("return $L(\nnativeValue, \n$L, \n$L)",
+                        genericCall, memberConverter, getTypeDescriptor)
                 .build();
     }
 

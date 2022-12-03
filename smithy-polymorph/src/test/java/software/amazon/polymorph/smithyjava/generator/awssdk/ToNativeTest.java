@@ -58,6 +58,12 @@ public class ToNativeTest {
 
         @Override
         // This allows the test class to call the otherwise protected method.
+        protected MethodSpec modeledList(ListShape shape) {
+            return super.modeledList(shape);
+        }
+
+        @Override
+        // This allows the test class to call the otherwise protected method.
         protected MethodReference memberConversionMethodReference(MemberShape memberShape) {
             return super.memberConversionMethodReference(memberShape);
         }
@@ -157,7 +163,7 @@ public class ToNativeTest {
     public void generateConvertList() {
         ShapeId listId = ShapeId.fromParts("com.amazonaws.kms", "KeyUsageTypes");
         ListShape listShape = model.expectShape(listId, ListShape.class);
-        MethodSpec listActual = underTest.generateConvertList(listShape);
+        MethodSpec listActual = underTestAbstract.modeledList(listShape);
         tokenizeAndAssertEqual(ToNativeConstants.GENERATE_CONVERT_LIST, listActual.toString());
     }
 

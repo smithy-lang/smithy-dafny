@@ -15,8 +15,10 @@ import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.polymorph.utils.TokenTree;
+
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.node.ExpectationNotMetException;
+import software.amazon.smithy.model.shapes.ListShape;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
@@ -110,6 +112,12 @@ public class JavaLibrary extends CodegenSubject {
 
     public List<UnionShape> getUnionsInServiceNamespace() {
         return this.model.getUnionShapes().stream().sequential()
+                .filter(shape -> ModelUtils.isInServiceNamespace(shape.getId(), this.serviceShape))
+                .collect(Collectors.toList());
+    }
+
+    public List<ListShape> getListsInServiceNamespace() {
+        return this.model.getListShapes().stream().sequential()
                 .filter(shape -> ModelUtils.isInServiceNamespace(shape.getId(), this.serviceShape))
                 .collect(Collectors.toList());
     }

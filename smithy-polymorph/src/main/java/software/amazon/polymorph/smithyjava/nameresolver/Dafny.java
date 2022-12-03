@@ -6,13 +6,22 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.WildcardTypeName;
 
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.Map;
+import java.util.Objects;
+
+import javax.annotation.Nullable;
 
 import dafny.DafnyMap;
 import dafny.DafnySequence;
 import dafny.DafnySet;
 import dafny.Tuple0;
+import dafny.TypeDescriptor;
 import software.amazon.polymorph.smithydafny.DafnyNameResolver;
 import software.amazon.polymorph.smithyjava.MethodReference;
 import software.amazon.smithy.model.Model;
@@ -33,6 +42,7 @@ import static software.amazon.polymorph.smithyjava.nameresolver.Constants.SMITHY
 import static software.amazon.polymorph.utils.DafnyNameResolverHelpers.dafnyCompilesExtra_;
 import static software.amazon.polymorph.utils.DafnyNameResolverHelpers.dafnyExternNamespaceForShapeId;
 import static software.amazon.polymorph.utils.DafnyNameResolverHelpers.packageNameForNamespace;
+import static software.amazon.polymorph.utils.ModelUtils.isSmithyApiShape;
 import static software.amazon.smithy.utils.StringUtils.capitalize;
 
 /**
@@ -41,6 +51,22 @@ import static software.amazon.smithy.utils.StringUtils.capitalize;
  * for the Dafny generated Java code.
  */
 public class Dafny extends NameResolver {
+    private static final Logger LOGGER = LoggerFactory.getLogger(Dafny.class);
+    protected static final Map<ShapeType, CodeBlock> TYPE_DESCRIPTOR_BY_SHAPE_TYPE;
+    static {
+        TYPE_DESCRIPTOR_BY_SHAPE_TYPE = Map.ofEntries(
+                Map.entry(ShapeType.STRING, CodeBlock.of("$T._typeDescriptor($T.CHAR)", DafnySequence.class, TypeDescriptor.class)),
+                // Tony is not sure BLOB is correct...
+                Map.entry(ShapeType.BLOB, CodeBlock.of("$T._typeDescriptor($T.BYTE)", DafnySequence.class, TypeDescriptor.class)),
+                Map.entry(ShapeType.BOOLEAN, CodeBlock.of("$T.BOOLEAN", TypeDescriptor.class)),
+                Map.entry(ShapeType.BYTE, CodeBlock.of("$T.BYTE", TypeDescriptor.class)),
+                Map.entry(ShapeType.SHORT, CodeBlock.of("$T.SHORT", TypeDescriptor.class)),
+                Map.entry(ShapeType.INTEGER, CodeBlock.of("$T.INT", TypeDescriptor.class)),
+                Map.entry(ShapeType.LONG, CodeBlock.of("$T.LONG", TypeDescriptor.class)),
+                Map.entry(ShapeType.TIMESTAMP, CodeBlock.of("$T._typeDescriptor($T.CHAR)", DafnySequence.class, TypeDescriptor.class)),
+                Map.entry(ShapeType.BIG_INTEGER, CodeBlock.of("$T.BIG_INTEGER", TypeDescriptor.class))
+        );
+    }
 
     public Dafny(
             final String packageName,
@@ -182,18 +208,30 @@ public class Dafny extends NameResolver {
         return classForDatatypeConstructor("Error", "Opaque");
     }
 
-    public MethodReference typeDescriptor(ShapeId shapeId) {
-        final Shape shape = model.getShape(shapeId)
+    public CodeBlock typeDescriptor(ShapeId shapeId) {
+        Shape shape = model.getShape(shapeId)
                 .orElseThrow(() -> new IllegalStateException("Cannot find shape " + shapeId));
-        ClassName className;
+        if (shape.isMemberShape()) {
+            // We have just established it is a member shape, asMemberShape will return a value
+            //noinspection OptionalGetWithoutIsPresent
+            return typeDescriptor(shape.asMemberShape().get().getTarget());
+        }
         if (shape.hasTrait(ErrorTrait.class)) {
-            className = abstractClassForError();
+            return CodeBlock.of("$L()",
+                    new MethodReference(abstractClassForError(), "_typeDescriptor").asNormalReference());
         }
         if (shape.getId().equals(SMITHY_API_UNIT)) {
-            className = ClassName.get(Tuple0.class);
+            return CodeBlock.of("$L()",
+                    new MethodReference(ClassName.get(Tuple0.class), "_typeDescriptor").asNormalReference());
         }
-        className = classForNotErrorNotUnitShape(shape);
-        return new MethodReference(className, "_typeDescriptor");
+        if (shape.getType().getCategory().equals(ShapeType.Category.SIMPLE) && !shape.hasTrait(EnumTrait.class)) {
+            @Nullable CodeBlock typeDescriptor = TYPE_DESCRIPTOR_BY_SHAPE_TYPE.get(shape.getType());
+            if (Objects.nonNull(typeDescriptor)) {
+                return CodeBlock.of("$L", typeDescriptor);
+            }
+        }
+        return CodeBlock.of("$L()",
+                new MethodReference(classForNotErrorNotUnitShape(shape), "_typeDescriptor").asNormalReference());
     }
 
     /*
