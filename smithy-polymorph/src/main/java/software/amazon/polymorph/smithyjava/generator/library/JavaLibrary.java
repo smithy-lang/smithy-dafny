@@ -22,6 +22,7 @@ import software.amazon.smithy.model.shapes.ListShape;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
+import software.amazon.smithy.model.shapes.SetShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StringShape;
@@ -118,6 +119,12 @@ public class JavaLibrary extends CodegenSubject {
 
     public List<ListShape> getListsInServiceNamespace() {
         return this.model.getListShapes().stream().sequential()
+                .filter(shape -> ModelUtils.isInServiceNamespace(shape.getId(), this.serviceShape))
+                .collect(Collectors.toList());
+    }
+
+    public List<SetShape> getSetsInServiceNamespace() {
+        return this.model.getSetShapes().stream().sequential()
                 .filter(shape -> ModelUtils.isInServiceNamespace(shape.getId(), this.serviceShape))
                 .collect(Collectors.toList());
     }

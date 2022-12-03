@@ -64,6 +64,12 @@ public class ToNativeTest {
 
         @Override
         // This allows the test class to call the otherwise protected method.
+        protected MethodSpec modeledSet(SetShape shape) {
+            return super.modeledSet(shape);
+        }
+
+        @Override
+        // This allows the test class to call the otherwise protected method.
         protected MethodReference memberConversionMethodReference(MemberShape memberShape) {
             return super.memberConversionMethodReference(memberShape);
         }
@@ -171,7 +177,7 @@ public class ToNativeTest {
     public void generateConvertSet() {
         ShapeId setId = ShapeId.fromParts("com.amazonaws.kms", "Names");
         SetShape setShape = model.expectShape(setId, SetShape.class);
-        MethodSpec setActual = underTest.generateConvertSet(setShape);
+        MethodSpec setActual = underTestAbstract.modeledSet(setShape);
         tokenizeAndAssertEqual(ToNativeConstants.GENERATE_CONVERT_SET, setActual.toString());
     }
 

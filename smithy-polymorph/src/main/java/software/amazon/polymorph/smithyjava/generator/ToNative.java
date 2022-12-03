@@ -16,6 +16,7 @@ import software.amazon.polymorph.utils.ModelUtils;
 
 import software.amazon.smithy.model.shapes.ListShape;
 import software.amazon.smithy.model.shapes.MemberShape;
+import software.amazon.smithy.model.shapes.SetShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.ShapeType;
@@ -208,6 +209,10 @@ public abstract class ToNative extends Generator {
     }
 
     protected MethodSpec modeledList(ListShape shape) {
+        return modeledListOrSet(shape.getMember(), shape.getId(), shape.getType());
+    }
+
+    protected MethodSpec modeledSet(SetShape shape) {
         return modeledListOrSet(shape.getMember(), shape.getId(), shape.getType());
     }
 

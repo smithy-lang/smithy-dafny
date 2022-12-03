@@ -21,7 +21,6 @@ import java.util.stream.Collectors;
 import javax.lang.model.element.Modifier;
 
 import dafny.DafnySequence;
-import software.amazon.polymorph.smithyjava.MethodReference;
 import software.amazon.polymorph.smithyjava.generator.ToDafny;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.smithy.model.shapes.ListShape;
@@ -139,7 +138,7 @@ public class ToDafnyAwsV1 extends ToDafny {
                     INTEGER, LONG, BIG_DECIMAL, BIG_INTEGER, MEMBER -> null;
             case LIST -> modeledList(shape.asListShape().get());
             case MAP -> generateConvertMap(shape.asMapShape().get());
-            case SET -> generateConvertSet(shape.asSetShape().get());
+            case SET -> modeledSet(shape.asSetShape().get());
             case STRUCTURE -> generateConvertStructure(shapeId);
             default -> throw new UnsupportedOperationException(
                     "ShapeId %s is of Type %s, which is not yet supported for ToDafny"
@@ -218,7 +217,15 @@ public class ToDafnyAwsV1 extends ToDafny {
                 .build();
     }
 
-    MethodSpec generateConvertSet(SetShape shape) {
+    /**
+     * We have to customize
+     * Set conversion for the AWS SDK for Java V1 because
+     * AWS SDK Java V1 treats Enums in a special way.
+     * See the comment on
+     * {@link software.amazon.polymorph.smithyjava.nameresolver.AwsSdkNativeV1#typeForShapeNoEnum}
+     **/
+    @Override
+    protected MethodSpec modeledSet(SetShape shape) {
         MemberShape memberShape = shape.getMember();
         CodeBlock memberConverter = memberConversionMethodReference(memberShape).asFunctionalReference();
         CodeBlock genericCall = AGGREGATE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(shape.getType()).asNormalReference();

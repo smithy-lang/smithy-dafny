@@ -100,17 +100,13 @@ public class ToNativeAwsV1 extends ToNative {
                     INTEGER, LONG, BIG_DECIMAL, BIG_INTEGER, MEMBER -> null;
             case STRING -> generateConvertString(shapeId); // STRING handles enums
             case LIST -> modeledList(shape.asListShape().get());
-            case SET -> generateConvertSet(shape.asSetShape().get());
+            case SET -> modeledSet(shape.asSetShape().get());
             case MAP -> generateConvertMap(shape.asMapShape().get());
             case STRUCTURE -> modeledStructure(shape.asStructureShape().get());
             default -> throw new UnsupportedOperationException(
                     "ShapeId %s is of Type %s, which is not yet supported for ToDafny"
                             .formatted(shapeId, shape.getType()));
         };
-    }
-
-    MethodSpec generateConvertSet(SetShape shape) {
-        return modeledListOrSet(shape.getMember(), shape.getId(), shape.getType());
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")
