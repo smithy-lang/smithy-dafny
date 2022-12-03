@@ -89,6 +89,9 @@ public class ToNativeLibrary extends ToNative {
         // Sets
         subject.getSetsInServiceNamespace().stream()
                 .map(this::modeledSet).forEachOrdered(toNativeMethods::add);
+        // Maps
+        subject.getMapsInServiceNamespace().stream()
+                .map(this::modeledMap).forEachOrdered(toNativeMethods::add);
         return TypeSpec.classBuilder(thisClassName)
                 .addModifiers(Modifier.PUBLIC)
                 .addMethods(toNativeMethods)

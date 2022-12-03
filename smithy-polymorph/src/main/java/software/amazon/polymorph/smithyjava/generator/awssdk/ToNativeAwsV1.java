@@ -4,7 +4,6 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
 
 import java.util.Collections;
@@ -20,10 +19,8 @@ import software.amazon.polymorph.smithyjava.generator.ToNative;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.polymorph.utils.ModelUtils;
 
-import software.amazon.smithy.model.shapes.MapShape;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
-import software.amazon.smithy.model.shapes.SetShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StringShape;
@@ -101,32 +98,12 @@ public class ToNativeAwsV1 extends ToNative {
             case STRING -> generateConvertString(shapeId); // STRING handles enums
             case LIST -> modeledList(shape.asListShape().get());
             case SET -> modeledSet(shape.asSetShape().get());
-            case MAP -> generateConvertMap(shape.asMapShape().get());
+            case MAP -> modeledMap(shape.asMapShape().get());
             case STRUCTURE -> modeledStructure(shape.asStructureShape().get());
             default -> throw new UnsupportedOperationException(
                     "ShapeId %s is of Type %s, which is not yet supported for ToDafny"
                             .formatted(shapeId, shape.getType()));
         };
-    }
-
-    @SuppressWarnings("OptionalGetWithoutIsPresent")
-    MethodSpec generateConvertMap(MapShape shape) {
-        MemberShape keyShape = shape.getKey().asMemberShape().get();
-        CodeBlock keyConverter = memberConversionMethodReference(keyShape).asFunctionalReference();
-        MemberShape valueShape = shape.getValue().asMemberShape().get();
-        CodeBlock valueConverter = memberConversionMethodReference(valueShape).asFunctionalReference();
-        CodeBlock genericCall = AGGREGATE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(shape.getType()).asNormalReference();
-        ParameterSpec parameterSpec = ParameterSpec
-                .builder(subject.dafnyNameResolver.typeForShape(shape.getId()), VAR_INPUT)
-                .build();
-        return MethodSpec
-                .methodBuilder(capitalize(shape.getId().getName()))
-                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                .returns(subject.nativeNameResolver.typeForShape(shape.getId()))
-                .addParameter(parameterSpec)
-                .addStatement("return $L(\n$L, \n$L, \n$L)",
-                        genericCall, VAR_INPUT, keyConverter, valueConverter)
-                .build();
     }
 
     @Override

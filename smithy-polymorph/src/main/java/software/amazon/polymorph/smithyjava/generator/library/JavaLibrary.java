@@ -19,6 +19,7 @@ import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.node.ExpectationNotMetException;
 import software.amazon.smithy.model.shapes.ListShape;
+import software.amazon.smithy.model.shapes.MapShape;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
@@ -125,6 +126,12 @@ public class JavaLibrary extends CodegenSubject {
 
     public List<SetShape> getSetsInServiceNamespace() {
         return this.model.getSetShapes().stream().sequential()
+                .filter(shape -> ModelUtils.isInServiceNamespace(shape.getId(), this.serviceShape))
+                .collect(Collectors.toList());
+    }
+
+    public List<MapShape> getMapsInServiceNamespace() {
+        return this.model.getMapShapes().stream().sequential()
                 .filter(shape -> ModelUtils.isInServiceNamespace(shape.getId(), this.serviceShape))
                 .collect(Collectors.toList());
     }

@@ -8,6 +8,8 @@ import com.squareup.javapoet.TypeName;
 
 import java.util.Map;
 
+import javax.lang.model.element.Modifier;
+
 import software.amazon.polymorph.smithyjava.BuilderSpecs;
 import software.amazon.polymorph.smithyjava.MethodReference;
 import software.amazon.polymorph.smithyjava.NamespaceHelper;
@@ -15,6 +17,7 @@ import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.polymorph.utils.ModelUtils;
 
 import software.amazon.smithy.model.shapes.ListShape;
+import software.amazon.smithy.model.shapes.MapShape;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.SetShape;
 import software.amazon.smithy.model.shapes.Shape;
@@ -110,6 +113,26 @@ public abstract class ToNative extends Generator {
     protected MethodSpec buildAndReturn(MethodSpec.Builder method) {
         method.addStatement("return $L.build()", NATIVE_BUILDER);
         return method.build();
+    }
+
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
+    protected MethodSpec modeledMap(MapShape shape) {
+        MemberShape keyShape = shape.getKey().asMemberShape().get();
+        CodeBlock keyConverter = memberConversionMethodReference(keyShape).asFunctionalReference();
+        MemberShape valueShape = shape.getValue().asMemberShape().get();
+        CodeBlock valueConverter = memberConversionMethodReference(valueShape).asFunctionalReference();
+        CodeBlock genericCall = AGGREGATE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(shape.getType()).asNormalReference();
+        ParameterSpec parameterSpec = ParameterSpec
+                .builder(subject.dafnyNameResolver.typeForShape(shape.getId()), VAR_INPUT)
+                .build();
+        return MethodSpec
+                .methodBuilder(capitalize(shape.getId().getName()))
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                .returns(subject.nativeNameResolver.typeForShape(shape.getId()))
+                .addParameter(parameterSpec)
+                .addStatement("return $L(\n$L, \n$L, \n$L)",
+                        genericCall, VAR_INPUT, keyConverter, valueConverter)
+                .build();
     }
 
     /** Uses a Builder to build the native value of Structure. */
