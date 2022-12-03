@@ -23,10 +23,14 @@ Outputs:
   GitHubCAReadWriteDeletePolicyArn:
     Description: "Arn for IAM Policy github-polymorph-CA-ReadWriteDelete"
     Value: !Ref CAReadWriteDeletePolicy
+    Export:
+      Name: !Sub '${AWS::StackName}-GitHubCAReadWriteDeletePolicyArn'
   # This policy SHOULD be given to the ESDK-Dafny & Gazelle Repos
   GitHubCAReadPolicyArn:
     Description: "Arn for IAM Policy github-polymorph-CA-Read"
     Value: !Ref CAReadPolicy
+    Export:
+      Name: !Sub '${AWS::StackName}-GitHubCAReadPolicyArn'
 
 Resources:
   Domain:
