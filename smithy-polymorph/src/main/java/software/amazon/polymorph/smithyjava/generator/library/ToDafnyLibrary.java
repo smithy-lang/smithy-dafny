@@ -93,6 +93,9 @@ public class ToDafnyLibrary extends ToDafny {
         // Sets
         subject.getSetsInServiceNamespace().stream()
                 .map(this::modeledSet).forEachOrdered(toDafnyMethods::add);
+        // Maps
+        subject.getMapsInServiceNamespace().stream()
+                .map(this::modeledMap).forEachOrdered(toDafnyMethods::add);
         return TypeSpec.classBuilder(thisClassName)
                 .addModifiers(Modifier.PUBLIC)
                 .addMethods(toDafnyMethods)
