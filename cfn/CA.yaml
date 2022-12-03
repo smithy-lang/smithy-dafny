@@ -1,0 +1,114 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "CodeArtifact Domain, Repositories, and related IAM Policies for packages in the Polymorph Repo"
+Parameters:
+  DomainName:
+    Type: String
+    Description: The name of the CodeArtifact Domain
+    Default: github-polymorph
+  CreateDomainFlag:
+    Type: String
+    Description: Attempt to create Domain or not
+    Default: True
+    AllowedValues:
+      - True
+      - False
+
+Conditions:
+  CreateDomain: !Equals
+    - !Ref CreateDomainFlag
+    - True
+
+Outputs:
+  # This policy SHOULD be given to the polymorph repo
+  GitHubCAReadWriteDeletePolicyArn:
+    Description: "Arn for IAM Policy github-polymorph-CA-ReadWriteDelete"
+    Value: !Ref CAReadWriteDeletePolicy
+  # This policy SHOULD be given to the ESDK-Dafny & Gazelle Repos
+  GitHubCAReadPolicyArn:
+    Description: "Arn for IAM Policy github-polymorph-CA-Read"
+    Value: !Ref CAReadPolicy
+
+Resources:
+  Domain:
+    Type: AWS::CodeArtifact::Domain
+    Condition: CreateDomain
+    Properties:
+      DomainName: !Ref DomainName
+
+  DafnyJavaConversion:
+    Type: AWS::CodeArtifact::Repository
+    Properties:
+      DomainName: !Ref DomainName
+      RepositoryName: "DafnyJavaConversion"
+
+  SmithyPolymorph:
+    Type: AWS::CodeArtifact::Repository
+    Properties:
+      DomainName: !Ref DomainName
+      RepositoryName: "SmithyPolymorph"
+
+  # This policy SHOULD be given to the polymorph repo
+  CAReadWriteDeletePolicy:
+    Type: "AWS::IAM::ManagedPolicy"
+    Properties:
+      Description: "Allow Read, Write, and Delete of CodeArtifact Domain github-polymorph"
+      ManagedPolicyName: !Sub "${DomainName}-CA-ReadWriteDelete-${AWS::Region}"
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action:
+              - codeartifact:DeletePackageVersions
+              - codeartifact:DescribeDomain
+              - codeartifact:DescribeRepository
+              - codeartifact:DisposePackageVersions
+              - codeartifact:GetAuthorizationToken
+              - codeartifact:GetPackageVersionAsset
+              - codeartifact:GetPackageVersionReadme
+              - codeartifact:GetRepositoryEndpoint
+              - codeartifact:PublishPackageVersion
+              - codeartifact:PutPackageMetadata
+              - codeartifact:ReadFromRepository
+              - codeartifact:UpdatePackageVersionsStatus
+              - codeartifact:UpdateRepository
+            Resource:
+              - !Ref DafnyJavaConversion
+              - !Ref SmithyPolymorph
+              - !Ref Domain
+          - Effect: Allow
+            Action:
+              - sts:GetServiceBearerToken
+            Resource: "*"
+            Condition:
+              StringEquals:
+                'sts:AWSServiceName': "codeartifact.amazonaws.com"
+
+  # This policy SHOULD be given to the ESDK-Dafny & Gazelle Repos
+  CAReadPolicy:
+    Type: "AWS::IAM::ManagedPolicy"
+    Properties:
+      Description: "Allow Read of CodeArtifact Domain github-polymorph"
+      ManagedPolicyName: !Sub "${DomainName}-CA-Read-${AWS::Region}"
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action:
+              - codeartifact:DescribeDomain
+              - codeartifact:DescribeRepository
+              - codeartifact:GetAuthorizationToken
+              - codeartifact:GetPackageVersionAsset
+              - codeartifact:GetPackageVersionReadme
+              - codeartifact:GetRepositoryEndpoint
+              - codeartifact:ReadFromRepository
+            Resource:
+              - !Ref DafnyJavaConversion
+              - !Ref SmithyPolymorph
+              - !Ref Domain
+          - Effect: Allow
+            Action:
+              - sts:GetServiceBearerToken
+            Resource: "*"
+            Condition:
+              StringEquals:
+                'sts:AWSServiceName': "codeartifact.amazonaws.com"
