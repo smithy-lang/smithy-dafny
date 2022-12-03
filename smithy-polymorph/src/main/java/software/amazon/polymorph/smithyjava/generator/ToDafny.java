@@ -20,6 +20,7 @@ import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 import software.amazon.polymorph.utils.ModelUtils;
 
+import software.amazon.smithy.model.shapes.ListShape;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
@@ -226,6 +227,10 @@ public abstract class ToDafny extends Generator {
                 .endControlFlow();
         builder.endControlFlow();
         return builder.build();
+    }
+
+    protected MethodSpec modeledList(ListShape shape) {
+        throw new RuntimeException("WIP");
     }
 
     /** AWS SDK V1 uses a different getter pattern than Library (or, possibly, SDK V2) */

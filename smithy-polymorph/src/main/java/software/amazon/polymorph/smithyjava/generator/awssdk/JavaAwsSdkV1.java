@@ -17,6 +17,10 @@ import software.amazon.smithy.model.shapes.ServiceShape;
  * the AWS SDK for Java V1.
  */
 public class JavaAwsSdkV1 extends CodegenSubject {
+    // Hack to override Name Resolvers to Aws Sdk V1 specific ones
+    // See code comment on ../library/ModelCodegen for details.
+    final AwsSdkDafnyV1 dafnyNameResolver;
+    final AwsSdkNativeV1 nativeNameResolver;
 
     public JavaAwsSdkV1(ServiceShape serviceShape, Model model) {
         super(
@@ -25,6 +29,8 @@ public class JavaAwsSdkV1 extends CodegenSubject {
                 new AwsSdkDafnyV1(serviceShape, model),
                 new AwsSdkNativeV1(serviceShape, model)
         );
+        this.dafnyNameResolver = new AwsSdkDafnyV1(serviceShape, model);
+        this.nativeNameResolver = new AwsSdkNativeV1(serviceShape, model);
     }
 
     public Map<Path, TokenTree> generate() {

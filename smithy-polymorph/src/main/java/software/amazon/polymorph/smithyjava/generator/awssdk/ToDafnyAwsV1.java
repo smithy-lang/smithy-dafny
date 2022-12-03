@@ -59,12 +59,16 @@ import static software.amazon.smithy.utils.StringUtils.capitalize;
  * </ul>
  */
 public class ToDafnyAwsV1 extends ToDafny {
+    // Hack to override subject to JavaAwsSdkV1
+    // See code comment on ../library/ModelCodegen for details.
+    final JavaAwsSdkV1 subject;
 
     public ToDafnyAwsV1(JavaAwsSdkV1 awsSdk) {
         super(
                 awsSdk,
                 //TODO: JavaAwsSdkV1 should really have a declared packageName, not rely on the name resolver
                 ClassName.get(awsSdk.dafnyNameResolver.packageName(), TO_DAFNY));
+        this.subject = awsSdk;
     }
 
     @Override
@@ -133,7 +137,7 @@ public class ToDafnyAwsV1 extends ToDafny {
             // For the AWS SDK for Java, we do not generate converters for simple shapes
             case BLOB, BOOLEAN, STRING, TIMESTAMP, BYTE, SHORT,
                     INTEGER, LONG, BIG_DECIMAL, BIG_INTEGER, MEMBER -> null;
-            case LIST -> generateConvertList(shape.asListShape().get());
+            case LIST -> modeledList(shape.asListShape().get());
             case MAP -> generateConvertMap(shape.asMapShape().get());
             case SET -> generateConvertSet(shape.asSetShape().get());
             case STRUCTURE -> generateConvertStructure(shapeId);
@@ -188,13 +192,21 @@ public class ToDafnyAwsV1 extends ToDafny {
         return CodeBlock.of("$L.get$L()", variableName, capitalize(memberShape.getMemberName()));
     }
 
-    MethodSpec generateConvertList(ListShape shape) {
+    /**
+     * We have to customize
+     * List conversion for the AWS SDK for Java V1 because
+     * AWS SDK Java V1 treats Enums in a special way.
+     * See the comment on
+     * {@link software.amazon.polymorph.smithyjava.nameresolver.AwsSdkNativeV1#typeForShapeNoEnum}
+     **/
+    @Override
+    protected MethodSpec modeledList(ListShape shape) {
         MemberShape memberShape = shape.getMember();
         CodeBlock memberConverter = memberConversionMethodReference(memberShape).asFunctionalReference();
         CodeBlock genericCall = AGGREGATE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(shape.getType()).asNormalReference();
         MethodReference getTypeDescriptor = subject.dafnyNameResolver.typeDescriptor(memberShape.getTarget());
         ParameterSpec parameterSpec = ParameterSpec
-                .builder(subject.nativeNameResolver.typeForShapeNoEnum(shape.getId()), "nativeValue")
+                .builder(subject.nativeNameResolver.typeForListSetOrMapNoEnum(shape.getId()), "nativeValue")
                 .build();
         return MethodSpec
                 .methodBuilder(capitalize(shape.getId().getName()))
@@ -211,7 +223,7 @@ public class ToDafnyAwsV1 extends ToDafny {
         CodeBlock memberConverter = memberConversionMethodReference(memberShape).asFunctionalReference();
         CodeBlock genericCall = AGGREGATE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(shape.getType()).asNormalReference();
         ParameterSpec parameterSpec = ParameterSpec
-                .builder(subject.nativeNameResolver.typeForShapeNoEnum(shape.getId()), "nativeValue")
+                .builder(subject.nativeNameResolver.typeForListSetOrMapNoEnum(shape.getId()), "nativeValue")
                 .build();
         return MethodSpec
                 .methodBuilder(capitalize(shape.getId().getName()))
@@ -231,7 +243,7 @@ public class ToDafnyAwsV1 extends ToDafny {
         CodeBlock valueConverter = memberConversionMethodReference(valueShape).asFunctionalReference();
         CodeBlock genericCall = AGGREGATE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(shape.getType()).asNormalReference();
         ParameterSpec parameterSpec = ParameterSpec
-                .builder(subject.nativeNameResolver.typeForShapeNoEnum(shape.getId()), "nativeValue")
+                .builder(subject.nativeNameResolver.typeForListSetOrMapNoEnum(shape.getId()), "nativeValue")
                 .build();
         return MethodSpec
                 .methodBuilder(capitalize(shape.getId().getName()))
