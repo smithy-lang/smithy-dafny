@@ -27,7 +27,7 @@ jobs:
         run: |
           wget https://github.com/dafny-lang/dafny/releases/download/nightly/dafny-nightly-2022-12-02-edab6cc-x64-osx-10.14.2.zip 
           unzip dafny-nightly-2022-12-02-edab6cc-x64-osx-10.14.2.zip 
-          mvn install:install-file \
+          mvn -B -ntp install:install-file \
           -Dfile=dafny/DafnyRuntime.jar \
           -DgroupId=dafny.lang \
           -DartifactId=DafnyRuntime \
