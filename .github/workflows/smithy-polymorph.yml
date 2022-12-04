@@ -19,11 +19,6 @@ jobs:
       - name: Setup Dafny
         uses: dafny-lang/setup-dafny-action@v1
         with:
-          dafny-version: ${{ matrix.dafny }}
-
-      - name: Setup Dafny
-        uses: dafny-lang/setup-dafny-action@v1
-        with:
           dafny-version: "nightly-2022-12-02-edab6cc"
 
       # Java DafnyRuntime is not published to maven,
