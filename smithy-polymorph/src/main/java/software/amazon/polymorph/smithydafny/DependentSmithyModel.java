@@ -12,7 +12,7 @@ import java.util.stream.Stream;
 public record DependentSmithyModel(
   Path modelPath,
   String namespace
-)
+) implements Comparable<DependentSmithyModel>
 {
   public static DependentSmithyModel of(final Shape shape, Path[] modelPaths) {
     final String namespace = shape.getId().getNamespace();
@@ -26,5 +26,10 @@ public record DependentSmithyModel(
       .get();
 
     return new DependentSmithyModel(modelPath, namespace);
+  }
+
+  @Override
+  public int compareTo(DependentSmithyModel dependentSmithyModel) {
+    return this.modelPath.compareTo(dependentSmithyModel.modelPath);
   }
 }
