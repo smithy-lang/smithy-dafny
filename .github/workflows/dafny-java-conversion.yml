@@ -4,40 +4,37 @@ on:
   pull_request:
   push:
     branches:
-      - main
+      - main-1.x
 
 jobs:
   gradle-build:
-    strategy:
-      matrix:
-        dafny: [ 3.9.0 ]
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-java@v3
         with:
           distribution: 'corretto'
           java-version: '8'
+
       - name: Setup Dafny
         uses: dafny-lang/setup-dafny-action@v1
         with:
-          dafny-version: ${{ matrix.dafny }}
-      - name: Setup dafny/DafnyRuntime.jar
-        shell: bash
+          dafny-version: "nightly-2022-12-02-edab6cc"
+
+      # Java DafnyRuntime is not published to maven,
+      # so manually download a nightly build for 3.10.0 and grab it from there.
+      - name: Locally Cache Java DafnyRuntime
         run: |
-          # The location of the dafny binary
-          # and by extension DafnyRuntime.jar
-          # should not be something that dafny-lang/setup-dafny-action
-          # worries about, this works for now...
-          # The `which dafny` is there to make sure they match
-          which dafny
+          wget https://github.com/dafny-lang/dafny/releases/download/nightly/dafny-nightly-2022-12-02-edab6cc-x64-osx-10.14.2.zip 
+          unzip dafny-nightly-2022-12-02-edab6cc-x64-osx-10.14.2.zip 
           mvn install:install-file \
-          -Dfile=/opt/hostedtoolcache/dafny/${{ matrix.dafny }}/x64/DafnyRuntime.jar \
+          -Dfile=dafny/DafnyRuntime.jar \
           -DgroupId=dafny.lang \
           -DartifactId=DafnyRuntime \
-          -Dversion=${{ matrix.dafny }} \
+          -Dversion=3.10.0 \
           -DgeneratePom=true \
           -Dpackaging=jar
+
       - name: Execute tests
         uses: gradle/gradle-build-action@v2
         with:
