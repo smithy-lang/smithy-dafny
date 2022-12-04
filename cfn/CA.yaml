@@ -65,11 +65,17 @@ Resources:
               - codeartifact:DeletePackageVersions
               - codeartifact:DescribeDomain
               - codeartifact:DescribeRepository
+              - codeartifact:DescribePackage
+              - codeartifact:DescribePackageVersion
               - codeartifact:DisposePackageVersions
               - codeartifact:GetAuthorizationToken
               - codeartifact:GetPackageVersionAsset
               - codeartifact:GetPackageVersionReadme
               - codeartifact:GetRepositoryEndpoint
+              - codeartifact:ListPackages
+              - codeartifact:ListPackageVersionAssets
+              - codeartifact:ListPackageVersionDependencies
+              - codeartifact:ListPackageVersions
               - codeartifact:PublishPackageVersion
               - codeartifact:PutPackageMetadata
               - codeartifact:ReadFromRepository
@@ -102,10 +108,16 @@ Resources:
             Action:
               - codeartifact:DescribeDomain
               - codeartifact:DescribeRepository
+              - codeartifact:DescribePackage
+              - codeartifact:DescribePackageVersion
               - codeartifact:GetAuthorizationToken
               - codeartifact:GetPackageVersionAsset
               - codeartifact:GetPackageVersionReadme
               - codeartifact:GetRepositoryEndpoint
+              - codeartifact:ListPackages
+              - codeartifact:ListPackageVersionAssets
+              - codeartifact:ListPackageVersionDependencies
+              - codeartifact:ListPackageVersions
               - codeartifact:ReadFromRepository
             Resource:
               - !Ref DafnyJavaConversion
