@@ -57,9 +57,37 @@ I have tried to hack the bloody Gradle script to conditionally publish.
 Let's see if that works.
 Run the above, and then `gradle publish`.
 
-Another debug script:
+### Reset
+Shell command to reset the environment:
 ```shell
 unset STS_RESPONSE AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY \
   AWS_SESSION_TOKEN CODEARTIFACT_AUTH_TOKEN \
   CODEARTIFACT_URL_CONVERSION CODEARTIFACT_URL_SMITHY
+```
+
+### Test Pulling
+You can test the Pull permissions by running the above command followed by:
+```shell
+aws codeartifact list-package-version-assets \
+  --domain github-polymorph \
+  --domain-owner "$ACCOUNT_ID" \
+  --repository DafnyJavaConversion \
+  --format maven \
+  --package conversion \
+  --namespace software.amazon.dafny \
+  --package-version 1.0-SNAPSHOT
+```
+
+Update the Asset parameter below to test pulling a Jar.
+```shell
+aws codeartifact get-package-version-asset \
+  --domain github-polymorph \
+  --domain-owner "$ACCOUNT_ID" \
+  --repository DafnyJavaConversion \
+  --format maven \
+  --namespace software.amazon.dafny \
+  --package conversion \
+  --package-version "1.0-SNAPSHOT" \
+  --asset "conversion-1.0-20221204.020926-1.jar" \
+  a.jar
 ```
