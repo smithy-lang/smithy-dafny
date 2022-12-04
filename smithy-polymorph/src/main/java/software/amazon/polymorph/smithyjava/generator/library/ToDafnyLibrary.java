@@ -87,6 +87,12 @@ public class ToDafnyLibrary extends ToDafny {
         // Unions
         subject.getUnionsInServiceNamespace().stream()
                 .map(this::modeledUnion).forEachOrdered(toDafnyMethods::add);
+        // Lists
+        subject.getListsInServiceNamespace().stream()
+                .map(this::modeledList).forEachOrdered(toDafnyMethods::add);
+        // Sets
+        subject.getSetsInServiceNamespace().stream()
+                .map(this::modeledSet).forEachOrdered(toDafnyMethods::add);
         return TypeSpec.classBuilder(thisClassName)
                 .addModifiers(Modifier.PUBLIC)
                 .addMethods(toDafnyMethods)

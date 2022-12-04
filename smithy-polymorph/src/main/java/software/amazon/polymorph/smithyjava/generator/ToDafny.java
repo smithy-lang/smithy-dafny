@@ -3,6 +3,7 @@ package software.amazon.polymorph.smithyjava.generator;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 
@@ -20,7 +21,9 @@ import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 import software.amazon.polymorph.utils.ModelUtils;
 
+import software.amazon.smithy.model.shapes.ListShape;
 import software.amazon.smithy.model.shapes.MemberShape;
+import software.amazon.smithy.model.shapes.SetShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.ShapeType;
@@ -226,6 +229,41 @@ public abstract class ToDafny extends Generator {
                 .endControlFlow();
         builder.endControlFlow();
         return builder.build();
+    }
+
+    protected MethodSpec modeledList(ListShape shape) {
+        MemberShape memberShape = shape.getMember();
+        CodeBlock memberConverter = memberConversionMethodReference(memberShape).asFunctionalReference();
+        CodeBlock genericCall = AGGREGATE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(shape.getType()).asNormalReference();
+        CodeBlock getTypeDescriptor = subject.dafnyNameResolver.typeDescriptor(memberShape.getTarget());
+        ParameterSpec parameterSpec = ParameterSpec
+                .builder(subject.nativeNameResolver.typeForShape(shape.getId()), "nativeValue")
+                .build();
+        return MethodSpec
+                .methodBuilder(capitalize(shape.getId().getName()))
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                .returns(subject.dafnyNameResolver.typeForAggregateWithWildcard(shape.getId()))
+                .addParameter(parameterSpec)
+                .addStatement("return $L(\nnativeValue, \n$L, \n$L)",
+                        genericCall, memberConverter, getTypeDescriptor)
+                .build();
+    }
+
+    protected MethodSpec modeledSet(SetShape shape) {
+        MemberShape memberShape = shape.getMember();
+        CodeBlock memberConverter = memberConversionMethodReference(memberShape).asFunctionalReference();
+        CodeBlock genericCall = AGGREGATE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(shape.getType()).asNormalReference();
+        ParameterSpec parameterSpec = ParameterSpec
+                .builder(subject.nativeNameResolver.typeForShape(shape.getId()), "nativeValue")
+                .build();
+        return MethodSpec
+                .methodBuilder(capitalize(shape.getId().getName()))
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                .returns(subject.dafnyNameResolver.typeForAggregateWithWildcard(shape.getId()))
+                .addParameter(parameterSpec)
+                .addStatement("return $L(\nnativeValue, \n$L)",
+                        genericCall, memberConverter)
+                .build();
     }
 
     /** AWS SDK V1 uses a different getter pattern than Library (or, possibly, SDK V2) */

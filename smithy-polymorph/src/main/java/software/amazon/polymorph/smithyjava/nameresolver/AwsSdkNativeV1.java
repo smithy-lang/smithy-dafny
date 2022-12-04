@@ -1,9 +1,12 @@
 package software.amazon.polymorph.smithyjava.nameresolver;
 
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import software.amazon.polymorph.utils.AwsSdkNameResolverHelpers;
 import software.amazon.smithy.model.Model;
@@ -11,8 +14,11 @@ import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
+import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.TraitDefinition;
 import software.amazon.smithy.utils.StringUtils;
+
+import static software.amazon.polymorph.smithyjava.nameresolver.Constants.SHAPE_TYPES_LIST_SET;
 
 /**
  * There are certain assumptions we can/have to make about
@@ -75,6 +81,54 @@ public class AwsSdkNativeV1 extends Native {
                     "ShapeId %s is not in this namespace %s".formatted(
                             shapeId, serviceShape.getId().getNamespace()));
         }
+    }
+
+    /**
+     * <p>In the AWS SDK Java V1,
+     * structures never return Enums, only their string representation.
+     * Thus, any methods that handle the result of a get Enum value
+     * must handle String, not the Enum reference.</p>
+     *
+     * <p>At this time, we believe that is only needs to be called
+     * for aggregates other than structure or union,
+     * as only Aggregate converters will indirectly deal with enums.</p>
+     *
+     * <p>Any direct involvement with Enums are safe,
+     * since we overload the enum converter methods.</p>
+     **/
+    private TypeName typeForShapeNoEnum(ShapeId shapeId) {
+        final Shape shape = model.expectShape(shapeId);
+        if (shape.hasTrait(EnumTrait.class)) {
+            return classForString();
+        }
+        if (SHAPE_TYPES_LIST_SET.contains(shape.getType())) {
+            return typeForListSetOrMapNoEnum(shapeId);
+        }
+        return typeForShape(shapeId);
+    }
+
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
+    public ParameterizedTypeName typeForListSetOrMapNoEnum(final ShapeId shapeId) {
+        final Shape shape = model.getShape(shapeId)
+                .orElseThrow(() -> new IllegalStateException("Cannot find shape " + shapeId));
+        return switch (shape.getType()) {
+            case LIST -> ParameterizedTypeName.get(
+                    ClassName.get(List.class),
+                    typeForShapeNoEnum(shape.asListShape().get().getMember().getTarget())
+            );
+            case SET -> ParameterizedTypeName.get(
+                    ClassName.get(Set.class),
+                    typeForShapeNoEnum(shape.asSetShape().get().getMember().getTarget())
+            );
+            case MAP -> ParameterizedTypeName.get(
+                    ClassName.get(Map.class),
+                    typeForShapeNoEnum(shape.asMapShape().get().getKey().getTarget()),
+                    typeForShapeNoEnum(shape.asMapShape().get().getValue().getTarget())
+            );
+            default -> throw new IllegalStateException(
+                    "typeForListOrSetNoEnum only accepts LIST or SET. Got: " + shape.getType()
+                            + " for ShapeId: " + shapeId);
+        };
     }
 
     @Override

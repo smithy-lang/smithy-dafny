@@ -20,14 +20,12 @@ import software.amazon.polymorph.smithyjava.generator.ToNative;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.polymorph.utils.ModelUtils;
 
-import software.amazon.smithy.model.shapes.ListShape;
 import software.amazon.smithy.model.shapes.MapShape;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.SetShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
-import software.amazon.smithy.model.shapes.ShapeType;
 import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.EnumTrait;
@@ -101,38 +99,14 @@ public class ToNativeAwsV1 extends ToNative {
             case BLOB, BOOLEAN, TIMESTAMP, BYTE, SHORT,
                     INTEGER, LONG, BIG_DECIMAL, BIG_INTEGER, MEMBER -> null;
             case STRING -> generateConvertString(shapeId); // STRING handles enums
-            case LIST -> generateConvertList(shape.asListShape().get());
-            case SET -> generateConvertSet(shape.asSetShape().get());
+            case LIST -> modeledList(shape.asListShape().get());
+            case SET -> modeledSet(shape.asSetShape().get());
             case MAP -> generateConvertMap(shape.asMapShape().get());
             case STRUCTURE -> modeledStructure(shape.asStructureShape().get());
             default -> throw new UnsupportedOperationException(
                     "ShapeId %s is of Type %s, which is not yet supported for ToDafny"
                             .formatted(shapeId, shape.getType()));
         };
-    }
-
-    MethodSpec generateConvertSet(SetShape shape) {
-        return generateConvertListOrSet(shape.getMember(), shape.getId(), shape.getType());
-    }
-
-    MethodSpec generateConvertList(ListShape shape) {
-        return generateConvertListOrSet(shape.getMember(), shape.getId(), shape.getType());
-    }
-
-    MethodSpec generateConvertListOrSet(MemberShape memberShape, ShapeId shapeId, ShapeType shapeType) {
-        CodeBlock memberConverter = memberConversionMethodReference(memberShape).asFunctionalReference();
-        CodeBlock genericCall = AGGREGATE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(shapeType).asNormalReference();
-        ParameterSpec parameterSpec = ParameterSpec
-                .builder(subject.dafnyNameResolver.typeForShape(shapeId), VAR_INPUT)
-                .build();
-        return MethodSpec
-                .methodBuilder(capitalize(shapeId.getName()))
-                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                .returns(subject.nativeNameResolver.typeForShape(shapeId))
-                .addParameter(parameterSpec)
-                .addStatement("return $L(\n$L, \n$L)",
-                        genericCall, VAR_INPUT, memberConverter)
-                .build();
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")
