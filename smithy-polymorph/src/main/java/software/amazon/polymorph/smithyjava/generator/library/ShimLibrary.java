@@ -19,6 +19,7 @@ import software.amazon.polymorph.smithyjava.BuildMethod;
 import software.amazon.polymorph.smithyjava.BuilderSpecs;
 import software.amazon.polymorph.smithyjava.generator.Generator;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
+import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ShapeId;
 
@@ -86,27 +87,35 @@ public class ShimLibrary extends Generator {
     }
 
     private MethodSpec operation(OperationShape operationShape) {
-        ShapeId inputShapeId = operationShape.getInputShape();
-        ShapeId outputShapeId = operationShape.getOutputShape();
-        String operationName = operationShape.toShapeId().getName();
-        MethodSpec.Builder method = MethodSpec
+        final ShapeId inputShapeId = operationShape.getInputShape();
+        ShapeId inputTargetId = inputShapeId;
+        final ShapeId outputShapeId = operationShape.getOutputShape();
+        ShapeId outputTargetId = outputShapeId;
+        final String operationName = operationShape.toShapeId().getName();
+        final MethodSpec.Builder method = MethodSpec
                 .methodBuilder(operationName)
                 .addModifiers(PUBLIC);
         // if operation takes an argument
         if (!inputShapeId.equals(SMITHY_API_UNIT)) {
             // Positional complicates everything, see dafnyDeclareAndConvert
-            ShapeId inputTargetId = subject.checkForPositional(inputShapeId);
+            inputTargetId = subject.checkForPositional(inputShapeId);
             TypeName inputType = subject.nativeNameResolver.typeForShape(inputTargetId);
             // Add parameter to method signature
             method.addParameter(inputType, NATIVE_VAR);
-            // Convert from nativeValue to dafnyValue
-            method.addStatement(dafnyDeclareAndConvert(inputTargetId, inputShapeId));
+            // if inputValue has ReferenceTrait.trait
+            if (subject.model.expectShape(inputTargetId).hasTrait(ReferenceTrait.class)) {
+                // do NOT convert, just declare as dafnyValue
+                method.addStatement(dafnyDeclare(inputTargetId));
+            } else {
+                // Convert from nativeValue to dafnyValue
+                method.addStatement(dafnyDeclareAndConvert(inputTargetId, inputShapeId));
+            }
         }
         // A void result in Dafny Java is Tuple0
         TypeName success = DAFNY_TUPLE0_CLASS_NAME;
         // if operation is not void
         if (!outputShapeId.equals(SMITHY_API_UNIT)) {
-            ShapeId outputTargetId = subject.checkForPositional(outputShapeId);
+            outputTargetId = subject.checkForPositional(outputShapeId);
             TypeName outputType = subject.nativeNameResolver.typeForShape(outputTargetId);
             // Add return type to method signature
             method.returns(outputType);
@@ -134,6 +143,12 @@ public class ShimLibrary extends Generator {
 
         // if operation is void
         if (outputShapeId.equals(SMITHY_API_UNIT)) {
+            return method.build();
+        }
+        // if outputShape is Reference
+        if (subject.model.expectShape(outputTargetId).hasTrait(ReferenceTrait.class)) {
+            // do NOT convert, just return success and return
+            method.addStatement("return $L.dtor_value()", RESULT_VAR);
             return method.build();
         }
         // else convert success to native and return
@@ -221,6 +236,15 @@ public class ShimLibrary extends Generator {
                 DAFNY_VAR,
                 toDafnyClassName,
                 shapeId.getName(),
+                NATIVE_VAR);
+    }
+
+    // Reference also adds a complication,
+    // as they do not need to be converted.
+    private CodeBlock dafnyDeclare(ShapeId targetId) {
+        return CodeBlock.of("$T $L = $L",
+                subject.dafnyNameResolver.typeForShape(targetId),
+                DAFNY_VAR,
                 NATIVE_VAR);
     }
 
