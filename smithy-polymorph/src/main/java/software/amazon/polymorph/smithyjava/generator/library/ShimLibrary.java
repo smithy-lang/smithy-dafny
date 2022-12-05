@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.annotation.Nullable;
 import javax.lang.model.element.Modifier;
 
 import software.amazon.polymorph.smithyjava.BuildMethod;
@@ -22,7 +21,6 @@ import software.amazon.polymorph.smithyjava.generator.Generator;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ShapeId;
-import software.amazon.smithy.utils.StringUtils;
 
 import static javax.lang.model.element.Modifier.PROTECTED;
 import static javax.lang.model.element.Modifier.PUBLIC;
@@ -82,7 +80,7 @@ public class ShimLibrary extends Generator {
                 ))
                 .addMethod(constructor(builderSpecs))
                 .addMethod(builderSpecs.builderMethod());
-        spec.addMethods(subject.getOperationsInServiceNamespace()
+        spec.addMethods(subject.getOperationsForService()
                 .stream().sequential().map(this::operation).collect(Collectors.toList()));
         return spec.build();
     }

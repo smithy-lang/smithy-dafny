@@ -105,9 +105,9 @@ public class JavaLibrary extends CodegenSubject {
                 .toList();
     }
 
-    public List<OperationShape> getOperationsInServiceNamespace() {
-        return this.model.getOperationShapes().stream().sequential()
-                .filter(shape -> ModelUtils.isInServiceNamespace(shape.getId(), this.serviceShape))
+    public List<OperationShape> getOperationsForService() {
+        return this.serviceShape.getOperations().stream().sequential()
+                .map(shapeId -> this.model.expectShape(shapeId, OperationShape.class))
                 .collect(Collectors.toList());
     }
 
