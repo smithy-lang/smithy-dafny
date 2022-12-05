@@ -23,7 +23,6 @@ import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.smithy.model.shapes.MapShape;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
-import software.amazon.smithy.model.shapes.SetShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StringShape;
@@ -132,7 +131,7 @@ public class ToNativeAwsV1 extends ToNative {
     @Override
     protected MethodSpec modeledStructure(StructureShape structureShape) {
         String methodName = capitalize(structureShape.getId().getName());
-        ClassName nativeClassName = subject.nativeNameResolver.typeForStructure(structureShape);
+        ClassName nativeClassName = subject.nativeNameResolver.classNameForStructure(structureShape);
         MethodSpec.Builder builder = MethodSpec
                 .methodBuilder(methodName)
                 .addModifiers(Modifier.STATIC, Modifier.PUBLIC)

@@ -55,7 +55,7 @@ public class ShimV1 extends Generator {
                 .addModifiers(Modifier.PUBLIC)
                 .addSuperinterface(subject.dafnyNameResolver.typeForShape(subject.serviceShape.getId()))
                 .addField(
-                        subject.nativeNameResolver.typeForService(subject.serviceShape),
+                        subject.nativeNameResolver.classNameForService(subject.serviceShape),
                         "_impl", Modifier.PRIVATE, Modifier.FINAL)
                 .addMethod(constructor())
                 .addMethods(
@@ -73,7 +73,7 @@ public class ShimV1 extends Generator {
                 .constructorBuilder()
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(
-                        subject.nativeNameResolver.typeForService(subject.serviceShape),
+                        subject.nativeNameResolver.classNameForService(subject.serviceShape),
                         "impl")
                 .addStatement("_impl = impl")
                 .build();

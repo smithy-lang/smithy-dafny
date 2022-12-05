@@ -132,7 +132,7 @@ public class AwsSdkNativeV1 extends Native {
     }
 
     @Override
-    public ClassName typeForStructure(final Shape shape) {
+    public ClassName classNameForStructure(final Shape shape) {
         if (!(shape.isUnionShape() || shape.isStructureShape())) {
             throw new IllegalArgumentException(
                     "typeForStructure should only be called for Structures or Unions. ShapeId: %s"
@@ -149,7 +149,7 @@ public class AwsSdkNativeV1 extends Native {
                     defaultModelPackageName(packageNameForAwsSdkV1Shape(shape)),
                     StringUtils.capitalize(shape.getId().getName()));
         }
-        return super.typeForStructure(shape);
+        return super.classNameForStructure(shape);
     }
 
     /** The AWS SDK for Java V1 replaces
@@ -158,7 +158,7 @@ public class AwsSdkNativeV1 extends Native {
      */
     public TypeName typeForOperationOutput(final ShapeId shapeId) {
         StructureShape shape = model.expectShape(shapeId, StructureShape.class);
-        ClassName smithyName = typeForStructure(shape);
+        ClassName smithyName = classNameForStructure(shape);
         // TODO: handle AWS SDK v2 naming convention, which uses 'Response', not 'Result'
         if (smithyName.simpleName().endsWith("Response")) {
             return ClassName.get(smithyName.packageName(),
@@ -176,7 +176,7 @@ public class AwsSdkNativeV1 extends Native {
      * Returns the TypeName for an AWS Service's Client Interface.
      */
     @Override
-    public ClassName typeForService(final ServiceShape shape) {
+    public ClassName classNameForService(final ServiceShape shape) {
         //TODO: refactor to not throw error on other namespace,
         // but instead check AWS_SERVICE_NAMESPACE_TO_CLIENT_INTERFACE for
         // namespace, and throw exception if not found.

@@ -110,7 +110,7 @@ public class ToDafnyLibrary extends ToDafny {
                 .addModifiers(PUBLIC_STATIC)
                 .addParameter(nativeError, VAR_INPUT);
         List<ClassName> allNativeErrors = subject.getErrorsInServiceNamespace().stream()
-                .map(subject.nativeNameResolver::typeForStructure)
+                .map(subject.nativeNameResolver::classNameForStructure)
                 .collect(Collectors.toCollection(ArrayList::new));
         allNativeErrors.add(OpaqueError.nativeClassName(subject.nativeNameResolver.modelPackage));
         allNativeErrors.add(CollectionOfErrors.nativeClassName(subject.nativeNameResolver.modelPackage));

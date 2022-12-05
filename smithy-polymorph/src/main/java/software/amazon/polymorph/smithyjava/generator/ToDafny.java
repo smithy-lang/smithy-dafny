@@ -85,7 +85,7 @@ public abstract class ToDafny extends Generator {
                 .methodBuilder(methodName)
                 .addModifiers(PUBLIC_STATIC)
                 .returns(subject.dafnyNameResolver.typeForShape(shapeId))
-                .addParameter(subject.nativeNameResolver.typeForStructure(structureShape), VAR_INPUT);
+                .addParameter(subject.nativeNameResolver.classNameForStructure(structureShape), VAR_INPUT);
 
         if (structureShape.members().size() == 0) {
             builder.addStatement("return new $T()", subject.dafnyNameResolver.typeForShape(shapeId));
@@ -116,7 +116,7 @@ public abstract class ToDafny extends Generator {
                 .methodBuilder(methodName)
                 .addModifiers(PUBLIC_STATIC)
                 .returns(returnType)
-                .addParameter(subject.nativeNameResolver.typeForStructure(shape), VAR_INPUT);
+                .addParameter(subject.nativeNameResolver.classNameForStructure(shape), VAR_INPUT);
         // TODO: Once dafny always generates create_<datatypeConstructor>, remove this if block
         if (shape.members().size() == 1) {
             // There is one, stream().findFirst will return a value
@@ -282,9 +282,9 @@ public abstract class ToDafny extends Generator {
      * the Java Native memberShape to
      * the Java Dafny memberShape.
      */
-    @SuppressWarnings({"DuplicatedCode", "OptionalGetWithoutIsPresent"})
+    @SuppressWarnings({"DuplicatedCode"})
     protected MethodReference memberConversionMethodReference(final MemberShape memberShape) {
-        Shape targetShape = subject.model.getShape(memberShape.getTarget()).get();
+        Shape targetShape = subject.model.expectShape(memberShape.getTarget());
         // If the target is simple, use SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE
         if (ModelUtils.isSmithyApiOrSimpleShape(targetShape)) {
             return SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(targetShape.getType());
