@@ -39,19 +39,13 @@ public class JavaLibrary extends CodegenSubject {
     public final String packageName;
     /** Public POJOs will go here. */
     public final String modelPackageName;
-    /** Public Interface/Class consumers interact with.*/
-    protected final String publicClass;
-    /** Config object required to create the public interface.*/
-    protected final ShapeId publicConfigShapeId;
 
     public JavaLibrary(Model model, ServiceShape serviceShape) {
         super(model, serviceShape, initDafny(model, serviceShape), initNative(model, serviceShape));
         packageName = NamespaceHelper.standardize(serviceShape.getId().getNamespace());
         modelPackageName = packageName + ".model";
         try {
-            LocalServiceTrait trait = serviceShape.expectTrait(LocalServiceTrait.class);
-            this.publicClass = trait.getSdkId();
-            this.publicConfigShapeId = trait.getConfigId();
+            serviceShape.expectTrait(LocalServiceTrait.class);
         } catch (ExpectationNotMetException ex) {
             throw new IllegalArgumentException(
                     "JavaLibrary's MUST have a localService trait. ShapeId: %s".formatted(serviceShape.getId()),
@@ -79,7 +73,7 @@ public class JavaLibrary extends CodegenSubject {
         rtn.putAll(toDafny.generate());
         ToNativeLibrary toNative = new ToNativeLibrary(this);
         rtn.putAll(toNative.generate());
-        ShimLibrary shim = new ShimLibrary(this);
+        ShimLibrary shim = new ShimLibrary(this, this.serviceShape);
         rtn.putAll(shim.generate());
         return rtn;
     }
@@ -115,12 +109,6 @@ public class JavaLibrary extends CodegenSubject {
         return this.model.getStringShapesWithTrait(EnumTrait.class).stream()
                 .filter(shape -> ModelUtils.isInServiceNamespace(shape.getId(), this.serviceShape))
                 .toList();
-    }
-
-    public List<OperationShape> getOperationsForService() {
-        return this.serviceShape.getOperations().stream().sequential()
-                .map(shapeId -> this.model.expectShape(shapeId, OperationShape.class))
-                .collect(Collectors.toList());
     }
 
     public List<UnionShape> getUnionsInServiceNamespace() {
