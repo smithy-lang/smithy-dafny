@@ -25,7 +25,9 @@ import software.amazon.polymorph.smithyjava.unmodeled.NativeError;
 import software.amazon.polymorph.smithyjava.unmodeled.OpaqueError;
 import software.amazon.polymorph.traits.PositionalTrait;
 
+import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.model.shapes.MemberShape;
+import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.ShapeType;
 import software.amazon.smithy.model.shapes.StructureShape;
@@ -190,5 +192,23 @@ public class ToDafnyLibrary extends ToDafny {
     @Override
     protected CodeBlock getMember(CodeBlock variableName, MemberShape memberShape) {
         return CodeBlock.of("$L.$L()", variableName, uncapitalize(memberShape.getMemberName()));
+    }
+
+    @Override
+    protected MethodReference memberConversionMethodReference(MemberShape memberShape) {
+        Shape targetShape = subject.model.expectShape(memberShape.getTarget());
+        // If the target is a Reference, use IDENTITY_FUNCTION
+        if (targetShape.hasTrait(ReferenceTrait.class)) {
+            return Constants.IDENTITY_FUNCTION;
+        }
+        // If the target is an indirect Reference, use IDENTITY_FUNCTION
+        if (targetShape.hasTrait(PositionalTrait.class)) {
+            // PositionalTrait can only exist on Structure Shapes, asStructureShape will return a value
+            //noinspection OptionalGetWithoutIsPresent
+            if (PositionalTrait.onlyMember(targetShape.asStructureShape().get()).hasTrait(ReferenceTrait.class)) {
+                return Constants.IDENTITY_FUNCTION;
+            }
+        }
+        return super.memberConversionMethodReference(memberShape);
     }
 }
