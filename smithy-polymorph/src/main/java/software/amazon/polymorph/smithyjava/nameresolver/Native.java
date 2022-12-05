@@ -17,6 +17,7 @@ import java.util.Set;
 import javax.annotation.Nullable;
 
 import software.amazon.polymorph.smithyjava.NamespaceHelper;
+import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.ResourceShape;
@@ -207,6 +208,13 @@ public class Native extends NameResolver{
             throw new IllegalArgumentException(
                     "typeForStructure should only be called for Structures or Unions. ShapeId: %s"
                             .formatted(shape.getId()));
+        }
+        if (shape.hasTrait(ReferenceTrait.class)) {
+            final ReferenceTrait trait = shape.expectTrait(ReferenceTrait.class);
+            if (trait.isService()) {
+                return classNameForService(model.expectShape(trait.getReferentId(), ServiceShape.class));
+            }
+            return classNameForResource(model.expectShape(trait.getReferentId(), ResourceShape.class));
         }
         if (isInServiceNameSpace(shape.getId())) {
             return ClassName.get(modelPackage, shape.getId().getName());
