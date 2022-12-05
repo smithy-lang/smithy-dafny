@@ -27,11 +27,13 @@ import static software.amazon.polymorph.smithyjava.generator.awssdk.Constants.Mo
 public class ShimTest {
     protected ShimV1 underTest;
     protected Model model;
+    protected JavaAwsSdkV1 subject;
 
     @Before
     public void setup() {
         model = TestSetupUtils.setupLocalModel(ModelConstants.MOCK_KMS);
-        underTest = new ShimV1(TestSetupUtils.setupAwsSdk(model, "kms"));
+        subject = TestSetupUtils.setupAwsSdk(model, "kms");
+        underTest = new ShimV1(subject);
     }
 
     @Test
@@ -50,7 +52,7 @@ public class ShimTest {
 
         JavaFile javaFile = JavaFile
                 .builder(
-                        underTest.subject.dafnyNameResolver.packageName(),
+                        subject.packageName,
                         shim)
                 .build();
         final String actualString = javaFile.toString();
@@ -84,7 +86,7 @@ public class ShimTest {
 
         JavaFile javaFile = JavaFile
                 .builder(
-                        underTest.subject.dafnyNameResolver.packageName(),
+                        subject.packageName,
                         shim)
                 .build();
         final String actualString = javaFile.toString();

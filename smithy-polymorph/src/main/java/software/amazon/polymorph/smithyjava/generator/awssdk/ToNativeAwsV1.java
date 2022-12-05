@@ -59,18 +59,18 @@ public class ToNativeAwsV1 extends ToNative {
 
     // TODO: for V2 support, use abstract AwsSdk name resolvers and sub class for V1 or V2.
 
+    // Hack to override CodegenSubject
+    // See code comment on ../library/ModelCodegen for details.
+    private final JavaAwsSdkV1 subject;
+
     public ToNativeAwsV1(JavaAwsSdkV1 awsSdk) {
-        super(
-                awsSdk,
-                //TODO: JavaAwsSdkV1 should really have a declared packageName, not rely on the name resolver
-                ClassName.get(awsSdk.dafnyNameResolver.packageName(), TO_NATIVE)
-        );
+        super(awsSdk, ClassName.get(awsSdk.packageName, TO_NATIVE));
+        this.subject = awsSdk;
     }
 
     @Override
     public Set<JavaFile> javaFiles() {
-        JavaFile.Builder builder = JavaFile
-                .builder(subject.dafnyNameResolver.packageName(), toNative());
+        JavaFile.Builder builder = JavaFile.builder(subject.packageName, toNative());
         return Collections.singleton(builder.build());
     }
 
@@ -84,7 +84,7 @@ public class ToNativeAwsV1 extends ToNative {
                 .map(this::generateConvert).filter(Objects::nonNull).toList();
         return TypeSpec
                 .classBuilder(
-                        ClassName.get(subject.dafnyNameResolver.packageName(), TO_NATIVE))
+                        ClassName.get(subject.packageName, TO_NATIVE))
                 .addModifiers(Modifier.PUBLIC)
                 .addMethods(convertRelevant)
                 .build();

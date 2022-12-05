@@ -32,9 +32,13 @@ import static software.amazon.polymorph.smithyjava.nameresolver.Constants.SMITHY
  * exposing an AWS Service's operations to Dafny Generated Java.
  */
 public class ShimV1 extends Generator {
+    // Hack to override CodegenSubject
+    // See code comment on ../library/ModelCodegen for details.
+    private final JavaAwsSdkV1 subject;
     private static final Logger LOGGER = LoggerFactory.getLogger(ShimV1.class);
     public ShimV1(JavaAwsSdkV1 awsSdk) {
         super(awsSdk);
+        this.subject = awsSdk;
     }
 
     @Override
