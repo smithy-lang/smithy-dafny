@@ -12,6 +12,7 @@ import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.polymorph.smithyjava.nameresolver.Native;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.traits.PositionalTrait;
+import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.polymorph.utils.TokenTree;
@@ -95,6 +96,17 @@ public class JavaLibrary extends CodegenSubject {
                 .filter(shape -> !shape.hasTrait(ErrorTrait.class))
                 .filter(shape -> !shape.hasTrait(TraitDefinition.class))
                 .filter(shape -> !shape.hasTrait(EnumTrait.class))
+                // We do not generate POJOs or To(Dafny,Native) for reference shapes
+                .filter(shape -> !shape.hasTrait(ReferenceTrait.class))
+                // We do not generate POJOs or To(Dafny,Native) for indirect reference shapes
+                .filter(shape -> {
+                    if (!shape.hasTrait(PositionalTrait.class)) {
+                        return true;
+                    }
+                    final MemberShape onlyMember = PositionalTrait.onlyMember(shape);
+                    final Shape targetShape = model.expectShape(onlyMember.getTarget());
+                    return !targetShape.hasTrait(ReferenceTrait.class);
+                })
                 .filter(shape -> ModelUtils.isInServiceNamespace(shape.getId(), this.serviceShape))
                 .toList();
     }
