@@ -12,19 +12,6 @@ Parameters:
     Description: A prefix that will be applied to any names
     Default: Polymorph
 
-  CreateDomainFlag:
-    Type: String
-    Description: Attempt to create Domain or not
-    Default: True
-    AllowedValues:
-      - True
-      - False
-
-Conditions:
-  CreateDomain: !Equals
-    - !Ref CreateDomainFlag
-    - True
-
 Outputs:
   # This policy SHOULD be given to the polymorph repo
   GitHubCAReadWriteDeletePolicyArn:
@@ -48,7 +35,6 @@ Outputs:
 Resources:
   Domain:
     Type: AWS::CodeArtifact::Domain
-    Condition: CreateDomain
     Properties:
       DomainName: !Ref DomainName
 
