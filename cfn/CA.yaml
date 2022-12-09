@@ -55,13 +55,15 @@ Resources:
   DafnyJavaConversion:
     Type: AWS::CodeArtifact::Repository
     Properties:
-      DomainName: !Ref DomainName
+      DomainName: !GetAtt Domain.Name
+      DomainOwner: !GetAtt Domain.Owner
       RepositoryName: "DafnyJavaConversion"
 
   SmithyPolymorph:
     Type: AWS::CodeArtifact::Repository
     Properties:
-      DomainName: !Ref DomainName
+      DomainName: !GetAtt Domain.Name
+      DomainOwner: !GetAtt Domain.Owner
       RepositoryName: "SmithyPolymorph"
 
   # This policy SHOULD be given to the polymorph repo
@@ -151,7 +153,7 @@ Resources:
     Properties:
       RoleName: !Sub "${ProjectName}-CA-SourceRole-${AWS::Region}"
       Description: "For the Source Repo, allows Publish, Pull, and Delete"
-      ManagedPolicyArns: !Ref CAReadWriteDeletePolicy
+      ManagedPolicyArns: [!Ref CAReadWriteDeletePolicy]
       # This is missing the GitHub ODIC, which I do not have in my account
       # Really, that ODIC should be exported by a stack
       AssumeRolePolicyDocument:
@@ -171,7 +173,7 @@ Resources:
     Properties:
       RoleName: !Sub "${ProjectName}-CA-PullRole-${AWS::Region}"
       Description: "For consuming Repos, only allows Pull"
-      ManagedPolicyArns: !Ref CAReadPolicy
+      ManagedPolicyArns: [!Ref CAReadPolicy]
       # This is missing the GitHub ODIC, which I do not have in my account
       # Really, that ODIC should be exported by a stack
       AssumeRolePolicyDocument:
