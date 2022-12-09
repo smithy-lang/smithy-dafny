@@ -196,49 +196,6 @@ public class Native extends NameResolver{
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")
-    ParameterizedTypeName typeForListOrSetNoEnum(final ShapeId shapeId) {
-        final Shape shape = model.getShape(shapeId)
-                .orElseThrow(() -> new IllegalStateException("Cannot find shape " + shapeId));
-        return switch (shape.getType()) {
-            case LIST -> ParameterizedTypeName.get(
-                    ClassName.get(List.class),
-                    typeForShapeNoEnum(shape.asListShape().get().getMember().getTarget())
-            );
-            case SET -> ParameterizedTypeName.get(
-                    ClassName.get(Set.class),
-                    typeForShapeNoEnum(shape.asSetShape().get().getMember().getTarget())
-            );
-            default -> throw new IllegalStateException(
-                    "typeForListOrSetNoEnum only accepts LIST or SET. Got: " + shape.getType()
-                            + " for ShapeId: " + shapeId);
-        };
-    }
-
-    /**
-     * <p>In the AWS SDK Java V1,
-     * structures never return Enums, only their string representation.
-     * Thus, any methods that handle the result of a get Enum value
-     * must handle String, not the Enum reference.</p>
-     *
-     * <p>At this time, we believe that is only needs to be called
-     * for aggregates other than structure or union,
-     * as only Aggregate converters will indirectly deal with enums.</p>
-     *
-     * <p>Any direct involvement with Enums are safe,
-     * since we overload the enum converter methods.</p>
-     **/
-    public TypeName typeForShapeNoEnum(ShapeId shapeId) {
-        final Shape shape = model.expectShape(shapeId);
-        if (shape.hasTrait(EnumTrait.class)) {
-            return classForString();
-        }
-        if (SHAPE_TYPES_LIST_SET.contains(shape.getType())) {
-            return typeForListOrSetNoEnum(shapeId);
-        }
-        return typeForShape(shapeId);
-    }
-
-    @SuppressWarnings("OptionalGetWithoutIsPresent")
     public TypeName typeForListOrSetMember(ShapeId shapeId) {
         Shape shape = model.expectShape(shapeId);
         return switch (shape.getType()) {

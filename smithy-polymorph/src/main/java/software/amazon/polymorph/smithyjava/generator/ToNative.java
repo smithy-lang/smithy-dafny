@@ -3,6 +3,7 @@ package software.amazon.polymorph.smithyjava.generator;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 
 import java.util.Map;
@@ -11,10 +12,11 @@ import software.amazon.polymorph.smithyjava.BuilderSpecs;
 import software.amazon.polymorph.smithyjava.MethodReference;
 import software.amazon.polymorph.smithyjava.NamespaceHelper;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
-import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 import software.amazon.polymorph.utils.ModelUtils;
 
+import software.amazon.smithy.model.shapes.ListShape;
 import software.amazon.smithy.model.shapes.MemberShape;
+import software.amazon.smithy.model.shapes.SetShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.ShapeType;
@@ -204,6 +206,30 @@ public abstract class ToNative extends Generator {
                             .endControlFlow();
                 });
         return buildAndReturn(method);
+    }
+
+    protected MethodSpec modeledList(ListShape shape) {
+        return modeledListOrSet(shape.getMember(), shape.getId(), shape.getType());
+    }
+
+    protected MethodSpec modeledSet(SetShape shape) {
+        return modeledListOrSet(shape.getMember(), shape.getId(), shape.getType());
+    }
+
+    protected MethodSpec modeledListOrSet(MemberShape memberShape, ShapeId shapeId, ShapeType shapeType) {
+        CodeBlock memberConverter = memberConversionMethodReference(memberShape).asFunctionalReference();
+        CodeBlock genericCall = AGGREGATE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(shapeType).asNormalReference();
+        ParameterSpec parameterSpec = ParameterSpec
+                .builder(subject.dafnyNameResolver.typeForShape(shapeId), VAR_INPUT)
+                .build();
+        return MethodSpec
+                .methodBuilder(capitalize(shapeId.getName()))
+                .addModifiers(PUBLIC_STATIC)
+                .returns(subject.nativeNameResolver.typeForShape(shapeId))
+                .addParameter(parameterSpec)
+                .addStatement("return $L(\n$L, \n$L)",
+                        genericCall, VAR_INPUT, memberConverter)
+                .build();
     }
 
     /** @param getMember can be a Variable or a method call that returns the member value.*/

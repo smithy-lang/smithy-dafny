@@ -264,9 +264,9 @@ public class CodegenCli {
 
     private static void writeToFile(final String text, final File file) {
         try {
-            if (!file.createNewFile()) {
+            /*if (!file.createNewFile()) {
                 logger.warn("Overwriting existing file {}", file);
-            }
+            }*/
             final FileWriter fileWriter = new FileWriter(file);
             fileWriter.write(text);
             if (!text.endsWith("\n")) {
