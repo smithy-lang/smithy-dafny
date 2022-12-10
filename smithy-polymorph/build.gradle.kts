@@ -1,3 +1,5 @@
+import java.net.URI
+import javax.annotation.Nullable
 plugins {
     java
     application
@@ -41,6 +43,20 @@ application {
     mainClass.set("software.amazon.polymorph.CodegenCli")
 }
 
+var caUrl: URI? = null
+@Nullable
+val caUrlStr: String? = System.getenv("CODEARTIFACT_URL_SMITHY")
+if (!caUrlStr.isNullOrBlank()) {
+    caUrl = URI.create(caUrlStr)
+}
+
+var caPassword: String? = null
+@Nullable
+val caPasswordString: String? = System.getenv("CODEARTIFACT_AUTH_TOKEN")
+if (!caPasswordString.isNullOrBlank()) {
+    caPassword = caPasswordString
+}
+
 
 publishing {
     publications {
@@ -48,5 +64,17 @@ publishing {
             from(components["java"])
         }
     }
-    repositories{ mavenLocal() }
+    repositories{
+        mavenLocal()
+        if (caUrl != null && caPassword != null) {
+            maven {
+                name = "CodeArtifact"
+                url = caUrl!!
+                credentials {
+                    username = "aws"
+                    password = caPassword!!
+                }
+            }
+        }
+    }
 }
