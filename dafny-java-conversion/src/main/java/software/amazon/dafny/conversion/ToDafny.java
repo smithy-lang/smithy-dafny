@@ -2,6 +2,11 @@ package software.amazon.dafny.conversion;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Date;
 import java.util.HashSet;
@@ -32,8 +37,19 @@ public class ToDafny {
     public static class Simple {
 
         // BLOB("blob", BlobShape.class, Category.SIMPLE),
+        public static DafnySequence<Byte> ByteSequence(
+                final ByteBuffer byteBuffer,
+                final int offset,
+                final int limit) {
+            return DafnySequence.fromArray(
+                    TypeDescriptor.BYTE,
+                    Array.wrap(byteBuffer.array()).copyOfRange(offset, limit)
+            );
+        }
+
+        // BLOB("blob", BlobShape.class, Category.SIMPLE),
         public static DafnySequence<Byte> ByteSequence(ByteBuffer byteBuffer) {
-            return DafnySequence.fromArray(TypeDescriptor.BYTE, Array.wrap(byteBuffer.array()));
+            return ByteSequence(byteBuffer, 0, byteBuffer.limit());
         }
 
         // STRING("string", StringShape.class, Category.SIMPLE),
@@ -53,6 +69,27 @@ public class ToDafny {
             // KMS uses unix timestamp, or seconds from epoch, as its serialized timestamp
             // Other services may use other formats
             return CharacterSequence(String.format("%d", input.getEpochSecond()));
+        }
+
+        public static DafnySequence<Byte> DafnyUtf8Bytes(String s) {
+            Charset utf8 = StandardCharsets.UTF_8;
+            // The only way to keep this thread/concurrent safe/ is
+            // to create a new Coder everytime.
+            // If we wanted to increase performance,
+            // we could declare this NOT thread/concurrent safe,
+            // and reset the coder everytime.
+            CharsetEncoder coder = utf8.newEncoder();
+            CharBuffer inBuffer = CharBuffer.wrap(s);
+            inBuffer.position(0);
+            try {
+                ByteBuffer outBuffer = coder.encode(inBuffer);
+                // outBuffer's capacity can be much higher than the limit.
+                // By taking just the limit, we ensure we do not include
+                // any allocated but un-filled space.
+                return ByteSequence(outBuffer, 0, outBuffer.limit());
+            } catch (CharacterCodingException ex) {
+                throw new RuntimeException("Could not encode input to Dafny Bytes.", ex);
+            }
         }
 
     }
