@@ -23,6 +23,7 @@ import software.amazon.polymorph.smithyjava.generator.ToDafny;
 import software.amazon.polymorph.smithyjava.unmodeled.CollectionOfErrors;
 import software.amazon.polymorph.smithyjava.unmodeled.NativeError;
 import software.amazon.polymorph.smithyjava.unmodeled.OpaqueError;
+import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.polymorph.traits.PositionalTrait;
 
 import software.amazon.polymorph.traits.ReferenceTrait;
@@ -49,6 +50,7 @@ import static software.amazon.smithy.utils.StringUtils.uncapitalize;
  * </ul>
  */
 public class ToDafnyLibrary extends ToDafny {
+    static final MethodReference DAFNY_UTF8_BYTES = new MethodReference(COMMON_TO_DAFNY_SIMPLE, "DafnyUtf8Bytes");
     // Hack to override CodegenSubject
     // See code comment on ModelCodegen for details.
     final JavaLibrary subject;
@@ -211,6 +213,11 @@ public class ToDafnyLibrary extends ToDafny {
             if (PositionalTrait.onlyMember(targetShape.asStructureShape().get()).hasTrait(ReferenceTrait.class)) {
                 return Constants.IDENTITY_FUNCTION;
             }
+        }
+        // If the target has the dafnyUtf8Bytes trait,
+        // going to Dafny, the Strings need to be converted to Bytes
+        if (targetShape.hasTrait(DafnyUtf8BytesTrait.class)) {
+            return DAFNY_UTF8_BYTES;
         }
         return super.memberConversionMethodReference(memberShape);
     }
