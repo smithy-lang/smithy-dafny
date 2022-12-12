@@ -13,16 +13,17 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.annotation.Nullable;
 import javax.lang.model.element.Modifier;
 
 import software.amazon.polymorph.smithyjava.BuildMethod;
 import software.amazon.polymorph.smithyjava.BuilderSpecs;
 import software.amazon.polymorph.smithyjava.generator.Generator;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
+import software.amazon.polymorph.traits.LocalServiceTrait;
+import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.model.shapes.OperationShape;
+import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
-import software.amazon.smithy.utils.StringUtils;
 
 import static javax.lang.model.element.Modifier.PROTECTED;
 import static javax.lang.model.element.Modifier.PUBLIC;
@@ -49,12 +50,25 @@ public class ShimLibrary extends Generator {
     protected final ClassName toDafnyClassName;
     /** The class name of the Subject's ToNative class. */
     protected final ClassName toNativeClassName;
+    /** The Service or Resource Shape the Shim wraps. */
+    protected final Shape targetShape;
 
-    public ShimLibrary(JavaLibrary javaLibrary) {
+    public ShimLibrary(JavaLibrary javaLibrary, Shape targetShape) {
         super(javaLibrary);
         this.subject = javaLibrary;
-        this.thisClassName = ClassName.get(
-                javaLibrary.packageName, javaLibrary.publicClass);
+        if (!(targetShape.isResourceShape() || targetShape.isServiceShape())) {
+            throw new IllegalArgumentException(
+                    "targetShape MUST be a Resource or Service Shape. ShapeId: %s".formatted(targetShape.toShapeId()));
+        }
+        if (!targetShape.isServiceShape()) {
+            // TODO: Handle Resources
+            throw new IllegalArgumentException(
+                    "targetShape MUST be a Service Shape with LocalTrait. ShapeId: %s".formatted(targetShape.toShapeId()));
+        }
+        //noinspection OptionalGetWithoutIsPresent
+        this.targetShape = targetShape.asServiceShape().get();
+        LocalServiceTrait trait = targetShape.expectTrait(LocalServiceTrait.class);
+        this.thisClassName = ClassName.get(javaLibrary.packageName, trait.getSdkId());
         this.toDafnyClassName = ToDafnyLibrary.className(javaLibrary);
         this.toNativeClassName = ToNativeLibrary.className(javaLibrary);
     }
@@ -78,37 +92,59 @@ public class ShimLibrary extends Generator {
                 .addType(builderSpecs.builderImpl(
                         false,
                         null,
-                        builderImplBuildMethod()
+                        // TODO: Handle Resources (serviceBuilderImplBuildMethod assumes this is a service)
+                        serviceBuilderImplBuildMethod()
                 ))
-                .addMethod(constructor(builderSpecs))
+                // TODO: Handle Resources (serviceConstructor assumes this is a service)
+                .addMethod(serviceConstructor(builderSpecs))
                 .addMethod(builderSpecs.builderMethod());
-        spec.addMethods(subject.getOperationsInServiceNamespace()
+        spec.addMethods(getOperationsForTarget()
                 .stream().sequential().map(this::operation).collect(Collectors.toList()));
         return spec.build();
     }
 
+    public List<OperationShape> getOperationsForTarget() {
+        if (!targetShape.isServiceShape()) {
+            // TODO: Handle Resources
+            throw new IllegalArgumentException(
+                    "targetShape MUST be a Service Shape with LocalTrait. ShapeId: %s".formatted(targetShape.toShapeId()));
+        }
+        //noinspection OptionalGetWithoutIsPresent
+        return targetShape.asServiceShape().get().getOperations().stream().sequential()
+                .map(shapeId -> subject.model.expectShape(shapeId, OperationShape.class))
+                .collect(Collectors.toList());
+    }
+
     private MethodSpec operation(OperationShape operationShape) {
-        ShapeId inputShapeId = operationShape.getInputShape();
-        ShapeId outputShapeId = operationShape.getOutputShape();
-        String operationName = operationShape.toShapeId().getName();
-        MethodSpec.Builder method = MethodSpec
+        final ShapeId inputShapeId = operationShape.getInputShape();
+        ShapeId inputTargetId = inputShapeId;
+        final ShapeId outputShapeId = operationShape.getOutputShape();
+        ShapeId outputTargetId = outputShapeId;
+        final String operationName = operationShape.toShapeId().getName();
+        final MethodSpec.Builder method = MethodSpec
                 .methodBuilder(operationName)
                 .addModifiers(PUBLIC);
         // if operation takes an argument
         if (!inputShapeId.equals(SMITHY_API_UNIT)) {
             // Positional complicates everything, see dafnyDeclareAndConvert
-            ShapeId inputTargetId = subject.checkForPositional(inputShapeId);
+            inputTargetId = subject.checkForPositional(inputShapeId);
             TypeName inputType = subject.nativeNameResolver.typeForShape(inputTargetId);
             // Add parameter to method signature
             method.addParameter(inputType, NATIVE_VAR);
-            // Convert from nativeValue to dafnyValue
-            method.addStatement(dafnyDeclareAndConvert(inputTargetId, inputShapeId));
+            // if inputValue has ReferenceTrait.trait
+            if (subject.model.expectShape(inputTargetId).hasTrait(ReferenceTrait.class)) {
+                // do NOT convert, just declare as dafnyValue
+                method.addStatement(dafnyDeclare(inputTargetId));
+            } else {
+                // Convert from nativeValue to dafnyValue
+                method.addStatement(dafnyDeclareAndConvert(inputTargetId, inputShapeId));
+            }
         }
         // A void result in Dafny Java is Tuple0
         TypeName success = DAFNY_TUPLE0_CLASS_NAME;
         // if operation is not void
         if (!outputShapeId.equals(SMITHY_API_UNIT)) {
-            ShapeId outputTargetId = subject.checkForPositional(outputShapeId);
+            outputTargetId = subject.checkForPositional(outputShapeId);
             TypeName outputType = subject.nativeNameResolver.typeForShape(outputTargetId);
             // Add return type to method signature
             method.returns(outputType);
@@ -138,6 +174,12 @@ public class ShimLibrary extends Generator {
         if (outputShapeId.equals(SMITHY_API_UNIT)) {
             return method.build();
         }
+        // if outputShape is Reference
+        if (subject.model.expectShape(outputTargetId).hasTrait(ReferenceTrait.class)) {
+            // do NOT convert, just return success and return
+            method.addStatement("return $L.dtor_value()", RESULT_VAR);
+            return method.build();
+        }
         // else convert success to native and return
         method.addStatement("return $T.$L($L.dtor_value())",
                 toNativeClassName, outputShapeId.getName(), RESULT_VAR);
@@ -145,15 +187,26 @@ public class ShimLibrary extends Generator {
     }
 
     private FieldSpec getArg() {
+        if (!targetShape.isServiceShape()) {
+            // TODO: Handle Resources
+            throw new IllegalArgumentException(
+                    "targetShape MUST be a Service Shape with LocalTrait. ShapeId: %s".formatted(targetShape.toShapeId()));
+        }
+        LocalServiceTrait trait = targetShape.expectTrait(LocalServiceTrait.class);
         return FieldSpec.builder(
-                subject.nativeNameResolver.typeForShape(subject.publicConfigShapeId),
-                subject.publicConfigShapeId.getName()).build();
+                subject.nativeNameResolver.typeForShape(trait.getConfigId()),
+                trait.getConfigId().getName()).build();
     }
 
     private FieldSpec getField() {
+        if (!targetShape.isServiceShape()) {
+            // TODO: Handle Resources
+            throw new IllegalArgumentException(
+                    "targetShape MUST be a Service Shape with LocalTrait. ShapeId: %s".formatted(targetShape.toShapeId()));
+        }
         return FieldSpec.builder(
                         subject.dafnyNameResolver.typeForShape(
-                                subject.serviceShape.toShapeId()),
+                                targetShape.toShapeId()),
                         INTERFACE_FIELD)
                 .addModifiers(PRIVATE_FINAL)
                 .build();
@@ -168,16 +221,28 @@ public class ShimLibrary extends Generator {
     but there is no @required annotation (or equivalent)
     to inform Smithy that the service client needs a config.
      */
-    private MethodSpec builderImplBuildMethod() {
+    private MethodSpec serviceBuilderImplBuildMethod() {
+        if (!targetShape.isServiceShape()) {
+            // TODO: Handle Resources
+            throw new IllegalArgumentException(
+                    "targetShape MUST be a Service Shape with LocalTrait. ShapeId: %s".formatted(targetShape.toShapeId()));
+        }
         return MethodSpec.methodBuilder("build")
                 .addModifiers(Modifier.PUBLIC)
                 .returns(thisClassName)
+                // A resource would not need a requiredCheck
                 .addCode(BuildMethod.requiredCheck(getArg()))
                 .addStatement("return new $T(this)", thisClassName)
                 .build();
     }
 
-    private MethodSpec constructor(BuilderSpecs builderSpecs) {
+    private MethodSpec serviceConstructor(BuilderSpecs builderSpecs) {
+        if (!targetShape.isServiceShape()) {
+            // TODO: Handle Resources
+            throw new IllegalArgumentException(
+                    "targetShape MUST be a Service Shape with LocalTrait. ShapeId: %s".formatted(targetShape.toShapeId()));
+        }
+        LocalServiceTrait trait = targetShape.expectTrait(LocalServiceTrait.class);
         MethodSpec.Builder method =  MethodSpec
                 .constructorBuilder()
                 .addModifiers(PROTECTED)
@@ -191,7 +256,7 @@ public class ShimLibrary extends Generator {
                 getArg().name);
         // convert config to Dafny
         // i.e: Dafny.Aws.Cryptography.Primitives.Types.CryptoConfig dafnyConfig = ToDafny.CryptoConfig(nativeConfig);
-        method.addStatement(dafnyDeclareAndConvert(subject.publicConfigShapeId));
+        method.addStatement(dafnyDeclareAndConvert(trait.getConfigId()));
         // Invoke client creation
         // i.e.: Result<AtomicPrimitivesClient, Error> result = Dafny.Aws.Cryptography.Primitives.__default.AtomicPrimitives(dafnyValue);
         TypeName success = subject.dafnyNameResolver.classNameForConcreteServiceClient(subject.serviceShape);
@@ -223,6 +288,15 @@ public class ShimLibrary extends Generator {
                 DAFNY_VAR,
                 toDafnyClassName,
                 shapeId.getName(),
+                NATIVE_VAR);
+    }
+
+    // Reference also adds a complication,
+    // as they do not need to be converted.
+    private CodeBlock dafnyDeclare(ShapeId targetId) {
+        return CodeBlock.of("$T $L = $L",
+                subject.dafnyNameResolver.typeForShape(targetId),
+                DAFNY_VAR,
                 NATIVE_VAR);
     }
 

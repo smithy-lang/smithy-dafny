@@ -70,6 +70,10 @@ public class ToNativeTest {
 
         @Override
         // This allows the test class to call the otherwise protected method.
+        protected MethodSpec modeledMap(MapShape shape) { return super.modeledMap(shape);}
+
+        @Override
+        // This allows the test class to call the otherwise protected method.
         protected MethodReference memberConversionMethodReference(MemberShape memberShape) {
             return super.memberConversionMethodReference(memberShape);
         }
@@ -185,7 +189,7 @@ public class ToNativeTest {
     public void generateConvertMap() {
         ShapeId mapId = ShapeId.fromParts("com.amazonaws.kms", "EncryptionContextType");
         MapShape mapShape = model.expectShape(mapId, MapShape.class);
-        MethodSpec mapActual = underTest.generateConvertMap(mapShape);
+        MethodSpec mapActual = underTestAbstract.modeledMap(mapShape);
         tokenizeAndAssertEqual(ToNativeConstants.GENERATE_CONVERT_MAP, mapActual.toString());
     }
 

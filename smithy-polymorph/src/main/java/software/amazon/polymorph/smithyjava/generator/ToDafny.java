@@ -18,10 +18,10 @@ import javax.lang.model.element.Modifier;
 import software.amazon.polymorph.smithyjava.MethodReference;
 import software.amazon.polymorph.smithyjava.NamespaceHelper;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
-import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 import software.amazon.polymorph.utils.ModelUtils;
 
 import software.amazon.smithy.model.shapes.ListShape;
+import software.amazon.smithy.model.shapes.MapShape;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.SetShape;
 import software.amazon.smithy.model.shapes.Shape;
@@ -85,7 +85,7 @@ public abstract class ToDafny extends Generator {
                 .methodBuilder(methodName)
                 .addModifiers(PUBLIC_STATIC)
                 .returns(subject.dafnyNameResolver.typeForShape(shapeId))
-                .addParameter(subject.nativeNameResolver.typeForStructure(structureShape), VAR_INPUT);
+                .addParameter(subject.nativeNameResolver.classNameForStructure(structureShape), VAR_INPUT);
 
         if (structureShape.members().size() == 0) {
             builder.addStatement("return new $T()", subject.dafnyNameResolver.typeForShape(shapeId));
@@ -116,7 +116,7 @@ public abstract class ToDafny extends Generator {
                 .methodBuilder(methodName)
                 .addModifiers(PUBLIC_STATIC)
                 .returns(returnType)
-                .addParameter(subject.nativeNameResolver.typeForStructure(shape), VAR_INPUT);
+                .addParameter(subject.nativeNameResolver.classNameForStructure(shape), VAR_INPUT);
         // TODO: Once dafny always generates create_<datatypeConstructor>, remove this if block
         if (shape.members().size() == 1) {
             // There is one, stream().findFirst will return a value
@@ -266,6 +266,26 @@ public abstract class ToDafny extends Generator {
                 .build();
     }
 
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
+    protected MethodSpec modeledMap(MapShape shape) {
+        MemberShape keyShape = shape.getKey().asMemberShape().get();
+        CodeBlock keyConverter = memberConversionMethodReference(keyShape).asFunctionalReference();
+        MemberShape valueShape = shape.getValue().asMemberShape().get();
+        CodeBlock valueConverter = memberConversionMethodReference(valueShape).asFunctionalReference();
+        CodeBlock genericCall = AGGREGATE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(shape.getType()).asNormalReference();
+        ParameterSpec parameterSpec = ParameterSpec
+                .builder(subject.nativeNameResolver.typeForShape(shape.getId()), "nativeValue")
+                .build();
+        return MethodSpec
+                .methodBuilder(capitalize(shape.getId().getName()))
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                .returns(subject.dafnyNameResolver.typeForAggregateWithWildcard(shape.getId()))
+                .addParameter(parameterSpec)
+                .addStatement("return $L(\nnativeValue, \n$L, \n$L)",
+                        genericCall, keyConverter, valueConverter)
+                .build();
+    }
+
     /** AWS SDK V1 uses a different getter pattern than Library (or, possibly, SDK V2) */
     abstract protected CodeBlock getMember(CodeBlock variableName, MemberShape memberShape);
 
@@ -282,9 +302,9 @@ public abstract class ToDafny extends Generator {
      * the Java Native memberShape to
      * the Java Dafny memberShape.
      */
-    @SuppressWarnings({"DuplicatedCode", "OptionalGetWithoutIsPresent"})
+    @SuppressWarnings({"DuplicatedCode"})
     protected MethodReference memberConversionMethodReference(final MemberShape memberShape) {
-        Shape targetShape = subject.model.getShape(memberShape.getTarget()).get();
+        Shape targetShape = subject.model.expectShape(memberShape.getTarget());
         // If the target is simple, use SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE
         if (ModelUtils.isSmithyApiOrSimpleShape(targetShape)) {
             return SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(targetShape.getType());

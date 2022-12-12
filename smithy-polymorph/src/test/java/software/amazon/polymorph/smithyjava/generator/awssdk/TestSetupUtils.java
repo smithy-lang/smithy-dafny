@@ -25,7 +25,7 @@ public class TestSetupUtils {
     public static JavaAwsSdkV1 setupAwsSdk(Model localModel, String awsName) {
         ServiceShape serviceShape = serviceFromNamespace(
                 localModel, namespaceForService(awsName));
-        return new JavaAwsSdkV1(serviceShape, localModel);
+        return JavaAwsSdkV1.createJavaAwsSdkV1(serviceShape, localModel);
     }
     public static JavaLibrary setupLibrary(Model localModel, String namespace) {
         ServiceShape serviceShape = serviceFromNamespace(localModel, namespace);

@@ -165,8 +165,10 @@ public class DafnyTest {
 
     @Test
     public void typeForShapeResource() {
-        assertThrows(UnsupportedOperationException.class,
-                () -> underTest.typeForShape(ShapeId.fromParts("smithy.example", "MyResource")));
+        final String expected = "Dafny.Smithy.Example.Types.IMyResource";
+        TypeName actual = underTest.typeForShape(ShapeId.fromParts("smithy.example", "MyResource"));
+        final String actualString = actual.toString();
+        assertEquals(expected, actualString);
     }
 
 }
