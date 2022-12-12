@@ -2,6 +2,10 @@ package software.amazon.dafny.conversion;
 
 import org.junit.Test;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,6 +26,7 @@ import static org.junit.Assert.assertEquals;
 
 public class ToDafnyTest {
     private static final ArrayList<String> INPUT_LIST = new ArrayList<>();
+    private static final String SMALL_STRING = "This is a string.";
 
     static {
         INPUT_LIST.add("Three");
@@ -101,5 +106,56 @@ public class ToDafnyTest {
         DafnySet expected = new DafnySet(input);
         DafnySet<Integer> actual = SetInteger(input);
         assertEquals(expected, actual);
+    }
+
+    @Test
+    public void testDafnyUtf8BytesSmall() {
+        DafnySequence<Byte> actualDafny = ToDafny.Simple.DafnyUtf8Bytes(SMALL_STRING);
+        assertEquals(17, actualDafny.length());
+        String actualNative = ToNative.Simple.DafnyUtf8Bytes(actualDafny);
+        assertEquals(SMALL_STRING, actualNative);
+    }
+
+    @Test
+    public void testDafnyUtf8BytesDemo() throws IOException {
+        // UTF-8-Demo.txt is written by Markus Kuhn
+        // It was retrieved on 2022/12/11 from:
+        // https://www.cl.cam.ac.uk/~mgk25/ucs/examples/UTF-8-demo.txt
+        String expectedString = getResourceFileAsString("UTF-8-demo.txt");
+        DafnySequence<Byte> actualDafny = ToDafny.Simple.DafnyUtf8Bytes(expectedString);
+        String actualNative = ToNative.Simple.DafnyUtf8Bytes(actualDafny);
+        assertEquals(expectedString, actualNative);
+    }
+
+    @Test
+    public void testDafnyUtf8BytesLarge() throws IOException {
+        // UTF-8-test.txt is written by Markus Kuhn
+        // It was retrieved on 2022/12/10 from:
+        // https://www.cl.cam.ac.uk/~mgk25/ucs/examples/UTF-8-test.txt
+        String expectedString = getResourceFileAsString("UTF-8-test.txt");
+        DafnySequence<Byte> actualDafny = ToDafny.Simple.DafnyUtf8Bytes(expectedString);
+        String actualNative = ToNative.Simple.DafnyUtf8Bytes(actualDafny);
+        assertEquals(expectedString, actualNative);
+    }
+
+    /**
+     * Reads given resource file as a string.
+     *
+     * @param fileName path to the resource file
+     * @return the file's contents
+     * @throws IOException if read fails for any reason
+     *
+     * @author
+     * <a href="https://stackoverflow.com/a/46613809/2090045">Lucio Paiva</a>
+     */
+    static String getResourceFileAsString(String fileName) throws IOException {
+        ClassLoader classLoader = ClassLoader.getSystemClassLoader();
+        try (InputStream is = classLoader.getResourceAsStream(fileName)) {
+            if (is == null) return null;
+            try (InputStreamReader isr = new InputStreamReader(is);
+                 BufferedReader reader = new BufferedReader(isr)) {
+                return reader.lines().collect(Collectors.joining(System.lineSeparator()));
+            }
+        }
     }
 }
