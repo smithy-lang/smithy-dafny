@@ -4,7 +4,6 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
 
 import java.util.Collections;
@@ -20,10 +19,8 @@ import software.amazon.polymorph.smithyjava.generator.ToNative;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.polymorph.utils.ModelUtils;
 
-import software.amazon.smithy.model.shapes.MapShape;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
-import software.amazon.smithy.model.shapes.SetShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StringShape;
@@ -59,18 +56,18 @@ public class ToNativeAwsV1 extends ToNative {
 
     // TODO: for V2 support, use abstract AwsSdk name resolvers and sub class for V1 or V2.
 
+    // Hack to override CodegenSubject
+    // See code comment on ../library/ModelCodegen for details.
+    private final JavaAwsSdkV1 subject;
+
     public ToNativeAwsV1(JavaAwsSdkV1 awsSdk) {
-        super(
-                awsSdk,
-                //TODO: JavaAwsSdkV1 should really have a declared packageName, not rely on the name resolver
-                ClassName.get(awsSdk.dafnyNameResolver.packageName(), TO_NATIVE)
-        );
+        super(awsSdk, ClassName.get(awsSdk.packageName, TO_NATIVE));
+        this.subject = awsSdk;
     }
 
     @Override
     public Set<JavaFile> javaFiles() {
-        JavaFile.Builder builder = JavaFile
-                .builder(subject.dafnyNameResolver.packageName(), toNative());
+        JavaFile.Builder builder = JavaFile.builder(subject.packageName, toNative());
         return Collections.singleton(builder.build());
     }
 
@@ -84,7 +81,7 @@ public class ToNativeAwsV1 extends ToNative {
                 .map(this::generateConvert).filter(Objects::nonNull).toList();
         return TypeSpec
                 .classBuilder(
-                        ClassName.get(subject.dafnyNameResolver.packageName(), TO_NATIVE))
+                        ClassName.get(subject.packageName, TO_NATIVE))
                 .addModifiers(Modifier.PUBLIC)
                 .addMethods(convertRelevant)
                 .build();
@@ -101,7 +98,7 @@ public class ToNativeAwsV1 extends ToNative {
             case STRING -> generateConvertString(shapeId); // STRING handles enums
             case LIST -> modeledList(shape.asListShape().get());
             case SET -> modeledSet(shape.asSetShape().get());
-            case MAP -> generateConvertMap(shape.asMapShape().get());
+            case MAP -> modeledMap(shape.asMapShape().get());
             case STRUCTURE -> modeledStructure(shape.asStructureShape().get());
             default -> throw new UnsupportedOperationException(
                     "ShapeId %s is of Type %s, which is not yet supported for ToDafny"
@@ -109,30 +106,10 @@ public class ToNativeAwsV1 extends ToNative {
         };
     }
 
-    @SuppressWarnings("OptionalGetWithoutIsPresent")
-    MethodSpec generateConvertMap(MapShape shape) {
-        MemberShape keyShape = shape.getKey().asMemberShape().get();
-        CodeBlock keyConverter = memberConversionMethodReference(keyShape).asFunctionalReference();
-        MemberShape valueShape = shape.getValue().asMemberShape().get();
-        CodeBlock valueConverter = memberConversionMethodReference(valueShape).asFunctionalReference();
-        CodeBlock genericCall = AGGREGATE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(shape.getType()).asNormalReference();
-        ParameterSpec parameterSpec = ParameterSpec
-                .builder(subject.dafnyNameResolver.typeForShape(shape.getId()), VAR_INPUT)
-                .build();
-        return MethodSpec
-                .methodBuilder(capitalize(shape.getId().getName()))
-                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                .returns(subject.nativeNameResolver.typeForShape(shape.getId()))
-                .addParameter(parameterSpec)
-                .addStatement("return $L(\n$L, \n$L, \n$L)",
-                        genericCall, VAR_INPUT, keyConverter, valueConverter)
-                .build();
-    }
-
     @Override
     protected MethodSpec modeledStructure(StructureShape structureShape) {
         String methodName = capitalize(structureShape.getId().getName());
-        ClassName nativeClassName = subject.nativeNameResolver.typeForStructure(structureShape);
+        ClassName nativeClassName = subject.nativeNameResolver.classNameForStructure(structureShape);
         MethodSpec.Builder builder = MethodSpec
                 .methodBuilder(methodName)
                 .addModifiers(Modifier.STATIC, Modifier.PUBLIC)

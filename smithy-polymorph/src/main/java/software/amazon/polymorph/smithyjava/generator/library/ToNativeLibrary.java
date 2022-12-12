@@ -4,6 +4,7 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 
@@ -11,18 +12,24 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.lang.model.element.Modifier;
 
+import software.amazon.polymorph.smithyjava.MethodReference;
 import software.amazon.polymorph.smithyjava.generator.ToNative;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.polymorph.smithyjava.unmodeled.CollectionOfErrors;
 import software.amazon.polymorph.smithyjava.unmodeled.NativeError;
 import software.amazon.polymorph.smithyjava.unmodeled.OpaqueError;
+import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.polymorph.traits.PositionalTrait;
 
+import software.amazon.polymorph.traits.ReferenceTrait;
+import software.amazon.smithy.model.shapes.ListShape;
 import software.amazon.smithy.model.shapes.MemberShape;
+import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.ShapeType;
 import software.amazon.smithy.model.shapes.StructureShape;
@@ -43,6 +50,7 @@ import static software.amazon.smithy.utils.StringUtils.capitalize;
  * </ul>
  */
 public class ToNativeLibrary extends ToNative {
+    static final MethodReference DAFNY_UTF8_BYTES = new MethodReference(COMMON_TO_NATIVE_SIMPLE, "DafnyUtf8Bytes");
     // Hack to override CodegenSubject
     // See code comment on ModelCodegen for details.
     final JavaLibrary subject;
@@ -89,6 +97,9 @@ public class ToNativeLibrary extends ToNative {
         // Sets
         subject.getSetsInServiceNamespace().stream()
                 .map(this::modeledSet).forEachOrdered(toNativeMethods::add);
+        // Maps
+        subject.getMapsInServiceNamespace().stream()
+                .map(this::modeledMap).forEachOrdered(toNativeMethods::add);
         return TypeSpec.classBuilder(thisClassName)
                 .addModifiers(Modifier.PUBLIC)
                 .addMethods(toNativeMethods)
@@ -130,10 +141,10 @@ public class ToNativeLibrary extends ToNative {
         // and, finally, replace "Error_" with nothing, thus getting just "<datatypeConstructor>".
         List<String> allDafnyErrorConstructors = subject.getErrorsInServiceNamespace().stream()
                 .sequential()
-                .map(subject.dafnyNameResolver::classForStructure)
+                .map(subject.dafnyNameResolver::classForError)
                 .map(ClassName::simpleName)
                 .map(simpleName -> simpleName.replaceFirst("Error_", ""))
-                .collect(Collectors.toCollection(ArrayList::new));
+                .collect(Collectors.toCollection(ArrayList::new)); // We need a mutable list, so we can't use stream().toList()
         allDafnyErrorConstructors.add("Opaque");
         allDafnyErrorConstructors.add("Collection");
         allDafnyErrorConstructors.forEach(constructorName ->
@@ -159,6 +170,68 @@ public class ToNativeLibrary extends ToNative {
         // if this structure does NOT have a positional trait,
         // then we can use the abstract's modeledStructure.
         return super.modeledStructure(structureShape);
+    }
+
+    // TODO: if we ever need support for References in Sets or Maps, we will have to extend this logic
+    @Override
+    protected MethodSpec modeledList(final ListShape shape) {
+        if (!this.subject.model.expectShape(shape.getMember().getTarget()).hasTrait(ReferenceTrait.class)) {
+            return super.modeledList(shape);
+        }
+        // TODO :: Verify this hack is necessary and ideally remove
+        // If the target is a Reference, Java's Type system gets upset with Dafny.
+        // Dafny, at least in Java, returns <? extends ReferenceInterface>,
+        // (which is silly, of course it returns an implementation of the interface, but whatever)
+        // But Java does not think it can convert a `<? extends ReferenceInterface>` to a `ReferenceInterface`
+        // via the generic conversion methods, (because they are too abstract? I really do not know why)
+        // By explicitly telling Java everything is OK, (at least that's what I think we are doing?)
+        // We can make a hack around that
+        final TypeName referentType = subject.nativeNameResolver.typeForShape(shape.getMember().getTarget());
+        final ParameterSpec parameterSpec = ParameterSpec
+                .builder(subject.dafnyNameResolver.typeForShape(shape.toShapeId()), VAR_INPUT)
+                .build();
+        // Set Method Signature
+        MethodSpec.Builder method = MethodSpec
+                .methodBuilder(capitalize(shape.toShapeId().getName()))
+                .addParameter(parameterSpec)
+                .addModifiers(PUBLIC_STATIC)
+                .returns(subject.nativeNameResolver.typeForShape(shape.toShapeId()));
+        // add Identity hack (explicitly telling Java everything is OK)
+        method.addStatement("$T<$T,$T> identity = $T.identity()",
+                Function.class, referentType, referentType,
+                Function.class);
+        // create return list
+        method.addStatement("$T<$T> nativeValue = new $T<>($L.length())",
+                List.class, referentType,
+                ArrayList.class, VAR_INPUT);
+        // Use identity hack
+        method.addStatement("$L.iterator().forEachRemaining(value -> nativeValue.add(identity.apply(value)))",
+                VAR_INPUT);
+        // Return nativeValue
+        return method.addStatement("return nativeValue").build();
+    }
+
+    @Override
+    protected MethodReference memberConversionMethodReference(MemberShape memberShape) {
+        Shape targetShape = subject.model.expectShape(memberShape.getTarget());
+        // If the target is a Reference, use IDENTITY_FUNCTION
+        if (targetShape.hasTrait(ReferenceTrait.class)) {
+            return Constants.IDENTITY_FUNCTION;
+        }
+        // If the target is an indirect Reference, use IDENTITY_FUNCTION
+        if (targetShape.hasTrait(PositionalTrait.class)) {
+            // PositionalTrait can only exist on Structure Shapes, asStructureShape will return a value
+            //noinspection OptionalGetWithoutIsPresent
+            if (PositionalTrait.onlyMember(targetShape.asStructureShape().get()).hasTrait(ReferenceTrait.class)) {
+                return Constants.IDENTITY_FUNCTION;
+            }
+        }
+        // If the target has the dafnyUtf8Bytes trait,
+        // going to Native, the Bytes need to be converted to Strings
+        if (targetShape.hasTrait(DafnyUtf8BytesTrait.class)) {
+            return DAFNY_UTF8_BYTES;
+        }
+        return super.memberConversionMethodReference(memberShape);
     }
 
     protected MethodSpec positionalStructure(StructureShape structureShape) {

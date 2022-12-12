@@ -137,7 +137,7 @@ public class ToDafnyAwsV1 extends ToDafny {
             case BLOB, BOOLEAN, STRING, TIMESTAMP, BYTE, SHORT,
                     INTEGER, LONG, BIG_DECIMAL, BIG_INTEGER, MEMBER -> null;
             case LIST -> modeledList(shape.asListShape().get());
-            case MAP -> generateConvertMap(shape.asMapShape().get());
+            case MAP -> modeledMap(shape.asMapShape().get());
             case SET -> modeledSet(shape.asSetShape().get());
             case STRUCTURE -> generateConvertStructure(shapeId);
             default -> throw new UnsupportedOperationException(
@@ -242,8 +242,16 @@ public class ToDafnyAwsV1 extends ToDafny {
                 .build();
     }
 
+    /**
+     * We have to customize
+     * Map conversion for the AWS SDK for Java V1 because
+     * AWS SDK Java V1 treats Enums in a special way.
+     * See the comment on
+     * {@link software.amazon.polymorph.smithyjava.nameresolver.AwsSdkNativeV1#typeForShapeNoEnum}
+     **/
+    @Override
     @SuppressWarnings("OptionalGetWithoutIsPresent")
-    MethodSpec generateConvertMap(MapShape shape) {
+    protected MethodSpec modeledMap(MapShape shape) {
         MemberShape keyShape = shape.getKey().asMemberShape().get();
         CodeBlock keyConverter = memberConversionMethodReference(keyShape).asFunctionalReference();
         MemberShape valueShape = shape.getValue().asMemberShape().get();

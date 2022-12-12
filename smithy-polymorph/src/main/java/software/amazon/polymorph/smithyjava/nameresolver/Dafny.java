@@ -6,7 +6,6 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.WildcardTypeName;
 
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,8 +21,12 @@ import dafny.DafnySequence;
 import dafny.DafnySet;
 import dafny.Tuple0;
 import dafny.TypeDescriptor;
+
 import software.amazon.polymorph.smithydafny.DafnyNameResolver;
 import software.amazon.polymorph.smithyjava.MethodReference;
+import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
+import software.amazon.polymorph.traits.ReferenceTrait;
+
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.ResourceShape;
@@ -42,7 +45,6 @@ import static software.amazon.polymorph.smithyjava.nameresolver.Constants.SMITHY
 import static software.amazon.polymorph.utils.DafnyNameResolverHelpers.dafnyCompilesExtra_;
 import static software.amazon.polymorph.utils.DafnyNameResolverHelpers.dafnyExternNamespaceForShapeId;
 import static software.amazon.polymorph.utils.DafnyNameResolverHelpers.packageNameForNamespace;
-import static software.amazon.polymorph.utils.ModelUtils.isSmithyApiShape;
 import static software.amazon.smithy.utils.StringUtils.capitalize;
 
 /**
@@ -148,10 +150,7 @@ public class Dafny extends NameResolver {
         final Shape shape = model.getShape(shapeId)
                 .orElseThrow(() -> new IllegalStateException("Cannot find shape " + shapeId));
         return switch (shape.getType()) {
-            case BLOB -> ParameterizedTypeName.get(
-                    ClassName.get(DafnySequence.class),
-                    WildcardTypeName.subtypeOf(TypeName.BYTE.box())
-            );
+            case BLOB -> Dafny.typeForBlob();
             case BOOLEAN -> TypeName.BOOLEAN.box();
             case STRING -> typeForString(shape.asStringShape().get());
             case TIMESTAMP -> typeForCharacterSequence();
@@ -164,12 +163,18 @@ public class Dafny extends NameResolver {
             case LIST, SET, MAP -> typeForAggregateWithWildcard(shapeId);
             case MEMBER -> typeForShape(shape.asMemberShape().get().getTarget());
             case STRUCTURE -> classForStructure(shape.asStructureShape().get());
-            case SERVICE -> typeForService(shape.asServiceShape().get());
-            case RESOURCE -> typeForResource(shape.asResourceShape().get());
+            case SERVICE -> classNameForService(shape.asServiceShape().get());
+            case RESOURCE -> classNameForResource(shape.asResourceShape().get());
             // Unions are identical to Structures (in this context).
             case UNION -> classForNotErrorNotUnitShape(shape.asUnionShape().get());
             default -> throw new UnsupportedOperationException("Unsupported shape " + shapeId);
         };
+    }
+
+    private static TypeName typeForBlob() {
+        return ParameterizedTypeName.get(
+                ClassName.get(DafnySequence.class),
+                WildcardTypeName.subtypeOf(TypeName.BYTE.box()));
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")
@@ -220,6 +225,11 @@ public class Dafny extends NameResolver {
             return CodeBlock.of("$L()",
                     new MethodReference(abstractClassForError(), "_typeDescriptor").asNormalReference());
         }
+        if (shape.hasTrait(ReferenceTrait.class)) {
+            // It is safe to use typeForShape here, as ReferenceTrait will always turn into a Resource or Service
+            TypeName interfaceClassName = typeForShape(shapeId);
+            return  CodeBlock.of("$T.reference($T.class)", TypeDescriptor.class, interfaceClassName);
+        }
         if (shape.getId().equals(SMITHY_API_UNIT)) {
             return CodeBlock.of("$L()",
                     new MethodReference(ClassName.get(Tuple0.class), "_typeDescriptor").asNormalReference());
@@ -264,10 +274,15 @@ public class Dafny extends NameResolver {
     }
 
     TypeName typeForString(StringShape shape) {
-        if (!shape.hasTrait(EnumTrait.class)) {
-            return typeForCharacterSequence();
+        if (shape.hasTrait(EnumTrait.class)) {
+            return classForNotErrorNotUnitShape(shape);
         }
-        return classForNotErrorNotUnitShape(shape);
+        // If the shape has the dafnyUtf8Bytes trait,
+        // the dafny representation will use Bytes
+        if (shape.hasTrait(DafnyUtf8BytesTrait.class)) {
+            return Dafny.typeForBlob();
+        }
+        return typeForCharacterSequence();
     }
 
     TypeName typeForCharacterSequence() {
@@ -277,9 +292,12 @@ public class Dafny extends NameResolver {
         );
     }
 
-    public ClassName classForStructure(StructureShape shape) {
+    public TypeName classForStructure(StructureShape shape) {
         if (shape.hasTrait(ErrorTrait.class)) {
             return classForError(shape);
+        }
+        if (shape.hasTrait(ReferenceTrait.class)) {
+            return typeForShape(shape.expectTrait(ReferenceTrait.class).getReferentId());
         }
         if (shape.getId().equals(SMITHY_API_UNIT)) {
             return ClassName.get(Tuple0.class);
@@ -287,16 +305,25 @@ public class Dafny extends NameResolver {
         return classForNotErrorNotUnitShape(shape);
     }
 
-    ClassName classForError(Shape shape) {
+    public ClassName classForError(Shape shape) {
+        if (!shape.hasTrait(ErrorTrait.class)) {
+            throw new IllegalArgumentException("shape MUST have ErrorTrait. ShapeId: %s".formatted(shape.getId()));
+        }
         // AwsCryptographicMaterialProvidersException -> Error_AwsCryptographicMaterialProvidersException
         ClassName className = classForNotErrorNotUnitShape(shape);
         return ClassName.get(className.packageName(), "Error_" + dafnyCompilesExtra_(className.simpleName()));
     }
 
     /** @return The interface for a service client. */
-     TypeName typeForService(ServiceShape shape) {
-        String packageName = dafnyExternNamespaceForShapeId(shape.getId());
-        String interfaceName = DafnyNameResolver.traitNameForServiceClient(shape);
+    // This facilitates an override by a subclass
+     ClassName classNameForService(final ServiceShape shape) {
+        return interfaceForService(shape);
+    }
+
+     /** @return The interface for a service client.*/
+    public static ClassName interfaceForService(final ServiceShape shape) {
+        final String packageName = dafnyExternNamespaceForShapeId(shape.getId());
+        final String interfaceName = DafnyNameResolver.traitNameForServiceClient(shape);
         return ClassName.get(packageName, interfaceName);
     }
 
@@ -312,7 +339,16 @@ public class Dafny extends NameResolver {
         return ClassName.get(packageName, "__default");
     }
 
-    TypeName typeForResource(ResourceShape shape) {
-        throw new UnsupportedOperationException("Not yet implemented for not AWS-SDK Style");
+    /** @return The interface for a resource.*/
+    // This facilitates an override by a subclass
+    ClassName classNameForResource(final ResourceShape shape) {
+        return Dafny.interfaceForResource(shape);
+    }
+
+    /** @return The interface for a resource.*/
+    public static ClassName interfaceForResource(final ResourceShape shape) {
+        final String packageName = dafnyExternNamespaceForShapeId(shape.getId());
+        final String interfaceName = DafnyNameResolver.traitNameForResource(shape);
+        return ClassName.get(packageName, interfaceName);
     }
 }

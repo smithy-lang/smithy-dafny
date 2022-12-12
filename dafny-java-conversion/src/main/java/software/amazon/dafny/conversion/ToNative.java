@@ -2,6 +2,11 @@ package software.amazon.dafny.conversion;
 
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
@@ -53,6 +58,29 @@ public class ToNative {
             // Other services may use other formats
             BigDecimal dateValue = new BigDecimal(Simple.String(s));
             return Instant.ofEpochMilli(dateValue.scaleByPowerOfTen(3).longValue());
+        }
+
+        public static String DafnyUtf8Bytes(DafnySequence<? extends Byte> s) {
+            Charset utf8 = StandardCharsets.UTF_8;
+            // The only way to keep this thread/concurrent safe/ is
+            // to create a new Coder everytime.
+            // If we wanted to increase performance,
+            // we could declare this NOT thread/concurrent safe,
+            // and reset the coder everytime.
+            CharsetDecoder coder = utf8.newDecoder();
+            ByteBuffer inBuffer = ByteBuffer(s);
+            inBuffer.position(0);
+            try {
+                CharBuffer outBuffer = coder.decode(inBuffer);
+                outBuffer.position(0);
+                // Compared to the ByteBuffer in ToDafny.Simple.DafnyUtf8Bytes,
+                // CharBuffer's toString is very user-friendly.
+                // It appears to only read to the limit,
+                // as compared to the capacity.
+                return outBuffer.toString();
+            } catch (CharacterCodingException ex) {
+                throw new RuntimeException("Could not encode input to Dafny Bytes.", ex);
+            }
         }
     }
 

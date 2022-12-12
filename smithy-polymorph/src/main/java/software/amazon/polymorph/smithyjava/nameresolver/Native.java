@@ -17,6 +17,7 @@ import java.util.Set;
 import javax.annotation.Nullable;
 
 import software.amazon.polymorph.smithyjava.NamespaceHelper;
+import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.ResourceShape;
@@ -25,13 +26,8 @@ import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.ShapeType;
 import software.amazon.smithy.model.shapes.StringShape;
-import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.BoxTrait;
 import software.amazon.smithy.model.traits.EnumTrait;
-import software.amazon.smithy.utils.StringUtils;
-
-import static software.amazon.polymorph.smithyjava.nameresolver.Constants.SHAPE_TYPES_LIST_SET;
-import static software.amazon.smithy.utils.StringUtils.capitalize;
 
 
 /**
@@ -160,11 +156,11 @@ public class Native extends NameResolver{
                     typeForShape(shape.asSetShape().get().getMember().getTarget())
             );
             case MEMBER -> typeForShape(shape.asMemberShape().get().getTarget());
-            case STRUCTURE -> typeForStructure(shape.asStructureShape().get());
-            case SERVICE -> typeForService(shape.asServiceShape().get());
-            case RESOURCE -> typeForResource(shape.asResourceShape().get());
+            case STRUCTURE -> classNameForStructure(shape.asStructureShape().get());
+            case SERVICE -> classNameForService(shape.asServiceShape().get());
+            case RESOURCE -> classNameForResource(shape.asResourceShape().get());
             // Unions are identical to Structures (in this context)
-            case UNION -> typeForStructure(shape.asUnionShape().get());
+            case UNION -> classNameForStructure(shape.asUnionShape().get());
             default -> throw new UnsupportedOperationException("Shape %s has unsupported type %s"
                     .formatted(shapeId, shape.getType()));
         };
@@ -207,11 +203,18 @@ public class Native extends NameResolver{
         };
     }
 
-    public ClassName typeForStructure(Shape shape) {
+    public ClassName classNameForStructure(Shape shape) {
         if (!(shape.isUnionShape() || shape.isStructureShape())) {
             throw new IllegalArgumentException(
                     "typeForStructure should only be called for Structures or Unions. ShapeId: %s"
                             .formatted(shape.getId()));
+        }
+        if (shape.hasTrait(ReferenceTrait.class)) {
+            final ReferenceTrait trait = shape.expectTrait(ReferenceTrait.class);
+            if (trait.isService()) {
+                return classNameForService(model.expectShape(trait.getReferentId(), ServiceShape.class));
+            }
+            return classNameForResource(model.expectShape(trait.getReferentId(), ResourceShape.class));
         }
         if (isInServiceNameSpace(shape.getId())) {
             return ClassName.get(modelPackage, shape.getId().getName());
@@ -226,20 +229,11 @@ public class Native extends NameResolver{
                 shape.getId().getName());
     }
 
-    public ClassName typeForService(ServiceShape shape) {
-        throw new UnsupportedOperationException("Not yet implemented for not AWS-SDK Style");
+    public ClassName classNameForService(ServiceShape shape) {
+        return Dafny.interfaceForService(shape);
     }
 
-    @SuppressWarnings("unused")
-    public ClassName typeForResource(ResourceShape shape) {
-        throw new UnsupportedOperationException("Not yet implemented for not AWS-SDK Style");
-    }
-
-    public TypeName typeForOperationOutput(ShapeId outputShapeId) {
-        throw new UnsupportedOperationException("Not yet implemented for not AWS-SDK Style");
-    }
-
-    public TypeName baseErrorForService() {
-        throw new UnsupportedOperationException("Not yet implemented for not AWS-SDK Style");
+    public ClassName classNameForResource(ResourceShape shape) {
+        return Dafny.interfaceForResource(shape);
     }
 }

@@ -25,7 +25,6 @@ import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.loader.ModelAssembler;
 import software.amazon.smithy.model.shapes.ServiceShape;
-import software.amazon.smithy.aws.traits.*;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -126,7 +125,7 @@ public class CodegenCli {
     //TODO: Figure out a nice way to differentiate AWS SDK Java V1 from AWS SDK Java V2
     // Or maybe we just hard code one or the other and call that good enough
     static String javaAwsSdkV1(Path outputJavaDir, ServiceShape serviceShape, Model model) {
-        final JavaAwsSdkV1 javaShimCodegen = new JavaAwsSdkV1(serviceShape, model);
+        final JavaAwsSdkV1 javaShimCodegen = JavaAwsSdkV1.createJavaAwsSdkV1(serviceShape, model);
         writeTokenTreesIntoDir(javaShimCodegen.generate(), outputJavaDir);
         return "Java code generated in %s".formatted(outputJavaDir);
     }
