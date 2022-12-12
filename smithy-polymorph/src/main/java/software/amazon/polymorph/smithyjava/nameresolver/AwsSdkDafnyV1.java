@@ -1,7 +1,6 @@
 package software.amazon.polymorph.smithyjava.nameresolver;
 
 import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.TypeName;
 
 import software.amazon.polymorph.utils.AwsSdkNameResolverHelpers;
 import software.amazon.smithy.model.Model;
@@ -19,24 +18,24 @@ public class AwsSdkDafnyV1 extends Dafny {
     }
 
     @Override
-    TypeName typeForService(ServiceShape shape) {
+    ClassName classNameForService(ServiceShape shape) {
         if (AwsSdkNameResolverHelpers.isAwsSdkServiceId(shape.getId())) {
             return ClassName.get(
                     modelPackageNameForNamespace(shape.getId().getNamespace()),
                     traitNameForServiceClient(shape)
             );
         }
-        return super.typeForService(shape);
+        return super.classNameForService(shape);
     }
 
     @Override
-    TypeName typeForResource(ResourceShape shape) {
+    ClassName classNameForResource(ResourceShape shape) {
         if (AwsSdkNameResolverHelpers.isAwsSdkServiceId(shape.getId())) {
             return ClassName.get(
                     modelPackageNameForNamespace(shape.getId().getNamespace()),
                     "I%s".formatted(StringUtils.capitalize(shape.getId().getName()))
             );
         }
-        return super.typeForResource(shape);
+        return super.classNameForResource(shape);
     }
 }

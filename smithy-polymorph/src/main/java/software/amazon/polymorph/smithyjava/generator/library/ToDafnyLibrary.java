@@ -23,9 +23,12 @@ import software.amazon.polymorph.smithyjava.generator.ToDafny;
 import software.amazon.polymorph.smithyjava.unmodeled.CollectionOfErrors;
 import software.amazon.polymorph.smithyjava.unmodeled.NativeError;
 import software.amazon.polymorph.smithyjava.unmodeled.OpaqueError;
+import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.polymorph.traits.PositionalTrait;
 
+import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.model.shapes.MemberShape;
+import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.ShapeType;
 import software.amazon.smithy.model.shapes.StructureShape;
@@ -47,6 +50,7 @@ import static software.amazon.smithy.utils.StringUtils.uncapitalize;
  * </ul>
  */
 public class ToDafnyLibrary extends ToDafny {
+    static final MethodReference DAFNY_UTF8_BYTES = new MethodReference(COMMON_TO_DAFNY_SIMPLE, "DafnyUtf8Bytes");
     // Hack to override CodegenSubject
     // See code comment on ModelCodegen for details.
     final JavaLibrary subject;
@@ -93,6 +97,9 @@ public class ToDafnyLibrary extends ToDafny {
         // Sets
         subject.getSetsInServiceNamespace().stream()
                 .map(this::modeledSet).forEachOrdered(toDafnyMethods::add);
+        // Maps
+        subject.getMapsInServiceNamespace().stream()
+                .map(this::modeledMap).forEachOrdered(toDafnyMethods::add);
         return TypeSpec.classBuilder(thisClassName)
                 .addModifiers(Modifier.PUBLIC)
                 .addMethods(toDafnyMethods)
@@ -110,7 +117,7 @@ public class ToDafnyLibrary extends ToDafny {
                 .addModifiers(PUBLIC_STATIC)
                 .addParameter(nativeError, VAR_INPUT);
         List<ClassName> allNativeErrors = subject.getErrorsInServiceNamespace().stream()
-                .map(subject.nativeNameResolver::typeForStructure)
+                .map(subject.nativeNameResolver::classNameForStructure)
                 .collect(Collectors.toCollection(ArrayList::new));
         allNativeErrors.add(OpaqueError.nativeClassName(subject.nativeNameResolver.modelPackage));
         allNativeErrors.add(CollectionOfErrors.nativeClassName(subject.nativeNameResolver.modelPackage));
@@ -190,5 +197,28 @@ public class ToDafnyLibrary extends ToDafny {
     @Override
     protected CodeBlock getMember(CodeBlock variableName, MemberShape memberShape) {
         return CodeBlock.of("$L.$L()", variableName, uncapitalize(memberShape.getMemberName()));
+    }
+
+    @Override
+    protected MethodReference memberConversionMethodReference(MemberShape memberShape) {
+        Shape targetShape = subject.model.expectShape(memberShape.getTarget());
+        // If the target is a Reference, use IDENTITY_FUNCTION
+        if (targetShape.hasTrait(ReferenceTrait.class)) {
+            return Constants.IDENTITY_FUNCTION;
+        }
+        // If the target is an indirect Reference, use IDENTITY_FUNCTION
+        if (targetShape.hasTrait(PositionalTrait.class)) {
+            // PositionalTrait can only exist on Structure Shapes, asStructureShape will return a value
+            //noinspection OptionalGetWithoutIsPresent
+            if (PositionalTrait.onlyMember(targetShape.asStructureShape().get()).hasTrait(ReferenceTrait.class)) {
+                return Constants.IDENTITY_FUNCTION;
+            }
+        }
+        // If the target has the dafnyUtf8Bytes trait,
+        // going to Dafny, the Strings need to be converted to Bytes
+        if (targetShape.hasTrait(DafnyUtf8BytesTrait.class)) {
+            return DAFNY_UTF8_BYTES;
+        }
+        return super.memberConversionMethodReference(memberShape);
     }
 }

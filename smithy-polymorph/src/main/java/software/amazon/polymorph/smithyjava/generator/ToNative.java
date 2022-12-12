@@ -8,6 +8,8 @@ import com.squareup.javapoet.TypeName;
 
 import java.util.Map;
 
+import javax.lang.model.element.Modifier;
+
 import software.amazon.polymorph.smithyjava.BuilderSpecs;
 import software.amazon.polymorph.smithyjava.MethodReference;
 import software.amazon.polymorph.smithyjava.NamespaceHelper;
@@ -15,6 +17,7 @@ import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.polymorph.utils.ModelUtils;
 
 import software.amazon.smithy.model.shapes.ListShape;
+import software.amazon.smithy.model.shapes.MapShape;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.SetShape;
 import software.amazon.smithy.model.shapes.Shape;
@@ -75,8 +78,8 @@ public abstract class ToNative extends Generator {
 
     /** Signature of an Error conversion method. */
     protected MethodSpec.Builder initializeErrorMethodSpec(
-            ClassName inputType,
-            ClassName returnType
+            TypeName inputType,
+            TypeName returnType
     ) {
         return initializeMethodSpec("Error", inputType, returnType);
     }
@@ -112,12 +115,32 @@ public abstract class ToNative extends Generator {
         return method.build();
     }
 
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
+    protected MethodSpec modeledMap(MapShape shape) {
+        MemberShape keyShape = shape.getKey().asMemberShape().get();
+        CodeBlock keyConverter = memberConversionMethodReference(keyShape).asFunctionalReference();
+        MemberShape valueShape = shape.getValue().asMemberShape().get();
+        CodeBlock valueConverter = memberConversionMethodReference(valueShape).asFunctionalReference();
+        CodeBlock genericCall = AGGREGATE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(shape.getType()).asNormalReference();
+        ParameterSpec parameterSpec = ParameterSpec
+                .builder(subject.dafnyNameResolver.typeForShape(shape.getId()), VAR_INPUT)
+                .build();
+        return MethodSpec
+                .methodBuilder(capitalize(shape.getId().getName()))
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                .returns(subject.nativeNameResolver.typeForShape(shape.getId()))
+                .addParameter(parameterSpec)
+                .addStatement("return $L(\n$L, \n$L, \n$L)",
+                        genericCall, VAR_INPUT, keyConverter, valueConverter)
+                .build();
+    }
+
     /** Uses a Builder to build the native value of Structure. */
     protected MethodSpec modeledStructure(StructureShape structureShape) {
         final ShapeId shapeId = structureShape.getId();
         final String methodName = capitalize(shapeId.getName());
         final TypeName inputType = subject.dafnyNameResolver.typeForShape(shapeId);
-        final ClassName returnType = subject.nativeNameResolver.typeForStructure(structureShape);
+        final ClassName returnType = subject.nativeNameResolver.classNameForStructure(structureShape);
         MethodSpec.Builder method = initializeMethodSpec(methodName, inputType, returnType);
         createNativeBuilder(method, returnType);
         // For each member
@@ -143,7 +166,7 @@ public abstract class ToNative extends Generator {
         MethodSpec structure = modeledStructure(shape);
         MethodSpec.Builder builder = structure.toBuilder();
         builder.setName("Error");
-        builder.returns(subject.nativeNameResolver.typeForStructure(shape));
+        builder.returns(subject.nativeNameResolver.classNameForStructure(shape));
         return builder.build();
     }
 
@@ -196,7 +219,7 @@ public abstract class ToNative extends Generator {
         final ShapeId shapeId = shape.getId();
         final String methodName = capitalize(shapeId.getName());
         final TypeName inputType = subject.dafnyNameResolver.typeForShape(shapeId);
-        final ClassName returnType = subject.nativeNameResolver.typeForStructure(shape);
+        final ClassName returnType = subject.nativeNameResolver.classNameForStructure(shape);
         MethodSpec.Builder method = initializeMethodSpec(methodName, inputType, returnType);
         createNativeBuilder(method, returnType);
         shape.members()
@@ -255,9 +278,9 @@ public abstract class ToNative extends Generator {
      * the Java Dafny memberShape to
      * the Java Native memberShape.
      */
-    @SuppressWarnings({"DuplicatedCode", "OptionalGetWithoutIsPresent"})
+    @SuppressWarnings({"DuplicatedCode"})
     protected MethodReference memberConversionMethodReference(MemberShape memberShape) {
-        Shape targetShape = subject.model.getShape(memberShape.getTarget()).get();
+        Shape targetShape = subject.model.expectShape(memberShape.getTarget());
         // If the target is simple, use SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE
         if (ModelUtils.isSmithyApiOrSimpleShape(targetShape)) {
             return SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(targetShape.getType());

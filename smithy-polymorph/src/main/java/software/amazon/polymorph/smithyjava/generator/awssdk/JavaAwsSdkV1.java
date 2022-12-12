@@ -22,15 +22,24 @@ public class JavaAwsSdkV1 extends CodegenSubject {
     final AwsSdkDafnyV1 dafnyNameResolver;
     final AwsSdkNativeV1 nativeNameResolver;
 
-    public JavaAwsSdkV1(ServiceShape serviceShape, Model model) {
-        super(
-                model,
-                serviceShape,
-                new AwsSdkDafnyV1(serviceShape, model),
-                new AwsSdkNativeV1(serviceShape, model)
-        );
-        this.dafnyNameResolver = new AwsSdkDafnyV1(serviceShape, model);
-        this.nativeNameResolver = new AwsSdkNativeV1(serviceShape, model);
+    /** Public Java Interfaces will go here. */
+    public final String packageName;
+
+    private JavaAwsSdkV1(
+            ServiceShape serviceShape,
+            Model model,
+            AwsSdkDafnyV1 dafnyNameResolver,
+            AwsSdkNativeV1 nativeNameResolver) {
+        super(model, serviceShape, dafnyNameResolver, nativeNameResolver);
+        this.dafnyNameResolver = dafnyNameResolver;
+        this.nativeNameResolver = nativeNameResolver;
+        this.packageName = dafnyNameResolver.packageName();
+    }
+
+    public static JavaAwsSdkV1 createJavaAwsSdkV1(ServiceShape serviceShape, Model model) {
+        final AwsSdkDafnyV1 dafnyNameResolver = new AwsSdkDafnyV1(serviceShape, model);
+        final AwsSdkNativeV1 nativeNameResolver = new AwsSdkNativeV1(serviceShape, model);
+        return new JavaAwsSdkV1(serviceShape, model, dafnyNameResolver, nativeNameResolver);
     }
 
     public Map<Path, TokenTree> generate() {

@@ -129,9 +129,12 @@ public record DafnyNameResolver(
     }
 
     public String traitForResource(final ResourceShape resourceShape) {
-        final ShapeId shapeId = resourceShape.getId();
-        final String resourceName = StringUtils.capitalize(shapeId.getName());
-        return dafnyModulePrefixForShapeId(resourceShape) + "I%s".formatted(resourceName);
+        return dafnyModulePrefixForShapeId(resourceShape) + traitNameForResource(resourceShape);
+    }
+
+    public static String traitNameForResource(final ResourceShape shape) {
+        final String resourceName = StringUtils.capitalize(shape.getId().getName());
+        return "I%s".formatted(resourceName);
     }
 
     public String publicMethodNameForOperation(final OperationShape operationShape) {
