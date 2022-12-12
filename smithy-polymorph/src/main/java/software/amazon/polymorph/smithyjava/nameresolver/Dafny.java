@@ -24,6 +24,7 @@ import dafny.TypeDescriptor;
 
 import software.amazon.polymorph.smithydafny.DafnyNameResolver;
 import software.amazon.polymorph.smithyjava.MethodReference;
+import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
 
 import software.amazon.smithy.model.Model;
@@ -149,10 +150,7 @@ public class Dafny extends NameResolver {
         final Shape shape = model.getShape(shapeId)
                 .orElseThrow(() -> new IllegalStateException("Cannot find shape " + shapeId));
         return switch (shape.getType()) {
-            case BLOB -> ParameterizedTypeName.get(
-                    ClassName.get(DafnySequence.class),
-                    WildcardTypeName.subtypeOf(TypeName.BYTE.box())
-            );
+            case BLOB -> Dafny.typeForBlob();
             case BOOLEAN -> TypeName.BOOLEAN.box();
             case STRING -> typeForString(shape.asStringShape().get());
             case TIMESTAMP -> typeForCharacterSequence();
@@ -171,6 +169,12 @@ public class Dafny extends NameResolver {
             case UNION -> classForNotErrorNotUnitShape(shape.asUnionShape().get());
             default -> throw new UnsupportedOperationException("Unsupported shape " + shapeId);
         };
+    }
+
+    private static TypeName typeForBlob() {
+        return ParameterizedTypeName.get(
+                ClassName.get(DafnySequence.class),
+                WildcardTypeName.subtypeOf(TypeName.BYTE.box()));
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")
@@ -270,10 +274,15 @@ public class Dafny extends NameResolver {
     }
 
     TypeName typeForString(StringShape shape) {
-        if (!shape.hasTrait(EnumTrait.class)) {
-            return typeForCharacterSequence();
+        if (shape.hasTrait(EnumTrait.class)) {
+            return classForNotErrorNotUnitShape(shape);
         }
-        return classForNotErrorNotUnitShape(shape);
+        // If the shape has the dafnyUtf8Bytes trait,
+        // the dafny representation will use Bytes
+        if (shape.hasTrait(DafnyUtf8BytesTrait.class)) {
+            return Dafny.typeForBlob();
+        }
+        return typeForCharacterSequence();
     }
 
     TypeName typeForCharacterSequence() {

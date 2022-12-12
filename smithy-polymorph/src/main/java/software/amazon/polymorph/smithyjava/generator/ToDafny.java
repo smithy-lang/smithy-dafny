@@ -21,6 +21,7 @@ import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.polymorph.utils.ModelUtils;
 
 import software.amazon.smithy.model.shapes.ListShape;
+import software.amazon.smithy.model.shapes.MapShape;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.SetShape;
 import software.amazon.smithy.model.shapes.Shape;
@@ -262,6 +263,26 @@ public abstract class ToDafny extends Generator {
                 .addParameter(parameterSpec)
                 .addStatement("return $L(\nnativeValue, \n$L)",
                         genericCall, memberConverter)
+                .build();
+    }
+
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
+    protected MethodSpec modeledMap(MapShape shape) {
+        MemberShape keyShape = shape.getKey().asMemberShape().get();
+        CodeBlock keyConverter = memberConversionMethodReference(keyShape).asFunctionalReference();
+        MemberShape valueShape = shape.getValue().asMemberShape().get();
+        CodeBlock valueConverter = memberConversionMethodReference(valueShape).asFunctionalReference();
+        CodeBlock genericCall = AGGREGATE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(shape.getType()).asNormalReference();
+        ParameterSpec parameterSpec = ParameterSpec
+                .builder(subject.nativeNameResolver.typeForShape(shape.getId()), "nativeValue")
+                .build();
+        return MethodSpec
+                .methodBuilder(capitalize(shape.getId().getName()))
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                .returns(subject.dafnyNameResolver.typeForAggregateWithWildcard(shape.getId()))
+                .addParameter(parameterSpec)
+                .addStatement("return $L(\nnativeValue, \n$L, \n$L)",
+                        genericCall, keyConverter, valueConverter)
                 .build();
     }
 
