@@ -178,6 +178,7 @@ public class ToNativeLibrary extends ToNative {
         if (!this.subject.model.expectShape(shape.getMember().getTarget()).hasTrait(ReferenceTrait.class)) {
             return super.modeledList(shape);
         }
+        // TODO :: Verify this hack is necessary and ideally remove
         // If the target is a Reference, Java's Type system gets upset with Dafny.
         // Dafny, at least in Java, returns <? extends ReferenceInterface>,
         // (which is silly, of course it returns an implementation of the interface, but whatever)
