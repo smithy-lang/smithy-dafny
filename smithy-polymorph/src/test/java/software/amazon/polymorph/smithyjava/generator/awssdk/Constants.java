@@ -34,7 +34,7 @@ public class Constants {
 
     static String MockKmsShim = """
             package Dafny.Com.Amazonaws.Kms;
-              
+            
             import Dafny.Com.Amazonaws.Kms.Types.DoSomethingRequest;
             import Dafny.Com.Amazonaws.Kms.Types.DoSomethingResponse;
             import Dafny.Com.Amazonaws.Kms.Types.DoVoidRequest;
