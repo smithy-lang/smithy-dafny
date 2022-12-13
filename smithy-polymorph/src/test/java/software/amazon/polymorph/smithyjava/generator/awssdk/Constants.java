@@ -50,12 +50,20 @@ public class Constants {
             import dafny.Tuple0;
             
             import java.lang.Override;
+            import java.lang.String;
             
             public class Shim implements IKeyManagementServiceClient {
               private final AWSKMS _impl;
               
-              public Shim(AWSKMS impl) {
-                _impl = impl;
+              private final String region;
+              
+              public Shim(final AWSKMS impl, final String region) {
+                this._impl = impl;
+                this.region = region;
+              }
+              
+              public String region() {
+                return this.region;
               }
               
               %s
