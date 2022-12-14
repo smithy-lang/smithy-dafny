@@ -889,9 +889,14 @@ public class TypeConversionCodegen {
      */
     public TypeConverter generateSpecificModeledErrorConverter(final StructureShape errorShape) {
         assert errorShape.hasTrait(ErrorTrait.class);
-        final String structureType = nameResolver.baseTypeForShape(errorShape.getId()).endsWith("Exception")
-                ? nameResolver.baseTypeForShape(errorShape.getId())
-                : "%sException".formatted(nameResolver.baseTypeForShape(errorShape.getId()));
+        final String structureType;
+        if (StringUtils.equals(errorShape.getId().getNamespace(), AwsSdkDotNetNameResolver.DDB_NAMESPACE)) {
+            structureType = nameResolver.baseTypeForShape(errorShape.getId()).endsWith("Exception")
+                    ? nameResolver.baseTypeForShape(errorShape.getId())
+                    : "%sException".formatted(nameResolver.baseTypeForShape(errorShape.getId()));
+        } else {
+            structureType = nameResolver.baseTypeForShape(errorShape.getId());
+        }
 
         final TokenTree fromDafnyConstructorArgs = TokenTree
           .of(ModelUtils
