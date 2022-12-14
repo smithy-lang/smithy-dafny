@@ -23,6 +23,7 @@ public class AwsSdkDotNetNameResolver extends DotNetNameResolver {
     public static final String DDB_SERVICE_NAME = "DynamoDB";
     public static final String DDB_SERVICE_NAME_V2 = "DynamoDBv2";
     public static final String DDB_SMITHY_SERVICE_NAME = "DynamoDB_20120810";
+    public static final String DDB_TYPES_SERVICE_NAME = "DynamoDB__20120810";
     public static final String DDB_INPUT = "Input";
     public static final String DDB_OUTPUT = "Output";
     public static final String DDB_REQUEST = "Request";
@@ -54,7 +55,9 @@ public class AwsSdkDotNetNameResolver extends DotNetNameResolver {
         // corresponding enum class every where else AFAICT.
         final String memberType = targetShape.hasTrait(EnumTrait.class) ? "string" : baseTypeForMember(memberShape);
 
-        return "System.Collections.Generic.List<%s>".formatted(memberType);
+        return StringUtils.equals(memberType, "Com.Amazonaws.Dynamodb.AttributeValue")
+            ? "System.Collections.Generic.List<%s>".formatted("Amazon.DynamoDBv2.Model.AttributeValue")
+            : "System.Collections.Generic.List<%s>".formatted(memberType);
     }
 
     @Override

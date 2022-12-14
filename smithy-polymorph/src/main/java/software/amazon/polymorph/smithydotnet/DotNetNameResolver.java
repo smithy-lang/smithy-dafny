@@ -22,12 +22,7 @@ import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.utils.StringUtils;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -137,10 +132,8 @@ public class DotNetNameResolver {
 
     public static String interfaceForService(final ShapeId serviceShapeId) {
         if (AwsSdkNameResolverHelpers.isAwsSdkServiceId(serviceShapeId)) {
-            // Resolve DynamoDB_20120810 to just DynamoDB. There is no reference to the version string
-            // in the NET SDK.
             final String serviceName = StringUtils.equals(serviceShapeId.getName(), AwsSdkDotNetNameResolver.DDB_SMITHY_SERVICE_NAME)
-                ? AwsSdkDotNetNameResolver.DDB_SERVICE_NAME
+                ? AwsSdkDotNetNameResolver.DDB_TYPES_SERVICE_NAME
                 : serviceShapeId.getName();
             return "I" + serviceName;
         }
@@ -277,13 +270,20 @@ public class DotNetNameResolver {
     }
 
     protected String baseTypeForList(final ListShape listShape) {
-        return "System.Collections.Generic.List<%s>".formatted(baseTypeForMember(listShape.getMember()));
+        return StringUtils.equals(baseTypeForMember(listShape.getMember()), "Com.Amazonaws.Dynamodb.AttributeValue")
+                ? "System.Collections.Generic.List<%s>".formatted("Amazon.DynamoDBv2.Model.AttributeValue")
+                : "System.Collections.Generic.List<%s>".formatted(baseTypeForMember(listShape.getMember()));
     }
 
     protected String baseTypeForMap(final MapShape mapShape) {
-        return "System.Collections.Generic.Dictionary<%s, %s>".formatted(
-                baseTypeForMember(mapShape.getKey()),
-                baseTypeForMember(mapShape.getValue()));
+        return StringUtils.equals(baseTypeForMember(mapShape.getValue()), "Com.Amazonaws.Dynamodb.AttributeValue")
+                ? "System.Collections.Generic.Dictionary<%s, %s>".formatted(
+                        baseTypeForMember(mapShape.getKey()),
+                        "Amazon.DynamoDBv2.Model.AttributeValue")
+                : "System.Collections.Generic.Dictionary<%s, %s>".formatted(
+                        baseTypeForMember(mapShape.getKey()),
+                        baseTypeForMember(mapShape.getValue()));
+
     }
 
     protected String baseTypeForStructure(final StructureShape structureShape) {
@@ -879,7 +879,42 @@ public class DotNetNameResolver {
     }
     /** Return the DotNet Type for a Union Member */
     public String unionMemberName(final MemberShape memberShape) {
-            String[] qualifiedName = classPropertyTypeForStructureMember(memberShape).split("[.]");
-            return "_%s".formatted(dafnyCompilesExtra_(qualifiedName[qualifiedName.length - 1]));
+        if (ModelUtils.isInServiceNamespace(memberShape.getTarget(), serviceShape)) {
+            if (StringUtils.equals(memberShape.getId().getName(), "AttributeValue")) {
+                switch (classPropertyForStructureMember(memberShape)) {
+                    case "S":
+                        return "_%s".formatted("StringAttributeValue");
+                    case "N":
+                        return "_%s".formatted("NumberAttributeValue");
+                    case "B":
+                        return "_%s".formatted("BinaryAttributeValue");
+                    case "SS":
+                        return "_%s".formatted("StringSetAttributeValue");
+                    case "NS":
+                        return "_%s".formatted("NumberSetAttributeValue");
+                    case "BS":
+                        return "_%s".formatted("BinarySetAttributeValue");
+                    case "M":
+                        return "_%s".formatted("MapAttributeValue");
+                    case "L":
+                        return "_%s".formatted("ListAttributeValue");
+                    case "NULL":
+                        return "_%s".formatted("NullAttributeValue");
+                    case "BOOL":
+                        return "_%s".formatted("BooleanAttributeValue");
+                }
+                String[] qualifiedName = classPropertyTypeForStructureMember(memberShape).split("[.]");
+                return "_%s".formatted(dafnyCompilesExtra_(qualifiedName[qualifiedName.length - 1]));
+            } else {
+                String[] qualifiedName = classPropertyTypeForStructureMember(memberShape).split("[.]");
+                return "_%s".formatted(dafnyCompilesExtra_(qualifiedName[qualifiedName.length - 1]));
+            }
+        } else {
+            final String name = dafnyConcreteTypeForUnionMember(memberShape)
+                    // TODO Hack to remove Dafny "namespace"
+                    .replace("Dafny.", "")
+                    .replace(".", "");
+            return "_%s".formatted(name);
+        }
     }
 }

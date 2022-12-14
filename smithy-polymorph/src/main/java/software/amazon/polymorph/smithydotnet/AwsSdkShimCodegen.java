@@ -6,6 +6,7 @@ package software.amazon.polymorph.smithydotnet;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
@@ -14,10 +15,8 @@ import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.polymorph.utils.Token;
 import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.smithy.model.Model;
-import software.amazon.smithy.model.shapes.OperationShape;
-import software.amazon.smithy.model.shapes.ServiceShape;
-import software.amazon.smithy.model.shapes.ShapeId;
-import software.amazon.smithy.model.shapes.StructureShape;
+import software.amazon.smithy.model.shapes.*;
+import software.amazon.smithy.utils.StringUtils;
 
 import static software.amazon.polymorph.smithydotnet.TypeConversionDirection.FROM_DAFNY;
 import static software.amazon.polymorph.smithydotnet.TypeConversionDirection.TO_DAFNY;
@@ -89,6 +88,7 @@ public class AwsSdkShimCodegen {
 
     public TokenTree generateOperationShim(final ShapeId operationShapeId) {
         final OperationShape operationShape = model.expectShape(operationShapeId, OperationShape.class);
+        // TODO Change Output type here for Disable/Enable Kinesis Streaming Destination
         final String dafnyOutputType = nameResolver.dafnyTypeForServiceOperationOutput(operationShape, true);
         final String implOperationName = nameResolver.methodForOperation(operationShapeId) + "Async";
 
@@ -158,12 +158,18 @@ public class AwsSdkShimCodegen {
         final TokenTree knownErrorCases = TokenTree.of(errorShapes.stream()
                 .map(errorShape -> {
                     final ShapeId errorShapeId = errorShape.getId();
-                    final String sdkErrorType = nameResolver.baseTypeForShape(errorShapeId);
+                    final String sdkErrorType;
+                    String errorType = nameResolver.baseTypeForShape(errorShapeId);
+                    sdkErrorType = !errorType.endsWith("Exception")
+                            ? "%sException".formatted(errorType)
+                            : errorType;
                     final String errorConverter = DotNetNameResolver.qualifiedTypeConverter(errorShapeId, TO_DAFNY);
-                    return Token.of("""
-                            case %s e:
-                                return %s(e);
-                            """.formatted(sdkErrorType, errorConverter));
+                    return sdkErrorType.endsWith("InvalidEndpointException")
+                            ? Token.of("")
+                            : Token.of("""
+                                case %s e:
+                                    return %s(e);
+                                """.formatted(sdkErrorType, errorConverter));
                 })).lineSeparated();
 
         final TokenTree unknownErrorCase = Token.of("""
