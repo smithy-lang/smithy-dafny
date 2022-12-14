@@ -24,6 +24,10 @@ import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.*;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
+<<<<<<< HEAD
+=======
+import software.amazon.smithy.model.traits.UnitTypeTrait;
+>>>>>>> 52ca472 (fix(NET TypeConversion Shim): correctly generate DDB NET code with temporary workarounds)
 import software.amazon.smithy.utils.StringUtils;
 
 import static software.amazon.polymorph.smithydotnet.DotNetNameResolver.TYPE_CONVERSION_CLASS_NAME;
@@ -64,7 +68,10 @@ public class TypeConversionCodegen {
     public Map<Path, TokenTree> generate() {
         final TokenTree prelude = TokenTree.of(
                 // needed for LINQ operators like Select
+<<<<<<< HEAD
                 // system needed for creating an exception
+=======
+>>>>>>> 52ca472 (fix(NET TypeConversion Shim): correctly generate DDB NET code with temporary workarounds)
                 "using System.Linq;","using System;"
                 );
         final Stream<TypeConverter> modeledConverters = findShapeIdsToConvert()
@@ -351,6 +358,7 @@ public class TypeConversionCodegen {
                 .map(memberShape -> {
                     final String dafnyMemberName = DotNetNameResolver.memberName(memberShape);
                     final String propertyName = nameResolver.classPropertyForStructureMember(memberShape);
+<<<<<<< HEAD
                     final String propertyType;
                     if (StringUtils.equals(nameResolver.classPropertyTypeForStructureMember(memberShape),
                             AwsSdkDotNetNameResolver.DDB_ATTRIBUTE_VALUE_MODEL_NAMESPACE)) {
@@ -358,6 +366,11 @@ public class TypeConversionCodegen {
                     } else {
                         propertyType = nameResolver.classPropertyTypeForStructureMember(memberShape);
                     }
+=======
+                    final String propertyType = StringUtils.equals(nameResolver.classPropertyTypeForStructureMember(memberShape), "Com.Amazonaws.Dynamodb.AttributeValue")
+                            ? "Amazon.DynamoDBv2.Model.AttributeValue"
+                            : nameResolver.classPropertyTypeForStructureMember(memberShape);
+>>>>>>> 52ca472 (fix(NET TypeConversion Shim): correctly generate DDB NET code with temporary workarounds)
                     final String memberFromDafnyConverterName = typeConverterForShape(
                             memberShape.getId(), FROM_DAFNY);
 
@@ -367,6 +380,7 @@ public class TypeConversionCodegen {
                     } else {
                         checkIfPresent = TokenTree.empty();
                     }
+<<<<<<< HEAD
                     // SizeEstimateRangeGb requires a list of double instead of the genereated int list
                     final TokenTree assign;
                     if (StringUtils.equals(dafnyMemberName, "_SizeEstimateRangeGB")) {
@@ -376,6 +390,14 @@ public class TypeConversionCodegen {
                         assign = Token.of("converted.%s = (%s) %s(concrete.%s);".formatted(
                                 propertyName, propertyType, memberFromDafnyConverterName, dafnyMemberName));
                     }
+=======
+
+                    final TokenTree assign = StringUtils.equals(dafnyMemberName, "_SizeEstimateRangeGB")
+                            ? Token.of("converted.%s = %s(concrete.%s).Select(i => (double) i).ToList();".formatted(
+                                    propertyName, memberFromDafnyConverterName, dafnyMemberName))
+                            : Token.of("converted.%s = (%s) %s(concrete.%s);".formatted(
+                                propertyName, propertyType, memberFromDafnyConverterName, dafnyMemberName));
+>>>>>>> 52ca472 (fix(NET TypeConversion Shim): correctly generate DDB NET code with temporary workarounds)
                     return TokenTree.of(checkIfPresent, assign);
                 })).lineSeparated();
         final String structureType = nameResolver.baseTypeForShape(structureShape.getId());
@@ -423,7 +445,10 @@ public class TypeConversionCodegen {
                     nameResolver.variableNameForClassProperty(memberShape));
         }
         if (StringUtils.equals(nameResolver.classPropertyForStructureMember(memberShape), "TargetValue")) {
+<<<<<<< HEAD
             // value.TargetValue returns a double, the Api constructor needs is an int
+=======
+>>>>>>> 52ca472 (fix(NET TypeConversion Shim): correctly generate DDB NET code with temporary workarounds)
             return "%s((int)value.%s)".formatted(
                     typeConverterForShape(memberShape.getId(), TO_DAFNY),
                     nameResolver.classPropertyForStructureMember(memberShape));
@@ -463,6 +488,7 @@ public class TypeConversionCodegen {
             return buildConverterFromMethodBodies(memberShape, fromDafnyBody, toDafnyBody);
         }
 
+<<<<<<< HEAD
         String cSharpTypeUnModified;
         if (StringUtils.equals(nameResolver.baseTypeForShape(targetShape.getId()),
                 AwsSdkDotNetNameResolver.DDB_ATTRIBUTE_VALUE_MODEL_NAMESPACE)) {
@@ -483,6 +509,17 @@ public class TypeConversionCodegen {
         } else {
             cSharpOptionType = nameResolver.baseTypeForShape(memberShape.getId());
         }
+=======
+        String cSharpTypeUnModified = StringUtils.equals(nameResolver.baseTypeForShape(targetShape.getId()), "Com.Amazonaws.Dynamodb.AttributeValue")
+                ? "Amazon.DynamoDBv2.Model.AttributeValue"
+                : nameResolver.baseTypeForShape(memberShape.getId());
+        final String cSharpType = cSharpTypeUnModified.endsWith("?")
+                ? cSharpTypeUnModified.substring(0 , (cSharpTypeUnModified.length() - 1))
+                : cSharpTypeUnModified;
+        final String cSharpOptionType = StringUtils.equals(nameResolver.baseTypeForShape(memberShape.getId()), "Com.Amazonaws.Dynamodb.AttributeValue")
+                ? "Amazon.DynamoDBv2.Model.AttributeValue"
+                : nameResolver.baseTypeForShape(memberShape.getId());
+>>>>>>> 52ca472 (fix(NET TypeConversion Shim): correctly generate DDB NET code with temporary workarounds)
         final String dafnyOptionType = nameResolver.dafnyConcreteTypeForOptionalMember(memberShape);
         final TokenTree fromDafnyBody = Token.of("return value.is_None ? (%s) null : %s(value.Extract());"
                 .formatted(cSharpOptionType, targetFromDafnyConverterName));
@@ -494,6 +531,7 @@ public class TypeConversionCodegen {
 
     public TypeConverter generateUnionConverter(final UnionShape unionShape) {
         final List<MemberShape> defNames = ModelUtils.streamUnionMembers(unionShape).toList();
+<<<<<<< HEAD
         final String unionClass;
         if (StringUtils.equals(nameResolver.baseTypeForShape(unionShape.getId()),
                 AwsSdkDotNetNameResolver.DDB_ATTRIBUTE_VALUE_MODEL_NAMESPACE)) {
@@ -501,6 +539,11 @@ public class TypeConversionCodegen {
         } else {
            unionClass = nameResolver.baseTypeForShape(unionShape.getId());
         }
+=======
+        final String unionClass = StringUtils.equals(nameResolver.baseTypeForShape(unionShape.getId()), "Com.Amazonaws.Dynamodb.AttributeValue")
+                ? "Amazon.DynamoDBv2.Model.AttributeValue"
+                : nameResolver.baseTypeForShape(unionShape.getId());
+>>>>>>> 52ca472 (fix(NET TypeConversion Shim): correctly generate DDB NET code with temporary workarounds)
         final String dafnyUnionConcreteType = nameResolver.dafnyConcreteTypeForUnion(unionShape);
         final Token throwInvalidUnionState = Token.of("\nthrow new System.ArgumentException(\"Invalid %s state\");"
                 .formatted(unionClass));
@@ -549,9 +592,12 @@ public class TypeConversionCodegen {
                     final String dafnyMemberName = nameResolver.unionMemberName(memberShape);
                     final String memberFromDafnyConverterName = typeConverterForShape(
                             memberShape.getId(), TO_DAFNY);
+<<<<<<< HEAD
                     // When generating the toDafnyBody, there is an edge case for AttributeValue.
                     // When checking if this a certain type the ddb sdk for net only gas value.is*Set for
                     // lists, map, and boolean types - it does not have one for the remaining attribute union types
+=======
+>>>>>>> 52ca472 (fix(NET TypeConversion Shim): correctly generate DDB NET code with temporary workarounds)
                     final Set<String> checkedAttributeValues = Set.of("L", "M", "BOOL");
                     // In v2 of the net sdk for ddb the only Is%sSet apis are for L, M, or BOOL other unions do
                     // not exist.
@@ -568,6 +614,7 @@ public class TypeConversionCodegen {
                         createSuffixUnMod = "_%s".formatted(propertyName);
                     }
                     final String createSuffix = createSuffixUnMod;
+<<<<<<< HEAD
                     if (StringUtils.equals(memberShape.getId().getName(), "AttributeValue")) {
                         return TokenTree
                                .of("if (value.Is%sSet)".formatted(propertyName))
@@ -583,6 +630,11 @@ public class TypeConversionCodegen {
                     } else {
                         return TokenTree
                                 .of("if (value.IsSet%s())".formatted(propertyName))
+=======
+                    return StringUtils.equals(memberShape.getId().getName(), "AttributeValue")
+                            ? TokenTree
+                                .of("if (value.Is%sSet)".formatted(propertyName))
+>>>>>>> 52ca472 (fix(NET TypeConversion Shim): correctly generate DDB NET code with temporary workarounds)
                                 .append(TokenTree.of("return %s.create%s(%s(value.%s));"
                                                 .formatted(
                                                         dafnyUnionConcreteType,
@@ -591,8 +643,23 @@ public class TypeConversionCodegen {
                                                         propertyName
                                                 ))
                                         .lineSeparated()
+<<<<<<< HEAD
                                         .braced());
                     }
+=======
+                                        .braced())
+                            : TokenTree
+                                .of("if (value.IsSet%s())".formatted(propertyName))
+                                .append(TokenTree.of("return %s.create%s(%s(value.%s));"
+                                            .formatted(
+                                                    dafnyUnionConcreteType,
+                                                    createSuffix,
+                                                    memberFromDafnyConverterName,
+                                                    propertyName
+                                            ))
+                                    .lineSeparated()
+                                    .braced());
+>>>>>>> 52ca472 (fix(NET TypeConversion Shim): correctly generate DDB NET code with temporary workarounds)
                 }))
                 .append(throwInvalidUnionState);
 
@@ -926,6 +993,7 @@ public class TypeConversionCodegen {
     public TypeConverter generateSpecificModeledErrorConverter(final StructureShape errorShape) {
         assert errorShape.hasTrait(ErrorTrait.class);
         final String structureType;
+<<<<<<< HEAD
         if (StringUtils.equals(errorShape.getId().getNamespace(), AwsSdkDotNetNameResolver.DDB_NAMESPACE)) {
             structureType = nameResolver.baseTypeForShape(errorShape.getId()).endsWith("Exception")
                     ? nameResolver.baseTypeForShape(errorShape.getId())
@@ -933,6 +1001,11 @@ public class TypeConversionCodegen {
         } else {
             structureType = nameResolver.baseTypeForShape(errorShape.getId());
         }
+=======
+        structureType = nameResolver.baseTypeForShape(errorShape.getId()).endsWith("Exception")
+                ? nameResolver.baseTypeForShape(errorShape.getId())
+                : "%sException".formatted(nameResolver.baseTypeForShape(errorShape.getId()));
+>>>>>>> 52ca472 (fix(NET TypeConversion Shim): correctly generate DDB NET code with temporary workarounds)
 
         final TokenTree fromDafnyConstructorArgs = TokenTree
           .of(ModelUtils
@@ -941,6 +1014,7 @@ public class TypeConversionCodegen {
                 final String dafnyMemberName = DotNetNameResolver.memberName(memberShape);
                 final String memberFromDafnyConverterName = typeConverterForShape(
                   memberShape.getId(), FROM_DAFNY);
+<<<<<<< HEAD
                 // special case for CancellationReasons Exception - this is the only exception
                 // that throws a list of possible errors - these must be turned into a string and thrown as an exception
                 // in order to be accepted by the API
@@ -953,6 +1027,15 @@ public class TypeConversionCodegen {
                             memberFromDafnyConverterName,
                             dafnyMemberName));
                 }
+=======
+                return StringUtils.equals(dafnyMemberName, "_CancellationReasons")
+                        ? Token.of("new Exception(%s(value.%s).ToString())".formatted(
+                                memberFromDafnyConverterName,
+                                dafnyMemberName))
+                        : Token.of("%s(value.%s)".formatted(
+                                memberFromDafnyConverterName,
+                                dafnyMemberName));
+>>>>>>> 52ca472 (fix(NET TypeConversion Shim): correctly generate DDB NET code with temporary workarounds)
             }))
           .separated(Token.of(','))
           .lineSeparated();
@@ -1010,6 +1093,7 @@ public class TypeConversionCodegen {
         final TokenTree toDafnyBody
     ) {
         final String dafnyType = nameResolver.dafnyTypeForShape(shape.getId());
+<<<<<<< HEAD
         String type;
         if (StringUtils.equals(nameResolver.baseTypeForShape(shape.getId()),
                 AwsSdkDotNetNameResolver.DDB_ATTRIBUTE_VALUE_MODEL_NAMESPACE)) {
@@ -1024,6 +1108,16 @@ public class TypeConversionCodegen {
 
         // InvalidEndpointException was deprecated in v3 of the dynamodb sdk for net
         if (StringUtils.equals(type, "Amazon.DynamoDBv2.Model.InvalidEndpointException")) {
+=======
+        String type = StringUtils.equals(nameResolver.baseTypeForShape(shape.getId()), "Com.Amazonaws.Dynamodb.AttributeValue")
+                ? "Amazon.DynamoDBv2.Model.AttributeValue"
+                : nameResolver.baseTypeForShape(shape.getId());
+
+        // InvalidEndpointException was deprecated in v3 of the dynamodb sdk for net
+        if (StringUtils.equals(type, "Amazon.DynamoDBv2.Model.InvalidEndpointException") ||
+                StringUtils.equals(type, "Amazon.DynamoDBv2.Model.KinesisStreamingDestinationRequest") ||
+                StringUtils.equals(type, "Amazon.DynamoDBv2.Model.KinesisStreamingDestinationResponse")) {
+>>>>>>> 52ca472 (fix(NET TypeConversion Shim): correctly generate DDB NET code with temporary workarounds)
             return new TypeConverter(shape.getId(), TokenTree.of(""), TokenTree.of(""));
         }
         // Some DDB Modeled exceptions don't end in Exception and the SDK v3 for NET has all Exceptions
