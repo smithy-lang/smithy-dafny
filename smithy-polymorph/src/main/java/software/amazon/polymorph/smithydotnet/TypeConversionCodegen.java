@@ -485,37 +485,24 @@ public class TypeConversionCodegen {
                     final String propertyName = nameResolver.classPropertyForStructureMember(memberShape);
                     final String memberFromDafnyConverterName = typeConverterForShape(
                             memberShape.getId(), FROM_DAFNY);
-                    return StringUtils.equals(memberShape.getId().getName(), "AttributeValue")
-                            ? TokenTree
-                                .of("if (value.is_%s)".formatted(propertyName))
-                                .append(TokenTree
-                                        .of(
-                                                "converted.%s = %s(concrete.dtor_%s);"
-                                                        .formatted(
-                                                                propertyName,
-                                                                memberFromDafnyConverterName,
-                                                                nameResolver.classPropertyForStructureMember(memberShape)
-                                                        ),
-                                                "return converted;"
-                                        )
-                                        .lineSeparated()
-                                        .braced()
-                                )
-                            : TokenTree
-                                .of("if (value.is_%s)".formatted(propertyName))
-                                .append(TokenTree
-                                        .of(
-                                                "converted.%s = %s(concrete.dtor_%s);"
-                                                        .formatted(
-                                                                propertyName,
-                                                                memberFromDafnyConverterName,
-                                                                dafnyCompilesExtra_(memberShape.getMemberName())
-                                                        ),
-                                                "return converted;"
-                                        )
-                                        .lineSeparated()
-                                        .braced()
-                                );
+                    final String destructorValue = StringUtils.equals(memberShape.getId().getName(), "AttributeValue")
+                            ? nameResolver.classPropertyForStructureMember(memberShape)
+                            : dafnyCompilesExtra_(memberShape.getMemberName());
+                    return TokenTree
+                            .of("if (value.is_%s)".formatted(propertyName))
+                            .append(TokenTree
+                                    .of(
+                                            "converted.%s = %s(concrete.dtor_%s);"
+                                                    .formatted(
+                                                            propertyName,
+                                                            memberFromDafnyConverterName,
+                                                            destructorValue
+                                                    ),
+                                            "return converted;"
+                                    )
+                                    .lineSeparated()
+                                    .braced()
+                            );
                 })
             )
             .prepend(TokenTree.of(concreteVar, convertedVar).lineSeparated())
