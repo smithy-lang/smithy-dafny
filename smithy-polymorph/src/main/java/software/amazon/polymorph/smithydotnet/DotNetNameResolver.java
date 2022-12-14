@@ -270,16 +270,16 @@ public class DotNetNameResolver {
     }
 
     protected String baseTypeForList(final ListShape listShape) {
-        return StringUtils.equals(baseTypeForMember(listShape.getMember()), "Com.Amazonaws.Dynamodb.AttributeValue")
-                ? "System.Collections.Generic.List<%s>".formatted("Amazon.DynamoDBv2.Model.AttributeValue")
+        return StringUtils.equals(baseTypeForMember(listShape.getMember()), AwsSdkDotNetNameResolver.DDB_ATTRIBUTE_VALUE_MODEL_NAMESPACE)
+                ? "System.Collections.Generic.List<%s>".formatted(AwsSdkDotNetNameResolver.DDB_V2_ATTRIBUTE_VALUE)
                 : "System.Collections.Generic.List<%s>".formatted(baseTypeForMember(listShape.getMember()));
     }
 
     protected String baseTypeForMap(final MapShape mapShape) {
-        return StringUtils.equals(baseTypeForMember(mapShape.getValue()), "Com.Amazonaws.Dynamodb.AttributeValue")
+        return StringUtils.equals(baseTypeForMember(mapShape.getValue()), AwsSdkDotNetNameResolver.DDB_ATTRIBUTE_VALUE_MODEL_NAMESPACE)
                 ? "System.Collections.Generic.Dictionary<%s, %s>".formatted(
                         baseTypeForMember(mapShape.getKey()),
-                        "Amazon.DynamoDBv2.Model.AttributeValue")
+                        AwsSdkDotNetNameResolver.DDB_V2_ATTRIBUTE_VALUE)
                 : "System.Collections.Generic.Dictionary<%s, %s>".formatted(
                         baseTypeForMember(mapShape.getKey()),
                         baseTypeForMember(mapShape.getValue()));
@@ -880,35 +880,8 @@ public class DotNetNameResolver {
     /** Return the DotNet Type for a Union Member */
     public String unionMemberName(final MemberShape memberShape) {
         if (ModelUtils.isInServiceNamespace(memberShape.getTarget(), serviceShape)) {
-            if (StringUtils.equals(memberShape.getId().getName(), "AttributeValue")) {
-                switch (classPropertyForStructureMember(memberShape)) {
-                    case "S":
-                        return "_%s".formatted("StringAttributeValue");
-                    case "N":
-                        return "_%s".formatted("NumberAttributeValue");
-                    case "B":
-                        return "_%s".formatted("BinaryAttributeValue");
-                    case "SS":
-                        return "_%s".formatted("StringSetAttributeValue");
-                    case "NS":
-                        return "_%s".formatted("NumberSetAttributeValue");
-                    case "BS":
-                        return "_%s".formatted("BinarySetAttributeValue");
-                    case "M":
-                        return "_%s".formatted("MapAttributeValue");
-                    case "L":
-                        return "_%s".formatted("ListAttributeValue");
-                    case "NULL":
-                        return "_%s".formatted("NullAttributeValue");
-                    case "BOOL":
-                        return "_%s".formatted("BooleanAttributeValue");
-                }
-                String[] qualifiedName = classPropertyTypeForStructureMember(memberShape).split("[.]");
-                return "_%s".formatted(dafnyCompilesExtra_(qualifiedName[qualifiedName.length - 1]));
-            } else {
-                String[] qualifiedName = classPropertyTypeForStructureMember(memberShape).split("[.]");
-                return "_%s".formatted(dafnyCompilesExtra_(qualifiedName[qualifiedName.length - 1]));
-            }
+            String[] qualifiedName = classPropertyTypeForStructureMember(memberShape).split("[.]");
+            return "_%s".formatted(dafnyCompilesExtra_(qualifiedName[qualifiedName.length - 1]));
         } else {
             final String name = dafnyConcreteTypeForUnionMember(memberShape)
                     // TODO Hack to remove Dafny "namespace"

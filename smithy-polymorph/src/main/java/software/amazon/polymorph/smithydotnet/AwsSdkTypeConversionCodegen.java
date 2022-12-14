@@ -48,8 +48,8 @@ public class AwsSdkTypeConversionCodegen extends TypeConversionCodegen {
      */
     @Override
     public TokenTree generateExtractOptionalMember(MemberShape memberShape) {
-        final String type = StringUtils.equals(nameResolver.baseTypeForShape(memberShape.getId()), "Com.Amazonaws.Dynamodb.AttributeValue")
-                ? "Amazon.DynamoDBv2.Model.AttributeValue"
+        final String type = StringUtils.equals(nameResolver.baseTypeForShape(memberShape.getId()), AwsSdkDotNetNameResolver.DDB_ATTRIBUTE_VALUE_MODEL_NAMESPACE)
+                ? AwsSdkDotNetNameResolver.DDB_V2_ATTRIBUTE_VALUE
                 : nameResolver.baseTypeForShape(memberShape.getId());
         final String varName = nameResolver.variableNameForClassProperty(memberShape);
         final String propertyName = nameResolver.classPropertyForStructureMember(memberShape);
@@ -62,6 +62,8 @@ public class AwsSdkTypeConversionCodegen extends TypeConversionCodegen {
                     varName,
                     "= (int) value.%s;".formatted(propertyName));
         } else if (StringUtils.equals(propertyName, "SizeEstimateRangeGB")) {
+            // Polymorph type casts the value; however when it is a list you cannot just typecast a list of type x to type y
+            // you need to convert the list. In this case we know it is converting the type of the list to int
             return TokenTree.of(
                     type,
                     varName,
