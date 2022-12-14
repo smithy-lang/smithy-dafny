@@ -175,9 +175,9 @@ public class AwsSdkShimCodegen {
                        return Token.of("");
                     }
                     return Token.of("""
-                                    case %s e:
-                                        return %s(e);
-                                    """.formatted(sdkErrorType, errorConverter));
+                            case %s e:
+                                return %s(e);
+                            """.formatted(sdkErrorType, errorConverter));
                 })).lineSeparated();
 
         final TokenTree unknownErrorCase = Token.of("""
