@@ -7,7 +7,11 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
 
 import java.nio.file.Path;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -419,7 +423,7 @@ public class TypeConversionCodegen {
                     nameResolver.variableNameForClassProperty(memberShape));
         }
         if (StringUtils.equals(nameResolver.classPropertyForStructureMember(memberShape), "TargetValue")) {
-            // value.TargetValue returns a double, the Api this constructor needs is an int
+            // value.TargetValue returns a double, the Api constructor needs is an int
             return "%s((int)value.%s)".formatted(
                     typeConverterForShape(memberShape.getId(), TO_DAFNY),
                     nameResolver.classPropertyForStructureMember(memberShape));
