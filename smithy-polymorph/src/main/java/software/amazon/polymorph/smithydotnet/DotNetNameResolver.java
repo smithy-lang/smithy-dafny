@@ -22,7 +22,12 @@ import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.utils.StringUtils;
 
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -270,19 +275,24 @@ public class DotNetNameResolver {
     }
 
     protected String baseTypeForList(final ListShape listShape) {
-        return StringUtils.equals(baseTypeForMember(listShape.getMember()), AwsSdkDotNetNameResolver.DDB_ATTRIBUTE_VALUE_MODEL_NAMESPACE)
-                ? "System.Collections.Generic.List<%s>".formatted(AwsSdkDotNetNameResolver.DDB_V2_ATTRIBUTE_VALUE)
-                : "System.Collections.Generic.List<%s>".formatted(baseTypeForMember(listShape.getMember()));
+        if (StringUtils.equals(baseTypeForMember(listShape.getMember()),
+                AwsSdkDotNetNameResolver.DDB_ATTRIBUTE_VALUE_MODEL_NAMESPACE)) {
+            return "System.Collections.Generic.List<%s>".formatted(
+                    AwsSdkDotNetNameResolver.DDB_V2_ATTRIBUTE_VALUE);
+        }
+        return "System.Collections.Generic.List<%s>".formatted(baseTypeForMember(listShape.getMember()));
     }
 
     protected String baseTypeForMap(final MapShape mapShape) {
-        return StringUtils.equals(baseTypeForMember(mapShape.getValue()), AwsSdkDotNetNameResolver.DDB_ATTRIBUTE_VALUE_MODEL_NAMESPACE)
-                ? "System.Collections.Generic.Dictionary<%s, %s>".formatted(
-                        baseTypeForMember(mapShape.getKey()),
-                        AwsSdkDotNetNameResolver.DDB_V2_ATTRIBUTE_VALUE)
-                : "System.Collections.Generic.Dictionary<%s, %s>".formatted(
-                        baseTypeForMember(mapShape.getKey()),
-                        baseTypeForMember(mapShape.getValue()));
+        if (StringUtils.equals(baseTypeForMember(mapShape.getValue()),
+                AwsSdkDotNetNameResolver.DDB_ATTRIBUTE_VALUE_MODEL_NAMESPACE)){
+            return "System.Collections.Generic.Dictionary<%s, %s>".formatted(
+                    baseTypeForMember(mapShape.getKey()),
+                    AwsSdkDotNetNameResolver.DDB_V2_ATTRIBUTE_VALUE);
+        }
+        return "System.Collections.Generic.Dictionary<%s, %s>".formatted(
+                baseTypeForMember(mapShape.getKey()),
+                baseTypeForMember(mapShape.getValue()));
 
     }
 

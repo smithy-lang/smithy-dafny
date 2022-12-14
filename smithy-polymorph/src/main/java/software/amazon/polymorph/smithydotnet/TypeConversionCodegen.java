@@ -7,7 +7,11 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
 
 import java.nio.file.Path;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -20,7 +24,6 @@ import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.*;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
-import software.amazon.smithy.model.traits.UnitTypeTrait;
 import software.amazon.smithy.utils.StringUtils;
 
 import static software.amazon.polymorph.smithydotnet.DotNetNameResolver.TYPE_CONVERSION_CLASS_NAME;
@@ -342,9 +345,13 @@ public class TypeConversionCodegen {
                 .map(memberShape -> {
                     final String dafnyMemberName = DotNetNameResolver.memberName(memberShape);
                     final String propertyName = nameResolver.classPropertyForStructureMember(memberShape);
-                    final String propertyType = StringUtils.equals(nameResolver.classPropertyTypeForStructureMember(memberShape), AwsSdkDotNetNameResolver.DDB_ATTRIBUTE_VALUE_MODEL_NAMESPACE)
-                            ? AwsSdkDotNetNameResolver.DDB_V2_ATTRIBUTE_VALUE
-                            : nameResolver.classPropertyTypeForStructureMember(memberShape);
+                    final String propertyType;
+                    if (StringUtils.equals(nameResolver.classPropertyTypeForStructureMember(memberShape),
+                            AwsSdkDotNetNameResolver.DDB_ATTRIBUTE_VALUE_MODEL_NAMESPACE)) {
+                        propertyType = AwsSdkDotNetNameResolver.DDB_V2_ATTRIBUTE_VALUE;
+                    } else {
+                        propertyType = nameResolver.classPropertyTypeForStructureMember(memberShape);
+                    }
                     final String memberFromDafnyConverterName = typeConverterForShape(
                             memberShape.getId(), FROM_DAFNY);
 
@@ -355,11 +362,14 @@ public class TypeConversionCodegen {
                         checkIfPresent = TokenTree.empty();
                     }
                     // SizeEstimateRangeGb requires a list of double instead of the genereated int list
-                    final TokenTree assign = StringUtils.equals(dafnyMemberName, "_SizeEstimateRangeGB")
-                            ? Token.of("converted.%s = %s(concrete.%s).Select(i => (double) i).ToList();".formatted(
-                                    propertyName, memberFromDafnyConverterName, dafnyMemberName))
-                            : Token.of("converted.%s = (%s) %s(concrete.%s);".formatted(
+                    final TokenTree assign;
+                    if (StringUtils.equals(dafnyMemberName, "_SizeEstimateRangeGB")) {
+                        assign = Token.of("converted.%s = %s(concrete.%s).Select(i => (double) i).ToList();".formatted(
+                                propertyName, memberFromDafnyConverterName, dafnyMemberName));
+                    } else {
+                        assign = Token.of("converted.%s = (%s) %s(concrete.%s);".formatted(
                                 propertyName, propertyType, memberFromDafnyConverterName, dafnyMemberName));
+                    }
                     return TokenTree.of(checkIfPresent, assign);
                 })).lineSeparated();
         final String structureType = nameResolver.baseTypeForShape(structureShape.getId());
@@ -407,7 +417,7 @@ public class TypeConversionCodegen {
                     nameResolver.variableNameForClassProperty(memberShape));
         }
         if (StringUtils.equals(nameResolver.classPropertyForStructureMember(memberShape), "TargetValue")) {
-            // value.TargetValue returns a double, the Api this constructor needs is an int
+            // value.TargetValue returns a double, the Api constructor needs is an int
             return "%s((int)value.%s)".formatted(
                     typeConverterForShape(memberShape.getId(), TO_DAFNY),
                     nameResolver.classPropertyForStructureMember(memberShape));
@@ -447,15 +457,26 @@ public class TypeConversionCodegen {
             return buildConverterFromMethodBodies(memberShape, fromDafnyBody, toDafnyBody);
         }
 
-        String cSharpTypeUnModified = StringUtils.equals(nameResolver.baseTypeForShape(targetShape.getId()), AwsSdkDotNetNameResolver.DDB_ATTRIBUTE_VALUE_MODEL_NAMESPACE)
-                ? AwsSdkDotNetNameResolver.DDB_V2_ATTRIBUTE_VALUE
-                : nameResolver.baseTypeForShape(memberShape.getId());
-        final String cSharpType = cSharpTypeUnModified.endsWith("?")
-                ? cSharpTypeUnModified.substring(0 , (cSharpTypeUnModified.length() - 1))
-                : cSharpTypeUnModified;
-        final String cSharpOptionType = StringUtils.equals(nameResolver.baseTypeForShape(memberShape.getId()), AwsSdkDotNetNameResolver.DDB_ATTRIBUTE_VALUE_MODEL_NAMESPACE)
-                ? AwsSdkDotNetNameResolver.DDB_V2_ATTRIBUTE_VALUE
-                : nameResolver.baseTypeForShape(memberShape.getId());
+        String cSharpTypeUnModified;
+        if (StringUtils.equals(nameResolver.baseTypeForShape(targetShape.getId()),
+                AwsSdkDotNetNameResolver.DDB_ATTRIBUTE_VALUE_MODEL_NAMESPACE)) {
+            cSharpTypeUnModified = AwsSdkDotNetNameResolver.DDB_V2_ATTRIBUTE_VALUE;
+        } else  {
+            cSharpTypeUnModified = nameResolver.baseTypeForShape(memberShape.getId());
+        }
+
+        if (cSharpTypeUnModified.endsWith("?")) {
+            cSharpTypeUnModified = cSharpTypeUnModified.substring(0 , (cSharpTypeUnModified.length() - 1));
+        }
+
+        final String cSharpType = cSharpTypeUnModified;
+        final String cSharpOptionType;
+        if (StringUtils.equals(nameResolver.baseTypeForShape(memberShape.getId()),
+                AwsSdkDotNetNameResolver.DDB_ATTRIBUTE_VALUE_MODEL_NAMESPACE)){
+            cSharpOptionType = AwsSdkDotNetNameResolver.DDB_V2_ATTRIBUTE_VALUE;
+        } else {
+            cSharpOptionType = nameResolver.baseTypeForShape(memberShape.getId());
+        }
         final String dafnyOptionType = nameResolver.dafnyConcreteTypeForOptionalMember(memberShape);
         final TokenTree fromDafnyBody = Token.of("return value.is_None ? (%s) null : %s(value.Extract());"
                 .formatted(cSharpOptionType, targetFromDafnyConverterName));
@@ -467,9 +488,13 @@ public class TypeConversionCodegen {
 
     public TypeConverter generateUnionConverter(final UnionShape unionShape) {
         final List<MemberShape> defNames = ModelUtils.streamUnionMembers(unionShape).toList();
-        final String unionClass = StringUtils.equals(nameResolver.baseTypeForShape(unionShape.getId()), AwsSdkDotNetNameResolver.DDB_ATTRIBUTE_VALUE_MODEL_NAMESPACE)
-                ?  AwsSdkDotNetNameResolver.DDB_V2_ATTRIBUTE_VALUE
-                : nameResolver.baseTypeForShape(unionShape.getId());
+        final String unionClass;
+        if (StringUtils.equals(nameResolver.baseTypeForShape(unionShape.getId()),
+                AwsSdkDotNetNameResolver.DDB_ATTRIBUTE_VALUE_MODEL_NAMESPACE)) {
+            unionClass = AwsSdkDotNetNameResolver.DDB_V2_ATTRIBUTE_VALUE;
+        } else {
+           unionClass = nameResolver.baseTypeForShape(unionShape.getId());
+        }
         final String dafnyUnionConcreteType = nameResolver.dafnyConcreteTypeForUnion(unionShape);
         final Token throwInvalidUnionState = Token.of("\nthrow new System.ArgumentException(\"Invalid %s state\");"
                 .formatted(unionClass));
@@ -485,9 +510,12 @@ public class TypeConversionCodegen {
                     final String propertyName = nameResolver.classPropertyForStructureMember(memberShape);
                     final String memberFromDafnyConverterName = typeConverterForShape(
                             memberShape.getId(), FROM_DAFNY);
-                    final String destructorValue = StringUtils.equals(memberShape.getId().getName(), "AttributeValue")
-                            ? nameResolver.classPropertyForStructureMember(memberShape)
-                            : dafnyCompilesExtra_(memberShape.getMemberName());
+                    final String destructorValue;
+                    if (StringUtils.equals(memberShape.getId().getName(), "AttributeValue")) {
+                        destructorValue = nameResolver.classPropertyForStructureMember(memberShape);
+                    } else {
+                        destructorValue = dafnyCompilesExtra_(memberShape.getMemberName());
+                    }
                     return TokenTree
                             .of("if (value.is_%s)".formatted(propertyName))
                             .append(TokenTree
@@ -534,9 +562,21 @@ public class TypeConversionCodegen {
                         createSuffixUnMod = "_%s".formatted(propertyName);
                     }
                     final String createSuffix = createSuffixUnMod;
-                    return StringUtils.equals(memberShape.getId().getName(), "AttributeValue")
-                            ? TokenTree
-                                .of("if (value.Is%sSet)".formatted(propertyName))
+                    if (StringUtils.equals(memberShape.getId().getName(), "AttributeValue")) {
+                        return TokenTree
+                               .of("if (value.Is%sSet)".formatted(propertyName))
+                               .append(TokenTree.of("return %s.create%s(%s(value.%s));"
+                                               .formatted(
+                                                       dafnyUnionConcreteType,
+                                                       createSuffix,
+                                                       memberFromDafnyConverterName,
+                                                       propertyName
+                                               ))
+                                       .lineSeparated()
+                                       .braced());
+                    } else {
+                        return TokenTree
+                                .of("if (value.IsSet%s())".formatted(propertyName))
                                 .append(TokenTree.of("return %s.create%s(%s(value.%s));"
                                                 .formatted(
                                                         dafnyUnionConcreteType,
@@ -545,18 +585,8 @@ public class TypeConversionCodegen {
                                                         propertyName
                                                 ))
                                         .lineSeparated()
-                                        .braced())
-                            : TokenTree
-                                .of("if (value.IsSet%s())".formatted(propertyName))
-                                .append(TokenTree.of("return %s.create%s(%s(value.%s));"
-                                            .formatted(
-                                                    dafnyUnionConcreteType,
-                                                    createSuffix,
-                                                    memberFromDafnyConverterName,
-                                                    propertyName
-                                            ))
-                                    .lineSeparated()
-                                    .braced());
+                                        .braced());
+                    }
                 }))
                 .append(throwInvalidUnionState);
 
@@ -908,13 +938,15 @@ public class TypeConversionCodegen {
                 // special case for CancellationReasons Exception - this is the only exception
                 // that throws a list of possible errors - these must be turned into a string and thrown as an exception
                 // in order to be accepted by the API
-                return StringUtils.equals(dafnyMemberName, "_CancellationReasons")
-                        ? Token.of("new Exception(%s(value.%s).ToString())".formatted(
-                                memberFromDafnyConverterName,
-                                dafnyMemberName))
-                        : Token.of("%s(value.%s)".formatted(
-                                memberFromDafnyConverterName,
-                                dafnyMemberName));
+                if (StringUtils.equals(dafnyMemberName, "_CancellationReasons")) {
+                   return Token.of("new Exception(%s(value.%s).ToString())".formatted(
+                           memberFromDafnyConverterName,
+                           dafnyMemberName));
+                } else {
+                    return Token.of("%s(value.%s)".formatted(
+                            memberFromDafnyConverterName,
+                            dafnyMemberName));
+                }
             }))
           .separated(Token.of(','))
           .lineSeparated();
@@ -972,9 +1004,13 @@ public class TypeConversionCodegen {
         final TokenTree toDafnyBody
     ) {
         final String dafnyType = nameResolver.dafnyTypeForShape(shape.getId());
-        String type = StringUtils.equals(nameResolver.baseTypeForShape(shape.getId()), AwsSdkDotNetNameResolver.DDB_ATTRIBUTE_VALUE_MODEL_NAMESPACE)
-                ? AwsSdkDotNetNameResolver.DDB_V2_ATTRIBUTE_VALUE
-                : nameResolver.baseTypeForShape(shape.getId());
+        String type;
+        if (StringUtils.equals(nameResolver.baseTypeForShape(shape.getId()),
+                AwsSdkDotNetNameResolver.DDB_ATTRIBUTE_VALUE_MODEL_NAMESPACE)) {
+            type = AwsSdkDotNetNameResolver.DDB_V2_ATTRIBUTE_VALUE;
+        } else {
+            type = nameResolver.baseTypeForShape(shape.getId());
+        }
 
         // InvalidEndpointException was deprecated in v3 of the dynamodb sdk for net
         if (StringUtils.equals(type, "Amazon.DynamoDBv2.Model.InvalidEndpointException")) {

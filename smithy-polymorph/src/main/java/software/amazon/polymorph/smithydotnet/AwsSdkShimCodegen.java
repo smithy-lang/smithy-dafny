@@ -14,7 +14,10 @@ import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.polymorph.utils.Token;
 import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.smithy.model.Model;
-import software.amazon.smithy.model.shapes.*;
+import software.amazon.smithy.model.shapes.OperationShape;
+import software.amazon.smithy.model.shapes.ServiceShape;
+import software.amazon.smithy.model.shapes.ShapeId;
+import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.utils.StringUtils;
 
 import static software.amazon.polymorph.smithydotnet.TypeConversionDirection.FROM_DAFNY;
@@ -168,12 +171,13 @@ public class AwsSdkShimCodegen {
                     }
                     final String errorConverter = DotNetNameResolver.qualifiedTypeConverter(errorShapeId, TO_DAFNY);
                     // InvalidEndpointException does not exist in v2 of the sdk
-                    return sdkErrorType.endsWith("InvalidEndpointException")
-                            ? Token.of("")
-                            : Token.of("""
-                                case %s e:
-                                    return %s(e);
-                                """.formatted(sdkErrorType, errorConverter));
+                    if (sdkErrorType.endsWith("InvalidEndpointException")) {
+                       return Token.of("");
+                    }
+                    return Token.of("""
+                                    case %s e:
+                                        return %s(e);
+                                    """.formatted(sdkErrorType, errorConverter));
                 })).lineSeparated();
 
         final TokenTree unknownErrorCase = Token.of("""

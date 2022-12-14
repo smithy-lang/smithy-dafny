@@ -48,9 +48,13 @@ public class AwsSdkTypeConversionCodegen extends TypeConversionCodegen {
      */
     @Override
     public TokenTree generateExtractOptionalMember(MemberShape memberShape) {
-        final String type = StringUtils.equals(nameResolver.baseTypeForShape(memberShape.getId()), AwsSdkDotNetNameResolver.DDB_ATTRIBUTE_VALUE_MODEL_NAMESPACE)
-                ? AwsSdkDotNetNameResolver.DDB_V2_ATTRIBUTE_VALUE
-                : nameResolver.baseTypeForShape(memberShape.getId());
+        final String type;
+        if (StringUtils.equals(nameResolver.baseTypeForShape(memberShape.getId()),
+                AwsSdkDotNetNameResolver.DDB_ATTRIBUTE_VALUE_MODEL_NAMESPACE)) {
+            type = AwsSdkDotNetNameResolver.DDB_V2_ATTRIBUTE_VALUE;
+        } else {
+            type = nameResolver.baseTypeForShape(memberShape.getId());
+        }
         final String varName = nameResolver.variableNameForClassProperty(memberShape);
         final String propertyName = nameResolver.classPropertyForStructureMember(memberShape);
         // In DynamoDB there are three edge cases for the Structures of ConsumedCapacityUnits and for SizeEstimateRangeGB

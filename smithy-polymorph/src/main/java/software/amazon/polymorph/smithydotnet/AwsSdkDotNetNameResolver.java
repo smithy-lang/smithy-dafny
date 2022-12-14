@@ -57,9 +57,11 @@ public class AwsSdkDotNetNameResolver extends DotNetNameResolver {
         // corresponding enum class every where else AFAICT.
         final String memberType = targetShape.hasTrait(EnumTrait.class) ? "string" : baseTypeForMember(memberShape);
 
-        return StringUtils.equals(memberType, DDB_ATTRIBUTE_VALUE_MODEL_NAMESPACE)
-            ? "System.Collections.Generic.List<%s>".formatted(DDB_V2_ATTRIBUTE_VALUE)
-            : "System.Collections.Generic.List<%s>".formatted(memberType);
+        // we need to return the name AttributeValue in the sdk not the name in the model
+        if (StringUtils.equals(memberType, DDB_ATTRIBUTE_VALUE_MODEL_NAMESPACE)) {
+            return "System.Collections.Generic.List<%s>".formatted(DDB_V2_ATTRIBUTE_VALUE);
+        }
+        return "System.Collections.Generic.List<%s>".formatted(memberType);
     }
 
     @Override
