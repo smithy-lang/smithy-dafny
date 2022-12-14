@@ -90,7 +90,6 @@ public class AwsSdkShimCodegen {
 
     public TokenTree generateOperationShim(final ShapeId operationShapeId) {
         final OperationShape operationShape = model.expectShape(operationShapeId, OperationShape.class);
-        // TODO Change Output type here for Disable/Enable Kinesis Streaming Destination
         final String dafnyOutputType = nameResolver.dafnyTypeForServiceOperationOutput(operationShape, true);
         final String implOperationName = nameResolver.methodForOperation(operationShapeId) + "Async";
 
