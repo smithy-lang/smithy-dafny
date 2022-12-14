@@ -107,11 +107,6 @@ public class AwsSdkTypeConversionCodegen extends TypeConversionCodegen {
         return buildConverterFromMethodBodies(structureShape, fromDafnyBody, toDafnyBody);
     }
 
-    @Override
-    protected String getTypeConversionNamespace() {
-        return ((AwsSdkDotNetNameResolver)nameResolver).syntheticNamespaceForService();
-    }
-
     /**
      * No unmodeled converters are needed for the AWS SDK shims.
      */
