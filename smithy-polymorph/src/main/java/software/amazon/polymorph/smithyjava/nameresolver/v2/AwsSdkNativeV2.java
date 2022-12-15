@@ -41,35 +41,41 @@ public class AwsSdkNativeV2 extends Native {
     private static final Map<String, String> AWS_SERVICE_NAMESPACE_TO_BASE_EXCEPTION;
 
     static {
-        // These are NOT in the service's model package
-        // i.e: kms : com.amazonaws.kms.AWSKMS
+        // The namespaces used as keys in this map correspond to the Polymorph namespace,
+        //   NOT the SDK V2 namespace.
+        // Polymorph namespace: com.amazonaws.X
+        // AWSSDK V2 namespace: software.amazon.awssdk.X
+        // These exception types are NOT located in the corresponding SDK V2 namespace's model
+        //   package; they are located in its parent namespace.
+        // i.e: kms : software.amazon.awssdk.kms.KmsClient
         AWS_SERVICE_NAMESPACE_TO_CLIENT_INTERFACE = Map.ofEntries(
-                Map.entry("com.amazonaws.kms", "AWSKMS"),
-                Map.entry("com.amazonaws.dynamodb", "AmazonDynamoDB"),
-                Map.entry("com.amazonaws.s3", "AmazonS3")
+                Map.entry("com.amazonaws.kms", "KmsClient"),
+                Map.entry("com.amazonaws.dynamodb", "DynamoDbClient"),
+                Map.entry("com.amazonaws.s3", "S3Client")
         );
-        // These are in the service's model package
-        // i.e.: kms : com.amazonaws.kms.model.AWSKMSException
+        // These namespaces correspond to the Polymorph generated namespace, NOT the SDK V2 namespace.
+        // These exception types are located in the corresponding SDK V2 namespace's model package.
+        // i.e.: kms : software.amazon.awssdk.kms.model.KmsException
         AWS_SERVICE_NAMESPACE_TO_BASE_EXCEPTION = Map.ofEntries(
-                Map.entry("com.amazonaws.kms", "AWSKMSException"),
-                Map.entry("com.amazonaws.dynamodb", "AmazonDynamoDBException"),
-                Map.entry("com.amazonaws.s3", "AmazonS3Exception")
+                Map.entry("com.amazonaws.kms", "KmsException"),
+                Map.entry("com.amazonaws.dynamodb", "DynamoDbException"),
+                Map.entry("com.amazonaws.s3", "S3Exception")
         );
     }
 
     /** Validates that Polymorph knows non-smithy modeled constants for an AWS Service */
     private void checkForAwsServiceConstants() {
-        String namespace = serviceShape.getId().getNamespace();
-        boolean knowBaseException = AWS_SERVICE_NAMESPACE_TO_BASE_EXCEPTION.containsKey(namespace);
-        if (!knowBaseException) {
-            throw new IllegalArgumentException(
-                    "Polymorph does not know this service's Base Exception: %s".formatted(namespace));
-        }
-        boolean knowClientInterface = AWS_SERVICE_NAMESPACE_TO_CLIENT_INTERFACE.containsKey(namespace);
-        if (!knowClientInterface) {
-            throw new IllegalArgumentException(
-                    "Polymorph does not know this service's Client Interface: %s".formatted(namespace));
-        }
+//        String namespace = serviceShape.getId().getNamespace();
+//        boolean knowBaseException = AWS_SERVICE_NAMESPACE_TO_BASE_EXCEPTION.containsKey(namespace);
+//        if (!knowBaseException) {
+//            throw new IllegalArgumentException(
+//                    "Polymorph does not know this service's Base Exception: %s".formatted(namespace));
+//        }
+//        boolean knowClientInterface = AWS_SERVICE_NAMESPACE_TO_CLIENT_INTERFACE.containsKey(namespace);
+//        if (!knowClientInterface) {
+//            throw new IllegalArgumentException(
+//                    "Polymorph does not know this service's Client Interface: %s".formatted(namespace));
+//        }
     }
 
     /**
@@ -205,7 +211,7 @@ public class AwsSdkNativeV2 extends Native {
         if (awsServiceName.equals("dynamodb")) {
             rtn = "dynamodbv2";
         }
-        return "com.amazonaws.services.%s".formatted(rtn);
+        return "software.amazon.awssdk.services.%s".formatted(rtn);
     }
 
     static String packageNameForAwsSdkV2Shape(final Shape shape) {

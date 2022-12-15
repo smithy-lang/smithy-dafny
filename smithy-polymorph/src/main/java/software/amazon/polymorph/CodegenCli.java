@@ -23,7 +23,8 @@ import software.amazon.polymorph.smithydotnet.AwsSdkTypeConversionCodegen;
 import software.amazon.polymorph.smithydotnet.ServiceCodegen;
 import software.amazon.polymorph.smithydotnet.ShimCodegen;
 import software.amazon.polymorph.smithydotnet.TypeConversionCodegen;
-import software.amazon.polymorph.smithyjava.generator.awssdk.JavaAwsSdkV1;
+import software.amazon.polymorph.smithyjava.generator.awssdk.v1.JavaAwsSdkV1;
+import software.amazon.polymorph.smithyjava.generator.awssdk.v2.JavaAwsSdkV2;
 import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.loader.ModelAssembler;
@@ -61,8 +62,11 @@ public class CodegenCli {
             if (cliArguments.outputDotnetDir.isPresent()) {
                 Files.createDirectories(cliArguments.outputDotnetDir.get());
             }
-            if (cliArguments.outputJavaDir.isPresent()) {
-                Files.createDirectories(cliArguments.outputJavaDir.get());
+            if (cliArguments.outputJavaV1Dir.isPresent()) {
+                Files.createDirectories(cliArguments.outputJavaV1Dir.get());
+            }
+            if (cliArguments.outputJavaV2Dir.isPresent()) {
+                Files.createDirectories(cliArguments.outputJavaV2Dir.get());
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -83,12 +87,21 @@ public class CodegenCli {
         final ServiceShape serviceShape = ModelUtils.serviceFromNamespace(model, cliArguments.namespace);
         final List<String> messages = new ArrayList<>(3);
 
-        if (cliArguments.outputJavaDir.isPresent()) {
-            final Path outputJavaDir = cliArguments.outputJavaDir.get();
+        if (cliArguments.outputJavaV1Dir.isPresent()) {
+            final Path outputJavaV1Dir = cliArguments.outputJavaV1Dir.get();
             if (cliArguments.awsSdkStyle) {
-                messages.add(javaAwsSdkV1(outputJavaDir, serviceShape, model));
+                messages.add(javaAwsSdkV1(outputJavaV1Dir, serviceShape, model));
             } else {
-                messages.add(javaLocalService(outputJavaDir, serviceShape, model));
+                messages.add(javaV1LocalService(outputJavaV1Dir, serviceShape, model));
+            }
+        }
+
+        if (cliArguments.outputJavaV2Dir.isPresent()) {
+            final Path outputJavaV2Dir = cliArguments.outputJavaV2Dir.get();
+            if (cliArguments.awsSdkStyle) {
+                messages.add(javaAwsSdkV2(outputJavaV2Dir, serviceShape, model));
+            } else {
+                messages.add(javaV2LocalService(outputJavaV2Dir, serviceShape, model));
             }
         }
 
@@ -130,18 +143,30 @@ public class CodegenCli {
         messages.forEach(logger::info);
     }
 
-    private static String javaLocalService(Path outputJavaDir, ServiceShape serviceShape, Model model) {
+    private static String javaV1LocalService(Path outputJavaV1Dir, ServiceShape serviceShape, Model model) {
         final JavaLibrary javaLibrary = new JavaLibrary(model, serviceShape);
-        writeTokenTreesIntoDir(javaLibrary.generate(), outputJavaDir);
-        return "Java code generated in %s".formatted(outputJavaDir);
+        writeTokenTreesIntoDir(javaLibrary.generate(), outputJavaV1Dir);
+        return "Java code generated in %s".formatted(outputJavaV1Dir);
+    }
+
+    private static String javaV2LocalService(Path outputJavaV2Dir, ServiceShape serviceShape, Model model) {
+        final JavaLibrary javaLibrary = new JavaLibrary(model, serviceShape);
+        writeTokenTreesIntoDir(javaLibrary.generate(), outputJavaV2Dir);
+        return "Java code generated in %s".formatted(outputJavaV2Dir);
     }
 
     //TODO: Figure out a nice way to differentiate AWS SDK Java V1 from AWS SDK Java V2
     // Or maybe we just hard code one or the other and call that good enough
-    static String javaAwsSdkV1(Path outputJavaDir, ServiceShape serviceShape, Model model) {
+    static String javaAwsSdkV1(Path outputJavaV1Dir, ServiceShape serviceShape, Model model) {
         final JavaAwsSdkV1 javaShimCodegen = JavaAwsSdkV1.createJavaAwsSdkV1(serviceShape, model);
-        writeTokenTreesIntoDir(javaShimCodegen.generate(), outputJavaDir);
-        return "Java code generated in %s".formatted(outputJavaDir);
+        writeTokenTreesIntoDir(javaShimCodegen.generate(), outputJavaV1Dir);
+        return "Java code generated in %s".formatted(outputJavaV1Dir);
+    }
+
+    static String javaAwsSdkV2(Path outputJavaV2Dir, ServiceShape serviceShape, Model model) {
+        final JavaAwsSdkV2 javaShimCodegen = JavaAwsSdkV2.createJavaAwsSdkV2(serviceShape, model);
+        writeTokenTreesIntoDir(javaShimCodegen.generate(), outputJavaV2Dir);
+        return "Java code generated in %s".formatted(outputJavaV2Dir);
     }
 
     static String netLocalService(Path outputNetDir, ServiceShape serviceShape, Model model) {
@@ -209,8 +234,13 @@ public class CodegenCli {
             .hasArg()
             .build())
           .addOption(Option.builder()
-            .longOpt("output-java")
-            .desc("<optional> output directory for generated Java files")
+            .longOpt("output-java-v1")
+            .desc("<optional> output directory for generated Java files using AWS SDK v1")
+            .hasArg()
+            .build())
+          .addOption(Option.builder()
+            .longOpt("output-java-v2")
+            .desc("<optional> output directory for generated Java files using AWS SDK v2")
             .hasArg()
             .build())
           .addOption(Option.builder()
@@ -242,7 +272,8 @@ public class CodegenCli {
             Path[] dependentModelPaths,
             String namespace,
             Optional<Path> outputDotnetDir,
-            Optional<Path> outputJavaDir,
+            Optional<Path> outputJavaV1Dir,
+            Optional<Path> outputJavaV2Dir,
             boolean awsSdkStyle,
             Optional<Path> outputLocalServiceTest,
             boolean outputDafny,
@@ -274,10 +305,15 @@ public class CodegenCli {
                         .toAbsolutePath().normalize());
             }
 
-            Optional<Path> outputJavaDir = Optional.empty();
-            if (commandLine.hasOption("output-java")) {
-                 outputJavaDir = Optional.of(Paths.get(commandLine.getOptionValue("output-java"))
+            Optional<Path> outputJavaV1Dir = Optional.empty();
+            if (commandLine.hasOption("output-java-v1")) {
+                outputJavaV1Dir = Optional.of(Paths.get(commandLine.getOptionValue("output-java-v1"))
                          .toAbsolutePath().normalize());
+            }
+            Optional<Path> outputJavaV2Dir = Optional.empty();
+            if (commandLine.hasOption("output-java-v2")) {
+                outputJavaV2Dir = Optional.of(Paths.get(commandLine.getOptionValue("output-java-v2"))
+                    .toAbsolutePath().normalize());
             }
 
             final boolean awsSdkStyle = commandLine.hasOption("aws-sdk");
@@ -307,7 +343,7 @@ public class CodegenCli {
                     dependentModelPaths,
                     namespace,
                     outputDotnetDir,
-                    outputJavaDir,
+                    outputJavaV1Dir, outputJavaV2Dir,
                     awsSdkStyle,
                     outputLocalServiceTest,
                     outputDafny,

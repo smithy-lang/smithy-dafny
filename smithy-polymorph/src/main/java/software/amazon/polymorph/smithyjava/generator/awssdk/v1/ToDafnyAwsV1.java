@@ -1,4 +1,4 @@
-package software.amazon.polymorph.smithyjava.generator.awssdk;
+package software.amazon.polymorph.smithyjava.generator.awssdk.v1;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
@@ -38,8 +38,8 @@ import software.amazon.smithy.model.traits.EnumTrait;
 import static software.amazon.smithy.utils.StringUtils.capitalize;
 
 /**
- * ToDafnyAwsV2 generates ToDafny.
- * ToDafny is a helper class for the AwsSdk's {@link ShimV2}.<p>
+ * ToDafnyAwsV1 generates ToDafny.
+ * ToDafny is a helper class for the AwsSdk's {@link ShimV1}.<p>
  * It holds methods to convert
  * a subset of an AWS SDK Service's types to Dafny types.<p>
  * The subset is composed of:
@@ -49,23 +49,23 @@ import static software.amazon.smithy.utils.StringUtils.capitalize;
  *   <li>All the fields contained by the above
  * </ul>
  * As such,
- * ToDafnyAwsV2 holds the logic to generate these methods based on:
+ * ToDafnyAwsV1 holds the logic to generate these methods based on:
  * <ul>
  *     <li>a smithy model</li>
  *     <li>knowledge of how smithy-dafny generates Dafny for AWS SDK</li>
  *     <li>knowledge of how Dafny compiles Java</li>
- *     <li>knowledge of the patterns of the AWS SDK V2 for Java</li>
+ *     <li>knowledge of the patterns of the AWS SDK V1 for Java</li>
  * </ul>
  */
-public class ToDafnyAwsV2 extends ToDafny {
-    // Hack to override subject to JavaAwsSdkV2
+public class ToDafnyAwsV1 extends ToDafny {
+    // Hack to override subject to JavaAwsSdkV1
     // See code comment on ../library/ModelCodegen for details.
-    final JavaAwsSdkV2 subject;
+    final JavaAwsSdkV1 subject;
 
-    public ToDafnyAwsV2(JavaAwsSdkV2 awsSdk) {
+    public ToDafnyAwsV1(JavaAwsSdkV1 awsSdk) {
         super(
                 awsSdk,
-                //TODO: JavaAwsSdkV2 should really have a declared packageName, not rely on the name resolver
+                //TODO: JavaAwsSdkV1 should really have a declared packageName, not rely on the name resolver
                 ClassName.get(awsSdk.dafnyNameResolver.packageName(), TO_DAFNY));
         this.subject = awsSdk;
     }
@@ -85,7 +85,7 @@ public class ToDafnyAwsV2 extends ToDafny {
                 .collect(Collectors.toCollection(LinkedHashSet::new));
         Set<ShapeId> allRelevantShapeIds = ModelUtils.findAllDependentShapes(operationOutputs, subject.model);
 
-        // In the AWS SDK for Java V2, Operation Outputs are special
+        // In the AWS SDK for Java V1, Operation Outputs are special
         allRelevantShapeIds.removeAll(operationOutputs);
         // Enums are also a special case
         LinkedHashSet<ShapeId> enumShapeIds = new LinkedHashSet<>();
@@ -98,7 +98,7 @@ public class ToDafnyAwsV2 extends ToDafny {
         allRelevantShapeIds.removeAll(enumShapeIds);
 
         final List<MethodSpec> convertOutputs = operationOutputs.stream()
-                .map(this::generateConvertResponseV2).toList();
+                .map(this::generateConvertResponseV1).toList();
         final List<MethodSpec> convertAllRelevant = allRelevantShapeIds.stream()
                 .map(this::generateConvert).filter(Objects::nonNull).toList();
         final List<MethodSpec> convertServiceErrors = ModelUtils.streamServiceErrors(subject.model, subject.serviceShape)
@@ -172,7 +172,7 @@ public class ToDafnyAwsV2 extends ToDafny {
     /**
      * Should be called for all of a service's operations' outputs.
      */
-    MethodSpec generateConvertResponseV2(final ShapeId shapeId) {
+    MethodSpec generateConvertResponseV1(final ShapeId shapeId) {
         MethodSpec structure = generateConvertStructure(shapeId);
         MethodSpec.Builder builder = structure.toBuilder();
         builder.parameters.clear();
@@ -193,10 +193,10 @@ public class ToDafnyAwsV2 extends ToDafny {
 
     /**
      * We have to customize
-     * List conversion for the AWS SDK for Java V2 because
-     * AWS SDK Java V2 treats Enums in a special way.
+     * List conversion for the AWS SDK for Java V1 because
+     * AWS SDK Java V1 treats Enums in a special way.
      * See the comment on
-     * {@link software.amazon.polymorph.smithyjava.nameresolver.AwsSdkNativeV2#typeForShapeNoEnum}
+     * {@link software.amazon.polymorph.smithyjava.nameresolver.AwsSdkNativeV1#typeForShapeNoEnum}
      **/
     @Override
     protected MethodSpec modeledList(ListShape shape) {
@@ -219,10 +219,10 @@ public class ToDafnyAwsV2 extends ToDafny {
 
     /**
      * We have to customize
-     * Set conversion for the AWS SDK for Java V2 because
-     * AWS SDK Java V2 treats Enums in a special way.
+     * Set conversion for the AWS SDK for Java V1 because
+     * AWS SDK Java V1 treats Enums in a special way.
      * See the comment on
-     * {@link software.amazon.polymorph.smithyjava.nameresolver.AwsSdkNativeV2#typeForShapeNoEnum}
+     * {@link software.amazon.polymorph.smithyjava.nameresolver.AwsSdkNativeV1#typeForShapeNoEnum}
      **/
     @Override
     protected MethodSpec modeledSet(SetShape shape) {
@@ -244,10 +244,10 @@ public class ToDafnyAwsV2 extends ToDafny {
 
     /**
      * We have to customize
-     * Map conversion for the AWS SDK for Java V2 because
-     * AWS SDK Java V2 treats Enums in a special way.
+     * Map conversion for the AWS SDK for Java V1 because
+     * AWS SDK Java V1 treats Enums in a special way.
      * See the comment on
-     * {@link software.amazon.polymorph.smithyjava.nameresolver.AwsSdkNativeV2#typeForShapeNoEnum}
+     * {@link software.amazon.polymorph.smithyjava.nameresolver.AwsSdkNativeV1#typeForShapeNoEnum}
      **/
     @Override
     @SuppressWarnings("OptionalGetWithoutIsPresent")
