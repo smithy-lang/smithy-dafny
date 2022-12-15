@@ -1,4 +1,4 @@
-package software.amazon.polymorph.smithyjava.generator.awssdk;
+package software.amazon.polymorph.smithyjava.generator.awssdk.v1;
 
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.JavaFile;

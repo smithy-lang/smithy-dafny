@@ -1,4 +1,4 @@
-package software.amazon.polymorph.smithyjava.generator.awssdk;
+package software.amazon.polymorph.smithyjava.generator.awssdk.v2;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
@@ -54,7 +54,7 @@ public class ToNativeAwsV2 extends ToNative {
     protected final static String VAR_OUTPUT = "converted";
     protected final static String VAR_TEMP = "temp";
 
-    // TODO: for V2 support, use abstract AwsSdk name resolvers and sub class for V2 or V2.
+    // TODO: for V2 support, use abstract AwsSdk name resolvers and sub class for V1 or V2.
 
     // Hack to override CodegenSubject
     // See code comment on ../library/ModelCodegen for details.

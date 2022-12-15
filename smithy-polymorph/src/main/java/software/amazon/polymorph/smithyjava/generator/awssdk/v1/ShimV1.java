@@ -1,4 +1,4 @@
-package software.amazon.polymorph.smithyjava.generator.awssdk;
+package software.amazon.polymorph.smithyjava.generator.awssdk.v1;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
@@ -26,17 +26,16 @@ import static software.amazon.polymorph.smithyjava.nameresolver.Constants.DAFNY_
 import static software.amazon.polymorph.smithyjava.nameresolver.Constants.DAFNY_TUPLE0_CLASS_NAME;
 import static software.amazon.polymorph.smithyjava.nameresolver.Constants.SMITHY_API_UNIT;
 
-
 /**
- * Generates an AWS SDK Shim for the AWS SKD for Java V2
+ * Generates an AWS SDK Shim for the AWS SKD for Java V1
  * exposing an AWS Service's operations to Dafny Generated Java.
  */
-public class ShimV2 extends Generator {
+public class ShimV1 extends Generator {
     // Hack to override CodegenSubject
     // See code comment on ../library/ModelCodegen for details.
-    private final JavaAwsSdkV2 subject;
-    private static final Logger LOGGER = LoggerFactory.getLogger(ShimV2.class);
-    public ShimV2(JavaAwsSdkV2 awsSdk) {
+    private final JavaAwsSdkV1 subject;
+    private static final Logger LOGGER = LoggerFactory.getLogger(ShimV1.class);
+    public ShimV1(JavaAwsSdkV1 awsSdk) {
         super(awsSdk);
         this.subject = awsSdk;
     }
@@ -57,7 +56,11 @@ public class ShimV2 extends Generator {
                 .addField(
                         subject.nativeNameResolver.classNameForService(subject.serviceShape),
                         "_impl", Modifier.PRIVATE, Modifier.FINAL)
+                .addField(
+                        ClassName.get(String.class),
+                        "region", Modifier.PRIVATE, Modifier.FINAL)
                 .addMethod(constructor())
+                .addMethod(region())
                 .addMethods(
                         subject.serviceShape.getAllOperations()
                                 .stream()
@@ -74,9 +77,24 @@ public class ShimV2 extends Generator {
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(
                         subject.nativeNameResolver.classNameForService(subject.serviceShape),
-                        "impl")
-                .addStatement("_impl = impl")
+                        "impl",
+                        Modifier.FINAL)
+                .addParameter(
+                        ClassName.get(String.class),
+                        "region",
+                        Modifier.FINAL)
+                .addStatement("this._impl = impl")
+                .addStatement("this.region = region")
                 .build();
+    }
+
+    MethodSpec region() {
+        return MethodSpec
+            .methodBuilder("region")
+            .addModifiers(Modifier.PUBLIC)
+            .returns(ClassName.get(String.class))
+            .addStatement("return this.region")
+            .build();
     }
 
     Optional<MethodSpec> operation(final ShapeId operationShapeId) {
