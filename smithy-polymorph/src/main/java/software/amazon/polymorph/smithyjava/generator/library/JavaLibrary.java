@@ -1,5 +1,9 @@
 package software.amazon.polymorph.smithyjava.generator.library;
 
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.CodeBlock;
+import com.squareup.javapoet.MethodSpec;
+
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -34,6 +38,8 @@ import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.TraitDefinition;
 
+import static software.amazon.polymorph.smithyjava.nameresolver.Constants.SMITHY_API_UNIT;
+
 public class JavaLibrary extends CodegenSubject {
 
     /** Public Java Interfaces will go here. */
@@ -64,6 +70,29 @@ public class JavaLibrary extends CodegenSubject {
         String packageName = NamespaceHelper.standardize(serviceShape.getId().getNamespace());
         return new Native(packageName, serviceShape, model, packageName + ".model");
     }
+
+    /**
+     * @param naiveId ShapeId that might have positional or reference trait.
+     * @param resolvedId Fully de-referenced shapeId;
+     *                   de-referenced means Positional or
+     *                   Reference traits have been fully resolved.
+     */
+    public record ResolvedShapeId(ShapeId naiveId, ShapeId resolvedId) {}
+
+    /**
+     * @param method      MethodSpec.Builder that SHOULD have Parameters,
+     *                    Returns, & Modifiers set correctly
+     *                    ( note that
+     *                    void or parameterless methods would
+     *                    not have any Returns or Parameters).
+     * @param resolvedInput  A ResolvedShapeId representing the input
+     * @param resolvedOutput A ResolvedShapeId representing the output
+     */
+    public record MethodSignature(
+            MethodSpec.Builder method,
+            ResolvedShapeId resolvedInput,
+            ResolvedShapeId resolvedOutput
+    ) {}
 
     @Override
     public Map<Path, TokenTree> generate() {
@@ -136,7 +165,10 @@ public class JavaLibrary extends CodegenSubject {
                 .collect(Collectors.toList());
     }
 
-    protected ShapeId checkForPositional(ShapeId originalId) {
+    private ShapeId checkForPositional(ShapeId originalId) {
+        if (originalId.equals(SMITHY_API_UNIT)) {
+            return originalId;
+        }
         Shape originalShape = model.expectShape(originalId);
         if (originalShape.hasTrait(PositionalTrait.class)) {
             // Positional traits can only be on structures,
@@ -146,5 +178,21 @@ public class JavaLibrary extends CodegenSubject {
             return onlyMember.getTarget();
         }
         return originalId;
+    }
+
+    /**
+     * @param shapeId ShapeId that might have positional or reference trait
+     * @return Fully de-referenced shapeId and naive shapeId as a ResolvedShapeId
+     */
+    protected ResolvedShapeId resolveShape(ShapeId shapeId) {
+        if (shapeId.equals(SMITHY_API_UNIT)) {
+            return new ResolvedShapeId(shapeId, shapeId);
+        }
+        ShapeId notPositionalId = checkForPositional(shapeId);
+        if (model.expectShape(notPositionalId).hasTrait(ReferenceTrait.class)) {
+            ReferenceTrait reference = model.expectShape(notPositionalId).expectTrait(ReferenceTrait.class);
+            return new ResolvedShapeId(shapeId, reference.getReferentId());
+        }
+        return new ResolvedShapeId(shapeId, notPositionalId);
     }
 }
