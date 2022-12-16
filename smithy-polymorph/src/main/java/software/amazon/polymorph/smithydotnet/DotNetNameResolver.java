@@ -137,10 +137,8 @@ public class DotNetNameResolver {
 
     public static String interfaceForService(final ShapeId serviceShapeId) {
         if (AwsSdkNameResolverHelpers.isAwsSdkServiceId(serviceShapeId)) {
-            // Resolve DynamoDB_20120810 to just DynamoDB. There is no reference to the version string
-            // in the NET SDK.
             final String serviceName = StringUtils.equals(serviceShapeId.getName(), AwsSdkDotNetNameResolver.DDB_SMITHY_SERVICE_NAME)
-                ? AwsSdkDotNetNameResolver.DDB_SERVICE_NAME
+                ? AwsSdkDotNetNameResolver.DDB_TYPES_SERVICE_NAME
                 : serviceShapeId.getName();
             return "I" + serviceName;
         }
@@ -277,13 +275,25 @@ public class DotNetNameResolver {
     }
 
     protected String baseTypeForList(final ListShape listShape) {
+        if (StringUtils.equals(baseTypeForMember(listShape.getMember()),
+                AwsSdkDotNetNameResolver.DDB_ATTRIBUTE_VALUE_MODEL_NAMESPACE)) {
+            return "System.Collections.Generic.List<%s>".formatted(
+                    AwsSdkDotNetNameResolver.DDB_V2_ATTRIBUTE_VALUE);
+        }
         return "System.Collections.Generic.List<%s>".formatted(baseTypeForMember(listShape.getMember()));
     }
 
     protected String baseTypeForMap(final MapShape mapShape) {
+        if (StringUtils.equals(baseTypeForMember(mapShape.getValue()),
+                AwsSdkDotNetNameResolver.DDB_ATTRIBUTE_VALUE_MODEL_NAMESPACE)){
+            return "System.Collections.Generic.Dictionary<%s, %s>".formatted(
+                    baseTypeForMember(mapShape.getKey()),
+                    AwsSdkDotNetNameResolver.DDB_V2_ATTRIBUTE_VALUE);
+        }
         return "System.Collections.Generic.Dictionary<%s, %s>".formatted(
                 baseTypeForMember(mapShape.getKey()),
                 baseTypeForMember(mapShape.getValue()));
+
     }
 
     protected String baseTypeForStructure(final StructureShape structureShape) {
@@ -879,7 +889,15 @@ public class DotNetNameResolver {
     }
     /** Return the DotNet Type for a Union Member */
     public String unionMemberName(final MemberShape memberShape) {
+        if (ModelUtils.isInServiceNamespace(memberShape.getTarget(), serviceShape)) {
             String[] qualifiedName = classPropertyTypeForStructureMember(memberShape).split("[.]");
             return "_%s".formatted(dafnyCompilesExtra_(qualifiedName[qualifiedName.length - 1]));
+        } else {
+            final String name = dafnyConcreteTypeForUnionMember(memberShape)
+                    // TODO Hack to remove Dafny "namespace"
+                    .replace("Dafny.", "")
+                    .replace(".", "");
+            return "_%s".formatted(name);
+        }
     }
 }
