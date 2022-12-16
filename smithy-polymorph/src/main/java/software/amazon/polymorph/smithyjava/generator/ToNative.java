@@ -8,6 +8,7 @@ import com.squareup.javapoet.TypeName;
 
 import java.util.Map;
 
+import javax.annotation.Nonnull;
 import javax.lang.model.element.Modifier;
 
 import software.amazon.polymorph.smithyjava.BuilderSpecs;
@@ -290,6 +291,12 @@ public abstract class ToNative extends Generator {
         if (ModelUtils.isSmithyApiOrSimpleShape(targetShape)) {
             return SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(targetShape.getType());
         }
+        return nonSimpleConversionMethodReference(targetShape);
+    }
+
+    @SuppressWarnings("DuplicatedCode")
+    @Nonnull
+    protected MethodReference nonSimpleConversionMethodReference(Shape targetShape) {
         final String methodName = capitalize(targetShape.getId().getName());
         // if in namespace, reference converter from this ToNative class
         if (subject.nativeNameResolver.isInServiceNameSpace(targetShape.getId())) {
