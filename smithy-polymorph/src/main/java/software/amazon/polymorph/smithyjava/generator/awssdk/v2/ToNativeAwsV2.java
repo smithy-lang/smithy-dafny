@@ -1,9 +1,11 @@
 package software.amazon.polymorph.smithyjava.generator.awssdk.v2;
 
+import com.google.common.base.CaseFormat;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 
 import java.util.Collections;
@@ -11,6 +13,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.HashSet;
 import java.util.stream.Collectors;
 
 import javax.lang.model.element.Modifier;
@@ -25,6 +28,7 @@ import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
+import software.amazon.smithy.model.traits.EnumDefinition;
 import software.amazon.smithy.model.traits.EnumTrait;
 
 import static software.amazon.smithy.utils.StringUtils.capitalize;
@@ -51,7 +55,7 @@ import static software.amazon.smithy.utils.StringUtils.uncapitalize;
  * </ul>
  */
 public class ToNativeAwsV2 extends ToNative {
-    protected final static String VAR_OUTPUT = "converted";
+    protected final static String VAR_BUILDER = "builder";
     protected final static String VAR_TEMP = "temp";
 
     // TODO: for V2 support, use abstract AwsSdk name resolvers and sub class for V1 or V2.
@@ -120,7 +124,7 @@ public class ToNativeAwsV2 extends ToNative {
             builder.addStatement("return new $T()", nativeClassName);
             return builder.build();
         }
-        builder.addStatement("$T $L = new $T()", nativeClassName, VAR_OUTPUT, nativeClassName);
+        builder.addStatement("$T.Builder $L = $T.builder()", nativeClassName, VAR_BUILDER, nativeClassName);
 
         // For each member
         structureShape.members()
@@ -141,7 +145,7 @@ public class ToNativeAwsV2 extends ToNative {
                     }
                     if (member.isOptional()) builder.endControlFlow();
                 });
-        return builder.addStatement("return $L", VAR_OUTPUT).build();
+        return builder.addStatement("return $L.build()", VAR_BUILDER).build();
     }
 
     /**
@@ -160,7 +164,7 @@ public class ToNativeAwsV2 extends ToNative {
     @Override
     protected CodeBlock setWithConversionCall(MemberShape member, CodeBlock getMember) {
         return CodeBlock.of("$L.$L($L($L.$L))",
-                VAR_OUTPUT,
+            VAR_BUILDER,
                 setMemberField(member),
                 memberConversionMethodReference(member).asNormalReference(),
                 VAR_INPUT,
@@ -169,7 +173,7 @@ public class ToNativeAwsV2 extends ToNative {
 
     CodeBlock setWithConversionCallAndToArray(MemberShape member) {
         return CodeBlock.of("$L.$L($L($L.$L).toArray($L_$L))",
-                VAR_OUTPUT,
+            VAR_BUILDER,
                 setMemberField(member),
                 memberConversionMethodReference(member).asNormalReference(),
                 VAR_INPUT,
@@ -182,7 +186,7 @@ public class ToNativeAwsV2 extends ToNative {
     protected CodeBlock setMemberField(MemberShape shape) {
         // In AWS SDK Java V2, using `with` allows for enums or strings
         // while `set` only allows for strings.
-        return CodeBlock.of("with$L", capitalize(shape.getMemberName()));
+        return CodeBlock.of("$L", uncapitalize(shape.getMemberName()));
     }
 
     MethodSpec generateConvertString(ShapeId shapeId) {
@@ -196,9 +200,51 @@ public class ToNativeAwsV2 extends ToNative {
     MethodSpec generateConvertEnum(ShapeId shapeId) {
         final StringShape shape = subject.model.expectShape(shapeId, StringShape.class);
         final ClassName returnType = subject.nativeNameResolver.classForEnum(shape);
-        MethodSpec.Builder method = modeledEnumCommon(shape, returnType);
+        MethodSpec.Builder method = modeledEnumNOTCommon(shape, returnType);
         // fromValue is an AWS SDK specific feature
         method.addStatement("return $T.fromValue($L.toString())", returnType, VAR_INPUT);
         return method.build();
+    }
+
+    // TODO this is unshippable
+    protected final MethodSpec.Builder modeledEnumNOTCommon(
+        StringShape shape, ClassName returnType
+    ) {
+        final ShapeId shapeId = shape.getId();
+        final String methodName = capitalize(shapeId.getName());
+        final TypeName inputType = subject.dafnyNameResolver.typeForShape(shapeId);
+        MethodSpec.Builder method = initializeMethodSpec(methodName, inputType, returnType);
+        final EnumTrait enumTrait = shape.getTrait(EnumTrait.class).orElseThrow();
+        if (!enumTrait.hasNames()) {
+            throw new UnsupportedOperationException(
+                "Unnamed enums not supported. ShapeId: %s".formatted(shapeId));
+        }
+
+        enumTrait.getValues().stream().sequential()
+            .map(EnumDefinition::getName)
+            .map(maybeName -> maybeName.orElseThrow(
+                () -> new IllegalArgumentException(
+                    "Unnamed enums not supported. ShapeId: %s".formatted(shapeId))
+            ))
+            .peek(name -> {
+                if (!ModelUtils.isValidEnumDefinitionName(name)) {
+                    throw new UnsupportedOperationException(
+                        "Invalid enum definition name: %s".formatted(name));
+                }
+            })
+            .forEachOrdered(name -> method
+                .beginControlFlow("if ($L.$L())", VAR_INPUT, Dafny.datatypeConstructorIs(name))
+                .addStatement("return $T.$L", returnType, enumContainsUpperCamelcase(returnType.simpleName()) ? CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, name) : name)
+                .endControlFlow()
+            );
+        return method;
+    }
+
+    protected final boolean enumContainsUpperCamelcase(final String enumClassName) {
+        Set<String> set = new HashSet<String>();
+
+        set.add("GrantOperation");
+
+        return set.contains(enumClassName);
     }
 }
