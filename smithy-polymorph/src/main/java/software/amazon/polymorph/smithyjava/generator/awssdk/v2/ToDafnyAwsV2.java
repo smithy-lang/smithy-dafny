@@ -205,12 +205,9 @@ public class ToDafnyAwsV2 extends ToDafny {
                     throw new UnsupportedOperationException(
                         "Invalid enum definition name: %s".formatted(name));
                 }
-                if(dafnyEnumClass.toString().contains("KeyState")) {
-                    System.out.println(dafnyEnumClass.toString());
-                }
             })
             .forEach(name -> builder
-                .beginControlFlow("case $L:", enumRequiresUpperCamelcaseConversion(dafnyEnumClass.toString()) ? CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, name) : name)
+                .beginControlFlow("case $L:", transformEnumCaseName(dafnyEnumClass, name))
                 .addStatement(
                     "return $T.$L()", dafnyEnumClass, Dafny.datatypeConstructorCreate(name))
                 .endControlFlow()
@@ -226,6 +223,14 @@ public class ToDafnyAwsV2 extends ToDafny {
             .endControlFlow();
         builder.endControlFlow();
         return builder.build();
+    }
+
+    protected final String transformEnumCaseName(final TypeName dafnyEnumClass, final String name) {
+        if (name.contains("ECC_SECG_P256K1")) {
+            return "ECC_SECG_P256_K1";
+        }
+
+        return enumRequiresUpperCamelcaseConversion(dafnyEnumClass.toString()) ? CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, name) : name;
     }
 
     // TODO unshippable
@@ -258,6 +263,10 @@ public class ToDafnyAwsV2 extends ToDafny {
     @Override
     protected CodeBlock getMember(CodeBlock variableName, MemberShape memberShape) {
         // TODO This is unshippable
+        if ("AWSAccountId".equals(memberShape.getMemberName())) {
+            return CodeBlock.of("$L.awsAccountId()", variableName);
+        }
+        // TODO This is unshippable
         if ("message".equals(uncapitalize(memberShape.getMemberName()))) {
             return CodeBlock.of("$L.get$L()", variableName, capitalize(memberShape.getMemberName()));
         }
@@ -277,6 +286,12 @@ public class ToDafnyAwsV2 extends ToDafny {
         CodeBlock memberConverter = memberConversionMethodReference(memberShape).asFunctionalReference();
         CodeBlock genericCall = AGGREGATE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(shape.getType()).asNormalReference();
         CodeBlock getTypeDescriptor = subject.dafnyNameResolver.typeDescriptor(memberShape.getTarget());
+
+        String nativeValueVar = "nativeValue";
+//        if (getTypeDescriptor.toString().contains("EncryptionAlgorithmSpec")) {
+//            nativeValueVar = nativeValueVar + ".stream().map(Object::toString).collect(Collectors.toList())";
+//        }
+
         ParameterSpec parameterSpec = ParameterSpec
                 .builder(subject.nativeNameResolver.typeForListSetOrMapNoEnum(shape.getId()), "nativeValue")
                 .build();
@@ -285,8 +300,8 @@ public class ToDafnyAwsV2 extends ToDafny {
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .returns(subject.dafnyNameResolver.typeForAggregateWithWildcard(shape.getId()))
                 .addParameter(parameterSpec)
-                .addStatement("return $L(\nnativeValue, \n$L, \n$L)",
-                        genericCall, memberConverter, getTypeDescriptor)
+                .addStatement("return $L(\n$L, \n$L, \n$L)",
+                        genericCall, nativeValueVar, memberConverter, getTypeDescriptor)
                 .build();
     }
 
