@@ -195,4 +195,22 @@ public class JavaLibrary extends CodegenSubject {
         }
         return new ResolvedShapeId(shapeId, notPositionalId);
     }
+
+    protected CodeBlock wrapWithShim(ShapeId referentId, CodeBlock dafnyValue) throws ExpectationNotMetException {
+        final Shape targetShape = model.expectShape(referentId);
+        final ClassName rtnClassName;
+        if (targetShape.isResourceShape()) {
+            //noinspection OptionalGetWithoutIsPresent
+            ResourceShape rShape = targetShape.asResourceShape().get();
+            rtnClassName = nativeNameResolver.classNameForResource(rShape);
+        } else {
+            // It MUST be a service, as reference traits ONLY reference Resources & Services
+            //noinspection OptionalGetWithoutIsPresent
+            ServiceShape sShape = targetShape.asServiceShape().get();
+            rtnClassName = nativeNameResolver.classNameForService(sShape);
+        }
+        return CodeBlock.of("new $T($L)",
+                rtnClassName,
+                dafnyValue);
+    }
 }
