@@ -1,6 +1,7 @@
 package software.amazon.polymorph.smithyjava;
 
 public class NamespaceHelper {
+    public final static String AWS_SERVICE_NAMESPACE_PREFIX = "com.amazonaws";
 
     /**
      * Crypto Tools has used the namespace `aws.cryptography` in our Smithy Models;
