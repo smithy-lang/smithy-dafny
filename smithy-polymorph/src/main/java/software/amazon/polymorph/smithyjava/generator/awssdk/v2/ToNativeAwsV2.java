@@ -163,6 +163,23 @@ public class ToNativeAwsV2 extends ToNative {
 
     @Override
     protected CodeBlock setWithConversionCall(MemberShape member, CodeBlock getMember) {
+        String methodName = setMemberField(member).toString();
+        if(memberConversionMethodReference(member).asNormalReference().toString().contains("ByteBuffer")) {
+            return CodeBlock.of("$L.$L(SdkBytes.fromByteBuffer($L($L.$L)))",
+                VAR_BUILDER,
+                setMemberField(member),
+                memberConversionMethodReference(member).asNormalReference(),
+                VAR_INPUT,
+                Dafny.getMemberFieldValue(member));
+        }
+        if(memberConversionMethodReference(member).asNormalReference().toString().contains("Date")) {
+            return CodeBlock.of("$L.$L($L($L.$L).toInstant())",
+                VAR_BUILDER,
+                setMemberField(member),
+                memberConversionMethodReference(member).asNormalReference(),
+                VAR_INPUT,
+                Dafny.getMemberFieldValue(member));
+        }
         return CodeBlock.of("$L.$L($L($L.$L))",
             VAR_BUILDER,
                 setMemberField(member),
@@ -234,10 +251,22 @@ public class ToNativeAwsV2 extends ToNative {
             })
             .forEachOrdered(name -> method
                 .beginControlFlow("if ($L.$L())", VAR_INPUT, Dafny.datatypeConstructorIs(name))
-                .addStatement("return $T.$L", returnType, enumContainsUpperCamelcase(returnType.simpleName()) ? CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, name) : name)
+                .addStatement("return $T.$L", returnType, transformedEnumValue(returnType, name))
                 .endControlFlow()
             );
         return method;
+    }
+
+    protected final String transformedEnumValue(final ClassName returnType, final String enumClassName) {
+        if ("ECC_SECG_P256K1".equals(enumClassName)) {
+            return "ECC_SECG_P256_K1";
+        }
+
+        if (enumContainsUpperCamelcase(returnType.simpleName())) {
+            return CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, enumClassName);
+        }
+
+        return enumClassName;
     }
 
     protected final boolean enumContainsUpperCamelcase(final String enumClassName) {

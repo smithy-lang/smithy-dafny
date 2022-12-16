@@ -291,10 +291,31 @@ public abstract class ToDafny extends Generator {
 
     /** CodeBlock invoking the member conversion method. */
     protected CodeBlock memberConversion(MemberShape memberShape, CodeBlock inputVar) {
+
+        // TODO unshippable
+        CodeBlock methodBlock = memberConversionMethodReference(memberShape).asNormalReference();
+
         return CodeBlock.of("$L($L)",
-                memberConversionMethodReference(memberShape).asNormalReference(),
-                inputVar
+            methodBlock,
+            transformInputVarForMemberConversion(methodBlock, inputVar)
         );
+    }
+
+    // TODO unshippable
+    public String transformInputVarForMemberConversion(CodeBlock methodBlock, CodeBlock inputVar) {
+        if (methodBlock.toString().contains("ByteSequence")) {
+            return "ByteBuffer.wrap(" + inputVar + ".asByteArray())";
+        }
+        if (methodBlock.toString().contains("EncryptionAlgorithmSpecList")) {
+            return inputVar + ".stream().map(Object::toString).collect(Collectors.toList())";
+        }
+        if (methodBlock.toString().contains("SigningAlgorithmSpecList")) {
+            return inputVar + ".stream().map(Object::toString).collect(Collectors.toList())";
+        }
+        if (methodBlock.toString().contains("GrantOperationList")) {
+            return inputVar + ".stream().map(Object::toString).collect(Collectors.toList())";
+        }
+        return inputVar.toString();
     }
 
     /**
