@@ -12,6 +12,9 @@ import java.util.stream.Collectors;
 
 import software.amazon.polymorph.smithyjava.NamespaceHelper;
 import software.amazon.polymorph.smithyjava.generator.CodegenSubject;
+import software.amazon.polymorph.smithyjava.generator.Generator;
+import software.amazon.polymorph.smithyjava.generator.library.shims.ResourceShim;
+import software.amazon.polymorph.smithyjava.generator.library.shims.ServiceShim;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.polymorph.smithyjava.nameresolver.Native;
 import software.amazon.polymorph.traits.LocalServiceTrait;
@@ -26,7 +29,7 @@ import software.amazon.smithy.model.node.ExpectationNotMetException;
 import software.amazon.smithy.model.shapes.ListShape;
 import software.amazon.smithy.model.shapes.MapShape;
 import software.amazon.smithy.model.shapes.MemberShape;
-import software.amazon.smithy.model.shapes.OperationShape;
+import software.amazon.smithy.model.shapes.ResourceShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.SetShape;
 import software.amazon.smithy.model.shapes.Shape;
@@ -103,8 +106,12 @@ public class JavaLibrary extends CodegenSubject {
         rtn.putAll(toDafny.generate());
         ToNativeLibrary toNative = new ToNativeLibrary(this);
         rtn.putAll(toNative.generate());
-        ShimLibrary shim = new ShimLibrary(this, this.serviceShape);
+        ShimLibrary shim = new ServiceShim(this, this.serviceShape);
         rtn.putAll(shim.generate());
+        getResourcesInServiceNamespace().stream()
+                .map(shape -> new ResourceShim(this, shape))
+                .map(Generator::generate)
+                .forEachOrdered(rtn::putAll);
         return rtn;
     }
 
@@ -131,6 +138,12 @@ public class JavaLibrary extends CodegenSubject {
                     final Shape targetShape = model.expectShape(onlyMember.getTarget());
                     return !targetShape.hasTrait(ReferenceTrait.class);
                 })
+                .filter(shape -> ModelUtils.isInServiceNamespace(shape.getId(), this.serviceShape))
+                .toList();
+    }
+
+    public List<ResourceShape> getResourcesInServiceNamespace() {
+        return this.model.getResourceShapes().stream()
                 .filter(shape -> ModelUtils.isInServiceNamespace(shape.getId(), this.serviceShape))
                 .toList();
     }
