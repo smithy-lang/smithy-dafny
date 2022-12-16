@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
+import javax.annotation.Nonnull;
 import javax.lang.model.element.Modifier;
 
 import software.amazon.polymorph.smithyjava.MethodReference;
@@ -309,6 +310,12 @@ public abstract class ToDafny extends Generator {
         if (ModelUtils.isSmithyApiOrSimpleShape(targetShape)) {
             return SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(targetShape.getType());
         }
+        return nonSimpleConversionMethodReference(targetShape);
+    }
+
+    @SuppressWarnings("DuplicatedCode")
+    @Nonnull
+    protected MethodReference nonSimpleConversionMethodReference(Shape targetShape) {
         final String methodName = capitalize(targetShape.getId().getName());
         // if in namespace, reference converter from this ToDafny class
         if (subject.nativeNameResolver.isInServiceNameSpace(targetShape.getId())) {
