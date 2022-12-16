@@ -1,5 +1,6 @@
 package software.amazon.polymorph.smithyjava.generator.awssdk.v2;
 
+import com.google.common.base.CaseFormat;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.JavaFile;
@@ -16,12 +17,14 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.HashSet;
 import java.util.stream.Collectors;
-
 import javax.lang.model.element.Modifier;
 
 import dafny.DafnySequence;
 import software.amazon.polymorph.smithyjava.generator.ToDafny;
+import software.amazon.polymorph.smithyjava.nameresolver.AwsSdkNativeV2;
+import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.smithy.model.shapes.ListShape;
 import software.amazon.smithy.model.shapes.MapShape;
@@ -33,9 +36,12 @@ import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.ShapeType;
 import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
+import software.amazon.smithy.model.traits.EnumDefinition;
 import software.amazon.smithy.model.traits.EnumTrait;
+import software.amazon.smithy.model.traits.ErrorTrait;
 
 import static software.amazon.smithy.utils.StringUtils.capitalize;
+import static software.amazon.smithy.utils.StringUtils.uncapitalize;
 
 /**
  * ToDafnyAwsV2 generates ToDafny.
@@ -166,7 +172,70 @@ public class ToDafnyAwsV2 extends ToDafny {
 
     protected MethodSpec generateConvertEnumEnum(ShapeId shapeId) {
         final StringShape shape = subject.model.expectShape(shapeId, StringShape.class);
-        return super.modeledEnum(shape);
+        return modeledOVERIDEEnum(shape);
+    }
+
+    // TODO this is unshippable
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
+    protected MethodSpec modeledOVERIDEEnum(StringShape shape) {
+        final ShapeId shapeId = shape.getId();
+        String methodName = capitalize(shapeId.getName());
+        final EnumTrait enumTrait = shape.getTrait(EnumTrait.class).orElseThrow(
+            () -> new IllegalArgumentException(
+                "Shape must have the enum trait. ShapeId: %s".formatted(shapeId))
+        );
+        if (!enumTrait.hasNames()) {
+            throw new UnsupportedOperationException(
+                "Unnamed enums not supported. ShapeId: %s".formatted(shapeId));
+        }
+        TypeName dafnyEnumClass = subject.dafnyNameResolver.typeForShape(shapeId);
+
+        MethodSpec.Builder builder = MethodSpec
+            .methodBuilder(methodName)
+            .addModifiers(Modifier.STATIC, Modifier.PUBLIC)
+            .returns(dafnyEnumClass)
+            .addParameter(subject.nativeNameResolver.classForEnum(shape), VAR_INPUT)
+            .beginControlFlow("switch ($L)", VAR_INPUT);
+
+        enumTrait.getValues().stream()
+            .map(EnumDefinition::getName)
+            .map(Optional::get)
+            .peek(name -> {
+                if (!ModelUtils.isValidEnumDefinitionName(name)) {
+                    throw new UnsupportedOperationException(
+                        "Invalid enum definition name: %s".formatted(name));
+                }
+                if(dafnyEnumClass.toString().contains("KeyState")) {
+                    System.out.println(dafnyEnumClass.toString());
+                }
+            })
+            .forEach(name -> builder
+                .beginControlFlow("case $L:", enumRequiresUpperCamelcaseConversion(dafnyEnumClass.toString()) ? CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, name) : name)
+                .addStatement(
+                    "return $T.$L()", dafnyEnumClass, Dafny.datatypeConstructorCreate(name))
+                .endControlFlow()
+            );
+
+        builder.beginControlFlow("default:")
+            .addStatement(
+                "throw new $T($S + $L + $S)",
+                RuntimeException.class,
+                "Cannot convert ",
+                VAR_INPUT,
+                " to %s.".formatted(dafnyEnumClass))
+            .endControlFlow();
+        builder.endControlFlow();
+        return builder.build();
+    }
+
+    // TODO unshippable
+    protected final boolean enumRequiresUpperCamelcaseConversion(final String enumClassName) {
+        Set<String> set = new HashSet<String>();
+
+        set.add("Dafny.Com.Amazonaws.Kms.Types.KeyState");
+        set.add("Dafny.Com.Amazonaws.Kms.Types.GrantOperation");
+
+        return set.contains(enumClassName);
     }
 
     /**
@@ -188,7 +257,11 @@ public class ToDafnyAwsV2 extends ToDafny {
     /** For AWS SDK structure members, the getter is `get + capitalized member name`. */
     @Override
     protected CodeBlock getMember(CodeBlock variableName, MemberShape memberShape) {
-        return CodeBlock.of("$L.get$L()", variableName, capitalize(memberShape.getMemberName()));
+        // TODO This is unshippable
+        if ("message".equals(uncapitalize(memberShape.getMemberName()))) {
+            return CodeBlock.of("$L.get$L()", variableName, capitalize(memberShape.getMemberName()));
+        }
+        return CodeBlock.of("$L.$L()", variableName, uncapitalize(memberShape.getMemberName()));
     }
 
     /**

@@ -135,7 +135,7 @@ public class ShimV2 extends Generator {
 
         operationShape.getErrors().forEach(shapeId ->
                 builder
-                        .nextControlFlow("catch ($T ex)", subject.nativeNameResolver.typeForShape(shapeId))
+                        .nextControlFlow("catch ($T ex)", subject.nativeNameResolver.typeForError(shapeId))
                         .addStatement("return $T.create_Failure(ToDafny.Error(ex))",
                                 DAFNY_RESULT_CLASS_NAME)
         );

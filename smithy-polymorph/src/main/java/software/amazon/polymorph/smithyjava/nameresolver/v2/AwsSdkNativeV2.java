@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import software.amazon.polymorph.smithyjava.nameresolver.Native;
 import software.amazon.polymorph.utils.AwsSdkNameResolverHelpers;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.ServiceShape;
@@ -15,6 +16,7 @@ import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.EnumTrait;
+import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.TraitDefinition;
 import software.amazon.smithy.utils.StringUtils;
 
@@ -151,11 +153,45 @@ public class AwsSdkNativeV2 extends Native {
         // check if this Shape is in AWS SDK for Java V2 package
         if (AwsSdkNameResolverHelpers.isAwsSdkServiceId(shape.getId())) {
             // Assume that the shape is in the model package
-            return ClassName.get(
-                    defaultModelPackageName(packageNameForAwsSdkV2Shape(shape)),
-                    StringUtils.capitalize(shape.getId().getName()));
+            ClassName smithyName = ClassName.get(
+                defaultModelPackageName(packageNameForAwsSdkV2Shape(shape)),
+                StringUtils.capitalize(shape.getId().getName()));
+            if (shape.hasTrait(ErrorTrait.class)) {
+                if (smithyName.simpleName().contains("KMS")) {
+                    return ClassName.get(smithyName.packageName(),
+                        smithyName.simpleName()
+                            .replace("KMS", "Kms")
+                    );
+                }
+                if (smithyName.simpleName().contains("CMK")) {
+                    return ClassName.get(smithyName.packageName(),
+                        smithyName.simpleName()
+                            .replace("CMK", "CmK")
+                    );
+                }
+                return smithyName;
+            }
         }
         return super.classNameForStructure(shape);
+    }
+
+    public TypeName typeForError(final ShapeId shapeId) {
+        StructureShape shape = model.expectShape(shapeId, StructureShape.class);
+        ClassName smithyName = classNameForStructure(shape);
+        // TODO chain so KMSCMK returns KmsCmK
+        if (smithyName.simpleName().contains("KMS")) {
+            return ClassName.get(smithyName.packageName(),
+                smithyName.simpleName()
+                    .replace("KMS", "Kms")
+            );
+        }
+        if (smithyName.simpleName().contains("CMK")) {
+            return ClassName.get(smithyName.packageName(),
+                smithyName.simpleName()
+                    .replace("CMK", "CmK")
+            );
+        }
+        return super.typeForShape(shapeId);
     }
 
     /** The AWS SDK for Java V2 replaces
@@ -172,9 +208,10 @@ public class AwsSdkNativeV2 extends Native {
                             .substring(
                                     0,
                                     smithyName.simpleName().lastIndexOf("Response"))
-                            + "Result"
+                            + "Response"
             );
         }
+
         return smithyName;
     }
 
