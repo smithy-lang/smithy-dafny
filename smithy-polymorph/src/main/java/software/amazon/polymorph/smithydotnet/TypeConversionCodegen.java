@@ -7,11 +7,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
 
 import java.nio.file.Path;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -173,8 +169,14 @@ public class TypeConversionCodegen {
                 .map(Shape::getId)
                 .collect(Collectors.toSet());
 
-        return Stream.of(operationStructures, clientConfigStructures, unionShapes, errorStructures, enumShapes)
-                .reduce(Sets::union).get();
+        // Collect into TreeSet so that we generate code in a deterministic order (lexicographic, in particular)
+        final TreeSet<ShapeId> orderedSet = new TreeSet<ShapeId>();
+        orderedSet.addAll(operationStructures);
+        orderedSet.addAll(clientConfigStructures);
+        orderedSet.addAll(unionShapes);
+        orderedSet.addAll(errorStructures);
+        orderedSet.addAll(enumShapes);
+        return orderedSet;
     }
 
     private boolean isInServiceNamespace(final ShapeId shapeId) {
