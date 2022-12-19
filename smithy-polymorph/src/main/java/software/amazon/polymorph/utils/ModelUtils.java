@@ -3,11 +3,7 @@
 
 package software.amazon.polymorph.utils;
 
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.Optional;
-import java.util.Queue;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
@@ -65,7 +61,8 @@ public class ModelUtils {
      * @return a stream of error structures in the given namespace
      */
     public static Stream<StructureShape> streamNamespaceErrors(final Model model, final String namespace) {
-        return model.getStructureShapesWithTrait(ErrorTrait.class)
+        // Collect into TreeSet so that we generate code in a deterministic order (lexicographic, in particular)
+        return new TreeSet<>(model.getStructureShapesWithTrait(ErrorTrait.class))
           .stream()
           .filter(structureShape -> structureShape.getId().getNamespace().equals(namespace));
     }

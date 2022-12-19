@@ -40,7 +40,8 @@ public class DafnyApiCodegen {
         this.nameResolver = new DafnyNameResolver(
           model,
           this.serviceShape.toShapeId().getNamespace(),
-          new HashSet(),
+          // Collect into TreeSet so that we generate code in a deterministic order (lexicographic, in particular)
+          new TreeSet(),
           dependentModelPaths.clone()
         );
     }
