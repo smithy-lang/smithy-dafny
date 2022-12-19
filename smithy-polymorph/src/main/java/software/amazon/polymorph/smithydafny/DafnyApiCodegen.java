@@ -4,7 +4,11 @@
 package software.amazon.polymorph.smithydafny;
 
 import com.google.common.annotations.VisibleForTesting;
-import software.amazon.polymorph.traits.*;
+import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
+import software.amazon.polymorph.traits.LocalServiceTrait;
+import software.amazon.polymorph.traits.PositionalTrait;
+import software.amazon.polymorph.traits.ReferenceTrait;
+import software.amazon.polymorph.traits.MutableLocalStateTrait;
 import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.polymorph.utils.Token;
@@ -513,16 +517,27 @@ public class DafnyApiCodegen {
           "// %s := {your, fields, here, %s};".formatted(
             nameResolver.mutableStateFunctionName(),
             nameResolver.callHistoryFieldName()),
-          "// If you do not need to mutate anything:",
-          "// %s := {%s};".formatted(
+            mutableState
+            ? """
+// Given that you are mutating state,
+// your %s function is going to get complicated.
+"""
+        .formatted(
+            nameResolver.validStateInvariantName()
+         )
+            : """
+// If you do not need to mutate anything:
+// %s := {%s};
+"""
+        .formatted(
             nameResolver.mutableStateFunctionName(),
             nameResolver.callHistoryFieldName()
-          ),
+        ),
           "ghost %s %s: set<object>".formatted(
               mutableState ? "var" : "const",
               nameResolver.mutableStateFunctionName()
           ),
-          "// For an unassigned const field defined in a trait,",
+          "// For an unassigned field defined in a trait,",
           "// Dafny can only assign a value in the constructor.",
           "// This means that for Dafny to reason about this value,",
           "// it needs some way to know (an invariant),",
@@ -534,8 +549,27 @@ public class DafnyApiCodegen {
           "// This means that the correctness of this requires",
           "// MUST only be evaluated by the class itself.",
           "// If you require any additional mutation,",
-          "// Then you MUST ensure everything you need in %s.".formatted(nameResolver.validStateInvariantName()),
+          "// then you MUST ensure everything you need in %s.".formatted(nameResolver.validStateInvariantName()),
           "// You MUST also ensure %s in your constructor.".formatted(nameResolver.validStateInvariantName()),
+            mutableState
+                    ? """
+// Not only will you need to ensure
+// that all your mutable elements are contained in %s,
+// you MUST also ensure
+// that your invariant does not rely on %s.
+// This means your invariant will begin to look like:
+// && %1$s in %2$s
+// && this in %2$s                      // so we can read property
+// && property in %2$s                  // so we can read properties of property
+// && property != %1$s as object        // property really is not %1$s!
+// && (forall m <- property.Modifies    // everything in property.Modifies
+//    :: m in %2$s - %1$s)              // is in %2$s and really is not %1$s!
+"""
+            .formatted(
+                nameResolver.callHistoryFieldName(),
+                nameResolver.mutableStateFunctionName()
+            )
+            : "",
           "predicate %s()".formatted(nameResolver.validStateInvariantName()),
           mutableState ? readsClause : "",
           "ensures %s() ==> %s in %s"
