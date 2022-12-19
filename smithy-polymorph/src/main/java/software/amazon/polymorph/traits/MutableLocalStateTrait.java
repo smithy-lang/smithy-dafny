@@ -12,6 +12,14 @@ import software.amazon.smithy.model.traits.TraitDefinition;
 import software.amazon.smithy.utils.SmithyBuilder;
 import software.amazon.smithy.utils.ToSmithyBuilder;
 
+/**
+ * A tait the identifies that a resource caries mutable state.
+ * This is useful for API consumers because they can reason about resources.
+ * But this is critical for building Dafny components.
+ * Since Dafny requires proving modifications are correct,
+ * Polymorph needs to be able to integrate these mutations
+ * with the History DafnyCallEvents.
+ */
 public class MutableLocalStateTrait extends AbstractTrait implements ToSmithyBuilder<MutableLocalStateTrait> {
     public static final ShapeId ID = ShapeId.from("aws.polymorph#mutableLocalState");
 
