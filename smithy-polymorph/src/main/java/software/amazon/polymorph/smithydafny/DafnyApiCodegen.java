@@ -4,10 +4,7 @@
 package software.amazon.polymorph.smithydafny;
 
 import com.google.common.annotations.VisibleForTesting;
-import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
-import software.amazon.polymorph.traits.LocalServiceTrait;
-import software.amazon.polymorph.traits.PositionalTrait;
-import software.amazon.polymorph.traits.ReferenceTrait;
+import software.amazon.polymorph.traits.*;
 import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.polymorph.utils.Token;
@@ -321,7 +318,7 @@ public class DafnyApiCodegen {
             generateHistoricalCallEventsForService(serviceShape),
             trait,
             methods
-              .prepend(generateMutableInvariantInterface()
+              .prepend(generateMutableInvariantInterface(serviceShape.getId())
                 .append(Token.of("ghost const %s: %s"
                   .formatted(
                     nameResolver.callHistoryFieldName(),
@@ -381,7 +378,7 @@ public class DafnyApiCodegen {
             generateHistoricalCallEventsForResource(resource),
             trait,
             methods
-              .prepend(generateMutableInvariantInterface()
+              .prepend(generateMutableInvariantInterface(referenceTrait.getReferentId())
                 .append(Token.of("ghost const %s: %s"
                   .formatted(
                     nameResolver.callHistoryFieldName(),
@@ -494,7 +491,19 @@ public class DafnyApiCodegen {
             ));
     }
 
-    private TokenTree generateMutableInvariantInterface() {
+    private TokenTree generateMutableInvariantInterface(ShapeId shapeId) {
+      // Dealing with mutable state is HARD.
+      // At this time we only support this
+      // for reference and not for services.
+      final boolean mutableState = model
+        .getShape(shapeId)
+        .orElseThrow()
+        .hasTrait(MutableLocalStateTrait.class);
+      final String readsClause = "reads this`%s, %s - {%s}".formatted(
+          nameResolver.mutableStateFunctionName(),
+          nameResolver.mutableStateFunctionName(),
+          nameResolver.callHistoryFieldName()
+      );
       return TokenTree
         .of(
           "// Helper to define any additional modifies/reads clauses.",
@@ -508,7 +517,10 @@ public class DafnyApiCodegen {
             nameResolver.mutableStateFunctionName(),
             nameResolver.callHistoryFieldName()
           ),
-          "ghost const %s: set<object>".formatted(nameResolver.mutableStateFunctionName()),
+          "ghost %s %s: set<object>".formatted(
+              mutableState ? "var" : "const",
+              nameResolver.mutableStateFunctionName()
+          ),
           "// For an unassigned const field defined in a trait,",
           "// Dafny can only assign a value in the constructor.",
           "// This means that for Dafny to reason about this value,",
@@ -524,6 +536,7 @@ public class DafnyApiCodegen {
           "// Then you MUST ensure everything you need in %s.".formatted(nameResolver.validStateInvariantName()),
           "// You MUST also ensure %s in your constructor.".formatted(nameResolver.validStateInvariantName()),
           "predicate %s()".formatted(nameResolver.validStateInvariantName()),
+          mutableState ? readsClause : "",
           "ensures %s() ==> %s in %s"
             .formatted(
               nameResolver.validStateInvariantName(),
@@ -531,6 +544,7 @@ public class DafnyApiCodegen {
               nameResolver.mutableStateFunctionName()
             )
         )
+        .dropEmpty()
         .lineSeparated()
         .append(TokenTree.empty())
         .lineSeparated();
