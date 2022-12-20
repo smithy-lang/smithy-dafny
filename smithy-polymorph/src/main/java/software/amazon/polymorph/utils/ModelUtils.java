@@ -7,12 +7,7 @@ import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import software.amazon.polymorph.traits.ClientConfigTrait;
-import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
-import software.amazon.polymorph.traits.ExtendableTrait;
-import software.amazon.polymorph.traits.LocalServiceTrait;
-import software.amazon.polymorph.traits.PositionalTrait;
-import software.amazon.polymorph.traits.ReferenceTrait;
+import software.amazon.polymorph.traits.*;
 
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.loader.ModelAssembler;
@@ -41,6 +36,7 @@ public class ModelUtils {
         assembler.addShape(DafnyUtf8BytesTrait.getDefinition());
         assembler.addShape(ExtendableTrait.getDefinition());
         assembler.addShape(LocalServiceTrait.getDefinition());
+        assembler.addShape(MutableLocalStateTrait.getDefinition());
     }
 
     /**
