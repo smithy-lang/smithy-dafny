@@ -6,11 +6,7 @@ package software.amazon.polymorph.smithydafny;
 import com.google.common.base.Joiner;
 
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
@@ -29,7 +25,8 @@ import software.amazon.smithy.utils.StringUtils;
 public record DafnyNameResolver(
   Model model,
   String namespace,
-  HashSet<DependentSmithyModel> dependentModels,
+  // Collect into TreeSet so that we generate code in a deterministic order (lexicographic, in particular)
+  TreeSet<DependentSmithyModel> dependentModels,
   Path[] dependentModelPaths
 ) {
 

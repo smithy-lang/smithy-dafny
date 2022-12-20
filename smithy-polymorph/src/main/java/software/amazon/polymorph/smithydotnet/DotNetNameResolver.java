@@ -137,10 +137,8 @@ public class DotNetNameResolver {
 
     public static String interfaceForService(final ShapeId serviceShapeId) {
         if (AwsSdkNameResolverHelpers.isAwsSdkServiceId(serviceShapeId)) {
-            // Resolve DynamoDB_20120810 to just DynamoDB. There is no reference to the version string
-            // in the NET SDK.
             final String serviceName = StringUtils.equals(serviceShapeId.getName(), AwsSdkDotNetNameResolver.DDB_SMITHY_SERVICE_NAME)
-                ? AwsSdkDotNetNameResolver.DDB_SERVICE_NAME
+                ? AwsSdkDotNetNameResolver.DDB_TYPES_SERVICE_NAME
                 : serviceShapeId.getName();
             return "I" + serviceName;
         }
@@ -265,6 +263,9 @@ public class DotNetNameResolver {
      * This is always non-nullable.
      */
     public String classPropertyTypeForStructureMember(final MemberShape memberShape) {
+        if (memberShape.getTarget().getName().endsWith("DdbClientReference")) {
+            return AwsSdkDotNetNameResolver.DDB_NET_INTERFACE_NAME;
+        }
         return baseTypeForShape(memberShape.getTarget());
     }
 
@@ -277,10 +278,21 @@ public class DotNetNameResolver {
     }
 
     protected String baseTypeForList(final ListShape listShape) {
+        if (StringUtils.equals(baseTypeForMember(listShape.getMember()),
+                AwsSdkDotNetNameResolver.DDB_ATTRIBUTE_VALUE_MODEL_NAMESPACE)) {
+            return "System.Collections.Generic.List<%s>".formatted(
+                    AwsSdkDotNetNameResolver.DDB_V2_ATTRIBUTE_VALUE);
+        }
         return "System.Collections.Generic.List<%s>".formatted(baseTypeForMember(listShape.getMember()));
     }
 
     protected String baseTypeForMap(final MapShape mapShape) {
+        if (StringUtils.equals(baseTypeForMember(mapShape.getValue()),
+                AwsSdkDotNetNameResolver.DDB_ATTRIBUTE_VALUE_MODEL_NAMESPACE)){
+            return "System.Collections.Generic.Dictionary<%s, %s>".formatted(
+                    baseTypeForMember(mapShape.getKey()),
+                    AwsSdkDotNetNameResolver.DDB_V2_ATTRIBUTE_VALUE);
+        }
         return "System.Collections.Generic.Dictionary<%s, %s>".formatted(
                 baseTypeForMember(mapShape.getKey()),
                 baseTypeForMember(mapShape.getValue()));
@@ -333,6 +345,9 @@ public class DotNetNameResolver {
 
     protected String baseTypeForOptionalMember(final MemberShape memberShape) {
         final String baseType = baseTypeForShape(memberShape.getTarget());
+        if (StringUtils.equals(baseType, "Amazon.DynamoDBv2.IAmazonDynamoDBv2")) {
+            return AwsSdkDotNetNameResolver.DDB_NET_INTERFACE_NAME;
+        }
         // We annotate C# value types with `?` to make them nullable.
         // We cannot do the same for C# reference types since those types are already nullable by design.
         // TODO: nullable reference types appear to be supported in C# 8.0+. Maybe revisit this.
@@ -879,7 +894,15 @@ public class DotNetNameResolver {
     }
     /** Return the DotNet Type for a Union Member */
     public String unionMemberName(final MemberShape memberShape) {
+        if (ModelUtils.isInServiceNamespace(memberShape.getTarget(), serviceShape)) {
             String[] qualifiedName = classPropertyTypeForStructureMember(memberShape).split("[.]");
             return "_%s".formatted(dafnyCompilesExtra_(qualifiedName[qualifiedName.length - 1]));
+        } else {
+            final String name = dafnyConcreteTypeForUnionMember(memberShape)
+                    // TODO Hack to remove Dafny "namespace"
+                    .replace("Dafny.", "")
+                    .replace(".", "");
+            return "_%s".formatted(name);
+        }
     }
 }
