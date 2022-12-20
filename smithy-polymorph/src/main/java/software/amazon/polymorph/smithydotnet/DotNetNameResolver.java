@@ -263,6 +263,9 @@ public class DotNetNameResolver {
      * This is always non-nullable.
      */
     public String classPropertyTypeForStructureMember(final MemberShape memberShape) {
+        if (memberShape.getTarget().getName().endsWith("DdbClientReference")) {
+            return AwsSdkDotNetNameResolver.DDB_NET_INTERFACE_NAME;
+        }
         return baseTypeForShape(memberShape.getTarget());
     }
 
@@ -342,6 +345,9 @@ public class DotNetNameResolver {
 
     protected String baseTypeForOptionalMember(final MemberShape memberShape) {
         final String baseType = baseTypeForShape(memberShape.getTarget());
+        if (StringUtils.equals(baseType, "Amazon.DynamoDBv2.IAmazonDynamoDBv2")) {
+            return AwsSdkDotNetNameResolver.DDB_NET_INTERFACE_NAME;
+        }
         // We annotate C# value types with `?` to make them nullable.
         // We cannot do the same for C# reference types since those types are already nullable by design.
         // TODO: nullable reference types appear to be supported in C# 8.0+. Maybe revisit this.

@@ -25,6 +25,7 @@ public class AwsSdkDotNetNameResolver extends DotNetNameResolver {
     public static final String DDB_SMITHY_SERVICE_NAME = "DynamoDB_20120810";
     public static final String DDB_TYPES_SERVICE_NAME = "DynamoDB__20120810";
     public static final String DDB_V2_ATTRIBUTE_VALUE = "Amazon.DynamoDBv2.Model.AttributeValue";
+    public static final String DDB_NET_INTERFACE_NAME = "Amazon.DynamoDBv2.IAmazonDynamoDB";
     public static final String DDB_ATTRIBUTE_VALUE_MODEL_NAMESPACE = "Com.Amazonaws.Dynamodb.AttributeValue";
     public static final String DDB_INPUT = "Input";
     public static final String DDB_OUTPUT = "Output";

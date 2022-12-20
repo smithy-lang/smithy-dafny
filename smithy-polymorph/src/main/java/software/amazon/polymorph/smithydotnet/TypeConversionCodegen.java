@@ -355,6 +355,9 @@ public class TypeConversionCodegen {
                     if (StringUtils.equals(nameResolver.classPropertyTypeForStructureMember(memberShape),
                             AwsSdkDotNetNameResolver.DDB_ATTRIBUTE_VALUE_MODEL_NAMESPACE)) {
                         propertyType = AwsSdkDotNetNameResolver.DDB_V2_ATTRIBUTE_VALUE;
+                    } else if (StringUtils.equals(nameResolver.classPropertyForStructureMember(memberShape),
+                            "DdbClient")) {
+                        propertyType = nameResolver.classPropertyTypeForStructureMember(memberShape);
                     } else {
                         propertyType = nameResolver.classPropertyTypeForStructureMember(memberShape);
                     }
@@ -1016,6 +1019,10 @@ public class TypeConversionCodegen {
             type = AwsSdkDotNetNameResolver.DDB_V2_ATTRIBUTE_VALUE;
         } else {
             type = nameResolver.baseTypeForShape(shape.getId());
+        }
+
+        if (StringUtils.equals(type, "Amazon.DynamoDBv2.IAmazonDynamoDBv2")){
+            type = AwsSdkDotNetNameResolver.DDB_NET_INTERFACE_NAME;
         }
 
         // InvalidEndpointException was deprecated in v3 of the dynamodb sdk for net
