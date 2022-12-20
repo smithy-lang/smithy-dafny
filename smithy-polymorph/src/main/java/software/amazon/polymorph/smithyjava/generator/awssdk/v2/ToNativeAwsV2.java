@@ -1,6 +1,5 @@
 package software.amazon.polymorph.smithyjava.generator.awssdk.v2;
 
-import com.google.common.base.CaseFormat;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.JavaFile;
@@ -14,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.HashSet;
 import java.util.stream.Collectors;
 
 import javax.lang.model.element.Modifier;
