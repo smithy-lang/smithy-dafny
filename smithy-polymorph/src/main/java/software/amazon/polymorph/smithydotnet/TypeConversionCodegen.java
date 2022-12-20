@@ -7,7 +7,11 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
 
 import java.nio.file.Path;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -1012,6 +1016,10 @@ public class TypeConversionCodegen {
             type = AwsSdkDotNetNameResolver.DDB_V2_ATTRIBUTE_VALUE;
         } else {
             type = nameResolver.baseTypeForShape(shape.getId());
+        }
+
+        if (StringUtils.equals(type, "Amazon.DynamoDBv2.IAmazonDynamoDBv2")){
+            type = AwsSdkDotNetNameResolver.DDB_NET_INTERFACE_NAME;
         }
 
         // InvalidEndpointException was deprecated in v3 of the dynamodb sdk for net
