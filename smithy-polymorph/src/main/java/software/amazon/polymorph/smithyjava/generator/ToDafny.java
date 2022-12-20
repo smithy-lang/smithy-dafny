@@ -301,21 +301,40 @@ public abstract class ToDafny extends Generator {
         );
     }
 
-    // TODO unshippable
-    public String transformInputVarForMemberConversion(CodeBlock methodBlock, CodeBlock inputVar) {
+    /**
+     * Transforms
+     * @param methodBlock
+     * @param inputVar
+     * @return
+     */
+    public CodeBlock transformInputVarForMemberConversion(CodeBlock methodBlock, CodeBlock inputVar) {
+        ClassName JAVA_UTIL_COLLECTORS = ClassName.get("java.util.stream", "Collectors");
+        MethodReference collectors = new MethodReference(JAVA_UTIL_COLLECTORS, "toList");
+
+        CodeBlock.Builder returnCodeBlockBuilder = CodeBlock.builder().add(inputVar);
         if (methodBlock.toString().contains("ByteSequence")) {
-            return "ByteBuffer.wrap(" + inputVar + ".asByteArray())";
+            CodeBlock asByteArray = CodeBlock.of("asByteArray()");
+            return returnCodeBlockBuilder.add(".asByteArray()").build();
         }
-        if (methodBlock.toString().contains("EncryptionAlgorithmSpecList")) {
-            return inputVar + ".stream().map(Object::toString).collect(Collectors.toList())";
+        if (methodTypeRequiresStringConversion(methodBlock)) {
+            return returnCodeBlockBuilder
+                .add(".stream().map(Object::toString).collect(")
+                .add(collectors.asNormalReference())
+                .add("())")
+                .build();
         }
-        if (methodBlock.toString().contains("SigningAlgorithmSpecList")) {
-            return inputVar + ".stream().map(Object::toString).collect(Collectors.toList())";
-        }
-        if (methodBlock.toString().contains("GrantOperationList")) {
-            return inputVar + ".stream().map(Object::toString).collect(Collectors.toList())";
-        }
-        return inputVar.toString();
+        return inputVar;
+    }
+
+    /**
+     * Returns true if the method name indicates the type requires conversion to String.
+     * Some AWS SDK V2 types now require explicit String conversion, while they didn't in V1.
+     * @return true if the method name indicates the type requires conversion to String; false otherwise
+     */
+    protected boolean methodTypeRequiresStringConversion(CodeBlock methodBlock) {
+        return methodBlock.toString().contains("EncryptionAlgorithmSpecList")
+            || methodBlock.toString().contains("SigningAlgorithmSpecList")
+            || methodBlock.toString().contains("GrantOperationList")
     }
 
     /**

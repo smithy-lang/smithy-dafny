@@ -159,7 +159,6 @@ public class AwsSdkNativeV1 extends Native {
     public TypeName typeForOperationOutput(final ShapeId shapeId) {
         StructureShape shape = model.expectShape(shapeId, StructureShape.class);
         ClassName smithyName = classNameForStructure(shape);
-        // TODO: handle AWS SDK v2 naming convention, which uses 'Response', not 'Result'
         if (smithyName.simpleName().endsWith("Response")) {
             return ClassName.get(smithyName.packageName(),
                     smithyName.simpleName()
