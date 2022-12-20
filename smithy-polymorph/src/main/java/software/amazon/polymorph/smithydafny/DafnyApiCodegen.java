@@ -79,6 +79,10 @@ public class DafnyApiCodegen {
                 .of(
                   modelPath.relativize(includeDafnyFile)
                 ),
+              // We can't just include every dependent model
+              // that was passed on the command line.
+              // This is because some models are only informational
+              // and do not point to any generated Dafny.
               nameResolver
                 .dependentModels()
                 .stream()
@@ -148,6 +152,54 @@ public class DafnyApiCodegen {
           )
           .lineSeparated();
         return Map.of(path, fullCode);
+    }
+
+    public Map<Path, TokenTree> generateWrappedAbstractServiceModule(final Path outputDafny) {
+        final String namespace = serviceShape.getId().getNamespace();
+        final String typesModuleName = DafnyNameResolver.dafnyTypesModuleForNamespace(namespace);
+        final Path path = Path.of("%sWrapped.dfy".formatted(typesModuleName));
+
+        // A smithy model may reference a model in a different package.
+        // In which case we need to include it.
+        final TokenTree includeDirectives = TokenTree
+            .of(Stream
+                .concat(
+                    Stream
+                        .of(
+                            modelPath.relativize(includeDafnyFile),
+                            outputDafny.relativize(modelPath.resolve("../src/Index.dfy"))
+                        ),
+                    nameResolver
+                        .dependentModels()
+                        .stream()
+                        .map(d -> modelPath
+                            .relativize(d.modelPath().resolve("../src/Index.dfy"))
+                        )
+                        .map(Path::toString)
+                )
+                .map(p -> "include \"" + p + "\"")
+                .map(Token::of)
+            )
+            .lineSeparated();
+
+        if (serviceShape.hasTrait(ServiceTrait.class)) {
+            // TODO move the AWS SDK branch over here.
+            // It should be the case that the default --aws-sdk
+            // is for building a Dafny AWS SDK,
+            // not wrapping an existing one.
+            throw new IllegalStateException("Wrapped AWS service only supported in --aws-sdk");
+        } else if (serviceShape.hasTrait(LocalServiceTrait.class)) {
+            final TokenTree fullCode = TokenTree
+                .of(
+                    includeDirectives,
+                    generateAbstractWrappedLocalService(serviceShape)
+                )
+                .lineSeparated();
+            return Map.of(path, fullCode);
+        } else {
+            throw new IllegalStateException("Service does not have supported trait");
+        }
+
     }
 
     private Optional<TokenTree> generateCodeForShape(final Shape shape) {
@@ -1271,13 +1323,11 @@ public class DafnyApiCodegen {
     }
 
     public TokenTree generateAbstractServiceModule(ServiceShape serviceShape) {
-      final String moduleNamespace = DafnyNameResolver
-        .dafnyNamespace(serviceShape.getId().getNamespace())
-        .replace(".", "");
       final TokenTree abstractModulePrelude = TokenTree
         .of(DafnyNameResolver.abstractModulePrelude(serviceShape))
         .lineSeparated();
-      final TokenTree moduleHeader = TokenTree.of("abstract module Abstract%sService".formatted(moduleNamespace));
+      final TokenTree moduleHeader = TokenTree.of("abstract module %s"
+        .formatted(nameResolver.abstractServiceModuleName(serviceShape)));
 
       if (serviceShape.hasTrait(ServiceTrait.class)) {
         return moduleHeader
@@ -1292,7 +1342,8 @@ public class DafnyApiCodegen {
       } else if (serviceShape.hasTrait(LocalServiceTrait.class)) {
         final TokenTree operationsPrelude = TokenTree
           .of(
-            "import Operations : Abstract%sOperations".formatted(moduleNamespace)
+            "import Operations : %s"
+              .formatted(nameResolver.abstractOperationsModuleName(serviceShape))
           )
           .lineSeparated();
 
@@ -1374,10 +1425,10 @@ public class DafnyApiCodegen {
           .lineSeparated()
           .braced();
 
-
         return TokenTree
           .of(
-            Token.of("abstract module Abstract%sService".formatted(moduleNamespace)),
+            Token.of("abstract module %s"
+              .formatted(nameResolver.abstractServiceModuleName(serviceShape))),
             body
           )
           .lineSeparated();
@@ -1422,6 +1473,58 @@ public class DafnyApiCodegen {
             serviceMethod
           )
           .lineSeparated();
+    }
+
+    public TokenTree generateAbstractWrappedLocalService(ServiceShape serviceShape)  {
+        if (!serviceShape.hasTrait(LocalServiceTrait.class)) throw new IllegalStateException("MUST be an LocalService");
+        final LocalServiceTrait localServiceTrait = serviceShape.expectTrait(LocalServiceTrait.class);
+
+        final String moduleNamespace = DafnyNameResolver
+                .dafnyNamespace(serviceShape.getId().getNamespace())
+                .replace(".", "");
+
+        final TokenTree moduleHeader = TokenTree.of("abstract module WrappedAbstract%sService".formatted(moduleNamespace));
+        final TokenTree abstractModulePrelude = TokenTree
+                .of(DafnyNameResolver.wrappedAbstractModulePrelude(serviceShape))
+                .lineSeparated();
+
+        final String configTypeName = localServiceTrait.getConfigId().getName();
+        final String defaultFunctionMethodName = "Default%s".formatted(configTypeName);
+
+        final TokenTree defaultConfig = TokenTree
+                .of("function method Wrapped%s(): %s".formatted(defaultFunctionMethodName, configTypeName));
+        // TODO defer to Service.defaultFunctionMethodName, there is no reason for this to be left to implement
+
+        final TokenTree serviceMethod = TokenTree
+                .of(
+                  "method {:extern} Wrapped%s(config: %s := Wrapped%s())"
+                    .formatted(
+                                    localServiceTrait.getSdkId(),
+                                    configTypeName,
+                                    defaultFunctionMethodName
+                            ),
+                    // Yes, Error is hard coded
+                    // this can work because we need to be able Errors from other modules...
+                    "returns (res: Result<%s, Error>)"
+                            .formatted(nameResolver.traitNameForServiceClient(serviceShape)),
+                    "ensures res.Success? ==> ",
+                    "&& fresh(res.value)",
+                    "&& fresh(res.value.%s)".formatted(nameResolver.mutableStateFunctionName()),
+                    "&& fresh(res.value.%s)".formatted(nameResolver.callHistoryFieldName()),
+                    "&& res.value.%s()".formatted(nameResolver.validStateInvariantName())
+                )
+                .lineSeparated();
+
+        return moduleHeader
+            .append(Token
+                .of(
+                    abstractModulePrelude,
+                    defaultConfig,
+                    serviceMethod
+                )
+                .lineSeparated()
+                .braced()
+            );
     }
 
     public TokenTree generateAbstractAwsServiceClass(ServiceShape serviceShape) {

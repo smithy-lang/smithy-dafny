@@ -259,4 +259,10 @@ public class ModelUtils {
         Shape shape = model.expectShape(shapeId);
         return shape.hasTrait(EnumTrait.class);
     }
+
+    public static ShapeId getReferentShapeId(final Shape shape) {
+        assert shape.hasTrait(ReferenceTrait.class);
+        final ReferenceTrait referenceTrait = shape.getTrait(ReferenceTrait.class).get();
+        return referenceTrait.getReferentId();
+    }
 }

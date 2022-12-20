@@ -38,7 +38,7 @@ import java.util.stream.Stream;
  */
 public class DotNetNameResolver {
     private final Model model;
-    private final ServiceShape serviceShape;
+    protected final ServiceShape serviceShape;
 
     public DotNetNameResolver(Model model, ServiceShape serviceShape) {
         this.model = model;

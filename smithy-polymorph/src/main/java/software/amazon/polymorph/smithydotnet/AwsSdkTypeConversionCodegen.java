@@ -85,9 +85,13 @@ public class AwsSdkTypeConversionCodegen extends TypeConversionCodegen {
         return true;
     }
 
-    TypeConverter generateAwsSdkServiceReferenceStructureConverter(final StructureShape structureShape) {
-        final String sdkServiceImpl = ((AwsSdkDotNetNameResolver) nameResolver).implForServiceClient();
+    public record DafnyConverterBodies(
+        TokenTree fromDafnyBody,
+        TokenTree toDafnyBody
+    ){}
 
+    DafnyConverterBodies generateAwsSdkServiceReferenceStructureConverter(final StructureShape structureShape) {
+        final String sdkServiceImpl = ((AwsSdkDotNetNameResolver) nameResolver).implForServiceClient();
 
         final String serviceClientShim = "%s.%s".formatted(
                 ((AwsSdkDotNetNameResolver) nameResolver).syntheticNamespaceForService(),
@@ -104,7 +108,7 @@ public class AwsSdkTypeConversionCodegen extends TypeConversionCodegen {
                 "if (value is %s impl) { return new %s(impl); }".formatted(sdkServiceImpl, serviceClientShim),
                 throwCustomImplException);
 
-        return buildConverterFromMethodBodies(structureShape, fromDafnyBody, toDafnyBody);
+        return new DafnyConverterBodies(fromDafnyBody, toDafnyBody);
     }
 
     @Override
