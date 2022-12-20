@@ -80,15 +80,6 @@ public class ToDafnyAwsV2 extends ToDafny {
         return Collections.singleton(builder.build());
     }
 
-//    @Override
-//    protected MethodReference memberConversionMethodReference(MemberShape memberShape) {
-//        Shape targetShape = subject.model.expectShape(memberShape.getTarget());
-//        if (V2_CONVERSION_METHOD_FROM_SHAPE_TYPE.containsKey(targetShape.getType())) {
-//            return V2_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(targetShape.getType());
-//        }
-//        return super.memberConversionMethodReference(memberShape);
-//    }
-
     TypeSpec toDafny() {
         LinkedHashSet<ShapeId> operationOutputs = subject.serviceShape
                 .getOperations().stream()
@@ -165,25 +156,35 @@ public class ToDafnyAwsV2 extends ToDafny {
 
         return CodeBlock.of("$L($L)",
             methodBlock,
-            transformInputVarForMemberConversion(methodBlock, inputVar)
+            formatInputVarForMemberConversion(methodBlock, inputVar)
         );
     }
 
     /**
-     * Transforms
+     * Formats inputVar if it requires reformatting for SDK V2.
      * @param methodBlock
      * @param inputVar
      * @return
      */
-    public CodeBlock transformInputVarForMemberConversion(CodeBlock methodBlock, CodeBlock inputVar) {
-        ClassName JAVA_UTIL_COLLECTORS = ClassName.get("java.util.stream", "Collectors");
-        MethodReference collectors = new MethodReference(JAVA_UTIL_COLLECTORS, "toList");
-
+    public CodeBlock formatInputVarForMemberConversion(CodeBlock methodBlock, CodeBlock inputVar) {
         CodeBlock.Builder returnCodeBlockBuilder = CodeBlock.builder().add(inputVar);
+
+        // If methodBlock is transforming to Dafny ByteSequence, it is expecting either a byte[]
+        //   or ByteBuffer.
+        // In this case, inputVar is of type SdkBytes.
+        // dafny-java-converison should not have a ByteSequence constructor that directly takes in
+        //   SdkBytes. If it did, Polymorph would need to depend on AWS SDK for Java V2.
+        // The conversion from inputVar as SdkBytes to a Dafny ByteSequence looks like
+        //   ByteSequence(inputVar.asByteArray())
         if (methodBlock.toString().contains("ByteSequence")) {
             return returnCodeBlockBuilder.add(".asByteArray()").build();
         }
+
+        // Some AWS SDK V2 types now require explicit String conversion, while they didn't in V1.
         if (methodTypeRequiresStringConversion(methodBlock)) {
+            ClassName JAVA_UTIL_COLLECTORS = ClassName.get("java.util.stream", "Collectors");
+            MethodReference collectors = new MethodReference(JAVA_UTIL_COLLECTORS, "toList");
+
             return returnCodeBlockBuilder
                 .add(".stream().map(Object::toString).collect(")
                 .add(collectors.asNormalReference())
@@ -230,8 +231,6 @@ public class ToDafnyAwsV2 extends ToDafny {
     /**
      * This logic is the same as ToDafny's logic,
      * except it calls an only-defined-in-V2 formatEnumCaseName function.
-     * @param shape
-     * @return
      */
     @Override
     @SuppressWarnings("OptionalGetWithoutIsPresent")
@@ -390,8 +389,6 @@ public class ToDafnyAwsV2 extends ToDafny {
         // Opaque Errors are not in the model,
         // so we cannot use any of our helper methods for this method.
 
-        // This is memberDeclaration from above,
-        // but with calls to target.dafnyNameResolver replaced with their expected response.
         CodeBlock memberDeclaration = CodeBlock.of(
                 "$T $L",
                 ParameterizedTypeName.get(

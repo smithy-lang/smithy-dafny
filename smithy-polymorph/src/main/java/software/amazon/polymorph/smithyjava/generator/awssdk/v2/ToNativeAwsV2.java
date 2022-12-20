@@ -203,15 +203,6 @@ public class ToNativeAwsV2 extends ToNative {
                 Dafny.getMemberFieldValue(member));
     }
 
-//    protected String modifiedMemberFieldValue(MemberShape member) {
-//        CodeBlock memberFieldValue = Dafny.getMemberFieldValue(member);
-//        Shape targetShape = subject.model.expectShape(member.getTarget());
-//        if (targetShape.getType() == ShapeType.BLOB) {
-//            return memberFieldValue.toString() + ".toRawArray()";
-//        }
-//        return memberFieldValue.toString();
-//    }
-
     CodeBlock setWithConversionCallAndToArray(MemberShape member) {
         return CodeBlock.of("$L.$L($L($L.$L).toArray($L_$L))",
             VAR_BUILDER,
@@ -250,19 +241,15 @@ public class ToNativeAwsV2 extends ToNative {
     MethodSpec generateConvertEnum(ShapeId shapeId) {
         final StringShape shape = subject.model.expectShape(shapeId, StringShape.class);
         final ClassName returnType = subject.nativeNameResolver.classForEnum(shape);
-        MethodSpec.Builder method = modeledEnumNOTCommon(shape, returnType);
-        // fromValue is an AWS SDK specific feature
-        method.addStatement("return $T.fromValue($L.toString())", returnType, VAR_INPUT);
-        return method.build();
+        MethodSpec method = modeledEnum(shape);
+        return method;
     }
 
-    // TODO this is unshippable
-    protected final MethodSpec.Builder modeledEnumNOTCommon(
-        StringShape shape, ClassName returnType
-    ) {
+    protected final MethodSpec modeledEnum(StringShape shape) {
         final ShapeId shapeId = shape.getId();
         final String methodName = capitalize(shapeId.getName());
         final TypeName inputType = subject.dafnyNameResolver.typeForShape(shapeId);
+        final ClassName returnType = subject.nativeNameResolver.classForEnum(shape);
         MethodSpec.Builder method = initializeMethodSpec(methodName, inputType, returnType);
         final EnumTrait enumTrait = shape.getTrait(EnumTrait.class).orElseThrow();
         if (!enumTrait.hasNames()) {
@@ -284,30 +271,11 @@ public class ToNativeAwsV2 extends ToNative {
             })
             .forEachOrdered(name -> method
                 .beginControlFlow("if ($L.$L())", VAR_INPUT, Dafny.datatypeConstructorIs(name))
-                .addStatement("return $T.$L", returnType, transformedEnumValue(returnType, name))
+                .addStatement("return $T.$L", returnType, subject.nativeNameResolver.v2FormattedEnumValue(returnType, name))
                 .endControlFlow()
             );
-        return method;
+
+        method.addStatement("return $T.fromValue($L.toString())", returnType, VAR_INPUT);
+        return method.build();
     }
-
-    protected final String transformedEnumValue(final ClassName returnType, final String enumClassName) {
-        if ("ECC_SECG_P256K1".equals(enumClassName)) {
-            return "ECC_SECG_P256_K1";
-        }
-
-        if (enumContainsUpperCamelcase(returnType.simpleName())) {
-            return CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, enumClassName);
-        }
-
-        return enumClassName;
-    }
-
-    protected final boolean enumContainsUpperCamelcase(final String enumClassName) {
-        Set<String> set = new HashSet<String>();
-
-        set.add("GrantOperation");
-
-        return set.contains(enumClassName);
-    }
-
 }

@@ -27,7 +27,7 @@ import static software.amazon.polymorph.smithyjava.nameresolver.Constants.DAFNY_
 import static software.amazon.polymorph.smithyjava.nameresolver.Constants.SMITHY_API_UNIT;
 
 /**
- * Generates an AWS SDK Shim for the AWS SKD for Java V2
+ * Generates an AWS SDK Shim for the AWS SDK for Java V2
  * exposing an AWS Service's operations to Dafny Generated Java.
  */
 public class ShimV2 extends Generator {
