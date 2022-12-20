@@ -16,7 +16,6 @@ import static software.amazon.polymorph.smithydafny.DafnyNameResolver.traitNameF
 import static software.amazon.smithy.utils.StringUtils.capitalize;
 import static software.amazon.smithy.utils.StringUtils.uncapitalize;
 
-
 public class AwsSdkDafnyV2 extends Dafny {
 
     public AwsSdkDafnyV2(ServiceShape serviceShape, Model model) {

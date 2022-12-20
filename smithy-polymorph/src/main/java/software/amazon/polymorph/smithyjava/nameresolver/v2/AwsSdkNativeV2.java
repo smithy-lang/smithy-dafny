@@ -1,9 +1,11 @@
 package software.amazon.polymorph.smithyjava.nameresolver;
 
+import com.google.common.base.CaseFormat;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -174,13 +176,25 @@ public class AwsSdkNativeV2 extends Native {
         return super.classNameForStructure(shape);
     }
 
-    /** The AWS SDK for Java V2 replaces
-     *  the last 'Response' with 'Result'
-     *  in operation outputs.
-     */
     public TypeName typeForOperationOutput(final ShapeId shapeId) {
         StructureShape shape = model.expectShape(shapeId, StructureShape.class);
         return classNameForStructure(shape);
+    }
+
+    public final String v2FormattedEnumValue(final ClassName returnType, final String enumClassName) {
+        if ("ECC_SECG_P256K1".equals(enumClassName)) {
+            return "ECC_SECG_P256_K1";
+        }
+
+        if (enumContainsUpperCamelcase(returnType.simpleName())) {
+            return CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, enumClassName);
+        }
+
+        return enumClassName;
+    }
+
+    protected final boolean enumContainsUpperCamelcase(final String enumClassName) {
+        return enumClassName.equals("GrantOperation");
     }
 
     /**

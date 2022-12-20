@@ -292,8 +292,8 @@ public abstract class ToDafny extends Generator {
     /** CodeBlock invoking the member conversion method. */
     protected CodeBlock memberConversion(MemberShape memberShape, CodeBlock inputVar) {
         return CodeBlock.of("$L($L)",
-            memberConversionMethodReference(memberShape).asNormalReference(),
-            inputVar
+                memberConversionMethodReference(memberShape).asNormalReference(),
+                inputVar
         );
     }
 
