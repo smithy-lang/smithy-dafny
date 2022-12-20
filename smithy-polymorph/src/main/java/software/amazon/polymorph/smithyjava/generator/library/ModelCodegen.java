@@ -12,7 +12,7 @@ import software.amazon.polymorph.smithyjava.modeled.ModeledUnion;
 import software.amazon.polymorph.smithyjava.unmodeled.CollectionOfErrors;
 import software.amazon.polymorph.smithyjava.unmodeled.NativeError;
 import software.amazon.polymorph.smithyjava.unmodeled.OpaqueError;
-import software.amazon.smithy.model.shapes.ResourceShape;
+
 import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.UnionShape;
@@ -68,7 +68,6 @@ class ModelCodegen extends Generator {
         // Unions
         subject.getUnionsInServiceNamespace().stream()
                 .map(this::modeledUnion).forEachOrdered(rtn::add);
-        // TODO Resources
         return rtn;
     }
 
@@ -86,17 +85,5 @@ class ModelCodegen extends Generator {
 
     JavaFile modeledUnion(UnionShape shape) {
         return ModeledUnion.javaFile(modelPackageName, shape, subject);
-    }
-
-    JavaFile generateResourceInterface(ResourceShape shape) {
-        throw new RuntimeException("TODO");
-    }
-
-    JavaFile generateResourceClass(ResourceShape shape) {
-        throw new RuntimeException("TODO");
-    }
-
-    JavaFile generateNativeWrapper(ResourceShape shape) {
-        throw new RuntimeException("TODO");
     }
 }

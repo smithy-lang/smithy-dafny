@@ -23,7 +23,7 @@ import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.smithy.model.shapes.ShapeType;
 
 public abstract class Generator {
-    protected static final Modifier[] PUBLIC_STATIC = new Modifier[]{Modifier.PUBLIC, Modifier.STATIC};
+    public static final Modifier[] PUBLIC_STATIC = new Modifier[]{Modifier.PUBLIC, Modifier.STATIC};
     protected static final Modifier[] PRIVATE_FINAL = new Modifier[]{Modifier.PRIVATE, Modifier.FINAL};
     private static final Logger LOGGER = LoggerFactory.getLogger(Generator.class);
 
