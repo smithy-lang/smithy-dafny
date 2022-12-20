@@ -499,7 +499,7 @@ public class DafnyApiCodegen {
     private TokenTree generateMutableInvariantInterface(ShapeId shapeId) {
       // Dealing with mutable state is HARD.
       // At this time we only support this
-      // for reference and not for services.
+      // for resources and not for services.
       final boolean mutableState = model
         .getShape(shapeId)
         .orElseThrow()
