@@ -355,6 +355,9 @@ public class TypeConversionCodegen {
                     if (StringUtils.equals(nameResolver.classPropertyTypeForStructureMember(memberShape),
                             AwsSdkDotNetNameResolver.DDB_ATTRIBUTE_VALUE_MODEL_NAMESPACE)) {
                         propertyType = AwsSdkDotNetNameResolver.DDB_V2_ATTRIBUTE_VALUE;
+                    } else if (StringUtils.equals(nameResolver.classPropertyForStructureMember(memberShape),
+                            "DdbClient")) {
+                        propertyType = nameResolver.classPropertyTypeForStructureMember(memberShape);
                     } else {
                         propertyType = nameResolver.classPropertyTypeForStructureMember(memberShape);
                     }
