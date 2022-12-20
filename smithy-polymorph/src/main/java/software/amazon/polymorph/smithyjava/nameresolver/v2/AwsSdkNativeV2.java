@@ -202,15 +202,6 @@ public class AwsSdkNativeV2 extends Native {
         StructureShape shape = model.expectShape(shapeId, StructureShape.class);
         ClassName smithyName = classNameForStructure(shape);
         // TODO: handle AWS SDK v2 naming convention, which uses 'Response', not 'Result'
-        if (smithyName.simpleName().endsWith("Response")) {
-            return ClassName.get(smithyName.packageName(),
-                    smithyName.simpleName()
-                            .substring(
-                                    0,
-                                    smithyName.simpleName().lastIndexOf("Response"))
-                            + "Response"
-            );
-        }
 
         return smithyName;
     }
@@ -249,6 +240,10 @@ public class AwsSdkNativeV2 extends Native {
             rtn = "dynamodbv2";
         }
         return "software.amazon.awssdk.services.%s".formatted(rtn);
+    }
+
+    public String classNameForSdkBytes() {
+        return "software.amazon.awssdk.core.SdkBytes";
     }
 
     static String packageNameForAwsSdkV2Shape(final Shape shape) {

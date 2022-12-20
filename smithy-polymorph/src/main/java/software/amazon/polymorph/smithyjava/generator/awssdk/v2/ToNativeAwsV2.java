@@ -8,9 +8,12 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 
+import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.HashSet;
@@ -18,19 +21,24 @@ import java.util.stream.Collectors;
 
 import javax.lang.model.element.Modifier;
 
+import software.amazon.polymorph.smithyjava.MethodReference;
 import software.amazon.polymorph.smithyjava.generator.ToNative;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
+import software.amazon.polymorph.smithyjava.unmodeled.CollectionOfErrors;
+import software.amazon.polymorph.smithyjava.unmodeled.OpaqueError;
 import software.amazon.polymorph.utils.ModelUtils;
 
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
+import software.amazon.smithy.model.shapes.ShapeType;
 import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.EnumDefinition;
 import software.amazon.smithy.model.traits.EnumTrait;
 
+import static software.amazon.polymorph.smithyjava.generator.Generator.Constants.IDENTITY_FUNCTION;
 import static software.amazon.smithy.utils.StringUtils.capitalize;
 import static software.amazon.smithy.utils.StringUtils.uncapitalize;
 
@@ -57,12 +65,24 @@ import static software.amazon.smithy.utils.StringUtils.uncapitalize;
 public class ToNativeAwsV2 extends ToNative {
     protected final static String VAR_BUILDER = "builder";
     protected final static String VAR_TEMP = "temp";
+    protected static final ClassName BLOB_TO_NATIVE_SDK_BYTES = ClassName.get("software.amazon.awssdk.core", "SdkBytes");
 
     // TODO: for V2 support, use abstract AwsSdk name resolvers and sub class for V1 or V2.
 
     // Hack to override CodegenSubject
     // See code comment on ../library/ModelCodegen for details.
     private final JavaAwsSdkV2 subject;
+
+    protected static Map<ShapeType, MethodReference> V2_CONVERSION_METHOD_FROM_SHAPE_TYPE;
+
+    static {
+        V2_CONVERSION_METHOD_FROM_SHAPE_TYPE = Map.ofEntries(
+            Map.entry(ShapeType.BLOB,
+                new MethodReference(BLOB_TO_NATIVE_SDK_BYTES, "fromByteArray")),
+            Map.entry(ShapeType.TIMESTAMP,
+                new MethodReference(COMMON_TO_NATIVE_SIMPLE, "Instant"))
+        );
+    }
 
     public ToNativeAwsV2(JavaAwsSdkV2 awsSdk) {
         super(awsSdk, ClassName.get(awsSdk.packageName, TO_NATIVE));
@@ -163,17 +183,10 @@ public class ToNativeAwsV2 extends ToNative {
 
     @Override
     protected CodeBlock setWithConversionCall(MemberShape member, CodeBlock getMember) {
-        String methodName = setMemberField(member).toString();
-        if(memberConversionMethodReference(member).asNormalReference().toString().contains("ByteBuffer")) {
-            return CodeBlock.of("$L.$L(SdkBytes.fromByteBuffer($L($L.$L)))",
-                VAR_BUILDER,
-                setMemberField(member),
-                memberConversionMethodReference(member).asNormalReference(),
-                VAR_INPUT,
-                Dafny.getMemberFieldValue(member));
-        }
-        if(memberConversionMethodReference(member).asNormalReference().toString().contains("Date")) {
-            return CodeBlock.of("$L.$L($L($L.$L).toInstant())",
+        Shape targetShape = subject.model.expectShape(member.getTarget());
+        // SDK V2 treats Blobs as SdkBytes. SdkBytes are a SDK V2-specific type defined in the V2 package.
+        if (targetShape.getType() == ShapeType.BLOB) {
+            return CodeBlock.of("$L.$L($L((byte[]) ($L.$L.toRawArray())))",
                 VAR_BUILDER,
                 setMemberField(member),
                 memberConversionMethodReference(member).asNormalReference(),
@@ -188,6 +201,15 @@ public class ToNativeAwsV2 extends ToNative {
                 Dafny.getMemberFieldValue(member));
     }
 
+//    protected String modifiedMemberFieldValue(MemberShape member) {
+//        CodeBlock memberFieldValue = Dafny.getMemberFieldValue(member);
+//        Shape targetShape = subject.model.expectShape(member.getTarget());
+//        if (targetShape.getType() == ShapeType.BLOB) {
+//            return memberFieldValue.toString() + ".toRawArray()";
+//        }
+//        return memberFieldValue.toString();
+//    }
+
     CodeBlock setWithConversionCallAndToArray(MemberShape member) {
         return CodeBlock.of("$L.$L($L($L.$L).toArray($L_$L))",
             VAR_BUILDER,
@@ -196,6 +218,15 @@ public class ToNativeAwsV2 extends ToNative {
                 VAR_INPUT,
                 Dafny.getMemberFieldValue(member),
                 uncapitalize(member.getMemberName()), VAR_TEMP);
+    }
+
+    @Override
+    protected MethodReference memberConversionMethodReference(MemberShape memberShape) {
+        Shape targetShape = subject.model.expectShape(memberShape.getTarget());
+        if (V2_CONVERSION_METHOD_FROM_SHAPE_TYPE.containsKey(targetShape.getType())) {
+            return V2_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(targetShape.getType());
+        }
+        return super.memberConversionMethodReference(memberShape);
     }
 
     /** @return CodeBlock of Method to set a member field. */
@@ -276,4 +307,5 @@ public class ToNativeAwsV2 extends ToNative {
 
         return set.contains(enumClassName);
     }
+
 }

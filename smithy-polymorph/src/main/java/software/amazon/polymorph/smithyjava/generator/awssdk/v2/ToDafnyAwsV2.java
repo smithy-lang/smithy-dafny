@@ -14,6 +14,7 @@ import com.squareup.javapoet.WildcardTypeName;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -22,6 +23,7 @@ import java.util.stream.Collectors;
 import javax.lang.model.element.Modifier;
 
 import dafny.DafnySequence;
+import software.amazon.polymorph.smithyjava.MethodReference;
 import software.amazon.polymorph.smithyjava.generator.ToDafny;
 import software.amazon.polymorph.smithyjava.nameresolver.AwsSdkNativeV2;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
@@ -64,15 +66,29 @@ import static software.amazon.smithy.utils.StringUtils.uncapitalize;
  * </ul>
  */
 public class ToDafnyAwsV2 extends ToDafny {
+    protected static final ClassName JAVA_UTIL_COLLECTORS = ClassName.get("java.util.stream", "Collectors");
+    protected static final ClassName JAVA_NIO_BYTEBUFFER = ClassName.get("java.nio", "ByteBuffer");
+
+
     // Hack to override subject to JavaAwsSdkV2
     // See code comment on ../library/ModelCodegen for details.
     final JavaAwsSdkV2 subject;
+
+//    protected static Map<ShapeType, MethodReference> V2_CONVERSION_METHOD_FROM_SHAPE_TYPE;
+//
+//    static {
+//        V2_CONVERSION_METHOD_FROM_SHAPE_TYPE = Map.ofEntries(
+//            Map.entry(ShapeType.BLOB,
+//                new MethodReference(JAVA_NIO_BYTEBUFFER, "wrap"))
+//        );
+//    }
 
     public ToDafnyAwsV2(JavaAwsSdkV2 awsSdk) {
         super(
                 awsSdk,
                 //TODO: JavaAwsSdkV2 should really have a declared packageName, not rely on the name resolver
                 ClassName.get(awsSdk.dafnyNameResolver.packageName(), TO_DAFNY));
+
         this.subject = awsSdk;
     }
 
@@ -82,6 +98,15 @@ public class ToDafnyAwsV2 extends ToDafny {
                 .builder(subject.dafnyNameResolver.packageName(), toDafny());
         return Collections.singleton(builder.build());
     }
+
+//    @Override
+//    protected MethodReference memberConversionMethodReference(MemberShape memberShape) {
+//        Shape targetShape = subject.model.expectShape(memberShape.getTarget());
+//        if (V2_CONVERSION_METHOD_FROM_SHAPE_TYPE.containsKey(targetShape.getType())) {
+//            return V2_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(targetShape.getType());
+//        }
+//        return super.memberConversionMethodReference(memberShape);
+//    }
 
     TypeSpec toDafny() {
         LinkedHashSet<ShapeId> operationOutputs = subject.serviceShape
