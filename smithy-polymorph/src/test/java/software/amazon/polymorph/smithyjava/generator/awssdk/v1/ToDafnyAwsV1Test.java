@@ -10,6 +10,7 @@ import java.util.Map;
 
 import software.amazon.polymorph.smithyjava.ModelConstants;
 import software.amazon.polymorph.smithyjava.generator.ToDafnyConstants;
+import software.amazon.polymorph.smithyjava.generator.awssdk.TestSetupUtils;
 import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.ShapeId;
@@ -26,13 +27,13 @@ public class ToDafnyAwsV1Test {
     @Before
     public void setup() {
         model = TestSetupUtils.setupTwoLocalModel(ModelConstants.KMS_KITCHEN, ModelConstants.OTHER_NAMESPACE);
-        underTest  = new ToDafnyAwsV1(TestSetupUtils.setupAwsSdk(model, "kms"));
+        underTest  = new ToDafnyAwsV1(TestSetupUtils.setupAwsSdkV1(model, "kms"));
     }
 
     @Test
     public void generateConvertResponseV1() {
         Model localModel = TestSetupUtils.setupLocalModel(ModelConstants.KMS_A_STRING_OPERATION);
-        ToDafnyAwsV1 localUnderTest = new ToDafnyAwsV1(TestSetupUtils.setupAwsSdk(localModel, "kms"));
+        ToDafnyAwsV1 localUnderTest = new ToDafnyAwsV1(TestSetupUtils.setupAwsSdkV1(localModel, "kms"));
         ShapeId responseId = ShapeId.fromParts("com.amazonaws.kms", "DoSomethingResponse");
         MethodSpec actual = localUnderTest.generateConvertResponseV1(responseId);
         tokenizeAndAssertEqual(ToDafnyAwsV1Constants.DO_SOMETHING_RESPONSE, actual.toString());
@@ -86,7 +87,7 @@ public class ToDafnyAwsV1Test {
     @Test
     public void generate() {
         Model localModel = TestSetupUtils.setupLocalModel(ModelConstants.KMS_A_STRING_OPERATION);
-        ToDafnyAwsV1 localUnderTest = new ToDafnyAwsV1(TestSetupUtils.setupAwsSdk(localModel, "kms"));
+        ToDafnyAwsV1 localUnderTest = new ToDafnyAwsV1(TestSetupUtils.setupAwsSdkV1(localModel, "kms"));
         final Map<Path, TokenTree> actual = localUnderTest.generate();
         final Path expectedPath = Path.of("Dafny/Com/Amazonaws/Kms/ToDafny.java");
         Path[] temp = new Path[1];

@@ -1,6 +1,5 @@
 package software.amazon.polymorph.smithyjava.generator.awssdk.v2;
 
-import com.google.common.base.CaseFormat;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.JavaFile;
@@ -14,18 +13,15 @@ import com.squareup.javapoet.WildcardTypeName;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.HashSet;
 import java.util.stream.Collectors;
 import javax.lang.model.element.Modifier;
 
 import dafny.DafnySequence;
 import software.amazon.polymorph.smithyjava.MethodReference;
 import software.amazon.polymorph.smithyjava.generator.ToDafny;
-import software.amazon.polymorph.smithyjava.nameresolver.AwsSdkNativeV2;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.smithy.model.shapes.ListShape;
@@ -40,10 +36,8 @@ import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.EnumDefinition;
 import software.amazon.smithy.model.traits.EnumTrait;
-import software.amazon.smithy.model.traits.ErrorTrait;
 
 import static software.amazon.smithy.utils.StringUtils.capitalize;
-import static software.amazon.smithy.utils.StringUtils.uncapitalize;
 
 /**
  * ToDafnyAwsV2 generates ToDafny.
@@ -66,22 +60,9 @@ import static software.amazon.smithy.utils.StringUtils.uncapitalize;
  * </ul>
  */
 public class ToDafnyAwsV2 extends ToDafny {
-    protected static final ClassName JAVA_UTIL_COLLECTORS = ClassName.get("java.util.stream", "Collectors");
-    protected static final ClassName JAVA_NIO_BYTEBUFFER = ClassName.get("java.nio", "ByteBuffer");
-
-
     // Hack to override subject to JavaAwsSdkV2
     // See code comment on ../library/ModelCodegen for details.
     final JavaAwsSdkV2 subject;
-
-//    protected static Map<ShapeType, MethodReference> V2_CONVERSION_METHOD_FROM_SHAPE_TYPE;
-//
-//    static {
-//        V2_CONVERSION_METHOD_FROM_SHAPE_TYPE = Map.ofEntries(
-//            Map.entry(ShapeType.BLOB,
-//                new MethodReference(JAVA_NIO_BYTEBUFFER, "wrap"))
-//        );
-//    }
 
     public ToDafnyAwsV2(JavaAwsSdkV2 awsSdk) {
         super(
@@ -177,6 +158,52 @@ public class ToDafnyAwsV2 extends ToDafny {
         };
     }
 
+    @Override
+    protected CodeBlock memberConversion(MemberShape memberShape, CodeBlock inputVar) {
+
+        CodeBlock methodBlock = memberConversionMethodReference(memberShape).asNormalReference();
+
+        return CodeBlock.of("$L($L)",
+            methodBlock,
+            transformInputVarForMemberConversion(methodBlock, inputVar)
+        );
+    }
+
+    /**
+     * Transforms
+     * @param methodBlock
+     * @param inputVar
+     * @return
+     */
+    public CodeBlock transformInputVarForMemberConversion(CodeBlock methodBlock, CodeBlock inputVar) {
+        ClassName JAVA_UTIL_COLLECTORS = ClassName.get("java.util.stream", "Collectors");
+        MethodReference collectors = new MethodReference(JAVA_UTIL_COLLECTORS, "toList");
+
+        CodeBlock.Builder returnCodeBlockBuilder = CodeBlock.builder().add(inputVar);
+        if (methodBlock.toString().contains("ByteSequence")) {
+            return returnCodeBlockBuilder.add(".asByteArray()").build();
+        }
+        if (methodTypeRequiresStringConversion(methodBlock)) {
+            return returnCodeBlockBuilder
+                .add(".stream().map(Object::toString).collect(")
+                .add(collectors.asNormalReference())
+                .add("())")
+                .build();
+        }
+        return inputVar;
+    }
+
+    /**
+     * Returns true if the method name indicates the type requires conversion to String.
+     * Some AWS SDK V2 types now require explicit String conversion, while they didn't in V1.
+     * @return true if the method name indicates the type requires conversion to String; false otherwise
+     */
+    protected boolean methodTypeRequiresStringConversion(CodeBlock methodBlock) {
+        return methodBlock.toString().contains("EncryptionAlgorithmSpecList")
+            || methodBlock.toString().contains("SigningAlgorithmSpecList")
+            || methodBlock.toString().contains("GrantOperationList");
+    }
+
     MethodSpec generateConvertEnumString(ShapeId shapeId) {
         final StringShape shape = subject.model.expectShape(shapeId, StringShape.class);
         String methodName = capitalize(shapeId.getName());
@@ -197,12 +224,18 @@ public class ToDafnyAwsV2 extends ToDafny {
 
     protected MethodSpec generateConvertEnumEnum(ShapeId shapeId) {
         final StringShape shape = subject.model.expectShape(shapeId, StringShape.class);
-        return modeledOVERIDEEnum(shape);
+        return modeledEnum(shape);
     }
 
-    // TODO this is unshippable
+    /**
+     * This logic is the same as ToDafny's logic,
+     * except it calls an only-defined-in-V2 formatEnumCaseName function.
+     * @param shape
+     * @return
+     */
+    @Override
     @SuppressWarnings("OptionalGetWithoutIsPresent")
-    protected MethodSpec modeledOVERIDEEnum(StringShape shape) {
+    protected MethodSpec modeledEnum(StringShape shape) {
         final ShapeId shapeId = shape.getId();
         String methodName = capitalize(shapeId.getName());
         final EnumTrait enumTrait = shape.getTrait(EnumTrait.class).orElseThrow(
@@ -232,7 +265,8 @@ public class ToDafnyAwsV2 extends ToDafny {
                 }
             })
             .forEach(name -> builder
-                .beginControlFlow("case $L:", transformEnumCaseName(dafnyEnumClass, name))
+                .beginControlFlow("case $L:",
+                    subject.dafnyNameResolver.formatEnumCaseName(dafnyEnumClass, name))
                 .addStatement(
                     "return $T.$L()", dafnyEnumClass, Dafny.datatypeConstructorCreate(name))
                 .endControlFlow()
@@ -248,24 +282,6 @@ public class ToDafnyAwsV2 extends ToDafny {
             .endControlFlow();
         builder.endControlFlow();
         return builder.build();
-    }
-
-    protected final String transformEnumCaseName(final TypeName dafnyEnumClass, final String name) {
-        if (name.contains("ECC_SECG_P256K1")) {
-            return "ECC_SECG_P256_K1";
-        }
-
-        return enumRequiresUpperCamelcaseConversion(dafnyEnumClass.toString()) ? CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, name) : name;
-    }
-
-    // TODO unshippable
-    protected final boolean enumRequiresUpperCamelcaseConversion(final String enumClassName) {
-        Set<String> set = new HashSet<String>();
-
-        set.add("Dafny.Com.Amazonaws.Kms.Types.KeyState");
-        set.add("Dafny.Com.Amazonaws.Kms.Types.GrantOperation");
-
-        return set.contains(enumClassName);
     }
 
     /**
@@ -284,18 +300,10 @@ public class ToDafnyAwsV2 extends ToDafny {
         return super.modeledStructure(structureShape);
     }
 
-    /** For AWS SDK structure members, the getter is `get + capitalized member name`. */
+
     @Override
     protected CodeBlock getMember(CodeBlock variableName, MemberShape memberShape) {
-        // TODO This is unshippable
-        if ("AWSAccountId".equals(memberShape.getMemberName())) {
-            return CodeBlock.of("$L.awsAccountId()", variableName);
-        }
-        // TODO This is unshippable
-        if ("message".equals(uncapitalize(memberShape.getMemberName()))) {
-            return CodeBlock.of("$L.get$L()", variableName, capitalize(memberShape.getMemberName()));
-        }
-        return CodeBlock.of("$L.$L()", variableName, uncapitalize(memberShape.getMemberName()));
+        return subject.dafnyNameResolver.methodForGetMember(variableName, memberShape);
     }
 
     /**
@@ -312,11 +320,6 @@ public class ToDafnyAwsV2 extends ToDafny {
         CodeBlock genericCall = AGGREGATE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(shape.getType()).asNormalReference();
         CodeBlock getTypeDescriptor = subject.dafnyNameResolver.typeDescriptor(memberShape.getTarget());
 
-        String nativeValueVar = "nativeValue";
-//        if (getTypeDescriptor.toString().contains("EncryptionAlgorithmSpec")) {
-//            nativeValueVar = nativeValueVar + ".stream().map(Object::toString).collect(Collectors.toList())";
-//        }
-
         ParameterSpec parameterSpec = ParameterSpec
                 .builder(subject.nativeNameResolver.typeForListSetOrMapNoEnum(shape.getId()), "nativeValue")
                 .build();
@@ -326,7 +329,7 @@ public class ToDafnyAwsV2 extends ToDafny {
                 .returns(subject.dafnyNameResolver.typeForAggregateWithWildcard(shape.getId()))
                 .addParameter(parameterSpec)
                 .addStatement("return $L(\n$L, \n$L, \n$L)",
-                        genericCall, nativeValueVar, memberConverter, getTypeDescriptor)
+                        genericCall, "nativeValue", memberConverter, getTypeDescriptor)
                 .build();
     }
 

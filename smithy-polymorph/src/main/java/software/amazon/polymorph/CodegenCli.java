@@ -144,15 +144,15 @@ public class CodegenCli {
     //TODO: Figure out a nice way to differentiate AWS SDK Java V1 from AWS SDK Java V2
     // Or maybe we just hard code one or the other and call that good enough
     static String javaAwsSdkV1(Path outputJavaV1Dir, ServiceShape serviceShape, Model model) {
-        final JavaAwsSdkV1 javaShimCodegen = JavaAwsSdkV1.createJavaAwsSdkV1(serviceShape, model);
-        writeTokenTreesIntoDir(javaShimCodegen.generate(), outputJavaV1Dir);
-        return "Java code generated in %s".formatted(outputJavaV1Dir);
+        final JavaAwsSdkV1 javaV1ShimCodegen = JavaAwsSdkV1.createJavaAwsSdkV1(serviceShape, model);
+        writeTokenTreesIntoDir(javaV1ShimCodegen.generate(), outputJavaV1Dir);
+        return "Java V1 code generated in %s".formatted(outputJavaV1Dir);
     }
 
     static String javaAwsSdkV2(Path outputJavaV2Dir, ServiceShape serviceShape, Model model) {
-        final JavaAwsSdkV2 javaShimCodegen = JavaAwsSdkV2.createJavaAwsSdkV2(serviceShape, model);
-        writeTokenTreesIntoDir(javaShimCodegen.generate(), outputJavaV2Dir);
-        return "Java code generated in %s".formatted(outputJavaV2Dir);
+        final JavaAwsSdkV2 javaV2ShimCodegen = JavaAwsSdkV2.createJavaAwsSdkV2(serviceShape, model);
+        writeTokenTreesIntoDir(javaV2ShimCodegen.generate(), outputJavaV2Dir);
+        return "Java V2 code generated in %s".formatted(outputJavaV2Dir);
     }
 
     static String netLocalService(Path outputNetDir, ServiceShape serviceShape, Model model) {

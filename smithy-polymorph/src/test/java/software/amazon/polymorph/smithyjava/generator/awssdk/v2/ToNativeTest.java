@@ -1,4 +1,4 @@
-package software.amazon.polymorph.smithyjava.generator.awssdk.V2;
+package software.amazon.polymorph.smithyjava.generator.awssdk.v2;
 
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.JavaFile;
@@ -13,6 +13,7 @@ import java.util.Set;
 
 import software.amazon.polymorph.smithyjava.MethodReference;
 import software.amazon.polymorph.smithyjava.ModelConstants;
+import software.amazon.polymorph.smithyjava.generator.awssdk.TestSetupUtils;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.smithy.model.Model;
@@ -26,7 +27,8 @@ import software.amazon.smithy.model.shapes.StructureShape;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
-import static software.amazon.polymorph.smithyjava.generator.awssdk.ToNativeConstants.KEY_USAGE_TYPE;
+
+import static software.amazon.polymorph.smithyjava.generator.awssdk.v2.ToNativeConstants.KEY_USAGE_TYPE;
 import static software.amazon.polymorph.util.Tokenizer.tokenizeAndAssertEqual;
 
 @SuppressWarnings("OptionalGetWithoutIsPresent")
@@ -88,8 +90,8 @@ public class ToNativeTest {
     @Before
     public void setup() {
         model = TestSetupUtils.setupTwoLocalModel(ModelConstants.KMS_KITCHEN, ModelConstants.OTHER_NAMESPACE);
-        underTest  = new ToNativeAwsV2(TestSetupUtils.setupAwsSdk(model, "kms"));
-        underTestAbstract  = new ToNativeTestImpl(TestSetupUtils.setupAwsSdk(model, "kms"));
+        underTest  = new ToNativeAwsV2(TestSetupUtils.setupAwsSdkV2(model, "kms"));
+        underTestAbstract  = new ToNativeTestImpl(TestSetupUtils.setupAwsSdkV2(model, "kms"));
     }
 
     @Test
@@ -98,7 +100,7 @@ public class ToNativeTest {
         StructureShape structureShape = model.expectShape(structureId, StructureShape.class);
         MemberShape stringMember = structureShape.getMember("name").get();
         CodeBlock actual = underTest.setMemberField(stringMember);
-        String expected = "withName";
+        String expected = "name";
         tokenizeAndAssertEqual(expected, actual.toString());
     }
 
@@ -238,7 +240,7 @@ public class ToNativeTest {
     @Test
     public void generate() {
         Model model = TestSetupUtils.setupLocalModel(ModelConstants.KMS_A_STRING_OPERATION);
-        ToNativeAwsV2 underTest = new ToNativeAwsV2(TestSetupUtils.setupAwsSdk(model, "kms"));
+        ToNativeAwsV2 underTest = new ToNativeAwsV2(TestSetupUtils.setupAwsSdkV2(model, "kms"));
         final Map<Path, TokenTree> actual = underTest.generate();
         final Path expectedPath = Path.of("Dafny/Com/Amazonaws/Kms/ToNative.java");
         Path[] temp = new Path[1];
