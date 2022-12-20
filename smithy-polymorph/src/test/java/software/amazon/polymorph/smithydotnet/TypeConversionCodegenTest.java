@@ -67,6 +67,7 @@ public class TypeConversionCodegenTest {
         final String actual = generate(codegen);
         final String expected = """
                 using System.Linq;
+                using System;
                 namespace Test.Foobar {
                     internal static class TypeConversion {
                        public static System.Exception FromDafny_CommonError(Dafny.Test.Foobar.Types._IError value) {
