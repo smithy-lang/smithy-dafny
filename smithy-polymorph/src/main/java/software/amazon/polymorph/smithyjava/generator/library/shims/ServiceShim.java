@@ -74,11 +74,11 @@ public class ServiceShim extends ShimLibrary {
                 trait.getConfigId().getName()).build();
     }
 
-    protected FieldSpec getField() {
+    private FieldSpec getField() {
         return FieldSpec.builder(
                         subject.dafnyNameResolver.typeForShape(
                                 targetShape.toShapeId()),
-                        DAFNY_INTERFACE_FIELD)
+                        INTERFACE_FIELD)
                 .addModifiers(PRIVATE_FINAL)
                 .build();
     }
@@ -128,14 +128,14 @@ public class ServiceShim extends ShimLibrary {
                 thisClassName.simpleName(),
                 DAFNY_VAR);
         method.addCode(ifFailure());
-        method.addStatement("this.$L = $L.dtor_value()", DAFNY_INTERFACE_FIELD, RESULT_VAR);
+        method.addStatement("this.$L = $L.dtor_value()", INTERFACE_FIELD, RESULT_VAR);
         return method.build();
     }
 
     protected MethodSpec impl() {
         return MethodSpec.methodBuilder("impl")
                 .addModifiers(PROTECTED)
-                .addStatement("return this.$L", DAFNY_INTERFACE_FIELD)
+                .addStatement("return this.$L", INTERFACE_FIELD)
                 .returns(Dafny.interfaceForService(this.targetShape))
                 .build();
     }

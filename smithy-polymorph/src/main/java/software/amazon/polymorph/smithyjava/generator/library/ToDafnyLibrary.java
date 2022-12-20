@@ -21,7 +21,6 @@ import dafny.DafnySequence;
 import software.amazon.polymorph.smithyjava.MethodReference;
 import software.amazon.polymorph.smithyjava.generator.ToDafny;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
-import software.amazon.polymorph.smithyjava.nameresolver.Native;
 import software.amazon.polymorph.smithyjava.unmodeled.CollectionOfErrors;
 import software.amazon.polymorph.smithyjava.unmodeled.NativeError;
 import software.amazon.polymorph.smithyjava.unmodeled.OpaqueError;
@@ -36,7 +35,7 @@ import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.ShapeType;
 import software.amazon.smithy.model.shapes.StructureShape;
 
-import static software.amazon.polymorph.smithyjava.NamespaceHelper.AWS_SERVICE_NAMESPACE_PREFIX;
+import static software.amazon.polymorph.utils.AwsSdkNameResolverHelpers.isAwsSdkServiceId;
 import static software.amazon.smithy.utils.StringUtils.capitalize;
 import static software.amazon.smithy.utils.StringUtils.uncapitalize;
 
@@ -205,7 +204,7 @@ public class ToDafnyLibrary extends ToDafny {
                 .methodBuilder(methodName)
                 .addModifiers(PUBLIC_STATIC)
                 .returns(Dafny.interfaceForResource(shape))
-                .addParameter(Native.classNameForResourceInterface(shape), VAR_INPUT)
+                .addParameter(subject.nativeNameResolver.classNameForResource(shape), VAR_INPUT)
                 .addStatement("return $L.impl()", VAR_INPUT)
                 .build();
     }
@@ -234,7 +233,7 @@ public class ToDafnyLibrary extends ToDafny {
         JavaLibrary.ResolvedShapeId resolvedShape = subject.resolveShape(memberShape.getTarget());
         Shape shape = subject.model.expectShape(resolvedShape.resolvedId());
         if (shape.isServiceShape() || shape.isResourceShape()) {
-            if (resolvedShape.resolvedId().getNamespace().startsWith(AWS_SERVICE_NAMESPACE_PREFIX)) {
+            if (isAwsSdkServiceId(resolvedShape.resolvedId())) {
                 // if targetShape is AWS Service/Resource, just use the IDENTITY_FUNCTION
                 return Constants.IDENTITY_FUNCTION;
             } else {

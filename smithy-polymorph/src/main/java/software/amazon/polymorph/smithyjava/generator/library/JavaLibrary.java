@@ -41,6 +41,7 @@ import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.TraitDefinition;
 
+import static software.amazon.polymorph.smithyjava.generator.library.shims.ResourceShim.CREATE_METHOD_NAME;
 import static software.amazon.polymorph.smithyjava.nameresolver.Constants.SMITHY_API_UNIT;
 
 public class JavaLibrary extends CodegenSubject {
@@ -179,9 +180,6 @@ public class JavaLibrary extends CodegenSubject {
     }
 
     private ShapeId checkForPositional(ShapeId originalId) {
-        if (originalId.equals(SMITHY_API_UNIT)) {
-            return originalId;
-        }
         Shape originalShape = model.expectShape(originalId);
         if (originalShape.hasTrait(PositionalTrait.class)) {
             // Positional traits can only be on structures,
@@ -197,7 +195,7 @@ public class JavaLibrary extends CodegenSubject {
      * @param shapeId ShapeId that might have positional or reference trait
      * @return Fully de-referenced shapeId and naive shapeId as a ResolvedShapeId
      */
-    protected ResolvedShapeId resolveShape(ShapeId shapeId) {
+    public ResolvedShapeId resolveShape(ShapeId shapeId) {
         if (shapeId.equals(SMITHY_API_UNIT)) {
             return new ResolvedShapeId(shapeId, shapeId);
         }
@@ -216,6 +214,8 @@ public class JavaLibrary extends CodegenSubject {
             //noinspection OptionalGetWithoutIsPresent
             ResourceShape rShape = targetShape.asResourceShape().get();
             rtnClassName = nativeNameResolver.classNameForResource(rShape);
+            return CodeBlock.of("$T.$L($L)",
+                    rtnClassName, CREATE_METHOD_NAME, dafnyValue);
         } else {
             // It MUST be a service, as reference traits ONLY reference Resources & Services
             //noinspection OptionalGetWithoutIsPresent

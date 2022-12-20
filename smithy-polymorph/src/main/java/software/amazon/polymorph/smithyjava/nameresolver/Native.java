@@ -18,7 +18,6 @@ import java.util.Set;
 import javax.annotation.Nullable;
 
 import software.amazon.polymorph.smithydafny.DafnyNameResolver;
-import software.amazon.polymorph.smithyjava.NamespaceHelper;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.polymorph.utils.ModelUtils;
@@ -32,8 +31,8 @@ import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.traits.BoxTrait;
 import software.amazon.smithy.model.traits.EnumTrait;
 
-import static software.amazon.polymorph.smithyjava.NamespaceHelper.AWS_SERVICE_NAMESPACE_PREFIX;
-
+import static software.amazon.polymorph.smithyjava.NamespaceHelper.standardize;
+import static software.amazon.polymorph.utils.AwsSdkNameResolverHelpers.isAwsSdkServiceId;
 
 /**
  * Provides a consistent mapping between names of
@@ -188,7 +187,7 @@ public class Native extends NameResolver{
         // and interfaces (smithy resources or services)
         // are placed in a model sub-package.
         return ClassName.get(
-                NamespaceHelper.standardize(shape.getId().getNamespace()) + ".model",
+                standardize(shape.getId().getNamespace()) + ".model",
                 shape.getId().getName());
     }
 
@@ -221,7 +220,13 @@ public class Native extends NameResolver{
         if (shape.hasTrait(ReferenceTrait.class)) {
             final ReferenceTrait reference = shape.expectTrait(ReferenceTrait.class);
             // A service or resource in a structure should almost always be treated as the interface
-            return classNameForInterfaceOrLocalService(model.expectShape(reference.getReferentId()));
+            Shape rShape = model.expectShape(reference.getReferentId());
+            if (reference.isService()) {
+                //noinspection OptionalGetWithoutIsPresent
+                return classNameForService(rShape.asServiceShape().get());
+            }
+            //noinspection OptionalGetWithoutIsPresent
+            return classNameForResource(rShape.asResourceShape().get());
         }
         if (isInServiceNameSpace(shape.getId())) {
             return ClassName.get(modelPackage, shape.getId().getName());
@@ -231,7 +236,7 @@ public class Native extends NameResolver{
         // most Exceptions (also structures),
         // are placed in a model sub-package.
         return ClassName.get(
-                NamespaceHelper.standardize(shape.getId().getNamespace()) + ".model",
+                standardize(shape.getId().getNamespace()) + ".model",
                 shape.getId().getName());
     }
 
@@ -241,14 +246,14 @@ public class Native extends NameResolver{
 
     public static ClassName classNameForResourceInterface(ResourceShape shape) {
         return ClassName.get(
-                NamespaceHelper.standardize(shape.getId().getNamespace()),
+                standardize(shape.getId().getNamespace()),
                 DafnyNameResolver.traitNameForResource(shape)
         );
     }
 
-    public ClassName classNameForInterfaceOrLocalService(Shape shape) {
+    public static ClassName classNameForInterfaceOrLocalService(Shape shape) {
         // if shape is an AWS Service/Resource, return Dafny Types Interface
-        if (shape.toShapeId().getNamespace().startsWith(AWS_SERVICE_NAMESPACE_PREFIX)) {
+        if (isAwsSdkServiceId(shape.toShapeId())) {
             if (shape.isServiceShape()) {
                 //noinspection OptionalGetWithoutIsPresent
                 return Dafny.interfaceForService(shape.asServiceShape().get());
@@ -270,7 +275,9 @@ public class Native extends NameResolver{
                         ("non AWS-Service ServiceShapes MUST have LocalTrait." +
                                 " ShapeId: %s").formatted(shape.toShapeId()));
             }
-            return ClassName.get(packageName, maybeTrait.get().getSdkId());
+            return ClassName.get(
+                    standardize(shape.getId().getNamespace()),
+                    maybeTrait.get().getSdkId());
         }
         throw new IllegalArgumentException(
                 "Polymorph only supports interfaces for Service & Resource Shapes. ShapeId: %s"
@@ -279,7 +286,7 @@ public class Native extends NameResolver{
 
     public ClassName classNameForResource(ResourceShape shape) {
         return ClassName.get(
-                NamespaceHelper.standardize(shape.getId().getNamespace()),
+                standardize(shape.getId().getNamespace()),
                 shape.getId().getName()
         );
     }

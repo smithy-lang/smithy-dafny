@@ -9,17 +9,19 @@ import com.squareup.javapoet.TypeName;
 import java.util.List;
 
 import software.amazon.polymorph.smithyjava.generator.Generator;
+import software.amazon.polymorph.smithyjava.generator.library.JavaLibrary.MethodSignature;
 import software.amazon.polymorph.smithyjava.generator.library.JavaLibrary.ResolvedShapeId;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 
+import software.amazon.polymorph.smithyjava.nameresolver.Native;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 
 import static javax.lang.model.element.Modifier.PUBLIC;
-import static software.amazon.polymorph.smithyjava.NamespaceHelper.AWS_SERVICE_NAMESPACE_PREFIX;
 import static software.amazon.polymorph.smithyjava.nameresolver.Constants.DAFNY_TUPLE0_CLASS_NAME;
 import static software.amazon.polymorph.smithyjava.nameresolver.Constants.SMITHY_API_UNIT;
+import static software.amazon.polymorph.utils.AwsSdkNameResolverHelpers.isAwsSdkServiceId;
 
 /**
  * A Java Library's Shim is the public class
@@ -27,7 +29,7 @@ import static software.amazon.polymorph.smithyjava.nameresolver.Constants.SMITHY
  * ShimLibrary holds the logic required to generate the Shim.
  */
 public abstract class ShimLibrary extends Generator {
-    protected static final String DAFNY_INTERFACE_FIELD = "_impl";
+    protected static final String INTERFACE_FIELD = "_impl";
     protected static final String NATIVE_VAR = "nativeValue";
     protected static final String DAFNY_VAR = "dafnyValue";
     protected static final String RESULT_VAR = "result";
@@ -78,10 +80,10 @@ public abstract class ShimLibrary extends Generator {
 
     protected JavaLibrary.MethodSignature operationMethodSignature(OperationShape operationShape) {
         final ResolvedShapeId inputResolved = subject.resolveShape(
-                operationShape.getInputShape());
+                shape.getInputShape());
         final ResolvedShapeId outputResolved = subject.resolveShape(
-                operationShape.getOutputShape());
-        final String operationName = operationShape.toShapeId().getName();
+                shape.getOutputShape());
+        final String operationName = shape.toShapeId().getName();
         final MethodSpec.Builder method = MethodSpec
                 .methodBuilder(operationName)
                 .addModifiers(PUBLIC);
@@ -95,23 +97,23 @@ public abstract class ShimLibrary extends Generator {
             TypeName outputType = methodSignatureTypeName(outputResolved);
             method.returns(outputType);
         }
-        return new JavaLibrary.MethodSignature(method, inputResolved, outputResolved);
+        return new MethodSignature(method, inputResolved, outputResolved);
     }
 
     /** @return TypeName for a method's signature. */
-    private TypeName methodSignatureTypeName(ResolvedShapeId resolvedShape) {
+    protected TypeName methodSignatureTypeName(ResolvedShapeId resolvedShape) {
         Shape shape = subject.model.expectShape(resolvedShape.resolvedId());
         if (shape.isServiceShape() || shape.isResourceShape()) {
             // If target is a Service or Resource,
             // the output type should be an interface OR LocalService.
-            return subject.nativeNameResolver.classNameForInterfaceOrLocalService(
+            return Native.classNameForInterfaceOrLocalService(
                     subject.model.expectShape(resolvedShape.resolvedId()));
         }
         return subject.nativeNameResolver.typeForShape(resolvedShape.resolvedId());
     }
 
     protected MethodSpec operation(OperationShape operationShape) {
-        final JavaLibrary.MethodSignature signature = operationMethodSignature(operationShape);
+        final MethodSignature signature = operationMethodSignature(operationShape);
         final ResolvedShapeId inputResolved = signature.resolvedInput();
         final ResolvedShapeId outputResolved = signature.resolvedOutput();
         MethodSpec.Builder method = signature.method();
@@ -121,7 +123,7 @@ public abstract class ShimLibrary extends Generator {
             // If input is a Service or Resource,
             Shape shape = subject.model.expectShape(inputResolved.resolvedId());
             if (shape.isServiceShape() || shape.isResourceShape()) {
-                if (inputResolved.resolvedId().getNamespace().startsWith(AWS_SERVICE_NAMESPACE_PREFIX)) {
+                if (isAwsSdkServiceId(inputResolved.resolvedId())) {
                     // if operation takes an AWS Service/Resource, just pass to dafny
                     method.addStatement(dafnyDeclare(inputResolved.resolvedId()));
                 } else {
@@ -148,12 +150,12 @@ public abstract class ShimLibrary extends Generator {
             // call with that argument in dafny
             method.addStatement("$T $L = this.$L.$L($L)",
                     result, RESULT_VAR,
-                    DAFNY_INTERFACE_FIELD, operationName, DAFNY_VAR);
+                    INTERFACE_FIELD, operationName, DAFNY_VAR);
         } else {
             // call with no args
             method.addStatement("$T $L = this.$L.$L()",
                     result, RESULT_VAR,
-                    DAFNY_INTERFACE_FIELD, operationName);
+                    INTERFACE_FIELD, operationName);
         }
         // Handle Failure
         method.addCode(ifFailure());
@@ -165,7 +167,7 @@ public abstract class ShimLibrary extends Generator {
         Shape outputShape = subject.model.expectShape(outputResolved.resolvedId());
         // if resolvedOutput is a Service or Resource
         if (outputShape.isServiceShape() || outputShape.isResourceShape()) {
-            if (outputResolved.resolvedId().getNamespace().startsWith(AWS_SERVICE_NAMESPACE_PREFIX)) {
+            if (isAwsSdkServiceId(outputResolved.resolvedId())) {
                 // if operation outputs an AWS Service/Resource, just return the Dafny result
                 method.addStatement("return $L.dtor_value()", RESULT_VAR);
             } else {
