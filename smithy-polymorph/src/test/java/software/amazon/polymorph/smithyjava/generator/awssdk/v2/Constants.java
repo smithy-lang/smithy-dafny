@@ -6,12 +6,12 @@ public class Constants {
               public Result<DoSomethingResponse, Error> DoSomething(DoSomethingRequest input) {
                 software.amazon.awssdk.services.kms.model.DoSomethingRequest converted = ToNative.DoSomethingRequest(input);
                 try {
-                  DoSomethingResult result = _impl.doSomething(converted);
+                  software.amazon.awssdk.services.kms.model.DoSomethingResponse result = _impl.doSomething(converted);
                   DoSomethingResponse dafnyResponse = ToDafny.DoSomethingResponse(result);
                   return Result.create_Success(dafnyResponse);
                 } catch (DependencyTimeoutException ex) {
                   return Result.create_Failure(ToDafny.Error(ex));
-                } catch (AWSKMSException ex) {
+                } catch (KmsException ex) {
                   return Result.create_Failure(ToDafny.Error(ex));
                 }
               }
@@ -26,7 +26,7 @@ public class Constants {
                   return Result.create_Success(Tuple0.create());
                 } catch (DependencyTimeoutException ex) {
                   return Result.create_Failure(ToDafny.Error(ex));
-                } catch (AWSKMSException ex) {
+                } catch (KmsException ex) {
                   return Result.create_Failure(ToDafny.Error(ex));
                 }
               }
@@ -40,24 +40,20 @@ public class Constants {
             import Dafny.Com.Amazonaws.Kms.Types.DoVoidRequest;
             import Dafny.Com.Amazonaws.Kms.Types.Error;
             import Dafny.Com.Amazonaws.Kms.Types.IKeyManagementServiceClient;
-            
             import Wrappers_Compile.Result;
-            
-            import software.amazon.awssdk.services.kms.AWSKMS;
-            import software.amazon.awssdk.services.kms.model.AWSKMSException;
-            import software.amazon.awssdk.services.kms.model.DependencyTimeoutException;
-            import software.amazon.awssdk.services.kms.model.DoSomethingResult;
             import dafny.Tuple0;
-            
             import java.lang.Override;
             import java.lang.String;
+            import software.amazon.awssdk.services.kms.KmsClient;
+            import software.amazon.awssdk.services.kms.model.DependencyTimeoutException;
+            import software.amazon.awssdk.services.kms.model.KmsException;            
             
             public class Shim implements IKeyManagementServiceClient {
-              private final AWSKMS _impl;
+              private final KmsClient _impl;
               
               private final String region;
               
-              public Shim(final AWSKMS impl, final String region) {
+              public Shim(final KmsClient impl, final String region) {
                 this._impl = impl;
                 this.region = region;
               }

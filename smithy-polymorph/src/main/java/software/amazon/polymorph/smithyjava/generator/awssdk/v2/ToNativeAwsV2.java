@@ -8,8 +8,6 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 
-import java.nio.ByteBuffer;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -24,8 +22,6 @@ import javax.lang.model.element.Modifier;
 import software.amazon.polymorph.smithyjava.MethodReference;
 import software.amazon.polymorph.smithyjava.generator.ToNative;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
-import software.amazon.polymorph.smithyjava.unmodeled.CollectionOfErrors;
-import software.amazon.polymorph.smithyjava.unmodeled.OpaqueError;
 import software.amazon.polymorph.utils.ModelUtils;
 
 import software.amazon.smithy.model.shapes.MemberShape;
@@ -38,7 +34,6 @@ import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.EnumDefinition;
 import software.amazon.smithy.model.traits.EnumTrait;
 
-import static software.amazon.polymorph.smithyjava.generator.Generator.Constants.IDENTITY_FUNCTION;
 import static software.amazon.smithy.utils.StringUtils.capitalize;
 import static software.amazon.smithy.utils.StringUtils.uncapitalize;
 
@@ -184,7 +179,14 @@ public class ToNativeAwsV2 extends ToNative {
     @Override
     protected CodeBlock setWithConversionCall(MemberShape member, CodeBlock getMember) {
         Shape targetShape = subject.model.expectShape(member.getTarget());
-        // SDK V2 treats Blobs as SdkBytes. SdkBytes are a SDK V2-specific type defined in the V2 package.
+        // SDK V2 reads in Blob shapes as SdkBytes.
+        // SdkBytes are a Java SDK V2-specific datatype defined in the SDK V2 package. As a result,
+        //   dafny-java-version should not define a byte-array-to-SdkBytes conversion. Otherwise,
+        //   Polymorph would need to depend on AWS SDK for Java V2.
+        // SDK V1 uses ByteBuffers, which are a common Java type defined externally from SDK V1, so
+        //   dafny-java-conversion may define a conversion without declaring a dependency on SDK V1.
+        // This block converts the Dafny array to a byte array, which is converted to SdkBytes via
+        //   SdkBytes.fromByteArray().
         if (targetShape.getType() == ShapeType.BLOB) {
             return CodeBlock.of("$L.$L($L((byte[]) ($L.$L.toRawArray())))",
                 VAR_BUILDER,

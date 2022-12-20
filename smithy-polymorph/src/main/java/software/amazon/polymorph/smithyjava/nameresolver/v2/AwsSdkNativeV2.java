@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import software.amazon.polymorph.smithyjava.nameresolver.Native;
 import software.amazon.polymorph.utils.AwsSdkNameResolverHelpers;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.ServiceShape;
@@ -67,17 +66,17 @@ public class AwsSdkNativeV2 extends Native {
 
     /** Validates that Polymorph knows non-smithy modeled constants for an AWS Service */
     private void checkForAwsServiceConstants() {
-//        String namespace = serviceShape.getId().getNamespace();
-//        boolean knowBaseException = AWS_SERVICE_NAMESPACE_TO_BASE_EXCEPTION.containsKey(namespace);
-//        if (!knowBaseException) {
-//            throw new IllegalArgumentException(
-//                    "Polymorph does not know this service's Base Exception: %s".formatted(namespace));
-//        }
-//        boolean knowClientInterface = AWS_SERVICE_NAMESPACE_TO_CLIENT_INTERFACE.containsKey(namespace);
-//        if (!knowClientInterface) {
-//            throw new IllegalArgumentException(
-//                    "Polymorph does not know this service's Client Interface: %s".formatted(namespace));
-//        }
+        String namespace = serviceShape.getId().getNamespace();
+        boolean knowBaseException = AWS_SERVICE_NAMESPACE_TO_BASE_EXCEPTION.containsKey(namespace);
+        if (!knowBaseException) {
+            throw new IllegalArgumentException(
+                    "Polymorph does not know this service's Base Exception: %s".formatted(namespace));
+        }
+        boolean knowClientInterface = AWS_SERVICE_NAMESPACE_TO_CLIENT_INTERFACE.containsKey(namespace);
+        if (!knowClientInterface) {
+            throw new IllegalArgumentException(
+                    "Polymorph does not know this service's Client Interface: %s".formatted(namespace));
+        }
     }
 
     /**
@@ -175,35 +174,13 @@ public class AwsSdkNativeV2 extends Native {
         return super.classNameForStructure(shape);
     }
 
-    public TypeName typeForError(final ShapeId shapeId) {
-        StructureShape shape = model.expectShape(shapeId, StructureShape.class);
-        ClassName smithyName = classNameForStructure(shape);
-        // TODO chain so KMSCMK returns KmsCmK
-        if (smithyName.simpleName().contains("KMS")) {
-            return ClassName.get(smithyName.packageName(),
-                smithyName.simpleName()
-                    .replace("KMS", "Kms")
-            );
-        }
-        if (smithyName.simpleName().contains("CMK")) {
-            return ClassName.get(smithyName.packageName(),
-                smithyName.simpleName()
-                    .replace("CMK", "CmK")
-            );
-        }
-        return super.typeForShape(shapeId);
-    }
-
     /** The AWS SDK for Java V2 replaces
      *  the last 'Response' with 'Result'
      *  in operation outputs.
      */
     public TypeName typeForOperationOutput(final ShapeId shapeId) {
         StructureShape shape = model.expectShape(shapeId, StructureShape.class);
-        ClassName smithyName = classNameForStructure(shape);
-        // TODO: handle AWS SDK v2 naming convention, which uses 'Response', not 'Result'
-
-        return smithyName;
+        return classNameForStructure(shape);
     }
 
     /**
@@ -240,10 +217,6 @@ public class AwsSdkNativeV2 extends Native {
             rtn = "dynamodbv2";
         }
         return "software.amazon.awssdk.services.%s".formatted(rtn);
-    }
-
-    public String classNameForSdkBytes() {
-        return "software.amazon.awssdk.core.SdkBytes";
     }
 
     static String packageNameForAwsSdkV2Shape(final Shape shape) {

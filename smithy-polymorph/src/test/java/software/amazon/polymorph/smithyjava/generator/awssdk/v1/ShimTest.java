@@ -13,6 +13,7 @@ import java.util.Map;
 import javax.lang.model.element.Modifier;
 
 import software.amazon.polymorph.smithyjava.ModelConstants;
+import software.amazon.polymorph.smithyjava.generator.awssdk.TestSetupUtils;
 import software.amazon.polymorph.util.Tokenizer;
 import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.smithy.model.Model;
@@ -20,9 +21,9 @@ import software.amazon.smithy.model.shapes.ShapeId;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static software.amazon.polymorph.smithyjava.generator.awssdk.Constants.DoSomethingOperation;
-import static software.amazon.polymorph.smithyjava.generator.awssdk.Constants.DoVoidOperation;
-import static software.amazon.polymorph.smithyjava.generator.awssdk.Constants.MockKmsShim;
+import static software.amazon.polymorph.smithyjava.generator.awssdk.v1.Constants.DoSomethingOperation;
+import static software.amazon.polymorph.smithyjava.generator.awssdk.v1.Constants.DoVoidOperation;
+import static software.amazon.polymorph.smithyjava.generator.awssdk.v1.Constants.MockKmsShim;
 
 public class ShimTest {
     protected ShimV1 underTest;
@@ -32,7 +33,7 @@ public class ShimTest {
     @Before
     public void setup() {
         model = TestSetupUtils.setupLocalModel(ModelConstants.MOCK_KMS);
-        subject = TestSetupUtils.setupAwsSdk(model, "kms");
+        subject = TestSetupUtils.setupAwsSdkV1(model, "kms");
         underTest = new ShimV1(subject);
     }
 
