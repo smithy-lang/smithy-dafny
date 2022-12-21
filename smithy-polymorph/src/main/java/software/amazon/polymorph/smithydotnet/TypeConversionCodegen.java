@@ -563,6 +563,8 @@ public class TypeConversionCodegen {
                     String createSuffixUnMod = defNames.size() == 1
                             ? ""
                             : dafnyMemberName;
+                    // TODO come back and revisit how we generate Unions - we should use the names
+                    // defined in the smithy model 
                     if (StringUtils.equals(memberShape.getId().getName(), "AttributeValue") ||
                         StringUtils.equals(memberShape.getContainer().getName(), "Materials")) {
                         createSuffixUnMod = "_%s".formatted(propertyName);
