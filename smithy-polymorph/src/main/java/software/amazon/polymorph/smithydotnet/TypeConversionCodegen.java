@@ -4,7 +4,6 @@
 package software.amazon.polymorph.smithydotnet;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.Sets;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -517,7 +516,14 @@ public class TypeConversionCodegen {
             .of(defNames
                 .stream()
                 .map(memberShape -> {
-                    final String propertyName = nameResolver.classPropertyForStructureMember(memberShape);
+                    final String propertyName;
+                    final String converterName = nameResolver.classPropertyForStructureMember(memberShape);
+                    if (StringUtils.equals(memberShape.getId().getName(), "Materials")) {
+                        propertyName = memberShape.getMemberName();
+                    } else {
+                        propertyName = nameResolver.classPropertyForStructureMember(memberShape);
+                    }
+
                     final String memberFromDafnyConverterName = typeConverterForShape(
                             memberShape.getId(), FROM_DAFNY);
                     final String destructorValue;
@@ -532,7 +538,7 @@ public class TypeConversionCodegen {
                                     .of(
                                             "converted.%s = %s(concrete.dtor_%s);"
                                                     .formatted(
-                                                            propertyName,
+                                                            converterName,
                                                             memberFromDafnyConverterName,
                                                             destructorValue
                                                     ),
@@ -570,6 +576,9 @@ public class TypeConversionCodegen {
                             : dafnyMemberName;
                     if (StringUtils.equals(memberShape.getId().getName(), "AttributeValue")) {
                         createSuffixUnMod = "_%s".formatted(propertyName);
+                    }
+                    if (StringUtils.equals(memberShape.getId().getName(), "Materials")) {
+                        createSuffixUnMod = "_%s".formatted(memberShape.getMemberName());
                     }
                     final String createSuffix = createSuffixUnMod;
                     if (StringUtils.equals(memberShape.getId().getName(), "AttributeValue")) {
