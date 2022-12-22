@@ -58,7 +58,7 @@ public class ToDafny {
         }
 
         public static DafnySequence<Byte> ByteSequence(byte[] byteArray) {
-            return ByteSequence(ByteBuffer.wrap(byteArray));
+            return DafnySequence.fromArray(TypeDescriptor.BYTE, Array.wrap(byteArray));
         }
 
         // STRING("string", StringShape.class, Category.SIMPLE),
