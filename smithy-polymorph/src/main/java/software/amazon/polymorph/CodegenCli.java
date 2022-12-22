@@ -86,13 +86,14 @@ public class CodegenCli {
 
         if (cliArguments.outputJavaDir.isPresent()) {
             final Path outputJavaDir = cliArguments.outputJavaDir.get();
-            if (cliArguments.awsSdkStyle) {
-                if ("v1".equals(cliArguments.javaAwsSdkVersion.trim())) {
+            if (cliArguments.awsSdkStyle && cliArguments.javaAwsSdkVersion.isPresent()) {
+                if ("v1".equals(cliArguments.javaAwsSdkVersion.get().trim())) {
                     messages.add(javaAwsSdkV1(outputJavaDir, serviceShape, model));
-                } else if ("v2".equals(cliArguments.javaAwsSdkVersion.trim())) {
+                } else if ("v2".equals(cliArguments.javaAwsSdkVersion.get().trim())) {
                     messages.add(javaAwsSdkV2(outputJavaDir, serviceShape, model));
                 } else {
-                  throw new ParseException("Unsupported version:" + cliArguments.javaAwsSdkVersion.trim());
+                    logger.error("Unsupported Java AWS SDK version:"
+                        + cliArguments.javaAwsSdkVersion.get().trim());
                 }
             } else {
                 messages.add(javaLocalService(outputJavaDir, serviceShape, model));
@@ -223,14 +224,14 @@ public class CodegenCli {
             .build())
           .addOption(Option.builder()
             .longOpt("output-java")
-            .desc("<optional> output directory for generated Java files using AWS SDK v1")
+            .desc("<optional> output directory for generated Java files")
             .hasArg()
             .build())
           .addOption(Option.builder()
-              .longOpt("java-aws-sdk-version")
-              .desc("<optional> AWS SDK for Java version to use: v1, or v2 (default)")
-              .hasArg()
-              .build())
+            .longOpt("java-aws-sdk-version")
+            .desc("<optional> AWS SDK for Java version to use: v1, or v2 (default)")
+            .hasArg()
+            .build())
           .addOption(Option.builder()
             .longOpt("aws-sdk")
             .desc("<optional> generate AWS SDK-style API and shims")
@@ -261,7 +262,7 @@ public class CodegenCli {
             String namespace,
             Optional<Path> outputDotnetDir,
             Optional<Path> outputJavaDir,
-            String javaAwsSdkVersion,
+            Optional<String> javaAwsSdkVersion,
             boolean awsSdkStyle,
             Optional<Path> outputLocalServiceTest,
             boolean outputDafny,
@@ -298,9 +299,7 @@ public class CodegenCli {
                 outputJavaDir = Optional.of(Paths.get(commandLine.getOptionValue("output-java"))
                          .toAbsolutePath().normalize());
             }
-            final String javaAwsSdkVersion = commandLine.hasOption("java-aws-sdk-version")
-                ? commandLine.getOptionValue("java-aws-sdk-version")
-                : "v2";
+
             final boolean awsSdkStyle = commandLine.hasOption("aws-sdk");
             if (awsSdkStyle && commandLine.hasOption("output-local-service-test")) {
                 throw new ParseException("Can not have aws sdk style and test a local service.");
@@ -312,6 +311,12 @@ public class CodegenCli {
                                                     .toAbsolutePath().normalize());
             }
 
+            Optional<String> javaAwsSdkVersion = Optional.empty();
+            if (awsSdkStyle) {
+                javaAwsSdkVersion = commandLine.hasOption("java-aws-sdk-version")
+                    ? Optional.of(commandLine.getOptionValue("java-aws-sdk-version"))
+                    : Optional.of("v2");
+            }
             final boolean outputDafny = commandLine.hasOption("output-dafny");
             Optional<Path> includeDafnyFile = Optional.empty();
             if (outputDafny) {
