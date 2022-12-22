@@ -146,7 +146,7 @@ public class AwsSdkNativeV2 extends Native {
 
     /**
      * Returns true if the provided ShapeId has type string in the Smithy model, but AWS SDK for
-     *   Java V2 effectively expects it to be modeled as a structure.
+     *   Java V2 effectively expects type structure.
      * @param shapeId
      * @return true if AWS SDK for Java V2 expects this to have been modeled as a structure in Smithy
      */

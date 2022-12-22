@@ -164,9 +164,11 @@ public class ToDafnyAwsV2 extends ToDafny {
     /**
      * Formats inputVar if it requires reformatting for SDK V2.
      * @param memberShape shape defined in Smithy model
-     * @param inputVar CodeBlock to be formatted. This SHOULD not be read from to determine how it
-     *                 should be formatted. Prefer to use MemberShape as it is the source of truth
-     *                 from the Smithy model.
+     * @param inputVar CodeBlock to be formatted. This SHOULD be used to build a formatted
+     *                 CodeBlock, but SHOULD NOT be used in logic that decides HOW to build a
+     *                 formatted CodeBlock.
+     *                 Prefer to use MemberShape in decision logic as MemberShape is the source of
+     *                 truth from the Smithy model.
      * @return inputVar formatted for SDK V2
      */
     public CodeBlock formatInputVarForMemberConversion(MemberShape memberShape, CodeBlock inputVar) {
