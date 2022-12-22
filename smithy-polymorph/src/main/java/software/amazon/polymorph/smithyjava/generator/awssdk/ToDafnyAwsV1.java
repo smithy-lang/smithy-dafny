@@ -33,6 +33,7 @@ import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.ShapeType;
 import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
+import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumTrait;
 
 import static software.amazon.smithy.utils.StringUtils.capitalize;
@@ -83,10 +84,16 @@ public class ToDafnyAwsV1 extends ToDafny {
                 .map(shapeId -> subject.model.expectShape(shapeId, OperationShape.class))
                 .map(OperationShape::getOutput).filter(Optional::isPresent).map(Optional::get)
                 .collect(Collectors.toCollection(LinkedHashSet::new));
+        LinkedHashSet<ShapeId> operationInputs = subject.serviceShape
+                .getOperations().stream()
+                .map(shapeId -> subject.model.expectShape(shapeId, OperationShape.class))
+                .map(OperationShape::getInput).filter(Optional::isPresent).map(Optional::get)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+        operationOutputs.addAll(operationInputs); // TODO
         Set<ShapeId> allRelevantShapeIds = ModelUtils.findAllDependentShapes(operationOutputs, subject.model);
 
         // In the AWS SDK for Java V1, Operation Outputs are special
-        allRelevantShapeIds.removeAll(operationOutputs);
+        allRelevantShapeIds.removeAll(operationInputs);
         // Enums are also a special case
         LinkedHashSet<ShapeId> enumShapeIds = new LinkedHashSet<>();
         allRelevantShapeIds.forEach(shapeId -> {
@@ -140,6 +147,7 @@ public class ToDafnyAwsV1 extends ToDafny {
             case MAP -> modeledMap(shape.asMapShape().get());
             case SET -> modeledSet(shape.asSetShape().get());
             case STRUCTURE -> generateConvertStructure(shapeId);
+            case UNION -> generateConvertUnion(shapeId);
             default -> throw new UnsupportedOperationException(
                     "ShapeId %s is of Type %s, which is not yet supported for ToDafny"
                             .formatted(shapeId, shape.getType()));
@@ -183,6 +191,11 @@ public class ToDafnyAwsV1 extends ToDafny {
     MethodSpec generateConvertStructure(final ShapeId shapeId) {
         final StructureShape structureShape = subject.model.expectShape(shapeId, StructureShape.class);
         return super.modeledStructure(structureShape);
+    }
+
+    MethodSpec generateConvertUnion(final ShapeId shapeId) {
+        final UnionShape unionShape = subject.model.expectShape(shapeId, UnionShape.class);
+        return super.modeledUnion(unionShape);
     }
 
     /** For AWS SDK structure members, the getter is `get + capitalized member name`. */
