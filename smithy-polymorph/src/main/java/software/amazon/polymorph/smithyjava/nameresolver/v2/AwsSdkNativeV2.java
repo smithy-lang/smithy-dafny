@@ -120,6 +120,19 @@ public class AwsSdkNativeV2 extends Native {
         return typeForShape(shapeId);
     }
 
+    /**
+     * Returns true if the provided ShapeId has type string in the Smithy model, but AWS SDK for
+     *   Java V2 effectively expects type structure.
+     * @param shapeId
+     * @return true if AWS SDK for Java V2 expects this to have been modeled as a structure in Smithy
+     */
+    protected boolean shapeRequiresTypeConversionFromStringToStructure(
+        ShapeId shapeId) {
+        return shapeId.toString().contains("EncryptionAlgorithmSpec")
+            || shapeId.toString().contains("SigningAlgorithmSpec")
+            || shapeId.toString().contains("GrantOperation");
+    }
+
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     public ParameterizedTypeName typeForListSetOrMapNoEnum(final ShapeId shapeId) {
         final Shape shape = model.getShape(shapeId)
@@ -142,19 +155,6 @@ public class AwsSdkNativeV2 extends Native {
                     "typeForListOrSetNoEnum only accepts LIST or SET. Got: " + shape.getType()
                             + " for ShapeId: " + shapeId);
         };
-    }
-
-    /**
-     * Returns true if the provided ShapeId has type string in the Smithy model, but AWS SDK for
-     *   Java V2 effectively expects type structure.
-     * @param shapeId
-     * @return true if AWS SDK for Java V2 expects this to have been modeled as a structure in Smithy
-     */
-    protected boolean shapeRequiresTypeConversionFromStringToStructure(
-        ShapeId shapeId) {
-        return shapeId.toString().contains("EncryptionAlgorithmSpec")
-            || shapeId.toString().contains("SigningAlgorithmSpec")
-            || shapeId.toString().contains("GrantOperation");
     }
 
     @Override
