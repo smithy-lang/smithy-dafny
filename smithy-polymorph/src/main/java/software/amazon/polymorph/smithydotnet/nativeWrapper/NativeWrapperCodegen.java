@@ -4,6 +4,7 @@
 package software.amazon.polymorph.smithydotnet.nativeWrapper;
 
 import software.amazon.polymorph.smithydotnet.DotNetNameResolver;
+import software.amazon.polymorph.smithydotnet.ShimCodegen;
 import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.utils.Token;
 import software.amazon.polymorph.utils.TokenTree;
@@ -225,7 +226,7 @@ public class NativeWrapperCodegen {
                         qualifiedTypeConverter(shapeId, TO_DAFNY),
                         NATIVE_OUTPUT));
         final TokenTree returnSuccess = TokenTree.of("return %s.create_Success(%s);".formatted(
-                concreteDafnyOutput, successConversion.orElse("")));
+                concreteDafnyOutput, successConversion.orElse("null")));
 
         return TokenTree.of("try").append(
                 TokenTree.of(nativeCall, isNativeOutputNull, validateNativeOutput, returnSuccess)
