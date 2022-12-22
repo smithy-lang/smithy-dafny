@@ -15,6 +15,7 @@ import software.amazon.smithy.model.shapes.ResourceShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
+import software.amazon.smithy.utils.StringUtils;
 
 import java.util.List;
 import java.util.Optional;
@@ -54,6 +55,7 @@ public class NativeWrapperCodegen {
                     """;
     protected static final List<String> UNCONDITIONAL_IMPORTS = List.of(
             "System",
+            "_System",
             "Wrappers_Compile"
     );
 
@@ -225,8 +227,11 @@ public class NativeWrapperCodegen {
                 .map(shapeId -> "%s(%s)".formatted(
                         qualifiedTypeConverter(shapeId, TO_DAFNY),
                         NATIVE_OUTPUT));
+        final String outputType = operationShape.getOutput()
+                .map(nameResolver::dafnyTypeForShape)
+                .orElse(nameResolver.dafnyTypeForUnit()).replace("_System._I", "");
         final TokenTree returnSuccess = TokenTree.of("return %s.create_Success(%s);".formatted(
-                concreteDafnyOutput, successConversion.orElse("null")));
+                concreteDafnyOutput, successConversion.orElse("%s.create()".formatted(outputType))));
 
         return TokenTree.of("try").append(
                 TokenTree.of(nativeCall, isNativeOutputNull, validateNativeOutput, returnSuccess)

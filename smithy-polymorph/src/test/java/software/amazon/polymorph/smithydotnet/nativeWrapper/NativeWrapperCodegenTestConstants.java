@@ -114,7 +114,7 @@ class NativeWrapperCodegenTestConstants {
                             return Wrappers_Compile.Result<
                                 _System._ITuple0,
                                 Dafny.Test.Foobar.Types._IError
-                            >.create_Success();
+                            >.create_Success(Tuple0.create());
                         }
                         %s
                     }
@@ -137,7 +137,7 @@ class NativeWrapperCodegenTestConstants {
                             return Wrappers_Compile.Result<
                                 _System._ITuple0,
                                 Dafny.Test.Foobar.Types._IError
-                            >.create_Success();
+                            >.create_Success(Tuple0.create());
                         }
                         %s
                     }
@@ -189,6 +189,7 @@ class NativeWrapperCodegenTestConstants {
                     // ReSharper disable SuggestVarOrType_SimpleTypes
                                 
                     using System;
+                    using _System;
                     using Wrappers_Compile;
                     """;
 
