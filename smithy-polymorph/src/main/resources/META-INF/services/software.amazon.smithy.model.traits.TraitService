@@ -4,3 +4,4 @@ software.amazon.polymorph.traits.LocalServiceTrait$Provider
 software.amazon.polymorph.traits.ClientConfigTrait$Provider
 software.amazon.polymorph.traits.DafnyUtf8BytesTrait$Provider
 software.amazon.polymorph.traits.ExtendableTrait$Provider
+software.amazon.polymorph.traits.MutableLocalStateTrait$Provider
