@@ -89,8 +89,10 @@ public class CodegenCli {
             if (cliArguments.awsSdkStyle) {
                 if ("v1".equals(cliArguments.javaAwsSdkVersion.trim())) {
                     messages.add(javaAwsSdkV1(outputJavaDir, serviceShape, model));
-                } else {
+                } else if ("v2".equals(cliArguments.javaAwsSdkVersion.trim())) {
                     messages.add(javaAwsSdkV2(outputJavaDir, serviceShape, model));
+                } else {
+                  throw new ParseException("Unsupported version:" + cliArguments.javaAwsSdkVersion.trim());
                 }
             } else {
                 messages.add(javaLocalService(outputJavaDir, serviceShape, model));
