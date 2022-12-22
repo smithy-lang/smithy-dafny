@@ -105,15 +105,6 @@ public class ToNativeTest {
     }
 
     @Test
-    public void initTempArray() {
-        ShapeId structureId = ShapeId.fromParts("com.amazonaws.kms", "Kitchen");
-        StructureShape structureShape = model.expectShape(structureId, StructureShape.class);
-        MemberShape enumListShape = structureShape.getMember("listEnum").get();
-        CodeBlock actual = underTest.initTempArray(enumListShape);
-        tokenizeAndAssertEqual(ToNativeConstants.INIT_TEMP_ARRAY, actual.toString());
-    }
-
-    @Test
     public void memberConversionMethodReference() {
         ShapeId structureId = ShapeId.fromParts("com.amazonaws.kms", "Kitchen");
         StructureShape structureShape = model.expectShape(structureId, StructureShape.class);
@@ -141,15 +132,6 @@ public class ToNativeTest {
         MemberShape ciphertextMember = structureShape.getMember("ciphertext").get();
         CodeBlock actual = underTestAbstract.setWithConversionCall(ciphertextMember, Dafny.getMemberFieldValue(ciphertextMember));
         tokenizeAndAssertEqual(ToNativeConstants.SET_WITH_CONVERSION_CALL, actual.toString());
-    }
-
-    @Test
-    public void setWithConversionCallAndToArray() {
-        ShapeId structureId = ShapeId.fromParts("com.amazonaws.kms", "Kitchen");
-        StructureShape structureShape = model.expectShape(structureId, StructureShape.class);
-        MemberShape enumListShape = structureShape.getMember("listEnum").get();
-        CodeBlock actual = underTest.setWithConversionCallAndToArray(enumListShape);
-        tokenizeAndAssertEqual(ToNativeConstants.SET_WITH_CONVERSION_CALL_AND_TO_ARRAY, actual.toString());
     }
 
     @Test
