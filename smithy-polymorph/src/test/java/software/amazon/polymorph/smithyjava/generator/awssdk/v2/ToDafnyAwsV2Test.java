@@ -30,16 +30,6 @@ public class ToDafnyAwsV2Test {
     }
 
     @Test
-    public void generateConvertResponseV2() {
-        Model localModel = TestSetupUtils.setupLocalModel(ModelConstants.KMS_A_STRING_OPERATION);
-        ToDafnyAwsV2 localUnderTest = new ToDafnyAwsV2(TestSetupUtils.setupAwsSdkV2(localModel, "kms"));
-        ShapeId responseId = ShapeId.fromParts("com.amazonaws.kms", "DoSomethingResponse");
-        MethodSpec actual = localUnderTest.generateConvertResponseV2(responseId);
-        System.out.println(actual.toString());
-        tokenizeAndAssertEqual(ToDafnyAwsV2Constants.DO_SOMETHING_RESPONSE, actual.toString());
-    }
-
-    @Test
     public void generateConvertEnumEnum() {
         ShapeId enumId = ShapeId.fromParts("com.amazonaws.kms", "KeyUsageType");
         MethodSpec actual = underTest.generateConvertEnumEnum(enumId);
