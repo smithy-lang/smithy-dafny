@@ -146,32 +146,11 @@ public class ToNativeAwsV2 extends ToNative {
                     if (member.isOptional()) {
                         builder.beginControlFlow("if ($L.$L.is_Some())", VAR_INPUT, Dafny.getMemberField(member));
                     }
-                    // if converting a LIST or SET of enums
-                    if (ModelUtils.isListOrSetOfEnums(member.getTarget(), subject.model)) {
-                        // create temp array
-                        builder.addStatement(initTempArray(member));
-                        // set with conversion call and toArray
-                        builder.addStatement(setWithConversionCallAndToArray(member));
-                    } else {
-                        // set with conversion call
-                        builder.addStatement(setWithConversionCall(member, Dafny.getMemberFieldValue(member)));
-                    }
+                    // set with conversion call
+                    builder.addStatement(setWithConversionCall(member, Dafny.getMemberFieldValue(member)));
                     if (member.isOptional()) builder.endControlFlow();
                 });
         return builder.addStatement("return $L.build()", VAR_BUILDER).build();
-    }
-
-    /**
-     * Generates an Array of member's type with size of input's field.
-     * i.e:<p> {@code MemberType[] member_temp = new MemberType[dafnyValue.Member.length()];}
-     */
-    CodeBlock initTempArray(MemberShape member) {
-        return CodeBlock.of("$T[] $L_$L = new $T[$L.$L.$L]",
-                subject.nativeNameResolver.typeForListOrSetMember(member.getTarget()),
-                uncapitalize(member.getMemberName()), VAR_TEMP,
-                subject.nativeNameResolver.typeForListOrSetMember(member.getTarget()),
-                VAR_INPUT, Dafny.getMemberFieldValue(member),
-                Dafny.aggregateSizeMethod(subject.model.expectShape(member.getTarget()).getType()));
     }
 
     @Override
@@ -199,16 +178,6 @@ public class ToNativeAwsV2 extends ToNative {
                 memberConversionMethodReference(member).asNormalReference(),
                 VAR_INPUT,
                 Dafny.getMemberFieldValue(member));
-    }
-
-    CodeBlock setWithConversionCallAndToArray(MemberShape member) {
-        return CodeBlock.of("$L.$L($L($L.$L).toArray($L_$L))",
-            VAR_BUILDER,
-                setMemberField(member),
-                memberConversionMethodReference(member).asNormalReference(),
-                VAR_INPUT,
-                Dafny.getMemberFieldValue(member),
-                uncapitalize(member.getMemberName()), VAR_TEMP);
     }
 
     @Override

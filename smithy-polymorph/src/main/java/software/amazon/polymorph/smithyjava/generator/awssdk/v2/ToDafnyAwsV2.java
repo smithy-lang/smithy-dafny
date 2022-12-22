@@ -37,6 +37,7 @@ import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.EnumDefinition;
 import software.amazon.smithy.model.traits.EnumTrait;
 
+import static software.amazon.polymorph.smithyjava.generator.Generator.Constants.JAVA_UTIL_COLLECTORS;
 import static software.amazon.smithy.utils.StringUtils.capitalize;
 
 /**
@@ -101,7 +102,7 @@ public class ToDafnyAwsV2 extends ToDafny {
         allRelevantShapeIds.removeAll(enumShapeIds);
 
         final List<MethodSpec> convertOutputs = operationOutputs.stream()
-                .map(this::generateConvertResponseV2).toList();
+                .map(this::generateConvert).toList();
         final List<MethodSpec> convertAllRelevant = allRelevantShapeIds.stream()
                 .map(this::generateConvert).filter(Objects::nonNull).toList();
         final List<MethodSpec> convertServiceErrors = ModelUtils.streamServiceErrors(subject.model, subject.serviceShape)
@@ -156,53 +157,34 @@ public class ToDafnyAwsV2 extends ToDafny {
 
         return CodeBlock.of("$L($L)",
             methodBlock,
-            formatInputVarForMemberConversion(methodBlock, inputVar)
+            formatInputVarForMemberConversion(memberShape, inputVar)
         );
     }
 
     /**
      * Formats inputVar if it requires reformatting for SDK V2.
-     * @param methodBlock
-     * @param inputVar
-     * @return
+     * @param memberShape shape defined in Smithy model
+     * @param inputVar CodeBlock to be formatted. This SHOULD not be read from to determine how it
+     *                 should be formatted. Prefer to use MemberShape as it is the source of truth
+     *                 from the Smithy model.
+     * @return inputVar formatted for SDK V2
      */
-    public CodeBlock formatInputVarForMemberConversion(CodeBlock methodBlock, CodeBlock inputVar) {
+    public CodeBlock formatInputVarForMemberConversion(MemberShape memberShape, CodeBlock inputVar) {
         CodeBlock.Builder returnCodeBlockBuilder = CodeBlock.builder().add(inputVar);
 
         // If methodBlock is transforming to Dafny ByteSequence, it is expecting either a byte[]
         //   or ByteBuffer.
         // In this case, inputVar is of type SdkBytes.
-        // dafny-java-converison should not have a ByteSequence constructor that directly takes in
+        // dafny-java-conversion should not have a ByteSequence constructor that directly takes in
         //   SdkBytes. If it did, Polymorph would need to depend on AWS SDK for Java V2.
         // The conversion from inputVar as SdkBytes to a Dafny ByteSequence looks like
         //   ByteSequence(inputVar.asByteArray())
-        if (methodBlock.toString().contains("ByteSequence")) {
+        Shape targetShape = subject.model.expectShape(memberShape.getTarget());
+        if (targetShape.getType() == ShapeType.BLOB) {
             return returnCodeBlockBuilder.add(".asByteArray()").build();
         }
 
-        // Some AWS SDK V2 types now require explicit String conversion, while they didn't in V1.
-        if (methodTypeRequiresStringConversion(methodBlock)) {
-            ClassName JAVA_UTIL_COLLECTORS = ClassName.get("java.util.stream", "Collectors");
-            MethodReference collectors = new MethodReference(JAVA_UTIL_COLLECTORS, "toList");
-
-            return returnCodeBlockBuilder
-                .add(".stream().map(Object::toString).collect(")
-                .add(collectors.asNormalReference())
-                .add("())")
-                .build();
-        }
         return inputVar;
-    }
-
-    /**
-     * Returns true if the method name indicates the type requires conversion to String.
-     * Some AWS SDK V2 types now require explicit String conversion, while they didn't in V1.
-     * @return true if the method name indicates the type requires conversion to String; false otherwise
-     */
-    protected boolean methodTypeRequiresStringConversion(CodeBlock methodBlock) {
-        return methodBlock.toString().contains("EncryptionAlgorithmSpecList")
-            || methodBlock.toString().contains("SigningAlgorithmSpecList")
-            || methodBlock.toString().contains("GrantOperationList");
     }
 
     MethodSpec generateConvertEnumString(ShapeId shapeId) {
@@ -280,17 +262,6 @@ public class ToDafnyAwsV2 extends ToDafny {
                 " to %s.".formatted(dafnyEnumClass))
             .endControlFlow();
         builder.endControlFlow();
-        return builder.build();
-    }
-
-    /**
-     * Should be called for all of a service's operations' outputs.
-     */
-    MethodSpec generateConvertResponseV2(final ShapeId shapeId) {
-        MethodSpec structure = generateConvertStructure(shapeId);
-        MethodSpec.Builder builder = structure.toBuilder();
-        builder.parameters.clear();
-        builder.addParameter(subject.nativeNameResolver.typeForOperationOutput(shapeId), "nativeValue");
         return builder.build();
     }
 
