@@ -4,7 +4,6 @@
 package software.amazon.polymorph.smithydotnet;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.Sets;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -564,7 +563,10 @@ public class TypeConversionCodegen {
                     String createSuffixUnMod = defNames.size() == 1
                             ? ""
                             : dafnyMemberName;
-                    if (StringUtils.equals(memberShape.getId().getName(), "AttributeValue")) {
+                    // TODO come back and revisit how we generate Unions - we should use the names
+                    // defined in the smithy model 
+                    if (StringUtils.equals(memberShape.getId().getName(), "AttributeValue") ||
+                        StringUtils.equals(memberShape.getContainer().getName(), "Materials")) {
                         createSuffixUnMod = "_%s".formatted(propertyName);
                     }
                     final String createSuffix = createSuffixUnMod;
