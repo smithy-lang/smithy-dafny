@@ -117,9 +117,8 @@ public class ToNativeAwsV2 extends ToNative {
             case SET -> modeledSet(shape.asSetShape().get());
             case MAP -> modeledMap(shape.asMapShape().get());
             case STRUCTURE -> modeledStructure(shape.asStructureShape().get());
-            default -> throw new UnsupportedOperationException(
-                    "ShapeId %s is of Type %s, which is not yet supported for ToDafny"
-                            .formatted(shapeId, shape.getType()));
+            // TODO: Support unions
+            default -> null;
         };
     }
 

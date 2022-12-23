@@ -144,9 +144,8 @@ public class ToDafnyAwsV2 extends ToDafny {
             case MAP -> modeledMap(shape.asMapShape().get());
             case SET -> modeledSet(shape.asSetShape().get());
             case STRUCTURE -> generateConvertStructure(shapeId);
-            default -> throw new UnsupportedOperationException(
-                    "ShapeId %s is of Type %s, which is not yet supported for ToDafny"
-                            .formatted(shapeId, shape.getType()));
+            // TODO: Support unions
+            default -> null;
         };
     }
 
