@@ -52,12 +52,29 @@ public class AwsSdkDafnyV2 extends Dafny {
      * @return CodeBlock containing something like `variable.member()`.
      */
     public CodeBlock methodForGetMember(CodeBlock variableName, MemberShape memberShape) {
+        // TODO: If we find many more cases to uncapitalize first 3 letters, consider removing
+        //   hardcoding and create separate method
         // AWS Account ID: Uncapitalize all of `AWS` --> `aws`
         if ("AWSAccountId".equals(memberShape.getMemberName())) {
             return CodeBlock.of("$L.awsAccountId()", variableName);
         }
+        // SSE (secure-side encryption) Description: Uncapitalize all of `SSE` --> `sse`
+        // TODO: Refactor with SSE renaming logic in AwsSdkNativeV2
+        if (memberShape.getMemberName().startsWith("SSE")) {
+            String suffix = memberShape.getMemberName()
+                .substring(memberShape.getMemberName().lastIndexOf("SSE") + "SSE".length());
+            return CodeBlock.of("$L.sse$L()", variableName, suffix);
+        }
+        // TODO: Refactor with KMS renaming logic in AwsSdkNativeV2
+        if (memberShape.getMemberName().startsWith("KMS")) {
+            String suffix = memberShape.getMemberName()
+                .substring(memberShape.getMemberName().lastIndexOf("KMS") + "KMS".length());
+            return CodeBlock.of("$L.kms$L()", variableName, suffix);
+        }
         // Message: Exception message. Retrieved via `getMessage()`.
-        if ("message".equals(uncapitalize(memberShape.getMemberName()))) {
+        if ("message".equals(uncapitalize(memberShape.getMemberName()))
+            // BatchStatementError type ; its message is retrieved via "message".
+            && !memberShape.getContainer().getName().contains("BatchStatementError")) {
             return CodeBlock.of("$L.get$L()", variableName, capitalize(memberShape.getMemberName()));
         }
         return CodeBlock.of("$L.$L()", variableName, uncapitalize(memberShape.getMemberName()));
@@ -89,6 +106,7 @@ public class AwsSdkDafnyV2 extends Dafny {
      */
     protected boolean enumRequiresUpperCamelcaseConversion(final String dafnyEnumType) {
         return dafnyEnumType.equals("Dafny.Com.Amazonaws.Kms.Types.KeyState")
-            || dafnyEnumType.equals("Dafny.Com.Amazonaws.Kms.Types.GrantOperation");
+            || dafnyEnumType.equals("Dafny.Com.Amazonaws.Kms.Types.GrantOperation")
+            || dafnyEnumType.equals("Dafny.Com.Amazonaws.Dynamodb.Types.BatchStatementErrorCodeEnum");
     }
 }

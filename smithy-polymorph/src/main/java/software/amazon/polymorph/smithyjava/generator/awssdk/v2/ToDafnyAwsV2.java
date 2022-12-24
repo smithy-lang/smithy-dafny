@@ -106,7 +106,9 @@ public class ToDafnyAwsV2 extends ToDafny {
         final List<MethodSpec> convertAllRelevant = allRelevantShapeIds.stream()
                 .map(this::generateConvert).filter(Objects::nonNull).toList();
         final List<MethodSpec> convertServiceErrors = ModelUtils.streamServiceErrors(subject.model, subject.serviceShape)
-                .map(this::modeledError).collect(Collectors.toList());
+            // InvalidEndpointException does not exist in SDK V2
+            .filter(structureShape -> !structureShape.getId().getName().contains("InvalidEndpointException"))
+            .map(this::modeledError).collect(Collectors.toList());
         convertServiceErrors.add(generateConvertOpaqueError());
         // For enums, we generate overloaded methods,
         // one to convert instances of the Enum
