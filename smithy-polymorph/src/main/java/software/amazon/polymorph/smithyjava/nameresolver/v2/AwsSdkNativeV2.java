@@ -174,6 +174,26 @@ public class AwsSdkNativeV2 extends Native {
             ClassName smithyName = ClassName.get(
                 defaultModelPackageName(packageNameForAwsSdkV2Shape(shape)),
                 StringUtils.capitalize(shape.getId().getName()));
+
+            if (smithyName.simpleName().endsWith("Input")) {
+                return ClassName.get(smithyName.packageName(),
+                    smithyName.simpleName()
+                        .substring(
+                            0,
+                            smithyName.simpleName().lastIndexOf("Input"))
+                        + "Request"
+                );
+            }
+            if (smithyName.simpleName().endsWith("Output")) {
+                return ClassName.get(smithyName.packageName(),
+                    smithyName.simpleName()
+                        .substring(
+                            0,
+                            smithyName.simpleName().lastIndexOf("Output"))
+                        + "Response"
+                );
+            }
+
             if (shape.hasTrait(ErrorTrait.class)) {
                 if (smithyName.simpleName().contains("KMS")) {
                     return ClassName.get(smithyName.packageName(),
@@ -187,6 +207,18 @@ public class AwsSdkNativeV2 extends Native {
                             .replace("CMK", "CmK")
                     );
                 }
+                if (smithyName.simpleName().endsWith("InternalServerError")) {
+                    return ClassName.get(smithyName.packageName(),
+                        smithyName.simpleName()
+                            .replace("InternalServerError", "InternalServerErrorException")
+                    );
+                }
+                if (smithyName.simpleName().endsWith("RequestLimitExceeded")) {
+                    return ClassName.get(smithyName.packageName(),
+                        smithyName.simpleName()
+                            .replace("RequestLimitExceeded", "RequestLimitExceededException")
+                    );
+                }
                 return smithyName;
             }
         }
@@ -195,6 +227,7 @@ public class AwsSdkNativeV2 extends Native {
 
     public TypeName typeForOperationOutput(final ShapeId shapeId) {
         StructureShape shape = model.expectShape(shapeId, StructureShape.class);
+        ClassName smithyName = classNameForStructure(shape);
         return classNameForStructure(shape);
     }
 
@@ -244,9 +277,6 @@ public class AwsSdkNativeV2 extends Native {
 
     public static String packageNameForService(final String awsServiceName) {
         String rtn = awsServiceName;
-        if (awsServiceName.equals("dynamodb")) {
-            rtn = "dynamodbv2";
-        }
         return "software.amazon.awssdk.services.%s".formatted(rtn);
     }
 

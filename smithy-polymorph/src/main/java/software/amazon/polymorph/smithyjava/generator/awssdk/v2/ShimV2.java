@@ -105,7 +105,7 @@ public class ShimV2 extends Generator {
         String operationName = operationShape.toShapeId().getName();
         MethodSpec.Builder builder = MethodSpec
                 .methodBuilder(StringUtils.capitalize(operationName))
-                .addAnnotation(Override.class)
+                //.addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
                 .returns(
                         Dafny.asDafnyResult(
@@ -133,12 +133,22 @@ public class ShimV2 extends Generator {
                             DAFNY_RESULT_CLASS_NAME);
         }
 
-        operationShape.getErrors().forEach(shapeId ->
-                builder
-                        .nextControlFlow("catch ($T ex)", subject.nativeNameResolver.typeForShape(shapeId))
-                        .addStatement("return $T.create_Failure(ToDafny.Error(ex))",
-                                DAFNY_RESULT_CLASS_NAME)
-        );
+        operationShape.getErrors().forEach(shapeId -> {
+            TypeName typeForShape = subject.nativeNameResolver.typeForShape(shapeId);
+            System.out.println(typeForShape);
+
+            // InvalidEndpointException was removed in SDK V2
+            if (typeForShape.toString().endsWith("InvalidEndpointException")) {
+                return; // Skips only this iteration
+            }
+
+            System.out.println(subject.nativeNameResolver.typeForShape(shapeId));
+
+            builder
+                .nextControlFlow("catch ($T ex)", subject.nativeNameResolver.typeForShape(shapeId))
+                .addStatement("return $T.create_Failure(ToDafny.Error(ex))",
+                    DAFNY_RESULT_CLASS_NAME);
+        });
         return Optional.of(builder
                 .nextControlFlow("catch ($T ex)", subject.nativeNameResolver.baseErrorForService())
                 .addStatement("return $T.create_Failure(ToDafny.Error(ex))",

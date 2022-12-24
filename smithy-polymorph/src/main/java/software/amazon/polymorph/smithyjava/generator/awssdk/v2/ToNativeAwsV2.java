@@ -133,7 +133,7 @@ public class ToNativeAwsV2 extends ToNative {
                 .addParameter(subject.dafnyNameResolver.typeForShape(structureShape.getId()), VAR_INPUT);
 
         if (structureShape.members().size() == 0) {
-            builder.addStatement("return new $T()", nativeClassName);
+            builder.addStatement("return $T.builder().build()", nativeClassName);
             return builder.build();
         }
         builder.addStatement("$T.Builder $L = $T.builder()", nativeClassName, VAR_BUILDER, nativeClassName);
@@ -193,6 +193,14 @@ public class ToNativeAwsV2 extends ToNative {
     protected CodeBlock setMemberField(MemberShape shape) {
         // In AWS SDK Java V2, using `with` allows for enums or strings
         // while `set` only allows for strings.
+        // TODO: Refactor with SSE renaming logic in AwsSdkDafnyV2
+        if (shape.getMemberName().contains("SSE")) {
+            return CodeBlock.of("$L", shape.getMemberName().replace("SSE", "sse"));
+        }
+        // TODO: Refactor with KMS renaming logic in AwsSdkDafnyV2
+        if (shape.getMemberName().contains("KMS")) {
+            return CodeBlock.of("$L", shape.getMemberName().replace("KMS", "kms"));
+        }
         return CodeBlock.of("$L", uncapitalize(shape.getMemberName()));
     }
 
