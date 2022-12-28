@@ -15,9 +15,24 @@ java {
     }
 }
 
+var caUrl: URI? = null
+@Nullable
+val caUrlStr: String? = System.getenv("CODEARTIFACT_URL_SMITHY")
+if (!caUrlStr.isNullOrBlank()) {
+    caUrl = URI.create(caUrlStr)
+}
+
+var caPassword: String? = null
+@Nullable
+val caPasswordString: String? = System.getenv("CODEARTIFACT_AUTH_TOKEN")
+if (!caPasswordString.isNullOrBlank()) {
+    caPassword = caPasswordString
+}
+
 repositories {
     mavenLocal()
     mavenCentral()
+    maybeCodeArtifact(this@Build_gradle, this)
 }
 
 dependencies {
@@ -43,21 +58,6 @@ application {
     mainClass.set("software.amazon.polymorph.CodegenCli")
 }
 
-var caUrl: URI? = null
-@Nullable
-val caUrlStr: String? = System.getenv("CODEARTIFACT_URL_SMITHY")
-if (!caUrlStr.isNullOrBlank()) {
-    caUrl = URI.create(caUrlStr)
-}
-
-var caPassword: String? = null
-@Nullable
-val caPasswordString: String? = System.getenv("CODEARTIFACT_AUTH_TOKEN")
-if (!caPasswordString.isNullOrBlank()) {
-    caPassword = caPasswordString
-}
-
-
 publishing {
     publications {
         create<MavenPublication>("smithy-polymorph") {
@@ -66,14 +66,19 @@ publishing {
     }
     repositories{
         mavenLocal()
-        if (caUrl != null && caPassword != null) {
-            maven {
-                name = "CodeArtifact"
-                url = caUrl!!
-                credentials {
-                    username = "aws"
-                    password = caPassword!!
-                }
+        maybeCodeArtifact(this@Build_gradle, this)
+    }
+}
+
+
+fun maybeCodeArtifact(buildGradle: Build_gradle, repositoryHandler: RepositoryHandler) {
+    if (buildGradle.caUrl != null && buildGradle.caPassword != null) {
+        repositoryHandler.maven {
+            name = "CodeArtifact"
+            url = buildGradle.caUrl!!
+            credentials {
+                username = "aws"
+                password = buildGradle.caPassword!!
             }
         }
     }

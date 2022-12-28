@@ -15,19 +15,9 @@ java {
     }
 }
 
-repositories {
-    mavenCentral()
-    mavenLocal()
-}
-
-dependencies {
-    implementation("dafny.lang:DafnyRuntime:3.10.0")
-    testImplementation("junit", "junit", "4.13.2")
-}
-
 var caUrl: URI? = null
 @Nullable
-val caUrlStr: String? = System.getenv("CODEARTIFACT_URL_CONVERSION")
+val caUrlStr: String? = System.getenv("CODEARTIFACT_URL_JAVA_CONVERSION")
 if (!caUrlStr.isNullOrBlank()) {
     caUrl = URI.create(caUrlStr)
 }
@@ -39,6 +29,16 @@ if (!caPasswordString.isNullOrBlank()) {
     caPassword = caPasswordString
 }
 
+repositories {
+    mavenCentral()
+    mavenLocal()
+    maybeCodeArtifact(this@Build_gradle, this)
+}
+
+dependencies {
+    implementation("dafny.lang:DafnyRuntime:3.10.0")
+    testImplementation("junit", "junit", "4.13.2")
+}
 
 publishing {
     publications {
@@ -50,14 +50,18 @@ publishing {
     }
     repositories{
         mavenLocal()
-        if (caUrl != null && caPassword != null) {
-            maven {
-                name = "CodeArtifact"
-                url = caUrl!!
-                credentials {
-                    username = "aws"
-                    password = caPassword!!
-                }
+        maybeCodeArtifact(this@Build_gradle, this)
+    }
+}
+
+fun maybeCodeArtifact(buildGradle: Build_gradle, repositoryHandler: RepositoryHandler) {
+    if (buildGradle.caUrl != null && buildGradle.caPassword != null) {
+        repositoryHandler.maven {
+            name = "CodeArtifact"
+            url = buildGradle.caUrl!!
+            credentials {
+                username = "aws"
+                password = buildGradle.caPassword!!
             }
         }
     }
