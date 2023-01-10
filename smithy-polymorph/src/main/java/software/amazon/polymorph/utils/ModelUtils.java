@@ -3,20 +3,11 @@
 
 package software.amazon.polymorph.utils;
 
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.Optional;
-import java.util.Queue;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import software.amazon.polymorph.traits.ClientConfigTrait;
-import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
-import software.amazon.polymorph.traits.ExtendableTrait;
-import software.amazon.polymorph.traits.LocalServiceTrait;
-import software.amazon.polymorph.traits.PositionalTrait;
-import software.amazon.polymorph.traits.ReferenceTrait;
+import software.amazon.polymorph.traits.*;
 
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.loader.ModelAssembler;
@@ -45,6 +36,7 @@ public class ModelUtils {
         assembler.addShape(DafnyUtf8BytesTrait.getDefinition());
         assembler.addShape(ExtendableTrait.getDefinition());
         assembler.addShape(LocalServiceTrait.getDefinition());
+        assembler.addShape(MutableLocalStateTrait.getDefinition());
     }
 
     /**
@@ -69,7 +61,8 @@ public class ModelUtils {
      * @return a stream of error structures in the given namespace
      */
     public static Stream<StructureShape> streamNamespaceErrors(final Model model, final String namespace) {
-        return model.getStructureShapesWithTrait(ErrorTrait.class)
+        // Collect into TreeSet so that we generate code in a deterministic order (lexicographic, in particular)
+        return new TreeSet<>(model.getStructureShapesWithTrait(ErrorTrait.class))
           .stream()
           .filter(structureShape -> structureShape.getId().getNamespace().equals(namespace));
     }
