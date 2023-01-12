@@ -19,6 +19,7 @@ import software.amazon.smithy.model.traits.TraitDefinition;
 import software.amazon.smithy.utils.StringUtils;
 
 import static software.amazon.polymorph.smithyjava.nameresolver.Constants.SHAPE_TYPES_LIST_SET;
+import static software.amazon.polymorph.utils.AwsSdkNameResolverHelpers.isAwsSdkServiceId;
 
 /**
  * There are certain assumptions we can/have to make about
@@ -37,8 +38,8 @@ public class AwsSdkNativeV1 extends Native {
     }
 
     // The values of these maps are NOT in smithy models and thus must be hard-coded
-    private static final Map<String, String> AWS_SERVICE_NAMESPACE_TO_CLIENT_INTERFACE;
-    private static final Map<String, String> AWS_SERVICE_NAMESPACE_TO_BASE_EXCEPTION;
+    public static final Map<String, String> AWS_SERVICE_NAMESPACE_TO_CLIENT_INTERFACE;
+    public static final Map<String, String> AWS_SERVICE_NAMESPACE_TO_BASE_EXCEPTION;
 
     static {
         // These are NOT in the service's model package
@@ -60,6 +61,10 @@ public class AwsSdkNativeV1 extends Native {
     /** Validates that Polymorph knows non-smithy modeled constants for an AWS Service */
     private void checkForAwsServiceConstants() {
         String namespace = serviceShape.getId().getNamespace();
+        checkForAwsServiceConstants(namespace);
+    }
+
+    public static void checkForAwsServiceConstants(String namespace) {
         boolean knowBaseException = AWS_SERVICE_NAMESPACE_TO_BASE_EXCEPTION.containsKey(namespace);
         if (!knowBaseException) {
             throw new IllegalArgumentException(
@@ -143,7 +148,7 @@ public class AwsSdkNativeV1 extends Native {
                     "Trait definition structures have no corresponding generated type");
         }
         // check if this Shape is in AWS SDK for Java V1 package
-        if (AwsSdkNameResolverHelpers.isAwsSdkServiceId(shape.getId())) {
+        if (isAwsSdkServiceId(shape.getId())) {
             // Assume that the shape is in the model package
             return ClassName.get(
                     defaultModelPackageName(packageNameForAwsSdkV1Shape(shape)),
@@ -172,28 +177,22 @@ public class AwsSdkNativeV1 extends Native {
         return smithyName;
     }
 
-    /**
-     * Returns the TypeName for an AWS Service's Client Interface.
-     */
-    @Override
-    public ClassName classNameForService(final ServiceShape shape) {
-        //TODO: refactor to not throw error on other namespace,
-        // but instead check AWS_SERVICE_NAMESPACE_TO_CLIENT_INTERFACE for
-        // namespace, and throw exception if not found.
-        checkInServiceNamespace(shape.getId());
+    public static ClassName classNameForServiceClient(ServiceShape shape) {
+        String awsServiceSmithyNamespace = shape.toShapeId().getNamespace();
+        checkForAwsServiceConstants(awsServiceSmithyNamespace);
         return ClassName.get(
-                packageName,
-                AWS_SERVICE_NAMESPACE_TO_CLIENT_INTERFACE.get(
-                        serviceShape.getId().getNamespace()));
+                packageNameForAwsSdkV1Shape(shape),
+                AWS_SERVICE_NAMESPACE_TO_CLIENT_INTERFACE.get(awsServiceSmithyNamespace)
+        );
     }
 
     /**
-     * Returns the TypeName for an AWS Service's Base Exception.
+     * Returns the ClassName for an AWS Service's Base Exception.
      * <p>
      * To be clear, a Base Exception is concrete.
      * But all of a service's other exceptions extend it.
      */
-    public TypeName baseErrorForService() {
+    public ClassName baseErrorForService() {
         return ClassName.get(
                 modelPackage,
                 AWS_SERVICE_NAMESPACE_TO_BASE_EXCEPTION.get(

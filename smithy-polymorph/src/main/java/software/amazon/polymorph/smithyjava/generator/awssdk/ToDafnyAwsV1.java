@@ -65,8 +65,7 @@ public class ToDafnyAwsV1 extends ToDafny {
     public ToDafnyAwsV1(JavaAwsSdkV1 awsSdk) {
         super(
                 awsSdk,
-                //TODO: JavaAwsSdkV1 should really have a declared packageName, not rely on the name resolver
-                ClassName.get(awsSdk.dafnyNameResolver.packageName(), TO_DAFNY));
+                ClassName.get(awsSdk.packageName, TO_DAFNY));
         this.subject = awsSdk;
     }
 

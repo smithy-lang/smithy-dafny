@@ -3,6 +3,7 @@ package software.amazon.polymorph.smithyjava.nameresolver;
 import com.squareup.javapoet.ClassName;
 
 import software.amazon.polymorph.utils.AwsSdkNameResolverHelpers;
+
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.ResourceShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
@@ -20,22 +21,30 @@ public class AwsSdkDafnyV1 extends Dafny {
     @Override
     ClassName classNameForService(ServiceShape shape) {
         if (AwsSdkNameResolverHelpers.isAwsSdkServiceId(shape.getId())) {
-            return ClassName.get(
-                    modelPackageNameForNamespace(shape.getId().getNamespace()),
-                    traitNameForServiceClient(shape)
-            );
+            return classNameForAwsService(shape);
         }
         return super.classNameForService(shape);
+    }
+
+    public static ClassName classNameForAwsService(ServiceShape shape) {
+        return ClassName.get(
+                modelPackageNameForNamespace(shape.getId().getNamespace()),
+                traitNameForServiceClient(shape)
+        );
     }
 
     @Override
     ClassName classNameForResource(ResourceShape shape) {
         if (AwsSdkNameResolverHelpers.isAwsSdkServiceId(shape.getId())) {
-            return ClassName.get(
-                    modelPackageNameForNamespace(shape.getId().getNamespace()),
-                    "I%s".formatted(StringUtils.capitalize(shape.getId().getName()))
-            );
+            return classNameForAwsResource(shape);
         }
         return super.classNameForResource(shape);
+    }
+
+    public static ClassName classNameForAwsResource(ResourceShape shape) {
+        return ClassName.get(
+                modelPackageNameForNamespace(shape.getId().getNamespace()),
+                "I%s".formatted(StringUtils.capitalize(shape.getId().getName()))
+        );
     }
 }

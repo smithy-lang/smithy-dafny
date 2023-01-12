@@ -51,8 +51,8 @@ public class JavaLibrary extends CodegenSubject {
     /** Public POJOs will go here. */
     public final String modelPackageName;
 
-    public JavaLibrary(Model model, ServiceShape serviceShape) {
-        super(model, serviceShape, initDafny(model, serviceShape), initNative(model, serviceShape));
+    public JavaLibrary(Model model, ServiceShape serviceShape, AwsSdkVersion sdkVersion) {
+        super(model, serviceShape, initDafny(model, serviceShape), initNative(model, serviceShape), sdkVersion);
         packageName = NamespaceHelper.standardize(serviceShape.getId().getNamespace());
         modelPackageName = packageName + ".model";
         try {

@@ -3,6 +3,7 @@
 
 package software.amazon.polymorph;
 
+import software.amazon.polymorph.smithyjava.generator.CodegenSubject;
 import software.amazon.polymorph.smithyjava.generator.library.JavaLibrary;
 import software.amazon.polymorph.utils.ModelUtils;
 
@@ -117,7 +118,7 @@ public class CodegenCli {
     }
 
     private static String javaLocalService(Path outputJavaDir, ServiceShape serviceShape, Model model) {
-        final JavaLibrary javaLibrary = new JavaLibrary(model, serviceShape);
+        final JavaLibrary javaLibrary = new JavaLibrary(model, serviceShape, CodegenSubject.AwsSdkVersion.V1);
         writeTokenTreesIntoDir(javaLibrary.generate(), outputJavaDir);
         return "Java code generated in %s".formatted(outputJavaDir);
     }
