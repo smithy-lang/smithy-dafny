@@ -4,6 +4,7 @@ import java.util.function.BiConsumer;
 
 import software.amazon.polymorph.smithyjava.generator.awssdk.v1.JavaAwsSdkV1;
 import software.amazon.polymorph.smithyjava.generator.awssdk.v2.JavaAwsSdkV2;
+import software.amazon.polymorph.smithyjava.generator.CodegenSubject;
 import software.amazon.polymorph.smithyjava.generator.library.JavaLibrary;
 import software.amazon.polymorph.util.TestModel;
 import software.amazon.smithy.model.Model;
@@ -36,6 +37,6 @@ public class TestSetupUtils {
     }
     public static JavaLibrary setupLibrary(Model localModel, String namespace) {
         ServiceShape serviceShape = serviceFromNamespace(localModel, namespace);
-        return new JavaLibrary(localModel, serviceShape);
+        return new JavaLibrary(localModel, serviceShape, CodegenSubject.AwsSdkVersion.V1);
     }
 }

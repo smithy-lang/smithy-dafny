@@ -14,12 +14,14 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import software.amazon.polymorph.smithyjava.generator.CodegenSubject;
 import software.amazon.polymorph.smithyjava.generator.library.JavaLibrary;
 import software.amazon.polymorph.smithyjava.generator.library.JavaLibrary.MethodSignature;
 import software.amazon.polymorph.smithyjava.generator.library.ShimLibrary;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.polymorph.smithyjava.nameresolver.Native;
 
+import software.amazon.polymorph.traits.ExtendableTrait;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ResourceShape;
 
@@ -39,7 +41,7 @@ public class ResourceShim extends ShimLibrary {
     protected final ClassName interfaceName;
     /** The class name of the Subject's Shim class. */
     protected final ClassName thisClassName;
-    //protected final boolean extendable;
+    protected final boolean extendable;
     private final ClassName dafnyType;
     private final String argName;
 
@@ -48,13 +50,13 @@ public class ResourceShim extends ShimLibrary {
         this.targetShape = targetShape;
         this.thisClassName = subject.nativeNameResolver.classNameForResource(targetShape);
         this.interfaceName = interfaceName(targetShape);
-        //this.extendable = targetShape.hasTrait(ExtendableTrait.class);
+        this.extendable = targetShape.hasTrait(ExtendableTrait.class);
         dafnyType = Dafny.interfaceForResource(this.targetShape);
         argName = uncapitalize(dafnyType.simpleName());
     }
 
     private static ClassName interfaceName(ResourceShape shape) {
-        return Native.classNameForInterfaceOrLocalService(shape);
+        return Native.classNameForInterfaceOrLocalService(shape, CodegenSubject.AwsSdkVersion.V1);
     }
 
     public static TypeVariableName iExtendsInterface(ResourceShape shape) {
@@ -85,6 +87,10 @@ public class ResourceShim extends ShimLibrary {
                 .addMethod(impl());
         spec.addMethods(getOperationsForTarget()
                 .stream().sequential().map(this::operation).collect(Collectors.toList()));
+        if (extendable) {
+            NativeWrapper wrapper = new NativeWrapper(subject, targetShape);
+            spec.addType(wrapper.nativeWrapper());
+        }
         return spec.build();
     }
 
@@ -106,7 +112,7 @@ public class ResourceShim extends ShimLibrary {
     }
 
     private MethodSpec resourceAsNativeInterface() {
-        return MethodSpec
+        MethodSpec.Builder method = MethodSpec
                 .methodBuilder(CREATE_METHOD_NAME)
                 .addModifiers(PUBLIC_STATIC)
                 .addTypeVariable(iExtendsInterface())
@@ -118,8 +124,16 @@ public class ResourceShim extends ShimLibrary {
                         argName, thisClassName)
                 .addStatement("return (($T) $L)",
                         thisClassName, argName)
-                .endControlFlow()
-                // TODO: handle Extendable trait
+                .endControlFlow();
+        if (extendable) {
+            return method
+                    // return Resource.create(new NativeWrapper(iResource));
+                    .addStatement("return $T.$L(new $T($L))",
+                            thisClassName, CREATE_METHOD_NAME,
+                            NativeWrapper.className(thisClassName), argName)
+                    .build();
+        }
+        return method
                 .addStatement("throw new $T($S)",
                         IllegalArgumentException.class,
                         "Custom implementations of %s are NOT supported at this time."

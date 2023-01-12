@@ -18,6 +18,10 @@ import java.util.Set;
 import javax.annotation.Nullable;
 
 import software.amazon.polymorph.smithydafny.DafnyNameResolver;
+import software.amazon.polymorph.smithyjava.generator.CodegenSubject;
+import software.amazon.polymorph.smithyjava.generator.CodegenSubject.AwsSdkVersion;
+import software.amazon.polymorph.smithyjava.unmodeled.NativeError;
+import software.amazon.polymorph.smithyjava.unmodeled.OpaqueError;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.polymorph.utils.ModelUtils;
@@ -241,7 +245,7 @@ public class Native extends NameResolver{
     }
 
     public ClassName classNameForService(ServiceShape shape) {
-        return classNameForInterfaceOrLocalService(shape);
+        return classNameForInterfaceOrLocalService(shape, AwsSdkVersion.V1);
     }
 
     public static ClassName classNameForResourceInterface(ResourceShape shape) {
@@ -251,12 +255,13 @@ public class Native extends NameResolver{
         );
     }
 
-    public static ClassName classNameForInterfaceOrLocalService(Shape shape) {
+    public static ClassName classNameForInterfaceOrLocalService(
+            Shape shape, AwsSdkVersion sdkVersion) {
         // if shape is an AWS Service/Resource, return Dafny Types Interface
         if (isAwsSdkServiceId(shape.toShapeId())) {
             if (shape.isServiceShape()) {
                 //noinspection OptionalGetWithoutIsPresent
-                return Dafny.interfaceForService(shape.asServiceShape().get());
+                return AwsSdkNativeV1.classNameForServiceClient(shape.asServiceShape().get());
             }
             if (shape.isResourceShape()) {
                 //noinspection OptionalGetWithoutIsPresent
@@ -284,10 +289,30 @@ public class Native extends NameResolver{
                         .formatted(shape.toShapeId()));
     }
 
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
+    static ClassName classNameForAwsSdkV1(Shape shape) {
+        if (shape.getType() == ShapeType.SERVICE) {
+            return AwsSdkNativeV1.classNameForServiceClient(
+                    shape.asServiceShape().get());
+        } else {
+            throw new RuntimeException(
+                    "Polymorph only knows Service clients for AWS SDK V1 shapes.");
+        }
+    }
+
     public ClassName classNameForResource(ResourceShape shape) {
         return ClassName.get(
                 standardize(shape.getId().getNamespace()),
                 shape.getId().getName()
         );
+    }
+
+    // TODO: improve exceptions for local services
+    public ClassName baseErrorForService() {
+        return NativeError.nativeClassName(modelPackage);
+    }
+
+    public ClassName opaqueErrorForService() {
+        return OpaqueError.nativeClassName(modelPackage);
     }
 }

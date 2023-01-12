@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -19,12 +20,14 @@ import javax.lang.model.element.Modifier;
 import software.amazon.polymorph.smithyjava.generator.Generator;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.smithy.model.shapes.OperationShape;
+import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.utils.StringUtils;
 
 import static software.amazon.polymorph.smithyjava.nameresolver.Constants.DAFNY_RESULT_CLASS_NAME;
 import static software.amazon.polymorph.smithyjava.nameresolver.Constants.DAFNY_TUPLE0_CLASS_NAME;
 import static software.amazon.polymorph.smithyjava.nameresolver.Constants.SMITHY_API_UNIT;
+import static software.amazon.polymorph.utils.DafnyNameResolverHelpers.packageNameForNamespace;
 
 //TODO: Create abstract class for V1 & V2 to extend
 /**
@@ -41,17 +44,20 @@ public class ShimV1 extends Generator {
         this.subject = awsSdk;
     }
 
+    public static ClassName className(ServiceShape shape) {
+        return ClassName.get(packageNameForNamespace(shape.toShapeId().getNamespace()), "Shim");
+    }
+
     @Override
     public Set<JavaFile> javaFiles() {
         JavaFile.Builder builder = JavaFile
-                .builder(subject.dafnyNameResolver.packageName(), shim());
+                .builder(subject.packageName, shim());
         return Collections.singleton(builder.build());
     }
 
     TypeSpec shim() {
         return TypeSpec
-                .classBuilder(
-                        ClassName.get(subject.dafnyNameResolver.packageName(), "Shim"))
+                .classBuilder(className(subject.serviceShape))
                 .addModifiers(Modifier.PUBLIC)
                 .addSuperinterface(subject.dafnyNameResolver.typeForShape(subject.serviceShape.getId()))
                 .addField(
@@ -63,6 +69,7 @@ public class ShimV1 extends Generator {
                 .addMethod(constructor())
                 .addMethod(impl())
                 .addMethod(region())
+                .addMethod(impl())
                 .addMethods(
                         subject.serviceShape.getAllOperations()
                                 .stream()
@@ -75,10 +82,10 @@ public class ShimV1 extends Generator {
 
     protected MethodSpec impl() {
         return MethodSpec.methodBuilder("impl")
-                       .addModifiers(Modifier.PUBLIC)
-                       .addStatement("return this._impl")
-                       .returns(subject.nativeNameResolver.classNameForService(subject.serviceShape))
-                       .build();
+                .addModifiers(Modifier.PUBLIC)
+                .addStatement("return this._impl")
+                .returns(subject.nativeNameResolver.classNameForService(subject.serviceShape))
+                .build();
     }
 
     MethodSpec constructor() {

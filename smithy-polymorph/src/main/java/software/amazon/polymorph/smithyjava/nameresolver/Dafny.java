@@ -39,6 +39,7 @@ import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
 
+import static software.amazon.polymorph.utils.AwsSdkNameResolverHelpers.isAwsSdkServiceId;
 import static software.amazon.polymorph.smithyjava.generator.Generator.Constants.SUPPORTED_CONVERSION_AGGREGATE_SHAPES;
 import static software.amazon.polymorph.smithyjava.nameresolver.Constants.DAFNY_RESULT_CLASS_NAME;
 import static software.amazon.polymorph.smithyjava.nameresolver.Constants.SMITHY_API_UNIT;
@@ -364,5 +365,33 @@ public class Dafny extends NameResolver {
         final String packageName = dafnyExternNamespaceForShapeId(shape.getId());
         final String interfaceName = DafnyNameResolver.traitNameForResource(shape);
         return ClassName.get(packageName, interfaceName);
+    }
+
+    public ClassName classNameForInterface(Shape shape) {
+        // if shape is an AWS Service/Resource, return Dafny Types Interface
+        if (isAwsSdkServiceId(shape.toShapeId())) {
+            if (shape.isServiceShape()) {
+                // TODO: use AwsSdkDafnyV2 is AWS SDK v2 flag is present
+                //noinspection OptionalGetWithoutIsPresent
+                return AwsSdkDafnyV1.classNameForAwsService(shape.asServiceShape().get());
+            }
+            if (shape.isResourceShape()) {
+                // TODO: use AwsSdkDafnyV2 is AWS SDK v2 flag is present
+                //noinspection OptionalGetWithoutIsPresent
+                return AwsSdkDafnyV1.classNameForAwsResource(shape.asResourceShape().get());
+            }
+        }
+        // if operation takes a non-AWS Service/Resource, return Dafny Interface Or Local Service
+        if (shape.isResourceShape()) {
+            //noinspection OptionalGetWithoutIsPresent
+            return interfaceForResource(shape.asResourceShape().get());
+        }
+        if (shape.isServiceShape()) {
+            //noinspection OptionalGetWithoutIsPresent
+            return interfaceForService(shape.asServiceShape().get());
+        }
+        throw new IllegalArgumentException(
+                "Polymorph only supports interfaces for Service & Resource Shapes. ShapeId: %s"
+                        .formatted(shape.toShapeId()));
     }
 }

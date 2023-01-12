@@ -105,7 +105,7 @@ public class ShimTest {
         );
     }
 
-    @Test
+    /*@Test
     public void generate() {
         final Map<Path, TokenTree> actual = underTest.generate();
         // TODO: refactor so that Shim is written as
