@@ -1,0 +1,35 @@
+# This workflow performs static analysis checks.
+name: tests
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  verification:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install Dafny
+        uses: dafny-lang/setup-dafny-action@v1
+        with:
+          dafny-version: "3.4.2"
+
+      - name: Install lit 
+        run: pip install lit OutputCheck
+
+      - name: Verify Dafny Code
+        run: lit --time-tests -v --param 'dafny_params=/verificationLogger:trx /verificationLogger:csv' .
+
+      - name: Generate Report
+        run: find . -name '*.csv' -print0 | xargs -0 --verbose dafny-reportgenerator summarize-csv-results --max-duration-seconds 10
+
+      - uses: actions/upload-artifact@v2  # upload test results
+        if: success() || failure()        # run this step even if previous step failed
+        with:
+          name: verification-results
+          path: '**/TestResults/*.trx'
+          if-no-files-found: error

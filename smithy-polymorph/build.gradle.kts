@@ -21,7 +21,7 @@ repositories {
 }
 
 dependencies {
-    implementation("dafny.lang:DafnyRuntime:3.9.0")
+    implementation("dafny.lang:DafnyRuntime:3.10.0")
     implementation("com.squareup:javapoet:1.13.0")
     implementation("software.amazon.dafny:conversion:1.0-SNAPSHOT")
     implementation("software.amazon.smithy:smithy-model:1.21.0")
