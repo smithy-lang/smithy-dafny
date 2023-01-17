@@ -27,6 +27,7 @@ transpile_implementation_net:
 		-compileTarget:cs \
 		-spillTargetCode:3 \
 		-compile:0 \
+		-optimizeErasableDatatypeWrapper:0 \
 		-useRuntimeLib \
 		-out runtimes/net/ImplementationFromDafny \
 		./src/Index.dfy \
@@ -40,6 +41,7 @@ transpile_test_net:
 		-spillTargetCode:3 \
 		-runAllTests:1 \
 		-compile:0 \
+		-optimizeErasableDatatypeWrapper:0 \
 		-useRuntimeLib \
 		-out runtimes/net/tests/TestsFromDafny \
 		`find ./test -name '*.dfy'` \
@@ -60,56 +62,4 @@ test_net_mac_intel:
 
 setup_net:
 	dotnet restore runtimes/net/
-
-transpile_java: | transpile_implementation_java transpile_test_java
-
-transpile_implementation_java: | _clean_implementation_java _transpile_implementation_java _mv_implementation_java
-
-_clean_implementation_java:
-	rm -rf runtimes/java/temp/ComAmazonawsKms-java/* && rm -rf runtimes/java/src/main/dafny-generated/*
-
-_transpile_implementation_java:
-	dafny \
-		-vcsCores:$(CORES) \
-		-compileTarget:java \
-		-spillTargetCode:3 \
-		-compile:0 \
-		-useRuntimeLib \
-		-out runtimes/java/temp/ComAmazonawsKms \
-		./src/Index.dfy \
-		-library:../smithy-polymorph/lib/std/src/Index.dfy
-
-_mv_implementation_java:
-	./runtimes/java/makefile_helper.sh implementation
-
-transpile_test_java: | _clean_test_java _transpile_test_java _mv_test_java
-
-_clean_test_java:
-	rm -rf runtimes/java/temp-tests/ComAmazonawsKmsTests-java/* && rm -rf runtimes/java/src/test/dafny-generated/*
-
-_transpile_test_java:
-	dafny \
-		-vcsCores:$(CORES) \
-		-compileTarget:java \
-		-spillTargetCode:3 \
-		-runAllTests:1 \
-		-compile:0 \
-		-useRuntimeLib \
-		-out runtimes/java/temp-tests/ComAmazonawsKmsTests \
-		`find ./test -name '*.dfy'` \
-		-library:src/Index.dfy
-
-_mv_test_java:
-	./runtimes/java/makefile_helper.sh test
-
-build_java_dependencies:
-	$(MAKE) -C ../StandardLibrary mvn_local_deploy
-
-build_java: transpile_java build_java_dependencies
-	gradle -p runtimes/java build
-
-mvn_local_deploy: transpile_java
-	gradle -p runtimes/java publishToMavenLocal
-
-test_java:
-	gradle -p runtimes/java runTests
+	

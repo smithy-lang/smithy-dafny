@@ -6,7 +6,7 @@ module  SimpleTypesImplTest {
     method{:test} GetString(){
         var client :- expect SimpleTypes.SimpleTypes();
         var ret := client.GetString(SimpleTypes.Types.GetStringInput(stringValue:= Some("S")));
-        expect ret.Failure?;
+        expect ret.Success?;
         print ret;
     }
 }
