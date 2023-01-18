@@ -10,6 +10,7 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.WildcardTypeName;
 
+import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -198,8 +199,14 @@ public class ToDafnyAwsV2 extends ToDafny {
         }
 
         if (memberShape.getMemberName().equals("SizeEstimateRangeGB")) {
+            MethodReference convert = new MethodReference(
+                JAVA_UTIL_COLLECTORS,
+                "toList");
+
             return returnCodeBlockBuilder
-                .add(".intValue()")
+                .add(".stream()")
+                .add(".map(Double::intValue)")
+                .add(".collect(" + convert.asNormalReference() + "())")
                 .build();
         }
 
