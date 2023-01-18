@@ -1,0 +1,28 @@
+#!/bin/bash
+
+# A simple script for using our Polymorph package to generate
+# all relevant code
+
+pushd .
+
+cd ../smithy-polymorph
+
+./gradlew run --args="\
+    --output-dafny \
+    --include-dafny /Users/scchatur/workspace/polymorph/smithy-polymorph/lib/std/src/Index.dfy \
+    --output-dotnet /Users/scchatur/workspace/polymorph/smithy-simple-types/runtimes/net/Generated/ \
+    --output-java /Users/scchatur/workspace/polymorph/smithy-simple-types/runtimes/java/src/main/smithy-generated \
+    --model /Users/scchatur/workspace/polymorph/smithy-simple-types/Model \
+    --dependent-model /Users/scchatur/workspace/polymorph/smithy-polymorph/lib/model \
+    --namespace example.simpletypes"
+
+./gradlew run --args="\
+    --output-dafny /Users/scchatur/workspace/polymorph/smithy-simple-types/Model \
+    --include-dafny /Users/scchatur/workspace/polymorph/smithy-polymorph/lib/std/src/Index.dfy \
+    --output-dotnet /Users/scchatur/workspace/polymorph/smithy-simple-types/runtimes/net/Generated/Wrapped/ \
+    --output-java /Users/scchatur/workspace/polymorph/smithy-simple-types/runtimes/java/src/main/smithy-generated/Wrapped \
+    --model /Users/scchatur/workspace/polymorph/smithy-simple-types/Model \
+    --dependent-model /Users/scchatur/workspace/polymorph/smithy-polymorph/lib/model \
+    --namespace example.simpletypes --wrapped-local-service"
+
+popd

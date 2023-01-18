@@ -20,6 +20,8 @@
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
 
     <ProjectReference Include="../SimpleTypes.csproj" />
+    <Compile Include="../Extern/**" />
+    <Compile Include="../Generated/**" />
     <Compile Include="TestsFromDafny.cs" />
   </ItemGroup>
 
