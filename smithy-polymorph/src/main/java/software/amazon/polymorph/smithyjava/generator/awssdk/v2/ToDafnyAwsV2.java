@@ -192,7 +192,8 @@ public class ToDafnyAwsV2 extends ToDafny {
 
         // Smithy models ConsumedCapacityUnits as an integer, but SDK expects double.
         // Mirroring the Dotnet implementation, which will round.
-        if (targetShape.getId().toString().equals("ConsumedCapacityUnits")) {
+        if (targetShape.getId().getName().equals("ConsumedCapacityUnits")) {
+
             return returnCodeBlockBuilder
                 .add(".intValue()")
                 .build();
