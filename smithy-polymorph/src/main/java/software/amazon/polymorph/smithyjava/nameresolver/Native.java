@@ -191,6 +191,10 @@ public class Native extends NameResolver{
         return ClassName.get(String.class);
     }
 
+    public ClassName classForDouble() {
+        return ClassName.get(Double.class);
+    }
+
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     public TypeName typeForListOrSetMember(ShapeId shapeId) {
         Shape shape = model.expectShape(shapeId);

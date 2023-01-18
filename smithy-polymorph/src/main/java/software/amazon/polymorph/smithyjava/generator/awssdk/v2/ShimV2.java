@@ -135,14 +135,14 @@ public class ShimV2 extends Generator {
 
         operationShape.getErrors().forEach(shapeId -> {
             TypeName typeForShape = subject.nativeNameResolver.typeForShape(shapeId);
-            System.out.println(typeForShape);
+            //System.out.println(typeForShape);
 
             // InvalidEndpointException was removed in SDK V2
             if (typeForShape.toString().endsWith("InvalidEndpointException")) {
                 return; // Skips only this iteration
             }
 
-            System.out.println(subject.nativeNameResolver.typeForShape(shapeId));
+            //System.out.println(subject.nativeNameResolver.typeForShape(shapeId));
 
             builder
                 .nextControlFlow("catch ($T ex)", subject.nativeNameResolver.typeForShape(shapeId))
