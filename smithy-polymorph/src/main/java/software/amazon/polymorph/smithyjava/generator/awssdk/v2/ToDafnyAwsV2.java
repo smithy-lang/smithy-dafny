@@ -184,7 +184,23 @@ public class ToDafnyAwsV2 extends ToDafny {
         //   ByteSequence(inputVar.asByteArray())
         Shape targetShape = subject.model.expectShape(memberShape.getTarget());
         if (targetShape.getType() == ShapeType.BLOB) {
-            return returnCodeBlockBuilder.add(".asByteArray()").build();
+            return returnCodeBlockBuilder
+                .add(".asByteArray()")
+                .build();
+        }
+
+        // Smithy models ConsumedCapacityUnits as an integer, but SDK expects double.
+        // Mirroring the Dotnet implementation, which will round.
+        if (targetShape.getId().toString().equals("ConsumedCapacityUnits")) {
+            return returnCodeBlockBuilder
+                .add(".intValue()")
+                .build();
+        }
+
+        if (memberShape.getMemberName().equals("SizeEstimateRangeGB")) {
+            return returnCodeBlockBuilder
+                .add(".intValue()")
+                .build();
         }
 
         return inputVar;

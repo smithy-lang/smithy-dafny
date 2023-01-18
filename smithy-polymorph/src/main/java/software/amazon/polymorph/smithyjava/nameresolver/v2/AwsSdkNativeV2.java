@@ -107,6 +107,14 @@ public class AwsSdkNativeV2 extends Native {
     private TypeName typeForShapeNoEnum(ShapeId shapeId) {
         final Shape shape = model.expectShape(shapeId);
 
+        if (shapeId.toString().contains("ConsumedCapacity")) {
+
+        }
+
+        if (shapeId.getMember().isPresent()) {
+            System.out.println("HAS MEMBER");
+        }
+
         if (shape.hasTrait(EnumTrait.class)) {
             if (shapeRequiresTypeConversionFromStringToStructure(shapeId)) {
                 return classForEnum(shape);
@@ -118,6 +126,17 @@ public class AwsSdkNativeV2 extends Native {
             return typeForListSetOrMapNoEnum(shapeId);
         }
         return typeForShape(shapeId);
+    }
+
+    /**
+     * Returns true if the provided ShapeId has type integer in the Smithy model, but AWS SDK for
+     *   Java V2 effectively expects type double.
+     * @param shapeId
+     * @return true if AWS SDK for Java V2 expects this to have been modeled as a double in Smithy
+     */
+    protected boolean shapeRequiresTypeConversionFromIntToDouble(
+        ShapeId shapeId) {
+        return shapeId.toString().contains("ConsumedCapacityUnits");
     }
 
     /**
