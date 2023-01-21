@@ -73,9 +73,7 @@ public class AwsSdkDafnyV2 extends Dafny {
         }
         // Message: Exception message. Retrieved via `getMessage()`.
         if ("message".equals(uncapitalize(memberShape.getMemberName()))) {
-
-            //System.out.println(memberShape.getContainer().getName());
-            // BatchStatementError AND CancellationReason type ; its message is retrieved via "message".
+            // BatchStatementError and CancellationReason types' messages are retrieved via "message".
             if (memberShape.getContainer().getName().contains("BatchStatementError")
                     || memberShape.getContainer().getName().contains("CancellationReason")) {
                 return CodeBlock.of("$L.$L()", variableName,
@@ -92,11 +90,7 @@ public class AwsSdkDafnyV2 extends Dafny {
             }
             return CodeBlock.of("$L.$L()", variableName, memberShape.getMemberName().toLowerCase());
         }
-//        if (memberShape.getMemberName().contains("AttributeValue")) {
-//            System.out.println(memberShape.getMemberName());
-//            System.out.println(memberShape.getTarget());
-//            return CodeBlock.of("$L.$L()", variableName, uncapitalize(memberShape.getMemberName()));
-//        }
+
         return CodeBlock.of("$L.$L()", variableName, uncapitalize(memberShape.getMemberName()));
     }
 
