@@ -72,12 +72,48 @@ public class AwsSdkDafnyV2 extends Dafny {
             return CodeBlock.of("$L.kms$L()", variableName, suffix);
         }
         // Message: Exception message. Retrieved via `getMessage()`.
-        if ("message".equals(uncapitalize(memberShape.getMemberName()))
-            // BatchStatementError type ; its message is retrieved via "message".
-            && !memberShape.getContainer().getName().contains("BatchStatementError")) {
-            return CodeBlock.of("$L.get$L()", variableName, capitalize(memberShape.getMemberName()));
+        if ("message".equals(uncapitalize(memberShape.getMemberName()))) {
+
+            //System.out.println(memberShape.getContainer().getName());
+            // BatchStatementError AND CancellationReason type ; its message is retrieved via "message".
+            if (memberShape.getContainer().getName().contains("BatchStatementError")
+                    || memberShape.getContainer().getName().contains("CancellationReason")) {
+                return CodeBlock.of("$L.$L()", variableName,
+                    uncapitalize(memberShape.getMemberName()));
+            } else {
+                return CodeBlock.of("$L.get$L()", variableName,
+                    capitalize(memberShape.getMemberName()));
+            }
         }
+
+        if (isAttributeValueType(memberShape)) {
+            if (memberShape.getMemberName().equals("NULL")) {
+                return CodeBlock.of("$L.nul()", variableName);
+            }
+            return CodeBlock.of("$L.$L()", variableName, memberShape.getMemberName().toLowerCase());
+        }
+//        if (memberShape.getMemberName().contains("AttributeValue")) {
+//            System.out.println(memberShape.getMemberName());
+//            System.out.println(memberShape.getTarget());
+//            return CodeBlock.of("$L.$L()", variableName, uncapitalize(memberShape.getMemberName()));
+//        }
         return CodeBlock.of("$L.$L()", variableName, uncapitalize(memberShape.getMemberName()));
+    }
+
+    // TODO: Refactor
+
+    protected static boolean isAttributeValueType(MemberShape shape) {
+        String memberName = shape.getMemberName();
+        return memberName.equals("BOOL")
+            || memberName.equals("NULL")
+            || memberName.equals("L")
+            || memberName.equals("M")
+            || memberName.equals("BS")
+            || memberName.equals("NS")
+            || memberName.equals("SS")
+            || memberName.equals("B")
+            || memberName.equals("N")
+            || memberName.equals("S");
     }
 
     /**

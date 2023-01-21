@@ -128,7 +128,7 @@ public abstract class ToDafny extends Generator {
             return method.build();
         }
         shape.members().forEach(member -> {
-            CodeBlock getField = CodeBlock.of("$L.$L()", VAR_INPUT, member.getMemberName());
+            CodeBlock getField = getMember(CodeBlock.builder().add(VAR_INPUT).build(), member);
             CodeBlock memberConversion = memberConversion(member, getField);
             String datatypeConstructorCreate = Dafny.datatypeConstructorCreate(member.getMemberName());
             method.beginControlFlow("if ($T.nonNull($L))", Objects.class, getField)
@@ -323,7 +323,9 @@ public abstract class ToDafny extends Generator {
     }
 
     protected MethodSpec modeledError(final StructureShape shape) {
+        //System.out.println(shape.getId().toString());
         MethodSpec structure = modeledStructure(shape);
+        //System.out.println(structure);
         MethodSpec.Builder builder = structure.toBuilder();
         builder.setName("Error");
         builder.returns(subject.dafnyNameResolver.abstractClassForError());

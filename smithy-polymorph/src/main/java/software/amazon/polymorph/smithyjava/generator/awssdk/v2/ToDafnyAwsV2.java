@@ -10,7 +10,7 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.WildcardTypeName;
 
-import java.lang.reflect.Method;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -35,10 +35,11 @@ import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.ShapeType;
 import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
+import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumDefinition;
 import software.amazon.smithy.model.traits.EnumTrait;
 
-import static software.amazon.polymorph.smithyjava.generator.Generator.Constants.JAVA_UTIL_COLLECTORS;
+import static software.amazon.polymorph.smithyjava.generator.Generator.Constants.JAVA_UTIL_STREAM_COLLECTORS;
 import static software.amazon.smithy.utils.StringUtils.capitalize;
 
 /**
@@ -83,15 +84,44 @@ public class ToDafnyAwsV2 extends ToDafny {
     }
 
     TypeSpec toDafny() {
+        ShapeId testId = ShapeId.from("com.amazonaws.dynamodb#CancellationReasonList");
+
+        //System.out.println(subject.serviceShape.toString());
+
         LinkedHashSet<ShapeId> operationOutputs = subject.serviceShape
                 .getOperations().stream()
                 .map(shapeId -> subject.model.expectShape(shapeId, OperationShape.class))
                 .map(OperationShape::getOutput).filter(Optional::isPresent).map(Optional::get)
                 .collect(Collectors.toCollection(LinkedHashSet::new));
+        LinkedHashSet<ShapeId> operationInputs = subject.serviceShape
+            .getOperations().stream()
+            .map(shapeId -> subject.model.expectShape(shapeId, OperationShape.class))
+            .map(OperationShape::getInput).filter(Optional::isPresent).map(Optional::get)
+            .collect(Collectors.toCollection(LinkedHashSet::new));
+
+        LinkedHashSet<ShapeId> operationErrors = subject.serviceShape
+            .getOperations().stream()
+            .map(shapeId -> subject.model.expectShape(shapeId, OperationShape.class))
+            .map(OperationShape::getErrors)
+            .flatMap(Collection::stream)
+            .filter(structureShape -> !structureShape.toString().contains("InvalidEndpointException"))
+            .collect(Collectors.toCollection(LinkedHashSet::new));
+        operationOutputs.addAll(operationInputs); // TODO
+        operationOutputs.addAll(operationErrors); // TODO
+
         Set<ShapeId> allRelevantShapeIds = ModelUtils.findAllDependentShapes(operationOutputs, subject.model);
+
+        if (allRelevantShapeIds.contains(testId)) {
+            System.out.println("1");
+        }
 
         // In the AWS SDK for Java V2, Operation Outputs are special
         allRelevantShapeIds.removeAll(operationOutputs);
+
+        if (allRelevantShapeIds.contains(testId)) {
+            System.out.println("2");
+        }
+        //allRelevantShapeIds.removeAll(operationInputs);
         // Enums are also a special case
         LinkedHashSet<ShapeId> enumShapeIds = new LinkedHashSet<>();
         allRelevantShapeIds.forEach(shapeId -> {
@@ -102,6 +132,11 @@ public class ToDafnyAwsV2 extends ToDafny {
         });
         allRelevantShapeIds.removeAll(enumShapeIds);
 
+        if (enumShapeIds.contains(testId)) {
+            System.out.println("3");
+        }
+
+
         final List<MethodSpec> convertOutputs = operationOutputs.stream()
                 .map(this::generateConvert).toList();
         final List<MethodSpec> convertAllRelevant = allRelevantShapeIds.stream()
@@ -109,8 +144,12 @@ public class ToDafnyAwsV2 extends ToDafny {
         final List<MethodSpec> convertServiceErrors = ModelUtils.streamServiceErrors(subject.model, subject.serviceShape)
             // InvalidEndpointException does not exist in SDK V2
             .filter(structureShape -> !structureShape.getId().getName().contains("InvalidEndpointException"))
+            // ????
+            .filter(structureShape -> !structureShape.getId().getName().contains("CancellationReason"))
             .map(this::modeledError).collect(Collectors.toList());
+        //System.out.println(convertServiceErrors);
         convertServiceErrors.add(generateConvertOpaqueError());
+
         // For enums, we generate overloaded methods,
         // one to convert instances of the Enum
         final List<MethodSpec> convertEnumEnum = enumShapeIds
@@ -139,6 +178,15 @@ public class ToDafnyAwsV2 extends ToDafny {
     MethodSpec generateConvert(final ShapeId shapeId) {
         final Shape shape = subject.model.getShape(shapeId)
                 .orElseThrow(() -> new IllegalStateException("Cannot find shape " + shapeId));
+
+//        System.out.println(shapeId);
+
+//        if (shapeId.toString().contains("CancellationReasonList")) {
+//            System.out.println(shapeId);
+//        }
+
+
+
         return switch (shape.getType()) {
             // For the AWS SDK for Java, we do not generate converters for simple shapes
             case BLOB, BOOLEAN, STRING, TIMESTAMP, BYTE, SHORT,
@@ -147,14 +195,18 @@ public class ToDafnyAwsV2 extends ToDafny {
             case MAP -> modeledMap(shape.asMapShape().get());
             case SET -> modeledSet(shape.asSetShape().get());
             case STRUCTURE -> generateConvertStructure(shapeId);
-            // TODO: Support unions
+            case UNION -> generateConvertUnion(shapeId);
             default -> null;
         };
     }
 
+    MethodSpec generateConvertUnion(final ShapeId shapeId) {
+        final UnionShape unionShape = subject.model.expectShape(shapeId, UnionShape.class);
+        return super.modeledUnion(unionShape);
+    }
+
     @Override
     protected CodeBlock memberConversion(MemberShape memberShape, CodeBlock inputVar) {
-
         CodeBlock methodBlock = memberConversionMethodReference(memberShape).asNormalReference();
 
         return CodeBlock.of("$L($L)",
@@ -190,18 +242,41 @@ public class ToDafnyAwsV2 extends ToDafny {
                 .build();
         }
 
+        if (targetShape.getId().getName().equals("BinarySetAttributeValue")) {
+            return returnCodeBlockBuilder
+                .add(".stream().map((self) -> { return self.asByteBuffer(); } ).collect(\n"
+                    + "          $L.toList())", JAVA_UTIL_STREAM_COLLECTORS)
+                .build();
+        }
+
+        // TODO refactor into a "requires double/int conversion" method
         // Smithy models ConsumedCapacityUnits as an integer, but SDK expects double.
         // Mirroring the Dotnet implementation, which will round.
         if (targetShape.getId().getName().equals("ConsumedCapacityUnits")) {
-
             return returnCodeBlockBuilder
                 .add(".intValue()")
                 .build();
         }
 
+        // Smithy models ConsumedCapacityUnits as an integer, but SDK expects double.
+        // Mirroring the Dotnet implementation, which will round.
+        if (targetShape.getId().getName().equals("Double")) {
+            return returnCodeBlockBuilder
+                .add(".intValue()")
+                .build();
+        }
+
+        // Smithy models ConsumedCapacityUnits as an integer, but SDK expects double.
+        // Mirroring the Dotnet implementation, which will round.
+        if (memberShape.getMemberName().equals("ReplicationGroup")) {
+            return returnCodeBlockBuilder
+                //.add(".toString()")
+                .build();
+        }
+
         if (memberShape.getMemberName().equals("SizeEstimateRangeGB")) {
             MethodReference convert = new MethodReference(
-                JAVA_UTIL_COLLECTORS,
+                JAVA_UTIL_STREAM_COLLECTORS,
                 "toList");
 
             return returnCodeBlockBuilder
@@ -295,6 +370,19 @@ public class ToDafnyAwsV2 extends ToDafny {
     MethodSpec generateConvertStructure(final ShapeId shapeId) {
         final StructureShape structureShape = subject.model.expectShape(shapeId, StructureShape.class);
         return super.modeledStructure(structureShape);
+    }
+
+    @Override
+    protected CodeBlock memberAssignment(
+        final MemberShape memberShape,
+        CodeBlock outputVar,
+        CodeBlock inputVar
+    ) {
+        ShapeId shapeId = memberShape.getId();
+        if (shapeId.getName().contains("CancellationReason")) {
+            System.out.println(shapeId.getName());
+        }
+        return super.memberAssignment(memberShape, outputVar, inputVar);
     }
 
 

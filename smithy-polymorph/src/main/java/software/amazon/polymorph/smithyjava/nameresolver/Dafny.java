@@ -125,8 +125,27 @@ public class Dafny extends NameResolver {
         if (shape.isRequired()) {
             return getMemberField(shape);
         }
+        // TODO refactor
+        if (isAttributeValueType(shape)) {
+            return getMemberField(shape);
+        }
         // if optional, get via dtor_value()
         return CodeBlock.of("$L.dtor_value()", getMemberField(shape));
+    }
+
+    // TODO refactor
+    protected static boolean isAttributeValueType(MemberShape shape) {
+        String memberName = shape.getMemberName();
+        return memberName.equals("BOOL")
+            || memberName.equals("NULL")
+            || memberName.equals("L")
+            || memberName.equals("M")
+            || memberName.equals("BS")
+            || memberName.equals("NS")
+            || memberName.equals("SS")
+            || memberName.equals("B")
+            || memberName.equals("N")
+            || memberName.equals("S");
     }
 
     public static TypeName asDafnyResult(TypeName success, TypeName failure) {

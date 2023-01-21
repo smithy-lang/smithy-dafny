@@ -62,7 +62,9 @@ public abstract class Generator {
                     ShapeType.LIST, ShapeType.SET, ShapeType.MAP
             );
         }
-        public static final ClassName JAVA_UTIL_COLLECTORS =
+        public static final ClassName JAVA_UTIL_STREAM_COLLECTORS =
             ClassName.get("java.util.stream", "Collectors");
+        public static final ClassName JAVA_UTIL_ARRAYLIST =
+            ClassName.get("java.util", "ArrayList");
      }
 }

@@ -43,6 +43,11 @@ public record DafnyNameResolver(
     );
 
     public static String nameForService(final ServiceShape serviceShape) {
+        // For ? reason, DDB client needs an extra underscore
+        if (serviceShape.getId().getName().contains("_")) {
+            return StringUtils.capitalize(serviceShape.getId().getName()
+                .replace("_", "__"));
+        }
         return StringUtils.capitalize(serviceShape.getId().getName());
     }
 
