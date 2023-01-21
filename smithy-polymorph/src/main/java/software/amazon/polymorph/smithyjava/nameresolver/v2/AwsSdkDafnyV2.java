@@ -139,4 +139,14 @@ public class AwsSdkDafnyV2 extends Dafny {
             || dafnyEnumType.equals("Dafny.Com.Amazonaws.Kms.Types.GrantOperation")
             || dafnyEnumType.equals("Dafny.Com.Amazonaws.Dynamodb.Types.BatchStatementErrorCodeEnum");
     }
+
+    // TODO finish this
+    public static CodeBlock getMemberFieldValue(MemberShape shape) {
+        // TODO refactor
+        if (isAttributeValueType(shape)) {
+            return getMemberField(shape);
+        }
+        return getMemberFieldValue(shape);
+    }
+
 }
