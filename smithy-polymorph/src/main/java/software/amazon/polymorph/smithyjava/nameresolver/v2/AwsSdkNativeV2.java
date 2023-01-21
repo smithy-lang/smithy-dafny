@@ -14,12 +14,14 @@ import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
+import software.amazon.smithy.model.shapes.ShapeType;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.TraitDefinition;
 import software.amazon.smithy.utils.StringUtils;
 
+import static software.amazon.polymorph.smithyjava.generator.awssdk.v2.ToNativeAwsV2.BLOB_TO_NATIVE_SDK_BYTES;
 import static software.amazon.polymorph.smithyjava.nameresolver.Constants.SHAPE_TYPES_LIST_SET;
 
 /**
@@ -111,10 +113,6 @@ public class AwsSdkNativeV2 extends Native {
 
         }
 
-        if (shapeId.getMember().isPresent()) {
-            System.out.println("HAS MEMBER");
-        }
-
         if (shape.hasTrait(EnumTrait.class)) {
             if (shapeRequiresTypeConversionFromStringToStructure(shapeId)) {
                 return classForEnum(shape);
@@ -126,6 +124,23 @@ public class AwsSdkNativeV2 extends Native {
             return typeForListSetOrMapNoEnum(shapeId);
         }
         return typeForShape(shapeId);
+    }
+
+    @Override
+    public TypeName typeForShape(final ShapeId shapeId) {
+        final Shape shape = model.expectShape(shapeId);
+
+        if (shapeId.getName().contains("BinarySetAttributeValue")) {
+            return ParameterizedTypeName.get(
+                ClassName.get(List.class),
+                BLOB_TO_NATIVE_SDK_BYTES);
+        }
+
+        if (shape.getType().equals(ShapeType.BYTE)) {
+            return BLOB_TO_NATIVE_SDK_BYTES;
+        }
+
+        return super.typeForShape(shapeId);
     }
 
     /**
