@@ -36,6 +36,7 @@ import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumDefinition;
 import software.amazon.smithy.model.traits.EnumTrait;
 
+import static software.amazon.polymorph.smithyjava.generator.Generator.Constants.BLOB_TO_NATIVE_SDK_BYTES;
 import static software.amazon.polymorph.smithyjava.generator.Generator.Constants.JAVA_UTIL_ARRAYLIST;
 import static software.amazon.smithy.utils.StringUtils.capitalize;
 import static software.amazon.smithy.utils.StringUtils.uncapitalize;
@@ -63,8 +64,6 @@ import static software.amazon.smithy.utils.StringUtils.uncapitalize;
 public class ToNativeAwsV2 extends ToNative {
     protected final static String VAR_BUILDER = "builder";
     protected final static String VAR_TEMP = "temp";
-    // TODO move
-    public static final ClassName BLOB_TO_NATIVE_SDK_BYTES = ClassName.get("software.amazon.awssdk.core", "SdkBytes");
 
     // TODO: for V2 support, use abstract AwsSdk name resolvers and sub class for V1 or V2.
 
@@ -150,8 +149,6 @@ public class ToNativeAwsV2 extends ToNative {
                 .builder(subject.dafnyNameResolver.typeForShape(shapeId), VAR_INPUT)
                 .build();
 
-           // System.out.println(subject.nativeNameResolver.typeForShape(shapeId));
-
             MethodSpec.Builder methodSpecBuilder = MethodSpec
                 .methodBuilder(capitalize(shapeId.getName()))
                 .addModifiers(PUBLIC_STATIC)
@@ -212,6 +209,7 @@ public class ToNativeAwsV2 extends ToNative {
     @Override
     protected CodeBlock setWithConversionCall(MemberShape member, CodeBlock getMember) {
         Shape targetShape = subject.model.expectShape(member.getTarget());
+
         // SDK V2 reads in Blob shapes as SdkBytes.
         // SdkBytes are a Java SDK V2-specific datatype defined in the SDK V2 package. As a result,
         //   dafny-java-version should not define a byte-array-to-SdkBytes conversion. Otherwise,
@@ -228,9 +226,10 @@ public class ToNativeAwsV2 extends ToNative {
                 VAR_INPUT,
                 Dafny.getMemberFieldValue(member));
         }
-        // TODO bad, refactor
-        // "targetValue" should refer to auto-scaled read/write capacity target values
-        if (setMemberField(member).toString().equals("targetValue")) {
+
+        // "TargetValue" refers to on-demand R/W capacity target values.
+        // SDK handles these as doubles, but the Smithy model stores them as integers.
+        if (member.getMemberName().equals("TargetValue")) {
             return CodeBlock.of("$L.$L($L((double) $L.$L))",
                 VAR_BUILDER,
                 setMemberField(member),
@@ -238,6 +237,7 @@ public class ToNativeAwsV2 extends ToNative {
                 VAR_INPUT,
                 Dafny.getMemberFieldValue(member));
         }
+
         return CodeBlock.of("$L.$L($L($L.$L))",
             VAR_BUILDER,
                 setMemberField(member),
@@ -269,19 +269,25 @@ public class ToNativeAwsV2 extends ToNative {
             return CodeBlock.of("$L", shape.getMemberName().replace("KMS", "kms"));
         }
 
-        // TODO: refactor
-        if (isAttributeValueType(shape)) {
+        // SDK AttributeValue type attributes are set using fully lowercase type names
+        if (shape.getContainer().getName().equals("AttributeValue")
+                && isAttributeValueType(shape)) {
+            // "NULL" attribute value is set using "nul"
             if (shape.getMemberName().equals("NULL")) {
                 return CodeBlock.of("nul");
             }
             return CodeBlock.of("$L", shape.getMemberName().toLowerCase());
         }
 
-
         return CodeBlock.of("$L", uncapitalize(shape.getMemberName()));
     }
 
-    // TODO refactor
+    /**
+     * Returns true if shape name is an allowed attribute type on AttributeValue objects.
+     * @param shape
+     * @return true if shape name is an allowed attribute type on AttributeValue objects; false
+     *     otherwise
+     */
     protected static boolean isAttributeValueType(MemberShape shape) {
         String memberName = shape.getMemberName();
         return memberName.equals("BOOL")
@@ -345,26 +351,26 @@ public class ToNativeAwsV2 extends ToNative {
         return method.build();
     }
 
-    // TODO: This is duplicated because ToNative uses "nativeBuilder" as builder but this file uses
-    // "builder". Fix this
+    // TODO: This is duplicated because ToNative uses "nativeBuilder" as the name for its builders,
+    // but this file uses "builder".
     protected MethodSpec modeledUnion(final UnionShape shape) {
         final ShapeId shapeId = shape.getId();
         final String methodName = capitalize(shapeId.getName());
         final TypeName inputType = subject.dafnyNameResolver.typeForShape(shapeId);
         final ClassName returnType = subject.nativeNameResolver.classNameForStructure(shape);
         MethodSpec.Builder method = initializeMethodSpec(methodName, inputType, returnType);
-        // TODO: next 2 lines need to be cleaned up
-        ClassName nativeClassName = subject.nativeNameResolver.classNameForStructure(shape.asUnionShape().get());
-        method.addStatement("$T.Builder $L = $T.builder()", nativeClassName, VAR_BUILDER, nativeClassName);
+        ClassName nativeClassName = subject.nativeNameResolver.classNameForStructure(
+            shape.asUnionShape().get());
+        method.addStatement("$T.Builder $L = $T.builder()", nativeClassName, VAR_BUILDER,
+            nativeClassName);
         shape.members()
             .forEach(member -> {
-                method.beginControlFlow("if ($L.$L())", VAR_INPUT, Dafny.datatypeConstructorIs(member.getMemberName()))
+                method.beginControlFlow("if ($L.$L())", VAR_INPUT,
+                        Dafny.datatypeConstructorIs(member.getMemberName()))
                     .addStatement(setWithConversionCall(member, Dafny.getMemberField(member)))
                     .endControlFlow();
             });
-        // TODO: next 2 lines need to be cleaned up
         method.addStatement("return $L.build()", VAR_BUILDER);
         return method.build();
     }
-
 }

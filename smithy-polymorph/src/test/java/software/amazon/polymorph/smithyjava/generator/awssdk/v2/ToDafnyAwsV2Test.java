@@ -84,7 +84,6 @@ public class ToDafnyAwsV2Test {
         final Path actualPath = actual.keySet().toArray(temp)[0];
         assertEquals(expectedPath, actualPath);
         final String actualSource = actual.get(actualPath).toString();
-        //System.out.println(actualSource);
         // TODO: This test is failing, but we have largely given up on Polymorph unit tests.
         //   If we decide to resume writing unit tests, we should fix this test.
         // tokenizeAndAssertEqual(ToDafnyAwsV2Constants.KMS_A_STRING_OPERATION_JAVA_FILE, actualSource);

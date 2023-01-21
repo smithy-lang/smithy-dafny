@@ -21,7 +21,7 @@ import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.TraitDefinition;
 import software.amazon.smithy.utils.StringUtils;
 
-import static software.amazon.polymorph.smithyjava.generator.awssdk.v2.ToNativeAwsV2.BLOB_TO_NATIVE_SDK_BYTES;
+import static software.amazon.polymorph.smithyjava.generator.Generator.Constants.BLOB_TO_NATIVE_SDK_BYTES;
 import static software.amazon.polymorph.smithyjava.nameresolver.Constants.SHAPE_TYPES_LIST_SET;
 
 /**
@@ -141,17 +141,6 @@ public class AwsSdkNativeV2 extends Native {
         }
 
         return super.typeForShape(shapeId);
-    }
-
-    /**
-     * Returns true if the provided ShapeId has type integer in the Smithy model, but AWS SDK for
-     *   Java V2 effectively expects type double.
-     * @param shapeId
-     * @return true if AWS SDK for Java V2 expects this to have been modeled as a double in Smithy
-     */
-    protected boolean shapeRequiresTypeConversionFromIntToDouble(
-        ShapeId shapeId) {
-        return shapeId.toString().contains("ConsumedCapacityUnits");
     }
 
     /**

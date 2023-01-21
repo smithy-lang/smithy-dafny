@@ -111,16 +111,9 @@ public class ToDafnyAwsV2 extends ToDafny {
 
         Set<ShapeId> allRelevantShapeIds = ModelUtils.findAllDependentShapes(operationOutputs, subject.model);
 
-        if (allRelevantShapeIds.contains(testId)) {
-            System.out.println("1");
-        }
-
         // In the AWS SDK for Java V2, Operation Outputs are special
         allRelevantShapeIds.removeAll(operationOutputs);
 
-        if (allRelevantShapeIds.contains(testId)) {
-            System.out.println("2");
-        }
         //allRelevantShapeIds.removeAll(operationInputs);
         // Enums are also a special case
         LinkedHashSet<ShapeId> enumShapeIds = new LinkedHashSet<>();
@@ -132,11 +125,6 @@ public class ToDafnyAwsV2 extends ToDafny {
         });
         allRelevantShapeIds.removeAll(enumShapeIds);
 
-        if (enumShapeIds.contains(testId)) {
-            System.out.println("3");
-        }
-
-
         final List<MethodSpec> convertOutputs = operationOutputs.stream()
                 .map(this::generateConvert).toList();
         final List<MethodSpec> convertAllRelevant = allRelevantShapeIds.stream()
@@ -147,7 +135,6 @@ public class ToDafnyAwsV2 extends ToDafny {
             // ????
             .filter(structureShape -> !structureShape.getId().getName().contains("CancellationReason"))
             .map(this::modeledError).collect(Collectors.toList());
-        //System.out.println(convertServiceErrors);
         convertServiceErrors.add(generateConvertOpaqueError());
 
         // For enums, we generate overloaded methods,
@@ -178,14 +165,6 @@ public class ToDafnyAwsV2 extends ToDafny {
     MethodSpec generateConvert(final ShapeId shapeId) {
         final Shape shape = subject.model.getShape(shapeId)
                 .orElseThrow(() -> new IllegalStateException("Cannot find shape " + shapeId));
-
-//        System.out.println(shapeId);
-
-//        if (shapeId.toString().contains("CancellationReasonList")) {
-//            System.out.println(shapeId);
-//        }
-
-
 
         return switch (shape.getType()) {
             // For the AWS SDK for Java, we do not generate converters for simple shapes
@@ -242,35 +221,31 @@ public class ToDafnyAwsV2 extends ToDafny {
                 .build();
         }
 
+        // BinarySetAttributeValue conversion is special.
+        // The input Dafny type is DafnySequence<? extends DafnySequence<? extends Byte>>.
+        // The output native type is List<SdkBytes>.
+        // dafny-java-conversion can convert most input types directly to the output types;
+        //     however, SdkBytes is an exception. SdkBytes is defined in the AWS SDK. It is not a
+        //     native Java nor Dafny type.
+        // We do not want to write a conversion to SdkBytes inside dafny-java-conversion, else
+        //     Polymorph would need to take a dependency on the AWS SDK. Instead, smithy-polymorph=
+        //     will generate the required conversion code.
+        // This is the only time when Polymorph needs to convert a list of a Dafny type to a list
+        //     of a type that Polymorph does not know about. So this is a special case and warrants
+        //     its own generation logic.
         if (targetShape.getId().getName().equals("BinarySetAttributeValue")) {
             return returnCodeBlockBuilder
                 .add(".stream().map((self) -> { return self.asByteBuffer(); } ).collect(\n"
-                    + "          $L.toList())", JAVA_UTIL_STREAM_COLLECTORS)
+                    + "$L.toList())", JAVA_UTIL_STREAM_COLLECTORS)
                 .build();
         }
 
-        // TODO refactor into a "requires double/int conversion" method
-        // Smithy models ConsumedCapacityUnits as an integer, but SDK expects double.
-        // Mirroring the Dotnet implementation, which will round.
-        if (targetShape.getId().getName().equals("ConsumedCapacityUnits")) {
+        // Smithy models some values as integers, but SDK expects doubles.
+        // .intValue will round down; i.e. the decimal portion is removed. This mirrors Dotnet's
+        //     double -> int casting.
+        if (shapeRequiresTypeConversionFromDoubleToInt(targetShape.getId())) {
             return returnCodeBlockBuilder
                 .add(".intValue()")
-                .build();
-        }
-
-        // Smithy models ConsumedCapacityUnits as an integer, but SDK expects double.
-        // Mirroring the Dotnet implementation, which will round.
-        if (targetShape.getId().getName().equals("Double")) {
-            return returnCodeBlockBuilder
-                .add(".intValue()")
-                .build();
-        }
-
-        // Smithy models ConsumedCapacityUnits as an integer, but SDK expects double.
-        // Mirroring the Dotnet implementation, which will round.
-        if (memberShape.getMemberName().equals("ReplicationGroup")) {
-            return returnCodeBlockBuilder
-                //.add(".toString()")
                 .build();
         }
 
@@ -287,6 +262,19 @@ public class ToDafnyAwsV2 extends ToDafny {
         }
 
         return inputVar;
+    }
+
+    /**
+     * Returns true if the provided ShapeId has type integer in the Smithy model, but AWS SDK for
+     *   Java V2 effectively expects type double.
+     * @param shapeId
+     * @return true if AWS SDK for Java V2 expects this to have been modeled as a double in Smithy
+     */
+    protected boolean shapeRequiresTypeConversionFromDoubleToInt(ShapeId shapeId) {
+        String shapeName = shapeId.getName();
+
+        return shapeName.equals("ConsumedCapacityUnits")
+            || shapeName.equals("Double");
     }
 
     MethodSpec generateConvertEnumString(ShapeId shapeId) {
@@ -379,9 +367,6 @@ public class ToDafnyAwsV2 extends ToDafny {
         CodeBlock inputVar
     ) {
         ShapeId shapeId = memberShape.getId();
-        if (shapeId.getName().contains("CancellationReason")) {
-            System.out.println(shapeId.getName());
-        }
         return super.memberAssignment(memberShape, outputVar, inputVar);
     }
 

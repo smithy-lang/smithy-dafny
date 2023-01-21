@@ -323,9 +323,7 @@ public abstract class ToDafny extends Generator {
     }
 
     protected MethodSpec modeledError(final StructureShape shape) {
-        //System.out.println(shape.getId().toString());
         MethodSpec structure = modeledStructure(shape);
-        //System.out.println(structure);
         MethodSpec.Builder builder = structure.toBuilder();
         builder.setName("Error");
         builder.returns(subject.dafnyNameResolver.abstractClassForError());
