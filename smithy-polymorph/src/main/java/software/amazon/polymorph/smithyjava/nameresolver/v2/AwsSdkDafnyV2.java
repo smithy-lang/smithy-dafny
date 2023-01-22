@@ -56,6 +56,7 @@ public class AwsSdkDafnyV2 extends Dafny {
         if ("AWSAccountId".equals(memberShape.getMemberName())) {
             return CodeBlock.of("$L.awsAccountId()", variableName);
         }
+
         // SSE (secure-side encryption) Description: Uncapitalize all of `SSE` --> `sse`
         // TODO: Refactor with SSE renaming logic in AwsSdkNativeV2
         if (memberShape.getMemberName().startsWith("SSE")) {
@@ -63,12 +64,14 @@ public class AwsSdkDafnyV2 extends Dafny {
                 .substring(memberShape.getMemberName().lastIndexOf("SSE") + "SSE".length());
             return CodeBlock.of("$L.sse$L()", variableName, suffix);
         }
+
         // TODO: Refactor with KMS renaming logic in AwsSdkNativeV2
         if (memberShape.getMemberName().startsWith("KMS")) {
             String suffix = memberShape.getMemberName()
                 .substring(memberShape.getMemberName().lastIndexOf("KMS") + "KMS".length());
             return CodeBlock.of("$L.kms$L()", variableName, suffix);
         }
+
         // Message: Exception message. Retrieved via `getMessage()`.
         if ("message".equals(uncapitalize(memberShape.getMemberName()))) {
             // BatchStatementError and CancellationReason types' messages are retrieved via "message".
