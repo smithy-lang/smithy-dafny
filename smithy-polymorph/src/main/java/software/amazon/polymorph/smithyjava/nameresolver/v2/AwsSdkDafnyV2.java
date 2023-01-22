@@ -52,8 +52,6 @@ public class AwsSdkDafnyV2 extends Dafny {
      * @return CodeBlock containing something like `variable.member()`.
      */
     public CodeBlock methodForGetMember(CodeBlock variableName, MemberShape memberShape) {
-        // TODO: If we find many more cases to uncapitalize first 3 letters, consider removing
-        //   hardcoding and create separate method
         // AWS Account ID: Uncapitalize all of `AWS` --> `aws`
         if ("AWSAccountId".equals(memberShape.getMemberName())) {
             return CodeBlock.of("$L.awsAccountId()", variableName);
