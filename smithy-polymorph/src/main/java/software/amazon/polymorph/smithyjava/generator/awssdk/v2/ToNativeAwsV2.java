@@ -20,6 +20,7 @@ import javax.lang.model.element.Modifier;
 
 import software.amazon.polymorph.smithyjava.MethodReference;
 import software.amazon.polymorph.smithyjava.generator.ToNative;
+import software.amazon.polymorph.smithyjava.nameresolver.AwsSdkDafnyV2;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.polymorph.utils.ModelUtils;
 
@@ -224,7 +225,7 @@ public class ToNativeAwsV2 extends ToNative {
                 setMemberField(member),
                 memberConversionMethodReference(member).asNormalReference(),
                 VAR_INPUT,
-                Dafny.getMemberFieldValue(member));
+                AwsSdkDafnyV2.getV2MemberFieldValue(member));
         }
 
         // "TargetValue" refers to on-demand R/W capacity target values.
@@ -235,7 +236,7 @@ public class ToNativeAwsV2 extends ToNative {
                 setMemberField(member),
                 memberConversionMethodReference(member).asNormalReference(),
                 VAR_INPUT,
-                Dafny.getMemberFieldValue(member));
+                AwsSdkDafnyV2.getV2MemberFieldValue(member));
         }
 
         return CodeBlock.of("$L.$L($L($L.$L))",
@@ -243,7 +244,7 @@ public class ToNativeAwsV2 extends ToNative {
                 setMemberField(member),
                 memberConversionMethodReference(member).asNormalReference(),
                 VAR_INPUT,
-                Dafny.getMemberFieldValue(member));
+                AwsSdkDafnyV2.getV2MemberFieldValue(member));
     }
 
     @Override
@@ -269,10 +270,10 @@ public class ToNativeAwsV2 extends ToNative {
             return CodeBlock.of("$L", shape.getMemberName().replace("KMS", "kms"));
         }
 
-        // SDK AttributeValue type attributes are set using fully lowercase type names
+        // Attributes of SDK AttributeValue shapes are entirely lower-case
         if (shape.getContainer().getName().equals("AttributeValue")
                 && isAttributeValueType(shape)) {
-            // "NULL" attribute value is set using "nul"
+            // "NULL" attribute is set using "nul"
             if (shape.getMemberName().equals("NULL")) {
                 return CodeBlock.of("nul");
             }

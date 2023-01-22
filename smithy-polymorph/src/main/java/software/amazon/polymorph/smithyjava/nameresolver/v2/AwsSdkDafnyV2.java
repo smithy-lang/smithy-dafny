@@ -84,7 +84,9 @@ public class AwsSdkDafnyV2 extends Dafny {
             }
         }
 
+        // Attributes of SDK AttributeValue shapes are entirely lower-case
         if (isAttributeValueType(memberShape)) {
+            // "NULL" attribute is retrieved using "nul"
             if (memberShape.getMemberName().equals("NULL")) {
                 return CodeBlock.of("$L.nul()", variableName);
             }
@@ -94,20 +96,26 @@ public class AwsSdkDafnyV2 extends Dafny {
         return CodeBlock.of("$L.$L()", variableName, uncapitalize(memberShape.getMemberName()));
     }
 
-    // TODO: Refactor
-
+    /**
+     * Returns true if shape is an attribute of an AttributeValue shape; false otherwise
+     * @param shape
+     * @return true if shape is an attribute of an AttributeValue shape; false otherwise
+     */
     protected static boolean isAttributeValueType(MemberShape shape) {
+        shape.getContainer().getName().equals("AttributeValue");
         String memberName = shape.getMemberName();
-        return memberName.equals("BOOL")
-            || memberName.equals("NULL")
-            || memberName.equals("L")
-            || memberName.equals("M")
-            || memberName.equals("BS")
-            || memberName.equals("NS")
-            || memberName.equals("SS")
-            || memberName.equals("B")
-            || memberName.equals("N")
-            || memberName.equals("S");
+        return (shape.getContainer().getName().equals("AttributeValue")
+            && (memberName.equals("BOOL")
+                || memberName.equals("NULL")
+                || memberName.equals("L")
+                || memberName.equals("M")
+                || memberName.equals("BS")
+                || memberName.equals("NS")
+                || memberName.equals("SS")
+                || memberName.equals("B")
+                || memberName.equals("N")
+                || memberName.equals("S")
+            ));
     }
 
     /**
@@ -140,13 +148,19 @@ public class AwsSdkDafnyV2 extends Dafny {
             || dafnyEnumType.equals("Dafny.Com.Amazonaws.Dynamodb.Types.BatchStatementErrorCodeEnum");
     }
 
-    // TODO finish this
-    public static CodeBlock getMemberFieldValue(MemberShape shape) {
-        // TODO refactor
+    /**
+     * Wrapper around Dafny.getMemberFieldValue.
+     * Checks if shape is a DynamoDB attribute value type:
+     *  - If it is, it doesn't need .dtor_value(); use getMemberField
+     *  - If it isn't, it needs .dtor_value(); use getMemberFieldValue
+     * @param shape
+     * @return CodeBlock to get member field for SDK V2 shape
+     */
+    public static CodeBlock getV2MemberFieldValue(MemberShape shape) {
         if (isAttributeValueType(shape)) {
             return getMemberField(shape);
         }
-        return getMemberFieldValue(shape);
+        return Dafny.getMemberFieldValue(shape);
     }
 
 }
