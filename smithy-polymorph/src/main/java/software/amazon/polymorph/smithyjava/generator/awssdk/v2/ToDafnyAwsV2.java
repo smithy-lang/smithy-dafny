@@ -1,5 +1,6 @@
 package software.amazon.polymorph.smithyjava.generator.awssdk.v2;
 
+import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.JavaFile;
@@ -391,13 +392,35 @@ public class ToDafnyAwsV2 extends ToDafny {
         CodeBlock getTypeDescriptor = subject.dafnyNameResolver.typeDescriptor(memberShape.getTarget());
 
         ParameterSpec parameterSpec = ParameterSpec
-                .builder(subject.nativeNameResolver.typeForListSetOrMapNoEnum(shape.getId()), "nativeValue")
+            .builder(subject.nativeNameResolver.typeForListSetOrMapNoEnum(shape.getId()), "nativeValue")
+            .build();
+
+        MethodSpec.Builder methodSpecBuilder = MethodSpec
+            .methodBuilder(capitalize(shape.getId().getName()))
+            .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+
+            .returns(subject.dafnyNameResolver.typeForAggregateWithWildcard(shape.getId()))
+            .addParameter(parameterSpec);
+
+        // A static call to TypeDescriptor class requires a typecast.
+        if (subject.dafnyNameResolver.shapeIdRequiresStaticTypeDescriptor(memberShape.getTarget())) {
+            return methodSpecBuilder
+                // Suppress "unchecked cast" warning; this is expected
+                .addAnnotation(
+                    AnnotationSpec.builder(SuppressWarnings.class)
+                        .addMember("value", "$S", "unchecked")
+                    .build()
+                )
+                .addStatement("return \n($L) \n$L(\n$L, \n$L, \n$L)",
+                    subject.dafnyNameResolver.typeForAggregateWithWildcard(shape.getId()),
+                    genericCall,
+                    "nativeValue",
+                    memberConverter,
+                    getTypeDescriptor)
                 .build();
-        return MethodSpec
-                .methodBuilder(capitalize(shape.getId().getName()))
-                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                .returns(subject.dafnyNameResolver.typeForAggregateWithWildcard(shape.getId()))
-                .addParameter(parameterSpec)
+        }
+
+        return methodSpecBuilder
                 .addStatement("return $L(\n$L, \n$L, \n$L)",
                         genericCall, "nativeValue", memberConverter, getTypeDescriptor)
                 .build();

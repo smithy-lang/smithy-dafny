@@ -10,6 +10,7 @@ import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.ResourceShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
+import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.utils.StringUtils;
 
 import static software.amazon.polymorph.smithydafny.DafnyNameResolver.traitNameForServiceClient;
@@ -164,4 +165,39 @@ public class AwsSdkDafnyV2 extends Dafny {
         return Dafny.getMemberFieldValue(shape);
     }
 
+    @Override
+    public CodeBlock typeDescriptor(ShapeId shapeId) {
+
+        if (shapeIdRequiresStaticTypeDescriptor(shapeId)) {
+            // TODO: Extend this assignment if we find more shapes that don't get classes generated.
+            //   However, explicitly assigning this string works for these 2 classes.
+            return CodeBlock.
+                of("TypeDescriptor.referenceWithInitializer(dafny.DafnyMap.class, () -> dafny.DafnyMap.<dafny.DafnySequence<? extends Character>,AttributeValue> empty())");
+        }
+        return super.typeDescriptor(shapeId);
+    }
+
+    /**
+     * AttributeMap and Key require special conversion.
+     * These are unique; they are the two map types used in generated code that do not have an
+     * associated Dafny-generated type Java class.
+     * When Dafny compiles map types into Java, Dafny will not generate a Java class for a map
+     * if the Dafny type does not have a predicate.
+     * Some maps are modelled to have a bound on the number of key/value pairs in the map.
+     * Polymorph translates these as a Dafny predicate. These 2 classes do not have a bound
+     * on map size, so they don't have a predicate, and aren't compiled into classes.
+     * Only classes have a _typeDescriptor() method; these are not classes, so they don't have one.
+     * Below, Polymorph generates a likeness of the _typeDescriptor() method for these types.
+     * Note that this results in an "unchecked cast" compiler warning, but the Dafny-generated
+     * cast also produces this warning.
+     * If we find more shapes that match this criteria, we should extend this logic.
+     * @param shapeId
+     * @return
+     */
+    public boolean shapeIdRequiresStaticTypeDescriptor(final ShapeId shapeId) {
+        String className = classForNotErrorNotUnitShape(shapeId).toString();
+
+        return (className.equals("AttributeMap")
+            || className.equals("Key"));
+    }
 }
