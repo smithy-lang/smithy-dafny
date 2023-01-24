@@ -22,6 +22,8 @@ import software.amazon.smithy.model.shapes.*;
 import software.amazon.smithy.model.traits.ReadonlyTrait;
 import software.amazon.smithy.utils.StringUtils;
 
+import static software.amazon.polymorph.utils.DafnyNameResolverHelpers.dafnyCompilesExtra_;
+
 public record DafnyNameResolver(
   Model model,
   String namespace,
@@ -42,12 +44,7 @@ public record DafnyNameResolver(
     );
 
     public static String nameForService(final ServiceShape serviceShape) {
-        // For ? reason, DDB client needs an extra underscore
-        if (serviceShape.getId().getName().contains("_")) {
-            return StringUtils.capitalize(serviceShape.getId().getName()
-                .replace("_", "__"));
-        }
-        return StringUtils.capitalize(serviceShape.getId().getName());
+        return StringUtils.capitalize(dafnyCompilesExtra_(serviceShape.getId().getName()));
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")
