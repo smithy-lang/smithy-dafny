@@ -35,7 +35,7 @@ structure GetAggregateOutput {
 }
 
 list SimpleStringList {
-  member: string
+  member: String
 }
 
 list StructureList {
@@ -44,19 +44,19 @@ list StructureList {
 
 // More elements SHOULD be added
 structure StructureListElement {
-  s: string,
-  i: integer,
+  s: String,
+  i: Integer,
 }
 
 map SimpleStringMap {
-  key: string,
-  value: string,
+  key: String,
+  value: String,
 }
 
 // Other map combinations SHOULD be added
 map SimpleIntegerMap {
-  key: integer,
-  value: integer,
+  key: String,
+  value: Integer,
 }
 
 structure Deeply {
@@ -64,5 +64,5 @@ structure Deeply {
 }
 
 structure Nested {
-  value: string,
+  value: String,
 }

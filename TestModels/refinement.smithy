@@ -21,15 +21,15 @@ operation GetRefinement {
 @input
 structure GetRefinementInput {
   @required
-  requiredString: string,
-  optionalString: string,
+  requiredString: String,
+  optionalString: String,
 }
 
 @output
 structure GetRefinementOutput {
   @required
-  requiredString: string,
-  optionalString: string,
+  requiredString: String,
+  optionalString: String,
 }
 
 operation OnlyInput {
@@ -38,7 +38,7 @@ operation OnlyInput {
 
 @input
 structure OnlyInputInput {
-  value: string,
+  value: String,
 }
 
 operation OnlyOutput {
@@ -47,7 +47,7 @@ operation OnlyOutput {
 
 @output
 structure OnlyOutputOutput {
-  value: string,
+  value: String,
 }
 
 // Dafny treats @readonly as a function.
@@ -61,12 +61,12 @@ operation ReadonlyOperation {
 
 structure ReadonlyOperationInput {
   @required
-  requiredString: string,
-  optionalString: string,
+  requiredString: String,
+  optionalString: String,
 }
 structure ReadonlyOperationOutput {
   @required
-  requiredString: string,
-  optionalString: string,
+  requiredString: String,
+  optionalString: String,
 }
 

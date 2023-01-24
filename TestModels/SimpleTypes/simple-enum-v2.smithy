@@ -21,11 +21,11 @@ operation GetEnumV2 {
 }
 
 structure GetEnumV2Input {
-  value: SimpleEnum
+  value: Suit
 }
 
 structure GetEnumV2Output {
-  value: SimpleEnum
+  value: Suit
 }
 
 // This is a smithy V2 Enum

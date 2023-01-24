@@ -22,33 +22,33 @@ operation GetExtern {
 }
 
 structure GetExternInput {
-  blobValue: blob,
-  booleanValue: boolean,
-  stringValue: string,
-  byteValue: byte,
-  shortValue: short,
-  integerValue: integer,
-  longValue: long,
-  floatValue: float,
-  doubleValue: double,
-  bigIntegerValue: bigInteger,
-  bigDecimalValue: bigDecimal,
-  timestampValue: timestamp,
+  blobValue: Blob,
+  booleanValue: Boolean,
+  stringValue: String,
+  byteValue: Byte,
+  shortValue: Short,
+  integerValue: Integer,
+  longValue: Long,
+  floatValue: Float,
+  doubleValue: Double,
+  bigIntegerValue: BigInteger,
+  bigDecimalValue: BigDecimal,
+  timestampValue: Timestamp,
 }
 
 structure GetExternOutput {
-  blobValue: blob,
-  booleanValue: boolean,
-  stringValue: string,
-  byteValue: byte,
-  shortValue: short,
-  integerValue: integer,
-  longValue: long,
-  floatValue: float,
-  doubleValue: double,
-  bigIntegerValue: bigInteger,
-  bigDecimalValue: bigDecimal,
-  timestampValue: timestamp,
+  blobValue: Blob,
+  booleanValue: Boolean,
+  stringValue: String,
+  byteValue: Byte,
+  shortValue: Short,
+  integerValue: Integer,
+  longValue: Long,
+  floatValue: Float,
+  doubleValue: Double,
+  bigIntegerValue: BigInteger,
+  bigDecimalValue: BigDecimal,
+  timestampValue: Timestamp,
 }
 
 // This operation MUST use
@@ -62,11 +62,11 @@ operation UseClassExtern {
 }
 
 structure UseClassExternInput {
-  value: string,
+  value: String,
 }
 
 structure UseClassExternOutput {
-  value: string,
+  value: String,
 }
 
 // This extern MUST error.
@@ -78,8 +78,8 @@ operation ExternMustError {
 }
 
 structure ExternMustErrorInput{
-  value: string,
+  value: String,
 }
 structure ExternMustErrorOutput{
-  value: string,
+  value: String,
 }

@@ -36,11 +36,11 @@ operation AlwaysNativeError {
 }
 
 structure GetErrorsInput {
-  value: string,
+  value: String,
 }
 
 structure GetErrorsOutput {
-  value: string,
+  value: String,
 }
 
 

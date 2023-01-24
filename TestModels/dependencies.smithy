@@ -37,7 +37,7 @@ structure SimpleDependenciesConfig {
 
 // This operation MUST call the local SimpleResourceService
 // that is stored _only_ in the InternalConfig
-operation GetSimpleResources {
+operation GetSimpleResource {
   input: simple.resources#GetResourcesInput,
   output: simple.resources#GetResourcesOutput,
 }
@@ -59,8 +59,8 @@ structure UseSimpeResourceInput {
 // This operation MUST call use the local extendableResourceReference
 // with the input and return the output
 operation UseLocalExtendableResource {
-  input: simple.extendable.resources#GetResourceDataInput,
-  output: UseExtendableResourcesOutput,
+  input: simple.extendable.resources#GetExtendableResourceDataInput,
+  output: simple.extendable.resources#UseExtendableResourcesOutput,
 }
 
 // This operation MUST call the local ExtendableResource and wrap the error

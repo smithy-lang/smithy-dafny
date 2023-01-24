@@ -7,7 +7,7 @@ namespace simple.extendable.resources
 service SimpleExtendableResources {
   version: "2021-11-01",
   Extendableresources: [],
-  operations: [ GetExtendableResources ],
+  operations: [ UseExtendableResources ],
   errors: [],
 }
 
@@ -27,12 +27,12 @@ structure UseExtendableResourcesInput {
   @required
   value: ExtendableResourceReference,
   @required
-  input: GetResourceDataInput,
+  input: GetExtendableResourceDataInput,
 }
 
 structure UseExtendableResourcesOutput {
   @required
-  output: GetResourceDataOutput
+  output: GetExtendableResourceDataOutput
 }
 
 @aws.polymorph#reference(resource: ExtendableResource)
@@ -49,38 +49,38 @@ resource ExtendableResource {
 }
 
 operation GetResourceData {
-  input: GetResourceDataInput,
-  output: GetResourceDataOutput,
+  input: GetExtendableResourceDataInput,
+  output: GetExtendableResourceDataOutput,
 }
 
-structure GetResourceDataInput {
-  blobValue: blob,
-  booleanValue: boolean,
-  stringValue: string,
-  byteValue: byte,
-  shortValue: short,
-  integerValue: integer,
-  longValue: long,
-  floatValue: float,
-  doubleValue: double,
-  bigIntegerValue: bigInteger,
-  bigDecimalValue: bigDecimal,
-  timestampValue: timestamp,
+structure GetExtendableResourceDataInput {
+  blobValue: Blob,
+  booleanValue: Boolean,
+  stringValue: String,
+  byteValue: Byte,
+  shortValue: Short,
+  integerValue: Integer,
+  longValue: Long,
+  floatValue: Float,
+  doubleValue: Double,
+  bigIntegerValue: BigInteger,
+  bigDecimalValue: BigDecimal,
+  timestampValue: Timestamp,
 }
 
-structure GetResourceDataOutput {
-  blobValue: blob,
-  booleanValue: boolean,
-  stringValue: string,
-  byteValue: byte,
-  shortValue: short,
-  integerValue: integer,
-  longValue: long,
-  floatValue: float,
-  doubleValue: double,
-  bigIntegerValue: bigInteger,
-  bigDecimalValue: bigDecimal,
-  timestampValue: timestamp,
+structure GetExtendableResourceDataOutput {
+  blobValue: Blob,
+  booleanValue: Boolean,
+  stringValue: String,
+  byteValue: Byte,
+  shortValue: Short,
+  integerValue: Integer,
+  longValue: Long,
+  floatValue: Float,
+  doubleValue: Double,
+  bigIntegerValue: BigInteger,
+  bigDecimalValue: BigDecimal,
+  timestampValue: Timestamp,
 }
 
 // This operation MUST ==> SimpleResourceException
@@ -102,11 +102,11 @@ operation AlwaysNativeError {
 }
 
 structure GetExtendableResourceErrorsInput {
-  value: string,
+  value: String,
 }
 
 structure GetExtendableResourceErrorsOutput {
-  value: string,
+  value: String,
 }
 
 // this SHOULD also alow no message,

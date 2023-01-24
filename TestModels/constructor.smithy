@@ -12,18 +12,18 @@ service SimpleConstructor {
 }
 
 structure SimpleConstructorConfig {
-  blobValue: blob,
-  booleanValue: boolean,
-  stringValue: string,
-  byteValue: byte,
-  shortValue: short,
-  integerValue: integer,
-  longValue: long,
-  floatValue: float,
-  doubleValue: double,
-  bigIntegerValue: bigInteger,
-  bigDecimalValue: bigDecimal,
-  timestampValue: timestamp,
+  blobValue: Blob,
+  booleanValue: Boolean,
+  stringValue: String,
+  byteValue: Byte,
+  shortValue: Short,
+  integerValue: Integer,
+  longValue: Long,
+  floatValue: Float,
+  doubleValue: Double,
+  bigIntegerValue: BigInteger,
+  bigDecimalValue: BigDecimal,
+  timestampValue: Timestamp,
 }
 
 // This operation MUST
@@ -40,17 +40,17 @@ structure GetConstructorInput {
 }
 
 structure GetConstructorOutput {
-  internalConfigString: string,
-  blobValue: blob,
-  booleanValue: boolean,
-  stringValue: string,
-  byteValue: byte,
-  shortValue: short,
-  integerValue: integer,
-  longValue: long,
-  floatValue: float,
-  doubleValue: double,
-  bigIntegerValue: bigInteger,
-  bigDecimalValue: bigDecimal,
-  timestampValue: timestamp,
+  internalConfigString: String,
+  blobValue: Blob,
+  booleanValue: Boolean,
+  stringValue: String,
+  byteValue: Byte,
+  shortValue: Short,
+  integerValue: Integer,
+  longValue: Long,
+  floatValue: Float,
+  doubleValue: Double,
+  bigIntegerValue: BigInteger,
+  bigDecimalValue: BigDecimal,
+  timestampValue: Timestamp,
 }

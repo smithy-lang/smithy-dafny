@@ -39,7 +39,7 @@ dependencies {
     implementation("dafny.lang:DafnyRuntime:3.10.0")
     implementation("com.squareup:javapoet:1.13.0")
     implementation("software.amazon.dafny:conversion:1.0-SNAPSHOT")
-    implementation("software.amazon.smithy:smithy-model:1.21.0")
+    implementation("software.amazon.smithy:smithy-model:1.27.1")
     implementation("software.amazon.smithy:smithy-codegen-core:[1.0.2,1.1.0[")
     implementation("software.amazon.smithy:smithy-protocol-test-traits:[1.0.2,1.1.0[")
     implementation("software.amazon.smithy:smithy-aws-traits:1.21.0")
