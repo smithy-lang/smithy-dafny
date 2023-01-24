@@ -39,7 +39,7 @@ import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
 
-import static software.amazon.polymorph.utils.AwsSdkNameResolverHelpers.isAwsSdkServiceId;
+import static software.amazon.polymorph.utils.AwsSdkNameResolverHelpers.isInAwsSdkNamespace;
 import static software.amazon.polymorph.smithyjava.generator.Generator.Constants.SUPPORTED_CONVERSION_AGGREGATE_SHAPES;
 import static software.amazon.polymorph.smithyjava.nameresolver.Constants.DAFNY_RESULT_CLASS_NAME;
 import static software.amazon.polymorph.smithyjava.nameresolver.Constants.SMITHY_API_UNIT;
@@ -325,14 +325,14 @@ public class Dafny extends NameResolver {
     public static ClassName interfaceForService(final ServiceShape shape) {
         final String packageName = dafnyExternNamespaceForShapeId(shape.getId());
         final String interfaceName = DafnyNameResolver.traitNameForServiceClient(shape);
-        return ClassName.get(packageName, interfaceName);
+        return ClassName.get(packageName, dafnyCompilesExtra_(interfaceName));
     }
 
     /** @return The concrete class for a service client. */
     public ClassName classNameForConcreteServiceClient(ServiceShape shape) {
         String packageName = packageNameForNamespace(shape.getId().getNamespace());
         String concreteClass = DafnyNameResolver.classNameForServiceClient(shape);
-        return ClassName.get(packageName, concreteClass);
+        return ClassName.get(packageName, dafnyCompilesExtra_(concreteClass));
     }
 
     public ClassName classNameForNamespaceDefault() {
@@ -350,12 +350,12 @@ public class Dafny extends NameResolver {
     public static ClassName interfaceForResource(final ResourceShape shape) {
         final String packageName = dafnyExternNamespaceForShapeId(shape.getId());
         final String interfaceName = DafnyNameResolver.traitNameForResource(shape);
-        return ClassName.get(packageName, interfaceName);
+        return ClassName.get(packageName, dafnyCompilesExtra_(interfaceName));
     }
 
     public ClassName classNameForInterface(Shape shape) {
         // if shape is an AWS Service/Resource, return Dafny Types Interface
-        if (isAwsSdkServiceId(shape.toShapeId())) {
+        if (isInAwsSdkNamespace(shape.toShapeId())) {
             if (shape.isServiceShape()) {
                 // TODO: use AwsSdkDafnyV2 is AWS SDK v2 flag is present
                 //noinspection OptionalGetWithoutIsPresent

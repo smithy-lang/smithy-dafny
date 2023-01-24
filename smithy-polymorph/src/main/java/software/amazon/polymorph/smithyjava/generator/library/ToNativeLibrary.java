@@ -31,7 +31,6 @@ import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.ShapeType;
 import software.amazon.smithy.model.shapes.StructureShape;
 
-import static software.amazon.polymorph.utils.AwsSdkNameResolverHelpers.isAwsSdkServiceId;
 import static software.amazon.smithy.utils.StringUtils.capitalize;
 
 /**
@@ -212,7 +211,9 @@ public class ToNativeLibrary extends ToNative {
     }
 
     protected CodeBlock returnWithConversionCall(final MemberShape shape) {
-        CodeBlock memberConversionMethod = memberConversionMethodReference(shape).asNormalReference();
+        CodeBlock memberConversionMethod = conversionMethodReference(
+                subject.model.expectShape(shape.getTarget())
+        ).asNormalReference();
         return CodeBlock.of("return $L($L)", memberConversionMethod, VAR_INPUT);
     }
 
@@ -220,26 +221,21 @@ public class ToNativeLibrary extends ToNative {
         return CodeBlock.of("return null");
     }
 
+    // Reference & Positional often mask Service or Resource shapes
+    // that can be in other namespaces.
+    // This override simplifies their lookup.
     @Override
-    protected MethodReference memberConversionMethodReference(MemberShape memberShape) {
-        //noinspection DuplicatedCode
-        JavaLibrary.ResolvedShapeId resolvedShape = subject.resolveShape(memberShape.getTarget());
-        Shape shape = subject.model.expectShape(resolvedShape.resolvedId());
-        if (shape.isServiceShape() || shape.isResourceShape()) {
-            if (isAwsSdkServiceId(resolvedShape.resolvedId())) {
-                // if targetShape is AWS Service/Resource, just use the IDENTITY_FUNCTION
-                return Constants.IDENTITY_FUNCTION;
-            } else {
-                // if operation takes a non-AWS Service/Resource, wrap with Shim
-                // via a generated method
-                return super.nonSimpleConversionMethodReference(shape);
-            }
+    protected MethodReference conversionMethodReference(Shape shape) {
+        JavaLibrary.ResolvedShapeId resolvedShapeId = subject.resolveShape(shape.toShapeId());
+        Shape resolvedShape = subject.model.expectShape(resolvedShapeId.resolvedId());
+        if (resolvedShape.isServiceShape() || resolvedShape.isResourceShape()) {
+            return super.nonSimpleConversionMethodReference(resolvedShape);
         }
         // If the target has the dafnyUtf8Bytes trait,
         // going to Dafny, the Strings need to be converted to Bytes
-        if (shape.hasTrait(DafnyUtf8BytesTrait.class)) {
+        if (resolvedShape.hasTrait(DafnyUtf8BytesTrait.class)) {
             return DAFNY_UTF8_BYTES;
         }
-        return super.memberConversionMethodReference(memberShape);
+        return super.conversionMethodReference(resolvedShape);
     }
 }

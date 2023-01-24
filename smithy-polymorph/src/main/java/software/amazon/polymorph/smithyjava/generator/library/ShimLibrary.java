@@ -5,23 +5,21 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
 
+import software.amazon.polymorph.smithyjava.MethodReference;
 import software.amazon.polymorph.smithyjava.generator.CodegenSubject;
 import software.amazon.polymorph.smithyjava.generator.Generator;
-import software.amazon.polymorph.smithyjava.generator.awssdk.ShimV1;
 import software.amazon.polymorph.smithyjava.generator.library.JavaLibrary.MethodSignature;
 import software.amazon.polymorph.smithyjava.generator.library.JavaLibrary.ResolvedShapeId;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
-
 import software.amazon.polymorph.smithyjava.nameresolver.Native;
 import software.amazon.smithy.model.shapes.OperationShape;
-import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static software.amazon.polymorph.smithyjava.nameresolver.Constants.DAFNY_TUPLE0_CLASS_NAME;
 import static software.amazon.polymorph.smithyjava.nameresolver.Constants.SMITHY_API_UNIT;
-import static software.amazon.polymorph.utils.AwsSdkNameResolverHelpers.isAwsSdkServiceId;
+import static software.amazon.polymorph.utils.AwsSdkNameResolverHelpers.isInAwsSdkNamespace;
 
 /**
  * A Java Library's Shim is the public class
@@ -90,16 +88,14 @@ public abstract class ShimLibrary extends Generator {
         final String operationName = operationShape.toShapeId().getName();
         // if operation takes an argument
         if (!inputResolved.resolvedId().equals(SMITHY_API_UNIT)) {
-            // If input is a Service or Resource,
             Shape shape = subject.model.expectShape(inputResolved.resolvedId());
-            if (shape.isServiceShape() || shape.isResourceShape()) {
-                if (isAwsSdkServiceId(inputResolved.resolvedId())) {
-                    // if operation takes an AWS Service/Resource, wrap it with a Shim
-                    method.addStatement(dafnyDeclare(inputResolved.resolvedId()));
-                } else {
-                    // if operation takes a non-AWS Service/Resource, get impl()
-                    method.addStatement(dafnyDeclareGetImpl(inputResolved.resolvedId()));
-                }
+            // If input is a Service or Resource, and Not in AWS Namespace
+            if (
+                    (shape.isServiceShape() || shape.isResourceShape())
+                    && !isInAwsSdkNamespace(inputResolved.resolvedId())
+            ) {
+                // if operation takes a non-AWS Service/Resource, get impl()
+                method.addStatement(dafnyDeclareGetImpl(inputResolved.resolvedId()));
             } else {
                 // Convert from nativeValue to dafnyValue
                 method.addStatement(dafnyDeclareAndConvert(inputResolved));
@@ -135,22 +131,23 @@ public abstract class ShimLibrary extends Generator {
             return method.build();
         }
         Shape outputShape = subject.model.expectShape(outputResolved.resolvedId());
-        // if resolvedOutput is a Service or Resource
-        if (outputShape.isServiceShape() || outputShape.isResourceShape()) {
-            if (isAwsSdkServiceId(outputResolved.resolvedId())) {
-                // if operation outputs an AWS Service/Resource, just return the Dafny result
-                method.addStatement("return $L.dtor_value()", RESULT_VAR);
-            } else {
-                // if operation outputs a non-AWS Service/Resource, wrap result with Shim
-                method.addStatement("return $L",
-                        subject.wrapWithShim(outputResolved.resolvedId(),
-                        CodeBlock.of("$L.dtor_value()", RESULT_VAR)));
-            }
+        // if resolvedOutput is a Service or Resource not in AWS SDK Namespace
+        if (
+                (outputShape.isServiceShape() || outputShape.isResourceShape())
+                && !isInAwsSdkNamespace(outputResolved.resolvedId())
+        ) {
+            // if operation outputs a non-AWS Service/Resource, wrap result with Shim
+            method.addStatement("return $L",
+                    subject.wrapWithShim(outputResolved.resolvedId(),
+                            CodeBlock.of("$L.dtor_value()", RESULT_VAR)));
             return method.build();
         }
+        final Shape naiveShape = subject.model.expectShape(outputResolved.naiveId());
+        final MethodReference toNativeMethod = subject.toNativeLibrary.conversionMethodReference(naiveShape);
         // else convert success to native and return
-        method.addStatement("return $T.$L($L.dtor_value())",
-                toNativeClassName, outputResolved.naiveId().getName(), RESULT_VAR);
+        method.addStatement("return $L($L.dtor_value())",
+                toNativeMethod.asNormalReference(),
+                RESULT_VAR);
         return method.build();
     }
 
@@ -165,12 +162,12 @@ public abstract class ShimLibrary extends Generator {
     // But The converters are named after the shapeId.
     protected CodeBlock dafnyDeclareAndConvert(ResolvedShapeId resolvedShape) {
         final ShapeId targetId = resolvedShape.resolvedId();
-        final ShapeId shapeId = resolvedShape.naiveId();
-        return CodeBlock.of("$T $L = $T.$L($L)",
+        final Shape naiveShape = subject.model.expectShape(resolvedShape.naiveId());
+        final MethodReference toDafnyMethod = subject.toDafnyLibrary.conversionMethodReference(naiveShape);
+        return CodeBlock.of("$T $L = $L($L)",
                 subject.dafnyNameResolver.typeForShape(targetId),
                 DAFNY_VAR,
-                toDafnyClassName,
-                shapeId.getName(),
+                toDafnyMethod.asNormalReference(),
                 NATIVE_VAR);
     }
 
@@ -180,12 +177,6 @@ public abstract class ShimLibrary extends Generator {
                 DAFNY_VAR,
                 NATIVE_VAR);
     }
-
-    /*protected CodeBlock wrapAwsService(ServiceShape shape) {
-        if (subject.sdkVersion.equals(CodegenSubject.AwsSdkVersion.V1)) {
-            ShimV1.className(shape),
-        }
-    }*/
 
     protected CodeBlock dafnyDeclareGetImpl(ShapeId targetId) {
         return CodeBlock.of("$L.impl()", dafnyDeclare(targetId));

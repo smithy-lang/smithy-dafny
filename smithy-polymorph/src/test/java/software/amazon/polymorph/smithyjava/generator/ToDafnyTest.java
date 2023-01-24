@@ -87,13 +87,13 @@ public class ToDafnyTest {
         StructureShape structureShape = model.expectShape(structureId, StructureShape.class);
         // if required
         MemberShape memberRequired = structureShape.getMember("name").get();
-        CodeBlock actualRequired = underTest.memberAssignment(
+        CodeBlock actualRequired = underTest.memberConvertAndAssign(
                 memberRequired, CodeBlock.of("name"), CodeBlock.of("nativeValue.getName()"));
         String expectedRequired = ToDafnyConstants.MEMBER_ASSIGNMENT_REQUIRED;
         tokenizeAndAssertEqual(expectedRequired, actualRequired.toString());
         // if optional
         MemberShape memberOptional = structureShape.getMember("message").get();
-        CodeBlock actualOptional = underTest.memberAssignment(
+        CodeBlock actualOptional = underTest.memberConvertAndAssign(
                 memberOptional, CodeBlock.of("message"), CodeBlock.of("nativeValue.getMessage()"));
         String expectedOptional = ToDafnyConstants.MEMBER_ASSIGNMENT_OPTIONAL;
         tokenizeAndAssertEqual(expectedOptional, actualOptional.toString());
@@ -105,19 +105,21 @@ public class ToDafnyTest {
         StructureShape structureShape = model.expectShape(structureId, StructureShape.class);
         // If the target is simple, use SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE
         MemberShape stringMember = structureShape.getMember("name").get();
-        MethodReference simpleActual = underTest.memberConversionMethodReference(stringMember);
+        MethodReference simpleActual = underTest.conversionMethodReference(model.expectShape(stringMember.getTarget()));
         String simpleExpected = ToDafnyConstants.STRING_CONVERSION;
         tokenizeAndAssertEqual(simpleExpected, simpleActual.asNormalReference().toString());
         // if in namespace reference created converter
         MemberShape enumMember = structureShape.getMember("keyUsage").get();
-        MethodReference enumActual = underTest.memberConversionMethodReference(enumMember);
+        MethodReference enumActual = underTest.conversionMethodReference(model.expectShape(enumMember.getTarget()));
         String enumExpected = ToDafnyConstants.KEY_USAGE_TYPE_CONVERSION;
-        tokenizeAndAssertEqual(enumExpected, enumActual.asNormalReference().toString());
+        String enumString = enumActual.asNormalReference().toString();
+        tokenizeAndAssertEqual(enumExpected, enumString);
         // Otherwise, this target must be in another namespace
         MemberShape otherNamespaceMember = structureShape.getMember("otherNamespace").get();
-        MethodReference otherNamespaceActual = underTest.memberConversionMethodReference(otherNamespaceMember);
+        MethodReference otherNamespaceActual = underTest.conversionMethodReference(model.expectShape(otherNamespaceMember.getTarget()));
         String otherNamespaceExpected = ToDafnyConstants.OTHER_NAMESPACE_CONVERSION;
-        tokenizeAndAssertEqual(otherNamespaceExpected, otherNamespaceActual.asNormalReference().toString());
+        String otherNamespaceString = otherNamespaceActual.asNormalReference().toString();
+        tokenizeAndAssertEqual(otherNamespaceExpected, otherNamespaceString);
     }
 
     @Test

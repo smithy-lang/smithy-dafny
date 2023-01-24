@@ -21,6 +21,7 @@ import dafny.DafnySequence;
 import software.amazon.polymorph.smithyjava.MethodReference;
 import software.amazon.polymorph.smithyjava.generator.ToDafny;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
+import software.amazon.polymorph.smithyjava.nameresolver.Native;
 import software.amazon.polymorph.smithyjava.unmodeled.CollectionOfErrors;
 import software.amazon.polymorph.smithyjava.unmodeled.NativeError;
 import software.amazon.polymorph.smithyjava.unmodeled.OpaqueError;
@@ -35,7 +36,6 @@ import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.ShapeType;
 import software.amazon.smithy.model.shapes.StructureShape;
 
-import static software.amazon.polymorph.utils.AwsSdkNameResolverHelpers.isAwsSdkServiceId;
 import static software.amazon.smithy.utils.StringUtils.capitalize;
 import static software.amazon.smithy.utils.StringUtils.uncapitalize;
 
@@ -193,7 +193,7 @@ public class ToDafnyLibrary extends ToDafny {
                 .addParameter(inputType, VAR_INPUT);
         CodeBlock variable = CodeBlock.of("$L", uncapitalize(onlyMember.getMemberName()));
         builder.addStatement(memberDeclaration(onlyMember, variable));
-        builder.addStatement(memberAssignment(onlyMember, variable, CodeBlock.of("$L", VAR_INPUT)));
+        builder.addStatement(memberConvertAndAssign(onlyMember, variable, CodeBlock.of("$L", VAR_INPUT)));
         builder.addStatement("return $L", variable);
         return builder.build();
     }
@@ -204,20 +204,19 @@ public class ToDafnyLibrary extends ToDafny {
                 .methodBuilder(methodName)
                 .addModifiers(PUBLIC_STATIC)
                 .returns(Dafny.interfaceForResource(shape))
-                .addParameter(subject.nativeNameResolver.classNameForResource(shape), VAR_INPUT)
-                .addStatement("return $L.impl()", VAR_INPUT)
+                .addParameter(Native.classNameForResourceInterface(shape), VAR_INPUT)
+                .addStatement("return $L.impl()", subject.wrapWithShim(shape.getId(), CodeBlock.of(VAR_INPUT)))
                 .build();
     }
 
-    // TODO: not sure if we need this, but if we do, it's ready
     protected MethodSpec modeledService(ServiceShape shape) {
         final String methodName = capitalize(shape.getId().getName());
         return MethodSpec
                 .methodBuilder(methodName)
                 .addModifiers(PUBLIC_STATIC)
                 .returns(Dafny.interfaceForService(shape))
-                .addParameter(subject.nativeNameResolver.classNameForService(shape), VAR_INPUT)
-                .addStatement("return $L.impl()", VAR_INPUT)
+                .addParameter(Native.classNameForAwsSdk(shape, subject.sdkVersion), VAR_INPUT)
+                .addStatement("return $L.impl()", subject.wrapWithShim(shape.getId(), CodeBlock.of(VAR_INPUT)))
                 .build();
     }
 
@@ -227,26 +226,21 @@ public class ToDafnyLibrary extends ToDafny {
         return CodeBlock.of("$L.$L()", variableName, uncapitalize(memberShape.getMemberName()));
     }
 
+    // Reference & Positional often mask Service or Resource shapes
+    // that can be in other namespaces.
+    // This override simplifies their lookup.
     @Override
-    protected MethodReference memberConversionMethodReference(MemberShape memberShape) {
-        //noinspection DuplicatedCode
-        JavaLibrary.ResolvedShapeId resolvedShape = subject.resolveShape(memberShape.getTarget());
-        Shape shape = subject.model.expectShape(resolvedShape.resolvedId());
-        if (shape.isServiceShape() || shape.isResourceShape()) {
-            if (isAwsSdkServiceId(resolvedShape.resolvedId())) {
-                // if targetShape is AWS Service/Resource, just use the IDENTITY_FUNCTION
-                return Constants.IDENTITY_FUNCTION;
-            } else {
-                // if operation takes a non-AWS Service/Resource, use get impl()
-                // via a generated method that just returns impl
-                return super.nonSimpleConversionMethodReference(shape);
-            }
+    protected MethodReference conversionMethodReference(Shape shape) {
+        JavaLibrary.ResolvedShapeId resolvedShapeId = subject.resolveShape(shape.getId());
+        Shape resolvedShape = subject.model.expectShape(resolvedShapeId.resolvedId());
+        if (resolvedShape.isServiceShape() || resolvedShape.isResourceShape()) {
+            return super.nonSimpleConversionMethodReference(resolvedShape);
         }
         // If the target has the dafnyUtf8Bytes trait,
         // going to Dafny, the Strings need to be converted to Bytes
-        if (shape.hasTrait(DafnyUtf8BytesTrait.class)) {
+        if (resolvedShape.hasTrait(DafnyUtf8BytesTrait.class)) {
             return DAFNY_UTF8_BYTES;
         }
-        return super.memberConversionMethodReference(memberShape);
+        return super.conversionMethodReference(shape);
     }
 }

@@ -20,6 +20,7 @@ import software.amazon.smithy.model.shapes.ListShape;
 import software.amazon.smithy.model.shapes.MapShape;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.SetShape;
+import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
 
@@ -45,7 +46,7 @@ public class ToNativeTest {
     protected ToNativeTestImpl underTestAbstract;
     protected Model model;
 
-    static class ToNativeTestImpl extends ToNativeAwsV1 {
+    class ToNativeTestImpl extends ToNativeAwsV1 {
 
         public ToNativeTestImpl(JavaAwsSdkV1 awsSdk) {
             super(awsSdk);
@@ -74,8 +75,11 @@ public class ToNativeTest {
 
         @Override
         // This allows the test class to call the otherwise protected method.
-        protected MethodReference memberConversionMethodReference(MemberShape memberShape) {
-            return super.memberConversionMethodReference(memberShape);
+        protected MethodReference conversionMethodReference(Shape shape) {
+            if (shape.isMemberShape()) {
+                return conversionMethodReference(model.expectShape(shape.asMemberShape().get().getTarget()));
+            }
+            return super.conversionMethodReference(shape);
         }
 
         @Override
@@ -117,19 +121,21 @@ public class ToNativeTest {
         StructureShape structureShape = model.expectShape(structureId, StructureShape.class);
         // If the target is simple, use SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE
         MemberShape stringMember = structureShape.getMember("name").get();
-        MethodReference simpleActual = underTestAbstract.memberConversionMethodReference(stringMember);
+        MethodReference simpleActual = underTestAbstract.conversionMethodReference(stringMember);
         String simpleExpected = ToNativeConstants.STRING_CONVERSION;
-        tokenizeAndAssertEqual(simpleExpected, simpleActual.asNormalReference().toString());
+        String simpleString = simpleActual.asNormalReference().toString();
+        tokenizeAndAssertEqual(simpleExpected, simpleString);
         // if in namespace reference created converter
         MemberShape enumMember = structureShape.getMember("keyUsage").get();
-        MethodReference enumActual = underTestAbstract.memberConversionMethodReference(enumMember);
+        MethodReference enumActual = underTestAbstract.conversionMethodReference(enumMember);
         String enumExpected = ToNativeConstants.KEY_USAGE_TYPE_CONVERSION;
         tokenizeAndAssertEqual(enumExpected, enumActual.asNormalReference().toString());
         // Otherwise, this target must be in another namespace
         MemberShape otherNamespaceMember = structureShape.getMember("otherNamespace").get();
-        MethodReference otherNamespaceActual = underTestAbstract.memberConversionMethodReference(otherNamespaceMember);
+        MethodReference otherNamespaceActual = underTestAbstract.conversionMethodReference(otherNamespaceMember);
         String otherNamespaceExpected = ToNativeConstants.OTHER_NAMESPACE_CONVERSION;
-        tokenizeAndAssertEqual(otherNamespaceExpected, otherNamespaceActual.asNormalReference().toString());
+        String otherNamespaceString = otherNamespaceActual.asNormalReference().toString();
+        tokenizeAndAssertEqual(otherNamespaceExpected, otherNamespaceString);
     }
 
     @Test

@@ -14,7 +14,10 @@ import javax.lang.model.element.Modifier;
 import software.amazon.polymorph.smithyjava.BuilderSpecs;
 import software.amazon.polymorph.smithyjava.MethodReference;
 import software.amazon.polymorph.smithyjava.NamespaceHelper;
+import software.amazon.polymorph.smithyjava.generator.awssdk.ToDafnyAwsV1;
+import software.amazon.polymorph.smithyjava.generator.awssdk.ToNativeAwsV1;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
+import software.amazon.polymorph.utils.AwsSdkNameResolverHelpers;
 import software.amazon.polymorph.utils.ModelUtils;
 
 import software.amazon.smithy.model.shapes.ListShape;
@@ -118,10 +121,10 @@ public abstract class ToNative extends Generator {
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     protected MethodSpec modeledMap(MapShape shape) {
-        MemberShape keyShape = shape.getKey().asMemberShape().get();
-        CodeBlock keyConverter = memberConversionMethodReference(keyShape).asFunctionalReference();
-        MemberShape valueShape = shape.getValue().asMemberShape().get();
-        CodeBlock valueConverter = memberConversionMethodReference(valueShape).asFunctionalReference();
+        Shape keyShape = subject.model.expectShape(shape.getKey().asMemberShape().get().getTarget());
+        CodeBlock keyConverter = conversionMethodReference(keyShape).asFunctionalReference();
+        Shape valueShape = subject.model.expectShape(shape.getValue().asMemberShape().get().getTarget());
+        CodeBlock valueConverter = conversionMethodReference(valueShape).asFunctionalReference();
         CodeBlock genericCall = AGGREGATE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(shape.getType()).asNormalReference();
         ParameterSpec parameterSpec = ParameterSpec
                 .builder(subject.dafnyNameResolver.typeForShape(shape.getId()), VAR_INPUT)
@@ -241,7 +244,7 @@ public abstract class ToNative extends Generator {
     }
 
     protected MethodSpec modeledListOrSet(MemberShape memberShape, ShapeId shapeId, ShapeType shapeType) {
-        CodeBlock memberConverter = memberConversionMethodReference(memberShape).asFunctionalReference();
+        CodeBlock memberConverter = conversionMethodReference(subject.model.expectShape(memberShape.getTarget())).asFunctionalReference();
         CodeBlock genericCall = AGGREGATE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(shapeType).asNormalReference();
         ParameterSpec parameterSpec = ParameterSpec
                 .builder(subject.dafnyNameResolver.typeForShape(shapeId), VAR_INPUT)
@@ -261,7 +264,7 @@ public abstract class ToNative extends Generator {
         return CodeBlock.of("$L.$L($L($L.$L))",
                 NATIVE_BUILDER,
                 setMemberField(member),
-                memberConversionMethodReference(member).asNormalReference(),
+                conversionMethodReference(subject.model.expectShape(member.getTarget())).asNormalReference(),
                 VAR_INPUT,
                 getMember);
     }
@@ -276,31 +279,41 @@ public abstract class ToNative extends Generator {
 
     /**
      * Returns MethodReference that converts from
-     * the Java Dafny memberShape to
-     * the Java Native memberShape.
+     * the Java Dafny shape to
+     * the Java Native shape.
      */
     @SuppressWarnings({"DuplicatedCode"})
-    protected MethodReference memberConversionMethodReference(MemberShape memberShape) {
-        Shape targetShape = subject.model.expectShape(memberShape.getTarget());
-        // If the target is simple, use SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE
-        if (ModelUtils.isSmithyApiOrSimpleShape(targetShape)) {
-            return SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(targetShape.getType());
+    protected MethodReference conversionMethodReference(Shape shape) {
+        if (shape.isMemberShape()) {
+            throw new IllegalArgumentException("MemberShapes MUST BE de-referenced BEFORE calling ToNative.conversionMethodReference.");
         }
-        return nonSimpleConversionMethodReference(targetShape);
+        // If the target is simple, use SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE
+        if (ModelUtils.isSmithyApiOrSimpleShape(shape)) {
+            return SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(shape.getType());
+        }
+        return nonSimpleConversionMethodReference(shape);
     }
 
     @SuppressWarnings("DuplicatedCode")
     @Nonnull
     protected MethodReference nonSimpleConversionMethodReference(Shape targetShape) {
-        final String methodName = capitalize(targetShape.getId().getName());
+        ShapeId targetId = targetShape.getId();
+        final String methodName = capitalize(targetId.getName());
         // if in namespace, reference converter from this ToNative class
-        if (subject.nativeNameResolver.isInServiceNameSpace(targetShape.getId())) {
+        if (subject.nativeNameResolver.isInServiceNameSpace(targetId)) {
             return new MethodReference(thisClassName, methodName);
+        }
+        // if in AWS SDK namespace, reference converter from AWS SDK ToNative class
+        if (AwsSdkNameResolverHelpers.isInAwsSdkNamespace(targetId)) {
+            return switch (subject.sdkVersion) {
+                case V1 -> new MethodReference(ToNativeAwsV1.className(targetId), methodName);
+                case V2 -> throw new IllegalArgumentException("Only AWS SDK V1 is currently supported");
+            };
         }
         // Otherwise, this target must be in another namespace,
         // reference converter from that namespace's ToNative class
         ClassName otherNamespaceToDafny = ClassName.get(
-                NamespaceHelper.standardize(targetShape.getId().getNamespace()),
+                NamespaceHelper.standardize(targetId.getNamespace()),
                 TO_NATIVE
         );
         return new MethodReference(otherNamespaceToDafny, methodName);

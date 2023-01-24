@@ -9,7 +9,7 @@ public class ToDafnyConstants {
             "name = software.amazon.dafny.conversion.ToDafny.Simple.CharacterSequence(nativeValue.getName())";
     public static String STRING_CONVERSION = "software.amazon.dafny.conversion.ToDafny.Simple.CharacterSequence";
     public static String KEY_USAGE_TYPE_CONVERSION = "Dafny.Com.Amazonaws.Kms.ToDafny.KeyUsageType";
-    public static String OTHER_NAMESPACE_CONVERSION = "com.amazonaws.other.ToDafny.OtherNamespace";
+    public static String OTHER_NAMESPACE_CONVERSION = "Dafny.Com.Amazonaws.Other.ToDafny.OtherNamespace";
     public static String MEMBER_ASSIGNMENT_OPTIONAL = """
                     message = java.util.Objects.nonNull(nativeValue.getMessage()) ?
                           Wrappers_Compile.Option.create_Some(software.amazon.dafny.conversion.ToDafny.Simple.CharacterSequence(nativeValue.getMessage()))

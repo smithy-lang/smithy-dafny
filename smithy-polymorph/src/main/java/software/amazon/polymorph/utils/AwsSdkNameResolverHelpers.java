@@ -12,8 +12,8 @@ public class AwsSdkNameResolverHelpers {
     }
 
     // TODO better way to determine if AWS SDK
-    public static boolean isAwsSdkServiceId(ShapeId serviceShapeId) {
-        return serviceShapeId.getNamespace().startsWith("com.amazonaws.");
+    public static boolean isInAwsSdkNamespace(ShapeId shapeId) {
+        return shapeId.getNamespace().startsWith("com.amazonaws.");
     }
 
     public static String awsServiceNameFromShape(final Shape shape) {

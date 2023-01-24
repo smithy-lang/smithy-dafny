@@ -19,7 +19,7 @@ import software.amazon.smithy.model.traits.TraitDefinition;
 import software.amazon.smithy.utils.StringUtils;
 
 import static software.amazon.polymorph.smithyjava.nameresolver.Constants.SHAPE_TYPES_LIST_SET;
-import static software.amazon.polymorph.utils.AwsSdkNameResolverHelpers.isAwsSdkServiceId;
+import static software.amazon.polymorph.utils.AwsSdkNameResolverHelpers.isInAwsSdkNamespace;
 
 /**
  * There are certain assumptions we can/have to make about
@@ -148,7 +148,7 @@ public class AwsSdkNativeV1 extends Native {
                     "Trait definition structures have no corresponding generated type");
         }
         // check if this Shape is in AWS SDK for Java V1 package
-        if (isAwsSdkServiceId(shape.getId())) {
+        if (isInAwsSdkNamespace(shape.getId())) {
             // Assume that the shape is in the model package
             return ClassName.get(
                     defaultModelPackageName(packageNameForAwsSdkV1Shape(shape)),
