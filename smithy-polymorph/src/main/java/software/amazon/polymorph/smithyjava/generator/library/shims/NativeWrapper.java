@@ -13,6 +13,7 @@ import software.amazon.polymorph.smithyjava.generator.library.JavaLibrary;
 import software.amazon.polymorph.smithyjava.generator.library.JavaLibrary.MethodSignature;
 import software.amazon.polymorph.smithyjava.generator.library.JavaLibrary.ResolvedShapeId;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
+import software.amazon.polymorph.utils.AwsSdkNameResolverHelpers;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ResourceShape;
 import software.amazon.smithy.model.shapes.Shape;
@@ -152,7 +153,6 @@ public class NativeWrapper extends ResourceShim {
                             DAFNY_RESULT_CLASS_NAME, DAFNY_TUPLE0_CLASS_NAME);
         } else {
             // operation is not void
-            // TODO: Handle AWS Service/Resource edge case
             method
                     .addStatement(declareNativeOutputAndInvoke(outputResolved, operationName))
                     .addStatement(declareDafnyOutputAndConvert(outputResolved))
@@ -199,9 +199,18 @@ public class NativeWrapper extends ResourceShim {
     }
 
     protected CodeBlock declareDafnyOutputAndConvert(ResolvedShapeId resolvedShape) {
-        return CodeBlock.of("$T $L = $T.$L($L)",
+        CodeBlock leftHand = CodeBlock.of("$T $L",
                 subject.dafnyNameResolver.typeForShape(resolvedShape.resolvedId()),
-                DAFNY_OUTPUT,
+                DAFNY_OUTPUT);
+        if (AwsSdkNameResolverHelpers.isInAwsSdkNamespace(resolvedShape.resolvedId())) {
+            Shape shape = subject.model.expectShape(resolvedShape.resolvedId());
+            // new Shim(nativeOutput, nativeInput.region());
+            return CodeBlock.of("$L = $L",
+                    leftHand,
+                    JavaLibrary.wrapAwsService(shape, CodeBlock.of(NATIVE_OUTPUT), CodeBlock.of("null"), subject.sdkVersion));
+        }
+        return CodeBlock.of("$L = $T.$L($L)",
+                leftHand,
                 toDafnyClassName,
                 resolvedShape.naiveId().getName(),
                 NATIVE_OUTPUT);

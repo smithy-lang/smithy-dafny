@@ -4,12 +4,14 @@ import com.squareup.javapoet.ClassName;
 
 import software.amazon.polymorph.utils.AwsSdkNameResolverHelpers;
 
+import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.ResourceShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.utils.StringUtils;
 
 import static software.amazon.polymorph.smithydafny.DafnyNameResolver.traitNameForServiceClient;
+import static software.amazon.polymorph.utils.DafnyNameResolverHelpers.dafnyCompilesExtra_;
 
 
 public class AwsSdkDafnyV1 extends Dafny {
@@ -20,7 +22,7 @@ public class AwsSdkDafnyV1 extends Dafny {
 
     @Override
     ClassName classNameForService(ServiceShape shape) {
-        if (AwsSdkNameResolverHelpers.isAwsSdkServiceNamespace(shape.getId())) {
+        if (AwsSdkNameResolverHelpers.isInAwsSdkNamespace(shape.getId())) {
             return classNameForAwsService(shape);
         }
         return super.classNameForService(shape);
@@ -29,13 +31,13 @@ public class AwsSdkDafnyV1 extends Dafny {
     public static ClassName classNameForAwsService(ServiceShape shape) {
         return ClassName.get(
                 modelPackageNameForNamespace(shape.getId().getNamespace()),
-                traitNameForServiceClient(shape)
+                dafnyCompilesExtra_(traitNameForServiceClient(shape))
         );
     }
 
     @Override
     ClassName classNameForResource(ResourceShape shape) {
-        if (AwsSdkNameResolverHelpers.isAwsSdkServiceNamespace(shape.getId())) {
+        if (AwsSdkNameResolverHelpers.isInAwsSdkNamespace(shape.getId())) {
             return classNameForAwsResource(shape);
         }
         return super.classNameForResource(shape);
@@ -44,7 +46,7 @@ public class AwsSdkDafnyV1 extends Dafny {
     public static ClassName classNameForAwsResource(ResourceShape shape) {
         return ClassName.get(
                 modelPackageNameForNamespace(shape.getId().getNamespace()),
-                "I%s".formatted(StringUtils.capitalize(shape.getId().getName()))
+                dafnyCompilesExtra_("I%s".formatted(StringUtils.capitalize(shape.getId().getName())))
         );
     }
 }

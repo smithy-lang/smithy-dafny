@@ -8,11 +8,13 @@ import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import software.amazon.polymorph.smithyjava.NamespaceHelper;
 import software.amazon.polymorph.smithyjava.generator.CodegenSubject;
 import software.amazon.polymorph.smithyjava.generator.Generator;
+import software.amazon.polymorph.smithyjava.generator.awssdk.ShimV1;
 import software.amazon.polymorph.smithyjava.generator.library.shims.ResourceShim;
 import software.amazon.polymorph.smithyjava.generator.library.shims.ServiceShim;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
@@ -50,6 +52,8 @@ public class JavaLibrary extends CodegenSubject {
     public final String packageName;
     /** Public POJOs will go here. */
     public final String modelPackageName;
+    protected final ToDafnyLibrary toDafnyLibrary;
+    protected final ToNativeLibrary toNativeLibrary;
 
     public JavaLibrary(Model model, ServiceShape serviceShape, AwsSdkVersion sdkVersion) {
         super(model, serviceShape, initDafny(model, serviceShape), initNative(model, serviceShape), sdkVersion);
@@ -63,6 +67,8 @@ public class JavaLibrary extends CodegenSubject {
                     ex
             );
         }
+        toDafnyLibrary = new ToDafnyLibrary(this);
+        toNativeLibrary = new ToNativeLibrary(this);
     }
 
     static Dafny initDafny(Model model, ServiceShape serviceShape) {
@@ -73,6 +79,41 @@ public class JavaLibrary extends CodegenSubject {
     static Native initNative(Model model, ServiceShape serviceShape) {
         String packageName = NamespaceHelper.standardize(serviceShape.getId().getNamespace());
         return new Native(packageName, serviceShape, model, packageName + ".model");
+    }
+
+    public static CodeBlock wrapAwsService(
+            Shape shape, CodeBlock nativeValue, CodeBlock regionVar,
+            AwsSdkVersion sdkVersion) {
+        Optional<ServiceShape> serviceShape = shape.asServiceShape();
+        if (serviceShape.isEmpty()) {
+            throw new IllegalArgumentException("Shape must be Service");
+        }
+        if (sdkVersion.equals(AwsSdkVersion.V1)) {
+            // new Shim(nativeOutput, null)
+            return CodeBlock.of("new $T($L, $L)",
+                    ShimV1.className(serviceShape.get()),
+                    nativeValue,
+                    regionVar
+            );
+        }
+        throw new IllegalArgumentException("Only V1 is currently supported");
+    }
+
+    protected static CodeBlock castAndUnwrapAwsService(
+            Shape shape, CodeBlock dafnyValue,
+            AwsSdkVersion sdkVersion) {
+        Optional<ServiceShape> serviceShape = shape.asServiceShape();
+        if (serviceShape.isEmpty()) {
+            throw new IllegalArgumentException("Shape must be Service");
+        }
+        if (sdkVersion.equals(AwsSdkVersion.V1)) {
+            // ((Shim) result.dtor_value()).impl()
+            return CodeBlock.of("(($T) $L).impl()",
+                    ShimV1.className(serviceShape.get()),
+                    dafnyValue
+            );
+        }
+        throw new IllegalArgumentException("Only V1 is currently supported");
     }
 
     /**
@@ -103,10 +144,8 @@ public class JavaLibrary extends CodegenSubject {
         Map<Path, TokenTree> rtn = new LinkedHashMap<>();
         ModelCodegen serviceCodegen = new ModelCodegen(this);
         rtn.putAll(serviceCodegen.generate());
-        ToDafnyLibrary toDafny = new ToDafnyLibrary(this);
-        rtn.putAll(toDafny.generate());
-        ToNativeLibrary toNative = new ToNativeLibrary(this);
-        rtn.putAll(toNative.generate());
+        rtn.putAll(toDafnyLibrary.generate());
+        rtn.putAll(toNativeLibrary.generate());
         ShimLibrary shim = new ServiceShim(this, this.serviceShape);
         rtn.putAll(shim.generate());
         getResourcesInServiceNamespace().stream()

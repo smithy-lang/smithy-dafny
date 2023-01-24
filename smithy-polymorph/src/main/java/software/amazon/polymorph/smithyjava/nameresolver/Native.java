@@ -18,7 +18,6 @@ import java.util.Set;
 import javax.annotation.Nullable;
 
 import software.amazon.polymorph.smithydafny.DafnyNameResolver;
-import software.amazon.polymorph.smithyjava.generator.CodegenSubject;
 import software.amazon.polymorph.smithyjava.generator.CodegenSubject.AwsSdkVersion;
 import software.amazon.polymorph.smithyjava.unmodeled.NativeError;
 import software.amazon.polymorph.smithyjava.unmodeled.OpaqueError;
@@ -36,7 +35,7 @@ import software.amazon.smithy.model.traits.BoxTrait;
 import software.amazon.smithy.model.traits.EnumTrait;
 
 import static software.amazon.polymorph.smithyjava.NamespaceHelper.standardize;
-import static software.amazon.polymorph.utils.AwsSdkNameResolverHelpers.isAwsSdkServiceId;
+import static software.amazon.polymorph.utils.AwsSdkNameResolverHelpers.isInAwsSdkNamespace;
 
 /**
  * Provides a consistent mapping between names of
@@ -258,7 +257,7 @@ public class Native extends NameResolver{
     public static ClassName classNameForInterfaceOrLocalService(
             Shape shape, AwsSdkVersion sdkVersion) {
         // if shape is an AWS Service/Resource, return Dafny Types Interface
-        if (isAwsSdkServiceId(shape.toShapeId())) {
+        if (isInAwsSdkNamespace(shape.toShapeId())) {
             if (shape.isServiceShape()) {
                 //noinspection OptionalGetWithoutIsPresent
                 return AwsSdkNativeV1.classNameForServiceClient(shape.asServiceShape().get());
@@ -287,6 +286,13 @@ public class Native extends NameResolver{
         throw new IllegalArgumentException(
                 "Polymorph only supports interfaces for Service & Resource Shapes. ShapeId: %s"
                         .formatted(shape.toShapeId()));
+    }
+
+    public static ClassName classNameForAwsSdk(Shape shape, AwsSdkVersion sdkVersion) {
+        return switch (sdkVersion) {
+            case V1 -> classNameForAwsSdkV1(shape);
+            case V2 -> throw new IllegalArgumentException("Only AWS SDK V1 is currently supported");
+        };
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")

@@ -17,11 +17,16 @@ import java.util.stream.Collectors;
 import javax.lang.model.element.Modifier;
 
 import software.amazon.polymorph.smithyjava.generator.ToNative;
+import software.amazon.polymorph.smithyjava.nameresolver.AwsSdkDafnyV1;
+import software.amazon.polymorph.smithyjava.nameresolver.AwsSdkNativeV1;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
+import software.amazon.polymorph.utils.AwsSdkNameResolverHelpers;
+import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 import software.amazon.polymorph.utils.ModelUtils;
 
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
+import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StringShape;
@@ -64,8 +69,17 @@ public class ToNativeAwsV1 extends ToNative {
     // See code comment on ../library/ModelCodegen for details.
     private final JavaAwsSdkV1 subject;
 
+    public static ClassName className(ShapeId shapeId) {
+        if (!AwsSdkNameResolverHelpers.isInAwsSdkNamespace(shapeId)) {
+            throw new IllegalArgumentException("ShapeId MUST BE in an AWS SDK Namespace");
+        }
+        return ClassName.get(
+                DafnyNameResolverHelpers.packageNameForNamespace(shapeId.getNamespace()),
+                TO_NATIVE);
+    }
+
     public ToNativeAwsV1(JavaAwsSdkV1 awsSdk) {
-        super(awsSdk, ClassName.get(awsSdk.packageName, TO_NATIVE));
+        super(awsSdk, className(awsSdk.serviceShape.toShapeId()));
         this.subject = awsSdk;
     }
 
@@ -114,14 +128,28 @@ public class ToNativeAwsV1 extends ToNative {
                 .map(this::modeledError).collect(Collectors.toList());
 
         return TypeSpec
-                .classBuilder(
-                        ClassName.get(subject.packageName, TO_NATIVE))
+                .classBuilder(className(subject.serviceShape.toShapeId()))
                 .addModifiers(Modifier.PUBLIC)
                 .addMethods(convertOutputs)
                 .addMethods(convertAllRelevant)
                 .addMethods(convertServiceErrors)
                 .build();
     }
+
+    MethodSpec modeledService(ServiceShape shape) {
+        //  public static AWSKMS KeyManagementService(IKeyManagementServiceClient dafnyValue) {
+        //    return ((Shim) dafnyValue).impl();
+        //  }
+        String methodName = capitalize(shape.toShapeId().getName());
+        ClassName nativeClass = AwsSdkNativeV1.classNameForServiceClient(shape);
+        ClassName dafnyClass = AwsSdkDafnyV1.classNameForAwsService(shape);
+        ClassName shim = ShimV1.className(shape);
+        return MethodSpec.methodBuilder(methodName)
+                .addModifiers(PUBLIC_STATIC)
+                .addParameter(dafnyClass, VAR_INPUT)
+                .returns(nativeClass)
+                .addStatement("return (($T) $L).impl()", shim, VAR_INPUT)
+                .build();
 
     @SuppressWarnings({"OptionalGetWithoutIsPresent"})
     MethodSpec generateConvert(ShapeId shapeId) {
@@ -199,7 +227,8 @@ public class ToNativeAwsV1 extends ToNative {
         return CodeBlock.of("$L.$L($L($L.$L))",
                 VAR_OUTPUT,
                 setMemberField(member),
-                memberConversionMethodReference(member).asNormalReference(),
+                conversionMethodReference(subject.model.expectShape(member.getTarget()))
+                        .asNormalReference(),
                 VAR_INPUT,
                 Dafny.getMemberFieldValue(member));
     }
@@ -208,7 +237,8 @@ public class ToNativeAwsV1 extends ToNative {
         return CodeBlock.of("$L.$L($L($L.$L).toArray($L_$L))",
                 VAR_OUTPUT,
                 setMemberField(member),
-                memberConversionMethodReference(member).asNormalReference(),
+                conversionMethodReference(subject.model.expectShape(member.getTarget()))
+                        .asNormalReference(),
                 VAR_INPUT,
                 Dafny.getMemberFieldValue(member),
                 uncapitalize(member.getMemberName()), VAR_TEMP);
