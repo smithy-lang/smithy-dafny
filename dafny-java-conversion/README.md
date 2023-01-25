@@ -17,12 +17,21 @@ install the jar to their local Maven repository.
 Note that the `version` should be determined by the Dafny version
 your project is currently working on (`dafny /version`).
 
+As of Dec 4th, 2022, 
+we depend on Dafny @ `nightly-2022-12-02`,
+which we are calling Dafny 3.10.
+
+At some point, Dafny will release 3.10,
+and we will move onto that.
+
 ```shell
-mvn install:install-file \
--Dfile=$(pwd)/DafnyRuntime.jar \
+wget https://github.com/dafny-lang/dafny/releases/download/nightly/dafny-nightly-2022-12-02-edab6cc-x64-osx-10.14.2.zip 
+unzip dafny-nightly-2022-12-02-edab6cc-x64-osx-10.14.2.zip 
+mvn -B -ntp install:install-file \
+-Dfile=dafny/DafnyRuntime.jar \
 -DgroupId=dafny.lang \
 -DartifactId=DafnyRuntime \
--Dversion=3.8.1 \
+-Dversion=3.10.0 \
 -DgeneratePom=true \
 -Dpackaging=jar
 ```
