@@ -126,14 +126,16 @@ public class AwsSdkNativeV2 extends Native {
     public TypeName typeForShape(final ShapeId shapeId) {
         final Shape shape = model.expectShape(shapeId);
 
+        // Overrides BYTE shapeType type conversion to SdkBytes conversion.
+        if (shape.getType().equals(ShapeType.BYTE)) {
+            return BLOB_TO_NATIVE_SDK_BYTES;
+        }
+
+        // BinarySetAttributeValue is the only list of bytes
         if (shapeId.getName().contains("BinarySetAttributeValue")) {
             return ParameterizedTypeName.get(
                 ClassName.get(List.class),
                 BLOB_TO_NATIVE_SDK_BYTES);
-        }
-
-        if (shape.getType().equals(ShapeType.BYTE)) {
-            return BLOB_TO_NATIVE_SDK_BYTES;
         }
 
         return super.typeForShape(shapeId);

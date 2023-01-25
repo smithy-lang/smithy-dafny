@@ -105,7 +105,7 @@ public class ShimV2 extends Generator {
         String operationName = operationShape.toShapeId().getName();
         MethodSpec.Builder builder = MethodSpec
                 .methodBuilder(StringUtils.capitalize(operationName))
-                //.addAnnotation(Override.class)
+                .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
                 .returns(
                         Dafny.asDafnyResult(
@@ -138,7 +138,7 @@ public class ShimV2 extends Generator {
 
             // InvalidEndpointException was removed in SDK V2
             if (typeForShape.toString().endsWith("InvalidEndpointException")) {
-                return; // Skips only this iteration
+                return; // Skips only this shape
             }
 
             builder
