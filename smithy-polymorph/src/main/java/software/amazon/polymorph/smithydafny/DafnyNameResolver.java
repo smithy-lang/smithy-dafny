@@ -44,7 +44,7 @@ public record DafnyNameResolver(
     );
 
     public static String nameForService(final ServiceShape serviceShape) {
-        return StringUtils.capitalize(dafnyCompilesExtra_(serviceShape.getId().getName()));
+        return StringUtils.capitalize(serviceShape.getId().getName());
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")
