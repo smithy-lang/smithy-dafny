@@ -24,10 +24,8 @@ import software.amazon.polymorph.smithyjava.nameresolver.AwsSdkDafnyV2;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.polymorph.utils.ModelUtils;
 
-import software.amazon.smithy.model.shapes.ListShape;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
-import software.amazon.smithy.model.shapes.SetShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.ShapeType;
@@ -124,7 +122,9 @@ public class ToNativeAwsV2 extends ToNative {
             case MAP -> modeledMap(shape.asMapShape().get());
             case STRUCTURE -> modeledStructure(shape.asStructureShape().get());
             case UNION -> modeledUnion(shape.asUnionShape().get());
-            default -> null;
+            default -> throw new UnsupportedOperationException(
+                "ShapeId %s is of Type %s, which is not yet supported for ToNative"
+                    .formatted(shapeId, shape.getType()));
         };
     }
 
@@ -143,9 +143,6 @@ public class ToNativeAwsV2 extends ToNative {
         //     of a type that Polymorph does not know about. So this is a special case and warrants
         //     its own generation logic.
         if (shapeId.getName().contains("BinarySetAttributeValue")) {
-
-            CodeBlock memberConverter = memberConversionMethodReference(memberShape).asFunctionalReference();
-            CodeBlock genericCall = AGGREGATE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(shapeType).asNormalReference();
             ParameterSpec parameterSpec = ParameterSpec
                 .builder(subject.dafnyNameResolver.typeForShape(shapeId), VAR_INPUT)
                 .build();
@@ -156,7 +153,9 @@ public class ToNativeAwsV2 extends ToNative {
                 .returns(subject.nativeNameResolver.typeForShape(shapeId))
                 .addParameter(parameterSpec);
 
-
+            // Since this special case only applies to one class right now, explicitly assigning a
+            //     string isn't unreasonable. We should extend this logic if this case applies to
+            //     more classes as we add new libraries.
             CodeBlock.Builder codeBlockBuilder = CodeBlock.builder();
             codeBlockBuilder.add("""
                 List<SdkBytes> returnList = new $L<SdkBytes>();
@@ -173,7 +172,6 @@ public class ToNativeAwsV2 extends ToNative {
             return methodSpecBuilder.build();
         }
 
-        // else call super
         return super.modeledListOrSet(memberShape, shapeId, shapeType);
     }
 
@@ -352,8 +350,9 @@ public class ToNativeAwsV2 extends ToNative {
         return method.build();
     }
 
-    // TODO: This is duplicated because ToNative uses "nativeBuilder" as the name for its builders,
-    // but this file uses "builder".
+    // TODO: Refactor with ToNative.
+    // This is only duplicated because ToNative uses "nativeBuilder" as the name for its builders,
+    //     but this file uses "builder". This seems able to be refactored.
     protected MethodSpec modeledUnion(final UnionShape shape) {
         final ShapeId shapeId = shape.getId();
         final String methodName = capitalize(shapeId.getName());

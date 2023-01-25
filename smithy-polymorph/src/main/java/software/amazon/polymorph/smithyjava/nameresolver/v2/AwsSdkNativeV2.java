@@ -109,10 +109,6 @@ public class AwsSdkNativeV2 extends Native {
     private TypeName typeForShapeNoEnum(ShapeId shapeId) {
         final Shape shape = model.expectShape(shapeId);
 
-        if (shapeId.toString().contains("ConsumedCapacity")) {
-
-        }
-
         if (shape.hasTrait(EnumTrait.class)) {
             if (shapeRequiresTypeConversionFromStringToStructure(shapeId)) {
                 return classForEnum(shape);
@@ -250,7 +246,6 @@ public class AwsSdkNativeV2 extends Native {
 
     public TypeName typeForOperationOutput(final ShapeId shapeId) {
         StructureShape shape = model.expectShape(shapeId, StructureShape.class);
-        ClassName smithyName = classNameForStructure(shape);
         return classNameForStructure(shape);
     }
 

@@ -29,7 +29,7 @@ public class AwsSdkDafnyV2 extends Dafny {
         if (AwsSdkNameResolverHelpers.isAwsSdkServiceId(shape.getId())) {
             return ClassName.get(
                     modelPackageNameForNamespace(shape.getId().getNamespace()),
-                dafnyCompilesExtra_(traitNameForServiceClient(shape))
+                    dafnyCompilesExtra_(traitNameForServiceClient(shape))
             );
         }
         return super.classNameForService(shape);
@@ -169,10 +169,10 @@ public class AwsSdkDafnyV2 extends Dafny {
     @Override
     public CodeBlock typeDescriptor(ShapeId shapeId) {
         if (shapeIdRequiresStaticTypeDescriptor(shapeId)) {
-            // TODO: Extend this assignment if we find more shapes that don't get classes generated
-            //       require special typeDescriptors.
-            //   Explicitly assigning this string works for these 2 classes because they map the
-            //       same types.
+            // Explicitly assigning this string is reasonable because these 2 classes assign the
+            //     same types.
+            // Extend this assignment if we find more shapes that don't get classes generated
+            //     require special typeDescriptors.
             return CodeBlock.
                 of("TypeDescriptor.referenceWithInitializer(dafny.DafnyMap.class, () -> dafny.DafnyMap.<dafny.DafnySequence<? extends Character>,AttributeValue> empty())");
         }

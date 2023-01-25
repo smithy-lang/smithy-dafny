@@ -22,8 +22,6 @@ import software.amazon.smithy.model.shapes.*;
 import software.amazon.smithy.model.traits.ReadonlyTrait;
 import software.amazon.smithy.utils.StringUtils;
 
-import static software.amazon.polymorph.utils.DafnyNameResolverHelpers.dafnyCompilesExtra_;
-
 public record DafnyNameResolver(
   Model model,
   String namespace,

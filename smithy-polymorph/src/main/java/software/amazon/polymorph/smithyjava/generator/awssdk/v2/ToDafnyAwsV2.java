@@ -85,21 +85,14 @@ public class ToDafnyAwsV2 extends ToDafny {
     }
 
     TypeSpec toDafny() {
-        ShapeId testId = ShapeId.from("com.amazonaws.dynamodb#CancellationReasonList");
-
-        //System.out.println(subject.serviceShape.toString());
-
         LinkedHashSet<ShapeId> operationOutputs = subject.serviceShape
                 .getOperations().stream()
                 .map(shapeId -> subject.model.expectShape(shapeId, OperationShape.class))
                 .map(OperationShape::getOutput).filter(Optional::isPresent).map(Optional::get)
                 .collect(Collectors.toCollection(LinkedHashSet::new));
-        LinkedHashSet<ShapeId> operationInputs = subject.serviceShape
-            .getOperations().stream()
-            .map(shapeId -> subject.model.expectShape(shapeId, OperationShape.class))
-            .map(OperationShape::getInput).filter(Optional::isPresent).map(Optional::get)
-            .collect(Collectors.toCollection(LinkedHashSet::new));
 
+        // OperationErrors are streamed to gather the types that are only inputs or outputs to errors.
+        // Right now this is only CancellationReasonList.
         LinkedHashSet<ShapeId> operationErrors = subject.serviceShape
             .getOperations().stream()
             .map(shapeId -> subject.model.expectShape(shapeId, OperationShape.class))
@@ -107,7 +100,6 @@ public class ToDafnyAwsV2 extends ToDafny {
             .flatMap(Collection::stream)
             .filter(structureShape -> !structureShape.toString().contains("InvalidEndpointException"))
             .collect(Collectors.toCollection(LinkedHashSet::new));
-        operationOutputs.addAll(operationInputs); // TODO
         operationOutputs.addAll(operationErrors); // TODO
 
         Set<ShapeId> allRelevantShapeIds = ModelUtils.findAllDependentShapes(operationOutputs, subject.model);
@@ -115,7 +107,6 @@ public class ToDafnyAwsV2 extends ToDafny {
         // In the AWS SDK for Java V2, Operation Outputs are special
         allRelevantShapeIds.removeAll(operationOutputs);
 
-        //allRelevantShapeIds.removeAll(operationInputs);
         // Enums are also a special case
         LinkedHashSet<ShapeId> enumShapeIds = new LinkedHashSet<>();
         allRelevantShapeIds.forEach(shapeId -> {
@@ -133,8 +124,6 @@ public class ToDafnyAwsV2 extends ToDafny {
         final List<MethodSpec> convertServiceErrors = ModelUtils.streamServiceErrors(subject.model, subject.serviceShape)
             // InvalidEndpointException does not exist in SDK V2
             .filter(structureShape -> !structureShape.getId().getName().contains("InvalidEndpointException"))
-            // ????
-            .filter(structureShape -> !structureShape.getId().getName().contains("CancellationReason"))
             .map(this::modeledError).collect(Collectors.toList());
         convertServiceErrors.add(generateConvertOpaqueError());
 
@@ -176,7 +165,9 @@ public class ToDafnyAwsV2 extends ToDafny {
             case SET -> modeledSet(shape.asSetShape().get());
             case STRUCTURE -> generateConvertStructure(shapeId);
             case UNION -> generateConvertUnion(shapeId);
-            default -> null;
+            default -> throw new UnsupportedOperationException(
+                "ShapeId %s is of Type %s, which is not yet supported for ToDafny"
+                    .formatted(shapeId, shape.getType()));
         };
     }
 
@@ -250,6 +241,9 @@ public class ToDafnyAwsV2 extends ToDafny {
                 .build();
         }
 
+        // SizeEstimateRangeGB is a list of the case above, where Smithy models values as integers,
+        //     but the SDK expects doubles.
+        // This is the only instance of double -> int conversion in a list right now.
         if (memberShape.getMemberName().equals("SizeEstimateRangeGB")) {
             MethodReference convert = new MethodReference(
                 JAVA_UTIL_STREAM_COLLECTORS,
@@ -362,17 +356,6 @@ public class ToDafnyAwsV2 extends ToDafny {
     }
 
     @Override
-    protected CodeBlock memberAssignment(
-        final MemberShape memberShape,
-        CodeBlock outputVar,
-        CodeBlock inputVar
-    ) {
-        ShapeId shapeId = memberShape.getId();
-        return super.memberAssignment(memberShape, outputVar, inputVar);
-    }
-
-
-    @Override
     protected CodeBlock getMember(CodeBlock variableName, MemberShape memberShape) {
         return subject.dafnyNameResolver.methodForGetMember(variableName, memberShape);
     }
@@ -402,7 +385,10 @@ public class ToDafnyAwsV2 extends ToDafny {
             .returns(subject.dafnyNameResolver.typeForAggregateWithWildcard(shape.getId()))
             .addParameter(parameterSpec);
 
-        // A static call to TypeDescriptor class requires a typecast.
+        // A static call to TypeDescriptor class requires an explicit typecast.
+        // This generates an "unchecked cast" warning, which needs to be suppressed.
+        // (Dafny automatically generates this warning suppression annotation for classes that
+        //     generate their own _typeDescriptor() method.)
         if (subject.dafnyNameResolver.shapeIdRequiresStaticTypeDescriptor(memberShape.getTarget())) {
             return methodSpecBuilder
                 // Suppress "unchecked cast" warning; this is expected
@@ -412,6 +398,7 @@ public class ToDafnyAwsV2 extends ToDafny {
                     .build()
                 )
                 .addStatement("return \n($L) \n$L(\n$L, \n$L, \n$L)",
+                    // This is the explicit typecast in the return statement
                     subject.dafnyNameResolver.typeForAggregateWithWildcard(shape.getId()),
                     genericCall,
                     "nativeValue",
