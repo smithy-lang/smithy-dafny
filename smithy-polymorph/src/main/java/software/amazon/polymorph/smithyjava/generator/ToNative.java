@@ -285,7 +285,7 @@ public abstract class ToNative extends Generator {
         if (ModelUtils.isSmithyApiOrSimpleShape(targetShape)) {
             return SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(targetShape.getType());
         }
-        String methodName = capitalize(targetShape.getId().getName());
+        final String methodName = capitalize(targetShape.getId().getName());
         // if in namespace, reference converter from this ToNative class
         if (subject.nativeNameResolver.isInServiceNameSpace(targetShape.getId())) {
             return new MethodReference(thisClassName, methodName);
