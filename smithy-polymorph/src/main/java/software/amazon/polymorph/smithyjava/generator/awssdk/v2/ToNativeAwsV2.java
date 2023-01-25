@@ -37,6 +37,8 @@ import software.amazon.smithy.model.traits.EnumTrait;
 
 import static software.amazon.polymorph.smithyjava.generator.Generator.Constants.BLOB_TO_NATIVE_SDK_BYTES;
 import static software.amazon.polymorph.smithyjava.generator.Generator.Constants.JAVA_UTIL_ARRAYLIST;
+import static software.amazon.polymorph.smithyjava.nameresolver.v2.AwsSdkV2NameResolverUtils.isAttributeValueType;
+import static software.amazon.polymorph.smithyjava.nameresolver.v2.AwsSdkV2NameResolverUtils.tokenToUncapitalizeInShape;
 import static software.amazon.smithy.utils.StringUtils.capitalize;
 import static software.amazon.smithy.utils.StringUtils.uncapitalize;
 
@@ -256,48 +258,8 @@ public class ToNativeAwsV2 extends ToNative {
     /** @return CodeBlock of Method to set a member field. */
     @Override
     protected CodeBlock setMemberField(MemberShape shape) {
-        // In AWS SDK Java V2, using `with` allows for enums or strings
-        // while `set` only allows for strings.
-        // TODO: Refactor with SSE renaming logic in AwsSdkDafnyV2
-        if (shape.getMemberName().contains("SSE")) {
-            return CodeBlock.of("$L", shape.getMemberName().replace("SSE", "sse"));
-        }
-        // TODO: Refactor with KMS renaming logic in AwsSdkDafnyV2
-        if (shape.getMemberName().contains("KMS")) {
-            return CodeBlock.of("$L", shape.getMemberName().replace("KMS", "kms"));
-        }
+        return subject.nativeNameResolver.fieldForSetMember(shape);
 
-        // Attributes of SDK AttributeValue shapes are entirely lower-case
-        if (shape.getContainer().getName().equals("AttributeValue")
-                && isAttributeValueType(shape)) {
-            // "NULL" attribute is set using "nul"
-            if (shape.getMemberName().equals("NULL")) {
-                return CodeBlock.of("nul");
-            }
-            return CodeBlock.of("$L", shape.getMemberName().toLowerCase());
-        }
-
-        return CodeBlock.of("$L", uncapitalize(shape.getMemberName()));
-    }
-
-    /**
-     * Returns true if shape name is an allowed attribute type on AttributeValue objects.
-     * @param shape
-     * @return true if shape name is an allowed attribute type on AttributeValue objects; false
-     *     otherwise
-     */
-    protected static boolean isAttributeValueType(MemberShape shape) {
-        String memberName = shape.getMemberName();
-        return memberName.equals("BOOL")
-            || memberName.equals("NULL")
-            || memberName.equals("L")
-            || memberName.equals("M")
-            || memberName.equals("BS")
-            || memberName.equals("NS")
-            || memberName.equals("SS")
-            || memberName.equals("B")
-            || memberName.equals("N")
-            || memberName.equals("S");
     }
 
     MethodSpec generateConvertString(ShapeId shapeId) {

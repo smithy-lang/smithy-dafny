@@ -2,6 +2,7 @@ package software.amazon.polymorph.smithyjava.nameresolver;
 
 import com.google.common.base.CaseFormat;
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 
@@ -11,6 +12,7 @@ import java.util.Set;
 
 import software.amazon.polymorph.utils.AwsSdkNameResolverHelpers;
 import software.amazon.smithy.model.Model;
+import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
@@ -23,6 +25,9 @@ import software.amazon.smithy.utils.StringUtils;
 
 import static software.amazon.polymorph.smithyjava.generator.Generator.Constants.BLOB_TO_NATIVE_SDK_BYTES;
 import static software.amazon.polymorph.smithyjava.nameresolver.Constants.SHAPE_TYPES_LIST_SET;
+import static software.amazon.polymorph.smithyjava.nameresolver.v2.AwsSdkV2NameResolverUtils.isAttributeValueType;
+import static software.amazon.polymorph.smithyjava.nameresolver.v2.AwsSdkV2NameResolverUtils.tokenToUncapitalizeInShape;
+import static software.amazon.smithy.utils.StringUtils.uncapitalize;
 
 /**
  * There are certain assumptions we can/have to make about
@@ -176,6 +181,32 @@ public class AwsSdkNativeV2 extends Native {
                     "typeForListOrSetNoEnum only accepts LIST or SET. Got: " + shape.getType()
                             + " for ShapeId: " + shapeId);
         };
+    }
+
+    /**
+     * Returns CodeBlock containing something like `member`.
+     * Most AWS SDK V2 setters are `uncapitalizedMemberName` with edge cases in this function
+     * @param shape
+     * @return CodeBlock containing something like `member`.
+     */
+    public CodeBlock fieldForSetMember(MemberShape shape) {
+        // Some strings have a token that requires multi-letter decapitalization (e.g. "SSE", "KMS")
+        String tokenToUncapitalize = tokenToUncapitalizeInShape(shape);
+        if (!tokenToUncapitalize.equals("")) {
+            return CodeBlock.of("$L", shape.getMemberName().replace(tokenToUncapitalize,
+                tokenToUncapitalize.toLowerCase()));
+        }
+        // Attributes of SDK AttributeValue shapes are always lower-case
+        if (shape.getContainer().getName().equals("AttributeValue")
+            && isAttributeValueType(shape)) {
+            // "NULL" attribute is set using "nul"
+            if (shape.getMemberName().equals("NULL")) {
+                return CodeBlock.of("nul");
+            }
+            return CodeBlock.of("$L", shape.getMemberName().toLowerCase());
+        }
+
+        return CodeBlock.of("$L", uncapitalize(shape.getMemberName()));
     }
 
     @Override

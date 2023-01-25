@@ -14,6 +14,8 @@ import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.utils.StringUtils;
 
 import static software.amazon.polymorph.smithydafny.DafnyNameResolver.traitNameForServiceClient;
+import static software.amazon.polymorph.smithyjava.nameresolver.v2.AwsSdkV2NameResolverUtils.isAttributeValueType;
+import static software.amazon.polymorph.smithyjava.nameresolver.v2.AwsSdkV2NameResolverUtils.tokenToUncapitalizeInShape;
 import static software.amazon.polymorph.utils.DafnyNameResolverHelpers.dafnyCompilesExtra_;
 import static software.amazon.smithy.utils.StringUtils.capitalize;
 import static software.amazon.smithy.utils.StringUtils.uncapitalize;
@@ -54,24 +56,11 @@ public class AwsSdkDafnyV2 extends Dafny {
      * @return CodeBlock containing something like `variable.member()`.
      */
     public CodeBlock methodForGetMember(CodeBlock variableName, MemberShape memberShape) {
-        // AWS Account ID: Uncapitalize all of `AWS` --> `aws`
-        if ("AWSAccountId".equals(memberShape.getMemberName())) {
-            return CodeBlock.of("$L.awsAccountId()", variableName);
-        }
-
-        // SSE (secure-side encryption) Description: Uncapitalize all of `SSE` --> `sse`
-        // TODO: Refactor with SSE renaming logic in AwsSdkNativeV2
-        if (memberShape.getMemberName().startsWith("SSE")) {
-            String suffix = memberShape.getMemberName()
-                .substring(memberShape.getMemberName().lastIndexOf("SSE") + "SSE".length());
-            return CodeBlock.of("$L.sse$L()", variableName, suffix);
-        }
-
-        // TODO: Refactor with KMS renaming logic in AwsSdkNativeV2
-        if (memberShape.getMemberName().startsWith("KMS")) {
-            String suffix = memberShape.getMemberName()
-                .substring(memberShape.getMemberName().lastIndexOf("KMS") + "KMS".length());
-            return CodeBlock.of("$L.kms$L()", variableName, suffix);
+        // Some Strings have a token that requires multi-letter decapitalization (e.g. "SSE", "KMS")
+        String tokenToUncapitalize = tokenToUncapitalizeInShape(memberShape);
+        if (!tokenToUncapitalize.equals("")) {
+            return CodeBlock.of("$L.$L()", variableName,
+                memberShape.getMemberName().replace(tokenToUncapitalize, tokenToUncapitalize.toLowerCase()));
         }
 
         // Message: Exception message. Retrieved via `getMessage()`.
@@ -97,28 +86,6 @@ public class AwsSdkDafnyV2 extends Dafny {
         }
 
         return CodeBlock.of("$L.$L()", variableName, uncapitalize(memberShape.getMemberName()));
-    }
-
-    /**
-     * Returns true if shape is an attribute of an AttributeValue shape; false otherwise
-     * @param shape
-     * @return true if shape is an attribute of an AttributeValue shape; false otherwise
-     */
-    protected static boolean isAttributeValueType(MemberShape shape) {
-        shape.getContainer().getName().equals("AttributeValue");
-        String memberName = shape.getMemberName();
-        return (shape.getContainer().getName().equals("AttributeValue")
-            && (memberName.equals("BOOL")
-                || memberName.equals("NULL")
-                || memberName.equals("L")
-                || memberName.equals("M")
-                || memberName.equals("BS")
-                || memberName.equals("NS")
-                || memberName.equals("SS")
-                || memberName.equals("B")
-                || memberName.equals("N")
-                || memberName.equals("S")
-            ));
     }
 
     /**
