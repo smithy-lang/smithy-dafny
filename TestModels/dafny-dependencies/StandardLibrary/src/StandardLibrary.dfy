@@ -429,4 +429,8 @@ module StandardLibrary {
       }
     }
   }
+<<<<<<< HEAD:TestModels/dafny-dependencies/StandardLibrary/src/StandardLibrary.dfy
 }
+=======
+}
+>>>>>>> 4b6592c (feat: TestBed Implementation for SimpleString):TestModels/DafnyLib/std/src/StandardLibrary.dfy
