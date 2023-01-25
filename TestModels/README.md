@@ -1,9 +1,14 @@
 # TestModels
- This package contains various models which is used to form a Test Bed for Dafny-Polymorph-Native layer. The idea is that we want an invariatn test bed with `Write Once, Test Anywhere` with the `Anyhwere` part targetting different runtimes that dafny supports. This would give us confidence in our test cases across runtimes, without writing native tests (and bugs) for each of those runtimes.
+ This package contains various models which is used to form a Test Bed for Dafny-Polymorph-Native layer.
+ The idea is that we want an invariant test bed with `Write Once, Test Anywhere`
+ with the `Anyhwere` part targeting different runtimes that dafny supports.
+ This will give us confidence in our test cases across runtimes,
+ without writing native tests (and bugs) for each of those runtimes.
 
 ## Structure
 
-Please add new project directories under the base `TestModels` directory. Anything which is to be re-used across all projects will go inside the `TestModels` directory as well.
+Please add new project directories under the base `TestModels` directory.
+Anything which is to be re-used across all projects will go inside the `TestModels` directory as well.
 
 ```
 .
