@@ -1,7 +1,7 @@
 DAFNY_ROOT := $(shell pwd)
 
 generate_polymorph :
-	git checkout scchatur/SimpleTypes
+	git checkout scchatur/SimpleTypes #TODO: This is only required till PR https://github.com/awslabs/polymorph/pull/86 is merged, and should be removed afterwards.
 	pushd .; \
 	cd ../../smithy-polymorph;\
 	./gradlew run --args="\
@@ -19,7 +19,7 @@ generate_polymorph :
 	--dependent-model $(DAFNY_ROOT)/../DafnyLib/model \
 	--namespace simple.types.string --wrapped-local-service"; \
 	popd;\
-	git checkout TestModelsDotNet
+	git checkout TestModelsDotNet #TODO: This is only required till PR https://github.com/awslabs/polymorph/pull/86 is merged, and should be removed afterwards.
 
 	# Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
