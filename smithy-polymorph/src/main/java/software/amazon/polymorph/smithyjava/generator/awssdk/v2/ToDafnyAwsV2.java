@@ -100,13 +100,12 @@ public class ToDafnyAwsV2 extends ToDafny {
             .flatMap(Collection::stream)
             .filter(structureShape -> !structureShape.toString().contains("InvalidEndpointException"))
             .collect(Collectors.toCollection(LinkedHashSet::new));
-        operationOutputs.addAll(operationErrors); // TODO
+        operationOutputs.addAll(operationErrors);
 
         Set<ShapeId> allRelevantShapeIds = ModelUtils.findAllDependentShapes(operationOutputs, subject.model);
 
         // In the AWS SDK for Java V2, Operation Outputs are special
         allRelevantShapeIds.removeAll(operationOutputs);
-
         // Enums are also a special case
         LinkedHashSet<ShapeId> enumShapeIds = new LinkedHashSet<>();
         allRelevantShapeIds.forEach(shapeId -> {
@@ -126,7 +125,6 @@ public class ToDafnyAwsV2 extends ToDafny {
             .filter(structureShape -> !structureShape.getId().getName().contains("InvalidEndpointException"))
             .map(this::modeledError).collect(Collectors.toList());
         convertServiceErrors.add(generateConvertOpaqueError());
-
         // For enums, we generate overloaded methods,
         // one to convert instances of the Enum
         final List<MethodSpec> convertEnumEnum = enumShapeIds
@@ -155,7 +153,6 @@ public class ToDafnyAwsV2 extends ToDafny {
     MethodSpec generateConvert(final ShapeId shapeId) {
         final Shape shape = subject.model.getShape(shapeId)
                 .orElseThrow(() -> new IllegalStateException("Cannot find shape " + shapeId));
-
         return switch (shape.getType()) {
             // For the AWS SDK for Java, we do not generate converters for simple shapes
             case BLOB, BOOLEAN, STRING, TIMESTAMP, BYTE, SHORT,
@@ -166,8 +163,8 @@ public class ToDafnyAwsV2 extends ToDafny {
             case STRUCTURE -> generateConvertStructure(shapeId);
             case UNION -> generateConvertUnion(shapeId);
             default -> throw new UnsupportedOperationException(
-                "ShapeId %s is of Type %s, which is not yet supported for ToDafny"
-                    .formatted(shapeId, shape.getType()));
+                    "ShapeId %s is of Type %s, which is not yet supported for ToDafny"
+                            .formatted(shapeId, shape.getType()));
         };
     }
 

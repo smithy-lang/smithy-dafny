@@ -123,8 +123,8 @@ public class ToNativeAwsV2 extends ToNative {
             case STRUCTURE -> modeledStructure(shape.asStructureShape().get());
             case UNION -> modeledUnion(shape.asUnionShape().get());
             default -> throw new UnsupportedOperationException(
-                "ShapeId %s is of Type %s, which is not yet supported for ToNative"
-                    .formatted(shapeId, shape.getType()));
+                    "ShapeId %s is of Type %s, which is not yet supported for ToNative"
+                            .formatted(shapeId, shape.getType()));
         };
     }
 
@@ -208,7 +208,6 @@ public class ToNativeAwsV2 extends ToNative {
     @Override
     protected CodeBlock setWithConversionCall(MemberShape member, CodeBlock getMember) {
         Shape targetShape = subject.model.expectShape(member.getTarget());
-
         // SDK V2 reads in Blob shapes as SdkBytes.
         // SdkBytes are a Java SDK V2-specific datatype defined in the SDK V2 package. As a result,
         //   dafny-java-version should not define a byte-array-to-SdkBytes conversion. Otherwise,
@@ -226,7 +225,7 @@ public class ToNativeAwsV2 extends ToNative {
                 AwsSdkDafnyV2.getV2MemberFieldValue(member));
         }
 
-        // "TargetValue" refers to on-demand R/W capacity target values.
+        // "TargetValue" refers to a table's target R/W capacity target values.
         // SDK handles these as doubles, but the Smithy model stores them as integers.
         if (member.getMemberName().equals("TargetValue")) {
             return CodeBlock.of("$L.$L($L((double) $L.$L))",
