@@ -1,0 +1,57 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Condition=" '$(ExcludeRestorePackageImports)' != 'true' ">
+    <RestoreSuccess Condition=" '$(RestoreSuccess)' == '' ">True</RestoreSuccess>
+    <RestoreTool Condition=" '$(RestoreTool)' == '' ">NuGet</RestoreTool>
+    <ProjectAssetsFile Condition=" '$(ProjectAssetsFile)' == '' ">$(MSBuildThisFileDirectory)project.assets.json</ProjectAssetsFile>
+    <NuGetPackageRoot Condition=" '$(NuGetPackageRoot)' == '' ">/Users/scchatur/.nuget/packages/</NuGetPackageRoot>
+    <NuGetPackageFolders Condition=" '$(NuGetPackageFolders)' == '' ">/Users/scchatur/.nuget/packages/</NuGetPackageFolders>
+    <NuGetProjectStyle Condition=" '$(NuGetProjectStyle)' == '' ">PackageReference</NuGetProjectStyle>
+    <NuGetToolVersion Condition=" '$(NuGetToolVersion)' == '' ">6.3.1</NuGetToolVersion>
+  </PropertyGroup>
+  <ItemGroup Condition=" '$(ExcludeRestorePackageImports)' != 'true' ">
+    <SourceRoot Include="/Users/scchatur/.nuget/packages/" />
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net6.0' AND '$(ExcludeRestorePackageImports)' != 'true' ">
+    <Content Include="$(NuGetPackageRoot)dafnyruntime/3.10.0.41215/contentFiles/any/netstandard2.0/DafnyRuntime.go" Condition="Exists('$(NuGetPackageRoot)dafnyruntime/3.10.0.41215/contentFiles/any/netstandard2.0/DafnyRuntime.go')">
+      <NuGetPackageId>DafnyRuntime</NuGetPackageId>
+      <NuGetPackageVersion>3.10.0.41215</NuGetPackageVersion>
+      <NuGetItemType>Content</NuGetItemType>
+      <Pack>false</Pack>
+      <Private>False</Private>
+      <Link>DafnyRuntime.go</Link>
+    </Content>
+    <Content Include="$(NuGetPackageRoot)dafnyruntime/3.10.0.41215/contentFiles/any/netstandard2.0/DafnyRuntime.h" Condition="Exists('$(NuGetPackageRoot)dafnyruntime/3.10.0.41215/contentFiles/any/netstandard2.0/DafnyRuntime.h')">
+      <NuGetPackageId>DafnyRuntime</NuGetPackageId>
+      <NuGetPackageVersion>3.10.0.41215</NuGetPackageVersion>
+      <NuGetItemType>Content</NuGetItemType>
+      <Pack>false</Pack>
+      <Private>False</Private>
+      <Link>DafnyRuntime.h</Link>
+    </Content>
+    <Content Include="$(NuGetPackageRoot)dafnyruntime/3.10.0.41215/contentFiles/any/netstandard2.0/DafnyRuntime.js" Condition="Exists('$(NuGetPackageRoot)dafnyruntime/3.10.0.41215/contentFiles/any/netstandard2.0/DafnyRuntime.js')">
+      <NuGetPackageId>DafnyRuntime</NuGetPackageId>
+      <NuGetPackageVersion>3.10.0.41215</NuGetPackageVersion>
+      <NuGetItemType>Content</NuGetItemType>
+      <Pack>false</Pack>
+      <Private>False</Private>
+      <Link>DafnyRuntime.js</Link>
+    </Content>
+    <Content Include="$(NuGetPackageRoot)dafnyruntime/3.10.0.41215/contentFiles/any/netstandard2.0/DafnyRuntime.py" Condition="Exists('$(NuGetPackageRoot)dafnyruntime/3.10.0.41215/contentFiles/any/netstandard2.0/DafnyRuntime.py')">
+      <NuGetPackageId>DafnyRuntime</NuGetPackageId>
+      <NuGetPackageVersion>3.10.0.41215</NuGetPackageVersion>
+      <NuGetItemType>Content</NuGetItemType>
+      <Pack>false</Pack>
+      <Private>False</Private>
+      <Link>DafnyRuntime.py</Link>
+    </Content>
+    <Content Include="$(NuGetPackageRoot)dafnyruntime/3.10.0.41215/contentFiles/any/netstandard2.0/DafnyRuntimeJava/build/libs/DafnyRuntime.jar" Condition="Exists('$(NuGetPackageRoot)dafnyruntime/3.10.0.41215/contentFiles/any/netstandard2.0/DafnyRuntimeJava/build/libs/DafnyRuntime.jar')">
+      <NuGetPackageId>DafnyRuntime</NuGetPackageId>
+      <NuGetPackageVersion>3.10.0.41215</NuGetPackageVersion>
+      <NuGetItemType>Content</NuGetItemType>
+      <Pack>false</Pack>
+      <Private>False</Private>
+      <Link>DafnyRuntimeJava/build/libs/DafnyRuntime.jar</Link>
+    </Content>
+  </ItemGroup>
+</Project>
