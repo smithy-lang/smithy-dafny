@@ -15,13 +15,28 @@ java {
     }
 }
 
+var caUrl: URI? = null
+@Nullable
+val caUrlStr: String? = System.getenv("CODEARTIFACT_URL_SMITHY")
+if (!caUrlStr.isNullOrBlank()) {
+    caUrl = URI.create(caUrlStr)
+}
+
+var caPassword: String? = null
+@Nullable
+val caPasswordString: String? = System.getenv("CODEARTIFACT_AUTH_TOKEN")
+if (!caPasswordString.isNullOrBlank()) {
+    caPassword = caPasswordString
+}
+
 repositories {
     mavenLocal()
     mavenCentral()
+    maybeCodeArtifact(this@Build_gradle, this)
 }
 
 dependencies {
-    implementation("dafny.lang:DafnyRuntime:3.9.0")
+    implementation("dafny.lang:DafnyRuntime:3.10.0")
     implementation("com.squareup:javapoet:1.13.0")
     implementation("software.amazon.dafny:conversion:1.0-SNAPSHOT")
     implementation("software.amazon.smithy:smithy-model:1.21.0")
@@ -43,21 +58,6 @@ application {
     mainClass.set("software.amazon.polymorph.CodegenCli")
 }
 
-var caUrl: URI? = null
-@Nullable
-val caUrlStr: String? = System.getenv("CODEARTIFACT_URL_SMITHY")
-if (!caUrlStr.isNullOrBlank()) {
-    caUrl = URI.create(caUrlStr)
-}
-
-var caPassword: String? = null
-@Nullable
-val caPasswordString: String? = System.getenv("CODEARTIFACT_AUTH_TOKEN")
-if (!caPasswordString.isNullOrBlank()) {
-    caPassword = caPasswordString
-}
-
-
 publishing {
     publications {
         create<MavenPublication>("smithy-polymorph") {
@@ -66,14 +66,19 @@ publishing {
     }
     repositories{
         mavenLocal()
-        if (caUrl != null && caPassword != null) {
-            maven {
-                name = "CodeArtifact"
-                url = caUrl!!
-                credentials {
-                    username = "aws"
-                    password = caPassword!!
-                }
+        maybeCodeArtifact(this@Build_gradle, this)
+    }
+}
+
+
+fun maybeCodeArtifact(buildGradle: Build_gradle, repositoryHandler: RepositoryHandler) {
+    if (buildGradle.caUrl != null && buildGradle.caPassword != null) {
+        repositoryHandler.maven {
+            name = "CodeArtifact"
+            url = buildGradle.caUrl!!
+            credentials {
+                username = "aws"
+                password = buildGradle.caPassword!!
             }
         }
     }

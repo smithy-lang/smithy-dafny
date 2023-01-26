@@ -97,7 +97,8 @@ public class ShimLibrary extends Generator {
                 ))
                 // TODO: Handle Resources (serviceConstructor assumes this is a service)
                 .addMethod(serviceConstructor(builderSpecs))
-                .addMethod(builderSpecs.builderMethod());
+                .addMethod(builderSpecs.builderMethod())
+                .addMethod(impl());
         spec.addMethods(getOperationsForTarget()
                 .stream().sequential().map(this::operation).collect(Collectors.toList()));
         return spec.build();
@@ -270,6 +271,16 @@ public class ShimLibrary extends Generator {
         method.addCode(ifFailure());
         method.addStatement("this.$L = $L.dtor_value()", INTERFACE_FIELD, RESULT_VAR);
         return method.build();
+    }
+
+    MethodSpec impl() {
+        return MethodSpec
+            .methodBuilder("impl")
+            .addModifiers(Modifier.PROTECTED)
+            .returns(subject.dafnyNameResolver.typeForShape(
+                    targetShape.toShapeId()))
+            .addStatement("return this.$L", INTERFACE_FIELD)
+            .build();
     }
 
     // If it is known the Shape cannot have a positional trait,
