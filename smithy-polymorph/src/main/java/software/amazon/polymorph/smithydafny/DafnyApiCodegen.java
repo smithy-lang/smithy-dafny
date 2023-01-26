@@ -1493,8 +1493,8 @@ public class DafnyApiCodegen {
                                     configTypeName,
                                     defaultFunctionMethodName
                             ),
-                    // Yes, Error is hard coded
-                    // this can work because we need to be able Errors from other modules...
+                    // Error MUST be hard coded.
+                    // We need to be able to reference Errors across modules.
                     "returns (res: Result<%s, Error>)"
                             .formatted(nameResolver.traitNameForServiceClient(serviceShape)),
                     "ensures res.Success? ==> ",
