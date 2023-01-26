@@ -155,51 +155,41 @@ public class DafnyApiCodegen {
     }
 
     public Map<Path, TokenTree> generateWrappedAbstractServiceModule(final Path outputDafny) {
-        final String namespace = serviceShape.getId().getNamespace();
-        final String typesModuleName = DafnyNameResolver.dafnyTypesModuleForNamespace(namespace);
-        final Path path = Path.of("%sWrapped.dfy".formatted(typesModuleName));
-
-        // A smithy model may reference a model in a different package.
-        // In which case we need to include it.
-        final TokenTree includeDirectives = TokenTree
-            .of(Stream
-                .concat(
-                    Stream
-                        .of(
-                            modelPath.relativize(includeDafnyFile),
-                            outputDafny.relativize(modelPath.resolve("../src/Index.dfy"))
-                        ),
-                    nameResolver
-                        .dependentModels()
-                        .stream()
-                        .map(d -> modelPath
-                            .relativize(d.modelPath().resolve("../src/Index.dfy"))
-                        )
-                        .map(Path::toString)
-                )
-                .map(p -> "include \"" + p + "\"")
-                .map(Token::of)
-            )
-            .lineSeparated();
-
         if (serviceShape.hasTrait(ServiceTrait.class)) {
             // TODO move the AWS SDK branch over here.
             // It should be the case that the default --aws-sdk
             // is for building a Dafny AWS SDK,
             // not wrapping an existing one.
             throw new IllegalStateException("Wrapped AWS service only supported in --aws-sdk");
-        } else if (serviceShape.hasTrait(LocalServiceTrait.class)) {
-            final TokenTree fullCode = TokenTree
-                .of(
-                    includeDirectives,
-                    generateAbstractWrappedLocalService(serviceShape)
-                )
-                .lineSeparated();
-            return Map.of(path, fullCode);
-        } else {
+        } else if (!serviceShape.hasTrait(LocalServiceTrait.class)) {
             throw new IllegalStateException("Service does not have supported trait");
         }
 
+        final String namespace = serviceShape.getId().getNamespace();
+        final String typesModuleName = DafnyNameResolver.dafnyTypesModuleForNamespace(namespace);
+        final Path path = Path.of("%sWrapped.dfy".formatted(typesModuleName));
+        // A smithy model may reference a model in a different package.
+        // In which case we need to include it.
+        final TokenTree includeDirectives = TokenTree.of(
+                Stream
+                        .concat(
+                                Stream.of(
+                                        modelPath.relativize(includeDafnyFile),
+                                        outputDafny.relativize(modelPath.resolve("../src/Index.dfy"))
+                                ),
+                                nameResolver
+                                        .dependentModels()
+                                        .stream()
+                                        .map(d -> modelPath.relativize(d.modelPath().resolve("../src/Index.dfy")))
+                                        .map(Path::toString)
+                        )
+                        .map(p -> "include \"" + p + "\"")
+                        .map(Token::of)
+        ).lineSeparated();
+        final TokenTree fullCode = TokenTree.of(
+                includeDirectives, generateAbstractWrappedLocalService(serviceShape)
+        ).lineSeparated();
+        return Map.of(path, fullCode);
     }
 
     private Optional<TokenTree> generateCodeForShape(final Shape shape) {
