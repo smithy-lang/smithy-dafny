@@ -79,12 +79,12 @@ public class DafnyApiCodegen {
                 .of(
                   modelPath.relativize(includeDafnyFile)
                 ),
-              // We can't just include every dependent model
-              // that was passed on the command line.
-              // This is because some models are only informational
-              // and do not point to any generated Dafny.
               nameResolver
                 .dependentModels()
+                // nameResolve.dependentModels() filters dependentModelPaths
+                // to only the relevant dependent models.
+                // Some models are only informational,
+                // and do not point to any generated Dafny.
                 .stream()
                 .map(d -> modelPath
                   .relativize(d.modelPath().resolve("../src/Index.dfy"))
