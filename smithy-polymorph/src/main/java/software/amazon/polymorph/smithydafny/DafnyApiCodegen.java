@@ -1496,7 +1496,7 @@ public class DafnyApiCodegen {
                     // Error MUST be hard coded.
                     // We need to be able to reference Errors across modules.
                     "returns (res: Result<%s, Error>)"
-                            .formatted(nameResolver.traitNameForServiceClient(serviceShape)),
+                            .formatted(DafnyNameResolver.traitNameForServiceClient(serviceShape)),
                     "ensures res.Success? ==> ",
                     "&& fresh(res.value)",
                     "&& fresh(res.value.%s)".formatted(nameResolver.mutableStateFunctionName()),
