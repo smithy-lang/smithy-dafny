@@ -1,0 +1,50 @@
+# This workflow performs static analysis checks.
+name: Library Dafny verification
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  verification:
+    strategy:
+      matrix:
+        library: [
+          TestModels/DafnyLib/std, # This stores current Polymorph dependencies that all TestModels depend on
+          TestModels/SimpleString,
+        ]
+        os: [ windows-latest, ubuntu-latest, macos-latest ]
+    runs-on: ${{ matrix.os }}
+    env:
+      DOTNET_CLI_TELEMETRY_OPTOUT: 1
+      DOTNET_NOLOGO: 1
+    steps:
+      - name: Support longpaths
+        run: |
+          git config --global core.longpaths true
+
+      - uses: actions/checkout@v2
+      # The specification submodule is private so we don't have access, but we don't need
+      # it to verify the Dafny code. Instead we manually pull the submodule we DO need.
+      - run: git submodule update --init libraries
+
+      - name: Setup Dafny
+        uses: dafny-lang/setup-dafny-action@v1
+        with:
+          dafny-version: "3.10.0"
+
+      - name: Verify ${{ matrix.library }} Dafny code
+        shell: bash
+        working-directory: ./${{ matrix.library }}
+        run: |
+          # This works because `node` is installed by default on GHA runners
+          CORES=$(node -e 'console.log(os.cpus().length)')
+          make verify CORES=$CORES
+
+      - name: Check solver resource use
+        shell: bash
+        working-directory: ./${{ matrix.library }}
+        run: |
+          make dafny-reportgenerator
