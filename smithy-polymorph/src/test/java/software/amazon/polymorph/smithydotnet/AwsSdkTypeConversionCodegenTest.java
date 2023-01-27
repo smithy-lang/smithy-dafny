@@ -36,6 +36,7 @@ public class AwsSdkTypeConversionCodegenTest {
         return new AwsSdkTypeConversionCodegen(model, serviceShape);
     }
 
+// Removed 2023-01-27 for output-local-service-test
 //    /**
 //     * Test that an AWS SDK structure type converter doesn't try to call the member properties' {@code IsSet*} methods,
 //     * since those are marked internal and are thus inaccessible to our generated code.
