@@ -86,10 +86,6 @@ public class DafnyApiCodegen {
                 // Some models are only informational,
                 // and do not point to any generated Dafny.
                 .stream()
-                // nameResolve.dependentModels() filters dependentModelPaths
-                // to only the relevant dependent models.
-                // Some models are only informational,
-                // and do not point to any generated Dafny.
                 .map(d -> modelPath
                   .relativize(d.modelPath().resolve("../src/Index.dfy"))
                 )
