@@ -31,18 +31,6 @@ public class LocalServiceWrappedCodegen extends ServiceCodegen {
 
     // TODO see: generateWrappedServiceExtern The extern for wrapping can be fully generated
 
-//    // Use LinkedHashSet to dedupe while maintaining insertion order
-//    final LinkedHashSet<String> importNamespaces = new LinkedHashSet<>(UNCONDITIONAL_IMPORTS);
-//    importNamespaces.add(nameResolver.namespaceForService());
-//    final TokenTree prelude = TokenTree.of(
-//      importNamespaces.stream().map("using %s;"::formatted).map(Token::of)
-//    ).lineSeparated();
-//
-//    // Opaque exception class
-//    final Path wrappedServiceExternPath = Path.of("Foo.cs");
-//    final TokenTree wrappedServiceExternPathCode = generateWrappedServiceExtern(serviceShape);
-//    codeByPath.put(wrappedServiceExternPath, wrappedServiceExternPathCode.prepend(prelude));
-
     // Resources
     model.getResourceShapes()
       .stream()
