@@ -33,8 +33,15 @@ jobs:
         with:
           dotnet-version: ${{ matrix.dotnet-version }}
 
+      - name: Debug Download Dependencies 
+        working-directory: ./${{ matrix.testSuite }}
+        shell: bash
+        run: |
+          ls -al
+
       - name: Download Dependencies 
         working-directory: ./${{ matrix.testSuite }}
+        shell: bash
         run: make setup_net
 
       - name: Compile TestSuite implementation
