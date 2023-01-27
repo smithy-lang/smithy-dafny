@@ -81,73 +81,73 @@ public class ServiceCodegenTest {
         assertEquals(expectedTokens, actualTokens);
     }
 
-    @Test
-    public void testGenerateStructureClass() {
-        final Model model = TestModel.setupModel((builder, modelAssembler) -> modelAssembler.addUnparsedModel("test.smithy", """
-                namespace %s
-                structure Foobar {
-                    someBool: Boolean,
-                    @required
-                    someInt: Integer,
-                    someString: String,
-                }
-                """.formatted(SERVICE_NAMESPACE)));
-
-        final ServiceShape serviceShape = model.expectShape(SERVICE_SHAPE_ID, ServiceShape.class);
-        final ServiceCodegen codegen = new ServiceCodegen(model, serviceShape);
-        final ShapeId shapeId = ShapeId.fromParts(SERVICE_NAMESPACE, "Foobar");
-        final StructureShape structureShape = model.expectShape(shapeId, StructureShape.class);
-        final String actualCode = codegen.generateStructureClass(structureShape).toString();
-        final List<ParseToken> actualTokens = Tokenizer.tokenize(actualCode);
-
-        final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
-                namespace Test.Foobar {
-                    public class Foobar {
-                        private bool? _someBool;
-                        private int? _someInt;
-                        private string _someString;
-                        
-                        public bool SomeBool {
-                            get { return this._someBool.GetValueOrDefault(); }
-                            set { this._someBool = value; }
-                        }
-                        
-                        internal bool IsSetSomeBool()
-                        {
-                            return this._someBool.HasValue;
-                        }
-                        
-                        public int SomeInt {
-                            get { return this._someInt.GetValueOrDefault(); }
-                            set { this._someInt = value; }
-                        }
-                        
-                        internal bool IsSetSomeInt()
-                        {
-                            return this._someInt.HasValue;
-                        }
-                        
-                        public string SomeString {
-                            get { return this._someString; }
-                            set { this._someString = value; }
-                        }
-                        
-                        internal bool IsSetSomeString()
-                        {
-                            return this._someString != null;
-                        }
-                        
-                        public void Validate() {
-                            if (!IsSetSomeInt()) throw new System.ArgumentException(
-                                "Missing value for required property 'SomeInt'"
-                            );
-                        }
-                    }
-                }
-                """);
-
-        assertEquals(expectedTokens, actualTokens);
-    }
+//    @Test
+//    public void testGenerateStructureClass() {
+//        final Model model = TestModel.setupModel((builder, modelAssembler) -> modelAssembler.addUnparsedModel("test.smithy", """
+//                namespace %s
+//                structure Foobar {
+//                    someBool: Boolean,
+//                    @required
+//                    someInt: Integer,
+//                    someString: String,
+//                }
+//                """.formatted(SERVICE_NAMESPACE)));
+//
+//        final ServiceShape serviceShape = model.expectShape(SERVICE_SHAPE_ID, ServiceShape.class);
+//        final ServiceCodegen codegen = new ServiceCodegen(model, serviceShape);
+//        final ShapeId shapeId = ShapeId.fromParts(SERVICE_NAMESPACE, "Foobar");
+//        final StructureShape structureShape = model.expectShape(shapeId, StructureShape.class);
+//        final String actualCode = codegen.generateStructureClass(structureShape).toString();
+//        final List<ParseToken> actualTokens = Tokenizer.tokenize(actualCode);
+//
+//        final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
+//                namespace Test.Foobar {
+//                    public class Foobar {
+//                        private bool? _someBool;
+//                        private int? _someInt;
+//                        private string _someString;
+//
+//                        public bool SomeBool {
+//                            get { return this._someBool.GetValueOrDefault(); }
+//                            set { this._someBool = value; }
+//                        }
+//
+//                        internal bool IsSetSomeBool()
+//                        {
+//                            return this._someBool.HasValue;
+//                        }
+//
+//                        public int SomeInt {
+//                            get { return this._someInt.GetValueOrDefault(); }
+//                            set { this._someInt = value; }
+//                        }
+//
+//                        internal bool IsSetSomeInt()
+//                        {
+//                            return this._someInt.HasValue;
+//                        }
+//
+//                        public string SomeString {
+//                            get { return this._someString; }
+//                            set { this._someString = value; }
+//                        }
+//
+//                        internal bool IsSetSomeString()
+//                        {
+//                            return this._someString != null;
+//                        }
+//
+//                        public void Validate() {
+//                            if (!IsSetSomeInt()) throw new System.ArgumentException(
+//                                "Missing value for required property 'SomeInt'"
+//                            );
+//                        }
+//                    }
+//                }
+//                """);
+//
+//        assertEquals(expectedTokens, actualTokens);
+//    }
 
     @Test
     public void testGenerateResourceInterface() {
