@@ -320,6 +320,32 @@ public record DafnyNameResolver(
           .map(i -> Token.of(i));
     }
 
+    public static String abstractServiceModuleName(ServiceShape serviceShape)
+    {
+        final String moduleNamespace = DafnyNameResolver
+                .dafnyNamespace(serviceShape.getId().getNamespace())
+                .replace(".", "");
+        return "Abstract%sService".formatted(moduleNamespace);
+    }
+
+    public static String abstractOperationsModuleName(ServiceShape serviceShape)
+    {
+        final String moduleNamespace = DafnyNameResolver
+          .dafnyNamespace(serviceShape.getId().getNamespace())
+          .replace(".", "");
+        return "Abstract%sOperations".formatted(moduleNamespace);
+    }
+
+    public static Stream<TokenTree> wrappedAbstractModulePrelude(ServiceShape serviceShape)
+    {
+        return Stream
+          .concat(
+            abstractModulePrelude(serviceShape),
+            Stream.of(TokenTree.of("import WrappedService : %s"
+              .formatted(abstractServiceModuleName(serviceShape))))
+          );
+    }
+
     public static String internalConfigType() {
         return "InternalConfig";
     }
