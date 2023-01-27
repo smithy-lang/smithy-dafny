@@ -3,6 +3,9 @@
 
 package software.amazon.polymorph;
 
+import software.amazon.polymorph.smithydotnet.localServiceWrapper.LocalServiceWrappedCodegen;
+import software.amazon.polymorph.smithydotnet.localServiceWrapper.LocalServiceWrappedConversionCodegen;
+import software.amazon.polymorph.smithydotnet.localServiceWrapper.LocalServiceWrappedShimCodegen;
 import software.amazon.polymorph.smithyjava.generator.library.JavaLibrary;
 import software.amazon.polymorph.utils.ModelUtils;
 
@@ -93,6 +96,8 @@ public class CodegenCli {
             final Path outputDotnetDir = cliArguments.outputDotnetDir.get();
             if (cliArguments.awsSdkStyle) {
                 messages.add(netAwsSdk(outputDotnetDir, serviceShape, model, cliArguments.dependentModelPaths));
+            } else if (cliArguments.outputLocalServiceTest.isPresent()) {
+                messages.add(netWrappedLocalService(outputDotnetDir, serviceShape, model, cliArguments.dependentModelPaths));
             } else {
                 messages.add(netLocalService(outputDotnetDir, serviceShape, model));
             }
@@ -106,10 +111,19 @@ public class CodegenCli {
                     cliArguments.includeDafnyFile.get(),
                     cliArguments.dependentModelPaths
             );
-            // The Smithy model and the Dafny code are expected to be in the same location.
-            // This simplifies the process of including the various Dafny files.
-            writeTokenTreesIntoDir(dafnyApiCodegen.generate(), cliArguments.modelPath);
-            messages.add("Dafny code generated in %s".formatted(cliArguments.modelPath));
+
+            if (cliArguments.outputLocalServiceTest.isPresent()) {
+                writeTokenTreesIntoDir(dafnyApiCodegen.generateWrappedAbstractServiceModule(
+                        cliArguments.outputLocalServiceTest.get()),
+                        cliArguments.outputLocalServiceTest.get()
+                );
+                messages.add("Dafny that tests a local service generated in %s".formatted(cliArguments.outputLocalServiceTest.get()));
+            } else {
+                // The Smithy model and the Dafny code are expected to be in the same location.
+                // This simplifies the process of including the various Dafny files.
+                writeTokenTreesIntoDir(dafnyApiCodegen.generate(), cliArguments.modelPath);
+                messages.add("Dafny code generated in %s".formatted(cliArguments.modelPath));
+            }
         }
 
         logger.info("\n");
@@ -141,6 +155,20 @@ public class CodegenCli {
         writeTokenTreesIntoDir(conversion.generate(), outputNetDir);
         return ".NET code generated in %s".formatted(outputNetDir);
     }
+
+    static String netWrappedLocalService(Path outputNetDir, ServiceShape serviceShape, Model model, Path[] dependentModelPaths) {
+        final LocalServiceWrappedCodegen service = new LocalServiceWrappedCodegen(model, serviceShape);
+        writeTokenTreesIntoDir(service.generate(), outputNetDir);
+
+        final LocalServiceWrappedShimCodegen wrappedShim = new LocalServiceWrappedShimCodegen(
+                model, serviceShape, dependentModelPaths);
+        writeTokenTreesIntoDir(wrappedShim.generate(), outputNetDir);
+
+        final TypeConversionCodegen conversion = new LocalServiceWrappedConversionCodegen(model, serviceShape);
+        writeTokenTreesIntoDir(conversion.generate(), outputNetDir);
+        return ".NET code generated in %s".formatted(outputNetDir);
+    }
+
     static String netAwsSdk(Path outputNetDir, ServiceShape serviceShape, Model model, Path[] dependentModelPaths) {
         final AwsSdkShimCodegen dotnetShimCodegen = new AwsSdkShimCodegen(
                 model, serviceShape, dependentModelPaths);
@@ -190,6 +218,11 @@ public class CodegenCli {
             .desc("<optional> generate AWS SDK-style API and shims")
             .build())
           .addOption(Option.builder()
+            .longOpt("output-local-service-test")
+            .desc("<optional> output directory for generated Dafny that tests a local service")
+            .hasArg()
+            .build())
+          .addOption(Option.builder()
             .longOpt("output-dafny")
             .desc("<optional> generate Dafny code")
             .build())
@@ -211,6 +244,7 @@ public class CodegenCli {
             Optional<Path> outputDotnetDir,
             Optional<Path> outputJavaDir,
             boolean awsSdkStyle,
+            Optional<Path> outputLocalServiceTest,
             boolean outputDafny,
             Optional<Path> includeDafnyFile
     ) {
@@ -239,25 +273,46 @@ public class CodegenCli {
                 outputDotnetDir = Optional.of(Paths.get(commandLine.getOptionValue("output-dotnet"))
                         .toAbsolutePath().normalize());
             }
+
             Optional<Path> outputJavaDir = Optional.empty();
             if (commandLine.hasOption("output-java")) {
                  outputJavaDir = Optional.of(Paths.get(commandLine.getOptionValue("output-java"))
                          .toAbsolutePath().normalize());
             }
+
             final boolean awsSdkStyle = commandLine.hasOption("aws-sdk");
+            if (awsSdkStyle && commandLine.hasOption("output-local-service-test")) {
+                throw new ParseException("Can not have aws sdk style and test a local service.");
+            }
+
+            Optional<Path> outputLocalServiceTest = Optional.empty();
+            if (commandLine.hasOption("output-local-service-test")) {
+                outputLocalServiceTest = Optional.of(Paths.get(commandLine.getOptionValue("output-local-service-test"))
+                                                    .toAbsolutePath().normalize());
+            }
+
             final boolean outputDafny = commandLine.hasOption("output-dafny");
             Optional<Path> includeDafnyFile = Optional.empty();
             if (outputDafny) {
                 if (!commandLine.hasOption("include-dafny")) {
                     // if outputing dafny, an include file is required
+                    // if outputting dafny, an include file is required
                     throw new ParseException("Dafny requires an include file.");
                 }
                 includeDafnyFile = Optional.of(Paths.get(commandLine.getOptionValue("include-dafny"))
-                        .toAbsolutePath().normalize());
+                                                       .toAbsolutePath().normalize());
             }
-
             return Optional.of(new CliArguments(
-              modelPath, dependentModelPaths, namespace, outputDotnetDir, outputJavaDir, awsSdkStyle, outputDafny, includeDafnyFile));
+                    modelPath,
+                    dependentModelPaths,
+                    namespace,
+                    outputDotnetDir,
+                    outputJavaDir,
+                    awsSdkStyle,
+                    outputLocalServiceTest,
+                    outputDafny,
+                    includeDafnyFile
+            ));
         }
     }
 
