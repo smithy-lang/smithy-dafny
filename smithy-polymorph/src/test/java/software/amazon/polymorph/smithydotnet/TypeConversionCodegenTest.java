@@ -61,6 +61,7 @@ public class TypeConversionCodegenTest {
         return Objects.requireNonNull(generatedCode.get(TYPE_CONVERSION_CLASS_PATH)).toString();
     }
 
+// Removed 2023-01-27 for output-local-service-test
 //    @Test
 //    public void testGenerateEmptyModel() {
 //        final TypeConversionCodegen codegen = setupCodegen((_builder, _modelAssembler) -> {});
