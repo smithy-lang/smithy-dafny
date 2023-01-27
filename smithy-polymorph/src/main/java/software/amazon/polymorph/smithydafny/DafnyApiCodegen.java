@@ -81,6 +81,10 @@ public class DafnyApiCodegen {
                 ),
               nameResolver
                 .dependentModels()
+                // nameResolve.dependentModels() filters dependentModelPaths
+                // to only the relevant dependent models.
+                // Some models are only informational,
+                // and do not point to any generated Dafny.
                 .stream()
                 // nameResolve.dependentModels() filters dependentModelPaths
                 // to only the relevant dependent models.
@@ -1499,10 +1503,10 @@ public class DafnyApiCodegen {
                                     configTypeName,
                                     defaultFunctionMethodName
                             ),
-                    // Yes, Error is hard coded
-                    // this can work because we need to be able Errors from other modules...
+                    // Error MUST be hard coded.
+                    // We need to be able to reference Errors across modules.
                     "returns (res: Result<%s, Error>)"
-                            .formatted(nameResolver.traitNameForServiceClient(serviceShape)),
+                            .formatted(DafnyNameResolver.traitNameForServiceClient(serviceShape)),
                     "ensures res.Success? ==> ",
                     "&& fresh(res.value)",
                     "&& fresh(res.value.%s)".formatted(nameResolver.mutableStateFunctionName()),
