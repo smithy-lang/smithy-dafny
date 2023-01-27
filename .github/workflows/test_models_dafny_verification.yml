@@ -12,7 +12,7 @@ jobs:
     strategy:
       matrix:
         library: [
-          TestModels/DafnyLib/std, # This stores current Polymorph dependencies that all TestModels depend on
+          TestModels/dafny-dependencies/std, # This stores current Polymorph dependencies that all TestModels depend on
         ]
         os: [ windows-latest, ubuntu-latest, macos-latest ]
     runs-on: ${{ matrix.os }}
@@ -25,9 +25,6 @@ jobs:
           git config --global core.longpaths true
 
       - uses: actions/checkout@v2
-      # The specification submodule is private so we don't have access, but we don't need
-      # it to verify the Dafny code. Instead we manually pull the submodule we DO need.
-      - run: git submodule update --init libraries
 
       - name: Setup Dafny
         uses: dafny-lang/setup-dafny-action@v1
