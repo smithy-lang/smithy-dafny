@@ -18,21 +18,28 @@ BUILD SUCCESSFUL in 507ms
 $ # run help
 $ ./gradlew run --args="-h"
 usage: smithy-polymorph
- --aws-sdk                 <optional> generate AWS SDK-style API and shims
- -d,--dependent-model <arg>   directory for dependent model file[s]
-                              (.smithy format)
- -h,--help                    print help message
- -m,--model <arg>             directory for the model file[s] (.smithy
-                              format). Also the Dafny output directory.
- -n,--namespace <arg>         smithy namespace to generate code for, such
-                              as 'com.foo'
- --output-dafny            <optional> generate Dafny code
- --include-dafny           <optional> include file for the Dafny generated model
-                            Required if generating Dafny code
- --output-dotnet <arg>     <optional> output directory for generated
-                           .NET files
- --output-java <arg>       <optional> output directory for generated
-                           Java files
+    --aws-sdk                       <optional> generate AWS SDK-style API
+                                    and shims
+ -d,--dependent-model <arg>         directory for dependent model file[s]
+                                    (.smithy format)
+ -h,--help                          print help message
+    --include-dafny <arg>           <optional> file to be include in the
+                                    Dafny model file
+ -m,--model <arg>                   directory for the model file[s]
+                                    (.smithy format). Also the Dafny
+                                    output directory.
+ -n,--namespace <arg>               smithy namespace to generate code for,
+                                    such as 'com.foo'
+    --output-dafny
+    --output-dotnet <arg>           <optional> output directory for
+                                    generated .NET files
+    --output-java <arg>             <optional> output directory for
+                                    generated Java files
+    --wrapped-local-service <arg>    <optional> generate wrapped codegen
+                                    and shims for an existing local
+                                    service. The argument is the path to
+                                    output Dafny. This MUST be in the
+                                    `Model` directory of the project.
 
 
 BUILD SUCCESSFUL in 839ms

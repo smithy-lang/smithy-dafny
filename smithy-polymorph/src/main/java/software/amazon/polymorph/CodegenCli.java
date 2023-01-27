@@ -219,11 +219,8 @@ public class CodegenCli {
             .build())
           .addOption(Option.builder()
             .longOpt("wrapped-local-service")
-            .desc("""
-<optional> generate wrapped codegen and shims for an existing local service
-This argument takes the path to output the wrapped Dafny types file.
-            """)
-            .numberOfArgs(1)
+            .desc(" <optional> generate wrapped codegen and shims for an existing local service. The argument is the path to output Dafny. This MUST be in the `Model` directory of the project.")
+            .hasArg()
             .build())
           .addOption(Option.builder()
             .longOpt("output-dafny")
