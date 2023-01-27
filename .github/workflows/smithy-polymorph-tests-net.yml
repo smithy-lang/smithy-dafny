@@ -23,6 +23,8 @@ jobs:
         run: |
           git config --global core.longpaths true
 
+      - uses: actions/checkout@v2
+
       - name: Setup Dafny
         uses: dafny-lang/setup-dafny-action@v1.4.0
         with:
@@ -32,12 +34,6 @@ jobs:
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: ${{ matrix.dotnet-version }}
-
-      - name: Debug Download Dependencies 
-        working-directory: ./${{ matrix.testSuite }}
-        shell: bash
-        run: |
-          ls -al
 
       - name: Download Dependencies 
         working-directory: ./${{ matrix.testSuite }}
