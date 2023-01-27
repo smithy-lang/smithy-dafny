@@ -1,0 +1,10 @@
+# .NET Test Results
+**/TestResults
+
+# Dafny Generated .NET
+**/ImplementationFromDafny.cs
+**/TestsFromDafny.cs
+
+# .NET Artifacts
+**/bin
+**/obj
