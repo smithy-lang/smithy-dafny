@@ -81,6 +81,7 @@ public class ServiceCodegenTest {
         assertEquals(expectedTokens, actualTokens);
     }
 
+// Removed 2023-01-27 for output-local-service-test
 //    @Test
 //    public void testGenerateStructureClass() {
 //        final Model model = TestModel.setupModel((builder, modelAssembler) -> modelAssembler.addUnparsedModel("test.smithy", """
