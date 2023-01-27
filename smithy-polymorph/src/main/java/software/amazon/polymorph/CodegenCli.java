@@ -219,15 +219,14 @@ public class CodegenCli {
             .build())
           .addOption(Option.builder()
             .longOpt("wrapped-local-service")
-            .desc("<optional> generate wrapped codegen and shims for an existing local service")
+            .desc("""
+<optional> generate wrapped codegen and shims for an existing local service
+This argument takes the path to output the wrapped Dafny types file.
+            """)
+            .numberOfArgs(1)
             .build())
           .addOption(Option.builder()
             .longOpt("output-dafny")
-            .desc("<optional> generate Dafny code")
-              // These 2 arguments are required
-              // to get the optional argument to work
-            .optionalArg(true)
-            .numberOfArgs(1)
             .build())
           .addOption(Option.builder()
             .longOpt("include-dafny")
@@ -295,16 +294,9 @@ public class CodegenCli {
                 // This simplifies the process of including the various Dafny files.
                 // However, in the case of a wrapped module
                 // the Dafny file MUST be in a different location.
-                final String customDafnyPath = commandLine.getOptionValue("output-dafny");
-                if (customDafnyPath != null && !commandLine.hasOption("wrapped-local-service")) {
-                    throw new ParseException("A custom Dafny output is only supported for wrapped local services.");
-                }
-                if (customDafnyPath == null && commandLine.hasOption("wrapped-local-service")) {
-                    throw new ParseException("A custom Dafny output is required for wrapped local services.");
-                }
-                outputDafny = customDafnyPath == null
-                        ? Optional.of(modelPath)
-                        : Optional.of(Paths.get(customDafnyPath));
+                outputDafny = commandLine.hasOption("wrapped-local-service")
+                        ? Optional.of(Paths.get(commandLine.getOptionValue("wrapped-local-service")))
+                        : Optional.of(modelPath);
 
                 if (!commandLine.hasOption("include-dafny")) {
                     // if outputting dafny, an include file is required
