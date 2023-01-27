@@ -155,6 +155,16 @@ public class DafnyApiCodegen {
     }
 
     public Map<Path, TokenTree> generateWrappedAbstractServiceModule(final Path outputDafny) {
+        if (serviceShape.hasTrait(ServiceTrait.class)) {
+            // TODO move the AWS SDK branch over here.
+            // It should be the case that the default --aws-sdk
+            // is for building a Dafny AWS SDK,
+            // not wrapping an existing one.
+            throw new IllegalStateException("Wrapped AWS service only supported in --aws-sdk");
+        } else if (!serviceShape.hasTrait(LocalServiceTrait.class)) {
+            throw new IllegalStateException("Service does not have supported trait");
+        }
+      
         final String namespace = serviceShape.getId().getNamespace();
         final String typesModuleName = DafnyNameResolver.dafnyTypesModuleForNamespace(namespace);
         final Path path = Path.of("%sWrapped.dfy".formatted(typesModuleName));
@@ -182,24 +192,10 @@ public class DafnyApiCodegen {
             )
             .lineSeparated();
 
-        if (serviceShape.hasTrait(ServiceTrait.class)) {
-            // TODO move the AWS SDK branch over here.
-            // It should be the case that the default --aws-sdk
-            // is for building a Dafny AWS SDK,
-            // not wrapping an existing one.
-            throw new IllegalStateException("Wrapped AWS service only supported in --aws-sdk");
-        } else if (serviceShape.hasTrait(LocalServiceTrait.class)) {
-            final TokenTree fullCode = TokenTree
-                .of(
-                    includeDirectives,
-                    generateAbstractWrappedLocalService(serviceShape)
-                )
-                .lineSeparated();
-            return Map.of(path, fullCode);
-        } else {
-            throw new IllegalStateException("Service does not have supported trait");
-        }
-
+        final TokenTree fullCode = TokenTree.of(
+                includeDirectives, generateAbstractWrappedLocalService(serviceShape)
+                ).lineSeparated();
+        return Map.of(path, fullCode);
     }
 
     private Optional<TokenTree> generateCodeForShape(final Shape shape) {
