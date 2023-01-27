@@ -34,9 +34,9 @@ import java.util.stream.Stream;
  * Note: this code generator does not aim to generate "nicely-formatted" code. That responsibility is left to external code formatters.
  */
 public class ServiceCodegen {
-    private final Model model;
-    private final ServiceShape serviceShape;
-    private final DotNetNameResolver nameResolver;
+    protected final Model model;
+    protected final ServiceShape serviceShape;
+    protected final DotNetNameResolver nameResolver;
 
     public ServiceCodegen(final Model model, final ServiceShape serviceShape) {
         this.model = model;
@@ -45,8 +45,19 @@ public class ServiceCodegen {
         this.nameResolver = new DotNetNameResolver(model, serviceShape);
     }
 
+    public ServiceCodegen(
+      final Model model,
+      final ServiceShape serviceShape,
+      final DotNetNameResolver nameResolver
+    ) {
+        this.model = model;
+
+        this.serviceShape = serviceShape;
+        this.nameResolver = nameResolver;
+    }
+
     // TODO: get smarter about imports. maybe just fully qualify all model-agnostic types?
-    private final static List<String> UNCONDITIONAL_IMPORTS = List.of(
+    protected final static List<String> UNCONDITIONAL_IMPORTS = List.of(
             "System"
     );
 
@@ -137,11 +148,10 @@ public class ServiceCodegen {
                     codeByPath.put(unionClassPath, structureCode.prepend(prelude));
                 });
 
-
         return codeByPath;
     }
 
-    boolean shouldGenerateNativeWrapper(ShapeId shapeId) {
+    protected boolean shouldGenerateNativeWrapper(ShapeId shapeId) {
         ResourceShape resourceShape = model.expectShape(shapeId, ResourceShape.class);
         return resourceShape.hasTrait(ExtendableTrait.class);
     }
@@ -284,7 +294,10 @@ public class ServiceCodegen {
             body = TokenTree.of("return this.%s != null;".formatted(
                     nameResolver.classFieldForStructureMember(memberShape)));
         }
-        return TokenTree.of("internal bool", methodName, "()").append(body.braced());
+        // The correctness of these types are improved by making this public
+        // Then customers in native runtimes can use these methods to integrate
+        // the state of this structure
+        return TokenTree.of("public bool", methodName, "()").append(body.braced());
     }
 
     /**

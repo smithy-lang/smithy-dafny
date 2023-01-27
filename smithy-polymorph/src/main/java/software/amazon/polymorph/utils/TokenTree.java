@@ -69,6 +69,10 @@ public class TokenTree {
         return TokenTree.of(Token.of("namespace"), namespace, this.braced());
     }
 
+    public TokenTree namespaced(final String namespace) {
+        return TokenTree.of(Token.of("namespace"), Token.of(namespace), this.braced());
+    }
+
     public TokenTree prependSeperated(final TokenTree separator) {
         Stream<TokenTree> separatedTokens = children
           .stream()
