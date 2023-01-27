@@ -86,6 +86,10 @@ public class DafnyApiCodegen {
                 // Some models are only informational,
                 // and do not point to any generated Dafny.
                 .stream()
+                // nameResolve.dependentModels() filters dependentModelPaths
+                // to only the relevant dependent models.
+                // Some models are only informational,
+                // and do not point to any generated Dafny.
                 .map(d -> modelPath
                   .relativize(d.modelPath().resolve("../src/Index.dfy"))
                 )
@@ -164,31 +168,37 @@ public class DafnyApiCodegen {
         } else if (!serviceShape.hasTrait(LocalServiceTrait.class)) {
             throw new IllegalStateException("Service does not have supported trait");
         }
-
+      
         final String namespace = serviceShape.getId().getNamespace();
         final String typesModuleName = DafnyNameResolver.dafnyTypesModuleForNamespace(namespace);
         final Path path = Path.of("%sWrapped.dfy".formatted(typesModuleName));
+
         // A smithy model may reference a model in a different package.
         // In which case we need to include it.
-        final TokenTree includeDirectives = TokenTree.of(
-                Stream
-                        .concat(
-                                Stream.of(
-                                        modelPath.relativize(includeDafnyFile),
-                                        outputDafny.relativize(modelPath.resolve("../src/Index.dfy"))
-                                ),
-                                nameResolver
-                                        .dependentModels()
-                                        .stream()
-                                        .map(d -> modelPath.relativize(d.modelPath().resolve("../src/Index.dfy")))
-                                        .map(Path::toString)
+        final TokenTree includeDirectives = TokenTree
+            .of(Stream
+                .concat(
+                    Stream
+                        .of(
+                            modelPath.relativize(includeDafnyFile),
+                            outputDafny.relativize(modelPath.resolve("../src/Index.dfy"))
+                        ),
+                    nameResolver
+                        .dependentModels()
+                        .stream()
+                        .map(d -> modelPath
+                            .relativize(d.modelPath().resolve("../src/Index.dfy"))
                         )
-                        .map(p -> "include \"" + p + "\"")
-                        .map(Token::of)
-        ).lineSeparated();
+                        .map(Path::toString)
+                )
+                .map(p -> "include \"" + p + "\"")
+                .map(Token::of)
+            )
+            .lineSeparated();
+
         final TokenTree fullCode = TokenTree.of(
                 includeDirectives, generateAbstractWrappedLocalService(serviceShape)
-        ).lineSeparated();
+                ).lineSeparated();
         return Map.of(path, fullCode);
     }
 

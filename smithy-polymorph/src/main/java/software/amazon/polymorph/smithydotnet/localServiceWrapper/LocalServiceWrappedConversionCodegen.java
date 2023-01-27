@@ -3,19 +3,12 @@
 
 package software.amazon.polymorph.smithydotnet.localServiceWrapper;
 
-import software.amazon.polymorph.smithydafny.DafnyNameResolver;
-import software.amazon.polymorph.smithydotnet.AwsSdkDotNetNameResolver;
-import software.amazon.polymorph.smithydotnet.DotNetNameResolver;
 import software.amazon.polymorph.smithydotnet.TypeConversionCodegen;
 import software.amazon.polymorph.traits.ReferenceTrait;
-import software.amazon.polymorph.utils.Token;
+import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.*;
-import software.amazon.smithy.model.traits.ErrorTrait;
-
-import java.util.Set;
-import java.util.stream.Stream;
 
 import static software.amazon.polymorph.smithydotnet.DotNetNameResolver.typeConverterForShape;
 import static software.amazon.polymorph.smithydotnet.TypeConversionDirection.FROM_DAFNY;
@@ -137,11 +130,10 @@ public class LocalServiceWrappedConversionCodegen extends TypeConversionCodegen 
      */
     private Boolean shouldWrapLocalResource(final Shape shape)
     {
-        if (DafnyNameResolver.isDependantModuleType(shape, nameResolver.namespaceForService())) {
+        if (ModelUtils.isReferenceDependantModuleType(shape, nameResolver.namespaceForService())) {
             final ShapeId resourceShapeId = shape.expectTrait(ReferenceTrait.class).getReferentId();
             return nameResolver.namespaceForShapeId(serviceShape.getId())
               .equalsIgnoreCase(resourceShapeId.getNamespace());
-
         } else {
             return false;
         }

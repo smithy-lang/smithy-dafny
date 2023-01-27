@@ -357,13 +357,4 @@ public record DafnyNameResolver(
     public static String modifiesInternalConfig() {
         return "ModifiesInternalConfig";
     }
-
-    public static Boolean isDependantModuleType(final Shape shape, final String namespace) {
-        if (shape.hasTrait(ReferenceTrait.class)) {
-            final ShapeId referentShapeId = ModelUtils.getReferentShapeId(shape);
-            return !namespace.equalsIgnoreCase(shape.getId().getNamespace());
-        } else {
-            return false;
-        }
-    }
 }

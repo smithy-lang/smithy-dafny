@@ -15,7 +15,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import software.amazon.polymorph.smithydafny.DafnyNameResolver;
 import software.amazon.polymorph.traits.*;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.polymorph.utils.Token;
@@ -1060,7 +1059,7 @@ public class TypeConversionCodegen {
         // from a dependent module
         // leave that as the _only_ public converter
         // and this converter is internal.
-        final boolean isDependantModuleType = DafnyNameResolver.isDependantModuleType(shape, nameResolver.namespaceForService());
+        final boolean isDependantModuleType = ModelUtils.isReferenceDependantModuleType(shape, nameResolver.namespaceForService());
         final String visibility = shape.hasTrait(ReferenceTrait.class) && !isDependantModuleType
                 ? "public"
                 : "internal";
