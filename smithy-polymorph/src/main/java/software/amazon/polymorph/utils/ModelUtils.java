@@ -265,4 +265,26 @@ public class ModelUtils {
         final ReferenceTrait referenceTrait = shape.getTrait(ReferenceTrait.class).get();
         return referenceTrait.getReferentId();
     }
+
+    /*
+        A reference type will point to a resource or service.
+        Regardless of where this referent is
+        the structure with the reference trait dictates
+        where the native wrapper types will exist.
+        If a Smithy namespace exports a service,
+        that namespace may not export a reference type
+        to support passing that service as an argument.
+        Therefore, a namespace that needs to accept such a service
+        needs to create a reference type that points to this service.
+
+        This is why the function check to see if the shapes has a reference trait,
+        but then compares the shapes' namespace and not the referent shape.
+     */
+    public static Boolean isReferenceDependantModuleType(final Shape shape, final String namespace) {
+        if (shape.hasTrait(ReferenceTrait.class)) {
+            return !namespace.equalsIgnoreCase(shape.getId().getNamespace());
+        } else {
+            return false;
+        }
+    }
 }
