@@ -31,9 +31,9 @@ This is how a project would look like (not all sub-driectories be present).
 ├── src
 │   ├── Index.dfy
 │   └── SimpleStringImpl.dfy
+|   ├── WrappedSimpleStringImpl.dfy
 └── test
     ├── SimpleStringImplTest.dfy
-    ├── WrappedSimpleStringImpl.dfy
     └── WrappedSimpleStringTest.dfy
 ```
 

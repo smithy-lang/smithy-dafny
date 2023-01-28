@@ -55,8 +55,4 @@ jobs:
         working-directory: ./${{ matrix.library }}
         shell: bash
         run: |
-          if [ "$RUNNER_OS" == "macOS" ]; then
-            make test_net_mac_intel
-          else
-            make test_net
-          fi
+          make test_net

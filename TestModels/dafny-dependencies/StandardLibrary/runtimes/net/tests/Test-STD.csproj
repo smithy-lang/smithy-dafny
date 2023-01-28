@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <RootNamespace>StdTest</RootNamespace>
+    <RootNamespace>Test-STD</RootNamespace>
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>disable</Nullable>
     <TargetFrameworks>net6.0</TargetFrameworks>
@@ -19,7 +19,7 @@
     <!-- Work around for dafny-lang/dafny/issues/1951; remove once resolved -->
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
 
-    <ProjectReference Include="../Std.csproj" />
+    <ProjectReference Include="../STD.csproj" />
     <Compile Include="TestsFromDafny.cs" />
   </ItemGroup>
 
