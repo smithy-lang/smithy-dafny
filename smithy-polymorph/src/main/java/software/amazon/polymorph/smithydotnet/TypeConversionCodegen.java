@@ -54,7 +54,11 @@ public class TypeConversionCodegen {
                 new DotNetNameResolver(model, serviceShape));
     }
 
-    public TypeConversionCodegen(final Model model, final ServiceShape serviceShape, final DotNetNameResolver nameResolver) {
+    public TypeConversionCodegen(
+      final Model model,
+      final ServiceShape serviceShape,
+      final DotNetNameResolver nameResolver
+    ) {
         this.model = model;
         this.serviceShape = serviceShape;
         this.nameResolver = nameResolver;
@@ -77,7 +81,7 @@ public class TypeConversionCodegen {
                 .lineSeparated()
                 .braced();
         final TokenTree conversionClass = conversionClassBody
-                .prepend(TokenTree.of("internal static class", TYPE_CONVERSION_CLASS_NAME))
+                .prepend(TokenTree.of("public static class", TYPE_CONVERSION_CLASS_NAME))
                 .namespaced(Token.of(getTypeConversionNamespace()));
         return Map.of(TYPE_CONVERSION_CLASS_PATH, conversionClass.prepend(prelude));
     }
@@ -631,7 +635,13 @@ public class TypeConversionCodegen {
 
         final AwsSdkTypeConversionCodegen awsSdkTypeConversionCodegen =
                 new AwsSdkTypeConversionCodegen(model, serviceShape);
-        return awsSdkTypeConversionCodegen.generateAwsSdkServiceReferenceStructureConverter(structureShape);
+        final AwsSdkTypeConversionCodegen.DafnyConverterBodies dafnyConverterBodies = awsSdkTypeConversionCodegen
+                .generateAwsSdkServiceReferenceStructureConverter(structureShape);
+        return buildConverterFromMethodBodies(
+                structureShape,
+                dafnyConverterBodies.fromDafnyBody(),
+                dafnyConverterBodies.toDafnyBody()
+        );
     }
 
     /**
@@ -999,9 +1009,6 @@ public class TypeConversionCodegen {
         return buildConverterFromMethodBodies(errorShape, fromDafnyBody, toDafnyBody);
     }
 
-
-
-
     /**
      * Build a {@link TypeConverter} by surrounding the given type converter method bodies with appropriate method
      * signatures. Each method body should assume the sole argument (the value to convert) is named {@code value}.
@@ -1011,13 +1018,15 @@ public class TypeConversionCodegen {
         final TokenTree fromDafnyBody,
         final TokenTree toDafnyBody
     ) {
-        final String dafnyType = nameResolver.dafnyTypeForShape(shape.getId());
+
+        final ShapeId id = shape.getId();
+        final String dafnyType = nameResolver.dafnyTypeForShape(id);
         String type;
-        if (StringUtils.equals(nameResolver.baseTypeForShape(shape.getId()),
+        if (StringUtils.equals(nameResolver.baseTypeForShape(id),
                 AwsSdkDotNetNameResolver.DDB_ATTRIBUTE_VALUE_MODEL_NAMESPACE)) {
             type = AwsSdkDotNetNameResolver.DDB_V2_ATTRIBUTE_VALUE;
         } else {
-            type = nameResolver.baseTypeForShape(shape.getId());
+            type = nameResolver.baseTypeForShape(id);
         }
 
         if (StringUtils.equals(type, "Amazon.DynamoDBv2.IAmazonDynamoDBv2")){
@@ -1034,17 +1043,74 @@ public class TypeConversionCodegen {
             type = "%sException".formatted(type);
         }
         final String cSharpType = type;
+
+
+
+        // TODO It may be more stable to have _all_ converters be public.
+        // Right now the expectation is that a reference to a resource
+        // is the _only_ way to share types.
+        // By making them all public the surface area is increased.
+
+        // For any module that takes a dependency on this module,
+        // they will need to wrap and unwrap reference types.
+        // This is more controlled than exposing
+        // the NativeWrapper and the Dafny wrapped type.
+        // However, if this type is already exposed
+        // from a dependent module
+        // leave that as the _only_ public converter
+        // and this converter is internal.
+        final boolean isDependantModuleType = ModelUtils.isReferenceDependantModuleType(shape, nameResolver.namespaceForService());
+        final String visibility = shape.hasTrait(ReferenceTrait.class) && !isDependantModuleType
+                ? "public"
+                : "internal";
+
         final String fromDafnyConverterName = typeConverterForShape(shape.getId(), FROM_DAFNY);
         final TokenTree fromDafnyConverterSignature = TokenTree.of(
-                "public static", cSharpType, fromDafnyConverterName, "(%s value)".formatted(dafnyType));
-        final TokenTree fromDafnyConverterMethod = TokenTree.of(fromDafnyConverterSignature, fromDafnyBody.braced());
+                "%s static".formatted(visibility), cSharpType, fromDafnyConverterName, "(%s value)".formatted(dafnyType));
 
         final String toDafnyConverterName = typeConverterForShape(shape.getId(), TO_DAFNY);
         final TokenTree toDafnyConverterSignature = TokenTree.of(
-                "public static", dafnyType, toDafnyConverterName, "(%s value)".formatted(cSharpType));
-        final TokenTree toDafnyConverterMethod = TokenTree.of(toDafnyConverterSignature, toDafnyBody.braced());
+                "%s static".formatted(visibility), dafnyType, toDafnyConverterName, "(%s value)".formatted(cSharpType));
 
-        return new TypeConverter(shape.getId(), fromDafnyConverterMethod, toDafnyConverterMethod);
+        if (!isDependantModuleType) {
+            final TokenTree fromDafnyConverterMethod = TokenTree.of(fromDafnyConverterSignature, fromDafnyBody.braced());
+            final TokenTree toDafnyConverterMethod = TokenTree.of(toDafnyConverterSignature, toDafnyBody.braced());
+            return new TypeConverter(shape.getId(), fromDafnyConverterMethod, toDafnyConverterMethod);
+        } else {
+
+            // This module is referencing a type from another module.
+            // These referenced types are not be internal to this module.
+            // Therefore, we need to call the conversion in the dependent module.
+            final String namespaceForReferent = nameResolver.namespaceForShapeId(id);
+            final TokenTree fromDafnyBodyOverride = TokenTree
+                .of(
+                    "// This is converting a reference type in a dependant module.",
+                    "// Therefore it defers to the dependant module for conversion",
+                    "return %s.TypeConversion.%s(value);"
+                        .formatted(
+                            namespaceForReferent,
+                            fromDafnyConverterName
+                        )
+
+                )
+                .lineSeparated();
+
+            final TokenTree toDafnyBodyOverride = TokenTree
+                .of(
+                    "// This is converting a reference type in a dependant module.",
+                    "// Therefore it defers to the dependant module for conversion",
+                    "return %s.TypeConversion.%s(value);"
+                        .formatted(
+                            namespaceForReferent,
+                            toDafnyConverterName
+                        )
+                )
+                .lineSeparated();
+
+            final TokenTree fromDafnyConverterMethod = TokenTree.of(fromDafnyConverterSignature, fromDafnyBodyOverride.braced());
+            final TokenTree toDafnyConverterMethod = TokenTree.of(toDafnyConverterSignature, toDafnyBodyOverride.braced());
+            return new TypeConverter(shape.getId(), fromDafnyConverterMethod, toDafnyConverterMethod);
+        }
     }
 
     /**
