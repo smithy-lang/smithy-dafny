@@ -6,14 +6,14 @@ polymorph_dafny :
 	--output-dafny \
 	--include-dafny $(DAFNY_ROOT)/../../dafny-dependencies/StandardLibrary/src/Index.dfy \
 	--model $(DAFNY_ROOT)/Model \
-	--dependent-model $(DAFNY_ROOT)/../../dafny-dependencies/StandardLibrary/model \
+	--dependent-model $(DAFNY_ROOT)/../../dafny-dependencies/Model \
 	--namespace simple.types.boolean"; \
 	./gradlew run --args="\
 	--output-dafny \
 	--output-local-service-test $(DAFNY_ROOT)/Model \
 	--include-dafny $(DAFNY_ROOT)/../../dafny-dependencies/StandardLibrary/src/Index.dfy \
 	--model $(DAFNY_ROOT)/Model \
-	--dependent-model $(DAFNY_ROOT)/../../dafny-dependencies/StandardLibrary/model \
+	--dependent-model $(DAFNY_ROOT)/../../dafny-dependencies/Model \
 	--namespace simple.types.boolean"; \
 
 polymorph_net :
@@ -23,7 +23,7 @@ polymorph_net :
 	--include-dafny $(DAFNY_ROOT)/../../dafny-dependencies/StandardLibrary/src/Index.dfy \
 	--output-dotnet $(DAFNY_ROOT)/runtimes/net/Generated/ \
 	--model $(DAFNY_ROOT)/Model \
-	--dependent-model $(DAFNY_ROOT)/../../dafny-dependencies/StandardLibrary/model \
+	--dependent-model $(DAFNY_ROOT)/../../dafny-dependencies/Model \
 	--namespace simple.types.boolean"; \
 	./gradlew run --args="\
 	--output-dafny \
@@ -31,7 +31,7 @@ polymorph_net :
 	--include-dafny $(DAFNY_ROOT)/../../dafny-dependencies/StandardLibrary/src/Index.dfy \
 	--output-dotnet $(DAFNY_ROOT)/runtimes/net/Generated/Wrapped \
 	--model $(DAFNY_ROOT)/Model \
-	--dependent-model $(DAFNY_ROOT)/../../dafny-dependencies/StandardLibrary/model \
+	--dependent-model $(DAFNY_ROOT)/../../dafny-dependencies/Model \
 	--namespace simple.types.boolean"; \
 
 	# Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
