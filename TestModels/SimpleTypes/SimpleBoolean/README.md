@@ -16,7 +16,7 @@ make transpile_net
 
 3. Generate the executable in the .NET
 ```
-cd runtimes/net/tests/ && dotnet test
+make test_net
 ```
 
 3. Execute the tests
