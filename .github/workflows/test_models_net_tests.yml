@@ -16,7 +16,7 @@ jobs:
           TestModels/SimpleTypes/SimpleBoolean,
         ]
         dotnet-version: [ '6.0.x' ]
-        os: [ ubuntu-latest, macos-latest ]
+        os: [ windows-latest, ubuntu-latest, macos-latest ]
     runs-on: ${{ matrix.os }}
     permissions:
       id-token: write
@@ -47,9 +47,23 @@ jobs:
 
       # Java DafnyRuntime is not published to maven,
       # so manually download a nightly build for 3.10.0 and grab it from there.
-      - name: Locally Cache Java DafnyRuntime
+      - name: Locally Cache Java DafnyRuntime (wget)
+        if: matrix.os != 'windows-latest'
         run: |
           wget https://github.com/dafny-lang/dafny/releases/download/nightly/dafny-nightly-2022-12-02-edab6cc-x64-osx-10.14.2.zip 
+          unzip dafny-nightly-2022-12-02-edab6cc-x64-osx-10.14.2.zip 
+          mvn -B -ntp install:install-file \
+          -Dfile=dafny/DafnyRuntime.jar \
+          -DgroupId=dafny.lang \
+          -DartifactId=DafnyRuntime \
+          -Dversion=3.10.0 \
+          -DgeneratePom=true \
+          -Dpackaging=jar
+
+      - name: Locally Cache Java DafnyRuntime (curl)
+        if: matrix.os == 'windows-latest'
+        run: |
+          curl https://github.com/dafny-lang/dafny/releases/download/nightly/dafny-nightly-2022-12-02-edab6cc-x64-osx-10.14.2.zip 
           unzip dafny-nightly-2022-12-02-edab6cc-x64-osx-10.14.2.zip 
           mvn -B -ntp install:install-file \
           -Dfile=dafny/DafnyRuntime.jar \
