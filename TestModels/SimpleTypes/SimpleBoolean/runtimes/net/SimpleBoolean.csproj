@@ -25,7 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../../../DafnyLib/std/runtimes/net/STD.csproj" />
+    <ProjectReference Include="../../../../dafny-dependencies/StandardLibrary/runtimes/net/STD.csproj" />
   </ItemGroup>
 
   <!--
