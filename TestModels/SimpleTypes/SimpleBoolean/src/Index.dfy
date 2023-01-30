@@ -23,8 +23,7 @@ module {:extern "Dafny.Simple.Types.Boolean" } SimpleBoolean refines AbstractSim
     this.config := config;
     History := new ISimpleTypesBooleanClientCallHistory();
     Modifies := Operations.ModifiesInternalConfig(config) + {History};
-
- }
+   }
  }
 
 }

@@ -92,11 +92,6 @@ test_net:
 		--project runtimes/net/tests/ \
 		--framework net6.0
 
-test_net_mac_intel:
-	DYLD_LIBRARY_PATH="/usr/local/opt/openssl@1.1/lib" dotnet run \
-		--project runtimes/net/tests/ \
-		--framework net6.0
-
 setup_net:
 	dotnet restore runtimes/net/
 	
