@@ -53,8 +53,8 @@ structure GetResourceDataInput {
   longValue: long,
   floatValue: float,
   doubleValue: double,
-  bigIntegerValue: bigInteger,
-  bigDecimalValue: bigDecimal,
+//  bigIntegerValue: bigInteger,
+//  bigDecimalValue: bigDecimal,
   timestampValue: timestamp,
 }
 
@@ -68,8 +68,8 @@ structure GetResourceDataOutput {
   longValue: long,
   floatValue: float,
   doubleValue: double,
-  bigIntegerValue: bigInteger,
-  bigDecimalValue: bigDecimal,
+//  bigIntegerValue: bigInteger,
+//  bigDecimalValue: bigDecimal,
   timestampValue: timestamp,
 }
 
