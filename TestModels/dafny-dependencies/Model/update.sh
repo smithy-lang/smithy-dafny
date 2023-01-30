@@ -26,5 +26,5 @@ for DIRECTORY in "${MDL_SRC_DIRS[@]}"; do
 done
 printf "Pulled Files for ESDK's model  and staged for commit. \n"
 printf "Suggest executing: \n"
-COMMIT_MSG="chore(tests): Update ESDK STD to $ESDK_COMMIT_SHA"
+COMMIT_MSG="chore(tests): Update ESDK's Model to $ESDK_COMMIT_SHA"
 echo "git commit -m \"$COMMIT_MSG\""
