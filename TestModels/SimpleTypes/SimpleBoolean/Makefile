@@ -66,7 +66,7 @@ transpile_implementation_net:
 		-useRuntimeLib \
 		-out runtimes/net/ImplementationFromDafny \
 		./src/Index.dfy \
-		-library:../../DafnyLib/std/src/Index.dfy
+		-library:../../dafny-dependencies/StandardLibrary/src/Index.dfy \
 
 
 transpile_test_net:
@@ -83,7 +83,7 @@ transpile_test_net:
 		-library:src/Index.dfy
 
 transpile_net_dependencies:
-	$(MAKE) -C ../../DafnyLib/std transpile_implementation_net
+	$(MAKE) -C ../../dafny-dependencies/StandardLibrary/src/Index.dfy \
 
 test_net:
 	dotnet run \
