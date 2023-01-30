@@ -21,7 +21,7 @@ for DAFNY_FILE in "${MDL_SRC_FILES[@]}"; do
   git add "$DAFNY_FILE"
 done
 for DIRECTORY in "${MDL_SRC_DIRS[@]}"; do
-  cp -r "$ESDK_PATH/model/$DIRECTORY" "$DIRECTORY"
+  cp -r "$ESDK_PATH/model/$DIRECTORY" "."
   git add "$DIRECTORY"
 done
 printf "Pulled Files for ESDK's model  and staged for commit. \n"
