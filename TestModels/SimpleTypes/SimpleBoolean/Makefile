@@ -9,11 +9,12 @@ polymorph_dafny :
 	--dependent-model $(DAFNY_ROOT)/../../dafny-dependencies/StandardLibrary/model \
 	--namespace simple.types.boolean"; \
 	./gradlew run --args="\
-	--output-dafny $(DAFNY_ROOT)/Model \
+	--output-dafny \
+	--output-local-service-test $(DAFNY_ROOT)/Model \
 	--include-dafny $(DAFNY_ROOT)/../../dafny-dependencies/StandardLibrary/src/Index.dfy \
 	--model $(DAFNY_ROOT)/Model \
 	--dependent-model $(DAFNY_ROOT)/../../dafny-dependencies/StandardLibrary/model \
-	--namespace simple.types.boolean --wrapped-local-service"; \
+	--namespace simple.types.boolean"; \
 
 polymorph_net :
 	cd ../../../smithy-polymorph;\
@@ -25,12 +26,13 @@ polymorph_net :
 	--dependent-model $(DAFNY_ROOT)/../../dafny-dependencies/StandardLibrary/model \
 	--namespace simple.types.boolean"; \
 	./gradlew run --args="\
-	--output-dafny $(DAFNY_ROOT)/Model \
+	--output-dafny \
+	--output-local-service-test $(DAFNY_ROOT)/Model \
 	--include-dafny $(DAFNY_ROOT)/../../dafny-dependencies/StandardLibrary/src/Index.dfy \
 	--output-dotnet $(DAFNY_ROOT)/runtimes/net/Generated/Wrapped \
 	--model $(DAFNY_ROOT)/Model \
 	--dependent-model $(DAFNY_ROOT)/../../dafny-dependencies/StandardLibrary/model \
-	--namespace simple.types.boolean --wrapped-local-service"; \
+	--namespace simple.types.boolean"; \
 
 	# Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
