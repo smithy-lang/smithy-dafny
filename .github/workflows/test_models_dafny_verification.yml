@@ -50,7 +50,7 @@ jobs:
       - name: Locally Cache Java DafnyRuntime (curl)
         if: matrix.os == 'windows-latest'
         run: |
-          curl https://github.com/dafny-lang/dafny/releases/download/nightly/dafny-nightly-2022-12-02-edab6cc-x64-osx-10.14.2.zip 
+          curl -L -O https://github.com/dafny-lang/dafny/releases/download/nightly/dafny-nightly-2022-12-02-edab6cc-x64-osx-10.14.2.zip 
           unzip dafny-nightly-2022-12-02-edab6cc-x64-osx-10.14.2.zip 
           mvn -B -ntp install:install-file \
           -Dfile=dafny/DafnyRuntime.jar \
