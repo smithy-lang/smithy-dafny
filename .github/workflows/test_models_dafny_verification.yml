@@ -36,7 +36,7 @@ jobs:
         shell: bash
         working-directory: ./${{ matrix.library }}
         run: |
-          make generate_polymorph
+          make polymorph_dafny
           # This works because `node` is installed by default on GHA runners
           CORES=$(node -e 'console.log(os.cpus().length)')
           make verify CORES=$CORES
