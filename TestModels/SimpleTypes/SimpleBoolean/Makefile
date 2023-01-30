@@ -85,7 +85,7 @@ transpile_test_net:
 		-library:src/Index.dfy
 
 transpile_net_dependencies:
-	$(MAKE) -C ../../dafny-dependencies/StandardLibrary/src/Index.dfy \
+	$(MAKE) -C ../../dafny-dependencies/StandardLibrary transpile_implementation_net \
 
 test_net:
 	dotnet run \
