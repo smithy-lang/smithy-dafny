@@ -4,12 +4,16 @@ module  SimpleBooleanImplTest {
     import SimpleBoolean
     import opened SimpleTypesBooleanTypes
     import opened Wrappers
-    method{:test} GetBoolean(){
+    method{:test} GetBooleanTrue(){
         var client :- expect SimpleBoolean.SimpleBoolean();
-        TestGetBoolean(client);
+        TestGetBooleanTrue(client);
+    }
+    method{:test} GetBooleanFalse(){
+        var client :- expect SimpleBoolean.SimpleBoolean();
+        TestGetBooleanFalse(client);
     }
 
-    method TestGetBoolean(client: ISimpleTypesBooleanClient)
+    method TestGetBooleanTrue(client: ISimpleTypesBooleanClient)
       requires client.ValidState()
       modifies client.Modifies
       ensures client.ValidState()
@@ -17,6 +21,17 @@ module  SimpleBooleanImplTest {
         var ret := client.GetBoolean(SimpleBoolean.Types.GetBooleanInput(value:= Some(true)));
         expect ret.Success?;
         expect ret.value.value.UnwrapOr(false) == true;
+        print ret;
+    }
+
+    method TestGetBooleanFalse(client: ISimpleTypesBooleanClient)
+      requires client.ValidState()
+      modifies client.Modifies
+      ensures client.ValidState()
+    {
+        var ret := client.GetBoolean(SimpleBoolean.Types.GetBooleanInput(value:= Some(false)));
+        expect ret.Success?;
+        expect ret.value.value.UnwrapOr(true) == false;
         print ret;
     }
 }

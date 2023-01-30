@@ -5,8 +5,12 @@ module WrappedSimpleTypesBooleanTest {
     import WrappedSimpleTypesBooleanService
     import SimpleBooleanImplTest
     import opened Wrappers
-    method{:test} GetBoolean() {
+    method{:test} GetBooleanTrue() {
         var client :- expect WrappedSimpleTypesBooleanService.WrappedSimpleBoolean();
-        SimpleBooleanImplTest.TestGetBoolean(client);
+        SimpleBooleanImplTest.TestGetBooleanTrue(client);
+    }
+    method{:test} GetBooleanFalse() {
+        var client :- expect WrappedSimpleTypesBooleanService.WrappedSimpleBoolean();
+        SimpleBooleanImplTest.TestGetBooleanFalse(client);
     }
 }
