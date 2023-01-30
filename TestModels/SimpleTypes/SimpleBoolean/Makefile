@@ -4,28 +4,32 @@ polymorph_dafny :
 	cd ../../../smithy-polymorph;\
 	./gradlew run --args="\
 	--output-dafny \
-	--include-dafny $(DAFNY_ROOT)/../../DafnyLib/std/src/Index.dfy \
+	--include-dafny $(DAFNY_ROOT)/../../dafny-dependencies/StandardLibrary/src/Index.dfy \
 	--model $(DAFNY_ROOT)/Model \
+	--dependent-model $(DAFNY_ROOT)/../../dafny-dependencies/StandardLibrary/model \
 	--namespace simple.types.boolean"; \
 	./gradlew run --args="\
 	--output-dafny $(DAFNY_ROOT)/Model \
-	--include-dafny $(DAFNY_ROOT)/../../DafnyLib/std/src/Index.dfy \
+	--include-dafny $(DAFNY_ROOT)/../../dafny-dependencies/StandardLibrary/src/Index.dfy \
 	--model $(DAFNY_ROOT)/Model \
+	--dependent-model $(DAFNY_ROOT)/../../dafny-dependencies/StandardLibrary/model \
 	--namespace simple.types.boolean --wrapped-local-service"; \
 
 polymorph_net :
 	cd ../../../smithy-polymorph;\
 	./gradlew run --args="\
 	--output-dafny \
-	--include-dafny $(DAFNY_ROOT)/../../DafnyLib/std/src/Index.dfy \
+	--include-dafny $(DAFNY_ROOT)/../../dafny-dependencies/StandardLibrary/src/Index.dfy \
 	--output-dotnet $(DAFNY_ROOT)/runtimes/net/Generated/ \
 	--model $(DAFNY_ROOT)/Model \
+	--dependent-model $(DAFNY_ROOT)/../../dafny-dependencies/StandardLibrary/model \
 	--namespace simple.types.boolean"; \
 	./gradlew run --args="\
 	--output-dafny $(DAFNY_ROOT)/Model \
-	--include-dafny $(DAFNY_ROOT)/../../DafnyLib/std/src/Index.dfy \
+	--include-dafny $(DAFNY_ROOT)/../../dafny-dependencies/StandardLibrary/src/Index.dfy \
 	--output-dotnet $(DAFNY_ROOT)/runtimes/net/Generated/Wrapped \
 	--model $(DAFNY_ROOT)/Model \
+	--dependent-model $(DAFNY_ROOT)/../../dafny-dependencies/StandardLibrary/model \
 	--namespace simple.types.boolean --wrapped-local-service"; \
 
 	# Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
