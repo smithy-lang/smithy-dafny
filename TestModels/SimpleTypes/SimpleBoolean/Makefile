@@ -1,23 +1,32 @@
 DAFNY_ROOT := $(shell pwd)
 
-generate_polymorph :
-	pushd .; \
-	cd ../../smithy-polymorph;\
+polymorph_dafny :
+	cd ../../../smithy-polymorph;\
 	./gradlew run --args="\
 	--output-dafny \
-	--include-dafny $(DAFNY_ROOT)/../DafnyLib/std/src/Index.dfy \
-	--output-dotnet $(DAFNY_ROOT)/runtimes/net/Generated/ \
+	--include-dafny $(DAFNY_ROOT)/../../DafnyLib/std/src/Index.dfy \
 	--model $(DAFNY_ROOT)/Model \
-	--dependent-model $(DAFNY_ROOT)/../DafnyLib/model \
 	--namespace simple.types.boolean"; \
 	./gradlew run --args="\
 	--output-dafny $(DAFNY_ROOT)/Model \
-	--include-dafny $(DAFNY_ROOT)/../DafnyLib/std/src/Index.dfy \
+	--include-dafny $(DAFNY_ROOT)/../../DafnyLib/std/src/Index.dfy \
+	--model $(DAFNY_ROOT)/Model \
+	--namespace simple.types.boolean --wrapped-local-service"; \
+
+polymorph_net :
+	cd ../../../smithy-polymorph;\
+	./gradlew run --args="\
+	--output-dafny \
+	--include-dafny $(DAFNY_ROOT)/../../DafnyLib/std/src/Index.dfy \
+	--output-dotnet $(DAFNY_ROOT)/runtimes/net/Generated/ \
+	--model $(DAFNY_ROOT)/Model \
+	--namespace simple.types.boolean"; \
+	./gradlew run --args="\
+	--output-dafny $(DAFNY_ROOT)/Model \
+	--include-dafny $(DAFNY_ROOT)/../../DafnyLib/std/src/Index.dfy \
 	--output-dotnet $(DAFNY_ROOT)/runtimes/net/Generated/Wrapped \
 	--model $(DAFNY_ROOT)/Model \
-	--dependent-model $(DAFNY_ROOT)/../DafnyLib/model \
 	--namespace simple.types.boolean --wrapped-local-service"; \
-	popd;\
 
 	# Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
@@ -53,7 +62,7 @@ transpile_implementation_net:
 		-useRuntimeLib \
 		-out runtimes/net/ImplementationFromDafny \
 		./src/Index.dfy \
-		-library:../DafnyLib/std/src/Index.dfy
+		-library:../../DafnyLib/std/src/Index.dfy
 
 
 transpile_test_net:
@@ -70,7 +79,7 @@ transpile_test_net:
 		-library:src/Index.dfy
 
 transpile_net_dependencies:
-	$(MAKE) -C ../DafnyLib/std transpile_implementation_net
+	$(MAKE) -C ../../DafnyLib/std transpile_implementation_net
 
 test_net:
 	dotnet run \
