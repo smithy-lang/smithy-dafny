@@ -1,4 +1,4 @@
-DAFNY_ROOT := $(shell pwd)
+DAFNY_ROOT := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
 
 polymorph_dafny :
 	cd ../../../smithy-polymorph;\
