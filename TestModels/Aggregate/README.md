@@ -1,6 +1,6 @@
 # SimpleString
 
-This project implements the smithy type [String](https://smithy.io/2.0/spec/simple-types.html#string) and the associated operations in `dafny`. This is then transpiled to a target runtime, and each tests are executed - either as CI actions or manually.
+This project implements all the smithy [SimpleTypes](https://smithy.io/2.0/spec/simple-types.html) and the associated operations in `dafny`. This is then transpiled to a target runtime, and each tests are executed - either as CI actions or manually.
 
 ## Build
 ### .NET

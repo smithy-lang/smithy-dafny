@@ -1,4 +1,4 @@
-include "WrappedSimpleAggregateImpl.dfy"
+include "../src/WrappedSimpleAggregateImpl.dfy"
 include "SimpleAggregateImplTest.dfy"
 
 module WrappedSimpleTypesStringTest {

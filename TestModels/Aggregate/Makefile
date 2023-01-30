@@ -1,25 +1,23 @@
 DAFNY_ROOT := $(shell pwd)
 
 generate_polymorph :
-	git checkout scchatur/SimpleTypes #TODO: This is only required till PR https://github.com/awslabs/polymorph/pull/86 is merged, and should be removed afterwards.
 	pushd .; \
 	cd ../../smithy-polymorph;\
 	./gradlew run --args="\
 	--output-dafny \
-	--include-dafny $(DAFNY_ROOT)/../DafnyLib/std/src/Index.dfy \
+	--include-dafny $(DAFNY_ROOT)/../dafny-dependencies/StandardLibrary/src/Index.dfy \
 	--output-dotnet $(DAFNY_ROOT)/runtimes/net/Generated/ \
 	--model $(DAFNY_ROOT)/Model \
-	--dependent-model $(DAFNY_ROOT)/../DafnyLib/model \
+	--dependent-model $(DAFNY_ROOT)/../dafny-dependencies/Model \
 	--namespace simple.aggregate"; \
 	./gradlew run --args="\
 	--output-dafny $(DAFNY_ROOT)/Model \
-	--include-dafny $(DAFNY_ROOT)/../DafnyLib/std/src/Index.dfy \
+	--include-dafny $(DAFNY_ROOT)/../dafny-dependencies/StandardLibrary/src/Index.dfy \
 	--output-dotnet $(DAFNY_ROOT)/runtimes/net/Generated/Wrapped \
 	--model $(DAFNY_ROOT)/Model \
-	--dependent-model $(DAFNY_ROOT)/../DafnyLib/model \
-	--namespace simple.aggregate --wrapped-local-service"; \
+	--dependent-model $(DAFNY_ROOT)/../dafny-dependencies/Model \
+	--namespace simple.aggregate --output-local-service-test $(DAFNY_ROOT)/Model"; \
 	popd;\
-	git checkout SimpleAggregate #TODO: This is only required till PR https://github.com/awslabs/polymorph/pull/86 is merged, and should be removed afterwards.
 
 	# Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
@@ -55,7 +53,7 @@ transpile_implementation_net:
 		-useRuntimeLib \
 		-out runtimes/net/ImplementationFromDafny \
 		./src/Index.dfy \
-		-library:../DafnyLib/std/src/Index.dfy
+		-library:../dafny-dependencies/StandardLibrary/src/Index.dfy
 
 
 transpile_test_net:
@@ -72,15 +70,10 @@ transpile_test_net:
 		-library:src/Index.dfy
 
 transpile_net_dependencies:
-	$(MAKE) -C ../DafnyLib/std transpile_implementation_net
+	$(MAKE) -C ../dafny-dependencies/StandardLibrary/ transpile_implementation_net
 
 test_net:
 	dotnet run \
-		--project runtimes/net/tests/ \
-		--framework net6.0
-
-test_net_mac_intel:
-	DYLD_LIBRARY_PATH="/usr/local/opt/openssl@1.1/lib" dotnet run \
 		--project runtimes/net/tests/ \
 		--framework net6.0
 
