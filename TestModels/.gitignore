@@ -14,3 +14,4 @@
 
 # Generated Dafny
 *Types.dfy
+**/*TypesWrapped.dfy
