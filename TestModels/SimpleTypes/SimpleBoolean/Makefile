@@ -1,3 +1,7 @@
+# Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+CORES=2
 DAFNY_ROOT := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
 
 polymorph_dafny :
@@ -33,11 +37,6 @@ polymorph_net :
 	--model $(DAFNY_ROOT)/Model \
 	--dependent-model $(DAFNY_ROOT)/../../dafny-dependencies/Model \
 	--namespace simple.types.boolean"; \
-
-	# Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
-# SPDX-License-Identifier: Apache-2.0
-
-CORES=2
 
 verify:
 	dafny \

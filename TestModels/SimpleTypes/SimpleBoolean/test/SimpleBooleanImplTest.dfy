@@ -18,9 +18,8 @@ module  SimpleBooleanImplTest {
       modifies client.Modifies
       ensures client.ValidState()
     {
-        var ret := client.GetBoolean(SimpleBoolean.Types.GetBooleanInput(value:= Some(true)));
-        expect ret.Success?;
-        expect ret.value.value.UnwrapOr(false) == true;
+        var ret :- expect client.GetBoolean(SimpleBoolean.Types.GetBooleanInput(value:= Some(true)));
+        expect ret.value.UnwrapOr(false) == true;
         print ret;
     }
 
@@ -29,9 +28,8 @@ module  SimpleBooleanImplTest {
       modifies client.Modifies
       ensures client.ValidState()
     {
-        var ret := client.GetBoolean(SimpleBoolean.Types.GetBooleanInput(value:= Some(false)));
-        expect ret.Success?;
-        expect ret.value.value.UnwrapOr(true) == false;
+        var ret :- expect client.GetBoolean(SimpleBoolean.Types.GetBooleanInput(value:= Some(false)));
+        expect ret.value.UnwrapOr(true) == false;
         print ret;
     }
 }
