@@ -65,14 +65,20 @@ jobs:
           arguments: publishToMavenLocal
           build-root-directory: dafny-java-conversion
 
-      - name: Compile ${{ matrix.library }} implementation
+      - name: Generate Polymorph Dafny and Dotnet code
         shell: bash
         working-directory: ./${{ matrix.library }}
         run: |
           make polymorph_net
+
+      - name: Compile ${{ matrix.library }} implementation
+        shell: bash
+        working-directory: ./${{ matrix.library }}
+        run: |
           # This works because `node` is installed by default on GHA runners
           CORES=$(node -e 'console.log(os.cpus().length)')
           make transpile_net CORES=$CORES
+          
       - name: Test ${{ matrix.library }}
         working-directory: ./${{ matrix.library }}
         shell: bash
