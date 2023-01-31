@@ -52,14 +52,20 @@ jobs:
           arguments: publishToMavenLocal
           build-root-directory: dafny-java-conversion
 
-      - name: Verify ${{ matrix.library }} Dafny code
+      - name: Generate Polymorph Wrapper Dafny code
         shell: bash
         working-directory: ./${{ matrix.library }}
         run: |
           make polymorph_dafny
+
+      - name: Verify ${{ matrix.library }} Dafny code
+        shell: bash
+        working-directory: ./${{ matrix.library }}
+        run: |
           # This works because `node` is installed by default on GHA runners
           CORES=$(node -e 'console.log(os.cpus().length)')
           make verify CORES=$CORES
+
       - name: Check solver resource use
         shell: bash
         working-directory: ./${{ matrix.library }}
