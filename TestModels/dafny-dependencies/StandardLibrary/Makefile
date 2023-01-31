@@ -3,6 +3,12 @@
 
 CORES=2
 
+polymorph_dafny :
+	echo "Skipping polymorph_dafny for StandardLibrary"
+
+polymorph_net :
+	echo "Skipping polymorph_net for StandardLibrary"
+
 verify:
 	dafny \
 		-vcsCores:$(CORES) \
