@@ -14,6 +14,7 @@ jobs:
         library: [
           TestModels/dafny-dependencies/StandardLibrary, # This stores current Polymorph dependencies that all TestModels depend on
           TestModels/SimpleTypes/SimpleString,
+          TestModels/SimpleTypes/SimpleBoolean,
         ]
         dotnet-version: [ '6.0.x' ]
         os: [ ubuntu-latest ]
@@ -61,19 +62,35 @@ jobs:
           arguments: publishToMavenLocal
           build-root-directory: dafny-java-conversion
 
-      - name: Generate Polymorph Wrapper Dafny code
-        shell: bash
-        working-directory: ./${{ matrix.library }}
-        run: |
-          if [ ${{ matrix.library }} == TestModels/dafny-dependencies/StandardLibrary ]; then
-            echo "Skipping polymorph wrapper since it is not required for dafny-dependencies"
-          else
-            make generate_polymorph
-          fi
-
       - name: Download Dependencies
         working-directory: ./${{ matrix.library }}
         run: make setup_net
+
+      # Java DafnyRuntime is not published to maven,
+      # so manually download a nightly build for 3.10.0 and grab it from there.
+      - name: Locally Cache Java DafnyRuntime
+        run: |
+          wget https://github.com/dafny-lang/dafny/releases/download/nightly/dafny-nightly-2022-12-02-edab6cc-x64-osx-10.14.2.zip 
+          unzip dafny-nightly-2022-12-02-edab6cc-x64-osx-10.14.2.zip 
+          mvn -B -ntp install:install-file \
+          -Dfile=dafny/DafnyRuntime.jar \
+          -DgroupId=dafny.lang \
+          -DartifactId=DafnyRuntime \
+          -Dversion=3.10.0 \
+          -DgeneratePom=true \
+          -Dpackaging=jar
+
+      - name: Setup dafny-java-conversion
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: publishToMavenLocal
+          build-root-directory: dafny-java-conversion
+
+      - name: Generate Polymorph Dafny and Dotnet code
+        shell: bash
+        working-directory: ./${{ matrix.library }}
+        run: |
+          make polymorph_net
 
       - name: Compile ${{ matrix.library }} implementation
         shell: bash
@@ -82,6 +99,7 @@ jobs:
           # This works because `node` is installed by default on GHA runners
           CORES=$(node -e 'console.log(os.cpus().length)')
           make transpile_net CORES=$CORES
+          
       - name: Test ${{ matrix.library }}
         working-directory: ./${{ matrix.library }}
         shell: bash

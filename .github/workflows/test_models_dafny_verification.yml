@@ -14,6 +14,7 @@ jobs:
         library: [
           TestModels/dafny-dependencies/StandardLibrary, # This stores current Polymorph dependencies that all TestModels depend on
           TestModels/SimpleTypes/SimpleString,
+          TestModels/SimpleTypes/SimpleBoolean,
         ]
         os: [ ubuntu-latest ]
     runs-on: ${{ matrix.os }}
@@ -36,8 +37,8 @@ jobs:
       # so manually download a nightly build for 3.10.0 and grab it from there.
       - name: Locally Cache Java DafnyRuntime
         run: |
-          wget https://github.com/dafny-lang/dafny/releases/download/nightly/dafny-nightly-2022-12-02-edab6cc-x64-osx-10.14.2.zip
-          unzip dafny-nightly-2022-12-02-edab6cc-x64-osx-10.14.2.zip
+          wget https://github.com/dafny-lang/dafny/releases/download/nightly/dafny-nightly-2022-12-02-edab6cc-x64-osx-10.14.2.zip 
+          unzip dafny-nightly-2022-12-02-edab6cc-x64-osx-10.14.2.zip 
           mvn -B -ntp install:install-file \
           -Dfile=dafny/DafnyRuntime.jar \
           -DgroupId=dafny.lang \
@@ -56,11 +57,7 @@ jobs:
         shell: bash
         working-directory: ./${{ matrix.library }}
         run: |
-          if [ ${{ matrix.library }} == TestModels/dafny-dependencies/StandardLibrary ]; then
-            echo "Skipping polymorph wrapper since it is not required for dafny-dependencies"
-          else
-            make generate_polymorph
-          fi
+          make polymorph_dafny
 
       - name: Verify ${{ matrix.library }} Dafny code
         shell: bash
@@ -69,6 +66,7 @@ jobs:
           # This works because `node` is installed by default on GHA runners
           CORES=$(node -e 'console.log(os.cpus().length)')
           make verify CORES=$CORES
+
       - name: Check solver resource use
         shell: bash
         working-directory: ./${{ matrix.library }}

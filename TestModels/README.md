@@ -1,5 +1,5 @@
 # TestModels
- This package contains various models which is used to form a Test Bed for Dafny-Polymorph-Native layer.
+ This package contains various groups of models which is used to form a Test Bed for Dafny-Polymorph-Native layer.
  The idea is that we want an invariant test bed with `Write Once, Test Anywhere`
  with the `Anyhwere` part targeting different runtimes that dafny supports.
  This will give us confidence in our test cases across runtimes,
@@ -12,29 +12,9 @@ Anything which is to be re-used across all projects will go inside the `TestMode
 
 ```
 .
-├── DafnyLib //This has standard dafny libraries used across projects
-├── README.md //This README.md
-└── String //This is a project directory
-```
-
-This is how a project would look like (not all sub-driectories be present).
-```
-.
-├── Makefile
-├── Model
-│   ├── SimpleTypesStringTypes.dfy
-│   ├── SimpleTypesStringTypesWrapped.dfy
-│   └── String.smithy
-├── README.md
-├── runtimes
-│   └── net
-├── src
-│   ├── Index.dfy
-│   └── SimpleStringImpl.dfy
-|   ├── WrappedSimpleStringImpl.dfy
-└── test
-    ├── SimpleStringImplTest.dfy
-    └── WrappedSimpleStringTest.dfy
+├── dafny-dependencies //This has standard dafny libraries used across projects
+├── SimpleTypes //This holds project directories for simple types
+└── README.md //This README.md
 ```
 
 ## Getting Started
