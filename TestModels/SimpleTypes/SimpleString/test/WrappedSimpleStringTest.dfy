@@ -8,5 +8,7 @@ module WrappedSimpleTypesStringTest {
     method{:test} GetString() {
         var client :- expect WrappedSimpleTypesStringService.WrappedSimpleString();
         SimpleStringImplTest.TestGetString(client);
+        SimpleStringImplTest.TestGetStringSingleValue(client);
+        SimpleStringImplTest. TestGetStringUTF8(client);
     }
 }
