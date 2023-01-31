@@ -24,27 +24,24 @@ module SimpleBlobImpl refines AbstractSimpleTypesBlobOperations  {
       // Input is index-accessible, which means input is seq-like rather than a set
       var inputElement := input.value.value[i];
       // "Input can be interpreted as any valid uint8"
-      expect inputElement >= 0x0 || inputElement < 0x0;
+      expect inputElement >= 0x0;
     }
 
-    // We have validated "input is a seq-like type containing elements that can be read as uint8s"
     // If input has 0 items, we don't care about validating properties on nonexistent items
 
     var res := GetBlobOutput(value := input.value);
-
     expect res.value.Some?;
 
-    // Validate seq<uint8> type properties on input
-    // Input can contain items: "input has a measurable length of at least 0"
+    // Validate seq<uint8> type properties on output
+    // Output can contain items: "output has a measurable length of at least 0"
     expect |res.value.value| >= 0;
-    // If input has at least one item, then:
 
-    // Validate uint8 type properties on input values
+    // Validate uint8 type properties on output values
     for i := 0 to |res.value.value| {
-      // Input is index-accessible, which means input is seq-like rather than a set
+      // Output is index-accessible, which means input is seq-like rather than a set
       var resElement := res.value.value[i];
-      // "Input can be interpreted as any valid uint8"
-      expect resElement >= 0x0 || resElement < 0x0;
+      // "Output can be interpreted as any valid uint8"
+      expect resElement >= 0x0;
     }
     
     // We have validated "res is a seq-like type containing elements that can be read as uint8s"
