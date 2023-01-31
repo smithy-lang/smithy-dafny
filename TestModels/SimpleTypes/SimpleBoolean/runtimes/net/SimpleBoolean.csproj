@@ -1,11 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <RootNamespace>STD</RootNamespace>
-    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>SimpleBoolean</RootNamespace>
+    <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>disable</Nullable>
-    <LangVersion>10</LangVersion>
     <TargetFrameworks>net6.0</TargetFrameworks>
+    <LangVersion>10</LangVersion>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
   </PropertyGroup>
 
@@ -22,6 +22,10 @@
     <Compile Include="Extern/**/*.cs" />
     <Compile Include="Generated/**/*.cs" />
     <Compile Include="ImplementationFromDafny.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../../../dafny-dependencies/StandardLibrary/runtimes/net/STD.csproj" />
   </ItemGroup>
 
   <!--
