@@ -11,3 +11,6 @@
 
 # JetBrains
 **/.idea/
+
+# Generated Dafny
+*Types.dfy
