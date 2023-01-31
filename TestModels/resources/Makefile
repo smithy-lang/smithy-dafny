@@ -8,7 +8,8 @@ polymorph_dafny:
 	gradle -p ../../smithy-polymorph run --args="\
 	  --output-dafny \
       --include-dafny $(PWD)/../dafny-dependencies/StandardLibrary/src/Index.dfy \
-      --model $(PWD)/../resources.smithy \
+      --model $(PWD)/../ \
       --dependent-model $(PWD)/../dafny-dependencies/Model \
       --namespace simple.resources";
+
 
