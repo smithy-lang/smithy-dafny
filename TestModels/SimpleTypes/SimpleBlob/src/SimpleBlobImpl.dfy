@@ -13,42 +13,31 @@ module SimpleBlobImpl refines AbstractSimpleTypesBlobOperations  {
  method GetBlob ( config: InternalConfig,  input: GetBlobInput )
  returns (output: Result<GetBlobOutput, Error>) {
     expect input.value.Some?;
-
-    // Validate seq<uint8> type properties on input
-    // Input can contain items: "input has a measurable length of at least 0"
-    expect |input.value.value| >= 0;
-    // If input has at least one item, then:
-
-    // Validate uint8 type properties on input values
-    for i := 0 to |input.value.value| {
-      // Input is index-accessible, which means input is seq-like rather than a set
-      var inputElement := input.value.value[i];
-      // "Input can be interpreted as any valid uint8"
-      expect inputElement >= 0x0;
-    }
-
-    // If input has 0 items, we don't care about validating properties on nonexistent items
+    ValidateBlobType(input.value.value);
 
     var res := GetBlobOutput(value := input.value);
     expect res.value.Some?;
-
-    // Validate seq<uint8> type properties on output
-    // Output can contain items: "output has a measurable length of at least 0"
-    expect |res.value.value| >= 0;
-
-    // Validate uint8 type properties on output values
-    for i := 0 to |res.value.value| {
-      // Output is index-accessible, which means input is seq-like rather than a set
-      var resElement := res.value.value[i];
-      // "Output can be interpreted as any valid uint8"
-      expect resElement >= 0x0;
-    }
-    
-    // We have validated "res is a seq-like type containing elements that can be read as uint8s"
+    ValidateBlobType(res.value.value);
 
     // Validate values: input is the same as the output
     expect res.value.value == input.value.value;
 
     return Success(res);
  }
+
+ method ValidateBlobType(input: seq<UInt.uint8>)
+ {
+    // Validate seq<uint8> type properties on input
+    // Input can contain items: "input has a measurable length of at least 0"
+    expect |input| >= 0;
+
+    // Validate uint8 type properties on input values
+    for i := 0 to |input| {
+      // Input is index-accessible, which means input is seq-like rather than a set
+      var inputElement := input[i];
+      // "Input can be interpreted as any valid uint8"
+      expect inputElement >= 0x0;
+    }
+    // If input does not contain any values, we aren't interested in validating per-element properties on it
+  }
 }
