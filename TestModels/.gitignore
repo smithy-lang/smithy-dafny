@@ -13,5 +13,5 @@
 **/.idea/
 
 # Generated Dafny
-*Types.dfy
+**/*Types.dfy
 **/*TypesWrapped.dfy
