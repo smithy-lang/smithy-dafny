@@ -28,7 +28,7 @@ This is the file directory for each project (example for SimpleString). Not all 
 |   |   ├── test
 |   |   |   └── SimpleStringTest.csproj
 │   |   └── Extern
-|   |   |   └── WrappedSimpleStringService.cs
+|   |       └── WrappedSimpleStringService.cs
 ├── src
 │   ├── Index.dfy
 │   ├── SimpleStringImpl.dfy
