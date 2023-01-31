@@ -8,7 +8,7 @@ on:
 
 jobs:
   gradle-build:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-java@v3
@@ -25,8 +25,8 @@ jobs:
       # so manually download a nightly build for 3.10.0 and grab it from there.
       - name: Locally Cache Java DafnyRuntime
         run: |
-          wget https://github.com/dafny-lang/dafny/releases/download/nightly/dafny-nightly-2022-12-02-edab6cc-x64-osx-10.14.2.zip 
-          unzip dafny-nightly-2022-12-02-edab6cc-x64-osx-10.14.2.zip 
+          wget https://github.com/dafny-lang/dafny/releases/download/nightly/dafny-nightly-2022-12-02-edab6cc-x64-ubuntu-16.04.zip
+          unzip dafny-nightly-2022-12-02-edab6cc-x64-ubuntu-16.04.zip
           mvn -B -ntp install:install-file \
           -Dfile=dafny/DafnyRuntime.jar \
           -DgroupId=dafny.lang \
