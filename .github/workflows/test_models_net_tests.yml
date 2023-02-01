@@ -13,6 +13,7 @@ jobs:
       matrix:
         library: [
           TestModels/dafny-dependencies/StandardLibrary, # This stores current Polymorph dependencies that all TestModels depend on
+          TestModels/SimpleTypes/SimpleString,
           TestModels/SimpleTypes/SimpleBoolean,
           TestModels/SimpleTypes/SimpleBlob,
         ]
@@ -42,16 +43,19 @@ jobs:
         with:
           dotnet-version: ${{ matrix.dotnet-version }}
 
-      - name: Download Dependencies
-        working-directory: ./${{ matrix.library }}
-        run: make setup_net
+      # GitHub docs on problem matcher's ::
+      # https://github.com/actions/toolkit/blob/master/docs/commands.md#problem-matchers
+      - name: Disable setup-dotnet's problem matcher
+        # setup-dotnet's problem matcher:
+        # https://github.com/actions/setup-dotnet/blob/main/.github/csc.json
+        run: echo "::remove-matcher owner=csc::"
 
       # Java DafnyRuntime is not published to maven,
       # so manually download a nightly build for 3.10.0 and grab it from there.
       - name: Locally Cache Java DafnyRuntime
         run: |
-          wget https://github.com/dafny-lang/dafny/releases/download/nightly/dafny-nightly-2022-12-02-edab6cc-x64-osx-10.14.2.zip 
-          unzip dafny-nightly-2022-12-02-edab6cc-x64-osx-10.14.2.zip 
+          wget https://github.com/dafny-lang/dafny/releases/download/nightly/dafny-nightly-2022-12-02-edab6cc-x64-osx-10.14.2.zip
+          unzip dafny-nightly-2022-12-02-edab6cc-x64-osx-10.14.2.zip
           mvn -B -ntp install:install-file \
           -Dfile=dafny/DafnyRuntime.jar \
           -DgroupId=dafny.lang \
@@ -65,6 +69,10 @@ jobs:
         with:
           arguments: publishToMavenLocal
           build-root-directory: dafny-java-conversion
+
+      - name: Download Dependencies
+        working-directory: ./${{ matrix.library }}
+        run: make setup_net
 
       - name: Generate Polymorph Dafny and Dotnet code
         shell: bash
