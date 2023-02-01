@@ -55,4 +55,5 @@ module SimpleBlobImplTest {
     }
 
     // TODO: Add Blob tests using externs. See "Extern Testing" section in TestModels' README file.
+    // SIM: https://sim.amazon.com/issues/CrypTool-5082
 }
