@@ -10,6 +10,7 @@ Please add new project directories for simple types under the base `SimpleTypes`
 .
 ├── SimpleString //This is a project directory
 ├── SimpleBoolean
+├── SimpleShort
 ...
 └── README.md //This README.md
 ```
