@@ -66,26 +66,6 @@ jobs:
         working-directory: ./${{ matrix.library }}
         run: make setup_net
 
-      # Java DafnyRuntime is not published to maven,
-      # so manually download a nightly build for 3.10.0 and grab it from there.
-      - name: Locally Cache Java DafnyRuntime
-        run: |
-          wget https://github.com/dafny-lang/dafny/releases/download/nightly/dafny-nightly-2022-12-02-edab6cc-x64-osx-10.14.2.zip 
-          unzip dafny-nightly-2022-12-02-edab6cc-x64-osx-10.14.2.zip 
-          mvn -B -ntp install:install-file \
-          -Dfile=dafny/DafnyRuntime.jar \
-          -DgroupId=dafny.lang \
-          -DartifactId=DafnyRuntime \
-          -Dversion=3.10.0 \
-          -DgeneratePom=true \
-          -Dpackaging=jar
-
-      - name: Setup dafny-java-conversion
-        uses: gradle/gradle-build-action@v2
-        with:
-          arguments: publishToMavenLocal
-          build-root-directory: dafny-java-conversion
-
       - name: Generate Polymorph Dafny and Dotnet code
         shell: bash
         working-directory: ./${{ matrix.library }}
