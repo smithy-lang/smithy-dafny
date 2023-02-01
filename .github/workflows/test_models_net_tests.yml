@@ -42,6 +42,13 @@ jobs:
         with:
           dotnet-version: ${{ matrix.dotnet-version }}
 
+      # GitHub docs on problem matcher's ::
+      # https://github.com/actions/toolkit/blob/master/docs/commands.md#problem-matchers
+      - name: Disable setup-dotnet's problem matcher
+        # setup-dotnet's problem matcher:
+        # https://github.com/actions/setup-dotnet/blob/main/.github/csc.json
+        run: echo "::remove-matcher owner=csc::"
+
       # Java DafnyRuntime is not published to maven,
       # so manually download a nightly build for 3.10.0 and grab it from there.
       - name: Locally Cache Java DafnyRuntime
