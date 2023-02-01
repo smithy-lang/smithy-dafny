@@ -15,14 +15,14 @@ module {:extern "Dafny.Simple.Aggregate"} SimpleAggregate refines AbstractSimple
 
     class SimpleAggregateClient... {
         predicate ValidState()
-    {
-      && Operations.ValidInternalConfig?(config)
-      && Modifies == Operations.ModifiesInternalConfig(config) + {History}
-    }
- constructor(config: Operations.InternalConfig) {
-    this.config := config;
-    History := new ISimpleAggregateClientCallHistory();
-    Modifies := Operations.ModifiesInternalConfig(config) + {History};
- }
+        {
+            && Operations.ValidInternalConfig?(config)
+            && Modifies == Operations.ModifiesInternalConfig(config) + {History}
+        }
+        constructor(config: Operations.InternalConfig) {
+            this.config := config;
+            History := new ISimpleAggregateClientCallHistory();
+            Modifies := Operations.ModifiesInternalConfig(config) + {History};
+        }
     }
 }

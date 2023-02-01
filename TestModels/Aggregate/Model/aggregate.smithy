@@ -21,17 +21,17 @@ operation GetAggregate {
 structure GetAggregateInput {
   simpleStringList: SimpleStringList,
   structureList: StructureList,
-  SimpleStringMap: SimpleStringMap,
-  SimpleIntegerMap: SimpleIntegerMap,
-  very: Deeply,
+  simpleStringMap: SimpleStringMap,
+  simpleIntegerMap: SimpleIntegerMap,
+  nestedStructure: NestedStructure,
 }
 
 structure GetAggregateOutput {
   simpleStringList: SimpleStringList,
   structureList: StructureList,
-  SimpleStringMap: SimpleStringMap,
-  SimpleIntegerMap: SimpleIntegerMap,
-  very: Deeply,
+  simpleStringMap: SimpleStringMap,
+  simpleIntegerMap: SimpleIntegerMap,
+  nestedStructure: NestedStructure,
 }
 
 list SimpleStringList {
@@ -44,8 +44,8 @@ list StructureList {
 
 // More elements SHOULD be added
 structure StructureListElement {
-  s: String,
-  i: Integer,
+  stringValue: String,
+  integerValue: Integer,
 }
 
 map SimpleStringMap {
@@ -59,10 +59,10 @@ map SimpleIntegerMap {
   value: Integer,
 }
 
-structure Deeply {
-  nested: Nested
+structure NestedStructure {
+  stringStructure: StringStructure
 }
 
-structure Nested {
+structure StringStructure {
   value: String,
 }

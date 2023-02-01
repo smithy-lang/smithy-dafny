@@ -16,11 +16,19 @@ module SimpleAggregateImplTest {
       {
         var stringList := ["Test"];
         var simpleStringMap := map["Test1" := "Success"];
-        var structureList :=[StructureListElement(s := Some("Test2"), i := Some(2))];
+        var structureList :=[StructureListElement(stringValue := Some("Test2"), integerValue := Some(2))];
         var simpleIntegerMap := map["Test3" := 3];
-        var nested := Deeply(nested := Some(Nested(value := Some("Nest"))));
-        var ret := client.GetAggregate(GetAggregateInput(SimpleIntegerMap := Some(simpleIntegerMap), SimpleStringMap := Some(simpleStringMap), simpleStringList := Some(stringList), structureList := Some(structureList), very := Some(nested)));
-        expect ret.Success?;
-        print ret;
+        var nestedStructure := NestedStructure(stringStructure := Some(StringStructure(value := Some("Nested"))));
+        var ret :- expect client.GetAggregate(GetAggregateInput(simpleIntegerMap := Some(simpleIntegerMap),
+                                                                simpleStringMap := Some(simpleStringMap),
+                                                                simpleStringList := Some(stringList),
+                                                                structureList := Some(structureList),
+                                                                nestedStructure := Some(nestedStructure))
+                                                                );
+        expect ret.simpleStringList.UnwrapOr([]) == stringList;
+        expect ret.structureList.UnwrapOr([]) == structureList;
+        expect ret.simpleStringMap.UnwrapOr(map[]) == simpleStringMap;
+        expect ret.simpleIntegerMap.UnwrapOr(map[]) == simpleIntegerMap;
+        expect ret.nestedStructure.UnwrapOr(NestedStructure(stringStructure := Some(StringStructure(value := Some(""))))) == nestedStructure;
     }
 }

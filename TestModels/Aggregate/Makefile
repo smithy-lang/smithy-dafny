@@ -1,7 +1,25 @@
+# Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+CORES=2
 DAFNY_ROOT := $(shell pwd)
 
-generate_polymorph :
-	pushd .; \
+polymorph_dafny :
+	cd ../../smithy-polymorph;\
+	./gradlew run --args="\
+	--output-dafny \
+	--include-dafny $(DAFNY_ROOT)/../dafny-dependencies/StandardLibrary/src/Index.dfy \
+	--model $(DAFNY_ROOT)/Model \
+	--dependent-model $(DAFNY_ROOT)/../dafny-dependencies/Model \
+	--namespace simple.aggregate"; \
+	./gradlew run --args="\
+	--output-dafny $(DAFNY_ROOT)/Model \
+	--include-dafny $(DAFNY_ROOT)/../dafny-dependencies/StandardLibrary/src/Index.dfy \
+	--model $(DAFNY_ROOT)/Model \
+	--dependent-model $(DAFNY_ROOT)/../dafny-dependencies/Model \
+	--namespace simple.aggregate --output-local-service-test $(DAFNY_ROOT)/Model"; \
+
+polymorph_net:
 	cd ../../smithy-polymorph;\
 	./gradlew run --args="\
 	--output-dafny \
@@ -17,12 +35,6 @@ generate_polymorph :
 	--model $(DAFNY_ROOT)/Model \
 	--dependent-model $(DAFNY_ROOT)/../dafny-dependencies/Model \
 	--namespace simple.aggregate --output-local-service-test $(DAFNY_ROOT)/Model"; \
-	popd;\
-
-	# Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
-# SPDX-License-Identifier: Apache-2.0
-
-CORES=2
 
 verify:
 	dafny \
@@ -79,4 +91,3 @@ test_net:
 
 setup_net:
 	dotnet restore runtimes/net/
-	
