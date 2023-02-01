@@ -8,5 +8,6 @@ module WrappedSimpleTypesBlobTest {
     method{:test} GetBlob() {
         var client :- expect WrappedSimpleTypesBlobService.WrappedSimpleBlob();
         SimpleBlobImplTest.TestGetBlob(client);
+        SimpleBlobImplTest.TestGetBlobKnownValueTest(client);
     }
 }

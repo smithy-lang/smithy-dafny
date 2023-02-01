@@ -7,13 +7,18 @@ namespace simple.types.blob
 service SimpleTypesBlob {
   version: "2021-11-01",
   resources: [],
-  operations: [ GetBlob ],
+  operations: [ GetBlob, GetBlobKnownValueTest ],
   errors: [],
 }
 
 structure SimpleBlobConfig {}
 
 operation GetBlob {
+  input: GetBlobInput,
+  output: GetBlobOutput,
+}
+
+operation GetBlobKnownValueTest {
   input: GetBlobInput,
   output: GetBlobOutput,
 }
