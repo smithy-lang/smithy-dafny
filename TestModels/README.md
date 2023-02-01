@@ -58,7 +58,7 @@ It also serves to be referenced from testing files to avoid re-explaining the pu
 
 ### Known Value Tests
 
-The `input` variable some `GetType` functions are called with is not necessarily the same `input` that is referenced within this function.
+The `input` variable some `Get[Type]` functions are called with is not necessarily the same `input` that is referenced within this function.
 ex. The transpiled code may have copied `input` by value into this function, rather than passing it by reference.
 This is runtime-dependent behavior. 
 We cannot test the value of `input` from outside this function; it must be tested inside the implementation.
@@ -72,8 +72,8 @@ This method is used in conjunction with a single test that always passes in the 
 As a result, this `expect` validates that the `input` referenced within this function matches the expected Dafny-defined test vector.
 
 Since this requires a new implementation that always expects a particular input vector, we create a new function for this.
-This is usually called `GetTypeKnownValueTest`.
-Other than the single new `expect` statement, this function should be the same as `GetBlob`.
+This is usually called `Get[Type]KnownValueTest`.
+Other than the single new `expect` statement, this function should be the same as `Get[Type]`.
 
 ### Extern Testing
 
@@ -82,7 +82,7 @@ Runtimes often implement these sequences using array-like structures.
 These structures may only be a "view" of a portion of memory.
 However, there is a risk that this "view" is implemented incorrectly.
 
-For example, a Dafny blob of length 5 (|seq<uint8>| = 5) may be expected to be represented as an (ex.) JavaByteSequence of length 5.
+For example, a Dafny blob of length 5 (think `|seq<uint8>| = 5`) may be expected to be represented as an (ex.) Java ByteSequence of length 5.
 The JRE may have already allocated a large memory buffer and would expect to
 allocate memory from this buffer as needed.
 (This improves allocation speed performance.)
