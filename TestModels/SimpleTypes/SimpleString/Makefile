@@ -4,7 +4,22 @@
 DAFNY_ROOT := $(shell pwd)
 CORES=2
 
-generate_polymorph :
+polymorph_dafny :
+	cd ../../../smithy-polymorph;\
+	./gradlew run --args="\
+	--output-dafny \
+	--include-dafny $(DAFNY_ROOT)/../../dafny-dependencies/StandardLibrary/src/Index.dfy \
+	--model $(DAFNY_ROOT)/Model \
+	--dependent-model $(DAFNY_ROOT)/../../dafny-dependencies/Model \
+	--namespace simple.types.string"; \
+	./gradlew run --args="\
+	--output-dafny $(DAFNY_ROOT)/Model \
+	--include-dafny $(DAFNY_ROOT)/../../dafny-dependencies/StandardLibrary/src/Index.dfy \
+	--model $(DAFNY_ROOT)/Model \
+	--dependent-model $(DAFNY_ROOT)/../../dafny-dependencies/Model \
+	--namespace simple.types.string --output-local-service-test $(DAFNY_ROOT)/Model"; \
+
+polymorph_net :
 	cd ../../../smithy-polymorph;\
 	./gradlew run --args="\
 	--output-dafny \
