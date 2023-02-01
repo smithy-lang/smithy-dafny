@@ -23,8 +23,7 @@ module {:extern "Dafny.Simple.Types.Blob" } SimpleBlob refines AbstractSimpleTyp
     this.config := config;
     History := new ISimpleTypesBlobClientCallHistory();
     Modifies := Operations.ModifiesInternalConfig(config) + {History};
-
- }
+   }
  }
 
 }

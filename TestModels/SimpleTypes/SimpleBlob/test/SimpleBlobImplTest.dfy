@@ -1,6 +1,6 @@
 include "../src/Index.dfy"
 
-module  SimpleBlobImplTest {
+module SimpleBlobImplTest {
     import SimpleBlob
     import SimpleBlobImpl
     import StandardLibrary.UInt

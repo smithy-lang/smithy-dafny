@@ -7,9 +7,9 @@ module SimpleBlobImpl refines AbstractSimpleTypesBlobOperations  {
   {true}
   function ModifiesInternalConfig(config: InternalConfig) : set<object>
   {{}}
-   predicate GetBlobEnsuresPublicly(input: GetBlobInput, output: Result<GetBlobOutput, Error>) {
+  predicate GetBlobEnsuresPublicly(input: GetBlobInput, output: Result<GetBlobOutput, Error>) {
     true
-   }
+  }
  method GetBlob ( config: InternalConfig,  input: GetBlobInput )
  returns (output: Result<GetBlobOutput, Error>) {
     expect input.value.Some?;
