@@ -21,7 +21,8 @@ polymorph_dafny :
 	--dependent-model $(DAFNY_ROOT)/../../dafny-dependencies/Model \
 	--namespace simple.types.timestamp"; \
 
-# Note: This build target fails. polymorph.smithydotnet does not support generation for Timestamp types.
+# Note: This build target fails. It generates Dafny code using polymorph.smithydafny, which does not support generation
+#       for Timestamp types.
 polymorph_net :
 	cd ../../../smithy-polymorph;\
 	./gradlew run --args="\
