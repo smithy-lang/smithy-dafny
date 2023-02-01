@@ -10,7 +10,21 @@ module SimpleAggregateImpl refines AbstractSimpleAggregateOperations {
     predicate GetAggregateEnsuresPublicly(input: GetAggregateInput, output: Result<GetAggregateOutput, Error>) {
         true
     }
+    predicate GetAggregateKnownValueTestEnsuresPublicly(input: GetAggregateInput, output: Result<GetAggregateOutput, Error>) {
+        true
+    }
     method GetAggregate(config: InternalConfig, input: GetAggregateInput )
+    returns (output: Result<GetAggregateOutput, Error>) {
+        var res := GetAggregateOutput(simpleStringList := input.simpleStringList,
+                                        structureList := input.structureList,
+                                        simpleStringMap := input.simpleStringMap,
+                                        simpleIntegerMap := input.simpleIntegerMap,
+                                        nestedStructure := input.nestedStructure);
+        return Success(res);
+    }
+
+    // This method is only used for known-value testing. See "Known Value Tests" inside TestModels' README file.
+    method GetAggregateKnownValueTest(config: InternalConfig, input: GetAggregateInput )
     returns (output: Result<GetAggregateOutput, Error>) {
         ValidateInput(input);
         var res := GetAggregateOutput(simpleStringList := input.simpleStringList,
@@ -22,23 +36,11 @@ module SimpleAggregateImpl refines AbstractSimpleAggregateOperations {
     }
 
     method ValidateInput(input: GetAggregateInput) {
-        var stringList := input.simpleStringList.UnwrapOr([]);
-        expect |stringList| >= 0;
-        for i := 0 to |stringList| {
-            var inputElement := stringList[i];
-            expect "" <= inputElement;
-        }
-
-        var structureList := input.structureList.UnwrapOr([]);
-        expect |structureList| >= 0;
-        for i := 0 to |structureList| {
-            var inputElement := structureList[i];
-            expect "" <= inputElement.stringValue.UnwrapOr("");
-            expect 0 <= inputElement.integerValue.UnwrapOr(0) || 0 >= inputElement.integerValue.UnwrapOr(0);
-        }
-        var simpleStringMap := input.simpleStringMap.UnwrapOr(map[]);
-        expect |simpleStringMap| >= 0;
-        var simpleIntegerMap := input.simpleIntegerMap.UnwrapOr(map[]);
-        expect |simpleIntegerMap| >= 0;
+        expect input.simpleStringList.UnwrapOr([]) == ["Test"];
+        expect input.simpleStringMap.UnwrapOr(map[]) == map["Test1" := "Success"];
+        expect input.simpleIntegerMap.UnwrapOr(map[]) == map["Test3" := 3];
+        expect input.structureList.UnwrapOr([]) == [StructureListElement(stringValue := Some("Test2"), integerValue := Some(2))];
+        expect input.nestedStructure.UnwrapOr(NestedStructure(stringStructure := Some(StringStructure(value := Some("")))))
+            == NestedStructure(stringStructure := Some(StringStructure(value := Some("Nested"))));
     }
 }
