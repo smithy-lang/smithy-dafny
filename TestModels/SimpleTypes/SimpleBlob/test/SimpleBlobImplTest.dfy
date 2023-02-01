@@ -54,18 +54,5 @@ module SimpleBlobImplTest {
         print ret;
     }
 
-    // TODO: Add Blob tests using externs.
-    // 
-    // Runtimes often implement blobs using array-like structures. These structures may only be a "view" of a portion
-    //   of memory. However, there is a risk that this "view" is implemented incorrectly.
-    // For example, a Dafny blob of length 5 (|seq<uint8>| = 5) may be expected to be represented as an (ex.) Java
-    //   ByteSequence of length 5. The JRE may have already allocated a large memory buffer and would expect to
-    //   allocate memory from this buffer as needed. (This improves allocation speed performance.)
-    // However, if the Polymorph layer is incorrect, Polymorph may accidentally request the entire memory buffer,
-    //   rather than only 5 bytes. The problem is there is no way to verify whether this has happened from within the
-    //   Dafny layer. If Dafny has modelled itself correctly but the error is only detectable from inside the runtime,
-    //   Dafny does not understand how to interact with the generated code inside the runtime in a way to verify the
-    //   size of the blob (ByteSequence) is expected.
-    // The solution is to revisit this test suite after writing externs: https://sim.amazon.com/issues/CrypTool-4911
-    // We would write test suites using externs to validate the runtime code is behaving as expected.
+    // TODO: Add Blob tests using externs. See "Extern Testing" section in TestModels' README file.
 }
