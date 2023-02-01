@@ -18,6 +18,11 @@ operation GetBigInteger {
   output: GetBigIntegerOutput,
 }
 
+operation GetBigIntegerKnownValueTest {
+  input: GetBigIntegerInput,
+  output: GetBigIntegerOutput,
+}
+
 structure GetBigIntegerInput {
   value: BigInteger
 }
