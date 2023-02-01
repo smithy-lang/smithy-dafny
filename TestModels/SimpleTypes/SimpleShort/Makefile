@@ -4,6 +4,7 @@
 CORES=2
 DAFNY_ROOT := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
 
+# Note: This build target fails. smithydafny does not support generation for Short types.
 polymorph_dafny :
 	cd ../../../smithy-polymorph;\
 	./gradlew run --args="\
@@ -20,6 +21,7 @@ polymorph_dafny :
 	--dependent-model $(DAFNY_ROOT)/../../dafny-dependencies/Model \
 	--namespace simple.types.short"; \
 
+# Note: This build target fails. smithydotnet does not support generation for Short types.
 polymorph_net :
 	cd ../../../smithy-polymorph;\
 	./gradlew run --args="\
