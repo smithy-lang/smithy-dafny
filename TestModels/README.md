@@ -52,7 +52,9 @@ This example is written assuming that the runtime you are targeting is .NET.
 
 ## Testing Patterns
 
-This section documents testing patterns used throughout these files. It  explains the purpose of some testing patterns. It also serves to be referenced from testing files to avoid re-explaining the purpose of a test.
+This section documents testing patterns used throughout these files.
+It explains testing patterns so developers understand their purpose.
+It also serves to be referenced from testing files to avoid re-explaining the purpose of a test.
 
 ### Known Value Tests
 
