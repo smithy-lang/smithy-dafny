@@ -16,6 +16,8 @@ jobs:
           TestModels/SimpleTypes/SimpleString,
           TestModels/SimpleTypes/SimpleBoolean,
           TestModels/SimpleTypes/SimpleBlob,
+          TestModels/SimpleTypes/SimpleEnum,
+          TestModels/SimpleTypes/SimpleLong,
           TestModels/Aggregate,
         ]
         os: [ ubuntu-latest ]

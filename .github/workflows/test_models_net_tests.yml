@@ -16,6 +16,8 @@ jobs:
           TestModels/SimpleTypes/SimpleString,
           TestModels/SimpleTypes/SimpleBoolean,
           TestModels/SimpleTypes/SimpleBlob,
+          TestModels/SimpleTypes/SimpleEnum,
+          TestModels/SimpleTypes/SimpleLong,
           TestModels/Aggregate,
         ]
         dotnet-version: [ '6.0.x' ]
@@ -79,6 +81,7 @@ jobs:
         shell: bash
         working-directory: ./${{ matrix.library }}
         run: |
+          make polymorph_dafny
           make polymorph_net
 
       - name: Compile ${{ matrix.library }} implementation

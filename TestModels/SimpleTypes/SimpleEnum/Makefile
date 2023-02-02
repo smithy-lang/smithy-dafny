@@ -5,7 +5,7 @@ CORES=2
 
 include ../../SharedMakefile.mk
 
-NAMESPACE=simple.types.string
+NAMESPACE=simple.types.enum
 
 # This project has no dependencies 
 # DEPENDENT-MODELS:= 
