@@ -23,7 +23,7 @@ public class AwsSdkNameResolverHelpers {
         return namespaceParts[namespaceParts.length - 1];
     }
 
-    public static ServiceShape getAwsServiceShape(final Model model, final ShapeId shapeId ) {
+    public static ServiceShape getAwsServiceShape(final Model model, final ShapeId shapeId) {
         if (!isAwsSdkServiceNamespace(shapeId)) throw new IllegalStateException("Shape is not in an AWS SKD namespace:" + shapeId.getName() + ", " + shapeId.getNamespace());
 
         return ModelUtils.serviceFromNamespace(model, shapeId.getNamespace());
