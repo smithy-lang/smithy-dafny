@@ -1,5 +1,7 @@
 package software.amazon.polymorph.utils;
 
+import software.amazon.smithy.model.Model;
+import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 
@@ -12,12 +14,18 @@ public class AwsSdkNameResolverHelpers {
     }
 
     // TODO better way to determine if AWS SDK
-    public static boolean isAwsSdkServiceId(ShapeId serviceShapeId) {
-        return serviceShapeId.getNamespace().startsWith("com.amazonaws.");
+    public static boolean isAwsSdkServiceNamespace(final ShapeId shapeId) {
+        return shapeId.getNamespace().startsWith("com.amazonaws.");
     }
 
     public static String awsServiceNameFromShape(final Shape shape) {
         String[] namespaceParts = shape.getId().getNamespace().split("\\.");
         return namespaceParts[namespaceParts.length - 1];
+    }
+
+    public static ServiceShape getAwsServiceShape(final Model model, final ShapeId shapeId) {
+        if (!isAwsSdkServiceNamespace(shapeId)) throw new IllegalStateException("Shape is not in an AWS SKD namespace:" + shapeId.getName() + ", " + shapeId.getNamespace());
+
+        return ModelUtils.serviceFromNamespace(model, shapeId.getNamespace());
     }
 }
