@@ -9,7 +9,9 @@ Please add new project directories for simple types under the base `SimpleTypes`
 ```
 .
 ├── SimpleString //This is a project directory
+├── SimpleBlob
 ├── SimpleBoolean
+├── SimpleFloat
 ├── SimpleShort
 ├── SimpleTimestamp
 ...
