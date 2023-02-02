@@ -1,15 +1,14 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-include "../Model/SimpleResourcesTypes.dfy"
+//include "../Model/SimpleResourcesTypes.dfy"
 
 module Config {
-  import opened StandardLibrary
-  import Types = SimpleResourcesTypes    
+//  import opened StandardLibrary
+//  import Types = SimpleResourcesTypes    
 
   datatype Config = Config(
-    nameonly name: string,
-    nameonly modified: bool := false
+    nameonly name: string
   )
 
   predicate method ValidInternalConfig?(config: Config)
@@ -19,5 +18,4 @@ module Config {
 
   function ModifiesInternalConfig(config: Config): set<object>
   {{}}
-
 }

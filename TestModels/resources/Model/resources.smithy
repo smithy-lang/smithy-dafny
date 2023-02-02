@@ -11,7 +11,9 @@ service SimpleResources {
   errors: [ SimpleResourceException ],
 }
 
-structure SimpleResourcesConfig {}
+structure SimpleResourcesConfig {
+  @required @length(min: 1) name: String
+}
 
 // This operation MUST
 // return the values given in the Resources.

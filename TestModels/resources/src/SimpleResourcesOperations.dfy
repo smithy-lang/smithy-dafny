@@ -9,7 +9,23 @@ module SimpleResourcesOperations refines AbstractSimpleResourcesOperations {
   import Config
   import SimpleResource
 
+  // Polymorph's smithydafny demands InternalConfig
+  // exist in Operations
   type InternalConfig = Config.Config
+
+  // Polymorph's smithydafny demands ValidInternalConfig? 
+  // exist in Operations
+  predicate ValidInternalConfig?(config: InternalConfig)
+  {
+    Config.ValidInternalConfig?(config)
+  }
+
+  // Polymorph's smithydafny demands ModifiesInternalConfig
+  // exist in Operations
+  function ModifiesInternalConfig(config: InternalConfig): set<object>
+  {
+    Config.ModifiesInternalConfig(config)
+  }
   
   predicate GetResourcesEnsuresPublicly(
     input: GetResourcesInput,
