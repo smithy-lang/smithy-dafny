@@ -22,14 +22,6 @@ module SimpleResources refines AbstractSimpleResourcesService
   ) returns (
     res: Result<SimpleResourcesClient, Error>
   )
-    ensures
-      res.Success?
-    ==>
-      && |config.name| > 0
-      && fresh(res.value.Modifies)
-      && fresh(res.value.History)
-      && res.value.ValidState()
-      && Operations.ValidInternalConfig?(res.value.config)
   {
     :- Need(|config.name| > 0,
       Types.SimpleResourceException(
