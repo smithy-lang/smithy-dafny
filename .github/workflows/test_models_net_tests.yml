@@ -16,6 +16,7 @@ jobs:
           TestModels/SimpleTypes/SimpleString,
           TestModels/SimpleTypes/SimpleBoolean,
           TestModels/SimpleTypes/SimpleBlob,
+          TestModels/Aggregate,
         ]
         dotnet-version: [ '6.0.x' ]
         os: [ ubuntu-latest ]

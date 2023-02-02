@@ -16,6 +16,7 @@ jobs:
           TestModels/SimpleTypes/SimpleString,
           TestModels/SimpleTypes/SimpleBoolean,
           TestModels/SimpleTypes/SimpleBlob,
+          TestModels/Aggregate,
         ]
         os: [ ubuntu-latest ]
     runs-on: ${{ matrix.os }}
