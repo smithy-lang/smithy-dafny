@@ -12,6 +12,7 @@ Please add new project directories for simple types under the base `SimpleTypes`
 ├── SimpleBlob
 ├── SimpleBoolean
 ├── SimpleFloat
+├── SimpleLong
 ├── SimpleShort
 ├── SimpleTimestamp
 ...
