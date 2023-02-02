@@ -63,7 +63,7 @@ public class DotNetNameResolver {
      */
     public String namespaceForShapeId(final ShapeId shapeId) {
         // TODO remove special AWS SDK special-case when https://github.com/awslabs/polymorph/issues/7 is resolved
-        final Function<String, String> segmentMapper = AwsSdkNameResolverHelpers.isAwsSdkServiceId(shapeId)
+        final Function<String, String> segmentMapper = AwsSdkNameResolverHelpers.isAwsSdkServiceNamespace(shapeId)
                 ? StringUtils::capitalize
                 : DotNetNameResolver::capitalizeNamespaceSegment;
 
@@ -136,7 +136,7 @@ public class DotNetNameResolver {
     }
 
     public static String interfaceForService(final ShapeId serviceShapeId) {
-        if (AwsSdkNameResolverHelpers.isAwsSdkServiceId(serviceShapeId)) {
+        if (AwsSdkNameResolverHelpers.isAwsSdkServiceNamespace(serviceShapeId)) {
             final String serviceName = StringUtils.equals(serviceShapeId.getName(), AwsSdkDotNetNameResolver.DDB_SMITHY_SERVICE_NAME)
                 ? AwsSdkDotNetNameResolver.DDB_TYPES_SERVICE_NAME
                 : serviceShapeId.getName();
@@ -357,7 +357,7 @@ public class DotNetNameResolver {
     protected String baseTypeForService(final ServiceShape serviceShape) {
         final ShapeId shapeId = serviceShape.getId();
 
-        if (AwsSdkNameResolverHelpers.isAwsSdkServiceId(shapeId)) {
+        if (AwsSdkNameResolverHelpers.isAwsSdkServiceNamespace(shapeId)) {
             return new AwsSdkDotNetNameResolver(model, serviceShape).baseTypeForService(serviceShape);
         }
 
@@ -386,12 +386,34 @@ public class DotNetNameResolver {
                     () -> String.format("No native type for prelude shape %s", shapeId));
         }
 
+        if (!AwsSdkNameResolverHelpers.isAwsSdkServiceNamespace(shapeId)) {
+            // The shape is not in an AWS Service,
+            // so use the base type switch
+            return baseTypeSwitch(shape);
+        } else {
+            // The shape *is* an AWS Service shape,
+            // therefore it MAY have specific naming requirements.
+            // These requirements SHOULD be handled in the `AwsSdkDotNetNameResolver`.
+            final ServiceShape awsSdkService = AwsSdkNameResolverHelpers.getAwsServiceShape(model, shapeId);
+            return new AwsSdkDotNetNameResolver(model, awsSdkService).baseTypeSwitch(shape);
+        }
+    }
+
+    // There is a relationship between the AWS SDK and LocalService Dafny development.
+    // While many of the type names are the same they are not all the same.
+    // As types are used from different namespaces,
+    // `baseTypeForShape` needs some way to swap between
+    // the AWS naming conventions and LocalService conventions.
+    // However, the current AwsSdkDotNetNameResolver defers to the DotNetNameResolver
+    // without this extra method we would have a stack overflow when generating AWS SDK models.
+    protected String baseTypeSwitch(final Shape shape)
+    {
         return switch (shape.getType()) {
             // For supported simple shapes, just map to native types
             case BLOB, BOOLEAN, INTEGER, LONG, TIMESTAMP -> {
                 @Nullable final String nativeTypeName = NATIVE_TYPES_BY_SIMPLE_SHAPE_TYPE.get(shape.getType());
                 yield Objects.requireNonNull(nativeTypeName,
-                        () -> String.format("No native type for shape type %s", shape.getType()));
+                  () -> String.format("No native type for shape type %s", shape.getType()));
             }
 
             case STRING -> baseTypeForString(shape.asStringShape().get());
@@ -404,7 +426,7 @@ public class DotNetNameResolver {
             case UNION -> baseTypeForUnion(shape.asUnionShape().get());
 
             default -> throw new UnsupportedOperationException("Shape %s has unsupported type %s"
-                    .formatted(shapeId, shape.getType()));
+              .formatted(shape.getId(), shape.getType()));
         };
     }
 
@@ -686,7 +708,7 @@ public class DotNetNameResolver {
     private String dafnyTypeForService(final ServiceShape serviceShape) {
         final ShapeId serviceShapeId = serviceShape.getId();
 
-        if (AwsSdkNameResolverHelpers.isAwsSdkServiceId(serviceShapeId)) {
+        if (AwsSdkNameResolverHelpers.isAwsSdkServiceNamespace(serviceShapeId)) {
             return "%s.%sClient".formatted(DafnyNameResolverHelpers.dafnyExternNamespaceForShapeId(serviceShapeId), interfaceForService(serviceShapeId));
         }
 
