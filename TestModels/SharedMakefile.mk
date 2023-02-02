@@ -89,7 +89,7 @@ transpile_implementation_net:
 		-useRuntimeLib \
 		-out runtimes/net/ImplementationFromDafny \
 		./src/Index.dfy \
-		-library:../../dafny-dependencies/StandardLibrary/src/Index.dfy \
+		-library:$(TEST_BED_ROOT)dafny-dependencies/StandardLibrary/src/Index.dfy \
 		$(LIBRARIES)
 
 transpile_test_net:
