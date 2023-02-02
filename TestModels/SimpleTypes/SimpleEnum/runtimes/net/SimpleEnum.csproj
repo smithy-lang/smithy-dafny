@@ -26,6 +26,10 @@
 
   <ItemGroup>
     <ProjectReference Include="../../../../dafny-dependencies/StandardLibrary/runtimes/net/STD.csproj" />
+    <!-- TODO: This is here because Dotnet Enum builder assumes the AWS SDK will be included.
+               (It generates classes that unambigiously extend the "ConstantClass" constructor, which is defined in
+               the AWS SDK.) -->
+    <PackageReference Include="AWSSDK.Core" Version="3.7.9.2" />
   </ItemGroup>
 
   <!--

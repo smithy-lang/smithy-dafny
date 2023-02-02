@@ -7,7 +7,10 @@ namespace simple.types.enum
 service SimpleTypesEnum {
   version: "2021-11-01",
   resources: [],
-  operations: [ GetEnum ],
+  operations: [ GetEnum,
+                GetEnumFirstKnownValueTest, 
+                GetEnumSecondKnownValueTest, 
+                GetEnumThirdKnownValueTest ],
   errors: [],
 }
 
@@ -18,12 +21,27 @@ operation GetEnum {
   output: GetEnumOutput,
 }
 
+operation GetEnumFirstKnownValueTest {
+  input: GetEnumInput,
+  output: GetEnumOutput,
+}
+
+operation GetEnumSecondKnownValueTest {
+  input: GetEnumInput,
+  output: GetEnumOutput,
+}
+
+operation GetEnumThirdKnownValueTest {
+  input: GetEnumInput,
+  output: GetEnumOutput,
+}
+
 structure GetEnumInput {
-  value: SimpleEnum
+  value: SimpleEnumShape
 }
 
 structure GetEnumOutput {
-  value: SimpleEnum
+  value: SimpleEnumShape
 }
 
 // This is a smithy V1 Enum
@@ -41,4 +59,4 @@ structure GetEnumOutput {
     value: "0x0078",
   },
 ])
-string SimpleEnum
+string SimpleEnumShape

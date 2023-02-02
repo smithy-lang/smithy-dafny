@@ -1,26 +1,12 @@
 # SimpleEnum
 
-This project will implement the smithy type [enum](https://smithy.io/2.0/spec/simple-types.html#enum) and the associated operations in `dafny`.
-
-## Status
-
-This project does not fully build for Dotnet. We can generate the Dafny and Dotnet code, but the generated Dotnet code does not contain the generated enum values. (This might be an issue with the Smithy model instead, but I'm not sure). As a result, running `make test_net` yields errors:
-
-```
-...polymorph/TestModels/SimpleTypes/SimpleEnum/runtimes/net/Generated/TypeConversion.cs(21,58): error CS0117: 'SimpleEnum' does not contain a definition for 'FIRST' [/...polymorph/TestModels/SimpleTypes/SimpleEnum/runtimes/net/SimpleEnum.csproj]
-...polymorph/TestModels/SimpleTypes/SimpleEnum/runtimes/net/Generated/TypeConversion.cs(22,59): error CS0117: 'SimpleEnum' does not contain a definition for 'SECOND' [/...polymorph/TestModels/SimpleTypes/SimpleEnum/runtimes/net/SimpleEnum.csproj]
-...polymorph/TestModels/SimpleTypes/SimpleEnum/runtimes/net/Generated/TypeConversion.cs(23,58): error CS0117: 'SimpleEnum' does not contain a definition for 'THIRD' [/Users/lucmcdon/Desktop/workplace/polymorph/TestModels/SimpleTypes/SimpleEnum/runtimes/net/SimpleEnum.csproj]
-```
-
-We would need to modify the Smithy model in some way, or update Dotnet code generator to generate enum values.
-
-## Build
+This project implements the smithy type [enum](https://smithy.io/2.0/spec/simple-types.html#blob) and the associated operations in `dafny`. This is then transpiled to a target runtime, and each tests are executed - either as CI actions or manually.
 
 ## Build
 ### .NET
 1. Generate the Wrappers using `polymorph`
 ```
-make generate_polymorph
+make polymorph_net
 ```
 
 2. Transpile the tests (and implementation) to the target runtime.
@@ -28,9 +14,16 @@ make generate_polymorph
 make transpile_net
 ```
 
-3. Generate the executable in the .NET.
-
-This does *not* work; we would need to debug either the Smithy model or the Dotnet code generator for this to work.
+3. Generate the executable in the .NET and execute the tests
 ```
 make test_net
 ```
+
+## Development
+1. To add another target runtime support, edit the `Makefile` and add the appropriate recipe to generate the `polymorph` wrappers, and dafny transpilation.
+2. Provide any glue code between dafny and target runtime if required.
+3. Build, execute, and test in the target runtime.
+
+*Example*
+
+`--output-dotnet <PATH>` in the `gradlew run` is used to generate the polymorph wrappers. Similarly `--compileTarget:<RUNTIME>` flags is used in dafny recipe to transpile to C#.
