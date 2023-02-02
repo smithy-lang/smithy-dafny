@@ -5,6 +5,9 @@
 **/ImplementationFromDafny.cs
 **/TestsFromDafny.cs
 
+# Smithy Generated .NET
+**/runtimes/net/Generated/*.cs
+
 # .NET Artifacts
 **/bin
 **/obj
