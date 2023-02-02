@@ -4,6 +4,7 @@
 CORES=2
 DAFNY_ROOT := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
 
+# Note: This build target fails. This project does not support code generation for Smithy 2.0 models.
 polymorph_dafny :
 	cd ../../../smithy-polymorph;\
 	./gradlew run --args="\
@@ -11,15 +12,16 @@ polymorph_dafny :
 	--include-dafny $(DAFNY_ROOT)/../../dafny-dependencies/StandardLibrary/src/Index.dfy \
 	--model $(DAFNY_ROOT)/Model \
 	--dependent-model $(DAFNY_ROOT)/../../dafny-dependencies/Model \
-	--namespace simple.types.boolean"; \
+	--namespace simple.types.enumv2"; \
 	./gradlew run --args="\
 	--output-dafny \
 	--output-local-service-test $(DAFNY_ROOT)/Model \
 	--include-dafny $(DAFNY_ROOT)/../../dafny-dependencies/StandardLibrary/src/Index.dfy \
 	--model $(DAFNY_ROOT)/Model \
 	--dependent-model $(DAFNY_ROOT)/../../dafny-dependencies/Model \
-	--namespace simple.types.boolean"; \
+	--namespace simple.types.enumv2"; \
 
+# Note: This build target fails. This project does not support code generation for Smithy 2.0 models.
 polymorph_net :
 	cd ../../../smithy-polymorph;\
 	./gradlew run --args="\
@@ -28,7 +30,7 @@ polymorph_net :
 	--output-dotnet $(DAFNY_ROOT)/runtimes/net/Generated/ \
 	--model $(DAFNY_ROOT)/Model \
 	--dependent-model $(DAFNY_ROOT)/../../dafny-dependencies/Model \
-	--namespace simple.types.boolean"; \
+	--namespace simple.types.enumv2"; \
 	./gradlew run --args="\
 	--output-dafny \
 	--output-local-service-test $(DAFNY_ROOT)/Model \
@@ -36,8 +38,9 @@ polymorph_net :
 	--output-dotnet $(DAFNY_ROOT)/runtimes/net/Generated/Wrapped \
 	--model $(DAFNY_ROOT)/Model \
 	--dependent-model $(DAFNY_ROOT)/../../dafny-dependencies/Model \
-	--namespace simple.types.boolean"; \
+	--namespace simple.types.enumv2"; \
 
+# Note: Any build targets below this line have not been tested; they depend on the first two targets, which fail.
 verify:
 	dafny \
 		-vcsCores:$(CORES) \
