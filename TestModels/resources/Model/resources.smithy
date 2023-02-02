@@ -8,7 +8,7 @@ service SimpleResources {
   version: "2021-11-01",
   resources: [],
   operations: [ GetResources ],
-  errors: [],
+  errors: [ SimpleResourceException ],
 }
 
 structure SimpleResourcesConfig {}
@@ -73,6 +73,7 @@ structure GetResourceDataOutput {
 //  timestampValue: Timestamp,
 }
 
+@error("client")
 structure SimpleResourceException {
   @required
   message: String,
