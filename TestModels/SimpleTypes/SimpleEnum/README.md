@@ -15,8 +15,6 @@ This project does not fully build for Dotnet. We can generate the Dafny and Dotn
 We would need to modify the Smithy model in some way, or update Dotnet code generator to generate enum values.
 
 ## Build
-
-## Build
 ### .NET
 1. Generate the Wrappers using `polymorph`
 ```
