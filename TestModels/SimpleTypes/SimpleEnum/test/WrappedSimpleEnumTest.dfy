@@ -8,5 +8,8 @@ module WrappedSimpleTypesEnumTest {
     method{:test} GetEnum() {
         var client :- expect WrappedSimpleTypesEnumService.WrappedSimpleEnum();
         SimpleEnumImplTest.TestGetEnum(client);
+        SimpleEnumImplTest.TestGetEnumFirstKnownValueTest(client);
+        SimpleEnumImplTest.TestGetEnumSecondKnownValueTest(client);
+        SimpleEnumImplTest.TestGetEnumThirdKnownValueTest(client);
     }
 }
