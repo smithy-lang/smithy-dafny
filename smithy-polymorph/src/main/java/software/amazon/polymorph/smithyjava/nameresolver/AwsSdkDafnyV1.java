@@ -19,7 +19,7 @@ public class AwsSdkDafnyV1 extends Dafny {
 
     @Override
     ClassName classNameForService(ServiceShape shape) {
-        if (AwsSdkNameResolverHelpers.isAwsSdkServiceId(shape.getId())) {
+        if (AwsSdkNameResolverHelpers.isAwsSdkServiceNamespace(shape.getId())) {
             return ClassName.get(
                     modelPackageNameForNamespace(shape.getId().getNamespace()),
                     traitNameForServiceClient(shape)
@@ -30,7 +30,7 @@ public class AwsSdkDafnyV1 extends Dafny {
 
     @Override
     ClassName classNameForResource(ResourceShape shape) {
-        if (AwsSdkNameResolverHelpers.isAwsSdkServiceId(shape.getId())) {
+        if (AwsSdkNameResolverHelpers.isAwsSdkServiceNamespace(shape.getId())) {
             return ClassName.get(
                     modelPackageNameForNamespace(shape.getId().getNamespace()),
                     "I%s".formatted(StringUtils.capitalize(shape.getId().getName()))

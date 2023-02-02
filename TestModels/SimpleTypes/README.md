@@ -13,6 +13,7 @@ Please add new project directories for simple types under the base `SimpleTypes`
 ├── SimpleBoolean
 ├── SimpleEnum
 ├── SimpleFloat
+├── SimpleLong
 ├── SimpleShort
 ├── SimpleTimestamp
 ...
