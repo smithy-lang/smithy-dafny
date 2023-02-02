@@ -4,7 +4,7 @@ This project will implement the smithy type [enum](https://smithy.io/2.0/spec/si
 
 ## Status
 
-This project does not fully build for Dotnet. We can generate the Dafny and Dotnet code, but the generated Dotnet code does not contain the generated enum values. (This might be an issue with the Smithy model too). As a result, running `make test_net` yields errors:
+This project does not fully build for Dotnet. We can generate the Dafny and Dotnet code, but the generated Dotnet code does not contain the generated enum values. (This might be an issue with the Smithy model instead, but I'm not sure). As a result, running `make test_net` yields errors:
 
 ```
 ...polymorph/TestModels/SimpleTypes/SimpleEnum/runtimes/net/Generated/TypeConversion.cs(21,58): error CS0117: 'SimpleEnum' does not contain a definition for 'FIRST' [/...polymorph/TestModels/SimpleTypes/SimpleEnum/runtimes/net/SimpleEnum.csproj]
@@ -28,7 +28,9 @@ make generate_polymorph
 make transpile_net
 ```
 
-3. Generate the executable in the .NET. This does *not* work; we would need to debug either the Smithy model or the Dotnet code generator to generate the enum values for this to work.
+3. Generate the executable in the .NET.
+
+This does *not* work; we would need to debug either the Smithy model or the Dotnet code generator for this to work.
 ```
 make test_net
 ```

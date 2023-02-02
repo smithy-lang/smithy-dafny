@@ -86,6 +86,7 @@ transpile_test_net:
 transpile_net_dependencies:
 	$(MAKE) -C ../../dafny-dependencies/StandardLibrary transpile_implementation_net \
 
+# Note: This target does not work. We would need to debug either the Smithy model or the Dotnet code generator for this to work.
 test_net:
 	dotnet run \
 		--project runtimes/net/tests/ \

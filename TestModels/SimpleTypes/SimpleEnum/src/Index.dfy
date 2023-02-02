@@ -14,17 +14,17 @@ module {:extern "Dafny.Simple.Types.Enum" } SimpleEnum refines AbstractSimpleTyp
  }
 
  class SimpleEnumClient... {
-    predicate ValidState()
-    {
-      && Operations.ValidInternalConfig?(config)
-      && Modifies == Operations.ModifiesInternalConfig(config) + {History}
-    }
- constructor(config: Operations.InternalConfig) {
-    this.config := config;
-    History := new ISimpleTypesEnumClientCallHistory();
-    Modifies := Operations.ModifiesInternalConfig(config) + {History};
+   predicate ValidState()
+   {
+     && Operations.ValidInternalConfig?(config)
+     && Modifies == Operations.ModifiesInternalConfig(config) + {History}
+   }
 
+   constructor(config: Operations.InternalConfig)
+   {
+     this.config := config;
+     History := new ISimpleTypesEnumClientCallHistory();
+     Modifies := Operations.ModifiesInternalConfig(config) + {History};
+   }
  }
- }
-
 }
