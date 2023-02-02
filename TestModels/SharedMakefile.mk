@@ -27,38 +27,7 @@ TEST_BED_ROOT := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
 # This evaluates to the path of the current working directory
 PROJECT_ROOT = $(PWD)
 
-polymorph_dafny :
-	cd $(TEST_BED_ROOT)../smithy-polymorph;\
-	./gradlew run --args="\
-	--output-dafny \
-	--include-dafny $(TEST_BED_ROOT)dafny-dependencies/StandardLibrary/src/Index.dfy \
-	--model $(PROJECT_ROOT)/Model \
-	--dependent-model $(TEST_BED_ROOT)/dafny-dependencies/Model \
-	$(DEPENDENT-MODELS) \
-	--namespace $(NAMESPACE)"; \
-	./gradlew run --args="\
-	--output-dafny $(PROJECT_ROOT)/Model \
-	--include-dafny $(TEST_BED_ROOT)/dafny-dependencies/StandardLibrary/src/Index.dfy \
-	--model $(PROJECT_ROOT)/Model \
-	--dependent-model $(TEST_BED_ROOT)/dafny-dependencies/Model \
-	$(DEPENDENT-MODELS) \
-	--namespace $(NAMESPACE) --output-local-service-test $(PROJECT_ROOT)/Model";
-
-polymorph_net :
-	cd $(TEST_BED_ROOT)../smithy-polymorph;\
-	./gradlew run --args="\
-	--output-dotnet $(PROJECT_ROOT)/runtimes/net/Generated/ \
-	--model $(PROJECT_ROOT)/Model \
-	--dependent-model $(TEST_BED_ROOT)/dafny-dependencies/Model \
-	$(DEPENDENT-MODELS) \
-	--namespace $(NAMESPACE)"; \
-	./gradlew run --args="\
-	--output-dotnet $(PROJECT_ROOT)/runtimes/net/Generated/Wrapped \
-	--model $(PROJECT_ROOT)/Model \
-	--dependent-model $(TEST_BED_ROOT)/dafny-dependencies/Model \
-	$(DEPENDENT-MODELS) \
-	--namespace $(NAMESPACE) \
-	--output-local-service-test $(PROJECT_ROOT)/Model";
+########################## Dafny targets
 
 verify:
 	dafny \
@@ -75,6 +44,58 @@ dafny-reportgenerator:
 		summarize-csv-results \
 		--max-resource-count 10000000 \
 		TestResults/*.csv
+
+polymorph_dafny : _polymorph_dafny _polymorph_wrapped_dafny
+
+# For production projects this would be the target to run.
+# It is only special cases where the wrapped target
+# needs to be added.
+_polymorph_dafny :
+	cd $(TEST_BED_ROOT)../smithy-polymorph; \
+	./gradlew run --args="\
+	--output-dafny \
+	--include-dafny $(TEST_BED_ROOT)dafny-dependencies/StandardLibrary/src/Index.dfy \
+	--model $(PROJECT_ROOT)/Model \
+	--dependent-model $(TEST_BED_ROOT)/dafny-dependencies/Model \
+	$(DEPENDENT-MODELS) \
+	--namespace $(NAMESPACE)";
+
+_polymorph_wrapped_dafny:
+	cd $(TEST_BED_ROOT)../smithy-polymorph; \
+	./gradlew run --args="\
+	--output-dafny $(PROJECT_ROOT)/Model \
+	--include-dafny $(TEST_BED_ROOT)/dafny-dependencies/StandardLibrary/src/Index.dfy \
+	--model $(PROJECT_ROOT)/Model \
+	--dependent-model $(TEST_BED_ROOT)/dafny-dependencies/Model \
+	$(DEPENDENT-MODELS) \
+	--namespace $(NAMESPACE) --output-local-service-test $(PROJECT_ROOT)/Model";
+
+
+########################## .NET targets
+
+polymorph_net : _polymorph_net _polymorph_wrapped_net
+
+# For production projects each runtime does not need to be broken out.
+# The various --output-runtime options can be run togeter.
+# They are seperated here to help issolate code for testing.
+_polymorph_net:
+	cd $(TEST_BED_ROOT)../smithy-polymorph; \
+	./gradlew run --args="\
+	--output-dotnet $(PROJECT_ROOT)/runtimes/net/Generated/ \
+	--model $(PROJECT_ROOT)/Model \
+	--dependent-model $(TEST_BED_ROOT)/dafny-dependencies/Model \
+	$(DEPENDENT-MODELS) \
+	--namespace $(NAMESPACE)";
+
+_polymorph_wrapped_net:
+	cd $(TEST_BED_ROOT)../smithy-polymorph; \
+	./gradlew run --args="\
+	--output-dotnet $(PROJECT_ROOT)/runtimes/net/Generated/Wrapped \
+	--model $(PROJECT_ROOT)/Model \
+	--dependent-model $(TEST_BED_ROOT)/dafny-dependencies/Model \
+	$(DEPENDENT-MODELS) \
+	--namespace $(NAMESPACE) \
+	--output-local-service-test $(PROJECT_ROOT)/Model";
 
 transpile_net: | transpile_implementation_net transpile_test_net transpile_StandardLibrary_net transpile_net_dependencies
 
