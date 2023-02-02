@@ -13,6 +13,7 @@ Please add new project directories for simple types under the base `SimpleTypes`
 ├── SimpleBoolean
 ├── SimpleFloat
 ├── SimpleShort
+├── SimpleTimestamp
 ...
 └── README.md //This README.md
 ```
