@@ -104,7 +104,6 @@ transpile_implementation_net:
 		-vcsCores:$(CORES) \
 		-compileTarget:cs \
 		-spillTargetCode:3 \
-		-runAllTests:1 \
 		-compile:0 \
 		-optimizeErasableDatatypeWrapper:0 \
 		-useRuntimeLib \
