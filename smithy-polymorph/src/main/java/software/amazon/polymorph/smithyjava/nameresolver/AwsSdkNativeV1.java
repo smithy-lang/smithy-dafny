@@ -143,7 +143,7 @@ public class AwsSdkNativeV1 extends Native {
                     "Trait definition structures have no corresponding generated type");
         }
         // check if this Shape is in AWS SDK for Java V1 package
-        if (AwsSdkNameResolverHelpers.isAwsSdkServiceId(shape.getId())) {
+        if (AwsSdkNameResolverHelpers.isAwsSdkServiceNamespace(shape.getId())) {
             // Assume that the shape is in the model package
             return ClassName.get(
                     defaultModelPackageName(packageNameForAwsSdkV1Shape(shape)),
