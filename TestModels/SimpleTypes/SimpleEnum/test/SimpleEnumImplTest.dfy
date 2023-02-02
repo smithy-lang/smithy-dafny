@@ -13,8 +13,6 @@ module  SimpleEnumImplTest {
         TestGetEnumThirdKnownValueTest(client);
     }
 
-    // TODO: Add more tests once we can run SimpleEnum tests
-
     method TestGetEnum(client: ISimpleTypesEnumClient)
       requires client.ValidState()
       modifies client.Modifies
