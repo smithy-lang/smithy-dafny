@@ -10,7 +10,7 @@ module SimpleResourcesTest {
   import opened Wrappers
   import opened Helpers
 
-  method GetResourcesClientHappy(
+  method TestGetResourcesAndDataHappy(
     config: Types.SimpleResourcesConfig
   )
     requires |config.name| > 0
@@ -31,21 +31,22 @@ module SimpleResourcesTest {
     resInput := allNone();
     resOutput :- expect output.output.GetResourceData(resInput);
     checkMostNone(config.name, resOutput);
-    print("\n\tCheckMostNone: PASSED");
+    print("\n\t\tCheckMostNone: PASSED");
 
     resInput := allSome();
     resOutput :- expect output.output.GetResourceData(resInput);
     checkSome(config.name, resOutput);
-    print("\n\tCheckSome PASSED");
+    print("\n\t\tCheckSome: PASSED");
   }
 
   method {:test} GetResourcesClient()
   {
-    GetResourcesClientHappy(
+    TestGetResourcesAndDataHappy(
       SimpleResources.DefaultSimpleResourcesConfig()
     );
     print("\n\tTest DefaultConfig PASSED");
-    GetResourcesClientHappy(
+    
+    TestGetResourcesAndDataHappy(
       Types.SimpleResourcesConfig(name := "Dafny")
     );
     print("\n\tTest Custom Config PASSED\n");  
