@@ -21,6 +21,7 @@
 
     <ProjectReference Include="../SimpleResources.csproj" />
     <Compile Include="../Generated/**" />
+    <Compile Include="../Extern/**" />
     <Compile Include="TestsFromDafny.cs" />
   </ItemGroup>
   
