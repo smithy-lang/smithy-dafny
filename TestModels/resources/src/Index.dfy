@@ -2,13 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 include "../Model/SimpleResourcesTypes.dfy"
-include "./Config.dfy"
 include "./SimpleResourcesOperations.dfy"
 
 module SimpleResources refines AbstractSimpleResourcesService
 {
   import Operations = SimpleResourcesOperations
-  import Config
 
   function method DefaultSimpleResourcesConfig(): SimpleResourcesConfig
   {
@@ -27,7 +25,7 @@ module SimpleResources refines AbstractSimpleResourcesService
       Types.SimpleResourceException(
       message := "Length of name must be greater than 0")
     );
-    var internalConfig: Operations.InternalConfig := Config.Config(
+    var internalConfig: Operations.InternalConfig := Operations.Config(
       name := config.name
     );
 

@@ -2,43 +2,37 @@
 // SPDX-License-Identifier: Apache-2.0
 
 include "../Model/SimpleResourcesTypes.dfy"
-include "./Config.dfy"
 
 module SimpleResource {
   import opened StandardLibrary
   import opened Wrappers
-  import opened Config    
   import Types = SimpleResourcesTypes    
 
   class SimpleResource extends Types.ISimpleResource
   {
-    const config: Config
-
     predicate ValidState()
       ensures ValidState() ==> History in Modifies
     {
       && History in Modifies
-      && ModifiesInternalConfig(config) <= Modifies
-      && History !in ModifiesInternalConfig(config)
-      && ValidInternalConfig?(config)
     }
-
-    const value: string
+    
+    const name: string
+    const value: Option<string>
 
     constructor (
-      value: string,
-      config: Config
+      value: Option<string>,
+      name: string
     )
-      requires ValidInternalConfig?(config)
+      requires |name| > 0
       ensures this.value == value
-      ensures this.config == config
-      ensures ValidState() && fresh(History) && fresh(Modifies - ModifiesInternalConfig(config))
+      ensures this.name == name
+      ensures ValidState() && fresh(History) && fresh(Modifies)
     {
       this.value := value;
-      this.config := config;
+      this.name := name;
 
       History := new Types.ISimpleResourceCallHistory();
-      Modifies := { History } + ModifiesInternalConfig(config);
+      Modifies := {History};
     }
 
     predicate GetResourceDataEnsuresPublicly(
@@ -59,9 +53,9 @@ module SimpleResource {
       ensures unchanged(History)
     {
       var rtnString: string := if input.stringValue.Some? then
-        this.config.name + " " + input.stringValue.value
+        this.name + " " + input.stringValue.value
       else
-        this.config.name;
+        this.name;
       var rtn: Types.GetResourceDataOutput := Types.GetResourceDataOutput(
         blobValue := input.blobValue,
         booleanValue := input.booleanValue,
