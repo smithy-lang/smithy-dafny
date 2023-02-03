@@ -21,19 +21,20 @@ module SimpleResources refines AbstractSimpleResourcesService
     res: Result<SimpleResourcesClient, Error>
   )
   {
-    :- Need(|config.name| > 0,
-      Types.SimpleResourceException(
-      message := "Length of name must be greater than 0")
-    );
     var internalConfig: Operations.InternalConfig := Operations.Config(
       name := config.name
     );
 
-    var client := new SimpleResourcesClient(
-      config := internalConfig
-    );
-
-    return Success(client);  
+    if Operations.ValidInternalConfig?(internalConfig) {
+      var client := new SimpleResourcesClient(
+        config := internalConfig
+      );
+      return Success(client);
+    } else {
+      return Failure(Types.SimpleResourceException(
+        message := "Length of name must be greater than 0")
+     );
+    }
   }
 
   class SimpleResourcesClient...
