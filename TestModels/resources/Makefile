@@ -37,7 +37,7 @@ polymorph_net:
 	  --dependent-model $(PWD)../dafny-dependencies/Model \
 	  --namespace simple.resources";
 
-transpile_net: | transpile_implementation_net transpile_net_dependencies
+transpile_net: | transpile_implementation_net transpile_net_dependencies transpile_test_net
 
 transpile_implementation_net:
 	dafny \
@@ -54,9 +54,29 @@ transpile_implementation_net:
 transpile_net_dependencies:
 	$(MAKE) -C $(PWD)../dafny-dependencies/StandardLibrary/ transpile_implementation_net
 
+transpile_test_net:
+	dafny \
+	  -vcsCores:$(CORES) \
+	  -compileTarget:cs \
+	  -spillTargetCode:3 \
+	  -compile:0 \
+	  -optimizeErasableDatatypeWrapper:0 \
+	  -useRuntimeLib \
+	  -out runtimes/net/tests/TestsFromDafny \
+	  -library $(PWD)src/Index.dfy \
+	  `find ./test -name '*.dfy'`
+
 setup_net:
 	dotnet restore runtimes/net/
 
+test_net:
+	dotnet run \
+	  --project runtimes/net/tests/ \
+	  --framework net6.0
+
 clean:
-	rm $(PWD)Model/*.dfy $(PWD)runtimes/net/ImplementationFromDafny.cs;
-	rm -rf $(PWD)TestResults $(PWD)runtimes/net/Generated
+	rm \
+	  $(PWD)Model/*.dfy \
+	  $(PWD)runtimes/net/ImplementationFromDafny.cs;
+	  ##$(PWD)runtimes/net/tests/TestFromDafny.cs;
+	rm -rf $(PWD)TestResults $(PWD)runtimes/net/Generated 
