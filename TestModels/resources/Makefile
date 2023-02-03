@@ -48,7 +48,7 @@ transpile_implementation_net:
 	  -optimizeErasableDatatypeWrapper:0 \
 	  -useRuntimeLib \
 	  -out runtimes/net/ImplementationFromDafny \
-	  -library $(PWD)../dafny-dependencies/StandardLibrary/src/Index.dfy \
+	  -library:$(PWD)../dafny-dependencies/StandardLibrary/src/Index.dfy \
 	  ./src/Index.dfy
 
 transpile_net_dependencies:
@@ -59,11 +59,12 @@ transpile_test_net:
 	  -vcsCores:$(CORES) \
 	  -compileTarget:cs \
 	  -spillTargetCode:3 \
+	  -runAllTests:1 \
 	  -compile:0 \
 	  -optimizeErasableDatatypeWrapper:0 \
 	  -useRuntimeLib \
 	  -out runtimes/net/tests/TestsFromDafny \
-	  -library $(PWD)src/Index.dfy \
+	  -library:$(PWD)src/Index.dfy \
 	  `find ./test -name '*.dfy'`
 
 setup_net:

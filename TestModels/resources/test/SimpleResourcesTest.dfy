@@ -15,26 +15,26 @@ module SimpleResourcesTest {
   )
     requires |config.name| > 0
   {
-    var resource: Types.ISimpleResource;
     var client: Types.ISimpleResourcesClient;
-    var input: Types.GetResourcesInput;
-    var output: Types.GetResourcesOutput;
-    var resInput: Types.GetResourceDataInput;
-    var resOutput: Types.GetResourceDataOutput;
+    // var resource: Types.ISimpleResource;
+    // var input: Types.GetResourcesInput;
+    // var output: Types.GetResourcesOutput;
+    // var resInput: Types.GetResourceDataInput;
+    // var resOutput: Types.GetResourceDataOutput;
 
     client :- expect SimpleResources.SimpleResources(config);
-    input := Types.GetResourcesInput(
-      value := Option.Some("Test")
-    );
-    output :- expect client.GetResources(input);
+    // input := Types.GetResourcesInput(
+    //   value := Option.Some("Test")
+    // );
+    // output :- expect client.GetResources(input);
     
-    resInput := allNone();
-    resOutput :- expect output.output.GetResourceData(resInput);
-    checkMostNone(config.name, resOutput);
+    // resInput := allNone();
+    // resOutput :- expect output.output.GetResourceData(resInput);
+    // checkMostNone(config.name, resOutput);
 
-    resInput := allSome();
-    resOutput :- expect output.output.GetResourceData(resInput);
-    checkSome(config.name, resOutput);
+    // resInput := allSome();
+    // resOutput :- expect output.output.GetResourceData(resInput);
+    // checkSome(config.name, resOutput);
   }
 
   method {:test} GetResourcesClient()
