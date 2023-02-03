@@ -1,7 +1,5 @@
 namespace simple.errors
 
-use simple.types.string#SimpleString
-
 @aws.polymorph#localService(
   sdkId: "SimpleErrors",
   config: SimpleErrorsConfig,
@@ -11,7 +9,7 @@ service SimpleErrors {
   resources: [],
   operations: [
     AlwaysError,
-    AlwaysMultipuleErrors,
+    AlwaysMultipleErrors,
     AlwaysNativeError,
   ],
   errors: [],
@@ -26,7 +24,7 @@ operation AlwaysError {
 }
 
 // This operation MUST ==> an list of errors
-operation AlwaysMultipuleErrors {
+operation AlwaysMultipleErrors {
   input: GetErrorsInput,
   output: GetErrorsOutput,
 }
@@ -38,13 +36,12 @@ operation AlwaysNativeError {
 }
 
 structure GetErrorsInput {
-  value: SimpleString,
+  value: String,
 }
 
 structure GetErrorsOutput {
-  value: SimpleString,
+  value: String,
 }
-
 
 // this SHOULD also alow no message,
 // and other/multipule values

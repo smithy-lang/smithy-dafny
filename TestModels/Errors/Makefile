@@ -11,7 +11,6 @@ polymorph_dafny :
 	--include-dafny $(DAFNY_ROOT)/../dafny-dependencies/StandardLibrary/src/Index.dfy \
 	--model $(DAFNY_ROOT)/Model \
 	--dependent-model $(DAFNY_ROOT)/../dafny-dependencies/Model \
-	--dependent-model $(DAFNY_ROOT)/../SimpleTypes/SimpleString/Model \
 	--namespace simple.errors"; \
 	./gradlew run --args="\
 	--output-dafny \
@@ -19,7 +18,6 @@ polymorph_dafny :
 	--include-dafny $(DAFNY_ROOT)/../dafny-dependencies/StandardLibrary/src/Index.dfy \
 	--model $(DAFNY_ROOT)/Model \
 	--dependent-model $(DAFNY_ROOT)/../dafny-dependencies/Model \
-	--dependent-model $(DAFNY_ROOT)/../SimpleTypes/SimpleString/Model \
 	--namespace simple.errors"; \
 
 polymorph_net :
@@ -69,7 +67,7 @@ transpile_implementation_net:
 		-useRuntimeLib \
 		-out runtimes/net/ImplementationFromDafny \
 		./src/Index.dfy \
-		-library:../../dafny-dependencies/StandardLibrary/src/Index.dfy \
+		-library:../dafny-dependencies/StandardLibrary/src/Index.dfy \
 
 
 transpile_test_net:
@@ -86,7 +84,7 @@ transpile_test_net:
 		-library:src/Index.dfy
 
 transpile_net_dependencies:
-	$(MAKE) -C ../../dafny-dependencies/StandardLibrary transpile_implementation_net \
+	$(MAKE) -C ../dafny-dependencies/StandardLibrary transpile_implementation_net \
 
 test_net:
 	dotnet run \
