@@ -1175,11 +1175,13 @@ public class DafnyApiCodegen {
         .of(
           TokenTree
             .of(
-              "predicate %s(%s, %s)"
+              "predicate %s(%s)"
                 .formatted(
                   nameResolver.ensuresPubliclyPredicate(operationShape),
-                  generateOperationParams(operationShape),
-                  generateOperationOutputParams(operationShape)
+                  generateOperationParams(operationShape)
+                    .append(generateOperationOutputParams(operationShape))
+                    .dropEmpty()
+                    .separated(TokenTree.of(","))
                 )
             )
         )
