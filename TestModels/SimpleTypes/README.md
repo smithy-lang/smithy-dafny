@@ -11,6 +11,9 @@ Please add new project directories for simple types under the base `SimpleTypes`
 ├── SimpleString //This is a project directory
 ├── SimpleBlob
 ├── SimpleBoolean
+├── SimpleByte
+├── SimpleDouble
+├── SimpleEnum
 ├── SimpleEnumV2
 ├── SimpleFloat
 ├── SimpleLong

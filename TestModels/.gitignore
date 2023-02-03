@@ -1,12 +1,14 @@
-# .NET Test Results
+# .NET and Dafny Test Results
 **/TestResults
 
-# Dafny Generated .NET
-**/ImplementationFromDafny.cs
-**/TestsFromDafny.cs
+# Polymorph Generated .NET
+**/runtimes/**/ImplementationFromDafny.cs
+**/runtimes/**/TestsFromDafny.cs
+**/runtimes/**/Generated
 
-# Smithy Generated .NET
-**/runtimes/net/Generated/*.cs
+# Polymorph Generated Dafny
+**/Model/*Types.dfy
+**/Model/*TypesWrapped.dfy
 
 # .NET Artifacts
 **/bin
@@ -14,7 +16,3 @@
 
 # JetBrains
 **/.idea/
-
-# Generated Dafny
-**/*Types.dfy
-**/*TypesWrapped.dfy
