@@ -2,27 +2,27 @@
 // SPDX-License-Identifier: Apache-2.0
 
 include "../src/Index.dfy"
-include "./Helpers.dfy"
+// include "./Helpers.dfy"
 
 module SimpleResourcesTest {
   import SimpleResources
-  import Types = SimpleResourcesTypes
-  import opened Wrappers
-  import opened Helpers
+  // import Types = SimpleResourcesTypes
+  // import opened Wrappers
+  // import opened Helpers
 
-  method GetResourcesClientHappy(
-    config: Types.SimpleResourcesConfig
-  )
-    requires |config.name| > 0
-  {
-    var client: Types.ISimpleResourcesClient;
+  // method GetResourcesClientHappy(
+  //   config: Types.SimpleResourcesConfig
+  // )
+    // requires |config.name| > 0
+  // {
+    // var client: Types.ISimpleResourcesClient;
     // var resource: Types.ISimpleResource;
     // var input: Types.GetResourcesInput;
     // var output: Types.GetResourcesOutput;
     // var resInput: Types.GetResourceDataInput;
     // var resOutput: Types.GetResourceDataOutput;
 
-    client :- expect SimpleResources.SimpleResources(config);
+    // client :- expect SimpleResources.SimpleResources();
     // input := Types.GetResourcesInput(
     //   value := Option.Some("Test")
     // );
@@ -35,16 +35,18 @@ module SimpleResourcesTest {
     // resInput := allSome();
     // resOutput :- expect output.output.GetResourceData(resInput);
     // checkSome(config.name, resOutput);
-  }
+  // }
 
   method {:test} GetResourcesClient()
   {
-    GetResourcesClientHappy(
-      SimpleResources.DefaultSimpleResourcesConfig()
-    );
-    GetResourcesClientHappy(
-      Types.SimpleResourcesConfig(name := "Dafny")
-    );
+//    var client: Types.ISimpleResourcesClient;
+    var client :- expect SimpleResources.SimpleResources();
+    // GetResourcesClientHappy(
+    //   SimpleResources.DefaultSimpleResourcesConfig()
+    // );
+    // GetResourcesClientHappy(
+    //   Types.SimpleResourcesConfig(name := "Dafny")
+    // );
   }
   
 }

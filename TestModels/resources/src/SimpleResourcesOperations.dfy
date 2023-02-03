@@ -38,6 +38,7 @@ module SimpleResourcesOperations refines AbstractSimpleResourcesOperations {
   ) returns (
     output: Result<GetResourcesOutput, Error>
   )
+    ensures output.Success? ==> output.value.output.ValidState()
   {
     :- Need(Config.ValidInternalConfig?(config),
       Types.SimpleResourceException(
