@@ -13,8 +13,6 @@ import software.amazon.smithy.model.shapes.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Objects;
-
 import static software.amazon.polymorph.smithydotnet.DotNetNameResolver.typeConverterForShape;
 import static software.amazon.polymorph.smithydotnet.TypeConversionDirection.FROM_DAFNY;
 import static software.amazon.polymorph.smithydotnet.TypeConversionDirection.TO_DAFNY;
@@ -70,16 +68,12 @@ public class LocalServiceWrappedConversionCodegen extends TypeConversionCodegen 
             // for more details.
 
             final ShapeId id = shape.getId();
-            if (
-                    id.getNamespace().equals("simple.resources") &&
-                            (
-                                    Objects.equals(id.getName(), "SimpleResource") ||
-                                            id.getName().equals("SimpleResourceReference")
-                            )
-            ) {
+            if (id.getNamespace().equals("simple.resources") && (
+                    id.getName().equals("SimpleResource") || id.getName().equals("SimpleResourceReference")
+            )) {
                 LOGGER.info("Trying to Use a NativeWrapper for SimpleResource Conversion");
-                LOGGER.info("Hard coded catch is executing.");
-                return super.buildConverterFromMethodBodies(shape, fromDafnyBody, toDafnyBody);
+                /*LOGGER.info("Hard coded catch is executing.");
+                return super.buildConverterFromMethodBodies(shape, fromDafnyBody, toDafnyBody);*/
             }
             final ShapeId resourceShapeId = shape.expectTrait(ReferenceTrait.class).getReferentId();
             final String dafnyType = nameResolver.dafnyTypeForShape(id);
