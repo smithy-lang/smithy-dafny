@@ -7,7 +7,7 @@ module SimpleErrorsImpl refines AbstractSimpleErrorsOperations  {
   {true}
   function ModifiesInternalConfig(config: InternalConfig) : set<object>
   {{}}
-  predicate AlwaysErrorEnsuresPublicly(input: GetErrorsInput, output: Result<GetErrorsOutput, Error>) {
+  predicate AlwaysErrorEnsuresPublicly(input: AlwaysErrorInput, output: Result<AlwaysErrorOutput, Error>) {
     true
   }
   predicate AlwaysMultipleErrorsEnsuresPublicly(input: GetErrorsInput, output: Result<GetErrorsOutput, Error>) {
@@ -16,12 +16,12 @@ module SimpleErrorsImpl refines AbstractSimpleErrorsOperations  {
   predicate AlwaysNativeErrorEnsuresPublicly(input: GetErrorsInput, output: Result<GetErrorsOutput, Error>) {
     true
   }
-  method AlwaysError ( config: InternalConfig,  input: GetErrorsInput )
-    returns (output: Result<GetErrorsOutput, Error>)
+  method AlwaysError ( config: InternalConfig,  input: AlwaysErrorInput )
+    returns (output: Result<AlwaysErrorOutput, Error>)
   {
     expect input.value.Some?;
 
-    var res := GetErrorsOutput(value := input.value);
+    var res := AlwaysErrorOutput(value := input.value);
     expect res.value.Some?;
 
     // Validate values: input is the same as the output

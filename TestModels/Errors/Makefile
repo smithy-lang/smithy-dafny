@@ -89,7 +89,7 @@ transpile_net_dependencies:
 test_net:
 	dotnet run \
 		--project runtimes/net/tests/ \
-		--framework net6.0
+		--framework net6.0 \
 
 setup_net:
 	dotnet restore runtimes/net/

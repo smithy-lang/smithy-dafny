@@ -15,12 +15,18 @@ module SimpleErrorsImplTest {
       modifies client.Modifies
       ensures client.ValidState()
     {
-      var e: string := "this is an error";
-      var convertedErrorInput: GetErrorsInput := SimpleErrors.Types.GetErrorsInput(value := Some(e));
+      var s: string := "this is an error";
+      var e: Error := SimpleErrors.Types.SimpleErrorsException(message := s);
+      var convertedErrorInput: AlwaysErrorInput := SimpleErrors.Types.AlwaysErrorInput(value := Some(e));
 
       var ret :- expect client.AlwaysError(convertedErrorInput);
 
-      expect ret.value.UnwrapOr("") == e;
+      // ret.value is Option
+      expect ret.value.Some?;
+      // ret.value.value is Error
+      expect ret.value.value == e;
+      expect ret.value.value.SimpleErrorsException?;
+      expect ret.value.value.message == s;
       print ret;
     }
 }

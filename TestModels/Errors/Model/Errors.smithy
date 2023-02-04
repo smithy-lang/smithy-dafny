@@ -19,8 +19,8 @@ structure SimpleErrorsConfig {}
 
 // This operation MUST ==> SimpleErrorsException
 operation AlwaysError {
-  input: GetErrorsInput,
-  output: GetErrorsOutput,
+  input: AlwaysErrorInput,
+  output: AlwaysErrorOutput,
 }
 
 // This operation MUST ==> an list of errors
@@ -43,8 +43,16 @@ structure GetErrorsOutput {
   value: String,
 }
 
+structure AlwaysErrorInput {
+  value: SimpleErrorsException,
+}
+
+structure AlwaysErrorOutput {
+  value: SimpleErrorsException,
+}
+
 // this SHOULD also alow no message,
-// and other/multipule values
+// and other/multiple values
 @error("client")
 structure SimpleErrorsException {
   @required

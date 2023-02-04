@@ -7,6 +7,6 @@ module WrappedSimpleErrorsTest {
     import opened Wrappers
     method{:test} GetErrors() {
         var client :- expect WrappedSimpleErrorsService.WrappedSimpleErrors();
-        SimpleErrorsImplTest.TestGetErrors(client);
+        SimpleErrorsImplTest.TestAlwaysError(client);
     }
 }
