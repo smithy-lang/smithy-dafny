@@ -31,7 +31,7 @@ module SimpleResources refines AbstractSimpleResourcesService
       );
       return Success(client);
     } else {
-      return Failure(Types.SimpleResourceException(
+      return Failure(Types.SimpleResourcesException(
         message := "Length of name must be greater than 0")
      );
     }

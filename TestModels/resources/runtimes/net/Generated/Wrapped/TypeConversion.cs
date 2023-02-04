@@ -127,23 +127,6 @@ namespace Simple.Resources.Wrapped
         ToDafny_N6_simple__N9_resources__S18_GetResourcesOutput__M6_output(value.Output));
     }
 
-    internal static Simple.Resources.SimpleResourceException
-      FromDafny_N6_simple__N9_resources__S23_SimpleResourceException(
-        Dafny.Simple.Resources.Types.Error_SimpleResourceException value)
-    {
-      return new Simple.Resources.SimpleResourceException(
-        FromDafny_N6_simple__N9_resources__S23_SimpleResourceException__M7_message(value._message)
-      );
-    }
-
-    internal static Dafny.Simple.Resources.Types.Error_SimpleResourceException
-      ToDafny_N6_simple__N9_resources__S23_SimpleResourceException(Simple.Resources.SimpleResourceException value)
-    {
-      return new Dafny.Simple.Resources.Types.Error_SimpleResourceException(
-        ToDafny_N6_simple__N9_resources__S23_SimpleResourceException__M7_message(value.Message)
-      );
-    }
-
     internal static Simple.Resources.SimpleResourcesConfig FromDafny_N6_simple__N9_resources__S21_SimpleResourcesConfig(
       Dafny.Simple.Resources.Types._ISimpleResourcesConfig value)
     {
@@ -159,6 +142,23 @@ namespace Simple.Resources.Wrapped
     {
       return new Dafny.Simple.Resources.Types.SimpleResourcesConfig(
         ToDafny_N6_simple__N9_resources__S21_SimpleResourcesConfig__M4_name(value.Name));
+    }
+
+    internal static Simple.Resources.SimpleResourcesException
+      FromDafny_N6_simple__N9_resources__S24_SimpleResourcesException(
+        Dafny.Simple.Resources.Types.Error_SimpleResourcesException value)
+    {
+      return new Simple.Resources.SimpleResourcesException(
+        FromDafny_N6_simple__N9_resources__S24_SimpleResourcesException__M7_message(value._message)
+      );
+    }
+
+    internal static Dafny.Simple.Resources.Types.Error_SimpleResourcesException
+      ToDafny_N6_simple__N9_resources__S24_SimpleResourcesException(Simple.Resources.SimpleResourcesException value)
+    {
+      return new Dafny.Simple.Resources.Types.Error_SimpleResourcesException(
+        ToDafny_N6_simple__N9_resources__S24_SimpleResourcesException__M7_message(value.Message)
+      );
     }
 
     internal static System.IO.MemoryStream FromDafny_N6_simple__N9_resources__S20_GetResourceDataInput__M9_blobValue(
@@ -333,18 +333,6 @@ namespace Simple.Resources.Wrapped
       return ToDafny_N6_simple__N9_resources__S23_SimpleResourceReference(value);
     }
 
-    internal static string FromDafny_N6_simple__N9_resources__S23_SimpleResourceException__M7_message(
-      Dafny.ISequence<char> value)
-    {
-      return FromDafny_N6_smithy__N3_api__S6_String(value);
-    }
-
-    internal static Dafny.ISequence<char>
-      ToDafny_N6_simple__N9_resources__S23_SimpleResourceException__M7_message(string value)
-    {
-      return ToDafny_N6_smithy__N3_api__S6_String(value);
-    }
-
     internal static string FromDafny_N6_simple__N9_resources__S21_SimpleResourcesConfig__M4_name(
       Dafny.ISequence<char> value)
     {
@@ -353,6 +341,18 @@ namespace Simple.Resources.Wrapped
 
     internal static Dafny.ISequence<char> ToDafny_N6_simple__N9_resources__S21_SimpleResourcesConfig__M4_name(
       string value)
+    {
+      return ToDafny_N6_smithy__N3_api__S6_String(value);
+    }
+
+    internal static string FromDafny_N6_simple__N9_resources__S24_SimpleResourcesException__M7_message(
+      Dafny.ISequence<char> value)
+    {
+      return FromDafny_N6_smithy__N3_api__S6_String(value);
+    }
+
+    internal static Dafny.ISequence<char>
+      ToDafny_N6_simple__N9_resources__S24_SimpleResourcesException__M7_message(string value)
     {
       return ToDafny_N6_smithy__N3_api__S6_String(value);
     }
@@ -427,8 +427,8 @@ namespace Simple.Resources.Wrapped
     {
       switch (value)
       {
-        case Dafny.Simple.Resources.Types.Error_SimpleResourceException dafnyVal:
-          return FromDafny_N6_simple__N9_resources__S23_SimpleResourceException(dafnyVal);
+        case Dafny.Simple.Resources.Types.Error_SimpleResourcesException dafnyVal:
+          return FromDafny_N6_simple__N9_resources__S24_SimpleResourcesException(dafnyVal);
         case Dafny.Simple.Resources.Types.Error_Opaque dafnyVal:
           return new OpaqueError(dafnyVal._obj);
         default:
@@ -441,8 +441,8 @@ namespace Simple.Resources.Wrapped
     {
       switch (value)
       {
-        case Simple.Resources.SimpleResourceException exception:
-          return ToDafny_N6_simple__N9_resources__S23_SimpleResourceException(exception);
+        case Simple.Resources.SimpleResourcesException exception:
+          return ToDafny_N6_simple__N9_resources__S24_SimpleResourcesException(exception);
         // OpaqueError is redundant, but listed for completeness.
         case OpaqueError exception:
           return new Dafny.Simple.Resources.Types.Error_Opaque(exception);
