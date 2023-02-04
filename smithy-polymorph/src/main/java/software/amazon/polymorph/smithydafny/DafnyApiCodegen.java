@@ -20,6 +20,7 @@ import software.amazon.smithy.aws.traits.*;
 
 import java.nio.file.Path;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -642,18 +643,21 @@ public class DafnyApiCodegen {
       final Boolean isFunction = nameResolver.isFunction(serviceShape, operationShape);
 
       final TokenTree config = implementationType.equals(ImplementationType.ABSTRACT)
-        ? TokenTree.of("config: %s, ".formatted(
+        ? TokenTree.of("config: %s ".formatted(
           DafnyNameResolver.internalConfigType()))
         : TokenTree.empty();
+
+      final TokenTree inputParamsTokenTree = generateOperationParams(operationShape);
 
       final TokenTree operationMethod = TokenTree
         .of(
           TokenTree
             .of(nameResolver.executableType(serviceShape, operationShape))
             .append(Token.of(nameResolver.publicMethodNameForOperation(operationShape)))
-            .append(generateOperationParams(operationShape)
+            .append(inputParamsTokenTree
               .prepend(config)
               .dropEmpty()
+              .separated(TokenTree.of(","))
               .parenthesized()),
           generateOperationReturnsClause(serviceShape, operationShape),
           isFunction
@@ -661,9 +665,9 @@ public class DafnyApiCodegen {
             : TokenTree
             .of(
               generateMutableInvariantForMethod(serviceShape, operationShapeId, implementationType),
-              generateEnsuresForEnsuresPubliclyPredicate(operationShapeId),
+              generateEnsuresForEnsuresPubliclyPredicate(operationShapeId, !inputParamsTokenTree.isEmpty()),
               !implementationType.equals(ImplementationType.ABSTRACT)
-                ? generateEnsuresHistoricalCallEvents(operationShapeId)
+                ? generateEnsuresHistoricalCallEvents(operationShapeId, !inputParamsTokenTree.isEmpty())
                 : TokenTree.empty()
             )
             .dropEmpty()
@@ -688,6 +692,7 @@ public class DafnyApiCodegen {
       final ShapeId operationShapeId
     ) {
         final OperationShape operationShape = model.expectShape(operationShapeId, OperationShape.class);
+        final TokenTree inputParamsTokenTree = generateOperationParams(operationShape);
 
         return TokenTree
           .of(
@@ -702,7 +707,7 @@ public class DafnyApiCodegen {
                   .of("output :=")
                   .append(Token.of(nameResolver.methodNameToImplementForResourceOperation(operationShape)))
                   .append(TokenTree.of("(input);")),
-                generateAccumulateHistoricalCallEvents(operationShapeId)
+                generateAccumulateHistoricalCallEvents(operationShapeId, !inputParamsTokenTree.isEmpty())
               )
               .lineSeparated()
               .braced(),
@@ -713,10 +718,10 @@ public class DafnyApiCodegen {
                 TokenTree
                   .of(nameResolver.executableType(serviceShape, operationShape))
                   .append(Token.of(nameResolver.methodNameToImplementForResourceOperation(operationShape)))
-                  .append(generateOperationParams(operationShape).parenthesized()),
+                  .append(inputParamsTokenTree.dropEmpty().parenthesized()),
                 generateOperationReturnsClause(serviceShape, operationShape),
                 generateMutableInvariantForMethod(serviceShape, operationShapeId, ImplementationType.DEVELOPER),
-                generateEnsuresForEnsuresPubliclyPredicate(operationShapeId),
+                generateEnsuresForEnsuresPubliclyPredicate(operationShapeId, !inputParamsTokenTree.isEmpty()),
                 generateEnsuresUnchangedCallHistory(operationShapeId)
               )
               .lineSeparated()
@@ -1121,7 +1126,7 @@ public class DafnyApiCodegen {
 
 
     private TokenTree generateEnsuresHistoricalCallEvents(
-        final ShapeId operationShapeId
+        final ShapeId operationShapeId, final boolean isInputParamRequired
     ) {
         final OperationShape operationShape = model.expectShape(operationShapeId, OperationShape.class);
 
@@ -1130,10 +1135,12 @@ public class DafnyApiCodegen {
             nameResolver.callHistoryFieldName(),
             nameResolver.historicalCallEventsForOperation(operationShape));
 
+        final String historicalCallEventDafnyString = isInputParamRequired ? "%s == old(%s) + [%s(input, output)]" : "%s == old(%s) + [%s((), output)]";
+
         return TokenTree
           .of(
             Token.of("ensures"),
-            Token.of("%s == old(%s) + [%s(input, output)]"
+            Token.of(historicalCallEventDafnyString
               .formatted(
                 historicalCallEventsForOperation,
                 historicalCallEventsForOperation,
@@ -1143,16 +1150,17 @@ public class DafnyApiCodegen {
     }
 
     private TokenTree generateAccumulateHistoricalCallEvents(
-      final ShapeId operationShapeId
+      final ShapeId operationShapeId, final boolean isInputParamRequired
     ) {
         final OperationShape operationShape = model.expectShape(operationShapeId, OperationShape.class);
+        final String historicalCallEventDafnyString = isInputParamRequired ? "%s := %s + [%s(input, output)];" : "%s := %s + [%s((), output)];";
         final String historicalCallEvents = "%s.%s"
           .formatted(
             nameResolver.callHistoryFieldName(),
             nameResolver.historicalCallEventsForOperation(operationShape));
         return TokenTree
           .of(
-            "%s := %s + [%s(input, output)];"
+            historicalCallEventDafnyString
               .formatted(
                 historicalCallEvents,
                 historicalCallEvents,
@@ -1190,13 +1198,12 @@ public class DafnyApiCodegen {
     }
 
     private TokenTree generateEnsuresForEnsuresPubliclyPredicate(
-      final ShapeId operationShapeId
+      final ShapeId operationShapeId, final boolean isInputParamRequired
     ) {
         final OperationShape operationShape = model.expectShape(operationShapeId, OperationShape.class);
-
+        final String ensureClauseDafnyString = isInputParamRequired ? "ensures %s(input, output)" : "ensures %s(output)";
         return TokenTree
-          .of(
-            "ensures %s(input, output)".formatted(nameResolver.ensuresPubliclyPredicate(operationShape))
+          .of(ensureClauseDafnyString.formatted(nameResolver.ensuresPubliclyPredicate(operationShape))
           );
     }
 
@@ -1345,6 +1352,11 @@ public class DafnyApiCodegen {
           )
           .lineSeparated();
 
+        final Function<ShapeId, Boolean> isInputParamRequiredForOperation = (operation) -> {
+            final TokenTree inputParamsTokenTree = generateOperationParams(model.expectShape(operation, OperationShape.class));
+            return !inputParamsTokenTree.isEmpty();
+        };
+
         final TokenTree methods = TokenTree
           .of(
             serviceShape
@@ -1358,7 +1370,7 @@ public class DafnyApiCodegen {
                     generateEnsuresPubliclyPredicate(serviceShape, operation),
                     TokenTree
                       .of(
-                        "{Operations.%s(input, output)}"
+                        (isInputParamRequiredForOperation.apply(operation) ? "{Operations.%s(input, output)}" : "{Operations.%s(output)}")
                           .formatted(
                             nameResolver.ensuresPubliclyPredicate(model.expectShape(operation, OperationShape.class))
                           )
@@ -1369,15 +1381,15 @@ public class DafnyApiCodegen {
                 TokenTree
                   .of(
                     nameResolver.isFunction(serviceShape, model.expectShape(operation, OperationShape.class))
-                    ? TokenTree.of("Operations.%s(config, input)".formatted(
+                    ? TokenTree.of((isInputParamRequiredForOperation.apply(operation) ? "Operations.%s(config, input)" : "Operations.%s(config)").formatted(
                       operation.getName()
                     ))
                     : TokenTree.of(
-                      Token.of("output := Operations.%s(config, input);"
+                      Token.of((isInputParamRequiredForOperation.apply(operation) ? "output := Operations.%s(config, input);" : "output := Operations.%s(config);")
                         .formatted(
                           operation.getName()
                         )),
-                        generateAccumulateHistoricalCallEvents(operation)
+                        generateAccumulateHistoricalCallEvents(operation, isInputParamRequiredForOperation.apply(operation))
                     )
                       .lineSeparated()
                   )
