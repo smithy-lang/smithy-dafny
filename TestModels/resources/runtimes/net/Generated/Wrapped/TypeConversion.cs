@@ -420,7 +420,7 @@ namespace Simple.Resources.Wrapped
     {
       // This is converting a reference type in a dependant module.
       // Therefore it defers to the dependant module for conversion
-      return Simple.Resources.TypeConversion.ToDafny_N6_simple__N9_resources__S23_SimpleResourceReference(value);
+      return new WrappedNativeWrapper_SimpleResource((SimpleResourceBase)value);
     }
 
     public static System.Exception FromDafny_CommonError(Dafny.Simple.Resources.Types._IError value)
