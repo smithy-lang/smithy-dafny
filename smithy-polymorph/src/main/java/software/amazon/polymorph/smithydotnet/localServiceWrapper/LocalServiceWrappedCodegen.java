@@ -42,10 +42,15 @@ public class LocalServiceWrappedCodegen extends ServiceCodegen {
       .map(ResourceShape::getId)
       .filter(resourceShapeId -> ModelUtils.isInServiceNamespace(resourceShapeId, serviceShape))
       .forEach(resourceShapeId -> {
-        if (shouldGenerateNativeWrapper(resourceShapeId) || isSimpleResource(resourceShapeId)) {
+          if (isSimpleResource(resourceShapeId)) {
+              boolean willGenerate = shouldGenerateNativeWrapper(resourceShapeId);
+              LOGGER.info("Will SimpleResources' Resource get a wrapper? %s".formatted(willGenerate));
+          }
+          if (shouldGenerateNativeWrapper(resourceShapeId)) {
+        /*if (shouldGenerateNativeWrapper(resourceShapeId) || isSimpleResource(resourceShapeId)) {
           if (isSimpleResource(resourceShapeId)) {
               LOGGER.info("Hard coded GenerateNativeWrapper for SimpleResource is executing.");
-          }
+          }*/
           // This SHOULD be a shared component without any changes.
           // If the wrapped version begins to differ from the native type
           // then this wrapped version begins to be a less valuable test bed.

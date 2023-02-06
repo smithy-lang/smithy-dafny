@@ -71,9 +71,9 @@ public class LocalServiceWrappedConversionCodegen extends TypeConversionCodegen 
             if (id.getNamespace().equals("simple.resources") && (
                     id.getName().equals("SimpleResource") || id.getName().equals("SimpleResourceReference")
             )) {
-                LOGGER.info("Trying to Use a NativeWrapper for SimpleResource Conversion");
-                /*LOGGER.info("Hard coded catch is executing.");
-                return super.buildConverterFromMethodBodies(shape, fromDafnyBody, toDafnyBody);*/
+                LOGGER.info("Trying to Use a NativeWrapper for SimpleResource Conversion.");
+                LOGGER.info("Hard coded catch is executing; preventing SimpleResources' Resource from using a wrapper.");
+                return super.buildConverterFromMethodBodies(shape, fromDafnyBody, toDafnyBody);
             }
             final ShapeId resourceShapeId = shape.expectTrait(ReferenceTrait.class).getReferentId();
             final String dafnyType = nameResolver.dafnyTypeForShape(id);
