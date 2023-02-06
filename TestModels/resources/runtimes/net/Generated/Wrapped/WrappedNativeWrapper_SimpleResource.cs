@@ -11,55 +11,56 @@ using Wrappers_Compile;
 
 namespace Simple.Resources.Wrapped
 {
-  internal class WrappedNativeWrapper_SimpleResource : Dafny.Simple.Resources.Types.ISimpleResource
-  {
-    internal readonly SimpleResourceBase _impl;
-
-    public WrappedNativeWrapper_SimpleResource(SimpleResourceBase nativeImpl)
+    internal class WrappedNativeWrapper_SimpleResource : Dafny.Simple.Resources.Types.ISimpleResource
     {
-      _impl = nativeImpl;
-    }
+        internal readonly SimpleResourceBase _impl;
 
-    public Wrappers_Compile._IResult<Dafny.Simple.Resources.Types._IGetResourceDataOutput,
-      Dafny.Simple.Resources.Types._IError> GetResourceData(Dafny.Simple.Resources.Types._IGetResourceDataInput input)
-    {
-      void validateOutput(Simple.Resources.GetResourceDataOutput nativeOutput)
-      {
-        try
+        public WrappedNativeWrapper_SimpleResource(SimpleResourceBase nativeImpl)
         {
-          nativeOutput.Validate();
+            _impl = nativeImpl;
+            Console.Write("\nCreating a WrappedNativeWrapper_SimpleResource\n");
         }
-        catch (ArgumentException e)
+
+        public Wrappers_Compile._IResult<Dafny.Simple.Resources.Types._IGetResourceDataOutput,
+          Dafny.Simple.Resources.Types._IError> GetResourceData(Dafny.Simple.Resources.Types._IGetResourceDataInput input)
         {
-          var message = $"Output of {_impl}._GetResourceData is invalid. {e.Message}";
-          throw new SimpleResourcesException(message);
+            void validateOutput(Simple.Resources.GetResourceDataOutput nativeOutput)
+            {
+                try
+                {
+                    nativeOutput.Validate();
+                }
+                catch (ArgumentException e)
+                {
+                    var message = $"Output of {_impl}._GetResourceData is invalid. {e.Message}";
+                    throw new SimpleResourcesException(message);
+                }
+            }
+
+            Simple.Resources.GetResourceDataInput nativeInput =
+              TypeConversion.FromDafny_N6_simple__N9_resources__S20_GetResourceDataInput(input);
+            try
+            {
+                Simple.Resources.GetResourceDataOutput nativeOutput = _impl.GetResourceData(nativeInput);
+                _ = nativeOutput ?? throw new SimpleResourcesException(
+                  $"{_impl}._GetResourceData returned null, should be {typeof(Simple.Resources.GetResourceDataOutput)}");
+                validateOutput(nativeOutput);
+                return Wrappers_Compile
+                  .Result<Dafny.Simple.Resources.Types._IGetResourceDataOutput, Dafny.Simple.Resources.Types._IError>
+                  .create_Success(TypeConversion.ToDafny_N6_simple__N9_resources__S21_GetResourceDataOutput(nativeOutput));
+            }
+            catch (Exception e)
+            {
+                return Wrappers_Compile
+                  .Result<Dafny.Simple.Resources.Types._IGetResourceDataOutput, Dafny.Simple.Resources.Types._IError>
+                  .create_Failure(TypeConversion.ToDafny_CommonError(e));
+            }
         }
-      }
 
-      Simple.Resources.GetResourceDataInput nativeInput =
-        TypeConversion.FromDafny_N6_simple__N9_resources__S20_GetResourceDataInput(input);
-      try
-      {
-        Simple.Resources.GetResourceDataOutput nativeOutput = _impl.GetResourceData(nativeInput);
-        _ = nativeOutput ?? throw new SimpleResourcesException(
-          $"{_impl}._GetResourceData returned null, should be {typeof(Simple.Resources.GetResourceDataOutput)}");
-        validateOutput(nativeOutput);
-        return Wrappers_Compile
-          .Result<Dafny.Simple.Resources.Types._IGetResourceDataOutput, Dafny.Simple.Resources.Types._IError>
-          .create_Success(TypeConversion.ToDafny_N6_simple__N9_resources__S21_GetResourceDataOutput(nativeOutput));
-      }
-      catch (Exception e)
-      {
-        return Wrappers_Compile
-          .Result<Dafny.Simple.Resources.Types._IGetResourceDataOutput, Dafny.Simple.Resources.Types._IError>
-          .create_Failure(TypeConversion.ToDafny_CommonError(e));
-      }
+        public Wrappers_Compile._IResult<Dafny.Simple.Resources.Types._IGetResourceDataOutput,
+          Dafny.Simple.Resources.Types._IError> GetResourceData_k(Dafny.Simple.Resources.Types._IGetResourceDataInput input)
+        {
+            throw new SimpleResourcesException("Not supported at this time.");
+        }
     }
-
-    public Wrappers_Compile._IResult<Dafny.Simple.Resources.Types._IGetResourceDataOutput,
-      Dafny.Simple.Resources.Types._IError> GetResourceData_k(Dafny.Simple.Resources.Types._IGetResourceDataInput input)
-    {
-      throw new SimpleResourcesException("Not supported at this time.");
-    }
-  }
 }
