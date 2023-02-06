@@ -6,18 +6,18 @@ namespace simple.extendable.resources
 )
 service SimpleExtendableResources {
   version: "2021-11-01",
-  Extendableresources: [],
-  operations: [ GetExtendableResources ],
+  resources: [ ExtendableResource ],
+  operations: [ UseExtendableResources ],
   errors: [],
 }
 
 structure SimpleExtendableResourcesConfig {}
 
 // This operation MUST
-// take an native implemented resource
+// take a native implemented resource
 // and input for that resource,
-// pass the input to the resource,
-// and return the resources output.
+// pass the input to the native resource,
+// and return the native resource's output.
 operation UseExtendableResources {
   input: UseExtendableResourcesInput,
   output: UseExtendableResourcesOutput,
@@ -32,7 +32,7 @@ structure UseExtendableResourcesInput {
 
 structure UseExtendableResourcesOutput {
   @required
-  output: GetResourceDataOutput
+  output: ExtendableResourceReference
 }
 
 @aws.polymorph#reference(resource: ExtendableResource)
@@ -46,6 +46,7 @@ resource ExtendableResource {
     AlwaysMultipuleErrors,
     AlwaysNativeError,
   ],
+  errors: [ SimpleResourceException ],
 }
 
 operation GetResourceData {
@@ -54,33 +55,33 @@ operation GetResourceData {
 }
 
 structure GetResourceDataInput {
-  blobValue: blob,
-  booleanValue: boolean,
-  stringValue: string,
-  byteValue: byte,
-  shortValue: short,
-  integerValue: integer,
-  longValue: long,
-  floatValue: float,
-  doubleValue: double,
-  bigIntegerValue: bigInteger,
-  bigDecimalValue: bigDecimal,
-  timestampValue: timestamp,
+  blobValue: Blob,
+  booleanValue: Boolean,
+  stringValue: String,
+  //  byteValue: Byte,
+  //  shortValue: Short,
+  integerValue: Integer,
+  longValue: Long,
+  //  floatValue: Float,
+  //  doubleValue: Double,
+  //  bigIntegerValue: BigInteger,
+  //  bigDecimalValue: BigDecimal,
+  //  timestampValue: Timestamp,
 }
 
 structure GetResourceDataOutput {
-  blobValue: blob,
-  booleanValue: boolean,
-  stringValue: string,
-  byteValue: byte,
-  shortValue: short,
-  integerValue: integer,
-  longValue: long,
-  floatValue: float,
-  doubleValue: double,
-  bigIntegerValue: bigInteger,
-  bigDecimalValue: bigDecimal,
-  timestampValue: timestamp,
+  blobValue: Blob,
+  booleanValue: Boolean,
+  stringValue: String,
+  //  byteValue: Byte,
+  //  shortValue: Short,
+  integerValue: Integer,
+  longValue: Long,
+  //  floatValue: Float,
+  //  doubleValue: Double,
+  //  bigIntegerValue: BigInteger,
+  //  bigDecimalValue: BigDecimal,
+  //  timestampValue: Timestamp,
 }
 
 // This operation MUST ==> SimpleResourceException
@@ -102,15 +103,13 @@ operation AlwaysNativeError {
 }
 
 structure GetExtendableResourceErrorsInput {
-  value: string,
+  value: String,
 }
 
 structure GetExtendableResourceErrorsOutput {
-  value: string,
+  value: String,
 }
 
-// this SHOULD also alow no message,
-// and other/multipule values
 @error("client")
 structure SimpleResourceException {
   @required
