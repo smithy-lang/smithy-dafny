@@ -31,8 +31,8 @@ structure AlwaysErrorOutput {
   value: SimpleErrorsException,
 }
 
-// Below this line I haven't changed yet.
-// Proposed for AlwaysMultipleErrors changes are in comments.
+// Below this line I haven't changed in code yet, as this would require more codegen debug.
+// I've thought about AlwaysMultipleErrors and outlined what I'd try in comments.
 // I haven't thought through AlwaysNativeError changes yet.
 
 // This operation MUST ==> an list of errors
@@ -74,6 +74,8 @@ structure GetErrorsOutput {
 // and other/multiple values
 @error("client")
 structure SimpleErrorsException {
-  @required
+  @required // Codegen fails if I remove @requried
   message: String,
+
+  // Codegen fails if I add more members
 }
