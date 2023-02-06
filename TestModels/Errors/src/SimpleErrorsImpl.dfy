@@ -38,10 +38,11 @@ module SimpleErrorsImpl refines AbstractSimpleErrorsOperations  {
     expect input.value.Some?;
 
     // TODO: Make this a Collection.
-    // As-is, generated Dotnet code does not understand how to convert a Collection error.
-    // (This is in the ToDafny_CommonError and FromDafny_CommonError functions.)
+    // As-is, generated Dotnet code does not understand how to convert a Collection error to/from Dafny code.
     // Generated code will throw a default OpaqueError when it sees a Collection.
-    // We would need to extend the codegen to handle Collections.
+    // (This is in the generated ToDafny_CommonError and FromDafny_CommonError functions.
+    //  These functions do not have code to convert Collections.
+    //  We would need to extend the codegen to generate code here to handle Collections.)
     var res := SimpleErrorsException(message := input.value.value);
 
     return Failure(res);
