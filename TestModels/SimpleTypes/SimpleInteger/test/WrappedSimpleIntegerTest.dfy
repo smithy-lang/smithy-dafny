@@ -9,5 +9,6 @@ module WrappedSimpleTypesIntegerTest {
         var client :- expect WrappedSimpleTypesIntegerService.WrappedSimpleInteger();
         SimpleIntegerImplTest.TestGetInteger(client);
         SimpleIntegerImplTest.TestGetIntegerKnownValue(client);
+        SimpleIntegerImplTest.TestGetIntegerEdgeCases(client);
     }
 }
