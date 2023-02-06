@@ -75,12 +75,7 @@ public record DafnyNameResolver(
                       .getMember(structure.getMemberNames().get(0))
                       .get();
                     yield baseTypeForShape(member.getTarget());
-                }
-                // Errors are modelled as extensions of the Error type
-                else if (shape.hasTrait(ErrorTrait.class)) {
-                    yield "Error";
-                }
-                else {
+                } else {
                     yield dafnyTypeNameShape(shape);
                 }
             }

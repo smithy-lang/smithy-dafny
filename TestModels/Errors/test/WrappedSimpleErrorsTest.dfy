@@ -8,5 +8,7 @@ module WrappedSimpleErrorsTest {
     method{:test} GetErrors() {
         var client :- expect WrappedSimpleErrorsService.WrappedSimpleErrors();
         SimpleErrorsImplTest.TestAlwaysError(client);
+        SimpleErrorsImplTest.TestAlwaysMultipleErrors(client);
+        SimpleErrorsImplTest.TestAlwaysNativeError(client);
     }
 }

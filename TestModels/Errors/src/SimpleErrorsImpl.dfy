@@ -7,7 +7,7 @@ module SimpleErrorsImpl refines AbstractSimpleErrorsOperations  {
   {true}
   function ModifiesInternalConfig(config: InternalConfig) : set<object>
   {{}}
-  predicate AlwaysErrorEnsuresPublicly(input: AlwaysErrorInput, output: Result<AlwaysErrorOutput, Error>) {
+  predicate AlwaysErrorEnsuresPublicly(input: GetErrorsInput, output: Result<GetErrorsOutput, Error>) {
     true
   }
   predicate AlwaysMultipleErrorsEnsuresPublicly(input: GetErrorsInput, output: Result<GetErrorsOutput, Error>) {
@@ -16,45 +16,48 @@ module SimpleErrorsImpl refines AbstractSimpleErrorsOperations  {
   predicate AlwaysNativeErrorEnsuresPublicly(input: GetErrorsInput, output: Result<GetErrorsOutput, Error>) {
     true
   }
-  method AlwaysError ( config: InternalConfig,  input: AlwaysErrorInput )
-    returns (output: Result<AlwaysErrorOutput, Error>)
-  {
+  method AlwaysError ( config: InternalConfig,  input: GetErrorsInput )
+    returns (output: Result<GetErrorsOutput, Error>)
+  {  
+    // TODO: input.value will not necessarily be non-empty when we remove the `@required` field from message.
+    // However, it is non-empty for now. So `expect .. Some?` is a valid statement.
+    // We should remove this check as part of SIM CrypTool-5085
     expect input.value.Some?;
 
-    var res := AlwaysErrorOutput(value := input.value);
-    expect res.value.Some?;
+    var res := SimpleErrorsException(message := input.value.value);
 
-    // Validate values: input is the same as the output
-    expect res.value.value == input.value.value;
-
-    return Success(res);
+    return Failure(res);
   }
 
   method AlwaysMultipleErrors ( config: InternalConfig,  input: GetErrorsInput )
     returns (output: Result<GetErrorsOutput, Error>)
   {
+    // TODO: input.value will not necessarily be non-empty when we remove the `@required` field from message.
+    // However, it is non-empty for now. So `expect .. Some?` is a valid statement.
+    // We should remove this check as part of SIM CrypTool-5085
     expect input.value.Some?;
 
-    var res := GetErrorsOutput(value := input.value);
-    expect res.value.Some?;
+    // TODO: Make this a Collection.
+    // As-is, generated Dotnet code does not understand how to convert a Collection error.
+    // (This is in the ToDafny_CommonError and FromDafny_CommonError functions.)
+    // Generated code will throw a default OpaqueError when it sees a Collection.
+    // We would need to extend the codegen to handle Collections.
+    var res := SimpleErrorsException(message := input.value.value);
 
-    // Validate values: input is the same as the output
-    expect res.value.value == input.value.value;
-
-    return Success(res);
+    return Failure(res);
   }
 
   method AlwaysNativeError ( config: InternalConfig,  input: GetErrorsInput )
     returns (output: Result<GetErrorsOutput, Error>)
   {
+    // TODO: input.value will not necessarily be non-empty when we remove the `@required` field from message.
+    // However, it is non-empty for now. So `expect .. Some?` is a valid statement.
+    // We should remove this check as part of SIM CrypTool-5085
     expect input.value.Some?;
 
-    var res := GetErrorsOutput(value := input.value);
-    expect res.value.Some?;
+    // TODO: Make this use Opaque error as part of SIM CrypTool-5085
+    var res := SimpleErrorsException(message := input.value.value);
 
-    // Validate values: input is the same as the output
-    expect res.value.value == input.value.value;
-
-    return Success(res);
+    return Failure(res);
   }
 }

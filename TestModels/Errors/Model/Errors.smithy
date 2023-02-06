@@ -12,54 +12,30 @@ service SimpleErrors {
     AlwaysMultipleErrors,
     AlwaysNativeError,
   ],
-  errors: [],
+  errors: [ SimpleErrorsException ],
 }
 
 structure SimpleErrorsConfig {}
 
 // This operation MUST ==> SimpleErrorsException
 operation AlwaysError {
-  input: AlwaysErrorInput,
-  output: AlwaysErrorOutput,
+  input: GetErrorsInput,
+  output: GetErrorsOutput,
+  errors: [ SimpleErrorsException ]
 }
-
-structure AlwaysErrorInput {
-  value: SimpleErrorsException,
-}
-
-structure AlwaysErrorOutput {
-  value: SimpleErrorsException,
-}
-
-// Below this line I haven't changed in code yet, as this would require more codegen debug.
-// I've thought about AlwaysMultipleErrors and outlined what I'd try in comments.
-// I haven't thought through AlwaysNativeError changes yet.
 
 // This operation MUST ==> an list of errors
 operation AlwaysMultipleErrors {
   input: GetErrorsInput,
   output: GetErrorsOutput,
+  errors: [ SimpleErrorsException ]
 }
-
-// operation AlwaysMultipleErrors {
-//   input: AlwaysMultipleErrorsInput,
-//   output: AlwaysMultipleErrorsOutput,
-// }
-
-// @sparse
-// list AlwaysMultipleErrorsInput {
-//   member: SimpleErrorsException,
-// }
-
-// @sparse
-// list AlwaysMultipleErrorsOutput {
-//   member: SimpleErrorsException,
-// }
 
 // This operation MUST ==> native unmodled error
 operation AlwaysNativeError {
   input: GetErrorsInput,
   output: GetErrorsOutput,
+  errors: [ SimpleErrorsException ]
 }
 
 structure GetErrorsInput {
@@ -70,12 +46,12 @@ structure GetErrorsOutput {
   value: String,
 }
 
-// this SHOULD also alow no message,
-// and other/multiple values
+// TODO: this SHOULD also allow no message (i.e. no `@required` trait) and other/multiple members.
+// However, codegen currently does not support either of these extensions.
+// We will come back and extend this exception after creating more of the testbed.
+// SIM: CrypTool-5085
 @error("client")
 structure SimpleErrorsException {
-  @required // Codegen fails if I remove @requried
+  @required
   message: String,
-
-  // Codegen fails if I add more members
 }
