@@ -16,6 +16,7 @@ jobs:
           TestModels/SimpleTypes/SimpleString,
           TestModels/SimpleTypes/SimpleBoolean,
           TestModels/SimpleTypes/SimpleBlob,
+          TestModels/SimpleTypes/SimpleEnum,
           TestModels/SimpleTypes/SimpleLong,
           TestModels/SimpleTypes/SimpleInteger,
           TestModels/Aggregate,
@@ -81,6 +82,7 @@ jobs:
         shell: bash
         working-directory: ./${{ matrix.library }}
         run: |
+          make polymorph_dafny
           make polymorph_net
 
       - name: Compile ${{ matrix.library }} implementation
