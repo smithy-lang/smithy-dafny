@@ -13,9 +13,9 @@ module SimpleRefinementImplTest {
     }
 
     method TestGetRefinement(client: ISimpleRefinementClient)
-    requires client.ValidState()
-    modifies client.Modifies
-    ensures client.ValidState()
+        requires client.ValidState()
+        modifies client.Modifies
+        ensures client.ValidState()
     {
         var res :- expect client.GetRefinement(GetRefinementInput(requiredString := "GetRefinement", optionalString := Some("GetRefinementOptional")));
         print res;
@@ -24,18 +24,18 @@ module SimpleRefinementImplTest {
     }
 
     method TestOnlyInput(client: ISimpleRefinementClient)
-    requires client.ValidState()
-    modifies client.Modifies
-    ensures client.ValidState()
+        requires client.ValidState()
+        modifies client.Modifies
+        ensures client.ValidState()
     {
         var res :- expect client.OnlyInput(OnlyInputInput(value := Some("InputValue")));
         print res;
     }
 
     method TestOnlyOutput(client: ISimpleRefinementClient)
-    requires client.ValidState()
-    modifies client.Modifies
-    ensures client.ValidState()
+        requires client.ValidState()
+        modifies client.Modifies
+        ensures client.ValidState()
     {
         var res :- expect client.OnlyOutput();
         print res;
@@ -43,9 +43,9 @@ module SimpleRefinementImplTest {
     }
 
     method TestReadonlyOperation(client: ISimpleRefinementClient)
-    requires client.ValidState()
-    modifies client.Modifies
-    ensures client.ValidState()
+        requires client.ValidState()
+        modifies client.Modifies
+        ensures client.ValidState()
     {
         var res :- expect client.ReadonlyOperation(ReadonlyOperationInput(requiredString := "Readonly", optionalString := Some("ReadonlyOptional")));
         print res;

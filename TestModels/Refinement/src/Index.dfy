@@ -7,8 +7,11 @@ module {:extern "Dafny.Simple.Refinement"} SimpleRefinement refines AbstractSimp
         SimpleRefinementConfig
     }
 
-    method SimpleRefinement(config: SimpleRefinementConfig)
-    returns (res: Result<SimpleRefinementClient, Error>) {
+    method SimpleRefinement(
+        config: SimpleRefinementConfig
+    ) returns (
+        res: Result<SimpleRefinementClient, Error>
+    ) {
         var client := new SimpleRefinementClient(Operations.Config);
         return Success(client);
     }

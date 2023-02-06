@@ -643,7 +643,7 @@ public class DafnyApiCodegen {
       final Boolean isFunction = nameResolver.isFunction(serviceShape, operationShape);
 
       final TokenTree config = implementationType.equals(ImplementationType.ABSTRACT)
-        ? TokenTree.of("config: %s ".formatted(
+        ? TokenTree.of("config: %s".formatted(
           DafnyNameResolver.internalConfigType()))
         : TokenTree.empty();
 

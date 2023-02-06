@@ -1,12 +1,12 @@
 # SimpleRefinement
 
-This project test the smithy behavior trait [readonly](https://smithy.io/1.0/spec/core/behavior-traits.html#readonly-trait) for the `polymorph_dafny` generated code. The `readonly` trait on a smithy operation that transalates to a `function method` in dafny. This means it can have only single expression. This is then transpiled to a target runtime, and each tests are executed - either as CI actions or manually.
+This project test the smithy behavior trait [readonly](https://smithy.io/1.0/spec/core/behavior-traits.html#readonly-trait) for the `polymorph_dafny` generated code. The `readonly` trait on a smithy operation that transalates to a `function method` in dafny. This means it can have only single expression. The project also tests `inputOnly`, `outputOnly` along with the base operation `getRefinement`. The project is then transpiled to a target runtime, and each tests are executed - either as CI actions or manually.
 
 ## Build
 ### .NET
 1. Generate the Wrappers using `polymorph`
 ```
-make polymorph_net
+make polymorph_dafny polymorph_net
 ```
 
 2. Transpile the tests (and implementation) to the target runtime.

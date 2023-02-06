@@ -26,14 +26,21 @@ module SimpleRefinementImpl refines AbstractSimpleRefinementOperations {
         return Success(res);
     }
 
-    method OnlyInput(config: InternalConfig, input: OnlyInputInput )
-    returns (output: Result<(), Error>) {
+    method OnlyInput(
+        config: InternalConfig,
+        input: OnlyInputInput
+    ) returns (
+        output: Result<(), Error>
+    ) {
         print input;
         return Success(());
     }
 
-    method OnlyOutput(config: InternalConfig)
-    returns (output: Result<OnlyOutputOutput, Error>) {
+    method OnlyOutput(
+        config: InternalConfig
+    ) returns (
+        output: Result<OnlyOutputOutput, Error>
+    ) {
         var res := OnlyOutputOutput(value := Some("Hello World"));
         return Success(res);
     }

@@ -28,13 +28,4 @@
     <ProjectReference Include="../../../dafny-dependencies/StandardLibrary/runtimes/net/STD.csproj" />
   </ItemGroup>
 
-  <!--
-    TODO .NET assemblies are expected to have an ICON.
-    This MUST be replaced before launch.
-  -->
-  <!-- <ItemGroup>
-    <None Include="..\icon.png" Pack="true" PackagePath="" />
-    <None Include="..\README.md" Pack="true" PackagePath="" />
-  </ItemGroup> -->
-
 </Project>
