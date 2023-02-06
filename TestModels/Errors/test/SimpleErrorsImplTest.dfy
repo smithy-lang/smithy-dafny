@@ -5,7 +5,7 @@ module SimpleErrorsImplTest {
     import StandardLibrary.UInt
     import opened SimpleErrorsTypes
     import opened Wrappers
-    method{:test} GetErrors(){
+    method{:test} TestErrors(){
         var client :- expect SimpleErrors.SimpleErrors();
         TestAlwaysError(client);
     }

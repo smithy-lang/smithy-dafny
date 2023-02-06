@@ -19,6 +19,7 @@ import software.amazon.polymorph.utils.Token;
 import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.*;
+import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.ReadonlyTrait;
 import software.amazon.smithy.utils.StringUtils;
 
@@ -74,7 +75,12 @@ public record DafnyNameResolver(
                       .getMember(structure.getMemberNames().get(0))
                       .get();
                     yield baseTypeForShape(member.getTarget());
-                } else {
+                }
+                // Errors are modelled as extensions of the Error type
+                else if (shape.hasTrait(ErrorTrait.class)) {
+                    yield "Error";
+                }
+                else {
                     yield dafnyTypeNameShape(shape);
                 }
             }

@@ -23,11 +23,38 @@ operation AlwaysError {
   output: AlwaysErrorOutput,
 }
 
+structure AlwaysErrorInput {
+  value: SimpleErrorsException,
+}
+
+structure AlwaysErrorOutput {
+  value: SimpleErrorsException,
+}
+
+// Below this line I haven't changed yet.
+// Proposed for AlwaysMultipleErrors changes are in comments.
+// I haven't thought through AlwaysNativeError changes yet.
+
 // This operation MUST ==> an list of errors
 operation AlwaysMultipleErrors {
   input: GetErrorsInput,
   output: GetErrorsOutput,
 }
+
+// operation AlwaysMultipleErrors {
+//   input: AlwaysMultipleErrorsInput,
+//   output: AlwaysMultipleErrorsOutput,
+// }
+
+// @sparse
+// list AlwaysMultipleErrorsInput {
+//   member: SimpleErrorsException,
+// }
+
+// @sparse
+// list AlwaysMultipleErrorsOutput {
+//   member: SimpleErrorsException,
+// }
 
 // This operation MUST ==> native unmodled error
 operation AlwaysNativeError {
@@ -41,14 +68,6 @@ structure GetErrorsInput {
 
 structure GetErrorsOutput {
   value: String,
-}
-
-structure AlwaysErrorInput {
-  value: SimpleErrorsException,
-}
-
-structure AlwaysErrorOutput {
-  value: SimpleErrorsException,
 }
 
 // this SHOULD also alow no message,
