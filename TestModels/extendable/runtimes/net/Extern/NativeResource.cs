@@ -1,12 +1,14 @@
+using Dafny.Simple.Extendable.Resources;
+using Dafny.Simple.Extendable.Resources.Types;
 using Simple.Extendable.Resources;
 
-namespace DefaultNamespace
+namespace Simple.Extendable.Resources
 {
     public class NativeResource : ExtendableResourceBase
     {
-        private readonly ExtendableResourceBase _impl;
+        private readonly IExtendableResource _impl;
 
-        public NativeResource(ExtendableResourceBase nativeImpl)
+        public NativeResource(IExtendableResource nativeImpl)
         {
             this._impl = nativeImpl;
         }
@@ -28,6 +30,19 @@ namespace DefaultNamespace
         protected override GetExtendableResourceErrorsOutput _AlwaysOpaqueError(GetExtendableResourceErrorsInput input)
         {
             return this._impl.AlwaysOpaqueError(input);
+        }
+
+        public static NativeResource NativeFactory()
+        {
+          ExtendableResource_Compile.ExtendableResource _nw2 = new ExtendableResource_Compile.ExtendableResource();
+          IExtendableResource dafnyResource = TypeConversion.FromDafny_N6_simple__N10_extendable__N9_resources__S27_ExtendableResourceReference(_nw2);
+          return new NativeResource(dafnyResource);
+        }
+
+        public static Dafny.Simple.Extendable.Resources.Types.IExtendableResource DafnyFactory()
+        {
+          return TypeConversion.ToDafny_N6_simple__N10_extendable__N9_resources__S27_ExtendableResourceReference(
+            NativeFactory());
         }
     }
 }
