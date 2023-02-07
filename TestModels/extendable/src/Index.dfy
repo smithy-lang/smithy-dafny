@@ -4,7 +4,9 @@
 include "../Model/SimpleExtendableResourcesTypes.dfy"
 include "./SimpleExtendableResourcesOperations.dfy"
 
-module SimpleExtendableResources refines AbstractSimpleExtendableResourcesService
+module
+  {:extern "Dafny.Simple.Extendable.Resources"}
+  SimpleExtendableResources refines AbstractSimpleExtendableResourcesService
 {
   import Operations = SimpleExtendableResourcesOperations
   
