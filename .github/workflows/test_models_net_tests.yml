@@ -19,6 +19,7 @@ jobs:
           TestModels/SimpleTypes/SimpleEnum,
           TestModels/SimpleTypes/SimpleLong,
           TestModels/Aggregate,
+          TestModels/SimpleErrors,
         ]
         dotnet-version: [ '6.0.x' ]
         os: [ ubuntu-latest ]

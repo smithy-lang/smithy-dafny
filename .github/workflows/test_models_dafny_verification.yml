@@ -19,6 +19,7 @@ jobs:
           TestModels/SimpleTypes/SimpleEnum,
           TestModels/SimpleTypes/SimpleLong,
           TestModels/Aggregate,
+          TestModels/SimpleErrors,
         ]
         os: [ ubuntu-latest ]
     runs-on: ${{ matrix.os }}
