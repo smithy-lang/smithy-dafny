@@ -13,13 +13,14 @@ jobs:
       matrix:
         library: [
           TestModels/dafny-dependencies/StandardLibrary, # This stores current Polymorph dependencies that all TestModels depend on
-          TestModels/SimpleTypes/SimpleString,
+          TestModels/Aggregate,
+          TestModels/SimpleErrors,
           TestModels/SimpleTypes/SimpleBoolean,
           TestModels/SimpleTypes/SimpleBlob,
           TestModels/SimpleTypes/SimpleEnum,
+          TestModels/SimpleTypes/SimpleInteger,
           TestModels/SimpleTypes/SimpleLong,
-          TestModels/Aggregate,
-          TestModels/SimpleErrors,
+          TestModels/SimpleTypes/SimpleString,
         ]
         os: [ ubuntu-latest ]
     runs-on: ${{ matrix.os }}
