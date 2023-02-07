@@ -552,17 +552,6 @@ public class TypeConversionCodegen {
                     final String dafnyMemberName = nameResolver.unionMemberName(memberShape);
                     final String memberFromDafnyConverterName = typeConverterForShape(
                             memberShape.getId(), TO_DAFNY);
-                    // When generating the toDafnyBody, there is an edge case for AttributeValue.
-                    // When checking if this a certain type the ddb sdk for net only gas value.is*Set for
-                    // lists, map, and boolean types - it does not have one for the remaining attribute union types
-                    final Set<String> checkedAttributeValues = Set.of("L", "M", "BOOL");
-                    // In v2 of the net sdk for ddb the only Is%sSet apis are for L, M, or BOOL other unions do
-                    // not exist.
-                    if (StringUtils.equals(memberShape.getId().getName(), "AttributeValue")) {
-                        if (!checkedAttributeValues.contains(propertyName)) {
-                            return TokenTree.of("");
-                        }
-                    }
                     // Dafny generates just "create" instead of "create_FOOBAR" if there's only one ctor
                     String createSuffixUnMod = defNames.size() == 1
                             ? ""
@@ -575,6 +564,27 @@ public class TypeConversionCodegen {
                     }
                     final String createSuffix = createSuffixUnMod;
                     if (StringUtils.equals(memberShape.getId().getName(), "AttributeValue")) {
+
+                        // When generating the toDafnyBody, there is an edge case for AttributeValue.
+                        // When checking if this a certain type the ddb sdk for net only gas value.is*Set for
+                        // lists, map, and boolean types - it does not have one for the remaining attribute union types
+                        final Set<String> checkedAttributeValues = Set.of("L", "M", "BOOL");
+
+                        // In v2 of the net sdk for ddb the only Is%sSet apis are for L, M, or BOOL other unions do
+                        // not exist.
+                        if (!checkedAttributeValues.contains(propertyName)) {
+                            return TokenTree
+                            .of("if (value.%s != null)".formatted(propertyName))
+                            .append(TokenTree.of("return %s.create%s(%s(value.%s));"
+                                                    .formatted(
+                                                            dafnyUnionConcreteType,
+                                                            createSuffix,
+                                                            memberFromDafnyConverterName,
+                                                            propertyName
+                                                    ))
+                                            .lineSeparated()
+                                            .braced());
+                        }
                         return TokenTree
                                .of("if (value.Is%sSet)".formatted(propertyName))
                                .append(TokenTree.of("return %s.create%s(%s(value.%s));"
@@ -587,6 +597,7 @@ public class TypeConversionCodegen {
                                        .lineSeparated()
                                        .braced());
                     } else {
+                        // This code is for legacy reasons and should be dropped after we are sure no sdk need this code.
                         return TokenTree
                                 .of("if (value.IsSet%s())".formatted(propertyName))
                                 .append(TokenTree.of("return %s.create%s(%s(value.%s));"
