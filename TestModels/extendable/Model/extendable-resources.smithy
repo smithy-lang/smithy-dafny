@@ -42,9 +42,9 @@ structure ExtendableResourceReference {}
 resource ExtendableResource {
   operations: [
     GetResourceData,
-    AlwaysError,
+    AlwaysModeledError,
     AlwaysMultipuleErrors,
-    AlwaysNativeError,
+    AlwaysOpaqueError,
   ],
   errors: [ SimpleResourceException ],
 }
@@ -85,7 +85,7 @@ structure GetResourceDataOutput {
 }
 
 // This operation MUST ==> SimpleResourceException
-operation AlwaysError {
+operation AlwaysModeledError {
   input: GetExtendableResourceErrorsInput,
   output: GetExtendableResourceErrorsOutput,
 }
@@ -97,7 +97,7 @@ operation AlwaysMultipuleErrors {
 }
 
 // This operation MUST ==> native unmodled error
-operation AlwaysNativeError {
+operation AlwaysOpaqueError {
   input: GetExtendableResourceErrorsInput,
   output: GetExtendableResourceErrorsOutput,
 }
