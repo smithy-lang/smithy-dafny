@@ -43,7 +43,7 @@ resource ExtendableResource {
   operations: [
     GetResourceData,
     AlwaysModeledError,
-    AlwaysMultipuleErrors,
+    AlwaysMultipleErrors,
     AlwaysOpaqueError,
   ],
   errors: [ SimpleExtendableResourcesException ],
@@ -91,7 +91,7 @@ operation AlwaysModeledError {
 }
 
 // This operation MUST ==> an list of errors
-operation AlwaysMultipuleErrors {
+operation AlwaysMultipleErrors {
   input: GetExtendableResourceErrorsInput,
   output: GetExtendableResourceErrorsOutput,
 }

@@ -28,12 +28,12 @@ module ExtendableResource {
       Modifies := {History};
     }
 
-    predicate AlwaysMultipuleErrorsEnsuresPublicly(
+    predicate AlwaysMultipleErrorsEnsuresPublicly(
       input: Types.GetExtendableResourceErrorsInput,
       output: Result<Types.GetExtendableResourceErrorsOutput, Types.Error>
     ) {true}
 
-    method AlwaysMultipuleErrors'(
+    method AlwaysMultipleErrors'(
       input: Types.GetExtendableResourceErrorsInput
     ) returns (
       output: Result<Types.GetExtendableResourceErrorsOutput, Types.Error>
@@ -42,7 +42,7 @@ module ExtendableResource {
       modifies Modifies - {History}
       decreases Modifies - {History}
       ensures ValidState()
-      ensures AlwaysMultipuleErrorsEnsuresPublicly(input, output)
+      ensures AlwaysMultipleErrorsEnsuresPublicly(input, output)
       ensures unchanged(History)
     {
       var message: object := new OpaqueMessage();
