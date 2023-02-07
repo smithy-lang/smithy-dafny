@@ -647,14 +647,12 @@ public class DafnyApiCodegen {
           DafnyNameResolver.internalConfigType()))
         : TokenTree.empty();
 
-      final TokenTree inputParamsTokenTree = generateOperationParams(operationShape);
-
       final TokenTree operationMethod = TokenTree
         .of(
           TokenTree
             .of(nameResolver.executableType(serviceShape, operationShape))
             .append(Token.of(nameResolver.publicMethodNameForOperation(operationShape)))
-            .append(inputParamsTokenTree
+            .append(generateOperationParams(operationShape)
               .prepend(config)
               .dropEmpty()
               .separated(TokenTree.of(","))
@@ -665,9 +663,9 @@ public class DafnyApiCodegen {
             : TokenTree
             .of(
               generateMutableInvariantForMethod(serviceShape, operationShapeId, implementationType),
-              generateEnsuresForEnsuresPubliclyPredicate(operationShapeId, !inputParamsTokenTree.isEmpty()),
+              generateEnsuresForEnsuresPubliclyPredicate(operationShapeId),
               !implementationType.equals(ImplementationType.ABSTRACT)
-                ? generateEnsuresHistoricalCallEvents(operationShapeId, !inputParamsTokenTree.isEmpty())
+                ? generateEnsuresHistoricalCallEvents(operationShapeId)
                 : TokenTree.empty()
             )
             .dropEmpty()
@@ -692,7 +690,6 @@ public class DafnyApiCodegen {
       final ShapeId operationShapeId
     ) {
         final OperationShape operationShape = model.expectShape(operationShapeId, OperationShape.class);
-        final TokenTree inputParamsTokenTree = generateOperationParams(operationShape);
 
         return TokenTree
           .of(
@@ -707,7 +704,7 @@ public class DafnyApiCodegen {
                   .of("output :=")
                   .append(Token.of(nameResolver.methodNameToImplementForResourceOperation(operationShape)))
                   .append(TokenTree.of("(input);")),
-                generateAccumulateHistoricalCallEvents(operationShapeId, !inputParamsTokenTree.isEmpty())
+                generateAccumulateHistoricalCallEvents(operationShapeId)
               )
               .lineSeparated()
               .braced(),
@@ -718,10 +715,10 @@ public class DafnyApiCodegen {
                 TokenTree
                   .of(nameResolver.executableType(serviceShape, operationShape))
                   .append(Token.of(nameResolver.methodNameToImplementForResourceOperation(operationShape)))
-                  .append(inputParamsTokenTree.dropEmpty().parenthesized()),
+                  .append(generateOperationParams(operationShape).dropEmpty().parenthesized()),
                 generateOperationReturnsClause(serviceShape, operationShape),
                 generateMutableInvariantForMethod(serviceShape, operationShapeId, ImplementationType.DEVELOPER),
-                generateEnsuresForEnsuresPubliclyPredicate(operationShapeId, !inputParamsTokenTree.isEmpty()),
+                generateEnsuresForEnsuresPubliclyPredicate(operationShapeId),
                 generateEnsuresUnchangedCallHistory(operationShapeId)
               )
               .lineSeparated()
@@ -1126,7 +1123,7 @@ public class DafnyApiCodegen {
 
 
     private TokenTree generateEnsuresHistoricalCallEvents(
-        final ShapeId operationShapeId, final boolean isInputParamRequired
+        final ShapeId operationShapeId
     ) {
         final OperationShape operationShape = model.expectShape(operationShapeId, OperationShape.class);
 
@@ -1135,7 +1132,7 @@ public class DafnyApiCodegen {
             nameResolver.callHistoryFieldName(),
             nameResolver.historicalCallEventsForOperation(operationShape));
 
-        final String historicalCallEventDafnyString = isInputParamRequired ? "%s == old(%s) + [%s(input, output)]" : "%s == old(%s) + [%s((), output)]";
+        final String historicalCallEventDafnyString = operationShape.getInput().isPresent() ? "%s == old(%s) + [%s(input, output)]" : "%s == old(%s) + [%s((), output)]";
 
         return TokenTree
           .of(
@@ -1150,10 +1147,10 @@ public class DafnyApiCodegen {
     }
 
     private TokenTree generateAccumulateHistoricalCallEvents(
-      final ShapeId operationShapeId, final boolean isInputParamRequired
+      final ShapeId operationShapeId
     ) {
         final OperationShape operationShape = model.expectShape(operationShapeId, OperationShape.class);
-        final String historicalCallEventDafnyString = isInputParamRequired ? "%s := %s + [%s(input, output)];" : "%s := %s + [%s((), output)];";
+        final String historicalCallEventDafnyString = operationShape.getInput().isPresent() ? "%s := %s + [%s(input, output)];" : "%s := %s + [%s((), output)];";
         final String historicalCallEvents = "%s.%s"
           .formatted(
             nameResolver.callHistoryFieldName(),
@@ -1198,10 +1195,10 @@ public class DafnyApiCodegen {
     }
 
     private TokenTree generateEnsuresForEnsuresPubliclyPredicate(
-      final ShapeId operationShapeId, final boolean isInputParamRequired
+      final ShapeId operationShapeId
     ) {
         final OperationShape operationShape = model.expectShape(operationShapeId, OperationShape.class);
-        final String ensureClauseDafnyString = isInputParamRequired ? "ensures %s(input, output)" : "ensures %s(output)";
+        final String ensureClauseDafnyString = operationShape.getInput().isPresent() ? "ensures %s(input, output)" : "ensures %s(output)";
         return TokenTree
           .of(ensureClauseDafnyString.formatted(nameResolver.ensuresPubliclyPredicate(operationShape))
           );
@@ -1353,8 +1350,7 @@ public class DafnyApiCodegen {
           .lineSeparated();
 
         final Function<ShapeId, Boolean> isInputParamRequiredForOperation = (operation) -> {
-            final TokenTree inputParamsTokenTree = generateOperationParams(model.expectShape(operation, OperationShape.class));
-            return !inputParamsTokenTree.isEmpty();
+            return model.expectShape(operation, OperationShape.class).getInput().isPresent();
         };
 
         final TokenTree methods = TokenTree
@@ -1389,7 +1385,7 @@ public class DafnyApiCodegen {
                         .formatted(
                           operation.getName()
                         )),
-                        generateAccumulateHistoricalCallEvents(operation, isInputParamRequiredForOperation.apply(operation))
+                        generateAccumulateHistoricalCallEvents(operation)
                     )
                       .lineSeparated()
                   )
