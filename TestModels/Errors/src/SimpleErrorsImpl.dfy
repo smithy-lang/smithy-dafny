@@ -37,13 +37,7 @@ module SimpleErrorsImpl refines AbstractSimpleErrorsOperations  {
     // We should remove this check as part of SIM CrypTool-5085
     expect input.value.Some?;
 
-    // TODO: Make this a Collection.
-    // As-is, generated Dotnet code does not understand how to convert a Collection error to/from Dafny code.
-    // Generated code will throw a default OpaqueError when it sees a Collection.
-    // (This is in the generated ToDafny_CommonError and FromDafny_CommonError functions.
-    //  These functions do not have code to convert Collections.
-    //  We would need to extend the codegen to generate code here to handle Collections.)
-    var res := SimpleErrorsException(message := input.value.value);
+    var res := Error.Collection( list := [ SimpleErrorsException(message := input.value.value) ] );
 
     return Failure(res);
   }
@@ -51,14 +45,17 @@ module SimpleErrorsImpl refines AbstractSimpleErrorsOperations  {
   method AlwaysNativeError ( config: InternalConfig,  input: GetErrorsInput )
     returns (output: Result<GetErrorsOutput, Error>)
   {
-    // TODO: input.value will not necessarily be non-empty when we remove the `@required` field from message.
-    // However, it is non-empty for now. So `expect .. Some?` is a valid statement.
-    // We should remove this check as part of SIM CrypTool-5085
-    expect input.value.Some?;
+      // The SomeOpaqueGeneratedTypeForTesting class is standing in as an extern.
+      // Ideally, this would be modelled as an extern, but this is good enough for testing for now.
+      // TODO: Rewrite this as an actual extern.
+      var opaqueObject := new SomeOpaqueGeneratedTypeForTesting();
 
-    // TODO: Make this use Opaque error as part of SIM CrypTool-5085
-    var res := SimpleErrorsException(message := input.value.value);
+      var res := Error.Opaque(obj := opaqueObject );
 
-    return Failure(res);
+      return Failure(res);
+  }
+
+  class SomeOpaqueGeneratedTypeForTesting {
+    constructor(){}
   }
 }
