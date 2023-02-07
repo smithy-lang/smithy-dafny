@@ -93,7 +93,7 @@ module ExtendableResource {
       ensures unchanged(History)
       decreases Modifies - {History}
     {
-      return Failure(Types.SimpleResourceException(message := "Hard Coded Exception in src/dafny"));
+      return Failure(Types.SimpleExtendableResourcesException(message := "Hard Coded Exception in src/dafny"));
     }
     
     predicate AlwaysOpaqueErrorEnsuresPublicly(

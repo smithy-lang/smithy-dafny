@@ -29,7 +29,7 @@ module SimpleExtendableResources refines AbstractSimpleExtendableResourcesServic
       );
       return Success(client);
     } else {
-      return Failure(Types.SimpleResourceException(
+      return Failure(Types.SimpleExtendableResourcesException(
         message := "Invalid Internal Config. Should be impossible.")
       );
     }

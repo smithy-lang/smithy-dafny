@@ -46,7 +46,7 @@ resource ExtendableResource {
     AlwaysMultipuleErrors,
     AlwaysOpaqueError,
   ],
-  errors: [ SimpleResourceException ],
+  errors: [ SimpleExtendableResourcesException ],
 }
 
 operation GetResourceData {
@@ -84,7 +84,7 @@ structure GetResourceDataOutput {
   //  timestampValue: Timestamp,
 }
 
-// This operation MUST ==> SimpleResourceException
+// This operation MUST ==> SimpleExtendableResourcesException
 operation AlwaysModeledError {
   input: GetExtendableResourceErrorsInput,
   output: GetExtendableResourceErrorsOutput,
@@ -111,7 +111,7 @@ structure GetExtendableResourceErrorsOutput {
 }
 
 @error("client")
-structure SimpleResourceException {
+structure SimpleExtendableResourcesException {
   @required
   message: String,
 }
