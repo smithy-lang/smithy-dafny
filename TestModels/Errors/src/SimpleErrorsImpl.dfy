@@ -46,11 +46,11 @@ module SimpleErrorsImpl refines AbstractSimpleErrorsOperations  {
     returns (output: Result<GetErrorsOutput, Error>)
   {
       // The SomeOpaqueGeneratedTypeForTesting class is standing in as an extern.
-      // Ideally, this would be modelled as an extern, but this is good enough for testing for now.
+      // Ideally, this would be modelled as an extern, but this is "good enough".
       // TODO: Rewrite this as an actual extern.
       var opaqueObject := new SomeOpaqueGeneratedTypeForTesting();
 
-      var res := Error.Opaque(obj := opaqueObject );
+      var res := Error.Opaque( obj := opaqueObject );
 
       return Failure(res);
   }

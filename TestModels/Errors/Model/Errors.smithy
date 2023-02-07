@@ -28,7 +28,6 @@ operation AlwaysError {
 operation AlwaysMultipleErrors {
   input: GetErrorsInput,
   output: GetErrorsOutput,
-  errors: [ SimpleErrorsException ]
 }
 
 // This operation MUST ==> native unmodled error
@@ -36,7 +35,6 @@ operation AlwaysMultipleErrors {
 operation AlwaysNativeError {
   input: GetErrorsInput,
   output: GetErrorsOutput,
-  errors: [ SimpleErrorsException ]
 }
 
 structure GetErrorsInput {
