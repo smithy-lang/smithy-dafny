@@ -31,7 +31,6 @@ operation AlwaysMultipleErrors {
 }
 
 // This operation MUST ==> native unmodled error
-// This will be done as part of SIM CrypTool-5085
 operation AlwaysNativeError {
   input: GetErrorsInput,
   output: GetErrorsOutput,
