@@ -52,7 +52,9 @@ module NativeExtendableResourceTest {
     // As such, even though AlwaysMutlipleErrors correctly returns a Collection in Dafny,
     // the generated .NET code botches the conversion,
     // and lumps it as an Opaue Exception.
-    // TODO: Once smithy-dotnet handles Collections, replace
+    // TODO:
+    // Once https://github.com/awslabs/polymorph/pull/136 is resolved/merged
+    // and smithy-dotnet handles Collections, replace
     // expect actualError.Opaque? with commented out expect,
     // and remove this comment.
     expect actualError.Opaque?;
