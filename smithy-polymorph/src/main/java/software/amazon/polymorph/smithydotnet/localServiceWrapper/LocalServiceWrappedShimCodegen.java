@@ -174,7 +174,7 @@ public class LocalServiceWrappedShimCodegen {
                             """.formatted(wrappedErrorType, errorConverter));
                 })).lineSeparated();
 
-        
+        // CollectionOfErrors wrapper for list of exceptions
         final TokenTree collectionOfErrorsCase = TokenTree
                 .of("""
                     case CollectionOfErrors collectionOfErrors:

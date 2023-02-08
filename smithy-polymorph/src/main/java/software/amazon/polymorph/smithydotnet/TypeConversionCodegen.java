@@ -872,7 +872,7 @@ public class TypeConversionCodegen {
             ));
         })).lineSeparated();
 
-        // Return Collection wrapper for list of exceptions.
+        // Return CollectionOfErrors wrapper for list of exceptions.
         final TokenTree handleCollectionOfErrors = TokenTree
             .of("""
                 case CollectionOfErrors collectionOfErrors:
