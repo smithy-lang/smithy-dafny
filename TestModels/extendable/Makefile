@@ -12,6 +12,8 @@ NAMESPACE=simple.extendable.resources
 # LIBRARIES :=
 transpile_net_dependencies:
 
+format_net:
+	pushd runtimes/net && dotnet format && popd
 
 clean:
 	rm \
