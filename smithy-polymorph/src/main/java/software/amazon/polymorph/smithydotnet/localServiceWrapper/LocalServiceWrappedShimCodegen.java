@@ -153,6 +153,8 @@ public class LocalServiceWrappedShimCodegen {
      */
     public TokenTree generateErrorTypeShim() {
         final String dafnyErrorAbstractType = DotNetNameResolver.dafnyTypeForCommonServiceError(serviceShape);
+        final String dafnyCollectionOfErrorsType = "%s.Error_Collection"
+          .formatted(DafnyNameResolverHelpers.dafnyExternNamespaceForShapeId(serviceShape.getId()));
         // TODO: Add the hard coded value `Error_Opaque` DafnyNameResolver
         final String dafnyUnknownErrorType = "%s.Error_Opaque"
           .formatted(DafnyNameResolverHelpers.dafnyExternNamespaceForShapeId(serviceShape.getId()));
@@ -171,6 +173,17 @@ public class LocalServiceWrappedShimCodegen {
                             """.formatted(wrappedErrorType, errorConverter));
                 })).lineSeparated();
 
+        
+        final TokenTree collectionOfErrorsCase = Token.of("""
+                case Simple.Errors.CollectionOfErrors exceptions:
+                return new Dafny.Simple.Errors.Types.Error_Collection(
+                        Dafny.Sequence<Dafny.Simple.Errors.Types._IError>
+                        .FromArray(
+                            exceptions.list.Select
+                            (x => ToDafny_CommonError(x)).ToArray())
+                        );                """
+                                );
+
         final TokenTree unknownErrorCase = Token.of("""
                 default:
                     return new %s(error);
@@ -180,7 +193,7 @@ public class LocalServiceWrappedShimCodegen {
                 dafnyErrorAbstractType,
                 CONVERT_ERROR_METHOD,
                 nameResolver.qualifiedClassForBaseServiceException()));
-        final TokenTree cases = TokenTree.of(knownErrorCases, unknownErrorCase).lineSeparated();
+        final TokenTree cases = TokenTree.of(knownErrorCases, collectionOfErrorsCase, unknownErrorCase).lineSeparated();
         final TokenTree body = Token.of("switch (error)").append(cases.braced());
         return signature.append(body.braced());
     }

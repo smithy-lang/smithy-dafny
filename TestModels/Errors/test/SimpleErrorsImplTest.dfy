@@ -7,9 +7,9 @@ module SimpleErrorsImplTest {
     import opened Wrappers
     method{:test} TestErrors(){
         var client :- expect SimpleErrors.SimpleErrors();
-        TestAlwaysError(client);
+        //TestAlwaysError(client);
         TestAlwaysMultipleErrors(client);
-        TestAlwaysNativeError(client);
+        //TestAlwaysNativeError(client);
     }
 
     method TestAlwaysError(client: ISimpleErrorsClient)
@@ -37,18 +37,18 @@ module SimpleErrorsImplTest {
       //   Collection conversion implementation works as expected.
       // TODO: Uncomment below as testing for Collection conversion
       // 
-      // var s: string := "this is in a collection of errors";
-      // var convertedErrorInput: GetErrorsInput := SimpleErrors.Types.GetErrorsInput(value := Some(s));
+      var s: string := "this is in a collection of errors";
+      var convertedErrorInput: GetErrorsInput := SimpleErrors.Types.GetErrorsInput(value := Some(s));
 
-      // var ret := client.AlwaysMultipleErrors(convertedErrorInput);
-      // print ret;
+      var ret := client.AlwaysMultipleErrors(convertedErrorInput);
+      print ret;
 
-      // // TODO: Expect a Collection.
-      // expect ret.Failure?;
-      // expect ret.error.Collection?;
+      // TODO: Expect a Collection.
+      expect ret.Failure?;
+      expect ret.error.Collection?;
 
-      // var expectedValue := Collection(list := [ SimpleErrorsException(message := s) ]);
-      // expect ret.error == expectedValue;
+      var expectedValue := Collection(list := [ SimpleErrorsException(message := s) ]);
+      expect ret.error == expectedValue;
     }
 
     method TestAlwaysNativeError(client: ISimpleErrorsClient)

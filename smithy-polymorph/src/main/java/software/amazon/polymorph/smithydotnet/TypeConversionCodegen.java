@@ -827,6 +827,16 @@ public class TypeConversionCodegen {
         })).lineSeparated();
 
         // Handle the special cases that were cast to the root service exception.
+        final TokenTree handleCollectionOfErrorsFromDafny = TokenTree
+          .of(
+            "case %1$s.Error_Collection dafnyVal:"
+              .formatted(dafnyExternNamespaceForShapeId(serviceShape.getId())),
+            "return new CollectionOfErrors(new %s(dafnyVal._list.Elements.Select(%s)));"
+              .formatted("System.Collections.Generic.List<Exception>",
+                         "x => FromDafny_CommonError(x)"))
+          .lineSeparated();
+
+        // Handle the special cases that were cast to the root service exception.
         final TokenTree handleBaseFromDafny = TokenTree
           .of(
             "case %1$s.Error_Opaque dafnyVal:"
@@ -840,7 +850,7 @@ public class TypeConversionCodegen {
 
         // Wrap all the converters into a switch statement.
         final TokenTree fromDafnySwitchCases = TokenTree
-          .of(modeledExceptionsFromDafny, handleBaseFromDafny)
+          .of(modeledExceptionsFromDafny, handleCollectionOfErrorsFromDafny, handleBaseFromDafny)
           .lineSeparated()
           .braced();
         final TokenTree fromDafnyBody = TokenTree.of(
@@ -863,6 +873,27 @@ public class TypeConversionCodegen {
             ));
         })).lineSeparated();
 
+        /*
+
+  case Simple.Errors.CollectionOfErrors exceptions:
+ return new Dafny.Simple.Errors.Types.Error_Collection(
+    Dafny.Sequence<Dafny.Simple.Errors.Types._IError>
+    .FromArray(
+        exceptions.list.Select
+        (x => ToDafny_CommonError(x)).ToArray())
+    );
+
+         */
+
+        // Return the root service exception with the custom message.
+        //  return new Dafny.Simple.Errors.Types.Error_Collection(Dafny.Sequence<Dafny.Simple.Errors.Types._IError>.FromArray(exceptions.list.Select(x => ToDafny_CommonError(x))));
+        final TokenTree handleCollectionOfErrors = TokenTree
+          .of(
+            "case CollectionOfErrors exceptions:",
+            "return new %1$s.Error_Collection(exceptions);"
+              .formatted(dafnyExternNamespaceForShapeId(serviceShape.getId()))
+          )
+          .lineSeparated();
 
         // Return the root service exception with the custom message.
         final TokenTree handleAnyException = TokenTree
@@ -882,7 +913,7 @@ public class TypeConversionCodegen {
           .lineSeparated();
 
         // Wrap all the converters into a switch statement.
-        final TokenTree toDafnySwitchCases = TokenTree.of(specificExceptionsToDafny, handleAnyException)
+        final TokenTree toDafnySwitchCases = TokenTree.of(specificExceptionsToDafny, handleCollectionOfErrors, handleAnyException)
                 .lineSeparated().braced();
         final TokenTree toDafnyBody = TokenTree
           .of(
