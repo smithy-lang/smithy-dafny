@@ -46,6 +46,7 @@ public class LocalServiceWrappedShimCodegen {
         final TokenTree prelude = TokenTree.of(
                 "using System;",
                 "using System.IO;",
+                "using System.Linq;",
                 "using System.Collections.Generic;"
         ).lineSeparated();
 
@@ -174,15 +175,21 @@ public class LocalServiceWrappedShimCodegen {
                 })).lineSeparated();
 
         
-        final TokenTree collectionOfErrorsCase = Token.of("""
-                case Simple.Errors.CollectionOfErrors exceptions:
-                return new Dafny.Simple.Errors.Types.Error_Collection(
-                        Dafny.Sequence<Dafny.Simple.Errors.Types._IError>
+        final TokenTree collectionOfErrorsCase = TokenTree
+                .of("""
+                    case CollectionOfErrors collectionOfErrors:
+                    return new %1$s.Error_Collection(
+                        Dafny.Sequence<%1$s._IError>
                         .FromArray(
-                            exceptions.list.Select
-                            (x => ToDafny_CommonError(x)).ToArray())
-                        );                """
-                                );
+                            collectionOfErrors.list.Select
+                                (x => TypeConversion.ToDafny_CommonError(x))
+                            .ToArray()
+                        )
+                    );
+                    """
+                    .formatted(DafnyNameResolverHelpers.dafnyExternNamespaceForShapeId(serviceShape.getId()))
+                )
+                .lineSeparated();
 
         final TokenTree unknownErrorCase = Token.of("""
                 default:

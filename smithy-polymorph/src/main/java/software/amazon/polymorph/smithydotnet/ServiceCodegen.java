@@ -222,7 +222,7 @@ public class ServiceCodegen {
     }
 
     /**
-     * @return a Collection exception class that can wrap any given list of System.Exception.
+     * @return a Collection of exceptions class that can wrap any given list of System.Exception.
      * The Collection class extends from System.Exception.
      */
     public TokenTree generateCollectionExceptionClass() {
@@ -230,9 +230,9 @@ public class ServiceCodegen {
         public class CollectionOfErrors : Exception {
           public readonly System.Collections.Generic.List<Exception> list;
           public CollectionOfErrors(System.Collections.Generic.List<Exception> list) : base("CollectionOfErrors") { this.list = list; }
-          public CollectionOfErrors() : base("Empty CollectionOfErrors") { this.list = new System.Collections.Generic.List<Exception>(); }
+          public CollectionOfErrors() : base("CollectionOfErrors") { this.list = new System.Collections.Generic.List<Exception>(); }
         }
-          """
+        """
         ).namespaced(Token.of(nameResolver.namespaceForService()));
     }
 
