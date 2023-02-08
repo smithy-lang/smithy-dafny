@@ -29,12 +29,16 @@ module SimpleExtendableResourcesOperations refines AbstractSimpleExtendableResou
   ) returns (
     output: Result<UseExtendableResourcesOutput, Error>
   )
-    ensures output.Success? ==> output.value.output.ValidState()
   {
-    var resource := new ExtendableResource.ExtendableResource();
-    var result := UseExtendableResourcesOutput(
-      output := resource
-    );
-    return Success(result);
+    var resource := input.value;
+    var maybeData := resource.GetResourceData(input.input);
+    if (maybeData.Success?) {
+      var result := UseExtendableResourcesOutput(
+        output := maybeData.Extract()
+      );
+      return Success(result);
+    } else {
+      return maybeData.PropagateFailure<UseExtendableResourcesOutput>();
+    }
   }
 }

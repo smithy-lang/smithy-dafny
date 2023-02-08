@@ -32,7 +32,7 @@ structure UseExtendableResourcesInput {
 
 structure UseExtendableResourcesOutput {
   @required
-  output: ExtendableResourceReference
+  output: GetResourceDataOutput
 }
 
 @aws.polymorph#reference(resource: ExtendableResource)
