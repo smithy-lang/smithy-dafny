@@ -7,9 +7,9 @@ module SimpleErrorsImplTest {
     import opened Wrappers
     method{:test} TestErrors(){
         var client :- expect SimpleErrors.SimpleErrors();
-        //TestAlwaysError(client);
+        TestAlwaysError(client);
         TestAlwaysMultipleErrors(client);
-        //TestAlwaysNativeError(client);
+        TestAlwaysNativeError(client);
     }
 
     method TestAlwaysError(client: ISimpleErrorsClient)
