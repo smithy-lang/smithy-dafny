@@ -872,36 +872,25 @@ public class TypeConversionCodegen {
                     typeConverterForShape(specificErrorShapeId, TO_DAFNY)
             ));
         })).lineSeparated();
-
-        /*
-
-  case Simple.Errors.CollectionOfErrors exceptions:
- return new Dafny.Simple.Errors.Types.Error_Collection(
-    Dafny.Sequence<Dafny.Simple.Errors.Types._IError>
-    .FromArray(
-        exceptions.list.Select
-        (x => ToDafny_CommonError(x)).ToArray())
-    );
-
-         */
-
+        
         // Return the root service exception with the custom message.
         //  return new Dafny.Simple.Errors.Types.Error_Collection(Dafny.Sequence<Dafny.Simple.Errors.Types._IError>.FromArray(exceptions.list.Select(x => ToDafny_CommonError(x))));
         final TokenTree handleCollectionOfErrors = TokenTree
-          .of("""
-              case CollectionOfErrors collectionOfErrors:
-              return new %1$s.Error_Collection(
-                  Dafny.Sequence<%1$s._IError>
-                  .FromArray(
-                      collectionOfErrors.list.Select
-                          (x => ToDafny_CommonError(x))
-                      .ToArray()
-                  )
-              );
-              """
-              .formatted(dafnyExternNamespaceForShapeId(serviceShape.getId()))
-          )
-          .lineSeparated();
+            .of("""
+                case CollectionOfErrors collectionOfErrors:
+                return new %1$s.Error_Collection(
+                    Dafny.Sequence<%1$s._IError>
+                    .FromArray(
+                        collectionOfErrors.list.Select
+                            (x => %2$s(x))
+                        .ToArray()
+                    )
+                );
+                """
+                .formatted(dafnyExternNamespaceForShapeId(serviceShape.getId()),
+                        nameResolver.qualifiedTypeConverterForCommonError(serviceShape, TO_DAFNY))
+            )
+            .lineSeparated();
 
         // Return the root service exception with the custom message.
         final TokenTree handleAnyException = TokenTree

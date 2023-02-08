@@ -178,16 +178,17 @@ public class LocalServiceWrappedShimCodegen {
         final TokenTree collectionOfErrorsCase = TokenTree
                 .of("""
                     case CollectionOfErrors collectionOfErrors:
-                    return new %1$s.Error_Collection(
-                        Dafny.Sequence<%1$s._IError>
-                        .FromArray(
-                            collectionOfErrors.list.Select
-                                (x => TypeConversion.ToDafny_CommonError(x))
-                            .ToArray()
-                        )
-                    );
+                     return new %1$s.Error_Collection(
+                         Dafny.Sequence<%1$s._IError>
+                         .FromArray(
+                             collectionOfErrors.list.Select
+                                 (x => %2$s(x))
+                             .ToArray()
+                         )
+                     );
                     """
-                    .formatted(DafnyNameResolverHelpers.dafnyExternNamespaceForShapeId(serviceShape.getId()))
+                    .formatted(DafnyNameResolverHelpers.dafnyExternNamespaceForShapeId(serviceShape.getId()),
+                               nameResolver.qualifiedTypeConverterForCommonError(serviceShape, TO_DAFNY))
                 )
                 .lineSeparated();
 
