@@ -47,6 +47,7 @@ public class ServiceCodegenTest {
         final Map<Path, TokenTree> codeByPath = codegen.generate();
 
         final Set<Path> expectedPaths = Collections.singleton(Path.of("OpaqueError.cs"));
+        expectedPaths.add(Path.of("CollectionOfErrors.cs"));
         assertEquals(expectedPaths, codeByPath.keySet());
     }
 
