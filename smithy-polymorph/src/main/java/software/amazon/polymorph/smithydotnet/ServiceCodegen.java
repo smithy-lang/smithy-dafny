@@ -223,7 +223,7 @@ public class ServiceCodegen {
 
     /**
      * @return a Collection of exceptions class that can wrap any given list of System.Exception.
-     * The Collection class extends from System.Exception.
+     * The CollectionOfErrors class extends from System.Exception.
      */
     public TokenTree generateCollectionExceptionClass() {
         return TokenTree.of("""
