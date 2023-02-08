@@ -45,9 +45,9 @@ public class LocalServiceWrappedShimCodegen {
         final Map<Path, TokenTree> codeByPath = new HashMap<>();
         final TokenTree prelude = TokenTree.of(
                 "using System;",
+                "using System.Collections.Generic;",
                 "using System.IO;",
-                "using System.Linq;",
-                "using System.Collections.Generic;"
+                "using System.Linq;"
         ).lineSeparated();
 
         // Service shim
