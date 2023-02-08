@@ -38,7 +38,6 @@ module SimpleErrorsImplTest {
       var ret := client.AlwaysMultipleErrors(convertedErrorInput);
       print ret;
 
-      // TODO: Expect a Collection.
       expect ret.Failure?;
       expect ret.error.Collection?;
 
