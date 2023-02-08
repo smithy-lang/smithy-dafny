@@ -9,7 +9,7 @@ module ExtendableResource {
   import Types = SimpleExtendableResourcesTypes
 
   class OpaqueMessage {
-    const message: string := "Hard Coded Opaque Error";
+    const message: string := "Hard Coded Opaque Message that will not survive translation.";
     constructor () {}
   }
 
@@ -45,8 +45,10 @@ module ExtendableResource {
       ensures AlwaysMultipleErrorsEnsuresPublicly(input, output)
       ensures unchanged(History)
     {
-      var message: object := new OpaqueMessage();
-      return Failure(Types.Collection([Types.Opaque(message)]));
+      var nestedError: Types.Error := Types.SimpleExtendableResourcesException(
+        message := "Hard Coded Modeled Exception in Collection"
+      );
+      return Failure(Types.Collection([nestedError]));
     }
 
     predicate GetResourceDataEnsuresPublicly(
@@ -113,8 +115,8 @@ module ExtendableResource {
       ensures AlwaysOpaqueErrorEnsuresPublicly(input, output)
       ensures unchanged(History)
     {
-      var message: object := new OpaqueMessage();
-      return Failure(Types.Opaque(message));
+      var obj: object := new OpaqueMessage();
+      return Failure(Types.Opaque(obj));
     }
   }
 }

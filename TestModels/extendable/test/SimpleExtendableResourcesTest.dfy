@@ -2,88 +2,56 @@
 // SPDX-License-Identifier: Apache-2.0
 
 include "../src/Index.dfy"
+include "./Helpers.dfy"
 
 module SimpleExtendableResourcesTest {
   import SimpleExtendableResources
   import Types = SimpleExtendableResourcesTypes
   import opened Wrappers
-
+  import opened TestHelpers
 
   method {:test} TestClient()
   {
     var client :- expect SimpleExtendableResources.SimpleExtendableResources();
+    TestNoneUseExtendableResources(client);
+    TestSomeUseExtendableResources(client);
   }
 
-  method {:extern "Simple.Extendable.Resources.NativeResource", "DafnyFactory"} DafnyFactory(
-  ) returns (
-    output: Types.IExtendableResource
+  method TestNoneUseExtendableResources(
+    client: Types.ISimpleExtendableResourcesClient
   )
-    ensures output.ValidState() && fresh(output.History) && fresh(output.Modifies)
-
-  method {:test} TestExternExtendableResource()
+    requires client.ValidState()
+    modifies client.Modifies
+    ensures client.ValidState()
   {
-    var resource := DafnyFactory();
+    var resource: Types.IExtendableResource := DafnyFactory();
     var dataInput: Types.GetResourceDataInput := allNone();
+    var useInput: Types.UseExtendableResourcesInput := Types.UseExtendableResourcesInput(
+      value := resource,
+      input := dataInput
+    );
     var dataOutput: Types.GetResourceDataOutput :- expect resource.GetResourceData(dataInput);
     checkNone(dataOutput);
+    var useOutput: Types.UseExtendableResourcesOutput :- expect client.UseExtendableResources(useInput);
+    checkNone(useOutput.output);
+  }
 
-    dataInput := allSome();
-    dataOutput :- expect resource.GetResourceData(dataInput);
-    checkSome(dataOutput);
-
-    var errorInput := Types.GetExtendableResourceErrorsInput(
-      value := Option.Some("Some")
+  method TestSomeUseExtendableResources(
+    client: Types.ISimpleExtendableResourcesClient
+  )
+    requires client.ValidState()
+    modifies client.Modifies
+    ensures client.ValidState()
+  {
+    var resource: Types.IExtendableResource := DafnyFactory();
+    var dataInput: Types.GetResourceDataInput := allSome();
+    var useInput: Types.UseExtendableResourcesInput := Types.UseExtendableResourcesInput(
+      value := resource,
+      input := dataInput
     );
-
-    var errorOutput: Result<Types.GetExtendableResourceErrorsOutput, Types.Error>;
-
-    errorOutput := resource.AlwaysModeledError(errorInput);
-    expect errorOutput.Failure?;
-    var actualError := errorOutput.PropagateFailure<Types.GetExtendableResourceErrorsOutput>().error;
-    expect actualError == Types.SimpleExtendableResourcesException(message := "Hard Coded Exception in src/dafny");
-  }
-
-  function method allNone(): Types.GetResourceDataInput
-  {
-   Types.GetResourceDataInput(
-      blobValue := Option.None(),
-      booleanValue := Option.None(),
-      stringValue := Option.None(),
-      integerValue := Option.None(),
-      longValue := Option.None()
-    )
-  }
-
-  method checkNone(
-    output: Types.GetResourceDataOutput
-  )
-  {
-    expect Option.None == output.stringValue;
-    expect Option.None() == output.blobValue;
-    expect Option.None() == output.booleanValue;
-    expect Option.None() == output.integerValue;
-    expect Option.None() == output.longValue; 
-  }  
-
-  function method allSome(): Types.GetResourceDataInput
-  {
-   Types.GetResourceDataInput(
-      blobValue := Option.Some([1]),
-      booleanValue := Option.Some(true),
-      stringValue := Option.Some("Some"),
-      integerValue := Option.Some(1),
-      longValue := Option.Some(1)
-    )
-  }
-
-  method checkSome(
-    output: Types.GetResourceDataOutput
-  )
-  {
-    expect Option.Some("Some") == output.stringValue;
-    expect Option.Some([1]) == output.blobValue;
-    expect Option.Some(true) == output.booleanValue;
-    expect Option.Some(1) == output.integerValue;
-    expect Option.Some(1) == output.longValue; 
+    var dataOutput: Types.GetResourceDataOutput :- expect resource.GetResourceData(dataInput);
+    checkSome(dataOutput);
+    var useOutput: Types.UseExtendableResourcesOutput :- expect client.UseExtendableResources(useInput);
+    checkSome(useOutput.output);
   }
 }  
