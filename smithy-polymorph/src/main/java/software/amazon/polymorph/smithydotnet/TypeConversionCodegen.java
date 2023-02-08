@@ -831,10 +831,9 @@ public class TypeConversionCodegen {
           .of(
             "case %1$s.Error_Collection dafnyVal:"
               .formatted(dafnyExternNamespaceForShapeId(serviceShape.getId())),
-            "return new CollectionOfErrors(new %s(dafnyVal._list.Elements.Select(%s)));"
-              .formatted("System.Collections.Generic.List<Exception>",
-                         "x => FromDafny_CommonError(x)"))
-          .lineSeparated();
+            "return new CollectionOfErrors(new System.Collections.Generic.List<Exception>(dafnyVal._list.Elements.Select(x => %s(x))));"
+              .formatted(nameResolver.qualifiedTypeConverterForCommonError(serviceShape, FROM_DAFNY))
+          ).lineSeparated();
 
         // Handle the special cases that were cast to the root service exception.
         final TokenTree handleBaseFromDafny = TokenTree
@@ -872,9 +871,8 @@ public class TypeConversionCodegen {
                     typeConverterForShape(specificErrorShapeId, TO_DAFNY)
             ));
         })).lineSeparated();
-        
-        // Return the root service exception with the custom message.
-        //  return new Dafny.Simple.Errors.Types.Error_Collection(Dafny.Sequence<Dafny.Simple.Errors.Types._IError>.FromArray(exceptions.list.Select(x => ToDafny_CommonError(x))));
+
+        // Return Collection wrapper for list of exceptions.
         final TokenTree handleCollectionOfErrors = TokenTree
             .of("""
                 case CollectionOfErrors collectionOfErrors:
@@ -888,7 +886,7 @@ public class TypeConversionCodegen {
                 );
                 """
                 .formatted(dafnyExternNamespaceForShapeId(serviceShape.getId()),
-                        nameResolver.qualifiedTypeConverterForCommonError(serviceShape, TO_DAFNY))
+                           nameResolver.qualifiedTypeConverterForCommonError(serviceShape, TO_DAFNY))
             )
             .lineSeparated();
 
