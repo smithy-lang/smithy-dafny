@@ -4,6 +4,7 @@
 package software.amazon.polymorph.smithydotnet.localServiceWrapper;
 
 import software.amazon.polymorph.smithydotnet.TypeConversionCodegen;
+import software.amazon.polymorph.traits.ExtendableTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.polymorph.utils.TokenTree;
@@ -72,8 +73,8 @@ public class LocalServiceWrappedConversionCodegen extends TypeConversionCodegen 
                     id.getName().equals("SimpleResource") || id.getName().equals("SimpleResourceReference")
             )) {
                 LOGGER.info("Trying to Use a NativeWrapper for SimpleResource Conversion.");
-                LOGGER.info("Hard coded catch is executing; preventing SimpleResources' Resource from using a wrapper.");
-                return super.buildConverterFromMethodBodies(shape, fromDafnyBody, toDafnyBody);
+                /*LOGGER.info("Hard coded catch is executing; preventing SimpleResources' Resource from using a wrapper.");
+                return super.buildConverterFromMethodBodies(shape, fromDafnyBody, toDafnyBody);*/
             }
             final ShapeId resourceShapeId = shape.expectTrait(ReferenceTrait.class).getReferentId();
             final String dafnyType = nameResolver.dafnyTypeForShape(id);
@@ -144,7 +145,8 @@ public class LocalServiceWrappedConversionCodegen extends TypeConversionCodegen 
         if (ModelUtils.isReferenceDependantModuleType(shape, nameResolver.namespaceForService())) {
             final ShapeId resourceShapeId = shape.expectTrait(ReferenceTrait.class).getReferentId();
             return nameResolver.namespaceForShapeId(serviceShape.getId())
-              .equalsIgnoreCase(resourceShapeId.getNamespace());
+              .equalsIgnoreCase(resourceShapeId.getNamespace())
+              && model.expectShape(resourceShapeId).hasTrait(ExtendableTrait.class);
         } else {
             return false;
         }
