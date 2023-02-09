@@ -17,13 +17,29 @@ module ExtendableResource {
   {
     predicate ValidState()
       ensures ValidState() ==> History in Modifies
+      ensures ValidState() ==> |this.name| > 0
     {
       && History in Modifies
+      && |this.name| > 0
     }
 
+    const name: string
+    
     constructor ()
       ensures ValidState() && fresh(History) && fresh(Modifies)
+      ensures this.name == "dafny-default"
     {
+      this.name := "dafny-default";
+      History := new Types.IExtendableResourceCallHistory();
+      Modifies := {History};
+    }
+
+    constructor OfName(name: string)
+      requires |name| > 0
+      ensures ValidState() && fresh(History) && fresh(Modifies)
+      ensures this.name == name
+    {
+      this.name := name;
       History := new Types.IExtendableResourceCallHistory();
       Modifies := {History};
     }

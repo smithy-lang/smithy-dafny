@@ -7,36 +7,74 @@ namespace simple.extendable.resources
 service SimpleExtendableResources {
   version: "2021-11-01",
   resources: [ ExtendableResource ],
-  operations: [ UseExtendableResources ],
+  operations: [
+    CreateExtendableResource,
+    UseExtendableResource,
+    UseExtendableResourceAlwaysModeledError,
+    UseExtendableResourceAlwaysMultipleErrors,
+    UseExtendableResourceAlwaysOpaqueError
+  ],
   errors: [],
 }
 
 structure SimpleExtendableResourcesConfig {}
+
+@aws.polymorph#reference(resource: ExtendableResource)
+structure ExtendableResourceReference {}
+
+operation CreateExtendableResource {
+  input: CreateExtendableResourceInput ,
+  output: CreateExtendableResourceOutput
+}
+
+@length(min: 1) string Name
+
+structure CreateExtendableResourceInput {
+  @required name: Name
+}
+
+structure CreateExtendableResourceOutput {
+  @required resource: ExtendableResourceReference
+}
 
 // This operation MUST
 // take a native implemented resource
 // and input for that resource,
 // pass the input to the native resource,
 // and return the native resource's output.
-operation UseExtendableResources {
-  input: UseExtendableResourcesInput,
-  output: UseExtendableResourcesOutput,
+operation UseExtendableResource {
+  input: UseExtendableResourceInput,
+  output: UseExtendableResourceOutput,
 }
 
-structure UseExtendableResourcesInput {
-  @required
-  value: ExtendableResourceReference,
-  @required
-  input: GetResourceDataInput,
+structure UseExtendableResourceInput {
+  @required resource: ExtendableResourceReference,
+  @required input: GetResourceDataInput,
 }
 
-structure UseExtendableResourcesOutput {
-  @required
-  output: GetResourceDataOutput
+structure UseExtendableResourceOutput {
+  @required output: GetResourceDataOutput
 }
 
-@aws.polymorph#reference(resource: ExtendableResource)
-structure ExtendableResourceReference {}
+operation UseExtendableResourceAlwaysModeledError {
+  input: UseExtendableResourceErrorsInput,
+  output: GetExtendableResourceErrorsOutput,
+}
+
+structure UseExtendableResourceErrorsInput {
+  @required resource: ExtendableResourceReference,
+  @required input: GetExtendableResourceErrorsInput,
+}
+
+operation UseExtendableResourceAlwaysMultipleErrors {
+  input: UseExtendableResourceErrorsInput,
+  output: GetExtendableResourceErrorsOutput,
+}
+
+operation UseExtendableResourceAlwaysOpaqueError {
+  input: UseExtendableResourceErrorsInput,
+  output: GetExtendableResourceErrorsOutput,
+}
 
 @aws.polymorph#extendable
 resource ExtendableResource {

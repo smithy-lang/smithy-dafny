@@ -6,52 +6,210 @@ include "./Helpers.dfy"
 
 module SimpleExtendableResourcesTest {
   import SimpleExtendableResources
+  import ExtendableResource
   import Types = SimpleExtendableResourcesTypes
   import opened Wrappers
   import opened TestHelpers
 
-  method {:test} TestClient()
+  // Tests the Resource created purely through Dafny Source Code
+  method {:test} TestClientDafnyResource()
   {
     var client :- expect SimpleExtendableResources.SimpleExtendableResources();
-    TestNoneUseExtendableResources(client);
-    TestSomeUseExtendableResources(client);
+    // The explict type cast is needed for the `is` test on the next line
+    var resource: Types.IExtendableResource := TestCreateExtendableResource(client);
+    expect resource is ExtendableResource.ExtendableResource;
+    // The `is` test above asserts this a "pure" Dafny resource
+    TestNoneUseExtendableResource(client, resource);
+    TestSomeUseExtendableResource(client, resource);
+    TestUseAlwaysModeledError(client, resource);
+    TestDafnyUseAlwaysMultipleErrors(client, resource);
+    TestDafnyUseAlwaysOpaqueError(client, resource);
   }
 
-  method TestNoneUseExtendableResources(
+  // Test the Resource created through an Extern
+  method {:test} TestClientNativeResource()
+  {
+    var client :- expect SimpleExtendableResources.SimpleExtendableResources();
+    // The explict type cast is needed for the `is` test on the next line
+    var resource: Types.IExtendableResource := DafnyFactory();
+    expect !(resource is ExtendableResource.ExtendableResource);
+    // The `is` test above asserts this NOT a "pure" Dafny resource
+    assert fresh(resource.Modifies - client.Modifies - {client.History});
+    TestNoneUseExtendableResource(client, resource);
+    TestSomeUseExtendableResource(client, resource);
+    TestUseAlwaysModeledError(client, resource);
+    TestUseAlwaysMultipleErrors(client, resource);
+    TestUseAlwaysOpaqueError(client, resource);
+  }
+
+  method TestCreateExtendableResource(
     client: Types.ISimpleExtendableResourcesClient
+  ) returns (
+    resource: Types.IExtendableResource
   )
     requires client.ValidState()
     modifies client.Modifies
     ensures client.ValidState()
+    ensures resource.Modifies !! {client.History}
+    ensures fresh(resource.Modifies - client.Modifies - {client.History} )
+    ensures resource.ValidState() && fresh(resource)
   {
-    var resource: Types.IExtendableResource := DafnyFactory();
-    var dataInput: Types.GetResourceDataInput := allNone();
-    var useInput: Types.UseExtendableResourcesInput := Types.UseExtendableResourcesInput(
-      value := resource,
+    var createInput := Types.CreateExtendableResourceInput(
+      name := "Dafny-Test"
+    );
+    var createOutput :- expect client.CreateExtendableResource(createInput);
+    resource := createOutput.resource;
+  }
+
+  method TestNoneUseExtendableResource(
+    client: Types.ISimpleExtendableResourcesClient,
+    resource: Types.IExtendableResource
+  )
+    requires client.ValidState() && resource.ValidState()
+    requires resource.Modifies !! {client.History}
+    modifies client.Modifies, resource.Modifies
+    ensures client.ValidState() && resource.ValidState()
+  {
+    var dataInput := allNone();
+    var useInput: Types.UseExtendableResourceInput := Types.UseExtendableResourceInput(
+      resource := resource,
       input := dataInput
     );
-    var dataOutput: Types.GetResourceDataOutput :- expect resource.GetResourceData(dataInput);
-    checkNone(dataOutput);
-    var useOutput: Types.UseExtendableResourcesOutput :- expect client.UseExtendableResources(useInput);
+    var useOutput: Types.UseExtendableResourceOutput :- expect client.UseExtendableResource(useInput);
     checkNone(useOutput.output);
   }
 
-  method TestSomeUseExtendableResources(
-    client: Types.ISimpleExtendableResourcesClient
+  method TestSomeUseExtendableResource(
+    client: Types.ISimpleExtendableResourcesClient,
+    resource: Types.IExtendableResource
   )
-    requires client.ValidState()
-    modifies client.Modifies
-    ensures client.ValidState()
+    requires client.ValidState() && resource.ValidState()
+    requires resource.Modifies !! {client.History}
+    modifies client.Modifies, resource.Modifies
+    ensures client.ValidState() && resource.ValidState()
   {
-    var resource: Types.IExtendableResource := DafnyFactory();
     var dataInput: Types.GetResourceDataInput := allSome();
-    var useInput: Types.UseExtendableResourcesInput := Types.UseExtendableResourcesInput(
-      value := resource,
+    var useInput: Types.UseExtendableResourceInput := Types.UseExtendableResourceInput(
+      resource := resource,
       input := dataInput
     );
-    var dataOutput: Types.GetResourceDataOutput :- expect resource.GetResourceData(dataInput);
-    checkSome(dataOutput);
-    var useOutput: Types.UseExtendableResourcesOutput :- expect client.UseExtendableResources(useInput);
+    var useOutput: Types.UseExtendableResourceOutput :- expect client.UseExtendableResource(useInput);
     checkSome(useOutput.output);
+  }
+
+  method TestUseAlwaysModeledError(
+    client: Types.ISimpleExtendableResourcesClient,
+    resource: Types.IExtendableResource
+  )
+    requires client.ValidState() && resource.ValidState()
+    requires resource.Modifies !! {client.History}
+    modifies client.Modifies, resource.Modifies
+    ensures client.ValidState() && resource.ValidState()  
+  {
+    var errorInput := Types.GetExtendableResourceErrorsInput(
+      value := Option.Some("Some")
+    );
+    var useInput: Types.UseExtendableResourceErrorsInput := Types.UseExtendableResourceErrorsInput(
+      resource := resource,
+      input := errorInput
+    );
+    var useOutput: Result<Types.GetExtendableResourceErrorsOutput, Types.Error>;
+    useOutput := client.UseExtendableResourceAlwaysModeledError(
+      useInput
+    );
+    CheckModeledError(useOutput);  
+  }
+
+  method TestUseAlwaysMultipleErrors(
+    client: Types.ISimpleExtendableResourcesClient,
+    resource: Types.IExtendableResource
+  )
+    requires client.ValidState() && resource.ValidState()
+    requires resource.Modifies !! {client.History}
+    modifies client.Modifies, resource.Modifies
+    ensures client.ValidState() && resource.ValidState()  
+  {
+    var errorInput := Types.GetExtendableResourceErrorsInput(
+      value := Option.Some("Some")
+    );
+    var useInput: Types.UseExtendableResourceErrorsInput := Types.UseExtendableResourceErrorsInput(
+      resource := resource,
+      input := errorInput
+    );
+    var useOutput: Result<Types.GetExtendableResourceErrorsOutput, Types.Error>;
+    useOutput := client.UseExtendableResourceAlwaysMultipleErrors(
+      useInput
+    );
+    CheckMultipleErrors(useOutput);  
+  }
+
+  method TestDafnyUseAlwaysMultipleErrors(
+    client: Types.ISimpleExtendableResourcesClient,
+    resource: Types.IExtendableResource
+  )
+    requires client.ValidState() && resource.ValidState()
+    requires resource.Modifies !! {client.History}
+    modifies client.Modifies, resource.Modifies
+    ensures client.ValidState() && resource.ValidState()  
+  {
+    var errorInput := Types.GetExtendableResourceErrorsInput(
+      value := Option.Some("Some")
+    );
+    var useInput: Types.UseExtendableResourceErrorsInput := Types.UseExtendableResourceErrorsInput(
+      resource := resource,
+      input := errorInput
+    );
+    var useOutput: Result<Types.GetExtendableResourceErrorsOutput, Types.Error>;
+    useOutput := client.UseExtendableResourceAlwaysMultipleErrors(
+      useInput
+    );
+    CheckDafnyMultipleErrors(useOutput);  
+  }
+  
+  method TestUseAlwaysOpaqueError(
+    client: Types.ISimpleExtendableResourcesClient,
+    resource: Types.IExtendableResource
+  )
+    requires client.ValidState() && resource.ValidState()
+    requires resource.Modifies !! {client.History}
+    modifies client.Modifies, resource.Modifies
+    ensures client.ValidState() && resource.ValidState()  
+  {
+    var errorInput := Types.GetExtendableResourceErrorsInput(
+      value := Option.Some("Some")
+    );
+    var useInput: Types.UseExtendableResourceErrorsInput := Types.UseExtendableResourceErrorsInput(
+      resource := resource,
+      input := errorInput
+    );
+    var useOutput: Result<Types.GetExtendableResourceErrorsOutput, Types.Error>;
+    useOutput := client.UseExtendableResourceAlwaysOpaqueError(
+      useInput
+    );
+    CheckOpaqueError(useOutput);  
+  }
+
+
+  method TestDafnyUseAlwaysOpaqueError(
+    client: Types.ISimpleExtendableResourcesClient,
+    resource: Types.IExtendableResource
+  )
+    requires client.ValidState() && resource.ValidState()
+    requires resource.Modifies !! {client.History}
+    modifies client.Modifies, resource.Modifies
+    ensures client.ValidState() && resource.ValidState()  
+  {
+    var errorInput := Types.GetExtendableResourceErrorsInput(
+      value := Option.Some("Some")
+    );
+    var useInput: Types.UseExtendableResourceErrorsInput := Types.UseExtendableResourceErrorsInput(
+      resource := resource,
+      input := errorInput
+    );
+    var useOutput: Result<Types.GetExtendableResourceErrorsOutput, Types.Error>;
+    useOutput := client.UseExtendableResourceAlwaysOpaqueError(
+      useInput
+    );
+    CheckDafnyOpaqueError(useOutput);  
   }
 }  

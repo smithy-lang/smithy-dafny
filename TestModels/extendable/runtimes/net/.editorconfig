@@ -19,3 +19,11 @@ indent_size = 2
 [*.{cs,csx,vb,vbx}]
 indent_size = 2
 insert_final_newline = true
+
+# Rider is wrong, dotnet_diagnostic is supported
+# noinspection EditorConfigKeyCorrectness
+[*.{cs,vb}]
+dotnet_diagnostic.CS0436.severity = none # The type <> ... conflicts with the imported type <> in ...
+dotnet_diagnostic.CS0162.severity = none # Unreachable code detected
+dotnet_diagnostic.CS0618.severity = none # obsolete
+dotnet_diagnostic.CS0168.severity = none # Unused variable

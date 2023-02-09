@@ -18,27 +18,118 @@ module SimpleExtendableResourcesOperations refines AbstractSimpleExtendableResou
   function ModifiesInternalConfig(config: InternalConfig): set<object>
   {{}}  
 
-  predicate UseExtendableResourcesEnsuresPublicly(
-    input: UseExtendableResourcesInput,
-    output: Result<UseExtendableResourcesOutput, Error>
+  predicate CreateExtendableResourceEnsuresPublicly(
+    input: CreateExtendableResourceInput,
+    output: Result<CreateExtendableResourceOutput, Error>
   ) {true}
 
-  method UseExtendableResources(
+  method CreateExtendableResource(
     config: InternalConfig,
-    input: UseExtendableResourcesInput
+    input: CreateExtendableResourceInput
   ) returns (
-    output: Result<UseExtendableResourcesOutput, Error>
+    output: Result<CreateExtendableResourceOutput, Error>
+  )
+    ensures
+      output.Success?
+    ==>
+      && output.value.resource.ValidState()
+      && fresh(output.value.resource.History)
+      && fresh(output.value.resource.Modifies)
+  {
+    var resource := new ExtendableResource.ExtendableResource.OfName(input.name);
+    var result := CreateExtendableResourceOutput(
+      resource := resource
+    );
+    return Success(result);
+  }
+
+  predicate UseExtendableResourceEnsuresPublicly(
+    input: UseExtendableResourceInput,
+    output: Result<UseExtendableResourceOutput, Error>
+  ) {true}
+
+  method UseExtendableResource(
+    config: InternalConfig,
+    input: UseExtendableResourceInput
+  ) returns (
+    output: Result<UseExtendableResourceOutput, Error>
   )
   {
-    var resource := input.value;
+    var resource := input.resource;
     var maybeData := resource.GetResourceData(input.input);
     if (maybeData.Success?) {
-      var result := UseExtendableResourcesOutput(
+      var result := UseExtendableResourceOutput(
         output := maybeData.Extract()
       );
       return Success(result);
     } else {
-      return maybeData.PropagateFailure<UseExtendableResourcesOutput>();
+      return maybeData.PropagateFailure<UseExtendableResourceOutput>();
     }
   }
+
+  predicate UseExtendableResourceAlwaysModeledErrorEnsuresPublicly(
+    input: UseExtendableResourceErrorsInput,
+    output: Result<GetExtendableResourceErrorsOutput, Error>
+  ) {true}
+
+  method UseExtendableResourceAlwaysModeledError(
+    config: InternalConfig,
+    input: UseExtendableResourceErrorsInput
+  ) returns (
+    output: Result<GetExtendableResourceErrorsOutput, Error>
+  )
+  {
+    var resource := input.resource;
+    var maybeData := resource.AlwaysModeledError(input.input);
+    if (maybeData.Success?) {
+      var result := maybeData.Extract();
+      return Success(result);
+    } else {
+      return maybeData.PropagateFailure<GetExtendableResourceErrorsOutput>();
+    }
+  }
+
+  predicate UseExtendableResourceAlwaysMultipleErrorsEnsuresPublicly(
+    input: UseExtendableResourceErrorsInput,
+    output: Result<GetExtendableResourceErrorsOutput, Error>
+  ) {true}
+
+  method UseExtendableResourceAlwaysMultipleErrors(
+    config: InternalConfig,
+    input: UseExtendableResourceErrorsInput
+  ) returns (
+    output: Result<GetExtendableResourceErrorsOutput, Error>
+  )
+  {
+    var resource := input.resource;
+    var maybeData := resource.AlwaysMultipleErrors(input.input);
+    if (maybeData.Success?) {
+      var result := maybeData.Extract();
+      return Success(result);
+    } else {
+      return maybeData.PropagateFailure<GetExtendableResourceErrorsOutput>();
+    }
+  }
+
+  predicate UseExtendableResourceAlwaysOpaqueErrorEnsuresPublicly(
+    input: UseExtendableResourceErrorsInput,
+    output: Result<GetExtendableResourceErrorsOutput, Error>
+  ) {true}
+
+  method UseExtendableResourceAlwaysOpaqueError(
+    config: InternalConfig,
+    input: UseExtendableResourceErrorsInput
+  ) returns (
+    output: Result<GetExtendableResourceErrorsOutput, Error>
+  )
+  {
+    var resource := input.resource;
+    var maybeData := resource.AlwaysOpaqueError(input.input);
+    if (maybeData.Success?) {
+      var result := maybeData.Extract();
+      return Success(result);
+    } else {
+      return maybeData.PropagateFailure<GetExtendableResourceErrorsOutput>();
+    }
+  }  
 }

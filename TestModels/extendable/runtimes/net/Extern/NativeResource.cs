@@ -4,6 +4,7 @@
 using Dafny.Simple.Extendable.Resources;
 using Dafny.Simple.Extendable.Resources.Types;
 using Simple.Extendable.Resources;
+using TypeConversion = Simple.Extendable.Resources.TypeConversion;
 
 namespace Simple.Extendable.Resources
 {
