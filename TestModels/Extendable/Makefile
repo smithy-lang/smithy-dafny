@@ -14,10 +14,3 @@ transpile_net_dependencies:
 
 format_net:
 	pushd runtimes/net && dotnet format && popd
-
-clean:
-	rm \
-	  $(PWD/)Model/*.dfy;
-	  # $(PWD)/runtimes/net/ImplementationFromDafny.cs;
-	  ##$(PWD)runtimes/net/tests/TestFromDafny.cs;
-	# rm -rf $(PWD)/TestResults $(PWD)/runtimes/net/Generated
