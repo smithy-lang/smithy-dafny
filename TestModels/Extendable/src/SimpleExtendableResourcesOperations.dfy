@@ -76,13 +76,8 @@ module SimpleExtendableResourcesOperations refines AbstractSimpleExtendableResou
   )
   {
     var resource := input.resource;
-    var maybeData := resource.AlwaysModeledError(input.input);
-    if (maybeData.Success?) {
-      var result := maybeData.Extract();
-      return Success(result);
-    } else {
-      return maybeData.PropagateFailure<GetExtendableResourceErrorsOutput>();
-    }
+    var result :- resource.AlwaysModeledError(input.input);
+    return Success(result);
   }
 
   predicate UseExtendableResourceAlwaysMultipleErrorsEnsuresPublicly(
@@ -98,13 +93,8 @@ module SimpleExtendableResourcesOperations refines AbstractSimpleExtendableResou
   )
   {
     var resource := input.resource;
-    var maybeData := resource.AlwaysMultipleErrors(input.input);
-    if (maybeData.Success?) {
-      var result := maybeData.Extract();
-      return Success(result);
-    } else {
-      return maybeData.PropagateFailure<GetExtendableResourceErrorsOutput>();
-    }
+    var result :- resource.AlwaysMultipleErrors(input.input);
+    return Success(result);
   }
 
   predicate UseExtendableResourceAlwaysOpaqueErrorEnsuresPublicly(
@@ -120,12 +110,7 @@ module SimpleExtendableResourcesOperations refines AbstractSimpleExtendableResou
   )
   {
     var resource := input.resource;
-    var maybeData := resource.AlwaysOpaqueError(input.input);
-    if (maybeData.Success?) {
-      var result := maybeData.Extract();
-      return Success(result);
-    } else {
-      return maybeData.PropagateFailure<GetExtendableResourceErrorsOutput>();
-    }
+    var result :- resource.AlwaysOpaqueError(input.input);
+    return Success(result);
   }  
 }
