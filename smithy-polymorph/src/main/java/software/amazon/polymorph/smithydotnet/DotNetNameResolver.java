@@ -758,7 +758,7 @@ public class DotNetNameResolver {
     }
 
     public static String dafnyCollectionOfErrorsTypeForServiceShape(final ServiceShape serviceShape) {
-        return "%s.Error_Collection".formatted(
+        return "%s.Error_CollectionOfErrors".formatted(
             DafnyNameResolverHelpers.dafnyExternNamespaceForShapeId(serviceShape.getId()));
     }
 
