@@ -9,6 +9,7 @@ module ExtendableResource {
   import Types = SimpleExtendableResourcesTypes
 
   class OpaqueMessage {
+    // See the comments in `CheckOpaqueError` of `../test/Helpers.dfy` for more details
     const message: string := "Hard Coded Opaque Message that will not survive translation.";
     constructor () {}
   }

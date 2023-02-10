@@ -56,15 +56,11 @@ module SimpleExtendableResourcesOperations refines AbstractSimpleExtendableResou
   )
   {
     var resource := input.resource;
-    var maybeData := resource.GetResourceData(input.input);
-    if (maybeData.Success?) {
-      var result := UseExtendableResourceOutput(
-        output := maybeData.Extract()
-      );
-      return Success(result);
-    } else {
-      return maybeData.PropagateFailure<UseExtendableResourceOutput>();
-    }
+    var output :- resource.GetResourceData(input.input);
+    var result := UseExtendableResourceOutput(
+      output := output
+    );
+    return Success(result);
   }
 
   predicate UseExtendableResourceAlwaysModeledErrorEnsuresPublicly(

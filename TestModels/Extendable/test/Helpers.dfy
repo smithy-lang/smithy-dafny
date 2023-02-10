@@ -11,11 +11,11 @@ module TestHelpers {
   function method allNone(): Types.GetResourceDataInput
   {
    Types.GetResourceDataInput(
-      blobValue := Option.None(),
-      booleanValue := Option.None(),
-      stringValue := Option.None(),
-      integerValue := Option.None(),
-      longValue := Option.None()
+      blobValue := None,
+      booleanValue := None,
+      stringValue := None,
+      integerValue := None,
+      longValue := None
     )
   }
 
@@ -23,11 +23,11 @@ module TestHelpers {
     output: Types.GetResourceDataOutput
   )
   {
-    expect Option.None == output.stringValue;
-    expect Option.None() == output.blobValue;
-    expect Option.None() == output.booleanValue;
-    expect Option.None() == output.integerValue;
-    expect Option.None() == output.longValue; 
+    expect output.stringValue.None?;
+    expect output.blobValue.None?;
+    expect output.booleanValue.None?;
+    expect output.integerValue.None?;
+    expect output.longValue;.None?
   }  
 
   function method allSome(): Types.GetResourceDataInput
@@ -57,7 +57,7 @@ module TestHelpers {
   )
   {
     expect errorOutput.Failure?;
-    var actualError := errorOutput.PropagateFailure<Types.GetExtendableResourceErrorsOutput>().error;
+    var actualError := errorOutput.error;
     expect actualError == Types.SimpleExtendableResourcesException(
       message := "Hard Coded Exception in src/dafny"
     );
@@ -91,16 +91,6 @@ module TestHelpers {
   {
     expect errorOutput.Failure?;
     var actualError := errorOutput.PropagateFailure<Types.GetExtendableResourceErrorsOutput>().error;
-    // TypeConversion.FromDafny_CommonError does not handle Collection.
-    // As such, even though AlwaysMutlipleErrors correctly returns a Collection in Dafny,
-    // the generated .NET code botches the conversion,
-    // and lumps it as an Opaue Exception.
-    // TODO:
-    // Once https://github.com/awslabs/polymorph/pull/136 is resolved/merged
-    // and smithy-dotnet handles Collections, replace
-    // expect actualError.Opaque? with commented out expect,
-    // and remove this comment.
-    // expect actualError.Opaque?;
     expect actualError.Collection?
       && |actualError.list| == 1
       && actualError.list[0].SimpleExtendableResourcesException?
