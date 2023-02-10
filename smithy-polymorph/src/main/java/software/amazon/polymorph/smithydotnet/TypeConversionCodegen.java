@@ -908,7 +908,7 @@ public class TypeConversionCodegen {
               .formatted(DotNetNameResolver.dafnyUnknownErrorTypeForServiceShape(serviceShape)),
             "default:",
             "// The switch MUST be complete for System.Exception, so `value` MUST NOT be an System.Exception. (How did you get here?)",
-              "return new %1$s(exception);"
+              "return new %1$s(value);"
               .formatted(DotNetNameResolver.dafnyUnknownErrorTypeForServiceShape(serviceShape))
           )
           .lineSeparated();
