@@ -1,6 +1,7 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
+using System;
 using Dafny.Simple.Extendable.Resources;
 using Dafny.Simple.Extendable.Resources.Types;
 using Simple.Extendable.Resources;
@@ -34,6 +35,10 @@ namespace Simple.Extendable.Resources
 
     protected override GetExtendableResourceErrorsOutput _AlwaysOpaqueError(GetExtendableResourceErrorsInput input)
     {
+      if (input.IsSetValue())
+      {
+        throw new Exception(".NET Hard Coded Exception");
+      }
       return this._impl.AlwaysOpaqueError(input);
     }
 

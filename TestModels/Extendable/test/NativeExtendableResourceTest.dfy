@@ -17,6 +17,7 @@ module NativeExtendableResourceTest {
     TestAlwaysModeledError(resource);
     TestAlwaysMultipleErrors(resource);
     TestAlwaysOpaqueError(resource);
+    TestNoneAlwaysOpaqueError(resource);
   }
 
   method TestSomeGetResourceData(
@@ -82,6 +83,32 @@ module NativeExtendableResourceTest {
   {
     var errorInput := Types.GetExtendableResourceErrorsInput(
       value := Option.Some("Some")
+    );
+    var errorOutput: Result<Types.GetExtendableResourceErrorsOutput, Types.Error>;
+    errorOutput := resource.AlwaysOpaqueError(errorInput);
+    expect errorOutput.Failure?;
+    var actualError := errorOutput.error;
+    expect actualError.Opaque?;
+    // The Value of actualError SHOULD be
+    // OpaqueError:
+    // Message: "OpaqueError:"
+    // Obj: "Exception(".NET Hard Coded Exception")"
+    // Which can be checked by uncommenting the print statement below
+    // print("\n\t Dafny Opaque Error");
+    // print("\n\t");
+    // print(actualError);
+    // print("\n");
+  }
+
+   method TestNoneAlwaysOpaqueError(
+    resource: Types.IExtendableResource
+  )
+    requires resource.ValidState()
+    modifies resource.Modifies
+    ensures resource.ValidState()
+  {
+    var errorInput := Types.GetExtendableResourceErrorsInput(
+      value := None()
     );
     var errorOutput: Result<Types.GetExtendableResourceErrorsOutput, Types.Error>;
     errorOutput := resource.AlwaysOpaqueError(errorInput);
