@@ -37,7 +37,7 @@ module SimpleErrorsImpl refines AbstractSimpleErrorsOperations  {
     // We should remove this check as part of SIM CrypTool-5085
     expect input.value.Some?;
 
-    var res := Error.Collection( list := [ SimpleErrorsException(message := input.value.value) ] );
+    var res := Error.CollectionOfErrors( list := [ SimpleErrorsException(message := input.value.value) ] );
 
     return Failure(res);
   }
