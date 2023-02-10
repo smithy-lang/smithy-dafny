@@ -152,7 +152,7 @@ module SimpleExtendableResourcesTest {
 
   method TestDafnyUseAlwaysMultipleErrors(
     client: Types.ISimpleExtendableResourcesClient,
-    resource: Types.IExtendableResource
+    resource: ExtendableResource.ExtendableResource
   )
     requires client.ValidState() && resource.ValidState()
     requires resource.Modifies !! {client.History}
@@ -199,7 +199,7 @@ module SimpleExtendableResourcesTest {
 
   method TestDafnyUseAlwaysOpaqueError(
     client: Types.ISimpleExtendableResourcesClient,
-    resource: Types.IExtendableResource
+    resource: ExtendableResource.ExtendableResource
   )
     requires client.ValidState() && resource.ValidState()
     requires resource.Modifies !! {client.History}
