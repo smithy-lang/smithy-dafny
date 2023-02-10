@@ -846,7 +846,7 @@ public class TypeConversionCodegen {
             "default:",
             "// The switch MUST be complete for _IError, so `value` MUST NOT be an _IError. (How did you get here?)",
             "return new %1$s();"
-                .formatted(DotNetNameResolver.baseClassForUnknownError()),
+                .formatted(DotNetNameResolver.baseClassForUnknownError())
           )
           .lineSeparated();
 
