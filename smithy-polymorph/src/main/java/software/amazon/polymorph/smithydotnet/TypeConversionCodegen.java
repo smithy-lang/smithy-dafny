@@ -829,21 +829,24 @@ public class TypeConversionCodegen {
         // Handle casting to the CollectionOfErrors list of exception type
         final TokenTree handleCollectionOfErrorsFromDafny = TokenTree
           .of(
-            "case %1$s.Error_Collection dafnyVal:"
-              .formatted(dafnyExternNamespaceForShapeId(serviceShape.getId())),
-            "return new CollectionOfErrors(new System.Collections.Generic.List<Exception>(dafnyVal._list.Elements.Select(x => %s(x))));"
-              .formatted(nameResolver.qualifiedTypeConverterForCommonError(serviceShape, FROM_DAFNY))
+            "case %1$s dafnyVal:"
+              .formatted(DotNetNameResolver.dafnyCollectionOfErrorsTypeForServiceShape(serviceShape)),
+            "return new %1$s(new System.Collections.Generic.List<Exception>(dafnyVal._list.Elements.Select(x => %2$s(x))));"
+              .formatted(DotNetNameResolver.baseClassForCollectionOfErrors(),
+                nameResolver.qualifiedTypeConverterForCommonError(serviceShape, FROM_DAFNY))
           ).lineSeparated();
 
         // Handle the special cases that were cast to the root service exception.
         final TokenTree handleBaseFromDafny = TokenTree
           .of(
-            "case %1$s.Error_Opaque dafnyVal:"
-              .formatted(dafnyExternNamespaceForShapeId(serviceShape.getId())),
-            "return new OpaqueError(dafnyVal._obj);",
+            "case %1$s dafnyVal:"
+                .formatted(DotNetNameResolver.dafnyUnknownErrorTypeForServiceShape(serviceShape)),
+            "return new %1$s(dafnyVal._obj);"
+                .formatted(DotNetNameResolver.baseClassForUnknownError()),
             "default:",
             "// The switch MUST be complete for _IError, so `value` MUST NOT be an _IError. (How did you get here?)",
-            "return new OpaqueError();"
+            "return new %1$s();"
+                .formatted(DotNetNameResolver.baseClassForUnknownError()),
           )
           .lineSeparated();
 
@@ -896,16 +899,17 @@ public class TypeConversionCodegen {
         final TokenTree handleAnyExceptionToDafny = TokenTree
           .of(
             "// OpaqueError is redundant, but listed for completeness.",
-            "case OpaqueError exception:",
-            "return new %1$s.Error_Opaque(exception);"
-              .formatted(dafnyExternNamespaceForShapeId(serviceShape.getId())),
+            "case %1$s exception:"
+              .formatted(DotNetNameResolver.baseClassForUnknownError()),
+            "return new %1$s(exception);"
+              .formatted(DotNetNameResolver.dafnyUnknownErrorTypeForServiceShape(serviceShape)),
             "case %1$s exception:".formatted(cSharpType),
-            "return new %1$s.Error_Opaque(exception);"
-              .formatted(dafnyExternNamespaceForShapeId(serviceShape.getId())),
+            "return new %1$s(exception);"
+              .formatted(DotNetNameResolver.dafnyUnknownErrorTypeForServiceShape(serviceShape)),
             "default:",
             "// The switch MUST be complete for System.Exception, so `value` MUST NOT be an System.Exception. (How did you get here?)",
-            "return new %1$s.Error_Opaque(value);"
-              .formatted(dafnyExternNamespaceForShapeId(serviceShape.getId()))
+              "return new %1$s(exception);"
+              .formatted(DotNetNameResolver.dafnyUnknownErrorTypeForServiceShape(serviceShape))
           )
           .lineSeparated();
 

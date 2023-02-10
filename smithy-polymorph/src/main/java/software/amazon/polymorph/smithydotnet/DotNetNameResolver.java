@@ -492,6 +492,10 @@ public class DotNetNameResolver {
         return "CollectionOfErrors";
     }
 
+    public static String baseClassForUnknownError() {
+        return "OpaqueError";
+    }
+
     /**
      * Implements {@code DafnyAst.NonglobalVariable.CompilerizeName} for strings which are valid enum definition names
      * according to {@link ModelUtils#isValidEnumDefinitionName(String)}.
