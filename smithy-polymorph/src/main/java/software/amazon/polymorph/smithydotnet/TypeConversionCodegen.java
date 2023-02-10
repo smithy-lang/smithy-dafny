@@ -873,25 +873,27 @@ public class TypeConversionCodegen {
         })).lineSeparated();
 
         // Return CollectionOfErrors wrapper for list of exceptions.
-        final TokenTree handleCollectionOfErrors = TokenTree
+        final TokenTree handleCollectionOfErrorsToDafny = TokenTree
             .of("""
-                case CollectionOfErrors collectionOfErrors:
-                return new %1$s.Error_Collection(
-                    Dafny.Sequence<%1$s._IError>
-                    .FromArray(
-                        collectionOfErrors.list.Select
-                            (x => %2$s(x))
-                        .ToArray()
-                    )
-                );
-                """
-                .formatted(dafnyExternNamespaceForShapeId(serviceShape.getId()),
-                           nameResolver.qualifiedTypeConverterForCommonError(serviceShape, TO_DAFNY))
+                    case %1$s collectionOfErrors:
+                     return new %2$s(
+                         Dafny.Sequence<%3$s>
+                         .FromArray(
+                             collectionOfErrors.list.Select
+                                 (x => %4$s(x))
+                             .ToArray()
+                         )
+                     );
+                    """
+                .formatted(DotNetNameResolver.baseClassForCollectionOfErrors(),
+                    DotNetNameResolver.dafnyCollectionOfErrorsTypeForServiceShape(serviceShape),
+                    DotNetNameResolver.dafnyTypeForCommonServiceError(serviceShape),
+                    nameResolver.qualifiedTypeConverterForCommonError(serviceShape, TO_DAFNY))
             )
             .lineSeparated();
 
         // Return the root service exception with the custom message.
-        final TokenTree handleAnyException = TokenTree
+        final TokenTree handleAnyExceptionToDafny = TokenTree
           .of(
             "// OpaqueError is redundant, but listed for completeness.",
             "case OpaqueError exception:",
@@ -908,8 +910,9 @@ public class TypeConversionCodegen {
           .lineSeparated();
 
         // Wrap all the converters into a switch statement.
-        final TokenTree toDafnySwitchCases = TokenTree.of(specificExceptionsToDafny, handleCollectionOfErrors, handleAnyException)
-                .lineSeparated().braced();
+        final TokenTree toDafnySwitchCases = TokenTree.of(specificExceptionsToDafny,
+                    handleCollectionOfErrorsToDafny, handleAnyExceptionToDafny
+            ).lineSeparated().braced();
         final TokenTree toDafnyBody = TokenTree
           .of(
             TokenTree.of("switch (value)"),

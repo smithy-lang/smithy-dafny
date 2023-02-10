@@ -153,12 +153,10 @@ public class LocalServiceWrappedShimCodegen {
      * We define this here instead of in {@link LocalServiceWrappedShimCodegen} because the base error type isn't modeled.
      */
     public TokenTree generateErrorTypeShim() {
-        final String dafnyErrorAbstractType = DotNetNameResolver.dafnyTypeForCommonServiceError(serviceShape);
-        final String dafnyCollectionOfErrorsType = "%s.Error_Collection"
-          .formatted(DafnyNameResolverHelpers.dafnyExternNamespaceForShapeId(serviceShape.getId()));
-        // TODO: Add the hard coded value `Error_Opaque` DafnyNameResolver
-        final String dafnyUnknownErrorType = "%s.Error_Opaque"
-          .formatted(DafnyNameResolverHelpers.dafnyExternNamespaceForShapeId(serviceShape.getId()));
+        final String dafnyErrorAbstractType =
+            DotNetNameResolver.dafnyTypeForCommonServiceError(serviceShape);
+        final String dafnyUnknownErrorType =
+            DotNetNameResolver.dafnyUnknownErrorTypeForServiceShape(serviceShape);
 
         // Collect into TreeSet so that we generate code in a deterministic order (lexicographic, in particular)
         final TreeSet<StructureShape> errorShapes = ModelUtils.streamServiceErrors(model, serviceShape)
@@ -177,18 +175,20 @@ public class LocalServiceWrappedShimCodegen {
         // CollectionOfErrors wrapper for list of exceptions
         final TokenTree collectionOfErrorsCase = TokenTree
                 .of("""
-                    case CollectionOfErrors collectionOfErrors:
-                     return new %1$s.Error_Collection(
-                         Dafny.Sequence<%1$s._IError>
+                    case %1$s collectionOfErrors:
+                     return new %2$s(
+                         Dafny.Sequence<%3$s>
                          .FromArray(
                              collectionOfErrors.list.Select
-                                 (x => %2$s(x))
+                                 (x => %4$s(x))
                              .ToArray()
                          )
                      );
                     """
-                    .formatted(DafnyNameResolverHelpers.dafnyExternNamespaceForShapeId(serviceShape.getId()),
-                               nameResolver.qualifiedTypeConverterForCommonError(serviceShape, TO_DAFNY))
+                    .formatted(DotNetNameResolver.baseClassForCollectionOfErrors(),
+                        DotNetNameResolver.dafnyCollectionOfErrorsTypeForServiceShape(serviceShape),
+                        DotNetNameResolver.dafnyTypeForCommonServiceError(serviceShape),
+                        nameResolver.qualifiedTypeConverterForCommonError(serviceShape, TO_DAFNY))
                 )
                 .lineSeparated();
 
