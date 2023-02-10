@@ -27,7 +27,7 @@ module TestHelpers {
     expect output.blobValue.None?;
     expect output.booleanValue.None?;
     expect output.integerValue.None?;
-    expect output.longValue;.None?
+    expect output.longValue.None?;
   }  
 
   function method allSome(): Types.GetResourceDataInput
