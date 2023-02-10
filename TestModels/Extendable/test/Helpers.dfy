@@ -20,10 +20,11 @@ module TestHelpers {
   }
 
   method checkNone(
-    output: Types.GetResourceDataOutput
+    output: Types.GetResourceDataOutput,
+    name: string
   )
   {
-    expect output.stringValue.None?;
+    expect output.stringValue == Some(name);
     expect output.blobValue.None?;
     expect output.booleanValue.None?;
     expect output.integerValue.None?;
@@ -33,23 +34,24 @@ module TestHelpers {
   function method allSome(): Types.GetResourceDataInput
   {
    Types.GetResourceDataInput(
-      blobValue := Option.Some([1]),
-      booleanValue := Option.Some(true),
-      stringValue := Option.Some("Some"),
-      integerValue := Option.Some(1),
-      longValue := Option.Some(1)
+      blobValue := Some([1]),
+      booleanValue := Some(true),
+      stringValue := Some("Some"),
+      integerValue := Some(1),
+      longValue := Some(1)
     )
   }
 
   method checkSome(
-    output: Types.GetResourceDataOutput
+    output: Types.GetResourceDataOutput,
+    name: string
   )
   {
-    expect Option.Some("Some") == output.stringValue;
-    expect Option.Some([1]) == output.blobValue;
-    expect Option.Some(true) == output.booleanValue;
-    expect Option.Some(1) == output.integerValue;
-    expect Option.Some(1) == output.longValue; 
+    expect Some("Some"+ " " + name) == output.stringValue;
+    expect Some([1]) == output.blobValue;
+    expect Some(true) == output.booleanValue;
+    expect Some(1) == output.integerValue;
+    expect Some(1) == output.longValue; 
   }
 
   method CheckModeledError(

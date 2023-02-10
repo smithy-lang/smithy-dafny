@@ -11,16 +11,20 @@ module SimpleExtendableResourcesTest {
   import opened Wrappers
   import opened TestHelpers
 
+  const TEST_RESOURCE_NAME: string := "Dafny-Test";
+  
   // Tests the Resource created purely through Dafny Source Code
   method {:test} TestClientDafnyResource()
   {
     var client :- expect SimpleExtendableResources.SimpleExtendableResources();
     // The explict type cast is needed for the `is` test on the next line
-    var resource: Types.IExtendableResource := TestCreateExtendableResource(client);
+    var resource: Types.IExtendableResource := TestCreateExtendableResource(
+      client, TEST_RESOURCE_NAME
+    );
     expect resource is ExtendableResource.ExtendableResource;
     // The `is` test above asserts this a "pure" Dafny resource
-    TestNoneUseExtendableResource(client, resource);
-    TestSomeUseExtendableResource(client, resource);
+    TestNoneUseExtendableResource(client, resource, TEST_RESOURCE_NAME);
+    TestSomeUseExtendableResource(client, resource, TEST_RESOURCE_NAME);
     TestUseAlwaysModeledError(client, resource);
     TestDafnyUseAlwaysMultipleErrors(client, resource);
     TestDafnyUseAlwaysOpaqueError(client, resource);
@@ -35,19 +39,20 @@ module SimpleExtendableResourcesTest {
     expect !(resource is ExtendableResource.ExtendableResource);
     // The `is` test above asserts this NOT a "pure" Dafny resource
     assert fresh(resource.Modifies - client.Modifies - {client.History});
-    TestNoneUseExtendableResource(client, resource);
-    TestSomeUseExtendableResource(client, resource);
+    TestNoneUseExtendableResource(client, resource, ExtendableResource.DEFAULT_RESOURCE_NAME);
+    TestSomeUseExtendableResource(client, resource, ExtendableResource.DEFAULT_RESOURCE_NAME);
     TestUseAlwaysModeledError(client, resource);
     TestUseAlwaysMultipleErrors(client, resource);
     TestUseAlwaysOpaqueError(client, resource);
   }
 
   method TestCreateExtendableResource(
-    client: Types.ISimpleExtendableResourcesClient
+    client: Types.ISimpleExtendableResourcesClient,
+    name: string
   ) returns (
     resource: Types.IExtendableResource
   )
-    requires client.ValidState()
+    requires client.ValidState() && |name| > 0
     modifies client.Modifies
     ensures client.ValidState()
     ensures resource.Modifies !! {client.History}
@@ -55,7 +60,7 @@ module SimpleExtendableResourcesTest {
     ensures resource.ValidState() && fresh(resource)
   {
     var createInput := Types.CreateExtendableResourceInput(
-      name := "Dafny-Test"
+      name := name
     );
     var createOutput :- expect client.CreateExtendableResource(createInput);
     resource := createOutput.resource;
@@ -63,7 +68,8 @@ module SimpleExtendableResourcesTest {
 
   method TestNoneUseExtendableResource(
     client: Types.ISimpleExtendableResourcesClient,
-    resource: Types.IExtendableResource
+    resource: Types.IExtendableResource,
+    name: string
   )
     requires client.ValidState() && resource.ValidState()
     requires resource.Modifies !! {client.History}
@@ -76,12 +82,13 @@ module SimpleExtendableResourcesTest {
       input := dataInput
     );
     var useOutput: Types.UseExtendableResourceOutput :- expect client.UseExtendableResource(useInput);
-    checkNone(useOutput.output);
+    checkNone(useOutput.output, name);
   }
 
   method TestSomeUseExtendableResource(
     client: Types.ISimpleExtendableResourcesClient,
-    resource: Types.IExtendableResource
+    resource: Types.IExtendableResource,
+    name: string
   )
     requires client.ValidState() && resource.ValidState()
     requires resource.Modifies !! {client.History}
@@ -94,7 +101,7 @@ module SimpleExtendableResourcesTest {
       input := dataInput
     );
     var useOutput: Types.UseExtendableResourceOutput :- expect client.UseExtendableResource(useInput);
-    checkSome(useOutput.output);
+    checkSome(useOutput.output, name);
   }
 
   method TestUseAlwaysModeledError(

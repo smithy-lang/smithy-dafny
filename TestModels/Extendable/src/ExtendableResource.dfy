@@ -8,8 +8,11 @@ module ExtendableResource {
   import opened Wrappers
   import Types = SimpleExtendableResourcesTypes
 
+  const DEFAULT_RESOURCE_NAME := "dafny-default";
+  
   class OpaqueMessage {
-    // See the comments in `CheckOpaqueError` of `../test/Helpers.dfy` for more details
+    // See the comments in `CheckOpaqueError` of `../test/Helpers.dfy` for 
+    // an explanation of why OpaqueMessage will not survive translation.
     const message: string := "Hard Coded Opaque Message that will not survive translation.";
     constructor () {}
   }
@@ -28,9 +31,9 @@ module ExtendableResource {
     
     constructor ()
       ensures ValidState() && fresh(History) && fresh(Modifies)
-      ensures this.name == "dafny-default"
+      ensures this.name == DEFAULT_RESOURCE_NAME
     {
-      this.name := "dafny-default";
+      this.name := DEFAULT_RESOURCE_NAME;
       History := new Types.IExtendableResourceCallHistory();
       Modifies := {History};
     }
@@ -85,10 +88,14 @@ module ExtendableResource {
       ensures GetResourceDataEnsuresPublicly(input, output)
       ensures unchanged(History)    
     {
+      var rtnString: string := if input.stringValue.Some? then
+        input.stringValue.value + " " + this.name
+      else
+        this.name;
       var rtn: Types.GetResourceDataOutput := Types.GetResourceDataOutput(
         blobValue := input.blobValue,
         booleanValue := input.booleanValue,
-        stringValue := input.stringValue,
+        stringValue := Some(rtnString),
         integerValue := input.integerValue,
         longValue := input.longValue
       );

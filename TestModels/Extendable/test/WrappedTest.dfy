@@ -19,9 +19,9 @@ module WrappedTest
   method {:test} WrappedTestClientDafnyResource()
   {
     var client :- expect WrappedSimpleExtendableResources.WrappedSimpleExtendableResources();
-    var resource := SimpleExtendableResourcesTest.TestCreateExtendableResource(client);
-    SimpleExtendableResourcesTest.TestNoneUseExtendableResource(client, resource);
-    SimpleExtendableResourcesTest.TestSomeUseExtendableResource(client, resource);
+    var resource := SimpleExtendableResourcesTest.TestCreateExtendableResource(client, SimpleExtendableResourcesTest.TEST_RESOURCE_NAME);
+    SimpleExtendableResourcesTest.TestNoneUseExtendableResource(client, resource, SimpleExtendableResourcesTest.TEST_RESOURCE_NAME);
+    SimpleExtendableResourcesTest.TestSomeUseExtendableResource(client, resource, SimpleExtendableResourcesTest.TEST_RESOURCE_NAME);
     SimpleExtendableResourcesTest.TestUseAlwaysModeledError(client, resource);
     SimpleExtendableResourcesTest.TestUseAlwaysMultipleErrors(client, resource);
     SimpleExtendableResourcesTest.TestUseAlwaysOpaqueError(client, resource);
@@ -34,8 +34,8 @@ module WrappedTest
     var client :- expect WrappedSimpleExtendableResources.WrappedSimpleExtendableResources();
     var resource := DafnyFactory();
     assert fresh(resource.Modifies - client.Modifies - {client.History});
-    SimpleExtendableResourcesTest.TestNoneUseExtendableResource(client, resource);
-    SimpleExtendableResourcesTest.TestSomeUseExtendableResource(client, resource);
+    SimpleExtendableResourcesTest.TestNoneUseExtendableResource(client, resource, ExtendableResource.DEFAULT_RESOURCE_NAME);
+    SimpleExtendableResourcesTest.TestSomeUseExtendableResource(client, resource, ExtendableResource.DEFAULT_RESOURCE_NAME);
     SimpleExtendableResourcesTest.TestUseAlwaysModeledError(client, resource);
     SimpleExtendableResourcesTest.TestUseAlwaysMultipleErrors(client, resource);
     SimpleExtendableResourcesTest.TestUseAlwaysOpaqueError(client, resource);

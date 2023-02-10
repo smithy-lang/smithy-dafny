@@ -28,7 +28,7 @@ module NativeExtendableResourceTest {
   {
     var dataInput: Types.GetResourceDataInput := allSome();
     var dataOutput: Types.GetResourceDataOutput :- expect resource.GetResourceData(dataInput);
-    checkSome(dataOutput);
+    checkSome(dataOutput, ExtendableResource.DEFAULT_RESOURCE_NAME);
   }
 
   method TestNoneGetResourceData(
@@ -40,7 +40,7 @@ module NativeExtendableResourceTest {
   {
     var dataInput: Types.GetResourceDataInput := allNone();
     var dataOutput: Types.GetResourceDataOutput :- expect resource.GetResourceData(dataInput);
-    checkNone(dataOutput);
+    checkNone(dataOutput, ExtendableResource.DEFAULT_RESOURCE_NAME);
   }
 
   method TestAlwaysModeledError(

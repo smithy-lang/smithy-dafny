@@ -40,6 +40,7 @@ namespace Simple.Extendable.Resources
     public static NativeResource NativeFactory()
     {
       ExtendableResource_Compile.ExtendableResource _nw2 = new ExtendableResource_Compile.ExtendableResource();
+      _nw2.__ctor();
       IExtendableResource dafnyResource =
         TypeConversion.FromDafny_N6_simple__N10_extendable__N9_resources__S27_ExtendableResourceReference(_nw2);
       return new NativeResource(dafnyResource);
