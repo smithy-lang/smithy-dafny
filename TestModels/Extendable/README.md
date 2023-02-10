@@ -10,10 +10,34 @@ Thus, this module is different than the other members of "TestModels",
 it requires both Dafny Source and Native Code to test it.
 
 ## What is under test?
+
 The `extendable` trait causes Smithy-Polymorph to generate a Native Wrapper
-such that a Resource implemented in Danfy can instead be implemented
+such that a Resource implemented in Dafny can instead be implemented
 in a Native Runtime while still respecting the conditions Dafny 
 imposes on the formally verified Dafny implementation.
+
+The `extendable` trait is tested in two ways via this project.
+1. As a customer would use the library,
+   via a runtime native implementation that extends from
+   the runtime base type.
+2. Via nothing but Dafny and Smithy generated code,
+   by the `localServiceWrapper` test utility.
+   
+Either of these tests would be sufficient to test
+the `extendable` trait alone.
+
+However, providing both tests let's us:
+1. Explicitly test the feature as the customer would use it.
+2. Ensures that `localServiceWrapper` works correctly.
+
+(2.) has great merit, 
+as we will have to implement `localServiceWrapper` in
+every LAN gauge `smithy-polymorph` supports.
+
+We need evidence that an implementation of `localServiceWrapper` is
+correct.
+
+This `TestModel` provides some evidence of that.
 
 ## Build
 ### Dafny
