@@ -1262,7 +1262,7 @@ public class DafnyApiCodegen {
           Token.of("// || (!exit(A(I)) && !exit(B(I)))"),
           Token.of("// || (!access(A(I)) && !exit(B(I)))"),
           Token.of("// || (!exit(A(I)) && !access(B(I)))"),
-          Token.of("| Collection(list: seq<Error>)"),
+          Token.of("| CollectionOfErrors(list: seq<Error>)"),
           Token.of("// The Opaque error, used for native, extern, wrapped or unknown errors"),
           Token.of("| Opaque(obj: object)"),
           // Helper error for use with `extern`

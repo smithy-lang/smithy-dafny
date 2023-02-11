@@ -118,7 +118,7 @@ public class ToNativeLibrary extends ToNative {
     }
 
     MethodSpec collectionError() {
-        ClassName inputType = subject.dafnyNameResolver.classForDatatypeConstructor("Error", "Collection");
+        ClassName inputType = subject.dafnyNameResolver.classForDatatypeConstructor("Error", "CollectionOfErrors");
         ClassName returnType = CollectionOfErrors.nativeClassName(subject.modelPackageName);
         CodeBlock genericCall = AGGREGATE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(ShapeType.LIST).asNormalReference();
         MethodSpec.Builder method = super.initializeErrorMethodSpec(inputType, returnType);
@@ -146,7 +146,7 @@ public class ToNativeLibrary extends ToNative {
                 .map(simpleName -> simpleName.replaceFirst("Error_", ""))
                 .collect(Collectors.toCollection(ArrayList::new)); // We need a mutable list, so we can't use stream().toList()
         allDafnyErrorConstructors.add("Opaque");
-        allDafnyErrorConstructors.add("Collection");
+        allDafnyErrorConstructors.add("CollectionOfErrors");
         allDafnyErrorConstructors.forEach(constructorName ->
                 method.beginControlFlow("if ($L.$L())", VAR_INPUT, Dafny.datatypeConstructorIs(constructorName))
                         .addStatement(

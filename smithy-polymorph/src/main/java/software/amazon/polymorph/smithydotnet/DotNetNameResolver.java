@@ -488,6 +488,14 @@ public class DotNetNameResolver {
         return StringUtils.capitalize(enumShapeId.getName());
     }
 
+    public static String baseClassForCollectionOfErrors() {
+        return "CollectionOfErrors";
+    }
+
+    public static String baseClassForUnknownError() {
+        return "OpaqueError";
+    }
+
     /**
      * Implements {@code DafnyAst.NonglobalVariable.CompilerizeName} for strings which are valid enum definition names
      * according to {@link ModelUtils#isValidEnumDefinitionName(String)}.
@@ -747,6 +755,16 @@ public class DotNetNameResolver {
         return "%s.Error_%s".formatted(
           DafnyNameResolverHelpers.dafnyExternNamespaceForShapeId(errorShapeId),
           errorShapeId.getName());
+    }
+
+    public static String dafnyCollectionOfErrorsTypeForServiceShape(final ServiceShape serviceShape) {
+        return "%s.Error_CollectionOfErrors".formatted(
+            DafnyNameResolverHelpers.dafnyExternNamespaceForShapeId(serviceShape.getId()));
+    }
+
+    public static String dafnyUnknownErrorTypeForServiceShape(final ServiceShape serviceShape) {
+        return "%s.Error_Opaque".formatted(
+            DafnyNameResolverHelpers.dafnyExternNamespaceForShapeId(serviceShape.getId()));
     }
 
     /**
