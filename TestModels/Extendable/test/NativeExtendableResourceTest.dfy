@@ -27,8 +27,8 @@ module NativeExtendableResourceTest {
     modifies resource.Modifies
     ensures resource.ValidState()
   {
-    var dataInput: Types.GetResourceDataInput := allSome();
-    var dataOutput: Types.GetResourceDataOutput :- expect resource.GetResourceData(dataInput);
+    var dataInput := allSome();
+    var dataOutput :- expect resource.GetResourceData(dataInput);
     checkSome(dataOutput, ExtendableResource.DEFAULT_RESOURCE_NAME);
   }
 
@@ -39,8 +39,8 @@ module NativeExtendableResourceTest {
     modifies resource.Modifies
     ensures resource.ValidState()
   {
-    var dataInput: Types.GetResourceDataInput := allNone();
-    var dataOutput: Types.GetResourceDataOutput :- expect resource.GetResourceData(dataInput);
+    var dataInput := allNone();
+    var dataOutput :- expect resource.GetResourceData(dataInput);
     checkNone(dataOutput, ExtendableResource.DEFAULT_RESOURCE_NAME);
   }
 
@@ -54,8 +54,7 @@ module NativeExtendableResourceTest {
     var errorInput := Types.GetExtendableResourceErrorsInput(
       value := Option.Some("Some")
     );
-    var errorOutput: Result<Types.GetExtendableResourceErrorsOutput, Types.Error>;
-    errorOutput := resource.AlwaysModeledError(errorInput);
+    var errorOutput := resource.AlwaysModeledError(errorInput);
     CheckModeledError(errorOutput);
   }
   
@@ -69,8 +68,7 @@ module NativeExtendableResourceTest {
     var errorInput := Types.GetExtendableResourceErrorsInput(
       value := Option.Some("Some")
     );
-    var errorOutput: Result<Types.GetExtendableResourceErrorsOutput, Types.Error>;
-    errorOutput := resource.AlwaysMultipleErrors(errorInput);
+    var errorOutput := resource.AlwaysMultipleErrors(errorInput);
     CheckMultipleErrors(errorOutput);
   }
 
@@ -84,8 +82,7 @@ module NativeExtendableResourceTest {
     var errorInput := Types.GetExtendableResourceErrorsInput(
       value := Option.Some("Some")
     );
-    var errorOutput: Result<Types.GetExtendableResourceErrorsOutput, Types.Error>;
-    errorOutput := resource.AlwaysOpaqueError(errorInput);
+    var errorOutput := resource.AlwaysOpaqueError(errorInput);
     expect errorOutput.Failure?;
     var actualError := errorOutput.error;
     expect actualError.Opaque?;
@@ -110,8 +107,7 @@ module NativeExtendableResourceTest {
     var errorInput := Types.GetExtendableResourceErrorsInput(
       value := None()
     );
-    var errorOutput: Result<Types.GetExtendableResourceErrorsOutput, Types.Error>;
-    errorOutput := resource.AlwaysOpaqueError(errorInput);
+    var errorOutput := resource.AlwaysOpaqueError(errorInput);
     CheckOpaqueError(errorOutput);
   }
-}  
+}

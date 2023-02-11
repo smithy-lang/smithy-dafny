@@ -77,11 +77,11 @@ module SimpleExtendableResourcesTest {
     ensures client.ValidState() && resource.ValidState()
   {
     var dataInput := allNone();
-    var useInput: Types.UseExtendableResourceInput := Types.UseExtendableResourceInput(
+    var useInput := Types.UseExtendableResourceInput(
       resource := resource,
       input := dataInput
     );
-    var useOutput: Types.UseExtendableResourceOutput :- expect client.UseExtendableResource(useInput);
+    var useOutput :- expect client.UseExtendableResource(useInput);
     checkNone(useOutput.output, name);
   }
 
@@ -95,12 +95,12 @@ module SimpleExtendableResourcesTest {
     modifies client.Modifies, resource.Modifies
     ensures client.ValidState() && resource.ValidState()
   {
-    var dataInput: Types.GetResourceDataInput := allSome();
-    var useInput: Types.UseExtendableResourceInput := Types.UseExtendableResourceInput(
+    var dataInput := allSome();
+    var useInput := Types.UseExtendableResourceInput(
       resource := resource,
       input := dataInput
     );
-    var useOutput: Types.UseExtendableResourceOutput :- expect client.UseExtendableResource(useInput);
+    var useOutput :- expect client.UseExtendableResource(useInput);
     checkSome(useOutput.output, name);
   }
 
@@ -116,12 +116,11 @@ module SimpleExtendableResourcesTest {
     var errorInput := Types.GetExtendableResourceErrorsInput(
       value := Option.Some("Some")
     );
-    var useInput: Types.UseExtendableResourceErrorsInput := Types.UseExtendableResourceErrorsInput(
+    var useInput := Types.UseExtendableResourceErrorsInput(
       resource := resource,
       input := errorInput
     );
-    var useOutput: Result<Types.GetExtendableResourceErrorsOutput, Types.Error>;
-    useOutput := client.UseExtendableResourceAlwaysModeledError(
+    var useOutput := client.UseExtendableResourceAlwaysModeledError(
       useInput
     );
     CheckModeledError(useOutput);  
@@ -139,12 +138,11 @@ module SimpleExtendableResourcesTest {
     var errorInput := Types.GetExtendableResourceErrorsInput(
       value := Option.Some("Some")
     );
-    var useInput: Types.UseExtendableResourceErrorsInput := Types.UseExtendableResourceErrorsInput(
+    var useInput := Types.UseExtendableResourceErrorsInput(
       resource := resource,
       input := errorInput
     );
-    var useOutput: Result<Types.GetExtendableResourceErrorsOutput, Types.Error>;
-    useOutput := client.UseExtendableResourceAlwaysMultipleErrors(
+    var useOutput := client.UseExtendableResourceAlwaysMultipleErrors(
       useInput
     );
     CheckMultipleErrors(useOutput);  
@@ -162,12 +160,11 @@ module SimpleExtendableResourcesTest {
     var errorInput := Types.GetExtendableResourceErrorsInput(
       value := Option.Some("Some")
     );
-    var useInput: Types.UseExtendableResourceErrorsInput := Types.UseExtendableResourceErrorsInput(
+    var useInput := Types.UseExtendableResourceErrorsInput(
       resource := resource,
       input := errorInput
     );
-    var useOutput: Result<Types.GetExtendableResourceErrorsOutput, Types.Error>;
-    useOutput := client.UseExtendableResourceAlwaysMultipleErrors(
+    var useOutput := client.UseExtendableResourceAlwaysMultipleErrors(
       useInput
     );
     CheckDafnyMultipleErrors(useOutput);  
@@ -185,12 +182,11 @@ module SimpleExtendableResourcesTest {
     var errorInput := Types.GetExtendableResourceErrorsInput(
       value := Option.Some("Some")
     );
-    var useInput: Types.UseExtendableResourceErrorsInput := Types.UseExtendableResourceErrorsInput(
+    var useInput := Types.UseExtendableResourceErrorsInput(
       resource := resource,
       input := errorInput
     );
-    var useOutput: Result<Types.GetExtendableResourceErrorsOutput, Types.Error>;
-    useOutput := client.UseExtendableResourceAlwaysOpaqueError(
+    var useOutput := client.UseExtendableResourceAlwaysOpaqueError(
       useInput
     );
     CheckOpaqueError(useOutput);  
@@ -209,12 +205,11 @@ module SimpleExtendableResourcesTest {
     var errorInput := Types.GetExtendableResourceErrorsInput(
       value := Option.Some("Some")
     );
-    var useInput: Types.UseExtendableResourceErrorsInput := Types.UseExtendableResourceErrorsInput(
+    var useInput := Types.UseExtendableResourceErrorsInput(
       resource := resource,
       input := errorInput
     );
-    var useOutput: Result<Types.GetExtendableResourceErrorsOutput, Types.Error>;
-    useOutput := client.UseExtendableResourceAlwaysOpaqueError(
+    var useOutput := client.UseExtendableResourceAlwaysOpaqueError(
       useInput
     );
     CheckDafnyOpaqueError(useOutput);  
