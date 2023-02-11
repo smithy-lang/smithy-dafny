@@ -161,7 +161,7 @@ public class ToDafnyLibrary extends ToDafny {
                         "$T list = $L(\n$L.list(), \n$T::Error, \n$L())",
                         listArg, genericCall, VAR_INPUT, thisClassName, getTypeDescriptor.asNormalReference()
                         )
-                .addStatement("return $T.create_Collection(list)", dafnyError)
+                .addStatement("return $T.create_CollectionOfErrors(list)", dafnyError)
                 .build();
     }
 

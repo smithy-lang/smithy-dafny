@@ -826,21 +826,33 @@ public class TypeConversionCodegen {
             ));
         })).lineSeparated();
 
+        // Handle casting to the CollectionOfErrors list of exception type
+        final TokenTree handleCollectionOfErrorsFromDafny = TokenTree
+          .of(
+            "case %1$s dafnyVal:"
+              .formatted(DotNetNameResolver.dafnyCollectionOfErrorsTypeForServiceShape(serviceShape)),
+            "return new %1$s(new System.Collections.Generic.List<Exception>(dafnyVal._list.Elements.Select(x => %2$s(x))));"
+              .formatted(DotNetNameResolver.baseClassForCollectionOfErrors(),
+                nameResolver.qualifiedTypeConverterForCommonError(serviceShape, FROM_DAFNY))
+          ).lineSeparated();
+
         // Handle the special cases that were cast to the root service exception.
         final TokenTree handleBaseFromDafny = TokenTree
           .of(
-            "case %1$s.Error_Opaque dafnyVal:"
-              .formatted(dafnyExternNamespaceForShapeId(serviceShape.getId())),
-            "return new OpaqueError(dafnyVal._obj);",
+            "case %1$s dafnyVal:"
+                .formatted(DotNetNameResolver.dafnyUnknownErrorTypeForServiceShape(serviceShape)),
+            "return new %1$s(dafnyVal._obj);"
+                .formatted(DotNetNameResolver.baseClassForUnknownError()),
             "default:",
             "// The switch MUST be complete for _IError, so `value` MUST NOT be an _IError. (How did you get here?)",
-            "return new OpaqueError();"
+            "return new %1$s();"
+                .formatted(DotNetNameResolver.baseClassForUnknownError())
           )
           .lineSeparated();
 
         // Wrap all the converters into a switch statement.
         final TokenTree fromDafnySwitchCases = TokenTree
-          .of(modeledExceptionsFromDafny, handleBaseFromDafny)
+          .of(modeledExceptionsFromDafny, handleCollectionOfErrorsFromDafny, handleBaseFromDafny)
           .lineSeparated()
           .braced();
         final TokenTree fromDafnyBody = TokenTree.of(
@@ -863,27 +875,48 @@ public class TypeConversionCodegen {
             ));
         })).lineSeparated();
 
+        // Return CollectionOfErrors wrapper for list of exceptions.
+        final TokenTree handleCollectionOfErrorsToDafny = TokenTree
+            .of("""
+                    case %1$s collectionOfErrors:
+                     return new %2$s(
+                         Dafny.Sequence<%3$s>
+                         .FromArray(
+                             collectionOfErrors.list.Select
+                                 (x => %4$s(x))
+                             .ToArray()
+                         )
+                     );
+                    """
+                .formatted(DotNetNameResolver.baseClassForCollectionOfErrors(),
+                    DotNetNameResolver.dafnyCollectionOfErrorsTypeForServiceShape(serviceShape),
+                    DotNetNameResolver.dafnyTypeForCommonServiceError(serviceShape),
+                    nameResolver.qualifiedTypeConverterForCommonError(serviceShape, TO_DAFNY))
+            )
+            .lineSeparated();
 
         // Return the root service exception with the custom message.
-        final TokenTree handleAnyException = TokenTree
+        final TokenTree handleAnyExceptionToDafny = TokenTree
           .of(
             "// OpaqueError is redundant, but listed for completeness.",
-            "case OpaqueError exception:",
-            "return new %1$s.Error_Opaque(exception);"
-              .formatted(dafnyExternNamespaceForShapeId(serviceShape.getId())),
+            "case %1$s exception:"
+              .formatted(DotNetNameResolver.baseClassForUnknownError()),
+            "return new %1$s(exception);"
+              .formatted(DotNetNameResolver.dafnyUnknownErrorTypeForServiceShape(serviceShape)),
             "case %1$s exception:".formatted(cSharpType),
-            "return new %1$s.Error_Opaque(exception);"
-              .formatted(dafnyExternNamespaceForShapeId(serviceShape.getId())),
+            "return new %1$s(exception);"
+              .formatted(DotNetNameResolver.dafnyUnknownErrorTypeForServiceShape(serviceShape)),
             "default:",
             "// The switch MUST be complete for System.Exception, so `value` MUST NOT be an System.Exception. (How did you get here?)",
-            "return new %1$s.Error_Opaque(value);"
-              .formatted(dafnyExternNamespaceForShapeId(serviceShape.getId()))
+              "return new %1$s(value);"
+              .formatted(DotNetNameResolver.dafnyUnknownErrorTypeForServiceShape(serviceShape))
           )
           .lineSeparated();
 
         // Wrap all the converters into a switch statement.
-        final TokenTree toDafnySwitchCases = TokenTree.of(specificExceptionsToDafny, handleAnyException)
-                .lineSeparated().braced();
+        final TokenTree toDafnySwitchCases = TokenTree.of(specificExceptionsToDafny,
+                    handleCollectionOfErrorsToDafny, handleAnyExceptionToDafny
+            ).lineSeparated().braced();
         final TokenTree toDafnyBody = TokenTree
           .of(
             TokenTree.of("switch (value)"),

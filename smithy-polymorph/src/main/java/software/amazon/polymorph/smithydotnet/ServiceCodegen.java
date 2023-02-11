@@ -74,6 +74,11 @@ public class ServiceCodegen {
                 importNamespaces.stream().map("using %s;"::formatted).map(Token::of)
         ).lineSeparated();
 
+        // Collection of errors class
+        final Path collectionOfErrorsPath = Path.of("CollectionOfErrors.cs");
+        final TokenTree collectionOfErrorsPathCode = generateCollectionExceptionClass();
+        codeByPath.put(collectionOfErrorsPath, collectionOfErrorsPathCode.prepend(prelude));
+
         // Opaque exception class
         final Path opaqueExceptionPath = Path.of("OpaqueError.cs");
         final TokenTree opaqueExceptionPathCode = generateOpaqueExceptionClass();
@@ -214,6 +219,21 @@ public class ServiceCodegen {
         // TODO need to model _all_ possible members here...
         final TokenTree messageCtor = Token.of("public %s(string message) : base(message) {}".formatted(exceptionName));
         return TokenTree.of(classHeader, messageCtor.braced()).namespaced(Token.of(nameResolver.namespaceForService()));
+    }
+
+    /**
+     * @return a Collection of exceptions class that can wrap any given list of System.Exception.
+     * The CollectionOfErrors class extends from System.Exception.
+     */
+    public TokenTree generateCollectionExceptionClass() {
+        return TokenTree.of("""
+        public class CollectionOfErrors : Exception {
+          public readonly System.Collections.Generic.List<Exception> list;
+          public CollectionOfErrors(System.Collections.Generic.List<Exception> list) : base("CollectionOfErrors") { this.list = list; }
+          public CollectionOfErrors() : base("CollectionOfErrors") { this.list = new System.Collections.Generic.List<Exception>(); }
+        }
+        """
+        ).namespaced(Token.of(nameResolver.namespaceForService()));
     }
 
     /**

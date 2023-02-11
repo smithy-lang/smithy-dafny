@@ -24,6 +24,7 @@ import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.TraitDefinition;
 
 import java.nio.file.Path;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -46,7 +47,9 @@ public class ServiceCodegenTest {
         final ServiceCodegen codegen = new ServiceCodegen(model, serviceShape);
         final Map<Path, TokenTree> codeByPath = codegen.generate();
 
-        final Set<Path> expectedPaths = Collections.singleton(Path.of("OpaqueError.cs"));
+        final Set<Path> expectedPaths = new HashSet<Path>();
+        expectedPaths.add(Path.of("CollectionOfErrors.cs"));
+        expectedPaths.add(Path.of("OpaqueError.cs"));
         assertEquals(expectedPaths, codeByPath.keySet());
     }
 

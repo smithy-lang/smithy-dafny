@@ -32,23 +32,17 @@ module SimpleErrorsImplTest {
       modifies client.Modifies
       ensures client.ValidState()
     {
-      // This is commented out because Dotnet codegen does not support conversion to/from Dafny for Collection errors.
-      // This should be uncommented out as part of adding Collection support, as this can be used to validate that the
-      //   Collection conversion implementation works as expected.
-      // TODO: Uncomment below as testing for Collection conversion
-      // 
-      // var s: string := "this is in a collection of errors";
-      // var convertedErrorInput: GetErrorsInput := SimpleErrors.Types.GetErrorsInput(value := Some(s));
+      var s: string := "this is in a collection of errors";
+      var convertedErrorInput: GetErrorsInput := SimpleErrors.Types.GetErrorsInput(value := Some(s));
 
-      // var ret := client.AlwaysMultipleErrors(convertedErrorInput);
-      // print ret;
+      var ret := client.AlwaysMultipleErrors(convertedErrorInput);
+      print ret;
 
-      // // TODO: Expect a Collection.
-      // expect ret.Failure?;
-      // expect ret.error.Collection?;
+      expect ret.Failure?;
+      expect ret.error.CollectionOfErrors?;
 
-      // var expectedValue := Collection(list := [ SimpleErrorsException(message := s) ]);
-      // expect ret.error == expectedValue;
+      var expectedValue := CollectionOfErrors(list := [ SimpleErrorsException(message := s) ]);
+      expect ret.error == expectedValue;
     }
 
     method TestAlwaysNativeError(client: ISimpleErrorsClient)
