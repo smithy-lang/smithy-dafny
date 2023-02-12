@@ -71,29 +71,7 @@ module TestHelpers {
   {
     expect errorOutput.Failure?;
     var actualError := errorOutput.PropagateFailure<Types.GetExtendableResourceErrorsOutput>().error;
-    // TypeConversion.FromDafny_CommonError does not handle Collection.
-    // As such, even though AlwaysMutlipleErrors correctly returns a Collection in Dafny,
-    // the generated .NET code botches the conversion,
-    // and lumps it as an Opaue Exception.
-    // TODO:
-    // Once https://github.com/awslabs/polymorph/pull/136 is resolved/merged
-    // and smithy-dotnet handles Collections, replace
-    // expect actualError.Opaque? with commented out expect,
-    // and remove this comment.
-    expect actualError.Opaque?;
-    // expect actualError.Collection?
-    //   && |actualError.list| == 1
-    //   && actualError.list[0].SimpleExtendableResourcesException?
-    //   && actualError.list[0].message == "Hard Coded Modeled Exception in Collection";
-  }
-
-  method CheckDafnyMultipleErrors(
-    errorOutput: Result<Types.GetExtendableResourceErrorsOutput, Types.Error>
-  )
-  {
-    expect errorOutput.Failure?;
-    var actualError := errorOutput.PropagateFailure<Types.GetExtendableResourceErrorsOutput>().error;
-    expect actualError.Collection?
+    expect actualError.CollectionOfErrors?
       && |actualError.list| == 1
       && actualError.list[0].SimpleExtendableResourcesException?
       && actualError.list[0].message == "Hard Coded Modeled Exception in Collection";

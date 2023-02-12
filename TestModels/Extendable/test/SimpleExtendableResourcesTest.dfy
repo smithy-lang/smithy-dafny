@@ -26,7 +26,7 @@ module SimpleExtendableResourcesTest {
     TestNoneUseExtendableResource(client, resource, TEST_RESOURCE_NAME);
     TestSomeUseExtendableResource(client, resource, TEST_RESOURCE_NAME);
     TestUseAlwaysModeledError(client, resource);
-    TestDafnyUseAlwaysMultipleErrors(client, resource);
+    TestUseAlwaysMultipleErrors(client, resource);
     TestDafnyUseAlwaysOpaqueError(client, resource);
   }
 
@@ -146,28 +146,6 @@ module SimpleExtendableResourcesTest {
       useInput
     );
     CheckMultipleErrors(useOutput);  
-  }
-
-  method TestDafnyUseAlwaysMultipleErrors(
-    client: Types.ISimpleExtendableResourcesClient,
-    resource: ExtendableResource.ExtendableResource
-  )
-    requires client.ValidState() && resource.ValidState()
-    requires resource.Modifies !! {client.History}
-    modifies client.Modifies, resource.Modifies
-    ensures client.ValidState() && resource.ValidState()  
-  {
-    var errorInput := Types.GetExtendableResourceErrorsInput(
-      value := Option.Some("Some")
-    );
-    var useInput := Types.UseExtendableResourceErrorsInput(
-      resource := resource,
-      input := errorInput
-    );
-    var useOutput := client.UseExtendableResourceAlwaysMultipleErrors(
-      useInput
-    );
-    CheckDafnyMultipleErrors(useOutput);  
   }
   
   method TestUseAlwaysOpaqueError(
