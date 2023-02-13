@@ -12,10 +12,5 @@ NAMESPACE=simple.resources
 # LIBRARIES :=
 transpile_net_dependencies:
 
-
-clean:
-	rm \
-	  $(PWD/)Model/*.dfy \
-	  $(PWD)/runtimes/net/ImplementationFromDafny.cs;
-	  ##$(PWD)runtimes/net/tests/TestFromDafny.cs;
-	rm -rf $(PWD)/TestResults $(PWD)/runtimes/net/Generated
+format_net:
+	pushd runtimes/net && dotnet format && popd

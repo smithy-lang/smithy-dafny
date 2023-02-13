@@ -10,11 +10,11 @@ module Helpers {
   function method allNone(): Types.GetResourceDataInput
   {
    Types.GetResourceDataInput(
-      blobValue := Option.None(),
-      booleanValue := Option.None(),
-      stringValue := Option.None(),
-      integerValue := Option.None(),
-      longValue := Option.None()
+      blobValue := None,
+      booleanValue := None,
+      stringValue := None,
+      integerValue := None,
+      longValue := None
     )
   }
 
@@ -22,23 +22,22 @@ module Helpers {
     name: string,
     output: Types.GetResourceDataOutput
   )
-    requires |name| > 0
   {
-    expect Option.Some(name) == output.stringValue;
-    expect Option.None() == output.blobValue;
-    expect Option.None() == output.booleanValue;
-    expect Option.None() == output.integerValue;
-    expect Option.None() == output.longValue; 
+    expect Some(name) == output.stringValue;
+    expect None == output.blobValue;
+    expect None == output.booleanValue;
+    expect None == output.integerValue;
+    expect None == output.longValue; 
   }
 
   function method allSome(): Types.GetResourceDataInput
   {
    Types.GetResourceDataInput(
-      blobValue := Option.Some([1]),
-      booleanValue := Option.Some(true),
-      stringValue := Option.Some("Some"),
-      integerValue := Option.Some(1),
-      longValue := Option.Some(1)
+      blobValue := Some([1]),
+      booleanValue := Some(true),
+      stringValue := Some("Some"),
+      integerValue := Some(1),
+      longValue := Some(1)
     )
   }
 
@@ -46,7 +45,6 @@ module Helpers {
     name: string,
     output: Types.GetResourceDataOutput
   )
-    requires |name| > 0
   {
     expect Option.Some(name + " Some") == output.stringValue;
     expect Option.Some([1]) == output.blobValue;
