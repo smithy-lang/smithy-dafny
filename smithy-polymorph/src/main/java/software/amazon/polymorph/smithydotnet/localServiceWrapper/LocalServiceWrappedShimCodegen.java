@@ -45,8 +45,9 @@ public class LocalServiceWrappedShimCodegen {
         final Map<Path, TokenTree> codeByPath = new HashMap<>();
         final TokenTree prelude = TokenTree.of(
                 "using System;",
+                "using System.Collections.Generic;",
                 "using System.IO;",
-                "using System.Collections.Generic;"
+                "using System.Linq;"
         ).lineSeparated();
 
         // Service shim
@@ -152,10 +153,10 @@ public class LocalServiceWrappedShimCodegen {
      * We define this here instead of in {@link LocalServiceWrappedShimCodegen} because the base error type isn't modeled.
      */
     public TokenTree generateErrorTypeShim() {
-        final String dafnyErrorAbstractType = DotNetNameResolver.dafnyTypeForCommonServiceError(serviceShape);
-        // TODO: Add the hard coded value `Error_Opaque` DafnyNameResolver
-        final String dafnyUnknownErrorType = "%s.Error_Opaque"
-          .formatted(DafnyNameResolverHelpers.dafnyExternNamespaceForShapeId(serviceShape.getId()));
+        final String dafnyErrorAbstractType =
+            DotNetNameResolver.dafnyTypeForCommonServiceError(serviceShape);
+        final String dafnyUnknownErrorType =
+            DotNetNameResolver.dafnyUnknownErrorTypeForServiceShape(serviceShape);
 
         // Collect into TreeSet so that we generate code in a deterministic order (lexicographic, in particular)
         final TreeSet<StructureShape> errorShapes = ModelUtils.streamServiceErrors(model, serviceShape)
@@ -171,6 +172,26 @@ public class LocalServiceWrappedShimCodegen {
                             """.formatted(wrappedErrorType, errorConverter));
                 })).lineSeparated();
 
+        // CollectionOfErrors wrapper for list of exceptions
+        final TokenTree collectionOfErrorsCase = TokenTree
+                .of("""
+                    case %1$s collectionOfErrors:
+                     return new %2$s(
+                         Dafny.Sequence<%3$s>
+                         .FromArray(
+                             collectionOfErrors.list.Select
+                                 (x => %4$s(x))
+                             .ToArray()
+                         )
+                     );
+                    """
+                    .formatted(DotNetNameResolver.baseClassForCollectionOfErrors(),
+                        DotNetNameResolver.dafnyCollectionOfErrorsTypeForServiceShape(serviceShape),
+                        DotNetNameResolver.dafnyTypeForCommonServiceError(serviceShape),
+                        nameResolver.qualifiedTypeConverterForCommonError(serviceShape, TO_DAFNY))
+                )
+                .lineSeparated();
+
         final TokenTree unknownErrorCase = Token.of("""
                 default:
                     return new %s(error);
@@ -180,7 +201,7 @@ public class LocalServiceWrappedShimCodegen {
                 dafnyErrorAbstractType,
                 CONVERT_ERROR_METHOD,
                 nameResolver.qualifiedClassForBaseServiceException()));
-        final TokenTree cases = TokenTree.of(knownErrorCases, unknownErrorCase).lineSeparated();
+        final TokenTree cases = TokenTree.of(knownErrorCases, collectionOfErrorsCase, unknownErrorCase).lineSeparated();
         final TokenTree body = Token.of("switch (error)").append(cases.braced());
         return signature.append(body.braced());
     }

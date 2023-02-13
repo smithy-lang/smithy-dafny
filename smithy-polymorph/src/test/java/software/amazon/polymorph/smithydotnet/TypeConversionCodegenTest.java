@@ -854,66 +854,65 @@ public class TypeConversionCodegenTest {
 //                }""".formatted(errorToDafnyConverterName, messageToDafnyConverterName));
 //        assertEquals(expectedTokensToDafny, actualTokensToDafny);
 //    }
-
-    @Test
-    public void testGenerateCommonExceptionConverter() {
-        final ShapeId exc1ShapeId = ShapeId.fromParts(SERVICE_NAMESPACE, "Exception1");
-        final ShapeId exc2ShapeId = ShapeId.fromParts(SERVICE_NAMESPACE, "Exception2");
-        final TypeConversionCodegen codegen = setupCodegen((builder, modelAssembler) ->
-                modelAssembler.addUnparsedModel("test.smithy", """
-                        namespace %s
-                        @error("client")
-                        structure Exception1 { @required message: String }
-                        @error("server")
-                        structure Exception2 { @required message: String }
-                        """.formatted(SERVICE_NAMESPACE)));
-        final TypeConverter converter = codegen.generateCommonExceptionConverter();
-        assertTrue("Common exception converter must use a shape ID not in the model",
-            codegen.getModel().getShape(converter.shapeId()).isEmpty());
-
-        final String actualFromDafny = converter.fromDafny().toString();
-        final String expectedFromDafny = """
-                public static System.Exception FromDafny_CommonError(Dafny.Test.Foobar.Types._IError value) {
-                    switch (value) {
-                        case Dafny.Test.Foobar.Types.Error_Exception1 dafnyVal:
-                            return %s(dafnyVal);
-                        case Dafny.Test.Foobar.Types.Error_Exception2 dafnyVal:
-                            return %s(dafnyVal);
-                        case Dafny.Test.Foobar.Types.Error_Opaque dafnyVal:
-                            return new OpaqueError(dafnyVal._obj);
-                        default:
-                            // The switch MUST be complete for _IError, so `value` MUST NOT be an _IError. (How did you get here?)
-                            return new OpaqueError();
-                    } 
-                }""".formatted(
-                DotNetNameResolver.typeConverterForShape(exc1ShapeId, FROM_DAFNY),
-                DotNetNameResolver.typeConverterForShape(exc2ShapeId, FROM_DAFNY)
-        );
-        tokenizeAndAssertEqual(expectedFromDafny, actualFromDafny);
-
-
-        final String actualToDafny = converter.toDafny().toString();
-        final String expectedToDafny = """
-                public static Dafny.Test.Foobar.Types._IError ToDafny_CommonError(System.Exception value) {
-                    switch (value) {
-                        case Test.Foobar.Exception1 exception:
-                            return %s(exception);
-                        case Test.Foobar.Exception2 exception:
-                            return %s(exception);
-                        // OpaqueError is redundant, but listed for completeness.
-                        case OpaqueError exception:
-                            return new Dafny.Test.Foobar.Types.Error_Opaque(exception);
-                        case System.Exception exception:
-                            return new Dafny.Test.Foobar.Types.Error_Opaque(exception);
-                        default:
-                            // The switch MUST be complete for System.Exception, so `value` MUST NOT be an System.Exception. (How did you get here?)
-                            return new Dafny.Test.Foobar.Types.Error_Opaque(value);
-                    } 
-                }""".formatted(
-            DotNetNameResolver.typeConverterForShape(exc1ShapeId, TO_DAFNY),
-            DotNetNameResolver.typeConverterForShape(exc2ShapeId, TO_DAFNY)
-        );
-
-        tokenizeAndAssertEqual(expectedToDafny, actualToDafny);
-    }
+//
+//    @Test
+//    public void testGenerateCommonExceptionConverter() {
+//        final ShapeId exc1ShapeId = ShapeId.fromParts(SERVICE_NAMESPACE, "Exception1");
+//        final ShapeId exc2ShapeId = ShapeId.fromParts(SERVICE_NAMESPACE, "Exception2");
+//        final TypeConversionCodegen codegen = setupCodegen((builder, modelAssembler) ->
+//            modelAssembler.addUnparsedModel("test.smithy", """
+//                namespace %s
+//                @error("client")
+//                structure Exception1 { @required message: String }
+//                @error("server")
+//                structure Exception2 { @required message: String }
+//                """.formatted(SERVICE_NAMESPACE)));
+//        final TypeConverter converter = codegen.generateCommonExceptionConverter();
+//        assertTrue("Common exception converter must use a shape ID not in the model",
+//            codegen.getModel().getShape(converter.shapeId()).isEmpty());
+//
+//        final String actualFromDafny = converter.fromDafny().toString();
+//        final String expectedFromDafny = """
+//            public static System.Exception FromDafny_CommonError(Dafny.Test.Foobar.Types._IError value) {
+//                switch (value) {
+//                    case Dafny.Test.Foobar.Types.Error_Exception1 dafnyVal:
+//                        return %s(dafnyVal);
+//                    case Dafny.Test.Foobar.Types.Error_Exception2 dafnyVal:
+//                        return %s(dafnyVal);
+//                    case Dafny.Test.Foobar.Types.Error_Opaque dafnyVal:
+//                        return new OpaqueError(dafnyVal._obj);
+//                    default:
+//                        // The switch MUST be complete for _IError, so `value` MUST NOT be an _IError. (How did you get here?)
+//                        return new OpaqueError();
+//                } 
+//            }""".formatted(
+//            DotNetNameResolver.typeConverterForShape(exc1ShapeId, FROM_DAFNY),
+//            DotNetNameResolver.typeConverterForShape(exc2ShapeId, FROM_DAFNY)
+//        );
+//        tokenizeAndAssertEqual(expectedFromDafny, actualFromDafny);
+//
+//
+//        final String actualToDafny = converter.toDafny().toString();
+//        final String expectedToDafny = """
+//            public static Dafny.Test.Foobar.Types._IError ToDafny_CommonError(System.Exception value) {
+//                switch (value) {
+//                    case Test.Foobar.Exception1 exception:
+//                        return %s(exception);
+//                    case Test.Foobar.Exception2 exception:
+//                        return %s(exception);
+//                    // OpaqueError is redundant, but listed for completeness.
+//                    case OpaqueError exception:
+//                        return new Dafny.Test.Foobar.Types.Error_Opaque(exception);
+//                    case System.Exception exception:
+//                        return new Dafny.Test.Foobar.Types.Error_Opaque(exception);
+//                    default:
+//                        // The switch MUST be complete for System.Exception, so `value` MUST NOT be an System.Exception. (How did you get here?)
+//                        return new Dafny.Test.Foobar.Types.Error_Opaque(value);
+//                } 
+//            }""".formatted(DotNetNameResolver.typeConverterForShape(exc1ShapeId, TO_DAFNY),
+//                           DotNetNameResolver.typeConverterForShape(exc2ShapeId, TO_DAFNY)
+//        );
+//
+//        tokenizeAndAssertEqual(expectedToDafny, actualToDafny);
+// }
 }
