@@ -59,7 +59,7 @@ module SimpleResource {
       var rtn: Types.GetResourceDataOutput := Types.GetResourceDataOutput(
         blobValue := input.blobValue,
         booleanValue := input.booleanValue,
-        stringValue := Option.Some(rtnString),
+        stringValue := Some(rtnString),
         integerValue := input.integerValue,
         longValue := input.longValue
       );

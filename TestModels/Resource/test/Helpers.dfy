@@ -46,10 +46,10 @@ module Helpers {
     output: Types.GetResourceDataOutput
   )
   {
-    expect Option.Some(name + " Some") == output.stringValue;
-    expect Option.Some([1]) == output.blobValue;
-    expect Option.Some(true) == output.booleanValue;
-    expect Option.Some(1) == output.integerValue;
-    expect Option.Some(1) == output.longValue; 
+    expect Some(name + " Some") == output.stringValue;
+    expect Some([1]) == output.blobValue;
+    expect Some(true) == output.booleanValue;
+    expect Some(1) == output.integerValue;
+    expect Some(1) == output.longValue; 
   }
 }
