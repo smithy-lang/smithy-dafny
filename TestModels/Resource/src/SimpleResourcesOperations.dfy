@@ -34,10 +34,6 @@ module SimpleResourcesOperations refines AbstractSimpleResourcesOperations {
   )
     ensures output.Success? ==> output.value.output.ValidState()
   {
-    :- Need(ValidInternalConfig?(config),
-      Types.SimpleResourcesException(
-      message := "Simple Resource Client has become invalid")
-    );
     var resource := new SimpleResource.SimpleResource(
       input.value,
       config.name
