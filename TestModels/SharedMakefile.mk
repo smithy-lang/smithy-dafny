@@ -136,3 +136,10 @@ test_net:
 setup_net:
 	dotnet restore runtimes/net/
 
+clean:
+	rm -f $(PWD)/Model/*Types.dfy $(PWD)/Model/*TypesWrapped.dfy
+	rm -f $(PWD)/runtimes/net/ImplementationFromDafny.cs
+	rm -f $(PWD)/runtimes/net/tests/TestFromDafny.cs
+	rm -rf $(PWD)/TestResults
+	rm -rf $(PWD)/runtimes/net/Generated $(PWD)/runtimes/net/bin $(PWD)/runtimes/net/obj
+	rm -rf $(PWD)/runtimes/net/tests/bin $(PWD)/runtimes/net/tests/obj
