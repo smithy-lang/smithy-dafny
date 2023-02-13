@@ -17,14 +17,9 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public class LocalServiceWrappedCodegen extends ServiceCodegen {
-    private static final Logger LOGGER = LoggerFactory.getLogger(LocalServiceWrappedCodegen.class);
 
-
-    public LocalServiceWrappedCodegen(final Model model, final ServiceShape serviceShape) {
+  public LocalServiceWrappedCodegen(final Model model, final ServiceShape serviceShape) {
     super(model, serviceShape,
       new LocalServiceWrappedNameResolver(model, serviceShape));
   }
@@ -42,10 +37,7 @@ public class LocalServiceWrappedCodegen extends ServiceCodegen {
       .map(ResourceShape::getId)
       .filter(resourceShapeId -> ModelUtils.isInServiceNamespace(resourceShapeId, serviceShape))
       .forEach(resourceShapeId -> {
-        if (shouldGenerateNativeWrapper(resourceShapeId) || isSimpleResource(resourceShapeId)) {
-          if (isSimpleResource(resourceShapeId)) {
-              LOGGER.info("Hard coded GenerateNativeWrapper for SimpleResource is executing.");
-          }
+        if (shouldGenerateNativeWrapper(resourceShapeId)) {
           // This SHOULD be a shared component without any changes.
           // If the wrapped version begins to differ from the native type
           // then this wrapped version begins to be a less valuable test bed.
@@ -61,12 +53,6 @@ public class LocalServiceWrappedCodegen extends ServiceCodegen {
       });
 
     return codeByPath;
-  }
-
-  private static boolean isSimpleResource(ShapeId id) {
-      return id.getNamespace().equals("simple.resources") &&
-             (id.getName().equals("SimpleResource") ||
-              id.getName().equals("SimpleResourceReference"));
   }
 
 

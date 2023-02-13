@@ -4,14 +4,12 @@
 package software.amazon.polymorph.smithydotnet.localServiceWrapper;
 
 import software.amazon.polymorph.smithydotnet.TypeConversionCodegen;
+import software.amazon.polymorph.traits.ExtendableTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.*;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static software.amazon.polymorph.smithydotnet.DotNetNameResolver.typeConverterForShape;
 import static software.amazon.polymorph.smithydotnet.TypeConversionDirection.FROM_DAFNY;
@@ -24,7 +22,6 @@ import static software.amazon.polymorph.smithydotnet.TypeConversionDirection.TO_
  * mostly for testing.
  */
 public class LocalServiceWrappedConversionCodegen extends TypeConversionCodegen {
-    private static final Logger LOGGER = LoggerFactory.getLogger(LocalServiceWrappedConversionCodegen.class);
 
     public LocalServiceWrappedConversionCodegen(final Model model, final ServiceShape serviceShape) {
         super(model, serviceShape,
@@ -68,13 +65,6 @@ public class LocalServiceWrappedConversionCodegen extends TypeConversionCodegen 
             // for more details.
 
             final ShapeId id = shape.getId();
-            if (id.getNamespace().equals("simple.resources") && (
-                    id.getName().equals("SimpleResource") || id.getName().equals("SimpleResourceReference")
-            )) {
-                LOGGER.info("Trying to Use a NativeWrapper for SimpleResource Conversion");
-                /*LOGGER.info("Hard coded catch is executing.");
-                return super.buildConverterFromMethodBodies(shape, fromDafnyBody, toDafnyBody);*/
-            }
             final ShapeId resourceShapeId = shape.expectTrait(ReferenceTrait.class).getReferentId();
             final String dafnyType = nameResolver.dafnyTypeForShape(id);
             final String cSharpType = nameResolver.baseTypeForShape(id);
@@ -144,7 +134,8 @@ public class LocalServiceWrappedConversionCodegen extends TypeConversionCodegen 
         if (ModelUtils.isReferenceDependantModuleType(shape, nameResolver.namespaceForService())) {
             final ShapeId resourceShapeId = shape.expectTrait(ReferenceTrait.class).getReferentId();
             return nameResolver.namespaceForShapeId(serviceShape.getId())
-              .equalsIgnoreCase(resourceShapeId.getNamespace());
+              .equalsIgnoreCase(resourceShapeId.getNamespace())
+              && model.expectShape(resourceShapeId).hasTrait(ExtendableTrait.class);
         } else {
             return false;
         }
