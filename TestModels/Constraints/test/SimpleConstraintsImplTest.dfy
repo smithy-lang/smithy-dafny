@@ -120,7 +120,7 @@ module SimpleConstraintsImplTest {
       returns (invalid: LessThanTen)
     {
       var invalidLessThanTenInput := 12;
-      assume IsValid_LessThanTen(invalidLessThanTenInput);
+      assume {:axiom} IsValid_LessThanTen(invalidLessThanTenInput);
       var invalidLessThanTen: LessThanTen := invalidLessThanTenInput;
       return invalidLessThanTen;
     }
@@ -129,7 +129,7 @@ module SimpleConstraintsImplTest {
       returns (invalid: MyString)
     {
       var invalidMyStringInput := "thisislongerthan10characters";
-      assume IsValid_MyString(invalidMyStringInput);
+      assume {:axiom} IsValid_MyString(invalidMyStringInput);
       var invalidMyString: MyString := invalidMyStringInput;
       return invalidMyString;
     }
@@ -138,7 +138,7 @@ module SimpleConstraintsImplTest {
       returns (invalid: NonEmptyString)
     {
       var invalidNonEmptyStringInput := "";
-      assume IsValid_NonEmptyString(invalidNonEmptyStringInput);
+      assume {:axiom} IsValid_NonEmptyString(invalidNonEmptyStringInput);
       var invalidNonEmptyString: NonEmptyString := invalidNonEmptyStringInput;
       return invalidNonEmptyString;
     }
@@ -147,7 +147,7 @@ module SimpleConstraintsImplTest {
       returns (invalid: StringLessThanOrEqualToTen)
     {
       var invalidStringLessThanOrEqualToTenInput := "";
-      assume IsValid_StringLessThanOrEqualToTen(invalidStringLessThanOrEqualToTenInput);
+      assume {:axiom} IsValid_StringLessThanOrEqualToTen(invalidStringLessThanOrEqualToTenInput);
       var invalidStringLessThanOrEqualToTen: StringLessThanOrEqualToTen := invalidStringLessThanOrEqualToTenInput;
       return invalidStringLessThanOrEqualToTen;
     }
@@ -156,7 +156,7 @@ module SimpleConstraintsImplTest {
       returns (invalid: MyBlob)
     {
       var invalidMyBlobInput := []; // Invalid because |x| < 1; predicate requires 1 <= |x| <= 10
-      assume IsValid_MyBlob(invalidMyBlobInput);
+      assume {:axiom} IsValid_MyBlob(invalidMyBlobInput);
       var invalidMyBlob: MyBlob := invalidMyBlobInput;
       return invalidMyBlob;
     }
