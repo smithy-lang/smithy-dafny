@@ -62,6 +62,10 @@ public class Constants {
                 this.region = region;
               }
               
+              public AWSKMS impl() {
+                return this._impl;
+              }
+              
               public String region() {
                 return this.region;
               }

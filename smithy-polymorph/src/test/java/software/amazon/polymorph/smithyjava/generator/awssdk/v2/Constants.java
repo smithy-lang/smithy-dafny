@@ -58,6 +58,10 @@ public class Constants {
                 this.region = region;
               }
               
+              public KmsClient impl() {
+                return this._impl;
+              }
+              
               public String region() {
                 return this.region;
               }
