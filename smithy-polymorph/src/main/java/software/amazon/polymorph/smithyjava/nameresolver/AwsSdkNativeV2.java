@@ -25,8 +25,8 @@ import software.amazon.smithy.utils.StringUtils;
 
 import static software.amazon.polymorph.smithyjava.generator.Generator.Constants.BLOB_TO_NATIVE_SDK_BYTES;
 import static software.amazon.polymorph.smithyjava.nameresolver.Constants.SHAPE_TYPES_LIST_SET;
-import static software.amazon.polymorph.smithyjava.nameresolver.v2.AwsSdkV2NameResolverUtils.isAttributeValueType;
-import static software.amazon.polymorph.smithyjava.nameresolver.v2.AwsSdkV2NameResolverUtils.tokenToUncapitalizeInShape;
+import static software.amazon.polymorph.smithyjava.nameresolver.AwsSdkV2NameResolverUtils.isAttributeValueType;
+import static software.amazon.polymorph.smithyjava.nameresolver.AwsSdkV2NameResolverUtils.tokenToUncapitalizeInShape;
 import static software.amazon.smithy.utils.StringUtils.uncapitalize;
 
 /**
@@ -221,7 +221,7 @@ public class AwsSdkNativeV2 extends Native {
                     "Trait definition structures have no corresponding generated type");
         }
         // check if this Shape is in AWS SDK for Java V2 package
-        if (AwsSdkNameResolverHelpers.isAwsSdkServiceId(shape.getId())) {
+        if (AwsSdkNameResolverHelpers.isAwsSdkServiceNamespace(shape.getId())) {
             // Assume that the shape is in the model package
             ClassName smithyName = ClassName.get(
                 defaultModelPackageName(packageNameForAwsSdkV2Shape(shape)),

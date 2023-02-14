@@ -1,4 +1,4 @@
-package software.amazon.polymorph.smithyjava.nameresolver.v2;
+package software.amazon.polymorph.smithyjava.nameresolver;
 
 import software.amazon.smithy.model.shapes.MemberShape;
 

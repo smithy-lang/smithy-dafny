@@ -53,7 +53,7 @@ public class ToNativeConstants {
             public static software.amazon.awssdk.services.kms.model.Simple Simple(
               Dafny.Com.Amazonaws.Kms.Types.Simple dafnyValue
             ) {
-              return new software.amazon.awssdk.services.kms.model.Simple();
+              return software.amazon.awssdk.services.kms.model.Simple.builder().build();
             }
             """;
     static String A_OPTIONAL_STRUCTURE = """
