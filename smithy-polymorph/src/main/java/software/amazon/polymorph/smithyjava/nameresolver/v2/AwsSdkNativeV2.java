@@ -2,6 +2,7 @@ package software.amazon.polymorph.smithyjava.nameresolver;
 
 import com.google.common.base.CaseFormat;
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 
@@ -11,16 +12,22 @@ import java.util.Set;
 
 import software.amazon.polymorph.utils.AwsSdkNameResolverHelpers;
 import software.amazon.smithy.model.Model;
+import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
+import software.amazon.smithy.model.shapes.ShapeType;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.TraitDefinition;
 import software.amazon.smithy.utils.StringUtils;
 
+import static software.amazon.polymorph.smithyjava.generator.Generator.Constants.BLOB_TO_NATIVE_SDK_BYTES;
 import static software.amazon.polymorph.smithyjava.nameresolver.Constants.SHAPE_TYPES_LIST_SET;
+import static software.amazon.polymorph.smithyjava.nameresolver.v2.AwsSdkV2NameResolverUtils.isAttributeValueType;
+import static software.amazon.polymorph.smithyjava.nameresolver.v2.AwsSdkV2NameResolverUtils.tokenToUncapitalizeInShape;
+import static software.amazon.smithy.utils.StringUtils.uncapitalize;
 
 /**
  * There are certain assumptions we can/have to make about
@@ -120,6 +127,25 @@ public class AwsSdkNativeV2 extends Native {
         return typeForShape(shapeId);
     }
 
+    @Override
+    public TypeName typeForShape(final ShapeId shapeId) {
+        final Shape shape = model.expectShape(shapeId);
+
+        // Overrides BYTE shapeType type conversion to SdkBytes conversion.
+        if (shape.getType().equals(ShapeType.BYTE)) {
+            return BLOB_TO_NATIVE_SDK_BYTES;
+        }
+
+        // BinarySetAttributeValue is the only list of bytes
+        if (shapeId.getName().contains("BinarySetAttributeValue")) {
+            return ParameterizedTypeName.get(
+                ClassName.get(List.class),
+                BLOB_TO_NATIVE_SDK_BYTES);
+        }
+
+        return super.typeForShape(shapeId);
+    }
+
     /**
      * Returns true if the provided ShapeId has type string in the Smithy model, but AWS SDK for
      *   Java V2 effectively expects type structure.
@@ -157,6 +183,32 @@ public class AwsSdkNativeV2 extends Native {
         };
     }
 
+    /**
+     * Returns CodeBlock containing something like `member`.
+     * Most AWS SDK V2 setters are `uncapitalizedMemberName` with edge cases in this function
+     * @param shape
+     * @return CodeBlock containing something like `member`.
+     */
+    public CodeBlock fieldForSetMember(MemberShape shape) {
+        // Some strings have a token that requires multi-letter decapitalization (e.g. "SSE", "KMS")
+        String tokenToUncapitalize = tokenToUncapitalizeInShape(shape);
+        if (!tokenToUncapitalize.equals("")) {
+            return CodeBlock.of("$L", shape.getMemberName().replace(tokenToUncapitalize,
+                tokenToUncapitalize.toLowerCase()));
+        }
+        // Attributes of SDK AttributeValue shapes are always lower-case
+        if (shape.getContainer().getName().equals("AttributeValue")
+            && isAttributeValueType(shape)) {
+            // "NULL" attribute is set using "nul"
+            if (shape.getMemberName().equals("NULL")) {
+                return CodeBlock.of("nul");
+            }
+            return CodeBlock.of("$L", shape.getMemberName().toLowerCase());
+        }
+
+        return CodeBlock.of("$L", uncapitalize(shape.getMemberName()));
+    }
+
     @Override
     public ClassName classNameForStructure(final Shape shape) {
         if (!(shape.isUnionShape() || shape.isStructureShape())) {
@@ -174,6 +226,26 @@ public class AwsSdkNativeV2 extends Native {
             ClassName smithyName = ClassName.get(
                 defaultModelPackageName(packageNameForAwsSdkV2Shape(shape)),
                 StringUtils.capitalize(shape.getId().getName()));
+
+            if (smithyName.simpleName().endsWith("Input")) {
+                return ClassName.get(smithyName.packageName(),
+                    smithyName.simpleName()
+                        .substring(
+                            0,
+                            smithyName.simpleName().lastIndexOf("Input"))
+                        + "Request"
+                );
+            }
+            if (smithyName.simpleName().endsWith("Output")) {
+                return ClassName.get(smithyName.packageName(),
+                    smithyName.simpleName()
+                        .substring(
+                            0,
+                            smithyName.simpleName().lastIndexOf("Output"))
+                        + "Response"
+                );
+            }
+
             if (shape.hasTrait(ErrorTrait.class)) {
                 if (smithyName.simpleName().contains("KMS")) {
                     return ClassName.get(smithyName.packageName(),
@@ -185,6 +257,18 @@ public class AwsSdkNativeV2 extends Native {
                     return ClassName.get(smithyName.packageName(),
                         smithyName.simpleName()
                             .replace("CMK", "CmK")
+                    );
+                }
+                if (smithyName.simpleName().endsWith("InternalServerError")) {
+                    return ClassName.get(smithyName.packageName(),
+                        smithyName.simpleName()
+                            .replace("InternalServerError", "InternalServerErrorException")
+                    );
+                }
+                if (smithyName.simpleName().endsWith("RequestLimitExceeded")) {
+                    return ClassName.get(smithyName.packageName(),
+                        smithyName.simpleName()
+                            .replace("RequestLimitExceeded", "RequestLimitExceededException")
                     );
                 }
                 return smithyName;
@@ -244,9 +328,6 @@ public class AwsSdkNativeV2 extends Native {
 
     public static String packageNameForService(final String awsServiceName) {
         String rtn = awsServiceName;
-        if (awsServiceName.equals("dynamodb")) {
-            rtn = "dynamodbv2";
-        }
         return "software.amazon.awssdk.services.%s".formatted(rtn);
     }
 

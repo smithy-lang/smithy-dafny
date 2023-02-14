@@ -1,5 +1,6 @@
 package software.amazon.polymorph.smithyjava.generator.awssdk.v2;
 
+import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.JavaFile;
@@ -10,6 +11,7 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.WildcardTypeName;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -34,10 +36,11 @@ import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.ShapeType;
 import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
+import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumDefinition;
 import software.amazon.smithy.model.traits.EnumTrait;
 
-import static software.amazon.polymorph.smithyjava.generator.Generator.Constants.JAVA_UTIL_COLLECTORS;
+import static software.amazon.polymorph.smithyjava.generator.Generator.Constants.JAVA_UTIL_STREAM_COLLECTORS;
 import static software.amazon.smithy.utils.StringUtils.capitalize;
 
 /**
@@ -87,6 +90,18 @@ public class ToDafnyAwsV2 extends ToDafny {
                 .map(shapeId -> subject.model.expectShape(shapeId, OperationShape.class))
                 .map(OperationShape::getOutput).filter(Optional::isPresent).map(Optional::get)
                 .collect(Collectors.toCollection(LinkedHashSet::new));
+
+        // OperationErrors are streamed to gather the types that are only inputs or outputs to errors.
+        // Right now this is only CancellationReasonList.
+        LinkedHashSet<ShapeId> operationErrors = subject.serviceShape
+            .getOperations().stream()
+            .map(shapeId -> subject.model.expectShape(shapeId, OperationShape.class))
+            .map(OperationShape::getErrors)
+            .flatMap(Collection::stream)
+            .filter(structureShape -> !structureShape.toString().contains("InvalidEndpointException"))
+            .collect(Collectors.toCollection(LinkedHashSet::new));
+        operationOutputs.addAll(operationErrors);
+
         Set<ShapeId> allRelevantShapeIds = ModelUtils.findAllDependentShapes(operationOutputs, subject.model);
 
         // In the AWS SDK for Java V2, Operation Outputs are special
@@ -106,7 +121,9 @@ public class ToDafnyAwsV2 extends ToDafny {
         final List<MethodSpec> convertAllRelevant = allRelevantShapeIds.stream()
                 .map(this::generateConvert).filter(Objects::nonNull).toList();
         final List<MethodSpec> convertServiceErrors = ModelUtils.streamServiceErrors(subject.model, subject.serviceShape)
-                .map(this::modeledError).collect(Collectors.toList());
+            // InvalidEndpointException does not exist in SDK V2
+            .filter(structureShape -> !structureShape.getId().getName().contains("InvalidEndpointException"))
+            .map(this::modeledError).collect(Collectors.toList());
         convertServiceErrors.add(generateConvertOpaqueError());
         // For enums, we generate overloaded methods,
         // one to convert instances of the Enum
@@ -144,15 +161,20 @@ public class ToDafnyAwsV2 extends ToDafny {
             case MAP -> modeledMap(shape.asMapShape().get());
             case SET -> modeledSet(shape.asSetShape().get());
             case STRUCTURE -> generateConvertStructure(shapeId);
+            case UNION -> generateConvertUnion(shapeId);
             default -> throw new UnsupportedOperationException(
                     "ShapeId %s is of Type %s, which is not yet supported for ToDafny"
                             .formatted(shapeId, shape.getType()));
         };
     }
 
+    MethodSpec generateConvertUnion(final ShapeId shapeId) {
+        final UnionShape unionShape = subject.model.expectShape(shapeId, UnionShape.class);
+        return super.modeledUnion(unionShape);
+    }
+
     @Override
     protected CodeBlock memberConversion(MemberShape memberShape, CodeBlock inputVar) {
-
         CodeBlock methodBlock = memberConversionMethodReference(memberShape).asNormalReference();
 
         return CodeBlock.of("$L($L)",
@@ -183,10 +205,68 @@ public class ToDafnyAwsV2 extends ToDafny {
         //   ByteSequence(inputVar.asByteArray())
         Shape targetShape = subject.model.expectShape(memberShape.getTarget());
         if (targetShape.getType() == ShapeType.BLOB) {
-            return returnCodeBlockBuilder.add(".asByteArray()").build();
+            return returnCodeBlockBuilder
+                .add(".asByteArray()")
+                .build();
+        }
+
+        // BinarySetAttributeValue conversion is special.
+        // The input Dafny type is DafnySequence<? extends DafnySequence<? extends Byte>>.
+        // The output native type is List<SdkBytes>.
+        // dafny-java-conversion can convert most input types directly to the output types;
+        //     however, SdkBytes is an exception. SdkBytes is defined in the AWS SDK. It is not a
+        //     native Java nor Dafny type.
+        // We do not want to write a conversion to SdkBytes inside dafny-java-conversion, else
+        //     Polymorph would need to take a dependency on the AWS SDK. Instead, smithy-polymorph=
+        //     will generate the required conversion code.
+        // This is the only time when Polymorph needs to convert a list of a Dafny type to a list
+        //     of a type that Polymorph does not know about. So this is a special case and warrants
+        //     its own generation logic.
+        if (targetShape.getId().getName().equals("BinarySetAttributeValue")) {
+            return returnCodeBlockBuilder
+                .add(".stream().map((self) -> { return self.asByteBuffer(); } ).collect(\n"
+                    + "$L.toList())", JAVA_UTIL_STREAM_COLLECTORS)
+                .build();
+        }
+
+        // Smithy models some values as integers, but SDK expects doubles.
+        // .intValue will round down; i.e. the decimal portion is removed. This mirrors Dotnet's
+        //     double -> int casting.
+        if (shapeRequiresTypeConversionFromDoubleToInt(targetShape.getId())) {
+            return returnCodeBlockBuilder
+                .add(".intValue()")
+                .build();
+        }
+
+        // SizeEstimateRangeGB is a list of the case above, where Smithy models values as integers,
+        //     but the SDK expects doubles.
+        // This is the only instance of double -> int conversion in a list right now.
+        if (memberShape.getMemberName().equals("SizeEstimateRangeGB")) {
+            MethodReference convert = new MethodReference(
+                JAVA_UTIL_STREAM_COLLECTORS,
+                "toList");
+
+            return returnCodeBlockBuilder
+                .add(".stream()")
+                .add(".map(Double::intValue)")
+                .add(".collect(" + convert.asNormalReference() + "())")
+                .build();
         }
 
         return inputVar;
+    }
+
+    /**
+     * Returns true if the provided ShapeId has type integer in the Smithy model, but AWS SDK for
+     *   Java V2 effectively expects type double.
+     * @param shapeId
+     * @return true if AWS SDK for Java V2 expects this to have been modeled as a double in Smithy
+     */
+    protected boolean shapeRequiresTypeConversionFromDoubleToInt(ShapeId shapeId) {
+        String shapeName = shapeId.getName();
+
+        return shapeName.equals("ConsumedCapacityUnits")
+            || shapeName.equals("Double");
     }
 
     MethodSpec generateConvertEnumString(ShapeId shapeId) {
@@ -272,7 +352,6 @@ public class ToDafnyAwsV2 extends ToDafny {
         return super.modeledStructure(structureShape);
     }
 
-
     @Override
     protected CodeBlock getMember(CodeBlock variableName, MemberShape memberShape) {
         return subject.dafnyNameResolver.methodForGetMember(variableName, memberShape);
@@ -293,13 +372,39 @@ public class ToDafnyAwsV2 extends ToDafny {
         CodeBlock getTypeDescriptor = subject.dafnyNameResolver.typeDescriptor(memberShape.getTarget());
 
         ParameterSpec parameterSpec = ParameterSpec
-                .builder(subject.nativeNameResolver.typeForListSetOrMapNoEnum(shape.getId()), "nativeValue")
+            .builder(subject.nativeNameResolver.typeForListSetOrMapNoEnum(shape.getId()), "nativeValue")
+            .build();
+
+        MethodSpec.Builder methodSpecBuilder = MethodSpec
+            .methodBuilder(capitalize(shape.getId().getName()))
+            .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+
+            .returns(subject.dafnyNameResolver.typeForAggregateWithWildcard(shape.getId()))
+            .addParameter(parameterSpec);
+
+        // A static call to TypeDescriptor class requires an explicit typecast.
+        // This generates an "unchecked cast" warning, which needs to be suppressed.
+        // (Dafny automatically generates this warning suppression annotation for classes that
+        //     generate their own _typeDescriptor() method.)
+        if (subject.dafnyNameResolver.shapeIdRequiresStaticTypeDescriptor(memberShape.getTarget())) {
+            return methodSpecBuilder
+                // Suppress "unchecked cast" warning; this is expected
+                .addAnnotation(
+                    AnnotationSpec.builder(SuppressWarnings.class)
+                        .addMember("value", "$S", "unchecked")
+                    .build()
+                )
+                .addStatement("return \n($L) \n$L(\n$L, \n$L, \n$L)",
+                    // This is the explicit typecast in the return statement
+                    subject.dafnyNameResolver.typeForAggregateWithWildcard(shape.getId()),
+                    genericCall,
+                    "nativeValue",
+                    memberConverter,
+                    getTypeDescriptor)
                 .build();
-        return MethodSpec
-                .methodBuilder(capitalize(shape.getId().getName()))
-                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                .returns(subject.dafnyNameResolver.typeForAggregateWithWildcard(shape.getId()))
-                .addParameter(parameterSpec)
+        }
+
+        return methodSpecBuilder
                 .addStatement("return $L(\n$L, \n$L, \n$L)",
                         genericCall, "nativeValue", memberConverter, getTypeDescriptor)
                 .build();

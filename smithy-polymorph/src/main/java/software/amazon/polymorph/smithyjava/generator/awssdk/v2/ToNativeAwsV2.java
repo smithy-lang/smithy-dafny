@@ -4,6 +4,7 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 
@@ -19,6 +20,7 @@ import javax.lang.model.element.Modifier;
 
 import software.amazon.polymorph.smithyjava.MethodReference;
 import software.amazon.polymorph.smithyjava.generator.ToNative;
+import software.amazon.polymorph.smithyjava.nameresolver.AwsSdkDafnyV2;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.polymorph.utils.ModelUtils;
 
@@ -29,9 +31,14 @@ import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.ShapeType;
 import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
+import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumDefinition;
 import software.amazon.smithy.model.traits.EnumTrait;
 
+import static software.amazon.polymorph.smithyjava.generator.Generator.Constants.BLOB_TO_NATIVE_SDK_BYTES;
+import static software.amazon.polymorph.smithyjava.generator.Generator.Constants.JAVA_UTIL_ARRAYLIST;
+import static software.amazon.polymorph.smithyjava.nameresolver.v2.AwsSdkV2NameResolverUtils.isAttributeValueType;
+import static software.amazon.polymorph.smithyjava.nameresolver.v2.AwsSdkV2NameResolverUtils.tokenToUncapitalizeInShape;
 import static software.amazon.smithy.utils.StringUtils.capitalize;
 import static software.amazon.smithy.utils.StringUtils.uncapitalize;
 
@@ -58,7 +65,6 @@ import static software.amazon.smithy.utils.StringUtils.uncapitalize;
 public class ToNativeAwsV2 extends ToNative {
     protected final static String VAR_BUILDER = "builder";
     protected final static String VAR_TEMP = "temp";
-    protected static final ClassName BLOB_TO_NATIVE_SDK_BYTES = ClassName.get("software.amazon.awssdk.core", "SdkBytes");
 
     // TODO: for V2 support, use abstract AwsSdk name resolvers and sub class for V1 or V2.
 
@@ -117,10 +123,58 @@ public class ToNativeAwsV2 extends ToNative {
             case SET -> modeledSet(shape.asSetShape().get());
             case MAP -> modeledMap(shape.asMapShape().get());
             case STRUCTURE -> modeledStructure(shape.asStructureShape().get());
+            case UNION -> modeledUnion(shape.asUnionShape().get());
             default -> throw new UnsupportedOperationException(
-                    "ShapeId %s is of Type %s, which is not yet supported for ToDafny"
+                    "ShapeId %s is of Type %s, which is not yet supported for ToNative"
                             .formatted(shapeId, shape.getType()));
         };
+    }
+
+    @Override
+    protected MethodSpec modeledListOrSet(MemberShape memberShape, ShapeId shapeId, ShapeType shapeType) {
+        // BinarySetAttributeValue conversion is special.
+        // The input Dafny type is DafnySequence<? extends DafnySequence<? extends Byte>>.
+        // The output native type is List<SdkBytes>.
+        // dafny-java-conversion can convert most input types directly to the output types;
+        //     however, SdkBytes is an exception. SdkBytes is defined in the AWS SDK. It is not a
+        //     native Java nor Dafny type.
+        // We do not want to write a conversion to SdkBytes inside dafny-java-conversion, else
+        //     Polymorph would need to take a dependency on the AWS SDK. Instead, smithy-polymorph=
+        //     will generate the required conversion code.
+        // This is the only time when Polymorph needs to convert a list of a Dafny type to a list
+        //     of a type that Polymorph does not know about. So this is a special case and warrants
+        //     its own generation logic.
+        if (shapeId.getName().contains("BinarySetAttributeValue")) {
+            ParameterSpec parameterSpec = ParameterSpec
+                .builder(subject.dafnyNameResolver.typeForShape(shapeId), VAR_INPUT)
+                .build();
+
+            MethodSpec.Builder methodSpecBuilder = MethodSpec
+                .methodBuilder(capitalize(shapeId.getName()))
+                .addModifiers(PUBLIC_STATIC)
+                .returns(subject.nativeNameResolver.typeForShape(shapeId))
+                .addParameter(parameterSpec);
+
+            // Since this special case only applies to one class right now, explicitly assigning a
+            //     string isn't unreasonable. We should extend this logic if this case applies to
+            //     more classes as we add new libraries.
+            CodeBlock.Builder codeBlockBuilder = CodeBlock.builder();
+            codeBlockBuilder.add("""
+                List<SdkBytes> returnList = new $L<SdkBytes>();
+            
+                dafnyValue.forEach((value) -> {
+                    returnList.add(software.amazon.awssdk.core.SdkBytes.fromByteArray((byte[]) value.toRawArray()));
+                });
+            
+                return returnList;
+            """, JAVA_UTIL_ARRAYLIST);
+
+            methodSpecBuilder.addCode(codeBlockBuilder.build());
+
+            return methodSpecBuilder.build();
+        }
+
+        return super.modeledListOrSet(memberShape, shapeId, shapeType);
     }
 
     @Override
@@ -134,7 +188,7 @@ public class ToNativeAwsV2 extends ToNative {
                 .addParameter(subject.dafnyNameResolver.typeForShape(structureShape.getId()), VAR_INPUT);
 
         if (structureShape.members().size() == 0) {
-            builder.addStatement("return new $T()", nativeClassName);
+            builder.addStatement("return $T.builder().build()", nativeClassName);
             return builder.build();
         }
         builder.addStatement("$T.Builder $L = $T.builder()", nativeClassName, VAR_BUILDER, nativeClassName);
@@ -170,14 +224,26 @@ public class ToNativeAwsV2 extends ToNative {
                 setMemberField(member),
                 memberConversionMethodReference(member).asNormalReference(),
                 VAR_INPUT,
-                Dafny.getMemberFieldValue(member));
+                AwsSdkDafnyV2.getV2MemberFieldValue(member));
         }
+
+        // "TargetValue" refers to a table's target R/W capacity target values.
+        // SDK handles these as doubles, but the Smithy model stores them as integers.
+        if (member.getMemberName().equals("TargetValue")) {
+            return CodeBlock.of("$L.$L($L((double) $L.$L))",
+                VAR_BUILDER,
+                setMemberField(member),
+                memberConversionMethodReference(member).asNormalReference(),
+                VAR_INPUT,
+                AwsSdkDafnyV2.getV2MemberFieldValue(member));
+        }
+
         return CodeBlock.of("$L.$L($L($L.$L))",
             VAR_BUILDER,
                 setMemberField(member),
                 memberConversionMethodReference(member).asNormalReference(),
                 VAR_INPUT,
-                Dafny.getMemberFieldValue(member));
+                AwsSdkDafnyV2.getV2MemberFieldValue(member));
     }
 
     @Override
@@ -192,9 +258,8 @@ public class ToNativeAwsV2 extends ToNative {
     /** @return CodeBlock of Method to set a member field. */
     @Override
     protected CodeBlock setMemberField(MemberShape shape) {
-        // In AWS SDK Java V2, using `with` allows for enums or strings
-        // while `set` only allows for strings.
-        return CodeBlock.of("$L", uncapitalize(shape.getMemberName()));
+        return subject.nativeNameResolver.fieldForSetMember(shape);
+
     }
 
     MethodSpec generateConvertString(ShapeId shapeId) {
@@ -243,6 +308,30 @@ public class ToNativeAwsV2 extends ToNative {
             );
 
         method.addStatement("return $T.fromValue($L.toString())", returnType, VAR_INPUT);
+        return method.build();
+    }
+
+    // TODO: Refactor with ToNative.
+    // This is only duplicated because ToNative uses "nativeBuilder" as the name for its builders,
+    //     but this file uses "builder". This seems able to be refactored.
+    protected MethodSpec modeledUnion(final UnionShape shape) {
+        final ShapeId shapeId = shape.getId();
+        final String methodName = capitalize(shapeId.getName());
+        final TypeName inputType = subject.dafnyNameResolver.typeForShape(shapeId);
+        final ClassName returnType = subject.nativeNameResolver.classNameForStructure(shape);
+        MethodSpec.Builder method = initializeMethodSpec(methodName, inputType, returnType);
+        ClassName nativeClassName = subject.nativeNameResolver.classNameForStructure(
+            shape.asUnionShape().get());
+        method.addStatement("$T.Builder $L = $T.builder()", nativeClassName, VAR_BUILDER,
+            nativeClassName);
+        shape.members()
+            .forEach(member -> {
+                method.beginControlFlow("if ($L.$L())", VAR_INPUT,
+                        Dafny.datatypeConstructorIs(member.getMemberName()))
+                    .addStatement(setWithConversionCall(member, Dafny.getMemberField(member)))
+                    .endControlFlow();
+            });
+        method.addStatement("return $L.build()", VAR_BUILDER);
         return method.build();
     }
 }
