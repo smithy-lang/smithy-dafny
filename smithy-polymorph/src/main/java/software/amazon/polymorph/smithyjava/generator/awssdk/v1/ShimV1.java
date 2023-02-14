@@ -26,6 +26,7 @@ import static software.amazon.polymorph.smithyjava.nameresolver.Constants.DAFNY_
 import static software.amazon.polymorph.smithyjava.nameresolver.Constants.DAFNY_TUPLE0_CLASS_NAME;
 import static software.amazon.polymorph.smithyjava.nameresolver.Constants.SMITHY_API_UNIT;
 
+//TODO: Create abstract class for V1 & V2 to extend
 /**
  * Generates an AWS SDK Shim for the AWS SKD for Java V1
  * exposing an AWS Service's operations to Dafny Generated Java.
@@ -60,6 +61,7 @@ public class ShimV1 extends Generator {
                         ClassName.get(String.class),
                         "region", Modifier.PRIVATE, Modifier.FINAL)
                 .addMethod(constructor())
+                .addMethod(impl())
                 .addMethod(region())
                 .addMethods(
                         subject.serviceShape.getAllOperations()
@@ -69,6 +71,14 @@ public class ShimV1 extends Generator {
                                 .map(Optional::get)
                                 .collect(Collectors.toList()))
                 .build();
+    }
+
+    protected MethodSpec impl() {
+        return MethodSpec.methodBuilder("impl")
+                       .addModifiers(Modifier.PUBLIC)
+                       .addStatement("return this._impl")
+                       .returns(subject.nativeNameResolver.classNameForService(subject.serviceShape))
+                       .build();
     }
 
     MethodSpec constructor() {
@@ -146,5 +156,4 @@ public class ShimV1 extends Generator {
                 .endControlFlow()
                 .build());
     }
-
 }
