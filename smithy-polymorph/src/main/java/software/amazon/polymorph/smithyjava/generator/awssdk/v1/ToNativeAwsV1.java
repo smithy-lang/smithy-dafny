@@ -76,14 +76,27 @@ public class ToNativeAwsV1 extends ToNative {
                 .map(shapeId -> subject.model.expectShape(shapeId, OperationShape.class))
                 .map(OperationShape::getInputShape)
                 .collect(Collectors.toCollection(LinkedHashSet::new));
+        LinkedHashSet<ShapeId> operationOutputs = subject.serviceShape.getOperations().stream()
+                .map(shapeId -> subject.model.expectShape(shapeId, OperationShape.class))
+                .map(OperationShape::getOutputShape)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+        operationInputs.addAll(operationOutputs); // TODO
         Set<ShapeId> allRelevantShapeIds = ModelUtils.findAllDependentShapes(operationInputs, subject.model);
-        List<MethodSpec> convertRelevant = allRelevantShapeIds.stream()
+
+        // In the AWS SDK for Java V1, Operation Outputs are special
+        allRelevantShapeIds.removeAll(operationOutputs);
+
+        final List<MethodSpec> convertOutputs = operationOutputs.stream()
+                .map(this::generateConvertResponseV1).toList();
+        final List<MethodSpec> convertAllRelevant = allRelevantShapeIds.stream()
                 .map(this::generateConvert).filter(Objects::nonNull).toList();
+
         return TypeSpec
                 .classBuilder(
                         ClassName.get(subject.packageName, TO_NATIVE))
                 .addModifiers(Modifier.PUBLIC)
-                .addMethods(convertRelevant)
+                .addMethods(convertOutputs)
+                .addMethods(convertAllRelevant)
                 .build();
     }
 
@@ -100,6 +113,7 @@ public class ToNativeAwsV1 extends ToNative {
             case SET -> modeledSet(shape.asSetShape().get());
             case MAP -> modeledMap(shape.asMapShape().get());
             case STRUCTURE -> modeledStructure(shape.asStructureShape().get());
+            case UNION -> modeledUnion(shape.asUnionShape().get());
             default -> throw new UnsupportedOperationException(
                     "ShapeId %s is of Type %s, which is not yet supported for ToDafny"
                             .formatted(shapeId, shape.getType()));
@@ -200,5 +214,18 @@ public class ToNativeAwsV1 extends ToNative {
         // fromValue is an AWS SDK specific feature
         method.addStatement("return $T.fromValue($L.toString())", returnType, VAR_INPUT);
         return method.build();
+    }
+
+    MethodSpec generateConvertResponseV1(final ShapeId shapeId) {
+        MethodSpec structure = generateConvertStructure(shapeId);
+        MethodSpec.Builder builder = structure.toBuilder();
+        builder.parameters.clear();
+        builder.addParameter(subject.nativeNameResolver.typeForOperationOutput(shapeId), "nativeValue");
+        return builder.build();
+    }
+
+    MethodSpec generateConvertStructure(final ShapeId shapeId) {
+        final StructureShape structureShape = subject.model.expectShape(shapeId, StructureShape.class);
+        return super.modeledStructure(structureShape);
     }
 }
