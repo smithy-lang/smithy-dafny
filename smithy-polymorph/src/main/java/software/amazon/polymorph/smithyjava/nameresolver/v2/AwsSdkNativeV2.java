@@ -1,5 +1,6 @@
 package software.amazon.polymorph.smithyjava.nameresolver;
 
+import com.google.common.base.CaseFormat;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
@@ -15,6 +16,7 @@ import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.EnumTrait;
+import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.TraitDefinition;
 import software.amazon.smithy.utils.StringUtils;
 
@@ -22,16 +24,16 @@ import static software.amazon.polymorph.smithyjava.nameresolver.Constants.SHAPE_
 
 /**
  * There are certain assumptions we can/have to make about
- * Types from the AWS SDK for Java V1 libraries.
+ * Types from the AWS SDK for Java V2 libraries.
  */
-public class AwsSdkNativeV1 extends Native {
+public class AwsSdkNativeV2 extends Native {
 
-    public AwsSdkNativeV1(final ServiceShape serviceShape,
+    public AwsSdkNativeV2(final ServiceShape serviceShape,
                           final Model model) {
-        super(packageNameForAwsSdkV1Shape(serviceShape),
+        super(packageNameForAwsSdkV2Shape(serviceShape),
                 serviceShape,
                 model,
-                defaultModelPackageName(packageNameForAwsSdkV1Shape(serviceShape))
+                defaultModelPackageName(packageNameForAwsSdkV2Shape(serviceShape))
         );
         checkForAwsServiceConstants();
     }
@@ -41,19 +43,25 @@ public class AwsSdkNativeV1 extends Native {
     private static final Map<String, String> AWS_SERVICE_NAMESPACE_TO_BASE_EXCEPTION;
 
     static {
-        // These are NOT in the service's model package
-        // i.e: kms : com.amazonaws.kms.AWSKMS
+        // The namespaces used as keys in this map correspond to the Polymorph namespace,
+        //   NOT the SDK V2 namespace.
+        // Polymorph namespace: com.amazonaws.X
+        // AWSSDK V2 namespace: software.amazon.awssdk.X
+        // These exception types are NOT located in the corresponding SDK V2 namespace's model
+        //   package; they are located in its parent namespace.
+        // i.e: kms : software.amazon.awssdk.kms.KmsClient
         AWS_SERVICE_NAMESPACE_TO_CLIENT_INTERFACE = Map.ofEntries(
-                Map.entry("com.amazonaws.kms", "AWSKMS"),
-                Map.entry("com.amazonaws.dynamodb", "AmazonDynamoDB"),
-                Map.entry("com.amazonaws.s3", "AmazonS3")
+                Map.entry("com.amazonaws.kms", "KmsClient"),
+                Map.entry("com.amazonaws.dynamodb", "DynamoDbClient"),
+                Map.entry("com.amazonaws.s3", "S3Client")
         );
-        // These are in the service's model package
-        // i.e.: kms : com.amazonaws.kms.model.AWSKMSException
+        // These namespaces correspond to the Polymorph generated namespace, NOT the SDK V2 namespace.
+        // These exception types are located in the corresponding SDK V2 namespace's model package.
+        // i.e.: kms : software.amazon.awssdk.kms.model.KmsException
         AWS_SERVICE_NAMESPACE_TO_BASE_EXCEPTION = Map.ofEntries(
-                Map.entry("com.amazonaws.kms", "AWSKMSException"),
-                Map.entry("com.amazonaws.dynamodb", "AmazonDynamoDBException"),
-                Map.entry("com.amazonaws.s3", "AmazonS3Exception")
+                Map.entry("com.amazonaws.kms", "KmsException"),
+                Map.entry("com.amazonaws.dynamodb", "DynamoDbException"),
+                Map.entry("com.amazonaws.s3", "S3Exception")
         );
     }
 
@@ -84,7 +92,7 @@ public class AwsSdkNativeV1 extends Native {
     }
 
     /**
-     * <p>In the AWS SDK Java V1,
+     * <p>In the AWS SDK Java V2,
      * structures never return Enums, only their string representation.
      * Thus, any methods that handle the result of a get Enum value
      * must handle String, not the Enum reference.</p>
@@ -98,13 +106,31 @@ public class AwsSdkNativeV1 extends Native {
      **/
     private TypeName typeForShapeNoEnum(ShapeId shapeId) {
         final Shape shape = model.expectShape(shapeId);
+
         if (shape.hasTrait(EnumTrait.class)) {
+            if (shapeRequiresTypeConversionFromStringToStructure(shapeId)) {
+                return classForEnum(shape);
+            }
+
             return classForString();
         }
         if (SHAPE_TYPES_LIST_SET.contains(shape.getType())) {
             return typeForListSetOrMapNoEnum(shapeId);
         }
         return typeForShape(shapeId);
+    }
+
+    /**
+     * Returns true if the provided ShapeId has type string in the Smithy model, but AWS SDK for
+     *   Java V2 effectively expects type structure.
+     * @param shapeId
+     * @return true if AWS SDK for Java V2 expects this to have been modeled as a structure in Smithy
+     */
+    protected boolean shapeRequiresTypeConversionFromStringToStructure(
+        ShapeId shapeId) {
+        return shapeId.toString().contains("EncryptionAlgorithmSpec")
+            || shapeId.toString().contains("SigningAlgorithmSpec")
+            || shapeId.toString().contains("GrantOperation");
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")
@@ -142,34 +168,50 @@ public class AwsSdkNativeV1 extends Native {
             throw new IllegalArgumentException(
                     "Trait definition structures have no corresponding generated type");
         }
-        // check if this Shape is in AWS SDK for Java V1 package
-        if (AwsSdkNameResolverHelpers.isAwsSdkServiceNamespace(shape.getId())) {
+        // check if this Shape is in AWS SDK for Java V2 package
+        if (AwsSdkNameResolverHelpers.isAwsSdkServiceId(shape.getId())) {
             // Assume that the shape is in the model package
-            return ClassName.get(
-                    defaultModelPackageName(packageNameForAwsSdkV1Shape(shape)),
-                    StringUtils.capitalize(shape.getId().getName()));
+            ClassName smithyName = ClassName.get(
+                defaultModelPackageName(packageNameForAwsSdkV2Shape(shape)),
+                StringUtils.capitalize(shape.getId().getName()));
+            if (shape.hasTrait(ErrorTrait.class)) {
+                if (smithyName.simpleName().contains("KMS")) {
+                    return ClassName.get(smithyName.packageName(),
+                        smithyName.simpleName()
+                            .replace("KMS", "Kms")
+                    );
+                }
+                if (smithyName.simpleName().contains("CMK")) {
+                    return ClassName.get(smithyName.packageName(),
+                        smithyName.simpleName()
+                            .replace("CMK", "CmK")
+                    );
+                }
+                return smithyName;
+            }
         }
         return super.classNameForStructure(shape);
     }
 
-    /** The AWS SDK for Java V1 replaces
-     *  the last 'Response' with 'Result'
-     *  in operation outputs.
-     */
     public TypeName typeForOperationOutput(final ShapeId shapeId) {
         StructureShape shape = model.expectShape(shapeId, StructureShape.class);
-        ClassName smithyName = classNameForStructure(shape);
-        // TODO: handle AWS SDK v2 naming convention, which uses 'Response', not 'Result'
-        if (smithyName.simpleName().endsWith("Response")) {
-            return ClassName.get(smithyName.packageName(),
-                    smithyName.simpleName()
-                            .substring(
-                                    0,
-                                    smithyName.simpleName().lastIndexOf("Response"))
-                            + "Result"
-            );
+        return classNameForStructure(shape);
+    }
+
+    public final String v2FormattedEnumValue(final ClassName returnType, final String enumClassName) {
+        if ("ECC_SECG_P256K1".equals(enumClassName)) {
+            return "ECC_SECG_P256_K1";
         }
-        return smithyName;
+
+        if (enumContainsUpperCamelcase(returnType.simpleName())) {
+            return CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, enumClassName);
+        }
+
+        return enumClassName;
+    }
+
+    protected final boolean enumContainsUpperCamelcase(final String enumClassName) {
+        return enumClassName.equals("GrantOperation");
     }
 
     /**
@@ -205,10 +247,10 @@ public class AwsSdkNativeV1 extends Native {
         if (awsServiceName.equals("dynamodb")) {
             rtn = "dynamodbv2";
         }
-        return "com.amazonaws.services.%s".formatted(rtn);
+        return "software.amazon.awssdk.services.%s".formatted(rtn);
     }
 
-    static String packageNameForAwsSdkV1Shape(final Shape shape) {
+    static String packageNameForAwsSdkV2Shape(final Shape shape) {
         String awsServiceName = AwsSdkNameResolverHelpers.awsServiceNameFromShape(shape);
         return packageNameForService(awsServiceName);
     }
