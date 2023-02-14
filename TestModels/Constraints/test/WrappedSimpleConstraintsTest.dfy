@@ -7,6 +7,6 @@ module WrappedSimpleConstraintsTest {
     import opened Wrappers
     method{:test} GetConstraints() {
         var client :- expect WrappedSimpleConstraintsService.WrappedSimpleConstraints();
-        SimpleConstraintsImplTest.TestGetConstraint(client);
+        SimpleConstraintsImplTest.TestGetConstraintWithValidInputs(client);
     }
 }

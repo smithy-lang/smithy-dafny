@@ -7,10 +7,10 @@ module SimpleConstraintsImplTest {
     import opened Wrappers
     method{:test} TestConstraints(){
         var client :- expect SimpleConstraints.SimpleConstraints();
-        TestGetConstraint(client);
+        TestGetConstraintWithValidInputs(client);
     }
 
-    method TestGetConstraint(client: ISimpleConstraintsClient)
+    method TestGetConstraintWithValidInputs(client: ISimpleConstraintsClient)
       requires client.ValidState()
       modifies client.Modifies
       ensures client.ValidState()
@@ -20,50 +20,61 @@ module SimpleConstraintsImplTest {
       expect ret.Success?;
     }
 
-    method TestGetConstraintWithInvalidMyString(client: ISimpleConstraintsClient)
-      requires client.ValidState()
-      modifies client.Modifies
-      ensures client.ValidState()
-    {
-      var input := GetConstraintsInputTemplate(overrideToInvalid := {"myString"});
-      var ret := client.GetConstraints(input := input);
-      expect ret.Success?;
-    }
+    // Example for overriding GetConstraintInputTemplate with an invalid input
+    // 
+    // method TestGetConstraintWithInvalidMyString(client: ISimpleConstraintsClient)
+    //   requires client.ValidState()
+    //   modifies client.Modifies
+    //   ensures client.ValidState()
+    // {
+    //   var input := GetConstraintsInputTemplate(overrideToInvalidInput := {"myString"});
+    //   var ret := client.GetConstraints(input := input);
+    // }
+
+    // TODO: Add invalid inputs after writing Dotnet constraint codegen
       
     // This returns a GetConstraintsInput object. 
     // By default with no parameters, this will return a valid GetConstraintsInput object.
     //   ("valid": Expected to pass Dafny predicate checks and runtime constraint validations.)
     // TODO: Passing in the name of a variable will override that variable to an invalid variable.
     //    ex. GetConstraintsInputTemplate("lessThanTen") could set "lessThanTen" equal to 14.
-    method GetConstraintsInputTemplate(overrideToInvalid: set<string> := {})
+    method GetConstraintsInputTemplate(overrideToInvalidInput: set<string> := {})
       returns (output: GetConstraintsInput)
     {
-      // TODO: Pass invalid constraint to runtime.
-      // Context: We cannot pass an invalid input to GetConstraintsInput in Dafny.
-      //    ex. Passing `lessThanTen := 14` is an invalid input as it violates the predicate `x < 10`.
-      // If this is passed, Dafny will not transpile the test to a runtime as the code contains errors.
-      // 
-      // However, we may actually want to pass an invalid constraint into this input to test Polymorph.
-      // Polymorph will generate a constraint validation function for constraint traits in Smithy models.
-      // We would like to test this constraint validation function:
-      //  - Passing "expected-valid" input results in Success
-      //      (i.e. runtime constraint validation function did not error)
-      //  - Passing "expected-invalid" input results in Failure
-      //      (i.e. runtime constraint validation function threw error)
-      // The easiest way to do create this test is to write it in Dafny, then transpile the test to a runtime.
-      // However, since GetConstraintsInput will not accept an "expected-invalid" input, this isn't possible.
-      //
-      // A workaround is to add this line `assume {:axiom} false;`.
-      // This will tell the Dafny compiler to ignore predicates for this function; however, the Polymorph compiler has
-      //   already generated the corresponding runtime constraint validation function.
-      // This allows us to test an "expected-invalid" input to GetConstraintsInput. The Dafny compiler will not error
-      //   because the predicate is ignored, but the runtime constraint validation function will error because the
-      //   input violates the constraints.
-      // assume {:axiom} false;
-      var myString := "bw1and10";
-      var nonEmptyString := "atleast1";
-      var stringLessThanOrEqualToTen := "leq10";
-      var myBlob := [0, 1, 0, 1]; 
+      var overrideMyString: bool := "myString" in overrideToInvalidInput;
+      var myString: MyString;
+      if (overrideMyString) {
+        myString := InvalidMyStringInput();
+      } else {
+        myString := "bw1and10";
+      }
+
+      var overrideNonEmptyString: bool := "nonEmptyString" in overrideToInvalidInput;
+      var nonEmptyString: NonEmptyString;
+      if (overrideNonEmptyString) {
+        nonEmptyString := InvalidNonEmptyStringInput();
+      } else {
+        nonEmptyString := "atleast1";
+      }
+
+      var overrideStringLessThanOrEqualToTen: bool := "overrideStringLessThanOrEqualToTen" in overrideToInvalidInput;
+      var stringLessThanOrEqualToTen: StringLessThanOrEqualToTen;
+      if (overrideStringLessThanOrEqualToTen) {
+        stringLessThanOrEqualToTen := InvalidStringLessThanOrEqualToTen();
+      } else {
+        stringLessThanOrEqualToTen := "leq10";
+      }
+
+      var overrideMyBlob: bool := "myBlob" in overrideToInvalidInput;
+      var myBlob: MyBlob;
+      if (overrideMyBlob) {
+        myBlob := InvalidMyBlob();
+      } else {
+        myBlob := [0, 1, 0, 1]; 
+      }
+
+      // TODO: Write more overrides to invalid inputs below...
+
       var nonEmptyBlob := [0, 1, 0, 1]; 
       var BlobLessThanOrEqualToTen := [0, 1, 0, 1]; 
       var myList := ["00", "11"];
@@ -104,4 +115,52 @@ module SimpleConstraintsImplTest {
 
       return input;
     }
+
+    method InvalidLessThanTenInput()
+      returns (invalid: LessThanTen)
+    {
+      var invalidLessThanTenInput := 12;
+      assume IsValid_LessThanTen(invalidLessThanTenInput);
+      var invalidLessThanTen: LessThanTen := invalidLessThanTenInput;
+      return invalidLessThanTen;
+    }
+
+    method InvalidMyStringInput()
+      returns (invalid: MyString)
+    {
+      var invalidMyStringInput := "thisislongerthan10characters";
+      assume IsValid_MyString(invalidMyStringInput);
+      var invalidMyString: MyString := invalidMyStringInput;
+      return invalidMyString;
+    }
+
+    method InvalidNonEmptyStringInput()
+      returns (invalid: NonEmptyString)
+    {
+      var invalidNonEmptyStringInput := "";
+      assume IsValid_NonEmptyString(invalidNonEmptyStringInput);
+      var invalidNonEmptyString: NonEmptyString := invalidNonEmptyStringInput;
+      return invalidNonEmptyString;
+    }
+
+    method InvalidStringLessThanOrEqualToTen()
+      returns (invalid: StringLessThanOrEqualToTen)
+    {
+      var invalidStringLessThanOrEqualToTenInput := "";
+      assume IsValid_StringLessThanOrEqualToTen(invalidStringLessThanOrEqualToTenInput);
+      var invalidStringLessThanOrEqualToTen: StringLessThanOrEqualToTen := invalidStringLessThanOrEqualToTenInput;
+      return invalidStringLessThanOrEqualToTen;
+    }
+
+    method InvalidMyBlob()
+      returns (invalid: MyBlob)
+    {
+      var invalidMyBlobInput := []; // Invalid because |x| < 1; predicate requires 1 <= |x| <= 10
+      assume IsValid_MyBlob(invalidMyBlobInput);
+      var invalidMyBlob: MyBlob := invalidMyBlobInput;
+      return invalidMyBlob;
+    }
+
+    // TODO: Write more invalid input generators...
+
 }
