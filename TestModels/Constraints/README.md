@@ -1,8 +1,8 @@
-# SimpleEnum
+# SimpleConstraints
 
 This project will implements Smithy 1.0 [constraints](https://smithy.io/1.0/spec/core/constraint-traits.html#)  in `dafny`. This is then transpiled to a target runtime, and each tests are executed - either as CI actions or manually.
 
-This project currently tests none of the 8 Smithy 1.0 constraint traits. `smithy-dotnet` currently does not generate validation code for any traits besides the `@required` trait. 
+Right now, this project tests none of the 8 Smithy 1.0 constraint traits. `smithy-dotnet` currently does not generate validation code for any traits other than the `@required` trait. 
 
 Once `smithy-dotnet` adds generation for other traits, we should extend this project to test the other traits.
 
