@@ -37,10 +37,7 @@ import software.amazon.smithy.model.traits.EnumTrait;
 
 import static software.amazon.polymorph.smithyjava.generator.Generator.Constants.BLOB_TO_NATIVE_SDK_BYTES;
 import static software.amazon.polymorph.smithyjava.generator.Generator.Constants.JAVA_UTIL_ARRAYLIST;
-import static software.amazon.polymorph.smithyjava.nameresolver.v2.AwsSdkV2NameResolverUtils.isAttributeValueType;
-import static software.amazon.polymorph.smithyjava.nameresolver.v2.AwsSdkV2NameResolverUtils.tokenToUncapitalizeInShape;
 import static software.amazon.smithy.utils.StringUtils.capitalize;
-import static software.amazon.smithy.utils.StringUtils.uncapitalize;
 
 /**
  * ToNativeAwsV2 generates ToNative.

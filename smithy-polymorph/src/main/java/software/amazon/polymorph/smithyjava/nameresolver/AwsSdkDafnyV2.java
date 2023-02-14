@@ -14,8 +14,8 @@ import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.utils.StringUtils;
 
 import static software.amazon.polymorph.smithydafny.DafnyNameResolver.traitNameForServiceClient;
-import static software.amazon.polymorph.smithyjava.nameresolver.v2.AwsSdkV2NameResolverUtils.isAttributeValueType;
-import static software.amazon.polymorph.smithyjava.nameresolver.v2.AwsSdkV2NameResolverUtils.tokenToUncapitalizeInShape;
+import static software.amazon.polymorph.smithyjava.nameresolver.AwsSdkV2NameResolverUtils.isAttributeValueType;
+import static software.amazon.polymorph.smithyjava.nameresolver.AwsSdkV2NameResolverUtils.tokenToUncapitalizeInShape;
 import static software.amazon.polymorph.utils.DafnyNameResolverHelpers.dafnyCompilesExtra_;
 import static software.amazon.smithy.utils.StringUtils.capitalize;
 import static software.amazon.smithy.utils.StringUtils.uncapitalize;
@@ -28,7 +28,7 @@ public class AwsSdkDafnyV2 extends Dafny {
 
     @Override
     ClassName classNameForService(ServiceShape shape) {
-        if (AwsSdkNameResolverHelpers.isAwsSdkServiceId(shape.getId())) {
+        if (AwsSdkNameResolverHelpers.isAwsSdkServiceNamespace(shape.getId())) {
             return ClassName.get(
                     modelPackageNameForNamespace(shape.getId().getNamespace()),
                     dafnyCompilesExtra_(traitNameForServiceClient(shape))
@@ -39,7 +39,7 @@ public class AwsSdkDafnyV2 extends Dafny {
 
     @Override
     ClassName classNameForResource(ResourceShape shape) {
-        if (AwsSdkNameResolverHelpers.isAwsSdkServiceId(shape.getId())) {
+        if (AwsSdkNameResolverHelpers.isAwsSdkServiceNamespace(shape.getId())) {
             return ClassName.get(
                     modelPackageNameForNamespace(shape.getId().getNamespace()),
                     "I%s".formatted(StringUtils.capitalize(shape.getId().getName()))
