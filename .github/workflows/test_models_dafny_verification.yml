@@ -16,6 +16,7 @@ jobs:
           TestModels/Aggregate,
           TestModels/Constraints,
           TestModels/Errors,
+          TestModels/Extendable,
           TestModels/Refinement,
           TestModels/SimpleTypes/SimpleBoolean,
           TestModels/SimpleTypes/SimpleBlob,
