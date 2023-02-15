@@ -8,6 +8,7 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -39,6 +40,7 @@ import static software.amazon.polymorph.smithyjava.generator.Generator.Constants
 import static software.amazon.polymorph.smithyjava.generator.Generator.Constants.JAVA_UTIL_ARRAYLIST;
 import static software.amazon.smithy.utils.StringUtils.capitalize;
 
+//TODO: Create abstract class for V1 & V2 to extend
 /**
  * ToNativeAwsV2 generates ToNative.
  * ToNative is a helper class for the AwsSdk's {@link ShimV2}.<p>
@@ -48,6 +50,8 @@ import static software.amazon.smithy.utils.StringUtils.capitalize;
  * The subset is composed of:
  * <ul>
  *   <li>All the Service's Operations' inputs
+ *   <li>All the Service's Operations' outputs
+ *   <li>All the Service's Errors
  *   <li>All the fields contained by the above
  * </ul>
  * As such,
@@ -92,18 +96,36 @@ public class ToNativeAwsV2 extends ToNative {
     }
 
     TypeSpec toNative() {
-        LinkedHashSet<ShapeId> operationInputs = subject.serviceShape.getOperations().stream()
+        List<OperationShape> operations = subject.serviceShape
+                .getOperations().stream()
                 .map(shapeId -> subject.model.expectShape(shapeId, OperationShape.class))
+                .toList();
+        LinkedHashSet<ShapeId> operationStructures = operations.stream()
                 .map(OperationShape::getInputShape)
                 .collect(Collectors.toCollection(LinkedHashSet::new));
-        Set<ShapeId> allRelevantShapeIds = ModelUtils.findAllDependentShapes(operationInputs, subject.model);
+        operations.stream().map(OperationShape::getOutputShape)
+                .forEachOrdered(operationStructures::add);
+        LinkedHashSet<ShapeId> serviceErrors = ModelUtils.streamServiceErrors(subject.model, subject.serviceShape)
+                .map(Shape::toShapeId)
+                // InvalidEndpointException does not exist in SDK V2
+                .filter(structureShapeId -> !structureShapeId.toString().contains("com.amazonaws.dynamodb#InvalidEndpointException"))
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+
+        operationStructures.addAll(serviceErrors);
+        Set<ShapeId> allRelevantShapeIds = ModelUtils.findAllDependentShapes(operationStructures, subject.model);
+        allRelevantShapeIds.removeAll(serviceErrors);
+        allRelevantShapeIds.remove(ShapeId.fromParts("smithy.api", "Unit"));
+
         List<MethodSpec> convertRelevant = allRelevantShapeIds.stream()
                 .map(this::generateConvert).filter(Objects::nonNull).toList();
+        final List<MethodSpec> convertServiceErrors = serviceErrors.stream()
+                .map(this::modeledError).toList();
         return TypeSpec
                 .classBuilder(
                         ClassName.get(subject.packageName, TO_NATIVE))
                 .addModifiers(Modifier.PUBLIC)
                 .addMethods(convertRelevant)
+                .addMethods(convertServiceErrors)
                 .build();
     }
 

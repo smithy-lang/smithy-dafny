@@ -11,6 +11,7 @@ import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.ResourceShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.ShapeId;
+import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.utils.StringUtils;
 
 import static software.amazon.polymorph.smithydafny.DafnyNameResolver.traitNameForServiceClient;
@@ -64,16 +65,10 @@ public class AwsSdkDafnyV2 extends Dafny {
         }
 
         // Message: Exception message. Retrieved via `getMessage()`.
-        if ("message".equals(uncapitalize(memberShape.getMemberName()))) {
-            // BatchStatementError and CancellationReason types' messages are retrieved via "message".
-            if (memberShape.getContainer().getName().contains("BatchStatementError")
-                    || memberShape.getContainer().getName().contains("CancellationReason")) {
-                return CodeBlock.of("$L.$L()", variableName,
-                    uncapitalize(memberShape.getMemberName()));
-            } else {
-                return CodeBlock.of("$L.get$L()", variableName,
+        if ("message".equals(uncapitalize(memberShape.getMemberName()))
+                && model.expectShape(memberShape.getContainer()).hasTrait(ErrorTrait.class)) {
+            return CodeBlock.of("$L.get$L()", variableName,
                     capitalize(memberShape.getMemberName()));
-            }
         }
 
         // Attributes of SDK AttributeValue shapes are entirely lower-case

@@ -6,6 +6,7 @@ import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeSpec;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -30,6 +31,7 @@ import software.amazon.smithy.model.traits.EnumTrait;
 import static software.amazon.smithy.utils.StringUtils.capitalize;
 import static software.amazon.smithy.utils.StringUtils.uncapitalize;
 
+//TODO: Create abstract class for V1 & V2 to extend
 /**
  * ToNativeAwsV1 generates ToNative.
  * ToNative is a helper class for the AwsSdk's {@link ShimV1}.<p>
@@ -39,6 +41,8 @@ import static software.amazon.smithy.utils.StringUtils.uncapitalize;
  * The subset is composed of:
  * <ul>
  *   <li>All the Service's Operations' inputs
+ *   <li>All the Service's Operations' outputs
+ *   <li>All the Service's Errors
  *   <li>All the fields contained by the above
  * </ul>
  * As such,
@@ -72,24 +76,42 @@ public class ToNativeAwsV1 extends ToNative {
     }
 
     TypeSpec toNative() {
-        LinkedHashSet<ShapeId> operationInputs = subject.serviceShape.getOperations().stream()
+        List<OperationShape> operations = subject.serviceShape
+                .getOperations().stream()
                 .map(shapeId -> subject.model.expectShape(shapeId, OperationShape.class))
-                .map(OperationShape::getInputShape)
-                .collect(Collectors.toCollection(LinkedHashSet::new));
-        LinkedHashSet<ShapeId> operationOutputs = subject.serviceShape.getOperations().stream()
-                .map(shapeId -> subject.model.expectShape(shapeId, OperationShape.class))
+                .toList();
+        LinkedHashSet<ShapeId> operationOutputs = operations.stream()
                 .map(OperationShape::getOutputShape)
                 .collect(Collectors.toCollection(LinkedHashSet::new));
-        operationInputs.addAll(operationOutputs); // TODO
-        Set<ShapeId> allRelevantShapeIds = ModelUtils.findAllDependentShapes(operationInputs, subject.model);
+        LinkedHashSet<ShapeId> operationInputs = operations.stream()
+                .map(OperationShape::getInputShape)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+        LinkedHashSet<ShapeId> serviceErrors = operations.stream()
+                .map(OperationShape::getErrors)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+        ModelUtils.streamServiceErrors(subject.model, subject.serviceShape)
+                .map(Shape::toShapeId)
+                .forEachOrdered(serviceErrors::add);
+
+        LinkedHashSet<ShapeId> operationStructures = new LinkedHashSet<>();
+        operationStructures.addAll(operationOutputs);
+        operationStructures.addAll(operationInputs);
+        operationStructures.addAll(serviceErrors);
+        Set<ShapeId> allRelevantShapeIds = ModelUtils.findAllDependentShapes(operationStructures, subject.model);
 
         // In the AWS SDK for Java V1, Operation Outputs are special
         allRelevantShapeIds.removeAll(operationOutputs);
+        // Errors are special case for all generators
+        allRelevantShapeIds.removeAll(serviceErrors);
+        allRelevantShapeIds.remove(ShapeId.fromParts("smithy.api", "Unit"));
 
         final List<MethodSpec> convertOutputs = operationOutputs.stream()
                 .map(this::generateConvertResponseV1).toList();
         final List<MethodSpec> convertAllRelevant = allRelevantShapeIds.stream()
                 .map(this::generateConvert).filter(Objects::nonNull).toList();
+        final List<MethodSpec> convertServiceErrors = serviceErrors.stream()
+                .map(this::modeledError).collect(Collectors.toList());
 
         return TypeSpec
                 .classBuilder(
@@ -97,6 +119,7 @@ public class ToNativeAwsV1 extends ToNative {
                 .addModifiers(Modifier.PUBLIC)
                 .addMethods(convertOutputs)
                 .addMethods(convertAllRelevant)
+                .addMethods(convertServiceErrors)
                 .build();
     }
 

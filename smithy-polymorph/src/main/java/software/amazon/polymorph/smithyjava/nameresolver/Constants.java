@@ -12,4 +12,5 @@ public class Constants {
     public static ClassName DAFNY_RESULT_CLASS_NAME = ClassName.get("Wrappers_Compile", "Result");
     public static ClassName DAFNY_TUPLE0_CLASS_NAME = ClassName.get("dafny", "Tuple0");
     public static Set<ShapeType> SHAPE_TYPES_LIST_SET = Set.of(ShapeType.LIST, ShapeType.SET);
+    public static Set<ShapeType> SHAPE_TYPES_LIST_SET_MAP = Set.of(ShapeType.LIST, ShapeType.SET, ShapeType.MAP);
 }

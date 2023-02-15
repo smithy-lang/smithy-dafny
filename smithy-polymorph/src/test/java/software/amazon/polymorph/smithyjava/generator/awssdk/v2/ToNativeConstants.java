@@ -79,17 +79,36 @@ public class ToNativeConstants {
             """.formatted(INIT_TEMP_ARRAY, SET_WITH_CONVERSION_CALL_AND_TO_ARRAY);
     static String KMS_A_STRING_OPERATION_JAVA_FILE = """
             package Dafny.Com.Amazonaws.Kms;
-            
-            import software.amazon.awssdk.services.kms.model.DoSomethingRequest;
-            
-            public class ToNative {
-              public static DoSomethingRequest DoSomethingRequest(
-                  Dafny.Com.Amazonaws.Kms.Types.DoSomethingRequest dafnyValue
-              ) {
-                DoSomethingRequest.Builder builder = DoSomethingRequest.builder();
-                builder.message(%s(dafnyValue.dtor_message()));
-                return builder.build();
-              }
-            }
-            """.formatted(STRING_CONVERSION);
+             
+             import Dafny.Com.Amazonaws.Kms.Types.Error_DependencyTimeoutException;
+             import software.amazon.awssdk.services.kms.model.DependencyTimeoutException;
+             import software.amazon.awssdk.services.kms.model.DoSomethingRequest;
+             import software.amazon.awssdk.services.kms.model.DoSomethingResponse;
+             
+             public class ToNative {
+               public static DoSomethingRequest DoSomethingRequest(
+                   Dafny.Com.Amazonaws.Kms.Types.DoSomethingRequest dafnyValue) {
+                 DoSomethingRequest.Builder builder = DoSomethingRequest.builder();
+                 builder.message(%s(dafnyValue.dtor_message()));
+                 return builder.build();
+               }
+             
+               public static DoSomethingResponse DoSomethingResponse(
+                   Dafny.Com.Amazonaws.Kms.Types.DoSomethingResponse dafnyValue) {
+                 DoSomethingResponse.Builder builder = DoSomethingResponse.builder();
+                 if (dafnyValue.dtor_message().is_Some()) {
+                   builder.message(%s(dafnyValue.dtor_message().dtor_value()));
+                 }
+                 return builder.build();
+               }
+             
+               public static DependencyTimeoutException Error(Error_DependencyTimeoutException dafnyValue) {
+                 DependencyTimeoutException.Builder builder = DependencyTimeoutException.builder();
+                 if (dafnyValue.dtor_message().is_Some()) {
+                   builder.message(%s(dafnyValue.dtor_message().dtor_value()));
+                 }
+                 return builder.build();
+               }
+             }
+            """.formatted(STRING_CONVERSION, STRING_CONVERSION, STRING_CONVERSION);
 }

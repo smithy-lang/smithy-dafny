@@ -161,6 +161,10 @@ public abstract class ToNative extends Generator {
         return buildAndReturn(method);
     }
 
+    protected MethodSpec modeledError(final ShapeId shapeId) {
+        return modeledError(subject.model.expectShape(shapeId, StructureShape.class));
+    }
+
     /** Uses a Builder to build the native value of Error. */
     protected MethodSpec modeledError(final StructureShape shape) {
         MethodSpec structure = modeledStructure(shape);
