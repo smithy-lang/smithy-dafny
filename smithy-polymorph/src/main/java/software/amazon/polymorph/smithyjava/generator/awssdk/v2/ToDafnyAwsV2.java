@@ -43,6 +43,7 @@ import software.amazon.smithy.model.traits.EnumTrait;
 import static software.amazon.polymorph.smithyjava.generator.Generator.Constants.JAVA_UTIL_STREAM_COLLECTORS;
 import static software.amazon.smithy.utils.StringUtils.capitalize;
 
+//TODO: Create abstract class for V1 & V2 to extend
 /**
  * ToDafnyAwsV2 generates ToDafny.
  * ToDafny is a helper class for the AwsSdk's {@link ShimV2}.<p>
@@ -51,6 +52,7 @@ import static software.amazon.smithy.utils.StringUtils.capitalize;
  * The subset is composed of:
  * <ul>
  *   <li>All the Service's Operations' outputs
+ *   <li>All the Service's Operations' inputs
  *   <li>All the Service's Errors
  *   <li>All the fields contained by the above
  * </ul>
@@ -85,27 +87,25 @@ public class ToDafnyAwsV2 extends ToDafny {
     }
 
     TypeSpec toDafny() {
-        LinkedHashSet<ShapeId> operationOutputs = subject.serviceShape
+        List<OperationShape> operations = subject.serviceShape
                 .getOperations().stream()
                 .map(shapeId -> subject.model.expectShape(shapeId, OperationShape.class))
-                .map(OperationShape::getOutput).filter(Optional::isPresent).map(Optional::get)
+                .toList();
+        LinkedHashSet<ShapeId> operationStructures = operations.stream()
+                .map(OperationShape::getInputShape)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+        operations.stream().map(OperationShape::getOutputShape)
+                .forEachOrdered(operationStructures::add);
+        LinkedHashSet<ShapeId> serviceErrors = ModelUtils.streamServiceErrors(subject.model, subject.serviceShape)
+                .map(Shape::toShapeId)
+                // InvalidEndpointException does not exist in SDK V2
+                .filter(structureShapeId -> !structureShapeId.toString().contains("com.amazonaws.dynamodb#InvalidEndpointException"))
                 .collect(Collectors.toCollection(LinkedHashSet::new));
 
-        // OperationErrors are streamed to gather the types that are only inputs or outputs to errors.
-        // Right now this is only CancellationReasonList.
-        LinkedHashSet<ShapeId> operationErrors = subject.serviceShape
-            .getOperations().stream()
-            .map(shapeId -> subject.model.expectShape(shapeId, OperationShape.class))
-            .map(OperationShape::getErrors)
-            .flatMap(Collection::stream)
-            .filter(structureShape -> !structureShape.toString().contains("InvalidEndpointException"))
-            .collect(Collectors.toCollection(LinkedHashSet::new));
-        operationOutputs.addAll(operationErrors);
-
-        Set<ShapeId> allRelevantShapeIds = ModelUtils.findAllDependentShapes(operationOutputs, subject.model);
-
-        // In the AWS SDK for Java V2, Operation Outputs are special
-        allRelevantShapeIds.removeAll(operationOutputs);
+        operationStructures.addAll(serviceErrors);
+        Set<ShapeId> allRelevantShapeIds = ModelUtils.findAllDependentShapes(operationStructures, subject.model);
+        allRelevantShapeIds.removeAll(serviceErrors);
+        allRelevantShapeIds.remove(ShapeId.fromParts("smithy.api", "Unit"));
         // Enums are also a special case
         LinkedHashSet<ShapeId> enumShapeIds = new LinkedHashSet<>();
         allRelevantShapeIds.forEach(shapeId -> {
@@ -116,15 +116,10 @@ public class ToDafnyAwsV2 extends ToDafny {
         });
         allRelevantShapeIds.removeAll(enumShapeIds);
 
-        final List<MethodSpec> convertOutputs = operationOutputs.stream()
-                .map(this::generateConvert).toList();
         final List<MethodSpec> convertAllRelevant = allRelevantShapeIds.stream()
                 .map(this::generateConvert).filter(Objects::nonNull).toList();
-        final List<MethodSpec> convertServiceErrors = ModelUtils.streamServiceErrors(subject.model, subject.serviceShape)
-            // InvalidEndpointException does not exist in SDK V2
-            .filter(structureShape -> !structureShape.getId().getName().contains("InvalidEndpointException"))
-            .map(this::modeledError).collect(Collectors.toList());
-        convertServiceErrors.add(generateConvertOpaqueError());
+        final List<MethodSpec> convertServiceErrors = serviceErrors.stream()
+                .map(this::modeledError).toList();
         // For enums, we generate overloaded methods,
         // one to convert instances of the Enum
         final List<MethodSpec> convertEnumEnum = enumShapeIds
@@ -137,11 +132,11 @@ public class ToDafnyAwsV2 extends ToDafny {
                 .classBuilder(
                         ClassName.get(subject.dafnyNameResolver.packageName(), "ToDafny"))
                 .addModifiers(Modifier.PUBLIC)
-                .addMethods(convertOutputs)
                 .addMethods(convertAllRelevant)
                 .addMethods(convertServiceErrors)
                 .addMethods(convertEnumEnum)
                 .addMethods(convertEnumString)
+                .addMethod(generateConvertOpaqueError())
                 .build();
     }
 

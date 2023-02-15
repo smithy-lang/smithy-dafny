@@ -322,6 +322,10 @@ public abstract class ToDafny extends Generator {
         return new MethodReference(otherNamespaceToDafny, methodName);
     }
 
+    protected MethodSpec modeledError(final ShapeId shapeId) {
+        return modeledError(subject.model.expectShape(shapeId, StructureShape.class));
+    }
+
     protected MethodSpec modeledError(final StructureShape shape) {
         MethodSpec structure = modeledStructure(shape);
         MethodSpec.Builder builder = structure.toBuilder();
