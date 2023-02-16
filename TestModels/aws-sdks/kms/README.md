@@ -1,6 +1,6 @@
 # AWS-SDK-KMS
 
-This project tests the [AWS KMS](https://aws.amazon.com/kms/) Operations `Encrypt, Decrypt, and GenerateDataKey` in `dafny`. The project utilizes the `aws-sdk-kms smithy model` to generate the dafny types using `polymorph`. This interface is then used in the dafny to call the appropriate operations. The actual implementation of the KMS Operations are provided by the underlying dafny runtime. These integration tests aim to verify the correctness of the polymorph generated code and is run either as CI actions or manually.
+This project tests the [AWS KMS](https://aws.amazon.com/kms/) Operations `Encrypt, Decrypt, and GenerateDataKey` in `dafny`. The project utilizes the `aws-sdk-kms smithy model` to generate the dafny types using `polymorph`. This interface is then used in the dafny to call the appropriate operations. The actual implementation of the KMS Operations are provided by the native runtime. These integration tests aim to verify the correctness of the polymorph generated code and is run either as CI actions or manually.
 
 ## Build
 ### .NET
