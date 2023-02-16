@@ -1,6 +1,7 @@
 package software.amazon.polymorph.smithyjava.nameresolver;
 
 import com.google.common.base.CaseFormat;
+
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterizedTypeName;
@@ -23,6 +24,9 @@ import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.TraitDefinition;
 import software.amazon.smithy.utils.StringUtils;
 
+import software.amazon.awssdk.codegen.naming.DefaultNamingStrategy;
+import software.amazon.awssdk.codegen.model.service.ServiceModel;
+
 import static software.amazon.polymorph.smithyjava.generator.Generator.Constants.BLOB_TO_NATIVE_SDK_BYTES;
 import static software.amazon.polymorph.smithyjava.nameresolver.AwsSdkV2NameResolverUtils.isAttributeValueType;
 import static software.amazon.polymorph.smithyjava.nameresolver.AwsSdkV2NameResolverUtils.tokenToUncapitalizeInShape;
@@ -35,6 +39,8 @@ import static software.amazon.smithy.utils.StringUtils.uncapitalize;
  */
 public class AwsSdkNativeV2 extends Native {
 
+    private final DefaultNamingStrategy awsSDKNaming;
+
     public AwsSdkNativeV2(final ServiceShape serviceShape,
                           final Model model) {
         super(packageNameForAwsSdkV2Shape(serviceShape),
@@ -43,11 +49,14 @@ public class AwsSdkNativeV2 extends Native {
                 defaultModelPackageName(packageNameForAwsSdkV2Shape(serviceShape))
         );
         checkForAwsServiceConstants();
+        awsSDKNaming = new DefaultNamingStrategy(new ServiceModel(), null);
     }
 
     // The values of these maps are NOT in smithy models and thus must be hard-coded
     private static final Map<String, String> AWS_SERVICE_NAMESPACE_TO_CLIENT_INTERFACE;
     private static final Map<String, String> AWS_SERVICE_NAMESPACE_TO_BASE_EXCEPTION;
+
+    private static final Set<String> KMS_ENUM_SHAPE_IDS_FOR_ECC_SECG_P256K1;
 
     static {
         // The namespaces used as keys in this map correspond to the Polymorph namespace,
@@ -69,6 +78,12 @@ public class AwsSdkNativeV2 extends Native {
                 Map.entry("com.amazonaws.kms", "KmsException"),
                 Map.entry("com.amazonaws.dynamodb", "DynamoDbException"),
                 Map.entry("com.amazonaws.s3", "S3Exception")
+        );
+
+        KMS_ENUM_SHAPE_IDS_FOR_ECC_SECG_P256K1 = Set.of(
+                "com.amazonaws.kms#CustomerMasterKeySpec",
+                "com.amazonaws.kms#DataKeyPairSpec",
+                "com.amazonaws.kms#KeySpec"
         );
     }
 
@@ -282,20 +297,8 @@ public class AwsSdkNativeV2 extends Native {
         return classNameForStructure(shape);
     }
 
-    public final String v2FormattedEnumValue(final ClassName returnType, final String enumClassName) {
-        if ("ECC_SECG_P256K1".equals(enumClassName)) {
-            return "ECC_SECG_P256_K1";
-        }
-
-        if (enumContainsUpperCamelcase(returnType.simpleName())) {
-            return CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, enumClassName);
-        }
-
-        return enumClassName;
-    }
-
-    protected final boolean enumContainsUpperCamelcase(final String enumClassName) {
-        return enumClassName.equals("GrantOperation") || enumClassName.equals("KeyState");
+    public final String v2FormattedEnumValue(final ShapeId shapeId, final String enumValueName) {
+        return this.awsSDKNaming.getEnumValueName(enumValueName);
     }
 
     /**
