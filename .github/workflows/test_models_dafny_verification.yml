@@ -30,6 +30,9 @@ jobs:
         ]
         os: [ ubuntu-latest ]
     runs-on: ${{ matrix.os }}
+    permissions:
+      id-token: write
+      contents: read
     env:
       DOTNET_CLI_TELEMETRY_OPTOUT: 1
       DOTNET_NOLOGO: 1
