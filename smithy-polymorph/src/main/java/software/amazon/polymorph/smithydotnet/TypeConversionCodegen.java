@@ -565,6 +565,11 @@ public class TypeConversionCodegen {
                     final String createSuffix = createSuffixUnMod;
                     if (StringUtils.equals(memberShape.getId().getName(), "AttributeValue")) {
 
+                        final TokenTree checkIfValuePresent;
+
+                        // List<T> where T is not of type AttributeVale are always not null, but empty.
+                        final Set<String> listTypes = Set.of("BS", "NS", "SS");
+
                         // When generating the toDafnyBody, there is an edge case for AttributeValue.
                         // When checking if this a certain type the ddb sdk for net only gas value.is*Set for
                         // lists, map, and boolean types - it does not have one for the remaining attribute union types
@@ -572,30 +577,29 @@ public class TypeConversionCodegen {
 
                         // In v2 of the net sdk for ddb the only Is%sSet apis are for L, M, or BOOL other unions do
                         // not exist.
-                        if (!checkedAttributeValues.contains(propertyName)) {
-                            return TokenTree
-                            .of("if (value.%s != null)".formatted(propertyName))
-                            .append(TokenTree.of("return %s.create%s(%s(value.%s));"
-                                                    .formatted(
-                                                            dafnyUnionConcreteType,
-                                                            createSuffix,
-                                                            memberFromDafnyConverterName,
-                                                            propertyName
-                                                    ))
-                                            .lineSeparated()
-                                            .braced());
+                        if (checkedAttributeValues.contains(propertyName)) {
+                            checkIfValuePresent = TokenTree
+                            .of("if (value.Is%sSet)".formatted(propertyName));
+                        } else if (listTypes.contains(propertyName)) {
+                            checkIfValuePresent = TokenTree
+                            .of("if (!value.%s.Any())".formatted(propertyName));
+                        } else if ("NULL".equals(propertyName)) {
+                            checkIfValuePresent =  TokenTree
+                            .of("if (value.%s == true)".formatted(propertyName));
+                        } else {
+                            checkIfValuePresent =  TokenTree
+                            .of("if (value.%s != null)".formatted(propertyName));
                         }
-                        return TokenTree
-                               .of("if (value.Is%sSet)".formatted(propertyName))
-                               .append(TokenTree.of("return %s.create%s(%s(value.%s));"
-                                               .formatted(
-                                                       dafnyUnionConcreteType,
-                                                       createSuffix,
-                                                       memberFromDafnyConverterName,
-                                                       propertyName
-                                               ))
-                                       .lineSeparated()
-                                       .braced());
+
+                        return checkIfValuePresent.append(TokenTree.of("return %s.create%s(%s(value.%s));"
+                                                .formatted(
+                                                    dafnyUnionConcreteType,
+                                                    createSuffix,
+                                                    memberFromDafnyConverterName,
+                                                    propertyName
+                                                ))
+                                                .lineSeparated()
+                                                .braced());
                     } else {
                         // This code is for legacy reasons and should be dropped after we are sure no sdk need this code.
                         return TokenTree
