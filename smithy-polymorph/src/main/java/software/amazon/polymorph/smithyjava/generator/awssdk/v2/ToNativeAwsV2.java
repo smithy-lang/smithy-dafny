@@ -322,7 +322,7 @@ public class ToNativeAwsV2 extends ToNative {
             })
             .forEachOrdered(name -> method
                 .beginControlFlow("if ($L.$L())", VAR_INPUT, Dafny.datatypeConstructorIs(name))
-                .addStatement("return $T.$L", returnType, subject.nativeNameResolver.v2FormattedEnumValue(returnType, name))
+                .addStatement("return $T.$L", returnType, subject.nativeNameResolver.v2FormattedEnumValue(shapeId, name))
                 .endControlFlow()
             );
 
