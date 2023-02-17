@@ -20,7 +20,6 @@ import software.amazon.smithy.utils.ToSmithyBuilder;
  * Polymorph needs to be able to integrate these mutations
  * with the History DafnyCallEvents.
  */
-
 public class MutableLocalStateTrait extends AbstractTrait implements ToSmithyBuilder<MutableLocalStateTrait> {
     public static final ShapeId ID = ShapeId.from("aws.polymorph#mutableLocalState");
 
