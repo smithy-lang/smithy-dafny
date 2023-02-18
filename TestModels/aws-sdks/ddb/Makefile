@@ -15,7 +15,7 @@ transpile_net_dependencies: ;
 _polymorph_dafny :
 	cd $(TEST_BED_ROOT)../smithy-polymorph; \
 	./gradlew run --args="\
-	--output-dafny $(PROJECT_ROOT)/Model \
+	--output-dafny \
 	--include-dafny $(TEST_BED_ROOT)/dafny-dependencies/StandardLibrary/src/Index.dfy \
 	--model $(PROJECT_ROOT)/Model \
 	--dependent-model $(TEST_BED_ROOT)/dafny-dependencies/Model \

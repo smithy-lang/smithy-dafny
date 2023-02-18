@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: "DDB Table and IAM Managed Policies/Role for DynamoDbEncryption testing"
+Description: "DDB Table and IAM Managed Policies/Role for Polymorph testing"
 
 Parameters:
   TableName:
@@ -9,11 +9,11 @@ Parameters:
   ProjectName:
     Type: String
     Description: A prefix that will be applied to any names
-    Default: DDBEC-Dafny
+    Default: Polymorph
   GitHubRepo:
     Type: String
     Description: GitHub Repo that invokes CI
-    Default: awslabs/aws-dynamodb-encryption-dafny
+    Default: awslabs/polymorph
 
 Resources:
   DDBDafnyTestTable:
