@@ -6,6 +6,7 @@ include "../src/Index.dfy"
 module TestComAmazonawsKms {
   import Com.Amazonaws.Kms
   import opened StandardLibrary.UInt
+  import opened Wrappers
 
   const keyId :=  "arn:aws:kms:us-west-2:658956600833:key/b3537ef1-d8dc-4780-9f5a-55776cbb2f7f";
   // One test depends on knowing the region it is being run it.
@@ -44,10 +45,10 @@ module TestComAmazonawsKms {
     BasicDecryptTest(
       input := Kms.Types.DecryptRequest(
         CiphertextBlob := workAround(CiphertextBlob),
-        EncryptionContext := Kms.Wrappers.None,
-        GrantTokens := Kms.Wrappers.None,
-        KeyId := Kms.Wrappers.Some(keyId),
-        EncryptionAlgorithm := Kms.Wrappers.None
+        EncryptionContext := Wrappers.None,
+        GrantTokens := Wrappers.None,
+        KeyId := Wrappers.Some(keyId),
+        EncryptionAlgorithm := Wrappers.None
       ),
       expectedPlaintext := [ 165, 191, 67, 62 ],
       expectedKeyId := keyId
@@ -58,10 +59,10 @@ module TestComAmazonawsKms {
     BasicGenerateTest(
       input := Kms.Types.GenerateDataKeyRequest(
         KeyId := keyId,
-        EncryptionContext := Kms.Wrappers.None,
-        NumberOfBytes := Kms.Wrappers.Some(32 as Kms.Types.NumberOfBytesType),
-        KeySpec := Kms.Wrappers.None,
-        GrantTokens := Kms.Wrappers.None
+        EncryptionContext := Wrappers.None,
+        NumberOfBytes := Wrappers.Some(32 as Kms.Types.NumberOfBytesType),
+        KeySpec := Wrappers.None,
+        GrantTokens := Wrappers.None
       )
     );
   }
@@ -72,9 +73,9 @@ module TestComAmazonawsKms {
       KeyId := keyId,
       // The string "asdf" as bytes
       Plaintext := [ 97, 115, 100, 102 ],
-      EncryptionContext := Kms.Wrappers.None,
-      GrantTokens := Kms.Wrappers.None,
-      EncryptionAlgorithm := Kms.Wrappers.None
+      EncryptionContext := Wrappers.None,
+      GrantTokens := Wrappers.None,
+      EncryptionAlgorithm := Wrappers.None
       )
     );
   }
@@ -88,8 +89,6 @@ module TestComAmazonawsKms {
     var client :- expect Kms.KMSClient();
 
     var ret := client.Decrypt(input);
-
-    print ret;
 
     expect(ret.Success?);
 
@@ -123,8 +122,8 @@ module TestComAmazonawsKms {
       CiphertextBlob := CiphertextBlob.value,
       EncryptionContext := input.EncryptionContext,
       GrantTokens := input.GrantTokens,
-      KeyId := Kms.Wrappers.Some(KeyId.value),
-      EncryptionAlgorithm := Kms.Wrappers.None
+      KeyId := Wrappers.Some(KeyId.value),
+      EncryptionAlgorithm := Wrappers.None
     );
 
     BasicDecryptTest(
@@ -153,7 +152,7 @@ module TestComAmazonawsKms {
       CiphertextBlob := CiphertextBlob.value,
       EncryptionContext := input.EncryptionContext,
       GrantTokens := input.GrantTokens,
-      KeyId := Kms.Wrappers.Some(KeyId.value),
+      KeyId := Wrappers.Some(KeyId.value),
       EncryptionAlgorithm := input.EncryptionAlgorithm
     );
 
