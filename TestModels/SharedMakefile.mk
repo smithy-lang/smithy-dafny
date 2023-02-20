@@ -58,7 +58,8 @@ _polymorph_dafny :
 	--model $(PROJECT_ROOT)/Model \
 	--dependent-model $(TEST_BED_ROOT)/dafny-dependencies/Model \
 	$(DEPENDENT-MODELS) \
-	--namespace $(NAMESPACE)";
+	--namespace $(NAMESPACE) \
+	$(AWS_SDK_CMD)";
 
 _polymorph_wrapped_dafny:
 	cd $(TEST_BED_ROOT)../smithy-polymorph; \
@@ -85,7 +86,8 @@ _polymorph_net:
 	--model $(PROJECT_ROOT)/Model \
 	--dependent-model $(TEST_BED_ROOT)/dafny-dependencies/Model \
 	$(DEPENDENT-MODELS) \
-	--namespace $(NAMESPACE)";
+	--namespace $(NAMESPACE) \
+	$(AWS_SDK_CMD)";
 
 _polymorph_wrapped_net:
 	cd $(TEST_BED_ROOT)../smithy-polymorph; \
