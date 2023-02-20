@@ -1,7 +1,5 @@
 package software.amazon.polymorph.smithyjava.nameresolver;
 
-import com.google.common.base.CaseFormat;
-
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterizedTypeName;
@@ -56,34 +54,26 @@ public class AwsSdkNativeV2 extends Native {
     private static final Map<String, String> AWS_SERVICE_NAMESPACE_TO_CLIENT_INTERFACE;
     private static final Map<String, String> AWS_SERVICE_NAMESPACE_TO_BASE_EXCEPTION;
 
-    private static final Set<String> KMS_ENUM_SHAPE_IDS_FOR_ECC_SECG_P256K1;
-
     static {
-        // The namespaces used as keys in this map correspond to the Polymorph namespace,
-        //   NOT the SDK V2 namespace.
-        // Polymorph namespace: com.amazonaws.X
+        // The namespaces used as keys in these maps correspond to the Smithy namespace,
+        // NOT the SDK V2 namespace.
+        // Smithy namespace: com.amazonaws.X
         // AWSSDK V2 namespace: software.amazon.awssdk.X
-        // These exception types are NOT located in the corresponding SDK V2 namespace's model
-        //   package; they are located in its parent namespace.
+
+        // These clients are NOT located in the services' model package;
+        // they are located in its parent namespace.
         // i.e: kms : software.amazon.awssdk.kms.KmsClient
         AWS_SERVICE_NAMESPACE_TO_CLIENT_INTERFACE = Map.ofEntries(
                 Map.entry("com.amazonaws.kms", "KmsClient"),
                 Map.entry("com.amazonaws.dynamodb", "DynamoDbClient"),
                 Map.entry("com.amazonaws.s3", "S3Client")
         );
-        // These namespaces correspond to the Polymorph generated namespace, NOT the SDK V2 namespace.
-        // These exception types are located in the corresponding SDK V2 namespace's model package.
+        // These exception are located in the services' model package.
         // i.e.: kms : software.amazon.awssdk.kms.model.KmsException
         AWS_SERVICE_NAMESPACE_TO_BASE_EXCEPTION = Map.ofEntries(
                 Map.entry("com.amazonaws.kms", "KmsException"),
                 Map.entry("com.amazonaws.dynamodb", "DynamoDbException"),
                 Map.entry("com.amazonaws.s3", "S3Exception")
-        );
-
-        KMS_ENUM_SHAPE_IDS_FOR_ECC_SECG_P256K1 = Set.of(
-                "com.amazonaws.kms#CustomerMasterKeySpec",
-                "com.amazonaws.kms#DataKeyPairSpec",
-                "com.amazonaws.kms#KeySpec"
         );
     }
 
@@ -297,7 +287,14 @@ public class AwsSdkNativeV2 extends Native {
         return classNameForStructure(shape);
     }
 
-    public final String v2FormattedEnumValue(final ShapeId shapeId, final String enumValueName) {
+    public final String v2FormattedEnumValue(
+            // ShapeIds are great; every method in this class SHOULD accept a ShapeId.
+            // If we ever need to handle an exception to the enum naming pattern (which the AWS SDK is full of)
+            // The ShapeId will be used.
+            @SuppressWarnings("unused") final ShapeId shapeId,
+            final String enumValueName
+    ) {
+        // TODO: We SHOULD employ the awsSDkNaming for more of the logic above..
         return this.awsSDKNaming.getEnumValueName(enumValueName);
     }
 
