@@ -15,8 +15,10 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import software.amazon.polymorph.smithydafny.DafnyApiCodegen;
 import software.amazon.polymorph.smithydotnet.AwsSdkShimCodegen;
 import software.amazon.polymorph.smithydotnet.AwsSdkTypeConversionCodegen;
@@ -80,6 +82,13 @@ public class CodegenCli {
         final Model model = assembler
                 .assemble()
                 .unwrap();
+        // If Smithy ever lets us configure this:
+        // https://github.com/awslabs/smithy/blob/f598b87c51af5943686e38706847a5091fe718da/smithy-model/src/main/java/software/amazon/smithy/model/loader/ModelLoader.java#L76
+        // We can remove this log statement.
+        // (Alternatively, We could inline `addImport`,
+        // and ignore dfy & md files. Link to `addImport` below)
+        // https://github.com/awslabs/smithy/blob/f598b87c51af5943686e38706847a5091fe718da/smithy-model/src/main/java/software/amazon/smithy/model/loader/ModelAssembler.java#L256-L281
+        logger.info("End annoying Smithy \"No ModelLoader was able to load\" warnings.\n\n");
 
         final ServiceShape serviceShape = ModelUtils.serviceFromNamespace(model, cliArguments.namespace);
         final List<String> messages = new ArrayList<>(3);

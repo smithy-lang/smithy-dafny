@@ -15,6 +15,9 @@ import java.util.Optional;
 
 import javax.lang.model.element.Modifier;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import software.amazon.polymorph.smithyjava.MethodReference;
 import software.amazon.polymorph.smithyjava.NamespaceHelper;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
@@ -50,6 +53,7 @@ public abstract class ToDafny extends Generator {
      * The class name of the Subject's Shim's ToDafny class.
      */
     protected final ClassName thisClassName;
+    private static final Logger LOGGER = LoggerFactory.getLogger(ToDafny.class);
 
     public ToDafny(CodegenSubject subject, ClassName className) {
         super(subject);
@@ -117,20 +121,11 @@ public abstract class ToDafny extends Generator {
                 .addModifiers(PUBLIC_STATIC)
                 .returns(returnType)
                 .addParameter(subject.nativeNameResolver.classNameForStructure(shape), VAR_INPUT);
-        // TODO: Once dafny always generates create_<datatypeConstructor>, remove this if block
-        if (shape.members().size() == 1) {
-            // There is one, stream().findFirst will return a value
-            //noinspection OptionalGetWithoutIsPresent
-            MemberShape onlyMember = shape.members().stream().findFirst().get();
-            CodeBlock getField = CodeBlock.of("$L.$L()", VAR_INPUT, onlyMember.getMemberName());
-            CodeBlock memberConversion = memberConversion(onlyMember, getField);
-            method.addStatement("return $T.create($L)", returnType, memberConversion);
-            return method.build();
-        }
+        boolean isRecordType = shape.members().size() == 1;
         shape.members().forEach(member -> {
             CodeBlock getField = getMember(CodeBlock.builder().add(VAR_INPUT).build(), member);
             CodeBlock memberConversion = memberConversion(member, getField);
-            String datatypeConstructorCreate = Dafny.datatypeConstructorCreate(member.getMemberName());
+            String datatypeConstructorCreate = Dafny.datatypeConstructorCreate(member.getMemberName(), isRecordType);
             method.beginControlFlow("if ($T.nonNull($L))", Objects.class, getField)
                     .addStatement("return $T.$L($L)", returnType, datatypeConstructorCreate, memberConversion)
                     .endControlFlow();
@@ -203,6 +198,8 @@ public abstract class ToDafny extends Generator {
                 .addParameter(subject.nativeNameResolver.classForEnum(shape), VAR_INPUT)
                 .beginControlFlow("switch ($L)", VAR_INPUT);
 
+        final boolean isRecordType = enumTrait.getValues().size() == 1;
+
         enumTrait.getValues().stream()
                 .map(EnumDefinition::getName)
                 .map(Optional::get)
@@ -215,7 +212,9 @@ public abstract class ToDafny extends Generator {
                 .forEach(name -> builder
                         .beginControlFlow("case $L:", name)
                         .addStatement(
-                                "return $T.$L()", dafnyEnumClass, Dafny.datatypeConstructorCreate(name))
+                                "return $T.$L()",
+                                dafnyEnumClass,
+                                Dafny.datatypeConstructorCreate(name, isRecordType))
                         .endControlFlow()
                 );
 

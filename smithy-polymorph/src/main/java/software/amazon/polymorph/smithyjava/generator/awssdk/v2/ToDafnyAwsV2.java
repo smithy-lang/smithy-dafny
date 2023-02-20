@@ -11,7 +11,6 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.WildcardTypeName;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -22,10 +21,12 @@ import java.util.stream.Collectors;
 import javax.lang.model.element.Modifier;
 
 import dafny.DafnySequence;
+
 import software.amazon.polymorph.smithyjava.MethodReference;
 import software.amazon.polymorph.smithyjava.generator.ToDafny;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.polymorph.utils.ModelUtils;
+
 import software.amazon.smithy.model.shapes.ListShape;
 import software.amazon.smithy.model.shapes.MapShape;
 import software.amazon.smithy.model.shapes.MemberShape;
@@ -287,6 +288,8 @@ public class ToDafnyAwsV2 extends ToDafny {
         return modeledEnum(shape);
     }
 
+    // TODO: We should make all name resolvers support `formatEnumCaseName`,
+    // rather than entirely ignoring the abstract implementation.
     /**
      * This logic is the same as ToDafny's logic,
      * except it calls an only-defined-in-V2 formatEnumCaseName function.
@@ -313,6 +316,8 @@ public class ToDafnyAwsV2 extends ToDafny {
             .addParameter(subject.nativeNameResolver.classForEnum(shape), VAR_INPUT)
             .beginControlFlow("switch ($L)", VAR_INPUT);
 
+        final boolean isRecordType = enumTrait.getValues().size() == 1;
+
         enumTrait.getValues().stream()
             .map(EnumDefinition::getName)
             .map(Optional::get)
@@ -326,7 +331,9 @@ public class ToDafnyAwsV2 extends ToDafny {
                 .beginControlFlow("case $L:",
                     subject.dafnyNameResolver.formatEnumCaseName(dafnyEnumClass, name))
                 .addStatement(
-                    "return $T.$L()", dafnyEnumClass, Dafny.datatypeConstructorCreate(name))
+                        "return $T.$L()",
+                        dafnyEnumClass,
+                        Dafny.datatypeConstructorCreate(name, isRecordType))
                 .endControlFlow()
             );
 
