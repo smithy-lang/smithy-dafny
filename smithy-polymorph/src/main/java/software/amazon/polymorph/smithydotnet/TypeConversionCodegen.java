@@ -558,6 +558,8 @@ public class TypeConversionCodegen {
                             : dafnyMemberName;
                     // TODO come back and revisit how we generate Unions - we should use the names
                     // defined in the smithy model 
+                    // Wrt to the above TODO, we should also not handle Aws specific shapes here,
+                    // rather delegate it to the AwsSdkTypeConversionCodegen class.
                     if (StringUtils.equals(memberShape.getId().getName(), "AttributeValue") ||
                         StringUtils.equals(memberShape.getContainer().getName(), "Materials")) {
                         createSuffixUnMod = "_%s".formatted(propertyName);
