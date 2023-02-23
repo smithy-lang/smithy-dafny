@@ -552,41 +552,58 @@ public class TypeConversionCodegen {
                     final String dafnyMemberName = nameResolver.unionMemberName(memberShape);
                     final String memberFromDafnyConverterName = typeConverterForShape(
                             memberShape.getId(), TO_DAFNY);
-                    // When generating the toDafnyBody, there is an edge case for AttributeValue.
-                    // When checking if this a certain type the ddb sdk for net only gas value.is*Set for
-                    // lists, map, and boolean types - it does not have one for the remaining attribute union types
-                    final Set<String> checkedAttributeValues = Set.of("L", "M", "BOOL");
-                    // In v2 of the net sdk for ddb the only Is%sSet apis are for L, M, or BOOL other unions do
-                    // not exist.
-                    if (StringUtils.equals(memberShape.getId().getName(), "AttributeValue")) {
-                        if (!checkedAttributeValues.contains(propertyName)) {
-                            return TokenTree.of("");
-                        }
-                    }
                     // Dafny generates just "create" instead of "create_FOOBAR" if there's only one ctor
                     String createSuffixUnMod = defNames.size() == 1
                             ? ""
                             : dafnyMemberName;
                     // TODO come back and revisit how we generate Unions - we should use the names
                     // defined in the smithy model 
+                    // Wrt to the above TODO, we should also not handle Aws specific shapes here,
+                    // rather delegate it to the AwsSdkTypeConversionCodegen class.
                     if (StringUtils.equals(memberShape.getId().getName(), "AttributeValue") ||
                         StringUtils.equals(memberShape.getContainer().getName(), "Materials")) {
                         createSuffixUnMod = "_%s".formatted(propertyName);
                     }
                     final String createSuffix = createSuffixUnMod;
                     if (StringUtils.equals(memberShape.getId().getName(), "AttributeValue")) {
-                        return TokenTree
-                               .of("if (value.Is%sSet)".formatted(propertyName))
-                               .append(TokenTree.of("return %s.create%s(%s(value.%s));"
-                                               .formatted(
-                                                       dafnyUnionConcreteType,
-                                                       createSuffix,
-                                                       memberFromDafnyConverterName,
-                                                       propertyName
-                                               ))
-                                       .lineSeparated()
-                                       .braced());
+
+                        final TokenTree checkIfValuePresent;
+
+                        // List<T> where T is not of type AttributeVale are always not null, but empty.
+                        final Set<String> listTypes = Set.of("BS", "NS", "SS");
+
+                        // When generating the toDafnyBody, there is an edge case for AttributeValue.
+                        // When checking if this a certain type the ddb sdk for net only gas value.is*Set for
+                        // lists, map, and boolean types - it does not have one for the remaining attribute union types
+                        final Set<String> checkedAttributeValues = Set.of("L", "M", "BOOL");
+
+                        // In v2 of the net sdk for ddb the only Is%sSet apis are for L, M, or BOOL other unions do
+                        // not exist.
+                        if (checkedAttributeValues.contains(propertyName)) {
+                            checkIfValuePresent = TokenTree
+                            .of("if (value.Is%sSet)".formatted(propertyName));
+                        } else if (listTypes.contains(propertyName)) {
+                            checkIfValuePresent = TokenTree
+                            .of("if (!value.%s.Any())".formatted(propertyName));
+                        } else if ("NULL".equals(propertyName)) {
+                            checkIfValuePresent =  TokenTree
+                            .of("if (value.%s == true)".formatted(propertyName));
+                        } else {
+                            checkIfValuePresent =  TokenTree
+                            .of("if (value.%s != null)".formatted(propertyName));
+                        }
+
+                        return checkIfValuePresent.append(TokenTree.of("return %s.create%s(%s(value.%s));"
+                                                .formatted(
+                                                    dafnyUnionConcreteType,
+                                                    createSuffix,
+                                                    memberFromDafnyConverterName,
+                                                    propertyName
+                                                ))
+                                                .lineSeparated()
+                                                .braced());
                     } else {
+                        // This code is for legacy reasons and should be dropped after we are sure no sdk need this code.
                         return TokenTree
                                 .of("if (value.IsSet%s())".formatted(propertyName))
                                 .append(TokenTree.of("return %s.create%s(%s(value.%s));"
