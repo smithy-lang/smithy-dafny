@@ -1,6 +1,6 @@
 # SimpleExtern
 
-# Add description here
+This project tests a few simple scenarios of implementing a [dafny extern](https://homepage.cs.uiowa.edu/~tinelli/classes/181/Papers/dafny-reference.pdf#15). This has a `GetExtern` operation which has the implementation in the native runtime while `ExternMustError` tries to simulate the scenario where the extern implementation returns a `Failure` instead of `Success`. `UseClassExtern` lays down the paradigm on having a class constructor as an extern implementation (constructors in dafny can't throw, but underlying runtime can throw even in constructors).
 
 ## Build
 ### .NET

@@ -7,8 +7,10 @@ module WrappedSimpleExternTest {
     import SimpleExternImplTest
     import opened Wrappers
     
-    method{:test} Extern() {
+    method{:test} Externs() {
         var client :- expect WrappedSimpleExternService.WrappedSimpleExtern();
         SimpleExternImplTest.TestGetExtern(client);
+        SimpleExternImplTest.TestExternMustError(client);
+        SimpleExternImplTest.TestUseClassExtern(client);
     }
 }
