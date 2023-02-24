@@ -603,13 +603,12 @@ public class TypeConversionCodegen {
                                                 .lineSeparated()
                                                 .braced());
                     } else {
-                        // This code is for legacy reasons and should be dropped after we are sure no sdk need this code.
                         return TokenTree
                                 .of("if (value.IsSet%s())".formatted(propertyName))
-                                .append(TokenTree.of("return %s.create%s(%s(value.%s));"
+                                .append(TokenTree.of("return %s.create_%s(%s(value.%s));"
                                                 .formatted(
                                                         dafnyUnionConcreteType,
-                                                        createSuffix,
+                                                        propertyName,
                                                         memberFromDafnyConverterName,
                                                         propertyName
                                                 ))
