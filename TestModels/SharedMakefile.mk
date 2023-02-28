@@ -58,7 +58,8 @@ _polymorph_dafny :
 	--model $(PROJECT_ROOT)/Model \
 	--dependent-model $(TEST_BED_ROOT)/dafny-dependencies/Model \
 	$(DEPENDENT-MODELS) \
-	--namespace $(NAMESPACE)";
+	--namespace $(NAMESPACE) \
+	$(AWS_SDK_CMD)";
 
 _polymorph_wrapped_dafny:
 	cd $(TEST_BED_ROOT)../smithy-polymorph; \
@@ -85,7 +86,8 @@ _polymorph_net:
 	--model $(PROJECT_ROOT)/Model \
 	--dependent-model $(TEST_BED_ROOT)/dafny-dependencies/Model \
 	$(DEPENDENT-MODELS) \
-	--namespace $(NAMESPACE)";
+	--namespace $(NAMESPACE) \
+	$(AWS_SDK_CMD)";
 
 _polymorph_wrapped_net:
 	cd $(TEST_BED_ROOT)../smithy-polymorph; \
@@ -137,9 +139,9 @@ setup_net:
 	dotnet restore runtimes/net/
 
 clean:
-	rm -f $(PWD)/Model/*Types.dfy $(PWD)/Model/*TypesWrapped.dfy
-	rm -f $(PWD)/runtimes/net/ImplementationFromDafny.cs
-	rm -f $(PWD)/runtimes/net/tests/TestFromDafny.cs
-	rm -rf $(PWD)/TestResults
-	rm -rf $(PWD)/runtimes/net/Generated $(PWD)/runtimes/net/bin $(PWD)/runtimes/net/obj
-	rm -rf $(PWD)/runtimes/net/tests/bin $(PWD)/runtimes/net/tests/obj
+	rm -f $(PROJECT_ROOT)/Model/*Types.dfy $(PROJECT_ROOT)/Model/*TypesWrapped.dfy
+	rm -f $(PROJECT_ROOT)/runtimes/net/ImplementationFromDafny.cs
+	rm -f $(PROJECT_ROOT)/runtimes/net/tests/TestFromDafny.cs
+	rm -rf $(PROJECT_ROOT)/TestResults
+	rm -rf $(PROJECT_ROOT)/runtimes/net/Generated $(PROJECT_ROOT)/runtimes/net/bin $(PROJECT_ROOT)/runtimes/net/obj
+	rm -rf $(PROJECT_ROOT)/runtimes/net/tests/bin $(PROJECT_ROOT)/runtimes/net/tests/obj

@@ -4,6 +4,7 @@
 package software.amazon.polymorph.smithydotnet.localServiceWrapper;
 
 import software.amazon.polymorph.smithydotnet.TypeConversionCodegen;
+import software.amazon.polymorph.traits.ExtendableTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.polymorph.utils.TokenTree;
@@ -133,7 +134,8 @@ public class LocalServiceWrappedConversionCodegen extends TypeConversionCodegen 
         if (ModelUtils.isReferenceDependantModuleType(shape, nameResolver.namespaceForService())) {
             final ShapeId resourceShapeId = shape.expectTrait(ReferenceTrait.class).getReferentId();
             return nameResolver.namespaceForShapeId(serviceShape.getId())
-              .equalsIgnoreCase(resourceShapeId.getNamespace());
+              .equalsIgnoreCase(resourceShapeId.getNamespace())
+              && model.expectShape(resourceShapeId).hasTrait(ExtendableTrait.class);
         } else {
             return false;
         }
