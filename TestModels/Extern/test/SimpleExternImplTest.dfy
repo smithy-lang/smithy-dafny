@@ -10,7 +10,8 @@ module SimpleExternImplTest {
         var client :- expect SimpleExtern.SimpleExtern();
         TestGetExtern(client);
         TestExternMustError(client);
-        TestUseClassExtern(client);
+        TestUseClassExternSuccess(client);
+        TestUseClassExternFailure(client);
     }
 
     method TestGetExtern(client: ISimpleExternClient)
@@ -43,13 +44,25 @@ module SimpleExternImplTest {
         // There is now way to assert the Opaque object type.
     }
 
-     method TestUseClassExtern(client: ISimpleExternClient)
+    method TestUseClassExternSuccess(client: ISimpleExternClient)
         requires client.ValidState()
         modifies client.Modifies
         ensures client.ValidState()
     {
-        var ret := client.UseClassExtern(input := UseClassExternInput(
+        var ret :- expect client.UseClassExtern(input := UseClassExternInput(
             value:= Some("TestStringValue")));
-        // The above line can throw and will cause dafny to halt the whole program and fail the tests.
+        expect ret.value.UnwrapOr("") == "TestStringValue";
+    }
+
+    method TestUseClassExternFailure(client: ISimpleExternClient)
+        requires client.ValidState()
+        modifies client.Modifies
+        ensures client.ValidState()
+    {
+        //The below line would cause the Build method to retrun error instead of class instance.
+        var ret := client.UseClassExtern(input := UseClassExternInput(
+            value:= Some("Error")));
+        expect ret.Failure?;
+        expect ret.error.Opaque?;
     }
 }

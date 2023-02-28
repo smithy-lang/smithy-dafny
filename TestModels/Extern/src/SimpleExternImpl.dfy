@@ -26,11 +26,8 @@ module SimpleExternImpl refines AbstractSimpleExternOperations  {
 
     method UseClassExtern(config: InternalConfig, input: UseClassExternInput)
         returns (output: Result<UseClassExternOutput, Error>) {
-            // This class constructor is implemented as extern and hence it might be possible
-            // that the underlying runtime can actualy throw errors in constructors (say C#).
-            // In these cases, dafny would halt the whole program (since constructor can't have a return type
-            // and can't return the error).
-            var externClassObject := new ExternConstructor.ExternConstructorClass();
-            return Success(UseClassExternOutput(value:=input.value));
+            var externClassObject :- ExternConstructor.ExternConstructorClass.Build(input:= input.value.UnwrapOr("Error"));
+            var res :- externClassObject.GetValue();
+            return Success(UseClassExternOutput(value:=Some(res)));
         }
 }

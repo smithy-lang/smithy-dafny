@@ -11,6 +11,7 @@ module WrappedSimpleExternTest {
         var client :- expect WrappedSimpleExternService.WrappedSimpleExtern();
         SimpleExternImplTest.TestGetExtern(client);
         SimpleExternImplTest.TestExternMustError(client);
-        SimpleExternImplTest.TestUseClassExtern(client);
+        SimpleExternImplTest.TestUseClassExternSuccess(client);
+        SimpleExternImplTest.TestUseClassExternFailure(client);
     }
 }
