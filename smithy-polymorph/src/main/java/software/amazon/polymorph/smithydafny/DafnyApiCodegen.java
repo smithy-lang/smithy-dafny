@@ -4,6 +4,7 @@
 package software.amazon.polymorph.smithydafny;
 
 import com.google.common.annotations.VisibleForTesting;
+
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.traits.PositionalTrait;
@@ -13,10 +14,14 @@ import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.polymorph.utils.Token;
 import software.amazon.polymorph.utils.TokenTree;
+
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.*;
 import software.amazon.smithy.model.traits.*;
 import software.amazon.smithy.aws.traits.*;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
 import java.util.*;
@@ -30,6 +35,10 @@ public class DafnyApiCodegen {
     private final DafnyNameResolver nameResolver;
     private final Path modelPath;
     private final Path includeDafnyFile;
+    private static final Logger LOGGER = LoggerFactory.getLogger(DafnyApiCodegen.class);
+    static final Optional<TokenTree> DOUBLE_LENGTH_CONSTRAINT = Optional.of(
+            generateLengthConstraint(LengthTrait.builder()
+                    .min((long) 8).max((long) 8).build()));
 
     public DafnyApiCodegen(
       final Model model,
@@ -217,6 +226,7 @@ public class DafnyApiCodegen {
                 }
             }
             case INTEGER, LONG -> generateNumericTypeDefinition(shapeId);
+            case DOUBLE -> generateDoubleTypeDefinition(shapeId);
             case LIST -> generateListTypeDefinition(shapeId);
             case MAP -> generateMapTypeDefinition(shapeId);
             case STRUCTURE -> {
@@ -291,6 +301,16 @@ public class DafnyApiCodegen {
         final String baseType = Objects.requireNonNull(
                 DafnyNameResolver.DAFNY_TYPES_BY_SIMPLE_SHAPE_TYPE.get(numberShape.getType()));
         return generateSubsetType(numberShapeId, baseType, rangeConstraint);
+    }
+
+    public TokenTree generateDoubleTypeDefinition(final ShapeId doubleShapeId) {
+        final DoubleShape doubleShape = model.expectShape(doubleShapeId, DoubleShape.class);
+        if (doubleShape.hasTrait(RangeTrait.class)) {
+            LOGGER.error("Smithy-Dafny cannot handle Range Trait on a Double and Ignores the Trait. ShapeId: %s".formatted(doubleShapeId));
+        }
+        final String baseType = Objects.requireNonNull(
+                DafnyNameResolver.DAFNY_TYPES_BY_SIMPLE_SHAPE_TYPE.get(doubleShape.getType()));
+        return generateSubsetType(doubleShapeId, baseType, DOUBLE_LENGTH_CONSTRAINT);
     }
 
     public TokenTree generateListTypeDefinition(final ShapeId listShapeId) {
