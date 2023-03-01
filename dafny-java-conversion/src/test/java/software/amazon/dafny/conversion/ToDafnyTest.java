@@ -14,6 +14,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -136,6 +137,16 @@ public class ToDafnyTest {
         DafnySequence<Byte> actualDafny = ToDafny.Simple.DafnyUtf8Bytes(expectedString);
         String actualNative = ToNative.Simple.DafnyUtf8Bytes(actualDafny);
         assertEquals(expectedString, actualNative);
+    }
+
+    @Test
+    public void testDouble() {
+        for (int i = 0; i < 100; i ++) {
+            double random = ThreadLocalRandom.current().nextDouble();
+            DafnySequence<Byte> actualDafny = ToDafny.Simple.Double(random);
+            Double actualDouble = ToNative.Simple.Double(actualDafny);
+            assertEquals((Double) random, actualDouble);
+        }
     }
 
     /**
