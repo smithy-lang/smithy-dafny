@@ -57,27 +57,10 @@ public class AwsSdkTypeConversionCodegen extends TypeConversionCodegen {
         }
         final String varName = nameResolver.variableNameForClassProperty(memberShape);
         final String propertyName = nameResolver.classPropertyForStructureMember(memberShape);
-        // In DynamoDB there are three edge cases for the Structures of ConsumedCapacityUnits and for SizeEstimateRangeGB
-        // The underlying data type is double but the conversion needs to be type int we will have to manually update these variables
-        // and for SizeEstimateRangeGB we have to convert the list of doubles to list of ints
-        if (StringUtils.equals(memberShape.getTarget().getName(), "ConsumedCapacityUnits")) {
-            return TokenTree.of(
-                    type,
-                    varName,
-                    "= (int) value.%s;".formatted(propertyName));
-        } else if (StringUtils.equals(propertyName, "SizeEstimateRangeGB")) {
-            // Polymorph type casts the value; however when it is a list you cannot just typecast a list of type x to type y
-            // you need to convert the list. In this case we know it is converting the type of the list to int
-            return TokenTree.of(
-                    type,
-                    varName,
-                    "= value.%s.Select(i => (int) i).ToList();".formatted(propertyName));
-        } else {
             return TokenTree.of(
                     type,
                     varName,
                     "= value.%s;".formatted(propertyName));
-        }
     }
 
     @Override
