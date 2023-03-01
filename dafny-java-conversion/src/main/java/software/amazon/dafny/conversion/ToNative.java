@@ -44,6 +44,11 @@ public class ToNative {
             return chars.map(Object::toString).collect(Collectors.joining());
         }
 
+        // DOUBLE("double", DoubleShape.class, Category.SIMPLE),
+        public static Double Double(DafnySequence<? extends Byte> dafnySequence) {
+            return ByteBuffer(dafnySequence).getDouble();
+        }
+
         // TIMESTAMP("timestamp", TimestampShape.class, Category.SIMPLE),
         public static Date Date(DafnySequence<? extends Character> s) {
             // KMS uses unix timestamp, or seconds from epoch, as its serialized timestamp
