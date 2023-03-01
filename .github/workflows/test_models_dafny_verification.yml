@@ -19,6 +19,7 @@ jobs:
           TestModels/Errors,
           TestModels/Extendable,
           TestModels/Refinement,
+          TestModels/Resource,
           TestModels/SimpleTypes/SimpleBoolean,
           TestModels/SimpleTypes/SimpleBlob,
           TestModels/SimpleTypes/SimpleEnum,
@@ -50,8 +51,8 @@ jobs:
       # so manually download a nightly build for 3.10.0 and grab it from there.
       - name: Locally Cache Java DafnyRuntime
         run: |
-          wget https://github.com/dafny-lang/dafny/releases/download/nightly/dafny-nightly-2022-12-02-edab6cc-x64-osx-10.14.2.zip 
-          unzip dafny-nightly-2022-12-02-edab6cc-x64-osx-10.14.2.zip 
+          wget -q https://github.com/dafny-lang/dafny/releases/download/nightly/dafny-nightly-2022-12-02-edab6cc-x64-osx-10.14.2.zip 
+          unzip -qq dafny-nightly-2022-12-02-edab6cc-x64-osx-10.14.2.zip 
           mvn -B -ntp install:install-file \
           -Dfile=dafny/DafnyRuntime.jar \
           -DgroupId=dafny.lang \

@@ -52,6 +52,11 @@ public class ToDafny {
             return ByteSequence(byteBuffer, 0, byteBuffer.limit());
         }
 
+        // DOUBLE("double", DoubleShape.class, Category.SIMPLE),
+        public static DafnySequence<Byte> Double(Double aDouble) {
+            return ByteSequence(ByteBuffer.allocate(8).putDouble(aDouble));
+        }
+
         // STRING("string", StringShape.class, Category.SIMPLE),
         public static DafnySequence<Character> CharacterSequence(String s) {
             return DafnySequence.asString(s);
