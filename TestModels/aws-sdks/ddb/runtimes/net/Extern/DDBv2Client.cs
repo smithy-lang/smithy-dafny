@@ -8,22 +8,22 @@ using Com.Amazonaws.Dynamodb;
 // that refines the AWS SDK DDB Model
 namespace Dafny.Com.Amazonaws.Dynamodb
 {
-    public partial class __default
+  public partial class __default
+  {
+    public static
+        _IResult<
+            Types.IDynamoDB__20120810Client,
+            Types._IError
+        >
+        DynamoDBClient()
     {
-        public static
-            _IResult<
-                Types.IDynamoDB__20120810Client,
-                Types._IError
-            >
-            DynamoDBClient()
-        {
-            var client = new AmazonDynamoDBClient();
+      var client = new AmazonDynamoDBClient();
 
-            return Result<
-                    Types.IDynamoDB__20120810Client,
-                    Types._IError
-                >
-                .create_Success(new DynamoDBv2Shim(client));
-        }
+      return Result<
+              Types.IDynamoDB__20120810Client,
+              Types._IError
+          >
+          .create_Success(new DynamoDBv2Shim(client));
     }
+  }
 }
