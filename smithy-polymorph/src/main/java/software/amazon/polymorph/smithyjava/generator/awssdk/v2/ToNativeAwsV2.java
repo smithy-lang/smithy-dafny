@@ -135,7 +135,7 @@ public class ToNativeAwsV2 extends ToNative {
                 .orElseThrow(() -> new IllegalStateException("Cannot find shape " + shapeId));
         return switch (shape.getType()) {
             // For the AWS SDK for Java V2, we do not generate converters for simple shapes
-            case BLOB, BOOLEAN, TIMESTAMP, BYTE, SHORT,
+            case BLOB, BOOLEAN, TIMESTAMP, BYTE, SHORT, DOUBLE,
                     INTEGER, LONG, BIG_DECIMAL, BIG_INTEGER, MEMBER -> null;
             case STRING -> generateConvertString(shapeId); // STRING handles enums
             case LIST -> modeledList(shape.asListShape().get());
@@ -239,17 +239,6 @@ public class ToNativeAwsV2 extends ToNative {
         //   SdkBytes.fromByteArray().
         if (targetShape.getType() == ShapeType.BLOB) {
             return CodeBlock.of("$L.$L($L((byte[]) ($L.$L.toRawArray())))",
-                VAR_BUILDER,
-                setMemberField(member),
-                memberConversionMethodReference(member).asNormalReference(),
-                VAR_INPUT,
-                AwsSdkDafnyV2.getV2MemberFieldValue(member));
-        }
-
-        // "TargetValue" refers to a table's target R/W capacity target values.
-        // SDK handles these as doubles, but the Smithy model stores them as integers.
-        if (member.getMemberName().equals("TargetValue")) {
-            return CodeBlock.of("$L.$L($L((double) $L.$L))",
                 VAR_BUILDER,
                 setMemberField(member),
                 memberConversionMethodReference(member).asNormalReference(),

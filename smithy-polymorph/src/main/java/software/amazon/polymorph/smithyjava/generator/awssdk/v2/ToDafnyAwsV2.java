@@ -151,7 +151,7 @@ public class ToDafnyAwsV2 extends ToDafny {
                 .orElseThrow(() -> new IllegalStateException("Cannot find shape " + shapeId));
         return switch (shape.getType()) {
             // For the AWS SDK for Java, we do not generate converters for simple shapes
-            case BLOB, BOOLEAN, STRING, TIMESTAMP, BYTE, SHORT,
+            case BLOB, BOOLEAN, STRING, TIMESTAMP, BYTE, SHORT, DOUBLE,
                     INTEGER, LONG, BIG_DECIMAL, BIG_INTEGER, MEMBER -> null;
             case LIST -> modeledList(shape.asListShape().get());
             case MAP -> modeledMap(shape.asMapShape().get());
@@ -224,45 +224,7 @@ public class ToDafnyAwsV2 extends ToDafny {
                     + "$L.toList())", JAVA_UTIL_STREAM_COLLECTORS)
                 .build();
         }
-
-        // Smithy models some values as integers, but SDK expects doubles.
-        // .intValue will round down; i.e. the decimal portion is removed. This mirrors Dotnet's
-        //     double -> int casting.
-        if (shapeRequiresTypeConversionFromDoubleToInt(targetShape.getId())) {
-            return returnCodeBlockBuilder
-                .add(".intValue()")
-                .build();
-        }
-
-        // SizeEstimateRangeGB is a list of the case above, where Smithy models values as integers,
-        //     but the SDK expects doubles.
-        // This is the only instance of double -> int conversion in a list right now.
-        if (memberShape.getMemberName().equals("SizeEstimateRangeGB")) {
-            MethodReference convert = new MethodReference(
-                JAVA_UTIL_STREAM_COLLECTORS,
-                "toList");
-
-            return returnCodeBlockBuilder
-                .add(".stream()")
-                .add(".map(Double::intValue)")
-                .add(".collect(" + convert.asNormalReference() + "())")
-                .build();
-        }
-
         return inputVar;
-    }
-
-    /**
-     * Returns true if the provided ShapeId has type integer in the Smithy model, but AWS SDK for
-     *   Java V2 effectively expects type double.
-     * @param shapeId
-     * @return true if AWS SDK for Java V2 expects this to have been modeled as a double in Smithy
-     */
-    protected boolean shapeRequiresTypeConversionFromDoubleToInt(ShapeId shapeId) {
-        String shapeName = shapeId.getName();
-
-        return shapeName.equals("ConsumedCapacityUnits")
-            || shapeName.equals("Double");
     }
 
     MethodSpec generateConvertEnumString(ShapeId shapeId) {

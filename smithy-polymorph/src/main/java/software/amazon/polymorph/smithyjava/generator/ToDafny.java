@@ -75,6 +75,7 @@ public abstract class ToDafny extends Generator {
                 Map.entry(ShapeType.SHORT, Constants.IDENTITY_FUNCTION),
                 Map.entry(ShapeType.INTEGER, Constants.IDENTITY_FUNCTION),
                 Map.entry(ShapeType.LONG, Constants.IDENTITY_FUNCTION),
+                Map.entry(ShapeType.DOUBLE, new MethodReference(COMMON_TO_DAFNY_SIMPLE, "Double")),
                 Map.entry(ShapeType.BIG_DECIMAL, Constants.IDENTITY_FUNCTION),
                 Map.entry(ShapeType.BIG_INTEGER, Constants.IDENTITY_FUNCTION)
         );

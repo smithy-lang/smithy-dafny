@@ -158,7 +158,7 @@ public class ToDafnyAwsV1 extends ToDafny {
                 .orElseThrow(() -> new IllegalStateException("Cannot find shape " + shapeId));
         return switch (shape.getType()) {
             // For the AWS SDK for Java, we do not generate converters for simple shapes
-            case BLOB, BOOLEAN, STRING, TIMESTAMP, BYTE, SHORT,
+            case BLOB, BOOLEAN, STRING, TIMESTAMP, BYTE, SHORT, DOUBLE,
                     INTEGER, LONG, BIG_DECIMAL, BIG_INTEGER, MEMBER -> null;
             case LIST -> modeledList(shape.asListShape().get());
             case MAP -> modeledMap(shape.asMapShape().get());
