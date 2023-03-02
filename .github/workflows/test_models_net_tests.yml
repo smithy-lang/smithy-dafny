@@ -22,7 +22,7 @@ jobs:
           TestModels/Resource,          
           TestModels/SimpleTypes/SimpleBoolean,
           TestModels/SimpleTypes/SimpleBlob,
-          TestModels/SimpleTypes/SimpleDouble,
+          # TestModels/SimpleTypes/SimpleDouble, # Blocked by https://t.corp.amazon.com/P80828550
           TestModels/SimpleTypes/SimpleEnum,
           TestModels/SimpleTypes/SimpleInteger,
           TestModels/SimpleTypes/SimpleLong,
