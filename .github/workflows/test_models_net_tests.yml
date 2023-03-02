@@ -68,6 +68,11 @@ jobs:
         # https://github.com/actions/setup-dotnet/blob/main/.github/csc.json
         run: echo "::remove-matcher owner=csc::"
 
+      - name: Setup Maven Action
+        uses: s4u/setup-maven-action@v1.7.0
+        with:
+          maven-version: 3.9.1
+
       # Java DafnyRuntime is not published to maven,
       # so manually download a nightly build for 3.10.0 and grab it from there.
       - name: Locally Cache Java DafnyRuntime
