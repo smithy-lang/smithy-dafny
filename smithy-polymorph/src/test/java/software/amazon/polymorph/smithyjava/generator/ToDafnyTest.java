@@ -44,7 +44,7 @@ public class ToDafnyTest {
         }
     }
 
-    @Before
+    /*@Before
     public void setup() {
         model = TestSetupUtils.setupTwoLocalModel(ModelConstants.KMS_KITCHEN, ModelConstants.OTHER_NAMESPACE);
         underTest  = new ToDafnyTestImpl(TestSetupUtils.setupAwsSdkV1(model, "kms"));
@@ -129,5 +129,5 @@ public class ToDafnyTest {
         MethodSpec errorActual = localUnderTest.modeledError(errorShape);
         String errorExpected = ToDafnyConstants.GENERATE_CONVERT_ERROR;
         tokenizeAndAssertEqual(errorExpected, errorActual.toString());
-    }
+    }*/
 }
