@@ -38,7 +38,8 @@ public record DafnyNameResolver(
 //            Map.entry(ShapeType.BYTE, "int8"),
 //            Map.entry(ShapeType.SHORT, "int16"),
             Map.entry(ShapeType.INTEGER, "int32"),
-            Map.entry(ShapeType.LONG, "int64")
+            Map.entry(ShapeType.LONG, "int64"),
+            Map.entry(ShapeType.DOUBLE, "seq<uint8>")
     );
 
     public static String nameForService(final ServiceShape serviceShape) {
@@ -60,7 +61,7 @@ public record DafnyNameResolver(
             case BLOB, BOOLEAN, STRING,
                     // currently unused in model and unsupported in StandardLibrary.UInt
                     // BYTE, SHORT
-                    INTEGER, LONG,
+                    INTEGER, LONG, DOUBLE,
                     LIST, MAP -> dafnyModulePrefixForShapeId(shape) + shapeName;
             case STRUCTURE -> {
                 if (shape.hasTrait(ReferenceTrait.class)) {
