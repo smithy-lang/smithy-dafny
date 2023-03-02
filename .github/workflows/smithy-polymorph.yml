@@ -20,6 +20,11 @@ jobs:
         uses: dafny-lang/setup-dafny-action@v1
         with:
           dafny-version: "nightly-2022-12-02-edab6cc"
+      - name: Setup Maven Action
+        uses: s4u/setup-maven-action@v1.7.0
+        with:
+          java-version: 8
+          maven-version: 3.8.7
 
       # Java DafnyRuntime is not published to maven,
       # so manually download a nightly build for 3.10.0 and grab it from there.
