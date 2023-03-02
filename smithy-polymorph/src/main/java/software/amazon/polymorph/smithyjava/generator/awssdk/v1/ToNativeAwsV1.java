@@ -129,7 +129,7 @@ public class ToNativeAwsV1 extends ToNative {
                 .orElseThrow(() -> new IllegalStateException("Cannot find shape " + shapeId));
         return switch (shape.getType()) {
             // For the AWS SDK for Java V1, we do not generate converters for simple shapes
-            case BLOB, BOOLEAN, TIMESTAMP, BYTE, SHORT,
+            case BLOB, BOOLEAN, TIMESTAMP, BYTE, SHORT, DOUBLE,
                     INTEGER, LONG, BIG_DECIMAL, BIG_INTEGER, MEMBER -> null;
             case STRING -> generateConvertString(shapeId); // STRING handles enums
             case LIST -> modeledList(shape.asListShape().get());

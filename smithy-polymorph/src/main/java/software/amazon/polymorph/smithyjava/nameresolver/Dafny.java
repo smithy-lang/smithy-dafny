@@ -167,6 +167,7 @@ public class Dafny extends NameResolver {
             case SHORT -> TypeName.SHORT.box();
             case INTEGER -> TypeName.INT.box();
             case LONG -> TypeName.LONG.box();
+            case DOUBLE -> Dafny.typeForDouble();
             case BIG_DECIMAL -> ClassName.get(BigDecimal.class);
             case BIG_INTEGER -> ClassName.get(BigInteger.class);
             case LIST, SET, MAP -> typeForAggregateWithWildcard(shapeId);
@@ -184,6 +185,10 @@ public class Dafny extends NameResolver {
         return ParameterizedTypeName.get(
                 ClassName.get(DafnySequence.class),
                 WildcardTypeName.subtypeOf(TypeName.BYTE.box()));
+    }
+
+    static TypeName typeForDouble() {
+        return typeForBlob();
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")
