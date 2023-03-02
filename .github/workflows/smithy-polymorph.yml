@@ -20,6 +20,9 @@ jobs:
         uses: dafny-lang/setup-dafny-action@v1
         with:
           dafny-version: "nightly-2022-12-02-edab6cc"
+
+      # TODO: This has been added has a workaround for https://issues.apache.org/jira/browse/MNG-7679
+      # Remove this when the latest version has been patched
       - name: Setup Maven Action
         uses: s4u/setup-maven-action@v1.7.0
         with:

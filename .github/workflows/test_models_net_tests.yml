@@ -68,6 +68,8 @@ jobs:
         # https://github.com/actions/setup-dotnet/blob/main/.github/csc.json
         run: echo "::remove-matcher owner=csc::"
 
+      # TODO: This has been added has a workaround for https://issues.apache.org/jira/browse/MNG-7679
+      # Remove this when the latest version has been patched
       - name: Setup Maven Action
         uses: s4u/setup-maven-action@v1.7.0
         with:
