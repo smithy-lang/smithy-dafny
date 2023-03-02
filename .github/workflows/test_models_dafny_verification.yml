@@ -46,6 +46,14 @@ jobs:
         with:
           dafny-version: "3.10.0"
 
+      # TODO: This has been added has a workaround for https://issues.apache.org/jira/browse/MNG-7679
+      # Remove this when the latest version has been patched
+      - name: Setup Maven Action
+        uses: s4u/setup-maven-action@v1.7.0
+        with:
+          java-version: 8
+          maven-version: 3.8.7
+
       # Java DafnyRuntime is not published to maven,
       # so manually download a nightly build for 3.10.0 and grab it from there.
       - name: Locally Cache Java DafnyRuntime
