@@ -386,7 +386,7 @@ public class DotNetNameResolver {
                     () -> String.format("No native type for prelude shape %s", shapeId));
         }
 
-        if (!AwsSdkNameResolverHelpers.isAwsSdkServiceNamespace(shapeId)) {
+        if (!AwsSdkNameResolverHelpers.isInAwsSdkNamespace(shapeId)) {
             // The shape is not in an AWS Service,
             // so use the base type switch
             return baseTypeSwitch(shape);

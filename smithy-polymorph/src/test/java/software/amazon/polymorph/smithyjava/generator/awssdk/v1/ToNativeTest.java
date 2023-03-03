@@ -90,7 +90,7 @@ public class ToNativeTest {
         }
     }
 
-    /*@Before
+    @Before
     public void setup() {
         model = TestSetupUtils.setupTwoLocalModel(ModelConstants.KMS_KITCHEN, ModelConstants.OTHER_NAMESPACE);
         underTest  = new ToNativeAwsV1(TestSetupUtils.setupAwsSdkV1(model, "kms"));
@@ -117,7 +117,7 @@ public class ToNativeTest {
     }
 
     @Test
-    public void memberConversionMethodReference() {
+    public void conversionMethodReference() {
         ShapeId structureId = ShapeId.fromParts("com.amazonaws.kms", "Kitchen");
         StructureShape structureShape = model.expectShape(structureId, StructureShape.class);
         // If the target is simple, use SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE
@@ -253,5 +253,5 @@ public class ToNativeTest {
         assertEquals(expectedPath, actualPath);
         final String actualSource = actual.get(actualPath).toString();
         tokenizeAndAssertEqual(ToNativeConstants.KMS_A_STRING_OPERATION_JAVA_FILE, actualSource);
-    }*/
+    }
 }

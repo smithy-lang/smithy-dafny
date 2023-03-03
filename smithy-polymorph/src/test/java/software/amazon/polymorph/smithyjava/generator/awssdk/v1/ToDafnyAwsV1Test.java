@@ -24,7 +24,7 @@ public class ToDafnyAwsV1Test {
     protected ToDafnyAwsV1 underTest;
     protected Model model;
 
-   /* @Before
+    @Before
     public void setup() {
         model = TestSetupUtils.setupTwoLocalModel(ModelConstants.KMS_KITCHEN, ModelConstants.OTHER_NAMESPACE);
         underTest  = new ToDafnyAwsV1(TestSetupUtils.setupAwsSdkV1(model, "kms"));
@@ -95,5 +95,5 @@ public class ToDafnyAwsV1Test {
         assertEquals(expectedPath, actualPath);
         final String actualSource = actual.get(actualPath).toString();
         tokenizeAndAssertEqual(ToDafnyAwsV1Constants.KMS_A_STRING_OPERATION_JAVA_FILE, actualSource);
-    }*/
+    }
 }

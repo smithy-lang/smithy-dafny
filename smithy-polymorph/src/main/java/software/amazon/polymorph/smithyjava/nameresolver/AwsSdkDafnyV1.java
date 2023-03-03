@@ -2,9 +2,9 @@ package software.amazon.polymorph.smithyjava.nameresolver;
 
 import com.squareup.javapoet.ClassName;
 
+import software.amazon.polymorph.smithyjava.generator.CodegenSubject;
 import software.amazon.polymorph.utils.AwsSdkNameResolverHelpers;
 
-import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.ResourceShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
@@ -17,7 +17,7 @@ import static software.amazon.polymorph.utils.DafnyNameResolverHelpers.dafnyComp
 public class AwsSdkDafnyV1 extends Dafny {
 
     public AwsSdkDafnyV1(ServiceShape serviceShape, Model model) {
-        super(packageNameForServiceShape(serviceShape), model, serviceShape);
+        super(packageNameForServiceShape(serviceShape), model, serviceShape, CodegenSubject.AwsSdkVersion.V1);
     }
 
     @Override

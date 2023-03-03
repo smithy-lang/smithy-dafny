@@ -14,8 +14,9 @@ import javax.lang.model.element.Modifier;
 import software.amazon.polymorph.smithyjava.BuilderSpecs;
 import software.amazon.polymorph.smithyjava.MethodReference;
 import software.amazon.polymorph.smithyjava.NamespaceHelper;
-import software.amazon.polymorph.smithyjava.generator.awssdk.ToDafnyAwsV1;
-import software.amazon.polymorph.smithyjava.generator.awssdk.ToNativeAwsV1;
+import software.amazon.polymorph.smithyjava.generator.awssdk.v1.ToDafnyAwsV1;
+import software.amazon.polymorph.smithyjava.generator.awssdk.v1.ToNativeAwsV1;
+import software.amazon.polymorph.smithyjava.generator.awssdk.v2.ToNativeAwsV2;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.polymorph.utils.AwsSdkNameResolverHelpers;
 import software.amazon.polymorph.utils.ModelUtils;
@@ -312,7 +313,7 @@ public abstract class ToNative extends Generator {
         if (AwsSdkNameResolverHelpers.isInAwsSdkNamespace(targetId)) {
             return switch (subject.sdkVersion) {
                 case V1 -> new MethodReference(ToNativeAwsV1.className(targetId), methodName);
-                case V2 -> throw new IllegalArgumentException("Only AWS SDK V1 is currently supported");
+                case V2 -> new MethodReference(ToNativeAwsV2.className(targetId), methodName);
             };
         }
         // Otherwise, this target must be in another namespace,

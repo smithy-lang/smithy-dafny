@@ -86,14 +86,14 @@ public class Native extends NameResolver{
             final String packageName,
             final ServiceShape serviceShape,
             final Model model,
-            final String modelPackageName
-    ) {
+            final String modelPackageName,
+            AwsSdkVersion awsSdkVersion) {
         super(
                 packageName,
                 serviceShape,
                 model,
-                modelPackageName
-        );
+                modelPackageName,
+                awsSdkVersion);
     }
 
     public static String aggregateSizeMethod(ShapeType shapeType) {
@@ -175,6 +175,12 @@ public class Native extends NameResolver{
 
     public ClassName classForStringOrEnum(final StringShape shape) {
         if (shape.hasTrait(EnumTrait.class)) {
+            if (isInAwsSdkNamespace(shape.getId())) {
+                return switch (awsSdkVersion) {
+                    case V2 -> AwsSdkNativeV2.classNameForAwsSdkShape(shape);
+                    case V1 -> AwsSdkNativeV1.classNameForAwsSdkShape(shape);
+                };
+            }
             return classForEnum(shape);
         }
         return classForString();
@@ -231,6 +237,12 @@ public class Native extends NameResolver{
             //noinspection OptionalGetWithoutIsPresent
             return classNameForResource(rShape.asResourceShape().get());
         }
+        if (isInAwsSdkNamespace(shape.getId())) {
+            return switch (awsSdkVersion) {
+                case V2 -> AwsSdkNativeV2.classNameForAwsSdkShape(shape);
+                case V1 -> AwsSdkNativeV1.classNameForAwsSdkShape(shape);
+            };
+        }
         if (isInServiceNameSpace(shape.getId())) {
             return ClassName.get(modelPackage, shape.getId().getName());
         }
@@ -244,7 +256,7 @@ public class Native extends NameResolver{
     }
 
     public ClassName classNameForService(ServiceShape shape) {
-        return classNameForInterfaceOrLocalService(shape, AwsSdkVersion.V1);
+        return classNameForInterfaceOrLocalService(shape, this.awsSdkVersion);
     }
 
     public static ClassName classNameForResourceInterface(ResourceShape shape) {
@@ -256,16 +268,8 @@ public class Native extends NameResolver{
 
     public static ClassName classNameForInterfaceOrLocalService(
             Shape shape, AwsSdkVersion sdkVersion) {
-        // if shape is an AWS Service/Resource, return Dafny Types Interface
         if (isInAwsSdkNamespace(shape.toShapeId())) {
-            if (shape.isServiceShape()) {
-                //noinspection OptionalGetWithoutIsPresent
-                return AwsSdkNativeV1.classNameForServiceClient(shape.asServiceShape().get());
-            }
-            if (shape.isResourceShape()) {
-                //noinspection OptionalGetWithoutIsPresent
-                return Dafny.interfaceForResource(shape.asResourceShape().get());
-            }
+            return classNameForAwsSdk(shape, sdkVersion);
         }
         // if operation takes a non-AWS Service/Resource, return Native Interface Or Local Service
         if (shape.isResourceShape()) {
@@ -289,21 +293,17 @@ public class Native extends NameResolver{
     }
 
     public static ClassName classNameForAwsSdk(Shape shape, AwsSdkVersion sdkVersion) {
-        return switch (sdkVersion) {
-            case V1 -> classNameForAwsSdkV1(shape);
-            case V2 -> throw new IllegalArgumentException("Only AWS SDK V1 is currently supported");
-        };
-    }
-
-    @SuppressWarnings("OptionalGetWithoutIsPresent")
-    static ClassName classNameForAwsSdkV1(Shape shape) {
-        if (shape.getType() == ShapeType.SERVICE) {
-            return AwsSdkNativeV1.classNameForServiceClient(
-                    shape.asServiceShape().get());
-        } else {
+        if (shape.getType() != ShapeType.SERVICE) {
             throw new RuntimeException(
-                    "Polymorph only knows Service clients for AWS SDK V1 shapes.");
+                    "Polymorph only knows the class Name of Service clients. " +
+                            "Would a TypeName suffice? ShapeId: " + shape.toShapeId());
         }
+        @SuppressWarnings("OptionalGetWithoutIsPresent")
+        ServiceShape service = shape.asServiceShape().get();
+        return switch (sdkVersion) {
+            case V1 -> AwsSdkNativeV1.classNameForServiceClient(service);
+            case V2 -> AwsSdkNativeV2.classNameForServiceClient(service);
+        };
     }
 
     public ClassName classNameForResource(ResourceShape shape) {

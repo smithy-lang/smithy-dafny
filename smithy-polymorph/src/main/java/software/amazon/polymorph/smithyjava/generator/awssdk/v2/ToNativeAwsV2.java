@@ -8,7 +8,6 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -22,11 +21,15 @@ import javax.lang.model.element.Modifier;
 import software.amazon.polymorph.smithyjava.MethodReference;
 import software.amazon.polymorph.smithyjava.generator.ToNative;
 import software.amazon.polymorph.smithyjava.nameresolver.AwsSdkDafnyV2;
+import software.amazon.polymorph.smithyjava.nameresolver.AwsSdkNativeV2;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
+import software.amazon.polymorph.utils.AwsSdkNameResolverHelpers;
+import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 import software.amazon.polymorph.utils.ModelUtils;
 
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
+import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.ShapeType;
@@ -73,6 +76,15 @@ public class ToNativeAwsV2 extends ToNative {
     // See code comment on ../library/ModelCodegen for details.
     private final JavaAwsSdkV2 subject;
 
+    public static ClassName className(ShapeId shapeId) {
+        if (!AwsSdkNameResolverHelpers.isInAwsSdkNamespace(shapeId)) {
+            throw new IllegalArgumentException("ShapeId MUST BE in an AWS SDK Namespace");
+        }
+        return ClassName.get(
+                DafnyNameResolverHelpers.packageNameForNamespace(shapeId.getNamespace()),
+                TO_NATIVE);
+    }
+
     protected static Map<ShapeType, MethodReference> V2_CONVERSION_METHOD_FROM_SHAPE_TYPE;
 
     static {
@@ -85,7 +97,7 @@ public class ToNativeAwsV2 extends ToNative {
     }
 
     public ToNativeAwsV2(JavaAwsSdkV2 awsSdk) {
-        super(awsSdk, ClassName.get(awsSdk.packageName, TO_NATIVE));
+        super(awsSdk, className(awsSdk.serviceShape.toShapeId()));
         this.subject = awsSdk;
     }
 
@@ -126,6 +138,23 @@ public class ToNativeAwsV2 extends ToNative {
                 .addModifiers(Modifier.PUBLIC)
                 .addMethods(convertRelevant)
                 .addMethods(convertServiceErrors)
+                .addMethod(modeledService(subject.serviceShape))
+                .build();
+    }
+
+    MethodSpec modeledService(ServiceShape shape) {
+        //  public static KmsClient KeyManagementService(IKeyManagementServiceClient dafnyValue) {
+        //    return ((Shim) dafnyValue).impl();
+        //  }
+        String methodName = capitalize(shape.toShapeId().getName());
+        ClassName nativeClass = AwsSdkNativeV2.classNameForServiceClient(shape);
+        ClassName dafnyClass = AwsSdkDafnyV2.classNameForAwsService(shape);
+        ClassName shim = ShimV2.className(shape);
+        return MethodSpec.methodBuilder(methodName)
+                .addModifiers(PUBLIC_STATIC)
+                .addParameter(dafnyClass, VAR_INPUT)
+                .returns(nativeClass)
+                .addStatement("return (($T) $L).impl()", shim, VAR_INPUT)
                 .build();
     }
 
@@ -241,7 +270,7 @@ public class ToNativeAwsV2 extends ToNative {
             return CodeBlock.of("$L.$L($L((byte[]) ($L.$L.toRawArray())))",
                 VAR_BUILDER,
                 setMemberField(member),
-                memberConversionMethodReference(member).asNormalReference(),
+                conversionMethodReference(member).asNormalReference(),
                 VAR_INPUT,
                 AwsSdkDafnyV2.getV2MemberFieldValue(member));
         }
@@ -249,18 +278,17 @@ public class ToNativeAwsV2 extends ToNative {
         return CodeBlock.of("$L.$L($L($L.$L))",
             VAR_BUILDER,
                 setMemberField(member),
-                memberConversionMethodReference(member).asNormalReference(),
+                conversionMethodReference(member).asNormalReference(),
                 VAR_INPUT,
                 AwsSdkDafnyV2.getV2MemberFieldValue(member));
     }
 
-    @Override
-    protected MethodReference memberConversionMethodReference(MemberShape memberShape) {
+    protected MethodReference conversionMethodReference(MemberShape memberShape) {
         Shape targetShape = subject.model.expectShape(memberShape.getTarget());
         if (V2_CONVERSION_METHOD_FROM_SHAPE_TYPE.containsKey(targetShape.getType())) {
             return V2_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(targetShape.getType());
         }
-        return super.memberConversionMethodReference(memberShape);
+        return super.conversionMethodReference(targetShape);
     }
 
     /** @return CodeBlock of Method to set a member field. */

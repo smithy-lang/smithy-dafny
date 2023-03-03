@@ -54,7 +54,8 @@ public class ToDafnyAwsV2Test {
         tokenizeAndAssertEqual(ToDafnyAwsV2Constants.GENERATE_CONVERT_LIST, actualListEnum);
         // case LIST of Structures from other AWS SDK namespace
         ShapeId listStructureId = ShapeId.fromParts("com.amazonaws.kms", "OtherNamespaces");
-        tokenizeAndAssertEqual(ToDafnyAwsV2Constants.GENERATE_CONVERT_LIST_STRUCTURES, underTest.generateConvert(listStructureId).toString());
+        String actualListOther = underTest.generateConvert(listStructureId).toString();
+        tokenizeAndAssertEqual(ToDafnyAwsV2Constants.GENERATE_CONVERT_LIST_STRUCTURES, actualListOther);
         // case MAP
         ShapeId mapId = ShapeId.fromParts("com.amazonaws.kms", "EncryptionContextType");
         tokenizeAndAssertEqual(ToDafnyAwsV2Constants.GENERATE_CONVERT_MAP_STRING, underTest.generateConvert(mapId).toString());

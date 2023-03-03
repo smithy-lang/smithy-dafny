@@ -2,9 +2,18 @@ package software.amazon.polymorph.smithyjava.generator.library;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
+import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
+import com.squareup.javapoet.TypeSpec;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import javax.lang.model.element.Modifier;
+
+import software.amazon.polymorph.smithyjava.BuilderSpecs;
 import software.amazon.polymorph.smithyjava.MethodReference;
 import software.amazon.polymorph.smithyjava.generator.CodegenSubject;
 import software.amazon.polymorph.smithyjava.generator.Generator;
@@ -46,37 +55,7 @@ public abstract class ShimLibrary extends Generator {
         this.toNativeClassName = ToNativeLibrary.className(javaLibrary);
     }
 
-    protected abstract List<OperationShape> getOperationsForTarget();
-
-    protected abstract MethodSpec impl();
-
-    TypeSpec shim() {
-        List<FieldSpec> shimArgs = List.of(getArg());
-        BuilderSpecs builderSpecs = new BuilderSpecs(
-                thisClassName, null, shimArgs, Collections.emptyList());
-        TypeSpec.Builder spec = TypeSpec
-                .classBuilder(thisClassName)
-                .addModifiers(Modifier.PUBLIC)
-                .addField(getField())
-                .addType(builderSpecs.builderInterface())
-                .addType(builderSpecs.builderImpl(
-                        false,
-                        null,
-                        // TODO: Handle Resources (serviceBuilderImplBuildMethod assumes this is a service)
-                        serviceBuilderImplBuildMethod()
-                ))
-                // TODO: Handle Resources (serviceConstructor assumes this is a service)
-                .addMethod(serviceConstructor(builderSpecs))
-                .addMethod(builderSpecs.builderMethod())
-                .addMethod(impl());
-        spec.addMethods(getOperationsForTarget()
-                .stream().sequential().map(this::operation).collect(Collectors.toList()));
-        return spec.build();
-    }
-
-    protected abstract FieldSpec getField();
-
-    protected JavaLibrary.MethodSignature operationMethodSignature(OperationShape operationShape) {
+    protected JavaLibrary.MethodSignature operationMethodSignature(OperationShape shape) {
         final ResolvedShapeId inputResolved = subject.resolveShape(
                 shape.getInputShape());
         final ResolvedShapeId outputResolved = subject.resolveShape(
@@ -105,7 +84,7 @@ public abstract class ShimLibrary extends Generator {
             // If target is a Service or Resource,
             // the output type should be an interface OR LocalService.
             return Native.classNameForInterfaceOrLocalService(
-                    subject.model.expectShape(resolvedShape.resolvedId()), CodegenSubject.AwsSdkVersion.V1);
+                    subject.model.expectShape(resolvedShape.resolvedId()), subject.sdkVersion);
         }
         return subject.nativeNameResolver.typeForShape(resolvedShape.resolvedId());
     }
@@ -179,16 +158,6 @@ public abstract class ShimLibrary extends Generator {
                 toNativeMethod.asNormalReference(),
                 RESULT_VAR);
         return method.build();
-    }
-
-    MethodSpec impl() {
-        return MethodSpec
-            .methodBuilder("impl")
-            .addModifiers(Modifier.PROTECTED)
-            .returns(subject.dafnyNameResolver.typeForShape(
-                    targetShape.toShapeId()))
-            .addStatement("return this.$L", INTERFACE_FIELD)
-            .build();
     }
 
     // If it is known the Shape cannot have a positional trait,

@@ -18,7 +18,9 @@ import javax.lang.model.element.Modifier;
 
 import software.amazon.polymorph.smithyjava.generator.Generator;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
+import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 import software.amazon.smithy.model.shapes.OperationShape;
+import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.utils.StringUtils;
 
@@ -32,6 +34,7 @@ import static software.amazon.polymorph.smithyjava.nameresolver.Constants.SMITHY
  * exposing an AWS Service's operations to Dafny Generated Java.
  */
 public class ShimV2 extends Generator {
+    public static final String SHIM = "Shim";
     // Hack to override CodegenSubject
     // See code comment on ../library/ModelCodegen for details.
     private final JavaAwsSdkV2 subject;
@@ -39,6 +42,12 @@ public class ShimV2 extends Generator {
     public ShimV2(JavaAwsSdkV2 awsSdk) {
         super(awsSdk);
         this.subject = awsSdk;
+    }
+
+    public static ClassName className(ServiceShape shape) {
+        return ClassName.get(
+                DafnyNameResolverHelpers.packageNameForNamespace(
+                        shape.toShapeId().getNamespace()), SHIM);
     }
 
     @Override

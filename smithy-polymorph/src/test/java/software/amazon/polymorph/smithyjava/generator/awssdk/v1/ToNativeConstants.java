@@ -79,46 +79,42 @@ public class ToNativeConstants {
             """.formatted(INIT_TEMP_ARRAY, SET_WITH_CONVERSION_CALL_AND_TO_ARRAY);
     static String KMS_A_STRING_OPERATION_JAVA_FILE = """
             package Dafny.Com.Amazonaws.Kms;
-            
+                        
             import Dafny.Com.Amazonaws.Kms.Types.Error_DependencyTimeoutException;
-            import com.amazonaws.services.kms.model.DependencyTimeoutException;
             import Dafny.Com.Amazonaws.Kms.Types.IKeyManagementServiceClient;
             import com.amazonaws.services.kms.AWSKMS;
+            import com.amazonaws.services.kms.model.DependencyTimeoutException;
             import com.amazonaws.services.kms.model.DoSomethingRequest;
             import com.amazonaws.services.kms.model.DoSomethingResponse;
             import com.amazonaws.services.kms.model.DoSomethingResult;
-            
+                        
             public class ToNative {
-              public static DoSomethingResponse DoSomethingResponse(
-                  DoSomethingResult nativeValue
-              ) {
+              public static DoSomethingResponse DoSomethingResponse(DoSomethingResult nativeValue) {
                 DoSomethingResponse.Builder nativeBuilder = DoSomethingResponse.builder();
                 if (dafnyValue.dtor_message().is_Some()) {
-                  converted.withMessage(%s(dafnyValue.dtor_message().dtor_value()));
+                  converted.withMessage(software.amazon.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_message().dtor_value()));
                 }
                 return nativeBuilder.build();
               }
+                        
               public static DoSomethingRequest DoSomethingRequest(
-                  Dafny.Com.Amazonaws.Kms.Types.DoSomethingRequest dafnyValue
-              ) {
+                  Dafny.Com.Amazonaws.Kms.Types.DoSomethingRequest dafnyValue) {
                 DoSomethingRequest converted = new DoSomethingRequest();
-                converted.withMessage(%s(dafnyValue.dtor_message()));
+                converted.withMessage(software.amazon.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_message()));
                 return converted;
               }
-              
-              public static DependencyTimeoutException Error(
-                  Error_DependencyTimeoutException dafnyValue
-              ) {
+                        
+              public static DependencyTimeoutException Error(Error_DependencyTimeoutException dafnyValue) {
                 DependencyTimeoutException converted = new DependencyTimeoutException();
                 if (dafnyValue.dtor_message().is_Some()) {
-                  converted.withMessage(%s(dafnyValue.dtor_message().dtor_value()));
+                  converted.withMessage(software.amazon.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_message().dtor_value()));
                 }
                 return converted;
               }
-            
+              
               public static AWSKMS KeyManagementService(IKeyManagementServiceClient dafnyValue) {
                 return ((Shim) dafnyValue).impl();
               }
             }
-            """.formatted(STRING_CONVERSION, STRING_CONVERSION, STRING_CONVERSION);
+            """;
 }

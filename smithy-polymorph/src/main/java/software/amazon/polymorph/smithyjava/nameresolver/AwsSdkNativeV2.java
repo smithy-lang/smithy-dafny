@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import software.amazon.polymorph.smithyjava.generator.CodegenSubject;
 import software.amazon.polymorph.utils.AwsSdkNameResolverHelpers;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.MemberShape;
@@ -44,8 +45,8 @@ public class AwsSdkNativeV2 extends Native {
         super(packageNameForAwsSdkV2Shape(serviceShape),
                 serviceShape,
                 model,
-                defaultModelPackageName(packageNameForAwsSdkV2Shape(serviceShape))
-        );
+                defaultModelPackageName(packageNameForAwsSdkV2Shape(serviceShape)),
+                CodegenSubject.AwsSdkVersion.V2);
         checkForAwsServiceConstants();
         awsSDKNaming = new DefaultNamingStrategy(new ServiceModel(), null);
     }
@@ -80,6 +81,11 @@ public class AwsSdkNativeV2 extends Native {
     /** Validates that Polymorph knows non-smithy modeled constants for an AWS Service */
     private void checkForAwsServiceConstants() {
         String namespace = serviceShape.getId().getNamespace();
+        checkForAwsServiceConstants(namespace);
+    }
+
+    /** Validates that Polymorph knows non-smithy modeled constants for an AWS Service */
+    private static void checkForAwsServiceConstants(String namespace) {
         boolean knowBaseException = AWS_SERVICE_NAMESPACE_TO_BASE_EXCEPTION.containsKey(namespace);
         if (!knowBaseException) {
             throw new IllegalArgumentException(
@@ -101,6 +107,15 @@ public class AwsSdkNativeV2 extends Native {
                     "ShapeId %s is not in this namespace %s".formatted(
                             shapeId, serviceShape.getId().getNamespace()));
         }
+    }
+
+    public static ClassName classNameForServiceClient(ServiceShape shape) {
+        String awsServiceSmithyNamespace = shape.toShapeId().getNamespace();
+        checkForAwsServiceConstants(awsServiceSmithyNamespace);
+        return ClassName.get(
+                packageNameForAwsSdkV2Shape(shape),
+                AWS_SERVICE_NAMESPACE_TO_CLIENT_INTERFACE.get(awsServiceSmithyNamespace)
+        );
     }
 
     /**
@@ -214,6 +229,61 @@ public class AwsSdkNativeV2 extends Native {
         return CodeBlock.of("$L", uncapitalize(shape.getMemberName()));
     }
 
+    public static ClassName classNameForAwsSdkShape(final Shape shape) {
+        // Assume that the shape is in the model package
+        ClassName smithyName = ClassName.get(
+                defaultModelPackageName(packageNameForAwsSdkV2Shape(shape)),
+                StringUtils.capitalize(shape.getId().getName()));
+
+        if (smithyName.simpleName().endsWith("Input")) {
+            return ClassName.get(smithyName.packageName(),
+                    smithyName.simpleName()
+                            .substring(
+                                    0,
+                                    smithyName.simpleName().lastIndexOf("Input"))
+                            + "Request"
+            );
+        }
+
+        if (smithyName.simpleName().endsWith("Output")) {
+            return ClassName.get(smithyName.packageName(),
+                    smithyName.simpleName()
+                            .substring(
+                                    0,
+                                    smithyName.simpleName().lastIndexOf("Output"))
+                            + "Response"
+            );
+        }
+
+        if (shape.hasTrait(ErrorTrait.class)) {
+            if (smithyName.simpleName().contains("KMS")) {
+                return ClassName.get(smithyName.packageName(),
+                        smithyName.simpleName()
+                                .replace("KMS", "Kms")
+                );
+            }
+            if (smithyName.simpleName().contains("CMK")) {
+                return ClassName.get(smithyName.packageName(),
+                        smithyName.simpleName()
+                                .replace("CMK", "CmK")
+                );
+            }
+            if (smithyName.simpleName().endsWith("InternalServerError")) {
+                return ClassName.get(smithyName.packageName(),
+                        smithyName.simpleName()
+                                .replace("InternalServerError", "InternalServerErrorException")
+                );
+            }
+            if (smithyName.simpleName().endsWith("RequestLimitExceeded")) {
+                return ClassName.get(smithyName.packageName(),
+                        smithyName.simpleName()
+                                .replace("RequestLimitExceeded", "RequestLimitExceededException")
+                );
+            }
+        }
+        return smithyName;
+    }
+
     @Override
     public ClassName classNameForStructure(final Shape shape) {
         if (!(shape.isUnionShape() || shape.isStructureShape())) {
@@ -226,58 +296,8 @@ public class AwsSdkNativeV2 extends Native {
                     "Trait definition structures have no corresponding generated type");
         }
         // check if this Shape is in AWS SDK for Java V2 package
-        if (AwsSdkNameResolverHelpers.isAwsSdkServiceNamespace(shape.getId())) {
-            // Assume that the shape is in the model package
-            ClassName smithyName = ClassName.get(
-                defaultModelPackageName(packageNameForAwsSdkV2Shape(shape)),
-                StringUtils.capitalize(shape.getId().getName()));
-
-            if (smithyName.simpleName().endsWith("Input")) {
-                return ClassName.get(smithyName.packageName(),
-                    smithyName.simpleName()
-                        .substring(
-                            0,
-                            smithyName.simpleName().lastIndexOf("Input"))
-                        + "Request"
-                );
-            }
-            if (smithyName.simpleName().endsWith("Output")) {
-                return ClassName.get(smithyName.packageName(),
-                    smithyName.simpleName()
-                        .substring(
-                            0,
-                            smithyName.simpleName().lastIndexOf("Output"))
-                        + "Response"
-                );
-            }
-
-            if (shape.hasTrait(ErrorTrait.class)) {
-                if (smithyName.simpleName().contains("KMS")) {
-                    return ClassName.get(smithyName.packageName(),
-                        smithyName.simpleName()
-                            .replace("KMS", "Kms")
-                    );
-                }
-                if (smithyName.simpleName().contains("CMK")) {
-                    return ClassName.get(smithyName.packageName(),
-                        smithyName.simpleName()
-                            .replace("CMK", "CmK")
-                    );
-                }
-                if (smithyName.simpleName().endsWith("InternalServerError")) {
-                    return ClassName.get(smithyName.packageName(),
-                        smithyName.simpleName()
-                            .replace("InternalServerError", "InternalServerErrorException")
-                    );
-                }
-                if (smithyName.simpleName().endsWith("RequestLimitExceeded")) {
-                    return ClassName.get(smithyName.packageName(),
-                        smithyName.simpleName()
-                            .replace("RequestLimitExceeded", "RequestLimitExceededException")
-                    );
-                }
-                return smithyName;
-            }
+        if (AwsSdkNameResolverHelpers.isInAwsSdkNamespace(shape.getId())) {
+            AwsSdkNativeV2.classNameForAwsSdkShape(shape);
         }
         return super.classNameForStructure(shape);
     }
@@ -319,7 +339,7 @@ public class AwsSdkNativeV2 extends Native {
      * To be clear, a Base Exception is concrete.
      * But all of a service's other exceptions extend it.
      */
-    public TypeName baseErrorForService() {
+    public ClassName baseErrorForService() {
         return ClassName.get(
                 modelPackage,
                 AWS_SERVICE_NAMESPACE_TO_BASE_EXCEPTION.get(

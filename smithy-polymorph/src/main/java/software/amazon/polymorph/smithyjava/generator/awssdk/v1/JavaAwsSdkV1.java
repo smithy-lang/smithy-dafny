@@ -38,13 +38,13 @@ public class JavaAwsSdkV1 extends CodegenSubject {
     }
 
     public static JavaAwsSdkV1 createJavaAwsSdkV1(ServiceShape serviceShape, Model model) {
-        throw new UnsupportedOperationException("The AWS SDK for Java V1 support has not been tested since we implemented Double support");
+        /*throw new UnsupportedOperationException("The AWS SDK for Java V1 support has not been tested since we implemented Double support");*/
         // We need to keep the ball rolling, and I do not have time to refactor & test the AWS-SDK V1 code.
         // For now, I am just marking it as un-supported.
         // If/When we need it (Java Keyrings?), we can resurrect it
-        /*final AwsSdkDafnyV1 dafnyNameResolver = new AwsSdkDafnyV1(serviceShape, model);
+        final AwsSdkDafnyV1 dafnyNameResolver = new AwsSdkDafnyV1(serviceShape, model);
         final AwsSdkNativeV1 nativeNameResolver = new AwsSdkNativeV1(serviceShape, model);
-        return new JavaAwsSdkV1(serviceShape, model, dafnyNameResolver, nativeNameResolver);*/
+        return new JavaAwsSdkV1(serviceShape, model, dafnyNameResolver, nativeNameResolver);
     }
 
     public Map<Path, TokenTree> generate() {

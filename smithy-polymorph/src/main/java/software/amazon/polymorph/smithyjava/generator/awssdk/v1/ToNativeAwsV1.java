@@ -133,6 +133,7 @@ public class ToNativeAwsV1 extends ToNative {
                 .addMethods(convertOutputs)
                 .addMethods(convertAllRelevant)
                 .addMethods(convertServiceErrors)
+                .addMethod(modeledService(subject.serviceShape))
                 .build();
     }
 
@@ -150,6 +151,7 @@ public class ToNativeAwsV1 extends ToNative {
                 .returns(nativeClass)
                 .addStatement("return (($T) $L).impl()", shim, VAR_INPUT)
                 .build();
+    }
 
     @SuppressWarnings({"OptionalGetWithoutIsPresent"})
     MethodSpec generateConvert(ShapeId shapeId) {

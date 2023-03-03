@@ -95,18 +95,25 @@ public class CodegenCli {
         final List<String> messages = new ArrayList<>(3);
 
         if (cliArguments.outputJavaDir.isPresent()) {
+            final CodegenSubject.AwsSdkVersion awsSdkVersion;
+            try {
+                awsSdkVersion = cliArguments.javaAwsSdkVersion
+                        .map(String::trim).map(String::toUpperCase)
+                        .map(CodegenSubject.AwsSdkVersion::valueOf)
+                        .orElse(CodegenSubject.AwsSdkVersion.V2);
+            } catch (IllegalArgumentException ex) {
+                logger.error("Unsupported Java AWS SDK version: " + cliArguments.javaAwsSdkVersion.get().trim());
+                throw ex;
+            }
+
             final Path outputJavaDir = cliArguments.outputJavaDir.get();
             if (cliArguments.awsSdkStyle && cliArguments.javaAwsSdkVersion.isPresent()) {
-                if ("v1".equals(cliArguments.javaAwsSdkVersion.get().trim())) {
-                    messages.add(javaAwsSdkV1(outputJavaDir, serviceShape, model));
-                } else if ("v2".equals(cliArguments.javaAwsSdkVersion.get().trim())) {
-                    messages.add(javaAwsSdkV2(outputJavaDir, serviceShape, model));
-                } else {
-                    logger.error("Unsupported Java AWS SDK version:"
-                        + cliArguments.javaAwsSdkVersion.get().trim());
+                switch (awsSdkVersion) {
+                    case V1 -> messages.add(javaAwsSdkV1(outputJavaDir, serviceShape, model));
+                    case V2 -> messages.add(javaAwsSdkV2(outputJavaDir, serviceShape, model));
                 }
             } else {
-                messages.add(javaLocalService(outputJavaDir, serviceShape, model));
+                messages.add(javaLocalService(outputJavaDir, serviceShape, model, awsSdkVersion));
             }
         }
 
@@ -148,8 +155,11 @@ public class CodegenCli {
         messages.forEach(logger::info);
     }
 
-    private static String javaLocalService(Path outputJavaDir, ServiceShape serviceShape, Model model) {
-        final JavaLibrary javaLibrary = new JavaLibrary(model, serviceShape, CodegenSubject.AwsSdkVersion.V1);
+    private static String javaLocalService(Path outputJavaDir,
+                                           ServiceShape serviceShape,
+                                           Model model,
+                                           CodegenSubject.AwsSdkVersion awsSdkVersion) {
+        final JavaLibrary javaLibrary = new JavaLibrary(model, serviceShape, awsSdkVersion);
         writeTokenTreesIntoDir(javaLibrary.generate(), outputJavaDir);
         return "Java code generated in %s".formatted(outputJavaDir);
     }

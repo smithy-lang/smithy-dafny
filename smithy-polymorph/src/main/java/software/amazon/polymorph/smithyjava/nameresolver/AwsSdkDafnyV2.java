@@ -5,6 +5,8 @@ import com.squareup.javapoet.ClassName;
 
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.TypeName;
+
+import software.amazon.polymorph.smithyjava.generator.CodegenSubject;
 import software.amazon.polymorph.utils.AwsSdkNameResolverHelpers;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.MemberShape;
@@ -24,23 +26,27 @@ import static software.amazon.smithy.utils.StringUtils.uncapitalize;
 public class AwsSdkDafnyV2 extends Dafny {
 
     public AwsSdkDafnyV2(ServiceShape serviceShape, Model model) {
-        super(packageNameForServiceShape(serviceShape), model, serviceShape);
+        super(packageNameForServiceShape(serviceShape), model, serviceShape, CodegenSubject.AwsSdkVersion.V2);
     }
 
     @Override
     ClassName classNameForService(ServiceShape shape) {
-        if (AwsSdkNameResolverHelpers.isAwsSdkServiceNamespace(shape.getId())) {
-            return ClassName.get(
-                    modelPackageNameForNamespace(shape.getId().getNamespace()),
-                    dafnyCompilesExtra_(traitNameForServiceClient(shape))
-            );
+        if (AwsSdkNameResolverHelpers.isInAwsSdkNamespace(shape.getId())) {
+            return classNameForAwsService(shape);
         }
         return super.classNameForService(shape);
     }
 
+    public static ClassName classNameForAwsService(ServiceShape shape) {
+        return ClassName.get(
+                modelPackageNameForNamespace(shape.getId().getNamespace()),
+                dafnyCompilesExtra_(traitNameForServiceClient(shape))
+        );
+    }
+
     @Override
     ClassName classNameForResource(ResourceShape shape) {
-        if (AwsSdkNameResolverHelpers.isAwsSdkServiceNamespace(shape.getId())) {
+        if (AwsSdkNameResolverHelpers.isInAwsSdkNamespace(shape.getId())) {
             return ClassName.get(
                     modelPackageNameForNamespace(shape.getId().getNamespace()),
                     "I%s".formatted(StringUtils.capitalize(shape.getId().getName()))

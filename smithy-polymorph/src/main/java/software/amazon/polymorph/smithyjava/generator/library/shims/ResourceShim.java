@@ -14,7 +14,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import software.amazon.polymorph.smithyjava.generator.CodegenSubject;
+import software.amazon.polymorph.smithyjava.generator.CodegenSubject.AwsSdkVersion;
 import software.amazon.polymorph.smithyjava.generator.library.JavaLibrary;
 import software.amazon.polymorph.smithyjava.generator.library.JavaLibrary.MethodSignature;
 import software.amazon.polymorph.smithyjava.generator.library.ShimLibrary;
@@ -49,18 +49,18 @@ public class ResourceShim extends ShimLibrary {
         super(javaLibrary);
         this.targetShape = targetShape;
         this.thisClassName = subject.nativeNameResolver.classNameForResource(targetShape);
-        this.interfaceName = interfaceName(targetShape);
+        this.interfaceName = interfaceName(targetShape, subject.sdkVersion);
         this.extendable = targetShape.hasTrait(ExtendableTrait.class);
         dafnyType = Dafny.interfaceForResource(this.targetShape);
         argName = uncapitalize(dafnyType.simpleName());
     }
 
-    private static ClassName interfaceName(ResourceShape shape) {
-        return Native.classNameForInterfaceOrLocalService(shape, CodegenSubject.AwsSdkVersion.V1);
+    private static ClassName interfaceName(ResourceShape shape, AwsSdkVersion sdkVersion) {
+        return Native.classNameForInterfaceOrLocalService(shape, sdkVersion);
     }
 
-    public static TypeVariableName iExtendsInterface(ResourceShape shape) {
-        return TypeVariableName.get(TYPE_VAR, interfaceName(shape));
+    public static TypeVariableName iExtendsInterface(ResourceShape shape, AwsSdkVersion sdkVersion) {
+        return TypeVariableName.get(TYPE_VAR, interfaceName(shape, sdkVersion));
     }
 
     private TypeVariableName iExtendsInterface() {

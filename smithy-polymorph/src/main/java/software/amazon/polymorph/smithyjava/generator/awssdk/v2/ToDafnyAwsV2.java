@@ -24,13 +24,18 @@ import dafny.DafnySequence;
 
 import software.amazon.polymorph.smithyjava.MethodReference;
 import software.amazon.polymorph.smithyjava.generator.ToDafny;
+import software.amazon.polymorph.smithyjava.nameresolver.AwsSdkDafnyV2;
+import software.amazon.polymorph.smithyjava.nameresolver.AwsSdkNativeV2;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
+import software.amazon.polymorph.utils.AwsSdkNameResolverHelpers;
+import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 import software.amazon.polymorph.utils.ModelUtils;
 
 import software.amazon.smithy.model.shapes.ListShape;
 import software.amazon.smithy.model.shapes.MapShape;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
+import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.SetShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
@@ -71,12 +76,17 @@ public class ToDafnyAwsV2 extends ToDafny {
     // See code comment on ../library/ModelCodegen for details.
     final JavaAwsSdkV2 subject;
 
-    public ToDafnyAwsV2(JavaAwsSdkV2 awsSdk) {
-        super(
-                awsSdk,
-                //TODO: JavaAwsSdkV2 should really have a declared packageName, not rely on the name resolver
-                ClassName.get(awsSdk.dafnyNameResolver.packageName(), TO_DAFNY));
+    public static ClassName className(ShapeId shapeId) {
+        if (!AwsSdkNameResolverHelpers.isInAwsSdkNamespace(shapeId)) {
+            throw new IllegalArgumentException("ShapeId MUST BE in an AWS SDK Namespace");
+        }
+        return ClassName.get(
+                DafnyNameResolverHelpers.packageNameForNamespace(shapeId.getNamespace()),
+                TO_DAFNY);
+    }
 
+    public ToDafnyAwsV2(JavaAwsSdkV2 awsSdk) {
+        super(awsSdk, className(awsSdk.serviceShape.toShapeId()));
         this.subject = awsSdk;
     }
 
@@ -138,6 +148,23 @@ public class ToDafnyAwsV2 extends ToDafny {
                 .addMethods(convertEnumEnum)
                 .addMethods(convertEnumString)
                 .addMethod(generateConvertOpaqueError())
+                .addMethod(modeledService(subject.serviceShape))
+                .build();
+    }
+
+    MethodSpec modeledService(ServiceShape shape) {
+        //   public static IKeyManagementServiceClient KeyManagementService(KmsClient nativeValue) {
+        //     return new Shim(nativeValue, null);
+        //   }
+        String methodName = capitalize(shape.toShapeId().getName());
+        ClassName nativeClass = AwsSdkNativeV2.classNameForServiceClient(shape);
+        ClassName dafnyClass = AwsSdkDafnyV2.classNameForAwsService(shape);
+        ClassName shim = ShimV2.className(shape);
+        return MethodSpec.methodBuilder(methodName)
+                .addModifiers(PUBLIC_STATIC)
+                .addParameter(nativeClass, VAR_INPUT)
+                .returns(dafnyClass)
+                .addStatement("return new $T($L, null)", shim, VAR_INPUT)
                 .build();
     }
 
@@ -171,7 +198,7 @@ public class ToDafnyAwsV2 extends ToDafny {
 
     @Override
     protected CodeBlock memberConversion(MemberShape memberShape, CodeBlock inputVar) {
-        CodeBlock methodBlock = memberConversionMethodReference(memberShape).asNormalReference();
+        CodeBlock methodBlock = conversionMethodReference(subject.model.expectShape(memberShape.getTarget())).asNormalReference();
 
         return CodeBlock.of("$L($L)",
             methodBlock,
@@ -331,7 +358,7 @@ public class ToDafnyAwsV2 extends ToDafny {
     @Override
     protected MethodSpec modeledList(ListShape shape) {
         MemberShape memberShape = shape.getMember();
-        CodeBlock memberConverter = memberConversionMethodReference(memberShape).asFunctionalReference();
+        CodeBlock memberConverter = conversionMethodReference(subject.model.expectShape(memberShape.getTarget())).asFunctionalReference();
         CodeBlock genericCall = AGGREGATE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(shape.getType()).asNormalReference();
         CodeBlock getTypeDescriptor = subject.dafnyNameResolver.typeDescriptor(memberShape.getTarget());
 
@@ -384,7 +411,7 @@ public class ToDafnyAwsV2 extends ToDafny {
     @Override
     protected MethodSpec modeledSet(SetShape shape) {
         MemberShape memberShape = shape.getMember();
-        CodeBlock memberConverter = memberConversionMethodReference(memberShape).asFunctionalReference();
+        CodeBlock memberConverter = conversionMethodReference(subject.model.expectShape(memberShape.getTarget())).asFunctionalReference();
         CodeBlock genericCall = AGGREGATE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(shape.getType()).asNormalReference();
         ParameterSpec parameterSpec = ParameterSpec
                 .builder(subject.nativeNameResolver.typeForListSetOrMapNoEnum(shape.getId()), "nativeValue")
@@ -410,9 +437,9 @@ public class ToDafnyAwsV2 extends ToDafny {
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     protected MethodSpec modeledMap(MapShape shape) {
         MemberShape keyShape = shape.getKey().asMemberShape().get();
-        CodeBlock keyConverter = memberConversionMethodReference(keyShape).asFunctionalReference();
+        CodeBlock keyConverter = conversionMethodReference(subject.model.expectShape(keyShape.getTarget())).asFunctionalReference();
         MemberShape valueShape = shape.getValue().asMemberShape().get();
-        CodeBlock valueConverter = memberConversionMethodReference(valueShape).asFunctionalReference();
+        CodeBlock valueConverter = conversionMethodReference(subject.model.expectShape(valueShape.getTarget())).asFunctionalReference();
         CodeBlock genericCall = AGGREGATE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(shape.getType()).asNormalReference();
         ParameterSpec parameterSpec = ParameterSpec
                 .builder(subject.nativeNameResolver.typeForListSetOrMapNoEnum(shape.getId()), "nativeValue")

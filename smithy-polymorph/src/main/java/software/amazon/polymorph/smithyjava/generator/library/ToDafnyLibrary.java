@@ -223,7 +223,7 @@ public class ToDafnyLibrary extends ToDafny {
     /** For Library structure members, the getter is `un-capitalized member name`. */
     @Override
     protected CodeBlock getMember(CodeBlock variableName, MemberShape memberShape) {
-        return CodeBlock.of("$L.$L()", variableName, uncapitalize(memberShape.getMemberName()));
+        return CodeBlock.of("$L.$L()", variableName, memberShape.getMemberName());
     }
 
     // Reference & Positional often mask Service or Resource shapes

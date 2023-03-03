@@ -21,7 +21,8 @@ import org.slf4j.LoggerFactory;
 
 import software.amazon.polymorph.smithyjava.MethodReference;
 import software.amazon.polymorph.smithyjava.NamespaceHelper;
-import software.amazon.polymorph.smithyjava.generator.awssdk.ToDafnyAwsV1;
+import software.amazon.polymorph.smithyjava.generator.awssdk.v1.ToDafnyAwsV1;
+import software.amazon.polymorph.smithyjava.generator.awssdk.v2.ToDafnyAwsV2;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.polymorph.utils.AwsSdkNameResolverHelpers;
 import software.amazon.polymorph.utils.ModelUtils;
@@ -317,7 +318,7 @@ public abstract class ToDafny extends Generator {
     @SuppressWarnings({"DuplicatedCode"})
     protected MethodReference conversionMethodReference(Shape shape) {
         if (shape.isMemberShape()) {
-            throw new IllegalArgumentException("MemberShapes MUST BE de-referenced BEFORE calling ToDafny.conversionMethodReference.");
+            throw new IllegalArgumentException("MemberShapes MUST BE de-referenced BEFORE calling ToDafny.conversionMethodReference. ShapeId: %s".formatted(shape.toShapeId()));
         }
         // If the target is simple, use SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE
         if (ModelUtils.isSmithyApiOrSimpleShape(shape)) {
@@ -335,7 +336,7 @@ public abstract class ToDafny extends Generator {
         if (AwsSdkNameResolverHelpers.isInAwsSdkNamespace(targetId)) {
             return switch (subject.sdkVersion) {
                 case V1 -> new MethodReference(ToDafnyAwsV1.className(targetId), methodName);
-                case V2 -> throw new IllegalArgumentException("Only AWS SDK V1 is currently supported");
+                case V2 -> new MethodReference(ToDafnyAwsV2.className(targetId), methodName);
             };
         }
         // Otherwise, this target must be in another namespace,

@@ -14,7 +14,8 @@ import java.util.stream.Collectors;
 import software.amazon.polymorph.smithyjava.NamespaceHelper;
 import software.amazon.polymorph.smithyjava.generator.CodegenSubject;
 import software.amazon.polymorph.smithyjava.generator.Generator;
-import software.amazon.polymorph.smithyjava.generator.awssdk.ShimV1;
+import software.amazon.polymorph.smithyjava.generator.awssdk.v1.ShimV1;
+import software.amazon.polymorph.smithyjava.generator.awssdk.v2.ShimV2;
 import software.amazon.polymorph.smithyjava.generator.library.shims.ResourceShim;
 import software.amazon.polymorph.smithyjava.generator.library.shims.ServiceShim;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
@@ -56,7 +57,7 @@ public class JavaLibrary extends CodegenSubject {
     protected final ToNativeLibrary toNativeLibrary;
 
     public JavaLibrary(Model model, ServiceShape serviceShape, AwsSdkVersion sdkVersion) {
-        super(model, serviceShape, initDafny(model, serviceShape), initNative(model, serviceShape), sdkVersion);
+        super(model, serviceShape, initDafny(model, serviceShape, sdkVersion), initNative(model, serviceShape, sdkVersion), sdkVersion);
         packageName = NamespaceHelper.standardize(serviceShape.getId().getNamespace());
         modelPackageName = packageName + ".model";
         try {
@@ -71,14 +72,14 @@ public class JavaLibrary extends CodegenSubject {
         toNativeLibrary = new ToNativeLibrary(this);
     }
 
-    static Dafny initDafny(Model model, ServiceShape serviceShape) {
+    static Dafny initDafny(Model model, ServiceShape serviceShape, AwsSdkVersion awsSdkVersion) {
         String packageName = DafnyNameResolverHelpers.packageNameForNamespace(serviceShape.getId().getNamespace());
-        return new Dafny(packageName, model, serviceShape);
+        return new Dafny(packageName, model, serviceShape, awsSdkVersion);
     }
 
-    static Native initNative(Model model, ServiceShape serviceShape) {
+    static Native initNative(Model model, ServiceShape serviceShape, AwsSdkVersion awsSdkVersion) {
         String packageName = NamespaceHelper.standardize(serviceShape.getId().getNamespace());
-        return new Native(packageName, serviceShape, model, packageName + ".model");
+        return new Native(packageName, serviceShape, model, packageName + ".model", awsSdkVersion);
     }
 
     public static CodeBlock wrapAwsService(
@@ -88,15 +89,16 @@ public class JavaLibrary extends CodegenSubject {
         if (serviceShape.isEmpty()) {
             throw new IllegalArgumentException("Shape must be Service");
         }
-        if (sdkVersion.equals(AwsSdkVersion.V1)) {
-            // new Shim(nativeOutput, null)
-            return CodeBlock.of("new $T($L, $L)",
+        return switch (sdkVersion) {
+            case V1 -> CodeBlock.of("new $T($L, $L)",
                     ShimV1.className(serviceShape.get()),
                     nativeValue,
-                    regionVar
-            );
-        }
-        throw new IllegalArgumentException("Only V1 is currently supported");
+                    regionVar);
+            case V2 -> CodeBlock.of("new $T($L, $L)",
+                    ShimV2.className(serviceShape.get()),
+                    nativeValue,
+                    regionVar);
+        };
     }
 
     protected static CodeBlock castAndUnwrapAwsService(
@@ -106,14 +108,14 @@ public class JavaLibrary extends CodegenSubject {
         if (serviceShape.isEmpty()) {
             throw new IllegalArgumentException("Shape must be Service");
         }
-        if (sdkVersion.equals(AwsSdkVersion.V1)) {
-            // ((Shim) result.dtor_value()).impl()
-            return CodeBlock.of("(($T) $L).impl()",
+        return switch (sdkVersion) {
+            case V1 -> CodeBlock.of("(($T) $L).impl()",
                     ShimV1.className(serviceShape.get()),
-                    dafnyValue
-            );
-        }
-        throw new IllegalArgumentException("Only V1 is currently supported");
+                    dafnyValue);
+            case V2 -> CodeBlock.of("(($T) $L).impl()",
+                    ShimV2.className(serviceShape.get()),
+                    dafnyValue);
+        };
     }
 
     /**

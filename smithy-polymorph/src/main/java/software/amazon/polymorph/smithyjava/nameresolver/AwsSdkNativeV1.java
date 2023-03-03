@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import software.amazon.polymorph.smithyjava.generator.CodegenSubject;
 import software.amazon.polymorph.utils.AwsSdkNameResolverHelpers;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.ServiceShape;
@@ -32,7 +33,8 @@ public class AwsSdkNativeV1 extends Native {
         super(packageNameForAwsSdkV1Shape(serviceShape),
                 serviceShape,
                 model,
-                defaultModelPackageName(packageNameForAwsSdkV1Shape(serviceShape))
+                defaultModelPackageName(packageNameForAwsSdkV1Shape(serviceShape)),
+                CodegenSubject.AwsSdkVersion.V1
         );
         checkForAwsServiceConstants();
     }
@@ -136,6 +138,12 @@ public class AwsSdkNativeV1 extends Native {
         };
     }
 
+    public static ClassName classNameForAwsSdkShape(final Shape shape) {
+        return ClassName.get(
+                defaultModelPackageName(packageNameForAwsSdkV1Shape(shape)),
+                StringUtils.capitalize(shape.getId().getName()));
+    }
+
     @Override
     public ClassName classNameForStructure(final Shape shape) {
         if (!(shape.isUnionShape() || shape.isStructureShape())) {
@@ -149,10 +157,7 @@ public class AwsSdkNativeV1 extends Native {
         }
         // check if this Shape is in AWS SDK for Java V1 package
         if (isInAwsSdkNamespace(shape.getId())) {
-            // Assume that the shape is in the model package
-            return ClassName.get(
-                    defaultModelPackageName(packageNameForAwsSdkV1Shape(shape)),
-                    StringUtils.capitalize(shape.getId().getName()));
+            AwsSdkNativeV1.classNameForAwsSdkShape(shape);
         }
         return super.classNameForStructure(shape);
     }
