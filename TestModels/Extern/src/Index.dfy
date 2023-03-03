@@ -1,0 +1,29 @@
+include "SimpleExternImpl.dfy"
+
+module {:extern "Dafny.Simple.Extern" } SimpleExtern refines AbstractSimpleExternService {
+    import Operations = SimpleExternImpl
+
+    function method DefaultSimpleExternConfig(): SimpleExternConfig {
+        SimpleExternConfig
+    }
+
+    method SimpleExtern(config: SimpleExternConfig)
+        returns (res: Result<SimpleExternClient, Error>)
+    {
+        var client := new SimpleExternClient(Operations.Config);
+        return Success(client);
+    }
+
+    class SimpleExternClient... {
+        predicate ValidState() {
+            && Operations.ValidInternalConfig?(config)
+            && Modifies == Operations.ModifiesInternalConfig(config) + {History}
+        }
+
+        constructor(config: Operations.InternalConfig) {
+            this.config := config;
+            History := new ISimpleExternClientCallHistory();
+            Modifies := Operations.ModifiesInternalConfig(config) + {History};
+        }
+    }
+}
