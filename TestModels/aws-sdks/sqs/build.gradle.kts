@@ -19,4 +19,13 @@ configure<software.amazon.smithy.gradle.SmithyExtension> {
 }
 
 // Uncomment to disable creating a JAR.
-//tasks["jar"].enabled = false
+tasks["jar"].enabled = false
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("software.amazon.smithy.typescript:smithy-aws-typescript-codegen:0.12.0")
+    }
+}
