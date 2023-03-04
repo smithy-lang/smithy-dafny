@@ -17,3 +17,7 @@
 # JetBrains
 **/.idea/
 **/Folder.DotSettings.user
+
+# Gradle
+**/.gradle/
+**/build/
