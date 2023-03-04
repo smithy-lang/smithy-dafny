@@ -1,6 +1,11 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
+// Something like this should work once we implement the
+// "dafny-client-codegen" Smithy build plugin and
+// configure it in smithy-build.json.
+// Note the lack of any manually-written code in the project!
+
 include "../src/Index.dfy"
 
 module TestComAmazonawsSqs {

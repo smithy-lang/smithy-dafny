@@ -29,6 +29,7 @@ jobs:
           TestModels/SimpleTypes/SimpleString,
           TestModels/aws-sdks/ddb,
           TestModels/aws-sdks/kms,
+          TestModels/aws-sdks/sqs,
         ]
         os: [ ubuntu-latest ]
     runs-on: ${{ matrix.os }}
