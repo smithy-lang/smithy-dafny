@@ -27,6 +27,7 @@ import software.amazon.polymorph.smithyjava.unmodeled.NativeError;
 import software.amazon.polymorph.smithyjava.unmodeled.OpaqueError;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.polymorph.traits.PositionalTrait;
+import software.amazon.polymorph.utils.ModelUtils.ResolvedShapeId;
 
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.ResourceShape;
@@ -36,6 +37,7 @@ import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.ShapeType;
 import software.amazon.smithy.model.shapes.StructureShape;
 
+import static software.amazon.polymorph.utils.ModelUtils.resolveShape;
 import static software.amazon.smithy.utils.StringUtils.capitalize;
 import static software.amazon.smithy.utils.StringUtils.uncapitalize;
 
@@ -209,6 +211,7 @@ public class ToDafnyLibrary extends ToDafny {
                 .build();
     }
 
+    @SuppressWarnings("unused") // We do not use this yet (2023-03-05), but we might soon-ish. Remove by 2023-06 if still not used.
     protected MethodSpec modeledService(ServiceShape shape) {
         final String methodName = capitalize(shape.getId().getName());
         return MethodSpec
@@ -231,7 +234,7 @@ public class ToDafnyLibrary extends ToDafny {
     // This override simplifies their lookup.
     @Override
     protected MethodReference conversionMethodReference(Shape shape) {
-        JavaLibrary.ResolvedShapeId resolvedShapeId = subject.resolveShape(shape.getId());
+        ResolvedShapeId resolvedShapeId = resolveShape(shape.getId(),subject.model );
         Shape resolvedShape = subject.model.expectShape(resolvedShapeId.resolvedId());
         if (resolvedShape.isServiceShape() || resolvedShape.isResourceShape()) {
             return super.nonSimpleConversionMethodReference(resolvedShape);

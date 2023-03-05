@@ -2,25 +2,17 @@ package software.amazon.polymorph.smithyjava.generator.library;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
-import com.squareup.javapoet.TypeSpec;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import javax.lang.model.element.Modifier;
-
-import software.amazon.polymorph.smithyjava.BuilderSpecs;
 import software.amazon.polymorph.smithyjava.MethodReference;
-import software.amazon.polymorph.smithyjava.generator.CodegenSubject;
 import software.amazon.polymorph.smithyjava.generator.Generator;
 import software.amazon.polymorph.smithyjava.generator.library.JavaLibrary.MethodSignature;
-import software.amazon.polymorph.smithyjava.generator.library.JavaLibrary.ResolvedShapeId;
+import software.amazon.polymorph.utils.ModelUtils.ResolvedShapeId;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.polymorph.smithyjava.nameresolver.Native;
+
+import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
@@ -56,10 +48,10 @@ public abstract class ShimLibrary extends Generator {
     }
 
     protected JavaLibrary.MethodSignature operationMethodSignature(OperationShape shape) {
-        final ResolvedShapeId inputResolved = subject.resolveShape(
-                shape.getInputShape());
-        final ResolvedShapeId outputResolved = subject.resolveShape(
-                shape.getOutputShape());
+        final ResolvedShapeId inputResolved = ModelUtils.resolveShape(
+                shape.getInputShape(), subject.model);
+        final ResolvedShapeId outputResolved = ModelUtils.resolveShape(
+                shape.getOutputShape(), subject.model);
         final String operationName = shape.toShapeId().getName();
         final MethodSpec.Builder method = MethodSpec
                 .methodBuilder(operationName)
@@ -84,9 +76,9 @@ public abstract class ShimLibrary extends Generator {
             // If target is a Service or Resource,
             // the output type should be an interface OR LocalService.
             return Native.classNameForInterfaceOrLocalService(
-                    subject.model.expectShape(resolvedShape.resolvedId()), subject.sdkVersion);
+                    shape, subject.sdkVersion);
         }
-        return subject.nativeNameResolver.typeForShape(resolvedShape.resolvedId());
+        return subject.nativeNameResolver.typeForShape(shape.toShapeId());
     }
 
     protected MethodSpec operation(OperationShape operationShape) {
