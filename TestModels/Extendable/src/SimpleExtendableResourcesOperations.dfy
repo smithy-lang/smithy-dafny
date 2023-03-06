@@ -56,7 +56,7 @@ module SimpleExtendableResourcesOperations refines AbstractSimpleExtendableResou
   )
   {
     var resource := input.resource;
-    var data :- resource.GetResourceData(input.input);
+    var data :- resource.GetExtendableResourceData(input.input);
     var result := Types.UseExtendableResourceOutput(
       output := data
     );

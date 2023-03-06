@@ -10,4 +10,3 @@ NAMESPACE=simple.constraints
 # This project has no dependencies 
 # DEPENDENT-MODELS:= 
 # LIBRARIES :=
-transpile_net_dependencies:

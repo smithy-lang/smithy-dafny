@@ -5,6 +5,7 @@ package software.amazon.polymorph.utils;
 
 import java.util.*;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import software.amazon.polymorph.traits.*;
@@ -205,15 +206,54 @@ public class ModelUtils {
     /**
      * For every ShapeId in {@code initialShapes},
      * with the given {@code model},
+     * find all the member shapes with @reference traits that ShapeId depends on.
+     */
+    public static Set<MemberShape> findAllDependentMemberReferenceShapes(
+        Set<ShapeId> initialShapeIds,
+        Model model
+    ) {
+        Set<ShapeId> dependentShapes = findAllDependentShapes(initialShapeIds, model);
+        return dependentShapes.stream()
+            .map(shapeId -> model.expectShape(shapeId, Shape.class))
+            .filter(shape -> shape.asMemberShape().isPresent())
+            .map(shape -> shape.asMemberShape().get())
+            .filter(shape -> model.expectShape(shape.getTarget(), Shape.class).hasTrait(ReferenceTrait.class))
+            .collect(Collectors.toSet());
+    }
+
+    public static Set<String> findAllDependentNamespaces(
+        Set<ShapeId> initialShapeIds,
+        Model model
+    ) {
+        // Set of all namespaces from all initialShapeIds
+        Set<String> initialNamespaces = initialShapeIds.stream()
+            .map(ShapeId::getNamespace)
+            .collect(Collectors.toSet());
+
+        Set<ShapeId> dependentShapeIds = findAllDependentShapes(initialShapeIds, model);
+
+        // Set of all namespaces in dependentShapeIds that are not in initialNamespaces
+        return dependentShapeIds.stream()
+            .map(ShapeId::getNamespace)
+            .filter(namespace -> !initialNamespaces.contains(namespace))
+            // smithy.api is technically a dependent namespace, as models depend on Smithy API.
+            // However, we are not interested in it as a dependent namespace for our purposes.
+            .filter(namespace -> !namespace.equals("smithy.api"))
+            .collect(Collectors.toSet());
+    }
+
+    /**
+     * For every ShapeId in {@code initialShapes},
+     * with the given {@code model},
      * find all the shapes that ShapeId depends on.
      */
     public static Set<ShapeId> findAllDependentShapes(
-            Set<ShapeId> initialShapes,
+            Set<ShapeId> initialShapeIds,
             Model model
     ) {
         final Set<ShapeId> shapes = new LinkedHashSet<>();
         // Breadth-first search via getDependencyShapeIds
-        final Queue<ShapeId> toTraverse = new LinkedList<>(initialShapes);
+        final Queue<ShapeId> toTraverse = new LinkedList<>(initialShapeIds);
         while (!toTraverse.isEmpty()) {
             final ShapeId currentShapeId = toTraverse.remove();
             if (shapes.add(currentShapeId)) {
@@ -282,7 +322,8 @@ public class ModelUtils {
      */
     public static Boolean isReferenceDependantModuleType(final Shape shape, final String namespace) {
         if (shape.hasTrait(ReferenceTrait.class)) {
-            return !namespace.equalsIgnoreCase(shape.getId().getNamespace());
+            return !namespace.equalsIgnoreCase(shape.getId().getNamespace())
+                && !namespace.equalsIgnoreCase(shape.getId().getNamespace() + ".Wrapped");
         } else {
             return false;
         }
