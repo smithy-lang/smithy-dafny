@@ -28,6 +28,7 @@ jobs:
           TestModels/SimpleTypes/SimpleInteger,
           TestModels/SimpleTypes/SimpleLong,
           TestModels/SimpleTypes/SimpleString,
+          TestModels/Union,
           TestModels/aws-sdks/ddb,
           TestModels/aws-sdks/kms,
         ]
