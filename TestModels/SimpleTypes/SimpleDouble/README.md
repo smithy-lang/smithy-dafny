@@ -7,8 +7,8 @@ and the associated operations in `dafny` and `.NET`.
 
 ## What is under test?
 
-Currently, the `double` shape is opaque in Dafny.
-That is, in Dafny, Smithy-Polymorph represesents Doubles as a
+Currently, the `double` shape should be treated as opaque in Dafny.
+In Dafny, Smithy-Polymorph represesents Doubles as a
 `seq<uint8>` with a length of 8. 
 
 This representation is NOT PORTABLE between runtimes/machines,

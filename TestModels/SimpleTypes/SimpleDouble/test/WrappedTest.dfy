@@ -10,9 +10,9 @@ module WrappedTest {
   import opened Types = SimpleTypesDoubleTypes
   import opened Wrappers
 
-  method {:test} TestWrappedClient(config: Types.SimpleDoubleConfig)
+  method {:test} TestWrappedClient()
   {
-    var client :- expect WrappedSimpleDouble(config);
+    var client :- expect WrappedSimpleDouble();
     TestGetDouble(client);
   }
 }
