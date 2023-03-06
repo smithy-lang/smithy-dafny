@@ -416,7 +416,7 @@ public class DotNetNameResolver {
     {
         return switch (shape.getType()) {
             // For supported simple shapes, just map to native types
-            case BLOB, BOOLEAN, INTEGER, LONG, TIMESTAMP -> {
+            case BLOB, BOOLEAN, INTEGER, LONG, TIMESTAMP, DOUBLE -> {
                 @Nullable final String nativeTypeName = NATIVE_TYPES_BY_SIMPLE_SHAPE_TYPE.get(shape.getType());
                 yield Objects.requireNonNull(nativeTypeName,
                   () -> String.format("No native type for shape type %s", shape.getType()));
@@ -573,7 +573,7 @@ public class DotNetNameResolver {
                 .orElseThrow(() -> new IllegalStateException("Cannot find shape " + shapeId));
 
         return switch (shape.getType()) {
-            case BLOB -> "Dafny.ISequence<byte>";
+            case BLOB, DOUBLE -> "Dafny.ISequence<byte>";
             case BOOLEAN -> "bool";
             case STRING -> dafnyTypeForString(shape.asStringShape().get());
             case INTEGER -> "int";
@@ -951,15 +951,6 @@ public class DotNetNameResolver {
     }
     /** Return the DotNet Type for a Union Member */
     public String unionMemberName(final MemberShape memberShape) {
-        if (ModelUtils.isInServiceNamespace(memberShape.getTarget(), serviceShape)) {
-            String[] qualifiedName = classPropertyTypeForStructureMember(memberShape).split("[.]");
-            return "_%s".formatted(dafnyCompilesExtra_(qualifiedName[qualifiedName.length - 1]));
-        } else {
-            final String name = dafnyConcreteTypeForUnionMember(memberShape)
-                    // TODO Hack to remove Dafny "namespace"
-                    .replace("Dafny.", "")
-                    .replace(".", "");
-            return "_%s".formatted(name);
-        }
+        return "_%s".formatted(dafnyCompilesExtra_(memberShape.getMemberName()));
     }
 }

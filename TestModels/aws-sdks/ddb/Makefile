@@ -15,3 +15,6 @@ AWS_SDK_CMD=--aws-sdk
 # There is no wrapped target for aws-sdk types
 _polymorph_wrapped_dafny: ;
 _polymorph_wrapped_net: ;
+
+format_net:
+	pushd runtimes/net && dotnet format && popd
