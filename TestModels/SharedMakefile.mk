@@ -76,6 +76,7 @@ transpile_implementation:
 		-useRuntimeLib \
 		-out $(OUT) \
 		./src/Index.dfy \
+		-library:$(PROJECT_ROOT)/dafny-dependencies/StandardLibrary/src/Index.dfy \
 		$(patsubst %, -library:$(PROJECT_ROOT)/%/src/Index.dfy, $(LIBRARIES))
 
 transpile_test:
@@ -162,9 +163,9 @@ polymorph_dafny: _polymorph_dependencies
 
 polymorph_dotnet: OUTPUT_DOTNET=--output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/
 polymorph_dotnet: _polymorph
-polymorph_dotnet: OUTPUT_DAFNY_WRAPPED=--output-dafny $(LIBRARY_ROOT)/Model
+polymorph_dotnet: OUTPUT_DOTNET_WRAPPED=--output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/Wrapped
 polymorph_dotnet: OUTPUT_LOCAL_SERVICE=--output-local-service-test $(LIBRARY_ROOT)/Model
-polymorph_dafny: _polymorph_wrapped
+polymorph_dotnet: _polymorph_wrapped
 polymorph_dotnet: POLYMORPH_LANGUAGE_TARGET=dotnet
 polymorph_dotnet: _polymorph_dependencies
 
@@ -244,3 +245,11 @@ mvn_local_deploy:
 
 test_java:
 	gradle -p runtimes/java runTests
+
+clean:
+	rm -f $(PROJECT_ROOT)/Model/*Types.dfy $(PROJECT_ROOT)/Model/*TypesWrapped.dfy
+	rm -f $(PROJECT_ROOT)/runtimes/net/ImplementationFromDafny.cs
+	rm -f $(PROJECT_ROOT)/runtimes/net/tests/TestFromDafny.cs
+	rm -rf $(PROJECT_ROOT)/TestResults
+	rm -rf $(PROJECT_ROOT)/runtimes/net/Generated $(PROJECT_ROOT)/runtimes/net/bin $(PROJECT_ROOT)/runtimes/net/obj
+	rm -rf $(PROJECT_ROOT)/runtimes/net/tests/bin $(PROJECT_ROOT)/runtimes/net/tests/obj
