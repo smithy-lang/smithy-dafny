@@ -120,6 +120,19 @@ _polymorph:
 	--namespace $(NAMESPACE) \
 	$(AWS_SDK_CMD)";
 
+_polymorph_wrapped:
+	@: $(if ${POLYMORPH_ROOT},,$(error You must pass the path POLYMORPH_ROOT: POLYMORPH_ROOT=/path/to/polymorph/smithy-polymorph));
+	cd $(POLYMORPH_ROOT); \
+	./gradlew run --args="\
+	$(OUTPUT_DAFNY_WRAPPED) \
+	$(OUTPUT_DOTNET_WRAPPED) \
+	--model $(LIBRARY_ROOT)/Model \
+	--dependent-model $(PROJECT_ROOT)/dafny-dependencies/Model \
+	$(patsubst %, --dependent-model $(PROJECT_ROOT)/%/Model, $(LIBRARIES)) \
+	--namespace $(NAMESPACE) \
+	$(OUTPUT_LOCAL_SERVICE) \
+	$(AWS_SDK_CMD)";
+
 _polymorph_dependencies:
 	@$(foreach dependency, \
  			   $(DEPENDENT-MODELS), \
@@ -127,17 +140,31 @@ _polymorph_dependencies:
  			   $(MAKE) -C $(PROJECT_ROOT)/$(dependency) polymorph_$(POLYMORPH_LANGUAGE_TARGET); \
 	   )
 
+# `polymorph_code_gen` is the generate-for-multiple-languages target
 polymorph_code_gen: OUTPUT_DAFNY=--output-dafny --include-dafny $(STANDARD_LIBRARY_PATH)/src/Index.dfy
 polymorph_code_gen: OUTPUT_DOTNET=--output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/
 polymorph_code_gen: _polymorph
+# Generate wrapped code for all languages that support wrapped services
+polymorph_code_gen: OUTPUT_DAFNY_WRAPPED=--output-dafny $(PROJECT_ROOT)/Model --include-dafny $(STANDARD_LIBRARY_PATH)/src/Index.dfy
+polymorph_code_gen: OUTPUT_DOTNET_WRAPPED=--output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/Wrapped
+polymorph_code_gen: OUTPUT_LOCAL_SERVICE=--output-local-service-test $(PROJECT_ROOT)/Model
+polymorph_code_gen: _polymorph_wrapped
+polymorph_code_gen: POLYMORPH_LANGUAGE_TARGET=code_gen
+polymorph_code_gen: _polymorph_dependencies
 
 polymorph_dafny: OUTPUT_DAFNY=--output-dafny --include-dafny $(STANDARD_LIBRARY_PATH)/src/Index.dfy
 polymorph_dafny: _polymorph
+polymorph_dafny: OUTPUT_DAFNY_WRAPPED=--output-dafny $(PROJECT_ROOT)/Model --include-dafny $(STANDARD_LIBRARY_PATH)/src/Index.dfy
+polymorph_dafny: OUTPUT_LOCAL_SERVICE=--output-local-service-test $(PROJECT_ROOT)/Model
+polymorph_dafny: _polymorph_wrapped
 polymorph_dafny: POLYMORPH_LANGUAGE_TARGET=dafny
 polymorph_dafny: _polymorph_dependencies
 
 polymorph_dotnet: OUTPUT_DOTNET=--output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/
 polymorph_dotnet: _polymorph
+polymorph_dotnet: OUTPUT_DAFNY_WRAPPED=--output-dafny $(PROJECT_ROOT)/Model
+polymorph_dotnet: OUTPUT_LOCAL_SERVICE=--output-local-service-test $(PROJECT_ROOT)/Model
+polymorph_dafny: _polymorph_wrapped
 polymorph_dotnet: POLYMORPH_LANGUAGE_TARGET=dotnet
 polymorph_dotnet: _polymorph_dependencies
 
