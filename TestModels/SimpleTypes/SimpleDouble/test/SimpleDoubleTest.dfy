@@ -8,7 +8,11 @@ module SimpleDoubleTest {
   import Operations = SimpleDoubleOperations
   import opened Wrappers
   import opened StandardLibrary.UInt
-  
+  method {:test} GetDouble()
+  {
+    var client :- expect SimpleDouble();
+    TestGetDouble(client);
+  }
   
   method TestGetDouble(client: Types.ISimpleTypesDoubleClient)
     requires client.ValidState()
