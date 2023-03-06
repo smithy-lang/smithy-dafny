@@ -145,25 +145,25 @@ polymorph_code_gen: OUTPUT_DAFNY=--output-dafny --include-dafny $(STANDARD_LIBRA
 polymorph_code_gen: OUTPUT_DOTNET=--output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/
 polymorph_code_gen: _polymorph
 # Generate wrapped code for all languages that support wrapped services
-polymorph_code_gen: OUTPUT_DAFNY_WRAPPED=--output-dafny $(PROJECT_ROOT)/Model --include-dafny $(STANDARD_LIBRARY_PATH)/src/Index.dfy
+polymorph_code_gen: OUTPUT_DAFNY_WRAPPED=--output-dafny $(LIBRARY_ROOT)/Model --include-dafny $(STANDARD_LIBRARY_PATH)/src/Index.dfy
 polymorph_code_gen: OUTPUT_DOTNET_WRAPPED=--output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/Wrapped
-polymorph_code_gen: OUTPUT_LOCAL_SERVICE=--output-local-service-test $(PROJECT_ROOT)/Model
+polymorph_code_gen: OUTPUT_LOCAL_SERVICE=--output-local-service-test $(LIBRARY_ROOT)/Model
 polymorph_code_gen: _polymorph_wrapped
 polymorph_code_gen: POLYMORPH_LANGUAGE_TARGET=code_gen
 polymorph_code_gen: _polymorph_dependencies
 
 polymorph_dafny: OUTPUT_DAFNY=--output-dafny --include-dafny $(STANDARD_LIBRARY_PATH)/src/Index.dfy
 polymorph_dafny: _polymorph
-polymorph_dafny: OUTPUT_DAFNY_WRAPPED=--output-dafny $(PROJECT_ROOT)/Model --include-dafny $(STANDARD_LIBRARY_PATH)/src/Index.dfy
-polymorph_dafny: OUTPUT_LOCAL_SERVICE=--output-local-service-test $(PROJECT_ROOT)/Model
+polymorph_dafny: OUTPUT_DAFNY_WRAPPED=--output-dafny $(LIBRARY_ROOT)/Model --include-dafny $(STANDARD_LIBRARY_PATH)/src/Index.dfy
+polymorph_dafny: OUTPUT_LOCAL_SERVICE=--output-local-service-test $(LIBRARY_ROOT)/Model
 polymorph_dafny: _polymorph_wrapped
 polymorph_dafny: POLYMORPH_LANGUAGE_TARGET=dafny
 polymorph_dafny: _polymorph_dependencies
 
 polymorph_dotnet: OUTPUT_DOTNET=--output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/
 polymorph_dotnet: _polymorph
-polymorph_dotnet: OUTPUT_DAFNY_WRAPPED=--output-dafny $(PROJECT_ROOT)/Model
-polymorph_dotnet: OUTPUT_LOCAL_SERVICE=--output-local-service-test $(PROJECT_ROOT)/Model
+polymorph_dotnet: OUTPUT_DAFNY_WRAPPED=--output-dafny $(LIBRARY_ROOT)/Model
+polymorph_dotnet: OUTPUT_LOCAL_SERVICE=--output-local-service-test $(LIBRARY_ROOT)/Model
 polymorph_dafny: _polymorph_wrapped
 polymorph_dotnet: POLYMORPH_LANGUAGE_TARGET=dotnet
 polymorph_dotnet: _polymorph_dependencies
