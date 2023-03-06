@@ -22,7 +22,7 @@ polymorph_dafny :
 	--namespace simple.types.double"; \
 
 # Note: This build target fails. polymorph.smithydotnet does not support generation for Double types.
-polymorph_net :
+polymorph_dotnet :
 	cd ../../../smithy-polymorph;\
 	./gradlew run --args="\
 	--output-dafny \

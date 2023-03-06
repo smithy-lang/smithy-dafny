@@ -8,7 +8,7 @@ NOTE: The `model.json` in this project comes from [private-aws-encryption-sdk-da
 ### .NET
 1. Generate the Wrappers using `polymorph`
 ```
-make polymorph_dafny polymorph_net
+make polymorph_dafny polymorph_dotnet
 ```
 
 2. Transpile the tests (and implementation) to the target runtime.

@@ -107,7 +107,7 @@ jobs:
         working-directory: ./${{ matrix.library }}
         run: |
           make polymorph_dafny
-          make polymorph_net
+          make polymorph_dotnet
 
       - name: Compile ${{ matrix.library }} implementation
         shell: bash
