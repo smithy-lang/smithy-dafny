@@ -201,6 +201,7 @@ public class TypeConversionCodegen {
             case STRING -> generateStringConverter(shape.asStringShape().get());
             case INTEGER -> generateIntegerConverter(shape.asIntegerShape().get());
             case LONG -> generateLongConverter(shape.asLongShape().get());
+            case DOUBLE -> generateDoubleConverter(shape.asDoubleShape().get());
             case TIMESTAMP -> generateTimestampConverter(shape.asTimestampShape().get());
             case LIST -> generateListConverter(shape.asListShape().get());
             case MAP -> generateMapConverter(shape.asMapShape().get());
@@ -247,6 +248,13 @@ public class TypeConversionCodegen {
         final TokenTree fromDafnyBody = Token.of("return value;");
         final TokenTree toDafnyBody = Token.of("return value;");
         return buildConverterFromMethodBodies(longShape, fromDafnyBody, toDafnyBody);
+    }
+
+    public TypeConverter generateDoubleConverter(final DoubleShape doubleShape) {
+        // BitConverter docs : https://learn.microsoft.com/en-us/dotnet/api/system.bitconverter?view=netstandard-2.1
+        final TokenTree fromDafnyBody = Token.of("return BitConverter.ToDouble(value.CloneAsArray(), 0);");
+        final TokenTree toDafnyBody = Token.of("return Dafny.Sequence<byte>.FromArray(BitConverter.GetBytes(value));");
+        return buildConverterFromMethodBodies(doubleShape, fromDafnyBody, toDafnyBody);
     }
 
     public TypeConverter generateTimestampConverter(final TimestampShape timestampShape) {
@@ -370,7 +378,7 @@ public class TypeConversionCodegen {
                     } else {
                         checkIfPresent = TokenTree.empty();
                     }
-                    // SizeEstimateRangeGb requires a list of double instead of the genereated int list
+                    // SizeEstimateRangeGb requires a list of double instead of the generated int list
                     final TokenTree assign;
                     if (StringUtils.equals(dafnyMemberName, "_SizeEstimateRangeGB")) {
                         assign = Token.of("converted.%s = %s(concrete.%s).Select(i => (double) i).ToList();".formatted(
@@ -603,7 +611,6 @@ public class TypeConversionCodegen {
                                                 .lineSeparated()
                                                 .braced());
                     } else {
-                        // This code is for legacy reasons and should be dropped after we are sure no sdk need this code.
                         return TokenTree
                                 .of("if (value.IsSet%s())".formatted(propertyName))
                                 .append(TokenTree.of("return %s.create%s(%s(value.%s));"
