@@ -85,6 +85,7 @@ transpile_test_net:
 		`find ./test -name '*.dfy'` \
 		-library:src/Index.dfy
 
+transpile_net_dependencies:
 	$(MAKE) -C ../../dafny-dependencies/StandardLibrary transpile_implementation_net \
 
 test_net:
