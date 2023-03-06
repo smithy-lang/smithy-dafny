@@ -6,6 +6,9 @@ package software.amazon.polymorph.smithydotnet;
 import com.google.common.annotations.VisibleForTesting;
 
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -15,7 +18,10 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import software.amazon.polymorph.smithydafny.DafnyNameResolver;
+import software.amazon.polymorph.smithydotnet.localServiceWrapper.LocalServiceWrappedNameResolver;
 import software.amazon.polymorph.traits.*;
+import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.polymorph.utils.Token;
 import software.amazon.polymorph.utils.TokenTree;
@@ -30,7 +36,6 @@ import static software.amazon.polymorph.smithydotnet.DotNetNameResolver.typeConv
 import static software.amazon.polymorph.smithydotnet.TypeConversionDirection.FROM_DAFNY;
 import static software.amazon.polymorph.smithydotnet.TypeConversionDirection.TO_DAFNY;
 import static software.amazon.polymorph.utils.DafnyNameResolverHelpers.dafnyCompilesExtra_;
-import static software.amazon.polymorph.utils.DafnyNameResolverHelpers.dafnyExternNamespaceForShapeId;
 
 /**
  * Generates a {@code TypeConversion} class that includes all {@link TypeConverter}s needed for the operations in the
@@ -207,7 +212,7 @@ public class TypeConversionCodegen {
             case STRUCTURE -> generateStructureConverter(shape.asStructureShape().get());
             case MEMBER -> generateMemberConverter(shape.asMemberShape().get());
             case UNION -> generateUnionConverter(shape.asUnionShape().get());
-            default -> throw new IllegalStateException();
+            default -> throw new IllegalStateException("Shape %s not supported for generateConverter".formatted(shape));
         };
     }
 
@@ -640,25 +645,68 @@ public class TypeConversionCodegen {
     /**
      * This should not be called directly, instead call
      * {@link TypeConversionCodegen#generateStructureConverter(StructureShape)}.
-     *
-     * Note that this currently only allows for C# implementations of AWS SDK service interfaces.
      */
     protected TypeConverter generateServiceReferenceStructureConverter(
             final StructureShape structureShape, final ServiceShape serviceShape) {
-        // TODO is this actually a good filter for AWS SDK services?
-        if (!serviceShape.getId().getNamespace().startsWith("com.amazonaws.")) {
-            throw new UnsupportedOperationException("Only AWS SDK service client converters are supported");
-        }
 
-        final AwsSdkTypeConversionCodegen awsSdkTypeConversionCodegen =
-                new AwsSdkTypeConversionCodegen(model, serviceShape);
-        final AwsSdkTypeConversionCodegen.DafnyConverterBodies dafnyConverterBodies = awsSdkTypeConversionCodegen
-                .generateAwsSdkServiceReferenceStructureConverter(structureShape);
-        return buildConverterFromMethodBodies(
-                structureShape,
-                dafnyConverterBodies.fromDafnyBody(),
-                dafnyConverterBodies.toDafnyBody()
-        );
+        // AWS SDK services are identified by namespace
+        // TODO is this actually a good filter for AWS SDK services?
+        if (serviceShape.getId().getNamespace().startsWith("com.amazonaws.")) {
+            final AwsSdkTypeConversionCodegen awsSdkTypeConversionCodegen =
+                    new AwsSdkTypeConversionCodegen(model, serviceShape);
+            final AwsSdkTypeConversionCodegen.DafnyConverterBodies dafnyConverterBodies = awsSdkTypeConversionCodegen
+                    .generateAwsSdkServiceReferenceStructureConverter(structureShape);
+            return buildConverterFromMethodBodies(
+                    structureShape,
+                    dafnyConverterBodies.fromDafnyBody(),
+                    dafnyConverterBodies.toDafnyBody()
+            );
+        // Local services are identified by dependent shapes with a reference trait
+        } else if (ModelUtils.isReferenceDependantModuleType(structureShape, serviceShape.getId().getNamespace())) {
+            return generateLocalServiceReferenceStructureConverter(structureShape, serviceShape);
+        } else {
+            throw new UnsupportedOperationException("Unsupported service shape: %s".formatted(serviceShape));
+        }
+    }
+
+    /**
+     * This should not be called directly, instead call
+     * {@link TypeConversionCodegen#generateStructureConverter(StructureShape)}.
+     */
+    protected TypeConverter generateLocalServiceReferenceStructureConverter(
+        final StructureShape structureShape, final ServiceShape serviceShape) {
+
+        LocalServiceWrappedNameResolver serviceWrappedNameResolver
+            = new LocalServiceWrappedNameResolver(model, serviceShape);
+        final ShapeId resourceShapeId = serviceShape.getId();
+        final String shimClass = serviceWrappedNameResolver.shimClassForService();
+        final String baseType = nameResolver.baseTypeForShape(resourceShapeId);
+
+        final String throwCustomImplException =
+            "throw new System.ArgumentException(\"Custom implementations of %s are not supported yet\");"
+                .formatted(baseType);
+
+        final TokenTree fromDafnyBody = Token.of("""
+            if (value is %s.Wrapped.%s shim) {
+                return shim._impl;
+            }
+            """
+            .formatted(
+                nameResolver.namespaceForShapeId(resourceShapeId),
+                shimClass),
+            throwCustomImplException);
+
+        final TokenTree toDafnyBody = Token.of("""
+            if (value is %s impl) {
+                return new %s.Wrapped.%s(value);
+            }
+            """
+            .formatted(nameResolver.baseTypeForShape(resourceShapeId),
+                nameResolver.namespaceForShapeId(resourceShapeId),
+                shimClass),
+            throwCustomImplException);
+
+        return buildConverterFromMethodBodies(structureShape, fromDafnyBody, toDafnyBody);
     }
 
     /**
@@ -832,6 +880,37 @@ public class TypeConversionCodegen {
         final String dafnyType = nameResolver.dafnyTypeForCommonServiceError(serviceShape);
 
         // Generate the FROM_DAFNY method
+        // Handle dependency exceptions
+        TokenTree dependencyErrorCasesFromDafny = TokenTree.empty();
+        if (serviceShape.hasTrait(LocalServiceTrait.class)) {
+            final LocalServiceTrait localServiceTrait = serviceShape.expectTrait(LocalServiceTrait.class);
+
+            Set<String> dependentNamespaces = ModelUtils.findAllDependentNamespaces(
+                new HashSet<ShapeId>(Collections.singleton(localServiceTrait.getConfigId())), model);
+
+            if (dependentNamespaces.size() > 0) {
+                Set<TokenTree> cases = new HashSet<>();
+                for (String dependentNamespace : dependentNamespaces) {
+
+                    TokenTree toAppend = TokenTree.of(
+                        """
+                        case %1$s.Error_%3$s dafnyVal:
+                          return %2$s.TypeConversion.FromDafny_CommonError(
+                            dafnyVal._%3$s
+                          );"""
+                        .formatted(
+                            DafnyNameResolver.dafnyExternNamespaceForNamespace(serviceShape.getId().getNamespace()),
+                            DotNetNameResolver.convertToCSharpNamespaceWithSegmentMapper(dependentNamespace, DotNetNameResolver::capitalizeNamespaceSegment),
+                            DafnyNameResolver.dafnyTypesModuleForNamespace(dependentNamespace).replace("Types", "")
+                        )
+                    );
+
+                    cases.add(toAppend);
+                }
+                dependencyErrorCasesFromDafny = TokenTree.of(cases.stream()).lineSeparated();
+            }
+        }
+
         // Handle the modeled exceptions.
         final TokenTree modeledExceptionsFromDafny = TokenTree.of(errorShapes
           .stream()
@@ -869,8 +948,12 @@ public class TypeConversionCodegen {
 
         // Wrap all the converters into a switch statement.
         final TokenTree fromDafnySwitchCases = TokenTree
-          .of(modeledExceptionsFromDafny, handleCollectionOfErrorsFromDafny, handleBaseFromDafny)
-          .lineSeparated()
+          .of(
+              dependencyErrorCasesFromDafny,
+              modeledExceptionsFromDafny,
+              handleCollectionOfErrorsFromDafny,
+              handleBaseFromDafny
+          ).lineSeparated()
           .braced();
         final TokenTree fromDafnyBody = TokenTree.of(
                 TokenTree.of("switch(value)"), fromDafnySwitchCases).lineSeparated();
@@ -883,6 +966,46 @@ public class TypeConversionCodegen {
         final TokenTree fromDafnyConverterMethod = TokenTree.of(fromDafnyConverterSignature, fromDafnyBody.braced());
 
         // Generate the TO_DAFNY method
+        // Handle any dependencies first.
+        // For errors from dependencies: pass anything from a dependency-recognized namespace into Dafny
+        // This passes all unmodelled errors to the dependency type conversion
+        TokenTree dependencyErrorsSwitchStatementToDafny = TokenTree.empty();
+        if (serviceShape.hasTrait(LocalServiceTrait.class)) {
+            final LocalServiceTrait localServiceTrait = serviceShape.expectTrait(LocalServiceTrait.class);
+
+            Set<String> dependentNamespaces = ModelUtils.findAllDependentNamespaces(
+                new HashSet<ShapeId>(Collections.singleton(localServiceTrait.getConfigId())), model);
+
+            // Dependencies may throw "unmodelled" errors that are unknown to Polymorph. Polymorph cannot write
+            //   explicit code to handle these errors because it does not know about unmodelled errors.
+            // This passes errors from a dependency-recognized namespace into the dependency's error handler.
+            // This handles both modelled and unmodelled errors.
+            TokenTree dependencyErrors = TokenTree.empty();;
+            if (dependentNamespaces.size() > 0) {
+                List<TokenTree> casesList = new ArrayList<>();
+                for (String dependentNamespace : dependentNamespaces) {
+                    TokenTree toAppend = TokenTree.of(
+                        """
+                          case "%1$s":
+                            return %2$s.Error.create_%3$s(
+                              %1$s.TypeConversion.ToDafny_CommonError(value)
+                            );"""
+                            .formatted(
+                                DotNetNameResolver.convertToCSharpNamespaceWithSegmentMapper(dependentNamespace, DotNetNameResolver::capitalizeNamespaceSegment),
+                                DafnyNameResolver.dafnyExternNamespaceForNamespace(serviceShape.getId().getNamespace()),
+                                DafnyNameResolver.dafnyTypesModuleForNamespace(dependentNamespace).replace("Types", "")
+                            )
+                    );
+                    casesList.add(toAppend);
+                }
+
+                final TokenTree casesTokens = TokenTree.of(casesList.stream()).lineSeparated();
+
+                // This `switch` condition is based on the namespace of the exception, and not the specific exception type.
+                dependencyErrorsSwitchStatementToDafny = Token.of("switch (value.GetType().Namespace)").append(casesTokens.braced());
+            }
+        }
+
         // Handle the modeled exceptions.
         final TokenTree specificExceptionsToDafny = TokenTree.of(errorShapes.stream().map(errorShape -> {
             final ShapeId specificErrorShapeId = errorShape.getId();
@@ -936,6 +1059,7 @@ public class TypeConversionCodegen {
             ).lineSeparated().braced();
         final TokenTree toDafnyBody = TokenTree
           .of(
+            dependencyErrorsSwitchStatementToDafny,
             TokenTree.of("switch (value)"),
             toDafnySwitchCases
           )
@@ -1109,16 +1233,18 @@ public class TypeConversionCodegen {
         // from a dependent module
         // leave that as the _only_ public converter
         // and this converter is internal.
-        final boolean isDependantModuleType = ModelUtils.isReferenceDependantModuleType(shape, nameResolver.namespaceForService());
+        final boolean isDependantModuleType = ModelUtils.isReferenceDependantModuleType(shape,
+            nameResolver.namespaceForService());
+
         final String visibility = shape.hasTrait(ReferenceTrait.class) && !isDependantModuleType
                 ? "public"
                 : "internal";
 
-        final String fromDafnyConverterName = typeConverterForShape(shape.getId(), FROM_DAFNY);
+        final String fromDafnyConverterName = typeConverterForShape(id, FROM_DAFNY);
         final TokenTree fromDafnyConverterSignature = TokenTree.of(
                 "%s static".formatted(visibility), cSharpType, fromDafnyConverterName, "(%s value)".formatted(dafnyType));
 
-        final String toDafnyConverterName = typeConverterForShape(shape.getId(), TO_DAFNY);
+        final String toDafnyConverterName = typeConverterForShape(id, TO_DAFNY);
         final TokenTree toDafnyConverterSignature = TokenTree.of(
                 "%s static".formatted(visibility), dafnyType, toDafnyConverterName, "(%s value)".formatted(cSharpType));
 
@@ -1159,7 +1285,7 @@ public class TypeConversionCodegen {
 
             final TokenTree fromDafnyConverterMethod = TokenTree.of(fromDafnyConverterSignature, fromDafnyBodyOverride.braced());
             final TokenTree toDafnyConverterMethod = TokenTree.of(toDafnyConverterSignature, toDafnyBodyOverride.braced());
-            return new TypeConverter(shape.getId(), fromDafnyConverterMethod, toDafnyConverterMethod);
+            return new TypeConverter(id, fromDafnyConverterMethod, toDafnyConverterMethod);
         }
     }
 

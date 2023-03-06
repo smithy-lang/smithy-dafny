@@ -3,12 +3,21 @@
 
 package software.amazon.polymorph.smithydotnet.localServiceWrapper;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import software.amazon.polymorph.smithydafny.DafnyNameResolver;
 import software.amazon.polymorph.smithydotnet.DotNetNameResolver;
+import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.polymorph.utils.Token;
 import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.smithy.model.Model;
+import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.ShapeId;
@@ -65,9 +74,8 @@ public class LocalServiceWrappedShimCodegen {
     // so making is `internal` or `private`
     // just complicates other Dafny libraries working with the wrapper.
     public TokenTree generateServiceShim() {
-        final TokenTree header = Token.of("public class %s : %s.%s".formatted(
+        final TokenTree header = Token.of("public class %s : %s".formatted(
                 nameResolver.shimClassForService(),
-                DafnyNameResolverHelpers.dafnyExternNamespaceForShapeId(serviceShape.getId()),
                 nameResolver.dafnyTypeForShape(serviceShape.getId())));
 
         final TokenTree impl = Token.of("public %s %s;".formatted(nameResolver.implForServiceClient(), IMPL_NAME));
@@ -158,6 +166,46 @@ public class LocalServiceWrappedShimCodegen {
         final String dafnyUnknownErrorType =
             DotNetNameResolver.dafnyUnknownErrorTypeForServiceShape(serviceShape);
 
+        // For errors from dependencies: pass anything from a dependency-recognized namespace into Dafny
+        // This passes all unmodelled errors to the dependency type conversion
+        if (!serviceShape.hasTrait(LocalServiceTrait.class)) throw new IllegalStateException("MUST be an LocalService");
+        final LocalServiceTrait localServiceTrait = serviceShape.expectTrait(LocalServiceTrait.class);
+
+        Set<String> dependentNamespaces = ModelUtils.findAllDependentNamespaces(
+            new HashSet<ShapeId>(Collections.singleton(localServiceTrait.getConfigId())), model);
+
+        // Dependencies may throw "unmodelled" errors that are unknown to Polymorph. Polymorph cannot write
+        //   explicit code to handle these errors because it does not know about unmodelled errors.
+        // This passes errors from a dependency-recognized namespace into the dependency's error handler.
+        // This handles both modelled and unmodelled errors.
+        TokenTree dependencyErrors = TokenTree.empty();;
+        if (dependentNamespaces.size() > 0) {
+            List<TokenTree> casesList = new ArrayList<>();
+            for (String dependentNamespace : dependentNamespaces) {
+                TokenTree toAppend = TokenTree.of(
+                    """
+                      case "%1$s":
+                        return %2$s.Error.create_%3$s(
+                          %1$s.TypeConversion.ToDafny_CommonError(error)
+                        );"""
+                        .formatted(
+                            DotNetNameResolver.convertToCSharpNamespaceWithSegmentMapper(dependentNamespace, DotNetNameResolver::capitalizeNamespaceSegment),
+                            DafnyNameResolver.dafnyExternNamespaceForNamespace(serviceShape.getId().getNamespace()),
+                            DafnyNameResolver.dafnyTypesModuleForNamespace(dependentNamespace).replace("Types", "")
+                        )
+                );
+                casesList.add(toAppend);
+            }
+
+            final TokenTree cases = TokenTree.of(casesList.stream()).lineSeparated();
+
+            // This `switch` condition is based on the namespace of the exception, and not the specific exception type.
+            dependencyErrors = Token.of("switch (error.GetType().Namespace)").append(cases.braced());
+        }
+
+        // Generate errors for local wrapped service modelled errors and unmodelled errors
+        // This code generates a default unrecognized error case, which MUST be generated after all other error
+        //   handlers; this includes other `switch` statements.
         // Collect into TreeSet so that we generate code in a deterministic order (lexicographic, in particular)
         final TreeSet<StructureShape> errorShapes = ModelUtils.streamServiceErrors(model, serviceShape)
                 .collect(Collectors.toCollection(TreeSet::new));
@@ -201,8 +249,17 @@ public class LocalServiceWrappedShimCodegen {
                 dafnyErrorAbstractType,
                 CONVERT_ERROR_METHOD,
                 nameResolver.qualifiedClassForBaseServiceException()));
+
+
         final TokenTree cases = TokenTree.of(knownErrorCases, collectionOfErrorsCase, unknownErrorCase).lineSeparated();
-        final TokenTree body = Token.of("switch (error)").append(cases.braced());
-        return signature.append(body.braced());
+        final TokenTree body = TokenTree.of(
+            "switch (error)").append(cases.braced());
+
+        return TokenTree.of(
+            signature.append(TokenTree.of(
+                dependencyErrors,
+                body
+            ).lineSeparated().braced())
+        ).lineSeparated();
     }
 }

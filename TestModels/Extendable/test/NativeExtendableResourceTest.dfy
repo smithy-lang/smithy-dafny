@@ -28,7 +28,7 @@ module NativeExtendableResourceTest {
     ensures resource.ValidState()
   {
     var dataInput := allSome();
-    var dataOutput :- expect resource.GetResourceData(dataInput);
+    var dataOutput :- expect resource.GetExtendableResourceData(dataInput);
     checkSome(dataOutput, ExtendableResource.DEFAULT_RESOURCE_NAME);
   }
 
@@ -40,7 +40,7 @@ module NativeExtendableResourceTest {
     ensures resource.ValidState()
   {
     var dataInput := allNone();
-    var dataOutput :- expect resource.GetResourceData(dataInput);
+    var dataOutput :- expect resource.GetExtendableResourceData(dataInput);
     checkNone(dataOutput, ExtendableResource.DEFAULT_RESOURCE_NAME);
   }
 

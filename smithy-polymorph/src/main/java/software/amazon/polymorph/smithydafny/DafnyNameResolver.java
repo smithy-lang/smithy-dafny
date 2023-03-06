@@ -276,7 +276,14 @@ public record DafnyNameResolver(
      * Returns the Dafny {@code {:extern}} namespace corresponding to the namespace of the given shape ID.
      */
     public static String dafnyExternNamespaceForShapeId(final ShapeId shapeId) {
-        return "Dafny." + dafnyModuleForNamespace(shapeId.getNamespace());
+        return dafnyExternNamespaceForNamespace(shapeId.getNamespace());
+    }
+
+    /**
+     * Returns the Dafny {@code {:extern}} namespace corresponding to the provided namespace
+     */
+    public static String dafnyExternNamespaceForNamespace(final String namespace) {
+        return "Dafny." + dafnyModuleForNamespace(namespace);
     }
 
     public String callEventTypeName() {

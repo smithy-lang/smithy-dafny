@@ -10,4 +10,8 @@ NAMESPACE=simple.types.enum
 # This project has no dependencies 
 # DEPENDENT-MODELS:= 
 # LIBRARIES :=
-transpile_net_dependencies:
+polymorph_dafny_dependencies: ;
+
+polymorph_net_dependencies: ;
+
+transpile_net_dependencies: ;
