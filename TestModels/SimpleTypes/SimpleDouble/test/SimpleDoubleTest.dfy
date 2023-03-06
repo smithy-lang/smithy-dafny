@@ -4,13 +4,14 @@
 include "../src/Index.dfy"
 
 module SimpleDoubleTest {
+  import SimpleDouble
   import Types = SimpleTypesDoubleTypes
   import Operations = SimpleDoubleOperations
   import opened Wrappers
   import opened StandardLibrary.UInt
   method {:test} GetDouble()
   {
-    var client :- expect SimpleDouble();
+    var client :- expect SimpleDouble.SimpleDouble();
     TestGetDouble(client);
   }
   
