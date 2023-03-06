@@ -9,6 +9,7 @@ module WrappedSimpleUnionTest {
         var client :- expect WrappedSimpleUnionService.WrappedSimpleUnion();
         SimpleUnionImplTest.TestMyUnionInteger(client);
         SimpleUnionImplTest.TestMyUnionString(client);
+        SimpleUnionImplTest.TestSingleValueUnionString(client);
 
     }
 }

@@ -6,7 +6,7 @@ namespace simple.union
 )
 service SimpleUnion {
   version: "2021-11-01",
-  operations: [ GetUnion ]
+  operations: [ GetUnion, GetSingleValueUnion ]
 }
 
 structure SimpleUnionConfig {}
@@ -27,4 +27,21 @@ structure GetUnionOutput {
 union MyUnion {
     IntegerValue: Integer,
     StringValue: String
+}
+
+operation GetSingleValueUnion {
+  input: GetSingleValueUnionInput,
+  output: GetSingleValueUnionOutput
+}
+
+structure GetSingleValueUnionInput {
+    union: SingleValueUnion
+}
+
+structure GetSingleValueUnionOutput {
+    union: SingleValueUnion
+}
+
+union SingleValueUnion {
+    Value: Integer
 }

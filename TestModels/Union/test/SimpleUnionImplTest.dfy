@@ -8,6 +8,7 @@ module SimpleUnionImplTest {
         var client :- expect SimpleUnion.SimpleUnion();
         TestMyUnionInteger(client);
         TestMyUnionString(client);
+        TestSingleValueUnionString(client);
     }
 
     method TestMyUnionInteger(client: ISimpleUnionClient)
@@ -34,5 +35,17 @@ module SimpleUnionImplTest {
         expect ret.union.value.StringValue?;
         expect ret.union.value.StringValue == "TestString";
         expect ret.union.value.IntegerValue? == false;
+    }
+
+    method TestSingleValueUnionString(client: ISimpleUnionClient)
+      requires client.ValidState()
+      modifies client.Modifies
+      ensures client.ValidState()
+    {
+        var ret :- expect client.GetSingleValueUnion(GetSingleValueUnionInput(union := Some(Value(10))));
+
+        expect ret.union.Some?;
+        expect ret.union.value.Value?;
+        expect ret.union.value.Value == 10;
     }
 }

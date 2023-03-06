@@ -605,10 +605,10 @@ public class TypeConversionCodegen {
                     } else {
                         return TokenTree
                                 .of("if (value.IsSet%s())".formatted(propertyName))
-                                .append(TokenTree.of("return %s.create_%s(%s(value.%s));"
+                                .append(TokenTree.of("return %s.create%s(%s(value.%s));"
                                                 .formatted(
                                                         dafnyUnionConcreteType,
-                                                        propertyName,
+                                                        createSuffix,
                                                         memberFromDafnyConverterName,
                                                         propertyName
                                                 ))
