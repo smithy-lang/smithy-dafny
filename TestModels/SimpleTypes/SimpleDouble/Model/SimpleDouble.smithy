@@ -13,6 +13,10 @@ service SimpleTypesDouble {
 
 structure SimpleDoubleConfig {}
 
+// TODO: https://github.com/awslabs/polymorph/issues/123
+// Once we have proper Double serialization,
+// we should add a GetDoubleKnownValueTest
+
 operation GetDouble {
   input: GetDoubleInput,
   output: GetDoubleOutput,
