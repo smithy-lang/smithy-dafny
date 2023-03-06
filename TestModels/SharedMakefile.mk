@@ -161,13 +161,13 @@ polymorph_dafny: _polymorph_wrapped
 polymorph_dafny: POLYMORPH_LANGUAGE_TARGET=dafny
 polymorph_dafny: _polymorph_dependencies
 
-polymorph_dotnet: OUTPUT_DOTNET=--output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/
-polymorph_dotnet: _polymorph
-polymorph_dotnet: OUTPUT_DOTNET_WRAPPED=--output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/Wrapped
-polymorph_dotnet: OUTPUT_LOCAL_SERVICE=--output-local-service-test $(LIBRARY_ROOT)/Model
-polymorph_dotnet: _polymorph_wrapped
-polymorph_dotnet: POLYMORPH_LANGUAGE_TARGET=dotnet
-polymorph_dotnet: _polymorph_dependencies
+polymorph_net: OUTPUT_DOTNET=--output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/
+polymorph_net: _polymorph
+polymorph_net: OUTPUT_DOTNET_WRAPPED=--output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/Wrapped
+polymorph_net: OUTPUT_LOCAL_SERVICE=--output-local-service-test $(LIBRARY_ROOT)/Model
+polymorph_net: _polymorph_wrapped
+polymorph_net: POLYMORPH_LANGUAGE_TARGET=net
+polymorph_net: _polymorph_dependencies
 
 polymorph_java: OUTPUT_JAVA=--output-java $(LIBRARY_ROOT)/runtimes/java/src/main/smithy-generated
 polymorph_java: _polymorph
