@@ -1471,27 +1471,106 @@ public class DafnyApiCodegen {
         final String defaultFunctionMethodName = "Default%s".formatted(configTypeName);
 
         final TokenTree defaultConfig = TokenTree
-          .of("function method %s(): %s".formatted(defaultFunctionMethodName, configTypeName));
-        
-        final TokenTree serviceMethod = TokenTree
-          .of(
+            .of("function method %s(): %s".formatted(defaultFunctionMethodName, configTypeName));
+
+        // "Managed reference" shapes are shapes in the local service config whose target types have the Polymorph
+        //   Reference trait.
+        // The local service must specially handle these shapes' Modifies members in its `modifies`, `ensures`,
+        //   `requires`, and `fresh` clauses.
+        List<MemberShape> managedReferenceMemberShapes = new ArrayList<MemberShape>();
+        final ShapeId configShapeId = localServiceTrait.getConfigId();
+        Set<ShapeId> configShapeIdAsSet = new HashSet<>();
+        configShapeIdAsSet.add(configShapeId);
+        managedReferenceMemberShapes = new ArrayList<>(
+            ModelUtils.findAllDependentMemberReferenceShapes(
+                configShapeIdAsSet, model));
+
+        TokenTree serviceMethod = TokenTree.of(
             "method %s(config: %s := %s())"
-              .formatted(
-                localServiceTrait.getSdkId(),
-                configTypeName,
-                defaultFunctionMethodName
-              ),
+                .formatted(
+                    localServiceTrait.getSdkId(),
+                    configTypeName,
+                    defaultFunctionMethodName
+                ),
             // Yes, Error is hard coded
             // this can work because we need to be able Errors from other modules...
-            "returns (res: Result<%sClient, Error>)"
-              .formatted(localServiceTrait.getSdkId()),
+            "returns (res: Result<%sClient, Error>)\n"
+                .formatted(localServiceTrait.getSdkId())
+        ).lineSeparated();
+
+        // Add `requires` clauses
+
+        // Requires any provided managed reference shapes to have ValidState()
+        if (managedReferenceMemberShapes.size() > 0) {
+          for (MemberShape managedReferenceMemberShape : managedReferenceMemberShapes) {
+            serviceMethod = serviceMethod.append(TokenTree.of(
+              "requires config.%1$s.Some? ==> config.%1$s.value.%2$s()\n"
+                .formatted(managedReferenceMemberShape.getMemberName(),
+                nameResolver.validStateInvariantName())
+              ).lineSeparated());
+          } 
+        }
+
+        // Add `modifies` clauses
+
+        // Local service modifies the Modifies member of managed reference shapes
+        if (managedReferenceMemberShapes.size() > 0) {
+          for (MemberShape managedReferenceMemberShape : managedReferenceMemberShapes) {
+            serviceMethod = serviceMethod.append(TokenTree.of(
+              "modifies if config.%1$s.Some? then config.%1$s.value.%2$s else {}\n"
+                .formatted(managedReferenceMemberShape.getMemberName(),
+                nameResolver.mutableStateFunctionName())
+              ).lineSeparated());
+          } 
+        }
+        
+        // Start `ensures` clause for assertions based on `res.Success?`
+        serviceMethod = serviceMethod.append(TokenTree.of(
             "ensures res.Success? ==> ",
-            "&& fresh(res.value)",
-            "&& fresh(res.value.%s)".formatted(nameResolver.mutableStateFunctionName()),
+            "&& fresh(res.value)\n"
+        ).lineSeparated());
+              
+        // Add `ensures` clauses based on `res.Success?`
+
+        // The local service Modifies member, minus all managed reference shapes, is ensured fresh
+        if (managedReferenceMemberShapes.size() > 0) {
+            serviceMethod = serviceMethod.append(TokenTree.of(
+                "&& fresh(res.value.%1$s\n"
+                    .formatted(nameResolver.mutableStateFunctionName())
+            ));
+            for (MemberShape managedReferenceMemberShape : managedReferenceMemberShapes) {
+                serviceMethod = serviceMethod.append(TokenTree.of(
+                    "- (if config.%1$s.Some? then config.%1$s.value.%2$s else {})\n"
+                        .formatted(managedReferenceMemberShape.getMemberName(),
+                            nameResolver.mutableStateFunctionName())
+                ));
+            }
+            serviceMethod = serviceMethod.append(TokenTree.of(")\n"));
+        } else {
+            // If there are no managed reference shapes, the entire local service Modifies member is ensured fresh
+            serviceMethod = serviceMethod.append(TokenTree.of(
+                "&& fresh(res.value.%s)\n".formatted(nameResolver.mutableStateFunctionName())
+            ).lineSeparated());
+        }
+
+        // Add more `ensures` clauses based on `res.Success?`
+        serviceMethod = serviceMethod.append(TokenTree.of(
             "&& fresh(res.value.%s)".formatted(nameResolver.callHistoryFieldName()),
-            "&& res.value.%s()".formatted(nameResolver.validStateInvariantName())
-            )
-          .lineSeparated();
+            "&& res.value.%s()\n".formatted(nameResolver.validStateInvariantName())
+        ).lineSeparated());
+
+        // Add any `ensures` clauses that have unique conditions
+
+        // A managed reference passed into the local service is ensured to have ValidState() after call
+        if (managedReferenceMemberShapes.size() > 0) {
+            for (MemberShape managedReferenceMemberShape : managedReferenceMemberShapes) {
+                serviceMethod = serviceMethod.append(TokenTree.of(
+                    "ensures config.%1$s.Some? ==> config.%1$s.value.%2$s()\n"
+                        .formatted(managedReferenceMemberShape.getMemberName(),
+                            nameResolver.validStateInvariantName())
+                ));
+            }
+        }
 
         return TokenTree
           .of(
