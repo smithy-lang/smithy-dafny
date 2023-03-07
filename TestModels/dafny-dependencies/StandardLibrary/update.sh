@@ -6,6 +6,7 @@ ESDK_BRANCH="$2"
 STD_DFY_SRC_FILES=('StandardLibrary.dfy' 'UInt.dfy' 'UTF8.dfy')
 STD_DFY_TST_FILES=('UTF8.dfy')
 STD_NET_FILES=('Extern/UTF8.cs' 'STD.csproj' 'tests/Test-STD.csproj')
+STD_JAVA_FILES=('src/main/java/UTF8/__default.java' 'build.gradle.kts')
 
 set -e
 
@@ -28,6 +29,10 @@ done
 for CS_FILE in "${STD_NET_FILES[@]}"; do
   cp "$ESDK_PATH/StandardLibrary/runtimes/net/$CS_FILE" "runtimes/net/$CS_FILE"
   git add "runtimes/net/$CS_FILE"
+done
+for JAVA_FILE in "${STD_JAVA_FILES[@]}"; do
+  cp "$ESDK_PATH/StandardLibrary/runtimes/java/$JAVA_FILE" "runtimes/java/$JAVA_FILE"
+  git add "runtimes/java/$JAVA_FILE"
 done
 printf "Pulled Files for ESDK's StandardLibrary and staged for commit. \n"
 printf "Suggest executing: \n"
