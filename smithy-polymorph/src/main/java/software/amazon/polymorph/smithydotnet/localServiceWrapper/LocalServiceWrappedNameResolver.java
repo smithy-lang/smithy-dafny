@@ -1,9 +1,6 @@
 package software.amazon.polymorph.smithydotnet.localServiceWrapper;
 
-import software.amazon.polymorph.smithydafny.DafnyNameResolver;
 import software.amazon.polymorph.smithydotnet.DotNetNameResolver;
-import software.amazon.polymorph.smithydotnet.nativeWrapper.NativeWrapperCodegen;
-import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.ShapeId;

@@ -18,9 +18,9 @@ namespace Simple.Extendable.Resources
       this._impl = nativeImpl;
     }
 
-    protected override GetResourceDataOutput _GetResourceData(GetResourceDataInput input)
+    protected override GetExtendableResourceDataOutput _GetExtendableResourceData(GetExtendableResourceDataInput input)
     {
-      return this._impl.GetResourceData(input);
+      return this._impl.GetExtendableResourceData(input);
     }
 
     protected override GetExtendableResourceErrorsOutput _AlwaysModeledError(GetExtendableResourceErrorsInput input)

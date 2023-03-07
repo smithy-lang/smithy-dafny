@@ -15,6 +15,7 @@ jobs:
           TestModels/dafny-dependencies/StandardLibrary, # This stores current Polymorph dependencies that all TestModels depend on
           TestModels/Aggregate,
           TestModels/Constructor,
+          TestModels/Dependencies,
           TestModels/Errors,
           TestModels/Extendable,
           TestModels/Extern,
@@ -22,11 +23,12 @@ jobs:
           TestModels/Resource,          
           TestModels/SimpleTypes/SimpleBoolean,
           TestModels/SimpleTypes/SimpleBlob,
-          # TestModels/SimpleTypes/SimpleDouble, # Blocked by https://t.corp.amazon.com/P80828550
+          TestModels/SimpleTypes/SimpleDouble,
           TestModels/SimpleTypes/SimpleEnum,
           TestModels/SimpleTypes/SimpleInteger,
           TestModels/SimpleTypes/SimpleLong,
           TestModels/SimpleTypes/SimpleString,
+          TestModels/Union,
           TestModels/aws-sdks/ddb,
           TestModels/aws-sdks/kms,
         ]

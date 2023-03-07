@@ -67,10 +67,14 @@ public class DotNetNameResolver {
                 ? StringUtils::capitalize
                 : DotNetNameResolver::capitalizeNamespaceSegment;
 
+        return convertToCSharpNamespaceWithSegmentMapper(shapeId.getNamespace(), segmentMapper);
+    }
+
+    public static String convertToCSharpNamespaceWithSegmentMapper(final String namespace, final Function<String, String> segmentMapper) {
         Stream<String> parts = Splitter.on('.')
-                .splitToList(shapeId.getNamespace())
-                .stream()
-                .map(segmentMapper);
+            .splitToList(namespace)
+            .stream()
+            .map(segmentMapper);
         return Joiner.on('.').join(parts.iterator());
     }
 
@@ -143,7 +147,7 @@ public class DotNetNameResolver {
             return "I" + serviceName;
         }
 
-        throw new UnsupportedOperationException("Interface types not supported for Shape %s".formatted(serviceShapeId));
+        return String.format("I%s", StringUtils.capitalize(serviceShapeId.getName()));
     }
 
     /**
@@ -361,7 +365,9 @@ public class DotNetNameResolver {
             return new AwsSdkDotNetNameResolver(model, serviceShape).baseTypeForService(serviceShape);
         }
 
-        throw new UnsupportedOperationException("Base types not supported for Shape %s".formatted(shapeId));
+        // Base type for local service is defined here
+        return "%s.%s".formatted(
+            namespaceForShapeId(shapeId), shapeId.getName());
     }
 
     protected String baseTypeForResource(final ResourceShape resourceShape) {
@@ -717,7 +723,16 @@ public class DotNetNameResolver {
         final ShapeId serviceShapeId = serviceShape.getId();
 
         if (AwsSdkNameResolverHelpers.isInAwsSdkNamespace(serviceShapeId)) {
-            return "%s.%sClient".formatted(DafnyNameResolverHelpers.dafnyExternNamespaceForShapeId(serviceShapeId), interfaceForService(serviceShapeId));
+            return "%s.%sClient"
+                .formatted(DafnyNameResolverHelpers.dafnyExternNamespaceForShapeId(serviceShapeId),
+                interfaceForService(serviceShapeId));
+        }
+
+        // Qualify extern namespace
+        if (!DafnyNameResolverHelpers.dafnyExternNamespaceForShapeId(serviceShapeId)
+                    .equals(serviceShape.getId().getNamespace())) {
+            return "%s.%s".formatted(DafnyNameResolverHelpers.dafnyExternNamespaceForShapeId(serviceShapeId),
+                DafnyNameResolver.traitNameForServiceClient(serviceShape));
         }
 
         return DafnyNameResolver.traitNameForServiceClient(serviceShape);
@@ -725,7 +740,9 @@ public class DotNetNameResolver {
 
     private String dafnyTypeForResource(final ResourceShape resourceShape) {
         final ShapeId resourceShapeId = resourceShape.getId();
-        return "%s.%s".formatted(DafnyNameResolverHelpers.dafnyExternNamespaceForShapeId(resourceShapeId), interfaceForResource(resourceShapeId));
+        return "%s.%s"
+            .formatted(DafnyNameResolverHelpers.dafnyExternNamespaceForShapeId(resourceShapeId),
+            interfaceForResource(resourceShapeId));
     }
 
     /**
@@ -934,15 +951,6 @@ public class DotNetNameResolver {
     }
     /** Return the DotNet Type for a Union Member */
     public String unionMemberName(final MemberShape memberShape) {
-        if (ModelUtils.isInServiceNamespace(memberShape.getTarget(), serviceShape)) {
-            String[] qualifiedName = classPropertyTypeForStructureMember(memberShape).split("[.]");
-            return "_%s".formatted(dafnyCompilesExtra_(qualifiedName[qualifiedName.length - 1]));
-        } else {
-            final String name = dafnyConcreteTypeForUnionMember(memberShape)
-                    // TODO Hack to remove Dafny "namespace"
-                    .replace("Dafny.", "")
-                    .replace(".", "");
-            return "_%s".formatted(name);
-        }
+        return "_%s".formatted(dafnyCompilesExtra_(memberShape.getMemberName()));
     }
 }

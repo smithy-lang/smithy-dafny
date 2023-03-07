@@ -85,10 +85,10 @@ public class ShimV1 extends Generator {
 
     protected MethodSpec impl() {
         return MethodSpec.methodBuilder("impl")
-                .addModifiers(Modifier.PUBLIC)
-                .addStatement("return this._impl")
-                .returns(subject.nativeNameResolver.classNameForService(subject.serviceShape))
-                .build();
+                       .addModifiers(Modifier.PUBLIC)
+                       .addStatement("return this._impl")
+                       .returns(subject.nativeNameResolver.classNameForService(subject.serviceShape))
+                       .build();
     }
 
     MethodSpec constructor() {

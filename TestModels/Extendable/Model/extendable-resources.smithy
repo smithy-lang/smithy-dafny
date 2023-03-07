@@ -49,11 +49,11 @@ operation UseExtendableResource {
 
 structure UseExtendableResourceInput {
   @required resource: ExtendableResourceReference,
-  @required input: GetResourceDataInput,
+  @required input: GetExtendableResourceDataInput,
 }
 
 structure UseExtendableResourceOutput {
-  @required output: GetResourceDataOutput
+  @required output: GetExtendableResourceDataOutput
 }
 
 operation UseExtendableResourceAlwaysModeledError {
@@ -79,7 +79,7 @@ operation UseExtendableResourceAlwaysOpaqueError {
 @aws.polymorph#extendable
 resource ExtendableResource {
   operations: [
-    GetResourceData,
+    GetExtendableResourceData,
     AlwaysModeledError,
     AlwaysMultipleErrors,
     AlwaysOpaqueError,
@@ -87,12 +87,12 @@ resource ExtendableResource {
   errors: [ SimpleExtendableResourcesException ],
 }
 
-operation GetResourceData {
-  input: GetResourceDataInput,
-  output: GetResourceDataOutput,
+operation GetExtendableResourceData {
+  input: GetExtendableResourceDataInput,
+  output: GetExtendableResourceDataOutput,
 }
 
-structure GetResourceDataInput {
+structure GetExtendableResourceDataInput {
   blobValue: Blob,
   booleanValue: Boolean,
   stringValue: String,
@@ -107,7 +107,7 @@ structure GetResourceDataInput {
   //  timestampValue: Timestamp,
 }
 
-structure GetResourceDataOutput {
+structure GetExtendableResourceDataOutput {
   blobValue: Blob,
   booleanValue: Boolean,
   stringValue: String,
