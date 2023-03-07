@@ -4,7 +4,6 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 
@@ -12,7 +11,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.lang.model.element.Modifier;
@@ -26,9 +24,8 @@ import software.amazon.polymorph.smithyjava.unmodeled.OpaqueError;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.polymorph.traits.PositionalTrait;
 
-import software.amazon.polymorph.traits.ReferenceTrait;
-import software.amazon.smithy.model.shapes.ListShape;
 import software.amazon.smithy.model.shapes.MemberShape;
+import software.amazon.smithy.model.shapes.ResourceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.ShapeType;
@@ -100,6 +97,9 @@ public class ToNativeLibrary extends ToNative {
         // Maps
         subject.getMapsInServiceNamespace().stream()
                 .map(this::modeledMap).forEachOrdered(toNativeMethods::add);
+        // Resources
+        subject.getResourcesInServiceNamespace().stream().sequential()
+                .map(this::modeledResource).forEachOrdered(toNativeMethods::add);
         return TypeSpec.classBuilder(thisClassName)
                 .addModifiers(Modifier.PUBLIC)
                 .addMethods(toNativeMethods)
@@ -172,68 +172,6 @@ public class ToNativeLibrary extends ToNative {
         return super.modeledStructure(structureShape);
     }
 
-    // TODO: if we ever need support for References in Sets or Maps, we will have to extend this logic
-    @Override
-    protected MethodSpec modeledList(final ListShape shape) {
-        if (!this.subject.model.expectShape(shape.getMember().getTarget()).hasTrait(ReferenceTrait.class)) {
-            return super.modeledList(shape);
-        }
-        // TODO :: Verify this hack is necessary and ideally remove
-        // If the target is a Reference, Java's Type system gets upset with Dafny.
-        // Dafny, at least in Java, returns <? extends ReferenceInterface>,
-        // (which is silly, of course it returns an implementation of the interface, but whatever)
-        // But Java does not think it can convert a `<? extends ReferenceInterface>` to a `ReferenceInterface`
-        // via the generic conversion methods, (because they are too abstract? I really do not know why)
-        // By explicitly telling Java everything is OK, (at least that's what I think we are doing?)
-        // We can make a hack around that
-        final TypeName referentType = subject.nativeNameResolver.typeForShape(shape.getMember().getTarget());
-        final ParameterSpec parameterSpec = ParameterSpec
-                .builder(subject.dafnyNameResolver.typeForShape(shape.toShapeId()), VAR_INPUT)
-                .build();
-        // Set Method Signature
-        MethodSpec.Builder method = MethodSpec
-                .methodBuilder(capitalize(shape.toShapeId().getName()))
-                .addParameter(parameterSpec)
-                .addModifiers(PUBLIC_STATIC)
-                .returns(subject.nativeNameResolver.typeForShape(shape.toShapeId()));
-        // add Identity hack (explicitly telling Java everything is OK)
-        method.addStatement("$T<$T,$T> identity = $T.identity()",
-                Function.class, referentType, referentType,
-                Function.class);
-        // create return list
-        method.addStatement("$T<$T> nativeValue = new $T<>($L.length())",
-                List.class, referentType,
-                ArrayList.class, VAR_INPUT);
-        // Use identity hack
-        method.addStatement("$L.iterator().forEachRemaining(value -> nativeValue.add(identity.apply(value)))",
-                VAR_INPUT);
-        // Return nativeValue
-        return method.addStatement("return nativeValue").build();
-    }
-
-    @Override
-    protected MethodReference memberConversionMethodReference(MemberShape memberShape) {
-        Shape targetShape = subject.model.expectShape(memberShape.getTarget());
-        // If the target is a Reference, use IDENTITY_FUNCTION
-        if (targetShape.hasTrait(ReferenceTrait.class)) {
-            return Constants.IDENTITY_FUNCTION;
-        }
-        // If the target is an indirect Reference, use IDENTITY_FUNCTION
-        if (targetShape.hasTrait(PositionalTrait.class)) {
-            // PositionalTrait can only exist on Structure Shapes, asStructureShape will return a value
-            //noinspection OptionalGetWithoutIsPresent
-            if (PositionalTrait.onlyMember(targetShape.asStructureShape().get()).hasTrait(ReferenceTrait.class)) {
-                return Constants.IDENTITY_FUNCTION;
-            }
-        }
-        // If the target has the dafnyUtf8Bytes trait,
-        // going to Native, the Bytes need to be converted to Strings
-        if (targetShape.hasTrait(DafnyUtf8BytesTrait.class)) {
-            return DAFNY_UTF8_BYTES;
-        }
-        return super.memberConversionMethodReference(memberShape);
-    }
-
     protected MethodSpec positionalStructure(StructureShape structureShape) {
         final MemberShape onlyMember = PositionalTrait.onlyMember(structureShape);
         final ShapeId onlyMemberId = onlyMember.toShapeId();
@@ -260,12 +198,44 @@ public class ToNativeLibrary extends ToNative {
         return method.build();
     }
 
+    protected MethodSpec modeledResource(ResourceShape shape) {
+        final String methodName = capitalize(shape.getId().getName());
+        return MethodSpec
+                .methodBuilder(methodName)
+                .addModifiers(PUBLIC_STATIC)
+                .addParameter(Dafny.interfaceForResource(shape), VAR_INPUT)
+                .returns(subject.nativeNameResolver.classNameForResource(shape))
+                .addStatement("return $L", subject.wrapWithShim(shape.getId(),
+                        CodeBlock.of(VAR_INPUT)))
+                .build();
+    }
+
     protected CodeBlock returnWithConversionCall(final MemberShape shape) {
-        CodeBlock memberConversionMethod = memberConversionMethodReference(shape).asNormalReference();
+        CodeBlock memberConversionMethod = conversionMethodReference(
+                subject.model.expectShape(shape.getTarget())
+        ).asNormalReference();
         return CodeBlock.of("return $L($L)", memberConversionMethod, VAR_INPUT);
     }
 
     protected static CodeBlock returnNull() {
         return CodeBlock.of("return null");
+    }
+
+    // Reference & Positional often mask Service or Resource shapes
+    // that can be in other namespaces.
+    // This override simplifies their lookup.
+    @Override
+    protected MethodReference conversionMethodReference(Shape shape) {
+        JavaLibrary.ResolvedShapeId resolvedShapeId = subject.resolveShape(shape.toShapeId());
+        Shape resolvedShape = subject.model.expectShape(resolvedShapeId.resolvedId());
+        if (resolvedShape.isServiceShape() || resolvedShape.isResourceShape()) {
+            return super.nonSimpleConversionMethodReference(resolvedShape);
+        }
+        // If the target has the dafnyUtf8Bytes trait,
+        // going to Dafny, the Strings need to be converted to Bytes
+        if (resolvedShape.hasTrait(DafnyUtf8BytesTrait.class)) {
+            return DAFNY_UTF8_BYTES;
+        }
+        return super.conversionMethodReference(resolvedShape);
     }
 }

@@ -7,6 +7,7 @@ import java.util.Map;
 import software.amazon.polymorph.smithyjava.generator.CodegenSubject;
 import software.amazon.polymorph.smithyjava.nameresolver.AwsSdkDafnyV1;
 import software.amazon.polymorph.smithyjava.nameresolver.AwsSdkNativeV1;
+import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.ServiceShape;
@@ -30,10 +31,10 @@ public class JavaAwsSdkV1 extends CodegenSubject {
             Model model,
             AwsSdkDafnyV1 dafnyNameResolver,
             AwsSdkNativeV1 nativeNameResolver) {
-        super(model, serviceShape, dafnyNameResolver, nativeNameResolver);
+        super(model, serviceShape, dafnyNameResolver, nativeNameResolver, AwsSdkVersion.V1);
         this.dafnyNameResolver = dafnyNameResolver;
         this.nativeNameResolver = nativeNameResolver;
-        this.packageName = dafnyNameResolver.packageName();
+        this.packageName =  DafnyNameResolverHelpers.packageNameForNamespace(serviceShape.getId().getNamespace());
     }
 
     public static JavaAwsSdkV1 createJavaAwsSdkV1(ServiceShape serviceShape, Model model) {

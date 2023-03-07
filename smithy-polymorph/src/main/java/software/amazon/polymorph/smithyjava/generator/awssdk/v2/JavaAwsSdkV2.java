@@ -30,7 +30,7 @@ public class JavaAwsSdkV2 extends CodegenSubject {
             Model model,
             AwsSdkDafnyV2 dafnyNameResolver,
             AwsSdkNativeV2 nativeNameResolver) {
-        super(model, serviceShape, dafnyNameResolver, nativeNameResolver);
+        super(model, serviceShape, dafnyNameResolver, nativeNameResolver, AwsSdkVersion.V2);
         this.dafnyNameResolver = dafnyNameResolver;
         this.nativeNameResolver = nativeNameResolver;
         this.packageName = dafnyNameResolver.packageName();

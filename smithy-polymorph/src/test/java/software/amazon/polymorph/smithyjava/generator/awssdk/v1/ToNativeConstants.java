@@ -3,7 +3,7 @@ package software.amazon.polymorph.smithyjava.generator.awssdk.v1;
 public class ToNativeConstants {
     static String STRING_CONVERSION = "software.amazon.dafny.conversion.ToNative.Simple.String";
     static String KEY_USAGE_TYPE_CONVERSION = "Dafny.Com.Amazonaws.Kms.ToNative.KeyUsageType";
-    static String OTHER_NAMESPACE_CONVERSION = "com.amazonaws.other.ToNative.OtherNamespace";
+    static String OTHER_NAMESPACE_CONVERSION = "Dafny.Com.Amazonaws.Other.ToNative.OtherNamespace";
     static String INIT_TEMP_ARRAY = "com.amazonaws.services.kms.model.KeyUsageType[] listEnum_temp = new com.amazonaws.services.kms.model.KeyUsageType[dafnyValue.dtor_listEnum().length()]";
     static String SET_WITH_CONVERSION_CALL = "converted.withCiphertext(software.amazon.dafny.conversion.ToNative.Simple.ByteBuffer(dafnyValue.dtor_ciphertext()))";
     static String SET_WITH_CONVERSION_CALL_AND_TO_ARRAY = "converted.withListEnum(Dafny.Com.Amazonaws.Kms.ToNative.KeyUsageTypes(dafnyValue.dtor_listEnum()).toArray(listEnum_temp))";
@@ -79,40 +79,42 @@ public class ToNativeConstants {
             """.formatted(INIT_TEMP_ARRAY, SET_WITH_CONVERSION_CALL_AND_TO_ARRAY);
     static String KMS_A_STRING_OPERATION_JAVA_FILE = """
             package Dafny.Com.Amazonaws.Kms;
-            
+                        
             import Dafny.Com.Amazonaws.Kms.Types.Error_DependencyTimeoutException;
+            import Dafny.Com.Amazonaws.Kms.Types.IKeyManagementServiceClient;
+            import com.amazonaws.services.kms.AWSKMS;
             import com.amazonaws.services.kms.model.DependencyTimeoutException;
             import com.amazonaws.services.kms.model.DoSomethingRequest;
             import com.amazonaws.services.kms.model.DoSomethingResponse;
             import com.amazonaws.services.kms.model.DoSomethingResult;
-            
+                        
             public class ToNative {
-              public static DoSomethingResponse DoSomethingResponse(
-                  DoSomethingResult nativeValue
-              ) {
+              public static DoSomethingResponse DoSomethingResponse(DoSomethingResult nativeValue) {
                 DoSomethingResponse.Builder nativeBuilder = DoSomethingResponse.builder();
                 if (dafnyValue.dtor_message().is_Some()) {
-                  converted.withMessage(%s(dafnyValue.dtor_message().dtor_value()));
+                  converted.withMessage(software.amazon.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_message().dtor_value()));
                 }
                 return nativeBuilder.build();
               }
+                        
               public static DoSomethingRequest DoSomethingRequest(
-                  Dafny.Com.Amazonaws.Kms.Types.DoSomethingRequest dafnyValue
-              ) {
+                  Dafny.Com.Amazonaws.Kms.Types.DoSomethingRequest dafnyValue) {
                 DoSomethingRequest converted = new DoSomethingRequest();
-                converted.withMessage(%s(dafnyValue.dtor_message()));
+                converted.withMessage(software.amazon.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_message()));
                 return converted;
               }
-              
-              public static DependencyTimeoutException Error(
-                  Error_DependencyTimeoutException dafnyValue
-              ) {
+                        
+              public static DependencyTimeoutException Error(Error_DependencyTimeoutException dafnyValue) {
                 DependencyTimeoutException converted = new DependencyTimeoutException();
                 if (dafnyValue.dtor_message().is_Some()) {
-                  converted.withMessage(%s(dafnyValue.dtor_message().dtor_value()));
+                  converted.withMessage(software.amazon.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_message().dtor_value()));
                 }
                 return converted;
               }
+              
+              public static AWSKMS KeyManagementService(IKeyManagementServiceClient dafnyValue) {
+                return ((Shim) dafnyValue).impl();
+              }
             }
-            """.formatted(STRING_CONVERSION, STRING_CONVERSION, STRING_CONVERSION);
+            """;
 }

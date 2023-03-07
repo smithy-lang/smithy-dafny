@@ -7,6 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import software.amazon.polymorph.smithyjava.ModelConstants;
+import software.amazon.polymorph.smithyjava.generator.CodegenSubject;
 import software.amazon.polymorph.smithyjava.generator.awssdk.TestSetupUtils;
 import software.amazon.polymorph.util.TestModel;
 import software.amazon.polymorph.utils.ModelUtils;
@@ -38,7 +39,7 @@ public class DafnyTest {
                 (builder, modelAssembler) -> modelAssembler
                         .addUnparsedModel("test.smithy", rawModel));
         ServiceShape serviceShape = ModelUtils.serviceFromNamespace(model, "smithy.example");
-        underTest = new Dafny("Dafny.Smithy.Example", model, serviceShape);
+        underTest = new Dafny("Dafny.Smithy.Example", model, serviceShape, CodegenSubject.AwsSdkVersion.V2);
     }
 
     @Test

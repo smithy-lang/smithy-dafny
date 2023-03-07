@@ -1,13 +1,23 @@
 package software.amazon.polymorph.smithyjava.generator.library;
 
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.CodeBlock;
+import com.squareup.javapoet.MethodSpec;
+
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import software.amazon.polymorph.smithyjava.NamespaceHelper;
 import software.amazon.polymorph.smithyjava.generator.CodegenSubject;
+import software.amazon.polymorph.smithyjava.generator.Generator;
+import software.amazon.polymorph.smithyjava.generator.awssdk.v1.ShimV1;
+import software.amazon.polymorph.smithyjava.generator.awssdk.v2.ShimV2;
+import software.amazon.polymorph.smithyjava.generator.library.shims.ResourceShim;
+import software.amazon.polymorph.smithyjava.generator.library.shims.ServiceShim;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.polymorph.smithyjava.nameresolver.Native;
 import software.amazon.polymorph.traits.LocalServiceTrait;
@@ -22,7 +32,7 @@ import software.amazon.smithy.model.node.ExpectationNotMetException;
 import software.amazon.smithy.model.shapes.ListShape;
 import software.amazon.smithy.model.shapes.MapShape;
 import software.amazon.smithy.model.shapes.MemberShape;
-import software.amazon.smithy.model.shapes.OperationShape;
+import software.amazon.smithy.model.shapes.ResourceShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.SetShape;
 import software.amazon.smithy.model.shapes.Shape;
@@ -34,15 +44,20 @@ import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.TraitDefinition;
 
+import static software.amazon.polymorph.smithyjava.generator.library.shims.ResourceShim.CREATE_METHOD_NAME;
+import static software.amazon.polymorph.smithyjava.nameresolver.Constants.SMITHY_API_UNIT;
+
 public class JavaLibrary extends CodegenSubject {
 
     /** Public Java Interfaces will go here. */
     public final String packageName;
     /** Public POJOs will go here. */
     public final String modelPackageName;
+    protected final ToDafnyLibrary toDafnyLibrary;
+    protected final ToNativeLibrary toNativeLibrary;
 
-    public JavaLibrary(Model model, ServiceShape serviceShape) {
-        super(model, serviceShape, initDafny(model, serviceShape), initNative(model, serviceShape));
+    public JavaLibrary(Model model, ServiceShape serviceShape, AwsSdkVersion sdkVersion) {
+        super(model, serviceShape, initDafny(model, serviceShape, sdkVersion), initNative(model, serviceShape, sdkVersion), sdkVersion);
         packageName = NamespaceHelper.standardize(serviceShape.getId().getNamespace());
         modelPackageName = packageName + ".model";
         try {
@@ -53,29 +68,92 @@ public class JavaLibrary extends CodegenSubject {
                     ex
             );
         }
+        toDafnyLibrary = new ToDafnyLibrary(this);
+        toNativeLibrary = new ToNativeLibrary(this);
     }
 
-    static Dafny initDafny(Model model, ServiceShape serviceShape) {
+    static Dafny initDafny(Model model, ServiceShape serviceShape, AwsSdkVersion awsSdkVersion) {
         String packageName = DafnyNameResolverHelpers.packageNameForNamespace(serviceShape.getId().getNamespace());
-        return new Dafny(packageName, model, serviceShape);
+        return new Dafny(packageName, model, serviceShape, awsSdkVersion);
     }
 
-    static Native initNative(Model model, ServiceShape serviceShape) {
+    static Native initNative(Model model, ServiceShape serviceShape, AwsSdkVersion awsSdkVersion) {
         String packageName = NamespaceHelper.standardize(serviceShape.getId().getNamespace());
-        return new Native(packageName, serviceShape, model, packageName + ".model");
+        return new Native(packageName, serviceShape, model, packageName + ".model", awsSdkVersion);
     }
+
+    public static CodeBlock wrapAwsService(
+            Shape shape, CodeBlock nativeValue, CodeBlock regionVar,
+            AwsSdkVersion sdkVersion) {
+        Optional<ServiceShape> serviceShape = shape.asServiceShape();
+        if (serviceShape.isEmpty()) {
+            throw new IllegalArgumentException("Shape must be Service");
+        }
+        return switch (sdkVersion) {
+            case V1 -> CodeBlock.of("new $T($L, $L)",
+                    ShimV1.className(serviceShape.get()),
+                    nativeValue,
+                    regionVar);
+            case V2 -> CodeBlock.of("new $T($L, $L)",
+                    ShimV2.className(serviceShape.get()),
+                    nativeValue,
+                    regionVar);
+        };
+    }
+
+    protected static CodeBlock castAndUnwrapAwsService(
+            Shape shape, CodeBlock dafnyValue,
+            AwsSdkVersion sdkVersion) {
+        Optional<ServiceShape> serviceShape = shape.asServiceShape();
+        if (serviceShape.isEmpty()) {
+            throw new IllegalArgumentException("Shape must be Service");
+        }
+        return switch (sdkVersion) {
+            case V1 -> CodeBlock.of("(($T) $L).impl()",
+                    ShimV1.className(serviceShape.get()),
+                    dafnyValue);
+            case V2 -> CodeBlock.of("(($T) $L).impl()",
+                    ShimV2.className(serviceShape.get()),
+                    dafnyValue);
+        };
+    }
+
+    /**
+     * @param naiveId ShapeId that might have positional or reference trait.
+     * @param resolvedId Fully de-referenced shapeId;
+     *                   de-referenced means Positional or
+     *                   Reference traits have been fully resolved.
+     */
+    public record ResolvedShapeId(ShapeId naiveId, ShapeId resolvedId) {}
+
+    /**
+     * @param method      MethodSpec.Builder that SHOULD have Parameters,
+     *                    Returns, & Modifiers set correctly
+     *                    ( note that
+     *                    void or parameterless methods would
+     *                    not have any Returns or Parameters).
+     * @param resolvedInput  A ResolvedShapeId representing the input
+     * @param resolvedOutput A ResolvedShapeId representing the output
+     */
+    public record MethodSignature(
+            MethodSpec.Builder method,
+            ResolvedShapeId resolvedInput,
+            ResolvedShapeId resolvedOutput
+    ) {}
 
     @Override
     public Map<Path, TokenTree> generate() {
         Map<Path, TokenTree> rtn = new LinkedHashMap<>();
         ModelCodegen serviceCodegen = new ModelCodegen(this);
         rtn.putAll(serviceCodegen.generate());
-        ToDafnyLibrary toDafny = new ToDafnyLibrary(this);
-        rtn.putAll(toDafny.generate());
-        ToNativeLibrary toNative = new ToNativeLibrary(this);
-        rtn.putAll(toNative.generate());
-        ShimLibrary shim = new ShimLibrary(this, this.serviceShape);
+        rtn.putAll(toDafnyLibrary.generate());
+        rtn.putAll(toNativeLibrary.generate());
+        ShimLibrary shim = new ServiceShim(this, this.serviceShape);
         rtn.putAll(shim.generate());
+        getResourcesInServiceNamespace().stream()
+                .map(shape -> new ResourceShim(this, shape))
+                .map(Generator::generate)
+                .forEachOrdered(rtn::putAll);
         return rtn;
     }
 
@@ -102,6 +180,12 @@ public class JavaLibrary extends CodegenSubject {
                     final Shape targetShape = model.expectShape(onlyMember.getTarget());
                     return !targetShape.hasTrait(ReferenceTrait.class);
                 })
+                .filter(shape -> ModelUtils.isInServiceNamespace(shape.getId(), this.serviceShape))
+                .toList();
+    }
+
+    public List<ResourceShape> getResourcesInServiceNamespace() {
+        return this.model.getResourceShapes().stream()
                 .filter(shape -> ModelUtils.isInServiceNamespace(shape.getId(), this.serviceShape))
                 .toList();
     }
@@ -136,7 +220,7 @@ public class JavaLibrary extends CodegenSubject {
                 .collect(Collectors.toList());
     }
 
-    protected ShapeId checkForPositional(ShapeId originalId) {
+    private ShapeId checkForPositional(ShapeId originalId) {
         Shape originalShape = model.expectShape(originalId);
         if (originalShape.hasTrait(PositionalTrait.class)) {
             // Positional traits can only be on structures,
@@ -146,5 +230,41 @@ public class JavaLibrary extends CodegenSubject {
             return onlyMember.getTarget();
         }
         return originalId;
+    }
+
+    /**
+     * @param shapeId ShapeId that might have positional or reference trait
+     * @return Fully de-referenced shapeId and naive shapeId as a ResolvedShapeId
+     */
+    public ResolvedShapeId resolveShape(ShapeId shapeId) {
+        if (shapeId.equals(SMITHY_API_UNIT)) {
+            return new ResolvedShapeId(shapeId, shapeId);
+        }
+        ShapeId notPositionalId = checkForPositional(shapeId);
+        if (model.expectShape(notPositionalId).hasTrait(ReferenceTrait.class)) {
+            ReferenceTrait reference = model.expectShape(notPositionalId).expectTrait(ReferenceTrait.class);
+            return new ResolvedShapeId(shapeId, reference.getReferentId());
+        }
+        return new ResolvedShapeId(shapeId, notPositionalId);
+    }
+
+    protected CodeBlock wrapWithShim(ShapeId referentId, CodeBlock dafnyValue) throws ExpectationNotMetException {
+        final Shape targetShape = model.expectShape(referentId);
+        final ClassName rtnClassName;
+        if (targetShape.isResourceShape()) {
+            //noinspection OptionalGetWithoutIsPresent
+            ResourceShape rShape = targetShape.asResourceShape().get();
+            rtnClassName = nativeNameResolver.classNameForResource(rShape);
+            return CodeBlock.of("$T.$L($L)",
+                    rtnClassName, CREATE_METHOD_NAME, dafnyValue);
+        } else {
+            // It MUST be a service, as reference traits ONLY reference Resources & Services
+            //noinspection OptionalGetWithoutIsPresent
+            ServiceShape sShape = targetShape.asServiceShape().get();
+            rtnClassName = nativeNameResolver.classNameForService(sShape);
+        }
+        return CodeBlock.of("new $T($L)",
+                rtnClassName,
+                dafnyValue);
     }
 }

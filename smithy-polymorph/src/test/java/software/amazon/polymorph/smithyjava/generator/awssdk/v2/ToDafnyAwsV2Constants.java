@@ -51,11 +51,11 @@ public class ToDafnyAwsV2Constants {
             """;
     protected static String GENERATE_CONVERT_LIST_STRUCTURES = """
             public static dafny.DafnySequence<? extends Dafny.Com.Amazonaws.Other.Types.OtherNamespace> OtherNamespaces (
-                java.util.List<com.amazonaws.other.model.OtherNamespace> nativeValue
+                java.util.List<software.amazon.awssdk.services.other.model.OtherNamespace> nativeValue
             ) {
               return software.amazon.dafny.conversion.ToDafny.Aggregate.GenericToSequence(
                   nativeValue,
-                  com.amazonaws.other.ToDafny::OtherNamespace,
+                  Dafny.Com.Amazonaws.Other.ToDafny::OtherNamespace,
                   Dafny.Com.Amazonaws.Other.Types.OtherNamespace._typeDescriptor()
               );
             }

@@ -3,7 +3,7 @@ package software.amazon.polymorph.smithyjava.generator.awssdk.v2;
 public class ToNativeConstants {
     static String STRING_CONVERSION = "software.amazon.dafny.conversion.ToNative.Simple.String";
     static String KEY_USAGE_TYPE_CONVERSION = "Dafny.Com.Amazonaws.Kms.ToNative.KeyUsageType";
-    static String OTHER_NAMESPACE_CONVERSION = "com.amazonaws.other.ToNative.OtherNamespace";
+    static String OTHER_NAMESPACE_CONVERSION = "Dafny.Com.Amazonaws.Other.ToNative.OtherNamespace";
     static String INIT_TEMP_ARRAY = "software.amazon.awssdk.services.kms.model.KeyUsageType[] listEnum_temp = new software.amazon.awssdk.services.kms.model.KeyUsageType[dafnyValue.dtor_listEnum().length()]";
     static String SET_WITH_CONVERSION_CALL = "builder.ciphertext(software.amazon.awssdk.core.SdkBytes.fromByteArray((byte[]) (dafnyValue.dtor_ciphertext().toRawArray())))";
     static String SET_WITH_CONVERSION_CALL_AND_TO_ARRAY = "builder.listEnum(Dafny.Com.Amazonaws.Kms.ToNative.KeyUsageTypes(dafnyValue.dtor_listEnum()).toArray(listEnum_temp))";
@@ -81,6 +81,8 @@ public class ToNativeConstants {
             package Dafny.Com.Amazonaws.Kms;
              
              import Dafny.Com.Amazonaws.Kms.Types.Error_DependencyTimeoutException;
+             import Dafny.Com.Amazonaws.Kms.Types.IKeyManagementServiceClient;
+             import software.amazon.awssdk.services.kms.KmsClient;
              import software.amazon.awssdk.services.kms.model.DependencyTimeoutException;
              import software.amazon.awssdk.services.kms.model.DoSomethingRequest;
              import software.amazon.awssdk.services.kms.model.DoSomethingResponse;
@@ -108,6 +110,10 @@ public class ToNativeConstants {
                    builder.message(%s(dafnyValue.dtor_message().dtor_value()));
                  }
                  return builder.build();
+               }
+               
+               public static KmsClient KeyManagementService(IKeyManagementServiceClient dafnyValue) {
+                   return ((Shim) dafnyValue).impl();
                }
              }
             """.formatted(STRING_CONVERSION, STRING_CONVERSION, STRING_CONVERSION);

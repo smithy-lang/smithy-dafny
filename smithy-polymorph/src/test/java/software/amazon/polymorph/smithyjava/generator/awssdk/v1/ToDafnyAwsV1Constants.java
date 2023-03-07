@@ -55,7 +55,7 @@ public class ToDafnyAwsV1Constants {
             ) {
               return software.amazon.dafny.conversion.ToDafny.Aggregate.GenericToSequence(
                   nativeValue,
-                  com.amazonaws.other.ToDafny::OtherNamespace,
+                  Dafny.Com.Amazonaws.Other.ToDafny::OtherNamespace,
                   Dafny.Com.Amazonaws.Other.Types.OtherNamespace._typeDescriptor()
               );
             }
@@ -107,7 +107,9 @@ public class ToDafnyAwsV1Constants {
             import Dafny.Com.Amazonaws.Kms.Types.Error;
             import Dafny.Com.Amazonaws.Kms.Types.Error_DependencyTimeoutException;
             import Dafny.Com.Amazonaws.Kms.Types.Error_Opaque;
+            import Dafny.Com.Amazonaws.Kms.Types.IKeyManagementServiceClient;
             import Wrappers_Compile.Option;
+            import com.amazonaws.services.kms.AWSKMS;
             import com.amazonaws.services.kms.model.AWSKMSException;
             import com.amazonaws.services.kms.model.DependencyTimeoutException;
             import com.amazonaws.services.kms.model.DoSomethingResult;
@@ -145,6 +147,10 @@ public class ToDafnyAwsV1Constants {
                     Option.create_Some(software.amazon.dafny.conversion.ToDafny.Simple.CharacterSequence(nativeValue.getMessage()))
                     : Option.create_None();
                 return new Error_Opaque(message);
+              }
+              
+              public static IKeyManagementServiceClient KeyManagementService(AWSKMS nativeValue) {
+                return new Shim(nativeValue, null);
               }
             }""";
 }

@@ -14,7 +14,7 @@ public class AwsSdkNameResolverHelpers {
     }
 
     // TODO better way to determine if AWS SDK
-    public static boolean isAwsSdkServiceNamespace(final ShapeId shapeId) {
+    public static boolean isInAwsSdkNamespace(ShapeId shapeId) {
         return shapeId.getNamespace().startsWith("com.amazonaws.");
     }
 
@@ -24,7 +24,7 @@ public class AwsSdkNameResolverHelpers {
     }
 
     public static ServiceShape getAwsServiceShape(final Model model, final ShapeId shapeId) {
-        if (!isAwsSdkServiceNamespace(shapeId)) throw new IllegalStateException("Shape is not in an AWS SKD namespace:" + shapeId.getName() + ", " + shapeId.getNamespace());
+        if (!isInAwsSdkNamespace(shapeId)) throw new IllegalStateException("Shape is not in an AWS SKD namespace:" + shapeId.getName() + ", " + shapeId.getNamespace());
 
         return ModelUtils.serviceFromNamespace(model, shapeId.getNamespace());
     }

@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
+import javax.annotation.Nonnull;
 import javax.lang.model.element.Modifier;
 
 import org.slf4j.Logger;
@@ -20,7 +21,10 @@ import org.slf4j.LoggerFactory;
 
 import software.amazon.polymorph.smithyjava.MethodReference;
 import software.amazon.polymorph.smithyjava.NamespaceHelper;
+import software.amazon.polymorph.smithyjava.generator.awssdk.v1.ToDafnyAwsV1;
+import software.amazon.polymorph.smithyjava.generator.awssdk.v2.ToDafnyAwsV2;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
+import software.amazon.polymorph.utils.AwsSdkNameResolverHelpers;
 import software.amazon.polymorph.utils.ModelUtils;
 
 import software.amazon.smithy.model.shapes.ListShape;
@@ -102,7 +106,7 @@ public abstract class ToDafny extends Generator {
                     CodeBlock varOut = CodeBlock.of("$L", uncapitalize(memberShape.getMemberName()));
                     CodeBlock varIn = getMember(CodeBlock.of(VAR_INPUT), memberShape);
                     builder.addStatement(memberDeclaration(memberShape, varOut));
-                    builder.addStatement(memberAssignment(memberShape, varOut, varIn));
+                    builder.addStatement(memberConvertAndAssign(memberShape, varOut, varIn));
                     variables.add(varOut);
                 }
         );
@@ -154,17 +158,26 @@ public abstract class ToDafny extends Generator {
                 variable);
     }
 
-    /** @return CodeBlock assigning result of member conversion to variable. */
-    protected CodeBlock memberAssignment(
+    /** @return CodeBlock invoking member Conversion and assigning the output. */
+    protected CodeBlock memberConvertAndAssign(
             final MemberShape memberShape,
             CodeBlock outputVar,
             CodeBlock inputVar
     ) {
+        return memberAssign(memberShape, outputVar, inputVar, memberConversion(memberShape, inputVar));
+    }
+
+    /** @return CodeBlock assigning result of member conversion to variable. */
+    protected CodeBlock memberAssign(
+            final MemberShape memberShape,
+            CodeBlock outputVar,
+            CodeBlock inputVar,
+            CodeBlock memberConversion) {
         if (memberShape.isRequired()) {
             return CodeBlock.of(
                     "$L = $L",
                     outputVar,
-                    memberConversion(memberShape, inputVar)
+                    memberConversion
             );
         }
         return CodeBlock.of(
@@ -173,7 +186,7 @@ public abstract class ToDafny extends Generator {
                 ClassName.get(Objects.class),
                 inputVar,
                 ClassName.get("Wrappers_Compile", "Option"),
-                memberConversion(memberShape, inputVar),
+                memberConversion,
                 ClassName.get("Wrappers_Compile", "Option")
         );
     }
@@ -233,7 +246,7 @@ public abstract class ToDafny extends Generator {
 
     protected MethodSpec modeledList(ListShape shape) {
         MemberShape memberShape = shape.getMember();
-        CodeBlock memberConverter = memberConversionMethodReference(memberShape).asFunctionalReference();
+        CodeBlock memberConverter = conversionMethodReference(subject.model.expectShape(memberShape.getTarget())).asFunctionalReference();
         CodeBlock genericCall = AGGREGATE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(shape.getType()).asNormalReference();
         CodeBlock getTypeDescriptor = subject.dafnyNameResolver.typeDescriptor(memberShape.getTarget());
         ParameterSpec parameterSpec = ParameterSpec
@@ -251,7 +264,7 @@ public abstract class ToDafny extends Generator {
 
     protected MethodSpec modeledSet(SetShape shape) {
         MemberShape memberShape = shape.getMember();
-        CodeBlock memberConverter = memberConversionMethodReference(memberShape).asFunctionalReference();
+        CodeBlock memberConverter = conversionMethodReference(subject.model.expectShape(memberShape.getTarget())).asFunctionalReference();
         CodeBlock genericCall = AGGREGATE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(shape.getType()).asNormalReference();
         ParameterSpec parameterSpec = ParameterSpec
                 .builder(subject.nativeNameResolver.typeForShape(shape.getId()), "nativeValue")
@@ -269,9 +282,9 @@ public abstract class ToDafny extends Generator {
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     protected MethodSpec modeledMap(MapShape shape) {
         MemberShape keyShape = shape.getKey().asMemberShape().get();
-        CodeBlock keyConverter = memberConversionMethodReference(keyShape).asFunctionalReference();
+        CodeBlock keyConverter = conversionMethodReference(subject.model.expectShape(keyShape.getTarget())).asFunctionalReference();
         MemberShape valueShape = shape.getValue().asMemberShape().get();
-        CodeBlock valueConverter = memberConversionMethodReference(valueShape).asFunctionalReference();
+        CodeBlock valueConverter = conversionMethodReference(subject.model.expectShape(valueShape.getTarget())).asFunctionalReference();
         CodeBlock genericCall = AGGREGATE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(shape.getType()).asNormalReference();
         ParameterSpec parameterSpec = ParameterSpec
                 .builder(subject.nativeNameResolver.typeForShape(shape.getId()), "nativeValue")
@@ -292,32 +305,44 @@ public abstract class ToDafny extends Generator {
     /** CodeBlock invoking the member conversion method. */
     protected CodeBlock memberConversion(MemberShape memberShape, CodeBlock inputVar) {
         return CodeBlock.of("$L($L)",
-                memberConversionMethodReference(memberShape).asNormalReference(),
+                conversionMethodReference(subject.model.expectShape(memberShape.getTarget())).asNormalReference(),
                 inputVar
         );
     }
 
     /**
      * Returns MethodReference that converts from
-     * the Java Native memberShape to
-     * the Java Dafny memberShape.
+     * the Java Native Shape to
+     * the Java Dafny Shape.
      */
     @SuppressWarnings({"DuplicatedCode"})
-    protected MethodReference memberConversionMethodReference(final MemberShape memberShape) {
-        Shape targetShape = subject.model.expectShape(memberShape.getTarget());
-        // If the target is simple, use SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE
-        if (ModelUtils.isSmithyApiOrSimpleShape(targetShape)) {
-            return SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(targetShape.getType());
+    protected MethodReference conversionMethodReference(Shape shape) {
+        if (shape.isMemberShape()) {
+            throw new IllegalArgumentException("MemberShapes MUST BE de-referenced BEFORE calling ToDafny.conversionMethodReference. ShapeId: %s".formatted(shape.toShapeId()));
         }
-        final String methodName = capitalize(targetShape.getId().getName());
-        // if in namespace, reference converter from this ToDafny class
-        if (subject.nativeNameResolver.isInServiceNameSpace(targetShape.getId())) {
-            return new MethodReference(thisClassName, methodName);
+        // If the target is simple, use SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE
+        if (ModelUtils.isSmithyApiOrSimpleShape(shape)) {
+            return SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(shape.getType());
+        }
+        return nonSimpleConversionMethodReference(shape);
+    }
+
+    @SuppressWarnings("DuplicatedCode")
+    @Nonnull
+    protected MethodReference nonSimpleConversionMethodReference(Shape shape) {
+        ShapeId targetId = shape.getId();
+        final String methodName = capitalize(targetId.getName());
+        // if in AWS SDK namespace, reference converter from AWS SDK ToDafny class
+        if (AwsSdkNameResolverHelpers.isInAwsSdkNamespace(targetId)) {
+            return switch (subject.sdkVersion) {
+                case V1 -> new MethodReference(ToDafnyAwsV1.className(targetId), methodName);
+                case V2 -> new MethodReference(ToDafnyAwsV2.className(targetId), methodName);
+            };
         }
         // Otherwise, this target must be in another namespace,
         // reference converter from that namespace's ToDafny class
         ClassName otherNamespaceToDafny = ClassName.get(
-                NamespaceHelper.standardize(targetShape.getId().getNamespace()),
+                NamespaceHelper.standardize(targetId.getNamespace()),
                 TO_DAFNY);
         return new MethodReference(otherNamespaceToDafny, methodName);
     }

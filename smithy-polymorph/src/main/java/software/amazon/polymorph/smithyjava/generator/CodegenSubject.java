@@ -21,17 +21,19 @@ public abstract class CodegenSubject {
     final public Native nativeNameResolver;
     final public Model model;
     final public ServiceShape serviceShape;
+    final public AwsSdkVersion sdkVersion;
 
     protected CodegenSubject(
             Model model,
             ServiceShape serviceShape,
             Dafny dafnyNameResolver,
-            Native nativeNameResolver
-    ) {
+            Native nativeNameResolver,
+            AwsSdkVersion sdkVersion) {
         this.model = model;
         this.serviceShape = serviceShape;
         this.dafnyNameResolver = dafnyNameResolver;
         this.nativeNameResolver = nativeNameResolver;
+        this.sdkVersion = sdkVersion;
     }
 
 
@@ -39,4 +41,9 @@ public abstract class CodegenSubject {
      * Generates Java Code for the Subject.
      */
     public abstract Map<Path, TokenTree> generate();
+
+    public enum AwsSdkVersion {
+        V1,
+        V2
+    }
 }

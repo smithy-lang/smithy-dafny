@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -18,7 +19,9 @@ import javax.lang.model.element.Modifier;
 
 import software.amazon.polymorph.smithyjava.generator.Generator;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
+import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 import software.amazon.smithy.model.shapes.OperationShape;
+import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.utils.StringUtils;
 
@@ -32,6 +35,7 @@ import static software.amazon.polymorph.smithyjava.nameresolver.Constants.SMITHY
  * exposing an AWS Service's operations to Dafny Generated Java.
  */
 public class ShimV1 extends Generator {
+    public static final String SHIM = "Shim";
     // Hack to override CodegenSubject
     // See code comment on ../library/ModelCodegen for details.
     private final JavaAwsSdkV1 subject;
@@ -41,17 +45,22 @@ public class ShimV1 extends Generator {
         this.subject = awsSdk;
     }
 
+    public static ClassName className(ServiceShape shape) {
+        return ClassName.get(
+                DafnyNameResolverHelpers.packageNameForNamespace(
+                        shape.toShapeId().getNamespace()), SHIM);
+    }
+
     @Override
     public Set<JavaFile> javaFiles() {
         JavaFile.Builder builder = JavaFile
-                .builder(subject.dafnyNameResolver.packageName(), shim());
+                .builder(subject.packageName, shim());
         return Collections.singleton(builder.build());
     }
 
     TypeSpec shim() {
         return TypeSpec
-                .classBuilder(
-                        ClassName.get(subject.dafnyNameResolver.packageName(), "Shim"))
+                .classBuilder(className(subject.serviceShape))
                 .addModifiers(Modifier.PUBLIC)
                 .addSuperinterface(subject.dafnyNameResolver.typeForShape(subject.serviceShape.getId()))
                 .addField(
@@ -63,6 +72,7 @@ public class ShimV1 extends Generator {
                 .addMethod(constructor())
                 .addMethod(impl())
                 .addMethod(region())
+                .addMethod(impl())
                 .addMethods(
                         subject.serviceShape.getAllOperations()
                                 .stream()

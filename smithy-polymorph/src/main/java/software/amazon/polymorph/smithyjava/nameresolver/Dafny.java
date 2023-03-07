@@ -24,6 +24,8 @@ import dafny.TypeDescriptor;
 
 import software.amazon.polymorph.smithydafny.DafnyNameResolver;
 import software.amazon.polymorph.smithyjava.MethodReference;
+import software.amazon.polymorph.smithyjava.generator.CodegenSubject;
+import software.amazon.polymorph.smithyjava.generator.CodegenSubject.AwsSdkVersion;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
 
@@ -39,6 +41,7 @@ import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
 
+import static software.amazon.polymorph.utils.AwsSdkNameResolverHelpers.isInAwsSdkNamespace;
 import static software.amazon.polymorph.smithyjava.generator.Generator.Constants.SUPPORTED_CONVERSION_AGGREGATE_SHAPES;
 import static software.amazon.polymorph.smithyjava.nameresolver.Constants.DAFNY_RESULT_CLASS_NAME;
 import static software.amazon.polymorph.smithyjava.nameresolver.Constants.SMITHY_API_UNIT;
@@ -73,14 +76,14 @@ public class Dafny extends NameResolver {
     public Dafny(
             final String packageName,
             final Model model,
-            final ServiceShape serviceShape
-    ) {
+            final ServiceShape serviceShape,
+            AwsSdkVersion awsSdkVersion) {
         super(
                 packageName,
                 serviceShape,
                 model,
-                modelPackageNameForServiceShape(serviceShape)
-        );
+                modelPackageNameForServiceShape(serviceShape),
+                awsSdkVersion);
     }
 
     /**
@@ -338,14 +341,14 @@ public class Dafny extends NameResolver {
     public static ClassName interfaceForService(final ServiceShape shape) {
         final String packageName = dafnyExternNamespaceForShapeId(shape.getId());
         final String interfaceName = DafnyNameResolver.traitNameForServiceClient(shape);
-        return ClassName.get(packageName, interfaceName);
+        return ClassName.get(packageName, dafnyCompilesExtra_(interfaceName));
     }
 
     /** @return The concrete class for a service client. */
     public ClassName classNameForConcreteServiceClient(ServiceShape shape) {
         String packageName = packageNameForNamespace(shape.getId().getNamespace());
         String concreteClass = DafnyNameResolver.classNameForServiceClient(shape);
-        return ClassName.get(packageName, concreteClass);
+        return ClassName.get(packageName, dafnyCompilesExtra_(concreteClass));
     }
 
     public ClassName classNameForNamespaceDefault() {
@@ -363,6 +366,39 @@ public class Dafny extends NameResolver {
     public static ClassName interfaceForResource(final ResourceShape shape) {
         final String packageName = dafnyExternNamespaceForShapeId(shape.getId());
         final String interfaceName = DafnyNameResolver.traitNameForResource(shape);
-        return ClassName.get(packageName, interfaceName);
+        return ClassName.get(packageName, dafnyCompilesExtra_(interfaceName));
+    }
+
+    public ClassName classNameForInterface(Shape shape) {
+        // if shape is an AWS Service/Resource, return Dafny Types Interface
+        if (isInAwsSdkNamespace(shape.toShapeId())) {
+            return classNameForAwsSdk(shape, this.awsSdkVersion);
+        }
+        // if operation takes a non-AWS Service/Resource, return Dafny Interface Or Local Service
+        if (shape.isResourceShape()) {
+            //noinspection OptionalGetWithoutIsPresent
+            return interfaceForResource(shape.asResourceShape().get());
+        }
+        if (shape.isServiceShape()) {
+            //noinspection OptionalGetWithoutIsPresent
+            return interfaceForService(shape.asServiceShape().get());
+        }
+        throw new IllegalArgumentException(
+                "Polymorph only supports interfaces for Service & Resource Shapes. ShapeId: %s"
+                        .formatted(shape.toShapeId()));
+    }
+
+    public static ClassName classNameForAwsSdk(Shape shape, AwsSdkVersion sdkVersion) {
+        if (shape.getType() != ShapeType.SERVICE) {
+            throw new RuntimeException(
+                    "Polymorph only knows the class Name of Service clients. " +
+                            "Would a TypeName suffice? ShapeId: " + shape.toShapeId());
+        }
+        @SuppressWarnings("OptionalGetWithoutIsPresent")
+        ServiceShape service = shape.asServiceShape().get();
+        return switch (sdkVersion) {
+            case V1 -> AwsSdkDafnyV1.classNameForAwsService(service);
+            case V2 -> AwsSdkDafnyV2.classNameForAwsService(service);
+        };
     }
 }

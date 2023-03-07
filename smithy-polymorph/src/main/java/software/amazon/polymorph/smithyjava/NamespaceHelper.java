@@ -1,7 +1,6 @@
 package software.amazon.polymorph.smithyjava;
 
 public class NamespaceHelper {
-
     /**
      * Crypto Tools has used the namespace `aws.cryptography` in our Smithy Models;
      * <p>But AWS Java uses `software.amazon` instead of `aws`.
