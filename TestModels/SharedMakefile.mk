@@ -247,9 +247,9 @@ test_java:
 	gradle -p runtimes/java runTests
 
 clean:
-	rm -f $(PROJECT_ROOT)/Model/*Types.dfy $(PROJECT_ROOT)/Model/*TypesWrapped.dfy
-	rm -f $(PROJECT_ROOT)/runtimes/net/ImplementationFromDafny.cs
-	rm -f $(PROJECT_ROOT)/runtimes/net/tests/TestFromDafny.cs
-	rm -rf $(PROJECT_ROOT)/TestResults
-	rm -rf $(PROJECT_ROOT)/runtimes/net/Generated $(PROJECT_ROOT)/runtimes/net/bin $(PROJECT_ROOT)/runtimes/net/obj
-	rm -rf $(PROJECT_ROOT)/runtimes/net/tests/bin $(PROJECT_ROOT)/runtimes/net/tests/obj
+	rm -f $(LIBRARY_ROOT)/Model/*Types.dfy $(LIBRARY_ROOT)/Model/*TypesWrapped.dfy
+	rm -f $(LIBRARY_ROOT)/runtimes/net/ImplementationFromDafny.cs
+	rm -f $(LIBRARY_ROOT)/runtimes/net/tests/TestFromDafny.cs
+	rm -rf $(LIBRARY_ROOT)/TestResults
+	rm -rf $(LIBRARY_ROOT)/runtimes/net/Generated $(LIBRARY_ROOT)/runtimes/net/bin $(LIBRARY_ROOT)/runtimes/net/obj
+	rm -rf $(LIBRARY_ROOT)/runtimes/net/tests/bin $(LIBRARY_ROOT)/runtimes/net/tests/obj
