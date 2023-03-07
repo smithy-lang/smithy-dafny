@@ -1,17 +1,16 @@
 package software.amazon.polymorph.smithyjava.unmodeled;
 
 import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeSpec;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.stream.Collectors;
 
 import software.amazon.polymorph.smithyjava.BuilderSpecs;
 
+import static software.amazon.polymorph.smithyjava.BuilderMemberSpec.THROWABLE_ARGS;
 import static software.amazon.smithy.utils.StringUtils.capitalize;
 
 import static javax.lang.model.element.Modifier.PRIVATE;
@@ -28,10 +27,6 @@ import static javax.lang.model.element.Modifier.STATIC;
  */
 public class NativeError {
     public static String NATIVE_ERROR = "NativeError";
-    public final static List<FieldSpec> THROWABLE_ARGS = List.of(
-            FieldSpec.builder(String.class, "message").build(),
-            FieldSpec.builder(Throwable.class, "cause").build()
-    );
 
     public static ClassName nativeClassName(String packageName) {
         return ClassName.get(packageName, NATIVE_ERROR);

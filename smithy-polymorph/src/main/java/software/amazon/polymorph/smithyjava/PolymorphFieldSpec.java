@@ -1,6 +1,5 @@
 package software.amazon.polymorph.smithyjava;
 
-import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.TypeName;
 
 import java.math.BigDecimal;
@@ -8,7 +7,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import software.amazon.polymorph.smithyjava.generator.CodegenSubject;
+import software.amazon.polymorph.smithyjava.generator.library.JavaLibrary;
 import software.amazon.polymorph.smithyjava.nameresolver.Native;
 import software.amazon.polymorph.utils.ConstrainTraitUtils;
 
@@ -18,15 +17,15 @@ import software.amazon.smithy.model.traits.LengthTrait;
 import software.amazon.smithy.model.traits.RangeTrait;
 
 public class PolymorphFieldSpec {
-    public final FieldSpec fieldSpec;
+    public final BuilderMemberSpec fieldSpec;
     public final MemberShape shape;
-    final CodegenSubject subject;
+    final JavaLibrary subject;
     public final TypeName type;
     public final String name;
     public final boolean hasConstraints;
 
-    public PolymorphFieldSpec(MemberShape shape, CodegenSubject subject) {
-        this.fieldSpec = BuilderSpecs.fieldSpecFromMemberShape(shape, subject.nativeNameResolver);
+    public PolymorphFieldSpec(MemberShape shape, JavaLibrary subject) {
+        this.fieldSpec = new BuilderMemberSpec(shape, subject);
         this.shape = shape;
         this.subject = subject;
         this.name = this.fieldSpec.name;
@@ -36,7 +35,7 @@ public class PolymorphFieldSpec {
 
     public static List<PolymorphFieldSpec> shapeToPolyFieldSpecs(
             Shape shape,
-            CodegenSubject subject
+            JavaLibrary subject
     ) {
         return shape.members().stream()
                 .map(member -> new PolymorphFieldSpec(member, subject))

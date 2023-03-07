@@ -11,9 +11,10 @@ import java.util.Set;
 
 import software.amazon.polymorph.smithyjava.generator.library.JavaLibrary;
 import software.amazon.polymorph.smithyjava.generator.library.JavaLibrary.MethodSignature;
-import software.amazon.polymorph.smithyjava.generator.library.JavaLibrary.ResolvedShapeId;
+import software.amazon.polymorph.utils.ModelUtils.ResolvedShapeId;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.polymorph.utils.AwsSdkNameResolverHelpers;
+import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ResourceShape;
 import software.amazon.smithy.model.shapes.Shape;
@@ -83,10 +84,10 @@ public class NativeWrapper extends ResourceShim {
             final OperationShape shape,
             boolean append_k
     ) {
-        final ResolvedShapeId inputResolved = subject.resolveShape(
-                shape.getInputShape());
-        final ResolvedShapeId outputResolved = subject.resolveShape(
-                shape.getOutputShape());
+        final ResolvedShapeId inputResolved = ModelUtils.resolveShape(
+                shape.getInputShape(), subject.model);
+        final ResolvedShapeId outputResolved = ModelUtils.resolveShape(
+                shape.getOutputShape(), subject.model);
         final String operationName = append_k ?
                 // See JavaDoc on operation_K below
                 shape.toShapeId().getName() + "_k" :
