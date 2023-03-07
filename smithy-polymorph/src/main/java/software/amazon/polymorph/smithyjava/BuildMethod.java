@@ -2,7 +2,6 @@ package software.amazon.polymorph.smithyjava;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 
 import java.util.List;
@@ -10,7 +9,7 @@ import java.util.Objects;
 
 import javax.lang.model.element.Modifier;
 
-import software.amazon.polymorph.smithyjava.generator.CodegenSubject;
+import software.amazon.polymorph.smithyjava.generator.library.JavaLibrary;
 import software.amazon.polymorph.smithyjava.modeled.ModeledUnion;
 import software.amazon.polymorph.utils.ConstrainTraitUtils;
 
@@ -35,7 +34,7 @@ public class BuildMethod {
     public static MethodSpec implBuildMethod(
             boolean overrideSuper,
             Shape shape,
-            CodegenSubject subject,
+            JavaLibrary subject,
             String packageName
     ) {
         ClassName className = ClassName.get(packageName, shape.getId().getName());
@@ -81,11 +80,11 @@ public class BuildMethod {
         return buildMethod.build();
     }
 
-    static CodeBlock fieldNonNull(FieldSpec field) {
+    static CodeBlock fieldNonNull(BuilderMemberSpec field) {
         return CodeBlock.of("$T.nonNull(this.$L())", Objects.class, field.name);
     }
 
-    public static CodeBlock requiredCheck(FieldSpec field) {
+    public static CodeBlock requiredCheck(BuilderMemberSpec field) {
         return CodeBlock.builder()
                 .beginControlFlow("if ($T.isNull(this.$L())) ", Objects.class, field.name)
                 .addStatement(

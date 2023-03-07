@@ -17,6 +17,8 @@ import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.RequiredTrait;
 
+import static software.amazon.polymorph.smithyjava.nameresolver.Constants.SMITHY_API_UNIT;
+
 public class ModelUtils {
     // Require title-case alphanumeric names, so we don't need to check for keyword conflicts.
     //
@@ -25,7 +27,7 @@ public class ModelUtils {
     private static final Pattern ENUM_NAME_PATTERN = Pattern.compile("^[A-Z]+[A-Za-z_0-9]*$");
 
     /**
-     * Adds our custom traits (and their definitions) to a {@link ModelAssembler}.
+     * Adds our custom traits (and their definitions) to a {@link ModelAssembler}.<p/>
      *
      * Note that this only needs to be called if the model file(s) being processed do not define these traits
      * (for example, in unit tests). If the model file does define the traits, adding them again does nothing.
@@ -300,12 +302,6 @@ public class ModelUtils {
         return shape.hasTrait(EnumTrait.class);
     }
 
-    public static ShapeId getReferentShapeId(final Shape shape) {
-        assert shape.hasTrait(ReferenceTrait.class);
-        final ReferenceTrait referenceTrait = shape.getTrait(ReferenceTrait.class).get();
-        return referenceTrait.getReferentId();
-    }
-
     /*
         A reference type will point to a resource or service.
         Regardless of where this referent is
@@ -328,4 +324,40 @@ public class ModelUtils {
             return false;
         }
     }
+
+    public static ShapeId checkForPositional(ShapeId originalId, Model model) {
+        Shape originalShape = model.expectShape(originalId);
+        if (originalShape.hasTrait(PositionalTrait.class)) {
+            // Positional traits can only be on structures,
+            // asStructureShape cannot return an empty optional
+            //noinspection OptionalGetWithoutIsPresent
+            MemberShape onlyMember = PositionalTrait.onlyMember(originalShape.asStructureShape().get());
+            return onlyMember.getTarget();
+        }
+        return originalId;
+    }
+
+    /**
+     * @param shapeId ShapeId that might have positional or reference trait
+     * @return Fully de-referenced shapeId and naive shapeId as a ResolvedShapeId
+     */
+    public static ResolvedShapeId resolveShape(ShapeId shapeId, Model model) {
+        if (shapeId.equals(SMITHY_API_UNIT)) {
+            return new ResolvedShapeId(shapeId, shapeId);
+        }
+        ShapeId notPositionalId = checkForPositional(shapeId, model);
+        if (model.expectShape(notPositionalId).hasTrait(ReferenceTrait.class)) {
+            ReferenceTrait reference = model.expectShape(notPositionalId).expectTrait(ReferenceTrait.class);
+            return new ResolvedShapeId(shapeId, reference.getReferentId());
+        }
+        return new ResolvedShapeId(shapeId, notPositionalId);
+    }
+
+    /**
+     * @param naiveId ShapeId that might have positional or reference trait.
+     * @param resolvedId Fully de-referenced shapeId;
+     *                   de-referenced means Positional or
+     *                   Reference traits have been fully resolved.
+     */
+    public record ResolvedShapeId(ShapeId naiveId, ShapeId resolvedId) {}
 }

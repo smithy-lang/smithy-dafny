@@ -1,7 +1,6 @@
 package software.amazon.polymorph.smithyjava.unmodeled;
 
 import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
@@ -9,6 +8,7 @@ import com.squareup.javapoet.TypeSpec;
 
 import java.util.List;
 
+import software.amazon.polymorph.smithyjava.BuilderMemberSpec;
 import software.amazon.polymorph.smithyjava.BuilderSpecs;
 
 import static javax.lang.model.element.Modifier.FINAL;
@@ -16,7 +16,7 @@ import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PROTECTED;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static software.amazon.polymorph.smithyjava.unmodeled.NativeError.NATIVE_ERROR;
-import static software.amazon.polymorph.smithyjava.unmodeled.NativeError.THROWABLE_ARGS;
+import static software.amazon.polymorph.smithyjava.BuilderMemberSpec.THROWABLE_ARGS;
 
 public class CollectionOfErrors {
     public final static String COLLECTION_ERROR = "CollectionOfErrors";
@@ -28,7 +28,7 @@ public class CollectionOfErrors {
     public static JavaFile javaFile(String packageName) {
         ClassName className = nativeClassName(packageName);
         ClassName superName = NativeError.nativeClassName(packageName);
-        List<FieldSpec> collectionArgs = getArgs(packageName);
+        List<BuilderMemberSpec> collectionArgs = getArgs(packageName);
         BuilderSpecs builderSpecs = new BuilderSpecs(
                 className, superName, collectionArgs, THROWABLE_ARGS);
         TypeSpec.Builder spec = TypeSpec
@@ -59,8 +59,8 @@ public class CollectionOfErrors {
                 .build();
     }
 
-    private static List<FieldSpec> getArgs(String packageName) {
-        return List.of(FieldSpec.builder(getArg(packageName), "list").build());
+    private static List<BuilderMemberSpec> getArgs(String packageName) {
+        return BuilderMemberSpec.collectionOfErrorsBuilderMemberSpecs(packageName);
     }
 
     public static ParameterizedTypeName getArg(String packageName) {

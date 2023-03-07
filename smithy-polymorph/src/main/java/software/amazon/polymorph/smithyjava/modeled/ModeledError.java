@@ -1,7 +1,6 @@
 package software.amazon.polymorph.smithyjava.modeled;
 
 import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeSpec;
@@ -11,22 +10,23 @@ import java.util.List;
 import javax.lang.model.element.Modifier;
 
 import software.amazon.polymorph.smithyjava.BuildMethod;
+import software.amazon.polymorph.smithyjava.BuilderMemberSpec;
 import software.amazon.polymorph.smithyjava.BuilderSpecs;
+import software.amazon.polymorph.smithyjava.generator.library.JavaLibrary;
 import software.amazon.polymorph.smithyjava.unmodeled.NativeError;
-import software.amazon.polymorph.smithyjava.generator.CodegenSubject;
 import software.amazon.smithy.model.shapes.StructureShape;
 
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PROTECTED;
-import static software.amazon.polymorph.smithyjava.unmodeled.NativeError.THROWABLE_ARGS;
+import static software.amazon.polymorph.smithyjava.BuilderMemberSpec.THROWABLE_ARGS;
 
 public class ModeledError {
 
-    public static JavaFile javaFile(String packageName, StructureShape shape, CodegenSubject subject) {
+    public static JavaFile javaFile(String packageName, StructureShape shape, JavaLibrary subject) {
         ClassName className = ClassName.get(packageName, shape.getId().getName());
         ClassName superName = NativeError.nativeClassName(packageName);
-        List<FieldSpec> modelFields = BuilderSpecs.shapeToArgs(shape, subject.nativeNameResolver);
+        List<BuilderMemberSpec> modelFields = BuilderSpecs.shapeToArgs(shape, subject);
         BuilderSpecs builderSpecs = new BuilderSpecs(
                 className, superName, modelFields, THROWABLE_ARGS);
         TypeSpec.Builder spec = TypeSpec
@@ -43,7 +43,7 @@ public class ModeledError {
                                 subject,
                                 packageName
                         )));
-        List<FieldSpec> localFields = builderSpecs.getLocalFields();
+        List<BuilderMemberSpec> localFields = builderSpecs.getLocalFields();
         localFields.forEach(field -> {
             // Add local fields
             spec.addField(field.type, field.name, PRIVATE, FINAL);
@@ -64,7 +64,7 @@ public class ModeledError {
                 .build();
     }
 
-    private static MethodSpec constructor(BuilderSpecs builderSpecs, List<FieldSpec> localFields) {
+    private static MethodSpec constructor(BuilderSpecs builderSpecs, List<BuilderMemberSpec> localFields) {
         MethodSpec.Builder method =  MethodSpec
                 .constructorBuilder()
                 .addModifiers(PROTECTED)

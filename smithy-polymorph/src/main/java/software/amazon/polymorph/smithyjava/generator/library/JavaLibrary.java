@@ -25,6 +25,7 @@ import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 import software.amazon.polymorph.utils.ModelUtils;
+import software.amazon.polymorph.utils.ModelUtils.ResolvedShapeId;
 import software.amazon.polymorph.utils.TokenTree;
 
 import software.amazon.smithy.model.Model;
@@ -44,8 +45,7 @@ import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.TraitDefinition;
 
-import static software.amazon.polymorph.smithyjava.generator.library.shims.ResourceShim.CREATE_METHOD_NAME;
-import static software.amazon.polymorph.smithyjava.nameresolver.Constants.SMITHY_API_UNIT;
+import static software.amazon.polymorph.smithyjava.generator.library.shims.ResourceShim.WRAP_METHOD_NAME;
 
 public class JavaLibrary extends CodegenSubject {
 
@@ -101,6 +101,7 @@ public class JavaLibrary extends CodegenSubject {
         };
     }
 
+    @SuppressWarnings("unused") // We do not use this yet (2023-03-05), but we might soon-ish. Remove by 2023-06 if still not used.
     protected static CodeBlock castAndUnwrapAwsService(
             Shape shape, CodeBlock dafnyValue,
             AwsSdkVersion sdkVersion) {
@@ -117,14 +118,6 @@ public class JavaLibrary extends CodegenSubject {
                     dafnyValue);
         };
     }
-
-    /**
-     * @param naiveId ShapeId that might have positional or reference trait.
-     * @param resolvedId Fully de-referenced shapeId;
-     *                   de-referenced means Positional or
-     *                   Reference traits have been fully resolved.
-     */
-    public record ResolvedShapeId(ShapeId naiveId, ShapeId resolvedId) {}
 
     /**
      * @param method      MethodSpec.Builder that SHOULD have Parameters,
@@ -220,35 +213,7 @@ public class JavaLibrary extends CodegenSubject {
                 .collect(Collectors.toList());
     }
 
-    private ShapeId checkForPositional(ShapeId originalId) {
-        Shape originalShape = model.expectShape(originalId);
-        if (originalShape.hasTrait(PositionalTrait.class)) {
-            // Positional traits can only be on structures,
-            // asStructureShape cannot return an empty optional
-            //noinspection OptionalGetWithoutIsPresent
-            MemberShape onlyMember = PositionalTrait.onlyMember(originalShape.asStructureShape().get());
-            return onlyMember.getTarget();
-        }
-        return originalId;
-    }
-
-    /**
-     * @param shapeId ShapeId that might have positional or reference trait
-     * @return Fully de-referenced shapeId and naive shapeId as a ResolvedShapeId
-     */
-    public ResolvedShapeId resolveShape(ShapeId shapeId) {
-        if (shapeId.equals(SMITHY_API_UNIT)) {
-            return new ResolvedShapeId(shapeId, shapeId);
-        }
-        ShapeId notPositionalId = checkForPositional(shapeId);
-        if (model.expectShape(notPositionalId).hasTrait(ReferenceTrait.class)) {
-            ReferenceTrait reference = model.expectShape(notPositionalId).expectTrait(ReferenceTrait.class);
-            return new ResolvedShapeId(shapeId, reference.getReferentId());
-        }
-        return new ResolvedShapeId(shapeId, notPositionalId);
-    }
-
-    protected CodeBlock wrapWithShim(ShapeId referentId, CodeBlock dafnyValue) throws ExpectationNotMetException {
+    public CodeBlock wrapWithShim(ShapeId referentId, CodeBlock referentVariable) throws ExpectationNotMetException {
         final Shape targetShape = model.expectShape(referentId);
         final ClassName rtnClassName;
         if (targetShape.isResourceShape()) {
@@ -256,7 +221,7 @@ public class JavaLibrary extends CodegenSubject {
             ResourceShape rShape = targetShape.asResourceShape().get();
             rtnClassName = nativeNameResolver.classNameForResource(rShape);
             return CodeBlock.of("$T.$L($L)",
-                    rtnClassName, CREATE_METHOD_NAME, dafnyValue);
+                    rtnClassName, WRAP_METHOD_NAME, referentVariable);
         } else {
             // It MUST be a service, as reference traits ONLY reference Resources & Services
             //noinspection OptionalGetWithoutIsPresent
@@ -265,6 +230,6 @@ public class JavaLibrary extends CodegenSubject {
         }
         return CodeBlock.of("new $T($L)",
                 rtnClassName,
-                dafnyValue);
+                referentVariable);
     }
 }

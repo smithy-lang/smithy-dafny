@@ -1,7 +1,6 @@
 package software.amazon.polymorph.smithyjava;
 
 import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeSpec;
 
@@ -14,8 +13,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.lang.model.element.Modifier;
 
-import software.amazon.polymorph.smithyjava.nameresolver.NameResolver;
-import software.amazon.smithy.model.shapes.MemberShape;
+import software.amazon.polymorph.smithyjava.generator.library.JavaLibrary;
 import software.amazon.smithy.model.shapes.Shape;
 
 import static javax.lang.model.element.Modifier.ABSTRACT;
@@ -23,26 +21,27 @@ import static javax.lang.model.element.Modifier.PROTECTED;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 
+/** Creates a Builder Interface and Implementation for a Shape. */
 public class BuilderSpecs {
     /** Also the name of the method to initialize a builder. */
     public static String BUILDER_VAR = "builder";
 
     @Nonnull private final ClassName className;
     @Nullable private final ClassName superName;
-    @Nonnull private final List<FieldSpec> localFields;
-    @Nonnull private final List<FieldSpec> superFields;
+    @Nonnull private final List<BuilderMemberSpec> localFields;
+    @Nonnull private final List<BuilderMemberSpec> superFields;
 
-    public static List<FieldSpec> shapeToArgs(Shape shape, NameResolver nameResolver) {
+    public static List<BuilderMemberSpec> shapeToArgs(Shape shape, JavaLibrary subject) {
         return shape.members().stream()
-                .map(member -> fieldSpecFromMemberShape(member, nameResolver))
+                .map(member -> new BuilderMemberSpec(member, subject))
                 .collect(Collectors.toList());
     }
 
     public BuilderSpecs(
             @Nonnull ClassName className,
             @Nullable ClassName superName,
-            @Nonnull List<FieldSpec> localFields,
-            @Nonnull List<FieldSpec> superFields
+            @Nonnull List<BuilderMemberSpec> localFields,
+            @Nonnull List<BuilderMemberSpec> superFields
     ) {
         if (superName == null && superFields.size() != 0) {
             throw new IllegalArgumentException(
@@ -67,19 +66,6 @@ public class BuilderSpecs {
         return className.nestedClass("BuilderImpl");
     }
 
-    /**
-     * @return Converts a Smithy representation of a shape to java-poet representation of a field.
-     */
-    public static FieldSpec fieldSpecFromMemberShape(
-            MemberShape memberShape,
-            NameResolver nameResolver
-    ) {
-        return FieldSpec.builder(
-                nameResolver.typeForShape(memberShape.getTarget().toShapeId()),
-                memberShape.getMemberName())
-                .build();
-    }
-
     public ClassName builderInterfaceName() { return builderInterfaceName(className); }
 
     public ClassName builderImplName() { return builderImplName(className); }
@@ -88,7 +74,7 @@ public class BuilderSpecs {
      * @return Get only the fields unique to the class, not those held by the super class.
      */
     @Nonnull
-    public List<FieldSpec> getLocalFields() { return this.localFields; }
+    public List<BuilderMemberSpec> getLocalFields() { return this.localFields; }
 
     /**
      * The Builder Interface defines the builder's
@@ -108,7 +94,8 @@ public class BuilderSpecs {
         }
         superFields.forEach(field ->
                 builder.addMethod(MethodSpec.methodBuilder(field.name)
-                        .addParameter(field.type, field.name)
+                        // If the type is a Reference to a Resource, the method should take an interface
+                        .addParameter(field.interfaceType != null? field.interfaceType : field.type, field.name)
                         .returns(builderInterfaceName())
                         .addModifiers(ABSTRACT, PUBLIC)
                         .build())
@@ -117,7 +104,8 @@ public class BuilderSpecs {
                 field -> {
                     builder.addMethod(
                             MethodSpec.methodBuilder(field.name)
-                                    .addParameter(field.type, field.name)
+                                    // If the type is a Reference to a Resource, the method should take an interface
+                                    .addParameter(field.interfaceType != null? field.interfaceType : field.type, field.name)
                                     .returns(builderInterfaceName())
                                     .addModifiers(PUBLIC, ABSTRACT)
                                     .build());
@@ -178,8 +166,10 @@ public class BuilderSpecs {
                     .methodBuilder(field.name)
                     .addModifiers(Modifier.PUBLIC)
                     .returns(builderInterfaceName())
-                    .addParameter(field.type, field.name)
-                    .addStatement("this.$L = $L", field.name, field.name)
+                    // If the type is a Reference to a Resource, the method should take an interface
+                    .addParameter(field.interfaceType != null? field.interfaceType : field.type, field.name)
+                    // If the type is a Reference to a Resource, and not in AWS-SDK, we need to "wrap" it
+                    .addStatement("this.$L = $L", field.name, field.wrapCall != null? field.wrapCall : field.name)
                     .addStatement("return this")
                     .build());
             // Getter Method
