@@ -1,4 +1,4 @@
-package software.amazon.polymorph.smithyjava.generator.awssdk;
+package software.amazon.polymorph.smithyjava.generator.awssdk.v1;
 
 public class ToNativeConstants {
     static String STRING_CONVERSION = "software.amazon.dafny.conversion.ToNative.Simple.String";
@@ -80,9 +80,22 @@ public class ToNativeConstants {
     static String KMS_A_STRING_OPERATION_JAVA_FILE = """
             package Dafny.Com.Amazonaws.Kms;
             
+            import Dafny.Com.Amazonaws.Kms.Types.Error_DependencyTimeoutException;
+            import com.amazonaws.services.kms.model.DependencyTimeoutException;
             import com.amazonaws.services.kms.model.DoSomethingRequest;
+            import com.amazonaws.services.kms.model.DoSomethingResponse;
+            import com.amazonaws.services.kms.model.DoSomethingResult;
             
             public class ToNative {
+              public static DoSomethingResponse DoSomethingResponse(
+                  DoSomethingResult nativeValue
+              ) {
+                DoSomethingResponse.Builder nativeBuilder = DoSomethingResponse.builder();
+                if (dafnyValue.dtor_message().is_Some()) {
+                  converted.withMessage(%s(dafnyValue.dtor_message().dtor_value()));
+                }
+                return nativeBuilder.build();
+              }
               public static DoSomethingRequest DoSomethingRequest(
                   Dafny.Com.Amazonaws.Kms.Types.DoSomethingRequest dafnyValue
               ) {
@@ -90,6 +103,16 @@ public class ToNativeConstants {
                 converted.withMessage(%s(dafnyValue.dtor_message()));
                 return converted;
               }
+              
+              public static DependencyTimeoutException Error(
+                  Error_DependencyTimeoutException dafnyValue
+              ) {
+                DependencyTimeoutException converted = new DependencyTimeoutException();
+                if (dafnyValue.dtor_message().is_Some()) {
+                  converted.withMessage(%s(dafnyValue.dtor_message().dtor_value()));
+                }
+                return converted;
+              }
             }
-            """.formatted(STRING_CONVERSION);
+            """.formatted(STRING_CONVERSION, STRING_CONVERSION, STRING_CONVERSION);
 }

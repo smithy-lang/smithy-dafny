@@ -1,4 +1,4 @@
-package software.amazon.polymorph.smithyjava.generator.awssdk;
+package software.amazon.polymorph.smithyjava.generator.awssdk.v1;
 
 import static software.amazon.polymorph.smithyjava.generator.ToDafnyConstants.MEMBER_ASSIGNMENT_OPTIONAL;
 import static software.amazon.polymorph.smithyjava.generator.ToDafnyConstants.MEMBER_DECLARATION_OPTIONAL;
@@ -102,6 +102,7 @@ public class ToDafnyAwsV1Constants {
     protected static final String KMS_A_STRING_OPERATION_JAVA_FILE = """
             package Dafny.Com.Amazonaws.Kms;
                         
+            import Dafny.Com.Amazonaws.Kms.Types.DoSomethingRequest;
             import Dafny.Com.Amazonaws.Kms.Types.DoSomethingResponse;
             import Dafny.Com.Amazonaws.Kms.Types.Error;
             import Dafny.Com.Amazonaws.Kms.Types.Error_DependencyTimeoutException;
@@ -121,6 +122,13 @@ public class ToDafnyAwsV1Constants {
                     Option.create_Some(software.amazon.dafny.conversion.ToDafny.Simple.CharacterSequence(nativeValue.getMessage()))
                     : Option.create_None();
                 return new DoSomethingResponse(message);
+              }
+              
+              public static DoSomethingRequest DoSomethingRequest(
+                  com.amazonaws.services.kms.model.DoSomethingRequest nativeValue) {
+                DafnySequence<? extends Character> message;
+                message = software.amazon.dafny.conversion.ToDafny.Simple.CharacterSequence(nativeValue.getMessage());
+                return new DoSomethingRequest(message);
               }
                         
               public static Error Error(DependencyTimeoutException nativeValue) {

@@ -2,6 +2,8 @@ package software.amazon.polymorph.smithyjava.generator.awssdk;
 
 import java.util.function.BiConsumer;
 
+import software.amazon.polymorph.smithyjava.generator.awssdk.v1.JavaAwsSdkV1;
+import software.amazon.polymorph.smithyjava.generator.awssdk.v2.JavaAwsSdkV2;
 import software.amazon.polymorph.smithyjava.generator.library.JavaLibrary;
 import software.amazon.polymorph.util.TestModel;
 import software.amazon.smithy.model.Model;
@@ -22,10 +24,15 @@ public class TestSetupUtils {
         updater = ((builder, modelAssembler) -> modelAssembler.addUnparsedModel("testOne.smithy", rawModelOne).addUnparsedModel("testTwo.smithy", rawModelTwo));
         return TestModel.setupModel(updater);
     }
-    public static JavaAwsSdkV1 setupAwsSdk(Model localModel, String awsName) {
+    public static JavaAwsSdkV1 setupAwsSdkV1(Model localModel, String awsName) {
         ServiceShape serviceShape = serviceFromNamespace(
                 localModel, namespaceForService(awsName));
         return JavaAwsSdkV1.createJavaAwsSdkV1(serviceShape, localModel);
+    }
+    public static JavaAwsSdkV2 setupAwsSdkV2(Model localModel, String awsName) {
+        ServiceShape serviceShape = serviceFromNamespace(
+            localModel, namespaceForService(awsName));
+        return JavaAwsSdkV2.createJavaAwsSdkV2(serviceShape, localModel);
     }
     public static JavaLibrary setupLibrary(Model localModel, String namespace) {
         ServiceShape serviceShape = serviceFromNamespace(localModel, namespace);

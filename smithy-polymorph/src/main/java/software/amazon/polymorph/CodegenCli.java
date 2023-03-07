@@ -15,15 +15,18 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import software.amazon.polymorph.smithydafny.DafnyApiCodegen;
 import software.amazon.polymorph.smithydotnet.AwsSdkShimCodegen;
 import software.amazon.polymorph.smithydotnet.AwsSdkTypeConversionCodegen;
 import software.amazon.polymorph.smithydotnet.ServiceCodegen;
 import software.amazon.polymorph.smithydotnet.ShimCodegen;
 import software.amazon.polymorph.smithydotnet.TypeConversionCodegen;
-import software.amazon.polymorph.smithyjava.generator.awssdk.JavaAwsSdkV1;
+import software.amazon.polymorph.smithyjava.generator.awssdk.v1.JavaAwsSdkV1;
+import software.amazon.polymorph.smithyjava.generator.awssdk.v2.JavaAwsSdkV2;
 import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.loader.ModelAssembler;
@@ -79,14 +82,28 @@ public class CodegenCli {
         final Model model = assembler
                 .assemble()
                 .unwrap();
+        // If Smithy ever lets us configure this:
+        // https://github.com/awslabs/smithy/blob/f598b87c51af5943686e38706847a5091fe718da/smithy-model/src/main/java/software/amazon/smithy/model/loader/ModelLoader.java#L76
+        // We can remove this log statement.
+        // (Alternatively, We could inline `addImport`,
+        // and ignore dfy & md files. Link to `addImport` below)
+        // https://github.com/awslabs/smithy/blob/f598b87c51af5943686e38706847a5091fe718da/smithy-model/src/main/java/software/amazon/smithy/model/loader/ModelAssembler.java#L256-L281
+        logger.info("End annoying Smithy \"No ModelLoader was able to load\" warnings.\n\n");
 
         final ServiceShape serviceShape = ModelUtils.serviceFromNamespace(model, cliArguments.namespace);
         final List<String> messages = new ArrayList<>(3);
 
         if (cliArguments.outputJavaDir.isPresent()) {
             final Path outputJavaDir = cliArguments.outputJavaDir.get();
-            if (cliArguments.awsSdkStyle) {
-                messages.add(javaAwsSdkV1(outputJavaDir, serviceShape, model));
+            if (cliArguments.awsSdkStyle && cliArguments.javaAwsSdkVersion.isPresent()) {
+                if ("v1".equals(cliArguments.javaAwsSdkVersion.get().trim())) {
+                    messages.add(javaAwsSdkV1(outputJavaDir, serviceShape, model));
+                } else if ("v2".equals(cliArguments.javaAwsSdkVersion.get().trim())) {
+                    messages.add(javaAwsSdkV2(outputJavaDir, serviceShape, model));
+                } else {
+                    logger.error("Unsupported Java AWS SDK version:"
+                        + cliArguments.javaAwsSdkVersion.get().trim());
+                }
             } else {
                 messages.add(javaLocalService(outputJavaDir, serviceShape, model));
             }
@@ -141,7 +158,13 @@ public class CodegenCli {
     static String javaAwsSdkV1(Path outputJavaDir, ServiceShape serviceShape, Model model) {
         final JavaAwsSdkV1 javaShimCodegen = JavaAwsSdkV1.createJavaAwsSdkV1(serviceShape, model);
         writeTokenTreesIntoDir(javaShimCodegen.generate(), outputJavaDir);
-        return "Java code generated in %s".formatted(outputJavaDir);
+        return "Java V1 code generated in %s".formatted(outputJavaDir);
+    }
+
+    static String javaAwsSdkV2(Path outputJavaDir, ServiceShape serviceShape, Model model) {
+        final JavaAwsSdkV2 javaV2ShimCodegen = JavaAwsSdkV2.createJavaAwsSdkV2(serviceShape, model);
+        writeTokenTreesIntoDir(javaV2ShimCodegen.generate(), outputJavaDir);
+        return "Java V2 code generated in %s".formatted(outputJavaDir);
     }
 
     static String netLocalService(Path outputNetDir, ServiceShape serviceShape, Model model) {
@@ -214,6 +237,11 @@ public class CodegenCli {
             .hasArg()
             .build())
           .addOption(Option.builder()
+            .longOpt("java-aws-sdk-version")
+            .desc("<optional> AWS SDK for Java version to use: v1, or v2 (default)")
+            .hasArg()
+            .build())
+          .addOption(Option.builder()
             .longOpt("aws-sdk")
             .desc("<optional> generate AWS SDK-style API and shims")
             .build())
@@ -243,6 +271,7 @@ public class CodegenCli {
             String namespace,
             Optional<Path> outputDotnetDir,
             Optional<Path> outputJavaDir,
+            Optional<String> javaAwsSdkVersion,
             boolean awsSdkStyle,
             Optional<Path> outputLocalServiceTest,
             boolean outputDafny,
@@ -276,7 +305,7 @@ public class CodegenCli {
 
             Optional<Path> outputJavaDir = Optional.empty();
             if (commandLine.hasOption("output-java")) {
-                 outputJavaDir = Optional.of(Paths.get(commandLine.getOptionValue("output-java"))
+                outputJavaDir = Optional.of(Paths.get(commandLine.getOptionValue("output-java"))
                          .toAbsolutePath().normalize());
             }
 
@@ -291,6 +320,12 @@ public class CodegenCli {
                                                     .toAbsolutePath().normalize());
             }
 
+            Optional<String> javaAwsSdkVersion = Optional.empty();
+            if (awsSdkStyle) {
+                javaAwsSdkVersion = commandLine.hasOption("java-aws-sdk-version")
+                    ? Optional.of(commandLine.getOptionValue("java-aws-sdk-version"))
+                    : Optional.of("v2");
+            }
             final boolean outputDafny = commandLine.hasOption("output-dafny");
             Optional<Path> includeDafnyFile = Optional.empty();
             if (outputDafny) {
@@ -307,7 +342,7 @@ public class CodegenCli {
                     dependentModelPaths,
                     namespace,
                     outputDotnetDir,
-                    outputJavaDir,
+                    outputJavaDir, javaAwsSdkVersion,
                     awsSdkStyle,
                     outputLocalServiceTest,
                     outputDafny,

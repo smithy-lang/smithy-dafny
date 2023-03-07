@@ -1,4 +1,4 @@
-package software.amazon.polymorph.smithyjava.generator.awssdk;
+package software.amazon.polymorph.smithyjava.generator.awssdk.v1;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
@@ -10,6 +10,7 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.WildcardTypeName;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -33,10 +34,12 @@ import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.ShapeType;
 import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
+import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumTrait;
 
 import static software.amazon.smithy.utils.StringUtils.capitalize;
 
+//TODO: Create abstract class for V1 & V2 to extend
 /**
  * ToDafnyAwsV1 generates ToDafny.
  * ToDafny is a helper class for the AwsSdk's {@link ShimV1}.<p>
@@ -45,6 +48,7 @@ import static software.amazon.smithy.utils.StringUtils.capitalize;
  * The subset is composed of:
  * <ul>
  *   <li>All the Service's Operations' outputs
+ *   <li>All the Service's Operations' inputs
  *   <li>All the Service's Errors
  *   <li>All the fields contained by the above
  * </ul>
@@ -78,15 +82,35 @@ public class ToDafnyAwsV1 extends ToDafny {
     }
 
     TypeSpec toDafny() {
-        LinkedHashSet<ShapeId> operationOutputs = subject.serviceShape
+        List<OperationShape> operations = subject.serviceShape
                 .getOperations().stream()
                 .map(shapeId -> subject.model.expectShape(shapeId, OperationShape.class))
-                .map(OperationShape::getOutput).filter(Optional::isPresent).map(Optional::get)
+                .toList();
+        LinkedHashSet<ShapeId> operationOutputs = operations.stream()
+                .map(OperationShape::getOutputShape)
                 .collect(Collectors.toCollection(LinkedHashSet::new));
-        Set<ShapeId> allRelevantShapeIds = ModelUtils.findAllDependentShapes(operationOutputs, subject.model);
+        LinkedHashSet<ShapeId> operationInputs = operations.stream()
+                .map(OperationShape::getInputShape)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+        LinkedHashSet<ShapeId> serviceErrors = operations.stream()
+                .map(OperationShape::getErrors)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+        ModelUtils.streamServiceErrors(subject.model, subject.serviceShape)
+                .map(Shape::toShapeId)
+                .forEachOrdered(serviceErrors::add);
+
+        LinkedHashSet<ShapeId> operationStructures = new LinkedHashSet<>();
+        operationStructures.addAll(operationOutputs);
+        operationStructures.addAll(operationInputs);
+        operationStructures.addAll(serviceErrors);
+        Set<ShapeId> allRelevantShapeIds = ModelUtils.findAllDependentShapes(operationStructures, subject.model);
 
         // In the AWS SDK for Java V1, Operation Outputs are special
         allRelevantShapeIds.removeAll(operationOutputs);
+        // Errors are special case for all generators
+        allRelevantShapeIds.removeAll(serviceErrors);
+        allRelevantShapeIds.remove(ShapeId.fromParts("smithy.api", "Unit"));
         // Enums are also a special case
         LinkedHashSet<ShapeId> enumShapeIds = new LinkedHashSet<>();
         allRelevantShapeIds.forEach(shapeId -> {
@@ -101,7 +125,7 @@ public class ToDafnyAwsV1 extends ToDafny {
                 .map(this::generateConvertResponseV1).toList();
         final List<MethodSpec> convertAllRelevant = allRelevantShapeIds.stream()
                 .map(this::generateConvert).filter(Objects::nonNull).toList();
-        final List<MethodSpec> convertServiceErrors = ModelUtils.streamServiceErrors(subject.model, subject.serviceShape)
+        final List<MethodSpec> convertServiceErrors = serviceErrors.stream()
                 .map(this::modeledError).collect(Collectors.toList());
         convertServiceErrors.add(generateConvertOpaqueError());
         // For enums, we generate overloaded methods,
@@ -134,12 +158,13 @@ public class ToDafnyAwsV1 extends ToDafny {
                 .orElseThrow(() -> new IllegalStateException("Cannot find shape " + shapeId));
         return switch (shape.getType()) {
             // For the AWS SDK for Java, we do not generate converters for simple shapes
-            case BLOB, BOOLEAN, STRING, TIMESTAMP, BYTE, SHORT,
+            case BLOB, BOOLEAN, STRING, TIMESTAMP, BYTE, SHORT, DOUBLE,
                     INTEGER, LONG, BIG_DECIMAL, BIG_INTEGER, MEMBER -> null;
             case LIST -> modeledList(shape.asListShape().get());
             case MAP -> modeledMap(shape.asMapShape().get());
             case SET -> modeledSet(shape.asSetShape().get());
             case STRUCTURE -> generateConvertStructure(shapeId);
+            case UNION -> generateConvertUnion(shapeId);
             default -> throw new UnsupportedOperationException(
                     "ShapeId %s is of Type %s, which is not yet supported for ToDafny"
                             .formatted(shapeId, shape.getType()));
@@ -183,6 +208,11 @@ public class ToDafnyAwsV1 extends ToDafny {
     MethodSpec generateConvertStructure(final ShapeId shapeId) {
         final StructureShape structureShape = subject.model.expectShape(shapeId, StructureShape.class);
         return super.modeledStructure(structureShape);
+    }
+
+    MethodSpec generateConvertUnion(final ShapeId shapeId) {
+        final UnionShape unionShape = subject.model.expectShape(shapeId, UnionShape.class);
+        return super.modeledUnion(unionShape);
     }
 
     /** For AWS SDK structure members, the getter is `get + capitalized member name`. */
