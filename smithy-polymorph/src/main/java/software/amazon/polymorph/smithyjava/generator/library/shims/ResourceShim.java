@@ -35,7 +35,7 @@ import static software.amazon.smithy.utils.StringUtils.uncapitalize;
 public class ResourceShim extends ShimLibrary {
     private final static String TYPE_VAR = "I";
     /** Factory Method name. */
-    public final static String CREATE_METHOD_NAME = "create";
+    public final static String WRAP_METHOD_NAME = "wrap";
     /** The Resource Shape the Shim wraps. */
     protected final ResourceShape targetShape;
     protected final ClassName interfaceName;
@@ -57,10 +57,6 @@ public class ResourceShim extends ShimLibrary {
 
     private static ClassName interfaceName(ResourceShape shape, AwsSdkVersion sdkVersion) {
         return Native.classNameForInterfaceOrLocalService(shape, sdkVersion);
-    }
-
-    public static TypeVariableName iExtendsInterface(ResourceShape shape, AwsSdkVersion sdkVersion) {
-        return TypeVariableName.get(TYPE_VAR, interfaceName(shape, sdkVersion));
     }
 
     private TypeVariableName iExtendsInterface() {
@@ -113,7 +109,7 @@ public class ResourceShim extends ShimLibrary {
 
     private MethodSpec resourceAsNativeInterface() {
         MethodSpec.Builder method = MethodSpec
-                .methodBuilder(CREATE_METHOD_NAME)
+                .methodBuilder(WRAP_METHOD_NAME)
                 .addModifiers(PUBLIC_STATIC)
                 .addTypeVariable(iExtendsInterface())
                 .addParameter(iExtendsInterface(), argName)
@@ -129,7 +125,7 @@ public class ResourceShim extends ShimLibrary {
             return method
                     // return Resource.create(new NativeWrapper(iResource));
                     .addStatement("return $T.$L(new $T($L))",
-                            thisClassName, CREATE_METHOD_NAME,
+                            thisClassName, WRAP_METHOD_NAME,
                             NativeWrapper.className(thisClassName), argName)
                     .build();
         }
@@ -143,7 +139,7 @@ public class ResourceShim extends ShimLibrary {
 
     public MethodSpec resourceAsDafny() {
         return MethodSpec
-                .methodBuilder(CREATE_METHOD_NAME)
+                .methodBuilder(WRAP_METHOD_NAME)
                 .addModifiers(PUBLIC_STATIC)
                 .addParameter(dafnyType, argName)
                 .returns(thisClassName)

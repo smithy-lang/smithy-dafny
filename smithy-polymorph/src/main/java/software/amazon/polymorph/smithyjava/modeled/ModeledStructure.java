@@ -1,7 +1,6 @@
 package software.amazon.polymorph.smithyjava.modeled;
 
 import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeSpec;
@@ -12,8 +11,9 @@ import java.util.List;
 import javax.lang.model.element.Modifier;
 
 import software.amazon.polymorph.smithyjava.BuildMethod;
+import software.amazon.polymorph.smithyjava.BuilderMemberSpec;
 import software.amazon.polymorph.smithyjava.BuilderSpecs;
-import software.amazon.polymorph.smithyjava.generator.CodegenSubject;
+import software.amazon.polymorph.smithyjava.generator.library.JavaLibrary;
 import software.amazon.smithy.model.shapes.Shape;
 
 import static javax.lang.model.element.Modifier.FINAL;
@@ -22,15 +22,15 @@ import static javax.lang.model.element.Modifier.PROTECTED;
 
 public class ModeledStructure {
 
-    public static JavaFile javaFile(String packageName, Shape shape, CodegenSubject subject) {
+    public static JavaFile javaFile(String packageName, Shape shape, JavaLibrary subject) {
         if (!(shape.isUnionShape() || shape.isStructureShape())) {
             throw new IllegalArgumentException(
                     "ModeledStructure should only be called for Structures or Unions. ShapeId: %s"
                             .formatted(shape.getId()));
         }
         ClassName className = ClassName.get(packageName, shape.getId().getName());
-        List<FieldSpec> modelFields = BuilderSpecs.shapeToArgs(shape, subject.nativeNameResolver);
-        List<FieldSpec> superFields = Collections.emptyList();
+        List<BuilderMemberSpec> modelFields = BuilderSpecs.shapeToArgs(shape, subject);
+        List<BuilderMemberSpec> superFields = Collections.emptyList();
         boolean override = false;
         BuilderSpecs builderSpecs = new BuilderSpecs(className, null, modelFields, superFields);
         MethodSpec builderImplBuildMethod = BuildMethod.implBuildMethod(override, shape, subject, packageName);
@@ -73,7 +73,7 @@ public class ModeledStructure {
     }
 
 
-    private static MethodSpec constructor(BuilderSpecs builderSpecs, List<FieldSpec> fields) {
+    private static MethodSpec constructor(BuilderSpecs builderSpecs, List<BuilderMemberSpec> fields) {
         MethodSpec.Builder method =  MethodSpec
                 .constructorBuilder()
                 .addModifiers(PROTECTED)

@@ -13,6 +13,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import software.amazon.polymorph.smithyjava.BuildMethod;
+import software.amazon.polymorph.smithyjava.BuilderMemberSpec;
 import software.amazon.polymorph.smithyjava.BuilderSpecs;
 import software.amazon.polymorph.smithyjava.generator.library.JavaLibrary;
 import software.amazon.polymorph.smithyjava.generator.library.ShimLibrary;
@@ -49,7 +50,7 @@ public class ServiceShim extends ShimLibrary {
                 .classBuilder(thisClassName)
                 .addModifiers(PUBLIC)
                 .addField(getField());
-        List<FieldSpec> shimArgs = List.of(getArg());
+        List<BuilderMemberSpec> shimArgs = List.of(getArg());
         BuilderSpecs builderSpecs = new BuilderSpecs(
                     thisClassName, null, shimArgs, Collections.emptyList());
         spec.addType(builderSpecs.builderInterface())
@@ -67,11 +68,9 @@ public class ServiceShim extends ShimLibrary {
         return spec.build();
     }
 
-    private FieldSpec getArg() {
+    private BuilderMemberSpec getArg() {
         LocalServiceTrait trait = targetShape.expectTrait(LocalServiceTrait.class);
-        return FieldSpec.builder(
-                this.subject.nativeNameResolver.typeForShape(trait.getConfigId()),
-                trait.getConfigId().getName()).build();
+        return BuilderMemberSpec.serviceShimMemberSpec(trait, subject);
     }
 
     private FieldSpec getField() {

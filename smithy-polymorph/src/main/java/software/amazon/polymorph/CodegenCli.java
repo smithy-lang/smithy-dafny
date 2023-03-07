@@ -151,7 +151,6 @@ public class CodegenCli {
             }
         }
 
-        logger.info("\n");
         messages.forEach(logger::info);
     }
 
