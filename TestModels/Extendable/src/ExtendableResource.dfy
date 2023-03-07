@@ -71,28 +71,28 @@ module ExtendableResource {
       return Failure(Types.CollectionOfErrors([nestedError]));
     }
 
-    predicate GetResourceDataEnsuresPublicly(
-      input: Types.GetResourceDataInput,
-      output: Result<Types.GetResourceDataOutput, Types.Error>
+    predicate GetExtendableResourceDataEnsuresPublicly(
+      input: Types.GetExtendableResourceDataInput,
+      output: Result<Types.GetExtendableResourceDataOutput, Types.Error>
     ) {true}
 
-    method GetResourceData'(
-      input: Types.GetResourceDataInput
+    method GetExtendableResourceData'(
+      input: Types.GetExtendableResourceDataInput
     ) returns (
-      output: Result<Types.GetResourceDataOutput, Types.Error>
+      output: Result<Types.GetExtendableResourceDataOutput, Types.Error>
     )
       requires ValidState()
       modifies Modifies - {History}
       decreases Modifies - {History}
       ensures ValidState()
-      ensures GetResourceDataEnsuresPublicly(input, output)
+      ensures GetExtendableResourceDataEnsuresPublicly(input, output)
       ensures unchanged(History)    
     {
       var rtnString: string := if input.stringValue.Some? then
         input.stringValue.value + " " + this.name
       else
         this.name;
-      var rtn: Types.GetResourceDataOutput := Types.GetResourceDataOutput(
+      var rtn: Types.GetExtendableResourceDataOutput := Types.GetExtendableResourceDataOutput(
         blobValue := input.blobValue,
         booleanValue := input.booleanValue,
         stringValue := Some(rtnString),

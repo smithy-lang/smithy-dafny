@@ -1,4 +1,4 @@
-package software.amazon.polymorph.smithyjava.generator.awssdk;
+package software.amazon.polymorph.smithyjava.generator.awssdk.v1;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
@@ -6,6 +6,7 @@ import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeSpec;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -30,6 +31,7 @@ import software.amazon.smithy.model.traits.EnumTrait;
 import static software.amazon.smithy.utils.StringUtils.capitalize;
 import static software.amazon.smithy.utils.StringUtils.uncapitalize;
 
+//TODO: Create abstract class for V1 & V2 to extend
 /**
  * ToNativeAwsV1 generates ToNative.
  * ToNative is a helper class for the AwsSdk's {@link ShimV1}.<p>
@@ -39,6 +41,8 @@ import static software.amazon.smithy.utils.StringUtils.uncapitalize;
  * The subset is composed of:
  * <ul>
  *   <li>All the Service's Operations' inputs
+ *   <li>All the Service's Operations' outputs
+ *   <li>All the Service's Errors
  *   <li>All the fields contained by the above
  * </ul>
  * As such,
@@ -72,18 +76,50 @@ public class ToNativeAwsV1 extends ToNative {
     }
 
     TypeSpec toNative() {
-        LinkedHashSet<ShapeId> operationInputs = subject.serviceShape.getOperations().stream()
+        List<OperationShape> operations = subject.serviceShape
+                .getOperations().stream()
                 .map(shapeId -> subject.model.expectShape(shapeId, OperationShape.class))
+                .toList();
+        LinkedHashSet<ShapeId> operationOutputs = operations.stream()
+                .map(OperationShape::getOutputShape)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+        LinkedHashSet<ShapeId> operationInputs = operations.stream()
                 .map(OperationShape::getInputShape)
                 .collect(Collectors.toCollection(LinkedHashSet::new));
-        Set<ShapeId> allRelevantShapeIds = ModelUtils.findAllDependentShapes(operationInputs, subject.model);
-        List<MethodSpec> convertRelevant = allRelevantShapeIds.stream()
+        LinkedHashSet<ShapeId> serviceErrors = operations.stream()
+                .map(OperationShape::getErrors)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+        ModelUtils.streamServiceErrors(subject.model, subject.serviceShape)
+                .map(Shape::toShapeId)
+                .forEachOrdered(serviceErrors::add);
+
+        LinkedHashSet<ShapeId> operationStructures = new LinkedHashSet<>();
+        operationStructures.addAll(operationOutputs);
+        operationStructures.addAll(operationInputs);
+        operationStructures.addAll(serviceErrors);
+        Set<ShapeId> allRelevantShapeIds = ModelUtils.findAllDependentShapes(operationStructures, subject.model);
+
+        // In the AWS SDK for Java V1, Operation Outputs are special
+        allRelevantShapeIds.removeAll(operationOutputs);
+        // Errors are special case for all generators
+        allRelevantShapeIds.removeAll(serviceErrors);
+        allRelevantShapeIds.remove(ShapeId.fromParts("smithy.api", "Unit"));
+
+        final List<MethodSpec> convertOutputs = operationOutputs.stream()
+                .map(this::generateConvertResponseV1).toList();
+        final List<MethodSpec> convertAllRelevant = allRelevantShapeIds.stream()
                 .map(this::generateConvert).filter(Objects::nonNull).toList();
+        final List<MethodSpec> convertServiceErrors = serviceErrors.stream()
+                .map(this::modeledError).collect(Collectors.toList());
+
         return TypeSpec
                 .classBuilder(
                         ClassName.get(subject.packageName, TO_NATIVE))
                 .addModifiers(Modifier.PUBLIC)
-                .addMethods(convertRelevant)
+                .addMethods(convertOutputs)
+                .addMethods(convertAllRelevant)
+                .addMethods(convertServiceErrors)
                 .build();
     }
 
@@ -93,13 +129,14 @@ public class ToNativeAwsV1 extends ToNative {
                 .orElseThrow(() -> new IllegalStateException("Cannot find shape " + shapeId));
         return switch (shape.getType()) {
             // For the AWS SDK for Java V1, we do not generate converters for simple shapes
-            case BLOB, BOOLEAN, TIMESTAMP, BYTE, SHORT,
+            case BLOB, BOOLEAN, TIMESTAMP, BYTE, SHORT, DOUBLE,
                     INTEGER, LONG, BIG_DECIMAL, BIG_INTEGER, MEMBER -> null;
             case STRING -> generateConvertString(shapeId); // STRING handles enums
             case LIST -> modeledList(shape.asListShape().get());
             case SET -> modeledSet(shape.asSetShape().get());
             case MAP -> modeledMap(shape.asMapShape().get());
             case STRUCTURE -> modeledStructure(shape.asStructureShape().get());
+            case UNION -> modeledUnion(shape.asUnionShape().get());
             default -> throw new UnsupportedOperationException(
                     "ShapeId %s is of Type %s, which is not yet supported for ToDafny"
                             .formatted(shapeId, shape.getType()));
@@ -200,5 +237,18 @@ public class ToNativeAwsV1 extends ToNative {
         // fromValue is an AWS SDK specific feature
         method.addStatement("return $T.fromValue($L.toString())", returnType, VAR_INPUT);
         return method.build();
+    }
+
+    MethodSpec generateConvertResponseV1(final ShapeId shapeId) {
+        MethodSpec structure = generateConvertStructure(shapeId);
+        MethodSpec.Builder builder = structure.toBuilder();
+        builder.parameters.clear();
+        builder.addParameter(subject.nativeNameResolver.typeForOperationOutput(shapeId), "nativeValue");
+        return builder.build();
+    }
+
+    MethodSpec generateConvertStructure(final ShapeId shapeId) {
+        final StructureShape structureShape = subject.model.expectShape(shapeId, StructureShape.class);
+        return super.modeledStructure(structureShape);
     }
 }

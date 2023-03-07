@@ -36,9 +36,7 @@ repositories {
 }
 
 dependencies {
-    implementation("dafny.lang:DafnyRuntime:3.10.0")
-    implementation("com.squareup:javapoet:1.13.0")
-    implementation("software.amazon.dafny:conversion:1.0-SNAPSHOT")
+    // For Parsing Smithy Models
     implementation("software.amazon.smithy:smithy-model:1.21.0")
     implementation("software.amazon.smithy:smithy-codegen-core:[1.0.2,1.1.0[")
     implementation("software.amazon.smithy:smithy-protocol-test-traits:[1.0.2,1.1.0[")
@@ -50,6 +48,12 @@ dependencies {
     implementation("org.slf4j:slf4j-simple:1.7.32")
 
     testImplementation("junit", "junit", "4.13.2")
+    // For Smithy-Java
+    implementation("software.amazon.awssdk:codegen:2.20.4")
+    implementation("dafny.lang:DafnyRuntime:3.10.0")
+    implementation("com.squareup:javapoet:1.13.0")
+    implementation("software.amazon.dafny:conversion:1.0-SNAPSHOT")
+
     // Used for parsing-based tests
     testImplementation("org.antlr:antlr4:4.9.2")
 }

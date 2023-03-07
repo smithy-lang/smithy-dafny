@@ -62,6 +62,7 @@ public abstract class ToNative extends Generator {
                 Map.entry(ShapeType.SHORT, IDENTITY_FUNCTION),
                 Map.entry(ShapeType.INTEGER, IDENTITY_FUNCTION),
                 Map.entry(ShapeType.LONG, IDENTITY_FUNCTION),
+                Map.entry(ShapeType.DOUBLE, new MethodReference(COMMON_TO_NATIVE_SIMPLE, "Double")),
                 Map.entry(ShapeType.BIG_DECIMAL, IDENTITY_FUNCTION),
                 Map.entry(ShapeType.BIG_INTEGER, IDENTITY_FUNCTION)
         );
@@ -159,6 +160,10 @@ public abstract class ToNative extends Generator {
                     }
                 });
         return buildAndReturn(method);
+    }
+
+    protected MethodSpec modeledError(final ShapeId shapeId) {
+        return modeledError(subject.model.expectShape(shapeId, StructureShape.class));
     }
 
     /** Uses a Builder to build the native value of Error. */

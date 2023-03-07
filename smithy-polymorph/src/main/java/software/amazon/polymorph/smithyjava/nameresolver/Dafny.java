@@ -83,9 +83,18 @@ public class Dafny extends NameResolver {
         );
     }
 
-    public static String datatypeConstructorCreate(String name) {
-        String dafnyEnumName = dafnyCompilesExtra_(name);
-        return "create_" + dafnyEnumName;
+    /**
+     * @param name A Constructor of the Dafny Datatype.
+     * @param isRecordType Does the datatype have a single data constructor,
+     *                     also called a "record type"?
+     * @return The name of Dafny-Java created method to create an instance of
+     * the constructor.
+     */
+    public static String datatypeConstructorCreate(String name, boolean isRecordType) {
+        if (isRecordType) {
+            return "create";
+        }
+        return "create_" + dafnyCompilesExtra_(name);
     }
 
     public static String datatypeConstructorIs(String name) {
@@ -158,6 +167,7 @@ public class Dafny extends NameResolver {
             case SHORT -> TypeName.SHORT.box();
             case INTEGER -> TypeName.INT.box();
             case LONG -> TypeName.LONG.box();
+            case DOUBLE -> Dafny.typeForDouble();
             case BIG_DECIMAL -> ClassName.get(BigDecimal.class);
             case BIG_INTEGER -> ClassName.get(BigInteger.class);
             case LIST, SET, MAP -> typeForAggregateWithWildcard(shapeId);
@@ -175,6 +185,10 @@ public class Dafny extends NameResolver {
         return ParameterizedTypeName.get(
                 ClassName.get(DafnySequence.class),
                 WildcardTypeName.subtypeOf(TypeName.BYTE.box()));
+    }
+
+    static TypeName typeForDouble() {
+        return typeForBlob();
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")

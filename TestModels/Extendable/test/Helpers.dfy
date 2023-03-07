@@ -8,9 +8,9 @@ module TestHelpers {
   import Types = SimpleExtendableResourcesTypes
   import opened Wrappers
 
-  function method allNone(): Types.GetResourceDataInput
+  function method allNone(): Types.GetExtendableResourceDataInput
   {
-   Types.GetResourceDataInput(
+   Types.GetExtendableResourceDataInput(
       blobValue := None,
       booleanValue := None,
       stringValue := None,
@@ -20,7 +20,7 @@ module TestHelpers {
   }
 
   method checkNone(
-    output: Types.GetResourceDataOutput,
+    output: Types.GetExtendableResourceDataOutput,
     name: string
   )
   {
@@ -31,9 +31,9 @@ module TestHelpers {
     expect output.longValue.None?;
   }  
 
-  function method allSome(): Types.GetResourceDataInput
+  function method allSome(): Types.GetExtendableResourceDataInput
   {
-   Types.GetResourceDataInput(
+   Types.GetExtendableResourceDataInput(
       blobValue := Some([1]),
       booleanValue := Some(true),
       stringValue := Some("Some"),
@@ -43,7 +43,7 @@ module TestHelpers {
   }
 
   method checkSome(
-    output: Types.GetResourceDataOutput,
+    output: Types.GetExtendableResourceDataOutput,
     name: string
   )
   {
