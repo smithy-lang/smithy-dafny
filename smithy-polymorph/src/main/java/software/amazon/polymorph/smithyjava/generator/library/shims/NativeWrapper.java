@@ -88,6 +88,7 @@ public class NativeWrapper extends ResourceShim {
         final ResolvedShapeId outputResolved = subject.resolveShape(
                 shape.getOutputShape());
         final String operationName = append_k ?
+                // See JavaDoc on operation_K below
                 shape.toShapeId().getName() + "_k" :
                 shape.toShapeId().getName();
         final MethodSpec.Builder method = MethodSpec
@@ -216,6 +217,17 @@ public class NativeWrapper extends ResourceShim {
                 NATIVE_OUTPUT);
     }
 
+    /**
+     *  Polymorph's Smithy-Dafny generates at least two methods for
+     *  operations on Resources,
+     *  one of which has an {@code `} appended to it.<p>
+     *  When this {@code `} suffix is transpiled to Java,
+     *  it becomes {@code _k}.<p>
+     *  However, this {@code _k} method MUST NOT be implemented natively.<p>
+     *  It can only be implemented in Dafny Source,
+     *  and then be transpiled.<p>
+     *  Hence, we MUST generate this "always throw" method.<p>
+     */
     protected MethodSpec operation_K(OperationShape operationShape) {
         final MethodSignature signature = nativeWrapperOperationMethodSignature(operationShape, true);
         MethodSpec.Builder method = signature.method();

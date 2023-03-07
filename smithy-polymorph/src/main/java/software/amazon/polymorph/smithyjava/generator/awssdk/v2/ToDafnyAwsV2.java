@@ -152,10 +152,17 @@ public class ToDafnyAwsV2 extends ToDafny {
                 .build();
     }
 
+    /**
+     * The Dafny representation of an AWS SDK Service is a
+     * Polymorph generated Shim wrapping that Service Client.</p>
+     * i.e.: For KMS, this method generates:</p>
+     * <pre>
+     * public static IKeyManagementServiceClient KeyManagementService(KmsClient nativeValue) {
+     *   return new Shim(nativeValue, null);
+     * }
+     * </pre>
+     */
     MethodSpec modeledService(ServiceShape shape) {
-        //   public static IKeyManagementServiceClient KeyManagementService(KmsClient nativeValue) {
-        //     return new Shim(nativeValue, null);
-        //   }
         String methodName = capitalize(shape.toShapeId().getName());
         ClassName nativeClass = AwsSdkNativeV2.classNameForServiceClient(shape);
         ClassName dafnyClass = AwsSdkDafnyV2.classNameForAwsService(shape);
