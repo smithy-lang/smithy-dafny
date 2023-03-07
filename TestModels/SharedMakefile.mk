@@ -209,7 +209,7 @@ setup_net:
 
 ########################## Java targets
 
-build_java: transpile_java mvn_local_deploy_dependencies 
+build_java: transpile_java mvn_local_deploy_dependencies
 	gradle -p runtimes/java build
 
 transpile_java: | transpile_implementation_java transpile_test_java transpile_dependencies_java
@@ -237,6 +237,7 @@ transpile_dependencies_java: LANG=java
 transpile_dependencies_java: transpile_dependencies
 
 mvn_local_deploy_dependencies:
+	$(MAKE) -C $(STANDARD_LIBRARY_PATH) mvn_local_deploy
 	$(patsubst %, $(MAKE) -C $(PROJECT_ROOT)/% mvn_local_deploy;, $(LIBRARIES))
 
 # The Java MUST all exist already through the transpile step.

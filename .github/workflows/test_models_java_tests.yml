@@ -101,7 +101,7 @@ jobs:
           arguments: publishToMavenLocal
           build-root-directory: dafny-java-conversion
 
-      - name: Generate Polymorph Dafny and Dotnet code
+      - name: Generate Polymorph Dafny and Java code
         shell: bash
         working-directory: ./${{ matrix.library }}
         run: |
