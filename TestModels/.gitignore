@@ -1,17 +1,24 @@
 # .NET and Dafny Test Results
 **/TestResults
 
-# Polymorph Generated .NET
+# Dafny Generated .NET
 **/runtimes/**/ImplementationFromDafny.cs
 **/runtimes/**/TestsFromDafny.cs
-**/runtimes/**/Generated
+
+# Dafny Generated Java
+**/runtimes/java/src/main/dafny-generated/
+**/runtimes/java/src/test/dafny-generated/
 
 # Polymorph Generated Dafny
 **/Model/*Types.dfy
 **/Model/*TypesWrapped.dfy
 
-# Smithy Generated .NET
+# Polymorph Generated .NET
 **/runtimes/net/Generated/*.cs
+**/runtimes/**/Generated
+
+# Polymorph Generated Java
+**/runtimes/java/src/main/smithy-generated/
 
 # .NET Artifacts
 **/bin
@@ -20,7 +27,14 @@
 # JetBrains
 **/.idea/
 **/Folder.DotSettings.user
+**/*.iml
+
+# Maven
+**/target
 
 # Gradle
 **/.gradle/
 **/build/
+
+# Mac OS X
+**/.DS_Store
