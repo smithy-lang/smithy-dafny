@@ -53,4 +53,4 @@ jobs:
         uses: gradle/gradle-build-action@v2
         with:
           arguments: test
-          build-root-directory: smithy-polymorph
+          build-root-directory: smithy-dafny-codegen

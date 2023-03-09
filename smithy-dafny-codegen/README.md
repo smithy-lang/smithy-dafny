@@ -18,7 +18,7 @@ and then execute `./gradlew publishToMavenLocal` to install
 ```bash
 $ # start in project root
 $ pwd
-~/src/polymorph/smithy-polymorph
+~/src/polymorph/smithy-dafny-codegen
 
 $ # build
 $ ./gradlew build # Alternatively, if unit tests are failing, ./gradlew assemble

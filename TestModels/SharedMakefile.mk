@@ -30,7 +30,7 @@ PROJECT_RELATIVE_ROOT := $(dir $(lastword $(MAKEFILE_LIST)))
 LIBRARY_ROOT = $(PWD)
 
 STANDARD_LIBRARY_PATH := $(PROJECT_ROOT)/dafny-dependencies/StandardLibrary
-POLYMORPH_ROOT := $(PROJECT_ROOT)/../smithy-polymorph
+POLYMORPH_ROOT := $(PROJECT_ROOT)/../smithy-dafny-codegen
 
 ########################## Dafny targets
 
