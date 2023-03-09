@@ -55,8 +55,11 @@ jobs:
           arguments: test
           build-root-directory: smithy-polymorph
 
+      # Avoid gradle-build-action here in order to avoid
+      # attempting to build the Java 17 project with Java 8 (runner default).
+      # This is necessary because Gradle doesn't
+      # correctly detect the JDK installed by actions/setup-java.
+      # See <https://github.com/gradle/gradle/issues/14903>.
       - name: Execute smithy-dafny-codegen tests
-        uses: gradle/gradle-build-action@v2
-        with:
-          arguments: :smithy-dafny-codegen:test
-          build-root-directory: codegen
+        working-directory: ./codegen
+        run: ./gradlew :smithy-dafny-codegen:test
