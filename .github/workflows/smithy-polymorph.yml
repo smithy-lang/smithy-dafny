@@ -54,3 +54,9 @@ jobs:
         with:
           arguments: test
           build-root-directory: smithy-polymorph
+
+      - name: Execute smithy-dafny-codegen tests
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: :smithy-dafny-codegen:test
+          build-root-directory: codegen
