@@ -1,4 +1,4 @@
-name: smithy-polymorph workflows
+name: smithy-dafny-codegen-cli workflows
 
 on: 
   pull_request:
@@ -53,4 +53,4 @@ jobs:
         uses: gradle/gradle-build-action@v2
         with:
           arguments: test
-          build-root-directory: smithy-polymorph
+          build-root-directory: codegen/smithy-dafny-codegen-cli
