@@ -1,0 +1,7 @@
+software.amazon.smithy.polymorph.traits.ReferenceTrait$Provider
+software.amazon.smithy.polymorph.traits.PositionalTrait$Provider
+software.amazon.smithy.polymorph.traits.LocalServiceTrait$Provider
+software.amazon.smithy.polymorph.traits.ClientConfigTrait$Provider
+software.amazon.smithy.polymorph.traits.DafnyUtf8BytesTrait$Provider
+software.amazon.smithy.polymorph.traits.ExtendableTrait$Provider
+software.amazon.smithy.polymorph.traits.MutableLocalStateTrait$Provider

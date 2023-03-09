@@ -1,0 +1,7 @@
+traits.software.amazon.smithy.dafny.codegen.ReferenceTrait$Provider
+traits.software.amazon.smithy.dafny.codegen.PositionalTrait$Provider
+traits.software.amazon.smithy.dafny.codegen.LocalServiceTrait$Provider
+traits.software.amazon.smithy.dafny.codegen.ClientConfigTrait$Provider
+traits.software.amazon.smithy.dafny.codegen.DafnyUtf8BytesTrait$Provider
+traits.software.amazon.smithy.dafny.codegen.ExtendableTrait$Provider
+traits.software.amazon.smithy.dafny.codegen.MutableLocalStateTrait$Provider
