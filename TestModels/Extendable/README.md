@@ -1,6 +1,6 @@
 # Extendable
 
-This project tests [Smithy-Polymorph's](../../smithy-polymorph) support 
+This project tests [smithy-dafny's](../../codegen/smithy-dafny-codegen-cli) support 
 for the custom smithy trait 
 [extendable](https://github.com/awslabs/polymorph/blob/main-1.x/TestModels/dafny-dependencies/Model/traits.smithy#L54-L58) 
 and the associated operations in `dafny` and `.NET`.
@@ -11,7 +11,7 @@ it requires both Dafny Source and Native Code to test it.
 
 ## What is under test?
 
-The `extendable` trait causes Smithy-Polymorph to generate a Native Wrapper
+The `extendable` trait causes smithy-dafny to generate a Native Wrapper
 such that a Resource implemented in Dafny can instead be implemented
 in a Native Runtime while still respecting the conditions Dafny 
 imposes on the formally verified Dafny implementation.
@@ -32,7 +32,7 @@ However, providing both tests let's us:
 
 (2.) has great merit, 
 as we will have to implement `localServiceWrapper` in
-every LAN gauge `smithy-polymorph` supports.
+every langauge `smithy-dafny` supports.
 
 We need evidence that an implementation of `localServiceWrapper` is
 correct.

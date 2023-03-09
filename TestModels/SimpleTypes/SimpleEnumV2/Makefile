@@ -6,7 +6,7 @@ DAFNY_ROOT := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
 
 # Note: This build target fails. This project does not support code generation for Smithy 2.0 models.
 polymorph_dafny :
-	cd ../../../smithy-polymorph;\
+	cd ../../../codegen/smithy-dafny-codegen-cli;\
 	./gradlew run --args="\
 	--output-dafny \
 	--include-dafny $(DAFNY_ROOT)/../../dafny-dependencies/StandardLibrary/src/Index.dfy \
@@ -23,7 +23,7 @@ polymorph_dafny :
 
 # Note: This build target fails. This project does not support code generation for Smithy 2.0 models.
 polymorph_net :
-	cd ../../../smithy-polymorph;\
+	cd ../../../codegen/smithy-dafny-codegen-cli;\
 	./gradlew run --args="\
 	--output-dafny \
 	--include-dafny $(DAFNY_ROOT)/../../dafny-dependencies/StandardLibrary/src/Index.dfy \
