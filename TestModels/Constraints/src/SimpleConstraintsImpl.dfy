@@ -31,7 +31,9 @@ module SimpleConstraintsImpl refines AbstractSimpleConstraintsOperations  {
       GreaterThanOne := input.GreaterThanOne,
       LessThanTen := input.LessThanTen,
       MyUniqueList := input.MyUniqueList,
-      MyComplexUniqueList := input.MyComplexUniqueList
+      MyComplexUniqueList := input.MyComplexUniqueList,
+      MyUtf8Bytes := input.MyUtf8Bytes,
+      MyListOfUtf8Bytes := input.MyListOfUtf8Bytes
     );
 
     return Success(res);
