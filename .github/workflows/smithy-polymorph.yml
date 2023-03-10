@@ -1,4 +1,4 @@
-name: smithy-polymorph workflows
+name: smithy-dafny-codegen-cli workflows
 
 on: 
   pull_request:
@@ -49,11 +49,11 @@ jobs:
           arguments: publishToMavenLocal
           build-root-directory: dafny-java-conversion
 
-      - name: Execute smithy-polymorph tests
+      - name: Execute smithy-dafny-codegen-cli tests
         uses: gradle/gradle-build-action@v2
         with:
           arguments: test
-          build-root-directory: smithy-polymorph
+          build-root-directory: codegen/smithy-dafny-codegen-cli
 
       - name: Execute smithy-dafny-codegen tests
         uses: gradle/gradle-build-action@v2

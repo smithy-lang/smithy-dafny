@@ -64,7 +64,7 @@ application {
 
 publishing {
     publications {
-        create<MavenPublication>("smithy-polymorph") {
+        create<MavenPublication>("smithy-dafny-codegen-cli") {
             from(components["java"])
         }
     }

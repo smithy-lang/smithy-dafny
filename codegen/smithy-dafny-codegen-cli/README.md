@@ -1,4 +1,4 @@
-# smithy-polymorph
+# smithy-dafny-codegen-cli
 
 C#/.NET, Dafny, & Java code generation for Smithy models
 
@@ -18,7 +18,7 @@ and then execute `./gradlew publishToMavenLocal` to install
 ```bash
 $ # start in project root
 $ pwd
-~/src/polymorph/smithy-polymorph
+~/src/smithy-dafny/smithy-dafny-codegen-cli
 
 $ # build
 $ ./gradlew build # Alternatively, if unit tests are failing, ./gradlew assemble
@@ -26,7 +26,7 @@ BUILD SUCCESSFUL in 507ms
 
 $ # run help
 $ ./gradlew run --args="-h"
-usage: smithy-polymorph
+usage: smithy-dafny-codegen-cli
     --aws-sdk                           <optional> generate AWS SDK-style
                                         API and shims
  -d,--dependent-model <arg>             directory for dependent model
@@ -54,7 +54,7 @@ BUILD SUCCESSFUL in 839ms
 
 
 $ # generate local service in Dafny, Java, & .NET
-$ DAFNY_ROOT=../../private-aws-encryption-sdk-dafny-staging
+$ DAFNY_ROOT=../../../private-aws-encryption-sdk-dafny-staging
 $ AwsCryptographyPrimitives_ROOT=$DAFNY_ROOT/AwsCryptographyPrimitives
 $./gradlew run --args="\
     --output-dafny \

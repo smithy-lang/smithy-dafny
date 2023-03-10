@@ -272,7 +272,7 @@ public class CodegenCli {
     }
 
     private static void printHelpMessage() {
-        new HelpFormatter().printHelp("smithy-polymorph", getCliOptions());
+        new HelpFormatter().printHelp("smithy-dafny-codegen-cli", getCliOptions());
     }
 
     private record CliArguments(

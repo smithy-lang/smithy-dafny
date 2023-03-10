@@ -195,7 +195,7 @@ public class ToNativeAwsV2 extends ToNative {
         //     however, SdkBytes is an exception. SdkBytes is defined in the AWS SDK. It is not a
         //     native Java nor Dafny type.
         // We do not want to write a conversion to SdkBytes inside dafny-java-conversion, else
-        //     Polymorph would need to take a dependency on the AWS SDK. Instead, smithy-polymorph=
+        //     Polymorph would need to take a dependency on the AWS SDK. Instead, smithy-dafny
         //     will generate the required conversion code.
         // This is the only time when Polymorph needs to convert a list of a Dafny type to a list
         //     of a type that Polymorph does not know about. So this is a special case and warrants
