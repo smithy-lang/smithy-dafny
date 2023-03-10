@@ -24,7 +24,6 @@ import dafny.TypeDescriptor;
 
 import software.amazon.polymorph.smithydafny.DafnyNameResolver;
 import software.amazon.polymorph.smithyjava.MethodReference;
-import software.amazon.polymorph.smithyjava.generator.CodegenSubject;
 import software.amazon.polymorph.smithyjava.generator.CodegenSubject.AwsSdkVersion;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
@@ -42,7 +41,7 @@ import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
 
 import static software.amazon.polymorph.utils.AwsSdkNameResolverHelpers.isInAwsSdkNamespace;
-import static software.amazon.polymorph.smithyjava.generator.Generator.Constants.SUPPORTED_CONVERSION_AGGREGATE_SHAPES;
+import static software.amazon.polymorph.smithyjava.generator.Generator.Constants.LIST_MAP_SET_SHAPE_TYPES;
 import static software.amazon.polymorph.smithyjava.nameresolver.Constants.DAFNY_RESULT_CLASS_NAME;
 import static software.amazon.polymorph.smithyjava.nameresolver.Constants.SMITHY_API_UNIT;
 import static software.amazon.polymorph.utils.DafnyNameResolverHelpers.dafnyCompilesExtra_;
@@ -56,6 +55,7 @@ import static software.amazon.smithy.utils.StringUtils.capitalize;
  * for the Dafny generated Java code.
  */
 public class Dafny extends NameResolver {
+    @SuppressWarnings("unused")
     private static final Logger LOGGER = LoggerFactory.getLogger(Dafny.class);
     protected static final Map<ShapeType, CodeBlock> TYPE_DESCRIPTOR_BY_SHAPE_TYPE;
     static {
@@ -199,7 +199,7 @@ public class Dafny extends NameResolver {
         final Shape shape = model.getShape(shapeId)
                 .orElseThrow(() -> new IllegalStateException("Cannot find shape " + shapeId));
 
-        if (!SUPPORTED_CONVERSION_AGGREGATE_SHAPES.contains(shape.getType())) {
+        if (!LIST_MAP_SET_SHAPE_TYPES.contains(shape.getType())) {
             throw new UnsupportedOperationException(
                     "No Dafny Java Type for %s yet.".formatted(shape.getType())
             );

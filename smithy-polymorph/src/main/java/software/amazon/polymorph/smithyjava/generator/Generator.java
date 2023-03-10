@@ -25,6 +25,7 @@ import software.amazon.smithy.model.shapes.ShapeType;
 public abstract class Generator {
     public static final Modifier[] PUBLIC_STATIC = new Modifier[]{Modifier.PUBLIC, Modifier.STATIC};
     protected static final Modifier[] PRIVATE_FINAL = new Modifier[]{Modifier.PRIVATE, Modifier.FINAL};
+    @SuppressWarnings("unused")
     private static final Logger LOGGER = LoggerFactory.getLogger(Generator.class);
 
     public CodegenSubject subject;
@@ -56,9 +57,9 @@ public abstract class Generator {
         public static final MethodReference IDENTITY_FUNCTION = new MethodReference(
                 ClassName.get(java.util.function.Function.class),
                 "identity");
-        public static final Set<ShapeType> SUPPORTED_CONVERSION_AGGREGATE_SHAPES;
+        public static final Set<ShapeType> LIST_MAP_SET_SHAPE_TYPES;
         static {
-            SUPPORTED_CONVERSION_AGGREGATE_SHAPES = Set.of(
+            LIST_MAP_SET_SHAPE_TYPES = Set.of(
                     ShapeType.LIST, ShapeType.SET, ShapeType.MAP
             );
         }

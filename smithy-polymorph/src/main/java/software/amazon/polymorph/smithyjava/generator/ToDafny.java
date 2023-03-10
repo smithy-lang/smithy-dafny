@@ -24,7 +24,6 @@ import software.amazon.polymorph.smithyjava.NamespaceHelper;
 import software.amazon.polymorph.smithyjava.generator.awssdk.v1.ToDafnyAwsV1;
 import software.amazon.polymorph.smithyjava.generator.awssdk.v2.ToDafnyAwsV2;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
-import software.amazon.polymorph.utils.AwsSdkNameResolverHelpers;
 import software.amazon.polymorph.utils.ModelUtils;
 
 import software.amazon.smithy.model.shapes.ListShape;
@@ -40,10 +39,14 @@ import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumDefinition;
 import software.amazon.smithy.model.traits.EnumTrait;
 
+import static software.amazon.polymorph.smithyjava.generator.Generator.Constants.LIST_MAP_SET_SHAPE_TYPES;
+import static software.amazon.polymorph.utils.AwsSdkNameResolverHelpers.isInAwsSdkNamespace;
 import static software.amazon.smithy.utils.StringUtils.capitalize;
 import static software.amazon.smithy.utils.StringUtils.uncapitalize;
 
 public abstract class ToDafny extends Generator {
+    @SuppressWarnings("unused")
+    private static final Logger LOGGER = LoggerFactory.getLogger(ToDafny.class);
     /**
      * The keys are the input type, the values are the method that converts from that input to the Dafny type
      */
@@ -57,7 +60,6 @@ public abstract class ToDafny extends Generator {
      * The class name of the Subject's Shim's ToDafny class.
      */
     protected final ClassName thisClassName;
-    private static final Logger LOGGER = LoggerFactory.getLogger(ToDafny.class);
 
     public ToDafny(CodegenSubject subject, ClassName className) {
         super(subject);
@@ -180,11 +182,21 @@ public abstract class ToDafny extends Generator {
                     memberConversion
             );
         }
-        return CodeBlock.of(
-                "$L = $T.nonNull($L) ?\n$T.create_Some($L)\n: $T.create_None()",
-                outputVar,
+        final CodeBlock isNullCheck = CodeBlock.of(
+                "$T.nonNull($L)",
                 ClassName.get(Objects.class),
-                inputVar,
+                inputVar);
+        CodeBlock isSetCheck = isNullCheck;
+        Shape targetShape = subject.model.expectShape(memberShape.getTarget());
+        if (LIST_MAP_SET_SHAPE_TYPES.contains(targetShape.getType())) {
+            isSetCheck = CodeBlock.of("($L && $L.size() > 0)",
+                    isNullCheck,
+                    inputVar);
+        }
+        return CodeBlock.of(
+                "$L = $L ?\n$T.create_Some($L)\n: $T.create_None()",
+                outputVar,
+                isSetCheck,
                 ClassName.get("Wrappers_Compile", "Option"),
                 memberConversion,
                 ClassName.get("Wrappers_Compile", "Option")
@@ -333,7 +345,7 @@ public abstract class ToDafny extends Generator {
         ShapeId targetId = shape.getId();
         final String methodName = capitalize(targetId.getName());
         // if in AWS SDK namespace, reference converter from AWS SDK ToDafny class
-        if (AwsSdkNameResolverHelpers.isInAwsSdkNamespace(targetId)) {
+        if (isInAwsSdkNamespace(targetId)) {
             return switch (subject.sdkVersion) {
                 case V1 -> new MethodReference(ToDafnyAwsV1.className(targetId), methodName);
                 case V2 -> new MethodReference(ToDafnyAwsV2.className(targetId), methodName);
