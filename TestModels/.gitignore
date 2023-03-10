@@ -35,6 +35,9 @@
 # Gradle
 **/.gradle/
 **/build/
+**/gradle/
+**/gradlew
+**/gradlew.bat
 
 # Mac OS X
 **/.DS_Store

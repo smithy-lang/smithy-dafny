@@ -6,7 +6,8 @@ include "../src/Index.dfy"
 module TestDDBv2 {
     import DDB = Com.Amazonaws.Dynamodb
     import opened StandardLibrary.UInt
-
+    import opened Wrappers
+    
     const tableNameTest : DDB.Types.TableName := "TestTable";
     const secIndex : DDB.Types.IndexName := "Active-Keys"
 
@@ -90,6 +91,37 @@ module TestDDBv2 {
         );
         BasicPutTest(input := putInput);
     }
+    
+    method {:test} BatGetItemTests() {
+      var attributeNameBranchKey: DDB.Types.AttributeName := "branch-key-id";
+      var attributeValueBranchKey: DDB.Types.AttributeValue := DDB.Types.AttributeValue.S(
+        "aws-kms-put-item");
+      var attributeNameVersion: DDB.Types.AttributeName := "version";
+      var attributeValueVersion: DDB.Types.AttributeValue := DDB.Types.AttributeValue.S(
+        "version-1");
+      var key: DDB.Types.Key := map[
+        attributeNameBranchKey := attributeValueBranchKey,
+        attributeNameVersion := attributeValueVersion
+      ];
+      var keys: DDB.Types.KeyList := [ key ];
+      var keyAndAttributes := DDB.Types.KeysAndAttributes(
+        Keys := keys,
+        AttributesToGet := None(),
+        ConsistentRead := None(),
+        ProjectionExpression := None(),
+        ExpressionAttributeNames := None()
+      );
+      
+      var batchGetRequestMap: DDB.Types.BatchGetRequestMap := map[
+        tableNameTest := keyAndAttributes
+      ];
+      
+      var batchGetInput := DDB.Types.BatchGetItemInput(
+        RequestItems := batchGetRequestMap,
+        ReturnConsumedCapacity := DDB.Wrappers.None()
+      );
+      BatchGetItemTest(input := batchGetInput);
+    }
 
     method BasicQueryTest(
         nameonly input: DDB.Types.QueryInput
@@ -99,7 +131,7 @@ module TestDDBv2 {
 
         var ret := client.Query(input);
 
-        print ret;
+        // print ret;
 
         expect(ret.Success?);
 
@@ -127,7 +159,7 @@ module TestDDBv2 {
 
         var ret := client.GetItem(input);
 
-        print ret;
+        // print ret;
 
         expect(ret.Success?);
 
@@ -147,8 +179,28 @@ module TestDDBv2 {
 
         var ret := client.PutItem(input);
 
-        print ret;
+        // print ret;
 
         expect(ret.Success?);
     }
+
+    method BatchGetItemTest(
+        nameonly input: DDB.Types.BatchGetItemInput
+    )
+    {
+        var client :- expect DDB.DynamoDBClient();
+
+        var ret := client.BatchGetItem(input);
+
+        if (ret.Failure?) {
+          print("\n\t BatchGetItemTest Failed");
+          print("\n\t");
+          print(ret);
+          print("\n");
+        }
+
+        expect(ret.Success?);
+    }
+
+    
 }
