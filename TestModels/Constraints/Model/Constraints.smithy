@@ -122,6 +122,8 @@ structure GetConstraintsInput {
   LessThanTen: LessThanTen,
   MyUniqueList: MyUniqueList,
   MyComplexUniqueList: MyComplexUniqueList,
+  MyUtf8Bytes: Utf8Bytes,
+  MyListOfUtf8Bytes: ListOfUtf8Bytes,
 }
 
 structure GetConstraintsOutput {
@@ -143,4 +145,14 @@ structure GetConstraintsOutput {
   LessThanTen: LessThanTen,
   MyUniqueList: MyUniqueList,
   MyComplexUniqueList: MyComplexUniqueList,
+  MyUtf8Bytes: Utf8Bytes,
+  MyListOfUtf8Bytes: ListOfUtf8Bytes,
+}
+
+// See Comment in traits.smithy
+@aws.polymorph#dafnyUtf8Bytes
+string Utf8Bytes
+
+list ListOfUtf8Bytes {
+  member: Utf8Bytes
 }

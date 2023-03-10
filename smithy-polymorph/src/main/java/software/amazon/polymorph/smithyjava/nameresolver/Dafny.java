@@ -252,7 +252,12 @@ public class Dafny extends NameResolver {
                     new MethodReference(ClassName.get(Tuple0.class), "_typeDescriptor").asNormalReference());
         }
         if (shape.getType().getCategory().equals(ShapeType.Category.SIMPLE) && !shape.hasTrait(EnumTrait.class)) {
-            @Nullable CodeBlock typeDescriptor = TYPE_DESCRIPTOR_BY_SHAPE_TYPE.get(shape.getType());
+            @Nullable CodeBlock typeDescriptor =
+              shape.hasTrait(DafnyUtf8BytesTrait.class)
+                // A Dafny UTF8 Bytes are basically a blob.
+                // They are a sequence of uint8 in Dafny, this makes them the same as a Blob.
+                ? TYPE_DESCRIPTOR_BY_SHAPE_TYPE.get(ShapeType.BLOB)
+                : TYPE_DESCRIPTOR_BY_SHAPE_TYPE.get(shape.getType());
             if (Objects.nonNull(typeDescriptor)) {
                 return CodeBlock.of("$L", typeDescriptor);
             }
