@@ -34,7 +34,7 @@ public class DotNetNameResolverTest {
     private DotNetNameResolver setupNameResolver(final BiConsumer<ServiceShape.Builder, ModelAssembler> updater) {
         final Model model = TestModel.setupModel(updater);
         final ServiceShape serviceShape = model.expectShape(SERVICE_SHAPE_ID, ServiceShape.class);
-        return new DotNetNameResolver(model, serviceShape);
+        return new DotNetV1NameResolver(model, serviceShape);
     }
 
     @Test

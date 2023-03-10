@@ -31,7 +31,8 @@ public class ShimCodegenTest {
     private static ShimCodegen setupCodegen(final BiConsumer<ServiceShape.Builder, ModelAssembler> updater) {
         final Model model = TestModel.setupModel(updater);
         final ServiceShape serviceShape = model.expectShape(SERVICE_SHAPE_ID, ServiceShape.class);
-        return new ShimCodegen(model, serviceShape);
+        final DotNetNameResolver nameResolver = new DotNetV1NameResolver(model, serviceShape);
+        return new ShimCodegen(model, serviceShape, nameResolver);
     }
 
     @Test

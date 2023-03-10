@@ -9,6 +9,7 @@ import org.junit.Test;
 import java.util.Optional;
 
 import software.amazon.polymorph.smithydotnet.DotNetNameResolver;
+import software.amazon.polymorph.smithydotnet.DotNetV1NameResolver;
 import software.amazon.polymorph.util.TestModel;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.ServiceShape;
@@ -186,7 +187,7 @@ public class NativeWrapperCodegenTest {
 
     @SuppressWarnings("SameParameterValue")
     protected static DotNetNameResolver getNameResolver(Model model, ShapeId shapeId) {
-        return new DotNetNameResolver(model,
+        return new DotNetV1NameResolver(model,
                 model.expectShape(shapeId, ServiceShape.class));
     }
 }

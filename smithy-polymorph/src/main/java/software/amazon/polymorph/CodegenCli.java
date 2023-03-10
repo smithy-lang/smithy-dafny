@@ -3,6 +3,14 @@
 
 package software.amazon.polymorph;
 
+import software.amazon.polymorph.smithydotnet.AwsSdkShimCodegen;
+import software.amazon.polymorph.smithydotnet.AwsSdkTypeConversionCodegen;
+import software.amazon.polymorph.smithydotnet.DotNetNameResolver;
+import software.amazon.polymorph.smithydotnet.DotNetV1NameResolver;
+import software.amazon.polymorph.smithydotnet.DotNetV2NameResolver;
+import software.amazon.polymorph.smithydotnet.ServiceCodegen;
+import software.amazon.polymorph.smithydotnet.ShimCodegen;
+import software.amazon.polymorph.smithydotnet.TypeConversionCodegen;
 import software.amazon.polymorph.smithydotnet.localServiceWrapper.LocalServiceWrappedCodegen;
 import software.amazon.polymorph.smithydotnet.localServiceWrapper.LocalServiceWrappedConversionCodegen;
 import software.amazon.polymorph.smithydotnet.localServiceWrapper.LocalServiceWrappedShimCodegen;
@@ -21,11 +29,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import software.amazon.polymorph.smithydafny.DafnyApiCodegen;
-import software.amazon.polymorph.smithydotnet.AwsSdkShimCodegen;
-import software.amazon.polymorph.smithydotnet.AwsSdkTypeConversionCodegen;
-import software.amazon.polymorph.smithydotnet.ServiceCodegen;
-import software.amazon.polymorph.smithydotnet.ShimCodegen;
-import software.amazon.polymorph.smithydotnet.TypeConversionCodegen;
 import software.amazon.polymorph.smithyjava.generator.awssdk.v1.JavaAwsSdkV1;
 import software.amazon.polymorph.smithyjava.generator.awssdk.v2.JavaAwsSdkV2;
 import software.amazon.polymorph.utils.TokenTree;
@@ -118,13 +121,29 @@ public class CodegenCli {
         }
 
         if (cliArguments.outputDotnetDir.isPresent()) {
+            final CodegenSubject.AwsSdkVersion awsSdkVersion;
+            try {
+                awsSdkVersion = cliArguments.dotnetAwsSdkVersion
+                        .map(String::trim).map(String::toUpperCase)
+                        .map(CodegenSubject.AwsSdkVersion::valueOf)
+                        .orElse(CodegenSubject.AwsSdkVersion.V2);
+            } catch (IllegalArgumentException ex) {
+                logger.error("Unsupported .NET AWS SDK version: " + cliArguments.dotnetAwsSdkVersion.get().trim());
+                throw ex;
+            }
+            DotNetNameResolver nameResolver = null;
+            switch (awsSdkVersion) {
+                case V1 -> nameResolver = new DotNetV1NameResolver(model, serviceShape);
+                case V2 -> nameResolver = new DotNetV2NameResolver(model, serviceShape);
+            }
+
             final Path outputDotnetDir = cliArguments.outputDotnetDir.get();
             if (cliArguments.awsSdkStyle) {
                 messages.add(netAwsSdk(outputDotnetDir, serviceShape, model, cliArguments.dependentModelPaths));
             } else if (cliArguments.outputLocalServiceTest.isPresent()) {
                 messages.add(netWrappedLocalService(outputDotnetDir, serviceShape, model, cliArguments.dependentModelPaths));
             } else {
-                messages.add(netLocalService(outputDotnetDir, serviceShape, model));
+                messages.add(netLocalService(outputDotnetDir, serviceShape, model, nameResolver));
             }
         }
 
@@ -177,14 +196,14 @@ public class CodegenCli {
         return "Java V2 code generated in %s".formatted(outputJavaDir);
     }
 
-    static String netLocalService(Path outputNetDir, ServiceShape serviceShape, Model model) {
-        final ServiceCodegen service = new ServiceCodegen(model, serviceShape);
+    static String netLocalService(Path outputNetDir, ServiceShape serviceShape, Model model, DotNetNameResolver nameResolver) {
+        final ServiceCodegen service = new ServiceCodegen(model, serviceShape, nameResolver);
         writeTokenTreesIntoDir(service.generate(), outputNetDir);
 
-        final ShimCodegen shim = new ShimCodegen(model, serviceShape);
+        final ShimCodegen shim = new ShimCodegen(model, serviceShape, nameResolver);
         writeTokenTreesIntoDir(shim.generate(), outputNetDir);
 
-        final TypeConversionCodegen conversion = new TypeConversionCodegen(model, serviceShape);
+        final TypeConversionCodegen conversion = new TypeConversionCodegen(model, serviceShape, nameResolver);
         writeTokenTreesIntoDir(conversion.generate(), outputNetDir);
         return ".NET code generated in %s".formatted(outputNetDir);
     }
@@ -280,6 +299,7 @@ public class CodegenCli {
             Path[] dependentModelPaths,
             String namespace,
             Optional<Path> outputDotnetDir,
+            Optional<String> dotnetAwsSdkVersion,
             Optional<Path> outputJavaDir,
             Optional<String> javaAwsSdkVersion,
             boolean awsSdkStyle,
@@ -331,9 +351,13 @@ public class CodegenCli {
             }
 
             Optional<String> javaAwsSdkVersion = Optional.empty();
+            Optional<String> dotnetAwsSdkVersion = Optional.empty();
             if (awsSdkStyle) {
                 javaAwsSdkVersion = commandLine.hasOption("java-aws-sdk-version")
                     ? Optional.of(commandLine.getOptionValue("java-aws-sdk-version"))
+                    : Optional.of("v2");
+                dotnetAwsSdkVersion = commandLine.hasOption("dotnet-aws-sdk-version")
+                    ? Optional.of(commandLine.getOptionValue("dotnet-aws-sdk-version"))
                     : Optional.of("v2");
             }
             final boolean outputDafny = commandLine.hasOption("output-dafny");
@@ -351,7 +375,7 @@ public class CodegenCli {
                     modelPath,
                     dependentModelPaths,
                     namespace,
-                    outputDotnetDir,
+                    outputDotnetDir, dotnetAwsSdkVersion,
                     outputJavaDir, javaAwsSdkVersion,
                     awsSdkStyle,
                     outputLocalServiceTest,

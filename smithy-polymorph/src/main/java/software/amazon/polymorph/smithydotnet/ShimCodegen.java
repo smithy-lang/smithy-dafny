@@ -31,10 +31,10 @@ public class ShimCodegen {
     private static final String INTERNAL_INPUT_NAME = "internalInput";
     private static final String RESULT_NAME = "result";
 
-    public ShimCodegen(final Model model, final ServiceShape serviceShape) {
+    public ShimCodegen(final Model model, final ServiceShape serviceShape, DotNetNameResolver nameResolver) {
         this.model = model;
         this.serviceShape = serviceShape;
-        this.nameResolver = new DotNetNameResolver(model, serviceShape);
+        this.nameResolver = nameResolver;
     }
 
     // TODO: get smarter about imports. maybe just fully qualify all model-agnostic types?

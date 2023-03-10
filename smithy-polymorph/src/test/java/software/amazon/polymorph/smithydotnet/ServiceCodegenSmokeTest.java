@@ -33,7 +33,8 @@ public class ServiceCodegenSmokeTest {
 
         final ShapeId serviceShapeId = ShapeId.fromParts("polymorph.demo", "StringLists");
         final ServiceShape serviceShape = model.expectShape(serviceShapeId, ServiceShape.class);
-        final ServiceCodegen serviceCodegen = new ServiceCodegen(model, serviceShape);
+        final DotNetNameResolver nameResolver = new DotNetV1NameResolver(model, serviceShape);
+        final ServiceCodegen serviceCodegen = new ServiceCodegen(model, serviceShape, nameResolver);
         final Map<Path, TokenTree> codeByPath = serviceCodegen.generate();
 
         final Set<Path> expectedPaths = Stream.of(

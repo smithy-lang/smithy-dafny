@@ -54,11 +54,6 @@ public class TypeConversionCodegen {
     protected final ServiceShape serviceShape;
     protected final DotNetNameResolver nameResolver;
 
-    public TypeConversionCodegen(final Model model, final ServiceShape serviceShape) {
-        this(model, serviceShape,
-                new DotNetNameResolver(model, serviceShape));
-    }
-
     public TypeConversionCodegen(
       final Model model,
       final ServiceShape serviceShape,

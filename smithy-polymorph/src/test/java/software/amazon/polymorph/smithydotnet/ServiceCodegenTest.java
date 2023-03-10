@@ -44,7 +44,8 @@ public class ServiceCodegenTest {
     public void testGenerateEmptyService() {
         final Model model = TestModel.setupModel();
         final ServiceShape serviceShape = model.expectShape(SERVICE_SHAPE_ID, ServiceShape.class);
-        final ServiceCodegen codegen = new ServiceCodegen(model, serviceShape);
+        final DotNetNameResolver nameResolver = new DotNetV1NameResolver(model, serviceShape);
+        final ServiceCodegen codegen = new ServiceCodegen(model, serviceShape, nameResolver);
         final Map<Path, TokenTree> codeByPath = codegen.generate();
 
         final Set<Path> expectedPaths = new HashSet<Path>();
@@ -73,7 +74,8 @@ public class ServiceCodegenTest {
             modelAssembler.addShape(operationShape);
         });
         final ServiceShape serviceShape = model.expectShape(SERVICE_SHAPE_ID, ServiceShape.class);
-        final ServiceCodegen codegen = new ServiceCodegen(model, serviceShape);
+        final DotNetNameResolver nameResolver = new DotNetV1NameResolver(model, serviceShape);
+        final ServiceCodegen codegen = new ServiceCodegen(model, serviceShape, nameResolver);
         final String actualCode = codegen.generateInterfaceMethod(operationShape.getId()).toString();
         final List<ParseToken> actualTokens = Tokenizer.tokenize(actualCode);
 
@@ -188,7 +190,8 @@ public class ServiceCodegenTest {
         });
 
         final ServiceShape serviceShape = model.expectShape(SERVICE_SHAPE_ID, ServiceShape.class);
-        final ServiceCodegen codegen = new ServiceCodegen(model, serviceShape);
+        final DotNetNameResolver nameResolver = new DotNetV1NameResolver(model, serviceShape);
+        final ServiceCodegen codegen = new ServiceCodegen(model, serviceShape, nameResolver);
         final String actualCode = codegen.generateResourceInterface(resourceShape.getId()).toString();
         final List<ParseToken> actualTokens = Tokenizer.tokenize(actualCode);
         final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
@@ -238,7 +241,8 @@ public class ServiceCodegenTest {
         });
 
         final ServiceShape serviceShape = model.expectShape(SERVICE_SHAPE_ID, ServiceShape.class);
-        final ServiceCodegen codegen = new ServiceCodegen(model, serviceShape);
+        final DotNetNameResolver nameResolver = new DotNetV1NameResolver(model, serviceShape);
+        final ServiceCodegen codegen = new ServiceCodegen(model, serviceShape, nameResolver);
         final String actualCode = codegen.generateResourceClass(resourceShape.getId()).toString();
         final List<ParseToken> actualTokens = Tokenizer.tokenize(actualCode);
         final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
@@ -293,7 +297,8 @@ public class ServiceCodegenTest {
         });
 
         final ServiceShape serviceShape = model.expectShape(SERVICE_SHAPE_ID, ServiceShape.class);
-        final ServiceCodegen codegen = new ServiceCodegen(model, serviceShape);
+        final DotNetNameResolver nameResolver = new DotNetV1NameResolver(model, serviceShape);
+        final ServiceCodegen codegen = new ServiceCodegen(model, serviceShape, nameResolver);
         final String actualCode = codegen.generateResourceClass(resourceShape.getId()).toString();
         final List<ParseToken> actualTokens = Tokenizer.tokenize(actualCode);
         final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
@@ -346,7 +351,8 @@ public class ServiceCodegenTest {
         });
 
         final ServiceShape serviceShape = model.expectShape(SERVICE_SHAPE_ID, ServiceShape.class);
-        final ServiceCodegen codegen = new ServiceCodegen(model, serviceShape);
+        final DotNetNameResolver nameResolver = new DotNetV1NameResolver(model, serviceShape);
+        final ServiceCodegen codegen = new ServiceCodegen(model, serviceShape, nameResolver);
         try {
             codegen.generateResourceClass(resourceShape.getId()).toString();
         } catch (IllegalStateException e) {
@@ -371,7 +377,8 @@ public class ServiceCodegenTest {
         });
 
         final ServiceShape serviceShape = model.expectShape(SERVICE_SHAPE_ID, ServiceShape.class);
-        final ServiceCodegen codegen = new ServiceCodegen(model, serviceShape);
+        final DotNetNameResolver nameResolver = new DotNetV1NameResolver(model, serviceShape);
+        final ServiceCodegen codegen = new ServiceCodegen(model, serviceShape, nameResolver);
         final ShapeId memberId = ShapeId.fromParts(SERVICE_NAMESPACE, "Container", "dummy");
         final MemberShape memberShape = model.expectShape(memberId, MemberShape.class);
         final String actualCode = codegen.generateStructureClassField(memberShape).toString();
@@ -409,7 +416,8 @@ public class ServiceCodegenTest {
         final Model model = TestModel.setupModel((builder, modelAssembler) -> modelAssembler.addShape(instanceTypeShape));
 
         final ServiceShape serviceShape = model.expectShape(SERVICE_SHAPE_ID, ServiceShape.class);
-        final ServiceCodegen codegen = new ServiceCodegen(model, serviceShape);
+        final DotNetNameResolver nameResolver = new DotNetV1NameResolver(model, serviceShape);
+        final ServiceCodegen codegen = new ServiceCodegen(model, serviceShape, nameResolver);
         final String actualCode = codegen.generateEnumClass(instanceTypeShape.getId()).toString();
         final List<ParseToken> actualTokens = Tokenizer.tokenize(actualCode);
         final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
@@ -453,7 +461,8 @@ public class ServiceCodegenTest {
         final Model model = TestModel.setupModel((builder, modelAssembler) -> modelAssembler.addShape(instanceTypeShape));
 
         final ServiceShape serviceShape = model.expectShape(SERVICE_SHAPE_ID, ServiceShape.class);
-        final ServiceCodegen codegen = new ServiceCodegen(model, serviceShape);
+        final DotNetNameResolver nameResolver = new DotNetV1NameResolver(model, serviceShape);
+        final ServiceCodegen codegen = new ServiceCodegen(model, serviceShape, nameResolver);
         final String actualCode = codegen.generateEnumClass(instanceTypeShape.getId()).toString();
         final List<ParseToken> actualTokens = Tokenizer.tokenize(actualCode);
         final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
@@ -482,7 +491,8 @@ public class ServiceCodegenTest {
 
         final Model model = TestModel.setupModel((builder, modelAssembler) -> modelAssembler.addShape(foobarStructureShape));
         final ServiceShape serviceShape = model.expectShape(SERVICE_SHAPE_ID, ServiceShape.class);
-        final ServiceCodegen codegen = new ServiceCodegen(model, serviceShape);
+        final DotNetNameResolver nameResolver = new DotNetV1NameResolver(model, serviceShape);
+        final ServiceCodegen codegen = new ServiceCodegen(model, serviceShape, nameResolver);
 
         assertFalse(
             "Should not try to generate class for structure marked with @reference",
@@ -500,7 +510,8 @@ public class ServiceCodegenTest {
 
         final Model model = TestModel.setupModel((builder, modelAssembler) -> modelAssembler.addShape(foobarStructureShape));
         final ServiceShape serviceShape = model.expectShape(SERVICE_SHAPE_ID, ServiceShape.class);
-        final ServiceCodegen codegen = new ServiceCodegen(model, serviceShape);
+        final DotNetNameResolver nameResolver = new DotNetV1NameResolver(model, serviceShape);
+        final ServiceCodegen codegen = new ServiceCodegen(model, serviceShape, nameResolver);
 
         assertFalse(
                 "Should not try to generate class for structure marked with @positional",
@@ -518,7 +529,8 @@ public class ServiceCodegenTest {
 
         final Model model = TestModel.setupModel((builder, modelAssembler) -> modelAssembler.addShape(foobarStructureShape));
         final ServiceShape serviceShape = model.expectShape(SERVICE_SHAPE_ID, ServiceShape.class);
-        final ServiceCodegen codegen = new ServiceCodegen(model, serviceShape);
+        final DotNetNameResolver nameResolver = new DotNetV1NameResolver(model, serviceShape);
+        final ServiceCodegen codegen = new ServiceCodegen(model, serviceShape, nameResolver);
 
         assertFalse(
                 "Should not try to generate class for structure marked with @trait",
@@ -535,7 +547,8 @@ public class ServiceCodegenTest {
 
         final Model model = TestModel.setupModel((builder, modelAssembler) -> modelAssembler.addShape(foobarStructureShape));
         final ServiceShape serviceShape = model.expectShape(SERVICE_SHAPE_ID, ServiceShape.class);
-        final ServiceCodegen codegen = new ServiceCodegen(model, serviceShape);
+        final DotNetNameResolver nameResolver = new DotNetV1NameResolver(model, serviceShape);
+        final ServiceCodegen codegen = new ServiceCodegen(model, serviceShape, nameResolver);
 
         assertTrue(
                 "Should have generated class for structure",
@@ -557,7 +570,8 @@ public class ServiceCodegenTest {
         final ShapeId exceptionShapeId = ShapeId.fromParts(SERVICE_NAMESPACE, "UnfortunateException");
 
         final ServiceShape serviceShape = model.expectShape(SERVICE_SHAPE_ID, ServiceShape.class);
-        final ServiceCodegen codegen = new ServiceCodegen(model, serviceShape);
+        final DotNetNameResolver nameResolver = new DotNetV1NameResolver(model, serviceShape);
+        final ServiceCodegen codegen = new ServiceCodegen(model, serviceShape, nameResolver);
         final String actualCode = codegen.generateSpecificExceptionClass(
                 model.expectShape(exceptionShapeId, StructureShape.class)).toString();
         final List<ParseToken> actualTokens = Tokenizer.tokenize(actualCode);

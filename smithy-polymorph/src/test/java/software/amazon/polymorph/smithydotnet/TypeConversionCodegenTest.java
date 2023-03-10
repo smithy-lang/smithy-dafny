@@ -52,7 +52,8 @@ public class TypeConversionCodegenTest {
     private static TypeConversionCodegen setupCodegen(final BiConsumer<ServiceShape.Builder, ModelAssembler> updater) {
         final Model model = TestModel.setupModel(updater);
         final ServiceShape serviceShape = model.expectShape(SERVICE_SHAPE_ID, ServiceShape.class);
-        return new TypeConversionCodegen(model, serviceShape);
+        final DotNetNameResolver nameResolver = new DotNetV1NameResolver(model, serviceShape);
+        return new TypeConversionCodegen(model, serviceShape, nameResolver);
     }
 
     private static String generate(final TypeConversionCodegen codegen) {

@@ -36,7 +36,7 @@ import java.util.stream.Stream;
 /**
  * Provides a consistent mapping between names of model Shapes and generated identifiers.
  */
-public class DotNetNameResolver {
+public abstract class DotNetNameResolver {
     private final Model model;
     protected final ServiceShape serviceShape;
 
@@ -135,18 +135,7 @@ public class DotNetNameResolver {
           : serviceShape.getId().getName();
     }
 
-    public String interfaceForService() {
-        return interfaceForService(serviceShape.getId());
-    }
-
-    public static String interfaceForService(final ShapeId serviceShapeId) {
-        if (AwsSdkNameResolverHelpers.isInAwsSdkNamespace(serviceShapeId)) {
-            final String serviceName = StringUtils.equals(serviceShapeId.getName(), AwsSdkDotNetNameResolver.DDB_SMITHY_SERVICE_NAME)
-                ? AwsSdkDotNetNameResolver.DDB_TYPES_SERVICE_NAME
-                : serviceShapeId.getName();
-            return "I" + serviceName;
-        }
-
+    public String interfaceForService(final ShapeId serviceShapeId) {
         return String.format("I%s", StringUtils.capitalize(serviceShapeId.getName()));
     }
 

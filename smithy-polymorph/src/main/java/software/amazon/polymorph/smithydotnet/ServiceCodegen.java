@@ -38,13 +38,6 @@ public class ServiceCodegen {
     protected final ServiceShape serviceShape;
     protected final DotNetNameResolver nameResolver;
 
-    public ServiceCodegen(final Model model, final ServiceShape serviceShape) {
-        this.model = model;
-
-        this.serviceShape = serviceShape;
-        this.nameResolver = new DotNetNameResolver(model, serviceShape);
-    }
-
     public ServiceCodegen(
       final Model model,
       final ServiceShape serviceShape,
