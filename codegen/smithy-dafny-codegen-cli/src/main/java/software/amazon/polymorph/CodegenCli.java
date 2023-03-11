@@ -80,6 +80,8 @@ public class CodegenCli {
                 .stream(cliArguments.dependentModelPaths)
                 .forEach(assembler::addImport);
 
+        assembler.discoverModels();
+
         final Model model = assembler
                 .assemble()
                 .unwrap();
@@ -340,7 +342,7 @@ public class CodegenCli {
             Optional<Path> includeDafnyFile = Optional.empty();
             if (outputDafny) {
                 if (!commandLine.hasOption("include-dafny")) {
-                    // if outputing dafny, an include file is required
+                    // if outputting dafny, an include file is required
                     // if outputting dafny, an include file is required
                     throw new ParseException("Dafny requires an include file.");
                 }
