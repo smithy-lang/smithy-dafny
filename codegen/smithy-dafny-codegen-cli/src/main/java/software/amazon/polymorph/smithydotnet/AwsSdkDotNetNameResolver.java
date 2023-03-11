@@ -4,6 +4,7 @@
 package software.amazon.polymorph.smithydotnet;
 
 import software.amazon.polymorph.utils.ModelUtils;
+import software.amazon.smithy.aws.traits.ServiceTrait;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.ListShape;
 import software.amazon.smithy.model.shapes.MemberShape;
@@ -15,6 +16,8 @@ import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.TraitDefinition;
 import software.amazon.smithy.utils.StringUtils;
+
+import java.util.Optional;
 
 public class AwsSdkDotNetNameResolver extends DotNetNameResolver {
     // The following are used to resolve namespace errors when generating
@@ -110,12 +113,19 @@ public class AwsSdkDotNetNameResolver extends DotNetNameResolver {
     }
 
     private String getServiceName() {
-        // The smithy model appends a version number in the name of the service
-        // This version number does not appear in the NET SDK and resolves it to DynamoDBv2
-        if (StringUtils.equals(getServiceShape().getId().getName(), DDB_SMITHY_SERVICE_NAME)) {
-            return StringUtils.capitalize(DDB_SERVICE_NAME_V2);
+        Optional<ServiceTrait> serviceTraitOptional = serviceShape.getTrait(ServiceTrait.class);
+        if (serviceTraitOptional.isPresent()) {
+            String sdkId = serviceTraitOptional.get().getSdkId();
+
+            // The .NET DDB SDK appends a "V2" only for DDB for some reason
+            if (StringUtils.equals(sdkId, DDB_SERVICE_NAME)) {
+                return StringUtils.capitalize(DDB_SERVICE_NAME_V2);
+            } else {
+                return sdkId;
+            }
+        } else {
+            return StringUtils.capitalize(getServiceShape().getId().getName());
         }
-        return StringUtils.capitalize(getServiceShape().getId().getName());
     }
 
     @Override
