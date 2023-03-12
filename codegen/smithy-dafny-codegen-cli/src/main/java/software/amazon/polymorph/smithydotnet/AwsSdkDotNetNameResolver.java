@@ -16,6 +16,7 @@ import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.EnumTrait;
+import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.TraitDefinition;
 import software.amazon.smithy.utils.StringUtils;
 
@@ -35,12 +36,8 @@ public class AwsSdkDotNetNameResolver extends DotNetNameResolver {
     public static final String REQUEST = "Request";
     public static final String RESPONSE = "Response";
 
-    private final OperationIndex operationIndex;
-
     public AwsSdkDotNetNameResolver(final Model model, final ServiceShape serviceShape) {
         super(model, serviceShape);
-
-        operationIndex = OperationIndex.of(model);
     }
 
     private boolean isGeneratedInSdk(final ShapeId shapeId) {
@@ -89,6 +86,11 @@ public class AwsSdkDotNetNameResolver extends DotNetNameResolver {
             if (operation.isPresent()) {
                 return "%s.Model.%s".formatted(namespaceForService(), operation.get().getId().getName() + RESPONSE);
             }
+
+            if (structureShape.hasTrait(ErrorTrait.class)) {
+                return "%s.Model.%s".formatted(namespaceForService(), classForSpecificServiceException(structureShape.getId()));
+            }
+
             return "%s.Model.%s".formatted(namespaceForService(), structureShape.getId().getName());
         }
 
@@ -152,5 +154,11 @@ public class AwsSdkDotNetNameResolver extends DotNetNameResolver {
 
     public String qualifiedClassForBaseServiceException() {
         return "%s.%s".formatted(namespaceForService(), classForBaseServiceException());
+    }
+
+    @Override
+    public String classForSpecificServiceException(ShapeId structureShapeId) {
+        String name = super.classForSpecificServiceException(structureShapeId);
+        return !name.endsWith("Exception") ? "%sException".formatted(name) : name;
     }
 }
