@@ -6,8 +6,10 @@ package software.amazon.polymorph.smithydotnet;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.smithy.aws.traits.ServiceTrait;
 import software.amazon.smithy.model.Model;
+import software.amazon.smithy.model.knowledge.OperationIndex;
 import software.amazon.smithy.model.shapes.ListShape;
 import software.amazon.smithy.model.shapes.MemberShape;
+import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
@@ -30,13 +32,15 @@ public class AwsSdkDotNetNameResolver extends DotNetNameResolver {
     public static final String DDB_V2_ATTRIBUTE_VALUE = "Amazon.DynamoDBv2.Model.AttributeValue";
     public static final String DDB_NET_INTERFACE_NAME = "Amazon.DynamoDBv2.IAmazonDynamoDB";
     public static final String DDB_ATTRIBUTE_VALUE_MODEL_NAMESPACE = "Com.Amazonaws.Dynamodb.AttributeValue";
-    public static final String DDB_INPUT = "Input";
-    public static final String DDB_OUTPUT = "Output";
-    public static final String DDB_REQUEST = "Request";
-    public static final String DDB_RESPONSE = "Response";
+    public static final String REQUEST = "Request";
+    public static final String RESPONSE = "Response";
+
+    private final OperationIndex operationIndex;
 
     public AwsSdkDotNetNameResolver(final Model model, final ServiceShape serviceShape) {
         super(model, serviceShape);
+
+        operationIndex = OperationIndex.of(model);
     }
 
     private boolean isGeneratedInSdk(final ShapeId shapeId) {
@@ -74,19 +78,16 @@ public class AwsSdkDotNetNameResolver extends DotNetNameResolver {
             if (structureShape.hasTrait(TraitDefinition.class)) {
                 throw new IllegalArgumentException("Trait definition structures have no corresponding generated type");
             }
-            // Structures for the DynamoDB NET SDK MUST be resolved from input to request
-            // The actual NET SDK uses Request/Response
-            if (StringUtils.equals(structureShape.getId().getNamespace(), DDB_NAMESPACE) &&
-                    structureShape.getId().getName().endsWith(DDB_INPUT)) {
-                String newRequestString = structureShape.getId().getName().replace(DDB_INPUT, DDB_REQUEST);
-                return "%s.Model.%s".formatted(namespaceForService(), newRequestString);
+            // The NET SDK uses <operation name>Request/Response
+            // rather than the structure name for operation input/output structures
+            Optional<ShapeId> shapeId = Optional.of(structureShape.getId());
+            Optional<OperationShape> operation = getModel().getOperationShapes().stream().filter(o -> o.getInput().equals(shapeId)).findFirst();
+            if (operation.isPresent()) {
+                return "%s.Model.%s".formatted(namespaceForService(), operation.get().getId().getName() + REQUEST);
             }
-            // Structures for the DynamoDB NET SDK MUST be resolved from output to response
-            // The actual NET SDK uses Request/Response
-            if (StringUtils.equals(structureShape.getId().getNamespace(), DDB_NAMESPACE) &&
-                    structureShape.getId().getName().endsWith(DDB_OUTPUT)) {
-                String newResponseString = structureShape.getId().getName().replace(DDB_OUTPUT, DDB_RESPONSE);
-                return "%s.Model.%s".formatted(namespaceForService(), newResponseString);
+            operation = getModel().getOperationShapes().stream().filter(o -> o.getOutput().equals(shapeId)).findFirst();
+            if (operation.isPresent()) {
+                return "%s.Model.%s".formatted(namespaceForService(), operation.get().getId().getName() + RESPONSE);
             }
             return "%s.Model.%s".formatted(namespaceForService(), structureShape.getId().getName());
         }
