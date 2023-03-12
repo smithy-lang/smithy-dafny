@@ -17,9 +17,14 @@ module TestComAmazonawsSqs {
   {
     var client :- expect Sqs.SQSClient();
 
-    var ret :- expect client.ListQueues(input);
+    var input := Sqs.Types.ListQueuesRequest(
+      QueueNamePrefix := None,
+      NextToken := None,
+      MaxResults := None
+    );
+    var ret: Sqs.Types.ListQueuesResult :- expect client.ListQueues(input);
 
-    var ListQueuesResult(QueueUrls) := ret;
+    var ListQueuesResult(NextToken, QueueUrls) := ret;
 
     expect QueueUrls.Some?;
     expect |QueueUrls.value| == 0;
