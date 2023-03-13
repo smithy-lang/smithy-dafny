@@ -13,7 +13,7 @@ module TestComAmazonawsSqs {
   import opened StandardLibrary.UInt
   import opened Wrappers
 
-  method BasicSanityTest()
+  method {:test} BasicSanityTest()
   {
     var client :- expect Sqs.SQSClient();
 
@@ -27,6 +27,6 @@ module TestComAmazonawsSqs {
     var ListQueuesResult(NextToken, QueueUrls) := ret;
 
     expect QueueUrls.Some?;
-    expect |QueueUrls.value| == 0;
+    expect |QueueUrls.value| == 1;
   }
 }
