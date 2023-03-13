@@ -8,6 +8,7 @@ import software.amazon.smithy.aws.traits.ServiceTrait;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.OperationIndex;
 import software.amazon.smithy.model.shapes.ListShape;
+import software.amazon.smithy.model.shapes.MapShape;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
@@ -67,6 +68,21 @@ public class AwsSdkDotNetNameResolver extends DotNetNameResolver {
             return "System.Collections.Generic.List<%s>".formatted(DDB_V2_ATTRIBUTE_VALUE);
         }
         return "System.Collections.Generic.List<%s>".formatted(memberType);
+    }
+
+    @Override
+    protected String baseTypeForMap(MapShape mapShape) {
+        final MemberShape keyShape = mapShape.getKey();
+        final Shape keyTargetShape = getModel().expectShape(keyShape.getTarget());
+        final MemberShape valueShape = mapShape.getValue();
+        final Shape valueTargetShape = getModel().expectShape(valueShape.getTarget());
+
+        // The .NET AWS SDK represents enums as strings in map keys and values, even though it represents enums as the
+        // corresponding enum class everywhere else AFAICT.
+        final String keyType = keyTargetShape.hasTrait(EnumTrait.class) ? "string" : baseTypeForMember(keyShape);
+        final String valueType = valueTargetShape.hasTrait(EnumTrait.class) ? "string" : baseTypeForMember(valueShape);
+
+        return "System.Collections.Generic.Dictionary<%s, %s>".formatted(keyType, valueType);
     }
 
     @Override

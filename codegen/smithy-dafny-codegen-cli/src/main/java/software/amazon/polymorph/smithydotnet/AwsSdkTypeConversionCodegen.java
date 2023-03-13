@@ -64,7 +64,7 @@ public class AwsSdkTypeConversionCodegen extends TypeConversionCodegen {
     }
 
     @Override
-    protected boolean enumListMembersAreStringsInCSharp() {
+    protected boolean enumListAndMapMembersAreStringsInCSharp() {
         return true;
     }
 
