@@ -13,7 +13,7 @@ public class AwsSdkNameResolverHelpers {
         return "com.amazonaws.%s".formatted(awsServiceName);
     }
 
-    // TODO better way to determine if AWS SDK
+    // TODO Accept a Shape and check for the @aws.api#service trait instead
     public static boolean isInAwsSdkNamespace(ShapeId shapeId) {
         return shapeId.getNamespace().startsWith("com.amazonaws.");
     }
