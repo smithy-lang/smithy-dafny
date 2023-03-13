@@ -13,7 +13,8 @@ public class AwsSdkNameResolverHelpers {
         return "com.amazonaws.%s".formatted(awsServiceName);
     }
 
-    // TODO Accept a Shape and check for the @aws.api#service trait instead
+    // TODO Accept a Shape and check if it is in the closure
+    // of a service with the @aws.api#service trait instead
     public static boolean isInAwsSdkNamespace(ShapeId shapeId) {
         return shapeId.getNamespace().startsWith("com.amazonaws.");
     }
