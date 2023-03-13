@@ -42,6 +42,7 @@ dependencies {
     implementation("software.amazon.smithy:smithy-protocol-test-traits:[1.0.2,1.1.0[")
     implementation("software.amazon.smithy:smithy-aws-traits:1.28.1")
     implementation("software.amazon.smithy:smithy-rules-engine:1.28.1")
+    implementation("software.amazon.smithy:smithy-waiters:1.28.1")
 
     implementation("com.google.guava:guava:30.1-jre")
     implementation("commons-cli:commons-cli:1.4")
