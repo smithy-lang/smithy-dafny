@@ -135,14 +135,6 @@ public class DotNetNameResolver {
           : serviceShape.getId().getName();
     }
 
-    public String interfaceForService() {
-        return interfaceForService(serviceShape);
-    }
-
-    public static String interfaceForService(final ServiceShape serviceShape) {
-        return String.format("I%s", AwsSdkNameResolverHelpers.getSdkId(serviceShape));
-    }
-
     /**
      * Returns the name for the service's base exception class. This exception class does not appear in the model, but
      * instead serves as the parent class of all modeled (concrete) exception classes.
@@ -716,9 +708,9 @@ public class DotNetNameResolver {
         final ShapeId serviceShapeId = serviceShape.getId();
 
         if (AwsSdkNameResolverHelpers.isInAwsSdkNamespace(serviceShapeId)) {
-            return "%s.%sClient"
+            return "%s.I%sClient"
                 .formatted(DafnyNameResolverHelpers.dafnyExternNamespaceForShapeId(serviceShapeId),
-                interfaceForService(serviceShape));
+                           StringUtils.capitalize(serviceShape.getId().getName()));
         }
 
         // Qualify extern namespace
