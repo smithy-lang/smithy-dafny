@@ -67,7 +67,5 @@ public abstract class Generator {
             ClassName.get("java.util.stream", "Collectors");
         public static final ClassName JAVA_UTIL_ARRAYLIST =
             ClassName.get("java.util", "ArrayList");
-       public static final ClassName BLOB_TO_NATIVE_SDK_BYTES =
-           ClassName.get("software.amazon.awssdk.core", "SdkBytes");
      }
 }

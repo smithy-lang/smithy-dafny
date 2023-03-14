@@ -11,6 +11,9 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.WildcardTypeName;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -18,11 +21,10 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 import javax.lang.model.element.Modifier;
 
 import dafny.DafnySequence;
-
-import software.amazon.polymorph.smithyjava.MethodReference;
 import software.amazon.polymorph.smithyjava.generator.ToDafny;
 import software.amazon.polymorph.smithyjava.nameresolver.AwsSdkDafnyV2;
 import software.amazon.polymorph.smithyjava.nameresolver.AwsSdkNativeV2;
@@ -47,6 +49,7 @@ import software.amazon.smithy.model.traits.EnumDefinition;
 import software.amazon.smithy.model.traits.EnumTrait;
 
 import static software.amazon.polymorph.smithyjava.generator.Generator.Constants.JAVA_UTIL_STREAM_COLLECTORS;
+import static software.amazon.polymorph.smithyjava.generator.awssdk.v2.JavaAwsSdkV2.SDK_BYTES_AS_BYTE_BUFFER;
 import static software.amazon.smithy.utils.StringUtils.capitalize;
 
 //TODO: Create abstract class for V1 & V2 to extend
@@ -72,6 +75,7 @@ import static software.amazon.smithy.utils.StringUtils.capitalize;
  * </ul>
  */
 public class ToDafnyAwsV2 extends ToDafny {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ToDafnyAwsV2.class);
     // Hack to override subject to JavaAwsSdkV2
     // See code comment on ../library/ModelCodegen for details.
     final JavaAwsSdkV2 subject;
@@ -200,7 +204,45 @@ public class ToDafnyAwsV2 extends ToDafny {
 
     MethodSpec generateConvertUnion(final ShapeId shapeId) {
         final UnionShape unionShape = subject.model.expectShape(shapeId, UnionShape.class);
+        if (shapeId.toString().equals("com.amazonaws.dynamodb#AttributeValue")) {
+            return ddbAttributeValueConversion(shapeId, unionShape);
+        }
+        LOGGER.warn("Encountered an AWS SDK Union Shape!" +
+                "Historically, we have not been good at generating these!\n" +
+                "Union ShapeID: %s".formatted(shapeId));
         return super.modeledUnion(unionShape);
+    }
+
+    /** */
+    private MethodSpec ddbAttributeValueConversion(final ShapeId shapeId, final UnionShape shape) {
+        String methodName = capitalize(shapeId.getName());
+        TypeName returnType = subject.dafnyNameResolver.typeForShape(shapeId);
+        MethodSpec.Builder method = MethodSpec
+                .methodBuilder(methodName)
+                .addModifiers(PUBLIC_STATIC)
+                .returns(returnType)
+                .addParameter(subject.nativeNameResolver.classNameForStructure(shape), VAR_INPUT);
+        method.beginControlFlow("switch ($L.type())", VAR_INPUT);
+        shape.members().forEach(member -> {
+            CodeBlock getField = getMember(CodeBlock.builder().add(VAR_INPUT).build(), member);
+            CodeBlock memberConversion = memberConversion(member, getField);
+            String datatypeConstructorCreate = Dafny.datatypeConstructorCreate(member.getMemberName(), false);
+            // The DDB Model uses NULL, but AWS SDK V2 uses NUL
+            String memberName = member.getMemberName().equals("NULL")? "NUL" : member.getMemberName();
+            method.beginControlFlow("case $L:", memberName)
+                    .addStatement("return $T.$L($L)", returnType, datatypeConstructorCreate, memberConversion)
+                    .endControlFlow();
+        });
+        method.beginControlFlow("default:")
+                .addStatement(
+                        "throw new $T($S + $L + $S)",
+                        IllegalArgumentException.class,
+                        "Cannot convert ",
+                        VAR_INPUT,
+                        " to %s.".formatted(returnType))
+                .endControlFlow();
+        method.endControlFlow();
+        return method.build();
     }
 
     @Override
@@ -252,10 +294,11 @@ public class ToDafnyAwsV2 extends ToDafny {
         // This is the only time when Polymorph needs to convert a list of a Dafny type to a list
         //     of a type that Polymorph does not know about. So this is a special case and warrants
         //     its own generation logic.
-        if (targetShape.getId().getName().equals("BinarySetAttributeValue")) {
+        if (targetShape.getId().toString().equals("com.amazonaws.dynamodb#BinarySetAttributeValue")) {
             return returnCodeBlockBuilder
-                .add(".stream().map((self) -> { return self.asByteBuffer(); } ).collect(\n"
-                    + "$L.toList())", JAVA_UTIL_STREAM_COLLECTORS)
+                .add(".stream()\n.map($L)\n.collect($L.toList())",
+                        SDK_BYTES_AS_BYTE_BUFFER.asFunctionalReference(),
+                        JAVA_UTIL_STREAM_COLLECTORS)
                 .build();
         }
         return inputVar;
