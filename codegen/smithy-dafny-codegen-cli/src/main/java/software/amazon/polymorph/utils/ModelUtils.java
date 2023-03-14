@@ -318,8 +318,7 @@ public class ModelUtils {
      */
     public static Boolean isReferenceDependantModuleType(final Shape shape, final String namespace) {
         if (shape.hasTrait(ReferenceTrait.class)) {
-            return !namespace.equalsIgnoreCase(shape.getId().getNamespace())
-                && !namespace.equalsIgnoreCase(shape.getId().getNamespace() + ".Wrapped");
+            return !namespace.equalsIgnoreCase(shape.getId().getNamespace());
         } else {
             return false;
         }
