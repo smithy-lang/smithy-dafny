@@ -16,7 +16,7 @@ module {:extern "Dafny.Com.Amazonaws.Kms"} Com.Amazonaws.Kms refines AbstractCom
    * Useful for MRKs where we need to check whether our client can decrypt an MRK.
    */
   function method {:extern "RegionMatch"} RegionMatch(
-    client: IKMSClient,
+    client: IKeyManagementServiceClient,
     region: string
   ): Option<bool>
 
