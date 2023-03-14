@@ -14,6 +14,7 @@ import javax.annotation.Nullable;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
+import software.amazon.polymorph.utils.AwsSdkNameResolverHelpers;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.polymorph.utils.Token;
 import software.amazon.polymorph.utils.TokenTree;
@@ -110,7 +111,7 @@ public record DafnyNameResolver(
     }
 
     public static String traitNameForServiceClient(final ServiceShape serviceShape) {
-        return "I%sClient".formatted(nameForService(serviceShape));
+        return "I%sClient".formatted(AwsSdkNameResolverHelpers.getSdkId(serviceShape));
     }
 
     public String traitForServiceClient(final ServiceShape serviceShape) {
@@ -118,7 +119,7 @@ public record DafnyNameResolver(
     }
 
     public static String classNameForServiceClient(ServiceShape shape) {
-        String serviceName = nameForService(shape);
+        String serviceName = AwsSdkNameResolverHelpers.getSdkId(shape);
         if (shape.hasTrait(LocalServiceTrait.class)) {
             LocalServiceTrait trait = shape.expectTrait(LocalServiceTrait.class);
             serviceName = trait.getSdkId();

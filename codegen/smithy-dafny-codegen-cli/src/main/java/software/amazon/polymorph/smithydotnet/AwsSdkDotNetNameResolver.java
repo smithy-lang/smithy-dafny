@@ -24,6 +24,8 @@ import software.amazon.smithy.utils.StringUtils;
 import java.util.Optional;
 
 public class AwsSdkDotNetNameResolver extends DotNetNameResolver {
+    public static final String KMS_SERVICE_NAME = "KMS";
+    public static final String KEY_MANAGEMENT_SERVICE_NAME = "KeyManagementService";
     // The following are used to resolve namespace errors when generating
     // code that uses the DynamoDBv2 service model
     public static final String DDB_NAMESPACE = "com.amazonaws.dynamodb";
@@ -136,12 +138,17 @@ public class AwsSdkDotNetNameResolver extends DotNetNameResolver {
         if (serviceTraitOptional.isPresent()) {
             String sdkId = serviceTraitOptional.get().getSdkId();
 
-            // The .NET DDB SDK appends a "V2" only for DDB for some reason
+            // Account for known legacy identifiers for a few services.
+            // See the metadata at https://github.com/aws/aws-sdk-net/tree/master/generator/ServiceModels
+            // for details.
             if (StringUtils.equals(sdkId, DDB_SERVICE_NAME)) {
                 return StringUtils.capitalize(DDB_SERVICE_NAME_V2);
-            } else {
-                return sdkId;
             }
+            if (StringUtils.equals(sdkId, KMS_SERVICE_NAME)) {
+                return KEY_MANAGEMENT_SERVICE_NAME;
+            }
+
+            return sdkId;
         } else {
             return StringUtils.capitalize(getServiceShape().getId().getName());
         }

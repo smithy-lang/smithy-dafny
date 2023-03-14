@@ -136,18 +136,11 @@ public class DotNetNameResolver {
     }
 
     public String interfaceForService() {
-        return interfaceForService(serviceShape.getId());
+        return interfaceForService(serviceShape);
     }
 
-    public static String interfaceForService(final ShapeId serviceShapeId) {
-        if (AwsSdkNameResolverHelpers.isInAwsSdkNamespace(serviceShapeId)) {
-            final String serviceName = StringUtils.equals(serviceShapeId.getName(), AwsSdkDotNetNameResolver.DDB_SMITHY_SERVICE_NAME)
-                ? AwsSdkDotNetNameResolver.DDB_TYPES_SERVICE_NAME
-                : serviceShapeId.getName();
-            return "I" + serviceName;
-        }
-
-        return String.format("I%s", StringUtils.capitalize(serviceShapeId.getName()));
+    public static String interfaceForService(final ServiceShape serviceShape) {
+        return String.format("I%s", AwsSdkNameResolverHelpers.getSdkId(serviceShape));
     }
 
     /**
@@ -725,7 +718,7 @@ public class DotNetNameResolver {
         if (AwsSdkNameResolverHelpers.isInAwsSdkNamespace(serviceShapeId)) {
             return "%s.%sClient"
                 .formatted(DafnyNameResolverHelpers.dafnyExternNamespaceForShapeId(serviceShapeId),
-                interfaceForService(serviceShapeId));
+                interfaceForService(serviceShape));
         }
 
         // Qualify extern namespace
