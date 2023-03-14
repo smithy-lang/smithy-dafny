@@ -4910,7 +4910,7 @@
             ],
             "traits": {
                 "aws.api#service": {
-                    "sdkId": "KMS",
+                    "sdkId": "KeyManagementService",
                     "arnNamespace": "kms",
                     "cloudFormationName": "KMS",
                     "cloudTrailEventSource": "kms.amazonaws.com",
