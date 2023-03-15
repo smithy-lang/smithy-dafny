@@ -146,8 +146,8 @@ public class ModelUtils {
           .filter(s -> s.toShapeId().getNamespace().equals(namespace))
           .toArray(ServiceShape[]::new);
 
-        if (tmp.length != 1 ) {
-            throw new IllegalStateException();
+        if (tmp.length != 1) {
+            throw new IllegalStateException("Found " + tmp.length + " services matching " + namespace + ", need exactly one");
         }
 
         return tmp[0];
