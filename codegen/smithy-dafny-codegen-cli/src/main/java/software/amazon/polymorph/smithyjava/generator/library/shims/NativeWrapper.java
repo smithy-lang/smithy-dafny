@@ -9,7 +9,6 @@ import com.squareup.javapoet.TypeSpec;
 
 import java.util.Set;
 
-import dafny.Tuple0;
 import software.amazon.polymorph.smithyjava.generator.library.JavaLibrary;
 import software.amazon.polymorph.smithyjava.generator.library.JavaLibrary.MethodSignature;
 import software.amazon.polymorph.utils.ModelUtils.ResolvedShapeId;
