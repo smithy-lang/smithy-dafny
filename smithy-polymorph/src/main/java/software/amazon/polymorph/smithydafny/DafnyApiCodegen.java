@@ -1079,6 +1079,58 @@ public class DafnyApiCodegen {
         .flatten();
     }
 
+    private TokenTree MemberModifies(
+        final MemberShape member,
+        final String varName
+    ) {
+        final boolean isList = model.expectShape(member.getTarget()).getType() == ShapeType.LIST;
+
+
+        // If we have a reference input,
+        // then we MAY modify that input.
+        // This means we will need both
+        // a modifies and a decreases' clause.
+        // The decreases clause is because
+        // Dafny will skip type parameters
+        // when generating a default decreases clause.
+        if (isList) {
+            if (member.isRequired()) {
+                // Required list item
+                return TokenTree
+                    .of(
+                        "(set m: object, i | i in %s && m in i.Modifies :: m)"
+                            .formatted(varName)
+                    )
+                    .lineSeparated();
+            } else if (!member.isRequired()) {
+                // Optional list item
+                return TokenTree
+                    .of(
+                        "(if %s.Some? then (set m: object, i | i in %s.value && m in i.Modifies :: m) else {})"
+                            .formatted(varName, varName)
+                    )
+                    .lineSeparated();
+            }
+        }
+        if (member.isRequired()) {
+            // Required single item
+            return TokenTree
+                .of(
+                    "%s.Modifies".formatted(varName)
+                );
+        } else if (!member.isRequired()) {
+            // Optional single item
+            return TokenTree
+                .of(
+                    "(if %s.Some? then %s.value.Modifies else {})"
+                        .formatted(varName, varName)
+                )
+                .lineSeparated();
+        } else {
+            throw new IllegalStateException("Unsupported shape type");
+        }
+    }
+
     private TokenTree OperationMemberModifies(
       final MemberShape member,
       final OperationShape operationShape
@@ -1089,7 +1141,6 @@ public class DafnyApiCodegen {
         throw new IllegalStateException("Member not on operation");
       }
 
-      final boolean isList = model.expectShape(member.getTarget()).getType() == ShapeType.LIST;
       // This is tricky, given where we are, there MUST be an output shape.
       // If this output is @positional,
       // then we need to drop the member name
@@ -1099,46 +1150,7 @@ public class DafnyApiCodegen {
 
       final String varName = "input" + memberName;
 
-      // If we have a reference input,
-      // then we MAY modify that input.
-      // This means we will need both
-      // a modifies and a decreases' clause.
-      // The decreases clause is because
-      // Dafny will skip type parameters
-      // when generating a default decreases clause.
-      if (member.isRequired() && !isList) {
-        // Required single item
-        return TokenTree
-          .of(
-            "%s.Modifies".formatted(varName)
-          );
-      } else if (!member.isRequired() && !isList) {
-        // Optional single item
-        return TokenTree
-          .of(
-            "(if %s.Some? then %s.value.Modifies else {})"
-              .formatted(varName, varName)
-          )
-          .lineSeparated();
-      } else if (isList && member.isRequired()) {
-        // Required list item
-        return TokenTree
-          .of(
-            "(set m: object, i | i in %s && m in i.Modifies :: m)"
-              .formatted(varName)
-          )
-          .lineSeparated();
-      } else if (isList && !member.isRequired()) {
-        // Optional list item
-        return TokenTree
-          .of(
-            "(if %s.Some? then (set m: object, i | i in %s.value && m in i.Modifies :: m) else {})"
-              .formatted(varName, varName)
-          )
-          .lineSeparated();
-      } else {
-        throw new IllegalStateException("Unsupported shape type");
-      }
+      return MemberModifies(member, varName);
     }
 
 
@@ -1485,6 +1497,16 @@ public class DafnyApiCodegen {
             ModelUtils.findAllDependentMemberReferenceShapes(
                 configShapeIdAsSet, model));
 
+        System.out.println(ModelUtils.findAllDependentMemberReferenceShapesWithPaths(configShapeIdAsSet, model));
+
+
+
+//        assert ModelUtils.findAllDependentShapesWithPaths(configShapeIdAsSet, model).size() ==
+//            ModelUtils.findAllDependentMemberReferenceShapes(
+//                configShapeIdAsSet, model).size();
+
+        System.out.println(managedReferenceMemberShapes);
+
         TokenTree serviceMethod = TokenTree.of(
             "method %s(config: %s := %s())"
                 .formatted(
@@ -1499,6 +1521,129 @@ public class DafnyApiCodegen {
         ).lineSeparated();
 
         // Add `requires` clauses
+
+        Set<List<ShapeId>> managedReferenceMemberShapePaths = ModelUtils.findAllDependentMemberReferenceShapesWithPaths(configShapeIdAsSet, model);
+
+        if (managedReferenceMemberShapePaths.size() > 0) {
+            for (List<ShapeId> managedReferenceMemberShapePath : managedReferenceMemberShapePaths) {
+
+                String appendingPath = "config";
+                String appending = "requires " + appendingPath;
+                ShapeType currentShapeType = null;
+                ShapeType previousShapeType = null;
+                String currentVarName = null;
+                String previousVarName = null;
+                boolean previousShapeRequired = false;
+                boolean currentShapeRequired = false;
+                int intermediateVarCounter = 0;
+
+                for (ShapeId shapeIdInPath : managedReferenceMemberShapePath) {
+                    System.out.println("shapeIdInPath: " + shapeIdInPath);
+                    Shape shapeInPath = model.expectShape(shapeIdInPath);
+                    System.out.println("shapeInPath: " + shapeInPath.getType());
+                }
+
+                for (ShapeId shapeIdInPath : managedReferenceMemberShapePath) {
+                    Shape shapeInPath = model.expectShape(shapeIdInPath);
+
+                    // Find all member variable names. start there I guess
+                    if (shapeInPath.isMemberShape()) {
+                        currentVarName = "." + shapeIdInPath.getMember().get();
+                        currentShapeRequired = shapeInPath.asMemberShape().get().isRequired();
+                        // Assumption here is none of these are required...
+                        if (currentShapeType == ShapeType.STRUCTURE) {
+                            if (previousShapeType == ShapeType.STRUCTURE) {
+                                appending += appendingPath + previousVarName + ".value";
+                                appendingPath += previousVarName + ".value";
+                            }
+
+                            if (!currentShapeRequired) {
+                                appending += currentVarName + ".Some? ==> ";
+                            } else {
+//                                throw new UnsupportedOperationException("Required 1 not supported");
+                            }
+                        } if (currentShapeType == ShapeType.MAP) {
+                            if (previousShapeType == ShapeType.STRUCTURE) {
+                                appendingPath += previousVarName + ".value";
+                            }
+
+                            if (!shapeInPath.asMemberShape().get().isRequired()) {
+
+                            }
+
+                            appending +=
+                                "\n var tmps%1$s := set t%1$s | t%1$s in %2$s.%3$s.Values;"
+                                    .formatted(
+                                        intermediateVarCounter,
+                                        appendingPath,
+                                        currentVarName);
+                            appending +=
+                                "\n forall tmp%1$s :: tmp%1$s in tmps%1$s ==> tmp%1$s"
+                                    .formatted(
+                                        intermediateVarCounter,
+                                        appendingPath,
+                                        currentVarName);
+
+                            intermediateVarCounter++;
+
+                        }
+                    } else {
+                        previousShapeType = currentShapeType;
+                        previousVarName = currentVarName;
+                        previousShapeRequired = currentShapeRequired;
+                        currentShapeType = shapeInPath.getType();
+                    }
+                }
+                if (currentShapeType == ShapeType.STRUCTURE) {
+                    appending += appendingPath + currentVarName + ".value";
+
+                }
+                appending += ".ValidState()";
+
+                serviceMethod = serviceMethod.append(TokenTree.of(
+                    "%1$s\n"
+                        .formatted(appending
+                            )
+                ).lineSeparated());
+            }
+        }
+
+
+
+        /*
+        this is actually all for requires... but principle is similar for modifies methinks
+        if map:
+            if isRequired:
+                accessor = "set {UID} | {UID} in {prevAccessor}.{varName}.{Getter}
+            else:
+                accessor = "if {prevAccessor}.{varName}.Some?
+                                then (set {UID} | {UID} in {prevAccessor}.{varName}.{Getter})
+                                else {}
+            if list:
+
+        else:
+            if isRequired:
+                accessor = "{prevAccessor}.{varName}"
+            else:
+                accessor = "(if {prevAccessor}.{varName}.Some? then {prevAccessor}.{varName}.value.
+
+
+
+
+         */
+
+        // if list or set or map:
+        // if map:
+
+
+        // if is membershape:
+        // list, map, and set all get unfolded
+        // member shapes get access directly
+        // else, skip
+
+//                    final boolean isList = model.expectShape(member.getTarget()).getType() == ShapeType.LIST;
+//                    if ()
+
 
         // Requires any provided managed reference shapes to have ValidState()
         if (managedReferenceMemberShapes.size() > 0) {
@@ -1516,11 +1661,12 @@ public class DafnyApiCodegen {
         // Local service modifies the Modifies member of managed reference shapes
         if (managedReferenceMemberShapes.size() > 0) {
           for (MemberShape managedReferenceMemberShape : managedReferenceMemberShapes) {
-            serviceMethod = serviceMethod.append(TokenTree.of(
-              "modifies if config.%1$s.Some? then config.%1$s.value.%2$s else {}\n"
-                .formatted(managedReferenceMemberShape.getMemberName(),
-                nameResolver.mutableStateFunctionName())
-              ).lineSeparated());
+//            serviceMethod = serviceMethod.append(TokenTree.of(
+//              "modifies if config.%1$s.Some? then config.%1$s.value.%2$s else {}\n"
+//                .formatted(managedReferenceMemberShape.getMemberName(),
+//                nameResolver.mutableStateFunctionName())
+//              ).lineSeparated());
+              serviceMethod = serviceMethod.append(MemberModifies(managedReferenceMemberShape, managedReferenceMemberShape.getMemberName()));
           } 
         }
         
