@@ -1547,25 +1547,16 @@ public class DafnyApiCodegen {
                 boolean previousShapeRequired = false;
                 boolean currentShapeRequired = false;
 
-                for (ShapeId shapeIdInPath : managedReferenceMemberShapePath) {
-                    System.out.println("shapeIdInPath: " + shapeIdInPath);
-                    Shape shapeInPath = model.expectShape(shapeIdInPath);
-                    System.out.println("shapeInPath: " + shapeInPath.getType());
-                }
 
                 for (ShapeId shapeIdInPath : managedReferenceMemberShapePath) {
                     Shape shapeInPath = model.expectShape(shapeIdInPath);
-//                    System.out.println("shapeInPath: " + shapeInPath);
 
-                    // Find all member variable names. start there I guess
                     if (shapeInPath.isMemberShape()) {
                         currentVarName = "." + shapeIdInPath.getMember().get();
                         currentShapeRequired = shapeInPath.asMemberShape().get().isRequired();
-                        // Assumption here is none of these are required...
+
                         if (currentShapeType == ShapeType.STRUCTURE) {
                             if (previousShapeType == ShapeType.STRUCTURE) {
-//                                System.out.println("currentShapeType: " + currentShapeType);
-//                                System.out.println("shapeInPath: " + shapeInPath);
                                 appendingPath += previousVarName;
                                 if (!previousShapeRequired) {
                                     appendingPath += ".value";
@@ -1595,14 +1586,9 @@ public class DafnyApiCodegen {
                                     appendingPath += ".value";
                                 }
                             } else if (previousShapeType == ShapeType.MAP) {
-                                // appending += "tmp%1$s".formatted(intermediateVarCounter-1);
                                 appendingPath = "tmp%1$s".formatted(intermediateVarCounter-1);
                             } else if (previousShapeType == null) {
                                 appending += appendingPath + currentVarName;
-                            }
-
-                            if (!shapeInPath.asMemberShape().get().isRequired()) {
-
                             }
 
                             appending +=
@@ -1617,7 +1603,6 @@ public class DafnyApiCodegen {
                                         appendingPath);
 
                             intermediateVarCounter++;
-
                         }
                     } else {
                         previousShapeType = currentShapeType;
