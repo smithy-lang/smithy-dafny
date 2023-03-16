@@ -1525,6 +1525,8 @@ public class DafnyApiCodegen {
         Set<List<ShapeId>> managedReferenceMemberShapePaths = ModelUtils.findAllDependentMemberReferenceShapesWithPaths(configShapeIdAsSet, model);
 
         if (managedReferenceMemberShapePaths.size() > 0) {
+            int intermediateVarCounter = 0;
+
             for (List<ShapeId> managedReferenceMemberShapePath : managedReferenceMemberShapePaths) {
 
                 String appendingPath = "config";
@@ -1535,7 +1537,6 @@ public class DafnyApiCodegen {
                 String previousVarName = null;
                 boolean previousShapeRequired = false;
                 boolean currentShapeRequired = false;
-                int intermediateVarCounter = 0;
 
                 for (ShapeId shapeIdInPath : managedReferenceMemberShapePath) {
                     System.out.println("shapeIdInPath: " + shapeIdInPath);
@@ -1564,7 +1565,12 @@ public class DafnyApiCodegen {
                             }
                         } if (currentShapeType == ShapeType.MAP) {
                             if (previousShapeType == ShapeType.STRUCTURE) {
-                                appendingPath += previousVarName + ".value";
+                                appendingPath += previousVarName;
+                            } else if (previousShapeType == ShapeType.MAP) {
+                                // appending += "tmp%1$s".formatted(intermediateVarCounter-1);
+                                appendingPath = "tmp%1$s".formatted(intermediateVarCounter-1);
+                            } else if (previousShapeType == null) {
+                                appending += appendingPath + currentVarName;
                             }
 
                             if (!shapeInPath.asMemberShape().get().isRequired()) {
@@ -1572,17 +1578,15 @@ public class DafnyApiCodegen {
                             }
 
                             appending +=
-                                "\n var tmps%1$s := set t%1$s | t%1$s in %2$s.%3$s.Values;"
+                                "\n var tmps%1$s := set t%1$s | t%1$s in %2$s.Values;"
                                     .formatted(
                                         intermediateVarCounter,
-                                        appendingPath,
-                                        currentVarName);
+                                        appendingPath);
                             appending +=
-                                "\n forall tmp%1$s :: tmp%1$s in tmps%1$s ==> tmp%1$s"
+                                "\n forall tmp%1$s :: tmp%1$s in tmps%1$s ==> "
                                     .formatted(
                                         intermediateVarCounter,
-                                        appendingPath,
-                                        currentVarName);
+                                        appendingPath);
 
                             intermediateVarCounter++;
 
@@ -1596,7 +1600,8 @@ public class DafnyApiCodegen {
                 }
                 if (currentShapeType == ShapeType.STRUCTURE) {
                     appending += appendingPath + currentVarName + ".value";
-
+                } else if (currentShapeType == ShapeType.MAP) {
+                    appending += "tmp%1$s".formatted(intermediateVarCounter-1);
                 }
                 appending += ".ValidState()";
 
