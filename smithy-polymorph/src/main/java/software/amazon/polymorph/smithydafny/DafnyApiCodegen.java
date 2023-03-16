@@ -1524,10 +1524,19 @@ public class DafnyApiCodegen {
 
         Set<List<ShapeId>> managedReferenceMemberShapePaths = ModelUtils.findAllDependentMemberReferenceShapesWithPaths(configShapeIdAsSet, model);
 
+        System.out.println("SIZE" + managedReferenceMemberShapePaths.size());
+
+
         if (managedReferenceMemberShapePaths.size() > 0) {
             int intermediateVarCounter = 0;
 
+
+
             for (List<ShapeId> managedReferenceMemberShapePath : managedReferenceMemberShapePaths) {
+
+                System.out.println("LAST " + managedReferenceMemberShapePath.get(managedReferenceMemberShapePath.size()-1));
+                System.out.println("FULLPATH " + managedReferenceMemberShapePath);
+
 
                 String appendingPath = "config";
                 String appending = "requires " + appendingPath;
@@ -1546,6 +1555,7 @@ public class DafnyApiCodegen {
 
                 for (ShapeId shapeIdInPath : managedReferenceMemberShapePath) {
                     Shape shapeInPath = model.expectShape(shapeIdInPath);
+//                    System.out.println("shapeInPath: " + shapeInPath);
 
                     // Find all member variable names. start there I guess
                     if (shapeInPath.isMemberShape()) {
@@ -1554,18 +1564,36 @@ public class DafnyApiCodegen {
                         // Assumption here is none of these are required...
                         if (currentShapeType == ShapeType.STRUCTURE) {
                             if (previousShapeType == ShapeType.STRUCTURE) {
-                                appending += appendingPath + previousVarName + ".value";
-                                appendingPath += previousVarName + ".value";
-                            }
+//                                System.out.println("currentShapeType: " + currentShapeType);
+//                                System.out.println("shapeInPath: " + shapeInPath);
+                                appendingPath += previousVarName;
+                                if (!previousShapeRequired) {
+                                    appendingPath += ".value";
+                                }
+                                if (!currentShapeRequired) {
+                                    appending += appendingPath + currentVarName
+                                        + ".Some? ==> ";
+                                }
 
-                            if (!currentShapeRequired) {
-                                appending += currentVarName + ".Some? ==> ";
-                            } else {
-//                                throw new UnsupportedOperationException("Required 1 not supported");
+                            } else if (previousShapeType == ShapeType.MAP) {
+                                appendingPath = "tmp%1$s".formatted(intermediateVarCounter-1);
+                                if (!currentShapeRequired) {
+                                    appending += appendingPath + currentVarName
+                                        + ".Some? ==> ";
+                                }
+                            } else if (previousShapeType == null ){
+                                if (!currentShapeRequired) {
+                                    appending += currentVarName + ".Some? ==> ";
+                                } else {
+                                    appendingPath += currentVarName;
+                                }
                             }
-                        } if (currentShapeType == ShapeType.MAP) {
+                        } else if (currentShapeType == ShapeType.MAP) {
                             if (previousShapeType == ShapeType.STRUCTURE) {
                                 appendingPath += previousVarName;
+                                if (!previousShapeRequired) {
+                                    appendingPath += ".value";
+                                }
                             } else if (previousShapeType == ShapeType.MAP) {
                                 // appending += "tmp%1$s".formatted(intermediateVarCounter-1);
                                 appendingPath = "tmp%1$s".formatted(intermediateVarCounter-1);
@@ -1651,15 +1679,15 @@ public class DafnyApiCodegen {
 
 
         // Requires any provided managed reference shapes to have ValidState()
-        if (managedReferenceMemberShapes.size() > 0) {
-          for (MemberShape managedReferenceMemberShape : managedReferenceMemberShapes) {
-            serviceMethod = serviceMethod.append(TokenTree.of(
-              "requires config.%1$s.Some? ==> config.%1$s.value.%2$s()\n"
-                .formatted(managedReferenceMemberShape.getMemberName(),
-                nameResolver.validStateInvariantName())
-              ).lineSeparated());
-          } 
-        }
+//        if (managedReferenceMemberShapes.size() > 0) {
+//          for (MemberShape managedReferenceMemberShape : managedReferenceMemberShapes) {
+//            serviceMethod = serviceMethod.append(TokenTree.of(
+//              "requires config.%1$s.Some? ==> config.%1$s.value.%2$s()\n"
+//                .formatted(managedReferenceMemberShape.getMemberName(),
+//                nameResolver.validStateInvariantName())
+//              ).lineSeparated());
+//          }
+//        }
 
         // Add `modifies` clauses
 
