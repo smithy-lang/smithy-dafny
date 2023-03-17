@@ -1475,6 +1475,108 @@ public class DafnyApiCodegen {
       }
     }
 
+    public TokenTree modifiesClauseForPathToReference(
+        List<ShapeId> managedReferenceMemberShapePath
+    ) {
+
+        int intermediateVarCounter = 0;
+
+
+                int startingIntermediateVarCounter = intermediateVarCounter;
+
+                String appendingPath = "config";
+                StringBuilder appending = new StringBuilder("modifies ");
+                ShapeType currentShapeType = null;
+                String currentVarName;
+                boolean currentShapeRequired;
+                // The Modifies members of optional structure members that are not inside set comprehension expressions
+                //   are accessed as `if path.to.var.Some? then path.to.var.value.path.to.reference.Modifies else {}`.
+                // The `else {}` is appended at the end of the entire modifies expression.
+                // If set comprehension is used later in the `modifies` clause,
+                //   this will be appended after the set comprehension expression completes.
+                String appendAtEnd = "";
+                // When the `modifies` expression uses set comprehension to access Modifies members,
+                //   the set comprehension is encapsulated in a single variable.
+                // This stores a reference to that variable's name.
+                String setComprehensionVar = null;
+
+                for (ShapeId shapeIdInPath : managedReferenceMemberShapePath) {
+                    Shape shapeInPath = model.expectShape(shapeIdInPath);
+
+                    if (shapeInPath.isMemberShape()) {
+                        currentVarName = "." + shapeIdInPath.getMember().get();
+                        currentShapeRequired = shapeInPath.asMemberShape().get().isRequired();
+
+                        if (currentShapeType == ShapeType.STRUCTURE) {
+                            appendingPath += currentVarName;
+
+                            if (!currentShapeRequired) {
+                                if (setComprehensionVar != null) {
+                                    appending.append(" && ").append(appendingPath)
+                                        .append(".Some? \n ");
+                                } else {
+                                    appending.append("if ").append(appendingPath)
+                                        .append(".Some? then \n ");
+                                    appendAtEnd += "else {}\n ";
+                                }
+
+                                appendingPath += ".value";
+                            }
+
+                        } else if (currentShapeType == ShapeType.MAP) {
+                            if (setComprehensionVar != null) {
+                                appending.append(" :: set t%1$s | t%1$s in %2$s.Values"
+                                    .formatted(intermediateVarCounter, appendingPath));
+                            } else {
+                                appending.append(
+                                    "var tmps%1$s := set t%1$s | t%1$s in %2$s.Values\n "
+                                        .formatted(
+                                            intermediateVarCounter,
+                                            appendingPath));
+                                setComprehensionVar =  "tmps%1$s".formatted(intermediateVarCounter);
+                            }
+
+                            appendingPath = "t%1$s".formatted(intermediateVarCounter);
+                            intermediateVarCounter++;
+                        }
+                    } else {
+                        currentShapeType = shapeInPath.getType();
+                    }
+                }
+
+                if (setComprehensionVar == null) {
+                    appending.append(appendingPath);
+                } if (setComprehensionVar != null) {
+                    appending.append(" :: %1$s".formatted(appendingPath));
+                    appending.append(";\n var %1$sModifiesSet: set<set<object>> := set t0"
+                        .formatted(
+                            setComprehensionVar));
+
+                    int newVar = intermediateVarCounter - startingIntermediateVarCounter;
+                    for (int i = 1; i < newVar; i++) {
+                        appending.append(", t%1$s".formatted(i));
+                    }
+                    appending.append(" | t0 in %1$s".formatted(setComprehensionVar));
+                    for (int i = 1; i < newVar; i++) {
+                        appending.append(" && t%1$s in t%2$s".formatted(i, i - 1));
+                    }
+                    appending.append(" :: t%1$s".formatted(newVar - 1));
+                }
+
+                appending.append(".Modifies");
+
+                if (setComprehensionVar != null) {
+                    appending.append(";\n ");
+                    appending.append(
+                        " (set tmp%1$sModifyEntry, tmp%1$sModifies | \n tmp%1$sModifies in %2$sModifiesSet \n && tmp%1$sModifyEntry in tmp%1$sModifies \n :: tmp%1$sModifyEntry) "
+                            .formatted(0, setComprehensionVar));
+                }
+
+                return TokenTree.of(
+                    "%1$s\n%2$s"
+                    .formatted(appending.toString(), appendAtEnd)).lineSeparated();
+    }
+
     public TokenTree generateAbstractLocalService(ServiceShape serviceShape)  {
         if (!serviceShape.hasTrait(LocalServiceTrait.class)) throw new IllegalStateException("MUST be an LocalService");
         final LocalServiceTrait localServiceTrait = serviceShape.expectTrait(LocalServiceTrait.class);
@@ -1569,7 +1671,7 @@ public class DafnyApiCodegen {
                         currentShapeType = shapeInPath.getType();
                     }
                 }
-                // This is the last shape in the path; by definition, it is the reference shape.
+                // currentShape is the last shape in the path; by definition, it is the reference shape.
                 // Append the accessor to the reference shape
                 if (currentShapeType == ShapeType.STRUCTURE) {
                     appending += appendingPath;
@@ -1585,106 +1687,15 @@ public class DafnyApiCodegen {
             }
         }
 
-        if (!managedReferenceMemberShapePaths.isEmpty()) {
-            int intermediateVarCounter = 0;
+    if (!managedReferenceMemberShapePaths.isEmpty()) {
+        List<TokenTree> modifiesClauseList = new ArrayList<>();
+        int intermediateVarCounter = 0;
 
-            for (List<ShapeId> managedReferenceMemberShapePath : managedReferenceMemberShapePaths) {
-
-                int startingIntermediateVarCounter = intermediateVarCounter;
-
-                String appendingPath = "config";
-                StringBuilder appending = new StringBuilder("modifies ");
-                ShapeType currentShapeType = null;
-                String currentVarName;
-                boolean currentShapeRequired;
-                // The Modifies members of optional structure members that are not inside set comprehension expressions
-                //   are accessed as `if path.to.var.Some? then path.to.var.value.path.to.reference.Modifies else {}`.
-                // The `else {}` is appended at the end of the entire modifies expression.
-                // If set comprehension is used later in the `modifies` clause,
-                //   this will be appended after the set comprehension expression completes.
-                String appendAtEnd = "";
-                // When the `modifies` expression uses set comprehension to access Modifies members,
-                //   the set comprehension is encapsulated in a single variable.
-                // This stores a reference to that variable's name.
-                String setComprehensionVar = null;
-
-                for (ShapeId shapeIdInPath : managedReferenceMemberShapePath) {
-                    Shape shapeInPath = model.expectShape(shapeIdInPath);
-
-                    if (shapeInPath.isMemberShape()) {
-                        currentVarName = "." + shapeIdInPath.getMember().get();
-                        currentShapeRequired = shapeInPath.asMemberShape().get().isRequired();
-
-                        if (currentShapeType == ShapeType.STRUCTURE) {
-                            appendingPath += currentVarName;
-
-                            if (!currentShapeRequired) {
-                                if (setComprehensionVar != null) {
-                                    appending.append(" && ").append(appendingPath)
-                                        .append(".Some? \n ");
-                                } else {
-                                    appending.append("if ").append(appendingPath)
-                                        .append(".Some? then \n ");
-                                    appendAtEnd += "else {}\n ";
-                                }
-
-                                appendingPath += ".value";
-                            }
-
-                        } else if (currentShapeType == ShapeType.MAP) {
-                            if (setComprehensionVar != null) {
-                                appending.append(" :: set t%1$s | t%1$s in %2$s.Values"
-                                    .formatted(intermediateVarCounter, appendingPath));
-                            } else {
-                                appending.append(
-                                    "var tmps%1$s := set t%1$s | t%1$s in %2$s.Values\n "
-                                        .formatted(
-                                            intermediateVarCounter,
-                                            appendingPath));
-                                setComprehensionVar =  "tmps%1$s".formatted(intermediateVarCounter);
-                            }
-
-                            appendingPath = "t%1$s".formatted(intermediateVarCounter);
-                            intermediateVarCounter++;
-                        }
-                    } else {
-                        currentShapeType = shapeInPath.getType();
-                    }
-                }
-
-                if (setComprehensionVar == null) {
-                    appending.append(appendingPath);
-                } if (setComprehensionVar != null) {
-                    appending.append(" :: %1$s".formatted(appendingPath));
-                    appending.append(";\n var %1$sModifiesSet: set<set<object>> := set t0"
-                        .formatted(
-                            setComprehensionVar));
-
-                    int newVar = intermediateVarCounter - startingIntermediateVarCounter;
-                    for (int i = 1; i < newVar; i++) {
-                        appending.append(", t%1$s".formatted(i));
-                    }
-                    appending.append(" | t0 in %1$s".formatted(setComprehensionVar));
-                    for (int i = 1; i < newVar; i++) {
-                        appending.append(" && t%1$s in t%2$s".formatted(i, i - 1));
-                    }
-                    appending.append(" :: t%1$s".formatted(newVar - 1));
-                }
-
-                appending.append(".Modifies");
-
-                if (setComprehensionVar != null) {
-                    appending.append(";\n ");
-                    appending.append(
-                        " (set tmp%1$sModifyEntry, tmp%1$sModifies | \n tmp%1$sModifies in %2$sModifiesSet \n && tmp%1$sModifyEntry in tmp%1$sModifies \n :: tmp%1$sModifyEntry) "
-                            .formatted(0, setComprehensionVar));
-                }
-
-                serviceMethod = serviceMethod.append(TokenTree.of(
-                    "%1$s\n%2$s"
-                        .formatted(appending.toString(), appendAtEnd)).lineSeparated());
-            }
+        for (List<ShapeId> managedReferenceMemberShapePath : managedReferenceMemberShapePaths) {
+            serviceMethod = serviceMethod.append(
+                modifiesClauseForPathToReference(managedReferenceMemberShapePath));
         }
+    }
 
 //        // Start `ensures` clause for assertions based on `res.Success?`
 //        serviceMethod = serviceMethod.append(TokenTree.of(
