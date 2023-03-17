@@ -1704,7 +1704,7 @@ public class DafnyApiCodegen {
                 boolean previousShapeRequired = false;
                 boolean currentShapeRequired = false;
                 String appendAtEnd = "";
-                String parentVar = null;
+                String setComprehensionVar = null;
 
                 for (ShapeId shapeIdInPath : managedReferenceMemberShapePath) {
                     Shape shapeInPath = model.expectShape(shapeIdInPath);
@@ -1714,38 +1714,42 @@ public class DafnyApiCodegen {
                         currentShapeRequired = shapeInPath.asMemberShape().get().isRequired();
 
                         if (currentShapeType == ShapeType.STRUCTURE) {
-                            if (previousShapeType == ShapeType.STRUCTURE) {
-                                if (parentVar != null) {
-                                    appending += " :: t%1$s%2$s.value".formatted(intermediateVarCounter, previousVarName);
-                                }
-                                appendingPath += previousVarName;
-                                if (!previousShapeRequired) {
-                                    appendingPath += ".value";
-                                }
-                                if (!currentShapeRequired) {
-                                    appending += " if ";
-                                    appending += appendingPath + currentVarName + ".Some? then \n ";
-                                    appendAtEnd += "else {}\n ";
-                                }
-                            } else if (previousShapeType == ShapeType.MAP) {
-                                appendingPath = "tmp%1$s".formatted(intermediateVarCounter-1);
+                            if (previousShapeType == ShapeType.MAP) {
+                                // Assuming `setComprehensionVar != null`, since last shape was a map
+                                appendingPath = "t%1$s".formatted(intermediateVarCounter-1);
+
                                 if (!currentShapeRequired) {
                                     appending += "&& t%1$s%2$s.Some?".formatted(intermediateVarCounter-1, currentVarName);
                                 }
-                            } else if (previousShapeType == null){
-                                if (!currentShapeRequired) {
-                                    appending += " if ";
-                                    appending += appendingPath + currentVarName + ".Some? then \n ";
-                                    appendAtEnd += "else {}\n ";
+                            } else if (previousShapeType == ShapeType.STRUCTURE) {
+
+                                if (setComprehensionVar != null) {
+                                    // If transitioning from a structure to a structure,
+                                    // and we are using set comprehension,
+                                    // extend the set comprehension
+                                    if (!currentShapeRequired) {
+                                        appending += " && ";
+                                        appending += appendingPath + currentVarName + ".Some? \n ";
+                                    }
                                 }
+
+                            }
+
+                            appendingPath += currentVarName;
+
+                            if (setComprehensionVar == null
+                                && !currentShapeRequired) {
+                                appending += " if ";
+                                appending += appendingPath + ".Some? then \n ";
+                                appendAtEnd += "else {}\n ";
+                            }
+
+                            if (!currentShapeRequired) {
+                                appendingPath += ".value";
                             }
                         } else if (currentShapeType == ShapeType.MAP) {
                             if (previousShapeType == ShapeType.STRUCTURE) {
-                                appendingPath += previousVarName;
-                                if (!previousShapeRequired) {
-                                    appendingPath += ".value";
-                                }
-                                if (parentVar != null) {
+                                if (setComprehensionVar != null) {
                                     appending += " :: set t%1$s | t%1$s in t%2$s%3$s.value.Values"
                                         .formatted(intermediateVarCounter, intermediateVarCounter-1, previousVarName);
                                 }
@@ -1753,23 +1757,18 @@ public class DafnyApiCodegen {
                                 appendingPath = "tmp%1$s".formatted(intermediateVarCounter-1);
                                 appending += " :: set t%1$s | t%1$s in t%2$s.Values"
                                     .formatted(intermediateVarCounter, intermediateVarCounter-1);
-                                //parentVar =  "tmp%1$s".formatted(intermediateVarCounter-1);
-                            } else if (previousShapeType == null) {
-                                // appending += currentVarName;
-                                appending += " if ";
+                                //setComprehensionVar =  "tmp%1$s".formatted(intermediateVarCounter-1);
                             }
 
-
-                            if (parentVar == null) {
+                            if (setComprehensionVar == null) {
                                 appending +=
                                 "var tmps%1$s := set t%1$s | t%1$s in %2$s.Values\n "
                                     .formatted(
                                         intermediateVarCounter,
                                         appendingPath);
-                                parentVar =  "tmps%1$s".formatted(intermediateVarCounter);
+                                setComprehensionVar =  "tmps%1$s".formatted(intermediateVarCounter);
 
                             }
-
 
                             intermediateVarCounter++;
                         }
@@ -1780,44 +1779,45 @@ public class DafnyApiCodegen {
                         currentShapeType = shapeInPath.getType();
                     }
                 }
-                if (parentVar == null) {
-                    appending += appendingPath + currentVarName + ".value";
-                } if (parentVar != null) {
+                if (setComprehensionVar == null) {
+                    appending += appendingPath;
+                } if (setComprehensionVar != null) {
                     if (currentShapeType == ShapeType.STRUCTURE) {
+                        appending += " :: %1$s".formatted(appendingPath);
                     } else if (currentShapeType == ShapeType.MAP) {
                         appending += " :: t%1$s".formatted(intermediateVarCounter-1);
                     }
                     appending +=
                         ";\n var %1$sModifiesSet: set<set<object>> := set t0"
                             .formatted(
-                                parentVar);
+                                setComprehensionVar);
                     // intermediateVarCounter guaranteed >= 1
                     int newVar = intermediateVarCounter - startingIntermediateVarCounter;
                     for (int i = 1; i < newVar; i++) {
                         appending += ", t%1$s".formatted(i);
                     }
-                    appending += " | t0 in %1$s".formatted(parentVar);
+                    appending += " | t0 in %1$s".formatted(setComprehensionVar);
                     for (int i = 1; i < newVar; i++) {
                         appending += " && t%1$s in t%2$s".formatted(i, i-1);
                     }
                     appending += " :: t%1$s".formatted(newVar-1);
 
                     if (currentShapeType == ShapeType.STRUCTURE) {
-                        appending += "%1$s".formatted(currentVarName);
-                        if (!currentShapeRequired) {
-                            appending += ".value";
-                        }
+//                        appending += "%1$s".formatted(currentVarName);
+//                        if (!currentShapeRequired) {
+//                            appending += ".value";
+//                        }
                     }
 //
 //                        appending += "tmp%1$s".formatted(intermediateVarCounter-1);
                 }
 
                 appending += ".Modifies";
-                if (parentVar != null) {
+                if (setComprehensionVar != null) {
                     appending += ";\n ";
                     appending +=
                         " (set tmp%1$sModifyEntry, tmp%1$sModifies | \n tmp%1$sModifies in %2$sModifiesSet \n && tmp%1$sModifyEntry in tmp%1$sModifies \n :: tmp%1$sModifyEntry) "
-                            .formatted(0, parentVar);
+                            .formatted(0, setComprehensionVar);
                 }
 
 
