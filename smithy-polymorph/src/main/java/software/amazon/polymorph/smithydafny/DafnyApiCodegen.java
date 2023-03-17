@@ -1540,15 +1540,6 @@ public class DafnyApiCodegen {
 
                 for (ShapeId shapeIdInPath : managedReferenceMemberShapePath) {
                     Shape shapeInPath = model.expectShape(shapeIdInPath);
-
-                    /*
-                    Transitioning between aggregate shapes requires 3 pieces of information about both shapes
-                    1. Shape type
-                    2. Whether member is required
-                    3. Shape variable name
-
-
-                     */
                     if (shapeInPath.isMemberShape()) {
                         currentVarName = "." + shapeIdInPath.getMember().get();
                         currentShapeRequired = shapeInPath.asMemberShape().get().isRequired();
@@ -1559,18 +1550,14 @@ public class DafnyApiCodegen {
                                 if (!previousShapeRequired) {
                                     appendingPath += ".value";
                                 }
-                                if (!currentShapeRequired) {
-                                    appending += appendingPath + currentVarName + ".Some? ==> \n ";
-                                }
+
                             } else if (previousShapeType == ShapeType.MAP) {
+                                // Maps define a new variable as a set comprehension for map values.
+                                // Any further variables are accessed on that variable.
                                 appendingPath = "tmp%1$s".formatted(intermediateVarCounter-1);
-                                if (!currentShapeRequired) {
-                                    appending += appendingPath + currentVarName + ".Some? ==> \n ";
-                                }
-                            } else if (previousShapeType == null){
-                                if (!currentShapeRequired) {
-                                    appending += appendingPath + currentVarName + ".Some? ==> \n ";
-                                }
+                            }
+                            if (!currentShapeRequired) {
+                                appending += appendingPath + currentVarName + ".Some? ==> \n ";
                             }
                         } else if (currentShapeType == ShapeType.MAP) {
                             if (previousShapeType == ShapeType.STRUCTURE) {
@@ -1618,54 +1605,6 @@ public class DafnyApiCodegen {
             }
         }
 
-
-
-        /*
-        this is actually all for requires... but principle is similar for modifies methinks
-        if map:
-            if isRequired:
-                accessor = "set {UID} | {UID} in {prevAccessor}.{varName}.{Getter}
-            else:
-                accessor = "if {prevAccessor}.{varName}.Some?
-                                then (set {UID} | {UID} in {prevAccessor}.{varName}.{Getter})
-                                else {}
-            if list:
-
-        else:
-            if isRequired:
-                accessor = "{prevAccessor}.{varName}"
-            else:
-                accessor = "(if {prevAccessor}.{varName}.Some? then {prevAccessor}.{varName}.value.
-
-
-
-
-         */
-
-        // if list or set or map:
-        // if map:
-
-
-        // if is membershape:
-        // list, map, and set all get unfolded
-        // member shapes get access directly
-        // else, skip
-
-//                    final boolean isList = model.expectShape(member.getTarget()).getType() == ShapeType.LIST;
-//                    if ()
-
-
-        // Requires any provided managed reference shapes to have ValidState()
-//        if (managedReferenceMemberShapes.size() > 0) {
-//          for (MemberShape managedReferenceMemberShape : managedReferenceMemberShapes) {
-//            serviceMethod = serviceMethod.append(TokenTree.of(
-//              "requires config.%1$s.Some? ==> config.%1$s.value.%2$s()\n"
-//                .formatted(managedReferenceMemberShape.getMemberName(),
-//                nameResolver.validStateInvariantName())
-//              ).lineSeparated());
-//          }
-//        }
-
         // Add `modifies` clauses
 
         //Set<List<ShapeId>> managedReferenceMemberShapePaths = ModelUtils.findAllDependentMemberReferenceShapesWithPaths(configShapeIdAsSet, model);
@@ -1689,14 +1628,6 @@ public class DafnyApiCodegen {
                 for (ShapeId shapeIdInPath : managedReferenceMemberShapePath) {
                     Shape shapeInPath = model.expectShape(shapeIdInPath);
 
-                    /*
-                    Transitioning between aggregate shapes requires 3 pieces of information about both shapes
-                    1. Shape type
-                    2. Whether member is required
-                    3. Shape variable name
-
-
-                     */
                     if (shapeInPath.isMemberShape()) {
                         currentVarName = "." + shapeIdInPath.getMember().get();
                         currentShapeRequired = shapeInPath.asMemberShape().get().isRequired();
@@ -1716,8 +1647,6 @@ public class DafnyApiCodegen {
                                 appendingPath = "tmp%1$s".formatted(intermediateVarCounter-1);
                                 if (!currentShapeRequired) {
                                     appending += "&& t%1$s%2$s.Some? :: t%1$s%2$s.value".formatted(intermediateVarCounter-1, currentVarName);
-                                    //appending += appendingPath + currentVarName + ".Some? then \n ";
-                                    //appendAtEnd += "else {}\n ";
                                 }
                             } else if (previousShapeType == null){
                                 if (!currentShapeRequired) {
@@ -1739,12 +1668,6 @@ public class DafnyApiCodegen {
                                 // appending += currentVarName;
                                 appending += " if ";
                             }
-
-                            /*
-                             var tmps0 := set t0 | t0 in config.mapOfReferences.value.Values;
-                            var tmps0ModifiesSet: set<set<object>> := set tmp0 | tmp0 in tmps0 :: tmp0
-                             */
-
 
                             appending +=
                                 "var tmps%1$s := set t%1$s | t%1$s in %2$s.Values\n "
@@ -1775,17 +1698,6 @@ public class DafnyApiCodegen {
                     appending += "tmp%1$s".formatted(intermediateVarCounter-1);
                 }
 
-                /*
-
-                  modifies
-              var tmps1 := set t1 | t1 in config.requiredMapOfStructuresWithReference.Values
-              && t1.referenceMember.Some? :: t1.referenceMember.value;
-               var tmps1ModifiesSet: set<set<object>> := set tmp1 | tmp1 in tmps1 :: tmp1.Modifies;
-             (set tmp1ModifyEntry, tmp1Modifies |  tmp1Modifies in tmps1ModifiesSet && tmp1ModifyEntry in tmp1Modifies :: tmp1ModifyEntry)
-
-
-                 */
-
                 appending += ".Modifies";
                 if (parentVar != null) {
                     appending += ";";
@@ -1801,24 +1713,12 @@ public class DafnyApiCodegen {
             }
         }
 
-//        // Local service modifies the Modifies member of managed reference shapes
-//        if (managedReferenceMemberShapes.size() > 0) {
-//          for (MemberShape managedReferenceMemberShape : managedReferenceMemberShapes) {
-////            serviceMethod = serviceMethod.append(TokenTree.of(
-////              "modifies if config.%1$s.Some? then config.%1$s.value.%2$s else {}\n"
-////                .formatted(managedReferenceMemberShape.getMemberName(),
-////                nameResolver.mutableStateFunctionName())
-////              ).lineSeparated());
-//              serviceMethod = serviceMethod.append(MemberModifies(managedReferenceMemberShape, managedReferenceMemberShape.getMemberName()));
-//          }
-//        }
-        
         // Start `ensures` clause for assertions based on `res.Success?`
         serviceMethod = serviceMethod.append(TokenTree.of(
             "ensures res.Success? ==> ",
             "&& fresh(res.value)\n"
         ).lineSeparated());
-              
+
         // Add `ensures` clauses based on `res.Success?`
 
         // The local service Modifies member, minus all managed reference shapes, is ensured fresh
@@ -1851,9 +1751,7 @@ public class DafnyApiCodegen {
                     1. Shape type
                     2. Whether member is required
                     3. Shape variable name
-
-
-                     */
+                        */
                         if (shapeInPath.isMemberShape()) {
                             currentVarName = "." + shapeIdInPath.getMember().get();
                             currentShapeRequired = shapeInPath.asMemberShape().get().isRequired();
@@ -1897,12 +1795,6 @@ public class DafnyApiCodegen {
                                     appending += " if ";
                                 }
 
-                            /*
-                             var tmps0 := set t0 | t0 in config.mapOfReferences.value.Values;
-                            var tmps0ModifiesSet: set<set<object>> := set tmp0 | tmp0 in tmps0 :: tmp0
-                             */
-
-
                                 appending +=
                                     "var tmps%1$s := set t%1$s | t%1$s in %2$s.Values\n "
                                         .formatted(
@@ -1931,17 +1823,6 @@ public class DafnyApiCodegen {
 
                         appending += "tmp%1$s".formatted(intermediateVarCounter-1);
                     }
-
-                /*
-
-                  modifies
-              var tmps1 := set t1 | t1 in config.requiredMapOfStructuresWithReference.Values
-              && t1.referenceMember.Some? :: t1.referenceMember.value;
-               var tmps1ModifiesSet: set<set<object>> := set tmp1 | tmp1 in tmps1 :: tmp1.Modifies;
-             (set tmp1ModifyEntry, tmp1Modifies |  tmp1Modifies in tmps1ModifiesSet && tmp1ModifyEntry in tmp1Modifies :: tmp1ModifyEntry)
-
-
-                 */
 
                     appending += ".Modifies";
                     if (parentVar != null) {
@@ -1992,14 +1873,6 @@ public class DafnyApiCodegen {
                 for (ShapeId shapeIdInPath : managedReferenceMemberShapePath) {
                     Shape shapeInPath = model.expectShape(shapeIdInPath);
 
-                    /*
-                    Transitioning between aggregate shapes requires 3 pieces of information about both shapes
-                    1. Shape type
-                    2. Whether member is required
-                    3. Shape variable name
-
-
-                     */
                     if (shapeInPath.isMemberShape()) {
                         currentVarName = "." + shapeIdInPath.getMember().get();
                         currentShapeRequired = shapeInPath.asMemberShape().get().isRequired();
@@ -2032,7 +1905,6 @@ public class DafnyApiCodegen {
                             } else if (previousShapeType == ShapeType.MAP) {
                                 appendingPath = "tmp%1$s".formatted(intermediateVarCounter-1);
                             } else if (previousShapeType == null) {
-                                // appending += currentVarName;
                             }
 
 
@@ -2068,16 +1940,6 @@ public class DafnyApiCodegen {
                         .formatted(appending)).lineSeparated());
             }
         }
-
-//        if (managedReferenceMemberShapes.size() > 0) {
-//            for (MemberShape managedReferenceMemberShape : managedReferenceMemberShapes) {
-//                serviceMethod = serviceMethod.append(TokenTree.of(
-//                    "ensures config.%1$s.Some? ==> config.%1$s.value.%2$s()\n"
-//                        .formatted(managedReferenceMemberShape.getMemberName(),
-//                            nameResolver.validStateInvariantName())
-//                ));
-//            }
-//        }
 
         return TokenTree
           .of(
