@@ -1524,22 +1524,13 @@ public class DafnyApiCodegen {
 
         Set<List<ShapeId>> managedReferenceMemberShapePaths = ModelUtils.findAllDependentMemberReferenceShapesWithPaths(configShapeIdAsSet, model);
 
-        System.out.println("SIZE" + managedReferenceMemberShapePaths.size());
-
-
-        if (managedReferenceMemberShapePaths.size() > 0) {
+        if (!managedReferenceMemberShapePaths.isEmpty()) {
             int intermediateVarCounter = 0;
-
-
 
             for (List<ShapeId> managedReferenceMemberShapePath : managedReferenceMemberShapePaths) {
 
-                System.out.println("LAST " + managedReferenceMemberShapePath.get(managedReferenceMemberShapePath.size()-1));
-                System.out.println("FULLPATH " + managedReferenceMemberShapePath);
-
-
                 String appendingPath = "config";
-                String appending = "requires " + appendingPath;
+                String appending = "requires ";
                 ShapeType currentShapeType = null;
                 ShapeType previousShapeType = null;
                 String currentVarName = null;
@@ -1547,10 +1538,17 @@ public class DafnyApiCodegen {
                 boolean previousShapeRequired = false;
                 boolean currentShapeRequired = false;
 
-
                 for (ShapeId shapeIdInPath : managedReferenceMemberShapePath) {
                     Shape shapeInPath = model.expectShape(shapeIdInPath);
 
+                    /*
+                    Transitioning between aggregate shapes requires 3 pieces of information about both shapes
+                    1. Shape type
+                    2. Whether member is required
+                    3. Shape variable name
+
+
+                     */
                     if (shapeInPath.isMemberShape()) {
                         currentVarName = "." + shapeIdInPath.getMember().get();
                         currentShapeRequired = shapeInPath.asMemberShape().get().isRequired();
@@ -1562,21 +1560,16 @@ public class DafnyApiCodegen {
                                     appendingPath += ".value";
                                 }
                                 if (!currentShapeRequired) {
-                                    appending += appendingPath + currentVarName
-                                        + ".Some? ==> ";
+                                    appending += appendingPath + currentVarName + ".Some? ==> \n ";
                                 }
-
                             } else if (previousShapeType == ShapeType.MAP) {
                                 appendingPath = "tmp%1$s".formatted(intermediateVarCounter-1);
                                 if (!currentShapeRequired) {
-                                    appending += appendingPath + currentVarName
-                                        + ".Some? ==> ";
+                                    appending += appendingPath + currentVarName + ".Some? ==> \n ";
                                 }
-                            } else if (previousShapeType == null ){
+                            } else if (previousShapeType == null){
                                 if (!currentShapeRequired) {
-                                    appending += currentVarName + ".Some? ==> ";
-                                } else {
-                                    appendingPath += currentVarName;
+                                    appending += appendingPath + currentVarName + ".Some? ==> \n ";
                                 }
                             }
                         } else if (currentShapeType == ShapeType.MAP) {
@@ -1588,16 +1581,17 @@ public class DafnyApiCodegen {
                             } else if (previousShapeType == ShapeType.MAP) {
                                 appendingPath = "tmp%1$s".formatted(intermediateVarCounter-1);
                             } else if (previousShapeType == null) {
-                                appending += appendingPath + currentVarName;
+                                // appending += currentVarName;
                             }
 
+
                             appending +=
-                                "\n var tmps%1$s := set t%1$s | t%1$s in %2$s.Values;"
+                                "var tmps%1$s := set t%1$s | t%1$s in %2$s.Values;\n "
                                     .formatted(
                                         intermediateVarCounter,
                                         appendingPath);
                             appending +=
-                                "\n forall tmp%1$s :: tmp%1$s in tmps%1$s ==> "
+                                "forall tmp%1$s :: tmp%1$s in tmps%1$s ==>\n "
                                     .formatted(
                                         intermediateVarCounter,
                                         appendingPath);
@@ -1620,9 +1614,7 @@ public class DafnyApiCodegen {
 
                 serviceMethod = serviceMethod.append(TokenTree.of(
                     "%1$s\n"
-                        .formatted(appending
-                            )
-                ).lineSeparated());
+                        .formatted(appending)).lineSeparated());
             }
         }
 
@@ -1676,17 +1668,150 @@ public class DafnyApiCodegen {
 
         // Add `modifies` clauses
 
-        // Local service modifies the Modifies member of managed reference shapes
-        if (managedReferenceMemberShapes.size() > 0) {
-          for (MemberShape managedReferenceMemberShape : managedReferenceMemberShapes) {
-//            serviceMethod = serviceMethod.append(TokenTree.of(
-//              "modifies if config.%1$s.Some? then config.%1$s.value.%2$s else {}\n"
-//                .formatted(managedReferenceMemberShape.getMemberName(),
-//                nameResolver.mutableStateFunctionName())
-//              ).lineSeparated());
-              serviceMethod = serviceMethod.append(MemberModifies(managedReferenceMemberShape, managedReferenceMemberShape.getMemberName()));
-          } 
+        //Set<List<ShapeId>> managedReferenceMemberShapePaths = ModelUtils.findAllDependentMemberReferenceShapesWithPaths(configShapeIdAsSet, model);
+
+        if (!managedReferenceMemberShapePaths.isEmpty()) {
+            int intermediateVarCounter = 0;
+
+            for (List<ShapeId> managedReferenceMemberShapePath : managedReferenceMemberShapePaths) {
+
+                String appendingPath = "config";
+                String appending = "modifies ";
+                ShapeType currentShapeType = null;
+                ShapeType previousShapeType = null;
+                String currentVarName = null;
+                String previousVarName = null;
+                boolean previousShapeRequired = false;
+                boolean currentShapeRequired = false;
+                String appendAtEnd = "";
+                String parentVar = null;
+
+                for (ShapeId shapeIdInPath : managedReferenceMemberShapePath) {
+                    Shape shapeInPath = model.expectShape(shapeIdInPath);
+
+                    /*
+                    Transitioning between aggregate shapes requires 3 pieces of information about both shapes
+                    1. Shape type
+                    2. Whether member is required
+                    3. Shape variable name
+
+
+                     */
+                    if (shapeInPath.isMemberShape()) {
+                        currentVarName = "." + shapeIdInPath.getMember().get();
+                        currentShapeRequired = shapeInPath.asMemberShape().get().isRequired();
+
+                        if (currentShapeType == ShapeType.STRUCTURE) {
+                            if (previousShapeType == ShapeType.STRUCTURE) {
+                                appendingPath += previousVarName;
+                                if (!previousShapeRequired) {
+                                    appendingPath += ".value";
+                                }
+                                if (!currentShapeRequired) {
+                                    appending += " if ";
+                                    appending += appendingPath + currentVarName + ".Some? then \n ";
+                                    appendAtEnd += "else {}\n ";
+                                }
+                            } else if (previousShapeType == ShapeType.MAP) {
+                                appendingPath = "tmp%1$s".formatted(intermediateVarCounter-1);
+                                if (!currentShapeRequired) {
+                                    appending += "&& t%1$s%2$s.Some? :: t%1$s%2$s.value".formatted(intermediateVarCounter-1, currentVarName);
+                                    //appending += appendingPath + currentVarName + ".Some? then \n ";
+                                    //appendAtEnd += "else {}\n ";
+                                }
+                            } else if (previousShapeType == null){
+                                if (!currentShapeRequired) {
+                                    appending += " if ";
+                                    appending += appendingPath + currentVarName + ".Some? then \n ";
+                                    appendAtEnd += "else {}\n ";
+                                }
+                            }
+                        } else if (currentShapeType == ShapeType.MAP) {
+                            if (previousShapeType == ShapeType.STRUCTURE) {
+                                appendingPath += previousVarName;
+                                if (!previousShapeRequired) {
+                                    appendingPath += ".value";
+                                }
+                            } else if (previousShapeType == ShapeType.MAP) {
+                                appendingPath = "tmp%1$s".formatted(intermediateVarCounter-1);
+                                //parentVar =  "tmp%1$s".formatted(intermediateVarCounter-1);
+                            } else if (previousShapeType == null) {
+                                // appending += currentVarName;
+                                appending += " if ";
+                            }
+
+                            /*
+                             var tmps0 := set t0 | t0 in config.mapOfReferences.value.Values;
+                            var tmps0ModifiesSet: set<set<object>> := set tmp0 | tmp0 in tmps0 :: tmp0
+                             */
+
+
+                            appending +=
+                                "var tmps%1$s := set t%1$s | t%1$s in %2$s.Values\n "
+                                    .formatted(
+                                        intermediateVarCounter,
+                                        appendingPath);
+                            parentVar =  "tmp%1$s".formatted(intermediateVarCounter);
+
+
+                            intermediateVarCounter++;
+                        }
+                    } else {
+                        previousShapeType = currentShapeType;
+                        previousVarName = currentVarName;
+                        previousShapeRequired = currentShapeRequired;
+                        currentShapeType = shapeInPath.getType();
+                    }
+                }
+                if (parentVar == null) {
+                    appending += appendingPath + currentVarName + ".value";
+                } if (parentVar != null) {
+                    appending +=
+                        ";\n var tmps%1$sModifiesSet: set<set<object>> := set tmp%1$s | tmp%1$s in tmps%1$s :: "
+                            .formatted(
+                                intermediateVarCounter-1,
+                                appendingPath);
+
+                    appending += "tmp%1$s".formatted(intermediateVarCounter-1);
+                }
+
+                /*
+
+                  modifies
+              var tmps1 := set t1 | t1 in config.requiredMapOfStructuresWithReference.Values
+              && t1.referenceMember.Some? :: t1.referenceMember.value;
+               var tmps1ModifiesSet: set<set<object>> := set tmp1 | tmp1 in tmps1 :: tmp1.Modifies;
+             (set tmp1ModifyEntry, tmp1Modifies |  tmp1Modifies in tmps1ModifiesSet && tmp1ModifyEntry in tmp1Modifies :: tmp1ModifyEntry)
+
+
+                 */
+
+                appending += ".Modifies";
+                if (parentVar != null) {
+                    appending += ";";
+                    appending +=
+                        " (set tmp%1$sModifyEntry, tmp%1$sModifies |  tmp%1$sModifies in tmps%1$sModifiesSet && tmp%1$sModifyEntry in tmp%1$sModifies :: tmp%1$sModifyEntry)\n "
+                            .formatted(intermediateVarCounter-1);
+                }
+
+
+                serviceMethod = serviceMethod.append(TokenTree.of(
+                    "%1$s\n%2$s"
+                        .formatted(appending, appendAtEnd)).lineSeparated());
+            }
         }
+
+//        // Local service modifies the Modifies member of managed reference shapes
+//        if (managedReferenceMemberShapes.size() > 0) {
+//          for (MemberShape managedReferenceMemberShape : managedReferenceMemberShapes) {
+////            serviceMethod = serviceMethod.append(TokenTree.of(
+////              "modifies if config.%1$s.Some? then config.%1$s.value.%2$s else {}\n"
+////                .formatted(managedReferenceMemberShape.getMemberName(),
+////                nameResolver.mutableStateFunctionName())
+////              ).lineSeparated());
+//              serviceMethod = serviceMethod.append(MemberModifies(managedReferenceMemberShape, managedReferenceMemberShape.getMemberName()));
+//          }
+//        }
         
         // Start `ensures` clause for assertions based on `res.Success?`
         serviceMethod = serviceMethod.append(TokenTree.of(
@@ -1702,12 +1827,135 @@ public class DafnyApiCodegen {
                 "&& fresh(res.value.%1$s\n"
                     .formatted(nameResolver.mutableStateFunctionName())
             ));
-            for (MemberShape managedReferenceMemberShape : managedReferenceMemberShapes) {
-                serviceMethod = serviceMethod.append(TokenTree.of(
-                    "- (if config.%1$s.Some? then config.%1$s.value.%2$s else {})\n"
-                        .formatted(managedReferenceMemberShape.getMemberName(),
-                            nameResolver.mutableStateFunctionName())
-                ));
+            if (!managedReferenceMemberShapePaths.isEmpty()) {
+                int intermediateVarCounter = 0;
+
+                for (List<ShapeId> managedReferenceMemberShapePath : managedReferenceMemberShapePaths) {
+
+                    String appendingPath = "config";
+                    String appending = "- (";
+                    ShapeType currentShapeType = null;
+                    ShapeType previousShapeType = null;
+                    String currentVarName = null;
+                    String previousVarName = null;
+                    boolean previousShapeRequired = false;
+                    boolean currentShapeRequired = false;
+                    String appendAtEnd = "";
+                    String parentVar = null;
+
+                    for (ShapeId shapeIdInPath : managedReferenceMemberShapePath) {
+                        Shape shapeInPath = model.expectShape(shapeIdInPath);
+
+                    /*
+                    Transitioning between aggregate shapes requires 3 pieces of information about both shapes
+                    1. Shape type
+                    2. Whether member is required
+                    3. Shape variable name
+
+
+                     */
+                        if (shapeInPath.isMemberShape()) {
+                            currentVarName = "." + shapeIdInPath.getMember().get();
+                            currentShapeRequired = shapeInPath.asMemberShape().get().isRequired();
+
+                            if (currentShapeType == ShapeType.STRUCTURE) {
+                                if (previousShapeType == ShapeType.STRUCTURE) {
+                                    appendingPath += previousVarName;
+                                    if (!previousShapeRequired) {
+                                        appendingPath += ".value";
+                                    }
+                                    if (!currentShapeRequired) {
+                                        appending += " if ";
+                                        appending += appendingPath + currentVarName + ".Some? then \n ";
+                                        appendAtEnd += "else {}\n ";
+                                    }
+                                } else if (previousShapeType == ShapeType.MAP) {
+                                    appendingPath = "tmp%1$s".formatted(intermediateVarCounter-1);
+                                    if (!currentShapeRequired) {
+                                        appending += "&& t%1$s%2$s.Some? :: t%1$s%2$s.value".formatted(intermediateVarCounter-1, currentVarName);
+                                        //appending += appendingPath + currentVarName + ".Some? then \n ";
+                                        //appendAtEnd += "else {}\n ";
+                                    }
+                                } else if (previousShapeType == null){
+                                    if (!currentShapeRequired) {
+                                        appending += " if ";
+                                        appending += appendingPath + currentVarName + ".Some? then \n ";
+                                        appendAtEnd += "else {}\n ";
+                                    }
+                                }
+                            } else if (currentShapeType == ShapeType.MAP) {
+                                if (previousShapeType == ShapeType.STRUCTURE) {
+                                    appendingPath += previousVarName;
+                                    if (!previousShapeRequired) {
+                                        appendingPath += ".value";
+                                    }
+                                } else if (previousShapeType == ShapeType.MAP) {
+                                    appendingPath = "tmp%1$s".formatted(intermediateVarCounter-1);
+                                    //parentVar =  "tmp%1$s".formatted(intermediateVarCounter-1);
+                                } else if (previousShapeType == null) {
+                                    // appending += currentVarName;
+                                    appending += " if ";
+                                }
+
+                            /*
+                             var tmps0 := set t0 | t0 in config.mapOfReferences.value.Values;
+                            var tmps0ModifiesSet: set<set<object>> := set tmp0 | tmp0 in tmps0 :: tmp0
+                             */
+
+
+                                appending +=
+                                    "var tmps%1$s := set t%1$s | t%1$s in %2$s.Values\n "
+                                        .formatted(
+                                            intermediateVarCounter,
+                                            appendingPath);
+                                parentVar =  "tmp%1$s".formatted(intermediateVarCounter);
+
+
+                                intermediateVarCounter++;
+                            }
+                        } else {
+                            previousShapeType = currentShapeType;
+                            previousVarName = currentVarName;
+                            previousShapeRequired = currentShapeRequired;
+                            currentShapeType = shapeInPath.getType();
+                        }
+                    }
+                    if (parentVar == null) {
+                        appending += appendingPath + currentVarName + ".value";
+                    } if (parentVar != null) {
+                        appending +=
+                            ";\n var tmps%1$sModifiesSet: set<set<object>> := set tmp%1$s | tmp%1$s in tmps%1$s :: "
+                                .formatted(
+                                    intermediateVarCounter-1,
+                                    appendingPath);
+
+                        appending += "tmp%1$s".formatted(intermediateVarCounter-1);
+                    }
+
+                /*
+
+                  modifies
+              var tmps1 := set t1 | t1 in config.requiredMapOfStructuresWithReference.Values
+              && t1.referenceMember.Some? :: t1.referenceMember.value;
+               var tmps1ModifiesSet: set<set<object>> := set tmp1 | tmp1 in tmps1 :: tmp1.Modifies;
+             (set tmp1ModifyEntry, tmp1Modifies |  tmp1Modifies in tmps1ModifiesSet && tmp1ModifyEntry in tmp1Modifies :: tmp1ModifyEntry)
+
+
+                 */
+
+                    appending += ".Modifies";
+                    if (parentVar != null) {
+                        appending += ";";
+                        appending +=
+                            " (set tmp%1$sModifyEntry, tmp%1$sModifies |  tmp%1$sModifies in tmps%1$sModifiesSet && tmp%1$sModifyEntry in tmp%1$sModifies :: tmp%1$sModifyEntry)\n "
+                                .formatted(intermediateVarCounter-1);
+                    }
+
+
+                    serviceMethod = serviceMethod.append(TokenTree.of(
+                        "%1$s\n%2$s)"
+                            .formatted(appending, appendAtEnd)).lineSeparated());
+                }
             }
             serviceMethod = serviceMethod.append(TokenTree.of(")\n"));
         } else {
@@ -1726,15 +1974,110 @@ public class DafnyApiCodegen {
         // Add any `ensures` clauses that have unique conditions
 
         // A managed reference passed into the local service is ensured to have ValidState() after call
-        if (managedReferenceMemberShapes.size() > 0) {
-            for (MemberShape managedReferenceMemberShape : managedReferenceMemberShapes) {
+
+        if (!managedReferenceMemberShapePaths.isEmpty()) {
+            int intermediateVarCounter = 0;
+
+            for (List<ShapeId> managedReferenceMemberShapePath : managedReferenceMemberShapePaths) {
+
+                String appendingPath = "config";
+                String appending = "ensures ";
+                ShapeType currentShapeType = null;
+                ShapeType previousShapeType = null;
+                String currentVarName = null;
+                String previousVarName = null;
+                boolean previousShapeRequired = false;
+                boolean currentShapeRequired = false;
+
+                for (ShapeId shapeIdInPath : managedReferenceMemberShapePath) {
+                    Shape shapeInPath = model.expectShape(shapeIdInPath);
+
+                    /*
+                    Transitioning between aggregate shapes requires 3 pieces of information about both shapes
+                    1. Shape type
+                    2. Whether member is required
+                    3. Shape variable name
+
+
+                     */
+                    if (shapeInPath.isMemberShape()) {
+                        currentVarName = "." + shapeIdInPath.getMember().get();
+                        currentShapeRequired = shapeInPath.asMemberShape().get().isRequired();
+
+                        if (currentShapeType == ShapeType.STRUCTURE) {
+                            if (previousShapeType == ShapeType.STRUCTURE) {
+                                appendingPath += previousVarName;
+                                if (!previousShapeRequired) {
+                                    appendingPath += ".value";
+                                }
+                                if (!currentShapeRequired) {
+                                    appending += appendingPath + currentVarName + ".Some? ==> \n ";
+                                }
+                            } else if (previousShapeType == ShapeType.MAP) {
+                                appendingPath = "tmp%1$s".formatted(intermediateVarCounter-1);
+                                if (!currentShapeRequired) {
+                                    appending += appendingPath + currentVarName + ".Some? ==> \n ";
+                                }
+                            } else if (previousShapeType == null){
+                                if (!currentShapeRequired) {
+                                    appending += appendingPath + currentVarName + ".Some? ==> \n ";
+                                }
+                            }
+                        } else if (currentShapeType == ShapeType.MAP) {
+                            if (previousShapeType == ShapeType.STRUCTURE) {
+                                appendingPath += previousVarName;
+                                if (!previousShapeRequired) {
+                                    appendingPath += ".value";
+                                }
+                            } else if (previousShapeType == ShapeType.MAP) {
+                                appendingPath = "tmp%1$s".formatted(intermediateVarCounter-1);
+                            } else if (previousShapeType == null) {
+                                // appending += currentVarName;
+                            }
+
+
+                            appending +=
+                                "var tmps%1$s := set t%1$s | t%1$s in %2$s.Values;\n "
+                                    .formatted(
+                                        intermediateVarCounter,
+                                        appendingPath);
+                            appending +=
+                                "forall tmp%1$s :: tmp%1$s in tmps%1$s ==>\n "
+                                    .formatted(
+                                        intermediateVarCounter,
+                                        appendingPath);
+
+                            intermediateVarCounter++;
+                        }
+                    } else {
+                        previousShapeType = currentShapeType;
+                        previousVarName = currentVarName;
+                        previousShapeRequired = currentShapeRequired;
+                        currentShapeType = shapeInPath.getType();
+                    }
+                }
+                if (currentShapeType == ShapeType.STRUCTURE) {
+                    appending += appendingPath + currentVarName + ".value";
+                } else if (currentShapeType == ShapeType.MAP) {
+                    appending += "tmp%1$s".formatted(intermediateVarCounter-1);
+                }
+                appending += ".ValidState()";
+
                 serviceMethod = serviceMethod.append(TokenTree.of(
-                    "ensures config.%1$s.Some? ==> config.%1$s.value.%2$s()\n"
-                        .formatted(managedReferenceMemberShape.getMemberName(),
-                            nameResolver.validStateInvariantName())
-                ));
+                    "%1$s\n"
+                        .formatted(appending)).lineSeparated());
             }
         }
+
+//        if (managedReferenceMemberShapes.size() > 0) {
+//            for (MemberShape managedReferenceMemberShape : managedReferenceMemberShapes) {
+//                serviceMethod = serviceMethod.append(TokenTree.of(
+//                    "ensures config.%1$s.Some? ==> config.%1$s.value.%2$s()\n"
+//                        .formatted(managedReferenceMemberShape.getMemberName(),
+//                            nameResolver.validStateInvariantName())
+//                ));
+//            }
+//        }
 
         return TokenTree
           .of(
