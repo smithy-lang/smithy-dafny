@@ -1715,6 +1715,9 @@ public class DafnyApiCodegen {
 
                         if (currentShapeType == ShapeType.STRUCTURE) {
                             if (previousShapeType == ShapeType.STRUCTURE) {
+                                if (parentVar != null) {
+                                    appending += " :: t%1$s%2$s.value".formatted(intermediateVarCounter, previousVarName);
+                                }
                                 appendingPath += previousVarName;
                                 if (!previousShapeRequired) {
                                     appendingPath += ".value";
@@ -1727,7 +1730,7 @@ public class DafnyApiCodegen {
                             } else if (previousShapeType == ShapeType.MAP) {
                                 appendingPath = "tmp%1$s".formatted(intermediateVarCounter-1);
                                 if (!currentShapeRequired) {
-                                    appending += "&& t%1$s%2$s.Some? :: t%1$s%2$s.value".formatted(intermediateVarCounter-1, currentVarName);
+                                    appending += "&& t%1$s%2$s.Some?".formatted(intermediateVarCounter-1, currentVarName);
                                 }
                             } else if (previousShapeType == null){
                                 if (!currentShapeRequired) {
@@ -1736,31 +1739,15 @@ public class DafnyApiCodegen {
                                     appendAtEnd += "else {}\n ";
                                 }
                             }
-
-                            // modifies
-                            // var tmps1 := set t1 | t1 in config.requiredMapOfStructuresWithReference.Values
-                            // && t1.referenceMember.Some? :: t1.referenceMember.value;
-
-                            //   var tmps1ModifiesSet: set<set<object>> := set tmp1 | tmp1 in tmps1 :: tmp1.Modifies;
-                            // (set tmp1ModifyEntry, tmp1Modifies |  tmp1Modifies in tmps1ModifiesSet && tmp1ModifyEntry in tmp1Modifies :: tmp1ModifyEntry)
-
-
-                            //   modifies  if config.nestedMapOfReferences.Some? then
-                            //  var tmps1 := set t10: MapOfReferences | t10 in config.nestedMapOfReferences.value.Values
-                            //   :: set t20: IResourceReference | t20 in t10.Values :: t20;
-
-                            //  var tmps2ModifiesSet := set t1, t2 | t2 in tmps1 && t1 in t2 :: t1.Modifies;
-                            //   (set tmp2ModifyEntry, tmp2Modifies |
-                            //  tmp2Modifies in tmps2ModifiesSet
-                            //  && tmp2ModifyEntry in tmp2Modifies
-                            //  :: tmp2ModifyEntry)
-                            // else {}
-
                         } else if (currentShapeType == ShapeType.MAP) {
                             if (previousShapeType == ShapeType.STRUCTURE) {
                                 appendingPath += previousVarName;
                                 if (!previousShapeRequired) {
                                     appendingPath += ".value";
+                                }
+                                if (parentVar != null) {
+                                    appending += " :: set t%1$s | t%1$s in t%2$s%3$s.value.Values"
+                                        .formatted(intermediateVarCounter, intermediateVarCounter-1, previousVarName);
                                 }
                             } else if (previousShapeType == ShapeType.MAP) {
                                 appendingPath = "tmp%1$s".formatted(intermediateVarCounter-1);
@@ -1797,7 +1784,6 @@ public class DafnyApiCodegen {
                     appending += appendingPath + currentVarName + ".value";
                 } if (parentVar != null) {
                     if (currentShapeType == ShapeType.STRUCTURE) {
-
                     } else if (currentShapeType == ShapeType.MAP) {
                         appending += " :: t%1$s".formatted(intermediateVarCounter-1);
                     }
@@ -1815,6 +1801,13 @@ public class DafnyApiCodegen {
                         appending += " && t%1$s in t%2$s".formatted(i, i-1);
                     }
                     appending += " :: t%1$s".formatted(newVar-1);
+
+                    if (currentShapeType == ShapeType.STRUCTURE) {
+                        appending += "%1$s".formatted(currentVarName);
+                        if (!currentShapeRequired) {
+                            appending += ".value";
+                        }
+                    }
 //
 //                        appending += "tmp%1$s".formatted(intermediateVarCounter-1);
                 }
