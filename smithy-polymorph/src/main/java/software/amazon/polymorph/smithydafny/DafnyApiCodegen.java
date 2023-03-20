@@ -1544,6 +1544,20 @@ public class DafnyApiCodegen {
                     appendingPath = TokenTree.of("tmp%1$s".formatted(intermediateVarCounter));
 
                     intermediateVarCounter++;
+                } else if (currentShapeType == ShapeType.LIST) {
+                    appending = appending.append(TokenTree.of(
+                        """
+                        var tmps%1$s := set t%1$s | t%1$s in %2$s;
+                         forall tmp%1$s :: tmp%1$s in tmps%1$s ==>
+                        """
+                            .formatted(
+                                intermediateVarCounter,
+                                appendingPath)
+                    ));
+
+                    appendingPath = TokenTree.of("tmp%1$s".formatted(intermediateVarCounter));
+
+                    intermediateVarCounter++;
                 }
             } else {
                 // Parent shape knows the type of the member.
@@ -1644,6 +1658,24 @@ public class DafnyApiCodegen {
                         setComprehensionVar = TokenTree.of("tmps%1$s".formatted(intermediateVarCounter));
                     }
 
+                    appendingPath = "t%1$s".formatted(intermediateVarCounter);
+                    intermediateVarCounter++;
+                } else if (currentShapeType == ShapeType.LIST) {
+                    if (setComprehensionVar != null) {
+                        appending = appending.append(TokenTree.of(
+                            ":: set t%1$s | t%1$s in %2$s"
+                                .formatted(intermediateVarCounter, appendingPath)
+                        ));
+                    } else {
+                        appending = appending.append(TokenTree.of("var tmps%1$s := set t%1$s | t%1$s in %2$s\n ".formatted(
+                            intermediateVarCounter,
+                            appendingPath)
+                        ));
+                        // Once this logic starts using set comprehension to access the variables,
+                        //   it will continue to expand on the same variable to access all Modifies clauses.
+                        // This variable is expected to contain Modifies clauses
+                        setComprehensionVar = TokenTree.of("tmps%1$s".formatted(intermediateVarCounter));
+                    }
                     appendingPath = "t%1$s".formatted(intermediateVarCounter);
                     intermediateVarCounter++;
                 }
