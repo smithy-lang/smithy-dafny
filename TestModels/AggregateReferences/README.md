@@ -12,10 +12,10 @@ Right now, this logic is implemented for local service code generators, but NOT 
 Effectively, Smithy-Dafny does NOT support generating `requires`/`modifies`/`ensures` clauses
 for operations whose inputs or outputs contain references nested inside multiple lists, maps, and structures.
 
-This module only contains Dafny verification
+This module is only included to run Dafny verification tests.
 There is NO runtime test for these at this time,
 as the unique code generation for this module is only Dafny code.
-However, it would be good to add runtime tests.
+It would be good to add runtime tests, but this is a lower priority.
 
 ## Build
 ### Dafny
