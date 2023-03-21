@@ -8,14 +8,14 @@ Once both of those modules' test models are passing for a given language,
 this module SHOULD work without issue.
 
 These shapes require unique code generation for the Dafny `requires`/`modifies`/`ensures` clauses.
-Right now, this logic is implemented for local service code generators, but not for operations code generators.
-Effectively, Smithy-Dafny does not support generating `requires`/`modifies`/`ensures` clauses
+Right now, this logic is implemented for local service code generators, but NOT for operations code generators.
+Effectively, Smithy-Dafny does NOT support generating `requires`/`modifies`/`ensures` clauses
 for operations whose inputs or outputs contain references nested inside multiple lists, maps, and structures.
 
 This module only contains Dafny verification
-There is no runtime test for these,
-as the unique code generation is only Dafny code.
-It would be nice to add runtime validation for this, but this has not been done at this time.
+There is NO runtime test for these at this time,
+as the unique code generation for this module is only Dafny code.
+However, it would be good to add runtime tests.
 
 ## Build
 ### Dafny
