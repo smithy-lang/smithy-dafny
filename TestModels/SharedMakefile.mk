@@ -30,7 +30,7 @@ PROJECT_RELATIVE_ROOT := $(dir $(lastword $(MAKEFILE_LIST)))
 LIBRARY_ROOT = $(PWD)
 
 STANDARD_LIBRARY_PATH := $(PROJECT_ROOT)/dafny-dependencies/StandardLibrary
-POLYMORPH_ROOT := $(PROJECT_ROOT)/../smithy-polymorph
+CODEGEN_CLI_ROOT := $(PROJECT_ROOT)/../codegen/smithy-dafny-codegen-cli
 
 ########################## Dafny targets
 
@@ -104,13 +104,13 @@ transpile_dependencies:
 # Since they are defined per target
 # a single target can decide what parts it wants to build.
 
-# Pass in POLYMORPH_ROOT in command line, e.g.
-#   make polymorph_code_gen POLYMORPH_ROOT=/path/to/polymorph/smithy-polymorph
+# Pass in CODEGEN_CLI_ROOT in command line, e.g.
+#   make polymorph_code_gen CODEGEN_CLI_ROOT=/path/to/smithy-dafny/codegen/smithy-dafny-codegen-cli
 # StandardLibrary is filtered out from dependent-model patsubst list;
 #   Its model is contained in $(LIBRARY_ROOT)/model, not $(LIBRARY_ROOT)/../StandardLibrary/Model.
 _polymorph:
-	@: $(if ${POLYMORPH_ROOT},,$(error You must pass the path POLYMORPH_ROOT: POLYMORPH_ROOT=/path/to/polymorph/smithy-polymorph));
-	cd $(POLYMORPH_ROOT); \
+	@: $(if ${CODEGEN_CLI_ROOT},,$(error You must pass the path CODEGEN_CLI_ROOT: CODEGEN_CLI_ROOT=/path/to/smithy-dafny/codegen/smithy-dafny-codegen-cli));
+	cd $(CODEGEN_CLI_ROOT); \
 	./gradlew run --args="\
 	$(OUTPUT_DAFNY) \
 	$(OUTPUT_DOTNET) \
@@ -122,8 +122,8 @@ _polymorph:
 	$(AWS_SDK_CMD)";
 
 _polymorph_wrapped:
-	@: $(if ${POLYMORPH_ROOT},,$(error You must pass the path POLYMORPH_ROOT: POLYMORPH_ROOT=/path/to/polymorph/smithy-polymorph));
-	cd $(POLYMORPH_ROOT); \
+	@: $(if ${CODEGEN_CLI_ROOT},,$(error You must pass the path CODEGEN_CLI_ROOT: CODEGEN_CLI_ROOT=/path/to/smithy-dafny/codegen/smithy-dafny-codegen-cli));
+	cd $(CODEGEN_CLI_ROOT); \
 	./gradlew run --args="\
 	$(OUTPUT_DAFNY_WRAPPED) \
 	$(OUTPUT_DOTNET_WRAPPED) \
@@ -142,21 +142,21 @@ _polymorph_dependencies:
 	   )
 
 # `polymorph_code_gen` is the generate-for-multiple-languages target
-polymorph_code_gen: OUTPUT_DAFNY=--output-dafny --include-dafny $(STANDARD_LIBRARY_PATH)/src/Index.dfy
+polymorph_code_gen: OUTPUT_DAFNY=--output-dafny $(LIBRARY_ROOT)/Model --include-dafny $(STANDARD_LIBRARY_PATH)/src/Index.dfy
 polymorph_code_gen: OUTPUT_DOTNET=--output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/
 polymorph_code_gen: _polymorph
 # Generate wrapped code for all languages that support wrapped services
 polymorph_code_gen: OUTPUT_DAFNY_WRAPPED=--output-dafny $(LIBRARY_ROOT)/Model --include-dafny $(STANDARD_LIBRARY_PATH)/src/Index.dfy
 polymorph_code_gen: OUTPUT_DOTNET_WRAPPED=--output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/Wrapped
-polymorph_code_gen: OUTPUT_LOCAL_SERVICE=--output-local-service-test $(LIBRARY_ROOT)/Model
+polymorph_code_gen: OUTPUT_LOCAL_SERVICE=--local-service-test
 polymorph_code_gen: _polymorph_wrapped
 polymorph_code_gen: POLYMORPH_LANGUAGE_TARGET=code_gen
 polymorph_code_gen: _polymorph_dependencies
 
-polymorph_dafny: OUTPUT_DAFNY=--output-dafny --include-dafny $(STANDARD_LIBRARY_PATH)/src/Index.dfy
+polymorph_dafny: OUTPUT_DAFNY=--output-dafny $(LIBRARY_ROOT)/Model --include-dafny $(STANDARD_LIBRARY_PATH)/src/Index.dfy
 polymorph_dafny: _polymorph
 polymorph_dafny: OUTPUT_DAFNY_WRAPPED=--output-dafny $(LIBRARY_ROOT)/Model --include-dafny $(STANDARD_LIBRARY_PATH)/src/Index.dfy
-polymorph_dafny: OUTPUT_LOCAL_SERVICE=--output-local-service-test $(LIBRARY_ROOT)/Model
+polymorph_dafny: OUTPUT_LOCAL_SERVICE=--local-service-test
 polymorph_dafny: _polymorph_wrapped
 polymorph_dafny: POLYMORPH_LANGUAGE_TARGET=dafny
 polymorph_dafny: _polymorph_dependencies
@@ -164,7 +164,7 @@ polymorph_dafny: _polymorph_dependencies
 polymorph_net: OUTPUT_DOTNET=--output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/
 polymorph_net: _polymorph
 polymorph_net: OUTPUT_DOTNET_WRAPPED=--output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/Wrapped
-polymorph_net: OUTPUT_LOCAL_SERVICE=--output-local-service-test $(LIBRARY_ROOT)/Model
+polymorph_net: OUTPUT_LOCAL_SERVICE=--local-service-test
 polymorph_net: _polymorph_wrapped
 polymorph_net: POLYMORPH_LANGUAGE_TARGET=net
 polymorph_net: _polymorph_dependencies

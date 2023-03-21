@@ -1,7 +1,7 @@
 # Dependencies
 
-This project tests [Smithy-Polymorph's](../../smithy-polymorph) support 
-for creatigng and using dependency Smithy-Polymorph projects.
+This project tests [smithy-dafny's](../../codegen/smithy-dafny-codegen-cli) support 
+for creating and using dependency projects.
 It explicitly tests using dependency local resources and local services,
 as well as errors thrown by any dependency namespace.
 These tests are written in `dafny` and transpiled to the target runtimes for execution.

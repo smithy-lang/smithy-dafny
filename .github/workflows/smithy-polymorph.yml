@@ -1,4 +1,4 @@
-name: smithy-polymorph workflows
+name: smithy-dafny-codegen-cli workflows
 
 on: 
   pull_request:
@@ -26,7 +26,7 @@ jobs:
       - name: Setup Maven Action
         uses: s4u/setup-maven-action@v1.7.0
         with:
-          java-version: 8
+          java-version: '17'
           maven-version: 3.8.7
 
       # Java DafnyRuntime is not published to maven,
@@ -49,8 +49,14 @@ jobs:
           arguments: publishToMavenLocal
           build-root-directory: dafny-java-conversion
 
-      - name: Execute tests
+      - name: Execute smithy-dafny-codegen-cli tests
         uses: gradle/gradle-build-action@v2
         with:
           arguments: test
-          build-root-directory: smithy-polymorph
+          build-root-directory: codegen/smithy-dafny-codegen-cli
+
+      - name: Execute smithy-dafny-codegen tests
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: :smithy-dafny-codegen:test
+          build-root-directory: codegen
