@@ -270,7 +270,11 @@ public class ModelUtils {
     /**
      * For every ShapeId in {@code initialShapes},
      * with the given {@code model},
-     * find all the member shapes with @reference traits that ShapeId depends on.
+     * return a list of shape IDs where:
+     *  - The first element is the initial shape ID
+     *  - The last element is the shape ID of a reference shape
+     *  - Intermediate elements are a path of shapes from the first to the last shape ID
+     *    such that l[i] is a dependent shape of l[i-1].
      */
     public static Set<List<ShapeId>> findAllDependentMemberReferenceShapesWithPaths(
         Set<ShapeId> initialShapeIds,
@@ -293,32 +297,15 @@ public class ModelUtils {
         }
 
         return outList;
-
-//        // Filter out outList; only return member Shapes
-//        Set<List<ShapeId>> newOutList = new LinkedHashSet<>(new ArrayList<>());
-//
-//
-//        for (List<ShapeId> outListList : outList) {
-//            List<ShapeId> outListListWithOnlyMemberShapes = new ArrayList<>();
-//            for (ShapeId outItem : outListList) {
-//                Shape finalDependentShape = model.expectShape(outItem, Shape.class);
-//                if (finalDependentShape.isMemberShape()) {
-//                    outListListWithOnlyMemberShapes.add(outItem);
-//                }
-//            }
-//            if (!outListListWithOnlyMemberShapes.isEmpty()) {
-//                newOutList.add(outListListWithOnlyMemberShapes);
-//            }
-//        }
-//
-//        return newOutList;
     }
 
     /**
      * For every ShapeId in {@code initialShapes},
      * with the given {@code model},
-     * find all the shapes that ShapeId depends on,
-     * and prepend all shapes in the dependency path to those shapes.
+     * return a list of shape IDs where:
+     *  - The first element is the initial shape ID
+     *  - The last element is the shape ID of a reference shape
+     *  - Intermediate elements are a path of shapes from the first to the last shape ID
      */
     public static Set<List<ShapeId>> findAllDependentShapesWithPaths(
         Set<ShapeId> initialShapeIds,

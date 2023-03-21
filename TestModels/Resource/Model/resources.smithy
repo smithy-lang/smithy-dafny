@@ -12,12 +12,6 @@ service SimpleResources {
 }
 
 structure SimpleResourcesConfig {
-  @required @length(min: 1) name: String,
-  mapOfReferenceStructures: MapOfSimpleResourceReferenceMemberShapes,
-  structureOfMap: StructureOfMap
-}
-
-structure TestSimpleResourcesChainConfig {
   @required @length(min: 1) name: String
 }
 
@@ -45,70 +39,6 @@ structure SimpleResourceReference {}
 resource SimpleResource {
   operations: [ GetResourceData ]
 }
-
-// list ListOfSimpleResourceReferenceMemberShapes {
-//   member: SimpleResourceReference
-// }
-
-// java.lang.UnsupportedOperationException: Shape simple.resources#SetOfSimpleResourceReferenceMemberShapes has unsupported type set
-// set SetOfSimpleResourceReferenceMemberShapes {
-//   member: SimpleResourceReference
-// }
-
-map MapOfSimpleResourceReferenceMemberShapes {
-  key: String,
-  value: SimpleResourceReference
-}
-
-structure StructureOfMap {
-  mapValue: MapOfSimpleResourceReferenceMemberShapes,
-}
-
-operation CollectionsOfMemberShapes {
-  input: CollectionsOfMemberShapesInput,
-  output: CollectionsOfMemberShapesOutput,
-}
-
-structure CollectionsOfMemberShapesInput {
-  // listOfMembers: ListOfSimpleResourceReferenceMemberShapes,
-  // setOfMembers: SetOfSimpleResourceReferenceMemberShapes,
-  mapOfReferenceStructures: MapOfSimpleResourceReferenceMemberShapes,
-  structureOfMap: StructureOfMap
-}
-
-structure CollectionsOfMemberShapesOutput {
-  // listOfMembers: ListOfSimpleResourceReferenceMemberShapes,
-  // setOfMembers: SetOfSimpleResourceReferenceMemberShapes,
-  mapOfReferenceStructures: MapOfSimpleResourceReferenceMemberShapes,
-  structureOfMap: StructureOfMap
-}
-
-// list ListOfLists {
-//   member: ListOfSimpleResourceReferenceMemberShapes
-// }
-
-// list ListOfSets {
-//   member: SetOfSimpleResourceReferenceMemberShapes
-// }
-
-// list ListOfMaps {
-//   member: MapOfSimpleResourceReferenceMemberShapes
-// }
-
-// map MapOfLists {
-//   key: String,
-//   value: ListOfSimpleResourceReferenceMemberShapes
-// }
-
-// map MapOfSets {
-//   key: String,
-//   value: SetOfSimpleResourceReferenceMemberShapes
-// }
-
-// map MapOfMaps {
-//   key: String,
-//   value: MapOfSimpleResourceReferenceMemberShapes
-// }
 
 operation GetResourceData {
   input: GetResourceDataInput,

@@ -1079,58 +1079,6 @@ public class DafnyApiCodegen {
         .flatten();
     }
 
-    private TokenTree MemberModifies(
-        final MemberShape member,
-        final String varName
-    ) {
-        final boolean isList = model.expectShape(member.getTarget()).getType() == ShapeType.LIST;
-
-
-        // If we have a reference input,
-        // then we MAY modify that input.
-        // This means we will need both
-        // a modifies and a decreases' clause.
-        // The decreases clause is because
-        // Dafny will skip type parameters
-        // when generating a default decreases clause.
-        if (isList) {
-            if (member.isRequired()) {
-                // Required list item
-                return TokenTree
-                    .of(
-                        "(set m: object, i | i in %s && m in i.Modifies :: m)"
-                            .formatted(varName)
-                    )
-                    .lineSeparated();
-            } else if (!member.isRequired()) {
-                // Optional list item
-                return TokenTree
-                    .of(
-                        "(if %s.Some? then (set m: object, i | i in %s.value && m in i.Modifies :: m) else {})"
-                            .formatted(varName, varName)
-                    )
-                    .lineSeparated();
-            }
-        }
-        if (member.isRequired()) {
-            // Required single item
-            return TokenTree
-                .of(
-                    "%s.Modifies".formatted(varName)
-                );
-        } else if (!member.isRequired()) {
-            // Optional single item
-            return TokenTree
-                .of(
-                    "(if %s.Some? then %s.value.Modifies else {})"
-                        .formatted(varName, varName)
-                )
-                .lineSeparated();
-        } else {
-            throw new IllegalStateException("Unsupported shape type");
-        }
-    }
-
     private TokenTree OperationMemberModifies(
       final MemberShape member,
       final OperationShape operationShape
@@ -1141,6 +1089,7 @@ public class DafnyApiCodegen {
         throw new IllegalStateException("Member not on operation");
       }
 
+      final boolean isList = model.expectShape(member.getTarget()).getType() == ShapeType.LIST;
       // This is tricky, given where we are, there MUST be an output shape.
       // If this output is @positional,
       // then we need to drop the member name
@@ -1150,7 +1099,49 @@ public class DafnyApiCodegen {
 
       final String varName = "input" + memberName;
 
-      return MemberModifies(member, varName);
+      // If we have a reference input,
+      // then we MAY modify that input.
+      // This means we will need both
+      // a modifies and a decreases' clause.
+      // The decreases clause is because
+      // Dafny will skip type parameters
+      // when generating a default decreases clause.
+      if (isList) {
+          if (member.isRequired()) {
+              // Required list item
+              return TokenTree
+                  .of(
+                      "(set m: object, i | i in %s && m in i.Modifies :: m)"
+                          .formatted(varName)
+                  )
+                  .lineSeparated();
+          } else if (!member.isRequired()) {
+              // Optional list item
+              return TokenTree
+                  .of(
+                      "(if %s.Some? then (set m: object, i | i in %s.value && m in i.Modifies :: m) else {})"
+                          .formatted(varName, varName)
+                  )
+                  .lineSeparated();
+          }
+      }
+      if (member.isRequired()) {
+          // Required single item
+          return TokenTree
+              .of(
+                  "%s.Modifies".formatted(varName)
+              );
+      } else if (!member.isRequired()) {
+          // Optional single item
+          return TokenTree
+              .of(
+                  "(if %s.Some? then %s.value.Modifies else {})"
+                      .formatted(varName, varName)
+              )
+              .lineSeparated();
+      } else {
+          throw new IllegalStateException("Unsupported shape type");
+      }
     }
 
 
