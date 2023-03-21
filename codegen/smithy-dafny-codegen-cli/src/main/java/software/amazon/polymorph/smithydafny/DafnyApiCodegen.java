@@ -1900,12 +1900,7 @@ public class DafnyApiCodegen {
                 serviceMethod = serviceMethod.append(
                     referenceMemberNotFreshClause(managedReferenceMemberShapePath));
             }
-
-            // Add more `ensures` clauses based on `res.Success?`
-            serviceMethod = serviceMethod.append(TokenTree.of(
-                ") && fresh(res.value.%s)".formatted(nameResolver.callHistoryFieldName()),
-                "&& res.value.%s()\n".formatted(nameResolver.validStateInvariantName())
-            ).lineSeparated());
+            serviceMethod = serviceMethod.append(TokenTree.of(")\n"));
 
         } else {
             // If there are no managed reference shapes, the entire local service Modifies member is ensured fresh
@@ -1913,6 +1908,12 @@ public class DafnyApiCodegen {
                 "&& fresh(res.value.%s)\n".formatted(nameResolver.mutableStateFunctionName())
             ).lineSeparated());
         }
+
+        // Add more `ensures` clauses based on `res.Success?`
+        serviceMethod = serviceMethod.append(TokenTree.of(
+            "&& fresh(res.value.%s)".formatted(nameResolver.callHistoryFieldName()),
+            "&& res.value.%s()\n".formatted(nameResolver.validStateInvariantName())
+        ).lineSeparated());
 
         // Add any `ensures` clauses that have unique conditions
 
