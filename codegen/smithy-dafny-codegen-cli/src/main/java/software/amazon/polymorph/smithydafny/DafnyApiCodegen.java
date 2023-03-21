@@ -1127,7 +1127,7 @@ public class DafnyApiCodegen {
           )
           .lineSeparated();
       } else if (isList && member.isRequired()) {
-          // Required list item
+        // Required list item
         return TokenTree
           .of(
             "(set m: object, i | i in %s && m in i.Modifies :: m)"
