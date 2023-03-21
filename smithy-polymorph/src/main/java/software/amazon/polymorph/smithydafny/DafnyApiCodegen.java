@@ -39,6 +39,12 @@ public class DafnyApiCodegen {
     static final Optional<TokenTree> DOUBLE_LENGTH_CONSTRAINT = Optional.of(
             generateLengthConstraint(LengthTrait.builder()
                     .min((long) 8).max((long) 8).build()));
+    // Codegen for nested lists and maps uses temporary variables with unique names for set comprehension.
+    // These look like `tmp`, `t`, or `tmps` with a number appended: e.g. `tmp0`, `t0`, `tmps0`.
+    // This identifier is appended to variable names to ensure all of these variables have unique names, and
+    //   do not accidentally re-use a variable.
+    // This provides unique identifiers across all Dafny-generated code.
+    private int intermediateTempVariableCounter = 0;
 
     public DafnyApiCodegen(
       final Model model,
@@ -1488,10 +1494,8 @@ public class DafnyApiCodegen {
         List<ShapeId> managedReferenceMemberShapePath,
         String prefix
     ) {
-        // The code will generate intermediate variables to store the result of set comprehensions.
-        // These look like `tmp`, `t`, or `tmps` with a number appended: e.g. `tmp0`, `t0`, `tmps0`.
-        // This intermediateVarCounter is appended to each variable that is declared to make each variable name unique.
-        int intermediateVarCounter = 0;
+
+        // This intermediateTempVariableCounter is appended to each variable that is declared to make each variable name unique.
 
         // appendingPath holds the accessor path prepending accessing the current shape in the path.
         // e.g. if `barStructure` is the current variable inside `fooStructure`:
@@ -1528,13 +1532,13 @@ public class DafnyApiCodegen {
                          forall tmp%1$s :: tmp%1$s in tmps%1$s ==>
                         """
                             .formatted(
-                                intermediateVarCounter,
+                                intermediateTempVariableCounter,
                                 appendingPath)
                     ));
 
-                    appendingPath = TokenTree.of("tmp%1$s".formatted(intermediateVarCounter));
+                    appendingPath = TokenTree.of("tmp%1$s".formatted(intermediateTempVariableCounter));
 
-                    intermediateVarCounter++;
+                    intermediateTempVariableCounter++;
                 } else if (currentShapeType == ShapeType.LIST) {
                     appending = appending.append(TokenTree.of(
                         """
@@ -1542,13 +1546,13 @@ public class DafnyApiCodegen {
                          forall tmp%1$s :: tmp%1$s in tmps%1$s ==>
                         """
                             .formatted(
-                                intermediateVarCounter,
+                                intermediateTempVariableCounter,
                                 appendingPath)
                     ));
 
-                    appendingPath = TokenTree.of("tmp%1$s".formatted(intermediateVarCounter));
+                    appendingPath = TokenTree.of("tmp%1$s".formatted(intermediateTempVariableCounter));
 
-                    intermediateVarCounter++;
+                    intermediateTempVariableCounter++;
                 }
             } else {
                 // Parent shape knows the type of the member.
@@ -1586,10 +1590,7 @@ public class DafnyApiCodegen {
         List<ShapeId> managedReferenceMemberShapePath,
         String prefix
     ) {
-
-        int intermediateVarCounter = 0;
-
-        int startingIntermediateVarCounter = intermediateVarCounter;
+        int startingIntermediateTempVariableCounter = intermediateTempVariableCounter;
 
         String appendingPath = "config";
         TokenTree appending = TokenTree.of(prefix);
@@ -1636,39 +1637,39 @@ public class DafnyApiCodegen {
                     if (setComprehensionVar != null) {
                         appending = appending.append(TokenTree.of(
                             ":: set t%1$s | t%1$s in %2$s.Values"
-                            .formatted(intermediateVarCounter, appendingPath)
+                            .formatted(intermediateTempVariableCounter, appendingPath)
                         ));
                     } else {
                         appending = appending.append(TokenTree.of("var tmps%1$s := set t%1$s | t%1$s in %2$s.Values\n ".formatted(
-                            intermediateVarCounter,
+                            intermediateTempVariableCounter,
                             appendingPath)
                         ));
                         // Once this logic starts using set comprehension to access the variables,
                         //   it will continue to expand on the same variable to access all Modifies clauses.
                         // This variable is expected to contain Modifies clauses
-                        setComprehensionVar = TokenTree.of("tmps%1$s".formatted(intermediateVarCounter));
+                        setComprehensionVar = TokenTree.of("tmps%1$s".formatted(intermediateTempVariableCounter));
                     }
 
-                    appendingPath = "t%1$s".formatted(intermediateVarCounter);
-                    intermediateVarCounter++;
+                    appendingPath = "t%1$s".formatted(intermediateTempVariableCounter);
+                    intermediateTempVariableCounter++;
                 } else if (currentShapeType == ShapeType.LIST) {
                     if (setComprehensionVar != null) {
                         appending = appending.append(TokenTree.of(
                             ":: set t%1$s | t%1$s in %2$s"
-                                .formatted(intermediateVarCounter, appendingPath)
+                                .formatted(intermediateTempVariableCounter, appendingPath)
                         ));
                     } else {
                         appending = appending.append(TokenTree.of("var tmps%1$s := set t%1$s | t%1$s in %2$s\n ".formatted(
-                            intermediateVarCounter,
+                            intermediateTempVariableCounter,
                             appendingPath)
                         ));
                         // Once this logic starts using set comprehension to access the variables,
                         //   it will continue to expand on the same variable to access all Modifies clauses.
                         // This variable is expected to contain Modifies clauses
-                        setComprehensionVar = TokenTree.of("tmps%1$s".formatted(intermediateVarCounter));
+                        setComprehensionVar = TokenTree.of("tmps%1$s".formatted(intermediateTempVariableCounter));
                     }
-                    appendingPath = "t%1$s".formatted(intermediateVarCounter);
-                    intermediateVarCounter++;
+                    appendingPath = "t%1$s".formatted(intermediateTempVariableCounter);
+                    intermediateTempVariableCounter++;
                 }
             } else {
                 currentShapeType = shapeInPath.getType();
@@ -1682,11 +1683,11 @@ public class DafnyApiCodegen {
         } if (setComprehensionVar != null) {
             appending = appending.append(TokenTree.of("""
               :: %1$s;
-                var %2$sModifiesSet: set<set<object>> := set t0
-                """.formatted(appendingPath, setComprehensionVar)
+               var %2$sFlattenedModifiesSet: set<set<object>> := set t0
+               """.formatted(appendingPath, setComprehensionVar)
             ));
 
-            int numberOfSetsToAccess = intermediateVarCounter - startingIntermediateVarCounter;
+            int numberOfSetsToAccess = intermediateTempVariableCounter - startingIntermediateTempVariableCounter;
             for (int i = 1; i < numberOfSetsToAccess; i++) {
                 appending = TokenTree.of("%1$s, t%2$s".formatted(appending, i));
             }
@@ -1706,7 +1707,7 @@ public class DafnyApiCodegen {
         if (setComprehensionVar != null) {
             appending = TokenTree.of("""
                 %1$s;
-                 (set tmp%2$sModifyEntry, tmp%2$sModifies | \n tmp%2$sModifies in %3$sModifiesSet \n && tmp%2$sModifyEntry in tmp%2$sModifies \n :: tmp%2$sModifyEntry)"""
+                 (set tmp%2$sModifyEntry, tmp%2$sModifies | \n tmp%2$sModifies in %3$sFlattenedModifiesSet \n && tmp%2$sModifyEntry in tmp%2$sModifies \n :: tmp%2$sModifyEntry)"""
                 .formatted(appending, 0, setComprehensionVar)
             );
         }
@@ -1754,8 +1755,8 @@ public class DafnyApiCodegen {
         if (!managedReferenceMemberShapePaths.isEmpty()) {
             // The code will generate intermediate variables to store the result of set comprehensions.
             // These look like `tmp`, `t`, or `tmps` with a number appended: e.g. `tmp0`, `t0`, `tmps0`.
-            // This intermediateVarCounter is appended to each variable that is declared to make each variable name unique.
-            int intermediateVarCounter = 0;
+            // This intermediateTempVariableCounter is appended to each variable that is declared to make each variable name unique.
+            int intermediateTempVariableCounter = 0;
 
             for (List<ShapeId> managedReferenceMemberShapePath : managedReferenceMemberShapePaths) {
                 serviceMethod = serviceMethod.append(
@@ -1766,7 +1767,7 @@ public class DafnyApiCodegen {
         // Add `modifies` clauses
 
         if (!managedReferenceMemberShapePaths.isEmpty()) {
-            int intermediateVarCounter = 0;
+            int intermediateTempVariableCounter = 0;
 
             for (List<ShapeId> managedReferenceMemberShapePath : managedReferenceMemberShapePaths) {
                 serviceMethod = serviceMethod.append(
@@ -1810,8 +1811,8 @@ public class DafnyApiCodegen {
         if (!managedReferenceMemberShapePaths.isEmpty()) {
             // The code will generate intermediate variables to store the result of set comprehensions.
             // These look like `tmp`, `t`, or `tmps` with a number appended: e.g. `tmp0`, `t0`, `tmps0`.
-            // This intermediateVarCounter is appended to each variable that is declared to make each variable name unique.
-            int intermediateVarCounter = 0;
+            // This intermediateTempVariableCounter is appended to each variable that is declared to make each variable name unique.
+            int intermediateTempVariableCounter = 0;
 
             for (List<ShapeId> managedReferenceMemberShapePath : managedReferenceMemberShapePaths) {
                 serviceMethod = serviceMethod.append(
