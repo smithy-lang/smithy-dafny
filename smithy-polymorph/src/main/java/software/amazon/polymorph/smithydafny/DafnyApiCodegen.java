@@ -1113,37 +1113,37 @@ public class DafnyApiCodegen {
       // Dafny will skip type parameters
       // when generating a default decreases clause.
       if (member.isRequired() && !isList) {
-          // Required single item
-          return TokenTree
-              .of(
-                  "%s.Modifies".formatted(varName)
-              );
+        // Required single item
+        return TokenTree
+          .of(
+            "%s.Modifies".formatted(varName)
+          );
       } else if (!member.isRequired() && !isList) {
-          // Optional single item
-          return TokenTree
-              .of(
-                  "(if %s.Some? then %s.value.Modifies else {})"
-                      .formatted(varName, varName)
-              )
-              .lineSeparated();
+        // Optional single item
+        return TokenTree
+          .of(
+            "(if %s.Some? then %s.value.Modifies else {})"
+              .formatted(varName, varName)
+          )
+          .lineSeparated();
       } else if (isList && member.isRequired()) {
           // Required list item
-          return TokenTree
-              .of(
-                  "(set m: object, i | i in %s && m in i.Modifies :: m)"
-                      .formatted(varName)
-              )
-              .lineSeparated();
+        return TokenTree
+          .of(
+            "(set m: object, i | i in %s && m in i.Modifies :: m)"
+              .formatted(varName)
+          )
+          .lineSeparated();
       } else if (isList && !member.isRequired()) {
-          // Optional list item
-          return TokenTree
-              .of(
-                  "(if %s.Some? then (set m: object, i | i in %s.value && m in i.Modifies :: m) else {})"
-                      .formatted(varName, varName)
-              )
-              .lineSeparated();
+        // Optional list item
+        return TokenTree
+          .of(
+            "(if %s.Some? then (set m: object, i | i in %s.value && m in i.Modifies :: m) else {})"
+              .formatted(varName, varName)
+          )
+          .lineSeparated();
       } else {
-          throw new IllegalStateException("Unsupported shape type");
+        throw new IllegalStateException("Unsupported shape type");
       }
     }
 
@@ -1469,7 +1469,16 @@ public class DafnyApiCodegen {
       }
     }
 
-    public TokenTree ensuresClauseForPathToReference(
+    /**
+     * Given a list of ShapeIds representing a path from a root shape to a reference shape,
+     *   generates a TokenTree containing an {@code ensures} clause on the reference's ValidState
+     * @param managedReferenceMemberShapePath a list of shape IDs where:
+     *  - The first element is the initial shape ID
+     *  - The last element is the shape ID of a reference shape
+     *  - Intermediate elements are a path of shape IDs from the first to the last shape ID
+     * @return TokenTree containing an {@code ensures} clause on the reference's ValidState
+     */
+    public TokenTree ensuresValidStateClauseForPathToReference(
         List<ShapeId> managedReferenceMemberShapePath
     ) {
         return validStateClauseForPathToReference(
@@ -1478,7 +1487,16 @@ public class DafnyApiCodegen {
         );
     }
 
-    public TokenTree requiresClauseForPathToReference(
+    /**
+     * Given a list of ShapeIds representing a path from a root shape to a reference shape,
+     *   generates a TokenTree containing a {@code requires} clause on the reference's ValidState
+     * @param managedReferenceMemberShapePath a list of shape IDs where:
+     *  - The first element is the initial shape ID
+     *  - The last element is the shape ID of a reference shape
+     *  - Intermediate elements are a path of shape IDs from the first to the last shape ID
+     * @return TokenTree containing an {@code requires} clause on the reference's ValidState
+     */
+    public TokenTree requiresValidStateClauseForPathToReference(
         List<ShapeId> managedReferenceMemberShapePath
     ) {
         return validStateClauseForPathToReference(
@@ -1487,6 +1505,15 @@ public class DafnyApiCodegen {
         );
     }
 
+    /**
+     * Given a list of ShapeIds representing a path from a root shape to a reference shape,
+     *   generates a TokenTree containing a clause starting with {@code prefix} on the reference's ValidState
+     * @param managedReferenceMemberShapePath a list of shape IDs where:
+     *  - The first element is the initial shape ID
+     *  - The last element is the shape ID of a reference shape
+     *  - Intermediate elements are a path of shape IDs from the first to the last shape ID
+     * @return TokenTree containing a clause starting with {@code prefix} on the reference's ValidState
+     */
     public TokenTree validStateClauseForPathToReference(
         List<ShapeId> managedReferenceMemberShapePath,
         String prefix
@@ -1573,6 +1600,15 @@ public class DafnyApiCodegen {
         return TokenTree.of(validStateClause).lineSeparated();
     }
 
+    /**
+     * Given a list of ShapeIds representing a path from a root shape to a reference shape,
+     *   generates a TokenTree containing a {@code modifies} clause on the reference's Modifies member
+     * @param managedReferenceMemberShapePath a list of shape IDs where:
+     *  - The first element is the initial shape ID
+     *  - The last element is the shape ID of a reference shape
+     *  - Intermediate elements are a path of shape IDs from the first to the last shape ID
+     * @return TokenTree containing a {@code modifies} clause on the reference's Modifies member
+     */
     public TokenTree modifiesClauseForPathToReference(
         List<ShapeId> managedReferenceMemberShapePath
     ) {
@@ -1582,6 +1618,19 @@ public class DafnyApiCodegen {
         );
     }
 
+    /**
+     * Given a list of ShapeIds representing a path from a root shape to a reference shape,
+     *   generates a TokenTree containing a clause that would subtract the reference shape's Modifies member
+     *   from another set.
+     * (This is expected to be wrapped around something like
+     *   {@code ensures fresh(parentShape.Modifies (referenceMemberNotFreshClause here) )},
+     * as the Modifies clauses access here will not be part of the fresh variable.)
+     * @param managedReferenceMemberShapePath a list of shape IDs where:
+     *  - The first element is the initial shape ID
+     *  - The last element is the shape ID of a reference shape
+     *  - Intermediate elements are a path of shape IDs from the first to the last shape ID
+     * @return TokenTree containing a set subtraction clause for the reference shape's Modifies member.
+     */
     public TokenTree referenceMemberNotFreshClause(
         List<ShapeId> managedReferenceMemberShapePath
     ) {
@@ -1594,6 +1643,15 @@ public class DafnyApiCodegen {
         );
     }
 
+    /**
+     * Given a list of ShapeIds representing a path from a root shape to a reference shape,
+     *   generates a TokenTree containing a clause starting with {@code prefix} on the reference's Modifies member
+     * @param managedReferenceMemberShapePath a list of shape IDs where:
+     *  - The first element is the initial shape ID
+     *  - The last element is the shape ID of a reference shape
+     *  - Intermediate elements are a path of shape IDs from the first to the last shape ID
+     * @return TokenTree containing a clause starting with {@code prefix} on the reference's Modifies member
+     */
     private TokenTree modifiesClauseForPathToReference(
         List<ShapeId> managedReferenceMemberShapePath,
         String prefix
@@ -1810,7 +1868,7 @@ public class DafnyApiCodegen {
 
             for (List<ShapeId> managedReferenceMemberShapePath : managedReferenceMemberShapePaths) {
                 serviceMethod = serviceMethod.append(
-                    requiresClauseForPathToReference(managedReferenceMemberShapePath));
+                    requiresValidStateClauseForPathToReference(managedReferenceMemberShapePath));
             }
         }
 
@@ -1866,7 +1924,7 @@ public class DafnyApiCodegen {
 
             for (List<ShapeId> managedReferenceMemberShapePath : managedReferenceMemberShapePaths) {
                 serviceMethod = serviceMethod.append(
-                    ensuresClauseForPathToReference(managedReferenceMemberShapePath));
+                    ensuresValidStateClauseForPathToReference(managedReferenceMemberShapePath));
             }
         }
 
