@@ -1861,11 +1861,6 @@ public class DafnyApiCodegen {
         Set<List<ShapeId>> managedReferenceMemberShapePaths = ModelUtils.findAllDependentMemberReferenceShapesWithPaths(configShapeIdAsSet, model);
 
         if (!managedReferenceMemberShapePaths.isEmpty()) {
-            // The code will generate intermediate variables to store the result of set comprehensions.
-            // These look like `tmp`, `t`, or `tmps` with a number appended: e.g. `tmp0`, `t0`, `tmps0`.
-            // This intermediateTempVariableCounter is appended to each variable that is declared to make each variable name unique.
-            int intermediateTempVariableCounter = 0;
-
             for (List<ShapeId> managedReferenceMemberShapePath : managedReferenceMemberShapePaths) {
                 serviceMethod = serviceMethod.append(
                     requiresValidStateClauseForPathToReference(managedReferenceMemberShapePath));
@@ -1918,11 +1913,6 @@ public class DafnyApiCodegen {
         // Add any `ensures` clauses that have unique conditions
 
         if (!managedReferenceMemberShapePaths.isEmpty()) {
-            // The code will generate intermediate variables to store the result of set comprehensions.
-            // These look like `tmp`, `t`, or `tmps` with a number appended: e.g. `tmp0`, `t0`, `tmps0`.
-            // This intermediateTempVariableCounter is appended to each variable that is declared to make each variable name unique.
-            int intermediateTempVariableCounter = 0;
-
             for (List<ShapeId> managedReferenceMemberShapePath : managedReferenceMemberShapePaths) {
                 serviceMethod = serviceMethod.append(
                     ensuresValidStateClauseForPathToReference(managedReferenceMemberShapePath));
