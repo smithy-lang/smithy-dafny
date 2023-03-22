@@ -19,10 +19,7 @@ import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ResourceShape;
 import software.amazon.smithy.model.shapes.Shape;
 
-import static javax.lang.model.element.Modifier.FINAL;
-import static javax.lang.model.element.Modifier.PRIVATE;
-import static javax.lang.model.element.Modifier.PUBLIC;
-import static javax.lang.model.element.Modifier.STATIC;
+import static javax.lang.model.element.Modifier.*;
 import static software.amazon.polymorph.smithyjava.nameresolver.Constants.DAFNY_RESULT_CLASS_NAME;
 import static software.amazon.polymorph.smithyjava.nameresolver.Constants.DAFNY_TUPLE0_CLASS_NAME;
 import static software.amazon.polymorph.smithyjava.nameresolver.Constants.SMITHY_API_UNIT;
@@ -50,9 +47,9 @@ public class NativeWrapper extends ResourceShim {
         ClassName className = className();
         TypeSpec.Builder spec =TypeSpec
                 .classBuilder(className)
-                .addModifiers(PRIVATE, FINAL, STATIC)
+                .addModifiers(PROTECTED, FINAL, STATIC)
                 .addSuperinterface(Dafny.interfaceForResource(targetShape))
-                .addField(interfaceName, INTERFACE_FIELD, PRIVATE, FINAL)
+                .addField(interfaceName, INTERFACE_FIELD, PROTECTED, FINAL)
                 .addMethod(nativeWrapperConstructor());
         getOperationsForTarget().forEach(oShape -> {
             spec.addMethod(operation(oShape));
