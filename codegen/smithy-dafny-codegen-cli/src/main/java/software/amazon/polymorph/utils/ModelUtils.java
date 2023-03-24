@@ -266,6 +266,77 @@ public class ModelUtils {
         return shapes;
     }
 
+
+    /**
+     * For every ShapeId in {@code initialShapes},
+     * with the given {@code model},
+     * return a list of shape IDs where:
+     *  - The first element is the initial shape ID
+     *  - The last element is the shape ID of a reference shape
+     *  - Intermediate elements are a path of shapes from the first to the last shape ID
+     *    such that l[i] is a dependent shape of l[i-1].
+     */
+    public static Set<List<ShapeId>> findAllDependentMemberReferenceShapesWithPaths(
+        Set<ShapeId> initialShapeIds,
+        Model model
+    ) {
+        Set<List<ShapeId>> outList = new LinkedHashSet<>(new ArrayList<>());
+
+        Set<List<ShapeId>> dependentShapesWithPaths = findAllDependentShapesWithPaths(initialShapeIds, model);
+        for (List<ShapeId> dependentShapeWithPath : dependentShapesWithPaths) {
+            ShapeId finalDependentShapeId = dependentShapeWithPath.get(
+                dependentShapeWithPath.size() - 1);
+            Shape finalDependentShape = model.expectShape(finalDependentShapeId, Shape.class);
+            if (finalDependentShape.asMemberShape().isPresent()) {
+                MemberShape finalDependentShapeAsMember = finalDependentShape.asMemberShape().get();
+                if (model.expectShape(finalDependentShapeAsMember.getTarget(), Shape.class)
+                    .hasTrait(ReferenceTrait.class)) {
+                    outList.add(dependentShapeWithPath);
+                }
+            }
+        }
+
+        return outList;
+    }
+
+    /**
+     * For every ShapeId in {@code initialShapes},
+     * with the given {@code model},
+     * return a list of shape IDs where:
+     *  - The first element is the initial shape ID
+     *  - The last element is the shape ID of a reference shape
+     *  - Intermediate elements are a path of shapes from the first to the last shape ID
+     */
+    public static Set<List<ShapeId>> findAllDependentShapesWithPaths(
+        Set<ShapeId> initialShapeIds,
+        Model model
+    ) {
+        Set<List<ShapeId>> initialShapeIdsAsPaths = initialShapeIds.stream()
+            .map(Collections::singletonList)
+            .collect(Collectors.toSet());
+        Set<List<ShapeId>> pathsToShapes = new LinkedHashSet<>(new LinkedHashSet<>());
+
+        // Breadth-first search via getDependencyShapeIds
+        final Queue<List<ShapeId>> toTraverse = new LinkedList<>(initialShapeIdsAsPaths);
+        while (!toTraverse.isEmpty()) {
+            final List<ShapeId> currentShapeIdWithPath = toTraverse.remove();
+            if (pathsToShapes.add(currentShapeIdWithPath)) {
+                final Shape currentShape = model.expectShape(currentShapeIdWithPath.get(
+                    currentShapeIdWithPath.size()-1));
+                final List<List<ShapeId>> dependencyShapeIdsWithPaths = getDependencyShapeIds(currentShape).map(
+                    dependencyShapeId ->
+                        Stream.concat(
+                            currentShapeIdWithPath.stream(),
+                            Stream.of(dependencyShapeId))
+                            .toList()
+                ).toList();
+                dependencyShapeIdsWithPaths.forEach(toTraverse::add);
+
+            }
+        }
+        return pathsToShapes;
+    }
+
     /**
      * Returns dependency shape IDs for the given shape.
      * A shape {@code S} has a dependency shape {@code D} if a type
