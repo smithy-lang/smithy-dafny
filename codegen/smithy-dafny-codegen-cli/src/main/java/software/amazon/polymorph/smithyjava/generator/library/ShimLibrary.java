@@ -28,10 +28,6 @@ import static software.amazon.polymorph.utils.AwsSdkNameResolverHelpers.isInAwsS
  * ShimLibrary holds the logic required to generate the Shim.
  */
 public abstract class ShimLibrary extends Generator {
-    protected static final String INTERFACE_FIELD = "_impl";
-    protected static final String NATIVE_VAR = "nativeValue";
-    protected static final String DAFNY_VAR = "dafnyValue";
-    protected static final String RESULT_VAR = "result";
     // Hack to override CodegenSubject
     // See ModelCodegen for explanation
     protected final JavaLibrary subject;

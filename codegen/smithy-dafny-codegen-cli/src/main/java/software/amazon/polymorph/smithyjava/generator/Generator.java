@@ -25,6 +25,11 @@ import software.amazon.smithy.model.shapes.ShapeType;
 public abstract class Generator {
     public static final Modifier[] PUBLIC_STATIC = new Modifier[]{Modifier.PUBLIC, Modifier.STATIC};
     protected static final Modifier[] PRIVATE_FINAL = new Modifier[]{Modifier.PRIVATE, Modifier.FINAL};
+    public static final String INTERFACE_VAR = "impl";
+    public static final String INTERFACE_FIELD = "_impl";
+    protected static final String NATIVE_VAR = "nativeValue";
+    protected static final String DAFNY_VAR = "dafnyValue";
+    protected static final String RESULT_VAR = "result";
     @SuppressWarnings("unused")
     private static final Logger LOGGER = LoggerFactory.getLogger(Generator.class);
 

@@ -17,6 +17,7 @@ import software.amazon.polymorph.utils.ModelUtils.ResolvedShapeId;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.Shape;
 
+import static software.amazon.polymorph.smithyjava.generator.Generator.INTERFACE_VAR;
 import static software.amazon.polymorph.utils.AwsSdkNameResolverHelpers.isInAwsSdkNamespace;
 import static software.amazon.polymorph.utils.ModelUtils.resolveShape;
 
@@ -61,6 +62,8 @@ public class BuilderMemberSpec {
         }
     }
 
+    /** Private Method for handling Edge Cases or cases where
+     * the target shape cannot be a member shape. */
     private BuilderMemberSpec(@Nonnull TypeName type, @Nonnull String name) {
         this.interfaceType = null;
         this.wrapCall = null;
@@ -74,11 +77,23 @@ public class BuilderMemberSpec {
         return List.of(new BuilderMemberSpec(type, name));
     }
 
-    public static BuilderMemberSpec serviceShimMemberSpec(
+
+    /** A Local Service Shim is built with a Configuration object,
+     *  which is stored as a field of the shim. */
+    // TODO: Should the Config object be optional?
+    public static BuilderMemberSpec localServiceConfigMemberSpec(
             LocalServiceTrait trait, JavaLibrary subject)
     {
         TypeName type = subject.nativeNameResolver.typeForShape(trait.getConfigId());
         String name = trait.getConfigId().getName();
+        return new BuilderMemberSpec(type, name);
+    }
+
+    public static BuilderMemberSpec localServiceAsMemberSpec(
+            JavaLibrary subject
+    ) {
+        TypeName type = subject.nativeNameResolver.classNameForService(subject.serviceShape);
+        String name = INTERFACE_VAR;
         return new BuilderMemberSpec(type, name);
     }
 }
