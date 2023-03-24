@@ -4,7 +4,7 @@ namespace simple.types.boolean
   sdkId: "SimpleBoolean",
   config: SimpleBooleanConfig,
 )
-service SimpleTypesBoolean {
+service SimpleBoolean {
   version: "2021-11-01",
   resources: [],
   operations: [ GetBoolean ],

@@ -254,3 +254,11 @@ clean:
 	rm -rf $(LIBRARY_ROOT)/TestResults
 	rm -rf $(LIBRARY_ROOT)/runtimes/net/Generated $(LIBRARY_ROOT)/runtimes/net/bin $(LIBRARY_ROOT)/runtimes/net/obj
 	rm -rf $(LIBRARY_ROOT)/runtimes/net/tests/bin $(LIBRARY_ROOT)/runtimes/net/tests/obj
+
+# Python Targets
+
+transpile_python: | transpile_implementation_python
+
+transpile_implementation_python: TARGET=python
+transpile_implementation_python: OUT=runtimes/python/ImplementationFromDafny
+transpile_implementation_python: transpile_implementation
