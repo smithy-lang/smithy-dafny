@@ -212,7 +212,7 @@ public class ToNativeLibrary extends ToNative {
         if (shape.hasTrait(ExtendableTrait.class)) {
             method
               .beginControlFlow(
-                "if ($L instanceof $L.NativeWrapper)",
+                "if ($L instanceof $T.NativeWrapper)",
                 VAR_INPUT, subject.nativeNameResolver.classNameForResource(shape)
               )
               .addStatement(
