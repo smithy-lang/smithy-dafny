@@ -207,7 +207,7 @@ public class ToNativeLibrary extends ToNative {
                 .methodBuilder(methodName)
                 .addModifiers(PUBLIC_STATIC)
                 .addParameter(Dafny.interfaceForResource(shape), VAR_INPUT)
-                .returns(subject.nativeNameResolver.classNameForInterfaceOrLocalService(shape, null));
+                .returns(Native.classNameForInterfaceOrLocalService(shape, subject.sdkVersion));
 
         if (shape.hasTrait(ExtendableTrait.class)) {
             method
