@@ -2,7 +2,6 @@ package software.amazon.polymorph.smithyjava.generator.library;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.MethodSpec;
 
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
@@ -25,7 +24,6 @@ import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 import software.amazon.polymorph.utils.ModelUtils;
-import software.amazon.polymorph.utils.ModelUtils.ResolvedShapeId;
 import software.amazon.polymorph.utils.TokenTree;
 
 import software.amazon.smithy.model.Model;
@@ -118,21 +116,6 @@ public class JavaLibrary extends CodegenSubject {
                     dafnyValue);
         };
     }
-
-    /**
-     * @param method      MethodSpec.Builder that SHOULD have Parameters,
-     *                    Returns, & Modifiers set correctly
-     *                    ( note that
-     *                    void or parameterless methods would
-     *                    not have any Returns or Parameters).
-     * @param resolvedInput  A ResolvedShapeId representing the input
-     * @param resolvedOutput A ResolvedShapeId representing the output
-     */
-    public record MethodSignature(
-            MethodSpec.Builder method,
-            ResolvedShapeId resolvedInput,
-            ResolvedShapeId resolvedOutput
-    ) {}
 
     @Override
     public Map<Path, TokenTree> generate() {

@@ -6,8 +6,9 @@ package software.amazon.polymorph;
 import software.amazon.polymorph.smithydotnet.localServiceWrapper.LocalServiceWrappedCodegen;
 import software.amazon.polymorph.smithydotnet.localServiceWrapper.LocalServiceWrappedConversionCodegen;
 import software.amazon.polymorph.smithydotnet.localServiceWrapper.LocalServiceWrappedShimCodegen;
-import software.amazon.polymorph.smithyjava.generator.CodegenSubject;
+import software.amazon.polymorph.smithyjava.generator.CodegenSubject.AwsSdkVersion;
 import software.amazon.polymorph.smithyjava.generator.library.JavaLibrary;
+import software.amazon.polymorph.smithyjava.generator.library.TestJavaLibrary;
 import software.amazon.polymorph.utils.ModelUtils;
 
 import org.apache.commons.cli.CommandLine;
@@ -100,12 +101,12 @@ public class CodegenCli {
         final List<String> messages = new ArrayList<>(3);
 
         if (cliArguments.outputJavaDir.isPresent()) {
-            final CodegenSubject.AwsSdkVersion awsSdkVersion;
+            final AwsSdkVersion awsSdkVersion;
             try {
                 awsSdkVersion = cliArguments.javaAwsSdkVersion
                         .map(String::trim).map(String::toUpperCase)
-                        .map(CodegenSubject.AwsSdkVersion::valueOf)
-                        .orElse(CodegenSubject.AwsSdkVersion.V2);
+                        .map(AwsSdkVersion::valueOf)
+                        .orElse(AwsSdkVersion.V2);
             } catch (IllegalArgumentException ex) {
                 logger.error("Unsupported Java AWS SDK version: " + cliArguments.javaAwsSdkVersion.get().trim());
                 throw ex;
@@ -117,6 +118,8 @@ public class CodegenCli {
                     case V1 -> messages.add(javaAwsSdkV1(outputJavaDir, serviceShape, model));
                     case V2 -> messages.add(javaAwsSdkV2(outputJavaDir, serviceShape, model));
                 }
+            } else if (cliArguments.localServiceTest) {
+                messages.add(javaWrappedLocalService(outputJavaDir, serviceShape, model, awsSdkVersion));
             } else {
                 messages.add(javaLocalService(outputJavaDir, serviceShape, model, awsSdkVersion));
             }
@@ -164,7 +167,7 @@ public class CodegenCli {
     private static String javaLocalService(Path outputJavaDir,
                                            ServiceShape serviceShape,
                                            Model model,
-                                           CodegenSubject.AwsSdkVersion awsSdkVersion) {
+                                           AwsSdkVersion awsSdkVersion) {
         final JavaLibrary javaLibrary = new JavaLibrary(model, serviceShape, awsSdkVersion);
         writeTokenTreesIntoDir(javaLibrary.generate(), outputJavaDir);
         return "Java code generated in %s".formatted(outputJavaDir);
@@ -180,6 +183,13 @@ public class CodegenCli {
         final JavaAwsSdkV2 javaV2ShimCodegen = JavaAwsSdkV2.createJavaAwsSdkV2(serviceShape, model);
         writeTokenTreesIntoDir(javaV2ShimCodegen.generate(), outputJavaDir);
         return "Java V2 code generated in %s".formatted(outputJavaDir);
+    }
+
+    static String javaWrappedLocalService(final Path outputJavaDir, final ServiceShape serviceShape,
+                                          final Model model, final AwsSdkVersion awsSdkVersion) {
+        final TestJavaLibrary testJavaLibrary = new TestJavaLibrary(model, serviceShape, awsSdkVersion);
+        writeTokenTreesIntoDir(testJavaLibrary.generate(), outputJavaDir);
+        return "Java that tests a local service generated in %s".formatted(outputJavaDir);
     }
 
     static String netLocalService(Path outputNetDir, ServiceShape serviceShape, Model model) {
@@ -204,7 +214,7 @@ public class CodegenCli {
 
         final TypeConversionCodegen conversion = new LocalServiceWrappedConversionCodegen(model, serviceShape);
         writeTokenTreesIntoDir(conversion.generate(), outputNetDir);
-        return ".NET code generated in %s".formatted(outputNetDir);
+        return ".NET that tests a local service generated in %s".formatted(outputNetDir);
     }
 
     static String netAwsSdk(Path outputNetDir, ServiceShape serviceShape, Model model, Path[] dependentModelPaths) {

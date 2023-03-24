@@ -7,7 +7,7 @@ import com.squareup.javapoet.TypeName;
 
 import software.amazon.polymorph.smithyjava.MethodReference;
 import software.amazon.polymorph.smithyjava.generator.Generator;
-import software.amazon.polymorph.smithyjava.generator.library.JavaLibrary.MethodSignature;
+import software.amazon.polymorph.smithyjava.MethodSignature;
 import software.amazon.polymorph.utils.ModelUtils.ResolvedShapeId;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.polymorph.smithyjava.nameresolver.Native;
@@ -32,9 +32,9 @@ public abstract class ShimLibrary extends Generator {
     // See ModelCodegen for explanation
     protected final JavaLibrary subject;
     /** The class name of the Subject's ToDafny class. */
-    protected final ClassName toDafnyClassName;
+    public final ClassName toDafnyClassName;
     /** The class name of the Subject's ToNative class. */
-    protected final ClassName toNativeClassName;
+    public final ClassName toNativeClassName;
 
     public ShimLibrary(JavaLibrary javaLibrary) {
         super(javaLibrary);
@@ -43,7 +43,7 @@ public abstract class ShimLibrary extends Generator {
         this.toNativeClassName = ToNativeLibrary.className(javaLibrary);
     }
 
-    protected JavaLibrary.MethodSignature operationMethodSignature(OperationShape shape) {
+    protected MethodSignature operationMethodSignature(OperationShape shape) {
         final ResolvedShapeId inputResolved = ModelUtils.resolveShape(
                 shape.getInputShape(), subject.model);
         final ResolvedShapeId outputResolved = ModelUtils.resolveShape(

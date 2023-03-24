@@ -20,7 +20,6 @@ import software.amazon.polymorph.smithyjava.generator.library.ShimLibrary;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 
-import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 
 import static javax.lang.model.element.Modifier.PROTECTED;
@@ -45,7 +44,7 @@ public class ServiceShim extends ShimLibrary {
         return Collections.singleton(shimFile.build());
     }
 
-    TypeSpec shim() {
+    protected TypeSpec shim() {
         TypeSpec.Builder spec = TypeSpec
                 .classBuilder(thisClassName)
                 .addModifiers(PUBLIC)
@@ -70,7 +69,7 @@ public class ServiceShim extends ShimLibrary {
 
     private BuilderMemberSpec getArg() {
         LocalServiceTrait trait = targetShape.expectTrait(LocalServiceTrait.class);
-        return BuilderMemberSpec.serviceShimMemberSpec(trait, subject);
+        return BuilderMemberSpec.localServiceConfigMemberSpec(trait, subject);
     }
 
     private FieldSpec getField() {
@@ -132,16 +131,11 @@ public class ServiceShim extends ShimLibrary {
     }
 
     protected MethodSpec impl() {
-        return MethodSpec.methodBuilder("impl")
+        return MethodSpec.methodBuilder(INTERFACE_VAR)
                 .addModifiers(PROTECTED)
                 .addStatement("return this.$L", INTERFACE_FIELD)
                 .returns(Dafny.interfaceForService(this.targetShape))
                 .build();
     }
 
-    protected List<OperationShape> getOperationsForTarget() {
-        return targetShape.getOperations().stream().sequential()
-                .map(shapeId -> subject.model.expectShape(shapeId, OperationShape.class))
-                .collect(Collectors.toList());
-    }
 }

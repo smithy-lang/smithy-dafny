@@ -20,6 +20,7 @@ import javax.lang.model.element.Modifier;
 
 import software.amazon.polymorph.smithyjava.MethodReference;
 import software.amazon.polymorph.utils.TokenTree;
+import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ShapeType;
 
 public abstract class Generator {
@@ -58,7 +59,13 @@ public abstract class Generator {
 
     public abstract Set<JavaFile> javaFiles();
 
-     public static class Constants {
+    protected List<OperationShape> getOperationsForTarget() {
+        return subject.serviceShape.getOperations().stream().sequential()
+                .map(shapeId -> subject.model.expectShape(shapeId, OperationShape.class))
+                .collect(Collectors.toList());
+    }
+
+    public static class Constants {
         public static final MethodReference IDENTITY_FUNCTION = new MethodReference(
                 ClassName.get(java.util.function.Function.class),
                 "identity");
