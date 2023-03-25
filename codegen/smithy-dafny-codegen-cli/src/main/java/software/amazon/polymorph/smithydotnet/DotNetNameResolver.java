@@ -266,6 +266,12 @@ public class DotNetNameResolver {
                 : "string";
     }
 
+    protected String baseTypeForEnum(final EnumShape enumShape) {
+        final ShapeId shapeId = enumShape.getId();
+        final String namespace = namespaceForShapeId(shapeId);
+        return "%s.%s".formatted(namespace, classForEnum(shapeId));
+    }
+
     protected String baseTypeForList(final ListShape listShape) {
         if (StringUtils.equals(baseTypeForMember(listShape.getMember()),
                 AwsSdkDotNetNameResolver.DDB_ATTRIBUTE_VALUE_MODEL_NAMESPACE)) {
@@ -560,7 +566,7 @@ public class DotNetNameResolver {
         return switch (shape.getType()) {
             case BLOB, DOUBLE -> "Dafny.ISequence<byte>";
             case BOOLEAN -> "bool";
-            case STRING -> dafnyTypeForString(shape.asStringShape().get());
+            case STRING, ENUM -> dafnyTypeForString(shape.asStringShape().get());
             case INTEGER -> "int";
             case LONG -> "long";
             // TODO create/use better timestamp type in Dafny libraries

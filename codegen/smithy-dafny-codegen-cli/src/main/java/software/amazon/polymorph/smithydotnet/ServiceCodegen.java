@@ -106,8 +106,8 @@ public class ServiceCodegen {
                     codeByPath.put(structureClassPath, structureCode.prepend(prelude));
                 });
 
-        // Enums
-        model.getStringShapesWithTrait(EnumTrait.class)
+        // Enums (both string shapes as in Smithy IDL 1.0, and enum shapes as in 2.0)
+        model.getShapesWithTrait(EnumTrait.class)
                 .stream()
                 .map(Shape::getId)
                 .filter(enumShapeId -> ModelUtils.isInServiceNamespace(enumShapeId, serviceShape))
@@ -467,9 +467,9 @@ public class ServiceCodegen {
                 .orElse(Token.of("void"));
     }
 
-    private EnumTrait getAndValidateEnumTrait(final StringShape stringShape) {
-        final EnumTrait enumTrait = stringShape.getTrait(EnumTrait.class)
-                .orElseThrow(() -> new IllegalStateException("EnumTrait absent on provided string shape"));
+    private EnumTrait getAndValidateEnumTrait(final Shape shape) {
+        final EnumTrait enumTrait = shape.getTrait(EnumTrait.class)
+                .orElseThrow(() -> new IllegalStateException("EnumTrait absent on provided shape"));
         if (enumTrait.hasNames() && hasInvalidEnumNames(enumTrait)) {
             throw new IllegalStateException("Enum definition names must be uppercase alphanumeric and begin with a letter");
         }
@@ -486,11 +486,11 @@ public class ServiceCodegen {
      *
      * @return a class containing constants for the enum members
      */
-    public TokenTree generateEnumClass(final ShapeId stringShapeId) {
-        final StringShape stringShape = model.expectShape(stringShapeId, StringShape.class);
+    public TokenTree generateEnumClass(final ShapeId shapeId) {
+        final StringShape stringShape = model.expectShape(shapeId, StringShape.class);
         final EnumTrait enumTrait = getAndValidateEnumTrait(stringShape);
 
-        final String enumClassName = nameResolver.classForEnum(stringShapeId);
+        final String enumClassName = nameResolver.classForEnum(shapeId);
         final String enumValueTypeName = enumTrait.hasNames() ? enumClassName : "string";
         final TokenTree namedEnumValues = enumTrait.hasNames()
                 ? generateNamedEnumValues(enumTrait, enumClassName)

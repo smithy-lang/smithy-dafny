@@ -30,7 +30,6 @@ import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.ShapeType;
-import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.traits.BoxTrait;
 import software.amazon.smithy.model.traits.EnumTrait;
 
@@ -148,7 +147,7 @@ public class Native extends NameResolver{
             }
             // For supported simple shapes, just map to native types
             case BLOB, TIMESTAMP, BIG_DECIMAL, BIG_INTEGER -> NATIVE_TYPES_BY_SIMPLE_SHAPE_TYPE.get(shape.getType());
-            case STRING -> classForStringOrEnum(shape.asStringShape().get());
+            case STRING, ENUM -> classForStringOrEnum(shape);
             case LIST -> ParameterizedTypeName.get(
                     ClassName.get(List.class),
                     typeForShape(shape.asListShape().get().getMember().getTarget())
@@ -173,7 +172,7 @@ public class Native extends NameResolver{
         };
     }
 
-    public ClassName classForStringOrEnum(final StringShape shape) {
+    public ClassName classForStringOrEnum(final Shape shape) {
         if (shape.hasTrait(EnumTrait.class)) {
             if (isInAwsSdkNamespace(shape.getId())) {
                 return switch (awsSdkVersion) {
