@@ -26,7 +26,7 @@ import software.amazon.smithy.utils.StringUtils;
 import software.amazon.awssdk.codegen.naming.DefaultNamingStrategy;
 import software.amazon.awssdk.codegen.model.service.ServiceModel;
 
-import static software.amazon.polymorph.smithyjava.generator.Generator.Constants.BLOB_TO_NATIVE_SDK_BYTES;
+import static software.amazon.polymorph.smithyjava.generator.awssdk.v2.JavaAwsSdkV2.BLOB_TO_NATIVE_SDK_BYTES;
 import static software.amazon.polymorph.smithyjava.nameresolver.AwsSdkV2NameResolverUtils.isAttributeValueType;
 import static software.amazon.polymorph.smithyjava.nameresolver.AwsSdkV2NameResolverUtils.tokenToUncapitalizeInShape;
 import static software.amazon.polymorph.smithyjava.nameresolver.Constants.SHAPE_TYPES_LIST_SET_MAP;
