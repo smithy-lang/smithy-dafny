@@ -13,7 +13,9 @@ module TestComAmazonawsSqs {
   import opened StandardLibrary.UInt
   import opened Wrappers
 
-  method {:test} BasicSanityTest()
+  // TODO: Enable {:test} once the GitHub-CI-PolymorphTestModels-Role-us-west-2 role
+  // has the necessary permissions.
+  method BasicSanityTest()
   {
     var client :- expect Sqs.SQSClient();
 
