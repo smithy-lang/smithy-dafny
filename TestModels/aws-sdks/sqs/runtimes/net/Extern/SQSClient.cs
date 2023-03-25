@@ -13,15 +13,15 @@ namespace Dafny.Com.Amazonaws.Sqs
     
     public static
       _IResult<
-        Types.IAmazonSQSClient,
+        Types.ISQSClient,
         Types._IError
       >
       SQSClient()
     {
-      var client = new AmazonSQSClient();
+      var client = new SQSClient();
 
       return Result<
-        Types.IAmazonSQSClient,
+        Types.ISQSClient,
         Types._IError
       >
         .create_Success(new SQSShim(client));

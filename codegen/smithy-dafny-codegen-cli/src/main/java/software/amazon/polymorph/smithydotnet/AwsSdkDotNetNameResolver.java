@@ -83,6 +83,12 @@ public class AwsSdkDotNetNameResolver extends DotNetNameResolver {
         final String keyType = keyTargetShape.hasTrait(EnumTrait.class) ? "string" : baseTypeForMember(keyShape);
         final String valueType = valueTargetShape.hasTrait(EnumTrait.class) ? "string" : baseTypeForMember(valueShape);
 
+        if (StringUtils.equals(valueType, AwsSdkDotNetNameResolver.DDB_ATTRIBUTE_VALUE_MODEL_NAMESPACE)){
+            return "System.Collections.Generic.Dictionary<%s, %s>".formatted(
+                    keyType,
+                    AwsSdkDotNetNameResolver.DDB_V2_ATTRIBUTE_VALUE);
+        }
+
         return "System.Collections.Generic.Dictionary<%s, %s>".formatted(keyType, valueType);
     }
 
