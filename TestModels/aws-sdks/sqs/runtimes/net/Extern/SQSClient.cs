@@ -18,7 +18,7 @@ namespace Dafny.Com.Amazonaws.Sqs
       >
       SQSClient()
     {
-      var client = new SQSClient();
+      var client = new AmazonSQSClient();
 
       return Result<
         Types.ISQSClient,
