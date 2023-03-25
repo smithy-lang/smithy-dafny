@@ -44,7 +44,7 @@ public record DafnyNameResolver(
     );
 
     public static String nameForService(final ServiceShape serviceShape) {
-        return StringUtils.capitalize(serviceShape.getId().getName());
+        return AwsSdkNameResolverHelpers.getServiceName(serviceShape);
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")

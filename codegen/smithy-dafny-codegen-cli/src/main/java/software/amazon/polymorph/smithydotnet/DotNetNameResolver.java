@@ -710,7 +710,7 @@ public class DotNetNameResolver {
         if (AwsSdkNameResolverHelpers.isInAwsSdkNamespace(serviceShapeId)) {
             return "%s.I%sClient"
                 .formatted(DafnyNameResolverHelpers.dafnyExternNamespaceForShapeId(serviceShapeId),
-                           StringUtils.capitalize(serviceShape.getId().getName()));
+                           DafnyNameResolver.nameForService(serviceShape));
         }
 
         // Qualify extern namespace

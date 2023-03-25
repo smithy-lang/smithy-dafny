@@ -15,10 +15,16 @@ public class AwsSdkNameResolverHelpers {
         return "com.amazonaws.%s".formatted(awsServiceName);
     }
 
-    public static String getSdkId(final ServiceShape serviceShape) {
+    public static String getServiceName(final ServiceShape serviceShape) {
         return serviceShape.getTrait(ServiceTrait.class)
-                           .map(t -> t.getSdkId())
-                           .orElse(StringUtils.capitalize(awsServiceNameFromShape(serviceShape)));
+                           .map(t -> mungeSdkId(t.getSdkId()))
+                           .orElse(StringUtils.capitalize(serviceShape.getId().getName()));
+    }
+
+    // TODO: similar smarts to capitalize known words ala DotNetNameResolver.capitalizeNamespaceSegment
+    // See https://smithy.io/2.0/aws/aws-core.html#using-sdk-service-id-for-client-naming
+    public static String mungeSdkId(String sdkId) {
+        return StringUtils.capitalize(sdkId.replace(" ", ""));
     }
 
     // TODO Accept a Shape and check if it is in the closure
@@ -27,6 +33,9 @@ public class AwsSdkNameResolverHelpers {
         return shapeId.getNamespace().startsWith("com.amazonaws.");
     }
 
+    // TODO: This should be 100% derived from the service name,
+    // (determined by the shape name or the aws.api#service$sdkId value)
+    // so I belive we should be able to drop this method.
     public static String awsServiceNameFromShape(final Shape shape) {
         String[] namespaceParts = shape.getId().getNamespace().split("\\.");
         return namespaceParts[namespaceParts.length - 1];

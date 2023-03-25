@@ -3,6 +3,7 @@
 
 package software.amazon.polymorph.smithydotnet;
 
+import software.amazon.polymorph.utils.AwsSdkNameResolverHelpers;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.smithy.aws.traits.ServiceTrait;
 import software.amazon.smithy.model.Model;
@@ -31,8 +32,6 @@ public class AwsSdkDotNetNameResolver extends DotNetNameResolver {
     public static final String DDB_NAMESPACE = "com.amazonaws.dynamodb";
     public static final String DDB_SERVICE_NAME = "DynamoDB";
     public static final String DDB_SERVICE_NAME_V2 = "DynamoDBv2";
-    public static final String DDB_SMITHY_SERVICE_NAME = "DynamoDB_20120810";
-    public static final String DDB_TYPES_SERVICE_NAME = "DynamoDB__20120810";
     public static final String DDB_V2_ATTRIBUTE_VALUE = "Amazon.DynamoDBv2.Model.AttributeValue";
     public static final String DDB_NET_INTERFACE_NAME = "Amazon.DynamoDBv2.IAmazonDynamoDB";
     public static final String DDB_ATTRIBUTE_VALUE_MODEL_NAMESPACE = "Com.Amazonaws.Dynamodb.AttributeValue";
@@ -148,7 +147,7 @@ public class AwsSdkDotNetNameResolver extends DotNetNameResolver {
                 return KEY_MANAGEMENT_SERVICE_NAME;
             }
 
-            return sdkId;
+            return AwsSdkNameResolverHelpers.mungeSdkId(sdkId);
         } else {
             return StringUtils.capitalize(getServiceShape().getId().getName());
         }
