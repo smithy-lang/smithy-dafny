@@ -67,7 +67,7 @@ public record DafnyNameResolver(
         }
 
         return switch (shape.getType()) {
-            case BLOB, BOOLEAN, STRING,
+            case BLOB, BOOLEAN, STRING, ENUM,
                     // currently unused in model and unsupported in StandardLibrary.UInt
                     // BYTE, SHORT
                     INTEGER, LONG, DOUBLE,
