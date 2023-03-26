@@ -111,10 +111,4 @@ module TestHelpers {
     expect actualError.Opaque?
       && (actualError.obj is ExtendableResource.OpaqueMessage);
   }
-  
-  method {:extern "Simple.Extendable.Resources.NativeResource", "DafnyFactory"} DafnyFactory(
-  ) returns (
-    output: Types.IExtendableResource
-  )
-    ensures output.ValidState() && fresh(output.History) && fresh(output.Modifies)  
 }
