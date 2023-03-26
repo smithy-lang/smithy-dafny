@@ -5,6 +5,7 @@ include "../src/WrappedIndex.dfy"
 include "./SimpleExtendableResourcesTest.dfy"
 include "./NativeExtendableResourceTest.dfy"
 include "./Helpers.dfy"
+include "./NativeResourceFactory.dfy"
 
 module WrappedTest
 {
@@ -14,6 +15,7 @@ module WrappedTest
   import ExtendableResource  
   import opened Wrappers  
   import opened TestHelpers
+  import opened NativeResourceFactory
 
   // Tests the Resource created purely through Dafny Source Code
   method {:test} WrappedTestClientDafnyResource()
