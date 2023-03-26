@@ -6,6 +6,7 @@ import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeSpec;
 
+import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.traits.EnumDefinition;
 import software.amazon.smithy.model.traits.EnumTrait;
@@ -19,7 +20,7 @@ public class ModeledEnum {
     static final String TO_STRING_METHOD_NAME = "toString";
     static final FieldSpec ENUM_VALUE_FIELD = FieldSpec.builder(String.class, VALUE_VAR, PRIVATE, FINAL).build();
 
-    public static JavaFile javaFile(String packageName, StringShape shape) {
+    public static JavaFile javaFile(String packageName, Shape shape) {
         ClassName className = ClassName.get(packageName, shape.getId().getName());
         TypeSpec.Builder enumSpec = TypeSpec.enumBuilder(className);
         enumSpec.addModifiers(PUBLIC);

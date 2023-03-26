@@ -28,7 +28,9 @@ import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.*;
 import software.amazon.smithy.model.traits.EnumTrait;
+import software.amazon.smithy.model.traits.EnumValueTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
+import software.amazon.smithy.model.traits.synthetic.SyntheticEnumTrait;
 import software.amazon.smithy.utils.StringUtils;
 
 import static software.amazon.polymorph.smithydotnet.DotNetNameResolver.TYPE_CONVERSION_CLASS_NAME;
@@ -168,12 +170,10 @@ public class TypeConversionCodegen {
                 .map(unionShape -> unionShape.getId())
                 .collect(Collectors.toSet());
 
-        // TODO add smithy v2 Enums
         // Collect enum shapes
-        final Set<ShapeId> enumShapes = model.getStringShapes().stream()
-                .filter(stringShape -> isInServiceNamespace(stringShape.getId()))
-                .filter(stringShape -> stringShape.hasTrait(EnumTrait.class))
-                .map(stringShape -> stringShape.getId())
+        final Set<ShapeId> enumShapes = model.getShapesWithTrait(EnumTrait.class).stream()
+                .map(Shape::getId)
+                .filter(this::isInServiceNamespace)
                 .collect(Collectors.toSet());
 
         // Collect all specific error structures
@@ -204,6 +204,7 @@ public class TypeConversionCodegen {
             case BLOB -> generateBlobConverter(shape.asBlobShape().get());
             case BOOLEAN -> generateBooleanConverter(shape.asBooleanShape().get());
             case STRING -> generateStringConverter(shape.asStringShape().get());
+            case ENUM -> generateEnumConverter(shape.asEnumShape().get());
             case INTEGER -> generateIntegerConverter(shape.asIntegerShape().get());
             case LONG -> generateLongConverter(shape.asLongShape().get());
             case DOUBLE -> generateDoubleConverter(shape.asDoubleShape().get());
@@ -793,21 +794,27 @@ public class TypeConversionCodegen {
      * Smithy-defined name (the {@link EnumDefNames#defName}) and the Dafny-compiler-generated name (the
      * {@link EnumDefNames#dafnyName}).
      */
-    private static record EnumDefNames(String defName, String dafnyName) {}
+    private record EnumDefNames(String defName, String dafnyName) {}
+
+    public TypeConverter generateEnumConverter(final EnumShape enumShape) {
+        return generateEnumConverter(enumShape, enumShape.expectTrait(SyntheticEnumTrait.class));
+    }
 
     /**
-     * This should not be called directly, instead call
-     * {@link TypeConversionCodegen#generateStringConverter(StringShape)}.
+     * This should not be called directly, instead call either
+     * {@link TypeConversionCodegen#generateStringConverter(StringShape)} (for @enums)
+     * or
+     * {@link TypeConversionCodegen#generateEnumConverter(EnumShape)} (for Smithy 2.0 enums).
      */
-    private TypeConverter generateEnumConverter(final StringShape stringShape, final EnumTrait enumTrait) {
+    private TypeConverter generateEnumConverter(final Shape shape, final EnumTrait enumTrait) {
         assert enumTrait.hasNames();
         //noinspection OptionalGetWithoutIsPresent
         final List<EnumDefNames> defNames = enumTrait.getValues().stream()
                 .map(enumDefinition -> enumDefinition.getName().get())
                 .map(name -> new EnumDefNames(name, DotNetNameResolver.dafnyCompiledNameForEnumDefinitionName(name)))
                 .toList();
-        final String enumClass = nameResolver.baseTypeForShape(stringShape.getId());
-        final String dafnyEnumConcreteType = nameResolver.dafnyConcreteTypeForEnum(stringShape.getId());
+        final String enumClass = nameResolver.baseTypeForShape(shape.getId());
+        final String dafnyEnumConcreteType = nameResolver.dafnyConcreteTypeForEnum(shape.getId());
         final Token throwInvalidEnumValue = Token.of("\nthrow new System.ArgumentException(\"Invalid %s value\");"
                 .formatted(enumClass));
 
@@ -830,7 +837,7 @@ public class TypeConversionCodegen {
                 .lineSeparated()
                 .append(throwInvalidEnumValue);
 
-        return buildConverterFromMethodBodies(stringShape, fromDafnyBody, toDafnyBody);
+        return buildConverterFromMethodBodies(shape, fromDafnyBody, toDafnyBody);
     }
 
     /**

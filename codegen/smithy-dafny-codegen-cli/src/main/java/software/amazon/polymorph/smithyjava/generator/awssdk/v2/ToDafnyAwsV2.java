@@ -335,7 +335,7 @@ public class ToDafnyAwsV2 extends ToDafny {
      */
     @Override
     @SuppressWarnings("OptionalGetWithoutIsPresent")
-    protected MethodSpec modeledEnum(StringShape shape) {
+    protected MethodSpec modeledEnum(Shape shape) {
         final ShapeId shapeId = shape.getId();
         String methodName = capitalize(shapeId.getName());
         final EnumTrait enumTrait = shape.getTrait(EnumTrait.class).orElseThrow(

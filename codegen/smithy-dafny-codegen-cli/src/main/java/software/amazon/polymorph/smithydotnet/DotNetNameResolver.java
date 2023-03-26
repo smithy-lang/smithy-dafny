@@ -414,6 +414,7 @@ public class DotNetNameResolver {
             }
 
             case STRING -> baseTypeForString(shape.asStringShape().get());
+            case ENUM -> baseTypeForEnum(shape.asEnumShape().get());
             case LIST -> baseTypeForList(shape.asListShape().get());
             case MAP -> baseTypeForMap(shape.asMapShape().get());
             case STRUCTURE -> baseTypeForStructure(shape.asStructureShape().get());
