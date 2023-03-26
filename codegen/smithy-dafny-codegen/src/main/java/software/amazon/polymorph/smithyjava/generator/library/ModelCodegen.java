@@ -8,7 +8,8 @@ import software.amazon.polymorph.smithyjava.modeled.ModeledStructure;
 import software.amazon.polymorph.smithyjava.modeled.ModeledUnion;
 import software.amazon.polymorph.smithyjava.unmodeled.CollectionOfErrors;
 import software.amazon.polymorph.smithyjava.unmodeled.OpaqueError;
-import software.amazon.smithy.model.shapes.StringShape;
+
+import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.UnionShape;
 
@@ -74,8 +75,8 @@ class ModelCodegen extends Generator {
         return ModeledStructure.javaFile(modelPackageName, shape, subject);
     }
 
-    JavaFile modeledEnum(StringShape stringShape) {
-        return ModeledEnum.javaFile(modelPackageName, stringShape);
+    JavaFile modeledEnum(Shape shape) {
+        return ModeledEnum.javaFile(modelPackageName, shape);
     }
 
     JavaFile modeledUnion(UnionShape shape) {

@@ -4,6 +4,7 @@
 package software.amazon.polymorph.smithydotnet;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Streams;
 import software.amazon.polymorph.smithydotnet.nativeWrapper.NativeWrapperCodegen;
 import software.amazon.polymorph.traits.ExtendableTrait;
 import software.amazon.polymorph.traits.PositionalTrait;
@@ -115,8 +116,7 @@ public class ServiceCodegen {
                 });
 
         // Enums (both string shapes as in Smithy IDL 1.0, and enum shapes as in 2.0)
-        model.getShapesWithTrait(EnumTrait.class)
-                .stream()
+        Streams.concat(model.getEnumShapes().stream(), model.getStringShapesWithTrait(EnumTrait.class).stream())
                 .map(Shape::getId)
                 .filter(enumShapeId -> ModelUtils.isInServiceNamespace(enumShapeId, serviceShape))
                 .forEach(enumShapeId -> {

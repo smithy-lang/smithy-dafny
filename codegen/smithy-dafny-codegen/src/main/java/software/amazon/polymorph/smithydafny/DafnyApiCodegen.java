@@ -238,6 +238,7 @@ public class DafnyApiCodegen {
                     yield generateStringTypeDefinition(shapeId);
                 }
             }
+            case ENUM -> generateEnumTypeDefinition(shapeId);
             case INTEGER, LONG -> generateNumericTypeDefinition(shapeId);
             case DOUBLE -> generateDoubleTypeDefinition(shapeId);
             case LIST -> generateListTypeDefinition(shapeId);
