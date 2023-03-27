@@ -92,8 +92,6 @@ Resources:
           - Effect: Allow
             Action:
               - sqs:ListQueues
-            Resource:
-              - !Sub "*"
 
   GitHubCIRole:
     Type: 'AWS::IAM::Role'
