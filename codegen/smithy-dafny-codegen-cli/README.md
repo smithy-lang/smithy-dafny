@@ -68,9 +68,9 @@ $./gradlew run --args="\
     --dependent-model $DAFNY_ROOT/model \
     --namespace aws.cryptography.primitives"
 ...<warn logs and other junk>
-[main] INFO software.amazon.polymorph.CodegenCli - Java code generated in /.../generated-java
-[main] INFO software.amazon.polymorph.CodegenCli - .NET code generated in /.../generated-dotnet
-[main] INFO software.amazon.polymorph.CodegenCli - Dafny code generated in /.../model
+[main] INFO software.amazon.software.amazon.polymorph.CodegenCli - Java code generated in /.../generated-java
+[main] INFO software.amazon.software.amazon.polymorph.CodegenCli - .NET code generated in /.../generated-dotnet
+[main] INFO software.amazon.software.amazon.polymorph.CodegenCli - Dafny code generated in /.../model
 ```
 
 You can also look at the [ServiceCodegenSmokeTest](./src/test/java/software/amazon/polymorph/smithydotnet/ServiceCodegenSmokeTest.java) as a reference for how to use the library. It reads and generates code for the [test model](./src/test/resources/model.smithy), then prints the generated code to stdout.
