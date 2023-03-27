@@ -82,6 +82,19 @@ Resources:
               - !Sub "arn:aws:kms:*:658956600833:key/*"
               - !Sub "arn:aws:kms:*:658956600833:alias/*"
 
+  SQSUsage:
+    Type: "AWS::IAM::ManagedPolicy"
+    Properties:
+      ManagedPolicyName: !Sub "${ProjectName}-SQS-${AWS::Region}"
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action:
+              - sqs:ListQueues
+            Resource:
+              - !Sub "*"
+
   GitHubCIRole:
     Type: 'AWS::IAM::Role'
     Properties:
@@ -91,6 +104,7 @@ Resources:
         - Fn::ImportValue: "Polymorph-CA-GitHubCAReadPolicyArn"
         - !Ref KMSUsage
         - !Ref DDBDafnyTestTableUsage
+        - !Ref SQSUsage
       AssumeRolePolicyDocument: !Sub |
         {
           "Version": "2012-10-17",   
