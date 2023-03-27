@@ -92,6 +92,8 @@ Resources:
           - Effect: Allow
             Action:
               - sqs:ListQueues
+            Resource:
+              - !Sub "arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:*"
 
   GitHubCIRole:
     Type: 'AWS::IAM::Role'
