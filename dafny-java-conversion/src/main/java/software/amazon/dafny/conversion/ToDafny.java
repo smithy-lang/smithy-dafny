@@ -35,16 +35,20 @@ public class ToDafny {
      * for Smithy's definition of Simple shapes.
      */
     public static class Simple {
+        // BLOB("blob", BlobShape.class, Category.SIMPLE),
+        public static DafnySequence<Byte> ByteSequence(byte[] byteArray) {
+            return DafnySequence.fromArray(TypeDescriptor.BYTE, Array.wrap(byteArray));
+        }
 
         // BLOB("blob", BlobShape.class, Category.SIMPLE),
         public static DafnySequence<Byte> ByteSequence(
                 final ByteBuffer byteBuffer,
-                final int offset,
+                final int start,
                 final int limit) {
-            return DafnySequence.fromArray(
-                    TypeDescriptor.BYTE,
-                    Array.wrap(byteBuffer.array()).copyOfRange(offset, limit)
-            );
+            byte[] rawArray = new byte[limit - start];
+            byteBuffer.position(start);
+            byteBuffer.get(rawArray, 0, limit);
+            return ByteSequence(rawArray);
         }
 
         // BLOB("blob", BlobShape.class, Category.SIMPLE),
@@ -54,11 +58,8 @@ public class ToDafny {
 
         // DOUBLE("double", DoubleShape.class, Category.SIMPLE),
         public static DafnySequence<Byte> Double(Double aDouble) {
-            return ByteSequence(ByteBuffer.allocate(8).putDouble(aDouble));
-        }
-
-        public static DafnySequence<Byte> ByteSequence(byte[] byteArray) {
-            return DafnySequence.fromArray(TypeDescriptor.BYTE, Array.wrap(byteArray));
+            ByteBuffer doubleBytes = ByteBuffer.allocate(8).putDouble(aDouble);
+            return ByteSequence(doubleBytes, 0, 8);
         }
 
         // STRING("string", StringShape.class, Category.SIMPLE),
