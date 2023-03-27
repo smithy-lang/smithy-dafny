@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
+// TODO re-enable JUnit 5 runner to make this test run
 public class DafnyClientCodegenPluginTest {
     @Test
     public void emptyTest() {
