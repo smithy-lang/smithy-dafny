@@ -1,9 +1,12 @@
 package software.amazon.polymorph.smithyjava.generator.awssdk.v2;
 
+import com.squareup.javapoet.ClassName;
+
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
+import software.amazon.polymorph.smithyjava.MethodReference;
 import software.amazon.polymorph.smithyjava.generator.CodegenSubject;
 import software.amazon.polymorph.smithyjava.nameresolver.AwsSdkDafnyV2;
 import software.amazon.polymorph.smithyjava.nameresolver.AwsSdkNativeV2;
@@ -17,6 +20,12 @@ import software.amazon.smithy.model.shapes.ServiceShape;
  * the AWS SDK for Java V2.
  */
 public class JavaAwsSdkV2 extends CodegenSubject {
+    public static final ClassName BLOB_TO_NATIVE_SDK_BYTES =
+        ClassName.get("software.amazon.awssdk.core", "SdkBytes");
+    public final static ClassName SDK_BYTES_WRAPPER =
+            ClassName.get("software.amazon.awssdk.core", "BytesWrapper");
+    public final static MethodReference SDK_BYTES_AS_BYTE_BUFFER =
+            new MethodReference(SDK_BYTES_WRAPPER, "asByteBuffer");
     // Hack to override Name Resolvers to Aws Sdk V2 specific ones
     // See code comment on ../library/ModelCodegen for details.
     final AwsSdkDafnyV2 dafnyNameResolver;
@@ -52,5 +61,4 @@ public class JavaAwsSdkV2 extends CodegenSubject {
         rtn.putAll(toNativeGenerator.generate());
         return rtn;
     }
-
 }

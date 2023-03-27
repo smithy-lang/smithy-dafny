@@ -39,7 +39,7 @@ import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumDefinition;
 import software.amazon.smithy.model.traits.EnumTrait;
 
-import static software.amazon.polymorph.smithyjava.generator.Generator.Constants.BLOB_TO_NATIVE_SDK_BYTES;
+import static software.amazon.polymorph.smithyjava.generator.awssdk.v2.JavaAwsSdkV2.BLOB_TO_NATIVE_SDK_BYTES;
 import static software.amazon.polymorph.smithyjava.generator.Generator.Constants.JAVA_UTIL_ARRAYLIST;
 import static software.amazon.smithy.utils.StringUtils.capitalize;
 

@@ -26,27 +26,30 @@ BUILD SUCCESSFUL in 507ms
 
 $ # run help
 $ ./gradlew run --args="-h"
+
+> Task :run
 usage: smithy-dafny-codegen-cli
-    --aws-sdk                           <optional> generate AWS SDK-style
-                                        API and shims
- -d,--dependent-model <arg>             directory for dependent model
-                                        file[s] (.smithy format)
- -h,--help                              print help message
-    --include-dafny <arg>               <optional> file to be include in
-                                        the Dafny model file
- -m,--model <arg>                       directory for the model file[s]
-                                        (.smithy format). Also the Dafny
-                                        output directory.
- -n,--namespace <arg>                   smithy namespace to generate code
-                                        for, such as 'com.foo'
-    --output-dafny                      <optional> generate Dafny code
-    --output-dotnet <arg>               <optional> output directory for
-                                        generated .NET files
-    --output-java <arg>                 <optional> output directory for
-                                        generated Java files
-    --output-local-service-test <arg>   <optional> output directory for
-                                        generated Dafny that tests a local
-                                        service
+    --aws-sdk                      <optional> generate AWS SDK-style API
+                                   and shims
+ -d,--dependent-model <arg>        directory for dependent model file[s]
+                                   (.smithy format)
+ -h,--help                         print help message
+    --include-dafny <arg>          <optional> files to be include in the
+                                   generated Dafny
+    --java-aws-sdk-version <arg>   <optional> AWS SDK for Java version to
+                                   use: v1, or v2 (default)
+    --local-service-test           <optional> generate Dafny that tests a
+                                   local service
+ -m,--model <arg>                  directory for the model file[s]
+                                   (.smithy or json format).
+ -n,--namespace <arg>              smithy namespace to generate code for,
+                                   such as 'com.foo'
+    --output-dafny <arg>           <optional> output directory for
+                                   generated Dafny code
+    --output-dotnet <arg>          <optional> output directory for
+                                   generated .NET files
+    --output-java <arg>            <optional> output directory for
+                                   generated Java files
 
 
 BUILD SUCCESSFUL in 839ms
@@ -57,7 +60,7 @@ $ # generate local service in Dafny, Java, & .NET
 $ DAFNY_ROOT=../../../private-aws-encryption-sdk-dafny-staging
 $ AwsCryptographyPrimitives_ROOT=$DAFNY_ROOT/AwsCryptographyPrimitives
 $./gradlew run --args="\
-    --output-dafny \
+    --output-dafny $AwsCryptographyPrimitives_ROOT/Model\
     --include-dafny $DAFNY_ROOT/StandardLibrary/src/Index.dfy \
     --output-dotnet $AwsCryptographyPrimitives_ROOT/runtimes/net/Generated/ \
     --output-java $AwsCryptographyPrimitives_ROOT/runtimes/java/src/main/smithy-generated \
@@ -75,11 +78,7 @@ You can also look at the [ServiceCodegenSmokeTest](./src/test/java/software/amaz
 ## Arguments
 By default, nothing is generated.  
 Language generation is enabled by the language's `output` argument.  
-For `dotnet` and `java`, this argument also determines the directory code will be written.  
-For `dafny`, by default, the code will be written to the `model` directory.
-If the `output-local-service-test` option is provided,
-the Dafny code will be written there.
-
+This argument also determines the directory code will be written.
 
 ## Useful Debugging expressions:
 

@@ -39,6 +39,12 @@ public class DafnyApiCodegen {
     static final Optional<TokenTree> DOUBLE_LENGTH_CONSTRAINT = Optional.of(
             generateLengthConstraint(LengthTrait.builder()
                     .min((long) 8).max((long) 8).build()));
+    // Codegen for nested lists and maps uses temporary variables with unique names for set comprehension.
+    // These look like `tmp`, `t`, or `tmps` with a number appended: e.g. `tmp0`, `t0`, `tmps0`.
+    // This identifier is appended to variable names to ensure all of these variables have unique names, and
+    //   do not accidentally re-use a variable.
+    // This provides unique identifiers across all Dafny-generated code.
+    private int intermediateTempVariableCounter = 0;
 
     public DafnyApiCodegen(
       final Model model,
@@ -1463,6 +1469,362 @@ public class DafnyApiCodegen {
       }
     }
 
+    /**
+     * Given a list of ShapeIds representing a path from a root shape to a reference shape,
+     *   generates a TokenTree containing an {@code ensures} clause on the reference's ValidState
+     * @param managedReferenceMemberShapePath a list of shape IDs where:
+     *  - The first element is the initial shape ID
+     *  - The last element is the shape ID of a reference shape
+     *  - Intermediate elements are a path of shape IDs from the first to the last shape ID
+     * @return TokenTree containing an {@code ensures} clause on the reference's ValidState
+     */
+    public TokenTree ensuresValidStateClauseForPathToReference(
+        List<ShapeId> managedReferenceMemberShapePath
+    ) {
+        return validStateClauseForPathToReference(
+            managedReferenceMemberShapePath,
+            "ensures"
+        );
+    }
+
+    /**
+     * Given a list of ShapeIds representing a path from a root shape to a reference shape,
+     *   generates a TokenTree containing a {@code requires} clause on the reference's ValidState
+     * @param managedReferenceMemberShapePath a list of shape IDs where:
+     *  - The first element is the initial shape ID
+     *  - The last element is the shape ID of a reference shape
+     *  - Intermediate elements are a path of shape IDs from the first to the last shape ID
+     * @return TokenTree containing an {@code requires} clause on the reference's ValidState
+     */
+    public TokenTree requiresValidStateClauseForPathToReference(
+        List<ShapeId> managedReferenceMemberShapePath
+    ) {
+        return validStateClauseForPathToReference(
+            managedReferenceMemberShapePath,
+            "requires"
+        );
+    }
+
+    /**
+     * Given a list of ShapeIds representing a path from a root shape to a reference shape,
+     *   generates a TokenTree containing a clause starting with {@code prefix} on the reference's ValidState
+     * @param managedReferenceMemberShapePath a list of shape IDs where:
+     *  - The first element is the initial shape ID
+     *  - The last element is the shape ID of a reference shape
+     *  - Intermediate elements are a path of shape IDs from the first to the last shape ID
+     * @return TokenTree containing a clause starting with {@code prefix} on the reference's ValidState
+     */
+    public TokenTree validStateClauseForPathToReference(
+        List<ShapeId> managedReferenceMemberShapePath,
+        String prefix
+    ) {
+        // accessPathToCurrentShape holds the accessor path prepending accessing the current shape in the path.
+        // e.g. if `barStructure` is the current variable inside `fooStructure`:
+        // accessPathToCurrentShape would be `config.fooStructure.value`
+        TokenTree accessPathToCurrentShape = TokenTree.of("config");
+        // validStateClause is a builder for the valid state clause this method generates.
+        TokenTree validStateClause = TokenTree.of(prefix);
+        ShapeType currentShapeType = null;
+        TokenTree currentVarName;
+        boolean currentShapeRequired;
+
+        for (ShapeId shapeIdInPath : managedReferenceMemberShapePath) {
+            Shape shapeInPath = model.expectShape(shapeIdInPath);
+            // Shapes in the path alternate between member shapes and their parents.
+            // Member shapes know the member variable name and whether the member is required.
+            // The parent shapes know the shape type.
+            // Both of these are relevant in transitioning to child members.
+            if (shapeInPath.isMemberShape()) {
+                currentVarName = TokenTree.of(".%s".formatted(shapeIdInPath.getMember().get()));
+                currentShapeRequired = shapeInPath.asMemberShape().get().isRequired();
+
+                if (currentShapeType == ShapeType.STRUCTURE) {
+                    // Children of structures are accessed like fields; e.g. `fooStructure.barStructure`
+                    accessPathToCurrentShape = TokenTree.of("%s%s".formatted(accessPathToCurrentShape, currentVarName));
+                    if (!currentShapeRequired) {
+                        // If `fooStructure` is not required, its access must be preceded by checking for `.Some?`
+                        validStateClause = validStateClause.append(TokenTree.of(
+                            "%s.Some? ==>\n"
+                           .formatted(accessPathToCurrentShape)));
+
+                        // Since `.Some?` is checked above, children are now accessed on the Option's value member
+                        //   i.e. `fooStructure.value.barStructure`
+                        accessPathToCurrentShape = TokenTree.of("%s.value".formatted(accessPathToCurrentShape));
+                    }
+                } else {
+                    // This branch is for collections of multiple values, i.e. maps or lists.
+                    // These shapes use set comprehension to access valid state methods.
+                    if (currentShapeType == ShapeType.MAP) {
+                        // Children of map values are accessed by creating a set of the map values,
+                        //   then iterating through each value.
+                        // (Smithy does not support references in map keys, so this does not need to be checked.)
+                        validStateClause = validStateClause.append(TokenTree.of(
+                            """
+                                var tmps%1$s := set t%1$s | t%1$s in %2$s.Values;
+                                 forall tmp%1$s :: tmp%1$s in tmps%1$s ==>
+                                """
+                                .formatted(
+                                    intermediateTempVariableCounter,
+                                    accessPathToCurrentShape)
+                        ));
+                    } else if (currentShapeType == ShapeType.LIST) {
+                        //
+                        validStateClause = validStateClause.append(TokenTree.of(
+                            """
+                                var tmps%1$s := set t%1$s | t%1$s in %2$s;
+                                 forall tmp%1$s :: tmp%1$s in tmps%1$s ==>
+                                """
+                                .formatted(
+                                    intermediateTempVariableCounter,
+                                    accessPathToCurrentShape)
+                        ));
+                    }
+
+                    // Parsing the map using set comprehension means the access path to the next shape will
+                    //   be based on the current set comprehension variable used in the `forall` statement.
+                    // This overwrites the accessPath up until this point.
+                    accessPathToCurrentShape = TokenTree.of("tmp%1$s".formatted(intermediateTempVariableCounter));
+
+                    // Increment tempVar counter so variable names don't get re-used
+                    intermediateTempVariableCounter++;
+                }
+            } else {
+                // This is not a member shape, so this is a parent shape of a member.
+                // The parent shape knows the type of the member.
+                currentShapeType = shapeInPath.getType();
+            }
+        }
+        // currentShape is the last shape in the path; by definition, it is the reference shape.
+        validStateClause = validStateClause.append(TokenTree.of("%s.ValidState()\n".formatted(accessPathToCurrentShape)));
+
+        return TokenTree.of(validStateClause).lineSeparated();
+    }
+
+    /**
+     * Given a list of ShapeIds representing a path from a root shape to a reference shape,
+     *   generates a TokenTree containing a {@code modifies} clause on the reference's Modifies member
+     * @param managedReferenceMemberShapePath a list of shape IDs where:
+     *  - The first element is the initial shape ID
+     *  - The last element is the shape ID of a reference shape
+     *  - Intermediate elements are a path of shape IDs from the first to the last shape ID
+     * @return TokenTree containing a {@code modifies} clause on the reference's Modifies member
+     */
+    public TokenTree modifiesClauseForPathToReference(
+        List<ShapeId> managedReferenceMemberShapePath
+    ) {
+        return modifiesClauseForPathToReference(
+            managedReferenceMemberShapePath,
+            "modifies"
+        );
+    }
+
+    /**
+     * Given a list of ShapeIds representing a path from a root shape to a reference shape,
+     *   generates a TokenTree containing a clause that would subtract the reference shape's Modifies member
+     *   from another set.
+     * (This is expected to be wrapped around something like
+     *   {@code ensures fresh(parentShape.Modifies (referenceMemberNotFreshClause here) )},
+     * as the Modifies clauses access here will not be part of the fresh variable.)
+     * @param managedReferenceMemberShapePath a list of shape IDs where:
+     *  - The first element is the initial shape ID
+     *  - The last element is the shape ID of a reference shape
+     *  - Intermediate elements are a path of shape IDs from the first to the last shape ID
+     * @return TokenTree containing a set subtraction clause for the reference shape's Modifies member.
+     */
+    public TokenTree referenceMemberNotFreshClause(
+        List<ShapeId> managedReferenceMemberShapePath
+    ) {
+        return TokenTree.of(
+            modifiesClauseForPathToReference(
+                managedReferenceMemberShapePath,
+                "- ("
+            ),
+            TokenTree.of(")")
+        );
+    }
+
+    /**
+     * Given a list of ShapeIds representing a path from a root shape to a reference shape,
+     *   generates a TokenTree containing a clause starting with {@code prefix} on the reference's Modifies member
+     * @param managedReferenceMemberShapePath a list of shape IDs where:
+     *  - The first element is the initial shape ID
+     *  - The last element is the shape ID of a reference shape
+     *  - Intermediate elements are a path of shape IDs from the first to the last shape ID
+     * @return TokenTree containing a clause starting with {@code prefix} on the reference's Modifies member
+     */
+    private TokenTree modifiesClauseForPathToReference(
+        List<ShapeId> managedReferenceMemberShapePath,
+        String prefix
+    ) {
+        // The change in intermediateTempVariableCounter over this function is equal to the number of set
+        //   comprehensions that were used to access the reference's Modifies member.
+        // This number is also used to generate the required number of set comprehensions to flatten out the
+        //   set of Modifies clauses.
+        int startingIntermediateTempVariableCounter = intermediateTempVariableCounter;
+        // accessPathToCurrentShape holds the accessor path prepending accessing the current shape in the path.
+        // e.g. if `barStructure` is the current variable inside `fooStructure`:
+        // accessPathToCurrentShape would be `config.fooStructure.value`
+        String accessPathToCurrentShape = "config";
+        // modifiesClause is a builder for the valid state clause this method generates.
+        TokenTree modifiesClause = TokenTree.of(prefix);
+        ShapeType currentShapeType = null;
+        String currentVarName;
+        boolean currentShapeRequired;
+        // The Modifies members of optional structure members that are not inside set comprehension expressions
+        //   are accessed as `if path.to.var.Some? then path.to.var.value.path.to.reference.Modifies else {}`.
+        // The `else {}` is appended at the end of the entire modifies expression.
+        // If set comprehension is used later in the `modifies` clause,
+        //   this will be appended after the set comprehension expression completes.
+        TokenTree appendAtEnd = TokenTree.empty();
+        // When the `modifies` expression uses set comprehension to access Modifies members,
+        //   the set comprehension is encapsulated in a single variable.
+        // This stores a reference to that variable's name.
+        TokenTree setComprehensionVar = null;
+
+        for (ShapeId shapeIdInPath : managedReferenceMemberShapePath) {
+            Shape shapeInPath = model.expectShape(shapeIdInPath);
+            // Shapes in the path alternate between member shapes and their parents.
+            // Member shapes know the member variable name and whether the member is required.
+            // The parent shapes know the shape type.
+            // Both of these are relevant in transitioning to child members.
+            if (shapeInPath.isMemberShape()) {
+                currentVarName = "." + shapeIdInPath.getMember().get();
+                currentShapeRequired = shapeInPath.asMemberShape().get().isRequired();
+
+                if (currentShapeType == ShapeType.STRUCTURE) {
+                    // Children of structures are accessed like fields; e.g. `fooStructure.barStructure`
+                    accessPathToCurrentShape += currentVarName;
+
+                    if (!currentShapeRequired) {
+                        // If `fooStructure` is not required, its access must be preceded by checking for `.Some?`
+                        if (setComprehensionVar != null) {
+                            // If using set comprehension, the `.Some` check on an optional structure is added as
+                            //   a condition on the existing comprehension, starting with `&&`
+                            // i.e. var setVar := set t | t in otherVar.Values && t.thisOptionalStructure.Some?
+                            modifiesClause = modifiesClause.append(TokenTree.of(
+                                "&& %1$s.Some? \n ".formatted(accessPathToCurrentShape)
+                            ));
+                        } else {
+                            // If not using set comprehension, the `.Some` check on an optional structure is added as
+                            //   an if/else clause, where the else is appended at the very end of the modifies clause
+                            modifiesClause = modifiesClause.append(TokenTree.of(
+                                "if %1$s.Some? then \n".formatted(accessPathToCurrentShape)
+                            ));
+                            appendAtEnd = appendAtEnd.append(TokenTree.of("else {}\n"));
+                        }
+
+                        // Since `.Some?` is checked above, children are now accessed on the Option's value member
+                        //   i.e. `fooStructure.value.barStructure`
+                        accessPathToCurrentShape += ".value";
+                    }
+
+                } else {
+                    // This branch is for collections of multiple values, i.e. maps or lists.
+                    // These shapes introduce a set comprehension variable to access valid state methods.
+                    if (setComprehensionVar != null) {
+                        if (currentShapeType == ShapeType.LIST) {
+                            modifiesClause = modifiesClause.append(TokenTree.of(
+                                ":: set t%1$s | t%1$s in %2$s"
+                                    .formatted(intermediateTempVariableCounter,
+                                        accessPathToCurrentShape)
+                            ));
+                        } else if (currentShapeType == ShapeType.MAP) {
+                            // If using set comprehension, the map's values are accessed by extending the current
+                            //   comprehension expression
+                            modifiesClause = modifiesClause.append(TokenTree.of(
+                                ":: set t%1$s | t%1$s in %2$s.Values"
+                                    .formatted(intermediateTempVariableCounter,
+                                        accessPathToCurrentShape)
+                            ));
+                        }
+                    } else {
+                        // If not using set comprehension, we now need to.
+                        if (currentShapeType == ShapeType.LIST) {
+                            modifiesClause = modifiesClause.append(TokenTree.of(
+                                "var tmps%1$s := set t%1$s | t%1$s in %2$s\n ".formatted(
+                                    intermediateTempVariableCounter,
+                                    accessPathToCurrentShape)
+                            ));
+                        } else if (currentShapeType == ShapeType.MAP) {
+                            modifiesClause = modifiesClause.append(TokenTree.of(
+                                "var tmps%1$s := set t%1$s | t%1$s in %2$s.Values\n ".formatted(
+                                    intermediateTempVariableCounter,
+                                    accessPathToCurrentShape)
+                            ));
+                        }
+
+                        // Once this logic starts using set comprehension to access the variables,
+                        //   it will continue to expand on the same variable to access all Modifies clauses.
+                        // Introduce a setComprehensionVar that will hold nested sets of Modifies members.
+                        setComprehensionVar = TokenTree.of(
+                            "tmps%1$s".formatted(intermediateTempVariableCounter));
+                    }
+
+                    // Parsing the map using set comprehension means the access path to the next shape will
+                    //   be based on the current set comprehension variable used in the expression.
+                    // This overwrites the accessPath up until this point.
+                    accessPathToCurrentShape = "t%1$s".formatted(
+                        intermediateTempVariableCounter);
+                    intermediateTempVariableCounter++;
+                }
+            } else {
+                currentShapeType = shapeInPath.getType();
+            }
+        }
+
+        if (setComprehensionVar == null) {
+            // If not using set comprehension, the Modifies member comes at the end of the current access path.
+            modifiesClause = modifiesClause.append(TokenTree.of(
+                "%s".formatted(accessPathToCurrentShape)
+            ));
+        } else {
+            // If using set comprehension, setComprehensionVar holds nested sets of modifies clauses.
+            // Flatten the set for easier access.
+            modifiesClause = modifiesClause.append(TokenTree.of("""
+              :: %1$s;
+               var %2$sFlattenedModifiesSet: set<set<object>> := set t0
+               """.formatted(accessPathToCurrentShape, setComprehensionVar)
+            ));
+
+            // The number of sets to flatten equals the number of additional set comprehensions introduced.
+            int numberOfSetsToAccess = intermediateTempVariableCounter - startingIntermediateTempVariableCounter;
+            for (int i = 1; i < numberOfSetsToAccess; i++) {
+                // `set t0, t1, ... tN`
+                modifiesClause = TokenTree.of("%1$s, t%2$s".formatted(modifiesClause, i));
+            }
+            // `set t0 .. tN | t0 in setComprehensionVar`
+            modifiesClause = TokenTree.of("%1$s | t0 in %2$s".formatted(modifiesClause, setComprehensionVar));
+            for (int i = 1; i < numberOfSetsToAccess; i++) {
+                // `set t0 .. tN | t0 in setComprehensionVar && t1 in t0 && .. tN-1 in tN`
+                modifiesClause = modifiesClause.append(TokenTree.of(
+                    "&& t%1$s in t%2$s".formatted(i, i - 1)
+                ));
+            }
+            // `set t0 .. tN | t0 in setComprehensionVar && t1 in t0 && .. tN-1 in tN :: tN`
+            modifiesClause = modifiesClause.append(TokenTree.of(
+                ":: t%2$s".formatted(modifiesClause, numberOfSetsToAccess - 1)
+            ));
+            // tN represents the reference member that contains a Modifies member.
+            // `set t0 .. tN | t0 in setComprehensionVar && t1 in t0 && .. tN-1 in tN :: tN.Modifies;`
+        }
+
+        modifiesClause = TokenTree.of("%1$s.Modifies".formatted(modifiesClause));
+
+        if (setComprehensionVar != null) {
+            // Create an expression that the `modifies` clause can use
+            modifiesClause = TokenTree.of("""
+                %1$s;
+                 (set tmp%2$sModifyEntry, tmp%2$sModifies | \n tmp%2$sModifies in %3$sFlattenedModifiesSet \n && tmp%2$sModifyEntry in tmp%2$sModifies \n :: tmp%2$sModifyEntry)"""
+                .formatted(modifiesClause, intermediateTempVariableCounter, setComprehensionVar)
+            );
+            intermediateTempVariableCounter++;
+        }
+
+        return TokenTree.of(
+            "%1$s\n%2$s"
+            .formatted(modifiesClause.toString(), appendAtEnd)).lineSeparated();
+    }
+
     public TokenTree generateAbstractLocalService(ServiceShape serviceShape)  {
         if (!serviceShape.hasTrait(LocalServiceTrait.class)) throw new IllegalStateException("MUST be an LocalService");
         final LocalServiceTrait localServiceTrait = serviceShape.expectTrait(LocalServiceTrait.class);
@@ -1477,13 +1839,9 @@ public class DafnyApiCodegen {
         //   Reference trait.
         // The local service must specially handle these shapes' Modifies members in its `modifies`, `ensures`,
         //   `requires`, and `fresh` clauses.
-        List<MemberShape> managedReferenceMemberShapes = new ArrayList<MemberShape>();
         final ShapeId configShapeId = localServiceTrait.getConfigId();
         Set<ShapeId> configShapeIdAsSet = new HashSet<>();
         configShapeIdAsSet.add(configShapeId);
-        managedReferenceMemberShapes = new ArrayList<>(
-            ModelUtils.findAllDependentMemberReferenceShapes(
-                configShapeIdAsSet, model));
 
         TokenTree serviceMethod = TokenTree.of(
             "method %s(config: %s := %s())"
@@ -1500,52 +1858,45 @@ public class DafnyApiCodegen {
 
         // Add `requires` clauses
 
-        // Requires any provided managed reference shapes to have ValidState()
-        if (managedReferenceMemberShapes.size() > 0) {
-          for (MemberShape managedReferenceMemberShape : managedReferenceMemberShapes) {
-            serviceMethod = serviceMethod.append(TokenTree.of(
-              "requires config.%1$s.Some? ==> config.%1$s.value.%2$s()\n"
-                .formatted(managedReferenceMemberShape.getMemberName(),
-                nameResolver.validStateInvariantName())
-              ).lineSeparated());
-          } 
+        Set<List<ShapeId>> managedReferenceMemberShapePaths = ModelUtils.findAllDependentMemberReferenceShapesWithPaths(configShapeIdAsSet, model);
+
+        if (!managedReferenceMemberShapePaths.isEmpty()) {
+            for (List<ShapeId> managedReferenceMemberShapePath : managedReferenceMemberShapePaths) {
+                serviceMethod = serviceMethod.append(
+                    requiresValidStateClauseForPathToReference(managedReferenceMemberShapePath));
+            }
         }
 
         // Add `modifies` clauses
 
-        // Local service modifies the Modifies member of managed reference shapes
-        if (managedReferenceMemberShapes.size() > 0) {
-          for (MemberShape managedReferenceMemberShape : managedReferenceMemberShapes) {
-            serviceMethod = serviceMethod.append(TokenTree.of(
-              "modifies if config.%1$s.Some? then config.%1$s.value.%2$s else {}\n"
-                .formatted(managedReferenceMemberShape.getMemberName(),
-                nameResolver.mutableStateFunctionName())
-              ).lineSeparated());
-          } 
+        if (!managedReferenceMemberShapePaths.isEmpty()) {
+            int intermediateTempVariableCounter = 0;
+
+            for (List<ShapeId> managedReferenceMemberShapePath : managedReferenceMemberShapePaths) {
+                serviceMethod = serviceMethod.append(
+                    modifiesClauseForPathToReference(managedReferenceMemberShapePath));
+            }
         }
-        
+
         // Start `ensures` clause for assertions based on `res.Success?`
+
         serviceMethod = serviceMethod.append(TokenTree.of(
             "ensures res.Success? ==> ",
             "&& fresh(res.value)\n"
         ).lineSeparated());
-              
-        // Add `ensures` clauses based on `res.Success?`
 
-        // The local service Modifies member, minus all managed reference shapes, is ensured fresh
-        if (managedReferenceMemberShapes.size() > 0) {
+        if (!managedReferenceMemberShapePaths.isEmpty()) {
             serviceMethod = serviceMethod.append(TokenTree.of(
                 "&& fresh(res.value.%1$s\n"
                     .formatted(nameResolver.mutableStateFunctionName())
             ));
-            for (MemberShape managedReferenceMemberShape : managedReferenceMemberShapes) {
-                serviceMethod = serviceMethod.append(TokenTree.of(
-                    "- (if config.%1$s.Some? then config.%1$s.value.%2$s else {})\n"
-                        .formatted(managedReferenceMemberShape.getMemberName(),
-                            nameResolver.mutableStateFunctionName())
-                ));
+
+            for (List<ShapeId> managedReferenceMemberShapePath : managedReferenceMemberShapePaths) {
+                serviceMethod = serviceMethod.append(
+                    referenceMemberNotFreshClause(managedReferenceMemberShapePath));
             }
             serviceMethod = serviceMethod.append(TokenTree.of(")\n"));
+
         } else {
             // If there are no managed reference shapes, the entire local service Modifies member is ensured fresh
             serviceMethod = serviceMethod.append(TokenTree.of(
@@ -1561,14 +1912,10 @@ public class DafnyApiCodegen {
 
         // Add any `ensures` clauses that have unique conditions
 
-        // A managed reference passed into the local service is ensured to have ValidState() after call
-        if (managedReferenceMemberShapes.size() > 0) {
-            for (MemberShape managedReferenceMemberShape : managedReferenceMemberShapes) {
-                serviceMethod = serviceMethod.append(TokenTree.of(
-                    "ensures config.%1$s.Some? ==> config.%1$s.value.%2$s()\n"
-                        .formatted(managedReferenceMemberShape.getMemberName(),
-                            nameResolver.validStateInvariantName())
-                ));
+        if (!managedReferenceMemberShapePaths.isEmpty()) {
+            for (List<ShapeId> managedReferenceMemberShapePath : managedReferenceMemberShapePaths) {
+                serviceMethod = serviceMethod.append(
+                    ensuresValidStateClauseForPathToReference(managedReferenceMemberShapePath));
             }
         }
 
