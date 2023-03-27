@@ -19,7 +19,7 @@ jobs:
           # TestModels/Constructor,
           # TestModels/Dependencies,
           # TestModels/Errors,
-          # TestModels/Extendable,
+          TestModels/Extendable,
           # TestModels/Extern,
           # TestModels/Refinement,
           # TestModels/Resource,
