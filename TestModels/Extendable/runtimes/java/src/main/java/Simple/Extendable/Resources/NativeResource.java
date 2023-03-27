@@ -38,9 +38,7 @@ public class NativeResource implements IExtendableResource {
         if (Objects.nonNull(nativeValue.value())) {
             throw new RuntimeException("Java Hard Coded Exception");
         }
-        // TODO: Determine why Java can pass OpaqueMessage check but .NET cannot?
-        //return this._impl.AlwaysOpaqueError(nativeValue);
-        throw new RuntimeException("Java Hard Coded Exception");
+        return this._impl.AlwaysOpaqueError(nativeValue);
     }
 
     public static NativeResource NativeFactory() {
