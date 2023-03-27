@@ -14,6 +14,7 @@ import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.ServiceShape;
 
 public class TestJavaLibrary extends JavaLibrary {
+    @SuppressWarnings("unused")
     private static final Logger LOGGER = LoggerFactory.getLogger(TestJavaLibrary.class);
 
     public TestJavaLibrary(Model model, ServiceShape serviceShape, AwsSdkVersion sdkVersion) {
@@ -23,11 +24,6 @@ public class TestJavaLibrary extends JavaLibrary {
     @Override
     public Map<Path, TokenTree> generate() {
         TestServiceShim shim = new TestServiceShim(this, this.serviceShape);
-        Map<Path, TokenTree> rtn = new LinkedHashMap<>(shim.generate());
-        if (getResourcesInServiceNamespace().size() > 0) {
-            // TODO: Support Resources https://sim.amazon.com/issues/CrypTool-5106
-            LOGGER.error("--local-service-test does not support Java Resources yet");
-        }
-        return rtn;
+        return new LinkedHashMap<>(shim.generate());
     }
 }
