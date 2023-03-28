@@ -84,8 +84,13 @@ public class DafnyApiCodegen {
               // Sort by shape ID for deterministic generated code
               .collect(Collectors.toCollection(TreeSet::new))
               .stream()
-              .map(this::generateCodeForShape)
-              .flatMap(Optional::stream)
+              .flatMap(shape -> {
+                  final Optional<TokenTree> tokens = generateCodeForShape(shape);
+                  if (tokens.isEmpty()) {
+                      LOGGER.info("No code generated for shape {}", shape.getId().toString());
+                  }
+                  return tokens.stream();
+              })
             )
           .lineSeparated();
 
