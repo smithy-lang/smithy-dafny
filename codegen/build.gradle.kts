@@ -57,7 +57,11 @@ subprojects {
      * ====================================================
      */
     if (subproject.name != "smithy-dafny-codegen-test") {
-        apply(plugin = "java-library")
+        if (subproject.name == "smithy-dafny-codegen-cli") {
+            apply(plugin = "application")
+        } else {
+            apply(plugin = "java-library")
+        }
 
         java {
             sourceCompatibility = JavaVersion.VERSION_17
