@@ -199,11 +199,11 @@ public class AwsSdkShimCodegenTest {
                 private Dafny.Com.Amazonaws.Foobar.Types._IError ConvertError(
                         Amazon.FoobarService.AmazonFoobarServiceException error) {
                     switch (error) {
-                        case Amazon.FoobarService.Model.Bang e:
+                        case Amazon.FoobarService.Model.BangException e:
                             return %s(e);
-                        case Amazon.FoobarService.Model.Boom e:
+                        case Amazon.FoobarService.Model.BoomException e:
                             return %s(e);
-                        case Amazon.FoobarService.Model.Crash e:
+                        case Amazon.FoobarService.Model.CrashException e:
                             return %s(e);
                         default:
                             return new Dafny.Com.Amazonaws.Foobar.Types.Error_Opaque(error);

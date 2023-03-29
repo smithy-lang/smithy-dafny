@@ -13,15 +13,22 @@ module TestComAmazonawsSqs {
   import opened StandardLibrary.UInt
   import opened Wrappers
 
-  method BasicSanityTest()
+  method {:test} BasicSanityTest()
   {
     var client :- expect Sqs.SQSClient();
 
-    var ret :- expect client.ListQueues(input);
+    var input := Sqs.Types.ListQueuesRequest(
+      QueueNamePrefix := None,
+      NextToken := None,
+      MaxResults := None
+    );
+    var ret: Sqs.Types.ListQueuesResult :- expect client.ListQueues(input);
 
-    var ListQueuesResult(QueueUrls) := ret;
+    var ListQueuesResult(NextToken, QueueUrls) := ret;
 
+    // Just asserting the request is successful.
+    // I could expect no queues but the test account might create some some day,
+    // and I don't want this to be brittle.
     expect QueueUrls.Some?;
-    expect |QueueUrls.value| == 0;
   }
 }
