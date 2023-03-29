@@ -3,34 +3,40 @@
 
 package software.amazon.polymorph.smithydotnet;
 
+import software.amazon.polymorph.utils.AwsSdkNameResolverHelpers;
 import software.amazon.polymorph.utils.ModelUtils;
+import software.amazon.smithy.aws.traits.ServiceTrait;
 import software.amazon.smithy.model.Model;
+import software.amazon.smithy.model.knowledge.OperationIndex;
 import software.amazon.smithy.model.shapes.ListShape;
+import software.amazon.smithy.model.shapes.MapShape;
 import software.amazon.smithy.model.shapes.MemberShape;
+import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.EnumTrait;
+import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.TraitDefinition;
 import software.amazon.smithy.utils.StringUtils;
 
+import java.util.Optional;
+
 public class AwsSdkDotNetNameResolver extends DotNetNameResolver {
+    public static final String KMS_SERVICE_NAME = "KMS";
+    public static final String KEY_MANAGEMENT_SERVICE_NAME = "KeyManagementService";
     // The following are used to resolve namespace errors when generating
     // code that uses the DynamoDBv2 service model
     public static final String DDB_NAMESPACE = "com.amazonaws.dynamodb";
     public static final String DDB_SERVICE_NAME = "DynamoDB";
     public static final String DDB_SERVICE_NAME_V2 = "DynamoDBv2";
-    public static final String DDB_SMITHY_SERVICE_NAME = "DynamoDB_20120810";
-    public static final String DDB_TYPES_SERVICE_NAME = "DynamoDB__20120810";
     public static final String DDB_V2_ATTRIBUTE_VALUE = "Amazon.DynamoDBv2.Model.AttributeValue";
     public static final String DDB_NET_INTERFACE_NAME = "Amazon.DynamoDBv2.IAmazonDynamoDB";
     public static final String DDB_ATTRIBUTE_VALUE_MODEL_NAMESPACE = "Com.Amazonaws.Dynamodb.AttributeValue";
-    public static final String DDB_INPUT = "Input";
-    public static final String DDB_OUTPUT = "Output";
-    public static final String DDB_REQUEST = "Request";
-    public static final String DDB_RESPONSE = "Response";
+    public static final String REQUEST = "Request";
+    public static final String RESPONSE = "Response";
 
     public AwsSdkDotNetNameResolver(final Model model, final ServiceShape serviceShape) {
         super(model, serviceShape);
@@ -66,25 +72,49 @@ public class AwsSdkDotNetNameResolver extends DotNetNameResolver {
     }
 
     @Override
+    protected String baseTypeForMap(MapShape mapShape) {
+        final MemberShape keyShape = mapShape.getKey();
+        final Shape keyTargetShape = getModel().expectShape(keyShape.getTarget());
+        final MemberShape valueShape = mapShape.getValue();
+        final Shape valueTargetShape = getModel().expectShape(valueShape.getTarget());
+
+        // The .NET AWS SDK represents enums as strings in map values, even though it represents enums as the
+        // corresponding enum class everywhere else AFAICT.
+        final String keyType = keyTargetShape.hasTrait(EnumTrait.class) ? "string" : baseTypeForMember(keyShape);
+        final String valueType = valueTargetShape.hasTrait(EnumTrait.class) ? "string" : baseTypeForMember(valueShape);
+
+        if (StringUtils.equals(valueType, AwsSdkDotNetNameResolver.DDB_ATTRIBUTE_VALUE_MODEL_NAMESPACE)){
+            return "System.Collections.Generic.Dictionary<%s, %s>".formatted(
+                    keyType,
+                    AwsSdkDotNetNameResolver.DDB_V2_ATTRIBUTE_VALUE);
+        }
+
+        return "System.Collections.Generic.Dictionary<%s, %s>".formatted(keyType, valueType);
+    }
+
+    @Override
     protected String baseTypeForStructure(final StructureShape structureShape) {
         if (isGeneratedInSdk(structureShape.getId())) {
             if (structureShape.hasTrait(TraitDefinition.class)) {
                 throw new IllegalArgumentException("Trait definition structures have no corresponding generated type");
             }
-            // Structures for the DynamoDB NET SDK MUST be resolved from input to request
-            // The actual NET SDK uses Request/Response
-            if (StringUtils.equals(structureShape.getId().getNamespace(), DDB_NAMESPACE) &&
-                    structureShape.getId().getName().endsWith(DDB_INPUT)) {
-                String newRequestString = structureShape.getId().getName().replace(DDB_INPUT, DDB_REQUEST);
-                return "%s.Model.%s".formatted(namespaceForService(), newRequestString);
+            // The NET SDK uses <operation name>Request/Response
+            // rather than the structure name for operation input/output structures
+            Optional<ShapeId> shapeId = Optional.of(structureShape.getId());
+            Optional<OperationShape> operation = getModel().getOperationShapes().stream().filter(o -> o.getInput().equals(shapeId)).findFirst();
+            if (operation.isPresent()) {
+                return "%s.Model.%s".formatted(namespaceForService(), operation.get().getId().getName() + REQUEST);
             }
-            // Structures for the DynamoDB NET SDK MUST be resolved from output to response
-            // The actual NET SDK uses Request/Response
-            if (StringUtils.equals(structureShape.getId().getNamespace(), DDB_NAMESPACE) &&
-                    structureShape.getId().getName().endsWith(DDB_OUTPUT)) {
-                String newResponseString = structureShape.getId().getName().replace(DDB_OUTPUT, DDB_RESPONSE);
-                return "%s.Model.%s".formatted(namespaceForService(), newResponseString);
+            operation = getModel().getOperationShapes().stream().filter(o -> o.getOutput().equals(shapeId)).findFirst();
+            if (operation.isPresent()) {
+                return "%s.Model.%s".formatted(namespaceForService(), operation.get().getId().getName() + RESPONSE);
             }
+
+            // The base type of an error structure is the corresponding generated exception class
+            if (structureShape.hasTrait(ErrorTrait.class)) {
+                return "%s.Model.%s".formatted(namespaceForService(), classForSpecificServiceException(structureShape.getId()));
+            }
+
             return "%s.Model.%s".formatted(namespaceForService(), structureShape.getId().getName());
         }
 
@@ -110,12 +140,24 @@ public class AwsSdkDotNetNameResolver extends DotNetNameResolver {
     }
 
     private String getServiceName() {
-        // The smithy model appends a version number in the name of the service
-        // This version number does not appear in the NET SDK and resolves it to DynamoDBv2
-        if (StringUtils.equals(getServiceShape().getId().getName(), DDB_SMITHY_SERVICE_NAME)) {
-            return StringUtils.capitalize(DDB_SERVICE_NAME_V2);
+        Optional<ServiceTrait> serviceTraitOptional = serviceShape.getTrait(ServiceTrait.class);
+        if (serviceTraitOptional.isPresent()) {
+            String sdkId = serviceTraitOptional.get().getSdkId();
+
+            // Account for known legacy identifiers for a few services.
+            // See the metadata at https://github.com/aws/aws-sdk-net/tree/master/generator/ServiceModels
+            // for details.
+            if (StringUtils.equals(sdkId, DDB_SERVICE_NAME)) {
+                return StringUtils.capitalize(DDB_SERVICE_NAME_V2);
+            }
+            if (StringUtils.equals(sdkId, KMS_SERVICE_NAME)) {
+                return KEY_MANAGEMENT_SERVICE_NAME;
+            }
+
+            return AwsSdkNameResolverHelpers.mungeSdkId(sdkId);
+        } else {
+            return StringUtils.capitalize(getServiceShape().getId().getName());
         }
-        return StringUtils.capitalize(getServiceShape().getId().getName());
     }
 
     @Override
@@ -141,5 +183,11 @@ public class AwsSdkDotNetNameResolver extends DotNetNameResolver {
 
     public String qualifiedClassForBaseServiceException() {
         return "%s.%s".formatted(namespaceForService(), classForBaseServiceException());
+    }
+
+    @Override
+    public String classForSpecificServiceException(ShapeId structureShapeId) {
+        String name = super.classForSpecificServiceException(structureShapeId);
+        return !name.endsWith("Exception") ? "%sException".formatted(name) : name;
     }
 }

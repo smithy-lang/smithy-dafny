@@ -159,16 +159,7 @@ public class AwsSdkShimCodegen {
         final TokenTree knownErrorCases = TokenTree.of(errorShapes.stream()
                 .map(errorShape -> {
                     final ShapeId errorShapeId = errorShape.getId();
-                    // Some DDB v2 Exception don't end with Exception; the model does not update them but in order
-                    // to generate valid v2 code they must end with Exception
-                    final String sdkErrorType;
-                    if (StringUtils.equals(errorShapeId.getNamespace(), AwsSdkDotNetNameResolver.DDB_NAMESPACE)) {
-                        sdkErrorType = !nameResolver.baseTypeForShape(errorShapeId).endsWith("Exception")
-                                ? "%sException".formatted(nameResolver.baseTypeForShape(errorShapeId))
-                                : nameResolver.baseTypeForShape(errorShapeId);
-                    } else {
-                        sdkErrorType = nameResolver.baseTypeForShape(errorShapeId);
-                    }
+                    final String sdkErrorType = nameResolver.baseTypeForShape(errorShapeId);
                     final String errorConverter = DotNetNameResolver.qualifiedTypeConverter(errorShapeId, TO_DAFNY);
                     // InvalidEndpointException does not exist in v2 of the sdk
                     if (sdkErrorType.endsWith("InvalidEndpointException")) {
