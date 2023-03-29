@@ -1,9 +1,10 @@
 {
   "version": "1.0",
   "plugins": {
-    "typescript-codegen": {
-        "package": "@testing-only/sqs-client",
-        "packageVersion": "0.0.1"
+    "dafny-client-codegen": {
+      "serviceId": "com.amazonsqs.sqs#AmazonSQS",
+      "targetLanguages": ["dotnet"],
+      "includeDafnyFile": "../../dafny-dependencies/StandardLibrary/src/Index.dfy"
     }
   }
 }
