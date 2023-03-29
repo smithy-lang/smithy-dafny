@@ -68,7 +68,7 @@ public record DafnyNameResolver(
                     // currently unused in model and unsupported in StandardLibrary.UInt
                     // BYTE, SHORT
                     INTEGER, LONG, DOUBLE,
-                    LIST, MAP -> dafnyModulePrefixForShapeId(shape) + shapeName;
+                    LIST, MAP -> dafnyModulePrefixForShape(shape) + shapeName;
             case STRUCTURE -> {
                 if (shape.hasTrait(ReferenceTrait.class)) {
                     yield baseTypeForShape(shape.expectTrait(ReferenceTrait.class).getReferentId());
@@ -108,7 +108,7 @@ public record DafnyNameResolver(
     }
 
     private String dafnyTypeNameShape(final Shape shape) {
-        return dafnyModulePrefixForShapeId(shape) + shape.getId().getName();
+        return dafnyModulePrefixForShape(shape) + shape.getId().getName();
     }
 
     public String generatedTypeForShape(final ShapeId shapeId) {
@@ -120,7 +120,7 @@ public record DafnyNameResolver(
     }
 
     public String traitForServiceClient(final ServiceShape serviceShape) {
-        return dafnyModulePrefixForShapeId(serviceShape) + traitNameForServiceClient(serviceShape);
+        return dafnyModulePrefixForShape(serviceShape) + traitNameForServiceClient(serviceShape);
     }
 
     public static String classNameForServiceClient(ServiceShape shape) {
@@ -133,7 +133,7 @@ public record DafnyNameResolver(
     }
 
     public String traitForResource(final ResourceShape resourceShape) {
-        return dafnyModulePrefixForShapeId(resourceShape) + traitNameForResource(resourceShape);
+        return dafnyModulePrefixForShape(resourceShape) + traitNameForResource(resourceShape);
     }
 
     public static String traitNameForResource(final ResourceShape shape) {
@@ -260,7 +260,7 @@ public record DafnyNameResolver(
     }
 
 
-    public String dafnyModulePrefixForShapeId(final Shape shape) {
+    public String dafnyModulePrefixForShape(final Shape shape) {
         final String shapeNamespace = shape.getId().getNamespace();
         if (!namespace.equals(shapeNamespace)) {
 

@@ -425,7 +425,7 @@ public class DafnyApiCodegen {
           // the module needs to be included
           // because we are obviously using it!
           final String sideEffect = nameResolver
-            .dafnyModulePrefixForShapeId(model.expectShape(referenceTrait.getReferentId()));
+            .dafnyModulePrefixForShape(model.expectShape(referenceTrait.getReferentId()));
           return null;
         }
 
@@ -1840,6 +1840,11 @@ public class DafnyApiCodegen {
         // The local service must specially handle these shapes' Modifies members in its `modifies`, `ensures`,
         //   `requires`, and `fresh` clauses.
         final ShapeId configShapeId = localServiceTrait.getConfigId();
+        // TODO: This is a hack to make the side effect happen
+        // While there is no code to generate,
+        // the module needs to be included
+        // because we are obviously using it!
+        nameResolver.dafnyModulePrefixForShape(model.expectShape(configShapeId));
         Set<ShapeId> configShapeIdAsSet = new HashSet<>();
         configShapeIdAsSet.add(configShapeId);
 
