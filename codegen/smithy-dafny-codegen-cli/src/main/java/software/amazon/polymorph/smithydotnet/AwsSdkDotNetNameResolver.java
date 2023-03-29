@@ -78,7 +78,7 @@ public class AwsSdkDotNetNameResolver extends DotNetNameResolver {
         final MemberShape valueShape = mapShape.getValue();
         final Shape valueTargetShape = getModel().expectShape(valueShape.getTarget());
 
-        // The .NET AWS SDK represents enums as strings in map keys and values, even though it represents enums as the
+        // The .NET AWS SDK represents enums as strings in map values, even though it represents enums as the
         // corresponding enum class everywhere else AFAICT.
         final String keyType = keyTargetShape.hasTrait(EnumTrait.class) ? "string" : baseTypeForMember(keyShape);
         final String valueType = valueTargetShape.hasTrait(EnumTrait.class) ? "string" : baseTypeForMember(valueShape);
@@ -110,6 +110,7 @@ public class AwsSdkDotNetNameResolver extends DotNetNameResolver {
                 return "%s.Model.%s".formatted(namespaceForService(), operation.get().getId().getName() + RESPONSE);
             }
 
+            // The base type of an error structure is the corresponding generated exception class
             if (structureShape.hasTrait(ErrorTrait.class)) {
                 return "%s.Model.%s".formatted(namespaceForService(), classForSpecificServiceException(structureShape.getId()));
             }

@@ -18,6 +18,7 @@ import software.amazon.polymorph.utils.AwsSdkNameResolverHelpers;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.polymorph.utils.Token;
 import software.amazon.polymorph.utils.TokenTree;
+import software.amazon.smithy.aws.traits.ServiceTrait;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.*;
 import software.amazon.smithy.model.traits.ReadonlyTrait;
@@ -44,7 +45,11 @@ public record DafnyNameResolver(
     );
 
     public static String nameForService(final ServiceShape serviceShape) {
-        return AwsSdkNameResolverHelpers.getServiceName(serviceShape);
+        // If the service is an AWS SDK service, use the sdkId.
+        // Otherwise just use the shape name.
+        return serviceShape.getTrait(ServiceTrait.class)
+                .map(t -> AwsSdkNameResolverHelpers.mungeSdkId(t.getSdkId()))
+                .orElse(StringUtils.capitalize(serviceShape.getId().getName()));
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")

@@ -15,12 +15,6 @@ public class AwsSdkNameResolverHelpers {
         return "com.amazonaws.%s".formatted(awsServiceName);
     }
 
-    public static String getServiceName(final ServiceShape serviceShape) {
-        return serviceShape.getTrait(ServiceTrait.class)
-                           .map(t -> mungeSdkId(t.getSdkId()))
-                           .orElse(StringUtils.capitalize(serviceShape.getId().getName()));
-    }
-
     // TODO: similar smarts to capitalize known words ala DotNetNameResolver.capitalizeNamespaceSegment
     // See https://smithy.io/2.0/aws/aws-core.html#using-sdk-service-id-for-client-naming
     public static String mungeSdkId(String sdkId) {
