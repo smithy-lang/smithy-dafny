@@ -22,7 +22,7 @@ jobs:
           TestModels/Extendable,
           # TestModels/Extern,
           # TestModels/Refinement,
-          # TestModels/Resource,
+          TestModels/Resource,
           # TestModels/SimpleTypes/BigDecimal,
           # TestModels/SimpleTypes/BigInteger,
           # TestModels/SimpleTypes/SimpleBlob,
