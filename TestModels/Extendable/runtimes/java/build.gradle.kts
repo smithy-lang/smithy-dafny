@@ -37,8 +37,8 @@ dependencies {
 
 publishing {
     publications.create<MavenPublication>("maven") {
-        groupId = "simple"
-        artifactId = "Constraints"
+        groupId = group as String?
+        artifactId = description
         from(components["java"])
     }
     repositories { mavenLocal() }
