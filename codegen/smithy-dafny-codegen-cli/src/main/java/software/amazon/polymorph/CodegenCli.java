@@ -86,7 +86,10 @@ public class CodegenCli {
                 .stream(cliArguments.dependentModelPaths)
                 .forEach(assembler::addImport);
 
-        final Model model = assembler
+        // Load models from the classpath (useful for finding *.smithy files for traits defined in libraries)
+        assembler.discoverModels();
+
+        final Model rawModel = assembler
                 .assemble()
                 .unwrap();
         // If Smithy ever lets us configure this:
@@ -96,6 +99,10 @@ public class CodegenCli {
         // and ignore dfy & md files. Link to `addImport` below)
         // https://github.com/awslabs/smithy/blob/f598b87c51af5943686e38706847a5091fe718da/smithy-model/src/main/java/software/amazon/smithy/model/loader/ModelAssembler.java#L256-L281
         logger.info("End annoying Smithy \"No ModelLoader was able to load\" warnings.\n\n");
+
+        // This would be done in a DirectedCodegen.customizeBeforeShapeGeneration implementation
+        // if we were using DirectedCodegen.
+        final Model model = ModelUtils.addMissingErrorMessageMembers(rawModel);
 
         final ServiceShape serviceShape = ModelUtils.serviceFromNamespace(model, cliArguments.namespace);
         final List<String> messages = new ArrayList<>(3);

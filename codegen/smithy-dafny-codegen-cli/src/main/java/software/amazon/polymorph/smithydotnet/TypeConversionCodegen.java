@@ -276,7 +276,7 @@ public class TypeConversionCodegen {
         return buildConverterFromMethodBodies(timestampShape, fromDafnyBody, toDafnyBody);
     }
 
-    protected boolean enumListMembersAreStringsInCSharp() {
+    protected boolean enumListAndMapMembersAreStringsInCSharp() {
         return false;
     }
 
@@ -290,7 +290,7 @@ public class TypeConversionCodegen {
         final String memberToDafnyConverterName = typeConverterForShape(memberShape.getId(), TO_DAFNY);
         final String memberFromDafnyConverterName = typeConverterForShape(memberShape.getId(), FROM_DAFNY);
 
-        final boolean convertMemberEnumToString = enumListMembersAreStringsInCSharp()
+        final boolean convertMemberEnumToString = enumListAndMapMembersAreStringsInCSharp()
             && model.expectShape(memberShape.getTarget()).hasTrait(EnumTrait.class);
         final String fromDafnyEnumConversion = convertMemberEnumToString
                 ? ".Select<%s, string>(x => x)".formatted(memberCSharpType)
@@ -325,16 +325,27 @@ public class TypeConversionCodegen {
         final String valueToDafnyConverterName = typeConverterForShape(valueShape.getId(), TO_DAFNY);
         final String valueFromDafnyConverterName = typeConverterForShape(valueShape.getId(), FROM_DAFNY);
 
+        final boolean convertKeyEnumToString = enumListAndMapMembersAreStringsInCSharp()
+                && model.expectShape(keyShape.getTarget()).hasTrait(EnumTrait.class);
+        final String fromDafnyKeyEnumConversion = convertKeyEnumToString ? ".Value" : "";
+
+        final boolean convertValueEnumToString = enumListAndMapMembersAreStringsInCSharp()
+                && model.expectShape(valueShape.getTarget()).hasTrait(EnumTrait.class);
+        final String fromDafnyValueEnumConversion = convertValueEnumToString ? ".Value" : "";
+
         final TokenTree fromDafnyBody = Token.of(
-                "return value.ItemEnumerable.ToDictionary(pair => %s(pair.Car), pair => %s(pair.Cdr));"
-                        .formatted(keyFromDafnyConverterName, valueFromDafnyConverterName));
+                "return value.ItemEnumerable.ToDictionary(pair => %s(pair.Car)%s, pair => %s(pair.Cdr)%s);"
+                        .formatted(keyFromDafnyConverterName, fromDafnyKeyEnumConversion,
+                                   valueFromDafnyConverterName, fromDafnyValueEnumConversion));
 
         final String dafnyMapTypeArgs = "<%s, %s>".formatted(keyDafnyType, valueDafnyType);
         final TokenTree toDafnyBody = Token.of("""
                 return Dafny.Map%s.FromCollection(value.Select(pair =>
                     new Dafny.Pair%s(%s(pair.Key), %s(pair.Value))
                 ));"""
-                .formatted(dafnyMapTypeArgs, dafnyMapTypeArgs, keyToDafnyConverterName, valueToDafnyConverterName));
+                .formatted(dafnyMapTypeArgs, dafnyMapTypeArgs,
+                           keyToDafnyConverterName,
+                           valueToDafnyConverterName));
         return buildConverterFromMethodBodies(mapShape, fromDafnyBody, toDafnyBody);
     }
 
@@ -1118,14 +1129,7 @@ public class TypeConversionCodegen {
      */
     public TypeConverter generateSpecificModeledErrorConverter(final StructureShape errorShape) {
         assert errorShape.hasTrait(ErrorTrait.class);
-        final String structureType;
-        if (StringUtils.equals(errorShape.getId().getNamespace(), AwsSdkDotNetNameResolver.DDB_NAMESPACE)) {
-            structureType = nameResolver.baseTypeForShape(errorShape.getId()).endsWith("Exception")
-                    ? nameResolver.baseTypeForShape(errorShape.getId())
-                    : "%sException".formatted(nameResolver.baseTypeForShape(errorShape.getId()));
-        } else {
-            structureType = nameResolver.baseTypeForShape(errorShape.getId());
-        }
+        final String structureType = nameResolver.baseTypeForShape(errorShape.getId());
 
         final TokenTree fromDafnyConstructorArgs = TokenTree
           .of(ModelUtils
