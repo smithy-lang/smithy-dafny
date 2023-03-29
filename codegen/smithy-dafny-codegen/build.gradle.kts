@@ -19,17 +19,16 @@ buildscript {
 }
 
 dependencies {
-    api("software.amazon.smithy:smithy-codegen-core:$smithyVersion")
-    api("software.amazon.smithy:smithy-model:$smithyVersion")
-    api("software.amazon.smithy:smithy-rules-engine:$smithyVersion")
-    api("software.amazon.smithy:smithy-waiters:$smithyVersion")
+    implementation("software.amazon.smithy:smithy-model:$smithyVersion")
+    implementation("software.amazon.smithy:smithy-codegen-core:$smithyVersion")
+    implementation("software.amazon.smithy:smithy-protocol-test-traits:$smithyVersion")
+    implementation("software.amazon.smithy:smithy-aws-traits:$smithyVersion")
+    implementation("software.amazon.smithy:smithy-rules-engine:$smithyVersion")
+    implementation("software.amazon.smithy:smithy-waiters:$smithyVersion")
 
     implementation("com.google.guava:guava:30.1-jre")
-    implementation("commons-cli:commons-cli:1.4")
     implementation("org.slf4j:slf4j-api:1.7.32")
     implementation("org.slf4j:slf4j-simple:1.7.32")
-    implementation("software.amazon.smithy:smithy-aws-traits:1.28.1")
-    implementation("software.amazon.smithy:smithy-protocol-test-traits:$smithyVersion")
 
     testImplementation("junit", "junit", "4.13.2")
 
