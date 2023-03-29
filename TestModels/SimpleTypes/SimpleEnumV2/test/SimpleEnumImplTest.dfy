@@ -19,14 +19,13 @@ module  SimpleEnumV2ImplTest {
       ensures client.ValidState()
     {
         var convertedEnumInput := SimpleEnumV2.Types.GetEnumV2Input(value := Some(THIRD));
-        
+
         expect convertedEnumInput.value.value == THIRD;
 
         var ret := client.GetEnumV2(convertedEnumInput);
-        
+
         expect ret.Success?;
         expect ret.value.value.UnwrapOr(FIRST) == THIRD;
-        print ret;
     }
 
     method TestGetEnumFirstKnownValueTest(client: ISimpleTypesEnumV2Client)
@@ -35,14 +34,13 @@ module  SimpleEnumV2ImplTest {
       ensures client.ValidState()
     {
         var convertedEnumInput := SimpleEnumV2.Types.GetEnumV2Input(value := Some(FIRST));
-        
+
         expect convertedEnumInput.value.value == FIRST;
 
         var ret := client.GetEnumV2FirstKnownValueTest(convertedEnumInput);
-        
+
         expect ret.Success?;
         expect ret.value.value.UnwrapOr(THIRD) == FIRST;
-        print ret;
     }
 
     method TestGetEnumSecondKnownValueTest(client: ISimpleTypesEnumV2Client)
@@ -51,14 +49,13 @@ module  SimpleEnumV2ImplTest {
       ensures client.ValidState()
     {
         var convertedEnumInput := SimpleEnumV2.Types.GetEnumV2Input(value := Some(SECOND));
-        
+
         expect convertedEnumInput.value.value == SECOND;
 
         var ret := client.GetEnumV2SecondKnownValueTest(convertedEnumInput);
-        
+
         expect ret.Success?;
         expect ret.value.value.UnwrapOr(THIRD) == SECOND;
-        print ret;
     }
 
     method TestGetEnumThirdKnownValueTest(client: ISimpleTypesEnumV2Client)
@@ -67,13 +64,12 @@ module  SimpleEnumV2ImplTest {
       ensures client.ValidState()
     {
         var convertedEnumInput := SimpleEnumV2.Types.GetEnumV2Input(value := Some(THIRD));
-        
+
         expect convertedEnumInput.value.value == THIRD;
 
         var ret := client.GetEnumV2ThirdKnownValueTest(convertedEnumInput);
-        
+
         expect ret.Success?;
         expect ret.value.value.UnwrapOr(FIRST) == THIRD;
-        print ret;
     }
 }
