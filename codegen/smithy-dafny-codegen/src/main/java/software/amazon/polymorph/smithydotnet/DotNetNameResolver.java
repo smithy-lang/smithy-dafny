@@ -567,7 +567,8 @@ public class DotNetNameResolver {
         return switch (shape.getType()) {
             case BLOB, DOUBLE -> "Dafny.ISequence<byte>";
             case BOOLEAN -> "bool";
-            case STRING, ENUM -> dafnyTypeForString(shape.asStringShape().get());
+            case STRING -> dafnyTypeForString(shape.asStringShape().get());
+            case ENUM -> dafnyTypeForEnum(shape.getId(), false);
             case INTEGER -> "int";
             case LONG -> "long";
             // TODO create/use better timestamp type in Dafny libraries

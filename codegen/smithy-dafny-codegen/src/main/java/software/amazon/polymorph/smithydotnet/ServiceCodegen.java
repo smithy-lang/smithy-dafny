@@ -496,8 +496,8 @@ public class ServiceCodegen {
      * @return a class containing constants for the enum members
      */
     public TokenTree generateEnumClass(final ShapeId shapeId) {
-        final StringShape stringShape = model.expectShape(shapeId, StringShape.class);
-        final EnumTrait enumTrait = getAndValidateEnumTrait(stringShape);
+        final Shape shape = model.expectShape(shapeId);
+        final EnumTrait enumTrait = getAndValidateEnumTrait(shape);
 
         final String enumClassName = nameResolver.classForEnum(shapeId);
         final String enumValueTypeName = enumTrait.hasNames() ? enumClassName : "string";

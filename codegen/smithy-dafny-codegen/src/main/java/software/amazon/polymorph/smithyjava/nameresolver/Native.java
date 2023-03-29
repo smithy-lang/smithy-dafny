@@ -173,6 +173,7 @@ public class Native extends NameResolver{
     }
 
     public ClassName classForStringOrEnum(final Shape shape) {
+        // This case must be first because shape can be an @enum string, or a Smithy 2.0 enum
         if (shape.hasTrait(EnumTrait.class)) {
             if (AwsSdkNameResolverHelpers.isInAwsSdkNamespace(shape.getId())) {
                 return switch (awsSdkVersion) {
@@ -182,7 +183,12 @@ public class Native extends NameResolver{
             }
             return classForEnum(shape);
         }
-        return classForString();
+
+        if (shape.getType().isShapeType(ShapeType.STRING)) {
+            return classForString();
+        }
+
+        throw new IllegalArgumentException("Shape was neither string nor enum");
     }
 
     public ClassName classForEnum(final Shape shape) {
