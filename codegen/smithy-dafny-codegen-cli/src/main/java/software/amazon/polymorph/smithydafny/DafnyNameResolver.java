@@ -46,7 +46,7 @@ public record DafnyNameResolver(
 
     public static String nameForService(final ServiceShape serviceShape) {
         // If the service is an AWS SDK service, use the sdkId.
-        // Otherwise just use the shape name.
+        // Otherwise, just use the shape name.
         return serviceShape.getTrait(ServiceTrait.class)
                 .map(t -> AwsSdkNameResolverHelpers.mungeSdkId(t.getSdkId()))
                 .orElse(StringUtils.capitalize(serviceShape.getId().getName()));

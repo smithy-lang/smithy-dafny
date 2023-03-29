@@ -708,9 +708,9 @@ public class DotNetNameResolver {
         final ShapeId serviceShapeId = serviceShape.getId();
 
         if (AwsSdkNameResolverHelpers.isInAwsSdkNamespace(serviceShapeId)) {
-            return "%s.I%sClient"
+            return "%s.%s"
                 .formatted(DafnyNameResolverHelpers.dafnyExternNamespaceForShapeId(serviceShapeId),
-                           DafnyNameResolver.nameForService(serviceShape));
+                           DafnyNameResolver.traitNameForServiceClient(serviceShape));
         }
 
         // Qualify extern namespace
