@@ -40,6 +40,7 @@ dependencies {
     implementation("software.amazon.smithy:smithy-model:1.28.1")
     implementation("software.amazon.smithy:smithy-codegen-core:1.28.1")
     implementation("software.amazon.smithy:smithy-protocol-test-traits:1.28.1")
+    implementation("software.amazon.smithy:smithy-aws-traits:1.28.1")
     implementation("software.amazon.smithy:smithy-rules-engine:1.28.1")
     implementation("software.amazon.smithy:smithy-waiters:1.28.1")
 
