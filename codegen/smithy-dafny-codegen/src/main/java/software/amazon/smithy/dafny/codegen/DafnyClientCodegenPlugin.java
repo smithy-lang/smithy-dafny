@@ -14,6 +14,9 @@ public final class DafnyClientCodegenPlugin implements SmithyBuildPlugin {
 
     @Override
     public void execute(PluginContext context) {
+        // TODO: move this into a DirectedCodegen.customizeBeforeShapeGeneration implementation
+        // Model model = ModelUtils.addMissingErrorMessageMembers(context.getModel());
+
         // TODO generate code
     }
 }

@@ -16,6 +16,8 @@ import software.amazon.smithy.model.shapes.*;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.RequiredTrait;
+import software.amazon.smithy.model.transform.ModelTransformer;
+import software.amazon.smithy.utils.StringUtils;
 
 import static software.amazon.polymorph.smithyjava.nameresolver.Constants.SMITHY_API_UNIT;
 
@@ -144,8 +146,8 @@ public class ModelUtils {
           .filter(s -> s.toShapeId().getNamespace().equals(namespace))
           .toArray(ServiceShape[]::new);
 
-        if (tmp.length != 1 ) {
-            throw new IllegalStateException();
+        if (tmp.length != 1) {
+            throw new IllegalStateException("Found " + tmp.length + " services matching " + namespace + ", need exactly one");
         }
 
         return tmp[0];
@@ -430,4 +432,24 @@ public class ModelUtils {
      *                   Reference traits have been fully resolved.
      */
     public record ResolvedShapeId(ShapeId naiveId, ShapeId resolvedId) {}
+
+    /**
+     * Adds a "message: String" member to any structure with the error trait
+     * that doesn't already define one (via case-insensitive match).
+     */
+    public static Model addMissingErrorMessageMembers(Model model) {
+        return ModelTransformer.create().mapShapes(model, shape -> {
+            if (shape instanceof StructureShape && shape.hasTrait(ErrorTrait.class)) {
+                StructureShape errorShape = (StructureShape) shape;
+                if (errorShape.members().stream().noneMatch(m -> "message".equalsIgnoreCase(m.getMemberName()))) {
+                    MemberShape implicitMessageMember = MemberShape.builder()
+                            .id(errorShape.getId().withMember("message"))
+                            .target(ShapeId.from("smithy.api#String"))
+                            .build();
+                    return errorShape.toBuilder().addMember(implicitMessageMember).build();
+                }
+            }
+            return shape;
+        });
+    }
 }
