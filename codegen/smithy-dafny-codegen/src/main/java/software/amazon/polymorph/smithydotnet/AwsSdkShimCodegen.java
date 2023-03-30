@@ -33,8 +33,7 @@ public class AwsSdkShimCodegen {
 
     public AwsSdkShimCodegen(
       final Model model,
-      final ServiceShape serviceShape,
-      final Path[] dependentModelPaths
+      final ServiceShape serviceShape
     ) {
         this.model = model;
         this.serviceShape = serviceShape;

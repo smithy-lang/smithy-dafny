@@ -118,7 +118,7 @@ public class JavaLibrary extends CodegenSubject {
 
     /**
      * @param method      MethodSpec.Builder that SHOULD have Parameters,
-     *                    Returns, & Modifiers set correctly
+     *                    Returns, and Modifiers set correctly
      *                    ( note that
      *                    void or parameterless methods would
      *                    not have any Returns or Parameters).

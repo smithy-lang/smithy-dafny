@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.polymorph.CodegenEngine;
 import software.amazon.polymorph.CodegenEngine.TargetLanguage;
+import software.amazon.smithy.build.FileManifest;
 import software.amazon.smithy.build.PluginContext;
 import software.amazon.smithy.build.SmithyBuildPlugin;
 import software.amazon.smithy.model.Model;
@@ -39,16 +40,13 @@ public final class DafnyClientCodegenPlugin implements SmithyBuildPlugin {
         final Model model = context.getModel();
         final Settings settings = Settings.fromObject(context.getSettings())
                 .orElseThrow(() -> new RuntimeException("Invalid plugin settings; aborting"));
+        final FileManifest manifest = context.getFileManifest();
 
         final Map<TargetLanguage, Path> outputDirs = new HashMap<>();
+        outputDirs.put(TargetLanguage.DAFNY, manifest.resolvePath(Paths.get("Model")));
         settings.targetLanguages.forEach(lang -> {
-            final Path dir;
-            if (lang == TargetLanguage.DAFNY) {
-                dir = Paths.get("Model");
-            } else {
-                dir = Paths.get("runtimes", lang.name().toLowerCase(), "Generated");
-            }
-            outputDirs.put(lang, context.getFileManifest().resolvePath(dir));
+            final Path dir = Paths.get("runtimes", lang.name().toLowerCase(), "Generated");
+            outputDirs.put(lang, manifest.resolvePath(dir));
         });
 
         // TODO generate Makefile
@@ -74,7 +72,7 @@ public final class DafnyClientCodegenPlugin implements SmithyBuildPlugin {
         }
 
         static Optional<Settings> fromObject(final ObjectNode node) {
-            final ShapeId serviceId = node.expectStringMember("serviceId").expectShapeId();
+            final ShapeId serviceId = node.expectStringMember("service").expectShapeId();
 
             final List<StringNode> targetLangNodes = node.expectArrayMember("targetLanguages").getElementsAs(StringNode.class);
             AtomicBoolean foundUnknownTargetLanguage = new AtomicBoolean(false);
@@ -82,6 +80,11 @@ public final class DafnyClientCodegenPlugin implements SmithyBuildPlugin {
                     .flatMap(strNode -> switch (strNode.getValue().toUpperCase()) {
                         case "JAVA" -> Stream.of(TargetLanguage.JAVA);
                         case "DOTNET", "CSHARP", "CS" -> Stream.of(TargetLanguage.DOTNET);
+                        case "DAFNY" -> {
+                            LOGGER.warn("Dafny code is always generated, and shouldn't be specified explicitly");
+                            foundUnknownTargetLanguage.set(true);
+                            yield Stream.empty();
+                        }
                         default -> {
                             LOGGER.error("Unknown target language: {}", strNode.getValue());
                             foundUnknownTargetLanguage.set(true);

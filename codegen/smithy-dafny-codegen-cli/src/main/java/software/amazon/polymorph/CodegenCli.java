@@ -49,6 +49,7 @@ public class CodegenCli {
         LOGGER.debug("Loading model from {}", cliArguments.modelPath);
         final ModelAssembler assembler = new ModelAssembler();
         assembler.addImport(cliArguments.modelPath);
+        Arrays.stream(cliArguments.dependentModelPaths).forEach(assembler::addImport);
         // Discover models from the classpath (e.g. models of library-defined traits)
         assembler.discoverModels();
         final Model serviceModel = assembler.assemble().unwrap();

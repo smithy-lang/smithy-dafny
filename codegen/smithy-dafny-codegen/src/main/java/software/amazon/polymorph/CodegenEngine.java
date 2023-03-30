@@ -79,14 +79,6 @@ public class CodegenEngine {
         Arrays.stream(this.dependentModelPaths).forEach(assembler::addImport);
         Model fullModel = assembler.assemble().unwrap();
 
-        // If Smithy ever lets us configure this:
-        // https://github.com/awslabs/smithy/blob/f598b87c51af5943686e38706847a5091fe718da/smithy-model/src/main/java/software/amazon/smithy/model/loader/ModelLoader.java#L76
-        // We can remove this log statement.
-        // (Alternatively, We could inline `addImport`,
-        // and ignore dfy & md files. Link to `addImport` below)
-        // https://github.com/awslabs/smithy/blob/f598b87c51af5943686e38706847a5091fe718da/smithy-model/src/main/java/software/amazon/smithy/model/loader/ModelAssembler.java#L256-L281
-        LOGGER.info("End annoying Smithy \"No ModelLoader was able to load\" warnings.\n\n");
-
         if (this.awsSdkStyle) {
             // TODO: move this into a DirectedCodegen.customizeBeforeShapeGeneration implementation
              fullModel = ModelUtils.addMissingErrorMessageMembers(fullModel);
@@ -201,8 +193,7 @@ public class CodegenEngine {
         final LocalServiceWrappedCodegen service = new LocalServiceWrappedCodegen(model, serviceShape);
         IOUtils.writeTokenTreesIntoDir(service.generate(), outputDir);
 
-        final LocalServiceWrappedShimCodegen wrappedShim = new LocalServiceWrappedShimCodegen(
-                model, serviceShape, dependentModelPaths);
+        final LocalServiceWrappedShimCodegen wrappedShim = new LocalServiceWrappedShimCodegen(model, serviceShape);
         IOUtils.writeTokenTreesIntoDir(wrappedShim.generate(), outputDir);
 
         final TypeConversionCodegen conversion = new LocalServiceWrappedConversionCodegen(model, serviceShape);
@@ -211,8 +202,7 @@ public class CodegenEngine {
     }
 
     private void netAwsSdk(final Path outputDir) {
-        final AwsSdkShimCodegen dotnetShimCodegen = new AwsSdkShimCodegen(
-                model, serviceShape, dependentModelPaths);
+        final AwsSdkShimCodegen dotnetShimCodegen = new AwsSdkShimCodegen(model, serviceShape);
         IOUtils.writeTokenTreesIntoDir(dotnetShimCodegen.generate(), outputDir);
 
         final TypeConversionCodegen conversion = new AwsSdkTypeConversionCodegen(model, serviceShape);

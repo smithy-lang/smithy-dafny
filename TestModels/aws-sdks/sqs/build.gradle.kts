@@ -11,7 +11,9 @@ dependencies {
     implementation("software.amazon.smithy:smithy-model:1.28.0")
     implementation("software.amazon.smithy:smithy-aws-traits:1.28.0")
     implementation("software.amazon.smithy:smithy-rules-engine:1.28.0")
-    implementation(project(":smithy-dafny-codegen"))
+
+    // Must be built and published to the local Maven repo
+    implementation("software.amazon.smithy.dafny:smithy-dafny-codegen:0.1.0")
 }
 
 configure<software.amazon.smithy.gradle.SmithyExtension> {
