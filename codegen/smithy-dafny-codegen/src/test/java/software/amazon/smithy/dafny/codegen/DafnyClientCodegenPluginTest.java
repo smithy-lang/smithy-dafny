@@ -3,9 +3,9 @@
 
 package software.amazon.smithy.dafny.codegen;
 
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import static org.junit.Assert.assertTrue;
+import org.junit.jupiter.api.Test;
 
 public class DafnyClientCodegenPluginTest {
     @Test
