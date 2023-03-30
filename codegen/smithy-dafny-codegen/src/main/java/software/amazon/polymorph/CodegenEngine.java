@@ -77,6 +77,8 @@ public class CodegenEngine {
         final ModelAssembler assembler = new ModelAssembler();
         assembler.addModel(serviceModel);
         Arrays.stream(this.dependentModelPaths).forEach(assembler::addImport);
+        // Discover models from the classpath (e.g. models of library-defined traits)
+        assembler.discoverModels();
         Model fullModel = assembler.assemble().unwrap();
 
         if (this.awsSdkStyle) {
