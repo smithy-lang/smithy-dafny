@@ -16,12 +16,6 @@ import java.util.Objects;
 
 import javax.annotation.Nullable;
 
-import dafny.DafnyMap;
-import dafny.DafnySequence;
-import dafny.DafnySet;
-import dafny.Tuple0;
-import dafny.TypeDescriptor;
-
 import software.amazon.polymorph.smithydafny.DafnyNameResolver;
 import software.amazon.polymorph.smithyjava.MethodReference;
 import software.amazon.polymorph.smithyjava.generator.CodegenSubject;
@@ -56,16 +50,16 @@ public class Dafny extends NameResolver {
     protected static final Map<ShapeType, CodeBlock> TYPE_DESCRIPTOR_BY_SHAPE_TYPE;
     static {
         TYPE_DESCRIPTOR_BY_SHAPE_TYPE = Map.ofEntries(
-                Map.entry(ShapeType.STRING, CodeBlock.of("$T._typeDescriptor($T.CHAR)", DafnySequence.class, TypeDescriptor.class)),
+                Map.entry(ShapeType.STRING, CodeBlock.of("$T._typeDescriptor($T.CHAR)", Constants.DAFNY_SEQUENCE_CLASS_NAME, Constants.DAFNY_TYPE_DESCRIPTOR_CLASS_NAME)),
                 // Tony is not sure BLOB is correct...
-                Map.entry(ShapeType.BLOB, CodeBlock.of("$T._typeDescriptor($T.BYTE)", DafnySequence.class, TypeDescriptor.class)),
-                Map.entry(ShapeType.BOOLEAN, CodeBlock.of("$T.BOOLEAN", TypeDescriptor.class)),
-                Map.entry(ShapeType.BYTE, CodeBlock.of("$T.BYTE", TypeDescriptor.class)),
-                Map.entry(ShapeType.SHORT, CodeBlock.of("$T.SHORT", TypeDescriptor.class)),
-                Map.entry(ShapeType.INTEGER, CodeBlock.of("$T.INT", TypeDescriptor.class)),
-                Map.entry(ShapeType.LONG, CodeBlock.of("$T.LONG", TypeDescriptor.class)),
-                Map.entry(ShapeType.TIMESTAMP, CodeBlock.of("$T._typeDescriptor($T.CHAR)", DafnySequence.class, TypeDescriptor.class)),
-                Map.entry(ShapeType.BIG_INTEGER, CodeBlock.of("$T.BIG_INTEGER", TypeDescriptor.class))
+                Map.entry(ShapeType.BLOB, CodeBlock.of("$T._typeDescriptor($T.BYTE)", Constants.DAFNY_SEQUENCE_CLASS_NAME, Constants.DAFNY_TYPE_DESCRIPTOR_CLASS_NAME)),
+                Map.entry(ShapeType.BOOLEAN, CodeBlock.of("$T.BOOLEAN", Constants.DAFNY_TYPE_DESCRIPTOR_CLASS_NAME)),
+                Map.entry(ShapeType.BYTE, CodeBlock.of("$T.BYTE", Constants.DAFNY_TYPE_DESCRIPTOR_CLASS_NAME)),
+                Map.entry(ShapeType.SHORT, CodeBlock.of("$T.SHORT", Constants.DAFNY_TYPE_DESCRIPTOR_CLASS_NAME)),
+                Map.entry(ShapeType.INTEGER, CodeBlock.of("$T.INT", Constants.DAFNY_TYPE_DESCRIPTOR_CLASS_NAME)),
+                Map.entry(ShapeType.LONG, CodeBlock.of("$T.LONG", Constants.DAFNY_TYPE_DESCRIPTOR_CLASS_NAME)),
+                Map.entry(ShapeType.TIMESTAMP, CodeBlock.of("$T._typeDescriptor($T.CHAR)", Constants.DAFNY_SEQUENCE_CLASS_NAME, Constants.DAFNY_TYPE_DESCRIPTOR_CLASS_NAME)),
+                Map.entry(ShapeType.BIG_INTEGER, CodeBlock.of("$T.BIG_INTEGER", Constants.DAFNY_TYPE_DESCRIPTOR_CLASS_NAME))
         );
     }
 
@@ -182,7 +176,7 @@ public class Dafny extends NameResolver {
 
     private static TypeName typeForBlob() {
         return ParameterizedTypeName.get(
-                ClassName.get(DafnySequence.class),
+                Constants.DAFNY_SEQUENCE_CLASS_NAME,
                 WildcardTypeName.subtypeOf(TypeName.BYTE.box()));
     }
 
@@ -202,15 +196,15 @@ public class Dafny extends NameResolver {
         }
         return switch (shape.getType()) {
             case LIST -> ParameterizedTypeName.get(
-                    ClassName.get(DafnySequence.class),
+                    Constants.DAFNY_SEQUENCE_CLASS_NAME,
                     WildcardTypeName.subtypeOf(typeForShape(shape.asListShape().get().getMember().getTarget()))
             );
             case SET -> ParameterizedTypeName.get(
-                    ClassName.get(DafnySet.class),
+                    Constants.DAFNY_SET_CLASS_NAME,
                     WildcardTypeName.subtypeOf(typeForShape(shape.asSetShape().get().getMember().getTarget()))
             );
             case MAP -> ParameterizedTypeName.get(
-                    ClassName.get(DafnyMap.class),
+                    Constants.DAFNY_MAP_CLASS_NAME,
                     WildcardTypeName.subtypeOf(typeForShape(shape.asMapShape().get().getKey().getTarget())),
                     WildcardTypeName.subtypeOf(typeForShape(shape.asMapShape().get().getValue().getTarget()))
             );
@@ -241,11 +235,11 @@ public class Dafny extends NameResolver {
         if (shape.hasTrait(ReferenceTrait.class)) {
             // It is safe to use typeForShape here, as ReferenceTrait will always turn into a Resource or Service
             TypeName interfaceClassName = typeForShape(shapeId);
-            return  CodeBlock.of("$T.reference($T.class)", TypeDescriptor.class, interfaceClassName);
+            return  CodeBlock.of("$T.reference($T.class)", Constants.DAFNY_TYPE_DESCRIPTOR_CLASS_NAME, interfaceClassName);
         }
         if (shape.getId().equals(Constants.SMITHY_API_UNIT)) {
             return CodeBlock.of("$L()",
-                    new MethodReference(ClassName.get(Tuple0.class), "_typeDescriptor").asNormalReference());
+                    new MethodReference(Constants.DAFNY_TUPLE0_CLASS_NAME, "_typeDescriptor").asNormalReference());
         }
         if (shape.getType().getCategory().equals(ShapeType.Category.SIMPLE) && !shape.hasTrait(EnumTrait.class)) {
             @Nullable CodeBlock typeDescriptor =
@@ -305,7 +299,7 @@ public class Dafny extends NameResolver {
 
     TypeName typeForCharacterSequence() {
         return ParameterizedTypeName.get(
-                ClassName.get(DafnySequence.class),
+                Constants.DAFNY_SEQUENCE_CLASS_NAME,
                 WildcardTypeName.subtypeOf(Character.class)
         );
     }
@@ -318,7 +312,7 @@ public class Dafny extends NameResolver {
             return typeForShape(shape.expectTrait(ReferenceTrait.class).getReferentId());
         }
         if (shape.getId().equals(Constants.SMITHY_API_UNIT)) {
-            return ClassName.get(Tuple0.class);
+            return Constants.DAFNY_TUPLE0_CLASS_NAME;
         }
         return classForNotErrorNotUnitShape(shape);
     }

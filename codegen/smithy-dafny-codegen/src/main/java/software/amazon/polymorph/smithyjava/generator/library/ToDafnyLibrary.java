@@ -17,9 +17,9 @@ import java.util.stream.Collectors;
 
 import javax.lang.model.element.Modifier;
 
-import dafny.DafnySequence;
 import software.amazon.polymorph.smithyjava.MethodReference;
 import software.amazon.polymorph.smithyjava.generator.ToDafny;
+import software.amazon.polymorph.smithyjava.nameresolver.Constants;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.utils.ModelUtils;
@@ -152,7 +152,7 @@ public class ToDafnyLibrary extends ToDafny {
         ClassName dafnyError = subject.dafnyNameResolver.abstractClassForError();
         ClassName collectionError = CollectionOfErrors.nativeClassName(subject.nativeNameResolver.modelPackage);
         ParameterizedTypeName listArg = ParameterizedTypeName.get(
-                ClassName.get(DafnySequence.class),
+                software.amazon.polymorph.smithyjava.nameresolver.Constants.DAFNY_SEQUENCE_CLASS_NAME,
                 WildcardTypeName.subtypeOf(dafnyError)
         );
         CodeBlock genericCall = AGGREGATE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(ShapeType.LIST).asNormalReference();
