@@ -52,8 +52,8 @@ jobs:
       - name: Execute smithy-dafny-codegen-cli tests
         uses: gradle/gradle-build-action@v2
         with:
-          arguments: test
-          build-root-directory: codegen/smithy-dafny-codegen-cli
+          arguments: :smithy-dafny-codegen-cli:test
+          build-root-directory: codegen
 
       - name: Execute smithy-dafny-codegen tests
         uses: gradle/gradle-build-action@v2
