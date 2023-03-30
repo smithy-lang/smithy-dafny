@@ -52,8 +52,8 @@ public abstract class ToDafny extends Generator {
      */
     protected static final Map<ShapeType, MethodReference> AGGREGATE_CONVERSION_METHOD_FROM_SHAPE_TYPE;
     protected static final Map<ShapeType, MethodReference> SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE;
-    protected static final ClassName COMMON_TO_DAFNY_SIMPLE = ClassName.get(software.amazon.dafny.conversion.ToDafny.Simple.class);
-    protected static final ClassName COMMON_TO_DAFNY_AGGREGATE = ClassName.get(software.amazon.dafny.conversion.ToDafny.Aggregate.class);
+    protected static final ClassName COMMON_TO_DAFNY_SIMPLE = ClassName.get("software.amazon.dafny.conversion", "ToDafny", "Simple");
+    protected static final ClassName COMMON_TO_DAFNY_AGGREGATE = ClassName.get("software.amazon.dafny.conversion", "ToDafny", "Aggregate");
     protected final static String VAR_INPUT = "nativeValue";
     protected static final String TO_DAFNY = "ToDafny";
     /**
