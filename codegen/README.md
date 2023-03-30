@@ -4,9 +4,6 @@ This library supports the standard Smithy workflow
 for generating a Dafny client for a given Smithy model,
 as described in the
 [Smithy codegen docs](https://smithy.io/2.0/guides/using-code-generation/generating-a-client.html).
-For now the library will only support AWS service models,
-since the implementation will generate both Dafny code and target language code
-to wrap existing AWS SDKs.
 
 *WARNING: All internal and external interfaces are considered unstable and subject to change without notice.*
 
@@ -20,3 +17,86 @@ were adapted from the corresponding files in the
 and/or
 [smithy-go](https://github.com/aws/smithy-go/tree/main/codegen)
 repositories.
+
+## Generating a client
+
+This repository builds Dafny declarations and Dafny clients from Smithy
+models.
+
+For now the library only supports AWS service models,
+since the implementation will generate both Dafny code and target language code
+to wrap existing AWS SDKs.
+This means only services with the `aws.api#service` trait are supported.
+
+The `TestModel/sqs` package in this repo is an example of
+how to build a Dafny client. The steps needed to build a Dafny client
+are as follows:
+
+1. Create a new directory for your package. For example, "foo-client".
+2. Create a `build.gradle.kts` file with the following contents:
+
+   ```kotlin
+    buildscript {
+        repositories {
+            mavenCentral()
+        }
+        dependencies {
+            "classpath"("software.amazon.smithy:smithy-cli:1.28.1")
+        }
+    }
+
+    plugins {
+        id("software.amazon.smithy").version("0.6.0")
+    }
+
+    repositories {
+        mavenLocal()
+        mavenCentral()
+    }
+
+    dependencies {
+        implementation("software.amazon.smithy:smithy-model:1.28.1")
+        implementation("software.amazon.smithy:smithy-aws-traits:1.28.1")
+        implementation("software.amazon.smithy.dafny:smithy-dafny-codegen:0.1.0")
+    }
+   ```
+
+   You may need additional Smithy dependencies depending on what Smithy features
+   your service model depends on, such as AWS-specific traits.
+   See https://smithy.io/2.0/guides/using-code-generation/index.html for more examples.
+
+3. Create a `smithy-build.json` file with the following contents,
+   substituting "smithy.example#ExampleService" with the name of the service
+   to generate a client for:
+
+   ```json
+    {
+        "version": "1.0",
+        "plugins": {
+            "dafny-client-codegen": {
+                "service": "smithy.example#ExampleService",
+            }
+        }
+    }
+
+   ```
+
+4. Create a directory named `model`. This is where all of your Smithy models
+   will go.
+
+5. Copy the model for the service into the `model` directory.
+   The Smithy models for AWS services can be found in several Smithy-based SDK projects,
+   such as
+   https://github.com/aws/aws-sdk-js-v3/tree/main/codegen/sdk-codegen/aws-models.
+
+6. Run `gradle build` (alternatively, you can use a
+   [Gradle wrapper](https://docs.gradle.org/current/userguide/gradle_wrapper.html)).
+
+7. The generated client can be found in `build/smithyprojections/foo-client/source/dafny-client-codegen`.
+
+See [the Smithy documentation](https://smithy.io/2.0/guides/building-models/gradle-plugin.html)
+for more information on building Smithy projects with Gradle.
+
+## Using projections
+
+TODO
