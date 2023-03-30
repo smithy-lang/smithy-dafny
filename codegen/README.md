@@ -67,7 +67,8 @@ are as follows:
 
 3. Create a `smithy-build.json` file with the following contents,
    substituting "smithy.example#ExampleService" with the name of the service
-   to generate a client for:
+   to generate a client for, and specifying the set of target languages
+   to support in the generated client (currently limited to "dotnet" and/or "java"):
 
    ```json
     {
@@ -75,10 +76,10 @@ are as follows:
         "plugins": {
             "dafny-client-codegen": {
                 "service": "smithy.example#ExampleService",
+                "targetLanguages": ["dotnet"]
             }
         }
     }
-
    ```
 
 4. Create a directory named `model`. This is where all of your Smithy models
@@ -98,5 +99,16 @@ See [the Smithy documentation](https://smithy.io/2.0/guides/building-models/grad
 for more information on building Smithy projects with Gradle.
 
 ## Using projections
+
+This plugin does not yet handle all Smithy shapes, especially since
+at the time of writing this, Dafny itself does not have a strongly
+idiomatic representation for concepts such as Timestamps.
+Fortunately, the Smithy Gradle plugin provides several
+[]"transforms"](https://smithy.io/2.0/guides/building-models/build-config.html#transforms)
+that can be used to filter a service model
+to remove unsupported shapes.
+
+The following example removes all operations that transitively refer
+to some of the shape types that this plugin does not yet support:
 
 TODO
