@@ -100,15 +100,41 @@ for more information on building Smithy projects with Gradle.
 
 ## Using projections
 
-This plugin does not yet handle all Smithy shapes, especially since
+This plugin does not yet handle all Smithy features, especially since
 at the time of writing this, Dafny itself does not have a strongly
 idiomatic representation for concepts such as Timestamps.
 Fortunately, the Smithy Gradle plugin provides several
-[]"transforms"](https://smithy.io/2.0/guides/building-models/build-config.html#transforms)
+["transforms"](https://smithy.io/2.0/guides/building-models/build-config.html#transforms)
 that can be used to filter a service model
 to remove unsupported shapes.
 
 The following example removes all operations that transitively refer
 to some of the shape types that this plugin does not yet support:
 
-TODO
+```json
+{
+    "version": "1.0",
+    "projections": {
+        "dafny-supported": {
+            "transforms": [
+                {
+                    "name": "excludeShapesBySelector",
+                    "args": {
+                        "selector": "operation :test(~> timestamp, double, float)"
+                    }
+                }
+            ]
+        }
+    },
+    "plugins": {
+        "dafny-client-codegen": {
+            "service": "smithy.example#ExampleService",
+            "targetLanguages": ["dotnet"]
+        }
+    }
+}
+```
+
+Refer to the Smithy documentation for more information about other transforms
+that might be useful, but bear in mind that removing arbitrary shapes may lead
+to a client that will fail to compile or not function correctly.
