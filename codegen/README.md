@@ -33,6 +33,7 @@ how to build a Dafny client. The steps needed to build a Dafny client
 are as follows:
 
 1. Create a new directory for your package. For example, "foo-client".
+
 2. Create a `build.gradle.kts` file with the following contents:
 
    ```kotlin
@@ -65,7 +66,15 @@ are as follows:
    your service model depends on, such as AWS-specific traits.
    See https://smithy.io/2.0/guides/using-code-generation/index.html for more examples.
 
-3. Create a `smithy-build.json` file with the following contents,
+3. Clone the GitHub repository for [smithy-dafny](https://github.com/awslabs/smithy-dafny)
+   somewhere nearby, being sure to initialize submodules.
+   If this repository is still private, reach out to aws-arg-dafny@amazon.com.
+      
+   This is necessary because it contains reusable Dafny code that
+   the generated client will depend on, but is not yet independently distributed for
+   shared use.
+
+4. Create a `smithy-build.json` file with the following contents,
    substituting "smithy.example#ExampleService" with the name of the service
    to generate a client for, and specifying the set of target languages
    to support in the generated client (currently limited to "dotnet" and/or "java"):
@@ -76,24 +85,25 @@ are as follows:
         "plugins": {
             "dafny-client-codegen": {
                 "service": "smithy.example#ExampleService",
-                "targetLanguages": ["dotnet"]
+                "targetLanguages": ["dotnet"],
+                "includeDafnyPath": "[relative]/[path]/[to]/smithy-dafny/TestModels/dafny-dependencies/StandardLibrary/src/Index.dfy"
             }
         }
     }
    ```
 
-4. Create a directory named `model`. This is where all of your Smithy models
+5. Create a directory named `model`. This is where all of your Smithy models
    will go.
 
-5. Copy the model for the service into the `model` directory.
+6. Copy the model for the service into the `model` directory.
    The Smithy models for AWS services can be found in several Smithy-based SDK projects,
    such as
    https://github.com/aws/aws-sdk-js-v3/tree/main/codegen/sdk-codegen/aws-models.
 
-6. Run `gradle build` (alternatively, you can use a
+7. Run `gradle build` (alternatively, you can use a
    [Gradle wrapper](https://docs.gradle.org/current/userguide/gradle_wrapper.html)).
 
-7. The generated client can be found in `build/smithyprojections/foo-client/source/dafny-client-codegen`.
+8. The generated client can be found in `build/smithyprojections/foo-client/source/dafny-client-codegen`.
 
 See [the Smithy documentation](https://smithy.io/2.0/guides/building-models/gradle-plugin.html)
 for more information on building Smithy projects with Gradle.
