@@ -1,14 +1,19 @@
 import java.net.URI
 import javax.annotation.Nullable
-
-description = "Legacy CLI for generating Dafny code from Smithy models"
-extra["displayName"] = "Smithy :: Dafny :: CodegenCLI"
-extra["moduleName"] = "software.amazon.smithy.dafny.codegencli"
-
-val smithyVersion: String by project
+plugins {
+    java
+    application
+    `maven-publish`
+}
 
 group = "software.amazon.polymorph"
 version = "0.1.0"
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    }
+}
 
 var caUrl: URI? = null
 @Nullable
@@ -31,8 +36,6 @@ repositories {
 }
 
 dependencies {
-    implementation(project(":smithy-dafny-codegen"))
-
     // For Parsing Smithy Models
     implementation("software.amazon.smithy:smithy-model:1.28.1")
     implementation("software.amazon.smithy:smithy-codegen-core:[1.0.2,1.1.0[")
