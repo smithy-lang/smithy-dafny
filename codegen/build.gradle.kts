@@ -57,7 +57,11 @@ subprojects {
      * ====================================================
      */
     if (subproject.name != "smithy-dafny-codegen-test") {
-        apply(plugin = "java-library")
+        if (subproject.name == "smithy-dafny-codegen-cli") {
+            apply(plugin = "application")
+        } else {
+            apply(plugin = "java-library")
+        }
 
         java {
             sourceCompatibility = JavaVersion.VERSION_17
@@ -66,19 +70,6 @@ subprojects {
 
         tasks.withType<JavaCompile> {
             options.encoding = "UTF-8"
-        }
-
-        // Use Junit5's test runner.
-        tasks.withType<Test> {
-            useJUnitPlatform()
-        }
-
-        // Apply junit 5 and hamcrest test dependencies to all java projects.
-        dependencies {
-            testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.2")
-            testImplementation("org.junit.jupiter:junit-jupiter-engine:5.9.2")
-            testImplementation("org.junit.jupiter:junit-jupiter-params:5.9.2")
-            testImplementation("org.hamcrest:hamcrest:2.2")
         }
 
         // Reusable license copySpec
