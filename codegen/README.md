@@ -68,7 +68,8 @@ are as follows:
 
 3. Clone the GitHub repository for [smithy-dafny](https://github.com/awslabs/smithy-dafny)
    somewhere nearby, being sure to initialize submodules.
-   If this repository is still private, reach out to aws-arg-dafny@amazon.com.
+   If this repository is still private, reach out to aws-arg-dafny@amazon.com
+   for access.
       
    This is necessary because it contains reusable Dafny code that
    the generated client will depend on, but is not yet independently distributed for
@@ -107,6 +108,13 @@ are as follows:
 
 See [the Smithy documentation](https://smithy.io/2.0/guides/building-models/gradle-plugin.html)
 for more information on building Smithy projects with Gradle.
+
+Note there are some caveats related to building the generated client:
+
+1. If you specified Java as a target language,
+   the result will depend on the [dafny-java-conversion](https://github.com/awslabs/smithy-dafny/tree/main-1.x/dafny-java-conversion)
+   library, which is also not yet published.
+   The easiest workaround is to first run the `publishToLocalMaven` gradle task on a copy of the source for that library.
 
 ## Using projections
 
