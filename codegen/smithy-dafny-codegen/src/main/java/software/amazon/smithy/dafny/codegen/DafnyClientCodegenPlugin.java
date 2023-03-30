@@ -38,9 +38,9 @@ public final class DafnyClientCodegenPlugin implements SmithyBuildPlugin {
     @Override
     public void execute(PluginContext context) {
         final Model model = context.getModel();
-        final Settings settings = Settings.fromObject(context.getSettings())
-                .orElseThrow(() -> new RuntimeException("Invalid plugin settings; aborting"));
         final FileManifest manifest = context.getFileManifest();
+        final Settings settings = Settings.fromObject(context.getSettings(), manifest)
+                .orElseThrow(() -> new RuntimeException("Invalid plugin settings; aborting"));
 
         final Map<TargetLanguage, Path> outputDirs = new HashMap<>();
         outputDirs.put(TargetLanguage.DAFNY, manifest.resolvePath(Paths.get("Model")));
@@ -55,7 +55,8 @@ public final class DafnyClientCodegenPlugin implements SmithyBuildPlugin {
                 .withServiceModel(model)
                 .withNamespace(settings.serviceId.getNamespace())
                 .withTargetLangOutputDirs(outputDirs)
-                .withAwsSdkStyle(true)  // TODO allow generating library-style code
+                .withAwsSdkStyle(true)  // this plugin only generated AWS SDK-style code
+                .withIncludeDafnyFile(settings.includeDafnyFile)
                 .build();
         codegenEngine.run();
     }
@@ -71,7 +72,7 @@ public final class DafnyClientCodegenPlugin implements SmithyBuildPlugin {
             this.includeDafnyFile = includeDafnyFile;
         }
 
-        static Optional<Settings> fromObject(final ObjectNode node) {
+        static Optional<Settings> fromObject(final ObjectNode node, final FileManifest manifest) {
             final ShapeId serviceId = node.expectStringMember("service").expectShapeId();
 
             final List<StringNode> targetLangNodes = node.expectArrayMember("targetLanguages").getElementsAs(StringNode.class);
@@ -99,13 +100,38 @@ public final class DafnyClientCodegenPlugin implements SmithyBuildPlugin {
                 return Optional.empty();
             }
 
+            final Path buildRoot = findSmithyBuildJson(manifest.getBaseDir())
+                    .orElseThrow(() -> new IllegalStateException("Couldn't find smithy-build.json"))
+                    .getParent();
             final String includeDafnyFileStr = node.expectStringMember("includeDafnyFile").getValue();
-            final Path includeDafnyFile = Paths.get(includeDafnyFileStr).toAbsolutePath().normalize();
+            final Path includeDafnyFile = buildRoot.resolve(includeDafnyFileStr).toAbsolutePath().normalize();
             if (Files.notExists(includeDafnyFile)) {
-                LOGGER.warn("includeDafnyFile not found; generated Dafny code may not compile!");
+                LOGGER.warn("Generated Dafny code may not compile because the includeDafnyFile could not be found: {}",
+                        includeDafnyFile);
             }
 
             return Optional.of(new Settings(serviceId, targetLanguages, includeDafnyFile));
+        }
+
+        /**
+         * Traverses up from the given start path,
+         * searching for a "smithy-build.json" file and returning its path if found.
+         */
+        private static Optional<Path> findSmithyBuildJson(final Path start) {
+            if (start == null || !start.isAbsolute()) {
+                throw new IllegalArgumentException("Start path must be non-null and absolute");
+            }
+            Path cursor = start.normalize();
+            final Path root = cursor.getRoot();
+            // Shouldn't need to traverse more than 100 levels... but don't hang forever
+            for (int i = 0; !root.equals(cursor) && i < 100; i++) {
+                final Path config = cursor.resolve("smithy-build.json");
+                if (Files.exists(config)) {
+                    return Optional.of(config);
+                }
+                cursor = cursor.getParent();
+            }
+            return Optional.empty();
         }
     }
 }
