@@ -139,7 +139,8 @@ to some of the shape types that this plugin does not yet support:
     "plugins": {
         "dafny-client-codegen": {
             "service": "smithy.example#ExampleService",
-            "targetLanguages": ["dotnet"]
+            "targetLanguages": ["dotnet"],
+            "includeDafnyPath": "[relative]/[path]/[to]/smithy-dafny/TestModels/dafny-dependencies/StandardLibrary/src/Index.dfy"
         }
     }
 }
