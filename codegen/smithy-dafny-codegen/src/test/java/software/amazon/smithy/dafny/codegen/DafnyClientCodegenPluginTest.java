@@ -3,11 +3,10 @@
 
 package software.amazon.smithy.dafny.codegen;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.Test;
 
-import org.junit.jupiter.api.Test;
+import static org.junit.Assert.assertTrue;
 
-// TODO re-enable JUnit 5 runner to make this test run
 public class DafnyClientCodegenPluginTest {
     @Test
     public void emptyTest() {

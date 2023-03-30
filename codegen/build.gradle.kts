@@ -72,22 +72,6 @@ subprojects {
             options.encoding = "UTF-8"
         }
 
-        // TODO re-enable JUnit 5 support once older JUnit 4 tests are migrated
-        // (see <https://junit.org/junit5/docs/current/user-guide/#migrating-from-junit4>)
-
-        // Use Junit5's test runner.
-//        tasks.withType<Test> {
-//            useJUnitPlatform()
-//        }
-
-//        // Apply junit 5 and hamcrest test dependencies to all java projects.
-//        dependencies {
-//            testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.2")
-//            testImplementation("org.junit.jupiter:junit-jupiter-engine:5.9.2")
-//            testImplementation("org.junit.jupiter:junit-jupiter-params:5.9.2")
-//            testImplementation("org.hamcrest:hamcrest:2.2")
-//        }
-
         // Reusable license copySpec
         val licenseSpec = copySpec {
             from("${project.rootDir}/LICENSE")
