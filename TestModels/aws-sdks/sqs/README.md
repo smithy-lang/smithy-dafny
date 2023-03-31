@@ -30,15 +30,15 @@ make transpile_net
 make test_net
 ```
 
-### Typescript
+### Dafny + .NET
 
-Building a typescript client for SQS (to demonstrate how the Smithy plugins work):
+Building a Dafny + .NET client for SQS (to demonstrate how the Smithy plugins work):
 
 ```
 gradle build
 ```
 
-The generated client package will appear in `build/smithyprojections/typescript-codegen`.
+The generated client package will appear in `build/smithyprojections/sqs/source/dafny-client-codegen`.
 
 ## Development
 
