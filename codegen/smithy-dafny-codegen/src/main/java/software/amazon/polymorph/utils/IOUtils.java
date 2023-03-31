@@ -16,7 +16,7 @@ import java.util.Map;
 public class IOUtils {
     private static final Logger LOGGER = LoggerFactory.getLogger(IOUtils.class);
 
-    private static void writeToFile(final String text, final File file) {
+    public static void writeToFile(final String text, final File file) {
         try {
             final FileWriter fileWriter = new FileWriter(file);
             fileWriter.write(text);
