@@ -76,7 +76,7 @@ class DafnyClientCodegenPluginSettings {
                     case "JAVA" -> Stream.of(CodegenEngine.TargetLanguage.JAVA);
                     case "DOTNET", "CSHARP", "CS" -> Stream.of(CodegenEngine.TargetLanguage.DOTNET);
                     case "DAFNY" -> {
-                        LOGGER.warn("Dafny code is always generated, and shouldn't be specified explicitly");
+                        LOGGER.error("Dafny code is always generated, and shouldn't be specified explicitly");
                         foundUnknownTargetLanguage.set(true);
                         yield Stream.empty();
                     }
