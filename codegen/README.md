@@ -10,7 +10,9 @@ as described in the
 ## Limitations
 
 1. Dafny supports compilation to multiple other target programming languages,
-   but of those targets, this plugin currently only supports Java and .NET.
+   but of those targets, this plugin currently only supports .NET.
+   Experimental support for Java exists
+   but does not yet work for arbitrary service models.
 2. This plugin does not yet handle all Smithy features,
    and may hit errors or generate incorrect code for some models.
    See the section below on "Using projections" for details
