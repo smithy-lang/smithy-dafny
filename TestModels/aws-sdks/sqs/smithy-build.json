@@ -2,6 +2,7 @@
   "version": "1.0",
   "plugins": {
     "dafny-client-codegen": {
+      "edition": "2023",
       "service": "com.amazonaws.sqs#AmazonSQS",
       "targetLanguages": ["dotnet"],
       "includeDafnyFile": "../../dafny-dependencies/StandardLibrary/src/Index.dfy"

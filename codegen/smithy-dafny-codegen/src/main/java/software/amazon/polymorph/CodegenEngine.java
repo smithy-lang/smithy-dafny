@@ -226,6 +226,8 @@ public class CodegenEngine {
                 .replace("%STDLIB_PATH%", stdLibPath.toString());
         IOUtils.writeToFile(csprojText, outputDir.resolve(sdkId + ".csproj").toFile());
 
+        // TODO generate Makefile
+
         LOGGER.info(".NET project files generated in {}", outputDir);
     }
 
