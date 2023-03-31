@@ -222,11 +222,17 @@ public class CodegenEngine {
     private void netAwsSdkProjectFiles(final Path outputDir) {
         final String sdkId = this.serviceShape.expectTrait(ServiceTrait.class).getSdkId();
 
+        final Path includeDafnyFile = this.includeDafnyFile.orElseThrow(
+                () -> new IllegalStateException("includeDafnyFile required when generating .NET project files"));
+        // Assumes that includeDafnyFile is at StandardLibrary/src/Index.dfy
+        // TODO be smarter about finding the StandardLibrary path
+        final Path stdLibPath = outputDir.relativize(includeDafnyFile.resolve("../.."));
+
         final String csprojTemplate = IoUtils.readUtf8Resource(
                 this.getClass(), "/templates/AwsSdkProject.csproj.template");
         final String csprojText = csprojTemplate
                 .replace("%SDK_ID%", sdkId)
-                .replace("%STDLIB_PATH%", "TODO_STDLIB_PATH");  // TODO
+                .replace("%STDLIB_PATH%", stdLibPath.toString());
         IOUtils.writeToFile(csprojText, outputDir.resolve(sdkId + ".csproj").toFile());
 
         LOGGER.info(".NET project files generated in {}", outputDir);
