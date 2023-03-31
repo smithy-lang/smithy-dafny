@@ -74,18 +74,10 @@ public class CodegenEngine {
         this.awsSdkStyle = awsSdkStyle;
         this.localServiceTest = localServiceTest;
 
-        final ModelAssembler assembler = new ModelAssembler();
-        assembler.addModel(serviceModel);
-        Arrays.stream(this.dependentModelPaths).forEach(assembler::addImport);
-        // Discover models from the classpath (e.g. models of library-defined traits)
-        assembler.discoverModels();
-        Model fullModel = assembler.assemble().unwrap();
-
-        if (this.awsSdkStyle) {
-            // TODO: move this into a DirectedCodegen.customizeBeforeShapeGeneration implementation
-             fullModel = ModelUtils.addMissingErrorMessageMembers(fullModel);
-        }
-        this.model = fullModel;
+        this.model = this.awsSdkStyle
+                // TODO: move this into a DirectedCodegen.customizeBeforeShapeGeneration implementation
+                ? ModelUtils.addMissingErrorMessageMembers(model)
+                : model;
 
         this.serviceShape = ModelUtils.serviceFromNamespace(this.model, this.namespace);
     }
