@@ -22,11 +22,20 @@ import software.amazon.polymorph.smithyjava.generator.awssdk.v2.JavaAwsSdkV2;
 import software.amazon.polymorph.smithyjava.generator.library.JavaLibrary;
 import software.amazon.polymorph.utils.IOUtils;
 import software.amazon.polymorph.utils.ModelUtils;
+import software.amazon.smithy.aws.traits.ServiceTrait;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.loader.ModelAssembler;
 import software.amazon.smithy.model.shapes.ServiceShape;
+import software.amazon.smithy.utils.IoUtils;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -45,6 +54,7 @@ public class CodegenEngine {
     private final Optional<Path> includeDafnyFile;
     private final boolean awsSdkStyle;
     private final boolean localServiceTest;
+    private final boolean generateProjectFiles;
 
     // To be initialized in constructor
     private final Model model;
@@ -63,7 +73,8 @@ public class CodegenEngine {
             final AwsSdkVersion javaAwsSdkVersion,
             final Optional<Path> includeDafnyFile,
             final boolean awsSdkStyle,
-            final boolean localServiceTest
+            final boolean localServiceTest,
+            final boolean generateProjectFiles
     ) {
         // To be provided to constructor
         this.dependentModelPaths = dependentModelPaths;
@@ -73,6 +84,7 @@ public class CodegenEngine {
         this.includeDafnyFile = includeDafnyFile;
         this.awsSdkStyle = awsSdkStyle;
         this.localServiceTest = localServiceTest;
+        this.generateProjectFiles = generateProjectFiles;
 
         this.model = this.awsSdkStyle
                 // TODO: move this into a DirectedCodegen.customizeBeforeShapeGeneration implementation
@@ -164,6 +176,9 @@ public class CodegenEngine {
     private void generateDotnet(final Path outputDir) {
         if (this.awsSdkStyle) {
             netAwsSdk(outputDir);
+            if (this.generateProjectFiles) {
+                netAwsSdkProjectFiles(outputDir);
+            }
         } else if (this.localServiceTest) {
             netWrappedLocalService(outputDir);
         } else {
@@ -204,6 +219,19 @@ public class CodegenEngine {
         LOGGER.info(".NET code generated in {}", outputDir);
     }
 
+    private void netAwsSdkProjectFiles(final Path outputDir) {
+        final String sdkId = this.serviceShape.expectTrait(ServiceTrait.class).getSdkId();
+
+        final String csprojTemplate = IoUtils.readUtf8Resource(
+                this.getClass(), "/templates/AwsSdkProject.csproj.template");
+        final String csprojText = csprojTemplate
+                .replace("%SDK_ID%", sdkId)
+                .replace("%STDLIB_PATH%", "TODO_STDLIB_PATH");  // TODO
+        IOUtils.writeToFile(csprojText, outputDir.resolve(sdkId + ".csproj").toFile());
+
+        LOGGER.info(".NET project files generated in {}", outputDir);
+    }
+
     public static class Builder {
         private Model serviceModel;
         private Path[] dependentModelPaths;
@@ -211,8 +239,9 @@ public class CodegenEngine {
         private Map<TargetLanguage, Path> targetLangOutputDirs;
         private AwsSdkVersion javaAwsSdkVersion = AwsSdkVersion.V2;
         private Path includeDafnyFile;
-        private boolean awsSdkStyle;
-        private boolean localServiceTest;
+        private boolean awsSdkStyle = false;
+        private boolean localServiceTest = false;
+        private boolean generateProjectFiles = false;
 
         public Builder() {}
 
@@ -282,6 +311,15 @@ public class CodegenEngine {
             return this;
         }
 
+        /**
+         * Sets whether codegen will generate project files,
+         * including a Makefile and target-language specific build configuration.
+         */
+        public Builder withGenerateProjectFiles(final boolean generateProjectFiles) {
+            this.generateProjectFiles = generateProjectFiles;
+            return this;
+        }
+
         public CodegenEngine build() {
             final Model serviceModel = Objects.requireNonNull(this.serviceModel);
             final Path[] dependentModelPaths = this.dependentModelPaths == null
@@ -317,7 +355,8 @@ public class CodegenEngine {
                     javaAwsSdkVersion,
                     includeDafnyFile,
                     this.awsSdkStyle,
-                    this.localServiceTest
+                    this.localServiceTest,
+                    this.generateProjectFiles
             );
         }
     }
