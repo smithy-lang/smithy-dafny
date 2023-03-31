@@ -83,6 +83,7 @@ are as follows:
         "version": "1.0",
         "plugins": {
             "dafny-client-codegen": {
+                "edition": "2023",
                 "service": "smithy.example#ExampleService",
                 "targetLanguages": ["dotnet"],
                 "includeDafnyPath": "[relative]/[path]/[to]/smithy-dafny/TestModels/dafny-dependencies/StandardLibrary/src/Index.dfy"
