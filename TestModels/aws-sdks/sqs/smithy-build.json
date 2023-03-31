@@ -1,5 +1,6 @@
 {
   "version": "1.0",
+  "sources": ["Model"],
   "plugins": {
     "dafny-client-codegen": {
       "edition": "2023",
