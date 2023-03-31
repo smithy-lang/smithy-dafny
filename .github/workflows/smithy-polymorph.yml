@@ -70,6 +70,8 @@ jobs:
 
       - name: Sanity-check SQS test model via plugin
         uses: gradle/gradle-build-action@v2
+        # Needed so that the Smithy plugin can locate the right model
+        working-directory: TestModels/aws-sdks/sqs
         with:
           arguments: build
           build-root-directory: TestModels/aws-sdks/sqs
