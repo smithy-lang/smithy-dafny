@@ -20,8 +20,8 @@ import java.util.stream.Collectors;
 
 import javax.lang.model.element.Modifier;
 
-import dafny.DafnySequence;
 import software.amazon.polymorph.smithyjava.generator.ToDafny;
+import software.amazon.polymorph.smithyjava.nameresolver.Constants;
 import software.amazon.polymorph.utils.AwsSdkNameResolverHelpers;
 import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 import software.amazon.polymorph.utils.ModelUtils;
@@ -337,7 +337,7 @@ public class ToDafnyAwsV1 extends ToDafny {
                 ParameterizedTypeName.get(
                         ClassName.get("Wrappers_Compile", "Option"),
                         ParameterizedTypeName.get(
-                                ClassName.get(DafnySequence.class),
+                                software.amazon.polymorph.smithyjava.nameresolver.Constants.DAFNY_SEQUENCE_CLASS_NAME,
                                 WildcardTypeName.subtypeOf(Character.class))
                 ),
                 "message"
