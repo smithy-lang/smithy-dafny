@@ -93,6 +93,7 @@ are as follows:
         }
     }
    ```
+See [`DafnyClientCodegenPluginSettings.java`](https://github.com/awslabs/smithy-dafny/blob/main-1.x/codegen/smithy-dafny-codegen/src/main/java/software/amazon/smithy/dafny/codegen/DafnyClientCodegenPluginSettings.java) for more details about plugin settings.
 
 5. Create a directory named `model`. This is where all of your Smithy models
    will go.
