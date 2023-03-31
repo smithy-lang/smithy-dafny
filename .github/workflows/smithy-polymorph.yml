@@ -70,5 +70,5 @@ jobs:
 
       - name: Sanity-check SQS test model via plugin
         run: |
-          cd TestModels/aws-sdks-sqs
+          cd TestModels/aws-sdks/sqs
           gradle build
