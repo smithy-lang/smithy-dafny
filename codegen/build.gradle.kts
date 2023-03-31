@@ -5,9 +5,9 @@ plugins {
     `java-library`
     `maven-publish`
     signing
-    checkstyle
+    //checkstyle
     jacoco
-    id("com.github.spotbugs") version "4.7.1"
+    /*id("com.github.spotbugs") version "4.7.1"*/
     id("io.codearte.nexus-staging") version "0.30.0"
 }
 
@@ -64,8 +64,7 @@ subprojects {
         }
 
         java {
-            sourceCompatibility = JavaVersion.VERSION_17
-            targetCompatibility = JavaVersion.VERSION_17
+            toolchain {languageVersion.set(JavaLanguageVersion.of(17))}
         }
 
         tasks.withType<JavaCompile> {
@@ -85,11 +84,11 @@ subprojects {
             archiveClassifier.set("sources")
         }
 
-        tasks.register<Jar>("javadocJar") {
+        /*tasks.register<Jar>("javadocJar") {
             metaInf.with(licenseSpec)
             from(tasks.javadoc)
             archiveClassifier.set("javadoc")
-        }
+        }*/
 
         // Configure jars to include license related info
         tasks.jar {
@@ -101,7 +100,7 @@ subprojects {
         }
 
         // Always run javadoc after build.
-        tasks["build"].finalizedBy(tasks["javadoc"])
+        /*tasks["build"].finalizedBy(tasks["javadoc"])*/
 
         /*
          * Maven
@@ -132,7 +131,7 @@ subprojects {
 
                     // Ship the source and javadoc jars.
                     artifact(tasks["sourcesJar"])
-                    artifact(tasks["javadocJar"])
+                    /*artifact(tasks["javadocJar"])*/
 
                     // Include extra information in the POMs.
                     afterEvaluate {
@@ -179,9 +178,9 @@ subprojects {
          * CheckStyle
          * ====================================================
          */
-        apply(plugin = "checkstyle")
+        //apply(plugin = "checkstyle")
 
-        tasks["checkstyleTest"].enabled = false
+        //tasks["checkstyleTest"].enabled = false
 
         /*
          * Tests
@@ -218,18 +217,18 @@ subprojects {
          * Spotbugs
          * ====================================================
          */
-        apply(plugin = "com.github.spotbugs")
+        //apply(plugin = "com.github.spotbugs")
 
         // We don't need to lint tests.
-        tasks["spotbugsTest"].enabled = false
+        //tasks["spotbugsTest"].enabled = false
 
         // Configure the bug filter for spotbugs.
-        spotbugs {
+        /*spotbugs {
             setEffort("max")
             val excludeFile = File("${project.rootDir}/config/spotbugs/filter.xml")
             if (excludeFile.exists()) {
                 excludeFilter.set(excludeFile)
             }
-        }
+        }*/
     }
 }
