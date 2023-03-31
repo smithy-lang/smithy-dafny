@@ -7,16 +7,14 @@ as described in the
 
 *WARNING: All internal and external interfaces are considered unstable and subject to change without notice.*
 
-The file layout of the library follows the
-[Codegen repo layout](https://smithy.io/2.0/guides/building-codegen/creating-codegen-repo.html#codegen-repo-layout)
-described in the Smithy documentation.
+## Limitations
 
-Most configuration (e.g. `config`) and build files (e.g. `build.gradle.kts`)
-were adapted from the corresponding files in the
-[smithy-typescript](https://github.com/awslabs/smithy-typescript)
-and/or
-[smithy-go](https://github.com/aws/smithy-go/tree/main/codegen)
-repositories.
+1. Dafny supports compilation to multiple other target programming languages,
+   but of those targets, this plugin currently only supports Java and .NET.
+2. This plugin does not yet handle all Smithy features,
+   and may hit errors or generate incorrect code for some models.
+   See the section below on "Using projections" for details
+   on how to cleanly avoid unsupported features.
 
 ## Generating a client
 
@@ -78,7 +76,7 @@ are as follows:
 4. Create a `smithy-build.json` file with the following contents,
    substituting "smithy.example#ExampleService" with the name of the service
    to generate a client for, and specifying the set of target languages
-   to support in the generated client (currently limited to "dotnet" and/or "java"):
+   to support in the generated client:
 
    ```json
     {
@@ -141,19 +139,37 @@ to some of the shape types that this plugin does not yet support:
                         "selector": "operation :test(~> timestamp, double, float)"
                     }
                 }
-            ]
+            ],
+            "plugins": {
+                "dafny-client-codegen": {
+                    "service": "smithy.example#ExampleService",
+                    "targetLanguages": ["dotnet"],
+                    "includeDafnyPath": "[relative]/[path]/[to]/smithy-dafny/TestModels/dafny-dependencies/StandardLibrary/src/Index.dfy"
+                }
+            }
         }
     },
-    "plugins": {
-        "dafny-client-codegen": {
-            "service": "smithy.example#ExampleService",
-            "targetLanguages": ["dotnet"],
-            "includeDafnyPath": "[relative]/[path]/[to]/smithy-dafny/TestModels/dafny-dependencies/StandardLibrary/src/Index.dfy"
-        }
-    }
 }
 ```
+
+Note that if you are using transformations to avoid unsupported features,
+the plugin has to be applied specifically to projections that use such transformations,
+and not at the top level were it will be applied to all projections.
+Otherwise the built-in "source" projection will still hit errors.
 
 Refer to the Smithy documentation for more information about other transforms
 that might be useful, but bear in mind that removing arbitrary shapes may lead
 to a client that will fail to compile or not function correctly.
+
+## Development
+
+The file layout of the library follows the
+[Codegen repo layout](https://smithy.io/2.0/guides/building-codegen/creating-codegen-repo.html#codegen-repo-layout)
+described in the Smithy documentation.
+
+Most configuration (e.g. `config`) and build files (e.g. `build.gradle.kts`)
+were adapted from the corresponding files in the
+[smithy-typescript](https://github.com/awslabs/smithy-typescript)
+and/or
+[smithy-go](https://github.com/aws/smithy-go/tree/main/codegen)
+repositories.
