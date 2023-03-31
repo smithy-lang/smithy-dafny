@@ -100,17 +100,18 @@ public final class DafnyClientCodegenPlugin implements SmithyBuildPlugin {
                 return Optional.empty();
             }
 
-            final Path buildRoot = findSmithyBuildJson(manifest.getBaseDir())
-                    .orElseThrow(() -> new IllegalStateException("Couldn't find smithy-build.json"))
-                    .getParent();
+            final Optional<Path> buildRoot = findSmithyBuildJson(manifest.getBaseDir()).map(p -> p.getParent());
             final String includeDafnyFileStr = node.expectStringMember("includeDafnyFile").getValue();
-            final Path includeDafnyFile = buildRoot.resolve(includeDafnyFileStr).toAbsolutePath().normalize();
-            if (Files.notExists(includeDafnyFile)) {
+            final Path includeDafnyFile = Path.of(includeDafnyFileStr);
+            final Path includeDafnyFileNormalized = buildRoot.isPresent() && !includeDafnyFile.isAbsolute()
+                    ? buildRoot.get().resolve(includeDafnyFile).toAbsolutePath().normalize()
+                    : includeDafnyFile;
+            if (Files.notExists(includeDafnyFileNormalized)) {
                 LOGGER.warn("Generated Dafny code may not compile because the includeDafnyFile could not be found: {}",
-                        includeDafnyFile);
+                        includeDafnyFileNormalized);
             }
 
-            return Optional.of(new Settings(serviceId, targetLanguages, includeDafnyFile));
+            return Optional.of(new Settings(serviceId, targetLanguages, includeDafnyFileNormalized));
         }
 
         /**
