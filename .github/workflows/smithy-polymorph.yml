@@ -69,6 +69,7 @@ jobs:
           build-root-directory: codegen
 
       - name: Sanity-check SQS test model via plugin
-        run: |
-          cd TestModels/aws-sdks/sqs
-          gradle build
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: build
+          build-root-directory: TestModels/aws-sdks/sqs
