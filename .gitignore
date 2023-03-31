@@ -2,3 +2,5 @@
 /.idea
 /.history
 /.smithy.lsp.log
+
+*/**/.idea
