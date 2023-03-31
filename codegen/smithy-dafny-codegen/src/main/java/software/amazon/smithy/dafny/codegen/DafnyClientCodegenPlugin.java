@@ -3,6 +3,8 @@
 
 package software.amazon.smithy.dafny.codegen;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import software.amazon.polymorph.CodegenEngine;
 import software.amazon.polymorph.CodegenEngine.TargetLanguage;
 import software.amazon.smithy.build.FileManifest;
@@ -16,6 +18,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public final class DafnyClientCodegenPlugin implements SmithyBuildPlugin {
+    private static final Logger LOGGER = LoggerFactory.getLogger(DafnyClientCodegenPlugin.class);
+
     @Override
     public String getName() {
         return "dafny-client-codegen";
@@ -35,6 +39,11 @@ public final class DafnyClientCodegenPlugin implements SmithyBuildPlugin {
             final Path dir = Paths.get("runtimes", lang.name().toLowerCase(), "Generated");
             outputDirs.put(lang, manifest.resolvePath(dir));
         });
+
+        // TODO remove when Java is properly supported
+        if (settings.targetLanguages.contains(TargetLanguage.JAVA)) {
+            LOGGER.warn("smithy-dafny-codegen support for Java code generation is experimental and does not yet work for arbitrary service models");
+        }
 
         final CodegenEngine codegenEngine = new CodegenEngine.Builder()
                 .withServiceModel(model)
