@@ -76,8 +76,8 @@ public class CodegenEngine {
 
         this.model = this.awsSdkStyle
                 // TODO: move this into a DirectedCodegen.customizeBeforeShapeGeneration implementation
-                ? ModelUtils.addMissingErrorMessageMembers(model)
-                : model;
+                ? ModelUtils.addMissingErrorMessageMembers(serviceModel)
+                : serviceModel;
 
         this.serviceShape = ModelUtils.serviceFromNamespace(this.model, this.namespace);
     }
