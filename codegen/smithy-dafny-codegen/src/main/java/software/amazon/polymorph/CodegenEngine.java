@@ -251,7 +251,7 @@ public class CodegenEngine {
         }
 
         /**
-         * Sets the directory in which to search for dependent model file(s).
+         * Sets the directories in which to search for dependent model file(s).
          */
         public Builder withDependentModelPaths(final Path[] dependentModelPaths) {
             this.dependentModelPaths = dependentModelPaths;
