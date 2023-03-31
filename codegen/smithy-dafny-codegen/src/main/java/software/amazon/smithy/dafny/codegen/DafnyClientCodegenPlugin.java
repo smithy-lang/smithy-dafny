@@ -28,6 +28,7 @@ public final class DafnyClientCodegenPlugin implements SmithyBuildPlugin {
     @Override
     public void execute(PluginContext context) {
         final Model model = context.getModel();
+        // TODO register generated files to allow to produce a proper manifest
         final FileManifest manifest = context.getFileManifest();
         final DafnyClientCodegenPluginSettings settings = DafnyClientCodegenPluginSettings
                 .fromObject(context.getSettings(), manifest)
