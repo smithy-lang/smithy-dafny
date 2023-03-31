@@ -46,5 +46,4 @@ public final class DafnyClientCodegenPlugin implements SmithyBuildPlugin {
                 .build();
         codegenEngine.run();
     }
-
 }
