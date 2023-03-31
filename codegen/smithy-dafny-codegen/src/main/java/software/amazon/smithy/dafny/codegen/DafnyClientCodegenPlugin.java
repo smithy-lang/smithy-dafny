@@ -83,7 +83,7 @@ public final class DafnyClientCodegenPlugin implements SmithyBuildPlugin {
                         case "JAVA" -> Stream.of(TargetLanguage.JAVA);
                         case "DOTNET", "CSHARP", "CS" -> Stream.of(TargetLanguage.DOTNET);
                         case "DAFNY" -> {
-                            LOGGER.warn("Dafny code is always generated, and shouldn't be specified explicitly");
+                            LOGGER.error("Dafny code is always generated, and shouldn't be specified explicitly");
                             foundUnknownTargetLanguage.set(true);
                             yield Stream.empty();
                         }
