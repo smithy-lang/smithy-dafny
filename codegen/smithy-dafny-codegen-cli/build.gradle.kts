@@ -49,7 +49,6 @@ dependencies {
     testImplementation("junit", "junit", "4.13.2")
     // For Smithy-Java
     implementation("software.amazon.awssdk:codegen:2.20.4")
-    implementation("dafny.lang:DafnyRuntime:3.10.0")
     implementation("com.squareup:javapoet:1.13.0")
 
     // Used for parsing-based tests

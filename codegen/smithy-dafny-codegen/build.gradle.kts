@@ -34,7 +34,6 @@ dependencies {
 
     // For Smithy-Java
     implementation("software.amazon.awssdk:codegen:2.20.26")
-    implementation("dafny.lang:DafnyRuntime:3.10.0")
     implementation("com.squareup:javapoet:1.13.0")
 
     // Used for parsing-based tests
