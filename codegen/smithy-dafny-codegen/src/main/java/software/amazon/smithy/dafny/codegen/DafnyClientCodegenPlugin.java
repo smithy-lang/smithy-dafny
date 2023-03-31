@@ -47,6 +47,7 @@ public final class DafnyClientCodegenPlugin implements SmithyBuildPlugin {
 
         final CodegenEngine codegenEngine = new CodegenEngine.Builder()
                 .withServiceModel(model)
+                // TODO generate code based on service closure, not namespace
                 .withNamespace(settings.serviceId.getNamespace())
                 .withTargetLangOutputDirs(outputDirs)
                 .withAwsSdkStyle(true)  // this plugin only generates AWS SDK-style code
