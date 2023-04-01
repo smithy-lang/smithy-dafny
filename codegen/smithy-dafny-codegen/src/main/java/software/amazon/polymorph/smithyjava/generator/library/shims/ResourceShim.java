@@ -14,14 +14,14 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import software.amazon.polymorph.smithyjava.generator.CodegenSubject.AwsSdkVersion;
+import software.amazon.polymorph.smithyjava.generator.CodegenSubject;
+import software.amazon.polymorph.smithyjava.generator.library.ShimLibrary;
+import software.amazon.polymorph.traits.ExtendableTrait;
 import software.amazon.polymorph.smithyjava.generator.library.JavaLibrary;
 import software.amazon.polymorph.smithyjava.MethodSignature;
-import software.amazon.polymorph.smithyjava.generator.library.ShimLibrary;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.polymorph.smithyjava.nameresolver.Native;
 
-import software.amazon.polymorph.traits.ExtendableTrait;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ResourceShape;
 
@@ -55,7 +55,7 @@ public class ResourceShim extends ShimLibrary {
         argName = uncapitalize(dafnyType.simpleName());
     }
 
-    private static ClassName interfaceName(ResourceShape shape, AwsSdkVersion sdkVersion) {
+    private static ClassName interfaceName(ResourceShape shape, CodegenSubject.AwsSdkVersion sdkVersion) {
         return Native.classNameForInterfaceOrLocalService(shape, sdkVersion);
     }
 

@@ -6,8 +6,10 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.TypeName;
 
+import software.amazon.polymorph.smithydafny.DafnyNameResolver;
 import software.amazon.polymorph.smithyjava.generator.CodegenSubject;
 import software.amazon.polymorph.utils.AwsSdkNameResolverHelpers;
+import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.ResourceShape;
@@ -16,10 +18,6 @@ import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.utils.StringUtils;
 
-import static software.amazon.polymorph.smithydafny.DafnyNameResolver.traitNameForServiceClient;
-import static software.amazon.polymorph.smithyjava.nameresolver.AwsSdkV2NameResolverUtils.isAttributeValueType;
-import static software.amazon.polymorph.smithyjava.nameresolver.AwsSdkV2NameResolverUtils.tokenToUncapitalizeInShape;
-import static software.amazon.polymorph.utils.DafnyNameResolverHelpers.dafnyCompilesExtra_;
 import static software.amazon.smithy.utils.StringUtils.capitalize;
 import static software.amazon.smithy.utils.StringUtils.uncapitalize;
 
@@ -40,7 +38,7 @@ public class AwsSdkDafnyV2 extends Dafny {
     public static ClassName classNameForAwsService(ServiceShape shape) {
         return ClassName.get(
                 modelPackageNameForNamespace(shape.getId().getNamespace()),
-                dafnyCompilesExtra_(traitNameForServiceClient(shape))
+                DafnyNameResolverHelpers.dafnyCompilesExtra_(DafnyNameResolver.traitNameForServiceClient(shape))
         );
     }
 
@@ -64,7 +62,7 @@ public class AwsSdkDafnyV2 extends Dafny {
      */
     public CodeBlock methodForGetMember(CodeBlock variableName, MemberShape memberShape) {
         // Some Strings have a token that requires multi-letter decapitalization (e.g. "SSE", "KMS")
-        String tokenToUncapitalize = tokenToUncapitalizeInShape(memberShape);
+        String tokenToUncapitalize = AwsSdkV2NameResolverUtils.tokenToUncapitalizeInShape(memberShape);
         if (!tokenToUncapitalize.equals("")) {
             return CodeBlock.of("$L.$L()", variableName,
                 memberShape.getMemberName().replace(tokenToUncapitalize, tokenToUncapitalize.toLowerCase()));
@@ -78,7 +76,7 @@ public class AwsSdkDafnyV2 extends Dafny {
         }
 
         // Attributes of SDK AttributeValue shapes are entirely lower-case
-        if (isAttributeValueType(memberShape)) {
+        if (AwsSdkV2NameResolverUtils.isAttributeValueType(memberShape)) {
             // "NULL" attribute is retrieved using "nul"
             if (memberShape.getMemberName().equals("NULL")) {
                 return CodeBlock.of("$L.nul()", variableName);
@@ -128,7 +126,7 @@ public class AwsSdkDafnyV2 extends Dafny {
      * @return CodeBlock to get member field for SDK V2 shape
      */
     public static CodeBlock getV2MemberFieldValue(MemberShape shape) {
-        if (isAttributeValueType(shape)) {
+        if (AwsSdkV2NameResolverUtils.isAttributeValueType(shape)) {
             return getMemberField(shape);
         }
         return Dafny.getMemberFieldValue(shape);

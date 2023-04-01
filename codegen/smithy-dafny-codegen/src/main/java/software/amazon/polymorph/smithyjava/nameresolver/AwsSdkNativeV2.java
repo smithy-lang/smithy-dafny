@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 
 import software.amazon.polymorph.smithyjava.generator.CodegenSubject;
+import software.amazon.polymorph.smithyjava.generator.awssdk.v2.JavaAwsSdkV2;
 import software.amazon.polymorph.utils.AwsSdkNameResolverHelpers;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.MemberShape;
@@ -26,7 +27,6 @@ import software.amazon.smithy.utils.StringUtils;
 import software.amazon.awssdk.codegen.naming.DefaultNamingStrategy;
 import software.amazon.awssdk.codegen.model.service.ServiceModel;
 
-import static software.amazon.polymorph.smithyjava.generator.awssdk.v2.JavaAwsSdkV2.BLOB_TO_NATIVE_SDK_BYTES;
 import static software.amazon.polymorph.smithyjava.nameresolver.AwsSdkV2NameResolverUtils.isAttributeValueType;
 import static software.amazon.polymorph.smithyjava.nameresolver.AwsSdkV2NameResolverUtils.tokenToUncapitalizeInShape;
 import static software.amazon.polymorph.smithyjava.nameresolver.Constants.SHAPE_TYPES_LIST_SET_MAP;
@@ -153,14 +153,14 @@ public class AwsSdkNativeV2 extends Native {
 
         // Overrides BYTE shapeType type conversion to SdkBytes conversion.
         if (shape.getType().equals(ShapeType.BYTE)) {
-            return BLOB_TO_NATIVE_SDK_BYTES;
+            return JavaAwsSdkV2.BLOB_TO_NATIVE_SDK_BYTES;
         }
 
         // BinarySetAttributeValue is the only list of bytes
         if (shapeId.getName().contains("BinarySetAttributeValue")) {
             return ParameterizedTypeName.get(
                 ClassName.get(List.class),
-                BLOB_TO_NATIVE_SDK_BYTES);
+                JavaAwsSdkV2.BLOB_TO_NATIVE_SDK_BYTES);
         }
 
         return super.typeForShape(shapeId);

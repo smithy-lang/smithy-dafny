@@ -16,7 +16,6 @@ import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PROTECTED;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static software.amazon.polymorph.smithyjava.unmodeled.NativeError.NATIVE_ERROR;
-import static software.amazon.polymorph.smithyjava.BuilderMemberSpec.THROWABLE_ARGS;
 
 public class CollectionOfErrors {
     public final static String COLLECTION_ERROR = "CollectionOfErrors";
@@ -30,7 +29,7 @@ public class CollectionOfErrors {
         ClassName superName = NativeError.nativeClassName(packageName);
         List<BuilderMemberSpec> collectionArgs = getArgs(packageName);
         BuilderSpecs builderSpecs = new BuilderSpecs(
-                className, superName, collectionArgs, THROWABLE_ARGS);
+                className, superName, collectionArgs, BuilderMemberSpec.THROWABLE_ARGS);
         TypeSpec.Builder spec = TypeSpec
                 .classBuilder(className)
                 .addModifiers(PUBLIC)

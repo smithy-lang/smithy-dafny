@@ -17,13 +17,15 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
-import software.amazon.polymorph.smithydafny.DafnyNameResolver;
-import software.amazon.polymorph.smithyjava.generator.CodegenSubject.AwsSdkVersion;
-import software.amazon.polymorph.smithyjava.unmodeled.NativeError;
-import software.amazon.polymorph.smithyjava.unmodeled.OpaqueError;
+import software.amazon.polymorph.smithyjava.NamespaceHelper;
+import software.amazon.polymorph.smithyjava.generator.CodegenSubject;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
+import software.amazon.polymorph.utils.AwsSdkNameResolverHelpers;
 import software.amazon.polymorph.utils.ModelUtils;
+import software.amazon.polymorph.smithydafny.DafnyNameResolver;
+import software.amazon.polymorph.smithyjava.unmodeled.NativeError;
+import software.amazon.polymorph.smithyjava.unmodeled.OpaqueError;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.ResourceShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
@@ -34,8 +36,6 @@ import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.traits.BoxTrait;
 import software.amazon.smithy.model.traits.EnumTrait;
 
-import static software.amazon.polymorph.smithyjava.NamespaceHelper.standardize;
-import static software.amazon.polymorph.utils.AwsSdkNameResolverHelpers.isInAwsSdkNamespace;
 import static software.amazon.smithy.utils.StringUtils.capitalize;
 
 /**
@@ -88,7 +88,7 @@ public class Native extends NameResolver{
             final ServiceShape serviceShape,
             final Model model,
             final String modelPackageName,
-            AwsSdkVersion awsSdkVersion) {
+            CodegenSubject.AwsSdkVersion awsSdkVersion) {
         super(
                 packageName,
                 serviceShape,
@@ -176,7 +176,7 @@ public class Native extends NameResolver{
 
     public ClassName classForStringOrEnum(final StringShape shape) {
         if (shape.hasTrait(EnumTrait.class)) {
-            if (isInAwsSdkNamespace(shape.getId())) {
+            if (AwsSdkNameResolverHelpers.isInAwsSdkNamespace(shape.getId())) {
                 return switch (awsSdkVersion) {
                     case V2 -> AwsSdkNativeV2.classNameForAwsSdkShape(shape);
                     case V1 -> AwsSdkNativeV1.classNameForAwsSdkShape(shape);
@@ -197,7 +197,7 @@ public class Native extends NameResolver{
         // and interfaces (smithy resources or services)
         // are placed in a model sub-package.
         return ClassName.get(
-                standardize(shape.getId().getNamespace()) + ".model",
+                NamespaceHelper.standardize(shape.getId().getNamespace()) + ".model",
                 shape.getId().getName());
     }
 
@@ -238,7 +238,7 @@ public class Native extends NameResolver{
             //noinspection OptionalGetWithoutIsPresent
             return classNameForResource(rShape.asResourceShape().get());
         }
-        if (isInAwsSdkNamespace(shape.getId())) {
+        if (AwsSdkNameResolverHelpers.isInAwsSdkNamespace(shape.getId())) {
             return switch (awsSdkVersion) {
                 case V2 -> AwsSdkNativeV2.classNameForAwsSdkShape(shape);
                 case V1 -> AwsSdkNativeV1.classNameForAwsSdkShape(shape);
@@ -252,7 +252,7 @@ public class Native extends NameResolver{
         // most Exceptions (also structures),
         // are placed in a model sub-package.
         return ClassName.get(
-                standardize(shape.getId().getNamespace()) + ".model",
+                NamespaceHelper.standardize(shape.getId().getNamespace()) + ".model",
                 shape.getId().getName());
     }
 
@@ -268,20 +268,20 @@ public class Native extends NameResolver{
                             " ShapeId: %s").formatted(shape.toShapeId()));
         }
         return ClassName.get(
-                standardize(shape.getId().getNamespace()) + ".wrapped",
+                NamespaceHelper.standardize(shape.getId().getNamespace()) + ".wrapped",
                 "Test" + capitalize(maybeTrait.get().getSdkId()));
     }
 
     public static ClassName classNameForResourceInterface(ResourceShape shape) {
         return ClassName.get(
-                standardize(shape.getId().getNamespace()),
+                NamespaceHelper.standardize(shape.getId().getNamespace()),
                 DafnyNameResolver.traitNameForResource(shape)
         );
     }
 
     public static ClassName classNameForInterfaceOrLocalService(
-            Shape shape, AwsSdkVersion sdkVersion) {
-        if (isInAwsSdkNamespace(shape.toShapeId())) {
+            Shape shape, CodegenSubject.AwsSdkVersion sdkVersion) {
+        if (AwsSdkNameResolverHelpers.isInAwsSdkNamespace(shape.toShapeId())) {
             return classNameForAwsSdk(shape, sdkVersion);
         }
         // if operation takes a non-AWS Service/Resource, return Native Interface Or Local Service
@@ -297,7 +297,7 @@ public class Native extends NameResolver{
                                 " ShapeId: %s").formatted(shape.toShapeId()));
             }
             return ClassName.get(
-                    standardize(shape.getId().getNamespace()),
+                    NamespaceHelper.standardize(shape.getId().getNamespace()),
                     maybeTrait.get().getSdkId());
         }
         throw new IllegalArgumentException(
@@ -305,7 +305,7 @@ public class Native extends NameResolver{
                         .formatted(shape.toShapeId()));
     }
 
-    public static ClassName classNameForAwsSdk(Shape shape, AwsSdkVersion sdkVersion) {
+    public static ClassName classNameForAwsSdk(Shape shape, CodegenSubject.AwsSdkVersion sdkVersion) {
         if (shape.getType() != ShapeType.SERVICE) {
             throw new RuntimeException(
                     "Polymorph only knows the class Name of Service clients. " +
@@ -321,7 +321,7 @@ public class Native extends NameResolver{
 
     public ClassName classNameForResource(ResourceShape shape) {
         return ClassName.get(
-                standardize(shape.getId().getNamespace()),
+                NamespaceHelper.standardize(shape.getId().getNamespace()),
                 shape.getId().getName()
         );
     }

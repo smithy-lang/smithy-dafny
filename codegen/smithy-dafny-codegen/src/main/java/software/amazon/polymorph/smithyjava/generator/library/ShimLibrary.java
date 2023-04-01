@@ -7,12 +7,13 @@ import com.squareup.javapoet.TypeName;
 
 import software.amazon.polymorph.smithyjava.MethodReference;
 import software.amazon.polymorph.smithyjava.generator.Generator;
+import software.amazon.polymorph.utils.AwsSdkNameResolverHelpers;
+import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.polymorph.smithyjava.MethodSignature;
 import software.amazon.polymorph.utils.ModelUtils.ResolvedShapeId;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.polymorph.smithyjava.nameresolver.Native;
 
-import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
@@ -20,7 +21,6 @@ import software.amazon.smithy.model.shapes.ShapeId;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static software.amazon.polymorph.smithyjava.nameresolver.Constants.DAFNY_TUPLE0_CLASS_NAME;
 import static software.amazon.polymorph.smithyjava.nameresolver.Constants.SMITHY_API_UNIT;
-import static software.amazon.polymorph.utils.AwsSdkNameResolverHelpers.isInAwsSdkNamespace;
 
 /**
  * A Java Library's Shim is the public class
@@ -89,7 +89,7 @@ public abstract class ShimLibrary extends Generator {
             // If input is a Service or Resource, and Not in AWS Namespace
             if (
                     (shape.isServiceShape() || shape.isResourceShape())
-                    && !isInAwsSdkNamespace(inputResolved.resolvedId())
+                    && !AwsSdkNameResolverHelpers.isInAwsSdkNamespace(inputResolved.resolvedId())
             ) {
                 // if operation takes a non-AWS Service/Resource, get impl()
                 method.addStatement(dafnyDeclareGetImpl(inputResolved.resolvedId()));
@@ -131,7 +131,7 @@ public abstract class ShimLibrary extends Generator {
         // if resolvedOutput is a Service or Resource not in AWS SDK Namespace
         if (
                 (outputShape.isServiceShape() || outputShape.isResourceShape())
-                && !isInAwsSdkNamespace(outputResolved.resolvedId())
+                && !AwsSdkNameResolverHelpers.isInAwsSdkNamespace(outputResolved.resolvedId())
         ) {
             // if operation outputs a non-AWS Service/Resource, wrap result with Shim
             method.addStatement("return $L",

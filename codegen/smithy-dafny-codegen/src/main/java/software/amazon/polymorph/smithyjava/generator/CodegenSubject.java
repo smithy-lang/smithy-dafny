@@ -3,9 +3,9 @@ package software.amazon.polymorph.smithyjava.generator;
 import java.nio.file.Path;
 import java.util.Map;
 
+import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.polymorph.smithyjava.nameresolver.Native;
-import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.ServiceShape;
 

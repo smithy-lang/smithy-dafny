@@ -3,22 +3,16 @@
 
 package software.amazon.polymorph.smithydotnet;
 
-import org.junit.Test;
 import software.amazon.polymorph.util.TestModel;
-import software.amazon.polymorph.util.Tokenizer;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.loader.ModelAssembler;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.ShapeId;
-import software.amazon.smithy.model.shapes.StructureShape;
 
-import java.util.List;
 import java.util.function.BiConsumer;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static software.amazon.polymorph.smithydotnet.TypeConversionDirection.FROM_DAFNY;
-import static software.amazon.polymorph.smithydotnet.TypeConversionDirection.TO_DAFNY;
 
 public class AwsSdkTypeConversionCodegenTest {
     // TODO: Apply "Errors" refactor to Tests

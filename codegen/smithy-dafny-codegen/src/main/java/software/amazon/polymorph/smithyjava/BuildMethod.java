@@ -9,9 +9,9 @@ import java.util.Objects;
 
 import javax.lang.model.element.Modifier;
 
+import software.amazon.polymorph.utils.ConstrainTraitUtils;
 import software.amazon.polymorph.smithyjava.generator.library.JavaLibrary;
 import software.amazon.polymorph.smithyjava.modeled.ModeledUnion;
-import software.amazon.polymorph.utils.ConstrainTraitUtils;
 
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.traits.LengthTrait;
