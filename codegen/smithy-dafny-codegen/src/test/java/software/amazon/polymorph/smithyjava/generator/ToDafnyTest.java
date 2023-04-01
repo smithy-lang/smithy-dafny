@@ -3,23 +3,13 @@ package software.amazon.polymorph.smithyjava.generator;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.JavaFile;
-import com.squareup.javapoet.MethodSpec;
-
-import org.junit.Before;
-import org.junit.Test;
 
 import java.util.Set;
 
 import software.amazon.polymorph.smithyjava.MethodReference;
-import software.amazon.polymorph.smithyjava.ModelConstants;
-import software.amazon.polymorph.smithyjava.generator.awssdk.TestSetupUtils;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.MemberShape;
-import software.amazon.smithy.model.shapes.ShapeId;
-import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.utils.StringUtils;
-
-import static software.amazon.polymorph.util.Tokenizer.tokenizeAndAssertEqual;
 
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 public class ToDafnyTest {

@@ -1,24 +1,11 @@
 package software.amazon.polymorph.smithyjava.generator.awssdk.v1;
 
-import com.squareup.javapoet.MethodSpec;
-
-import org.junit.Before;
-import org.junit.Test;
-
-import java.nio.file.Path;
-import java.util.Map;
-
-import software.amazon.polymorph.smithyjava.ModelConstants;
-import software.amazon.polymorph.smithyjava.generator.ToDafnyConstants;
-import software.amazon.polymorph.smithyjava.generator.awssdk.TestSetupUtils;
 import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.smithy.model.Model;
-import software.amazon.smithy.model.shapes.ShapeId;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
-import static software.amazon.polymorph.util.Tokenizer.tokenizeAndAssertEqual;
 
 public class ToDafnyAwsV1Test {
     protected ToDafnyAwsV1 underTest;

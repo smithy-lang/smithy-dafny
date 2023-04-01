@@ -16,17 +16,14 @@ import java.util.Objects;
 
 import javax.annotation.Nullable;
 
-import dafny.DafnyMap;
-import dafny.DafnySequence;
-import dafny.DafnySet;
-import dafny.Tuple0;
-import dafny.TypeDescriptor;
-
 import software.amazon.polymorph.smithydafny.DafnyNameResolver;
 import software.amazon.polymorph.smithyjava.MethodReference;
-import software.amazon.polymorph.smithyjava.generator.CodegenSubject.AwsSdkVersion;
+import software.amazon.polymorph.smithyjava.generator.CodegenSubject;
+import software.amazon.polymorph.smithyjava.generator.Generator;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
+import software.amazon.polymorph.utils.AwsSdkNameResolverHelpers;
+import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.MemberShape;
@@ -40,13 +37,6 @@ import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
 
-import static software.amazon.polymorph.utils.AwsSdkNameResolverHelpers.isInAwsSdkNamespace;
-import static software.amazon.polymorph.smithyjava.generator.Generator.Constants.LIST_MAP_SET_SHAPE_TYPES;
-import static software.amazon.polymorph.smithyjava.nameresolver.Constants.DAFNY_RESULT_CLASS_NAME;
-import static software.amazon.polymorph.smithyjava.nameresolver.Constants.SMITHY_API_UNIT;
-import static software.amazon.polymorph.utils.DafnyNameResolverHelpers.dafnyCompilesExtra_;
-import static software.amazon.polymorph.utils.DafnyNameResolverHelpers.dafnyExternNamespaceForShapeId;
-import static software.amazon.polymorph.utils.DafnyNameResolverHelpers.packageNameForNamespace;
 import static software.amazon.smithy.utils.StringUtils.capitalize;
 
 /**
@@ -60,16 +50,16 @@ public class Dafny extends NameResolver {
     protected static final Map<ShapeType, CodeBlock> TYPE_DESCRIPTOR_BY_SHAPE_TYPE;
     static {
         TYPE_DESCRIPTOR_BY_SHAPE_TYPE = Map.ofEntries(
-                Map.entry(ShapeType.STRING, CodeBlock.of("$T._typeDescriptor($T.CHAR)", DafnySequence.class, TypeDescriptor.class)),
+                Map.entry(ShapeType.STRING, CodeBlock.of("$T._typeDescriptor($T.CHAR)", Constants.DAFNY_SEQUENCE_CLASS_NAME, Constants.DAFNY_TYPE_DESCRIPTOR_CLASS_NAME)),
                 // Tony is not sure BLOB is correct...
-                Map.entry(ShapeType.BLOB, CodeBlock.of("$T._typeDescriptor($T.BYTE)", DafnySequence.class, TypeDescriptor.class)),
-                Map.entry(ShapeType.BOOLEAN, CodeBlock.of("$T.BOOLEAN", TypeDescriptor.class)),
-                Map.entry(ShapeType.BYTE, CodeBlock.of("$T.BYTE", TypeDescriptor.class)),
-                Map.entry(ShapeType.SHORT, CodeBlock.of("$T.SHORT", TypeDescriptor.class)),
-                Map.entry(ShapeType.INTEGER, CodeBlock.of("$T.INT", TypeDescriptor.class)),
-                Map.entry(ShapeType.LONG, CodeBlock.of("$T.LONG", TypeDescriptor.class)),
-                Map.entry(ShapeType.TIMESTAMP, CodeBlock.of("$T._typeDescriptor($T.CHAR)", DafnySequence.class, TypeDescriptor.class)),
-                Map.entry(ShapeType.BIG_INTEGER, CodeBlock.of("$T.BIG_INTEGER", TypeDescriptor.class))
+                Map.entry(ShapeType.BLOB, CodeBlock.of("$T._typeDescriptor($T.BYTE)", Constants.DAFNY_SEQUENCE_CLASS_NAME, Constants.DAFNY_TYPE_DESCRIPTOR_CLASS_NAME)),
+                Map.entry(ShapeType.BOOLEAN, CodeBlock.of("$T.BOOLEAN", Constants.DAFNY_TYPE_DESCRIPTOR_CLASS_NAME)),
+                Map.entry(ShapeType.BYTE, CodeBlock.of("$T.BYTE", Constants.DAFNY_TYPE_DESCRIPTOR_CLASS_NAME)),
+                Map.entry(ShapeType.SHORT, CodeBlock.of("$T.SHORT", Constants.DAFNY_TYPE_DESCRIPTOR_CLASS_NAME)),
+                Map.entry(ShapeType.INTEGER, CodeBlock.of("$T.INT", Constants.DAFNY_TYPE_DESCRIPTOR_CLASS_NAME)),
+                Map.entry(ShapeType.LONG, CodeBlock.of("$T.LONG", Constants.DAFNY_TYPE_DESCRIPTOR_CLASS_NAME)),
+                Map.entry(ShapeType.TIMESTAMP, CodeBlock.of("$T._typeDescriptor($T.CHAR)", Constants.DAFNY_SEQUENCE_CLASS_NAME, Constants.DAFNY_TYPE_DESCRIPTOR_CLASS_NAME)),
+                Map.entry(ShapeType.BIG_INTEGER, CodeBlock.of("$T.BIG_INTEGER", Constants.DAFNY_TYPE_DESCRIPTOR_CLASS_NAME))
         );
     }
 
@@ -77,7 +67,7 @@ public class Dafny extends NameResolver {
             final String packageName,
             final Model model,
             final ServiceShape serviceShape,
-            AwsSdkVersion awsSdkVersion) {
+            CodegenSubject.AwsSdkVersion awsSdkVersion) {
         super(
                 packageName,
                 serviceShape,
@@ -97,11 +87,11 @@ public class Dafny extends NameResolver {
         if (isRecordType) {
             return "create";
         }
-        return "create_" + dafnyCompilesExtra_(name);
+        return "create_" + DafnyNameResolverHelpers.dafnyCompilesExtra_(name);
     }
 
     public static String datatypeConstructorIs(String name) {
-        String dafnyEnumName = dafnyCompilesExtra_(name);
+        String dafnyEnumName = DafnyNameResolverHelpers.dafnyCompilesExtra_(name);
         return "is_" + dafnyEnumName;
     }
 
@@ -115,11 +105,11 @@ public class Dafny extends NameResolver {
     }
 
     static String modelPackageNameForNamespace(final String namespace) {
-        return packageNameForNamespace(namespace) + ".Types";
+        return DafnyNameResolverHelpers.packageNameForNamespace(namespace) + ".Types";
     }
 
     static String packageNameForServiceShape(ServiceShape serviceShape) {
-        return packageNameForNamespace(serviceShape.getId().getNamespace());
+        return DafnyNameResolverHelpers.packageNameForNamespace(serviceShape.getId().getNamespace());
     }
 
     static String modelPackageNameForServiceShape(ServiceShape serviceShape) {
@@ -127,7 +117,7 @@ public class Dafny extends NameResolver {
     }
 
     public static CodeBlock getMemberField(MemberShape shape) {
-        return CodeBlock.of("dtor_$L()", dafnyCompilesExtra_(shape.getMemberName()));
+        return CodeBlock.of("dtor_$L()", DafnyNameResolverHelpers.dafnyCompilesExtra_(shape.getMemberName()));
     }
 
     /** If not optional, get via {@code dtor_<memberName>()}.
@@ -143,7 +133,7 @@ public class Dafny extends NameResolver {
 
     public static TypeName asDafnyResult(TypeName success, TypeName failure) {
         return ParameterizedTypeName.get(
-                DAFNY_RESULT_CLASS_NAME,
+                Constants.DAFNY_RESULT_CLASS_NAME,
                 success,
                 failure
         );
@@ -186,7 +176,7 @@ public class Dafny extends NameResolver {
 
     private static TypeName typeForBlob() {
         return ParameterizedTypeName.get(
-                ClassName.get(DafnySequence.class),
+                Constants.DAFNY_SEQUENCE_CLASS_NAME,
                 WildcardTypeName.subtypeOf(TypeName.BYTE.box()));
     }
 
@@ -199,22 +189,22 @@ public class Dafny extends NameResolver {
         final Shape shape = model.getShape(shapeId)
                 .orElseThrow(() -> new IllegalStateException("Cannot find shape " + shapeId));
 
-        if (!LIST_MAP_SET_SHAPE_TYPES.contains(shape.getType())) {
+        if (!Generator.Constants.LIST_MAP_SET_SHAPE_TYPES.contains(shape.getType())) {
             throw new UnsupportedOperationException(
                     "No Dafny Java Type for %s yet.".formatted(shape.getType())
             );
         }
         return switch (shape.getType()) {
             case LIST -> ParameterizedTypeName.get(
-                    ClassName.get(DafnySequence.class),
+                    Constants.DAFNY_SEQUENCE_CLASS_NAME,
                     WildcardTypeName.subtypeOf(typeForShape(shape.asListShape().get().getMember().getTarget()))
             );
             case SET -> ParameterizedTypeName.get(
-                    ClassName.get(DafnySet.class),
+                    Constants.DAFNY_SET_CLASS_NAME,
                     WildcardTypeName.subtypeOf(typeForShape(shape.asSetShape().get().getMember().getTarget()))
             );
             case MAP -> ParameterizedTypeName.get(
-                    ClassName.get(DafnyMap.class),
+                    Constants.DAFNY_MAP_CLASS_NAME,
                     WildcardTypeName.subtypeOf(typeForShape(shape.asMapShape().get().getKey().getTarget())),
                     WildcardTypeName.subtypeOf(typeForShape(shape.asMapShape().get().getValue().getTarget()))
             );
@@ -245,11 +235,11 @@ public class Dafny extends NameResolver {
         if (shape.hasTrait(ReferenceTrait.class)) {
             // It is safe to use typeForShape here, as ReferenceTrait will always turn into a Resource or Service
             TypeName interfaceClassName = typeForShape(shapeId);
-            return  CodeBlock.of("$T.reference($T.class)", TypeDescriptor.class, interfaceClassName);
+            return  CodeBlock.of("$T.reference($T.class)", Constants.DAFNY_TYPE_DESCRIPTOR_CLASS_NAME, interfaceClassName);
         }
-        if (shape.getId().equals(SMITHY_API_UNIT)) {
+        if (shape.getId().equals(Constants.SMITHY_API_UNIT)) {
             return CodeBlock.of("$L()",
-                    new MethodReference(ClassName.get(Tuple0.class), "_typeDescriptor").asNormalReference());
+                    new MethodReference(Constants.DAFNY_TUPLE0_CLASS_NAME, "_typeDescriptor").asNormalReference());
         }
         if (shape.getType().getCategory().equals(ShapeType.Category.SIMPLE) && !shape.hasTrait(EnumTrait.class)) {
             @Nullable CodeBlock typeDescriptor =
@@ -276,7 +266,7 @@ public class Dafny extends NameResolver {
     */
     public ClassName classForDatatypeConstructor(String dataTypeName, String constructorName) {
         return ClassName.get(modelPackage, "%s_%s".formatted(
-                dafnyCompilesExtra_(dataTypeName), dafnyCompilesExtra_(constructorName)));
+                DafnyNameResolverHelpers.dafnyCompilesExtra_(dataTypeName), DafnyNameResolverHelpers.dafnyCompilesExtra_(constructorName)));
     }
 
     // This method assumes the shape is not an Error nor a Unit
@@ -291,7 +281,7 @@ public class Dafny extends NameResolver {
         // And that Shape is not an Error
         return ClassName.get(
                 modelPackageNameForNamespace(shapeId.getNamespace()),
-                dafnyCompilesExtra_(capitalize(shapeId.getName()))
+                DafnyNameResolverHelpers.dafnyCompilesExtra_(capitalize(shapeId.getName()))
         );
     }
 
@@ -309,7 +299,7 @@ public class Dafny extends NameResolver {
 
     TypeName typeForCharacterSequence() {
         return ParameterizedTypeName.get(
-                ClassName.get(DafnySequence.class),
+                Constants.DAFNY_SEQUENCE_CLASS_NAME,
                 WildcardTypeName.subtypeOf(Character.class)
         );
     }
@@ -321,8 +311,8 @@ public class Dafny extends NameResolver {
         if (shape.hasTrait(ReferenceTrait.class)) {
             return typeForShape(shape.expectTrait(ReferenceTrait.class).getReferentId());
         }
-        if (shape.getId().equals(SMITHY_API_UNIT)) {
-            return ClassName.get(Tuple0.class);
+        if (shape.getId().equals(Constants.SMITHY_API_UNIT)) {
+            return Constants.DAFNY_TUPLE0_CLASS_NAME;
         }
         return classForNotErrorNotUnitShape(shape);
     }
@@ -333,7 +323,7 @@ public class Dafny extends NameResolver {
         }
         // AwsCryptographicMaterialProvidersException -> Error_AwsCryptographicMaterialProvidersException
         ClassName className = classForNotErrorNotUnitShape(shape);
-        return ClassName.get(className.packageName(), "Error_" + dafnyCompilesExtra_(className.simpleName()));
+        return ClassName.get(className.packageName(), "Error_" + DafnyNameResolverHelpers.dafnyCompilesExtra_(className.simpleName()));
     }
 
     /** @return The interface for a service client. */
@@ -344,20 +334,20 @@ public class Dafny extends NameResolver {
 
      /** @return The interface for a service client.*/
     public static ClassName interfaceForService(final ServiceShape shape) {
-        final String packageName = dafnyExternNamespaceForShapeId(shape.getId());
+        final String packageName = DafnyNameResolverHelpers.dafnyExternNamespaceForShapeId(shape.getId());
         final String interfaceName = DafnyNameResolver.traitNameForServiceClient(shape);
-        return ClassName.get(packageName, dafnyCompilesExtra_(interfaceName));
+        return ClassName.get(packageName, DafnyNameResolverHelpers.dafnyCompilesExtra_(interfaceName));
     }
 
     /** @return The concrete class for a service client. */
     public ClassName classNameForConcreteServiceClient(ServiceShape shape) {
-        String packageName = packageNameForNamespace(shape.getId().getNamespace());
+        String packageName = DafnyNameResolverHelpers.packageNameForNamespace(shape.getId().getNamespace());
         String concreteClass = DafnyNameResolver.classNameForServiceClient(shape);
-        return ClassName.get(packageName, dafnyCompilesExtra_(concreteClass));
+        return ClassName.get(packageName, DafnyNameResolverHelpers.dafnyCompilesExtra_(concreteClass));
     }
 
     public ClassName classNameForNamespaceDefault() {
-        String packageName = packageNameForNamespace(this.serviceShape.getId().getNamespace());
+        String packageName = DafnyNameResolverHelpers.packageNameForNamespace(this.serviceShape.getId().getNamespace());
         return ClassName.get(packageName, "__default");
     }
 
@@ -369,14 +359,14 @@ public class Dafny extends NameResolver {
 
     /** @return The interface for a resource.*/
     public static ClassName interfaceForResource(final ResourceShape shape) {
-        final String packageName = dafnyExternNamespaceForShapeId(shape.getId());
+        final String packageName = DafnyNameResolverHelpers.dafnyExternNamespaceForShapeId(shape.getId());
         final String interfaceName = DafnyNameResolver.traitNameForResource(shape);
-        return ClassName.get(packageName, dafnyCompilesExtra_(interfaceName));
+        return ClassName.get(packageName, DafnyNameResolverHelpers.dafnyCompilesExtra_(interfaceName));
     }
 
     public ClassName classNameForInterface(Shape shape) {
         // if shape is an AWS Service/Resource, return Dafny Types Interface
-        if (isInAwsSdkNamespace(shape.toShapeId())) {
+        if (AwsSdkNameResolverHelpers.isInAwsSdkNamespace(shape.toShapeId())) {
             return classNameForAwsSdk(shape, this.awsSdkVersion);
         }
         // if operation takes a non-AWS Service/Resource, return Dafny Interface Or Local Service
@@ -393,7 +383,7 @@ public class Dafny extends NameResolver {
                         .formatted(shape.toShapeId()));
     }
 
-    public static ClassName classNameForAwsSdk(Shape shape, AwsSdkVersion sdkVersion) {
+    public static ClassName classNameForAwsSdk(Shape shape, CodegenSubject.AwsSdkVersion sdkVersion) {
         if (shape.getType() != ShapeType.SERVICE) {
             throw new RuntimeException(
                     "Polymorph only knows the class Name of Service clients. " +

@@ -14,12 +14,11 @@ import javax.lang.model.element.Modifier;
 import software.amazon.polymorph.smithyjava.BuilderSpecs;
 import software.amazon.polymorph.smithyjava.MethodReference;
 import software.amazon.polymorph.smithyjava.NamespaceHelper;
-import software.amazon.polymorph.smithyjava.generator.awssdk.v1.ToDafnyAwsV1;
+import software.amazon.polymorph.utils.AwsSdkNameResolverHelpers;
+import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.polymorph.smithyjava.generator.awssdk.v1.ToNativeAwsV1;
 import software.amazon.polymorph.smithyjava.generator.awssdk.v2.ToNativeAwsV2;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
-import software.amazon.polymorph.utils.AwsSdkNameResolverHelpers;
-import software.amazon.polymorph.utils.ModelUtils;
 
 import software.amazon.smithy.model.shapes.ListShape;
 import software.amazon.smithy.model.shapes.MapShape;
@@ -34,7 +33,6 @@ import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumDefinition;
 import software.amazon.smithy.model.traits.EnumTrait;
 
-import static software.amazon.polymorph.smithyjava.generator.Generator.Constants.IDENTITY_FUNCTION;
 import static software.amazon.smithy.utils.StringUtils.capitalize;
 
 public abstract class ToNative extends Generator {
@@ -48,8 +46,8 @@ public abstract class ToNative extends Generator {
      */
     protected static final Map<ShapeType, MethodReference> AGGREGATE_CONVERSION_METHOD_FROM_SHAPE_TYPE;
     protected static final Map<ShapeType, MethodReference> SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE;
-    protected static final ClassName COMMON_TO_NATIVE_SIMPLE = ClassName.get(software.amazon.dafny.conversion.ToNative.Simple.class);
-    protected static final ClassName COMMON_TO_NATIVE_AGGREGATE = ClassName.get(software.amazon.dafny.conversion.ToNative.Aggregate.class);
+    protected static final ClassName COMMON_TO_NATIVE_SIMPLE = ClassName.get("software.amazon.dafny.conversion", "ToNative", "Simple");
+    protected static final ClassName COMMON_TO_NATIVE_AGGREGATE = ClassName.get("software.amazon.dafny.conversion", "ToNative", "Aggregate");
 
     static {
         AGGREGATE_CONVERSION_METHOD_FROM_SHAPE_TYPE = Map.ofEntries(
@@ -59,17 +57,17 @@ public abstract class ToNative extends Generator {
         );
         SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE = Map.ofEntries(
                 Map.entry(ShapeType.BLOB, new MethodReference(COMMON_TO_NATIVE_SIMPLE, "ByteBuffer")),
-                Map.entry(ShapeType.BOOLEAN, IDENTITY_FUNCTION),
+                Map.entry(ShapeType.BOOLEAN, Constants.IDENTITY_FUNCTION),
                 Map.entry(ShapeType.STRING, new MethodReference(COMMON_TO_NATIVE_SIMPLE, "String")),
                 // TODO: Timestamp should be service specific
                 Map.entry(ShapeType.TIMESTAMP, new MethodReference(COMMON_TO_NATIVE_SIMPLE, "Date")),
-                Map.entry(ShapeType.BYTE, IDENTITY_FUNCTION),
-                Map.entry(ShapeType.SHORT, IDENTITY_FUNCTION),
-                Map.entry(ShapeType.INTEGER, IDENTITY_FUNCTION),
-                Map.entry(ShapeType.LONG, IDENTITY_FUNCTION),
+                Map.entry(ShapeType.BYTE, Constants.IDENTITY_FUNCTION),
+                Map.entry(ShapeType.SHORT, Constants.IDENTITY_FUNCTION),
+                Map.entry(ShapeType.INTEGER, Constants.IDENTITY_FUNCTION),
+                Map.entry(ShapeType.LONG, Constants.IDENTITY_FUNCTION),
                 Map.entry(ShapeType.DOUBLE, new MethodReference(COMMON_TO_NATIVE_SIMPLE, "Double")),
-                Map.entry(ShapeType.BIG_DECIMAL, IDENTITY_FUNCTION),
-                Map.entry(ShapeType.BIG_INTEGER, IDENTITY_FUNCTION)
+                Map.entry(ShapeType.BIG_DECIMAL, Constants.IDENTITY_FUNCTION),
+                Map.entry(ShapeType.BIG_INTEGER, Constants.IDENTITY_FUNCTION)
         );
     }
     /**

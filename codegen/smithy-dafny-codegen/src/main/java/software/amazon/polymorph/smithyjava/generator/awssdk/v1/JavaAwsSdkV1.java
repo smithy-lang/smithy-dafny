@@ -5,10 +5,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import software.amazon.polymorph.smithyjava.generator.CodegenSubject;
-import software.amazon.polymorph.smithyjava.nameresolver.AwsSdkDafnyV1;
-import software.amazon.polymorph.smithyjava.nameresolver.AwsSdkNativeV1;
 import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 import software.amazon.polymorph.utils.TokenTree;
+import software.amazon.polymorph.smithyjava.nameresolver.AwsSdkDafnyV1;
+import software.amazon.polymorph.smithyjava.nameresolver.AwsSdkNativeV1;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.ServiceShape;
 

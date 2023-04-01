@@ -17,17 +17,17 @@ import java.util.stream.Collectors;
 
 import javax.lang.model.element.Modifier;
 
-import dafny.DafnySequence;
 import software.amazon.polymorph.smithyjava.MethodReference;
 import software.amazon.polymorph.smithyjava.generator.ToDafny;
+import software.amazon.polymorph.smithyjava.nameresolver.Constants;
+import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
+import software.amazon.polymorph.traits.PositionalTrait;
+import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.polymorph.smithyjava.nameresolver.Native;
 import software.amazon.polymorph.smithyjava.unmodeled.CollectionOfErrors;
 import software.amazon.polymorph.smithyjava.unmodeled.NativeError;
 import software.amazon.polymorph.smithyjava.unmodeled.OpaqueError;
-import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
-import software.amazon.polymorph.traits.PositionalTrait;
-import software.amazon.polymorph.utils.ModelUtils.ResolvedShapeId;
 
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.ResourceShape;
@@ -37,7 +37,6 @@ import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.ShapeType;
 import software.amazon.smithy.model.shapes.StructureShape;
 
-import static software.amazon.polymorph.utils.ModelUtils.resolveShape;
 import static software.amazon.smithy.utils.StringUtils.capitalize;
 import static software.amazon.smithy.utils.StringUtils.uncapitalize;
 
@@ -153,7 +152,7 @@ public class ToDafnyLibrary extends ToDafny {
         ClassName dafnyError = subject.dafnyNameResolver.abstractClassForError();
         ClassName collectionError = CollectionOfErrors.nativeClassName(subject.nativeNameResolver.modelPackage);
         ParameterizedTypeName listArg = ParameterizedTypeName.get(
-                ClassName.get(DafnySequence.class),
+                software.amazon.polymorph.smithyjava.nameresolver.Constants.DAFNY_SEQUENCE_CLASS_NAME,
                 WildcardTypeName.subtypeOf(dafnyError)
         );
         CodeBlock genericCall = AGGREGATE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(ShapeType.LIST).asNormalReference();
@@ -234,7 +233,7 @@ public class ToDafnyLibrary extends ToDafny {
     // This override simplifies their lookup.
     @Override
     protected MethodReference conversionMethodReference(Shape shape) {
-        ResolvedShapeId resolvedShapeId = resolveShape(shape.getId(),subject.model );
+        ModelUtils.ResolvedShapeId resolvedShapeId = ModelUtils.resolveShape(shape.getId(),subject.model );
         Shape resolvedShape = subject.model.expectShape(resolvedShapeId.resolvedId());
         if (resolvedShape.isServiceShape() || resolvedShape.isResourceShape()) {
             return super.nonSimpleConversionMethodReference(resolvedShape);

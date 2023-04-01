@@ -11,7 +11,7 @@ import software.amazon.polymorph.antlr.CSharpLexer;
 
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import org.junit.Assert;
 
 /**
  * Simple tokenizer for C# source code, intended for testing generated code in a format-agnostic manner.
@@ -33,6 +33,6 @@ public class Tokenizer {
     public static void tokenizeAndAssertEqual(String expected, String actual) {
         final List<ParseToken> actualTokens = tokenize(actual);
         final List<ParseToken> expectedTokens = tokenize(expected);
-        assertEquals(expectedTokens, actualTokens);
+        Assert.assertEquals(expectedTokens, actualTokens);
     }
 }

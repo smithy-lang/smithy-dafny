@@ -9,16 +9,11 @@ import software.amazon.polymorph.util.Tokenizer;
 import software.amazon.polymorph.util.Tokenizer.ParseToken;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.loader.ModelAssembler;
-import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.ShapeId;
 
-import java.nio.file.Path;
 import java.util.List;
-import java.util.Set;
 import java.util.function.BiConsumer;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.junit.Assert.*;
 import static software.amazon.polymorph.smithydotnet.TypeConversionDirection.*;

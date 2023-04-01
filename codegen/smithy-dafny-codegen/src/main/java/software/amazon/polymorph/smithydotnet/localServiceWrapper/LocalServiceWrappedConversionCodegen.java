@@ -3,11 +3,11 @@
 
 package software.amazon.polymorph.smithydotnet.localServiceWrapper;
 
-import software.amazon.polymorph.smithydotnet.TypeConversionCodegen;
 import software.amazon.polymorph.traits.ExtendableTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.polymorph.utils.TokenTree;
+import software.amazon.polymorph.smithydotnet.TypeConversionCodegen;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.*;
 

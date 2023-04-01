@@ -41,21 +41,21 @@ public class DotNetNameResolverTest {
     public void testEncodeShapeIdRoot() {
         final ShapeId shapeId = ShapeId.fromParts("com.foo.bar_baz", "ShapeName");
         final String encodedShapeId = DotNetNameResolver.encodedIdentForShapeId(shapeId);
-        assertEquals(encodedShapeId, "N3_com__N3_foo__N7_bar_baz__S9_ShapeName");
+        Assert.assertEquals(encodedShapeId, "N3_com__N3_foo__N7_bar_baz__S9_ShapeName");
     }
 
     @Test
     public void testEncodeShapeIdWithMember() {
         final ShapeId shapeId = ShapeId.fromParts("com.foo.bar_baz", "ShapeName", "MemberName");
         final String encodedShapeId = DotNetNameResolver.encodedIdentForShapeId(shapeId);
-        assertEquals(encodedShapeId, "N3_com__N3_foo__N7_bar_baz__S9_ShapeName__M10_MemberName");
+        Assert.assertEquals(encodedShapeId, "N3_com__N3_foo__N7_bar_baz__S9_ShapeName__M10_MemberName");
     }
 
     @Test
     public void testEncodeShapeIdWithSuspiciousIdents() {
         final ShapeId shapeId = ShapeId.fromParts("N3_com__.__bar_baz.M10_MemberName", "N3_foo", "__SUS__S1__");
         final String encodedShapeId = DotNetNameResolver.encodedIdentForShapeId(shapeId);
-        assertEquals(encodedShapeId, "N8_N3_com____N9___bar_baz__N14_M10_MemberName__S6_N3_foo__M11___SUS__S1__");
+        Assert.assertEquals(encodedShapeId, "N8_N3_com____N9___bar_baz__N14_M10_MemberName__S6_N3_foo__M11___SUS__S1__");
     }
 
     @Test
@@ -66,18 +66,18 @@ public class DotNetNameResolverTest {
 
         final String toDafnyConverterName = DotNetNameResolver.typeConverterForShape(foobarStructureShape.getId(),
                 TypeConversionDirection.TO_DAFNY);
-        assertEquals("ToDafny_N4_test__N6_foobar__S6_Foobar", toDafnyConverterName);
+        Assert.assertEquals("ToDafny_N4_test__N6_foobar__S6_Foobar", toDafnyConverterName);
 
         final String fromDafnyConverterName = DotNetNameResolver.typeConverterForShape(foobarStructureShape.getId(),
                 TypeConversionDirection.FROM_DAFNY);
-        assertEquals("FromDafny_N4_test__N6_foobar__S6_Foobar", fromDafnyConverterName);
+        Assert.assertEquals("FromDafny_N4_test__N6_foobar__S6_Foobar", fromDafnyConverterName);
     }
 
     @Test
     public void testDafnyNamespaceForShapeId() {
         final ShapeId shapeId = ShapeId.fromParts("test.foobar.baz", "Whatever");
         final String dafnyNamespace = DafnyNameResolver.dafnyExternNamespaceForShapeId(shapeId);
-        assertEquals("Dafny.Test.Foobar.Baz.Types", dafnyNamespace);
+        Assert.assertEquals("Dafny.Test.Foobar.Baz.Types", dafnyNamespace);
     }
 
     @Test
@@ -212,7 +212,7 @@ public class DotNetNameResolverTest {
         final DotNetNameResolver nameResolver = setupNameResolver((_builder, _modelAssembler) -> {});
         final String actualName = nameResolver.dafnyImplForServiceClient();
         final String expectedName = "Dafny.Test.Foobar.__default.FoobarServiceFactory";
-        assertEquals(expectedName, actualName);
+        Assert.assertEquals(expectedName, actualName);
     }
 
     @Test

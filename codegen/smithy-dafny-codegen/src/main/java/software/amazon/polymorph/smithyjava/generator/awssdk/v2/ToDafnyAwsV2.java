@@ -24,14 +24,13 @@ import java.util.stream.Collectors;
 
 import javax.lang.model.element.Modifier;
 
-import dafny.DafnySequence;
 import software.amazon.polymorph.smithyjava.generator.ToDafny;
-import software.amazon.polymorph.smithyjava.nameresolver.AwsSdkDafnyV2;
-import software.amazon.polymorph.smithyjava.nameresolver.AwsSdkNativeV2;
-import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.polymorph.utils.AwsSdkNameResolverHelpers;
 import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 import software.amazon.polymorph.utils.ModelUtils;
+import software.amazon.polymorph.smithyjava.nameresolver.AwsSdkDafnyV2;
+import software.amazon.polymorph.smithyjava.nameresolver.AwsSdkNativeV2;
+import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 
 import software.amazon.smithy.model.shapes.ListShape;
 import software.amazon.smithy.model.shapes.MapShape;
@@ -48,7 +47,6 @@ import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumDefinition;
 import software.amazon.smithy.model.traits.EnumTrait;
 
-import static software.amazon.polymorph.smithyjava.generator.Generator.Constants.JAVA_UTIL_STREAM_COLLECTORS;
 import static software.amazon.polymorph.smithyjava.generator.awssdk.v2.JavaAwsSdkV2.SDK_BYTES_AS_BYTE_BUFFER;
 import static software.amazon.smithy.utils.StringUtils.capitalize;
 
@@ -298,7 +296,7 @@ public class ToDafnyAwsV2 extends ToDafny {
             return returnCodeBlockBuilder
                 .add(".stream()\n.map($L)\n.collect($L.toList())",
                         SDK_BYTES_AS_BYTE_BUFFER.asFunctionalReference(),
-                        JAVA_UTIL_STREAM_COLLECTORS)
+                        Constants.JAVA_UTIL_STREAM_COLLECTORS)
                 .build();
         }
         return inputVar;
@@ -403,7 +401,7 @@ public class ToDafnyAwsV2 extends ToDafny {
      * List conversion for the AWS SDK for Java V2 because
      * AWS SDK Java V2 treats Enums in a special way.
      * See the comment on
-     * {@link software.amazon.polymorph.smithyjava.nameresolver.AwsSdkNativeV2#typeForShapeNoEnum}
+     * {@link AwsSdkNativeV2#typeForShapeNoEnum}
      **/
     @Override
     protected MethodSpec modeledList(ListShape shape) {
@@ -456,7 +454,7 @@ public class ToDafnyAwsV2 extends ToDafny {
      * Set conversion for the AWS SDK for Java V2 because
      * AWS SDK Java V2 treats Enums in a special way.
      * See the comment on
-     * {@link software.amazon.polymorph.smithyjava.nameresolver.AwsSdkNativeV2#typeForShapeNoEnum}
+     * {@link AwsSdkNativeV2#typeForShapeNoEnum}
      **/
     @Override
     protected MethodSpec modeledSet(SetShape shape) {
@@ -481,7 +479,7 @@ public class ToDafnyAwsV2 extends ToDafny {
      * Map conversion for the AWS SDK for Java V2 because
      * AWS SDK Java V2 treats Enums in a special way.
      * See the comment on
-     * {@link software.amazon.polymorph.smithyjava.nameresolver.AwsSdkNativeV2#typeForShapeNoEnum}
+     * {@link AwsSdkNativeV2#typeForShapeNoEnum}
      **/
     @Override
     @SuppressWarnings("OptionalGetWithoutIsPresent")
@@ -513,7 +511,7 @@ public class ToDafnyAwsV2 extends ToDafny {
                 ParameterizedTypeName.get(
                         ClassName.get("Wrappers_Compile", "Option"),
                         ParameterizedTypeName.get(
-                                ClassName.get(DafnySequence.class),
+                                software.amazon.polymorph.smithyjava.nameresolver.Constants.DAFNY_SEQUENCE_CLASS_NAME,
                                 WildcardTypeName.subtypeOf(Character.class))
                 ),
                 "message"

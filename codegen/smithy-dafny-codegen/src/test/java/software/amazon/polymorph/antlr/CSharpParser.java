@@ -421,7 +421,7 @@ public class CSharpParser extends Parser {
 			}
 
 			setState(454);
-			match(EOF);
+			match(Recognizer.EOF);
 			}
 		}
 		catch (RecognitionException re) {

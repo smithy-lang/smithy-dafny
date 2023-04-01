@@ -17,12 +17,12 @@ import java.util.stream.Collectors;
 import javax.lang.model.element.Modifier;
 
 import software.amazon.polymorph.smithyjava.generator.ToNative;
-import software.amazon.polymorph.smithyjava.nameresolver.AwsSdkDafnyV1;
-import software.amazon.polymorph.smithyjava.nameresolver.AwsSdkNativeV1;
-import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.polymorph.utils.AwsSdkNameResolverHelpers;
 import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 import software.amazon.polymorph.utils.ModelUtils;
+import software.amazon.polymorph.smithyjava.nameresolver.AwsSdkDafnyV1;
+import software.amazon.polymorph.smithyjava.nameresolver.AwsSdkNativeV1;
+import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;

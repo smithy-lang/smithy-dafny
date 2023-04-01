@@ -1,7 +1,6 @@
 package software.amazon.polymorph.utils;
 
 import software.amazon.polymorph.smithydafny.DafnyNameResolver;
-import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.ShapeId;
 
 /**

@@ -2,6 +2,7 @@ package software.amazon.polymorph.smithyjava.generator.library;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
+import com.squareup.javapoet.MethodSpec;
 
 import java.nio.file.Path;
 import java.util.LinkedHashMap;

@@ -3,11 +3,10 @@
 
 package software.amazon.polymorph.smithydotnet.nativeWrapper;
 
-import software.amazon.polymorph.smithydotnet.DotNetNameResolver;
-import software.amazon.polymorph.smithydotnet.ShimCodegen;
 import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.utils.Token;
 import software.amazon.polymorph.utils.TokenTree;
+import software.amazon.polymorph.smithydotnet.DotNetNameResolver;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.EntityShape;
 import software.amazon.smithy.model.shapes.OperationShape;
@@ -15,7 +14,6 @@ import software.amazon.smithy.model.shapes.ResourceShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
-import software.amazon.smithy.utils.StringUtils;
 
 import java.util.List;
 import java.util.Optional;

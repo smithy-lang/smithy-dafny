@@ -20,12 +20,12 @@ import javax.lang.model.element.Modifier;
 
 import software.amazon.polymorph.smithyjava.MethodReference;
 import software.amazon.polymorph.smithyjava.generator.ToNative;
-import software.amazon.polymorph.smithyjava.nameresolver.AwsSdkDafnyV2;
-import software.amazon.polymorph.smithyjava.nameresolver.AwsSdkNativeV2;
-import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.polymorph.utils.AwsSdkNameResolverHelpers;
 import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 import software.amazon.polymorph.utils.ModelUtils;
+import software.amazon.polymorph.smithyjava.nameresolver.AwsSdkDafnyV2;
+import software.amazon.polymorph.smithyjava.nameresolver.AwsSdkNativeV2;
+import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
@@ -39,8 +39,6 @@ import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumDefinition;
 import software.amazon.smithy.model.traits.EnumTrait;
 
-import static software.amazon.polymorph.smithyjava.generator.awssdk.v2.JavaAwsSdkV2.BLOB_TO_NATIVE_SDK_BYTES;
-import static software.amazon.polymorph.smithyjava.generator.Generator.Constants.JAVA_UTIL_ARRAYLIST;
 import static software.amazon.smithy.utils.StringUtils.capitalize;
 
 //TODO: Create abstract class for V1 & V2 to extend
@@ -90,7 +88,7 @@ public class ToNativeAwsV2 extends ToNative {
     static {
         V2_CONVERSION_METHOD_FROM_SHAPE_TYPE = Map.ofEntries(
             Map.entry(ShapeType.BLOB,
-                new MethodReference(BLOB_TO_NATIVE_SDK_BYTES, "fromByteArray")),
+                new MethodReference(JavaAwsSdkV2.BLOB_TO_NATIVE_SDK_BYTES, "fromByteArray")),
             Map.entry(ShapeType.TIMESTAMP,
                 new MethodReference(COMMON_TO_NATIVE_SIMPLE, "Instant"))
         );
@@ -223,7 +221,7 @@ public class ToNativeAwsV2 extends ToNative {
                 });
             
                 return returnList;
-            """, JAVA_UTIL_ARRAYLIST);
+            """, Constants.JAVA_UTIL_ARRAYLIST);
 
             methodSpecBuilder.addCode(codeBlockBuilder.build());
 

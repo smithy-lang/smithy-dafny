@@ -36,9 +36,6 @@ dependencies {
     implementation("software.amazon.awssdk:codegen:2.20.26")
     implementation("com.squareup:javapoet:1.13.0")
 
-    implementation("dafny.lang:DafnyRuntime:3.10.0")
-    implementation("software.amazon.dafny:conversion:1.0-SNAPSHOT")
-
     // Used for parsing-based tests
     testImplementation("org.antlr:antlr4:4.9.2")
 }

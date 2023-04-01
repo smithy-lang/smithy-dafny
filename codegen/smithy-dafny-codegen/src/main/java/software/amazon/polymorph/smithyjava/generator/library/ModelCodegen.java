@@ -1,9 +1,6 @@
 package software.amazon.polymorph.smithyjava.generator.library;
 
 import com.squareup.javapoet.JavaFile;
-
-import java.util.LinkedHashSet;
-
 import software.amazon.polymorph.smithyjava.generator.Generator;
 import software.amazon.polymorph.smithyjava.modeled.ModeledEnum;
 import software.amazon.polymorph.smithyjava.modeled.ModeledError;
@@ -12,10 +9,11 @@ import software.amazon.polymorph.smithyjava.modeled.ModeledUnion;
 import software.amazon.polymorph.smithyjava.unmodeled.CollectionOfErrors;
 import software.amazon.polymorph.smithyjava.unmodeled.NativeError;
 import software.amazon.polymorph.smithyjava.unmodeled.OpaqueError;
-
 import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.UnionShape;
+
+import java.util.LinkedHashSet;
 
 
 /**

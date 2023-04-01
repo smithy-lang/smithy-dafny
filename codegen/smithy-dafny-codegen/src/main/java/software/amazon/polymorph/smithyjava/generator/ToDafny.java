@@ -21,10 +21,11 @@ import org.slf4j.LoggerFactory;
 
 import software.amazon.polymorph.smithyjava.MethodReference;
 import software.amazon.polymorph.smithyjava.NamespaceHelper;
+import software.amazon.polymorph.utils.AwsSdkNameResolverHelpers;
+import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.polymorph.smithyjava.generator.awssdk.v1.ToDafnyAwsV1;
 import software.amazon.polymorph.smithyjava.generator.awssdk.v2.ToDafnyAwsV2;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
-import software.amazon.polymorph.utils.ModelUtils;
 
 import software.amazon.smithy.model.shapes.ListShape;
 import software.amazon.smithy.model.shapes.MapShape;
@@ -39,8 +40,6 @@ import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumDefinition;
 import software.amazon.smithy.model.traits.EnumTrait;
 
-import static software.amazon.polymorph.smithyjava.generator.Generator.Constants.LIST_MAP_SET_SHAPE_TYPES;
-import static software.amazon.polymorph.utils.AwsSdkNameResolverHelpers.isInAwsSdkNamespace;
 import static software.amazon.smithy.utils.StringUtils.capitalize;
 import static software.amazon.smithy.utils.StringUtils.uncapitalize;
 
@@ -52,8 +51,8 @@ public abstract class ToDafny extends Generator {
      */
     protected static final Map<ShapeType, MethodReference> AGGREGATE_CONVERSION_METHOD_FROM_SHAPE_TYPE;
     protected static final Map<ShapeType, MethodReference> SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE;
-    protected static final ClassName COMMON_TO_DAFNY_SIMPLE = ClassName.get(software.amazon.dafny.conversion.ToDafny.Simple.class);
-    protected static final ClassName COMMON_TO_DAFNY_AGGREGATE = ClassName.get(software.amazon.dafny.conversion.ToDafny.Aggregate.class);
+    protected static final ClassName COMMON_TO_DAFNY_SIMPLE = ClassName.get("software.amazon.dafny.conversion", "ToDafny", "Simple");
+    protected static final ClassName COMMON_TO_DAFNY_AGGREGATE = ClassName.get("software.amazon.dafny.conversion", "ToDafny", "Aggregate");
     protected final static String VAR_INPUT = "nativeValue";
     protected static final String TO_DAFNY = "ToDafny";
     /**
@@ -188,7 +187,7 @@ public abstract class ToDafny extends Generator {
                 inputVar);
         CodeBlock isSetCheck = isNullCheck;
         Shape targetShape = subject.model.expectShape(memberShape.getTarget());
-        if (LIST_MAP_SET_SHAPE_TYPES.contains(targetShape.getType())) {
+        if (Constants.LIST_MAP_SET_SHAPE_TYPES.contains(targetShape.getType())) {
             isSetCheck = CodeBlock.of("($L && $L.size() > 0)",
                     isNullCheck,
                     inputVar);
@@ -345,7 +344,7 @@ public abstract class ToDafny extends Generator {
         ShapeId targetId = shape.getId();
         final String methodName = capitalize(targetId.getName());
         // if in AWS SDK namespace, reference converter from AWS SDK ToDafny class
-        if (isInAwsSdkNamespace(targetId)) {
+        if (AwsSdkNameResolverHelpers.isInAwsSdkNamespace(targetId)) {
             return switch (subject.sdkVersion) {
                 case V1 -> new MethodReference(ToDafnyAwsV1.className(targetId), methodName);
                 case V2 -> new MethodReference(ToDafnyAwsV2.className(targetId), methodName);

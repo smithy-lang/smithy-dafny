@@ -5,8 +5,6 @@ import com.squareup.javapoet.JavaFile;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.List;
-
 import software.amazon.polymorph.smithyjava.ModelConstants;
 import software.amazon.polymorph.smithyjava.generator.awssdk.TestSetupUtils;
 import software.amazon.smithy.model.Model;

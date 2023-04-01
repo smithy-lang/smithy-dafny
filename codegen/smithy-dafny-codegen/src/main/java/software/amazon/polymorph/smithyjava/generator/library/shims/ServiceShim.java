@@ -15,10 +15,10 @@ import java.util.stream.Collectors;
 import software.amazon.polymorph.smithyjava.BuildMethod;
 import software.amazon.polymorph.smithyjava.BuilderMemberSpec;
 import software.amazon.polymorph.smithyjava.BuilderSpecs;
-import software.amazon.polymorph.smithyjava.generator.library.JavaLibrary;
 import software.amazon.polymorph.smithyjava.generator.library.ShimLibrary;
-import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.polymorph.traits.LocalServiceTrait;
+import software.amazon.polymorph.smithyjava.generator.library.JavaLibrary;
+import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 
 import software.amazon.smithy.model.shapes.ServiceShape;
 

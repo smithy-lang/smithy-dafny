@@ -20,7 +20,11 @@ import java.util.stream.Stream;
 
 import software.amazon.polymorph.smithydafny.DafnyNameResolver;
 import software.amazon.polymorph.smithydotnet.localServiceWrapper.LocalServiceWrappedNameResolver;
-import software.amazon.polymorph.traits.*;
+import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
+import software.amazon.polymorph.traits.ExtendableTrait;
+import software.amazon.polymorph.traits.LocalServiceTrait;
+import software.amazon.polymorph.traits.PositionalTrait;
+import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.polymorph.utils.Token;
@@ -35,7 +39,6 @@ import static software.amazon.polymorph.smithydotnet.DotNetNameResolver.TYPE_CON
 import static software.amazon.polymorph.smithydotnet.DotNetNameResolver.typeConverterForShape;
 import static software.amazon.polymorph.smithydotnet.TypeConversionDirection.FROM_DAFNY;
 import static software.amazon.polymorph.smithydotnet.TypeConversionDirection.TO_DAFNY;
-import static software.amazon.polymorph.utils.DafnyNameResolverHelpers.dafnyCompilesExtra_;
 
 /**
  * Generates a {@code TypeConversion} class that includes all {@link TypeConverter}s needed for the operations in the
@@ -547,7 +550,7 @@ public class TypeConversionCodegen {
                     if (StringUtils.equals(memberShape.getId().getName(), "AttributeValue")) {
                         destructorValue = nameResolver.classPropertyForStructureMember(memberShape);
                     } else {
-                        destructorValue = dafnyCompilesExtra_(memberShape.getMemberName());
+                        destructorValue = DafnyNameResolverHelpers.dafnyCompilesExtra_(memberShape.getMemberName());
                     }
                     return TokenTree
                             .of("if (value.is_%s)".formatted(propertyName))

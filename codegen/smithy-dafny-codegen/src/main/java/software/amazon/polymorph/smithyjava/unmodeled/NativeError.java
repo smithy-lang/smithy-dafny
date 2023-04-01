@@ -8,9 +8,9 @@ import com.squareup.javapoet.TypeSpec;
 import java.util.Collections;
 import java.util.stream.Collectors;
 
+import software.amazon.polymorph.smithyjava.BuilderMemberSpec;
 import software.amazon.polymorph.smithyjava.BuilderSpecs;
 
-import static software.amazon.polymorph.smithyjava.BuilderMemberSpec.THROWABLE_ARGS;
 import static software.amazon.smithy.utils.StringUtils.capitalize;
 
 import static javax.lang.model.element.Modifier.PRIVATE;
@@ -36,7 +36,7 @@ public class NativeError {
         ClassName className = nativeClassName(packageName);
         ClassName superName = ClassName.get(RuntimeException.class);
         BuilderSpecs builderSpecs = new BuilderSpecs(
-                className, null, THROWABLE_ARGS, Collections.emptyList());
+                className, null, BuilderMemberSpec.THROWABLE_ARGS, Collections.emptyList());
         TypeSpec spec = TypeSpec
                 .classBuilder(className)
                 .addModifiers(PUBLIC)
@@ -111,7 +111,7 @@ public class NativeError {
      * but our generated Java just uses the field name.
      */
     static Iterable<MethodSpec> getters() {
-        return THROWABLE_ARGS.stream().map(field ->
+        return BuilderMemberSpec.THROWABLE_ARGS.stream().map(field ->
                 MethodSpec.methodBuilder(field.name)
                         .returns(field.type)
                         .addModifiers(PUBLIC)

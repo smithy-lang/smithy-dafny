@@ -19,7 +19,6 @@ import software.amazon.smithy.model.shapes.StructureShape;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PROTECTED;
-import static software.amazon.polymorph.smithyjava.BuilderMemberSpec.THROWABLE_ARGS;
 
 public class ModeledError {
 
@@ -28,7 +27,7 @@ public class ModeledError {
         ClassName superName = NativeError.nativeClassName(packageName);
         List<BuilderMemberSpec> modelFields = BuilderSpecs.shapeToArgs(shape, subject);
         BuilderSpecs builderSpecs = new BuilderSpecs(
-                className, superName, modelFields, THROWABLE_ARGS);
+                className, superName, modelFields, BuilderMemberSpec.THROWABLE_ARGS);
         TypeSpec.Builder spec = TypeSpec
                 .classBuilder(className)
                 .addModifiers(Modifier.PUBLIC)

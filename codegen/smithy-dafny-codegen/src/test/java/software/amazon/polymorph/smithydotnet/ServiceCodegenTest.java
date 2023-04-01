@@ -4,7 +4,6 @@
 package software.amazon.polymorph.smithydotnet;
 
 import org.junit.Test;
-import software.amazon.polymorph.traits.ClientConfigTrait;
 import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.polymorph.util.TestModel;
@@ -27,9 +26,7 @@ import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
-import java.util.Collections;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

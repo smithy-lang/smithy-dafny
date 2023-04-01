@@ -10,14 +10,12 @@ import java.util.List;
 import java.util.Set;
 
 import software.amazon.polymorph.smithydafny.DafnyNameResolver;
-import software.amazon.polymorph.smithydotnet.DotNetNameResolver;
 import software.amazon.polymorph.traits.LocalServiceTrait;
-import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.polymorph.utils.Token;
 import software.amazon.polymorph.utils.TokenTree;
+import software.amazon.polymorph.smithydotnet.DotNetNameResolver;
 import software.amazon.smithy.model.Model;
-import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.ShapeId;

@@ -18,7 +18,6 @@ import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThrows;
 import static software.amazon.polymorph.util.Tokenizer.tokenizeAndAssertEqual;
 
 public class DafnyTest {
