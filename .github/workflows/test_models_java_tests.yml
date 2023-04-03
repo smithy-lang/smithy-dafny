@@ -78,7 +78,7 @@ jobs:
       - name: Setup Maven Action
         uses: s4u/setup-maven-action@v1.7.0
         with:
-          java-version: 17
+          java-version: '8'
           maven-version: 3.8.7
 
       # Java DafnyRuntime is not published to maven,
@@ -101,12 +101,24 @@ jobs:
           arguments: publishToMavenLocal
           build-root-directory: dafny-java-conversion
 
+      - name: Setup Java 17 for codegen
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'corretto'
+          java-version: '17'
+
       - name: Generate Polymorph Dafny and Java code
         shell: bash
         working-directory: ./${{ matrix.library }}
         run: |
           make polymorph_dafny
           make polymorph_java
+
+      - name: Setup Java 8 for running tests
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'corretto'
+          java-version: '8'
 
       - name: Compile ${{ matrix.library }} implementation
         shell: bash
@@ -115,7 +127,7 @@ jobs:
           # This works because `node` is installed by default on GHA runners
           CORES=$(node -e 'console.log(os.cpus().length)')
           make build_java CORES=$CORES
-          
+
       - name: Test ${{ matrix.library }}
         working-directory: ./${{ matrix.library }}
         shell: bash
