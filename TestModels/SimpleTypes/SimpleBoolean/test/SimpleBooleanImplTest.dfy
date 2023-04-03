@@ -13,7 +13,7 @@ module  SimpleBooleanImplTest {
         TestGetBooleanFalse(client);
     }
 
-    method TestGetBooleanTrue(client: ISimpleTypesBooleanClient)
+    method TestGetBooleanTrue(client: ISimpleBooleanClient)
       requires client.ValidState()
       modifies client.Modifies
       ensures client.ValidState()
@@ -23,7 +23,7 @@ module  SimpleBooleanImplTest {
         print ret;
     }
 
-    method TestGetBooleanFalse(client: ISimpleTypesBooleanClient)
+    method TestGetBooleanFalse(client: ISimpleBooleanClient)
       requires client.ValidState()
       modifies client.Modifies
       ensures client.ValidState()

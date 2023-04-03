@@ -1,0 +1,14 @@
+{
+    "version": "1.0",
+    "outputDirectory": "runtimes/python",
+    "sources": ["${MODEL_DIR}"],
+    "plugins": {
+        "python-client-codegen": {
+            "service": "simple.types.boolean#SimpleTypesBoolean",
+            "module": "simple_boolean",
+            "moduleVersion": "0.0.1",
+            "protocol": "aws.polymorph#localService"
+        }
+    },
+    "protocol": "aws.polymorph#localService"
+}

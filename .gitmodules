@@ -1,0 +1,4 @@
+
+[submodule "codegen/smithy-dafny-codegen/src/main/java/software/amazon/smithy/dafny/python/codegen/smithy-python"]
+	path = codegen/smithy-dafny-codegen/src/main/java/software/amazon/smithy/dafny/python/codegen/smithy-python
+	url = git@github.com:awslabs/smithy-python.git

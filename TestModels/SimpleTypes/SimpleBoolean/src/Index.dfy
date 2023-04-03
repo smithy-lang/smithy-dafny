@@ -21,9 +21,22 @@ module {:extern "Dafny.Simple.Types.Boolean" } SimpleBoolean refines AbstractSim
     }
  constructor(config: Operations.InternalConfig) {
     this.config := config;
-    History := new ISimpleTypesBooleanClientCallHistory();
+    History := new ISimpleBooleanClientCallHistory();
     Modifies := Operations.ModifiesInternalConfig(config) + {History};
    }
  }
 
 }
+/*
+dafny \
+                -vcsCores:2 \
+                -compileTarget:py \
+                -spillTargetCode:3 \
+                -runAllTests:1 \
+                -compile:0 \
+                -optimizeErasableDatatypeWrapper:0 \
+                -useRuntimeLib \
+                -out runtimes/java/TestsFromDafny \
+                `find ./test -name '*.dfy'` \
+                -library:src/Index.dfy
+*/

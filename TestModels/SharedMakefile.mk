@@ -174,6 +174,10 @@ polymorph_java: _polymorph
 polymorph_java: POLYMORPH_LANGUAGE_TARGET=java
 polymorph_java: _polymorph_dependencies
 
+smithy_dafny_python: export MODEL_DIR=$(LIBRARY_ROOT)/Model
+smithy_dafny_python:
+	gradle build
+
 ########################## .NET targets
 
 transpile_net: | transpile_implementation_net transpile_test_net transpile_dependencies_net

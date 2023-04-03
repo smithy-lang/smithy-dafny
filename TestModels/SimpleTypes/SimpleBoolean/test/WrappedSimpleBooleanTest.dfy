@@ -14,3 +14,16 @@ module WrappedSimpleTypesBooleanTest {
         SimpleBooleanImplTest.TestGetBooleanFalse(client);
     }
 }
+
+/*
+dafny \
+    -vcsCores:2 \
+    -compileTarget:py \
+    -spillTargetCode:3 \
+    -compile:0 \
+    -optimizeErasableDatatypeWrapper:0 \
+    -useRuntimeLib \
+    -out runtimes/net/ImplementationFromDafny \
+    ./src/Index.dfy \
+    -library:/Users/lucmcdon/Desktop/workplace/polymorph/TestModels/dafny-dependencies/StandardLibrary/src/Index.dfy \
+*/
