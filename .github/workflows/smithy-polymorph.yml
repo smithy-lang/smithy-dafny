@@ -27,3 +27,9 @@ jobs:
         with:
           arguments: :smithy-dafny-codegen:test
           build-root-directory: codegen
+
+      - name: Execute codegen build
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: build
+          build-root-directory: codegen
