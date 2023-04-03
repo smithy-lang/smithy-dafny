@@ -119,19 +119,23 @@ public class DafnyApiCodegen {
             DafnyNameResolverHelpers.dafnyExternNamespaceForShapeId(serviceShape.getId()),
             typesModuleName
           ));
-
+        final TokenTree abstractServiceModule = generateAbstractServiceModule(serviceShape);
+        final TokenTree abstractOperationsModule = generateAbstractOperationsModule(serviceShape);
+        final TokenTree modeledErrorDataType = generateModeledErrorDataType();
         // A smithy model may reference a model in a different package.
         // In which case we need to import it.
+        // Everything MUST BE GENERATED BEFORE `typesModulePrelude` is calculated.
+        // Otherwise, a foreign shape maybe referenced WITHOUT an import.
         final TokenTree typesModulePrelude = TokenTree
           .of(Stream
             .concat(
-              nameResolver.modulePreludeStandardImports(),
+              DafnyNameResolver.modulePreludeStandardImports(),
               nameResolver
                 .dependentModels()
                 .stream()
                 .map(d ->
-                  "import " + nameResolver.dafnyTypesModuleForNamespace(d.namespace())))
-            .map(i -> Token.of(i))
+                  "import " + DafnyNameResolver.dafnyTypesModuleForNamespace(d.namespace())))
+            .map(Token::of)
           )
           .lineSeparated();
 
@@ -152,7 +156,7 @@ public class DafnyApiCodegen {
               // Error types are generated *after*
               // all other types to account
               // for any dependent modules
-              generateModeledErrorDataType()
+              modeledErrorDataType
             )
             .lineSeparated()
             .braced();
@@ -163,8 +167,8 @@ public class DafnyApiCodegen {
             includeDirectives,
             typesModuleHeader,
             typesModuleBody,
-            generateAbstractServiceModule(serviceShape),
-            generateAbstractOperationsModule(serviceShape)
+            abstractServiceModule,
+            abstractOperationsModule
           )
           .lineSeparated();
         return Map.of(path, fullCode);
