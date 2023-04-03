@@ -5,7 +5,7 @@ Like the similar `kms` and `ddb` projects,
 it does this by generating Dafny and target language code
 to wrap an existing SQS SDK in one or more target languages.
 Unlike those projects, however,
-this one uses the Smithy Gradle plugin to build Dafny SDK clients
+this one is also intended to use the Smithy Gradle plugin to build Dafny SDK clients
 in the same way that other `smithy-<language>` tools support.
 
 NOTE: The `sqs.json` in this project was copied unmodified from https://github.com/aws/aws-sdk-js-v3/blob/main/codegen/sdk-codegen/aws-models/sqs.json on March 6, 2023.
@@ -14,8 +14,25 @@ You should be able to use the standard [projections](https://smithy.io/2.0/guide
 to trim-down or modify a model as needed before code generation instead.
 
 ## Build
+### .NET
+1. Generate the Wrappers using `polymorph`
+```
+make polymorph_dafny polymorph_net
+```
 
-Building a typescript client for SQS:
+2. Transpile the tests (and implementation) to the target runtime.
+```
+make transpile_net
+```
+
+3. Generate the executable in the .NET and execute the tests
+```
+make test_net
+```
+
+### Typescript
+
+Building a typescript client for SQS (to demonstrate how the Smithy plugins work):
 
 ```
 gradle build

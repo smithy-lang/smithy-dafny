@@ -16,47 +16,20 @@ jobs:
           distribution: 'corretto'
           java-version: '17'
 
-      - name: Setup Dafny
-        uses: dafny-lang/setup-dafny-action@v1
-        with:
-          dafny-version: "nightly-2022-12-02-edab6cc"
-
-      # TODO: This has been added has a workaround for https://issues.apache.org/jira/browse/MNG-7679
-      # Remove this when the latest version has been patched
-      - name: Setup Maven Action
-        uses: s4u/setup-maven-action@v1.7.0
-        with:
-          java-version: '17'
-          maven-version: 3.8.7
-
-      # Java DafnyRuntime is not published to maven,
-      # so manually download a nightly build for 3.10.0 and grab it from there.
-      - name: Locally Cache Java DafnyRuntime
-        run: |
-          wget https://github.com/dafny-lang/dafny/releases/download/nightly/dafny-nightly-2022-12-02-edab6cc-x64-ubuntu-16.04.zip
-          unzip dafny-nightly-2022-12-02-edab6cc-x64-ubuntu-16.04.zip
-          mvn -B -ntp install:install-file \
-          -Dfile=dafny/DafnyRuntime.jar \
-          -DgroupId=dafny.lang \
-          -DartifactId=DafnyRuntime \
-          -Dversion=3.10.0 \
-          -DgeneratePom=true \
-          -Dpackaging=jar
-
-      - name: Setup dafny-java-conversion
-        uses: gradle/gradle-build-action@v2
-        with:
-          arguments: publishToMavenLocal
-          build-root-directory: dafny-java-conversion
-
       - name: Execute smithy-dafny-codegen-cli tests
         uses: gradle/gradle-build-action@v2
         with:
-          arguments: test
-          build-root-directory: codegen/smithy-dafny-codegen-cli
+          arguments: :smithy-dafny-codegen-cli:test
+          build-root-directory: codegen
 
       - name: Execute smithy-dafny-codegen tests
         uses: gradle/gradle-build-action@v2
         with:
           arguments: :smithy-dafny-codegen:test
+          build-root-directory: codegen
+
+      - name: Execute codegen build
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: build
           build-root-directory: codegen

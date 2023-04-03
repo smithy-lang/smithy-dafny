@@ -1,4 +1,4 @@
-# This workflow performs static analysis checks.
+# This workflow formally verifies the generated Dafny.
 name: Library Dafny verification
 
 on:
@@ -58,34 +58,6 @@ jobs:
         uses: dafny-lang/setup-dafny-action@v1
         with:
           dafny-version: "3.10.0"
-
-      # TODO: This has been added has a workaround for https://issues.apache.org/jira/browse/MNG-7679
-      # Remove this when the latest version has been patched
-      - name: Setup Maven Action
-        uses: s4u/setup-maven-action@v1.7.0
-        with:
-          java-version: 8
-          maven-version: 3.8.7
-
-      # Java DafnyRuntime is not published to maven,
-      # so manually download a nightly build for 3.10.0 and grab it from there.
-      - name: Locally Cache Java DafnyRuntime
-        run: |
-          wget -q https://github.com/dafny-lang/dafny/releases/download/nightly/dafny-nightly-2022-12-02-edab6cc-x64-osx-10.14.2.zip 
-          unzip -qq dafny-nightly-2022-12-02-edab6cc-x64-osx-10.14.2.zip 
-          mvn -B -ntp install:install-file \
-          -Dfile=dafny/DafnyRuntime.jar \
-          -DgroupId=dafny.lang \
-          -DartifactId=DafnyRuntime \
-          -Dversion=3.10.0 \
-          -DgeneratePom=true \
-          -Dpackaging=jar
-
-      - name: Setup dafny-java-conversion
-        uses: gradle/gradle-build-action@v2
-        with:
-          arguments: publishToMavenLocal
-          build-root-directory: dafny-java-conversion
 
       - name: Generate Polymorph Wrapper Dafny code
         shell: bash
