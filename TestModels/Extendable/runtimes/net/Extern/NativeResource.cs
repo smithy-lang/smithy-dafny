@@ -5,7 +5,6 @@ using System;
 using Dafny.Simple.Extendable.Resources;
 using Dafny.Simple.Extendable.Resources.Types;
 using Simple.Extendable.Resources;
-using TypeConversion = Simple.Extendable.Resources.TypeConversion;
 
 namespace Simple.Extendable.Resources
 {
@@ -39,6 +38,7 @@ namespace Simple.Extendable.Resources
       {
         throw new Exception(".NET Hard Coded Exception");
       }
+
       return this._impl.AlwaysOpaqueError(input);
     }
 
@@ -50,11 +50,7 @@ namespace Simple.Extendable.Resources
         TypeConversion.FromDafny_N6_simple__N10_extendable__N9_resources__S27_ExtendableResourceReference(_nw2);
       return new NativeResource(dafnyResource);
     }
-
-    public static Dafny.Simple.Extendable.Resources.Types.IExtendableResource DafnyFactory()
-    {
-      return TypeConversion.ToDafny_N6_simple__N10_extendable__N9_resources__S27_ExtendableResourceReference(
-        NativeFactory());
-    }
   }
 }
+
+
