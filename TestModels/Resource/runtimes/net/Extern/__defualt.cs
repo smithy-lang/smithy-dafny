@@ -6,7 +6,8 @@ using Simple.Resources;
 using Simple.Resources.Wrapped;
 using Dafny.Simple.Resources.Types;
 using TypeConversion = Simple.Resources.TypeConversion;
-namespace Dafny.Simple.Resources
+// TODO: Not sure what the fuck is going on... figure out why we no longer need the SimpleResources method.
+/*namespace Dafny.Simple.Resources
 {
   public partial class __default
   {
@@ -18,7 +19,7 @@ namespace Dafny.Simple.Resources
       return SimpleResources_Compile.__default.SimpleResources(config);
     }
   }
-}
+}*/
 
 namespace Dafny.Simple.Resources.Wrapped
 {

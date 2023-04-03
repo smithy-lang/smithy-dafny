@@ -28,3 +28,15 @@ namespace Dafny.Simple.Extendable.Resources.Wrapped
     }
   }
 }
+
+namespace Dafny.Simple.Extendable.Resources.NativeResourceFactory
+{
+  public partial class __default
+  {
+    public static Dafny.Simple.Extendable.Resources.Types.IExtendableResource DafnyFactory()
+    {
+      return TypeConversion.ToDafny_N6_simple__N10_extendable__N9_resources__S27_ExtendableResourceReference(
+        NativeResource.NativeFactory());
+    }
+  }
+}
