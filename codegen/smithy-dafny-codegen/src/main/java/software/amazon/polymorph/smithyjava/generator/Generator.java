@@ -20,11 +20,17 @@ import javax.lang.model.element.Modifier;
 
 import software.amazon.polymorph.smithyjava.MethodReference;
 import software.amazon.polymorph.utils.TokenTree;
+import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ShapeType;
 
 public abstract class Generator {
     public static final Modifier[] PUBLIC_STATIC = new Modifier[]{Modifier.PUBLIC, Modifier.STATIC};
     protected static final Modifier[] PRIVATE_FINAL = new Modifier[]{Modifier.PRIVATE, Modifier.FINAL};
+    public static final String INTERFACE_VAR = "impl";
+    public static final String INTERFACE_FIELD = "_impl";
+    protected static final String NATIVE_VAR = "nativeValue";
+    protected static final String DAFNY_VAR = "dafnyValue";
+    protected static final String RESULT_VAR = "result";
     @SuppressWarnings("unused")
     private static final Logger LOGGER = LoggerFactory.getLogger(Generator.class);
 
@@ -53,7 +59,13 @@ public abstract class Generator {
 
     public abstract Set<JavaFile> javaFiles();
 
-     public static class Constants {
+    protected List<OperationShape> getOperationsForTarget() {
+        return subject.serviceShape.getOperations().stream().sequential()
+                .map(shapeId -> subject.model.expectShape(shapeId, OperationShape.class))
+                .collect(Collectors.toList());
+    }
+
+    public static class Constants {
         public static final MethodReference IDENTITY_FUNCTION = new MethodReference(
                 ClassName.get(java.util.function.Function.class),
                 "identity");

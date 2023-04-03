@@ -20,6 +20,7 @@ import software.amazon.polymorph.smithyjava.generator.CodegenSubject.AwsSdkVersi
 import software.amazon.polymorph.smithyjava.generator.awssdk.v1.JavaAwsSdkV1;
 import software.amazon.polymorph.smithyjava.generator.awssdk.v2.JavaAwsSdkV2;
 import software.amazon.polymorph.smithyjava.generator.library.JavaLibrary;
+import software.amazon.polymorph.smithyjava.generator.library.TestJavaLibrary;
 import software.amazon.polymorph.utils.IOUtils;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.smithy.aws.traits.ServiceTrait;
@@ -141,6 +142,8 @@ public class CodegenEngine {
                 case V1 -> javaAwsSdkV1(outputDir);
                 case V2 -> javaAwsSdkV2(outputDir);
             }
+        } else if (this.localServiceTest) {
+            javaWrappedLocalService(outputDir);
         } else {
             javaLocalService(outputDir);
         }
@@ -150,6 +153,12 @@ public class CodegenEngine {
         final JavaLibrary javaLibrary = new JavaLibrary(this.model, this.serviceShape, this.javaAwsSdkVersion);
         IOUtils.writeTokenTreesIntoDir(javaLibrary.generate(), outputDir);
         LOGGER.info("Java code generated in {}", outputDir);
+    }
+
+    private void javaWrappedLocalService(final Path outputDir) {
+        final TestJavaLibrary testJavaLibrary = new TestJavaLibrary(model, serviceShape, this.javaAwsSdkVersion);
+        IOUtils.writeTokenTreesIntoDir(testJavaLibrary.generate(), outputDir);
+        LOGGER.info("Java that tests a local service generated in {}", outputDir);
     }
 
     private void javaAwsSdkV1(Path outputDir) {
@@ -198,7 +207,7 @@ public class CodegenEngine {
 
         final TypeConversionCodegen conversion = new LocalServiceWrappedConversionCodegen(model, serviceShape);
         IOUtils.writeTokenTreesIntoDir(conversion.generate(), outputDir);
-        LOGGER.info(".NET code generated in {}", outputDir);
+        LOGGER.info(".NET that tests a local service generated in {}", outputDir);
     }
 
     private void netAwsSdk(final Path outputDir) {

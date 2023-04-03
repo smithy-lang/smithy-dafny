@@ -2,12 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 include "./Helpers.dfy"
+include "./NativeResourceFactory.dfy"
 
 module NativeExtendableResourceTest {
   import ExtendableResource
   import Types = SimpleExtendableResourcesTypes
   import opened Wrappers
   import opened TestHelpers
+  import opened NativeResourceFactory
 
   method {:test} TestNativeResource()
   {

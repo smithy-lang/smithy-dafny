@@ -18,7 +18,7 @@ import software.amazon.polymorph.smithyjava.generator.CodegenSubject;
 import software.amazon.polymorph.smithyjava.generator.library.ShimLibrary;
 import software.amazon.polymorph.traits.ExtendableTrait;
 import software.amazon.polymorph.smithyjava.generator.library.JavaLibrary;
-import software.amazon.polymorph.smithyjava.generator.library.JavaLibrary.MethodSignature;
+import software.amazon.polymorph.smithyjava.MethodSignature;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.polymorph.smithyjava.nameresolver.Native;
 

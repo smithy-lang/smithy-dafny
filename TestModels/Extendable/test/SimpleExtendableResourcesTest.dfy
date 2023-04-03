@@ -3,6 +3,7 @@
 
 include "../src/Index.dfy"
 include "./Helpers.dfy"
+include "./NativeResourceFactory.dfy"
 
 module SimpleExtendableResourcesTest {
   import SimpleExtendableResources
@@ -10,6 +11,7 @@ module SimpleExtendableResourcesTest {
   import Types = SimpleExtendableResourcesTypes
   import opened Wrappers
   import opened TestHelpers
+  import opened NativeResourceFactory
 
   const TEST_RESOURCE_NAME: string := "Dafny-Test";
   
