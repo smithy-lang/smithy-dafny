@@ -25,10 +25,12 @@ configure<software.amazon.smithy.gradle.SmithyExtension> {
 tasks["jar"].enabled = false
 
 buildscript {
+    val smithyVersion: String by project
+
     repositories {
         mavenCentral()
     }
     dependencies {
-        classpath("software.amazon.smithy.typescript:smithy-aws-typescript-codegen:0.12.0")
+        "classpath"("software.amazon.smithy:smithy-cli:$smithyVersion")
     }
 }
