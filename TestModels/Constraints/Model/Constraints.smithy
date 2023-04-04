@@ -8,7 +8,7 @@ service SimpleConstraints {
   version: "2021-11-01",
   resources: [],
   operations: [ GetConstraints ],
-  errors: [],
+  errors: [ SimpleConstraintsException ],
 }
 
 structure SimpleConstraintsConfig {}
@@ -155,4 +155,10 @@ string Utf8Bytes
 
 list ListOfUtf8Bytes {
   member: Utf8Bytes
+}
+
+@error("client")
+structure SimpleConstraintsException {
+  @required
+  message: String,
 }

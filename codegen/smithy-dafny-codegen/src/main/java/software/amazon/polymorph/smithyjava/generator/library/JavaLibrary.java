@@ -18,14 +18,14 @@ import software.amazon.polymorph.smithyjava.generator.awssdk.v1.ShimV1;
 import software.amazon.polymorph.smithyjava.generator.awssdk.v2.ShimV2;
 import software.amazon.polymorph.smithyjava.generator.library.shims.ResourceShim;
 import software.amazon.polymorph.smithyjava.generator.library.shims.ServiceShim;
+import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
+import software.amazon.polymorph.smithyjava.nameresolver.Native;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.polymorph.utils.TokenTree;
-import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
-import software.amazon.polymorph.smithyjava.nameresolver.Native;
 
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.node.ExpectationNotMetException;
@@ -43,6 +43,8 @@ import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.TraitDefinition;
+
+import static software.amazon.polymorph.smithyjava.generator.library.shims.ResourceShim.WRAP_METHOD_NAME;
 
 public class JavaLibrary extends CodegenSubject {
 
@@ -115,21 +117,6 @@ public class JavaLibrary extends CodegenSubject {
                     dafnyValue);
         };
     }
-
-    /**
-     * @param method      MethodSpec.Builder that SHOULD have Parameters,
-     *                    Returns, & Modifiers set correctly
-     *                    ( note that
-     *                    void or parameterless methods would
-     *                    not have any Returns or Parameters).
-     * @param resolvedInput  A ResolvedShapeId representing the input
-     * @param resolvedOutput A ResolvedShapeId representing the output
-     */
-    public record MethodSignature(
-            MethodSpec.Builder method,
-            ModelUtils.ResolvedShapeId resolvedInput,
-            ModelUtils.ResolvedShapeId resolvedOutput
-    ) {}
 
     @Override
     public Map<Path, TokenTree> generate() {
@@ -218,7 +205,7 @@ public class JavaLibrary extends CodegenSubject {
             ResourceShape rShape = targetShape.asResourceShape().get();
             rtnClassName = nativeNameResolver.classNameForResource(rShape);
             return CodeBlock.of("$T.$L($L)",
-                    rtnClassName, ResourceShim.WRAP_METHOD_NAME, referentVariable);
+                    rtnClassName, WRAP_METHOD_NAME, referentVariable);
         } else {
             // It MUST be a service, as reference traits ONLY reference Resources & Services
             //noinspection OptionalGetWithoutIsPresent

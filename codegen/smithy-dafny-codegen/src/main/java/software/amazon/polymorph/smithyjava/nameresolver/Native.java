@@ -36,6 +36,8 @@ import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.traits.BoxTrait;
 import software.amazon.smithy.model.traits.EnumTrait;
 
+import static software.amazon.smithy.utils.StringUtils.capitalize;
+
 /**
  * Provides a consistent mapping between names of
  * model Shapes and generated identifiers in Java
@@ -256,6 +258,18 @@ public class Native extends NameResolver{
 
     public ClassName classNameForService(ServiceShape shape) {
         return classNameForInterfaceOrLocalService(shape, this.awsSdkVersion);
+    }
+
+    public ClassName classNameForTestService(ServiceShape shape) {
+        Optional<LocalServiceTrait> maybeTrait = shape.getTrait(LocalServiceTrait.class);
+        if (maybeTrait.isEmpty()) {
+            throw new IllegalArgumentException(
+                    ("ServiceShape for local-service-test MUST have LocalTrait." +
+                            " ShapeId: %s").formatted(shape.toShapeId()));
+        }
+        return ClassName.get(
+                NamespaceHelper.standardize(shape.getId().getNamespace()) + ".wrapped",
+                "Test" + capitalize(maybeTrait.get().getSdkId()));
     }
 
     public static ClassName classNameForResourceInterface(ResourceShape shape) {

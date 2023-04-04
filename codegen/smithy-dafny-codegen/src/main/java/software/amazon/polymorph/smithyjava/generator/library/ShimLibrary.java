@@ -9,7 +9,8 @@ import software.amazon.polymorph.smithyjava.MethodReference;
 import software.amazon.polymorph.smithyjava.generator.Generator;
 import software.amazon.polymorph.utils.AwsSdkNameResolverHelpers;
 import software.amazon.polymorph.utils.ModelUtils;
-import software.amazon.polymorph.smithyjava.generator.library.JavaLibrary.MethodSignature;
+import software.amazon.polymorph.smithyjava.MethodSignature;
+import software.amazon.polymorph.utils.ModelUtils.ResolvedShapeId;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.polymorph.smithyjava.nameresolver.Native;
 
@@ -27,17 +28,13 @@ import static software.amazon.polymorph.smithyjava.nameresolver.Constants.SMITHY
  * ShimLibrary holds the logic required to generate the Shim.
  */
 public abstract class ShimLibrary extends Generator {
-    protected static final String INTERFACE_FIELD = "_impl";
-    protected static final String NATIVE_VAR = "nativeValue";
-    protected static final String DAFNY_VAR = "dafnyValue";
-    protected static final String RESULT_VAR = "result";
     // Hack to override CodegenSubject
     // See ModelCodegen for explanation
     protected final JavaLibrary subject;
     /** The class name of the Subject's ToDafny class. */
-    protected final ClassName toDafnyClassName;
+    public final ClassName toDafnyClassName;
     /** The class name of the Subject's ToNative class. */
-    protected final ClassName toNativeClassName;
+    public final ClassName toNativeClassName;
 
     public ShimLibrary(JavaLibrary javaLibrary) {
         super(javaLibrary);
@@ -46,10 +43,10 @@ public abstract class ShimLibrary extends Generator {
         this.toNativeClassName = ToNativeLibrary.className(javaLibrary);
     }
 
-    protected JavaLibrary.MethodSignature operationMethodSignature(OperationShape shape) {
-        final ModelUtils.ResolvedShapeId inputResolved = ModelUtils.resolveShape(
+    protected MethodSignature operationMethodSignature(OperationShape shape) {
+        final ResolvedShapeId inputResolved = ModelUtils.resolveShape(
                 shape.getInputShape(), subject.model);
-        final ModelUtils.ResolvedShapeId outputResolved = ModelUtils.resolveShape(
+        final ResolvedShapeId outputResolved = ModelUtils.resolveShape(
                 shape.getOutputShape(), subject.model);
         final String operationName = shape.toShapeId().getName();
         final MethodSpec.Builder method = MethodSpec
@@ -69,7 +66,7 @@ public abstract class ShimLibrary extends Generator {
     }
 
     /** @return TypeName for a method's signature. */
-    protected TypeName methodSignatureTypeName(ModelUtils.ResolvedShapeId resolvedShape) {
+    protected TypeName methodSignatureTypeName(ResolvedShapeId resolvedShape) {
         Shape shape = subject.model.expectShape(resolvedShape.resolvedId());
         if (shape.isServiceShape() || shape.isResourceShape()) {
             // If target is a Service or Resource,
@@ -82,8 +79,8 @@ public abstract class ShimLibrary extends Generator {
 
     protected MethodSpec operation(OperationShape operationShape) {
         final MethodSignature signature = operationMethodSignature(operationShape);
-        final ModelUtils.ResolvedShapeId inputResolved = signature.resolvedInput();
-        final ModelUtils.ResolvedShapeId outputResolved = signature.resolvedOutput();
+        final ResolvedShapeId inputResolved = signature.resolvedInput();
+        final ResolvedShapeId outputResolved = signature.resolvedOutput();
         MethodSpec.Builder method = signature.method();
         final String operationName = operationShape.toShapeId().getName();
         // if operation takes an argument
@@ -154,13 +151,13 @@ public abstract class ShimLibrary extends Generator {
     // If it is known the Shape cannot have a positional trait,
     // then the "targetId" and the "shapeId" are the same.
     protected CodeBlock dafnyDeclareAndConvert(ShapeId shapeId) {
-        return dafnyDeclareAndConvert(new ModelUtils.ResolvedShapeId(shapeId, shapeId));
+        return dafnyDeclareAndConvert(new ResolvedShapeId(shapeId, shapeId));
     }
 
     // Positional complicates everything.
     // The types need to be looked up by targetId.
     // But The converters are named after the shapeId.
-    protected CodeBlock dafnyDeclareAndConvert(ModelUtils.ResolvedShapeId resolvedShape) {
+    protected CodeBlock dafnyDeclareAndConvert(ResolvedShapeId resolvedShape) {
         final ShapeId targetId = resolvedShape.resolvedId();
         final Shape naiveShape = subject.model.expectShape(resolvedShape.naiveId());
         final MethodReference toDafnyMethod = subject.toDafnyLibrary.conversionMethodReference(naiveShape);

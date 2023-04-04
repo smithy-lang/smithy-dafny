@@ -8,15 +8,18 @@ import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import software.amazon.polymorph.traits.LocalServiceTrait;
-import software.amazon.polymorph.utils.AwsSdkNameResolverHelpers;
-import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.polymorph.smithyjava.generator.library.JavaLibrary;
 import software.amazon.polymorph.smithyjava.nameresolver.Native;
 import software.amazon.polymorph.smithyjava.unmodeled.CollectionOfErrors;
+import software.amazon.polymorph.traits.LocalServiceTrait;
+import software.amazon.polymorph.utils.ModelUtils.ResolvedShapeId;
 
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.Shape;
+
+import static software.amazon.polymorph.smithyjava.generator.Generator.INTERFACE_VAR;
+import static software.amazon.polymorph.utils.AwsSdkNameResolverHelpers.isInAwsSdkNamespace;
+import static software.amazon.polymorph.utils.ModelUtils.resolveShape;
 
 // TODO: We can shrink our code base by combining
 //  BuilderMemberSpec w/ PolymorphFieldSpec.
@@ -38,13 +41,13 @@ public class BuilderMemberSpec {
     @Nullable public final CodeBlock wrapCall;
 
     public BuilderMemberSpec(MemberShape memberShape, JavaLibrary subject) {
-        ModelUtils.ResolvedShapeId resolvedShapeId = ModelUtils.resolveShape(memberShape.getTarget(), subject.model);
+        ResolvedShapeId resolvedShapeId = resolveShape(memberShape.getTarget(), subject.model);
         Shape resolvedShape = subject.model.expectShape(resolvedShapeId.resolvedId());
         this.type = subject.nativeNameResolver.typeForShape(resolvedShapeId.naiveId());
         this.name = memberShape.getMemberName();
         if (
                 (resolvedShape.isServiceShape() || resolvedShape.isResourceShape())
-                && !AwsSdkNameResolverHelpers.isInAwsSdkNamespace(resolvedShapeId.resolvedId())
+                && !isInAwsSdkNamespace(resolvedShapeId.resolvedId())
         ) {
             // If target is a non-AWS Service/Resource,
             // the output type should be an interface OR LocalService
@@ -59,6 +62,8 @@ public class BuilderMemberSpec {
         }
     }
 
+    /** Private Method for handling Edge Cases or cases where
+     * the target shape cannot be a member shape. */
     private BuilderMemberSpec(@Nonnull TypeName type, @Nonnull String name) {
         this.interfaceType = null;
         this.wrapCall = null;
@@ -72,11 +77,23 @@ public class BuilderMemberSpec {
         return List.of(new BuilderMemberSpec(type, name));
     }
 
-    public static BuilderMemberSpec serviceShimMemberSpec(
+
+    /** A Local Service Shim is built with a Configuration object,
+     *  which is stored as a field of the shim. */
+    // TODO: Should the Config object be optional?
+    public static BuilderMemberSpec localServiceConfigMemberSpec(
             LocalServiceTrait trait, JavaLibrary subject)
     {
         TypeName type = subject.nativeNameResolver.typeForShape(trait.getConfigId());
         String name = trait.getConfigId().getName();
+        return new BuilderMemberSpec(type, name);
+    }
+
+    public static BuilderMemberSpec localServiceAsMemberSpec(
+            JavaLibrary subject
+    ) {
+        TypeName type = subject.nativeNameResolver.classNameForService(subject.serviceShape);
+        String name = INTERFACE_VAR;
         return new BuilderMemberSpec(type, name);
     }
 }
