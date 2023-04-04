@@ -13,7 +13,7 @@
  * permissions and limitations under the License.
  */
 
-package software.amazon.smithy.python.codegen.integration;
+package software.amazon.smithy.dafny.python;
 
 import java.util.Collections;
 import java.util.List;
@@ -27,7 +27,8 @@ import software.amazon.smithy.python.codegen.ConfigField;
 import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonDependency;
 import software.amazon.smithy.python.codegen.SmithyPythonDependency;
-
+import software.amazon.smithy.python.codegen.integration.ProtocolGenerator;
+import software.amazon.smithy.python.codegen.integration.RuntimeClientPlugin;
 
 /**
  * Integration that registers {@link RestJsonProtocolGenerator}.
@@ -88,6 +89,7 @@ public final class DafnyTestIntegration implements
 
     @Override
     public List<ProtocolGenerator> getProtocolGenerators() {
+
         return Collections.singletonList(new DafnyProtocolGenerator() {
 
             @Override

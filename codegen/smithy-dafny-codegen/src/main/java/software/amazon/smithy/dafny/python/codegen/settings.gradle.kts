@@ -14,8 +14,6 @@
  */
 
 rootProject.name = "smithy-dafny-python"
-include(":smithy-python-codegen")
-project(":smithy-python-codegen").projectDir = file("smithy-python/codegen/smithy-python-codegen")
 
 pluginManagement {
     repositories {

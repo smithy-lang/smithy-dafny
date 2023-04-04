@@ -1,41 +1,18 @@
-/*
- * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License").
- * You may not use this file except in compliance with the License.
- * A copy of the License is located at
- *
- *  http://aws.amazon.com/apache2.0
- *
- * or in the "license" file accompanying this file. This file is distributed
- * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied. See the License for the specific language governing
- * permissions and limitations under the License.
- */
+plugins {
+    id("software.amazon.smithy").version("0.6.0")
+    `maven-publish`
+}
 
+allprojects {
+    group = "software.amazon.smithy.dafny.python"
+    version = "0.1.0"
+}
+
+description = "Generates Python code from Smithy models"
 extra["displayName"] = "Smithy :: Dafny :: Python :: Codegen"
 extra["moduleName"] = "software.amazon.smithy.dafny.python.codegen"
 
-tasks["jar"].enabled = false
-
 val smithyVersion: String by project
-
-buildscript {
-    val smithyVersion: String by project
-
-    repositories {
-        mavenLocal()
-        mavenCentral()
-    }
-    dependencies {
-        "classpath"("software.amazon.smithy:smithy-cli:$smithyVersion")
-    }
-}
-
-plugins {
-    val smithyGradleVersion: String by project
-    id("software.amazon.smithy").version(smithyGradleVersion)
-}
 
 repositories {
     mavenLocal()
@@ -43,7 +20,19 @@ repositories {
 }
 
 dependencies {
-    implementation(project(":smithy-python-codegen"))
-    implementation("software.amazon.smithy:smithy-waiters:$smithyVersion")
-    implementation("software.amazon.smithy:smithy-protocol-test-traits:$smithyVersion")
+    implementation("software.amazon.smithy:smithy-model:1.28.1")
+    implementation("software.amazon.smithy:smithy-aws-traits:1.28.1")
+    implementation("software.amazon.smithy.python:smithy-python-codegen:0.1.0")
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            groupId = "software.amazon.smithy.dafny.python"
+            artifactId = "smithy-dafny-python"
+            version = "0.1.0"
+
+            from(components["java"])
+        }
+    }
 }

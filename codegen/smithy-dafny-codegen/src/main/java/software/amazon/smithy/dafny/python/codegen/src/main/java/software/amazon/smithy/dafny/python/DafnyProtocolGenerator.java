@@ -1,4 +1,4 @@
-/*
+package software.amazon.smithy.dafny.python;/*
  * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License").
@@ -12,8 +12,6 @@
  * express or implied. See the License for the specific language governing
  * permissions and limitations under the License.
  */
-
-package software.amazon.smithy.python.codegen.integration;
 
 
 import static java.lang.String.format;
@@ -54,6 +52,7 @@ import software.amazon.smithy.python.codegen.CodegenUtils;
 import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonWriter;
 import software.amazon.smithy.python.codegen.SmithyPythonDependency;
+import software.amazon.smithy.python.codegen.integration.ProtocolGenerator;
 import software.amazon.smithy.utils.CodeSection;
 import software.amazon.smithy.utils.SmithyUnstableApi;
 /*
@@ -373,21 +372,7 @@ public abstract class DafnyProtocolGenerator implements ProtocolGenerator {
 
     @Override
     public String timestampShape(TimestampShape shape) {
-      var httpIndex = HttpBindingIndex.of(context.model());
-      var format = switch (bindingType) {
-        case HEADER -> httpIndex.determineTimestampFormat(member, bindingType, Format.HTTP_DATE);
-        case LABEL -> httpIndex.determineTimestampFormat(member, bindingType, defaultTimestampFormat);
-        case QUERY -> httpIndex.determineTimestampFormat(member, bindingType, Format.DATE_TIME);
-        default ->
-            throw new CodegenException("Unexpected named member shape binding location `" + bindingType + "`");
-      };
-
-      var result = HttpProtocolGeneratorUtils.getTimestampInputParam(
-          context, writer, dataSource, member, format);
-      if (format == Format.EPOCH_SECONDS) {
-        result = format("str(%s)", result);
-      }
-      return result;
+      return "timestampshape";
     }
   }
 
@@ -541,15 +526,7 @@ public abstract class DafnyProtocolGenerator implements ProtocolGenerator {
 
     @Override
     public String timestampShape(TimestampShape shape) {
-      HttpBindingIndex httpIndex = HttpBindingIndex.of(context.model());
-      Format format = httpIndex.determineTimestampFormat(member, bindingType, defaultTimestampFormat);
-      var source = dataSource;
-      if (format == Format.EPOCH_SECONDS) {
-        writer.addDependency(SmithyPythonDependency.SMITHY_PYTHON);
-        writer.addImport("smithy_python.utils", "strict_parse_float");
-        source = "strict_parse_float(" + dataSource + ")";
-      }
-      return HttpProtocolGeneratorUtils.getTimestampOutputParam(writer, source, member, format);
+      return "timestampshape";
     }
 
     @Override

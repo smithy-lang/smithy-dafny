@@ -1,0 +1,16 @@
+{
+    "version": "1.0",
+    "outputDirectory": "runtimes/python",
+    "projections": {
+        "simple-boolean": {
+            "plugins": {
+                "python-client-codegen": {
+                    "service": "simple.types.boolean#SimpleBoolean",
+                    "module": "simple_boolean",
+                    "moduleVersion": "0.0.1",
+                    "protocolDefinition": "aws.polymorph#localService"
+                }
+            }
+        }
+    }
+}
