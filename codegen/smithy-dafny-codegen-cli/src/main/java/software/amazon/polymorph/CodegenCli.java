@@ -195,7 +195,7 @@ public class CodegenCli {
             final boolean awsSdkStyle = commandLine.hasOption("aws-sdk");
 
             Optional<AwsSdkVersion> javaAwsSdkVersion = Optional.empty();
-            if (awsSdkStyle && commandLine.hasOption("java-aws-sdk-version")) {
+            if (commandLine.hasOption("java-aws-sdk-version")) {
                 final String versionStr = commandLine.getOptionValue("java-aws-sdk-version").trim().toUpperCase();
                 try {
                     javaAwsSdkVersion = Optional.of(AwsSdkVersion.valueOf(versionStr));
