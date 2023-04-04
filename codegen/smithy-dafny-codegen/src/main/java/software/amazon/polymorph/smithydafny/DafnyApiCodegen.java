@@ -119,19 +119,23 @@ public class DafnyApiCodegen {
             DafnyNameResolverHelpers.dafnyExternNamespaceForShapeId(serviceShape.getId()),
             typesModuleName
           ));
-
+        final TokenTree abstractServiceModule = generateAbstractServiceModule(serviceShape);
+        final TokenTree abstractOperationsModule = generateAbstractOperationsModule(serviceShape);
+        final TokenTree modeledErrorDataType = generateModeledErrorDataType();
         // A smithy model may reference a model in a different package.
         // In which case we need to import it.
+        // Everything MUST BE GENERATED BEFORE `typesModulePrelude` is calculated.
+        // Otherwise, a foreign shape maybe referenced WITHOUT an import.
         final TokenTree typesModulePrelude = TokenTree
           .of(Stream
             .concat(
-              nameResolver.modulePreludeStandardImports(),
+              DafnyNameResolver.modulePreludeStandardImports(),
               nameResolver
                 .dependentModels()
                 .stream()
                 .map(d ->
-                  "import " + nameResolver.dafnyTypesModuleForNamespace(d.namespace())))
-            .map(i -> Token.of(i))
+                  "import " + DafnyNameResolver.dafnyTypesModuleForNamespace(d.namespace())))
+            .map(Token::of)
           )
           .lineSeparated();
 
@@ -152,7 +156,7 @@ public class DafnyApiCodegen {
               // Error types are generated *after*
               // all other types to account
               // for any dependent modules
-              generateModeledErrorDataType()
+              modeledErrorDataType
             )
             .lineSeparated()
             .braced();
@@ -163,8 +167,8 @@ public class DafnyApiCodegen {
             includeDirectives,
             typesModuleHeader,
             typesModuleBody,
-            generateAbstractServiceModule(serviceShape),
-            generateAbstractOperationsModule(serviceShape)
+            abstractServiceModule,
+            abstractOperationsModule
           )
           .lineSeparated();
         return Map.of(path, fullCode);
@@ -425,7 +429,7 @@ public class DafnyApiCodegen {
           // the module needs to be included
           // because we are obviously using it!
           final String sideEffect = nameResolver
-            .dafnyModulePrefixForShapeId(model.expectShape(referenceTrait.getReferentId()));
+            .dafnyModulePrefixForShape(model.expectShape(referenceTrait.getReferentId()));
           return null;
         }
 
@@ -1350,6 +1354,7 @@ public class DafnyApiCodegen {
       }
     }
 
+    // This method needs to be called before typesModulePrelude is calculated
     public TokenTree generateAbstractServiceModule(ServiceShape serviceShape) {
       final TokenTree abstractModulePrelude = TokenTree
         .of(DafnyNameResolver.abstractModulePrelude(serviceShape))
@@ -1358,11 +1363,12 @@ public class DafnyApiCodegen {
         .formatted(nameResolver.abstractServiceModuleName(serviceShape)));
 
       if (serviceShape.hasTrait(ServiceTrait.class)) {
+          TokenTree body = generateAbstractAwsServiceClass(serviceShape);
         return moduleHeader
           .append(Token
             .of(
               abstractModulePrelude,
-              generateAbstractAwsServiceClass(serviceShape)
+              body
             )
             .lineSeparated()
             .braced()
@@ -1829,8 +1835,8 @@ public class DafnyApiCodegen {
         if (!serviceShape.hasTrait(LocalServiceTrait.class)) throw new IllegalStateException("MUST be an LocalService");
         final LocalServiceTrait localServiceTrait = serviceShape.expectTrait(LocalServiceTrait.class);
 
-        final String configTypeName = localServiceTrait.getConfigId().getName();
-        final String defaultFunctionMethodName = "Default%s".formatted(configTypeName);
+        final String configTypeName = nameResolver.baseTypeForShape(localServiceTrait.getConfigId());
+        final String defaultFunctionMethodName = "Default%s".formatted(localServiceTrait.getConfigId().getName());
 
         final TokenTree defaultConfig = TokenTree
             .of("function method %s(): %s".formatted(defaultFunctionMethodName, configTypeName));
@@ -1940,8 +1946,8 @@ public class DafnyApiCodegen {
                 .of(DafnyNameResolver.wrappedAbstractModulePrelude(serviceShape))
                 .lineSeparated();
 
-        final String configTypeName = localServiceTrait.getConfigId().getName();
-        final String defaultFunctionMethodName = "Default%s".formatted(configTypeName);
+        final String configTypeName = nameResolver.baseTypeForShape(localServiceTrait.getConfigId());
+        final String defaultFunctionMethodName = "Default%s".formatted(localServiceTrait.getConfigId().getName());
 
         final TokenTree defaultConfig = TokenTree
                 .of("function method Wrapped%s(): %s".formatted(defaultFunctionMethodName, configTypeName));
