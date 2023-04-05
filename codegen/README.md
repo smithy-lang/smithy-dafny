@@ -142,7 +142,7 @@ to some of the shape types that this plugin does not yet support:
                 {
                     "name": "excludeShapesBySelector",
                     "args": {
-                        "selector": "operation :test(~> timestamp, double, float)"
+                        "selector": "operation :test(~> timestamp, double, float, resource)"
                     }
                 }
             ],
