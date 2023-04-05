@@ -8,7 +8,7 @@
                     "service": "simple.types.boolean#SimpleBoolean",
                     "module": "simple_boolean",
                     "moduleVersion": "0.0.1",
-                    "protocolDefinition": "aws.polymorph#localService"
+                    "protocol": "aws.polymorph#localService"
                 }
             }
         }
