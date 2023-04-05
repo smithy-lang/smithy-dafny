@@ -21,9 +21,11 @@ import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
+import software.amazon.polymorph.smithyjava.nameresolver.Native;
 import software.amazon.polymorph.smithyjava.unmodeled.CollectionOfErrors;
 import software.amazon.polymorph.smithyjava.unmodeled.NativeError;
 import software.amazon.polymorph.smithyjava.unmodeled.OpaqueError;
+import software.amazon.polymorph.traits.ExtendableTrait;
 
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.ResourceShape;
@@ -201,14 +203,30 @@ public class ToNativeLibrary extends ToNative {
 
     protected MethodSpec modeledResource(ResourceShape shape) {
         final String methodName = capitalize(shape.getId().getName());
-        return MethodSpec
+        MethodSpec.Builder method = MethodSpec
                 .methodBuilder(methodName)
                 .addModifiers(PUBLIC_STATIC)
                 .addParameter(Dafny.interfaceForResource(shape), VAR_INPUT)
-                .returns(subject.nativeNameResolver.classNameForResource(shape))
-                .addStatement("return $L", subject.wrapWithShim(shape.getId(),
-                        CodeBlock.of(VAR_INPUT)))
-                .build();
+                .returns(Native.classNameForInterfaceOrLocalService(shape, subject.sdkVersion));
+
+        if (shape.hasTrait(ExtendableTrait.class)) {
+            method
+              .beginControlFlow(
+                "if ($L instanceof $T.NativeWrapper)",
+                VAR_INPUT, subject.nativeNameResolver.classNameForResource(shape)
+              )
+              .addStatement(
+                "return (($T.NativeWrapper) $L)._impl",
+                subject.nativeNameResolver.classNameForResource(shape), VAR_INPUT
+              )
+              .endControlFlow();
+        }
+        return method
+          .addStatement(
+            "return $L",
+            subject.wrapWithShim(shape.getId(), CodeBlock.of(VAR_INPUT))
+          )
+          .build();
     }
 
     protected CodeBlock returnWithConversionCall(final MemberShape shape) {
