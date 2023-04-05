@@ -67,6 +67,9 @@ are as follows:
    your service model depends on, such as AWS-specific traits.
    See https://smithy.io/2.0/guides/using-code-generation/index.html for more examples.
 
+   Note the exact version of the `software.amazon.smithy` dependencies MAY NOT need to be 
+   `1.28.1` exactly, but MUST be consistent.
+
 3. Clone the GitHub repository for [smithy-dafny](https://github.com/awslabs/smithy-dafny)
    somewhere nearby, being sure to initialize submodules.
    If this repository is still private, reach out to aws-arg-dafny@amazon.com
