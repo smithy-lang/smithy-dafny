@@ -41,7 +41,7 @@ public class ModeledUnion {
         return ModeledStructure.javaFile(packageName, shape, subject);
     }
 
-    /** Aggregates all fields into {@code ALL_FIELDS_VAR} & then {@code ONLY_ONE_NON_NULL} */
+    /** Aggregates all fields into {@code ALL_FIELDS_VAR} and then {@code ONLY_ONE_NON_NULL} */
     protected static MethodSpec unionValidate(UnionShape shape) {
         List<CodeBlock> thisAllFields = shape.members().stream().map(
                 member -> CodeBlock.of("this.$L", member.getMemberName())).toList();

@@ -491,7 +491,7 @@ public class DotNetNameResolver {
      * Implements {@code DafnyAst.NonglobalVariable.CompilerizeName} for strings which are valid enum definition names
      * according to {@link ModelUtils#isValidEnumDefinitionName(String)}.
      *
-     * @see <a href="https://github.com/dafny-lang/dafny/blob/319a1f8e6ac655ac10394a12c2140a9e09514115/Source/Dafny/AST/DafnyAst.cs#L5908}">CompilerizeName</a>
+     * @see <a href="https://github.com/dafny-lang/dafny/blob/319a1f8e6ac655ac10394a12c2140a9e09514115/Source/Dafny/AST/DafnyAst.cs#L5908">CompilerizeName</a>
      */
     public static String dafnyCompiledNameForEnumDefinitionName(final String name) {
         if (!ModelUtils.isValidEnumDefinitionName(name)) {

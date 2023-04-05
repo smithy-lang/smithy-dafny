@@ -11,6 +11,9 @@ dependencies {
     implementation("software.amazon.smithy:smithy-model:1.28.0")
     implementation("software.amazon.smithy:smithy-aws-traits:1.28.0")
     implementation("software.amazon.smithy:smithy-rules-engine:1.28.0")
+
+    // Must be built and published to the local Maven repo
+    implementation("software.amazon.smithy.dafny:smithy-dafny-codegen:0.1.0")
 }
 
 configure<software.amazon.smithy.gradle.SmithyExtension> {
@@ -22,10 +25,12 @@ configure<software.amazon.smithy.gradle.SmithyExtension> {
 tasks["jar"].enabled = false
 
 buildscript {
+    val smithyVersion: String by project
+
     repositories {
         mavenCentral()
     }
     dependencies {
-        classpath("software.amazon.smithy.typescript:smithy-aws-typescript-codegen:0.12.0")
+        "classpath"("software.amazon.smithy:smithy-cli:$smithyVersion")
     }
 }

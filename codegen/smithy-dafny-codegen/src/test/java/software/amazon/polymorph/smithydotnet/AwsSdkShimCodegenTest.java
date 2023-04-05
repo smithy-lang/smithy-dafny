@@ -35,7 +35,7 @@ public class AwsSdkShimCodegenTest {
             updater.accept(builder, assembler);
         });
         final ServiceShape serviceShape = model.expectShape(SERVICE_SHAPE_ID, ServiceShape.class);
-        return new AwsSdkShimCodegen(model, serviceShape, new Path[0]);
+        return new AwsSdkShimCodegen(model, serviceShape);
     }
     //TODO: apply AwsSdkShimCodegen refactor to tests
     @Test

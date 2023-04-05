@@ -33,7 +33,7 @@ public class DafnyApiCodegen {
     private final Model model;
     private final ServiceShape serviceShape;
     private final DafnyNameResolver nameResolver;
-    private final Path modelPath;
+    private final Path outputDir;
     private final Path includeDafnyFile;
     private static final Logger LOGGER = LoggerFactory.getLogger(DafnyApiCodegen.class);
     static final Optional<TokenTree> DOUBLE_LENGTH_CONSTRAINT = Optional.of(
@@ -49,13 +49,13 @@ public class DafnyApiCodegen {
     public DafnyApiCodegen(
       final Model model,
       final ServiceShape serviceShape,
-      final Path modelPath,
+      final Path outputDir,
       final Path includeDafnyFile,
       final Path[] dependentModelPaths
     ) {
         this.model = model;
         this.serviceShape = serviceShape;
-        this.modelPath = modelPath;
+        this.outputDir = outputDir;
         this.includeDafnyFile = includeDafnyFile;
         this.nameResolver = new DafnyNameResolver(
           model,
@@ -93,7 +93,7 @@ public class DafnyApiCodegen {
             .concat(
               Stream
                 .of(
-                  modelPath.relativize(includeDafnyFile)
+                  outputDir.relativize(includeDafnyFile)
                 ),
               nameResolver
                 .dependentModels()
@@ -102,7 +102,7 @@ public class DafnyApiCodegen {
                 // Some models are only informational,
                 // and do not point to any generated Dafny.
                 .stream()
-                .map(d -> modelPath
+                .map(d -> outputDir
                   .relativize(d.modelPath().resolve("../src/Index.dfy"))
                 )
                 .map(Path::toString)
@@ -196,13 +196,13 @@ public class DafnyApiCodegen {
                 .concat(
                     Stream
                         .of(
-                            modelPath.relativize(includeDafnyFile),
-                            outputDafny.relativize(modelPath.resolve("../src/Index.dfy"))
+                            outputDir.relativize(includeDafnyFile),
+                            outputDafny.relativize(outputDir.resolve("../src/Index.dfy"))
                         ),
                     nameResolver
                         .dependentModels()
                         .stream()
-                        .map(d -> modelPath
+                        .map(d -> outputDir
                             .relativize(d.modelPath().resolve("../src/Index.dfy"))
                         )
                         .map(Path::toString)
