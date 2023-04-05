@@ -40,8 +40,7 @@ public class LocalServiceWrappedShimCodegen {
 
     public LocalServiceWrappedShimCodegen(
       final Model model,
-      final ServiceShape serviceShape,
-      final Path[] dependentModelPaths
+      final ServiceShape serviceShape
     ) {
         this.model = model;
         this.serviceShape = serviceShape;

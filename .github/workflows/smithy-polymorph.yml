@@ -28,6 +28,19 @@ jobs:
           arguments: :smithy-dafny-codegen:test
           build-root-directory: codegen
 
+      # Required for building the SQS model
+      - name: Locally cache smithy-dafny-codegen
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: :smithy-dafny-codegen:publishToMavenLocal
+          build-root-directory: codegen
+
+      - name: Sanity-check SQS test model via plugin
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: build --info
+          build-root-directory: TestModels/aws-sdks/sqs
+
       - name: Execute codegen build
         uses: gradle/gradle-build-action@v2
         with:

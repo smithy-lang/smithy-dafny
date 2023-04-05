@@ -34,12 +34,12 @@ dependencies {
     implementation(project(":smithy-dafny-codegen"))
 
     // For Parsing Smithy Models
-    implementation("software.amazon.smithy:smithy-model:1.28.1")
-    implementation("software.amazon.smithy:smithy-codegen-core:[1.0.2,1.1.0[")
-    implementation("software.amazon.smithy:smithy-protocol-test-traits:[1.0.2,1.1.0[")
-    implementation("software.amazon.smithy:smithy-aws-traits:1.28.1")
-    implementation("software.amazon.smithy:smithy-rules-engine:1.28.1")
-    implementation("software.amazon.smithy:smithy-waiters:1.28.1")
+    implementation("software.amazon.smithy:smithy-model:$smithyVersion")
+    implementation("software.amazon.smithy:smithy-codegen-core:$smithyVersion")
+    implementation("software.amazon.smithy:smithy-protocol-test-traits:$smithyVersion")
+    implementation("software.amazon.smithy:smithy-aws-traits:$smithyVersion")
+    implementation("software.amazon.smithy:smithy-rules-engine:$smithyVersion")
+    implementation("software.amazon.smithy:smithy-waiters:$smithyVersion")
 
     implementation("com.google.guava:guava:30.1-jre")
     implementation("commons-cli:commons-cli:1.4")

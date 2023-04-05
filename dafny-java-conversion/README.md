@@ -5,6 +5,8 @@ idiomatic Java types to Dafny-Java types and vice versa.
 This library assumes that Dafny will not introduce breaking changes
 to the Dafny Runtime jar inside a major version.
 
+*WARNING: All internal and external interfaces are considered unstable and subject to change without notice.*
+
 ## Set Up
 This library depends on the `DafnyRuntime.jar`. 
 
