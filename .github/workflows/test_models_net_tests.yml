@@ -15,7 +15,7 @@ jobs:
           TestModels/dafny-dependencies/StandardLibrary, # This stores current Polymorph dependencies that all TestModels depend on
           TestModels/Aggregate,
           # TestModels/AggregateReferences,
-          # TestModels/Constraints,
+          TestModels/Constraints,
           TestModels/Constructor,
           TestModels/Dependencies,
           TestModels/Errors,
@@ -40,7 +40,7 @@ jobs:
           TestModels/Union,
           TestModels/aws-sdks/ddb,
           TestModels/aws-sdks/kms,
-          TestModels/aws-sdks/sqs,
+          TestModels/aws-sdks/sqs-via-cli,
         ]
         dotnet-version: [ '6.0.x' ]
         os: [ ubuntu-latest ]
@@ -75,44 +75,22 @@ jobs:
         with:
           dotnet-version: ${{ matrix.dotnet-version }}
 
-      # GitHub docs on problem matcher's ::
+      # GitHub's docs on problem matcher's ::
       # https://github.com/actions/toolkit/blob/master/docs/commands.md#problem-matchers
       - name: Disable setup-dotnet's problem matcher
         # setup-dotnet's problem matcher:
         # https://github.com/actions/setup-dotnet/blob/main/.github/csc.json
         run: echo "::remove-matcher owner=csc::"
 
-      # TODO: This has been added has a workaround for https://issues.apache.org/jira/browse/MNG-7679
-      # Remove this when the latest version has been patched
-      - name: Setup Maven Action
-        uses: s4u/setup-maven-action@v1.7.0
-        with:
-          java-version: 8
-          maven-version: 3.8.7
-
-      # Java DafnyRuntime is not published to maven,
-      # so manually download a nightly build for 3.10.0 and grab it from there.
-      - name: Locally Cache Java DafnyRuntime
-        run: |
-          wget -q https://github.com/dafny-lang/dafny/releases/download/nightly/dafny-nightly-2022-12-02-edab6cc-x64-osx-10.14.2.zip
-          unzip -qq dafny-nightly-2022-12-02-edab6cc-x64-osx-10.14.2.zip
-          mvn -B -ntp install:install-file \
-          -Dfile=dafny/DafnyRuntime.jar \
-          -DgroupId=dafny.lang \
-          -DartifactId=DafnyRuntime \
-          -Dversion=3.10.0 \
-          -DgeneratePom=true \
-          -Dpackaging=jar
-
-      - name: Setup dafny-java-conversion
-        uses: gradle/gradle-build-action@v2
-        with:
-          arguments: publishToMavenLocal
-          build-root-directory: dafny-java-conversion
-
       - name: Download Dependencies
         working-directory: ./${{ matrix.library }}
         run: make setup_net
+
+      - name: Setup Java 17 for codegen
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'corretto'
+          java-version: '17'
 
       - name: Generate Polymorph Dafny and Dotnet code
         shell: bash
@@ -128,7 +106,7 @@ jobs:
           # This works because `node` is installed by default on GHA runners
           CORES=$(node -e 'console.log(os.cpus().length)')
           make transpile_net CORES=$CORES
-          
+
       - name: Test ${{ matrix.library }}
         working-directory: ./${{ matrix.library }}
         shell: bash

@@ -14,38 +14,26 @@ You should be able to use the standard [projections](https://smithy.io/2.0/guide
 to trim-down or modify a model as needed before code generation instead.
 
 ## Build
-### .NET
-1. Generate the Wrappers using `polymorph`
-```
-make polymorph_dafny polymorph_net
-```
 
-2. Transpile the tests (and implementation) to the target runtime.
-```
-make transpile_net
-```
+### Dafny + .NET
 
-3. Generate the executable in the .NET and execute the tests
-```
-make test_net
-```
-
-### Typescript
-
-Building a typescript client for SQS (to demonstrate how the Smithy plugins work):
+Building a Dafny + .NET client for SQS (to demonstrate how the Smithy plugins work):
 
 ```
 gradle build
 ```
 
-The generated client package will appear in `build/smithyprojections/typescript-codegen`.
+The generated client package will appear in `build/smithyprojections/sqs/source/dafny-client-codegen`.
 
 ## Development
 
-To implement https://github.com/awslabs/polymorph/issues/151, we want to provide a similar
+To implement <https://github.com/awslabs/polymorph/issues/151>, we provide a similar
 "dafny-client-codegen" Smithy plugin that can be configured in smithy-build.json as well.
-It should produce a fully-formed, ready-to-build project under
-`build/smithyprojections/dafny-client-codegen`.
-This probably means emitting a Makefile with a subset of what's currently in the `SharedMakefile.mk`.
+It will produce a fully-formed, ready-to-build project
+under `build/smithyprojections/sqs/source/dafny-client-codegen`.
+This will mean emitting a Makefile with a subset of what's currently in the `SharedMakefile.mk`,
+or alternatively to emit a Dafny project file (TBD).
 
-The JSON configuration for this plugin will need to accept a list of target languages.
+For now, the plugin generates the same code files as the older CLI,
+but does not generate all they build configuration files necessary to build the project.
+This shortcoming will be addressed in a future update.
