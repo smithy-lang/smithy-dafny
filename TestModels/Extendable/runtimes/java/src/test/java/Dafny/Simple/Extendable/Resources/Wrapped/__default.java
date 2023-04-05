@@ -24,7 +24,8 @@ public class __default extends _ExternBase___default {
     }
 
     /**
-     * We cannot call ToNative from Dafny source code. But we need to test this un-wrapping.
+     * We have not developed the ability to call ToNative from Dafny source code at this time.
+     * But we need to test this un-wrapping, so this is written in native code until we figure that out.
      */
     public static void TestUnwrapExtendable() {
         IExtendableResource dafnyWrappingNativeWrappingDafny = DafnyFactory();
