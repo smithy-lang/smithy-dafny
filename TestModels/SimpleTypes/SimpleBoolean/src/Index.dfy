@@ -1,6 +1,6 @@
 include "SimpleBooleanImpl.dfy"
 
-module {:extern "Dafny.Simple.Types.Boolean" } SimpleBoolean refines AbstractSimpleTypesBooleanService {
+module {:extern "Dafny.Simpletypes.Boolean" } SimpleBoolean refines AbstractSimpletypesBooleanService {
     import Operations = SimpleBooleanImpl
 
  function method DefaultSimpleBooleanConfig(): SimpleBooleanConfig {

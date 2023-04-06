@@ -8,7 +8,7 @@ CORES=2
 
 include ../../SharedMakefile.mk
 
-NAMESPACE=simple.types.boolean
+NAMESPACE=simpletypes.boolean
 
 # This project has no dependencies 
 # DEPENDENT-MODELS:= 

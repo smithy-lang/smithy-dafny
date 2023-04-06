@@ -18,21 +18,22 @@ package software.amazon.smithy.dafny.python;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import software.amazon.smithy.codegen.core.ReservedWords;
+import software.amazon.smithy.codegen.core.ReservedWordsBuilder;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolReference;
+import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.python.codegen.ApplicationProtocol;
 import software.amazon.smithy.python.codegen.ConfigField;
 import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonDependency;
+import software.amazon.smithy.python.codegen.PythonSettings;
 import software.amazon.smithy.python.codegen.SmithyPythonDependency;
 import software.amazon.smithy.python.codegen.integration.ProtocolGenerator;
 import software.amazon.smithy.python.codegen.integration.RuntimeClientPlugin;
 
-/**
- * Integration that registers {@link RestJsonProtocolGenerator}.
- */
 public final class DafnyTestIntegration implements
     software.amazon.smithy.python.codegen.integration.PythonIntegration {
 

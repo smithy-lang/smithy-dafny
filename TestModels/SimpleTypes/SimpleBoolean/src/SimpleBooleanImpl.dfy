@@ -1,6 +1,6 @@
 include "../Model/SimpleTypesBooleanTypes.dfy"
 
-module SimpleBooleanImpl refines AbstractSimpleTypesBooleanOperations  {
+module SimpleBooleanImpl refines AbstractSimpletypesBooleanOperations  {
   datatype Config = Config
   type InternalConfig = Config
   predicate ValidInternalConfig?(config: InternalConfig)

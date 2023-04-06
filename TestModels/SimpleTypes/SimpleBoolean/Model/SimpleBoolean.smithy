@@ -1,4 +1,4 @@
-namespace simple.types.boolean
+namespace simpletypes.boolean
 
 @aws.polymorph#localService(
   sdkId: "SimpleBoolean",

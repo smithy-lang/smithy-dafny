@@ -2,7 +2,7 @@ include "../src/Index.dfy"
 
 module  SimpleBooleanImplTest {
     import SimpleBoolean
-    import opened SimpleTypesBooleanTypes
+    import opened SimpletypesBooleanTypes
     import opened Wrappers
     method{:test} GetBooleanTrue(){
         var client :- expect SimpleBoolean.SimpleBoolean();

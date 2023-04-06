@@ -1,6 +1,6 @@
 include "../Model/SimpleTypesBooleanTypesWrapped.dfy"
 
-module {:extern "Dafny.Simple.Types.Boolean.Wrapped"} WrappedSimpleTypesBooleanService refines WrappedAbstractSimpleTypesBooleanService {
+module {:extern "Dafny.Simpletypes.Boolean.Wrapped"} WrappedSimpleTypesBooleanService refines WrappedAbstractSimpletypesBooleanService {
     import WrappedService = SimpleBoolean
     function method WrappedDefaultSimpleBooleanConfig(): SimpleBooleanConfig {
         SimpleBooleanConfig

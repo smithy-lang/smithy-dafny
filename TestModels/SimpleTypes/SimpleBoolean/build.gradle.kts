@@ -10,5 +10,6 @@ repositories {
 dependencies {
     implementation("software.amazon.smithy:smithy-model:1.28.1")
     implementation("software.amazon.smithy:smithy-aws-traits:1.28.1")
-    implementation("software.amazon.smithy.dafny.python:smithy-dafny-python:0.1.0")
+    //implementation("software.amazon.smithy.dafny.python:smithy-dafny-python:0.1.0")
+    implementation(project(":smithy-dafny-python"))
 }

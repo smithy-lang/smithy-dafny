@@ -67,6 +67,26 @@ dafny-reportgenerator:
 # and can be the same for all such runtimes.
 # Since such targets are all shared,
 # this is tractable.
+
+# TODO refactor
+# Dafny-compiled Python code requires the Python runtime
+build_implementation:
+	dafny build \
+		-t:$(TARGET) \
+		./src/Index.dfy \
+		-o $(OUT) \
+		--optimize-erasable-datatype-wrapper:false \
+		--library:$(PROJECT_ROOT)/dafny-dependencies/StandardLibrary/src/Index.dfy \
+		$(patsubst %, -library:$(PROJECT_ROOT)/%/src/Index.dfy, $(LIBRARIES))
+
+build_test:
+	dafny build \
+		-t:$(TARGET) \
+		`find ./test -name '*.dfy'` \
+		-o $(OUT) \
+		--optimize-erasable-datatype-wrapper:false \
+		--library:src/Index.dfy
+
 transpile_implementation:
 	dafny \
 		-vcsCores:$(CORES) \
@@ -179,9 +199,15 @@ polymorph_java: _polymorph_wrapped
 polymorph_java: POLYMORPH_LANGUAGE_TARGET=java
 polymorph_java: _polymorph_dependencies
 
-smithy_dafny_python: export MODEL_DIR=$(LIBRARY_ROOT)/Model
 smithy_dafny_python:
 	gradle build
+	# Smithy outputDirectory can be overridden in smithy-build.json:
+	#   https://smithy.io/2.0/guides/building-models/build-config.html#smithy-build-json
+	# However, outputDirectory is currently bugged, and overrides do not apply:
+	#   https://github.com/awslabs/smithy/issues/1425
+	# As a workaround, the Make script will move output to the correct directory until #1425 is resolved.
+	cp -r build/smithyprojections/simple-types-boolean/source/python-client-codegen runtimes/python
+
 
 ########################## .NET targets
 
@@ -266,8 +292,19 @@ clean:
 
 # Python Targets
 
-transpile_python: | transpile_implementation_python
+transpile_python: | transpile_implementation_python transpile_test_python
 
-transpile_implementation_python: TARGET=python
+transpile_implementation_python: TARGET=py
 transpile_implementation_python: OUT=runtimes/python/ImplementationFromDafny
-transpile_implementation_python: transpile_implementation
+transpile_implementation_python:  build_implementation
+
+transpile_test_python: TARGET=py
+transpile_test_python: OUT=runtimes/python/TestsFromDafny
+transpile_test_python: transpile_test
+
+cleanup_filenames:
+	cd runtimes/Pyt
+
+
+test_python:
+	python3 runtimes/python/TestsFromDafny_py/__init__.py
