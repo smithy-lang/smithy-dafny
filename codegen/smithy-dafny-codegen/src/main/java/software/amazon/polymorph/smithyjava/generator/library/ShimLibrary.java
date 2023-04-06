@@ -7,12 +7,12 @@ import com.squareup.javapoet.TypeName;
 
 import software.amazon.polymorph.smithyjava.MethodReference;
 import software.amazon.polymorph.smithyjava.generator.Generator;
+import software.amazon.polymorph.smithyjava.modeled.Operation;
 import software.amazon.polymorph.utils.AwsSdkNameResolverHelpers;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.polymorph.smithyjava.MethodSignature;
 import software.amazon.polymorph.utils.ModelUtils.ResolvedShapeId;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
-import software.amazon.polymorph.smithyjava.nameresolver.Native;
 
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.Shape;
@@ -43,6 +43,9 @@ public abstract class ShimLibrary extends Generator {
         this.toNativeClassName = ToNativeLibrary.className(javaLibrary);
     }
 
+    // TODO: The methods in this class SHOULD all be moved to
+    //  software.amazon.polymorph.smithyjava.modeled.Operation.AsNative,
+    //  which, ideally, would become a Shape Visitor?
     protected MethodSignature operationMethodSignature(OperationShape shape) {
         final ResolvedShapeId inputResolved = ModelUtils.resolveShape(
                 shape.getInputShape(), subject.model);
@@ -67,14 +70,7 @@ public abstract class ShimLibrary extends Generator {
 
     /** @return TypeName for a method's signature. */
     protected TypeName methodSignatureTypeName(ResolvedShapeId resolvedShape) {
-        Shape shape = subject.model.expectShape(resolvedShape.resolvedId());
-        if (shape.isServiceShape() || shape.isResourceShape()) {
-            // If target is a Service or Resource,
-            // the output type should be an interface OR LocalService.
-            return Native.classNameForInterfaceOrLocalService(
-                    shape, subject.sdkVersion);
-        }
-        return subject.nativeNameResolver.typeForShape(shape.toShapeId());
+        return Operation.preferNativeInterface(resolvedShape, subject);
     }
 
     protected MethodSpec operation(OperationShape operationShape) {
