@@ -52,8 +52,8 @@ public class JavaLibrary extends CodegenSubject {
     public final String packageName;
     /** Public POJOs will go here. */
     public final String modelPackageName;
-    protected final ToDafnyLibrary toDafnyLibrary;
-    protected final ToNativeLibrary toNativeLibrary;
+    public final ToDafnyLibrary toDafnyLibrary;
+    public final ToNativeLibrary toNativeLibrary;
 
     public JavaLibrary(Model model, ServiceShape serviceShape, AwsSdkVersion sdkVersion) {
         super(model, serviceShape, initDafny(model, serviceShape, sdkVersion), initNative(model, serviceShape, sdkVersion), sdkVersion);
