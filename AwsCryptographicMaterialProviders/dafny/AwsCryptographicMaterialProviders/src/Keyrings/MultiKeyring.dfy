@@ -4,7 +4,7 @@
 include "../Keyring.dfy"
 include "../Materials.dfy"
 include "../../Model/AwsCryptographyMaterialProvidersTypes.dfy"
-include "../../../libraries/src/Collections/Sequences/Seq.dfy"
+include "../../../../../libraries/src/Collections/Sequences/Seq.dfy"
 
 module MultiKeyring {
   import opened StandardLibrary

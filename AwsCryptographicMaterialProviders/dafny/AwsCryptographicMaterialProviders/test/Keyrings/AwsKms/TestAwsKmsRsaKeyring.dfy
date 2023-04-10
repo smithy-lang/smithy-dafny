@@ -4,7 +4,7 @@
 include "../../../src/Index.dfy"
 include "../../../src/Keyrings/AwsKms/AwsKmsDiscoveryKeyring.dfy"
 include "../../TestUtils.dfy"
-include "../../../../ComAmazonawsKms/src/Index.dfy"
+include "../../../../../../ComAmazonawsKms/src/Index.dfy"
 
 module TestAwsKmsRsaKeyring {
   import opened Wrappers

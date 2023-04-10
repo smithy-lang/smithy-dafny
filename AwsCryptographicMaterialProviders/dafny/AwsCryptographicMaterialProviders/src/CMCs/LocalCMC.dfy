@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 include "../../Model/AwsCryptographyMaterialProvidersTypes.dfy"
-include "../../../libraries/src/MutableMap/MutableMap.dfy"
+include "../../../../../libraries/src/MutableMap/MutableMap.dfy"
 
 module {:options "/functionSyntax:4" } LocalCMC {
   import opened Wrappers

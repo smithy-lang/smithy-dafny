@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 include "../Model/AwsCryptographyMaterialProvidersTypes.dfy"
-include "../../ComAmazonawsDynamodb/Model/ComAmazonawsDynamodbTypes.dfy"
+include "../../../../ComAmazonawsDynamodb/Model/ComAmazonawsDynamodbTypes.dfy"
 
 module AwsArnParsing {
   import opened StandardLibrary

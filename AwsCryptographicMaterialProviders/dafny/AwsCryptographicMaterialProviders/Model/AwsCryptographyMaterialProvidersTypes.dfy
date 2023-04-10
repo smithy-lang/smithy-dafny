@@ -1,10 +1,10 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 // Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
-include "../../StandardLibrary/src/Index.dfy"
- include "../../AwsCryptographyPrimitives/src/Index.dfy"
- include "../../ComAmazonawsDynamodb/src/Index.dfy"
- include "../../ComAmazonawsKms/src/Index.dfy"
+include "../../../../StandardLibrary/src/Index.dfy"
+ include "../../../../AwsCryptographyPrimitives/src/Index.dfy"
+ include "../../../../ComAmazonawsDynamodb/src/Index.dfy"
+ include "../../../../ComAmazonawsKms/src/Index.dfy"
  module {:extern "Dafny.Aws.Cryptography.MaterialProviders.Types" } AwsCryptographyMaterialProvidersTypes
  {
  import opened Wrappers
