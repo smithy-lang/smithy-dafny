@@ -14,8 +14,9 @@ import java.util.Objects;
 import simple.errors.SimpleErrors;
 import simple.errors.ToDafny;
 import simple.errors.ToNative;
-import simple.errors.model.NativeError;
+import simple.errors.model.CollectionOfErrors;
 import simple.errors.model.OpaqueError;
+import simple.errors.model.SimpleErrorsException;
 
 public class TestSimpleErrors implements ISimpleErrorsClient {
   private final SimpleErrors _impl;
@@ -34,7 +35,7 @@ public class TestSimpleErrors implements ISimpleErrorsClient {
       simple.errors.model.GetErrorsOutput nativeOutput = this._impl.AlwaysError(nativeInput);
       GetErrorsOutput dafnyOutput = ToDafny.GetErrorsOutput(nativeOutput);
       return Result.create_Success(dafnyOutput);
-    } catch (NativeError ex) {
+    } catch (CollectionOfErrors|SimpleErrorsException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (Exception ex) {
       OpaqueError error = OpaqueError.builder().obj(ex).cause(ex).build();
@@ -48,7 +49,7 @@ public class TestSimpleErrors implements ISimpleErrorsClient {
       simple.errors.model.GetErrorsOutput nativeOutput = this._impl.AlwaysMultipleErrors(nativeInput);
       GetErrorsOutput dafnyOutput = ToDafny.GetErrorsOutput(nativeOutput);
       return Result.create_Success(dafnyOutput);
-    } catch (NativeError ex) {
+    } catch (CollectionOfErrors|SimpleErrorsException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (Exception ex) {
       OpaqueError error = OpaqueError.builder().obj(ex).cause(ex).build();
@@ -62,7 +63,7 @@ public class TestSimpleErrors implements ISimpleErrorsClient {
       simple.errors.model.GetErrorsOutput nativeOutput = this._impl.AlwaysNativeError(nativeInput);
       GetErrorsOutput dafnyOutput = ToDafny.GetErrorsOutput(nativeOutput);
       return Result.create_Success(dafnyOutput);
-    } catch (NativeError ex) {
+    } catch (CollectionOfErrors|SimpleErrorsException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (Exception ex) {
       OpaqueError error = OpaqueError.builder().obj(ex).cause(ex).build();

@@ -3,15 +3,24 @@
 // Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 package simple.errors.model;
 
-public class OpaqueError extends NativeError {
+public class OpaqueError extends RuntimeException {
   private final Object obj;
 
   protected OpaqueError(BuilderImpl builder) {
-    super(builder);
-    this.obj = builder.obj();
+      super(messageFromBuilder(builder), builder.cause());
+      this.obj = builder.obj();
   }
 
-  @Override
+    private static String messageFromBuilder(Builder builder) {
+        if (builder.message() != null) {
+            return builder.message();
+        }
+        if (builder.cause() != null) {
+            return builder.cause().getMessage();
+        }
+        return null;
+    }
+
   public Builder toBuilder() {
     return new BuilderImpl(this);
   }
@@ -24,53 +33,65 @@ public class OpaqueError extends NativeError {
     return this.obj;
   }
 
-  public interface Builder extends NativeError.Builder {
-    Builder message(String message);
+    public interface Builder {
+        Builder message(String message);
 
-    Builder cause(Throwable cause);
+        String message();
 
-    Builder obj(Object obj);
+        Builder cause(Throwable cause);
 
-    Object obj();
+        Throwable cause();
 
-    OpaqueError build();
-  }
+        Builder obj(Object obj);
 
-  static class BuilderImpl extends NativeError.BuilderImpl implements Builder {
-    protected Object obj;
+        Object obj();
 
-    protected BuilderImpl() {
+        OpaqueError build();
     }
 
-    protected BuilderImpl(OpaqueError model) {
-      super(model);
-      this.obj = model.obj();
-    }
+    static class BuilderImpl implements Builder {
+        protected String message;
+        protected Throwable cause;
+        protected Object obj;
 
-    public Builder obj(Object obj) {
-      this.obj = obj;
-      return this;
-    }
+        protected BuilderImpl() {
+        }
 
-    public Object obj() {
-      return this.obj;
-    }
+        protected BuilderImpl(OpaqueError model) {
+            this.cause = model.getCause();
+            this.message = model.getMessage();
+            this.obj = model.obj();
+        }
 
-    @Override
-    public Builder message(String message) {
-      super.message(message);
-      return this;
-    }
+        public Builder message(String message) {
+            this.message = message;
+            return this;
+        }
 
-    @Override
-    public Builder cause(Throwable cause) {
-      super.cause(cause);
-      return this;
-    }
+        public String message() {
+            return this.message;
+        }
 
-    @Override
-    public OpaqueError build() {
-      return new OpaqueError(this);
+        public Builder cause(Throwable cause) {
+            this.cause = cause;
+            return this;
+        }
+
+        public Throwable cause() {
+            return this.cause;
+        }
+
+        public Builder obj(Object obj) {
+            this.obj = obj;
+            return this;
+        }
+
+        public Object obj() {
+            return this.obj;
+        }
+
+        public OpaqueError build() {
+            return new OpaqueError(this);
+        }
     }
-  }
 }

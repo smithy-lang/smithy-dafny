@@ -10,7 +10,6 @@ import Dafny.Simple.Errors.Types.Error_SimpleErrorsException;
 import simple.errors.model.CollectionOfErrors;
 import simple.errors.model.GetErrorsInput;
 import simple.errors.model.GetErrorsOutput;
-import simple.errors.model.NativeError;
 import simple.errors.model.OpaqueError;
 import simple.errors.model.SimpleErrorsConfig;
 import simple.errors.model.SimpleErrorsException;
@@ -37,7 +36,7 @@ public class ToNative {
     return nativeBuilder.build();
   }
 
-  public static NativeError Error(Error dafnyValue) {
+  public static RuntimeException Error(Error dafnyValue) {
     if (dafnyValue.is_SimpleErrorsException()) {
       return ToNative.Error((Error_SimpleErrorsException) dafnyValue);
     }

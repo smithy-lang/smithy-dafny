@@ -13,12 +13,11 @@ import dafny.DafnySequence;
 import java.lang.Character;
 import java.util.Objects;
 import simple.errors.model.CollectionOfErrors;
-import simple.errors.model.NativeError;
 import simple.errors.model.OpaqueError;
 import simple.errors.model.SimpleErrorsException;
 
 public class ToDafny {
-  public static Error Error(NativeError nativeValue) {
+  public static Error Error(RuntimeException nativeValue) {
     if (nativeValue instanceof SimpleErrorsException) {
       return ToDafny.Error((SimpleErrorsException) nativeValue);
     }

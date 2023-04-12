@@ -5,74 +5,104 @@ package simple.errors.model;
 
 import java.util.List;
 
-public class CollectionOfErrors extends NativeError {
-  private final List<NativeError> list;
+public class CollectionOfErrors extends RuntimeException {
+    private final List<RuntimeException> list;
 
-  protected CollectionOfErrors(BuilderImpl builder) {
-    super(builder);
-    this.list = builder.list();
-  }
-
-  public List<NativeError> list() {
-    return this.list;
-  }
-
-  @Override
-  public Builder toBuilder() {
-    return new BuilderImpl(this);
-  }
-
-  public static Builder builder() {
-    return new BuilderImpl();
-  }
-
-  public interface Builder extends NativeError.Builder {
-    Builder message(String message);
-
-    Builder cause(Throwable cause);
-
-    Builder list(List<NativeError> list);
-
-    List<NativeError> list();
-
-    CollectionOfErrors build();
-  }
-
-  static class BuilderImpl extends NativeError.BuilderImpl implements Builder {
-    protected List<NativeError> list;
-
-    protected BuilderImpl() {
+    protected CollectionOfErrors(BuilderImpl builder) {
+        super(messageFromBuilder(builder), builder.cause());
+        this.list = builder.list();
     }
 
-    protected BuilderImpl(CollectionOfErrors model) {
-      super(model);
-      this.list = model.list();
+    public List<RuntimeException> list() {
+        return this.list;
     }
 
-    public Builder list(List<NativeError> list) {
-      this.list = list;
-      return this;
+    public static Builder builder() {
+        return new BuilderImpl();
     }
 
-    public List<NativeError> list() {
-      return this.list;
+    public Builder toBuilder() {
+        return new BuilderImpl(this);
     }
 
-    @Override
-    public Builder message(String message) {
-      super.message(message);
-      return this;
+    private static String messageFromBuilder(Builder builder) {
+        if (builder.message() != null) {
+            return builder.message();
+        }
+        if (builder.cause() != null) {
+            return builder.cause().getMessage();
+        }
+        return null;
     }
 
-    @Override
-    public Builder cause(Throwable cause) {
-      super.cause(cause);
-      return this;
+    public String message() {
+        return this.getMessage();
     }
 
-    @Override
-    public CollectionOfErrors build() {
-      return new CollectionOfErrors(this);
+    public Throwable cause() {
+        return this.getCause();
     }
-  }
+
+    static class BuilderImpl implements Builder {
+        protected String message;
+        protected Throwable cause;
+        protected List<RuntimeException> list;
+
+
+        protected BuilderImpl() {
+        }
+
+        protected BuilderImpl(CollectionOfErrors model) {
+            this.cause = model.getCause();
+            this.message = model.getMessage();
+            this.list = model.list();
+        }
+
+        public Builder message(String message) {
+            this.message = message;
+            return this;
+        }
+
+        public String message() {
+            return this.message;
+        }
+
+        public Builder cause(Throwable cause) {
+            this.cause = cause;
+            return this;
+        }
+
+        public Throwable cause() {
+            return this.cause;
+        }
+
+        public Builder list(List<RuntimeException> list) {
+            this.list = list;
+            return this;
+        }
+
+        public List<RuntimeException> list() {
+            return this.list;
+        }
+
+        public CollectionOfErrors build() {
+            return new CollectionOfErrors(this);
+        }
+    }
+
+    public interface Builder {
+        Builder message(String message);
+
+        String message();
+
+        Builder cause(Throwable cause);
+
+        Throwable cause();
+
+        Builder list(List<RuntimeException> list);
+
+        List<RuntimeException> list();
+
+        CollectionOfErrors build();
+    }
 }
