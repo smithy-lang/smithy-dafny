@@ -1,0 +1,56 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
+// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
+package simple.errors.model;
+
+public class GetErrorsOutput {
+  private final String value;
+
+  protected GetErrorsOutput(BuilderImpl builder) {
+    this.value = builder.value();
+  }
+
+  public String value() {
+    return this.value;
+  }
+
+  public Builder toBuilder() {
+    return new BuilderImpl(this);
+  }
+
+  public static Builder builder() {
+    return new BuilderImpl();
+  }
+
+  public interface Builder {
+    Builder value(String value);
+
+    String value();
+
+    GetErrorsOutput build();
+  }
+
+  static class BuilderImpl implements Builder {
+    protected String value;
+
+    protected BuilderImpl() {
+    }
+
+    protected BuilderImpl(GetErrorsOutput model) {
+      this.value = model.value();
+    }
+
+    public Builder value(String value) {
+      this.value = value;
+      return this;
+    }
+
+    public String value() {
+      return this.value;
+    }
+
+    public GetErrorsOutput build() {
+      return new GetErrorsOutput(this);
+    }
+  }
+}
