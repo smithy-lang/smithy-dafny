@@ -1723,13 +1723,13 @@ public class DafnyApiCodegen {
                             //   a condition on the existing comprehension, starting with `&&`
                             // i.e. var setVar := set t | t in otherVar.Values && t.thisOptionalStructure.Some?
                             modifiesClause = modifiesClause.append(TokenTree.of(
-                                "&& %1$s.Some? \n " .formatted(accessPathToCurrentShape)
+                                "&& %1$s.Some? \n ".formatted(accessPathToCurrentShape)
                             ));
                         } else {
                             // If not using set comprehension, the `.Some` check on an optional structure is added as
                             //   an if/else clause, where the else is appended at the very end of the modifies clause
                             modifiesClause = modifiesClause.append(TokenTree.of(
-                                "if %1$s.Some? then \n" .formatted(accessPathToCurrentShape)
+                                "if %1$s.Some? then \n".formatted(accessPathToCurrentShape)
                             ));
                             appendAtEnd = appendAtEnd.append(TokenTree.of("else {}\n"));
                         }
