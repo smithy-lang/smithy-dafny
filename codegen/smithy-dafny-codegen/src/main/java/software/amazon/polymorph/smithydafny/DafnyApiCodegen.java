@@ -1708,7 +1708,7 @@ public class DafnyApiCodegen {
                             //   a condition on the existing comprehension, starting with `&&`
                             // i.e. var setVar := set t | t in otherVar.Values && t.thisOptionalStructure.Some?
                             modifiesClause = modifiesClause.append(TokenTree.of(
-                                "&& %1$s.Some? \n ".formatted(accessPathToCurrentShape)
+                                "| %1$s.Some? \n ".formatted(accessPathToCurrentShape)
                             ));
                         } else {
                             // If not using set comprehension, the `.Some` check on an optional structure is added as
@@ -1728,32 +1728,37 @@ public class DafnyApiCodegen {
                     // This branch is for collections of multiple values, i.e. maps or lists.
                     // These shapes introduce a set comprehension variable to access valid state methods.
                     if (setComprehensionVar != null) {
+
+                        // TODO: Support nested lists/maps inside lists/maps
+                        // There is previous code
                         if (currentShapeType == ShapeType.LIST) {
-                            modifiesClause = modifiesClause.append(TokenTree.of(
-                                ":: set t%1$s | t%1$s in %2$s"
-                                    .formatted(intermediateTempVariableCounter,
-                                        accessPathToCurrentShape)
-                            ));
+                            throw new IllegalArgumentException("Nested lists are not supported");
+//                            modifiesClause = modifiesClause.append(TokenTree.of(
+//                                ":: set t%1$s | t%1$s in %2$s"
+//                                    .formatted(intermediateTempVariableCounter,
+//                                        accessPathToCurrentShape)
+//                            ));
                         } else if (currentShapeType == ShapeType.MAP) {
+                            throw new IllegalArgumentException("Nested maps are not supported yet");
                             // If using set comprehension, the map's values are accessed by extending the current
                             //   comprehension expression
-                            modifiesClause = modifiesClause.append(TokenTree.of(
-                                ":: set t%1$s | t%1$s in %2$s.Values"
-                                    .formatted(intermediateTempVariableCounter,
-                                        accessPathToCurrentShape)
-                            ));
+//                            modifiesClause = modifiesClause.append(TokenTree.of(
+//                                ":: set t%1$s | t%1$s in %2$s.Values"
+//                                    .formatted(intermediateTempVariableCounter,
+//                                        accessPathToCurrentShape)
+//                            ));
                         }
                     } else {
                         // If not using set comprehension, we now need to.
                         if (currentShapeType == ShapeType.LIST) {
                             modifiesClause = modifiesClause.append(TokenTree.of(
-                                "var tmps%1$s := set t%1$s | t%1$s in %2$s\n ".formatted(
+                                "set tmps%1$s <- set t%1$s <- %2$s\n ".formatted(
                                     intermediateTempVariableCounter,
                                     accessPathToCurrentShape)
                             ));
                         } else if (currentShapeType == ShapeType.MAP) {
                             modifiesClause = modifiesClause.append(TokenTree.of(
-                                "var tmps%1$s := set t%1$s | t%1$s in %2$s.Values\n ".formatted(
+                                "set tmps%1$s <- set t%1$s <- %2$s.Values\n ".formatted(
                                     intermediateTempVariableCounter,
                                     accessPathToCurrentShape)
                             ));
@@ -1783,48 +1788,47 @@ public class DafnyApiCodegen {
             modifiesClause = modifiesClause.append(TokenTree.of(
                 "%s".formatted(accessPathToCurrentShape)
             ));
+            modifiesClause = TokenTree.of("%1$s.Modifies".formatted(modifiesClause));
         } else {
-            // If using set comprehension, setComprehensionVar holds nested sets of modifies clauses.
-            // Flatten the set for easier access.
+            // Extract Modifies member from expression
             modifiesClause = modifiesClause.append(TokenTree.of("""
-              :: %1$s;
-               var %2$sFlattenedModifiesSet: set<set<object>> := set t0
+              :: %1$s,
+               obj <- %2$s.Modifies | obj in %2$s.Modifies :: obj
                """.formatted(accessPathToCurrentShape, setComprehensionVar)
             ));
-
-            // The number of sets to flatten equals the number of additional set comprehensions introduced.
-            int numberOfSetsToAccess = intermediateTempVariableCounter - startingIntermediateTempVariableCounter;
-            for (int i = 1; i < numberOfSetsToAccess; i++) {
-                // `set t0, t1, ... tN`
-                modifiesClause = TokenTree.of("%1$s, t%2$s".formatted(modifiesClause, i));
-            }
-            // `set t0 .. tN | t0 in setComprehensionVar`
-            modifiesClause = TokenTree.of("%1$s | t0 in %2$s".formatted(modifiesClause, setComprehensionVar));
-            for (int i = 1; i < numberOfSetsToAccess; i++) {
-                // `set t0 .. tN | t0 in setComprehensionVar && t1 in t0 && .. tN-1 in tN`
-                modifiesClause = modifiesClause.append(TokenTree.of(
-                    "&& t%1$s in t%2$s".formatted(i, i - 1)
-                ));
-            }
-            // `set t0 .. tN | t0 in setComprehensionVar && t1 in t0 && .. tN-1 in tN :: tN`
-            modifiesClause = modifiesClause.append(TokenTree.of(
-                ":: t%2$s".formatted(modifiesClause, numberOfSetsToAccess - 1)
-            ));
-            // tN represents the reference member that contains a Modifies member.
-            // `set t0 .. tN | t0 in setComprehensionVar && t1 in t0 && .. tN-1 in tN :: tN.Modifies;`
+//
+//            // The number of sets to flatten equals the number of additional set comprehensions introduced.
+//            int numberOfSetsToAccess = intermediateTempVariableCounter - startingIntermediateTempVariableCounter;
+//            for (int i = 1; i < numberOfSetsToAccess; i++) {
+//                // `set t0, t1, ... tN`
+//                modifiesClause = TokenTree.of("%1$s, t%2$s".formatted(modifiesClause, i));
+//            }
+//            // `set t0 .. tN | t0 in setComprehensionVar`
+//            modifiesClause = TokenTree.of("%1$s | t0 in %2$s".formatted(modifiesClause, setComprehensionVar));
+//            for (int i = 1; i < numberOfSetsToAccess; i++) {
+//                // `set t0 .. tN | t0 in setComprehensionVar && t1 in t0 && .. tN-1 in tN`
+//                modifiesClause = modifiesClause.append(TokenTree.of(
+//                    "&& t%1$s in t%2$s".formatted(i, i - 1)
+//                ));
+//            }
+//            // `set t0 .. tN | t0 in setComprehensionVar && t1 in t0 && .. tN-1 in tN :: tN`
+//            modifiesClause = modifiesClause.append(TokenTree.of(
+//                ":: t%2$s".formatted(modifiesClause, numberOfSetsToAccess - 1)
+//            ));
+//            // tN represents the reference member that contains a Modifies member.
+//            // `set t0 .. tN | t0 in setComprehensionVar && t1 in t0 && .. tN-1 in tN :: tN.Modifies;`
         }
 
-        modifiesClause = TokenTree.of("%1$s.Modifies".formatted(modifiesClause));
-
-        if (setComprehensionVar != null) {
-            // Create an expression that the `modifies` clause can use
-            modifiesClause = TokenTree.of("""
-                %1$s;
-                 (set tmp%2$sModifyEntry, tmp%2$sModifies | \n tmp%2$sModifies in %3$sFlattenedModifiesSet \n && tmp%2$sModifyEntry in tmp%2$sModifies \n :: tmp%2$sModifyEntry)"""
-                .formatted(modifiesClause, intermediateTempVariableCounter, setComprehensionVar)
-            );
-            intermediateTempVariableCounter++;
-        }
+//
+//        if (setComprehensionVar != null) {
+//            // Create an expression that the `modifies` clause can use
+//            modifiesClause = TokenTree.of("""
+//                %1$s;
+//                 (set tmp%2$sModifyEntry, tmp%2$sModifies | \n tmp%2$sModifies in %3$sFlattenedModifiesSet \n && tmp%2$sModifyEntry in tmp%2$sModifies \n :: tmp%2$sModifyEntry)"""
+//                .formatted(modifiesClause, intermediateTempVariableCounter, setComprehensionVar)
+//            );
+//            intermediateTempVariableCounter++;
+//        }
 
         return TokenTree.of(
             "%1$s\n%2$s"
