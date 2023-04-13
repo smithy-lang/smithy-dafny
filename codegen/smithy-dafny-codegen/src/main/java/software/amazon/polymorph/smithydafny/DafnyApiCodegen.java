@@ -1557,6 +1557,21 @@ public class DafnyApiCodegen {
                         //   i.e. `fooStructure.value.barStructure`
                         accessPathToCurrentShape = TokenTree.of("%s.value".formatted(accessPathToCurrentShape));
                     }
+                } else if (currentShapeType == ShapeType.UNION) {
+                    // Union members are accessed like fields
+                    // e.g. `fooUnion.barUnionMember`
+                    accessPathToCurrentShape = TokenTree.of(
+                        "%s%s" .formatted(accessPathToCurrentShape, currentVarName));
+
+                    // Union members must always be checked for presence; i.e. are always "optional"
+                    // e.g. `fooUnion.barUnionMember? ==> `
+                    validStateClause = validStateClause.append(TokenTree.of(
+                        "%s? ==>\n"
+                            .formatted(accessPathToCurrentShape)));
+
+                    // Since presence is checked above, children are now accessed on the member
+                    // e.g. `fooUnion.barUnionMember? ==> fooUnion.barUnionMember ...`
+                    accessPathToCurrentShape = TokenTree.of("%s".formatted(accessPathToCurrentShape));
                 } else {
                     // This branch is for collections of multiple values, i.e. maps or lists.
                     // These shapes use set comprehension to access valid state methods.
@@ -1723,6 +1738,30 @@ public class DafnyApiCodegen {
                         //   i.e. `fooStructure.value.barStructure`
                         accessPathToCurrentShape += ".value";
                     }
+
+                else if (currentShapeType == ShapeType.UNION) {
+                    // Union members are accessed like fields
+                    // e.g. `fooUnion.barUnionMember`
+                    accessPathToCurrentShape += currentVarName;
+
+                    // Union members must always be checked for presence; i.e. are always "optional"
+                    if (setComprehensionVar != null) {
+                        // If using set comprehension, the destructor on a union member is added as
+                        //   a condition on the existing comprehension, starting with `&&`
+                        // e.g. `&& fooUnion.barUnionMember? ...`
+                        modifiesClause = modifiesClause.append(TokenTree.of(
+                            "&& %1$s? \n ".formatted(accessPathToCurrentShape)
+                        ));
+                    } else {
+                        // If not using set comprehension, the destructor on a union member is added as
+                        //     an if/else clause, where the else is appended at the very end of the modifies clause
+                        // e.g. `if fooUnion.barUnionMember? then ... else {}`
+                        modifiesClause = modifiesClause.append(TokenTree.of(
+                            "if %1$s? then \n".formatted(accessPathToCurrentShape)
+                        ));
+                        appendAtEnd = appendAtEnd.append(TokenTree.of("else {}\n"));
+                    }
+                }
 
                 } else {
                     // This branch is for collections of multiple values, i.e. maps or lists.
