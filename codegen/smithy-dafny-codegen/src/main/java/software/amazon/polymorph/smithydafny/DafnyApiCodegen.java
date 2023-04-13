@@ -1730,23 +1730,20 @@ public class DafnyApiCodegen {
                     if (setComprehensionVar != null) {
 
                         // TODO: Support nested lists/maps inside lists/maps
-                        // There is previous code
                         if (currentShapeType == ShapeType.LIST) {
-                            throw new IllegalArgumentException("Nested lists are not supported");
-//                            modifiesClause = modifiesClause.append(TokenTree.of(
-//                                ":: set t%1$s | t%1$s in %2$s"
-//                                    .formatted(intermediateTempVariableCounter,
-//                                        accessPathToCurrentShape)
-//                            ));
+                            modifiesClause = modifiesClause.append(TokenTree.of(
+                                ", t%1$s <- %2$s"
+                                    .formatted(intermediateTempVariableCounter,
+                                        accessPathToCurrentShape)
+                            ));
                         } else if (currentShapeType == ShapeType.MAP) {
-                            throw new IllegalArgumentException("Nested maps are not supported yet");
                             // If using set comprehension, the map's values are accessed by extending the current
                             //   comprehension expression
-//                            modifiesClause = modifiesClause.append(TokenTree.of(
-//                                ":: set t%1$s | t%1$s in %2$s.Values"
-//                                    .formatted(intermediateTempVariableCounter,
-//                                        accessPathToCurrentShape)
-//                            ));
+                            modifiesClause = modifiesClause.append(TokenTree.of(
+                                ", t%1$s <- %2$s.Values"
+                                    .formatted(intermediateTempVariableCounter,
+                                        accessPathToCurrentShape)
+                            ));
                         }
                     } else {
                         // If not using set comprehension, we now need to.
