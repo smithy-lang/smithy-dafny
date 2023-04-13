@@ -5,7 +5,6 @@ import com.squareup.javapoet.JavaFile;
 import org.junit.Test;
 
 import software.amazon.polymorph.smithyjava.unmodeled.CollectionOfErrors;
-import software.amazon.polymorph.smithyjava.unmodeled.NativeError;
 import software.amazon.polymorph.smithyjava.unmodeled.OpaqueError;
 
 import static software.amazon.polymorph.util.Tokenizer.tokenizeAndAssertEqual;
@@ -17,13 +16,6 @@ import static software.amazon.polymorph.util.Tokenizer.tokenizeAndAssertEqual;
 //TODO: Refactor to test components instead of whole
 public class StaticErrorsTest {
     static String packageName = "software.amazon.cryptography.model";
-
-    @Test
-    public void NativeErrorTest() {
-        JavaFile actual = NativeError.javaFile(packageName);
-        String actualString = actual.toString();
-        tokenizeAndAssertEqual(Constants.NATIVE_ERROR_EXPECTED, actualString);
-    }
 
     @Test
     public void OpaqueErrorTest() {

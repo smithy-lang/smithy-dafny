@@ -6,17 +6,12 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeSpec;
 
 import java.util.Collections;
-import java.util.stream.Collectors;
 
 import software.amazon.polymorph.smithyjava.BuilderMemberSpec;
 import software.amazon.polymorph.smithyjava.BuilderSpecs;
 
-import static software.amazon.smithy.utils.StringUtils.capitalize;
-
-import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PROTECTED;
 import static javax.lang.model.element.Modifier.PUBLIC;
-import static javax.lang.model.element.Modifier.STATIC;
 
 /**
  * NativeError is a concrete allegory to smithy-dafny's
@@ -41,17 +36,17 @@ public class NativeError {
                 .classBuilder(className)
                 .addModifiers(PUBLIC)
                 .superclass(superName)
-                .addMethod(builderSpecs.builderMethod())
-                .addMethod(builderSpecs.toBuilderMethod(false))
-                .addMethod(constructor(builderSpecs))
-                .addMethod(messageFromBuilder(builderSpecs))
+                .addMethod(ErrorHelpers.messageFromBuilder(builderSpecs))
+                .addMethods(ErrorHelpers.throwableGetters())
+                .addType(builderSpecs.builderInterface())
                 .addType(builderSpecs.builderImpl(
                         false,
                         builderImplConstructor(packageName),
                         builderSpecs.implBuildMethod(false))
                 )
-                .addType(builderSpecs.builderInterface())
-                .addMethods(getters())
+                .addMethod(constructor(builderSpecs))
+                .addMethod(builderSpecs.toBuilderMethod(false))
+                .addMethod(builderSpecs.builderMethod())
                 .build();
         return JavaFile.builder(packageName, spec)
                 .skipJavaLangImports(true)
@@ -75,25 +70,6 @@ public class NativeError {
     }
 
     /**
-     * @return MethodSpec that checks the message field and cause's
-     * message field for a valid message.
-     */
-    static MethodSpec messageFromBuilder(BuilderSpecs builderSpecs) {
-        return MethodSpec.methodBuilder("messageFromBuilder")
-                .returns(String.class)
-                .addModifiers(PRIVATE, STATIC)
-                .addParameter(builderSpecs.builderInterfaceName(), BuilderSpecs.BUILDER_VAR)
-                .beginControlFlow("if ($L.message() != null)", BuilderSpecs.BUILDER_VAR)
-                .addStatement("return $L.message()", BuilderSpecs.BUILDER_VAR)
-                .endControlFlow()
-                .beginControlFlow("if ($L.cause() != null)", BuilderSpecs.BUILDER_VAR)
-                .addStatement("return $L.cause().getMessage()", BuilderSpecs.BUILDER_VAR)
-                .endControlFlow()
-                .addStatement("return null")
-                .build();
-    }
-
-    /**
      * @return Constructor that that uses {@code RuntimeException}'s getter
      * methods to initialize builder.
      */
@@ -106,17 +82,4 @@ public class NativeError {
                 .build();
     }
 
-    /**
-     * RuntimeException's fields are retrieved by `get + capitalize-field-name`,
-     * but our generated Java just uses the field name.
-     */
-    static Iterable<MethodSpec> getters() {
-        return BuilderMemberSpec.THROWABLE_ARGS.stream().map(field ->
-                MethodSpec.methodBuilder(field.name)
-                        .returns(field.type)
-                        .addModifiers(PUBLIC)
-                        .addStatement("return this.$L()",
-                                String.format("get%s", capitalize(field.name)))
-                        .build()).collect(Collectors.toList());
-    }
 }

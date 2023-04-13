@@ -32,6 +32,8 @@ public class BuilderMemberSpec {
     );
 
     public final static List<BuilderMemberSpec> OPAQUE_ARGS = List.of(
+            new BuilderMemberSpec(TypeName.get(String.class), "message"),
+            new BuilderMemberSpec(TypeName.get(Throwable.class), "cause"),
             new BuilderMemberSpec(TypeName.get(Object.class), "obj")
     );
 
