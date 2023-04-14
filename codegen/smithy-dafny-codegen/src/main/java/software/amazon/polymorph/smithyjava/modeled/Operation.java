@@ -73,16 +73,8 @@ public class Operation {
             // catch Errors in this Namespace
             method
                     .nextControlFlow("catch ($T ex)",
-                            subject.nativeNameResolver.baseErrorForService())
+                            ClassName.get(RuntimeException.class))
                     .addStatement("return $T.create_Failure($T.Error(ex))",
-                            DAFNY_RESULT_CLASS_NAME, shimLibrary.toDafnyClassName);
-            // catch any Exception and cast them as an Opaque Error
-            ClassName opaqueError = subject.nativeNameResolver.opaqueErrorForService();
-            method
-                    .nextControlFlow("catch ($T ex)", Exception.class)
-                    .addStatement("$T error = $T.builder().obj(ex).cause(ex).build()",
-                            opaqueError, opaqueError)
-                    .addStatement("return $T.create_Failure($T.Error(error))",
                             DAFNY_RESULT_CLASS_NAME, shimLibrary.toDafnyClassName)
                     .endControlFlow();
             return method.build();

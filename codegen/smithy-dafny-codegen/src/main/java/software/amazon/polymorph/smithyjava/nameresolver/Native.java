@@ -327,10 +327,9 @@ public class Native extends NameResolver{
 
     // TODO: improve exceptions for local services
     public ClassName baseErrorForService() {
-        return ClassName.get(RuntimeException.class);
+        throw new IllegalArgumentException(
+                "Local Services no longer have a local error hierarchy." +
+                        "Use `ClassName.get(RuntimeException.class)` instead.");
     }
 
-    public ClassName opaqueErrorForService() {
-        return OpaqueError.nativeClassName(modelPackage);
-    }
 }
