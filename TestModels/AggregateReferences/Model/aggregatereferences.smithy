@@ -39,11 +39,11 @@ structure SimpleAggregateReferencesConfig {
   // config.List.Map.Values.List[].Reference[]
   @required
   listOfMapOfLists: ListOfMapOfLists,
-  // config.Structure.List.Structure[].Reference
-  structureWithListOfStructures: StructureWithListOfStructures,
+  // config.Union.List.Structure[].Reference
+  unionWithListOfStructures: UnionWithListOfStructures,
 }
 
-structure StructureWithListOfStructures {
+union UnionWithListOfStructures {
   listMember: ListOfStructures
 }
 
