@@ -1750,7 +1750,7 @@ public class DafnyApiCodegen {
                         //   a condition on the existing comprehension, starting with `&&`
                         // e.g. `&& fooUnion.barUnionMember? ...`
                         modifiesClause = modifiesClause.append(TokenTree.of(
-                            "&& %1$s? \n ".formatted(accessPathToCurrentShape)
+                            "| %1$s? \n ".formatted(accessPathToCurrentShape)
                         ));
                     } else {
                         // If not using set comprehension, the destructor on a union member is added as

@@ -10,109 +10,137 @@ service SimpleAggregateReferences {
   operations: [],
   errors: [],
 }
-// Shape transitions between maps, structures, and lists,
+// Shape transitions between structures, unions, maps, and lists,
 // plus each being required/not required, are in scope.
 
-// Shapes actually under test
-// config.Map.Map
-// config.Map.Structure.Map
-// config.Structure.Map.Structure
-// config.Structure.Structure
-// config.List.List
-// config.List.Map.List
-// config.Structure.List.Structure
+// Shapes actually under test:
+// config.Union.Structure
+// config.Union.Map
+// config.Structure.Union
+// config.Structure.List
+// config.Map.Union
+// config.Map.List
+// config.List.Structure
+// config.List.Map
+
 // This isn't a fixed list and can be added/removed to to test different generations
+// Some suggested alternative shapes are commented out
 // Dafny verification times out if too many shapes are added
 structure SimpleAggregateReferencesConfig {
-  // config.Map.Values.Structure[].Map.Values.Reference[]
+  // unionWithUnionWithReference: UnionWithUnionWithReference,
   @required
-  requiredMapOfStructuresOfMapsOfReferences: MapOfStructuresOfMapsOfReferences,
-  // config.Structure.Map.Values.Structure[].Reference
+  unionWithStructureWithReference: UnionWithStructureWithReference,
+  unionWithMapOfReferences: UnionWithMapOfReferences,
+  // unionWithListOfReferences: UnionWithListOfReferences,
+  structureWithUnionWithReference: StructureWithUnionWithReference,
+  // structureWithStructureWithReference: StructureWithStructureWithReference,
+  // structureWithMapOfReferences: StructureWithMapOfReferences,
   @required
-  requiredStructureWithMapOfStructures: StructureWithMapOfStructures,
-  // config.Structure.Structure.Reference
-  nestedStructureWithReference: NestedStructureWithReference,
-  // config.Map1.Values.Map2.Values.Reference[]
-  nestedMapOfReferences: NestedMapOfReferences,
-  // config.List.List[].Reference[]
-  nestedList: NestedList,
-  // config.List.Map.Values.List[].Reference[]
+  structureWithListOfReferences: StructureWithListOfReferences,
   @required
-  listOfMapOfLists: ListOfMapOfLists,
-  // config.Union.List.Structure[].Reference
-  unionWithListOfStructures: UnionWithListOfStructures,
+  mapOfUnionWithReference: MapOfUnionWithReference,
+  // mapOfStructureWithReference: MapOfStructureWithReference,
+  // mapOfMapOfReferences: MapOfMapOfReferences,
+  mapOfListOfReferences: MapOfListOfReferences,
+  // listOfUnionWithReference: ListOfUnionWithReference,
+  @required
+  listOfStructureWithReference: ListOfStructureWithReference,
+  listOfMapOfReferences: ListOfMapOfReferences,
+  // listOfListOfReferences: ListOfListOfReferences,
 }
 
-union UnionWithListOfStructures {
-  listMember: ListOfStructures
-}
-
-list ListOfStructures {
-  member: StructureWithReference
-}
-
-list ListOfMapOfLists {
-  member: MapOfLists
-}
-
-map MapOfLists {
-  key: String,
-  value: ListOfReferences
+resource ResourceReference {
 }
 
 @aws.polymorph#reference(resource: ResourceReference)
 structure ResourceReferenceStructure {}
 
-resource ResourceReference {
+// Single-wrapped references
+union UnionWithReference {
+  referenceMember: ResourceReferenceStructure
 }
 
-list NestedList {
-  member: ListOfReferences
+structure StructureWithReference {
+  referenceMember: ResourceReferenceStructure
+}
+
+map MapOfReferences {
+  key: String,
+  value: ResourceReferenceStructure
 }
 
 list ListOfReferences {
   member: ResourceReferenceStructure
 }
 
-structure StructureWithMapOfStructures {
-  mapMember: MapOfStructuresWithReference
+// Double-wrapped references
+
+union UnionWithUnionWithReference {
+  unionMember: UnionWithReference
 }
 
-map MapOfStructuresOfMapsOfReferences {
-  key: String,
-  value: StructureWithMapOfReferences
+union UnionWithStructureWithReference {
+  structureMember: StructureWithReference
 }
 
-structure StructureWithReference {
-  referenceMember: ResourceReferenceStructure,
+union UnionWithMapOfReferences {
+  mapMember: MapOfReferences
 }
 
-map MapOfReferences {
-  key: String,
-  value: ResourceReferenceStructure,
+union UnionWithListOfReferences {
+  listMember: ListOfReferences
 }
 
-structure NestedStructureWithReference {
-  structureMember: StructureWithReference,
+structure StructureWithUnionWithReference {
+  unionMember: UnionWithReference
 }
 
-map NestedMapOfReferences {
-  key: String,
-  value: DoubleNestedMapOfReferences,
-}
-
-map DoubleNestedMapOfReferences {
-  key: String,
-  value: MapOfReferences,
+structure StructureWithStructureWithReference {
+  structureMember: StructureWithReference
 }
 
 structure StructureWithMapOfReferences {
-  mapMember: MapOfReferences,
+  mapMember: MapOfReferences
 }
 
-map MapOfStructuresWithReference {
+structure StructureWithListOfReferences {
+  listMember: ListOfReferences
+}
+
+map MapOfUnionWithReference {
+  key: String,
+  value: UnionWithReference
+}
+
+map MapOfStructureWithReference {
   key: String,
   value: StructureWithReference
+}
+
+map MapOfMapOfReferences {
+  key: String,
+  value: MapOfReferences
+}
+
+map MapOfListOfReferences {
+  key: String,
+  value: ListOfReferences
+}
+
+list ListOfUnionWithReference {
+  member: UnionWithReference
+}
+
+list ListOfStructureWithReference {
+  member: StructureWithReference
+}
+
+list ListOfMapOfReferences {
+  member: MapOfReferences
+}
+
+list ListOfListOfReferences {
+  member: ListOfReferences
 }
 
 // Operations not supported
