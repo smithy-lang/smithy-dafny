@@ -1572,7 +1572,7 @@ public class DafnyApiCodegen {
                     // Since presence is checked above, children are now accessed on the member
                     // e.g. `fooUnion.barUnionMember? ==> fooUnion.barUnionMember ...`
                     accessPathToCurrentShape = TokenTree.of("%s".formatted(accessPathToCurrentShape));
-                } else {
+                } else if (currentShapeType == ShapeType.MAP || currentShapeType == ShapeType.LIST) {
                     // This branch is for collections of multiple values, i.e. maps or lists.
                     // These shapes use set comprehension to access valid state methods.
                     if (currentShapeType == ShapeType.MAP) {
@@ -1608,6 +1608,10 @@ public class DafnyApiCodegen {
 
                     // Increment tempVar counter so variable names don't get re-used
                     intermediateTempVariableCounter++;
+                } else {
+                    // This is not a recognized shape type and is unsupported
+                    throw new UnsupportedOperationException(
+                        String.format("Shape type %s not supported. Shape name: %s", currentShapeType, currentVarName));
                 }
             } else {
                 // This is not a member shape, so this is a parent shape of a member.
