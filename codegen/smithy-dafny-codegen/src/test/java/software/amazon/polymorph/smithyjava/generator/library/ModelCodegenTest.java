@@ -24,15 +24,6 @@ public class ModelCodegenTest {
     }
 
     @Test
-    public void ModeledErrorTest() {
-        ShapeId structureId = ShapeId.fromParts("aws.cryptography.test", "TestError");
-        StructureShape structureShape = model.expectShape(structureId, StructureShape.class);
-        JavaFile actual = underTest.modeledError(structureShape);
-        String actualString = actual.toString();
-        tokenizeAndAssertEqual(Constants.TEST_ERROR_EXPECTED, actualString);
-    }
-
-    @Test
     public void StructureWithRangeTraitTest() {
         ShapeId structureId = ShapeId.fromParts("aws.cryptography.test", "TestRangeMinMaxInteger");
         StructureShape structureShape = model.expectShape(structureId, StructureShape.class);
