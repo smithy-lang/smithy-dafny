@@ -54,7 +54,7 @@ public class OpaqueError {
                 .addType(builderSpecs.builderImpl(
                         overrideSuperFalse,
                         builderImplConstructor(packageName),
-                        builderSpecs.implBuildMethod(overrideSuperFalse))
+                        implBuildMethod(className))
                 )
                 .addMethod(constructor(builderSpecs))
                 .addMethod(builderSpecs.toBuilderMethod(overrideSuperFalse))
@@ -90,6 +90,20 @@ public class OpaqueError {
                 .addStatement("this.cause = model.getCause()")
                 .addStatement("this.message = model.getMessage()")
                 .addStatement("this.obj = model.obj()")
+                .build();
+    }
+
+    static MethodSpec implBuildMethod(ClassName className) {
+        return MethodSpec
+                .methodBuilder("build")
+                .addModifiers(PUBLIC)
+                .returns(className)
+                .beginControlFlow("if (this.obj != null && this.cause == null && this.obj instanceof Throwable)")
+                .addStatement("this.cause = (Throwable) this.obj")
+                .nextControlFlow("else if (this.obj == null && this.cause != null)")
+                .addStatement("this.obj = this.cause")
+                .endControlFlow()
+                .addStatement("return new $T(this)", className)
                 .build();
     }
 }
