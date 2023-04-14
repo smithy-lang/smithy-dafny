@@ -1761,12 +1761,11 @@ public class DafnyApiCodegen {
                         ));
                         appendAtEnd = appendAtEnd.append(TokenTree.of("else {}\n"));
                     }
-                } else {
+                } else if (currentShapeType == ShapeType.MAP || currentShapeType == ShapeType.LIST) {
                     // This branch is for collections of multiple values, i.e. maps or lists.
                     // These shapes introduce a set comprehension variable to access valid state methods.
                     if (setComprehensionVar != null) {
 
-                        // TODO: Support nested lists/maps inside lists/maps
                         if (currentShapeType == ShapeType.LIST) {
                             modifiesClause = modifiesClause.append(TokenTree.of(
                                 ", t%1$s <- %2$s"
@@ -1811,6 +1810,10 @@ public class DafnyApiCodegen {
                     accessPathToCurrentShape = "t%1$s".formatted(
                         intermediateTempVariableCounter);
                     intermediateTempVariableCounter++;
+                } else {
+                    // This is not a recognized shape type and is unsupported
+                    throw new UnsupportedOperationException(
+                        String.format("Shape type %s not supported. Shape name: %s", currentShapeType, currentVarName));
                 }
             } else {
                 currentShapeType = shapeInPath.getType();
@@ -1827,42 +1830,10 @@ public class DafnyApiCodegen {
             // Extract Modifies member from expression
             modifiesClause = modifiesClause.append(TokenTree.of("""
               :: %1$s,
-               obj <- %2$s.Modifies | obj in %2$s.Modifies :: obj
-               """.formatted(accessPathToCurrentShape, setComprehensionVar)
+               obj <- %2$s.Modifies | obj in %2$s.Modifies :: obj"""
+                .formatted(accessPathToCurrentShape, setComprehensionVar)
             ));
-//
-//            // The number of sets to flatten equals the number of additional set comprehensions introduced.
-//            int numberOfSetsToAccess = intermediateTempVariableCounter - startingIntermediateTempVariableCounter;
-//            for (int i = 1; i < numberOfSetsToAccess; i++) {
-//                // `set t0, t1, ... tN`
-//                modifiesClause = TokenTree.of("%1$s, t%2$s".formatted(modifiesClause, i));
-//            }
-//            // `set t0 .. tN | t0 in setComprehensionVar`
-//            modifiesClause = TokenTree.of("%1$s | t0 in %2$s".formatted(modifiesClause, setComprehensionVar));
-//            for (int i = 1; i < numberOfSetsToAccess; i++) {
-//                // `set t0 .. tN | t0 in setComprehensionVar && t1 in t0 && .. tN-1 in tN`
-//                modifiesClause = modifiesClause.append(TokenTree.of(
-//                    "&& t%1$s in t%2$s".formatted(i, i - 1)
-//                ));
-//            }
-//            // `set t0 .. tN | t0 in setComprehensionVar && t1 in t0 && .. tN-1 in tN :: tN`
-//            modifiesClause = modifiesClause.append(TokenTree.of(
-//                ":: t%2$s".formatted(modifiesClause, numberOfSetsToAccess - 1)
-//            ));
-//            // tN represents the reference member that contains a Modifies member.
-//            // `set t0 .. tN | t0 in setComprehensionVar && t1 in t0 && .. tN-1 in tN :: tN.Modifies;`
         }
-
-//
-//        if (setComprehensionVar != null) {
-//            // Create an expression that the `modifies` clause can use
-//            modifiesClause = TokenTree.of("""
-//                %1$s;
-//                 (set tmp%2$sModifyEntry, tmp%2$sModifies | \n tmp%2$sModifies in %3$sFlattenedModifiesSet \n && tmp%2$sModifyEntry in tmp%2$sModifies \n :: tmp%2$sModifyEntry)"""
-//                .formatted(modifiesClause, intermediateTempVariableCounter, setComprehensionVar)
-//            );
-//            intermediateTempVariableCounter++;
-//        }
 
         return TokenTree.of(
             "%1$s\n%2$s"
