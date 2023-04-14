@@ -90,8 +90,8 @@ public class NativeWrapper extends ResourceShim {
     protected MethodSpec operation_K(OperationShape operationShape) {
         final MethodSignature signature = Operation.AsDafny.methodSignature(operationShape, true, subject);
         MethodSpec.Builder method = signature.method();
-        method.addStatement("throw $T.builder().message($S).build()",
-                subject.nativeNameResolver.baseErrorForService(),
+        method.addStatement("throw new $T($S)",
+                ClassName.get(RuntimeException.class),
                 "Not supported at this time."
                 );
         return method.build();

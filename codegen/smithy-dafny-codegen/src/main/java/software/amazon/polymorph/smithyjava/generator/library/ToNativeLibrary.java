@@ -23,7 +23,6 @@ import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.polymorph.smithyjava.nameresolver.Native;
 import software.amazon.polymorph.smithyjava.unmodeled.CollectionOfErrors;
-import software.amazon.polymorph.smithyjava.unmodeled.NativeError;
 import software.amazon.polymorph.smithyjava.unmodeled.OpaqueError;
 import software.amazon.polymorph.traits.ExtendableTrait;
 
@@ -135,7 +134,7 @@ public class ToNativeLibrary extends ToNative {
 
     MethodSpec dafnyError() {
         ClassName inputType = subject.dafnyNameResolver.abstractClassForError();
-        ClassName returnType = NativeError.nativeClassName(subject.modelPackageName);
+        ClassName returnType = ClassName.get(RuntimeException.class);
         MethodSpec.Builder method = super.initializeErrorMethodSpec(inputType, returnType);
         // We need a list of `<datatypeConstructor>`.
         // We have the logic exposed to look up the ClassName,
