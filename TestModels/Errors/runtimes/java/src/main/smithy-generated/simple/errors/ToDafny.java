@@ -11,6 +11,7 @@ import Dafny.Simple.Errors.Types.SimpleErrorsConfig;
 import Wrappers_Compile.Option;
 import dafny.DafnySequence;
 import java.lang.Character;
+import java.lang.RuntimeException;
 import java.util.Objects;
 import simple.errors.model.CollectionOfErrors;
 import simple.errors.model.OpaqueError;

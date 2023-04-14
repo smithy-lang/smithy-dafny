@@ -7,6 +7,7 @@ import Dafny.Simple.Errors.Types.Error;
 import Dafny.Simple.Errors.Types.Error_CollectionOfErrors;
 import Dafny.Simple.Errors.Types.Error_Opaque;
 import Dafny.Simple.Errors.Types.Error_SimpleErrorsException;
+import java.lang.RuntimeException;
 import simple.errors.model.CollectionOfErrors;
 import simple.errors.model.GetErrorsInput;
 import simple.errors.model.GetErrorsOutput;
