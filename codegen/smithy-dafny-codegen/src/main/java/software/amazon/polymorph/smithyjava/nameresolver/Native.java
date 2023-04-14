@@ -24,7 +24,6 @@ import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.polymorph.utils.AwsSdkNameResolverHelpers;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.polymorph.smithydafny.DafnyNameResolver;
-import software.amazon.polymorph.smithyjava.unmodeled.NativeError;
 import software.amazon.polymorph.smithyjava.unmodeled.OpaqueError;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.ResourceShape;
@@ -328,7 +327,7 @@ public class Native extends NameResolver{
 
     // TODO: improve exceptions for local services
     public ClassName baseErrorForService() {
-        return NativeError.nativeClassName(modelPackage);
+        return ClassName.get(RuntimeException.class);
     }
 
     public ClassName opaqueErrorForService() {

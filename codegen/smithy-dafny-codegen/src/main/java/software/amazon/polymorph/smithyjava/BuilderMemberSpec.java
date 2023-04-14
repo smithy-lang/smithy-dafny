@@ -26,15 +26,18 @@ import static software.amazon.polymorph.utils.ModelUtils.resolveShape;
 // They serve very similar purposes:
 // Parsing Traits from Smithy Shapes for Builder Class generators.
 public class BuilderMemberSpec {
-    public final static List<BuilderMemberSpec> THROWABLE_ARGS = List.of(
-            new BuilderMemberSpec(TypeName.get(String.class), "message"),
-            new BuilderMemberSpec(TypeName.get(Throwable.class), "cause")
-    );
-
+    private final static BuilderMemberSpec _MESSAGE =
+            new BuilderMemberSpec(TypeName.get(String.class), "message");
+    private final static BuilderMemberSpec _CAUSE =
+            new BuilderMemberSpec(TypeName.get(Throwable.class), "cause");
+    public final static List<BuilderMemberSpec> THROWABLE_ARGS = List.of(_MESSAGE, _CAUSE);
     public final static List<BuilderMemberSpec> OPAQUE_ARGS = List.of(
-            new BuilderMemberSpec(TypeName.get(String.class), "message"),
-            new BuilderMemberSpec(TypeName.get(Throwable.class), "cause"),
+            _MESSAGE, _CAUSE,
             new BuilderMemberSpec(TypeName.get(Object.class), "obj")
+    );
+    public static final List<BuilderMemberSpec> COLLECTION_ARGS = List.of(
+            _MESSAGE, _CAUSE,
+            new BuilderMemberSpec(CollectionOfErrors.exceptionList(), "list")
     );
 
     @Nonnull public final TypeName type;
@@ -71,12 +74,6 @@ public class BuilderMemberSpec {
         this.wrapCall = null;
         this.name = name;
         this.type = type;
-    }
-
-    public static List<BuilderMemberSpec> collectionOfErrorsBuilderMemberSpecs(String packageName) {
-        TypeName type = CollectionOfErrors.getArg(packageName);
-        String name = "list";
-        return List.of(new BuilderMemberSpec(type, name));
     }
 
 
