@@ -19,14 +19,12 @@ import javax.lang.model.element.Modifier;
 
 import software.amazon.polymorph.smithyjava.MethodReference;
 import software.amazon.polymorph.smithyjava.generator.ToDafny;
-import software.amazon.polymorph.smithyjava.nameresolver.Constants;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.polymorph.smithyjava.nameresolver.Native;
 import software.amazon.polymorph.smithyjava.unmodeled.CollectionOfErrors;
-import software.amazon.polymorph.smithyjava.unmodeled.NativeError;
 import software.amazon.polymorph.smithyjava.unmodeled.OpaqueError;
 
 import software.amazon.smithy.model.shapes.MemberShape;
@@ -78,7 +76,7 @@ public class ToDafnyLibrary extends ToDafny {
     TypeSpec toDafny() {
         ArrayList<MethodSpec> toDafnyMethods = new ArrayList<>();
         // NativeError (really, any Error in the service)
-        toDafnyMethods.add(nativeError());
+        toDafnyMethods.add(runtimeException());
         // OpaqueError
         toDafnyMethods.add(opaqueError());
         // CollectionError
@@ -113,15 +111,15 @@ public class ToDafnyLibrary extends ToDafny {
                 .build();
     }
 
-    // Converts any subclass of NativeError to the correct Dafny Error,
+    // Converts any subclass of RuntimeException to the correct Dafny Error,
     // or casts it as an OpaqueError.
-    MethodSpec nativeError() {
+    MethodSpec runtimeException() {
         TypeName dafnyError = subject.dafnyNameResolver.abstractClassForError();
-        ClassName nativeError = NativeError.nativeClassName(subject.nativeNameResolver.modelPackage);
+        ClassName runtimeException = ClassName.get(RuntimeException.class);
         MethodSpec.Builder method = MethodSpec.methodBuilder("Error")
                 .returns(dafnyError)
                 .addModifiers(PUBLIC_STATIC)
-                .addParameter(nativeError, VAR_INPUT);
+                .addParameter(runtimeException, VAR_INPUT);
         List<ClassName> allNativeErrors = subject.getErrorsInServiceNamespace().stream()
                 .map(subject.nativeNameResolver::classNameForStructure)
                 .collect(Collectors.toCollection(ArrayList::new));
