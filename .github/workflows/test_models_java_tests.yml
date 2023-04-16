@@ -21,6 +21,7 @@ jobs:
           TestModels/Errors,
           TestModels/Extendable,
           # TestModels/Extern,
+          TestModels/LocalService,
           # TestModels/Refinement,
           TestModels/Resource,
           # TestModels/SimpleTypes/BigDecimal,
@@ -66,12 +67,6 @@ jobs:
         uses: dafny-lang/setup-dafny-action@v1.4.0
         with:
           dafny-version: "3.10.0"
-
-      - name: Setup Java 
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'corretto'
-          java-version: 17
 
       # TODO: This has been added has a workaround for https://issues.apache.org/jira/browse/MNG-7679
       # Remove this when the latest version has been patched
