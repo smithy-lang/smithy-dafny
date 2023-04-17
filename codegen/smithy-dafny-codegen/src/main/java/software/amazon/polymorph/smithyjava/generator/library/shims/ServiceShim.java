@@ -59,7 +59,8 @@ public class ServiceShim extends ShimLibrary {
                         serviceBuilderImplBuildMethod()
                 ))
                 .addMethod(serviceConstructor(builderSpecs))
-                .addMethod(builderSpecs.builderMethod());
+                .addMethod(builderSpecs.builderMethod())
+                .addMethod(dafnyConstructor());
 
         spec.addMethods(getOperationsForTarget()
                 .stream().sequential().map(this::operation).collect(Collectors.toList()));
@@ -138,4 +139,11 @@ public class ServiceShim extends ShimLibrary {
                 .build();
     }
 
+    private MethodSpec dafnyConstructor() {
+        FieldSpec dafnyInterfaceField = getField();
+        return MethodSpec.constructorBuilder()
+                .addParameter(dafnyInterfaceField.type, INTERFACE_VAR)
+                .addStatement("this.$L = $L", INTERFACE_FIELD, INTERFACE_VAR)
+                .build();
+    }
 }

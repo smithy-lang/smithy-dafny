@@ -103,8 +103,10 @@ public class ToDafnyLibrary extends ToDafny {
         subject.getMapsInServiceNamespace().stream()
                 .map(this::modeledMap).forEachOrdered(toDafnyMethods::add);
         // Resources
-        subject.getResourcesInServiceNamespace().stream().sequential()
+        subject.getResourcesInServiceNamespace().stream()
                 .map(this::modeledResource).forEachOrdered(toDafnyMethods::add);
+        // The Service, it's self
+        toDafnyMethods.add(modeledService(subject.serviceShape));
         return TypeSpec.classBuilder(thisClassName)
                 .addModifiers(Modifier.PUBLIC)
                 .addMethods(toDafnyMethods)
@@ -208,15 +210,14 @@ public class ToDafnyLibrary extends ToDafny {
                 .build();
     }
 
-    @SuppressWarnings("unused") // We do not use this yet (2023-03-05), but we might soon-ish. Remove by 2023-06 if still not used.
     protected MethodSpec modeledService(ServiceShape shape) {
         final String methodName = capitalize(shape.getId().getName());
         return MethodSpec
                 .methodBuilder(methodName)
                 .addModifiers(PUBLIC_STATIC)
                 .returns(Dafny.interfaceForService(shape))
-                .addParameter(Native.classNameForAwsSdk(shape, subject.sdkVersion), VAR_INPUT)
-                .addStatement("return $L.impl()", subject.wrapWithShim(shape.getId(), CodeBlock.of(VAR_INPUT)))
+                .addParameter(Native.classNameForInterfaceOrLocalService(shape, subject.sdkVersion), VAR_INPUT)
+                .addStatement("return $L.impl()", CodeBlock.of(VAR_INPUT))
                 .build();
     }
 

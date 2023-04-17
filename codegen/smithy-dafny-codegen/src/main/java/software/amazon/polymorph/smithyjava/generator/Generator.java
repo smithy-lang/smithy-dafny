@@ -51,7 +51,12 @@ public abstract class Generator {
                     .collect(Collectors.toList());
             pathPieces.add(javaFile.typeSpec.name + ".java");
             final Path path = Path.of(Joiner.on('/').join(pathPieces));
-            final TokenTree tokenTree = TokenTree.of(javaFile.toString());
+            final TokenTree tokenTree = TokenTree.of(
+                    // Indent
+                    // javaFile.toBuilder().indent("    ").build().toString()
+                    // Don't Indent to reduce git diff:
+                    javaFile.toString()
+            );
             rtn.put(path, tokenTree);
         }
         return rtn;

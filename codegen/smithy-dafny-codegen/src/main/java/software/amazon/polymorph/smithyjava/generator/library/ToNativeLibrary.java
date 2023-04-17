@@ -28,6 +28,7 @@ import software.amazon.polymorph.traits.ExtendableTrait;
 
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.ResourceShape;
+import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.ShapeType;
@@ -100,8 +101,10 @@ public class ToNativeLibrary extends ToNative {
         subject.getMapsInServiceNamespace().stream()
                 .map(this::modeledMap).forEachOrdered(toNativeMethods::add);
         // Resources
-        subject.getResourcesInServiceNamespace().stream().sequential()
+        subject.getResourcesInServiceNamespace().stream()
                 .map(this::modeledResource).forEachOrdered(toNativeMethods::add);
+        // The Service, it's self
+        toNativeMethods.add(modeledService(subject.serviceShape));
         return TypeSpec.classBuilder(thisClassName)
                 .addModifiers(Modifier.PUBLIC)
                 .addMethods(toNativeMethods)
@@ -226,6 +229,18 @@ public class ToNativeLibrary extends ToNative {
             subject.wrapWithShim(shape.getId(), CodeBlock.of(VAR_INPUT))
           )
           .build();
+    }
+
+    protected MethodSpec modeledService(ServiceShape shape) {
+        final String methodName = capitalize(shape.getId().getName());
+        final ClassName serviceClass = Native.classNameForInterfaceOrLocalService(shape, subject.sdkVersion);
+        return MethodSpec
+                .methodBuilder(methodName)
+                .addModifiers(PUBLIC_STATIC)
+                .returns(serviceClass)
+                .addParameter(Dafny.interfaceForService(shape), VAR_INPUT)
+                .addStatement("return new $T($L)", serviceClass, CodeBlock.of(VAR_INPUT))
+                .build();
     }
 
     protected CodeBlock returnWithConversionCall(final MemberShape shape) {
