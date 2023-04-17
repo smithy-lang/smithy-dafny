@@ -230,12 +230,7 @@ public class Native extends NameResolver{
             final ReferenceTrait reference = shape.expectTrait(ReferenceTrait.class);
             // A service or resource in a structure should almost always be treated as the interface
             Shape rShape = model.expectShape(reference.getReferentId());
-            if (reference.isService()) {
-                //noinspection OptionalGetWithoutIsPresent
-                return classNameForService(rShape.asServiceShape().get());
-            }
-            //noinspection OptionalGetWithoutIsPresent
-            return classNameForResource(rShape.asResourceShape().get());
+            return classNameForInterfaceOrLocalService(rShape, this.awsSdkVersion);
         }
         if (AwsSdkNameResolverHelpers.isInAwsSdkNamespace(shape.getId())) {
             return switch (awsSdkVersion) {
