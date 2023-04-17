@@ -36,7 +36,7 @@ repositories {
 }
 
 dependencies {
-    implementation("dafny.lang:DafnyRuntime:3.10.0")
+    implementation("org.dafny:DafnyRuntime:4.0.0")
     testImplementation("junit", "junit", "4.13.2")
 }
 
