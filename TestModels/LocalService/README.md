@@ -30,9 +30,13 @@ explicitly test all the behaviors of the `aws.polymorph#localService` trait.
 
 Right now, only the following is tested:
 - Smithy-Dafny's generated Java 
-  include converters for LocalServices,
-  and does not reference them correctly
-  in Builders
+  include converters for LocalServices
+
+## TODO
+Everything else part of the LocalService Trait.
+Particularly:
+- Smithy-Dafny's generated Java references 
+  LocalServices correctly in Builders
   
 ## Build
 ### Dafny
