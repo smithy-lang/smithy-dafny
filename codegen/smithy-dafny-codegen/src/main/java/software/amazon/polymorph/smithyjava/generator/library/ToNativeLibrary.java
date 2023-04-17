@@ -215,8 +215,7 @@ public class ToNativeLibrary extends ToNative {
                 VAR_INPUT, subject.nativeNameResolver.classNameForResource(shape)
               )
               .addStatement(
-                "return ($T) (($T.NativeWrapper) $L)._impl",
-                      subject.nativeNameResolver.classNameForResource(shape),
+                "return (($T.NativeWrapper) $L)._impl",
                       subject.nativeNameResolver.classNameForResource(shape),
                       VAR_INPUT
               )
