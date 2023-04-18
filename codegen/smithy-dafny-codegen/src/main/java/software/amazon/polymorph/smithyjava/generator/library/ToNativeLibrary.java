@@ -216,7 +216,8 @@ public class ToNativeLibrary extends ToNative {
               )
               .addStatement(
                 "return (($T.NativeWrapper) $L)._impl",
-                subject.nativeNameResolver.classNameForResource(shape), VAR_INPUT
+                      subject.nativeNameResolver.classNameForResource(shape),
+                      VAR_INPUT
               )
               .endControlFlow();
         }
