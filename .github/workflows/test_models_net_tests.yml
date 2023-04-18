@@ -21,6 +21,7 @@ jobs:
           TestModels/Errors,
           TestModels/Extendable,
           TestModels/Extern,
+          # TestModels/LocalService,
           TestModels/Refinement,
           TestModels/Resource,          
           # TestModels/SimpleTypes/BigDecimal,

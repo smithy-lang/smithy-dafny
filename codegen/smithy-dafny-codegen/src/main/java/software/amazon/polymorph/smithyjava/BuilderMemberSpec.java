@@ -51,11 +51,11 @@ public class BuilderMemberSpec {
         this.type = subject.nativeNameResolver.typeForShape(resolvedShapeId.naiveId());
         this.name = memberShape.getMemberName();
         if (
-                (resolvedShape.isServiceShape() || resolvedShape.isResourceShape())
+                (resolvedShape.isResourceShape())
                 && !isInAwsSdkNamespace(resolvedShapeId.resolvedId())
         ) {
-            // If target is a non-AWS Service/Resource,
-            // the output type should be an interface OR LocalService
+            // If target is a non-AWS Resource,
+            // the output type should be an interface
             this.interfaceType = Native.classNameForInterfaceOrLocalService(
                     resolvedShape, subject.sdkVersion);
             // And we will need to wrap it
