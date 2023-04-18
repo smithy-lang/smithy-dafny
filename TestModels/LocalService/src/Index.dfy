@@ -21,7 +21,6 @@ module
     res: Result<SimpleLocalServiceClient, Error>
   )
   {
-    // var internalConfig: Operations.InternalConfig := config;
     var client := new SimpleLocalServiceClient(Operations.Config);
     return Success(client);
   }
