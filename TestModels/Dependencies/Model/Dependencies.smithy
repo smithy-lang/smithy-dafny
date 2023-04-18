@@ -1,8 +1,19 @@
 namespace simple.dependencies
 
+use simple.resources#SimpleResources
+use simple.constraints#SimpleConstraints
+use simple.extendable.resources#SimpleExtendableResources
+use simple.errors#SimpleErrors
+
 @aws.polymorph#localService(
   sdkId: "SimpleDependencies",
   config: SimpleDependenciesConfig,
+  dependencies: [
+    SimpleResources,
+    SimpleConstraints,
+    SimpleExtendableResources,
+    SimpleErrors
+  ]
 )
 service SimpleDependencies {
   version: "2021-11-01",
