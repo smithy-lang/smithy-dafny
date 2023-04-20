@@ -259,7 +259,7 @@ public class ToNativeLibrary extends ToNative {
     // that can be in other namespaces.
     // This override simplifies their lookup.
     @Override
-    protected MethodReference conversionMethodReference(Shape shape) {
+    public MethodReference conversionMethodReference(Shape shape) {
         ModelUtils.ResolvedShapeId resolvedShapeId = ModelUtils.resolveShape(shape.toShapeId(), subject.model);
         Shape resolvedShape = subject.model.expectShape(resolvedShapeId.resolvedId());
         if (resolvedShape.isServiceShape() || resolvedShape.isResourceShape()) {
