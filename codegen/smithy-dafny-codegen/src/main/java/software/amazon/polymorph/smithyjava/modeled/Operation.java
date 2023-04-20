@@ -52,7 +52,7 @@ public class Operation {
             MethodSpec.Builder method = signature.method();
             final String operationName = operationShape.toShapeId().getName();
             // Convert Input
-            method.addStatement(declareNativeInputAndCovert(inputResolved, subject, shimLibrary));
+            method.addStatement(declareNativeInputAndCovert(inputResolved, subject));
             // Try native implementation
             method.beginControlFlow("try");
             if (outputResolved.resolvedId().equals(SMITHY_API_UNIT)) {
@@ -126,20 +126,20 @@ public class Operation {
 
         /** Declare the Idiomatic-Java input and
          * assign the conversion of the Dafny-Java object to it. */
-        // Note: this method does not use the same ToNative method look up as
-        // software.amazon.polymorph.smithyjava.generator.library.ShimLibrary.operation,
-        // which might be the cause of future bugs.
+        // TODO: this method may not handle AWS-SDK shapes correctly!
         static CodeBlock declareNativeInputAndCovert(
-                final ResolvedShapeId resolvedShape,
-                CodegenSubject subject,
-                ShimLibrary shimLibrary
+          final ResolvedShapeId resolvedShape,
+          JavaLibrary subject
         ) {
-            return CodeBlock.of("$T $L = $T.$L($L)",
-                    subject.nativeNameResolver.typeForShape(resolvedShape.resolvedId()),
-                    NATIVE_INPUT,
-                    shimLibrary.toNativeClassName,
-                    resolvedShape.naiveId().getName(),
-                    DAFNY_INPUT);
+            CodeBlock leftHand = CodeBlock.of("$T $L",
+              subject.nativeNameResolver.typeForShape(resolvedShape.resolvedId()),
+              NATIVE_INPUT);
+            final Shape naiveShape = subject.model.expectShape(resolvedShape.naiveId());
+            final MethodReference toNativeMethod = subject.toNativeLibrary.conversionMethodReference(naiveShape);
+            return CodeBlock.of("$L = $L($L)",
+              leftHand,
+              toNativeMethod.asNormalReference(),
+              DAFNY_INPUT);
         }
 
         /** Declare the Idiomatic-Java output and
@@ -170,6 +170,8 @@ public class Operation {
                     DAFNY_OUTPUT);
             if (AwsSdkNameResolverHelpers.isInAwsSdkNamespace(resolvedShape.resolvedId())) {
                 Shape shape = subject.model.expectShape(resolvedShape.resolvedId());
+                // TODO: Does this only work for AWS Services? It looks like that!.
+                // On the bright side, `JavaLibrary.wrapAwsService` throws an error if its not service.
                 return CodeBlock.of("$L = $L",
                         leftHand,
                         JavaLibrary.wrapAwsService(shape, CodeBlock.of(NATIVE_OUTPUT), CodeBlock.of("null"), subject.sdkVersion));
