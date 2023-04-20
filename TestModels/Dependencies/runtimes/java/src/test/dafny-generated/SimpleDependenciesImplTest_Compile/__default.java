@@ -46,8 +46,8 @@ public class __default {
     Dafny.Simple.Dependencies.Types.SimpleDependenciesConfig _39_customConfig;
     _39_customConfig = Dafny.Simple.Dependencies.Types.SimpleDependenciesConfig.create(
       Wrappers_Compile.Option.<Dafny.Simple.Resources.Types.SimpleResourcesConfig>create_Some(Dafny.Simple.Resources.Types.SimpleResourcesConfig.create(dafny.DafnySequence.asString("default"))),
-      Wrappers_Compile.Option.<Dafny.Simple.Constraints.SimpleConstraintsClient>create_Some(_37_simpleConstraintsServiceReferenceToAssign),
-      Wrappers_Compile.Option.<ExtendableResource_Compile.ExtendableResource>create_Some(_36_extendableResourceReferenceToAssign),
+      Wrappers_Compile.Option.create_Some(_37_simpleConstraintsServiceReferenceToAssign),
+      Wrappers_Compile.Option.create_Some(_36_extendableResourceReferenceToAssign),
       Wrappers_Compile.Option.<dafny.DafnySequence<? extends Character>>create_Some(dafny.DafnySequence.asString("bw1and10")))
     ;
     Dafny.Simple.Dependencies.SimpleDependenciesClient _40_client;

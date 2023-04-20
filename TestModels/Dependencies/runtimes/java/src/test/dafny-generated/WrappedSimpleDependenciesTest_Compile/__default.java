@@ -45,7 +45,11 @@ public class __default {
     }
     _67_simpleConstraintsServiceReferenceToAssign = (_68_valueOrError0).Extract(Dafny.Simple.Constraints.SimpleConstraintsClient._typeDescriptor(), Dafny.Simple.Constraints.Types.Error._typeDescriptor());
     Dafny.Simple.Dependencies.Types.SimpleDependenciesConfig _69_customConfig;
-    _69_customConfig = Dafny.Simple.Dependencies.Types.SimpleDependenciesConfig.create(Wrappers_Compile.Option.<Dafny.Simple.Resources.Types.SimpleResourcesConfig>create_Some(Dafny.Simple.Resources.Types.SimpleResourcesConfig.create(dafny.DafnySequence.asString("default"))), Wrappers_Compile.Option.<Dafny.Simple.Constraints.SimpleConstraintsClient>create_Some(_67_simpleConstraintsServiceReferenceToAssign), Wrappers_Compile.Option.<ExtendableResource_Compile.ExtendableResource>create_Some(_66_extendableResourceReferenceToAssign), Wrappers_Compile.Option.<dafny.DafnySequence<? extends Character>>create_Some(dafny.DafnySequence.asString("bw1and10")));
+    _69_customConfig = Dafny.Simple.Dependencies.Types.SimpleDependenciesConfig.create(
+      Wrappers_Compile.Option.<Dafny.Simple.Resources.Types.SimpleResourcesConfig>create_Some(Dafny.Simple.Resources.Types.SimpleResourcesConfig.create(dafny.DafnySequence.asString("default"))),
+      Wrappers_Compile.Option.create_Some(_67_simpleConstraintsServiceReferenceToAssign),
+      Wrappers_Compile.Option.create_Some(_66_extendableResourceReferenceToAssign), 
+      Wrappers_Compile.Option.<dafny.DafnySequence<? extends Character>>create_Some(dafny.DafnySequence.asString("bw1and10")));
     Dafny.Simple.Dependencies.SimpleDependenciesClient _70_client;
     Wrappers_Compile.Result<Dafny.Simple.Dependencies.SimpleDependenciesClient, Dafny.Simple.Dependencies.Types.Error> _71_valueOrError1 = (Wrappers_Compile.Result<Dafny.Simple.Dependencies.SimpleDependenciesClient, Dafny.Simple.Dependencies.Types.Error>)null;
     Wrappers_Compile.Result<Dafny.Simple.Dependencies.SimpleDependenciesClient, Dafny.Simple.Dependencies.Types.Error> _out18;
