@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Stream;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import software.amazon.polymorph.traits.LocalServiceTrait;
@@ -49,6 +50,7 @@ public record DafnyNameResolver(
         // Otherwise, just use the shape name.
         return serviceShape.getTrait(ServiceTrait.class)
                 .map(t -> AwsSdkNameResolverHelpers.mungeSdkId(t.getSdkId()))
+          // TODO: LocalServiceTrait has an SDKID as well... is this wrong?
                 .orElse(StringUtils.capitalize(serviceShape.getId().getName()));
     }
 
@@ -336,17 +338,22 @@ public record DafnyNameResolver(
 
     public static String abstractServiceModuleName(ServiceShape serviceShape)
     {
-        final String moduleNamespace = DafnyNameResolver
-                .dafnyNamespace(serviceShape.getId().getNamespace())
-                .replace(".", "");
+        final String moduleNamespace = moduleNamespace(serviceShape.getId().getNamespace());
         return "Abstract%sService".formatted(moduleNamespace);
+    }
+
+    // TODO: I am so confused by what all these dafny*Namespace methods are doing.
+    //  There has to be duplication. I do not know where. But it must exist.
+    //  Let's give them documentation and then reduce.
+    /** "com.amazonaws.kms" -> "ComAmazonAwsKms" */
+    @Nonnull
+    public static String moduleNamespace(String namespace) {
+        return DafnyNameResolver.dafnyNamespace(namespace).replace(".", "");
     }
 
     public static String abstractOperationsModuleName(ServiceShape serviceShape)
     {
-        final String moduleNamespace = DafnyNameResolver
-          .dafnyNamespace(serviceShape.getId().getNamespace())
-          .replace(".", "");
+        final String moduleNamespace = moduleNamespace(serviceShape.getId().getNamespace());
         return "Abstract%sOperations".formatted(moduleNamespace);
     }
 

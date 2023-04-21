@@ -2,7 +2,6 @@ package software.amazon.polymorph.smithyjava.generator.library;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.MethodSpec;
 
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
@@ -10,6 +9,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import software.amazon.polymorph.smithyjava.NamespaceHelper;
 import software.amazon.polymorph.smithyjava.generator.CodegenSubject;
@@ -47,6 +49,8 @@ import software.amazon.smithy.model.traits.TraitDefinition;
 import static software.amazon.polymorph.smithyjava.generator.library.shims.ResourceShim.WRAP_METHOD_NAME;
 
 public class JavaLibrary extends CodegenSubject {
+    @SuppressWarnings("unused")
+    private static final Logger LOGGER = LoggerFactory.getLogger(JavaLibrary.class);
 
     /** Public Java Interfaces will go here. */
     public final String packageName;
@@ -174,25 +178,25 @@ public class JavaLibrary extends CodegenSubject {
     }
 
     public List<UnionShape> getUnionsInServiceNamespace() {
-        return this.model.getUnionShapes().stream().sequential()
+        return this.model.getUnionShapes().stream()
                 .filter(shape -> ModelUtils.isInServiceNamespace(shape.getId(), this.serviceShape))
                 .collect(Collectors.toList());
     }
 
     public List<ListShape> getListsInServiceNamespace() {
-        return this.model.getListShapes().stream().sequential()
+        return this.model.getListShapes().stream()
                 .filter(shape -> ModelUtils.isInServiceNamespace(shape.getId(), this.serviceShape))
                 .collect(Collectors.toList());
     }
 
     public List<SetShape> getSetsInServiceNamespace() {
-        return this.model.getSetShapes().stream().sequential()
+        return this.model.getSetShapes().stream()
                 .filter(shape -> ModelUtils.isInServiceNamespace(shape.getId(), this.serviceShape))
                 .collect(Collectors.toList());
     }
 
     public List<MapShape> getMapsInServiceNamespace() {
-        return this.model.getMapShapes().stream().sequential()
+        return this.model.getMapShapes().stream()
                 .filter(shape -> ModelUtils.isInServiceNamespace(shape.getId(), this.serviceShape))
                 .collect(Collectors.toList());
     }
