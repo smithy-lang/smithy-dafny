@@ -47,7 +47,7 @@ public class ModelUtils {
         assembler.addShape(ClientConfigTrait.getDefinition());
         assembler.addShape(DafnyUtf8BytesTrait.getDefinition());
         assembler.addShape(ExtendableTrait.getDefinition());
-        assembler.addShape(LocalServiceTrait.getDefinition());
+        LocalServiceTrait.getDefinitions().forEach(assembler::addShape);
         assembler.addShape(MutableLocalStateTrait.getDefinition());
     }
 
