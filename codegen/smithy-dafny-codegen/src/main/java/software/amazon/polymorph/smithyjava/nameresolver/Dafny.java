@@ -95,6 +95,11 @@ public class Dafny extends NameResolver {
         return "is_" + dafnyEnumName;
     }
 
+    public static String datatypeDeconstructor(String name) {
+        String dafnyEnumName = DafnyNameResolverHelpers.dafnyCompilesExtra_(name);
+        return "dtor_" + dafnyEnumName + "()";
+    }
+
     public static String aggregateSizeMethod(ShapeType shapeType) {
         return switch (shapeType) {
             case LIST -> "length()";
@@ -117,7 +122,7 @@ public class Dafny extends NameResolver {
     }
 
     public static CodeBlock getMemberField(MemberShape shape) {
-        return CodeBlock.of("dtor_$L()", DafnyNameResolverHelpers.dafnyCompilesExtra_(shape.getMemberName()));
+        return CodeBlock.of("$L", datatypeDeconstructor(shape.getMemberName()));
     }
 
     /** If not optional, get via {@code dtor_<memberName>()}.
@@ -128,7 +133,7 @@ public class Dafny extends NameResolver {
             return getMemberField(shape);
         }
         // if optional, get via dtor_value()
-        return CodeBlock.of("$L.dtor_value()", getMemberField(shape));
+        return CodeBlock.of("$L.$L", getMemberField(shape), datatypeDeconstructor("value"));
     }
 
     public static TypeName asDafnyResult(TypeName success, TypeName failure) {
