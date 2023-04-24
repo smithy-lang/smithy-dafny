@@ -3,7 +3,6 @@ namespace simple.dependencies
 use simple.resources#SimpleResources
 use simple.constraints#SimpleConstraints
 use simple.extendable.resources#SimpleExtendableResources
-use simple.errors#SimpleErrors
 
 @aws.polymorph#localService(
   sdkId: "SimpleDependencies",
@@ -11,8 +10,7 @@ use simple.errors#SimpleErrors
   dependencies: [
     SimpleResources,
     SimpleConstraints,
-    SimpleExtendableResources,
-    SimpleErrors
+    SimpleExtendableResources
   ]
 )
 service SimpleDependencies {

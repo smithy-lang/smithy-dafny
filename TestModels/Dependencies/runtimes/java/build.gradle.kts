@@ -38,7 +38,6 @@ dependencies {
     implementation("org.dafny:DafnyRuntime:4.0.0")
     implementation("software.amazon.dafny:conversion:1.0-SNAPSHOT")
     implementation("software.amazon.cryptography:StandardLibrary:1.0-SNAPSHOT")
-    implementation("simple:Errors:1.0-SNAPSHOT")
     implementation("simple.extendable.resources:SimpleExtendableResources:1.0-SNAPSHOT")
     implementation("simple.resources:SimpleResources:1.0-SNAPSHOT")
     implementation("simple:Constraints:1.0-SNAPSHOT")

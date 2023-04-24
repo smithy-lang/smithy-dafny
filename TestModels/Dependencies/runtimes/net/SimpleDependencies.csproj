@@ -26,7 +26,6 @@
 
   <ItemGroup>
     <ProjectReference Include="../../../dafny-dependencies/StandardLibrary/runtimes/net/STD.csproj" />
-    <ProjectReference Include="../../../Errors/runtimes/net/SimpleErrors.csproj" />
     <ProjectReference Include="../../../Extendable/runtimes/net/SimpleResourcesExtendable.csproj" />
     <ProjectReference Include="../../../Resource/runtimes/net/SimpleResources.csproj" />
     <ProjectReference Include="../../../Constraints/runtimes/net/SimpleConstraints.csproj" />
