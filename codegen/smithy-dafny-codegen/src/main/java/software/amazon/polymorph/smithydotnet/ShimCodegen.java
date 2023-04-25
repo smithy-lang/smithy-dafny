@@ -108,11 +108,10 @@ public class ShimCodegen {
 
     public TokenTree generateServiceShimDeconstructor() {
         return Token.of("""
-                public %s %s(%s impl) {
+                public %s %s() {
                     return this.%s;
                 }""".formatted(nameResolver.dafnyTypeForShape(serviceShape.getId()),
           SHIM_UMWRAP_METHOD_NAME,
-          nameResolver.clientForService(),
           IMPL_NAME));
     }
 
