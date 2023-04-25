@@ -684,7 +684,6 @@ public class TypeConversionCodegen {
             );
         // Local services are identified by dependent shapes with a reference trait
         } else if (ModelUtils.isReferenceDependantModuleType(structureShape, serviceShape.getId().getNamespace())) {
-            // TODO: This assumes we are wrapping a local service for testing CrypTool-5107
             return generateLocalServiceReferenceStructureConverter(structureShape, serviceShape);
         } else {
             throw new UnsupportedOperationException("Unsupported service shape: %s".formatted(serviceShape));
