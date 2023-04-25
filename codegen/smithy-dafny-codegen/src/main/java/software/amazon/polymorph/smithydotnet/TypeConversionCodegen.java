@@ -684,6 +684,7 @@ public class TypeConversionCodegen {
             );
         // Local services are identified by dependent shapes with a reference trait
         } else if (ModelUtils.isReferenceDependantModuleType(structureShape, serviceShape.getId().getNamespace())) {
+            // TODO: This assumes we are wrapping a local service for testing CrypTool-5107
             return generateLocalServiceReferenceStructureConverter(structureShape, serviceShape);
         } else {
             throw new UnsupportedOperationException("Unsupported service shape: %s".formatted(serviceShape));
@@ -696,36 +697,27 @@ public class TypeConversionCodegen {
      */
     protected TypeConverter generateLocalServiceReferenceStructureConverter(
         final StructureShape structureShape, final ServiceShape serviceShape) {
-
-        LocalServiceWrappedNameResolver serviceWrappedNameResolver
-            = new LocalServiceWrappedNameResolver(model, serviceShape);
         final ShapeId resourceShapeId = serviceShape.getId();
-        final String shimClass = serviceWrappedNameResolver.shimClassForService();
         final String baseType = nameResolver.baseTypeForShape(resourceShapeId);
-
         final String throwCustomImplException =
             "throw new System.ArgumentException(\"Custom implementations of %s are not supported yet\");"
                 .formatted(baseType);
 
         final TokenTree fromDafnyBody = Token.of("""
-            if (value is %s.Wrapped.%s shim) {
-                return shim._impl;
+            if (value is %s dafnyValue) {
+                return new %s(dafnyValue);
             }
             """
-            .formatted(
-                nameResolver.namespaceForShapeId(resourceShapeId),
-                shimClass),
-            throwCustomImplException);
+            .formatted(nameResolver.dafnyTypeForShape(serviceShape.getId()), baseType),
+          throwCustomImplException);
 
         final TokenTree toDafnyBody = Token.of("""
-            if (value is %s impl) {
-                return new %s.Wrapped.%s(value);
+            if (value is %s nativeValue) {
+                return nativeValue.%s();
             }
             """
-            .formatted(nameResolver.baseTypeForShape(resourceShapeId),
-                nameResolver.namespaceForShapeId(resourceShapeId),
-                shimClass),
-            throwCustomImplException);
+            .formatted(baseType, ShimCodegen.SHIM_UMWRAP_METHOD_NAME),
+          throwCustomImplException);
 
         return buildConverterFromMethodBodies(structureShape, fromDafnyBody, toDafnyBody);
     }

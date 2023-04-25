@@ -26,6 +26,7 @@ public class ShimCodegen {
     private final ServiceShape serviceShape;
     private final DotNetNameResolver nameResolver;
 
+    static final String SHIM_UMWRAP_METHOD_NAME = "impl";
     private static final String IMPL_NAME = "_impl";
     private static final String INPUT_NAME = "input";
     private static final String INTERNAL_INPUT_NAME = "internalInput";
@@ -85,6 +86,8 @@ public class ShimCodegen {
         final TokenTree body = TokenTree
           .of(
             generateServiceImplDeclaration(serviceShape),
+            generateServiceShimConstructor(),
+            generateServiceShimDeconstructor(),
             generateServiceConstructor(serviceShape),
             generateServiceOperationShims(serviceShape.getId())
           )
@@ -92,6 +95,25 @@ public class ShimCodegen {
         return header
                 .append(body.braced())
                 .namespaced(Token.of(nameResolver.namespaceForService()));
+    }
+
+    public TokenTree generateServiceShimConstructor() {
+        return Token.of("""
+                public %s(%s impl) {
+                    this.%s = impl;
+                }""".formatted(nameResolver.clientForService(),
+          nameResolver.dafnyTypeForShape(serviceShape.getId()),
+          IMPL_NAME));
+    }
+
+    public TokenTree generateServiceShimDeconstructor() {
+        return Token.of("""
+                public %s %s(%s impl) {
+                    return this.%s;
+                }""".formatted(nameResolver.dafnyTypeForShape(serviceShape.getId()),
+          SHIM_UMWRAP_METHOD_NAME,
+          nameResolver.clientForService(),
+          IMPL_NAME));
     }
 
     public TokenTree generateServiceImplDeclaration(ServiceShape serviceShape) {
