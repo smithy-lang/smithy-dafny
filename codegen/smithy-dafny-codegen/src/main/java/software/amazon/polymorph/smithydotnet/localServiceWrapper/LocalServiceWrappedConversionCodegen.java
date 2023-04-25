@@ -6,6 +6,7 @@ package software.amazon.polymorph.smithydotnet.localServiceWrapper;
 import software.amazon.polymorph.traits.ExtendableTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.polymorph.utils.ModelUtils;
+import software.amazon.polymorph.utils.Token;
 import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.polymorph.smithydotnet.TypeConversionCodegen;
 import software.amazon.smithy.model.Model;
@@ -107,6 +108,47 @@ public class LocalServiceWrappedConversionCodegen extends TypeConversionCodegen 
             final TokenTree toDafnyConverterMethod = TokenTree.of(toDafnyConverterSignature, toDafnyBodyOverride.braced());
             return new TypeConverter(shape.getId(), fromDafnyConverterMethod, toDafnyConverterMethod);
         }
+    }
+
+    /**
+     * This should not be called directly, instead call
+     * {@link TypeConversionCodegen#generateStructureConverter(StructureShape)}.
+     */
+    @Override
+    protected TypeConverter generateLocalServiceReferenceStructureConverter(
+      final StructureShape structureShape, final ServiceShape serviceShape) {
+
+        LocalServiceWrappedNameResolver serviceWrappedNameResolver
+          = new LocalServiceWrappedNameResolver(model, serviceShape);
+        final ShapeId resourceShapeId = serviceShape.getId();
+        final String shimClass = serviceWrappedNameResolver.shimClassForService();
+        final String baseType = nameResolver.baseTypeForShape(resourceShapeId);
+
+        final String throwCustomImplException =
+          "throw new System.ArgumentException(\"Custom implementations of %s are not supported yet\");"
+            .formatted(baseType);
+
+        final TokenTree fromDafnyBody = Token.of("""
+            if (value is %s.Wrapped.%s shim) {
+                return shim._impl;
+            }
+            """
+            .formatted(
+              nameResolver.namespaceForShapeId(resourceShapeId),
+              shimClass),
+          throwCustomImplException);
+
+        final TokenTree toDafnyBody = Token.of("""
+            if (value is %s impl) {
+                return new %s.Wrapped.%s(value);
+            }
+            """
+            .formatted(nameResolver.baseTypeForShape(resourceShapeId),
+              nameResolver.namespaceForShapeId(resourceShapeId),
+              shimClass),
+          throwCustomImplException);
+
+        return buildConverterFromMethodBodies(structureShape, fromDafnyBody, toDafnyBody);
     }
 
     /**
