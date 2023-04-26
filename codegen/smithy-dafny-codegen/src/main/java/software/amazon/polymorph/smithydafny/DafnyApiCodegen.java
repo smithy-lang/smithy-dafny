@@ -5,7 +5,6 @@ package software.amazon.polymorph.smithydafny;
 
 import com.google.common.annotations.VisibleForTesting;
 
-import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.traits.MutableLocalStateTrait;
