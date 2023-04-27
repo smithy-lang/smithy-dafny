@@ -203,7 +203,7 @@ public abstract class ToNative extends Generator {
                     "Unnamed enums not supported. ShapeId: %s".formatted(shapeId));
         }
 
-        enumTrait.getValues().stream().sequential()
+        enumTrait.getValues().stream()
                 .map(EnumDefinition::getName)
                 .map(maybeName -> maybeName.orElseThrow(
                         () -> new IllegalArgumentException(

@@ -63,7 +63,7 @@ public class ServiceShim extends ShimLibrary {
                 .addMethod(dafnyConstructor());
 
         spec.addMethods(getOperationsForTarget()
-                .stream().sequential().map(this::operation).collect(Collectors.toList()));
+                .stream().map(this::operation).collect(Collectors.toList()));
         spec.addMethod(impl());
         return spec.build();
     }

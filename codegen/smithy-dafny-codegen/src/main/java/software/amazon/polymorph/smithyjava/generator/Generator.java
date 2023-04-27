@@ -65,7 +65,7 @@ public abstract class Generator {
     public abstract Set<JavaFile> javaFiles();
 
     protected List<OperationShape> getOperationsForTarget() {
-        return subject.serviceShape.getOperations().stream().sequential()
+        return subject.serviceShape.getOperations().stream().sorted()
                 .map(shapeId -> subject.model.expectShape(shapeId, OperationShape.class))
                 .collect(Collectors.toList());
     }

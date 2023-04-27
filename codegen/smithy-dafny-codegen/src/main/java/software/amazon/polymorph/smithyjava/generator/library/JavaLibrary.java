@@ -2,7 +2,6 @@ package software.amazon.polymorph.smithyjava.generator.library;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.MethodSpec;
 
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
@@ -138,7 +137,7 @@ public class JavaLibrary extends CodegenSubject {
         return this.model.getStructureShapes().stream()
                 .filter(shape -> shape.hasTrait(ErrorTrait.class))
                 .filter(shape -> ModelUtils.isInServiceNamespace(shape.getId(), this.serviceShape))
-                .toList();
+                .sorted().toList();
     }
 
     public List<StructureShape> getStructuresInServiceNamespace() {
@@ -158,43 +157,43 @@ public class JavaLibrary extends CodegenSubject {
                     return !targetShape.hasTrait(ReferenceTrait.class);
                 })
                 .filter(shape -> ModelUtils.isInServiceNamespace(shape.getId(), this.serviceShape))
-                .toList();
+                .sorted().toList();
     }
 
     public List<ResourceShape> getResourcesInServiceNamespace() {
         return this.model.getResourceShapes().stream()
                 .filter(shape -> ModelUtils.isInServiceNamespace(shape.getId(), this.serviceShape))
-                .toList();
+                .sorted().toList();
     }
 
     public List<StringShape> getEnumsInServiceNamespace() {
         return this.model.getStringShapesWithTrait(EnumTrait.class).stream()
                 .filter(shape -> ModelUtils.isInServiceNamespace(shape.getId(), this.serviceShape))
-                .toList();
+                .sorted().toList();
     }
 
     public List<UnionShape> getUnionsInServiceNamespace() {
-        return this.model.getUnionShapes().stream().sequential()
+        return this.model.getUnionShapes().stream()
                 .filter(shape -> ModelUtils.isInServiceNamespace(shape.getId(), this.serviceShape))
-                .collect(Collectors.toList());
+                .sorted().toList();
     }
 
     public List<ListShape> getListsInServiceNamespace() {
-        return this.model.getListShapes().stream().sequential()
+        return this.model.getListShapes().stream()
                 .filter(shape -> ModelUtils.isInServiceNamespace(shape.getId(), this.serviceShape))
-                .collect(Collectors.toList());
+                .sorted().toList();
     }
 
     public List<SetShape> getSetsInServiceNamespace() {
-        return this.model.getSetShapes().stream().sequential()
+        return this.model.getSetShapes().stream()
                 .filter(shape -> ModelUtils.isInServiceNamespace(shape.getId(), this.serviceShape))
-                .collect(Collectors.toList());
+                .sorted().toList();
     }
 
     public List<MapShape> getMapsInServiceNamespace() {
-        return this.model.getMapShapes().stream().sequential()
+        return this.model.getMapShapes().stream()
                 .filter(shape -> ModelUtils.isInServiceNamespace(shape.getId(), this.serviceShape))
-                .collect(Collectors.toList());
+                .sorted().toList();
     }
 
     public CodeBlock wrapWithShim(ShapeId referentId, CodeBlock referentVariable) throws ExpectationNotMetException {

@@ -181,7 +181,7 @@ public class ResourceShim extends ShimLibrary {
     }
 
     protected List<OperationShape> getOperationsForTarget() {
-        return targetShape.getOperations().stream().sequential()
+        return targetShape.getOperations().stream().sorted()
                 .map(shapeId -> subject.model.expectShape(shapeId, OperationShape.class))
                 .collect(Collectors.toList());
     }
