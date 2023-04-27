@@ -10,6 +10,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import software.amazon.polymorph.smithyjava.NamespaceHelper;
 import software.amazon.polymorph.smithyjava.generator.CodegenSubject;
 import software.amazon.polymorph.smithyjava.generator.Generator;
@@ -46,6 +49,8 @@ import software.amazon.smithy.model.traits.TraitDefinition;
 import static software.amazon.polymorph.smithyjava.generator.library.shims.ResourceShim.WRAP_METHOD_NAME;
 
 public class JavaLibrary extends CodegenSubject {
+    @SuppressWarnings("unused")
+    private static final Logger LOGGER = LoggerFactory.getLogger(JavaLibrary.class);
 
     /** Public Java Interfaces will go here. */
     public final String packageName;

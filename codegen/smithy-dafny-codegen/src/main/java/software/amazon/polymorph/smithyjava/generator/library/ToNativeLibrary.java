@@ -10,14 +10,17 @@ import com.squareup.javapoet.TypeSpec;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.lang.model.element.Modifier;
 
+import software.amazon.polymorph.smithydafny.DafnyNameResolver;
 import software.amazon.polymorph.smithyjava.MethodReference;
 import software.amazon.polymorph.smithyjava.generator.ToNative;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
+import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
@@ -34,6 +37,8 @@ import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.ShapeType;
 import software.amazon.smithy.model.shapes.StructureShape;
 
+import static software.amazon.polymorph.smithyjava.nameresolver.Dafny.datatypeConstructorIs;
+import static software.amazon.polymorph.smithyjava.nameresolver.Dafny.datatypeDeconstructor;
 import static software.amazon.smithy.utils.StringUtils.capitalize;
 
 /**
@@ -117,7 +122,7 @@ public class ToNativeLibrary extends ToNative {
         MethodSpec.Builder method = super.initializeErrorMethodSpec(inputType, returnType);
         method = super.createNativeBuilder(method, returnType);
         // Set Value
-        method.addStatement("$L.obj($L.dtor_obj())", NATIVE_BUILDER, VAR_INPUT);
+        method.addStatement("$L.obj($L.$L)", NATIVE_BUILDER, VAR_INPUT, datatypeDeconstructor("obj"));
         // Build and Return
         return super.buildAndReturn(method);
     }
@@ -129,8 +134,8 @@ public class ToNativeLibrary extends ToNative {
         MethodSpec.Builder method = super.initializeErrorMethodSpec(inputType, returnType);
         super.createNativeBuilder(method, returnType);
         // Set Value
-        method.addStatement("$L.list(\n$L(\n$L.dtor_list(), \n$T::Error))",
-                NATIVE_BUILDER, genericCall, VAR_INPUT, thisClassName);
+        method.addStatement("$L.list(\n$L(\n$L.$L, \n$T::Error))",
+                NATIVE_BUILDER, genericCall, VAR_INPUT, datatypeDeconstructor("list"), thisClassName);
         // Build and Return
         return super.buildAndReturn(method);
     }
@@ -145,7 +150,6 @@ public class ToNativeLibrary extends ToNative {
         // We get the "simpleName" (i.e.: Error_<datatypeConstructor>),
         // and, finally, replace "Error_" with nothing, thus getting just "<datatypeConstructor>".
         List<String> allDafnyErrorConstructors = subject.getErrorsInServiceNamespace().stream()
-                .sequential()
                 .map(subject.dafnyNameResolver::classForError)
                 .map(ClassName::simpleName)
                 .map(simpleName -> simpleName.replaceFirst("Error_", ""))
@@ -153,7 +157,7 @@ public class ToNativeLibrary extends ToNative {
         allDafnyErrorConstructors.add("Opaque");
         allDafnyErrorConstructors.add("CollectionOfErrors");
         allDafnyErrorConstructors.forEach(constructorName ->
-                method.beginControlFlow("if ($L.$L())", VAR_INPUT, Dafny.datatypeConstructorIs(constructorName))
+                method.beginControlFlow("if ($L.$L())", VAR_INPUT, datatypeConstructorIs(constructorName))
                         .addStatement(
                                 "return $T.Error(($T) $L)",
                                 thisClassName,
@@ -161,7 +165,30 @@ public class ToNativeLibrary extends ToNative {
                                 VAR_INPUT)
                         .endControlFlow()
         );
-        // If the Error cannot be placed into one of the above, call it opaque and move on
+        // Handle Errors from another service:
+        LocalServiceTrait localServiceTrait = subject.serviceShape.expectTrait(LocalServiceTrait.class);
+        if (localServiceTrait.getDependencies() != null) {
+            localServiceTrait.getDependencies().stream()
+              .map(subject.model::expectShape)
+              .map(Shape::asServiceShape)
+              .filter(Optional::isPresent)
+              .map(Optional::get)
+              .forEach(serviceShape ->
+                {
+                    String serviceName = DafnyNameResolver.moduleNamespace(serviceShape.toShapeId().getNamespace());
+                    method
+                      .beginControlFlow(
+                        "if ($L.$L())", VAR_INPUT, datatypeConstructorIs(serviceName))
+                      .addStatement(
+                        "return $T.Error($L.$L)",
+                        ToNative.ToNativeClassNameForShape(serviceShape, subject.sdkVersion),
+                        VAR_INPUT,
+                        datatypeDeconstructor(serviceName))
+                      .endControlFlow();
+                }
+              );
+        }
+        // If the Error cannot be placed into any of the above, call it opaque and move on
         super.createNativeBuilder(method, OpaqueError.nativeClassName(subject.modelPackageName));
         method.addStatement("$L.obj($L)", NATIVE_BUILDER, VAR_INPUT);
         return super.buildAndReturn(method);
