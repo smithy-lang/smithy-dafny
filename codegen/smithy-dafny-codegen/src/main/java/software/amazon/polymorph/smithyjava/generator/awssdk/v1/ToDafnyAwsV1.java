@@ -93,21 +93,21 @@ public class ToDafnyAwsV1 extends ToDafny {
 
     TypeSpec toDafny() {
         List<OperationShape> operations = subject.serviceShape
-                .getOperations().stream()
+                .getOperations().stream().sorted()
                 .map(shapeId -> subject.model.expectShape(shapeId, OperationShape.class))
                 .toList();
         LinkedHashSet<ShapeId> operationOutputs = operations.stream()
-                .map(OperationShape::getOutputShape)
+                .map(OperationShape::getOutputShape).sorted()
                 .collect(Collectors.toCollection(LinkedHashSet::new));
         LinkedHashSet<ShapeId> operationInputs = operations.stream()
-                .map(OperationShape::getInputShape)
+                .map(OperationShape::getInputShape).sorted()
                 .collect(Collectors.toCollection(LinkedHashSet::new));
         LinkedHashSet<ShapeId> serviceErrors = operations.stream()
                 .map(OperationShape::getErrors)
-                .flatMap(Collection::stream)
+                .flatMap(Collection::stream).sorted()
                 .collect(Collectors.toCollection(LinkedHashSet::new));
         ModelUtils.streamServiceErrors(subject.model, subject.serviceShape)
-                .map(Shape::toShapeId)
+                .map(Shape::toShapeId).sorted()
                 .forEachOrdered(serviceErrors::add);
 
         LinkedHashSet<ShapeId> operationStructures = new LinkedHashSet<>();
@@ -133,18 +133,18 @@ public class ToDafnyAwsV1 extends ToDafny {
 
         final List<MethodSpec> convertOutputs = operationOutputs.stream()
                 .map(this::generateConvertResponseV1).toList();
-        final List<MethodSpec> convertAllRelevant = allRelevantShapeIds.stream()
+        final List<MethodSpec> convertAllRelevant = allRelevantShapeIds.stream().sorted()
                 .map(this::generateConvert).filter(Objects::nonNull).toList();
-        final List<MethodSpec> convertServiceErrors = serviceErrors.stream()
+        final List<MethodSpec> convertServiceErrors = serviceErrors.stream().sorted()
                 .map(this::modeledError).collect(Collectors.toList());
         convertServiceErrors.add(generateConvertOpaqueError());
         // For enums, we generate overloaded methods,
         // one to convert instances of the Enum
         final List<MethodSpec> convertEnumEnum = enumShapeIds
-                .stream().map(this::generateConvertEnumEnum).toList();
+                .stream().sorted().map(this::generateConvertEnumEnum).toList();
         // The other to convert String representatives of the enum
         final List<MethodSpec> convertEnumString = enumShapeIds
-                .stream().map(this::generateConvertEnumString).toList();
+                .stream().sorted().map(this::generateConvertEnumString).toList();
 
         return TypeSpec
                 .classBuilder(className(subject.serviceShape.toShapeId()))
