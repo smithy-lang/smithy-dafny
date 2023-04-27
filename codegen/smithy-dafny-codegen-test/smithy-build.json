@@ -1,6 +1,15 @@
 {
     "version": "1.0",
     "plugins": {
-        "_comment": "TODO"
+        "dafny-client-codegen": {
+            "service": "simple.aggregate#SimpleAggregate",
+            "module": "github.com/aws/smithy-dafny/internal/tests/service/SimpleAggregate",
+            "moduleVersion": "0.0.1",
+            "generateGoMod": true,
+            "goDirective": "1.18",
+            "edition":"2023",
+            "targetLanguages":["GO"],
+            "includeDafnyFile":""
+        }
     }
 }
