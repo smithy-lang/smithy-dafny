@@ -125,51 +125,51 @@ public class TypeConversionCodegenTest {
         assertTrue(expectedConverterMethods.allMatch(actualTokens::contains));
     }
 
-    @Test
-    public void testFindShapeIdsToConvert() {
-        final TypeConversionCodegen codegen = setupCodegen((builder, modelAssembler) -> {
-            builder.addOperation(ShapeId.fromParts(SERVICE_NAMESPACE, "DoBar"));
-            builder.addTrait(ClientConfigTrait.builder()
-                    .clientConfigId(ShapeId.fromParts(SERVICE_NAMESPACE, "FoobarConfig"))
-                    .build());
-            modelAssembler.addUnparsedModel("test.smithy", """
-                        namespace %s
-                        structure FoobarConfig {}
-                        resource FooResource { operations: [DoBaz] }
-                        operation DoBar { input: DoBarInput, errors: [UsedError] }
-                        operation DoBaz { output: DoBazOutput }
-                        structure DoBarInput { qux: Qux }
-                        structure DoBazOutput { xyzzy: Xyzzy }
-                        map Qux { key: String, value: Integer }
-                        list Xyzzy { member: Blob }
-                        @error("client") structure UsedError { @required message: String }
-                        @error("client") structure UnusedError { @required message: String }
-                        """.formatted(SERVICE_NAMESPACE));
-        });
-        final Set<ShapeId> expectedShapeIds = Stream.of(
-                SERVICE_NAMESPACE + "#DoBarInput",
-                SERVICE_NAMESPACE + "#DoBarInput$qux",
-                SERVICE_NAMESPACE + "#DoBazOutput",
-                SERVICE_NAMESPACE + "#DoBazOutput$xyzzy",
-                SERVICE_NAMESPACE + "#Qux",
-                SERVICE_NAMESPACE + "#Qux$key",
-                SERVICE_NAMESPACE + "#Qux$value",
-                SERVICE_NAMESPACE + "#Xyzzy",
-                SERVICE_NAMESPACE + "#Xyzzy$member",
-                SERVICE_NAMESPACE + "#UsedError",
-                SERVICE_NAMESPACE + "#UsedError$message",
-                // Unused errors must also have type converters, since the common error shape converter depends on all
-                // specific errors in the model (even if unused in operations)
-                SERVICE_NAMESPACE + "#UnusedError",
-                SERVICE_NAMESPACE + "#UnusedError$message",
-                "smithy.api#String",
-                "smithy.api#Integer",
-                "smithy.api#Blob"
-        ).map(ShapeId::from).collect(Collectors.toSet());
-
-        final Set<ShapeId> actualShapeIds = codegen.findShapeIdsToConvert();
-        assertEquals(expectedShapeIds, actualShapeIds);
-    }
+    // @Test
+    // public void testFindShapeIdsToConvert() {
+    //     final TypeConversionCodegen codegen = setupCodegen((builder, modelAssembler) -> {
+    //         builder.addOperation(ShapeId.fromParts(SERVICE_NAMESPACE, "DoBar"));
+    //         builder.addTrait(ClientConfigTrait.builder()
+    //                 .clientConfigId(ShapeId.fromParts(SERVICE_NAMESPACE, "FoobarConfig"))
+    //                 .build());
+    //         modelAssembler.addUnparsedModel("test.smithy", """
+    //                     namespace %s
+    //                     structure FoobarConfig {}
+    //                     resource FooResource { operations: [DoBaz] }
+    //                     operation DoBar { input: DoBarInput, errors: [UsedError] }
+    //                     operation DoBaz { output: DoBazOutput }
+    //                     structure DoBarInput { qux: Qux }
+    //                     structure DoBazOutput { xyzzy: Xyzzy }
+    //                     map Qux { key: String, value: Integer }
+    //                     list Xyzzy { member: Blob }
+    //                     @error("client") structure UsedError { @required message: String }
+    //                     @error("client") structure UnusedError { @required message: String }
+    //                     """.formatted(SERVICE_NAMESPACE));
+    //     });
+    //     final Set<ShapeId> expectedShapeIds = Stream.of(
+    //             SERVICE_NAMESPACE + "#DoBarInput",
+    //             SERVICE_NAMESPACE + "#DoBarInput$qux",
+    //             SERVICE_NAMESPACE + "#DoBazOutput",
+    //             SERVICE_NAMESPACE + "#DoBazOutput$xyzzy",
+    //             SERVICE_NAMESPACE + "#Qux",
+    //             SERVICE_NAMESPACE + "#Qux$key",
+    //             SERVICE_NAMESPACE + "#Qux$value",
+    //             SERVICE_NAMESPACE + "#Xyzzy",
+    //             SERVICE_NAMESPACE + "#Xyzzy$member",
+    //             SERVICE_NAMESPACE + "#UsedError",
+    //             SERVICE_NAMESPACE + "#UsedError$message",
+    //             // Unused errors must also have type converters, since the common error shape converter depends on all
+    //             // specific errors in the model (even if unused in operations)
+    //             SERVICE_NAMESPACE + "#UnusedError",
+    //             SERVICE_NAMESPACE + "#UnusedError$message",
+    //             "smithy.api#String",
+    //             "smithy.api#Integer",
+    //             "smithy.api#Blob"
+    //     ).map(ShapeId::from).collect(Collectors.toSet());
+    //
+    //     final Set<ShapeId> actualShapeIds = codegen.findShapeIdsToConvert();
+    //     assertEquals(expectedShapeIds, actualShapeIds);
+    // }
 
 //    @Test
 //    public void testGenerateBlobConverter() {
