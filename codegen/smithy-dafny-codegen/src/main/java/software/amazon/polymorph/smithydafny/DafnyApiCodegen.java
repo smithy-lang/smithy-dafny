@@ -29,6 +29,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.annotation.Nonnull;
+
 public class DafnyApiCodegen {
     private final Model model;
     private final ServiceShape serviceShape;
@@ -75,11 +77,7 @@ public class DafnyApiCodegen {
         // so that I can include them.
         final TokenTree generatedTypes = TokenTree
           .of(
-            model
-              .shapes()
-              .filter(shape -> ModelUtils.isInServiceNamespace(shape.getId(), serviceShape))
-              // Sort by shape ID for deterministic generated code
-              .collect(Collectors.toCollection(TreeSet::new))
+            getShapes(model, serviceShape)
               .stream()
               .map(this::generateCodeForShape)
               .flatMap(Optional::stream)
@@ -172,6 +170,15 @@ public class DafnyApiCodegen {
           )
           .lineSeparated();
         return Map.of(path, fullCode);
+    }
+
+    @Nonnull
+    public static TreeSet<Shape> getShapes(final Model model, final ServiceShape serviceShape) {
+        return model
+          .shapes()
+          .filter(shape -> ModelUtils.isInServiceNamespace(shape.getId(), serviceShape))
+          // Sort by shape ID for deterministic generated code
+          .collect(Collectors.toCollection(TreeSet::new));
     }
 
     public Map<Path, TokenTree> generateWrappedAbstractServiceModule(final Path outputDafny) {
