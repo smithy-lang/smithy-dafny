@@ -4,14 +4,21 @@
 package software.amazon.polymorph.smithydotnet;
 
 import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
+import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.polymorph.utils.Token;
 import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.*;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.utils.StringUtils;
+
+import static software.amazon.polymorph.smithydotnet.TypeConversionDirection.FROM_DAFNY;
+import static software.amazon.polymorph.smithydotnet.TypeConversionDirection.TO_DAFNY;
 
 /**
  * Generates a {@code TypeConversion} class that includes all {@link TypeConversionCodegen.TypeConverter}s needed
@@ -104,6 +111,80 @@ public class AwsSdkTypeConversionCodegen extends TypeConversionCodegen {
      */
     @Override
     protected Stream<TypeConverter> generateUnmodeledConverters() {
-        return Stream.empty();
+        return Stream.of(generateCommonExceptionConverter());
+    }
+
+    @Override
+    protected TokenTree errorToDafnyBody(final TreeSet<StructureShape> errorShapes) {
+        final String dafnyUnknownErrorType = "%s.Error_Opaque"
+          .formatted(DafnyNameResolverHelpers.dafnyExternNamespaceForShapeId(serviceShape.getId()));
+
+        // Collect into TreeSet so that we generate code in a deterministic order (lexicographic, in particular)
+        // final TreeSet<StructureShape> errorShapes = ModelUtils.streamServiceErrors(model, serviceShape)
+        //   .collect(Collectors.toCollection(TreeSet::new));
+        final TokenTree knownErrorCases = TokenTree.of(errorShapes.stream()
+          .map(errorShape -> {
+              final ShapeId errorShapeId = errorShape.getId();
+              final String sdkErrorType = nameResolver.baseTypeForShape(errorShapeId);
+              final String errorConverter = DotNetNameResolver.qualifiedTypeConverter(errorShapeId, TO_DAFNY);
+              // InvalidEndpointException does not exist in v2 of the sdk
+              if (sdkErrorType.endsWith("InvalidEndpointException")) {
+                  return Token.of("");
+              }
+              return Token.of("""
+                            case %s e:
+                                return %s(e);
+                            """.formatted(sdkErrorType, errorConverter));
+          })).lineSeparated();
+
+        final TokenTree unknownErrorCase = Token.of("""
+                default:
+                    return new %s(value);
+                """.formatted(dafnyUnknownErrorType));
+        final TokenTree cases = TokenTree.of(knownErrorCases, unknownErrorCase).lineSeparated();
+        final TokenTree body = Token.of("switch (value)").append(cases.braced());
+        return body;
+    }
+
+    @Override
+    protected TokenTree errorFromDanyBody(final TreeSet<StructureShape> errorShapes) {
+        // Handle the modeled exceptions.
+        final TokenTree modeledExceptionsFromDafny = TokenTree.of(errorShapes
+          .stream()
+          .map(errorShape -> {
+              final ShapeId modeledErrorShapeId = errorShape.getId();
+              if (modeledErrorShapeId.getName().endsWith("InvalidEndpointException")) {
+                  return Token.of("");
+              }
+              return Token.of("case %1$s dafnyVal:\nreturn %2$s(dafnyVal);".formatted(
+                nameResolver.dafnyTypeForShape(modeledErrorShapeId),
+                DotNetNameResolver.typeConverterForShape(modeledErrorShapeId, FROM_DAFNY)
+              ));
+          })).lineSeparated();
+
+        // Handle the special cases that were cast to the root service exception.
+        // TODO: We could look up the AWS SDK Base Service Exception, and possibly return that...
+        final TokenTree handleBaseFromDafny = TokenTree
+          .of(
+            "case %1$s dafnyVal:"
+              .formatted(DotNetNameResolver.dafnyUnknownErrorTypeForServiceShape(serviceShape)),
+            "return new SystemException(dafnyVal._obj.ToString());",
+            "default:",
+            "// The switch MUST be complete for _IError, so `value` MUST NOT be an _IError. (How did you get here?)",
+            "return new SystemException();;"
+          )
+          .lineSeparated();
+
+        // Wrap all the converters into a switch statement.
+        final TokenTree fromDafnySwitchCases = TokenTree
+          .of(
+            modeledExceptionsFromDafny,
+            handleBaseFromDafny
+          ).lineSeparated()
+          .braced();
+
+        final TokenTree fromDafnyBody = TokenTree.of(
+          TokenTree.of("switch(value)"), fromDafnySwitchCases).lineSeparated();
+        return fromDafnyBody;
     }
 }
