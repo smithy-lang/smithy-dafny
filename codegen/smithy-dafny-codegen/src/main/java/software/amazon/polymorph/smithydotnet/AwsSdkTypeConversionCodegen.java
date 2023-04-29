@@ -36,6 +36,9 @@ public class AwsSdkTypeConversionCodegen extends TypeConversionCodegen {
     public Set<ShapeId> findShapeIdsToConvert() {
         final Set<ShapeId> shapeIds = super.findShapeIdsToConvert();
         shapeIds.add(SMITHY_STRING_SHAPE_ID);  // needed for converting the message of an unknown error type
+        // in .NET, there DDBv2 does not have entries for these Smithy Shapes.
+        shapeIds.remove(ShapeId.fromParts("com.amazonaws.dynamodb", "KinesisStreamingDestinationOutput"));
+        shapeIds.remove(ShapeId.fromParts("com.amazonaws.dynamodb", "KinesisStreamingDestinationInput"));
         return shapeIds;
     }
 
