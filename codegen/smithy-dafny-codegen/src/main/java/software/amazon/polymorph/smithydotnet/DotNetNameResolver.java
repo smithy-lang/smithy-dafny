@@ -349,10 +349,11 @@ public class DotNetNameResolver {
         if (AwsSdkNameResolverHelpers.isInAwsSdkNamespace(shapeId)) {
             return new AwsSdkDotNetNameResolver(model, serviceShape).baseTypeForService(serviceShape);
         }
+        final LocalServiceTrait localServiceTrait = serviceShape.expectTrait(LocalServiceTrait.class);
 
         // Base type for local service is defined here
         return "%s.%s".formatted(
-            namespaceForShapeId(shapeId), shapeId.getName());
+            namespaceForShapeId(shapeId), localServiceTrait.getSdkId());
     }
 
     protected String baseTypeForResource(final ResourceShape resourceShape) {
