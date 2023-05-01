@@ -120,8 +120,6 @@ public class AwsSdkTypeConversionCodegen extends TypeConversionCodegen {
           .formatted(DafnyNameResolverHelpers.dafnyExternNamespaceForShapeId(serviceShape.getId()));
 
         // Collect into TreeSet so that we generate code in a deterministic order (lexicographic, in particular)
-        // final TreeSet<StructureShape> errorShapes = ModelUtils.streamServiceErrors(model, serviceShape)
-        //   .collect(Collectors.toCollection(TreeSet::new));
         final TokenTree knownErrorCases = TokenTree.of(errorShapes.stream()
           .map(errorShape -> {
               final ShapeId errorShapeId = errorShape.getId();
