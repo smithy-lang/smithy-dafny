@@ -43,6 +43,7 @@ import static software.amazon.polymorph.smithydotnet.DotNetNameResolver.TYPE_CON
 import static software.amazon.polymorph.smithydotnet.DotNetNameResolver.typeConverterForShape;
 import static software.amazon.polymorph.smithydotnet.TypeConversionDirection.FROM_DAFNY;
 import static software.amazon.polymorph.smithydotnet.TypeConversionDirection.TO_DAFNY;
+import static software.amazon.polymorph.utils.DafnyNameResolverHelpers.dafnyCompilesExtra_;
 
 /**
  * Generates a {@code TypeConversion} class that includes all {@link TypeConverter}s needed for the operations in the
@@ -486,10 +487,10 @@ public class TypeConversionCodegen {
                     if (StringUtils.equals(memberShape.getId().getName(), "AttributeValue")) {
                         destructorValue = nameResolver.classPropertyForStructureMember(memberShape);
                     } else {
-                        destructorValue = DafnyNameResolverHelpers.dafnyCompilesExtra_(memberShape.getMemberName());
+                        destructorValue = dafnyCompilesExtra_(memberShape.getMemberName());
                     }
                     return TokenTree
-                            .of("if (value.is%s)".formatted(nameResolver.classFieldForStructureMember(memberShape)))
+                            .of("if (value.is_%s)".formatted(dafnyCompilesExtra_(nameResolver.classFieldForStructureMember(memberShape))))
                             .append(TokenTree
                                     .of(
                                             "converted.%s = %s(concrete.dtor_%s);"

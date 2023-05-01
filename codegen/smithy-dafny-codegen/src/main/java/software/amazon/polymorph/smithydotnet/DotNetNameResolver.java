@@ -432,7 +432,7 @@ public class DotNetNameResolver {
      * Returns the name of the (private) structure class field for the given member shape.
      */
     public String classFieldForStructureMember(final MemberShape memberShape) {
-        return "_%s".formatted(memberShape.getMemberName());
+        return "%s".formatted(memberShape.getMemberName());
     }
 
     /**

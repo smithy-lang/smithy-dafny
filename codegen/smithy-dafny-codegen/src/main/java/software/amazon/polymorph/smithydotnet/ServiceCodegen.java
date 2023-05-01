@@ -285,7 +285,7 @@ public class ServiceCodegen {
         return TokenTree.of(
                 Token.of("private"),
                 typeToken,
-                Token.of(nameResolver.classFieldForStructureMember(memberShape)),
+                Token.of("_%s".formatted(nameResolver.classFieldForStructureMember(memberShape))),
                 Token.of(';'));
     }
 
@@ -299,8 +299,8 @@ public class ServiceCodegen {
         final boolean isValueType = nameResolver.isValueType(memberShape.getTarget());
         final String unwrapValue = isValueType ? ".GetValueOrDefault()" : "";
 
-        final TokenTree getter = Token.of("get { return this.%s%s; }".formatted(fieldName, unwrapValue));
-        final TokenTree setter = Token.of("set { this.%s = value; }".formatted(fieldName));
+        final TokenTree getter = Token.of("get { return this._%s%s; }".formatted(fieldName, unwrapValue));
+        final TokenTree setter = Token.of("set { this._%s = value; }".formatted(fieldName));
 
         final String type = nameResolver.classPropertyTypeForStructureMember(memberShape);
         final String propertyName = nameResolver.classPropertyForStructureMember(memberShape);
@@ -316,10 +316,10 @@ public class ServiceCodegen {
         final String methodName = nameResolver.isSetForStructureMember(memberShape);
         TokenTree body;
         if (nameResolver.isValueType(memberShape.getTarget())) {
-            body = TokenTree.of("return this.%s.HasValue;".formatted(
+            body = TokenTree.of("return this._%s.HasValue;".formatted(
                     nameResolver.classFieldForStructureMember(memberShape)));
         } else {
-            body = TokenTree.of("return this.%s != null;".formatted(
+            body = TokenTree.of("return this._%s != null;".formatted(
                     nameResolver.classFieldForStructureMember(memberShape)));
         }
         // The correctness of these types are improved by making this public
