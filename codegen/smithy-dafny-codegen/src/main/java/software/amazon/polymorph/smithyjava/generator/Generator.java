@@ -21,7 +21,6 @@ import javax.lang.model.element.Modifier;
 import software.amazon.polymorph.smithyjava.MethodReference;
 import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.smithy.model.shapes.OperationShape;
-import software.amazon.smithy.model.shapes.ShapeType;
 
 public abstract class Generator {
     public static final Modifier[] PUBLIC_STATIC = new Modifier[]{Modifier.PUBLIC, Modifier.STATIC};
@@ -74,12 +73,6 @@ public abstract class Generator {
         public static final MethodReference IDENTITY_FUNCTION = new MethodReference(
                 ClassName.get(java.util.function.Function.class),
                 "identity");
-        public static final Set<ShapeType> LIST_MAP_SET_SHAPE_TYPES;
-        static {
-            LIST_MAP_SET_SHAPE_TYPES = Set.of(
-                    ShapeType.LIST, ShapeType.SET, ShapeType.MAP
-            );
-        }
         public static final ClassName JAVA_UTIL_STREAM_COLLECTORS =
             ClassName.get("java.util.stream", "Collectors");
         public static final ClassName JAVA_UTIL_ARRAYLIST =

@@ -27,6 +27,7 @@ import software.amazon.polymorph.smithyjava.generator.awssdk.v1.ToDafnyAwsV1;
 import software.amazon.polymorph.smithyjava.generator.awssdk.v2.ToDafnyAwsV2;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 
+import software.amazon.polymorph.utils.SmithyConstants;
 import software.amazon.smithy.model.shapes.ListShape;
 import software.amazon.smithy.model.shapes.MapShape;
 import software.amazon.smithy.model.shapes.MemberShape;
@@ -187,7 +188,7 @@ public abstract class ToDafny extends Generator {
                 inputVar);
         CodeBlock isSetCheck = isNullCheck;
         Shape targetShape = subject.model.expectShape(memberShape.getTarget());
-        if (Constants.LIST_MAP_SET_SHAPE_TYPES.contains(targetShape.getType())) {
+        if (SmithyConstants.LIST_MAP_SET_SHAPE_TYPES.contains(targetShape.getType())) {
             isSetCheck = CodeBlock.of("($L && $L.size() > 0)",
                     isNullCheck,
                     inputVar);

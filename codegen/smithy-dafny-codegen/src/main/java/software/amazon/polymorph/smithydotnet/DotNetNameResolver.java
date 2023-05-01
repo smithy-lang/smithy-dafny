@@ -15,6 +15,7 @@ import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.polymorph.utils.AwsSdkNameResolverHelpers;
 import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 import software.amazon.polymorph.utils.ModelUtils;
+import software.amazon.polymorph.utils.SmithyConstants;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.*;
 import software.amazon.smithy.model.traits.EnumTrait;
@@ -452,7 +453,7 @@ public class DotNetNameResolver {
         if (isInAwsSdkNamespace(containerId)) {
             //  don't use IsSet<memberName> but use !null or !null and !empty check.
             final Shape targetShape = model.expectShape(memberShape.getTarget());
-            if (targetShape.getType().getCategory() == ShapeType.Category.AGGREGATE) {
+            if (SmithyConstants.LIST_MAP_SET_SHAPE_TYPES.contains(targetShape.getType())) {
                 return "%s is {Count: > 0}".formatted(property); // !null and !empty check
             }
             return "%s != null".formatted(property); // !null check

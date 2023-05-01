@@ -19,12 +19,12 @@ import javax.annotation.Nullable;
 import software.amazon.polymorph.smithydafny.DafnyNameResolver;
 import software.amazon.polymorph.smithyjava.MethodReference;
 import software.amazon.polymorph.smithyjava.generator.CodegenSubject;
-import software.amazon.polymorph.smithyjava.generator.Generator;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.polymorph.utils.AwsSdkNameResolverHelpers;
 import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 
+import software.amazon.polymorph.utils.SmithyConstants;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.ResourceShape;
@@ -194,7 +194,7 @@ public class Dafny extends NameResolver {
         final Shape shape = model.getShape(shapeId)
                 .orElseThrow(() -> new IllegalStateException("Cannot find shape " + shapeId));
 
-        if (!Generator.Constants.LIST_MAP_SET_SHAPE_TYPES.contains(shape.getType())) {
+        if (!SmithyConstants.LIST_MAP_SET_SHAPE_TYPES.contains(shape.getType())) {
             throw new UnsupportedOperationException(
                     "No Dafny Java Type for %s yet.".formatted(shape.getType())
             );
