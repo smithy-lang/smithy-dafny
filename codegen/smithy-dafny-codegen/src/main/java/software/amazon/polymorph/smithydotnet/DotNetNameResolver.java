@@ -33,6 +33,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+import static software.amazon.polymorph.utils.AwsSdkNameResolverHelpers.isInAwsSdkNamespace;
+
 /**
  * Provides a consistent mapping between names of model Shapes and generated identifiers.
  */
@@ -63,7 +65,7 @@ public class DotNetNameResolver {
      */
     public static String namespaceForShapeId(final ShapeId shapeId) {
         // TODO remove special AWS SDK special-case when https://github.com/awslabs/polymorph/issues/7 is resolved
-        final Function<String, String> segmentMapper = AwsSdkNameResolverHelpers.isInAwsSdkNamespace(shapeId)
+        final Function<String, String> segmentMapper = isInAwsSdkNamespace(shapeId)
                 ? StringUtils::capitalize
                 : DotNetNameResolver::capitalizeNamespaceSegment;
 
@@ -346,7 +348,7 @@ public class DotNetNameResolver {
     protected String baseTypeForService(final ServiceShape serviceShape) {
         final ShapeId shapeId = serviceShape.getId();
 
-        if (AwsSdkNameResolverHelpers.isInAwsSdkNamespace(shapeId)) {
+        if (isInAwsSdkNamespace(shapeId)) {
             return new AwsSdkDotNetNameResolver(model, serviceShape).baseTypeForService(serviceShape);
         }
         final LocalServiceTrait localServiceTrait = serviceShape.expectTrait(LocalServiceTrait.class);
@@ -378,7 +380,7 @@ public class DotNetNameResolver {
                     () -> String.format("No native type for prelude shape %s", shapeId));
         }
 
-        if (!AwsSdkNameResolverHelpers.isInAwsSdkNamespace(shapeId)) {
+        if (!isInAwsSdkNamespace(shapeId)) {
             // The shape is not in an AWS Service,
             // so use the base type switch
             return baseTypeSwitch(shape);
@@ -441,10 +443,21 @@ public class DotNetNameResolver {
     }
 
     /**
-     * Returns the name of the given member shape's IsSet method.
+     * Returns the logic to determine if a StructureMember is set.
      */
-    public String isSetMethodForStructureMember(final MemberShape memberShape) {
-        return "IsSet%s".formatted(classPropertyForStructureMember(memberShape));
+    public String isSetForStructureMember(final MemberShape memberShape) {
+        final String property = classPropertyForStructureMember(memberShape);
+        final ShapeId containerId = memberShape.getContainer();
+        //  When reading AWS-SDK objects,
+        if (isInAwsSdkNamespace(containerId)) {
+            //  don't use IsSet<memberName> but use !null or !null and !empty check.
+            final Shape targetShape = model.expectShape(memberShape.getTarget());
+            if (targetShape.getType().getCategory() == ShapeType.Category.AGGREGATE) {
+                return "%s is {Count: > 0}".formatted(property); // !null and !empty check
+            }
+            return "%s != null".formatted(property); // !null check
+        }
+        return "IsSet%s()".formatted(property);
     }
 
     /**
@@ -708,7 +721,7 @@ public class DotNetNameResolver {
     private String dafnyTypeForService(final ServiceShape serviceShape) {
         final ShapeId serviceShapeId = serviceShape.getId();
 
-        if (AwsSdkNameResolverHelpers.isInAwsSdkNamespace(serviceShapeId)) {
+        if (isInAwsSdkNamespace(serviceShapeId)) {
             return "%s.%s"
                 .formatted(DafnyNameResolverHelpers.dafnyExternNamespaceForShapeId(serviceShapeId),
                            DafnyNameResolver.traitNameForServiceClient(serviceShape));

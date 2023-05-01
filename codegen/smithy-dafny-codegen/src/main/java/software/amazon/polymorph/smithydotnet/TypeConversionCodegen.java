@@ -406,12 +406,12 @@ public class TypeConversionCodegen {
     public TokenTree generateExtractOptionalMember(final MemberShape memberShape) {
         final String type = nameResolver.baseTypeForShape(memberShape.getId());
         final String varName = nameResolver.variableNameForClassProperty(memberShape);
-        final String isSetMethod = nameResolver.isSetMethodForStructureMember(memberShape);
+        final String isSetMethod = nameResolver.isSetForStructureMember(memberShape);
         final String propertyName = nameResolver.classPropertyForStructureMember(memberShape);
         return TokenTree.of(
                 type,
                 varName,
-                "= value.%s()".formatted(isSetMethod),
+                "= value.%s".formatted(isSetMethod),
                 "? value.%s :".formatted(propertyName),
                 "(%s) null;".formatted(type)
         );
