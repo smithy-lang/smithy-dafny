@@ -61,7 +61,7 @@ public class DotNetNameResolver {
     /**
      * Returns the C# namespace containing the C# implementation/interface for the given shape ID.
      */
-    public String namespaceForShapeId(final ShapeId shapeId) {
+    public static String namespaceForShapeId(final ShapeId shapeId) {
         // TODO remove special AWS SDK special-case when https://github.com/awslabs/polymorph/issues/7 is resolved
         final Function<String, String> segmentMapper = AwsSdkNameResolverHelpers.isInAwsSdkNamespace(shapeId)
                 ? StringUtils::capitalize
@@ -517,12 +517,12 @@ public class DotNetNameResolver {
     }
 
     /**
-     * Returns the converter method name for the given shape and type conversion direction, qualified with the type
-     * conversion class name.
+     * Returns the converter method name for the given shape and type conversion direction,
+     * qualified with the .NET Namespace and type conversion class name.
      */
     public static String qualifiedTypeConverter(final ShapeId shapeId, final TypeConversionDirection direction) {
         final String methodName = DotNetNameResolver.typeConverterForShape(shapeId, direction);
-        return "%s.%s".formatted(DotNetNameResolver.TYPE_CONVERSION_CLASS_NAME, methodName);
+        return "%s.%s.%s".formatted(namespaceForShapeId(shapeId), DotNetNameResolver.TYPE_CONVERSION_CLASS_NAME, methodName);
     }
 
     /**

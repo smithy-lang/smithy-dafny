@@ -50,6 +50,7 @@ import static software.amazon.polymorph.smithydotnet.TypeConversionDirection.TO_
  */
 public class TypeConversionCodegen {
     public static final String C_SHARP_SYSTEM_EXCEPTION = "System.Exception";
+    public static final String DEFAULT_VISIBILITY = "public";
 
     @SuppressWarnings("unused")
     private static final Logger LOGGER = LoggerFactory.getLogger(TypeConversionCodegen.class);
@@ -1197,17 +1198,13 @@ public class TypeConversionCodegen {
         final boolean isDependantModuleType = ModelUtils.isReferenceDependantModuleType(shape,
             nameResolver.namespaceForService());
 
-        final String visibility = shape.hasTrait(ReferenceTrait.class) && !isDependantModuleType
-                ? "public"
-                : "internal";
-
         final String fromDafnyConverterName = typeConverterForShape(id, FROM_DAFNY);
         final TokenTree fromDafnyConverterSignature = TokenTree.of(
-                "%s static".formatted(visibility), cSharpType, fromDafnyConverterName, "(%s value)".formatted(dafnyType));
+                "%s static".formatted(DEFAULT_VISIBILITY), cSharpType, fromDafnyConverterName, "(%s value)".formatted(dafnyType));
 
         final String toDafnyConverterName = typeConverterForShape(id, TO_DAFNY);
         final TokenTree toDafnyConverterSignature = TokenTree.of(
-                "%s static".formatted(visibility), dafnyType, toDafnyConverterName, "(%s value)".formatted(cSharpType));
+                "%s static".formatted(DEFAULT_VISIBILITY), dafnyType, toDafnyConverterName, "(%s value)".formatted(cSharpType));
 
         if (!isDependantModuleType) {
             final TokenTree fromDafnyConverterMethod = TokenTree.of(fromDafnyConverterSignature, fromDafnyBody.braced());
@@ -1218,7 +1215,7 @@ public class TypeConversionCodegen {
             // This module is referencing a type from another module.
             // These referenced types are not be internal to this module.
             // Therefore, we need to call the conversion in the dependent module.
-            final String namespaceForReferent = nameResolver.namespaceForShapeId(id);
+            final String namespaceForReferent = DotNetNameResolver.namespaceForShapeId(id);
             final TokenTree fromDafnyBodyOverride = TokenTree
                 .of(
                     "// This is converting a reference type in a dependant module.",
