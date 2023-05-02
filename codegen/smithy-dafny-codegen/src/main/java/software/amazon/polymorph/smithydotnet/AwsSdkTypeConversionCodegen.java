@@ -49,28 +49,6 @@ public class AwsSdkTypeConversionCodegen extends TypeConversionCodegen {
         return super.generateStructureConverter(structureShape);
     }
 
-    /**
-     * We can't call the {@code IsSet} methods on AWS SDK classes' member properties because they're internal.
-     * The best we can do is to call the properties' getters, which calls {@code GetValueOrDefault}, which in turn may
-     * improperly coalesce absent optional values to 0 (for example).
-     */
-    @Override
-    public TokenTree generateExtractOptionalMemberToDafny(MemberShape memberShape) {
-        final String type;
-        if (StringUtils.equals(nameResolver.baseTypeForShape(memberShape.getId()),
-                AwsSdkDotNetNameResolver.DDB_ATTRIBUTE_VALUE_MODEL_NAMESPACE)) {
-            type = AwsSdkDotNetNameResolver.DDB_V2_ATTRIBUTE_VALUE;
-        } else {
-            type = nameResolver.baseTypeForShape(memberShape.getId());
-        }
-        final String varName = nameResolver.variableNameForClassProperty(memberShape);
-        final String propertyName = nameResolver.classPropertyForStructureMember(memberShape);
-            return TokenTree.of(
-                    type,
-                    varName,
-                    "= value.%s;".formatted(propertyName));
-    }
-
     @Override
     protected boolean enumListAndMapMembersAreStringsInCSharp() {
         return true;

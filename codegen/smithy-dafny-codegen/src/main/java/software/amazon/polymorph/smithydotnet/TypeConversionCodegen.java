@@ -295,7 +295,7 @@ public class TypeConversionCodegen {
 
     private String memberConverterName(MemberShape memberShape, TypeConversionDirection direction) {
         return
-          isInServiceNamespace(memberShape.getTarget(), serviceShape) ?
+          (isInServiceNamespace(memberShape.getTarget(), serviceShape) | (memberShape.getTarget().getNamespace().equals(SMITHY_API_NAMESPACE))) ?
           typeConverterForShape(memberShape.getTarget(), direction) :
           qualifiedTypeConverter(memberShape.getTarget(), direction);
     }
