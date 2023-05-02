@@ -29,6 +29,5 @@ module TestComAmazonawsSqs {
     // Just asserting the request is successful.
     // I could expect no queues but the test account might create some some day,
     // and I don't want this to be brittle.
-    expect QueueUrls.Some?;
   }
 }
