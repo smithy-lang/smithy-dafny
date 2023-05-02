@@ -5,11 +5,10 @@ package software.amazon.polymorph.smithydotnet;
 
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
-import software.amazon.polymorph.utils.ModelUtils;
+import software.amazon.polymorph.utils.SmithyConstants;
 import software.amazon.polymorph.utils.Token;
 import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.smithy.model.Model;
@@ -25,7 +24,6 @@ import static software.amazon.polymorph.smithydotnet.TypeConversionDirection.TO_
  * for AWS SDK-specific types.
  */
 public class AwsSdkTypeConversionCodegen extends TypeConversionCodegen {
-    private static final ShapeId SMITHY_STRING_SHAPE_ID = ShapeId.from("smithy.api#String");
 
     public AwsSdkTypeConversionCodegen(final Model model, final ServiceShape serviceShape) {
         super(model, serviceShape,
@@ -35,7 +33,7 @@ public class AwsSdkTypeConversionCodegen extends TypeConversionCodegen {
     @Override
     public Set<ShapeId> findShapeIdsToConvert() {
         final Set<ShapeId> shapeIds = super.findShapeIdsToConvert();
-        shapeIds.add(SMITHY_STRING_SHAPE_ID);  // needed for converting the message of an unknown error type
+        shapeIds.add(SmithyConstants.SMITHY_STRING_SHAPE_ID);  // needed for converting the message of an unknown error type
         // in .NET, there DDBv2 does not have entries for these Smithy Shapes.
         shapeIds.remove(ShapeId.fromParts("com.amazonaws.dynamodb", "KinesisStreamingDestinationOutput"));
         shapeIds.remove(ShapeId.fromParts("com.amazonaws.dynamodb", "KinesisStreamingDestinationInput"));
@@ -57,7 +55,7 @@ public class AwsSdkTypeConversionCodegen extends TypeConversionCodegen {
      * improperly coalesce absent optional values to 0 (for example).
      */
     @Override
-    public TokenTree generateExtractOptionalMember(MemberShape memberShape) {
+    public TokenTree generateExtractOptionalMemberToDafny(MemberShape memberShape) {
         final String type;
         if (StringUtils.equals(nameResolver.baseTypeForShape(memberShape.getId()),
                 AwsSdkDotNetNameResolver.DDB_ATTRIBUTE_VALUE_MODEL_NAMESPACE)) {
@@ -159,7 +157,7 @@ public class AwsSdkTypeConversionCodegen extends TypeConversionCodegen {
               }
               return Token.of("case %1$s dafnyVal:\nreturn %2$s(dafnyVal);".formatted(
                 nameResolver.dafnyTypeForShape(modeledErrorShapeId),
-                DotNetNameResolver.typeConverterForShape(modeledErrorShapeId, FROM_DAFNY)
+                DotNetNameResolver.qualifiedTypeConverter(modeledErrorShapeId, FROM_DAFNY)
               ));
           })).lineSeparated();
 
