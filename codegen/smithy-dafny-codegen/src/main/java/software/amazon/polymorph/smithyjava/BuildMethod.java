@@ -47,6 +47,7 @@ public class BuildMethod {
         polyFieldSpecs.forEach(polyField -> {
             // Required Trait
             if (polyField.isRequired()) {
+                // TODO: CrypTool-4889: If primitive type, check isSet
                 buildMethod.addCode(requiredCheck(polyField.fieldSpec));
             }
 

@@ -157,6 +157,8 @@ public class BuilderSpecs {
         if (superName != null) { builder.superclass(builderImplName(superName)); }
         // Add Fields
         localFields.forEach(field ->
+          // TODO: CrypTool-4889: If primitive type & Required,
+          //  there MUST be a private field to track setting the field
                 builder.addField(field.type, field.name, PROTECTED));
         // Add Constructors
         builder.addMethod(MethodSpec.constructorBuilder()
@@ -167,6 +169,8 @@ public class BuilderSpecs {
         }
         // for local fields
         localFields.forEach(field -> {
+            // TODO: CrypTool-4889: If primitive type & Required,
+            //  Setter MUST record that the field was set
             // Builder Setter Method
             builder.addMethod(MethodSpec
                     .methodBuilder(field.name)
@@ -250,6 +254,8 @@ public class BuilderSpecs {
                 .addParameter(className, "model");
         if (superName != null ) { modelConstructor.addStatement("super(model)"); }
         localFields.forEach(field ->
+          // TODO: CrypTool-4889: If primitive type & Required,
+          //  Setter MUST record that the field was set
                 modelConstructor.addStatement(
                         "this.$L = model.$L()", field.name, field.name)
         );
