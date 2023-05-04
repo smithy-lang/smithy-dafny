@@ -1,21 +1,28 @@
 package software.amazon.polymorph.smithyjava;
 
 import com.squareup.javapoet.CodeBlock;
+import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.TypeName;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.lang.model.element.Modifier;
 
 import software.amazon.polymorph.smithyjava.generator.library.JavaLibrary;
 import software.amazon.polymorph.smithyjava.nameresolver.Native;
 import software.amazon.polymorph.smithyjava.unmodeled.CollectionOfErrors;
+import software.amazon.polymorph.traits.JavaDocTrait;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.utils.ModelUtils.ResolvedShapeId;
 
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.Shape;
+import software.amazon.smithy.model.shapes.StructureShape;
+import software.amazon.smithy.model.traits.StringTrait;
 
 import static software.amazon.polymorph.smithyjava.generator.Generator.INTERFACE_VAR;
 import static software.amazon.polymorph.utils.AwsSdkNameResolverHelpers.isInAwsSdkNamespace;
@@ -27,23 +34,41 @@ import static software.amazon.polymorph.utils.ModelUtils.resolveShape;
 // Parsing Traits from Smithy Shapes for Builder Class generators.
 public class BuilderMemberSpec {
     private final static BuilderMemberSpec _MESSAGE =
-            new BuilderMemberSpec(TypeName.get(String.class), "message");
+            new BuilderMemberSpec(
+              TypeName.get(String.class),
+              "message",
+              "the detail message. The detail message is saved for" +
+                " later retrieval by the {@link #getMessage()} method.");
     private final static BuilderMemberSpec _CAUSE =
-            new BuilderMemberSpec(TypeName.get(Throwable.class), "cause");
+            new BuilderMemberSpec(
+              TypeName.get(Throwable.class),
+              "cause",
+              "the cause (which is saved for later retrieval by the" +
+                " {@link #getCause()} method). (A {@code null} value is" +
+                " permitted, and indicates that the cause is nonexistent or" +
+                " unknown.)");
     public final static List<BuilderMemberSpec> THROWABLE_ARGS = List.of(_MESSAGE, _CAUSE);
     public final static List<BuilderMemberSpec> OPAQUE_ARGS = List.of(
             _MESSAGE, _CAUSE,
-            new BuilderMemberSpec(TypeName.get(Object.class), "obj")
+            new BuilderMemberSpec(
+              TypeName.get(Object.class),
+              "obj",
+              "The unexpected object encountered. It MIGHT BE an Exception," +
+              " but that is not guaranteed.")
     );
     public static final List<BuilderMemberSpec> COLLECTION_ARGS = List.of(
             _MESSAGE, _CAUSE,
-            new BuilderMemberSpec(CollectionOfErrors.exceptionList(), "list")
+            new BuilderMemberSpec(
+              CollectionOfErrors.exceptionList(),
+              "list",
+              "the list of Exceptions encountered.")
     );
 
     @Nonnull public final TypeName type;
     @Nonnull public final String name;
     @Nullable public final TypeName interfaceType;
     @Nullable public final CodeBlock wrapCall;
+    @Nullable public final String javaDoc;
 
     public BuilderMemberSpec(MemberShape memberShape, JavaLibrary subject) {
         ResolvedShapeId resolvedShapeId = resolveShape(memberShape.getTarget(), subject.model);
@@ -65,15 +90,18 @@ public class BuilderMemberSpec {
             this.interfaceType = null;
             this.wrapCall = null;
         }
+        Optional<JavaDocTrait> maybeJavaDoc = memberShape.getMemberTrait(subject.model, JavaDocTrait.class);
+        this.javaDoc = maybeJavaDoc.map(StringTrait::getValue).orElse(null);
     }
 
     /** Private Method for handling Edge Cases or cases where
      * the target shape cannot be a member shape. */
-    private BuilderMemberSpec(@Nonnull TypeName type, @Nonnull String name) {
+    private BuilderMemberSpec(@Nonnull TypeName type, @Nonnull String name, @Nullable String javaDoc) {
         this.interfaceType = null;
         this.wrapCall = null;
         this.name = name;
         this.type = type;
+        this.javaDoc = javaDoc;
     }
 
 
@@ -85,7 +113,10 @@ public class BuilderMemberSpec {
     {
         TypeName type = subject.nativeNameResolver.typeForShape(trait.getConfigId());
         String name = trait.getConfigId().getName();
-        return new BuilderMemberSpec(type, name);
+        StructureShape structureShape = subject.model.expectShape(trait.getConfigId(), StructureShape.class);
+        Optional<JavaDocTrait> maybeJavaDoc = structureShape.getTrait(JavaDocTrait.class);
+        String javaDoc = maybeJavaDoc.map(StringTrait::getValue).orElse(null);
+        return new BuilderMemberSpec(type, name, javaDoc);
     }
 
     public static BuilderMemberSpec localServiceAsMemberSpec(
@@ -93,6 +124,20 @@ public class BuilderMemberSpec {
     ) {
         TypeName type = subject.nativeNameResolver.classNameForService(subject.serviceShape);
         String name = INTERFACE_VAR;
-        return new BuilderMemberSpec(type, name);
+        Optional<JavaDocTrait> maybeJavaDoc = subject.serviceShape.getTrait(JavaDocTrait.class);
+        String javaDoc = maybeJavaDoc.map(StringTrait::getValue).orElse(null);
+        return new BuilderMemberSpec(type, name, javaDoc);
+    }
+
+    public FieldSpec toFieldSpec(@Nullable Modifier... modifiers) {
+        FieldSpec.Builder fieldSpec = FieldSpec
+          .builder(this.type, this.name);
+        if (Objects.nonNull(modifiers)) {
+            fieldSpec.addModifiers(modifiers);
+        }
+        if (Objects.nonNull(this.javaDoc)) {
+            fieldSpec.addJavadoc(this.javaDoc);
+        }
+        return fieldSpec.build();
     }
 }

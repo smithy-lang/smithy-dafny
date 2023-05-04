@@ -5,9 +5,12 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
 
+import java.util.Optional;
+
 import software.amazon.polymorph.smithyjava.MethodReference;
 import software.amazon.polymorph.smithyjava.generator.Generator;
 import software.amazon.polymorph.smithyjava.modeled.Operation;
+import software.amazon.polymorph.traits.JavaDocTrait;
 import software.amazon.polymorph.utils.AwsSdkNameResolverHelpers;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.polymorph.smithyjava.MethodSignature;
@@ -65,6 +68,8 @@ public abstract class ShimLibrary extends Generator {
             TypeName outputType = methodSignatureTypeName(outputResolved);
             method.returns(outputType);
         }
+        Optional<JavaDocTrait> maybeJavaDoc = shape.getMemberTrait(subject.model, JavaDocTrait.class);
+        maybeJavaDoc.ifPresent(javaDoc -> method.addJavadoc(javaDoc.getValue()));
         return new MethodSignature(method, inputResolved, outputResolved);
     }
 

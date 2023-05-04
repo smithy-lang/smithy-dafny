@@ -7,7 +7,9 @@ import com.squareup.javapoet.TypeSpec;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
+import javax.annotation.Nonnull;
 import javax.lang.model.element.Modifier;
 
 import software.amazon.polymorph.smithyjava.BuildMethod;
@@ -55,14 +57,9 @@ public class ModeledStructure {
 
         modelFields.forEach(field -> {
             // Add fields
-            spec.addField(field.type, field.name, PRIVATE, FINAL);
+            spec.addField(field.toFieldSpec(PRIVATE, FINAL));
             // Add getter methods
-            spec.addMethod(MethodSpec
-                    .methodBuilder(field.name)
-                    .addModifiers(Modifier.PUBLIC)
-                    .returns(field.type)
-                    .addStatement("return this.$L", field.name)
-                    .build());
+            spec.addMethod(getterMethod(field));
         });
         spec.addMethod(constructor(builderSpecs, modelFields))
                 .addMethod(builderSpecs.toBuilderMethod(override))
@@ -70,6 +67,19 @@ public class ModeledStructure {
         return JavaFile.builder(packageName, spec.build())
                 .skipJavaLangImports(true)
                 .build();
+    }
+
+    @Nonnull
+    public static MethodSpec getterMethod(BuilderMemberSpec field) {
+        MethodSpec.Builder method = MethodSpec
+          .methodBuilder(field.name)
+          .addModifiers(Modifier.PUBLIC)
+          .returns(field.type)
+          .addStatement("return this.$L", field.name);
+        if (Objects.nonNull(field.javaDoc)) {
+            method.addJavadoc(field.javaDoc);
+        }
+        return method.build();
     }
 
 

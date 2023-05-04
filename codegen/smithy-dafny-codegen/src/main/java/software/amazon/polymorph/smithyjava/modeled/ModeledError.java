@@ -41,7 +41,7 @@ public class ModeledError {
                 .superclass(superName);
         localOnlyFields.forEach(field -> {
             // Add local fields
-            spec.addField(field.type, field.name, PRIVATE, FINAL);});
+            spec.addField(field.toFieldSpec(PRIVATE, FINAL));});
         spec.addMethod(ErrorHelpers.messageFromBuilder(builderSpecs));
         // Add getter methods
         spec.addMethods(ErrorHelpers.throwableGetters());
