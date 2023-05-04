@@ -13,7 +13,7 @@ public class DafnyNameResolverHelpers {
      * assuming it was generated into a "Types" module.
      */
     public static String dafnyExternNamespaceForShapeId(final ShapeId shapeId) {
-        return DafnyNameResolver.dafnyExternNamespaceForNamespace(shapeId.getNamespace()) + ".types";
+        return DafnyNameResolver.dafnyTypesModuleExternNamespace(shapeId.getNamespace());
     }
 
     /**
@@ -21,7 +21,7 @@ public class DafnyNameResolverHelpers {
      * but NOT the Types module.
      */
     public static String packageNameForNamespace(final String namespace) {
-        return DafnyNameResolver.dafnyExternNamespaceForNamespace(namespace);
+        return DafnyNameResolver.dafnyExternNamespace(namespace);
     }
 
     /** @return The __default for a namespace.*/

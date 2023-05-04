@@ -10,6 +10,8 @@ public class NamespaceHelper {
         String rtn = namespace;
         if (namespace.startsWith("aws")) {
             rtn = rtn.replaceFirst("aws", "software.amazon");
+        } else if (namespace.startsWith("com.amazonaws")) {
+            rtn = rtn.replaceFirst("com.amazonaws", "software.amazon.awssdk.services");
         }
         return rtn;
     }

@@ -112,9 +112,9 @@ public class AwsSdkDafnyV2 extends Dafny {
      * @return trye if values for dafnyEnumType require conversion to UpperCamelcase.
      */
     protected boolean enumRequiresUpperCamelcaseConversion(final String dafnyEnumType) {
-        return dafnyEnumType.equals("com.amazonaws.kms.internaldafny.types.KeyState")
-            || dafnyEnumType.equals("com.amazonaws.kms.internaldafny.types.GrantOperation")
-            || dafnyEnumType.equals("com.amazonaws.dynamodb.internaldafny.types.BatchStatementErrorCodeEnum");
+        return dafnyEnumType.equals("software.amazon.awssdk.services.kms.internaldafny.types.KeyState")
+            || dafnyEnumType.equals("software.amazon.awssdk.services.kms.internaldafny.types.GrantOperation")
+            || dafnyEnumType.equals("software.amazon.awssdk.services.dynamodb.internaldafny.types.BatchStatementErrorCodeEnum");
     }
 
     /**
@@ -165,7 +165,7 @@ public class AwsSdkDafnyV2 extends Dafny {
     public boolean shapeIdRequiresStaticTypeDescriptor(final ShapeId shapeId) {
         String className = classForNotErrorNotUnitShape(shapeId).toString();
 
-        return (className.equals("com.amazonaws.dynamodb.internaldafny.types.AttributeMap")
-            || className.equals("com.amazonaws.dynamodb.internaldafny.types.Key"));
+        return (className.equals("software.amazon.awssdk.services.dynamodb.internaldafny.types.AttributeMap")
+            || className.equals("software.amazon.awssdk.services.dynamodb.internaldafny.types.Key"));
     }
 }
