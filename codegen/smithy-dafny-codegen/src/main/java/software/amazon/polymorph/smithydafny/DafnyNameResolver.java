@@ -12,6 +12,7 @@ import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import software.amazon.polymorph.smithyjava.NamespaceHelper;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
@@ -234,10 +235,23 @@ public record DafnyNameResolver(
      * Returns the Dafny module corresponding to the namespace of the given shape ID.
      */
     public static String dafnyModuleForNamespace(final String namespace) {
-        return dafnyNamespace(namespace) + ".Types";
+        return dafnyNamespace(namespace) + ".types";
     }
 
+    public static String dafnyModuleForFoo(final String namespace) {
+        return dafnyFoo(namespace) + ".Types";
+    }
+
+    // TODO: Currently calculates a Java idiomatic namespace.
     public static String dafnyNamespace(final String namespace) {
+        final Stream<String> namespaceParts = Arrays
+          .stream(namespace.split("\\."))
+          .map(StringUtils::lowerCase);
+        return NamespaceHelper.standardize(Joiner.on('.').join(namespaceParts.iterator()));
+    }
+
+    // i.e. "Software.Amazon.Cryptography.Namespace"
+    public static String dafnyFoo(final String namespace) {
         final Stream<String> namespaceParts = Arrays
           .stream(namespace.split("\\."))
           .map(StringUtils::capitalize);
@@ -246,19 +260,19 @@ public record DafnyNameResolver(
 
     public static String dafnyTypesModuleForNamespace(final String namespace) {
         // The namespace has dots
-        return (dafnyModuleForNamespace(namespace)).replace(".", "");
+        return (dafnyModuleForFoo(namespace)).replace(".", "");
     }
 
     public static String dafnyAbstractModuleForNamespace(final String namespace) {
         // The namespace has dots
-        return (dafnyModuleForNamespace(namespace))
-          .replace(".Types", "Abstract")
+        return (dafnyModuleForFoo(namespace))
+          .replace(".types", "Abstract")
           .replace(".", "");
     }
 
     public static String dafnyInternalConfigModuleForNamespace(final String namespace) {
         return "%sInternalConfig"
-          .formatted(dafnyNamespace(namespace).replace(".", ""));
+          .formatted(dafnyFoo(namespace).replace(".", ""));
     }
 
 
@@ -281,18 +295,18 @@ public record DafnyNameResolver(
         }
     }
 
-    /**
-     * Returns the Dafny {@code {:extern}} namespace corresponding to the namespace of the given shape ID.
-     */
-    public static String dafnyExternNamespaceForShapeId(final ShapeId shapeId) {
-        return dafnyExternNamespaceForNamespace(shapeId.getNamespace());
-    }
+    // /**
+    //  * Returns the Dafny {@code {:extern}} namespace corresponding to the namespace of the given shape ID.
+    //  */
+    // public static String dafnyExternNamespaceForShapeId(final ShapeId shapeId) {
+    //     return dafnyExternNamespaceForNamespace(shapeId.getNamespace());
+    // }
 
     /**
      * Returns the Dafny {@code {:extern}} namespace corresponding to the provided namespace
      */
     public static String dafnyExternNamespaceForNamespace(final String namespace) {
-        return "Dafny." + dafnyModuleForNamespace(namespace);
+        return dafnyNamespace(namespace) + ".internaldafny";
     }
 
     public String callEventTypeName() {
@@ -348,7 +362,7 @@ public record DafnyNameResolver(
     /** "com.amazonaws.kms" -> "ComAmazonAwsKms" */
     @Nonnull
     public static String moduleNamespace(String namespace) {
-        return DafnyNameResolver.dafnyNamespace(namespace).replace(".", "");
+        return DafnyNameResolver.dafnyFoo(namespace).replace(".", "");
     }
 
     public static String abstractOperationsModuleName(ServiceShape serviceShape)

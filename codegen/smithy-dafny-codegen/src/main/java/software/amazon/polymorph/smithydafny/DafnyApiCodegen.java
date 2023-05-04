@@ -1951,7 +1951,7 @@ public class DafnyApiCodegen {
         final LocalServiceTrait localServiceTrait = serviceShape.expectTrait(LocalServiceTrait.class);
 
         final String moduleNamespace = DafnyNameResolver
-                .dafnyNamespace(serviceShape.getId().getNamespace())
+                .dafnyFoo(serviceShape.getId().getNamespace())
                 .replace(".", "");
 
         final TokenTree moduleHeader = TokenTree.of("abstract module WrappedAbstract%sService".formatted(moduleNamespace));
@@ -2101,7 +2101,7 @@ public class DafnyApiCodegen {
     {
 
       final String moduleNamespace = DafnyNameResolver
-        .dafnyNamespace(serviceShape.getId().getNamespace())
+        .dafnyFoo(serviceShape.getId().getNamespace())
         .replace(".", "");
       final TokenTree header = TokenTree.of("abstract module Abstract%sOperations"
         .formatted(moduleNamespace)
