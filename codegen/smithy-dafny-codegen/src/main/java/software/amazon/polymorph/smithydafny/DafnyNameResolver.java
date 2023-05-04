@@ -279,7 +279,7 @@ public record DafnyNameResolver(
         return dafnyNamespace(namespace) + ".internaldafny";
     }
 
-    // i.e. "software.amazon.cryptography.materialproviders.internaldafny"
+    // i.e. "software.amazon.cryptography.materialproviders.internaldafny.types"
     // The string used in {:extern} specifically in the Dafny types module.
     public static String dafnyTypesModuleExternNamespace(final String namespace) {
         return dafnyExternNamespace(namespace) + ".types";
