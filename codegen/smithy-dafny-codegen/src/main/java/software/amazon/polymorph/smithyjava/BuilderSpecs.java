@@ -1,7 +1,10 @@
 package software.amazon.polymorph.smithyjava;
 
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.CodeBlock;
+import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 
 import java.util.List;
@@ -17,6 +20,7 @@ import software.amazon.polymorph.smithyjava.generator.library.JavaLibrary;
 import software.amazon.smithy.model.shapes.Shape;
 
 import static javax.lang.model.element.Modifier.ABSTRACT;
+import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PROTECTED;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
@@ -37,6 +41,9 @@ public class BuilderSpecs {
                 .collect(Collectors.toList());
     }
 
+    // TODO: We have removed all users of superName & superFields,
+    //  and have no tests for their usage.
+    //  We SHOULD remove them entirely.
     public BuilderSpecs(
             @Nonnull ClassName className,
             @Nullable ClassName superName,
@@ -137,6 +144,9 @@ public class BuilderSpecs {
      * @return The nested public class that implements the Builder Interface.
      */
     public TypeSpec builderImpl(
+      // TODO: We have removed all use of overrideSuper,
+      //  and have no tests for it usage.
+      //  We SHOULD remove it entirely.
             boolean overrideSuper,
             @Nullable MethodSpec modelConstructor,
             @Nonnull MethodSpec buildMethod
@@ -150,8 +160,7 @@ public class BuilderSpecs {
                 .addModifiers(STATIC);
         if (superName != null) { builder.superclass(builderImplName(superName)); }
         // Add Fields
-        localFields.forEach(field ->
-                builder.addField(field.type, field.name, PROTECTED));
+        localFields.forEach(field -> addField(builder, field));
         // Add Constructors
         builder.addMethod(MethodSpec.constructorBuilder()
                 .addModifiers(PROTECTED)
@@ -162,16 +171,7 @@ public class BuilderSpecs {
         // for local fields
         localFields.forEach(field -> {
             // Builder Setter Method
-            builder.addMethod(MethodSpec
-                    .methodBuilder(field.name)
-                    .addModifiers(Modifier.PUBLIC)
-                    .returns(builderInterfaceName())
-                    // If the type is a Reference to a Resource, the method should take an interface
-                    .addParameter(field.interfaceType != null? field.interfaceType : field.type, field.name)
-                    // If the type is a Reference to a Resource, and not in AWS-SDK, we need to "wrap" it
-                    .addStatement("this.$L = $L", field.name, field.wrapCall != null? field.wrapCall : field.name)
-                    .addStatement("return this")
-                    .build());
+            builder.addMethod(setterMethod(field));
             // Getter Method
             builder.addMethod(MethodSpec
                     .methodBuilder(field.name)
@@ -197,10 +197,43 @@ public class BuilderSpecs {
         return builder.build();
     }
 
+    private TypeSpec.Builder addField(TypeSpec.Builder builder, BuilderMemberSpec field) {
+        builder.addField(field.type, field.name, PROTECTED);
+        // If primitive type, there MUST be a private field to track setting the field
+        if (field.type.isPrimitive()) {
+            builder.addField(FieldSpec
+              .builder(TypeName.BOOLEAN, BuildMethod.isSetFieldName(field))
+              .addModifiers(PRIVATE)
+              .initializer(CodeBlock.of("false"))
+              .build());
+        }
+        return builder;
+    }
+
+    private MethodSpec setterMethod(BuilderMemberSpec field) {
+        MethodSpec.Builder setter = MethodSpec
+          .methodBuilder(field.name)
+          .addModifiers(PUBLIC)
+          .returns(builderInterfaceName())
+          // If the type is a Reference to a Resource, the method should take an interface
+          .addParameter(field.interfaceType != null ? field.interfaceType : field.type, field.name)
+          // If the type is a Reference to a Resource, and not in AWS-SDK, we need to "wrap" it
+          .addStatement("this.$L = $L", field.name, field.wrapCall != null ? field.wrapCall : field.name);
+        if (field.type.isPrimitive()) {
+            // If primitive type, Setter MUST record that the field was set.
+            setter.addStatement(
+              "this.$L = true", BuildMethod.isSetFieldName(field));
+        }
+        return setter.addStatement("return this").build();
+    }
+
     /**
      * @param override If True, add Override annotation
      * @return Method that converts the class to an instance of it's Builder
      */
+    // TODO: We have removed all use of override=true,
+    //  and have no tests for it usage.
+    //  We SHOULD remove it entirely.
     public MethodSpec toBuilderMethod(boolean override) {
         MethodSpec.Builder method = MethodSpec
                 .methodBuilder("toBuilder")
@@ -241,8 +274,15 @@ public class BuilderSpecs {
                 .addParameter(className, "model");
         if (superName != null ) { modelConstructor.addStatement("super(model)"); }
         localFields.forEach(field ->
-                modelConstructor.addStatement(
-                        "this.$L = model.$L()", field.name, field.name)
+          {
+              modelConstructor.addStatement(
+                "this.$L = model.$L()", field.name, field.name);
+              if (field.type.isPrimitive()) {
+                  // If primitive type, MUST record that the field was set
+                  modelConstructor.addStatement(
+                    "this.$L = true", BuildMethod.isSetFieldName(field));
+              }
+          }
         );
         return modelConstructor.build();
     }
