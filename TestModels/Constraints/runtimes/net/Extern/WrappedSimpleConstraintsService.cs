@@ -2,7 +2,7 @@ using Wrappers_Compile;
 using Simple.Constraints;
 using Simple.Constraints.Wrapped;
 using TypeConversion = Simple.Constraints.TypeConversion ;
-namespace Dafny.Simple.Constraints.Wrapped
+namespace simple.constraints.internaldafny.wrapped
 {
     public partial class __default {
         public static _IResult<Types.ISimpleConstraintsClient, Types._IError> WrappedSimpleConstraints(Types._ISimpleConstraintsConfig config) {

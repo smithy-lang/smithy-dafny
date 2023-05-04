@@ -236,15 +236,6 @@ public record DafnyNameResolver(
         return dafnyBaseModuleName(namespace) + "Types";
     }
 
-    // i.e. "software.amazon.cryptography.materialproviders"
-    // TODO: Currently converts the smithy namespace into a Java idiomatic one.
-    public static String dafnyNamespace(final String namespace) {
-        final Stream<String> namespaceParts = Arrays
-          .stream(namespace.split("\\."))
-          .map(StringUtils::lowerCase);
-        return NamespaceHelper.standardize(Joiner.on('.').join(namespaceParts.iterator()));
-    }
-
     // i.e. "AwsCryptographyMaterialProviders"
     // This is used as a base to build various names for generated Dafny types.
     public static String dafnyBaseModuleName(final String namespace) {
@@ -274,13 +265,20 @@ public record DafnyNameResolver(
     }
 
     // i.e. "software.amazon.cryptography.materialproviders.internaldafny"
-    // The string used in {:extern} in the smithy->Dafny generated types file.
+    // The base namespace at which all smithy->Dafny->X generated code is built to,
+    // used in {:extern}.
+    // TODO: Currently converts the smithy namespace into a Java idiomatic one.
     public static String dafnyExternNamespace(final String namespace) {
-        return dafnyNamespace(namespace) + ".internaldafny";
+        final Stream<String> namespaceParts = Arrays
+          .stream(namespace.split("\\."))
+          .map(StringUtils::lowerCase);
+        final String baseNamespace = NamespaceHelper.standardize(Joiner.on('.').join(namespaceParts.iterator()));
+        return baseNamespace + ".internaldafny";
     }
 
     // i.e. "software.amazon.cryptography.materialproviders.internaldafny.types"
-    // The string used in {:extern} specifically in the Dafny types module.
+    // The namespace for all the smithy->Dafny->X generated types,
+    // i.e. the {:extern} for the Dafny Types module
     public static String dafnyTypesModuleExternNamespace(final String namespace) {
         return dafnyExternNamespace(namespace) + ".types";
     }

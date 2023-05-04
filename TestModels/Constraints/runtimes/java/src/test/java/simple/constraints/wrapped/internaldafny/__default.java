@@ -1,12 +1,12 @@
-package Dafny.Simple.Constraints.Wrapped;
+package simple.constraints.wrapped.internaldafny;
 
 import simple.constraints.SimpleConstraints;
 import simple.constraints.ToNative;
 import simple.constraints.wrapped.TestSimpleConstraints;
 
-import Dafny.Simple.Constraints.Types.ISimpleConstraintsClient;
-import Dafny.Simple.Constraints.Types.SimpleConstraintsConfig;
-import Dafny.Simple.Constraints.Types.Error;
+import simple.constraints.internaldafny.types.ISimpleConstraintsClient;
+import simple.constraints.internaldafny.types.SimpleConstraintsConfig;
+import simple.constraints.internaldafny.types.Error;
 import Wrappers_Compile.Result;
 
 public class __default extends _ExternBase___default {
