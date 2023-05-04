@@ -37,6 +37,9 @@ public class BuilderSpecs {
                 .collect(Collectors.toList());
     }
 
+    // TODO: We have removed all users of superName & superFields,
+    //  and have no tests for their usage.
+    //  We SHOULD remove them entirely.
     public BuilderSpecs(
             @Nonnull ClassName className,
             @Nullable ClassName superName,
@@ -137,6 +140,9 @@ public class BuilderSpecs {
      * @return The nested public class that implements the Builder Interface.
      */
     public TypeSpec builderImpl(
+      // TODO: We have removed all use of overrideSuper,
+      //  and have no tests for it usage.
+      //  We SHOULD remove it entirely.
             boolean overrideSuper,
             @Nullable MethodSpec modelConstructor,
             @Nonnull MethodSpec buildMethod
@@ -201,6 +207,9 @@ public class BuilderSpecs {
      * @param override If True, add Override annotation
      * @return Method that converts the class to an instance of it's Builder
      */
+    // TODO: We have removed all use of override=true,
+    //  and have no tests for it usage.
+    //  We SHOULD remove it entirely.
     public MethodSpec toBuilderMethod(boolean override) {
         MethodSpec.Builder method = MethodSpec
                 .methodBuilder("toBuilder")
