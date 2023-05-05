@@ -37,7 +37,7 @@ public class BuilderMemberSpec {
             new BuilderMemberSpec(
               TypeName.get(String.class),
               "message",
-              "The detail message. The detail message is saved for" +
+              "The detailed message. The detail message is saved for" +
                 " later retrieval by the {@link #getMessage()} method.");
     private final static BuilderMemberSpec _CAUSE =
             new BuilderMemberSpec(
