@@ -15,11 +15,13 @@ import software.amazon.polymorph.smithyjava.BuilderMemberSpec;
 import software.amazon.polymorph.smithyjava.BuilderSpecs;
 import software.amazon.polymorph.smithyjava.generator.library.JavaLibrary;
 import software.amazon.polymorph.smithyjava.unmodeled.ErrorHelpers;
+import software.amazon.polymorph.traits.JavaDocTrait;
 import software.amazon.smithy.model.shapes.StructureShape;
 
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PROTECTED;
+import static software.amazon.polymorph.smithyjava.modeled.ModeledStructure.getterMethod;
 
 public class ModeledError {
 
@@ -39,20 +41,15 @@ public class ModeledError {
                 .classBuilder(className)
                 .addModifiers(Modifier.PUBLIC)
                 .superclass(superName);
+        shape.getTrait(JavaDocTrait.class)
+          .map(docTrait -> spec.addJavadoc(docTrait.getValue()));
         localOnlyFields.forEach(field -> {
             // Add local fields
             spec.addField(field.toFieldSpec(PRIVATE, FINAL));});
         spec.addMethod(ErrorHelpers.messageFromBuilder(builderSpecs));
         // Add getter methods
         spec.addMethods(ErrorHelpers.throwableGetters());
-        localOnlyFields.forEach(field -> {
-            spec.addMethod(MethodSpec
-                    .methodBuilder(field.name)
-                    .addModifiers(Modifier.PUBLIC)
-                    .returns(field.type)
-                    .addStatement("return this.$L", field.name)
-                    .build());
-        });
+        localOnlyFields.forEach(field -> spec.addMethod(getterMethod(field)));
         spec
                 .addType(builderSpecs.builderInterface())
                 .addType(builderSpecs.builderImpl(

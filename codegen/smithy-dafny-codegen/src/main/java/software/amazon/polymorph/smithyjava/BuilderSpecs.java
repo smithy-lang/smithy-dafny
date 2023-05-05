@@ -78,12 +78,6 @@ public class BuilderSpecs {
     public ClassName builderImplName() { return builderImplName(className); }
 
     /**
-     * @return Get only the fields unique to the class, not those held by the super class.
-     */
-    @Nonnull
-    public List<BuilderMemberSpec> getLocalFields() { return this.localFields; }
-
-    /**
      * The Builder Interface defines the builder's
      * getter, setters, and build method.<p>
      * Note: The method that takes an instance of the class and
@@ -117,9 +111,7 @@ public class BuilderSpecs {
           .returns(field.type)
           .addModifiers(PUBLIC, ABSTRACT);
         if (Objects.nonNull(field.javaDoc)) {
-            method.addJavadoc(
-              "Get the $L parameter. See {@link $T#$L()}.",
-              field.name, className, field.name);
+            method.addJavadoc("@return $L", field.javaDoc);;
         }
         return method.build();
     }
@@ -133,8 +125,8 @@ public class BuilderSpecs {
           .addModifiers(ABSTRACT, PUBLIC);
         if (Objects.nonNull(field.javaDoc)) {
             method.addJavadoc(
-              "Set the $L parameter. See {@link $T#$L()}.",
-              field.name, className, field.name);
+              "Set the $L param.\n@param $L $L",
+              field.name, field.name, field.javaDoc);
         }
         return method.build();
     }
