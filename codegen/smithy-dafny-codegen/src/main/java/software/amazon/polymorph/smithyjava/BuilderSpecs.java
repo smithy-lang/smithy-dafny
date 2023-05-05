@@ -78,12 +78,6 @@ public class BuilderSpecs {
     public ClassName builderImplName() { return builderImplName(className); }
 
     /**
-     * @return Get only the fields unique to the class, not those held by the super class.
-     */
-    @Nonnull
-    public List<BuilderMemberSpec> getLocalFields() { return this.localFields; }
-
-    /**
      * The Builder Interface defines the builder's
      * getter, setters, and build method.<p>
      * Note: The method that takes an instance of the class and
@@ -100,30 +94,40 @@ public class BuilderSpecs {
             builder.addSuperinterface(builderInterfaceName(superName));
         }
         superFields.forEach(field ->
-                builder.addMethod(MethodSpec.methodBuilder(field.name)
-                        // If the type is a Reference to a Resource, the method should take an interface
-                        .addParameter(field.interfaceType != null? field.interfaceType : field.type, field.name)
-                        .returns(builderInterfaceName())
-                        .addModifiers(ABSTRACT, PUBLIC)
-                        .build())
+                builder.addMethod(interfaceSetter(field))
         );
         localFields.forEach(
                 field -> {
-                    builder.addMethod(
-                            MethodSpec.methodBuilder(field.name)
-                                    // If the type is a Reference to a Resource, the method should take an interface
-                                    .addParameter(field.interfaceType != null? field.interfaceType : field.type, field.name)
-                                    .returns(builderInterfaceName())
-                                    .addModifiers(PUBLIC, ABSTRACT)
-                                    .build());
-                    builder.addMethod(
-                            MethodSpec.methodBuilder(field.name)
-                                    .returns(field.type)
-                                    .addModifiers(PUBLIC, ABSTRACT)
-                                    .build());
+                    builder.addMethod(interfaceSetter(field));
+                    builder.addMethod(interfaceGetter(field));
                 });
         builder.addMethod(builderInterfaceBuildMethod());
         return builder.build();
+    }
+
+    @Nonnull
+    private MethodSpec interfaceGetter(BuilderMemberSpec field) {
+        MethodSpec.Builder method = MethodSpec.methodBuilder(field.name)
+          .returns(field.type)
+          .addModifiers(PUBLIC, ABSTRACT);
+        if (Objects.nonNull(field.javaDoc)) {
+            method.addJavadoc("@return $L", field.javaDoc);;
+        }
+        return method.build();
+    }
+
+    @Nonnull
+    private MethodSpec interfaceSetter(BuilderMemberSpec field) {
+        MethodSpec.Builder method = MethodSpec.methodBuilder(field.name)
+          // If the type is a Reference to a Resource, the method should take an interface
+          .addParameter(field.interfaceType != null ? field.interfaceType : field.type, field.name)
+          .returns(builderInterfaceName())
+          .addModifiers(ABSTRACT, PUBLIC);
+        if (Objects.nonNull(field.javaDoc)) {
+            method.addJavadoc(
+              "@param $L $L", field.name, field.javaDoc);
+        }
+        return method.build();
     }
 
     private MethodSpec builderInterfaceBuildMethod() {
