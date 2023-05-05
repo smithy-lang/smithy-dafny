@@ -30,9 +30,10 @@ public record OperationJavaDoc(
         // https://github.com/aws/aws-sdk-java-v2/blob/79b34ed72b2d39084e3c2b516d150f89b6bf39f8/codegen/src/main/java/software/amazon/awssdk/codegen/docs/DocumentationBuilder.java#L215
         StringBuilder str = new StringBuilder();
         if (StringUtils.isNotBlank(desc)) {
-            str.append(desc).append(LF).append(LF);
+            str.append(desc).append(LF);
         }
         if (Objects.nonNull(params)) {
+            str.append(LF);
             params.forEach(p -> p.apply((paramName, paramDoc) -> formatParam(str, paramName, paramDoc)));
         }
         if (StringUtils.isNotBlank(returns)) {
