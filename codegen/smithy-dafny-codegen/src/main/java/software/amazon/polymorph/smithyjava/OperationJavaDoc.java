@@ -26,6 +26,8 @@ public record OperationJavaDoc(
     static final String LF = System.lineSeparator();
 
     public String getDoc() {
+        // Note: this is largely copied from another AWS Product:
+        // https://github.com/aws/aws-sdk-java-v2/blob/79b34ed72b2d39084e3c2b516d150f89b6bf39f8/codegen/src/main/java/software/amazon/awssdk/codegen/docs/DocumentationBuilder.java#L215
         StringBuilder str = new StringBuilder();
         if (StringUtils.isNotBlank(desc)) {
             str.append(desc).append(LF).append(LF);
