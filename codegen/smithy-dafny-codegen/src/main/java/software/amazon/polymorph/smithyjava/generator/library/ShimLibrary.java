@@ -7,7 +7,9 @@ import com.squareup.javapoet.TypeName;
 
 import java.util.Optional;
 
+import software.amazon.awssdk.utils.StringUtils;
 import software.amazon.polymorph.smithyjava.MethodReference;
+import software.amazon.polymorph.smithyjava.OperationJavaDoc;
 import software.amazon.polymorph.smithyjava.generator.Generator;
 import software.amazon.polymorph.smithyjava.modeled.Operation;
 import software.amazon.polymorph.traits.JavaDocTrait;
@@ -68,8 +70,10 @@ public abstract class ShimLibrary extends Generator {
             TypeName outputType = methodSignatureTypeName(outputResolved);
             method.returns(outputType);
         }
-        Optional<JavaDocTrait> maybeJavaDoc = shape.getMemberTrait(subject.model, JavaDocTrait.class);
-        maybeJavaDoc.ifPresent(javaDoc -> method.addJavadoc(javaDoc.getValue()));
+        String maybeJavaDoc = OperationJavaDoc.fromOperationShape(subject.model, shape).getDoc();
+        if (StringUtils.isNotBlank(maybeJavaDoc)) {
+            method.addJavadoc(maybeJavaDoc);
+        }
         return new MethodSignature(method, inputResolved, outputResolved);
     }
 

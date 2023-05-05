@@ -1,0 +1,67 @@
+package software.amazon.polymorph.smithyjava;
+
+import java.util.List;
+import java.util.Objects;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
+import software.amazon.awssdk.utils.Pair;
+import software.amazon.awssdk.utils.StringUtils;
+import software.amazon.polymorph.traits.JavaDocTrait;
+import software.amazon.smithy.model.Model;
+import software.amazon.smithy.model.shapes.OperationShape;
+import software.amazon.smithy.model.traits.StringTrait;
+
+/**
+ * @param desc    JavaDoc Body content
+ * @param params  List of {@link Pair} of Strings which will get {@code @param}
+ * @param returns String which will get {@code @return}
+ */
+public record OperationJavaDoc(
+  @Nullable String desc,
+  @Nullable List<Pair<String, String>> params,
+  @Nullable String returns
+) {
+    static final String LF = System.lineSeparator();
+
+    public String getDoc() {
+        StringBuilder str = new StringBuilder();
+        if (StringUtils.isNotBlank(desc)) {
+            str.append(desc).append(LF).append(LF);
+        }
+        if (Objects.nonNull(params)) {
+            params.forEach(p -> p.apply((paramName, paramDoc) -> formatParam(str, paramName, paramDoc)));
+        }
+        if (StringUtils.isNotBlank(returns)) {
+            str.append("@return ").append(returns);
+        }
+        return str.append(LF).toString();
+    }
+
+    private StringBuilder formatParam(StringBuilder doc, String paramName, String paramDoc) {
+        if (StringUtils.isNotBlank(paramDoc)) {
+            return doc.append("@param ").append(paramName).append(" ").append(paramDoc).append(LF);
+        }
+        return doc;
+    }
+
+    public static OperationJavaDoc fromOperationShape(Model model, OperationShape shape) {
+        @Nullable String paramDoc = model
+          .expectShape(shape.getInputShape())
+          .getMemberTrait(model, JavaDocTrait.class)
+          .map(StringTrait::getValue).orElse(null);
+        @Nonnull String paramName = shape.getInputShape().getName();
+        @Nullable String returns = model
+          .expectShape(shape.getOutputShape())
+          .getMemberTrait(model, JavaDocTrait.class)
+          .map(StringTrait::getValue).orElse(null);
+        @Nullable String desc = shape
+          .getTrait(JavaDocTrait.class)
+          .map(StringTrait::getValue).orElse(null);
+        List<Pair<String, String>> params = StringUtils.isNotBlank(paramDoc) ?
+          List.of(Pair.of(paramName, paramDoc))
+          : null;
+        return new OperationJavaDoc(desc, params, returns);
+    }
+}

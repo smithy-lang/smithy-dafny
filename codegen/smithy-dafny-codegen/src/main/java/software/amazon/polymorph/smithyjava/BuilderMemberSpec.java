@@ -37,13 +37,13 @@ public class BuilderMemberSpec {
             new BuilderMemberSpec(
               TypeName.get(String.class),
               "message",
-              "the detail message. The detail message is saved for" +
+              "The detail message. The detail message is saved for" +
                 " later retrieval by the {@link #getMessage()} method.");
     private final static BuilderMemberSpec _CAUSE =
             new BuilderMemberSpec(
               TypeName.get(Throwable.class),
               "cause",
-              "the cause (which is saved for later retrieval by the" +
+              "The cause (which is saved for later retrieval by the" +
                 " {@link #getCause()} method). (A {@code null} value is" +
                 " permitted, and indicates that the cause is nonexistent or" +
                 " unknown.)");
@@ -61,7 +61,7 @@ public class BuilderMemberSpec {
             new BuilderMemberSpec(
               CollectionOfErrors.exceptionList(),
               "list",
-              "the list of Exceptions encountered.")
+              "The list of Exceptions encountered.")
     );
 
     @Nonnull public final TypeName type;

@@ -125,8 +125,7 @@ public class BuilderSpecs {
           .addModifiers(ABSTRACT, PUBLIC);
         if (Objects.nonNull(field.javaDoc)) {
             method.addJavadoc(
-              "Set the $L param.\n@param $L $L",
-              field.name, field.name, field.javaDoc);
+              "@param $L $L", field.name, field.javaDoc);
         }
         return method.build();
     }
