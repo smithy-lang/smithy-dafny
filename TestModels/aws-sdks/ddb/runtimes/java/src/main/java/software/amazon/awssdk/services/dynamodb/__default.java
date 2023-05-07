@@ -1,9 +1,9 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
-package Dafny.Com.Amazonaws.Dynamodb;
+package software.amazon.awssdk.services.dynamodb.internaldafny;
 
-import Dafny.Com.Amazonaws.Dynamodb.Types.IDynamoDBClient;
-import Dafny.Com.Amazonaws.Dynamodb.Types.Error;
+import software.amazon.awssdk.services.dynamodb.internaldafny.types.IDynamoDBClient;
+import software.amazon.awssdk.services.dynamodb.internaldafny.types.Error;
 import Wrappers_Compile.Option;
 import Wrappers_Compile.Result;
 import software.amazon.awssdk.auth.credentials.ProfileCredentialsProvider;
@@ -16,7 +16,7 @@ import dafny.DafnySequence;
 import static software.amazon.dafny.conversion.ToDafny.Simple.CharacterSequence;
 import static software.amazon.dafny.conversion.ToNative.Simple.String;
 
-public class __default extends Dafny.Com.Amazonaws.Dynamodb._ExternBase___default{
+public class __default extends software.amazon.awssdk.services.dynamodb.internaldafny._ExternBase___default{
     public static Result<IDynamoDBClient, Error> DynamoDBClient() {
         try {
             Region region = new DefaultAwsRegionProviderChain().getRegion();

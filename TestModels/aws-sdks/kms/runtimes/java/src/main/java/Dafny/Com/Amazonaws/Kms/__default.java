@@ -1,7 +1,7 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 // Extern code for AWS SDK for Java V2
-package Dafny.Com.Amazonaws.Kms;
+package software.amazon.awssdk.services.kms.internaldafny;
 
 import dafny.DafnySequence;
 import software.amazon.awssdk.regions.Region;
@@ -10,15 +10,15 @@ import software.amazon.awssdk.regions.providers.DefaultAwsRegionProviderChain;
 import software.amazon.awssdk.services.kms.KmsClient;
 import software.amazon.awssdk.services.kms.KmsClientBuilder;
 
-import Dafny.Com.Amazonaws.Kms.Types.Error;
-import Dafny.Com.Amazonaws.Kms.Types.IKMSClient;
+import software.amazon.awssdk.services.kms.internaldafny.types.Error;
+import software.amazon.awssdk.services.kms.internaldafny.types.IKMSClient;
 import Wrappers_Compile.Option;
 import Wrappers_Compile.Result;
 
 import static software.amazon.dafny.conversion.ToDafny.Simple.CharacterSequence;
 import static software.amazon.dafny.conversion.ToNative.Simple.String;
 
-public class __default extends Dafny.Com.Amazonaws.Kms._ExternBase___default{
+public class __default extends software.amazon.awssdk.services.kms.internaldafny._ExternBase___default{
     public static Result<IKMSClient, Error> KMSClient() {
         try {
             KmsClientBuilder builder = KmsClient.builder();

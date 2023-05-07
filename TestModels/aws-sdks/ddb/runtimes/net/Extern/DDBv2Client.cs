@@ -6,7 +6,7 @@ using Com.Amazonaws.Dynamodb;
 
 // This extern is identified in Dafny code
 // that refines the AWS SDK DDB Model
-namespace Dafny.Com.Amazonaws.Dynamodb
+namespace software.amazon.awssdk.services.dynamodb.internaldafny
 {
   public partial class __default
   {
