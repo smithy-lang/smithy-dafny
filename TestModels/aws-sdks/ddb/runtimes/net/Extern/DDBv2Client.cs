@@ -12,16 +12,16 @@ namespace software.amazon.awssdk.services.dynamodb.internaldafny
   {
     public static
         _IResult<
-            Types.IDynamoDBClient,
-            Types._IError
+            types.IDynamoDBClient,
+            types._IError
         >
         DynamoDBClient()
     {
       var client = new AmazonDynamoDBClient();
 
       return Result<
-              Types.IDynamoDBClient,
-              Types._IError
+              types.IDynamoDBClient,
+              types._IError
           >
           .create_Success(new DynamoDBv2Shim(client));
     }
