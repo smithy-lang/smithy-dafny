@@ -13,16 +13,16 @@ namespace software.amazon.awssdk.services.sqs.internaldafny
     
     public static
       _IResult<
-        Types.ISQSClient,
-        Types._IError
+        types.ISQSClient,
+        types._IError
       >
       SQSClient()
     {
       var client = new AmazonSQSClient();
 
       return Result<
-        Types.ISQSClient,
-        Types._IError
+        types.ISQSClient,
+        types._IError
       >
         .create_Success(new SQSShim(client));
     }
