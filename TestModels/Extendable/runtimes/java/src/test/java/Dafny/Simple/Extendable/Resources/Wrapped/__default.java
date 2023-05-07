@@ -1,18 +1,18 @@
-package Dafny.Simple.Extendable.Resources.Wrapped;
+package simple.extendable.internaldafny.wrapped;
 
 import simple.extendable.resources.SimpleExtendableResources;
 import simple.extendable.resources.ToNative;
 import simple.extendable.resources.wrapped.TestSimpleExtendableResources;
 
-import Dafny.Simple.Extendable.Resources.Types.IExtendableResource;
-import Dafny.Simple.Extendable.Resources.Types.ISimpleExtendableResourcesClient;
-import Dafny.Simple.Extendable.Resources.Types.Error;
+import simple.extendable.resources.internaldafny.types.IExtendableResource;
+import simple.extendable.resources.internaldafny.types.ISimpleExtendableResourcesClient;
+import simple.extendable.resources.internaldafny.types.Error;
 
-import Dafny.Simple.Extendable.Resources.Types.SimpleExtendableResourcesConfig;
-import Simple.Extendable.Resources.NativeResource;
+import simple.extendable.resources.internaldafny.types.SimpleExtendableResourcesConfig;
+import simple.extendable.resources.NativeResource;
 import Wrappers_Compile.Result;
 
-import static Dafny.Simple.Extendable.Resources.NativeResourceFactory.__default.DafnyFactory;
+import static simple.extendable.internaldafny.nativeresourcefactory.__default.DafnyFactory;
 
 public class __default extends _ExternBase___default {
     public static Result<ISimpleExtendableResourcesClient, Error> WrappedSimpleExtendableResources(SimpleExtendableResourcesConfig config) {

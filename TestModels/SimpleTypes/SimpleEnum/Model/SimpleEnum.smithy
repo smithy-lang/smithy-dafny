@@ -1,4 +1,4 @@
-namespace simple.types.enum
+namespace simple.types.smithyEnum
 
 @aws.polymorph#localService(
   sdkId: "SimpleEnum",

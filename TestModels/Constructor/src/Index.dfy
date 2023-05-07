@@ -1,6 +1,6 @@
 include "SimpleConstructorImpl.dfy"
 
-module {:extern "Dafny.Simple.Constructor" } SimpleConstructor refines AbstractSimpleConstructorService {
+module {:extern "simple.constructor.internaldafny" } SimpleConstructor refines AbstractSimpleConstructorService {
     import Operations = SimpleConstructorImpl
 
     function method DefaultSimpleConstructorConfig(): SimpleConstructorConfig {

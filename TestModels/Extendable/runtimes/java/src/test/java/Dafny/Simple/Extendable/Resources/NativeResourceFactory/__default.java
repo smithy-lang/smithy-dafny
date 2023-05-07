@@ -1,9 +1,9 @@
-package Dafny.Simple.Extendable.Resources.NativeResourceFactory;
+package simple.extendable.internaldafny.nativeresourcefactory;
 
 import simple.extendable.resources.ToDafny;
 
-import Dafny.Simple.Extendable.Resources.Types.IExtendableResource;
-import Simple.Extendable.Resources.NativeResource;
+import simple.extendable.resources.internaldafny.types.IExtendableResource;
+import simple.extendable.resources.NativeResource;
 
 public class __default {
     public static IExtendableResource DafnyFactory() {

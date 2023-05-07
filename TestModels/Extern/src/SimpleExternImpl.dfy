@@ -1,7 +1,7 @@
-include "../Model/SimpleExternTypes.dfy"
+include "../Model/SimpleDafnyExternTypes.dfy"
 include "ExternConstructor.dfy"
 
-module SimpleExternImpl refines AbstractSimpleExternOperations  {
+module SimpleExternImpl refines AbstractSimpleDafnyExternOperations  {
     import opened ExternConstructor
     datatype Config = Config
     type InternalConfig = Config

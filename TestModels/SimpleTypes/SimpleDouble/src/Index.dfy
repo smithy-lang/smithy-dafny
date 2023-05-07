@@ -1,11 +1,11 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-include "../Model/SimpleTypesDoubleTypes.dfy"
-include "./SimpleDoubleOperations.dfy"
+include "../Model/SimpleTypesSmithyDoubleTypes.dfy"
+include "./SimpleSmithyDoubleOperations.dfy"
 
-module {:extern "Dafny.Simple.Types.Double" } SimpleDouble refines AbstractSimpleTypesDoubleService {
- import Operations = SimpleDoubleOperations
+module {:extern "simple.types.smithydouble.internaldafny" } SimpleDouble refines AbstractSimpleTypesSmithyDoubleService {
+ import Operations = SimpleSmithyDoubleOperations
 
  function method DefaultSimpleDoubleConfig(): SimpleDoubleConfig {
     SimpleDoubleConfig

@@ -4,7 +4,7 @@ module  SimpleLongImplTest {
     import SimpleLong
     import SimpleLongImpl
     import opened StandardLibrary.UInt
-    import opened SimpleTypesLongTypes
+    import opened SimpleTypesSmithyLongTypes
     import opened Wrappers
     method{:test} GetLong(){
         var client :- expect SimpleLong.SimpleLong();

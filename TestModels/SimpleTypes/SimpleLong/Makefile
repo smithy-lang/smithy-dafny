@@ -5,7 +5,7 @@ CORES=2
 
 include ../../SharedMakefile.mk
 
-NAMESPACE=simple.types.long
+NAMESPACE=simple.types.smithyLong
 
 # This project has no dependencies 
 # DEPENDENT-MODELS:= 
