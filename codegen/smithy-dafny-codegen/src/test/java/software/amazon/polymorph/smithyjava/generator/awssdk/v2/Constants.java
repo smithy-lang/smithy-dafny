@@ -35,16 +35,16 @@ public class Constants {
     static String MockKmsShim = """
             package software.amazon.awssdk.services.kms.internaldafny;
             
-            import software.amazon.awssdk.services.kms.internaldafny.types.DoSomethingRequest;
-            import software.amazon.awssdk.services.kms.internaldafny.types.DoSomethingResponse;
-            import software.amazon.awssdk.services.kms.internaldafny.types.DoVoidRequest;
-            import software.amazon.awssdk.services.kms.internaldafny.types.Error;
-            import software.amazon.awssdk.services.kms.internaldafny.types.IKeyManagementServiceClient;
             import Wrappers_Compile.Result;
             import dafny.Tuple0;
             import java.lang.Override;
             import java.lang.String;
             import software.amazon.awssdk.services.kms.KmsClient;
+            import software.amazon.awssdk.services.kms.internaldafny.types.DoSomethingRequest;
+            import software.amazon.awssdk.services.kms.internaldafny.types.DoSomethingResponse;
+            import software.amazon.awssdk.services.kms.internaldafny.types.DoVoidRequest;
+            import software.amazon.awssdk.services.kms.internaldafny.types.Error;
+            import software.amazon.awssdk.services.kms.internaldafny.types.IKeyManagementServiceClient;
             import software.amazon.awssdk.services.kms.model.DependencyTimeoutException;
             import software.amazon.awssdk.services.kms.model.KmsException;            
             

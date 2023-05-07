@@ -53,7 +53,7 @@ public class AwsSdkShimCodegenTest {
                 using System.Collections.Generic;
                 
                 namespace Com.Amazonaws.Foobar {
-                    public class FoobarServiceShim : Dafny.Com.Amazonaws.Foobar.Types.IFoobarServiceClient {
+                    public class FoobarServiceShim : software.amazon.awssdk.services.foobar.internaldafny.types.IFoobarServiceClient {
                         public Amazon.FoobarService.AmazonFoobarServiceClient _impl;
                         
                         public FoobarServiceShim(Amazon.FoobarService.AmazonFoobarServiceClient impl) {
@@ -95,7 +95,7 @@ public class AwsSdkShimCodegenTest {
         final String expectedOutputOperationShim = codegen.generateOperationShim(outputOperation).toString();
         final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
                 namespace Com.Amazonaws.Foobar {
-                    public class FoobarServiceShim : Dafny.Com.Amazonaws.Foobar.Types.IFoobarServiceClient {
+                    public class FoobarServiceShim : software.amazon.awssdk.services.foobar.internaldafny.types.IFoobarServiceClient {
                         public Amazon.FoobarService.AmazonFoobarServiceClient _impl;
                         %s
                         %s
@@ -134,13 +134,13 @@ public class AwsSdkShimCodegenTest {
                 codegen.generateOperationShim(operationShapeId).toString());
 
         final String resultTypeParams = "%s, %s".formatted(
-                "Dafny.Com.Amazonaws.Foobar.Types._IGoResponse", "Dafny.Com.Amazonaws.Foobar.Types._IError");
+                "software.amazon.awssdk.services.foobar.internaldafny.types._IGoResponse", "software.amazon.awssdk.services.foobar.internaldafny.types._IError");
         final String requestFromDafnyConverter =
                 AwsSdkDotNetNameResolver.qualifiedTypeConverter(requestShapeId, FROM_DAFNY);
         final String responseToDafnyConverter =
                 AwsSdkDotNetNameResolver.qualifiedTypeConverter(responseShapeId, TO_DAFNY);
         final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
-                public Wrappers_Compile._IResult<%1$s> Go(Dafny.Com.Amazonaws.Foobar.Types._IGoRequest request) {
+                public Wrappers_Compile._IResult<%1$s> Go(software.amazon.awssdk.services.foobar.internaldafny.types._IGoRequest request) {
                     Amazon.FoobarService.Model.GoRequest sdkRequest = %2$s(request);
                     try {
                         Amazon.FoobarService.Model.GoResponse sdkResponse =

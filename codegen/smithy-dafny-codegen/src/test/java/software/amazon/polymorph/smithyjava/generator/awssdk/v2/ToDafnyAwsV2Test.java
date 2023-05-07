@@ -55,6 +55,7 @@ public class ToDafnyAwsV2Test {
         // case LIST of Structures from other AWS SDK namespace
         ShapeId listStructureId = ShapeId.fromParts("com.amazonaws.kms", "OtherNamespaces");
         String actualListOther = underTest.generateConvert(listStructureId).toString();
+        System.out.println(actualListOther);
         tokenizeAndAssertEqual(ToDafnyAwsV2Constants.GENERATE_CONVERT_LIST_STRUCTURES, actualListOther);
         // case MAP
         ShapeId mapId = ShapeId.fromParts("com.amazonaws.kms", "EncryptionContextType");
@@ -80,7 +81,7 @@ public class ToDafnyAwsV2Test {
         Model localModel = TestSetupUtils.setupLocalModel(ModelConstants.KMS_A_STRING_OPERATION);
         ToDafnyAwsV2 localUnderTest = new ToDafnyAwsV2(TestSetupUtils.setupAwsSdkV2(localModel, "kms"));
         final Map<Path, TokenTree> actual = localUnderTest.generate();
-        final Path expectedPath = Path.of("Dafny/Com/Amazonaws/Kms/ToDafny.java");
+        final Path expectedPath = Path.of("software/amazon/awssdk/services/kms/internaldafny/ToDafny.java");
         Path[] temp = new Path[1];
         final Path actualPath = actual.keySet().toArray(temp)[0];
         assertEquals(expectedPath, actualPath);

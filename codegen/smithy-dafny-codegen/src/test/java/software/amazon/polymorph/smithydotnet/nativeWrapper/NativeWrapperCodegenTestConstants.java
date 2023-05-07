@@ -22,7 +22,7 @@ class NativeWrapperCodegenTestConstants {
                     catch (Exception e)
                     {
                         return Wrappers_Compile
-                            .Result<%s, Dafny.Test.Foobar.Types._IError>
+                            .Result<%s, test.foobar.internaldafny.types._IError>
                             .create_Failure(TypeConversion.ToDafny_CommonError(e));
                     }
                     """; // Format: method name
@@ -31,7 +31,7 @@ class NativeWrapperCodegenTestConstants {
             """
                     public Wrappers_Compile._IResult<
                         %s,
-                        Dafny.Test.Foobar.Types._IError
+                        test.foobar.internaldafny.types._IError
                     > DoSomethingWithOutput()
                     {
                         %s
@@ -44,7 +44,7 @@ class NativeWrapperCodegenTestConstants {
                             %s
                             return Wrappers_Compile.Result<
                                 %s,
-                                Dafny.Test.Foobar.Types._IError
+                                test.foobar.internaldafny.types._IError
                             >.create_Success(
                                 TypeConversion.%s(
                                     nativeOutput)
@@ -53,7 +53,7 @@ class NativeWrapperCodegenTestConstants {
                         %s
                     }
                     
-                    public Wrappers_Compile._IResult<%s, Dafny.Test.Foobar.Types._IError>
+                    public Wrappers_Compile._IResult<%s, test.foobar.internaldafny.types._IError>
                         DoSomethingWithOutput_k()
                     {
                         throw new FoobarServiceException("Not supported at this time.");
@@ -81,7 +81,7 @@ class NativeWrapperCodegenTestConstants {
     }
 
     static String DO_OUTPUT_POSITIONAL = getOutput(
-            "Dafny.Test.Foobar.Types.IThing", // abstract output or interface
+            "test.foobar.internaldafny.types.IThing", // abstract output or interface
             "", // validateOutput method
             "Test.Foobar.IThing", // type of native output
             "", // validate native output
@@ -90,7 +90,7 @@ class NativeWrapperCodegenTestConstants {
     );
 
     static String DO_OUTPUT_NOT_POSITIONAL = getOutput(
-            "Dafny.Test.Foobar.Types._IDoSomethingOutput",
+            "test.foobar.internaldafny.types._IDoSomethingOutput",
             VALIDATE_NATIVE_OUTPUT.formatted("Test.Foobar.DoSomethingOutput", "DoSomethingWithOutput"),
             "Test.Foobar.DoSomethingOutput",
             "validateOutput(nativeOutput);",
@@ -102,8 +102,8 @@ class NativeWrapperCodegenTestConstants {
             """
                     public Wrappers_Compile._IResult<
                         _System._ITuple0,
-                        Dafny.Test.Foobar.Types._IError
-                    > DoSomethingWithInput(Dafny.Test.Foobar.Types._IDoSomethingInput input)
+                        test.foobar.internaldafny.types._IError
+                    > DoSomethingWithInput(test.foobar.internaldafny.types._IDoSomethingInput input)
                     {
                         Test.Foobar.DoSomethingInput nativeInput =
                             TypeConversion.FromDafny_N4_test__N6_foobar__S16_DoSomethingInput(
@@ -113,12 +113,12 @@ class NativeWrapperCodegenTestConstants {
                             _impl.DoSomethingWithInput(nativeInput);
                             return Wrappers_Compile.Result<
                                 _System._ITuple0,
-                                Dafny.Test.Foobar.Types._IError
+                                test.foobar.internaldafny.types._IError
                             >.create_Success(Tuple0.create());
                         }
                         %s
                     }
-                    public Wrappers_Compile._IResult<_System._ITuple0, Dafny.Test.Foobar.Types._IError> DoSomethingWithInput_k(Dafny.Test.Foobar.Types._IDoSomethingInput input)
+                    public Wrappers_Compile._IResult<_System._ITuple0, test.foobar.internaldafny.types._IError> DoSomethingWithInput_k(test.foobar.internaldafny.types._IDoSomethingInput input)
                     {
                         throw new FoobarServiceException("Not supported at this time.");
                     }
@@ -128,7 +128,7 @@ class NativeWrapperCodegenTestConstants {
             """
                     public Wrappers_Compile._IResult<
                         _System._ITuple0,
-                        Dafny.Test.Foobar.Types._IError
+                        test.foobar.internaldafny.types._IError
                     > Do()
                     {
                         try
@@ -136,13 +136,13 @@ class NativeWrapperCodegenTestConstants {
                             _impl.Do();
                             return Wrappers_Compile.Result<
                                 _System._ITuple0,
-                                Dafny.Test.Foobar.Types._IError
+                                test.foobar.internaldafny.types._IError
                             >.create_Success(Tuple0.create());
                         }
                         %s
                     }
                     
-                    public Wrappers_Compile._IResult<_System._ITuple0, Dafny.Test.Foobar.Types._IError> Do_k()
+                    public Wrappers_Compile._IResult<_System._ITuple0, test.foobar.internaldafny.types._IError> Do_k()
                     {
                         throw new FoobarServiceException("Not supported at this time.");
                     }
@@ -161,7 +161,7 @@ class NativeWrapperCodegenTestConstants {
                 """
                         namespace Test.Foobar
                         {
-                            internal class NativeWrapper_Baz : Dafny.Test.Foobar.Types.IBaz
+                            internal class NativeWrapper_Baz : test.foobar.internaldafny.types.IBaz
                             {
                                 internal readonly BazBase _impl;
                                     

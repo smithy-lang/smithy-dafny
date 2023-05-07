@@ -1,4 +1,4 @@
-package simple.extendable.internaldafny.nativeresourcefactory;
+package simple.extendable.resources.internaldafny.nativeresourcefactory;
 
 import simple.extendable.resources.ToDafny;
 

@@ -1,4 +1,4 @@
-package simple.extendable.internaldafny.wrapped;
+package simple.extendable.resources.internaldafny.wrapped;
 
 import simple.extendable.resources.SimpleExtendableResources;
 import simple.extendable.resources.ToNative;
@@ -12,7 +12,7 @@ import simple.extendable.resources.internaldafny.types.SimpleExtendableResources
 import simple.extendable.resources.NativeResource;
 import Wrappers_Compile.Result;
 
-import static simple.extendable.internaldafny.nativeresourcefactory.__default.DafnyFactory;
+import static simple.extendable.resources.internaldafny.nativeresourcefactory.__default.DafnyFactory;
 
 public class __default extends _ExternBase___default {
     public static Result<ISimpleExtendableResourcesClient, Error> WrappedSimpleExtendableResources(SimpleExtendableResourcesConfig config) {

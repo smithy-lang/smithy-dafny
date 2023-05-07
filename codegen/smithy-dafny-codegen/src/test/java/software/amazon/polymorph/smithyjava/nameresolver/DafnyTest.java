@@ -149,7 +149,7 @@ public class DafnyTest {
 
     @Test
     public void typeForShapeStructure() {
-        final String expected = "Dafny.Smithy.Example.Types.MyStructure";
+        final String expected = "smithy.example.internaldafny.types.MyStructure";
         TypeName actual = underTest.typeForShape(ShapeId.fromParts("smithy.example", "MyStructure"));
         final String actualString = actual.toString();
         assertEquals(expected, actualString);
@@ -157,7 +157,7 @@ public class DafnyTest {
 
     @Test
     public void typeForShapeService() {
-        final String expected = "Dafny.Smithy.Example.Types.IExampleClient";
+        final String expected = "smithy.example.internaldafny.types.IExampleClient";
         TypeName actual = underTest.typeForShape(ShapeId.fromParts("smithy.example", "Example"));
         final String actualString = actual.toString();
         assertEquals(expected, actualString);
@@ -165,7 +165,7 @@ public class DafnyTest {
 
     @Test
     public void typeForShapeResource() {
-        final String expected = "Dafny.Smithy.Example.Types.IMyResource";
+        final String expected = "smithy.example.internaldafny.types.IMyResource";
         TypeName actual = underTest.typeForShape(ShapeId.fromParts("smithy.example", "MyResource"));
         final String actualString = actual.toString();
         assertEquals(expected, actualString);
