@@ -13,8 +13,8 @@ namespace software.amazon.awssdk.services.kms.internaldafny
     
     public static
       _IResult<
-        Types.IKMSClient,
-        Types._IError
+        types.IKMSClient,
+        types._IError
       >
       KMSClient()
     {
@@ -23,8 +23,8 @@ namespace software.amazon.awssdk.services.kms.internaldafny
       var client = new AmazonKeyManagementServiceClient();
 
       return Result<
-        Types.IKMSClient,
-        Types._IError
+        types.IKMSClient,
+        types._IError
       >
         .create_Success(new KeyManagementServiceShim(client));
     }
