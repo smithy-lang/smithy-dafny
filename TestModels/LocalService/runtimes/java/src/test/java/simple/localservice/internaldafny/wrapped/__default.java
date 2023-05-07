@@ -1,9 +1,9 @@
 package simple.localservice.internaldafny.wrapped;
 
-import simple.localService.SimpleLocalService;
-import simple.localService.ToDafny;
-import simple.localService.ToNative;
-import simple.localService.wrapped.TestSimpleLocalService;
+import simple.localservice.SimpleLocalService;
+import simple.localservice.ToDafny;
+import simple.localservice.ToNative;
+import simple.localservice.wrapped.TestSimpleLocalService;
 
 import simple.localservice.internaldafny.types.ISimpleLocalServiceClient;
 import simple.localservice.internaldafny.types.SimpleLocalServiceConfig;
@@ -12,8 +12,8 @@ import Wrappers_Compile.Result;
 
 public class __default extends _ExternBase___default {
     public static Result<ISimpleLocalServiceClient, Error> WrappedSimpleLocalService(SimpleLocalServiceConfig config) {
-        simple.localService.model.SimpleLocalServiceConfig wrappedConfig = ToNative.SimpleLocalServiceConfig(config);
-        simple.localService.SimpleLocalService impl = SimpleLocalService.builder().SimpleLocalServiceConfig(wrappedConfig).build();
+        simple.localservice.model.SimpleLocalServiceConfig wrappedConfig = ToNative.SimpleLocalServiceConfig(config);
+        simple.localservice.SimpleLocalService impl = SimpleLocalService.builder().SimpleLocalServiceConfig(wrappedConfig).build();
         TestToNativeAndToDafnyLocalService(impl);
         TestSimpleLocalService wrappedClient = TestSimpleLocalService.builder().impl(impl).build();
         return Result.create_Success(wrappedClient);
@@ -27,6 +27,6 @@ public class __default extends _ExternBase___default {
     public static void TestToNativeAndToDafnyLocalService(SimpleLocalService nativeValue) {
         simple.localservice.internaldafny.types.ISimpleLocalServiceClient dafnyValue = ToDafny.SimpleLocalService(nativeValue);
         //noinspection unused
-        simple.localService.SimpleLocalService recreateNativeValue = ToNative.SimpleLocalService(dafnyValue);
+        simple.localservice.SimpleLocalService recreateNativeValue = ToNative.SimpleLocalService(dafnyValue);
     }
 }

@@ -5,7 +5,7 @@ CORES=2
 
 include ../SharedMakefile.mk
 
-NAMESPACE=simple.localService
+NAMESPACE=simple.localservice
 
 # This project has no dependencies 
 # DEPENDENT-MODELS:= 
