@@ -22,7 +22,6 @@ import software.amazon.polymorph.smithyjava.generator.CodegenSubject;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.polymorph.utils.AwsSdkNameResolverHelpers;
-import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.polymorph.smithydafny.DafnyNameResolver;
 import software.amazon.polymorph.smithyjava.unmodeled.OpaqueError;
@@ -262,7 +261,7 @@ public class Native extends NameResolver{
                     ("ServiceShape for local-service-test MUST have LocalTrait." +
                             " ShapeId: %s").formatted(shape.toShapeId()));
         }
-        final String namespace = DafnyNameResolverHelpers.packageNameForNamespace(shape.getId().getNamespace()) + ".wrapped";
+        final String namespace = NamespaceHelper.standardize(shape.getId().getNamespace()) + ".wrapped";
         return ClassName.get(
                 namespace,
                 "Test" + capitalize(maybeTrait.get().getSdkId()));

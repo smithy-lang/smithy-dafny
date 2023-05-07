@@ -269,11 +269,7 @@ public record DafnyNameResolver(
     // used in {:extern}.
     // TODO: Currently converts the smithy namespace into a Java idiomatic one.
     public static String dafnyExternNamespace(final String namespace) {
-        final Stream<String> namespaceParts = Arrays
-          .stream(namespace.split("\\."))
-          .map(StringUtils::lowerCase);
-        final String baseNamespace = NamespaceHelper.standardize(Joiner.on('.').join(namespaceParts.iterator()));
-        return baseNamespace + ".internaldafny";
+        return NamespaceHelper.standardize(namespace) + ".internaldafny";
     }
 
     // i.e. "software.amazon.cryptography.materialproviders.internaldafny.types"
