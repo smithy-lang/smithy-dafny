@@ -30,16 +30,29 @@ import dafny.TypeDescriptor;
 public class ToDafny {
 
     /**
-     * Methods that convert from a Native Java type
+     * Methods that convert from a Native (idiomatic) Java type
      * to a Dafny Java type,
      * for Smithy's definition of Simple shapes.
+     * @see <a href="https://smithy.io/2.0/spec/simple-types.html#simple-types">Smithy Simple Types</a>.
      */
     public static class Simple {
+        /**
+         * @param blob The idiomatic Java type for a blob can be an array of bytes.
+         * @return The Dafny-Java type for a blob is a Dafny Sequence of Bytes.
+         */
         // BLOB("blob", BlobShape.class, Category.SIMPLE),
-        public static DafnySequence<Byte> ByteSequence(byte[] byteArray) {
-            return DafnySequence.fromArray(TypeDescriptor.BYTE, Array.wrap(byteArray));
+        public static DafnySequence<Byte> ByteSequence(byte[] blob) {
+            return DafnySequence.fromArray(TypeDescriptor.BYTE, Array.wrap(blob));
         }
 
+        /**
+         * Copy {@code limit} bytes from {@code byteBuffer} starting at {@code start},
+         * and return them as a Dafny-Java ByteSequence.
+         * @param byteBuffer The idiomatic Java type for a blob can be a ByteBuffer.
+         * @param start The index in the byteBuffer from which to start at.
+         * @param limit The number of bytes to copy.
+         * @return A DafnySequence of Bytes, containing the copied bytes.
+         */
         // BLOB("blob", BlobShape.class, Category.SIMPLE),
         public static DafnySequence<Byte> ByteSequence(
                 final ByteBuffer byteBuffer,
@@ -51,11 +64,26 @@ public class ToDafny {
             return ByteSequence(rawArray);
         }
 
+        /**
+         * A convenience function for converting all the bytes from a ByteBuffer.
+         * Note: Regardless of the buffer's mark, position, or capacity,
+         * this will return the bytes from 0 till limit.
+         *
+         * @param byteBuffer The idiomatic Java type for a blob can be a ByteBuffer.
+         * @return A DafnySequence of Bytes,
+         * containing the bytes in the {@code byteBuffer},
+         * starting from 0 until the buffer's limit.
+         */
         // BLOB("blob", BlobShape.class, Category.SIMPLE),
         public static DafnySequence<Byte> ByteSequence(ByteBuffer byteBuffer) {
             return ByteSequence(byteBuffer, 0, byteBuffer.limit());
         }
 
+        /**
+         * @param aDouble The idiomatic Java type for a double can be a Double.
+         * @return A DafnySequence of Bytes containing the serialization of the {@code aDouble}.
+         * Note: This serialization is NOT guaranteed to be consistent among different distributions.
+         */
         // DOUBLE("double", DoubleShape.class, Category.SIMPLE),
         public static DafnySequence<Byte> Double(Double aDouble) {
             ByteBuffer doubleBytes = ByteBuffer.allocate(8).putDouble(aDouble);
