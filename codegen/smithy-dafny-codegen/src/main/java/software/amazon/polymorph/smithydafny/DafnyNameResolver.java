@@ -230,14 +230,16 @@ public record DafnyNameResolver(
         return "IsValid_%s".formatted(unqualifiedTypeName);
     }
 
+    //TODO: Figure which of these public static string methods should go to DafnyNameResolverHelpers
+
     // i.e. "AwsCryptographyMaterialProvidersTypes"
-    // This the Dafny module name for the smithy->Dafny types file.
+    // This is the Dafny module name for the smithy->Dafny types file.
     public static String dafnyTypesModuleName(final String namespace) {
         return dafnyBaseModuleName(namespace) + "Types";
     }
 
     // i.e. "AwsCryptographyMaterialProviders"
-    // This is used as a base to build various names for generated Dafny types.
+    // This is used as a base to build various names for generated Dafny types and traits.
     public static String dafnyBaseModuleName(final String namespace) {
         final Stream<String> namespaceParts = Arrays
           .stream(namespace.split("\\."))

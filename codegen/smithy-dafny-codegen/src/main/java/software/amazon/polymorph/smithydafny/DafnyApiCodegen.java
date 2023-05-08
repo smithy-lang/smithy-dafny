@@ -1950,10 +1950,10 @@ public class DafnyApiCodegen {
         if (!serviceShape.hasTrait(LocalServiceTrait.class)) throw new IllegalStateException("MUST be an LocalService");
         final LocalServiceTrait localServiceTrait = serviceShape.expectTrait(LocalServiceTrait.class);
 
-        final String moduleNamespace = DafnyNameResolver
+        final String baseModuleName = DafnyNameResolver
                 .dafnyBaseModuleName(serviceShape.getId().getNamespace());
 
-        final TokenTree moduleHeader = TokenTree.of("abstract module WrappedAbstract%sService".formatted(moduleNamespace));
+        final TokenTree moduleHeader = TokenTree.of("abstract module WrappedAbstract%sService".formatted(baseModuleName));
         final TokenTree abstractModulePrelude = TokenTree
                 .of(DafnyNameResolver.wrappedAbstractModulePrelude(serviceShape))
                 .lineSeparated();
@@ -2099,10 +2099,10 @@ public class DafnyApiCodegen {
     private TokenTree generateAbstractOperationsModule(final ServiceShape serviceShape)
     {
 
-      final String moduleNamespace = DafnyNameResolver
+      final String baseModuleName = DafnyNameResolver
         .dafnyBaseModuleName(serviceShape.getId().getNamespace());
       final TokenTree header = TokenTree.of("abstract module Abstract%sOperations"
-        .formatted(moduleNamespace)
+        .formatted(baseModuleName)
       );
 
 

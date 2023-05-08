@@ -17,6 +17,14 @@ public class DafnyNameResolverHelpers {
     }
 
     /**
+     * Returns the Dafny {@code {:extern}} namespace corresponding to the given namespace,
+     * assuming it was generated into a "Types" module.
+     */
+    public static String dafnyExternNamespaceForNamespace(final String namespace) {
+        return DafnyNameResolver.dafnyTypesModuleExternNamespace(namespace);
+    }
+
+    /**
      * Returns the Dafny {@code {:extern}} namespace corresponding to the namespace,
      * but NOT the Types module.
      */

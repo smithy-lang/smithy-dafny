@@ -110,7 +110,7 @@ public class Dafny extends NameResolver {
     }
 
     static String modelPackageNameForNamespace(final String namespace) {
-        return DafnyNameResolverHelpers.packageNameForNamespace(namespace) + ".types";
+        return DafnyNameResolverHelpers.dafnyExternNamespaceForNamespace(namespace);
     }
 
     static String packageNameForServiceShape(ServiceShape serviceShape) {

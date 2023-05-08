@@ -188,7 +188,7 @@ public class LocalServiceWrappedShimCodegen {
                         .formatted(
                             DotNetNameResolver.convertToCSharpNamespaceWithSegmentMapper(dependentNamespace, DotNetNameResolver::capitalizeNamespaceSegment),
                             DafnyNameResolver.dafnyTypesModuleExternNamespace(serviceShape.getId().getNamespace()),
-                            DafnyNameResolver.dafnyTypesModuleName(dependentNamespace).replace("Types", "")
+                            DafnyNameResolver.dafnyBaseModuleName(dependentNamespace)
                         )
                 );
                 casesList.add(toAppend);

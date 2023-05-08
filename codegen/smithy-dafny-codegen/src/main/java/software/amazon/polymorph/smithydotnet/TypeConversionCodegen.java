@@ -948,7 +948,7 @@ public class TypeConversionCodegen {
                         .formatted(
                             DafnyNameResolverHelpers.dafnyExternNamespaceForShapeId(serviceShape.getId()),
                             DotNetNameResolver.convertToCSharpNamespaceWithSegmentMapper(dependentNamespace, DotNetNameResolver::capitalizeNamespaceSegment),
-                            DafnyNameResolver.dafnyTypesModuleName(dependentNamespace).replace("Types", "")
+                            DafnyNameResolver.dafnyBaseModuleName(dependentNamespace)
                         )
                     );
 
@@ -1036,7 +1036,7 @@ public class TypeConversionCodegen {
                             .formatted(
                                 DotNetNameResolver.convertToCSharpNamespaceWithSegmentMapper(dependentNamespace, DotNetNameResolver::capitalizeNamespaceSegment),
                                 DafnyNameResolverHelpers.dafnyExternNamespaceForShapeId(serviceShape.getId()),
-                                DafnyNameResolver.dafnyTypesModuleName(dependentNamespace).replace("Types", "")
+                                DafnyNameResolver.dafnyBaseModuleName(dependentNamespace)
                             )
                     );
                     casesList.add(toAppend);
