@@ -33,13 +33,13 @@ public class Constants {
             """;
 
     static String MockKmsShim = """
-            package software.amazon.awssdk.services.kms.internaldafny;
+            package software.amazon.cryptography.services.kms.internaldafny;
             
-            import software.amazon.awssdk.services.kms.internaldafny.types.DoSomethingRequest;
-            import software.amazon.awssdk.services.kms.internaldafny.types.DoSomethingResponse;
-            import software.amazon.awssdk.services.kms.internaldafny.types.DoVoidRequest;
-            import software.amazon.awssdk.services.kms.internaldafny.types.Error;
-            import software.amazon.awssdk.services.kms.internaldafny.types.IKeyManagementServiceClient;
+            import software.amazon.cryptography.services.kms.internaldafny.types.DoSomethingRequest;
+            import software.amazon.cryptography.services.kms.internaldafny.types.DoSomethingResponse;
+            import software.amazon.cryptography.services.kms.internaldafny.types.DoVoidRequest;
+            import software.amazon.cryptography.services.kms.internaldafny.types.Error;
+            import software.amazon.cryptography.services.kms.internaldafny.types.IKeyManagementServiceClient;
             
             import Wrappers_Compile.Result;
             

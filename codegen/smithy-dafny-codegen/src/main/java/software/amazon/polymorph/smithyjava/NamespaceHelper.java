@@ -11,7 +11,7 @@ public class NamespaceHelper {
         if (namespace.startsWith("aws")) {
             rtn = rtn.replaceFirst("aws", "software.amazon");
         } else if (namespace.startsWith("com.amazonaws")) {
-            rtn = rtn.replaceFirst("com.amazonaws", "software.amazon.awssdk.services");
+            rtn = rtn.replaceFirst("com.amazonaws", "software.amazon.cryptography.services");
         }
         return rtn;
     }

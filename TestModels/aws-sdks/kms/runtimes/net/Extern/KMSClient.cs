@@ -6,7 +6,7 @@ using Com.Amazonaws.Kms;
 
 // This extern is identified in Dafny code
 // that refines the AWS SDK KMS Model
-namespace software.amazon.awssdk.services.kms.internaldafny
+namespace software.amazon.cryptography.services.kms.internaldafny
 {
   public partial class __default
   {
@@ -30,7 +30,7 @@ namespace software.amazon.awssdk.services.kms.internaldafny
     }
 
         public static _IOption<bool> RegionMatch(
-            software.amazon.awssdk.services.kms.internaldafny.types.IKMSClient client,
+            software.amazon.cryptography.services.kms.internaldafny.types.IKMSClient client,
             Dafny.ISequence<char> region)
         {
             string regionStr = TypeConversion.FromDafny_N6_smithy__N3_api__S6_String(region);
