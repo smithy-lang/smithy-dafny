@@ -6,7 +6,7 @@ using Com.Amazonaws.Sqs;
 
 // This extern is identified in Dafny code
 // that refines the AWS SDK SQS Model
-namespace software.amazon.awssdk.services.sqs.internaldafny
+namespace software.amazon.cryptography.services.sqs.internaldafny
 {
   public partial class __default
   {

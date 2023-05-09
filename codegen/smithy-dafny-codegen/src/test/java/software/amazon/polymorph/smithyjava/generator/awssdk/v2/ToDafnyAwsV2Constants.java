@@ -50,13 +50,13 @@ public class ToDafnyAwsV2Constants {
             }
             """;
     protected static String GENERATE_CONVERT_LIST_STRUCTURES = """
-            public static dafny.DafnySequence<? extends software.amazon.awssdk.services.other.internaldafny.types.OtherNamespace> OtherNamespaces (
+            public static dafny.DafnySequence<? extends software.amazon.cryptography.services.other.internaldafny.types.OtherNamespace> OtherNamespaces (
                 java.util.List<software.amazon.awssdk.services.other.model.OtherNamespace> nativeValue
             ) {
               return software.amazon.dafny.conversion.ToDafny.Aggregate.GenericToSequence(
                   nativeValue,
-                  software.amazon.awssdk.services.other.internaldafny.ToDafny::OtherNamespace,
-                  software.amazon.awssdk.services.other.internaldafny.types.OtherNamespace._typeDescriptor()
+                  software.amazon.cryptography.services.other.internaldafny.ToDafny::OtherNamespace,
+                  software.amazon.cryptography.services.other.internaldafny.types.OtherNamespace._typeDescriptor()
               );
             }
             """;

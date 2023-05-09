@@ -3,7 +3,7 @@
 
 include "../Model/ComAmazonawsSqsTypes.dfy"
 
-module {:extern "software.amazon.awssdk.services.sqs.internaldafny"} Com.Amazonaws.Sqs refines AbstractComAmazonawsSqsService {
+module {:extern "software.amazon.cryptography.services.sqs.internaldafny"} Com.Amazonaws.Sqs refines AbstractComAmazonawsSqsService {
 
   function method DefaultSQSClientConfigType() : SQSClientConfigType {
     SQSClientConfigType

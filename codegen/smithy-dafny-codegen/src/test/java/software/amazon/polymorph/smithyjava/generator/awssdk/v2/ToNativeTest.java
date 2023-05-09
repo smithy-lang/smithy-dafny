@@ -231,7 +231,7 @@ public class ToNativeTest {
         Model model = TestSetupUtils.setupLocalModel(ModelConstants.KMS_A_STRING_OPERATION);
         ToNativeAwsV2 underTest = new ToNativeAwsV2(TestSetupUtils.setupAwsSdkV2(model, "kms"));
         final Map<Path, TokenTree> actual = underTest.generate();
-        final Path expectedPath = Path.of("software/amazon/awssdk/services/kms/internaldafny/ToNative.java");
+        final Path expectedPath = Path.of("software/amazon/cryptography/services/kms/internaldafny/ToNative.java");
         Path[] temp = new Path[1];
         final Path actualPath = actual.keySet().toArray(temp)[0];
         assertEquals(expectedPath, actualPath);

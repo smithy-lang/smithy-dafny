@@ -40,13 +40,13 @@ public class Constants {
             import java.lang.Override;
             import java.lang.String;
             import software.amazon.awssdk.services.kms.KmsClient;
+            import software.amazon.awssdk.services.kms.model.DependencyTimeoutException;
+            import software.amazon.awssdk.services.kms.model.KmsException;            
             import software.amazon.cryptography.services.kms.internaldafny.types.DoSomethingRequest;
             import software.amazon.cryptography.services.kms.internaldafny.types.DoSomethingResponse;
             import software.amazon.cryptography.services.kms.internaldafny.types.DoVoidRequest;
             import software.amazon.cryptography.services.kms.internaldafny.types.Error;
             import software.amazon.cryptography.services.kms.internaldafny.types.IKeyManagementServiceClient;
-            import software.amazon.awssdk.services.kms.model.DependencyTimeoutException;
-            import software.amazon.awssdk.services.kms.model.KmsException;            
             
             public class Shim implements IKeyManagementServiceClient {
               private final KmsClient _impl;
