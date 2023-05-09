@@ -1,8 +1,8 @@
-include "../Model/SimpleExternTypes.dfy"
+include "../Model/SimpleDafnyExternTypes.dfy"
 
 module{:extern "ExternConstructor"} ExternConstructor {
     import opened Wrappers
-    import opened SimpleExternTypes
+    import opened SimpleDafnyExternTypes
 
     class{:extern "ExternConstructorClass"} ExternConstructorClass {
 

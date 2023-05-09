@@ -1,4 +1,4 @@
-namespace simple.types.string
+namespace simple.types.smithyString
 
 @aws.polymorph#localService(
   sdkId: "SimpleString",

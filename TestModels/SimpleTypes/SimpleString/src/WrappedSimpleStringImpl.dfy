@@ -1,6 +1,6 @@
-include "../Model/SimpleTypesStringTypesWrapped.dfy"
+include "../Model/SimpleTypesSmithyStringTypesWrapped.dfy"
 
-module {:extern "Dafny.Simple.Types.String.Wrapped"} WrappedSimpleTypesStringService refines WrappedAbstractSimpleTypesStringService {
+module {:extern "simple.types.smithystring.internaldafny.wrapped"} WrappedSimpleTypesStringService refines WrappedAbstractSimpleTypesSmithyStringService {
     import WrappedService = SimpleString
     function method WrappedDefaultSimpleStringConfig(): SimpleStringConfig {
         SimpleStringConfig

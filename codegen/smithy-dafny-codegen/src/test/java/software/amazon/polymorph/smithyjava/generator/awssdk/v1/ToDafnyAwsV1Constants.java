@@ -5,47 +5,47 @@ import static software.amazon.polymorph.smithyjava.generator.ToDafnyConstants.ME
 
 public class ToDafnyAwsV1Constants {
     protected static String DO_SOMETHING_RESPONSE = """
-            public static Dafny.Com.Amazonaws.Kms.Types.DoSomethingResponse DoSomethingResponse(
+            public static software.amazon.cryptography.services.kms.internaldafny.types.DoSomethingResponse DoSomethingResponse(
                 com.amazonaws.services.kms.model.DoSomethingResult nativeValue) {
               %s;
               %s;
-              return new Dafny.Com.Amazonaws.Kms.Types.DoSomethingResponse(message);
+              return new software.amazon.cryptography.services.kms.internaldafny.types.DoSomethingResponse(message);
             }
             """.formatted(MEMBER_DECLARATION_OPTIONAL, MEMBER_ASSIGNMENT_OPTIONAL);
 
     protected static String KEY_USAGE_TYPE = """
-            public static Dafny.Com.Amazonaws.Kms.Types.KeyUsageType KeyUsageType(
+            public static software.amazon.cryptography.services.kms.internaldafny.types.KeyUsageType KeyUsageType(
                 com.amazonaws.services.kms.model.KeyUsageType nativeValue
             ) {
               switch (nativeValue) {
                 case SIGN_VERIFY: {
-                  return Dafny.Com.Amazonaws.Kms.Types.KeyUsageType.create_SIGN__VERIFY();
+                  return software.amazon.cryptography.services.kms.internaldafny.types.KeyUsageType.create_SIGN__VERIFY();
                 }
                 case ENCRYPT_DECRYPT: {
-                  return Dafny.Com.Amazonaws.Kms.Types.KeyUsageType.create_ENCRYPT__DECRYPT();
+                  return software.amazon.cryptography.services.kms.internaldafny.types.KeyUsageType.create_ENCRYPT__DECRYPT();
                 }
                 default: {
-                  throw new java.lang.RuntimeException("Cannot convert " + nativeValue + " to Dafny.Com.Amazonaws.Kms.Types.KeyUsageType.");
+                  throw new java.lang.RuntimeException("Cannot convert " + nativeValue + " to software.amazon.cryptography.services.kms.internaldafny.types.KeyUsageType.");
                 }
               }
             }
             """;
 
     protected static String KEY_USAGE_TYPE_STRING = """
-            public static Dafny.Com.Amazonaws.Kms.Types.KeyUsageType KeyUsageType(
+            public static software.amazon.cryptography.services.kms.internaldafny.types.KeyUsageType KeyUsageType(
                 java.lang.String nativeValue
             ) {
               return KeyUsageType(com.amazonaws.services.kms.model.KeyUsageType.fromValue(nativeValue));
             }""";
 
     protected static String GENERATE_CONVERT_LIST = """
-            public static dafny.DafnySequence<? extends Dafny.Com.Amazonaws.Kms.Types.KeyUsageType> KeyUsageTypes (
+            public static dafny.DafnySequence<? extends software.amazon.cryptography.services.kms.internaldafny.types.KeyUsageType> KeyUsageTypes (
                 java.util.List<java.lang.String> nativeValue
             ) {
               return software.amazon.dafny.conversion.ToDafny.Aggregate.GenericToSequence(
                   nativeValue,
-                  Dafny.Com.Amazonaws.Kms.ToDafny::KeyUsageType,
-                  Dafny.Com.Amazonaws.Kms.Types.KeyUsageType._typeDescriptor()
+                  software.amazon.cryptography.services.kms.internaldafny.ToDafny::KeyUsageType,
+                  software.amazon.cryptography.services.kms.internaldafny.types.KeyUsageType._typeDescriptor()
               );
             }
             """;
@@ -88,26 +88,26 @@ public class ToDafnyAwsV1Constants {
             """;
 
     protected static String GENERATE_CONVERT_OPAQUE_ERROR = """
-            public static Dafny.Com.Amazonaws.Kms.Types.Error Error(
+            public static software.amazon.cryptography.services.kms.internaldafny.types.Error Error(
                     com.amazonaws.services.kms.model.AWSKMSException nativeValue
             ) {
               Wrappers_Compile.Option<dafny.DafnySequence<? extends java.lang.Character>> message;
               message = java.util.Objects.nonNull(nativeValue.getMessage()) ?
                     Wrappers_Compile.Option.create_Some(software.amazon.dafny.conversion.ToDafny.Simple.CharacterSequence(nativeValue.getMessage()))
                   : Wrappers_Compile.Option.create_None();
-              return new Dafny.Com.Amazonaws.Kms.Types.Error_Opaque(message);
+              return new software.amazon.cryptography.services.kms.internaldafny.types.Error_Opaque(message);
             }
             """;
 
     protected static final String KMS_A_STRING_OPERATION_JAVA_FILE = """
-            package Dafny.Com.Amazonaws.Kms;
+            package software.amazon.cryptography.services.kms.internaldafny;
                         
-            import Dafny.Com.Amazonaws.Kms.Types.DoSomethingRequest;
-            import Dafny.Com.Amazonaws.Kms.Types.DoSomethingResponse;
-            import Dafny.Com.Amazonaws.Kms.Types.Error;
-            import Dafny.Com.Amazonaws.Kms.Types.Error_DependencyTimeoutException;
-            import Dafny.Com.Amazonaws.Kms.Types.Error_Opaque;
-            import Dafny.Com.Amazonaws.Kms.Types.IKeyManagementServiceClient;
+            import software.amazon.cryptography.services.kms.internaldafny.types.DoSomethingRequest;
+            import software.amazon.cryptography.services.kms.internaldafny.types.DoSomethingResponse;
+            import software.amazon.cryptography.services.kms.internaldafny.types.Error;
+            import software.amazon.cryptography.services.kms.internaldafny.types.Error_DependencyTimeoutException;
+            import software.amazon.cryptography.services.kms.internaldafny.types.Error_Opaque;
+            import software.amazon.cryptography.services.kms.internaldafny.types.IKeyManagementServiceClient;
             import Wrappers_Compile.Option;
             import com.amazonaws.services.kms.AWSKMS;
             import com.amazonaws.services.kms.model.AWSKMSException;

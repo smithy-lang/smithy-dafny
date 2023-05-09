@@ -119,10 +119,10 @@ public class ServiceShim extends ShimLibrary {
                 BuilderSpecs.BUILDER_VAR,
                 getArg().name);
         // convert config to Dafny
-        // i.e: Dafny.Aws.Cryptography.Primitives.Types.CryptoConfig dafnyConfig = ToDafny.CryptoConfig(nativeConfig);
+        // i.e: software.amazon.cryptography.primitives.internaldafny.types.CryptoConfig dafnyConfig = ToDafny.CryptoConfig(nativeConfig);
         method.addStatement(dafnyDeclareAndConvert(trait.getConfigId()));
         // Invoke client creation
-        // i.e.: Result<AtomicPrimitivesClient, Error> result = Dafny.Aws.Cryptography.Primitives.__default.AtomicPrimitives(dafnyValue);
+        // i.e.: Result<AtomicPrimitivesClient, Error> result = software.amazon.cryptography.primitives.internaldafny.__default.AtomicPrimitives(dafnyValue);
         TypeName success = subject.dafnyNameResolver.classNameForConcreteServiceClient(subject.serviceShape);
         TypeName failure = subject.dafnyNameResolver.abstractClassForError();
         TypeName result = Dafny.asDafnyResult(success, failure);
