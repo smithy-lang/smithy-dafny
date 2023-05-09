@@ -266,6 +266,11 @@ public record DafnyNameResolver(
         }
     }
 
+    /**
+     * Outside of {@code smithydafny}, this should not be called directly.
+     * Instead, call
+     * {@link software.amazon.polymorph.utils.DafnyNameResolverHelpers#packageNameForNamespace}.
+     */
     // i.e. "software.amazon.cryptography.materialproviders.internaldafny"
     // The base namespace at which all smithy->Dafny->X generated code is built to,
     // used in {:extern}.
@@ -274,6 +279,11 @@ public record DafnyNameResolver(
         return NamespaceHelper.standardize(namespace) + ".internaldafny";
     }
 
+    /**
+     * Outside of {@code smithydafny}, this should not be called directly.
+     * Instead, call
+     * {@link software.amazon.polymorph.utils.DafnyNameResolverHelpers#dafnyExternNamespaceForNamespace}.
+     */
     // i.e. "software.amazon.cryptography.materialproviders.internaldafny.types"
     // The namespace for all the smithy->Dafny->X generated types,
     // i.e. the {:extern} for the Dafny Types module
