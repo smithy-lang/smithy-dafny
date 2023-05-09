@@ -1,6 +1,6 @@
 include "SimpleAggregateImpl.dfy"
 
-module {:extern "Dafny.Simple.Aggregate"} SimpleAggregate refines AbstractSimpleAggregateService {
+module {:extern "simple.aggregate.internaldafny"} SimpleAggregate refines AbstractSimpleAggregateService {
     import Operations = SimpleAggregateImpl
 
     function method DefaultSimpleAggregateConfig(): SimpleAggregateConfig {

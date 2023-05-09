@@ -1,4 +1,4 @@
-namespace simple.types.long
+namespace simple.types.smithyLong
 
 @aws.polymorph#localService(
   sdkId: "SimpleLong",

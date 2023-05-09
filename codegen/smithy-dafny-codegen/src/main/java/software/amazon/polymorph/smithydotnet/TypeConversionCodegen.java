@@ -946,9 +946,9 @@ public class TypeConversionCodegen {
                             dafnyVal._%3$s
                           );"""
                         .formatted(
-                            DafnyNameResolver.dafnyExternNamespaceForNamespace(serviceShape.getId().getNamespace()),
+                            DafnyNameResolverHelpers.dafnyExternNamespaceForShapeId(serviceShape.getId()),
                             DotNetNameResolver.convertToCSharpNamespaceWithSegmentMapper(dependentNamespace, DotNetNameResolver::capitalizeNamespaceSegment),
-                            DafnyNameResolver.dafnyTypesModuleForNamespace(dependentNamespace).replace("Types", "")
+                            DafnyNameResolver.dafnyBaseModuleName(dependentNamespace)
                         )
                     );
 
@@ -1035,8 +1035,8 @@ public class TypeConversionCodegen {
                             );"""
                             .formatted(
                                 DotNetNameResolver.convertToCSharpNamespaceWithSegmentMapper(dependentNamespace, DotNetNameResolver::capitalizeNamespaceSegment),
-                                DafnyNameResolver.dafnyExternNamespaceForNamespace(serviceShape.getId().getNamespace()),
-                                DafnyNameResolver.dafnyTypesModuleForNamespace(dependentNamespace).replace("Types", "")
+                                DafnyNameResolverHelpers.dafnyExternNamespaceForShapeId(serviceShape.getId()),
+                                DafnyNameResolver.dafnyBaseModuleName(dependentNamespace)
                             )
                     );
                     casesList.add(toAppend);

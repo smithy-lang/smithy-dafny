@@ -1,6 +1,6 @@
 include "SimpleConstraintsImpl.dfy"
 
-module {:extern "Dafny.Simple.Constraints" } SimpleConstraints refines AbstractSimpleConstraintsService {
+module {:extern "simple.constraints.internaldafny" } SimpleConstraints refines AbstractSimpleConstraintsService {
   import Operations = SimpleConstraintsImpl
 
   function method DefaultSimpleConstraintsConfig(): SimpleConstraintsConfig {

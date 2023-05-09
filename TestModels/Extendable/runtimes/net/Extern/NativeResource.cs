@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System;
-using Dafny.Simple.Extendable.Resources;
-using Dafny.Simple.Extendable.Resources.Types;
+using simple.extendable.resources.internaldafny;
+using simple.extendable.resources.internaldafny.types;
 using Simple.Extendable.Resources;
 
 namespace Simple.Extendable.Resources

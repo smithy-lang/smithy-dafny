@@ -7,9 +7,11 @@ public class NamespaceHelper {
      // Historically, we have used `encryption` instead of `cryptography`,
      // but we are more flexible w.r.t. encryption vs cryptography.
     public static String standardize(String namespace) {
-        String rtn = namespace;
+        String rtn = namespace.toLowerCase();
         if (namespace.startsWith("aws")) {
             rtn = rtn.replaceFirst("aws", "software.amazon");
+        } else if (namespace.startsWith("com.amazonaws")) {
+            rtn = rtn.replaceFirst("com.amazonaws", "software.amazon.cryptography.services");
         }
         return rtn;
     }

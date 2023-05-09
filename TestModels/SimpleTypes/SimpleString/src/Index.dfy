@@ -1,6 +1,6 @@
 include "SimpleStringImpl.dfy"
 
-module {:extern "Dafny.Simple.Types.String" } SimpleString refines AbstractSimpleTypesStringService {
+module {:extern "simple.types.smithystring.internaldafny" } SimpleString refines AbstractSimpleTypesSmithyStringService {
     import Operations = SimpleStringImpl
 
     function method DefaultSimpleStringConfig(): SimpleStringConfig {

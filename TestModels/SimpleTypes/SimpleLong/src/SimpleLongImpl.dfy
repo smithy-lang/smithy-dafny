@@ -1,6 +1,6 @@
-include "../Model/SimpleTypesLongTypes.dfy"
+include "../Model/SimpleTypesSmithyLongTypes.dfy"
 
-module SimpleLongImpl refines AbstractSimpleTypesLongOperations  {
+module SimpleLongImpl refines AbstractSimpleTypesSmithyLongOperations  {
   datatype Config = Config
   type InternalConfig = Config
   predicate ValidInternalConfig?(config: InternalConfig)

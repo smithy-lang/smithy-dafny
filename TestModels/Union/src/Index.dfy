@@ -1,6 +1,6 @@
 include "SimpleUnionImpl.dfy"
 
-module {:extern "Dafny.Simple.Union" } SimpleUnion refines AbstractSimpleUnionService {
+module {:extern "simple.union.internaldafny" } SimpleUnion refines AbstractSimpleUnionService {
     import Operations = SimpleUnionImpl
 
     function method DefaultSimpleUnionConfig(): SimpleUnionConfig {

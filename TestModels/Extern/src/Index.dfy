@@ -1,6 +1,6 @@
 include "SimpleExternImpl.dfy"
 
-module {:extern "Dafny.Simple.Extern" } SimpleExtern refines AbstractSimpleExternService {
+module {:extern "simple.dafnyextern.internaldafny" } SimpleExtern refines AbstractSimpleDafnyExternService {
     import Operations = SimpleExternImpl
 
     function method DefaultSimpleExternConfig(): SimpleExternConfig {

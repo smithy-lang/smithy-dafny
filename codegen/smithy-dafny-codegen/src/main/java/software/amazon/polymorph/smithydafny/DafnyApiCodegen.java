@@ -113,7 +113,7 @@ public class DafnyApiCodegen {
           .lineSeparated();
 
         final String namespace = serviceShape.getId().getNamespace();
-        final String typesModuleName = DafnyNameResolver.dafnyTypesModuleForNamespace(namespace);
+        final String typesModuleName = DafnyNameResolver.dafnyTypesModuleName(namespace);
         final TokenTree typesModuleHeader = Token.of("module {:extern \"%s\" } %s"
           .formatted(
             DafnyNameResolverHelpers.dafnyExternNamespaceForShapeId(serviceShape.getId()),
@@ -134,7 +134,7 @@ public class DafnyApiCodegen {
                 .dependentModels()
                 .stream()
                 .map(d ->
-                  "import " + DafnyNameResolver.dafnyTypesModuleForNamespace(d.namespace())))
+                  "import " + DafnyNameResolver.dafnyTypesModuleName(d.namespace())))
             .map(Token::of)
           )
           .lineSeparated();
@@ -186,7 +186,7 @@ public class DafnyApiCodegen {
         }
       
         final String namespace = serviceShape.getId().getNamespace();
-        final String typesModuleName = DafnyNameResolver.dafnyTypesModuleForNamespace(namespace);
+        final String typesModuleName = DafnyNameResolver.dafnyTypesModuleName(namespace);
         final Path path = Path.of("%sWrapped.dfy".formatted(typesModuleName));
 
         // A smithy model may reference a model in a different package.
@@ -1321,7 +1321,7 @@ public class DafnyApiCodegen {
     }
 
     public TokenTree generateDependantErrorDataTypeConstructor(final DependentSmithyModel dependentSmithyModel) {
-        final String errorType = nameResolver.dafnyTypesModuleForNamespace(dependentSmithyModel.namespace()) + ".Error";
+        final String errorType = nameResolver.dafnyTypesModuleName(dependentSmithyModel.namespace()) + ".Error";
         final String errorConstructorName = errorType
           .replace("Types.Error", "");
 
@@ -1950,11 +1950,10 @@ public class DafnyApiCodegen {
         if (!serviceShape.hasTrait(LocalServiceTrait.class)) throw new IllegalStateException("MUST be an LocalService");
         final LocalServiceTrait localServiceTrait = serviceShape.expectTrait(LocalServiceTrait.class);
 
-        final String moduleNamespace = DafnyNameResolver
-                .dafnyNamespace(serviceShape.getId().getNamespace())
-                .replace(".", "");
+        final String baseModuleName = DafnyNameResolver
+                .dafnyBaseModuleName(serviceShape.getId().getNamespace());
 
-        final TokenTree moduleHeader = TokenTree.of("abstract module WrappedAbstract%sService".formatted(moduleNamespace));
+        final TokenTree moduleHeader = TokenTree.of("abstract module WrappedAbstract%sService".formatted(baseModuleName));
         final TokenTree abstractModulePrelude = TokenTree
                 .of(DafnyNameResolver.wrappedAbstractModulePrelude(serviceShape))
                 .lineSeparated();
@@ -2100,11 +2099,10 @@ public class DafnyApiCodegen {
     private TokenTree generateAbstractOperationsModule(final ServiceShape serviceShape)
     {
 
-      final String moduleNamespace = DafnyNameResolver
-        .dafnyNamespace(serviceShape.getId().getNamespace())
-        .replace(".", "");
+      final String baseModuleName = DafnyNameResolver
+        .dafnyBaseModuleName(serviceShape.getId().getNamespace());
       final TokenTree header = TokenTree.of("abstract module Abstract%sOperations"
-        .formatted(moduleNamespace)
+        .formatted(baseModuleName)
       );
 
 

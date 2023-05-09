@@ -261,8 +261,9 @@ public class Native extends NameResolver{
                     ("ServiceShape for local-service-test MUST have LocalTrait." +
                             " ShapeId: %s").formatted(shape.toShapeId()));
         }
+        final String namespace = NamespaceHelper.standardize(shape.getId().getNamespace()) + ".wrapped";
         return ClassName.get(
-                NamespaceHelper.standardize(shape.getId().getNamespace()) + ".wrapped",
+                namespace,
                 "Test" + capitalize(maybeTrait.get().getSdkId()));
     }
 

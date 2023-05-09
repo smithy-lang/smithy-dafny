@@ -1,6 +1,6 @@
-include "../Model/SimpleTypesStringTypes.dfy"
+include "../Model/SimpleTypesSmithyStringTypes.dfy"
 
-module SimpleStringImpl refines AbstractSimpleTypesStringOperations  {
+module SimpleStringImpl refines AbstractSimpleTypesSmithyStringOperations  {
     datatype Config = Config
     type InternalConfig = Config
     predicate ValidInternalConfig?(config: InternalConfig)

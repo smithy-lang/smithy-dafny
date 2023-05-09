@@ -1,6 +1,6 @@
 include "../Model/SimpleConstructorTypesWrapped.dfy"
 
-module {:extern "Dafny.Simple.Constructor.Wrapped"} WrappedSimpleConstructorService refines WrappedAbstractSimpleConstructorService {
+module {:extern "simple.constructor.internaldafny.wrapped"} WrappedSimpleConstructorService refines WrappedAbstractSimpleConstructorService {
     import WrappedService = SimpleConstructor
     function method WrappedDefaultSimpleConstructorConfig(): SimpleConstructorConfig {
         WrappedService.DefaultSimpleConstructorConfig()
