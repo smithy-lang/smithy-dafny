@@ -21,8 +21,20 @@ jobs:
         with:
           dafny-version: "4.0.0"
 
-      - name: Execute tests
+      - name: test
         uses: gradle/gradle-build-action@v2
         with:
           arguments: test
+          build-root-directory: smithy-dafny-conversion
+
+      - name: javadoc
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: javadoc
+          build-root-directory: smithy-dafny-conversion
+
+      - name: publishToMavenLocal
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: publishToMavenLocal
           build-root-directory: smithy-dafny-conversion
