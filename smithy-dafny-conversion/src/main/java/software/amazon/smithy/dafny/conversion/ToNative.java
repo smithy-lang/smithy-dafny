@@ -24,48 +24,98 @@ import dafny.DafnyMap;
 import dafny.DafnySequence;
 import dafny.DafnySet;
 
+/**
+ * Methods that convert from a Dafny Runtime Type to native (natural) Java Type.<p>
+ * Every Method here has its inverse is {@link ToDafny}.
+ * @see <a href="https://dafny.org/dafny/DafnyRef/integration-java/IntegrationJava">Dafny Integration with Java</a>
+ */
 public class ToNative {
 
     /**
-     * Methods that convert from a Dafny generated Java type
+     * Methods that convert from a Dafny Runtime Type
      * to a native Java type,
      * for Smithy's definition of Simple shapes.
+     * @see <a href="https://smithy.io/2.0/spec/simple-types.html#simple-types">Smithy Simple Types</a>
      */
     public static class Simple {
 
+        /**
+         * @param dafnySequence The Dafny Runtime type for a blob is a {@link DafnySequence} of {@link Byte}s.
+         * @return The Java type for a blob can be a {@link ByteBuffer}.
+         * @see ToDafny.Simple#ByteSequence
+         */
         // BLOB("blob", BlobShape.class, Category.SIMPLE),
         static public ByteBuffer ByteBuffer(DafnySequence<? extends Byte> dafnySequence) {
             return ByteBuffer.wrap((byte[]) dafnySequence.toRawArray());
         }
 
+        /**
+         * @param dafnySequence The Dafny Runtime type for a String is A {@link DafnySequence} of {@link Character}s.
+         * @return The Java type for a String is {@link String}.
+         * @see ToDafny.Simple#CharacterSequence
+         */
         // STRING("string", StringShape.class, Category.SIMPLE),
-        public static String String(DafnySequence<? extends Character> s) {
-            Stream<? extends Character> chars = StreamSupport.stream(s.spliterator(), false);
+        public static String String(DafnySequence<? extends Character> dafnySequence) {
+            Stream<? extends Character> chars = StreamSupport.stream(dafnySequence.spliterator(), false);
             return chars.map(Object::toString).collect(Collectors.joining());
         }
 
+        /**
+         * Deserialize the 8 Bytes from a {@link DafnySequence} of {@link Byte}s
+         * into a {@link Double}.<p>
+         * (In Dafny, Doubles are represented as the serialized bytes of
+         * their Native Type.)<p>
+         * Note: This serialization is NOT guaranteed to be
+         * consistent among different Dafny Runtimes or
+         * even native distributions.
+         * @param dafnySequence A {@link DafnySequence} of 8 {@link Byte}s
+         * @return The Java type for a double can be a {@link Double}.
+         * @see ToDafny.Simple#Double
+         */
         // DOUBLE("double", DoubleShape.class, Category.SIMPLE),
         public static Double Double(DafnySequence<? extends Byte> dafnySequence) {
             return ByteBuffer(dafnySequence).getDouble();
         }
 
+        /**
+         * Parse a {@link DafnySequence} of {@link Character}s into a {@link Date}.<p>
+         * At this time, Dafny does not have a Timestamp or Date type.<p>
+         * Instead, the Timestamp is serialized as seconds from epoch, as a string.
+         * @param dafnySequence {@link DafnySequence} of {@link Character}s containing the serialization of the {@code timestamp}.
+         * @return The Java type for a Smithy timestamp can be {@link Date}.
+         * @see ToDafny.Simple#CharacterSequence(Date)
+         */
         // TIMESTAMP("timestamp", TimestampShape.class, Category.SIMPLE),
-        public static Date Date(DafnySequence<? extends Character> s) {
+        public static Date Date(DafnySequence<? extends Character> dafnySequence) {
             // KMS uses unix timestamp, or seconds from epoch, as its serialized timestamp
             // Other services may use other formats
-            BigDecimal dateValue = new BigDecimal(Simple.String(s));
+            BigDecimal dateValue = new BigDecimal(Simple.String(dafnySequence));
             return new Date(dateValue.scaleByPowerOfTen(3).longValue());
         }
 
+        /**
+         * Parse a {@link DafnySequence} of {@link Character}s into a {@link Instant}.<p>
+         * At this time, Dafny does not have a Timestamp or Instant type.<p>
+         * Instead, the Timestamp is serialized as seconds from epoch, as a string.
+         * @param dafnySequence {@link DafnySequence} of {@link Character}s containing the serialization of the {@code timestamp}.
+         * @return The Java type for a Smithy timestamp can be {@link Instant}.
+         * @see ToDafny.Simple#CharacterSequence(Instant)
+         */
         // TIMESTAMP("timestamp", TimestampShape.class, Category.SIMPLE),
-        public static Instant Instant(DafnySequence<? extends Character> s) {
+        public static Instant Instant(DafnySequence<? extends Character> dafnySequence) {
             // KMS uses unix timestamp, or seconds from epoch, as its serialized timestamp
             // Other services may use other formats
-            BigDecimal dateValue = new BigDecimal(Simple.String(s));
+            BigDecimal dateValue = new BigDecimal(Simple.String(dafnySequence));
             return Instant.ofEpochMilli(dateValue.scaleByPowerOfTen(3).longValue());
         }
 
-        public static String DafnyUtf8Bytes(DafnySequence<? extends Byte> s) {
+        /**
+         * Decode a {@link DafnySequence} of UTF-8 {@link Byte}s into a {@link String}.
+         * @param dafnySequence A {@link DafnySequence} of {@link Byte}s.
+         * @return The Java type for a String is {@link String}
+         * @see ToDafny.Simple#DafnyUtf8Bytes(String)
+         */
+        public static String DafnyUtf8Bytes(DafnySequence<? extends Byte> dafnySequence) {
             Charset utf8 = StandardCharsets.UTF_8;
             // The only way to keep this thread/concurrent safe/ is
             // to create a new Coder everytime.
@@ -73,7 +123,7 @@ public class ToNative {
             // we could declare this NOT thread/concurrent safe,
             // and reset the coder everytime.
             CharsetDecoder coder = utf8.newDecoder();
-            ByteBuffer inBuffer = ByteBuffer(s);
+            ByteBuffer inBuffer = ByteBuffer(dafnySequence);
             inBuffer.position(0);
             try {
                 CharBuffer outBuffer = coder.decode(inBuffer);
