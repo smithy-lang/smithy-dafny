@@ -1,6 +1,6 @@
 [submodule "libraries"]
 	path = libraries
-	url = git@github.com:dafny-lang/libraries.git
+	url = https://github.com/dafny-lang/libraries.git 
 	branch = mutable_map
 [submodule "aws-encryption-sdk-specification"]
 	path = aws-encryption-sdk-specification

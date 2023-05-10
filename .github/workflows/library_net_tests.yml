@@ -1,0 +1,92 @@
+# This workflow performs tests in .NET.
+name: Library net tests
+
+on: 
+  pull_request:
+  push:
+    branches:
+      - main
+  schedule:
+    # Nightly build against Dafny's nightly prereleases,
+    # for early warning of verification issues or regressions.
+    # Timing chosen to be adequately after Dafny's own nightly build,
+    # but this might need to be tweaked:
+    # https://github.com/dafny-lang/dafny/blob/master/.github/workflows/deep-tests.yml#L16
+    - cron: "30 16 * * *"
+
+jobs:
+  testDotNet:
+    # Don't run the nightly build on forks
+    if: github.event_name != 'schedule' || github.repository_owner == 'aws'
+    strategy:
+      matrix:
+        library: [
+          StandardLibrary,
+          AwsCryptographyPrimitives,
+          ComAmazonawsKms,
+          ComAmazonawsDynamodb,
+          AwsCryptographicMaterialProviders,
+          TestVectorsAwsCryptographicMaterialProviders,
+        ]
+        dotnet-version: [ '6.0.x' ]
+        os: [
+          windows-latest,
+          ubuntu-latest,
+          macos-latest,
+        ]
+    runs-on: ${{ matrix.os }}
+    permissions:
+      id-token: write
+      contents: read
+    env:
+      DOTNET_CLI_TELEMETRY_OPTOUT: 1
+      DOTNET_NOLOGO: 1
+    steps:
+      - name: Support longpaths on Git checkout
+        run: |
+          git config --global core.longpaths true
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-region: us-west-2
+          role-to-assume: arn:aws:iam::370957321024:role/GitHub-CI-MPL-Dafny-Role-us-west-2
+          role-session-name: NetTests
+
+      - uses: actions/checkout@v3
+      # The specification submodule is private so we don't have access, but we don't need
+      # it to verify the Dafny code. Instead we manually pull the submodule we DO need.
+      - run: git submodule update --init libraries
+
+      - name: Setup .NET Core SDK ${{ matrix.dotnet-version }}
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: ${{ matrix.dotnet-version }}
+
+      - name: Setup Dafny
+        uses: dafny-lang/setup-dafny-action@v1.6.1
+        with:
+          # A && B || C is the closest thing to an if .. then ... else ... or ?: expression the GitHub Actions syntax supports.
+          dafny-version: ${{ (github.event_name == 'schedule' || inputs.nightly) && 'nightly-latest' || '4.0.0' }}
+
+      - name: Download Dependencies 
+        working-directory: ./${{ matrix.library }}
+        run: make setup_net
+
+      - name: Compile ${{ matrix.library }} implementation
+        shell: bash
+        working-directory: ./${{ matrix.library }}
+        run: |
+          # This works because `node` is installed by default on GHA runners
+          CORES=$(node -e 'console.log(os.cpus().length)')
+          make transpile_net CORES=$CORES
+
+      - name: Test ${{ matrix.library }}
+        working-directory: ./${{ matrix.library }}
+        shell: bash
+        run: |
+          if [ "$RUNNER_OS" == "macOS" ]; then
+            make test_net_mac_intel
+          else
+            make test_net
+          fi

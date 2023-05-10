@@ -1,0 +1,50 @@
+# This workflow verifies
+# that the source is annotated
+# with respect to the specification
+name: Duvet report
+
+on: 
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  duvet:
+    runs-on: ubuntu-latest
+    # This environment stores a token
+    # that can be used to checkout
+    # the ESDK specification
+    environment: "Duvet CI"
+    env:
+      DOTNET_CLI_TELEMETRY_OPTOUT: 1
+      DOTNET_NOLOGO: 1
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          # This secret is in the configured environment
+          # Token created on # 12/14/2022
+          # expires in ~30 days 01/13/2023
+          token: ${{ secrets.PAT_SPEC }}
+          submodules: true
+
+      - name: Install duvet
+        shell: bash
+        run: |
+          cargo +stable install duvet
+
+      # //= aws-encryption-sdk-specification/framework/structures.md#overview
+      # //= type=implication
+      # //# These structures define a group of related fields that MUST hold certain properties.
+      # //# Wherever these structures are referenced in this specification,
+      # //# implementations MUST ensure that all properties of a structure's fields are upheld.
+      - name: Run the duvet report
+        shell: bash
+        run: |
+          make duvet
+
+      - uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: specification_compliance_report
+          path: specification_compliance_report.html
