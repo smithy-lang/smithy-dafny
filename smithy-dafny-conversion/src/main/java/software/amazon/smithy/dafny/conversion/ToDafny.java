@@ -41,6 +41,7 @@ public class ToDafny {
         /**
          * @param blob The Java type for a blob can be an array of bytes.
          * @return The Dafny Runtime type for a blob is a {@link DafnySequence} of {@link Byte}s.
+         * @see ToNative.Simple#ByteBuffer
          */
         // BLOB("blob", BlobShape.class, Category.SIMPLE),
         public static DafnySequence<Byte> ByteSequence(byte[] blob) {
@@ -54,6 +55,7 @@ public class ToDafny {
          * @param start The index in the byteBuffer from which to start at.
          * @param limit The number of bytes to copy.
          * @return A {@link DafnySequence} of {@link Byte}s, containing the copied bytes.
+         * @see ToNative.Simple#ByteBuffer
          */
         // BLOB("blob", BlobShape.class, Category.SIMPLE),
         public static DafnySequence<Byte> ByteSequence(
@@ -72,13 +74,13 @@ public class ToDafny {
          * Note: Regardless of the buffer's mark, position, or capacity,
          * this will return the bytes from 0 till limit.
          *
-         * @param byteBuffer The idiomatic Java type for a blob can be a ByteBuffer.
+         * @param byteBuffer The Java type for a blob can be a ByteBuffer.
          * @return A {@link DafnySequence} of {@link Byte}s,
          * containing the bytes in the {@code byteBuffer},
          * starting from 0 until the buffer's limit.
+         * @see ToNative.Simple#ByteBuffer
          */
         // BLOB("blob", BlobShape.class, Category.SIMPLE),
-        @SuppressWarnings("unused")
         public static DafnySequence<Byte> ByteSequence(ByteBuffer byteBuffer) {
             return ByteSequence(byteBuffer, 0, byteBuffer.limit());
         }
@@ -87,9 +89,12 @@ public class ToDafny {
          * At this time, Dafny does not have a Double type.<p>
          * Instead, the Double is serialized into bytes,
          * which are then wrapped as a DafnySequence of Bytes.<p>
-         * Note: This serialization is NOT guaranteed to be consistent among different distributions.
-         * @param aDouble The Java type for a double can be a Double.
-         * @return A DafnySequence of Bytes containing the serialization of the {@code aDouble}.
+         * Note: This serialization is NOT guaranteed to be
+         * consistent among different Dafny Runtimes or
+         * even native distributions.
+         * @param aDouble The Java type for a double can be a {@link Double}.
+         * @return A {@link DafnySequence} of {@link Byte}s containing the serialization of the {@code aDouble}.
+         * @see ToNative.Simple#Double
          */
         // DOUBLE("double", DoubleShape.class, Category.SIMPLE),
         public static DafnySequence<Byte> Double(Double aDouble) {
@@ -98,8 +103,9 @@ public class ToDafny {
         }
 
         /**
-         * @param aString The Java type for a String is String.
-         * @return A {@link DafnySequence} of {@link Character}s.
+         * @param aString The Java type for a String is {@link String}.
+         * @return The Dafny Runtime type for a String is A {@link DafnySequence} of {@link Character}s.
+         * @see ToNative.Simple#String
          */
         // STRING("string", StringShape.class, Category.SIMPLE),
         public static DafnySequence<Character> CharacterSequence(String aString) {
@@ -109,12 +115,12 @@ public class ToDafny {
         /**
          * At this time, Dafny does not have a Timestamp or Date type.<p>
          * Instead, the Timestamp is serialized as seconds from epoch, as a string,
-         * which is than wrapped as a DafnySequence of Charters.
-         * @param timestamp The Java type for a timestamp can be {@link Date}.
+         * which is than wrapped as a {@link DafnySequence} of {@link Character}s.
+         * @param timestamp The Java type for a Smithy timestamp can be {@link Date}.
          * @return A {@link DafnySequence} of {@link Character}s containing the serialization of the {@code timestamp}.
+         * @see ToNative.Simple#Date(DafnySequence)
          */
         // TIMESTAMP("timestamp", TimestampShape.class, Category.SIMPLE),
-        @SuppressWarnings("unused")
         public static DafnySequence<Character> CharacterSequence(Date timestamp) {
             // KMS uses unix timestamp, or seconds from epoch, as its serialized timestamp
             // Other services may use other formats
@@ -127,9 +133,9 @@ public class ToDafny {
          * which is than wrapped as a DafnySequence of Charters.
          * @param timestamp The Java type for a timestamp can be {@link Instant}.
          * @return A {@link DafnySequence} of {@link Character}s containing the serialization of the {@code timestamp}.
+         * @see ToNative.Simple#Instant(DafnySequence)
          */
         // TIMESTAMP("timestamp", TimestampShape.class, Category.SIMPLE),
-        @SuppressWarnings("unused")
         public static DafnySequence<Character> CharacterSequence(Instant timestamp) {
             // KMS uses unix timestamp, or seconds from epoch, as its serialized timestamp
             // Other services may use other formats
@@ -143,7 +149,8 @@ public class ToDafny {
          * this method can be used to reliably convert a Java String
          * to a DafnySequence of UTF-8 Encoded bytes.
          * @param aString The Java type for a String is {@link String}
-         * @return A {@link DafnySequence} of {@link Byte}s containing {@code s} as UTF-8 Encoded Bytes.
+         * @return A {@link DafnySequence} of {@link Byte}s containing {@code aString} as UTF-8 Encoded Bytes.
+         * @see ToNative.Simple#DafnyUtf8Bytes(DafnySequence)
          */
         public static DafnySequence<Byte> DafnyUtf8Bytes(String aString) {
             Charset utf8 = StandardCharsets.UTF_8;
