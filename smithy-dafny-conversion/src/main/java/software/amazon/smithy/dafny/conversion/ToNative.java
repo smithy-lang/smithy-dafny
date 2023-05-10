@@ -23,6 +23,7 @@ import java.util.stream.StreamSupport;
 import dafny.DafnyMap;
 import dafny.DafnySequence;
 import dafny.DafnySet;
+import dafny.TypeDescriptor;
 
 /**
  * Methods that convert from a Dafny Runtime Type to native (natural) Java Type.<p>
@@ -139,7 +140,23 @@ public class ToNative {
         }
     }
 
+    /**
+     * Methods that convert from a Dafny Runtime type
+     * to a Native Java type,
+     * for Smithy's definition of Aggregate shapes.
+     * @see <a href="https://smithy.io/2.0/spec/aggregate-types.html#aggregate-types">Smithy Aggregate Types</a>
+     */
     public static class Aggregate {
+        /**
+         * @param dafnyValues The Dafny Runtime Type for a List is a {@link DafnySequence}.
+         * @param converter A {@link Function} that converts from a Dafny Runtime Type to a Native Java Type.
+         * @param <INPUT> The Dafny Runtime Type.
+         * @param <OUTPUT> The Native Java Type.
+         * @return A {@link List} of {@code <OUTPUT>},
+         * which is the result of applying {@code converter} to
+         * every member of {@code dafnyValues}.
+         * @see ToDafny.Aggregate#GenericToSequence(List, Function, TypeDescriptor)
+         */
         // LIST("list", ListShape.class, Category.AGGREGATE),
         public static <INPUT, OUTPUT> List<OUTPUT> GenericToList(
                 DafnySequence<INPUT> dafnyValues,
@@ -152,6 +169,16 @@ public class ToNative {
             return returnList;
         }
 
+        /**
+         * @param dafnyValues The Dafny Runtime Type for a Set is a {@link DafnySet}.
+         * @param converter A {@link Function} that converts from a Dafny Runtime Type to a Native Java Type.
+         * @param <INPUT> The Dafny Runtime Type.
+         * @param <OUTPUT> The Native Java Type.
+         * @return A {@link Set} of {@code <OUTPUT>},
+         * which is the result of applying {@code converter} to
+         * every member of {@code dafnyValues}.
+         * @see ToDafny.Aggregate#GenericToSet(Set, Function)
+         */
         // SET("set", SetShape.class, Category.AGGREGATE),
         // technically, sets are deprecated in Smithy
         // They have been replaced with LIST w/ the uniqueItem trait
@@ -170,6 +197,19 @@ public class ToNative {
             return returnSet;
         }
 
+        /**
+         * @param dafnyValues The Dafny Runtime type for a map can be {@link DafnyMap}.
+         * @param keyConverter A {@link Function} that converts Dafny Runtime Type for the Key to a Native Java Type.
+         * @param valueConverter A {@link Function} that converts Dafny Runtime Type for the Value to a Native Java Type.
+         * @param <IN_KEY> The Dafny Runtime Type for the Key.
+         * @param <IN_VALUE> The Dafny Runtime Type for the Value.
+         * @param <OUT_KEY> The Native Java Type for the Key.
+         * @param <OUT_VALUE> The Native Java Type for the Value.
+         * @return A {@link Map} of {@code <OUT_KEY, OUT_VALUE>},
+         * which is the result of applying {@code keyConverter} and {@code valueConverter} to
+         * every member of {@code dafnyValues}.
+         * @see ToDafny.Aggregate#GenericToMap(Map, Function, Function)
+         */
         // MAP("map", MapShape.class, Category.AGGREGATE),
         // Technically, a smithy Map's Key value will always be a String
         public static <IN_KEY, IN_VALUE, OUT_KEY, OUT_VALUE> Map<OUT_KEY, OUT_VALUE> GenericToMap(

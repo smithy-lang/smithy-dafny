@@ -192,6 +192,7 @@ public class ToDafny {
          * @return A {@link DafnySequence} of {@code <OUTPUT>},
          * which is the result of applying {@code converter} to
          * every member of {@code nativeValues}.
+         * @see ToNative.Aggregate#GenericToList(DafnySequence, Function)
          */
         // LIST("list", ListShape.class, Category.AGGREGATE),
         public static <INPUT, OUTPUT> DafnySequence<? extends OUTPUT> GenericToSequence(
@@ -222,6 +223,7 @@ public class ToDafny {
          * @return A {@link DafnySet} of {@code <OUTPUT>},
          * which is the result of applying {@code converter} to
          * every member of {@code nativeValues}.
+         * @see ToNative.Aggregate#GenericToSet(DafnySet, Function)
          */
         // SET("set", SetShape.class, Category.AGGREGATE),
         // TODO: Frankly, we should avoid Dafny Sets since they do not preserve order;
@@ -237,7 +239,7 @@ public class ToDafny {
         }
 
         /**
-         * @param nativeValues The Java type for a set can be {@link Map}.
+         * @param nativeValues The Java type for a map can be {@link Map}.
          * @param keyConverter A {@link Function} that converts natural Java Type for the Key to a Dafny Runtime Type.
          * @param valueConverter A {@link Function} that converts natural Java Type for the Value to a Dafny Runtime Type.
          * @param <IN_KEY> The natural Java Type for the Key
@@ -247,6 +249,7 @@ public class ToDafny {
          * @return A {@link DafnyMap} of {@code <OUT_KEY, OUT_VALUE>},
          * which is the result of applying {@code keyConverter} and {@code valueConverter} to
          * every member of {@code nativeValues}.
+         * @see ToNative.Aggregate#GenericToMap(DafnyMap, Function, Function)
          */
         // MAP("map", MapShape.class, Category.AGGREGATE),
         // Technically, a smithy Map's Key value will always be a String
