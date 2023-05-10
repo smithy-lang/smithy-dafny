@@ -25,20 +25,22 @@ import dafny.TypeDescriptor;
 
 
 /**
- * Methods that convert from a Native Java type to a Dafny Java type.
+ * Methods that convert from a Native Java type to a Dafny Runtime type.<p>
+ * Every Method here has its inverse is {@link ToNative}.
+ * @see <a href="https://dafny.org/dafny/DafnyRef/integration-java/IntegrationJava">Dafny Integration with Java</a>
  */
 public class ToDafny {
 
     /**
-     * Methods that convert from a Native (idiomatic) Java type
+     * Methods that convert from a Native Java type
      * to a Dafny Java type,
      * for Smithy's definition of Simple shapes.
-     * @see <a href="https://smithy.io/2.0/spec/simple-types.html#simple-types">Smithy Simple Types</a>.
+     * @see <a href="https://smithy.io/2.0/spec/simple-types.html#simple-types">Smithy Simple Types</a>
      */
     public static class Simple {
         /**
-         * @param blob The idiomatic Java type for a blob can be an array of bytes.
-         * @return The Dafny-Java type for a blob is a Dafny Sequence of Bytes.
+         * @param blob The Java type for a blob can be an array of bytes.
+         * @return The Dafny Runtime type for a blob is a {@link DafnySequence} of {@link Byte}s.
          */
         // BLOB("blob", BlobShape.class, Category.SIMPLE),
         public static DafnySequence<Byte> ByteSequence(byte[] blob) {
@@ -47,11 +49,11 @@ public class ToDafny {
 
         /**
          * Copy {@code limit} bytes from {@code byteBuffer} starting at {@code start},
-         * and return them as a Dafny-Java ByteSequence.
-         * @param byteBuffer The idiomatic Java type for a blob can be a ByteBuffer.
+         * and return them as a Dafny Runtime ByteSequence.
+         * @param byteBuffer The Java type for a blob can be a {@link ByteBuffer}.
          * @param start The index in the byteBuffer from which to start at.
          * @param limit The number of bytes to copy.
-         * @return A DafnySequence of Bytes, containing the copied bytes.
+         * @return A {@link DafnySequence} of {@link Byte}s, containing the copied bytes.
          */
         // BLOB("blob", BlobShape.class, Category.SIMPLE),
         public static DafnySequence<Byte> ByteSequence(
@@ -66,23 +68,28 @@ public class ToDafny {
 
         /**
          * A convenience function for converting all the bytes from a ByteBuffer.
+         * <p>
          * Note: Regardless of the buffer's mark, position, or capacity,
          * this will return the bytes from 0 till limit.
          *
          * @param byteBuffer The idiomatic Java type for a blob can be a ByteBuffer.
-         * @return A DafnySequence of Bytes,
+         * @return A {@link DafnySequence} of {@link Byte}s,
          * containing the bytes in the {@code byteBuffer},
          * starting from 0 until the buffer's limit.
          */
         // BLOB("blob", BlobShape.class, Category.SIMPLE),
+        @SuppressWarnings("unused")
         public static DafnySequence<Byte> ByteSequence(ByteBuffer byteBuffer) {
             return ByteSequence(byteBuffer, 0, byteBuffer.limit());
         }
 
         /**
-         * @param aDouble The idiomatic Java type for a double can be a Double.
-         * @return A DafnySequence of Bytes containing the serialization of the {@code aDouble}.
+         * At this time, Dafny does not have a Double type.<p>
+         * Instead, the Double is serialized into bytes,
+         * which are then wrapped as a DafnySequence of Bytes.<p>
          * Note: This serialization is NOT guaranteed to be consistent among different distributions.
+         * @param aDouble The Java type for a double can be a Double.
+         * @return A DafnySequence of Bytes containing the serialization of the {@code aDouble}.
          */
         // DOUBLE("double", DoubleShape.class, Category.SIMPLE),
         public static DafnySequence<Byte> Double(Double aDouble) {
@@ -90,26 +97,55 @@ public class ToDafny {
             return ByteSequence(doubleBytes, 0, 8);
         }
 
+        /**
+         * @param aString The Java type for a String is String.
+         * @return A {@link DafnySequence} of {@link Character}s.
+         */
         // STRING("string", StringShape.class, Category.SIMPLE),
-        public static DafnySequence<Character> CharacterSequence(String s) {
-            return DafnySequence.asString(s);
+        public static DafnySequence<Character> CharacterSequence(String aString) {
+            return DafnySequence.asString(aString);
         }
 
+        /**
+         * At this time, Dafny does not have a Timestamp or Date type.<p>
+         * Instead, the Timestamp is serialized as seconds from epoch, as a string,
+         * which is than wrapped as a DafnySequence of Charters.
+         * @param timestamp The Java type for a timestamp can be {@link Date}.
+         * @return A {@link DafnySequence} of {@link Character}s containing the serialization of the {@code timestamp}.
+         */
         // TIMESTAMP("timestamp", TimestampShape.class, Category.SIMPLE),
-        public static DafnySequence<Character> CharacterSequence(Date input) {
+        @SuppressWarnings("unused")
+        public static DafnySequence<Character> CharacterSequence(Date timestamp) {
             // KMS uses unix timestamp, or seconds from epoch, as its serialized timestamp
             // Other services may use other formats
-            return CharacterSequence(String.format("%d", (input.getTime() / 1000L)));
+            return CharacterSequence(String.format("%d", (timestamp.getTime() / 1000L)));
         }
 
+        /**
+         * At this time, Dafny does not have a Timestamp or Instant type.<p>
+         * Instead, the Timestamp is serialized as seconds from epoch, as a string,
+         * which is than wrapped as a DafnySequence of Charters.
+         * @param timestamp The Java type for a timestamp can be {@link Instant}.
+         * @return A {@link DafnySequence} of {@link Character}s containing the serialization of the {@code timestamp}.
+         */
         // TIMESTAMP("timestamp", TimestampShape.class, Category.SIMPLE),
-        public static DafnySequence<Character> CharacterSequence(Instant input) {
+        @SuppressWarnings("unused")
+        public static DafnySequence<Character> CharacterSequence(Instant timestamp) {
             // KMS uses unix timestamp, or seconds from epoch, as its serialized timestamp
             // Other services may use other formats
-            return CharacterSequence(String.format("%d", input.getEpochSecond()));
+            return CharacterSequence(String.format("%d", timestamp.getEpochSecond()));
         }
 
-        public static DafnySequence<Byte> DafnyUtf8Bytes(String s) {
+        /**
+         * Dafny can be configured to represent Strings in an encoding OTHER THAN UTF-8.<p>
+         * (Until recently, it only supported UTF-16.)<p>
+         * Regardless of how the Dafny Compiler is configured,
+         * this method can be used to reliably convert a Java String
+         * to a DafnySequence of UTF-8 Encoded bytes.
+         * @param aString The Java type for a String is {@link String}
+         * @return A {@link DafnySequence} of {@link Byte}s containing {@code s} as UTF-8 Encoded Bytes.
+         */
+        public static DafnySequence<Byte> DafnyUtf8Bytes(String aString) {
             Charset utf8 = StandardCharsets.UTF_8;
             // The only way to keep this thread/concurrent safe/ is
             // to create a new Coder everytime.
@@ -117,7 +153,7 @@ public class ToDafny {
             // we could declare this NOT thread/concurrent safe,
             // and reset the coder everytime.
             CharsetEncoder coder = utf8.newEncoder();
-            CharBuffer inBuffer = CharBuffer.wrap(s);
+            CharBuffer inBuffer = CharBuffer.wrap(aString);
             inBuffer.position(0);
             try {
                 ByteBuffer outBuffer = coder.encode(inBuffer);
@@ -132,8 +168,24 @@ public class ToDafny {
 
     }
 
+    /**
+     * Methods that convert from a Native Java type
+     * to a Dafny Runtime type,
+     * for Smithy's definition of Aggregate shapes.
+     * @see <a href="https://smithy.io/2.0/spec/aggregate-types.html#aggregate-types">Smithy Aggregate Types</a>
+     */
     public static class Aggregate {
 
+        /**
+         * @param nativeValues The Java type for a list can be {@link List}.
+         * @param converter A {@link Function} that converts from a natural Java Type to a Dafny Runtime Type.
+         * @param typeDescriptor A {@link TypeDescriptor} that describes the Dafny Runtime Type.
+         * @param <INPUT> The natural Java Type.
+         * @param <OUTPUT> The Dafny Runtime Type.
+         * @return A {@link DafnySequence} of {@code <OUTPUT>},
+         * which is the result of applying {@code converter} to
+         * every member of {@code nativeValues}.
+         */
         // LIST("list", ListShape.class, Category.AGGREGATE),
         public static <INPUT, OUTPUT> DafnySequence<? extends OUTPUT> GenericToSequence(
                 List<INPUT> nativeValues,
@@ -152,8 +204,21 @@ public class ToDafny {
                     local::IndexConverter);
         }
 
+
+        /**
+         * Note: Sets in Java and in Dafny DO NOT preserve order; Smithy discourages un-ordered Sets.
+         * @see <a href="https://smithy.io/1.0/spec/core/model.html#set">Simthy 1.0's Set</a>
+         * @param nativeValues The Java type for a set can be {@link Set}.
+         * @param converter A {@link Function} that converts from a natural Java Type to a Dafny Runtime Type.
+         * @param <INPUT> The natural Java Type.
+         * @param <OUTPUT> The Dafny Runtime Type.
+         * @return A {@link DafnySet} of {@code <OUTPUT>},
+         * which is the result of applying {@code converter} to
+         * every member of {@code nativeValues}.
+         */
         // SET("set", SetShape.class, Category.AGGREGATE),
-        // TODO: Frankly, we should avoid Dafny Sets since they do not preserve order
+        // TODO: Frankly, we should avoid Dafny Sets since they do not preserve order;
+        //  Smithy 2.0 deprecates Sets for Unique Lists to ensure order is preserved.
         // But, we would need to implement our own Dafny Ordered Set...
         public static <INPUT, OUTPUT> DafnySet<OUTPUT> GenericToSet(
                 Set<INPUT> nativeValues,
@@ -164,17 +229,29 @@ public class ToDafny {
             return new DafnySet<>(hashSet);
         }
 
+        /**
+         * @param nativeValues The Java type for a set can be {@link Map}.
+         * @param keyConverter A {@link Function} that converts natural Java Type for the Key to a Dafny Runtime Type.
+         * @param valueConverter A {@link Function} that converts natural Java Type for the Value to a Dafny Runtime Type.
+         * @param <IN_KEY> The natural Java Type for the Key
+         * @param <IN_VALUE> The natural Java Type for the Value
+         * @param <OUT_KEY> The Dafny Runtime Type for the Key.
+         * @param <OUT_VALUE> The Dafny Runtime Type for the Value.
+         * @return A {@link DafnyMap} of {@code <OUT_KEY, OUT_VALUE>},
+         * which is the result of applying {@code keyConverter} and {@code valueConverter} to
+         * every member of {@code nativeValues}.
+         */
         // MAP("map", MapShape.class, Category.AGGREGATE),
         // Technically, a smithy Map's Key value will always be a String
         public static <IN_KEY, IN_VALUE, OUT_KEY, OUT_VALUE> DafnyMap<OUT_KEY, OUT_VALUE> GenericToMap(
-                Map<IN_KEY, IN_VALUE> nativeValue,
+                Map<IN_KEY, IN_VALUE> nativeValues,
                 Function<IN_KEY, OUT_KEY> keyConverter,
                 Function<IN_VALUE, OUT_VALUE> valueConverter
         ) {
             @SuppressWarnings("unchecked")
-            Tuple2<OUT_KEY, OUT_VALUE>[] tuples = new Tuple2[nativeValue.size()];
+            Tuple2<OUT_KEY, OUT_VALUE>[] tuples = new Tuple2[nativeValues.size()];
             AtomicInteger counter = new AtomicInteger(0);
-            nativeValue.forEach((k, v) -> tuples[counter.getAndIncrement()] = new Tuple2<>(
+            nativeValues.forEach((k, v) -> tuples[counter.getAndIncrement()] = new Tuple2<>(
                     keyConverter.apply(k), valueConverter.apply(v))
             );
             return DafnyMap.fromElements(tuples);
