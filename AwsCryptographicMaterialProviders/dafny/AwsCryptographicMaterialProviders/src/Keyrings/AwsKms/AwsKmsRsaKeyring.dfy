@@ -125,11 +125,25 @@ module AwsKmsRsaKeyring {
         )
       ensures (publicKey.None? || |publicKey.Extract()| == 0)
         ==> res.Failure?
+
+      //= aws-encryption-sdk-specification/framework/aws-kms/aws-kms-rsa-keyring.md#onencrypt
+      //= type=implication
+      //# OnEncrypt MUST fail if the input [encryption materials](../structures.md#encryption-materials)
+      //# contains an [algorithm suite](../algorithm-suites.md) containing an
+      //# [asymmetric signature](../algorithm-suites.md#asymmetric-signature-algorithm).
+      ensures !(input.materials.algorithmSuite.signature.None?)
+        ==> res.Failure?
     {
       :- Need(
         this.publicKey.Some? && |this.publicKey.Extract()| > 0,
         Types.AwsCryptographicMaterialProvidersException(
           message := "A AwsKmsRsaKeyring without a public key cannot provide OnEncrypt"));
+
+      :- Need(
+        input.materials.algorithmSuite.signature.None?,
+        Types.AwsCryptographicMaterialProvidersException(
+          message := "AwsKmsRsaKeyring cannot be used with an Algorithm Suite with asymmetric signing." +
+          " Please specify an algorithm suite without asymmetric signing."));
 
       var wrap := new KmsRsaWrapKeyMaterial(
         publicKey.value,
@@ -185,6 +199,14 @@ module AwsKmsRsaKeyring {
           input.materials,
           res.value.materials)
       ensures client.None? ==> res.Failure?
+
+      //= aws-encryption-sdk-specification/framework/aws-kms/aws-kms-rsa-keyring.md#ondecrypt
+      //= type=implication
+      //# OnDecrypt MUST fail if the input [decryption materials](../structures.md#decryption-materials)
+      //# contains an [algorithm suite](../algorithm-suites.md) containing an
+      //# [asymmetric signature](../algorithm-suites.md#asymmetric-signature-algorithm).
+      ensures !(input.materials.algorithmSuite.signature.None?)
+        ==> res.Failure?
     {
 
       :- Need(
@@ -197,6 +219,12 @@ module AwsKmsRsaKeyring {
         Materials.DecryptionMaterialsWithoutPlaintextDataKey(materials),
         Types.AwsCryptographicMaterialProvidersException(
           message := "Keyring received decryption materials that already contain a plaintext data key."));
+
+      :- Need(
+        input.materials.algorithmSuite.signature.None?,
+        Types.AwsCryptographicMaterialProvidersException(
+          message := "AwsKmsRsaKeyring cannot be used with an Algorithm Suite with asymmetric signing." +
+          " Please specify an algorithm suite without asymmetric signing."));
 
       var filter := new AwsKmsUtils.OnDecryptMrkAwareEncryptedDataKeyFilter(awsKmsArn, RSA_PROVIDER_ID);
       var edksToAttempt :- FilterWithResult(filter, input.encryptedDataKeys);
