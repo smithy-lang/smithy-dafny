@@ -133,12 +133,18 @@ module RawAESKeyring {
       // EDK created using expected AAD
       ensures output.Success?
       ==>
-        // Verify AESEncrypt Input
+        //= aws-encryption-sdk-specification/framework/raw-aes-keyring.md#onencrypt
+        //= type=implication
+        //# The keyring MUST attempt to serialize the [encryption materials'](structures.md#encryption-materials)
+        //# [encryption context](structures.md#encryption-context-1) according to the [encryption context serialization specification](structures.md#serialization).
         && CanonicalEncryptionContext.EncryptionContextToAAD(input.materials.encryptionContext).Success?
+
         && 1 <= |cryptoPrimitives.History.GenerateRandomBytes|
         && Seq.Last(cryptoPrimitives.History.GenerateRandomBytes).output.Success?
         && var iv :=  Seq.Last(cryptoPrimitives.History.GenerateRandomBytes).output.value;
         && |iv| == wrappingAlgorithm.ivLength as nat
+
+        // Verify AESEncrypt Input
         && 1 <= |cryptoPrimitives.History.AESEncrypt|
         && var AESEncryptInput := Seq.Last(cryptoPrimitives.History.AESEncrypt).input;
         && AESEncryptInput.encAlg == wrappingAlgorithm
@@ -243,15 +249,19 @@ module RawAESKeyring {
           output.value.materials
         )
 
-      // Plaintext decrypted using expected AAD
       ensures
         && output.Success?
       ==>
+        //= aws-encryption-sdk-specification/framework/raw-aes-keyring.md#ondecrypt
+        //= type=implication
+        //# The keyring MUST attempt to serialize the [decryption materials'](structures.md#decryption-materials)
+        //# [encryption context](structures.md#encryption-context-1) according to the [encryption context serialization specification](structures.md#serialization).
+        && CanonicalEncryptionContext.EncryptionContextToAAD(input.materials.encryptionContext).Success?
+
         && input.materials.plaintextDataKey.None?
         && output.value.materials.plaintextDataKey.Some?
         && 0 < |cryptoPrimitives.History.AESDecrypt|
         && Seq.Last(cryptoPrimitives.History.AESDecrypt).output.Success?
-        && CanonicalEncryptionContext.EncryptionContextToAAD(input.materials.encryptionContext).Success?
         && var AESDecryptRequest := Seq.Last(cryptoPrimitives.History.AESDecrypt).input;
         && AESDecryptRequest.encAlg == wrappingAlgorithm
         && AESDecryptRequest.key == wrappingKey

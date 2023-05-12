@@ -205,6 +205,11 @@ module AwsKmsRsaKeyring {
         Types.AwsCryptographicMaterialProvidersException(
           message := "Unable to decrypt data key: No Encrypted Data Keys found to match."));
 
+      //= aws-encryption-sdk-specification/framework/aws-kms/aws-kms-rsa-keyring.md#onencrypt
+      //# OnEncrypt MUST calculate a Encryption Context Digest by:
+      //  1. Serializing The [encryption context](structures.md#encryption-context-1) from the input
+      //     [encryption materials](../structures.md#encryption-materials) according to the [encryption context serialization specification](../structures.md#serialization).
+      //  2. Taking the SHA-384 Digest of this concatenation.
       var encryptionContextDigest :- EncryptionContextDigest(cryptoPrimitives, materials.encryptionContext);  
 
       var decryptClosure := new DecryptSingleAWSRSAEncryptedDataKey(
@@ -238,7 +243,7 @@ module AwsKmsRsaKeyring {
     ensures cryptoPrimitives.ValidState()
   {
     var canonicalEC :- CanonicalEncryptionContext.EncryptionContextToAAD(encryptionContext);
-    
+
     var DigestInput := Crypto.DigestInput(
       digestAlgorithm := Crypto.SHA_384,
       message := canonicalEC

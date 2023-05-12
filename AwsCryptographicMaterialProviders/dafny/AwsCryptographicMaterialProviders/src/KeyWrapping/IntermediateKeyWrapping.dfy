@@ -156,14 +156,14 @@ module IntermediateKeyWrapping {
         //# - The [EDK ciphertext](./structures.md#ciphertext) MUST be the following serialization:
         //  | Field                      | Length (bytes)                                     | Interpreted as |
         //  | -------------------------- | -------------------------------------------------- | -------------- |
-        //  | Wrapped Plaintext Data Key | The algorithm suite's encryption key length + 12   | Bytes          |
+        //  | Wrapped Plaintext Data Key | The algorithm suite's encryption key length + 16   | Bytes          |
         //  | Wrapped Intermediate Key   | Determined by the keyring responsible for wrapping | Bytes          |
         && res.value.wrappedMaterial ==
             maybeIntermediateWrappedMat.value.encryptedPdk + maybeIntermediateWrappedMat.value.providerWrappedIkm
 
         //= aws-encryption-sdk-specification/framework/algorithm-suites.md#wrapped-plaintext-data-key
         //= type=implication
-        //# This value MUST be equal to the algorithm suite's encryption key length + 12.
+        //# This value MUST be equal to the algorithm suite's encryption key length + 16.
         && |maybeIntermediateWrappedMat.value.encryptedPdk| ==
             (AlgorithmSuites.GetEncryptKeyLength(algorithmSuite) + AlgorithmSuites.GetEncryptTagLength(algorithmSuite)) as nat
   {
@@ -194,9 +194,10 @@ module IntermediateKeyWrapping {
     //# The wrapped plaintext data key MUST be the result of the following AES GCM 256 Encrypt operation:
     //  - Plaintext: the [plaintext data key](./structures.md#plaintext-data-key) in the related encryption or decryption materials.
     //  - Encryption key: The `key encryption key` derived above.
-    //  - AAD: The [enccryption context](./structures.md#encryption-context) in the related encryption or decryption materials,
-    //    serialized according to the the [ESDK message header](../data-format/message-header.md#aad).
-    var iv: seq<uint8> := seq(AlgorithmSuites.GetEncryptIvLength(algorithmSuite) as nat, _ => 0); // IV is zero
+    //  - AAD: The [encryption context](./structures.md#encryption-context) in the related encryption or decryption materials,
+    //    [serialized according to it's specification](structures.md#serialization).
+    //  - IV: The IV is 0.
+    var iv: seq<uint8> := seq(AlgorithmSuites.GetEncryptIvLength(algorithmSuite) as nat, _ => 0);
     var aad :- CanonicalEncryptionContext.EncryptionContextToAAD(encryptionContext);
     var encInput := Crypto.AESEncryptInput(
       encAlg := algorithmSuite.encrypt.AES_GCM,

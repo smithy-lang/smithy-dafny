@@ -521,24 +521,24 @@ module AwsKmsHierarchicalKeyring {
     output := Success(derivedBranchKey);
   }
 
-  function method WrappingAad(
+  function method {:opaque} WrappingAad(
     branchKeyId: seq<uint8>,
     branchKeyVersion: seq<uint8>,
     aad: seq<uint8>
   ): (res : seq<uint8>)
     requires UTF8.ValidUTF8Seq(branchKeyId)
+    //= aws-encryption-sdk-specification/framework/aws-kms/aws-kms-hierarchical-keyring.md#branch-key-wrapping-and-unwrapping-aad
+    //= type=implication
+    //# To construct the AAD, the keyring MUST concatenate the following values
+    //  1. "aws-kms-hierarchy" as UTF8 Bytes
+    //  1. Value of `branch-key-id` as UTF8 Bytes
+    //  1. [version](../structures.md#branch-key-version) as Bytes
+    //  1. [encryption context](structures.md#encryption-context-1) from the input
+    //     [encryption materials](../structures.md#encryption-materials) according to the [encryption context serialization specification](../structures.md#serialization).
+    ensures res == PROVIDER_ID_HIERARCHY + branchKeyId + branchKeyVersion + aad
     // branchKeyVersion is stored as UTF8 Bytes in the materials.
     // Store it as raw bytes in the materials so that we can encode it once per call.
   {
-      //= aws-encryption-sdk-specification/framework/aws-kms/aws-kms-hierarchical-keyring.md#branch-key-wrapping-and-unwrapping-aad
-      //# To construct the AAD, the keyring MUST concatenate the following values
-      // (blank line for duvet)
-      //# 1. "aws-kms-hierarchy" as UTF8 Bytes
-      //# 1. Value of `branch-key-id` as UTF8 Bytes
-      //# 1. [version](../structures.md#branch-key-version) as Bytes
-      //# 1. [encryption context](structures.md#encryption-context-1) from the input
-      //# [encryption materials](../structures.md#encryption-materials) in the same format as the serialization of
-      //# [message header AAD key value pairs](../../data-format/message-header.md#key-value-pairs).
       PROVIDER_ID_HIERARCHY + branchKeyId + branchKeyVersion + aad
   }
   
@@ -1136,16 +1136,13 @@ module AwsKmsHierarchicalKeyring {
         var nonce := saltAndNonce[H_WRAP_SALT_LEN..];
         
         //= aws-encryption-sdk-specification/framework/aws-kms/aws-kms-hierarchical-keyring.md#branch-key-wrapping-and-unwrapping-aad
-        //# the keyring MUST include the following values as part of the AAD for the AES Encrypt/Decrypt calls.
-        // (blank line for duvet)
-        // To construct the AAD, the keyring MUST concatante the following values
-        // (blank line for duvet)
-        //# 1. "aws-kms-hierarchy" as UTF8 Bytes
-        //# 1. Value of `branch-key-id` as UTF8 Bytes
-        //# 1. [version](../structures.md#branch-key-version) as Bytes
-        //# 1. [encryption context](structures.md#encryption-context-1) from the input
-        //#   [encryption materials](../structures.md#encryption-materials) in the same format as the serialization of
-        //#   [message header AAD key value pairs](../../data-format/message-header.md#key-value-pairs).
+        //# To Encrypt and Decrypt the `wrappedDerivedBranchKey` the keyring MUST include the following values as part of the AAD for
+        //# the AES Encrypt/Decrypt calls.
+        //  1. "aws-kms-hierarchy" as UTF8 Bytes
+        //  1. Value of `branch-key-id` as UTF8 Bytes
+        //  1. [version](../structures.md#branch-key-version) as Bytes
+        //  1. [encryption context](structures.md#encryption-context-1) from the input
+        //     [encryption materials](../structures.md#encryption-materials) according to the [encryption context serialization specification](../structures.md#serialization).
         var serializedEC :- CanonicalEncryptionContext.EncryptionContextToAAD(input.encryptionContext);
         var wrappingAad := WrappingAad(branchKeyIdUtf8, branchKeyVersionAsBytes, serializedEC);
 

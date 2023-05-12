@@ -13,13 +13,11 @@ module CanonicalEncryptionContext {
   //= aws-encryption-sdk-specification/framework/raw-aes-keyring.md#onencrypt
   //# The keyring MUST attempt to serialize the [encryption materials']
   //# (structures.md#encryption-materials) [encryption context]
-  //# (structures.md#encryption-context-1) in the same format as the
-  //# serialization of [message header AAD key value pairs](../data-format/
-  //# message-header.md#key-value-pairs).
+  //# (structures.md#encryption-context-1) according to the
+  //# [encryption context serialization specification](structures.md#serialization).
 
-  // This serialization matches the serialization described by
-  // [Message Header AAD Key Value Pairs](../data-format/message-header.md#key-value-pairs)
-  // and is used to serialize EC to use as AAD in the various keyrings
+  // This implements the canonical Encryption Context serialization
+  // (i.e. the serialization without the prepended total length)
   function method EncryptionContextToAAD(
     encryptionContext: Types.EncryptionContext
   ):

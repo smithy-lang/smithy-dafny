@@ -294,14 +294,10 @@ module TestRawAESKeyring {
     expect decryptionMaterialsOut.IsFailure();
   }
 
-  //= compliance/framework/raw-aes-keyring.txt#2.7.1
+  //= aws-encryption-sdk-specification/framework/raw-aes-keyring.md#onencrypt
   //= type=test
-  //# The keyring MUST attempt to serialize the encryption materials'
-  //# (structures.md#encryption-materials) encryption context
-  //# (structures.md#encryption-context-1) in the same format as the
-  //# serialization of message header AAD key value pairs (../data-format/
-  //# message-header.md#key-value-pairs).
-
+  //# The keyring MUST attempt to serialize the [encryption materials'](structures.md#encryption-materials)
+  //# [encryption context](structures.md#encryption-context-1) according to the [encryption context serialization specification](structures.md#serialization).
   method {:test} TestOnEncryptUnserializableEC()
   {
     var mpl :- expect MaterialProviders.MaterialProviders();
@@ -331,13 +327,10 @@ module TestRawAESKeyring {
     expect encryptionMaterialsOut.Failure?;
   }
 
-  //= compliance/framework/raw-aes-keyring.txt#2.7.2
+  //= aws-encryption-sdk-specification/framework/raw-aes-keyring.md#ondecrypt
   //= type=test
-  //# The keyring MUST attempt to serialize the decryption materials'
-  //# (structures.md#decryption-materials) encryption context
-  //# (structures.md#encryption-context-1) in the same format as the
-  //# serialization of the message header AAD key value pairs (../data-
-  //# format/message-header.md#key-value-pairs).
+  //# The keyring MUST attempt to serialize the [decryption materials'](structures.md#decryption-materials)
+  //# [encryption context](structures.md#encryption-context-1) according to the [encryption context serialization specification](structures.md#serialization).
   method {:test} TestOnDecryptUnserializableEC()
   {
     // Set up valid EDK for decryption
