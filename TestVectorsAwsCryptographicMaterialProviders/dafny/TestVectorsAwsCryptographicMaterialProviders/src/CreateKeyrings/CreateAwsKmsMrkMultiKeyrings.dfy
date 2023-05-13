@@ -17,19 +17,19 @@ module CreateAwsKmsMrkMultiKeyrings {
     returns (allAwsKmsMrkMult: seq<Types.IKeyring>)
     requires input.AwsKmsMrkMultiKeyring?
     ensures forall keyring | keyring in allAwsKmsMrkMult
-    ::
-      && keyring.ValidState()
-      && fresh(keyring)
-      && fresh(keyring.Modifies)
+              ::
+                && keyring.ValidState()
+                && fresh(keyring)
+                && fresh(keyring.Modifies)
   {
     allAwsKmsMrkMult := [];
 
     for i := 0 to |AllAwsKMSKeys|
       invariant forall keyring | keyring in allAwsKmsMrkMult
-        ::
-          && keyring.ValidState()
-          && fresh(keyring)
-          && fresh(keyring.Modifies)
+          ::
+            && keyring.ValidState()
+            && fresh(keyring)
+            && fresh(keyring.Modifies)
     {
       var (kmsKeyId, _) := AllAwsKMSKeys[i];
       var keyring := CreateAwsKmsMrkMultiKeyring(Some(kmsKeyId), None);
@@ -53,11 +53,11 @@ module CreateAwsKmsMrkMultiKeyrings {
     var mpl :- expect WrappedMaterialProviders.WrappedMaterialProviders();
 
     keyring :- expect mpl.CreateAwsKmsMrkMultiKeyring(Types.CreateAwsKmsMrkMultiKeyringInput(
-      generator := kmsKeyId,
-      kmsKeyIds := kmsKeyIds,
-      clientSupplier := None,
-      grantTokens := None
-    ));
+                                                        generator := kmsKeyId,
+                                                        kmsKeyIds := kmsKeyIds,
+                                                        clientSupplier := None,
+                                                        grantTokens := None
+                                                      ));
 
   }
 

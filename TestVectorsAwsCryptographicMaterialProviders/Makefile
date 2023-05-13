@@ -6,12 +6,14 @@ CORES=2
 include ../SharedMakefileV2.mk
 
 PROJECT_SERVICES := \
+	KeyVectors \
 	TestVectorsAwsCryptographicMaterialProviders \
 
 SMITHY_MODEL_ROOT := $(PROJECT_ROOT)/AwsCryptographicMaterialProviders/dafny/AwsCryptographicMaterialProviders/Model
 OUTPUT_LOCAL_SERVICE_TestVectorsAwsCryptographicMaterialProviders := --local-service-test
 
 SERVICE_NAMESPACE_TestVectorsAwsCryptographicMaterialProviders=aws.cryptography.materialProviders
+SERVICE_NAMESPACE_KeyVectors=aws.cryptography.materialProvidersTestVectorKeys
 
 MAX_RESOURCE_COUNT=10000000
 # Order is important
@@ -47,11 +49,12 @@ SERVICE_DEPS_TestVectorsAwsCryptographicMaterialProviders := \
 	AwsCryptographicMaterialProviders/dafny/AwsCryptographyKeyStore \
 	AwsCryptographicMaterialProviders/dafny/AwsCryptographicMaterialProviders \
 
-# LIBRARY_MODEL := \
-# 	AwsCryptographyPrimitives/Model \
-# 	ComAmazonawsKms/Model \
-# 	ComAmazonawsDynamodb/Model \
-# 	AwsCryptographicMaterialProviders/dafny/AwsCryptographicMaterialProviders/Model
+SERVICE_DEPS_KeyVectors := \
+	AwsCryptographyPrimitives \
+	ComAmazonawsKms \
+	ComAmazonawsDynamodb \
+	AwsCryptographicMaterialProviders/dafny/AwsCryptographyKeyStore \
+	AwsCryptographicMaterialProviders/dafny/AwsCryptographicMaterialProviders \
 
 format_net:
 	pushd runtimes/net && dotnet format && popd

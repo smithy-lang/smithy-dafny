@@ -4,11 +4,14 @@
 include "LibraryIndex.dfy"
 include "KeyringExpectations.dfy"
 include "CreateKeyrings.dfy"
+include "TestManifests.dfy"
+include "CompleteVectors.dfy"
 
 module WrappedMaterialProvidersMain {
   import WrappedMaterialProviders
   import KeyringExpectations
   import CreateKeyrings
+  import TestManifests
 
   // Currently this is chekcing
   // that keyrings can encrypt and decrypt encrypted data keys.
@@ -28,4 +31,11 @@ module WrappedMaterialProvidersMain {
       );
     }
   }
+
+  method EncryptTestVectors() {
+
+
+
+  }
+
 }

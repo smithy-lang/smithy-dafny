@@ -1,22 +1,22 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
+include "../../libraries/src/BoundedInts.dfy"
 module StandardLibrary.UInt {
+  import BoundedInts
+  
+  type uint8 = BoundedInts.uint8
+  type uint16 = BoundedInts.uint16
+  type uint32 = BoundedInts.uint32
+  type uint64 = BoundedInts.uint64
+  type int32 = BoundedInts.int32
+  type int64 = BoundedInts.int64
 
-  newtype uint8 = x | 0 <= x < 0x100
-  newtype uint16 = x | 0 <= x < 0x1_0000
-  newtype uint32 = x | 0 <= x < 0x1_0000_0000
-  newtype uint64 = x | 0 <= x < 0x1_0000_0000_0000_0000
-
-  newtype int32 = x | -0x8000_0000 <= x < 0x8000_0000
-  newtype int64 = x | -0x8000_0000_0000_0000 <= x < 0x8000_0000_0000_0000
-  newtype posInt64 = x | 0 < x < 0x8000_0000_0000_0000 witness 1
-
-  const UINT16_LIMIT := 0x1_0000
-  const UINT32_LIMIT := 0x1_0000_0000
-  const UINT64_LIMIT := 0x1_0000_0000_0000_0000
-  const INT32_MAX_LIMIT := 0x8000_0000
-  const INT64_MAX_LIMIT := 0x8000_0000_0000_0000
+  const UINT16_LIMIT := BoundedInts.UINT16_MAX as int
+  const UINT32_LIMIT := BoundedInts.UINT32_MAX as int
+  const UINT64_LIMIT := BoundedInts.UINT64_MAX as int
+  const INT32_MAX_LIMIT := BoundedInts.INT32_MAX as int
+  const INT64_MAX_LIMIT := BoundedInts.INT64_MAX as int
 
   predicate method UInt8Less(a: uint8, b: uint8) { a < b }
 

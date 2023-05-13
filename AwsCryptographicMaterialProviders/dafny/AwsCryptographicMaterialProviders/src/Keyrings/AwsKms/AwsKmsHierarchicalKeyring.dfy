@@ -75,11 +75,11 @@ module AwsKmsHierarchicalKeyring {
     ivLength := AES_256_ENC_IV_LENGTH
   );
 
-  const EXPECTED_EDK_CIPHERTEXT_LENGTH := 92;
   const EDK_CIPHERTEXT_VERSION_LENGTH: int32 := 16;
   const EDK_CIPHERTEXT_BRANCH_KEY_VERSION_INDEX := H_WRAP_SALT_LEN + H_WRAP_NONCE_LEN; 
   const EDK_CIPHERTEXT_VERSION_INDEX := EDK_CIPHERTEXT_BRANCH_KEY_VERSION_INDEX + EDK_CIPHERTEXT_VERSION_LENGTH;
-  const EDK_CIPHERTEXT_KEY_INDEX := EDK_CIPHERTEXT_VERSION_INDEX + AES_256_ENC_KEY_LENGTH;
+    // Salt = 16, IV = 12, Version = 16, Authentication Tag = 16
+  const EXPECTED_EDK_CIPHERTEXT_OVERHEAD := EDK_CIPHERTEXT_VERSION_INDEX + AES_256_ENC_TAG_LENGTH;
 
   // We add this axiom here because verifying the mutability of the share state of the 
   // cache. Dafny does not support concurrency and proving the state of mutable frames 
@@ -865,7 +865,8 @@ module AwsKmsHierarchicalKeyring {
         res.Success?
       ==>
         && Invariant()
-        && |input.wrappedMaterial| == EXPECTED_EDK_CIPHERTEXT_LENGTH
+        && var KeyLength := AlgorithmSuites.GetEncryptKeyLength(input.algorithmSuite);
+        && |input.wrappedMaterial| == EXPECTED_EDK_CIPHERTEXT_OVERHEAD as int + KeyLength as int
         && |crypto.History.AESDecrypt| > 0
         && Seq.Last(crypto.History.AESDecrypt).output.Success?
         && var AESDecryptInput := Seq.Last(crypto.History.AESDecrypt).input;
@@ -875,8 +876,8 @@ module AwsKmsHierarchicalKeyring {
         && var salt := wrappedMaterial[0..H_WRAP_SALT_LEN];
         && var iv := wrappedMaterial[H_WRAP_SALT_LEN..EDK_CIPHERTEXT_BRANCH_KEY_VERSION_INDEX];
         && var branchKeyVersionUuid := wrappedMaterial[EDK_CIPHERTEXT_BRANCH_KEY_VERSION_INDEX..EDK_CIPHERTEXT_VERSION_INDEX];
-        && var wrappedKey := wrappedMaterial[EDK_CIPHERTEXT_VERSION_INDEX..EDK_CIPHERTEXT_KEY_INDEX];
-        && var authTag := wrappedMaterial[EDK_CIPHERTEXT_KEY_INDEX..];
+        && var wrappedKey := wrappedMaterial[EDK_CIPHERTEXT_VERSION_INDEX..EDK_CIPHERTEXT_VERSION_INDEX + KeyLength];
+        && var authTag := wrappedMaterial[EDK_CIPHERTEXT_VERSION_INDEX + KeyLength..];
         && CanonicalEncryptionContext.EncryptionContextToAAD(input.encryptionContext).Success?
         && var serializedEC := CanonicalEncryptionContext.EncryptionContextToAAD(input.encryptionContext).value;
         && var wrappingAad := WrappingAad(branchKeyIdUtf8, branchKeyVersionAsBytes, serializedEC);
@@ -906,17 +907,19 @@ module AwsKmsHierarchicalKeyring {
       var wrappedMaterial := input.wrappedMaterial;
       var aad := input.encryptionContext;
       
+      var KeyLength := AlgorithmSuites.GetEncryptKeyLength(suite);
+
       :- Need (
-        // Salt = 16, IV = 12, Version = 16, Encrypted Key = 32, Authentication Tag = 16
-        |wrappedMaterial| == EXPECTED_EDK_CIPHERTEXT_LENGTH,
-        Types.AwsCryptographicMaterialProvidersException(message := "Received EDK Ciphertext of incorrect length.")
+        // Salt = 16, IV = 12, Version = 16, Authentication Tag = 16 + Encrypted Key Length
+        |wrappedMaterial| == EXPECTED_EDK_CIPHERTEXT_OVERHEAD as int + KeyLength as int,
+        Types.AwsCryptographicMaterialProvidersException(message := "Received EDK Ciphertext of incorrect length2.")
       );
 
       var salt := wrappedMaterial[0..H_WRAP_SALT_LEN];
       var iv := wrappedMaterial[H_WRAP_SALT_LEN..EDK_CIPHERTEXT_BRANCH_KEY_VERSION_INDEX];
       var branchKeyVersionUuid := wrappedMaterial[EDK_CIPHERTEXT_BRANCH_KEY_VERSION_INDEX..EDK_CIPHERTEXT_VERSION_INDEX];
-      var wrappedKey := wrappedMaterial[EDK_CIPHERTEXT_VERSION_INDEX..EDK_CIPHERTEXT_KEY_INDEX];
-      var authTag := wrappedMaterial[EDK_CIPHERTEXT_KEY_INDEX..];
+      var wrappedKey := wrappedMaterial[EDK_CIPHERTEXT_VERSION_INDEX.. EDK_CIPHERTEXT_VERSION_INDEX + KeyLength];
+      var authTag := wrappedMaterial[EDK_CIPHERTEXT_VERSION_INDEX + KeyLength..];
 
       var serializedEC :- CanonicalEncryptionContext.EncryptionContextToAAD(input.encryptionContext);
       var wrappingAad := WrappingAad(branchKeyIdUtf8, branchKeyVersionAsBytes, serializedEC);

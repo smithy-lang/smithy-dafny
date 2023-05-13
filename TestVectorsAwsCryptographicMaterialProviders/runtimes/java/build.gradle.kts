@@ -56,7 +56,7 @@ repositories {
 }
 
 dependencies {
-    implementation("org.dafny:DafnyRuntime:4.0.0")
+    implementation("org.dafny:DafnyRuntime:4.1.0")
     implementation("software.amazon.dafny:conversion:1.0-SNAPSHOT")
     implementation("software.amazon.cryptography:StandardLibrary:1.0-SNAPSHOT")
     implementation("software.amazon.cryptography:AwsCryptographyPrimitives:1.0-SNAPSHOT")
@@ -83,9 +83,13 @@ tasks.withType<JavaCompile>() {
     options.encoding = "UTF-8"
 }
 
-tasks {
-    register("runTests", JavaExec::class.java) {
-        mainClass.set("TestsFromDafny")
-        classpath = sourceSets["test"].runtimeClasspath
-    }
+tasks.register<JavaExec>("runTests") {
+    dependsOn("copyKeysJSON")
+    mainClass.set("TestsFromDafny")
+    classpath = sourceSets["test"].runtimeClasspath
+}
+
+tasks.register<Copy>("copyKeysJSON") {
+    from(layout.projectDirectory.file("../../dafny/TestVectorsAwsCryptographicMaterialProviders/test/keys.json"))
+    into(layout.projectDirectory.dir("dafny/TestVectorsAwsCryptographicMaterialProviders/test"))
 }

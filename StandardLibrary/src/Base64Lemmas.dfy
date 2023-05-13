@@ -143,9 +143,35 @@ module Base64Lemmas {
     }
   }
 
-  lemma EncodeDecodeValid(b: seq<uint8>)
+  lemma {:vcs_split_on_every_assert} EncodeDecodeValid(b: seq<uint8>)
+    ensures DecodeValid(Encode(b)) == b
+  {
+    if |b| % 3 == 0 {
+      EncodeDecodeValid0(b);
+    } 
+    else if |b| % 3 == 1 {
+      EncodeDecodeValid1(b);
+    }
+    else {
+      EncodeDecodeValid2(b);
+    } 
+  }
+
+  lemma EncodeDecodeValid0(b: seq<uint8>)
+    requires |b| % 3 == 0
     ensures DecodeValid(Encode(b)) == b
   {}
+
+  lemma EncodeDecodeValid1(b: seq<uint8>)
+    requires |b| % 3 == 1 
+    ensures DecodeValid(Encode(b)) == b
+  {}
+  
+  lemma EncodeDecodeValid2(b: seq<uint8>)
+    requires |b| % 3 == 2
+    ensures DecodeValid(Encode(b)) == b
+  {}
+
 
   lemma DecodeEncode(s: seq<char>)
     requires IsBase64String(s)

@@ -116,7 +116,7 @@ module AwsKmsRsaKeyring {
       decreases Modifies - {History}
       ensures ValidState()
       ensures OnEncryptEnsuresPublicly(input, res)
-      ensures unchanged(History) 
+      ensures unchanged(History)
       ensures res.Success?
       ==>
         && Materials.ValidEncryptionMaterialsTransition(
@@ -192,7 +192,7 @@ module AwsKmsRsaKeyring {
       ensures ValidState()
       ensures OnDecryptEnsuresPublicly(input, res)
       ensures unchanged(History)
-      
+
       ensures res.Success?
       ==>
         && Materials.DecryptionMaterialsTransitionIsValid(
@@ -350,20 +350,25 @@ module AwsKmsRsaKeyring {
         res.Success?
       ==>
         && Invariant()
-        && KMS.IsValid_CiphertextType(edk.ciphertext)
+        && var maybeWrappedMaterial :=
+            EdkWrapping.GetProviderWrappedMaterial(edk.ciphertext, materials.algorithmSuite);
+        && maybeWrappedMaterial.Success?
+        && KMS.IsValid_CiphertextType(maybeWrappedMaterial.value)
         && Materials.DecryptionMaterialsTransitionIsValid(materials, res.value)
         && 0 < |client.History.Decrypt|
         && KMS.DecryptRequest(
           KeyId := Some(awsKmsKey),
-          CiphertextBlob := edk.ciphertext,
+          CiphertextBlob := maybeWrappedMaterial.value,
           EncryptionContext := None,
           GrantTokens := Some(grantTokens),
           EncryptionAlgorithm := Some(paddingScheme)
         ) == Seq.Last(client.History.Decrypt).input
         && Seq.Last(client.History.Decrypt).output.Success?
         && Seq.Last(client.History.Decrypt).output.value.Plaintext.Some?
-        && Seq.Last(client.History.Decrypt).output.value.Plaintext.value
-          == encryptionContextDigest + res.value.plaintextDataKey.value
+        && (
+          materials.algorithmSuite.edkWrapping.DIRECT_KEY_WRAPPING? ==>
+            Seq.Last(client.History.Decrypt).output.value.Plaintext.value
+              == encryptionContextDigest + res.value.plaintextDataKey.value)
         && Seq.Last(client.History.Decrypt).output.value.KeyId == Some(awsKmsKey)
     }
 
@@ -390,7 +395,7 @@ module AwsKmsRsaKeyring {
         unwrap
       );
 
-      var result :- Materials.DecryptionMaterialsAddDataKey(materials, unwrapOutput.plaintextDataKey, None);
+      var result :- Materials.DecryptionMaterialsAddDataKey(materials, unwrapOutput.plaintextDataKey, unwrapOutput.symmetricSigningKey);
       return Success(result);
     }
   }
@@ -475,7 +480,7 @@ module AwsKmsRsaKeyring {
         wrappedMaterial := wrapOutput.wrappedMaterial,
         wrapInfo := KmsRsaWrapInfo()
       );
-      
+
       return Success(output);
     }
   }
@@ -553,7 +558,7 @@ module AwsKmsRsaKeyring {
         wrappedMaterial := ciphertext,
         wrapInfo := KmsRsaWrapInfo()
       );
-      
+
       return Success(output);
     }
   }
@@ -666,11 +671,11 @@ module AwsKmsRsaKeyring {
           && AlgorithmSuites.GetEncryptKeyLength(input.algorithmSuite) as nat + |encryptionContextDigest| == |decryptResponse.Plaintext.value|
           , Types.AwsCryptographicMaterialProvidersException(
           message := "Encryption context digest does not match expected value."));
-      
+
       var output := MaterialWrapping.UnwrapOutput(
         unwrappedMaterial := decryptResponse.Plaintext.value[|encryptionContextDigest|..],
         unwrapInfo := KmsRsaUnwrapInfo());
-      
+
       return Success(output);
     }
   }

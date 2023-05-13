@@ -26,7 +26,8 @@ module TestVectorsUtils {
   const ACCOUNT_IDS := ["658956600833"];
 
   const PARTITION := "aws";
-  
+
+  // TODO correctly verify UTF8 validity of long sequences
   // This axiom should only be used by tests to skip UTF8 verification of long sequences
   // long to be serialized in 16 bytes, in order to avoid a false negative for from verification.
   lemma {:axiom} AssumeLongSeqIsValidUTF8(s: seq<uint8>)
@@ -109,12 +110,12 @@ module TestVectorsUtils {
     var encodedKeyProviderInfo :- expect UTF8.Encode(keyProviderInfo);
     var fakeCiphertext :- expect UTF8.Encode("fakeCiphertext");
     return Types.EncryptedDataKey(
-      keyProviderId := encodedkeyProviderId,
-      keyProviderInfo := encodedKeyProviderInfo,
-      ciphertext := fakeCiphertext
-    );
+        keyProviderId := encodedkeyProviderId,
+        keyProviderInfo := encodedKeyProviderInfo,
+        ciphertext := fakeCiphertext
+      );
   }
-    
+
   method NamespaceAndName(n: nat) returns (namespace: string, name: string)
     requires 0 <= n < 10
     ensures |namespace| < UINT16_LIMIT

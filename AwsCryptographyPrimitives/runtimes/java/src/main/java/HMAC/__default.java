@@ -1,7 +1,6 @@
 package HMAC;
 
 import software.amazon.cryptography.primitives.internaldafny.types.Error;
-import StandardLibrary_mUInt_Compile.uint8;
 import Wrappers_Compile.Result;
 import dafny.DafnySequence;
 

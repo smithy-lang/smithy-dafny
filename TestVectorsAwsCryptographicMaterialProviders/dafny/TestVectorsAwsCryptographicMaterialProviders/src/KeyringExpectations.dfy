@@ -9,15 +9,15 @@ module KeyringExpectations {
   import opened Wrappers
   import WrappedMaterialProviders
   import Types = AwsCryptographyMaterialProvidersTypes
-  
+
   import opened TestVectorConstants
   import TestVectorsUtils
 
   datatype Materials =
-  | Materials(
-    encryptionMaterials: Types.EncryptionMaterials,
-    decryptionMaterials: Types.DecryptionMaterials
-  )
+    | Materials(
+        encryptionMaterials: Types.EncryptionMaterials,
+        decryptionMaterials: Types.DecryptionMaterials
+      )
 
   // This method tests that a keyring can create an encrypted data key
   // and then decrypt that encrypted data key
@@ -98,11 +98,11 @@ module KeyringExpectations {
     ensures keyring.ValidState()
 
     ensures mpl.ValidEncryptionMaterialsTransition(
-      Types.ValidEncryptionMaterialsTransitionInput(
-        start := encryptionMaterialsIn,
-        stop := encryptionMaterials
-      ) 
-    ).Success?
+              Types.ValidEncryptionMaterialsTransitionInput(
+                start := encryptionMaterialsIn,
+                stop := encryptionMaterials
+              )
+            ).Success?
     ensures mpl.EncryptionMaterialsHasPlaintextDataKey(encryptionMaterials).Success?
   {
 
@@ -113,12 +113,12 @@ module KeyringExpectations {
 
     encryptionMaterials := encryptionMaterialsOut.materials;
 
-    // Only the right things changed 
+    // Only the right things changed
     var _ :- expect mpl.ValidEncryptionMaterialsTransition(
       Types.ValidEncryptionMaterialsTransitionInput(
         start := encryptionMaterialsIn,
         stop := encryptionMaterials
-      ) 
+      )
     );
 
     // The resultant materials is valid
@@ -140,11 +140,11 @@ module KeyringExpectations {
     ensures keyring.ValidState()
 
     ensures mpl.ValidDecryptionMaterialsTransition(
-      Types.ValidDecryptionMaterialsTransitionInput(
-        start := decryptionMaterialsIn,
-        stop := decryptionMaterials
-      )
-    ).Success?
+              Types.ValidDecryptionMaterialsTransitionInput(
+                start := decryptionMaterialsIn,
+                stop := decryptionMaterials
+              )
+            ).Success?
     ensures mpl.DecryptionMaterialsWithPlaintextDataKey(decryptionMaterials).Success?
   {
 

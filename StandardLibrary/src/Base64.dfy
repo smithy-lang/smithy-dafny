@@ -417,7 +417,7 @@ module Base64 {
   {
   }
 
-  function method Encode(b: seq<uint8>): (s: seq<char>)
+  function method {:vcs_split_on_every_assert} Encode(b: seq<uint8>): (s: seq<char>)
     ensures StringIs7Bit(s)
     ensures |s| % 4 == 0
     ensures IsBase64String(s)

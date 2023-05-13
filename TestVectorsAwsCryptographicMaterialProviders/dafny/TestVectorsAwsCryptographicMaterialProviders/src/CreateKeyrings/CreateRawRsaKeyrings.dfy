@@ -23,19 +23,19 @@ module CreateRawRsaKeyrings {
     returns (allRSA: seq<Types.IKeyring>)
     requires input.RawRsaKeyring?
     ensures forall keyring | keyring in allRSA
-    ::
-      && keyring.ValidState()
-      && fresh(keyring)
-      && fresh(keyring.Modifies)
+              ::
+                && keyring.ValidState()
+                && fresh(keyring)
+                && fresh(keyring.Modifies)
   {
     allRSA := [];
     var AllPaddingSchemes := set w: Types.PaddingScheme | true;
     while AllPaddingSchemes != {}
       invariant forall keyring | keyring in allRSA
-        ::
-          && keyring.ValidState()
-          && fresh(keyring)
-          && fresh(keyring.Modifies)
+                  ::
+                    && keyring.ValidState()
+                    && fresh(keyring)
+                    && fresh(keyring.Modifies)
     {
       var paddingScheme :| paddingScheme in AllPaddingSchemes;
       var keyring := CreateRawRsaKeyring(paddingScheme);
@@ -64,12 +64,12 @@ module CreateRawRsaKeyrings {
 
     var namespace, name := TestVectorsUtils.NamespaceAndName(0);
     keyring :- expect mpl.CreateRawRsaKeyring(Types.CreateRawRsaKeyringInput(
-      keyNamespace := namespace,
-      keyName := name,
-      paddingScheme := paddingScheme,
-      publicKey := Option.Some(keys.publicKey.pem),
-      privateKey := Option.Some(keys.privateKey.pem)
-    ));
+                                                keyNamespace := namespace,
+                                                keyName := name,
+                                                paddingScheme := paddingScheme,
+                                                publicKey := Option.Some(keys.publicKey.pem),
+                                                privateKey := Option.Some(keys.privateKey.pem)
+                                              ));
   }
 
 }

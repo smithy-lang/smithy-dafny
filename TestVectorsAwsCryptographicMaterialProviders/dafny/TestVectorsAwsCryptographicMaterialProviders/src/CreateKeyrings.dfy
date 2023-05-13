@@ -26,40 +26,40 @@ module CreateKeyrings {
   method CreateAllEncryptDecryptKeyrings()
     returns (all: seq<Types.IKeyring>)
     ensures forall keyring | keyring in all
-    ::
-      && keyring.ValidState()
-      && fresh(keyring)
-      && fresh(keyring.Modifies)
+              ::
+                && keyring.ValidState()
+                && fresh(keyring)
+                && fresh(keyring.Modifies)
   {
 
     all := [];
     for i := 0 to |AllEncryptDecryptKeyrings|
       invariant forall keyring | keyring in all
-      ::
-        && keyring.ValidState()
-        && fresh(keyring)
-        && fresh(keyring.Modifies)
+          ::
+            && keyring.ValidState()
+            && fresh(keyring)
+            && fresh(keyring.Modifies)
     {
       var keyringType := AllEncryptDecryptKeyrings[i];
       match keyringType
-        case AwsKmsKeyring() =>
-          var allAwsKms := CreateAwsKmsKeyrings.CreateAllAwsKmsKeyring(keyringType);
-          all := all + allAwsKms;
-        case AwsKmsMultiKeyring() =>
-          var allAwsKms := CreateAwsKmsMultiKeyrings.CreateAllAwsKmsMultiKeyring(keyringType);
-          all := all + allAwsKms;
-        case AwsKmsMrkKeyring() =>
-          var allAwsKmsMrk := CreateAwsKmsMrkKeyrings.CreateAllAwsKmsMrkKeyring(keyringType);
-          all := all + allAwsKmsMrk;
-        case AwsKmsMrkMultiKeyring() =>
-          var allAwsKmsMrkMult := CreateAwsKmsMrkMultiKeyrings.CreateAllAwsKmsMrkMultiKeyring(keyringType);
-          all := all + allAwsKmsMrkMult;
-        case RawAesKeyring() =>
-          var allRSA := CreateRawAesKeyrings.CreateAllRawAesKeyring(keyringType);
-          all := all + allRSA;
-        case RawRsaKeyring() =>
-          var allAES := CreateRawRsaKeyrings.CreateAllRawRsaKeyring(keyringType);
-          all := all + allAES;
+      case AwsKmsKeyring() =>
+        var allAwsKms := CreateAwsKmsKeyrings.CreateAllAwsKmsKeyring(keyringType);
+        all := all + allAwsKms;
+      case AwsKmsMultiKeyring() =>
+        var allAwsKms := CreateAwsKmsMultiKeyrings.CreateAllAwsKmsMultiKeyring(keyringType);
+        all := all + allAwsKms;
+      case AwsKmsMrkKeyring() =>
+        var allAwsKmsMrk := CreateAwsKmsMrkKeyrings.CreateAllAwsKmsMrkKeyring(keyringType);
+        all := all + allAwsKmsMrk;
+      case AwsKmsMrkMultiKeyring() =>
+        var allAwsKmsMrkMult := CreateAwsKmsMrkMultiKeyrings.CreateAllAwsKmsMrkMultiKeyring(keyringType);
+        all := all + allAwsKmsMrkMult;
+      case RawAesKeyring() =>
+        var allRSA := CreateRawAesKeyrings.CreateAllRawAesKeyring(keyringType);
+        all := all + allRSA;
+      case RawRsaKeyring() =>
+        var allAES := CreateRawRsaKeyrings.CreateAllRawRsaKeyring(keyringType);
+        all := all + allAES;
     }
   }
 

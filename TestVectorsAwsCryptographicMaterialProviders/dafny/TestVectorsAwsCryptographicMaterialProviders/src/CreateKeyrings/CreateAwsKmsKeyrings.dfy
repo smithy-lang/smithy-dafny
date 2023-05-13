@@ -17,19 +17,19 @@ module CreateAwsKmsKeyrings {
     returns (allAwsKms: seq<Types.IKeyring>)
     requires input.AwsKmsKeyring?
     ensures forall keyring | keyring in allAwsKms
-    ::
-      && keyring.ValidState()
-      && fresh(keyring)
-      && fresh(keyring.Modifies)
+              ::
+                && keyring.ValidState()
+                && fresh(keyring)
+                && fresh(keyring.Modifies)
   {
     allAwsKms := [];
 
     for i := 0 to |AllAwsKMSKeys|
       invariant forall keyring | keyring in allAwsKms
-        ::
-          && keyring.ValidState()
-          && fresh(keyring)
-          && fresh(keyring.Modifies)
+          ::
+            && keyring.ValidState()
+            && fresh(keyring)
+            && fresh(keyring.Modifies)
     {
       var (kmsKeyId, region) := AllAwsKMSKeys[i];
       var keyring := CreateAwsKmsKeyring(kmsKeyId, region);
@@ -56,10 +56,10 @@ module CreateAwsKmsKeyrings {
     var kmsClient :- expect clientSupplier.GetClient(Types.GetClientInput( region := region ));
 
     keyring :- expect mpl.CreateAwsKmsKeyring(Types.CreateAwsKmsKeyringInput(
-      kmsKeyId := kmsKeyId,
-      kmsClient := kmsClient,
-      grantTokens := None
-    ));
+                                                kmsKeyId := kmsKeyId,
+                                                kmsClient := kmsClient,
+                                                grantTokens := None
+                                              ));
 
   }
 
