@@ -1,4 +1,4 @@
-name: dafny-java-conversion workflows
+name: smithy-dafny-conversion workflows
 
 on: 
   pull_request:
@@ -21,8 +21,20 @@ jobs:
         with:
           dafny-version: "4.1.0"
 
-      - name: Execute tests
+      - name: test
         uses: gradle/gradle-build-action@v2
         with:
           arguments: test
-          build-root-directory: dafny-java-conversion
+          build-root-directory: smithy-dafny-conversion
+
+      - name: javadoc
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: javadoc
+          build-root-directory: smithy-dafny-conversion
+
+      - name: publishToMavenLocal
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: publishToMavenLocal
+          build-root-directory: smithy-dafny-conversion

@@ -2,16 +2,34 @@ import java.net.URI
 import javax.annotation.Nullable
 
 plugins {
-    java
+    `java-library`
     `maven-publish`
 }
-
-group = "software.amazon.dafny"
+description = "Convert Native Java Types to Dafny Runtime Types and vice versa"
+group = "software.amazon.smithy.dafny"
+var artifactId = "conversion"
 version = "1.0-SNAPSHOT"
+
+var moduleName = "%s.%s".format(group, artifactId)
+var displayName = "Smithy :: Dafny :: Conversion"
 
 java {
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(8))
+    }
+}
+
+tasks.register<Jar>("javadocJar") {
+    from(tasks.javadoc)
+    archiveClassifier.set("javadoc")
+}
+
+tasks.register<Jar>("sourcesJar") {
+    from(sourceSets.main.get().allJava)
+    archiveClassifier.set("sources")
+    inputs.property("moduleName", moduleName)
+    manifest {
+        attributes["Automatic-Module-Name"] = moduleName
     }
 }
 
