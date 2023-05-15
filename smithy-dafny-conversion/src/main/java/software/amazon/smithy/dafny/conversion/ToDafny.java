@@ -50,7 +50,7 @@ public class ToDafny {
 
         /**
          * Copy {@code limit} bytes from {@code byteBuffer} starting at {@code start},
-         * and return them as a Dafny Runtime DafnySequence<Byte>.
+         * and return them as a Dafny Runtime {@link DafnySequence} of {@link Byte}s.
          * @param byteBuffer The Java type for a blob can be a {@link ByteBuffer}.
          * @param start The index in the byteBuffer from which to start at.
          * @param limit The number of bytes to copy.
