@@ -21,16 +21,19 @@ import software.amazon.polymorph.smithyjava.generator.awssdk.v1.JavaAwsSdkV1;
 import software.amazon.polymorph.smithyjava.generator.awssdk.v2.JavaAwsSdkV2;
 import software.amazon.polymorph.smithyjava.generator.library.JavaLibrary;
 import software.amazon.polymorph.smithyjava.generator.library.TestJavaLibrary;
+import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.polymorph.utils.IOUtils;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.smithy.aws.traits.ServiceTrait;
 import software.amazon.smithy.model.Model;
+import software.amazon.smithy.model.selector.Selector;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.utils.IoUtils;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -103,6 +106,11 @@ public class CodegenEngine {
         }
 
         for (final TargetLanguage lang : targetLangOutputDirs.keySet()) {
+            Selector supportedFeatures = SupportedFeaturesByTargetLanguage.get(lang);
+            if (supportedFeatures != null) {
+                supportedFeatures.
+            }
+
             final Path outputDir = targetLangOutputDirs.get(lang).toAbsolutePath().normalize();
             switch (lang) {
                 case DAFNY -> generateDafny(outputDir);
@@ -373,5 +381,14 @@ public class CodegenEngine {
         DAFNY,
         JAVA,
         DOTNET,
+    }
+
+    private static final Map<TargetLanguage, Selector> SupportedFeaturesByTargetLanguage = new HashMap<>();
+    static {
+        var commonSelector = Selector.parse(
+                "test(service operation structure boolean"
+        );
+
+        SupportedFeaturesByTargetLanguage.put(TargetLanguage.DAFNY, commonSelector);
     }
 }
