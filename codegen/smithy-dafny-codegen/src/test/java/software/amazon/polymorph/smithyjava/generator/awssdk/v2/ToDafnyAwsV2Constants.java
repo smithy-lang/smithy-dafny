@@ -42,7 +42,7 @@ public class ToDafnyAwsV2Constants {
             public static dafny.DafnySequence<? extends software.amazon.cryptography.services.kms.internaldafny.types.KeyUsageType> KeyUsageTypes (
                 java.util.List<java.lang.String> nativeValue
             ) {
-              return software.amazon.dafny.conversion.ToDafny.Aggregate.GenericToSequence(
+              return software.amazon.smithy.dafny.conversion.ToDafny.Aggregate.GenericToSequence(
                   nativeValue,
                   software.amazon.cryptography.services.kms.internaldafny.ToDafny::KeyUsageType,
                   software.amazon.cryptography.services.kms.internaldafny.types.KeyUsageType._typeDescriptor()
@@ -53,7 +53,7 @@ public class ToDafnyAwsV2Constants {
             public static dafny.DafnySequence<? extends software.amazon.cryptography.services.other.internaldafny.types.OtherNamespace> OtherNamespaces (
                 java.util.List<software.amazon.awssdk.services.other.model.OtherNamespace> nativeValue
             ) {
-              return software.amazon.dafny.conversion.ToDafny.Aggregate.GenericToSequence(
+              return software.amazon.smithy.dafny.conversion.ToDafny.Aggregate.GenericToSequence(
                   nativeValue,
                   software.amazon.cryptography.services.other.internaldafny.ToDafny::OtherNamespace,
                   software.amazon.cryptography.services.other.internaldafny.types.OtherNamespace._typeDescriptor()
@@ -67,10 +67,10 @@ public class ToDafnyAwsV2Constants {
             EncryptionContextType(
                 java.util.Map<java.lang.String, java.lang.String> nativeValue
             ) {
-              return software.amazon.dafny.conversion.ToDafny.Aggregate.GenericToMap(
+              return software.amazon.smithy.dafny.conversion.ToDafny.Aggregate.GenericToMap(
                   nativeValue,
-                  software.amazon.dafny.conversion.ToDafny.Simple::CharacterSequence,
-                  software.amazon.dafny.conversion.ToDafny.Simple::CharacterSequence
+                  software.amazon.smithy.dafny.conversion.ToDafny.Simple::CharacterSequence,
+                  software.amazon.smithy.dafny.conversion.ToDafny.Simple::CharacterSequence
               );
             }
             """;
@@ -80,9 +80,9 @@ public class ToDafnyAwsV2Constants {
             Names(
                 java.util.Set<java.lang.String> nativeValue
             ) {
-              return software.amazon.dafny.conversion.ToDafny.Aggregate.GenericToSet(
+              return software.amazon.smithy.dafny.conversion.ToDafny.Aggregate.GenericToSet(
                   nativeValue,
-                  software.amazon.dafny.conversion.ToDafny.Simple::CharacterSequence
+                  software.amazon.smithy.dafny.conversion.ToDafny.Simple::CharacterSequence
               );
             }
             """;
@@ -100,7 +100,7 @@ public class ToDafnyAwsV2Constants {
             ) {
               Wrappers_Compile.Option<dafny.DafnySequence<? extends java.lang.Character>> message;
               message = java.util.Objects.nonNull(nativeValue.getMessage()) ?
-                    Wrappers_Compile.Option.create_Some(software.amazon.dafny.conversion.ToDafny.Simple.CharacterSequence(nativeValue.getMessage()))
+                    Wrappers_Compile.Option.create_Some(software.amazon.smithy.dafny.conversion.ToDafny.Simple.CharacterSequence(nativeValue.getMessage()))
                   : Wrappers_Compile.Option.create_None();
               return new software.amazon.cryptography.services.kms.internaldafny.types.Error_Opaque(message);
             }
@@ -124,7 +124,7 @@ public class ToDafnyAwsV2Constants {
               public static DoSomethingResponse DoSomethingResponse(DoSomethingResponse nativeValue) {
                 Option<DafnySequence<? extends Character>> message;
                 message = Objects.nonNull(nativeValue.getMessage()) ?
-                    Option.create_Some(software.amazon.dafny.conversion.ToDafny.Simple.CharacterSequence(nativeValue.getMessage()))
+                    Option.create_Some(software.amazon.smithy.dafny.conversion.ToDafny.Simple.CharacterSequence(nativeValue.getMessage()))
                     : Option.create_None();
                 return new DoSomethingResponse(message);
               }
@@ -132,7 +132,7 @@ public class ToDafnyAwsV2Constants {
               public static Error Error(DependencyTimeoutException nativeValue) {
                 Option<DafnySequence<? extends Character>> message;
                 message = Objects.nonNull(nativeValue.getMessage()) ?
-                    Option.create_Some(software.amazon.dafny.conversion.ToDafny.Simple.CharacterSequence(nativeValue.getMessage()))
+                    Option.create_Some(software.amazon.smithy.dafny.conversion.ToDafny.Simple.CharacterSequence(nativeValue.getMessage()))
                     : Option.create_None();
                 return new Error_DependencyTimeoutException(message);
               }
@@ -140,7 +140,7 @@ public class ToDafnyAwsV2Constants {
               public static Error Error(KmsException nativeValue) {
                 Option<DafnySequence<? extends Character>> message;
                 message = Objects.nonNull(nativeValue.getMessage()) ?
-                    Option.create_Some(software.amazon.dafny.conversion.ToDafny.Simple.CharacterSequence(nativeValue.getMessage()))
+                    Option.create_Some(software.amazon.smithy.dafny.conversion.ToDafny.Simple.CharacterSequence(nativeValue.getMessage()))
                     : Option.create_None();
                 return new Error_Opaque(message);
               }

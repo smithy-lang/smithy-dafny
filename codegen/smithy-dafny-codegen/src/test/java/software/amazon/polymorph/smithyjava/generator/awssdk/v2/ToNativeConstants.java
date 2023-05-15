@@ -1,7 +1,7 @@
 package software.amazon.polymorph.smithyjava.generator.awssdk.v2;
 
 public class ToNativeConstants {
-    static String STRING_CONVERSION = "software.amazon.dafny.conversion.ToNative.Simple.String";
+    static String STRING_CONVERSION = "software.amazon.smithy.dafny.conversion.ToNative.Simple.String";
     static String KEY_USAGE_TYPE_CONVERSION = "software.amazon.cryptography.services.kms.internaldafny.ToNative.KeyUsageType";
     static String OTHER_NAMESPACE_CONVERSION = "software.amazon.cryptography.services.other.internaldafny.ToNative.OtherNamespace";
     static String INIT_TEMP_ARRAY = "software.amazon.awssdk.services.kms.model.KeyUsageType[] listEnum_temp = new software.amazon.awssdk.services.kms.model.KeyUsageType[dafnyValue.dtor_listEnum().length()]";
@@ -23,7 +23,7 @@ public class ToNativeConstants {
             public static java.util.List<software.amazon.awssdk.services.kms.model.KeyUsageType> KeyUsageTypes(
                 dafny.DafnySequence<? extends software.amazon.cryptography.services.kms.internaldafny.types.KeyUsageType> dafnyValue
             ) {
-              return software.amazon.dafny.conversion.ToNative.Aggregate.GenericToList(
+              return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToList(
                   dafnyValue,
                   software.amazon.cryptography.services.kms.internaldafny.ToNative::KeyUsageType);
             }
@@ -32,9 +32,9 @@ public class ToNativeConstants {
             public static java.util.Set<java.lang.String> Names(
                 dafny.DafnySet<? extends dafny.DafnySequence<? extends java.lang.Character>> dafnyValue
             ) {
-              return software.amazon.dafny.conversion.ToNative.Aggregate.GenericToSet(
+              return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToSet(
                   dafnyValue,
-                  software.amazon.dafny.conversion.ToNative.Simple::String);
+                  software.amazon.smithy.dafny.conversion.ToNative.Simple::String);
             }
             """;
     static String GENERATE_CONVERT_MAP = """
@@ -44,10 +44,10 @@ public class ToNativeConstants {
                         ? extends dafny.DafnySequence<? extends java.lang.Character>
                 > dafnyValue
             ) {
-              return software.amazon.dafny.conversion.ToNative.Aggregate.GenericToMap(
+              return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToMap(
                   dafnyValue,
-                  software.amazon.dafny.conversion.ToNative.Simple::String,
-                  software.amazon.dafny.conversion.ToNative.Simple::String);
+                  software.amazon.smithy.dafny.conversion.ToNative.Simple::String,
+                  software.amazon.smithy.dafny.conversion.ToNative.Simple::String);
             }""";
     static String SIMPLE_STRUCTURE = """
             public static software.amazon.awssdk.services.kms.model.Simple Simple(
@@ -62,7 +62,7 @@ public class ToNativeConstants {
             ) {
               software.amazon.awssdk.services.kms.model.AOptional.Builder builder = software.amazon.awssdk.services.kms.model.AOptional.builder();
               if (dafnyValue.dtor_message().is_Some()) {
-                builder.message(software.amazon.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_message().dtor_value()));
+                builder.message(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_message().dtor_value()));
               }
               return builder.build();
             }
