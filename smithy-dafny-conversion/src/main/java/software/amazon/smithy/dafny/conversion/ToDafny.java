@@ -86,7 +86,7 @@ public class ToDafny {
         }
 
         /**
-         * At this time, Dafny does not have a Double type.<p>
+         * At this time, Dafny does not have an idiomatic Double type in the language or any standard library.<p>
          * Instead, the Double is serialized into bytes,
          * which are then wrapped as a DafnySequence of Bytes.<p>
          * Note: This serialization is NOT guaranteed to be
@@ -113,7 +113,7 @@ public class ToDafny {
         }
 
         /**
-         * At this time, Dafny does not have a Timestamp or Date type.<p>
+         * At this time, Dafny does not have an idiomatic Timestamp or Date type in the language or any standard library.<p>
          * Instead, the Timestamp is serialized as seconds from epoch, as a string,
          * which is than wrapped as a {@link DafnySequence} of {@link Character}s.
          * @param timestamp The Java type for a Smithy timestamp can be {@link Date}.
@@ -128,7 +128,7 @@ public class ToDafny {
         }
 
         /**
-         * At this time, Dafny does not have a Timestamp or Instant type.<p>
+         * At this time, Dafny does not have an idiomatic Timestamp or Date type in the language or any standard library.<p>
          * Instead, the Timestamp is serialized as seconds from epoch, as a string,
          * which is than wrapped as a DafnySequence of Charters.
          * @param timestamp The Java type for a timestamp can be {@link Instant}.
@@ -200,16 +200,10 @@ public class ToDafny {
                 Function<INPUT, OUTPUT> converter,
                 TypeDescriptor<OUTPUT> typeDescriptor
         ) {
-            class Local {
-                public OUTPUT IndexConverter(BigInteger index) {
-                    return converter.apply(nativeValues.get(index.intValue()));
-                }
-            }
-            Local local = new Local();
             return DafnySequence.Create(
                     typeDescriptor,
                     BigInteger.valueOf(nativeValues.size()),
-                    local::IndexConverter);
+                    index -> converter.apply(nativeValues.get(index.intValue())));
         }
 
 
