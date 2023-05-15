@@ -187,18 +187,18 @@ public class ToDafny {
          * @param nativeValues The Java type for a list can be {@link List}.
          * @param converter A {@link Function} that converts from a natural Java Type to a Dafny Runtime Type.
          * @param typeDescriptor A {@link TypeDescriptor} that describes the Dafny Runtime Type.
-         * @param <INPUT> The natural Java Type.
-         * @param <OUTPUT> The Dafny Runtime Type.
-         * @return A {@link DafnySequence} of {@code <OUTPUT>},
+         * @param <T> The natural Java Type.
+         * @param <R> The Dafny Runtime Type.
+         * @return A {@link DafnySequence} of {@code <R>},
          * which is the result of applying {@code converter} to
          * every member of {@code nativeValues}.
          * @see ToNative.Aggregate#GenericToList(DafnySequence, Function)
          */
         // LIST("list", ListShape.class, Category.AGGREGATE),
-        public static <INPUT, OUTPUT> DafnySequence<? extends OUTPUT> GenericToSequence(
-                List<INPUT> nativeValues,
-                Function<INPUT, OUTPUT> converter,
-                TypeDescriptor<OUTPUT> typeDescriptor
+        public static <T, R> DafnySequence<? extends R> GenericToSequence(
+                List<T> nativeValues,
+                Function<T, R> converter,
+                TypeDescriptor<R> typeDescriptor
         ) {
             return DafnySequence.Create(
                     typeDescriptor,
@@ -212,9 +212,9 @@ public class ToDafny {
          * @see <a href="https://smithy.io/1.0/spec/core/model.html#set">Simthy 1.0's Set</a>
          * @param nativeValues The Java type for a set can be {@link Set}.
          * @param converter A {@link Function} that converts from a natural Java Type to a Dafny Runtime Type.
-         * @param <INPUT> The natural Java Type.
-         * @param <OUTPUT> The Dafny Runtime Type.
-         * @return A {@link DafnySet} of {@code <OUTPUT>},
+         * @param <T> The natural Java Type.
+         * @param <R> The Dafny Runtime Type.
+         * @return A {@link DafnySet} of {@code <R>},
          * which is the result of applying {@code converter} to
          * every member of {@code nativeValues}.
          * @see ToNative.Aggregate#GenericToSet(DafnySet, Function)
@@ -223,11 +223,11 @@ public class ToDafny {
         // TODO: Frankly, we should avoid Dafny Sets since they do not preserve order;
         //  Smithy 2.0 deprecates Sets for Unique Lists to ensure order is preserved.
         // But, we would need to implement our own Dafny Ordered Set...
-        public static <INPUT, OUTPUT> DafnySet<OUTPUT> GenericToSet(
-                Set<INPUT> nativeValues,
-                Function<INPUT, OUTPUT> converter
+        public static <T, R> DafnySet<R> GenericToSet(
+                Set<T> nativeValues,
+                Function<T, R> converter
         ) {
-            HashSet<OUTPUT> hashSet = new HashSet<>(nativeValues.size(), 1);
+            HashSet<R> hashSet = new HashSet<>(nativeValues.size(), 1);
             nativeValues.forEach(v -> hashSet.add(converter.apply(v)));
             return new DafnySet<>(hashSet);
         }
