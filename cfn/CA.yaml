@@ -88,6 +88,7 @@ Resources:
               - !Ref Domain
               - !Sub "arn:aws:codeartifact:${AWS::Region}:${AWS::AccountId}:package/${DomainName}/${SmithyPolymorph.Name}/*/*/*"
               - !Sub "arn:aws:codeartifact:${AWS::Region}:${AWS::AccountId}:package/${DomainName}/${DafnyJavaConversion.Name}/*/*/*"
+              - !Sub "arn:aws:codeartifact:${AWS::Region}:${AWS::AccountId}:package/${DomainName}/SmithyDafnyConversion/*/*/*"
           - Effect: Allow
             Action:
               - sts:GetServiceBearerToken
@@ -126,6 +127,7 @@ Resources:
               - !Ref Domain
               - !Sub "arn:aws:codeartifact:${AWS::Region}:${AWS::AccountId}:package/${DomainName}/${SmithyPolymorph.Name}/*/*/*"
               - !Sub "arn:aws:codeartifact:${AWS::Region}:${AWS::AccountId}:package/${DomainName}/${DafnyJavaConversion.Name}/*/*/*"
+              - !Sub "arn:aws:codeartifact:${AWS::Region}:${AWS::AccountId}:package/${DomainName}/SmithyDafnyConversion/*/*/*"
           - Effect: Allow
             Action:
               - sts:GetServiceBearerToken

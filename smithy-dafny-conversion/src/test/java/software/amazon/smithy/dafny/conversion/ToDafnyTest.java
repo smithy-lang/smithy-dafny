@@ -1,4 +1,4 @@
-package software.amazon.dafny.conversion;
+package software.amazon.smithy.dafny.conversion;
 
 import org.junit.Test;
 
