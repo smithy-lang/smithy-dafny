@@ -28,6 +28,7 @@ import software.amazon.smithy.aws.traits.ServiceTrait;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.selector.Selector;
 import software.amazon.smithy.model.shapes.ServiceShape;
+import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.utils.IoUtils;
 
 import java.io.IOException;
@@ -37,6 +38,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class CodegenEngine {
     private static final Logger LOGGER = LoggerFactory.getLogger(CodegenEngine.class);
@@ -92,7 +95,7 @@ public class CodegenEngine {
     /**
      * Executes code generation for the configured language(s).
      * This method is designed to be internally stateless
-     * and idempotent with respect with respect to the file system.
+     * and idempotent with respect to the file system.
      */
     public void run() {
         try {
@@ -106,9 +109,17 @@ public class CodegenEngine {
         }
 
         for (final TargetLanguage lang : targetLangOutputDirs.keySet()) {
-            Selector supportedFeatures = SupportedFeaturesByTargetLanguage.get(lang);
+            String supportedFeatures = SupportedFeaturesByTargetLanguage.get(lang);
             if (supportedFeatures != null) {
-                supportedFeatures.
+                // TODO: look for unsupported traits too
+                Selector s = Selector.parse("[id=" + serviceShape.getId() + "] :is(*, ~> *) :not(" + supportedFeatures + ")");
+                Set<Shape> notSupported = s.select(model);
+                if (!notSupported.isEmpty()) {
+                    String message = "The following shapes in the service's closure are not supported: \n" +
+                        notSupported.stream().map(shape -> shape.toString()).collect(Collectors.joining("\n"));
+                    // TODO: don't use an exception
+                    throw new IllegalArgumentException(message);
+                }
             }
 
             final Path outputDir = targetLangOutputDirs.get(lang).toAbsolutePath().normalize();
@@ -383,11 +394,9 @@ public class CodegenEngine {
         DOTNET,
     }
 
-    private static final Map<TargetLanguage, Selector> SupportedFeaturesByTargetLanguage = new HashMap<>();
+    private static final Map<TargetLanguage, String> SupportedFeaturesByTargetLanguage = new HashMap<>();
     static {
-        var commonSelector = Selector.parse(
-                "test(service operation structure boolean"
-        );
+        var commonSelector = ":is(service, operation, structure, string, boolean, member, list)";
 
         SupportedFeaturesByTargetLanguage.put(TargetLanguage.DAFNY, commonSelector);
     }
