@@ -38,7 +38,7 @@ public class ToNative {
   public static CollectionOfErrors Error(Error_CollectionOfErrors dafnyValue) {
     CollectionOfErrors.Builder nativeBuilder = CollectionOfErrors.builder();
     nativeBuilder.list(
-        software.amazon.dafny.conversion.ToNative.Aggregate.GenericToList(
+        software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToList(
         dafnyValue.dtor_list(), 
         ToNative::Error));
     return nativeBuilder.build();
@@ -46,7 +46,7 @@ public class ToNative {
 
   public static KeyVectorException Error(Error_KeyVectorException dafnyValue) {
     KeyVectorException.Builder nativeBuilder = KeyVectorException.builder();
-    nativeBuilder.message(software.amazon.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_message()));
+    nativeBuilder.message(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_message()));
     return nativeBuilder.build();
   }
 
@@ -68,7 +68,7 @@ public class ToNative {
   public static GetKeyDescriptionInput GetKeyDescriptionInput(
       software.amazon.cryptography.materialproviderstestvectorkeys.internaldafny.types.GetKeyDescriptionInput dafnyValue) {
     GetKeyDescriptionInput.Builder nativeBuilder = GetKeyDescriptionInput.builder();
-    nativeBuilder.json(software.amazon.dafny.conversion.ToNative.Simple.ByteBuffer(dafnyValue.dtor_json()));
+    nativeBuilder.json(software.amazon.smithy.dafny.conversion.ToNative.Simple.ByteBuffer(dafnyValue.dtor_json()));
     return nativeBuilder.build();
   }
 
@@ -82,36 +82,36 @@ public class ToNative {
   public static HierarchyKeyring HierarchyKeyring(
       software.amazon.cryptography.materialproviderstestvectorkeys.internaldafny.types.HierarchyKeyring dafnyValue) {
     HierarchyKeyring.Builder nativeBuilder = HierarchyKeyring.builder();
-    nativeBuilder.keyId(software.amazon.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_keyId()));
+    nativeBuilder.keyId(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_keyId()));
     return nativeBuilder.build();
   }
 
   public static KeyVectorsConfig KeyVectorsConfig(
       software.amazon.cryptography.materialproviderstestvectorkeys.internaldafny.types.KeyVectorsConfig dafnyValue) {
     KeyVectorsConfig.Builder nativeBuilder = KeyVectorsConfig.builder();
-    nativeBuilder.keyManifiestPath(software.amazon.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_keyManifiestPath()));
+    nativeBuilder.keyManifiestPath(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_keyManifiestPath()));
     return nativeBuilder.build();
   }
 
   public static KMSInfo KMSInfo(
       software.amazon.cryptography.materialproviderstestvectorkeys.internaldafny.types.KMSInfo dafnyValue) {
     KMSInfo.Builder nativeBuilder = KMSInfo.builder();
-    nativeBuilder.keyId(software.amazon.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_keyId()));
+    nativeBuilder.keyId(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_keyId()));
     return nativeBuilder.build();
   }
 
   public static KmsMrkAware KmsMrkAware(
       software.amazon.cryptography.materialproviderstestvectorkeys.internaldafny.types.KmsMrkAware dafnyValue) {
     KmsMrkAware.Builder nativeBuilder = KmsMrkAware.builder();
-    nativeBuilder.keyId(software.amazon.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_keyId()));
+    nativeBuilder.keyId(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_keyId()));
     return nativeBuilder.build();
   }
 
   public static KmsMrkAwareDiscovery KmsMrkAwareDiscovery(
       software.amazon.cryptography.materialproviderstestvectorkeys.internaldafny.types.KmsMrkAwareDiscovery dafnyValue) {
     KmsMrkAwareDiscovery.Builder nativeBuilder = KmsMrkAwareDiscovery.builder();
-    nativeBuilder.keyId(software.amazon.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_keyId()));
-    nativeBuilder.defaultMrkRegion(software.amazon.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_defaultMrkRegion()));
+    nativeBuilder.keyId(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_keyId()));
+    nativeBuilder.defaultMrkRegion(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_defaultMrkRegion()));
     if (dafnyValue.dtor_awsKmsDiscoveryFilter().is_Some()) {
       nativeBuilder.awsKmsDiscoveryFilter(software.amazon.cryptography.materialproviders.ToNative.DiscoveryFilter(dafnyValue.dtor_awsKmsDiscoveryFilter().dtor_value()));
     }
@@ -121,7 +121,7 @@ public class ToNative {
   public static KmsRsaKeyring KmsRsaKeyring(
       software.amazon.cryptography.materialproviderstestvectorkeys.internaldafny.types.KmsRsaKeyring dafnyValue) {
     KmsRsaKeyring.Builder nativeBuilder = KmsRsaKeyring.builder();
-    nativeBuilder.keyId(software.amazon.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_keyId()));
+    nativeBuilder.keyId(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_keyId()));
     nativeBuilder.encryptionAlgorithm(software.amazon.cryptography.services.kms.internaldafny.ToNative.EncryptionAlgorithmSpec(dafnyValue.dtor_encryptionAlgorithm()));
     return nativeBuilder.build();
   }
@@ -129,16 +129,16 @@ public class ToNative {
   public static RawAES RawAES(
       software.amazon.cryptography.materialproviderstestvectorkeys.internaldafny.types.RawAES dafnyValue) {
     RawAES.Builder nativeBuilder = RawAES.builder();
-    nativeBuilder.keyId(software.amazon.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_keyId()));
-    nativeBuilder.providerId(software.amazon.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_providerId()));
+    nativeBuilder.keyId(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_keyId()));
+    nativeBuilder.providerId(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_providerId()));
     return nativeBuilder.build();
   }
 
   public static RawRSA RawRSA(
       software.amazon.cryptography.materialproviderstestvectorkeys.internaldafny.types.RawRSA dafnyValue) {
     RawRSA.Builder nativeBuilder = RawRSA.builder();
-    nativeBuilder.keyId(software.amazon.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_keyId()));
-    nativeBuilder.providerId(software.amazon.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_providerId()));
+    nativeBuilder.keyId(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_keyId()));
+    nativeBuilder.providerId(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_providerId()));
     nativeBuilder.padding(software.amazon.cryptography.materialproviders.ToNative.PaddingScheme(dafnyValue.dtor_padding()));
     return nativeBuilder.build();
   }
@@ -153,14 +153,14 @@ public class ToNative {
   public static SerializeKeyDescriptionOutput SerializeKeyDescriptionOutput(
       software.amazon.cryptography.materialproviderstestvectorkeys.internaldafny.types.SerializeKeyDescriptionOutput dafnyValue) {
     SerializeKeyDescriptionOutput.Builder nativeBuilder = SerializeKeyDescriptionOutput.builder();
-    nativeBuilder.json(software.amazon.dafny.conversion.ToNative.Simple.ByteBuffer(dafnyValue.dtor_json()));
+    nativeBuilder.json(software.amazon.smithy.dafny.conversion.ToNative.Simple.ByteBuffer(dafnyValue.dtor_json()));
     return nativeBuilder.build();
   }
 
   public static StaticKeyring StaticKeyring(
       software.amazon.cryptography.materialproviderstestvectorkeys.internaldafny.types.StaticKeyring dafnyValue) {
     StaticKeyring.Builder nativeBuilder = StaticKeyring.builder();
-    nativeBuilder.keyId(software.amazon.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_keyId()));
+    nativeBuilder.keyId(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_keyId()));
     return nativeBuilder.build();
   }
 
