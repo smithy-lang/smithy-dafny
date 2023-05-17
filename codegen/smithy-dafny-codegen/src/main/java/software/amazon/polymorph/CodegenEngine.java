@@ -36,6 +36,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -404,18 +405,24 @@ public class CodegenEngine {
         DOTNET,
     }
 
+    private static final List<String> SUPPORTED_SHAPES = List.of(
+            "service", "operation", "resource",
+            "structure", "union", "list", "map", "member",
+            "string", "boolean", "integer", "long", "double",
+            "timestamp", "blob"
+    );
+
+    private static final List<String> SUPPORTED_TRAITS = List.of(
+            "smithy.api#box", "smithy.api#required", "smithy.api#length", "smithy.api#documentation",
+            "aws.polymorph#reference", "aws.polymorph#localService", "aws.polymorph#extendable"
+    );
+
     private static final Map<TargetLanguage, String> SupportedFeaturesByTargetLanguage = new HashMap<>();
     static {
         // TODO: Should only allow resources when not generating SDK style
-        var supportedShapes = "service, operation, resource, " +
-                "structure, union, list, map, member, " +
-                "string, boolean, integer, long, double, timestamp, blob";
-        String supportedTraits = "smithy.api#box, smithy.api#required, smithy.api#length, " +
-                "aws.polymorph#reference, aws.polymorph#localService, aws.polymorph#extendable";
-
         var commonSelector =
-                ":is(" + supportedShapes + ") " +
-                "$supportedTraits(:root([id = " + supportedTraits + "])) " +
+                ":is(" + String.join(", ", SUPPORTED_SHAPES) + ") " +
+                "$supportedTraits(:root([id = " + String.join(", ", SUPPORTED_TRAITS) + "])) " +
                 "[@: @{trait|(keys)} {<} @{var|supportedTraits|id}]";
 
         SupportedFeaturesByTargetLanguage.put(TargetLanguage.DAFNY, commonSelector);
