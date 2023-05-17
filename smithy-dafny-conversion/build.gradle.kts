@@ -19,6 +19,20 @@ java {
     }
 }
 
+var caUrl: URI? = null
+@Nullable
+val caUrlStr: String? = System.getenv("CODEARTIFACT_URL_JAVA_CONVERSION")
+if (!caUrlStr.isNullOrBlank()) {
+    caUrl = URI.create(caUrlStr)
+}
+
+var caPassword: String? = null
+@Nullable
+val caPasswordString: String? = System.getenv("CODEARTIFACT_AUTH_TOKEN")
+if (!caPasswordString.isNullOrBlank()) {
+    caPassword = caPasswordString
+}
+
 repositories {
     mavenCentral()
     mavenLocal()
@@ -59,20 +73,6 @@ publishing {
             maybeCodeArtifact(this@Build_gradle, this)
         }
     }
-}
-
-var caUrl: URI? = null
-@Nullable
-val caUrlStr: String? = System.getenv("CODEARTIFACT_URL_JAVA_CONVERSION")
-if (!caUrlStr.isNullOrBlank()) {
-    caUrl = URI.create(caUrlStr)
-}
-
-var caPassword: String? = null
-@Nullable
-val caPasswordString: String? = System.getenv("CODEARTIFACT_AUTH_TOKEN")
-if (!caPasswordString.isNullOrBlank()) {
-    caPassword = caPasswordString
 }
 
 fun maybeCodeArtifact(buildGradle: Build_gradle, repositoryHandler: RepositoryHandler) {
