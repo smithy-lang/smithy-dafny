@@ -396,7 +396,8 @@ public class CodegenEngine {
 
     private static final Map<TargetLanguage, String> SupportedFeaturesByTargetLanguage = new HashMap<>();
     static {
-        var commonSelector = ":is(service, operation, " +
+        // TODO: Should only allow resources when not generating SDK style
+        var commonSelector = ":is(service, operation, resources, " +
                 "structure, union, list, map, member, " +
                 "string, boolean, integer, long, double, timestamp, blob)";
 
