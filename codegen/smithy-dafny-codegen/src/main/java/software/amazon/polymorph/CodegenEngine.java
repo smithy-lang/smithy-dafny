@@ -396,9 +396,9 @@ public class CodegenEngine {
 
     private static final Map<TargetLanguage, String> SupportedFeaturesByTargetLanguage = new HashMap<>();
     static {
-        var commonSelector = ":is(service, operation, structure, member, " +
-                "list, map, " +
-                "string, boolean, blob, integer, timestamp)";
+        var commonSelector = ":is(service, operation, " +
+                "structure, union, list, map, member, " +
+                "string, boolean, integer, long, double, timestamp, blob)";
 
         SupportedFeaturesByTargetLanguage.put(TargetLanguage.DAFNY, commonSelector);
     }
