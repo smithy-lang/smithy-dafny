@@ -29,6 +29,7 @@ import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.selector.Selector;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
+import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.utils.IoUtils;
 
 import java.io.IOException;
@@ -111,12 +112,16 @@ public class CodegenEngine {
         for (final TargetLanguage lang : targetLangOutputDirs.keySet()) {
             String supportedFeatures = SupportedFeaturesByTargetLanguage.get(lang);
             if (supportedFeatures != null) {
-                // TODO: look for unsupported traits too
-                Selector s = Selector.parse("[id=" + serviceShape.getId() + "] :is(*, ~> *) :not(" + supportedFeatures + ")");
+                Selector s = Selector.parse(
+                        "[id=" + serviceShape.getId() + "] " +
+                        ":is(*, ~> *) " +
+                        ":not(" + supportedFeatures + ")");
+
                 Set<Shape> notSupported = s.select(model);
+
                 if (!notSupported.isEmpty()) {
                     String message = "The following shapes in the service's closure are not supported: \n" +
-                        notSupported.stream().map(shape -> shape.toString()).collect(Collectors.joining("\n"));
+                        notSupported.stream().map(this::toStringWithTraits).collect(Collectors.joining("\n"));
                     // TODO: don't use an exception
                     throw new IllegalArgumentException(message);
                 }
@@ -132,6 +137,11 @@ public class CodegenEngine {
             }
         }
     }
+
+    private String toStringWithTraits(Shape shape) {
+        return shape.toString() + " (" + shape.getAllTraits().keySet().stream().map(ShapeId::toString).collect(Collectors.joining(", ")) + ")";
+    }
+
 
     private void generateDafny(final Path outputDir) {
         // Validated by builder, but check again
@@ -397,9 +407,16 @@ public class CodegenEngine {
     private static final Map<TargetLanguage, String> SupportedFeaturesByTargetLanguage = new HashMap<>();
     static {
         // TODO: Should only allow resources when not generating SDK style
-        var commonSelector = ":is(service, operation, resource, " +
+        var supportedShapes = "service, operation, resource, " +
                 "structure, union, list, map, member, " +
-                "string, boolean, integer, long, double, timestamp, blob)";
+                "string, boolean, integer, long, double, timestamp, blob";
+        String supportedTraits = "smithy.api#box, smithy.api#required, smithy.api#length, " +
+                "aws.polymorph#reference, aws.polymorph#localService, aws.polymorph#extendable";
+
+        var commonSelector =
+                ":is(" + supportedShapes + ") " +
+                "$supportedTraits(:root([id = " + supportedTraits + "])) " +
+                "[@: @{trait|(keys)} {<} @{var|supportedTraits|id}]";
 
         SupportedFeaturesByTargetLanguage.put(TargetLanguage.DAFNY, commonSelector);
     }
