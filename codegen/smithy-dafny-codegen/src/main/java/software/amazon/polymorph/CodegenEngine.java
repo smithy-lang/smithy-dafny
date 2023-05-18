@@ -406,10 +406,16 @@ public class CodegenEngine {
     }
 
     private static final List<String> SUPPORTED_SHAPES = List.of(
-            "service", "operation", "resource",
+            "service", "operation",
             "structure", "union", "list", "map", "member",
             "string", "boolean", "integer", "long", "double",
             "timestamp", "blob"
+    );
+
+    private static final List<String> SUPPORTED_SHAPES_NON_AWS_SDK_STYLE = List.of(
+            // Playing it safe and not claiming to support this in SDK style mode yet,
+            // since we might be generating code that only makes sense for local services.
+            "resource"
     );
 
     private static final List<String> SUPPORTED_TRAITS = List.of(
