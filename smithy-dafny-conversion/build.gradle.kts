@@ -8,7 +8,8 @@ plugins {
 description = "Convert Native Java Types to Dafny Runtime Types and vice versa"
 group = "software.amazon.smithy.dafny"
 var artifactId = "conversion"
-version = "1.0-SNAPSHOT"
+version = "0.1"
+ext.isReleaseVersion = !version.endsWith('SNAPSHOT')
 
 var moduleName = "%s.%s".format(group, artifactId)
 var displayName = "Smithy :: Dafny :: Conversion"
@@ -67,6 +68,34 @@ publishing {
             from(components["java"])
             artifact(tasks["sourcesJar"])
             artifact(tasks["javadocJar"])
+
+            // Include extra information in the POMs.
+            afterEvaluate {
+                pom {
+                    name.set(subproject.extra["displayName"].toString())
+                    description.set(subproject.description)
+                    url.set("https://github.com/awslabs/smithy")
+                    licenses {
+                        license {
+                            name.set("Apache License 2.0")
+                            url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+                            distribution.set("repo")
+                        }
+                    }
+                    developers {
+                        developer {
+                            id.set("smithy")
+                            name.set("Smithy")
+                            organization.set("Amazon Web Services")
+                            organizationUrl.set("https://aws.amazon.com")
+                            roles.add("developer")
+                        }
+                    }
+                    scm {
+                        url.set("https://github.com/awslabs/smithy.git")
+                    }
+                }
+            }
         }
         repositories {
             mavenLocal()
