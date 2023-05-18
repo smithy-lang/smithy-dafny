@@ -4,6 +4,8 @@ import javax.annotation.Nullable
 plugins {
     `java-library`
     `maven-publish`
+    signing
+    id("io.github.gradle-nexus.publish-plugin") version "1.1.0"
 }
 description = "Convert Native Java Types to Dafny Runtime Types and vice versa"
 group = "software.amazon.smithy.dafny"
