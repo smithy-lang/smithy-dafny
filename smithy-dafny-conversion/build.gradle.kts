@@ -9,7 +9,6 @@ description = "Convert Native Java Types to Dafny Runtime Types and vice versa"
 group = "software.amazon.smithy.dafny"
 var artifactId = "conversion"
 version = "0.1"
-ext.isReleaseVersion = !version.endsWith('SNAPSHOT')
 
 var moduleName = "%s.%s".format(group, artifactId)
 var displayName = "Smithy :: Dafny :: Conversion"
@@ -72,8 +71,8 @@ publishing {
             // Include extra information in the POMs.
             afterEvaluate {
                 pom {
-                    name.set(subproject.extra["displayName"].toString())
-                    description.set(subproject.description)
+                    name.set("Smithy :: Dafny :: Conversion")
+                    description.set("Convert Native Java Types to Dafny Runtime Types and vice versa")
                     url.set("https://github.com/awslabs/smithy")
                     licenses {
                         license {
