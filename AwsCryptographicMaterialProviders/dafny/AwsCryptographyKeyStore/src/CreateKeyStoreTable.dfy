@@ -46,15 +46,20 @@ module CreateKeyStoreTable {
   ); 
   const GSI_NAME := "Active-Keys";
 
-  // type tableName = tn : DDB.TableName;
   type keyStoreDescription = t: DDB.TableDescription | keyStoreHasExpectedConstruction?(t) witness *
   predicate method keyStoreHasExpectedConstruction?(t: DDB.TableDescription) {
     && t.AttributeDefinitions.Some? && t.KeySchema.Some? && t.GlobalSecondaryIndexes.Some? && t.TableName.Some? && t.TableArn.Some?
-    && ToSet(t.AttributeDefinitions.value) == ToSet(attrDef)
-    && ToSet(t.KeySchema.value) == ToSet(keySchema)
+    //= aws-encryption-sdk-specification/framework/branch-key-store.md#keyschema
+    //= type=implication
+    //# The following KeySchema MUST be configured on the table:
+    && ToSet(t.AttributeDefinitions.value) >= ToSet(attrDef)
+    && ToSet(t.KeySchema.value) >= ToSet(keySchema)
     && |t.GlobalSecondaryIndexes.value| >= 1
     && var gsiList := t.GlobalSecondaryIndexes.value;
     && exists gsi | gsi in gsiList :: 
+      //= aws-encryption-sdk-specification/framework/branch-key-store.md#globalsecondary-indexes
+      //= type=implication
+      //# The table MUST contain a GlobalSecondaryIndex defined as follows:
       && gsi.IndexName.Some? && gsi.KeySchema.Some? && gsi.Projection.Some?
       && gsi.IndexName.value == GSI_NAME
       && ToSet(gsi.KeySchema.value) == ToSet(keySchemaGsi)
@@ -104,7 +109,7 @@ module CreateKeyStoreTable {
             KeySchema := keySchema,
             LocalSecondaryIndexes := None,
             //= aws-encryption-sdk-specification/framework/branch-key-store.md#globalsecondary-indexes
-            //# The table MUST configure a single GlobalSecondaryIndex:
+            //# The table MUST contain a GlobalSecondaryIndex defined as follows:
             GlobalSecondaryIndexes := Some(gsi),
             BillingMode := Some(DDB.BillingMode.PAY_PER_REQUEST) ,
             ProvisionedThroughput :=  None,
