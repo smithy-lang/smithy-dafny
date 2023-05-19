@@ -64,37 +64,37 @@ module {:options "-functionSyntax:4"} KeyringFromKeyDescription {
     }
     case Kms(KMSInfo(key)) => {
       :- Need(material.Some? && material.value.KMS?, KeyVectorException( message := "Not type: KMS" ));
-      var input := MPL.CreateAwsKmsMultiKeyringInput(
-        generator := Some(material.value.keyIdentifier),
-        kmsKeyIds := None,
-        clientSupplier := None,
+
+      var kmsClient :- getKmsClient(mpl, material.value.keyIdentifier);
+
+      var input := MPL.CreateAwsKmsKeyringInput(
+        kmsKeyId := material.value.keyIdentifier,
+        kmsClient := kmsClient,
         grantTokens := None
       );
-      var keyring := mpl.CreateAwsKmsMultiKeyring(input);
+
+      var keyring := mpl.CreateAwsKmsKeyring(input);
       return keyring.MapFailure(e => AwsCryptographyMaterialProviders(e));
     }
     case KmsMrk(KmsMrkAware(key)) => {
       :- Need(material.Some? && material.value.KMS?, KeyVectorException( message := "Not type: KMS" ));
-      var input := MPL.CreateAwsKmsMrkMultiKeyringInput(
-        generator := Some(material.value.keyIdentifier),
-        kmsKeyIds := None,
-        clientSupplier := None,
+
+      var kmsClient :- getKmsClient(mpl, material.value.keyIdentifier);
+
+      var input := MPL.CreateAwsKmsMrkKeyringInput(
+        kmsKeyId := material.value.keyIdentifier,
+        kmsClient := kmsClient,
         grantTokens := None
       );
-      var keyring := mpl.CreateAwsKmsMrkMultiKeyring(input);
+
+      var keyring := mpl.CreateAwsKmsMrkKeyring(input);
       return keyring.MapFailure(e => AwsCryptographyMaterialProviders(e));
     }
     case KmsRsa(KmsRsaKeyring(key, encryptionAlgorithm)) => {
       :- Need(material.Some? && material.value.KMSAsymetric?, KeyVectorException( message := "Not type: KMSAsymetric" ));
 
-      var arn :- AwsArnParsing.ParseAwsKmsArn(material.value.keyIdentifier)
-      .MapFailure(e => KeyVectorException( message := e ));
-      var maybeClientSupplier := mpl.CreateDefaultClientSupplier(MPL.CreateDefaultClientSupplierInput());
-      var clientSupplier :- maybeClientSupplier
-      .MapFailure(e => AwsCryptographyMaterialProviders(e));
-      var maybeKmsClient := clientSupplier.GetClient(MPL.GetClientInput( region := arn.region ));
-      var kmsClient :- maybeKmsClient
-      .MapFailure(e => AwsCryptographyMaterialProviders(e));
+      var kmsClient :- getKmsClient(mpl, material.value.keyIdentifier);
+
       var input := MPL.CreateAwsKmsRsaKeyringInput(
         publicKey := Some(material.value.publicKey),
         kmsKeyId := material.value.keyIdentifier,
@@ -183,4 +183,31 @@ module {:options "-functionSyntax:4"} KeyringFromKeyDescription {
       }
     }
   }
+
+  // A simple helper to turn the arn into a client.
+  // This is not terribly efficient, but it works for test vectors
+  method getKmsClient(mpl: MPL.IAwsCryptographicMaterialProvidersClient, maybeKmsArn: string)
+    returns (output: Result<ComAmazonawsKmsTypes.IKMSClient, Error>)
+    requires mpl.ValidState()
+    modifies mpl.Modifies
+    ensures mpl.ValidState()
+    ensures  ( output.Success? ==>
+                 && output.value.ValidState()
+                 && output.value.Modifies !! {mpl.History}
+                 && fresh(output.value)
+                 && fresh ( output.value.Modifies - mpl.Modifies ) )
+  {
+    var maybeClientSupplier := mpl.CreateDefaultClientSupplier(MPL.CreateDefaultClientSupplierInput);
+    var clientSupplier :- maybeClientSupplier
+    .MapFailure(e => AwsCryptographyMaterialProviders(e));
+
+    var arn :- AwsArnParsing.ParseAwsKmsArn(maybeKmsArn)
+    .MapFailure(e => KeyVectorException( message := e ));
+
+    var tmp := clientSupplier.GetClient(MPL.GetClientInput(
+                                          region := arn.region
+                                        ));
+    output := tmp.MapFailure(e => AwsCryptographyMaterialProviders(e));
+  }
+
 }
