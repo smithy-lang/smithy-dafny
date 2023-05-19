@@ -35,6 +35,7 @@ import software.amazon.smithy.utils.IoUtils;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -111,23 +112,6 @@ public class CodegenEngine {
         }
 
         for (final TargetLanguage lang : targetLangOutputDirs.keySet()) {
-            String supportedFeatures = SupportedFeaturesByTargetLanguage.get(lang);
-            if (supportedFeatures != null) {
-                Selector s = Selector.parse(
-                        "[id=" + serviceShape.getId() + "] " +
-                        ":is(*, ~> *) " +
-                        ":not(" + supportedFeatures + ")");
-
-                Set<Shape> notSupported = s.select(model);
-
-                if (!notSupported.isEmpty()) {
-                    String message = "The following shapes in the service's closure are not supported: \n" +
-                        notSupported.stream().map(this::toStringWithTraits).collect(Collectors.joining("\n"));
-                    // TODO: don't use an exception
-                    throw new IllegalArgumentException(message);
-                }
-            }
-
             final Path outputDir = targetLangOutputDirs.get(lang).toAbsolutePath().normalize();
             switch (lang) {
                 case DAFNY -> generateDafny(outputDir);
@@ -145,6 +129,8 @@ public class CodegenEngine {
 
 
     private void generateDafny(final Path outputDir) {
+        checkForUnsupportedFeatures(COMMON_SUPPORTED_SHAPES, COMMON_SUPPORTED_TRAITS);
+
         // Validated by builder, but check again
         assert this.includeDafnyFile.isPresent();
         final DafnyApiCodegen dafnyApiCodegen = new DafnyApiCodegen(
@@ -405,7 +391,7 @@ public class CodegenEngine {
         DOTNET,
     }
 
-    private static final List<String> SUPPORTED_SHAPES = List.of(
+    private static final List<String> COMMON_SUPPORTED_SHAPES = List.of(
             "service", "operation",
             "structure", "union", "list", "map", "member",
             "string", "boolean", "integer", "long", "double",
@@ -418,19 +404,36 @@ public class CodegenEngine {
             "resource"
     );
 
-    private static final List<String> SUPPORTED_TRAITS = List.of(
-            "smithy.api#box", "smithy.api#required", "smithy.api#length", "smithy.api#documentation",
-            "aws.polymorph#reference", "aws.polymorph#localService", "aws.polymorph#extendable"
+    private static final List<String> COMMON_SUPPORTED_TRAITS = List.of(
+            "smithy.api#box", "smithy.api#required", "smithy.api#length", "smithy.api#range", "smithy.api#documentation",
+            "smithy.api#default", "smithy.api#error", "smithy.api#pattern", "smithy.api#uniqueItems",
+            "smithy.api#input", "smithy.api#output", "smithy.api#readonly", "smithy.api#enum",
+            "aws.polymorph#reference", "aws.polymorph#localService", "aws.polymorph#extendable", "aws.polymorph#dafnyUtf8Bytes"
     );
 
-    private static final Map<TargetLanguage, String> SupportedFeaturesByTargetLanguage = new HashMap<>();
-    static {
-        // TODO: Should only allow resources when not generating SDK style
-        var commonSelector =
-                ":is(" + String.join(", ", SUPPORTED_SHAPES) + ") " +
-                "$supportedTraits(:root([id = " + String.join(", ", SUPPORTED_TRAITS) + "])) " +
-                "[@: @{trait|(keys)} {<} @{var|supportedTraits|id}]";
+    private static final List<String> SUPPORTED_TRAITS_NON_AWS_SDK_STYLE = List.of(
+            // TODO: We probably want model validation to forbid this instead,
+            // since it literally can't be used for non-local services.
+            "aws.polymorph#extendable"
+    );
 
-        SupportedFeaturesByTargetLanguage.put(TargetLanguage.DAFNY, commonSelector);
+    private void checkForUnsupportedFeatures(Collection<String> supportedShapes, Collection<String> supportedTraits) {
+        String selectorExpr =
+                "[id=" + serviceShape.getId() + "] \n" +
+                        ":is(*, ~> *) \n" +
+                        ":not(\n" +
+                            ":is(" + String.join(", ", supportedShapes) + ") " +
+                            "$supportedTraits(:root([id = " + String.join(", ", supportedTraits) + "])) " +
+                            "[@: @{trait|(keys)} {<} @{var|supportedTraits|id}]" +
+                        ")";
+
+        Set<Shape> notSupported = Selector.parse(selectorExpr).select(model);
+
+        if (!notSupported.isEmpty()) {
+            String message = "The following shapes in the service's closure are not supported: \n" +
+                    notSupported.stream().map(this::toStringWithTraits).collect(Collectors.joining("\n"));
+            // TODO: don't use an exception
+            throw new IllegalArgumentException(message);
+        }
     }
 }

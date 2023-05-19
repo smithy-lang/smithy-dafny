@@ -20,9 +20,23 @@ buildscript {
 }
 
 plugins {
-    val smithyGradleVersion: String by project
+    java
+    "java-library"
+}
 
-    id("software.amazon.smithy").version(smithyGradleVersion)
+sourceSets {
+    test {
+        resources {
+            srcDirs("../TestModels")
+        }
+    }
+}
+
+tasks.named<Test>("test") {
+    // Use JUnit Jupiter for unit tests.
+    useJUnitPlatform()
+
+    maxParallelForks = Runtime.getRuntime().availableProcessors() / 2
 }
 
 repositories {
@@ -32,6 +46,6 @@ repositories {
 
 dependencies {
     implementation(project(":smithy-dafny-codegen"))
-    implementation("software.amazon.smithy:smithy-waiters:$smithyVersion")
-    implementation("software.amazon.smithy:smithy-protocol-test-traits:$smithyVersion")
+    testImplementation(platform("org.junit:junit-bom:5.9.3"))
+    testImplementation("org.junit.jupiter:junit-jupiter")
 }
