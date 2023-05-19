@@ -22,12 +22,16 @@ module {:extern "Sets"} SortedSets {
     // The seq came from the set
     ensures Seq.HasNoDuplicates(res)
     ensures forall k <- res :: k in s
+    ensures forall k <- s :: k in res
     ensures |res| == |s|
 
-function method {:extern "SetToSequence"} ComputeSetToSequence<T(==)>(
+  function method {:extern "SetToSequence"} ComputeSetToSequence<T(==)>(
     s: set<T>
   )
-  : (res: seq<T>)
-  ensures Seq.HasNoDuplicates(res)
+    : (res: seq<T>)
+    ensures Seq.HasNoDuplicates(res)
+    ensures forall k <- res :: k in s
+    ensures forall k <- s :: k in res
+    ensures |res| == |s|
 
 }
