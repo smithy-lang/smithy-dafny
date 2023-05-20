@@ -1,13 +1,18 @@
 package software.amazon.polymorph.smithyjava.generator.awssdk.v2;
 
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.JavaFile;
 
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 
 import software.amazon.polymorph.smithyjava.MethodReference;
 import software.amazon.polymorph.smithyjava.generator.CodegenSubject;
+import software.amazon.polymorph.smithyjava.generator.Generator;
+import software.amazon.polymorph.smithyjava.unmodeled.CollectionOfErrors;
+import software.amazon.polymorph.smithyjava.unmodeled.OpaqueError;
 import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.polymorph.smithyjava.nameresolver.AwsSdkDafnyV2;
 import software.amazon.polymorph.smithyjava.nameresolver.AwsSdkNativeV2;
@@ -33,6 +38,8 @@ public class JavaAwsSdkV2 extends CodegenSubject {
 
     /** Public Java Interfaces will go here. */
     public final String packageName;
+    /** Public POJOs will go here. */
+    public final String modelPackageName;
 
     private JavaAwsSdkV2(
             ServiceShape serviceShape,
@@ -43,6 +50,7 @@ public class JavaAwsSdkV2 extends CodegenSubject {
         this.dafnyNameResolver = dafnyNameResolver;
         this.nativeNameResolver = nativeNameResolver;
         this.packageName = dafnyNameResolver.packageName();
+        this.modelPackageName = packageName + ".model";
     }
 
     public static JavaAwsSdkV2 createJavaAwsSdkV2(ServiceShape serviceShape, Model model) {
@@ -54,11 +62,37 @@ public class JavaAwsSdkV2 extends CodegenSubject {
     public Map<Path, TokenTree> generate() {
         Map<Path, TokenTree> rtn = new HashMap<>();
         ShimV2 shimGenerator = new ShimV2(this);
+        ModelCodegen modelCodegen = new ModelCodegen(this);
         ToDafnyAwsV2 toDafnyGenerator = new ToDafnyAwsV2(this);
         ToNativeAwsV2 toNativeGenerator = new ToNativeAwsV2(this);
         rtn.putAll(shimGenerator.generate());
         rtn.putAll(toDafnyGenerator.generate());
         rtn.putAll(toNativeGenerator.generate());
+        rtn.putAll(modelCodegen.generate());
         return rtn;
+    }
+
+    class ModelCodegen extends Generator {
+        final JavaAwsSdkV2 subject;
+        public final String packageName;
+        public final String modelPackageName;
+
+        public ModelCodegen(JavaAwsSdkV2 subject) {
+            super(subject);
+            // Hack to override CodegenSubject
+            this.subject = subject;
+            packageName = subject.packageName;
+            modelPackageName = subject.modelPackageName;
+        }
+
+        @Override
+        public LinkedHashSet<JavaFile> javaFiles() {
+            LinkedHashSet<JavaFile> rtn = new LinkedHashSet<>();
+            // Opaque Exception Class
+            rtn.add(OpaqueError.javaFile(modelPackageName));
+            // Collection of Errors class
+            rtn.add(CollectionOfErrors.javaFile(modelPackageName));
+            return rtn;
+        }
     }
 }

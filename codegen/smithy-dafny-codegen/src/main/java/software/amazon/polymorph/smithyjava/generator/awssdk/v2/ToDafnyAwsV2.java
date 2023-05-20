@@ -14,6 +14,7 @@ import com.squareup.javapoet.WildcardTypeName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -24,7 +25,10 @@ import java.util.stream.Collectors;
 
 import javax.lang.model.element.Modifier;
 
+import software.amazon.polymorph.smithyjava.MethodReference;
 import software.amazon.polymorph.smithyjava.generator.ToDafny;
+import software.amazon.polymorph.smithyjava.unmodeled.CollectionOfErrors;
+import software.amazon.polymorph.smithyjava.unmodeled.OpaqueError;
 import software.amazon.polymorph.utils.AwsSdkNameResolverHelpers;
 import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 import software.amazon.polymorph.utils.ModelUtils;
@@ -145,12 +149,85 @@ public class ToDafnyAwsV2 extends ToDafny {
                 .classBuilder(
                         ClassName.get(subject.dafnyNameResolver.packageName(), "ToDafny"))
                 .addModifiers(Modifier.PUBLIC)
-                .addMethods(convertAllRelevant)
+                .addMethod(dafnyError(serviceErrors))
+                .addMethod(opaqueError())
+                .addMethod(serviceError())
+                .addMethod(collectionError())
                 .addMethods(convertServiceErrors)
+                .addMethods(convertAllRelevant)
                 .addMethods(convertEnumEnum)
                 .addMethods(convertEnumString)
-                .addMethod(generateConvertOpaqueError())
                 .addMethod(modeledService(subject.serviceShape))
+                .build();
+    }
+
+    // Converts any subclass of RuntimeException to the correct Dafny Error,
+    // or casts it as an OpaqueError.
+    MethodSpec dafnyError(LinkedHashSet<ShapeId> serviceErrors) {
+        TypeName dafnyError = subject.dafnyNameResolver.abstractClassForError();
+        ClassName runtimeException = ClassName.get(RuntimeException.class);
+        MethodSpec.Builder method = MethodSpec.methodBuilder("Error")
+                .returns(dafnyError)
+                .addModifiers(PUBLIC_STATIC)
+                .addParameter(runtimeException, VAR_INPUT);
+        List<ClassName> allNativeErrors = serviceErrors.stream()
+                .map(subject.model::expectShape)
+                .map(subject.nativeNameResolver::classNameForStructure)
+                .collect(Collectors.toCollection(ArrayList::new));
+        allNativeErrors.add(OpaqueError.nativeClassName(subject.modelPackageName));
+        allNativeErrors.add(CollectionOfErrors.nativeClassName(subject.modelPackageName));
+        allNativeErrors.forEach(errorClassName ->
+                method.beginControlFlow("if ($L instanceof $T)", VAR_INPUT, errorClassName)
+                        .addStatement("return $T.Error(($T) $L)", thisClassName, errorClassName, VAR_INPUT)
+                        .endControlFlow()
+        );
+        return method
+                .addStatement("return $T.create_Opaque($L)", dafnyError, VAR_INPUT)
+                .build();
+    }
+
+    MethodSpec opaqueError() {
+        TypeName dafnyError = subject.dafnyNameResolver.abstractClassForError();
+        ClassName opaqueError = OpaqueError.nativeClassName(subject.modelPackageName);
+        return MethodSpec.methodBuilder("Error")
+                .returns(dafnyError)
+                .addModifiers(PUBLIC_STATIC)
+                .addParameter(opaqueError, VAR_INPUT)
+                .addStatement("return $T.create_Opaque($L.obj())", dafnyError, VAR_INPUT)
+                .build();
+    }
+
+    MethodSpec serviceError() {
+        TypeName dafnyError = subject.dafnyNameResolver.abstractClassForError();
+        ClassName serviceError = subject.nativeNameResolver.baseErrorForService();
+        return MethodSpec.methodBuilder("Error")
+                .returns(dafnyError)
+                .addModifiers(PUBLIC_STATIC)
+                .addParameter(serviceError, VAR_INPUT)
+                .addStatement("return $T.create_Opaque($L)", dafnyError, VAR_INPUT)
+                .build();
+    }
+
+    MethodSpec collectionError() {
+        ClassName dafnyError = subject.dafnyNameResolver.abstractClassForError();
+        ClassName collectionError = CollectionOfErrors.nativeClassName(subject.modelPackageName);
+        ParameterizedTypeName listArg = ParameterizedTypeName.get(
+                software.amazon.polymorph.smithyjava.nameresolver.Constants.DAFNY_SEQUENCE_CLASS_NAME,
+                WildcardTypeName.subtypeOf(dafnyError)
+        );
+        CodeBlock genericCall = AGGREGATE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(ShapeType.LIST).asNormalReference();
+        MethodReference getTypeDescriptor = new MethodReference(
+                dafnyError,
+                "_typeDescriptor");
+        return MethodSpec.methodBuilder("Error")
+                .returns(dafnyError)
+                .addModifiers(PUBLIC_STATIC)
+                .addParameter(collectionError, VAR_INPUT)
+                .addStatement(
+                        "$T list = $L(\n$L.list(), \n$T::Error, \n$L())",
+                        listArg, genericCall, VAR_INPUT, thisClassName, getTypeDescriptor.asNormalReference()
+                )
+                .addStatement("return $T.create_CollectionOfErrors(list)", dafnyError)
                 .build();
     }
 
@@ -499,43 +576,6 @@ public class ToDafnyAwsV2 extends ToDafny {
                 .addParameter(parameterSpec)
                 .addStatement("return $L(\nnativeValue, \n$L, \n$L)",
                         genericCall, keyConverter, valueConverter)
-                .build();
-    }
-
-    MethodSpec generateConvertOpaqueError() {
-        // Opaque Errors are not in the model,
-        // so we cannot use any of our helper methods for this method.
-
-        CodeBlock memberDeclaration = CodeBlock.of(
-                "$T $L",
-                ParameterizedTypeName.get(
-                        ClassName.get("Wrappers_Compile", "Option"),
-                        ParameterizedTypeName.get(
-                                software.amazon.polymorph.smithyjava.nameresolver.Constants.DAFNY_SEQUENCE_CLASS_NAME,
-                                WildcardTypeName.subtypeOf(Character.class))
-                ),
-                "message"
-        );
-        // This is memberAssignment from above,
-        // but with calls to dafnyNameResolver replaced with their expected response.
-        CodeBlock memberAssignment = CodeBlock.of(
-                "$L = $T.nonNull($L) ?\n$T.create_Some($T.$L($L))\n: $T.create_None()",
-                "message",
-                ClassName.get(Objects.class),
-                "nativeValue.getMessage()",
-                ClassName.get("Wrappers_Compile", "Option"),
-                COMMON_TO_DAFNY_SIMPLE,
-                SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(ShapeType.STRING).methodName(),
-                "nativeValue.getMessage()",
-                ClassName.get("Wrappers_Compile", "Option")
-        );
-        return MethodSpec.methodBuilder("Error")
-                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                .returns(subject.dafnyNameResolver.abstractClassForError())
-                .addParameter(subject.nativeNameResolver.baseErrorForService(), "nativeValue")
-                .addStatement(memberDeclaration)
-                .addStatement(memberAssignment)
-                .addStatement("return new $T(message)", subject.dafnyNameResolver.classForOpaqueError())
                 .build();
     }
 }
