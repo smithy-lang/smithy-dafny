@@ -4,6 +4,7 @@ import javax.annotation.Nullable
 plugins {
     `java-library`
     `maven-publish`
+    id("com.github.johnrengelman.shadow") version "7.1.2"
 }
 
 group = "software.amazon.cryptography"
@@ -69,7 +70,7 @@ publishing {
     publications.create<MavenPublication>("maven") {
         groupId = "software.amazon.cryptography"
         artifactId = "AwsCryptographicMaterialProviders"
-        from(components["java"])
+        artifact(tasks["shadowJar"])
     }
     repositories { mavenLocal() }
 }
@@ -82,5 +83,35 @@ tasks {
     register("runTests", JavaExec::class.java) {
         mainClass.set("TestsFromDafny")
         classpath = sourceSets["test"].runtimeClasspath
+    }
+}
+
+tasks.jar {
+    enabled = false
+}
+
+tasks.build {
+    dependsOn(tasks.shadowJar)
+}
+
+tasks.shadowJar {
+    mergeServiceFiles()
+    archiveClassifier.set("")
+
+    dependencies {
+        include(dependency("software.amazon.cryptography:StandardLibrary:1.0-SNAPSHOT"))
+        include(dependency("software.amazon.cryptography:AwsCryptographyPrimitives:1.0-SNAPSHOT"))
+        include(dependency("software.amazon.cryptography:ComAmazonawsKms:1.0-SNAPSHOT"))
+        include(dependency("software.amazon.cryptography:ComAmazonawsDynamodb:1.0-SNAPSHOT"))
+    }
+
+    configurations {
+        runtimeClasspath {
+            dependencies {
+                // We want to package this version of BC since it is the one the Primitives depends on.
+                // These dependencies need to remain in sync with one another.
+               include(dependency("org.bouncycastle:bcprov-jdk18on:1.72"))
+            }
+        }
     }
 }
