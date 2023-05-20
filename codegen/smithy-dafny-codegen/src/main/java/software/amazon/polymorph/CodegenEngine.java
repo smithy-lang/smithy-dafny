@@ -43,6 +43,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class CodegenEngine {
     private static final Logger LOGGER = LoggerFactory.getLogger(CodegenEngine.class);
@@ -129,7 +130,9 @@ public class CodegenEngine {
 
 
     private void generateDafny(final Path outputDir) {
-        checkForUnsupportedFeatures(COMMON_SUPPORTED_SHAPES, COMMON_SUPPORTED_TRAITS);
+        List<String> supportedShapes = awsSdkStyle ? COMMON_SUPPORTED_SHAPES : SUPPORTED_SHAPES_NON_AWS_SDK_STYLE;
+        List<String> supportedTraits = awsSdkStyle ? COMMON_SUPPORTED_TRAITS : SUPPORTED_TRAITS_NON_AWS_SDK_STYLE;
+        checkForUnsupportedFeatures(supportedShapes, supportedTraits);
 
         // Validated by builder, but check again
         assert this.includeDafnyFile.isPresent();
@@ -398,24 +401,32 @@ public class CodegenEngine {
             "timestamp", "blob"
     );
 
-    private static final List<String> SUPPORTED_SHAPES_NON_AWS_SDK_STYLE = List.of(
-            // Playing it safe and not claiming to support this in SDK style mode yet,
-            // since we might be generating code that only makes sense for local services.
-            "resource"
-    );
+    private static final List<String> SUPPORTED_SHAPES_NON_AWS_SDK_STYLE =
+            Stream.concat(
+                    COMMON_SUPPORTED_SHAPES.stream(),
+                    Stream.of(
+                            // Playing it safe and not claiming to support this in SDK style mode yet,
+                            // since we might be generating code that only makes sense for local services.
+                            "resource"
+                    )).toList();
 
     private static final List<String> COMMON_SUPPORTED_TRAITS = List.of(
             "smithy.api#box", "smithy.api#required", "smithy.api#length", "smithy.api#range", "smithy.api#documentation",
             "smithy.api#default", "smithy.api#error", "smithy.api#pattern", "smithy.api#uniqueItems",
-            "smithy.api#input", "smithy.api#output", "smithy.api#readonly", "smithy.api#enum",
-            "aws.polymorph#reference", "aws.polymorph#localService", "aws.polymorph#extendable", "aws.polymorph#dafnyUtf8Bytes"
+            "smithy.api#input", "smithy.api#output", "smithy.api#readonly", "smithy.api#enum"
     );
 
-    private static final List<String> SUPPORTED_TRAITS_NON_AWS_SDK_STYLE = List.of(
-            // TODO: We probably want model validation to forbid this instead,
-            // since it literally can't be used for non-local services.
-            "aws.polymorph#extendable"
-    );
+    private static final List<String> SUPPORTED_TRAITS_NON_AWS_SDK_STYLE =
+            Stream.concat(
+                    COMMON_SUPPORTED_TRAITS.stream(),
+                    Stream.of(
+                            // TODO: For those that literally can't be used for non-local services,
+                            //  We probably want model validation to forbid them instead,
+                            "aws.polymorph#reference",
+                            "aws.polymorph#localService",
+                            "aws.polymorph#extendable",
+                            "aws.polymorph#dafnyUtf8Bytes"
+                    )).toList();
 
     private void checkForUnsupportedFeatures(Collection<String> supportedShapes, Collection<String> supportedTraits) {
         String selectorExpr =
