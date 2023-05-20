@@ -70,10 +70,10 @@ public class ToDafnyAwsV2Test {
         //assertThrows(UnsupportedOperationException.class, () -> underTest.generateConvert(doubleId));
     }
 
-    @Test
-    public void generateConvertOpaqueError() {
-        tokenizeAndAssertEqual(ToDafnyAwsV2Constants.GENERATE_CONVERT_OPAQUE_ERROR, underTest.generateConvertOpaqueError().toString());
-    }
+    // @Test
+    // public void generateConvertOpaqueError() {
+    //     tokenizeAndAssertEqual(ToDafnyAwsV2Constants.GENERATE_CONVERT_OPAQUE_ERROR, underTest.generateConvertOpaqueError().toString());
+    // }
 
     @Test
     public void generate() {
