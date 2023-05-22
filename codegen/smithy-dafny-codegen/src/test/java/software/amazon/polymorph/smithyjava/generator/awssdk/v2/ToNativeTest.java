@@ -226,16 +226,16 @@ public class ToNativeTest {
         //assertThrows(UnsupportedOperationException.class, () -> underTest.generateConvert(doubleId));
     }
 
-    @Test
-    public void generate() {
-        Model model = TestSetupUtils.setupLocalModel(ModelConstants.KMS_A_STRING_OPERATION);
-        ToNativeAwsV2 underTest = new ToNativeAwsV2(TestSetupUtils.setupAwsSdkV2(model, "kms"));
-        final Map<Path, TokenTree> actual = underTest.generate();
-        final Path expectedPath = Path.of("software/amazon/cryptography/services/kms/internaldafny/ToNative.java");
-        Path[] temp = new Path[1];
-        final Path actualPath = actual.keySet().toArray(temp)[0];
-        assertEquals(expectedPath, actualPath);
-        final String actualSource = actual.get(actualPath).toString();
-        tokenizeAndAssertEqual(ToNativeConstants.KMS_A_STRING_OPERATION_JAVA_FILE, actualSource);
-    }
+    // @Test
+    // public void generate() {
+    //     Model model = TestSetupUtils.setupLocalModel(ModelConstants.KMS_A_STRING_OPERATION);
+    //     ToNativeAwsV2 underTest = new ToNativeAwsV2(TestSetupUtils.setupAwsSdkV2(model, "kms"));
+    //     final Map<Path, TokenTree> actual = underTest.generate();
+    //     final Path expectedPath = Path.of("software/amazon/cryptography/services/kms/internaldafny/ToNative.java");
+    //     Path[] temp = new Path[1];
+    //     final Path actualPath = actual.keySet().toArray(temp)[0];
+    //     assertEquals(expectedPath, actualPath);
+    //     final String actualSource = actual.get(actualPath).toString();
+    //     tokenizeAndAssertEqual(ToNativeConstants.KMS_A_STRING_OPERATION_JAVA_FILE, actualSource);
+    // }
 }

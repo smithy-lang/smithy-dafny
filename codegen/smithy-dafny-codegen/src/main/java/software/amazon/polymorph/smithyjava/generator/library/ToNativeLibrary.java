@@ -134,7 +134,7 @@ public class ToNativeLibrary extends ToNative {
         MethodSpec.Builder method = super.initializeErrorMethodSpec(inputType, returnType);
         super.createNativeBuilder(method, returnType);
         // Set Value
-        method.addStatement("$L.list(\n$L(\n$L.$L, \n$T::Error))",
+        method.addStatement("$L.list($L($L.$L, $T::Error))",
                 NATIVE_BUILDER, genericCall, VAR_INPUT, datatypeDeconstructor("list"), thisClassName);
         // Build and Return
         return super.buildAndReturn(method);

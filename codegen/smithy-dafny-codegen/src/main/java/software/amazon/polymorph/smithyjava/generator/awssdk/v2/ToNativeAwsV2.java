@@ -8,6 +8,7 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -20,6 +21,8 @@ import javax.lang.model.element.Modifier;
 
 import software.amazon.polymorph.smithyjava.MethodReference;
 import software.amazon.polymorph.smithyjava.generator.ToNative;
+import software.amazon.polymorph.smithyjava.unmodeled.CollectionOfErrors;
+import software.amazon.polymorph.smithyjava.unmodeled.OpaqueError;
 import software.amazon.polymorph.utils.AwsSdkNameResolverHelpers;
 import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 import software.amazon.polymorph.utils.ModelUtils;
@@ -39,6 +42,8 @@ import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumDefinition;
 import software.amazon.smithy.model.traits.EnumTrait;
 
+import static software.amazon.polymorph.smithyjava.nameresolver.Dafny.datatypeConstructorIs;
+import static software.amazon.polymorph.smithyjava.nameresolver.Dafny.datatypeDeconstructor;
 import static software.amazon.smithy.utils.StringUtils.capitalize;
 
 //TODO: Create abstract class for V1 & V2 to extend
@@ -115,14 +120,18 @@ public class ToNativeAwsV2 extends ToNative {
                 .collect(Collectors.toCollection(LinkedHashSet::new));
         operations.stream().map(OperationShape::getOutputShape).sorted()
                 .forEachOrdered(operationStructures::add);
-        LinkedHashSet<ShapeId> serviceErrors = ModelUtils.streamServiceErrors(subject.model, subject.serviceShape)
+        LinkedHashSet<ShapeId> serviceErrors = ModelUtils
+                .streamServiceErrors(subject.model, subject.serviceShape)
                 .map(Shape::toShapeId).sorted()
                 // InvalidEndpointException does not exist in SDK V2
-                .filter(structureShapeId -> !structureShapeId.toString().contains("com.amazonaws.dynamodb#InvalidEndpointException"))
+                .filter(structureShapeId -> !structureShapeId
+                        .toString()
+                        .contains("com.amazonaws.dynamodb#InvalidEndpointException"))
                 .collect(Collectors.toCollection(LinkedHashSet::new));
 
         operationStructures.addAll(serviceErrors);
-        Set<ShapeId> allRelevantShapeIds = ModelUtils.findAllDependentShapes(operationStructures, subject.model);
+        Set<ShapeId> allRelevantShapeIds = ModelUtils
+                .findAllDependentShapes(operationStructures, subject.model);
         allRelevantShapeIds.removeAll(serviceErrors);
         allRelevantShapeIds.remove(ShapeId.fromParts("smithy.api", "Unit"));
 
@@ -134,8 +143,11 @@ public class ToNativeAwsV2 extends ToNative {
                 .classBuilder(
                         ClassName.get(subject.packageName, TO_NATIVE))
                 .addModifiers(Modifier.PUBLIC)
-                .addMethods(convertRelevant)
+                .addMethod(dafnyError(serviceErrors))
+                .addMethod(opaqueError())
+                .addMethod(collectionError())
                 .addMethods(convertServiceErrors)
+                .addMethods(convertRelevant)
                 .addMethod(modeledService(subject.serviceShape))
                 .build();
     }
@@ -261,6 +273,84 @@ public class ToNativeAwsV2 extends ToNative {
         return builder.addStatement("return $L.build()", VAR_BUILDER).build();
     }
 
+    // public static RuntimeException Error(Error_Opaque dafnyValue) {
+    //     if (dafnyValue.dtor_obj() instanceof DynamoDbException) {
+    //       return (DynamoDbException) dafnyValue.dtor_obj();
+    //     }
+    //     if (dafnyValue.dtor_obj() instanceof RuntimeException) {
+    //       return (RuntimeException) dafnyValue.dtor_obj();
+    //     }
+    //     OpaqueError.Builder nativeBuilder = OpaqueError.builder();
+    //     nativeBuilder.obj(dafnyValue.dtor_obj());
+    //     return nativeBuilder.build();
+    //   }
+    MethodSpec opaqueError() {
+        ClassName inputType = subject.dafnyNameResolver.classForDatatypeConstructor("Error", "Opaque");
+        ClassName returnType = ClassName.get(RuntimeException.class);
+        MethodSpec.Builder method = super.initializeErrorMethodSpec(inputType, returnType);
+        ClassName serviceError = subject.nativeNameResolver.baseErrorForService();
+        // if Service Error
+        method.beginControlFlow(
+                "if ($L.dtor_obj() instanceof $T)",
+                VAR_INPUT, serviceError)
+                .addStatement("return ($T) $L.dtor_obj()", serviceError, VAR_INPUT)
+                .endControlFlow();
+        // if Runtime Exception
+        method.beginControlFlow(
+                        "if ($L.dtor_obj() instanceof $T)",
+                        VAR_INPUT, RuntimeException.class)
+                .addStatement("return ($T) $L.dtor_obj()", RuntimeException.class, VAR_INPUT)
+                .endControlFlow();
+        super.createNativeBuilder(method, OpaqueError.nativeClassName(subject.modelPackageName));
+        method.addStatement("$L.obj($L.dtor_obj())", NATIVE_BUILDER, VAR_INPUT);
+        return super.buildAndReturn(method);
+    }
+
+    MethodSpec collectionError() {
+        ClassName inputType = subject.dafnyNameResolver.classForDatatypeConstructor("Error", "CollectionOfErrors");
+        ClassName returnType = CollectionOfErrors.nativeClassName(subject.modelPackageName);
+        CodeBlock genericCall = AGGREGATE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(ShapeType.LIST).asNormalReference();
+        MethodSpec.Builder method = super.initializeErrorMethodSpec(inputType, returnType);
+        super.createNativeBuilder(method, returnType);
+        // Set Value
+        method.addStatement("$L.list($L($L.$L, $T::Error))",
+                NATIVE_BUILDER, genericCall, VAR_INPUT, datatypeDeconstructor("list"), thisClassName);
+        // Build and Return
+        return super.buildAndReturn(method);
+    }
+
+    MethodSpec dafnyError(LinkedHashSet<ShapeId> serviceErrors) {
+        ClassName inputType = subject.dafnyNameResolver.abstractClassForError();
+        ClassName returnType = ClassName.get(RuntimeException.class);
+        MethodSpec.Builder method = super.initializeErrorMethodSpec(inputType, returnType);
+        // We need a list of `<datatypeConstructor>`.
+        // We have the logic exposed to look up the ClassName,
+        // which, as a string, will be <modelPackage>.Error_<datatypeConstructor>.
+        // We get the "simpleName" (i.e.: Error_<datatypeConstructor>),
+        // and, finally, replace "Error_" with nothing, thus getting just "<datatypeConstructor>".
+        List<String> allDafnyErrorConstructors = serviceErrors.stream()
+                .map(subject.model::expectShape)
+                .map(subject.dafnyNameResolver::classForError)
+                .map(ClassName::simpleName)
+                .map(simpleName -> simpleName.replaceFirst("Error_", ""))
+                .collect(Collectors.toCollection(ArrayList::new)); // We need a mutable list, so we can't use stream().toList()
+        allDafnyErrorConstructors.add("Opaque");
+        allDafnyErrorConstructors.add("CollectionOfErrors");
+        allDafnyErrorConstructors.forEach(constructorName ->
+                method.beginControlFlow("if ($L.$L())", VAR_INPUT, datatypeConstructorIs(constructorName))
+                        .addStatement(
+                                "return $T.Error(($T) $L)",
+                                thisClassName,
+                                subject.dafnyNameResolver.classForDatatypeConstructor("Error", constructorName),
+                                VAR_INPUT)
+                        .endControlFlow()
+        );
+        // If the Error cannot be placed into any of the above, call it opaque and move on
+        super.createNativeBuilder(method, OpaqueError.nativeClassName(subject.modelPackageName));
+        method.addStatement("$L.obj($L)", NATIVE_BUILDER, VAR_INPUT);
+        return super.buildAndReturn(method);
+    }
+
     @Override
     protected CodeBlock setWithConversionCall(MemberShape member, CodeBlock getMember) {
         Shape targetShape = subject.model.expectShape(member.getTarget());
@@ -344,7 +434,7 @@ public class ToNativeAwsV2 extends ToNative {
                 }
             })
             .forEachOrdered(name -> method
-                .beginControlFlow("if ($L.$L())", VAR_INPUT, Dafny.datatypeConstructorIs(name))
+                .beginControlFlow("if ($L.$L())", VAR_INPUT, datatypeConstructorIs(name))
                 .addStatement("return $T.$L", returnType, subject.nativeNameResolver.v2FormattedEnumValue(shapeId, name))
                 .endControlFlow()
             );
@@ -369,7 +459,7 @@ public class ToNativeAwsV2 extends ToNative {
         shape.members()
             .forEach(member -> {
                 method.beginControlFlow("if ($L.$L())", VAR_INPUT,
-                        Dafny.datatypeConstructorIs(member.getMemberName()))
+                        datatypeConstructorIs(member.getMemberName()))
                     .addStatement(setWithConversionCall(member, Dafny.getMemberField(member)))
                     .endControlFlow();
             });

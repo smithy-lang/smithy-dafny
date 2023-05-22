@@ -9,9 +9,7 @@ public class Constants {
                   software.amazon.awssdk.services.kms.model.DoSomethingResponse result = _impl.doSomething(converted);
                   DoSomethingResponse dafnyResponse = ToDafny.DoSomethingResponse(result);
                   return Result.create_Success(dafnyResponse);
-                } catch (DependencyTimeoutException ex) {
-                  return Result.create_Failure(ToDafny.Error(ex));
-                } catch (KmsException ex) {
+                } catch (RuntimeException ex) {
                   return Result.create_Failure(ToDafny.Error(ex));
                 }
               }
@@ -24,9 +22,7 @@ public class Constants {
                 try {
                   _impl.doVoid(converted);
                   return Result.create_Success(Tuple0.create());
-                } catch (DependencyTimeoutException ex) {
-                  return Result.create_Failure(ToDafny.Error(ex));
-                } catch (KmsException ex) {
+                } catch (RuntimeException ex) {
                   return Result.create_Failure(ToDafny.Error(ex));
                 }
               }
@@ -38,10 +34,9 @@ public class Constants {
             import Wrappers_Compile.Result;
             import dafny.Tuple0;
             import java.lang.Override;
+            import java.lang.RuntimeException;
             import java.lang.String;
             import software.amazon.awssdk.services.kms.KmsClient;
-            import software.amazon.awssdk.services.kms.model.DependencyTimeoutException;
-            import software.amazon.awssdk.services.kms.model.KmsException;            
             import software.amazon.cryptography.services.kms.internaldafny.types.DoSomethingRequest;
             import software.amazon.cryptography.services.kms.internaldafny.types.DoSomethingResponse;
             import software.amazon.cryptography.services.kms.internaldafny.types.DoVoidRequest;

@@ -152,21 +152,8 @@ public class ShimV2 extends Generator {
                             DAFNY_RESULT_CLASS_NAME);
         }
 
-        operationShape.getErrors().stream().sorted().forEach(shapeId -> {
-            TypeName typeForShape = subject.nativeNameResolver.typeForShape(shapeId);
-
-            // InvalidEndpointException was removed in SDK V2
-            if (typeForShape.toString().endsWith("InvalidEndpointException")) {
-                return; // Skips only this shape
-            }
-
-            builder
-                .nextControlFlow("catch ($T ex)", subject.nativeNameResolver.typeForShape(shapeId))
-                .addStatement("return $T.create_Failure(ToDafny.Error(ex))",
-                    DAFNY_RESULT_CLASS_NAME);
-        });
         return Optional.of(builder
-                .nextControlFlow("catch ($T ex)", subject.nativeNameResolver.baseErrorForService())
+                .nextControlFlow("catch ($T ex)", ClassName.get(RuntimeException.class))
                 .addStatement("return $T.create_Failure(ToDafny.Error(ex))",
                         DAFNY_RESULT_CLASS_NAME)
                 .endControlFlow()
