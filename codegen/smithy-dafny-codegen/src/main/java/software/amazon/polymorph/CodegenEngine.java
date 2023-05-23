@@ -124,14 +124,9 @@ public class CodegenEngine {
         }
     }
 
-    private String toStringWithTraits(Shape shape) {
-        return shape.toString() + " (" + shape.getAllTraits().keySet().stream().map(ShapeId::toString).collect(Collectors.joining(", ")) + ")";
-    }
-
-
     private void generateDafny(final Path outputDir) {
         List<String> supportedShapes = awsSdkStyle ? COMMON_SUPPORTED_SHAPES : SUPPORTED_SHAPES_NON_AWS_SDK_STYLE;
-        List<String> supportedTraits = awsSdkStyle ? COMMON_SUPPORTED_TRAITS : SUPPORTED_TRAITS_NON_AWS_SDK_STYLE;
+        List<String> supportedTraits = awsSdkStyle ? SUPPORTED_TRAITS_AWS_SDK_STYLE : SUPPORTED_TRAITS_NON_AWS_SDK_STYLE;
         checkForUnsupportedFeatures(supportedShapes, supportedTraits);
 
         // Validated by builder, but check again
@@ -428,6 +423,37 @@ public class CodegenEngine {
                             "aws.polymorph#dafnyUtf8Bytes"
                     )).toList();
 
+    private static final List<String> SUPPORTED_TRAITS_AWS_SDK_STYLE =
+            Stream.concat(
+                    COMMON_SUPPORTED_TRAITS.stream(),
+                    Stream.of(
+                            // Most of these are protocol details handled by the wrapped SDKs
+                            // and not relevant for SDK consumers.
+                            "aws.api#service",
+                            "smithy.api#httpError",
+                            "aws.protocols#awsQueryError",
+                            "aws.api#clientEndpointDiscovery",
+                            "aws.api#clientDiscoveredEndpoint",
+                            "smithy.api#paginated",
+                            "smithy.api#idempotencyToken",
+                            "smithy.api#deprecated",
+                            "smithy.api#suppress",
+                            "smithy.api#sensitive",
+                            // We don't really support this yet, since it implies extra API
+                            // methods we don't generate, but at least we don't generate incorrect code.
+                            "smithy.waiters#waitable",
+                            "aws.auth#sigv4",
+                            "smithy.api#title",
+                            "aws.protocols#awsJson1_0",
+                            "aws.protocols#awsJson1_1",
+                            "aws.protocols#awsQuery",
+                            "smithy.api#xmlNamespace",
+                            "smithy.api#xmlFlattened",
+                            "smithy.api#xmlName",
+                            "smithy.rules#endpointTests",
+                            "smithy.rules#endpointRuleSet"
+                    )).toList();
+
     private void checkForUnsupportedFeatures(Collection<String> supportedShapes, Collection<String> supportedTraits) {
         String selectorExpr =
                 "[id=" + serviceShape.getId() + "] \n" +
@@ -442,9 +468,26 @@ public class CodegenEngine {
 
         if (!notSupported.isEmpty()) {
             String message = "The following shapes in the service's closure are not supported: \n" +
-                    notSupported.stream().map(this::toStringWithTraits).collect(Collectors.joining("\n"));
+                    notSupported.stream()
+                                .map(shape -> unsupportedShapeLine(shape, supportedShapes, supportedTraits))
+                                .collect(Collectors.joining("\n"));
             // TODO: don't use an exception
             throw new IllegalArgumentException(message);
         }
+    }
+
+    private String unsupportedShapeLine(Shape shape, Collection<String> supportedShapes, Collection<String> supportedTraits) {
+        StringBuilder builder = new StringBuilder();
+        builder.append(shape.toString());
+        builder.append("\n");
+        if (!supportedShapes.contains(shape.getType().toString())) {
+            builder.append(" - (shape type `" + shape.getType().toString() + "` is not supported)");
+        }
+        for (var trait : shape.getAllTraits().keySet()) {
+            if (!supportedTraits.contains(trait.toShapeId().toString())) {
+                builder.append(" - (trait `" + trait.toShapeId() + "` is not supported)");
+            }
+        }
+        return builder.toString();
     }
 }

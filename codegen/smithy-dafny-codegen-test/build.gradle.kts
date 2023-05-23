@@ -36,7 +36,7 @@ tasks.named<Test>("test") {
     // Use JUnit Jupiter for unit tests.
     useJUnitPlatform()
 
-    maxParallelForks = Runtime.getRuntime().availableProcessors() / 2
+    maxParallelForks = (Runtime.getRuntime().availableProcessors() / 2).takeIf { it > 0 } ?: 1
 }
 
 repositories {
