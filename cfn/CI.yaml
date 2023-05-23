@@ -16,7 +16,7 @@ Resources:
     Type: 'AWS::IAM::Role'
     Properties:
       RoleName: !Sub "GitHub-CI-${ProjectName}-Role-${AWS::Region}"
-      Description: "Access DDB, KMS, Resources for CI from GitHub"
+      Description: "Access DDB, KMS, Resources for CI from GitHub, and Prod CodeBuild"
       ManagedPolicyArns:
         - "arn:aws:iam::370957321024:policy/PolymorphTestModels-KMS-us-west-2"
         - "arn:aws:iam::370957321024:policy/RSA-GitHub-KMS-Key-Policy"
@@ -43,6 +43,13 @@ Resources:
             {
               "Effect": "Allow",
               "Principal": { "AWS": "arn:aws:iam::${AWS::AccountId}:role/ToolsDevelopment" },
+              "Action": "sts:AssumeRole"
+            },
+            {
+              "Effect": "Allow",
+              "Principal": {
+                  "AWS": "arn:aws:iam::587316601012:role/service-role/codebuild-AWS-MPL-Java-service-role-release"
+              },
               "Action": "sts:AssumeRole"
             }
           ]
