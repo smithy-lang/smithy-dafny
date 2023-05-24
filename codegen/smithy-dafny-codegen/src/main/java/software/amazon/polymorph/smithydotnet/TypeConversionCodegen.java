@@ -970,6 +970,8 @@ public class TypeConversionCodegen {
         })).lineSeparated();
 
         // Handle casting to the CollectionOfErrors list of exception type
+        // TODO: replace `new string` with generic converter when
+        //  conversion library for .NET is created.
         final TokenTree handleCollectionOfErrorsFromDafny = TokenTree
           .of(
             "case %1$s dafnyVal:"
@@ -978,10 +980,9 @@ public class TypeConversionCodegen {
               return new %1$s(
                    new System.Collections.Generic.List<Exception>(dafnyVal.dtor_list.CloneAsArray()
                      .Select(x => %2$s(x))),
-                   %3$s(dafnyVal.dtor_message));""")
+                   new string(dafnyVal.dtor_message.Elements));""")
               .formatted(DotNetNameResolver.baseClassForCollectionOfErrors(),
-                nameResolver.qualifiedTypeConverterForCommonError(serviceShape, FROM_DAFNY),
-                typeConverterForShape(ShapeId.fromParts("smithy.api", "String"), FROM_DAFNY))
+                nameResolver.qualifiedTypeConverterForCommonError(serviceShape, FROM_DAFNY))
           ).lineSeparated();
 
         // Handle the special cases that were cast to the root service exception.
