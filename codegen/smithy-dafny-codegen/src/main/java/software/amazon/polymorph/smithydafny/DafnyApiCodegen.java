@@ -1309,7 +1309,7 @@ public class DafnyApiCodegen {
             Token.of("// || (!access(A(I)) && !exit(B(I)))"),
             Token.of("// || (!exit(A(I)) && !access(B(I)))"),
             Token.of("| CollectionOfErrors(list: seq<Error>, nameonly message: string)")
-        );
+        ).lineSeparated();
     }
 
     public TokenTree generateDataTypeConstructorFromStructure(final ShapeId shapeId) {
