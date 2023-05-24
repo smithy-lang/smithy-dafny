@@ -390,10 +390,20 @@ public class CodegenEngine {
     }
 
     private static final List<String> COMMON_SUPPORTED_SHAPES = List.of(
-            "service", "operation",
-            "structure", "union", "list", "map", "member",
-            "string", "boolean", "integer", "long", "double",
-            "timestamp", "blob"
+            "boolean",
+            "blob",
+            "double",
+            "integer",
+            "list",
+            "long",
+            "map",
+            "member",
+            "operation",
+            "string",
+            "service",
+            "structure",
+            "timestamp",
+            "union"
     );
 
     private static final List<String> SUPPORTED_SHAPES_NON_AWS_SDK_STYLE =
@@ -406,9 +416,19 @@ public class CodegenEngine {
                     )).toList();
 
     private static final List<String> COMMON_SUPPORTED_TRAITS = List.of(
-            "smithy.api#box", "smithy.api#required", "smithy.api#length", "smithy.api#range", "smithy.api#documentation",
-            "smithy.api#default", "smithy.api#error", "smithy.api#pattern", "smithy.api#uniqueItems",
-            "smithy.api#input", "smithy.api#output", "smithy.api#readonly", "smithy.api#enum"
+            "smithy.api#box",
+            "smithy.api#default",
+            "smithy.api#documentation",
+            "smithy.api#error",
+            "smithy.api#enum",
+            "smithy.api#input",
+            "smithy.api#length",
+            "smithy.api#output",
+            "smithy.api#pattern",
+            "smithy.api#required",
+            "smithy.api#range",
+            "smithy.api#readonly",
+            "smithy.api#uniqueItems"
     );
 
     private static final List<String> SUPPORTED_TRAITS_NON_AWS_SDK_STYLE =
@@ -417,10 +437,10 @@ public class CodegenEngine {
                     Stream.of(
                             // TODO: For those that literally can't be used for non-local services,
                             //  We probably want model validation to forbid them instead,
-                            "aws.polymorph#reference",
-                            "aws.polymorph#localService",
                             "aws.polymorph#extendable",
-                            "aws.polymorph#dafnyUtf8Bytes"
+                            "aws.polymorph#localService",
+                            "aws.polymorph#dafnyUtf8Bytes",
+                            "aws.polymorph#reference"
                     )).toList();
 
     private static final List<String> SUPPORTED_TRAITS_AWS_SDK_STYLE =
@@ -429,29 +449,29 @@ public class CodegenEngine {
                     Stream.of(
                             // Most of these are protocol details handled by the wrapped SDKs
                             // and not relevant for SDK consumers.
-                            "aws.api#service",
-                            "smithy.api#httpError",
-                            "aws.protocols#awsQueryError",
                             "aws.api#clientEndpointDiscovery",
                             "aws.api#clientDiscoveredEndpoint",
-                            "smithy.api#paginated",
-                            "smithy.api#idempotencyToken",
-                            "smithy.api#deprecated",
-                            "smithy.api#suppress",
-                            "smithy.api#sensitive",
-                            // We don't really support this yet, since it implies extra API
-                            // methods we don't generate, but at least we don't generate incorrect code.
-                            "smithy.waiters#waitable",
+                            "aws.api#service",
                             "aws.auth#sigv4",
-                            "smithy.api#title",
                             "aws.protocols#awsJson1_0",
                             "aws.protocols#awsJson1_1",
                             "aws.protocols#awsQuery",
-                            "smithy.api#xmlNamespace",
+                            "aws.protocols#awsQueryError",
+                            "smithy.api#idempotencyToken",
+                            "smithy.api#deprecated",
+                            "smithy.api#paginated",
+                            "smithy.api#suppress",
+                            "smithy.api#sensitive",
+                            "smithy.api#httpError",
+                            "smithy.api#title",
                             "smithy.api#xmlFlattened",
                             "smithy.api#xmlName",
+                            "smithy.api#xmlNamespace",
                             "smithy.rules#endpointTests",
-                            "smithy.rules#endpointRuleSet"
+                            "smithy.rules#endpointRuleSet",
+                            // We don't really support this yet, since it implies extra API
+                            // methods we don't generate, but at least we don't generate incorrect code.
+                            "smithy.waiters#waitable"
                     )).toList();
 
     private void checkForUnsupportedFeatures(Collection<String> supportedShapes, Collection<String> supportedTraits) {
@@ -471,7 +491,6 @@ public class CodegenEngine {
                     notSupported.stream()
                                 .map(shape -> unsupportedShapeLine(shape, supportedShapes, supportedTraits))
                                 .collect(Collectors.joining("\n"));
-            // TODO: don't use an exception
             throw new IllegalArgumentException(message);
         }
     }

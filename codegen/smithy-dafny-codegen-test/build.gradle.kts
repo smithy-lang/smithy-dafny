@@ -24,19 +24,9 @@ plugins {
     "java-library"
 }
 
-sourceSets {
-    test {
-        resources {
-            srcDirs("../TestModels")
-        }
-    }
-}
-
 tasks.named<Test>("test") {
     // Use JUnit Jupiter for unit tests.
     useJUnitPlatform()
-
-    maxParallelForks = (Runtime.getRuntime().availableProcessors() / 2).takeIf { it > 0 } ?: 1
 }
 
 repositories {
@@ -48,4 +38,5 @@ dependencies {
     implementation(project(":smithy-dafny-codegen"))
     testImplementation(platform("org.junit:junit-bom:5.9.3"))
     testImplementation("org.junit.jupiter:junit-jupiter")
+    testImplementation("org.hamcrest:hamcrest:2.1")
 }
