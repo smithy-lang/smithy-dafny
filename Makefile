@@ -24,11 +24,6 @@ duvet_extract:
 	# $(foreach file, $(shell find aws-encryption-sdk-specification/client-apis -name '*.md'), duvet extract -o compliance -f MARKDOWN $(file);)
 	# $(foreach file, $(shell find aws-encryption-sdk-specification/data-format -name '*.md'), duvet extract -o compliance -f MARKDOWN $(file);)
 
-# TODO add these arguments to duvet_report as the work completes
-#		--ci \
-#		--require-citations true \
-#		--require-tests true \
-
 duvet_report:
 	duvet \
 		report \

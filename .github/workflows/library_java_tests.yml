@@ -43,7 +43,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-region: us-west-2
-          # TODO: This role was manually created.
+          # This role was manually created.
           role-to-assume: arn:aws:iam::370957321024:role/ESDK-Dafny-Private-CA-Read
           role-session-name: JavaPrivateESDKDafnyTests
 
@@ -75,7 +75,7 @@ jobs:
       # KMS and MPL tests need to use credentials which can call KMS
       - name: Configure AWS Credentials for Tests
         uses: aws-actions/configure-aws-credentials@v1
-        if: matrix.library == 'ComAmazonawsKms' || matrix.library == 'AwsCryptographicMaterialProviders' || matrix.library == 'TestVectorsAwsCryptographicMaterialProviders'
+        if: matrix.library == 'ComAmazonawsKms' || matrix.library == 'ComAmazonawsDynamodb' || matrix.library == 'AwsCryptographicMaterialProviders' || matrix.library == 'TestVectorsAwsCryptographicMaterialProviders'
         with:
           aws-region: us-west-2
           role-to-assume: arn:aws:iam::370957321024:role/GitHub-CI-MPL-Dafny-Role-us-west-2
@@ -83,8 +83,6 @@ jobs:
 
       - name: Test ${{ matrix.library }}
         working-directory: ./${{ matrix.library }}
-        # TODO: DDB currently has no tests
-        if: matrix.library != 'ComAmazonawsDynamodb'
         run: |
           make test_java
 

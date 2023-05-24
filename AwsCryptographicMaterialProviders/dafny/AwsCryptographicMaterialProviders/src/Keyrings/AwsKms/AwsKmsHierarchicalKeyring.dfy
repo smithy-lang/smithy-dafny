@@ -510,7 +510,6 @@ module AwsKmsHierarchicalKeyring {
         //= aws-encryption-sdk-specification/framework/aws-kms/aws-kms-hierarchical-keyring.md#branch-key-wrapping
         //# to derive a 32 byte `derivedBranchKey`
         expectedLength := DERIVED_BRANCH_KEY_EXPECTED_LENGTH,
-        // TODO: change name to label
         purpose := purpose,
         //= aws-encryption-sdk-specification/framework/aws-kms/aws-kms-hierarchical-keyring.md#branch-key-wrapping
         //# - Use the `salt` as the salt.

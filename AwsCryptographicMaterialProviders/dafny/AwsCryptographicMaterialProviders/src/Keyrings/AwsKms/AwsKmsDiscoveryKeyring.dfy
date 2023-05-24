@@ -139,7 +139,6 @@ module AwsKmsDiscoveryKeyring {
 
       // If we could not convert the encryption context into a form understandable
       // by KMS, the result must be failure
-      // TODO: add this to the spec
       ensures
         StringifyEncryptionContext(input.materials.encryptionContext).Failure?
       ==>
