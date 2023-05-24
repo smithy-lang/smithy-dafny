@@ -1,5 +1,4 @@
-# SimpleTimestamp
-
+# SimpleDocument
 This project will implement the smithy type [document](https://smithy.io/2.0/spec/simple-types.html#document) and the associated operations in `dafny`.
 
 ## Status
