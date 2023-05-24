@@ -421,6 +421,7 @@ public class CodegenEngine {
             "smithy.api#documentation",
             "smithy.api#error",
             "smithy.api#enum",
+            "smithy.api#idempotencyToken",
             "smithy.api#input",
             "smithy.api#length",
             "smithy.api#output",
@@ -428,6 +429,7 @@ public class CodegenEngine {
             "smithy.api#required",
             "smithy.api#range",
             "smithy.api#readonly",
+            "smithy.api#sensitive",
             "smithy.api#uniqueItems"
     );
 
@@ -440,6 +442,7 @@ public class CodegenEngine {
                             "aws.polymorph#extendable",
                             "aws.polymorph#localService",
                             "aws.polymorph#dafnyUtf8Bytes",
+                            "aws.polymorph#positional",
                             "aws.polymorph#reference"
                     )).toList();
 
@@ -457,11 +460,9 @@ public class CodegenEngine {
                             "aws.protocols#awsJson1_1",
                             "aws.protocols#awsQuery",
                             "aws.protocols#awsQueryError",
-                            "smithy.api#idempotencyToken",
                             "smithy.api#deprecated",
                             "smithy.api#paginated",
                             "smithy.api#suppress",
-                            "smithy.api#sensitive",
                             "smithy.api#httpError",
                             "smithy.api#title",
                             "smithy.api#xmlFlattened",
