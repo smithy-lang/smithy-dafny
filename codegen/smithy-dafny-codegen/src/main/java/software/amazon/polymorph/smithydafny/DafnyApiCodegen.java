@@ -45,13 +45,15 @@ public class DafnyApiCodegen {
     //   do not accidentally re-use a variable.
     // This provides unique identifiers across all Dafny-generated code.
     private int intermediateTempVariableCounter = 0;
+    private final boolean generateCollectionOfErrors;
 
     public DafnyApiCodegen(
       final Model model,
       final ServiceShape serviceShape,
       final Path outputDir,
       final Path includeDafnyFile,
-      final Path[] dependentModelPaths
+      final Path[] dependentModelPaths,
+      final boolean awsSdkRequest
     ) {
         this.model = model;
         this.serviceShape = serviceShape;
@@ -64,6 +66,7 @@ public class DafnyApiCodegen {
           new TreeSet(),
           dependentModelPaths.clone()
         );
+        this.generateCollectionOfErrors = !awsSdkRequest;
     }
 
     public Map<Path, TokenTree> generate() {
@@ -1269,35 +1272,44 @@ public class DafnyApiCodegen {
               .stream()
               .map(this::generateDependantErrorDataTypeConstructor)
           ).lineSeparated(),
-          Token.of("// The Collection error is used to collect several errors together"),
-          Token.of("// This is useful when composing OR logic."),
-          Token.of("// Consider the following method:"),
-          Token.of("// "),
-          Token.of("// method FN<I, O>(n:I)"),
-          Token.of("//   returns (res: Result<O, Types.Error>)"),
-          Token.of("//   ensures A(I).Success? ==> res.Success?"),
-          Token.of("//   ensures B(I).Success? ==> res.Success?"),
-          Token.of("//   ensures A(I).Failure? && B(I).Failure? ==> res.Failure?"),
-          Token.of("// "),
-          Token.of("// If either A || B is successful then FN is successful."),
-          Token.of("// And if A && B fail then FN will fail."),
-          Token.of("// But what information should FN transmit back to the caller?"),
-          Token.of("// While it may be correct to hide these details from the caller,"),
-          Token.of("// this can not be the globally correct option."),
-          Token.of("// Suppose that A and B can be blocked by different ACLs,"),
-          Token.of("// and that their representation of I is only eventually consistent."),
-          Token.of("// How can the caller distinguish, at a minimum for logging,"),
-          Token.of("// the difference between the four failure modes?"),
-          Token.of("// || (!access(A(I)) && !access(B(I)))"),
-          Token.of("// || (!exit(A(I)) && !exit(B(I)))"),
-          Token.of("// || (!access(A(I)) && !exit(B(I)))"),
-          Token.of("// || (!exit(A(I)) && !access(B(I)))"),
-          Token.of("| CollectionOfErrors(list: seq<Error>, nameonly message: string)"),
+          collectionOfErrors(),
           Token.of("// The Opaque error, used for native, extern, wrapped or unknown errors"),
           Token.of("| Opaque(obj: object)"),
           // Helper error for use with `extern`
           Token.of("type OpaqueError = e: Error | e.Opaque? witness *")
         ).lineSeparated();
+    }
+
+    private TokenTree collectionOfErrors() {
+        if (!this.generateCollectionOfErrors) {
+            return TokenTree.empty();
+        }
+        return TokenTree.of(
+            Token.of("// The Collection error is used to collect several errors together"),
+            Token.of("// This is useful when composing OR logic."),
+            Token.of("// Consider the following method:"),
+            Token.of("// "),
+            Token.of("// method FN<I, O>(n:I)"),
+            Token.of("//   returns (res: Result<O, Types.Error>)"),
+            Token.of("//   ensures A(I).Success? ==> res.Success?"),
+            Token.of("//   ensures B(I).Success? ==> res.Success?"),
+            Token.of("//   ensures A(I).Failure? && B(I).Failure? ==> res.Failure?"),
+            Token.of("// "),
+            Token.of("// If either A || B is successful then FN is successful."),
+            Token.of("// And if A && B fail then FN will fail."),
+            Token.of("// But what information should FN transmit back to the caller?"),
+            Token.of("// While it may be correct to hide these details from the caller,"),
+            Token.of("// this can not be the globally correct option."),
+            Token.of("// Suppose that A and B can be blocked by different ACLs,"),
+            Token.of("// and that their representation of I is only eventually consistent."),
+            Token.of("// How can the caller distinguish, at a minimum for logging,"),
+            Token.of("// the difference between the four failure modes?"),
+            Token.of("// || (!access(A(I)) && !access(B(I)))"),
+            Token.of("// || (!exit(A(I)) && !exit(B(I)))"),
+            Token.of("// || (!access(A(I)) && !exit(B(I)))"),
+            Token.of("// || (!exit(A(I)) && !access(B(I)))"),
+            Token.of("| CollectionOfErrors(list: seq<Error>, nameonly message: string)")
+        );
     }
 
     public TokenTree generateDataTypeConstructorFromStructure(final ShapeId shapeId) {
