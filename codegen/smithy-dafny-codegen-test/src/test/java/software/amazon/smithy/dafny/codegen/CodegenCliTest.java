@@ -41,8 +41,8 @@ class CodegenCliTest {
         AssertionError e = Assertions.assertThrows(AssertionError.class, () ->
                 make(testModelPath, "polymorph_dafny"));
         String expectedMessage = "Exception in thread \"main\" java.lang.IllegalArgumentException: The following shapes in the service's closure are not supported: \n" +
-                "(document: `smithy.api#Document`)\n" +
-                " - (shape type `document` is not supported)";
+                "(blob: `simple.streaming#StreamingBlob`)\n" +
+                " - (trait `smithy.api#streaming` is not supported)";
         assertThat(e.getMessage(), containsString(expectedMessage));
     }
 
