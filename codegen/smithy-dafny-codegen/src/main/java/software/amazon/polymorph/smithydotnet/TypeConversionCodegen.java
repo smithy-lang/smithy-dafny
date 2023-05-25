@@ -18,8 +18,9 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.annotation.Nonnull;
+
 import software.amazon.polymorph.smithydafny.DafnyNameResolver;
-import software.amazon.polymorph.smithydotnet.localServiceWrapper.LocalServiceWrappedNameResolver;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.polymorph.traits.ExtendableTrait;
 import software.amazon.polymorph.traits.LocalServiceTrait;
@@ -45,6 +46,8 @@ import static software.amazon.polymorph.smithydotnet.TypeConversionDirection.TO_
  * provided {@link Model}.
  */
 public class TypeConversionCodegen {
+    public static final String C_SHARP_SYSTEM_EXCEPTION = "System.Exception";
+
     /**
      * A pair of type converter methods that converts between the compiled Dafny representation and the idiomatic C#
      * representation of a given {@link software.amazon.smithy.model.shapes.Shape} value.
@@ -696,36 +699,27 @@ public class TypeConversionCodegen {
      */
     protected TypeConverter generateLocalServiceReferenceStructureConverter(
         final StructureShape structureShape, final ServiceShape serviceShape) {
-
-        LocalServiceWrappedNameResolver serviceWrappedNameResolver
-            = new LocalServiceWrappedNameResolver(model, serviceShape);
         final ShapeId resourceShapeId = serviceShape.getId();
-        final String shimClass = serviceWrappedNameResolver.shimClassForService();
         final String baseType = nameResolver.baseTypeForShape(resourceShapeId);
-
         final String throwCustomImplException =
             "throw new System.ArgumentException(\"Custom implementations of %s are not supported yet\");"
                 .formatted(baseType);
 
         final TokenTree fromDafnyBody = Token.of("""
-            if (value is %s.Wrapped.%s shim) {
-                return shim._impl;
+            if (value is %s dafnyValue) {
+                return new %s(dafnyValue);
             }
             """
-            .formatted(
-                nameResolver.namespaceForShapeId(resourceShapeId),
-                shimClass),
-            throwCustomImplException);
+            .formatted(nameResolver.dafnyTypeForShape(serviceShape.getId()), baseType),
+          throwCustomImplException);
 
         final TokenTree toDafnyBody = Token.of("""
-            if (value is %s impl) {
-                return new %s.Wrapped.%s(value);
+            if (value is %s nativeValue) {
+                return nativeValue.%s();
             }
             """
-            .formatted(nameResolver.baseTypeForShape(resourceShapeId),
-                nameResolver.namespaceForShapeId(resourceShapeId),
-                shimClass),
-            throwCustomImplException);
+            .formatted(baseType, ShimCodegen.SHIM_UMWRAP_METHOD_NAME),
+          throwCustomImplException);
 
         return buildConverterFromMethodBodies(structureShape, fromDafnyBody, toDafnyBody);
     }
@@ -849,6 +843,9 @@ public class TypeConversionCodegen {
         return buildConverterFromMethodBodies(stringShape, fromDafnyBody, toDafnyBody);
     }
 
+    // TODO: The javadoc below is outdated. The following is no longer true:
+    //  "all of a Service's Exceptions descend from a root Service Exception"
+    //  We should update this.
     /**
      * Generates Converters From/To Dafny/dotnet for Exceptions.
      * <p>
@@ -889,17 +886,46 @@ public class TypeConversionCodegen {
      *     as it will only yield descends of <code>ServiceBaseException</code> or <code>ServiceBaseException</code> itself.<br>
      * </p>
      */
+    // TODO: This is a run-on method. We SHOULD break it up into smaller pieces.
     public TypeConverter generateCommonExceptionConverter() {
         // Gather the Smithy Modeled specific exceptions by collecting them into a TreeSet.
         // This sorts the set by shape ID, making the order deterministic w.r.t the model.
+        final TreeSet<StructureShape> errorShapes = getServiceErrors();
+
+        // TODO: Is a raw exception really the right thing to be returning?
+        final String dafnyType = DotNetNameResolver.dafnyTypeForCommonServiceError(serviceShape);
+
+        final TokenTree fromDafnyBody = errorFromDanyBody(errorShapes);
+
+        final TokenTree fromDafnyConverterSignature = Token.of("public static %s %s(%s value)"
+          .formatted(
+            C_SHARP_SYSTEM_EXCEPTION,
+            nameResolver.typeConverterForCommonError(serviceShape, FROM_DAFNY),
+            dafnyType
+          ));
+        final TokenTree fromDafnyConverterMethod = TokenTree.of(fromDafnyConverterSignature, fromDafnyBody.braced());
+
+        final TokenTree toDafnyBody = errorToDafnyBody(errorShapes);
+
+        final TokenTree toDafnyConverterSignature = Token.of("public static %s %s(System.Exception value)".formatted(
+                dafnyType, nameResolver.typeConverterForCommonError(serviceShape, TO_DAFNY)));
+        final TokenTree toDafnyConverterMethod = TokenTree.of(toDafnyConverterSignature, toDafnyBody.braced());
+
+        // The Common Exception Converter is novel to Polymorph, it is not native to smithy.
+        // As such, it needs a shape ID. That shape ID must not conflict with anything else.
+        final ShapeId syntheticShapeId = ShapeId.fromParts(serviceShape.getId().getNamespace(), "__SYNTHETIC_COMMON_ERROR");
+        return new TypeConverter(syntheticShapeId, fromDafnyConverterMethod, toDafnyConverterMethod);
+    }
+
+    @Nonnull
+    protected TreeSet<StructureShape> getServiceErrors() {
         final TreeSet<StructureShape> errorShapes = ModelUtils
           .streamServiceErrors(model, serviceShape)
           .collect(Collectors.toCollection(TreeSet::new));
+        return errorShapes;
+    }
 
-        // TODO: Is a raw exception really the right thing to be returning?
-        final String cSharpType = "System.Exception";
-        final String dafnyType = nameResolver.dafnyTypeForCommonServiceError(serviceShape);
-
+    protected TokenTree errorFromDanyBody(final TreeSet<StructureShape> errorShapes) {
         // Generate the FROM_DAFNY method
         // Handle dependency exceptions
         TokenTree dependencyErrorCasesFromDafny = TokenTree.empty();
@@ -920,9 +946,9 @@ public class TypeConversionCodegen {
                             dafnyVal._%3$s
                           );"""
                         .formatted(
-                            DafnyNameResolver.dafnyExternNamespaceForNamespace(serviceShape.getId().getNamespace()),
+                            DafnyNameResolverHelpers.dafnyExternNamespaceForShapeId(serviceShape.getId()),
                             DotNetNameResolver.convertToCSharpNamespaceWithSegmentMapper(dependentNamespace, DotNetNameResolver::capitalizeNamespaceSegment),
-                            DafnyNameResolver.dafnyTypesModuleForNamespace(dependentNamespace).replace("Types", "")
+                            DafnyNameResolver.dafnyBaseModuleName(dependentNamespace)
                         )
                     );
 
@@ -978,14 +1004,10 @@ public class TypeConversionCodegen {
           .braced();
         final TokenTree fromDafnyBody = TokenTree.of(
                 TokenTree.of("switch(value)"), fromDafnySwitchCases).lineSeparated();
-        final TokenTree fromDafnyConverterSignature = Token.of("public static %s %s(%s value)"
-          .formatted(
-            cSharpType,
-            nameResolver.typeConverterForCommonError(serviceShape, FROM_DAFNY),
-            dafnyType
-          ));
-        final TokenTree fromDafnyConverterMethod = TokenTree.of(fromDafnyConverterSignature, fromDafnyBody.braced());
+        return fromDafnyBody;
+    }
 
+    protected TokenTree errorToDafnyBody(final TreeSet<StructureShape> errorShapes) {
         // Generate the TO_DAFNY method
         // Handle any dependencies first.
         // For errors from dependencies: pass anything from a dependency-recognized namespace into Dafny
@@ -1013,8 +1035,8 @@ public class TypeConversionCodegen {
                             );"""
                             .formatted(
                                 DotNetNameResolver.convertToCSharpNamespaceWithSegmentMapper(dependentNamespace, DotNetNameResolver::capitalizeNamespaceSegment),
-                                DafnyNameResolver.dafnyExternNamespaceForNamespace(serviceShape.getId().getNamespace()),
-                                DafnyNameResolver.dafnyTypesModuleForNamespace(dependentNamespace).replace("Types", "")
+                                DafnyNameResolverHelpers.dafnyExternNamespaceForShapeId(serviceShape.getId()),
+                                DafnyNameResolver.dafnyBaseModuleName(dependentNamespace)
                             )
                     );
                     casesList.add(toAppend);
@@ -1064,7 +1086,7 @@ public class TypeConversionCodegen {
               .formatted(DotNetNameResolver.baseClassForUnknownError()),
             "return new %1$s(exception);"
               .formatted(DotNetNameResolver.dafnyUnknownErrorTypeForServiceShape(serviceShape)),
-            "case %1$s exception:".formatted(cSharpType),
+            "case %1$s exception:".formatted(C_SHARP_SYSTEM_EXCEPTION),
             "return new %1$s(exception);"
               .formatted(DotNetNameResolver.dafnyUnknownErrorTypeForServiceShape(serviceShape)),
             "default:",
@@ -1085,14 +1107,7 @@ public class TypeConversionCodegen {
             toDafnySwitchCases
           )
           .lineSeparated();
-        final TokenTree toDafnyConverterSignature = Token.of("public static %s %s(System.Exception value)".formatted(
-                dafnyType, nameResolver.typeConverterForCommonError(serviceShape, TO_DAFNY)));
-        final TokenTree toDafnyConverterMethod = TokenTree.of(toDafnyConverterSignature, toDafnyBody.braced());
-
-        // The Common Exception Converter is novel to Polymorph, it is not native to smithy.
-        // As such, it needs a shape ID. That shape ID must not conflict with anything else.
-        final ShapeId syntheticShapeId = ShapeId.fromParts(serviceShape.getId().getNamespace(), "__SYNTHETIC_COMMON_ERROR");
-        return new TypeConverter(syntheticShapeId, fromDafnyConverterMethod, toDafnyConverterMethod);
+        return toDafnyBody;
     }
 
     /**

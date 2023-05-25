@@ -40,8 +40,7 @@ public class LocalServiceWrappedShimCodegen {
 
     public LocalServiceWrappedShimCodegen(
       final Model model,
-      final ServiceShape serviceShape,
-      final Path[] dependentModelPaths
+      final ServiceShape serviceShape
     ) {
         this.model = model;
         this.serviceShape = serviceShape;
@@ -188,8 +187,8 @@ public class LocalServiceWrappedShimCodegen {
                         );"""
                         .formatted(
                             DotNetNameResolver.convertToCSharpNamespaceWithSegmentMapper(dependentNamespace, DotNetNameResolver::capitalizeNamespaceSegment),
-                            DafnyNameResolver.dafnyExternNamespaceForNamespace(serviceShape.getId().getNamespace()),
-                            DafnyNameResolver.dafnyTypesModuleForNamespace(dependentNamespace).replace("Types", "")
+                            DafnyNameResolver.dafnyTypesModuleExternNamespace(serviceShape.getId().getNamespace()),
+                            DafnyNameResolver.dafnyBaseModuleName(dependentNamespace)
                         )
                 );
                 casesList.add(toAppend);

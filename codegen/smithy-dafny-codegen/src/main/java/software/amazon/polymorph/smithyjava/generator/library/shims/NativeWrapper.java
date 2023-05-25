@@ -15,7 +15,7 @@ import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ResourceShape;
 
 import static javax.lang.model.element.Modifier.FINAL;
-import static javax.lang.model.element.Modifier.PRIVATE;
+import static javax.lang.model.element.Modifier.PROTECTED;
 import static javax.lang.model.element.Modifier.STATIC;
 
 public class NativeWrapper extends ResourceShim {
@@ -37,9 +37,13 @@ public class NativeWrapper extends ResourceShim {
         ClassName className = className();
         TypeSpec.Builder spec =TypeSpec
                 .classBuilder(className)
-                .addModifiers(PRIVATE, FINAL, STATIC)
+                // TODO: Verify that the nested class SHOULD BE `PROTECTED` instead of `PRIVATE`
+                // PR #215 or #196
+                .addModifiers(PROTECTED, FINAL, STATIC)
                 .addSuperinterface(Dafny.interfaceForResource(targetShape))
-                .addField(interfaceName, INTERFACE_FIELD, PRIVATE, FINAL)
+                // TODO: It MAYBE best to keep the INTERFACE_FIELD PRIVATE, rather than PROTECTED,
+                // and add getter method. PR #215 or #196
+                .addField(interfaceName, INTERFACE_FIELD, PROTECTED, FINAL)
                 .addMethod(nativeWrapperConstructor());
         getOperationsForTarget().forEach(oShape -> {
             spec.addMethod(operation(oShape));
@@ -86,8 +90,8 @@ public class NativeWrapper extends ResourceShim {
     protected MethodSpec operation_K(OperationShape operationShape) {
         final MethodSignature signature = Operation.AsDafny.methodSignature(operationShape, true, subject);
         MethodSpec.Builder method = signature.method();
-        method.addStatement("throw $T.builder().message($S).build()",
-                subject.nativeNameResolver.baseErrorForService(),
+        method.addStatement("throw new $T($S)",
+                ClassName.get(RuntimeException.class),
                 "Not supported at this time."
                 );
         return method.build();

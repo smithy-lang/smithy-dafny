@@ -5,14 +5,19 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
 
+import java.util.Optional;
+
+import software.amazon.awssdk.utils.StringUtils;
 import software.amazon.polymorph.smithyjava.MethodReference;
+import software.amazon.polymorph.smithyjava.OperationJavaDoc;
 import software.amazon.polymorph.smithyjava.generator.Generator;
+import software.amazon.polymorph.smithyjava.modeled.Operation;
+import software.amazon.polymorph.traits.JavaDocTrait;
 import software.amazon.polymorph.utils.AwsSdkNameResolverHelpers;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.polymorph.smithyjava.MethodSignature;
 import software.amazon.polymorph.utils.ModelUtils.ResolvedShapeId;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
-import software.amazon.polymorph.smithyjava.nameresolver.Native;
 
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.Shape;
@@ -43,6 +48,9 @@ public abstract class ShimLibrary extends Generator {
         this.toNativeClassName = ToNativeLibrary.className(javaLibrary);
     }
 
+    // TODO: The methods in this class SHOULD all be moved to
+    //  software.amazon.polymorph.smithyjava.modeled.Operation.AsNative,
+    //  which, ideally, would become a Shape Visitor?
     protected MethodSignature operationMethodSignature(OperationShape shape) {
         final ResolvedShapeId inputResolved = ModelUtils.resolveShape(
                 shape.getInputShape(), subject.model);
@@ -62,19 +70,16 @@ public abstract class ShimLibrary extends Generator {
             TypeName outputType = methodSignatureTypeName(outputResolved);
             method.returns(outputType);
         }
+        String maybeJavaDoc = OperationJavaDoc.fromOperationShape(subject.model, shape).getDoc();
+        if (StringUtils.isNotBlank(maybeJavaDoc)) {
+            method.addJavadoc(maybeJavaDoc);
+        }
         return new MethodSignature(method, inputResolved, outputResolved);
     }
 
     /** @return TypeName for a method's signature. */
     protected TypeName methodSignatureTypeName(ResolvedShapeId resolvedShape) {
-        Shape shape = subject.model.expectShape(resolvedShape.resolvedId());
-        if (shape.isServiceShape() || shape.isResourceShape()) {
-            // If target is a Service or Resource,
-            // the output type should be an interface OR LocalService.
-            return Native.classNameForInterfaceOrLocalService(
-                    shape, subject.sdkVersion);
-        }
-        return subject.nativeNameResolver.typeForShape(shape.toShapeId());
+        return Operation.preferNativeInterface(resolvedShape, subject);
     }
 
     protected MethodSpec operation(OperationShape operationShape) {

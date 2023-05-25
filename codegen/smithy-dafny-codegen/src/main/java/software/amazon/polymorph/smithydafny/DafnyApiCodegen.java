@@ -33,7 +33,7 @@ public class DafnyApiCodegen {
     private final Model model;
     private final ServiceShape serviceShape;
     private final DafnyNameResolver nameResolver;
-    private final Path modelPath;
+    private final Path outputDir;
     private final Path includeDafnyFile;
     private static final Logger LOGGER = LoggerFactory.getLogger(DafnyApiCodegen.class);
     static final Optional<TokenTree> DOUBLE_LENGTH_CONSTRAINT = Optional.of(
@@ -49,13 +49,13 @@ public class DafnyApiCodegen {
     public DafnyApiCodegen(
       final Model model,
       final ServiceShape serviceShape,
-      final Path modelPath,
+      final Path outputDir,
       final Path includeDafnyFile,
       final Path[] dependentModelPaths
     ) {
         this.model = model;
         this.serviceShape = serviceShape;
-        this.modelPath = modelPath;
+        this.outputDir = outputDir;
         this.includeDafnyFile = includeDafnyFile;
         this.nameResolver = new DafnyNameResolver(
           model,
@@ -93,7 +93,7 @@ public class DafnyApiCodegen {
             .concat(
               Stream
                 .of(
-                  modelPath.relativize(includeDafnyFile)
+                  outputDir.relativize(includeDafnyFile)
                 ),
               nameResolver
                 .dependentModels()
@@ -102,7 +102,7 @@ public class DafnyApiCodegen {
                 // Some models are only informational,
                 // and do not point to any generated Dafny.
                 .stream()
-                .map(d -> modelPath
+                .map(d -> outputDir
                   .relativize(d.modelPath().resolve("../src/Index.dfy"))
                 )
                 .map(Path::toString)
@@ -113,25 +113,29 @@ public class DafnyApiCodegen {
           .lineSeparated();
 
         final String namespace = serviceShape.getId().getNamespace();
-        final String typesModuleName = DafnyNameResolver.dafnyTypesModuleForNamespace(namespace);
+        final String typesModuleName = DafnyNameResolver.dafnyTypesModuleName(namespace);
         final TokenTree typesModuleHeader = Token.of("module {:extern \"%s\" } %s"
           .formatted(
             DafnyNameResolverHelpers.dafnyExternNamespaceForShapeId(serviceShape.getId()),
             typesModuleName
           ));
-
+        final TokenTree abstractServiceModule = generateAbstractServiceModule(serviceShape);
+        final TokenTree abstractOperationsModule = generateAbstractOperationsModule(serviceShape);
+        final TokenTree modeledErrorDataType = generateModeledErrorDataType();
         // A smithy model may reference a model in a different package.
         // In which case we need to import it.
+        // Everything MUST BE GENERATED BEFORE `typesModulePrelude` is calculated.
+        // Otherwise, a foreign shape maybe referenced WITHOUT an import.
         final TokenTree typesModulePrelude = TokenTree
           .of(Stream
             .concat(
-              nameResolver.modulePreludeStandardImports(),
+              DafnyNameResolver.modulePreludeStandardImports(),
               nameResolver
                 .dependentModels()
                 .stream()
                 .map(d ->
-                  "import " + nameResolver.dafnyTypesModuleForNamespace(d.namespace())))
-            .map(i -> Token.of(i))
+                  "import " + DafnyNameResolver.dafnyTypesModuleName(d.namespace())))
+            .map(Token::of)
           )
           .lineSeparated();
 
@@ -152,7 +156,7 @@ public class DafnyApiCodegen {
               // Error types are generated *after*
               // all other types to account
               // for any dependent modules
-              generateModeledErrorDataType()
+              modeledErrorDataType
             )
             .lineSeparated()
             .braced();
@@ -163,8 +167,8 @@ public class DafnyApiCodegen {
             includeDirectives,
             typesModuleHeader,
             typesModuleBody,
-            generateAbstractServiceModule(serviceShape),
-            generateAbstractOperationsModule(serviceShape)
+            abstractServiceModule,
+            abstractOperationsModule
           )
           .lineSeparated();
         return Map.of(path, fullCode);
@@ -182,7 +186,7 @@ public class DafnyApiCodegen {
         }
       
         final String namespace = serviceShape.getId().getNamespace();
-        final String typesModuleName = DafnyNameResolver.dafnyTypesModuleForNamespace(namespace);
+        final String typesModuleName = DafnyNameResolver.dafnyTypesModuleName(namespace);
         final Path path = Path.of("%sWrapped.dfy".formatted(typesModuleName));
 
         // A smithy model may reference a model in a different package.
@@ -192,13 +196,13 @@ public class DafnyApiCodegen {
                 .concat(
                     Stream
                         .of(
-                            modelPath.relativize(includeDafnyFile),
-                            outputDafny.relativize(modelPath.resolve("../src/Index.dfy"))
+                            outputDir.relativize(includeDafnyFile),
+                            outputDafny.relativize(outputDir.resolve("../src/Index.dfy"))
                         ),
                     nameResolver
                         .dependentModels()
                         .stream()
-                        .map(d -> modelPath
+                        .map(d -> outputDir
                             .relativize(d.modelPath().resolve("../src/Index.dfy"))
                         )
                         .map(Path::toString)
@@ -425,7 +429,7 @@ public class DafnyApiCodegen {
           // the module needs to be included
           // because we are obviously using it!
           final String sideEffect = nameResolver
-            .dafnyModulePrefixForShapeId(model.expectShape(referenceTrait.getReferentId()));
+            .dafnyModulePrefixForShape(model.expectShape(referenceTrait.getReferentId()));
           return null;
         }
 
@@ -1317,7 +1321,7 @@ public class DafnyApiCodegen {
     }
 
     public TokenTree generateDependantErrorDataTypeConstructor(final DependentSmithyModel dependentSmithyModel) {
-        final String errorType = nameResolver.dafnyTypesModuleForNamespace(dependentSmithyModel.namespace()) + ".Error";
+        final String errorType = nameResolver.dafnyTypesModuleName(dependentSmithyModel.namespace()) + ".Error";
         final String errorConstructorName = errorType
           .replace("Types.Error", "");
 
@@ -1350,6 +1354,7 @@ public class DafnyApiCodegen {
       }
     }
 
+    // This method needs to be called before typesModulePrelude is calculated
     public TokenTree generateAbstractServiceModule(ServiceShape serviceShape) {
       final TokenTree abstractModulePrelude = TokenTree
         .of(DafnyNameResolver.abstractModulePrelude(serviceShape))
@@ -1358,11 +1363,12 @@ public class DafnyApiCodegen {
         .formatted(nameResolver.abstractServiceModuleName(serviceShape)));
 
       if (serviceShape.hasTrait(ServiceTrait.class)) {
+          TokenTree body = generateAbstractAwsServiceClass(serviceShape);
         return moduleHeader
           .append(Token
             .of(
               abstractModulePrelude,
-              generateAbstractAwsServiceClass(serviceShape)
+              body
             )
             .lineSeparated()
             .braced()
@@ -1551,7 +1557,22 @@ public class DafnyApiCodegen {
                         //   i.e. `fooStructure.value.barStructure`
                         accessPathToCurrentShape = TokenTree.of("%s.value".formatted(accessPathToCurrentShape));
                     }
-                } else {
+                } else if (currentShapeType == ShapeType.UNION) {
+                    // Union members are accessed like fields
+                    // e.g. `fooUnion.barUnionMember`
+                    accessPathToCurrentShape = TokenTree.of(
+                        "%s%s" .formatted(accessPathToCurrentShape, currentVarName));
+
+                    // Union members must always be checked for presence; i.e. are always "optional"
+                    // e.g. `fooUnion.barUnionMember? ==> `
+                    validStateClause = validStateClause.append(TokenTree.of(
+                        "%s? ==>\n"
+                            .formatted(accessPathToCurrentShape)));
+
+                    // Since presence is checked above, children are now accessed on the member
+                    // e.g. `fooUnion.barUnionMember? ==> fooUnion.barUnionMember ...`
+                    accessPathToCurrentShape = TokenTree.of("%s".formatted(accessPathToCurrentShape));
+                } else if (currentShapeType == ShapeType.MAP || currentShapeType == ShapeType.LIST) {
                     // This branch is for collections of multiple values, i.e. maps or lists.
                     // These shapes use set comprehension to access valid state methods.
                     if (currentShapeType == ShapeType.MAP) {
@@ -1587,6 +1608,10 @@ public class DafnyApiCodegen {
 
                     // Increment tempVar counter so variable names don't get re-used
                     intermediateTempVariableCounter++;
+                } else {
+                    // This is not a recognized shape type and is unsupported
+                    throw new UnsupportedOperationException(
+                        String.format("Shape type %s not supported. Shape name: %s", currentShapeType, currentVarName));
                 }
             } else {
                 // This is not a member shape, so this is a parent shape of a member.
@@ -1702,7 +1727,7 @@ public class DafnyApiCodegen {
                             //   a condition on the existing comprehension, starting with `&&`
                             // i.e. var setVar := set t | t in otherVar.Values && t.thisOptionalStructure.Some?
                             modifiesClause = modifiesClause.append(TokenTree.of(
-                                "&& %1$s.Some? \n ".formatted(accessPathToCurrentShape)
+                                "| %1$s.Some? \n ".formatted(accessPathToCurrentShape)
                             ));
                         } else {
                             // If not using set comprehension, the `.Some` check on an optional structure is added as
@@ -1718,13 +1743,36 @@ public class DafnyApiCodegen {
                         accessPathToCurrentShape += ".value";
                     }
 
-                } else {
+                } else if (currentShapeType == ShapeType.UNION) {
+                    // Union members are accessed like fields
+                    // e.g. `fooUnion.barUnionMember`
+                    accessPathToCurrentShape += currentVarName;
+
+                    // Union members must always be checked for presence; i.e. are always "optional"
+                    if (setComprehensionVar != null) {
+                        // If using set comprehension, the destructor on a union member is added as
+                        //   a condition on the existing comprehension, starting with `&&`
+                        // e.g. `&& fooUnion.barUnionMember? ...`
+                        modifiesClause = modifiesClause.append(TokenTree.of(
+                            "| %1$s? \n ".formatted(accessPathToCurrentShape)
+                        ));
+                    } else {
+                        // If not using set comprehension, the destructor on a union member is added as
+                        //     an if/else clause, where the else is appended at the very end of the modifies clause
+                        // e.g. `if fooUnion.barUnionMember? then ... else {}`
+                        modifiesClause = modifiesClause.append(TokenTree.of(
+                            "if %1$s? then \n".formatted(accessPathToCurrentShape)
+                        ));
+                        appendAtEnd = appendAtEnd.append(TokenTree.of("else {}\n"));
+                    }
+                } else if (currentShapeType == ShapeType.MAP || currentShapeType == ShapeType.LIST) {
                     // This branch is for collections of multiple values, i.e. maps or lists.
                     // These shapes introduce a set comprehension variable to access valid state methods.
                     if (setComprehensionVar != null) {
+
                         if (currentShapeType == ShapeType.LIST) {
                             modifiesClause = modifiesClause.append(TokenTree.of(
-                                ":: set t%1$s | t%1$s in %2$s"
+                                ", t%1$s <- %2$s"
                                     .formatted(intermediateTempVariableCounter,
                                         accessPathToCurrentShape)
                             ));
@@ -1732,7 +1780,7 @@ public class DafnyApiCodegen {
                             // If using set comprehension, the map's values are accessed by extending the current
                             //   comprehension expression
                             modifiesClause = modifiesClause.append(TokenTree.of(
-                                ":: set t%1$s | t%1$s in %2$s.Values"
+                                ", t%1$s <- %2$s.Values"
                                     .formatted(intermediateTempVariableCounter,
                                         accessPathToCurrentShape)
                             ));
@@ -1741,13 +1789,13 @@ public class DafnyApiCodegen {
                         // If not using set comprehension, we now need to.
                         if (currentShapeType == ShapeType.LIST) {
                             modifiesClause = modifiesClause.append(TokenTree.of(
-                                "var tmps%1$s := set t%1$s | t%1$s in %2$s\n ".formatted(
+                                "set tmps%1$s <- set t%1$s <- %2$s\n ".formatted(
                                     intermediateTempVariableCounter,
                                     accessPathToCurrentShape)
                             ));
                         } else if (currentShapeType == ShapeType.MAP) {
                             modifiesClause = modifiesClause.append(TokenTree.of(
-                                "var tmps%1$s := set t%1$s | t%1$s in %2$s.Values\n ".formatted(
+                                "set tmps%1$s <- set t%1$s <- %2$s.Values\n ".formatted(
                                     intermediateTempVariableCounter,
                                     accessPathToCurrentShape)
                             ));
@@ -1766,6 +1814,10 @@ public class DafnyApiCodegen {
                     accessPathToCurrentShape = "t%1$s".formatted(
                         intermediateTempVariableCounter);
                     intermediateTempVariableCounter++;
+                } else {
+                    // This is not a recognized shape type and is unsupported
+                    throw new UnsupportedOperationException(
+                        String.format("Shape type %s not supported. Shape name: %s", currentShapeType, currentVarName));
                 }
             } else {
                 currentShapeType = shapeInPath.getType();
@@ -1777,47 +1829,14 @@ public class DafnyApiCodegen {
             modifiesClause = modifiesClause.append(TokenTree.of(
                 "%s".formatted(accessPathToCurrentShape)
             ));
+            modifiesClause = TokenTree.of("%1$s.Modifies".formatted(modifiesClause));
         } else {
-            // If using set comprehension, setComprehensionVar holds nested sets of modifies clauses.
-            // Flatten the set for easier access.
+            // Extract Modifies member from expression
             modifiesClause = modifiesClause.append(TokenTree.of("""
-              :: %1$s;
-               var %2$sFlattenedModifiesSet: set<set<object>> := set t0
-               """.formatted(accessPathToCurrentShape, setComprehensionVar)
+              :: %1$s,
+               obj <- %2$s.Modifies | obj in %2$s.Modifies :: obj"""
+                .formatted(accessPathToCurrentShape, setComprehensionVar)
             ));
-
-            // The number of sets to flatten equals the number of additional set comprehensions introduced.
-            int numberOfSetsToAccess = intermediateTempVariableCounter - startingIntermediateTempVariableCounter;
-            for (int i = 1; i < numberOfSetsToAccess; i++) {
-                // `set t0, t1, ... tN`
-                modifiesClause = TokenTree.of("%1$s, t%2$s".formatted(modifiesClause, i));
-            }
-            // `set t0 .. tN | t0 in setComprehensionVar`
-            modifiesClause = TokenTree.of("%1$s | t0 in %2$s".formatted(modifiesClause, setComprehensionVar));
-            for (int i = 1; i < numberOfSetsToAccess; i++) {
-                // `set t0 .. tN | t0 in setComprehensionVar && t1 in t0 && .. tN-1 in tN`
-                modifiesClause = modifiesClause.append(TokenTree.of(
-                    "&& t%1$s in t%2$s".formatted(i, i - 1)
-                ));
-            }
-            // `set t0 .. tN | t0 in setComprehensionVar && t1 in t0 && .. tN-1 in tN :: tN`
-            modifiesClause = modifiesClause.append(TokenTree.of(
-                ":: t%2$s".formatted(modifiesClause, numberOfSetsToAccess - 1)
-            ));
-            // tN represents the reference member that contains a Modifies member.
-            // `set t0 .. tN | t0 in setComprehensionVar && t1 in t0 && .. tN-1 in tN :: tN.Modifies;`
-        }
-
-        modifiesClause = TokenTree.of("%1$s.Modifies".formatted(modifiesClause));
-
-        if (setComprehensionVar != null) {
-            // Create an expression that the `modifies` clause can use
-            modifiesClause = TokenTree.of("""
-                %1$s;
-                 (set tmp%2$sModifyEntry, tmp%2$sModifies | \n tmp%2$sModifies in %3$sFlattenedModifiesSet \n && tmp%2$sModifyEntry in tmp%2$sModifies \n :: tmp%2$sModifyEntry)"""
-                .formatted(modifiesClause, intermediateTempVariableCounter, setComprehensionVar)
-            );
-            intermediateTempVariableCounter++;
         }
 
         return TokenTree.of(
@@ -1829,8 +1848,8 @@ public class DafnyApiCodegen {
         if (!serviceShape.hasTrait(LocalServiceTrait.class)) throw new IllegalStateException("MUST be an LocalService");
         final LocalServiceTrait localServiceTrait = serviceShape.expectTrait(LocalServiceTrait.class);
 
-        final String configTypeName = localServiceTrait.getConfigId().getName();
-        final String defaultFunctionMethodName = "Default%s".formatted(configTypeName);
+        final String configTypeName = nameResolver.baseTypeForShape(localServiceTrait.getConfigId());
+        final String defaultFunctionMethodName = "Default%s".formatted(localServiceTrait.getConfigId().getName());
 
         final TokenTree defaultConfig = TokenTree
             .of("function method %s(): %s".formatted(defaultFunctionMethodName, configTypeName));
@@ -1931,17 +1950,16 @@ public class DafnyApiCodegen {
         if (!serviceShape.hasTrait(LocalServiceTrait.class)) throw new IllegalStateException("MUST be an LocalService");
         final LocalServiceTrait localServiceTrait = serviceShape.expectTrait(LocalServiceTrait.class);
 
-        final String moduleNamespace = DafnyNameResolver
-                .dafnyNamespace(serviceShape.getId().getNamespace())
-                .replace(".", "");
+        final String baseModuleName = DafnyNameResolver
+                .dafnyBaseModuleName(serviceShape.getId().getNamespace());
 
-        final TokenTree moduleHeader = TokenTree.of("abstract module WrappedAbstract%sService".formatted(moduleNamespace));
+        final TokenTree moduleHeader = TokenTree.of("abstract module WrappedAbstract%sService".formatted(baseModuleName));
         final TokenTree abstractModulePrelude = TokenTree
                 .of(DafnyNameResolver.wrappedAbstractModulePrelude(serviceShape))
                 .lineSeparated();
 
-        final String configTypeName = localServiceTrait.getConfigId().getName();
-        final String defaultFunctionMethodName = "Default%s".formatted(configTypeName);
+        final String configTypeName = nameResolver.baseTypeForShape(localServiceTrait.getConfigId());
+        final String defaultFunctionMethodName = "Default%s".formatted(localServiceTrait.getConfigId().getName());
 
         final TokenTree defaultConfig = TokenTree
                 .of("function method Wrapped%s(): %s".formatted(defaultFunctionMethodName, configTypeName));
@@ -2081,11 +2099,10 @@ public class DafnyApiCodegen {
     private TokenTree generateAbstractOperationsModule(final ServiceShape serviceShape)
     {
 
-      final String moduleNamespace = DafnyNameResolver
-        .dafnyNamespace(serviceShape.getId().getNamespace())
-        .replace(".", "");
+      final String baseModuleName = DafnyNameResolver
+        .dafnyBaseModuleName(serviceShape.getId().getNamespace());
       final TokenTree header = TokenTree.of("abstract module Abstract%sOperations"
-        .formatted(moduleNamespace)
+        .formatted(baseModuleName)
       );
 
 

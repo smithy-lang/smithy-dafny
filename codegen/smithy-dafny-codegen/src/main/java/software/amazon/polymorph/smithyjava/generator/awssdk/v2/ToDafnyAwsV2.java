@@ -101,16 +101,16 @@ public class ToDafnyAwsV2 extends ToDafny {
 
     TypeSpec toDafny() {
         List<OperationShape> operations = subject.serviceShape
-                .getOperations().stream()
+                .getOperations().stream().sorted()
                 .map(shapeId -> subject.model.expectShape(shapeId, OperationShape.class))
                 .toList();
         LinkedHashSet<ShapeId> operationStructures = operations.stream()
-                .map(OperationShape::getInputShape)
+                .map(OperationShape::getInputShape).sorted()
                 .collect(Collectors.toCollection(LinkedHashSet::new));
-        operations.stream().map(OperationShape::getOutputShape)
+        operations.stream().map(OperationShape::getOutputShape).sorted()
                 .forEachOrdered(operationStructures::add);
         LinkedHashSet<ShapeId> serviceErrors = ModelUtils.streamServiceErrors(subject.model, subject.serviceShape)
-                .map(Shape::toShapeId)
+                .map(Shape::toShapeId).sorted()
                 // InvalidEndpointException does not exist in SDK V2
                 .filter(structureShapeId -> !structureShapeId.toString().contains("com.amazonaws.dynamodb#InvalidEndpointException"))
                 .collect(Collectors.toCollection(LinkedHashSet::new));
@@ -129,17 +129,17 @@ public class ToDafnyAwsV2 extends ToDafny {
         });
         allRelevantShapeIds.removeAll(enumShapeIds);
 
-        final List<MethodSpec> convertAllRelevant = allRelevantShapeIds.stream()
+        final List<MethodSpec> convertAllRelevant = allRelevantShapeIds.stream().sorted()
                 .map(this::generateConvert).filter(Objects::nonNull).toList();
-        final List<MethodSpec> convertServiceErrors = serviceErrors.stream()
+        final List<MethodSpec> convertServiceErrors = serviceErrors.stream().sorted()
                 .map(this::modeledError).toList();
         // For enums, we generate overloaded methods,
         // one to convert instances of the Enum
         final List<MethodSpec> convertEnumEnum = enumShapeIds
-                .stream().map(this::generateConvertEnumEnum).toList();
+                .stream().sorted().map(this::generateConvertEnumEnum).toList();
         // The other to convert String representatives of the enum
         final List<MethodSpec> convertEnumString = enumShapeIds
-                .stream().map(this::generateConvertEnumString).toList();
+                .stream().sorted().map(this::generateConvertEnumString).toList();
 
         return TypeSpec
                 .classBuilder(

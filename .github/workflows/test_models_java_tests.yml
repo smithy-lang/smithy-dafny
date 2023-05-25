@@ -18,9 +18,10 @@ jobs:
           TestModels/Constraints,
           # TestModels/Constructor,
           # TestModels/Dependencies,
-          # TestModels/Errors,
+          TestModels/Errors,
           TestModels/Extendable,
           # TestModels/Extern,
+          TestModels/LocalService,
           # TestModels/Refinement,
           TestModels/Resource,
           # TestModels/SimpleTypes/BigDecimal,
@@ -63,9 +64,9 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Setup Dafny
-        uses: dafny-lang/setup-dafny-action@v1.4.0
+        uses: dafny-lang/setup-dafny-action@v1.6.1
         with:
-          dafny-version: "3.10.0"
+          dafny-version: "4.1.0"
 
       - name: Setup Java 
         uses: actions/setup-java@v3
@@ -73,33 +74,11 @@ jobs:
           distribution: 'corretto'
           java-version: 17
 
-      # TODO: This has been added has a workaround for https://issues.apache.org/jira/browse/MNG-7679
-      # Remove this when the latest version has been patched
-      - name: Setup Maven Action
-        uses: s4u/setup-maven-action@v1.7.0
-        with:
-          java-version: '8'
-          maven-version: 3.8.7
-
-      # Java DafnyRuntime is not published to maven,
-      # so manually download a nightly build for 3.10.0 and grab it from there.
-      - name: Locally Cache Java DafnyRuntime
-        run: |
-          wget -q https://github.com/dafny-lang/dafny/releases/download/nightly/dafny-nightly-2022-12-02-edab6cc-x64-osx-10.14.2.zip
-          unzip -qq dafny-nightly-2022-12-02-edab6cc-x64-osx-10.14.2.zip
-          mvn -B -ntp install:install-file \
-          -Dfile=dafny/DafnyRuntime.jar \
-          -DgroupId=dafny.lang \
-          -DartifactId=DafnyRuntime \
-          -Dversion=3.10.0 \
-          -DgeneratePom=true \
-          -Dpackaging=jar
-
-      - name: Setup dafny-java-conversion
+      - name: Setup smithy-dafny-conversion
         uses: gradle/gradle-build-action@v2
         with:
           arguments: publishToMavenLocal
-          build-root-directory: dafny-java-conversion
+          build-root-directory: smithy-dafny-conversion
 
       - name: Setup Java 17 for codegen
         uses: actions/setup-java@v3

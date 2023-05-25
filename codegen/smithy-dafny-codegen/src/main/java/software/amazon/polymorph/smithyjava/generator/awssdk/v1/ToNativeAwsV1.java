@@ -91,21 +91,21 @@ public class ToNativeAwsV1 extends ToNative {
 
     TypeSpec toNative() {
         List<OperationShape> operations = subject.serviceShape
-                .getOperations().stream()
+                .getOperations().stream().sorted()
                 .map(shapeId -> subject.model.expectShape(shapeId, OperationShape.class))
                 .toList();
         LinkedHashSet<ShapeId> operationOutputs = operations.stream()
-                .map(OperationShape::getOutputShape)
+                .map(OperationShape::getOutputShape).sorted()
                 .collect(Collectors.toCollection(LinkedHashSet::new));
         LinkedHashSet<ShapeId> operationInputs = operations.stream()
-                .map(OperationShape::getInputShape)
+                .map(OperationShape::getInputShape).sorted()
                 .collect(Collectors.toCollection(LinkedHashSet::new));
         LinkedHashSet<ShapeId> serviceErrors = operations.stream()
                 .map(OperationShape::getErrors)
-                .flatMap(Collection::stream)
+                .flatMap(Collection::stream).sorted()
                 .collect(Collectors.toCollection(LinkedHashSet::new));
         ModelUtils.streamServiceErrors(subject.model, subject.serviceShape)
-                .map(Shape::toShapeId)
+                .map(Shape::toShapeId).sorted()
                 .forEachOrdered(serviceErrors::add);
 
         LinkedHashSet<ShapeId> operationStructures = new LinkedHashSet<>();
@@ -122,9 +122,9 @@ public class ToNativeAwsV1 extends ToNative {
 
         final List<MethodSpec> convertOutputs = operationOutputs.stream()
                 .map(this::generateConvertResponseV1).toList();
-        final List<MethodSpec> convertAllRelevant = allRelevantShapeIds.stream()
+        final List<MethodSpec> convertAllRelevant = allRelevantShapeIds.stream().sorted()
                 .map(this::generateConvert).filter(Objects::nonNull).toList();
-        final List<MethodSpec> convertServiceErrors = serviceErrors.stream()
+        final List<MethodSpec> convertServiceErrors = serviceErrors.stream().sorted()
                 .map(this::modeledError).collect(Collectors.toList());
 
         return TypeSpec
@@ -190,7 +190,7 @@ public class ToNativeAwsV1 extends ToNative {
         builder.addStatement("$T $L = new $T()", nativeClassName, VAR_OUTPUT, nativeClassName);
 
         // For each member
-        structureShape.members()
+        structureShape.members().stream().sorted()
                 .forEach(member -> {
                     // if optional, check if present
                     if (member.isOptional()) {

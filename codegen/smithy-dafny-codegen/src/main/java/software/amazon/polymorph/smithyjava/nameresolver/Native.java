@@ -24,7 +24,6 @@ import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.polymorph.utils.AwsSdkNameResolverHelpers;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.polymorph.smithydafny.DafnyNameResolver;
-import software.amazon.polymorph.smithyjava.unmodeled.NativeError;
 import software.amazon.polymorph.smithyjava.unmodeled.OpaqueError;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.ResourceShape;
@@ -231,12 +230,7 @@ public class Native extends NameResolver{
             final ReferenceTrait reference = shape.expectTrait(ReferenceTrait.class);
             // A service or resource in a structure should almost always be treated as the interface
             Shape rShape = model.expectShape(reference.getReferentId());
-            if (reference.isService()) {
-                //noinspection OptionalGetWithoutIsPresent
-                return classNameForService(rShape.asServiceShape().get());
-            }
-            //noinspection OptionalGetWithoutIsPresent
-            return classNameForResource(rShape.asResourceShape().get());
+            return classNameForInterfaceOrLocalService(rShape, this.awsSdkVersion);
         }
         if (AwsSdkNameResolverHelpers.isInAwsSdkNamespace(shape.getId())) {
             return switch (awsSdkVersion) {
@@ -267,8 +261,9 @@ public class Native extends NameResolver{
                     ("ServiceShape for local-service-test MUST have LocalTrait." +
                             " ShapeId: %s").formatted(shape.toShapeId()));
         }
+        final String namespace = NamespaceHelper.standardize(shape.getId().getNamespace()) + ".wrapped";
         return ClassName.get(
-                NamespaceHelper.standardize(shape.getId().getNamespace()) + ".wrapped",
+                namespace,
                 "Test" + capitalize(maybeTrait.get().getSdkId()));
     }
 
@@ -328,10 +323,9 @@ public class Native extends NameResolver{
 
     // TODO: improve exceptions for local services
     public ClassName baseErrorForService() {
-        return NativeError.nativeClassName(modelPackage);
+        throw new IllegalArgumentException(
+                "Local Services no longer have a local error hierarchy." +
+                        "Use `ClassName.get(RuntimeException.class)` instead.");
     }
 
-    public ClassName opaqueErrorForService() {
-        return OpaqueError.nativeClassName(modelPackage);
-    }
 }

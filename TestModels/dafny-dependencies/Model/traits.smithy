@@ -15,16 +15,21 @@ structure reference {
   resource: String
 }
 
-
+list ServiceList {
+  @idRef(failWhenMissing: true, selector: "service")
+  member: String
+}
 // A trait for explicitly modeling the configuration options that should be
 // available in the generated methods for creating clients.
 @trait(selector: "service")
 structure localService {
-  // @required
+  @required
   sdkId: String,
-  // @required
-  // @idRef(failWhenMissing: true, selector: "structure")
+  @required
+  @idRef(failWhenMissing: true, selector: "structure")
   config: String,
+  // Explicitly NOT required
+  dependencies: ServiceList
 }
 
 // Trait indicates that the member of the given structure MUST be expanded.
@@ -53,25 +58,19 @@ structure dafnyUtf8Bytes {}
 
 // A trait indicating that the resource may be implemented by native code (instead of Dafny code).
 // i.e.: Users may author their own classes that implement and extend this resource.
-// Polymorph will generate and utilize NativeWrappers for these resources.
+// Polymorph MUST generate and utilize NativeWrappers for these resources.
+// Polymorph MUST generate conversion methods capabale of wrapping & un-wrapping
+// these native resources.
+// i.e.: The wrapping MUST NOT be a one way door.
 @trait(selector: "resource")
 structure extendable {}
 
-// A trait indicating that a structure is a members of a union
-// and MUST NOT be used independently of the union.
-// This is syntactic sugar for
-//  union Foo {
-//    Bar: structure Bar { baz: String }
-//  }
-//
-// It is used like this
-//  union Foo {
-//    Bar: Bar
-//  }
-//  structure Bar { baz: String }
-// This is especilay useful in Dafny.
-// Because it results in a single datatype
-// whos constructors are the member structures.
-// datatypes Foo = Bar( baz: String )
-@trait(selector: "structure")
-structure datatypeUnion {}
+// A trait to indicate that a resource stores local state
+@trait(selector: "resource")
+structure mutableLocalState {}
+
+// This is a workaround that should be removed when
+// Smithy-Dafny properly supports @documentation
+// https://github.com/awslabs/smithy-dafny/issues/247
+@trait(selector: "*")
+string javadoc

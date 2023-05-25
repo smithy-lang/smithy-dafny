@@ -22,6 +22,7 @@ import software.amazon.polymorph.smithyjava.MethodSignature;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.polymorph.smithyjava.nameresolver.Native;
 
+import software.amazon.polymorph.traits.JavaDocTrait;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ResourceShape;
 
@@ -81,8 +82,10 @@ public class ResourceShim extends ShimLibrary {
                 .addMethod(resourceAsDafny())
                 .addMethod(resourceAsNativeInterface())
                 .addMethod(impl());
+        targetShape.getTrait(JavaDocTrait.class)
+          .map(docTrait -> spec.addJavadoc(docTrait.getValue()));
         spec.addMethods(getOperationsForTarget()
-                .stream().sequential().map(this::operation).collect(Collectors.toList()));
+                .stream().map(this::operation).collect(Collectors.toList()));
         if (extendable) {
             NativeWrapper wrapper = new NativeWrapper(subject, targetShape);
             spec.addType(wrapper.nativeWrapper());
@@ -181,7 +184,7 @@ public class ResourceShim extends ShimLibrary {
     }
 
     protected List<OperationShape> getOperationsForTarget() {
-        return targetShape.getOperations().stream().sequential()
+        return targetShape.getOperations().stream().sorted()
                 .map(shapeId -> subject.model.expectShape(shapeId, OperationShape.class))
                 .collect(Collectors.toList());
     }

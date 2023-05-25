@@ -19,14 +19,12 @@ import javax.lang.model.element.Modifier;
 
 import software.amazon.polymorph.smithyjava.MethodReference;
 import software.amazon.polymorph.smithyjava.generator.ToDafny;
-import software.amazon.polymorph.smithyjava.nameresolver.Constants;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.polymorph.smithyjava.nameresolver.Native;
 import software.amazon.polymorph.smithyjava.unmodeled.CollectionOfErrors;
-import software.amazon.polymorph.smithyjava.unmodeled.NativeError;
 import software.amazon.polymorph.smithyjava.unmodeled.OpaqueError;
 
 import software.amazon.smithy.model.shapes.MemberShape;
@@ -78,7 +76,7 @@ public class ToDafnyLibrary extends ToDafny {
     TypeSpec toDafny() {
         ArrayList<MethodSpec> toDafnyMethods = new ArrayList<>();
         // NativeError (really, any Error in the service)
-        toDafnyMethods.add(nativeError());
+        toDafnyMethods.add(runtimeException());
         // OpaqueError
         toDafnyMethods.add(opaqueError());
         // CollectionError
@@ -105,23 +103,25 @@ public class ToDafnyLibrary extends ToDafny {
         subject.getMapsInServiceNamespace().stream()
                 .map(this::modeledMap).forEachOrdered(toDafnyMethods::add);
         // Resources
-        subject.getResourcesInServiceNamespace().stream().sequential()
+        subject.getResourcesInServiceNamespace().stream()
                 .map(this::modeledResource).forEachOrdered(toDafnyMethods::add);
+        // The Service, it's self
+        toDafnyMethods.add(modeledService(subject.serviceShape));
         return TypeSpec.classBuilder(thisClassName)
                 .addModifiers(Modifier.PUBLIC)
                 .addMethods(toDafnyMethods)
                 .build();
     }
 
-    // Converts any subclass of NativeError to the correct Dafny Error,
+    // Converts any subclass of RuntimeException to the correct Dafny Error,
     // or casts it as an OpaqueError.
-    MethodSpec nativeError() {
+    MethodSpec runtimeException() {
         TypeName dafnyError = subject.dafnyNameResolver.abstractClassForError();
-        ClassName nativeError = NativeError.nativeClassName(subject.nativeNameResolver.modelPackage);
+        ClassName runtimeException = ClassName.get(RuntimeException.class);
         MethodSpec.Builder method = MethodSpec.methodBuilder("Error")
                 .returns(dafnyError)
                 .addModifiers(PUBLIC_STATIC)
-                .addParameter(nativeError, VAR_INPUT);
+                .addParameter(runtimeException, VAR_INPUT);
         List<ClassName> allNativeErrors = subject.getErrorsInServiceNamespace().stream()
                 .map(subject.nativeNameResolver::classNameForStructure)
                 .collect(Collectors.toCollection(ArrayList::new));
@@ -210,15 +210,14 @@ public class ToDafnyLibrary extends ToDafny {
                 .build();
     }
 
-    @SuppressWarnings("unused") // We do not use this yet (2023-03-05), but we might soon-ish. Remove by 2023-06 if still not used.
     protected MethodSpec modeledService(ServiceShape shape) {
         final String methodName = capitalize(shape.getId().getName());
         return MethodSpec
                 .methodBuilder(methodName)
                 .addModifiers(PUBLIC_STATIC)
                 .returns(Dafny.interfaceForService(shape))
-                .addParameter(Native.classNameForAwsSdk(shape, subject.sdkVersion), VAR_INPUT)
-                .addStatement("return $L.impl()", subject.wrapWithShim(shape.getId(), CodeBlock.of(VAR_INPUT)))
+                .addParameter(Native.classNameForInterfaceOrLocalService(shape, subject.sdkVersion), VAR_INPUT)
+                .addStatement("return $L.impl()", CodeBlock.of(VAR_INPUT))
                 .build();
     }
 
@@ -232,7 +231,7 @@ public class ToDafnyLibrary extends ToDafny {
     // that can be in other namespaces.
     // This override simplifies their lookup.
     @Override
-    protected MethodReference conversionMethodReference(Shape shape) {
+    public MethodReference conversionMethodReference(Shape shape) {
         ModelUtils.ResolvedShapeId resolvedShapeId = ModelUtils.resolveShape(shape.getId(),subject.model );
         Shape resolvedShape = subject.model.expectShape(resolvedShapeId.resolvedId());
         if (resolvedShape.isServiceShape() || resolvedShape.isResourceShape()) {

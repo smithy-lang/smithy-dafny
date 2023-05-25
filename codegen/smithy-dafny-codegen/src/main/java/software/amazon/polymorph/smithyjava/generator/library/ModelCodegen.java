@@ -7,7 +7,6 @@ import software.amazon.polymorph.smithyjava.modeled.ModeledError;
 import software.amazon.polymorph.smithyjava.modeled.ModeledStructure;
 import software.amazon.polymorph.smithyjava.modeled.ModeledUnion;
 import software.amazon.polymorph.smithyjava.unmodeled.CollectionOfErrors;
-import software.amazon.polymorph.smithyjava.unmodeled.NativeError;
 import software.amazon.polymorph.smithyjava.unmodeled.OpaqueError;
 import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
@@ -48,8 +47,6 @@ class ModelCodegen extends Generator {
     @Override
     public LinkedHashSet<JavaFile> javaFiles() {
         LinkedHashSet<JavaFile> rtn = new LinkedHashSet<>();
-        // NativeError Exception Class
-        rtn.add(NativeError.javaFile(modelPackageName));
         // Opaque Exception Class
         rtn.add(OpaqueError.javaFile(modelPackageName));
         // Collection of Errors class

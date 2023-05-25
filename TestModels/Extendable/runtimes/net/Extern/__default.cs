@@ -6,15 +6,15 @@ using Simple.Extendable.Resources;
 using Simple.Extendable.Resources.Wrapped;
 using TypeConversion = Simple.Extendable.Resources.TypeConversion;
 
-namespace Dafny.Simple.Extendable.Resources.Wrapped
+namespace simple.extendable.resources.internaldafny.wrapped
 {
   public partial class __default
   {
     public static _IResult<
-      Types.ISimpleExtendableResourcesClient,
-      Types._IError
+      types.ISimpleExtendableResourcesClient,
+      types._IError
     > WrappedSimpleExtendableResources(
-      Types._ISimpleExtendableResourcesConfig config
+      types._ISimpleExtendableResourcesConfig config
     )
     {
       var wrappedConfig =
@@ -22,18 +22,18 @@ namespace Dafny.Simple.Extendable.Resources.Wrapped
       var impl = new SimpleExtendableResources(wrappedConfig);
       var wrappedClient = new SimpleExtendableResourcesShim(impl);
       return Result<
-        Types.ISimpleExtendableResourcesClient,
-        Types._IError
+        types.ISimpleExtendableResourcesClient,
+        types._IError
       >.create_Success(wrappedClient);
     }
   }
 }
 
-namespace Dafny.Simple.Extendable.Resources.NativeResourceFactory
+namespace simple.extendable.resources.internaldafny.nativeresourcefactory
 {
   public partial class __default
   {
-    public static Dafny.Simple.Extendable.Resources.Types.IExtendableResource DafnyFactory()
+    public static simple.extendable.resources.internaldafny.types.IExtendableResource DafnyFactory()
     {
       return TypeConversion.ToDafny_N6_simple__N10_extendable__N9_resources__S27_ExtendableResourceReference(
         NativeResource.NativeFactory());

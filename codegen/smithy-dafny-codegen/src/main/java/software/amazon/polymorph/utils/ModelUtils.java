@@ -8,9 +8,11 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.slf4j.LoggerFactory;
 import software.amazon.polymorph.traits.ClientConfigTrait;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.polymorph.traits.ExtendableTrait;
+import software.amazon.polymorph.traits.JavaDocTrait;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.traits.MutableLocalStateTrait;
 import software.amazon.polymorph.traits.PositionalTrait;
@@ -35,8 +37,8 @@ public class ModelUtils {
     private static final Pattern ENUM_NAME_PATTERN = Pattern.compile("^[A-Z]+[A-Za-z_0-9]*$");
 
     /**
-     * Adds our custom traits (and their definitions) to a {@link ModelAssembler}.<p/>
-     *
+     * Adds our custom traits (and their definitions) to a {@link ModelAssembler}.
+     * <p>
      * Note that this only needs to be called if the model file(s) being processed do not define these traits
      * (for example, in unit tests). If the model file does define the traits, adding them again does nothing.
      */
@@ -46,8 +48,9 @@ public class ModelUtils {
         assembler.addShape(ClientConfigTrait.getDefinition());
         assembler.addShape(DafnyUtf8BytesTrait.getDefinition());
         assembler.addShape(ExtendableTrait.getDefinition());
-        assembler.addShape(LocalServiceTrait.getDefinition());
+        LocalServiceTrait.getDefinitions().forEach(assembler::addShape);
         assembler.addShape(MutableLocalStateTrait.getDefinition());
+        assembler.addShape(JavaDocTrait.getDefinition());
     }
 
     /**

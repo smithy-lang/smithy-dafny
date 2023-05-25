@@ -1,9 +1,9 @@
 using System;
 using Dafny;
-using Dafny.Simple.Extern.Types;
-using Simple.Extern;
+using simple.dafnyextern.internaldafny.types;
+using Simple.DafnyExtern;
 using Wrappers_Compile;
-using GetExternOutput = Dafny.Simple.Extern.Types.GetExternOutput;
+using GetExternOutput = simple.dafnyextern.internaldafny.types.GetExternOutput;
 
 namespace SimpleExternImpl_Compile
 {
@@ -24,7 +24,7 @@ namespace SimpleExternImpl_Compile
         {
             var exception = new Exception(
                 TypeConversion
-                    .FromDafny_N6_simple__N6_extern__S20_ExternMustErrorInput__M5_value(input.dtor_value));
+                    .FromDafny_N6_simple__N11_dafnyExtern__S20_ExternMustErrorInput__M5_value(input.dtor_value));
             return Result<_IExternMustErrorOutput, _IError>.create_Failure(Error.create_Opaque(exception));
         }
     }

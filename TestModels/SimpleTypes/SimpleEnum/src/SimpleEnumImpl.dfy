@@ -1,6 +1,6 @@
-include "../Model/SimpleTypesEnumTypes.dfy"
+include "../Model/SimpleTypesSmithyEnumTypes.dfy"
 
-module SimpleEnumImpl refines AbstractSimpleTypesEnumOperations  {
+module SimpleEnumImpl refines AbstractSimpleTypesSmithyEnumOperations  {
   datatype Config = Config
   type InternalConfig = Config
   predicate ValidInternalConfig?(config: InternalConfig)

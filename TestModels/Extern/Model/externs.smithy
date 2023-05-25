@@ -1,4 +1,4 @@
-namespace simple.extern
+namespace simple.dafnyExtern
 
 @aws.polymorph#localService(
   sdkId: "SimpleExtern",

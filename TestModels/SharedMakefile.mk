@@ -40,9 +40,27 @@ verify:
 		-vcsCores:$(CORES) \
 		-compile:0 \
 		-definiteAssignment:3 \
+		-quantifierSyntax:3 \
+		-unicodeChar:0 \
+		-functionSyntax:3 \
 		-verificationLogger:csv \
 		-timeLimit:300 \
 		-trace \
+		`find . -name '*.dfy'`
+
+format:
+	dafny format \
+		--function-syntax 3 \
+		--quantifier-syntax 3 \
+		--unicode-char false \
+		`find . -name '*.dfy'`
+
+format-check:
+	dafny format \
+		--check \
+		--function-syntax 3 \
+		--quantifier-syntax 3 \
+		--unicode-char false \
 		`find . -name '*.dfy'`
 
 dafny-reportgenerator:
@@ -94,6 +112,9 @@ transpile_implementation:
 		-spillTargetCode:3 \
 		-compile:0 \
 		-optimizeErasableDatatypeWrapper:0 \
+		-quantifierSyntax:3 \
+		-unicodeChar:0 \
+		-functionSyntax:3 \
 		-useRuntimeLib \
 		-out $(OUT) \
 		./src/Index.dfy \
@@ -108,6 +129,9 @@ transpile_test:
 		-runAllTests:1 \
 		-compile:0 \
 		-optimizeErasableDatatypeWrapper:0 \
+		-quantifierSyntax:3 \
+		-unicodeChar:0 \
+		-functionSyntax:3 \
 		-useRuntimeLib \
 		-out $(OUT) \
 		`find ./test -name '*.dfy'` \
