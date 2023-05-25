@@ -137,10 +137,12 @@ public abstract class DafnyProtocolGenerator implements ProtocolGenerator {
       PythonWriter writer
   ) {
     writer.addDependency(SmithyPythonDependency.SMITHY_PYTHON);
-    writer.addImport("Dafny.Path.To.Dafny.Code.", "SimpleBooleanHardCoded", "_SimpleBooleanHardCoded");
+    // get this from... topdownindex?
+    // i have freedom to pass in anything i want to generateRequestSerializer
+    writer.addImport("Dafny.Simpletypes.Boolean.Types", "GetBooleanInput_GetBooleanInput", "DafnyGetBooleanInput");
 
     writer.write("""
-            return _SimpleBooleanHardCoded.get_boolean()
+            return DafnyGetBooleanInput(value=input.value)
             """);
   }
 
@@ -182,12 +184,14 @@ public abstract class DafnyProtocolGenerator implements ProtocolGenerator {
     var deserFunction = getDeserializationFunction(context, operation);
     delegator.useFileWriter(deserFunction.getDefinitionFile(), deserFunction.getNamespace(), writer -> {
       writer.pushState(new ResponseDeserializerSection(operation));
+      
+      writer.addImport("Dafny.Simpletypes.Boolean.Types", "GetBooleanOutput_GetBooleanOutput", "DafnyGetBooleanOutput");
+      writer.addImport(".config", "Config", "Config");
+      writer.addImport(".models", "GetBooleanOutput", "GetBooleanOutput");
 
-      writer.addStdlibImport("typing", "Any");
       writer.write("""
-                # This is the output of Dafny,
-                #   so it probably needs to call the impl and get the result?
-                """);
+            return GetBooleanOutput(value=input.value.value)
+      """);
       writer.popState();
     });
   }

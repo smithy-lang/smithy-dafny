@@ -41,16 +41,16 @@ public final class DafnyTestIntegration implements
         .configFields(
             Collections.singletonList(new ConfigField("impl",
                 Symbol.builder()
-                    .name("config_type")
-                    .namespace("Path.To.Config.Namespace", ".")
+                    .name("SimpleBooleanClient")
+                    .namespace("Dafny.Simpletypes.Boolean", ".")
                     .build(),
                 false, "")))
-        .pythonPlugin(SymbolReference.builder()
-            .symbol(Symbol.builder()
-                .name("set_config_impl")
-                .namespace(".", ".")
-                .build())
-            .build())
+        // .pythonPlugin(SymbolReference.builder()
+        //     .symbol(Symbol.builder()
+        //         .name("set_config_impl")
+        //         .namespace(".", ".")
+        //         .build())
+        //     .build())
         .build();
 
 
@@ -71,20 +71,19 @@ public final class DafnyTestIntegration implements
         return new ApplicationProtocol(
             "dafny",
             SymbolReference.builder()
-                .symbol(createHttpSymbol("IaAmDafny"))
+                .symbol(createDafnySymbol("DafnyGetBooleanInput"))
                 .build(),
             SymbolReference.builder()
-                .symbol(createHttpSymbol("IamaAlsoDafny"))
+                .symbol(createDafnySymbol("DafnyGetBooleanOutput"))
                 .build()
         );
     }
 
-    private static Symbol createHttpSymbol(String symbolName) {
-        PythonDependency dependency = SmithyPythonDependency.SMITHY_PYTHON;
+    private static Symbol createDafnySymbol(String symbolName) {
         return Symbol.builder()
-            .namespace(dependency.packageName() + ".interfaces.http", ".")
+            .namespace("Dafny.Simpletypes.Boolean.Types", ".")
             .name(symbolName)
-            .addDependency(dependency)
+//            .addDependency(dependency)
             .build();
     }
 
