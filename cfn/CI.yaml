@@ -9,7 +9,7 @@ Parameters:
   GitHubRepo:
     Type: String
     Description: GitHub Repo that invokes CI
-    Default: aws/aws-cryptographic-material-providers-library-dafny
+    Default: aws/aws-cryptographic-material-providers-library-java
 
 Resources:
   GitHubCIRole:
