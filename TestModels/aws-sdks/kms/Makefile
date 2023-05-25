@@ -17,3 +17,8 @@ _polymorph_wrapped: ;
 _polymorph_wrapped_dafny: ;
 _polymorph_wrapped_net: ;
 _polymorph_wrapped_java: ;
+
+clean: _clean
+	rm -rf $(LIBRARY_ROOT)/runtimes/java/src/main/dafny-generated
+	rm -rf $(LIBRARY_ROOT)/runtimes/java/src/main/smithy-generated
+	rm -rf $(LIBRARY_ROOT)/runtimes/java/src/test/dafny-generated
