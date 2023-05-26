@@ -147,7 +147,8 @@ module SimpleDependenciesImpl refines AbstractSimpleDependenciesOperations {
       message := "msg no 2"
     );
     var collectionOfExtendableResourceErrors := SimpleExtendableResourcesTypes.CollectionOfErrors(
-      [nestedExtendableResourceError, nestedExtendableResourceError2]
+      [nestedExtendableResourceError, nestedExtendableResourceError2],
+      message := "2 Somethings"
     );
     var dependenciesError := Error.SimpleExtendableResources(collectionOfExtendableResourceErrors);
     return Failure(dependenciesError);
