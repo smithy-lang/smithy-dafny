@@ -146,6 +146,10 @@ Resources:
             Principal:
               AWS: !Sub "arn:aws:iam::${AWS::AccountId}:role/ToolsDevelopment"
             Action: 'sts:AssumeRole'
+          - Effect: Allow
+            Principal:
+              AWS: "arn:aws:iam::370957321024:role/GitHub-CI-MPL-Dafny-Role-us-west-2"
+            Action: 'sts:AssumeRole'
 
   CAPullRole:
     Type: 'AWS::IAM::Role'
