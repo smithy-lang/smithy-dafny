@@ -437,11 +437,12 @@ public class CodegenEngine {
             Stream.concat(
                     COMMON_SUPPORTED_TRAITS.stream(),
                     Stream.of(
-                            // TODO: For those that literally can't be used for non-local services,
-                            //  We probably want model validation to forbid them instead,
+                            // For those that literally can't be used for non-local services,
+                            // We probably want model validation to forbid them instead,
                             "aws.polymorph#extendable",
                             "aws.polymorph#localService",
                             "aws.polymorph#dafnyUtf8Bytes",
+                            "aws.polymorph#javadoc",
                             "aws.polymorph#positional",
                             "aws.polymorph#reference"
                     )).toList();
