@@ -44,10 +44,10 @@ public class ShimCodegenTest {
         final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
                 namespace Test.Foobar {
                     internal class Doer : DoerBase {
-                        internal readonly Dafny.Test.Foobar.Types.IDoer _impl;
-                        internal Doer(Dafny.Test.Foobar.Types.IDoer impl) { this._impl = impl; }
+                        internal readonly test.foobar.internaldafny.types.IDoer _impl;
+                        internal Doer(test.foobar.internaldafny.types.IDoer impl) { this._impl = impl; }
                         protected override void _DoIt() {
-                            Wrappers_Compile._IResult<_System._ITuple0, Dafny.Test.Foobar.Types._IError> result =
+                            Wrappers_Compile._IResult<_System._ITuple0, test.foobar.internaldafny.types._IError> result =
                                     this._impl.DoIt();
                             if (result.is_Failure) throw %s(result.dtor_error);
                         }
@@ -70,7 +70,7 @@ public class ShimCodegenTest {
         final ShapeId resourceShapeId = ShapeId.fromParts(SERVICE_NAMESPACE, "Thing");
 
         final List<ParseToken> expectedTokens = Tokenizer.tokenize(
-                "internal Thing(Dafny.Test.Foobar.Types.IThing impl) { this._impl = impl; }");
+                "internal Thing(test.foobar.internaldafny.types.IThing impl) { this._impl = impl; }");
 
         final String actualCode = codegen.generateResourceConstructor(resourceShapeId).toString();
         final List<ParseToken> actualTokens = Tokenizer.tokenize(actualCode);
@@ -93,12 +93,12 @@ public class ShimCodegenTest {
                 .qualifiedTypeConverterForCommonError(serviceShape, FROM_DAFNY);
         final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
                 protected override void _DoThis() {
-                    Wrappers_Compile._IResult<_System._ITuple0, Dafny.Test.Foobar.Types._IError> result =
+                    Wrappers_Compile._IResult<_System._ITuple0, test.foobar.internaldafny.types._IError> result =
                             this._impl.DoThis();
                     if (result.is_Failure) throw %1$s(result.dtor_error);
                 }
                 protected override void _DoThat() {
-                    Wrappers_Compile._IResult<_System._ITuple0, Dafny.Test.Foobar.Types._IError> result =
+                    Wrappers_Compile._IResult<_System._ITuple0, test.foobar.internaldafny.types._IError> result =
                             this._impl.DoThat();
                     if (result.is_Failure) throw %1$s(result.dtor_error);
                 }
@@ -125,8 +125,8 @@ public class ShimCodegenTest {
                 .qualifiedTypeConverterForCommonError(serviceShape, FROM_DAFNY);
         final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
                 protected override void _DoIt(Test.Foobar.Input input) {
-                    Dafny.Test.Foobar.Types._IInput internalInput = %s(input);
-                    Wrappers_Compile._IResult<_System._ITuple0, Dafny.Test.Foobar.Types._IError>
+                    test.foobar.internaldafny.types._IInput internalInput = %s(input);
+                    Wrappers_Compile._IResult<_System._ITuple0, test.foobar.internaldafny.types._IError>
                             result = this._impl.DoIt(internalInput);
                     if (result.is_Failure) throw %s(result.dtor_error);
                 }
@@ -155,7 +155,7 @@ public class ShimCodegenTest {
                 .qualifiedTypeConverterForCommonError(serviceShape, FROM_DAFNY);
         final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
                 protected override Test.Foobar.Output _DoIt() {
-                    Wrappers_Compile._IResult<Dafny.Test.Foobar.Types._IOutput, Dafny.Test.Foobar.Types._IError>
+                    Wrappers_Compile._IResult<test.foobar.internaldafny.types._IOutput, test.foobar.internaldafny.types._IError>
                             result = this._impl.DoIt();
                     if (result.is_Failure) throw %s(result.dtor_error);
                     return %s(result.dtor_value);
@@ -189,8 +189,8 @@ public class ShimCodegenTest {
                 .qualifiedTypeConverterForCommonError(serviceShape, FROM_DAFNY);
         final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
                 protected override Test.Foobar.Output _DoIt(Test.Foobar.Input input) {
-                    Dafny.Test.Foobar.Types._IInput internalInput = %s(input);
-                    Wrappers_Compile._IResult<Dafny.Test.Foobar.Types._IOutput, Dafny.Test.Foobar.Types._IError>
+                    test.foobar.internaldafny.types._IInput internalInput = %s(input);
+                    Wrappers_Compile._IResult<test.foobar.internaldafny.types._IOutput, test.foobar.internaldafny.types._IError>
                             result = this._impl.DoIt(internalInput);
                     if (result.is_Failure) throw %s(result.dtor_error);
                     return %s(result.dtor_value);

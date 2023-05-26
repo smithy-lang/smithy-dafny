@@ -51,8 +51,8 @@ repositories {
 }
 
 dependencies {
-    implementation("org.dafny:DafnyRuntime:4.0.0")
-    implementation("software.amazon.dafny:conversion:1.0-SNAPSHOT")
+    implementation("org.dafny:DafnyRuntime:4.1.0")
+    implementation("software.amazon.smithy.dafny:conversion:0.1")
 }
 publishing {
     publications.create<MavenPublication>("maven") {

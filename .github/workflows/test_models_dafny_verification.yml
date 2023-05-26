@@ -58,7 +58,7 @@ jobs:
       - name: Setup Dafny
         uses: dafny-lang/setup-dafny-action@v1.6.1
         with:
-          dafny-version: "4.0.0"
+          dafny-version: "4.1.0"
 
       - name: Generate Polymorph Wrapper Dafny code
         shell: bash

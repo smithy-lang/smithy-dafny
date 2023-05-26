@@ -9,8 +9,10 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Stream;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import software.amazon.polymorph.smithyjava.NamespaceHelper;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
@@ -49,6 +51,7 @@ public record DafnyNameResolver(
         // Otherwise, just use the shape name.
         return serviceShape.getTrait(ServiceTrait.class)
                 .map(t -> AwsSdkNameResolverHelpers.mungeSdkId(t.getSdkId()))
+          // TODO: LocalServiceTrait has an SDKID as well... is this wrong?
                 .orElse(StringUtils.capitalize(serviceShape.getId().getName()));
     }
 
@@ -228,37 +231,21 @@ public record DafnyNameResolver(
     }
 
     //TODO: Figure which of these public static string methods should go to DafnyNameResolverHelpers
-    /**
-     * Returns the Dafny module corresponding to the namespace of the given shape ID.
-     */
-    public static String dafnyModuleForNamespace(final String namespace) {
-        return dafnyNamespace(namespace) + ".Types";
+
+    // i.e. "AwsCryptographyMaterialProvidersTypes"
+    // This is the Dafny module name for the smithy->Dafny types file.
+    public static String dafnyTypesModuleName(final String namespace) {
+        return dafnyBaseModuleName(namespace) + "Types";
     }
 
-    public static String dafnyNamespace(final String namespace) {
+    // i.e. "AwsCryptographyMaterialProviders"
+    // This is used as a base to build various names for generated Dafny types and traits.
+    public static String dafnyBaseModuleName(final String namespace) {
         final Stream<String> namespaceParts = Arrays
           .stream(namespace.split("\\."))
           .map(StringUtils::capitalize);
-        return Joiner.on('.').join(namespaceParts.iterator());
+        return Joiner.on("").join(namespaceParts.iterator());
     }
-
-    public static String dafnyTypesModuleForNamespace(final String namespace) {
-        // The namespace has dots
-        return (dafnyModuleForNamespace(namespace)).replace(".", "");
-    }
-
-    public static String dafnyAbstractModuleForNamespace(final String namespace) {
-        // The namespace has dots
-        return (dafnyModuleForNamespace(namespace))
-          .replace(".Types", "Abstract")
-          .replace(".", "");
-    }
-
-    public static String dafnyInternalConfigModuleForNamespace(final String namespace) {
-        return "%sInternalConfig"
-          .formatted(dafnyNamespace(namespace).replace(".", ""));
-    }
-
 
     public String dafnyModulePrefixForShape(final Shape shape) {
         final String shapeNamespace = shape.getId().getNamespace();
@@ -272,7 +259,7 @@ public record DafnyNameResolver(
 
             // Append `.` so that it is easy to use.
             // If you only want the name use localDafnyModuleName
-            return dafnyTypesModuleForNamespace(shapeNamespace) + ".";
+            return dafnyTypesModuleName(shapeNamespace) + ".";
         } else {
             // This is "local" and so does not need any Module name...
             return "";
@@ -280,17 +267,28 @@ public record DafnyNameResolver(
     }
 
     /**
-     * Returns the Dafny {@code {:extern}} namespace corresponding to the namespace of the given shape ID.
+     * Outside of {@code smithydafny}, this should not be called directly.
+     * Instead, call
+     * {@link software.amazon.polymorph.utils.DafnyNameResolverHelpers#packageNameForNamespace}.
      */
-    public static String dafnyExternNamespaceForShapeId(final ShapeId shapeId) {
-        return dafnyExternNamespaceForNamespace(shapeId.getNamespace());
+    // i.e. "software.amazon.cryptography.materialproviders.internaldafny"
+    // The base namespace at which all smithy->Dafny->X generated code is built to,
+    // used in {:extern}.
+    // TODO: Currently converts the smithy namespace into a Java idiomatic one.
+    public static String dafnyExternNamespace(final String namespace) {
+        return NamespaceHelper.standardize(namespace) + ".internaldafny";
     }
 
     /**
-     * Returns the Dafny {@code {:extern}} namespace corresponding to the provided namespace
+     * Outside of {@code smithydafny}, this should not be called directly.
+     * Instead, call
+     * {@link software.amazon.polymorph.utils.DafnyNameResolverHelpers#dafnyExternNamespaceForNamespace}.
      */
-    public static String dafnyExternNamespaceForNamespace(final String namespace) {
-        return "Dafny." + dafnyModuleForNamespace(namespace);
+    // i.e. "software.amazon.cryptography.materialproviders.internaldafny.types"
+    // The namespace for all the smithy->Dafny->X generated types,
+    // i.e. the {:extern} for the Dafny Types module
+    public static String dafnyTypesModuleExternNamespace(final String namespace) {
+        return dafnyExternNamespace(namespace) + ".types";
     }
 
     public String callEventTypeName() {
@@ -324,7 +322,7 @@ public record DafnyNameResolver(
 
     public static Stream<TokenTree> abstractModulePrelude(ServiceShape serviceShape)
     {
-        final String typesModuleName = dafnyTypesModuleForNamespace(serviceShape.getId().getNamespace());
+        final String typesModuleName = dafnyTypesModuleName(serviceShape.getId().getNamespace());
 
         return Stream
           .concat(
@@ -336,17 +334,22 @@ public record DafnyNameResolver(
 
     public static String abstractServiceModuleName(ServiceShape serviceShape)
     {
-        final String moduleNamespace = DafnyNameResolver
-                .dafnyNamespace(serviceShape.getId().getNamespace())
-                .replace(".", "");
+        final String moduleNamespace = moduleNamespace(serviceShape.getId().getNamespace());
         return "Abstract%sService".formatted(moduleNamespace);
+    }
+
+    // TODO: I am so confused by what all these dafny*Namespace methods are doing.
+    //  There has to be duplication. I do not know where. But it must exist.
+    //  Let's give them documentation and then reduce.
+    /** "com.amazonaws.kms" -> "ComAmazonAwsKms" */
+    @Nonnull
+    public static String moduleNamespace(String namespace) {
+        return DafnyNameResolver.dafnyBaseModuleName(namespace);
     }
 
     public static String abstractOperationsModuleName(ServiceShape serviceShape)
     {
-        final String moduleNamespace = DafnyNameResolver
-          .dafnyNamespace(serviceShape.getId().getNamespace())
-          .replace(".", "");
+        final String moduleNamespace = moduleNamespace(serviceShape.getId().getNamespace());
         return "Abstract%sOperations".formatted(moduleNamespace);
     }
 

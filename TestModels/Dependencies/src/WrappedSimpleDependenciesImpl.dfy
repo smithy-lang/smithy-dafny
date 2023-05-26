@@ -1,6 +1,6 @@
 include "../Model/SimpleDependenciesTypesWrapped.dfy"
 
-module {:extern "Dafny.Simple.Dependencies.Wrapped"} WrappedSimpleDependenciesService refines WrappedAbstractSimpleDependenciesService {
+module {:extern "simple.dependencies.internaldafny.wrapped"} WrappedSimpleDependenciesService refines WrappedAbstractSimpleDependenciesService {
     import WrappedService = SimpleDependencies
     function method WrappedDefaultSimpleDependenciesConfig(): SimpleDependenciesConfig {
         SimpleDependenciesConfig(

@@ -1,4 +1,4 @@
-package Simple.Extendable.Resources;
+package simple.extendable.resources;
 
 import simple.extendable.resources.IExtendableResource;
 import simple.extendable.resources.ToNative;

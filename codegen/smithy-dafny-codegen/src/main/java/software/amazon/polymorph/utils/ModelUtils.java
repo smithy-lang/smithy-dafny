@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import software.amazon.polymorph.traits.ClientConfigTrait;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.polymorph.traits.ExtendableTrait;
+import software.amazon.polymorph.traits.JavaDocTrait;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.traits.MutableLocalStateTrait;
 import software.amazon.polymorph.traits.PositionalTrait;
@@ -47,8 +48,9 @@ public class ModelUtils {
         assembler.addShape(ClientConfigTrait.getDefinition());
         assembler.addShape(DafnyUtf8BytesTrait.getDefinition());
         assembler.addShape(ExtendableTrait.getDefinition());
-        assembler.addShape(LocalServiceTrait.getDefinition());
+        LocalServiceTrait.getDefinitions().forEach(assembler::addShape);
         assembler.addShape(MutableLocalStateTrait.getDefinition());
+        assembler.addShape(JavaDocTrait.getDefinition());
     }
 
     /**

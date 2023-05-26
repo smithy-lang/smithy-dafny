@@ -107,16 +107,16 @@ public class ToNativeAwsV2 extends ToNative {
 
     TypeSpec toNative() {
         List<OperationShape> operations = subject.serviceShape
-                .getOperations().stream()
+                .getOperations().stream().sorted()
                 .map(shapeId -> subject.model.expectShape(shapeId, OperationShape.class))
                 .toList();
         LinkedHashSet<ShapeId> operationStructures = operations.stream()
-                .map(OperationShape::getInputShape)
+                .map(OperationShape::getInputShape).sorted()
                 .collect(Collectors.toCollection(LinkedHashSet::new));
-        operations.stream().map(OperationShape::getOutputShape)
+        operations.stream().map(OperationShape::getOutputShape).sorted()
                 .forEachOrdered(operationStructures::add);
         LinkedHashSet<ShapeId> serviceErrors = ModelUtils.streamServiceErrors(subject.model, subject.serviceShape)
-                .map(Shape::toShapeId)
+                .map(Shape::toShapeId).sorted()
                 // InvalidEndpointException does not exist in SDK V2
                 .filter(structureShapeId -> !structureShapeId.toString().contains("com.amazonaws.dynamodb#InvalidEndpointException"))
                 .collect(Collectors.toCollection(LinkedHashSet::new));
@@ -126,9 +126,9 @@ public class ToNativeAwsV2 extends ToNative {
         allRelevantShapeIds.removeAll(serviceErrors);
         allRelevantShapeIds.remove(ShapeId.fromParts("smithy.api", "Unit"));
 
-        List<MethodSpec> convertRelevant = allRelevantShapeIds.stream()
+        List<MethodSpec> convertRelevant = allRelevantShapeIds.stream().sorted()
                 .map(this::generateConvert).filter(Objects::nonNull).toList();
-        final List<MethodSpec> convertServiceErrors = serviceErrors.stream()
+        final List<MethodSpec> convertServiceErrors = serviceErrors.stream().sorted()
                 .map(this::modeledError).toList();
         return TypeSpec
                 .classBuilder(
@@ -248,7 +248,7 @@ public class ToNativeAwsV2 extends ToNative {
         builder.addStatement("$T.Builder $L = $T.builder()", nativeClassName, VAR_BUILDER, nativeClassName);
 
         // For each member
-        structureShape.members()
+        structureShape.members().stream().sorted()
                 .forEach(member -> {
                     // if optional, check if present
                     if (member.isOptional()) {
@@ -331,7 +331,7 @@ public class ToNativeAwsV2 extends ToNative {
                 "Unnamed enums not supported. ShapeId: %s".formatted(shapeId));
         }
 
-        enumTrait.getValues().stream().sequential()
+        enumTrait.getValues().stream()
             .map(EnumDefinition::getName)
             .map(maybeName -> maybeName.orElseThrow(
                 () -> new IllegalArgumentException(

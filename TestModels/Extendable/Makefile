@@ -14,13 +14,7 @@ NAMESPACE=simple.extendable.resources
 format_net:
 	pushd runtimes/net && dotnet format && popd
 
-clean:
-	rm -f $(LIBRARY_ROOT)/Model/*Types.dfy $(LIBRARY_ROOT)/Model/*TypesWrapped.dfy
-	rm -f $(LIBRARY_ROOT)/runtimes/net/ImplementationFromDafny.cs
-	rm -f $(LIBRARY_ROOT)/runtimes/net/tests/TestFromDafny.cs
-	rm -rf $(LIBRARY_ROOT)/TestResults
-	rm -rf $(LIBRARY_ROOT)/runtimes/net/Generated $(LIBRARY_ROOT)/runtimes/net/bin $(LIBRARY_ROOT)/runtimes/net/obj
-	rm -rf $(LIBRARY_ROOT)/runtimes/net/tests/bin $(LIBRARY_ROOT)/runtimes/net/tests/obj
+clean: _clean
 	rm -rf $(LIBRARY_ROOT)/runtimes/java/src/main/dafny-generated
 	rm -rf $(LIBRARY_ROOT)/runtimes/java/src/main/smithy-generated
 	rm -rf $(LIBRARY_ROOT)/runtimes/java/src/test/dafny-generated

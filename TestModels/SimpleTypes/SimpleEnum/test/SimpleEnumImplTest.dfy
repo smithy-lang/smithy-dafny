@@ -3,7 +3,7 @@ include "../src/Index.dfy"
 module  SimpleEnumImplTest {
     import SimpleEnum
     import StandardLibrary.UInt
-    import opened SimpleTypesEnumTypes
+    import opened SimpleTypesSmithyEnumTypes
     import opened Wrappers
     method{:test} GetEnum(){
         var client :- expect SimpleEnum.SimpleEnum();

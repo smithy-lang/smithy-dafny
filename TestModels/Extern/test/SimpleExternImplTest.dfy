@@ -3,7 +3,7 @@ include "../src/Index.dfy"
 module SimpleExternImplTest {
     import SimpleExtern
     import StandardLibrary.UInt
-    import opened SimpleExternTypes
+    import opened SimpleDafnyExternTypes
     import opened Wrappers
 
     method{:test} Externs(){

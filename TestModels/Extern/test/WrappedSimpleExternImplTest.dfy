@@ -3,7 +3,7 @@ include "SimpleExternImplTest.dfy"
 
 module WrappedSimpleExternTest {
     import WrappedSimpleExternService
-    import opened SimpleExternTypes
+    import opened SimpleDafnyExternTypes
     import SimpleExternImplTest
     import opened Wrappers
     

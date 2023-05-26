@@ -15,16 +15,21 @@ structure reference {
   resource: String
 }
 
-
+list ServiceList {
+  @idRef(failWhenMissing: true, selector: "service")
+  member: String
+}
 // A trait for explicitly modeling the configuration options that should be
 // available in the generated methods for creating clients.
 @trait(selector: "service")
 structure localService {
-  // @required
+  @required
   sdkId: String,
-  // @required
-  // @idRef(failWhenMissing: true, selector: "structure")
+  @required
+  @idRef(failWhenMissing: true, selector: "structure")
   config: String,
+  // Explicitly NOT required
+  dependencies: ServiceList
 }
 
 // Trait indicates that the member of the given structure MUST be expanded.
@@ -63,3 +68,9 @@ structure extendable {}
 // A trait to indicate that a resource stores local state
 @trait(selector: "resource")
 structure mutableLocalState {}
+
+// This is a workaround that should be removed when
+// Smithy-Dafny properly supports @documentation
+// https://github.com/awslabs/smithy-dafny/issues/247
+@trait(selector: "*")
+string javadoc

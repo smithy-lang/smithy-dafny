@@ -53,8 +53,8 @@ repositories {
 }
 
 dependencies {
-    implementation("org.dafny:DafnyRuntime:4.0.0")
-    implementation("software.amazon.dafny:conversion:1.0-SNAPSHOT")
+    implementation("org.dafny:DafnyRuntime:4.1.0")
+    implementation("software.amazon.smithy.dafny:conversion:0.1")
     implementation("software.amazon.cryptography:StandardLibrary:1.0-SNAPSHOT")
     /*implementation("com.amazonaws:aws-java-sdk-kms:1.12.417")*/
     implementation(platform("software.amazon.awssdk:bom:2.19.1"))
