@@ -262,7 +262,12 @@ module AwsKmsDiscoveryKeyring {
         //= aws-encryption-sdk-specification/framework/aws-kms/aws-kms-discovery-keyring.md#ondecrypt
         //# If OnDecrypt fails to successfully decrypt any [encrypted data key](../structures.md#encrypted-data-key),
         //# then it MUST yield an error that includes all collected errors.
-        case Failure(errors) => Failure(Types.CollectionOfErrors(list := errors))
+        case Failure(errors) => Failure(
+          Types.CollectionOfErrors(
+            list := errors,
+            message := "No Configured KMS Key was able to decrypt the Data Key. The list of encountered Exceptions is available via `list`."
+          )
+        )
       };
     }
   }

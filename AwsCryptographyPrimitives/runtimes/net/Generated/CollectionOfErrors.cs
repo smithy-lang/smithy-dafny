@@ -5,7 +5,8 @@ using System;
  using AWS.Cryptography.Primitives; namespace AWS.Cryptography.Primitives {
  public class CollectionOfErrors : Exception {
   public readonly System.Collections.Generic.List<Exception> list;
-  public CollectionOfErrors(System.Collections.Generic.List<Exception> list) : base("CollectionOfErrors") { this.list = list; }
+  public CollectionOfErrors(System.Collections.Generic.List<Exception> list, string message) : base(message) { this.list = list; }
+  public CollectionOfErrors(string message) : base(message) { this.list = new System.Collections.Generic.List<Exception>(); }
   public CollectionOfErrors() : base("CollectionOfErrors") { this.list = new System.Collections.Generic.List<Exception>(); }
 }
 

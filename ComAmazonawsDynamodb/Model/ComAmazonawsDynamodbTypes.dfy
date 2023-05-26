@@ -2723,30 +2723,7 @@ include "../../StandardLibrary/src/Index.dfy"
  )
  // Any dependent models are listed here
  
- // The Collection error is used to collect several errors together
- // This is useful when composing OR logic.
- // Consider the following method:
- // 
- // method FN<I, O>(n:I)
- //   returns (res: Result<O, Types.Error>)
- //   ensures A(I).Success? ==> res.Success?
- //   ensures B(I).Success? ==> res.Success?
- //   ensures A(I).Failure? && B(I).Failure? ==> res.Failure?
- // 
- // If either A || B is successful then FN is successful.
- // And if A && B fail then FN will fail.
- // But what information should FN transmit back to the caller?
- // While it may be correct to hide these details from the caller,
- // this can not be the globally correct option.
- // Suppose that A and B can be blocked by different ACLs,
- // and that their representation of I is only eventually consistent.
- // How can the caller distinguish, at a minimum for logging,
- // the difference between the four failure modes?
- // || (!access(A(I)) && !access(B(I)))
- // || (!exit(A(I)) && !exit(B(I)))
- // || (!access(A(I)) && !exit(B(I)))
- // || (!exit(A(I)) && !access(B(I)))
- | CollectionOfErrors(list: seq<Error>)
+ 
  // The Opaque error, used for native, extern, wrapped or unknown errors
  | Opaque(obj: object)
  type OpaqueError = e: Error | e.Opaque? witness *

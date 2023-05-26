@@ -347,7 +347,8 @@ module RawAESKeyring {
       //= aws-encryption-sdk-specification/framework/raw-aes-keyring.md#ondecrypt
       //# If no decryption succeeds, the keyring MUST fail and MUST NOT modify
       //# the [decryption materials](structures.md#decryption-materials).
-      return Failure(Types.CollectionOfErrors(list := errors));
+      return Failure(Types.CollectionOfErrors(list := errors,
+      message := "Raw AES Keyring was unable to decrypt any encrypted data key. The list of encountered Exceptions is avaible via `list`."));
     }
 
     function method SerializeProviderInfo(iv: seq<uint8>): seq<uint8>

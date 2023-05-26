@@ -314,15 +314,14 @@ using System;
     return TypeConversion.ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S36_InvalidEncryptionMaterialsTransition(e);
 
  case CollectionOfErrors collectionOfErrors:
- return new software.amazon.cryptography.materialproviders.internaldafny.types.Error_CollectionOfErrors(
+   return new software.amazon.cryptography.materialproviders.internaldafny.types.Error_CollectionOfErrors(
      Dafny.Sequence<software.amazon.cryptography.materialproviders.internaldafny.types._IError>
-     .FromArray(
+       .FromArray(
          collectionOfErrors.list.Select
              (x => TypeConversion.ToDafny_CommonError(x))
-         .ToArray()
-     )
- );
-
+           .ToArray()),
+     Dafny.Sequence<char>.FromString(collectionOfErrors.Message)
+   );
  default:
     return new software.amazon.cryptography.materialproviders.internaldafny.types.Error_Opaque(error);
 

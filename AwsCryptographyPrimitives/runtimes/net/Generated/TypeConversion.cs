@@ -903,7 +903,10 @@ throw new System.ArgumentException("Invalid AWS.Cryptography.Primitives.RSAPaddi
  case software.amazon.cryptography.primitives.internaldafny.types.Error_AwsCryptographicPrimitivesError dafnyVal:
 return FromDafny_N3_aws__N12_cryptography__N10_primitives__S31_AwsCryptographicPrimitivesError(dafnyVal);
  case software.amazon.cryptography.primitives.internaldafny.types.Error_CollectionOfErrors dafnyVal:
- return new CollectionOfErrors(new System.Collections.Generic.List<Exception>(dafnyVal._list.Elements.Select(x => TypeConversion.FromDafny_CommonError(x))));
+ return new CollectionOfErrors(
+     new System.Collections.Generic.List<Exception>(dafnyVal.dtor_list.CloneAsArray()
+       .Select(x => TypeConversion.FromDafny_CommonError(x))),
+     new string(dafnyVal.dtor_message.Elements));
  case software.amazon.cryptography.primitives.internaldafny.types.Error_Opaque dafnyVal:
  return new OpaqueError(dafnyVal._obj);
  default:
@@ -918,15 +921,14 @@ return FromDafny_N3_aws__N12_cryptography__N10_primitives__S31_AwsCryptographicP
  case AWS.Cryptography.Primitives.AwsCryptographicPrimitivesError exception:
  return ToDafny_N3_aws__N12_cryptography__N10_primitives__S31_AwsCryptographicPrimitivesError(exception);
  case CollectionOfErrors collectionOfErrors:
- return new software.amazon.cryptography.primitives.internaldafny.types.Error_CollectionOfErrors(
+   return new software.amazon.cryptography.primitives.internaldafny.types.Error_CollectionOfErrors(
      Dafny.Sequence<software.amazon.cryptography.primitives.internaldafny.types._IError>
-     .FromArray(
+       .FromArray(
          collectionOfErrors.list.Select
              (x => TypeConversion.ToDafny_CommonError(x))
-         .ToArray()
-     )
- );
-
+           .ToArray()),
+     Dafny.Sequence<char>.FromString(collectionOfErrors.Message)
+   );
  // OpaqueError is redundant, but listed for completeness.
  case OpaqueError exception:
  return new software.amazon.cryptography.primitives.internaldafny.types.Error_Opaque(exception);
