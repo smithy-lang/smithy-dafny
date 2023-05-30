@@ -1,0 +1,66 @@
+# This workflow publishes a jar artifact to CodeArtifact
+name: Push artifacts to CodeArtifact
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  
+jobs:
+  publish:
+    runs-on: macos-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-region: us-west-2
+          # This role was manually created.
+          role-to-assume: arn:aws:iam::370957321024:role/ESDK-Dafny-Private-CA-Read
+          role-session-name: JavaPrivateESDKDafnyTests
+
+      - uses: actions/checkout@v3
+      # The specification submodule is private so we don't have access, but we don't need
+      # it to verify the Dafny code. Instead we manually pull the submodule we DO need.
+      - run: git submodule update --init libraries
+
+      - name: Setup Dafny
+        uses: dafny-lang/setup-dafny-action@v1.6.1
+        with:
+          # A && B || C is the closest thing to an if .. then ... else ... or ?: expression the GitHub Actions syntax supports.
+          dafny-version: ${{ (github.event_name == 'schedule' || inputs.nightly) && 'nightly-latest' || '4.1.0' }}
+
+      - name: Setup Java 8
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'corretto'
+          java-version:  8
+
+      - name: Build ${{ matrix.library }} implementation
+        shell: bash
+        working-directory: ./AwsCryptographicMaterialProviders
+        run: |
+          # This works because `node` is installed by default on GHA runners
+          CORES=$(node -e 'console.log(os.cpus().length)')
+          make build_java CORES=$CORES
+
+      # We need to access the role that has permissions to assume the role to publish to CodeArtifact
+      - name: Configure AWS Credentials to be able to assume Publishing role
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-region: us-west-2
+          role-to-assume: arn:aws:iam::370957321024:role/MPL-Java-CA-SourceRole-us-west-2
+          role-session-name: AwsCredsForPublishingRole
+      
+      - name: PublishToCodeArtifact
+        shell: bash
+        working-directory: ./AwsCryptographicMaterialProviders
+        run : |
+          # get codeartifact token with permissions to push
+          # we can do this since we have assumed the role that allows us to push to the mpl repo. 
+          export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain github-mpl --domain-owner 370957321024 --region us-west-2 --query authorizationToken --output text`
+          make mvn_ca_deploy
+        

@@ -133,8 +133,6 @@ Resources:
       RoleName: !Sub "${ProjectName}-CA-SourceRole-${AWS::Region}"
       Description: "For the Source Repo, allows Publish, Pull, and Delete"
       ManagedPolicyArns: [!Ref CAReadWriteDeletePolicy]
-      # This is missing the GitHub ODIC, which I do not have in my account
-      # Really, that ODIC should be exported by a stack
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -148,8 +146,25 @@ Resources:
             Action: 'sts:AssumeRole'
           - Effect: Allow
             Principal:
+              Federated: !Sub "arn:aws:iam::${AWS::AccountId}:oidc-provider/token.actions.githubusercontent.com"
+            Action:
+              - 'sts:AssumeRoleWithWebIdentity'
+            Condition:
+              StringEquals:
+                "token.actions.githubusercontent.com:aud": "sts.amazonaws.com"
+              StringLike:
+                "token.actions.githubusercontent.com:sub": "repo:aws/aws-cryptographic-material-providers-library-java:*"
+          - Effect: Allow
+            Principal:
               AWS: "arn:aws:iam::370957321024:role/GitHub-CI-MPL-Dafny-Role-us-west-2"
-            Action: 'sts:AssumeRole'
+            Action:
+              - 'sts:AssumeRole'
+              - 'sts:AssumeRoleWithWebIdentity'
+            Condition:
+              StringEquals:
+                "token.actions.githubusercontent.com:aud": "sts.amazonaws.com"
+              StringLike:
+                "token.actions.githubusercontent.com:sub": "repo:aws/aws-cryptographic-material-providers-library-java:*"
 
   CAPullRole:
     Type: 'AWS::IAM::Role'

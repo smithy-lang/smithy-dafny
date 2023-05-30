@@ -346,6 +346,10 @@ mvn_local_deploy_dependencies:
 mvn_local_deploy:
 	gradle -p runtimes/java publishToMavenLocal
 
+# The Java MUST all exsist if we want to publish to CodeArtifact
+mvn_ca_deploy:
+	gradle -p runtimes/java publishMavenPublicationToPublishToCodeArtifactRepository
+
 test_java:
     # run Dafny generated tests
 	gradle -p runtimes/java runTests

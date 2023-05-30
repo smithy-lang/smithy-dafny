@@ -50,7 +50,15 @@ Resources:
               "Principal": {
                   "AWS": "arn:aws:iam::587316601012:role/service-role/codebuild-AWS-MPL-Java-service-role-release"
               },
-              "Action": "sts:AssumeRole"
+              "Action": ["sts:AssumeRole", "sts:AssumeRoleWithWebIdentity"],
+              "Condition": {
+                "StringEquals": {
+                    "token.actions.githubusercontent.com:aud": "sts.amazonaws.com"
+                },
+                "StringLike": {
+                    "token.actions.githubusercontent.com:sub": "repo:aws/aws-cryptographic-material-providers-library-java:*"
+                }
+              }
             }
           ]
         }

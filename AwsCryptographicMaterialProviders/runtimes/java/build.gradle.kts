@@ -4,6 +4,7 @@ import javax.annotation.Nullable
 plugins {
     `java-library`
     `maven-publish`
+    `signing`
     id("com.github.johnrengelman.shadow") version "7.1.2"
 }
 
@@ -21,6 +22,9 @@ java {
     sourceSets["test"].java {
         srcDir("src/test/dafny-generated")
     }
+
+    withJavadocJar()
+    withSourcesJar()
 }
 
 var caUrl: URI? = null
@@ -69,14 +73,34 @@ dependencies {
 publishing {
     publications.create<MavenPublication>("maven") {
         groupId = "software.amazon.cryptography"
-        artifactId = "AwsCryptographicMaterialProviders"
+        artifactId = "aws-cryptographic-material-providers"
         artifact(tasks["shadowJar"])
+        artifact(tasks["javadocJar"])
+        artifact(tasks["sourcesJar"])
     }
-    repositories { mavenLocal() }
+
+    repositories {
+        mavenLocal()
+        maven {
+            name = "PublishToCodeArtifact"
+            url = URI.create("https://github-mpl-370957321024.d.codeartifact.us-west-2.amazonaws.com/maven/MPL-Java-CI/")
+            credentials {
+                username = "aws"
+                password = System.getenv("CODEARTIFACT_AUTH_TOKEN")
+            }
+        }
+    }
 }
 
 tasks.withType<JavaCompile>() {
     options.encoding = "UTF-8"
+}
+
+
+tasks.withType<Jar>() {
+   // to compile a sources jar we need a strategy on how to deal with duplicates;
+   // we choose to include duplicate classes.
+   duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
 
 tasks {
@@ -88,6 +112,10 @@ tasks {
 
 tasks.jar {
     enabled = false
+}
+
+tasks.javadoc {
+    exclude("src/main/dafny-generated")
 }
 
 tasks.build {
