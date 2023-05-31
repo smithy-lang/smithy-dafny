@@ -15,9 +15,7 @@ description = "AwsCryptographicMaterialProviders"
 java {
     toolchain.languageVersion.set(JavaLanguageVersion.of(8))
     sourceSets["main"].java {
-        srcDir("src/main/java")
-        srcDir("src/main/dafny-generated")
-        srcDir("src/main/smithy-generated")
+        mainSourceSet()
     }
     sourceSets["test"].java {
         srcDir("src/test/dafny-generated")
@@ -141,5 +139,14 @@ tasks.shadowJar {
                include(dependency("org.bouncycastle:bcprov-jdk18on:1.72"))
             }
         }
+        sourceSets["main"].java {
+            mainSourceSet()
+        }
     }
+}
+
+fun SourceDirectorySet.mainSourceSet() {
+    srcDir("src/main/java")
+    srcDir("src/main/dafny-generated")
+    srcDir("src/main/smithy-generated")
 }
