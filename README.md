@@ -3,7 +3,7 @@
 Smithy-based code generation tools for the [Dafny](https://dafny.org) verification-aware programming language.
 
 To a degree these tools are similar to other Smithy code generation tools
-such as []`smithy-typescript`](https://github.com/awslabs/smithy-typescript),
+such as [`smithy-typescript`](https://github.com/awslabs/smithy-typescript),
 but as Dafny is a rather unique programming language,
 these tools have a somewhat unusual implementation and feature set.
 They support two main use cases to date:
@@ -18,7 +18,7 @@ that can make requests to that service from Dafny code.
 Because Dafny supports cross-compilation to multiple target languages
 (C#, Java, Javascript, Go, and Python at the time of writing this),
 these code generators work by emitting code to wrap existing AWS SDK clients in each target language.
-A generated Dafny client for AWS SQS meant for compilation to Java, for example,
+A generated Dafny client for AWS SQS targeting compilation to Java, for example,
 will contain Dafny source code, Java source code,
 and a dependency on a Java artifact such as `software.amazon.awssdk:sqs`.
 
@@ -26,7 +26,7 @@ This support is provided as a `dafny-client-codegen` Smithy build plugin with a 
 
 ## Generating multi-language libraries (a.k.a. "polymorphing")
 
-This is a more novel use of the Smithy IDL: modeling a "service" that is implemented locally instead of in a remote microservice.
+This is a more novel use of the Smithy IDL: modeling a "service" that is implemented locally (i.e. runs client-side) instead of in a remote service.
 The workflow is similar to generating a [Smithy-based server implementation](https://smithy.io/2.0/ts-ssdk/index.html):
 
 1. Write a Smithy model that describes the API for your library,
