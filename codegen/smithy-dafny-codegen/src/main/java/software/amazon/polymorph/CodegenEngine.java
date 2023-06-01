@@ -122,8 +122,8 @@ public class CodegenEngine {
                 serviceShape,
                 outputDir,
                 this.includeDafnyFile.get(),
-                this.dependentModelPaths
-        );
+                this.dependentModelPaths,
+                this.awsSdkStyle);
 
         if (this.localServiceTest) {
             IOUtils.writeTokenTreesIntoDir(

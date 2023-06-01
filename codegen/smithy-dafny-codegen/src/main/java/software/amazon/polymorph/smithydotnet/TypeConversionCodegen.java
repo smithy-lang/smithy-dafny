@@ -970,11 +970,17 @@ public class TypeConversionCodegen {
         })).lineSeparated();
 
         // Handle casting to the CollectionOfErrors list of exception type
+        // TODO: replace `new string` with generic converter when
+        //  conversion library for .NET is created.
         final TokenTree handleCollectionOfErrorsFromDafny = TokenTree
           .of(
             "case %1$s dafnyVal:"
               .formatted(DotNetNameResolver.dafnyCollectionOfErrorsTypeForServiceShape(serviceShape)),
-            "return new %1$s(new System.Collections.Generic.List<Exception>(dafnyVal._list.Elements.Select(x => %2$s(x))));"
+            ("""
+              return new %1$s(
+                   new System.Collections.Generic.List<Exception>(dafnyVal.dtor_list.CloneAsArray()
+                     .Select(x => %2$s(x))),
+                   new string(dafnyVal.dtor_message.Elements));""")
               .formatted(DotNetNameResolver.baseClassForCollectionOfErrors(),
                 nameResolver.qualifiedTypeConverterForCommonError(serviceShape, FROM_DAFNY))
           ).lineSeparated();
@@ -1058,25 +1064,7 @@ public class TypeConversionCodegen {
             ));
         })).lineSeparated();
 
-        // Return CollectionOfErrors wrapper for list of exceptions.
-        final TokenTree handleCollectionOfErrorsToDafny = TokenTree
-            .of("""
-                    case %1$s collectionOfErrors:
-                     return new %2$s(
-                         Dafny.Sequence<%3$s>
-                         .FromArray(
-                             collectionOfErrors.list.Select
-                                 (x => %4$s(x))
-                             .ToArray()
-                         )
-                     );
-                    """
-                .formatted(DotNetNameResolver.baseClassForCollectionOfErrors(),
-                    DotNetNameResolver.dafnyCollectionOfErrorsTypeForServiceShape(serviceShape),
-                    DotNetNameResolver.dafnyTypeForCommonServiceError(serviceShape),
-                    nameResolver.qualifiedTypeConverterForCommonError(serviceShape, TO_DAFNY))
-            )
-            .lineSeparated();
+        final TokenTree handleCollectionOfErrorsToDafny = collectionOfErrorsToDafny(serviceShape, nameResolver);
 
         // Return the root service exception with the custom message.
         final TokenTree handleAnyExceptionToDafny = TokenTree
@@ -1108,6 +1096,33 @@ public class TypeConversionCodegen {
           )
           .lineSeparated();
         return toDafnyBody;
+    }
+
+    public static TokenTree collectionOfErrorsToDafny(
+      ServiceShape serviceShape, DotNetNameResolver nameResolver
+    ) {
+        // Return CollectionOfErrors wrapper for list of exceptions.
+        // String conversion must be hard coded as this method is used in
+        // LocalServiceWrappedShimCodegen which may not have a sting converter!!
+        // TODO: replace `Dafny.Sequence<char>.FromString` with generic converter when
+        //  conversion library for .NET is created.
+        return TokenTree
+            .of(("""
+              case %1$s collectionOfErrors:
+                 return new %2$s(
+                   Dafny.Sequence<%3$s>
+                     .FromArray(
+                       collectionOfErrors.list.Select
+                           (x => %4$s(x))
+                         .ToArray()),
+                   Dafny.Sequence<char>.FromString(collectionOfErrors.Message)
+                 );""")
+                .formatted(DotNetNameResolver.baseClassForCollectionOfErrors(),
+                    DotNetNameResolver.dafnyCollectionOfErrorsTypeForServiceShape(serviceShape),
+                    DotNetNameResolver.dafnyTypeForCommonServiceError(serviceShape),
+                    nameResolver.qualifiedTypeConverterForCommonError(serviceShape, TO_DAFNY))
+            )
+            .lineSeparated();
     }
 
     /**
