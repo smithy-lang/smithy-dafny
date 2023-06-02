@@ -8,6 +8,150 @@ module FloatCompareTest {
   import opened Wrappers
   import opened FloatCompare
 
+  // 15 different interesting representations of -2
+  const NEGATIVE_TWO := [
+    "-2",
+    "-2.",
+    "-2.0",
+    "-2e0",
+    "-2.e0",
+    "-2.0e0",
+    "-2.0e+0",
+    "-2.0e-0",
+    "-.2e1",
+    "-0.2e1",
+    "-0.2e+1",
+    "-0.02e2",
+    "-20e-1",
+    "-20.e-1",
+    "-200.0e-2"
+  ]
+
+  // 15 different interesting representations of -1
+  const NEGATIVE_ONE := [
+    "-1",
+    "-1.",
+    "-1.0",
+    "-1e0",
+    "-1.e0",
+    "-1.0e0",
+    "-1.0e+0",
+    "-1.0e-0",
+    "-.1e1",
+    "-0.1e1",
+    "-0.1e+1",
+    "-0.01e2",
+    "-10e-1",
+    "-10.e-1",
+    "-100.0e-2"
+  ]
+
+  // 34 different interesting representations of 0
+  const ZERO := [
+    "0",
+    "+0",
+    "-0",
+    "0.",
+    "+0.",
+    "-0.",
+    "00",
+    "+00",
+    "-00",
+    "0.0",
+    "+0.0",
+    "-0.0",
+    "00.00",
+    "+00.00",
+    "-00.00",
+    ".0",
+    "+.0",
+    "-.0",
+    "0e0",
+    "+0e0",
+    "+0e+0",
+    "+0e-0",
+    "-0e0",
+    "-0e+0",
+    "-0e-0",
+    "0e-99",
+    "+0e-99",
+    "-0e-99",
+    "0e99",
+    "+0e99",
+    "-0e99",
+    "0e+99",
+    "+0e+99",
+    "-0e+99"
+  ]
+
+  // 30 different interesting representations of 1
+  const ONE := [
+    "1",
+    "1.",
+    "1.0",
+    "1e0",
+    "1.e0",
+    "1.0e0",
+    "1.0e+0",
+    "1.0e-0",
+    ".1e1",
+    "0.1e1",
+    "0.1e+1",
+    "0.01e2",
+    "10e-1",
+    "10.e-1",
+    "100.0e-2",
+    "+1",
+    "+1.",
+    "+1.0",
+    "+1e0",
+    "+1.e0",
+    "+1.0e0",
+    "+1.0e+0",
+    "+1.0e-0",
+    "+.1e1",
+    "+0.1e1",
+    "+0.1e+1",
+    "+0.01e2",
+    "+10e-1",
+    "+10.e-1",
+    "+100.0e-2"
+  ];
+
+  // 30 different interesting representations of 2
+  const TWO := [
+    "2",
+    "2.",
+    "2.0",
+    "2e0",
+    "2.e0",
+    "2.0e0",
+    "2.0e+0",
+    "2.0e-0",
+    ".2e1",
+    "0.2e1",
+    "0.2e+1",
+    "0.02e2",
+    "20e-1",
+    "20.e-1",
+    "200.0e-2",
+    "+2",
+    "+2.",
+    "+2.0",
+    "+2e0",
+    "+2.e0",
+    "+2.0e0",
+    "+2.0e+0",
+    "+2.0e-0",
+    "+.2e1",
+    "+0.2e1",
+    "+0.2e+1",
+    "+0.02e2",
+    "+20e-1",
+    "+20.e-1",
+    "+200.0e-2"
+  ];
+
   method TestCompareFloat(x : string, y : string, ret : CompareType)
     ensures CompareFloat(x, y) == ret
     ensures CompareFloat(y, x) == -ret
@@ -20,6 +164,19 @@ module FloatCompareTest {
     }
     expect CompareFloat(x, y) == ret;
     expect CompareFloat(y, x) == -ret;
+  }
+
+  // Test all interesting representations of -2, -1, 0, 1, 2 against one another
+  method {:test} TestOneTwoZeroMatrix() {
+    for i := 0 to |NEGATIVE_TWO| {
+      var negativeTwo := NEGATIVE_TWO[i];
+      for j := i to |NEGATIVE_TWO| {
+        TestCompareFloat(NEGATIVE_TWO[j], negativeTwo, Equal);
+      }
+      for j := 0 to |NEGATIVE_ONE| {
+        TestCompareFloat(NEGATIVE_ONE[j], negativeTwo, Equal);
+      }
+    }
   }
 
 
@@ -68,6 +225,30 @@ module FloatCompareTest {
     TestCompareFloat("-1e5", "-1e6", Greater);
     TestCompareFloat("-1e-5", "-1e-6", Less);
     TestCompareFloat("-1e-5", "-1e-4", Greater);
+
+    TestCompareFloat("2", "2e0", Equal);
+    TestCompareFloat("1", "2e0", Less);
+    TestCompareFloat("3", "2e0", Greater);
+
+    //TestCompareFloat("20", "2e1", Equal);
+    TestCompareFloat("19", "2e1", Less);
+    TestCompareFloat("21", "2e1", Greater);
+
+    //TestCompareFloat("-20", "-2e1", Equal);
+    TestCompareFloat("-21", "-2e1", Less);
+    TestCompareFloat("-19", "-2e1", Greater);
+
+    TestCompareFloat("0.2", "2e-1", Equal);
+    //TestCompareFloat("0.02", "2e-2", Equal);
+    //TestCompareFloat("0.02", ".2e-1", Equal);
+    TestCompareFloat(".1", "2e-1", Less);
+    TestCompareFloat(".3", "2e-1", Greater);
+
+    TestCompareFloat("-0.2", "-2e-1", Equal);
+    //TestCompareFloat("-0.02", "-2e-2", Equal);
+    //TestCompareFloat("-0.02", "-.2e-1", Equal);
+    TestCompareFloat("-.3", "-2e-1", Less);
+    TestCompareFloat("-.1", "-2e-1", Greater);
   }
 
   method {:test} ZeroTests() {
