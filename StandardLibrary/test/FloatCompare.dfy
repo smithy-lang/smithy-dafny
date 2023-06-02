@@ -168,13 +168,73 @@ module FloatCompareTest {
 
   // Test all interesting representations of -2, -1, 0, 1, 2 against one another
   method {:test} TestOneTwoZeroMatrix() {
+    // -2 tests
     for i := 0 to |NEGATIVE_TWO| {
       var negativeTwo := NEGATIVE_TWO[i];
       for j := i to |NEGATIVE_TWO| {
         TestCompareFloat(NEGATIVE_TWO[j], negativeTwo, Equal);
       }
       for j := 0 to |NEGATIVE_ONE| {
-        TestCompareFloat(NEGATIVE_ONE[j], negativeTwo, Equal);
+        TestCompareFloat(NEGATIVE_ONE[j], negativeTwo, Greater);
+      }
+      for j := 0 to |ZERO| {
+        TestCompareFloat(ZERO[j], negativeTwo, Greater);
+      }
+      for j := 0 to |ONE| {
+        TestCompareFloat(ONE[j], negativeTwo, Greater);
+      }
+      for j := 0 to |TWO| {
+        TestCompareFloat(TWO[j], negativeTwo, Greater);
+      }
+    }
+
+    // -1 tests
+    for i := 0 to |NEGATIVE_ONE| {
+      var negativeOne := NEGATIVE_ONE[i];
+      for j := i to |NEGATIVE_ONE| {
+        TestCompareFloat(NEGATIVE_ONE[j], negativeOne, Equal);
+      }
+      for j := 0 to |ZERO| {
+        TestCompareFloat(ZERO[j], negativeOne, Greater);
+      }
+      for j := 0 to |ONE| {
+        TestCompareFloat(ONE[j], negativeOne, Greater);
+      }
+      for j := 0 to |TWO| {
+        TestCompareFloat(TWO[j], negativeOne, Greater);
+      }
+    }
+
+    // 0 tests
+    for i := 0 to |ZERO| {
+      var zero := ZERO[i];
+      for j := i to |ZERO| {
+        TestCompareFloat(ZERO[j], zero, Equal);
+      }
+      for j := 0 to |ONE| {
+        TestCompareFloat(ONE[j], zero, Greater);
+      }
+      for j := 0 to |TWO| {
+        TestCompareFloat(TWO[j], zero, Greater);
+      }
+    }
+
+    // 1 tests
+    for i := 0 to |ONE| {
+      var one := ONE[i];
+      for j := i to |ONE| {
+        TestCompareFloat(ONE[j], one, Equal);
+      }
+      for j := 0 to |TWO| {
+        TestCompareFloat(TWO[j], one, Greater);
+      }
+    }
+
+    // 2 tests
+    for i := 0 to |TWO| {
+      var two := TWO[i];
+      for j := i to |TWO| {
+        TestCompareFloat(TWO[j], two, Equal);
       }
     }
   }
@@ -230,23 +290,23 @@ module FloatCompareTest {
     TestCompareFloat("1", "2e0", Less);
     TestCompareFloat("3", "2e0", Greater);
 
-    //TestCompareFloat("20", "2e1", Equal);
+    TestCompareFloat("20", "2e1", Equal);
     TestCompareFloat("19", "2e1", Less);
     TestCompareFloat("21", "2e1", Greater);
 
-    //TestCompareFloat("-20", "-2e1", Equal);
+    TestCompareFloat("-20", "-2e1", Equal);
     TestCompareFloat("-21", "-2e1", Less);
     TestCompareFloat("-19", "-2e1", Greater);
 
     TestCompareFloat("0.2", "2e-1", Equal);
-    //TestCompareFloat("0.02", "2e-2", Equal);
-    //TestCompareFloat("0.02", ".2e-1", Equal);
+    TestCompareFloat("0.02", "2e-2", Equal);
+    TestCompareFloat("0.02", ".2e-1", Equal);
     TestCompareFloat(".1", "2e-1", Less);
     TestCompareFloat(".3", "2e-1", Greater);
 
     TestCompareFloat("-0.2", "-2e-1", Equal);
-    //TestCompareFloat("-0.02", "-2e-2", Equal);
-    //TestCompareFloat("-0.02", "-.2e-1", Equal);
+    TestCompareFloat("-0.02", "-2e-2", Equal);
+    TestCompareFloat("-0.02", "-.2e-1", Equal);
     TestCompareFloat("-.3", "-2e-1", Less);
     TestCompareFloat("-.1", "-2e-1", Greater);
   }
@@ -287,8 +347,6 @@ module FloatCompareTest {
     TestCompareFloat("123456789.01234567890123456789012345677", "123456789.01234567890123456789012345676", Greater);
     TestCompareFloat("-123456789.01234567890123456789012345678", "123456789.01234567890123456789012345678", Less);
     TestCompareFloat("123456789.01234567890123456789012345678", "-123456789.01234567890123456789012345678", Greater);
-
-    // It appears we have issues dealing with exponents
 
     // high and low exponents
     TestCompareFloat("0000000000000000000000000012345.67e121", "123456700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000", Equal);
