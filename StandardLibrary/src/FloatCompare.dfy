@@ -134,7 +134,7 @@ module FloatCompare {
   {}
 
   // Add zeros to 'x' until its length reaches 'newLength'
-  function method AddZeros(x : string, newLength : nat) : (ret : string)
+  function method AppendZeros(x : string, newLength : nat) : (ret : string)
     requires |x| < newLength
     ensures |ret| == newLength
   {
@@ -174,9 +174,9 @@ module FloatCompare {
 
     // For StrCmp to work correctly, we need to pad the shorter string with zeros
     else if |xDigits| < |yDigits| then
-      StrCmp(AddZeros(xDigits, |yDigits|), yDigits)
+      StrCmp(AppendZeros(xDigits, |yDigits|), yDigits)
     else if |yDigits| < |xDigits| then
-      StrCmp(xDigits, AddZeros(yDigits, |xDigits|))
+      StrCmp(xDigits, AppendZeros(yDigits, |xDigits|))
     else
       StrCmp(xDigits, yDigits)
   }
