@@ -7,13 +7,22 @@ import java.util.Objects;
 import software.amazon.cryptography.materialproviders.IKeyring;
 import software.amazon.cryptography.materialproviders.Keyring;
 
+/**
+ * Inputs for creating a Default Cryptographic Materials Manager.
+ */
 public class CreateDefaultCryptographicMaterialsManagerInput {
+  /**
+   * The Keyring that the created Default Cryprographic Materials Manager will use to wrap data keys.
+   */
   private final IKeyring keyring;
 
   protected CreateDefaultCryptographicMaterialsManagerInput(BuilderImpl builder) {
     this.keyring = builder.keyring();
   }
 
+  /**
+   * @return The Keyring that the created Default Cryprographic Materials Manager will use to wrap data keys.
+   */
   public IKeyring keyring() {
     return this.keyring;
   }
@@ -27,8 +36,14 @@ public class CreateDefaultCryptographicMaterialsManagerInput {
   }
 
   public interface Builder {
+    /**
+     * @param keyring The Keyring that the created Default Cryprographic Materials Manager will use to wrap data keys.
+     */
     Builder keyring(IKeyring keyring);
 
+    /**
+     * @return The Keyring that the created Default Cryprographic Materials Manager will use to wrap data keys.
+     */
     IKeyring keyring();
 
     CreateDefaultCryptographicMaterialsManagerInput build();

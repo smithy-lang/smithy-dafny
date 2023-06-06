@@ -5,13 +5,22 @@ package software.amazon.cryptography.keystore.model;
 
 import java.util.Objects;
 
+/**
+ * Inputs for versioning a Branch Key.
+ */
 public class VersionKeyInput {
+  /**
+   * The identifier for the Branch Key to be versioned.
+   */
   private final String branchKeyIdentifier;
 
   protected VersionKeyInput(BuilderImpl builder) {
     this.branchKeyIdentifier = builder.branchKeyIdentifier();
   }
 
+  /**
+   * @return The identifier for the Branch Key to be versioned.
+   */
   public String branchKeyIdentifier() {
     return this.branchKeyIdentifier;
   }
@@ -25,8 +34,14 @@ public class VersionKeyInput {
   }
 
   public interface Builder {
+    /**
+     * @param branchKeyIdentifier The identifier for the Branch Key to be versioned.
+     */
     Builder branchKeyIdentifier(String branchKeyIdentifier);
 
+    /**
+     * @return The identifier for the Branch Key to be versioned.
+     */
     String branchKeyIdentifier();
 
     VersionKeyInput build();

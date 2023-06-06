@@ -8,13 +8,28 @@ import java.util.Objects;
 import software.amazon.cryptography.materialproviders.ClientSupplier;
 import software.amazon.cryptography.materialproviders.IClientSupplier;
 
+/**
+ * Inputs for for creating an AWS KMS Discovery Multi-Keyring.
+ */
 public class CreateAwsKmsDiscoveryMultiKeyringInput {
+  /**
+   * The list of regions this Keyring will creates KMS clients for.
+   */
   private final List<String> regions;
 
+  /**
+   * A filter which restricts which KMS Keys this Keyring may attempt to decrypt with by AWS partition and account.
+   */
   private final DiscoveryFilter discoveryFilter;
 
+  /**
+   * The Client Supplier which will be used to get KMS Clients for use with this Keyring. If not specified on input, a Default Client Supplier is created which creates a KMS Client for each region in the 'regions' input.
+   */
   private final IClientSupplier clientSupplier;
 
+  /**
+   * A list of grant tokens to be used when calling KMS.
+   */
   private final List<String> grantTokens;
 
   protected CreateAwsKmsDiscoveryMultiKeyringInput(BuilderImpl builder) {
@@ -24,18 +39,30 @@ public class CreateAwsKmsDiscoveryMultiKeyringInput {
     this.grantTokens = builder.grantTokens();
   }
 
+  /**
+   * @return The list of regions this Keyring will creates KMS clients for.
+   */
   public List<String> regions() {
     return this.regions;
   }
 
+  /**
+   * @return A filter which restricts which KMS Keys this Keyring may attempt to decrypt with by AWS partition and account.
+   */
   public DiscoveryFilter discoveryFilter() {
     return this.discoveryFilter;
   }
 
+  /**
+   * @return The Client Supplier which will be used to get KMS Clients for use with this Keyring. If not specified on input, a Default Client Supplier is created which creates a KMS Client for each region in the 'regions' input.
+   */
   public IClientSupplier clientSupplier() {
     return this.clientSupplier;
   }
 
+  /**
+   * @return A list of grant tokens to be used when calling KMS.
+   */
   public List<String> grantTokens() {
     return this.grantTokens;
   }
@@ -49,20 +76,44 @@ public class CreateAwsKmsDiscoveryMultiKeyringInput {
   }
 
   public interface Builder {
+    /**
+     * @param regions The list of regions this Keyring will creates KMS clients for.
+     */
     Builder regions(List<String> regions);
 
+    /**
+     * @return The list of regions this Keyring will creates KMS clients for.
+     */
     List<String> regions();
 
+    /**
+     * @param discoveryFilter A filter which restricts which KMS Keys this Keyring may attempt to decrypt with by AWS partition and account.
+     */
     Builder discoveryFilter(DiscoveryFilter discoveryFilter);
 
+    /**
+     * @return A filter which restricts which KMS Keys this Keyring may attempt to decrypt with by AWS partition and account.
+     */
     DiscoveryFilter discoveryFilter();
 
+    /**
+     * @param clientSupplier The Client Supplier which will be used to get KMS Clients for use with this Keyring. If not specified on input, a Default Client Supplier is created which creates a KMS Client for each region in the 'regions' input.
+     */
     Builder clientSupplier(IClientSupplier clientSupplier);
 
+    /**
+     * @return The Client Supplier which will be used to get KMS Clients for use with this Keyring. If not specified on input, a Default Client Supplier is created which creates a KMS Client for each region in the 'regions' input.
+     */
     IClientSupplier clientSupplier();
 
+    /**
+     * @param grantTokens A list of grant tokens to be used when calling KMS.
+     */
     Builder grantTokens(List<String> grantTokens);
 
+    /**
+     * @return A list of grant tokens to be used when calling KMS.
+     */
     List<String> grantTokens();
 
     CreateAwsKmsDiscoveryMultiKeyringInput build();

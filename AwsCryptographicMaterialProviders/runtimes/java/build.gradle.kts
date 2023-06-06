@@ -148,6 +148,9 @@ tasks.jar {
 }
 
 tasks.javadoc {
+    options {
+        (this as CoreJavadocOptions).addStringOption("Xdoclint:none", "-quiet")
+    }
     exclude("src/main/dafny-generated")
 }
 

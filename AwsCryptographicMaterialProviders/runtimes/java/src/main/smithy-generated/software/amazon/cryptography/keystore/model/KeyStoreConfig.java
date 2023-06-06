@@ -9,18 +9,39 @@ import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.kms.KmsClient;
 
 public class KeyStoreConfig {
+  /**
+   * The DynamoDB table name that backs this Key Store.
+   */
   private final String ddbTableName;
 
+  /**
+   * The AWS KMS Key that protects this Key Store.
+   */
   private final KMSConfiguration kmsConfiguration;
 
+  /**
+   * The logical name for this Key Store, which is cryptographically bound to the keys it holds.
+   */
   private final String logicalKeyStoreName;
 
+  /**
+   * An identifier for this Key Store.
+   */
   private final String id;
 
+  /**
+   * The AWS KMS grant tokens that are used when this Key Store calls to AWS KMS.
+   */
   private final List<String> grantTokens;
 
+  /**
+   * The DynamoDB client this Key Store uses to call Amazon DynamoDB.
+   */
   private final DynamoDbClient ddbClient;
 
+  /**
+   * The KMS client this Key Store uses to call AWS KMS.
+   */
   private final KmsClient kmsClient;
 
   protected KeyStoreConfig(BuilderImpl builder) {
@@ -33,30 +54,51 @@ public class KeyStoreConfig {
     this.kmsClient = builder.kmsClient();
   }
 
+  /**
+   * @return The DynamoDB table name that backs this Key Store.
+   */
   public String ddbTableName() {
     return this.ddbTableName;
   }
 
+  /**
+   * @return The AWS KMS Key that protects this Key Store.
+   */
   public KMSConfiguration kmsConfiguration() {
     return this.kmsConfiguration;
   }
 
+  /**
+   * @return The logical name for this Key Store, which is cryptographically bound to the keys it holds.
+   */
   public String logicalKeyStoreName() {
     return this.logicalKeyStoreName;
   }
 
+  /**
+   * @return An identifier for this Key Store.
+   */
   public String id() {
     return this.id;
   }
 
+  /**
+   * @return The AWS KMS grant tokens that are used when this Key Store calls to AWS KMS.
+   */
   public List<String> grantTokens() {
     return this.grantTokens;
   }
 
+  /**
+   * @return The DynamoDB client this Key Store uses to call Amazon DynamoDB.
+   */
   public DynamoDbClient ddbClient() {
     return this.ddbClient;
   }
 
+  /**
+   * @return The KMS client this Key Store uses to call AWS KMS.
+   */
   public KmsClient kmsClient() {
     return this.kmsClient;
   }
@@ -70,32 +112,74 @@ public class KeyStoreConfig {
   }
 
   public interface Builder {
+    /**
+     * @param ddbTableName The DynamoDB table name that backs this Key Store.
+     */
     Builder ddbTableName(String ddbTableName);
 
+    /**
+     * @return The DynamoDB table name that backs this Key Store.
+     */
     String ddbTableName();
 
+    /**
+     * @param kmsConfiguration The AWS KMS Key that protects this Key Store.
+     */
     Builder kmsConfiguration(KMSConfiguration kmsConfiguration);
 
+    /**
+     * @return The AWS KMS Key that protects this Key Store.
+     */
     KMSConfiguration kmsConfiguration();
 
+    /**
+     * @param logicalKeyStoreName The logical name for this Key Store, which is cryptographically bound to the keys it holds.
+     */
     Builder logicalKeyStoreName(String logicalKeyStoreName);
 
+    /**
+     * @return The logical name for this Key Store, which is cryptographically bound to the keys it holds.
+     */
     String logicalKeyStoreName();
 
+    /**
+     * @param id An identifier for this Key Store.
+     */
     Builder id(String id);
 
+    /**
+     * @return An identifier for this Key Store.
+     */
     String id();
 
+    /**
+     * @param grantTokens The AWS KMS grant tokens that are used when this Key Store calls to AWS KMS.
+     */
     Builder grantTokens(List<String> grantTokens);
 
+    /**
+     * @return The AWS KMS grant tokens that are used when this Key Store calls to AWS KMS.
+     */
     List<String> grantTokens();
 
+    /**
+     * @param ddbClient The DynamoDB client this Key Store uses to call Amazon DynamoDB.
+     */
     Builder ddbClient(DynamoDbClient ddbClient);
 
+    /**
+     * @return The DynamoDB client this Key Store uses to call Amazon DynamoDB.
+     */
     DynamoDbClient ddbClient();
 
+    /**
+     * @param kmsClient The KMS client this Key Store uses to call AWS KMS.
+     */
     Builder kmsClient(KmsClient kmsClient);
 
+    /**
+     * @return The KMS client this Key Store uses to call AWS KMS.
+     */
     KmsClient kmsClient();
 
     KeyStoreConfig build();

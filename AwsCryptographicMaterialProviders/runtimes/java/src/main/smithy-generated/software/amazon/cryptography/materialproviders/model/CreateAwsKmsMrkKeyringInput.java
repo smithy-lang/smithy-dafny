@@ -7,11 +7,23 @@ import java.util.List;
 import java.util.Objects;
 import software.amazon.awssdk.services.kms.KmsClient;
 
+/**
+ * Inputs for for creating an AWS KMS MRK Keyring.
+ */
 public class CreateAwsKmsMrkKeyringInput {
+  /**
+   * The identifier for the symmetric AWS KMS Key or AWS KMS Multi-Region Key responsible for wrapping and unwrapping data keys.
+   */
   private final String kmsKeyId;
 
+  /**
+   * The KMS Client this Keyring will use to call KMS.
+   */
   private final KmsClient kmsClient;
 
+  /**
+   * A list of grant tokens to be used when calling KMS.
+   */
   private final List<String> grantTokens;
 
   protected CreateAwsKmsMrkKeyringInput(BuilderImpl builder) {
@@ -20,14 +32,23 @@ public class CreateAwsKmsMrkKeyringInput {
     this.grantTokens = builder.grantTokens();
   }
 
+  /**
+   * @return The identifier for the symmetric AWS KMS Key or AWS KMS Multi-Region Key responsible for wrapping and unwrapping data keys.
+   */
   public String kmsKeyId() {
     return this.kmsKeyId;
   }
 
+  /**
+   * @return The KMS Client this Keyring will use to call KMS.
+   */
   public KmsClient kmsClient() {
     return this.kmsClient;
   }
 
+  /**
+   * @return A list of grant tokens to be used when calling KMS.
+   */
   public List<String> grantTokens() {
     return this.grantTokens;
   }
@@ -41,16 +62,34 @@ public class CreateAwsKmsMrkKeyringInput {
   }
 
   public interface Builder {
+    /**
+     * @param kmsKeyId The identifier for the symmetric AWS KMS Key or AWS KMS Multi-Region Key responsible for wrapping and unwrapping data keys.
+     */
     Builder kmsKeyId(String kmsKeyId);
 
+    /**
+     * @return The identifier for the symmetric AWS KMS Key or AWS KMS Multi-Region Key responsible for wrapping and unwrapping data keys.
+     */
     String kmsKeyId();
 
+    /**
+     * @param kmsClient The KMS Client this Keyring will use to call KMS.
+     */
     Builder kmsClient(KmsClient kmsClient);
 
+    /**
+     * @return The KMS Client this Keyring will use to call KMS.
+     */
     KmsClient kmsClient();
 
+    /**
+     * @param grantTokens A list of grant tokens to be used when calling KMS.
+     */
     Builder grantTokens(List<String> grantTokens);
 
+    /**
+     * @return A list of grant tokens to be used when calling KMS.
+     */
     List<String> grantTokens();
 
     CreateAwsKmsMrkKeyringInput build();

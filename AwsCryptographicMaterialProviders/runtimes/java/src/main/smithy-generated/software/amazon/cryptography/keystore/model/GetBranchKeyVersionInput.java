@@ -5,9 +5,18 @@ package software.amazon.cryptography.keystore.model;
 
 import java.util.Objects;
 
+/**
+ * Inputs for getting a version of a Branch Key.
+ */
 public class GetBranchKeyVersionInput {
+  /**
+   * The identifier for the Branch Key to get a particular version for.
+   */
   private final String branchKeyIdentifier;
 
+  /**
+   * The version to get.
+   */
   private final String branchKeyVersion;
 
   protected GetBranchKeyVersionInput(BuilderImpl builder) {
@@ -15,10 +24,16 @@ public class GetBranchKeyVersionInput {
     this.branchKeyVersion = builder.branchKeyVersion();
   }
 
+  /**
+   * @return The identifier for the Branch Key to get a particular version for.
+   */
   public String branchKeyIdentifier() {
     return this.branchKeyIdentifier;
   }
 
+  /**
+   * @return The version to get.
+   */
   public String branchKeyVersion() {
     return this.branchKeyVersion;
   }
@@ -32,12 +47,24 @@ public class GetBranchKeyVersionInput {
   }
 
   public interface Builder {
+    /**
+     * @param branchKeyIdentifier The identifier for the Branch Key to get a particular version for.
+     */
     Builder branchKeyIdentifier(String branchKeyIdentifier);
 
+    /**
+     * @return The identifier for the Branch Key to get a particular version for.
+     */
     String branchKeyIdentifier();
 
+    /**
+     * @param branchKeyVersion The version to get.
+     */
     Builder branchKeyVersion(String branchKeyVersion);
 
+    /**
+     * @return The version to get.
+     */
     String branchKeyVersion();
 
     GetBranchKeyVersionInput build();

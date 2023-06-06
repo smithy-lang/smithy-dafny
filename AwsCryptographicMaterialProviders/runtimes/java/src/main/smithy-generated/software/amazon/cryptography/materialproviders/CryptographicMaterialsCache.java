@@ -43,16 +43,16 @@ public final class CryptographicMaterialsCache implements ICryptographicMaterial
     return this._impl;
   }
 
-  public void DeleteCacheEntry(DeleteCacheEntryInput nativeValue) {
-    software.amazon.cryptography.materialproviders.internaldafny.types.DeleteCacheEntryInput dafnyValue = ToDafny.DeleteCacheEntryInput(nativeValue);
+  public void DeleteCacheEntry(DeleteCacheEntryInput input) {
+    software.amazon.cryptography.materialproviders.internaldafny.types.DeleteCacheEntryInput dafnyValue = ToDafny.DeleteCacheEntryInput(input);
     Result<Tuple0, Error> result = this._impl.DeleteCacheEntry(dafnyValue);
     if (result.is_Failure()) {
       throw ToNative.Error(result.dtor_error());
     }
   }
 
-  public GetCacheEntryOutput GetCacheEntry(GetCacheEntryInput nativeValue) {
-    software.amazon.cryptography.materialproviders.internaldafny.types.GetCacheEntryInput dafnyValue = ToDafny.GetCacheEntryInput(nativeValue);
+  public GetCacheEntryOutput GetCacheEntry(GetCacheEntryInput input) {
+    software.amazon.cryptography.materialproviders.internaldafny.types.GetCacheEntryInput dafnyValue = ToDafny.GetCacheEntryInput(input);
     Result<software.amazon.cryptography.materialproviders.internaldafny.types.GetCacheEntryOutput, Error> result = this._impl.GetCacheEntry(dafnyValue);
     if (result.is_Failure()) {
       throw ToNative.Error(result.dtor_error());
@@ -60,16 +60,16 @@ public final class CryptographicMaterialsCache implements ICryptographicMaterial
     return ToNative.GetCacheEntryOutput(result.dtor_value());
   }
 
-  public void PutCacheEntry(PutCacheEntryInput nativeValue) {
-    software.amazon.cryptography.materialproviders.internaldafny.types.PutCacheEntryInput dafnyValue = ToDafny.PutCacheEntryInput(nativeValue);
+  public void PutCacheEntry(PutCacheEntryInput input) {
+    software.amazon.cryptography.materialproviders.internaldafny.types.PutCacheEntryInput dafnyValue = ToDafny.PutCacheEntryInput(input);
     Result<Tuple0, Error> result = this._impl.PutCacheEntry(dafnyValue);
     if (result.is_Failure()) {
       throw ToNative.Error(result.dtor_error());
     }
   }
 
-  public void UpdaterUsageMetadata(UpdaterUsageMetadataInput nativeValue) {
-    software.amazon.cryptography.materialproviders.internaldafny.types.UpdaterUsageMetadataInput dafnyValue = ToDafny.UpdaterUsageMetadataInput(nativeValue);
+  public void UpdaterUsageMetadata(UpdaterUsageMetadataInput input) {
+    software.amazon.cryptography.materialproviders.internaldafny.types.UpdaterUsageMetadataInput dafnyValue = ToDafny.UpdaterUsageMetadataInput(input);
     Result<Tuple0, Error> result = this._impl.UpdaterUsageMetadata(dafnyValue);
     if (result.is_Failure()) {
       throw ToNative.Error(result.dtor_error());

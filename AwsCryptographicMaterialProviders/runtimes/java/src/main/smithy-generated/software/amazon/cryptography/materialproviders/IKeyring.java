@@ -9,7 +9,7 @@ import software.amazon.cryptography.materialproviders.model.OnEncryptInput;
 import software.amazon.cryptography.materialproviders.model.OnEncryptOutput;
 
 public interface IKeyring {
-  OnDecryptOutput OnDecrypt(OnDecryptInput nativeValue);
+  OnDecryptOutput OnDecrypt(OnDecryptInput input);
 
-  OnEncryptOutput OnEncrypt(OnEncryptInput nativeValue);
+  OnEncryptOutput OnEncrypt(OnEncryptInput input);
 }

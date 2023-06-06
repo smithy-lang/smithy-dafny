@@ -6,13 +6,28 @@ package software.amazon.cryptography.materialproviders.model;
 import java.nio.ByteBuffer;
 import java.util.Objects;
 
+/**
+ * Inputs for creating a Raw AES Keyring.
+ */
 public class CreateRawAesKeyringInput {
+  /**
+   * A namespace associated with this wrapping key.
+   */
   private final String keyNamespace;
 
+  /**
+   * A name associated with this wrapping key.
+   */
   private final String keyName;
 
+  /**
+   * The AES key used with AES_GCM encryption and decryption.
+   */
   private final ByteBuffer wrappingKey;
 
+  /**
+   * The AES_GCM algorithm this Keyring uses to wrap and unwrap data keys.
+   */
   private final AesWrappingAlg wrappingAlg;
 
   protected CreateRawAesKeyringInput(BuilderImpl builder) {
@@ -22,18 +37,30 @@ public class CreateRawAesKeyringInput {
     this.wrappingAlg = builder.wrappingAlg();
   }
 
+  /**
+   * @return A namespace associated with this wrapping key.
+   */
   public String keyNamespace() {
     return this.keyNamespace;
   }
 
+  /**
+   * @return A name associated with this wrapping key.
+   */
   public String keyName() {
     return this.keyName;
   }
 
+  /**
+   * @return The AES key used with AES_GCM encryption and decryption.
+   */
   public ByteBuffer wrappingKey() {
     return this.wrappingKey;
   }
 
+  /**
+   * @return The AES_GCM algorithm this Keyring uses to wrap and unwrap data keys.
+   */
   public AesWrappingAlg wrappingAlg() {
     return this.wrappingAlg;
   }
@@ -47,20 +74,44 @@ public class CreateRawAesKeyringInput {
   }
 
   public interface Builder {
+    /**
+     * @param keyNamespace A namespace associated with this wrapping key.
+     */
     Builder keyNamespace(String keyNamespace);
 
+    /**
+     * @return A namespace associated with this wrapping key.
+     */
     String keyNamespace();
 
+    /**
+     * @param keyName A name associated with this wrapping key.
+     */
     Builder keyName(String keyName);
 
+    /**
+     * @return A name associated with this wrapping key.
+     */
     String keyName();
 
+    /**
+     * @param wrappingKey The AES key used with AES_GCM encryption and decryption.
+     */
     Builder wrappingKey(ByteBuffer wrappingKey);
 
+    /**
+     * @return The AES key used with AES_GCM encryption and decryption.
+     */
     ByteBuffer wrappingKey();
 
+    /**
+     * @param wrappingAlg The AES_GCM algorithm this Keyring uses to wrap and unwrap data keys.
+     */
     Builder wrappingAlg(AesWrappingAlg wrappingAlg);
 
+    /**
+     * @return The AES_GCM algorithm this Keyring uses to wrap and unwrap data keys.
+     */
     AesWrappingAlg wrappingAlg();
 
     CreateRawAesKeyringInput build();

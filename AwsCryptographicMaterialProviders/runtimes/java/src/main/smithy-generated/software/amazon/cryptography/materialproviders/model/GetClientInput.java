@@ -5,13 +5,22 @@ package software.amazon.cryptography.materialproviders.model;
 
 import java.util.Objects;
 
+/**
+ * Inputs for getting a AWS KMS Client.
+ */
 public class GetClientInput {
+  /**
+   * The region the client should be created in.
+   */
   private final String region;
 
   protected GetClientInput(BuilderImpl builder) {
     this.region = builder.region();
   }
 
+  /**
+   * @return The region the client should be created in.
+   */
   public String region() {
     return this.region;
   }
@@ -25,8 +34,14 @@ public class GetClientInput {
   }
 
   public interface Builder {
+    /**
+     * @param region The region the client should be created in.
+     */
     Builder region(String region);
 
+    /**
+     * @return The region the client should be created in.
+     */
     String region();
 
     GetClientInput build();

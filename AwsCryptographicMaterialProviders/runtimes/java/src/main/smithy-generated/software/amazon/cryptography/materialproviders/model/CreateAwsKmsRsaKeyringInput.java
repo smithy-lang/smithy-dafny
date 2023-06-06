@@ -9,15 +9,33 @@ import java.util.Objects;
 import software.amazon.awssdk.services.kms.KmsClient;
 import software.amazon.awssdk.services.kms.model.EncryptionAlgorithmSpec;
 
+/**
+ * Inputs for creating a AWS KMS RSA Keyring.
+ */
 public class CreateAwsKmsRsaKeyringInput {
+  /**
+   * The public RSA Key responsible for wrapping data keys, as a UTF8 encoded, PEM encoded X.509 SubjectPublicKeyInfo structure. This should be the public key as exported from KMS. If not specified, this Keyring cannot be used on encrypt.
+   */
   private final ByteBuffer publicKey;
 
+  /**
+   * The ARN for the asymmetric AWS KMS Key for RSA responsible for wrapping and unwrapping data keys.
+   */
   private final String kmsKeyId;
 
+  /**
+   * The RSA algorithm used to wrap and unwrap data keys.
+   */
   private final EncryptionAlgorithmSpec encryptionAlgorithm;
 
+  /**
+   * The KMS Client this Keyring will use to call KMS.
+   */
   private final KmsClient kmsClient;
 
+  /**
+   * A list of grant tokens to be used when calling KMS.
+   */
   private final List<String> grantTokens;
 
   protected CreateAwsKmsRsaKeyringInput(BuilderImpl builder) {
@@ -28,22 +46,37 @@ public class CreateAwsKmsRsaKeyringInput {
     this.grantTokens = builder.grantTokens();
   }
 
+  /**
+   * @return The public RSA Key responsible for wrapping data keys, as a UTF8 encoded, PEM encoded X.509 SubjectPublicKeyInfo structure. This should be the public key as exported from KMS. If not specified, this Keyring cannot be used on encrypt.
+   */
   public ByteBuffer publicKey() {
     return this.publicKey;
   }
 
+  /**
+   * @return The ARN for the asymmetric AWS KMS Key for RSA responsible for wrapping and unwrapping data keys.
+   */
   public String kmsKeyId() {
     return this.kmsKeyId;
   }
 
+  /**
+   * @return The RSA algorithm used to wrap and unwrap data keys.
+   */
   public EncryptionAlgorithmSpec encryptionAlgorithm() {
     return this.encryptionAlgorithm;
   }
 
+  /**
+   * @return The KMS Client this Keyring will use to call KMS.
+   */
   public KmsClient kmsClient() {
     return this.kmsClient;
   }
 
+  /**
+   * @return A list of grant tokens to be used when calling KMS.
+   */
   public List<String> grantTokens() {
     return this.grantTokens;
   }
@@ -57,24 +90,54 @@ public class CreateAwsKmsRsaKeyringInput {
   }
 
   public interface Builder {
+    /**
+     * @param publicKey The public RSA Key responsible for wrapping data keys, as a UTF8 encoded, PEM encoded X.509 SubjectPublicKeyInfo structure. This should be the public key as exported from KMS. If not specified, this Keyring cannot be used on encrypt.
+     */
     Builder publicKey(ByteBuffer publicKey);
 
+    /**
+     * @return The public RSA Key responsible for wrapping data keys, as a UTF8 encoded, PEM encoded X.509 SubjectPublicKeyInfo structure. This should be the public key as exported from KMS. If not specified, this Keyring cannot be used on encrypt.
+     */
     ByteBuffer publicKey();
 
+    /**
+     * @param kmsKeyId The ARN for the asymmetric AWS KMS Key for RSA responsible for wrapping and unwrapping data keys.
+     */
     Builder kmsKeyId(String kmsKeyId);
 
+    /**
+     * @return The ARN for the asymmetric AWS KMS Key for RSA responsible for wrapping and unwrapping data keys.
+     */
     String kmsKeyId();
 
+    /**
+     * @param encryptionAlgorithm The RSA algorithm used to wrap and unwrap data keys.
+     */
     Builder encryptionAlgorithm(EncryptionAlgorithmSpec encryptionAlgorithm);
 
+    /**
+     * @return The RSA algorithm used to wrap and unwrap data keys.
+     */
     EncryptionAlgorithmSpec encryptionAlgorithm();
 
+    /**
+     * @param kmsClient The KMS Client this Keyring will use to call KMS.
+     */
     Builder kmsClient(KmsClient kmsClient);
 
+    /**
+     * @return The KMS Client this Keyring will use to call KMS.
+     */
     KmsClient kmsClient();
 
+    /**
+     * @param grantTokens A list of grant tokens to be used when calling KMS.
+     */
     Builder grantTokens(List<String> grantTokens);
 
+    /**
+     * @return A list of grant tokens to be used when calling KMS.
+     */
     List<String> grantTokens();
 
     CreateAwsKmsRsaKeyringInput build();

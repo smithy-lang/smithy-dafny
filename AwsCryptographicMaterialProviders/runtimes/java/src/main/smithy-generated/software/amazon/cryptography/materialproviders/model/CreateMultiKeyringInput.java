@@ -8,9 +8,18 @@ import java.util.Objects;
 import software.amazon.cryptography.materialproviders.IKeyring;
 import software.amazon.cryptography.materialproviders.Keyring;
 
+/**
+ * Inputs for creating a Multi-Keyring.
+ */
 public class CreateMultiKeyringInput {
+  /**
+   * A keyring responsible for wrapping and unwrapping the data key. This is the first keyring that will be used to wrap the data key, and may be responsible for additionally generating the data key.
+   */
   private final IKeyring generator;
 
+  /**
+   * A list of keyrings (other than the generator) responsible for wrapping and unwrapping the data key.
+   */
   private final List<IKeyring> childKeyrings;
 
   protected CreateMultiKeyringInput(BuilderImpl builder) {
@@ -18,10 +27,16 @@ public class CreateMultiKeyringInput {
     this.childKeyrings = builder.childKeyrings();
   }
 
+  /**
+   * @return A keyring responsible for wrapping and unwrapping the data key. This is the first keyring that will be used to wrap the data key, and may be responsible for additionally generating the data key.
+   */
   public IKeyring generator() {
     return this.generator;
   }
 
+  /**
+   * @return A list of keyrings (other than the generator) responsible for wrapping and unwrapping the data key.
+   */
   public List<IKeyring> childKeyrings() {
     return this.childKeyrings;
   }
@@ -35,12 +50,24 @@ public class CreateMultiKeyringInput {
   }
 
   public interface Builder {
+    /**
+     * @param generator A keyring responsible for wrapping and unwrapping the data key. This is the first keyring that will be used to wrap the data key, and may be responsible for additionally generating the data key.
+     */
     Builder generator(IKeyring generator);
 
+    /**
+     * @return A keyring responsible for wrapping and unwrapping the data key. This is the first keyring that will be used to wrap the data key, and may be responsible for additionally generating the data key.
+     */
     IKeyring generator();
 
+    /**
+     * @param childKeyrings A list of keyrings (other than the generator) responsible for wrapping and unwrapping the data key.
+     */
     Builder childKeyrings(List<IKeyring> childKeyrings);
 
+    /**
+     * @return A list of keyrings (other than the generator) responsible for wrapping and unwrapping the data key.
+     */
     List<IKeyring> childKeyrings();
 
     CreateMultiKeyringInput build();

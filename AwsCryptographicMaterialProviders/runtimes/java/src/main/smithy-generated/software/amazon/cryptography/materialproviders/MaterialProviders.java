@@ -46,8 +46,8 @@ public class MaterialProviders {
   private final IAwsCryptographicMaterialProvidersClient _impl;
 
   protected MaterialProviders(BuilderImpl builder) {
-    MaterialProvidersConfig nativeValue = builder.MaterialProvidersConfig();
-    software.amazon.cryptography.materialproviders.internaldafny.types.MaterialProvidersConfig dafnyValue = ToDafny.MaterialProvidersConfig(nativeValue);
+    MaterialProvidersConfig input = builder.MaterialProvidersConfig();
+    software.amazon.cryptography.materialproviders.internaldafny.types.MaterialProvidersConfig dafnyValue = ToDafny.MaterialProvidersConfig(input);
     Result<MaterialProvidersClient, Error> result = __default.MaterialProviders(dafnyValue);
     if (result.is_Failure()) {
       throw ToNative.Error(result.dtor_error());
@@ -63,8 +63,14 @@ public class MaterialProviders {
     return new BuilderImpl();
   }
 
-  public IKeyring CreateAwsKmsDiscoveryKeyring(CreateAwsKmsDiscoveryKeyringInput nativeValue) {
-    software.amazon.cryptography.materialproviders.internaldafny.types.CreateAwsKmsDiscoveryKeyringInput dafnyValue = ToDafny.CreateAwsKmsDiscoveryKeyringInput(nativeValue);
+  /**
+   * Creates an AWS KMS Discovery Keyring, which supports unwrapping data keys wrapped by a symmetric AWS KMS Key for a single region.
+   *
+   * @param input Inputs for for creating a AWS KMS Discovery Keyring.
+   * @return Outputs for creating a Keyring.
+   */
+  public IKeyring CreateAwsKmsDiscoveryKeyring(CreateAwsKmsDiscoveryKeyringInput input) {
+    software.amazon.cryptography.materialproviders.internaldafny.types.CreateAwsKmsDiscoveryKeyringInput dafnyValue = ToDafny.CreateAwsKmsDiscoveryKeyringInput(input);
     Result<software.amazon.cryptography.materialproviders.internaldafny.types.IKeyring, Error> result = this._impl.CreateAwsKmsDiscoveryKeyring(dafnyValue);
     if (result.is_Failure()) {
       throw ToNative.Error(result.dtor_error());
@@ -72,9 +78,14 @@ public class MaterialProviders {
     return Keyring.wrap(result.dtor_value());
   }
 
-  public IKeyring CreateAwsKmsDiscoveryMultiKeyring(
-      CreateAwsKmsDiscoveryMultiKeyringInput nativeValue) {
-    software.amazon.cryptography.materialproviders.internaldafny.types.CreateAwsKmsDiscoveryMultiKeyringInput dafnyValue = ToDafny.CreateAwsKmsDiscoveryMultiKeyringInput(nativeValue);
+  /**
+   * Creates an AWS KMS Discovery Multi-Keyring, which supports unwrapping data keys wrapped by a symmetric AWS KMS Key, for multiple regions.
+   *
+   * @param input Inputs for for creating an AWS KMS Discovery Multi-Keyring.
+   * @return Outputs for creating a Keyring.
+   */
+  public IKeyring CreateAwsKmsDiscoveryMultiKeyring(CreateAwsKmsDiscoveryMultiKeyringInput input) {
+    software.amazon.cryptography.materialproviders.internaldafny.types.CreateAwsKmsDiscoveryMultiKeyringInput dafnyValue = ToDafny.CreateAwsKmsDiscoveryMultiKeyringInput(input);
     Result<software.amazon.cryptography.materialproviders.internaldafny.types.IKeyring, Error> result = this._impl.CreateAwsKmsDiscoveryMultiKeyring(dafnyValue);
     if (result.is_Failure()) {
       throw ToNative.Error(result.dtor_error());
@@ -82,9 +93,14 @@ public class MaterialProviders {
     return Keyring.wrap(result.dtor_value());
   }
 
-  public IKeyring CreateAwsKmsHierarchicalKeyring(
-      CreateAwsKmsHierarchicalKeyringInput nativeValue) {
-    software.amazon.cryptography.materialproviders.internaldafny.types.CreateAwsKmsHierarchicalKeyringInput dafnyValue = ToDafny.CreateAwsKmsHierarchicalKeyringInput(nativeValue);
+  /**
+   * Creates a Hierarchical Keyring, which supports wrapping and unwrapping data keys using Branch Keys persisted in DynamoDB and protected by a symmetric AWS KMS Key or AWS KMS Multi-Region Key.
+   *
+   * @param input Inputs for creating a Hierarchical Keyring.
+   * @return Outputs for creating a Keyring.
+   */
+  public IKeyring CreateAwsKmsHierarchicalKeyring(CreateAwsKmsHierarchicalKeyringInput input) {
+    software.amazon.cryptography.materialproviders.internaldafny.types.CreateAwsKmsHierarchicalKeyringInput dafnyValue = ToDafny.CreateAwsKmsHierarchicalKeyringInput(input);
     Result<software.amazon.cryptography.materialproviders.internaldafny.types.IKeyring, Error> result = this._impl.CreateAwsKmsHierarchicalKeyring(dafnyValue);
     if (result.is_Failure()) {
       throw ToNative.Error(result.dtor_error());
@@ -92,8 +108,14 @@ public class MaterialProviders {
     return Keyring.wrap(result.dtor_value());
   }
 
-  public IKeyring CreateAwsKmsKeyring(CreateAwsKmsKeyringInput nativeValue) {
-    software.amazon.cryptography.materialproviders.internaldafny.types.CreateAwsKmsKeyringInput dafnyValue = ToDafny.CreateAwsKmsKeyringInput(nativeValue);
+  /**
+   * Creates an AWS KMS Keyring, which wraps and unwraps data keys using single symmetric AWS KMS Key.
+   *
+   * @param input Inputs for for creating a AWS KMS Keyring.
+   * @return Outputs for creating a Keyring.
+   */
+  public IKeyring CreateAwsKmsKeyring(CreateAwsKmsKeyringInput input) {
+    software.amazon.cryptography.materialproviders.internaldafny.types.CreateAwsKmsKeyringInput dafnyValue = ToDafny.CreateAwsKmsKeyringInput(input);
     Result<software.amazon.cryptography.materialproviders.internaldafny.types.IKeyring, Error> result = this._impl.CreateAwsKmsKeyring(dafnyValue);
     if (result.is_Failure()) {
       throw ToNative.Error(result.dtor_error());
@@ -101,9 +123,14 @@ public class MaterialProviders {
     return Keyring.wrap(result.dtor_value());
   }
 
-  public IKeyring CreateAwsKmsMrkDiscoveryKeyring(
-      CreateAwsKmsMrkDiscoveryKeyringInput nativeValue) {
-    software.amazon.cryptography.materialproviders.internaldafny.types.CreateAwsKmsMrkDiscoveryKeyringInput dafnyValue = ToDafny.CreateAwsKmsMrkDiscoveryKeyringInput(nativeValue);
+  /**
+   * Creates an AWS KMS MRK Discovery Keyring, which supports unwrapping data keys wrapped by a symmetric AWS KMS Key or AWS KMS Multi-Region Key in a particular region.
+   *
+   * @param input Inputs for for creating a AWS KMS MRK Discovery Keyring.
+   * @return Outputs for creating a Keyring.
+   */
+  public IKeyring CreateAwsKmsMrkDiscoveryKeyring(CreateAwsKmsMrkDiscoveryKeyringInput input) {
+    software.amazon.cryptography.materialproviders.internaldafny.types.CreateAwsKmsMrkDiscoveryKeyringInput dafnyValue = ToDafny.CreateAwsKmsMrkDiscoveryKeyringInput(input);
     Result<software.amazon.cryptography.materialproviders.internaldafny.types.IKeyring, Error> result = this._impl.CreateAwsKmsMrkDiscoveryKeyring(dafnyValue);
     if (result.is_Failure()) {
       throw ToNative.Error(result.dtor_error());
@@ -111,9 +138,15 @@ public class MaterialProviders {
     return Keyring.wrap(result.dtor_value());
   }
 
+  /**
+   * Creates an AWS KMS MRK Discovery Multi-Keyring that supports unwrapping data keys wrapped by a symmetric AWS KMS Key or AWS KMS Multi-Region Key, for a single region.
+   *
+   * @param input Inputs for for creating a AWS KMS MRK Discovery Multi-Keyring.
+   * @return Outputs for creating a Keyring.
+   */
   public IKeyring CreateAwsKmsMrkDiscoveryMultiKeyring(
-      CreateAwsKmsMrkDiscoveryMultiKeyringInput nativeValue) {
-    software.amazon.cryptography.materialproviders.internaldafny.types.CreateAwsKmsMrkDiscoveryMultiKeyringInput dafnyValue = ToDafny.CreateAwsKmsMrkDiscoveryMultiKeyringInput(nativeValue);
+      CreateAwsKmsMrkDiscoveryMultiKeyringInput input) {
+    software.amazon.cryptography.materialproviders.internaldafny.types.CreateAwsKmsMrkDiscoveryMultiKeyringInput dafnyValue = ToDafny.CreateAwsKmsMrkDiscoveryMultiKeyringInput(input);
     Result<software.amazon.cryptography.materialproviders.internaldafny.types.IKeyring, Error> result = this._impl.CreateAwsKmsMrkDiscoveryMultiKeyring(dafnyValue);
     if (result.is_Failure()) {
       throw ToNative.Error(result.dtor_error());
@@ -121,8 +154,14 @@ public class MaterialProviders {
     return Keyring.wrap(result.dtor_value());
   }
 
-  public IKeyring CreateAwsKmsMrkKeyring(CreateAwsKmsMrkKeyringInput nativeValue) {
-    software.amazon.cryptography.materialproviders.internaldafny.types.CreateAwsKmsMrkKeyringInput dafnyValue = ToDafny.CreateAwsKmsMrkKeyringInput(nativeValue);
+  /**
+   * Creates an AWS KMS MRK Keyring, which wraps and unwraps data keys using single symmetric AWS KMS Key or AWS KMS Multi-Region Key.
+   *
+   * @param input Inputs for for creating an AWS KMS MRK Keyring.
+   * @return Outputs for creating a Keyring.
+   */
+  public IKeyring CreateAwsKmsMrkKeyring(CreateAwsKmsMrkKeyringInput input) {
+    software.amazon.cryptography.materialproviders.internaldafny.types.CreateAwsKmsMrkKeyringInput dafnyValue = ToDafny.CreateAwsKmsMrkKeyringInput(input);
     Result<software.amazon.cryptography.materialproviders.internaldafny.types.IKeyring, Error> result = this._impl.CreateAwsKmsMrkKeyring(dafnyValue);
     if (result.is_Failure()) {
       throw ToNative.Error(result.dtor_error());
@@ -130,8 +169,14 @@ public class MaterialProviders {
     return Keyring.wrap(result.dtor_value());
   }
 
-  public IKeyring CreateAwsKmsMrkMultiKeyring(CreateAwsKmsMrkMultiKeyringInput nativeValue) {
-    software.amazon.cryptography.materialproviders.internaldafny.types.CreateAwsKmsMrkMultiKeyringInput dafnyValue = ToDafny.CreateAwsKmsMrkMultiKeyringInput(nativeValue);
+  /**
+   * Creates an AWS KMS MRK Multi-Keyring, which wraps and unwraps data keys using one or more symmetric AWS KMS Keys or AWS KMS Multi-Region Keys.
+   *
+   * @param input Inputs for for creating a AWS KMS MRK Multi-Keyring.
+   * @return Outputs for creating a Keyring.
+   */
+  public IKeyring CreateAwsKmsMrkMultiKeyring(CreateAwsKmsMrkMultiKeyringInput input) {
+    software.amazon.cryptography.materialproviders.internaldafny.types.CreateAwsKmsMrkMultiKeyringInput dafnyValue = ToDafny.CreateAwsKmsMrkMultiKeyringInput(input);
     Result<software.amazon.cryptography.materialproviders.internaldafny.types.IKeyring, Error> result = this._impl.CreateAwsKmsMrkMultiKeyring(dafnyValue);
     if (result.is_Failure()) {
       throw ToNative.Error(result.dtor_error());
@@ -139,8 +184,14 @@ public class MaterialProviders {
     return Keyring.wrap(result.dtor_value());
   }
 
-  public IKeyring CreateAwsKmsMultiKeyring(CreateAwsKmsMultiKeyringInput nativeValue) {
-    software.amazon.cryptography.materialproviders.internaldafny.types.CreateAwsKmsMultiKeyringInput dafnyValue = ToDafny.CreateAwsKmsMultiKeyringInput(nativeValue);
+  /**
+   * Creates an AWS KMS Multi-Keyring, which wraps and unwraps data keys using one or more symmetric AWS KMS Keys.
+   *
+   * @param input Inputs for for creating a AWS KMS Multi-Keyring.
+   * @return Outputs for creating a Keyring.
+   */
+  public IKeyring CreateAwsKmsMultiKeyring(CreateAwsKmsMultiKeyringInput input) {
+    software.amazon.cryptography.materialproviders.internaldafny.types.CreateAwsKmsMultiKeyringInput dafnyValue = ToDafny.CreateAwsKmsMultiKeyringInput(input);
     Result<software.amazon.cryptography.materialproviders.internaldafny.types.IKeyring, Error> result = this._impl.CreateAwsKmsMultiKeyring(dafnyValue);
     if (result.is_Failure()) {
       throw ToNative.Error(result.dtor_error());
@@ -148,8 +199,14 @@ public class MaterialProviders {
     return Keyring.wrap(result.dtor_value());
   }
 
-  public IKeyring CreateAwsKmsRsaKeyring(CreateAwsKmsRsaKeyringInput nativeValue) {
-    software.amazon.cryptography.materialproviders.internaldafny.types.CreateAwsKmsRsaKeyringInput dafnyValue = ToDafny.CreateAwsKmsRsaKeyringInput(nativeValue);
+  /**
+   * Creates an AWS KMS RSA Keyring, which wraps and unwraps data keys using a single asymmetric AWS KMS Key for RSA.
+   *
+   * @param input Inputs for creating a AWS KMS RSA Keyring.
+   * @return Outputs for creating a Keyring.
+   */
+  public IKeyring CreateAwsKmsRsaKeyring(CreateAwsKmsRsaKeyringInput input) {
+    software.amazon.cryptography.materialproviders.internaldafny.types.CreateAwsKmsRsaKeyringInput dafnyValue = ToDafny.CreateAwsKmsRsaKeyringInput(input);
     Result<software.amazon.cryptography.materialproviders.internaldafny.types.IKeyring, Error> result = this._impl.CreateAwsKmsRsaKeyring(dafnyValue);
     if (result.is_Failure()) {
       throw ToNative.Error(result.dtor_error());
@@ -158,8 +215,8 @@ public class MaterialProviders {
   }
 
   public ICryptographicMaterialsCache CreateCryptographicMaterialsCache(
-      CreateCryptographicMaterialsCacheInput nativeValue) {
-    software.amazon.cryptography.materialproviders.internaldafny.types.CreateCryptographicMaterialsCacheInput dafnyValue = ToDafny.CreateCryptographicMaterialsCacheInput(nativeValue);
+      CreateCryptographicMaterialsCacheInput input) {
+    software.amazon.cryptography.materialproviders.internaldafny.types.CreateCryptographicMaterialsCacheInput dafnyValue = ToDafny.CreateCryptographicMaterialsCacheInput(input);
     Result<software.amazon.cryptography.materialproviders.internaldafny.types.ICryptographicMaterialsCache, Error> result = this._impl.CreateCryptographicMaterialsCache(dafnyValue);
     if (result.is_Failure()) {
       throw ToNative.Error(result.dtor_error());
@@ -167,8 +224,8 @@ public class MaterialProviders {
     return CryptographicMaterialsCache.wrap(result.dtor_value());
   }
 
-  public IClientSupplier CreateDefaultClientSupplier(CreateDefaultClientSupplierInput nativeValue) {
-    software.amazon.cryptography.materialproviders.internaldafny.types.CreateDefaultClientSupplierInput dafnyValue = ToDafny.CreateDefaultClientSupplierInput(nativeValue);
+  public IClientSupplier CreateDefaultClientSupplier(CreateDefaultClientSupplierInput input) {
+    software.amazon.cryptography.materialproviders.internaldafny.types.CreateDefaultClientSupplierInput dafnyValue = ToDafny.CreateDefaultClientSupplierInput(input);
     Result<software.amazon.cryptography.materialproviders.internaldafny.types.IClientSupplier, Error> result = this._impl.CreateDefaultClientSupplier(dafnyValue);
     if (result.is_Failure()) {
       throw ToNative.Error(result.dtor_error());
@@ -176,9 +233,15 @@ public class MaterialProviders {
     return ClientSupplier.wrap(result.dtor_value());
   }
 
+  /**
+   * Creates a Default Cryptographic Materials Manager.
+   *
+   * @param input Inputs for creating a Default Cryptographic Materials Manager.
+   * @return Outputs for creating a Default Cryptographic Materials Manager.
+   */
   public ICryptographicMaterialsManager CreateDefaultCryptographicMaterialsManager(
-      CreateDefaultCryptographicMaterialsManagerInput nativeValue) {
-    software.amazon.cryptography.materialproviders.internaldafny.types.CreateDefaultCryptographicMaterialsManagerInput dafnyValue = ToDafny.CreateDefaultCryptographicMaterialsManagerInput(nativeValue);
+      CreateDefaultCryptographicMaterialsManagerInput input) {
+    software.amazon.cryptography.materialproviders.internaldafny.types.CreateDefaultCryptographicMaterialsManagerInput dafnyValue = ToDafny.CreateDefaultCryptographicMaterialsManagerInput(input);
     Result<software.amazon.cryptography.materialproviders.internaldafny.types.ICryptographicMaterialsManager, Error> result = this._impl.CreateDefaultCryptographicMaterialsManager(dafnyValue);
     if (result.is_Failure()) {
       throw ToNative.Error(result.dtor_error());
@@ -186,9 +249,15 @@ public class MaterialProviders {
     return CryptographicMaterialsManager.wrap(result.dtor_value());
   }
 
+  /**
+   * Creates an Expected Cryptographic Materials Manager.
+   *
+   * @param input Inputs for creating an Expected Cryptographic Materials Manager.
+   * @return Outputs for creating an Expected Cryptographic Materials Manager.
+   */
   public ICryptographicMaterialsManager CreateExpectedEncryptionContextCMM(
-      CreateExpectedEncryptionContextCMMInput nativeValue) {
-    software.amazon.cryptography.materialproviders.internaldafny.types.CreateExpectedEncryptionContextCMMInput dafnyValue = ToDafny.CreateExpectedEncryptionContextCMMInput(nativeValue);
+      CreateExpectedEncryptionContextCMMInput input) {
+    software.amazon.cryptography.materialproviders.internaldafny.types.CreateExpectedEncryptionContextCMMInput dafnyValue = ToDafny.CreateExpectedEncryptionContextCMMInput(input);
     Result<software.amazon.cryptography.materialproviders.internaldafny.types.ICryptographicMaterialsManager, Error> result = this._impl.CreateExpectedEncryptionContextCMM(dafnyValue);
     if (result.is_Failure()) {
       throw ToNative.Error(result.dtor_error());
@@ -196,8 +265,14 @@ public class MaterialProviders {
     return CryptographicMaterialsManager.wrap(result.dtor_value());
   }
 
-  public IKeyring CreateMultiKeyring(CreateMultiKeyringInput nativeValue) {
-    software.amazon.cryptography.materialproviders.internaldafny.types.CreateMultiKeyringInput dafnyValue = ToDafny.CreateMultiKeyringInput(nativeValue);
+  /**
+   * Creates a Multi-Keyring comprised of one or more other Keyrings.
+   *
+   * @param input Inputs for creating a Multi-Keyring.
+   * @return Outputs for creating a Keyring.
+   */
+  public IKeyring CreateMultiKeyring(CreateMultiKeyringInput input) {
+    software.amazon.cryptography.materialproviders.internaldafny.types.CreateMultiKeyringInput dafnyValue = ToDafny.CreateMultiKeyringInput(input);
     Result<software.amazon.cryptography.materialproviders.internaldafny.types.IKeyring, Error> result = this._impl.CreateMultiKeyring(dafnyValue);
     if (result.is_Failure()) {
       throw ToNative.Error(result.dtor_error());
@@ -205,8 +280,14 @@ public class MaterialProviders {
     return Keyring.wrap(result.dtor_value());
   }
 
-  public IKeyring CreateRawAesKeyring(CreateRawAesKeyringInput nativeValue) {
-    software.amazon.cryptography.materialproviders.internaldafny.types.CreateRawAesKeyringInput dafnyValue = ToDafny.CreateRawAesKeyringInput(nativeValue);
+  /**
+   * Creates a Raw AES Keyring, which wraps and unwraps data keys locally using AES_GCM.
+   *
+   * @param input Inputs for creating a Raw AES Keyring.
+   * @return Outputs for creating a Keyring.
+   */
+  public IKeyring CreateRawAesKeyring(CreateRawAesKeyringInput input) {
+    software.amazon.cryptography.materialproviders.internaldafny.types.CreateRawAesKeyringInput dafnyValue = ToDafny.CreateRawAesKeyringInput(input);
     Result<software.amazon.cryptography.materialproviders.internaldafny.types.IKeyring, Error> result = this._impl.CreateRawAesKeyring(dafnyValue);
     if (result.is_Failure()) {
       throw ToNative.Error(result.dtor_error());
@@ -214,8 +295,14 @@ public class MaterialProviders {
     return Keyring.wrap(result.dtor_value());
   }
 
-  public IKeyring CreateRawRsaKeyring(CreateRawRsaKeyringInput nativeValue) {
-    software.amazon.cryptography.materialproviders.internaldafny.types.CreateRawRsaKeyringInput dafnyValue = ToDafny.CreateRawRsaKeyringInput(nativeValue);
+  /**
+   * Creates a Raw RSA Keyring, which wraps and unwraps data keys locally using RSA.
+   *
+   * @param input Inputs for creating a Raw RAW Keyring.
+   * @return Outputs for creating a Keyring.
+   */
+  public IKeyring CreateRawRsaKeyring(CreateRawRsaKeyringInput input) {
+    software.amazon.cryptography.materialproviders.internaldafny.types.CreateRawRsaKeyringInput dafnyValue = ToDafny.CreateRawRsaKeyringInput(input);
     Result<software.amazon.cryptography.materialproviders.internaldafny.types.IKeyring, Error> result = this._impl.CreateRawRsaKeyring(dafnyValue);
     if (result.is_Failure()) {
       throw ToNative.Error(result.dtor_error());
@@ -223,24 +310,24 @@ public class MaterialProviders {
     return Keyring.wrap(result.dtor_value());
   }
 
-  public void DecryptionMaterialsWithPlaintextDataKey(DecryptionMaterials nativeValue) {
-    software.amazon.cryptography.materialproviders.internaldafny.types.DecryptionMaterials dafnyValue = ToDafny.DecryptionMaterials(nativeValue);
+  public void DecryptionMaterialsWithPlaintextDataKey(DecryptionMaterials input) {
+    software.amazon.cryptography.materialproviders.internaldafny.types.DecryptionMaterials dafnyValue = ToDafny.DecryptionMaterials(input);
     Result<Tuple0, Error> result = this._impl.DecryptionMaterialsWithPlaintextDataKey(dafnyValue);
     if (result.is_Failure()) {
       throw ToNative.Error(result.dtor_error());
     }
   }
 
-  public void EncryptionMaterialsHasPlaintextDataKey(EncryptionMaterials nativeValue) {
-    software.amazon.cryptography.materialproviders.internaldafny.types.EncryptionMaterials dafnyValue = ToDafny.EncryptionMaterials(nativeValue);
+  public void EncryptionMaterialsHasPlaintextDataKey(EncryptionMaterials input) {
+    software.amazon.cryptography.materialproviders.internaldafny.types.EncryptionMaterials dafnyValue = ToDafny.EncryptionMaterials(input);
     Result<Tuple0, Error> result = this._impl.EncryptionMaterialsHasPlaintextDataKey(dafnyValue);
     if (result.is_Failure()) {
       throw ToNative.Error(result.dtor_error());
     }
   }
 
-  public AlgorithmSuiteInfo GetAlgorithmSuiteInfo(ByteBuffer nativeValue) {
-    DafnySequence<? extends Byte> dafnyValue = ToDafny.GetAlgorithmSuiteInfoInput(nativeValue);
+  public AlgorithmSuiteInfo GetAlgorithmSuiteInfo(ByteBuffer input) {
+    DafnySequence<? extends Byte> dafnyValue = ToDafny.GetAlgorithmSuiteInfoInput(input);
     Result<software.amazon.cryptography.materialproviders.internaldafny.types.AlgorithmSuiteInfo, Error> result = this._impl.GetAlgorithmSuiteInfo(dafnyValue);
     if (result.is_Failure()) {
       throw ToNative.Error(result.dtor_error());
@@ -249,8 +336,8 @@ public class MaterialProviders {
   }
 
   public DecryptionMaterials InitializeDecryptionMaterials(
-      InitializeDecryptionMaterialsInput nativeValue) {
-    software.amazon.cryptography.materialproviders.internaldafny.types.InitializeDecryptionMaterialsInput dafnyValue = ToDafny.InitializeDecryptionMaterialsInput(nativeValue);
+      InitializeDecryptionMaterialsInput input) {
+    software.amazon.cryptography.materialproviders.internaldafny.types.InitializeDecryptionMaterialsInput dafnyValue = ToDafny.InitializeDecryptionMaterialsInput(input);
     Result<software.amazon.cryptography.materialproviders.internaldafny.types.DecryptionMaterials, Error> result = this._impl.InitializeDecryptionMaterials(dafnyValue);
     if (result.is_Failure()) {
       throw ToNative.Error(result.dtor_error());
@@ -259,8 +346,8 @@ public class MaterialProviders {
   }
 
   public EncryptionMaterials InitializeEncryptionMaterials(
-      InitializeEncryptionMaterialsInput nativeValue) {
-    software.amazon.cryptography.materialproviders.internaldafny.types.InitializeEncryptionMaterialsInput dafnyValue = ToDafny.InitializeEncryptionMaterialsInput(nativeValue);
+      InitializeEncryptionMaterialsInput input) {
+    software.amazon.cryptography.materialproviders.internaldafny.types.InitializeEncryptionMaterialsInput dafnyValue = ToDafny.InitializeEncryptionMaterialsInput(input);
     Result<software.amazon.cryptography.materialproviders.internaldafny.types.EncryptionMaterials, Error> result = this._impl.InitializeEncryptionMaterials(dafnyValue);
     if (result.is_Failure()) {
       throw ToNative.Error(result.dtor_error());
@@ -268,44 +355,40 @@ public class MaterialProviders {
     return ToNative.EncryptionMaterials(result.dtor_value());
   }
 
-  public void ValidAlgorithmSuiteInfo(AlgorithmSuiteInfo nativeValue) {
-    software.amazon.cryptography.materialproviders.internaldafny.types.AlgorithmSuiteInfo dafnyValue = ToDafny.AlgorithmSuiteInfo(nativeValue);
+  public void ValidAlgorithmSuiteInfo(AlgorithmSuiteInfo input) {
+    software.amazon.cryptography.materialproviders.internaldafny.types.AlgorithmSuiteInfo dafnyValue = ToDafny.AlgorithmSuiteInfo(input);
     Result<Tuple0, Error> result = this._impl.ValidAlgorithmSuiteInfo(dafnyValue);
     if (result.is_Failure()) {
       throw ToNative.Error(result.dtor_error());
     }
   }
 
-  public void ValidateCommitmentPolicyOnDecrypt(
-      ValidateCommitmentPolicyOnDecryptInput nativeValue) {
-    software.amazon.cryptography.materialproviders.internaldafny.types.ValidateCommitmentPolicyOnDecryptInput dafnyValue = ToDafny.ValidateCommitmentPolicyOnDecryptInput(nativeValue);
+  public void ValidateCommitmentPolicyOnDecrypt(ValidateCommitmentPolicyOnDecryptInput input) {
+    software.amazon.cryptography.materialproviders.internaldafny.types.ValidateCommitmentPolicyOnDecryptInput dafnyValue = ToDafny.ValidateCommitmentPolicyOnDecryptInput(input);
     Result<Tuple0, Error> result = this._impl.ValidateCommitmentPolicyOnDecrypt(dafnyValue);
     if (result.is_Failure()) {
       throw ToNative.Error(result.dtor_error());
     }
   }
 
-  public void ValidateCommitmentPolicyOnEncrypt(
-      ValidateCommitmentPolicyOnEncryptInput nativeValue) {
-    software.amazon.cryptography.materialproviders.internaldafny.types.ValidateCommitmentPolicyOnEncryptInput dafnyValue = ToDafny.ValidateCommitmentPolicyOnEncryptInput(nativeValue);
+  public void ValidateCommitmentPolicyOnEncrypt(ValidateCommitmentPolicyOnEncryptInput input) {
+    software.amazon.cryptography.materialproviders.internaldafny.types.ValidateCommitmentPolicyOnEncryptInput dafnyValue = ToDafny.ValidateCommitmentPolicyOnEncryptInput(input);
     Result<Tuple0, Error> result = this._impl.ValidateCommitmentPolicyOnEncrypt(dafnyValue);
     if (result.is_Failure()) {
       throw ToNative.Error(result.dtor_error());
     }
   }
 
-  public void ValidDecryptionMaterialsTransition(
-      ValidDecryptionMaterialsTransitionInput nativeValue) {
-    software.amazon.cryptography.materialproviders.internaldafny.types.ValidDecryptionMaterialsTransitionInput dafnyValue = ToDafny.ValidDecryptionMaterialsTransitionInput(nativeValue);
+  public void ValidDecryptionMaterialsTransition(ValidDecryptionMaterialsTransitionInput input) {
+    software.amazon.cryptography.materialproviders.internaldafny.types.ValidDecryptionMaterialsTransitionInput dafnyValue = ToDafny.ValidDecryptionMaterialsTransitionInput(input);
     Result<Tuple0, Error> result = this._impl.ValidDecryptionMaterialsTransition(dafnyValue);
     if (result.is_Failure()) {
       throw ToNative.Error(result.dtor_error());
     }
   }
 
-  public void ValidEncryptionMaterialsTransition(
-      ValidEncryptionMaterialsTransitionInput nativeValue) {
-    software.amazon.cryptography.materialproviders.internaldafny.types.ValidEncryptionMaterialsTransitionInput dafnyValue = ToDafny.ValidEncryptionMaterialsTransitionInput(nativeValue);
+  public void ValidEncryptionMaterialsTransition(ValidEncryptionMaterialsTransitionInput input) {
+    software.amazon.cryptography.materialproviders.internaldafny.types.ValidEncryptionMaterialsTransitionInput dafnyValue = ToDafny.ValidEncryptionMaterialsTransitionInput(input);
     Result<Tuple0, Error> result = this._impl.ValidEncryptionMaterialsTransition(dafnyValue);
     if (result.is_Failure()) {
       throw ToNative.Error(result.dtor_error());

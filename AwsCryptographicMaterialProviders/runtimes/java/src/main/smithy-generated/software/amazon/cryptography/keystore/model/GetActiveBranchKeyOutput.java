@@ -6,9 +6,18 @@ package software.amazon.cryptography.keystore.model;
 import java.nio.ByteBuffer;
 import java.util.Objects;
 
+/**
+ * Outputs for getting a Branch Key's ACTIVE version.
+ */
 public class GetActiveBranchKeyOutput {
+  /**
+   * The ACTIVE Branch Key version.
+   */
   private final String branchKeyVersion;
 
+  /**
+   * The key material for this ACTIVE Branch Key version.
+   */
   private final ByteBuffer branchKey;
 
   protected GetActiveBranchKeyOutput(BuilderImpl builder) {
@@ -16,10 +25,16 @@ public class GetActiveBranchKeyOutput {
     this.branchKey = builder.branchKey();
   }
 
+  /**
+   * @return The ACTIVE Branch Key version.
+   */
   public String branchKeyVersion() {
     return this.branchKeyVersion;
   }
 
+  /**
+   * @return The key material for this ACTIVE Branch Key version.
+   */
   public ByteBuffer branchKey() {
     return this.branchKey;
   }
@@ -33,12 +48,24 @@ public class GetActiveBranchKeyOutput {
   }
 
   public interface Builder {
+    /**
+     * @param branchKeyVersion The ACTIVE Branch Key version.
+     */
     Builder branchKeyVersion(String branchKeyVersion);
 
+    /**
+     * @return The ACTIVE Branch Key version.
+     */
     String branchKeyVersion();
 
+    /**
+     * @param branchKey The key material for this ACTIVE Branch Key version.
+     */
     Builder branchKey(ByteBuffer branchKey);
 
+    /**
+     * @return The key material for this ACTIVE Branch Key version.
+     */
     ByteBuffer branchKey();
 
     GetActiveBranchKeyOutput build();

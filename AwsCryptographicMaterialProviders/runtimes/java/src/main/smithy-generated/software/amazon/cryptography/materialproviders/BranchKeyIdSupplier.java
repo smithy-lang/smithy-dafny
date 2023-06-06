@@ -38,8 +38,14 @@ public final class BranchKeyIdSupplier implements IBranchKeyIdSupplier {
     return this._impl;
   }
 
-  public GetBranchKeyIdOutput GetBranchKeyId(GetBranchKeyIdInput nativeValue) {
-    software.amazon.cryptography.materialproviders.internaldafny.types.GetBranchKeyIdInput dafnyValue = ToDafny.GetBranchKeyIdInput(nativeValue);
+  /**
+   * Given the Encryption Context associated with this encryption or decryption, returns the branch key that should be responsible for unwrapping or wrapping the data key.
+   *
+   * @param input Inputs for determining the Branch Key which should be used to wrap or unwrap the data key for this encryption or decryption
+   * @return Outputs for the Branch Key repsonsible for wrapping or unwrapping the data key in this encryption or decryption.
+   */
+  public GetBranchKeyIdOutput GetBranchKeyId(GetBranchKeyIdInput input) {
+    software.amazon.cryptography.materialproviders.internaldafny.types.GetBranchKeyIdInput dafnyValue = ToDafny.GetBranchKeyIdInput(input);
     Result<software.amazon.cryptography.materialproviders.internaldafny.types.GetBranchKeyIdOutput, Error> result = this._impl.GetBranchKeyId(dafnyValue);
     if (result.is_Failure()) {
       throw ToNative.Error(result.dtor_error());

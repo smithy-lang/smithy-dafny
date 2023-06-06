@@ -6,9 +6,18 @@ package software.amazon.cryptography.keystore.model;
 import java.nio.ByteBuffer;
 import java.util.Objects;
 
+/**
+ * Outputs for getting a Beacon Key
+ */
 public class GetBeaconKeyOutput {
+  /**
+   * The identifier for the Beacon Key.
+   */
   private final String beaconKeyIdentifier;
 
+  /**
+   * The key material for this Beacon Key.
+   */
   private final ByteBuffer beaconKey;
 
   protected GetBeaconKeyOutput(BuilderImpl builder) {
@@ -16,10 +25,16 @@ public class GetBeaconKeyOutput {
     this.beaconKey = builder.beaconKey();
   }
 
+  /**
+   * @return The identifier for the Beacon Key.
+   */
   public String beaconKeyIdentifier() {
     return this.beaconKeyIdentifier;
   }
 
+  /**
+   * @return The key material for this Beacon Key.
+   */
   public ByteBuffer beaconKey() {
     return this.beaconKey;
   }
@@ -33,12 +48,24 @@ public class GetBeaconKeyOutput {
   }
 
   public interface Builder {
+    /**
+     * @param beaconKeyIdentifier The identifier for the Beacon Key.
+     */
     Builder beaconKeyIdentifier(String beaconKeyIdentifier);
 
+    /**
+     * @return The identifier for the Beacon Key.
+     */
     String beaconKeyIdentifier();
 
+    /**
+     * @param beaconKey The key material for this Beacon Key.
+     */
     Builder beaconKey(ByteBuffer beaconKey);
 
+    /**
+     * @return The key material for this Beacon Key.
+     */
     ByteBuffer beaconKey();
 
     GetBeaconKeyOutput build();

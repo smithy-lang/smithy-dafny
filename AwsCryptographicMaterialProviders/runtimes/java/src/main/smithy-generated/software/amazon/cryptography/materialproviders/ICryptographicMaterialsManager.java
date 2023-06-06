@@ -9,7 +9,7 @@ import software.amazon.cryptography.materialproviders.model.GetEncryptionMateria
 import software.amazon.cryptography.materialproviders.model.GetEncryptionMaterialsOutput;
 
 public interface ICryptographicMaterialsManager {
-  DecryptMaterialsOutput DecryptMaterials(DecryptMaterialsInput nativeValue);
+  DecryptMaterialsOutput DecryptMaterials(DecryptMaterialsInput input);
 
-  GetEncryptionMaterialsOutput GetEncryptionMaterials(GetEncryptionMaterialsInput nativeValue);
+  GetEncryptionMaterialsOutput GetEncryptionMaterials(GetEncryptionMaterialsInput input);
 }

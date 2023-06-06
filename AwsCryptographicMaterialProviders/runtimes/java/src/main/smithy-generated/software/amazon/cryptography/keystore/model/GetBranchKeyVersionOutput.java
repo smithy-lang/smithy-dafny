@@ -6,9 +6,18 @@ package software.amazon.cryptography.keystore.model;
 import java.nio.ByteBuffer;
 import java.util.Objects;
 
+/**
+ * Outputs for getting a version of a Branch Key.
+ */
 public class GetBranchKeyVersionOutput {
+  /**
+   * The version of this Branch Key.
+   */
   private final String branchKeyVersion;
 
+  /**
+   * The key material for this Branch Key version.
+   */
   private final ByteBuffer branchKey;
 
   protected GetBranchKeyVersionOutput(BuilderImpl builder) {
@@ -16,10 +25,16 @@ public class GetBranchKeyVersionOutput {
     this.branchKey = builder.branchKey();
   }
 
+  /**
+   * @return The version of this Branch Key.
+   */
   public String branchKeyVersion() {
     return this.branchKeyVersion;
   }
 
+  /**
+   * @return The key material for this Branch Key version.
+   */
   public ByteBuffer branchKey() {
     return this.branchKey;
   }
@@ -33,12 +48,24 @@ public class GetBranchKeyVersionOutput {
   }
 
   public interface Builder {
+    /**
+     * @param branchKeyVersion The version of this Branch Key.
+     */
     Builder branchKeyVersion(String branchKeyVersion);
 
+    /**
+     * @return The version of this Branch Key.
+     */
     String branchKeyVersion();
 
+    /**
+     * @param branchKey The key material for this Branch Key version.
+     */
     Builder branchKey(ByteBuffer branchKey);
 
+    /**
+     * @return The key material for this Branch Key version.
+     */
     ByteBuffer branchKey();
 
     GetBranchKeyVersionOutput build();

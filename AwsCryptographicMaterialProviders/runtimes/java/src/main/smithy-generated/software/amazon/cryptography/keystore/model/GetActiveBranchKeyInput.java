@@ -5,13 +5,22 @@ package software.amazon.cryptography.keystore.model;
 
 import java.util.Objects;
 
+/**
+ * Inputs for getting a Branch Key's ACTIVE version.
+ */
 public class GetActiveBranchKeyInput {
+  /**
+   * The identifier for the Branch Key to get the ACTIVE version for.
+   */
   private final String branchKeyIdentifier;
 
   protected GetActiveBranchKeyInput(BuilderImpl builder) {
     this.branchKeyIdentifier = builder.branchKeyIdentifier();
   }
 
+  /**
+   * @return The identifier for the Branch Key to get the ACTIVE version for.
+   */
   public String branchKeyIdentifier() {
     return this.branchKeyIdentifier;
   }
@@ -25,8 +34,14 @@ public class GetActiveBranchKeyInput {
   }
 
   public interface Builder {
+    /**
+     * @param branchKeyIdentifier The identifier for the Branch Key to get the ACTIVE version for.
+     */
     Builder branchKeyIdentifier(String branchKeyIdentifier);
 
+    /**
+     * @return The identifier for the Branch Key to get the ACTIVE version for.
+     */
     String branchKeyIdentifier();
 
     GetActiveBranchKeyInput build();

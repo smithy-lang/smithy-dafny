@@ -10,11 +10,11 @@ import software.amazon.cryptography.materialproviders.model.PutCacheEntryInput;
 import software.amazon.cryptography.materialproviders.model.UpdaterUsageMetadataInput;
 
 public interface ICryptographicMaterialsCache {
-  void DeleteCacheEntry(DeleteCacheEntryInput nativeValue);
+  void DeleteCacheEntry(DeleteCacheEntryInput input);
 
-  GetCacheEntryOutput GetCacheEntry(GetCacheEntryInput nativeValue);
+  GetCacheEntryOutput GetCacheEntry(GetCacheEntryInput input);
 
-  void PutCacheEntry(PutCacheEntryInput nativeValue);
+  void PutCacheEntry(PutCacheEntryInput input);
 
-  void UpdaterUsageMetadata(UpdaterUsageMetadataInput nativeValue);
+  void UpdaterUsageMetadata(UpdaterUsageMetadataInput input);
 }

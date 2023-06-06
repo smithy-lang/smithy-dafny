@@ -6,15 +6,33 @@ package software.amazon.cryptography.keystore.model;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * The configuration information for a Key Store.
+ */
 public class GetKeyStoreInfoOutput {
+  /**
+   * An identifier for this Key Store.
+   */
   private final String keyStoreId;
 
+  /**
+   * The DynamoDB table name that backs this Key Store.
+   */
   private final String keyStoreName;
 
+  /**
+   * The logical name for this Key Store, which is cryptographically bound to the keys it holds.
+   */
   private final String logicalKeyStoreName;
 
+  /**
+   * The AWS KMS grant tokens that are used when this Key Store calls to AWS KMS.
+   */
   private final List<String> grantTokens;
 
+  /**
+   * The AWS KMS Key that protects this Key Store.
+   */
   private final KMSConfiguration kmsConfiguration;
 
   protected GetKeyStoreInfoOutput(BuilderImpl builder) {
@@ -25,22 +43,37 @@ public class GetKeyStoreInfoOutput {
     this.kmsConfiguration = builder.kmsConfiguration();
   }
 
+  /**
+   * @return An identifier for this Key Store.
+   */
   public String keyStoreId() {
     return this.keyStoreId;
   }
 
+  /**
+   * @return The DynamoDB table name that backs this Key Store.
+   */
   public String keyStoreName() {
     return this.keyStoreName;
   }
 
+  /**
+   * @return The logical name for this Key Store, which is cryptographically bound to the keys it holds.
+   */
   public String logicalKeyStoreName() {
     return this.logicalKeyStoreName;
   }
 
+  /**
+   * @return The AWS KMS grant tokens that are used when this Key Store calls to AWS KMS.
+   */
   public List<String> grantTokens() {
     return this.grantTokens;
   }
 
+  /**
+   * @return The AWS KMS Key that protects this Key Store.
+   */
   public KMSConfiguration kmsConfiguration() {
     return this.kmsConfiguration;
   }
@@ -54,24 +87,54 @@ public class GetKeyStoreInfoOutput {
   }
 
   public interface Builder {
+    /**
+     * @param keyStoreId An identifier for this Key Store.
+     */
     Builder keyStoreId(String keyStoreId);
 
+    /**
+     * @return An identifier for this Key Store.
+     */
     String keyStoreId();
 
+    /**
+     * @param keyStoreName The DynamoDB table name that backs this Key Store.
+     */
     Builder keyStoreName(String keyStoreName);
 
+    /**
+     * @return The DynamoDB table name that backs this Key Store.
+     */
     String keyStoreName();
 
+    /**
+     * @param logicalKeyStoreName The logical name for this Key Store, which is cryptographically bound to the keys it holds.
+     */
     Builder logicalKeyStoreName(String logicalKeyStoreName);
 
+    /**
+     * @return The logical name for this Key Store, which is cryptographically bound to the keys it holds.
+     */
     String logicalKeyStoreName();
 
+    /**
+     * @param grantTokens The AWS KMS grant tokens that are used when this Key Store calls to AWS KMS.
+     */
     Builder grantTokens(List<String> grantTokens);
 
+    /**
+     * @return The AWS KMS grant tokens that are used when this Key Store calls to AWS KMS.
+     */
     List<String> grantTokens();
 
+    /**
+     * @param kmsConfiguration The AWS KMS Key that protects this Key Store.
+     */
     Builder kmsConfiguration(KMSConfiguration kmsConfiguration);
 
+    /**
+     * @return The AWS KMS Key that protects this Key Store.
+     */
     KMSConfiguration kmsConfiguration();
 
     GetKeyStoreInfoOutput build();

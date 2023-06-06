@@ -5,13 +5,22 @@ package software.amazon.cryptography.keystore.model;
 
 import java.util.Objects;
 
+/**
+ * Inputs for resolving a multiple ACTIVE versions state.
+ */
 public class BranchKeyStatusResolutionInput {
+  /**
+   * The identifier for the Branch Key which has more than one ACTIVE version
+   */
   private final String branchKeyIdentifier;
 
   protected BranchKeyStatusResolutionInput(BuilderImpl builder) {
     this.branchKeyIdentifier = builder.branchKeyIdentifier();
   }
 
+  /**
+   * @return The identifier for the Branch Key which has more than one ACTIVE version
+   */
   public String branchKeyIdentifier() {
     return this.branchKeyIdentifier;
   }
@@ -25,8 +34,14 @@ public class BranchKeyStatusResolutionInput {
   }
 
   public interface Builder {
+    /**
+     * @param branchKeyIdentifier The identifier for the Branch Key which has more than one ACTIVE version
+     */
     Builder branchKeyIdentifier(String branchKeyIdentifier);
 
+    /**
+     * @return The identifier for the Branch Key which has more than one ACTIVE version
+     */
     String branchKeyIdentifier();
 
     BranchKeyStatusResolutionInput build();

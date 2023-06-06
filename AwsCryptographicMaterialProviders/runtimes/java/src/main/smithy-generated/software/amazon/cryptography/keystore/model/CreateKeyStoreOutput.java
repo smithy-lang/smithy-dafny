@@ -5,13 +5,22 @@ package software.amazon.cryptography.keystore.model;
 
 import java.util.Objects;
 
+/**
+ * Outputs for Key Store DynamoDB table creation.
+ */
 public class CreateKeyStoreOutput {
+  /**
+   * The ARN of the DynamoDB table that backs this Key Store.
+   */
   private final String tableArn;
 
   protected CreateKeyStoreOutput(BuilderImpl builder) {
     this.tableArn = builder.tableArn();
   }
 
+  /**
+   * @return The ARN of the DynamoDB table that backs this Key Store.
+   */
   public String tableArn() {
     return this.tableArn;
   }
@@ -25,8 +34,14 @@ public class CreateKeyStoreOutput {
   }
 
   public interface Builder {
+    /**
+     * @param tableArn The ARN of the DynamoDB table that backs this Key Store.
+     */
     Builder tableArn(String tableArn);
 
+    /**
+     * @return The ARN of the DynamoDB table that backs this Key Store.
+     */
     String tableArn();
 
     CreateKeyStoreOutput build();

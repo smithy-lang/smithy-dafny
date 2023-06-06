@@ -41,8 +41,8 @@ public final class CryptographicMaterialsManager implements ICryptographicMateri
     return this._impl;
   }
 
-  public DecryptMaterialsOutput DecryptMaterials(DecryptMaterialsInput nativeValue) {
-    software.amazon.cryptography.materialproviders.internaldafny.types.DecryptMaterialsInput dafnyValue = ToDafny.DecryptMaterialsInput(nativeValue);
+  public DecryptMaterialsOutput DecryptMaterials(DecryptMaterialsInput input) {
+    software.amazon.cryptography.materialproviders.internaldafny.types.DecryptMaterialsInput dafnyValue = ToDafny.DecryptMaterialsInput(input);
     Result<software.amazon.cryptography.materialproviders.internaldafny.types.DecryptMaterialsOutput, Error> result = this._impl.DecryptMaterials(dafnyValue);
     if (result.is_Failure()) {
       throw ToNative.Error(result.dtor_error());
@@ -50,9 +50,8 @@ public final class CryptographicMaterialsManager implements ICryptographicMateri
     return ToNative.DecryptMaterialsOutput(result.dtor_value());
   }
 
-  public GetEncryptionMaterialsOutput GetEncryptionMaterials(
-      GetEncryptionMaterialsInput nativeValue) {
-    software.amazon.cryptography.materialproviders.internaldafny.types.GetEncryptionMaterialsInput dafnyValue = ToDafny.GetEncryptionMaterialsInput(nativeValue);
+  public GetEncryptionMaterialsOutput GetEncryptionMaterials(GetEncryptionMaterialsInput input) {
+    software.amazon.cryptography.materialproviders.internaldafny.types.GetEncryptionMaterialsInput dafnyValue = ToDafny.GetEncryptionMaterialsInput(input);
     Result<software.amazon.cryptography.materialproviders.internaldafny.types.GetEncryptionMaterialsOutput, Error> result = this._impl.GetEncryptionMaterials(dafnyValue);
     if (result.is_Failure()) {
       throw ToNative.Error(result.dtor_error());

@@ -3,6 +3,7 @@ namespace aws.cryptography.materialProviders
 use aws.polymorph#reference
 use aws.polymorph#positional
 use aws.polymorph#extendable
+use aws.polymorph#javadoc
 
 use com.amazonaws.kms#TrentService
 
@@ -44,13 +45,16 @@ resource ClientSupplier {
 @reference(resource: ClientSupplier)
 structure ClientSupplierReference {}
 
+@javadoc("Returns an AWS KMS Client.")
 operation GetClient {
   input: GetClientInput,
   output: GetClientOutput,
 }
 
+@javadoc("Inputs for getting a AWS KMS Client.")
 structure GetClientInput {
   @required
+  @javadoc("The region the client should be created in.")
   region: Region,
 }
 

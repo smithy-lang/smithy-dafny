@@ -6,9 +6,18 @@ package software.amazon.cryptography.materialproviders.model;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * A filter which defines what AWS partition and AWS accounts a KMS Key may be in for a Keyring to be allowed to attempt to decrypt it.
+ */
 public class DiscoveryFilter {
+  /**
+   * A list of allowed AWS account IDs.
+   */
   private final List<String> accountIds;
 
+  /**
+   * The AWS partition which is allowed.
+   */
   private final String partition;
 
   protected DiscoveryFilter(BuilderImpl builder) {
@@ -16,10 +25,16 @@ public class DiscoveryFilter {
     this.partition = builder.partition();
   }
 
+  /**
+   * @return A list of allowed AWS account IDs.
+   */
   public List<String> accountIds() {
     return this.accountIds;
   }
 
+  /**
+   * @return The AWS partition which is allowed.
+   */
   public String partition() {
     return this.partition;
   }
@@ -33,12 +48,24 @@ public class DiscoveryFilter {
   }
 
   public interface Builder {
+    /**
+     * @param accountIds A list of allowed AWS account IDs.
+     */
     Builder accountIds(List<String> accountIds);
 
+    /**
+     * @return A list of allowed AWS account IDs.
+     */
     List<String> accountIds();
 
+    /**
+     * @param partition The AWS partition which is allowed.
+     */
     Builder partition(String partition);
 
+    /**
+     * @return The AWS partition which is allowed.
+     */
     String partition();
 
     DiscoveryFilter build();

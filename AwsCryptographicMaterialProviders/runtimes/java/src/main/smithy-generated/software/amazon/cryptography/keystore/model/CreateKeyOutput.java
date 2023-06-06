@@ -5,13 +5,22 @@ package software.amazon.cryptography.keystore.model;
 
 import java.util.Objects;
 
+/**
+ * Outputs for Branch Key creation.
+ */
 public class CreateKeyOutput {
+  /**
+   * A identifier for the created Branch Key.
+   */
   private final String branchKeyIdentifier;
 
   protected CreateKeyOutput(BuilderImpl builder) {
     this.branchKeyIdentifier = builder.branchKeyIdentifier();
   }
 
+  /**
+   * @return A identifier for the created Branch Key.
+   */
   public String branchKeyIdentifier() {
     return this.branchKeyIdentifier;
   }
@@ -25,8 +34,14 @@ public class CreateKeyOutput {
   }
 
   public interface Builder {
+    /**
+     * @param branchKeyIdentifier A identifier for the created Branch Key.
+     */
     Builder branchKeyIdentifier(String branchKeyIdentifier);
 
+    /**
+     * @return A identifier for the created Branch Key.
+     */
     String branchKeyIdentifier();
 
     CreateKeyOutput build();
