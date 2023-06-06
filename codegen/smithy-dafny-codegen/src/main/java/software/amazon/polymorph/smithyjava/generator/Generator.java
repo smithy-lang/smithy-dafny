@@ -28,7 +28,7 @@ public abstract class Generator {
     protected static final Modifier[] PRIVATE_FINAL = new Modifier[]{Modifier.PRIVATE, Modifier.FINAL};
     public static final String INTERFACE_VAR = "impl";
     public static final String INTERFACE_FIELD = "_impl";
-    protected static final String NATIVE_VAR = "nativeValue";
+    public static final String NATIVE_VAR = "input";
     protected static final String DAFNY_VAR = "dafnyValue";
     protected static final String RESULT_VAR = "result";
     @SuppressWarnings("unused")
