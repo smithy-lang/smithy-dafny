@@ -22,7 +22,12 @@ A generated Dafny client for AWS SQS targeting compilation to Java, for example,
 will contain Dafny source code, Java source code,
 and a dependency on a Java artifact such as `software.amazon.awssdk:sqs`.
 
-This support is provided as a `dafny-client-codegen` Smithy build plugin with a similar API to the other [Smithy code generators](https://smithy.io/2.0/implementations.html#client-code-generators), configured by entries in a `smithy-build.json` file. See the [`codegen/smithy-dafny-codegen`](codegen/smithy-dafny-codegen) directory for further details and examples.
+This support is provided as a `dafny-client-codegen` Smithy build plugin
+with a similar API to the other 
+[Smithy code generators](https://smithy.io/2.0/implementations.html#client-code-generators),
+configured by entries in a `smithy-build.json` file. 
+See the [`codegen/smithy-dafny-codegen`](codegen/smithy-dafny-codegen) directory for
+further details and examples.
 
 ## Generating multi-language libraries (a.k.a. "polymorphing")
 
@@ -53,6 +58,8 @@ See the [`codegen/smithy-dafny-codegen-cli`](codegen/smithy-dafny-codegen-cli) d
 
 ## Limitations
 
+### Completeness
+
 The code generators in this repository do not yet support all shapes and traits in the core Smithy specification
 or the related AWS traits specifications.
 Even for those that are supported, the implementation does not necessarily follow all of the recommendations
@@ -66,6 +73,18 @@ This can be helpful for proving that the calls you make to a service from Dafny 
 and safely assuming response structures are valid,
 with respect to a particular snapshot of that service's API constraints.
 However, it also means that future service changes that should be backwards-compatible may cause your Dafny code to break.
+
+### Runtime libraries
+
+Like other Smithy-based code generators, these tools will emit references to 
+[common runtime library code](https://smithy.io/2.0/guides/building-codegen/overview-and-concepts.html#runtime-libraries).
+However, at the time of writing this the Dafny ecosystem does not yet have mature package management features
+to support distributing and maintaining such libraries.
+An example of the required runtime functionality is located in
+`TestModels/dafny-dependencies/StandardLibrary`,
+but is not intended to be distributed as a shared library.
+We recommend making a copy of this code in your own projects
+as the copy maintained here may change in the future.
 
 ## Security
 
