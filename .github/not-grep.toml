@@ -3,7 +3,8 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 """
-"**/*.dfy" = """
+# Exclude files from dafny-lang/libraries
+"**/[!libraries]*.dfy" = """
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 """
