@@ -31,9 +31,9 @@ The workflow is similar to generating a [Smithy-based server implementation](htt
 
 1. Write a Smithy model that describes the API for your library,
    which by construction will be language-agnostic just as AWS service APIs are.
-2. Use `smithy-dafny-codegen-cli` to automatically Generate the Dafny API "skeleton" for this model.
+2. Use `smithy-dafny-codegen-cli` to generate the Dafny API "skeleton" for this model.
 3. Write a Dafny implementation of the API skeleton.
-4. Use `smithy-dafny-codegen-cli` to automatically generate the glue code
+4. Use `smithy-dafny-codegen-cli` to generate the glue code
    necessary to adapt the Dafny-idiomatic API to each desired target language's idiomatic API.
 5. Build and publish the library for each desired target language.
 6. Profit!
@@ -65,8 +65,6 @@ that are therefore statically checked by the Dafny verifier.
 This can be helpful for proving that the calls you make to a service from Dafny code are valid,
 with respect to a particular snapshot of that service's API constraints,
 but means that future service changes that should be backwards-compatible may cause your Dafny code to break.
-The mapping of Smithy shapes to Dafny types and specifications will likely be configurable
-in the future to address this.
 
 ## Security
 
