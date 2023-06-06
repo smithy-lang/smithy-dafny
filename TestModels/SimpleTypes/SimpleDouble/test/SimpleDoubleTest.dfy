@@ -5,8 +5,8 @@ include "../src/Index.dfy"
 
 module SimpleDoubleTest {
   import SimpleDouble
-  import Types = SimpleTypesDoubleTypes
-  import Operations = SimpleDoubleOperations
+  import Types = SimpleTypesSmithyDoubleTypes
+  import Operations = SimpleSmithyDoubleOperations
   import opened Wrappers
   import opened StandardLibrary.UInt
   method {:test} GetDouble()

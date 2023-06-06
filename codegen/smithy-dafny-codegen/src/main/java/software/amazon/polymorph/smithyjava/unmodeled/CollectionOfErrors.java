@@ -6,16 +6,18 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 
+import java.util.Collections;
 import java.util.List;
 
 import software.amazon.polymorph.smithyjava.BuilderMemberSpec;
 import software.amazon.polymorph.smithyjava.BuilderSpecs;
+import software.amazon.polymorph.smithyjava.modeled.ModeledStructure;
 
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PROTECTED;
 import static javax.lang.model.element.Modifier.PUBLIC;
-import static software.amazon.polymorph.smithyjava.unmodeled.NativeError.NATIVE_ERROR;
+import static software.amazon.polymorph.smithyjava.BuilderMemberSpec.COLLECTION_ARGS;
 
 public class CollectionOfErrors {
     public final static String COLLECTION_ERROR = "CollectionOfErrors";
@@ -26,31 +28,31 @@ public class CollectionOfErrors {
 
     public static JavaFile javaFile(String packageName) {
         ClassName className = nativeClassName(packageName);
-        ClassName superName = NativeError.nativeClassName(packageName);
-        List<BuilderMemberSpec> collectionArgs = getArgs(packageName);
+        ClassName superName = ClassName.get(RuntimeException.class);
+        List<BuilderMemberSpec> localOnlyFields = ErrorHelpers.removeThrowableArgs(COLLECTION_ARGS);
         BuilderSpecs builderSpecs = new BuilderSpecs(
-                className, superName, collectionArgs, BuilderMemberSpec.THROWABLE_ARGS);
+                className, null, COLLECTION_ARGS, Collections.emptyList());
+        final boolean overrideSuperFalse = false;
         TypeSpec.Builder spec = TypeSpec
                 .classBuilder(className)
                 .addModifiers(PUBLIC)
-                .superclass(superName)
+                .superclass(superName);
+        localOnlyFields.forEach(field -> {
+            // Add local fields
+            spec.addField(field.toFieldSpec(PRIVATE, FINAL));
+        });
+        spec.addMethod(ErrorHelpers.messageFromBuilder(builderSpecs));
+        spec.addMethods(ErrorHelpers.throwableGetters());
+        localOnlyFields.forEach(field -> spec.addMethod(ModeledStructure.getterMethod(field)));
+        spec
                 .addType(builderSpecs.builderInterface())
                 .addType(builderSpecs.builderImpl(
-                        true,
-                        builderSpecs.implModelConstructor(),
-                        builderSpecs.implBuildMethod(true))
+                        overrideSuperFalse,
+                        builderImplConstructor(packageName),
+                        builderSpecs.implBuildMethod(overrideSuperFalse))
                 );
-        collectionArgs.forEach(field -> {
-            spec.addField(field.type, field.name, PRIVATE, FINAL);
-            spec.addMethod(MethodSpec
-                    .methodBuilder(field.name)
-                    .returns(field.type)
-                    .addModifiers(PUBLIC)
-                    .addStatement("return this.$L", field.name)
-                    .build());
-        });
-        spec.addMethod(constructor(builderSpecs, packageName))
-                .addMethod(builderSpecs.toBuilderMethod(true))
+        spec.addMethod(constructor(builderSpecs))
+                .addMethod(builderSpecs.toBuilderMethod(overrideSuperFalse))
                 .addMethod(builderSpecs.builderMethod());
 
         return JavaFile.builder(packageName, spec.build())
@@ -58,28 +60,38 @@ public class CollectionOfErrors {
                 .build();
     }
 
-    private static List<BuilderMemberSpec> getArgs(String packageName) {
-        return BuilderMemberSpec.collectionOfErrorsBuilderMemberSpecs(packageName);
-    }
-
-    public static ParameterizedTypeName getArg(String packageName) {
+    public static ParameterizedTypeName exceptionList() {
         return ParameterizedTypeName.get(
                 ClassName.get(List.class),
-                ClassName.get(packageName, NATIVE_ERROR)
+                ClassName.get(RuntimeException.class)
         );
     }
 
-    private static MethodSpec constructor(BuilderSpecs builderSpecs, String packageName) {
+    /** The Class's constructor.*/
+    static MethodSpec constructor(BuilderSpecs builderSpecs) {
         MethodSpec.Builder method =  MethodSpec
                 .constructorBuilder()
                 .addModifiers(PROTECTED)
                 .addParameter(builderSpecs.builderImplName(), BuilderSpecs.BUILDER_VAR)
-                .addStatement("super($L)", BuilderSpecs.BUILDER_VAR);
-        getArgs(packageName).forEach(field ->
-                method.addStatement(
-                        "this.$L = $L.$L()",
-                        field.name, BuilderSpecs.BUILDER_VAR, field.name
-                ));
+                .addStatement(
+                        "super(messageFromBuilder($L), $L.cause())",
+                        BuilderSpecs.BUILDER_VAR, BuilderSpecs.BUILDER_VAR
+                )
+                .addStatement("this.list = builder.list()");
         return method.build();
+    }
+
+    /**
+     * @return Constructor that that uses {@code RuntimeException}'s getter
+     * methods to initialize builder.
+     */
+    static MethodSpec builderImplConstructor(String packageName) {
+        return MethodSpec.constructorBuilder()
+                .addModifiers(PROTECTED)
+                .addParameter(nativeClassName(packageName), "model")
+                .addStatement("this.cause = model.getCause()")
+                .addStatement("this.message = model.getMessage()")
+                .addStatement("this.list = model.list()")
+                .build();
     }
 }

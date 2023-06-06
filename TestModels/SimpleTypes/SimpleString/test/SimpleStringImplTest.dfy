@@ -2,7 +2,7 @@ include "../src/Index.dfy"
 
 module  SimpleStringImplTest {
     import SimpleString
-    import opened SimpleTypesStringTypes
+    import opened SimpleTypesSmithyStringTypes
     import opened Wrappers
     method{:test} GetString(){
         var client :- expect SimpleString.SimpleString();

@@ -1,6 +1,6 @@
 include "SimpleLongImpl.dfy"
 
-module {:extern "Dafny.Simple.Types.Long" } SimpleLong refines AbstractSimpleTypesLongService {
+module {:extern "simple.types.smithylong.internaldafny" } SimpleLong refines AbstractSimpleTypesSmithyLongService {
     import Operations = SimpleLongImpl
 
  function method DefaultSimpleLongConfig(): SimpleLongConfig {

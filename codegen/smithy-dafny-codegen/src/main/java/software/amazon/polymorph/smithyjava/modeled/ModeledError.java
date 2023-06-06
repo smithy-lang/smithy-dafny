@@ -5,6 +5,7 @@ import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeSpec;
 
+import java.util.Collections;
 import java.util.List;
 
 import javax.lang.model.element.Modifier;
@@ -13,49 +14,56 @@ import software.amazon.polymorph.smithyjava.BuildMethod;
 import software.amazon.polymorph.smithyjava.BuilderMemberSpec;
 import software.amazon.polymorph.smithyjava.BuilderSpecs;
 import software.amazon.polymorph.smithyjava.generator.library.JavaLibrary;
-import software.amazon.polymorph.smithyjava.unmodeled.NativeError;
+import software.amazon.polymorph.smithyjava.unmodeled.ErrorHelpers;
+import software.amazon.polymorph.traits.JavaDocTrait;
 import software.amazon.smithy.model.shapes.StructureShape;
 
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PROTECTED;
+import static software.amazon.polymorph.smithyjava.modeled.ModeledStructure.getterMethod;
 
 public class ModeledError {
 
     public static JavaFile javaFile(String packageName, StructureShape shape, JavaLibrary subject) {
         ClassName className = ClassName.get(packageName, shape.getId().getName());
-        ClassName superName = NativeError.nativeClassName(packageName);
+        ClassName superName = ClassName.get(RuntimeException.class);
+        // Fields in the Smithy Model
         List<BuilderMemberSpec> modelFields = BuilderSpecs.shapeToArgs(shape, subject);
+        // Union of Fields in (Smithy Model) + (THROWABLE_ARGS)
+        List<BuilderMemberSpec> allFields = ErrorHelpers.prependThrowableArgs(modelFields);
+        // Fields in (Smithy Model) NOT IN (THROWABLE_ARGS)
+        List<BuilderMemberSpec> localOnlyFields = ErrorHelpers.removeThrowableArgs(modelFields);
+        final boolean overrideSuperFalse = false;
         BuilderSpecs builderSpecs = new BuilderSpecs(
-                className, superName, modelFields, BuilderMemberSpec.THROWABLE_ARGS);
+                className, null, allFields, Collections.emptyList());
         TypeSpec.Builder spec = TypeSpec
                 .classBuilder(className)
                 .addModifiers(Modifier.PUBLIC)
-                .superclass(superName)
+                .superclass(superName);
+        shape.getTrait(JavaDocTrait.class)
+          .map(docTrait -> spec.addJavadoc(docTrait.getValue()));
+        localOnlyFields.forEach(field -> {
+            // Add local fields
+            spec.addField(field.toFieldSpec(PRIVATE, FINAL));});
+        spec.addMethod(ErrorHelpers.messageFromBuilder(builderSpecs));
+        // Add getter methods
+        spec.addMethods(ErrorHelpers.throwableGetters());
+        localOnlyFields.forEach(field -> spec.addMethod(getterMethod(field)));
+        spec
                 .addType(builderSpecs.builderInterface())
                 .addType(builderSpecs.builderImpl(
-                        true,
+                        overrideSuperFalse,
                         builderSpecs.implModelConstructor(),
                         BuildMethod.implBuildMethod(
-                                true,
+                                overrideSuperFalse,
                                 shape,
                                 subject,
                                 packageName
                         )));
-        List<BuilderMemberSpec> localFields = builderSpecs.getLocalFields();
-        localFields.forEach(field -> {
-            // Add local fields
-            spec.addField(field.type, field.name, PRIVATE, FINAL);
-            // Add getter methods
-            spec.addMethod(MethodSpec
-                    .methodBuilder(field.name)
-                    .addModifiers(Modifier.PUBLIC)
-                    .returns(field.type)
-                    .addStatement("return this.$L", field.name)
-                    .build());
-        });
-        spec.addMethod(constructor(builderSpecs, localFields))
-                .addMethod(builderSpecs.toBuilderMethod(true))
+
+        spec.addMethod(constructor(builderSpecs, localOnlyFields))
+                .addMethod(builderSpecs.toBuilderMethod(overrideSuperFalse))
                 .addMethod(builderSpecs.builderMethod());
 
         return JavaFile.builder(packageName, spec.build())
@@ -63,13 +71,16 @@ public class ModeledError {
                 .build();
     }
 
-    private static MethodSpec constructor(BuilderSpecs builderSpecs, List<BuilderMemberSpec> localFields) {
+    private static MethodSpec constructor(BuilderSpecs builderSpecs, List<BuilderMemberSpec> localOnlyFields) {
         MethodSpec.Builder method =  MethodSpec
                 .constructorBuilder()
                 .addModifiers(PROTECTED)
                 .addParameter(builderSpecs.builderImplName(), BuilderSpecs.BUILDER_VAR)
-                .addStatement("super($L)", BuilderSpecs.BUILDER_VAR);
-        localFields.forEach(field -> method.addStatement(
+                .addStatement(
+                        "super(messageFromBuilder($L), $L.cause())",
+                        BuilderSpecs.BUILDER_VAR, BuilderSpecs.BUILDER_VAR
+                );
+        localOnlyFields.forEach(field -> method.addStatement(
                 "this.$L = $L.$L()",
                 field.name, BuilderSpecs.BUILDER_VAR, field.name
         ));

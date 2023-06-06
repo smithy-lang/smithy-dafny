@@ -68,7 +68,7 @@ module ExtendableResource {
       var nestedError: Types.Error := Types.SimpleExtendableResourcesException(
         message := "Hard Coded Modeled Exception in Collection"
       );
-      return Failure(Types.CollectionOfErrors([nestedError]));
+      return Failure(Types.CollectionOfErrors([nestedError], message := "Something"));
     }
 
     predicate GetExtendableResourceDataEnsuresPublicly(

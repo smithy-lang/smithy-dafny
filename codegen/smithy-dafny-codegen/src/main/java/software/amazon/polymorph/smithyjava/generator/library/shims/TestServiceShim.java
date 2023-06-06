@@ -58,7 +58,7 @@ public class TestServiceShim extends ServiceShim {
         // Add public static method for creating a builder
         spec.addMethod(builderSpecs.builderMethod());
 
-        spec.addMethods(getOperationsForTarget().stream().sequential()
+        spec.addMethods(getOperationsForTarget().stream()
                 .map(shape -> Operation.AsDafny.operation(shape, this.subject, this))
                 .collect(Collectors.toList()));
         return spec.build();

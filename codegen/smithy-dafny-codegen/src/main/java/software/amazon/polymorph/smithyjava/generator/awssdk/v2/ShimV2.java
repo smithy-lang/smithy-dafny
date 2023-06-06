@@ -74,7 +74,7 @@ public class ShimV2 extends Generator {
                 .addMethod(region())
                 .addMethods(
                         subject.serviceShape.getAllOperations()
-                                .stream()
+                                .stream().sorted()
                                 .map(this::operation)
                                 .filter(Optional::isPresent)
                                 .map(Optional::get)
@@ -152,7 +152,7 @@ public class ShimV2 extends Generator {
                             DAFNY_RESULT_CLASS_NAME);
         }
 
-        operationShape.getErrors().forEach(shapeId -> {
+        operationShape.getErrors().stream().sorted().forEach(shapeId -> {
             TypeName typeForShape = subject.nativeNameResolver.typeForShape(shapeId);
 
             // InvalidEndpointException was removed in SDK V2

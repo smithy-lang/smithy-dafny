@@ -40,9 +40,27 @@ verify:
 		-vcsCores:$(CORES) \
 		-compile:0 \
 		-definiteAssignment:3 \
+		-quantifierSyntax:3 \
+		-unicodeChar:0 \
+		-functionSyntax:3 \
 		-verificationLogger:csv \
 		-timeLimit:300 \
 		-trace \
+		`find . -name '*.dfy'`
+
+format:
+	dafny format \
+		--function-syntax 3 \
+		--quantifier-syntax 3 \
+		--unicode-char false \
+		`find . -name '*.dfy'`
+
+format-check:
+	dafny format \
+		--check \
+		--function-syntax 3 \
+		--quantifier-syntax 3 \
+		--unicode-char false \
 		`find . -name '*.dfy'`
 
 dafny-reportgenerator:
@@ -74,6 +92,9 @@ transpile_implementation:
 		-spillTargetCode:3 \
 		-compile:0 \
 		-optimizeErasableDatatypeWrapper:0 \
+		-quantifierSyntax:3 \
+		-unicodeChar:0 \
+		-functionSyntax:3 \
 		-useRuntimeLib \
 		-out $(OUT) \
 		./src/Index.dfy \
@@ -88,6 +109,9 @@ transpile_test:
 		-runAllTests:1 \
 		-compile:0 \
 		-optimizeErasableDatatypeWrapper:0 \
+		-quantifierSyntax:3 \
+		-unicodeChar:0 \
+		-functionSyntax:3 \
 		-useRuntimeLib \
 		-out $(OUT) \
 		`find ./test -name '*.dfy'` \
@@ -252,10 +276,12 @@ mvn_local_deploy:
 test_java:
 	gradle -p runtimes/java runTests
 
-clean:
+_clean:
 	rm -f $(LIBRARY_ROOT)/Model/*Types.dfy $(LIBRARY_ROOT)/Model/*TypesWrapped.dfy
 	rm -f $(LIBRARY_ROOT)/runtimes/net/ImplementationFromDafny.cs
 	rm -f $(LIBRARY_ROOT)/runtimes/net/tests/TestFromDafny.cs
 	rm -rf $(LIBRARY_ROOT)/TestResults
 	rm -rf $(LIBRARY_ROOT)/runtimes/net/Generated $(LIBRARY_ROOT)/runtimes/net/bin $(LIBRARY_ROOT)/runtimes/net/obj
 	rm -rf $(LIBRARY_ROOT)/runtimes/net/tests/bin $(LIBRARY_ROOT)/runtimes/net/tests/obj
+
+clean: _clean

@@ -1,6 +1,6 @@
-include "../Model/SimpleTypesLongTypesWrapped.dfy"
+include "../Model/SimpleTypesSmithyLongTypesWrapped.dfy"
 
-module {:extern "Dafny.Simple.Types.Long.Wrapped"} WrappedSimpleTypesLongService refines WrappedAbstractSimpleTypesLongService {
+module {:extern "simple.types.smithylong.internaldafny.wrapped"} WrappedSimpleTypesLongService refines WrappedAbstractSimpleTypesSmithyLongService {
     import WrappedService = SimpleLong
     function method WrappedDefaultSimpleLongConfig(): SimpleLongConfig {
         SimpleLongConfig

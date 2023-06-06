@@ -1,4 +1,4 @@
-namespace simple.types.double
+namespace simple.types.smithyDouble
 
 @aws.polymorph#localService(
   sdkId: "SimpleDouble",

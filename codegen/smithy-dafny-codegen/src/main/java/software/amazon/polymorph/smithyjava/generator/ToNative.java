@@ -14,6 +14,7 @@ import javax.lang.model.element.Modifier;
 import software.amazon.polymorph.smithyjava.BuilderSpecs;
 import software.amazon.polymorph.smithyjava.MethodReference;
 import software.amazon.polymorph.smithyjava.NamespaceHelper;
+import software.amazon.polymorph.smithyjava.generator.CodegenSubject.AwsSdkVersion;
 import software.amazon.polymorph.utils.AwsSdkNameResolverHelpers;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.polymorph.smithyjava.generator.awssdk.v1.ToNativeAwsV1;
@@ -46,8 +47,8 @@ public abstract class ToNative extends Generator {
      */
     protected static final Map<ShapeType, MethodReference> AGGREGATE_CONVERSION_METHOD_FROM_SHAPE_TYPE;
     protected static final Map<ShapeType, MethodReference> SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE;
-    protected static final ClassName COMMON_TO_NATIVE_SIMPLE = ClassName.get("software.amazon.dafny.conversion", "ToNative", "Simple");
-    protected static final ClassName COMMON_TO_NATIVE_AGGREGATE = ClassName.get("software.amazon.dafny.conversion", "ToNative", "Aggregate");
+    protected static final ClassName COMMON_TO_NATIVE_SIMPLE = ClassName.get("software.amazon.smithy.dafny.conversion", "ToNative", "Simple");
+    protected static final ClassName COMMON_TO_NATIVE_AGGREGATE = ClassName.get("software.amazon.smithy.dafny.conversion", "ToNative", "Aggregate");
 
     static {
         AGGREGATE_CONVERSION_METHOD_FROM_SHAPE_TYPE = Map.ofEntries(
@@ -203,7 +204,7 @@ public abstract class ToNative extends Generator {
                     "Unnamed enums not supported. ShapeId: %s".formatted(shapeId));
         }
 
-        enumTrait.getValues().stream().sequential()
+        enumTrait.getValues().stream()
                 .map(EnumDefinition::getName)
                 .map(maybeName -> maybeName.orElseThrow(
                         () -> new IllegalArgumentException(
@@ -298,28 +299,30 @@ public abstract class ToNative extends Generator {
         return nonSimpleConversionMethodReference(shape);
     }
 
-    @SuppressWarnings("DuplicatedCode")
     @Nonnull
     protected MethodReference nonSimpleConversionMethodReference(Shape targetShape) {
         ShapeId targetId = targetShape.getId();
         final String methodName = capitalize(targetId.getName());
-        // if in namespace, reference converter from this ToNative class
-        if (subject.nativeNameResolver.isInServiceNameSpace(targetId)) {
-            return new MethodReference(thisClassName, methodName);
-        }
-        // if in AWS SDK namespace, reference converter from AWS SDK ToNative class
+        final ClassName toNativeClassName = ToNativeClassNameForShape(targetShape, subject.sdkVersion);
+        return new MethodReference(toNativeClassName, methodName);
+    }
+
+    public static ClassName ToNativeClassNameForShape(
+      final Shape targetShape,
+      final AwsSdkVersion sdkVersion
+    ) {
+        ShapeId targetId = targetShape.getId();
+        // if in AWS SDK namespace, reference ToNative from AWS SDK
         if (AwsSdkNameResolverHelpers.isInAwsSdkNamespace(targetId)) {
-            return switch (subject.sdkVersion) {
-                case V1 -> new MethodReference(ToNativeAwsV1.className(targetId), methodName);
-                case V2 -> new MethodReference(ToNativeAwsV2.className(targetId), methodName);
+            return switch (sdkVersion) {
+                case V1 -> ToNativeAwsV1.className(targetId);
+                case V2 -> ToNativeAwsV2.className(targetId);
             };
         }
-        // Otherwise, this target must be in another namespace,
-        // reference converter from that namespace's ToNative class
-        ClassName otherNamespaceToDafny = ClassName.get(
-                NamespaceHelper.standardize(targetId.getNamespace()),
-                TO_NATIVE
+        // Otherwise, must be one of our Local Service's
+        return ClassName.get(
+          NamespaceHelper.standardize(targetId.getNamespace()),
+          TO_NATIVE
         );
-        return new MethodReference(otherNamespaceToDafny, methodName);
     }
 }

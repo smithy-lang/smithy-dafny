@@ -10,3 +10,8 @@ NAMESPACE=simple.errors
 # This project has no dependencies 
 # DEPENDENT-MODELS:= 
 # LIBRARIES :=
+
+clean: _clean
+	rm -rf $(LIBRARY_ROOT)/runtimes/java/src/main/dafny-generated
+	rm -rf $(LIBRARY_ROOT)/runtimes/java/src/main/smithy-generated
+	rm -rf $(LIBRARY_ROOT)/runtimes/java/src/test/dafny-generated

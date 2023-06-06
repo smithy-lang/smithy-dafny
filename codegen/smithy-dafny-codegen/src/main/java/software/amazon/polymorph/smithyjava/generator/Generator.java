@@ -28,7 +28,7 @@ public abstract class Generator {
     protected static final Modifier[] PRIVATE_FINAL = new Modifier[]{Modifier.PRIVATE, Modifier.FINAL};
     public static final String INTERFACE_VAR = "impl";
     public static final String INTERFACE_FIELD = "_impl";
-    protected static final String NATIVE_VAR = "nativeValue";
+    public static final String NATIVE_VAR = "input";
     protected static final String DAFNY_VAR = "dafnyValue";
     protected static final String RESULT_VAR = "result";
     @SuppressWarnings("unused")
@@ -51,7 +51,12 @@ public abstract class Generator {
                     .collect(Collectors.toList());
             pathPieces.add(javaFile.typeSpec.name + ".java");
             final Path path = Path.of(Joiner.on('/').join(pathPieces));
-            final TokenTree tokenTree = TokenTree.of(javaFile.toString());
+            final TokenTree tokenTree = TokenTree.of(
+                    // Indent
+                    // javaFile.toBuilder().indent("    ").build().toString()
+                    // Don't Indent to reduce git diff:
+                    javaFile.toString()
+            );
             rtn.put(path, tokenTree);
         }
         return rtn;
@@ -60,7 +65,7 @@ public abstract class Generator {
     public abstract Set<JavaFile> javaFiles();
 
     protected List<OperationShape> getOperationsForTarget() {
-        return subject.serviceShape.getOperations().stream().sequential()
+        return subject.serviceShape.getOperations().stream().sorted()
                 .map(shapeId -> subject.model.expectShape(shapeId, OperationShape.class))
                 .collect(Collectors.toList());
     }

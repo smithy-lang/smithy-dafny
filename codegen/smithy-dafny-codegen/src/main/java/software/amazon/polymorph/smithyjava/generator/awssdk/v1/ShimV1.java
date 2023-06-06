@@ -74,7 +74,7 @@ public class ShimV1 extends Generator {
                 .addMethod(impl())
                 .addMethods(
                         subject.serviceShape.getAllOperations()
-                                .stream()
+                                .stream().sorted()
                                 .map(this::operation)
                                 .filter(Optional::isPresent)
                                 .map(Optional::get)
@@ -152,7 +152,7 @@ public class ShimV1 extends Generator {
                             DAFNY_RESULT_CLASS_NAME);
         }
 
-        operationShape.getErrors().forEach(shapeId ->
+        operationShape.getErrors().stream().sorted().forEach(shapeId ->
                 builder
                         .nextControlFlow("catch ($T ex)", subject.nativeNameResolver.typeForShape(shapeId))
                         .addStatement("return $T.create_Failure(ToDafny.Error(ex))",

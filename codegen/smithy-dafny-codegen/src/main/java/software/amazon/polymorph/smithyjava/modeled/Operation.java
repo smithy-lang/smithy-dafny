@@ -5,6 +5,7 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
 
+import software.amazon.polymorph.smithyjava.MethodReference;
 import software.amazon.polymorph.smithyjava.MethodSignature;
 import software.amazon.polymorph.smithyjava.generator.CodegenSubject;
 import software.amazon.polymorph.smithyjava.generator.Generator;
@@ -12,6 +13,7 @@ import software.amazon.polymorph.smithyjava.generator.library.JavaLibrary;
 import software.amazon.polymorph.smithyjava.generator.library.ShimLibrary;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 
+import software.amazon.polymorph.smithyjava.nameresolver.Native;
 import software.amazon.polymorph.utils.AwsSdkNameResolverHelpers;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.polymorph.utils.ModelUtils.ResolvedShapeId;
@@ -41,7 +43,7 @@ public class Operation {
         // TODO: AWS-SDK generators should use this method
         public static MethodSpec operation(
                 final OperationShape operationShape,
-                CodegenSubject subject,
+                JavaLibrary subject,
                 ShimLibrary shimLibrary
         ) {
             final MethodSignature signature = methodSignature(operationShape, false, subject);
@@ -50,7 +52,7 @@ public class Operation {
             MethodSpec.Builder method = signature.method();
             final String operationName = operationShape.toShapeId().getName();
             // Convert Input
-            method.addStatement(declareNativeInputAndCovert(inputResolved, subject, shimLibrary));
+            method.addStatement(declareNativeInputAndCovert(inputResolved, subject));
             // Try native implementation
             method.beginControlFlow("try");
             if (outputResolved.resolvedId().equals(SMITHY_API_UNIT)) {
@@ -61,25 +63,18 @@ public class Operation {
                                 DAFNY_RESULT_CLASS_NAME, DAFNY_TUPLE0_CLASS_NAME);
             } else {
                 // operation is not void
+                TypeName nativeOutputType = preferNativeInterface(outputResolved, subject);
                 method
-                        .addStatement(declareNativeOutputAndInvoke(outputResolved, operationName, subject))
-                        .addStatement(declareDafnyOutputAndConvert(outputResolved, subject, shimLibrary))
+                        .addStatement(declareNativeOutputAndInvoke(operationName, nativeOutputType))
+                        .addStatement(declareDafnyOutputAndConvert(outputResolved, subject))
                         .addStatement("return $T.create_Success($L)",
                                 DAFNY_RESULT_CLASS_NAME, DAFNY_OUTPUT);
             }
             // catch Errors in this Namespace
             method
                     .nextControlFlow("catch ($T ex)",
-                            subject.nativeNameResolver.baseErrorForService())
+                            ClassName.get(RuntimeException.class))
                     .addStatement("return $T.create_Failure($T.Error(ex))",
-                            DAFNY_RESULT_CLASS_NAME, shimLibrary.toDafnyClassName);
-            // catch any Exception and cast them as an Opaque Error
-            ClassName opaqueError = subject.nativeNameResolver.opaqueErrorForService();
-            method
-                    .nextControlFlow("catch ($T ex)", Exception.class)
-                    .addStatement("$T error = $T.builder().obj(ex).cause(ex).build()",
-                            opaqueError, opaqueError)
-                    .addStatement("return $T.create_Failure($T.Error(error))",
                             DAFNY_RESULT_CLASS_NAME, shimLibrary.toDafnyClassName)
                     .endControlFlow();
             return method.build();
@@ -116,14 +111,7 @@ public class Operation {
                 final ResolvedShapeId resolvedShape,
                 CodegenSubject subject
         ) {
-            Shape shape = subject.model.expectShape(resolvedShape.resolvedId());
-            if (shape.isServiceShape() || shape.isResourceShape()) {
-                // If target is a Service or Resource,
-                // the output type should be an interface OR LocalService.
-                return subject.dafnyNameResolver.classNameForInterface(
-                        subject.model.expectShape(resolvedShape.resolvedId()));
-            }
-            return subject.dafnyNameResolver.typeForShape(resolvedShape.resolvedId());
+            return preferDafnyInterface(resolvedShape, subject);
         }
 
         /** @return TypeName for a method's signature.*/
@@ -131,43 +119,35 @@ public class Operation {
                 final ResolvedShapeId resolvedShape,
                 CodegenSubject subject
         ) {
-            Shape shape = subject.model.expectShape(resolvedShape.resolvedId());
-            final TypeName success;
-            if (shape.isServiceShape() || shape.isResourceShape()) {
-                // If target is a Service or Resource,
-                // the output type should be an interface.
-                success = subject.dafnyNameResolver.classNameForInterface(
-                        subject.model.expectShape(resolvedShape.resolvedId()));
-            } else {
-                success = subject.dafnyNameResolver.typeForShape(resolvedShape.resolvedId());
-            }
+            final TypeName success = preferDafnyInterface(resolvedShape, subject);
             TypeName failure = subject.dafnyNameResolver.abstractClassForError();
             return Dafny.asDafnyResult(success, failure);
         }
 
         /** Declare the Idiomatic-Java input and
          * assign the conversion of the Dafny-Java object to it. */
+        // TODO: this method may not handle AWS-SDK shapes correctly!
         static CodeBlock declareNativeInputAndCovert(
-                final ResolvedShapeId resolvedShape,
-                CodegenSubject subject,
-                ShimLibrary shimLibrary
+          final ResolvedShapeId resolvedShape,
+          JavaLibrary subject
         ) {
-            return CodeBlock.of("$T $L = $T.$L($L)",
-                    subject.nativeNameResolver.typeForShape(resolvedShape.resolvedId()),
-                    NATIVE_INPUT,
-                    shimLibrary.toNativeClassName,
-                    resolvedShape.naiveId().getName(),
-                    DAFNY_INPUT);
+            CodeBlock leftHand = CodeBlock.of("$T $L",
+              subject.nativeNameResolver.typeForShape(resolvedShape.resolvedId()),
+              NATIVE_INPUT);
+            final Shape naiveShape = subject.model.expectShape(resolvedShape.naiveId());
+            final MethodReference toNativeMethod = subject.toNativeLibrary.conversionMethodReference(naiveShape);
+            return CodeBlock.of("$L = $L($L)",
+              leftHand,
+              toNativeMethod.asNormalReference(),
+              DAFNY_INPUT);
         }
 
         /** Declare the Idiomatic-Java output and
          * assign the result of the operation invocation to it. */
         static CodeBlock declareNativeOutputAndInvoke(
-                final ResolvedShapeId resolvedShape,
                 final String operationName,
-                CodegenSubject subject
+                final TypeName nativeOutputType
         ) {
-            final TypeName nativeOutputType = subject.nativeNameResolver.typeForShape(resolvedShape.resolvedId());
             return CodeBlock.of("$T $L = $L",
                     nativeOutputType, NATIVE_OUTPUT,
                     invoke(operationName));
@@ -183,24 +163,51 @@ public class Operation {
          * assign the result of converting the Idiomatic-Java output to it. */
         static CodeBlock declareDafnyOutputAndConvert(
                 final ResolvedShapeId resolvedShape,
-                CodegenSubject subject,
-                ShimLibrary shimLibrary
+                JavaLibrary subject
         ) {
             CodeBlock leftHand = CodeBlock.of("$T $L",
                     subject.dafnyNameResolver.typeForShape(resolvedShape.resolvedId()),
                     DAFNY_OUTPUT);
             if (AwsSdkNameResolverHelpers.isInAwsSdkNamespace(resolvedShape.resolvedId())) {
                 Shape shape = subject.model.expectShape(resolvedShape.resolvedId());
+                // TODO: Does this only work for AWS Services? It looks like that!.
+                // On the bright side, `JavaLibrary.wrapAwsService` throws an error if its not service.
                 return CodeBlock.of("$L = $L",
                         leftHand,
                         JavaLibrary.wrapAwsService(shape, CodeBlock.of(NATIVE_OUTPUT), CodeBlock.of("null"), subject.sdkVersion));
             }
-            return CodeBlock.of("$L = $T.$L($L)",
+            final Shape naiveShape = subject.model.expectShape(resolvedShape.naiveId());
+            final MethodReference toDafnyMethod = subject.toDafnyLibrary.conversionMethodReference(naiveShape);
+            return CodeBlock.of("$L = $L($L)",
                     leftHand,
-                    shimLibrary.toDafnyClassName,
-                    resolvedShape.naiveId().getName(),
+                    toDafnyMethod.asNormalReference(),
                     NATIVE_OUTPUT);
         }
+    }
+
+    private static TypeName preferDafnyInterface(
+            final ResolvedShapeId resolvedShape,
+            CodegenSubject subject
+    ) {
+        Shape shape = subject.model.expectShape(resolvedShape.resolvedId());
+        if (shape.isServiceShape() || shape.isResourceShape()) {
+            // If target is a Service or Resource,
+            // the output type should be an interface.
+            return subject.dafnyNameResolver.classNameForInterface(shape);
+        }
+        return subject.dafnyNameResolver.typeForShape(resolvedShape.resolvedId());
+    }
+
+    public static TypeName preferNativeInterface(
+            final ResolvedShapeId resolvedShape,
+            CodegenSubject subject) {
+        final Shape shape = subject.model.expectShape(resolvedShape.resolvedId());
+        if (shape.isServiceShape() || shape.isResourceShape()) {
+            // If target is a Service or Resource,
+            // the output type should be an interface.
+            return Native.classNameForInterfaceOrLocalService(shape, subject.sdkVersion);
+        }
+        return subject.nativeNameResolver.typeForShape(resolvedShape.resolvedId());
     }
 
     /** Generate a Method who's input and output are Idiomatic-Java.*/

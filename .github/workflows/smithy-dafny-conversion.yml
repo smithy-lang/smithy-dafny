@@ -1,0 +1,40 @@
+name: smithy-dafny-conversion workflows
+
+on: 
+  pull_request:
+  push:
+    branches:
+      - main-1.x
+
+jobs:
+  gradle-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'corretto'
+          java-version: '8'
+
+      - name: Setup Dafny
+        uses: dafny-lang/setup-dafny-action@v1.6.1
+        with:
+          dafny-version: "4.1.0"
+
+      - name: test
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: test
+          build-root-directory: smithy-dafny-conversion
+
+      - name: javadoc
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: javadoc
+          build-root-directory: smithy-dafny-conversion
+
+      - name: publishToMavenLocal
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: publishToMavenLocal
+          build-root-directory: smithy-dafny-conversion

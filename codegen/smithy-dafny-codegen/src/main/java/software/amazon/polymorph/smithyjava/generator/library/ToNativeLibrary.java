@@ -10,30 +10,35 @@ import com.squareup.javapoet.TypeSpec;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.lang.model.element.Modifier;
 
+import software.amazon.polymorph.smithydafny.DafnyNameResolver;
 import software.amazon.polymorph.smithyjava.MethodReference;
 import software.amazon.polymorph.smithyjava.generator.ToNative;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
+import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.polymorph.smithyjava.nameresolver.Native;
 import software.amazon.polymorph.smithyjava.unmodeled.CollectionOfErrors;
-import software.amazon.polymorph.smithyjava.unmodeled.NativeError;
 import software.amazon.polymorph.smithyjava.unmodeled.OpaqueError;
 import software.amazon.polymorph.traits.ExtendableTrait;
 
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.ResourceShape;
+import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.ShapeType;
 import software.amazon.smithy.model.shapes.StructureShape;
 
+import static software.amazon.polymorph.smithyjava.nameresolver.Dafny.datatypeConstructorIs;
+import static software.amazon.polymorph.smithyjava.nameresolver.Dafny.datatypeDeconstructor;
 import static software.amazon.smithy.utils.StringUtils.capitalize;
 
 /**
@@ -101,8 +106,10 @@ public class ToNativeLibrary extends ToNative {
         subject.getMapsInServiceNamespace().stream()
                 .map(this::modeledMap).forEachOrdered(toNativeMethods::add);
         // Resources
-        subject.getResourcesInServiceNamespace().stream().sequential()
+        subject.getResourcesInServiceNamespace().stream()
                 .map(this::modeledResource).forEachOrdered(toNativeMethods::add);
+        // The Service, it's self
+        toNativeMethods.add(modeledService(subject.serviceShape));
         return TypeSpec.classBuilder(thisClassName)
                 .addModifiers(Modifier.PUBLIC)
                 .addMethods(toNativeMethods)
@@ -115,7 +122,7 @@ public class ToNativeLibrary extends ToNative {
         MethodSpec.Builder method = super.initializeErrorMethodSpec(inputType, returnType);
         method = super.createNativeBuilder(method, returnType);
         // Set Value
-        method.addStatement("$L.obj($L.dtor_obj())", NATIVE_BUILDER, VAR_INPUT);
+        method.addStatement("$L.obj($L.$L)", NATIVE_BUILDER, VAR_INPUT, datatypeDeconstructor("obj"));
         // Build and Return
         return super.buildAndReturn(method);
     }
@@ -123,19 +130,23 @@ public class ToNativeLibrary extends ToNative {
     MethodSpec collectionError() {
         ClassName inputType = subject.dafnyNameResolver.classForDatatypeConstructor("Error", "CollectionOfErrors");
         ClassName returnType = CollectionOfErrors.nativeClassName(subject.modelPackageName);
-        CodeBlock genericCall = AGGREGATE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(ShapeType.LIST).asNormalReference();
+        CodeBlock listConverter = AGGREGATE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(ShapeType.LIST).asNormalReference();
+        CodeBlock messageConverter = SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(ShapeType.STRING).asNormalReference();
         MethodSpec.Builder method = super.initializeErrorMethodSpec(inputType, returnType);
         super.createNativeBuilder(method, returnType);
-        // Set Value
-        method.addStatement("$L.list(\n$L(\n$L.dtor_list(), \n$T::Error))",
-                NATIVE_BUILDER, genericCall, VAR_INPUT, thisClassName);
+        // Set Values
+        method
+            .addStatement("$L.list(\n$L(\n$L.$L, \n$T::Error))",
+                NATIVE_BUILDER, listConverter, VAR_INPUT, datatypeDeconstructor("list"), thisClassName)
+            .addStatement("$L.message($L($L.$L))",
+                NATIVE_BUILDER, messageConverter, VAR_INPUT, datatypeDeconstructor("message"));
         // Build and Return
         return super.buildAndReturn(method);
     }
 
     MethodSpec dafnyError() {
         ClassName inputType = subject.dafnyNameResolver.abstractClassForError();
-        ClassName returnType = NativeError.nativeClassName(subject.modelPackageName);
+        ClassName returnType = ClassName.get(RuntimeException.class);
         MethodSpec.Builder method = super.initializeErrorMethodSpec(inputType, returnType);
         // We need a list of `<datatypeConstructor>`.
         // We have the logic exposed to look up the ClassName,
@@ -143,7 +154,6 @@ public class ToNativeLibrary extends ToNative {
         // We get the "simpleName" (i.e.: Error_<datatypeConstructor>),
         // and, finally, replace "Error_" with nothing, thus getting just "<datatypeConstructor>".
         List<String> allDafnyErrorConstructors = subject.getErrorsInServiceNamespace().stream()
-                .sequential()
                 .map(subject.dafnyNameResolver::classForError)
                 .map(ClassName::simpleName)
                 .map(simpleName -> simpleName.replaceFirst("Error_", ""))
@@ -151,7 +161,7 @@ public class ToNativeLibrary extends ToNative {
         allDafnyErrorConstructors.add("Opaque");
         allDafnyErrorConstructors.add("CollectionOfErrors");
         allDafnyErrorConstructors.forEach(constructorName ->
-                method.beginControlFlow("if ($L.$L())", VAR_INPUT, Dafny.datatypeConstructorIs(constructorName))
+                method.beginControlFlow("if ($L.$L())", VAR_INPUT, datatypeConstructorIs(constructorName))
                         .addStatement(
                                 "return $T.Error(($T) $L)",
                                 thisClassName,
@@ -159,7 +169,30 @@ public class ToNativeLibrary extends ToNative {
                                 VAR_INPUT)
                         .endControlFlow()
         );
-        // If the Error cannot be placed into one of the above, call it opaque and move on
+        // Handle Errors from another service:
+        LocalServiceTrait localServiceTrait = subject.serviceShape.expectTrait(LocalServiceTrait.class);
+        if (localServiceTrait.getDependencies() != null) {
+            localServiceTrait.getDependencies().stream()
+              .map(subject.model::expectShape)
+              .map(Shape::asServiceShape)
+              .filter(Optional::isPresent)
+              .map(Optional::get)
+              .forEach(serviceShape ->
+                {
+                    String serviceName = DafnyNameResolver.moduleNamespace(serviceShape.toShapeId().getNamespace());
+                    method
+                      .beginControlFlow(
+                        "if ($L.$L())", VAR_INPUT, datatypeConstructorIs(serviceName))
+                      .addStatement(
+                        "return $T.Error($L.$L)",
+                        ToNative.ToNativeClassNameForShape(serviceShape, subject.sdkVersion),
+                        VAR_INPUT,
+                        datatypeDeconstructor(serviceName))
+                      .endControlFlow();
+                }
+              );
+        }
+        // If the Error cannot be placed into any of the above, call it opaque and move on
         super.createNativeBuilder(method, OpaqueError.nativeClassName(subject.modelPackageName));
         method.addStatement("$L.obj($L)", NATIVE_BUILDER, VAR_INPUT);
         return super.buildAndReturn(method);
@@ -217,7 +250,8 @@ public class ToNativeLibrary extends ToNative {
               )
               .addStatement(
                 "return (($T.NativeWrapper) $L)._impl",
-                subject.nativeNameResolver.classNameForResource(shape), VAR_INPUT
+                      subject.nativeNameResolver.classNameForResource(shape),
+                      VAR_INPUT
               )
               .endControlFlow();
         }
@@ -227,6 +261,18 @@ public class ToNativeLibrary extends ToNative {
             subject.wrapWithShim(shape.getId(), CodeBlock.of(VAR_INPUT))
           )
           .build();
+    }
+
+    protected MethodSpec modeledService(ServiceShape shape) {
+        final String methodName = capitalize(shape.getId().getName());
+        final ClassName serviceClass = Native.classNameForInterfaceOrLocalService(shape, subject.sdkVersion);
+        return MethodSpec
+                .methodBuilder(methodName)
+                .addModifiers(PUBLIC_STATIC)
+                .returns(serviceClass)
+                .addParameter(Dafny.interfaceForService(shape), VAR_INPUT)
+                .addStatement("return new $T($L)", serviceClass, CodeBlock.of(VAR_INPUT))
+                .build();
     }
 
     protected CodeBlock returnWithConversionCall(final MemberShape shape) {
@@ -244,7 +290,7 @@ public class ToNativeLibrary extends ToNative {
     // that can be in other namespaces.
     // This override simplifies their lookup.
     @Override
-    protected MethodReference conversionMethodReference(Shape shape) {
+    public MethodReference conversionMethodReference(Shape shape) {
         ModelUtils.ResolvedShapeId resolvedShapeId = ModelUtils.resolveShape(shape.toShapeId(), subject.model);
         Shape resolvedShape = subject.model.expectShape(resolvedShapeId.resolvedId());
         if (resolvedShape.isServiceShape() || resolvedShape.isResourceShape()) {
