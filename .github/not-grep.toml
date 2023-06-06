@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 """
 # Exclude files from dafny-lang/libraries
-"**/[!libraries]*.dfy" = """
+"**/[!Wrappers]*.dfy" = """
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 """
