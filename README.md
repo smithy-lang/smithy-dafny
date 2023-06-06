@@ -63,8 +63,9 @@ be [validated in the service rather than in clients](https://smithy.io/2.0/guide
 The above code generators, however, map these constraints to explicit Dafny specifications
 that are therefore statically checked by the Dafny verifier.
 This can be helpful for proving that the calls you make to a service from Dafny code are valid,
-with respect to a particular snapshot of that service's API constraints,
-but means that future service changes that should be backwards-compatible may cause your Dafny code to break.
+and safely assuming response structures are valid,
+with respect to a particular snapshot of that service's API constraints.
+However, it also means that future service changes that should be backwards-compatible may cause your Dafny code to break.
 
 ## Security
 
