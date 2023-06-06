@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 include "../../libraries/src/Wrappers.dfy"
-include "StandardLibrary.dfy" 
+include "StandardLibrary.dfy"
 
 /*
   Compare two strings as floating point numbers.
@@ -130,40 +130,110 @@ module FloatCompare {
   }
 
   lemma StrCmpSymmetric(x : string, y : string)
-  ensures StrCmp(x,y) == -StrCmp(y,x)
+    ensures StrCmp(x,y) == -StrCmp(y,x)
   {}
 
-  // compare two positive floats
-  function method CompareFloatInner(x : string, y : string) : (ret : CompareType) 
+  // Add zeros to 'x' until its length reaches 'newLength'
+  function method AppendZeros(x : string, newLength : nat) : (ret : string)
+    requires |x| < newLength
+    ensures |ret| == newLength
   {
+    x + seq(newLength - |x|, i => '0')
+  }
+
+  // compare two positive floats
+  function method CompareFloatInner(x : string, y : string) : (ret : CompareType)
+  {
+    // assume "123.456e78"
+
     var xParts := SplitExp(x);
     var yParts := SplitExp(y);
-    
+    // "123.456" and 78
+
     var xNum := SplitDot(xParts.0);
     var yNum := SplitDot(yParts.0);
+    // "123" and "456"
 
-    var logX := xParts.1 + |xNum.0|;
-    var logY := yParts.1 + |yNum.0|;
+    var xDigits := SkipLeadingZeros(xNum.0 + xNum.1);
+    var yDigits := SkipLeadingZeros(yNum.0 + yNum.1);
+    // "123456"
 
+    var xExp := xParts.1 - |xNum.1|;
+    var yExp := yParts.1 - |yNum.1|;
+    // 75, because 123.456e78 == 123456e75
+
+    var logX := xExp + |xDigits|;
+    var logY := yExp + |yDigits|;
+    // 81, because 123.456e78 in non-exponential is 81 digits long
+
+    // if number of digits is different, we don't need to compare the digits.
     if logX > logY then
       1
     else if logY > logX then
       -1
+
+    // For StrCmp to work correctly, we need to pad the shorter string with zeros
+    else if |xDigits| < |yDigits| then
+      StrCmp(AppendZeros(xDigits, |yDigits|), yDigits)
+    else if |yDigits| < |xDigits| then
+      StrCmp(xDigits, AppendZeros(yDigits, |xDigits|))
     else
-      var nX := xNum.0 + xNum.1;
-      var nY := yNum.0 + yNum.1;
-      StrCmp(nX, nY)
+      StrCmp(xDigits, yDigits)
   }
 
+  // Does the string start with a '-'?
   predicate method IsNegative(x: string)
   {
     |x| > 0 && x[0] == '-'
   }
 
-  function method CompareFloat(x : string, y : string) : (ret : CompareType) 
+  // if the first character is '+'. remove it
+  function method SkipLeadingPlus(x : string) : string
   {
-    var x := SkipLeadingSpace(x);
-    var y := SkipLeadingSpace(y);
+    if 0 < |x| && x[0] == '+' then
+      x[1..]
+    else
+      x
+  }
+
+  // a string counts as zero unless it has a non-zero digit
+  // before the first character that isn't 0 or decimal point
+  predicate method IsZero(x: string)
+  {
+    if |x| == 0 then
+      true
+    else if x[0] == '0' || x[0] == '.' then
+      IsZero(x[1..])
+    else if '1' <= x[0] <= '9' then
+      false
+    else // presumably 'E' or 'e', but we don't care.
+      true
+  }
+
+  // if the value is zero, then return just "0"
+  function method RecognizeZero(x: string) : string
+  {
+    if IsNegative(x) then
+      if IsZero(x[1..]) then
+        "0"
+      else
+        x
+    else if IsZero(x) then
+      "0"
+    else
+      x
+  }
+
+  // normalize the string before comparison
+  function method CleanNumber(x : string) : string
+  {
+    RecognizeZero(SkipLeadingPlus(SkipLeadingSpace(x)))
+  }
+
+  function method CompareFloat(x : string, y : string) : (ret : CompareType)
+  {
+    var x := CleanNumber(x);
+    var y := CleanNumber(y);
 
     if IsNegative(x) && IsNegative(y) then
       CompareFloatInner(y[1..], x[1..])
