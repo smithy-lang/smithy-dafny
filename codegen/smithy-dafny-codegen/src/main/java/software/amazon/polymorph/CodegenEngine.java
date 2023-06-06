@@ -21,19 +21,29 @@ import software.amazon.polymorph.smithyjava.generator.awssdk.v1.JavaAwsSdkV1;
 import software.amazon.polymorph.smithyjava.generator.awssdk.v2.JavaAwsSdkV2;
 import software.amazon.polymorph.smithyjava.generator.library.JavaLibrary;
 import software.amazon.polymorph.smithyjava.generator.library.TestJavaLibrary;
+import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.polymorph.utils.IOUtils;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.smithy.aws.traits.ServiceTrait;
 import software.amazon.smithy.model.Model;
+import software.amazon.smithy.model.selector.Selector;
 import software.amazon.smithy.model.shapes.ServiceShape;
+import software.amazon.smithy.model.shapes.Shape;
+import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.utils.IoUtils;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class CodegenEngine {
     private static final Logger LOGGER = LoggerFactory.getLogger(CodegenEngine.class);
@@ -89,7 +99,7 @@ public class CodegenEngine {
     /**
      * Executes code generation for the configured language(s).
      * This method is designed to be internally stateless
-     * and idempotent with respect with respect to the file system.
+     * and idempotent with respect to the file system.
      */
     public void run() {
         try {
@@ -115,6 +125,10 @@ public class CodegenEngine {
     }
 
     private void generateDafny(final Path outputDir) {
+        List<String> supportedShapes = awsSdkStyle ? COMMON_SUPPORTED_SHAPES : SUPPORTED_SHAPES_NON_AWS_SDK_STYLE;
+        List<String> supportedTraits = awsSdkStyle ? SUPPORTED_TRAITS_AWS_SDK_STYLE : SUPPORTED_TRAITS_NON_AWS_SDK_STYLE;
+        checkForUnsupportedFeatures(supportedShapes, supportedTraits);
+
         // Validated by builder, but check again
         assert this.includeDafnyFile.isPresent();
         final DafnyApiCodegen dafnyApiCodegen = new DafnyApiCodegen(
@@ -373,5 +387,128 @@ public class CodegenEngine {
         DAFNY,
         JAVA,
         DOTNET,
+    }
+
+    private static final List<String> COMMON_SUPPORTED_SHAPES = List.of(
+            "boolean",
+            "blob",
+            "double",
+            "integer",
+            "list",
+            "long",
+            "map",
+            "member",
+            "operation",
+            "string",
+            "service",
+            "structure",
+            "timestamp",
+            "union"
+    );
+
+    private static final List<String> SUPPORTED_SHAPES_NON_AWS_SDK_STYLE =
+            Stream.concat(
+                    COMMON_SUPPORTED_SHAPES.stream(),
+                    Stream.of(
+                            // Playing it safe and not claiming to support this in SDK style mode yet,
+                            // since we might be generating code that only makes sense for local services.
+                            "resource"
+                    )).toList();
+
+    private static final List<String> COMMON_SUPPORTED_TRAITS = List.of(
+            "smithy.api#box",
+            "smithy.api#default",
+            "smithy.api#documentation",
+            "smithy.api#error",
+            "smithy.api#enum",
+            "smithy.api#idempotencyToken",
+            "smithy.api#input",
+            "smithy.api#length",
+            "smithy.api#output",
+            "smithy.api#pattern",
+            "smithy.api#required",
+            "smithy.api#range",
+            "smithy.api#readonly",
+            "smithy.api#sensitive",
+            "smithy.api#uniqueItems"
+    );
+
+    private static final List<String> SUPPORTED_TRAITS_NON_AWS_SDK_STYLE =
+            Stream.concat(
+                    COMMON_SUPPORTED_TRAITS.stream(),
+                    Stream.of(
+                            // For those that literally can't be used for non-local services,
+                            // We probably want model validation to forbid them instead,
+                            "aws.polymorph#extendable",
+                            "aws.polymorph#localService",
+                            "aws.polymorph#dafnyUtf8Bytes",
+                            "aws.polymorph#javadoc",
+                            "aws.polymorph#positional",
+                            "aws.polymorph#reference"
+                    )).toList();
+
+    private static final List<String> SUPPORTED_TRAITS_AWS_SDK_STYLE =
+            Stream.concat(
+                    COMMON_SUPPORTED_TRAITS.stream(),
+                    Stream.of(
+                            // Most of these are protocol details handled by the wrapped SDKs
+                            // and not relevant for SDK consumers.
+                            "aws.api#clientEndpointDiscovery",
+                            "aws.api#clientDiscoveredEndpoint",
+                            "aws.api#service",
+                            "aws.auth#sigv4",
+                            "aws.protocols#awsJson1_0",
+                            "aws.protocols#awsJson1_1",
+                            "aws.protocols#awsQuery",
+                            "aws.protocols#awsQueryError",
+                            "smithy.api#deprecated",
+                            "smithy.api#paginated",
+                            "smithy.api#suppress",
+                            "smithy.api#httpError",
+                            "smithy.api#title",
+                            "smithy.api#xmlFlattened",
+                            "smithy.api#xmlName",
+                            "smithy.api#xmlNamespace",
+                            "smithy.rules#endpointTests",
+                            "smithy.rules#endpointRuleSet",
+                            // We don't really support this yet, since it implies extra API
+                            // methods we don't generate, but at least we don't generate incorrect code.
+                            "smithy.waiters#waitable"
+                    )).toList();
+
+    private void checkForUnsupportedFeatures(Collection<String> supportedShapes, Collection<String> supportedTraits) {
+        String selectorExpr =
+                "[id=" + serviceShape.getId() + "] \n" +
+                        ":is(*, ~> *) \n" +
+                        ":not(\n" +
+                            ":is(" + String.join(", ", supportedShapes) + ") " +
+                            "$supportedTraits(:root([id = " + String.join(", ", supportedTraits) + "])) " +
+                            "[@: @{trait|(keys)} {<} @{var|supportedTraits|id}]" +
+                        ")";
+
+        Set<Shape> notSupported = Selector.parse(selectorExpr).select(model);
+
+        if (!notSupported.isEmpty()) {
+            String message = "The following shapes in the service's closure are not supported: \n" +
+                    notSupported.stream()
+                                .map(shape -> unsupportedShapeLine(shape, supportedShapes, supportedTraits))
+                                .collect(Collectors.joining("\n"));
+            throw new IllegalArgumentException(message);
+        }
+    }
+
+    private String unsupportedShapeLine(Shape shape, Collection<String> supportedShapes, Collection<String> supportedTraits) {
+        StringBuilder builder = new StringBuilder();
+        builder.append(shape.toString());
+        builder.append("\n");
+        if (!supportedShapes.contains(shape.getType().toString())) {
+            builder.append(" - (shape type `" + shape.getType().toString() + "` is not supported)");
+        }
+        for (var trait : shape.getAllTraits().keySet()) {
+            if (!supportedTraits.contains(trait.toShapeId().toString())) {
+                builder.append(" - (trait `" + trait.toShapeId() + "` is not supported)");
+            }
+        }
+        return builder.toString();
     }
 }

@@ -27,7 +27,7 @@ PROJECT_ROOT := $(abspath $(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
 PROJECT_RELATIVE_ROOT := $(dir $(lastword $(MAKEFILE_LIST)))
 # This evaluates to the path of the current working directory.
 # i.e. The specific library under consideration.
-LIBRARY_ROOT = $(PWD)
+LIBRARY_ROOT = $(shell pwd)
 
 STANDARD_LIBRARY_PATH := $(PROJECT_ROOT)/dafny-dependencies/StandardLibrary
 CODEGEN_CLI_ROOT := $(PROJECT_ROOT)/../codegen/smithy-dafny-codegen-cli
