@@ -6,6 +6,7 @@ plugins {
     `maven-publish`
     `signing`
     id("com.github.johnrengelman.shadow") version "7.1.2"
+    id("io.github.gradle-nexus.publish-plugin") version "1.1.0"
 }
 
 group = "software.amazon.cryptography"
@@ -183,6 +184,17 @@ tasks.shadowJar {
     }
 }
 
+nexusPublishing {
+    // We are using the nexusPublishing plugin since it is recommended by Sonatype Gradle Project configurations
+    // and it is easy to supply the creds we need to deploy
+    // https://github.com/gradle-nexus/publish-plugin/
+    repositories {
+        sonatype {
+            username.set(System.getenv("SONA_USERNAME"))
+            password.set(System.getenv("SONA_PASSWORD"))
+        }
+    }
+}
 
 signing {
     useGpgCmd()
