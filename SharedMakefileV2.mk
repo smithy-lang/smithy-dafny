@@ -309,7 +309,7 @@ setup_net:
 
 ########################## Java targets
 
-build_java: transpile_java mvn_local_deploy_dependencies 
+build_java: transpile_java mvn_local_deploy_dependencies
 	gradle -p runtimes/java build
 
 transpile_java: | transpile_implementation_java transpile_test_java transpile_dependencies_java
@@ -344,11 +344,14 @@ mvn_local_deploy_dependencies:
 
 # The Java MUST all exist already through the transpile step.
 mvn_local_deploy:
-	gradle -p runtimes/java publishToMavenLocal
+	gradle -p runtimes/java publishMavenLocalPublicationToMavenLocal 
 
 # The Java MUST all exsist if we want to publish to CodeArtifact
 mvn_ca_deploy:
-	gradle -p runtimes/java publishMavenPublicationToPublishToCodeArtifactRepository
+	gradle -p runtimes/java publishMavenPublicationToPublishToCodeArtifactCIRepository
+
+mvn_staging_deploy:
+	gradle -p runtimes/java publishMavenPublicationToPublishToCodeArtifactStagingRepository
 
 test_java:
     # run Dafny generated tests

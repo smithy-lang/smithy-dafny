@@ -9,8 +9,8 @@ plugins {
 }
 
 group = "software.amazon.cryptography"
-version = "1.0-SNAPSHOT"
-description = "AwsCryptographicMaterialProviders"
+version = "1.0.0"
+description = "AWS Cryptographic Material Providers Library"
 
 java {
     toolchain.languageVersion.set(JavaLanguageVersion.of(8))
@@ -69,7 +69,7 @@ dependencies {
 }
 
 publishing {
-    publications.create<MavenPublication>("maven") {
+    publications.create<MavenPublication>("mavenLocal") {
         groupId = "software.amazon.cryptography"
         artifactId = "aws-cryptographic-material-providers"
         artifact(tasks["shadowJar"])
@@ -77,14 +77,49 @@ publishing {
         artifact(tasks["sourcesJar"])
     }
 
+    publications.create<MavenPublication>("maven") {
+        groupId = "software.amazon.cryptography"
+        artifactId = "aws-cryptographic-material-providers"
+        artifact(tasks["shadowJar"])
+        artifact(tasks["javadocJar"])
+        artifact(tasks["sourcesJar"])
+
+        // Include extra information in the POMs.
+        afterEvaluate {
+            pom {
+                name.set("AWS Cryptographic Material Providers Library")
+                description.set("The AWS Cryptographic Material Providers Library for Java")
+                url.set("https://github.com/aws/aws-cryptographic-material-providers-library-java")
+                licenses {
+                    license {
+                        name.set("Apache License 2.0")
+                        url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+                        distribution.set("repo")
+                    }
+                }
+                developers {
+                    developer {
+                        id.set("amazonwebservices")
+                        organization.set("Amazon Web Services")
+                        organizationUrl.set("https://aws.amazon.com")
+                        roles.add("developer")
+                    }
+                }
+                scm {
+                    url.set("https://github.com/aws/aws-cryptographic-material-providers-library-java.git")
+                }
+            }
+        }
+    }
+
     repositories {
         mavenLocal()
         maven {
-            name = "PublishToCodeArtifact"
-            url = URI.create("https://github-mpl-370957321024.d.codeartifact.us-west-2.amazonaws.com/maven/MPL-Java-CI/")
+            name = "PublishToCodeArtifactStaging"
+            url = URI.create("https://crypto-tools-internal-587316601012.d.codeartifact.us-east-1.amazonaws.com/maven/java-mpl-staging/")
             credentials {
                 username = "aws"
-                password = System.getenv("CODEARTIFACT_AUTH_TOKEN")
+                password = System.getenv("CODEARTIFACT_TOKEN")
             }
         }
     }
@@ -143,6 +178,26 @@ tasks.shadowJar {
             mainSourceSet()
         }
     }
+}
+
+
+signing {
+    useGpgCmd()
+
+    // Dynamically set these properties
+    project.ext.set("signing.gnupg.executable", "gpg")
+    project.ext.set("signing.gnupg.useLegacyGpg" , "true")
+    project.ext.set("signing.gnupg.homeDir", System.getenv("HOME") + "/.gnupg/")
+    project.ext.set("signing.gnupg.optionsFile", System.getenv("HOME") + "/.gnupg/gpg.conf")
+    project.ext.set("signing.gnupg.keyName", System.getenv("GPG_KEY"))
+    project.ext.set("signing.gnupg.passphrase", System.getenv("GPG_PASS"))
+
+    // Signing is required if building a release version and if we're going to publish it.
+    // Otherwise if doing a maven publication we will sign
+    setRequired({
+        gradle.getTaskGraph().hasTask("publish")
+    })
+    sign(publishing.publications["maven"])
 }
 
 fun SourceDirectorySet.mainSourceSet() {

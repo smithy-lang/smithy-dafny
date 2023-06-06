@@ -1,0 +1,50 @@
+## Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+## SPDX-License-Identifier: Apache-2.0
+
+version: 0.2
+
+env:
+  variables:
+    REGION: us-east-1
+    DOMAIN: crypto-tools-internal
+    REPOSITORY: java-mpl-staging
+  parameter-store:
+    ACCOUNT: /CodeBuild/AccountId
+  secrets-manager:
+    GPG_KEY: Maven-GPG-Keys-Release-Credentials:Keyname
+    GPG_PASS: Maven-GPG-Keys-Release-Credentials:Passphrase
+
+phases:
+  install:
+    runtime-versions:
+      java: corretto8
+    commands:
+      - cd ..
+      # Get Dafny
+      - curl https://github.com/dafny-lang/dafny/releases/download/v4.1.0/dafny-4.1.0-x64-ubuntu-20.04.zip  -L -o dafny.zip
+      - unzip -qq dafny.zip && rm dafny.zip
+      - export PATH="$PWD/dafny:$PATH"
+      # Get Gradle 7.6
+      - curl https://services.gradle.org/distributions/gradle-7.6-all.zip -L -o gradle.zip
+      - unzip -qq gradle.zip && rm gradle.zip
+      - export PATH="$PWD/gradle-7.6/bin:$PATH"
+      - cd aws-cryptographic-material-providers-library-java/
+  pre_build:
+    commands:
+      - export SETTINGS_FILE=$(pwd)/codebuild/release/settings.xml
+      - export CODEARTIFACT_TOKEN=$(aws codeartifact get-authorization-token --domain crypto-tools-internal --domain-owner 587316601012 --region us-east-1 --query authorizationToken --output text)
+      - export CODEARTIFACT_REPO_URL=hhttps://crypto-tools-internal-587316601012.d.codeartifact.us-east-1.amazonaws.com/maven/java-mpl-staging/
+      - aws secretsmanager get-secret-value --region us-west-2 --secret-id Maven-GPG-Keys-Release --query SecretBinary --output text | base64 -d > ~/mvn_gpg.tgz
+      - tar -xvf ~/mvn_gpg.tgz -C ~
+      - mkdir /root/.gnupg
+      - printf "use-agent\npinentry-mode loopback" >> ~/mvn_gpg/gpg.conf
+      - printf "allow-loopback-pinentry" >> ~/mvn_gpg/gpg-agent.conf
+      - mv -v ~/mvn_gpg/* /root/.gnupg/
+      - cat /root/.gnupg/gpg.conf
+  build:
+    commands:
+      - cd AwsCryptographicMaterialProviders/
+      # Build and deploy to maven local
+      - make build_java && make mvn_local_deploy
+      # Deploy to AWS CodeArtifact
+      - make mvn_staging_deploy

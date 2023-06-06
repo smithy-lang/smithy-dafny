@@ -60,6 +60,11 @@ dependencies {
 }
 
 publishing {
+    publications.create<MavenPublication>("mavenLocal") {
+        groupId = "software.amazon.cryptography"
+        artifactId = "ComAmazonawsDynamodb"
+        from(components["java"])
+    }
     publications.create<MavenPublication>("maven") {
         groupId = "software.amazon.cryptography"
         artifactId = "ComAmazonawsDynamodb"
