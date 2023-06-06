@@ -69,14 +69,11 @@ are as follows:
    Note the exact version of the `software.amazon.smithy` dependencies MAY NOT need to be 
    `1.28.1` exactly, but MUST be consistent.
 
-3. Clone the GitHub repository for [smithy-dafny](https://github.com/awslabs/smithy-dafny)
-   somewhere nearby, being sure to initialize submodules.
-   If this repository is still private, reach out to aws-arg-dafny@amazon.com
-   for access.
+3. Make a copy of the `TestModels/dafny-dependencies/StandardLibrary` directory
+   for the generated code to refer to.
       
-   This is necessary because it contains reusable Dafny code that
-   the generated client will depend on, but is not yet independently distributed for
-   shared use.
+   This is necessary because the runtime library code the generated code will depend on
+   is not yet available as a shared Dafny library.
 
 4. Create a `smithy-build.json` file with the following contents,
    substituting "smithy.example#ExampleService" with the name of the service
@@ -91,7 +88,7 @@ are as follows:
                 "edition": "2023",
                 "service": "smithy.example#ExampleService",
                 "targetLanguages": ["dotnet"],
-                "includeDafnyPath": "[relative]/[path]/[to]/smithy-dafny/TestModels/dafny-dependencies/StandardLibrary/src/Index.dfy"
+                "includeDafnyPath": "[relative]/[path]/[to]/StandardLibrary/src/Index.dfy"
             }
         }
     }
@@ -110,17 +107,12 @@ are as follows:
 7. Run `gradle build` (alternatively, you can use a
    [Gradle wrapper](https://docs.gradle.org/current/userguide/gradle_wrapper.html)).
 
-8. The generated client can be found in `build/smithyprojections/foo-client/source/dafny-client-codegen`.
+8. The generated client can be found under the `build/smithyprojections`,
+   the exact path depending on the name of the service.
+   For example, `build/smithyprojections/example-client/source/dafny-client-codegen`.
 
 See [the Smithy documentation](https://smithy.io/2.0/guides/building-models/gradle-plugin.html)
 for more information on building Smithy projects with Gradle.
-
-Note there are some caveats related to building the generated client code:
-
-1. If you specified Java as a target language,
-   the result will depend on the [dafny-java-conversion](https://github.com/awslabs/smithy-dafny/tree/main-1.x/dafny-java-conversion)
-   library, which is also not yet published.
-   The easiest workaround is to first run the `publishToLocalMaven` gradle task on a copy of the source for that library.
 
 ## Using projections
 
