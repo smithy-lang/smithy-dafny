@@ -120,7 +120,7 @@ public class DotNetNameResolverTest {
                 .build();
         final DotNetNameResolver nameResolver = setupNameResolver(
                 (builder, modelAssembler) -> modelAssembler.addShape(enumShape));
-        assertEquals("Dafny.Test.Foobar.Types._IEnumShape", nameResolver.dafnyTypeForShape(enumShape.getId()));
+        assertEquals("test.foobar.internaldafny.types._IEnumShape", nameResolver.dafnyTypeForShape(enumShape.getId()));
     }
 
     @Test
