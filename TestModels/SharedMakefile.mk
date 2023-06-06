@@ -276,10 +276,12 @@ mvn_local_deploy:
 test_java:
 	gradle -p runtimes/java runTests
 
-clean:
+_clean:
 	rm -f $(LIBRARY_ROOT)/Model/*Types.dfy $(LIBRARY_ROOT)/Model/*TypesWrapped.dfy
 	rm -f $(LIBRARY_ROOT)/runtimes/net/ImplementationFromDafny.cs
 	rm -f $(LIBRARY_ROOT)/runtimes/net/tests/TestFromDafny.cs
 	rm -rf $(LIBRARY_ROOT)/TestResults
 	rm -rf $(LIBRARY_ROOT)/runtimes/net/Generated $(LIBRARY_ROOT)/runtimes/net/bin $(LIBRARY_ROOT)/runtimes/net/obj
 	rm -rf $(LIBRARY_ROOT)/runtimes/net/tests/bin $(LIBRARY_ROOT)/runtimes/net/tests/obj
+
+clean: _clean

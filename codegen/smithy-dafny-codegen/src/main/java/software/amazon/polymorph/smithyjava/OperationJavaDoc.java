@@ -13,6 +13,8 @@ import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.traits.StringTrait;
 
+import static software.amazon.polymorph.smithyjava.generator.Generator.NATIVE_VAR;
+
 /**
  * @param desc    JavaDoc Body content
  * @param params  List of {@link Pair} of Strings which will get {@code @param}
@@ -54,7 +56,7 @@ public record OperationJavaDoc(
           .expectShape(shape.getInputShape())
           .getMemberTrait(model, JavaDocTrait.class)
           .map(StringTrait::getValue).orElse(null);
-        @Nonnull String paramName = shape.getInputShape().getName();
+        @Nonnull String paramName = NATIVE_VAR;
         @Nullable String returns = model
           .expectShape(shape.getOutputShape())
           .getMemberTrait(model, JavaDocTrait.class)

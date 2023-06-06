@@ -41,7 +41,9 @@ module SimpleErrorsImplTest {
       expect ret.Failure?;
       expect ret.error.CollectionOfErrors?;
 
-      var expectedValue := CollectionOfErrors(list := [ SimpleErrorsException(message := s) ]);
+      var expectedValue := CollectionOfErrors(
+        list := [ SimpleErrorsException(message := s) ],
+        message := "Something");
       expect ret.error == expectedValue;
     }
 
