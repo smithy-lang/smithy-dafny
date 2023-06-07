@@ -380,7 +380,7 @@ module {:options "/functionSyntax:4" } LocalCMC {
         //
         //= aws-encryption-sdk-specification/framework/local-cryptographic-materials-cache.md#get-cache-entry
         //# The local CMC MUST NOT return any TTL-expired entry.
-        if entry.expiryTime <= now {
+        if now <= entry.expiryTime {
           // Dafny does not remember the equivalences of seq and multiset(seq)
           assert entry in multiset(queue.Items);
           queue.moveToFront(entry);
@@ -596,7 +596,7 @@ module {:options "/functionSyntax:4" } LocalCMC {
         invariant Modifies <= old(Modifies)
       {
         if queue.tail.Ptr? {
-          if now < queue.tail.deref.expiryTime {
+          if queue.tail.deref.expiryTime < now {
             // The tail has timed out,
             // so it should be removed.
             // This should happen regardless

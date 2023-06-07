@@ -19,6 +19,7 @@ include "Keyrings/RawAESKeyring.dfy"
 include "Keyrings/RawRSAKeyring.dfy"
 include "CMMs/DefaultCMM.dfy"
 include "CMCs/LocalCMC.dfy"
+include "CMCs/SynchronizedLocalCMC.dfy"
 include "DefaultClientSupplier.dfy"
 include "Materials.dfy"
 include "Commitment.dfy"
@@ -43,6 +44,7 @@ module AwsCryptographyMaterialProvidersOperations refines AbstractAwsCryptograph
   import RawRSAKeyring
   import opened C = DefaultCMM
   import opened L = LocalCMC
+  import SynchronizedLocalCMC
   import Crypto = AwsCryptographyPrimitivesTypes
   import Aws.Cryptography.Primitives
   import opened AwsKmsUtils
@@ -512,7 +514,8 @@ module AwsCryptographyMaterialProvidersOperations refines AbstractAwsCryptograph
       entryPruningTailSize := 1;
     } 
     var cmc := new LocalCMC(input.entryCapacity as nat, entryPruningTailSize);
-    return Success(cmc);
+    var synCmc := new SynchronizedLocalCMC.SynchronizedLocalCMC(cmc);
+    return Success(synCmc);
   }
 
   predicate CreateDefaultClientSupplierEnsuresPublicly(input: CreateDefaultClientSupplierInput, output: Result<IClientSupplier, Error>)

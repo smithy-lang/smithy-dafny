@@ -19,7 +19,7 @@ java {
         mainSourceSet()
     }
     sourceSets["test"].java {
-        srcDir("src/test/dafny-generated")
+        srcDir("src/test")
     }
 
     withJavadocJar()
@@ -67,6 +67,9 @@ dependencies {
     implementation("software.amazon.awssdk:dynamodb-enhanced")
     implementation("software.amazon.awssdk:kms")
     implementation("software.amazon.awssdk:core:2.19.1")
+
+    // https://mvnrepository.com/artifact/org.testng/testng
+    testImplementation("org.testng:testng:7.5")
 }
 
 publishing {
@@ -219,4 +222,43 @@ fun SourceDirectorySet.mainSourceSet() {
     srcDir("src/main/java")
     srcDir("src/main/dafny-generated")
     srcDir("src/main/smithy-generated")
+}
+
+
+tasks.test {
+    useTestNG()
+
+    // This will show System.out.println statements
+    testLogging.showStandardStreams = true
+
+    testLogging {
+        lifecycle {
+            events = mutableSetOf(org.gradle.api.tasks.testing.logging.TestLogEvent.FAILED, org.gradle.api.tasks.testing.logging.TestLogEvent.PASSED, org.gradle.api.tasks.testing.logging.TestLogEvent.SKIPPED)
+            exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+            showExceptions = true
+            showCauses = true
+            showStackTraces = true
+            showStandardStreams = true
+        }
+        info.events = lifecycle.events
+        info.exceptionFormat = lifecycle.exceptionFormat
+    }
+
+    // See https://github.com/gradle/kotlin-dsl/issues/836
+    addTestListener(object : TestListener {
+        override fun beforeSuite(suite: TestDescriptor) {}
+        override fun beforeTest(testDescriptor: TestDescriptor) {}
+        override fun afterTest(testDescriptor: TestDescriptor, result: TestResult) {}
+
+        override fun afterSuite(suite: TestDescriptor, result: TestResult) {
+            if (suite.parent == null) { // root suite
+                logger.lifecycle("----")
+                logger.lifecycle("Test result: ${result.resultType}")
+                logger.lifecycle("Test summary: ${result.testCount} tests, " +
+                        "${result.successfulTestCount} succeeded, " +
+                        "${result.failedTestCount} failed, " +
+                        "${result.skippedTestCount} skipped")
+            }
+        }
+    })
 }

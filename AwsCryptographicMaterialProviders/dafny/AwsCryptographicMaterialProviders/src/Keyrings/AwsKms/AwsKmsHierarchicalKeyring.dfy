@@ -11,6 +11,7 @@ include "AwsKmsMrkMatchForDecrypt.dfy"
 include "../../AwsArnParsing.dfy"
 include "AwsKmsUtils.dfy"
 include "../../CMCs/LocalCMC.dfy"
+include "../../CMCs/SynchronizedLocalCMC.dfy"
 
 include "../../../Model/AwsCryptographyMaterialProvidersTypes.dfy"
 
@@ -25,6 +26,7 @@ module AwsKmsHierarchicalKeyring {
   import opened Constants
   import opened A = AwsKmsMrkMatchForDecrypt
   import opened L = LocalCMC
+  import SynchronizedLocalCMC
   import opened AlgorithmSuites
   import EdkWrapping
   import MaterialWrapping
@@ -84,9 +86,9 @@ module AwsKmsHierarchicalKeyring {
   // We add this axiom here because verifying the mutability of the share state of the 
   // cache. Dafny does not support concurrency and proving the state of mutable frames 
   // is complicated.  
-  lemma {:axiom} verifyValidStateCache (cmc: LocalCMC) ensures cmc.ValidState()
+  lemma {:axiom} verifyValidStateCache (cmc: SynchronizedLocalCMC.SynchronizedLocalCMC) ensures cmc.ValidState()
 
-  method getEntry(cmc: LocalCMC, input: Types.GetCacheEntryInput) returns (res: Result<Types.GetCacheEntryOutput, Types.Error>)
+  method getEntry(cmc: SynchronizedLocalCMC.SynchronizedLocalCMC, input: Types.GetCacheEntryInput) returns (res: Result<Types.GetCacheEntryOutput, Types.Error>)
     requires cmc.ValidState()
     ensures cmc.ValidState()
     ensures cmc.GetCacheEntryEnsuresPublicly(input, res)
@@ -98,7 +100,7 @@ module AwsKmsHierarchicalKeyring {
     res := cmc.GetCacheEntry(input);
   }
 
-  method putEntry(cmc: LocalCMC, input: Types.PutCacheEntryInput) returns (res: Result<(), Types.Error>)
+  method putEntry(cmc: SynchronizedLocalCMC.SynchronizedLocalCMC, input: Types.PutCacheEntryInput) returns (res: Result<(), Types.Error>)
     requires cmc.ValidState()
     ensures cmc.ValidState()
     ensures cmc.PutCacheEntryEnsuresPublicly(input, res)
@@ -122,7 +124,7 @@ module AwsKmsHierarchicalKeyring {
     const ttlSeconds: Types.PositiveLong
     const maxCacheSize: Types.PositiveInteger
     const cryptoPrimitives: Primitives.AtomicPrimitivesClient
-    const cache: LocalCMC
+    const cache: SynchronizedLocalCMC.SynchronizedLocalCMC
 
     predicate ValidState()
       ensures ValidState() ==> History in Modifies
@@ -179,7 +181,8 @@ module AwsKmsHierarchicalKeyring {
         && var maybeSupplierModifies := if branchKeyIdSupplier.Some? then branchKeyIdSupplier.value.Modifies else {};
         && fresh(Modifies - keyStore.Modifies - cryptoPrimitives.Modifies - maybeSupplierModifies)
     {
-      var cmc := new LocalCMC(maxCacheSize as nat, 1);
+      var localCMC := new LocalCMC(maxCacheSize as nat, 1);
+      var cmc := new SynchronizedLocalCMC.SynchronizedLocalCMC(localCMC);
 
       this.keyStore            := keyStore;
       this.branchKeyId         := branchKeyId;
@@ -609,7 +612,7 @@ module AwsKmsHierarchicalKeyring {
     const cryptoPrimitives: Primitives.AtomicPrimitivesClient
     const branchKeyId: string
     const ttlSeconds: Types.PositiveLong
-    const cache: L.LocalCMC
+    const cache: SynchronizedLocalCMC.SynchronizedLocalCMC
 
     constructor(
       materials: Materials.DecryptionMaterialsPendingPlaintextDataKey,
@@ -617,7 +620,7 @@ module AwsKmsHierarchicalKeyring {
       cryptoPrimitives: Primitives.AtomicPrimitivesClient,
       branchKeyId: string,
       ttlSeconds: Types.PositiveLong,
-      cache: L.LocalCMC
+      cache: SynchronizedLocalCMC.SynchronizedLocalCMC
     )
       requires keyStore.ValidState() && cryptoPrimitives.ValidState()
       ensures
