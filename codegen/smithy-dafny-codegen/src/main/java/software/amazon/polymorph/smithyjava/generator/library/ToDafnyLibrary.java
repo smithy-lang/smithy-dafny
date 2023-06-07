@@ -1,3 +1,5 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 package software.amazon.polymorph.smithyjava.generator.library;
 
 import com.squareup.javapoet.ClassName;
@@ -150,24 +152,27 @@ public class ToDafnyLibrary extends ToDafny {
 
     MethodSpec collectionError() {
         ClassName dafnyError = subject.dafnyNameResolver.abstractClassForError();
-        ClassName collectionError = CollectionOfErrors.nativeClassName(subject.nativeNameResolver.modelPackage);
-        ParameterizedTypeName listArg = ParameterizedTypeName.get(
+        ClassName nativeError = CollectionOfErrors.nativeClassName(subject.nativeNameResolver.modelPackage);
+        ParameterizedTypeName listType = ParameterizedTypeName.get(
                 software.amazon.polymorph.smithyjava.nameresolver.Constants.DAFNY_SEQUENCE_CLASS_NAME,
                 WildcardTypeName.subtypeOf(dafnyError)
         );
-        CodeBlock genericCall = AGGREGATE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(ShapeType.LIST).asNormalReference();
-        MethodReference getTypeDescriptor = new MethodReference(
+        CodeBlock listConverter = AGGREGATE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(ShapeType.LIST).asNormalReference();
+        MethodReference errorTypeDescriptor = new MethodReference(
                 dafnyError,
                 "_typeDescriptor");
+        TypeName messageType = subject.dafnyNameResolver.typeForShape(ShapeId.fromParts("smithy.api", "String"));
+        CodeBlock messageConverter = SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(ShapeType.STRING).asNormalReference();
         return MethodSpec.methodBuilder("Error")
                 .returns(dafnyError)
                 .addModifiers(PUBLIC_STATIC)
-                .addParameter(collectionError, VAR_INPUT)
+                .addParameter(nativeError, VAR_INPUT)
                 .addStatement(
                         "$T list = $L(\n$L.list(), \n$T::Error, \n$L())",
-                        listArg, genericCall, VAR_INPUT, thisClassName, getTypeDescriptor.asNormalReference()
+                        listType, listConverter, VAR_INPUT, thisClassName, errorTypeDescriptor.asNormalReference()
                         )
-                .addStatement("return $T.create_CollectionOfErrors(list)", dafnyError)
+                .addStatement("$T message = $L($L.getMessage())", messageType, messageConverter, VAR_INPUT)
+                .addStatement("return $T.create_CollectionOfErrors(list, message)", dafnyError)
                 .build();
     }
 

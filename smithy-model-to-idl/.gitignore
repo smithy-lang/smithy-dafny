@@ -1,7 +1,0 @@
-# Gradle
-/.gradle/
-/build/
-/target/
-
-# IDE
-/.idea/
