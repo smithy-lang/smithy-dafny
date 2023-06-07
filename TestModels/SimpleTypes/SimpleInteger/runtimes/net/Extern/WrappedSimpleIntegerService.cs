@@ -1,3 +1,5 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 using Wrappers_Compile;
 using Simple.Types.Integer;
 using Simple.Types.Integer.Wrapped;
