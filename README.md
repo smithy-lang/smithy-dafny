@@ -1,5 +1,10 @@
 # AWS Cryptographic Material Providers Library for Java
 
+Note: The AWS Cryptographic Material Providers Library is released as a
+[developer preview](https://docs.aws.amazon.com/sdkref/latest/guide/maint-policy.html#version-life-cycle)
+and is subject to change.
+The current release is not intended to be used in production environments.
+
 The AWS Cryptographic Material Providers Library abstracts lower level cryptographic materials management of encryption and decryption materials.
 It uses cryptographic best practices to protect the data keys that protect your data.
 The data key is protected with a key encryption key called a *wrapping key* or *master key*.
