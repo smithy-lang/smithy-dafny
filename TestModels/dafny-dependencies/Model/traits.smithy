@@ -1,3 +1,5 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 namespace aws.polymorph
 
 // Smithy doesn't allow passing resources or services as members of structures, 
