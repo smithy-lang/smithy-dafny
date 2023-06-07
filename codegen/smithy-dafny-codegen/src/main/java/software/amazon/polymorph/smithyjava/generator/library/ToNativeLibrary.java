@@ -1,3 +1,5 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 package software.amazon.polymorph.smithyjava.generator.library;
 
 import com.squareup.javapoet.ClassName;
@@ -130,12 +132,16 @@ public class ToNativeLibrary extends ToNative {
     MethodSpec collectionError() {
         ClassName inputType = subject.dafnyNameResolver.classForDatatypeConstructor("Error", "CollectionOfErrors");
         ClassName returnType = CollectionOfErrors.nativeClassName(subject.modelPackageName);
-        CodeBlock genericCall = AGGREGATE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(ShapeType.LIST).asNormalReference();
+        CodeBlock listConverter = AGGREGATE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(ShapeType.LIST).asNormalReference();
+        CodeBlock messageConverter = SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(ShapeType.STRING).asNormalReference();
         MethodSpec.Builder method = super.initializeErrorMethodSpec(inputType, returnType);
         super.createNativeBuilder(method, returnType);
-        // Set Value
-        method.addStatement("$L.list(\n$L(\n$L.$L, \n$T::Error))",
-                NATIVE_BUILDER, genericCall, VAR_INPUT, datatypeDeconstructor("list"), thisClassName);
+        // Set Values
+        method
+            .addStatement("$L.list(\n$L(\n$L.$L, \n$T::Error))",
+                NATIVE_BUILDER, listConverter, VAR_INPUT, datatypeDeconstructor("list"), thisClassName)
+            .addStatement("$L.message($L($L.$L))",
+                NATIVE_BUILDER, messageConverter, VAR_INPUT, datatypeDeconstructor("message"));
         // Build and Return
         return super.buildAndReturn(method);
     }

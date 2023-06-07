@@ -1,3 +1,5 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 include "../Model/SimpleErrorsTypes.dfy"
 
 module SimpleErrorsImpl refines AbstractSimpleErrorsOperations  {
@@ -37,7 +39,9 @@ module SimpleErrorsImpl refines AbstractSimpleErrorsOperations  {
     // We should remove this check as part of SIM CrypTool-5085
     expect input.value.Some?;
 
-    var res := Error.CollectionOfErrors( list := [ SimpleErrorsException(message := input.value.value) ] );
+    var res := Error.CollectionOfErrors(
+      list := [ SimpleErrorsException(message := input.value.value) ],
+      message := "Something");
 
     return Failure(res);
   }

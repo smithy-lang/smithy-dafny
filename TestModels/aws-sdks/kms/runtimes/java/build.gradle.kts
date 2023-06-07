@@ -1,3 +1,5 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 import java.net.URI
 import javax.annotation.Nullable
 import org.gradle.api.tasks.wrapper.Wrapper
