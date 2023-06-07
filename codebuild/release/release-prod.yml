@@ -62,6 +62,7 @@ phases:
       - cd ../AwsCryptographicMaterialProviders/
 
       # Publish to Sonatype
-      - gradle -p runtimes/java publishMavenPublicationToSonatypeRepository
+      - gradle -p runtimes/java publishMavenPublicationToSonatypeRepository closeSonatypeStagingRepository
+      - gradle -p runtimes/java findSonatypeStagingRepository releaseSonatypeStagingRepository
 
 

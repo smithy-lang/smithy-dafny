@@ -6,7 +6,7 @@ plugins {
     `maven-publish`
     `signing`
     id("com.github.johnrengelman.shadow") version "7.1.2"
-    id("io.github.gradle-nexus.publish-plugin") version "1.1.0"
+    id("io.github.gradle-nexus.publish-plugin") version "1.3.0"
 }
 
 group = "software.amazon.cryptography"
@@ -193,6 +193,8 @@ nexusPublishing {
     // https://github.com/gradle-nexus/publish-plugin/
     repositories {
         sonatype {
+            nexusUrl.set(uri("https://aws.oss.sonatype.org/service/local/"))
+            snapshotRepositoryUrl.set(uri("https://aws.oss.sonatype.org/content/repositories/snapshots/"))
             username.set(System.getenv("SONA_USERNAME"))
             password.set(System.getenv("SONA_PASSWORD"))
         }
