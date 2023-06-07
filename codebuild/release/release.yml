@@ -73,7 +73,7 @@ batch:
 
   - identifier: validate_release_corretto11
     depend-on:
-        - rupload_to_sonatype
+        - upload_to_sonatype
     buildspec: codebuild/release/validate-release.yml
     env:
       variables:
