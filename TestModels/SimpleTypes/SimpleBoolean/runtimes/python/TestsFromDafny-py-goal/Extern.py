@@ -8,7 +8,7 @@ import _dafny
 import System_
 import SimpleBooleanImplTest_Compile
 import simple.types.boolean.internaldafny.types
-from simple_boolean.client import SimpleBoolean
+from python_client_codegen.simple_boolean.client import SimpleBoolean
 from Shim import SimpleBooleanShim
 import Wrappers_Compile
 

@@ -6,24 +6,25 @@ from itertools import count
 import module_
 import _dafny
 import System_
-import types
+import simple.types.boolean.internaldafny.types
 import SimpleBooleanImpl_Compile
+
 import Wrappers_Compile
 
-assert "simple.types.boolean.internaldafny" == __name__
+assert "simple.types.boolean.internaldafny.impl" == __name__
 
-class SimpleBooleanClient(types.ISimpleBooleanClient):
+class SimpleBooleanClient(simple.types.boolean.internaldafny.types.ISimpleBooleanClient):
     def  __init__(self):
         self._config: SimpleBooleanImpl_Compile.Config = SimpleBooleanImpl_Compile.Config_Config.default()()
         pass
 
     def __dafnystr__(self) -> str:
-        return "simple.types.boolean.internaldafny_Compile.SimpleBooleanClient"
+        return "simple.types.boolean.internaldafny.impl_Compile.SimpleBooleanClient"
     def ctor__(self, config):
         (self)._config = config
 
     def GetBoolean(self, input):
-        output: Wrappers_Compile.Result = Wrappers_Compile.Result_Success.default(types.GetBooleanOutput.default())()
+        output: Wrappers_Compile.Result = Wrappers_Compile.Result_Success.default(simple.types.boolean.internaldafny.types.GetBooleanOutput.default())()
         out0_: Wrappers_Compile.Result
         out0_ = SimpleBooleanImpl_Compile.default__.GetBoolean((self).config, input)
         output = out0_
@@ -38,16 +39,16 @@ class default__:
         pass
 
     def __dafnystr__(self) -> str:
-        return "simple.types.boolean.internaldafny_Compile._default"
+        return "simple.types.boolean.internaldafny.impl_Compile._default"
     @staticmethod
     def DefaultSimpleBooleanConfig():
-        return types.SimpleBooleanConfig_SimpleBooleanConfig()
+        return simple.types.boolean.internaldafny.types.SimpleBooleanConfig_SimpleBooleanConfig()
 
     @staticmethod
     def SimpleBoolean(config):
         res: Wrappers_Compile.Result = None
-        d_1_client_: SimpleBooleanClient
-        nw0_ = SimpleBooleanClient()
+        d_1_client_: simple.types.boolean.internaldafny.impl.SimpleBooleanClient
+        nw0_ = simple.types.boolean.internaldafny.impl.SimpleBooleanClient()
         nw0_.ctor__(SimpleBooleanImpl_Compile.Config_Config())
         d_1_client_ = nw0_
         res = Wrappers_Compile.Result_Success(d_1_client_)

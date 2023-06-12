@@ -1,12 +1,14 @@
 import sys
+from typing import Callable, Any, TypeVar, NamedTuple
 from math import floor
+from itertools import count
 
 import module_
 import _dafny
 import System_
 import SimpleBooleanImplTest_Compile
 import simple.types.boolean.internaldafny.wrapped
-
+import simple.types.boolean.internaldafny.wrapped
 assert "WrappedSimpleTypesBooleanTest_Compile" == __name__
 WrappedSimpleTypesBooleanTest_Compile = sys.modules[__name__]
 

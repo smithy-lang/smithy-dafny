@@ -3,12 +3,13 @@ from typing import Callable, Any, TypeVar, NamedTuple
 from math import floor
 from itertools import count
 
-import simple.types.boolean.internaldafny
+import simple.types.boolean.internaldafny.impl
+
+import Wrappers_Compile
 
 import module_
 import _dafny
 import System_
-import Wrappers_Compile
 
 assert "SimpleBooleanImplTest_Compile" == __name__
 SimpleBooleanImplTest_Compile = sys.modules[__name__]
@@ -21,10 +22,10 @@ class default__:
         return "SimpleBooleanImplTest_Compile._default"
     @staticmethod
     def GetBooleanTrue():
-        d_0_client_: simple.types.boolean.internaldafny.SimpleBooleanClient
+        d_0_client_: simple.types.boolean.internaldafny.impl.SimpleBooleanClient
         d_1_valueOrError0_: Wrappers_Compile.Result = None
         out0_: Wrappers_Compile.Result
-        out0_ = simple.types.boolean.internaldafny.default__.SimpleBoolean(simple.types.boolean.internaldafny.default__.DefaultSimpleBooleanConfig())
+        out0_ = simple.types.boolean.internaldafny.impl.default__.SimpleBoolean(simple.types.boolean.internaldafny.impl.default__.DefaultSimpleBooleanConfig())
         d_1_valueOrError0_ = out0_
         if not(not((d_1_valueOrError0_).IsFailure())):
             raise _dafny.HaltException("/Users/lucmcdon/Desktop/workplace/polymorph/TestModels/SimpleTypes/SimpleBoolean/test/SimpleBooleanImplTest.dfy(10,19): " + _dafny.string_of(d_1_valueOrError0_))
@@ -33,10 +34,10 @@ class default__:
 
     @staticmethod
     def GetBooleanFalse():
-        d_2_client_: simple.types.boolean.internaldafny.SimpleBooleanClient
+        d_2_client_: simple.types.boolean.internaldafny.impl.SimpleBooleanClient
         d_3_valueOrError0_: Wrappers_Compile.Result = None
         out1_: Wrappers_Compile.Result
-        out1_ = simple.types.boolean.internaldafny.default__.SimpleBoolean(simple.types.boolean.internaldafny.default__.DefaultSimpleBooleanConfig())
+        out1_ = simple.types.boolean.internaldafny.impl.default__.SimpleBoolean(simple.types.boolean.internaldafny.impl.default__.DefaultSimpleBooleanConfig())
         d_3_valueOrError0_ = out1_
         if not(not((d_3_valueOrError0_).IsFailure())):
             raise _dafny.HaltException("/Users/lucmcdon/Desktop/workplace/polymorph/TestModels/SimpleTypes/SimpleBoolean/test/SimpleBooleanImplTest.dfy(14,19): " + _dafny.string_of(d_3_valueOrError0_))

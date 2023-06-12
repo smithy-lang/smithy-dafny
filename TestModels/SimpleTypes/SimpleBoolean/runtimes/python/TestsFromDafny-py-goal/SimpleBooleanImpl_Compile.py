@@ -7,9 +7,7 @@ import module_
 import _dafny
 import System_
 import simple.types.boolean.internaldafny.types
-
 import Wrappers_Compile
-
 assert "SimpleBooleanImpl_Compile" == __name__
 SimpleBooleanImpl_Compile = sys.modules[__name__]
 

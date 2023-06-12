@@ -11,7 +11,7 @@ from .errors import ServiceError
 from .models import GetBooleanInput, GetBooleanOutput
 from simple.types.boolean.internaldafny.types import GetBooleanInput_GetBooleanInput as DafnyGetBooleanInput
 from simple.types.boolean.internaldafny.types import GetBooleanOutput_GetBooleanOutput as DafnyGetBooleanOutput
-from simple.types.boolean.internaldafny import SimpleBooleanClient
+from simple.types.boolean.internaldafny.impl import SimpleBooleanClient
 from .deserialize import _deserialize_get_boolean
 from smithy_python.interfaces.interceptor import Interceptor, InterceptorContext
 

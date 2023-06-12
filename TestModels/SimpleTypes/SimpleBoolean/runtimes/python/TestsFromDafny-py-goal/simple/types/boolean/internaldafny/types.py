@@ -6,7 +6,6 @@ from itertools import count
 import module_
 import _dafny
 import System_
-
 import Wrappers_Compile
 
 assert "simple.types.boolean.internaldafny.types" == __name__
@@ -106,7 +105,7 @@ class SimpleBooleanConfig_SimpleBooleanConfig(SimpleBooleanConfig, NamedTuple('S
 class Error:
     @classmethod
     def default(cls, ):
-        return lambda: Error_CollectionOfErrors(_dafny.Seq({}))
+        return lambda: Error_CollectionOfErrors(_dafny.Seq({}), _dafny.Seq({}))
     def __ne__(self, __o: object) -> bool:
         return not self.__eq__(__o)
     @property
@@ -116,11 +115,11 @@ class Error:
     def is_Opaque(self) -> bool:
         return isinstance(self, simple.types.boolean.internaldafny.types.Error_Opaque)
 
-class Error_CollectionOfErrors(Error, NamedTuple('CollectionOfErrors', [('list', Any)])):
+class Error_CollectionOfErrors(Error, NamedTuple('CollectionOfErrors', [('list', Any), ('message', Any)])):
     def __dafnystr__(self) -> str:
-        return f'simple.types.boolean.internaldafny.types_Compile.Error.CollectionOfErrors({_dafny.string_of(self.list)})'
+        return f'simple.types.boolean.internaldafny.types_Compile.Error.CollectionOfErrors({_dafny.string_of(self.list)}, {_dafny.string_of(self.message)})'
     def __eq__(self, __o: object) -> bool:
-        return isinstance(__o, simple.types.boolean.internaldafny.types.Error_CollectionOfErrors) and self.list == __o.list
+        return isinstance(__o, simple.types.boolean.internaldafny.types.Error_CollectionOfErrors) and self.list == __o.list and self.message == __o.message
     def __hash__(self) -> int:
         return super().__hash__()
 

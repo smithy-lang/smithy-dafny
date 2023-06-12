@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 from typing import Any, Callable, TypeAlias, Union
 
-import simple.types.boolean.internaldafny
+import simple.types.boolean.internaldafny.impl
 
 from .models import GetBooleanInput, GetBooleanOutput
 
@@ -22,7 +22,7 @@ class Config:
     """
     interceptors: list[None]
     retry_strategy: None
-    impl: simple.types.boolean.internaldafny.SimpleBooleanClient
+    impl: simple.types.boolean.internaldafny.impl.SimpleBooleanClient
 
 # A callable that allows customizing the config object on each request.
 Plugin: TypeAlias = Callable[[Config], None]

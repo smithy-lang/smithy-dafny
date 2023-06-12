@@ -8,7 +8,6 @@ import _dafny
 import System_
 import SimpleBooleanImplTest_Compile
 import simple.types.boolean.internaldafny.types
-
 assert "simple.types.boolean.internaldafny.wrapped" == __name__
 
 class default__:
