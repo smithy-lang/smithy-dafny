@@ -243,7 +243,7 @@ module {:options "/functionSyntax:4" } LocalCMC {
       && (s' == s[..pos] + s[pos+1..])
   {
     var pos := IndexOfCacheEntry(s, v);
-    // Associativitiy, s is the sum of both sides
+    // Associativity, s is the sum of both sides
     assert s == s[..pos] + s[pos..];
     // the 1 v MUST be in the right side
     assert multiset(s[pos..])[v] == 1;
@@ -365,6 +365,7 @@ module {:options "/functionSyntax:4" } LocalCMC {
       // ensures output.Failure? ==> input.identifier !in cache
       ensures GetCacheEntryEnsuresPublicly(input, output)
       ensures unchanged(History)
+      ensures Modifies <= old(Modifies)
     {
       if input.identifier in cache.Keys() {
         var now := Time.GetCurrent();
@@ -417,22 +418,25 @@ module {:options "/functionSyntax:4" } LocalCMC {
       ensures ValidState()
       ensures PutCacheEntryEnsuresPublicly(input, output)
       ensures unchanged(History)
+      ensures fresh(Modifies - old(Modifies))
     {
 
       if entryCapacity == 0 {
         return Success(());
       }
 
-      :- Need(input.identifier !in cache.Keys(), Types.EntryAlreadyExists(
-        message := "Updating an entry is not allowed, remove first."
-      ));
-
+      if input.identifier in cache.Keys() {
+        var _ :- DeleteCacheEntry'(Types.DeleteCacheEntryInput(
+          identifier := input.identifier
+        ));
+      }
+      assert input.identifier !in cache.Keys();
       assert 0 < entryCapacity;
 
       //= aws-encryption-sdk-specification/framework/local-cryptographic-materials-cache.md#put-cache-entry
       //# However, before returning the local CMC MUST evict least-recently used entries
       //# until the number of stored entries does not exceed the entry capacity.
-      // This is a todo, becuase this only decriments by 1.
+      // This is a todo, because this only decrements by 1.
       // While it is true that only 1 is added,
       // this should be a loop.
       //
@@ -546,6 +550,7 @@ module {:options "/functionSyntax:4" } LocalCMC {
       modifies Modifies - {History}
       decreases Modifies - {History}
       ensures ValidState()
+      ensures Modifies <= old(Modifies)
     {
       if input.identifier in cache.Keys() {
         var cell := cache.Select(input.identifier);

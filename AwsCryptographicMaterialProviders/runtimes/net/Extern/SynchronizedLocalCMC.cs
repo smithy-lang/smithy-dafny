@@ -3,7 +3,7 @@
 
 using software.amazon.cryptography.primitives.internaldafny.types;
 
-namespace software.amazon.cryptography.internaldafny
+namespace software.amazon.cryptography.internaldafny.SynchronizedLocalCMC
 {
   public partial class SynchronizedLocalCMC : software.amazon.cryptography.materialproviders.internaldafny.types.ICryptographicMaterialsCache
   {

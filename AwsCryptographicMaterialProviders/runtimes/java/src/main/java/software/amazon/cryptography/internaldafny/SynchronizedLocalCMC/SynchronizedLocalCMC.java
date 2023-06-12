@@ -1,4 +1,4 @@
-package software.amazon.cryptography.internaldafny;
+package software.amazon.cryptography.internaldafny.SynchronizedLocalCMC;
 
 import LocalCMC_Compile.LocalCMC;
 
