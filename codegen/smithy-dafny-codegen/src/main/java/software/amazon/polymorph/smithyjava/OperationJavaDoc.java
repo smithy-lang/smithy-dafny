@@ -1,3 +1,5 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 package software.amazon.polymorph.smithyjava;
 
 import java.util.List;
@@ -12,6 +14,8 @@ import software.amazon.polymorph.traits.JavaDocTrait;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.traits.StringTrait;
+
+import static software.amazon.polymorph.smithyjava.generator.Generator.NATIVE_VAR;
 
 /**
  * @param desc    JavaDoc Body content
@@ -54,7 +58,7 @@ public record OperationJavaDoc(
           .expectShape(shape.getInputShape())
           .getMemberTrait(model, JavaDocTrait.class)
           .map(StringTrait::getValue).orElse(null);
-        @Nonnull String paramName = shape.getInputShape().getName();
+        @Nonnull String paramName = NATIVE_VAR;
         @Nullable String returns = model
           .expectShape(shape.getOutputShape())
           .getMemberTrait(model, JavaDocTrait.class)

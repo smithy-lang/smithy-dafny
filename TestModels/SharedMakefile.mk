@@ -306,7 +306,7 @@ mvn_local_deploy:
 test_java:
 	gradle -p runtimes/java runTests
 
-clean:
+_clean:
 	rm -f $(LIBRARY_ROOT)/Model/*Types.dfy $(LIBRARY_ROOT)/Model/*TypesWrapped.dfy
 	rm -f $(LIBRARY_ROOT)/runtimes/net/ImplementationFromDafny.cs
 	rm -f $(LIBRARY_ROOT)/runtimes/net/tests/TestFromDafny.cs
@@ -332,3 +332,5 @@ cleanup_filenames:
 
 test_python:
 	python3 runtimes/python/TestsFromDafny_py/__init__.py
+
+clean: _clean

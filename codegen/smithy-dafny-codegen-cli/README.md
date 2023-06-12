@@ -5,13 +5,6 @@ C#/.NET, Dafny, & Java code generation for Smithy models
 ## How to Install
 
 This project requires Java 17 or above.
-It also requires the DafnyRuntime Jar,
-and `dafny-java-conversion`.
-
-Follow the instructions in `dafny-java-conversion`'s README
-to install the DafnyRuntime Jar, 
-and then execute `./gradlew publishToMavenLocal` to install
-`dafny-java-conversion` locally.
 
 ## How to use
 

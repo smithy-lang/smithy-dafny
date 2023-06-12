@@ -1,4 +1,6 @@
-namespace simpletypes.boolean
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
+namespace simple.types.boolean
 
 @aws.polymorph#localService(
   sdkId: "SimpleBoolean",
