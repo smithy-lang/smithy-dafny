@@ -61,7 +61,7 @@ public class StormTrackingCMC
         return Wrappers_Compile.Result.create_Failure((result).dtor_error());
       } else if (result.dtor_value().is_Full()) {
         return Wrappers_Compile.Result.create_Success(result.dtor_value().dtor_data());
-      } else if (result.dtor_value().is_FakeEmpty()) {
+      } else if (result.dtor_value().is_EmptyFetch()) {
         return Wrappers_Compile.Result
             .create_Failure(software.amazon.cryptography.materialproviders.internaldafny.types.Error
                 .create_EntryDoesNotExist(dafny.DafnySequence.asString("Entry does not exist")));
