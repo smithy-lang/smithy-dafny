@@ -19,4 +19,4 @@ def WrappedSimpleBoolean(config):
     wrapped_client = SimpleBooleanShim(impl)
     return Wrappers_Compile.Result_Success(wrapped_client)
 
-simple.types.boolean.internaldafny.wrapped.default__.WrappedSimpleBoolean = WrappedSimpleBoolean
+# simple.types.boolean.internaldafny.wrapped.default__.WrappedSimpleBoolean = WrappedSimpleBoolean

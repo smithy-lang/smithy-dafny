@@ -15,6 +15,8 @@ from simple.types.boolean.internaldafny.impl import SimpleBooleanClient
 from .deserialize import _deserialize_get_boolean
 from smithy_python.interfaces.interceptor import Interceptor, InterceptorContext
 
+import Extern
+
 Input = TypeVar("Input")
 Output = TypeVar("Output")
 

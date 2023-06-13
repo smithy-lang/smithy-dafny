@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 include "../Model/SimpleTypesBooleanTypes.dfy"
 
-module SimpleBooleanImpl refines AbstractSimpletypesBooleanOperations  {
+module SimpleBooleanImpl refines AbstractSimpleTypesBooleanOperations  {
   datatype Config = Config
   type InternalConfig = Config
   predicate ValidInternalConfig?(config: InternalConfig)

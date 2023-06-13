@@ -1,0 +1,2 @@
+[run_tests]
+tests = src.test.dafny_generated:main

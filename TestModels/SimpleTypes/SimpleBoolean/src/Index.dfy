@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 include "SimpleBooleanImpl.dfy"
 
-module {:extern "simple.types.boolean.internaldafny" } SimpleBoolean refines AbstractSimpleTypesBooleanService {
+module {:extern "simple.types.boolean.internaldafny.impl" } SimpleBoolean refines AbstractSimpleTypesBooleanService {
     import Operations = SimpleBooleanImpl
 
  function method DefaultSimpleBooleanConfig(): SimpleBooleanConfig {

@@ -93,6 +93,8 @@ build_implementation:
 		-t:$(TARGET) \
 		./src/Index.dfy \
 		-o $(OUT) \
+		--quantifier-syntax:3 \
+		--function-syntax:3 \
 		--optimize-erasable-datatype-wrapper:false \
 		--library:$(PROJECT_ROOT)/dafny-dependencies/StandardLibrary/src/Index.dfy \
 		$(patsubst %, -library:$(PROJECT_ROOT)/%/src/Index.dfy, $(LIBRARIES))
@@ -102,6 +104,8 @@ build_test:
 		-t:$(TARGET) \
 		`find ./test -name '*.dfy'` \
 		-o $(OUT) \
+		--quantifier-syntax:3 \
+		--function-syntax:3 \
 		--optimize-erasable-datatype-wrapper:false \
 		--library:src/Index.dfy
 
@@ -227,10 +231,11 @@ smithy_dafny_python:
 	gradle build
 	# Smithy outputDirectory can be overridden in smithy-build.json:
 	#   https://smithy.io/2.0/guides/building-models/build-config.html#smithy-build-json
-	# However, outputDirectory is currently bugged, and overrides do not apply:
+	# However, outputDirectory is currently bugged, and overrides do not apply:sm
 	#   https://github.com/awslabs/smithy/issues/1425
 	# As a workaround, the Make script will move output to the correct directory until #1425 is resolved.
-	cp -r build/smithyprojections/simple-types-boolean/source/python-client-codegen runtimes/python
+	mkdir -p runtimes/python/src/smithy_generated
+	cp -r build/smithyprojections/simple-types-boolean/source/python-client-codegen/. runtimes/python/src/smithy_generated
 
 
 ########################## .NET targets
@@ -316,21 +321,48 @@ _clean:
 
 # Python Targets
 
+make_python: | build_implementation_python transpile_test_python
+
+build_python: | build_implementation_python build_test_python
+
+build_implementation_python: TARGET=py
+build_implementation_python: OUT=runtimes/python/src/dafny_generated
+build_implementation_python: build_implementation
+build_implementation_python:
+	rm -rf runtimes/python/src/dafny_generated
+	mv runtimes/python/src/dafny_generated-py runtimes/python/src/dafny_generated
+
+build_test_python: TARGET=py
+build_test_python: OUT=runtimes/python/test/dafny_generated
+build_test_python: build_test
+
 transpile_python: | transpile_implementation_python transpile_test_python
 
 transpile_implementation_python: TARGET=py
-transpile_implementation_python: OUT=runtimes/python/ImplementationFromDafny
-transpile_implementation_python:  build_implementation
+transpile_implementation_python: OUT=runtimes/python/src/dafny_generated
+transpile_implementation_python: transpile_implementation
+# TODO: Ask Dafny team to not generate -py suffix
+# Python modules can't have a hyphen in them
+transpile_implementation_python:
+	rm -rf runtimes/python/src/dafny_generated
+	mv runtimes/python/src/dafny_generated-py runtimes/python/src/dafny_generated
 
 transpile_test_python: TARGET=py
-transpile_test_python: OUT=runtimes/python/TestsFromDafny
+transpile_test_python: OUT=runtimes/python/test/dafny_generated
 transpile_test_python: transpile_test
+# TODO: Ask Dafny team to not generate -py suffix
+# Python modules can't have a hyphen in them
+transpile_test_python:
+	rm -rf runtimes/python/test/dafny_generated
+	mv runtimes/python/test/dafny_generated-py runtimes/python/test/dafny_generated
+	# Assumes that implementation was built, and uses the _dafny from that
+	cp runtimes/python/src/dafny_generated/_dafny.py runtimes/python/test/dafny_generated
 
 cleanup_filenames:
 	cd runtimes/Pyt
 
-
 test_python:
-	python3 runtimes/python/TestsFromDafny_py/__init__.py
+#	python -m pip install -e runtimes/python
+	python runtimes/python/test/dafny_generated/dafny_generated.py
 
 clean: _clean

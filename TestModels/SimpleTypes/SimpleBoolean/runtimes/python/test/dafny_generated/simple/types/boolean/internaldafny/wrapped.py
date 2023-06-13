@@ -7,9 +7,8 @@ import module_
 import _dafny
 import System_
 import SimpleBooleanImplTest_Compile
-import simple.types.boolean.internaldafny.types
+
 assert "simple.types.boolean.internaldafny.wrapped" == __name__
-import Extern
 
 class default__:
     def  __init__(self):
@@ -20,5 +19,4 @@ class default__:
     @staticmethod
     def WrappedDefaultSimpleBooleanConfig():
         return simple.types.boolean.internaldafny.types.SimpleBooleanConfig_SimpleBooleanConfig()
-    WrappedSimpleBoolean = Extern.WrappedSimpleBoolean
 
