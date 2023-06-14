@@ -323,27 +323,16 @@ _clean:
 
 make_python: | clean_dafny_python transpile_dependencies_python build_implementation_python transpile_test_python mv_files_python
 
-build_python: | build_implementation_python build_test_python
-
 clean_dafny_python:
 	rm -rf runtimes/python/src/dafny_generated
 
 build_implementation_python: TARGET=py
 build_implementation_python: OUT=runtimes/python/src/dafny_generated
 build_implementation_python: build_implementation
-# Leave in -py for now; transpile_test will move over
-
-build_test_python: TARGET=py
-build_test_python: OUT=runtimes/python/test/dafny_generated
-build_test_python: build_test
-
-transpile_python: | transpile_implementation_python transpile_test_python
 
 transpile_implementation_python: TARGET=py
 transpile_implementation_python: OUT=runtimes/python/src/dafny_generated
 transpile_implementation_python: transpile_implementation
-# TODO: Ask Dafny team to not generate -py suffix
-# Python modules can't have a hyphen in them
 transpile_implementation_python:
 	rm -rf runtimes/python/src/dafny_generated
 	mv runtimes/python/src/dafny_generated-py runtimes/python/src/dafny_generated
@@ -351,22 +340,16 @@ transpile_implementation_python:
 transpile_dependencies_python: LANG=python
 transpile_dependencies_python: transpile_dependencies
 transpile_dependencies_python:
+	mkdir -p runtimes/python/src/dafny_generated-py
 	cp -r $(STANDARD_LIBRARY_PATH)/runtimes/python/src/dafny_generated/. runtimes/python/src/dafny_generated-py
 
 transpile_test_python: TARGET=py
 transpile_test_python: OUT=runtimes/python/src/dafny_generated
 transpile_test_python: transpile_test
-# TODO: Ask Dafny team to not generate -py suffix
-# Python modules can't have a hyphen in them
-
 mv_files_python:
 	mv runtimes/python/src/dafny_generated-py runtimes/python/src/dafny_generated
 
-cleanup_filenames:
-	cd runtimes/Pyt
-
 test_python:
-#	python -m pip install -e runtimes/python
 	python runtimes/python/src/dafny_generated/dafny_generated.py
 
 clean: _clean
