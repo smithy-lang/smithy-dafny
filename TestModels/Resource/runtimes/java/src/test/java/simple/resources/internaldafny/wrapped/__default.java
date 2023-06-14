@@ -1,3 +1,5 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 package simple.resources.internaldafny.wrapped;
 
 import simple.resources.SimpleResources;

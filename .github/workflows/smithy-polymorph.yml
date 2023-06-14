@@ -7,7 +7,7 @@ on:
       - main-1.x
 
 jobs:
-  gradle-build:
+  gradle-build-smithy-dafny:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -46,3 +46,6 @@ jobs:
         with:
           arguments: build
           build-root-directory: codegen
+
+      - name: not-grep
+        uses: mattsb42-meta/not-grep@1.0.0

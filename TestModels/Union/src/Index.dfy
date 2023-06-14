@@ -1,3 +1,5 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 include "SimpleUnionImpl.dfy"
 
 module {:extern "simple.union.internaldafny" } SimpleUnion refines AbstractSimpleUnionService {
