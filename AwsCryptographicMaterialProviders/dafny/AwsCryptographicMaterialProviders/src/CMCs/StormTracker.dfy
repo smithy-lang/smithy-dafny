@@ -34,17 +34,12 @@ module {:options "/functionSyntax:4" }  StormTracker {
     ghost predicate ValidState()
       reads this, wrapped, wrapped.Modifies
     {
-      // && this in Modifies
-      // && wrapped in Modifies
-      // && inFlight in Modifies
-      // && wrapped.Modifies <= Modifies
       && this !in wrapped.Modifies
       && inFlight !in wrapped.Modifies
       && wrapped.ValidState()
     }
     var wrapped : LocalCMC.LocalCMC;
     var inFlight: MutableMap<seq<uint8>, Types.PositiveLong>
-    // ghost var Modifies : set<object>
 
     constructor(
       entryCapacity: nat,
@@ -59,8 +54,6 @@ module {:options "/functionSyntax:4" }  StormTracker {
     {
       this.wrapped := new LocalCMC.LocalCMC(entryCapacity, entryPruningTailSize);
       this.inFlight := new MutableMap();
-      // new;
-      // Modifies := { wrapped, inFlight, this } + wrapped.Modifies;
     }
 
     ghost function Modifies() : set<object>
@@ -143,13 +136,17 @@ module {:options "/functionSyntax:4" }  StormTracker {
       output := GetFromCacheWithTime(input, now);
     }
 
-    /*
-    // If StormTracker wanted to implement GetCacheEntry, this is what it would look like.
+    // This should not be used directly.
+    // If we needed StormTracker to be an ICryptographicMaterialsCache, this would be needed
+    // It is also useful because Dafny generates almost the right code for the native StormTrackingCMC
     method GetCacheEntry(input: Types.GetCacheEntryInput)
       returns (output: Result<Types.GetCacheEntryOutput, Types.Error>)
       requires ValidState()
       modifies inFlight, wrapped.Modifies
       ensures ValidState()
+      ensures inFlight == old(inFlight)
+      ensures wrapped == old(wrapped)
+      ensures wrapped.Modifies <= old(wrapped.Modifies)
     {
       var result := GetFromCache(input);
       if result.Failure? {
@@ -160,7 +157,6 @@ module {:options "/functionSyntax:4" }  StormTracker {
         return Failure(Types.EntryDoesNotExist(message := "Entry does not exist"));
       }
     }
-    */
 
     method PutCacheEntry(input: Types.PutCacheEntryInput)
       returns (output: Result<(), Types.Error>)
