@@ -176,6 +176,7 @@ module {:options "/functionSyntax:4" }  StormTracker {
       requires ValidState()
       modifies inFlight, wrapped.Modifies
       ensures ValidState()
+      ensures wrapped.Modifies <= old(wrapped.Modifies)
     {
       inFlight.Remove(input.identifier);
       output := wrapped.DeleteCacheEntry'(input);

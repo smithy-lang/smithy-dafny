@@ -89,14 +89,7 @@ public class LocalCMCTests {
         .expiryTime(Instant.now().getEpochSecond() + 1)
         .materials(materials)
         .build();
-      try {
         test.PutCacheEntry(putCacheEntryInput);
-      } catch (EntryAlreadyExists ex2) {
-        TestALotOfAdding();
-        // This is a threading "problem",
-        // but not an issue per se
-        // because this is a guarded error
-      }
     }
 
   }

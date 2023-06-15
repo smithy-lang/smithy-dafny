@@ -8,7 +8,7 @@ module {:options "/functionSyntax:4" } {:extern "software.amazon.cryptography.in
   import Types = AwsCryptographyMaterialProvidersTypes
   import StormTracker
 
-  class {:extern} SynchronizedLocalCMC extends Types.ICryptographicMaterialsCache {
+  class {:extern} StormTrackingCMC extends Types.ICryptographicMaterialsCache {
 
     ghost predicate ValidState()
       reads this`Modifies, Modifies - {History}

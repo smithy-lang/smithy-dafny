@@ -4,11 +4,11 @@
 include "../../src/Index.dfy"
 include "../TestUtils.dfy"
 
-module  {:options "/functionSyntax:4"} TestStormTracker {
+module  {:options "/functionSyntax:4"} TestLocalCMC {
   import opened AwsCryptographyMaterialProvidersTypes
   import opened UInt = StandardLibrary.UInt
   import opened Wrappers
-  import opened StormTracker
+  import opened LocalCMC
   import UTF8
 
   function MakeMat(data : Utf8Bytes) : Materials
@@ -44,28 +44,29 @@ module  {:options "/functionSyntax:4"} TestStormTracker {
     )
   }
 
-  method {:test} StormTrackerBasics() {
-    var st := new StormTracker(100);
+  method {:test} LocalCMCBasics() {
+    var st := new LocalCMC(100);
 
     var abc := UTF8.EncodeAscii("abc");
     var cde := UTF8.EncodeAscii("cde");
-    var res :- expect st.GetFromCacheWithTime(MakeGet(abc), 10000);
-    expect res.EmptyFetch?;
-    res :- expect st.GetFromCacheWithTime(MakeGet(abc), 10000);
-    expect res.EmptyWait?;
-    var res2 :- expect st.PutCacheEntry(MakePut(abc, 10000));
-    res2 :- expect st.PutCacheEntry(MakePut(cde, 10000));
-    res :- expect st.GetFromCacheWithTime(MakeGet(abc), 10001);
-    expect res.EmptyFetch?;
-    res :- expect st.GetFromCacheWithTime(MakeGet(abc), 10001);
-    expect res.EmptyWait?;
+    var res := st.GetCacheEntryWithTime(MakeGet(abc), 10000);
+    expect res.Failure?;
+    expect res.error.EntryDoesNotExist?;
 
-    // the following are to test the Dafny header, to see that it allows for multiple calls
-    var res3 := st.GetCacheEntry(MakeGet(abc));
-    res3 := st.GetCacheEntry(MakeGet(abc));
-    var res4 := st.GetFromCache(MakeGet(abc));
-    res4 := st.GetFromCache(MakeGet(abc));
-    var res5 := st.DeleteCacheEntry(MakeDel(abc));
-    res5 := st.DeleteCacheEntry(MakeDel(abc));
+    var res2 :- expect st.PutCacheEntry'(MakePut(abc, 10000));
+    res2 :- expect st.PutCacheEntry'(MakePut(cde, 10000));
+
+    var res3 :- expect st.GetCacheEntryWithTime(MakeGet(abc), 9999);
+    res3 :- expect st.GetCacheEntryWithTime(MakeGet(abc), 10000);
+    res := st.GetCacheEntryWithTime(MakeGet(abc), 10001);
+    expect res.Failure?;
+    expect res.error.EntryDoesNotExist?;
+
+    res3 :- expect st.GetCacheEntryWithTime(MakeGet(cde), 9999);
+    var res5 :- expect st.DeleteCacheEntry'(MakeDel(cde));
+    res := st.GetCacheEntryWithTime(MakeGet(abc), 9999);
+    expect res.Failure?;
+    expect res.error.EntryDoesNotExist?;
+    res5 :- expect st.DeleteCacheEntry'(MakeDel(cde));
   }
 }

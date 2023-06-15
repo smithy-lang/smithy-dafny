@@ -47,6 +47,8 @@ module AwsCryptographyMaterialProvidersOperations refines AbstractAwsCryptograph
   import opened C = DefaultCMM
   import opened L = LocalCMC
   import SynchronizedLocalCMC
+  import StormTracker
+  import StormTrackingCMC
   import Crypto = AwsCryptographyPrimitivesTypes
   import Aws.Cryptography.Primitives
   import opened AwsKmsUtils
@@ -256,7 +258,7 @@ module AwsCryptographyMaterialProvidersOperations refines AbstractAwsCryptograph
     
     //= aws-encryption-sdk-specification/framework/aws-kms/aws-kms-hierarchical-keyring.md#initialization
     //= type=implication
-    //# If no max cache size is provided, the crypotgraphic materials cache MUST be configured to a
+    //# If no max cache size is provided, the cryptographic materials cache MUST be configured to a
     //# max cache size of 1000.
     if input.maxCacheSize.None? {
       maxCacheSize := 1000;
@@ -510,14 +512,20 @@ module AwsCryptographyMaterialProvidersOperations refines AbstractAwsCryptograph
     if input.entryPruningTailSize.Some? {
       :- Need(input.entryPruningTailSize.value >= 1,
         Types.AwsCryptographicMaterialProvidersException(
-          message := "Entry Prunning Tail Size MUST be greater than or equal to 1."));
+          message := "Entry Pruning Tail Size MUST be greater than or equal to 1."));
       entryPruningTailSize := input.entryPruningTailSize.value as nat;
     } else {
       entryPruningTailSize := 1;
-    } 
-    var cmc := new LocalCMC(input.entryCapacity as nat, entryPruningTailSize);
-    var synCmc := new SynchronizedLocalCMC.SynchronizedLocalCMC(cmc);
-    return Success(synCmc);
+    }
+    if true {
+      var cmc := new StormTracker.StormTracker(input.entryCapacity as nat, entryPruningTailSize);
+      var synCmc := new StormTrackingCMC.StormTrackingCMC(cmc);
+      return Success(synCmc);
+    } else {
+      var cmc := new LocalCMC(input.entryCapacity as nat, entryPruningTailSize);
+      var synCmc := new SynchronizedLocalCMC.SynchronizedLocalCMC(cmc);
+      return Success(synCmc);
+    }
   }
 
   predicate CreateDefaultClientSupplierEnsuresPublicly(input: CreateDefaultClientSupplierInput, output: Result<IClientSupplier, Error>)
