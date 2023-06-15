@@ -1,10 +1,10 @@
 # TODO generate this
 
 import simple.types.boolean.internaldafny.types
-import python_client_codegen.simple_boolean.client as SimpleBoolean
+import smithy_generated.simple_boolean.client as SimpleBoolean
 import Wrappers_Compile
 import asyncio
-from python_client_codegen.simple_boolean.models import GetBooleanInput
+from smithy_generated.simple_boolean.models import GetBooleanInput
 
 class SimpleBooleanShim(simple.types.boolean.internaldafny.types.ISimpleBooleanClient):
     def __init__(self, _impl: SimpleBoolean) :

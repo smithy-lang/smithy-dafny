@@ -345,7 +345,21 @@ transpile_dependencies_python:
 
 transpile_test_python: TARGET=py
 transpile_test_python: OUT=runtimes/python/src/dafny_generated
-transpile_test_python: transpile_test
+transpile_test_python:
+	dafny \
+		-vcsCores:$(CORES) \
+		-compileTarget:$(TARGET) \
+		-spillTargetCode:3 \
+		-runAllTests:1 \
+		-quantifierSyntax:3 \
+		-unicodeChar:0 \
+		-functionSyntax:3 \
+		-optimizeErasableDatatypeWrapper:0 \
+		-useRuntimeLib \
+		-out $(OUT) \
+		-compile:0 \
+		`find ./test -name '*.dfy'`
+
 mv_files_python:
 	mv runtimes/python/src/dafny_generated-py runtimes/python/src/dafny_generated
 
