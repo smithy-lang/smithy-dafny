@@ -45,12 +45,12 @@ public final class DafnyTestIntegration implements
                     .namespace("Dafny.Simpletypes.Boolean", ".")
                     .build(),
                 false, "")))
-        // .pythonPlugin(SymbolReference.builder()
-        //     .symbol(Symbol.builder()
-        //         .name("set_config_impl")
-        //         .namespace(".", ".")
-        //         .build())
-        //     .build())
+         .pythonPlugin(SymbolReference.builder()
+             .symbol(Symbol.builder()
+                 .name("set_config_impl")
+                 .namespace(".", ".")
+                 .build())
+             .build())
         .build();
 
 

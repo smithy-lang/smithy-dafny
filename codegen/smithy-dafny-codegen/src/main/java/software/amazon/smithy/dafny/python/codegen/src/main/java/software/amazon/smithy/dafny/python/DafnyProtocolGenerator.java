@@ -91,17 +91,28 @@ public abstract class DafnyProtocolGenerator implements ProtocolGenerator {
     var topDownIndex = TopDownIndex.of(context.model());
     var delegator = context.writerDelegator();
     var configSymbol = CodegenUtils.getConfigSymbol(context.settings());
+    // I beLIEVE transportRequest needs to be the output shape
+    // for requestSeralizers this is a dafnyType
+    // i.e. the operation output...?
+    // no... the operation output is... not... this...
+    // Oh, ok: input is GetBooleanInput, output is GetBooleanOutput...
+    // OH, duhDOY. I am looking at the Smithy model. Smithy model dgaf about the Dafny stuff.
+    // I need to hardcode the Dafny stuff!
+    // i.e. DafnyNameResolver... one day. For now, name = "Dafny"+input.
+    // Actually, for now: hardcoded DafnyGetBooleanInput.
     var transportRequest = context.applicationProtocol().requestType();
     for (OperationShape operation : topDownIndex.getContainedOperations(context.settings().getService())) {
       var serFunction = getSerializationFunction(context, operation);
       var input = context.model().expectShape(operation.getInputShape());
       var inputSymbol = context.symbolProvider().toSymbol(input);
+      var output = context.model().expectShape(operation.getOutputShape());
+      var outputSymbol = context.symbolProvider().toSymbol(output);
       delegator.useFileWriter(serFunction.getDefinitionFile(), serFunction.getNamespace(), writer -> {
         writer.pushState(new RequestSerializerSection(operation));
         writer.write("""
-                    async def $L(input: $T, config: $T) -> $T:
+                    async def $L(input: $T, config: $T) -> DafnyGetBooleanInput:
                         ${C|}
-                    """, serFunction.getName(), inputSymbol, configSymbol, transportRequest,
+                    """, serFunction.getName(), inputSymbol, configSymbol,
             writer.consumer(w -> generateRequestSerializer(context, operation, w)));
         writer.popState();
       });
@@ -137,9 +148,10 @@ public abstract class DafnyProtocolGenerator implements ProtocolGenerator {
       PythonWriter writer
   ) {
     writer.addDependency(SmithyPythonDependency.SMITHY_PYTHON);
-    // get this from... topdownindex?
-    // i have freedom to pass in anything i want to generateRequestSerializer
-    writer.addImport("Dafny.Simpletypes.Boolean.Types", "GetBooleanInput_GetBooleanInput", "DafnyGetBooleanInput");
+    // TODO: pass topDownIndex into this function
+    // TODO: parse topDownIndex for the required imports
+
+    writer.addImport("simple.types.boolean.internaldafny.types", "GetBooleanInput_GetBooleanInput", "DafnyGetBooleanInput");
 
     writer.write("""
             return DafnyGetBooleanInput(value=input.value)
@@ -151,10 +163,30 @@ public abstract class DafnyProtocolGenerator implements ProtocolGenerator {
     var topDownIndex = TopDownIndex.of(context.model());
     var service = context.settings().getService(context.model());
     var deserializingErrorShapes = new TreeSet<ShapeId>();
+    var delegator = context.writerDelegator();
+    var configSymbol = CodegenUtils.getConfigSymbol(context.settings());
+    var transportRequest = context.applicationProtocol().requestType();
+
     for (OperationShape operation : topDownIndex.getContainedOperations(context.settings().getService())) {
-      generateOperationResponseDeserializer(context, operation);
       deserializingErrorShapes.addAll(operation.getErrors(service));
+
+      var deserFunction = getDeserializationFunction(context, operation);
+      var output = context.model().expectShape(operation.getOutputShape());
+      var outputSymbol = context.symbolProvider().toSymbol(output);
+      delegator.useFileWriter(deserFunction.getDefinitionFile(), deserFunction.getNamespace(), writer -> {
+        writer.pushState(new RequestSerializerSection(operation));
+
+        writer.write("""
+                    async def $L(input: DafnyGetBooleanOutput, config: $T) -> $T:
+                        ${C|}
+                    """, deserFunction.getName(), configSymbol, outputSymbol,
+            writer.consumer(w -> generateOperationResponseDeserializer(context, operation)));
+        writer.popState();
+      });
+
     }
+
+
     for (ShapeId errorId : deserializingErrorShapes) {
       var error = context.model().expectShape(errorId, StructureShape.class);
       generateErrorResponseDeserializer(context, error);
@@ -184,10 +216,13 @@ public abstract class DafnyProtocolGenerator implements ProtocolGenerator {
     var deserFunction = getDeserializationFunction(context, operation);
     delegator.useFileWriter(deserFunction.getDefinitionFile(), deserFunction.getNamespace(), writer -> {
       writer.pushState(new ResponseDeserializerSection(operation));
+
+      // TODO: pass topDownIndex into this function
+      // TODO: parse topDownIndex for the required imports
       
-      writer.addImport("Dafny.Simpletypes.Boolean.Types", "GetBooleanOutput_GetBooleanOutput", "DafnyGetBooleanOutput");
-      writer.addImport(".config", "Config", "Config");
-      writer.addImport(".models", "GetBooleanOutput", "GetBooleanOutput");
+      writer.addImport("simple.types.boolean.internaldafny.types", "GetBooleanOutput_GetBooleanOutput", "DafnyGetBooleanOutput");
+//      writer.addImport(".config", "Config", "Config");
+//      writer.addImport(".models", "GetBooleanOutput", "GetBooleanOutput");
 
       writer.write("""
             return GetBooleanOutput(value=input.value.value)
