@@ -20,6 +20,7 @@ import static software.amazon.smithy.model.knowledge.HttpBinding.Location.PAYLOA
 import static software.amazon.smithy.model.knowledge.HttpBinding.Location.PREFIX_HEADERS;
 import static software.amazon.smithy.model.traits.TimestampFormatTrait.Format;
 
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import software.amazon.smithy.codegen.core.CodegenException;
@@ -53,6 +54,7 @@ import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonWriter;
 import software.amazon.smithy.python.codegen.SmithyPythonDependency;
 import software.amazon.smithy.python.codegen.integration.ProtocolGenerator;
+import software.amazon.smithy.utils.CodeInterceptor;
 import software.amazon.smithy.utils.CodeSection;
 import software.amazon.smithy.utils.SmithyUnstableApi;
 /*

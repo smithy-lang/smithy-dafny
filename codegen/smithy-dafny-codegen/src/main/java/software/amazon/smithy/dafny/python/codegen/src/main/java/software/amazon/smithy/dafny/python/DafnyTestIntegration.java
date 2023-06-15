@@ -30,9 +30,12 @@ import software.amazon.smithy.python.codegen.ConfigField;
 import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonDependency;
 import software.amazon.smithy.python.codegen.PythonSettings;
+import software.amazon.smithy.python.codegen.PythonWriter;
 import software.amazon.smithy.python.codegen.SmithyPythonDependency;
 import software.amazon.smithy.python.codegen.integration.ProtocolGenerator;
 import software.amazon.smithy.python.codegen.integration.RuntimeClientPlugin;
+import software.amazon.smithy.utils.CodeInterceptor;
+import software.amazon.smithy.utils.CodeSection;
 
 public final class DafnyTestIntegration implements
     software.amazon.smithy.python.codegen.integration.PythonIntegration {
@@ -41,24 +44,54 @@ public final class DafnyTestIntegration implements
         .configFields(
             Collections.singletonList(new ConfigField("impl",
                 Symbol.builder()
-                    .name("SimpleBooleanClient")
-                    .namespace("Dafny.Simpletypes.Boolean", ".")
+                    // TODO: ISimple..>?
+                    .name("ISimpleBooleanClient")
+                    .namespace("simple.types.boolean.internaldafny.types", ".")
                     .build(),
-                false, "")))
-         .pythonPlugin(SymbolReference.builder()
-             .symbol(Symbol.builder()
+                true, ""))
+         ).pythonPlugin(
+             // TODO: ??????
+            // This goes into client_plugins.... I do not think I need to plug in tho?
+            // Since IG this is a runtime plugin but idk if we need anything at runtime
+             SymbolReference.builder()
+             .symbol(
+                 Symbol.builder()
                  .name("set_config_impl")
-                 .namespace(".", ".")
+                 .namespace(".plugin", ".")
                  .build())
-             .build())
+             .build()
+         )
         .build();
 
-
+    @Override
+    public List<? extends CodeInterceptor<? extends CodeSection, PythonWriter>>
+    interceptors(GenerationContext codegenContext) {
+        return List.of(new SendRequestInterceptor());
+    }
     @Override
     public void customize(GenerationContext codegenContext) {
-        codegenContext.writerDelegator().useFileWriter("Iamaredme", "", writer -> {
+        codegenContext.writerDelegator().useFileWriter("simple_boolean/plugin.py", "", writer -> {
             // The $ character is escaped using $$
-            writer.write("yo");
+            writer.write("""
+from .config import Config, Plugin
+from smithy_python.interfaces.retries import RetryStrategy
+from smithy_python.exceptions import SmithyRetryException
+
+def set_config_impl(config: Config):
+    from simple.types.boolean.internaldafny.impl import SimpleBooleanClient
+    config.impl = SimpleBooleanClient()
+    config.retry_strategy = NoRetriesStrategy()
+
+class NoRetriesToken:
+    retry_delay = 0
+
+class NoRetriesStrategy(RetryStrategy):
+    def acquire_initial_retry_token(self):
+        return NoRetriesToken()
+
+    def refresh_retry_token_for_retry(self, token_to_renew, error_info):
+        raise SmithyRetryException()
+                                """);
         });
     }
 
@@ -71,17 +104,18 @@ public final class DafnyTestIntegration implements
         return new ApplicationProtocol(
             "dafny",
             SymbolReference.builder()
-                .symbol(createDafnySymbol("DafnyGetBooleanInput"))
+                .symbol(createDafnySymbol("GetBooleanOutput_GetBooleanOutput"))
                 .build(),
             SymbolReference.builder()
-                .symbol(createDafnySymbol("DafnyGetBooleanOutput"))
+                .symbol(createDafnySymbol("GetBooleanInput_GetBooleanInput"))
                 .build()
         );
     }
 
     private static Symbol createDafnySymbol(String symbolName) {
+        // TODO: ?????
         return Symbol.builder()
-            .namespace("Dafny.Simpletypes.Boolean.Types", ".")
+            .namespace("simple.types.boolean.internaldafny.types", ".")
             .name(symbolName)
 //            .addDependency(dependency)
             .build();
