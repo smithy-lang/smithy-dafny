@@ -179,8 +179,8 @@ public abstract class DafnyProtocolGenerator implements ProtocolGenerator {
         writer.pushState(new RequestSerializerSection(operation));
 
         writer.write("""
-                    async def $L(input: DafnyGetBooleanOutput, config: $T) -> $T:
-                        ${C|}
+async def $L(input: DafnyGetBooleanOutput, config: $T) -> $T:
+  ${C|}
                     """, deserFunction.getName(), configSymbol, outputSymbol,
             writer.consumer(w -> generateOperationResponseDeserializer(context, operation)));
         writer.popState();
@@ -227,7 +227,7 @@ public abstract class DafnyProtocolGenerator implements ProtocolGenerator {
 //      writer.addImport(".models", "GetBooleanOutput", "GetBooleanOutput");
 
       writer.write("""
-            return GetBooleanOutput(value=input.value.value)
+return GetBooleanOutput(value=input.value.value)
       """);
       writer.popState();
     });

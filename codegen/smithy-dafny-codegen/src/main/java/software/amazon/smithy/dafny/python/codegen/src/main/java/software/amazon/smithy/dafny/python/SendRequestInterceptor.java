@@ -23,7 +23,9 @@ final class SendRequestInterceptor implements
                 context_with_response = cast(
                     InterceptorContext[Input, None,  GetBooleanInput_GetBooleanInput, GetBooleanOutput_GetBooleanOutput], context
                 )
-                                
+                
+                print(f"transport_request is {context_with_response.transport_request}")
+                
                 context_with_response._transport_response = config.impl.GetBoolean(
                     input=context_with_response.transport_request
                 )
