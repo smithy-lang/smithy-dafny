@@ -258,7 +258,7 @@ module AwsCryptographyMaterialProvidersOperations refines AbstractAwsCryptograph
     
     //= aws-encryption-sdk-specification/framework/aws-kms/aws-kms-hierarchical-keyring.md#initialization
     //= type=implication
-    //# If no max cache size is provided, the cryptographic materials cache MUST be configured to a
+    //# If no max cache size is provided, the crypotgraphic materials cache MUST be configured to a
     //# max cache size of 1000.
     if input.maxCacheSize.None? {
       maxCacheSize := 1000;
