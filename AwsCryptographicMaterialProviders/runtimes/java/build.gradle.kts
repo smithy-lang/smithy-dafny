@@ -21,7 +21,6 @@ java {
     sourceSets["test"].java {
         srcDir("src/test")
     }
-
     withJavadocJar()
     withSourcesJar()
 }
@@ -56,17 +55,21 @@ repositories {
 }
 
 dependencies {
-    implementation("org.dafny:DafnyRuntime:4.1.0")
-    implementation("software.amazon.smithy.dafny:conversion:0.1")
+    // generated dependencies
     implementation("software.amazon.cryptography:StandardLibrary:1.0-SNAPSHOT")
     implementation("software.amazon.cryptography:AwsCryptographyPrimitives:1.0-SNAPSHOT")
     implementation("software.amazon.cryptography:ComAmazonawsKms:1.0-SNAPSHOT")
     implementation("software.amazon.cryptography:ComAmazonawsDynamodb:1.0-SNAPSHOT")
+
+    // Dafny dependencies
+    implementation("org.dafny:DafnyRuntime:4.1.0")
+    implementation("software.amazon.smithy.dafny:conversion:0.1")
+
+    // sdk dependencies
     implementation(platform("software.amazon.awssdk:bom:2.19.1"))
     implementation("software.amazon.awssdk:dynamodb")
     implementation("software.amazon.awssdk:dynamodb-enhanced")
     implementation("software.amazon.awssdk:kms")
-    implementation("software.amazon.awssdk:core:2.19.1")
 
     // https://mvnrepository.com/artifact/org.testng/testng
     testImplementation("org.testng:testng:7.5")
@@ -79,6 +82,68 @@ publishing {
         artifact(tasks["shadowJar"])
         artifact(tasks["javadocJar"])
         artifact(tasks["sourcesJar"])
+
+        // Since we ship the MPL bundled with our generated dependencies they should not be included in the generated pom.xml
+        // however; we also use additional dependencies runtime dependencies that are needed in order to properly run the mpl.
+        // When you bundle a shadow jar you don't need to include any dependencies in the pom.xml since everything is on the jar, but since
+        // we are selective so we have to "manually" write our own pom file.
+        pom.withXml {
+            var dependencyManagementNode = asNode().appendNode("dependencyManagement").appendNode("dependencies").appendNode("dependency")
+            var sdkPomDependency = configurations.implementation.get().dependencies.find { dependency ->  dependency.group.equals("software.amazon.awssdk") && dependency.name.equals("bom") }
+            if (sdkPomDependency != null) {
+                dependencyManagementNode.appendNode("groupId", sdkPomDependency.group)
+                dependencyManagementNode.appendNode("artifactId", sdkPomDependency.name)
+                dependencyManagementNode.appendNode("version", sdkPomDependency.version)
+                dependencyManagementNode.appendNode("type", "pom")
+                dependencyManagementNode.appendNode("scope", "import")
+            }
+
+            var dependenciesNode = asNode().appendNode("dependencies")
+            configurations.implementation.get().dependencies.forEach {
+                // we don't want to include generated dependencies
+                if (!(it.name.equals("StandardLibrary") ||
+                                it.name.equals("AwsCryptographyPrimitives") ||
+                                it.name.equals("ComAmazonawsKms") ||
+                                it.name.equals("ComAmazonawsDynamodb") ||
+                                it.name.equals("bom"))
+                ) {
+                    var dependencyNode = dependenciesNode.appendNode("dependency")
+                    dependencyNode.appendNode("groupId", it.group)
+                    dependencyNode.appendNode("artifactId", it.name)
+                    if (!it.version.isNullOrEmpty()) {
+                        dependencyNode.appendNode("version", it.version)
+                    }
+                    dependencyNode.appendNode("scope", "runtime")
+                }
+            }
+        }
+
+        // Include extra information in the POMs.
+        afterEvaluate {
+            pom {
+                name.set("AWS Cryptographic Material Providers Library")
+                description.set("The AWS Cryptographic Material Providers Library for Java")
+                url.set("https://github.com/aws/aws-cryptographic-material-providers-library-java")
+                licenses {
+                    license {
+                        name.set("Apache License 2.0")
+                        url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+                        distribution.set("repo")
+                    }
+                }
+                developers {
+                    developer {
+                        id.set("amazonwebservices")
+                        organization.set("Amazon Web Services")
+                        organizationUrl.set("https://aws.amazon.com")
+                        roles.add("developer")
+                    }
+                }
+                scm {
+                    url.set("https://github.com/aws/aws-cryptographic-material-providers-library-java.git")
+                }
+            }
+        }
     }
 
     publications.create<MavenPublication>("maven") {
@@ -87,6 +152,41 @@ publishing {
         artifact(tasks["shadowJar"])
         artifact(tasks["javadocJar"])
         artifact(tasks["sourcesJar"])
+
+        // Since we ship the MPL bundled with our generated dependencies they should not be included in the generated pom.xml
+        // however; we also use additional dependencies runtime dependencies that are needed in order to properly run the mpl.
+        // When you bundle a shadow jar you don't need to include any dependencies in the pom.xml since everything is on the jar, but since
+        // we are selective so we have to "manually" write our own pom file.
+        pom.withXml {
+            var dependencyManagementNode = asNode().appendNode("dependencyManagement").appendNode("dependencies").appendNode("dependency")
+            var sdkPomDependency = configurations.implementation.get().dependencies.find { dependency ->  dependency.group.equals("software.amazon.awssdk") && dependency.name.equals("bom") }
+            if (sdkPomDependency != null) {
+                dependencyManagementNode.appendNode("groupId", sdkPomDependency.group)
+                dependencyManagementNode.appendNode("artifactId", sdkPomDependency.name)
+                dependencyManagementNode.appendNode("version", sdkPomDependency.version)
+                dependencyManagementNode.appendNode("type", "pom")
+                dependencyManagementNode.appendNode("scope", "import")
+            }
+
+            var dependenciesNode = asNode().appendNode("dependencies")
+            configurations.implementation.get().dependencies.forEach {
+                // we don't want to include generated dependencies
+                if (!(it.name.equals("StandardLibrary") ||
+                                it.name.equals("AwsCryptographyPrimitives") ||
+                                it.name.equals("ComAmazonawsKms") ||
+                                it.name.equals("ComAmazonawsDynamodb") ||
+                                it.name.equals("bom"))
+                ) {
+                    var dependencyNode = dependenciesNode.appendNode("dependency")
+                    dependencyNode.appendNode("groupId", it.group)
+                    dependencyNode.appendNode("artifactId", it.name)
+                    if (!it.version.isNullOrEmpty()) {
+                        dependencyNode.appendNode("version", it.version)
+                    }
+                    dependencyNode.appendNode("scope", "runtime")
+                }
+            }
+        }
 
         // Include extra information in the POMs.
         afterEvaluate {
@@ -135,9 +235,9 @@ tasks.withType<JavaCompile>() {
 
 
 tasks.withType<Jar>() {
-   // to compile a sources jar we need a strategy on how to deal with duplicates;
-   // we choose to include duplicate classes.
-   duplicatesStrategy = DuplicatesStrategy.INCLUDE
+    // to compile a sources jar we need a strategy on how to deal with duplicates;
+    // we choose to include duplicate classes.
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
 
 tasks {

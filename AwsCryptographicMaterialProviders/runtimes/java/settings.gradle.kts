@@ -1,1 +1,1 @@
-rootProject.name = "AwsCryptographicMaterialProviders"
+rootProject.name = "aws-cryptographic-material-providers"
