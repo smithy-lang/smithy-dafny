@@ -39,7 +39,7 @@ public class GoSettings {
                 Arrays.asList(SERVICE, MODULE_NAME, MODULE_DESCRIPTION, MODULE_VERSION, GENERATE_GO_MOD, GO_DIRECTIVE));
 
         settings.setService(config.expectStringMember(SERVICE).expectShapeId());
-        settings.setModuleName(config.expectStringMember(MODULE_NAME).getValue());
+        settings.setModuleName(config.expectStringMember(SERVICE).toString().split("#")[1]);
         settings.setModuleDescription(config.getStringMemberOrDefault(
                 MODULE_DESCRIPTION, settings.getModuleName() + " client"));
         settings.setModuleVersion(config.getStringMemberOrDefault(MODULE_VERSION, null));

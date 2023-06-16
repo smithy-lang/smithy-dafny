@@ -1,73 +1,27 @@
-namespace simple.aggregate
+namespace simple.types.boolean
 
-//@aws.polymorph#localService(
-//    sdkId: "SimpleAggregate",
-//    config: SimpleAggregateConfig,
-//)
-service SimpleAggregate {
+@aws.polymorph#localService(
+    sdkId: "SimpleBoolean",
+    config: SimpleBooleanConfig,
+)
+service SimpleTypesBoolean {
     version: "2021-11-01",
     resources: [],
-    operations: [ GetAggregate, GetAggregateKnownValueTest ],
+    operations: [ GetBoolean ],
     errors: [],
 }
 
-structure SimpleAggregateConfig {}
+structure SimpleBooleanConfig {}
 
-operation GetAggregate {
-    input: GetAggregateInput,
-    output: GetAggregateOutput,
+operation GetBoolean {
+    input: GetBooleanInput,
+    output: GetBooleanOutput,
 }
 
-operation GetAggregateKnownValueTest {
-    input: GetAggregateInput,
-    output: GetAggregateOutput,
+structure GetBooleanInput {
+    value: Boolean
 }
 
-structure GetAggregateInput {
-    simpleStringList: SimpleStringList,
-    structureList: StructureList,
-    simpleStringMap: SimpleStringMap,
-    simpleIntegerMap: SimpleIntegerMap,
-    nestedStructure: NestedStructure,
-}
-
-structure GetAggregateOutput {
-    simpleStringList: SimpleStringList,
-    structureList: StructureList,
-    simpleStringMap: SimpleStringMap,
-    simpleIntegerMap: SimpleIntegerMap,
-    nestedStructure: NestedStructure,
-}
-
-list SimpleStringList {
-    member: String
-}
-
-list StructureList {
-    member: StructureListElement
-}
-
-// More elements SHOULD be added
-structure StructureListElement {
-    stringValue: String,
-    integerValue: Integer,
-}
-
-map SimpleStringMap {
-    key: String,
-    value: String,
-}
-
-// Other map combinations SHOULD be added
-map SimpleIntegerMap {
-    key: String,
-    value: Integer,
-}
-
-structure NestedStructure {
-    stringStructure: StringStructure
-}
-
-structure StringStructure {
-    value: String,
+structure GetBooleanOutput {
+    value: Boolean
 }

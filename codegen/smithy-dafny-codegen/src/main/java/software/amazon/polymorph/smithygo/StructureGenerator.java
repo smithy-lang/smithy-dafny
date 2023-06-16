@@ -20,8 +20,11 @@ import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
+import software.amazon.smithy.model.shapes.ShapeType;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.ErrorTrait;
+import software.amazon.smithy.model.traits.InputTrait;
+import software.amazon.smithy.model.traits.OutputTrait;
 import software.amazon.smithy.model.traits.StreamingTrait;
 import software.amazon.smithy.utils.MapUtils;
 import software.amazon.smithy.utils.SetUtils;
@@ -32,64 +35,30 @@ import java.util.Set;
 /**
  * Renders structures.
  */
-public final class StructureGenerator implements Runnable {
-    private static final Map<String, String> STANDARD_ERROR_MEMBERS = MapUtils.of(
-            "ErrorCode", "string",
-            "ErrorMessage", "string",
-            "ErrorFault", "string"
-    );
+public final class StructureGenerator implements ShapeGenerator<StructureShape> {
     private static final Set<String> ERROR_MEMBER_NAMES = SetUtils.of("ErrorMessage", "Message", "ErrorCodeOverride");
 
     private final Model model;
     private final SymbolProvider symbolProvider;
-    private final GoWriter writer;
-    private final StructureShape shape;
-    private final Symbol symbol;
-    private final ServiceShape service;
-    StructureGenerator(
+    private final GoDelegator writerDelegator;
+    public StructureGenerator(
             Model model,
             SymbolProvider symbolProvider,
-            GoWriter writer,
-            ServiceShape service,
-            StructureShape shape,
-            Symbol symbol
+            GoDelegator writerDelegator
     ) {
         this.model = model;
         this.symbolProvider = symbolProvider;
-        this.writer = writer;
-        this.service = service;
-        this.shape = shape;
-        this.symbol = symbol;
-    }
-
-    @Override
-    public void run() {
-        if (!shape.hasTrait(ErrorTrait.class)) {
-            renderStructure(() -> {
-            });
-        } else {
-            renderErrorStructure();
-        }
+        this.writerDelegator = writerDelegator;
     }
 
     /**
      * Renders a non-error structure.
      *
-     * @param runnable A runnable that runs before the structure definition is closed. This can be used to write
-     *                 additional members.
-     */
-    public void renderStructure(Runnable runnable) {
-        renderStructure(runnable, false);
-    }
-
-    /**
-     * Renders a non-error structure.
-     *
-     * @param runnable         A runnable that runs before the structure definition is closed. This can be used to write
-     *                         additional members.
      * @param isInputStructure A boolean indicating if input variants for member symbols should be used.
      */
-    public void renderStructure(Runnable runnable, boolean isInputStructure) {
+    public void renderStructure(GoWriter writer, StructureShape shape, boolean isInputStructure) {
+        Symbol symbol = symbolProvider.toSymbol(shape);
+        System.out.println(shape.getId());
         writer.openBlock("type $L struct {", symbol.getName());
 
         CodegenUtils.SortedMembers sortedMembers = new CodegenUtils.SortedMembers(symbolProvider);
@@ -110,7 +79,6 @@ public final class StructureGenerator implements Runnable {
                     writer.write("$L $P", memberName, memberSymbol);
                 });
 
-        runnable.run();
 
         writer.closeBlock("}").write("");
     }
@@ -118,49 +86,62 @@ public final class StructureGenerator implements Runnable {
     /**
      * Renders an error structure and supporting methods.
      */
-    private void renderErrorStructure() {
-        Symbol structureSymbol = symbolProvider.toSymbol(shape);
-        writer.addUseImports(SmithyGoDependency.SMITHY);
-        writer.addUseImports(SmithyGoDependency.FMT);
-        ErrorTrait errorTrait = shape.expectTrait(ErrorTrait.class);
+    private void renderErrorStructure(StructureShape shape) {
+        writerDelegator.useShapeWriter(shape, writer -> {
+            Symbol structureSymbol = symbolProvider.toSymbol(shape);
+            writer.addUseImports(SmithyGoDependency.SMITHY);
+            writer.addUseImports(SmithyGoDependency.FMT);
+            ErrorTrait errorTrait = shape.expectTrait(ErrorTrait.class);
 
-        // Write out a struct to hold the error data.
-        writer.openBlock("type $L struct {", "}", structureSymbol.getName(), () -> {
-            // The message is the only part of the standard APIError interface that isn't known ahead of time.
-            // Message is a pointer mostly for the sake of consistency.
-            writer.write("Message *string").write("");
-            writer.write("ErrorCodeOverride *string").write("");
+            // Write out a struct to hold the error data.
+            writer.openBlock("type $L struct {", "}", structureSymbol.getName(), () -> {
+                // The message is the only part of the standard APIError interface that isn't known ahead of time.
+                // Message is a pointer mostly for the sake of consistency.
+                writer.write("Message *string").write("");
+                writer.write("ErrorCodeOverride *string").write("");
 
-            for (MemberShape member : shape.getAllMembers().values()) {
-                String memberName = symbolProvider.toMemberName(member);
-                // error messages are represented under Message for consistency
-                if (!ERROR_MEMBER_NAMES.contains(memberName)) {
-                    writer.write("$L $P", memberName, symbolProvider.toSymbol(member));
+                for (MemberShape member : shape.getAllMembers().values()) {
+                    String memberName = symbolProvider.toMemberName(member);
+                    // error messages are represented under Message for consistency
+                    if (!ERROR_MEMBER_NAMES.contains(memberName)) {
+                        writer.write("$L $P", memberName, symbolProvider.toSymbol(member));
+                    }
                 }
-            }
 
-        }).write("");
+            }).write("");
 
-        // write the Error method to satisfy the standard error interface
-        writer.openBlock("func (e *$L) Error() string {", "}", structureSymbol.getName(), () -> {
-            writer.write("return fmt.Sprintf(\"%s: %s\", e.ErrorCode(), e.ErrorMessage())");
-        });
-
-        // Write out methods to satisfy the APIError interface. All but the message are known ahead of time,
-        // and for those we just encode the information in the method itself.
-        writer.openBlock("func (e *$L) ErrorMessage() string {", "}", structureSymbol.getName(), () -> {
-            writer.openBlock("if e.Message == nil {", "}", () -> {
-                writer.write("return \"\"");
+            // write the Error method to satisfy the standard error interface
+            writer.openBlock("func (e *$L) Error() string {", "}", structureSymbol.getName(), () -> {
+                writer.write("return fmt.Sprintf(\"%s: %s\", e.ErrorCode(), e.ErrorMessage())");
             });
-            writer.write("return *e.Message");
-        });
 
-        String fault = "smithy.FaultUnknown";
-        if (errorTrait.isClientError()) {
-            fault = "smithy.FaultClient";
-        } else if (errorTrait.isServerError()) {
-            fault = "smithy.FaultServer";
+            // Write out methods to satisfy the APIError interface. All but the message are known ahead of time,
+            // and for those we just encode the information in the method itself.
+            writer.openBlock("func (e *$L) ErrorMessage() string {", "}", structureSymbol.getName(), () -> {
+                writer.openBlock("if e.Message == nil {", "}", () -> {
+                    writer.write("return \"\"");
+                });
+                writer.write("return *e.Message");
+            });
+
+            String fault = "smithy.FaultUnknown";
+            if (errorTrait.isClientError()) {
+                fault = "smithy.FaultClient";
+            } else if (errorTrait.isServerError()) {
+                fault = "smithy.FaultServer";
+            }
+            writer.write("func (e *$L) ErrorFault() smithy.ErrorFault { return $L }", structureSymbol.getName(), fault);
+        });
+    }
+
+    @Override
+    public void generate(StructureShape shape) {
+        if (!shape.hasTrait(ErrorTrait.class)) {
+            writerDelegator.useShapeWriter(shape, writer -> {
+                renderStructure(writer, shape, false);
+            });
+        } else {
+            renderErrorStructure(shape);
         }
-        writer.write("func (e *$L) ErrorFault() smithy.ErrorFault { return $L }", structureSymbol.getName(), fault);
     }
 }

@@ -1,7 +1,6 @@
 package software.amazon.polymorph.smithygo;
 
 import software.amazon.polymorph.smithygo.integration.GoIntegration;
-import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.codegen.core.directed.CreateContextDirective;
 import software.amazon.smithy.codegen.core.directed.CreateSymbolProviderDirective;
@@ -12,17 +11,13 @@ import software.amazon.smithy.codegen.core.directed.GenerateIntEnumDirective;
 import software.amazon.smithy.codegen.core.directed.GenerateServiceDirective;
 import software.amazon.smithy.codegen.core.directed.GenerateStructureDirective;
 import software.amazon.smithy.codegen.core.directed.GenerateUnionDirective;
-import software.amazon.smithy.model.knowledge.TopDownIndex;
-import software.amazon.smithy.model.shapes.OperationShape;
-import software.amazon.smithy.model.shapes.ServiceShape;
-import software.amazon.smithy.model.shapes.Shape;
+import software.amazon.smithy.model.Model;
+import software.amazon.smithy.model.traits.InputTrait;
+import software.amazon.smithy.model.traits.OutputTrait;
 
-import java.util.Set;
-import java.util.TreeSet;
 import java.util.logging.Logger;
 
 public class DirectedGoCodegen implements DirectedCodegen<GoCodegenContext, GoSettings, GoIntegration> {
-
     private static final Logger LOGGER = Logger.getLogger(DirectedGoCodegen.class.getName());
     @Override
     public SymbolProvider createSymbolProvider(CreateSymbolProviderDirective<GoSettings> directive) {
@@ -43,32 +38,32 @@ public class DirectedGoCodegen implements DirectedCodegen<GoCodegenContext, GoSe
 
     @Override
     public void generateService(GenerateServiceDirective<GoCodegenContext, GoSettings> directive) {
-        // Write API client type and utilities.
-        directive.context().writerDelegator().useShapeWriter(directive.service(), serviceWriter -> {
-            ServiceShape service = directive.service();
-            // Generate each operation for the service. We do this here instead of via the operation visitor method to
-            // limit it to the operations bound to the service.
-            TopDownIndex topDownIndex = directive.model().getKnowledge(TopDownIndex.class);
-            Set<OperationShape> containedOperations = new TreeSet<>(topDownIndex.getContainedOperations(service));
-            for (OperationShape operation : containedOperations) {
-                Symbol operationSymbol = directive.symbolProvider().toSymbol(operation);
-
-                directive.context().writerDelegator().useShapeWriter(
-                        operation, operationWriter -> new OperationGenerator(directive.settings(), directive.model(), directive.symbolProvider(),
-                                                                             operationWriter, service, operation, operationSymbol).run());
-            }
-        });
-
+        GoDelegator writerDelegator = directive.context().writerDelegator();
+        Model model = directive.model();
+        SymbolProvider symbolProvider = directive.symbolProvider();
+        new LocalServiceGenerator(writerDelegator, model, symbolProvider).generate(directive.service());
     }
 
     @Override
     public void generateStructure(GenerateStructureDirective<GoCodegenContext, GoSettings> directive) {
-
+        GoDelegator writerDelegator = directive.context().writerDelegator();
+        Model model = directive.model();
+        SymbolProvider symbolProvider = directive.symbolProvider();
+        StructureGenerator structureGenerator = new StructureGenerator(model, symbolProvider, writerDelegator);
+        System.out.println(directive.shape());
+        structureGenerator.generate(directive.shape());
     }
 
     @Override
     public void generateError(GenerateErrorDirective<GoCodegenContext, GoSettings> directive) {
-
+        GoDelegator writerDelegator = directive.context().writerDelegator();
+        Model model = directive.model();
+        SymbolProvider symbolProvider = directive.symbolProvider();
+        StructureGenerator structureGenerator = new StructureGenerator(model, symbolProvider, writerDelegator);
+        if(directive.shape().hasTrait(InputTrait.class) || directive.shape().hasTrait(OutputTrait.class)) {
+            return;
+        }
+        structureGenerator.generate(directive.shape());
     }
 
     @Override

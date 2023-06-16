@@ -4,6 +4,7 @@
 package software.amazon.polymorph;
 
 import software.amazon.polymorph.CodegenEngine.TargetLanguage;
+import software.amazon.polymorph.smithygo.GoSettings;
 import software.amazon.polymorph.smithyjava.generator.CodegenSubject.AwsSdkVersion;
 
 import org.apache.commons.cli.CommandLine;
@@ -16,8 +17,13 @@ import org.apache.commons.cli.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import software.amazon.polymorph.traits.LocalServiceTrait;
+import software.amazon.smithy.build.FileManifest;
+import software.amazon.smithy.build.PluginContext;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.loader.ModelAssembler;
+import software.amazon.smithy.model.node.ObjectNode;
+import software.amazon.smithy.model.shapes.ServiceShape;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -66,6 +72,16 @@ public class CodegenCli {
         cliArguments.outputDafnyDir.ifPresent(path -> outputDirs.put(TargetLanguage.DAFNY, path));
         cliArguments.outputJavaDir.ifPresent(path -> outputDirs.put(TargetLanguage.JAVA, path));
         cliArguments.outputDotnetDir.ifPresent(path -> outputDirs.put(TargetLanguage.DOTNET, path));
+        cliArguments.outputGoDir.ifPresent(path -> outputDirs.put(TargetLanguage.GO, path));
+
+        final ServiceShape serviceShape = serviceModel.getServiceShapesWithTrait(LocalServiceTrait.class).stream().findFirst().get();
+        final PluginContext pluginContext = PluginContext.builder()
+                                                   .model(serviceModel)
+                                                   .fileManifest(FileManifest.create(cliArguments.outputGoDir().orElse(cliArguments.modelPath)))
+                                                   .settings(ObjectNode.builder()
+                                                                       .withMember("service", serviceShape.toShapeId().toString())
+                                                                       .build())
+                                                   .build();
 
         final CodegenEngine.Builder engineBuilder = new CodegenEngine.Builder()
                 .withServiceModel(serviceModel)
@@ -73,6 +89,7 @@ public class CodegenCli {
                 .withNamespace(cliArguments.namespace)
                 .withTargetLangOutputDirs(outputDirs)
                 .withAwsSdkStyle(cliArguments.awsSdkStyle)
+                .withPluginContext(pluginContext)
                 .withLocalServiceTest(cliArguments.localServiceTest);
         cliArguments.javaAwsSdkVersion.ifPresent(engineBuilder::withJavaAwsSdkVersion);
         cliArguments.includeDafnyFile.ifPresent(engineBuilder::withIncludeDafnyFile);
@@ -115,6 +132,11 @@ public class CodegenCli {
             .hasArg()
             .build())
           .addOption(Option.builder()
+                           .longOpt("output-go")
+                           .desc("<optional> output directory for generated Go files")
+                           .hasArg()
+                           .build())
+          .addOption(Option.builder()
             .longOpt("java-aws-sdk-version")
             .desc("<optional> AWS SDK for Java version to use: v1, or v2 (default)")
             .hasArg()
@@ -151,6 +173,7 @@ public class CodegenCli {
             Optional<Path> outputDotnetDir,
             Optional<Path> outputJavaDir,
             Optional<Path> outputDafnyDir,
+            Optional<Path> outputGoDir,
             Optional<AwsSdkVersion> javaAwsSdkVersion,
             Optional<Path> includeDafnyFile,
             boolean awsSdkStyle,
@@ -190,6 +213,8 @@ public class CodegenCli {
                     .map(Paths::get);
             final Optional<Path> outputDotnetDir = Optional.ofNullable(commandLine.getOptionValue("output-dotnet"))
                     .map(Paths::get);
+            final Optional<Path> outputGoDir = Optional.ofNullable(commandLine.getOptionValue("output-go"))
+                                                           .map(Paths::get);
 
             boolean localServiceTest = commandLine.hasOption("local-service-test");
             final boolean awsSdkStyle = commandLine.hasOption("aws-sdk");
@@ -212,7 +237,7 @@ public class CodegenCli {
 
             return Optional.of(new CliArguments(
                     modelPath, dependentModelPaths, namespace,
-                    outputDotnetDir, outputJavaDir, outputDafnyDir,
+                    outputDotnetDir, outputJavaDir, outputDafnyDir, outputGoDir,
                     javaAwsSdkVersion, includeDafnyFile, awsSdkStyle,
                     localServiceTest
             ));

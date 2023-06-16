@@ -2,8 +2,8 @@
     "version": "1.0",
     "plugins": {
         "dafny-client-codegen": {
-            "service": "simple.aggregate#SimpleAggregate",
-            "module": "github.com/aws/smithy-dafny/internal/tests/service/SimpleAggregate",
+            "service": "simple.types.boolean#SimpleTypesBoolean",
+            "module": "github.com/aws/smithy-dafny/internal/tests/service/SimpleTypesBoolean",
             "moduleVersion": "0.0.1",
             "generateGoMod": true,
             "goDirective": "1.18",
@@ -11,5 +11,6 @@
             "targetLanguages":["GO"],
             "includeDafnyFile":""
         }
-    }
+    },
+    "imports": ["/Users/scchatur/workspace/DafnyGoCodegen/smithy-dafny/TestModels/dafny-dependencies/Model/"]
 }

@@ -140,6 +140,7 @@ _polymorph:
 	$(OUTPUT_DAFNY) \
 	$(OUTPUT_DOTNET) \
 	$(OUTPUT_JAVA) \
+	$(OUTPUT_GO) \
 	--model $(LIBRARY_ROOT)/Model \
 	--dependent-model $(PROJECT_ROOT)/dafny-dependencies/Model \
 	$(patsubst %, --dependent-model $(PROJECT_ROOT)/%/Model, $(LIBRARIES)) \
@@ -170,6 +171,8 @@ _polymorph_dependencies:
 # `polymorph_code_gen` is the generate-for-multiple-languages target
 polymorph_code_gen: OUTPUT_DAFNY=--output-dafny $(LIBRARY_ROOT)/Model --include-dafny $(STANDARD_LIBRARY_PATH)/src/Index.dfy
 polymorph_code_gen: OUTPUT_DOTNET=--output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/
+polymorph_code_gen: OUTPUT_GO=--output-go $(LIBRARY_ROOT)/runtimes/go/Generated/src/
+
 polymorph_code_gen: _polymorph
 # Generate wrapped code for all languages that support wrapped services
 polymorph_code_gen: OUTPUT_DAFNY_WRAPPED=--output-dafny $(LIBRARY_ROOT)/Model --include-dafny $(STANDARD_LIBRARY_PATH)/src/Index.dfy
@@ -285,3 +288,16 @@ _clean:
 	rm -rf $(LIBRARY_ROOT)/runtimes/net/tests/bin $(LIBRARY_ROOT)/runtimes/net/tests/obj
 
 clean: _clean
+
+transpile_go: | transpile_implementation_go transpile_test_go transpile_dependencies_go
+
+transpile_implementation_go: TARGET=go
+transpile_implementation_go: OUT=runtimes/go/ImplementationFromDafny
+transpile_implementation_go: transpile_implementation
+
+transpile_test_go: TARGET=go
+transpile_test_go: OUT=runtimes/go/TestsFromDafny
+transpile_test_go: transpile_test
+
+transpile_dependencies_go: LANG=go
+transpile_dependencies_go: transpile_dependencies
