@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.0-preview-2 2023-06-19
+
+### Fix
+- Fixes build file to correctly generate pom file with correct dependencies during release.
+
 ## 1.0.0-preview-1 2023-06-07
 
 ### Features
