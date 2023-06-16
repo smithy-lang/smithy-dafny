@@ -45,7 +45,8 @@ public class StormTrackingCMC
     return wrapped.UpdaterUsageMetadata(input);
   }
 
-  public synchronized Wrappers_Compile.Result<CacheState, software.amazon.cryptography.materialproviders.internaldafny.types.Error> GetFromCache(
+  // This is the synchronization for GetCacheEntry and GetCacheEntry_k
+  public synchronized Wrappers_Compile.Result<CacheState, software.amazon.cryptography.materialproviders.internaldafny.types.Error> GetFromCacheInner(
       software.amazon.cryptography.materialproviders.internaldafny.types.GetCacheEntryInput input) {
     return wrapped.GetFromCache(input);
   }
@@ -56,7 +57,7 @@ public class StormTrackingCMC
   {
     while (true) {
       Wrappers_Compile.Result<CacheState, software.amazon.cryptography.materialproviders.internaldafny.types.Error>
-      result = GetFromCache(input);
+      result = GetFromCacheInner(input);
       if (result.is_Failure()) {
         return Wrappers_Compile.Result.create_Failure((result).dtor_error());
       } else if (result.dtor_value().is_Full()) {

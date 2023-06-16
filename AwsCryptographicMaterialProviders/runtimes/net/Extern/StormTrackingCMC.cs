@@ -8,36 +8,49 @@ namespace software.amazon.cryptography.internaldafny.StormTrackingCMC
   public partial class StormTrackingCMC : software.amazon.cryptography.materialproviders.internaldafny.types.ICryptographicMaterialsCache
   {
     public StormTracker_Compile.StormTracker wrapped;
+
     public StormTrackingCMC(StormTracker_Compile.StormTracker cmc)
     {
       this.wrapped = cmc;
     }
+
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.Synchronized)]
     public Wrappers_Compile._IResult<_System._ITuple0, software.amazon.cryptography.materialproviders.internaldafny.types._IError> PutCacheEntry(software.amazon.cryptography.materialproviders.internaldafny.types._IPutCacheEntryInput input)
     {
-      return PutCacheEntry_k(input);
+      return PutCacheEntry(input);
     }
+
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.Synchronized)]
     public Wrappers_Compile._IResult<_System._ITuple0, software.amazon.cryptography.materialproviders.internaldafny.types._IError> UpdaterUsageMetadata(software.amazon.cryptography.materialproviders.internaldafny.types._IUpdaterUsageMetadataInput input)
     {
-      return UpdaterUsageMetadata_k(input);
+      return UpdaterUsageMetadata(input);
     }
-    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.Synchronized)]
+
+    // NOT synchronized, as some sleeping might be involved
     public Wrappers_Compile._IResult<software.amazon.cryptography.materialproviders.internaldafny.types._IGetCacheEntryOutput, software.amazon.cryptography.materialproviders.internaldafny.types._IError> GetCacheEntry(software.amazon.cryptography.materialproviders.internaldafny.types._IGetCacheEntryInput input)
     {
       return GetCacheEntry_k(input);
     }
+
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.Synchronized)]
     public Wrappers_Compile._IResult<_System._ITuple0, software.amazon.cryptography.materialproviders.internaldafny.types._IError> DeleteCacheEntry(software.amazon.cryptography.materialproviders.internaldafny.types._IDeleteCacheEntryInput input)
     {
-      return DeleteCacheEntry_k(input);
+      return DeleteCacheEntry(input);
     }
+
+    // This is the synchronization for GetCacheEntry and GetCacheEntry_k
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.Synchronized)]
+    public Wrappers_Compile._IResult<StormTracker_Compile._ICacheState, software.amazon.cryptography.materialproviders.internaldafny.types._IError>
+      GetFromCacheInner(software.amazon.cryptography.materialproviders.internaldafny.types._IGetCacheEntryInput input) {
+      return wrapped.GetFromCache(input);
+    }
+
+    // NOT synchronized, as some sleeping might be involved
     public Wrappers_Compile._IResult<software.amazon.cryptography.materialproviders.internaldafny.types._IGetCacheEntryOutput, software.amazon.cryptography.materialproviders.internaldafny.types._IError> GetCacheEntry_k(software.amazon.cryptography.materialproviders.internaldafny.types._IGetCacheEntryInput input)
     {
       while (true) {
         Wrappers_Compile._IResult<StormTracker_Compile._ICacheState, software.amazon.cryptography.materialproviders.internaldafny.types._IError>
-          result = wrapped.GetFromCache(input);
+          result = GetFromCacheInner(input);
         if (result.is_Failure) {
           return Wrappers_Compile.Result<software.amazon.cryptography.materialproviders.internaldafny.types._IGetCacheEntryOutput, software.amazon.cryptography.materialproviders.internaldafny.types._IError>
             .create_Failure((result).dtor_error);
@@ -59,11 +72,13 @@ namespace software.amazon.cryptography.internaldafny.StormTrackingCMC
     {
       return this.wrapped.PutCacheEntry(input);
     }
+
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.Synchronized)]
     public Wrappers_Compile._IResult<_System._ITuple0, software.amazon.cryptography.materialproviders.internaldafny.types._IError> DeleteCacheEntry_k(software.amazon.cryptography.materialproviders.internaldafny.types._IDeleteCacheEntryInput input)
     {
       return this.wrapped.DeleteCacheEntry(input);
     }
+
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.Synchronized)]
     public Wrappers_Compile._IResult<_System._ITuple0, software.amazon.cryptography.materialproviders.internaldafny.types._IError> UpdaterUsageMetadata_k(software.amazon.cryptography.materialproviders.internaldafny.types._IUpdaterUsageMetadataInput input)
     {
