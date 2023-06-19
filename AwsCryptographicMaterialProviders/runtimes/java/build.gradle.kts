@@ -68,7 +68,6 @@ dependencies {
     // sdk dependencies
     implementation(platform("software.amazon.awssdk:bom:2.19.1"))
     implementation("software.amazon.awssdk:dynamodb")
-    implementation("software.amazon.awssdk:dynamodb-enhanced")
     implementation("software.amazon.awssdk:kms")
 
     // https://mvnrepository.com/artifact/org.testng/testng
