@@ -243,11 +243,11 @@ module {:options "/functionSyntax:4" } LocalCMC {
       && (s' == s[..pos] + s[pos+1..])
   {
     var pos := IndexOfCacheEntry(s, v);
-    // Associativitiy, s is the sum of both sides
+    // Associativity, is is the sum of both sides
     assert s == s[..pos] + s[pos..];
     // the 1 v MUST be in the right side
     assert multiset(s[pos..])[v] == 1;
-    // Associativity, s[pos..] is the some of both sides
+    // Associativity, s[pos..] is the sum of both sides
     assert s[pos..] == [s[pos]] + s[pos+1..];
     s[..pos] + s[pos+1..]
   }
@@ -423,16 +423,18 @@ module {:options "/functionSyntax:4" } LocalCMC {
         return Success(());
       }
 
-      :- Need(input.identifier !in cache.Keys(), Types.EntryAlreadyExists(
-        message := "Updating an entry is not allowed, remove first."
-      ));
-
+      if input.identifier in cache.Keys() {
+        var _ :- DeleteCacheEntry'(Types.DeleteCacheEntryInput(
+          identifier := input.identifier
+        ));
+      }
+      assert input.identifier !in cache.Keys();
       assert 0 < entryCapacity;
 
       //= aws-encryption-sdk-specification/framework/local-cryptographic-materials-cache.md#put-cache-entry
       //# However, before returning the local CMC MUST evict least-recently used entries
       //# until the number of stored entries does not exceed the entry capacity.
-      // This is a todo, becuase this only decriments by 1.
+      // This is a todo, because this only decrements by 1.
       // While it is true that only 1 is added,
       // this should be a loop.
       //
