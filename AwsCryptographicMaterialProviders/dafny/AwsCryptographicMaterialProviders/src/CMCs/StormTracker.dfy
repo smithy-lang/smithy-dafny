@@ -38,12 +38,18 @@ module {:options "/functionSyntax:4" }  StormTracker {
       && inFlight !in wrapped.Modifies
       && wrapped.ValidState()
     }
-    var wrapped : LocalCMC.LocalCMC;
-    var inFlight: MutableMap<seq<uint8>, Types.PositiveLong>
+    var wrapped : LocalCMC.LocalCMC; // the actual cache
+    var inFlight: MutableMap<seq<uint8>, Types.PositiveLong> // the time at which this key became in flight
+    var gracePeriod : Types.PositiveLong // seconds before expiration that we start putting things in flight
+    var graceInterval : Types.PositiveLong // minimum seconds before putting the same key in flight again
+    var fanOut : Types.PositiveLong // maximum keys in flight at one time
 
     constructor(
       entryCapacity: nat,
-      entryPruningTailSize: nat := 1
+      entryPruningTailSize: nat := 1,
+      gracePeriod : Types.PositiveLong := 10,
+      graceInterval : Types.PositiveLong := 1,
+      fanOut : Types.PositiveLong := 20
     )
       requires entryPruningTailSize >= 1
       ensures
@@ -54,12 +60,28 @@ module {:options "/functionSyntax:4" }  StormTracker {
     {
       this.wrapped := new LocalCMC.LocalCMC(entryCapacity, entryPruningTailSize);
       this.inFlight := new MutableMap();
+      this.gracePeriod := gracePeriod;
+      this.graceInterval := graceInterval;
+      this.fanOut := fanOut;
     }
 
-    ghost function Modifies() : set<object>
-      reads this, wrapped, wrapped.Modifies
+    function InFlightSize() : Types.PositiveLong
+      reads this, this.inFlight
     {
-      {inFlight} + wrapped.Modifies
+      var x := inFlight.Size();
+      assert x >= 0;
+      if x <= INT64_MAX_LIMIT then
+        x as Types.PositiveLong
+      else
+        INT64_MAX_LIMIT as Types.PositiveLong
+    }
+
+    function AddLong(x : Types.PositiveLong, y : Types.PositiveLong) : Types.PositiveLong
+    {
+      if x < (INT64_MAX_LIMIT as Types.PositiveLong - y) then
+        x + y
+      else
+        INT64_MAX_LIMIT as Types.PositiveLong
     }
 
     // If entry is within 10 seconds of expiration, then return EmptyFetch once per second, 
@@ -68,20 +90,20 @@ module {:options "/functionSyntax:4" }  StormTracker {
       returns (output: CacheState)
       modifies inFlight
     {
-      if result.expiryTime <= now { // should be impossible
+      if fanOut <= InFlightSize() {
         return Full(result);
-      } else if now < result.expiryTime - 10 { // lots of time left
+      } else if result.expiryTime <= now { // expired? should be impossible
+        output := CheckNewEntry(identifier, now);
+      } else if now < result.expiryTime - gracePeriod { // lots of time left
         return Full(result);
       } else { // in grace time
-        var timeLeft : Types.PositiveLong := result.expiryTime - now;
-        assert 0 < timeLeft <= 10;
         if inFlight.HasKey(identifier) {
           var entry := inFlight.Select(identifier);
-          if entry <= timeLeft {  // already returned a EmptyFetch for this second
+          if AddLong(entry, graceInterval) > now {  // already returned an EmptyFetch for this interval
             return Full(result);
           }
         }
-        inFlight.Put(identifier, timeLeft);
+        inFlight.Put(identifier, now);
         return EmptyFetch;
       }
     }
@@ -91,9 +113,11 @@ module {:options "/functionSyntax:4" }  StormTracker {
       returns (output: CacheState)
       modifies inFlight
     {
-      if inFlight.HasKey(identifier) {
+      if fanOut <= InFlightSize() {
+        return EmptyWait;
+      } else if inFlight.HasKey(identifier) {
         var entry := inFlight.Select(identifier);
-        if entry == now {  // already returned a EmptyFetch for this second
+        if AddLong(entry, graceInterval) > now {  // already returned an EmptyFetch for this interval
           return EmptyWait;
         }
       }
