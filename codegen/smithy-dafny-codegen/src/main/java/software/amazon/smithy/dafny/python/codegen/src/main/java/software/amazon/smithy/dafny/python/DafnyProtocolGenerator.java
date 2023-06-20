@@ -1,4 +1,4 @@
-package software.amazon.smithy.dafny.python;/*
+/*
  * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License").
@@ -13,19 +13,14 @@ package software.amazon.smithy.dafny.python;/*
  * permissions and limitations under the License.
  */
 
+package software.amazon.smithy.dafny.python;
 
-import static java.lang.String.format;
-import static software.amazon.smithy.model.knowledge.HttpBinding.Location.HEADER;
-import static software.amazon.smithy.model.knowledge.HttpBinding.Location.PAYLOAD;
-import static software.amazon.smithy.model.knowledge.HttpBinding.Location.PREFIX_HEADERS;
 import static software.amazon.smithy.model.traits.TimestampFormatTrait.Format;
 
-import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.model.knowledge.HttpBinding.Location;
-import software.amazon.smithy.model.knowledge.HttpBindingIndex;
 import software.amazon.smithy.model.knowledge.TopDownIndex;
 import software.amazon.smithy.model.shapes.BigDecimalShape;
 import software.amazon.smithy.model.shapes.BigIntegerShape;
@@ -35,10 +30,10 @@ import software.amazon.smithy.model.shapes.ByteShape;
 import software.amazon.smithy.model.shapes.DoubleShape;
 import software.amazon.smithy.model.shapes.FloatShape;
 import software.amazon.smithy.model.shapes.IntegerShape;
-import software.amazon.smithy.model.shapes.ListShape;
 import software.amazon.smithy.model.shapes.LongShape;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
+import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.ShapeVisitor;
@@ -46,37 +41,21 @@ import software.amazon.smithy.model.shapes.ShortShape;
 import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.TimestampShape;
-import software.amazon.smithy.model.traits.MediaTypeTrait;
-import software.amazon.smithy.model.traits.StreamingTrait;
 import software.amazon.smithy.python.codegen.ApplicationProtocol;
 import software.amazon.smithy.python.codegen.CodegenUtils;
 import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonWriter;
 import software.amazon.smithy.python.codegen.SmithyPythonDependency;
 import software.amazon.smithy.python.codegen.integration.ProtocolGenerator;
-import software.amazon.smithy.utils.CodeInterceptor;
 import software.amazon.smithy.utils.CodeSection;
 import software.amazon.smithy.utils.SmithyUnstableApi;
-/*
-dafny \
-    -vcsCores:2 \
-    -compileTarget:java\
-    -spillTargetCode:3 \
-    -compile:0 \
-    -useRuntimeLib \
-    -out runtimes/java \
-    ./src/Index.dfy \
-    -library:$(PROJECT_ROOT)/dafny-dependencies/StandardLibrary/src/Index.dfy \
-    $(patsubst %, -library:$(PROJECT_ROOT)/%/src/Index.dfy, $(LIBRARIES))
-
- */
 
 /**
- * Abstract implementation useful for all protocols that use HTTP bindings.
  *
  * <p>This will implement any handling of components outside the request
  * body and error handling.
  */
+// TODO: Naming of DafnyProtocolGenerator?
 @SmithyUnstableApi
 public abstract class DafnyProtocolGenerator implements ProtocolGenerator {
 
@@ -85,7 +64,7 @@ public abstract class DafnyProtocolGenerator implements ProtocolGenerator {
 
   @Override
   public ApplicationProtocol getApplicationProtocol() {
-    return DafnyTestIntegration.createDafnyApplicationProtocol();
+    return DafnyIntegration.createDafnyApplicationProtocol();
   }
 
   @Override
@@ -93,33 +72,23 @@ public abstract class DafnyProtocolGenerator implements ProtocolGenerator {
     var topDownIndex = TopDownIndex.of(context.model());
     var delegator = context.writerDelegator();
     var configSymbol = CodegenUtils.getConfigSymbol(context.settings());
-    // I beLIEVE transportRequest needs to be the output shape
-    // for requestSeralizers this is a dafnyType
-    // i.e. the operation output...?
-    // no... the operation output is... not... this...
-    // Oh, ok: input is GetBooleanInput, output is GetBooleanOutput...
-    // OH, duhDOY. I am looking at the Smithy model. Smithy model dgaf about the Dafny stuff.
-    // I need to hardcode the Dafny stuff!
-    // i.e. DafnyNameResolver... one day. For now, name = "Dafny"+input.
-    // Actually, for now: hardcoded DafnyGetBooleanInput.
-    var transportRequest = context.applicationProtocol().requestType();
+
     for (OperationShape operation : topDownIndex.getContainedOperations(context.settings().getService())) {
       var serFunction = getSerializationFunction(context, operation);
       var input = context.model().expectShape(operation.getInputShape());
       var inputSymbol = context.symbolProvider().toSymbol(input);
-      var output = context.model().expectShape(operation.getOutputShape());
-      var outputSymbol = context.symbolProvider().toSymbol(output);
+
       delegator.useFileWriter(serFunction.getDefinitionFile(), serFunction.getNamespace(), writer -> {
         writer.pushState(new RequestSerializerSection(operation));
+        // TODO: nameresolver
         writer.write("""
-                    async def $L(input: $T, config: $T) -> DafnyGetBooleanInput:
+                    async def $L(input: $T, config: $T) -> Dafny$T:
                         ${C|}
-                    """, serFunction.getName(), inputSymbol, configSymbol,
+                    """, serFunction.getName(), inputSymbol, configSymbol, inputSymbol,
             writer.consumer(w -> generateRequestSerializer(context, operation, w)));
         writer.popState();
       });
     }
-//    generateDocumentBodyShapeSerializers(context, serializingDocumentShapes);
   }
 
   /**
@@ -133,10 +102,14 @@ public abstract class DafnyProtocolGenerator implements ProtocolGenerator {
   /**
    * Generates the content of the operation request serializer.
    *
-   * <p>Serialization of the http-level components will be inline
-   * since there isn't any use for them elsewhere. Serialization
-   * of document body components should be delegated, however,
-   * as they will need to be re-used in all likelihood.
+   * Smithy-Python uses the word 'serialize' in this part of the code.
+   * This name stems from its default HTTP-style application protocol
+   * as this code would, by default, transform POJOs of Smithy-modelled objects
+   * into serialized HTTP objects.
+   *
+   * The Dafny plugin will not 'serialize' here, but will instead
+   * transform POJOs of Smithy-modelled objects
+   * into POJOs of Dafny-compiled objects.
    *
    * <p>This function has the following in scope:
    * <ul>
@@ -150,14 +123,18 @@ public abstract class DafnyProtocolGenerator implements ProtocolGenerator {
       PythonWriter writer
   ) {
     writer.addDependency(SmithyPythonDependency.SMITHY_PYTHON);
-    // TODO: pass topDownIndex into this function
-    // TODO: parse topDownIndex for the required imports
+    ServiceShape serviceShape = ( ServiceShape) context.model().getServiceShapes().toArray()[0];
+    String serviceName = serviceShape.getId().getName();
 
-    writer.addImport("simple.types.boolean.internaldafny.types", "GetBooleanInput_GetBooleanInput", "DafnyGetBooleanInput");
+    // TODO: nameresolver
+    String typesModulePrelude = operation.getInputShape().getNamespace() + ".internaldafny.types";
+    String inputName = operation.getInputShape().getName();
+    writer.addImport(typesModulePrelude, inputName + "_" + inputName, "Dafny" + inputName);
 
     writer.write("""
-            return DafnyGetBooleanInput(value=input.value)
-            """);
+            return ("$L", $L(value=input.value))
+            """, operation.getId().getName(), "Dafny" + inputName
+        );
   }
 
   @Override
@@ -167,7 +144,6 @@ public abstract class DafnyProtocolGenerator implements ProtocolGenerator {
     var deserializingErrorShapes = new TreeSet<ShapeId>();
     var delegator = context.writerDelegator();
     var configSymbol = CodegenUtils.getConfigSymbol(context.settings());
-    var transportRequest = context.applicationProtocol().requestType();
 
     for (OperationShape operation : topDownIndex.getContainedOperations(context.settings().getService())) {
       deserializingErrorShapes.addAll(operation.getErrors(service));
@@ -179,15 +155,13 @@ public abstract class DafnyProtocolGenerator implements ProtocolGenerator {
         writer.pushState(new RequestSerializerSection(operation));
 
         writer.write("""
-async def $L(input: DafnyGetBooleanOutput, config: $T) -> $T:
-  ${C|}
-                    """, deserFunction.getName(), configSymbol, outputSymbol,
+                    async def $L(input: Dafny$T, config: $T) -> $T:
+                      ${C|}
+                    """, deserFunction.getName(), outputSymbol, configSymbol, outputSymbol,
             writer.consumer(w -> generateOperationResponseDeserializer(context, operation)));
         writer.popState();
       });
-
     }
-
 
     for (ShapeId errorId : deserializingErrorShapes) {
       var error = context.model().expectShape(errorId, StructureShape.class);
@@ -199,10 +173,14 @@ async def $L(input: DafnyGetBooleanOutput, config: $T) -> $T:
   /**
    * Generates the content of the operation response deserializer.
    *
-   * <p>Deserialization of the http-level components will be inline
-   * since there isn't any use for them elsewhere. Deserialization
-   * of document body components should be delegated, however,
-   * as they will need to be re-used in all likelihood.
+   * Smithy-Python uses the word 'deserialize' in this part of the code.
+   * This name stems from its default HTTP-style application protocol
+   * as this code would, by default, transform serialized HTTP objects
+   * into POJOs of Smithy-modelled objects.
+   *
+   * The Dafny plugin will not 'deserialize' here, but will instead
+   * transform POJOs of Dafny-compiled objects
+   * into POJOs of Smithy-modelled objects.
    *
    * <p>This function has the following in scope:
    * <ul>
@@ -219,16 +197,14 @@ async def $L(input: DafnyGetBooleanOutput, config: $T) -> $T:
     delegator.useFileWriter(deserFunction.getDefinitionFile(), deserFunction.getNamespace(), writer -> {
       writer.pushState(new ResponseDeserializerSection(operation));
 
-      // TODO: pass topDownIndex into this function
-      // TODO: parse topDownIndex for the required imports
-      
-      writer.addImport("simple.types.boolean.internaldafny.types", "GetBooleanOutput_GetBooleanOutput", "DafnyGetBooleanOutput");
-//      writer.addImport(".config", "Config", "Config");
-//      writer.addImport(".models", "GetBooleanOutput", "GetBooleanOutput");
+      // TODO: nameresolver
+      String typesModulePrelude = operation.getOutputShape().getNamespace() + ".internaldafny.types";
+      String outputName = operation.getOutputShape().getName();
+      writer.addImport(typesModulePrelude, outputName + "_" + outputName, "Dafny" + outputName);
 
       writer.write("""
-return GetBooleanOutput(value=input.value.value)
-      """);
+return $L(value=input.value.value)
+      """, outputName);
       writer.popState();
     });
   }
@@ -246,6 +222,7 @@ return GetBooleanOutput(value=input.value.value)
     var delegator = context.writerDelegator();
     var transportResponse = context.applicationProtocol().responseType();
     var configSymbol = CodegenUtils.getConfigSymbol(context.settings());
+
     delegator.useFileWriter(deserFunction.getDefinitionFile(), deserFunction.getNamespace(), writer -> {
       writer.pushState(new ErrorDeserializerSection(error));
       writer.addStdlibImport("typing", "Any");
@@ -262,7 +239,6 @@ return GetBooleanOutput(value=input.value.value)
       writer.popState();
     });
   }
-
 
   /**
    * A section that controls writing out the entire deserialization function for an error.
@@ -289,24 +265,21 @@ return GetBooleanOutput(value=input.value.value)
    * shape. This may use native types or invoke complex type serializers to
    * manipulate the dataSource into the proper input content.
    */
-  private static class HttpMemberSerVisitor extends ShapeVisitor.Default<String> {
+  // TODO: Naming of DafnyMemberSerVisitor?
+  private static class DafnyMemberSerVisitor extends ShapeVisitor.Default<String> {
     private final GenerationContext context;
     private final PythonWriter writer;
     private final String dataSource;
-    private final Location bindingType;
     private final MemberShape member;
-    private final Format defaultTimestampFormat;
 
     /**
      * @param context The generation context.
      * @param writer The writer to add dependencies to.
-     * @param bindingType How this value is bound to the operation input.
      * @param dataSource The in-code location of the data to provide an output of
      *                   ({@code input.foo}, {@code entry}, etc.)
      * @param member The member that points to the value being provided.
-     * @param defaultTimestampFormat The default timestamp format to use.
      */
-    HttpMemberSerVisitor(
+    DafnyMemberSerVisitor(
         GenerationContext context,
         PythonWriter writer,
         Location bindingType,
@@ -317,103 +290,75 @@ return GetBooleanOutput(value=input.value.value)
       this.context = context;
       this.writer = writer;
       this.dataSource = dataSource;
-      this.bindingType = bindingType;
       this.member = member;
-      this.defaultTimestampFormat = defaultTimestampFormat;
     }
 
     @Override
     protected String getDefault(Shape shape) {
       var protocolName = context.protocolGenerator().getName();
       throw new CodegenException(String.format(
-          "Unsupported %s binding of %s to %s in %s using the %s protocol",
-          bindingType, member.getMemberName(), shape.getType(), member.getContainer(), protocolName));
+          "Unsupported conversion of %s to %s in %s using the %s protocol",
+          member.getMemberName(), shape.getType(), member.getContainer(), protocolName));
     }
 
     @Override
     public String blobShape(BlobShape shape) {
-      if (member.getMemberTrait(context.model(), StreamingTrait.class).isPresent()) {
-        return dataSource;
-      }
-      writer.addStdlibImport("base64", "b64encode");
-      return format("b64encode(%s).decode('utf-8')", dataSource);
+      return getDefault(shape);
     }
 
     @Override
     public String booleanShape(BooleanShape shape) {
-      return String.format("('true' if %s else 'false')", dataSource);
+      return getDefault(shape);
     }
 
     @Override
     public String stringShape(StringShape shape) {
-      if (bindingType == Location.HEADER) {
-        if (shape.hasTrait(MediaTypeTrait.class)) {
-          writer.addStdlibImport("base64", "b64encode");
-          return format("b64encode(%s.encode('utf-8')).decode('utf-8')", dataSource);
-        }
-      }
-      return dataSource;
+      return getDefault(shape);
     }
 
     @Override
     public String byteShape(ByteShape shape) {
-      // TODO: perform bounds checks
-      return integerShape();
+      return getDefault(shape);
     }
 
     @Override
     public String shortShape(ShortShape shape) {
-      // TODO: perform bounds checks
-      return integerShape();
+      return getDefault(shape);
     }
 
     @Override
     public String integerShape(IntegerShape shape) {
-      // TODO: perform bounds checks
-      return integerShape();
+      return getDefault(shape);
     }
 
     @Override
     public String longShape(LongShape shape) {
-      // TODO: perform bounds checks
-      return integerShape();
+      return getDefault(shape);
     }
 
     @Override
     public String bigIntegerShape(BigIntegerShape shape) {
-      return integerShape();
-    }
-
-    private String integerShape() {
-      return String.format("str(%s)", dataSource);
+      return getDefault(shape);
     }
 
     @Override
     public String floatShape(FloatShape shape) {
-      // TODO: use strict parsing
-      return floatShapes();
+      return getDefault(shape);
     }
 
     @Override
     public String doubleShape(DoubleShape shape) {
-      // TODO: use strict parsing
-      return floatShapes();
+      return getDefault(shape);
     }
 
     @Override
     public String bigDecimalShape(BigDecimalShape shape) {
-      return floatShapes();
-    }
-
-    private String floatShapes() {
-      writer.addDependency(SmithyPythonDependency.SMITHY_PYTHON);
-      writer.addImport("smithy_python.utils", "serialize_float");
-      return String.format("serialize_float(%s)", dataSource);
+      return getDefault(shape);
     }
 
     @Override
     public String timestampShape(TimestampShape shape) {
-      return "timestampshape";
+      return getDefault(shape);
     }
   }
 
@@ -423,25 +368,22 @@ return GetBooleanOutput(value=input.value.value)
    * converters (like a b64decode) or invoke complex type deserializers to
    * manipulate the dataSource into the proper output content.
    */
-  private static class HttpMemberDeserVisitor extends ShapeVisitor.Default<String> {
+  // TODO: Naming of DafnyMemberDeserVisitor?
+  private static class DafnyMemberDeserVisitor extends ShapeVisitor.Default<String> {
 
     private final GenerationContext context;
     private final PythonWriter writer;
     private final String dataSource;
-    private final Location bindingType;
     private final MemberShape member;
-    private final Format defaultTimestampFormat;
 
     /**
      * @param context The generation context.
      * @param writer The writer to add dependencies to.
-     * @param bindingType How this value is bound to the operation output.
      * @param dataSource The in-code location of the data to provide an output of
      *                   ({@code output.foo}, {@code entry}, etc.)
      * @param member The member that points to the value being provided.
-     * @param defaultTimestampFormat The default timestamp format to use.
      */
-    HttpMemberDeserVisitor(
+    DafnyMemberDeserVisitor(
         GenerationContext context,
         PythonWriter writer,
         Location bindingType,
@@ -452,152 +394,75 @@ return GetBooleanOutput(value=input.value.value)
       this.context = context;
       this.writer = writer;
       this.dataSource = dataSource;
-      this.bindingType = bindingType;
       this.member = member;
-      this.defaultTimestampFormat = defaultTimestampFormat;
     }
 
     @Override
     protected String getDefault(Shape shape) {
       var protocolName = context.protocolGenerator().getName();
       throw new CodegenException(String.format(
-          "Unsupported %s binding of %s to %s in %s using the %s protocol",
-          bindingType, member.getMemberName(), shape.getType(), member.getContainer(), protocolName));
+          "Unsupported conversion of %s to %s in %s using the %s protocol",
+          member.getMemberName(), shape.getType(), member.getContainer(), protocolName));
     }
 
     @Override
     public String blobShape(BlobShape shape) {
-      if (bindingType == PAYLOAD) {
-        return dataSource;
-      }
-      throw new CodegenException("Unexpected blob binding location `" + bindingType + "`");
+      return getDefault(shape);
     }
 
     @Override
     public String booleanShape(BooleanShape shape) {
-      switch (bindingType) {
-        case QUERY, LABEL, HEADER -> {
-          writer.addDependency(SmithyPythonDependency.SMITHY_PYTHON);
-          writer.addImport("smithy_python.utils", "strict_parse_bool");
-          return "strict_parse_bool(" + dataSource + ")";
-        }
-        default -> throw new CodegenException("Unexpected boolean binding location `" + bindingType + "`");
-      }
-    }
-
-    @Override
-    public String byteShape(ByteShape shape) {
-      // TODO: perform bounds checks
-      return integerShape();
-    }
-
-    @Override
-    public String shortShape(ShortShape shape) {
-      // TODO: perform bounds checks
-      return integerShape();
-    }
-
-    @Override
-    public String integerShape(IntegerShape shape) {
-      // TODO: perform bounds checks
-      return integerShape();
-    }
-
-    @Override
-    public String longShape(LongShape shape) {
-      // TODO: perform bounds checks
-      return integerShape();
-    }
-
-    @Override
-    public String bigIntegerShape(BigIntegerShape shape) {
-      return integerShape();
-    }
-
-    private String integerShape() {
-      return switch (bindingType) {
-        case QUERY, LABEL, HEADER, RESPONSE_CODE -> "int(" + dataSource + ")";
-        default -> throw new CodegenException("Unexpected integer binding location `" + bindingType + "`");
-      };
-    }
-
-    @Override
-    public String floatShape(FloatShape shape) {
-      // TODO: use strict parsing
-      return floatShapes();
-    }
-
-    @Override
-    public String doubleShape(DoubleShape shape) {
-      // TODO: use strict parsing
-      return floatShapes();
-    }
-
-    private String floatShapes() {
-      switch (bindingType) {
-        case QUERY, LABEL, HEADER -> {
-          writer.addDependency(SmithyPythonDependency.SMITHY_PYTHON);
-          writer.addImport("smithy_python.utils", "strict_parse_float");
-          return "strict_parse_float(" + dataSource + ")";
-        }
-        default -> throw new CodegenException("Unexpected float binding location `" + bindingType + "`");
-      }
-    }
-
-    @Override
-    public String bigDecimalShape(BigDecimalShape shape) {
-      switch (bindingType) {
-        case QUERY, LABEL, HEADER -> {
-          writer.addStdlibImport("decimal", "Decimal", "_Decimal");
-          return "_Decimal(" + dataSource + ")";
-        }
-        default -> throw new CodegenException("Unexpected bigDecimal binding location `" + bindingType + "`");
-      }
+      return getDefault(shape);
     }
 
     @Override
     public String stringShape(StringShape shape) {
-      if ((bindingType == HEADER || bindingType == PREFIX_HEADERS) && shape.hasTrait(MediaTypeTrait.ID)) {
-        writer.addStdlibImport("base64", "b64decode");
-        return  "b64decode(" + dataSource + ").decode('utf-8')";
-      }
+      return getDefault(shape);
+    }
 
-      return dataSource;
+    @Override
+    public String byteShape(ByteShape shape) {
+      return getDefault(shape);
+    }
+
+    @Override
+    public String shortShape(ShortShape shape) {
+      return getDefault(shape);
+    }
+
+    @Override
+    public String integerShape(IntegerShape shape) {
+      return getDefault(shape);
+    }
+
+    @Override
+    public String longShape(LongShape shape) {
+      return getDefault(shape);
+    }
+
+    @Override
+    public String bigIntegerShape(BigIntegerShape shape) {
+      return getDefault(shape);
+    }
+
+    @Override
+    public String floatShape(FloatShape shape) {
+      return getDefault(shape);
+    }
+
+    @Override
+    public String doubleShape(DoubleShape shape) {
+      return getDefault(shape);
+    }
+
+    @Override
+    public String bigDecimalShape(BigDecimalShape shape) {
+      return getDefault(shape);
     }
 
     @Override
     public String timestampShape(TimestampShape shape) {
-      return "timestampshape";
-    }
-
-    @Override
-    public String listShape(ListShape shape) {
-      if (bindingType != HEADER) {
-        throw new CodegenException("Unexpected list binding location `" + bindingType + "`");
-      }
-      var collectionTarget = context.model().expectShape(shape.getMember().getTarget());
-      writer.addImport("smithy_python.httputils", "split_header");
-      writer.addDependency(SmithyPythonDependency.SMITHY_PYTHON);
-      String split = String.format("split_header(%s or '')", dataSource);;
-
-      // Headers that have HTTP_DATE formatted timestamps may not be quoted, so we need
-      // to enable special handling for them.
-      if (isHttpDate(shape.getMember(), collectionTarget)) {
-        split = String.format("split_header(%s or '', True)", dataSource);
-      }
-
-      var targetDeserVisitor = new HttpMemberDeserVisitor(
-          context, writer, bindingType, "e.strip()", shape.getMember(), defaultTimestampFormat);
-      return String.format("[%s for e in %s]", collectionTarget.accept(targetDeserVisitor), split);
-    }
-
-    private boolean isHttpDate(MemberShape member, Shape target) {
-      if (target.isTimestampShape()) {
-        HttpBindingIndex httpIndex = HttpBindingIndex.of(context.model());
-        Format format = httpIndex.determineTimestampFormat(member, bindingType, Format.HTTP_DATE);
-        return format == Format.HTTP_DATE;
-      }
-      return false;
+      return getDefault(shape);
     }
   }
 }

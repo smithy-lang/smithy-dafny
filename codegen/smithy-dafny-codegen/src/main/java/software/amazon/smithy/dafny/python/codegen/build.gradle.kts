@@ -23,6 +23,7 @@ dependencies {
     implementation("software.amazon.smithy:smithy-model:1.28.1")
     implementation("software.amazon.smithy:smithy-aws-traits:1.28.1")
     implementation("software.amazon.smithy.python:smithy-python-codegen:0.1.0")
+    implementation("software.amazon.smithy.dafny:smithy-dafny-codegen:0.1.0")
 }
 
 publishing {

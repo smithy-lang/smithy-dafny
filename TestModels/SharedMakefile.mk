@@ -231,11 +231,11 @@ smithy_dafny_python:
 	gradle build
 	# Smithy outputDirectory can be overridden in smithy-build.json:
 	#   https://smithy.io/2.0/guides/building-models/build-config.html#smithy-build-json
-	# However, outputDirectory is currently bugged, and overrides do not apply:sm
+	# However, outputDirectory is currently bugged, and overrides do not apply:
 	#   https://github.com/awslabs/smithy/issues/1425
 	# As a workaround, the Make script will move output to the correct directory until #1425 is resolved.
 	mkdir -p runtimes/python/src/smithy_generated
-	cp -r build/smithyprojections/simple-types-boolean/source/python-client-codegen/. runtimes/python/src/smithy_generated
+	cp -r build/smithyprojections/*/source/python-client-codegen/. runtimes/python/src/smithy_generated
 
 
 ########################## .NET targets
