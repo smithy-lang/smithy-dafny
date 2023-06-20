@@ -1,4 +1,6 @@
-namespace simple.types.enum
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
+namespace simple.types.smithyEnum
 
 @aws.polymorph#localService(
   sdkId: "SimpleEnum",

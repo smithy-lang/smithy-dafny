@@ -1,3 +1,5 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 package software.amazon.polymorph.utils;
 
 import software.amazon.polymorph.smithydafny.DafnyNameResolver;
@@ -13,7 +15,15 @@ public class DafnyNameResolverHelpers {
      * assuming it was generated into a "Types" module.
      */
     public static String dafnyExternNamespaceForShapeId(final ShapeId shapeId) {
-        return "Dafny." + DafnyNameResolver.dafnyModuleForNamespace(shapeId.getNamespace());
+        return DafnyNameResolver.dafnyTypesModuleExternNamespace(shapeId.getNamespace());
+    }
+
+    /**
+     * Returns the Dafny {@code {:extern}} namespace corresponding to the given namespace,
+     * assuming it was generated into a "Types" module.
+     */
+    public static String dafnyExternNamespaceForNamespace(final String namespace) {
+        return DafnyNameResolver.dafnyTypesModuleExternNamespace(namespace);
     }
 
     /**
@@ -21,7 +31,7 @@ public class DafnyNameResolverHelpers {
      * but NOT the Types module.
      */
     public static String packageNameForNamespace(final String namespace) {
-        return "Dafny." + DafnyNameResolver.dafnyNamespace(namespace);
+        return DafnyNameResolver.dafnyExternNamespace(namespace);
     }
 
     /** @return The __default for a namespace.*/

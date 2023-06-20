@@ -1,15 +1,17 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 using Wrappers_Compile;
-using Simple.Types.Long;
-using Simple.Types.Long.Wrapped;
-using TypeConversion = Simple.Types.Long.TypeConversion ;
-namespace Dafny.Simple.Types.Long.Wrapped
+using Simple.Types.SmithyLong;
+using Simple.Types.SmithyLong.Wrapped;
+using TypeConversion = Simple.Types.SmithyLong.TypeConversion ;
+namespace simple.types.smithylong.internaldafny.wrapped
 {
     public partial class __default {
-        public static _IResult<Types.ISimpleTypesLongClient, Types._IError> WrappedSimpleLong(Types._ISimpleLongConfig config) {
-            var wrappedConfig = TypeConversion.FromDafny_N6_simple__N5_types__N4_long__S16_SimpleLongConfig(config);
+        public static _IResult<types.ISimpleTypesLongClient, types._IError> WrappedSimpleLong(types._ISimpleLongConfig config) {
+            var wrappedConfig = TypeConversion.FromDafny_N6_simple__N5_types__N10_smithyLong__S16_SimpleLongConfig(config);
             var impl = new SimpleLong(wrappedConfig);
             var wrappedClient = new SimpleTypesLongShim(impl);
-            return Result<Types.ISimpleTypesLongClient, Types._IError>.create_Success(wrappedClient);
+            return Result<types.ISimpleTypesLongClient, types._IError>.create_Success(wrappedClient);
         }
     }
 }

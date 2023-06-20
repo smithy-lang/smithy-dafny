@@ -1,10 +1,12 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 include "../src/Index.dfy"
 
 module  SimpleLongImplTest {
     import SimpleLong
     import SimpleLongImpl
     import opened StandardLibrary.UInt
-    import opened SimpleTypesLongTypes
+    import opened SimpleTypesSmithyLongTypes
     import opened Wrappers
     method{:test} GetLong(){
         var client :- expect SimpleLong.SimpleLong();

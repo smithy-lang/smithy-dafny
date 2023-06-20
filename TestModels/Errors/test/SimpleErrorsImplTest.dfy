@@ -1,3 +1,5 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 include "../src/Index.dfy"
 
 module SimpleErrorsImplTest {
@@ -41,7 +43,9 @@ module SimpleErrorsImplTest {
       expect ret.Failure?;
       expect ret.error.CollectionOfErrors?;
 
-      var expectedValue := CollectionOfErrors(list := [ SimpleErrorsException(message := s) ]);
+      var expectedValue := CollectionOfErrors(
+        list := [ SimpleErrorsException(message := s) ],
+        message := "Something");
       expect ret.error == expectedValue;
     }
 

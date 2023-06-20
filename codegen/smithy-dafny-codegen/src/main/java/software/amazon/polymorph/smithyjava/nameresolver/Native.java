@@ -1,3 +1,5 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 package software.amazon.polymorph.smithyjava.nameresolver;
 
 import com.squareup.javapoet.ClassName;
@@ -261,8 +263,9 @@ public class Native extends NameResolver{
                     ("ServiceShape for local-service-test MUST have LocalTrait." +
                             " ShapeId: %s").formatted(shape.toShapeId()));
         }
+        final String namespace = NamespaceHelper.standardize(shape.getId().getNamespace()) + ".wrapped";
         return ClassName.get(
-                NamespaceHelper.standardize(shape.getId().getNamespace()) + ".wrapped",
+                namespace,
                 "Test" + capitalize(maybeTrait.get().getSdkId()));
     }
 

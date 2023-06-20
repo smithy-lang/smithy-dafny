@@ -1,6 +1,8 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 include "SimpleBlobImpl.dfy"
 
-module {:extern "Dafny.Simple.Types.Blob" } SimpleBlob refines AbstractSimpleTypesBlobService {
+module {:extern "simple.types.blob.internaldafny" } SimpleBlob refines AbstractSimpleTypesBlobService {
     import Operations = SimpleBlobImpl
 
  function method DefaultSimpleBlobConfig(): SimpleBlobConfig {

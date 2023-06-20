@@ -1,4 +1,6 @@
-namespace simple.types.string
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
+namespace simple.types.smithyString
 
 @aws.polymorph#localService(
   sdkId: "SimpleString",

@@ -1,3 +1,5 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 import java.net.URI
 import javax.annotation.Nullable
 import org.gradle.api.tasks.wrapper.Wrapper
@@ -53,8 +55,8 @@ repositories {
 }
 
 dependencies {
-    implementation("org.dafny:DafnyRuntime:4.0.0")
-    implementation("software.amazon.dafny:conversion:1.0-SNAPSHOT")
+    implementation("org.dafny:DafnyRuntime:4.1.0")
+    implementation("software.amazon.smithy.dafny:conversion:0.1")
     implementation("software.amazon.cryptography:StandardLibrary:1.0-SNAPSHOT")
     /*implementation("com.amazonaws:aws-java-sdk-kms:1.12.417")*/
     implementation(platform("software.amazon.awssdk:bom:2.19.1"))

@@ -1,8 +1,10 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 include "../src/Index.dfy"
 
 module  SimpleStringImplTest {
     import SimpleString
-    import opened SimpleTypesStringTypes
+    import opened SimpleTypesSmithyStringTypes
     import opened Wrappers
     method{:test} GetString(){
         var client :- expect SimpleString.SimpleString();

@@ -1,6 +1,8 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 include "SimpleErrorsImpl.dfy"
 
-module {:extern "Dafny.Simple.Errors" } SimpleErrors refines AbstractSimpleErrorsService {
+module {:extern "simple.errors.internaldafny" } SimpleErrors refines AbstractSimpleErrorsService {
   import Operations = SimpleErrorsImpl
 
   function method DefaultSimpleErrorsConfig(): SimpleErrorsConfig {

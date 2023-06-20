@@ -1,7 +1,9 @@
-include "../Model/SimpleExternTypes.dfy"
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
+include "../Model/SimpleDafnyExternTypes.dfy"
 include "ExternConstructor.dfy"
 
-module SimpleExternImpl refines AbstractSimpleExternOperations  {
+module SimpleExternImpl refines AbstractSimpleDafnyExternOperations  {
     import opened ExternConstructor
     datatype Config = Config
     type InternalConfig = Config

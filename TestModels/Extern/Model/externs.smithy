@@ -1,4 +1,6 @@
-namespace simple.extern
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
+namespace simple.dafnyExtern
 
 @aws.polymorph#localService(
   sdkId: "SimpleExtern",

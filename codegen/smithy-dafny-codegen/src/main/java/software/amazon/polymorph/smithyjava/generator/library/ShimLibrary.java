@@ -1,3 +1,5 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 package software.amazon.polymorph.smithyjava.generator.library;
 
 import com.squareup.javapoet.ClassName;
@@ -5,9 +7,14 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
 
+import java.util.Optional;
+
+import software.amazon.awssdk.utils.StringUtils;
 import software.amazon.polymorph.smithyjava.MethodReference;
+import software.amazon.polymorph.smithyjava.OperationJavaDoc;
 import software.amazon.polymorph.smithyjava.generator.Generator;
 import software.amazon.polymorph.smithyjava.modeled.Operation;
+import software.amazon.polymorph.traits.JavaDocTrait;
 import software.amazon.polymorph.utils.AwsSdkNameResolverHelpers;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.polymorph.smithyjava.MethodSignature;
@@ -64,6 +71,10 @@ public abstract class ShimLibrary extends Generator {
         if (!outputResolved.resolvedId().equals(SMITHY_API_UNIT)) {
             TypeName outputType = methodSignatureTypeName(outputResolved);
             method.returns(outputType);
+        }
+        String maybeJavaDoc = OperationJavaDoc.fromOperationShape(subject.model, shape).getDoc();
+        if (StringUtils.isNotBlank(maybeJavaDoc)) {
+            method.addJavadoc(maybeJavaDoc);
         }
         return new MethodSignature(method, inputResolved, outputResolved);
     }

@@ -1,3 +1,5 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 package software.amazon.polymorph.smithyjava.nameresolver;
 
 import com.squareup.javapoet.ClassName;
@@ -110,7 +112,7 @@ public class Dafny extends NameResolver {
     }
 
     static String modelPackageNameForNamespace(final String namespace) {
-        return DafnyNameResolverHelpers.packageNameForNamespace(namespace) + ".Types";
+        return DafnyNameResolverHelpers.dafnyExternNamespaceForNamespace(namespace);
     }
 
     static String packageNameForServiceShape(ServiceShape serviceShape) {

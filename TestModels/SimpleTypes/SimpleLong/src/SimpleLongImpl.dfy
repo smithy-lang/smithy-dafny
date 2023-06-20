@@ -1,6 +1,8 @@
-include "../Model/SimpleTypesLongTypes.dfy"
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
+include "../Model/SimpleTypesSmithyLongTypes.dfy"
 
-module SimpleLongImpl refines AbstractSimpleTypesLongOperations  {
+module SimpleLongImpl refines AbstractSimpleTypesSmithyLongOperations  {
   datatype Config = Config
   type InternalConfig = Config
   predicate ValidInternalConfig?(config: InternalConfig)

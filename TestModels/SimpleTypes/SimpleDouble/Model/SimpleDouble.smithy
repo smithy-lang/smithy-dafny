@@ -1,4 +1,6 @@
-namespace simple.types.double
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
+namespace simple.types.smithyDouble
 
 @aws.polymorph#localService(
   sdkId: "SimpleDouble",

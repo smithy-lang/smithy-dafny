@@ -1,3 +1,5 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 package software.amazon.polymorph.smithyjava.unmodeled;
 
 import com.squareup.javapoet.MethodSpec;
@@ -50,19 +52,22 @@ public class ErrorHelpers {
      * but our generated Java just uses the field name.
      */
     public static Iterable<MethodSpec> throwableGetters() {
+        //noinspection DataFlowIssue (All THROWABLE_ARGS hava a JavaDoc)
         return THROWABLE_ARGS.stream().map(field ->
                 MethodSpec.methodBuilder(field.name)
                         .returns(field.type)
                         .addModifiers(PUBLIC)
+                        .addJavadoc("See {@link $T#$L()}.",
+                          Throwable.class, String.format("get%s", capitalize(field.name)))
                         .addStatement("return this.$L()",
                                 String.format("get%s", capitalize(field.name)))
                         .build()).collect(Collectors.toList());
     }
 
     /** All Error Shapes MUST HAVE the THROWABLE_ARGS.
-     * Their Model MAY already state include these are Members.
+     * Their Model MAY already include these as Members.
      * This method ensures THROWABLE_ARGS are present only once
-     * in a Error class. */
+     * in an Error class. */
     public static List<BuilderMemberSpec> prependThrowableArgs(
             List<BuilderMemberSpec> originalArgs
     ) {

@@ -1,3 +1,5 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 package software.amazon.polymorph.smithyjava.modeled;
 
 import com.squareup.javapoet.ClassName;
@@ -6,6 +8,7 @@ import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeSpec;
 
+import software.amazon.polymorph.traits.JavaDocTrait;
 import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.traits.EnumDefinition;
 import software.amazon.smithy.model.traits.EnumTrait;
@@ -36,6 +39,8 @@ public class ModeledEnum {
         enumSpec.addField(ENUM_VALUE_FIELD);
         enumSpec.addMethod(constructor());
         enumSpec.addMethod(toStringMethod());
+        shape.getTrait(JavaDocTrait.class)
+          .map(docTrait -> enumSpec.addJavadoc(docTrait.getValue()));
         return JavaFile.builder(packageName, enumSpec.build())
                 .skipJavaLangImports(true)
                 .build();

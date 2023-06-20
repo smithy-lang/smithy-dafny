@@ -1,8 +1,10 @@
-include "../Model/SimpleExternTypes.dfy"
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
+include "../Model/SimpleDafnyExternTypes.dfy"
 
 module{:extern "ExternConstructor"} ExternConstructor {
     import opened Wrappers
-    import opened SimpleExternTypes
+    import opened SimpleDafnyExternTypes
 
     class{:extern "ExternConstructorClass"} ExternConstructorClass {
 

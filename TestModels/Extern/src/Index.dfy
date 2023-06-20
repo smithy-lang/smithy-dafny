@@ -1,6 +1,8 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 include "SimpleExternImpl.dfy"
 
-module {:extern "Dafny.Simple.Extern" } SimpleExtern refines AbstractSimpleExternService {
+module {:extern "simple.dafnyextern.internaldafny" } SimpleExtern refines AbstractSimpleDafnyExternService {
     import Operations = SimpleExternImpl
 
     function method DefaultSimpleExternConfig(): SimpleExternConfig {

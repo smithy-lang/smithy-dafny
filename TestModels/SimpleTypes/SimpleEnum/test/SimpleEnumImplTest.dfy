@@ -1,9 +1,11 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 include "../src/Index.dfy"
 
 module  SimpleEnumImplTest {
     import SimpleEnum
     import StandardLibrary.UInt
-    import opened SimpleTypesEnumTypes
+    import opened SimpleTypesSmithyEnumTypes
     import opened Wrappers
     method{:test} GetEnum(){
         var client :- expect SimpleEnum.SimpleEnum();

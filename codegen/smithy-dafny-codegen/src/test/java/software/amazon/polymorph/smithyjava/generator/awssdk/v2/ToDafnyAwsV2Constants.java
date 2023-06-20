@@ -1,3 +1,5 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 package software.amazon.polymorph.smithyjava.generator.awssdk.v2;
 
 import static software.amazon.polymorph.smithyjava.generator.ToDafnyConstants.MEMBER_ASSIGNMENT_OPTIONAL;
@@ -5,58 +7,58 @@ import static software.amazon.polymorph.smithyjava.generator.ToDafnyConstants.ME
 
 public class ToDafnyAwsV2Constants {
     protected static String DO_SOMETHING_RESPONSE = """
-            public static Dafny.Com.Amazonaws.Kms.Types.DoSomethingResponse DoSomethingResponse(
+            public static software.amazon.cryptography.services.kms.internaldafny.types.DoSomethingResponse DoSomethingResponse(
                 software.amazon.awssdk.services.kms.model.DoSomethingResponse nativeValue) {
               %s;
               %s;
-              return new Dafny.Com.Amazonaws.Kms.Types.DoSomethingResponse(message);
+              return new software.amazon.cryptography.services.kms.internaldafny.types.DoSomethingResponse(message);
             }
             """.formatted(MEMBER_DECLARATION_OPTIONAL, MEMBER_ASSIGNMENT_OPTIONAL);
 
     protected static String KEY_USAGE_TYPE = """
-            public static Dafny.Com.Amazonaws.Kms.Types.KeyUsageType KeyUsageType(
+            public static software.amazon.cryptography.services.kms.internaldafny.types.KeyUsageType KeyUsageType(
                 software.amazon.awssdk.services.kms.model.KeyUsageType nativeValue
             ) {
               switch (nativeValue) {
                 case SIGN_VERIFY: {
-                  return Dafny.Com.Amazonaws.Kms.Types.KeyUsageType.create_SIGN__VERIFY();
+                  return software.amazon.cryptography.services.kms.internaldafny.types.KeyUsageType.create_SIGN__VERIFY();
                 }
                 case ENCRYPT_DECRYPT: {
-                  return Dafny.Com.Amazonaws.Kms.Types.KeyUsageType.create_ENCRYPT__DECRYPT();
+                  return software.amazon.cryptography.services.kms.internaldafny.types.KeyUsageType.create_ENCRYPT__DECRYPT();
                 }
                 default: {
-                  throw new java.lang.RuntimeException("Cannot convert " + nativeValue + " to Dafny.Com.Amazonaws.Kms.Types.KeyUsageType.");
+                  throw new java.lang.RuntimeException("Cannot convert " + nativeValue + " to software.amazon.cryptography.services.kms.internaldafny.types.KeyUsageType.");
                 }
               }
             }
             """;
 
     protected static String KEY_USAGE_TYPE_STRING = """
-            public static Dafny.Com.Amazonaws.Kms.Types.KeyUsageType KeyUsageType(
+            public static software.amazon.cryptography.services.kms.internaldafny.types.KeyUsageType KeyUsageType(
                 java.lang.String nativeValue
             ) {
               return KeyUsageType(software.amazon.awssdk.services.kms.model.KeyUsageType.fromValue(nativeValue));
             }""";
 
     protected static String GENERATE_CONVERT_LIST = """
-            public static dafny.DafnySequence<? extends Dafny.Com.Amazonaws.Kms.Types.KeyUsageType> KeyUsageTypes (
+            public static dafny.DafnySequence<? extends software.amazon.cryptography.services.kms.internaldafny.types.KeyUsageType> KeyUsageTypes (
                 java.util.List<java.lang.String> nativeValue
             ) {
-              return software.amazon.dafny.conversion.ToDafny.Aggregate.GenericToSequence(
+              return software.amazon.smithy.dafny.conversion.ToDafny.Aggregate.GenericToSequence(
                   nativeValue,
-                  Dafny.Com.Amazonaws.Kms.ToDafny::KeyUsageType,
-                  Dafny.Com.Amazonaws.Kms.Types.KeyUsageType._typeDescriptor()
+                  software.amazon.cryptography.services.kms.internaldafny.ToDafny::KeyUsageType,
+                  software.amazon.cryptography.services.kms.internaldafny.types.KeyUsageType._typeDescriptor()
               );
             }
             """;
     protected static String GENERATE_CONVERT_LIST_STRUCTURES = """
-            public static dafny.DafnySequence<? extends Dafny.Com.Amazonaws.Other.Types.OtherNamespace> OtherNamespaces (
+            public static dafny.DafnySequence<? extends software.amazon.cryptography.services.other.internaldafny.types.OtherNamespace> OtherNamespaces (
                 java.util.List<software.amazon.awssdk.services.other.model.OtherNamespace> nativeValue
             ) {
-              return software.amazon.dafny.conversion.ToDafny.Aggregate.GenericToSequence(
+              return software.amazon.smithy.dafny.conversion.ToDafny.Aggregate.GenericToSequence(
                   nativeValue,
-                  Dafny.Com.Amazonaws.Other.ToDafny::OtherNamespace,
-                  Dafny.Com.Amazonaws.Other.Types.OtherNamespace._typeDescriptor()
+                  software.amazon.cryptography.services.other.internaldafny.ToDafny::OtherNamespace,
+                  software.amazon.cryptography.services.other.internaldafny.types.OtherNamespace._typeDescriptor()
               );
             }
             """;
@@ -67,10 +69,10 @@ public class ToDafnyAwsV2Constants {
             EncryptionContextType(
                 java.util.Map<java.lang.String, java.lang.String> nativeValue
             ) {
-              return software.amazon.dafny.conversion.ToDafny.Aggregate.GenericToMap(
+              return software.amazon.smithy.dafny.conversion.ToDafny.Aggregate.GenericToMap(
                   nativeValue,
-                  software.amazon.dafny.conversion.ToDafny.Simple::CharacterSequence,
-                  software.amazon.dafny.conversion.ToDafny.Simple::CharacterSequence
+                  software.amazon.smithy.dafny.conversion.ToDafny.Simple::CharacterSequence,
+                  software.amazon.smithy.dafny.conversion.ToDafny.Simple::CharacterSequence
               );
             }
             """;
@@ -80,39 +82,39 @@ public class ToDafnyAwsV2Constants {
             Names(
                 java.util.Set<java.lang.String> nativeValue
             ) {
-              return software.amazon.dafny.conversion.ToDafny.Aggregate.GenericToSet(
+              return software.amazon.smithy.dafny.conversion.ToDafny.Aggregate.GenericToSet(
                   nativeValue,
-                  software.amazon.dafny.conversion.ToDafny.Simple::CharacterSequence
+                  software.amazon.smithy.dafny.conversion.ToDafny.Simple::CharacterSequence
               );
             }
             """;
 
     public static String SIMPLE_STRUCTURE = """
-            public static Dafny.Com.Amazonaws.Kms.Types.Simple Simple(
+            public static software.amazon.cryptography.services.kms.internaldafny.types.Simple Simple(
                 software.amazon.awssdk.services.kms.model.Simple nativeValue) {
-              return new Dafny.Com.Amazonaws.Kms.Types.Simple();
+              return new software.amazon.cryptography.services.kms.internaldafny.types.Simple();
             }
             """;
 
     protected static String GENERATE_CONVERT_OPAQUE_ERROR = """
-            public static Dafny.Com.Amazonaws.Kms.Types.Error Error(
+            public static software.amazon.cryptography.services.kms.internaldafny.types.Error Error(
                     software.amazon.awssdk.services.kms.model.KmsException nativeValue
             ) {
               Wrappers_Compile.Option<dafny.DafnySequence<? extends java.lang.Character>> message;
               message = java.util.Objects.nonNull(nativeValue.getMessage()) ?
-                    Wrappers_Compile.Option.create_Some(software.amazon.dafny.conversion.ToDafny.Simple.CharacterSequence(nativeValue.getMessage()))
+                    Wrappers_Compile.Option.create_Some(software.amazon.smithy.dafny.conversion.ToDafny.Simple.CharacterSequence(nativeValue.getMessage()))
                   : Wrappers_Compile.Option.create_None();
-              return new Dafny.Com.Amazonaws.Kms.Types.Error_Opaque(message);
+              return new software.amazon.cryptography.services.kms.internaldafny.types.Error_Opaque(message);
             }
             """;
 
     protected static final String KMS_A_STRING_OPERATION_JAVA_FILE = """
-            package Dafny.Com.Amazonaws.Kms;
+            package software.amazon.cryptography.services.kms.internaldafny;
                         
-            import Dafny.Com.Amazonaws.Kms.Types.DoSomethingResponse;
-            import Dafny.Com.Amazonaws.Kms.Types.Error;
-            import Dafny.Com.Amazonaws.Kms.Types.Error_DependencyTimeoutException;
-            import Dafny.Com.Amazonaws.Kms.Types.Error_Opaque;
+            import software.amazon.cryptography.services.kms.internaldafny.types.DoSomethingResponse;
+            import software.amazon.cryptography.services.kms.internaldafny.types.Error;
+            import software.amazon.cryptography.services.kms.internaldafny.types.Error_DependencyTimeoutException;
+            import software.amazon.cryptography.services.kms.internaldafny.types.Error_Opaque;
             import Wrappers_Compile.Option;
             import dafny.DafnySequence;
             import java.lang.Character;
@@ -124,7 +126,7 @@ public class ToDafnyAwsV2Constants {
               public static DoSomethingResponse DoSomethingResponse(DoSomethingResponse nativeValue) {
                 Option<DafnySequence<? extends Character>> message;
                 message = Objects.nonNull(nativeValue.getMessage()) ?
-                    Option.create_Some(software.amazon.dafny.conversion.ToDafny.Simple.CharacterSequence(nativeValue.getMessage()))
+                    Option.create_Some(software.amazon.smithy.dafny.conversion.ToDafny.Simple.CharacterSequence(nativeValue.getMessage()))
                     : Option.create_None();
                 return new DoSomethingResponse(message);
               }
@@ -132,7 +134,7 @@ public class ToDafnyAwsV2Constants {
               public static Error Error(DependencyTimeoutException nativeValue) {
                 Option<DafnySequence<? extends Character>> message;
                 message = Objects.nonNull(nativeValue.getMessage()) ?
-                    Option.create_Some(software.amazon.dafny.conversion.ToDafny.Simple.CharacterSequence(nativeValue.getMessage()))
+                    Option.create_Some(software.amazon.smithy.dafny.conversion.ToDafny.Simple.CharacterSequence(nativeValue.getMessage()))
                     : Option.create_None();
                 return new Error_DependencyTimeoutException(message);
               }
@@ -140,7 +142,7 @@ public class ToDafnyAwsV2Constants {
               public static Error Error(KmsException nativeValue) {
                 Option<DafnySequence<? extends Character>> message;
                 message = Objects.nonNull(nativeValue.getMessage()) ?
-                    Option.create_Some(software.amazon.dafny.conversion.ToDafny.Simple.CharacterSequence(nativeValue.getMessage()))
+                    Option.create_Some(software.amazon.smithy.dafny.conversion.ToDafny.Simple.CharacterSequence(nativeValue.getMessage()))
                     : Option.create_None();
                 return new Error_Opaque(message);
               }

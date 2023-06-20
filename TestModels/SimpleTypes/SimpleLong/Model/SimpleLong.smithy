@@ -1,4 +1,6 @@
-namespace simple.types.long
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
+namespace simple.types.smithyLong
 
 @aws.polymorph#localService(
   sdkId: "SimpleLong",

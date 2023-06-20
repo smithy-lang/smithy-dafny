@@ -1,15 +1,17 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 using Wrappers_Compile;
-using Simple.Types.Enum;
-using Simple.Types.Enum.Wrapped;
-using TypeConversion = Simple.Types.Enum.TypeConversion ;
-namespace Dafny.Simple.Types.Enum.Wrapped
+using Simple.Types.SmithyEnum;
+using Simple.Types.SmithyEnum.Wrapped;
+using TypeConversion = Simple.Types.SmithyEnum.TypeConversion ;
+namespace simple.types.smithyenum.internaldafny.wrapped
 {
     public partial class __default {
-        public static _IResult<Types.ISimpleTypesEnumClient, Types._IError> WrappedSimpleEnum(Types._ISimpleEnumConfig config) {
-            var wrappedConfig = TypeConversion.FromDafny_N6_simple__N5_types__N4_enum__S16_SimpleEnumConfig(config);
+        public static _IResult<types.ISimpleTypesEnumClient, types._IError> WrappedSimpleEnum(types._ISimpleEnumConfig config) {
+            var wrappedConfig = TypeConversion.FromDafny_N6_simple__N5_types__N10_smithyEnum__S16_SimpleEnumConfig(config);
             var impl = new SimpleEnum(wrappedConfig);
             var wrappedClient = new SimpleTypesEnumShim(impl);
-            return Result<Types.ISimpleTypesEnumClient, Types._IError>.create_Success(wrappedClient);
+            return Result<types.ISimpleTypesEnumClient, types._IError>.create_Success(wrappedClient);
         }
     }
 }

@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import static software.amazon.polymorph.smithydotnet.TypeConversionCodegen.collectionOfErrorsToDafny;
 import static software.amazon.polymorph.smithydotnet.TypeConversionDirection.FROM_DAFNY;
 import static software.amazon.polymorph.smithydotnet.TypeConversionDirection.TO_DAFNY;
 
@@ -187,8 +188,8 @@ public class LocalServiceWrappedShimCodegen {
                         );"""
                         .formatted(
                             DotNetNameResolver.convertToCSharpNamespaceWithSegmentMapper(dependentNamespace, DotNetNameResolver::capitalizeNamespaceSegment),
-                            DafnyNameResolver.dafnyExternNamespaceForNamespace(serviceShape.getId().getNamespace()),
-                            DafnyNameResolver.dafnyTypesModuleForNamespace(dependentNamespace).replace("Types", "")
+                            DafnyNameResolver.dafnyTypesModuleExternNamespace(serviceShape.getId().getNamespace()),
+                            DafnyNameResolver.dafnyBaseModuleName(dependentNamespace)
                         )
                 );
                 casesList.add(toAppend);
@@ -218,24 +219,7 @@ public class LocalServiceWrappedShimCodegen {
                 })).lineSeparated();
 
         // CollectionOfErrors wrapper for list of exceptions
-        final TokenTree collectionOfErrorsCase = TokenTree
-                .of("""
-                    case %1$s collectionOfErrors:
-                     return new %2$s(
-                         Dafny.Sequence<%3$s>
-                         .FromArray(
-                             collectionOfErrors.list.Select
-                                 (x => %4$s(x))
-                             .ToArray()
-                         )
-                     );
-                    """
-                    .formatted(DotNetNameResolver.baseClassForCollectionOfErrors(),
-                        DotNetNameResolver.dafnyCollectionOfErrorsTypeForServiceShape(serviceShape),
-                        DotNetNameResolver.dafnyTypeForCommonServiceError(serviceShape),
-                        nameResolver.qualifiedTypeConverterForCommonError(serviceShape, TO_DAFNY))
-                )
-                .lineSeparated();
+        final TokenTree collectionOfErrorsCase = collectionOfErrorsToDafny(serviceShape, nameResolver);
 
         final TokenTree unknownErrorCase = Token.of("""
                 default:

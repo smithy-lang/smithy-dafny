@@ -1,3 +1,5 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 package software.amazon.polymorph.smithyjava.unmodeled;
 
 import com.squareup.javapoet.ClassName;
@@ -11,6 +13,7 @@ import java.util.List;
 
 import software.amazon.polymorph.smithyjava.BuilderMemberSpec;
 import software.amazon.polymorph.smithyjava.BuilderSpecs;
+import software.amazon.polymorph.smithyjava.modeled.ModeledStructure;
 
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
@@ -28,22 +31,22 @@ public class CollectionOfErrors {
     public static JavaFile javaFile(String packageName) {
         ClassName className = nativeClassName(packageName);
         ClassName superName = ClassName.get(RuntimeException.class);
+        List<BuilderMemberSpec> localOnlyFields = ErrorHelpers.removeThrowableArgs(COLLECTION_ARGS);
         BuilderSpecs builderSpecs = new BuilderSpecs(
                 className, null, COLLECTION_ARGS, Collections.emptyList());
         final boolean overrideSuperFalse = false;
         TypeSpec.Builder spec = TypeSpec
                 .classBuilder(className)
                 .addModifiers(PUBLIC)
-                .superclass(superName)
-                .addField(CollectionOfErrors.exceptionList(), "list", PRIVATE, FINAL)
-                .addMethod(ErrorHelpers.messageFromBuilder(builderSpecs))
-                .addMethods(ErrorHelpers.throwableGetters())
-                .addMethod(MethodSpec
-                        .methodBuilder("list")
-                        .returns(CollectionOfErrors.exceptionList())
-                        .addModifiers(PUBLIC)
-                        .addStatement("return this.$L", "list")
-                        .build())
+                .superclass(superName);
+        localOnlyFields.forEach(field -> {
+            // Add local fields
+            spec.addField(field.toFieldSpec(PRIVATE, FINAL));
+        });
+        spec.addMethod(ErrorHelpers.messageFromBuilder(builderSpecs));
+        spec.addMethods(ErrorHelpers.throwableGetters());
+        localOnlyFields.forEach(field -> spec.addMethod(ModeledStructure.getterMethod(field)));
+        spec
                 .addType(builderSpecs.builderInterface())
                 .addType(builderSpecs.builderImpl(
                         overrideSuperFalse,

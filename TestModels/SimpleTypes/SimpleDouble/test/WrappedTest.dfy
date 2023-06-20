@@ -7,7 +7,7 @@ include "./SimpleDoubleTest.dfy"
 module WrappedTest {
   import opened SimpleDoubleTest
   import opened WrappedSimpleTypesDouble
-  import opened Types = SimpleTypesDoubleTypes
+  import opened Types = SimpleTypesSmithyDoubleTypes
   import opened Wrappers
 
   method {:test} TestWrappedClient()

@@ -1,3 +1,5 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 package software.amazon.polymorph.smithyjava.generator.awssdk.v2;
 
 import com.squareup.javapoet.MethodSpec;
@@ -80,7 +82,7 @@ public class ToDafnyAwsV2Test {
         Model localModel = TestSetupUtils.setupLocalModel(ModelConstants.KMS_A_STRING_OPERATION);
         ToDafnyAwsV2 localUnderTest = new ToDafnyAwsV2(TestSetupUtils.setupAwsSdkV2(localModel, "kms"));
         final Map<Path, TokenTree> actual = localUnderTest.generate();
-        final Path expectedPath = Path.of("Dafny/Com/Amazonaws/Kms/ToDafny.java");
+        final Path expectedPath = Path.of("software/amazon/cryptography/services/kms/internaldafny/ToDafny.java");
         Path[] temp = new Path[1];
         final Path actualPath = actual.keySet().toArray(temp)[0];
         assertEquals(expectedPath, actualPath);

@@ -1,6 +1,8 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 include "../Model/SimpleDependenciesTypesWrapped.dfy"
 
-module {:extern "Dafny.Simple.Dependencies.Wrapped"} WrappedSimpleDependenciesService refines WrappedAbstractSimpleDependenciesService {
+module {:extern "simple.dependencies.internaldafny.wrapped"} WrappedSimpleDependenciesService refines WrappedAbstractSimpleDependenciesService {
     import WrappedService = SimpleDependencies
     function method WrappedDefaultSimpleDependenciesConfig(): SimpleDependenciesConfig {
         SimpleDependenciesConfig(

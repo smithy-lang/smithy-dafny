@@ -1,3 +1,5 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 package software.amazon.polymorph.smithyjava.generator.library;
 
 class Constants {
@@ -6,10 +8,10 @@ class Constants {
     static String RANGE_TRAIT_INTEGER_BUILD_METHOD_RETURN = "return new TestRangeMinMaxInteger(this);";
     static String RANGE_TRAIT_INTEGER_BUILD_EXPECTED = """
             %s {
-              if (Objects.nonNull(this.zeroToTen()) && this.zeroToTen() < 0) {
+              if (this._zeroToTenSet && this.zeroToTen() < 0) {
                 throw new IllegalArgumentException("`zeroToTen` must be greater than or equal to 0");
               }
-              if (Objects.nonNull(this.zeroToTen()) && this.zeroToTen() > 10) {
+              if (this._zeroToTenSet && this.zeroToTen() > 10) {
                 throw new IllegalArgumentException("`zeroToTen` must be less than or equal to 10.");
               }
               %s

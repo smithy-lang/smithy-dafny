@@ -1,3 +1,5 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 package software.amazon.polymorph.smithyjava.generator;
 
 import com.squareup.javapoet.ClassName;
@@ -47,8 +49,8 @@ public abstract class ToNative extends Generator {
      */
     protected static final Map<ShapeType, MethodReference> AGGREGATE_CONVERSION_METHOD_FROM_SHAPE_TYPE;
     protected static final Map<ShapeType, MethodReference> SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE;
-    protected static final ClassName COMMON_TO_NATIVE_SIMPLE = ClassName.get("software.amazon.dafny.conversion", "ToNative", "Simple");
-    protected static final ClassName COMMON_TO_NATIVE_AGGREGATE = ClassName.get("software.amazon.dafny.conversion", "ToNative", "Aggregate");
+    protected static final ClassName COMMON_TO_NATIVE_SIMPLE = ClassName.get("software.amazon.smithy.dafny.conversion", "ToNative", "Simple");
+    protected static final ClassName COMMON_TO_NATIVE_AGGREGATE = ClassName.get("software.amazon.smithy.dafny.conversion", "ToNative", "Aggregate");
 
     static {
         AGGREGATE_CONVERSION_METHOD_FROM_SHAPE_TYPE = Map.ofEntries(

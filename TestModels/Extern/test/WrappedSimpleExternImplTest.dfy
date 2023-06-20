@@ -1,9 +1,11 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 include "../src/WrappedSimpleExternImpl.dfy"
 include "SimpleExternImplTest.dfy"
 
 module WrappedSimpleExternTest {
     import WrappedSimpleExternService
-    import opened SimpleExternTypes
+    import opened SimpleDafnyExternTypes
     import SimpleExternImplTest
     import opened Wrappers
     

@@ -1,6 +1,8 @@
-include "../Model/SimpleTypesStringTypes.dfy"
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
+include "../Model/SimpleTypesSmithyStringTypes.dfy"
 
-module SimpleStringImpl refines AbstractSimpleTypesStringOperations  {
+module SimpleStringImpl refines AbstractSimpleTypesSmithyStringOperations  {
     datatype Config = Config
     type InternalConfig = Config
     predicate ValidInternalConfig?(config: InternalConfig)

@@ -1,6 +1,8 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 include "SimpleConstraintsImpl.dfy"
 
-module {:extern "Dafny.Simple.Constraints" } SimpleConstraints refines AbstractSimpleConstraintsService {
+module {:extern "simple.constraints.internaldafny" } SimpleConstraints refines AbstractSimpleConstraintsService {
   import Operations = SimpleConstraintsImpl
 
   function method DefaultSimpleConstraintsConfig(): SimpleConstraintsConfig {

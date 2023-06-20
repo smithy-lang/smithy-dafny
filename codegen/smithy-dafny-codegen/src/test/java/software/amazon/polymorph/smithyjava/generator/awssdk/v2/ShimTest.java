@@ -1,3 +1,5 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 package software.amazon.polymorph.smithyjava.generator.awssdk.v2;
 
 import com.squareup.javapoet.JavaFile;
@@ -110,11 +112,13 @@ public class ShimTest {
         final Map<Path, TokenTree> actual = underTest.generate();
         // TODO: refactor so that Shim is written as
         // com.amazonaws.encryptionsdk.kms.Shim.java
-        final Path expectedPath = Path.of("Dafny/Com/Amazonaws/Kms/Shim.java");
+        final Path expectedPath = Path.of("software/amazon/cryptography/services/kms/internaldafny/Shim.java");
         Path[] temp = new Path[1];
         final Path actualPath = actual.keySet().toArray(temp)[0];
         assertEquals(expectedPath, actualPath);
         final String actualSource = actual.get(actualPath).toString();
+        System.out.println(actualSource);
+        System.out.print(MockKmsShim);
         Tokenizer.tokenizeAndAssertEqual(MockKmsShim, actualSource);
     }
 }

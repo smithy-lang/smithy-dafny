@@ -1,7 +1,9 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 include "../Model/SimpleDependenciesTypes.dfy"
 include "SimpleDependenciesImpl.dfy"
 
-module {:extern "Dafny.Simple.Dependencies" } SimpleDependencies refines AbstractSimpleDependenciesService {
+module {:extern "simple.dependencies.internaldafny" } SimpleDependencies refines AbstractSimpleDependenciesService {
   import Operations = SimpleDependenciesImpl
   import SimpleResourcesTypes
   import SimpleConstraints

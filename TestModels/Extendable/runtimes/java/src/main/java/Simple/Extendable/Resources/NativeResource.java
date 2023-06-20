@@ -1,4 +1,6 @@
-package Simple.Extendable.Resources;
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
+package simple.extendable.resources;
 
 import simple.extendable.resources.IExtendableResource;
 import simple.extendable.resources.ToNative;

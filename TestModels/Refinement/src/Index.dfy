@@ -1,6 +1,8 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 include "SimpleRefinementImpl.dfy"
 
-module {:extern "Dafny.Simple.Refinement"} SimpleRefinement refines AbstractSimpleRefinementService {
+module {:extern "simple.refinement.internaldafny"} SimpleRefinement refines AbstractSimpleRefinementService {
     import Operations = SimpleRefinementImpl
 
     function method DefaultSimpleRefinementConfig(): SimpleRefinementConfig {

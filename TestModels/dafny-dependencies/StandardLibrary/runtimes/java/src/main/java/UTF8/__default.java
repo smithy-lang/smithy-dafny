@@ -1,3 +1,5 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 package UTF8;
 
 import java.nio.ByteBuffer;
@@ -11,10 +13,10 @@ import java.nio.charset.StandardCharsets;
 import Wrappers_Compile.Result;
 import dafny.DafnySequence;
 
-import static software.amazon.dafny.conversion.ToDafny.Simple.ByteSequence;
-import static software.amazon.dafny.conversion.ToDafny.Simple.CharacterSequence;
-import static software.amazon.dafny.conversion.ToNative.Simple.ByteBuffer;
-import static software.amazon.dafny.conversion.ToNative.Simple.String;
+import static software.amazon.smithy.dafny.conversion.ToDafny.Simple.ByteSequence;
+import static software.amazon.smithy.dafny.conversion.ToDafny.Simple.CharacterSequence;
+import static software.amazon.smithy.dafny.conversion.ToNative.Simple.ByteBuffer;
+import static software.amazon.smithy.dafny.conversion.ToNative.Simple.String;
 
 // The only way to keep this thread/concurrent safe/ is
 // to create a new Coder everytime.
@@ -24,7 +26,7 @@ import static software.amazon.dafny.conversion.ToNative.Simple.String;
 public class __default extends UTF8._ExternBase___default {
 
     // This is largely copied from Polymorph's dafny-java-conversion:
-    // software.amazon.dafny.conversion.ToDafny.Simple.DafnyUtf8Bytes
+    // software.amazon.smithy.dafny.conversion.ToDafny.Simple.DafnyUtf8Bytes
     public static Result<
             DafnySequence<? extends Byte>,
             DafnySequence<? extends Character>> Encode(
@@ -48,7 +50,7 @@ public class __default extends UTF8._ExternBase___default {
     }
 
     // This is largely copied from Polymorph's dafny-java-conversion:
-    // software.amazon.dafny.conversion.ToNative.Simple.DafnyUtf8Bytes
+    // software.amazon.smithy.dafny.conversion.ToNative.Simple.DafnyUtf8Bytes
     public static Result<
             DafnySequence<? extends Character>,
             DafnySequence<? extends Character>> Decode(

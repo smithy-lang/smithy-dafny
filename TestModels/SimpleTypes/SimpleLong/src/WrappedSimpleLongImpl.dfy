@@ -1,6 +1,8 @@
-include "../Model/SimpleTypesLongTypesWrapped.dfy"
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
+include "../Model/SimpleTypesSmithyLongTypesWrapped.dfy"
 
-module {:extern "Dafny.Simple.Types.Long.Wrapped"} WrappedSimpleTypesLongService refines WrappedAbstractSimpleTypesLongService {
+module {:extern "simple.types.smithylong.internaldafny.wrapped"} WrappedSimpleTypesLongService refines WrappedAbstractSimpleTypesSmithyLongService {
     import WrappedService = SimpleLong
     function method WrappedDefaultSimpleLongConfig(): SimpleLongConfig {
         SimpleLongConfig

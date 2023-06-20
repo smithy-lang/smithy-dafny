@@ -1,9 +1,11 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 include "../src/Index.dfy"
 
 module SimpleExternImplTest {
     import SimpleExtern
     import StandardLibrary.UInt
-    import opened SimpleExternTypes
+    import opened SimpleDafnyExternTypes
     import opened Wrappers
 
     method{:test} Externs(){

@@ -1,3 +1,5 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 package software.amazon.polymorph.smithyjava.generator.awssdk.v2;
 
 public class Constants {
@@ -33,13 +35,8 @@ public class Constants {
             """;
 
     static String MockKmsShim = """
-            package Dafny.Com.Amazonaws.Kms;
+            package software.amazon.cryptography.services.kms.internaldafny;
             
-            import Dafny.Com.Amazonaws.Kms.Types.DoSomethingRequest;
-            import Dafny.Com.Amazonaws.Kms.Types.DoSomethingResponse;
-            import Dafny.Com.Amazonaws.Kms.Types.DoVoidRequest;
-            import Dafny.Com.Amazonaws.Kms.Types.Error;
-            import Dafny.Com.Amazonaws.Kms.Types.IKeyManagementServiceClient;
             import Wrappers_Compile.Result;
             import dafny.Tuple0;
             import java.lang.Override;
@@ -47,6 +44,11 @@ public class Constants {
             import software.amazon.awssdk.services.kms.KmsClient;
             import software.amazon.awssdk.services.kms.model.DependencyTimeoutException;
             import software.amazon.awssdk.services.kms.model.KmsException;            
+            import software.amazon.cryptography.services.kms.internaldafny.types.DoSomethingRequest;
+            import software.amazon.cryptography.services.kms.internaldafny.types.DoSomethingResponse;
+            import software.amazon.cryptography.services.kms.internaldafny.types.DoVoidRequest;
+            import software.amazon.cryptography.services.kms.internaldafny.types.Error;
+            import software.amazon.cryptography.services.kms.internaldafny.types.IKeyManagementServiceClient;
             
             public class Shim implements IKeyManagementServiceClient {
               private final KmsClient _impl;

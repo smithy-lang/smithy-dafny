@@ -1,3 +1,5 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 package software.amazon.polymorph.smithyjava;
 
 import com.squareup.javapoet.ClassName;
@@ -81,18 +83,29 @@ public class BuildMethod {
     }
 
     static CodeBlock fieldNonNull(BuilderMemberSpec field) {
+        if (field.type.isPrimitive()) {
+            return CodeBlock.of("this.$L", isSetFieldName(field));
+        }
         return CodeBlock.of("$T.nonNull(this.$L())", Objects.class, field.name);
     }
 
+    static String isSetFieldName(BuilderMemberSpec field) {
+        return "_%sSet".formatted(field.name);
+    }
+
     public static CodeBlock requiredCheck(BuilderMemberSpec field) {
-        return CodeBlock.builder()
-                .beginControlFlow("if ($T.isNull(this.$L())) ", Objects.class, field.name)
-                .addStatement(
-                        "throw new $T($S)",
-                        IllegalArgumentException.class,
-                        "Missing value for required field `%s`".formatted(field.name))
-                .endControlFlow()
-                .build();
+        CodeBlock.Builder check = CodeBlock.builder();
+        if (field.type.isPrimitive()) {
+            check.beginControlFlow("if (!this.$L)", isSetFieldName(field));
+        } else {
+            check.beginControlFlow("if ($T.isNull(this.$L())) ", Objects.class, field.name);
+        }
+        return check.addStatement(
+          "throw new $T($S)",
+          IllegalArgumentException.class,
+          "Missing value for required field `%s`".formatted(field.name))
+          .endControlFlow()
+          .build();
     }
 
     static CodeBlock rangeMinCheck(PolymorphFieldSpec polyField, RangeTrait trait) {

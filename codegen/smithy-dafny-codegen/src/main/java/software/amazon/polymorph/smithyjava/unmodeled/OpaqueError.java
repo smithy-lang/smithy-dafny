@@ -1,20 +1,28 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 package software.amazon.polymorph.smithyjava.unmodeled;
 
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 
 import java.util.Collections;
+import java.util.List;
+
+import javax.annotation.Nonnull;
 
 import software.amazon.polymorph.smithyjava.BuilderMemberSpec;
 import software.amazon.polymorph.smithyjava.BuilderSpecs;
+import software.amazon.polymorph.smithyjava.modeled.ModeledStructure;
 
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PROTECTED;
 import static javax.lang.model.element.Modifier.PUBLIC;
+import static software.amazon.polymorph.smithyjava.BuilderMemberSpec.OPAQUE_ARGS;
 
 /**
  * OpaqueError is a Native-Java allegory to smithy-dafny's
@@ -33,23 +41,23 @@ public class OpaqueError {
     public static JavaFile javaFile(String packageName) {
         ClassName className = nativeClassName(packageName);
         ClassName superName = ClassName.get(RuntimeException.class);
+        List<BuilderMemberSpec> localOnlyFields = ErrorHelpers.removeThrowableArgs(OPAQUE_ARGS);
         BuilderSpecs builderSpecs = new BuilderSpecs(
-                className, null, BuilderMemberSpec.OPAQUE_ARGS, Collections.emptyList());
+                className, null, OPAQUE_ARGS, Collections.emptyList());
         final boolean overrideSuperFalse = false;
 
         TypeSpec.Builder spec = TypeSpec
                 .classBuilder(className)
                 .addModifiers(PUBLIC)
-                .superclass(superName)
-                .addField(TypeName.get(Object.class), "obj", PRIVATE, FINAL)
-                .addMethod(ErrorHelpers.messageFromBuilder(builderSpecs))
-                .addMethods(ErrorHelpers.throwableGetters())
-                .addMethod(MethodSpec
-                        .methodBuilder("obj")
-                        .returns(Object.class)
-                        .addModifiers(PUBLIC)
-                        .addStatement("return this.$L", "obj")
-                        .build())
+                .superclass(superName);
+        localOnlyFields.forEach(field -> {
+            // Add local fields
+            spec.addField(field.toFieldSpec(PRIVATE, FINAL));
+        });
+        spec.addMethod(ErrorHelpers.messageFromBuilder(builderSpecs));
+        spec.addMethods(ErrorHelpers.throwableGetters());
+        localOnlyFields.forEach(field -> spec.addMethod(ModeledStructure.getterMethod(field)));
+        spec
                 .addType(builderSpecs.builderInterface())
                 .addType(builderSpecs.builderImpl(
                         overrideSuperFalse,

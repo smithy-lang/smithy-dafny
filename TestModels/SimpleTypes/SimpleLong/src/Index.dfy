@@ -1,6 +1,8 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 include "SimpleLongImpl.dfy"
 
-module {:extern "Dafny.Simple.Types.Long" } SimpleLong refines AbstractSimpleTypesLongService {
+module {:extern "simple.types.smithylong.internaldafny" } SimpleLong refines AbstractSimpleTypesSmithyLongService {
     import Operations = SimpleLongImpl
 
  function method DefaultSimpleLongConfig(): SimpleLongConfig {
