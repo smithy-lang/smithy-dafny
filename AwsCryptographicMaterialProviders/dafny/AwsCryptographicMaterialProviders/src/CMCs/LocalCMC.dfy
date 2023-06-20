@@ -520,6 +520,7 @@ module {:options "/functionSyntax:4" } LocalCMC {
         && old(cache.Keys()) - {input.identifier} == cache.Keys())
     {
       if cache.HasKey(input.identifier) {
+        assert input.identifier in cache.Keys();
         var cell := cache.Select(input.identifier);
         assert cell in multiset(queue.Items);
         label CAN_REMOVE:
