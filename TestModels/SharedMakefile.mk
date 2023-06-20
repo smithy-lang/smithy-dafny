@@ -228,23 +228,8 @@ polymorph_java: _polymorph_wrapped
 polymorph_java: POLYMORPH_LANGUAGE_TARGET=java
 polymorph_java: _polymorph_dependencies
 
-polymorph_python: OUTPUT_PYTHON=--output-python $(LIBRARY_ROOT)/runtimes/python/src/smithy_generated
+polymorph_python: OUTPUT_PYTHON=--output-python $(LIBRARY_ROOT)/runtimes/python/src/$(PYTHON_MODULE_NAME)/smithy_generated
 polymorph_python: _polymorph
-#polymorph_java: OUTPUT_PYTHON_WRAPPED=--output-java $(LIBRARY_ROOT)/runtimes/java/src/main/smithy-generated
-#polymorph_java: OUTPUT_LOCAL_SERVICE=--local-service-test
-#polymorph_java: _polymorph_wrapped
-#polymorph_java: POLYMORPH_LANGUAGE_TARGET=java
-#polymorph_java: _polymorph_dependencies
-
-#	gradle build
-#	# Smithy outputDirectory can be overridden in smithy-build.json:
-#	#   https://smithy.io/2.0/guides/building-models/build-config.html#smithy-build-json
-#	# However, outputDirectory is currently bugged, and overrides do not apply:
-#	#   https://github.com/awslabs/smithy/issues/1425
-#	# As a workaround, the Make script will move output to the correct directory until #1425 is resolved.
-#	mkdir -p runtimes/python/src/smithy_generated
-#	cp -r build/smithyprojections/*/source/python-client-codegen/. runtimes/python/src/smithy_generated
-
 
 ########################## .NET targets
 
@@ -329,7 +314,7 @@ _clean:
 
 # Python Targets
 
-make_python: | clean_dafny_python transpile_dependencies_python build_implementation_python transpile_test_python mv_files_python
+make_python: | clean_dafny_python transpile_dependencies_python build_implementation_python transpile_test_python hack_to_import_extern mv_files_python
 
 clean_dafny_python:
 	rm -rf runtimes/python/src/dafny_generated
@@ -368,11 +353,15 @@ transpile_test_python:
 		-compile:0 \
 		`find ./test -name '*.dfy'`
 
+hack_to_import_extern:
+	# TODO: Create SIM to replace this process...
+	sed -i '' '2s/^/from $(PYTHON_MODULE_NAME).extern import Extern\n/' 'runtimes/python/src/dafny_generated-py/dafny_generated.py'
+
 mv_files_python:
-	mv runtimes/python/src/dafny_generated-py runtimes/python/src/dafny_generated
+	mv runtimes/python/src/dafny_generated-py runtimes/python/src/$(PYTHON_MODULE_NAME)/dafny_generated
 
 test_python:
-	python runtimes/python/src/**/dafny_generated/dafny_generated.py
+	python runtimes/python/src/$(PYTHON_MODULE_NAME)/dafny_generated/dafny_generated.py
 
 # python -m pip install runtimes/python
 

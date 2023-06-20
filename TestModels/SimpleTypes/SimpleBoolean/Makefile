@@ -9,6 +9,8 @@ CORES=2
 include ../../SharedMakefile.mk
 
 NAMESPACE=simple.types.boolean
+# This is only here temporarily. TODO: Create SIM
+PYTHON_MODULE_NAME=simple_boolean
 
 # This project has no dependencies 
 # DEPENDENT-MODELS:= 
