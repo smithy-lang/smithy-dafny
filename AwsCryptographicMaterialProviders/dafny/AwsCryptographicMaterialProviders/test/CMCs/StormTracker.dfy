@@ -135,7 +135,7 @@ module  {:options "/functionSyntax:4"} TestStormTracker {
     var res :- expect st.GetFromCacheWithTime(MakeGet(one), 9999);
     expect res.Full?;
     res :- expect st.GetFromCacheWithTime(MakeGet(one), 10000);
-    expect res.EmptyWait?;
+    expect res.EmptyFetch?;
     res :- expect st.GetFromCacheWithTime(MakeGet(one), 10000);
     expect res.Full?;
   }

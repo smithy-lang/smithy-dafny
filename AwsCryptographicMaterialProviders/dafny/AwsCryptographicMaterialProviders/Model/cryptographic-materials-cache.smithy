@@ -152,4 +152,13 @@ structure CreateCryptographicMaterialsCacheInput {
 
   @range(min: 0)
   entryPruningTailSize: PositiveInteger, 
+
+  @range(min: 0)
+  gracePeriod: PositiveInteger,
+
+  @range(min: 0)
+  graceInterval: PositiveInteger,
+
+  @range(min: 0)
+  fanOut: PositiveInteger,
 }

@@ -84,7 +84,7 @@ module {:options "/functionSyntax:4" }  StormTracker {
         INT64_MAX_LIMIT as Types.PositiveLong
     }
 
-    // If entry is within 10 seconds of expiration, then return EmptyFetch once per second, 
+    // If entry is within `grace time` of expiration, then return EmptyFetch once per `grace interval`, 
     // and return cached value otherwise
     method CheckInFlight(identifier: seq<uint8>, result: Types.GetCacheEntryOutput, now : Types.PositiveLong)
       returns (output: CacheState)

@@ -8,9 +8,18 @@ public class CreateCryptographicMaterialsCacheInput {
 
   private final int entryPruningTailSize;
 
+  private final int gracePeriod;
+
+  private final int graceInterval;
+
+  private final int fanOut;
+
   protected CreateCryptographicMaterialsCacheInput(BuilderImpl builder) {
     this.entryCapacity = builder.entryCapacity();
     this.entryPruningTailSize = builder.entryPruningTailSize();
+    this.gracePeriod = builder.gracePeriod();
+    this.graceInterval = builder.graceInterval();
+    this.fanOut = builder.fanOut();
   }
 
   public int entryCapacity() {
@@ -19,6 +28,18 @@ public class CreateCryptographicMaterialsCacheInput {
 
   public int entryPruningTailSize() {
     return this.entryPruningTailSize;
+  }
+
+  public int gracePeriod() {
+    return this.gracePeriod;
+  }
+
+  public int graceInterval() {
+    return this.graceInterval;
+  }
+
+  public int fanOut() {
+    return this.fanOut;
   }
 
   public Builder toBuilder() {
@@ -38,6 +59,18 @@ public class CreateCryptographicMaterialsCacheInput {
 
     int entryPruningTailSize();
 
+    Builder gracePeriod(int gracePeriod);
+
+    int gracePeriod();
+
+    Builder graceInterval(int graceInterval);
+
+    int graceInterval();
+
+    Builder fanOut(int fanOut);
+
+    int fanOut();
+
     CreateCryptographicMaterialsCacheInput build();
   }
 
@@ -50,6 +83,18 @@ public class CreateCryptographicMaterialsCacheInput {
 
     private boolean _entryPruningTailSizeSet = false;
 
+    protected int gracePeriod;
+
+    private boolean _gracePeriodSet = false;
+
+    protected int graceInterval;
+
+    private boolean _graceIntervalSet = false;
+
+    protected int fanOut;
+
+    private boolean _fanOutSet = false;
+
     protected BuilderImpl() {
     }
 
@@ -58,6 +103,12 @@ public class CreateCryptographicMaterialsCacheInput {
       this._entryCapacitySet = true;
       this.entryPruningTailSize = model.entryPruningTailSize();
       this._entryPruningTailSizeSet = true;
+      this.gracePeriod = model.gracePeriod();
+      this._gracePeriodSet = true;
+      this.graceInterval = model.graceInterval();
+      this._graceIntervalSet = true;
+      this.fanOut = model.fanOut();
+      this._fanOutSet = true;
     }
 
     public Builder entryCapacity(int entryCapacity) {
@@ -80,6 +131,36 @@ public class CreateCryptographicMaterialsCacheInput {
       return this.entryPruningTailSize;
     }
 
+    public Builder gracePeriod(int gracePeriod) {
+      this.gracePeriod = gracePeriod;
+      this._gracePeriodSet = true;
+      return this;
+    }
+
+    public int gracePeriod() {
+      return this.gracePeriod;
+    }
+
+    public Builder graceInterval(int graceInterval) {
+      this.graceInterval = graceInterval;
+      this._graceIntervalSet = true;
+      return this;
+    }
+
+    public int graceInterval() {
+      return this.graceInterval;
+    }
+
+    public Builder fanOut(int fanOut) {
+      this.fanOut = fanOut;
+      this._fanOutSet = true;
+      return this;
+    }
+
+    public int fanOut() {
+      return this.fanOut;
+    }
+
     public CreateCryptographicMaterialsCacheInput build() {
       if (!this._entryCapacitySet) {
         throw new IllegalArgumentException("Missing value for required field `entryCapacity`");
@@ -89,6 +170,15 @@ public class CreateCryptographicMaterialsCacheInput {
       }
       if (this._entryPruningTailSizeSet && this.entryPruningTailSize() < 0) {
         throw new IllegalArgumentException("`entryPruningTailSize` must be greater than or equal to 0");
+      }
+      if (this._gracePeriodSet && this.gracePeriod() < 0) {
+        throw new IllegalArgumentException("`gracePeriod` must be greater than or equal to 0");
+      }
+      if (this._graceIntervalSet && this.graceInterval() < 0) {
+        throw new IllegalArgumentException("`graceInterval` must be greater than or equal to 0");
+      }
+      if (this._fanOutSet && this.fanOut() < 0) {
+        throw new IllegalArgumentException("`fanOut` must be greater than or equal to 0");
       }
       return new CreateCryptographicMaterialsCacheInput(this);
     }

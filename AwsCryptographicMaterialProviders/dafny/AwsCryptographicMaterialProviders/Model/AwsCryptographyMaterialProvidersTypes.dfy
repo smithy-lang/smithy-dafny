@@ -813,7 +813,10 @@ include "../../../../StandardLibrary/src/Index.dfy"
  )
  datatype CreateCryptographicMaterialsCacheInput = | CreateCryptographicMaterialsCacheInput (
  nameonly entryCapacity: PositiveInteger ,
- nameonly entryPruningTailSize: Option<PositiveInteger>
+ nameonly entryPruningTailSize: Option<PositiveInteger> ,
+ nameonly gracePeriod: Option<PositiveInteger> ,
+ nameonly graceInterval: Option<PositiveInteger> ,
+ nameonly fanOut: Option<PositiveInteger>
  )
  datatype CreateDefaultClientSupplierInput = | CreateDefaultClientSupplierInput (
  

@@ -405,7 +405,19 @@ public class ToDafny {
     entryPruningTailSize = Objects.nonNull(nativeValue.entryPruningTailSize()) ?
         Option.create_Some((nativeValue.entryPruningTailSize()))
         : Option.create_None();
-    return new CreateCryptographicMaterialsCacheInput(entryCapacity, entryPruningTailSize);
+    Option<Integer> gracePeriod;
+    gracePeriod = Objects.nonNull(nativeValue.gracePeriod()) ?
+        Option.create_Some((nativeValue.gracePeriod()))
+        : Option.create_None();
+    Option<Integer> graceInterval;
+    graceInterval = Objects.nonNull(nativeValue.graceInterval()) ?
+        Option.create_Some((nativeValue.graceInterval()))
+        : Option.create_None();
+    Option<Integer> fanOut;
+    fanOut = Objects.nonNull(nativeValue.fanOut()) ?
+        Option.create_Some((nativeValue.fanOut()))
+        : Option.create_None();
+    return new CreateCryptographicMaterialsCacheInput(entryCapacity, entryPruningTailSize, gracePeriod, graceInterval, fanOut);
   }
 
   public static CreateDefaultClientSupplierInput CreateDefaultClientSupplierInput(

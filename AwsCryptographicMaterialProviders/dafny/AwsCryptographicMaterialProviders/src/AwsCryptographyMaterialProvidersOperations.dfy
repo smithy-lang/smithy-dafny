@@ -501,6 +501,17 @@ module AwsCryptographyMaterialProvidersOperations refines AbstractAwsCryptograph
   predicate CreateCryptographicMaterialsCacheEnsuresPublicly(input: CreateCryptographicMaterialsCacheInput , output: Result<ICryptographicMaterialsCache, Error>)
   {true}
 
+  function method GetFromOpt(data : Option<int32>, default : int32) : Types.PositiveLong
+    requires data.None? || 0 <= data.value
+    requires 0 < default
+  {
+    if data.Some? then
+      data.value as Types.PositiveLong
+    else
+      default as Types.PositiveLong
+  }
+
+
   method CreateCryptographicMaterialsCache(config: InternalConfig, input: CreateCryptographicMaterialsCacheInput)
     returns (output: Result<ICryptographicMaterialsCache, Error>)
   {
@@ -517,8 +528,18 @@ module AwsCryptographyMaterialProvidersOperations refines AbstractAwsCryptograph
     } else {
       entryPruningTailSize := 1;
     }
-    if true {
-      var cmc := new StormTracker.StormTracker(input.entryCapacity as nat, entryPruningTailSize);
+
+    var gracePeriod := GetFromOpt(input.gracePeriod, 10);
+    var graceInterval := GetFromOpt(input.graceInterval, 1);
+    var fanOut := GetFromOpt(input.fanOut, 20);
+
+    if gracePeriod <= 0 || graceInterval <= 0 || fanOut <= 0 {
+      var cmc := new StormTracker.StormTracker(
+        entryCapacity := input.entryCapacity as nat,
+        entryPruningTailSize := entryPruningTailSize,
+        gracePeriod := gracePeriod,
+        graceInterval := graceInterval,
+        fanOut := fanOut);
       var synCmc := new StormTrackingCMC.StormTrackingCMC(cmc);
       return Success(synCmc);
     } else {
