@@ -243,11 +243,11 @@ module {:options "/functionSyntax:4" } LocalCMC {
       && (s' == s[..pos] + s[pos+1..])
   {
     var pos := IndexOfCacheEntry(s, v);
-    // Associativity, s is the sum of both sides
+    // Associativity, s[pos..] is the sum of both sides
     assert s == s[..pos] + s[pos..];
     // the 1 v MUST be in the right side
     assert multiset(s[pos..])[v] == 1;
-    // Associativity, s[pos..] is the some of both sides
+    // Associativity, s[pos..] is the sum of both sides
     assert s[pos..] == [s[pos]] + s[pos+1..];
     s[..pos] + s[pos+1..]
   }
@@ -380,7 +380,7 @@ module {:options "/functionSyntax:4" } LocalCMC {
       ensures unchanged(History)
       ensures Modifies <= old(Modifies)
     {
-      if input.identifier in cache.Keys() {
+      if cache.HasKey(input.identifier) {
         var entry := cache.Select(input.identifier);
         //= aws-encryption-sdk-specification/framework/cryptographic-materials-cache.md#time-to-live-ttl
         //# After a cache entry's TTL has elapsed,
@@ -437,7 +437,7 @@ module {:options "/functionSyntax:4" } LocalCMC {
         return Success(());
       }
 
-      if input.identifier in cache.Keys() {
+      if cache.HasKey(input.identifier) {
         var _ :- DeleteCacheEntry'(Types.DeleteCacheEntryInput(
           identifier := input.identifier
         ));
@@ -519,7 +519,7 @@ module {:options "/functionSyntax:4" } LocalCMC {
         && cache.Size() == old(cache.Size()) - 1
         && old(cache.Keys()) - {input.identifier} == cache.Keys())
     {
-      if input.identifier in cache.Keys() {
+      if cache.HasKey(input.identifier) {
         var cell := cache.Select(input.identifier);
         assert cell in multiset(queue.Items);
         label CAN_REMOVE:
@@ -564,7 +564,7 @@ module {:options "/functionSyntax:4" } LocalCMC {
       ensures ValidState()
       ensures Modifies <= old(Modifies)
     {
-      if input.identifier in cache.Keys() {
+      if cache.HasKey(input.identifier) {
         var cell := cache.Select(input.identifier);
         assert cell in multiset(cache.Values());
         if
