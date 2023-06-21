@@ -1,10 +1,12 @@
 {
     "version": "1.0",
     "plugins": {
-        "python-client-codegen": {
+        "dafny-client-codegen": {
             "service": "simple.types.boolean#SimpleBoolean",
             "module": "simple_boolean",
-            "moduleVersion": "0.0.1"
+            "moduleVersion": "0.0.1",
+            "targetLanguages": ["PYTHON"],
+            "edition" : "2023"
         }
     },
     "imports": ["../../dafny-dependencies/Model"]

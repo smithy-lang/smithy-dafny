@@ -329,6 +329,7 @@ build_implementation_python: TARGET=py
 build_implementation_python: OUT=runtimes/python/src/dafny_generated
 build_implementation_python: build_implementation
 
+# `transpile_implementation_python` is not directly used, but is indirectly used via `transpile_dependencies`
 transpile_implementation_python: TARGET=py
 transpile_implementation_python: OUT=runtimes/python/src/dafny_generated
 transpile_implementation_python: transpile_implementation
@@ -361,6 +362,7 @@ transpile_test_python:
 
 hack_to_import_extern:
 	# TODO: Create SIM to replace this process...
+	# TODO: Check with Dafny on what I should be doing here...
 	sed -i '' '2s/^/from $(PYTHON_MODULE_NAME).extern import Extern\n/' 'runtimes/python/src/dafny_generated-py/dafny_generated.py'
 
 mv_files_python:
