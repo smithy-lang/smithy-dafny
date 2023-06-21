@@ -164,7 +164,6 @@ _polymorph:
 	$(OUTPUT_DAFNY) \
 	$(OUTPUT_DOTNET) \
 	$(OUTPUT_JAVA) \
-	$(OUTPUT_PYTHON) \
 	--model $(LIBRARY_ROOT)/Model \
 	--dependent-model $(PROJECT_ROOT)/dafny-dependencies/Model \
 	$(patsubst %, --dependent-model $(PROJECT_ROOT)/%/Model, $(LIBRARIES)) \
@@ -228,8 +227,15 @@ polymorph_java: _polymorph_wrapped
 polymorph_java: POLYMORPH_LANGUAGE_TARGET=java
 polymorph_java: _polymorph_dependencies
 
-polymorph_python: OUTPUT_PYTHON=--output-python $(LIBRARY_ROOT)/runtimes/python/src/$(PYTHON_MODULE_NAME)/smithy_generated
-polymorph_python: _polymorph
+polymorph_python:
+	gradle build
+	# Smithy outputDirectory can be overridden in smithy-build.json:
+	#   https://smithy.io/2.0/guides/building-models/build-config.html#smithy-build-json
+	# However, outputDirectory is currently bugged, and overrides do not apply:
+	#   https://github.com/awslabs/smithy/issues/1425
+	# As a workaround, the Make script will move output to the correct directory until #1425 is resolved.
+	mkdir -p runtimes/python/src/smithy_generated
+	cp -r build/smithyprojections/*/source/python-client-codegen/. runtimes/python/src/smithy_generated
 
 ########################## .NET targets
 
@@ -362,7 +368,5 @@ mv_files_python:
 
 test_python:
 	python runtimes/python/src/$(PYTHON_MODULE_NAME)/dafny_generated/dafny_generated.py
-
-# python -m pip install runtimes/python
 
 clean: _clean

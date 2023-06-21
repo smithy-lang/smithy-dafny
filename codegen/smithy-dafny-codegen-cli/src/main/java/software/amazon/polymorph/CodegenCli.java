@@ -16,10 +16,6 @@ import org.apache.commons.cli.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import software.amazon.polymorph.traits.LocalServiceTrait;
-import software.amazon.polymorph.utils.ModelUtils;
-import software.amazon.smithy.build.FileManifest;
-import software.amazon.smithy.build.PluginContext;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.loader.ModelAssembler;
 
@@ -29,8 +25,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Arrays;
-import software.amazon.smithy.model.node.ObjectNode;
-import software.amazon.smithy.model.shapes.ServiceShape;
 
 public class CodegenCli {
     private static final Logger LOGGER = LoggerFactory.getLogger(CodegenCli.class);
@@ -72,21 +66,6 @@ public class CodegenCli {
         cliArguments.outputDafnyDir.ifPresent(path -> outputDirs.put(TargetLanguage.DAFNY, path));
         cliArguments.outputJavaDir.ifPresent(path -> outputDirs.put(TargetLanguage.JAVA, path));
         cliArguments.outputDotnetDir.ifPresent(path -> outputDirs.put(TargetLanguage.DOTNET, path));
-        cliArguments.outputPythonDir.ifPresent(path -> outputDirs.put(TargetLanguage.PYTHON, path));
-
-        final ServiceShape serviceShape = ModelUtils.serviceFromNamespace(serviceModel, cliArguments.namespace);
-        final PluginContext pluginContext = PluginContext.builder()
-            .model(serviceModel)
-            .fileManifest(FileManifest.create(cliArguments.outputPythonDir().orElse(cliArguments.modelPath)))
-            .settings(ObjectNode.builder()
-                // TODO these magic strings are copy-pasted from python
-                .withMember("service", serviceShape.toShapeId().toString())
-                // TODO get next 3 from smithy_build.json
-                .withMember("module", "simple_boolean")
-                .withMember("moduleVersion", "0.0.1")
-                .withMember("protocol", "aws.polymorph#localService")
-                .build())
-            .build();
 
         final CodegenEngine.Builder engineBuilder = new CodegenEngine.Builder()
                 .withServiceModel(serviceModel)
@@ -94,7 +73,6 @@ public class CodegenCli {
                 .withNamespace(cliArguments.namespace)
                 .withTargetLangOutputDirs(outputDirs)
                 .withAwsSdkStyle(cliArguments.awsSdkStyle)
-                .withPluginContext(pluginContext)
                 .withLocalServiceTest(cliArguments.localServiceTest);
         cliArguments.javaAwsSdkVersion.ifPresent(engineBuilder::withJavaAwsSdkVersion);
         cliArguments.includeDafnyFile.ifPresent(engineBuilder::withIncludeDafnyFile);
@@ -137,11 +115,6 @@ public class CodegenCli {
             .hasArg()
             .build())
           .addOption(Option.builder()
-            .longOpt("output-python")
-            .desc("<optional> output directory for generated Python files")
-            .hasArg()
-            .build())
-          .addOption(Option.builder()
             .longOpt("java-aws-sdk-version")
             .desc("<optional> AWS SDK for Java version to use: v1, or v2 (default)")
             .hasArg()
@@ -177,7 +150,6 @@ public class CodegenCli {
             String namespace,
             Optional<Path> outputDotnetDir,
             Optional<Path> outputJavaDir,
-            Optional<Path> outputPythonDir,
             Optional<Path> outputDafnyDir,
             Optional<AwsSdkVersion> javaAwsSdkVersion,
             Optional<Path> includeDafnyFile,
@@ -218,8 +190,6 @@ public class CodegenCli {
                     .map(Paths::get);
             final Optional<Path> outputDotnetDir = Optional.ofNullable(commandLine.getOptionValue("output-dotnet"))
                     .map(Paths::get);
-            final Optional<Path> outputPythonDir = Optional.ofNullable(commandLine.getOptionValue("output-python"))
-                .map(Paths::get);
 
             boolean localServiceTest = commandLine.hasOption("local-service-test");
             final boolean awsSdkStyle = commandLine.hasOption("aws-sdk");
@@ -242,7 +212,7 @@ public class CodegenCli {
 
             return Optional.of(new CliArguments(
                     modelPath, dependentModelPaths, namespace,
-                    outputDotnetDir, outputJavaDir, outputPythonDir, outputDafnyDir,
+                    outputDotnetDir, outputJavaDir, outputDafnyDir,
                     javaAwsSdkVersion, includeDafnyFile, awsSdkStyle,
                     localServiceTest
             ));

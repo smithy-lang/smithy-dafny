@@ -24,11 +24,9 @@ import software.amazon.polymorph.smithyjava.generator.library.TestJavaLibrary;
 import software.amazon.polymorph.utils.IOUtils;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.smithy.aws.traits.ServiceTrait;
-import software.amazon.smithy.build.PluginContext;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.utils.IoUtils;
-import software.amazon.smithy.python.codegen.PythonClientCodegenPlugin;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -53,7 +51,6 @@ public class CodegenEngine {
     // To be initialized in constructor
     private final Model model;
     private final ServiceShape serviceShape;
-    private final PluginContext pluginContext;
 
     /**
      * This should only be called by {@link Builder#build()},
@@ -69,8 +66,7 @@ public class CodegenEngine {
             final Optional<Path> includeDafnyFile,
             final boolean awsSdkStyle,
             final boolean localServiceTest,
-            final boolean generateProjectFiles,
-            final PluginContext pluginContext
+            final boolean generateProjectFiles
     ) {
         // To be provided to constructor
         this.dependentModelPaths = dependentModelPaths;
@@ -88,7 +84,6 @@ public class CodegenEngine {
                 : serviceModel;
 
         this.serviceShape = ModelUtils.serviceFromNamespace(this.model, this.namespace);
-        this.pluginContext = pluginContext;
     }
 
     /**
@@ -113,7 +108,6 @@ public class CodegenEngine {
                 case DAFNY -> generateDafny(outputDir);
                 case JAVA -> generateJava(outputDir);
                 case DOTNET -> generateDotnet(outputDir);
-                case PYTHON -> generatePython(outputDir);
                 default -> throw new UnsupportedOperationException("Cannot generate code for target language %s"
                         .formatted(lang.name()));
             }
@@ -246,11 +240,6 @@ public class CodegenEngine {
         LOGGER.info(".NET project files generated in {}", outputDir);
     }
 
-    private void generatePython(final Path outputDir) {
-        PythonClientCodegenPlugin pythonClientCodegenPlugin = new PythonClientCodegenPlugin();
-        pythonClientCodegenPlugin.execute(pluginContext);
-    }
-
     public static class Builder {
         private Model serviceModel;
         private Path[] dependentModelPaths;
@@ -261,7 +250,6 @@ public class CodegenEngine {
         private boolean awsSdkStyle = false;
         private boolean localServiceTest = false;
         private boolean generateProjectFiles = false;
-        private PluginContext pluginContext;
 
         public Builder() {}
 
@@ -340,11 +328,6 @@ public class CodegenEngine {
             return this;
         }
 
-        public Builder withPluginContext(final PluginContext pluginContext) {
-            this.pluginContext = pluginContext;
-            return this;
-        }
-
         public CodegenEngine build() {
             final Model serviceModel = Objects.requireNonNull(this.serviceModel);
             final Path[] dependentModelPaths = this.dependentModelPaths == null
@@ -381,8 +364,7 @@ public class CodegenEngine {
                     includeDafnyFile,
                     this.awsSdkStyle,
                     this.localServiceTest,
-                    this.generateProjectFiles,
-                    this.pluginContext
+                    this.generateProjectFiles
             );
         }
     }
@@ -391,6 +373,5 @@ public class CodegenEngine {
         DAFNY,
         JAVA,
         DOTNET,
-        PYTHON,
     }
 }

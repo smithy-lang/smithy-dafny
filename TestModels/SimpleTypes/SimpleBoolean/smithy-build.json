@@ -1,12 +1,11 @@
 {
     "version": "1.0",
-    "outputDirectory": "runtimes/python (outputDirectory doesn't work until Smithy/1425 is resolved; see SharedMakefile.mk)",
     "plugins": {
         "python-client-codegen": {
             "service": "simple.types.boolean#SimpleBoolean",
             "module": "simple_boolean",
-            "moduleVersion": "0.0.1",
-            "protocol": "aws.polymorph#localService"
+            "moduleVersion": "0.0.1"
         }
-    }
+    },
+    "imports": ["../../dafny-dependencies/Model"]
 }

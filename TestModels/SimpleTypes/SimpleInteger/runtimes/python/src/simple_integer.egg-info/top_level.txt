@@ -1,4 +1,0 @@
-__init__
-dafny_generated
-extern
-smithy_generated
