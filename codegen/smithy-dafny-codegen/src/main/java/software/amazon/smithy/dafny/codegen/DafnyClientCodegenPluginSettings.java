@@ -5,7 +5,6 @@ package software.amazon.smithy.dafny.codegen;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.polymorph.CodegenEngine;
-import software.amazon.polymorph.CodegenEngine.TargetLanguage;
 import software.amazon.smithy.build.FileManifest;
 import software.amazon.smithy.model.node.ObjectNode;
 import software.amazon.smithy.model.node.StringNode;
@@ -83,7 +82,7 @@ class DafnyClientCodegenPluginSettings {
                         foundUnknownTargetLanguage.set(true);
                         yield Stream.empty();
                     }
-                    case "PYTHON" -> Stream.of(TargetLanguage.PYTHON);
+                    case "PYTHON" -> Stream.of(CodegenEngine.TargetLanguage.PYTHON);
                     default -> {
                         LOGGER.error("Unknown target language: {}", strNode.getValue());
                         foundUnknownTargetLanguage.set(true);

@@ -25,6 +25,3 @@ class SimpleBooleanShim(simple.types.boolean.internaldafny.types.ISimpleTypesBoo
         unwrapped_request: GetBooleanInput = GetBooleanInput(value=input.value)
         wrapped_response = asyncio.run(self._impl.get_boolean(unwrapped_request))
         return Wrappers_Compile.Result_Success(wrapped_response)
-        
-        
-        
