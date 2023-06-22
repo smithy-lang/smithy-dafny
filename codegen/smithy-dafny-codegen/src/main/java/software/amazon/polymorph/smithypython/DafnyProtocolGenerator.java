@@ -19,7 +19,6 @@ import static software.amazon.smithy.model.traits.TimestampFormatTrait.Format;
 
 import java.util.Set;
 import java.util.TreeSet;
-import org.apache.commons.lang3.NotImplementedException;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.model.knowledge.HttpBinding.Location;
 import software.amazon.smithy.model.knowledge.TopDownIndex;
@@ -218,7 +217,7 @@ return $L(value=input.value.value)
   public record ResponseDeserializerSection(OperationShape operation) implements CodeSection {}
 
   private void generateErrorResponseDeserializer(GenerationContext context, StructureShape error) {
-    throw new NotImplementedException("Error generation not supported");
+    throw new UnsupportedOperationException("Error generation not supported");
 //    var deserFunction = getErrorDeserializationFunction(context, error);
 //    var errorSymbol = context.symbolProvider().toSymbol(error);
 //    var delegator = context.writerDelegator();
