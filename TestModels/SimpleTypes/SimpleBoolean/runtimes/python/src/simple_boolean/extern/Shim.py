@@ -1,4 +1,5 @@
-# TODO generate this
+# Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: Apache-2.0
 
 import simple.types.boolean.internaldafny.types
 import simple_boolean.smithy_generated.simple_boolean.client as SimpleBoolean
@@ -12,6 +13,7 @@ class SimpleBooleanShim(simple.types.boolean.internaldafny.types.ISimpleTypesBoo
 
     def GetBoolean(self, input: simple.types.boolean.internaldafny.types.GetBooleanInput_GetBooleanInput) -> simple.types.boolean.internaldafny.types.GetBooleanOutput_GetBooleanOutput:
         '''
+        TODO: This is what this SHOULD look like after getting some sort of TypeConversion in
         unwrapped_request = TypeConversion.ToNative(input)
         try:
             wrapped_response = self._impl.get_boolean(unwrapped_request)

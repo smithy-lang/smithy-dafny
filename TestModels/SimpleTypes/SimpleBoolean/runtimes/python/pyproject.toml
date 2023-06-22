@@ -2,7 +2,7 @@
 name = "simpleboolean"
 version = "0.1.0"
 authors = [
-    { name = "AWS Crypto Tools", email = "aws-crypto-tools@amazon.com" }
+    { name = "AWS", email = "aws-arg-dafny@amazon.com" }
 ]
 
 [tool.poetry]

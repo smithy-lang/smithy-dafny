@@ -1,12 +1,6 @@
-import sys
-from typing import Callable, Any, TypeVar, NamedTuple
-from math import floor
-from itertools import count
+# Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: Apache-2.0
 
-import module_
-import _dafny
-import System_
-import SimpleBooleanImplTest_Compile
 import simple.types.boolean.internaldafny.types
 from simple_boolean.smithy_generated.simple_boolean.client import SimpleTypesBoolean
 from .Shim import SimpleBooleanShim

@@ -359,15 +359,21 @@ transpile_test_python:
 		-compile:0 \
 		`find ./test -name '*.dfy'`
 
+# TODO: This is not OK. Create SIM to replace this...
+# TODO: Check with Dafny on what I should be doing here...
+# This inserts (ex for simple boolean). "from simple_boolean.extern import Extern"
+#   at the second line of dafny_generated.py (after the copyright line).
+# To the best of my knowledge, you MUST import a module for it to be loaded in your Python runtime.
+# We must import the Extern module within Dafny code, since only the Dafny code uses it.
+# But we do not control Dafny code generation, so we cannot import the Extern module...
 hack_to_import_extern:
-	# TODO: This is not OK. Create SIM to replace this...
-	# TODO: Check with Dafny on what I should be doing here...
 	sed -i '' '2s/^/from $(PYTHON_MODULE_NAME).extern import Extern\n/' 'runtimes/python/src/dafny_generated-py/dafny_generated.py'
 
 mv_files_python:
 	mv runtimes/python/src/dafny_generated-py runtimes/python/src/$(PYTHON_MODULE_NAME)/dafny_generated
 
 test_python:
+	# Installs the Python project in pip before using it
 	python -m pip install runtimes/python
 	python runtimes/python/src/$(PYTHON_MODULE_NAME)/dafny_generated/dafny_generated.py
 

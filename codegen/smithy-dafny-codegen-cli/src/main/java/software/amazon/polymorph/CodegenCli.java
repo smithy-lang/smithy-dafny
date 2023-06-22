@@ -3,6 +3,7 @@
 
 package software.amazon.polymorph;
 
+import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -10,9 +11,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Iterator;
 import java.util.Map.Entry;
-import com.fasterxml.jackson.core.JsonFactory;
-import software.amazon.polymorph.CodegenEngine.TargetLanguage;
-import software.amazon.polymorph.smithyjava.generator.CodegenSubject.AwsSdkVersion;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
@@ -24,12 +22,16 @@ import org.apache.commons.cli.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import software.amazon.polymorph.CodegenEngine.TargetLanguage;
+import software.amazon.polymorph.smithyjava.generator.CodegenSubject.AwsSdkVersion;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.smithy.build.FileManifest;
 import software.amazon.smithy.build.PluginContext;
 import software.amazon.smithy.dafny.codegen.DafnyClientCodegenPlugin;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.loader.ModelAssembler;
+import software.amazon.smithy.model.node.ObjectNode;
+import software.amazon.smithy.model.shapes.ServiceShape;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -37,8 +39,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Arrays;
-import software.amazon.smithy.model.node.ObjectNode;
-import software.amazon.smithy.model.shapes.ServiceShape;
 
 public class CodegenCli {
     private static final Logger LOGGER = LoggerFactory.getLogger(CodegenCli.class);

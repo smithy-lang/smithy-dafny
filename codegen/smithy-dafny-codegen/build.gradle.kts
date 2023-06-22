@@ -29,7 +29,6 @@ dependencies {
     implementation("com.google.guava:guava:30.1-jre")
     implementation("org.slf4j:slf4j-api:1.7.32")
     implementation("org.slf4j:slf4j-simple:1.7.32")
-    implementation("org.apache.commons:commons-lang3:3.6")
 
     testImplementation("junit", "junit", "4.13.2")
 
