@@ -1,12 +1,12 @@
 # TODO generate this
 
 import simple.types.boolean.internaldafny.types
-import smithy_generated.simple_boolean.client as SimpleBoolean
+import simple_boolean.smithy_generated.simple_boolean.client as SimpleBoolean
 import Wrappers_Compile
 import asyncio
-from smithy_generated.simple_boolean.models import GetBooleanInput
+from simple_boolean.smithy_generated.simple_boolean.models import GetBooleanInput
 
-class SimpleBooleanShim(simple.types.boolean.internaldafny.types.ISimpleBooleanClient):
+class SimpleBooleanShim(simple.types.boolean.internaldafny.types.ISimpleTypesBooleanClient):
     def __init__(self, _impl: SimpleBoolean) :
         self._impl = _impl
 

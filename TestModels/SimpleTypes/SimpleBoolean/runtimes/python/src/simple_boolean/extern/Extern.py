@@ -8,14 +8,14 @@ import _dafny
 import System_
 import SimpleBooleanImplTest_Compile
 import simple.types.boolean.internaldafny.types
-from smithy_generated.simple_boolean.client import SimpleBoolean
+from simple_boolean.smithy_generated.simple_boolean.client import SimpleTypesBoolean
 from .Shim import SimpleBooleanShim
 import Wrappers_Compile
 
 @staticmethod
 def WrappedSimpleBoolean(config):
     wrapped_config = config
-    impl = SimpleBoolean(wrapped_config)
+    impl = SimpleTypesBoolean(wrapped_config)
     wrapped_client = SimpleBooleanShim(impl)
     return Wrappers_Compile.Result_Success(wrapped_client)
 

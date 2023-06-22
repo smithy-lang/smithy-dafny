@@ -86,8 +86,6 @@ dafny-reportgenerator:
 # Since such targets are all shared,
 # this is tractable.
 
-# TODO refactor
-# Dafny-compiled Python code requires the Python runtime
 build_implementation:
 	dafny build \
 		-t:$(TARGET) \
@@ -169,7 +167,7 @@ _polymorph:
 	--dependent-model $(PROJECT_ROOT)/dafny-dependencies/Model \
 	$(patsubst %, --dependent-model $(PROJECT_ROOT)/%/Model, $(LIBRARIES)) \
 	--namespace $(NAMESPACE) \
-	--smithy-build $(LIBRARY_ROOT)/smithy-build.json \
+	$(SMITHY_BUILD) \
 	$(AWS_SDK_CMD)";
 
 _polymorph_wrapped:
@@ -230,6 +228,7 @@ polymorph_java: POLYMORPH_LANGUAGE_TARGET=java
 polymorph_java: _polymorph_dependencies
 
 polymorph_python: OUTPUT_PYTHON=--output-python $(LIBRARY_ROOT)/runtimes/python/src/$(PYTHON_MODULE_NAME)/smithy_generated
+polymorph_python: SMITHY_BUILD=--smithy-build $(LIBRARY_ROOT)/smithy-build.json
 polymorph_python: _polymorph
 
 ########################## .NET targets
@@ -312,13 +311,11 @@ _clean:
 	rm -rf $(LIBRARY_ROOT)/TestResults
 	rm -rf $(LIBRARY_ROOT)/runtimes/net/Generated $(LIBRARY_ROOT)/runtimes/net/bin $(LIBRARY_ROOT)/runtimes/net/obj
 	rm -rf $(LIBRARY_ROOT)/runtimes/net/tests/bin $(LIBRARY_ROOT)/runtimes/net/tests/obj
+	rm -rf $(LIBRARY_ROOT)/runtimes/python/src/**/dafny_generated $(LIBRARY_ROOT)/runtimes/python/src/**/smithy_generated
 
 ########################## Python targets
 
-# Dafny-compiled Python has issues stemming from the --library flag
-# This is blocking us from separating src/ and test/ directories
-# https://sim.amazon.com/issues/CrypTool-5190
-make_python: | clean_dafny_python transpile_dependencies_python build_implementation_python transpile_test_python hack_to_import_extern mv_files_python
+build_python: | clean_dafny_python transpile_dependencies_python build_implementation_python transpile_test_python hack_to_import_extern mv_files_python
 
 clean_dafny_python:
 	rm -rf runtimes/python/src/dafny_generated
@@ -341,6 +338,10 @@ transpile_dependencies_python:
 	mkdir -p runtimes/python/src/dafny_generated-py
 	cp -r $(STANDARD_LIBRARY_PATH)/runtimes/python/src/dafny_generated/. runtimes/python/src/dafny_generated-py
 
+# Dafny-compiled Python has issues stemming from the --library flag
+# This is blocking us from separating src/ and test/ directories
+# This is also why Python has a separate transpile_test target
+# https://sim.amazon.com/issues/CrypTool-5190
 transpile_test_python: TARGET=py
 transpile_test_python: OUT=runtimes/python/src/dafny_generated
 transpile_test_python:
@@ -359,7 +360,7 @@ transpile_test_python:
 		`find ./test -name '*.dfy'`
 
 hack_to_import_extern:
-	# TODO: Create SIM to replace this process...
+	# TODO: This is not OK. Create SIM to replace this...
 	# TODO: Check with Dafny on what I should be doing here...
 	sed -i '' '2s/^/from $(PYTHON_MODULE_NAME).extern import Extern\n/' 'runtimes/python/src/dafny_generated-py/dafny_generated.py'
 
@@ -367,8 +368,7 @@ mv_files_python:
 	mv runtimes/python/src/dafny_generated-py runtimes/python/src/$(PYTHON_MODULE_NAME)/dafny_generated
 
 test_python:
+	python -m pip install runtimes/python
 	python runtimes/python/src/$(PYTHON_MODULE_NAME)/dafny_generated/dafny_generated.py
-
-# python -m pip install runtimes/python
 
 clean: _clean

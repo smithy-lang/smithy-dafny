@@ -113,7 +113,7 @@ public final class DafnyIntegration implements PythonIntegration {
             );
         });
 
-        // TODO: builder
+        // TODO: StringBuilder
         String operations = "";
         for (OperationShape operationShape : codegenContext.model().getOperationShapes()) {
             operations += """
