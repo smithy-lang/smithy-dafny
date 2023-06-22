@@ -18,6 +18,7 @@ package software.amazon.polymorph.smithypython;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolReference;
 import software.amazon.smithy.model.shapes.OperationShape;
@@ -71,19 +72,31 @@ public final class DafnyIntegration implements PythonIntegration {
         return List.of(new SendRequestInterceptor());
     }
 
+    // TODO: Refactor into nameresovler
+    public String clientForService(ServiceShape serviceShape) {
+        if (serviceShape.hasTrait(LocalServiceTrait.class)) {
+            return serviceShape.expectTrait(LocalServiceTrait.class).getSdkId() + "Client";
+        } else {
+            throw new UnsupportedOperationException("Non-local services not supported");
+        }
+    }
+
     @Override
     public void customize(GenerationContext codegenContext) {
         // TODO: Refactor into a nameResolver and call nameForService
         // TODO: Support more than 1 service (will throw IndexOutOfBoundsException if >1 service)
         ServiceShape serviceShape = (ServiceShape) codegenContext.model().getServiceShapes().toArray()[0];
+        System.out.println("yo");
+        System.out.println(serviceShape.getId());
         String serviceName = serviceShape.getId().getName();
-        String clientName = serviceName + "Client";
+        System.out.println(serviceName);
+        String clientName = clientForService(serviceShape);
 
         // TODO: nameResolver
         String moduleName =  codegenContext.settings().getModuleName();
         String implModulePrelude = serviceShape.getId().getNamespace() + ".internaldafny.impl";
 
-        // TODO: refactor to PluginFileWriter
+        // TODO: refactor to PluginFileWriter; do imports, etc. correctly
         // TODO: Naming of this file?
         codegenContext.writerDelegator().useFileWriter(moduleName + "/plugin.py", "", writer -> {
             writer.write(
