@@ -1,7 +1,7 @@
 # Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-import simple.types.boolean.internaldafny.types
+import simple.types.boolean.internaldafny.wrapped
 from simple_boolean.smithy_generated.simple_boolean.client import SimpleTypesBoolean
 from .Shim import SimpleBooleanShim
 import Wrappers_Compile
