@@ -113,7 +113,7 @@ public class CodegenEngine {
                 case DAFNY -> generateDafny(outputDir);
                 case JAVA -> generateJava(outputDir);
                 case DOTNET -> generateDotnet(outputDir);
-                case PYTHON -> generatePython(outputDir);
+                case PYTHON -> generatePython();
                 default -> throw new UnsupportedOperationException("Cannot generate code for target language %s"
                         .formatted(lang.name()));
             }
@@ -246,7 +246,7 @@ public class CodegenEngine {
         LOGGER.info(".NET project files generated in {}", outputDir);
     }
 
-    private void generatePython(final Path outputDir) {
+    private void generatePython() {
         PythonClientCodegenPlugin pythonClientCodegenPlugin = new PythonClientCodegenPlugin();
         pythonClientCodegenPlugin.execute(pluginContext);
     }

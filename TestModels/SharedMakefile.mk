@@ -169,6 +169,7 @@ _polymorph:
 	--dependent-model $(PROJECT_ROOT)/dafny-dependencies/Model \
 	$(patsubst %, --dependent-model $(PROJECT_ROOT)/%/Model, $(LIBRARIES)) \
 	--namespace $(NAMESPACE) \
+	--smithy-build $(LIBRARY_ROOT)/smithy-build.json \
 	$(AWS_SDK_CMD)";
 
 _polymorph_wrapped:

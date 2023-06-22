@@ -14,8 +14,6 @@
  */
 
 rootProject.name = "simple-types-boolean"
-include(":smithy-dafny-python")
-project(":smithy-dafny-python").projectDir = file("../../../codegen/smithy-dafny-codegen/src/main/java/software/amazon/smithy/dafny/python/codegen")
 
 pluginManagement {
     repositories {

@@ -1,5 +1,3 @@
-includeBuild "../../../../../smithy-python/codegen:smithy-python-codegen"
-
 plugins {
     id("software.amazon.smithy").version("0.6.0")
 }
