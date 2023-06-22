@@ -86,10 +86,6 @@ public final class DafnyIntegration implements PythonIntegration {
         // TODO: Refactor into a nameResolver and call nameForService
         // TODO: Support more than 1 service (will throw IndexOutOfBoundsException if >1 service)
         ServiceShape serviceShape = (ServiceShape) codegenContext.model().getServiceShapes().toArray()[0];
-        System.out.println("yo");
-        System.out.println(serviceShape.getId());
-        String serviceName = serviceShape.getId().getName();
-        System.out.println(serviceName);
         String clientName = clientForService(serviceShape);
 
         // TODO: nameResolver
