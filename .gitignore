@@ -2,5 +2,5 @@
 /.idea
 /.history
 /.smithy.lsp.log
-
+*.pyc
 */**/.idea
