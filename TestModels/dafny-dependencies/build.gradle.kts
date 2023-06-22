@@ -9,13 +9,6 @@ repositories {
 
 dependencies {
     implementation("software.amazon.smithy:smithy-model:1.28.1")
-//    implementation files("../../../../../smithy-python/codegen:smithy-python-codegen")
+    implementation("software.amazon.smithy:smithy-aws-traits:1.28.1")
+    implementation("software.amazon.smithy.dafny:smithy-dafny-codegen:0.1.0")
 }
-
-configure<software.amazon.smithy.gradle.SmithyExtension> {
-    // Uncomment this to use a custom projection when building the JAR.
-    // projection = "foo"
-}
-
-// Uncomment to disable creating a JAR.
-//tasks["jar"].enabled = false

@@ -19,6 +19,7 @@ import static software.amazon.smithy.model.traits.TimestampFormatTrait.Format;
 
 import java.util.Set;
 import java.util.TreeSet;
+import org.apache.commons.lang3.NotImplementedException;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.model.knowledge.HttpBinding.Location;
 import software.amazon.smithy.model.knowledge.TopDownIndex;
@@ -64,7 +65,6 @@ public abstract class DafnyProtocolGenerator implements ProtocolGenerator {
 
   @Override
   public ApplicationProtocol getApplicationProtocol() {
-    System.out.println("yo");
     return DafnyIntegration.createDafnyApplicationProtocol();
   }
 
@@ -185,7 +185,7 @@ public abstract class DafnyProtocolGenerator implements ProtocolGenerator {
    *
    * <p>This function has the following in scope:
    * <ul>
-   *     <li>http_response - the http-level response</li>
+   *     <li>dafny_response - the Dafny-level response</li>
    *     <li>config - the client config</li>
    * </ul>
    */
@@ -218,27 +218,28 @@ return $L(value=input.value.value)
   public record ResponseDeserializerSection(OperationShape operation) implements CodeSection {}
 
   private void generateErrorResponseDeserializer(GenerationContext context, StructureShape error) {
-    var deserFunction = getErrorDeserializationFunction(context, error);
-    var errorSymbol = context.symbolProvider().toSymbol(error);
-    var delegator = context.writerDelegator();
-    var transportResponse = context.applicationProtocol().responseType();
-    var configSymbol = CodegenUtils.getConfigSymbol(context.settings());
-
-    delegator.useFileWriter(deserFunction.getDefinitionFile(), deserFunction.getNamespace(), writer -> {
-      writer.pushState(new ErrorDeserializerSection(error));
-      writer.addStdlibImport("typing", "Any");
-      writer.write("""
-                async def $L(
-                    http_response: $T,
-                    config: $T,
-                    parsed_body: dict[str, Document]| None,
-                    default_message: str,
-                ) -> $T:
-                    kwargs: dict[str, Any] = {"message": default_message}
-
-                """, deserFunction.getName(), transportResponse, configSymbol, errorSymbol);
-      writer.popState();
-    });
+    throw new NotImplementedException("Error generation not supported");
+//    var deserFunction = getErrorDeserializationFunction(context, error);
+//    var errorSymbol = context.symbolProvider().toSymbol(error);
+//    var delegator = context.writerDelegator();
+//    var transportResponse = context.applicationProtocol().responseType();
+//    var configSymbol = CodegenUtils.getConfigSymbol(context.settings());
+//
+//    delegator.useFileWriter(deserFunction.getDefinitionFile(), deserFunction.getNamespace(), writer -> {
+//      writer.pushState(new ErrorDeserializerSection(error));
+//      writer.addStdlibImport("typing", "Any");
+//      writer.write("""
+//                async def $L(
+//                    http_response: $T,
+//                    config: $T,
+//                    parsed_body: dict[str, Document]| None,
+//                    default_message: str,
+//                ) -> $T:
+//                    kwargs: dict[str, Any] = {"message": default_message}
+//
+//                """, deserFunction.getName(), transportResponse, configSymbol, errorSymbol);
+//      writer.popState();
+//    });
   }
 
   /**

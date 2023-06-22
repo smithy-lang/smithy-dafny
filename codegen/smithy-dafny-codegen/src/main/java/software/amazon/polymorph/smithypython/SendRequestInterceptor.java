@@ -6,7 +6,7 @@ import software.amazon.smithy.utils.CodeInterceptor.Appender;
 
 /**
  * Dafny plugin's interceptor for SendRequestSection.
- * By default, Smithy-Python will generate code to make an HTTP request.
+ * By default, Smithy-Python will generate code to make an HTTP request in this section.
  * Dafny plugin overrides this to interact with DafnyImplInterface.
  */
 final class SendRequestInterceptor implements

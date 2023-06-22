@@ -23,22 +23,9 @@ module {:extern "simple.types.boolean.internaldafny.impl" } SimpleBoolean refine
     }
  constructor(config: Operations.InternalConfig) {
     this.config := config;
-    History := new ISimpleBooleanClientCallHistory();
+    History := new ISimpleTypesBooleanClientCallHistory();
     Modifies := Operations.ModifiesInternalConfig(config) + {History};
    }
  }
 
 }
-/*
-dafny \
-                -vcsCores:2 \
-                -compileTarget:py \
-                -spillTargetCode:3 \
-                -runAllTests:1 \
-                -compile:0 \
-                -optimizeErasableDatatypeWrapper:0 \
-                -useRuntimeLib \
-                -out runtimes/java/TestsFromDafny \
-                `find ./test -name '*.dfy'` \
-                -library:src/Index.dfy
-*/

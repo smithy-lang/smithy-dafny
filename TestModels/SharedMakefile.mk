@@ -313,8 +313,11 @@ _clean:
 	rm -rf $(LIBRARY_ROOT)/runtimes/net/Generated $(LIBRARY_ROOT)/runtimes/net/bin $(LIBRARY_ROOT)/runtimes/net/obj
 	rm -rf $(LIBRARY_ROOT)/runtimes/net/tests/bin $(LIBRARY_ROOT)/runtimes/net/tests/obj
 
-# Python Targets
+########################## Python targets
 
+# Dafny-compiled Python has issues stemming from the --library flag
+# This is blocking us from separating src/ and test/ directories
+# https://sim.amazon.com/issues/CrypTool-5190
 make_python: | clean_dafny_python transpile_dependencies_python build_implementation_python transpile_test_python hack_to_import_extern mv_files_python
 
 clean_dafny_python:
