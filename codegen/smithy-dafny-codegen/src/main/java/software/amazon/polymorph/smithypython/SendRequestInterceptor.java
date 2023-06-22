@@ -26,9 +26,7 @@ final class SendRequestInterceptor implements
                 context_with_response = cast(
                     InterceptorContext[Input, None, DafnyRequest, DafnyResponse], context
                 )
-                
-                print(f"transport_request is {context_with_response.transport_request}")
-                
+                                
                 context_with_response._transport_response = config.dafnyImplInterface.handle_request(
                     input=context_with_response.transport_request
                 )
