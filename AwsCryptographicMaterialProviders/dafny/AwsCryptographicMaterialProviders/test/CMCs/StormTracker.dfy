@@ -94,6 +94,38 @@ module  {:options "/functionSyntax:4"} TestStormTracker {
     expect res.EmptyWait?;
   }
 
+    method {:test} StormTrackerTTL()
+  {
+    var st := new StormTracker(
+      entryCapacity := 100,
+      entryPruningTailSize := 1,
+      gracePeriod := 10,
+      graceInterval := 1,
+      fanOut := 3,
+      inFlightTTL := 5
+    );
+
+    var one := UTF8.EncodeAscii("one");
+    var two := UTF8.EncodeAscii("two");
+    var three := UTF8.EncodeAscii("three");
+    var four := UTF8.EncodeAscii("four");
+
+    var res :- expect st.GetFromCacheWithTime(MakeGet(one), 10000);
+    expect res.EmptyFetch?;
+    res :- expect st.GetFromCacheWithTime(MakeGet(two), 10000);
+    expect res.EmptyFetch?;
+    res :- expect st.GetFromCacheWithTime(MakeGet(three), 10000);
+    expect res.EmptyFetch?;
+    res :- expect st.GetFromCacheWithTime(MakeGet(four), 10000);
+    expect res.EmptyWait?;
+    res :- expect st.GetFromCacheWithTime(MakeGet(four), 10001);
+    expect res.EmptyWait?;
+    res :- expect st.GetFromCacheWithTime(MakeGet(four), 10003);
+    expect res.EmptyWait?;
+    res :- expect st.GetFromCacheWithTime(MakeGet(four), 10005);
+    expect res.EmptyFetch?;
+  }
+
   method {:test} StormTrackerGraceInterval()
   {
     var st := new StormTracker(

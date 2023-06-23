@@ -23,6 +23,7 @@ module {:options "/functionSyntax:4" }  StormTracker {
   import Types = AwsCryptographyMaterialProvidersTypes
   import LocalCMC
   import Time
+  import SortedSets
 
   datatype CacheState =
     | EmptyWait // No data, client should wait
@@ -43,13 +44,15 @@ module {:options "/functionSyntax:4" }  StormTracker {
     var gracePeriod : Types.PositiveLong // seconds before expiration that we start putting things in flight
     var graceInterval : Types.PositiveLong // minimum seconds before putting the same key in flight again
     var fanOut : Types.PositiveLong // maximum keys in flight at one time
+    var inFlightTTL : Types.PositiveLong // maximum time before a key is no longer in flight
 
     constructor(
       entryCapacity: nat,
       entryPruningTailSize: nat := 1,
       gracePeriod : Types.PositiveLong := 10,
       graceInterval : Types.PositiveLong := 1,
-      fanOut : Types.PositiveLong := 20
+      fanOut : Types.PositiveLong := 20,
+      inFlightTTL : Types.PositiveLong := 5
     )
       requires entryPruningTailSize >= 1
       ensures
@@ -63,6 +66,7 @@ module {:options "/functionSyntax:4" }  StormTracker {
       this.gracePeriod := gracePeriod;
       this.graceInterval := graceInterval;
       this.fanOut := fanOut;
+      this.inFlightTTL := inFlightTTL;
     }
 
     function InFlightSize() : Types.PositiveLong
@@ -108,6 +112,23 @@ module {:options "/functionSyntax:4" }  StormTracker {
       }
     }
 
+    // If InFlight is at maximum, see if any entries are too old
+    method PruneInFlight(now : Types.PositiveLong)
+      modifies inFlight
+    {
+      if fanOut > InFlightSize() {
+        return;
+      }
+      var keySet := inFlight.Keys();
+      var keys := SortedSets.ComputeSetToSequence(keySet);
+      for i := 0 to |keys| {
+        var v := inFlight.Select(keys[i]);
+        if now >= AddLong(v, inFlightTTL) {
+          inFlight.Remove(keys[i]);
+          return;
+        }
+      }
+    }
     // If entry is not in cache, then return EmptyFetch once per second, and EmptyWait otherwise
     method CheckNewEntry(identifier: seq<uint8>, now : Types.PositiveLong)
       returns (output: CacheState)
@@ -135,6 +156,7 @@ module {:options "/functionSyntax:4" }  StormTracker {
       ensures wrapped == old(wrapped)
       ensures wrapped.Modifies <= old(wrapped.Modifies)
     {
+      PruneInFlight(now);
       var result := wrapped.GetCacheEntryWithTime(input, now);
       if result.Success? {
         var newResult := CheckInFlight(input.identifier, result.value, now);
