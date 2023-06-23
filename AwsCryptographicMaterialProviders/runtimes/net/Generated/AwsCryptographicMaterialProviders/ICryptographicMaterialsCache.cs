@@ -6,7 +6,7 @@ using System;
  public interface ICryptographicMaterialsCache {
  void PutCacheEntry ( AWS.Cryptography.MaterialProviders.PutCacheEntryInput input ) ;
  AWS.Cryptography.MaterialProviders.GetCacheEntryOutput GetCacheEntry ( AWS.Cryptography.MaterialProviders.GetCacheEntryInput input ) ;
- void UpdaterUsageMetadata ( AWS.Cryptography.MaterialProviders.UpdaterUsageMetadataInput input ) ;
+ void UpdateUsageMetadata ( AWS.Cryptography.MaterialProviders.UpdateUsageMetadataInput input ) ;
  void DeleteCacheEntry ( AWS.Cryptography.MaterialProviders.DeleteCacheEntryInput input ) ;
 }
 }

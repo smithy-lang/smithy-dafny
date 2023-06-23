@@ -3,7 +3,7 @@
 // Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 using System;
  using AWS.Cryptography.MaterialProviders; namespace AWS.Cryptography.MaterialProviders {
- public class UpdaterUsageMetadataInput {
+ public class UpdateUsageMetadataInput {
  private System.IO.MemoryStream _identifier ;
  private int? _bytesUsed ;
  public System.IO.MemoryStream Identifier {

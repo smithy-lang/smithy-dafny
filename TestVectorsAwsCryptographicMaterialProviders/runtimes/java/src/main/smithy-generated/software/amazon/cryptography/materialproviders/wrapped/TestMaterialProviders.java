@@ -28,7 +28,7 @@ import software.amazon.cryptography.materialproviders.internaldafny.types.Create
 import software.amazon.cryptography.materialproviders.internaldafny.types.CreateCryptographicMaterialsCacheInput;
 import software.amazon.cryptography.materialproviders.internaldafny.types.CreateDefaultClientSupplierInput;
 import software.amazon.cryptography.materialproviders.internaldafny.types.CreateDefaultCryptographicMaterialsManagerInput;
-import software.amazon.cryptography.materialproviders.internaldafny.types.CreateExpectedEncryptionContextCMMInput;
+import software.amazon.cryptography.materialproviders.internaldafny.types.CreateRequiredEncryptionContextCMMInput;
 import software.amazon.cryptography.materialproviders.internaldafny.types.CreateMultiKeyringInput;
 import software.amazon.cryptography.materialproviders.internaldafny.types.CreateRawAesKeyringInput;
 import software.amazon.cryptography.materialproviders.internaldafny.types.CreateRawRsaKeyringInput;
@@ -211,11 +211,11 @@ public class TestMaterialProviders implements IAwsCryptographicMaterialProviders
     }
   }
 
-  public Result<ICryptographicMaterialsManager, Error> CreateExpectedEncryptionContextCMM(
-      CreateExpectedEncryptionContextCMMInput dafnyInput) {
-    software.amazon.cryptography.materialproviders.model.CreateExpectedEncryptionContextCMMInput nativeInput = ToNative.CreateExpectedEncryptionContextCMMInput(dafnyInput);
+  public Result<ICryptographicMaterialsManager, Error> CreateRequiredEncryptionContextCMM(
+      CreateRequiredEncryptionContextCMMInput dafnyInput) {
+    software.amazon.cryptography.materialproviders.model.CreateRequiredEncryptionContextCMMInput nativeInput = ToNative.CreateRequiredEncryptionContextCMMInput(dafnyInput);
     try {
-      software.amazon.cryptography.materialproviders.ICryptographicMaterialsManager nativeOutput = this._impl.CreateExpectedEncryptionContextCMM(nativeInput);
+      software.amazon.cryptography.materialproviders.ICryptographicMaterialsManager nativeOutput = this._impl.CreateRequiredEncryptionContextCMM(nativeInput);
       ICryptographicMaterialsManager dafnyOutput = ToDafny.CryptographicMaterialsManager(nativeOutput);
       return Result.create_Success(dafnyOutput);
     } catch (RuntimeException ex) {

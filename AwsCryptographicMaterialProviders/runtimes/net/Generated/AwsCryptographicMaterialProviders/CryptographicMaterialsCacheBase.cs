@@ -14,11 +14,11 @@ using System;
  input.Validate(); return _GetCacheEntry ( input ) ;
 }
  protected abstract AWS.Cryptography.MaterialProviders.GetCacheEntryOutput _GetCacheEntry ( AWS.Cryptography.MaterialProviders.GetCacheEntryInput input ) ;
- public void UpdaterUsageMetadata ( AWS.Cryptography.MaterialProviders.UpdaterUsageMetadataInput input )
+ public void UpdateUsageMetadata ( AWS.Cryptography.MaterialProviders.UpdateUsageMetadataInput input )
  {
- input.Validate();  _UpdaterUsageMetadata ( input ) ;
+ input.Validate();  _UpdateUsageMetadata ( input ) ;
 }
- protected abstract void _UpdaterUsageMetadata ( AWS.Cryptography.MaterialProviders.UpdaterUsageMetadataInput input ) ;
+ protected abstract void _UpdateUsageMetadata ( AWS.Cryptography.MaterialProviders.UpdateUsageMetadataInput input ) ;
  public void DeleteCacheEntry ( AWS.Cryptography.MaterialProviders.DeleteCacheEntryInput input )
  {
  input.Validate();  _DeleteCacheEntry ( input ) ;

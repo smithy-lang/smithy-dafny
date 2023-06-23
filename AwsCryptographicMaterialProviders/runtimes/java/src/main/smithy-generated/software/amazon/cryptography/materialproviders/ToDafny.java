@@ -38,10 +38,10 @@ import software.amazon.cryptography.materialproviders.internaldafny.types.Create
 import software.amazon.cryptography.materialproviders.internaldafny.types.CreateCryptographicMaterialsCacheInput;
 import software.amazon.cryptography.materialproviders.internaldafny.types.CreateDefaultClientSupplierInput;
 import software.amazon.cryptography.materialproviders.internaldafny.types.CreateDefaultCryptographicMaterialsManagerInput;
-import software.amazon.cryptography.materialproviders.internaldafny.types.CreateExpectedEncryptionContextCMMInput;
 import software.amazon.cryptography.materialproviders.internaldafny.types.CreateMultiKeyringInput;
 import software.amazon.cryptography.materialproviders.internaldafny.types.CreateRawAesKeyringInput;
 import software.amazon.cryptography.materialproviders.internaldafny.types.CreateRawRsaKeyringInput;
+import software.amazon.cryptography.materialproviders.internaldafny.types.CreateRequiredEncryptionContextCMMInput;
 import software.amazon.cryptography.materialproviders.internaldafny.types.DBEAlgorithmSuiteId;
 import software.amazon.cryptography.materialproviders.internaldafny.types.DBECommitmentPolicy;
 import software.amazon.cryptography.materialproviders.internaldafny.types.DIRECT__KEY__WRAPPING;
@@ -93,7 +93,7 @@ import software.amazon.cryptography.materialproviders.internaldafny.types.Paddin
 import software.amazon.cryptography.materialproviders.internaldafny.types.PutCacheEntryInput;
 import software.amazon.cryptography.materialproviders.internaldafny.types.SignatureAlgorithm;
 import software.amazon.cryptography.materialproviders.internaldafny.types.SymmetricSignatureAlgorithm;
-import software.amazon.cryptography.materialproviders.internaldafny.types.UpdaterUsageMetadataInput;
+import software.amazon.cryptography.materialproviders.internaldafny.types.UpdateUsageMetadataInput;
 import software.amazon.cryptography.materialproviders.internaldafny.types.ValidDecryptionMaterialsTransitionInput;
 import software.amazon.cryptography.materialproviders.internaldafny.types.ValidEncryptionMaterialsTransitionInput;
 import software.amazon.cryptography.materialproviders.internaldafny.types.ValidateCommitmentPolicyOnDecryptInput;
@@ -420,21 +420,6 @@ public class ToDafny {
     return new CreateDefaultCryptographicMaterialsManagerInput(keyring);
   }
 
-  public static CreateExpectedEncryptionContextCMMInput CreateExpectedEncryptionContextCMMInput(
-      software.amazon.cryptography.materialproviders.model.CreateExpectedEncryptionContextCMMInput nativeValue) {
-    Option<software.amazon.cryptography.materialproviders.internaldafny.types.ICryptographicMaterialsManager> underlyingCMM;
-    underlyingCMM = Objects.nonNull(nativeValue.underlyingCMM()) ?
-        Option.create_Some(ToDafny.CryptographicMaterialsManager(nativeValue.underlyingCMM()))
-        : Option.create_None();
-    Option<software.amazon.cryptography.materialproviders.internaldafny.types.IKeyring> keyring;
-    keyring = Objects.nonNull(nativeValue.keyring()) ?
-        Option.create_Some(ToDafny.Keyring(nativeValue.keyring()))
-        : Option.create_None();
-    DafnySequence<? extends DafnySequence<? extends Byte>> requiredEncryptionContextKeys;
-    requiredEncryptionContextKeys = ToDafny.EncryptionContextKeys(nativeValue.requiredEncryptionContextKeys());
-    return new CreateExpectedEncryptionContextCMMInput(underlyingCMM, keyring, requiredEncryptionContextKeys);
-  }
-
   public static CreateMultiKeyringInput CreateMultiKeyringInput(
       software.amazon.cryptography.materialproviders.model.CreateMultiKeyringInput nativeValue) {
     Option<software.amazon.cryptography.materialproviders.internaldafny.types.IKeyring> generator;
@@ -476,6 +461,21 @@ public class ToDafny {
         Option.create_Some(software.amazon.smithy.dafny.conversion.ToDafny.Simple.ByteSequence(nativeValue.privateKey()))
         : Option.create_None();
     return new CreateRawRsaKeyringInput(keyNamespace, keyName, paddingScheme, publicKey, privateKey);
+  }
+
+  public static CreateRequiredEncryptionContextCMMInput CreateRequiredEncryptionContextCMMInput(
+      software.amazon.cryptography.materialproviders.model.CreateRequiredEncryptionContextCMMInput nativeValue) {
+    Option<software.amazon.cryptography.materialproviders.internaldafny.types.ICryptographicMaterialsManager> underlyingCMM;
+    underlyingCMM = Objects.nonNull(nativeValue.underlyingCMM()) ?
+        Option.create_Some(ToDafny.CryptographicMaterialsManager(nativeValue.underlyingCMM()))
+        : Option.create_None();
+    Option<software.amazon.cryptography.materialproviders.internaldafny.types.IKeyring> keyring;
+    keyring = Objects.nonNull(nativeValue.keyring()) ?
+        Option.create_Some(ToDafny.Keyring(nativeValue.keyring()))
+        : Option.create_None();
+    DafnySequence<? extends DafnySequence<? extends Byte>> requiredEncryptionContextKeys;
+    requiredEncryptionContextKeys = ToDafny.EncryptionContextKeys(nativeValue.requiredEncryptionContextKeys());
+    return new CreateRequiredEncryptionContextCMMInput(underlyingCMM, keyring, requiredEncryptionContextKeys);
   }
 
   public static DecryptionMaterials DecryptionMaterials(
@@ -787,13 +787,13 @@ public class ToDafny {
     return new PutCacheEntryInput(identifier, materials, creationTime, expiryTime, messagesUsed, bytesUsed);
   }
 
-  public static UpdaterUsageMetadataInput UpdaterUsageMetadataInput(
-      software.amazon.cryptography.materialproviders.model.UpdaterUsageMetadataInput nativeValue) {
+  public static UpdateUsageMetadataInput UpdateUsageMetadataInput(
+      software.amazon.cryptography.materialproviders.model.UpdateUsageMetadataInput nativeValue) {
     DafnySequence<? extends Byte> identifier;
     identifier = software.amazon.smithy.dafny.conversion.ToDafny.Simple.ByteSequence(nativeValue.identifier());
     Integer bytesUsed;
     bytesUsed = (nativeValue.bytesUsed());
-    return new UpdaterUsageMetadataInput(identifier, bytesUsed);
+    return new UpdateUsageMetadataInput(identifier, bytesUsed);
   }
 
   public static ValidateCommitmentPolicyOnDecryptInput ValidateCommitmentPolicyOnDecryptInput(

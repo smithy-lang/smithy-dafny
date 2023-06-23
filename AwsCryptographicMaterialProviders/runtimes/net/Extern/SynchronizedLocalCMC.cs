@@ -18,9 +18,9 @@ namespace software.amazon.cryptography.internaldafny
       return this.wrapped.PutCacheEntry(input);
     }
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.Synchronized)]
-    public Wrappers_Compile._IResult<_System._ITuple0, software.amazon.cryptography.materialproviders.internaldafny.types._IError> UpdaterUsageMetadata(software.amazon.cryptography.materialproviders.internaldafny.types._IUpdaterUsageMetadataInput input)
+    public Wrappers_Compile._IResult<_System._ITuple0, software.amazon.cryptography.materialproviders.internaldafny.types._IError> UpdateUsageMetadata(software.amazon.cryptography.materialproviders.internaldafny.types._IUpdateUsageMetadataInput input)
     {
-      return this.wrapped.UpdaterUsageMetadata(input);
+      return this.wrapped.UpdateUsageMetadata(input);
     }
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.Synchronized)]
     public Wrappers_Compile._IResult<software.amazon.cryptography.materialproviders.internaldafny.types._IGetCacheEntryOutput, software.amazon.cryptography.materialproviders.internaldafny.types._IError> GetCacheEntry(software.amazon.cryptography.materialproviders.internaldafny.types._IGetCacheEntryInput input)
@@ -48,9 +48,9 @@ namespace software.amazon.cryptography.internaldafny
       return this.wrapped.DeleteCacheEntry_k(input);
     }
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.Synchronized)]
-    public Wrappers_Compile._IResult<_System._ITuple0, software.amazon.cryptography.materialproviders.internaldafny.types._IError> UpdaterUsageMetadata_k(software.amazon.cryptography.materialproviders.internaldafny.types._IUpdaterUsageMetadataInput input)
+    public Wrappers_Compile._IResult<_System._ITuple0, software.amazon.cryptography.materialproviders.internaldafny.types._IError> UpdateUsageMetadata_k(software.amazon.cryptography.materialproviders.internaldafny.types._IUpdateUsageMetadataInput input)
     {
-      return this.wrapped.UpdaterUsageMetadata_k(input);
+      return this.wrapped.UpdateUsageMetadata_k(input);
     }
   }
 }

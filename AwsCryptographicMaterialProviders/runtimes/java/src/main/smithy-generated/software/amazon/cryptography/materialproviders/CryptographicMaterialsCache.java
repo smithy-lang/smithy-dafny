@@ -13,7 +13,7 @@ import software.amazon.cryptography.materialproviders.model.DeleteCacheEntryInpu
 import software.amazon.cryptography.materialproviders.model.GetCacheEntryInput;
 import software.amazon.cryptography.materialproviders.model.GetCacheEntryOutput;
 import software.amazon.cryptography.materialproviders.model.PutCacheEntryInput;
-import software.amazon.cryptography.materialproviders.model.UpdaterUsageMetadataInput;
+import software.amazon.cryptography.materialproviders.model.UpdateUsageMetadataInput;
 
 public final class CryptographicMaterialsCache implements ICryptographicMaterialsCache {
   private final software.amazon.cryptography.materialproviders.internaldafny.types.ICryptographicMaterialsCache _impl;
@@ -68,9 +68,9 @@ public final class CryptographicMaterialsCache implements ICryptographicMaterial
     }
   }
 
-  public void UpdaterUsageMetadata(UpdaterUsageMetadataInput input) {
-    software.amazon.cryptography.materialproviders.internaldafny.types.UpdaterUsageMetadataInput dafnyValue = ToDafny.UpdaterUsageMetadataInput(input);
-    Result<Tuple0, Error> result = this._impl.UpdaterUsageMetadata(dafnyValue);
+  public void UpdateUsageMetadata(UpdateUsageMetadataInput input) {
+    software.amazon.cryptography.materialproviders.internaldafny.types.UpdateUsageMetadataInput dafnyValue = ToDafny.UpdateUsageMetadataInput(input);
+    Result<Tuple0, Error> result = this._impl.UpdateUsageMetadata(dafnyValue);
     if (result.is_Failure()) {
       throw ToNative.Error(result.dtor_error());
     }
@@ -135,19 +135,19 @@ public final class CryptographicMaterialsCache implements ICryptographicMaterial
       throw new RuntimeException("Not supported at this time.");
     }
 
-    public Result<Tuple0, Error> UpdaterUsageMetadata(
-        software.amazon.cryptography.materialproviders.internaldafny.types.UpdaterUsageMetadataInput dafnyInput) {
-      UpdaterUsageMetadataInput nativeInput = ToNative.UpdaterUsageMetadataInput(dafnyInput);
+    public Result<Tuple0, Error> UpdateUsageMetadata(
+        software.amazon.cryptography.materialproviders.internaldafny.types.UpdateUsageMetadataInput dafnyInput) {
+      UpdateUsageMetadataInput nativeInput = ToNative.UpdateUsageMetadataInput(dafnyInput);
       try {
-        this._impl.UpdaterUsageMetadata(nativeInput);
+        this._impl.UpdateUsageMetadata(nativeInput);
         return Result.create_Success(Tuple0.create());
       } catch (RuntimeException ex) {
         return Result.create_Failure(ToDafny.Error(ex));
       }
     }
 
-    public Result<Tuple0, Error> UpdaterUsageMetadata_k(
-        software.amazon.cryptography.materialproviders.internaldafny.types.UpdaterUsageMetadataInput dafnyInput) {
+    public Result<Tuple0, Error> UpdateUsageMetadata_k(
+        software.amazon.cryptography.materialproviders.internaldafny.types.UpdateUsageMetadataInput dafnyInput) {
       throw new RuntimeException("Not supported at this time.");
     }
   }

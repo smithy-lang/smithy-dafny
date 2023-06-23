@@ -15,9 +15,9 @@ public class SynchronizedLocalCMC implements software.amazon.cryptography.materi
   {
     return wrapped.PutCacheEntry(input);
   }
-  public synchronized Wrappers_Compile.Result<dafny.Tuple0, software.amazon.cryptography.materialproviders.internaldafny.types.Error> UpdaterUsageMetadata(software.amazon.cryptography.materialproviders.internaldafny.types.UpdaterUsageMetadataInput input)
+  public synchronized Wrappers_Compile.Result<dafny.Tuple0, software.amazon.cryptography.materialproviders.internaldafny.types.Error> UpdateUsageMetadata(software.amazon.cryptography.materialproviders.internaldafny.types.UpdateUsageMetadataInput input)
   {
-    return wrapped.UpdaterUsageMetadata(input);
+    return wrapped.UpdateUsageMetadata(input);
   }
   public synchronized Wrappers_Compile.Result<software.amazon.cryptography.materialproviders.internaldafny.types.GetCacheEntryOutput, software.amazon.cryptography.materialproviders.internaldafny.types.Error> GetCacheEntry(software.amazon.cryptography.materialproviders.internaldafny.types.GetCacheEntryInput input)
   {
@@ -32,9 +32,9 @@ public class SynchronizedLocalCMC implements software.amazon.cryptography.materi
   {
     return wrapped.PutCacheEntry(input);
   }
-  public synchronized Wrappers_Compile.Result<dafny.Tuple0, software.amazon.cryptography.materialproviders.internaldafny.types.Error> UpdaterUsageMetadata_k(software.amazon.cryptography.materialproviders.internaldafny.types.UpdaterUsageMetadataInput input)
+  public synchronized Wrappers_Compile.Result<dafny.Tuple0, software.amazon.cryptography.materialproviders.internaldafny.types.Error> UpdateUsageMetadata_k(software.amazon.cryptography.materialproviders.internaldafny.types.UpdateUsageMetadataInput input)
   {
-    return wrapped.UpdaterUsageMetadata(input);
+    return wrapped.UpdateUsageMetadata(input);
   }
   public synchronized Wrappers_Compile.Result<software.amazon.cryptography.materialproviders.internaldafny.types.GetCacheEntryOutput, software.amazon.cryptography.materialproviders.internaldafny.types.Error> GetCacheEntry_k(software.amazon.cryptography.materialproviders.internaldafny.types.GetCacheEntryInput input)
   {

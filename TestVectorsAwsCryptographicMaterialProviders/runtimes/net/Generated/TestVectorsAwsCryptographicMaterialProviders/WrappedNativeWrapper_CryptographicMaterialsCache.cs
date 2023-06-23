@@ -35,12 +35,12 @@
  {
  throw new AwsCryptographicMaterialProvidersException("Not supported at this time.");
 }
- public Wrappers_Compile._IResult<_System._ITuple0, software.amazon.cryptography.materialproviders.internaldafny.types._IError> UpdaterUsageMetadata(software.amazon.cryptography.materialproviders.internaldafny.types._IUpdaterUsageMetadataInput input)
+ public Wrappers_Compile._IResult<_System._ITuple0, software.amazon.cryptography.materialproviders.internaldafny.types._IError> UpdateUsageMetadata(software.amazon.cryptography.materialproviders.internaldafny.types._IUpdateUsageMetadataInput input)
  {
 
- AWS.Cryptography.MaterialProviders.UpdaterUsageMetadataInput nativeInput = TypeConversion.FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S25_UpdaterUsageMetadataInput(input);
+ AWS.Cryptography.MaterialProviders.UpdateUsageMetadataInput nativeInput = TypeConversion.FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S25_UpdateUsageMetadataInput(input);
  try {
-  _impl.UpdaterUsageMetadata(nativeInput);
+  _impl.UpdateUsageMetadata(nativeInput);
  
  
  return Wrappers_Compile.Result<_System._ITuple0, software.amazon.cryptography.materialproviders.internaldafny.types._IError>.create_Success(Tuple0.create());
@@ -50,7 +50,7 @@
  return Wrappers_Compile.Result<_System._ITuple0, software.amazon.cryptography.materialproviders.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(e));
 }
 }
- public Wrappers_Compile._IResult<_System._ITuple0, software.amazon.cryptography.materialproviders.internaldafny.types._IError> UpdaterUsageMetadata_k(software.amazon.cryptography.materialproviders.internaldafny.types._IUpdaterUsageMetadataInput input)
+ public Wrappers_Compile._IResult<_System._ITuple0, software.amazon.cryptography.materialproviders.internaldafny.types._IError> UpdateUsageMetadata_k(software.amazon.cryptography.materialproviders.internaldafny.types._IUpdateUsageMetadataInput input)
  {
  throw new AwsCryptographicMaterialProvidersException("Not supported at this time.");
 }

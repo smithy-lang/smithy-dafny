@@ -539,10 +539,10 @@ module {:options "/functionSyntax:4" } LocalCMC {
       output := Success(());
     }
 
-    ghost predicate UpdaterUsageMetadataEnsuresPublicly(input: Types.UpdaterUsageMetadataInput, output: Result<(), Types.Error>)
+    ghost predicate UpdateUsageMetadataEnsuresPublicly(input: Types.UpdateUsageMetadataInput, output: Result<(), Types.Error>)
     {true}
 
-    method UpdaterUsageMetadata'(input: Types.UpdaterUsageMetadataInput)
+    method UpdateUsageMetadata'(input: Types.UpdateUsageMetadataInput)
       returns (output: Result<(), Types.Error>)
       requires ValidState()
       modifies Modifies - {History}

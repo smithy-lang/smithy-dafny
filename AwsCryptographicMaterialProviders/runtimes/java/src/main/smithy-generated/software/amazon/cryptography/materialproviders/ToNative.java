@@ -49,10 +49,10 @@ import software.amazon.cryptography.materialproviders.model.CreateAwsKmsRsaKeyri
 import software.amazon.cryptography.materialproviders.model.CreateCryptographicMaterialsCacheInput;
 import software.amazon.cryptography.materialproviders.model.CreateDefaultClientSupplierInput;
 import software.amazon.cryptography.materialproviders.model.CreateDefaultCryptographicMaterialsManagerInput;
-import software.amazon.cryptography.materialproviders.model.CreateExpectedEncryptionContextCMMInput;
 import software.amazon.cryptography.materialproviders.model.CreateMultiKeyringInput;
 import software.amazon.cryptography.materialproviders.model.CreateRawAesKeyringInput;
 import software.amazon.cryptography.materialproviders.model.CreateRawRsaKeyringInput;
+import software.amazon.cryptography.materialproviders.model.CreateRequiredEncryptionContextCMMInput;
 import software.amazon.cryptography.materialproviders.model.DBEAlgorithmSuiteId;
 import software.amazon.cryptography.materialproviders.model.DBECommitmentPolicy;
 import software.amazon.cryptography.materialproviders.model.DIRECT_KEY_WRAPPING;
@@ -102,7 +102,7 @@ import software.amazon.cryptography.materialproviders.model.PaddingScheme;
 import software.amazon.cryptography.materialproviders.model.PutCacheEntryInput;
 import software.amazon.cryptography.materialproviders.model.SignatureAlgorithm;
 import software.amazon.cryptography.materialproviders.model.SymmetricSignatureAlgorithm;
-import software.amazon.cryptography.materialproviders.model.UpdaterUsageMetadataInput;
+import software.amazon.cryptography.materialproviders.model.UpdateUsageMetadataInput;
 import software.amazon.cryptography.materialproviders.model.ValidDecryptionMaterialsTransitionInput;
 import software.amazon.cryptography.materialproviders.model.ValidEncryptionMaterialsTransitionInput;
 import software.amazon.cryptography.materialproviders.model.ValidateCommitmentPolicyOnDecryptInput;
@@ -454,19 +454,6 @@ public class ToNative {
     return nativeBuilder.build();
   }
 
-  public static CreateExpectedEncryptionContextCMMInput CreateExpectedEncryptionContextCMMInput(
-      software.amazon.cryptography.materialproviders.internaldafny.types.CreateExpectedEncryptionContextCMMInput dafnyValue) {
-    CreateExpectedEncryptionContextCMMInput.Builder nativeBuilder = CreateExpectedEncryptionContextCMMInput.builder();
-    if (dafnyValue.dtor_underlyingCMM().is_Some()) {
-      nativeBuilder.underlyingCMM(ToNative.CryptographicMaterialsManager(dafnyValue.dtor_underlyingCMM().dtor_value()));
-    }
-    if (dafnyValue.dtor_keyring().is_Some()) {
-      nativeBuilder.keyring(ToNative.Keyring(dafnyValue.dtor_keyring().dtor_value()));
-    }
-    nativeBuilder.requiredEncryptionContextKeys(ToNative.EncryptionContextKeys(dafnyValue.dtor_requiredEncryptionContextKeys()));
-    return nativeBuilder.build();
-  }
-
   public static CreateMultiKeyringInput CreateMultiKeyringInput(
       software.amazon.cryptography.materialproviders.internaldafny.types.CreateMultiKeyringInput dafnyValue) {
     CreateMultiKeyringInput.Builder nativeBuilder = CreateMultiKeyringInput.builder();
@@ -499,6 +486,19 @@ public class ToNative {
     if (dafnyValue.dtor_privateKey().is_Some()) {
       nativeBuilder.privateKey(software.amazon.smithy.dafny.conversion.ToNative.Simple.ByteBuffer(dafnyValue.dtor_privateKey().dtor_value()));
     }
+    return nativeBuilder.build();
+  }
+
+  public static CreateRequiredEncryptionContextCMMInput CreateRequiredEncryptionContextCMMInput(
+      software.amazon.cryptography.materialproviders.internaldafny.types.CreateRequiredEncryptionContextCMMInput dafnyValue) {
+    CreateRequiredEncryptionContextCMMInput.Builder nativeBuilder = CreateRequiredEncryptionContextCMMInput.builder();
+    if (dafnyValue.dtor_underlyingCMM().is_Some()) {
+      nativeBuilder.underlyingCMM(ToNative.CryptographicMaterialsManager(dafnyValue.dtor_underlyingCMM().dtor_value()));
+    }
+    if (dafnyValue.dtor_keyring().is_Some()) {
+      nativeBuilder.keyring(ToNative.Keyring(dafnyValue.dtor_keyring().dtor_value()));
+    }
+    nativeBuilder.requiredEncryptionContextKeys(ToNative.EncryptionContextKeys(dafnyValue.dtor_requiredEncryptionContextKeys()));
     return nativeBuilder.build();
   }
 
@@ -771,9 +771,9 @@ public class ToNative {
     return nativeBuilder.build();
   }
 
-  public static UpdaterUsageMetadataInput UpdaterUsageMetadataInput(
-      software.amazon.cryptography.materialproviders.internaldafny.types.UpdaterUsageMetadataInput dafnyValue) {
-    UpdaterUsageMetadataInput.Builder nativeBuilder = UpdaterUsageMetadataInput.builder();
+  public static UpdateUsageMetadataInput UpdateUsageMetadataInput(
+      software.amazon.cryptography.materialproviders.internaldafny.types.UpdateUsageMetadataInput dafnyValue) {
+    UpdateUsageMetadataInput.Builder nativeBuilder = UpdateUsageMetadataInput.builder();
     nativeBuilder.identifier(software.amazon.smithy.dafny.conversion.ToNative.Simple.ByteBuffer(dafnyValue.dtor_identifier()));
     nativeBuilder.bytesUsed((dafnyValue.dtor_bytesUsed()));
     return nativeBuilder.build();
