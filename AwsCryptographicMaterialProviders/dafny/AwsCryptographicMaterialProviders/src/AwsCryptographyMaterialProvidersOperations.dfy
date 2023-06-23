@@ -532,14 +532,16 @@ module AwsCryptographyMaterialProvidersOperations refines AbstractAwsCryptograph
     var gracePeriod := GetFromOpt(input.gracePeriod, 10);
     var graceInterval := GetFromOpt(input.graceInterval, 1);
     var fanOut := GetFromOpt(input.fanOut, 20);
+    var inFlightTTL := GetFromOpt(input.inFlightTTL, 20);
 
-    if gracePeriod <= 0 || graceInterval <= 0 || fanOut <= 0 {
+    if gracePeriod <= 0 || graceInterval <= 0 || fanOut <= 0 || inFlightTTL <= 0 {
       var cmc := new StormTracker.StormTracker(
         entryCapacity := input.entryCapacity as nat,
         entryPruningTailSize := entryPruningTailSize,
         gracePeriod := gracePeriod,
         graceInterval := graceInterval,
-        fanOut := fanOut);
+        fanOut := fanOut,
+        inFlightTTL := inFlightTTL);
       var synCmc := new StormTrackingCMC.StormTrackingCMC(cmc);
       return Success(synCmc);
     } else {
