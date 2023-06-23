@@ -417,7 +417,11 @@ public class ToDafny {
     fanOut = Objects.nonNull(nativeValue.fanOut()) ?
         Option.create_Some((nativeValue.fanOut()))
         : Option.create_None();
-    return new CreateCryptographicMaterialsCacheInput(entryCapacity, entryPruningTailSize, gracePeriod, graceInterval, fanOut);
+    Option<Integer> inFlightTTL;
+    inFlightTTL = Objects.nonNull(nativeValue.inFlightTTL()) ?
+        Option.create_Some((nativeValue.inFlightTTL()))
+        : Option.create_None();
+    return new CreateCryptographicMaterialsCacheInput(entryCapacity, entryPruningTailSize, gracePeriod, graceInterval, fanOut, inFlightTTL);
   }
 
   public static CreateDefaultClientSupplierInput CreateDefaultClientSupplierInput(

@@ -161,4 +161,7 @@ structure CreateCryptographicMaterialsCacheInput {
 
   @range(min: 0)
   fanOut: PositiveInteger,
+
+  @range(min: 0)
+  inFlightTTL: PositiveInteger,
 }

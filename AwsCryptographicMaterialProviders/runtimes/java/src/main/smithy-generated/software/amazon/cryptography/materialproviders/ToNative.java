@@ -447,6 +447,9 @@ public class ToNative {
     if (dafnyValue.dtor_fanOut().is_Some()) {
       nativeBuilder.fanOut((dafnyValue.dtor_fanOut().dtor_value()));
     }
+    if (dafnyValue.dtor_inFlightTTL().is_Some()) {
+      nativeBuilder.inFlightTTL((dafnyValue.dtor_inFlightTTL().dtor_value()));
+    }
     return nativeBuilder.build();
   }
 

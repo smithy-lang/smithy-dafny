@@ -9,6 +9,7 @@ using System;
  private int? _gracePeriod ;
  private int? _graceInterval ;
  private int? _fanOut ;
+ private int? _inFlightTTL ;
  public int EntryCapacity {
  get { return this._entryCapacity.GetValueOrDefault(); }
  set { this._entryCapacity = value; }
@@ -43,6 +44,13 @@ using System;
 }
  public bool IsSetFanOut () {
  return this._fanOut.HasValue;
+}
+ public int InFlightTTL {
+ get { return this._inFlightTTL.GetValueOrDefault(); }
+ set { this._inFlightTTL = value; }
+}
+ public bool IsSetInFlightTTL () {
+ return this._inFlightTTL.HasValue;
 }
  public void Validate() {
  if (!IsSetEntryCapacity()) throw new System.ArgumentException("Missing value for required property 'EntryCapacity'");

@@ -199,14 +199,16 @@ throw new System.ArgumentException("Invalid AWS.Cryptography.MaterialProviders.C
  if (concrete._entryPruningTailSize.is_Some) converted.EntryPruningTailSize = (int) FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S38_CreateCryptographicMaterialsCacheInput__M20_entryPruningTailSize(concrete._entryPruningTailSize);
  if (concrete._gracePeriod.is_Some) converted.GracePeriod = (int) FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S38_CreateCryptographicMaterialsCacheInput__M11_gracePeriod(concrete._gracePeriod);
  if (concrete._graceInterval.is_Some) converted.GraceInterval = (int) FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S38_CreateCryptographicMaterialsCacheInput__M13_graceInterval(concrete._graceInterval);
- if (concrete._fanOut.is_Some) converted.FanOut = (int) FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S38_CreateCryptographicMaterialsCacheInput__M6_fanOut(concrete._fanOut); return converted;
+ if (concrete._fanOut.is_Some) converted.FanOut = (int) FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S38_CreateCryptographicMaterialsCacheInput__M6_fanOut(concrete._fanOut);
+ if (concrete._inFlightTTL.is_Some) converted.InFlightTTL = (int) FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S38_CreateCryptographicMaterialsCacheInput__M11_inFlightTTL(concrete._inFlightTTL); return converted;
 }
  internal static software.amazon.cryptography.materialproviders.internaldafny.types._ICreateCryptographicMaterialsCacheInput ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S38_CreateCryptographicMaterialsCacheInput (AWS.Cryptography.MaterialProviders.CreateCryptographicMaterialsCacheInput value) {
  int? var_entryPruningTailSize = value.IsSetEntryPruningTailSize() ? value.EntryPruningTailSize : (int?) null;
  int? var_gracePeriod = value.IsSetGracePeriod() ? value.GracePeriod : (int?) null;
  int? var_graceInterval = value.IsSetGraceInterval() ? value.GraceInterval : (int?) null;
  int? var_fanOut = value.IsSetFanOut() ? value.FanOut : (int?) null;
- return new software.amazon.cryptography.materialproviders.internaldafny.types.CreateCryptographicMaterialsCacheInput ( ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S38_CreateCryptographicMaterialsCacheInput__M13_entryCapacity(value.EntryCapacity) , ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S38_CreateCryptographicMaterialsCacheInput__M20_entryPruningTailSize(var_entryPruningTailSize) , ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S38_CreateCryptographicMaterialsCacheInput__M11_gracePeriod(var_gracePeriod) , ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S38_CreateCryptographicMaterialsCacheInput__M13_graceInterval(var_graceInterval) , ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S38_CreateCryptographicMaterialsCacheInput__M6_fanOut(var_fanOut) ) ;
+ int? var_inFlightTTL = value.IsSetInFlightTTL() ? value.InFlightTTL : (int?) null;
+ return new software.amazon.cryptography.materialproviders.internaldafny.types.CreateCryptographicMaterialsCacheInput ( ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S38_CreateCryptographicMaterialsCacheInput__M13_entryCapacity(value.EntryCapacity) , ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S38_CreateCryptographicMaterialsCacheInput__M20_entryPruningTailSize(var_entryPruningTailSize) , ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S38_CreateCryptographicMaterialsCacheInput__M11_gracePeriod(var_gracePeriod) , ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S38_CreateCryptographicMaterialsCacheInput__M13_graceInterval(var_graceInterval) , ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S38_CreateCryptographicMaterialsCacheInput__M6_fanOut(var_fanOut) , ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S38_CreateCryptographicMaterialsCacheInput__M11_inFlightTTL(var_inFlightTTL) ) ;
 }
  internal static AWS.Cryptography.MaterialProviders.ICryptographicMaterialsCache FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S39_CreateCryptographicMaterialsCacheOutput (software.amazon.cryptography.materialproviders.internaldafny.types.ICryptographicMaterialsCache value) {
  return FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S39_CreateCryptographicMaterialsCacheOutput__M14_materialsCache(value);
@@ -1171,6 +1173,12 @@ throw new System.ArgumentException("Invalid AWS.Cryptography.MaterialProviders.S
  return value.is_None ? (int?) null : FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S15_PositiveInteger(value.Extract());
 }
  internal static Wrappers_Compile._IOption<int> ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S38_CreateCryptographicMaterialsCacheInput__M6_fanOut (int? value) {
+ return value == null ? Wrappers_Compile.Option<int>.create_None() : Wrappers_Compile.Option<int>.create_Some(ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S15_PositiveInteger((int) value));
+}
+ internal static int? FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S38_CreateCryptographicMaterialsCacheInput__M11_inFlightTTL (Wrappers_Compile._IOption<int> value) {
+ return value.is_None ? (int?) null : FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S15_PositiveInteger(value.Extract());
+}
+ internal static Wrappers_Compile._IOption<int> ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S38_CreateCryptographicMaterialsCacheInput__M11_inFlightTTL (int? value) {
  return value == null ? Wrappers_Compile.Option<int>.create_None() : Wrappers_Compile.Option<int>.create_Some(ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S15_PositiveInteger((int) value));
 }
  internal static AWS.Cryptography.MaterialProviders.ICryptographicMaterialsCache FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S39_CreateCryptographicMaterialsCacheOutput__M14_materialsCache (software.amazon.cryptography.materialproviders.internaldafny.types.ICryptographicMaterialsCache value) {

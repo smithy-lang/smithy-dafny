@@ -816,7 +816,8 @@ include "../../../../StandardLibrary/src/Index.dfy"
  nameonly entryPruningTailSize: Option<PositiveInteger> ,
  nameonly gracePeriod: Option<PositiveInteger> ,
  nameonly graceInterval: Option<PositiveInteger> ,
- nameonly fanOut: Option<PositiveInteger>
+ nameonly fanOut: Option<PositiveInteger> ,
+ nameonly inFlightTTL: Option<PositiveInteger>
  )
  datatype CreateDefaultClientSupplierInput = | CreateDefaultClientSupplierInput (
  

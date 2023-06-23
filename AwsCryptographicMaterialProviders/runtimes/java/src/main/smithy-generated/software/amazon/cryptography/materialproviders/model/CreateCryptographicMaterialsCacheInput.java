@@ -14,12 +14,15 @@ public class CreateCryptographicMaterialsCacheInput {
 
   private final int fanOut;
 
+  private final int inFlightTTL;
+
   protected CreateCryptographicMaterialsCacheInput(BuilderImpl builder) {
     this.entryCapacity = builder.entryCapacity();
     this.entryPruningTailSize = builder.entryPruningTailSize();
     this.gracePeriod = builder.gracePeriod();
     this.graceInterval = builder.graceInterval();
     this.fanOut = builder.fanOut();
+    this.inFlightTTL = builder.inFlightTTL();
   }
 
   public int entryCapacity() {
@@ -40,6 +43,10 @@ public class CreateCryptographicMaterialsCacheInput {
 
   public int fanOut() {
     return this.fanOut;
+  }
+
+  public int inFlightTTL() {
+    return this.inFlightTTL;
   }
 
   public Builder toBuilder() {
@@ -71,6 +78,10 @@ public class CreateCryptographicMaterialsCacheInput {
 
     int fanOut();
 
+    Builder inFlightTTL(int inFlightTTL);
+
+    int inFlightTTL();
+
     CreateCryptographicMaterialsCacheInput build();
   }
 
@@ -95,6 +106,10 @@ public class CreateCryptographicMaterialsCacheInput {
 
     private boolean _fanOutSet = false;
 
+    protected int inFlightTTL;
+
+    private boolean _inFlightTTLSet = false;
+
     protected BuilderImpl() {
     }
 
@@ -109,6 +124,8 @@ public class CreateCryptographicMaterialsCacheInput {
       this._graceIntervalSet = true;
       this.fanOut = model.fanOut();
       this._fanOutSet = true;
+      this.inFlightTTL = model.inFlightTTL();
+      this._inFlightTTLSet = true;
     }
 
     public Builder entryCapacity(int entryCapacity) {
@@ -161,6 +178,16 @@ public class CreateCryptographicMaterialsCacheInput {
       return this.fanOut;
     }
 
+    public Builder inFlightTTL(int inFlightTTL) {
+      this.inFlightTTL = inFlightTTL;
+      this._inFlightTTLSet = true;
+      return this;
+    }
+
+    public int inFlightTTL() {
+      return this.inFlightTTL;
+    }
+
     public CreateCryptographicMaterialsCacheInput build() {
       if (!this._entryCapacitySet) {
         throw new IllegalArgumentException("Missing value for required field `entryCapacity`");
@@ -179,6 +206,9 @@ public class CreateCryptographicMaterialsCacheInput {
       }
       if (this._fanOutSet && this.fanOut() < 0) {
         throw new IllegalArgumentException("`fanOut` must be greater than or equal to 0");
+      }
+      if (this._inFlightTTLSet && this.inFlightTTL() < 0) {
+        throw new IllegalArgumentException("`inFlightTTL` must be greater than or equal to 0");
       }
       return new CreateCryptographicMaterialsCacheInput(this);
     }
