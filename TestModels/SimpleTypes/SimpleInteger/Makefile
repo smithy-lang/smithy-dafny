@@ -6,6 +6,7 @@ CORES=2
 include ../../SharedMakefile.mk
 
 NAMESPACE=simple.types.integer
+PYTHON_MODULE_NAME=simple_integer
 
 # This project has no dependencies
 # DEPENDENT-MODELS:=

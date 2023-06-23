@@ -16,6 +16,7 @@
 package software.amazon.polymorph.smithypython;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import software.amazon.polymorph.traits.LocalServiceTrait;
@@ -80,6 +81,13 @@ public final class DafnyIntegration implements PythonIntegration {
             throw new UnsupportedOperationException("Non-local services not supported");
         }
     }
+    public String shimForService(ServiceShape serviceShape) {
+        if (serviceShape.hasTrait(LocalServiceTrait.class)) {
+            return serviceShape.expectTrait(LocalServiceTrait.class).getSdkId() + "Shim";
+        } else {
+            throw new UnsupportedOperationException("Non-local services not supported");
+        }
+    }
 
     @Override
     public void customize(GenerationContext codegenContext) {
@@ -126,7 +134,7 @@ public final class DafnyIntegration implements PythonIntegration {
         String operations = "";
         for (OperationShape operationShape : codegenContext.model().getOperationShapes()) {
             operations += """
-                "%1$s": self.%2$s.%1$s\n
+                "%1$s": self.%2$s.%1$s,\n
                 """.formatted(operationShape.getId().getName(), "impl");
         }
         String allOperations = operations;
@@ -172,6 +180,69 @@ public final class DafnyIntegration implements PythonIntegration {
                     # but we do not use this at this time.
                     pass
                 """
+            );
+        });
+
+        String typesModulePrelude = serviceShape.getId().getNamespace() + ".internaldafny.types";
+        // TODO: refactor to DafnyProtocolFileWriter
+        // TODO: Naming of this file?
+
+        // TODO: StringBuilder
+        /*
+        TODO: This is what this SHOULD look like after getting some sort of TypeConversion in
+                        unwrapped_request = TypeConversion.ToNative(input)
+                        try:
+                            wrapped_response = self._impl.get_integer(unwrapped_request)
+                            return Wrappers_Compile.Result_Success(wrapped_response)
+                        catch ex:
+                            return Wrappers_Compile.Result_Failure(ex)
+         */
+        String operationsShim = "";
+        Set<ShapeId> allInputShapesSet = new HashSet<>();
+        for (OperationShape operationShape : codegenContext.model().getOperationShapes()) {
+            String inputName = operationShape.getInputShape().getName();
+            allInputShapesSet.add(operationShape.getInputShape());
+            String doubledInputName = typesModulePrelude + "." + inputName + "_" + inputName;
+            String outputName = operationShape.getOutputShape().getName();
+            String doubledOutputName = typesModulePrelude + "." + outputName + "_" + outputName;
+            String operationSymbol = codegenContext.symbolProvider().toSymbol(operationShape).getName();
+
+            operationsShim += """
+                    def %1$s(self, input: %2$s) -> %3$s:
+                            unwrapped_request: %4$s = %4$s(value=input.value)
+                            wrapped_response = asyncio.run(self._impl.%5$s(unwrapped_request))
+                            return Wrappers_Compile.Result_Success(wrapped_response)
+                """.formatted(
+                    operationShape.getId().getName(),
+                doubledInputName,
+                doubledOutputName,
+                inputName,
+                operationSymbol
+                );
+        }
+        String allOperationsShim = operationsShim;
+
+        codegenContext.writerDelegator().useFileWriter(moduleName + "/shim.py", "", writer -> {
+            for (ShapeId inputShapeId : allInputShapesSet) {
+                writer.addImport(".models", inputShapeId.getName());
+            }
+
+            writer.write(
+                """
+                import Wrappers_Compile
+                import asyncio
+                import $L
+                import $L.smithy_generated.$L.client as client_impl
+               
+                                
+                class $L($L.$L):
+                    def __init__(self, _impl: client_impl) :
+                        self._impl = _impl
+                                
+                $L
+                    
+                    """, typesModulePrelude, moduleName, moduleName, shimForService(serviceShape),
+                typesModulePrelude, "I" + serviceShape.getId().getName() + "Client", allOperationsShim
             );
         });
 

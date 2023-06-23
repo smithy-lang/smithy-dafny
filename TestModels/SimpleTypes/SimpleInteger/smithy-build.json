@@ -1,0 +1,11 @@
+{
+    "version": "1.0",
+    "plugins": {
+        "dafny-client-codegen": {
+            "service": "simple.types.integer#SimpleTypesInteger",
+            "module": "simple_integer",
+            "moduleVersion": "0.0.1",
+            "protocol": "aws.polymorph#localService"
+        }
+    }
+}
