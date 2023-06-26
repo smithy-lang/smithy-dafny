@@ -1,0 +1,16 @@
+[project]
+name = "simple_long"
+description = "simple_long test package"
+version = "0.1.0"
+authors = [
+    { name = "AWS Crypto Tools", email = "aws-crypto-tools@amazon.com" }
+]
+
+[tool.poetry]
+packages = [
+    { include = "simple_long", from = "src" },
+]
+
+[tool.poetry.dependencies]
+python = "^3.7"
+smithy_python = "^0.0.1"

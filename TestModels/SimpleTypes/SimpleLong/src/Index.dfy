@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 include "SimpleLongImpl.dfy"
 
-module {:extern "simple.types.smithylong.internaldafny" } SimpleLong refines AbstractSimpleTypesSmithyLongService {
+module {:extern "simple.types.smithylong.internaldafny.impl" } SimpleLong refines AbstractSimpleTypesSmithyLongService {
     import Operations = SimpleLongImpl
 
  function method DefaultSimpleLongConfig(): SimpleLongConfig {
