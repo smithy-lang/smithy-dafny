@@ -33,6 +33,19 @@ STANDARD_LIBRARY_PATH := $(PROJECT_ROOT)/dafny-dependencies/StandardLibrary
 CODEGEN_CLI_ROOT := $(PROJECT_ROOT)/../codegen/smithy-dafny-codegen-cli
 GRADLEW := $(PROJECT_ROOT)/../codegen/gradlew
 
+# Run as
+# $(call GetFromSmithyBuild,[property])
+# ex. $(call GetFromSmithyBuild,module)
+# Refactor this later if we need to access properties not in plugins.dafny-client-codegen
+# TODO: Do I need to install jq on GH runners...?
+define GetFromSmithyBuild
+$(shell jq -r '.plugins."dafny-client-codegen".$(1)' smithy-build.json)
+endef
+
+# node -p "require('runtimes/python/smithy-build.json').plugins.dafny-client-codegen.module"
+
+PYTHON_MODULE_NAME := $(call GetFromSmithyBuild,module)
+
 ########################## Dafny targets
 
 verify:

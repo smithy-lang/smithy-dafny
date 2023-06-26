@@ -49,6 +49,7 @@ import software.amazon.smithy.python.codegen.SmithyPythonDependency;
 import software.amazon.smithy.python.codegen.integration.ProtocolGenerator;
 import software.amazon.smithy.utils.CodeSection;
 import software.amazon.smithy.utils.SmithyUnstableApi;
+import software.amazon.smithy.utils.StringUtils;
 
 /**
  *
@@ -131,9 +132,30 @@ public abstract class DafnyProtocolGenerator implements ProtocolGenerator {
     String inputName = operation.getInputShape().getName();
     writer.addImport(typesModulePrelude, inputName + "_" + inputName, "Dafny" + inputName);
 
+    System.out.println("ytoyo");
+    System.out.println(operation.getInput());
+
+    Shape targetShape = context.model().expectShape(operation.getInputShape());
+    // TODO: This isn't right... need to support >1 member in structure
+    MemberShape member = targetShape.getMember("value").get();
+    System.out.println(targetShape);
+    System.out.println(targetShape.getMemberNames());
+    var input = targetShape.accept(new DafnyMemberSerVisitor(
+        context,
+        writer,
+        "input",
+        member
+    ));
+
+        /*
+        return ("$L", $L(
+         */
+
+    // value=input.value
+
     writer.write("""
-            return ("$L", $L(value=input.value))
-            """, operation.getId().getName(), "Dafny" + inputName
+            return ("$L", $L($L))
+            """, operation.getId().getName(), "Dafny" + inputName, input
         );
   }
 
@@ -202,9 +224,19 @@ public abstract class DafnyProtocolGenerator implements ProtocolGenerator {
       String outputName = operation.getOutputShape().getName();
       writer.addImport(typesModulePrelude, outputName + "_" + outputName, "Dafny" + outputName);
 
+      Shape targetShape = context.model().expectShape(operation.getOutputShape());
+      // TODO: support >1 member in structure
+      MemberShape member = targetShape.getMember("value").get();
+      var output = targetShape.accept(new DafnyMemberDeserVisitor(
+          context,
+          writer,
+          "input",
+          member
+      ));
+
       writer.write("""
-return $L(value=input.value.value)
-      """, outputName);
+return $L($L)
+      """, outputName, output);
       writer.popState();
     });
   }
@@ -283,10 +315,8 @@ return $L(value=input.value.value)
     DafnyMemberSerVisitor(
         GenerationContext context,
         PythonWriter writer,
-        Location bindingType,
         String dataSource,
-        MemberShape member,
-        Format defaultTimestampFormat
+        MemberShape member
     ) {
       this.context = context;
       this.writer = writer;
@@ -305,6 +335,20 @@ return $L(value=input.value.value)
     @Override
     public String blobShape(BlobShape shape) {
       return getDefault(shape);
+    }
+
+    @Override
+    public String structureShape(StructureShape shape) {
+      System.out.println("structureShape");
+      String out = "";
+      // TODO: Change fstring to support >1 shape
+      if (shape.getMemberNames().size() > 1) {
+        throw new UnsupportedOperationException("StructureShapes with >1 value not supported");
+      }
+      for (String memberName : shape.getMemberNames()) {
+        out += "%1$s=%2$s.%1$s".formatted(memberName, dataSource);
+      }
+      return out;
     }
 
     @Override
@@ -387,10 +431,8 @@ return $L(value=input.value.value)
     DafnyMemberDeserVisitor(
         GenerationContext context,
         PythonWriter writer,
-        Location bindingType,
         String dataSource,
-        MemberShape member,
-        Format defaultTimestampFormat
+        MemberShape member
     ) {
       this.context = context;
       this.writer = writer;
@@ -409,6 +451,21 @@ return $L(value=input.value.value)
     @Override
     public String blobShape(BlobShape shape) {
       return getDefault(shape);
+    }
+
+    @Override
+    public String structureShape(StructureShape shape) {
+      System.out.println("structureShape deser");
+      String out = "";
+      // TODO: Change fstring to support >1 shape
+      if (shape.getMemberNames().size() > 1) {
+        throw new UnsupportedOperationException("StructureShapes with >1 value not supported");
+      }
+      for (String memberName : shape.getMemberNames()) {
+        // TODO: Investigate what this should be... one of these is accessing a Wrappers_Compile...
+        out += "%1$s=%2$s.value.%1$s".formatted(memberName, dataSource);
+      }
+      return out;
     }
 
     @Override
