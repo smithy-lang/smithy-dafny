@@ -24,6 +24,7 @@ module {:options "/functionSyntax:4" }  StormTracker {
   import LocalCMC
   import Time
   import SortedSets
+  import Seq
 
   datatype CacheState =
     | EmptyWait // No data, client should wait
@@ -45,6 +46,7 @@ module {:options "/functionSyntax:4" }  StormTracker {
     var graceInterval : Types.PositiveLong // minimum seconds before putting the same key in flight again
     var fanOut : Types.PositiveLong // maximum keys in flight at one time
     var inFlightTTL : Types.PositiveLong // maximum time before a key is no longer in flight
+    var lastPrune : Types.PositiveLong // timestamp of last call to PruneInFlight
 
     constructor(
       entryCapacity: nat,
@@ -67,6 +69,7 @@ module {:options "/functionSyntax:4" }  StormTracker {
       this.graceInterval := graceInterval;
       this.fanOut := fanOut;
       this.inFlightTTL := inFlightTTL;
+      this.lastPrune := 0;
     }
 
     function InFlightSize() : Types.PositiveLong
@@ -78,6 +81,14 @@ module {:options "/functionSyntax:4" }  StormTracker {
         x as Types.PositiveLong
       else
         INT64_MAX_LIMIT as Types.PositiveLong
+    }
+
+    // return true if InFlight is full
+    method FanOutReached(now : Types.PositiveLong) returns (res : bool)
+      modifies this`lastPrune, inFlight
+    {
+      PruneInFlight(now);
+      return fanOut <= InFlightSize();
     }
 
     function AddLong(x : Types.PositiveLong, y : Types.PositiveLong) : Types.PositiveLong
@@ -92,9 +103,10 @@ module {:options "/functionSyntax:4" }  StormTracker {
     // and return cached value otherwise
     method CheckInFlight(identifier: seq<uint8>, result: Types.GetCacheEntryOutput, now : Types.PositiveLong)
       returns (output: CacheState)
-      modifies inFlight
+      modifies this`lastPrune, inFlight
     {
-      if fanOut <= InFlightSize() {
+      var fanOutReached := FanOutReached(now);
+      if fanOutReached {
         return Full(result);
       } else if result.expiryTime <= now { // expired? should be impossible
         output := CheckNewEntry(identifier, now);
@@ -114,27 +126,34 @@ module {:options "/functionSyntax:4" }  StormTracker {
 
     // If InFlight is at maximum, see if any entries are too old
     method PruneInFlight(now : Types.PositiveLong)
-      modifies inFlight
+      modifies this`lastPrune, inFlight
     {
-      if fanOut > InFlightSize() {
+      // We don't need to check more than once per second,
+      // because we would have already removed everything that expired in that second.
+      if fanOut > InFlightSize() || lastPrune == now {
         return;
       }
+      lastPrune := now;
       var keySet := inFlight.Keys();
       var keys := SortedSets.ComputeSetToSequence(keySet);
-      for i := 0 to |keys| {
+      for i := 0 to |keys|
+        invariant forall k | i <= k < |keys| :: keys[k] in inFlight.Keys()
+      {
+        reveal Seq.HasNoDuplicates();
         var v := inFlight.Select(keys[i]);
         if now >= AddLong(v, inFlightTTL) {
           inFlight.Remove(keys[i]);
-          return;
         }
       }
     }
+
     // If entry is not in cache, then return EmptyFetch once per second, and EmptyWait otherwise
     method CheckNewEntry(identifier: seq<uint8>, now : Types.PositiveLong)
       returns (output: CacheState)
-      modifies inFlight
+      modifies this`lastPrune, inFlight
     {
-      if fanOut <= InFlightSize() {
+      var fanOutReached := FanOutReached(now);
+      if fanOutReached {
         return EmptyWait;
       } else if inFlight.HasKey(identifier) {
         var entry := inFlight.Select(identifier);
@@ -150,13 +169,12 @@ module {:options "/functionSyntax:4" }  StormTracker {
     method GetFromCacheWithTime(input: Types.GetCacheEntryInput, now : Types.PositiveLong)
       returns (output: Result<CacheState, Types.Error>)
       requires ValidState()
-      modifies inFlight, wrapped.Modifies
+      modifies this`lastPrune, inFlight, wrapped.Modifies
       ensures ValidState()
       ensures inFlight == old(inFlight)
       ensures wrapped == old(wrapped)
       ensures wrapped.Modifies <= old(wrapped.Modifies)
     {
-      PruneInFlight(now);
       var result := wrapped.GetCacheEntryWithTime(input, now);
       if result.Success? {
         var newResult := CheckInFlight(input.identifier, result.value, now);
@@ -172,7 +190,7 @@ module {:options "/functionSyntax:4" }  StormTracker {
     method GetFromCache(input: Types.GetCacheEntryInput)
       returns (output: Result<CacheState, Types.Error>)
       requires ValidState()
-      modifies inFlight, wrapped.Modifies
+      modifies this`lastPrune, inFlight, wrapped.Modifies
       ensures ValidState()
       ensures inFlight == old(inFlight)
       ensures wrapped == old(wrapped)
@@ -188,7 +206,7 @@ module {:options "/functionSyntax:4" }  StormTracker {
     method GetCacheEntry(input: Types.GetCacheEntryInput)
       returns (output: Result<Types.GetCacheEntryOutput, Types.Error>)
       requires ValidState()
-      modifies inFlight, wrapped.Modifies
+      modifies this`lastPrune, inFlight, wrapped.Modifies
       ensures ValidState()
       ensures inFlight == old(inFlight)
       ensures wrapped == old(wrapped)
