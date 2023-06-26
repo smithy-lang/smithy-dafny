@@ -30,6 +30,9 @@
 **/bin
 **/obj
 
+# Python Artifacts
+**/runtimes/python/src/**.egg-info/
+
 # JetBrains
 **/.idea/
 **/Folder.DotSettings.user
