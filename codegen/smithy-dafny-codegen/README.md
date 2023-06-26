@@ -89,7 +89,7 @@ are as follows:
                 "edition": "2023",
                 "service": "smithy.example#ExampleService",
                 "targetLanguages": ["dotnet"],
-                "includeDafnyPath": "[relative]/[path]/[to]/StandardLibrary/src/Index.dfy"
+                "includeDafnyFile": "[relative]/[path]/[to]/StandardLibrary/src/Index.dfy"
             }
         }
     }
