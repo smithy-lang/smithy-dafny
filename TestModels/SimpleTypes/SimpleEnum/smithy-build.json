@@ -1,0 +1,11 @@
+{
+    "version": "1.0",
+    "plugins": {
+        "dafny-client-codegen": {
+            "service": "simple.types.smithyEnum#SimpleTypesEnum",
+            "module": "simple_enum",
+            "moduleVersion": "0.0.1",
+            "protocol": "aws.polymorph#localService"
+        }
+    }
+}

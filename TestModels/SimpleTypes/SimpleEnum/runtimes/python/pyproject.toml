@@ -1,0 +1,16 @@
+[project]
+name = "simple_enum"
+description = "simple_enum test package"
+version = "0.1.0"
+authors = [
+    { name = "AWS Crypto Tools", email = "aws-crypto-tools@amazon.com" }
+]
+
+[tool.poetry]
+packages = [
+    { include = "simple_enum", from = "src" },
+]
+
+[tool.poetry.dependencies]
+python = "^3.7"
+smithy_python = "^0.0.1"
