@@ -17,6 +17,7 @@ package software.amazon.polymorph.smithypython;
 
 import static software.amazon.smithy.model.traits.TimestampFormatTrait.Format;
 
+import java.util.Locale;
 import java.util.Set;
 import java.util.TreeSet;
 import software.amazon.smithy.codegen.core.CodegenException;
@@ -128,7 +129,7 @@ public abstract class DafnyProtocolGenerator implements ProtocolGenerator {
     String serviceName = serviceShape.getId().getName();
 
     // TODO: nameresolver
-    String typesModulePrelude = operation.getInputShape().getNamespace() + ".internaldafny.types";
+    String typesModulePrelude = operation.getInputShape().getNamespace().toLowerCase(Locale.ROOT) + ".internaldafny.types";
     String inputName = operation.getInputShape().getName();
     writer.addImport(typesModulePrelude, inputName + "_" + inputName, "Dafny" + inputName);
 
@@ -220,7 +221,7 @@ public abstract class DafnyProtocolGenerator implements ProtocolGenerator {
       writer.pushState(new ResponseDeserializerSection(operation));
 
       // TODO: nameresolver
-      String typesModulePrelude = operation.getOutputShape().getNamespace() + ".internaldafny.types";
+      String typesModulePrelude = operation.getOutputShape().getNamespace().toLowerCase(Locale.ROOT)  + ".internaldafny.types";
       String outputName = operation.getOutputShape().getName();
       writer.addImport(typesModulePrelude, outputName + "_" + outputName, "Dafny" + outputName);
 

@@ -18,6 +18,7 @@ package software.amazon.polymorph.smithypython;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.smithy.codegen.core.Symbol;
@@ -98,7 +99,7 @@ public final class DafnyIntegration implements PythonIntegration {
 
         // TODO: nameResolver
         String moduleName =  codegenContext.settings().getModuleName();
-        String implModulePrelude = serviceShape.getId().getNamespace() + ".internaldafny.impl";
+        String implModulePrelude = serviceShape.getId().getNamespace().toLowerCase(Locale.ROOT) + ".internaldafny.impl";
 
         // TODO: refactor to PluginFileWriter; do imports, etc. correctly
         // TODO: Naming of this file?
@@ -183,7 +184,7 @@ public final class DafnyIntegration implements PythonIntegration {
             );
         });
 
-        String typesModulePrelude = serviceShape.getId().getNamespace() + ".internaldafny.types";
+        String typesModulePrelude = serviceShape.getId().getNamespace().toLowerCase(Locale.ROOT) + ".internaldafny.types";
         // TODO: refactor to DafnyProtocolFileWriter
         // TODO: Naming of this file?
 
