@@ -250,28 +250,32 @@ return $L($L)
   public record ResponseDeserializerSection(OperationShape operation) implements CodeSection {}
 
   private void generateErrorResponseDeserializer(GenerationContext context, StructureShape error) {
-    throw new UnsupportedOperationException("Error generation not supported");
-//    var deserFunction = getErrorDeserializationFunction(context, error);
-//    var errorSymbol = context.symbolProvider().toSymbol(error);
-//    var delegator = context.writerDelegator();
-//    var transportResponse = context.applicationProtocol().responseType();
-//    var configSymbol = CodegenUtils.getConfigSymbol(context.settings());
-//
-//    delegator.useFileWriter(deserFunction.getDefinitionFile(), deserFunction.getNamespace(), writer -> {
-//      writer.pushState(new ErrorDeserializerSection(error));
-//      writer.addStdlibImport("typing", "Any");
-//      writer.write("""
-//                async def $L(
-//                    http_response: $T,
-//                    config: $T,
-//                    parsed_body: dict[str, Document]| None,
-//                    default_message: str,
-//                ) -> $T:
-//                    kwargs: dict[str, Any] = {"message": default_message}
-//
-//                """, deserFunction.getName(), transportResponse, configSymbol, errorSymbol);
-//      writer.popState();
-//    });
+//    throw new UnsupportedOperationException("Error generation not supported");
+    var deserFunction = getErrorDeserializationFunction(context, error);
+    var errorSymbol = context.symbolProvider().toSymbol(error);
+    var delegator = context.writerDelegator();
+    var transportResponse = context.applicationProtocol().responseType();
+    var configSymbol = CodegenUtils.getConfigSymbol(context.settings());
+
+    delegator.useFileWriter(deserFunction.getDefinitionFile(), deserFunction.getNamespace(), writer -> {
+      writer.pushState(new ErrorDeserializerSection(error));
+      writer.addStdlibImport("typing", "Any");
+      writer.write("""
+                # Need to convert Dafny types' Error_SimpleErrorsException to .models' SimpleErrorsException
+                # Actually! This is Wrappers_Compile.Failure(Error_SimpleErrorsException)
+                # so unwrapping it prolly looks like
+                # 
+                async def $L(
+                    http_response: $T,
+                    config: $T,
+                    parsed_body: dict[str, Document]| None,
+                    default_message: str,
+                ) -> $T:
+                    kwargs: dict[str, Any] = {"message": default_message}
+
+                """, deserFunction.getName(), transportResponse, configSymbol, errorSymbol);
+      writer.popState();
+    });
   }
 
   /**
