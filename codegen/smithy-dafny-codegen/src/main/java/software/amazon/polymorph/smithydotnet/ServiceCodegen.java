@@ -4,6 +4,7 @@
 package software.amazon.polymorph.smithydotnet;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Streams;
 import software.amazon.polymorph.smithydotnet.nativeWrapper.NativeWrapperCodegen;
 import software.amazon.polymorph.traits.ExtendableTrait;
 import software.amazon.polymorph.traits.PositionalTrait;
@@ -114,9 +115,8 @@ public class ServiceCodegen {
                     codeByPath.put(structureClassPath, structureCode.prepend(prelude));
                 });
 
-        // Enums
-        model.getStringShapesWithTrait(EnumTrait.class)
-                .stream()
+        // Enums (both string shapes as in Smithy IDL 1.0, and enum shapes as in 2.0)
+        Streams.concat(model.getEnumShapes().stream(), model.getStringShapesWithTrait(EnumTrait.class).stream())
                 .map(Shape::getId)
                 .filter(enumShapeId -> ModelUtils.isInServiceNamespace(enumShapeId, serviceShape))
                 .forEach(enumShapeId -> {
@@ -476,9 +476,9 @@ public class ServiceCodegen {
                 .orElse(Token.of("void"));
     }
 
-    private EnumTrait getAndValidateEnumTrait(final StringShape stringShape) {
-        final EnumTrait enumTrait = stringShape.getTrait(EnumTrait.class)
-                .orElseThrow(() -> new IllegalStateException("EnumTrait absent on provided string shape"));
+    private EnumTrait getAndValidateEnumTrait(final Shape shape) {
+        final EnumTrait enumTrait = shape.getTrait(EnumTrait.class)
+                .orElseThrow(() -> new IllegalStateException("EnumTrait absent on provided shape"));
         if (enumTrait.hasNames() && hasInvalidEnumNames(enumTrait)) {
             throw new IllegalStateException("Enum definition names must be uppercase alphanumeric and begin with a letter");
         }
@@ -495,11 +495,11 @@ public class ServiceCodegen {
      *
      * @return a class containing constants for the enum members
      */
-    public TokenTree generateEnumClass(final ShapeId stringShapeId) {
-        final StringShape stringShape = model.expectShape(stringShapeId, StringShape.class);
-        final EnumTrait enumTrait = getAndValidateEnumTrait(stringShape);
+    public TokenTree generateEnumClass(final ShapeId shapeId) {
+        final Shape shape = model.expectShape(shapeId);
+        final EnumTrait enumTrait = getAndValidateEnumTrait(shape);
 
-        final String enumClassName = nameResolver.classForEnum(stringShapeId);
+        final String enumClassName = nameResolver.classForEnum(shapeId);
         final String enumValueTypeName = enumTrait.hasNames() ? enumClassName : "string";
         final TokenTree namedEnumValues = enumTrait.hasNames()
                 ? generateNamedEnumValues(enumTrait, enumClassName)
