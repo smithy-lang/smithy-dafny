@@ -286,7 +286,7 @@ public class ServiceCodegen {
         return TokenTree.of(
                 Token.of("private"),
                 typeToken,
-                Token.of(nameResolver.classFieldForStructureMember(memberShape)),
+                Token.of("_%s".formatted(nameResolver.classFieldForStructureMember(memberShape))),
                 Token.of(';'));
     }
 
@@ -300,8 +300,8 @@ public class ServiceCodegen {
         final boolean isValueType = nameResolver.isValueType(memberShape.getTarget());
         final String unwrapValue = isValueType ? ".GetValueOrDefault()" : "";
 
-        final TokenTree getter = Token.of("get { return this.%s%s; }".formatted(fieldName, unwrapValue));
-        final TokenTree setter = Token.of("set { this.%s = value; }".formatted(fieldName));
+        final TokenTree getter = Token.of("get { return this._%s%s; }".formatted(fieldName, unwrapValue));
+        final TokenTree setter = Token.of("set { this._%s = value; }".formatted(fieldName));
 
         final String type = nameResolver.classPropertyTypeForStructureMember(memberShape);
         final String propertyName = nameResolver.classPropertyForStructureMember(memberShape);
@@ -314,19 +314,19 @@ public class ServiceCodegen {
      * @return IsSet method for either reference types or value types
      */
     private TokenTree generateIsSetStructureClassProperty(final MemberShape memberShape) {
-        final String methodName = nameResolver.isSetMethodForStructureMember(memberShape);
+        final String methodName = nameResolver.isSetForStructureMember(memberShape);
         TokenTree body;
         if (nameResolver.isValueType(memberShape.getTarget())) {
-            body = TokenTree.of("return this.%s.HasValue;".formatted(
+            body = TokenTree.of("return this._%s.HasValue;".formatted(
                     nameResolver.classFieldForStructureMember(memberShape)));
         } else {
-            body = TokenTree.of("return this.%s != null;".formatted(
+            body = TokenTree.of("return this._%s != null;".formatted(
                     nameResolver.classFieldForStructureMember(memberShape)));
         }
         // The correctness of these types are improved by making this public
         // Then customers in native runtimes can use these methods to integrate
         // the state of this structure
-        return TokenTree.of("public bool", methodName, "()").append(body.braced());
+        return TokenTree.of("public bool", methodName).append(body.braced());
     }
 
     /**
@@ -349,10 +349,10 @@ public class ServiceCodegen {
         final TokenTree checks = TokenTree.of(ModelUtils.streamStructureMembers(structureShape)
                 .filter(MemberShape::isRequired)
                 .map(memberShape -> {
-                    final String isSetMethod = nameResolver.isSetMethodForStructureMember(memberShape);
+                    final String isSetMethod = nameResolver.isSetForStructureMember(memberShape);
                     final String propertyName = nameResolver.classPropertyForStructureMember(memberShape);
                     return Token.of("""
-                            if (!%s()) throw new System.ArgumentException("Missing value for required property '%s'");
+                            if (!%s) throw new System.ArgumentException("Missing value for required property '%s'");
                             """.formatted(isSetMethod, propertyName));
                 })).braced();
 
@@ -366,8 +366,8 @@ public class ServiceCodegen {
                 .of("var numberOfPropertiesSet =")
                 .append(TokenTree
                         .of( ModelUtils.streamUnionMembers(unionShape)
-                                .map(memberShape -> nameResolver.isSetMethodForStructureMember(memberShape))
-                                .map(isSet -> TokenTree.of("Convert.ToUInt16(%s())".formatted(isSet))))
+                                .map(nameResolver::isSetForStructureMember)
+                                .map(isSet -> TokenTree.of("Convert.ToUInt16(%s)".formatted(isSet))))
                         .separated(Token.of("+\n")))
                 .append(Token.of(";"));
 

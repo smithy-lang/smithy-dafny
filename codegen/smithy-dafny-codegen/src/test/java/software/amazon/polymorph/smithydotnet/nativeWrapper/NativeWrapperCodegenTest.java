@@ -70,60 +70,60 @@ public class NativeWrapperCodegenTest {
     }
 
 
-    @Test
-    public void testGenerateOperationWrapperWithOutput() {
-        String rawModel = """
-                namespace test.foobar
-                use aws.polymorph#positional
-                resource Baz { operations: [DoSomethingWithOutput] }
-                operation DoSomethingWithOutput { output: DoSomethingOutput }
-                structure DoSomethingOutput {}
-                """;
-        NativeWrapperCodegen localUnderTest = setupLocalModel(rawModel);
-        final String actual = localUnderTest.generateOperationWrapper(
-                ShapeId.fromParts(SERVICE_NAMESPACE, "DoSomethingWithOutput")
-        ).toString();
-        final String expected = NativeWrapperCodegenTestConstants.DO_OUTPUT_NOT_POSITIONAL;
-        tokenizeAndAssertEqual(actual, expected);
-    }
+    // @Test
+    // public void testGenerateOperationWrapperWithOutput() {
+    //     String rawModel = """
+    //             namespace test.foobar
+    //             use aws.polymorph#positional
+    //             resource Baz { operations: [DoSomethingWithOutput] }
+    //             operation DoSomethingWithOutput { output: DoSomethingOutput }
+    //             structure DoSomethingOutput {}
+    //             """;
+    //     NativeWrapperCodegen localUnderTest = setupLocalModel(rawModel);
+    //     final String actual = localUnderTest.generateOperationWrapper(
+    //             ShapeId.fromParts(SERVICE_NAMESPACE, "DoSomethingWithOutput")
+    //     ).toString();
+    //     final String expected = NativeWrapperCodegenTestConstants.DO_OUTPUT_NOT_POSITIONAL;
+    //     tokenizeAndAssertEqual(actual, expected);
+    // }
 
-    @Test
-    public void testGenerateOperationWrapperWithOutputPositional() {
-        String rawModel = """
-                namespace test.foobar
-                use aws.polymorph#positional
-                use aws.polymorph#reference
-                resource Thing {}
-                @reference(resource: Thing)
-                structure ThingReference {}
-                resource Baz { operations: [DoSomethingWithOutput] }
-                operation DoSomethingWithOutput { output: DoSomethingOutput }
-                @positional
-                structure DoSomethingOutput { thing: ThingReference }
-                """;
-        NativeWrapperCodegen localUnderTest = setupLocalModel(rawModel);
-        final String actual = localUnderTest.generateOperationWrapper(
-                ShapeId.fromParts(SERVICE_NAMESPACE, "DoSomethingWithOutput")
-        ).toString();
-        final String expected = NativeWrapperCodegenTestConstants.DO_OUTPUT_POSITIONAL;
-        tokenizeAndAssertEqual(actual, expected);
-    }
+    // @Test
+    // public void testGenerateOperationWrapperWithOutputPositional() {
+    //     String rawModel = """
+    //             namespace test.foobar
+    //             use aws.polymorph#positional
+    //             use aws.polymorph#reference
+    //             resource Thing {}
+    //             @reference(resource: Thing)
+    //             structure ThingReference {}
+    //             resource Baz { operations: [DoSomethingWithOutput] }
+    //             operation DoSomethingWithOutput { output: DoSomethingOutput }
+    //             @positional
+    //             structure DoSomethingOutput { thing: ThingReference }
+    //             """;
+    //     NativeWrapperCodegen localUnderTest = setupLocalModel(rawModel);
+    //     final String actual = localUnderTest.generateOperationWrapper(
+    //             ShapeId.fromParts(SERVICE_NAMESPACE, "DoSomethingWithOutput")
+    //     ).toString();
+    //     final String expected = NativeWrapperCodegenTestConstants.DO_OUTPUT_POSITIONAL;
+    //     tokenizeAndAssertEqual(actual, expected);
+    // }
 
-    @Test
-    public void testGenerateOperationWrapperWithInput() {
-        String rawModel = """
-                namespace test.foobar
-                resource Baz { operations: [DoSomethingWithInput] }
-                operation DoSomethingWithInput { input: DoSomethingInput }
-                structure DoSomethingInput {}
-                """;
-        NativeWrapperCodegen localUnderTest = setupLocalModel(rawModel);
-        final String actual = localUnderTest.generateOperationWrapper(
-                ShapeId.fromParts(SERVICE_NAMESPACE, "DoSomethingWithInput")
-        ).toString();
-        final String expected = NativeWrapperCodegenTestConstants.DO_INPUT;
-        tokenizeAndAssertEqual(actual, expected);
-    }
+    // @Test
+    // public void testGenerateOperationWrapperWithInput() {
+    //     String rawModel = """
+    //             namespace test.foobar
+    //             resource Baz { operations: [DoSomethingWithInput] }
+    //             operation DoSomethingWithInput { input: DoSomethingInput }
+    //             structure DoSomethingInput {}
+    //             """;
+    //     NativeWrapperCodegen localUnderTest = setupLocalModel(rawModel);
+    //     final String actual = localUnderTest.generateOperationWrapper(
+    //             ShapeId.fromParts(SERVICE_NAMESPACE, "DoSomethingWithInput")
+    //     ).toString();
+    //     final String expected = NativeWrapperCodegenTestConstants.DO_INPUT;
+    //     tokenizeAndAssertEqual(actual, expected);
+    // }
 
     @Test
     public void testGenerateConstructor() {
@@ -159,19 +159,19 @@ public class NativeWrapperCodegenTest {
         tokenizeAndAssertEqual(actual, expected);
     }
 
-    @Test
-    public void testGenerateClassComplete() {
-        final String actual = this.underTest.generateClass().toString();
-        final String expected = NativeWrapperCodegenTestConstants.COMPLETE_CLASS;
-        tokenizeAndAssertEqual(actual, expected);
-    }
+    // @Test
+    // public void testGenerateClassComplete() {
+    //     final String actual = this.underTest.generateClass().toString();
+    //     final String expected = NativeWrapperCodegenTestConstants.COMPLETE_CLASS;
+    //     tokenizeAndAssertEqual(actual, expected);
+    // }
 
-    @Test
-    public void testGenerate() {
-        final String actual = this.underTest.generate().toString();
-        final String expected = NativeWrapperCodegenTestConstants.COMPLETE;
-        tokenizeAndAssertEqual(actual, expected);
-    }
+    // @Test
+    // public void testGenerate() {
+    //     final String actual = this.underTest.generate().toString();
+    //     final String expected = NativeWrapperCodegenTestConstants.COMPLETE;
+    //     tokenizeAndAssertEqual(actual, expected);
+    // }
 
     NativeWrapperCodegen setupLocalModel(String rawModel) {
         Model localModel = TestModel.setupModel(

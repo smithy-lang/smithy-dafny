@@ -5,6 +5,9 @@ package software.amazon.polymorph.smithydotnet;
 
 import com.google.common.annotations.VisibleForTesting;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -14,19 +17,18 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
+import software.amazon.polymorph.smithydafny.DafnyApiCodegen;
 import software.amazon.polymorph.smithydafny.DafnyNameResolver;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.polymorph.traits.ExtendableTrait;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
-import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.polymorph.utils.Token;
 import software.amazon.polymorph.utils.TokenTree;
@@ -36,10 +38,14 @@ import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.utils.StringUtils;
 
+import static software.amazon.polymorph.utils.SmithyConstants.SMITHY_API_NAMESPACE;
 import static software.amazon.polymorph.smithydotnet.DotNetNameResolver.TYPE_CONVERSION_CLASS_NAME;
+import static software.amazon.polymorph.smithydotnet.DotNetNameResolver.qualifiedTypeConverter;
 import static software.amazon.polymorph.smithydotnet.DotNetNameResolver.typeConverterForShape;
 import static software.amazon.polymorph.smithydotnet.TypeConversionDirection.FROM_DAFNY;
 import static software.amazon.polymorph.smithydotnet.TypeConversionDirection.TO_DAFNY;
+import static software.amazon.polymorph.utils.DafnyNameResolverHelpers.dafnyCompilesExtra_;
+import static software.amazon.polymorph.utils.ModelUtils.isInServiceNamespace;
 
 /**
  * Generates a {@code TypeConversion} class that includes all {@link TypeConverter}s needed for the operations in the
@@ -47,6 +53,10 @@ import static software.amazon.polymorph.smithydotnet.TypeConversionDirection.TO_
  */
 public class TypeConversionCodegen {
     public static final String C_SHARP_SYSTEM_EXCEPTION = "System.Exception";
+    public static final String DEFAULT_VISIBILITY = "public";
+
+    @SuppressWarnings("unused")
+    private static final Logger LOGGER = LoggerFactory.getLogger(TypeConversionCodegen.class);
 
     /**
      * A pair of type converter methods that converts between the compiled Dafny representation and the idiomatic C#
@@ -83,6 +93,8 @@ public class TypeConversionCodegen {
                 );
         final Stream<TypeConverter> modeledConverters = findShapeIdsToConvert()
                 .stream()
+                 // TODO: once we have a conversion library, remove SMITHY_API_NAMESPACE
+                 .filter(shapeId -> (isInServiceNamespace(shapeId, serviceShape) | shapeId.getNamespace().equals(SMITHY_API_NAMESPACE)))
                 .map(model::expectShape)
                 .map(this::generateConverter);
         final Stream<TypeConverter> unmodeledConverters = generateUnmodeledConverters();
@@ -114,91 +126,17 @@ public class TypeConversionCodegen {
     }
 
     /**
-     * Returns a set of shape IDs for which to start generating type converter pairs, by recursively traversing
-     * services, resources, and operations defined in the model.
-     * <p>
-     * Since type converters are only necessary when calling API operations, it suffices to find the shape IDs of:
-     * <ul>
-     *     <li>operation input and output structures</li>
-     *     <li>client configuration structures</li>
-     *     <li>specific (modeled) error structures</li>
-     * </ul>
+     * Let {@link DafnyApiCodegen#getShapes} determine what to generate.
      */
     private Set<ShapeId> findInitialShapeIdsToConvert() {
-        // Collect services
-        final Set<ServiceShape> serviceShapes = model.getServiceShapes().stream()
-                .filter(serviceShape -> isInServiceNamespace(serviceShape.getId()))
-                .collect(Collectors.toSet());
-
-        // Collect resources defined in model...
-        final Stream<ResourceShape> topLevelResourceShapes = model.getResourceShapes().stream()
-                .filter(resourceShape -> isInServiceNamespace(resourceShape.getId()));
-        // ... and resources of collected services.
-        final Stream<ResourceShape> serviceResourceShapes = serviceShapes.stream()
-                .flatMap(serviceShape -> serviceShape.getResources().stream())
-                .map(resourceShapeId -> model.expectShape(resourceShapeId, ResourceShape.class));
-        final Set<ResourceShape> resourceShapes = Stream.concat(topLevelResourceShapes, serviceResourceShapes)
-                .collect(Collectors.toSet());
-
-        // Collect operations defined in model...
-        final Stream<OperationShape> topLevelOperationShapes = model.getOperationShapes().stream()
-                .filter(operationShape -> isInServiceNamespace(operationShape.getId()));
-        // ... and operations of collected services...
-        final Stream<OperationShape> serviceOperationShapes = serviceShapes.stream()
-                .flatMap(serviceShape -> serviceShape.getAllOperations().stream())
-                .map(operationShapeId -> model.expectShape(operationShapeId, OperationShape.class));
-        // ... and operations of collected resources.
-        final Stream<OperationShape> resourceOperationShapes = resourceShapes.stream()
-                .flatMap(resourceShape -> resourceShape.getAllOperations().stream())
-                .map(operationShapeId -> model.expectShape(operationShapeId, OperationShape.class));
-        final Set<OperationShape> operationShapes = Stream
-                .of(topLevelOperationShapes, serviceOperationShapes, resourceOperationShapes)
-                .flatMap(Function.identity())
-                .collect(Collectors.toSet());
-        // Collect inputs/output structures for collected operations
-        final Set<ShapeId> operationStructures = operationShapes.stream()
-                .flatMap(operationShape -> Stream
-                        .of(operationShape.getInput(), operationShape.getOutput())
-                        .flatMap(Optional::stream))
-                .collect(Collectors.toSet());
-        // Collect service client config structures
-        final Set<ShapeId> clientConfigStructures = serviceShapes.stream()
-                .map(serviceShape -> serviceShape.getTrait(LocalServiceTrait.class))
-                .flatMap(Optional::stream)
-                .map(LocalServiceTrait::getConfigId)
-                .collect(Collectors.toSet());
-
-        // Collect union shapes
-        final Set<ShapeId> unionShapes = model.getUnionShapes().stream()
-                .filter(unionShape -> isInServiceNamespace(unionShape.getId()))
-                .map(unionShape -> unionShape.getId())
-                .collect(Collectors.toSet());
-
-        // TODO add smithy v2 Enums
-        // Collect enum shapes
-        final Set<ShapeId> enumShapes = model.getStringShapes().stream()
-                .filter(stringShape -> isInServiceNamespace(stringShape.getId()))
-                .filter(stringShape -> stringShape.hasTrait(EnumTrait.class))
-                .map(stringShape -> stringShape.getId())
-                .collect(Collectors.toSet());
-
-        // Collect all specific error structures
-        final Set<ShapeId> errorStructures = ModelUtils.streamServiceErrors(model, serviceShape)
-                .map(Shape::getId)
-                .collect(Collectors.toSet());
-
-        // Collect into TreeSet so that we generate code in a deterministic order (lexicographic, in particular)
-        final TreeSet<ShapeId> orderedSet = new TreeSet<ShapeId>();
-        orderedSet.addAll(operationStructures);
-        orderedSet.addAll(clientConfigStructures);
-        orderedSet.addAll(unionShapes);
-        orderedSet.addAll(errorStructures);
-        orderedSet.addAll(enumShapes);
-        return orderedSet;
-    }
-
-    private boolean isInServiceNamespace(final ShapeId shapeId) {
-        return shapeId.getNamespace().equals(serviceShape.getId().getNamespace());
+        return DafnyApiCodegen.getShapes(model, serviceShape)
+          .stream()
+          .filter(shape -> !shape.isOperationShape())
+          .filter(shape -> !shape.isServiceShape())
+          .filter(shape -> !shape.isResourceShape())
+          .map(Shape::toShapeId)
+          // Sort by shape ID for deterministic generated code
+          .collect(Collectors.toCollection(TreeSet::new));
     }
 
     /**
@@ -293,8 +231,8 @@ public class TypeConversionCodegen {
         final String memberDafnyType = nameResolver.dafnyTypeForShape(memberShape.getId());
         final String memberCSharpType = nameResolver.baseTypeForMember(memberShape);;
 
-        final String memberToDafnyConverterName = typeConverterForShape(memberShape.getId(), TO_DAFNY);
-        final String memberFromDafnyConverterName = typeConverterForShape(memberShape.getId(), FROM_DAFNY);
+        final String memberToDafnyConverterName = memberConverterName(memberShape, TO_DAFNY);
+        final String memberFromDafnyConverterName = memberConverterName(memberShape, FROM_DAFNY);
 
         final boolean convertMemberEnumToString = enumListAndMapMembersAreStringsInCSharp()
             && model.expectShape(memberShape.getTarget()).hasTrait(EnumTrait.class);
@@ -326,10 +264,10 @@ public class TypeConversionCodegen {
         final String keyDafnyType = nameResolver.dafnyTypeForShape(keyShape.getId());
         final String valueDafnyType = nameResolver.dafnyTypeForShape(valueShape.getId());
 
-        final String keyToDafnyConverterName = typeConverterForShape(keyShape.getId(), TO_DAFNY);
-        final String keyFromDafnyConverterName = typeConverterForShape(keyShape.getId(), FROM_DAFNY);
-        final String valueToDafnyConverterName = typeConverterForShape(valueShape.getId(), TO_DAFNY);
-        final String valueFromDafnyConverterName = typeConverterForShape(valueShape.getId(), FROM_DAFNY);
+        final String keyToDafnyConverterName = memberConverterName(keyShape, TO_DAFNY);
+        final String keyFromDafnyConverterName = memberConverterName(keyShape, FROM_DAFNY);
+        final String valueToDafnyConverterName = memberConverterName(valueShape, TO_DAFNY);
+        final String valueFromDafnyConverterName = memberConverterName(valueShape, FROM_DAFNY);
 
         final boolean convertKeyEnumToString = enumListAndMapMembersAreStringsInCSharp()
                 && model.expectShape(keyShape.getTarget()).hasTrait(EnumTrait.class);
@@ -353,6 +291,13 @@ public class TypeConversionCodegen {
                            keyToDafnyConverterName,
                            valueToDafnyConverterName));
         return buildConverterFromMethodBodies(mapShape, fromDafnyBody, toDafnyBody);
+    }
+
+    private String memberConverterName(MemberShape memberShape, TypeConversionDirection direction) {
+        return
+          (isInServiceNamespace(memberShape.getTarget(), serviceShape) | (memberShape.getTarget().getNamespace().equals(SMITHY_API_NAMESPACE))) ?
+          typeConverterForShape(memberShape.getTarget(), direction) :
+          qualifiedTypeConverter(memberShape.getTarget(), direction);
     }
 
     public TypeConverter generateStructureConverter(final StructureShape structureShape) {
@@ -381,54 +326,25 @@ public class TypeConversionCodegen {
         final TokenTree concreteVar = Token.of("%1$s concrete = (%1$s)value;".formatted(
                 nameResolver.dafnyConcreteTypeForRegularStructure(structureShape)));
         final TokenTree assignments = TokenTree.of(ModelUtils.streamStructureMembers(structureShape)
-                .map(memberShape -> {
-                    final String dafnyMemberName = DotNetNameResolver.memberName(memberShape);
-                    final String propertyName = nameResolver.classPropertyForStructureMember(memberShape);
-                    final String propertyType;
-                    if (StringUtils.equals(nameResolver.classPropertyTypeForStructureMember(memberShape),
-                            AwsSdkDotNetNameResolver.DDB_ATTRIBUTE_VALUE_MODEL_NAMESPACE)) {
-                        propertyType = AwsSdkDotNetNameResolver.DDB_V2_ATTRIBUTE_VALUE;
-                    } else {
-                        propertyType = nameResolver.classPropertyTypeForStructureMember(memberShape);
-                    }
-                    final String memberFromDafnyConverterName = typeConverterForShape(
-                            memberShape.getId(), FROM_DAFNY);
-
-                    final TokenTree checkIfPresent;
-                    if (nameResolver.memberShapeIsOptional(memberShape)) {
-                        checkIfPresent = Token.of("if (concrete.%s.is_Some)".formatted(dafnyMemberName));
-                    } else {
-                        checkIfPresent = TokenTree.empty();
-                    }
-                    // SizeEstimateRangeGb requires a list of double instead of the generated int list
-                    final TokenTree assign;
-                    if (StringUtils.equals(dafnyMemberName, "_SizeEstimateRangeGB")) {
-                        assign = Token.of("converted.%s = %s(concrete.%s).Select(i => (double) i).ToList();".formatted(
-                                propertyName, memberFromDafnyConverterName, dafnyMemberName));
-                    } else {
-                        assign = Token.of("converted.%s = (%s) %s(concrete.%s);".formatted(
-                                propertyName, propertyType, memberFromDafnyConverterName, dafnyMemberName));
-                    }
-                    return TokenTree.of(checkIfPresent, assign);
-                })).lineSeparated();
+                .map(this::structureMemberFromDafny)).lineSeparated();
         final String structureType = nameResolver.baseTypeForShape(structureShape.getId());
         final TokenTree fromDafnyBody = TokenTree.of(
                 concreteVar,
                 Token.of("%1$s converted = new %1$s();".formatted(structureType)),
                 assignments,
                 Token.of("return converted;")
-        );
+        ).lineSeparated();
 
         final TokenTree isSetTernaries = TokenTree.of(
                 ModelUtils.streamStructureMembers(structureShape)
                         .filter(nameResolver::memberShapeIsOptional)
-                        .map(this::generateExtractOptionalMember)
+                        .map(this::generateExtractOptionalMemberToDafny)
         ).lineSeparated();
 
         final TokenTree constructorArgs = TokenTree.of(ModelUtils.streamStructureMembers(structureShape)
                 .map(this::generateConstructorArg)
                 .map(Token::of)
-        ).separated(Token.of(','));
+        ).separated(Token.of(",\n"));
         final TokenTree constructor = TokenTree.of(
                 TokenTree.of("return new"),
                 TokenTree.of(nameResolver.dafnyConcreteTypeForRegularStructure(structureShape)),
@@ -443,6 +359,39 @@ public class TypeConversionCodegen {
         return buildConverterFromMethodBodies(structureShape, fromDafnyBody, toDafnyBody);
     }
 
+    private TokenTree structureMemberFromDafny(MemberShape memberShape) {
+        final String dafnyMemberName = DotNetNameResolver.memberName(memberShape);
+        final String propertyName = nameResolver.classPropertyForStructureMember(memberShape);
+        final String propertyType;
+        if (StringUtils.equals(nameResolver.classPropertyTypeForStructureMember(memberShape),
+                AwsSdkDotNetNameResolver.DDB_ATTRIBUTE_VALUE_MODEL_NAMESPACE)) {
+            propertyType = AwsSdkDotNetNameResolver.DDB_V2_ATTRIBUTE_VALUE;
+        } else {
+            propertyType = nameResolver.classPropertyTypeForStructureMember(memberShape);
+        }
+        final String memberFromDafnyConverterName = memberConverterName(memberShape, FROM_DAFNY);
+
+        final TokenTree checkIfPresent;
+        final String dafnyValue;
+        if (nameResolver.memberShapeIsOptional(memberShape)) {
+            checkIfPresent = Token.of("if (concrete.%s.is_Some)".formatted(dafnyMemberName));
+            dafnyValue = "concrete.%s.dtor_value".formatted(dafnyMemberName);
+        } else {
+            checkIfPresent = TokenTree.empty();
+            dafnyValue = "concrete.%s".formatted(dafnyMemberName);
+        }
+        // SizeEstimateRangeGb requires a list of double instead of the generated int list
+        final TokenTree assign;
+        if (StringUtils.equals(dafnyMemberName, "_SizeEstimateRangeGB")) {
+            assign = Token.of("converted.%s = %s(%s).Select(i => (double) i).ToList();".formatted(
+                    propertyName, memberFromDafnyConverterName, dafnyValue));
+        } else {
+            assign = Token.of("converted.%s = (%s) %s(%s);".formatted(
+                    propertyName, propertyType, memberFromDafnyConverterName, dafnyValue));
+        }
+        return TokenTree.of(checkIfPresent, assign);
+    }
+
     /**
      * Returns either:
      * "ToDafny_memberShape(value.PropertyName)"
@@ -451,45 +400,48 @@ public class TypeConversionCodegen {
      */
     private String generateConstructorArg(final MemberShape memberShape) {
         if (nameResolver.memberShapeIsOptional(memberShape)) {
-            return "%s(%s)".formatted(
-                    typeConverterForShape(memberShape.getId(), TO_DAFNY),
+            return "%s".formatted(
                     nameResolver.variableNameForClassProperty(memberShape));
         }
         if (StringUtils.equals(nameResolver.classPropertyForStructureMember(memberShape), "TargetValue")) {
+            // TODO: This looks wildly dangerous!!
             // value.TargetValue returns a double, the Api constructor needs is an int
             return "%s((int)value.%s)".formatted(
-                    typeConverterForShape(memberShape.getId(), TO_DAFNY),
+                    memberConverterName(memberShape, TO_DAFNY),
                     nameResolver.classPropertyForStructureMember(memberShape));
         }
         return "%s(value.%s)".formatted(
-                typeConverterForShape(memberShape.getId(), TO_DAFNY),
+                memberConverterName(memberShape, TO_DAFNY),
                 nameResolver.classPropertyForStructureMember(memberShape));
     }
 
     /**
      * Returns:
-     * "type varName = value.IsSetPropertyName() ? value.PropertyName : (type) null;"
+     * "Wrappers_Compile._IOption(dafnyType) varName = value.IsSetPropertyName() ? new Option_Some(ToDafny(value.PropertyName)) : new Option_None();"
      */
-    public TokenTree generateExtractOptionalMember(final MemberShape memberShape) {
-        final String type = nameResolver.baseTypeForShape(memberShape.getId());
+    public TokenTree generateExtractOptionalMemberToDafny(final MemberShape memberShape) {
+        final String optionType = nameResolver.dafnyTypeForShape(memberShape.getId());
+        final String baseType = nameResolver.dafnyTypeForShape(memberShape.getTarget());
+        final String asSome = "new Wrappers_Compile.Option_Some<%s>".formatted(baseType);
+        final String asNone = "new Wrappers_Compile.Option_None<%s>".formatted(baseType);
+        final String convertToDafny = memberConverterName(memberShape, TO_DAFNY);
         final String varName = nameResolver.variableNameForClassProperty(memberShape);
-        final String isSetMethod = nameResolver.isSetMethodForStructureMember(memberShape);
+        final String isSetMethod = nameResolver.isSetForStructureMember(memberShape);
         final String propertyName = nameResolver.classPropertyForStructureMember(memberShape);
         return TokenTree.of(
-                type,
+                optionType,
                 varName,
-                "= value.%s()".formatted(isSetMethod),
-                "? value.%s :".formatted(propertyName),
-                "(%s) null;".formatted(type)
+                "=\n\tvalue.%s ?\n".formatted(isSetMethod),
+                "\t%s(%s(value.%s))\n".formatted(asSome, convertToDafny, propertyName),
+                "\t: %s();".formatted(asNone)
         );
     }
 
     public TypeConverter generateMemberConverter(final MemberShape memberShape) {
         final Shape targetShape = model.expectShape(memberShape.getTarget());
 
-        final String targetFromDafnyConverterName = typeConverterForShape(targetShape.getId(), FROM_DAFNY);
-        final String targetToDafnyConverterName = typeConverterForShape(targetShape.getId(), TO_DAFNY);
-
+        final String targetFromDafnyConverterName = memberConverterName(memberShape, FROM_DAFNY);
+        final String targetToDafnyConverterName = memberConverterName(memberShape, TO_DAFNY);
         if (!nameResolver.memberShapeIsOptional(memberShape)) {
             final TokenTree fromDafnyBody = Token.of("return %s(value);".formatted(targetFromDafnyConverterName));
             final TokenTree toDafnyBody = Token.of("return %s(value);".formatted(targetToDafnyConverterName));
@@ -547,19 +499,13 @@ public class TypeConversionCodegen {
                 .stream()
                 .map(memberShape -> {
                     final String propertyName = nameResolver.classPropertyForStructureMember(memberShape);
-                    final String memberFromDafnyConverterName = typeConverterForShape(
-                            memberShape.getId(), FROM_DAFNY);
-                    final String destructorValue;
-                    if (StringUtils.equals(memberShape.getId().getName(), "AttributeValue")) {
-                        destructorValue = nameResolver.classPropertyForStructureMember(memberShape);
-                    } else {
-                        destructorValue = DafnyNameResolverHelpers.dafnyCompilesExtra_(memberShape.getMemberName());
-                    }
+                    final String memberFromDafnyConverterName = memberConverterName(memberShape, FROM_DAFNY);
+                    final String destructorValue = getDestructorValue(memberShape);
                     return TokenTree
-                            .of("if (value.is_%s)".formatted(propertyName))
+                            .of("if (value.is_%s)".formatted(dafnyCompilesExtra_(nameResolver.classFieldForStructureMember(memberShape))))
                             .append(TokenTree
                                     .of(
-                                            "converted.%s = %s(concrete.dtor_%s);"
+                                            "converted.%s = %s(concrete.%s);"
                                                     .formatted(
                                                             propertyName,
                                                             memberFromDafnyConverterName,
@@ -580,8 +526,7 @@ public class TypeConversionCodegen {
                     final String propertyName = nameResolver.classPropertyForStructureMember(memberShape);
                     final String propertyType = nameResolver.classPropertyTypeForStructureMember(memberShape);
                     final String dafnyMemberName = nameResolver.unionMemberName(memberShape);
-                    final String memberFromDafnyConverterName = typeConverterForShape(
-                            memberShape.getId(), TO_DAFNY);
+                    final String memberFromDafnyConverterName = memberConverterName(memberShape, TO_DAFNY);
                     // Dafny generates just "create" instead of "create_FOOBAR" if there's only one ctor
                     String createSuffixUnMod = defNames.size() == 1
                             ? ""
@@ -649,6 +594,16 @@ public class TypeConversionCodegen {
                 .append(throwInvalidUnionState);
 
         return buildConverterFromMethodBodies(unionShape, fromDafnyBody, toDafnyBody);
+    }
+
+    private String getDestructorValue(MemberShape memberShape) {
+        final String destructorValue;
+        if (StringUtils.equals(memberShape.getId().getName(), "AttributeValue")) {
+            destructorValue = nameResolver.classPropertyForStructureMember(memberShape);
+        } else {
+            destructorValue = dafnyCompilesExtra_(memberShape.getMemberName());
+        }
+        return "dtor_%s".formatted(destructorValue);
     }
 
     /**
@@ -776,9 +731,9 @@ public class TypeConversionCodegen {
      */
     private TypeConverter generatePositionalStructureConverter(final StructureShape structureShape) {
         final ShapeId memberShapeId = ModelUtils.getPositionalStructureMember(structureShape).orElseThrow();
-
-        final String memberFromDafnyConverterName = typeConverterForShape(memberShapeId, FROM_DAFNY);
-        final String memberToDafnyConverterName = typeConverterForShape(memberShapeId, TO_DAFNY);
+        final MemberShape memberShape = model.expectShape(memberShapeId, MemberShape.class);
+        final String memberFromDafnyConverterName = memberConverterName(memberShape, FROM_DAFNY);
+        final String memberToDafnyConverterName = memberConverterName(memberShape, TO_DAFNY);
         final TokenTree fromDafnyBody = Token.of("return %s(value);".formatted(memberFromDafnyConverterName));
         final TokenTree toDafnyBody = Token.of("return %s(value);".formatted(memberToDafnyConverterName));
 
@@ -1199,7 +1154,7 @@ public class TypeConversionCodegen {
             ModelUtils
               .streamStructureMembers(errorShape)
               .filter(nameResolver::memberShapeIsOptional)
-              .map(this::generateExtractOptionalMember))
+              .map(this::generateExtractOptionalMemberToDafny))
           .lineSeparated();
         final TokenTree toDafnyConstructorArgs = TokenTree
           .of(ModelUtils
@@ -1280,17 +1235,13 @@ public class TypeConversionCodegen {
         final boolean isDependantModuleType = ModelUtils.isReferenceDependantModuleType(shape,
             nameResolver.namespaceForService());
 
-        final String visibility = shape.hasTrait(ReferenceTrait.class) && !isDependantModuleType
-                ? "public"
-                : "internal";
-
         final String fromDafnyConverterName = typeConverterForShape(id, FROM_DAFNY);
         final TokenTree fromDafnyConverterSignature = TokenTree.of(
-                "%s static".formatted(visibility), cSharpType, fromDafnyConverterName, "(%s value)".formatted(dafnyType));
+                "%s static".formatted(DEFAULT_VISIBILITY), cSharpType, fromDafnyConverterName, "(%s value)".formatted(dafnyType));
 
         final String toDafnyConverterName = typeConverterForShape(id, TO_DAFNY);
         final TokenTree toDafnyConverterSignature = TokenTree.of(
-                "%s static".formatted(visibility), dafnyType, toDafnyConverterName, "(%s value)".formatted(cSharpType));
+                "%s static".formatted(DEFAULT_VISIBILITY), dafnyType, toDafnyConverterName, "(%s value)".formatted(cSharpType));
 
         if (!isDependantModuleType) {
             final TokenTree fromDafnyConverterMethod = TokenTree.of(fromDafnyConverterSignature, fromDafnyBody.braced());
@@ -1301,7 +1252,7 @@ public class TypeConversionCodegen {
             // This module is referencing a type from another module.
             // These referenced types are not be internal to this module.
             // Therefore, we need to call the conversion in the dependent module.
-            final String namespaceForReferent = nameResolver.namespaceForShapeId(id);
+            final String namespaceForReferent = DotNetNameResolver.namespaceForShapeId(id);
             final TokenTree fromDafnyBodyOverride = TokenTree
                 .of(
                     "// This is converting a reference type in a dependant module.",
