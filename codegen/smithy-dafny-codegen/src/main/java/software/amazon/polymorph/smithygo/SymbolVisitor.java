@@ -280,10 +280,10 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
 
     @Override
     public Symbol booleanShape(BooleanShape shape) {
-        return symbolBuilderFor(shape, "bool").definitionFile("./TypeConversion.go").namespace("typeconversion", "")
+        return symbolBuilderFor(shape, "bool").definitionFile("./typeconversion/typeconversion.go").namespace("typeconversion", "")
                 .putProperty(SymbolUtils.GO_UNIVERSE_TYPE, true)
-                .putProperty("native", symbolBuilderFor(shape, "bool").definitionFile("./TypeConversion.go").build())
-                .putProperty("dafny", symbolBuilderFor(shape, "Wrappers_Compile.Option").addDependency("Wrappers_Compile", "").definitionFile("./TypeConversion.go").build())
+                .putProperty("native", symbolBuilderFor(shape, "bool").definitionFile("./typeconversion/typeconversion.go").build())
+                .putProperty("dafny", symbolBuilderFor(shape, "Wrappers_Compile.Option").addDependency("Wrappers_Compile", "").definitionFile("./typeconversion/typeconversion.go").build())
                        .putProperty("ToNative", "val.Dtor_value().(bool)")
                                               .putProperty("ToDafny", "Wrappers_Compile.Companion_Option_.Create_Some_(val)")
 
@@ -329,9 +329,9 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     }
 
     private Symbol.Builder symbolBuilderFor(Shape shape, String typeName) {
-//        if (pointableIndex.isPointable(shape)) {
-//            return SymbolUtils.createPointableSymbolBuilder(shape, typeName);
-//        }
+        if (pointableIndex.isPointable(shape)) {
+            return SymbolUtils.createPointableSymbolBuilder(shape, typeName);
+        }
 
         return SymbolUtils.createValueSymbolBuilder(shape, typeName);
     }
@@ -454,18 +454,15 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     @Override
     public Symbol structureShape(StructureShape shape) {
         String name = getDefaultShapeName(shape);
-        String typeName = OperationIndex.of(model).isOutputStructure(shape) ? "Result" : name;
-//        if (shape.getId().getNamespace().equals(CodegenUtils.getSyntheticTypeNamespace())) {
-//            Optional<String> boundOperationName = getNameOfBoundOperation(shape);
-//            if (boundOperationName.isPresent()) {
-//                return symbolBuilderFor(shape, name, rootModuleName)
-//                        .definitionFile("./api_op_" + boundOperationName.get() + ".go")
-//                        .build();
-//            }
-//        }
+        if (shape.getId().getNamespace().equals(CodegenUtils.getSyntheticTypeNamespace())) {
+            Optional<String> boundOperationName = getNameOfBoundOperation(shape);
+            if (boundOperationName.isPresent()) {
+                return symbolBuilderFor(shape, name, rootModuleName)
+                        .definitionFile("./api_op_" + boundOperationName.get() + ".go")
+                        .build();
+            }
+        }
         Symbol.Builder builder = symbolBuilderFor(shape, name, typesPackageName);
-                                         //.putProperty("dafny", symbolBuilderFor(shape, String.format("%s%s", , typeName))
-                                         //                           .build();
         if (shape.hasTrait(ErrorTrait.ID)) {
             builder.definitionFile("./types/errors.go");
         } else {
@@ -499,7 +496,7 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
         Shape targetShape = model.expectShape(member.getTarget());
         return toSymbol(targetShape)
                 .toBuilder()
-                //.putProperty(SymbolUtils.POINTABLE, pointableIndex.isPointable(member))
+                .putProperty(SymbolUtils.POINTABLE, pointableIndex.isPointable(member))
                 .build();
     }
 

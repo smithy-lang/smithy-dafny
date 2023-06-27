@@ -2,7 +2,6 @@ package software.amazon.polymorph.smithygo;
 
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.model.Model;
-import software.amazon.smithy.model.knowledge.ServiceIndex;
 import software.amazon.smithy.model.node.ObjectNode;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.ShapeId;
@@ -10,7 +9,6 @@ import software.amazon.smithy.model.shapes.ShapeId;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 
 public class GoSettings {
     private static final String SERVICE = "service";

@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import software.amazon.polymorph.traits.LocalServiceTrait;
+import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.smithy.build.FileManifest;
 import software.amazon.smithy.build.PluginContext;
 import software.amazon.smithy.model.Model;
@@ -74,23 +75,23 @@ public class CodegenCli {
         cliArguments.outputDotnetDir.ifPresent(path -> outputDirs.put(TargetLanguage.DOTNET, path));
         cliArguments.outputGoDir.ifPresent(path -> outputDirs.put(TargetLanguage.GO, path));
 
-        final ServiceShape serviceShape = serviceModel.getServiceShapesWithTrait(LocalServiceTrait.class).stream().findFirst().get();
+        final ServiceShape serviceShape = ModelUtils.serviceFromNamespace(serviceModel, cliArguments.namespace);
         final PluginContext pluginContext = PluginContext.builder()
-                                                   .model(serviceModel)
-                                                   .fileManifest(FileManifest.create(cliArguments.outputGoDir().orElse(cliArguments.modelPath)))
-                                                   .settings(ObjectNode.builder()
-                                                                       .withMember("service", serviceShape.toShapeId().toString())
-                                                                       .build())
-                                                   .build();
+                                                         .model(serviceModel)
+                                                         .fileManifest(FileManifest.create(cliArguments.outputGoDir().orElse(cliArguments.modelPath)))
+                                                         .settings(ObjectNode.builder()
+                                                                             .withMember("service", serviceShape.toShapeId().toString())
+                                                                             .build())
+                                                         .build();
 
         final CodegenEngine.Builder engineBuilder = new CodegenEngine.Builder()
-                .withServiceModel(serviceModel)
-                .withDependentModelPaths(cliArguments.dependentModelPaths)
-                .withNamespace(cliArguments.namespace)
-                .withTargetLangOutputDirs(outputDirs)
-                .withAwsSdkStyle(cliArguments.awsSdkStyle)
-                .withPluginContext(pluginContext)
-                .withLocalServiceTest(cliArguments.localServiceTest);
+                                                            .withServiceModel(serviceModel)
+                                                            .withDependentModelPaths(cliArguments.dependentModelPaths)
+                                                            .withNamespace(cliArguments.namespace)
+                                                            .withTargetLangOutputDirs(outputDirs)
+                                                            .withAwsSdkStyle(cliArguments.awsSdkStyle)
+                                                            .withPluginContext(pluginContext)
+                                                            .withLocalServiceTest(cliArguments.localServiceTest);
         cliArguments.javaAwsSdkVersion.ifPresent(engineBuilder::withJavaAwsSdkVersion);
         cliArguments.includeDafnyFile.ifPresent(engineBuilder::withIncludeDafnyFile);
         final CodegenEngine engine = engineBuilder.build();

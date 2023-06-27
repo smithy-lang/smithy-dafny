@@ -4,7 +4,6 @@ import software.amazon.polymorph.smithygo.integration.GoIntegration;
 import software.amazon.smithy.build.FileManifest;
 import software.amazon.smithy.codegen.core.CodegenContext;
 import software.amazon.smithy.codegen.core.SymbolProvider;
-import software.amazon.smithy.codegen.core.WriterDelegator;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.utils.SmithyBuilder;
 

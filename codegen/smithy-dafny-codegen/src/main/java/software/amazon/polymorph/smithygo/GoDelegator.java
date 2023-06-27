@@ -16,17 +16,8 @@
 package software.amazon.polymorph.smithygo;
 
 import software.amazon.smithy.build.FileManifest;
-import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
-import software.amazon.smithy.codegen.core.SymbolReference;
-import software.amazon.smithy.codegen.core.SymbolWriter;
 import software.amazon.smithy.codegen.core.WriterDelegator;
-import software.amazon.smithy.model.shapes.Shape;
-
-import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Consumer;
 
 /**
  * Manages writers for Go files.Based off of GoWriterDelegator adding support

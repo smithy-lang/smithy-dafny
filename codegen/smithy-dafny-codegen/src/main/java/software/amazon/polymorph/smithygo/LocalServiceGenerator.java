@@ -1,17 +1,13 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
+
 package software.amazon.polymorph.smithygo;
 
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
-import software.amazon.smithy.model.knowledge.TopDownIndex;
-import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
-import software.amazon.smithy.model.shapes.Shape;
-import software.amazon.smithy.model.shapes.ShapeId;
-
-import java.util.Set;
-import java.util.TreeSet;
 
 public class LocalServiceGenerator implements ShapeGenerator<ServiceShape> {
     private Model model;
@@ -53,7 +49,7 @@ public class LocalServiceGenerator implements ShapeGenerator<ServiceShape> {
                 String operationName = operation.getName();
                 String inputType = model.expectShape(model.expectShape(operation).asOperationShape().get().getInputShape()).toShapeId().getName();
                 String outputType = model.expectShape(model.expectShape(operation).asOperationShape().get().getOutputShape()).toShapeId().getName();
-                goWriter.write("func (client *Client) $L(ctx context.Context, params types.$L) (types.$L, error) {", operationName, inputType, outputType);
+                goWriter.write("func (client *$T) $L(ctx context.Context, params types.$L) (types.$L, error) {", serviceSymbol, operationName, inputType, outputType);
                 goWriter.write("""
                                        	var dafnyType, _ = typeconversion.FromNativeToDafny$L(params)
                                        	result, _ := $Linternaldafny.New_$LClient_().$L(dafnyType).Extract().($Linternaldafnytypes.$L)

@@ -205,13 +205,13 @@ subprojects {
         tasks["test"].finalizedBy(tasks["jacocoTestReport"])
 
         // Configure jacoco to generate an HTML report.
-//        tasks.jacocoTestReport {
-//            reports {
-//                xml.isEnabled = false
-//                csv.isEnabled = false
-//                html.destination = file("$buildDir/reports/jacoco")
-//            }
-//        }
+        tasks.jacocoTestReport {
+            reports {
+                xml.isEnabled = false
+                csv.isEnabled = false
+                html.destination = file("$buildDir/reports/jacoco")
+            }
+        }
 
         /*
          * Spotbugs

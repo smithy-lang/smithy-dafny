@@ -21,11 +21,6 @@ public class ImportDeclarations implements ImportContainer {
             }
             importAlias = alias;
         }
-//        // Ensure that multiple packages cannot be imported with the same name.
-//        if (imports.containsKey(importAlias) && !imports.get(importAlias).equals(importPath)) {
-//            throw new CodegenException("Import name collision: " + importAlias
-//                                               + ". Previous: " + imports.get(importAlias) + "New: " + importPath);
-//        }
         imports.putIfAbsent(importAlias, importPath);
         return this;
     }

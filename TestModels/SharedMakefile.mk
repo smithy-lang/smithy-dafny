@@ -95,10 +95,8 @@ transpile_implementation:
 		-quantifierSyntax:3 \
 		-unicodeChar:0 \
 		-functionSyntax:3 \
-		-useRuntimeLib \
 		-out $(OUT) \
 		./src/Index.dfy \
-		-library:$(PROJECT_ROOT)/dafny-dependencies/StandardLibrary/src/Index.dfy \
 		$(patsubst %, -library:$(PROJECT_ROOT)/%/src/Index.dfy, $(LIBRARIES))
 
 transpile_test:
@@ -112,10 +110,8 @@ transpile_test:
 		-quantifierSyntax:3 \
 		-unicodeChar:0 \
 		-functionSyntax:3 \
-		-useRuntimeLib \
 		-out $(OUT) \
 		`find ./test -name '*.dfy'` \
-		-library:src/Index.dfy
 
 transpile_dependencies:
 	$(MAKE) -C $(STANDARD_LIBRARY_PATH) transpile_implementation_$(LANG)
@@ -171,7 +167,7 @@ _polymorph_dependencies:
 # `polymorph_code_gen` is the generate-for-multiple-languages target
 polymorph_code_gen: OUTPUT_DAFNY=--output-dafny $(LIBRARY_ROOT)/Model --include-dafny $(STANDARD_LIBRARY_PATH)/src/Index.dfy
 polymorph_code_gen: OUTPUT_DOTNET=--output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/
-polymorph_code_gen: OUTPUT_GO=--output-go $(LIBRARY_ROOT)/runtimes/go/Generated/src/
+polymorph_code_gen: OUTPUT_GO=--output-go $(LIBRARY_ROOT)/runtimes/go/Generated/src/$(GO_NAMESPACE)
 
 polymorph_code_gen: _polymorph
 # Generate wrapped code for all languages that support wrapped services
@@ -289,7 +285,7 @@ _clean:
 
 clean: _clean
 
-transpile_go: | transpile_implementation_go transpile_test_go transpile_dependencies_go
+transpile_go: clean_go transpile_implementation_go transpile_test_go transpile_dependencies_go migrate_go
 
 transpile_implementation_go: TARGET=go
 transpile_implementation_go: OUT=runtimes/go/ImplementationFromDafny
@@ -301,3 +297,10 @@ transpile_test_go: transpile_test
 
 transpile_dependencies_go: LANG=go
 transpile_dependencies_go: transpile_dependencies
+
+clean_go:
+	rm -rf $(LIBRARY_ROOT)/runtimes/go
+
+migrate_go:
+	cd $(LIBRARY_ROOT)/runtimes/go
+	./run_go_tooling_migrations.sh

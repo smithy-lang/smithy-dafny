@@ -301,7 +301,7 @@ public final class CodegenUtils {
     }
 
     /**
-     * Returns the shape unpacked as a CollectionShape. Throws and exception if the passed in
+     * Returns the shape unpacked as a CollectionShape. Throws an exception if the passed in
      * shape is not a list or set.
      *
      * @param shape the list or set shape.
@@ -316,7 +316,7 @@ public final class CodegenUtils {
     }
 
     /**
-     * Returns the shape unpacked as a MapShape. Throws and exception if the passed in
+     * Returns the shape unpacked as a MapShape. Throws an exception if the passed in
      * shape is not a map.
      *
      * @param shape the map shape.

@@ -50,7 +50,6 @@ public class DirectedGoCodegen implements DirectedCodegen<GoCodegenContext, GoSe
         Model model = directive.model();
         SymbolProvider symbolProvider = directive.symbolProvider();
         StructureGenerator structureGenerator = new StructureGenerator(model, symbolProvider, writerDelegator);
-        System.out.println(directive.shape());
         structureGenerator.generate(directive.shape());
     }
 

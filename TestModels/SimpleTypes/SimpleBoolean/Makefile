@@ -10,6 +10,8 @@ include ../../SharedMakefile.mk
 
 NAMESPACE=simple.types.boolean
 
+GO_NAMESPACE=simpletypesboolean
+
 # This project has no dependencies 
 # DEPENDENT-MODELS:= 
 # LIBRARIES :=

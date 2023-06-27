@@ -15,7 +15,6 @@
 
 package software.amazon.polymorph.smithygo;
 
-import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.SymbolDependency;
 import software.amazon.smithy.codegen.core.SymbolDependencyContainer;
 import software.amazon.smithy.utils.SetUtils;
@@ -29,9 +28,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 
-/**
- *
- */
 public final class GoDependency implements SymbolDependencyContainer {
     private final Type type;
     private final String sourcePath;
