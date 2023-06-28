@@ -17,7 +17,13 @@ package software.amazon.polymorph.smithypython;
 
 import static software.amazon.smithy.model.traits.TimestampFormatTrait.Format;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import software.amazon.smithy.codegen.core.CodegenException;
@@ -186,10 +192,8 @@ public abstract class DafnyProtocolGenerator implements ProtocolGenerator {
       });
     }
 
-    for (ShapeId errorId : deserializingErrorShapes) {
-      var error = context.model().expectShape(errorId, StructureShape.class);
-      generateErrorResponseDeserializer(context, error);
-    }
+    generateErrorResponseDeserializerSection(context, deserializingErrorShapes);
+
     generateDocumentBodyShapeDeserializers(context, deserializingDocumentShapes);
   }
 
@@ -236,6 +240,8 @@ public abstract class DafnyProtocolGenerator implements ProtocolGenerator {
       ));
 
       writer.write("""
+if input.IsFailure():
+  return await _deserialize_error(input.error)
 return $L($L)
       """, outputName, output);
       writer.popState();
@@ -249,33 +255,82 @@ return $L($L)
    */
   public record ResponseDeserializerSection(OperationShape operation) implements CodeSection {}
 
-  private void generateErrorResponseDeserializer(GenerationContext context, StructureShape error) {
-//    throw new UnsupportedOperationException("Error generation not supported");
-    var deserFunction = getErrorDeserializationFunction(context, error);
-    var errorSymbol = context.symbolProvider().toSymbol(error);
-    var delegator = context.writerDelegator();
-    var transportResponse = context.applicationProtocol().responseType();
-    var configSymbol = CodegenUtils.getConfigSymbol(context.settings());
+  // TODO: CodeSection-ize this?
+  private void generateErrorResponseDeserializerSection(
+      GenerationContext context,
+      TreeSet<ShapeId> deserializingErrorShapes)
+  {
 
-    delegator.useFileWriter(deserFunction.getDefinitionFile(), deserFunction.getNamespace(), writer -> {
-      writer.pushState(new ErrorDeserializerSection(error));
-      writer.addStdlibImport("typing", "Any");
-      writer.write("""
-                # Need to convert Dafny types' Error_SimpleErrorsException to .models' SimpleErrorsException
-                # Actually! This is Wrappers_Compile.Failure(Error_SimpleErrorsException)
-                # so unwrapping it prolly looks like
-                # 
-                async def $L(
-                    http_response: $T,
-                    config: $T,
-                    parsed_body: dict[str, Document]| None,
-                    default_message: str,
-                ) -> $T:
-                    kwargs: dict[str, Any] = {"message": default_message}
+    // I need to store a map from deserFunction metadata -> Set<errorId>
+    // Such that for a given set of metadata (i.e. a given file),
+    // I have all of the errors I need to write to that file
+    // TODO: Is a List<String> for keys the right thing here? Seems too brittle
+    // TODO: This whole section feels wrong
+    Map<List<String>, List<ShapeId>> deserFunctionMetadataMap = new HashMap<>();
+    for (ShapeId errorId : deserializingErrorShapes) {
+      var error = context.model().expectShape(errorId, StructureShape.class);
+      var deserFunction = getErrorDeserializationFunction(context, error);
 
-                """, deserFunction.getName(), transportResponse, configSymbol, errorSymbol);
-      writer.popState();
-    });
+      List<String> deserFunctionMetadata = Arrays.asList(deserFunction.getDefinitionFile(), deserFunction.getNamespace());
+      if (deserFunctionMetadataMap.containsKey(deserFunctionMetadata)) {
+        List<ShapeId> oldList = deserFunctionMetadataMap.get(deserFunctionMetadata);
+        oldList.add(errorId);
+        deserFunctionMetadataMap.put(
+            deserFunctionMetadata,
+            oldList
+        );
+      } else {
+        deserFunctionMetadataMap.put(
+            deserFunctionMetadata,
+            Arrays.asList(errorId)
+        );
+      }
+    }
+
+    System.out.println("deserFunctionMetadataMap size = " + deserFunctionMetadataMap.size());
+
+    for (List<String> deserFunctionMetadata : deserFunctionMetadataMap.keySet()) {
+      var delegator = context.writerDelegator();
+
+      delegator.useFileWriter(deserFunctionMetadata.get(0), deserFunctionMetadata.get(1), writer -> {
+
+        writer.addStdlibImport("typing", "Any");
+        // TODO is this right? Or do I want my own thing?
+        // Client appears to unambiguously wrap errors thrown from within Dafny impl as ServiceError.
+        // Do I want that?
+        writer.addImport(".errors", "ServiceError");
+        writer.write("""
+                async def _deserialize_error(
+                    error: Error
+                ) -> ServiceError:
+                  if error.is_Opaque:
+                    return None # TODO: model Opaque error in Smithy
+                  if error.is_CollectionOfErrors:
+                    return None # TODO: model Collection errors in Smithy"""
+          );
+
+        for (ShapeId errorId : deserFunctionMetadataMap.get(deserFunctionMetadata)) {
+          var error = context.model().expectShape(errorId, StructureShape.class);
+          writer.pushState(new ErrorDeserializerSection(error));
+
+          writer.addImport(".errors", errorId.getName());
+          // TODO: I suspect this namespace is probably wrong, particularly for Dependencies...
+          writer.addImport(errorId.getNamespace() + ".internaldafny.types", "Error");
+          writer.addImport(errorId.getNamespace() + ".internaldafny.types", "Error_" + errorId.getName());
+          writer.write(
+                  """
+                  if error.is_$L:
+                    return $L(message=error.message)
+                """, errorId.getName(), errorId.getName()
+          );
+
+          writer.popState();
+        }
+
+
+      });
+    }
+
   }
 
   /**

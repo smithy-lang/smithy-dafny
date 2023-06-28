@@ -20,6 +20,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.TreeSet;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolReference;
@@ -199,8 +200,12 @@ public final class DafnyIntegration implements PythonIntegration {
                             return Wrappers_Compile.Result_Failure(ex)
          */
         String operationsShim = "";
+        String errorsString = "";
         Set<ShapeId> allInputShapesSet = new HashSet<>();
+        var deserializingErrorShapes = new TreeSet<ShapeId>();
+        var service = codegenContext.settings().getService(codegenContext.model());
         for (OperationShape operationShape : codegenContext.model().getOperationShapes()) {
+            deserializingErrorShapes.addAll(operationShape.getErrors(service));
             String inputName = operationShape.getInputShape().getName();
             allInputShapesSet.add(operationShape.getInputShape());
             String doubledInputName = typesModulePrelude + "." + inputName + "_" + inputName;
@@ -211,7 +216,10 @@ public final class DafnyIntegration implements PythonIntegration {
             operationsShim += """
                     def %1$s(self, input: %2$s) -> %3$s:
                             unwrapped_request: %4$s = %4$s(value=input.value)
-                            wrapped_response = asyncio.run(self._impl.%5$s(unwrapped_request))
+                            try:
+                                wrapped_response = asyncio.run(self._impl.%5$s(unwrapped_request))
+                            except ServiceError as e:
+                                return Wrappers_Compile.Result_Failure(smithy_error_to_dafny_error(e))
                             return Wrappers_Compile.Result_Success(wrapped_response)
                 """.formatted(
                     operationShape.getId().getName(),
@@ -223,9 +231,27 @@ public final class DafnyIntegration implements PythonIntegration {
         }
         String allOperationsShim = operationsShim;
 
+        for (ShapeId errorShape : deserializingErrorShapes) {
+            errorsString += """
+if isinstance(e, %1$s):
+            return %2$s%3$s(message=e.message)
+                """.formatted(
+                    errorShape.getName(),
+                errorShape.getNamespace() + ".internaldafny.types.",
+                "Error_" + errorShape.getName()
+            );
+        }
+        final String finalErrorsString = errorsString;
+
         codegenContext.writerDelegator().useFileWriter(moduleName + "/shim.py", "", writer -> {
             for (ShapeId inputShapeId : allInputShapesSet) {
                 writer.addImport(".models", inputShapeId.getName());
+            }
+
+            writer.addImport(".errors", "ServiceError");
+
+            for (ShapeId errorShapeId : deserializingErrorShapes) {
+                writer.addImport(".errors", errorShapeId.getName());
             }
 
             writer.write(
@@ -236,13 +262,16 @@ public final class DafnyIntegration implements PythonIntegration {
                 import $L.smithy_generated.$L.client as client_impl
                
                                 
+                def smithy_error_to_dafny_error(e: ServiceError):
+                    $L
+                                
                 class $L($L.$L):
                     def __init__(self, _impl: client_impl) :
                         self._impl = _impl
                                 
                 $L
                     
-                    """, typesModulePrelude, moduleName, moduleName, shimForService(serviceShape),
+                    """, typesModulePrelude, moduleName, moduleName, finalErrorsString, shimForService(serviceShape),
                 typesModulePrelude, "I" + serviceShape.getId().getName() + "Client", allOperationsShim
             );
         });
