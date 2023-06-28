@@ -299,14 +299,16 @@ return $L($L)
         // Client appears to unambiguously wrap errors thrown from within Dafny impl as ServiceError.
         // Do I want that?
         writer.addImport(".errors", "ServiceError");
+        writer.addImport(".errors", "OpaqueError");
+        writer.addImport(".errors", "CollectionOfErrors");
         writer.write("""
                 async def _deserialize_error(
                     error: Error
                 ) -> ServiceError:
                   if error.is_Opaque:
-                    return None # TODO: model Opaque error in Smithy
+                    return OpaqueError(obj=error.obj)
                   if error.is_CollectionOfErrors:
-                    return None # TODO: model Collection errors in Smithy"""
+                    return CollectionOfErrors(message=error.message, list=error.list)"""
           );
 
         for (ShapeId errorId : deserFunctionMetadataMap.get(deserFunctionMetadata)) {
