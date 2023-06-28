@@ -133,8 +133,6 @@ class SimpleErrors:
         except Exception as e:
             # Make sure every exception that we throw is an instance of ServiceError so
             # customers can reliably catch everything we throw.
-            print("exception!!")
-            print(e)
             if not isinstance(e, ServiceError):
                 raise ServiceError(e) from e
             raise e
@@ -236,7 +234,6 @@ class SimpleErrors:
 
                 if isinstance(context_with_response.response, Exception):
                     # Step 7u: Reacquire retry token if the attempt failed
-                    print("isinstance(Exception)")
                     try:
                         retry_token = retry_strategy.refresh_retry_token_for_retry(
                             token_to_renew=retry_token,
@@ -246,7 +243,7 @@ class SimpleErrors:
                             )
                         )
                     except SmithyRetryException:
-                        print("Iama SmithyRetryException")
+                        print("SmithyRetryException!")
                         print(context_with_response.response)
                         raise context_with_response.response
                     await sleep(retry_token.retry_delay)
@@ -322,8 +319,6 @@ class SimpleErrors:
                 input=context_with_response.transport_request
             )
 
-            print("request is past handle_request")
-
             # Step 7n: Invoke read_after_transmit
             for interceptor in interceptors:
                 interceptor.read_after_transmit(context_with_response)
@@ -347,14 +342,10 @@ class SimpleErrors:
                 context_with_output._transport_response, config
             )
 
-            print("request is past deserialize")
-
-
             # Step 7r: Invoke read_after_deserialization
             for interceptor in interceptors:
                 interceptor.read_after_deserialization(context_with_output)
         except Exception as e:
-            print("hallo")
             if context.response is not None:
                 # config.logger.exception(f"Exception occurred while handling: {context.response}")
                 pass
@@ -367,7 +358,6 @@ class SimpleErrors:
         attempt_context = cast(
             InterceptorContext[Input, Output, DafnyRequest, DafnyResponse | None], context
         )
-        print("boutta finalize")
         return await self._finalize_attempt(interceptors, attempt_context)
 
     async def _finalize_attempt(
@@ -397,7 +387,6 @@ class SimpleErrors:
                     pass
                 context._response = e
 
-        print("good here")
         return context
 
     async def _finalize_execution(

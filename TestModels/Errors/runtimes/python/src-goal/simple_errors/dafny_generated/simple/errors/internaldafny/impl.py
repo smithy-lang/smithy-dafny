@@ -37,6 +37,8 @@ class SimpleErrorsClient(simple.errors.internaldafny.types.ISimpleErrorsClient):
         out1_: Wrappers_Compile.Result
         out1_ = SimpleErrorsImpl_Compile.default__.AlwaysMultipleErrors((self).config, input)
         output = out1_
+        print("AlwaysMultipleErrors")
+        print(output)
         return output
 
     def AlwaysNativeError(self, input):

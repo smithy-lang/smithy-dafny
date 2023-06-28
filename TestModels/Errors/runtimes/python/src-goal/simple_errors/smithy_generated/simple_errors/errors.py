@@ -22,6 +22,69 @@ class UnknownApiError(ApiError[Literal['Unknown']]):
     """
     code: Literal['Unknown'] = 'Unknown'
 
+# TODO: Should this extend ApiError...?
+class CollectionOfErrors(ApiError[Literal["CollectionOfErrors"]]):
+    code: Literal["CollectionOfErrors"] = "CollectionOfErrors"
+    message: str
+    # TODO: To add `list` here, I'd need a typehint... what should the object type be? i.e. list[?]
+    def __init__(
+        self,
+        *,
+        message: str,
+        list
+    ):
+        print("coe __init__")
+        super().__init__(message)
+        self.list = list
+        print(self.message)
+        print(self.list)
+
+    def as_dict(self) -> Dict[str, Any]:
+        """Converts the CollectionOfErrors to a dictionary.
+
+        The dictionary uses the modeled shape names rather than the parameter names as
+        keys to be mostly compatible with boto3.
+        """
+        return {
+            'message': self.message,
+            'code': self.code,
+            'list': self.list,
+        }
+
+    @staticmethod
+    def from_dict(d: Dict[str, Any]) -> "CollectionOfErrors":
+        """Creates a CollectionOfErrors from a dictionary.
+
+        The dictionary is expected to use the modeled shape names rather than the
+        parameter names as keys to be mostly compatible with boto3.
+        """
+        kwargs: Dict[str, Any] = {
+            'message': d['message'],
+            'list': d['list']
+        }
+
+        return CollectionOfErrors(**kwargs)
+
+    def __repr__(self) -> str:
+        result = "CollectionOfErrors("
+        result += f'message={self.message},'
+        if self.message is not None:
+            result += f"message={repr(self.message)}"
+        result += f'list={self.list}'
+        result += ")"
+        return result
+
+    def __eq__(self, other: Any) -> bool:
+        if not isinstance(other, CollectionOfErrors):
+            return False
+        if not (self.list == other.list):
+            return false
+        attributes: list[str] = ['message','message']
+        return all(
+            getattr(self, a) == getattr(other, a)
+            for a in attributes
+        )
+
 class SimpleErrorsException(ApiError[Literal["SimpleErrorsException"]]):
     code: Literal["SimpleErrorsException"] = "SimpleErrorsException"
     message: str

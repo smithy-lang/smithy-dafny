@@ -289,6 +289,9 @@ if isinstance(e, %1$s):
         return new ApplicationProtocol(
             "dafny",
             // TODO: Naming of these symbols?
+            // TODO: This is just the input/output of a Dafny call, right?
+            //       If that is true, is output just wrappers_compile.result?
+            //       Then what is input? Maybe DafnyCallEvent?
             SymbolReference.builder()
                 .symbol(createDafnySymbol("DafnyRequest"))
                 .build(),
