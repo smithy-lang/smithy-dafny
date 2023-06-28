@@ -86,16 +86,29 @@ public abstract class DafnyProtocolGenerator implements ProtocolGenerator {
       var input = context.model().expectShape(operation.getInputShape());
       var inputSymbol = context.symbolProvider().toSymbol(input);
 
-      delegator.useFileWriter(serFunction.getDefinitionFile(), serFunction.getNamespace(), writer -> {
-        writer.pushState(new RequestSerializerSection(operation));
-        // TODO: nameresolver
-        writer.write("""
+      if (input.getId().getName().equals("Unit")) {
+        delegator.useFileWriter(serFunction.getDefinitionFile(), serFunction.getNamespace(), writer -> {
+          writer.pushState(new RequestSerializerSection(operation));
+          // TODO: nameresolver
+          writer.write("""
+                    async def $L(config: $T) -> None:
+                        ${C|}
+                    """, serFunction.getName(), configSymbol,
+              writer.consumer(w -> generateRequestSerializer(context, operation, w)));
+          writer.popState();
+        });
+      } else {
+        delegator.useFileWriter(serFunction.getDefinitionFile(), serFunction.getNamespace(), writer -> {
+          writer.pushState(new RequestSerializerSection(operation));
+          // TODO: nameresolver
+          writer.write("""
                     async def $L(input: $T, config: $T) -> Dafny$T:
                         ${C|}
                     """, serFunction.getName(), inputSymbol, configSymbol, inputSymbol,
-            writer.consumer(w -> generateRequestSerializer(context, operation, w)));
-        writer.popState();
-      });
+              writer.consumer(w -> generateRequestSerializer(context, operation, w)));
+          writer.popState();
+        });
+      }
     }
   }
 
@@ -137,33 +150,39 @@ public abstract class DafnyProtocolGenerator implements ProtocolGenerator {
     // TODO: nameresolver
     String typesModulePrelude = operation.getInputShape().getNamespace().toLowerCase(Locale.ROOT) + ".internaldafny.types";
     String inputName = operation.getInputShape().getName();
-    writer.addImport(typesModulePrelude, inputName + "_" + inputName, "Dafny" + inputName);
+    if (!inputName.equals("Unit")) {
+      writer.addImport(typesModulePrelude, inputName + "_" + inputName, "Dafny" + inputName);
+    }
 
-    System.out.println("ytoyo");
-    System.out.println(operation.getInput());
 
     Shape targetShape = context.model().expectShape(operation.getInputShape());
-    // TODO: This isn't right... need to support >1 member in structure
-    MemberShape member = targetShape.getMember("value").get();
-    System.out.println(targetShape);
-    System.out.println(targetShape.getMemberNames());
-    var input = targetShape.accept(new DafnyMemberSerVisitor(
-        context,
-        writer,
-        "input",
-        member
-    ));
+    
+    System.out.println("serring");
+    System.out.println(operation.getInputShape());
+    System.out.println(inputName);
 
-        /*
-        return ("$L", $L(
-         */
+    // TODO better Unit checking
+    if (inputName.equals("Unit")) {
+      writer.write("""
+          return ("$L", None)
+          """, operation.getId().getName()
+      );
+    } else {
+      // TODO: This isn't right... need to support >1 member in structure
+      var input = targetShape.accept(new DafnyMemberSerVisitor(
+          context,
+          writer,
+          "input"
+      ));
 
-    // value=input.value
+      writer.write("""
+          return ("$L", $L($L))
+          """, operation.getId().getName(), "Dafny" + inputName, input
+      );
 
-    writer.write("""
-            return ("$L", $L($L))
-            """, operation.getId().getName(), "Dafny" + inputName, input
-        );
+    }
+
+
   }
 
   @Override
@@ -180,16 +199,32 @@ public abstract class DafnyProtocolGenerator implements ProtocolGenerator {
       var deserFunction = getDeserializationFunction(context, operation);
       var output = context.model().expectShape(operation.getOutputShape());
       var outputSymbol = context.symbolProvider().toSymbol(output);
-      delegator.useFileWriter(deserFunction.getDefinitionFile(), deserFunction.getNamespace(), writer -> {
-        writer.pushState(new RequestSerializerSection(operation));
 
-        writer.write("""
+
+      if (output.getId().getName().equals("Unit")) {
+        delegator.useFileWriter(deserFunction.getDefinitionFile(), deserFunction.getNamespace(), writer -> {
+          writer.pushState(new RequestSerializerSection(operation));
+
+          writer.write("""
+                    async def $L(config: $T) -> None:
+                      ${C|}
+                    """, deserFunction.getName(), configSymbol,
+              writer.consumer(w -> generateOperationResponseDeserializer(context, operation)));
+          writer.popState();
+        });
+      } else {
+        delegator.useFileWriter(deserFunction.getDefinitionFile(), deserFunction.getNamespace(), writer -> {
+          writer.pushState(new RequestSerializerSection(operation));
+
+          writer.write("""
                     async def $L(input: Dafny$T, config: $T) -> $T:
                       ${C|}
                     """, deserFunction.getName(), outputSymbol, configSymbol, outputSymbol,
-            writer.consumer(w -> generateOperationResponseDeserializer(context, operation)));
-        writer.popState();
-      });
+              writer.consumer(w -> generateOperationResponseDeserializer(context, operation)));
+          writer.popState();
+        });
+      }
+
     }
 
     generateErrorResponseDeserializerSection(context, deserializingErrorShapes);
@@ -227,24 +262,40 @@ public abstract class DafnyProtocolGenerator implements ProtocolGenerator {
       // TODO: nameresolver
       String typesModulePrelude = operation.getOutputShape().getNamespace().toLowerCase(Locale.ROOT)  + ".internaldafny.types";
       String outputName = operation.getOutputShape().getName();
-      writer.addImport(typesModulePrelude, outputName + "_" + outputName, "Dafny" + outputName);
+      if (!outputName.equals("Unit")) {
+        writer.addImport(typesModulePrelude, outputName + "_" + outputName, "Dafny" + outputName);
+      }
 
       Shape targetShape = context.model().expectShape(operation.getOutputShape());
       // TODO: support >1 member in structure
-      MemberShape member = targetShape.getMember("value").get();
-      var output = targetShape.accept(new DafnyMemberDeserVisitor(
-          context,
-          writer,
-          "input",
-          member
-      ));
 
-      writer.write("""
+      // TODO better Unit checking
+      // TODO: If there is no output... how can there be an error?
+      if (outputName.equals("Unit")) {
+        writer.write("""
+return None
+      """);
+        writer.popState();
+      } else {
+
+        // TODO: This isn't right... need to support >1 member in structure
+        var output = targetShape.accept(new DafnyMemberDeserVisitor(
+            context,
+            writer,
+            "input"
+        ));
+
+        writer.write("""
 if input.IsFailure():
   return await _deserialize_error(input.error)
 return $L($L)
       """, outputName, output);
-      writer.popState();
+
+        writer.popState();
+
+
+      }
+
     });
   }
 
@@ -287,7 +338,7 @@ return $L($L)
       }
     }
 
-    System.out.println("deserFunctionMetadataMap size = " + deserFunctionMetadataMap.size());
+    
 
     for (List<String> deserFunctionMetadata : deserFunctionMetadataMap.keySet()) {
       var delegator = context.writerDelegator();
@@ -298,6 +349,7 @@ return $L($L)
         // TODO is this right? Or do I want my own thing?
         // Client appears to unambiguously wrap errors thrown from within Dafny impl as ServiceError.
         // Do I want that?
+        // TODO: This also doesn't seem to be generated if there are no modelled errors...
         writer.addImport(".errors", "ServiceError");
         writer.addImport(".errors", "OpaqueError");
         writer.addImport(".errors", "CollectionOfErrors");
@@ -365,7 +417,7 @@ return $L($L)
     private final GenerationContext context;
     private final PythonWriter writer;
     private final String dataSource;
-    private final MemberShape member;
+//    private final MemberShape member;
 
     /**
      * @param context The generation context.
@@ -377,21 +429,22 @@ return $L($L)
     DafnyMemberSerVisitor(
         GenerationContext context,
         PythonWriter writer,
-        String dataSource,
-        MemberShape member
+        String dataSource
+//        MemberShape member
     ) {
       this.context = context;
       this.writer = writer;
       this.dataSource = dataSource;
-      this.member = member;
+      // TODO: Do I even need member here...?
+//      this.member = member;
     }
 
     @Override
     protected String getDefault(Shape shape) {
       var protocolName = context.protocolGenerator().getName();
       throw new CodegenException(String.format(
-          "Unsupported conversion of %s to %s in %s using the %s protocol",
-          member.getMemberName(), shape.getType(), member.getContainer(), protocolName));
+          "Unsupported conversion of %s to %s using the %s protocol",
+          shape, shape.getType(), protocolName));
     }
 
     @Override
@@ -401,14 +454,10 @@ return $L($L)
 
     @Override
     public String structureShape(StructureShape shape) {
-      System.out.println("structureShape");
+      
       String out = "";
-      // TODO: Change fstring to support >1 shape
-      if (shape.getMemberNames().size() > 1) {
-        throw new UnsupportedOperationException("StructureShapes with >1 value not supported");
-      }
       for (String memberName : shape.getMemberNames()) {
-        out += "%1$s=%2$s.%1$s".formatted(memberName, dataSource);
+        out += "%1$s=%2$s.%1$s,\n".formatted(memberName, dataSource);
       }
       return out;
     }
@@ -481,7 +530,7 @@ return $L($L)
     private final GenerationContext context;
     private final PythonWriter writer;
     private final String dataSource;
-    private final MemberShape member;
+//    private final MemberShape member;
 
     /**
      * @param context The generation context.
@@ -493,21 +542,22 @@ return $L($L)
     DafnyMemberDeserVisitor(
         GenerationContext context,
         PythonWriter writer,
-        String dataSource,
-        MemberShape member
+        String dataSource
+//        MemberShape member
     ) {
       this.context = context;
       this.writer = writer;
       this.dataSource = dataSource;
-      this.member = member;
+      // TODO: Do I even need member here...?
+//      this.member = member;
     }
 
     @Override
     protected String getDefault(Shape shape) {
       var protocolName = context.protocolGenerator().getName();
       throw new CodegenException(String.format(
-          "Unsupported conversion of %s to %s in %s using the %s protocol",
-          member.getMemberName(), shape.getType(), member.getContainer(), protocolName));
+          "Unsupported conversion of %s to %s using the %s protocol",
+          shape, shape.getType(), protocolName));
     }
 
     @Override
@@ -517,15 +567,12 @@ return $L($L)
 
     @Override
     public String structureShape(StructureShape shape) {
-      System.out.println("structureShape deser");
+      
       String out = "";
       // TODO: Change fstring to support >1 shape
-      if (shape.getMemberNames().size() > 1) {
-        throw new UnsupportedOperationException("StructureShapes with >1 value not supported");
-      }
       for (String memberName : shape.getMemberNames()) {
         // TODO: Investigate what this should be... one of these is accessing a Wrappers_Compile...
-        out += "%1$s=%2$s.value.%1$s".formatted(memberName, dataSource);
+        out += "%1$s=%2$s.value.%1$s,\n".formatted(memberName, dataSource);
       }
       return out;
     }
