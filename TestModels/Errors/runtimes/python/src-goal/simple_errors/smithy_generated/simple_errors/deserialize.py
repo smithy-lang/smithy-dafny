@@ -2,7 +2,7 @@
 
 from typing import Any
 
-from .errors import ServiceError, SimpleErrorsException, CollectionOfErrors
+from .errors import ServiceError, SimpleErrorsException, CollectionOfErrors, OpaqueError
 from simple.errors.internaldafny.types import (
     Error,
     Error_SimpleErrorsException,
@@ -37,7 +37,7 @@ async def _deserialize_error(
     error: Error
 ) -> ServiceError:
   if error.is_Opaque:
-    return None # TODO: model Opaque error in Smithy
+    return OpaqueError(obj=error.obj)
   if error.is_CollectionOfErrors:
     print("deser error collection")
     print(error)
