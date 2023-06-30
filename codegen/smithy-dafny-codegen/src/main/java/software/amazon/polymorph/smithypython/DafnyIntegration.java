@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.TreeSet;
+import software.amazon.polymorph.smithypython.DafnyProtocolGenerator.DafnyMemberDeserVisitor;
+import software.amazon.polymorph.smithypython.DafnyProtocolGenerator.DafnyMemberSerVisitor;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolReference;
@@ -160,7 +162,10 @@ public final class DafnyIntegration implements PythonIntegration {
                     }
             
                     operation_name = input[0]
-                    return operation_map[operation_name](input[1])
+                    if input[1] == None:
+                        return operation_map[operation_name]()
+                    else:
+                        return operation_map[operation_name](input[1])
             """, implModulePrelude, clientName, "impl", clientName, allOperations
             );
         });
@@ -213,20 +218,37 @@ public final class DafnyIntegration implements PythonIntegration {
             String doubledOutputName = typesModulePrelude + "." + outputName + "_" + outputName;
             String operationSymbol = codegenContext.symbolProvider().toSymbol(operationShape).getName();
 
+            Shape targetShape = codegenContext.model().expectShape(operationShape.getOutputShape());
+            var output = targetShape.accept(new DafnyMemberDeserVisitor(
+                codegenContext,
+                "wrapped_response",
+                true
+            ));
+
+            Shape targetShapeInput = codegenContext.model().expectShape(operationShape.getInputShape());
+            var input = targetShapeInput.accept(new DafnyMemberSerVisitor(
+                codegenContext,
+//          writer,
+                "input",
+                false
+            ));
+
             operationsShim += """
-                    def %1$s(self, input: %2$s) -> %3$s:
-                            unwrapped_request: %4$s = %4$s(value=input.value)
+                    def %1$s(self, %2$s) -> %3$s:
+                            unwrapped_request: %4$s = %4$s(%6$s)
                             try:
                                 wrapped_response = asyncio.run(self._impl.%5$s(unwrapped_request))
                             except ServiceError as e:
                                 return Wrappers_Compile.Result_Failure(smithy_error_to_dafny_error(e))
-                            return Wrappers_Compile.Result_Success(wrapped_response)
+                            return Wrappers_Compile.Result_Success(%3$s%7$s)
                 """.formatted(
                     operationShape.getId().getName(),
-                doubledInputName,
-                doubledOutputName,
+                inputName.equals("Unit") ? "" : "input: " + doubledInputName,
+                outputName.equals("Unit") ? "None" : doubledOutputName,
                 inputName,
-                operationSymbol
+                operationSymbol,
+                input,
+                outputName.equals("Unit") ? "" : "(" + output + ")"
                 );
         }
         String allOperationsShim = operationsShim;
@@ -280,7 +302,7 @@ if isinstance(e, %1$s):
                
                                 
                 def smithy_error_to_dafny_error(e: ServiceError):
-                    $L
+                $L
                                 
                 class $L($L.$L):
                     def __init__(self, _impl: client_impl) :
@@ -294,6 +316,9 @@ if isinstance(e, %1$s):
         });
 
         codegenContext.writerDelegator().useFileWriter(moduleName + "/errors.py", "", writer -> {
+            writer.addStdlibImport("typing", "Dict");
+            writer.addStdlibImport("typing", "Any");
+
             writer.write(
                 """
                    # TODO: Should this extend ApiError...?
@@ -415,6 +440,16 @@ if isinstance(e, %1$s):
                                getattr(self, a) == getattr(other, a)
                                for a in attributes
                            )
+                    """
+            );
+        });
+
+        // TODO: I might need this to avoid having to fork Smithy-Python...
+        codegenContext.writerDelegator().useFileWriter(moduleName + "/models.py", "", writer -> {
+            writer.write(
+                """
+                   class Unit:
+                       pass
                     """
             );
         });

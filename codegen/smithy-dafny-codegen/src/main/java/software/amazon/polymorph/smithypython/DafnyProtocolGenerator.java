@@ -54,6 +54,7 @@ import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonWriter;
 import software.amazon.smithy.python.codegen.SmithyPythonDependency;
 import software.amazon.smithy.python.codegen.integration.ProtocolGenerator;
+import software.amazon.smithy.utils.CaseUtils;
 import software.amazon.smithy.utils.CodeSection;
 import software.amazon.smithy.utils.SmithyUnstableApi;
 import software.amazon.smithy.utils.StringUtils;
@@ -86,29 +87,17 @@ public abstract class DafnyProtocolGenerator implements ProtocolGenerator {
       var input = context.model().expectShape(operation.getInputShape());
       var inputSymbol = context.symbolProvider().toSymbol(input);
 
-      if (input.getId().getName().equals("Unit")) {
-        delegator.useFileWriter(serFunction.getDefinitionFile(), serFunction.getNamespace(), writer -> {
-          writer.pushState(new RequestSerializerSection(operation));
-          // TODO: nameresolver
-          writer.write("""
-                    async def $L(config: $T) -> None:
-                        ${C|}
-                    """, serFunction.getName(), configSymbol,
-              writer.consumer(w -> generateRequestSerializer(context, operation, w)));
-          writer.popState();
-        });
-      } else {
-        delegator.useFileWriter(serFunction.getDefinitionFile(), serFunction.getNamespace(), writer -> {
-          writer.pushState(new RequestSerializerSection(operation));
-          // TODO: nameresolver
-          writer.write("""
-                    async def $L(input: $T, config: $T) -> Dafny$T:
-                        ${C|}
-                    """, serFunction.getName(), inputSymbol, configSymbol, inputSymbol,
-              writer.consumer(w -> generateRequestSerializer(context, operation, w)));
-          writer.popState();
-        });
-      }
+      delegator.useFileWriter(serFunction.getDefinitionFile(), serFunction.getNamespace(), writer -> {
+        writer.pushState(new RequestSerializerSection(operation));
+        // TODO: nameresolver
+        writer.write("""
+                  async def $L(input: $T, config: $T) -> $L:
+                      ${C|}
+                  """, serFunction.getName(), inputSymbol, configSymbol,
+            input.getId().getName().equals("Unit") ? "None" : "Dafny" + inputSymbol.getName(),
+            writer.consumer(w -> generateRequestSerializer(context, operation, w)));
+        writer.popState();
+      });
     }
   }
 
@@ -155,8 +144,7 @@ public abstract class DafnyProtocolGenerator implements ProtocolGenerator {
     }
 
 
-    Shape targetShape = context.model().expectShape(operation.getInputShape());
-    
+
     System.out.println("serring");
     System.out.println(operation.getInputShape());
     System.out.println(inputName);
@@ -169,10 +157,12 @@ public abstract class DafnyProtocolGenerator implements ProtocolGenerator {
       );
     } else {
       // TODO: This isn't right... need to support >1 member in structure
+      Shape targetShape = context.model().expectShape(operation.getInputShape());
       var input = targetShape.accept(new DafnyMemberSerVisitor(
           context,
-          writer,
-          "input"
+//          writer,
+          "input",
+          true
       ));
 
       writer.write("""
@@ -201,29 +191,17 @@ public abstract class DafnyProtocolGenerator implements ProtocolGenerator {
       var outputSymbol = context.symbolProvider().toSymbol(output);
 
 
-      if (output.getId().getName().equals("Unit")) {
-        delegator.useFileWriter(deserFunction.getDefinitionFile(), deserFunction.getNamespace(), writer -> {
-          writer.pushState(new RequestSerializerSection(operation));
+      delegator.useFileWriter(deserFunction.getDefinitionFile(), deserFunction.getNamespace(), writer -> {
+        writer.pushState(new RequestSerializerSection(operation));
 
-          writer.write("""
-                    async def $L(config: $T) -> None:
-                      ${C|}
-                    """, deserFunction.getName(), configSymbol,
-              writer.consumer(w -> generateOperationResponseDeserializer(context, operation)));
-          writer.popState();
-        });
-      } else {
-        delegator.useFileWriter(deserFunction.getDefinitionFile(), deserFunction.getNamespace(), writer -> {
-          writer.pushState(new RequestSerializerSection(operation));
-
-          writer.write("""
-                    async def $L(input: Dafny$T, config: $T) -> $T:
-                      ${C|}
-                    """, deserFunction.getName(), outputSymbol, configSymbol, outputSymbol,
-              writer.consumer(w -> generateOperationResponseDeserializer(context, operation)));
-          writer.popState();
-        });
-      }
+        writer.write("""
+                  async def $L(input: $L, config: $T) -> $T:
+                    ${C|}
+                  """, deserFunction.getName(),
+            output.getId().getName().equals("Unit") ? "None" : "Dafny" + outputSymbol.getName(), configSymbol, outputSymbol,
+            writer.consumer(w -> generateOperationResponseDeserializer(context, operation)));
+        writer.popState();
+      });
 
     }
 
@@ -281,8 +259,9 @@ return None
         // TODO: This isn't right... need to support >1 member in structure
         var output = targetShape.accept(new DafnyMemberDeserVisitor(
             context,
-            writer,
-            "input"
+//            writer,
+            "input.value",
+            false
         ));
 
         writer.write("""
@@ -413,11 +392,12 @@ return $L($L)
    * manipulate the dataSource into the proper input content.
    */
   // TODO: Naming of DafnyMemberSerVisitor?
-  private static class DafnyMemberSerVisitor extends ShapeVisitor.Default<String> {
+  // TODO: Since Shim generator needs this... make it its own class
+  public static class DafnyMemberSerVisitor extends ShapeVisitor.Default<String> {
     private final GenerationContext context;
-    private final PythonWriter writer;
+//    private final PythonWriter writer;
     private final String dataSource;
-//    private final MemberShape member;
+    private final boolean useOtherOrder;
 
     /**
      * @param context The generation context.
@@ -428,15 +408,15 @@ return $L($L)
      */
     DafnyMemberSerVisitor(
         GenerationContext context,
-        PythonWriter writer,
-        String dataSource
-//        MemberShape member
+//        PythonWriter writer,
+        String dataSource,
+        boolean useOtherOrder
     ) {
       this.context = context;
-      this.writer = writer;
+//      this.writer = writer;
       this.dataSource = dataSource;
       // TODO: Do I even need member here...?
-//      this.member = member;
+      this.useOtherOrder = useOtherOrder;
     }
 
     @Override
@@ -454,10 +434,17 @@ return $L($L)
 
     @Override
     public String structureShape(StructureShape shape) {
-      
+
       String out = "";
+      // TODO: Change fstring to support >1 shape
       for (String memberName : shape.getMemberNames()) {
-        out += "%1$s=%2$s.%1$s,\n".formatted(memberName, dataSource);
+        // TODO: Need to refactor entire class
+        if (useOtherOrder) {
+          out += "%1$s=%2$s.%3$s,\n".formatted(memberName, dataSource, CaseUtils.toSnakeCase(memberName));
+        } else {
+          out += "%1$s=%2$s.%3$s,\n".formatted(CaseUtils.toSnakeCase(memberName), dataSource, memberName);
+        }
+        // TODO: Investigate what this should be... one of these is accessing a Wrappers_Compile...
       }
       return out;
     }
@@ -525,12 +512,13 @@ return $L($L)
    * manipulate the dataSource into the proper output content.
    */
   // TODO: Naming of DafnyMemberDeserVisitor?
-  private static class DafnyMemberDeserVisitor extends ShapeVisitor.Default<String> {
+  // TODO: Since Shim generator needs this... make it its own class
+  public static class DafnyMemberDeserVisitor extends ShapeVisitor.Default<String> {
 
     private final GenerationContext context;
-    private final PythonWriter writer;
+//    private final PythonWriter writer;
     private final String dataSource;
-//    private final MemberShape member;
+    private final boolean useOtherOrder;
 
     /**
      * @param context The generation context.
@@ -541,15 +529,15 @@ return $L($L)
      */
     DafnyMemberDeserVisitor(
         GenerationContext context,
-        PythonWriter writer,
-        String dataSource
-//        MemberShape member
+//        PythonWriter writer,
+        String dataSource,
+        boolean useOtherOrder
     ) {
       this.context = context;
-      this.writer = writer;
+//      this.writer = writer;
       this.dataSource = dataSource;
       // TODO: Do I even need member here...?
-//      this.member = member;
+      this.useOtherOrder = useOtherOrder;
     }
 
     @Override
@@ -571,8 +559,13 @@ return $L($L)
       String out = "";
       // TODO: Change fstring to support >1 shape
       for (String memberName : shape.getMemberNames()) {
+        // TODO: Need to refactor entire class
+        if (useOtherOrder) {
+          out += "%1$s=%2$s.%3$s,\n".formatted(memberName, dataSource, CaseUtils.toSnakeCase(memberName));
+        } else {
+          out += "%1$s=%2$s.%3$s,\n".formatted(CaseUtils.toSnakeCase(memberName), dataSource, memberName);
+        }
         // TODO: Investigate what this should be... one of these is accessing a Wrappers_Compile...
-        out += "%1$s=%2$s.value.%1$s,\n".formatted(memberName, dataSource);
       }
       return out;
     }

@@ -17,7 +17,7 @@ class SimpleRefinementShim(simple.refinement.internaldafny.types.ISimpleRefineme
     def __init__(self, _impl: client_impl) :
         self._impl = _impl
 
-    def OnlyOutput(self) -> simple.refinement.internaldafny.types.OnlyOutputOutput_OnlyOutputOutput:
+    def OnlyOutput(self,) -> simple.refinement.internaldafny.types.OnlyOutputOutput_OnlyOutputOutput:
             unwrapped_request = None
             try:
                 wrapped_response = asyncio.run(self._impl.only_output(unwrapped_request))
@@ -25,7 +25,7 @@ class SimpleRefinementShim(simple.refinement.internaldafny.types.ISimpleRefineme
                 return Wrappers_Compile.Result_Failure(smithy_error_to_dafny_error(e))
             return Wrappers_Compile.Result_Success(wrapped_response)
     def OnlyInput(self, input: simple.refinement.internaldafny.types.OnlyInputInput_OnlyInputInput) -> None:
-            unwrapped_request: OnlyInputInput = OnlyInputInput(value=input.value)
+            unwrapped_request: OnlyInputInput = OnlyInputInput()
             try:
                 wrapped_response = asyncio.run(self._impl.only_input(unwrapped_request))
             except ServiceError as e:
