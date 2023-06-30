@@ -147,9 +147,8 @@ public class AwsSdkShimCodegenTest {
                             this._impl.GoAsync(sdkRequest).Result;
                         return Wrappers_Compile.Result<%1$s>.create_Success(%3$s(sdkResponse));
                     }
-                    catch (System.AggregateException aggregate)
-                        when (aggregate.InnerException is Amazon.FoobarService.AmazonFoobarServiceException ex) {
-                        return Wrappers_Compile.Result<%1$s>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
+                    catch (System.AggregateException aggregate) {
+                        return Wrappers_Compile.Result<%1$s>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
                     }
                 }
                 """.formatted(resultTypeParams, requestFromDafnyConverter, responseToDafnyConverter));
