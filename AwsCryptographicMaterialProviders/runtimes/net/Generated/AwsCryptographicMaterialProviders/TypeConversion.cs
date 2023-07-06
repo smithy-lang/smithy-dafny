@@ -106,13 +106,21 @@ throw new System.ArgumentException("Invalid AWS.Cryptography.MaterialProviders.C
  if (concrete._branchKeyIdSupplier.is_Some) converted.BranchKeyIdSupplier = (AWS.Cryptography.MaterialProviders.IBranchKeyIdSupplier) FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S36_CreateAwsKmsHierarchicalKeyringInput__M19_branchKeyIdSupplier(concrete._branchKeyIdSupplier);
   converted.KeyStore = (AWS.Cryptography.KeyStore.KeyStore) FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S36_CreateAwsKmsHierarchicalKeyringInput__M8_keyStore(concrete._keyStore);
   converted.TtlSeconds = (long) FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S36_CreateAwsKmsHierarchicalKeyringInput__M10_ttlSeconds(concrete._ttlSeconds);
- if (concrete._maxCacheSize.is_Some) converted.MaxCacheSize = (int) FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S36_CreateAwsKmsHierarchicalKeyringInput__M12_maxCacheSize(concrete._maxCacheSize); return converted;
+ if (concrete._maxCacheSize.is_Some) converted.MaxCacheSize = (int) FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S36_CreateAwsKmsHierarchicalKeyringInput__M12_maxCacheSize(concrete._maxCacheSize);
+ if (concrete._gracePeriod.is_Some) converted.GracePeriod = (int) FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S36_CreateAwsKmsHierarchicalKeyringInput__M11_gracePeriod(concrete._gracePeriod);
+ if (concrete._graceInterval.is_Some) converted.GraceInterval = (int) FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S36_CreateAwsKmsHierarchicalKeyringInput__M13_graceInterval(concrete._graceInterval);
+ if (concrete._fanOut.is_Some) converted.FanOut = (int) FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S36_CreateAwsKmsHierarchicalKeyringInput__M6_fanOut(concrete._fanOut);
+ if (concrete._inFlightTTL.is_Some) converted.InFlightTTL = (int) FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S36_CreateAwsKmsHierarchicalKeyringInput__M11_inFlightTTL(concrete._inFlightTTL); return converted;
 }
  internal static software.amazon.cryptography.materialproviders.internaldafny.types._ICreateAwsKmsHierarchicalKeyringInput ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S36_CreateAwsKmsHierarchicalKeyringInput (AWS.Cryptography.MaterialProviders.CreateAwsKmsHierarchicalKeyringInput value) {
  string var_branchKeyId = value.IsSetBranchKeyId() ? value.BranchKeyId : (string) null;
  AWS.Cryptography.MaterialProviders.IBranchKeyIdSupplier var_branchKeyIdSupplier = value.IsSetBranchKeyIdSupplier() ? value.BranchKeyIdSupplier : (AWS.Cryptography.MaterialProviders.IBranchKeyIdSupplier) null;
  int? var_maxCacheSize = value.IsSetMaxCacheSize() ? value.MaxCacheSize : (int?) null;
- return new software.amazon.cryptography.materialproviders.internaldafny.types.CreateAwsKmsHierarchicalKeyringInput ( ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S36_CreateAwsKmsHierarchicalKeyringInput__M11_branchKeyId(var_branchKeyId) , ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S36_CreateAwsKmsHierarchicalKeyringInput__M19_branchKeyIdSupplier(var_branchKeyIdSupplier) , ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S36_CreateAwsKmsHierarchicalKeyringInput__M8_keyStore(value.KeyStore) , ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S36_CreateAwsKmsHierarchicalKeyringInput__M10_ttlSeconds(value.TtlSeconds) , ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S36_CreateAwsKmsHierarchicalKeyringInput__M12_maxCacheSize(var_maxCacheSize) ) ;
+ int? var_gracePeriod = value.IsSetGracePeriod() ? value.GracePeriod : (int?) null;
+ int? var_graceInterval = value.IsSetGraceInterval() ? value.GraceInterval : (int?) null;
+ int? var_fanOut = value.IsSetFanOut() ? value.FanOut : (int?) null;
+ int? var_inFlightTTL = value.IsSetInFlightTTL() ? value.InFlightTTL : (int?) null;
+ return new software.amazon.cryptography.materialproviders.internaldafny.types.CreateAwsKmsHierarchicalKeyringInput ( ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S36_CreateAwsKmsHierarchicalKeyringInput__M11_branchKeyId(var_branchKeyId) , ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S36_CreateAwsKmsHierarchicalKeyringInput__M19_branchKeyIdSupplier(var_branchKeyIdSupplier) , ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S36_CreateAwsKmsHierarchicalKeyringInput__M8_keyStore(value.KeyStore) , ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S36_CreateAwsKmsHierarchicalKeyringInput__M10_ttlSeconds(value.TtlSeconds) , ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S36_CreateAwsKmsHierarchicalKeyringInput__M12_maxCacheSize(var_maxCacheSize) , ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S36_CreateAwsKmsHierarchicalKeyringInput__M11_gracePeriod(var_gracePeriod) , ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S36_CreateAwsKmsHierarchicalKeyringInput__M13_graceInterval(var_graceInterval) , ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S36_CreateAwsKmsHierarchicalKeyringInput__M6_fanOut(var_fanOut) , ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S36_CreateAwsKmsHierarchicalKeyringInput__M11_inFlightTTL(var_inFlightTTL) ) ;
 }
  internal static AWS.Cryptography.MaterialProviders.CreateAwsKmsKeyringInput FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S24_CreateAwsKmsKeyringInput (software.amazon.cryptography.materialproviders.internaldafny.types._ICreateAwsKmsKeyringInput value) {
  software.amazon.cryptography.materialproviders.internaldafny.types.CreateAwsKmsKeyringInput concrete = (software.amazon.cryptography.materialproviders.internaldafny.types.CreateAwsKmsKeyringInput)value; AWS.Cryptography.MaterialProviders.CreateAwsKmsKeyringInput converted = new AWS.Cryptography.MaterialProviders.CreateAwsKmsKeyringInput();  converted.KmsKeyId = (string) FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S24_CreateAwsKmsKeyringInput__M8_kmsKeyId(concrete._kmsKeyId);
@@ -981,6 +989,30 @@ throw new System.ArgumentException("Invalid AWS.Cryptography.MaterialProviders.S
  return value.is_None ? (int?) null : FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S15_PositiveInteger(value.Extract());
 }
  internal static Wrappers_Compile._IOption<int> ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S36_CreateAwsKmsHierarchicalKeyringInput__M12_maxCacheSize (int? value) {
+ return value == null ? Wrappers_Compile.Option<int>.create_None() : Wrappers_Compile.Option<int>.create_Some(ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S15_PositiveInteger((int) value));
+}
+ internal static int? FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S36_CreateAwsKmsHierarchicalKeyringInput__M11_gracePeriod (Wrappers_Compile._IOption<int> value) {
+ return value.is_None ? (int?) null : FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S15_PositiveInteger(value.Extract());
+}
+ internal static Wrappers_Compile._IOption<int> ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S36_CreateAwsKmsHierarchicalKeyringInput__M11_gracePeriod (int? value) {
+ return value == null ? Wrappers_Compile.Option<int>.create_None() : Wrappers_Compile.Option<int>.create_Some(ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S15_PositiveInteger((int) value));
+}
+ internal static int? FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S36_CreateAwsKmsHierarchicalKeyringInput__M13_graceInterval (Wrappers_Compile._IOption<int> value) {
+ return value.is_None ? (int?) null : FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S15_PositiveInteger(value.Extract());
+}
+ internal static Wrappers_Compile._IOption<int> ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S36_CreateAwsKmsHierarchicalKeyringInput__M13_graceInterval (int? value) {
+ return value == null ? Wrappers_Compile.Option<int>.create_None() : Wrappers_Compile.Option<int>.create_Some(ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S15_PositiveInteger((int) value));
+}
+ internal static int? FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S36_CreateAwsKmsHierarchicalKeyringInput__M6_fanOut (Wrappers_Compile._IOption<int> value) {
+ return value.is_None ? (int?) null : FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S15_PositiveInteger(value.Extract());
+}
+ internal static Wrappers_Compile._IOption<int> ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S36_CreateAwsKmsHierarchicalKeyringInput__M6_fanOut (int? value) {
+ return value == null ? Wrappers_Compile.Option<int>.create_None() : Wrappers_Compile.Option<int>.create_Some(ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S15_PositiveInteger((int) value));
+}
+ internal static int? FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S36_CreateAwsKmsHierarchicalKeyringInput__M11_inFlightTTL (Wrappers_Compile._IOption<int> value) {
+ return value.is_None ? (int?) null : FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S15_PositiveInteger(value.Extract());
+}
+ internal static Wrappers_Compile._IOption<int> ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S36_CreateAwsKmsHierarchicalKeyringInput__M11_inFlightTTL (int? value) {
  return value == null ? Wrappers_Compile.Option<int>.create_None() : Wrappers_Compile.Option<int>.create_Some(ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S15_PositiveInteger((int) value));
 }
  internal static string FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S24_CreateAwsKmsKeyringInput__M8_kmsKeyId (Dafny.ISequence<char> value) {

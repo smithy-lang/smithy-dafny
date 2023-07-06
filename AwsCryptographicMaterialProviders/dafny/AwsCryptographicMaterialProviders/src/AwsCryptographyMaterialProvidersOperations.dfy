@@ -251,6 +251,16 @@ module AwsCryptographyMaterialProvidersOperations refines AbstractAwsCryptograph
   predicate CreateAwsKmsHierarchicalKeyringEnsuresPublicly(input: CreateAwsKmsHierarchicalKeyringInput, output: Result<IKeyring, Error>)
   {true}
 
+  function method GetIntFromOpt(data : Option<int32>, default : int32) : Types.PositiveInteger
+    requires data.None? || 0 <= data.value
+    requires 0 < default
+  {
+    if data.Some? then
+      data.value as Types.PositiveInteger
+    else
+      default as Types.PositiveInteger
+  }
+
   method CreateAwsKmsHierarchicalKeyring (config: InternalConfig, input: CreateAwsKmsHierarchicalKeyringInput)
     returns (output: Result<IKeyring, Error>)
   {
@@ -281,13 +291,22 @@ module AwsCryptographyMaterialProvidersOperations refines AbstractAwsCryptograph
         Types.AwsCryptographicMaterialProvidersException(
           message := "Must initialize keyring with either branchKeyId or BranchKeyIdSupplier."));
 
+    var gracePeriod := GetIntFromOpt(input.gracePeriod, 10);
+    var graceInterval := GetIntFromOpt(input.graceInterval, 1);
+    var fanOut := GetIntFromOpt(input.fanOut, 20);
+    var inFlightTTL := GetIntFromOpt(input.inFlightTTL, 20);
+
     var keyring := new AwsKmsHierarchicalKeyring.AwsKmsHierarchicalKeyring(
-      input.keyStore,
-      input.branchKeyId,
-      input.branchKeyIdSupplier,
-      input.ttlSeconds,
-      maxCacheSize,
-      config.crypto
+      keyStore := input.keyStore,
+      branchKeyId := input.branchKeyId,
+      branchKeyIdSupplier := input.branchKeyIdSupplier,
+      ttlSeconds := input.ttlSeconds,
+      maxCacheSize := maxCacheSize,
+      gracePeriod:= gracePeriod,
+      graceInterval := graceInterval,
+      fanOut := fanOut,
+      inFlightTTL := inFlightTTL,
+      cryptoPrimitives := config.crypto
     );
     return Success(keyring);
   }

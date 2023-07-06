@@ -768,7 +768,11 @@ include "../../../../StandardLibrary/src/Index.dfy"
  nameonly branchKeyIdSupplier: Option<IBranchKeyIdSupplier> ,
  nameonly keyStore: AwsCryptographyKeyStoreTypes.IKeyStoreClient ,
  nameonly ttlSeconds: PositiveLong ,
- nameonly maxCacheSize: Option<PositiveInteger>
+ nameonly maxCacheSize: Option<PositiveInteger> ,
+ nameonly gracePeriod: Option<PositiveInteger> ,
+ nameonly graceInterval: Option<PositiveInteger> ,
+ nameonly fanOut: Option<PositiveInteger> ,
+ nameonly inFlightTTL: Option<PositiveInteger>
  )
  datatype CreateAwsKmsKeyringInput = | CreateAwsKmsKeyringInput (
  nameonly kmsKeyId: KmsKeyId ,

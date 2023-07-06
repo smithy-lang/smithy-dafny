@@ -90,6 +90,10 @@ module TestAwsKmsHierarchicalKeyring {
         branchKeyIdSupplier := None,
         keyStore := keyStore,
         ttlSeconds := ttl,
+        gracePeriod := None,
+        graceInterval := None,
+        fanOut := None,
+        inFlightTTL := None,
         maxCacheSize := Option.Some(10)
       )
     );
@@ -136,6 +140,10 @@ module TestAwsKmsHierarchicalKeyring {
         branchKeyIdSupplier := None,
         keyStore := keyStore,
         ttlSeconds := ttl,
+        gracePeriod := None,
+        graceInterval := None,
+        fanOut := None,
+        inFlightTTL := None,
         maxCacheSize := Option.Some(10)
       )
     );
@@ -177,6 +185,10 @@ module TestAwsKmsHierarchicalKeyring {
         branchKeyIdSupplier := None,
         keyStore := keyStore,
         ttlSeconds := ttl,
+        gracePeriod := None,
+        graceInterval := None,
+        fanOut := None,
+        inFlightTTL := None,
         maxCacheSize := Option.Some(10)
       )
     );
@@ -223,6 +235,10 @@ module TestAwsKmsHierarchicalKeyring {
         branchKeyIdSupplier := None,
         keyStore := keyStore,
         ttlSeconds := ttl,
+        gracePeriod := None,
+        graceInterval := None,
+        fanOut := None,
+        inFlightTTL := None,
         maxCacheSize := Option.Some(10)
       )
     );
@@ -266,6 +282,10 @@ module TestAwsKmsHierarchicalKeyring {
         branchKeyIdSupplier := Some(branchKeyIdSupplier),
         keyStore := keyStore,
         ttlSeconds := ttl,
+        gracePeriod := None,
+        graceInterval := None,
+        fanOut := None,
+        inFlightTTL := None,
         maxCacheSize := Option.Some(10)
       )
     );

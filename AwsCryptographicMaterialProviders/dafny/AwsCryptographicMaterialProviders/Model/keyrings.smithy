@@ -318,7 +318,7 @@ structure GetBranchKeyIdInput {
   encryptionContext: EncryptionContext
 }
 
-@javadoc("Outputs for the Branch Key repsonsible for wrapping or unwrapping the data key in this encryption or decryption.")
+@javadoc("Outputs for the Branch Key responsible for wrapping or unwrapping the data key in this encryption or decryption.")
 structure GetBranchKeyIdOutput {
   @required
   @javadoc("The identifier of the Branch Key that should be responsible for wrapping or unwrapping the data key in this encryption or decryption.")
@@ -328,7 +328,7 @@ structure GetBranchKeyIdOutput {
 @javadoc("Inputs for creating a Hierarchical Keyring.")
 structure CreateAwsKmsHierarchicalKeyringInput {
     // branchKeyId XOR BranchKeyIdSupplier required
-    @javadoc("The identifier for the single Branch Key repsonsible for wrapping and unwrapping the data key. Either a Branch Key ID or Branch Key Supplier must be specified.")
+    @javadoc("The identifier for the single Branch Key responsible for wrapping and unwrapping the data key. Either a Branch Key ID or Branch Key Supplier must be specified.")
     branchKeyId: String,
     @javadoc("A Branch Key Supplier which determines what Branch Key to use to wrap and unwrap the data key. Either a Branch Key ID or Branch Key Supplier must be specified.")
     branchKeyIdSupplier: BranchKeyIdSupplierReference,
@@ -342,7 +342,23 @@ structure CreateAwsKmsHierarchicalKeyringInput {
     ttlSeconds: PositiveLong,
 
     @javadoc("How many entries the local cache for Branch Key material can hold before evicting older entries.")
-    maxCacheSize: PositiveInteger
+    maxCacheSize: PositiveInteger,
+
+    @range(min: 0)
+    @javadoc("How many seconds before expiration should an attempt be made to refresh the materials.")
+    gracePeriod: PositiveInteger,
+
+    @range(min: 0)
+    @javadoc("How many seconds between attempts to refresh the materials.")
+    graceInterval: PositiveInteger,
+
+    @range(min: 0)
+    @javadoc("How many simultaneous attempts to refresh the materials.")
+    fanOut: PositiveInteger,
+
+    @range(min: 0)
+    @javadoc("How many seconds until an attempt to refresh the materials should be forgotten.")
+    inFlightTTL: PositiveInteger,
 }
 
 // Raw

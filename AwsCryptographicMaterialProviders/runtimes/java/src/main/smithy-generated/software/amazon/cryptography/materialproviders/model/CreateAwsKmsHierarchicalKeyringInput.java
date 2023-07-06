@@ -13,7 +13,7 @@ import software.amazon.cryptography.materialproviders.IBranchKeyIdSupplier;
  */
 public class CreateAwsKmsHierarchicalKeyringInput {
   /**
-   * The identifier for the single Branch Key repsonsible for wrapping and unwrapping the data key. Either a Branch Key ID or Branch Key Supplier must be specified.
+   * The identifier for the single Branch Key responsible for wrapping and unwrapping the data key. Either a Branch Key ID or Branch Key Supplier must be specified.
    */
   private final String branchKeyId;
 
@@ -37,16 +37,40 @@ public class CreateAwsKmsHierarchicalKeyringInput {
    */
   private final int maxCacheSize;
 
+  /**
+   * How many seconds before expiration should an attempt be made to refresh the materials.
+   */
+  private final int gracePeriod;
+
+  /**
+   * How many seconds between attempts to refresh the materials.
+   */
+  private final int graceInterval;
+
+  /**
+   * How many simultaneous attempts to refresh the materials.
+   */
+  private final int fanOut;
+
+  /**
+   * How many seconds until an attempt to refresh the materials should be forgotten.
+   */
+  private final int inFlightTTL;
+
   protected CreateAwsKmsHierarchicalKeyringInput(BuilderImpl builder) {
     this.branchKeyId = builder.branchKeyId();
     this.branchKeyIdSupplier = builder.branchKeyIdSupplier();
     this.keyStore = builder.keyStore();
     this.ttlSeconds = builder.ttlSeconds();
     this.maxCacheSize = builder.maxCacheSize();
+    this.gracePeriod = builder.gracePeriod();
+    this.graceInterval = builder.graceInterval();
+    this.fanOut = builder.fanOut();
+    this.inFlightTTL = builder.inFlightTTL();
   }
 
   /**
-   * @return The identifier for the single Branch Key repsonsible for wrapping and unwrapping the data key. Either a Branch Key ID or Branch Key Supplier must be specified.
+   * @return The identifier for the single Branch Key responsible for wrapping and unwrapping the data key. Either a Branch Key ID or Branch Key Supplier must be specified.
    */
   public String branchKeyId() {
     return this.branchKeyId;
@@ -80,6 +104,34 @@ public class CreateAwsKmsHierarchicalKeyringInput {
     return this.maxCacheSize;
   }
 
+  /**
+   * @return How many seconds before expiration should an attempt be made to refresh the materials.
+   */
+  public int gracePeriod() {
+    return this.gracePeriod;
+  }
+
+  /**
+   * @return How many seconds between attempts to refresh the materials.
+   */
+  public int graceInterval() {
+    return this.graceInterval;
+  }
+
+  /**
+   * @return How many simultaneous attempts to refresh the materials.
+   */
+  public int fanOut() {
+    return this.fanOut;
+  }
+
+  /**
+   * @return How many seconds until an attempt to refresh the materials should be forgotten.
+   */
+  public int inFlightTTL() {
+    return this.inFlightTTL;
+  }
+
   public Builder toBuilder() {
     return new BuilderImpl(this);
   }
@@ -90,12 +142,12 @@ public class CreateAwsKmsHierarchicalKeyringInput {
 
   public interface Builder {
     /**
-     * @param branchKeyId The identifier for the single Branch Key repsonsible for wrapping and unwrapping the data key. Either a Branch Key ID or Branch Key Supplier must be specified.
+     * @param branchKeyId The identifier for the single Branch Key responsible for wrapping and unwrapping the data key. Either a Branch Key ID or Branch Key Supplier must be specified.
      */
     Builder branchKeyId(String branchKeyId);
 
     /**
-     * @return The identifier for the single Branch Key repsonsible for wrapping and unwrapping the data key. Either a Branch Key ID or Branch Key Supplier must be specified.
+     * @return The identifier for the single Branch Key responsible for wrapping and unwrapping the data key. Either a Branch Key ID or Branch Key Supplier must be specified.
      */
     String branchKeyId();
 
@@ -139,6 +191,46 @@ public class CreateAwsKmsHierarchicalKeyringInput {
      */
     int maxCacheSize();
 
+    /**
+     * @param gracePeriod How many seconds before expiration should an attempt be made to refresh the materials.
+     */
+    Builder gracePeriod(int gracePeriod);
+
+    /**
+     * @return How many seconds before expiration should an attempt be made to refresh the materials.
+     */
+    int gracePeriod();
+
+    /**
+     * @param graceInterval How many seconds between attempts to refresh the materials.
+     */
+    Builder graceInterval(int graceInterval);
+
+    /**
+     * @return How many seconds between attempts to refresh the materials.
+     */
+    int graceInterval();
+
+    /**
+     * @param fanOut How many simultaneous attempts to refresh the materials.
+     */
+    Builder fanOut(int fanOut);
+
+    /**
+     * @return How many simultaneous attempts to refresh the materials.
+     */
+    int fanOut();
+
+    /**
+     * @param inFlightTTL How many seconds until an attempt to refresh the materials should be forgotten.
+     */
+    Builder inFlightTTL(int inFlightTTL);
+
+    /**
+     * @return How many seconds until an attempt to refresh the materials should be forgotten.
+     */
+    int inFlightTTL();
+
     CreateAwsKmsHierarchicalKeyringInput build();
   }
 
@@ -157,6 +249,22 @@ public class CreateAwsKmsHierarchicalKeyringInput {
 
     private boolean _maxCacheSizeSet = false;
 
+    protected int gracePeriod;
+
+    private boolean _gracePeriodSet = false;
+
+    protected int graceInterval;
+
+    private boolean _graceIntervalSet = false;
+
+    protected int fanOut;
+
+    private boolean _fanOutSet = false;
+
+    protected int inFlightTTL;
+
+    private boolean _inFlightTTLSet = false;
+
     protected BuilderImpl() {
     }
 
@@ -168,6 +276,14 @@ public class CreateAwsKmsHierarchicalKeyringInput {
       this._ttlSecondsSet = true;
       this.maxCacheSize = model.maxCacheSize();
       this._maxCacheSizeSet = true;
+      this.gracePeriod = model.gracePeriod();
+      this._gracePeriodSet = true;
+      this.graceInterval = model.graceInterval();
+      this._graceIntervalSet = true;
+      this.fanOut = model.fanOut();
+      this._fanOutSet = true;
+      this.inFlightTTL = model.inFlightTTL();
+      this._inFlightTTLSet = true;
     }
 
     public Builder branchKeyId(String branchKeyId) {
@@ -217,6 +333,46 @@ public class CreateAwsKmsHierarchicalKeyringInput {
       return this.maxCacheSize;
     }
 
+    public Builder gracePeriod(int gracePeriod) {
+      this.gracePeriod = gracePeriod;
+      this._gracePeriodSet = true;
+      return this;
+    }
+
+    public int gracePeriod() {
+      return this.gracePeriod;
+    }
+
+    public Builder graceInterval(int graceInterval) {
+      this.graceInterval = graceInterval;
+      this._graceIntervalSet = true;
+      return this;
+    }
+
+    public int graceInterval() {
+      return this.graceInterval;
+    }
+
+    public Builder fanOut(int fanOut) {
+      this.fanOut = fanOut;
+      this._fanOutSet = true;
+      return this;
+    }
+
+    public int fanOut() {
+      return this.fanOut;
+    }
+
+    public Builder inFlightTTL(int inFlightTTL) {
+      this.inFlightTTL = inFlightTTL;
+      this._inFlightTTLSet = true;
+      return this;
+    }
+
+    public int inFlightTTL() {
+      return this.inFlightTTL;
+    }
+
     public CreateAwsKmsHierarchicalKeyringInput build() {
       if (Objects.isNull(this.keyStore()))  {
         throw new IllegalArgumentException("Missing value for required field `keyStore`");
@@ -229,6 +385,18 @@ public class CreateAwsKmsHierarchicalKeyringInput {
       }
       if (this._maxCacheSizeSet && this.maxCacheSize() < 0) {
         throw new IllegalArgumentException("`maxCacheSize` must be greater than or equal to 0");
+      }
+      if (this._gracePeriodSet && this.gracePeriod() < 0) {
+        throw new IllegalArgumentException("`gracePeriod` must be greater than or equal to 0");
+      }
+      if (this._graceIntervalSet && this.graceInterval() < 0) {
+        throw new IllegalArgumentException("`graceInterval` must be greater than or equal to 0");
+      }
+      if (this._fanOutSet && this.fanOut() < 0) {
+        throw new IllegalArgumentException("`fanOut` must be greater than or equal to 0");
+      }
+      if (this._inFlightTTLSet && this.inFlightTTL() < 0) {
+        throw new IllegalArgumentException("`inFlightTTL` must be greater than or equal to 0");
       }
       return new CreateAwsKmsHierarchicalKeyringInput(this);
     }

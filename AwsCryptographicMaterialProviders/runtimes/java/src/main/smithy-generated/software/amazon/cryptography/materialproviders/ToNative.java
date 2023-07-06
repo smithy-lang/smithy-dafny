@@ -323,6 +323,18 @@ public class ToNative {
     if (dafnyValue.dtor_maxCacheSize().is_Some()) {
       nativeBuilder.maxCacheSize((dafnyValue.dtor_maxCacheSize().dtor_value()));
     }
+    if (dafnyValue.dtor_gracePeriod().is_Some()) {
+      nativeBuilder.gracePeriod((dafnyValue.dtor_gracePeriod().dtor_value()));
+    }
+    if (dafnyValue.dtor_graceInterval().is_Some()) {
+      nativeBuilder.graceInterval((dafnyValue.dtor_graceInterval().dtor_value()));
+    }
+    if (dafnyValue.dtor_fanOut().is_Some()) {
+      nativeBuilder.fanOut((dafnyValue.dtor_fanOut().dtor_value()));
+    }
+    if (dafnyValue.dtor_inFlightTTL().is_Some()) {
+      nativeBuilder.inFlightTTL((dafnyValue.dtor_inFlightTTL().dtor_value()));
+    }
     return nativeBuilder.build();
   }
 

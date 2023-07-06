@@ -10,8 +10,8 @@ include "Constants.dfy"
 include "AwsKmsMrkMatchForDecrypt.dfy"
 include "../../AwsArnParsing.dfy"
 include "AwsKmsUtils.dfy"
-include "../../CMCs/LocalCMC.dfy"
-include "../../CMCs/SynchronizedLocalCMC.dfy"
+include "../../CMCs/StormTracker.dfy"
+include "../../CMCs/StormTrackingCMC.dfy"
 
 include "../../../Model/AwsCryptographyMaterialProvidersTypes.dfy"
 
@@ -25,8 +25,8 @@ module AwsKmsHierarchicalKeyring {
   import opened Actions
   import opened Constants
   import opened A = AwsKmsMrkMatchForDecrypt
-  import opened L = LocalCMC
-  import SynchronizedLocalCMC
+  import StormTracker
+  import StormTrackingCMC
   import opened AlgorithmSuites
   import EdkWrapping
   import MaterialWrapping
@@ -86,9 +86,9 @@ module AwsKmsHierarchicalKeyring {
   // We add this axiom here because verifying the mutability of the share state of the 
   // cache. Dafny does not support concurrency and proving the state of mutable frames 
   // is complicated.  
-  lemma {:axiom} verifyValidStateCache (cmc: SynchronizedLocalCMC.SynchronizedLocalCMC) ensures cmc.ValidState()
+  lemma {:axiom} verifyValidStateCache (cmc: StormTrackingCMC.StormTrackingCMC) ensures cmc.ValidState()
 
-  method getEntry(cmc: SynchronizedLocalCMC.SynchronizedLocalCMC, input: Types.GetCacheEntryInput) returns (res: Result<Types.GetCacheEntryOutput, Types.Error>)
+  method getEntry(cmc: StormTrackingCMC.StormTrackingCMC, input: Types.GetCacheEntryInput) returns (res: Result<Types.GetCacheEntryOutput, Types.Error>)
     requires cmc.ValidState()
     ensures cmc.ValidState()
     ensures cmc.GetCacheEntryEnsuresPublicly(input, res)
@@ -100,7 +100,7 @@ module AwsKmsHierarchicalKeyring {
     res := cmc.GetCacheEntry(input);
   }
 
-  method putEntry(cmc: SynchronizedLocalCMC.SynchronizedLocalCMC, input: Types.PutCacheEntryInput) returns (res: Result<(), Types.Error>)
+  method putEntry(cmc: StormTrackingCMC.StormTrackingCMC, input: Types.PutCacheEntryInput) returns (res: Result<(), Types.Error>)
     requires cmc.ValidState()
     ensures cmc.ValidState()
     ensures cmc.PutCacheEntryEnsuresPublicly(input, res)
@@ -124,7 +124,7 @@ module AwsKmsHierarchicalKeyring {
     const ttlSeconds: Types.PositiveLong
     const maxCacheSize: Types.PositiveInteger
     const cryptoPrimitives: Primitives.AtomicPrimitivesClient
-    const cache: SynchronizedLocalCMC.SynchronizedLocalCMC
+    const cache: StormTrackingCMC.StormTrackingCMC
 
     predicate ValidState()
       ensures ValidState() ==> History in Modifies
@@ -161,6 +161,10 @@ module AwsKmsHierarchicalKeyring {
       //= type=implication
       //# - MAY provide a max cache size
       maxCacheSize: Types.PositiveInteger,
+      gracePeriod: Types.PositiveInteger,
+      graceInterval: Types.PositiveInteger,
+      fanOut: Types.PositiveInteger,
+      inFlightTTL: Types.PositiveInteger,
       cryptoPrimitives : Primitives.AtomicPrimitivesClient
     )
       requires maxCacheSize >= 1
@@ -181,8 +185,14 @@ module AwsKmsHierarchicalKeyring {
         && var maybeSupplierModifies := if branchKeyIdSupplier.Some? then branchKeyIdSupplier.value.Modifies else {};
         && fresh(Modifies - keyStore.Modifies - cryptoPrimitives.Modifies - maybeSupplierModifies)
     {
-      var localCMC := new LocalCMC(maxCacheSize as nat, 1);
-      var cmc := new SynchronizedLocalCMC.SynchronizedLocalCMC(localCMC);
+      var localCMC := new StormTracker.StormTracker(
+        entryCapacity := maxCacheSize as nat,
+        entryPruningTailSize := 1,
+        gracePeriod := gracePeriod as Types.PositiveLong,
+        graceInterval := graceInterval as Types.PositiveLong,
+        fanOut := fanOut as Types.PositiveLong,
+        inFlightTTL := inFlightTTL as Types.PositiveLong);
+      var cmc := new StormTrackingCMC.StormTrackingCMC(localCMC);
 
       this.keyStore            := keyStore;
       this.branchKeyId         := branchKeyId;
@@ -612,7 +622,7 @@ module AwsKmsHierarchicalKeyring {
     const cryptoPrimitives: Primitives.AtomicPrimitivesClient
     const branchKeyId: string
     const ttlSeconds: Types.PositiveLong
-    const cache: SynchronizedLocalCMC.SynchronizedLocalCMC
+    const cache: StormTrackingCMC.StormTrackingCMC
 
     constructor(
       materials: Materials.DecryptionMaterialsPendingPlaintextDataKey,
@@ -620,7 +630,7 @@ module AwsKmsHierarchicalKeyring {
       cryptoPrimitives: Primitives.AtomicPrimitivesClient,
       branchKeyId: string,
       ttlSeconds: Types.PositiveLong,
-      cache: SynchronizedLocalCMC.SynchronizedLocalCMC
+      cache: StormTrackingCMC.StormTrackingCMC
     )
       requires keyStore.ValidState() && cryptoPrimitives.ValidState()
       ensures

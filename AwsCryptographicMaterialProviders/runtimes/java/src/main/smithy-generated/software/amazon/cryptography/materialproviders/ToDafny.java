@@ -269,7 +269,23 @@ public class ToDafny {
     maxCacheSize = Objects.nonNull(nativeValue.maxCacheSize()) ?
         Option.create_Some((nativeValue.maxCacheSize()))
         : Option.create_None();
-    return new CreateAwsKmsHierarchicalKeyringInput(branchKeyId, branchKeyIdSupplier, keyStore, ttlSeconds, maxCacheSize);
+    Option<Integer> gracePeriod;
+    gracePeriod = Objects.nonNull(nativeValue.gracePeriod()) ?
+        Option.create_Some((nativeValue.gracePeriod()))
+        : Option.create_None();
+    Option<Integer> graceInterval;
+    graceInterval = Objects.nonNull(nativeValue.graceInterval()) ?
+        Option.create_Some((nativeValue.graceInterval()))
+        : Option.create_None();
+    Option<Integer> fanOut;
+    fanOut = Objects.nonNull(nativeValue.fanOut()) ?
+        Option.create_Some((nativeValue.fanOut()))
+        : Option.create_None();
+    Option<Integer> inFlightTTL;
+    inFlightTTL = Objects.nonNull(nativeValue.inFlightTTL()) ?
+        Option.create_Some((nativeValue.inFlightTTL()))
+        : Option.create_None();
+    return new CreateAwsKmsHierarchicalKeyringInput(branchKeyId, branchKeyIdSupplier, keyStore, ttlSeconds, maxCacheSize, gracePeriod, graceInterval, fanOut, inFlightTTL);
   }
 
   public static CreateAwsKmsKeyringInput CreateAwsKmsKeyringInput(

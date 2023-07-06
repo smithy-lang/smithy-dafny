@@ -9,6 +9,10 @@ using System;
  private AWS.Cryptography.KeyStore.KeyStore _keyStore ;
  private long? _ttlSeconds ;
  private int? _maxCacheSize ;
+ private int? _gracePeriod ;
+ private int? _graceInterval ;
+ private int? _fanOut ;
+ private int? _inFlightTTL ;
  public string BranchKeyId {
  get { return this._branchKeyId; }
  set { this._branchKeyId = value; }
@@ -43,6 +47,34 @@ using System;
 }
  public bool IsSetMaxCacheSize () {
  return this._maxCacheSize.HasValue;
+}
+ public int GracePeriod {
+ get { return this._gracePeriod.GetValueOrDefault(); }
+ set { this._gracePeriod = value; }
+}
+ public bool IsSetGracePeriod () {
+ return this._gracePeriod.HasValue;
+}
+ public int GraceInterval {
+ get { return this._graceInterval.GetValueOrDefault(); }
+ set { this._graceInterval = value; }
+}
+ public bool IsSetGraceInterval () {
+ return this._graceInterval.HasValue;
+}
+ public int FanOut {
+ get { return this._fanOut.GetValueOrDefault(); }
+ set { this._fanOut = value; }
+}
+ public bool IsSetFanOut () {
+ return this._fanOut.HasValue;
+}
+ public int InFlightTTL {
+ get { return this._inFlightTTL.GetValueOrDefault(); }
+ set { this._inFlightTTL = value; }
+}
+ public bool IsSetInFlightTTL () {
+ return this._inFlightTTL.HasValue;
 }
  public void Validate() {
  if (!IsSetKeyStore()) throw new System.ArgumentException("Missing value for required property 'KeyStore'");
