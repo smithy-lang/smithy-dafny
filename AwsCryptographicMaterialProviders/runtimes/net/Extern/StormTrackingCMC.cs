@@ -17,13 +17,13 @@ namespace software.amazon.cryptography.internaldafny.StormTrackingCMC
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.Synchronized)]
     public Wrappers_Compile._IResult<_System._ITuple0, software.amazon.cryptography.materialproviders.internaldafny.types._IError> PutCacheEntry(software.amazon.cryptography.materialproviders.internaldafny.types._IPutCacheEntryInput input)
     {
-      return PutCacheEntry(input);
+      return PutCacheEntry_k(input);
     }
 
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.Synchronized)]
-    public Wrappers_Compile._IResult<_System._ITuple0, software.amazon.cryptography.materialproviders.internaldafny.types._IError> UpdaterUsageMetadata(software.amazon.cryptography.materialproviders.internaldafny.types._IUpdaterUsageMetadataInput input)
+    public Wrappers_Compile._IResult<_System._ITuple0, software.amazon.cryptography.materialproviders.internaldafny.types._IError> UpdateUsageMetadata(software.amazon.cryptography.materialproviders.internaldafny.types._IUpdateUsageMetadataInput input)
     {
-      return UpdaterUsageMetadata(input);
+      return UpdateUsageMetadata_k(input);
     }
 
     // NOT synchronized, as some sleeping might be involved
@@ -35,7 +35,7 @@ namespace software.amazon.cryptography.internaldafny.StormTrackingCMC
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.Synchronized)]
     public Wrappers_Compile._IResult<_System._ITuple0, software.amazon.cryptography.materialproviders.internaldafny.types._IError> DeleteCacheEntry(software.amazon.cryptography.materialproviders.internaldafny.types._IDeleteCacheEntryInput input)
     {
-      return DeleteCacheEntry(input);
+      return DeleteCacheEntry_k(input);
     }
 
     // This is the synchronization for GetCacheEntry and GetCacheEntry_k
@@ -80,9 +80,9 @@ namespace software.amazon.cryptography.internaldafny.StormTrackingCMC
     }
 
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.Synchronized)]
-    public Wrappers_Compile._IResult<_System._ITuple0, software.amazon.cryptography.materialproviders.internaldafny.types._IError> UpdaterUsageMetadata_k(software.amazon.cryptography.materialproviders.internaldafny.types._IUpdaterUsageMetadataInput input)
+    public Wrappers_Compile._IResult<_System._ITuple0, software.amazon.cryptography.materialproviders.internaldafny.types._IError> UpdateUsageMetadata_k(software.amazon.cryptography.materialproviders.internaldafny.types._IUpdateUsageMetadataInput input)
     {
-      return this.wrapped.UpdaterUsageMetadata(input);
+      return this.wrapped.UpdateUsageMetadata(input);
     }
   }
 }
