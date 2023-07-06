@@ -9,11 +9,13 @@ module  {:options "/functionSyntax:4"} TestLocalCMC {
   import opened UInt = StandardLibrary.UInt
   import opened Wrappers
   import opened LocalCMC
+  import opened AwsCryptographyKeyStoreTypes
   import UTF8
 
   function MakeMat(data : Utf8Bytes) : Materials
   {
     BranchKey(BranchKey := BranchKeyMaterials (
+                branchKeyIdentifier := "spoo",
                 branchKeyVersion := data,
                 branchKey := data
               ))

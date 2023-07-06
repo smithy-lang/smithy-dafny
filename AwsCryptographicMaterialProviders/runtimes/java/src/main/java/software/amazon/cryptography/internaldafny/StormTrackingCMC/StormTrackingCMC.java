@@ -19,9 +19,9 @@ public class StormTrackingCMC
     return wrapped.PutCacheEntry(input);
   }
 
-  public synchronized Wrappers_Compile.Result<dafny.Tuple0, software.amazon.cryptography.materialproviders.internaldafny.types.Error> UpdaterUsageMetadata(
-      software.amazon.cryptography.materialproviders.internaldafny.types.UpdaterUsageMetadataInput input) {
-    return wrapped.UpdaterUsageMetadata(input);
+  public synchronized Wrappers_Compile.Result<dafny.Tuple0, software.amazon.cryptography.materialproviders.internaldafny.types.Error> UpdateUsageMetadata(
+      software.amazon.cryptography.materialproviders.internaldafny.types.UpdateUsageMetadataInput input) {
+    return wrapped.UpdateUsageMetadata(input);
   }
 
   // NOT synchronized, as some sleeping might be involved
@@ -40,9 +40,9 @@ public class StormTrackingCMC
     return wrapped.PutCacheEntry(input);
   }
 
-  public synchronized Wrappers_Compile.Result<dafny.Tuple0, software.amazon.cryptography.materialproviders.internaldafny.types.Error> UpdaterUsageMetadata_k(
-      software.amazon.cryptography.materialproviders.internaldafny.types.UpdaterUsageMetadataInput input) {
-    return wrapped.UpdaterUsageMetadata(input);
+  public synchronized Wrappers_Compile.Result<dafny.Tuple0, software.amazon.cryptography.materialproviders.internaldafny.types.Error> UpdateUsageMetadata_k(
+      software.amazon.cryptography.materialproviders.internaldafny.types.UpdateUsageMetadataInput input) {
+    return wrapped.UpdateUsageMetadata(input);
   }
 
   // This is the synchronization for GetCacheEntry and GetCacheEntry_k

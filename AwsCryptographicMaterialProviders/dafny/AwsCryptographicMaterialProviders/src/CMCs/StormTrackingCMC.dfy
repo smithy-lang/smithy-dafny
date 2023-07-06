@@ -62,10 +62,10 @@ module {:options "/functionSyntax:4" } {:extern "software.amazon.cryptography.in
       ensures unchanged(History)
       ensures Modifies <= old(Modifies)
 
-    ghost predicate UpdaterUsageMetadataEnsuresPublicly(input: Types.UpdaterUsageMetadataInput, output: Result<(), Types.Error>)
+    ghost predicate UpdateUsageMetadataEnsuresPublicly(input: Types.UpdateUsageMetadataInput, output: Result<(), Types.Error>)
     {true}
 
-    method {:extern "UpdaterUsageMetadata"} UpdaterUsageMetadata'(input: Types.UpdaterUsageMetadataInput)
+    method {:extern "UpdateUsageMetadata"} UpdateUsageMetadata'(input: Types.UpdateUsageMetadataInput)
       returns (output: Result<(), Types.Error>)
       requires ValidState()
       modifies Modifies - {History}

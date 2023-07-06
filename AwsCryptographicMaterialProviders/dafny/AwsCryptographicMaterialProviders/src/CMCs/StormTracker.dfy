@@ -246,13 +246,13 @@ module {:options "/functionSyntax:4" }  StormTracker {
       output := wrapped.DeleteCacheEntry'(input);
     }
 
-    method UpdaterUsageMetadata(input: Types.UpdaterUsageMetadataInput)
+    method UpdateUsageMetadata(input: Types.UpdateUsageMetadataInput)
       returns (output: Result<(), Types.Error>)
       requires ValidState()
       modifies inFlight, wrapped.Modifies
       ensures ValidState()
     {
-      output := wrapped.UpdaterUsageMetadata'(input);
+      output := wrapped.UpdateUsageMetadata'(input);
     }
   }
 }
