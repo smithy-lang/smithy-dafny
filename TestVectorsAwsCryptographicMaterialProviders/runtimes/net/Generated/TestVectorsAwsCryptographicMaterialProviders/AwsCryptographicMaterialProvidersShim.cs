@@ -150,11 +150,11 @@ using System;
 }
 
 }
- public Wrappers_Compile._IResult<software.amazon.cryptography.materialproviders.internaldafny.types.ICryptographicMaterialsManager, software.amazon.cryptography.materialproviders.internaldafny.types._IError> CreateExpectedEncryptionContextCMM(software.amazon.cryptography.materialproviders.internaldafny.types._ICreateExpectedEncryptionContextCMMInput request) {
- AWS.Cryptography.MaterialProviders.CreateExpectedEncryptionContextCMMInput unWrappedRequest = TypeConversion.FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S39_CreateExpectedEncryptionContextCMMInput(request); try {
+ public Wrappers_Compile._IResult<software.amazon.cryptography.materialproviders.internaldafny.types.ICryptographicMaterialsManager, software.amazon.cryptography.materialproviders.internaldafny.types._IError> CreateRequiredEncryptionContextCMM(software.amazon.cryptography.materialproviders.internaldafny.types._ICreateRequiredEncryptionContextCMMInput request) {
+ AWS.Cryptography.MaterialProviders.CreateRequiredEncryptionContextCMMInput unWrappedRequest = TypeConversion.FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S39_CreateRequiredEncryptionContextCMMInput(request); try {
  AWS.Cryptography.MaterialProviders.ICryptographicMaterialsManager wrappedResponse =
- this._impl.CreateExpectedEncryptionContextCMM(unWrappedRequest);
- return Wrappers_Compile.Result<software.amazon.cryptography.materialproviders.internaldafny.types.ICryptographicMaterialsManager, software.amazon.cryptography.materialproviders.internaldafny.types._IError>.create_Success(TypeConversion.ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S40_CreateExpectedEncryptionContextCMMOutput(wrappedResponse));
+ this._impl.CreateRequiredEncryptionContextCMM(unWrappedRequest);
+ return Wrappers_Compile.Result<software.amazon.cryptography.materialproviders.internaldafny.types.ICryptographicMaterialsManager, software.amazon.cryptography.materialproviders.internaldafny.types._IError>.create_Success(TypeConversion.ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S40_CreateRequiredEncryptionContextCMMOutput(wrappedResponse));
 } catch (System.Exception ex) {
     return Wrappers_Compile.Result<software.amazon.cryptography.materialproviders.internaldafny.types.ICryptographicMaterialsManager, software.amazon.cryptography.materialproviders.internaldafny.types._IError>.create_Failure(this.ConvertError(ex));
 }

@@ -15,9 +15,9 @@ using System;
  if (result.is_Failure) throw TypeConversion.FromDafny_CommonError(result.dtor_error);
  
 }
- protected override void _UpdaterUsageMetadata(AWS.Cryptography.MaterialProviders.UpdaterUsageMetadataInput input) {
- software.amazon.cryptography.materialproviders.internaldafny.types._IUpdaterUsageMetadataInput internalInput = TypeConversion.ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S25_UpdaterUsageMetadataInput(input);
- Wrappers_Compile._IResult<_System._ITuple0, software.amazon.cryptography.materialproviders.internaldafny.types._IError> result = this._impl.UpdaterUsageMetadata(internalInput);
+ protected override void _UpdateUsageMetadata(AWS.Cryptography.MaterialProviders.UpdateUsageMetadataInput input) {
+ software.amazon.cryptography.materialproviders.internaldafny.types._IUpdateUsageMetadataInput internalInput = TypeConversion.ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S24_UpdateUsageMetadataInput(input);
+ Wrappers_Compile._IResult<_System._ITuple0, software.amazon.cryptography.materialproviders.internaldafny.types._IError> result = this._impl.UpdateUsageMetadata(internalInput);
  if (result.is_Failure) throw TypeConversion.FromDafny_CommonError(result.dtor_error);
  
 }

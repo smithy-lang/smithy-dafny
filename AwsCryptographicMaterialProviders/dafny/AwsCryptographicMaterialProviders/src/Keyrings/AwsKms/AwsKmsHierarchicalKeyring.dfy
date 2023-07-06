@@ -444,7 +444,7 @@ module AwsKmsHierarchicalKeyring {
       cacheId: seq<uint8>,
       keyStore: KeyStore.IKeyStoreClient
     )
-      returns (material: Result<Types.BranchKeyMaterials, Types.Error>)
+      returns (material: Result<KeyStore.BranchKeyMaterials, Types.Error>)
       requires ValidState() 
       requires keyStore.ValidState()
       modifies keyStore.Modifies
@@ -457,18 +457,15 @@ module AwsKmsHierarchicalKeyring {
       var getCacheOutput := getEntry(cache, getCacheInput);
 
       if getCacheOutput.Failure? {
-        var maybeRawBranchKeyMaterials := keyStore.GetActiveBranchKey(
+        var maybeGetActiveBranchKeyOutput := keyStore.GetActiveBranchKey(
           KeyStore.GetActiveBranchKeyInput(
             branchKeyIdentifier := branchKeyId
           )
         );
-        var rawBranchKeyMaterials :- maybeRawBranchKeyMaterials
+        var getActiveBranchKeyOutput :- maybeGetActiveBranchKeyOutput
           .MapFailure(e => Types.AwsCryptographyKeyStore(AwsCryptographyKeyStore := e));
 
-        var branchKeyMaterials := Types.BranchKeyMaterials(
-          branchKey := rawBranchKeyMaterials.branchKey,
-          branchKeyVersion := rawBranchKeyMaterials.branchKeyVersion
-        );
+        var branchKeyMaterials := getActiveBranchKeyOutput.branchKeyMaterials;
         
         var now := Time.GetCurrent();
         :- Need(
@@ -773,7 +770,7 @@ module AwsKmsHierarchicalKeyring {
       version: string,
       cacheId: seq<uint8>
     )
-      returns (material: Result<Types.BranchKeyMaterials, Types.Error>)
+      returns (material: Result<KeyStore.BranchKeyMaterials, Types.Error>)
       requires Invariant()
       requires keyStore.ValidState()
       modifies keyStore.Modifies
@@ -785,20 +782,17 @@ module AwsKmsHierarchicalKeyring {
       var getCacheOutput := getEntry(cache, getCacheInput);
 
       if getCacheOutput.Failure? {
-        var maybeRawBranchKeyMaterials := keyStore.GetBranchKeyVersion(
+        var maybeGetBranchKeyVersionOutput := keyStore.GetBranchKeyVersion(
           KeyStore.GetBranchKeyVersionInput(
             branchKeyIdentifier := branchKeyId,
             branchKeyVersion := version
           )
         );
-        
-        var rawBranchKeyMaterials :- maybeRawBranchKeyMaterials
+
+        var getBranchKeyVersionOutput :- maybeGetBranchKeyVersionOutput
           .MapFailure(e => Types.AwsCryptographyKeyStore(AwsCryptographyKeyStore := e));
 
-        var branchKeyMaterials := Types.BranchKeyMaterials(
-          branchKey := rawBranchKeyMaterials.branchKey,
-          branchKeyVersion := rawBranchKeyMaterials.branchKeyVersion
-        );
+        var branchKeyMaterials := getBranchKeyVersionOutput.branchKeyMaterials;
         
         var now := Time.GetCurrent();
         :- Need(

@@ -95,34 +95,6 @@ structure DecryptionMaterials {
   symmetricSigningKey: Secret
 }
 
-structure BranchKeyMaterials {
-    @required
-    branchKeyVersion: Utf8Bytes,
-
-    @required 
-    branchKey: Secret
-}
-
-structure BeaconKeyMaterials {
-  //= aws-encryption-sdk-specification/framework/structures.md#structure-4
-  //= type=implication
-  //# This structure MUST include the following fields:
-  //# - [Beacon Key Id](#beacon-key-id)
-  @required
-  beaconKeyIdentifier: String,
-
-  //= aws-encryption-sdk-specification/framework/structures.md#structure-4
-  //= type=implication
-  //# This structure MAY include the following fields:
-  //# - [Beacon Key](#beacon-key)
-  //# - [HMAC Keys](#hmac-keys)
-
-  beaconKey: Secret,
-
-  hmacKeys: HmacKeyMap  
-}
-
-
 //= aws-encryption-sdk-specification/framework/structures.md#structure
 //= type=implication
 //# An encrypted data key is comprised of the following fields:
@@ -168,13 +140,6 @@ list SymmetricSigningKeyList {
   //= type=implication
   //# The value of keys in this list MUST be kept secret.
   member: Secret
-}
-
-map HmacKeyMap {
-  // This key refers to the beacon name for which this value was derived.
-  key: String,
-  // HKDF derived from the beacon key and the UTF Encoding of the beacon name.
-  value: Secret
 }
 
 //= aws-encryption-sdk-specification/framework/structures.md#structure-1

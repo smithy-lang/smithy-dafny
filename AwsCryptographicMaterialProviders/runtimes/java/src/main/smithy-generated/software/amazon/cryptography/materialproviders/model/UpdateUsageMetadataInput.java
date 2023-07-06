@@ -6,12 +6,12 @@ package software.amazon.cryptography.materialproviders.model;
 import java.nio.ByteBuffer;
 import java.util.Objects;
 
-public class UpdaterUsageMetadataInput {
+public class UpdateUsageMetadataInput {
   private final ByteBuffer identifier;
 
   private final int bytesUsed;
 
-  protected UpdaterUsageMetadataInput(BuilderImpl builder) {
+  protected UpdateUsageMetadataInput(BuilderImpl builder) {
     this.identifier = builder.identifier();
     this.bytesUsed = builder.bytesUsed();
   }
@@ -41,7 +41,7 @@ public class UpdaterUsageMetadataInput {
 
     int bytesUsed();
 
-    UpdaterUsageMetadataInput build();
+    UpdateUsageMetadataInput build();
   }
 
   static class BuilderImpl implements Builder {
@@ -54,7 +54,7 @@ public class UpdaterUsageMetadataInput {
     protected BuilderImpl() {
     }
 
-    protected BuilderImpl(UpdaterUsageMetadataInput model) {
+    protected BuilderImpl(UpdateUsageMetadataInput model) {
       this.identifier = model.identifier();
       this.bytesUsed = model.bytesUsed();
       this._bytesUsedSet = true;
@@ -79,7 +79,7 @@ public class UpdaterUsageMetadataInput {
       return this.bytesUsed;
     }
 
-    public UpdaterUsageMetadataInput build() {
+    public UpdateUsageMetadataInput build() {
       if (Objects.isNull(this.identifier()))  {
         throw new IllegalArgumentException("Missing value for required field `identifier`");
       }
@@ -89,7 +89,7 @@ public class UpdaterUsageMetadataInput {
       if (this._bytesUsedSet && this.bytesUsed() < 0) {
         throw new IllegalArgumentException("`bytesUsed` must be greater than or equal to 0");
       }
-      return new UpdaterUsageMetadataInput(this);
+      return new UpdateUsageMetadataInput(this);
     }
   }
 }

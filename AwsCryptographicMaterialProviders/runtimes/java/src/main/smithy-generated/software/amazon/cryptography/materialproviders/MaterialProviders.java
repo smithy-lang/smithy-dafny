@@ -28,10 +28,10 @@ import software.amazon.cryptography.materialproviders.model.CreateAwsKmsRsaKeyri
 import software.amazon.cryptography.materialproviders.model.CreateCryptographicMaterialsCacheInput;
 import software.amazon.cryptography.materialproviders.model.CreateDefaultClientSupplierInput;
 import software.amazon.cryptography.materialproviders.model.CreateDefaultCryptographicMaterialsManagerInput;
-import software.amazon.cryptography.materialproviders.model.CreateExpectedEncryptionContextCMMInput;
 import software.amazon.cryptography.materialproviders.model.CreateMultiKeyringInput;
 import software.amazon.cryptography.materialproviders.model.CreateRawAesKeyringInput;
 import software.amazon.cryptography.materialproviders.model.CreateRawRsaKeyringInput;
+import software.amazon.cryptography.materialproviders.model.CreateRequiredEncryptionContextCMMInput;
 import software.amazon.cryptography.materialproviders.model.DecryptionMaterials;
 import software.amazon.cryptography.materialproviders.model.EncryptionMaterials;
 import software.amazon.cryptography.materialproviders.model.InitializeDecryptionMaterialsInput;
@@ -250,22 +250,6 @@ public class MaterialProviders {
   }
 
   /**
-   * Creates an Expected Cryptographic Materials Manager.
-   *
-   * @param input Inputs for creating an Expected Cryptographic Materials Manager.
-   * @return Outputs for creating an Expected Cryptographic Materials Manager.
-   */
-  public ICryptographicMaterialsManager CreateExpectedEncryptionContextCMM(
-      CreateExpectedEncryptionContextCMMInput input) {
-    software.amazon.cryptography.materialproviders.internaldafny.types.CreateExpectedEncryptionContextCMMInput dafnyValue = ToDafny.CreateExpectedEncryptionContextCMMInput(input);
-    Result<software.amazon.cryptography.materialproviders.internaldafny.types.ICryptographicMaterialsManager, Error> result = this._impl.CreateExpectedEncryptionContextCMM(dafnyValue);
-    if (result.is_Failure()) {
-      throw ToNative.Error(result.dtor_error());
-    }
-    return CryptographicMaterialsManager.wrap(result.dtor_value());
-  }
-
-  /**
    * Creates a Multi-Keyring comprised of one or more other Keyrings.
    *
    * @param input Inputs for creating a Multi-Keyring.
@@ -308,6 +292,22 @@ public class MaterialProviders {
       throw ToNative.Error(result.dtor_error());
     }
     return Keyring.wrap(result.dtor_value());
+  }
+
+  /**
+   * Creates an Required Encryption Context Cryptographic Materials Manager.
+   *
+   * @param input Inputs for creating an Required Encryption Context Cryptographic Materials Manager.
+   * @return Outputs for creating an Required Encryption Context Cryptographic Materials Manager.
+   */
+  public ICryptographicMaterialsManager CreateRequiredEncryptionContextCMM(
+      CreateRequiredEncryptionContextCMMInput input) {
+    software.amazon.cryptography.materialproviders.internaldafny.types.CreateRequiredEncryptionContextCMMInput dafnyValue = ToDafny.CreateRequiredEncryptionContextCMMInput(input);
+    Result<software.amazon.cryptography.materialproviders.internaldafny.types.ICryptographicMaterialsManager, Error> result = this._impl.CreateRequiredEncryptionContextCMM(dafnyValue);
+    if (result.is_Failure()) {
+      throw ToNative.Error(result.dtor_error());
+    }
+    return CryptographicMaterialsManager.wrap(result.dtor_value());
   }
 
   public void DecryptionMaterialsWithPlaintextDataKey(DecryptionMaterials input) {

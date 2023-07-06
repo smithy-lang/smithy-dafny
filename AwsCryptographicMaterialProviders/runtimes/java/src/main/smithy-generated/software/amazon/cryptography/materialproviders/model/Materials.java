@@ -4,6 +4,8 @@
 package software.amazon.cryptography.materialproviders.model;
 
 import java.util.Objects;
+import software.amazon.cryptography.keystore.model.BeaconKeyMaterials;
+import software.amazon.cryptography.keystore.model.BranchKeyMaterials;
 
 public class Materials {
   private final EncryptionMaterials Encryption;

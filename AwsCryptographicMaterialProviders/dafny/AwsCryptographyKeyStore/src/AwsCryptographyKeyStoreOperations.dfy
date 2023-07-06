@@ -94,10 +94,10 @@ module AwsCryptographyKeyStoreOperations refines AbstractAwsCryptographyKeyStore
     output := Success(Types.CreateKeyStoreOutput(tableArn := ddbTableArn));
   }
 
-  predicate CreateKeyEnsuresPublicly(output: Result<CreateKeyOutput, Error>)
+  predicate CreateKeyEnsuresPublicly(input: CreateKeyInput , output: Result<CreateKeyOutput, Error>)
   {true}
 
-  method CreateKey(config: InternalConfig)
+  method CreateKey ( config: InternalConfig , input: CreateKeyInput )
     returns (output: Result<CreateKeyOutput, Error>)
   {
     output := CreateKeys.CreateBranchAndBeaconKeys(config.ddbTableName, config.logicalKeyStoreName, config.kmsConfiguration.kmsKeyArn, config.grantTokens, config.kmsClient, config.ddbClient);

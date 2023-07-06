@@ -46,7 +46,7 @@ module TestKeyResolution {
     // Create a new key
     // We will create a use this new key per run to avoid tripping up
     // when running in different runtimes across different hosts
-    var branchKeyIdentifier :- expect keyStore.CreateKey();
+    var branchKeyIdentifier :- expect keyStore.CreateKey(Types.CreateKeyInput());
     
     WriteActiveActiveBranchKey(branchKeyIdentifier.branchKeyIdentifier, kmsClient, ddbClient);
 

@@ -2,6 +2,7 @@
 
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+import software.amazon.cryptography.keystore.model.BeaconKeyMaterials;
 import software.amazon.cryptography.materialproviders.ICryptographicMaterialsCache;
 import software.amazon.cryptography.materialproviders.MaterialProviders;
 import software.amazon.cryptography.materialproviders.model.*;

@@ -40,13 +40,13 @@ module TestVersionKey {
     // Create a new key
     // We will create a use this new key per run to avoid tripping up
     // when running in different runtimes
-    var branchKeyIdentifier :- expect keyStore.CreateKey();
+    var branchKeyIdentifier :- expect keyStore.CreateKey(Types.CreateKeyInput());
 
     var oldActiveResult :- expect keyStore.GetActiveBranchKey(Types.GetActiveBranchKeyInput(
       branchKeyIdentifier := branchKeyIdentifier.branchKeyIdentifier
     ));
 
-    var oldActiveVersion :- expect UTF8.Decode(oldActiveResult.branchKeyVersion).MapFailure(WrapStringToError);
+    var oldActiveVersion :- expect UTF8.Decode(oldActiveResult.branchKeyMaterials.branchKeyVersion).MapFailure(WrapStringToError);
     
     var versionKeyResult := keyStore.VersionKey(Types.VersionKeyInput(
       branchKeyIdentifier := branchKeyIdentifier.branchKeyIdentifier
@@ -67,10 +67,10 @@ module TestVersionKey {
     ));
 
     // We expect that getting the old active key has the same version as getting a branch key through the get version key api
-    expect getBranchKeyVersionResult.branchKeyVersion == oldActiveResult.branchKeyVersion;
+    expect getBranchKeyVersionResult.branchKeyMaterials.branchKeyVersion == oldActiveResult.branchKeyMaterials.branchKeyVersion;
     // We expect that if we rotate the branch key, the returned materials MUST not be equal to the previous active key.
-    expect getBranchKeyVersionResult.branchKeyVersion != newActiveResult.branchKeyVersion;
-    expect getBranchKeyVersionResult.branchKey != newActiveResult.branchKey;
+    expect getBranchKeyVersionResult.branchKeyMaterials.branchKeyVersion != newActiveResult.branchKeyMaterials.branchKeyVersion;
+    expect getBranchKeyVersionResult.branchKeyMaterials.branchKey != newActiveResult.branchKeyMaterials.branchKey;
   }
 
   method {:test} TestErrorActiveActiveVersion() {

@@ -16,8 +16,21 @@ include "../../../../StandardLibrary/src/Index.dfy"
  
  // Begin Generated Types
  
+ datatype BeaconKeyMaterials = | BeaconKeyMaterials (
+ nameonly beaconKeyIdentifier: string ,
+ nameonly beaconKey: Option<Secret> ,
+ nameonly hmacKeys: Option<HmacKeyMap>
+ )
+ datatype BranchKeyMaterials = | BranchKeyMaterials (
+ nameonly branchKeyIdentifier: string ,
+ nameonly branchKeyVersion: Utf8Bytes ,
+ nameonly branchKey: Secret
+ )
  datatype BranchKeyStatusResolutionInput = | BranchKeyStatusResolutionInput (
  nameonly branchKeyIdentifier: string
+ )
+ datatype CreateKeyInput = | CreateKeyInput (
+ 
  )
  datatype CreateKeyOutput = | CreateKeyOutput (
  nameonly branchKeyIdentifier: string
@@ -32,23 +45,20 @@ include "../../../../StandardLibrary/src/Index.dfy"
  nameonly branchKeyIdentifier: string
  )
  datatype GetActiveBranchKeyOutput = | GetActiveBranchKeyOutput (
- nameonly branchKeyVersion: Utf8Bytes ,
- nameonly branchKey: Secret
+ nameonly branchKeyMaterials: BranchKeyMaterials
  )
  datatype GetBeaconKeyInput = | GetBeaconKeyInput (
  nameonly branchKeyIdentifier: string
  )
  datatype GetBeaconKeyOutput = | GetBeaconKeyOutput (
- nameonly beaconKeyIdentifier: string ,
- nameonly beaconKey: Secret
+ nameonly beaconKeyMaterials: BeaconKeyMaterials
  )
  datatype GetBranchKeyVersionInput = | GetBranchKeyVersionInput (
  nameonly branchKeyIdentifier: string ,
  nameonly branchKeyVersion: string
  )
  datatype GetBranchKeyVersionOutput = | GetBranchKeyVersionOutput (
- nameonly branchKeyVersion: Utf8Bytes ,
- nameonly branchKey: Secret
+ nameonly branchKeyMaterials: BranchKeyMaterials
  )
  datatype GetKeyStoreInfoOutput = | GetKeyStoreInfoOutput (
  nameonly keyStoreId: string ,
@@ -58,6 +68,7 @@ include "../../../../StandardLibrary/src/Index.dfy"
  nameonly kmsConfiguration: KMSConfiguration
  )
  type GrantTokenList = seq<string>
+ type HmacKeyMap = map<string, Secret>
  class IKeyStoreClientCallHistory {
  ghost constructor() {
  GetKeyStoreInfo := [];
@@ -71,7 +82,7 @@ include "../../../../StandardLibrary/src/Index.dfy"
 }
  ghost var GetKeyStoreInfo: seq<DafnyCallEvent<(), Result<GetKeyStoreInfoOutput, Error>>>
  ghost var CreateKeyStore: seq<DafnyCallEvent<CreateKeyStoreInput, Result<CreateKeyStoreOutput, Error>>>
- ghost var CreateKey: seq<DafnyCallEvent<(), Result<CreateKeyOutput, Error>>>
+ ghost var CreateKey: seq<DafnyCallEvent<CreateKeyInput, Result<CreateKeyOutput, Error>>>
  ghost var VersionKey: seq<DafnyCallEvent<VersionKeyInput, Result<(), Error>>>
  ghost var GetActiveBranchKey: seq<DafnyCallEvent<GetActiveBranchKeyInput, Result<GetActiveBranchKeyOutput, Error>>>
  ghost var GetBranchKeyVersion: seq<DafnyCallEvent<GetBranchKeyVersionInput, Result<GetBranchKeyVersionOutput, Error>>>
@@ -135,9 +146,9 @@ include "../../../../StandardLibrary/src/Index.dfy"
  ensures CreateKeyStoreEnsuresPublicly(input, output)
  ensures History.CreateKeyStore == old(History.CreateKeyStore) + [DafnyCallEvent(input, output)]
  
- predicate CreateKeyEnsuresPublicly(output: Result<CreateKeyOutput, Error>)
+ predicate CreateKeyEnsuresPublicly(input: CreateKeyInput , output: Result<CreateKeyOutput, Error>)
  // The public method to be called by library consumers
- method CreateKey (  )
+ method CreateKey ( input: CreateKeyInput )
  returns (output: Result<CreateKeyOutput, Error>)
  requires
  && ValidState()
@@ -147,8 +158,8 @@ include "../../../../StandardLibrary/src/Index.dfy"
  decreases Modifies - {History}
  ensures
  && ValidState()
- ensures CreateKeyEnsuresPublicly(output)
- ensures History.CreateKey == old(History.CreateKey) + [DafnyCallEvent((), output)]
+ ensures CreateKeyEnsuresPublicly(input, output)
+ ensures History.CreateKey == old(History.CreateKey) + [DafnyCallEvent(input, output)]
  
  predicate VersionKeyEnsuresPublicly(input: VersionKeyInput , output: Result<(), Error>)
  // The public method to be called by library consumers
@@ -370,10 +381,10 @@ include "../../../../StandardLibrary/src/Index.dfy"
  History.CreateKeyStore := History.CreateKeyStore + [DafnyCallEvent(input, output)];
 }
  
- predicate CreateKeyEnsuresPublicly(output: Result<CreateKeyOutput, Error>)
- {Operations.CreateKeyEnsuresPublicly(output)}
+ predicate CreateKeyEnsuresPublicly(input: CreateKeyInput , output: Result<CreateKeyOutput, Error>)
+ {Operations.CreateKeyEnsuresPublicly(input, output)}
  // The public method to be called by library consumers
- method CreateKey (  )
+ method CreateKey ( input: CreateKeyInput )
  returns (output: Result<CreateKeyOutput, Error>)
  requires
  && ValidState()
@@ -383,11 +394,11 @@ include "../../../../StandardLibrary/src/Index.dfy"
  decreases Modifies - {History}
  ensures
  && ValidState()
- ensures CreateKeyEnsuresPublicly(output)
- ensures History.CreateKey == old(History.CreateKey) + [DafnyCallEvent((), output)]
+ ensures CreateKeyEnsuresPublicly(input, output)
+ ensures History.CreateKey == old(History.CreateKey) + [DafnyCallEvent(input, output)]
  {
- output := Operations.CreateKey(config);
- History.CreateKey := History.CreateKey + [DafnyCallEvent((), output)];
+ output := Operations.CreateKey(config, input);
+ History.CreateKey := History.CreateKey + [DafnyCallEvent(input, output)];
 }
  
  predicate VersionKeyEnsuresPublicly(input: VersionKeyInput , output: Result<(), Error>)
@@ -532,11 +543,11 @@ include "../../../../StandardLibrary/src/Index.dfy"
  ensures CreateKeyStoreEnsuresPublicly(input, output)
 
 
- predicate CreateKeyEnsuresPublicly(output: Result<CreateKeyOutput, Error>)
+ predicate CreateKeyEnsuresPublicly(input: CreateKeyInput , output: Result<CreateKeyOutput, Error>)
  // The private method to be refined by the library developer
 
 
- method CreateKey ( config: InternalConfig )
+ method CreateKey ( config: InternalConfig , input: CreateKeyInput )
  returns (output: Result<CreateKeyOutput, Error>)
  requires
  && ValidInternalConfig?(config)
@@ -545,7 +556,7 @@ include "../../../../StandardLibrary/src/Index.dfy"
  decreases ModifiesInternalConfig(config)
  ensures
  && ValidInternalConfig?(config)
- ensures CreateKeyEnsuresPublicly(output)
+ ensures CreateKeyEnsuresPublicly(input, output)
 
 
  predicate VersionKeyEnsuresPublicly(input: VersionKeyInput , output: Result<(), Error>)

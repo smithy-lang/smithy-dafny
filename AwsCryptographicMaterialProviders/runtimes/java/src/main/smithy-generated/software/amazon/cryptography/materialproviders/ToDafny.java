@@ -22,8 +22,6 @@ import software.amazon.cryptography.keystore.internaldafny.types.IKeyStoreClient
 import software.amazon.cryptography.materialproviders.internaldafny.types.AesWrappingAlg;
 import software.amazon.cryptography.materialproviders.internaldafny.types.AlgorithmSuiteId;
 import software.amazon.cryptography.materialproviders.internaldafny.types.AlgorithmSuiteInfo;
-import software.amazon.cryptography.materialproviders.internaldafny.types.BeaconKeyMaterials;
-import software.amazon.cryptography.materialproviders.internaldafny.types.BranchKeyMaterials;
 import software.amazon.cryptography.materialproviders.internaldafny.types.CommitmentPolicy;
 import software.amazon.cryptography.materialproviders.internaldafny.types.CreateAwsKmsDiscoveryKeyringInput;
 import software.amazon.cryptography.materialproviders.internaldafny.types.CreateAwsKmsDiscoveryMultiKeyringInput;
@@ -38,10 +36,10 @@ import software.amazon.cryptography.materialproviders.internaldafny.types.Create
 import software.amazon.cryptography.materialproviders.internaldafny.types.CreateCryptographicMaterialsCacheInput;
 import software.amazon.cryptography.materialproviders.internaldafny.types.CreateDefaultClientSupplierInput;
 import software.amazon.cryptography.materialproviders.internaldafny.types.CreateDefaultCryptographicMaterialsManagerInput;
-import software.amazon.cryptography.materialproviders.internaldafny.types.CreateExpectedEncryptionContextCMMInput;
 import software.amazon.cryptography.materialproviders.internaldafny.types.CreateMultiKeyringInput;
 import software.amazon.cryptography.materialproviders.internaldafny.types.CreateRawAesKeyringInput;
 import software.amazon.cryptography.materialproviders.internaldafny.types.CreateRawRsaKeyringInput;
+import software.amazon.cryptography.materialproviders.internaldafny.types.CreateRequiredEncryptionContextCMMInput;
 import software.amazon.cryptography.materialproviders.internaldafny.types.DBEAlgorithmSuiteId;
 import software.amazon.cryptography.materialproviders.internaldafny.types.DBECommitmentPolicy;
 import software.amazon.cryptography.materialproviders.internaldafny.types.DIRECT__KEY__WRAPPING;
@@ -93,7 +91,7 @@ import software.amazon.cryptography.materialproviders.internaldafny.types.Paddin
 import software.amazon.cryptography.materialproviders.internaldafny.types.PutCacheEntryInput;
 import software.amazon.cryptography.materialproviders.internaldafny.types.SignatureAlgorithm;
 import software.amazon.cryptography.materialproviders.internaldafny.types.SymmetricSignatureAlgorithm;
-import software.amazon.cryptography.materialproviders.internaldafny.types.UpdaterUsageMetadataInput;
+import software.amazon.cryptography.materialproviders.internaldafny.types.UpdateUsageMetadataInput;
 import software.amazon.cryptography.materialproviders.internaldafny.types.ValidDecryptionMaterialsTransitionInput;
 import software.amazon.cryptography.materialproviders.internaldafny.types.ValidEncryptionMaterialsTransitionInput;
 import software.amazon.cryptography.materialproviders.internaldafny.types.ValidateCommitmentPolicyOnDecryptInput;
@@ -191,30 +189,6 @@ public class ToDafny {
     EdkWrappingAlgorithm edkWrapping;
     edkWrapping = ToDafny.EdkWrappingAlgorithm(nativeValue.edkWrapping());
     return new AlgorithmSuiteInfo(id, binaryId, messageVersion, encrypt, kdf, commitment, signature, symmetricSignature, edkWrapping);
-  }
-
-  public static BeaconKeyMaterials BeaconKeyMaterials(
-      software.amazon.cryptography.materialproviders.model.BeaconKeyMaterials nativeValue) {
-    DafnySequence<? extends Character> beaconKeyIdentifier;
-    beaconKeyIdentifier = software.amazon.smithy.dafny.conversion.ToDafny.Simple.CharacterSequence(nativeValue.beaconKeyIdentifier());
-    Option<DafnySequence<? extends Byte>> beaconKey;
-    beaconKey = Objects.nonNull(nativeValue.beaconKey()) ?
-        Option.create_Some(software.amazon.smithy.dafny.conversion.ToDafny.Simple.ByteSequence(nativeValue.beaconKey()))
-        : Option.create_None();
-    Option<DafnyMap<? extends DafnySequence<? extends Character>, ? extends DafnySequence<? extends Byte>>> hmacKeys;
-    hmacKeys = (Objects.nonNull(nativeValue.hmacKeys()) && nativeValue.hmacKeys().size() > 0) ?
-        Option.create_Some(ToDafny.HmacKeyMap(nativeValue.hmacKeys()))
-        : Option.create_None();
-    return new BeaconKeyMaterials(beaconKeyIdentifier, beaconKey, hmacKeys);
-  }
-
-  public static BranchKeyMaterials BranchKeyMaterials(
-      software.amazon.cryptography.materialproviders.model.BranchKeyMaterials nativeValue) {
-    DafnySequence<? extends Byte> branchKeyVersion;
-    branchKeyVersion = software.amazon.smithy.dafny.conversion.ToDafny.Simple.DafnyUtf8Bytes(nativeValue.branchKeyVersion());
-    DafnySequence<? extends Byte> branchKey;
-    branchKey = software.amazon.smithy.dafny.conversion.ToDafny.Simple.ByteSequence(nativeValue.branchKey());
-    return new BranchKeyMaterials(branchKeyVersion, branchKey);
   }
 
   public static CreateAwsKmsDiscoveryKeyringInput CreateAwsKmsDiscoveryKeyringInput(
@@ -452,21 +426,6 @@ public class ToDafny {
     return new CreateDefaultCryptographicMaterialsManagerInput(keyring);
   }
 
-  public static CreateExpectedEncryptionContextCMMInput CreateExpectedEncryptionContextCMMInput(
-      software.amazon.cryptography.materialproviders.model.CreateExpectedEncryptionContextCMMInput nativeValue) {
-    Option<software.amazon.cryptography.materialproviders.internaldafny.types.ICryptographicMaterialsManager> underlyingCMM;
-    underlyingCMM = Objects.nonNull(nativeValue.underlyingCMM()) ?
-        Option.create_Some(ToDafny.CryptographicMaterialsManager(nativeValue.underlyingCMM()))
-        : Option.create_None();
-    Option<software.amazon.cryptography.materialproviders.internaldafny.types.IKeyring> keyring;
-    keyring = Objects.nonNull(nativeValue.keyring()) ?
-        Option.create_Some(ToDafny.Keyring(nativeValue.keyring()))
-        : Option.create_None();
-    DafnySequence<? extends DafnySequence<? extends Byte>> requiredEncryptionContextKeys;
-    requiredEncryptionContextKeys = ToDafny.EncryptionContextKeys(nativeValue.requiredEncryptionContextKeys());
-    return new CreateExpectedEncryptionContextCMMInput(underlyingCMM, keyring, requiredEncryptionContextKeys);
-  }
-
   public static CreateMultiKeyringInput CreateMultiKeyringInput(
       software.amazon.cryptography.materialproviders.model.CreateMultiKeyringInput nativeValue) {
     Option<software.amazon.cryptography.materialproviders.internaldafny.types.IKeyring> generator;
@@ -508,6 +467,21 @@ public class ToDafny {
         Option.create_Some(software.amazon.smithy.dafny.conversion.ToDafny.Simple.ByteSequence(nativeValue.privateKey()))
         : Option.create_None();
     return new CreateRawRsaKeyringInput(keyNamespace, keyName, paddingScheme, publicKey, privateKey);
+  }
+
+  public static CreateRequiredEncryptionContextCMMInput CreateRequiredEncryptionContextCMMInput(
+      software.amazon.cryptography.materialproviders.model.CreateRequiredEncryptionContextCMMInput nativeValue) {
+    Option<software.amazon.cryptography.materialproviders.internaldafny.types.ICryptographicMaterialsManager> underlyingCMM;
+    underlyingCMM = Objects.nonNull(nativeValue.underlyingCMM()) ?
+        Option.create_Some(ToDafny.CryptographicMaterialsManager(nativeValue.underlyingCMM()))
+        : Option.create_None();
+    Option<software.amazon.cryptography.materialproviders.internaldafny.types.IKeyring> keyring;
+    keyring = Objects.nonNull(nativeValue.keyring()) ?
+        Option.create_Some(ToDafny.Keyring(nativeValue.keyring()))
+        : Option.create_None();
+    DafnySequence<? extends DafnySequence<? extends Byte>> requiredEncryptionContextKeys;
+    requiredEncryptionContextKeys = ToDafny.EncryptionContextKeys(nativeValue.requiredEncryptionContextKeys());
+    return new CreateRequiredEncryptionContextCMMInput(underlyingCMM, keyring, requiredEncryptionContextKeys);
   }
 
   public static DecryptionMaterials DecryptionMaterials(
@@ -819,13 +793,13 @@ public class ToDafny {
     return new PutCacheEntryInput(identifier, materials, creationTime, expiryTime, messagesUsed, bytesUsed);
   }
 
-  public static UpdaterUsageMetadataInput UpdaterUsageMetadataInput(
-      software.amazon.cryptography.materialproviders.model.UpdaterUsageMetadataInput nativeValue) {
+  public static UpdateUsageMetadataInput UpdateUsageMetadataInput(
+      software.amazon.cryptography.materialproviders.model.UpdateUsageMetadataInput nativeValue) {
     DafnySequence<? extends Byte> identifier;
     identifier = software.amazon.smithy.dafny.conversion.ToDafny.Simple.ByteSequence(nativeValue.identifier());
     Integer bytesUsed;
     bytesUsed = (nativeValue.bytesUsed());
-    return new UpdaterUsageMetadataInput(identifier, bytesUsed);
+    return new UpdateUsageMetadataInput(identifier, bytesUsed);
   }
 
   public static ValidateCommitmentPolicyOnDecryptInput ValidateCommitmentPolicyOnDecryptInput(
@@ -1117,10 +1091,10 @@ public class ToDafny {
       return Materials.create_Decryption(ToDafny.DecryptionMaterials(nativeValue.Decryption()));
     }
     if (Objects.nonNull(nativeValue.BranchKey())) {
-      return Materials.create_BranchKey(ToDafny.BranchKeyMaterials(nativeValue.BranchKey()));
+      return Materials.create_BranchKey(software.amazon.cryptography.keystore.ToDafny.BranchKeyMaterials(nativeValue.BranchKey()));
     }
     if (Objects.nonNull(nativeValue.BeaconKey())) {
-      return Materials.create_BeaconKey(ToDafny.BeaconKeyMaterials(nativeValue.BeaconKey()));
+      return Materials.create_BeaconKey(software.amazon.cryptography.keystore.ToDafny.BeaconKeyMaterials(nativeValue.BeaconKey()));
     }
     throw new IllegalArgumentException("Cannot convert " + nativeValue + " to software.amazon.cryptography.materialproviders.internaldafny.types.Materials.");
   }
@@ -1217,14 +1191,6 @@ public class ToDafny {
         nativeValue, 
         software.amazon.smithy.dafny.conversion.ToDafny.Simple::DafnyUtf8Bytes, 
         software.amazon.smithy.dafny.conversion.ToDafny.Simple::DafnyUtf8Bytes);
-  }
-
-  public static DafnyMap<? extends DafnySequence<? extends Character>, ? extends DafnySequence<? extends Byte>> HmacKeyMap(
-      Map<String, ByteBuffer> nativeValue) {
-    return software.amazon.smithy.dafny.conversion.ToDafny.Aggregate.GenericToMap(
-        nativeValue, 
-        software.amazon.smithy.dafny.conversion.ToDafny.Simple::CharacterSequence, 
-        software.amazon.smithy.dafny.conversion.ToDafny.Simple::ByteSequence);
   }
 
   public static software.amazon.cryptography.materialproviders.internaldafny.types.IBranchKeyIdSupplier BranchKeyIdSupplier(

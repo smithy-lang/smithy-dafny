@@ -120,8 +120,11 @@ module GetKeys {
     var branchKeyVersionUtf8 :- UTF8.Encode(branchKeyVersion).MapFailure(e => E(e));
 
     return Success(Types.GetActiveBranchKeyOutput(
-      branchKeyVersion := branchKeyVersionUtf8,
-      branchKey := branchKeyResponse.Plaintext.value
+      branchKeyMaterials := Types.BranchKeyMaterials(
+        branchKeyIdentifier := input.branchKeyIdentifier,
+        branchKeyVersion := branchKeyVersionUtf8,
+        branchKey := branchKeyResponse.Plaintext.value
+      )
     ));
   }
 
@@ -243,8 +246,11 @@ module GetKeys {
     var branchKeyVersionUtf8 :- UTF8.Encode(branchKeyVersion).MapFailure(e => E(e));
 
     return Success(Types.GetBranchKeyVersionOutput(
-      branchKey := branchKeyResponse.Plaintext.value,
-      branchKeyVersion := branchKeyVersionUtf8
+      branchKeyMaterials := Types.BranchKeyMaterials(
+        branchKeyIdentifier := input.branchKeyIdentifier,
+        branchKeyVersion := branchKeyVersionUtf8,
+        branchKey := branchKeyResponse.Plaintext.value
+      )
     ));
   }
   
@@ -312,8 +318,11 @@ module GetKeys {
       //= aws-encryption-sdk-specification/framework/branch-key-store.md#getbeaconkey
       //# This operation MUST construct [beacon key materials](./structures.md#beacon-key-materials) from the decrypted branch key material
       //# and the `branchKeyId` from the returned `branch-key-id` field.
-      beaconKeyIdentifier := input.branchKeyIdentifier,
-      beaconKey := beaconKeyResponse.Plaintext.value
+      beaconKeyMaterials := Types.BeaconKeyMaterials(
+        beaconKeyIdentifier := input.branchKeyIdentifier,
+        beaconKey := Some(beaconKeyResponse.Plaintext.value),
+        hmacKeys := None
+      )
     ));
   }
   

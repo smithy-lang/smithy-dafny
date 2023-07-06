@@ -3,18 +3,25 @@
 // Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 package software.amazon.cryptography.keystore;
 
+import dafny.DafnyMap;
 import dafny.DafnySequence;
+import java.lang.Byte;
 import java.lang.Character;
 import java.lang.RuntimeException;
 import java.lang.String;
+import java.nio.ByteBuffer;
 import java.util.List;
+import java.util.Map;
 import software.amazon.cryptography.keystore.internaldafny.types.Error;
 import software.amazon.cryptography.keystore.internaldafny.types.Error_CollectionOfErrors;
 import software.amazon.cryptography.keystore.internaldafny.types.Error_KeyStoreException;
 import software.amazon.cryptography.keystore.internaldafny.types.Error_Opaque;
 import software.amazon.cryptography.keystore.internaldafny.types.IKeyStoreClient;
+import software.amazon.cryptography.keystore.model.BeaconKeyMaterials;
+import software.amazon.cryptography.keystore.model.BranchKeyMaterials;
 import software.amazon.cryptography.keystore.model.BranchKeyStatusResolutionInput;
 import software.amazon.cryptography.keystore.model.CollectionOfErrors;
+import software.amazon.cryptography.keystore.model.CreateKeyInput;
 import software.amazon.cryptography.keystore.model.CreateKeyOutput;
 import software.amazon.cryptography.keystore.model.CreateKeyStoreInput;
 import software.amazon.cryptography.keystore.model.CreateKeyStoreOutput;
@@ -75,10 +82,38 @@ public class ToNative {
     return nativeBuilder.build();
   }
 
+  public static BeaconKeyMaterials BeaconKeyMaterials(
+      software.amazon.cryptography.keystore.internaldafny.types.BeaconKeyMaterials dafnyValue) {
+    BeaconKeyMaterials.Builder nativeBuilder = BeaconKeyMaterials.builder();
+    nativeBuilder.beaconKeyIdentifier(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_beaconKeyIdentifier()));
+    if (dafnyValue.dtor_beaconKey().is_Some()) {
+      nativeBuilder.beaconKey(software.amazon.smithy.dafny.conversion.ToNative.Simple.ByteBuffer(dafnyValue.dtor_beaconKey().dtor_value()));
+    }
+    if (dafnyValue.dtor_hmacKeys().is_Some()) {
+      nativeBuilder.hmacKeys(ToNative.HmacKeyMap(dafnyValue.dtor_hmacKeys().dtor_value()));
+    }
+    return nativeBuilder.build();
+  }
+
+  public static BranchKeyMaterials BranchKeyMaterials(
+      software.amazon.cryptography.keystore.internaldafny.types.BranchKeyMaterials dafnyValue) {
+    BranchKeyMaterials.Builder nativeBuilder = BranchKeyMaterials.builder();
+    nativeBuilder.branchKeyIdentifier(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_branchKeyIdentifier()));
+    nativeBuilder.branchKeyVersion(software.amazon.smithy.dafny.conversion.ToNative.Simple.DafnyUtf8Bytes(dafnyValue.dtor_branchKeyVersion()));
+    nativeBuilder.branchKey(software.amazon.smithy.dafny.conversion.ToNative.Simple.ByteBuffer(dafnyValue.dtor_branchKey()));
+    return nativeBuilder.build();
+  }
+
   public static BranchKeyStatusResolutionInput BranchKeyStatusResolutionInput(
       software.amazon.cryptography.keystore.internaldafny.types.BranchKeyStatusResolutionInput dafnyValue) {
     BranchKeyStatusResolutionInput.Builder nativeBuilder = BranchKeyStatusResolutionInput.builder();
     nativeBuilder.branchKeyIdentifier(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_branchKeyIdentifier()));
+    return nativeBuilder.build();
+  }
+
+  public static CreateKeyInput CreateKeyInput(
+      software.amazon.cryptography.keystore.internaldafny.types.CreateKeyInput dafnyValue) {
+    CreateKeyInput.Builder nativeBuilder = CreateKeyInput.builder();
     return nativeBuilder.build();
   }
 
@@ -112,8 +147,7 @@ public class ToNative {
   public static GetActiveBranchKeyOutput GetActiveBranchKeyOutput(
       software.amazon.cryptography.keystore.internaldafny.types.GetActiveBranchKeyOutput dafnyValue) {
     GetActiveBranchKeyOutput.Builder nativeBuilder = GetActiveBranchKeyOutput.builder();
-    nativeBuilder.branchKeyVersion(software.amazon.smithy.dafny.conversion.ToNative.Simple.DafnyUtf8Bytes(dafnyValue.dtor_branchKeyVersion()));
-    nativeBuilder.branchKey(software.amazon.smithy.dafny.conversion.ToNative.Simple.ByteBuffer(dafnyValue.dtor_branchKey()));
+    nativeBuilder.branchKeyMaterials(ToNative.BranchKeyMaterials(dafnyValue.dtor_branchKeyMaterials()));
     return nativeBuilder.build();
   }
 
@@ -127,8 +161,7 @@ public class ToNative {
   public static GetBeaconKeyOutput GetBeaconKeyOutput(
       software.amazon.cryptography.keystore.internaldafny.types.GetBeaconKeyOutput dafnyValue) {
     GetBeaconKeyOutput.Builder nativeBuilder = GetBeaconKeyOutput.builder();
-    nativeBuilder.beaconKeyIdentifier(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_beaconKeyIdentifier()));
-    nativeBuilder.beaconKey(software.amazon.smithy.dafny.conversion.ToNative.Simple.ByteBuffer(dafnyValue.dtor_beaconKey()));
+    nativeBuilder.beaconKeyMaterials(ToNative.BeaconKeyMaterials(dafnyValue.dtor_beaconKeyMaterials()));
     return nativeBuilder.build();
   }
 
@@ -143,8 +176,7 @@ public class ToNative {
   public static GetBranchKeyVersionOutput GetBranchKeyVersionOutput(
       software.amazon.cryptography.keystore.internaldafny.types.GetBranchKeyVersionOutput dafnyValue) {
     GetBranchKeyVersionOutput.Builder nativeBuilder = GetBranchKeyVersionOutput.builder();
-    nativeBuilder.branchKeyVersion(software.amazon.smithy.dafny.conversion.ToNative.Simple.DafnyUtf8Bytes(dafnyValue.dtor_branchKeyVersion()));
-    nativeBuilder.branchKey(software.amazon.smithy.dafny.conversion.ToNative.Simple.ByteBuffer(dafnyValue.dtor_branchKey()));
+    nativeBuilder.branchKeyMaterials(ToNative.BranchKeyMaterials(dafnyValue.dtor_branchKeyMaterials()));
     return nativeBuilder.build();
   }
 
@@ -201,6 +233,14 @@ public class ToNative {
     return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToList(
         dafnyValue, 
         software.amazon.smithy.dafny.conversion.ToNative.Simple::String);
+  }
+
+  public static Map<String, ByteBuffer> HmacKeyMap(
+      DafnyMap<? extends DafnySequence<? extends Character>, ? extends DafnySequence<? extends Byte>> dafnyValue) {
+    return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToMap(
+        dafnyValue, 
+        software.amazon.smithy.dafny.conversion.ToNative.Simple::String, 
+        software.amazon.smithy.dafny.conversion.ToNative.Simple::ByteBuffer);
   }
 
   public static KeyStore KeyStore(IKeyStoreClient dafnyValue) {

@@ -3,7 +3,7 @@
 // Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 using System;
  using AWS.Cryptography.MaterialProviders; namespace AWS.Cryptography.MaterialProviders {
- public class CreateExpectedEncryptionContextCMMInput {
+ public class CreateRequiredEncryptionContextCMMInput {
  private AWS.Cryptography.MaterialProviders.ICryptographicMaterialsManager _underlyingCMM ;
  private AWS.Cryptography.MaterialProviders.IKeyring _keyring ;
  private System.Collections.Generic.List<string> _requiredEncryptionContextKeys ;

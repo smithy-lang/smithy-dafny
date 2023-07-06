@@ -27,7 +27,7 @@ include "Materials.dfy"
 include "Commitment.dfy"
 include "AwsArnParsing.dfy"
 include "AlgorithmSuites.dfy"
-include "CMMs/ExpectedEncryptionContextCMM.dfy"
+include "CMMs/RequiredEncryptionContextCMM.dfy"
 
 module AwsCryptographyMaterialProvidersOperations refines AbstractAwsCryptographyMaterialProvidersOperations {
 
@@ -59,7 +59,7 @@ module AwsCryptographyMaterialProvidersOperations refines AbstractAwsCryptograph
   import opened AwsArnParsing
   import Kms = Com.Amazonaws.Kms
   import Ddb = ComAmazonawsDynamodbTypes
-  import ExpectedEncryptionContextCMM
+  import RequiredEncryptionContextCMM
 
   datatype Config = Config(
     nameonly crypto: Primitives.AtomicPrimitivesClient
@@ -499,17 +499,17 @@ module AwsCryptographyMaterialProvidersOperations refines AbstractAwsCryptograph
     Types.AwsCryptographicMaterialProvidersException(
         message := "A publicKey or a kmsClient is required")
   }
-  predicate CreateExpectedEncryptionContextCMMEnsuresPublicly(input: CreateExpectedEncryptionContextCMMInput, output: Result<ICryptographicMaterialsManager, Error>)
+  predicate CreateRequiredEncryptionContextCMMEnsuresPublicly(input: CreateRequiredEncryptionContextCMMInput, output: Result<ICryptographicMaterialsManager, Error>)
   {true}
 
-  method CreateExpectedEncryptionContextCMM(config: InternalConfig, input: CreateExpectedEncryptionContextCMMInput)
+  method CreateRequiredEncryptionContextCMM(config: InternalConfig, input: CreateRequiredEncryptionContextCMMInput)
     returns (output: Result<ICryptographicMaterialsManager, Error>)
     ensures output.Success? ==> output.value.ValidState()
   {
-    :- Need(input.underlyingCMM.Some? && input.keyring.None?, CmpError("CreateExpectedEncryptionContextCMM currently only supports cmm."));
+    :- Need(input.underlyingCMM.Some? && input.keyring.None?, CmpError("CreateRequiredEncryptionContextCMM currently only supports cmm."));
     var keySet : set<UTF8.ValidUTF8Bytes> := set k <- input.requiredEncryptionContextKeys;
-    :- Need(0 < |keySet|, CmpError("ExpectedEncryptionContextCMM needs at least one requiredEncryptionContextKey."));
-    var cmm := new ExpectedEncryptionContextCMM.ExpectedEncryptionContextCMM(
+    :- Need(0 < |keySet|, CmpError("RequiredEncryptionContextCMM needs at least one requiredEncryptionContextKey."));
+    var cmm := new RequiredEncryptionContextCMM.RequiredEncryptionContextCMM(
       input.underlyingCMM.value,
       keySet);
 

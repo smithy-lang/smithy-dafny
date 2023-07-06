@@ -138,24 +138,24 @@ structure CreateDefaultCryptographicMaterialsManagerInput {
 }
 
 @positional
-@javadoc("Outputs for creating an Expected Cryptographic Materials Manager.")
-structure CreateExpectedEncryptionContextCMMOutput {
+@javadoc("Outputs for creating an Required Encryption Context Cryptographic Materials Manager.")
+structure CreateRequiredEncryptionContextCMMOutput {
   @required
-  @javadoc("The created Expected Cryptographic Materials Manager.")
+  @javadoc("The created Required Encryption Context Cryptographic Materials Manager.")
   materialsManager: CryptographicMaterialsManagerReference
 }
 
-@javadoc("Creates an Expected Cryptographic Materials Manager.")
-operation CreateExpectedEncryptionContextCMM {
-  input: CreateExpectedEncryptionContextCMMInput,
-  output: CreateExpectedEncryptionContextCMMOutput,
+@javadoc("Creates an Required Encryption Context Cryptographic Materials Manager.")
+operation CreateRequiredEncryptionContextCMM {
+  input: CreateRequiredEncryptionContextCMMInput,
+  output: CreateRequiredEncryptionContextCMMOutput,
 }
 
-@javadoc("Inputs for creating an Expected Cryptographic Materials Manager.")
-structure CreateExpectedEncryptionContextCMMInput {
-  @javadoc("The Cryprographic Materials Manager that the created Expected Cryptographic Materials Manager will delegate to. Either a Keyring or underlying Cryprographic Materials Manager must be specified.")
+@javadoc("Inputs for creating an Required Encryption Context Cryptographic Materials Manager.")
+structure CreateRequiredEncryptionContextCMMInput {
+  @javadoc("The Cryprographic Materials Manager that the created Required Encryption Context Cryptographic Materials Manager will delegate to. Either a Keyring or underlying Cryprographic Materials Manager must be specified.")
   underlyingCMM: CryptographicMaterialsManagerReference,
-  @javadoc("The Keyring that the created Cryprographic Materials Manager will use to wrap data keys. The created Expected Encryption Context CMM will delegate to a Default Cryptographic Materials Manager created with this Keyring. Either a Keyring or an underlying Cryprographic Materials Manager must be specified as input.")
+  @javadoc("The Keyring that the created Cryprographic Materials Manager will use to wrap data keys. The created Required Encryption Context CMM will delegate to a Default Cryptographic Materials Manager created with this Keyring. Either a Keyring or an underlying Cryprographic Materials Manager must be specified as input.")
   keyring: KeyringReference,
   @required
   @javadoc("A list of Encryption Context keys which are required to be supplied during encryption and decryption, and correspond to Encryption Context key-value pairs which are not stored on the resulting message.")

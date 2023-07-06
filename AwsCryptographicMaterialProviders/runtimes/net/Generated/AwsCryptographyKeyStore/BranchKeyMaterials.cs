@@ -2,10 +2,18 @@
 // SPDX-License-Identifier: Apache-2.0
 // Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 using System;
- using AWS.Cryptography.MaterialProviders; namespace AWS.Cryptography.MaterialProviders {
+ using AWS.Cryptography.KeyStore; namespace AWS.Cryptography.KeyStore {
  public class BranchKeyMaterials {
+ private string _branchKeyIdentifier ;
  private string _branchKeyVersion ;
  private System.IO.MemoryStream _branchKey ;
+ public string BranchKeyIdentifier {
+ get { return this._branchKeyIdentifier; }
+ set { this._branchKeyIdentifier = value; }
+}
+ public bool IsSetBranchKeyIdentifier () {
+ return this._branchKeyIdentifier != null;
+}
  public string BranchKeyVersion {
  get { return this._branchKeyVersion; }
  set { this._branchKeyVersion = value; }
@@ -21,6 +29,7 @@ using System;
  return this._branchKey != null;
 }
  public void Validate() {
+ if (!IsSetBranchKeyIdentifier()) throw new System.ArgumentException("Missing value for required property 'BranchKeyIdentifier'");
  if (!IsSetBranchKeyVersion()) throw new System.ArgumentException("Missing value for required property 'BranchKeyVersion'");
  if (!IsSetBranchKey()) throw new System.ArgumentException("Missing value for required property 'BranchKey'");
 

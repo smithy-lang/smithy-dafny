@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.0-preview-4 XXXX-XX-XX
+
+### Fix
+- Fixes Required Encryption Context CMM and UpdateUsageMetadata names in smithy model
+
 ## 1.0.0-preview-3 2023-06-22
 
 ### Fix

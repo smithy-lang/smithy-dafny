@@ -122,7 +122,12 @@ structure CreateKeyStoreOutput {
 // derive different beacon keys per beacon.
 @javadoc("Create a new Branch Key in the Key Store. Additionally create a Beacon Key that is tied to this Branch Key.")
 operation CreateKey {
+  input: CreateKeyInput
   output: CreateKeyOutput
+}
+
+structure CreateKeyInput {
+
 }
 
 @javadoc("Outputs for Branch Key creation.")
@@ -164,12 +169,8 @@ structure GetActiveBranchKeyInput {
 @javadoc("Outputs for getting a Branch Key's ACTIVE version.")
 structure GetActiveBranchKeyOutput {
   @required
-  @javadoc("The ACTIVE Branch Key version.")
-  branchKeyVersion: Utf8Bytes,
-
-  @required
-  @javadoc("The key material for this ACTIVE Branch Key version.")
-  branchKey: Secret
+  @javadoc("The materials for the Branch Key.")
+  branchKeyMaterials: BranchKeyMaterials,
 }
 
 @javadoc("Get a particular version of a Branch Key from the Key Store.")
@@ -192,12 +193,8 @@ structure GetBranchKeyVersionInput {
 @javadoc("Outputs for getting a version of a Branch Key.")
 structure GetBranchKeyVersionOutput {
   @required
-  @javadoc("The version of this Branch Key.")
-  branchKeyVersion: Utf8Bytes,
-
-  @required
-  @javadoc("The key material for this Branch Key version.")
-  branchKey: Secret
+  @javadoc("The materials for the Branch Key.")
+  branchKeyMaterials: BranchKeyMaterials,
 }
 
 @javadoc("Get a Beacon Key from the Key Store.")
@@ -216,12 +213,8 @@ structure GetBeaconKeyInput {
 @javadoc("Outputs for getting a Beacon Key")
 structure GetBeaconKeyOutput {
   @required
-  @javadoc("The identifier for the Beacon Key.")
-  beaconKeyIdentifier: String,
-
-  @required
-  @javadoc("The key material for this Beacon Key.")
-  beaconKey: Secret,
+  @javadoc("The materials for the Beacon Key.")
+  beaconKeyMaterials: BeaconKeyMaterials,
 }
 
 @javadoc("In the case that the Key Store contains two ACTIVE Branch Key versions (this should not be possible in normal operation), attempt to resolve to one by making one ACTIVE version DECRYPT_ONLY.")
@@ -240,6 +233,43 @@ string KmsKeyArn
 
 list GrantTokenList {
   member: String
+}
+
+structure BranchKeyMaterials {
+    @required
+    branchKeyIdentifier: String,
+
+    @required
+    branchKeyVersion: Utf8Bytes,
+
+    @required
+    branchKey: Secret,
+}
+
+structure BeaconKeyMaterials {
+  //= aws-encryption-sdk-specification/framework/structures.md#structure-4
+  //= type=implication
+  //# This structure MUST include the following fields:
+  //# - [Beacon Key Id](#beacon-key-id)
+  @required
+  beaconKeyIdentifier: String,
+
+  //= aws-encryption-sdk-specification/framework/structures.md#structure-4
+  //= type=implication
+  //# This structure MAY include the following fields:
+  //# - [Beacon Key](#beacon-key)
+  //# - [HMAC Keys](#hmac-keys)
+
+  beaconKey: Secret,
+
+  hmacKeys: HmacKeyMap
+}
+
+map HmacKeyMap {
+  // This key refers to the beacon name for which this value was derived.
+  key: String,
+  // HKDF derived from the beacon key and the UTF Encoding of the beacon name.
+  value: Secret
 }
 
 @sensitive

@@ -7,7 +7,7 @@ import software.amazon.cryptography.materialproviders.model.DeleteCacheEntryInpu
 import software.amazon.cryptography.materialproviders.model.GetCacheEntryInput;
 import software.amazon.cryptography.materialproviders.model.GetCacheEntryOutput;
 import software.amazon.cryptography.materialproviders.model.PutCacheEntryInput;
-import software.amazon.cryptography.materialproviders.model.UpdaterUsageMetadataInput;
+import software.amazon.cryptography.materialproviders.model.UpdateUsageMetadataInput;
 
 public interface ICryptographicMaterialsCache {
   void DeleteCacheEntry(DeleteCacheEntryInput input);
@@ -16,5 +16,5 @@ public interface ICryptographicMaterialsCache {
 
   void PutCacheEntry(PutCacheEntryInput input);
 
-  void UpdaterUsageMetadata(UpdaterUsageMetadataInput input);
+  void UpdateUsageMetadata(UpdateUsageMetadataInput input);
 }

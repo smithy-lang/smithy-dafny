@@ -12,6 +12,7 @@ import software.amazon.cryptography.keystore.internaldafny.__default;
 import software.amazon.cryptography.keystore.internaldafny.types.Error;
 import software.amazon.cryptography.keystore.internaldafny.types.IKeyStoreClient;
 import software.amazon.cryptography.keystore.model.BranchKeyStatusResolutionInput;
+import software.amazon.cryptography.keystore.model.CreateKeyInput;
 import software.amazon.cryptography.keystore.model.CreateKeyOutput;
 import software.amazon.cryptography.keystore.model.CreateKeyStoreInput;
 import software.amazon.cryptography.keystore.model.CreateKeyStoreOutput;
@@ -64,8 +65,9 @@ public class KeyStore {
    * Create a new Branch Key in the Key Store. Additionally create a Beacon Key that is tied to this Branch Key.
    * @return Outputs for Branch Key creation.
    */
-  public CreateKeyOutput CreateKey() {
-    Result<software.amazon.cryptography.keystore.internaldafny.types.CreateKeyOutput, Error> result = this._impl.CreateKey();
+  public CreateKeyOutput CreateKey(CreateKeyInput input) {
+    software.amazon.cryptography.keystore.internaldafny.types.CreateKeyInput dafnyValue = ToDafny.CreateKeyInput(input);
+    Result<software.amazon.cryptography.keystore.internaldafny.types.CreateKeyOutput, Error> result = this._impl.CreateKey(dafnyValue);
     if (result.is_Failure()) {
       throw ToNative.Error(result.dtor_error());
     }

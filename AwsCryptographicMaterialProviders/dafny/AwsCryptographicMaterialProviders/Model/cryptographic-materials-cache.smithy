@@ -13,7 +13,7 @@ resource CryptographicMaterialsCache {
   //# Cryptographic materials cache (CMC) is used by the [caching cryptographic materials manager (CMM)](caching-cmm.md)
   //# to store cryptographic materials for reuse.
   //# This document describes the interface that all CMCs MUST implement.
-  operations: [PutCacheEntry, GetCacheEntry, UpdaterUsageMetadata, DeleteCacheEntry]
+  operations: [PutCacheEntry, GetCacheEntry, UpdateUsageMetadata, DeleteCacheEntry]
 }
 
 @aws.polymorph#reference(resource: CryptographicMaterialsCache)
@@ -85,8 +85,8 @@ structure GetCacheEntryOutput {
 union Materials {
   Encryption: EncryptionMaterials,
   Decryption: DecryptionMaterials,
-  BranchKey: BranchKeyMaterials,
-  BeaconKey: BeaconKeyMaterials
+  BranchKey: aws.cryptography.keyStore#BranchKeyMaterials,
+  BeaconKey: aws.cryptography.keyStore#BeaconKeyMaterials
 }
 
 operation DeleteCacheEntry {
@@ -98,11 +98,11 @@ structure DeleteCacheEntryInput {
   identifier: Blob
 }
 
-operation UpdaterUsageMetadata {
-  input: UpdaterUsageMetadataInput
+operation UpdateUsageMetadata {
+  input: UpdateUsageMetadataInput
 }
 
-structure UpdaterUsageMetadataInput {
+structure UpdateUsageMetadataInput {
   @required
   identifier: Blob,
   @required
