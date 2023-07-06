@@ -32,8 +32,6 @@ import software.amazon.cryptography.materialproviders.model.AesWrappingAlg;
 import software.amazon.cryptography.materialproviders.model.AlgorithmSuiteId;
 import software.amazon.cryptography.materialproviders.model.AlgorithmSuiteInfo;
 import software.amazon.cryptography.materialproviders.model.AwsCryptographicMaterialProvidersException;
-import software.amazon.cryptography.materialproviders.model.BeaconKeyMaterials;
-import software.amazon.cryptography.materialproviders.model.BranchKeyMaterials;
 import software.amazon.cryptography.materialproviders.model.CollectionOfErrors;
 import software.amazon.cryptography.materialproviders.model.CommitmentPolicy;
 import software.amazon.cryptography.materialproviders.model.CreateAwsKmsDiscoveryKeyringInput;
@@ -256,27 +254,6 @@ public class ToNative {
     nativeBuilder.signature(ToNative.SignatureAlgorithm(dafnyValue.dtor_signature()));
     nativeBuilder.symmetricSignature(ToNative.SymmetricSignatureAlgorithm(dafnyValue.dtor_symmetricSignature()));
     nativeBuilder.edkWrapping(ToNative.EdkWrappingAlgorithm(dafnyValue.dtor_edkWrapping()));
-    return nativeBuilder.build();
-  }
-
-  public static BeaconKeyMaterials BeaconKeyMaterials(
-      software.amazon.cryptography.materialproviders.internaldafny.types.BeaconKeyMaterials dafnyValue) {
-    BeaconKeyMaterials.Builder nativeBuilder = BeaconKeyMaterials.builder();
-    nativeBuilder.beaconKeyIdentifier(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_beaconKeyIdentifier()));
-    if (dafnyValue.dtor_beaconKey().is_Some()) {
-      nativeBuilder.beaconKey(software.amazon.smithy.dafny.conversion.ToNative.Simple.ByteBuffer(dafnyValue.dtor_beaconKey().dtor_value()));
-    }
-    if (dafnyValue.dtor_hmacKeys().is_Some()) {
-      nativeBuilder.hmacKeys(ToNative.HmacKeyMap(dafnyValue.dtor_hmacKeys().dtor_value()));
-    }
-    return nativeBuilder.build();
-  }
-
-  public static BranchKeyMaterials BranchKeyMaterials(
-      software.amazon.cryptography.materialproviders.internaldafny.types.BranchKeyMaterials dafnyValue) {
-    BranchKeyMaterials.Builder nativeBuilder = BranchKeyMaterials.builder();
-    nativeBuilder.branchKeyVersion(software.amazon.smithy.dafny.conversion.ToNative.Simple.DafnyUtf8Bytes(dafnyValue.dtor_branchKeyVersion()));
-    nativeBuilder.branchKey(software.amazon.smithy.dafny.conversion.ToNative.Simple.ByteBuffer(dafnyValue.dtor_branchKey()));
     return nativeBuilder.build();
   }
 
@@ -986,10 +963,10 @@ public class ToNative {
       nativeBuilder.Decryption(ToNative.DecryptionMaterials(dafnyValue.dtor_Decryption()));
     }
     if (dafnyValue.is_BranchKey()) {
-      nativeBuilder.BranchKey(ToNative.BranchKeyMaterials(dafnyValue.dtor_BranchKey()));
+      nativeBuilder.BranchKey(software.amazon.cryptography.keystore.ToNative.BranchKeyMaterials(dafnyValue.dtor_BranchKey()));
     }
     if (dafnyValue.is_BeaconKey()) {
-      nativeBuilder.BeaconKey(ToNative.BeaconKeyMaterials(dafnyValue.dtor_BeaconKey()));
+      nativeBuilder.BeaconKey(software.amazon.cryptography.keystore.ToNative.BeaconKeyMaterials(dafnyValue.dtor_BeaconKey()));
     }
     return nativeBuilder.build();
   }
@@ -1080,14 +1057,6 @@ public class ToNative {
         dafnyValue, 
         software.amazon.smithy.dafny.conversion.ToNative.Simple::DafnyUtf8Bytes, 
         software.amazon.smithy.dafny.conversion.ToNative.Simple::DafnyUtf8Bytes);
-  }
-
-  public static Map<String, ByteBuffer> HmacKeyMap(
-      DafnyMap<? extends DafnySequence<? extends Character>, ? extends DafnySequence<? extends Byte>> dafnyValue) {
-    return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToMap(
-        dafnyValue, 
-        software.amazon.smithy.dafny.conversion.ToNative.Simple::String, 
-        software.amazon.smithy.dafny.conversion.ToNative.Simple::ByteBuffer);
   }
 
   public static IBranchKeyIdSupplier BranchKeyIdSupplier(

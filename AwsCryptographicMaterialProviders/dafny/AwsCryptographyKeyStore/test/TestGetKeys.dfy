@@ -40,7 +40,8 @@ module TestGetKeys {
     var beaconKeyResult :- expect keyStore.GetBeaconKey(Types.GetBeaconKeyInput(
       branchKeyIdentifier := branchKeyId
     ));
-    expect |beaconKeyResult.beaconKey| == 32;
+    expect beaconKeyResult.beaconKeyMaterials.beaconKey.Some?;
+    expect |beaconKeyResult.beaconKeyMaterials.beaconKey.value| == 32;
   }
 
   method {:test} TestGetActiveKey()
@@ -65,7 +66,7 @@ module TestGetKeys {
       branchKeyIdentifier := branchKeyId
     ));
     
-    expect |activeResult.branchKey| == 32;
+    expect |activeResult.branchKeyMaterials.branchKey| == 32;
   }
 
   method {:test} TestGetActiveKeyWithIncorrectKmsKeyArn() {
@@ -137,6 +138,6 @@ module TestGetKeys {
       branchKeyIdentifier := branchKeyId
     ));
     
-    expect |activeResult.branchKey| == 32;
+    expect |activeResult.branchKeyMaterials.branchKey| == 32;
   }
 }

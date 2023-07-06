@@ -1647,17 +1647,17 @@ throw new System.ArgumentException("Invalid AWS.Cryptography.MaterialProviders.S
  internal static software.amazon.cryptography.materialproviders.internaldafny.types._IDecryptionMaterials ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S9_Materials__M10_Decryption (AWS.Cryptography.MaterialProviders.DecryptionMaterials value) {
  return ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S19_DecryptionMaterials(value);
 }
- internal static AWS.Cryptography.MaterialProviders.BranchKeyMaterials FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S9_Materials__M9_BranchKey (software.amazon.cryptography.materialproviders.internaldafny.types._IBranchKeyMaterials value) {
- return FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S18_BranchKeyMaterials(value);
+ internal static AWS.Cryptography.KeyStore.BranchKeyMaterials FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S9_Materials__M9_BranchKey (software.amazon.cryptography.keystore.internaldafny.types._IBranchKeyMaterials value) {
+ return FromDafny_N3_aws__N12_cryptography__N8_keyStore__S18_BranchKeyMaterials(value);
 }
- internal static software.amazon.cryptography.materialproviders.internaldafny.types._IBranchKeyMaterials ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S9_Materials__M9_BranchKey (AWS.Cryptography.MaterialProviders.BranchKeyMaterials value) {
- return ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S18_BranchKeyMaterials(value);
+ internal static software.amazon.cryptography.keystore.internaldafny.types._IBranchKeyMaterials ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S9_Materials__M9_BranchKey (AWS.Cryptography.KeyStore.BranchKeyMaterials value) {
+ return ToDafny_N3_aws__N12_cryptography__N8_keyStore__S18_BranchKeyMaterials(value);
 }
- internal static AWS.Cryptography.MaterialProviders.BeaconKeyMaterials FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S9_Materials__M9_BeaconKey (software.amazon.cryptography.materialproviders.internaldafny.types._IBeaconKeyMaterials value) {
- return FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S18_BeaconKeyMaterials(value);
+ internal static AWS.Cryptography.KeyStore.BeaconKeyMaterials FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S9_Materials__M9_BeaconKey (software.amazon.cryptography.keystore.internaldafny.types._IBeaconKeyMaterials value) {
+ return FromDafny_N3_aws__N12_cryptography__N8_keyStore__S18_BeaconKeyMaterials(value);
 }
- internal static software.amazon.cryptography.materialproviders.internaldafny.types._IBeaconKeyMaterials ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S9_Materials__M9_BeaconKey (AWS.Cryptography.MaterialProviders.BeaconKeyMaterials value) {
- return ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S18_BeaconKeyMaterials(value);
+ internal static software.amazon.cryptography.keystore.internaldafny.types._IBeaconKeyMaterials ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S9_Materials__M9_BeaconKey (AWS.Cryptography.KeyStore.BeaconKeyMaterials value) {
+ return ToDafny_N3_aws__N12_cryptography__N8_keyStore__S18_BeaconKeyMaterials(value);
 }
  internal static AWS.Cryptography.MaterialProviders.DecryptionMaterials FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S14_OnDecryptInput__M9_materials (software.amazon.cryptography.materialproviders.internaldafny.types._IDecryptionMaterials value) {
  return FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S19_DecryptionMaterials(value);
@@ -2085,23 +2085,24 @@ return new Keyring(value);
  internal static long ToDafny_N6_smithy__N3_api__S4_Long (long value) {
  return value;
 }
- internal static AWS.Cryptography.MaterialProviders.BranchKeyMaterials FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S18_BranchKeyMaterials (software.amazon.cryptography.materialproviders.internaldafny.types._IBranchKeyMaterials value) {
- software.amazon.cryptography.materialproviders.internaldafny.types.BranchKeyMaterials concrete = (software.amazon.cryptography.materialproviders.internaldafny.types.BranchKeyMaterials)value; AWS.Cryptography.MaterialProviders.BranchKeyMaterials converted = new AWS.Cryptography.MaterialProviders.BranchKeyMaterials();  converted.BranchKeyVersion = (string) FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S18_BranchKeyMaterials__M16_branchKeyVersion(concrete._branchKeyVersion);
-  converted.BranchKey = (System.IO.MemoryStream) FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S18_BranchKeyMaterials__M9_branchKey(concrete._branchKey); return converted;
+ internal static AWS.Cryptography.KeyStore.BranchKeyMaterials FromDafny_N3_aws__N12_cryptography__N8_keyStore__S18_BranchKeyMaterials (software.amazon.cryptography.keystore.internaldafny.types._IBranchKeyMaterials value) {
+ software.amazon.cryptography.keystore.internaldafny.types.BranchKeyMaterials concrete = (software.amazon.cryptography.keystore.internaldafny.types.BranchKeyMaterials)value; AWS.Cryptography.KeyStore.BranchKeyMaterials converted = new AWS.Cryptography.KeyStore.BranchKeyMaterials();  converted.BranchKeyIdentifier = (string) FromDafny_N3_aws__N12_cryptography__N8_keyStore__S18_BranchKeyMaterials__M19_branchKeyIdentifier(concrete._branchKeyIdentifier);
+  converted.BranchKeyVersion = (string) FromDafny_N3_aws__N12_cryptography__N8_keyStore__S18_BranchKeyMaterials__M16_branchKeyVersion(concrete._branchKeyVersion);
+  converted.BranchKey = (System.IO.MemoryStream) FromDafny_N3_aws__N12_cryptography__N8_keyStore__S18_BranchKeyMaterials__M9_branchKey(concrete._branchKey); return converted;
 }
- internal static software.amazon.cryptography.materialproviders.internaldafny.types._IBranchKeyMaterials ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S18_BranchKeyMaterials (AWS.Cryptography.MaterialProviders.BranchKeyMaterials value) {
+ internal static software.amazon.cryptography.keystore.internaldafny.types._IBranchKeyMaterials ToDafny_N3_aws__N12_cryptography__N8_keyStore__S18_BranchKeyMaterials (AWS.Cryptography.KeyStore.BranchKeyMaterials value) {
 
- return new software.amazon.cryptography.materialproviders.internaldafny.types.BranchKeyMaterials ( ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S18_BranchKeyMaterials__M16_branchKeyVersion(value.BranchKeyVersion) , ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S18_BranchKeyMaterials__M9_branchKey(value.BranchKey) ) ;
+ return new software.amazon.cryptography.keystore.internaldafny.types.BranchKeyMaterials ( ToDafny_N3_aws__N12_cryptography__N8_keyStore__S18_BranchKeyMaterials__M19_branchKeyIdentifier(value.BranchKeyIdentifier) , ToDafny_N3_aws__N12_cryptography__N8_keyStore__S18_BranchKeyMaterials__M16_branchKeyVersion(value.BranchKeyVersion) , ToDafny_N3_aws__N12_cryptography__N8_keyStore__S18_BranchKeyMaterials__M9_branchKey(value.BranchKey) ) ;
 }
- internal static AWS.Cryptography.MaterialProviders.BeaconKeyMaterials FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S18_BeaconKeyMaterials (software.amazon.cryptography.materialproviders.internaldafny.types._IBeaconKeyMaterials value) {
- software.amazon.cryptography.materialproviders.internaldafny.types.BeaconKeyMaterials concrete = (software.amazon.cryptography.materialproviders.internaldafny.types.BeaconKeyMaterials)value; AWS.Cryptography.MaterialProviders.BeaconKeyMaterials converted = new AWS.Cryptography.MaterialProviders.BeaconKeyMaterials();  converted.BeaconKeyIdentifier = (string) FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S18_BeaconKeyMaterials__M19_beaconKeyIdentifier(concrete._beaconKeyIdentifier);
- if (concrete._beaconKey.is_Some) converted.BeaconKey = (System.IO.MemoryStream) FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S18_BeaconKeyMaterials__M9_beaconKey(concrete._beaconKey);
- if (concrete._hmacKeys.is_Some) converted.HmacKeys = (System.Collections.Generic.Dictionary<string, System.IO.MemoryStream>) FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S18_BeaconKeyMaterials__M8_hmacKeys(concrete._hmacKeys); return converted;
+ internal static AWS.Cryptography.KeyStore.BeaconKeyMaterials FromDafny_N3_aws__N12_cryptography__N8_keyStore__S18_BeaconKeyMaterials (software.amazon.cryptography.keystore.internaldafny.types._IBeaconKeyMaterials value) {
+ software.amazon.cryptography.keystore.internaldafny.types.BeaconKeyMaterials concrete = (software.amazon.cryptography.keystore.internaldafny.types.BeaconKeyMaterials)value; AWS.Cryptography.KeyStore.BeaconKeyMaterials converted = new AWS.Cryptography.KeyStore.BeaconKeyMaterials();  converted.BeaconKeyIdentifier = (string) FromDafny_N3_aws__N12_cryptography__N8_keyStore__S18_BeaconKeyMaterials__M19_beaconKeyIdentifier(concrete._beaconKeyIdentifier);
+ if (concrete._beaconKey.is_Some) converted.BeaconKey = (System.IO.MemoryStream) FromDafny_N3_aws__N12_cryptography__N8_keyStore__S18_BeaconKeyMaterials__M9_beaconKey(concrete._beaconKey);
+ if (concrete._hmacKeys.is_Some) converted.HmacKeys = (System.Collections.Generic.Dictionary<string, System.IO.MemoryStream>) FromDafny_N3_aws__N12_cryptography__N8_keyStore__S18_BeaconKeyMaterials__M8_hmacKeys(concrete._hmacKeys); return converted;
 }
- internal static software.amazon.cryptography.materialproviders.internaldafny.types._IBeaconKeyMaterials ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S18_BeaconKeyMaterials (AWS.Cryptography.MaterialProviders.BeaconKeyMaterials value) {
+ internal static software.amazon.cryptography.keystore.internaldafny.types._IBeaconKeyMaterials ToDafny_N3_aws__N12_cryptography__N8_keyStore__S18_BeaconKeyMaterials (AWS.Cryptography.KeyStore.BeaconKeyMaterials value) {
  System.IO.MemoryStream var_beaconKey = value.IsSetBeaconKey() ? value.BeaconKey : (System.IO.MemoryStream) null;
  System.Collections.Generic.Dictionary<string, System.IO.MemoryStream> var_hmacKeys = value.IsSetHmacKeys() ? value.HmacKeys : (System.Collections.Generic.Dictionary<string, System.IO.MemoryStream>) null;
- return new software.amazon.cryptography.materialproviders.internaldafny.types.BeaconKeyMaterials ( ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S18_BeaconKeyMaterials__M19_beaconKeyIdentifier(value.BeaconKeyIdentifier) , ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S18_BeaconKeyMaterials__M9_beaconKey(var_beaconKey) , ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S18_BeaconKeyMaterials__M8_hmacKeys(var_hmacKeys) ) ;
+ return new software.amazon.cryptography.keystore.internaldafny.types.BeaconKeyMaterials ( ToDafny_N3_aws__N12_cryptography__N8_keyStore__S18_BeaconKeyMaterials__M19_beaconKeyIdentifier(value.BeaconKeyIdentifier) , ToDafny_N3_aws__N12_cryptography__N8_keyStore__S18_BeaconKeyMaterials__M9_beaconKey(var_beaconKey) , ToDafny_N3_aws__N12_cryptography__N8_keyStore__S18_BeaconKeyMaterials__M8_hmacKeys(var_hmacKeys) ) ;
 }
  internal static AWS.Cryptography.MaterialProviders.ECDSA FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S5_ECDSA (software.amazon.cryptography.materialproviders.internaldafny.types._IECDSA value) {
  software.amazon.cryptography.materialproviders.internaldafny.types.ECDSA concrete = (software.amazon.cryptography.materialproviders.internaldafny.types.ECDSA)value; AWS.Cryptography.MaterialProviders.ECDSA converted = new AWS.Cryptography.MaterialProviders.ECDSA();  converted.Curve = (AWS.Cryptography.Primitives.ECDSASignatureAlgorithm) FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S5_ECDSA__M5_curve(concrete._curve); return converted;
@@ -2248,35 +2249,41 @@ throw new System.ArgumentException("Invalid AWS.Cryptography.Primitives.DigestAl
  internal static Dafny.ISequence<byte> ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S23_SymmetricSigningKeyList__M6_member (System.IO.MemoryStream value) {
  return ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S6_Secret(value);
 }
- internal static string FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S18_BranchKeyMaterials__M16_branchKeyVersion (Dafny.ISequence<byte> value) {
- return FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S9_Utf8Bytes(value);
-}
- internal static Dafny.ISequence<byte> ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S18_BranchKeyMaterials__M16_branchKeyVersion (string value) {
- return ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S9_Utf8Bytes(value);
-}
- internal static System.IO.MemoryStream FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S18_BranchKeyMaterials__M9_branchKey (Dafny.ISequence<byte> value) {
- return FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S6_Secret(value);
-}
- internal static Dafny.ISequence<byte> ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S18_BranchKeyMaterials__M9_branchKey (System.IO.MemoryStream value) {
- return ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S6_Secret(value);
-}
- internal static string FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S18_BeaconKeyMaterials__M19_beaconKeyIdentifier (Dafny.ISequence<char> value) {
+ internal static string FromDafny_N3_aws__N12_cryptography__N8_keyStore__S18_BranchKeyMaterials__M19_branchKeyIdentifier (Dafny.ISequence<char> value) {
  return FromDafny_N6_smithy__N3_api__S6_String(value);
 }
- internal static Dafny.ISequence<char> ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S18_BeaconKeyMaterials__M19_beaconKeyIdentifier (string value) {
+ internal static Dafny.ISequence<char> ToDafny_N3_aws__N12_cryptography__N8_keyStore__S18_BranchKeyMaterials__M19_branchKeyIdentifier (string value) {
  return ToDafny_N6_smithy__N3_api__S6_String(value);
 }
- internal static System.IO.MemoryStream FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S18_BeaconKeyMaterials__M9_beaconKey (Wrappers_Compile._IOption<Dafny.ISequence<byte>> value) {
- return value.is_None ? (System.IO.MemoryStream) null : FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S6_Secret(value.Extract());
+ internal static string FromDafny_N3_aws__N12_cryptography__N8_keyStore__S18_BranchKeyMaterials__M16_branchKeyVersion (Dafny.ISequence<byte> value) {
+ return FromDafny_N3_aws__N12_cryptography__N8_keyStore__S9_Utf8Bytes(value);
 }
- internal static Wrappers_Compile._IOption<Dafny.ISequence<byte>> ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S18_BeaconKeyMaterials__M9_beaconKey (System.IO.MemoryStream value) {
- return value == null ? Wrappers_Compile.Option<Dafny.ISequence<byte>>.create_None() : Wrappers_Compile.Option<Dafny.ISequence<byte>>.create_Some(ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S6_Secret((System.IO.MemoryStream) value));
+ internal static Dafny.ISequence<byte> ToDafny_N3_aws__N12_cryptography__N8_keyStore__S18_BranchKeyMaterials__M16_branchKeyVersion (string value) {
+ return ToDafny_N3_aws__N12_cryptography__N8_keyStore__S9_Utf8Bytes(value);
 }
- internal static System.Collections.Generic.Dictionary<string, System.IO.MemoryStream> FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S18_BeaconKeyMaterials__M8_hmacKeys (Wrappers_Compile._IOption<Dafny.IMap<Dafny.ISequence<char>, Dafny.ISequence<byte>>> value) {
- return value.is_None ? (System.Collections.Generic.Dictionary<string, System.IO.MemoryStream>) null : FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S10_HmacKeyMap(value.Extract());
+ internal static System.IO.MemoryStream FromDafny_N3_aws__N12_cryptography__N8_keyStore__S18_BranchKeyMaterials__M9_branchKey (Dafny.ISequence<byte> value) {
+ return FromDafny_N3_aws__N12_cryptography__N8_keyStore__S6_Secret(value);
 }
- internal static Wrappers_Compile._IOption<Dafny.IMap<Dafny.ISequence<char>, Dafny.ISequence<byte>>> ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S18_BeaconKeyMaterials__M8_hmacKeys (System.Collections.Generic.Dictionary<string, System.IO.MemoryStream> value) {
- return value == null ? Wrappers_Compile.Option<Dafny.IMap<Dafny.ISequence<char>, Dafny.ISequence<byte>>>.create_None() : Wrappers_Compile.Option<Dafny.IMap<Dafny.ISequence<char>, Dafny.ISequence<byte>>>.create_Some(ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S10_HmacKeyMap((System.Collections.Generic.Dictionary<string, System.IO.MemoryStream>) value));
+ internal static Dafny.ISequence<byte> ToDafny_N3_aws__N12_cryptography__N8_keyStore__S18_BranchKeyMaterials__M9_branchKey (System.IO.MemoryStream value) {
+ return ToDafny_N3_aws__N12_cryptography__N8_keyStore__S6_Secret(value);
+}
+ internal static string FromDafny_N3_aws__N12_cryptography__N8_keyStore__S18_BeaconKeyMaterials__M19_beaconKeyIdentifier (Dafny.ISequence<char> value) {
+ return FromDafny_N6_smithy__N3_api__S6_String(value);
+}
+ internal static Dafny.ISequence<char> ToDafny_N3_aws__N12_cryptography__N8_keyStore__S18_BeaconKeyMaterials__M19_beaconKeyIdentifier (string value) {
+ return ToDafny_N6_smithy__N3_api__S6_String(value);
+}
+ internal static System.IO.MemoryStream FromDafny_N3_aws__N12_cryptography__N8_keyStore__S18_BeaconKeyMaterials__M9_beaconKey (Wrappers_Compile._IOption<Dafny.ISequence<byte>> value) {
+ return value.is_None ? (System.IO.MemoryStream) null : FromDafny_N3_aws__N12_cryptography__N8_keyStore__S6_Secret(value.Extract());
+}
+ internal static Wrappers_Compile._IOption<Dafny.ISequence<byte>> ToDafny_N3_aws__N12_cryptography__N8_keyStore__S18_BeaconKeyMaterials__M9_beaconKey (System.IO.MemoryStream value) {
+ return value == null ? Wrappers_Compile.Option<Dafny.ISequence<byte>>.create_None() : Wrappers_Compile.Option<Dafny.ISequence<byte>>.create_Some(ToDafny_N3_aws__N12_cryptography__N8_keyStore__S6_Secret((System.IO.MemoryStream) value));
+}
+ internal static System.Collections.Generic.Dictionary<string, System.IO.MemoryStream> FromDafny_N3_aws__N12_cryptography__N8_keyStore__S18_BeaconKeyMaterials__M8_hmacKeys (Wrappers_Compile._IOption<Dafny.IMap<Dafny.ISequence<char>, Dafny.ISequence<byte>>> value) {
+ return value.is_None ? (System.Collections.Generic.Dictionary<string, System.IO.MemoryStream>) null : FromDafny_N3_aws__N12_cryptography__N8_keyStore__S10_HmacKeyMap(value.Extract());
+}
+ internal static Wrappers_Compile._IOption<Dafny.IMap<Dafny.ISequence<char>, Dafny.ISequence<byte>>> ToDafny_N3_aws__N12_cryptography__N8_keyStore__S18_BeaconKeyMaterials__M8_hmacKeys (System.Collections.Generic.Dictionary<string, System.IO.MemoryStream> value) {
+ return value == null ? Wrappers_Compile.Option<Dafny.IMap<Dafny.ISequence<char>, Dafny.ISequence<byte>>>.create_None() : Wrappers_Compile.Option<Dafny.IMap<Dafny.ISequence<char>, Dafny.ISequence<byte>>>.create_Some(ToDafny_N3_aws__N12_cryptography__N8_keyStore__S10_HmacKeyMap((System.Collections.Generic.Dictionary<string, System.IO.MemoryStream>) value));
 }
  internal static AWS.Cryptography.Primitives.ECDSASignatureAlgorithm FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S5_ECDSA__M5_curve (software.amazon.cryptography.primitives.internaldafny.types._IECDSASignatureAlgorithm value) {
  return FromDafny_N3_aws__N12_cryptography__N10_primitives__S23_ECDSASignatureAlgorithm(value);
@@ -2331,12 +2338,26 @@ return Dafny.Sequence<byte>.FromArray(utf8.GetBytes(value));
  internal static int ToDafny_N3_aws__N12_cryptography__N10_primitives__S9_Uint8Bits (int value) {
  return value;
 }
- internal static System.Collections.Generic.Dictionary<string, System.IO.MemoryStream> FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S10_HmacKeyMap (Dafny.IMap<Dafny.ISequence<char>, Dafny.ISequence<byte>> value) {
- return value.ItemEnumerable.ToDictionary(pair => FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S10_HmacKeyMap__M3_key(pair.Car), pair => FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S10_HmacKeyMap__M5_value(pair.Cdr));
+ internal static string FromDafny_N3_aws__N12_cryptography__N8_keyStore__S9_Utf8Bytes (Dafny.ISequence<byte> value) {
+ System.Text.UTF8Encoding utf8 = new System.Text.UTF8Encoding(false, true);
+return utf8.GetString(value.Elements);
 }
- internal static Dafny.IMap<Dafny.ISequence<char>, Dafny.ISequence<byte>> ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S10_HmacKeyMap (System.Collections.Generic.Dictionary<string, System.IO.MemoryStream> value) {
+ internal static Dafny.ISequence<byte> ToDafny_N3_aws__N12_cryptography__N8_keyStore__S9_Utf8Bytes (string value) {
+ System.Text.UTF8Encoding utf8 = new System.Text.UTF8Encoding(false, true);
+return Dafny.Sequence<byte>.FromArray(utf8.GetBytes(value));
+}
+ internal static System.IO.MemoryStream FromDafny_N3_aws__N12_cryptography__N8_keyStore__S6_Secret (Dafny.ISequence<byte> value) {
+ return new System.IO.MemoryStream(value.Elements);
+}
+ internal static Dafny.ISequence<byte> ToDafny_N3_aws__N12_cryptography__N8_keyStore__S6_Secret (System.IO.MemoryStream value) {
+ return Dafny.Sequence<byte>.FromArray(value.ToArray());
+}
+ internal static System.Collections.Generic.Dictionary<string, System.IO.MemoryStream> FromDafny_N3_aws__N12_cryptography__N8_keyStore__S10_HmacKeyMap (Dafny.IMap<Dafny.ISequence<char>, Dafny.ISequence<byte>> value) {
+ return value.ItemEnumerable.ToDictionary(pair => FromDafny_N3_aws__N12_cryptography__N8_keyStore__S10_HmacKeyMap__M3_key(pair.Car), pair => FromDafny_N3_aws__N12_cryptography__N8_keyStore__S10_HmacKeyMap__M5_value(pair.Cdr));
+}
+ internal static Dafny.IMap<Dafny.ISequence<char>, Dafny.ISequence<byte>> ToDafny_N3_aws__N12_cryptography__N8_keyStore__S10_HmacKeyMap (System.Collections.Generic.Dictionary<string, System.IO.MemoryStream> value) {
  return Dafny.Map<Dafny.ISequence<char>, Dafny.ISequence<byte>>.FromCollection(value.Select(pair =>
-    new Dafny.Pair<Dafny.ISequence<char>, Dafny.ISequence<byte>>(ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S10_HmacKeyMap__M3_key(pair.Key), ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S10_HmacKeyMap__M5_value(pair.Value))
+    new Dafny.Pair<Dafny.ISequence<char>, Dafny.ISequence<byte>>(ToDafny_N3_aws__N12_cryptography__N8_keyStore__S10_HmacKeyMap__M3_key(pair.Key), ToDafny_N3_aws__N12_cryptography__N8_keyStore__S10_HmacKeyMap__M5_value(pair.Value))
 ));
 }
  internal static AWS.Cryptography.Primitives.ECDSASignatureAlgorithm FromDafny_N3_aws__N12_cryptography__N10_primitives__S23_ECDSASignatureAlgorithm (software.amazon.cryptography.primitives.internaldafny.types._IECDSASignatureAlgorithm value) {
@@ -2373,17 +2394,17 @@ throw new System.ArgumentException("Invalid AWS.Cryptography.Primitives.ECDSASig
  internal static Dafny.ISequence<byte> ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S16_EncryptedDataKey__M10_ciphertext (System.IO.MemoryStream value) {
  return ToDafny_N6_smithy__N3_api__S4_Blob(value);
 }
- internal static string FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S10_HmacKeyMap__M3_key (Dafny.ISequence<char> value) {
+ internal static string FromDafny_N3_aws__N12_cryptography__N8_keyStore__S10_HmacKeyMap__M3_key (Dafny.ISequence<char> value) {
  return FromDafny_N6_smithy__N3_api__S6_String(value);
 }
- internal static Dafny.ISequence<char> ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S10_HmacKeyMap__M3_key (string value) {
+ internal static Dafny.ISequence<char> ToDafny_N3_aws__N12_cryptography__N8_keyStore__S10_HmacKeyMap__M3_key (string value) {
  return ToDafny_N6_smithy__N3_api__S6_String(value);
 }
- internal static System.IO.MemoryStream FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S10_HmacKeyMap__M5_value (Dafny.ISequence<byte> value) {
- return FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S6_Secret(value);
+ internal static System.IO.MemoryStream FromDafny_N3_aws__N12_cryptography__N8_keyStore__S10_HmacKeyMap__M5_value (Dafny.ISequence<byte> value) {
+ return FromDafny_N3_aws__N12_cryptography__N8_keyStore__S6_Secret(value);
 }
- internal static Dafny.ISequence<byte> ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S10_HmacKeyMap__M5_value (System.IO.MemoryStream value) {
- return ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S6_Secret(value);
+ internal static Dafny.ISequence<byte> ToDafny_N3_aws__N12_cryptography__N8_keyStore__S10_HmacKeyMap__M5_value (System.IO.MemoryStream value) {
+ return ToDafny_N3_aws__N12_cryptography__N8_keyStore__S6_Secret(value);
 }
  internal static string FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S9_AccountId (Dafny.ISequence<char> value) {
  return new string(value.Elements);

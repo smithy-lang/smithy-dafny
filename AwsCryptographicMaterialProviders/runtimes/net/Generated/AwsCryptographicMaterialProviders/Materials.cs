@@ -6,8 +6,8 @@ using System;
  public class Materials {
  private AWS.Cryptography.MaterialProviders.EncryptionMaterials _encryption ;
  private AWS.Cryptography.MaterialProviders.DecryptionMaterials _decryption ;
- private AWS.Cryptography.MaterialProviders.BranchKeyMaterials _branchKey ;
- private AWS.Cryptography.MaterialProviders.BeaconKeyMaterials _beaconKey ;
+ private AWS.Cryptography.KeyStore.BranchKeyMaterials _branchKey ;
+ private AWS.Cryptography.KeyStore.BeaconKeyMaterials _beaconKey ;
  public AWS.Cryptography.MaterialProviders.EncryptionMaterials Encryption {
  get { return this._encryption; }
  set { this._encryption = value; }
@@ -22,14 +22,14 @@ using System;
  public bool IsSetDecryption () {
  return this._decryption != null;
 }
- public AWS.Cryptography.MaterialProviders.BranchKeyMaterials BranchKey {
+ public AWS.Cryptography.KeyStore.BranchKeyMaterials BranchKey {
  get { return this._branchKey; }
  set { this._branchKey = value; }
 }
  public bool IsSetBranchKey () {
  return this._branchKey != null;
 }
- public AWS.Cryptography.MaterialProviders.BeaconKeyMaterials BeaconKey {
+ public AWS.Cryptography.KeyStore.BeaconKeyMaterials BeaconKey {
  get { return this._beaconKey; }
  set { this._beaconKey = value; }
 }

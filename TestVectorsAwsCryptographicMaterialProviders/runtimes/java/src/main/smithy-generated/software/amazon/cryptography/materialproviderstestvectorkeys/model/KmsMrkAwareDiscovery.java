@@ -11,6 +11,9 @@ public class KmsMrkAwareDiscovery {
 
   private final String defaultMrkRegion;
 
+  /**
+   * A filter which defines what AWS partition and AWS accounts a KMS Key may be in for a Keyring to be allowed to attempt to decrypt it.
+   */
   private final DiscoveryFilter awsKmsDiscoveryFilter;
 
   protected KmsMrkAwareDiscovery(BuilderImpl builder) {
@@ -27,6 +30,9 @@ public class KmsMrkAwareDiscovery {
     return this.defaultMrkRegion;
   }
 
+  /**
+   * @return A filter which defines what AWS partition and AWS accounts a KMS Key may be in for a Keyring to be allowed to attempt to decrypt it.
+   */
   public DiscoveryFilter awsKmsDiscoveryFilter() {
     return this.awsKmsDiscoveryFilter;
   }
@@ -48,8 +54,14 @@ public class KmsMrkAwareDiscovery {
 
     String defaultMrkRegion();
 
+    /**
+     * @param awsKmsDiscoveryFilter A filter which defines what AWS partition and AWS accounts a KMS Key may be in for a Keyring to be allowed to attempt to decrypt it.
+     */
     Builder awsKmsDiscoveryFilter(DiscoveryFilter awsKmsDiscoveryFilter);
 
+    /**
+     * @return A filter which defines what AWS partition and AWS accounts a KMS Key may be in for a Keyring to be allowed to attempt to decrypt it.
+     */
     DiscoveryFilter awsKmsDiscoveryFilter();
 
     KmsMrkAwareDiscovery build();

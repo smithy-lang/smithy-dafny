@@ -85,8 +85,8 @@ structure GetCacheEntryOutput {
 union Materials {
   Encryption: EncryptionMaterials,
   Decryption: DecryptionMaterials,
-  BranchKey: BranchKeyMaterials,
-  BeaconKey: BeaconKeyMaterials
+  BranchKey: aws.cryptography.keyStore#BranchKeyMaterials,
+  BeaconKey: aws.cryptography.keyStore#BeaconKeyMaterials
 }
 
 operation DeleteCacheEntry {

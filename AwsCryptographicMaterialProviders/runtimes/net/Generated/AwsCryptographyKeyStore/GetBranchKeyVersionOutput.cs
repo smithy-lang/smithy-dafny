@@ -4,25 +4,16 @@
 using System;
  using AWS.Cryptography.KeyStore; namespace AWS.Cryptography.KeyStore {
  public class GetBranchKeyVersionOutput {
- private string _branchKeyVersion ;
- private System.IO.MemoryStream _branchKey ;
- public string BranchKeyVersion {
- get { return this._branchKeyVersion; }
- set { this._branchKeyVersion = value; }
+ private AWS.Cryptography.KeyStore.BranchKeyMaterials _branchKeyMaterials ;
+ public AWS.Cryptography.KeyStore.BranchKeyMaterials BranchKeyMaterials {
+ get { return this._branchKeyMaterials; }
+ set { this._branchKeyMaterials = value; }
 }
- public bool IsSetBranchKeyVersion () {
- return this._branchKeyVersion != null;
-}
- public System.IO.MemoryStream BranchKey {
- get { return this._branchKey; }
- set { this._branchKey = value; }
-}
- public bool IsSetBranchKey () {
- return this._branchKey != null;
+ public bool IsSetBranchKeyMaterials () {
+ return this._branchKeyMaterials != null;
 }
  public void Validate() {
- if (!IsSetBranchKeyVersion()) throw new System.ArgumentException("Missing value for required property 'BranchKeyVersion'");
- if (!IsSetBranchKey()) throw new System.ArgumentException("Missing value for required property 'BranchKey'");
+ if (!IsSetBranchKeyMaterials()) throw new System.ArgumentException("Missing value for required property 'BranchKeyMaterials'");
 
 }
 }

@@ -38,7 +38,7 @@
  public Wrappers_Compile._IResult<_System._ITuple0, software.amazon.cryptography.materialproviders.internaldafny.types._IError> UpdateUsageMetadata(software.amazon.cryptography.materialproviders.internaldafny.types._IUpdateUsageMetadataInput input)
  {
 
- AWS.Cryptography.MaterialProviders.UpdateUsageMetadataInput nativeInput = TypeConversion.FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S25_UpdateUsageMetadataInput(input);
+ AWS.Cryptography.MaterialProviders.UpdateUsageMetadataInput nativeInput = TypeConversion.FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S24_UpdateUsageMetadataInput(input);
  try {
   _impl.UpdateUsageMetadata(nativeInput);
  

@@ -33,9 +33,9 @@ using System;
  if (result.is_Failure) throw TypeConversion.FromDafny_CommonError(result.dtor_error);
  return TypeConversion.FromDafny_N3_aws__N12_cryptography__N8_keyStore__S20_CreateKeyStoreOutput(result.dtor_value);
 }
- public AWS.Cryptography.KeyStore.CreateKeyOutput CreateKey() {
-
- Wrappers_Compile._IResult<software.amazon.cryptography.keystore.internaldafny.types._ICreateKeyOutput, software.amazon.cryptography.keystore.internaldafny.types._IError> result = _impl.CreateKey();
+ public AWS.Cryptography.KeyStore.CreateKeyOutput CreateKey(AWS.Cryptography.KeyStore.CreateKeyInput input) {
+ software.amazon.cryptography.keystore.internaldafny.types._ICreateKeyInput internalInput = TypeConversion.ToDafny_N3_aws__N12_cryptography__N8_keyStore__S14_CreateKeyInput(input);
+ Wrappers_Compile._IResult<software.amazon.cryptography.keystore.internaldafny.types._ICreateKeyOutput, software.amazon.cryptography.keystore.internaldafny.types._IError> result = _impl.CreateKey(internalInput);
  if (result.is_Failure) throw TypeConversion.FromDafny_CommonError(result.dtor_error);
  return TypeConversion.FromDafny_N3_aws__N12_cryptography__N8_keyStore__S15_CreateKeyOutput(result.dtor_value);
 }

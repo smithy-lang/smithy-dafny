@@ -28,10 +28,10 @@ import software.amazon.cryptography.materialproviders.internaldafny.types.Create
 import software.amazon.cryptography.materialproviders.internaldafny.types.CreateCryptographicMaterialsCacheInput;
 import software.amazon.cryptography.materialproviders.internaldafny.types.CreateDefaultClientSupplierInput;
 import software.amazon.cryptography.materialproviders.internaldafny.types.CreateDefaultCryptographicMaterialsManagerInput;
-import software.amazon.cryptography.materialproviders.internaldafny.types.CreateRequiredEncryptionContextCMMInput;
 import software.amazon.cryptography.materialproviders.internaldafny.types.CreateMultiKeyringInput;
 import software.amazon.cryptography.materialproviders.internaldafny.types.CreateRawAesKeyringInput;
 import software.amazon.cryptography.materialproviders.internaldafny.types.CreateRawRsaKeyringInput;
+import software.amazon.cryptography.materialproviders.internaldafny.types.CreateRequiredEncryptionContextCMMInput;
 import software.amazon.cryptography.materialproviders.internaldafny.types.DecryptionMaterials;
 import software.amazon.cryptography.materialproviders.internaldafny.types.EncryptionMaterials;
 import software.amazon.cryptography.materialproviders.internaldafny.types.Error;
@@ -211,18 +211,6 @@ public class TestMaterialProviders implements IAwsCryptographicMaterialProviders
     }
   }
 
-  public Result<ICryptographicMaterialsManager, Error> CreateRequiredEncryptionContextCMM(
-      CreateRequiredEncryptionContextCMMInput dafnyInput) {
-    software.amazon.cryptography.materialproviders.model.CreateRequiredEncryptionContextCMMInput nativeInput = ToNative.CreateRequiredEncryptionContextCMMInput(dafnyInput);
-    try {
-      software.amazon.cryptography.materialproviders.ICryptographicMaterialsManager nativeOutput = this._impl.CreateRequiredEncryptionContextCMM(nativeInput);
-      ICryptographicMaterialsManager dafnyOutput = ToDafny.CryptographicMaterialsManager(nativeOutput);
-      return Result.create_Success(dafnyOutput);
-    } catch (RuntimeException ex) {
-      return Result.create_Failure(ToDafny.Error(ex));
-    }
-  }
-
   public Result<IKeyring, Error> CreateMultiKeyring(CreateMultiKeyringInput dafnyInput) {
     software.amazon.cryptography.materialproviders.model.CreateMultiKeyringInput nativeInput = ToNative.CreateMultiKeyringInput(dafnyInput);
     try {
@@ -250,6 +238,18 @@ public class TestMaterialProviders implements IAwsCryptographicMaterialProviders
     try {
       software.amazon.cryptography.materialproviders.IKeyring nativeOutput = this._impl.CreateRawRsaKeyring(nativeInput);
       IKeyring dafnyOutput = ToDafny.Keyring(nativeOutput);
+      return Result.create_Success(dafnyOutput);
+    } catch (RuntimeException ex) {
+      return Result.create_Failure(ToDafny.Error(ex));
+    }
+  }
+
+  public Result<ICryptographicMaterialsManager, Error> CreateRequiredEncryptionContextCMM(
+      CreateRequiredEncryptionContextCMMInput dafnyInput) {
+    software.amazon.cryptography.materialproviders.model.CreateRequiredEncryptionContextCMMInput nativeInput = ToNative.CreateRequiredEncryptionContextCMMInput(dafnyInput);
+    try {
+      software.amazon.cryptography.materialproviders.ICryptographicMaterialsManager nativeOutput = this._impl.CreateRequiredEncryptionContextCMM(nativeInput);
+      ICryptographicMaterialsManager dafnyOutput = ToDafny.CryptographicMaterialsManager(nativeOutput);
       return Result.create_Success(dafnyOutput);
     } catch (RuntimeException ex) {
       return Result.create_Failure(ToDafny.Error(ex));

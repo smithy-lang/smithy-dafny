@@ -34,7 +34,7 @@ module TestCreateKeys {
     
     var keyStore :- expect KeyStore.KeyStore(keyStoreConfig);
 
-    var branchKeyId :- expect keyStore.CreateKey();
+    var branchKeyId :- expect keyStore.CreateKey(Types.CreateKeyInput());
 
     var beaconKeyResult :- expect keyStore.GetBeaconKey(Types.GetBeaconKeyInput(
       branchKeyIdentifier := branchKeyId.branchKeyIdentifier
@@ -44,7 +44,8 @@ module TestCreateKeys {
       branchKeyIdentifier := branchKeyId.branchKeyIdentifier
     ));
     
-    expect |beaconKeyResult.beaconKey| == 32;
-    expect |activeResult.branchKey| == 32;
+    expect beaconKeyResult.beaconKeyMaterials.beaconKey.Some?;
+    expect |beaconKeyResult.beaconKeyMaterials.beaconKey.value| == 32;
+    expect |activeResult.branchKeyMaterials.branchKey| == 32;
   }
 }

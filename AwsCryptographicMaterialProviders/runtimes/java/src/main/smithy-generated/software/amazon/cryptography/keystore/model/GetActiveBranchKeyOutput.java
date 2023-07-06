@@ -3,7 +3,6 @@
 // Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 package software.amazon.cryptography.keystore.model;
 
-import java.nio.ByteBuffer;
 import java.util.Objects;
 
 /**
@@ -11,32 +10,19 @@ import java.util.Objects;
  */
 public class GetActiveBranchKeyOutput {
   /**
-   * The ACTIVE Branch Key version.
+   * The materials for the Branch Key.
    */
-  private final String branchKeyVersion;
-
-  /**
-   * The key material for this ACTIVE Branch Key version.
-   */
-  private final ByteBuffer branchKey;
+  private final BranchKeyMaterials branchKeyMaterials;
 
   protected GetActiveBranchKeyOutput(BuilderImpl builder) {
-    this.branchKeyVersion = builder.branchKeyVersion();
-    this.branchKey = builder.branchKey();
+    this.branchKeyMaterials = builder.branchKeyMaterials();
   }
 
   /**
-   * @return The ACTIVE Branch Key version.
+   * @return The materials for the Branch Key.
    */
-  public String branchKeyVersion() {
-    return this.branchKeyVersion;
-  }
-
-  /**
-   * @return The key material for this ACTIVE Branch Key version.
-   */
-  public ByteBuffer branchKey() {
-    return this.branchKey;
+  public BranchKeyMaterials branchKeyMaterials() {
+    return this.branchKeyMaterials;
   }
 
   public Builder toBuilder() {
@@ -49,65 +35,40 @@ public class GetActiveBranchKeyOutput {
 
   public interface Builder {
     /**
-     * @param branchKeyVersion The ACTIVE Branch Key version.
+     * @param branchKeyMaterials The materials for the Branch Key.
      */
-    Builder branchKeyVersion(String branchKeyVersion);
+    Builder branchKeyMaterials(BranchKeyMaterials branchKeyMaterials);
 
     /**
-     * @return The ACTIVE Branch Key version.
+     * @return The materials for the Branch Key.
      */
-    String branchKeyVersion();
-
-    /**
-     * @param branchKey The key material for this ACTIVE Branch Key version.
-     */
-    Builder branchKey(ByteBuffer branchKey);
-
-    /**
-     * @return The key material for this ACTIVE Branch Key version.
-     */
-    ByteBuffer branchKey();
+    BranchKeyMaterials branchKeyMaterials();
 
     GetActiveBranchKeyOutput build();
   }
 
   static class BuilderImpl implements Builder {
-    protected String branchKeyVersion;
-
-    protected ByteBuffer branchKey;
+    protected BranchKeyMaterials branchKeyMaterials;
 
     protected BuilderImpl() {
     }
 
     protected BuilderImpl(GetActiveBranchKeyOutput model) {
-      this.branchKeyVersion = model.branchKeyVersion();
-      this.branchKey = model.branchKey();
+      this.branchKeyMaterials = model.branchKeyMaterials();
     }
 
-    public Builder branchKeyVersion(String branchKeyVersion) {
-      this.branchKeyVersion = branchKeyVersion;
+    public Builder branchKeyMaterials(BranchKeyMaterials branchKeyMaterials) {
+      this.branchKeyMaterials = branchKeyMaterials;
       return this;
     }
 
-    public String branchKeyVersion() {
-      return this.branchKeyVersion;
-    }
-
-    public Builder branchKey(ByteBuffer branchKey) {
-      this.branchKey = branchKey;
-      return this;
-    }
-
-    public ByteBuffer branchKey() {
-      return this.branchKey;
+    public BranchKeyMaterials branchKeyMaterials() {
+      return this.branchKeyMaterials;
     }
 
     public GetActiveBranchKeyOutput build() {
-      if (Objects.isNull(this.branchKeyVersion()))  {
-        throw new IllegalArgumentException("Missing value for required field `branchKeyVersion`");
-      }
-      if (Objects.isNull(this.branchKey()))  {
-        throw new IllegalArgumentException("Missing value for required field `branchKey`");
+      if (Objects.isNull(this.branchKeyMaterials()))  {
+        throw new IllegalArgumentException("Missing value for required field `branchKeyMaterials`");
       }
       return new GetActiveBranchKeyOutput(this);
     }
