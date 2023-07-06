@@ -115,6 +115,10 @@ module {:options "-functionSyntax:4"} KeyringFromKeyDescription {
         branchKeyIdSupplier := None,
         keyStore := keyStore,
         ttlSeconds := 0,
+        gracePeriod := None,
+        graceInterval := None,
+        fanOut := None,
+        inFlightTTL := None,
         maxCacheSize := Some(10)
       );
       var keyring := mpl.CreateAwsKmsHierarchicalKeyring(input);
