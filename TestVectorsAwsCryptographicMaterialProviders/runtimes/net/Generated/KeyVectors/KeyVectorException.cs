@@ -5,5 +5,6 @@ using System;
  using AWS.Cryptography.MaterialProvidersTestVectorKeys; namespace AWS.Cryptography.MaterialProvidersTestVectorKeys {
  public class KeyVectorException : Exception {
  public KeyVectorException(string message) : base(message) {}
+public string getMessage() { return this.Message; }
 }
 }

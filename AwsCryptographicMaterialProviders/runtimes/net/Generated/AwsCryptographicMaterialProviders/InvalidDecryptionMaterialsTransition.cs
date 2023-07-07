@@ -5,5 +5,6 @@ using System;
  using AWS.Cryptography.MaterialProviders; namespace AWS.Cryptography.MaterialProviders {
  public class InvalidDecryptionMaterialsTransition : Exception {
  public InvalidDecryptionMaterialsTransition(string message) : base(message) {}
+public string getMessage() { return this.Message; }
 }
 }

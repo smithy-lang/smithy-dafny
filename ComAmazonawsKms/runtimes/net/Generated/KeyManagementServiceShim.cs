@@ -14,8 +14,8 @@ using System;
  Amazon.KeyManagementService.Model.CancelKeyDeletionResponse sdkResponse =
  this._impl.CancelKeyDeletionAsync(sdkRequest).Result;
  return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._ICancelKeyDeletionResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Success(TypeConversion.ToDafny_N3_com__N9_amazonaws__N3_kms__S25_CancelKeyDeletionResponse(sdkResponse));
-} catch (System.AggregateException aggregate) when (aggregate.InnerException is Amazon.KeyManagementService.AmazonKeyManagementServiceException ex) {
-    return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._ICancelKeyDeletionResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
+} catch (System.AggregateException aggregate) {
+    return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._ICancelKeyDeletionResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
 }
 
 }
@@ -24,8 +24,8 @@ using System;
  Amazon.KeyManagementService.Model.ConnectCustomKeyStoreResponse sdkResponse =
  this._impl.ConnectCustomKeyStoreAsync(sdkRequest).Result;
  return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._IConnectCustomKeyStoreResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Success(TypeConversion.ToDafny_N3_com__N9_amazonaws__N3_kms__S29_ConnectCustomKeyStoreResponse(sdkResponse));
-} catch (System.AggregateException aggregate) when (aggregate.InnerException is Amazon.KeyManagementService.AmazonKeyManagementServiceException ex) {
-    return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._IConnectCustomKeyStoreResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
+} catch (System.AggregateException aggregate) {
+    return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._IConnectCustomKeyStoreResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
 }
 
 }
@@ -34,8 +34,8 @@ using System;
 
  this._impl.CreateAliasAsync(sdkRequest).Wait();
  return Wrappers_Compile.Result<_System._ITuple0, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Success(_System.Tuple0.Default());
-} catch (System.AggregateException aggregate) when (aggregate.InnerException is Amazon.KeyManagementService.AmazonKeyManagementServiceException ex) {
-    return Wrappers_Compile.Result<_System._ITuple0, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
+} catch (System.AggregateException aggregate) {
+    return Wrappers_Compile.Result<_System._ITuple0, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
 }
 
 }
@@ -44,8 +44,8 @@ using System;
  Amazon.KeyManagementService.Model.CreateCustomKeyStoreResponse sdkResponse =
  this._impl.CreateCustomKeyStoreAsync(sdkRequest).Result;
  return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._ICreateCustomKeyStoreResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Success(TypeConversion.ToDafny_N3_com__N9_amazonaws__N3_kms__S28_CreateCustomKeyStoreResponse(sdkResponse));
-} catch (System.AggregateException aggregate) when (aggregate.InnerException is Amazon.KeyManagementService.AmazonKeyManagementServiceException ex) {
-    return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._ICreateCustomKeyStoreResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
+} catch (System.AggregateException aggregate) {
+    return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._ICreateCustomKeyStoreResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
 }
 
 }
@@ -54,8 +54,8 @@ using System;
  Amazon.KeyManagementService.Model.CreateGrantResponse sdkResponse =
  this._impl.CreateGrantAsync(sdkRequest).Result;
  return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._ICreateGrantResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Success(TypeConversion.ToDafny_N3_com__N9_amazonaws__N3_kms__S19_CreateGrantResponse(sdkResponse));
-} catch (System.AggregateException aggregate) when (aggregate.InnerException is Amazon.KeyManagementService.AmazonKeyManagementServiceException ex) {
-    return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._ICreateGrantResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
+} catch (System.AggregateException aggregate) {
+    return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._ICreateGrantResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
 }
 
 }
@@ -64,8 +64,8 @@ using System;
  Amazon.KeyManagementService.Model.CreateKeyResponse sdkResponse =
  this._impl.CreateKeyAsync(sdkRequest).Result;
  return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._ICreateKeyResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Success(TypeConversion.ToDafny_N3_com__N9_amazonaws__N3_kms__S17_CreateKeyResponse(sdkResponse));
-} catch (System.AggregateException aggregate) when (aggregate.InnerException is Amazon.KeyManagementService.AmazonKeyManagementServiceException ex) {
-    return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._ICreateKeyResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
+} catch (System.AggregateException aggregate) {
+    return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._ICreateKeyResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
 }
 
 }
@@ -74,8 +74,8 @@ using System;
  Amazon.KeyManagementService.Model.DecryptResponse sdkResponse =
  this._impl.DecryptAsync(sdkRequest).Result;
  return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._IDecryptResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Success(TypeConversion.ToDafny_N3_com__N9_amazonaws__N3_kms__S15_DecryptResponse(sdkResponse));
-} catch (System.AggregateException aggregate) when (aggregate.InnerException is Amazon.KeyManagementService.AmazonKeyManagementServiceException ex) {
-    return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._IDecryptResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
+} catch (System.AggregateException aggregate) {
+    return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._IDecryptResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
 }
 
 }
@@ -84,8 +84,8 @@ using System;
 
  this._impl.DeleteAliasAsync(sdkRequest).Wait();
  return Wrappers_Compile.Result<_System._ITuple0, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Success(_System.Tuple0.Default());
-} catch (System.AggregateException aggregate) when (aggregate.InnerException is Amazon.KeyManagementService.AmazonKeyManagementServiceException ex) {
-    return Wrappers_Compile.Result<_System._ITuple0, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
+} catch (System.AggregateException aggregate) {
+    return Wrappers_Compile.Result<_System._ITuple0, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
 }
 
 }
@@ -94,8 +94,8 @@ using System;
  Amazon.KeyManagementService.Model.DeleteCustomKeyStoreResponse sdkResponse =
  this._impl.DeleteCustomKeyStoreAsync(sdkRequest).Result;
  return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._IDeleteCustomKeyStoreResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Success(TypeConversion.ToDafny_N3_com__N9_amazonaws__N3_kms__S28_DeleteCustomKeyStoreResponse(sdkResponse));
-} catch (System.AggregateException aggregate) when (aggregate.InnerException is Amazon.KeyManagementService.AmazonKeyManagementServiceException ex) {
-    return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._IDeleteCustomKeyStoreResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
+} catch (System.AggregateException aggregate) {
+    return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._IDeleteCustomKeyStoreResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
 }
 
 }
@@ -104,8 +104,8 @@ using System;
 
  this._impl.DeleteImportedKeyMaterialAsync(sdkRequest).Wait();
  return Wrappers_Compile.Result<_System._ITuple0, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Success(_System.Tuple0.Default());
-} catch (System.AggregateException aggregate) when (aggregate.InnerException is Amazon.KeyManagementService.AmazonKeyManagementServiceException ex) {
-    return Wrappers_Compile.Result<_System._ITuple0, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
+} catch (System.AggregateException aggregate) {
+    return Wrappers_Compile.Result<_System._ITuple0, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
 }
 
 }
@@ -114,8 +114,8 @@ using System;
  Amazon.KeyManagementService.Model.DescribeCustomKeyStoresResponse sdkResponse =
  this._impl.DescribeCustomKeyStoresAsync(sdkRequest).Result;
  return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._IDescribeCustomKeyStoresResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Success(TypeConversion.ToDafny_N3_com__N9_amazonaws__N3_kms__S31_DescribeCustomKeyStoresResponse(sdkResponse));
-} catch (System.AggregateException aggregate) when (aggregate.InnerException is Amazon.KeyManagementService.AmazonKeyManagementServiceException ex) {
-    return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._IDescribeCustomKeyStoresResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
+} catch (System.AggregateException aggregate) {
+    return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._IDescribeCustomKeyStoresResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
 }
 
 }
@@ -124,8 +124,8 @@ using System;
  Amazon.KeyManagementService.Model.DescribeKeyResponse sdkResponse =
  this._impl.DescribeKeyAsync(sdkRequest).Result;
  return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._IDescribeKeyResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Success(TypeConversion.ToDafny_N3_com__N9_amazonaws__N3_kms__S19_DescribeKeyResponse(sdkResponse));
-} catch (System.AggregateException aggregate) when (aggregate.InnerException is Amazon.KeyManagementService.AmazonKeyManagementServiceException ex) {
-    return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._IDescribeKeyResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
+} catch (System.AggregateException aggregate) {
+    return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._IDescribeKeyResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
 }
 
 }
@@ -134,8 +134,8 @@ using System;
 
  this._impl.DisableKeyAsync(sdkRequest).Wait();
  return Wrappers_Compile.Result<_System._ITuple0, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Success(_System.Tuple0.Default());
-} catch (System.AggregateException aggregate) when (aggregate.InnerException is Amazon.KeyManagementService.AmazonKeyManagementServiceException ex) {
-    return Wrappers_Compile.Result<_System._ITuple0, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
+} catch (System.AggregateException aggregate) {
+    return Wrappers_Compile.Result<_System._ITuple0, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
 }
 
 }
@@ -144,8 +144,8 @@ using System;
 
  this._impl.DisableKeyRotationAsync(sdkRequest).Wait();
  return Wrappers_Compile.Result<_System._ITuple0, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Success(_System.Tuple0.Default());
-} catch (System.AggregateException aggregate) when (aggregate.InnerException is Amazon.KeyManagementService.AmazonKeyManagementServiceException ex) {
-    return Wrappers_Compile.Result<_System._ITuple0, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
+} catch (System.AggregateException aggregate) {
+    return Wrappers_Compile.Result<_System._ITuple0, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
 }
 
 }
@@ -154,8 +154,8 @@ using System;
  Amazon.KeyManagementService.Model.DisconnectCustomKeyStoreResponse sdkResponse =
  this._impl.DisconnectCustomKeyStoreAsync(sdkRequest).Result;
  return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._IDisconnectCustomKeyStoreResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Success(TypeConversion.ToDafny_N3_com__N9_amazonaws__N3_kms__S32_DisconnectCustomKeyStoreResponse(sdkResponse));
-} catch (System.AggregateException aggregate) when (aggregate.InnerException is Amazon.KeyManagementService.AmazonKeyManagementServiceException ex) {
-    return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._IDisconnectCustomKeyStoreResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
+} catch (System.AggregateException aggregate) {
+    return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._IDisconnectCustomKeyStoreResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
 }
 
 }
@@ -164,8 +164,8 @@ using System;
 
  this._impl.EnableKeyAsync(sdkRequest).Wait();
  return Wrappers_Compile.Result<_System._ITuple0, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Success(_System.Tuple0.Default());
-} catch (System.AggregateException aggregate) when (aggregate.InnerException is Amazon.KeyManagementService.AmazonKeyManagementServiceException ex) {
-    return Wrappers_Compile.Result<_System._ITuple0, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
+} catch (System.AggregateException aggregate) {
+    return Wrappers_Compile.Result<_System._ITuple0, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
 }
 
 }
@@ -174,8 +174,8 @@ using System;
 
  this._impl.EnableKeyRotationAsync(sdkRequest).Wait();
  return Wrappers_Compile.Result<_System._ITuple0, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Success(_System.Tuple0.Default());
-} catch (System.AggregateException aggregate) when (aggregate.InnerException is Amazon.KeyManagementService.AmazonKeyManagementServiceException ex) {
-    return Wrappers_Compile.Result<_System._ITuple0, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
+} catch (System.AggregateException aggregate) {
+    return Wrappers_Compile.Result<_System._ITuple0, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
 }
 
 }
@@ -184,8 +184,8 @@ using System;
  Amazon.KeyManagementService.Model.EncryptResponse sdkResponse =
  this._impl.EncryptAsync(sdkRequest).Result;
  return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._IEncryptResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Success(TypeConversion.ToDafny_N3_com__N9_amazonaws__N3_kms__S15_EncryptResponse(sdkResponse));
-} catch (System.AggregateException aggregate) when (aggregate.InnerException is Amazon.KeyManagementService.AmazonKeyManagementServiceException ex) {
-    return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._IEncryptResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
+} catch (System.AggregateException aggregate) {
+    return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._IEncryptResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
 }
 
 }
@@ -194,8 +194,8 @@ using System;
  Amazon.KeyManagementService.Model.GenerateDataKeyResponse sdkResponse =
  this._impl.GenerateDataKeyAsync(sdkRequest).Result;
  return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._IGenerateDataKeyResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Success(TypeConversion.ToDafny_N3_com__N9_amazonaws__N3_kms__S23_GenerateDataKeyResponse(sdkResponse));
-} catch (System.AggregateException aggregate) when (aggregate.InnerException is Amazon.KeyManagementService.AmazonKeyManagementServiceException ex) {
-    return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._IGenerateDataKeyResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
+} catch (System.AggregateException aggregate) {
+    return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._IGenerateDataKeyResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
 }
 
 }
@@ -204,8 +204,8 @@ using System;
  Amazon.KeyManagementService.Model.GenerateDataKeyPairResponse sdkResponse =
  this._impl.GenerateDataKeyPairAsync(sdkRequest).Result;
  return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._IGenerateDataKeyPairResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Success(TypeConversion.ToDafny_N3_com__N9_amazonaws__N3_kms__S27_GenerateDataKeyPairResponse(sdkResponse));
-} catch (System.AggregateException aggregate) when (aggregate.InnerException is Amazon.KeyManagementService.AmazonKeyManagementServiceException ex) {
-    return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._IGenerateDataKeyPairResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
+} catch (System.AggregateException aggregate) {
+    return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._IGenerateDataKeyPairResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
 }
 
 }
@@ -214,8 +214,8 @@ using System;
  Amazon.KeyManagementService.Model.GenerateDataKeyPairWithoutPlaintextResponse sdkResponse =
  this._impl.GenerateDataKeyPairWithoutPlaintextAsync(sdkRequest).Result;
  return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._IGenerateDataKeyPairWithoutPlaintextResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Success(TypeConversion.ToDafny_N3_com__N9_amazonaws__N3_kms__S43_GenerateDataKeyPairWithoutPlaintextResponse(sdkResponse));
-} catch (System.AggregateException aggregate) when (aggregate.InnerException is Amazon.KeyManagementService.AmazonKeyManagementServiceException ex) {
-    return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._IGenerateDataKeyPairWithoutPlaintextResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
+} catch (System.AggregateException aggregate) {
+    return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._IGenerateDataKeyPairWithoutPlaintextResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
 }
 
 }
@@ -224,8 +224,8 @@ using System;
  Amazon.KeyManagementService.Model.GenerateDataKeyWithoutPlaintextResponse sdkResponse =
  this._impl.GenerateDataKeyWithoutPlaintextAsync(sdkRequest).Result;
  return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._IGenerateDataKeyWithoutPlaintextResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Success(TypeConversion.ToDafny_N3_com__N9_amazonaws__N3_kms__S39_GenerateDataKeyWithoutPlaintextResponse(sdkResponse));
-} catch (System.AggregateException aggregate) when (aggregate.InnerException is Amazon.KeyManagementService.AmazonKeyManagementServiceException ex) {
-    return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._IGenerateDataKeyWithoutPlaintextResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
+} catch (System.AggregateException aggregate) {
+    return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._IGenerateDataKeyWithoutPlaintextResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
 }
 
 }
@@ -234,8 +234,8 @@ using System;
  Amazon.KeyManagementService.Model.GenerateRandomResponse sdkResponse =
  this._impl.GenerateRandomAsync(sdkRequest).Result;
  return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._IGenerateRandomResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Success(TypeConversion.ToDafny_N3_com__N9_amazonaws__N3_kms__S22_GenerateRandomResponse(sdkResponse));
-} catch (System.AggregateException aggregate) when (aggregate.InnerException is Amazon.KeyManagementService.AmazonKeyManagementServiceException ex) {
-    return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._IGenerateRandomResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
+} catch (System.AggregateException aggregate) {
+    return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._IGenerateRandomResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
 }
 
 }
@@ -244,8 +244,8 @@ using System;
  Amazon.KeyManagementService.Model.GetKeyPolicyResponse sdkResponse =
  this._impl.GetKeyPolicyAsync(sdkRequest).Result;
  return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._IGetKeyPolicyResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Success(TypeConversion.ToDafny_N3_com__N9_amazonaws__N3_kms__S20_GetKeyPolicyResponse(sdkResponse));
-} catch (System.AggregateException aggregate) when (aggregate.InnerException is Amazon.KeyManagementService.AmazonKeyManagementServiceException ex) {
-    return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._IGetKeyPolicyResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
+} catch (System.AggregateException aggregate) {
+    return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._IGetKeyPolicyResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
 }
 
 }
@@ -254,8 +254,8 @@ using System;
  Amazon.KeyManagementService.Model.GetKeyRotationStatusResponse sdkResponse =
  this._impl.GetKeyRotationStatusAsync(sdkRequest).Result;
  return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._IGetKeyRotationStatusResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Success(TypeConversion.ToDafny_N3_com__N9_amazonaws__N3_kms__S28_GetKeyRotationStatusResponse(sdkResponse));
-} catch (System.AggregateException aggregate) when (aggregate.InnerException is Amazon.KeyManagementService.AmazonKeyManagementServiceException ex) {
-    return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._IGetKeyRotationStatusResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
+} catch (System.AggregateException aggregate) {
+    return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._IGetKeyRotationStatusResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
 }
 
 }
@@ -264,8 +264,8 @@ using System;
  Amazon.KeyManagementService.Model.GetParametersForImportResponse sdkResponse =
  this._impl.GetParametersForImportAsync(sdkRequest).Result;
  return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._IGetParametersForImportResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Success(TypeConversion.ToDafny_N3_com__N9_amazonaws__N3_kms__S30_GetParametersForImportResponse(sdkResponse));
-} catch (System.AggregateException aggregate) when (aggregate.InnerException is Amazon.KeyManagementService.AmazonKeyManagementServiceException ex) {
-    return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._IGetParametersForImportResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
+} catch (System.AggregateException aggregate) {
+    return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._IGetParametersForImportResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
 }
 
 }
@@ -274,8 +274,8 @@ using System;
  Amazon.KeyManagementService.Model.GetPublicKeyResponse sdkResponse =
  this._impl.GetPublicKeyAsync(sdkRequest).Result;
  return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._IGetPublicKeyResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Success(TypeConversion.ToDafny_N3_com__N9_amazonaws__N3_kms__S20_GetPublicKeyResponse(sdkResponse));
-} catch (System.AggregateException aggregate) when (aggregate.InnerException is Amazon.KeyManagementService.AmazonKeyManagementServiceException ex) {
-    return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._IGetPublicKeyResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
+} catch (System.AggregateException aggregate) {
+    return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._IGetPublicKeyResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
 }
 
 }
@@ -284,8 +284,8 @@ using System;
  Amazon.KeyManagementService.Model.ImportKeyMaterialResponse sdkResponse =
  this._impl.ImportKeyMaterialAsync(sdkRequest).Result;
  return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._IImportKeyMaterialResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Success(TypeConversion.ToDafny_N3_com__N9_amazonaws__N3_kms__S25_ImportKeyMaterialResponse(sdkResponse));
-} catch (System.AggregateException aggregate) when (aggregate.InnerException is Amazon.KeyManagementService.AmazonKeyManagementServiceException ex) {
-    return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._IImportKeyMaterialResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
+} catch (System.AggregateException aggregate) {
+    return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._IImportKeyMaterialResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
 }
 
 }
@@ -294,8 +294,8 @@ using System;
  Amazon.KeyManagementService.Model.ListAliasesResponse sdkResponse =
  this._impl.ListAliasesAsync(sdkRequest).Result;
  return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._IListAliasesResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Success(TypeConversion.ToDafny_N3_com__N9_amazonaws__N3_kms__S19_ListAliasesResponse(sdkResponse));
-} catch (System.AggregateException aggregate) when (aggregate.InnerException is Amazon.KeyManagementService.AmazonKeyManagementServiceException ex) {
-    return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._IListAliasesResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
+} catch (System.AggregateException aggregate) {
+    return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._IListAliasesResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
 }
 
 }
@@ -304,8 +304,8 @@ using System;
  Amazon.KeyManagementService.Model.ListGrantsResponse sdkResponse =
  this._impl.ListGrantsAsync(sdkRequest).Result;
  return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._IListGrantsResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Success(TypeConversion.ToDafny_N3_com__N9_amazonaws__N3_kms__S18_ListGrantsResponse(sdkResponse));
-} catch (System.AggregateException aggregate) when (aggregate.InnerException is Amazon.KeyManagementService.AmazonKeyManagementServiceException ex) {
-    return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._IListGrantsResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
+} catch (System.AggregateException aggregate) {
+    return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._IListGrantsResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
 }
 
 }
@@ -314,8 +314,8 @@ using System;
  Amazon.KeyManagementService.Model.ListKeyPoliciesResponse sdkResponse =
  this._impl.ListKeyPoliciesAsync(sdkRequest).Result;
  return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._IListKeyPoliciesResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Success(TypeConversion.ToDafny_N3_com__N9_amazonaws__N3_kms__S23_ListKeyPoliciesResponse(sdkResponse));
-} catch (System.AggregateException aggregate) when (aggregate.InnerException is Amazon.KeyManagementService.AmazonKeyManagementServiceException ex) {
-    return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._IListKeyPoliciesResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
+} catch (System.AggregateException aggregate) {
+    return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._IListKeyPoliciesResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
 }
 
 }
@@ -324,8 +324,8 @@ using System;
  Amazon.KeyManagementService.Model.ListResourceTagsResponse sdkResponse =
  this._impl.ListResourceTagsAsync(sdkRequest).Result;
  return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._IListResourceTagsResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Success(TypeConversion.ToDafny_N3_com__N9_amazonaws__N3_kms__S24_ListResourceTagsResponse(sdkResponse));
-} catch (System.AggregateException aggregate) when (aggregate.InnerException is Amazon.KeyManagementService.AmazonKeyManagementServiceException ex) {
-    return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._IListResourceTagsResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
+} catch (System.AggregateException aggregate) {
+    return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._IListResourceTagsResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
 }
 
 }
@@ -334,8 +334,8 @@ using System;
 
  this._impl.PutKeyPolicyAsync(sdkRequest).Wait();
  return Wrappers_Compile.Result<_System._ITuple0, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Success(_System.Tuple0.Default());
-} catch (System.AggregateException aggregate) when (aggregate.InnerException is Amazon.KeyManagementService.AmazonKeyManagementServiceException ex) {
-    return Wrappers_Compile.Result<_System._ITuple0, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
+} catch (System.AggregateException aggregate) {
+    return Wrappers_Compile.Result<_System._ITuple0, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
 }
 
 }
@@ -344,8 +344,8 @@ using System;
  Amazon.KeyManagementService.Model.ReEncryptResponse sdkResponse =
  this._impl.ReEncryptAsync(sdkRequest).Result;
  return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._IReEncryptResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Success(TypeConversion.ToDafny_N3_com__N9_amazonaws__N3_kms__S17_ReEncryptResponse(sdkResponse));
-} catch (System.AggregateException aggregate) when (aggregate.InnerException is Amazon.KeyManagementService.AmazonKeyManagementServiceException ex) {
-    return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._IReEncryptResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
+} catch (System.AggregateException aggregate) {
+    return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._IReEncryptResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
 }
 
 }
@@ -354,8 +354,8 @@ using System;
  Amazon.KeyManagementService.Model.ReplicateKeyResponse sdkResponse =
  this._impl.ReplicateKeyAsync(sdkRequest).Result;
  return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._IReplicateKeyResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Success(TypeConversion.ToDafny_N3_com__N9_amazonaws__N3_kms__S20_ReplicateKeyResponse(sdkResponse));
-} catch (System.AggregateException aggregate) when (aggregate.InnerException is Amazon.KeyManagementService.AmazonKeyManagementServiceException ex) {
-    return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._IReplicateKeyResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
+} catch (System.AggregateException aggregate) {
+    return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._IReplicateKeyResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
 }
 
 }
@@ -364,8 +364,8 @@ using System;
 
  this._impl.RetireGrantAsync(sdkRequest).Wait();
  return Wrappers_Compile.Result<_System._ITuple0, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Success(_System.Tuple0.Default());
-} catch (System.AggregateException aggregate) when (aggregate.InnerException is Amazon.KeyManagementService.AmazonKeyManagementServiceException ex) {
-    return Wrappers_Compile.Result<_System._ITuple0, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
+} catch (System.AggregateException aggregate) {
+    return Wrappers_Compile.Result<_System._ITuple0, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
 }
 
 }
@@ -374,8 +374,8 @@ using System;
 
  this._impl.RevokeGrantAsync(sdkRequest).Wait();
  return Wrappers_Compile.Result<_System._ITuple0, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Success(_System.Tuple0.Default());
-} catch (System.AggregateException aggregate) when (aggregate.InnerException is Amazon.KeyManagementService.AmazonKeyManagementServiceException ex) {
-    return Wrappers_Compile.Result<_System._ITuple0, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
+} catch (System.AggregateException aggregate) {
+    return Wrappers_Compile.Result<_System._ITuple0, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
 }
 
 }
@@ -384,8 +384,8 @@ using System;
  Amazon.KeyManagementService.Model.ScheduleKeyDeletionResponse sdkResponse =
  this._impl.ScheduleKeyDeletionAsync(sdkRequest).Result;
  return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._IScheduleKeyDeletionResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Success(TypeConversion.ToDafny_N3_com__N9_amazonaws__N3_kms__S27_ScheduleKeyDeletionResponse(sdkResponse));
-} catch (System.AggregateException aggregate) when (aggregate.InnerException is Amazon.KeyManagementService.AmazonKeyManagementServiceException ex) {
-    return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._IScheduleKeyDeletionResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
+} catch (System.AggregateException aggregate) {
+    return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._IScheduleKeyDeletionResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
 }
 
 }
@@ -394,8 +394,8 @@ using System;
  Amazon.KeyManagementService.Model.SignResponse sdkResponse =
  this._impl.SignAsync(sdkRequest).Result;
  return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._ISignResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Success(TypeConversion.ToDafny_N3_com__N9_amazonaws__N3_kms__S12_SignResponse(sdkResponse));
-} catch (System.AggregateException aggregate) when (aggregate.InnerException is Amazon.KeyManagementService.AmazonKeyManagementServiceException ex) {
-    return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._ISignResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
+} catch (System.AggregateException aggregate) {
+    return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._ISignResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
 }
 
 }
@@ -404,8 +404,8 @@ using System;
 
  this._impl.TagResourceAsync(sdkRequest).Wait();
  return Wrappers_Compile.Result<_System._ITuple0, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Success(_System.Tuple0.Default());
-} catch (System.AggregateException aggregate) when (aggregate.InnerException is Amazon.KeyManagementService.AmazonKeyManagementServiceException ex) {
-    return Wrappers_Compile.Result<_System._ITuple0, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
+} catch (System.AggregateException aggregate) {
+    return Wrappers_Compile.Result<_System._ITuple0, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
 }
 
 }
@@ -414,8 +414,8 @@ using System;
 
  this._impl.UntagResourceAsync(sdkRequest).Wait();
  return Wrappers_Compile.Result<_System._ITuple0, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Success(_System.Tuple0.Default());
-} catch (System.AggregateException aggregate) when (aggregate.InnerException is Amazon.KeyManagementService.AmazonKeyManagementServiceException ex) {
-    return Wrappers_Compile.Result<_System._ITuple0, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
+} catch (System.AggregateException aggregate) {
+    return Wrappers_Compile.Result<_System._ITuple0, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
 }
 
 }
@@ -424,8 +424,8 @@ using System;
 
  this._impl.UpdateAliasAsync(sdkRequest).Wait();
  return Wrappers_Compile.Result<_System._ITuple0, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Success(_System.Tuple0.Default());
-} catch (System.AggregateException aggregate) when (aggregate.InnerException is Amazon.KeyManagementService.AmazonKeyManagementServiceException ex) {
-    return Wrappers_Compile.Result<_System._ITuple0, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
+} catch (System.AggregateException aggregate) {
+    return Wrappers_Compile.Result<_System._ITuple0, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
 }
 
 }
@@ -434,8 +434,8 @@ using System;
  Amazon.KeyManagementService.Model.UpdateCustomKeyStoreResponse sdkResponse =
  this._impl.UpdateCustomKeyStoreAsync(sdkRequest).Result;
  return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._IUpdateCustomKeyStoreResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Success(TypeConversion.ToDafny_N3_com__N9_amazonaws__N3_kms__S28_UpdateCustomKeyStoreResponse(sdkResponse));
-} catch (System.AggregateException aggregate) when (aggregate.InnerException is Amazon.KeyManagementService.AmazonKeyManagementServiceException ex) {
-    return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._IUpdateCustomKeyStoreResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
+} catch (System.AggregateException aggregate) {
+    return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._IUpdateCustomKeyStoreResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
 }
 
 }
@@ -444,8 +444,8 @@ using System;
 
  this._impl.UpdateKeyDescriptionAsync(sdkRequest).Wait();
  return Wrappers_Compile.Result<_System._ITuple0, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Success(_System.Tuple0.Default());
-} catch (System.AggregateException aggregate) when (aggregate.InnerException is Amazon.KeyManagementService.AmazonKeyManagementServiceException ex) {
-    return Wrappers_Compile.Result<_System._ITuple0, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
+} catch (System.AggregateException aggregate) {
+    return Wrappers_Compile.Result<_System._ITuple0, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
 }
 
 }
@@ -454,8 +454,8 @@ using System;
 
  this._impl.UpdatePrimaryRegionAsync(sdkRequest).Wait();
  return Wrappers_Compile.Result<_System._ITuple0, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Success(_System.Tuple0.Default());
-} catch (System.AggregateException aggregate) when (aggregate.InnerException is Amazon.KeyManagementService.AmazonKeyManagementServiceException ex) {
-    return Wrappers_Compile.Result<_System._ITuple0, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
+} catch (System.AggregateException aggregate) {
+    return Wrappers_Compile.Result<_System._ITuple0, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
 }
 
 }
@@ -464,8 +464,8 @@ using System;
  Amazon.KeyManagementService.Model.VerifyResponse sdkResponse =
  this._impl.VerifyAsync(sdkRequest).Result;
  return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._IVerifyResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Success(TypeConversion.ToDafny_N3_com__N9_amazonaws__N3_kms__S14_VerifyResponse(sdkResponse));
-} catch (System.AggregateException aggregate) when (aggregate.InnerException is Amazon.KeyManagementService.AmazonKeyManagementServiceException ex) {
-    return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._IVerifyResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
+} catch (System.AggregateException aggregate) {
+    return Wrappers_Compile.Result<software.amazon.cryptography.services.kms.internaldafny.types._IVerifyResponse, software.amazon.cryptography.services.kms.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
 }
 
 }

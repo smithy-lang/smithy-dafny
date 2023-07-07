@@ -5,5 +5,6 @@ using System;
  using AWS.Cryptography.MaterialProviders; namespace AWS.Cryptography.MaterialProviders {
  public class EntryDoesNotExist : Exception {
  public EntryDoesNotExist(string message) : base(message) {}
+public string getMessage() { return this.Message; }
 }
 }
