@@ -386,17 +386,17 @@ public class CreateAwsKmsHierarchicalKeyringInput {
       if (this._maxCacheSizeSet && this.maxCacheSize() < 0) {
         throw new IllegalArgumentException("`maxCacheSize` must be greater than or equal to 0");
       }
-      if (this._gracePeriodSet && this.gracePeriod() < 0) {
-        throw new IllegalArgumentException("`gracePeriod` must be greater than or equal to 0");
+      if (this._gracePeriodSet && this.gracePeriod() < 1) {
+        throw new IllegalArgumentException("`gracePeriod` must be greater than or equal to 1");
       }
-      if (this._graceIntervalSet && this.graceInterval() < 0) {
-        throw new IllegalArgumentException("`graceInterval` must be greater than or equal to 0");
+      if (this._graceIntervalSet && this.graceInterval() < 1) {
+        throw new IllegalArgumentException("`graceInterval` must be greater than or equal to 1");
       }
-      if (this._fanOutSet && this.fanOut() < 0) {
-        throw new IllegalArgumentException("`fanOut` must be greater than or equal to 0");
+      if (this._fanOutSet && this.fanOut() < 1) {
+        throw new IllegalArgumentException("`fanOut` must be greater than or equal to 1");
       }
-      if (this._inFlightTTLSet && this.inFlightTTL() < 0) {
-        throw new IllegalArgumentException("`inFlightTTL` must be greater than or equal to 0");
+      if (this._inFlightTTLSet && this.inFlightTTL() < 1) {
+        throw new IllegalArgumentException("`inFlightTTL` must be greater than or equal to 1");
       }
       return new CreateAwsKmsHierarchicalKeyringInput(this);
     }

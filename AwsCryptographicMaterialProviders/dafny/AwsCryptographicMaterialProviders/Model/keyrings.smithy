@@ -344,19 +344,19 @@ structure CreateAwsKmsHierarchicalKeyringInput {
     @javadoc("How many entries the local cache for Branch Key material can hold before evicting older entries.")
     maxCacheSize: PositiveInteger,
 
-    @range(min: 0)
+    @range(min: 1)
     @javadoc("How many seconds before expiration should an attempt be made to refresh the materials.")
     gracePeriod: PositiveInteger,
 
-    @range(min: 0)
+    @range(min: 1)
     @javadoc("How many seconds between attempts to refresh the materials.")
     graceInterval: PositiveInteger,
 
-    @range(min: 0)
+    @range(min: 1)
     @javadoc("How many simultaneous attempts to refresh the materials.")
     fanOut: PositiveInteger,
 
-    @range(min: 0)
+    @range(min: 1)
     @javadoc("How many seconds until an attempt to refresh the materials should be forgotten.")
     inFlightTTL: PositiveInteger,
 }

@@ -251,16 +251,6 @@ module AwsCryptographyMaterialProvidersOperations refines AbstractAwsCryptograph
   predicate CreateAwsKmsHierarchicalKeyringEnsuresPublicly(input: CreateAwsKmsHierarchicalKeyringInput, output: Result<IKeyring, Error>)
   {true}
 
-  function method GetIntFromOpt(data : Option<int32>, default : int32) : Types.PositiveInteger
-    requires data.None? || 0 <= data.value
-    requires 0 < default
-  {
-    if data.Some? then
-      data.value as Types.PositiveInteger
-    else
-      default as Types.PositiveInteger
-  }
-
   method CreateAwsKmsHierarchicalKeyring (config: InternalConfig, input: CreateAwsKmsHierarchicalKeyringInput)
     returns (output: Result<IKeyring, Error>)
   {
@@ -291,21 +281,16 @@ module AwsCryptographyMaterialProvidersOperations refines AbstractAwsCryptograph
         Types.AwsCryptographicMaterialProvidersException(
           message := "Must initialize keyring with either branchKeyId or BranchKeyIdSupplier."));
 
-    var gracePeriod := GetIntFromOpt(input.gracePeriod, 10);
-    var graceInterval := GetIntFromOpt(input.graceInterval, 1);
-    var fanOut := GetIntFromOpt(input.fanOut, 20);
-    var inFlightTTL := GetIntFromOpt(input.inFlightTTL, 20);
-
     var keyring := new AwsKmsHierarchicalKeyring.AwsKmsHierarchicalKeyring(
       keyStore := input.keyStore,
       branchKeyId := input.branchKeyId,
       branchKeyIdSupplier := input.branchKeyIdSupplier,
       ttlSeconds := input.ttlSeconds,
       maxCacheSize := maxCacheSize,
-      gracePeriod:= gracePeriod,
-      graceInterval := graceInterval,
-      fanOut := fanOut,
-      inFlightTTL := inFlightTTL,
+      gracePeriod := input.gracePeriod,
+      graceInterval := input.graceInterval,
+      fanOut := input.fanOut,
+      inFlightTTL := input.inFlightTTL,
       cryptoPrimitives := config.crypto
     );
     return Success(keyring);
@@ -520,17 +505,6 @@ module AwsCryptographyMaterialProvidersOperations refines AbstractAwsCryptograph
   predicate CreateCryptographicMaterialsCacheEnsuresPublicly(input: CreateCryptographicMaterialsCacheInput , output: Result<ICryptographicMaterialsCache, Error>)
   {true}
 
-  function method GetFromOpt(data : Option<int32>, default : int32) : Types.PositiveLong
-    requires data.None? || 0 <= data.value
-    requires 0 < default
-  {
-    if data.Some? then
-      data.value as Types.PositiveLong
-    else
-      default as Types.PositiveLong
-  }
-
-
   method CreateCryptographicMaterialsCache(config: InternalConfig, input: CreateCryptographicMaterialsCacheInput)
     returns (output: Result<ICryptographicMaterialsCache, Error>)
   {
@@ -548,19 +522,19 @@ module AwsCryptographyMaterialProvidersOperations refines AbstractAwsCryptograph
       entryPruningTailSize := 1;
     }
 
-    var gracePeriod := GetFromOpt(input.gracePeriod, 10);
-    var graceInterval := GetFromOpt(input.graceInterval, 1);
-    var fanOut := GetFromOpt(input.fanOut, 20);
-    var inFlightTTL := GetFromOpt(input.inFlightTTL, 20);
+    var gracePeriod := input.gracePeriod.UnwrapOr(10);
+    var graceInterval := input.graceInterval.UnwrapOr(1);
+    var fanOut := input.fanOut.UnwrapOr(20);
+    var inFlightTTL := input.inFlightTTL.UnwrapOr(20);
 
     if gracePeriod <= 0 || graceInterval <= 0 || fanOut <= 0 || inFlightTTL <= 0 {
       var cmc := new StormTracker.StormTracker(
         entryCapacity := input.entryCapacity as nat,
         entryPruningTailSize := entryPruningTailSize,
-        gracePeriod := gracePeriod,
-        graceInterval := graceInterval,
-        fanOut := fanOut,
-        inFlightTTL := inFlightTTL);
+        gracePeriod := gracePeriod as Types.PositiveLong,
+        graceInterval := graceInterval as Types.PositiveLong,
+        fanOut := fanOut as Types.PositiveLong,
+        inFlightTTL := inFlightTTL as Types.PositiveLong);
       var synCmc := new StormTrackingCMC.StormTrackingCMC(cmc);
       return Success(synCmc);
     } else {

@@ -86,9 +86,9 @@ module AwsKmsHierarchicalKeyring {
   // We add this axiom here because verifying the mutability of the share state of the 
   // cache. Dafny does not support concurrency and proving the state of mutable frames 
   // is complicated.  
-  lemma {:axiom} verifyValidStateCache (cmc: StormTrackingCMC.StormTrackingCMC) ensures cmc.ValidState()
+  lemma {:axiom} verifyValidStateCache (cmc: Types.ICryptographicMaterialsCache) ensures cmc.ValidState()
 
-  method getEntry(cmc: StormTrackingCMC.StormTrackingCMC, input: Types.GetCacheEntryInput) returns (res: Result<Types.GetCacheEntryOutput, Types.Error>)
+  method getEntry(cmc: Types.ICryptographicMaterialsCache, input: Types.GetCacheEntryInput) returns (res: Result<Types.GetCacheEntryOutput, Types.Error>)
     requires cmc.ValidState()
     ensures cmc.ValidState()
     ensures cmc.GetCacheEntryEnsuresPublicly(input, res)
@@ -100,7 +100,7 @@ module AwsKmsHierarchicalKeyring {
     res := cmc.GetCacheEntry(input);
   }
 
-  method putEntry(cmc: StormTrackingCMC.StormTrackingCMC, input: Types.PutCacheEntryInput) returns (res: Result<(), Types.Error>)
+  method putEntry(cmc: Types.ICryptographicMaterialsCache, input: Types.PutCacheEntryInput) returns (res: Result<(), Types.Error>)
     requires cmc.ValidState()
     ensures cmc.ValidState()
     ensures cmc.PutCacheEntryEnsuresPublicly(input, res)
@@ -124,7 +124,7 @@ module AwsKmsHierarchicalKeyring {
     const ttlSeconds: Types.PositiveLong
     const maxCacheSize: Types.PositiveInteger
     const cryptoPrimitives: Primitives.AtomicPrimitivesClient
-    const cache: StormTrackingCMC.StormTrackingCMC
+    const cache: Types.ICryptographicMaterialsCache
 
     predicate ValidState()
       ensures ValidState() ==> History in Modifies
@@ -161,10 +161,10 @@ module AwsKmsHierarchicalKeyring {
       //= type=implication
       //# - MAY provide a max cache size
       maxCacheSize: Types.PositiveInteger,
-      gracePeriod: Types.PositiveInteger,
-      graceInterval: Types.PositiveInteger,
-      fanOut: Types.PositiveInteger,
-      inFlightTTL: Types.PositiveInteger,
+      gracePeriod: Option<Types.PositiveInteger>,
+      graceInterval: Option<Types.PositiveInteger>,
+      fanOut: Option<Types.PositiveInteger>,
+      inFlightTTL: Option<Types.PositiveInteger>,
       cryptoPrimitives : Primitives.AtomicPrimitivesClient
     )
       requires maxCacheSize >= 1
@@ -188,10 +188,10 @@ module AwsKmsHierarchicalKeyring {
       var localCMC := new StormTracker.StormTracker(
         entryCapacity := maxCacheSize as nat,
         entryPruningTailSize := 1,
-        gracePeriod := gracePeriod as Types.PositiveLong,
-        graceInterval := graceInterval as Types.PositiveLong,
-        fanOut := fanOut as Types.PositiveLong,
-        inFlightTTL := inFlightTTL as Types.PositiveLong);
+        gracePeriod := gracePeriod.UnwrapOr(10) as Types.PositiveLong,
+        graceInterval := graceInterval.UnwrapOr(1) as Types.PositiveLong,
+        fanOut := fanOut.UnwrapOr(20) as Types.PositiveLong,
+        inFlightTTL := inFlightTTL.UnwrapOr(20) as Types.PositiveLong);
       var cmc := new StormTrackingCMC.StormTrackingCMC(localCMC);
 
       this.keyStore            := keyStore;
@@ -619,7 +619,7 @@ module AwsKmsHierarchicalKeyring {
     const cryptoPrimitives: Primitives.AtomicPrimitivesClient
     const branchKeyId: string
     const ttlSeconds: Types.PositiveLong
-    const cache: StormTrackingCMC.StormTrackingCMC
+    const cache: Types.ICryptographicMaterialsCache
 
     constructor(
       materials: Materials.DecryptionMaterialsPendingPlaintextDataKey,
@@ -627,7 +627,7 @@ module AwsKmsHierarchicalKeyring {
       cryptoPrimitives: Primitives.AtomicPrimitivesClient,
       branchKeyId: string,
       ttlSeconds: Types.PositiveLong,
-      cache: StormTrackingCMC.StormTrackingCMC
+      cache: Types.ICryptographicMaterialsCache
     )
       requires keyStore.ValidState() && cryptoPrimitives.ValidState()
       ensures

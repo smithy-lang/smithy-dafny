@@ -128,11 +128,19 @@ module {:options "/functionSyntax:4" }  StormTracker {
     method PruneInFlight(now : Types.PositiveLong)
       modifies this`lastPrune, inFlight
     {
-      // We don't need to check more than once per second,
-      // because we would have already removed everything that expired in that second.
-      if fanOut > InFlightSize() || lastPrune == now {
+      // Pruning is expensive, so only do it if we have to,
+      // i.e. if without pruning, InFlight is full
+      // with luck, we will never have to prune
+      if fanOut > InFlightSize() {
         return;
       }
+
+      // We don't need to check more than once per second,
+      // because we would have already removed everything that expired in that second.
+      if lastPrune == now {
+        return;
+      }
+
       lastPrune := now;
       var keySet := inFlight.Keys();
       var keys := SortedSets.ComputeSetToSequence(keySet);
