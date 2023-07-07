@@ -281,8 +281,6 @@ module AwsCryptographyMaterialProvidersOperations refines AbstractAwsCryptograph
         Types.AwsCryptographicMaterialProvidersException(
           message := "Must initialize keyring with either branchKeyId or BranchKeyIdSupplier."));
 
-    print ("About to construct AwsKmsHierarchicalKeyring\n");
-    print input.gracePeriod, "\n", input.graceInterval, "\n";
     var keyring := new AwsKmsHierarchicalKeyring.AwsKmsHierarchicalKeyring(
       keyStore := input.keyStore,
       branchKeyId := input.branchKeyId,

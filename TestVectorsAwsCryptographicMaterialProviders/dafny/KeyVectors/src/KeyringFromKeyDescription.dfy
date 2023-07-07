@@ -121,8 +121,6 @@ module {:options "-functionSyntax:4"} KeyringFromKeyDescription {
         inFlightTTL := None,
         maxCacheSize := Some(10)
       );
-      print("About to CreateAwsKmsHierarchicalKeyring\n");
-      print input.fanOut, " ", input.gracePeriod, "\n";
       var keyring := mpl.CreateAwsKmsHierarchicalKeyring(input);
       return keyring.MapFailure(e => AwsCryptographyMaterialProviders(e));
     }
