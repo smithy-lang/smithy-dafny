@@ -40,6 +40,21 @@ import static software.amazon.polymorph.smithydotnet.TypeConversionDirection.TO_
  */
 public class TypeConversionCodegen {
     public static final String C_SHARP_SYSTEM_EXCEPTION = "System.Exception";
+    // Edge case for constructors of Exceptions that extend the base Exception class.
+    public static final List<String> ERROR_CTOR = Arrays.asList(
+            "AwsCryptographicMaterialProvidersException",
+            "EntryAlreadyExists",
+            "EntryDoesNotExist",
+            "InvalidAlgorithmSuiteInfo",
+            "InvalidAlgorithmSuiteInfoOnDecrypt",
+            "InvalidAlgorithmSuiteInfoOnEncrypt",
+            "InvalidDecryptionMaterials",
+            "InvalidDecryptionMaterialsTransition",
+            "InvalidEncryptionMaterials",
+            "InvalidEncryptionMaterialsTransition",
+            "KeyStoreException",
+            "KeyVectorException"
+    );
 
     /**
      * A pair of type converter methods that converts between the compiled Dafny representation and the idiomatic C#
@@ -454,23 +469,7 @@ public class TypeConversionCodegen {
                     typeConverterForShape(memberShape.getId(), TO_DAFNY),
                     nameResolver.classPropertyForStructureMember(memberShape));
         }
-        // Special Case for constructors of Exceptions that extend the base Exception class.
-        final List<String> errorCtor = Arrays.asList(
-                "AwsCryptographicMaterialProvidersException",
-                "EntryAlreadyExists",
-                "EntryDoesNotExist",
-                "InvalidAlgorithmSuiteInfo",
-                "InvalidAlgorithmSuiteInfoOnDecrypt",
-                "InvalidAlgorithmSuiteInfoOnEncrypt",
-                "InvalidDecryptionMaterials",
-                "InvalidDecryptionMaterialsTransition",
-                "InvalidEncryptionMaterials",
-                "InvalidEncryptionMaterialsTransition",
-                "KeyStoreException",
-                "KeyVectorException"
-        );
-
-        if (errorCtor.contains(memberShape.getContainer().getName()) || memberShape.getContainer().getName().endsWith("Error"))  {
+        if (ERROR_CTOR.contains(memberShape.getContainer().getName()) || memberShape.getContainer().getName().endsWith("Error"))  {
             return "%s(value.getMessage())".formatted(
                      typeConverterForShape(memberShape.getId(), TO_DAFNY));
         }
