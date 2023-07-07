@@ -31,28 +31,28 @@ module {:extern "Signature"} Signature {
     input: Types.GenerateECDSASignatureKeyInput
   ) returns (res: Result<Types.GenerateECDSASignatureKeyOutput, Types.Error>)
     ensures match res
-      case Success(sigKeyPair) =>
-        //= compliance/framework/structures.txt#2.3.3.2.5
-        //= type=implication
-        //# The signing key MUST fit the specification described by the signature
-        //# algorithm (algorithm-suites.md#signature-algorithm) included in this
-        //# encryption material's algorithm suite (Section 2.3.3.2.1).
-        && |sigKeyPair.verificationKey| == FieldSize(input.signatureAlgorithm)
-        // && IsValidSignatureKeyPair(sigKeyPair)
-      case Failure(_) => true
+            case Success(sigKeyPair) =>
+              //= compliance/framework/structures.txt#2.3.3.2.5
+              //= type=implication
+              //# The signing key MUST fit the specification described by the signature
+              //# algorithm (algorithm-suites.md#signature-algorithm) included in this
+              //# encryption material's algorithm suite (Section 2.3.3.2.1).
+              && |sigKeyPair.verificationKey| == FieldSize(input.signatureAlgorithm)
+            // && IsValidSignatureKeyPair(sigKeyPair)
+            case Failure(_) => true
   {
     var sigKeyPair :- ExternKeyGen(input.signatureAlgorithm);
 
     :- Need(|sigKeyPair.verificationKey| == FieldSize(input.signatureAlgorithm),
-      Types.AwsCryptographicPrimitivesError(
-        message := "Incorrect verification-key length from ExternKeyGen."
-      ));
+            Types.AwsCryptographicPrimitivesError(
+              message := "Incorrect verification-key length from ExternKeyGen."
+            ));
 
     return Success(Types.GenerateECDSASignatureKeyOutput(
-      signatureAlgorithm := input.signatureAlgorithm,
-      verificationKey := sigKeyPair.verificationKey,
-      signingKey := sigKeyPair.signingKey
-    ));
+                     signatureAlgorithm := input.signatureAlgorithm,
+                     verificationKey := sigKeyPair.verificationKey,
+                     signingKey := sigKeyPair.signingKey
+                   ));
   }
 
   method {:extern "Signature.ECDSA", "ExternKeyGen"} ExternKeyGen(

@@ -18,13 +18,13 @@ module TestVersionKey {
   const logicalKeyStoreName := branchKeyStoreName;
   // THESE ARE TESTING RESOURCES DO NOT USE IN A PRODUCTION ENVIRONMENT
   const keyArn := "arn:aws:kms:us-west-2:370957321024:key/9d989aa2-2f9c-438c-a745-cc57d3ad0126";
-  
-  method {:test} TestVersionKey() 
+
+  method {:test} TestVersionKey()
   {
     var kmsClient :- expect KMS.KMSClient();
     var ddbClient :- expect DDB.DynamoDBClient();
     var kmsConfig := Types.KMSConfiguration.kmsKeyArn(keyArn);
-    
+
     var keyStoreConfig := Types.KeyStoreConfig(
       id := None,
       kmsConfiguration := kmsConfig,
@@ -43,17 +43,17 @@ module TestVersionKey {
     var branchKeyIdentifier :- expect keyStore.CreateKey(Types.CreateKeyInput());
 
     var oldActiveResult :- expect keyStore.GetActiveBranchKey(Types.GetActiveBranchKeyInput(
-      branchKeyIdentifier := branchKeyIdentifier.branchKeyIdentifier
-    ));
+                                                                branchKeyIdentifier := branchKeyIdentifier.branchKeyIdentifier
+                                                              ));
 
     var oldActiveVersion :- expect UTF8.Decode(oldActiveResult.branchKeyMaterials.branchKeyVersion).MapFailure(WrapStringToError);
-    
+
     var versionKeyResult := keyStore.VersionKey(Types.VersionKeyInput(
-      branchKeyIdentifier := branchKeyIdentifier.branchKeyIdentifier
-    ));
+                                                  branchKeyIdentifier := branchKeyIdentifier.branchKeyIdentifier
+                                                ));
 
     expect versionKeyResult.Success?;
-    
+
     var getBranchKeyVersionResult :- expect keyStore.GetBranchKeyVersion(
       Types.GetBranchKeyVersionInput(
         branchKeyIdentifier := branchKeyIdentifier.branchKeyIdentifier,
@@ -61,10 +61,10 @@ module TestVersionKey {
         branchKeyVersion := oldActiveVersion
       )
     );
-    
+
     var newActiveResult :- expect keyStore.GetActiveBranchKey(Types.GetActiveBranchKeyInput(
-      branchKeyIdentifier := branchKeyIdentifier.branchKeyIdentifier
-    ));
+                                                                branchKeyIdentifier := branchKeyIdentifier.branchKeyIdentifier
+                                                              ));
 
     // We expect that getting the old active key has the same version as getting a branch key through the get version key api
     expect getBranchKeyVersionResult.branchKeyMaterials.branchKeyVersion == oldActiveResult.branchKeyMaterials.branchKeyVersion;
@@ -80,7 +80,7 @@ module TestVersionKey {
     var kmsClient :- expect KMS.KMSClient();
     var ddbClient :- expect DDB.DynamoDBClient();
     var kmsConfig := Types.KMSConfiguration.kmsKeyArn(keyArn);
-    
+
     var keyStoreConfig := Types.KeyStoreConfig(
       id := None,
       kmsConfiguration := kmsConfig,
@@ -93,14 +93,14 @@ module TestVersionKey {
 
     var keyStore :- expect KeyStore.KeyStore(keyStoreConfig);
 
-    // First we test that if we try to version or "rotate" a branch key in an 
+    // First we test that if we try to version or "rotate" a branch key in an
     // active-active situation we end up with a failure.
     var versionKeyResult := keyStore.VersionKey(Types.VersionKeyInput(
-      branchKeyIdentifier := keyId
-    ));
+                                                  branchKeyIdentifier := keyId
+                                                ));
 
     expect versionKeyResult.Failure?;
     expect versionKeyResult.error == Types.KeyStoreException(
-      message := "Found more than one active key under: " + keyId + ". Resolve by calling ActiveKeyResolution API.");
+                                       message := "Found more than one active key under: " + keyId + ". Resolve by calling ActiveKeyResolution API.");
   }
 }

@@ -20,12 +20,12 @@ module TestRawRSAKeying {
     var namespace, name := TestUtils.NamespaceAndName(0);
     var keys := GenerateKeyPair(2048 as AwsCryptographyPrimitivesTypes.RSAModulusLengthBits);
     var rawRSAKeyring :- expect mpl.CreateRawRsaKeyring(Types.CreateRawRsaKeyringInput(
-      keyNamespace := namespace,
-      keyName := name,
-      paddingScheme := Types.PaddingScheme.OAEP_SHA1_MGF1,
-      publicKey := Option.Some(keys.publicKey.pem),
-      privateKey := Option.Some(keys.privateKey.pem)
-    ));
+                                                          keyNamespace := namespace,
+                                                          keyName := name,
+                                                          paddingScheme := Types.PaddingScheme.OAEP_SHA1_MGF1,
+                                                          publicKey := Option.Some(keys.publicKey.pem),
+                                                          privateKey := Option.Some(keys.privateKey.pem)
+                                                        ));
 
     var encryptionContext := TestUtils.SmallEncryptionContext(
       TestUtils.SmallEncryptionContextVariation.A
@@ -70,7 +70,7 @@ module TestRawRSAKeying {
     //# encryption materials (structures.md#encryption-materials) using RSA.
     // We demonstrate this by showing OnEncrypt then OnDecrypt gets us the same pdk back.
     expect decryptionMaterialsOut.materials.plaintextDataKey
-    == encryptionMaterialsOut.materials.plaintextDataKey;
+        == encryptionMaterialsOut.materials.plaintextDataKey;
   }
 
   method {:test} TestOnDecryptKeyNameMismatch()
@@ -80,20 +80,20 @@ module TestRawRSAKeying {
     var namespace, name := TestUtils.NamespaceAndName(0);
     var keys := GenerateKeyPair(2048 as AwsCryptographyPrimitivesTypes.RSAModulusLengthBits);
     var rawRSAKeyring :- expect mpl.CreateRawRsaKeyring(Types.CreateRawRsaKeyringInput(
-      keyNamespace := namespace,
-      keyName := name,
-      paddingScheme := Types.PaddingScheme.OAEP_SHA1_MGF1,
-      publicKey := Option.Some(keys.publicKey.pem),
-      privateKey := Option.Some(keys.privateKey.pem)
-    ));
+                                                          keyNamespace := namespace,
+                                                          keyName := name,
+                                                          paddingScheme := Types.PaddingScheme.OAEP_SHA1_MGF1,
+                                                          publicKey := Option.Some(keys.publicKey.pem),
+                                                          privateKey := Option.Some(keys.privateKey.pem)
+                                                        ));
 
     var mismatchedRSAKeyring :- expect mpl.CreateRawRsaKeyring(Types.CreateRawRsaKeyringInput(
-      keyNamespace := namespace,
-      keyName := "mismatched",
-      paddingScheme := Types.PaddingScheme.OAEP_SHA1_MGF1,
-      publicKey := Option.Some(keys.publicKey.pem),
-      privateKey := Option.Some(keys.privateKey.pem)
-    ));
+                                                                 keyNamespace := namespace,
+                                                                 keyName := "mismatched",
+                                                                 paddingScheme := Types.PaddingScheme.OAEP_SHA1_MGF1,
+                                                                 publicKey := Option.Some(keys.publicKey.pem),
+                                                                 privateKey := Option.Some(keys.privateKey.pem)
+                                                               ));
 
     var encryptionContext := TestUtils.SmallEncryptionContext(
       TestUtils.SmallEncryptionContextVariation.A
@@ -145,20 +145,20 @@ module TestRawRSAKeying {
     var decryptKeys := GenerateKeyPair(2048 as AwsCryptographyPrimitivesTypes.RSAModulusLengthBits);
 
     var encryptKeyring :- expect mpl.CreateRawRsaKeyring(Types.CreateRawRsaKeyringInput(
-      keyNamespace := namespace,
-      keyName := name,
-      paddingScheme := Types.PaddingScheme.OAEP_SHA1_MGF1,
-      publicKey := Option.Some(encryptKeys.publicKey.pem),
-      privateKey := Option.Some(encryptKeys.privateKey.pem)
-    ));
+                                                           keyNamespace := namespace,
+                                                           keyName := name,
+                                                           paddingScheme := Types.PaddingScheme.OAEP_SHA1_MGF1,
+                                                           publicKey := Option.Some(encryptKeys.publicKey.pem),
+                                                           privateKey := Option.Some(encryptKeys.privateKey.pem)
+                                                         ));
 
     var decryptKeyring :- expect mpl.CreateRawRsaKeyring(Types.CreateRawRsaKeyringInput(
-      keyNamespace := namespace,
-      keyName := name,
-      paddingScheme := Types.PaddingScheme.OAEP_SHA1_MGF1,
-      publicKey := Option.Some(decryptKeys.publicKey.pem),
-      privateKey := Option.Some(decryptKeys.privateKey.pem)
-    ));
+                                                           keyNamespace := namespace,
+                                                           keyName := name,
+                                                           paddingScheme := Types.PaddingScheme.OAEP_SHA1_MGF1,
+                                                           publicKey := Option.Some(decryptKeys.publicKey.pem),
+                                                           privateKey := Option.Some(decryptKeys.privateKey.pem)
+                                                         ));
 
     var encryptionContext := TestUtils.SmallEncryptionContext(TestUtils.SmallEncryptionContextVariation.A);
 
@@ -214,12 +214,12 @@ module TestRawRSAKeying {
     var namespace, name := TestUtils.NamespaceAndName(0);
     var keys := GenerateKeyPair(2048 as AwsCryptographyPrimitivesTypes.RSAModulusLengthBits);
     var rawRSAKeyring :- expect mpl.CreateRawRsaKeyring(Types.CreateRawRsaKeyringInput(
-      keyNamespace := namespace,
-      keyName := name,
-      paddingScheme := Types.PaddingScheme.OAEP_SHA1_MGF1,
-      publicKey := Option.Some(keys.publicKey.pem),
-      privateKey := Option.Some(keys.privateKey.pem)
-    ));
+                                                          keyNamespace := namespace,
+                                                          keyName := name,
+                                                          paddingScheme := Types.PaddingScheme.OAEP_SHA1_MGF1,
+                                                          publicKey := Option.Some(keys.publicKey.pem),
+                                                          privateKey := Option.Some(keys.privateKey.pem)
+                                                        ));
 
     var encryptionContext := TestUtils.SmallEncryptionContext(
       TestUtils.SmallEncryptionContextVariation.A
@@ -271,7 +271,7 @@ module TestRawRSAKeying {
     //# input decryption materials (structures.md#decryption-materials),
     //# modified in the following ways:
     expect decryptionMaterialsOut.materials.plaintextDataKey
-    == encryptionMaterialsOut.materials.plaintextDataKey;
+        == encryptionMaterialsOut.materials.plaintextDataKey;
   }
 
   method GenerateKeyPair( keyModulusLength: AwsCryptographyPrimitivesTypes.RSAModulusLengthBitsToGenerate )

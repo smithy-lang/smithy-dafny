@@ -34,17 +34,17 @@ module {:extern "software.amazon.cryptography.keystore.internaldafny"}
   method KeyStore(config: KeyStoreConfig)
     returns (res: Result<KeyStoreClient, Error>)
     ensures res.Success? ==>
-      && KMS.IsValid_KeyIdType(res.value.config.kmsConfiguration.kmsKeyArn)
-      && DDB.IsValid_TableName(config.ddbTableName)
-      && GetValidGrantTokens(config.grantTokens).Success?
-      && config.kmsClient.Some? ==> res.value.config.kmsClient == config.kmsClient.value
-      && config.ddbClient.Some? ==> res.value.config.ddbClient == config.ddbClient.value
-      && res.value.config.kmsClient.ValidState()
-      && res.value.config.ddbClient.ValidState()
+              && KMS.IsValid_KeyIdType(res.value.config.kmsConfiguration.kmsKeyArn)
+              && DDB.IsValid_TableName(config.ddbTableName)
+              && GetValidGrantTokens(config.grantTokens).Success?
+              && config.kmsClient.Some? ==> res.value.config.kmsClient == config.kmsClient.value
+                                            && config.ddbClient.Some? ==> res.value.config.ddbClient == config.ddbClient.value
+                                                                          && res.value.config.kmsClient.ValidState()
+                                                                          && res.value.config.ddbClient.ValidState()
     ensures
-        && !DDB.IsValid_TableName(config.ddbTableName)
-        && !KMS.IsValid_KeyIdType(config.kmsConfiguration.kmsKeyArn)
-        && ParseAwsKmsArn(config.kmsConfiguration.kmsKeyArn).Failure?
+      && !DDB.IsValid_TableName(config.ddbTableName)
+      && !KMS.IsValid_KeyIdType(config.kmsConfiguration.kmsKeyArn)
+      && ParseAwsKmsArn(config.kmsConfiguration.kmsKeyArn).Failure?
       ==>
         res.Failure?
   {
@@ -73,7 +73,7 @@ module {:extern "software.amazon.cryptography.keystore.internaldafny"}
       //# If one is not supplied, then a [version 4 UUID](https://www.ietf.org/rfc/rfc4122.txt) MUST be used.
       var maybeUuid := UUID.GenerateUUID();
       var uuid :- maybeUuid
-        .MapFailure(e => Types.KeyStoreException(message := e));
+      .MapFailure(e => Types.KeyStoreException(message := e));
       keyStoreId := uuid;
     }
 
@@ -82,27 +82,27 @@ module {:extern "software.amazon.cryptography.keystore.internaldafny"}
 
     var keyArn := ParseAwsKmsIdentifier(config.kmsConfiguration.kmsKeyArn);
     var kmsRegion := GetRegion(keyArn.value);
-    
+
     if config.kmsClient.None? {
       var maybeKmsClient := KMSOperations.KMSClientForRegion(kmsRegion.value);
       var extractedClient :- maybeKmsClient
-        .MapFailure(e => Types.ComAmazonawsKms(ComAmazonawsKms := e));
+      .MapFailure(e => Types.ComAmazonawsKms(ComAmazonawsKms := e));
       kmsClient := extractedClient;
     } else {
       kmsClient := config.kmsClient.value;
     }
-    
+
     if config.ddbClient.None? {
       var maybeDdbClient := DDBOperations.DDBClientForRegion(kmsRegion.value);
       var extractedClient :- maybeDdbClient
-        .MapFailure(e => Types.ComAmazonawsDynamodb(ComAmazonawsDynamodb := e));
+      .MapFailure(e => Types.ComAmazonawsDynamodb(ComAmazonawsDynamodb := e));
       ddbClient := extractedClient;
     } else {
       ddbClient := config.ddbClient.value;
     }
 
-    //= aws-encryption-sdk-specification/framework/branch-key-store.md#initialization
-    //# The following inputs MUST be specified to create a KeyStore:
+      //= aws-encryption-sdk-specification/framework/branch-key-store.md#initialization
+      //# The following inputs MUST be specified to create a KeyStore:
     :- Need(
       DDB.IsValid_TableName(config.ddbTableName),
       Types.KeyStoreException(
@@ -111,20 +111,20 @@ module {:extern "software.amazon.cryptography.keystore.internaldafny"}
 
     var client := new KeyStoreClient(
       Operations.Config(
-        id := keyStoreId,
-        ddbTableName := config.ddbTableName,
-        logicalKeyStoreName := config.logicalKeyStoreName,
-        kmsConfiguration := config.kmsConfiguration,
-        grantTokens := grantTokens.value,
-        kmsClient := kmsClient,
-        ddbClient := ddbClient
-      )
+      id := keyStoreId,
+      ddbTableName := config.ddbTableName,
+      logicalKeyStoreName := config.logicalKeyStoreName,
+      kmsConfiguration := config.kmsConfiguration,
+      grantTokens := grantTokens.value,
+      kmsClient := kmsClient,
+      ddbClient := ddbClient
+    )
     );
     return Success(client);
   }
 
   class KeyStoreClient... {
-    
+
     predicate {:vcs_split_on_every_assert} {:rlimit 3000} ValidState() {
       && Operations.ValidInternalConfig?(config)
       && History !in Operations.ModifiesInternalConfig(config)

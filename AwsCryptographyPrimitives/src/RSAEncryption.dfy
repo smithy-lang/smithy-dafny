@@ -9,7 +9,7 @@ module {:extern "RSAEncryption"} RSAEncryption {
   import Types = AwsCryptographyPrimitivesTypes
 
   method GenerateKeyPair(lengthBits: Types.RSAModulusLengthBitsToGenerate)
-      returns (publicKey: Types.RSAPublicKey, privateKey: Types.RSAPrivateKey)
+    returns (publicKey: Types.RSAPublicKey, privateKey: Types.RSAPrivateKey)
   {
     var pemPublic, pemPrivate := GenerateKeyPairExtern(lengthBits);
     privateKey := Types.RSAPrivateKey(pem := pemPrivate, lengthBits := lengthBits);
@@ -17,11 +17,11 @@ module {:extern "RSAEncryption"} RSAEncryption {
   }
 
   function method GetRSAKeyModulusLength(publicKey: seq<uint8>)
-      : (res: Result<Types.RSAModulusLengthBits, Types.Error>)
+    : (res: Result<Types.RSAModulusLengthBits, Types.Error>)
   {
     var length :- GetRSAKeyModulusLengthExtern(publicKey);
     :- Need(81 <= length as int < INT32_MAX_LIMIT,
-        Types.AwsCryptographicPrimitivesError(message := "Unsupported length for RSA modulus."));
+            Types.AwsCryptographicPrimitivesError(message := "Unsupported length for RSA modulus."));
     Success(length as int32)
   }
 
@@ -40,22 +40,22 @@ module {:extern "RSAEncryption"} RSAEncryption {
   }
 
   method {:extern "RSAEncryption.RSA", "GenerateKeyPairExtern"} GenerateKeyPairExtern(lengthBits: Types.RSAModulusLengthBitsToGenerate)
-      returns (publicKey: seq<uint8>, privateKey: seq<uint8>)
+    returns (publicKey: seq<uint8>, privateKey: seq<uint8>)
     ensures |publicKey| > 0
     ensures |privateKey| > 0
 
   function method {:extern "RSAEncryption.RSA", "GetRSAKeyModulusLengthExtern"} GetRSAKeyModulusLengthExtern(publicKey: seq<uint8>)
-      : (length: Result<uint32, Types.Error>)
+    : (length: Result<uint32, Types.Error>)
 
   method {:extern "RSAEncryption.RSA", "DecryptExtern"} DecryptExtern(padding: Types.RSAPaddingMode, privateKey: seq<uint8>,
                                                                       cipherText: seq<uint8>)
-      returns (res: Result<seq<uint8>, Types.Error>)
+    returns (res: Result<seq<uint8>, Types.Error>)
     requires |privateKey| > 0
     requires |cipherText| > 0
 
   method {:extern "RSAEncryption.RSA", "EncryptExtern"} EncryptExtern(padding: Types.RSAPaddingMode, publicKey: seq<uint8>,
                                                                       plaintextData: seq<uint8>)
-      returns (res: Result<seq<uint8>, Types.Error>)
+    returns (res: Result<seq<uint8>, Types.Error>)
     requires |publicKey| > 0
     requires |plaintextData| > 0
 }

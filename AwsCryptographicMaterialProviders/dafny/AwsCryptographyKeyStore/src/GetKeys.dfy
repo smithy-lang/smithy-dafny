@@ -24,18 +24,18 @@ module GetKeys {
   const BRANCH_KEY_IDENTIFIER_FIELD := "branch-key-id";
   const TABLE_FIELD := "tablename";
   const KMS_FIELD := "kms-arn";
-  
+
   const BRANCH_KEY_FIELD := "enc";
-  
+
   const STATUS_BRANCH_KEY_ID_MATCH_EXPRESSION := "#branch_key_id = :branch_key_id and #status = :status";
   const EXPRESSION_ATTRIBUTE_NAMES := map[
-    "#branch_key_id" := "branch-key-id",
-    "#status"       := "status"
-  ];
+                                        "#branch_key_id" := "branch-key-id",
+                                        "#status"       := "status"
+                                      ];
   const EXPRESSION_ATTRIBUTE_VALUE_STATUS_KEY := ":status";
   const STATUS_ACTIVE := "ACTIVE";
   const EXPRESSION_ATTRIBUTE_VALUE_BRANCH_KEY := ":branch_key_id";
-  
+
   type baseKeyStoreItem = m: DDB.AttributeMap | baseKeyStoreItemHasRequiredAttributes?(m) witness *
   predicate method baseKeyStoreItemHasRequiredAttributes?(m: DDB.AttributeMap) {
     && "branch-key-id" in m && m["branch-key-id"].S?
@@ -68,7 +68,7 @@ module GetKeys {
     && (m["status"].S == "ACTIVE" || m["status"].S == "DECRYPT_ONLY")
     && |m["type"].S| > |BRANCH_KEY_TYPE_PREFIX|
   }
-  
+
   function method ValueToString(a: DDB.AttributeValue): Result<string, Types.Error>
   {
     match a {
@@ -100,8 +100,8 @@ module GetKeys {
   {
     var maybeQueryResponse := QueryForActiveBranchKey(input.branchKeyIdentifier, tableName, ddbClient);
     var queryResponse :- maybeQueryResponse
-      .MapFailure(e => Types.ComAmazonawsDynamodb(ComAmazonawsDynamodb := e));
-    
+    .MapFailure(e => Types.ComAmazonawsDynamodb(ComAmazonawsDynamodb := e));
+
     :- Need(
       && queryResponse.Items.Some?
       && |queryResponse.Items.value| > 0,
@@ -114,18 +114,18 @@ module GetKeys {
     );
 
     var branchKeyRecord := SortByTime(queryResponse.Items.value);
-    
+
     var branchKeyResponse :- decryptKeyStoreItem(branchKeyRecord, kmsKeyArn, grantTokens, logicalKeyStoreName, kmsClient);
     var branchKeyVersion := branchKeyRecord["type"].S[|BRANCH_KEY_TYPE_PREFIX|..];
     var branchKeyVersionUtf8 :- UTF8.Encode(branchKeyVersion).MapFailure(e => E(e));
 
     return Success(Types.GetActiveBranchKeyOutput(
-      branchKeyMaterials := Types.BranchKeyMaterials(
-        branchKeyIdentifier := input.branchKeyIdentifier,
-        branchKeyVersion := branchKeyVersionUtf8,
-        branchKey := branchKeyResponse.Plaintext.value
-      )
-    ));
+                     branchKeyMaterials := Types.BranchKeyMaterials(
+                       branchKeyIdentifier := input.branchKeyIdentifier,
+                       branchKeyVersion := branchKeyVersionUtf8,
+                       branchKey := branchKeyResponse.Plaintext.value
+                     )
+                   ));
   }
 
   method QueryForActiveBranchKey(branchKeyId: string, ddbTableName: DDB.TableName, ddbClient: DDB.IDynamoDBClient)
@@ -133,7 +133,7 @@ module GetKeys {
     requires ddbClient.ValidState()
     modifies ddbClient.Modifies
     ensures ddbClient.ValidState()
-    ensures 
+    ensures
       && |ddbClient.History.Query| > 0
       && var ddbOperationOutput := Last(ddbClient.History.Query).output;
       //= aws-encryption-sdk-specification/framework/branch-key-store.md#versionkey
@@ -142,32 +142,32 @@ module GetKeys {
       && ddbOperationOutput.Failure?
       ==> res.Failure?
     ensures res.Success? ==>
-      && |ddbClient.History.Query| > 0
-      //= aws-encryption-sdk-specification/framework/branch-key-store.md#versionkey
-      //= type=implication
-      //# This operation MUST make a DDB::Query to get the branch key at `branchKeyId` with status `ACTIVE`
-      && var ddbOperationInput := Last(ddbClient.History.Query).input;
-      && var ddbOperationOutput := Last(ddbClient.History.Query).output;
-      && var expressionAttributeValues: DDB.AttributeMap := map[
-        EXPRESSION_ATTRIBUTE_VALUE_BRANCH_KEY := DDB.AttributeValue.S(branchKeyId),
-        EXPRESSION_ATTRIBUTE_VALUE_STATUS_KEY := DDB.AttributeValue.S(STATUS_ACTIVE)];
-      && ddbOperationOutput.Success?
-      && ddbOperationInput.TableName == ddbTableName
-      && ddbOperationInput.IndexName.Some?
-      && ddbOperationInput.IndexName.value == CreateKeyStoreTable.GSI_NAME
-      && ddbOperationInput.KeyConditionExpression.Some?
-      && ddbOperationInput.KeyConditionExpression.value == STATUS_BRANCH_KEY_ID_MATCH_EXPRESSION
-      && ddbOperationInput.ExpressionAttributeNames.Some?
-      && ddbOperationInput.ExpressionAttributeNames.value == EXPRESSION_ATTRIBUTE_NAMES
-      && ddbOperationInput.ExpressionAttributeValues.Some?
-      && ddbOperationInput.ExpressionAttributeValues.value == expressionAttributeValues
-      && ddbOperationOutput.value == res.value
+              && |ddbClient.History.Query| > 0
+                 //= aws-encryption-sdk-specification/framework/branch-key-store.md#versionkey
+                 //= type=implication
+                 //# This operation MUST make a DDB::Query to get the branch key at `branchKeyId` with status `ACTIVE`
+              && var ddbOperationInput := Last(ddbClient.History.Query).input;
+              && var ddbOperationOutput := Last(ddbClient.History.Query).output;
+              && var expressionAttributeValues: DDB.AttributeMap := map[
+                                                                      EXPRESSION_ATTRIBUTE_VALUE_BRANCH_KEY := DDB.AttributeValue.S(branchKeyId),
+                                                                      EXPRESSION_ATTRIBUTE_VALUE_STATUS_KEY := DDB.AttributeValue.S(STATUS_ACTIVE)];
+              && ddbOperationOutput.Success?
+              && ddbOperationInput.TableName == ddbTableName
+              && ddbOperationInput.IndexName.Some?
+              && ddbOperationInput.IndexName.value == CreateKeyStoreTable.GSI_NAME
+              && ddbOperationInput.KeyConditionExpression.Some?
+              && ddbOperationInput.KeyConditionExpression.value == STATUS_BRANCH_KEY_ID_MATCH_EXPRESSION
+              && ddbOperationInput.ExpressionAttributeNames.Some?
+              && ddbOperationInput.ExpressionAttributeNames.value == EXPRESSION_ATTRIBUTE_NAMES
+              && ddbOperationInput.ExpressionAttributeValues.Some?
+              && ddbOperationInput.ExpressionAttributeValues.value == expressionAttributeValues
+              && ddbOperationOutput.value == res.value
   {
     var expressionAttributeValues : DDB.AttributeMap := map[
       EXPRESSION_ATTRIBUTE_VALUE_BRANCH_KEY := DDB.AttributeValue.S(branchKeyId),
       EXPRESSION_ATTRIBUTE_VALUE_STATUS_KEY := DDB.AttributeValue.S(STATUS_ACTIVE)
     ];
-    
+
     var queryInput := DDB.QueryInput(
       TableName := ddbTableName,
       IndexName := Some(CreateKeyStoreTable.GSI_NAME),
@@ -187,9 +187,9 @@ module GetKeys {
       ExpressionAttributeNames := Some(EXPRESSION_ATTRIBUTE_NAMES),
       ExpressionAttributeValues := Some(expressionAttributeValues)
     );
-    
+
     var queryResponse :- ddbClient.Query(queryInput);
-    
+
     res := Success(queryResponse);
   }
 
@@ -220,13 +220,13 @@ module GetKeys {
       ConsistentRead :=  None,
       ReturnConsumedCapacity := None,
       ProjectionExpression := None,
-      ExpressionAttributeNames := None 
+      ExpressionAttributeNames := None
     );
 
     var maybeGetItem := ddbClient.GetItem(ItemRequest);
     var getItemResponse :- maybeGetItem
-      .MapFailure(e => Types.ComAmazonawsDynamodb(ComAmazonawsDynamodb := e));
-    
+    .MapFailure(e => Types.ComAmazonawsDynamodb(ComAmazonawsDynamodb := e));
+
     :- Need(
       getItemResponse.Item.Some?,
       E("No item found for corresponding branch key identifier.")
@@ -236,7 +236,7 @@ module GetKeys {
       validVersionBranchKey?(getItemResponse.Item.value),
       E("Malformed Branch Key entry")
     );
-    
+
     var branchKeyRecord: versionBranchKeyItem := getItemResponse.Item.value;
 
     var maybeBranchKeyResponse := decryptKeyStoreItem(branchKeyRecord, kmsKeyArn, grantTokens, logicalKeyStoreName, kmsClient);
@@ -246,14 +246,14 @@ module GetKeys {
     var branchKeyVersionUtf8 :- UTF8.Encode(branchKeyVersion).MapFailure(e => E(e));
 
     return Success(Types.GetBranchKeyVersionOutput(
-      branchKeyMaterials := Types.BranchKeyMaterials(
-        branchKeyIdentifier := input.branchKeyIdentifier,
-        branchKeyVersion := branchKeyVersionUtf8,
-        branchKey := branchKeyResponse.Plaintext.value
-      )
-    ));
+                     branchKeyMaterials := Types.BranchKeyMaterials(
+                       branchKeyIdentifier := input.branchKeyIdentifier,
+                       branchKeyVersion := branchKeyVersionUtf8,
+                       branchKey := branchKeyResponse.Plaintext.value
+                     )
+                   ));
   }
-  
+
   method GetBeaconKeyAndUnwrap(
     input: Types.GetBeaconKeyInput,
     tableName: DDB.TableName,
@@ -277,7 +277,7 @@ module GetKeys {
       BRANCH_KEY_IDENTIFIER_FIELD := DDB.AttributeValue.S(input.branchKeyIdentifier),
       TYPE_FIELD := DDB.AttributeValue.S("beacon:true")
     ];
-    
+
     var ItemRequest := DDB.GetItemInput(
       Key := dynamoDbKey,
       TableName := tableName,
@@ -285,13 +285,13 @@ module GetKeys {
       ConsistentRead :=  None,
       ReturnConsumedCapacity := None,
       ProjectionExpression := None,
-      ExpressionAttributeNames := None 
+      ExpressionAttributeNames := None
     );
 
     var maybeGetItem := ddbClient.GetItem(ItemRequest);
     var getItemResponse :- maybeGetItem
-      .MapFailure(e => Types.ComAmazonawsDynamodb(ComAmazonawsDynamodb := e));
-    
+    .MapFailure(e => Types.ComAmazonawsDynamodb(ComAmazonawsDynamodb := e));
+
     :- Need(
       getItemResponse.Item.Some?,
       E("No item found for corresponding branch key identifier.")
@@ -305,9 +305,9 @@ module GetKeys {
       validBeaconKeyItem?(getItemResponse.Item.value),
       E("Malformed Branch Key entry")
     );
-  
+
     var beaconKeyItem: baseKeyStoreItem := getItemResponse.Item.value;
-    
+
     //= aws-encryption-sdk-specification/framework/branch-key-store.md#getbeaconkey
     //# The operation MUST decrypt the beacon key according to the [AWS KMS Branch Key Decryption](#aws-kms-branch-key-decryption) section.
     var beaconKeyResponse :- decryptKeyStoreItem(beaconKeyItem, kmsKeyArn, grantTokens, logicalKeyStoreName, kmsClient);
@@ -315,17 +315,17 @@ module GetKeys {
     //= aws-encryption-sdk-specification/framework/branch-key-store.md#getbeaconkey
     //# This operation MUST return the constructed [beacon key materials](./structures.md#beacon-key-materials).
     return Success(Types.GetBeaconKeyOutput(
-      //= aws-encryption-sdk-specification/framework/branch-key-store.md#getbeaconkey
-      //# This operation MUST construct [beacon key materials](./structures.md#beacon-key-materials) from the decrypted branch key material
-      //# and the `branchKeyId` from the returned `branch-key-id` field.
-      beaconKeyMaterials := Types.BeaconKeyMaterials(
-        beaconKeyIdentifier := input.branchKeyIdentifier,
-        beaconKey := Some(beaconKeyResponse.Plaintext.value),
-        hmacKeys := None
-      )
-    ));
+                     //= aws-encryption-sdk-specification/framework/branch-key-store.md#getbeaconkey
+                     //# This operation MUST construct [beacon key materials](./structures.md#beacon-key-materials) from the decrypted branch key material
+                     //# and the `branchKeyId` from the returned `branch-key-id` field.
+                     beaconKeyMaterials := Types.BeaconKeyMaterials(
+                       beaconKeyIdentifier := input.branchKeyIdentifier,
+                       beaconKey := Some(beaconKeyResponse.Plaintext.value),
+                       hmacKeys := None
+                     )
+                   ));
   }
-  
+
   method decryptKeyStoreItem(
     branchKeyRecord: baseKeyStoreItem,
     awsKmsKeyArn: KMS.KeyIdType,
@@ -342,14 +342,14 @@ module GetKeys {
     modifies kmsClient.Modifies
     ensures kmsClient.ValidState()
     ensures output.Success?
-      ==> 
-        && output.value.KeyId.Some?
-        //= aws-encryption-sdk-specification/framework/branch-key-store.md#getbeaconkey
-        //= type=implication
-        //# - The `KeyId` field in the AWS KMS response MUST equal the configured AWS KMS Key ARN.
-        && output.value.KeyId.value == awsKmsKeyArn
-        && output.value.Plaintext.Some?
-        && 32 == |output.value.Plaintext.value|
+            ==>
+              && output.value.KeyId.Some?
+                 //= aws-encryption-sdk-specification/framework/branch-key-store.md#getbeaconkey
+                 //= type=implication
+                 //# - The `KeyId` field in the AWS KMS response MUST equal the configured AWS KMS Key ARN.
+              && output.value.KeyId.value == awsKmsKeyArn
+              && output.value.Plaintext.Some?
+              && 32 == |output.value.Plaintext.value|
   {
     var wrappedBranchKey: KMS.CiphertextType := branchKeyRecord[BRANCH_KEY_FIELD].B;
 
@@ -388,7 +388,7 @@ module GetKeys {
     //= aws-encryption-sdk-specification/framework/branch-key-store.md#getbeaconkey
     //# If the beacon key fails to decrypt, this operation MUST fail.
     var decryptResponse :- maybeDecryptResponse
-      .MapFailure(e => Types.ComAmazonawsKms(ComAmazonawsKms := e));
+    .MapFailure(e => Types.ComAmazonawsKms(ComAmazonawsKms := e));
 
     :- Need(
       && decryptResponse.KeyId.Some?
@@ -399,21 +399,21 @@ module GetKeys {
     );
     return Success(decryptResponse);
   }
-  
+
   method SortByTime(queryResponse: DDB.ItemList)
     returns (output: branchKeyItem)
     requires |queryResponse| > 0
-    requires 
-      && (forall resp <- queryResponse :: 
-        && validActiveBranchKey?(resp))
+    requires
+      && (forall resp <- queryResponse ::
+            && validActiveBranchKey?(resp))
     ensures validActiveBranchKey?(output)
-  { 
+  {
     if |queryResponse| == 1 {
       return queryResponse[0];
     }
 
     var newestBranchKey: branchKeyItem := queryResponse[0];
-    
+
     for i := 1 to |queryResponse| {
       var tmp: branchKeyItem := queryResponse[i];
       var a := newestBranchKey["create-time"].S;
@@ -435,8 +435,8 @@ module GetKeys {
     return newestBranchKey;
   }
 
-  function method CharGreater(a: char, b: char): bool 
+  function method CharGreater(a: char, b: char): bool
   {
     a > b
-  } 
+  }
 }

@@ -70,7 +70,7 @@ module AwsCryptographyPrimitivesOperations refines AbstractAwsCryptographyPrimit
 
   predicate HkdfExpandEnsuresPublicly(input: HkdfExpandInput, output: Result<seq<uint8>, Error>)
   {
-      output.Success?
+    output.Success?
     ==>
       && |output.value| == input.expectedLength as nat
   }
@@ -83,7 +83,7 @@ module AwsCryptographyPrimitivesOperations refines AbstractAwsCryptographyPrimit
 
   predicate HkdfEnsuresPublicly(input: HkdfInput, output: Result<seq<uint8>, Error>)
   {
-      output.Success?
+    output.Success?
     ==>
       && |output.value| == input.expectedLength as nat
   }
@@ -93,10 +93,10 @@ module AwsCryptographyPrimitivesOperations refines AbstractAwsCryptographyPrimit
   {
     output := WrappedHKDF.Hkdf(input);
   }
-  
+
   predicate KdfCounterModeEnsuresPublicly(input: KdfCtrInput, output: Result<seq<uint8>, Error>)
   {
-      output.Success?
+    output.Success?
     ==>
       && |output.value| == input.expectedLength as nat
   }
@@ -109,7 +109,7 @@ module AwsCryptographyPrimitivesOperations refines AbstractAwsCryptographyPrimit
 
   predicate AesKdfCounterModeEnsuresPublicly(input: AesKdfCtrInput, output: Result<seq<uint8>, Error>)
   {
-      output.Success?
+    output.Success?
     ==>
       && |output.value| == input.expectedLength as nat
   }
@@ -119,10 +119,10 @@ module AwsCryptographyPrimitivesOperations refines AbstractAwsCryptographyPrimit
   {
     output := Failure(Types.AwsCryptographicPrimitivesError(message := "Implement"));
   }
-  
+
   predicate AESEncryptEnsuresPublicly(input: AESEncryptInput, output: Result<AESEncryptOutput, Error>)
   {
-      && output.Success?
+    && output.Success?
     ==>
       && |output.value.cipherText| == |input.msg|
       && |output.value.authTag| == input.encAlg.tagLength as nat
@@ -136,7 +136,7 @@ module AwsCryptographyPrimitivesOperations refines AbstractAwsCryptographyPrimit
 
   predicate AESDecryptEnsuresPublicly(input: AESDecryptInput, output: Result<seq<uint8>, Error>)
   {
-      && output.Success?
+    && output.Success?
     ==>
       && |output.value| == |input.cipherTxt|
   }
@@ -156,7 +156,7 @@ module AwsCryptographyPrimitivesOperations refines AbstractAwsCryptographyPrimit
     var publicKey, privateKey := RSAEncryption.GenerateKeyPair(input.lengthBits);
     output := Success(GenerateRSAKeyPairOutput(publicKey := publicKey, privateKey := privateKey));
   }
-  
+
   predicate GetRSAKeyModulusLengthEnsuresPublicly(input: GetRSAKeyModulusLengthInput, output: Result<GetRSAKeyModulusLengthOutput, Error>)
   {true}
 

@@ -18,7 +18,7 @@ module {:extern "AESEncryption"} AESEncryption {
   predicate {:axiom} DecryptedWithKey(key: seq<uint8>, plaintext: seq<uint8>)
 
   function method EncryptionOutputFromByteSeq(s: seq<uint8>, encAlg: Types.AES_GCM): (encArt: Types.AESEncryptOutput)
-    requires 0 < encAlg.tagLength 
+    requires 0 < encAlg.tagLength
     requires encAlg.tagLength as nat <= |s|
     ensures |encArt.cipherText + encArt.authTag| == |s|
     ensures |encArt.authTag| == encAlg.tagLength as int
@@ -48,8 +48,8 @@ module {:extern "AESEncryption"} AESEncryption {
   method AESEncrypt(input: Types.AESEncryptInput)
     returns (res : Result<Types.AESEncryptOutput, Types.Error>)
     ensures res.Success? ==>
-      && |res.value.cipherText| == |input.msg|
-      && |res.value.authTag| == input.encAlg.tagLength as int
+              && |res.value.cipherText| == |input.msg|
+              && |res.value.authTag| == input.encAlg.tagLength as int
     ensures res.Success? ==> EncryptionOutputEncryptedWithAAD(res.value, input.aad)
     ensures res.Success? ==> CiphertextGeneratedWithPlaintext(res.value.cipherText, input.msg)
     ensures res.Success? ==> EncryptedWithKey(res.value.cipherText, input.key)
@@ -77,7 +77,7 @@ module {:extern "AESEncryption"} AESEncryption {
     );
 
     return Success(value);
-}
+  }
 
   method {:extern "AESEncryption.AES_GCM", "AESDecryptExtern"} AESDecryptExtern(
     encAlg: Types.AES_GCM,

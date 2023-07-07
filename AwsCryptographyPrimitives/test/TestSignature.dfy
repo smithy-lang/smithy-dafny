@@ -40,15 +40,15 @@ module TestSignature {
     var genInput := Types.GenerateECDSASignatureKeyInput( signatureAlgorithm := alg);
     var keys :- expect Signature.ExternKeyGen(alg);
     RequireGoodKeyLengths(alg, keys);
-      
+
     var signature :- expect Signature.Sign(alg, keys.signingKey, message);
     var shouldBeTrue :- expect Signature.Verify(alg, keys.verificationKey, message, signature);
     expect shouldBeTrue;
-      
+
     var shouldBeFalse :- expect Signature.Verify(alg, keys.verificationKey, message + [1], signature);
     expect !shouldBeFalse;
   }
-  
+
   method {:test} YCompression384() {
     YCompression(P384, 384);
   }

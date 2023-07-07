@@ -65,7 +65,7 @@ module Actions {
       ensures Ensures(a, r, attemptsState)
   }
 
-    trait {:termination false} DeterministicAction<A, R>
+  trait {:termination false} DeterministicAction<A, R>
   {
     /*
      * Contains the implementation of the given deterministic action
@@ -94,7 +94,7 @@ module Actions {
       ensures Ensures(a, r)
   }
 
-/*
+  /*
    * Returns a sequence with elements of type R
    * which is built by executing the input action
    * to all items in the input sequence.
@@ -111,15 +111,15 @@ module Actions {
       forall i ::
         && 0 <= i < |s|
         ==>
-        action.Ensures(s[i], res[i])
+          action.Ensures(s[i], res[i])
   {
     var rs := [];
     for i := 0 to |s|
       invariant |s[..i]| == |rs|
       invariant forall j ::
-        && 0 <= j < i
-        ==>
-        action.Ensures(s[j], rs[j])
+          && 0 <= j < i
+          ==>
+            action.Ensures(s[j], rs[j])
     {
       var r := action.Invoke(s[i]);
       rs := rs + [r];
@@ -137,23 +137,23 @@ module Actions {
     returns (res: Result<seq<R>, E>)
     ensures
       res.Success?
-    ==>
-      |s| == |res.value|
+      ==>
+        |s| == |res.value|
     ensures
       res.Success?
-    ==>
+      ==>
         (forall i ::
-          && 0 <= i < |s|
-          ==>
-          action.Ensures(s[i], Success(res.value[i])))
+           && 0 <= i < |s|
+           ==>
+             action.Ensures(s[i], Success(res.value[i])))
   {
     var rs := [];
     for i := 0 to |s|
       invariant |s[..i]| == |rs|
       invariant forall j ::
-        && 0 <= j < i
-        ==>
-        action.Ensures(s[j], Success(rs[j]))
+          && 0 <= j < i
+          ==>
+            action.Ensures(s[j], Success(rs[j]))
     {
       var r :- action.Invoke(s[i]);
       rs := rs + [r];
@@ -174,20 +174,20 @@ module Actions {
     returns (res: seq<R>)
     ensures
       forall i :: i in s
-        ==>
-        && exists fm ::
-          && action.Ensures(i, fm)
-          && forall k | k in fm :: k in res
+                  ==>
+                    && exists fm ::
+                      && action.Ensures(i, fm)
+                      && forall k | k in fm :: k in res
   {
     ghost var parts := [];
     var rs := [];
     for i := 0 to |s|
       invariant |s[..i]| == |parts|
       invariant forall j ::
-        && 0 <= j < i
-        ==>
-        && action.Ensures(s[j], parts[j])
-        && forall b | b in parts[j] :: b in rs
+          && 0 <= j < i
+          ==>
+            && action.Ensures(s[j], parts[j])
+            && forall b | b in parts[j] :: b in rs
     {
       var r := action.Invoke(s[i]);
       rs := rs + r;
@@ -210,24 +210,24 @@ module Actions {
     returns (res: Result<seq<R>, E>, ghost parts: seq<seq<R>>)
     ensures
       res.Success?
-    ==>
-      && |s| == |parts|
-      && res.value == Flatten(parts)
-      && (
-        forall i :: 0 <= i < |s|
-          ==>
-          && action.Ensures(s[i], Success(parts[i]))
-          && multiset(parts[i]) <= multiset(res.value))
+      ==>
+        && |s| == |parts|
+        && res.value == Flatten(parts)
+        && (
+             forall i :: 0 <= i < |s|
+                         ==>
+                           && action.Ensures(s[i], Success(parts[i]))
+                           && multiset(parts[i]) <= multiset(res.value))
   {
     parts := [];
     var rs := [];
     for i := 0 to |s|
       invariant |s[..i]| == |parts|
       invariant forall j ::
-        && 0 <= j < i
-        ==>
-        && action.Ensures(s[j], Success(parts[j]))
-        && multiset(parts[j]) <= multiset(rs)
+          && 0 <= j < i
+          ==>
+            && action.Ensures(s[j], Success(parts[j]))
+            && multiset(parts[j]) <= multiset(rs)
       invariant Flatten(parts) == rs
     {
       var r :- action.Invoke(s[i]);
@@ -238,7 +238,7 @@ module Actions {
     return Success(rs), parts;
   }
 
- /*
+  /*
    * Given an input action (which must return a boolean) and an input sequence,
    * returns a sequence containing only those items from the input sequence which
    * return true when the action is invoked on them.
@@ -253,17 +253,17 @@ module Actions {
       forall j ::
         j in res
         ==>
-        && j in s
-        && action.Ensures(j, true)
+          && j in s
+          && action.Ensures(j, true)
   {
     var rs := [];
     for i := 0 to |s|
       invariant |s[..i]| >= |rs|
       invariant forall j ::
-        j in rs
-        ==>
-        && j in s
-        && action.Ensures(j, true)
+          j in rs
+          ==>
+            && j in s
+            && action.Ensures(j, true)
     {
       var r := action.Invoke(s[i]);
       if r {
@@ -283,22 +283,22 @@ module Actions {
     returns (res: Result<seq<A>, E>)
     ensures
       res.Success?
-    ==>
-      && |s| >= |res.value|
-      && forall j ::
-        j in res.value
-        ==>
-        && j in s
-        && action.Ensures(j, Success(true))
+      ==>
+        && |s| >= |res.value|
+        && forall j ::
+             j in res.value
+             ==>
+               && j in s
+               && action.Ensures(j, Success(true))
   {
     var rs := [];
     for i := 0 to |s|
       invariant |s[..i]| >= |rs|
       invariant forall j ::
-        j in rs
-        ==>
-        && j in s
-        && action.Ensures(j, Success(true))
+          j in rs
+          ==>
+            && j in s
+            && action.Ensures(j, Success(true))
     {
       var r :- action.Invoke(s[i]);
       if r {
@@ -315,7 +315,7 @@ module Actions {
    * the successful attempt's result. If all fail, this method returns a single
    * failure which aggregates all failures.
    */
-    method ReduceToSuccess<A, B, E>(
+  method ReduceToSuccess<A, B, E>(
     action: ActionWithResult<A, B, E>,
     s: seq<A>
   )
@@ -329,40 +329,40 @@ module Actions {
     decreases action.Modifies
     ensures 0 < |attemptsState| <= |s|
     ensures forall i
-      | 0 <= i < |attemptsState|
-      :: attemptsState[i].input == s[i]
+              | 0 <= i < |attemptsState|
+              :: attemptsState[i].input == s[i]
     ensures action.Invariant() // this feels a little strange
     ensures
-    if res.Success? then
-      && Last(attemptsState).output.Success?
-      && Last(attemptsState).output.value == res.value
-      // This is the engine that can be used to hoist proof obligations
-      && action.Ensures(
-        Last(attemptsState).input,
-        Last(attemptsState).output,
-        DropLast(attemptsState))
-      // Attempts are made until there is a success
-      // so attemps will be amde up of failures
-      // with one final Success at the end.
-      && forall i
-      | 0 <= i < |DropLast(attemptsState)|
-      :: attemptsState[i].output.Failure?
-    else
-      && |attemptsState| == |s|
-      && forall i
-      | 0 <= i < |attemptsState|
-      :: attemptsState[i].output.Failure?
+      if res.Success? then
+        && Last(attemptsState).output.Success?
+        && Last(attemptsState).output.value == res.value
+           // This is the engine that can be used to hoist proof obligations
+        && action.Ensures(
+             Last(attemptsState).input,
+             Last(attemptsState).output,
+             DropLast(attemptsState))
+           // Attempts are made until there is a success
+           // so attemps will be amde up of failures
+           // with one final Success at the end.
+        && forall i
+             | 0 <= i < |DropLast(attemptsState)|
+             :: attemptsState[i].output.Failure?
+      else
+        && |attemptsState| == |s|
+        && forall i
+             | 0 <= i < |attemptsState|
+             :: attemptsState[i].output.Failure?
   {
     var attemptedResults := [];
     attemptsState := [];
     for i := 0 to |s|
       invariant |s[..i]| == |attemptsState| == |attemptedResults|
       invariant forall j
-      | 0 <= j < |attemptsState|
-      ::
-        && attemptsState[j].input == s[j]
-        && attemptsState[j].output.Failure?
-        && attemptedResults[j] == attemptsState[j].output
+          | 0 <= j < |attemptsState|
+          ::
+            && attemptsState[j].input == s[j]
+            && attemptsState[j].output.Failure?
+            && attemptedResults[j] == attemptsState[j].output
       invariant action.Invariant()
     {
       var attempt := action.Invoke(s[i], attemptsState);

@@ -21,7 +21,7 @@ module TestCreateKeys {
     var kmsClient :- expect KMS.KMSClient();
     var ddbClient :- expect DDB.DynamoDBClient();
     var kmsConfig := Types.KMSConfiguration.kmsKeyArn(keyArn);
-    
+
     var keyStoreConfig := Types.KeyStoreConfig(
       id := None,
       kmsConfiguration := kmsConfig,
@@ -31,19 +31,19 @@ module TestCreateKeys {
       ddbClient := Some(ddbClient),
       kmsClient := Some(kmsClient)
     );
-    
+
     var keyStore :- expect KeyStore.KeyStore(keyStoreConfig);
 
     var branchKeyId :- expect keyStore.CreateKey(Types.CreateKeyInput());
 
     var beaconKeyResult :- expect keyStore.GetBeaconKey(Types.GetBeaconKeyInput(
-      branchKeyIdentifier := branchKeyId.branchKeyIdentifier
-    ));
-    
+                                                          branchKeyIdentifier := branchKeyId.branchKeyIdentifier
+                                                        ));
+
     var activeResult :- expect keyStore.GetActiveBranchKey(Types.GetActiveBranchKeyInput(
-      branchKeyIdentifier := branchKeyId.branchKeyIdentifier
-    ));
-    
+                                                             branchKeyIdentifier := branchKeyId.branchKeyIdentifier
+                                                           ));
+
     expect beaconKeyResult.beaconKeyMaterials.beaconKey.Some?;
     expect |beaconKeyResult.beaconKeyMaterials.beaconKey.value| == 32;
     expect |activeResult.branchKeyMaterials.branchKey| == 32;

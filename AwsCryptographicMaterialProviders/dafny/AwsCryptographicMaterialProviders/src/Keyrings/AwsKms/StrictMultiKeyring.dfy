@@ -12,7 +12,7 @@ include "../../AlgorithmSuites.dfy"
 module StrictMultiKeyring {
   import opened Wrappers
   import Seq
-  import Types = AwsCryptographyMaterialProvidersTypes 
+  import Types = AwsCryptographyMaterialProvidersTypes
   import KMS = Types.ComAmazonawsKmsTypes
   import MultiKeyring
   import AwsArnParsing
@@ -30,16 +30,16 @@ module StrictMultiKeyring {
     requires clientSupplier.ValidState()
     modifies clientSupplier.Modifies
     ensures output.Success? ==>
-    && output.value.ValidState()
-    && fresh(output.value)
-    && fresh(output.value.History)
-    && fresh(output.value.Modifies - clientSupplier.Modifies)
+              && output.value.ValidState()
+              && fresh(output.value)
+              && fresh(output.value.History)
+              && fresh(output.value.Modifies - clientSupplier.Modifies)
 
     ensures
       || (generator.Some? && generator.value == "")
       || (awsKmsKeys.Some? && (exists k | k in awsKmsKeys.value :: k == ""))
-    ==>
-      output.Failure?
+      ==>
+        output.Failure?
 
     //= aws-encryption-sdk-specification/framework/aws-kms/aws-kms-multi-keyrings.md#aws-kms-multi-keyring
     //= type=implication
@@ -47,13 +47,13 @@ module StrictMultiKeyring {
     //# (aws-kms-key-arn.md#a-valid-aws-kms-arn), this function MUST fail.
     ensures
       var allStrings := if generator.Some? then
-        [generator.value] + awsKmsKeys.UnwrapOr([])
-      else
-        awsKmsKeys.UnwrapOr([]);
+                          [generator.value] + awsKmsKeys.UnwrapOr([])
+                        else
+                          awsKmsKeys.UnwrapOr([]);
       var allIdentifiers := Seq.MapWithResult(AwsArnParsing.IsAwsKmsIdentifierString, allStrings);
       && allIdentifiers.Failure?
-    ==>
-      output.Failure?
+      ==>
+        output.Failure?
 
     //= aws-encryption-sdk-specification/framework/aws-kms/aws-kms-multi-keyrings.md#aws-kms-multi-keyring
     //= type=implication
@@ -68,41 +68,41 @@ module StrictMultiKeyring {
     //# Keyring MUST be this function's output.
     ensures
       && output.Success?
-    ==>
-      //= aws-encryption-sdk-specification/framework/aws-kms/aws-kms-multi-keyrings.md#aws-kms-multi-keyring
-      //= type=implication
-      //# If there is a generator input then the generator keyring MUST be a
-      //# [AWS KMS Keyring](aws-kms-keyring.md) initialized with
-      && (generator.Some?
       ==>
-        && output.value.generatorKeyring.Some?
-        && output.value.generatorKeyring.value is AwsKmsKeyring.AwsKmsKeyring
-        && var g := output.value.generatorKeyring.value as AwsKmsKeyring.AwsKmsKeyring;
-        && g.awsKmsKey == generator.value
-        && (grantTokens.Some? ==> g.grantTokens == grantTokens.value))
-      && (generator.None?
-      ==>
-        && output.value.generatorKeyring.None?)
-      //= aws-encryption-sdk-specification/framework/aws-kms/aws-kms-multi-keyrings.md#aws-kms-multi-keyring
-      //= type=implication
-      //# If there is a set of child identifiers then a set of [AWS KMS Keyring]
-      //# (aws-kms-keyring.md) MUST be created for each AWS KMS key identifier
-      //# by initializing each keyring with
-      && (awsKmsKeys.Some?
-      ==>
-        && |awsKmsKeys.value| == |output.value.childKeyrings|
-        && forall index | 0 <= index < |awsKmsKeys.value| ::
-          // AWS KMS Keyring must be created for each AWS KMS Key identifier
-          && var childKeyring: Types.IKeyring := output.value.childKeyrings[index];
-          && childKeyring is AwsKmsKeyring.AwsKmsKeyring
-          && var awsKmsChild := childKeyring as AwsKmsKeyring.AwsKmsKeyring;
-          // AWS KMS key identifier
-          && awsKmsChild.awsKmsKey == awsKmsKeys.value[index]
-          // The input list of AWS KMS grant tokens
-          && (grantTokens.Some? ==> awsKmsChild.grantTokens == grantTokens.value))
-      && (awsKmsKeys.None?
-      ==>
-        && output.value.childKeyrings == [])
+        //= aws-encryption-sdk-specification/framework/aws-kms/aws-kms-multi-keyrings.md#aws-kms-multi-keyring
+        //= type=implication
+        //# If there is a generator input then the generator keyring MUST be a
+        //# [AWS KMS Keyring](aws-kms-keyring.md) initialized with
+        && (generator.Some?
+            ==>
+              && output.value.generatorKeyring.Some?
+              && output.value.generatorKeyring.value is AwsKmsKeyring.AwsKmsKeyring
+              && var g := output.value.generatorKeyring.value as AwsKmsKeyring.AwsKmsKeyring;
+              && g.awsKmsKey == generator.value
+              && (grantTokens.Some? ==> g.grantTokens == grantTokens.value))
+        && (generator.None?
+            ==>
+              && output.value.generatorKeyring.None?)
+           //= aws-encryption-sdk-specification/framework/aws-kms/aws-kms-multi-keyrings.md#aws-kms-multi-keyring
+           //= type=implication
+           //# If there is a set of child identifiers then a set of [AWS KMS Keyring]
+           //# (aws-kms-keyring.md) MUST be created for each AWS KMS key identifier
+           //# by initializing each keyring with
+        && (awsKmsKeys.Some?
+            ==>
+              && |awsKmsKeys.value| == |output.value.childKeyrings|
+              && forall index | 0 <= index < |awsKmsKeys.value| ::
+                   // AWS KMS Keyring must be created for each AWS KMS Key identifier
+                   && var childKeyring: Types.IKeyring := output.value.childKeyrings[index];
+                   && childKeyring is AwsKmsKeyring.AwsKmsKeyring
+                   && var awsKmsChild := childKeyring as AwsKmsKeyring.AwsKmsKeyring;
+                   // AWS KMS key identifier
+                   && awsKmsChild.awsKmsKey == awsKmsKeys.value[index]
+                      // The input list of AWS KMS grant tokens
+                   && (grantTokens.Some? ==> awsKmsChild.grantTokens == grantTokens.value))
+        && (awsKmsKeys.None?
+            ==>
+              && output.value.childKeyrings == [])
   {
     var allStrings := match (generator) {
       case Some(g) => [g] + awsKmsKeys.UnwrapOr([])
@@ -143,10 +143,10 @@ module StrictMultiKeyring {
           invariant |awsKmsKeys.value[..index]| == |children|
           invariant fresh(MultiKeyring.GatherModifies(generatorKeyring, children) - clientSupplier.Modifies)
           invariant forall i | 0 <= i < |children[..index]|
-          ::
-            && children[i].awsKmsKey == awsKmsKeys.value[i]
-            && (grantTokens.Some? ==> children[i].grantTokens == grantTokens.value)
-            && children[i].ValidState()
+              ::
+                && children[i].awsKmsKey == awsKmsKeys.value[i]
+                && (grantTokens.Some? ==> children[i].grantTokens == grantTokens.value)
+                && children[i].ValidState()
         {
           var childIdentifier := childIdentifiers[index];
           var info :- AwsArnParsing.IsAwsKmsIdentifierString(childIdentifier).MapFailure(WrapStringToError);

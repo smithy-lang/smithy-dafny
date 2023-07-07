@@ -153,7 +153,7 @@ module {:options "-functionSyntax:4"} KeyMaterial {
                     material := material
                   ))
         case "aws-kms-rsa" =>
-        var publicKey :- UTF8.Encode(material);
+          var publicKey :- UTF8.Encode(material);
 
           Success(KMSAsymetric(
                     name := name,

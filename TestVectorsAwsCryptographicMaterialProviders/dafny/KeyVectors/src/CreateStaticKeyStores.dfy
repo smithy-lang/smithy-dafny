@@ -18,9 +18,9 @@ module {:options "-functionSyntax:4"} CreateStaticKeyStores {
       && keyStore.ValidState()
       && fresh(keyStore)
       && fresh(keyStore.Modifies)
-    {
-      return new StaticKeyStore(staticKeyMaterial);
-    }
+  {
+    return new StaticKeyStore(staticKeyMaterial);
+  }
 
   // The goal of this class is to return *invalid* materials.
   // The CMM MUST check that the materials it gets are valid
@@ -28,18 +28,18 @@ module {:options "-functionSyntax:4"} CreateStaticKeyStores {
   // that MUST fail this check.
   // This is *NOT* at example of a properly desgined keyring!
   class StaticKeyStore extends IKeyStoreClient
-    {
+  {
     constructor(staticKeyMaterial : KeyMaterial.KeyMaterial)
       requires staticKeyMaterial.StaticKeyStoreInformation?
       ensures
         && ValidState()
         && fresh(History)
         && fresh(Modifies)
-      {
-        this.staticKeyMaterial := staticKeyMaterial;
-        History := new IKeyStoreClientCallHistory();
-        Modifies := {History};
-      }
+    {
+      this.staticKeyMaterial := staticKeyMaterial;
+      History := new IKeyStoreClientCallHistory();
+      Modifies := {History};
+    }
 
     const staticKeyMaterial : KeyMaterial.KeyMaterial
 
@@ -67,18 +67,18 @@ module {:options "-functionSyntax:4"} CreateStaticKeyStores {
         && ValidState()
       ensures GetActiveBranchKeyEnsuresPublicly(input, output)
       ensures History.GetActiveBranchKey == old(History.GetActiveBranchKey) + [DafnyCallEvent(input, output)]
-      {
+    {
 
-        output := Success(GetActiveBranchKeyOutput(
-                            branchKeyMaterials := BranchKeyMaterials(
-                              branchKeyIdentifier := input.branchKeyIdentifier,
-                              branchKeyVersion := staticKeyMaterial.branchKeyVersion,
-                              branchKey := staticKeyMaterial.branchKey
-                            )
-                          ));
+      output := Success(GetActiveBranchKeyOutput(
+                          branchKeyMaterials := BranchKeyMaterials(
+                            branchKeyIdentifier := input.branchKeyIdentifier,
+                            branchKeyVersion := staticKeyMaterial.branchKeyVersion,
+                            branchKey := staticKeyMaterial.branchKey
+                          )
+                        ));
 
-        History.GetActiveBranchKey := History.GetActiveBranchKey + [DafnyCallEvent(input, output)];
-      }
+      History.GetActiveBranchKey := History.GetActiveBranchKey + [DafnyCallEvent(input, output)];
+    }
 
     ghost predicate GetBranchKeyVersionEnsuresPublicly(input: GetBranchKeyVersionInput , output: Result<GetBranchKeyVersionOutput, Error>)
     {true}
@@ -95,16 +95,16 @@ module {:options "-functionSyntax:4"} CreateStaticKeyStores {
         && ValidState()
       ensures GetBranchKeyVersionEnsuresPublicly(input, output)
       ensures History.GetBranchKeyVersion == old(History.GetBranchKeyVersion) + [DafnyCallEvent(input, output)]
-      {
-        output := Success(GetBranchKeyVersionOutput(
-                            branchKeyMaterials := BranchKeyMaterials(
-                              branchKeyIdentifier := input.branchKeyIdentifier,
-                              branchKeyVersion := staticKeyMaterial.branchKeyVersion,
-                              branchKey := staticKeyMaterial.branchKey
-                            )
-                          ));
-        History.GetBranchKeyVersion := History.GetBranchKeyVersion + [DafnyCallEvent(input, output)];
-      }
+    {
+      output := Success(GetBranchKeyVersionOutput(
+                          branchKeyMaterials := BranchKeyMaterials(
+                            branchKeyIdentifier := input.branchKeyIdentifier,
+                            branchKeyVersion := staticKeyMaterial.branchKeyVersion,
+                            branchKey := staticKeyMaterial.branchKey
+                          )
+                        ));
+      History.GetBranchKeyVersion := History.GetBranchKeyVersion + [DafnyCallEvent(input, output)];
+    }
 
     ghost predicate GetBeaconKeyEnsuresPublicly(input: GetBeaconKeyInput , output: Result<GetBeaconKeyOutput, Error>)
     {true}
@@ -121,16 +121,16 @@ module {:options "-functionSyntax:4"} CreateStaticKeyStores {
         && ValidState()
       ensures GetBeaconKeyEnsuresPublicly(input, output)
       ensures History.GetBeaconKey == old(History.GetBeaconKey) + [DafnyCallEvent(input, output)]
-      {
+    {
 
-        output := Success(GetBeaconKeyOutput(
-                            beaconKeyMaterials := BeaconKeyMaterials(
-                              beaconKeyIdentifier := input.branchKeyIdentifier,
-                              beaconKey := Some(staticKeyMaterial.beaconKey),
-                              hmacKeys := None
-                            )));
-        History.GetBeaconKey := History.GetBeaconKey + [DafnyCallEvent(input, output)];
-      }
+      output := Success(GetBeaconKeyOutput(
+                          beaconKeyMaterials := BeaconKeyMaterials(
+                            beaconKeyIdentifier := input.branchKeyIdentifier,
+                            beaconKey := Some(staticKeyMaterial.beaconKey),
+                            hmacKeys := None
+                          )));
+      History.GetBeaconKey := History.GetBeaconKey + [DafnyCallEvent(input, output)];
+    }
 
     // These are all not supported operations in a static context
 
@@ -149,10 +149,10 @@ module {:options "-functionSyntax:4"} CreateStaticKeyStores {
         && ValidState()
       ensures GetKeyStoreInfoEnsuresPublicly(output)
       ensures History.GetKeyStoreInfo == old(History.GetKeyStoreInfo) + [DafnyCallEvent((), output)]
-      {
-        output := Failure(KeyStoreException( message := "Not Supported"));
-        History.GetKeyStoreInfo := History.GetKeyStoreInfo + [DafnyCallEvent((), output)];
-      }
+    {
+      output := Failure(KeyStoreException( message := "Not Supported"));
+      History.GetKeyStoreInfo := History.GetKeyStoreInfo + [DafnyCallEvent((), output)];
+    }
 
     ghost predicate CreateKeyStoreEnsuresPublicly(input: CreateKeyStoreInput , output: Result<CreateKeyStoreOutput, Error>)
     {true}
@@ -169,10 +169,10 @@ module {:options "-functionSyntax:4"} CreateStaticKeyStores {
         && ValidState()
       ensures CreateKeyStoreEnsuresPublicly(input, output)
       ensures History.CreateKeyStore == old(History.CreateKeyStore) + [DafnyCallEvent(input, output)]
-      {
-        output := Failure(KeyStoreException( message := "Not Supported"));
-        History.CreateKeyStore := History.CreateKeyStore + [DafnyCallEvent(input, output)];
-      }
+    {
+      output := Failure(KeyStoreException( message := "Not Supported"));
+      History.CreateKeyStore := History.CreateKeyStore + [DafnyCallEvent(input, output)];
+    }
 
     ghost predicate CreateKeyEnsuresPublicly(input: CreateKeyInput, output: Result<CreateKeyOutput, Error>)
     {true}
@@ -189,10 +189,10 @@ module {:options "-functionSyntax:4"} CreateStaticKeyStores {
         && ValidState()
       ensures CreateKeyEnsuresPublicly(input, output)
       ensures History.CreateKey == old(History.CreateKey) + [DafnyCallEvent(input, output)]
-      {
-        output := Failure(KeyStoreException( message := "Not Supported"));
-        History.CreateKey := History.CreateKey + [DafnyCallEvent(input, output)];
-      }
+    {
+      output := Failure(KeyStoreException( message := "Not Supported"));
+      History.CreateKey := History.CreateKey + [DafnyCallEvent(input, output)];
+    }
 
     ghost predicate VersionKeyEnsuresPublicly(input: VersionKeyInput , output: Result<(), Error>)
     {true}
@@ -209,10 +209,10 @@ module {:options "-functionSyntax:4"} CreateStaticKeyStores {
         && ValidState()
       ensures VersionKeyEnsuresPublicly(input, output)
       ensures History.VersionKey == old(History.VersionKey) + [DafnyCallEvent(input, output)]
-      {
-        output := Failure(KeyStoreException( message := "Not Supported"));
-        History.VersionKey := History.VersionKey + [DafnyCallEvent(input, output)];
-      }
+    {
+      output := Failure(KeyStoreException( message := "Not Supported"));
+      History.VersionKey := History.VersionKey + [DafnyCallEvent(input, output)];
+    }
 
     ghost predicate BranchKeyStatusResolutionEnsuresPublicly(input: BranchKeyStatusResolutionInput , output: Result<(), Error>)
     {true}
@@ -229,10 +229,10 @@ module {:options "-functionSyntax:4"} CreateStaticKeyStores {
         && ValidState()
       ensures BranchKeyStatusResolutionEnsuresPublicly(input, output)
       ensures History.BranchKeyStatusResolution == old(History.BranchKeyStatusResolution) + [DafnyCallEvent(input, output)]
-      {
-        output := Failure(KeyStoreException( message := "Not Supported"));
-        History.BranchKeyStatusResolution := History.BranchKeyStatusResolution + [DafnyCallEvent(input, output)];
-      }
+    {
+      output := Failure(KeyStoreException( message := "Not Supported"));
+      History.BranchKeyStatusResolution := History.BranchKeyStatusResolution + [DafnyCallEvent(input, output)];
+    }
 
   }
 }

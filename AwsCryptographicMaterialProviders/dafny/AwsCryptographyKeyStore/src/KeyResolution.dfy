@@ -24,7 +24,7 @@ module KeyResolution {
   import DDB = ComAmazonawsDynamodbTypes
   import KMS = ComAmazonawsKmsTypes
   import MPL = AwsCryptographyMaterialProvidersTypes
-  
+
   method ActiveBranchKeysResolution(
     input: Types.BranchKeyStatusResolutionInput,
     tableName: DDB.TableName,
@@ -42,8 +42,8 @@ module KeyResolution {
   {
     var maybeActiveBranchKeys := GetKeys.QueryForActiveBranchKey(input.branchKeyIdentifier, tableName, ddbClient);
     var activeBranchKeys :- maybeActiveBranchKeys
-      .MapFailure(e => Types.ComAmazonawsDynamodb(ComAmazonawsDynamodb := e));
-    
+    .MapFailure(e => Types.ComAmazonawsDynamodb(ComAmazonawsDynamodb := e));
+
     :- Need(
       && activeBranchKeys.Items.Some?
       && |activeBranchKeys.Items.value| > 1,
@@ -54,15 +54,15 @@ module KeyResolution {
       forall resp <- activeBranchKeys.Items.value :: validActiveBranchKey?(resp),
       E("Malformed Branch Key entry")
     );
-    
+
     var latestActiveBranchKey := SortByTime(activeBranchKeys.Items.value);
     var activeBranchKeysAsSet := ToSet(activeBranchKeys.Items.value);
 
     assert forall activeKey <- activeBranchKeysAsSet - {latestActiveBranchKey} :: validActiveBranchKey?(activeKey)
-      by {
-        assert forall resp <- activeBranchKeys.Items.value :: validActiveBranchKey?(resp);
-        reveal ToSet();
-      }
+    by {
+      assert forall resp <- activeBranchKeys.Items.value :: validActiveBranchKey?(resp);
+      reveal ToSet();
+    }
 
     var nonLatestActiveBranchKeys := activeBranchKeysAsSet - {latestActiveBranchKey};
 
@@ -77,20 +77,20 @@ module KeyResolution {
     var writeResolvedActiveBranchKeys :- WriteDecryptOnlyBranchKeys(
       reEncryptedDecryptOnlyBranchKeysDDMap,
       tableName,
-      ddbClient 
+      ddbClient
     );
-    
-    var maybeOneActiveKey := GetKeys.QueryForActiveBranchKey(input.branchKeyIdentifier, tableName, ddbClient); 
+
+    var maybeOneActiveKey := GetKeys.QueryForActiveBranchKey(input.branchKeyIdentifier, tableName, ddbClient);
     var oneActiveBranchKey :- maybeOneActiveKey
-      .MapFailure(e => Types.ComAmazonawsDynamodb(ComAmazonawsDynamodb := e));
-    
+    .MapFailure(e => Types.ComAmazonawsDynamodb(ComAmazonawsDynamodb := e));
+
     :- Need(
       && oneActiveBranchKey.Items.Some?
       && |oneActiveBranchKey.Items.value| == 1,
-      E("Failed to resolve multiple ACTIVE branch keys under branch-key-identifier: " + 
-          input.branchKeyIdentifier + 
-          ". Consider calling the BranchKeyStatusResolution API again."
-        )
+      E("Failed to resolve multiple ACTIVE branch keys under branch-key-identifier: " +
+        input.branchKeyIdentifier +
+        ". Consider calling the BranchKeyStatusResolution API again."
+      )
     );
 
     return Success(());
@@ -100,7 +100,7 @@ module KeyResolution {
     returns (res: Result<seq<DDB.AttributeMap>, Types.Error>)
     requires KMS.IsValid_KeyIdType(kmsKeyArn) // Remove?
     requires forall activeKey : branchKeyItem | activeKey in activeKeys :: validActiveBranchKey?(activeKey)
-    requires kmsClient.ValidState() 
+    requires kmsClient.ValidState()
     modifies kmsClient.Modifies
     ensures kmsClient.ValidState()
   {
@@ -111,7 +111,7 @@ module KeyResolution {
       decreases |tmpActiveKeySet|
     {
       var currentActiveKey: branchKeyItem :| currentActiveKey in tmpActiveKeySet;
-      
+
       :- Need(
         currentActiveKey[KMS_FIELD].S == kmsKeyArn,
         Types.KeyStoreException(message := "Configured AWS KMS Key ARN does not match KMS Key ARN for branch-key-id: " + currentActiveKey[BRANCH_KEY_IDENTIFIER_FIELD].S)
@@ -158,7 +158,7 @@ module KeyResolution {
   {
     var transactWriteItemList := [];
     for i := 0 to |decryptOnlyBranchKeys|
-    {  
+    {
       :- Need(
         validVersionBranchKey?(decryptOnlyBranchKeys[i]),
         Types.KeyStoreException(message := "Unable to write key material to Key Store: " + tableName)
@@ -166,12 +166,12 @@ module KeyResolution {
 
       var decryptOnlyBranchKeyTransactWriteItem := CreateTransactWritePutItem(decryptOnlyBranchKeys[i], tableName);
       transactWriteItemList := transactWriteItemList + [decryptOnlyBranchKeyTransactWriteItem];
-      
+
       // TransactWrites Only allow up to 25 write item requests
       // if it is the case we have more than 25 we will segment the writes in
       // batches
       if |transactWriteItemList| == 25 ||
-        ((1 <= |transactWriteItemList| <= 25) && (|transactWriteItemList| == |decryptOnlyBranchKeys|)) 
+         ((1 <= |transactWriteItemList| <= 25) && (|transactWriteItemList| == |decryptOnlyBranchKeys|))
       {
         var transactRequest := DDB.TransactWriteItemsInput(
           TransactItems := transactWriteItemList,
@@ -181,7 +181,7 @@ module KeyResolution {
         );
         var maybeTransactWriteResponse := ddbClient.TransactWriteItems(transactRequest);
         var transactWriteItemsResponse :- maybeTransactWriteResponse
-          .MapFailure(e => Types.ComAmazonawsDynamodb(ComAmazonawsDynamodb := e));
+        .MapFailure(e => Types.ComAmazonawsDynamodb(ComAmazonawsDynamodb := e));
         transactWriteItemList := [];
       }
     }

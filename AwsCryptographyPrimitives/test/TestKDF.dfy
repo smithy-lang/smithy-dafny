@@ -12,13 +12,13 @@ module TestKDF {
   import Digest
   import KdfCtr
 
-  method KdfRawDeriveTest( 
+  method KdfRawDeriveTest(
     ikm: seq<uint8>,
     info: seq<uint8>,
     L: Primitives.Types.PositiveInteger,
     expectedOKM: seq<uint8>
   )
-    requires 
+    requires
       && |ikm| == 32
       && L == 32
       && 4 + |info| < INT32_MAX_LIMIT

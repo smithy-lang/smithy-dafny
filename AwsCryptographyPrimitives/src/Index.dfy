@@ -12,7 +12,7 @@ module {:extern "software.amazon.cryptography.primitives.internaldafny" } Aws.Cr
   }
 
   method AtomicPrimitives(config: CryptoConfig)
-		returns (res: Result<AtomicPrimitivesClient, Error>)
+    returns (res: Result<AtomicPrimitivesClient, Error>)
   {
     var client := new AtomicPrimitivesClient(Operations.Config);
     return Success(client);

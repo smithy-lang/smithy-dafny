@@ -15,7 +15,7 @@ module TestAwsKmsEncryptedDataKeyFilter {
   import Types = AwsCryptographyMaterialProvidersTypes
   import AwsKmsDiscoveryKeyring
   import Actions
-  
+
   //= compliance/framework/aws-kms/aws-kms-discovery-keyring.txt#2.8
   //= type=test
   //# *  The provider info MUST be a valid AWS KMS ARN (aws-kms-key-
@@ -70,9 +70,9 @@ module TestAwsKmsEncryptedDataKeyFilter {
   method GetDiscoveryFilter() returns (discoveryFilter: Types.DiscoveryFilter)
   {
     return Types.DiscoveryFilter(
-      accountIds := TestUtils.ACCOUNT_IDS,
-      partition := TestUtils.PARTITION
-    );
+        accountIds := TestUtils.ACCOUNT_IDS,
+        partition := TestUtils.PARTITION
+      );
   }
 
   method GetNonKeyEncryptedDataKey() returns (edk: Types.EncryptedDataKey)

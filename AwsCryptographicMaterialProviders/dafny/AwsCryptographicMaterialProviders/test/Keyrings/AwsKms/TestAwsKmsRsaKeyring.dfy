@@ -26,12 +26,12 @@ module TestAwsKmsRsaKeyring {
     var kmsClient :- expect clientSupplier.GetClient(Types.GetClientInput(region:="us-west-2"));
 
     var kmsRsaKeyring :- expect mpl.CreateAwsKmsRsaKeyring(Types.CreateAwsKmsRsaKeyringInput(
-        publicKey := Some(publicKey),
-        kmsKeyId := TestUtils.KMS_RSA_PRIVATE_KEY_ARN,
-        encryptionAlgorithm := ComAmazonawsKmsTypes.EncryptionAlgorithmSpec.RSAES_OAEP_SHA_1,
-        kmsClient := Some(kmsClient),
-        grantTokens := None()
-    ));
+                                                             publicKey := Some(publicKey),
+                                                             kmsKeyId := TestUtils.KMS_RSA_PRIVATE_KEY_ARN,
+                                                             encryptionAlgorithm := ComAmazonawsKmsTypes.EncryptionAlgorithmSpec.RSAES_OAEP_SHA_1,
+                                                             kmsClient := Some(kmsClient),
+                                                             grantTokens := None()
+                                                           ));
 
     var encryptionContext := TestUtils.SmallEncryptionContext(TestUtils.SmallEncryptionContextVariation.A);
 
@@ -72,10 +72,10 @@ module TestAwsKmsRsaKeyring {
     );
 
     expect encryptionMaterialsOut.materials.plaintextDataKey
-    == decryptionMaterialsOut.materials.plaintextDataKey;
+        == decryptionMaterialsOut.materials.plaintextDataKey;
   }
 
-    method {:test} TestKmsRsaWithAsymmetricSignatureFails() {
+  method {:test} TestKmsRsaWithAsymmetricSignatureFails() {
     var mpl :- expect MaterialProviders.MaterialProviders();
 
     var publicKey :- expect UTF8.Encode(TestUtils.KMS_RSA_PUBLIC_KEY);
@@ -84,12 +84,12 @@ module TestAwsKmsRsaKeyring {
     var kmsClient :- expect clientSupplier.GetClient(Types.GetClientInput(region:="us-west-2"));
 
     var kmsRsaKeyring :- expect mpl.CreateAwsKmsRsaKeyring(Types.CreateAwsKmsRsaKeyringInput(
-        publicKey := Some(publicKey),
-        kmsKeyId := TestUtils.KMS_RSA_PRIVATE_KEY_ARN,
-        encryptionAlgorithm := ComAmazonawsKmsTypes.EncryptionAlgorithmSpec.RSAES_OAEP_SHA_1,
-        kmsClient := Some(kmsClient),
-        grantTokens := None()
-    ));
+                                                             publicKey := Some(publicKey),
+                                                             kmsKeyId := TestUtils.KMS_RSA_PRIVATE_KEY_ARN,
+                                                             encryptionAlgorithm := ComAmazonawsKmsTypes.EncryptionAlgorithmSpec.RSAES_OAEP_SHA_1,
+                                                             kmsClient := Some(kmsClient),
+                                                             grantTokens := None()
+                                                           ));
 
     var algorithmSuiteId := Types.AlgorithmSuiteId.DBE(Types.ALG_AES_256_GCM_HKDF_SHA512_COMMIT_KEY_ECDSA_P384_SYMSIG_HMAC_SHA384);
     var suite := AlgorithmSuites.GetSuite(algorithmSuiteId);
@@ -110,7 +110,7 @@ module TestAwsKmsRsaKeyring {
     expect encryptionMaterialsOutRes.Failure?;
     expect encryptionMaterialsOutRes.error.AwsCryptographicMaterialProvidersException?;
     expect encryptionMaterialsOutRes.error.message == "AwsKmsRsaKeyring cannot be used with" +
-      " an Algorithm Suite with asymmetric signing. Please specify an algorithm suite without asymmetric signing.";
+                                                      " an Algorithm Suite with asymmetric signing. Please specify an algorithm suite without asymmetric signing.";
 
     var decryptionMaterialsIn :- expect mpl.InitializeDecryptionMaterials(
       Types.InitializeDecryptionMaterialsInput(
@@ -129,6 +129,6 @@ module TestAwsKmsRsaKeyring {
     expect decryptionMaterialsOutRes.Failure?;
     expect decryptionMaterialsOutRes.error.AwsCryptographicMaterialProvidersException?;
     expect decryptionMaterialsOutRes.error.message == "AwsKmsRsaKeyring cannot be used with" +
-      " an Algorithm Suite with asymmetric signing. Please specify an algorithm suite without asymmetric signing.";
+                                                      " an Algorithm Suite with asymmetric signing. Please specify an algorithm suite without asymmetric signing.";
   }
 }

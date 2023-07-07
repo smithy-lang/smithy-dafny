@@ -56,7 +56,7 @@ module RequiredEncryptionContextCMM {
       while keySet != {}
         invariant |keySeq| + |keySet| == |inputKeys|
         invariant forall k <- keySeq
-        :: k in inputKeys
+                    :: k in inputKeys
       {
         var key :| key in keySet;
         keySeq := keySeq + [key];
@@ -78,12 +78,12 @@ module RequiredEncryptionContextCMM {
     )
       returns (output: Result<Types.GetEncryptionMaterialsOutput, Types.Error>)
       requires
-      && ValidState() 
+        && ValidState()
       modifies Modifies - {History}
       // Dafny will skip type parameters when generating a default decreases clause.
       decreases Modifies - {History}
       ensures
-      && ValidState()
+        && ValidState()
       ensures GetEncryptionMaterialsEnsuresPublicly(input, output)
       ensures unchanged(History)
 
@@ -104,16 +104,16 @@ module RequiredEncryptionContextCMM {
       //# - For every key in [Required Encryption Context Keys](structures.md#required-encryption-context-keys)
       //#   there MUST be a matching key in the [Encryption Context](structures.md#encryption-context-1).
       ensures output.Success?
-      ==>
-        && Materials.EncryptionMaterialsHasPlaintextDataKey(output.value.encryptionMaterials)
+              ==>
+                && Materials.EncryptionMaterialsHasPlaintextDataKey(output.value.encryptionMaterials)
 
       //= aws-encryption-sdk-specification/framework/cmm-interface.md#get-encryption-materials
       //= type=implication
       //# - The [Required Encryption Context Keys](structures.md#required-encryption-context-keys) MUST be
       //#   a super set of the Required Encryption Context Keys in the [encryption materials request](#encryption-materials-request).
       ensures output.Success?
-      ==>
-        && CMM.RequiredEncryptionContextKeys?(input.requiredEncryptionContextKeys, output.value.encryptionMaterials)
+              ==>
+                && CMM.RequiredEncryptionContextKeys?(input.requiredEncryptionContextKeys, output.value.encryptionMaterials)
 
       //= aws-encryption-sdk-specification/framework/required-encryption-context-cmm.md#get-encryption-materials
       //= type=implication
@@ -121,8 +121,8 @@ module RequiredEncryptionContextCMM {
       //# MUST contain a value for every key in the configured [required encryption context keys](#required-encryption-context-keys)
       //# or this request MUST fail.
       ensures !(forall k <- requiredEncryptionContextKeys :: k in input.encryptionContext)
-      ==>
-        output.Failure?
+              ==>
+                output.Failure?
 
       //= aws-encryption-sdk-specification/framework/required-encryption-context-cmm.md#get-encryption-materials
       //= type=implication
@@ -131,10 +131,10 @@ module RequiredEncryptionContextCMM {
       //# [Get Encryption Materials](cmm-interface.md#get-encryption-materials).
       ensures
         && output.Success?
-      ==>
-        && |underlyingCMM.History.GetEncryptionMaterials| == |old(underlyingCMM.History.GetEncryptionMaterials)| + 1
-        && Seq.Last(underlyingCMM.History.GetEncryptionMaterials).output.Success?
-        && output == Seq.Last(underlyingCMM.History.GetEncryptionMaterials).output
+        ==>
+          && |underlyingCMM.History.GetEncryptionMaterials| == |old(underlyingCMM.History.GetEncryptionMaterials)| + 1
+          && Seq.Last(underlyingCMM.History.GetEncryptionMaterials).output.Success?
+          && output == Seq.Last(underlyingCMM.History.GetEncryptionMaterials).output
 
       //= aws-encryption-sdk-specification/framework/required-encryption-context-cmm.md#get-encryption-materials
       //= type=implication
@@ -144,10 +144,10 @@ module RequiredEncryptionContextCMM {
       //# to the [underlying CMM's](#underlying-cryptographic-materials-manager).
       ensures
         && output.Success?
-      ==>
-        && Seq.Last(underlyingCMM.History.GetEncryptionMaterials).input.requiredEncryptionContextKeys.Some?
-        && var keys := Seq.Last(underlyingCMM.History.GetEncryptionMaterials).input.requiredEncryptionContextKeys.value;
-        && forall k <- requiredEncryptionContextKeys :: k in keys
+        ==>
+          && Seq.Last(underlyingCMM.History.GetEncryptionMaterials).input.requiredEncryptionContextKeys.Some?
+          && var keys := Seq.Last(underlyingCMM.History.GetEncryptionMaterials).input.requiredEncryptionContextKeys.value;
+          && forall k <- requiredEncryptionContextKeys :: k in keys
 
       //= aws-encryption-sdk-specification/framework/required-encryption-context-cmm.md#get-encryption-materials
       //= type=implication
@@ -156,30 +156,30 @@ module RequiredEncryptionContextCMM {
       //# in it's [required encryption context keys](./structures.md#required-encryption-context-keys).
       ensures
         && output.Success?
-      ==>
-        && forall k <- requiredEncryptionContextKeys
-        :: k in output.value.encryptionMaterials.requiredEncryptionContextKeys
+        ==>
+          && forall k <- requiredEncryptionContextKeys
+            :: k in output.value.encryptionMaterials.requiredEncryptionContextKeys
     {
       :- Need(forall k <- requiredEncryptionContextKeys :: k in input.encryptionContext,
-        Types.AwsCryptographicMaterialProvidersException(
-          message := "Encryption context does not contain required keys.")
+              Types.AwsCryptographicMaterialProvidersException(
+                message := "Encryption context does not contain required keys.")
       );
 
       var result :- underlyingCMM.GetEncryptionMaterials(
         input.(
-          requiredEncryptionContextKeys := 
-          Some(input.requiredEncryptionContextKeys.UnwrapOr([]) + requiredEncryptionContextKeys))
+        requiredEncryptionContextKeys :=
+        Some(input.requiredEncryptionContextKeys.UnwrapOr([]) + requiredEncryptionContextKeys))
       );
 
       :- Need(forall k <- requiredEncryptionContextKeys :: k in result.encryptionMaterials.requiredEncryptionContextKeys,
-        Types.AwsCryptographicMaterialProvidersException(
-          message := "Expected encryption context keys do not exist in keys to only authenticate.")
+              Types.AwsCryptographicMaterialProvidersException(
+                message := "Expected encryption context keys do not exist in keys to only authenticate.")
       );
 
-      // For Dafny keyrings this is a trivial statement
-      // because they implement a trait that ensures this.
-      // However not all keyrings are Dafny keyrings.
-      // Customers can create custom keyrings.
+        // For Dafny keyrings this is a trivial statement
+        // because they implement a trait that ensures this.
+        // However not all keyrings are Dafny keyrings.
+        // Customers can create custom keyrings.
       :- Need(
         Materials.EncryptionMaterialsHasPlaintextDataKey(result.encryptionMaterials),
         Types.AwsCryptographicMaterialProvidersException(
@@ -200,18 +200,18 @@ module RequiredEncryptionContextCMM {
     )
       returns (output: Result<Types.DecryptMaterialsOutput, Types.Error>)
       requires
-      && ValidState() 
+        && ValidState()
       modifies Modifies - {History}
       // Dafny will skip type parameters when generating a default decreases clause.
       decreases Modifies - {History}
       ensures
-      && ValidState()
+        && ValidState()
       ensures DecryptMaterialsEnsuresPublicly(input, output)
       ensures unchanged(History)
 
       ensures output.Success?
-      ==>
-        && Materials.DecryptionMaterialsWithPlaintextDataKey(output.value.decryptionMaterials)
+              ==>
+                && Materials.DecryptionMaterialsWithPlaintextDataKey(output.value.decryptionMaterials)
 
       //= aws-encryption-sdk-specification/framework/cmm-interface.md#decrypt-materials
       //= type=implication
@@ -238,14 +238,14 @@ module RequiredEncryptionContextCMM {
       //# or this request MUST fail.
       ensures
         && (output.Success?
-      ==>
-        && input.reproducedEncryptionContext.Some?
-        && forall k <- requiredEncryptionContextKeys :: k in input.reproducedEncryptionContext.value)
+            ==>
+              && input.reproducedEncryptionContext.Some?
+              && forall k <- requiredEncryptionContextKeys :: k in input.reproducedEncryptionContext.value)
       ensures input.reproducedEncryptionContext.None? ==> output.Failure?
       ensures
         && input.reproducedEncryptionContext.Some?
         && !(forall k <- requiredEncryptionContextKeys :: k in input.reproducedEncryptionContext.value)
-      ==> output.Failure?
+        ==> output.Failure?
 
       //= aws-encryption-sdk-specification/framework/required-encryption-context-cmm.md#decrypt-materials
       //= type=implication
@@ -255,10 +255,10 @@ module RequiredEncryptionContextCMM {
       //# [decrypt materials](cmm-interface.md#decrypt-materials) interface
       //# with the unchanged [decrypt materials request](./cmm-interface.md#decrypt-materials-request).
       ensures output.Success?
-      ==>
-        && |underlyingCMM.History.DecryptMaterials| == |old(underlyingCMM.History.DecryptMaterials)| + 1
-        && Seq.Last(underlyingCMM.History.DecryptMaterials).output == output
-        && Seq.Last(underlyingCMM.History.DecryptMaterials).input == input
+              ==>
+                && |underlyingCMM.History.DecryptMaterials| == |old(underlyingCMM.History.DecryptMaterials)| + 1
+                && Seq.Last(underlyingCMM.History.DecryptMaterials).output == output
+                && Seq.Last(underlyingCMM.History.DecryptMaterials).input == input
 
       //= aws-encryption-sdk-specification/framework/required-encryption-context-cmm.md#decrypt-materials
       //= type=implication
@@ -269,42 +269,42 @@ module RequiredEncryptionContextCMM {
         && |underlyingCMM.History.DecryptMaterials| == |old(underlyingCMM.History.DecryptMaterials)| + 1
         && Seq.Last(underlyingCMM.History.DecryptMaterials).output.Success?
         && !(forall k <- requiredEncryptionContextKeys
-          :: k in Seq.Last(underlyingCMM.History.DecryptMaterials).output.value.decryptionMaterials.encryptionContext)
-      ==> output.Failure?
+               :: k in Seq.Last(underlyingCMM.History.DecryptMaterials).output.value.decryptionMaterials.encryptionContext)
+        ==> output.Failure?
 
     {
 
       :- Need(input.reproducedEncryptionContext.Some?,
-        Types.AwsCryptographicMaterialProvidersException(
-          message := "No reproduced encryption context on decrypt.")
+              Types.AwsCryptographicMaterialProvidersException(
+                message := "No reproduced encryption context on decrypt.")
       );
 
       :- Need(CMM.ReproducedEncryptionContext?(input),
-        Types.AwsCryptographicMaterialProvidersException(
-          message := "Encryption context does not match reproduced encryption context.")
+              Types.AwsCryptographicMaterialProvidersException(
+                message := "Encryption context does not match reproduced encryption context.")
       );
 
       :- Need(forall k <- requiredEncryptionContextKeys :: k in input.reproducedEncryptionContext.value,
-        Types.AwsCryptographicMaterialProvidersException(
-          message := "Reproduced encryption context missing required keys.")
+              Types.AwsCryptographicMaterialProvidersException(
+                message := "Reproduced encryption context missing required keys.")
       );
 
       var result :- underlyingCMM.DecryptMaterials(input);
 
       :- Need(forall k <- requiredEncryptionContextKeys :: k in result.decryptionMaterials.encryptionContext,
-        Types.AwsCryptographicMaterialProvidersException(
-          message := "Final encryption context missing required keys.")
+              Types.AwsCryptographicMaterialProvidersException(
+                message := "Final encryption context missing required keys.")
       );
 
       :- Need(CMM.EncryptionContextComplete(input, result.decryptionMaterials),
-        Types.AwsCryptographicMaterialProvidersException(
-          message := "Reproduced encryption context missing from encryption context.")
+              Types.AwsCryptographicMaterialProvidersException(
+                message := "Reproduced encryption context missing from encryption context.")
       );
 
-      // For Dafny keyrings this is a trivial statement
-      // because they implement a trait that ensures this.
-      // However not all keyrings are Dafny keyrings.
-      // Customers can create custom keyrings.
+        // For Dafny keyrings this is a trivial statement
+        // because they implement a trait that ensures this.
+        // However not all keyrings are Dafny keyrings.
+        // Customers can create custom keyrings.
       :- Need(
         Materials.DecryptionMaterialsWithPlaintextDataKey(result.decryptionMaterials),
         Types.AwsCryptographicMaterialProvidersException(

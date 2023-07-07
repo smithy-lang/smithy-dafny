@@ -13,10 +13,10 @@ module Digest {
   function method Length(digestAlgorithm: Types.DigestAlgorithm): nat
   {
     match digestAlgorithm
-      case SHA_512 => 64
-      case SHA_384 => 48
-      case SHA_256 => 32
-      case SHA_1 => 20
+    case SHA_512 => 64
+    case SHA_384 => 48
+    case SHA_256 => 32
+    case SHA_1 => 20
   }
 
   method Digest(input: Types.DigestInput)

@@ -38,7 +38,7 @@ module HKDF {
   method Extract(
     hmac: HMac,
     salt: seq<uint8>,
-    ikm: seq<uint8>, 
+    ikm: seq<uint8>,
     ghost digest: Types.DigestAlgorithm
   )
     returns (prk: seq<uint8>)
@@ -98,7 +98,7 @@ module HKDF {
       exists prev :: PreTi(hmac, info, n, prev) &&  hmac.HashSignature(prev, res)
   }
 
-    // return T (i)
+  // return T (i)
   predicate PreTi(hmac: HMac, info: seq<uint8>, n: nat, res: seq<uint8>)
     requires 1 <= n < 256
     decreases n, 0
@@ -126,15 +126,15 @@ module HKDF {
   //    Output:
   //       OKM      output keying material (of L octets)
   method Expand(
-    hmac: HMac, 
-    prk: seq<uint8>, 
-    info: seq<uint8>, 
-    expectedLength: int, 
+    hmac: HMac,
+    prk: seq<uint8>,
+    info: seq<uint8>,
+    expectedLength: int,
     digest: Types.DigestAlgorithm
   ) returns (
-      okm: seq<uint8>, 
+      okm: seq<uint8>,
       ghost okmUnabridged: seq<uint8>
-  )
+    )
     requires hmac.GetDigest() == digest
     requires 1 <= expectedLength <= 255 * Digest.Length(hmac.GetDigest())
     requires |info| < INT32_MAX_LIMIT
@@ -144,9 +144,9 @@ module HKDF {
     ensures hmac.GetKey() == prk
     ensures hmac.GetDigest() == digest
     ensures var n := (Digest.Length(digest) + expectedLength - 1) / Digest.Length(digest);
-      && T(hmac, info, n, okmUnabridged)
-      && (|okmUnabridged| <= expectedLength ==> okm == okmUnabridged)
-      && (expectedLength < |okmUnabridged| ==> okm == okmUnabridged[..expectedLength])
+            && T(hmac, info, n, okmUnabridged)
+            && (|okmUnabridged| <= expectedLength ==> okm == okmUnabridged)
+            && (expectedLength < |okmUnabridged| ==> okm == okmUnabridged[..expectedLength])
   {
     // N = ceil(L / Hash Length)
     var hashLength := Digest.Length(digest);
@@ -204,10 +204,10 @@ module HKDF {
    * The RFC 5869 KDF. Outputs L bytes of output key material.
    */
   method Hkdf(
-    digest: Types.DigestAlgorithm, 
-    salt: Option<seq<uint8>>, 
-    ikm: seq<uint8>, 
-    info: seq<uint8>, 
+    digest: Types.DigestAlgorithm,
+    salt: Option<seq<uint8>>,
+    ikm: seq<uint8>,
+    info: seq<uint8>,
     L: int
   ) returns (okm: seq<uint8>)
     requires 0 <= L <= 255 * Digest.Length(digest)

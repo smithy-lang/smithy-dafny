@@ -48,16 +48,16 @@ module AwsKmsRsaKeyring {
     const cryptoPrimitives: Primitives.AtomicPrimitivesClient
 
     predicate ValidState()
-    ensures ValidState() ==> History in Modifies
+      ensures ValidState() ==> History in Modifies
     {
       && History in Modifies
       && cryptoPrimitives.Modifies <= Modifies
       && History !in cryptoPrimitives.Modifies
       && cryptoPrimitives.ValidState()
       && (client.Some? ==>
-        && client.value.ValidState()
-        && client.value.Modifies <= Modifies
-        && History !in client.value.Modifies)
+            && client.value.ValidState()
+            && client.value.Modifies <= Modifies
+            && History !in client.value.Modifies)
       && (paddingScheme.RSAES_OAEP_SHA_1? || paddingScheme.RSAES_OAEP_SHA_256?)
       && UTF8.Encode(awsKmsKey).Success?
       && (publicKey.Some? ==> ValidRSAKeyLength(publicKey.value))
@@ -65,7 +65,7 @@ module AwsKmsRsaKeyring {
 
     predicate ValidRSAKeyLength(publicKey: seq<uint8>) {
       var rsaKeyLengthRes := cryptoPrimitives.GetRSAKeyModulusLength(
-          Crypto.GetRSAKeyModulusLengthInput(publicKey := publicKey));
+                               Crypto.GetRSAKeyModulusLengthInput(publicKey := publicKey));
       && rsaKeyLengthRes.Success?
       && rsaKeyLengthRes.value.length >= MIN_KMS_RSA_KEY_LEN
     }
@@ -81,13 +81,13 @@ module AwsKmsRsaKeyring {
       requires cryptoPrimitives.ValidState()
       requires client.Some? ==> client.value.ValidState()
       requires publicKey.Some? ==>
-        && var rsaKeyLengthRes := cryptoPrimitives.GetRSAKeyModulusLength(
-            Crypto.GetRSAKeyModulusLengthInput(publicKey := publicKey.value));
-        && rsaKeyLengthRes.Success?
-        && rsaKeyLengthRes.value.length >= MIN_KMS_RSA_KEY_LEN
+                 && var rsaKeyLengthRes := cryptoPrimitives.GetRSAKeyModulusLength(
+                                             Crypto.GetRSAKeyModulusLengthInput(publicKey := publicKey.value));
+                 && rsaKeyLengthRes.Success?
+                 && rsaKeyLengthRes.value.length >= MIN_KMS_RSA_KEY_LEN
       requires (paddingScheme.RSAES_OAEP_SHA_1? || paddingScheme.RSAES_OAEP_SHA_256?)
       ensures ValidState() && fresh(this) && fresh(History)
-        && fresh(Modifies - (if client.Some? then client.value.Modifies else {}) - cryptoPrimitives.Modifies)
+              && fresh(Modifies - (if client.Some? then client.value.Modifies else {}) - cryptoPrimitives.Modifies)
     {
       History := new Types.IKeyringCallHistory();
       Modifies := {History};
@@ -107,7 +107,7 @@ module AwsKmsRsaKeyring {
     }
 
     predicate OnEncryptEnsuresPublicly(input: Types.OnEncryptInput , output: Result<Types.OnEncryptOutput, Types.Error>)
-      {true}
+    {true}
 
     method OnEncrypt'(input: Types.OnEncryptInput)
       returns (res: Result<Types.OnEncryptOutput, Types.Error>)
@@ -118,13 +118,13 @@ module AwsKmsRsaKeyring {
       ensures OnEncryptEnsuresPublicly(input, res)
       ensures unchanged(History)
       ensures res.Success?
-      ==>
-        && Materials.ValidEncryptionMaterialsTransition(
-          input.materials,
-          res.value.materials
-        )
+              ==>
+                && Materials.ValidEncryptionMaterialsTransition(
+                  input.materials,
+                  res.value.materials
+                )
       ensures (publicKey.None? || |publicKey.Extract()| == 0)
-        ==> res.Failure?
+              ==> res.Failure?
 
       //= aws-encryption-sdk-specification/framework/aws-kms/aws-kms-rsa-keyring.md#onencrypt
       //= type=implication
@@ -132,7 +132,7 @@ module AwsKmsRsaKeyring {
       //# contains an [algorithm suite](../algorithm-suites.md) containing an
       //# [asymmetric signature](../algorithm-suites.md#asymmetric-signature-algorithm).
       ensures !(input.materials.algorithmSuite.signature.None?)
-        ==> res.Failure?
+              ==> res.Failure?
     {
       :- Need(
         this.publicKey.Some? && |this.publicKey.Extract()| > 0,
@@ -194,10 +194,10 @@ module AwsKmsRsaKeyring {
       ensures unchanged(History)
 
       ensures res.Success?
-      ==>
-        && Materials.DecryptionMaterialsTransitionIsValid(
-          input.materials,
-          res.value.materials)
+              ==>
+                && Materials.DecryptionMaterialsTransitionIsValid(
+                  input.materials,
+                  res.value.materials)
       ensures client.None? ==> res.Failure?
 
       //= aws-encryption-sdk-specification/framework/aws-kms/aws-kms-rsa-keyring.md#ondecrypt
@@ -206,7 +206,7 @@ module AwsKmsRsaKeyring {
       //# contains an [algorithm suite](../algorithm-suites.md) containing an
       //# [asymmetric signature](../algorithm-suites.md#asymmetric-signature-algorithm).
       ensures !(input.materials.algorithmSuite.signature.None?)
-        ==> res.Failure?
+              ==> res.Failure?
     {
 
       :- Need(
@@ -230,15 +230,15 @@ module AwsKmsRsaKeyring {
       var edksToAttempt :- FilterWithResult(filter, input.encryptedDataKeys);
 
       :- Need(0 < |edksToAttempt|,
-        Types.AwsCryptographicMaterialProvidersException(
-          message := "Unable to decrypt data key: No Encrypted Data Keys found to match."));
+              Types.AwsCryptographicMaterialProvidersException(
+                message := "Unable to decrypt data key: No Encrypted Data Keys found to match."));
 
       //= aws-encryption-sdk-specification/framework/aws-kms/aws-kms-rsa-keyring.md#onencrypt
       //# OnEncrypt MUST calculate a Encryption Context Digest by:
       //  1. Serializing The [encryption context](structures.md#encryption-context-1) from the input
       //     [encryption materials](../structures.md#encryption-materials) according to the [encryption context serialization specification](../structures.md#serialization).
       //  2. Taking the SHA-384 Digest of this concatenation.
-      var encryptionContextDigest :- EncryptionContextDigest(cryptoPrimitives, materials.encryptionContext);  
+      var encryptionContextDigest :- EncryptionContextDigest(cryptoPrimitives, materials.encryptionContext);
 
       var decryptClosure := new DecryptSingleAWSRSAEncryptedDataKey(
         materials,
@@ -255,13 +255,13 @@ module AwsKmsRsaKeyring {
       );
 
       var SealedDecryptionMaterials :- outcome
-        .MapFailure(errors => Types.CollectionOfErrors(list := errors,
-        message := "No Configured KMS Key was able to decrypt the Data Key. The list of encountered Exceptions is available via `list`."));
+      .MapFailure(errors => Types.CollectionOfErrors(list := errors,
+                                                                   message := "No Configured KMS Key was able to decrypt the Data Key. The list of encountered Exceptions is available via `list`."));
 
       assert decryptClosure.Ensures(Seq.Last(attempts).input, Success(SealedDecryptionMaterials), Seq.DropLast(attempts));
       return Success(Types.OnDecryptOutput(
-        materials := SealedDecryptionMaterials
-      ));
+                       materials := SealedDecryptionMaterials
+                     ));
     }
   }
 
@@ -315,12 +315,12 @@ module AwsKmsRsaKeyring {
     )
       requires client.ValidState()
       ensures
-      && this.materials == materials
-      && this.client == client
-      && this.awsKmsKey == awsKmsKey
-      && this.paddingScheme == paddingScheme
-      && this.encryptionContextDigest == encryptionContextDigest
-      && this.grantTokens == grantTokens
+        && this.materials == materials
+        && this.client == client
+        && this.awsKmsKey == awsKmsKey
+        && this.paddingScheme == paddingScheme
+        && this.encryptionContextDigest == encryptionContextDigest
+        && this.grantTokens == grantTokens
       ensures Invariant()
     {
       this.materials := materials;
@@ -348,28 +348,28 @@ module AwsKmsRsaKeyring {
       reads Modifies
       decreases Modifies
     {
-        res.Success?
+      res.Success?
       ==>
         && Invariant()
         && var maybeWrappedMaterial :=
-            EdkWrapping.GetProviderWrappedMaterial(edk.ciphertext, materials.algorithmSuite);
+             EdkWrapping.GetProviderWrappedMaterial(edk.ciphertext, materials.algorithmSuite);
         && maybeWrappedMaterial.Success?
         && KMS.IsValid_CiphertextType(maybeWrappedMaterial.value)
         && Materials.DecryptionMaterialsTransitionIsValid(materials, res.value)
         && 0 < |client.History.Decrypt|
         && KMS.DecryptRequest(
-          KeyId := Some(awsKmsKey),
-          CiphertextBlob := maybeWrappedMaterial.value,
-          EncryptionContext := None,
-          GrantTokens := Some(grantTokens),
-          EncryptionAlgorithm := Some(paddingScheme)
-        ) == Seq.Last(client.History.Decrypt).input
+             KeyId := Some(awsKmsKey),
+             CiphertextBlob := maybeWrappedMaterial.value,
+             EncryptionContext := None,
+             GrantTokens := Some(grantTokens),
+             EncryptionAlgorithm := Some(paddingScheme)
+           ) == Seq.Last(client.History.Decrypt).input
         && Seq.Last(client.History.Decrypt).output.Success?
         && Seq.Last(client.History.Decrypt).output.value.Plaintext.Some?
         && (
-          materials.algorithmSuite.edkWrapping.DIRECT_KEY_WRAPPING? ==>
-            Seq.Last(client.History.Decrypt).output.value.Plaintext.value
-              == encryptionContextDigest + res.value.plaintextDataKey.value)
+             materials.algorithmSuite.edkWrapping.DIRECT_KEY_WRAPPING? ==>
+               Seq.Last(client.History.Decrypt).output.value.Plaintext.value
+               == encryptionContextDigest + res.value.plaintextDataKey.value)
         && Seq.Last(client.History.Decrypt).output.value.KeyId == Some(awsKmsKey)
     }
 
@@ -420,9 +420,9 @@ module AwsKmsRsaKeyring {
       requires cryptoPrimitives.ValidState()
       requires (paddingScheme.RSAES_OAEP_SHA_1? || paddingScheme.RSAES_OAEP_SHA_256?)
       ensures
-      && this.publicKey == publicKey
-      && this.cryptoPrimitives == cryptoPrimitives
-      && this.paddingScheme == paddingScheme
+        && this.publicKey == publicKey
+        && this.cryptoPrimitives == cryptoPrimitives
+        && this.paddingScheme == paddingScheme
       ensures Invariant()
     {
       this.publicKey := publicKey;
@@ -461,7 +461,7 @@ module AwsKmsRsaKeyring {
       ensures res.Success? ==> |res.value.plaintextMaterial| == AlgorithmSuites.GetEncryptKeyLength(input.algorithmSuite) as nat
     {
       var generateBytesResult := cryptoPrimitives
-        .GenerateRandomBytes(Crypto.GenerateRandomBytesInput(length := AlgorithmSuites.GetEncryptKeyLength(input.algorithmSuite)));
+      .GenerateRandomBytes(Crypto.GenerateRandomBytesInput(length := AlgorithmSuites.GetEncryptKeyLength(input.algorithmSuite)));
       var plaintextMaterial :- generateBytesResult.MapFailure(e => Types.AwsCryptographyPrimitives(AwsCryptographyPrimitives := e));
 
       var wrap := new KmsRsaWrapKeyMaterial(
@@ -501,9 +501,9 @@ module AwsKmsRsaKeyring {
       requires cryptoPrimitives.ValidState()
       requires (paddingScheme.RSAES_OAEP_SHA_1? || paddingScheme.RSAES_OAEP_SHA_256?)
       ensures
-      && this.publicKey == publicKey
-      && this.cryptoPrimitives == cryptoPrimitives
-      && this.paddingScheme == paddingScheme
+        && this.publicKey == publicKey
+        && this.cryptoPrimitives == cryptoPrimitives
+        && this.paddingScheme == paddingScheme
       ensures Invariant()
     {
       this.publicKey := publicKey;
@@ -542,8 +542,8 @@ module AwsKmsRsaKeyring {
     {
       var encryptionContextDigest :- EncryptionContextDigest(cryptoPrimitives, input.encryptionContext);
       var padding := match paddingScheme
-            case RSAES_OAEP_SHA_1() => Crypto.OAEP_SHA1
-            case RSAES_OAEP_SHA_256() => Crypto.OAEP_SHA256;
+        case RSAES_OAEP_SHA_1() => Crypto.OAEP_SHA1
+        case RSAES_OAEP_SHA_256() => Crypto.OAEP_SHA256;
 
       var RSAEncryptOutput := cryptoPrimitives.RSAEncrypt(
         Crypto.RSAEncryptInput(
@@ -582,11 +582,11 @@ module AwsKmsRsaKeyring {
     )
       requires client.ValidState()
       ensures
-      && this.client == client
-      && this.awsKmsKey == awsKmsKey
-      && this.paddingScheme == paddingScheme
-      && this.encryptionContextDigest == encryptionContextDigest
-      && this.grantTokens == grantTokens
+        && this.client == client
+        && this.awsKmsKey == awsKmsKey
+        && this.paddingScheme == paddingScheme
+        && this.encryptionContextDigest == encryptionContextDigest
+        && this.grantTokens == grantTokens
       ensures Invariant()
     {
       this.client := client;
@@ -613,22 +613,22 @@ module AwsKmsRsaKeyring {
       reads Modifies
       decreases Modifies
     {
-        res.Success?
+      res.Success?
       ==>
         && Invariant()
         && KMS.IsValid_CiphertextType(input.wrappedMaterial)
         && 0 < |client.History.Decrypt|
         && KMS.DecryptRequest(
-          KeyId := Some(awsKmsKey),
-          CiphertextBlob := input.wrappedMaterial,
-          EncryptionContext := None,
-          GrantTokens := Some(grantTokens),
-          EncryptionAlgorithm := Some(paddingScheme)
-        ) == Seq.Last(client.History.Decrypt).input
+             KeyId := Some(awsKmsKey),
+             CiphertextBlob := input.wrappedMaterial,
+             EncryptionContext := None,
+             GrantTokens := Some(grantTokens),
+             EncryptionAlgorithm := Some(paddingScheme)
+           ) == Seq.Last(client.History.Decrypt).input
         && Seq.Last(client.History.Decrypt).output.Success?
         && Seq.Last(client.History.Decrypt).output.value.Plaintext.Some?
         && Seq.Last(client.History.Decrypt).output.value.Plaintext.value
-          == encryptionContextDigest + res.value.unwrappedMaterial
+           == encryptionContextDigest + res.value.unwrappedMaterial
         && Seq.Last(client.History.Decrypt).output.value.KeyId == Some(awsKmsKey)
     }
 
@@ -644,7 +644,7 @@ module AwsKmsRsaKeyring {
       ensures res.Success? ==> |res.value.unwrappedMaterial| == AlgorithmSuites.GetEncryptKeyLength(input.algorithmSuite) as nat
     {
       :- Need(KMS.IsValid_CiphertextType(input.wrappedMaterial),
-        Types.AwsCryptographicMaterialProvidersException(message := "Ciphertext length invalid"));
+              Types.AwsCryptographicMaterialProvidersException(message := "Ciphertext length invalid"));
 
       var decryptRequest := KMS.DecryptRequest(
         KeyId := Some(awsKmsKey),
@@ -658,19 +658,19 @@ module AwsKmsRsaKeyring {
 
       var maybeDecryptResponse := client.Decrypt(decryptRequest);
       var decryptResponse :- maybeDecryptResponse
-        .MapFailure(e => Types.ComAmazonawsKms( ComAmazonawsKms := e ));
+      .MapFailure(e => Types.ComAmazonawsKms( ComAmazonawsKms := e ));
 
       :- Need(
         && decryptResponse.KeyId.Some?
         && decryptResponse.KeyId.value == awsKmsKey
         && decryptResponse.Plaintext.Some?
-        , Types.AwsCryptographicMaterialProvidersException(
+      , Types.AwsCryptographicMaterialProvidersException(
           message := "Invalid response from KMS Decrypt"));
 
       :- Need(
-          && encryptionContextDigest <= decryptResponse.Plaintext.value
-          && AlgorithmSuites.GetEncryptKeyLength(input.algorithmSuite) as nat + |encryptionContextDigest| == |decryptResponse.Plaintext.value|
-          , Types.AwsCryptographicMaterialProvidersException(
+        && encryptionContextDigest <= decryptResponse.Plaintext.value
+        && AlgorithmSuites.GetEncryptKeyLength(input.algorithmSuite) as nat + |encryptionContextDigest| == |decryptResponse.Plaintext.value|
+      , Types.AwsCryptographicMaterialProvidersException(
           message := "Encryption context digest does not match expected value."));
 
       var output := MaterialWrapping.UnwrapOutput(

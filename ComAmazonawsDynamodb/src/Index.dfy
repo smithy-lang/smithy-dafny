@@ -12,8 +12,8 @@ module {:extern "software.amazon.cryptography.services.dynamodb.internaldafny"} 
   method {:extern} DDBClientForRegion(region: string)
     returns (res: Result<IDynamoDBClient, Error>)
     ensures res.Success? ==>
-      && fresh(res.value)
-      && fresh(res.value.Modifies)
-      && fresh(res.value.History)
-      && res.value.ValidState()
+              && fresh(res.value)
+              && fresh(res.value.Modifies)
+              && fresh(res.value.History)
+              && res.value.ValidState()
 }

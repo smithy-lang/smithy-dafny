@@ -36,12 +36,12 @@ module KdfCtr {
       && input.digestAlgorithm == Types.DigestAlgorithm.SHA_256
       && |input.ikm| == 32
       && input.nonce.Some?
-      && |input.nonce.value| == 16 
+      && |input.nonce.value| == 16
       && input.expectedLength == 32
       && 0 < ((input.expectedLength as int) * 8) as int < INT32_MAX_LIMIT,
       Types.AwsCryptographicPrimitivesError(message := "Kdf in Counter Mode input is invalid.")
     );
-    
+
     var ikm := input.ikm;
     var label_ := input.purpose.UnwrapOr([]);
     var info := input.nonce.UnwrapOr([]);
@@ -50,7 +50,7 @@ module KdfCtr {
     // Compute length in bits of the input going into the PRF.
     var internalLength : uint32 := (4 + |SEPARATION_INDICATOR| + 4) as uint32;
     :- Need(
-      && internalLength as int + |label_| + |info| < INT32_MAX_LIMIT, 
+      && internalLength as int + |label_| + |info| < INT32_MAX_LIMIT,
       Types.AwsCryptographicPrimitivesError(message:= "Input Length exceeds INT32_MAX_LIMIT")
     );
 
@@ -70,7 +70,7 @@ module KdfCtr {
 
   method RawDerive(ikm: seq<uint8>, explicitInfo: seq<uint8>, length: int32, offset: int32)
     returns (output: Result<seq<uint8>, Types.Error>)
-    requires 
+    requires
       && |ikm| == 32
       && length == 32
       && 4 + |explicitInfo| < INT32_MAX_LIMIT
@@ -113,7 +113,7 @@ module KdfCtr {
 
     return Success(buffer[..length]);
   }
-  
+
   function method Increment(x : seq<uint8>) : (ret : Result<seq<uint8>, Types.Error>)
     requires |x| == 4
     ensures ret.Success? ==> |ret.value| == 4

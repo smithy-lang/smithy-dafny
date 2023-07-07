@@ -103,25 +103,25 @@ module CreateKeys {
     //= aws-encryption-sdk-specification/framework/branch-key-store.md#branch-key-and-beacon-key-creation
     //# - `branchKeyId`: a new guid. This guid MUST be [version 4 UUID](https://www.ietf.org/rfc/rfc4122.txt)
     var branchKeyId :- maybeBranchKeyId
-      .MapFailure(e => Types.KeyStoreException(message := e));
+    .MapFailure(e => Types.KeyStoreException(message := e));
     //= aws-encryption-sdk-specification/framework/branch-key-store.md#branch-key-and-beacon-key-creation
-    //# - `timestamp`: a timestamp for the current time. 
+    //# - `timestamp`: a timestamp for the current time.
     //# This MUST be in ISO8601 format in UTC, to microsecond precision (e.g. “YYYY-MM-DDTHH:mm:ss.ssssssZ“)
     var timestamp :- Time.GetCurrentTimeStamp()
-      .MapFailure(e => E(e));
-    
+    .MapFailure(e => E(e));
+
     var maybeBranchKeyVersion := UUID.GenerateUUID();
     //= aws-encryption-sdk-specification/framework/branch-key-store.md#branch-key-and-beacon-key-creation
     //# - `version`: a new guid. This guid MUST be [version 4 UUID](https://www.ietf.org/rfc/rfc4122.txt)
     var branchKeyVersion :- maybeBranchKeyVersion
-      .MapFailure(e => Types.KeyStoreException(message := e));
+    .MapFailure(e => Types.KeyStoreException(message := e));
 
     :- Need(
       && maybeBranchKeyId.Success?
       && maybeBranchKeyVersion.Success?,
       Types.KeyStoreException(message := "Failed to generate UUID for Key ID or Key Version.")
     );
-    
+
     var activeBranchKeyEncryptionContext: BranchKeyContext := activeBranchKeyEncryptionContext(branchKeyId, branchKeyVersion, timestamp, logicalKeyStoreName, kmsKeyArn);
 
     //= aws-encryption-sdk-specification/framework/branch-key-store.md#branch-key-and-beacon-key-creation
@@ -152,7 +152,7 @@ module CreateKeys {
     );
 
     //= aws-encryption-sdk-specification/framework/branch-key-store.md#createkey
-    //# If creation of both keys is successful, 
+    //# If creation of both keys is successful,
     //# this operation MUST call [Amazon DynamoDB API TransactWriteItems]
     //# (https://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_TransactWriteItems.html).
     var transactWriteItemsToKeyStore :- WriteNewKeyToStore(
@@ -168,8 +168,8 @@ module CreateKeys {
     //# If writing to the key store succeeds, the operation MUST return the branch-key-id that maps to both
     //# the branch key and the beacon key.
     res := Success(Types.CreateKeyOutput(
-      branchKeyIdentifier := branchKeyId 
-    ));
+                     branchKeyIdentifier := branchKeyId
+                   ));
   }
 
 
@@ -178,31 +178,31 @@ module CreateKeys {
     awsKmsKey: KMS.KeyIdType,
     grantTokens: KMS.GrantTokenList,
     kmsClient: KMS.IKMSClient
-  ) 
+  )
     returns (res: Result<KMS.GenerateDataKeyWithoutPlaintextResponse, Types.Error>)
     requires kmsClient.ValidState()
     modifies kmsClient.Modifies
     ensures kmsClient.ValidState()
     ensures res.Success? ==>
-      && res.value.KeyId.Some?
-      && res.value.CiphertextBlob.Some?
-      && |res.value.CiphertextBlob.value| == KMS_GEN_KEY_NO_PLAINTEXT_LENGTH_32
-      && |kmsClient.History.GenerateDataKeyWithoutPlaintext| > 0
-      && KMS.IsValid_CiphertextType(res.value.CiphertextBlob.value)
-      && var kmsOperation := Last(kmsClient.History.GenerateDataKeyWithoutPlaintext).input;
-      && var kmsOperationOutput := Last(kmsClient.History.GenerateDataKeyWithoutPlaintext).output;
-      && kmsOperationOutput.Success?
-      && KMS.GenerateDataKeyWithoutPlaintextRequest(
-          KeyId := awsKmsKey,
-          EncryptionContext := Some(encryptionContext),
-          KeySpec := None,
-          NumberOfBytes := Some(32),
-          GrantTokens := Some(grantTokens)
-        ) == kmsOperation
-      && kmsOperationOutput.value.CiphertextBlob.Some?
-      && kmsOperationOutput.value.CiphertextBlob == res.value.CiphertextBlob
-      && kmsOperationOutput.value.KeyId.Some?
-      && kmsOperationOutput.value.KeyId == res.value.KeyId
+              && res.value.KeyId.Some?
+              && res.value.CiphertextBlob.Some?
+              && |res.value.CiphertextBlob.value| == KMS_GEN_KEY_NO_PLAINTEXT_LENGTH_32
+              && |kmsClient.History.GenerateDataKeyWithoutPlaintext| > 0
+              && KMS.IsValid_CiphertextType(res.value.CiphertextBlob.value)
+              && var kmsOperation := Last(kmsClient.History.GenerateDataKeyWithoutPlaintext).input;
+              && var kmsOperationOutput := Last(kmsClient.History.GenerateDataKeyWithoutPlaintext).output;
+              && kmsOperationOutput.Success?
+              && KMS.GenerateDataKeyWithoutPlaintextRequest(
+                   KeyId := awsKmsKey,
+                   EncryptionContext := Some(encryptionContext),
+                   KeySpec := None,
+                   NumberOfBytes := Some(32),
+                   GrantTokens := Some(grantTokens)
+                 ) == kmsOperation
+              && kmsOperationOutput.value.CiphertextBlob.Some?
+              && kmsOperationOutput.value.CiphertextBlob == res.value.CiphertextBlob
+              && kmsOperationOutput.value.KeyId.Some?
+              && kmsOperationOutput.value.KeyId == res.value.KeyId
   {
     var generatorRequest := KMS.GenerateDataKeyWithoutPlaintextRequest(
       KeyId := awsKmsKey,
@@ -214,8 +214,8 @@ module CreateKeys {
 
     var maybeGenerateResponse := kmsClient.GenerateDataKeyWithoutPlaintext(generatorRequest);
     var generateResponse :- maybeGenerateResponse
-      .MapFailure(e => Types.ComAmazonawsKms(ComAmazonawsKms := e));
-    
+    .MapFailure(e => Types.ComAmazonawsKms(ComAmazonawsKms := e));
+
     :- Need(
       && generateResponse.KeyId.Some?
       && ParseAwsKmsIdentifier(generateResponse.KeyId.value).Success?,
@@ -230,7 +230,7 @@ module CreateKeys {
       Types.KeyStoreException(
         message := "Invalid response from AWS KMS GeneratedDataKey: Invalid ciphertext")
     );
-    
+
     return Success(generateResponse);
   }
 
@@ -252,7 +252,7 @@ module CreateKeys {
 
     var beaconKeyDDBMap := ToBranchKeyItemAttributeMap(beaconKeyContext, wrappedBeaconKey);
     var beaconKeyTransactWriteItem := CreateTransactWritePutItem(beaconKeyDDBMap, tableName);
-    
+
     :- Need(
       // In order to be certain we are writing something that is well formed
       // and something we will be able to get or query we need to ensure it has certain properties
@@ -263,7 +263,7 @@ module CreateKeys {
 
     var items: DDB.TransactWriteItemList := [
       branchKeyTransactWriteItem,
-      beaconKeyTransactWriteItem 
+      beaconKeyTransactWriteItem
     ];
 
     var transactRequest := DDB.TransactWriteItemsInput(
@@ -275,7 +275,7 @@ module CreateKeys {
 
     var maybeTransactWriteResponse := ddbClient.TransactWriteItems(transactRequest);
     var transactWriteItemsResponse :- maybeTransactWriteResponse
-      .MapFailure(e => Types.ComAmazonawsDynamodb(ComAmazonawsDynamodb := e));
+    .MapFailure(e => Types.ComAmazonawsDynamodb(ComAmazonawsDynamodb := e));
 
     res := Success(transactWriteItemsResponse);
   }
@@ -304,19 +304,19 @@ module CreateKeys {
 
     var items: DDB.TransactWriteItemList := [
       decryptOnlyBranchKeyTransactWriteItem,
-      newActiveBranchKeyTransactWriteItem 
+      newActiveBranchKeyTransactWriteItem
     ];
-    
+
     var transactRequest := DDB.TransactWriteItemsInput(
       TransactItems := items,
       ReturnConsumedCapacity := None,
       ReturnItemCollectionMetrics := None,
       ClientRequestToken := None
     );
-    
+
     var maybeTransactWriteResponse := ddbClient.TransactWriteItems(transactRequest);
     var transactWriteItemsResponse :- maybeTransactWriteResponse
-      .MapFailure(e => Types.ComAmazonawsDynamodb(ComAmazonawsDynamodb := e));
+    .MapFailure(e => Types.ComAmazonawsDynamodb(ComAmazonawsDynamodb := e));
 
     res := Success(transactWriteItemsResponse);
   }
@@ -340,13 +340,13 @@ module CreateKeys {
   {
     DDB.TransactWriteItem(
       ConditionCheck := None,
-      Put := Some(DDB.Put( 
-        Item := item,
-        TableName := tableName,
-        ConditionExpression := None,
-        ExpressionAttributeNames := None,
-        ExpressionAttributeValues := None,
-        ReturnValuesOnConditionCheckFailure := None)),
+      Put := Some(DDB.Put(
+                    Item := item,
+                    TableName := tableName,
+                    ConditionExpression := None,
+                    ExpressionAttributeNames := None,
+                    ExpressionAttributeValues := None,
+                    ReturnValuesOnConditionCheckFailure := None)),
       Delete := None,
       Update := None
     )
@@ -372,8 +372,8 @@ module CreateKeys {
     //= type=implication
     //# 1. If the client is unable to fetch an `ACTIVE` key, GetActiveBranchKey MUST fail.
     var queryOutput :- maybeQueryOutput
-      .MapFailure(e => Types.ComAmazonawsDynamodb(ComAmazonawsDynamodb := e));
-    
+    .MapFailure(e => Types.ComAmazonawsDynamodb(ComAmazonawsDynamodb := e));
+
     :- Need(
       //= aws-encryption-sdk-specification/framework/branch-key-store.md#versionkey
       //= type=implication
@@ -389,20 +389,20 @@ module CreateKeys {
       //# The AWS DDB response MUST contain the fields defined in the [branch keystore record format](../#record-format).
       //# If the record does not contain the defined fields, this operation MUST fail.
       && validActiveBranchKey?(queryOutput.Items.value[0])
-      //= aws-encryption-sdk-specification/framework/branch-key-store.md#versionkey
-      //= type=implication
-      //# If the `type` on the item is not prefixed by "version", this operation MUST fail.
+         //= aws-encryption-sdk-specification/framework/branch-key-store.md#versionkey
+         //= type=implication
+         //# If the `type` on the item is not prefixed by "version", this operation MUST fail.
       && queryOutput.Items.value[0][TYPE_FIELD].S[..|BRANCH_KEY_TYPE_PREFIX|] == BRANCH_KEY_TYPE_PREFIX,
       Types.KeyStoreException(message := "Active key for " + input.branchKeyIdentifier + " does not have required fields.")
     );
-    
+
     var item := queryOutput.Items.value[0];
-    
+
     :- Need(
       item[KMS_FIELD].S == kmsKeyArn,
       Types.KeyStoreException(message := "Configured AWS KMS Key ARN does not match KMS Key ARN for branch-key-id: " + item[BRANCH_KEY_IDENTIFIER_FIELD].S)
     );
-    
+
 
     //= aws-encryption-sdk-specification/framework/branch-key-store.md#aws-kms-branch-key-reencryption
     //= type=implication
@@ -415,7 +415,7 @@ module CreateKeys {
       logicalKeyStoreName,
       item[KMS_FIELD].S
     );
-    
+
     //= aws-encryption-sdk-specification/framework/branch-key-store.md#aws-kms-branch-key-reencryption
     //= type=implication
     //# The operation MUST create a branch key [encryption context](./structures.md#encryption-context)
@@ -446,19 +446,19 @@ module CreateKeys {
     //= aws-encryption-sdk-specification/framework/branch-key-store.md#versionkey
     //# - `version`: a new guid. This guid MUST be [version 4 UUID](https://www.ietf.org/rfc/rfc4122.txt)
     var branchKeyVersion :- maybeBranchKeyVersion
-      .MapFailure(e => Types.KeyStoreException(message := e));
+    .MapFailure(e => Types.KeyStoreException(message := e));
     //= aws-encryption-sdk-specification/framework/branch-key-store.md#versionkey
-    //# - `timestamp`: a timestamp for the current time. 
+    //# - `timestamp`: a timestamp for the current time.
     //# This MUST be in ISO8601 format in UTC, to microsecond precision (e.g. “YYYY-MM-DDTHH:mm:ss.ssssssZ“)
     var timestamp :- Time.GetCurrentTimeStamp()
-      .MapFailure(e => E(e));
-    
+    .MapFailure(e => E(e));
+
     var newActiveBranchKeyEncryptionContext: BranchKeyContext := activeBranchKeyEncryptionContext(
       item[BRANCH_KEY_IDENTIFIER_FIELD].S,
       branchKeyVersion,
       timestamp,
       logicalKeyStoreName,
-      kmsKeyArn 
+      kmsKeyArn
     );
 
     var newBranchKeyWithoutPlaintext :- GenerateKey(
@@ -469,13 +469,13 @@ module CreateKeys {
     );
 
     var decryptOnlyBranchKeyDDBMap := ToBranchKeyItemAttributeMap(decryptOnlyBranchKeyEncryptionContext, decryptOnlyBranchKey.CiphertextBlob.value);
-    var newActiveBranchKeyDDBMap := ToBranchKeyItemAttributeMap(newActiveBranchKeyEncryptionContext, newBranchKeyWithoutPlaintext.CiphertextBlob.value); 
+    var newActiveBranchKeyDDBMap := ToBranchKeyItemAttributeMap(newActiveBranchKeyEncryptionContext, newBranchKeyWithoutPlaintext.CiphertextBlob.value);
 
     var writeRotatedMaterials :- WriteVersionedKeyToStore(
       decryptOnlyBranchKeyDDBMap,
       newActiveBranchKeyDDBMap,
       ddbTableName,
-      ddbClient 
+      ddbClient
     );
 
     res := Success(());
@@ -495,54 +495,54 @@ module CreateKeys {
     modifies kmsClient.Modifies
     ensures kmsClient.ValidState()
     ensures res.Success? ==>
-      && res.value.CiphertextBlob.Some?
-      && res.value.SourceKeyId.Some?
-      && res.value.KeyId.Some?
-      && res.value.SourceKeyId.value == awsKmsKey
-      && res.value.KeyId.value == awsKmsKey
-      //= aws-encryption-sdk-specification/framework/branch-key-store.md#aws-kms-branch-key-reencryption
-      //= type=implication
-      //# The operation MUST use the configured `KMS SDK Client` to decrypt the value of the branch key field.
-      && |kmsClient.History.ReEncrypt| > 0
-      && KMS.IsValid_CiphertextType(res.value.CiphertextBlob.value)
-      && var kmsOperationInput := Last(kmsClient.History.ReEncrypt).input;
-      && var kmsOperationOutput := Last(kmsClient.History.ReEncrypt).output;
-      && kmsOperationOutput.Success?
-      //= aws-encryption-sdk-specification/framework/branch-key-store.md#aws-kms-branch-key-reencryption
-      //= type=implication
-      //# When calling [AWS KMS API ReEncrypt](https://docs.aws.amazon.com/kms/latest/APIReference/API_ReEncrypt.html), 
-      //# the key store operation MUST call with a request constructed as follows:
-      && KMS.ReEncryptRequest(
-        //= aws-encryption-sdk-specification/framework/branch-key-store.md#aws-kms-branch-key-reencryption
-        //= type=implication
-        //# - `CiphertextBlob` MUST be the encrypted branch key value that is stored in AWS DDB.
-        CiphertextBlob := ciphertext,
-        //= aws-encryption-sdk-specification/framework/branch-key-store.md#aws-kms-branch-key-reencryption
-        //= type=implication
-        //# - `SourceEncryptionContext` MUST be the branch key encryption context.
-        SourceEncryptionContext := Some(oldEncryptionContext),
-        //= aws-encryption-sdk-specification/framework/branch-key-store.md#aws-kms-branch-key-reencryption
-        //= type=implication
-        //# - `SourceKeyId` MUST be the AWS KMS Key ARN configured in the key store operation.
-        SourceKeyId := Some(awsKmsKey),
-        //= aws-encryption-sdk-specification/framework/branch-key-store.md#aws-kms-branch-key-reencryption
-        //= type=implication
-        //# - `DestinationKeyId` MUST be the AWS KMS Key ARN configured in the key store operation.
-        DestinationKeyId := awsKmsKey,
-        //= aws-encryption-sdk-specification/framework/branch-key-store.md#aws-kms-branch-key-reencryption
-        //= type=implication
-        //# - `DestinationEncryptionContext` MUST be the DECRYPT_ONLY branch key encryption context created.
-        DestinationEncryptionContext := Some(decryptOnlyEncryptionContext),
-        SourceEncryptionAlgorithm := None,
-        DestinationEncryptionAlgorithm := None,
-        GrantTokens := Some(grantTokens)
-      ) == kmsOperationInput
-      && kmsOperationOutput.value.CiphertextBlob.Some?
-      && kmsOperationOutput.value.SourceKeyId.Some?
-      && kmsOperationOutput.value.KeyId.Some?
-      && kmsOperationOutput.value.CiphertextBlob.value == res.value.CiphertextBlob.value
-      && kmsOperationOutput.value.SourceKeyId.value == res.value.SourceKeyId.value
-      && kmsOperationOutput.value.KeyId.value == res.value.KeyId.value
+              && res.value.CiphertextBlob.Some?
+              && res.value.SourceKeyId.Some?
+              && res.value.KeyId.Some?
+              && res.value.SourceKeyId.value == awsKmsKey
+              && res.value.KeyId.value == awsKmsKey
+                 //= aws-encryption-sdk-specification/framework/branch-key-store.md#aws-kms-branch-key-reencryption
+                 //= type=implication
+                 //# The operation MUST use the configured `KMS SDK Client` to decrypt the value of the branch key field.
+              && |kmsClient.History.ReEncrypt| > 0
+              && KMS.IsValid_CiphertextType(res.value.CiphertextBlob.value)
+              && var kmsOperationInput := Last(kmsClient.History.ReEncrypt).input;
+              && var kmsOperationOutput := Last(kmsClient.History.ReEncrypt).output;
+              && kmsOperationOutput.Success?
+                 //= aws-encryption-sdk-specification/framework/branch-key-store.md#aws-kms-branch-key-reencryption
+                 //= type=implication
+                 //# When calling [AWS KMS API ReEncrypt](https://docs.aws.amazon.com/kms/latest/APIReference/API_ReEncrypt.html),
+                 //# the key store operation MUST call with a request constructed as follows:
+              && KMS.ReEncryptRequest(
+                   //= aws-encryption-sdk-specification/framework/branch-key-store.md#aws-kms-branch-key-reencryption
+                   //= type=implication
+                   //# - `CiphertextBlob` MUST be the encrypted branch key value that is stored in AWS DDB.
+                   CiphertextBlob := ciphertext,
+                   //= aws-encryption-sdk-specification/framework/branch-key-store.md#aws-kms-branch-key-reencryption
+                   //= type=implication
+                   //# - `SourceEncryptionContext` MUST be the branch key encryption context.
+                   SourceEncryptionContext := Some(oldEncryptionContext),
+                   //= aws-encryption-sdk-specification/framework/branch-key-store.md#aws-kms-branch-key-reencryption
+                   //= type=implication
+                   //# - `SourceKeyId` MUST be the AWS KMS Key ARN configured in the key store operation.
+                   SourceKeyId := Some(awsKmsKey),
+                   //= aws-encryption-sdk-specification/framework/branch-key-store.md#aws-kms-branch-key-reencryption
+                   //= type=implication
+                   //# - `DestinationKeyId` MUST be the AWS KMS Key ARN configured in the key store operation.
+                   DestinationKeyId := awsKmsKey,
+                   //= aws-encryption-sdk-specification/framework/branch-key-store.md#aws-kms-branch-key-reencryption
+                   //= type=implication
+                   //# - `DestinationEncryptionContext` MUST be the DECRYPT_ONLY branch key encryption context created.
+                   DestinationEncryptionContext := Some(decryptOnlyEncryptionContext),
+                   SourceEncryptionAlgorithm := None,
+                   DestinationEncryptionAlgorithm := None,
+                   GrantTokens := Some(grantTokens)
+                 ) == kmsOperationInput
+              && kmsOperationOutput.value.CiphertextBlob.Some?
+              && kmsOperationOutput.value.SourceKeyId.Some?
+              && kmsOperationOutput.value.KeyId.Some?
+              && kmsOperationOutput.value.CiphertextBlob.value == res.value.CiphertextBlob.value
+              && kmsOperationOutput.value.SourceKeyId.value == res.value.SourceKeyId.value
+              && kmsOperationOutput.value.KeyId.value == res.value.KeyId.value
   {
     var reEncryptRequest := KMS.ReEncryptRequest(
       CiphertextBlob := ciphertext,
@@ -557,13 +557,13 @@ module CreateKeys {
 
     var maybeReEncryptResponse := kmsClient.ReEncrypt(reEncryptRequest);
     var reEncryptResponse :- maybeReEncryptResponse
-      .MapFailure(e => Types.ComAmazonawsKms(ComAmazonawsKms := e));
-    
+    .MapFailure(e => Types.ComAmazonawsKms(ComAmazonawsKms := e));
+
     :- Need(
       && reEncryptResponse.SourceKeyId.Some?
       && reEncryptResponse.KeyId.Some?
       && reEncryptResponse.SourceKeyId.value == awsKmsKey
-      && reEncryptResponse.KeyId.value == awsKmsKey 
+      && reEncryptResponse.KeyId.value == awsKmsKey
       && ParseAwsKmsIdentifier(reEncryptResponse.SourceKeyId.value).Success?
       && ParseAwsKmsIdentifier(reEncryptResponse.KeyId.value).Success?,
       Types.KeyStoreException(
