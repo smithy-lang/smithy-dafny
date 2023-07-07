@@ -127,7 +127,7 @@ module {:options "-functionSyntax:4"} KeyDescription {
   {
     // This is missing SYMMETRIC_DEFAULT because this is asymmetric only
     || s == "RSAES_OAEP_SHA_1"
-	  || s == "RSAES_OAEP_SHA_256"
+    || s == "RSAES_OAEP_SHA_256"
   }
 
 }

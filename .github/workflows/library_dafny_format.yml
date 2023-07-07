@@ -1,5 +1,5 @@
 # This workflow performs static analysis checks.
-name: Library Dafny verification
+name: Library Dafny format check
 
 on:
   pull_request:
@@ -58,16 +58,10 @@ jobs:
           # A && B || C is the closest thing to an if .. then ... else ... or ?: expression the GitHub Actions syntax supports.
           dafny-version: ${{ (github.event_name == 'schedule' || inputs.nightly) && 'nightly-latest' || '4.1.0' }}
 
-      - name: Verify ${{ matrix.library }} Dafny code
+      - name: Check format of ${{ matrix.library }} Dafny code
         shell: bash
         working-directory: ./${{ matrix.library }}
         run: |
           # This works because `node` is installed by default on GHA runners
           CORES=$(node -e 'console.log(os.cpus().length)')
-          make verify CORES=$CORES
-
-      - name: Check solver resource use
-        shell: bash
-        working-directory: ./${{ matrix.library }}
-        run: |
-          make dafny-reportgenerator
+          make format-check

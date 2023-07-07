@@ -91,12 +91,12 @@ module DefaultCMM {
     )
       returns (output: Result<Types.GetEncryptionMaterialsOutput, Types.Error>)
       requires
-      && ValidState() 
+        && ValidState()
       modifies Modifies - {History}
       // Dafny will skip type parameters when generating a default decreases clause.
       decreases Modifies - {History}
       ensures
-      && ValidState()
+        && ValidState()
       ensures GetEncryptionMaterialsEnsuresPublicly(input, output)
       ensures unchanged(History)
 
@@ -117,51 +117,51 @@ module DefaultCMM {
       //# - For every key in [Required Encryption Context Keys](structures.md#required-encryption-context-keys)
       //#   there MUST be a matching key in the [Encryption Context](structures.md#encryption-context-1).
       ensures output.Success?
-      ==>
-        && Materials.EncryptionMaterialsHasPlaintextDataKey(output.value.encryptionMaterials)
+              ==>
+                && Materials.EncryptionMaterialsHasPlaintextDataKey(output.value.encryptionMaterials)
 
       //= aws-encryption-sdk-specification/framework/cmm-interface.md#get-encryption-materials
       //= type=implication
       //# - The [Required Encryption Context Keys](structures.md#required-encryption-context-keys) MUST be
       //#   a super set of the Required Encryption Context Keys in the [encryption materials request](#encryption-materials-request).
       ensures output.Success?
-      ==>
-        && CMM.RequiredEncryptionContextKeys?(input.requiredEncryptionContextKeys, output.value.encryptionMaterials)
+              ==>
+                && CMM.RequiredEncryptionContextKeys?(input.requiredEncryptionContextKeys, output.value.encryptionMaterials)
 
       //= aws-encryption-sdk-specification/framework/cmm-interface.md#get-encryption-materials
       //= type=implication
       //# If the algorithm suite contains a [signing algorithm](algorithm-suites.md#signature-algorithm):
-      //# 
+      //#
       //# - The CMM MUST include a [signing key](structures.md#signing-key).
       //# - The CMM SHOULD also add a key-value pair using the reserved key `aws-crypto-public-key` to the encryption context.
       //#   If it does, the mapped value SHOULD be the signature verification key corresponding to the signing key.
-      //# 
+      //#
       //# If the algorithm suite does not contain a [signing algorithm](algorithm-suites.md#signature-algorithm):
-      //# 
+      //#
       //# - The CMM SHOULD NOT add a key-value pair using the reserved key `aws-crypto-public-key` to the encryption context.
       ensures output.Success?
-      ==>
-        && (
-          output.value.encryptionMaterials.algorithmSuite.signature.ECDSA?
-        <==>
-          //= aws-encryption-sdk-specification/framework/cmm-interface.md#get-encryption-materials
-          //= type=implication
-          //# - The CMM MAY modify the encryption context.
-          //
-          //= aws-encryption-sdk-specification/framework/default-cmm.md#get-encryption-materials
-          //= type=implication
-          //# If the algorithm suite contains a [signing algorithm](algorithm-suites.md#signature-algorithm),
-          //# the default CMM MUST Add the key-value pair of
-          //# key `aws-crypto-public-key`,
-          //# value `base64-encoded public verification key`
-          //# to the [encryption context](structures.md#encryption-context).
-          && Materials.EC_PUBLIC_KEY_FIELD in output.value.encryptionMaterials.encryptionContext
-          //= aws-encryption-sdk-specification/framework/default-cmm.md#get-encryption-materials
-          //= type=implication
-          //# If the algorithm suite contains a [signing algorithm](algorithm-suites.md#signature-algorithm),
-          //# the default CMM MUST Generate a [signing key](structures.md#signing-key).
-          && output.value.encryptionMaterials.signingKey.Some?
-        )
+              ==>
+                && (
+                  output.value.encryptionMaterials.algorithmSuite.signature.ECDSA?
+                  <==>
+                  //= aws-encryption-sdk-specification/framework/cmm-interface.md#get-encryption-materials
+                  //= type=implication
+                  //# - The CMM MAY modify the encryption context.
+                  //
+                  //= aws-encryption-sdk-specification/framework/default-cmm.md#get-encryption-materials
+                  //= type=implication
+                  //# If the algorithm suite contains a [signing algorithm](algorithm-suites.md#signature-algorithm),
+                  //# the default CMM MUST Add the key-value pair of
+                  //# key `aws-crypto-public-key`,
+                  //# value `base64-encoded public verification key`
+                  //# to the [encryption context](structures.md#encryption-context).
+                  && Materials.EC_PUBLIC_KEY_FIELD in output.value.encryptionMaterials.encryptionContext
+                                                      //= aws-encryption-sdk-specification/framework/default-cmm.md#get-encryption-materials
+                                                      //= type=implication
+                                                      //# If the algorithm suite contains a [signing algorithm](algorithm-suites.md#signature-algorithm),
+                                                      //# the default CMM MUST Generate a [signing key](structures.md#signing-key).
+                  && output.value.encryptionMaterials.signingKey.Some?
+                )
 
       //= aws-encryption-sdk-specification/framework/default-cmm.md#get-encryption-materials
       //= type=implication
@@ -174,56 +174,56 @@ module DefaultCMM {
       // the input or, if that was not given, the default for the provided commitment policy
       ensures
         && output.Success?
-      ==>
-        (if input.algorithmSuiteId.Some? then
-          //= aws-encryption-sdk-specification/framework/cmm-interface.md#get-encryption-materials
-          //= type=implication
-          //# - If the encryption materials request contains an algorithm suite, the encryption materials returned
-          //# SHOULD contain the same algorithm suite.
-          //
-          //= aws-encryption-sdk-specification/framework/default-cmm.md#get-encryption-materials
-          //= type=implication
-          //# - If the [encryption materials request](cmm-interface.md#encryption-
-          //# materials-request) does contain an algorithm suite, the encryption
-          //# materials returned MUST contain the same algorithm suite.
-          output.value.encryptionMaterials.algorithmSuite.id == input.algorithmSuiteId.value
-        else
-            //= aws-encryption-sdk-specification/framework/default-cmm.md#get-encryption-materials
-            //= type=implication
-            //# - If the [encryption materials request](cmm-interface.md#encryption-
-            //# materials-request) does not contain an algorithm suite, the
-            //# operation MUST add the default algorithm suite for the [commitment
-            //# policy](./commitment-policy.md#supported-commitment-policy-enum) as the
-            //# algorithm suite in the encryption materials returned.
-            && input.algorithmSuiteId.None?
-            && output.value.encryptionMaterials.algorithmSuite.id
-              == Defaults.GetAlgorithmSuiteForCommitmentPolicy(input.commitmentPolicy))
+        ==>
+          (if input.algorithmSuiteId.Some? then
+             //= aws-encryption-sdk-specification/framework/cmm-interface.md#get-encryption-materials
+             //= type=implication
+             //# - If the encryption materials request contains an algorithm suite, the encryption materials returned
+             //# SHOULD contain the same algorithm suite.
+             //
+             //= aws-encryption-sdk-specification/framework/default-cmm.md#get-encryption-materials
+             //= type=implication
+             //# - If the [encryption materials request](cmm-interface.md#encryption-
+             //# materials-request) does contain an algorithm suite, the encryption
+             //# materials returned MUST contain the same algorithm suite.
+             output.value.encryptionMaterials.algorithmSuite.id == input.algorithmSuiteId.value
+           else
+             //= aws-encryption-sdk-specification/framework/default-cmm.md#get-encryption-materials
+             //= type=implication
+             //# - If the [encryption materials request](cmm-interface.md#encryption-
+             //# materials-request) does not contain an algorithm suite, the
+             //# operation MUST add the default algorithm suite for the [commitment
+             //# policy](./commitment-policy.md#supported-commitment-policy-enum) as the
+             //# algorithm suite in the encryption materials returned.
+             && input.algorithmSuiteId.None?
+             && output.value.encryptionMaterials.algorithmSuite.id
+                == Defaults.GetAlgorithmSuiteForCommitmentPolicy(input.commitmentPolicy))
 
       ensures
         && output.Success?
-      ==>
-        && |keyring.History.OnEncrypt| == |old(keyring.History.OnEncrypt)| + 1
-        //= aws-encryption-sdk-specification/framework/default-cmm.md#get-encryption-materials
-        //= type=implication
-        //# On each call to Get Encryption Materials,
-        //# the default CMM MUST make a call to its [keyring's](#keyring)
-        //# [On Encrypt](keyring-interface.md#onencrypt) operation.
-        && Seq.Last(keyring.History.OnEncrypt).output.Success?
-        //= aws-encryption-sdk-specification/framework/default-cmm.md#get-encryption-materials
-        //= type=implication
-        //# The default CMM MUST obtain the Plaintext Data Key from the
-        //# On Encrypt Response and include it in the
-        //# [encryption materials](structures.md#encryption-materials) returned.
-        && Seq.Last(keyring.History.OnEncrypt).output.value.materials.plaintextDataKey
-        == output.value.encryptionMaterials.plaintextDataKey
-        //= aws-encryption-sdk-specification/framework/default-cmm.md#get-encryption-materials
-        //= type=implication
-        //# The default CMM MUST obtain the
-        //# [Encrypted Data Keys](structures.md#encrypted-data-keys)
-        //# from the On Encrypt Response and include it
-        //# in the [encryption materials](structures.md#encryption-materials) returned.
-        && Seq.Last(keyring.History.OnEncrypt).output.value.materials.encryptedDataKeys
-        == output.value.encryptionMaterials.encryptedDataKeys
+        ==>
+          && |keyring.History.OnEncrypt| == |old(keyring.History.OnEncrypt)| + 1
+             //= aws-encryption-sdk-specification/framework/default-cmm.md#get-encryption-materials
+             //= type=implication
+             //# On each call to Get Encryption Materials,
+             //# the default CMM MUST make a call to its [keyring's](#keyring)
+             //# [On Encrypt](keyring-interface.md#onencrypt) operation.
+          && Seq.Last(keyring.History.OnEncrypt).output.Success?
+             //= aws-encryption-sdk-specification/framework/default-cmm.md#get-encryption-materials
+             //= type=implication
+             //# The default CMM MUST obtain the Plaintext Data Key from the
+             //# On Encrypt Response and include it in the
+             //# [encryption materials](structures.md#encryption-materials) returned.
+          && Seq.Last(keyring.History.OnEncrypt).output.value.materials.plaintextDataKey
+             == output.value.encryptionMaterials.plaintextDataKey
+             //= aws-encryption-sdk-specification/framework/default-cmm.md#get-encryption-materials
+             //= type=implication
+             //# The default CMM MUST obtain the
+             //# [Encrypted Data Keys](structures.md#encrypted-data-keys)
+             //# from the On Encrypt Response and include it
+             //# in the [encryption materials](structures.md#encryption-materials) returned.
+          && Seq.Last(keyring.History.OnEncrypt).output.value.materials.encryptedDataKeys
+             == output.value.encryptionMaterials.encryptedDataKeys
 
       //= aws-encryption-sdk-specification/framework/default-cmm.md#get-encryption-materials
       //= type=implication
@@ -235,12 +235,12 @@ module DefaultCMM {
       ensures
         && input.algorithmSuiteId.Some?
         && Commitment.ValidateCommitmentPolicyOnEncrypt(input.algorithmSuiteId.value, input.commitmentPolicy).Fail?
-      ==>
-        output.Failure?
+        ==>
+          output.Failure?
     {
       :- Need(Materials.EC_PUBLIC_KEY_FIELD !in input.encryptionContext,
-        Types.AwsCryptographicMaterialProvidersException(
-          message :="Reserved Field found in EncryptionContext keys."));
+              Types.AwsCryptographicMaterialProvidersException(
+                message :="Reserved Field found in EncryptionContext keys."));
 
       var algorithmId := if input.algorithmSuiteId.Some? then
         input.algorithmSuiteId.value
@@ -290,10 +290,10 @@ module DefaultCMM {
         Types.AwsCryptographicMaterialProvidersException(
           message := "Could not retrieve materials required for encryption"));
 
-      // For Dafny keyrings this is a trivial statement
-      // because they implement a trait that ensures this.
-      // However not all keyrings are Dafny keyrings.
-      // Customers can create custom keyrings.
+        // For Dafny keyrings this is a trivial statement
+        // because they implement a trait that ensures this.
+        // However not all keyrings are Dafny keyrings.
+        // Customers can create custom keyrings.
       :- Need(
         Materials.ValidEncryptionMaterialsTransition(materials, encryptionMaterialsOutput.encryptionMaterials),
         Types.AwsCryptographicMaterialProvidersException(
@@ -334,12 +334,12 @@ module DefaultCMM {
     )
       returns (output: Result<Types.DecryptMaterialsOutput, Types.Error>)
       requires
-      && ValidState() 
+        && ValidState()
       modifies Modifies - {History}
       // Dafny will skip type parameters when generating a default decreases clause.
       decreases Modifies - {History}
       ensures
-      && ValidState()
+        && ValidState()
       ensures DecryptMaterialsEnsuresPublicly(input, output)
       ensures unchanged(History)
 
@@ -359,8 +359,8 @@ module DefaultCMM {
       //# - The decryption materials returned MUST follow the specification for [decryption-materials](structures.md#decryption-materials).
       //# - The value of the plaintext data key MUST be non-NULL.
       ensures output.Success?
-      ==>
-        && Materials.DecryptionMaterialsWithPlaintextDataKey(output.value.decryptionMaterials)
+              ==>
+                && Materials.DecryptionMaterialsWithPlaintextDataKey(output.value.decryptionMaterials)
 
       //= aws-encryption-sdk-specification/framework/cmm-interface.md#decrypt-materials
       //= type=implication
@@ -411,8 +411,8 @@ module DefaultCMM {
       //# supported by the [commitment policy](./commitment-policy.md#supported-commitment-policy-enum)
       //# on the request.
       ensures Commitment.ValidateCommitmentPolicyOnDecrypt(input.algorithmSuiteId, input.commitmentPolicy).Fail?
-      ==>
-        output.Failure?
+              ==>
+                output.Failure?
 
       //= aws-encryption-sdk-specification/framework/default-cmm.md#decrypt-materials
       //= type=implication
@@ -422,53 +422,53 @@ module DefaultCMM {
       ensures
         && output.Success?
         && AlgorithmSuites.GetSuite(input.algorithmSuiteId).signature.ECDSA?
-      ==>
-        && Materials.DecodeVerificationKey(input.encryptionContext + input.reproducedEncryptionContext.UnwrapOr(map[])).Success?
-        && output.value.decryptionMaterials.verificationKey.Some?
-        && output.value.decryptionMaterials.verificationKey
-        == Some(Materials.DecodeVerificationKey(input.encryptionContext + input.reproducedEncryptionContext.UnwrapOr(map[])).value.value)
+        ==>
+          && Materials.DecodeVerificationKey(input.encryptionContext + input.reproducedEncryptionContext.UnwrapOr(map[])).Success?
+          && output.value.decryptionMaterials.verificationKey.Some?
+          && output.value.decryptionMaterials.verificationKey
+             == Some(Materials.DecodeVerificationKey(input.encryptionContext + input.reproducedEncryptionContext.UnwrapOr(map[])).value.value)
 
       ensures output.Success?
-      ==>
-        //= aws-encryption-sdk-specification/framework/cmm-interface.md#decrypt-materials
-        //= type=implication
-        //# - If the decrypt materials request contains an algorithm suite,
-        //# the decryption materials returned SHOULD contain the same algorithm suite.
-        && input.algorithmSuiteId == output.value.decryptionMaterials.algorithmSuite.id
-        //= aws-encryption-sdk-specification/framework/cmm-interface.md#decrypt-materials
-        //= type=implication
-        //# If the algorithm suite obtained from the decryption request contains a [signing algorithm](algorithm-suites.md#signature-algorithm),
-        //# the decryption materials MUST include the [signature verification key](structures.md#verification-key).
-        && (output.value.decryptionMaterials.algorithmSuite.signature.ECDSA? ==> output.value.decryptionMaterials.verificationKey.Some?)
+              ==>
+                //= aws-encryption-sdk-specification/framework/cmm-interface.md#decrypt-materials
+                //= type=implication
+                //# - If the decrypt materials request contains an algorithm suite,
+                //# the decryption materials returned SHOULD contain the same algorithm suite.
+                && input.algorithmSuiteId == output.value.decryptionMaterials.algorithmSuite.id
+                   //= aws-encryption-sdk-specification/framework/cmm-interface.md#decrypt-materials
+                   //= type=implication
+                   //# If the algorithm suite obtained from the decryption request contains a [signing algorithm](algorithm-suites.md#signature-algorithm),
+                   //# the decryption materials MUST include the [signature verification key](structures.md#verification-key).
+                && (output.value.decryptionMaterials.algorithmSuite.signature.ECDSA? ==> output.value.decryptionMaterials.verificationKey.Some?)
 
-        && (0 < |output.value.decryptionMaterials.requiredEncryptionContextKeys| ==> input.reproducedEncryptionContext.Some?)
-        //= aws-encryption-sdk-specification/framework/cmm-interface.md#decrypt-materials
-        //= type=implication
-        //# - This set MUST include all keys added to the decryption materials encryption context
-        //# that existed in the [decrypt materials request's](#decrypt-materials-request) reproduced encryption context
-        //# but did not exist in the [decrypt materials request's](#decrypt-materials-request) encryption context.
-        && (forall key <- output.value.decryptionMaterials.requiredEncryptionContextKeys
-          ::
-            && key !in input.encryptionContext
-            && key in input.reproducedEncryptionContext.value)
+                && (0 < |output.value.decryptionMaterials.requiredEncryptionContextKeys| ==> input.reproducedEncryptionContext.Some?)
+                   //= aws-encryption-sdk-specification/framework/cmm-interface.md#decrypt-materials
+                   //= type=implication
+                   //# - This set MUST include all keys added to the decryption materials encryption context
+                   //# that existed in the [decrypt materials request's](#decrypt-materials-request) reproduced encryption context
+                   //# but did not exist in the [decrypt materials request's](#decrypt-materials-request) encryption context.
+                && (forall key <- output.value.decryptionMaterials.requiredEncryptionContextKeys
+                      ::
+                        && key !in input.encryptionContext
+                        && key in input.reproducedEncryptionContext.value)
 
       ensures
         && output.Success?
-      ==>
-        && |keyring.History.OnDecrypt| == |old(keyring.History.OnDecrypt)| + 1
-        //= aws-encryption-sdk-specification/framework/default-cmm.md#decrypt-materials
-        //= type=implication
-        //# On each call to Decrypt Materials,
-        //# the default CMM MUST make a call to its [keyring's](#keyring)
-        //# [On Decrypt](keyring-interface.md#ondecrypt) operation.
-        && Seq.Last(keyring.History.OnDecrypt).output.Success?
-        //= aws-encryption-sdk-specification/framework/default-cmm.md#decrypt-materials
-        //= type=implication
-        //# The default CMM MUST obtain the Plaintext Data Key from
-        //# the On Decrypt response and include it in the decrypt
-        //# materials returned.
-        && Seq.Last(keyring.History.OnDecrypt).output.value.materials.plaintextDataKey
-        == output.value.decryptionMaterials.plaintextDataKey
+        ==>
+          && |keyring.History.OnDecrypt| == |old(keyring.History.OnDecrypt)| + 1
+             //= aws-encryption-sdk-specification/framework/default-cmm.md#decrypt-materials
+             //= type=implication
+             //# On each call to Decrypt Materials,
+             //# the default CMM MUST make a call to its [keyring's](#keyring)
+             //# [On Decrypt](keyring-interface.md#ondecrypt) operation.
+          && Seq.Last(keyring.History.OnDecrypt).output.Success?
+             //= aws-encryption-sdk-specification/framework/default-cmm.md#decrypt-materials
+             //= type=implication
+             //# The default CMM MUST obtain the Plaintext Data Key from
+             //# the On Decrypt response and include it in the decrypt
+             //# materials returned.
+          && Seq.Last(keyring.History.OnDecrypt).output.value.materials.plaintextDataKey
+             == output.value.decryptionMaterials.plaintextDataKey
 
     {
       :- Commitment.ValidateCommitmentPolicyOnDecrypt(
@@ -480,26 +480,26 @@ module DefaultCMM {
         var keysSet := input.reproducedEncryptionContext.value.Keys;
         while keysSet != {}
           invariant forall key
-          |
-            && key in input.reproducedEncryptionContext.value
-            && key in input.encryptionContext
-            && key !in keysSet
-          :: input.reproducedEncryptionContext.value[key] == input.encryptionContext[key]
+                      |
+                      && key in input.reproducedEncryptionContext.value
+                      && key in input.encryptionContext
+                      && key !in keysSet
+                      :: input.reproducedEncryptionContext.value[key] == input.encryptionContext[key]
           invariant forall key <- requiredEncryptionContextKeys
-          :: key !in input.encryptionContext
+                      :: key !in input.encryptionContext
         {
           var key :| key in keysSet;
           if key in input.encryptionContext {
             :- Need(input.reproducedEncryptionContext.value[key] == input.encryptionContext[key],
-              Types.AwsCryptographicMaterialProvidersException(
-              message := "Encryption context does not match reproduced encryption context."));
+                    Types.AwsCryptographicMaterialProvidersException(
+                      message := "Encryption context does not match reproduced encryption context."));
           } else {
             requiredEncryptionContextKeys :=  requiredEncryptionContextKeys + [key];
           }
           keysSet := keysSet - {key};
         }
       }
-    
+
       var materials :- Materials.InitializeDecryptionMaterials(
         Types.InitializeDecryptionMaterialsInput(
           algorithmSuiteId := input.algorithmSuiteId,
@@ -509,14 +509,14 @@ module DefaultCMM {
       );
 
       var result :- keyring.OnDecrypt(Types.OnDecryptInput(
-        materials:=materials,
-        encryptedDataKeys:=input.encryptedDataKeys
-      ));
+                                        materials:=materials,
+                                        encryptedDataKeys:=input.encryptedDataKeys
+                                      ));
 
-      // For Dafny keyrings this is a trivial statement
-      // because they implement a trait that ensures this.
-      // However not all keyrings are Dafny keyrings.
-      // Customers can create custom keyrings.
+        // For Dafny keyrings this is a trivial statement
+        // because they implement a trait that ensures this.
+        // However not all keyrings are Dafny keyrings.
+        // Customers can create custom keyrings.
       :- Need(
         Materials.DecryptionMaterialsTransitionIsValid(materials, result.materials),
         Types.AwsCryptographicMaterialProvidersException(

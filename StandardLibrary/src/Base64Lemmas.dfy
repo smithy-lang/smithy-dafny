@@ -148,13 +148,13 @@ module Base64Lemmas {
   {
     if |b| % 3 == 0 {
       EncodeDecodeValid0(b);
-    } 
+    }
     else if |b| % 3 == 1 {
       EncodeDecodeValid1(b);
     }
     else {
       EncodeDecodeValid2(b);
-    } 
+    }
   }
 
   lemma EncodeDecodeValid0(b: seq<uint8>)
@@ -163,10 +163,10 @@ module Base64Lemmas {
   {}
 
   lemma EncodeDecodeValid1(b: seq<uint8>)
-    requires |b| % 3 == 1 
+    requires |b| % 3 == 1
     ensures DecodeValid(Encode(b)) == b
   {}
-  
+
   lemma EncodeDecodeValid2(b: seq<uint8>)
     requires |b| % 3 == 2
     ensures DecodeValid(Encode(b)) == b

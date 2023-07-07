@@ -37,10 +37,10 @@ module TestAwsCryptographyPrimitivesAesKdfCtr {
   These tests wre generated with
   const crypto = require('crypto');
   function aes256ctr_stream(length, key, nonce) {
-	  const aes = crypto.createCipheriv('aes-256-ctr', key, nonce)
-	  const output = aes.update(Buffer.alloc(length))
-	  aes.final()
-	  return output
+   const aes = crypto.createCipheriv('aes-256-ctr', key, nonce)
+   const output = aes.update(Buffer.alloc(length))
+   aes.final()
+   return output
   }
   k = crypto.randomBytes(32)
   n = crypto.randomBytes(16)

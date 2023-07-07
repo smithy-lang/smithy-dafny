@@ -7,12 +7,12 @@ module  AwsKmsMrkMatchForDecrypt {
   import opened StandardLibrary
   import opened Wrappers
   import opened Seq
-   import opened AwsArnParsing
+  import opened AwsArnParsing
 
   //= aws-encryption-sdk-specification/framework/aws-kms/aws-kms-mrk-match-for-decrypt.md#implementation
   //= type=implication
   //# The caller MUST provide:
-  //# *  2 AWS KMS key identifiers 
+  //# *  2 AWS KMS key identifiers
   predicate method AwsKmsMrkMatchForDecrypt(
     configuredAwsKmsIdentifier: AwsKmsIdentifier,
     messageAwsKmsIdentifer: AwsKmsIdentifier
@@ -23,7 +23,7 @@ module  AwsKmsMrkMatchForDecrypt {
         case (
           AwsKmsArnIdentifier(configuredAwsKmsArn),
           AwsKmsArnIdentifier(messageAwsKmsArn)
-        ) =>
+          ) =>
           if !IsMultiRegionAwsKmsArn(configuredAwsKmsArn) || !IsMultiRegionAwsKmsArn(messageAwsKmsArn) then false
           else
             && messageAwsKmsArn.partition == configuredAwsKmsArn.partition
@@ -44,8 +44,8 @@ module  AwsKmsMrkMatchForDecrypt {
       && config == message
       && c.Success?
       && m.Success?
-    ==>
-      AwsKmsMrkMatchForDecrypt(c.value, m.value)
+      ==>
+        AwsKmsMrkMatchForDecrypt(c.value, m.value)
     //= aws-encryption-sdk-specification/framework/aws-kms/aws-kms-mrk-match-for-decrypt.md#implementation
     //= type=implication
     //# Otherwise if either input is not [identified as a multi-Region key]
@@ -58,11 +58,11 @@ module  AwsKmsMrkMatchForDecrypt {
       && c.Success?
       && m.Success?
       && IsMultiRegionAwsKmsArn(c.value) != IsMultiRegionAwsKmsArn(m.value)
-    ==>
-      !AwsKmsMrkMatchForDecrypt(
-        AwsKmsArnIdentifier(c.value), 
-        AwsKmsArnIdentifier(m.value)
-      );
+      ==>
+        !AwsKmsMrkMatchForDecrypt(
+          AwsKmsArnIdentifier(c.value),
+          AwsKmsArnIdentifier(m.value)
+        );
     //= aws-encryption-sdk-specification/framework/aws-kms/aws-kms-mrk-match-for-decrypt.md#implementation
     //= type=implication
     //# Otherwise if both inputs are
@@ -77,15 +77,15 @@ module  AwsKmsMrkMatchForDecrypt {
       && m.Success?
       && IsMultiRegionAwsKmsArn(c.value)
       && IsMultiRegionAwsKmsArn(m.value)
-    ==>
-      AwsKmsMrkMatchForDecrypt(
-        AwsKmsArnIdentifier(c.value),
-        AwsKmsArnIdentifier(m.value)
-      ) == (
-        && m.value.partition == c.value.partition
-        && m.value.service   == c.value.service
-        && m.value.account   == c.value.account
-        && m.value.resource  == c.value.resource
-      );
+      ==>
+        AwsKmsMrkMatchForDecrypt(
+          AwsKmsArnIdentifier(c.value),
+          AwsKmsArnIdentifier(m.value)
+        ) == (
+          && m.value.partition == c.value.partition
+          && m.value.service   == c.value.service
+          && m.value.account   == c.value.account
+          && m.value.resource  == c.value.resource
+             );
   {}
 }

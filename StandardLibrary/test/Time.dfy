@@ -6,7 +6,7 @@ include "../src/Time.dfy"
 
 module TestTime {
   import Time
-  
+
   method {:test} TestNonDecreasing() {
     var t1 := Time.GetCurrent();
     var t2 := Time.GetCurrent();

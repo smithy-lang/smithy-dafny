@@ -54,7 +54,7 @@ module IntermediateKeyWrapping {
   ) returns (res: Result<IntermediateUnwrapOutput<T>, Types.Error>)
     requires unwrap.Invariant()
     requires |wrappedMaterial| >=
-      (AlgorithmSuites.GetEncryptKeyLength(algorithmSuite) + AlgorithmSuites.GetEncryptTagLength(algorithmSuite)) as nat
+             (AlgorithmSuites.GetEncryptKeyLength(algorithmSuite) + AlgorithmSuites.GetEncryptTagLength(algorithmSuite)) as nat
     requires algorithmSuite.commitment.HKDF?
     modifies unwrap.Modifies
     ensures res.Success? ==> |res.value.plaintextDataKey| == AlgorithmSuites.GetEncryptKeyLength(algorithmSuite) as nat
@@ -63,8 +63,8 @@ module IntermediateKeyWrapping {
         && var maybeIntermediateWrappedMat := DeserializeIntermediateWrappedMaterial(wrappedMaterial, algorithmSuite);
         && maybeIntermediateWrappedMat.Success?
         && var unwrapRes := UnwrapOutput(
-          unwrappedMaterial := res.value.intermediateMaterial,
-          unwrapInfo := res.value.unwrapInfo);
+                              unwrappedMaterial := res.value.intermediateMaterial,
+                              unwrapInfo := res.value.unwrapInfo);
         && unwrap.Ensures(
           UnwrapInput(
             wrappedMaterial := maybeIntermediateWrappedMat.value.providerWrappedIkm,
@@ -76,20 +76,20 @@ module IntermediateKeyWrapping {
   {
     var maybeCrypto := Primitives.AtomicPrimitives();
     var cryptoPrimitives :- maybeCrypto
-      .MapFailure(e => Types.AwsCryptographyPrimitives(e));
+    .MapFailure(e => Types.AwsCryptographyPrimitives(e));
 
     // Deserialize the Intermediate-Wrapped material
     var deserializedWrapped :- DeserializeIntermediateWrappedMaterial(wrappedMaterial, algorithmSuite);
     var DeserializedIntermediateWrappedMaterial(encryptedPdk, providerWrappedIkm) := deserializedWrapped;
- 
+
     var unwrapOutput :- unwrap.Invoke(
       UnwrapInput(
         wrappedMaterial := providerWrappedIkm,
         encryptionContext := encryptionContext,
         algorithmSuite := algorithmSuite
-      ), []); 
+      ), []);
     var UnwrapOutput(intermediateMaterial, unwrapInfo) := unwrapOutput;
- 
+
     var derivedKeys :- DeriveKeysFromIntermediateMaterial(
       intermediateMaterial,
       algorithmSuite,
@@ -97,7 +97,7 @@ module IntermediateKeyWrapping {
       cryptoPrimitives
     );
     var PdkEncryptionAndSymmetricSigningKeys(pdkEncryptionKey, symmetricSigningKey) := derivedKeys;
- 
+
     // Decrypt the plaintext data key with the pdkEncryptionKey
     var iv: seq<uint8> := seq(AlgorithmSuites.GetEncryptIvLength(algorithmSuite) as nat, _ => 0); // IV is zero
     var tagIndex := |encryptedPdk| - AlgorithmSuites.GetEncryptTagLength(algorithmSuite) as nat;
@@ -115,15 +115,15 @@ module IntermediateKeyWrapping {
     var plaintextDataKey :- decOutR.MapFailure(e => Types.AwsCryptographyPrimitives(e));
 
     :- Need(|plaintextDataKey| == AlgorithmSuites.GetEncryptKeyLength(algorithmSuite) as nat,
-      Types.AwsCryptographicMaterialProvidersException(
-        message := "Unexpected AES_GCM Decrypt length"));
- 
+            Types.AwsCryptographicMaterialProvidersException(
+              message := "Unexpected AES_GCM Decrypt length"));
+
     return Success(IntermediateUnwrapOutput(
-      plaintextDataKey := plaintextDataKey,
-      symmetricSigningKey := symmetricSigningKey,
-      unwrapInfo := unwrapInfo,
-      intermediateMaterial := intermediateMaterial
-    ));
+                     plaintextDataKey := plaintextDataKey,
+                     symmetricSigningKey := symmetricSigningKey,
+                     unwrapInfo := unwrapInfo,
+                     intermediateMaterial := intermediateMaterial
+                   ));
   }
 
   method IntermediateWrap<T>(
@@ -139,18 +139,18 @@ module IntermediateKeyWrapping {
     ensures
       res.Success? ==>
         && var maybeIntermediateWrappedMat :=
-            DeserializeIntermediateWrappedMaterial(res.value.wrappedMaterial, algorithmSuite);
+          DeserializeIntermediateWrappedMaterial(res.value.wrappedMaterial, algorithmSuite);
         && maybeIntermediateWrappedMat.Success?
         && generateAndWrap.Ensures(
-          GenerateAndWrapInput(
-            algorithmSuite := algorithmSuite,
-            encryptionContext := encryptionContext),
-          Success(
-            GenerateAndWrapOutput(
-              plaintextMaterial := res.value.intermediateMaterial,
-              wrappedMaterial := maybeIntermediateWrappedMat.value.providerWrappedIkm,
-              wrapInfo := res.value.wrapInfo)),
-          [])
+             GenerateAndWrapInput(
+               algorithmSuite := algorithmSuite,
+               encryptionContext := encryptionContext),
+             Success(
+               GenerateAndWrapOutput(
+                 plaintextMaterial := res.value.intermediateMaterial,
+                 wrappedMaterial := maybeIntermediateWrappedMat.value.providerWrappedIkm,
+                 wrapInfo := res.value.wrapInfo)),
+             [])
 
         //= aws-encryption-sdk-specification/framework/algorithm-suites.md#intermediate-key-wrapping
         //# - The [EDK ciphertext](./structures.md#ciphertext) MUST be the following serialization:
@@ -159,17 +159,17 @@ module IntermediateKeyWrapping {
         //  | Wrapped Plaintext Data Key | The algorithm suite's encryption key length + 16   | Bytes          |
         //  | Wrapped Intermediate Key   | Determined by the keyring responsible for wrapping | Bytes          |
         && res.value.wrappedMaterial ==
-            maybeIntermediateWrappedMat.value.encryptedPdk + maybeIntermediateWrappedMat.value.providerWrappedIkm
+           maybeIntermediateWrappedMat.value.encryptedPdk + maybeIntermediateWrappedMat.value.providerWrappedIkm
 
         //= aws-encryption-sdk-specification/framework/algorithm-suites.md#wrapped-plaintext-data-key
         //= type=implication
         //# This value MUST be equal to the algorithm suite's encryption key length + 16.
         && |maybeIntermediateWrappedMat.value.encryptedPdk| ==
-            (AlgorithmSuites.GetEncryptKeyLength(algorithmSuite) + AlgorithmSuites.GetEncryptTagLength(algorithmSuite)) as nat
+           (AlgorithmSuites.GetEncryptKeyLength(algorithmSuite) + AlgorithmSuites.GetEncryptTagLength(algorithmSuite)) as nat
   {
     var maybeCrypto := Primitives.AtomicPrimitives();
     var cryptoPrimitives :- maybeCrypto
-      .MapFailure(e => Types.AwsCryptographyPrimitives(e));
+    .MapFailure(e => Types.AwsCryptographyPrimitives(e));
 
     // Use the provider to get the intermediate key material, and wrapped intermediate key material
     var generateAndWrapOutput :- generateAndWrap.Invoke(
@@ -210,18 +210,18 @@ module IntermediateKeyWrapping {
     var encryptedPdk :- encOutR.MapFailure(e => Types.AwsCryptographyPrimitives(e));
 
     :- Need(|encryptedPdk.cipherText + encryptedPdk.authTag| ==
-        (AlgorithmSuites.GetEncryptKeyLength(algorithmSuite) + AlgorithmSuites.GetEncryptTagLength(algorithmSuite)) as nat,
-      Types.AwsCryptographicMaterialProvidersException(
-        message := "Unexpected AES_GCM Encrypt length"));
+            (AlgorithmSuites.GetEncryptKeyLength(algorithmSuite) + AlgorithmSuites.GetEncryptTagLength(algorithmSuite)) as nat,
+            Types.AwsCryptographicMaterialProvidersException(
+              message := "Unexpected AES_GCM Encrypt length"));
 
     var serializedMaterial := encryptedPdk.cipherText + encryptedPdk.authTag + providerWrappedIkm;
 
     return Success(IntermediateWrapOutput(
-      wrappedMaterial := serializedMaterial,
-      symmetricSigningKey := symmetricSigningKey,
-      wrapInfo := wrapInfo,
-      intermediateMaterial := intermediateMaterial
-    ));
+                     wrappedMaterial := serializedMaterial,
+                     symmetricSigningKey := symmetricSigningKey,
+                     wrapInfo := wrapInfo,
+                     intermediateMaterial := intermediateMaterial
+                   ));
   }
 
   method IntermediateGenerateAndWrap<T>(
@@ -235,24 +235,24 @@ module IntermediateKeyWrapping {
     ensures
       res.Success? ==>
         && var maybeIntermediateWrappedMat :=
-            DeserializeIntermediateWrappedMaterial(res.value.wrappedMaterial, algorithmSuite);
+          DeserializeIntermediateWrappedMaterial(res.value.wrappedMaterial, algorithmSuite);
         && maybeIntermediateWrappedMat.Success?
         && generateAndWrap.Ensures(GenerateAndWrapInput(
-          algorithmSuite := algorithmSuite,
-          encryptionContext := encryptionContext
-        ), Success(
-          GenerateAndWrapOutput(
-            plaintextMaterial := res.value.intermediateMaterial,
-            wrappedMaterial := maybeIntermediateWrappedMat.value.providerWrappedIkm,
-            wrapInfo := res.value.wrapInfo)),
-        [])
+                                     algorithmSuite := algorithmSuite,
+                                     encryptionContext := encryptionContext
+                                   ), Success(
+                                     GenerateAndWrapOutput(
+                                       plaintextMaterial := res.value.intermediateMaterial,
+                                       wrappedMaterial := maybeIntermediateWrappedMat.value.providerWrappedIkm,
+                                       wrapInfo := res.value.wrapInfo)),
+                                   [])
   {
     var maybeCrypto := Primitives.AtomicPrimitives();
     var cryptoPrimitives :- maybeCrypto
-      .MapFailure(e => Types.AwsCryptographyPrimitives(e));
+    .MapFailure(e => Types.AwsCryptographyPrimitives(e));
 
     var generateBytesResult := cryptoPrimitives
-      .GenerateRandomBytes(Crypto.GenerateRandomBytesInput(length := GetEncryptKeyLength(algorithmSuite)));
+    .GenerateRandomBytes(Crypto.GenerateRandomBytesInput(length := GetEncryptKeyLength(algorithmSuite)));
     var plaintextDataKey :- generateBytesResult.MapFailure(e => Types.AwsCryptographyPrimitives(AwsCryptographyPrimitives := e));
 
     var wrapOutput :- IntermediateWrap(
@@ -263,12 +263,12 @@ module IntermediateKeyWrapping {
     );
 
     return Success(IntermediateGenerateAndWrapOutput(
-      plaintextDataKey := plaintextDataKey,
-      wrappedMaterial := wrapOutput.wrappedMaterial,
-      symmetricSigningKey := wrapOutput.symmetricSigningKey,
-      wrapInfo := wrapOutput.wrapInfo,
-      intermediateMaterial := wrapOutput.intermediateMaterial
-    ));
+                     plaintextDataKey := plaintextDataKey,
+                     wrappedMaterial := wrapOutput.wrappedMaterial,
+                     symmetricSigningKey := wrapOutput.symmetricSigningKey,
+                     wrapInfo := wrapOutput.wrapInfo,
+                     intermediateMaterial := wrapOutput.intermediateMaterial
+                   ));
   }
 
   datatype DeserializedIntermediateWrappedMaterial = DeserializedIntermediateWrappedMaterial(
@@ -279,16 +279,16 @@ module IntermediateKeyWrapping {
   // Given material wrapped using Intermediate Key Wrapping,
   // get the provider wrapped portion
   function method DeserializeIntermediateWrappedMaterial(material: seq<uint8>, algSuite: Types.AlgorithmSuiteInfo)
-  : (ret: Result<DeserializedIntermediateWrappedMaterial, Types.Error>)
+    : (ret: Result<DeserializedIntermediateWrappedMaterial, Types.Error>)
   {
     :- Need(|material| >= (AlgorithmSuites.GetEncryptKeyLength(algSuite) + AlgorithmSuites.GetEncryptTagLength(algSuite)) as nat,
-      Types.AwsCryptographicMaterialProvidersException(
-        message := "Unable to deserialize Intermediate Key Wrapped material: too short."));
+            Types.AwsCryptographicMaterialProvidersException(
+              message := "Unable to deserialize Intermediate Key Wrapped material: too short."));
     var encryptedPdkLen := AlgorithmSuites.GetEncryptKeyLength(algSuite) + AlgorithmSuites.GetEncryptTagLength(algSuite);
     Success(DeserializedIntermediateWrappedMaterial(
-      encryptedPdk := material[..encryptedPdkLen],
-      providerWrappedIkm := material[encryptedPdkLen..]
-    ))
+              encryptedPdk := material[..encryptedPdkLen],
+              providerWrappedIkm := material[encryptedPdkLen..]
+            ))
   }
 
   datatype PdkEncryptionAndSymmetricSigningKeys = PdkEncryptionAndSymmetricSigningKeys(
@@ -297,12 +297,12 @@ module IntermediateKeyWrapping {
   )
 
   method DeriveKeysFromIntermediateMaterial(
-      intermediateMaterial: seq<uint8>,
-      algorithmSuite: Types.AlgorithmSuiteInfo,
-      encryptionContext: Types.EncryptionContext,
-      cryptoPrimitives: Primitives.AtomicPrimitivesClient
-    )
-      returns (res: Result<PdkEncryptionAndSymmetricSigningKeys, Types.Error>)
+    intermediateMaterial: seq<uint8>,
+    algorithmSuite: Types.AlgorithmSuiteInfo,
+    encryptionContext: Types.EncryptionContext,
+    cryptoPrimitives: Primitives.AtomicPrimitivesClient
+  )
+    returns (res: Result<PdkEncryptionAndSymmetricSigningKeys, Types.Error>)
     requires cryptoPrimitives.ValidState()
     requires algorithmSuite.commitment.HKDF?
     modifies cryptoPrimitives.Modifies
@@ -316,7 +316,7 @@ module IntermediateKeyWrapping {
 
     var maybePseudoRandomKey := cryptoPrimitives.HkdfExtract(hkdfExtractInput);
     var pseudoRandomKey :- maybePseudoRandomKey
-      .MapFailure(e => Types.AwsCryptographyPrimitives(e));
+    .MapFailure(e => Types.AwsCryptographyPrimitives(e));
 
     var symmetricSigningKeyInput := Crypto.HkdfExpandInput(
       digestAlgorithm := algorithmSuite.commitment.HKDF.hmac,
@@ -325,7 +325,7 @@ module IntermediateKeyWrapping {
       expectedLength := algorithmSuite.commitment.HKDF.outputKeyLength
     );
     var pdkEncryptionKeyInput := symmetricSigningKeyInput.(
-      info := KEYWRAP_ENC_INFO
+    info := KEYWRAP_ENC_INFO
     );
 
     //= aws-encryption-sdk-specification/framework/algorithm-suites.md#intermediate-key-wrapping
@@ -336,8 +336,8 @@ module IntermediateKeyWrapping {
     //  - The info is "AWS_MPL_INTERMEDIATE_KEYWRAP_MAC" as UTF8 bytes.
     var maybeSymmetricSigningKey := cryptoPrimitives.HkdfExpand(symmetricSigningKeyInput);
     var symmetricSigningKey :- maybeSymmetricSigningKey
-      .MapFailure(e => Types.AwsCryptographyPrimitives(e));
-    
+    .MapFailure(e => Types.AwsCryptographyPrimitives(e));
+
     //= aws-encryption-sdk-specification/framework/algorithm-suites.md#intermediate-key-wrapping
     //# - For each encrypted data key, a `key encryption key` MUST be derived from the `intermediate key`
     //# using the key derivation algorithm in the algorithm suite, with the following specifics:
@@ -346,13 +346,13 @@ module IntermediateKeyWrapping {
     //  - The info is "AWS_MPL_INTERMEDIATE_KEYWRAP_ENC" as UTF8 bytes.
     var maybePdkEncryptionKey := cryptoPrimitives.HkdfExpand(pdkEncryptionKeyInput);
     var pdkEncryptionKey :- maybePdkEncryptionKey
-      .MapFailure(e => Types.AwsCryptographyPrimitives(e));
+    .MapFailure(e => Types.AwsCryptographyPrimitives(e));
 
     return Success(
-      PdkEncryptionAndSymmetricSigningKeys(
-        pdkEncryptionKey := pdkEncryptionKey,
-        symmetricSigningKey := symmetricSigningKey
-      )
-    );
+        PdkEncryptionAndSymmetricSigningKeys(
+          pdkEncryptionKey := pdkEncryptionKey,
+          symmetricSigningKey := symmetricSigningKey
+        )
+      );
   }
 }

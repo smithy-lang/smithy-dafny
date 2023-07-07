@@ -21,7 +21,7 @@ module
   {
     var maybeCrypto := Primitives.AtomicPrimitives();
     var crypto :- maybeCrypto
-      .MapFailure(e => AwsCryptographyPrimitives(e));
+    .MapFailure(e => AwsCryptographyPrimitives(e));
     var client := new MaterialProvidersClient(Operations.Config( crypto := crypto ));
     return Success(client);
   }

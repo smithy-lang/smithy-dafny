@@ -22,11 +22,11 @@ module {:options "/functionSyntax:4" } CMM {
       ensures GetEncryptionMaterialsEnsuresPublicly(input, output)
       ensures unchanged(History)
       ensures output.Success?
-      ==>
-        && Materials.EncryptionMaterialsHasPlaintextDataKey(output.value.encryptionMaterials)
+              ==>
+                && Materials.EncryptionMaterialsHasPlaintextDataKey(output.value.encryptionMaterials)
       ensures output.Success?
-      ==>
-        && RequiredEncryptionContextKeys?(input.requiredEncryptionContextKeys, output.value.encryptionMaterials)
+              ==>
+                && RequiredEncryptionContextKeys?(input.requiredEncryptionContextKeys, output.value.encryptionMaterials)
 
     method DecryptMaterials'(input: Types.DecryptMaterialsInput)
       returns (output: Result<Types.DecryptMaterialsOutput, Types.Error>)
@@ -38,8 +38,8 @@ module {:options "/functionSyntax:4" } CMM {
       ensures DecryptMaterialsEnsuresPublicly(input, output)
       ensures unchanged(History)
       ensures output.Success?
-      ==>
-        && Materials.DecryptionMaterialsWithPlaintextDataKey(output.value.decryptionMaterials)
+              ==>
+                && Materials.DecryptionMaterialsWithPlaintextDataKey(output.value.decryptionMaterials)
       //= aws-encryption-sdk-specification/framework/cmm-interface.md#decrypt-materials
       //# The CMM MUST validate the [Encryption Context](structures.md#encryption-context)
       //# by comparing it to the customer supplied [Reproduced Encryption Context](structures.md#encryption-context)
@@ -73,7 +73,7 @@ module {:options "/functionSyntax:4" } CMM {
   predicate ReproducedEncryptionContext?(input: Types.DecryptMaterialsInput) {
     var reproducedEncryptionContext := input.reproducedEncryptionContext.UnwrapOr(map[]);
     forall k <- reproducedEncryptionContext.Keys
-    | k in input.encryptionContext
-    :: input.encryptionContext[k] == reproducedEncryptionContext[k]
+           | k in input.encryptionContext
+      :: input.encryptionContext[k] == reproducedEncryptionContext[k]
   }
 }

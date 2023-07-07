@@ -16,9 +16,9 @@ module {:options "-functionSyntax:4"} WrappedHMAC {
   {
 
     :- Need(0 < |input.key|,
-      Types.AwsCryptographicPrimitivesError(message := "Key MUST NOT be 0 bytes."));
+            Types.AwsCryptographicPrimitivesError(message := "Key MUST NOT be 0 bytes."));
     :- Need(|input.message| < INT32_MAX_LIMIT,
-      Types.AwsCryptographicPrimitivesError(message := "Message over INT32_MAX_LIMIT"));
+            Types.AwsCryptographicPrimitivesError(message := "Message over INT32_MAX_LIMIT"));
 
     var value :- HMAC.Digest(input);
 

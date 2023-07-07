@@ -54,14 +54,14 @@ module AwsCryptographyKeyStoreOperations refines AbstractAwsCryptographyKeyStore
     //= type=implication
     //# This operation MUST return the key store information in this key store configuration.
     ensures output.Success? ==>
-      //= aws-encryption-sdk-specification/framework/branch-key-store.md#getkeystoreinfo
-      //= type=implication
-      //# This MUST include:
-      && output.value.keyStoreId == config.id 
-      && output.value.keyStoreName == config.ddbTableName
-      && output.value.logicalKeyStoreName == config.logicalKeyStoreName
-      && output.value.grantTokens == config.grantTokens
-      && output.value.kmsConfiguration == config.kmsConfiguration
+              //= aws-encryption-sdk-specification/framework/branch-key-store.md#getkeystoreinfo
+              //= type=implication
+              //# This MUST include:
+              && output.value.keyStoreId == config.id
+              && output.value.keyStoreName == config.ddbTableName
+              && output.value.logicalKeyStoreName == config.logicalKeyStoreName
+              && output.value.grantTokens == config.grantTokens
+              && output.value.kmsConfiguration == config.kmsConfiguration
   {
     output := Success(
       Types.GetKeyStoreInfoOutput(
@@ -80,15 +80,15 @@ module AwsCryptographyKeyStoreOperations refines AbstractAwsCryptographyKeyStore
   method CreateKeyStore ( config: InternalConfig, input: CreateKeyStoreInput )
     returns (output: Result<CreateKeyStoreOutput, Error>)
     ensures output.Success? ==>
-      && AwsArnParsing.ParseAmazonDynamodbTableName(output.value.tableArn).Success?
-      && AwsArnParsing.ParseAmazonDynamodbTableName(output.value.tableArn).value == config.ddbTableName
+              && AwsArnParsing.ParseAmazonDynamodbTableName(output.value.tableArn).Success?
+              && AwsArnParsing.ParseAmazonDynamodbTableName(output.value.tableArn).value == config.ddbTableName
   {
     var ddbTableArn :- CreateKeyStoreTable.CreateKeyStoreTable(config.ddbTableName, config.ddbClient);
     :- Need(
       && AwsArnParsing.ParseAmazonDynamodbTableName(ddbTableArn).Success?
       && var tableName := AwsArnParsing.ParseAmazonDynamodbTableName(ddbTableArn);
       && tableName.value == config.ddbTableName,
-      Types.KeyStoreException(message := "Configured DDB Table Name does not match parsed Table Name from DDB Table Arn.") 
+      Types.KeyStoreException(message := "Configured DDB Table Name does not match parsed Table Name from DDB Table Arn.")
     );
 
     output := Success(Types.CreateKeyStoreOutput(tableArn := ddbTableArn));
@@ -102,7 +102,7 @@ module AwsCryptographyKeyStoreOperations refines AbstractAwsCryptographyKeyStore
   {
     output := CreateKeys.CreateBranchAndBeaconKeys(config.ddbTableName, config.logicalKeyStoreName, config.kmsConfiguration.kmsKeyArn, config.grantTokens, config.kmsClient, config.ddbClient);
   }
-  
+
   predicate VersionKeyEnsuresPublicly(input: VersionKeyInput, output: Result<(), Error>)
   {true}
 
@@ -115,7 +115,7 @@ module AwsCryptographyKeyStoreOperations refines AbstractAwsCryptographyKeyStore
   predicate GetActiveBranchKeyEnsuresPublicly(input: GetActiveBranchKeyInput, output: Result<GetActiveBranchKeyOutput, Error>)
   {true}
 
-  method GetActiveBranchKey(config: InternalConfig, input: GetActiveBranchKeyInput) 
+  method GetActiveBranchKey(config: InternalConfig, input: GetActiveBranchKeyInput)
     returns (output: Result<GetActiveBranchKeyOutput, Error>)
   {
     output := GetKeys.GetActiveKeyAndUnwrap(input, config.ddbTableName, config.logicalKeyStoreName, config.kmsConfiguration.kmsKeyArn, config.grantTokens, config.kmsClient, config.ddbClient);

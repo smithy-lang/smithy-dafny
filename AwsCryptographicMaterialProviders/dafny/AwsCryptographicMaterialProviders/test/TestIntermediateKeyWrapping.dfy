@@ -28,10 +28,10 @@ module TestIntermediateKeyWrapping {
 
     var testGenerateAndWrap := new TestGenerateAndWrapKeyMaterial();
     var intermediateWrapOutput := IntermediateWrap(
-        testGenerateAndWrap,
-        pdk,
-        TEST_ALG_SUITE,
-        encCtx
+      testGenerateAndWrap,
+      pdk,
+      TEST_ALG_SUITE,
+      encCtx
     );
     expect intermediateWrapOutput.Success?;
     expect |intermediateWrapOutput.value.wrappedMaterial| == keyLen + tagLen + |WRAPPED_MAT|;
@@ -39,10 +39,10 @@ module TestIntermediateKeyWrapping {
 
     var testUnwrap := new TestUnwrapKeyMaterial();
     var intermediateUnwrapOutput := IntermediateUnwrap(
-        testUnwrap,
-        intermediateWrapOutput.value.wrappedMaterial,
-        TEST_ALG_SUITE,
-        encCtx
+      testUnwrap,
+      intermediateWrapOutput.value.wrappedMaterial,
+      TEST_ALG_SUITE,
+      encCtx
     );
     expect intermediateUnwrapOutput.Success?;
     expect intermediateUnwrapOutput.value.plaintextDataKey == pdk;
@@ -56,9 +56,9 @@ module TestIntermediateKeyWrapping {
 
     var testGenerateAndWrap := new TestGenerateAndWrapKeyMaterial();
     var intermediateWrapOutput := IntermediateGenerateAndWrap(
-        testGenerateAndWrap,
-        TEST_ALG_SUITE,
-        encCtx
+      testGenerateAndWrap,
+      TEST_ALG_SUITE,
+      encCtx
     );
     expect intermediateWrapOutput.Success?;
     expect |intermediateWrapOutput.value.wrappedMaterial| == keyLen + tagLen + |WRAPPED_MAT|;
@@ -66,10 +66,10 @@ module TestIntermediateKeyWrapping {
 
     var testUnwrap := new TestUnwrapKeyMaterial();
     var intermediateUnwrapOutput := IntermediateUnwrap(
-        testUnwrap,
-        intermediateWrapOutput.value.wrappedMaterial,
-        TEST_ALG_SUITE,
-        encCtx
+      testUnwrap,
+      intermediateWrapOutput.value.wrappedMaterial,
+      TEST_ALG_SUITE,
+      encCtx
     );
     expect intermediateUnwrapOutput.Success?;
     expect intermediateWrapOutput.value.plaintextDataKey == intermediateUnwrapOutput.value.plaintextDataKey;
@@ -115,13 +115,13 @@ module TestIntermediateKeyWrapping {
       ensures res.Success? ==> |res.value.plaintextMaterial| == AlgorithmSuites.GetEncryptKeyLength(input.algorithmSuite) as nat
     {
       :- Need(input.algorithmSuite == TEST_ALG_SUITE,
-        Types.AwsCryptographicMaterialProvidersException(
-          message := "Unexpected input on TestGenerateAndWrapMaterial"));
+              Types.AwsCryptographicMaterialProvidersException(
+                message := "Unexpected input on TestGenerateAndWrapMaterial"));
       return Success(MaterialWrapping.GenerateAndWrapOutput(
-        plaintextMaterial := PLAINTEXT_MAT,
-        wrappedMaterial := WRAPPED_MAT,
-        wrapInfo := TestInfo()
-      ));
+                       plaintextMaterial := PLAINTEXT_MAT,
+                       wrappedMaterial := WRAPPED_MAT,
+                       wrapInfo := TestInfo()
+                     ));
     }
   }
 
@@ -162,15 +162,15 @@ module TestIntermediateKeyWrapping {
       ensures res.Success? ==> |res.value.unwrappedMaterial| == AlgorithmSuites.GetEncryptKeyLength(input.algorithmSuite) as nat
     {
       :- Need(input.wrappedMaterial == WRAPPED_MAT,
-        Types.AwsCryptographicMaterialProvidersException(
-          message := "Unexpected input on TestUnwrapMaterial"));
+              Types.AwsCryptographicMaterialProvidersException(
+                message := "Unexpected input on TestUnwrapMaterial"));
       :- Need(input.algorithmSuite == TEST_ALG_SUITE,
-        Types.AwsCryptographicMaterialProvidersException(
-          message := "Unexpected input on TestUnwrapMaterial"));
+              Types.AwsCryptographicMaterialProvidersException(
+                message := "Unexpected input on TestUnwrapMaterial"));
       return Success(MaterialWrapping.UnwrapOutput(
-        unwrappedMaterial := PLAINTEXT_MAT,
-        unwrapInfo := TestInfo()
-      ));
+                       unwrappedMaterial := PLAINTEXT_MAT,
+                       unwrapInfo := TestInfo()
+                     ));
     }
   }
 }

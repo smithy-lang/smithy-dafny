@@ -9,7 +9,7 @@ module CanonicalEncryptionContext {
   import Types = AwsCryptographyMaterialProvidersTypes
   import opened Wrappers
   import Seq
-  
+
   //= aws-encryption-sdk-specification/framework/raw-aes-keyring.md#onencrypt
   //# The keyring MUST attempt to serialize the [encryption materials']
   //# (structures.md#encryption-materials) [encryption context]
@@ -24,19 +24,19 @@ module CanonicalEncryptionContext {
     (res: Result<seq<uint8>, Types.Error>)
   {
     :- Need(|encryptionContext| < UINT16_LIMIT,
-      Types.AwsCryptographicMaterialProvidersException( message := "Encryption Context is too large" ));
+            Types.AwsCryptographicMaterialProvidersException( message := "Encryption Context is too large" ));
     var keys := SetToOrderedSequence(encryptionContext.Keys, UInt.UInt8Less);
 
     if |keys| == 0 then
       Success([])
     else
       var KeyIntoPairBytes := k
-        requires k in encryptionContext
-      =>
-        var v := encryptionContext[k];
-        :- Need(HasUint16Len(k) && HasUint16Len(v),
-          Types.AwsCryptographicMaterialProvidersException( message := "Unable to serialize encryption context"));
-        Success(UInt16ToSeq(|k| as uint16) + k + UInt16ToSeq(|v| as uint16) + v);
+                              requires k in encryptionContext
+                              =>
+                                var v := encryptionContext[k];
+                                :- Need(HasUint16Len(k) && HasUint16Len(v),
+                                        Types.AwsCryptographicMaterialProvidersException( message := "Unable to serialize encryption context"));
+                                Success(UInt16ToSeq(|k| as uint16) + k + UInt16ToSeq(|v| as uint16) + v);
 
       var pairsBytes :- Seq.MapWithResult(KeyIntoPairBytes, keys);
 

@@ -8,14 +8,14 @@ module AwsKmsMrkAreUnique {
   import opened StandardLibrary
   import opened Wrappers
   import opened Seq
-   import opened AwsArnParsing
-  import Types = AwsCryptographyMaterialProvidersTypes 
+  import opened AwsArnParsing
+  import Types = AwsCryptographyMaterialProvidersTypes
 
   //= aws-encryption-sdk-specification/framework/aws-kms/aws-kms-mrk-are-unique.md#implementation
   //= type=implication
   //# The caller MUST provide:
   function method AwsKmsMrkAreUnique(identifiers: seq<AwsKmsIdentifier>)
-  : (result: Outcome<Types.Error>)
+    : (result: Outcome<Types.Error>)
   {
     var mrks := Seq.Filter(IsMultiRegionAwsKmsIdentifier, identifiers);
 
@@ -40,9 +40,9 @@ module AwsKmsMrkAreUnique {
           Fail(Types.AwsCryptographicMaterialProvidersException(message :="Impossible"))
         else
           Fail(Types.AwsCryptographicMaterialProvidersException(
-            message := "Related multi-Region keys: "
-                + Join(duplicates, ",")
-                + "are not allowed.")
+                 message := "Related multi-Region keys: "
+                 + Join(duplicates, ",")
+                 + "are not allowed.")
           )
   }
 
@@ -61,8 +61,8 @@ module AwsKmsMrkAreUnique {
     //# exit successfully.
     ensures
       |Seq.Filter(IsMultiRegionAwsKmsIdentifier, identifiers)| == 0
-    ==>
-      AwsKmsMrkAreUnique(identifiers).Pass?
+      ==>
+        AwsKmsMrkAreUnique(identifiers).Pass?
 
     //= aws-encryption-sdk-specification/framework/aws-kms/aws-kms-mrk-are-unique.md#implementation
     //= type=implication
@@ -73,8 +73,8 @@ module AwsKmsMrkAreUnique {
       var ids := Seq.Map(GetKeyId, mrks);
       && |mrks| > 0
       && Seq.HasNoDuplicates(ids)
-    ==>
-      AwsKmsMrkAreUnique(identifiers).Pass?
+      ==>
+        AwsKmsMrkAreUnique(identifiers).Pass?
 
     //= aws-encryption-sdk-specification/framework/aws-kms/aws-kms-mrk-are-unique.md#implementation
     //# If any duplicate multi-region resource ids exist, this function MUST
@@ -87,8 +87,8 @@ module AwsKmsMrkAreUnique {
       var ids := Seq.Map(GetKeyId, mrks);
       && |mrks| > 0
       && !Seq.HasNoDuplicates(ids)
-    ==>
-      AwsKmsMrkAreUnique(identifiers).Fail?
+      ==>
+        AwsKmsMrkAreUnique(identifiers).Fail?
   {
     var mrks := Seq.Filter(IsMultiRegionAwsKmsIdentifier, identifiers);
     var ids := Seq.Map(GetKeyId, mrks);

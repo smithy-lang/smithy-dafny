@@ -82,22 +82,22 @@ module {:options "-functionSyntax:4"} CompleteVectors {
   const AllRawRSA :=
     set
       key <- rsaPersistentKeyNamesWithoutPublicPrivate,
-      padding: Types.PaddingScheme
+             padding: Types.PaddingScheme
       ::
         var sharedOptions := [
                                ("type", String("raw")),
                                ("encryption-algorithm", String("rsa")),
                                ("provider-id", String("aws-raw-vectors-persistent-" + key)),
                                ("padding-algorithm", String(match padding
-                                                            case PKCS1() => "pkcs1"
-                                                            case _ => "oaep-mgf1"
+                                case PKCS1() => "pkcs1"
+                                case _ => "oaep-mgf1"
                                 )),
                                ("padding-hash", String(match padding
-                                                       case PKCS1() => "sha1"
-                                                       case OAEP_SHA1_MGF1() => "sha1"
-                                                       case OAEP_SHA256_MGF1() => "sha256"
-                                                       case OAEP_SHA384_MGF1() => "sha384"
-                                                       case OAEP_SHA512_MGF1() => "sha512"
+                                case PKCS1() => "sha1"
+                                case OAEP_SHA1_MGF1() => "sha1"
+                                case OAEP_SHA256_MGF1() => "sha256"
+                                case OAEP_SHA384_MGF1() => "sha384"
+                                case OAEP_SHA512_MGF1() => "sha512"
                                 ))
                              ];
         PositiveKeyDescriptionJSON(
@@ -185,11 +185,11 @@ module {:options "-functionSyntax:4"} CompleteVectors {
                      ("type", String("aws-kms-mrk-aware-discovery")),
                      ("default-mrk-region", String("us-west-2")),
                      ("aws-kms-discovery-filter", Object(
-                        [
-                          ("partition", String(filter.value.partition)),
-                          ("account-ids", Array(
-                             Seq.Map(s => String(s), filter.value.accountIds)))
-                        ]))
+                      [
+                      ("partition", String(filter.value.partition)),
+                      ("account-ids", Array(
+                      Seq.Map(s => String(s), filter.value.accountIds)))
+                      ]))
                    ])
           else
             Object([
@@ -221,7 +221,7 @@ module {:options "-functionSyntax:4"} CompleteVectors {
          case RSAES_OAEP_SHA_256() => "RSAES_OAEP_SHA_256";
   const AllKmsRsaKeys := [ "us-west-2-rsa-mrk" ];
   const KmsRsa := "KMS RSA ";
-  
+
   const AllKmsRsa :=
     set
       keyId <- AllKmsRsaKeys,
@@ -246,29 +246,29 @@ module {:options "-functionSyntax:4"} CompleteVectors {
   const AllPositiveKeyringTests :=
     set
       postiveKeyDescription <-
-      AllKMSInfo +
-      AllKmsMrkAware +
-      AllKmsMrkAwareDiscovery +
-      AllRawAES +
-      AllRawRSA +
-      AllHierarchy +
-      AllKmsRsa,
+        AllKMSInfo +
+        AllKmsMrkAware +
+        AllKmsMrkAwareDiscovery +
+        AllRawAES +
+        AllRawRSA +
+        AllHierarchy +
+        AllKmsRsa,
       algorithmSuite <-
-      ESDKAlgorithmSuites +
-      DBEAlgorithmSuites
-      // AwsKmsRsaKeyring cannot be used with an Algorithm Suite with asymmetric signing
-      | !(postiveKeyDescription.description[..|KmsRsa|] == KmsRsa && algorithmSuite.signature.ECDSA?) 
+        ESDKAlgorithmSuites +
+        DBEAlgorithmSuites
+        // AwsKmsRsaKeyring cannot be used with an Algorithm Suite with asymmetric signing
+      | !(postiveKeyDescription.description[..|KmsRsa|] == KmsRsa && algorithmSuite.signature.ECDSA?)
       ::
         var id := HexStrings.ToHexString(algorithmSuite.binaryId);
         Object([
-                ("type", String("positive-keyring")),
-                ("description", String(postiveKeyDescription.description + " " + id)),
-                ("algorithmSuiteId", String(id)),
-                ("encryptionContext", Object([])),
-                ("requiredEncryptionContextKeys", Array([])),
-                ("encryptKeyDescription", postiveKeyDescription.encrypt),
-                ("decryptKeyDescription", postiveKeyDescription.decrypt)
-              ]);
+                 ("type", String("positive-keyring")),
+                 ("description", String(postiveKeyDescription.description + " " + id)),
+                 ("algorithmSuiteId", String(id)),
+                 ("encryptionContext", Object([])),
+                 ("requiredEncryptionContextKeys", Array([])),
+                 ("encryptKeyDescription", postiveKeyDescription.encrypt),
+                 ("decryptKeyDescription", postiveKeyDescription.decrypt)
+               ]);
 
   method WriteStuff() {
 

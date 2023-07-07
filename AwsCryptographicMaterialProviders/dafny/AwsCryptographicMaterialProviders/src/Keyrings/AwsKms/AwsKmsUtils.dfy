@@ -23,15 +23,15 @@ module AwsKmsUtils {
       var stringifyResults: map<UTF8.ValidUTF8Bytes, Result<(string, string), Types.Error>> :=
         map utf8Key | utf8Key in utf8EncCtx.Keys :: utf8Key := StringifyEncryptionContextPair(utf8Key, utf8EncCtx[utf8Key]);
       if exists r | r in stringifyResults.Values :: r.Failure?
-        then Failure(
-          Types.AwsCryptographicMaterialProvidersException( message := "Encryption context contains invalid UTF8")
-        )
+      then Failure(
+             Types.AwsCryptographicMaterialProvidersException( message := "Encryption context contains invalid UTF8")
+           )
       else
         assert forall r | r in stringifyResults.Values :: r.Success?;
         var stringKeysUnique := forall k, k' | k in stringifyResults && k' in stringifyResults
-          :: k != k' ==> stringifyResults[k].value.0 != stringifyResults[k'].value.0;
+                                  :: k != k' ==> stringifyResults[k].value.0 != stringifyResults[k'].value.0;
         if !stringKeysUnique then Failure(Types.AwsCryptographicMaterialProvidersException(
-          message := "Encryption context keys are not unique"))  // this should never happen...
+                                            message := "Encryption context keys are not unique"))  // this should never happen...
         else Success(map r | r in stringifyResults.Values :: r.value.0 := r.value.1)
   }
 
@@ -40,11 +40,11 @@ module AwsKmsUtils {
     ensures (UTF8.Decode(utf8Key).Success? && UTF8.Decode(utf8Value).Success?) <==> res.Success?
   {
     var key :- UTF8
-      .Decode(utf8Key)
-      .MapFailure(WrapStringToError);
+               .Decode(utf8Key)
+               .MapFailure(WrapStringToError);
     var value :- UTF8
-      .Decode(utf8Value)
-      .MapFailure(WrapStringToError);
+                 .Decode(utf8Value)
+                 .MapFailure(WrapStringToError);
 
     Success((key, value))
   }
@@ -58,59 +58,59 @@ module AwsKmsUtils {
   function method ValidateKmsKeyId(keyId: string)
     : (res: Result<(), Types.Error>)
     ensures res.Success? ==>
-      && AwsArnParsing.ParseAwsKmsIdentifier(keyId).Success?
-      && UTF8.IsASCIIString(keyId)
-      && 0 < |keyId| <= AwsArnParsing.MAX_AWS_KMS_IDENTIFIER_LENGTH
+              && AwsArnParsing.ParseAwsKmsIdentifier(keyId).Success?
+              && UTF8.IsASCIIString(keyId)
+              && 0 < |keyId| <= AwsArnParsing.MAX_AWS_KMS_IDENTIFIER_LENGTH
   {
     var _ :- AwsArnParsing.ParseAwsKmsIdentifier(keyId).MapFailure(WrapStringToError);
 
     :- Need(UTF8.IsASCIIString(keyId),
-      Types.AwsCryptographicMaterialProvidersException(
-        message := "Key identifier is not ASCII"));
+            Types.AwsCryptographicMaterialProvidersException(
+              message := "Key identifier is not ASCII"));
     :- Need(0 < |keyId| <= AwsArnParsing.MAX_AWS_KMS_IDENTIFIER_LENGTH,
-      Types.AwsCryptographicMaterialProvidersException(
-        message := "Key identifier is too long"));
+            Types.AwsCryptographicMaterialProvidersException(
+              message := "Key identifier is too long"));
     Success(())
   }
 
   function method GetValidGrantTokens(grantTokens: Option<Types.GrantTokenList>)
     : (res: Result<Types.GrantTokenList, Types.Error>)
     ensures res.Success? ==>
-      var tokens := res.value;
-      && 0 <= |tokens| <= 10
-      && forall token | token in tokens :: 1 <= |token| <= 8192
+              var tokens := res.value;
+              && 0 <= |tokens| <= 10
+              && forall token | token in tokens :: 1 <= |token| <= 8192
     ensures res.Success? && grantTokens.Some? ==> res.value == grantTokens.value
   {
     var tokens: Types.GrantTokenList := grantTokens.UnwrapOr([]);
     :- Need(0 <= |tokens| <= 10,
-      Types.AwsCryptographicMaterialProvidersException(
-        message := "Grant token list can have no more than 10 tokens"));
+            Types.AwsCryptographicMaterialProvidersException(
+              message := "Grant token list can have no more than 10 tokens"));
     :- Need(forall token | token in tokens :: 1 <= |token| <= 8192,
-      Types.AwsCryptographicMaterialProvidersException(
-        message := "Grant token list contains a grant token with invalid length"));
+            Types.AwsCryptographicMaterialProvidersException(
+              message := "Grant token list contains a grant token with invalid length"));
     Success(tokens)
   }
 
   function method ParseKeyNamespaceAndName(keyNamespace: string, keyName: string)
     : (res: Result<(UTF8.ValidUTF8Bytes, UTF8.ValidUTF8Bytes), Types.Error>)
     ensures res.Success? ==>
-      var (namespace, name) := res.value;
-      && |namespace| < UINT16_LIMIT
-      && |name| < UINT16_LIMIT
+              var (namespace, name) := res.value;
+              && |namespace| < UINT16_LIMIT
+              && |name| < UINT16_LIMIT
   {
     var namespace :- UTF8.Encode(keyNamespace)
-      .MapFailure(e => Types.AwsCryptographicMaterialProvidersException(
-        message := "Key namespace could not be UTF8-encoded" + e ));
+                     .MapFailure(e => Types.AwsCryptographicMaterialProvidersException(
+                                     message := "Key namespace could not be UTF8-encoded" + e ));
     :- Need(|namespace| < UINT16_LIMIT,
-      Types.AwsCryptographicMaterialProvidersException(
-        message := "Key namespace too long"));
+            Types.AwsCryptographicMaterialProvidersException(
+              message := "Key namespace too long"));
 
     var name :- UTF8.Encode(keyName)
-      .MapFailure(e => Types.AwsCryptographicMaterialProvidersException(
-        message := "Key name could not be UTF8-encoded" + e ));
+                .MapFailure(e => Types.AwsCryptographicMaterialProvidersException(
+                                message := "Key name could not be UTF8-encoded" + e ));
     :- Need(|name| < UINT16_LIMIT,
-      Types.AwsCryptographicMaterialProvidersException(
-        message := "Key name too long"));
+            Types.AwsCryptographicMaterialProvidersException(
+              message := "Key name too long"));
 
     Success((namespace, name))
   }
@@ -118,19 +118,19 @@ module AwsKmsUtils {
   function method ValidateDiscoveryFilter(filter: Types.DiscoveryFilter)
     : (res: Result<(), Types.Error>)
     ensures res.Success? ==>
-      && |filter.accountIds| > 0
-      && (forall accountId | accountId in filter.accountIds :: |accountId| > 0)
-      && |filter.partition| > 0
+              && |filter.accountIds| > 0
+              && (forall accountId | accountId in filter.accountIds :: |accountId| > 0)
+              && |filter.partition| > 0
   {
     :- Need(|filter.accountIds| > 0,
-      Types.AwsCryptographicMaterialProvidersException(
-        message := "Discovery filter must have at least one account ID"));
+            Types.AwsCryptographicMaterialProvidersException(
+              message := "Discovery filter must have at least one account ID"));
     :- Need(forall accountId | accountId in filter.accountIds :: |accountId| > 0,
-      Types.AwsCryptographicMaterialProvidersException(
-        message := "Discovery filter account IDs cannot be blank"));
+            Types.AwsCryptographicMaterialProvidersException(
+              message := "Discovery filter account IDs cannot be blank"));
     :- Need(|filter.partition| > 0,
-      Types.AwsCryptographicMaterialProvidersException(
-        message := "Discovery filter partition cannot be blank"));
+            Types.AwsCryptographicMaterialProvidersException(
+              message := "Discovery filter partition cannot be blank"));
     Success(())
   }
 
@@ -145,7 +145,7 @@ module AwsKmsUtils {
     constructor(
       awsKmsKey: AwsArnParsing.AwsKmsIdentifier,
       providerId: UTF8.ValidUTF8Bytes
-    ) 
+    )
       ensures
         && this.awsKmsKey == awsKmsKey
         && this.providerId == providerId
@@ -160,8 +160,8 @@ module AwsKmsUtils {
     )
     {
       && (
-          && res.Success?
-          && res.value
+        && res.Success?
+        && res.value
         ==>
           edk.keyProviderId == providerId)
     }
@@ -180,12 +180,12 @@ module AwsKmsUtils {
         // If an `aws-kms` encrypted data key's keyProviderInfo is not UTF8
         // this is an error, not simply an EDK to filter out.
         return Failure(
-          Types.AwsCryptographicMaterialProvidersException( message := "Invalid AWS KMS encoding, provider info is not UTF8."));
+            Types.AwsCryptographicMaterialProvidersException( message := "Invalid AWS KMS encoding, provider info is not UTF8."));
       }
 
       var keyId :- UTF8
-        .Decode(edk.keyProviderInfo)
-        .MapFailure(WrapStringToError);
+      .Decode(edk.keyProviderInfo)
+      .MapFailure(WrapStringToError);
       //= aws-encryption-sdk-specification/framework/aws-kms/aws-kms-mrk-keyring.md#ondecrypt
       //# -  The provider info MUST be a [valid AWS KMS ARN](aws-kms-key-
       //# arn.md#a-valid-aws-kms-arn) with a resource type of `key` or
@@ -197,9 +197,9 @@ module AwsKmsUtils {
       //# for-decrypt.md#implementation) called with the configured AWS KMS
       //# key identifier and the provider info MUST return `true`.
       return Success(AwsKmsMrkMatchForDecrypt(
-        awsKmsKey,
-        AwsArnParsing.AwsKmsArnIdentifier(arn)
-      ));
+                       awsKmsKey,
+                       AwsArnParsing.AwsKmsArnIdentifier(arn)
+                     ));
     }
   }
 

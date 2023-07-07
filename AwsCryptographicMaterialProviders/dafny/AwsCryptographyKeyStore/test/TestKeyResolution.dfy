@@ -20,7 +20,7 @@ module TestKeyResolution {
   import opened AwsKmsUtils
   import opened CreateKeys
   import opened KeyResolution
-  
+
   const branchKeyStoreName := "KeyStoreTestTable";
   const logicalKeyStoreName := branchKeyStoreName;
   // THESE ARE TESTING RESOURCES DO NOT USE IN A PRODUCTION ENVIRONMENT
@@ -30,7 +30,7 @@ module TestKeyResolution {
     var kmsClient :- expect KMS.KMSClient();
     var ddbClient :- expect DDB.DynamoDBClient();
     var kmsConfig := Types.KMSConfiguration.kmsKeyArn(keyArn);
-    
+
     var keyStoreConfig := Types.KeyStoreConfig(
       id := None,
       kmsConfiguration := kmsConfig,
@@ -47,18 +47,18 @@ module TestKeyResolution {
     // We will create a use this new key per run to avoid tripping up
     // when running in different runtimes across different hosts
     var branchKeyIdentifier :- expect keyStore.CreateKey(Types.CreateKeyInput());
-    
+
     WriteActiveActiveBranchKey(branchKeyIdentifier.branchKeyIdentifier, kmsClient, ddbClient);
 
     // Resolve active key to latest key based on lexicographically timestamp value
     var resolveActiveKeyResult := keyStore.BranchKeyStatusResolution(Types.BranchKeyStatusResolutionInput(
-      branchKeyIdentifier := branchKeyIdentifier.branchKeyIdentifier
-    ));
+                                                                       branchKeyIdentifier := branchKeyIdentifier.branchKeyIdentifier
+                                                                     ));
 
     expect resolveActiveKeyResult.Success?;
   }
 
-  method WriteActiveActiveBranchKey(branchKeyIdentifer: string, kmsClient: KMSTypes.IKMSClient, ddbClient: DDBTypes.IDynamoDBClient) 
+  method WriteActiveActiveBranchKey(branchKeyIdentifer: string, kmsClient: KMSTypes.IKMSClient, ddbClient: DDBTypes.IDynamoDBClient)
     requires kmsClient.ValidState() && ddbClient.ValidState()
     modifies ddbClient.Modifies, kmsClient.Modifies
     ensures ddbClient.ValidState() && kmsClient.ValidState()
@@ -67,7 +67,7 @@ module TestKeyResolution {
     // DO NOT use the KeyStore methods this way
     // We are doing this in order to continuously test that the APIs work
     // as spec'd out.
-    
+
     // In order to be able to test this again in ci we will deliberately
     // add another active key under this branch key id
     var timestamp := Time.GetCurrentTimeStamp();

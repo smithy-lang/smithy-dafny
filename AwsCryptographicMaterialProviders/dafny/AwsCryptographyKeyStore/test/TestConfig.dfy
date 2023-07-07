@@ -31,7 +31,7 @@ module TestConfig {
       ddbClient := Some(ddbClient),
       kmsClient := Some(kmsClient)
     );
-    
+
     var keyStore := KeyStore.KeyStore(keyStoreConfig);
     expect keyStore.Failure?;
     expect keyStore.error == Types.KeyStoreException(message := "Invalid AWS KMS Key Arn");
@@ -41,7 +41,7 @@ module TestConfig {
     var kmsClient :- expect KMS.KMSClient();
     var ddbClient :- expect DDB.DynamoDBClient();
     var kmsConfig := Types.KMSConfiguration.kmsKeyArn(keyArn);
-    
+
     var keyStoreConfig := Types.KeyStoreConfig(
       id := None,
       kmsConfiguration := kmsConfig,
@@ -51,7 +51,7 @@ module TestConfig {
       ddbClient := Some(ddbClient),
       kmsClient := Some(kmsClient)
     );
-    
+
     var keyStore := KeyStore.KeyStore(keyStoreConfig);
     expect keyStore.Success?;
   }
@@ -60,7 +60,7 @@ module TestConfig {
     var kmsClient :- expect KMS.KMSClient();
     var ddbClient :- expect DDB.DynamoDBClient();
     var kmsConfig := Types.KMSConfiguration.kmsKeyArn(keyArn);
-    
+
     // Test with no kms client supplied
     var keyStoreConfig := Types.KeyStoreConfig(
       id := None,
@@ -86,7 +86,7 @@ module TestConfig {
     );
     keyStore := KeyStore.KeyStore(keyStoreConfig);
     expect keyStore.Success?;
-    
+
     // Test with no clients supplied
     keyStoreConfig := Types.KeyStoreConfig(
       id := None,

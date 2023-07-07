@@ -27,10 +27,10 @@ module {:options "-functionSyntax:4"} {:extern "HMAC"} HMAC {
     static method {:extern} Build(digest: Types.DigestAlgorithm)
       returns (output: Result<HMac, Types.Error>)
       ensures output.Success?
-      ==>
-        && output.value.GetDigest() == digest
-        && output.value.GetInputSoFar() == []
-        && fresh(output.value)
+              ==>
+                && output.value.GetDigest() == digest
+                && output.value.GetInputSoFar() == []
+                && fresh(output.value)
 
     method {:extern "Init"} Init(key: seq<uint8>)
       requires 0 < |key|

@@ -10,7 +10,7 @@ module CreateKeyStoreTable {
   import Types = AwsCryptographyKeyStoreTypes
   import DDB = ComAmazonawsDynamodbTypes
 
-  // KeyStore Definitions 
+  // KeyStore Definitions
   const attrDef: DDB.AttributeDefinitions := [
     DDB.AttributeDefinition(
       AttributeName := "branch-key-id",
@@ -31,7 +31,7 @@ module CreateKeyStoreTable {
       KeyType := DDB.KeyType.RANGE)
   ];
 
-  // GSI 
+  // GSI
   const keySchemaGsi: DDB.KeySchema := [
     DDB.KeySchemaElement(
       AttributeName := "branch-key-id",
@@ -41,22 +41,22 @@ module CreateKeyStoreTable {
       KeyType := DDB.KeyType.RANGE)
   ];
   const gsiProjection: DDB.Projection := DDB.Projection(
-    ProjectionType := Some(DDB.ProjectionType.ALL),
-    NonKeyAttributes := None
-  ); 
+                                           ProjectionType := Some(DDB.ProjectionType.ALL),
+                                           NonKeyAttributes := None
+                                         );
   const GSI_NAME := "Active-Keys";
 
   type keyStoreDescription = t: DDB.TableDescription | keyStoreHasExpectedConstruction?(t) witness *
   predicate method keyStoreHasExpectedConstruction?(t: DDB.TableDescription) {
     && t.AttributeDefinitions.Some? && t.KeySchema.Some? && t.GlobalSecondaryIndexes.Some? && t.TableName.Some? && t.TableArn.Some?
-    //= aws-encryption-sdk-specification/framework/branch-key-store.md#keyschema
-    //= type=implication
-    //# The following KeySchema MUST be configured on the table:
+       //= aws-encryption-sdk-specification/framework/branch-key-store.md#keyschema
+       //= type=implication
+       //# The following KeySchema MUST be configured on the table:
     && ToSet(t.AttributeDefinitions.value) >= ToSet(attrDef)
     && ToSet(t.KeySchema.value) >= ToSet(keySchema)
     && |t.GlobalSecondaryIndexes.value| >= 1
     && var gsiList := t.GlobalSecondaryIndexes.value;
-    && exists gsi | gsi in gsiList :: 
+    && exists gsi | gsi in gsiList ::
       //= aws-encryption-sdk-specification/framework/branch-key-store.md#globalsecondary-indexes
       //= type=implication
       //# The table MUST contain a GlobalSecondaryIndex defined as follows:
@@ -70,7 +70,7 @@ module CreateKeyStoreTable {
     returns (res: Result<string, Types.Error>)
     requires ddbClient.ValidState()
     requires DDB.IsValid_TableName(tableName)
-    requires DDB.IsValid_IndexName(GSI_NAME) 
+    requires DDB.IsValid_IndexName(GSI_NAME)
     modifies ddbClient.Modifies
     ensures ddbClient.ValidState()
   {
@@ -152,8 +152,8 @@ module CreateKeyStoreTable {
       );
       res := Success(tableDescription.TableArn.value);
     }
-  } 
-  
+  }
+
   function method E(s : string) : Types.Error {
     Types.KeyStoreException(message := s)
   }

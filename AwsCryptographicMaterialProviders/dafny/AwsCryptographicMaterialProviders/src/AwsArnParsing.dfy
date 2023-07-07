@@ -81,9 +81,9 @@ module AwsArnParsing {
   {
     && resource.Valid()
     && (
-      || resource.resourceType == "key"
-      || resource.resourceType == "alias"
-      )
+         || resource.resourceType == "key"
+         || resource.resourceType == "alias"
+       )
   }
 
   predicate method ValidAwsKmsArn(arn: AwsArn)
@@ -142,7 +142,7 @@ module AwsArnParsing {
 
   predicate method ValidAmazonDynamodbResource(resource: AwsResource)
   {
-    // There are other valid resources aside from table in dynamodb 
+    // There are other valid resources aside from table in dynamodb
     // but for now we only care about table:
     // https://docs.aws.amazon.com/service-authorization/latest/reference/list_amazondynamodb.html#amazondynamodb-resources-for-iam-policies
     && resource.Valid()
@@ -158,10 +158,10 @@ module AwsArnParsing {
 
   type AmazonDynamodbTableArn = a : AwsArn | ValidAmazonDynamodbArn(a)
     witness *
-  
+
   type AmazonDynamodbResource = r : AwsResource | ValidAmazonDynamodbResource(r)
     witness *
-  
+
   datatype AmazonDynamodbTableName = AmazonDynamodbTableArn(a: AmazonDynamodbTableArn)
   {
     function method GetTableName(): string
@@ -175,9 +175,9 @@ module AwsArnParsing {
   function method ParseAmazonDynamodbResources(identifier: string): (result: Result<AmazonDynamodbResource, string>)
   {
     var info := SplitOnce?(identifier, '/');
-    
+
     :- Need(info.Some?, "Malformed resource: " + identifier);
-    
+
     var resourceType := info.value.0;
     var value := info.value.1;
 
@@ -197,46 +197,46 @@ module AwsArnParsing {
     //# The resource section MUST be non-empty and MUST be split by a
     //# single `/` any additional `/` are included in the resource id
     ensures ParseAwsKmsResources(identifier).Success? ==>
-      var info := Split(identifier, '/');
-      var r := ParseAwsKmsResources(identifier);
-      && |info| > 1
-      && Join([r.value.resourceType, r.value.value], "/") == identifier
+              var info := Split(identifier, '/');
+              var r := ParseAwsKmsResources(identifier);
+              && |info| > 1
+              && Join([r.value.resourceType, r.value.value], "/") == identifier
     //= aws-encryption-sdk-specification/framework/aws-kms/aws-kms-key-arn.md#a-valid-aws-kms-arn
     //= type=implication
     //# The resource type MUST be either `alias` or `key`
     ensures ParseAwsKmsResources(identifier).Success? ==>
-      var resourceType := Split(identifier, '/')[0];
-      "key" == resourceType || "alias" == resourceType
+              var resourceType := Split(identifier, '/')[0];
+              "key" == resourceType || "alias" == resourceType
     //= aws-encryption-sdk-specification/framework/aws-kms/aws-kms-key-arn.md#a-valid-aws-kms-arn
     //= type=implication
     //# The resource id MUST be a non-empty string
     ensures ParseAwsKmsResources(identifier).Success? ==>
-      var info := Split(identifier, '/');
-      |Join(info[1..], "/")| > 0
+              var info := Split(identifier, '/');
+              |Join(info[1..], "/")| > 0
   {}
 
   lemma ParseAmazonDynamodbResourcesCorrect(identifier: string)
     ensures ParseAmazonDynamodbResources(identifier).Success? ==>
-      var info := SplitOnce?(identifier, '/');
-      var r := ParseAmazonDynamodbResources(identifier);
-      &&  info.Some?
-      && Join([r.value.resourceType, r.value.value], "/") == identifier
+              var info := SplitOnce?(identifier, '/');
+              var r := ParseAmazonDynamodbResources(identifier);
+              &&  info.Some?
+              && Join([r.value.resourceType, r.value.value], "/") == identifier
     ensures ParseAmazonDynamodbResources(identifier).Success? ==>
-      var resourceType := SplitOnce?(identifier, '/').value.0;
-      resourceType == "table"
+              var resourceType := SplitOnce?(identifier, '/').value.0;
+              resourceType == "table"
     ensures ParseAmazonDynamodbResources(identifier).Success? ==>
-      var info := SplitOnce?(identifier, '/');
-      DDB.IsValid_TableName(info.value.1)
+              var info := SplitOnce?(identifier, '/');
+              DDB.IsValid_TableName(info.value.1)
   {}
 
   function method ParseAwsKmsArn(identifier: string): (result: Result<AwsKmsArn, string>)
     ensures result.Success? ==>
-      && "arn" <= identifier
-      && |Split(identifier, ':')| == 6
-      && |Split(identifier, ':')[1]| > 0
-      && Split(identifier, ':')[2] == "kms"
-      && |Split(identifier, ':')[3]| > 0
-      && |Split(identifier, ':')[4]| > 0
+              && "arn" <= identifier
+              && |Split(identifier, ':')| == 6
+              && |Split(identifier, ':')[1]| > 0
+              && Split(identifier, ':')[2] == "kms"
+              && |Split(identifier, ':')[3]| > 0
+              && |Split(identifier, ':')[4]| > 0
   {
     var components := Split(identifier, ':');
 
@@ -245,13 +245,13 @@ module AwsArnParsing {
     var resource :- ParseAwsKmsResources(components[5]);
 
     var arn := AwsArn(
-      components[0],
-      components[1],
-      components[2],
-      components[3],
-      components[4],
-      resource
-    );
+                 components[0],
+                 components[1],
+                 components[2],
+                 components[3],
+                 components[4],
+                 resource
+               );
 
     :- Need(ValidAwsKmsArn(arn), "Malformed Arn:" + identifier);
 
@@ -260,12 +260,12 @@ module AwsArnParsing {
 
   function method ParseAmazonDynamodbTableArn(identifier: string): (result: Result<AmazonDynamodbTableArn, string>)
     ensures result.Success? ==>
-      && "arn" <= identifier
-      && |Split(identifier, ':')| == 6
-      && |Split(identifier, ':')[1]| > 0
-      && Split(identifier, ':')[2] == "dynamodb"
-      && |Split(identifier, ':')[3]| > 0
-      && |Split(identifier, ':')[4]| > 0
+              && "arn" <= identifier
+              && |Split(identifier, ':')| == 6
+              && |Split(identifier, ':')[1]| > 0
+              && Split(identifier, ':')[2] == "dynamodb"
+              && |Split(identifier, ':')[3]| > 0
+              && |Split(identifier, ':')[4]| > 0
   {
     var components := Split(identifier, ':');
 
@@ -274,13 +274,13 @@ module AwsArnParsing {
     var resource :- ParseAmazonDynamodbResources(components[5]);
 
     var arn := AwsArn(
-      components[0],
-      components[1],
-      components[2],
-      components[3],
-      components[4],
-      resource
-    );
+                 components[0],
+                 components[1],
+                 components[2],
+                 components[3],
+                 components[4],
+                 resource
+               );
 
     :- Need(ValidAmazonDynamodbArn(arn), "Malformed Arn:" + identifier);
 
@@ -319,9 +319,9 @@ module AwsArnParsing {
   lemma ParseAmazonDynamodbTableArnCorrect(identifier: string)
     ensures ParseAmazonDynamodbTableArn(identifier).Success? ==> "arn" <= identifier
     ensures ParseAmazonDynamodbTableArn(identifier).Success? ==> |Split(identifier, ':')| == 6
-    ensures ParseAmazonDynamodbTableArn(identifier).Success? ==> |Split(identifier, ':')[1]| > 0 
+    ensures ParseAmazonDynamodbTableArn(identifier).Success? ==> |Split(identifier, ':')[1]| > 0
     ensures ParseAmazonDynamodbTableArn(identifier).Success? ==>  Split(identifier, ':')[2] == "dynamodb"
-    ensures ParseAmazonDynamodbTableArn(identifier).Success? ==> |Split(identifier, ':')[3]| > 0 
+    ensures ParseAmazonDynamodbTableArn(identifier).Success? ==> |Split(identifier, ':')[3]| > 0
     ensures ParseAmazonDynamodbTableArn(identifier).Success? ==> |Split(identifier, ':')[4]| > 0
   {}
 
@@ -363,15 +363,15 @@ module AwsArnParsing {
     //# If resource type is “key” and resource ID starts with “mrk-“,
     //# this is a AWS KMS multi-Region key ARN and MUST return true.
     ensures !IsMultiRegionAwsKmsArn(arn) <==
-        (&& arn.resource.resourceType == "key"
-        && !("mrk-" <= arn.resource.value))
+            (&& arn.resource.resourceType == "key"
+             && !("mrk-" <= arn.resource.value))
     //= aws-encryption-sdk-specification/framework/aws-kms/aws-kms-key-arn.md#identifying-an-an-aws-kms-multi-region-arn
     //= type=implication
     //# If resource type is “key” and resource ID does not start with “mrk-“,
     //# this is a (single-region) AWS KMS key ARN and MUST return false.
     ensures IsMultiRegionAwsKmsArn(arn) <==
-      (&& arn.resource.resourceType == "key"
-      && "mrk-" <= arn.resource.value)
+            (&& arn.resource.resourceType == "key"
+             && "mrk-" <= arn.resource.value)
   {
   }
 
@@ -395,43 +395,43 @@ module AwsArnParsing {
     //# this MUST return the output of [identifying an an AWS KMS multi-Region ARN](aws-kms-key-arn.md#identifying-an-an-aws-kms-multi-region-arn)
     //# called with this input.
     ensures "arn:" <= s && ParseAwsKmsArn(s).Success?
-      ==>
-        var arn := ParseAwsKmsArn(s);
-        var arnIdentifier := AwsKmsArnIdentifier(arn.value);
-        IsMultiRegionAwsKmsIdentifier(arnIdentifier) == IsMultiRegionAwsKmsArn(arn.value)
+            ==>
+              var arn := ParseAwsKmsArn(s);
+              var arnIdentifier := AwsKmsArnIdentifier(arn.value);
+              IsMultiRegionAwsKmsIdentifier(arnIdentifier) == IsMultiRegionAwsKmsArn(arn.value)
 
     //= aws-encryption-sdk-specification/framework/aws-kms/aws-kms-key-arn.md#identifying-an-an-aws-kms-multi-region-identifier
     //= type=implication
     //# If the input starts with “alias/“,
     //# this an AWS KMS alias and not a multi-Region key id and MUST return false.
     ensures "alias/" <= s && ParseAwsKmsResources(s).Success?
-      ==>
-        var resource := ParseAwsKmsResources(s);
-        var resourceIdentifier := AwsKmsRawResourceIdentifier(resource.value);
-        !IsMultiRegionAwsKmsIdentifier(resourceIdentifier)
+            ==>
+              var resource := ParseAwsKmsResources(s);
+              var resourceIdentifier := AwsKmsRawResourceIdentifier(resource.value);
+              !IsMultiRegionAwsKmsIdentifier(resourceIdentifier)
     //= aws-encryption-sdk-specification/framework/aws-kms/aws-kms-key-arn.md#identifying-an-an-aws-kms-multi-region-identifier
     //= type=implication
     //# If the input starts with “mrk-“,
     //# this is a multi-Region key id and MUST return true.
     ensures "mrk-" <= s && ParseAwsKmsResources(s).Success?
-      ==>
-        var resource := ParseAwsKmsResources(s);
-        var resourceIdentifier := AwsKmsRawResourceIdentifier(resource.value);
-        IsMultiRegionAwsKmsIdentifier(resourceIdentifier)
+            ==>
+              var resource := ParseAwsKmsResources(s);
+              var resourceIdentifier := AwsKmsRawResourceIdentifier(resource.value);
+              IsMultiRegionAwsKmsIdentifier(resourceIdentifier)
     //= aws-encryption-sdk-specification/framework/aws-kms/aws-kms-key-arn.md#identifying-an-an-aws-kms-multi-region-identifier
     //= type=implication
     //# If
     //# the input does not start with any of the above, this is not a multi-
     //# Region key id and MUST return false.
     ensures (
-        && !("arn:" <= s )
-        && !("alias/" <= s )
-        && !("mrk-" <= s )
-        && ParseAwsKmsIdentifier(s).Success?
-      )
-      ==>
-        var resourceIdentifier := ParseAwsKmsIdentifier(s);
-        !IsMultiRegionAwsKmsIdentifier(resourceIdentifier.value)
+              && !("arn:" <= s )
+              && !("alias/" <= s )
+              && !("mrk-" <= s )
+              && ParseAwsKmsIdentifier(s).Success?
+            )
+            ==>
+              var resourceIdentifier := ParseAwsKmsIdentifier(s);
+              !IsMultiRegionAwsKmsIdentifier(resourceIdentifier.value)
   {}
 
   predicate method IsMultiRegionAwsKmsResource(resource: AwsKmsResource)
@@ -459,7 +459,7 @@ module AwsArnParsing {
   }
 
   type AwsKmsIdentifierString = s: string |
-    IsAwsKmsIdentifierString(s).Success?
+      IsAwsKmsIdentifierString(s).Success?
     witness *
 
   function method Error(s : string) : Types.Error {
@@ -467,20 +467,20 @@ module AwsArnParsing {
   }
 
   function method ValidateDdbTableArn(tableArn: string)
-      : (res: Result<(), Types.Error>)
-      ensures res.Success? ==>
-        && ParseAmazonDynamodbTableArn(tableArn).Success?
-        && UTF8.IsASCIIString(tableArn)
-        && DDB.IsValid_TableName(ParseAmazonDynamodbTableName(tableArn).value)
-    {
-      var _ :- ParseAmazonDynamodbTableName(tableArn).MapFailure(Error);
+    : (res: Result<(), Types.Error>)
+    ensures res.Success? ==>
+              && ParseAmazonDynamodbTableArn(tableArn).Success?
+              && UTF8.IsASCIIString(tableArn)
+              && DDB.IsValid_TableName(ParseAmazonDynamodbTableName(tableArn).value)
+  {
+    var _ :- ParseAmazonDynamodbTableName(tableArn).MapFailure(Error);
 
-      :- Need(UTF8.IsASCIIString(tableArn),
-        Types.AwsCryptographicMaterialProvidersException(
-          message := "Table Arn is not ASCII"));
-      :- Need(DDB.IsValid_TableName(ParseAmazonDynamodbTableName(tableArn).value),
-        Types.AwsCryptographicMaterialProvidersException(
-          message := "Table Name is too long"));
-      Success(())
-    }
+    :- Need(UTF8.IsASCIIString(tableArn),
+            Types.AwsCryptographicMaterialProvidersException(
+              message := "Table Arn is not ASCII"));
+    :- Need(DDB.IsValid_TableName(ParseAmazonDynamodbTableName(tableArn).value),
+            Types.AwsCryptographicMaterialProvidersException(
+              message := "Table Name is too long"));
+    Success(())
+  }
 }

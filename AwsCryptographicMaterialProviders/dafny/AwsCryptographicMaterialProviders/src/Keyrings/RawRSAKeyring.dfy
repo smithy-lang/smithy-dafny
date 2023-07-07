@@ -136,55 +136,55 @@ module RawRSAKeyring {
       ensures unchanged(History)
       ensures
         output.Success?
-      ==>
-        && Materials.ValidEncryptionMaterialsTransition(
-          input.materials,
-          output.value.materials
-        )
+        ==>
+          && Materials.ValidEncryptionMaterialsTransition(
+            input.materials,
+            output.value.materials
+          )
 
-     //= aws-encryption-sdk-specification/framework/raw-rsa-keyring.md#onencrypt
-     //= type=implication
-     //# OnEncrypt MUST fail if this keyring does not have a specified [public
-     //# key](#public-key).
-     ensures
-       this.publicKey.None? || |this.publicKey.Extract()| == 0
-     ==>
-       output.Failure?
+      //= aws-encryption-sdk-specification/framework/raw-rsa-keyring.md#onencrypt
+      //= type=implication
+      //# OnEncrypt MUST fail if this keyring does not have a specified [public
+      //# key](#public-key).
+      ensures
+        this.publicKey.None? || |this.publicKey.Extract()| == 0
+        ==>
+          output.Failure?
 
-     //= aws-encryption-sdk-specification/framework/raw-rsa-keyring.md#onencrypt
-     //= type=implication
-     //# If the [encryption materials](structures.md#encryption-materials) do
-     //# not contain a plaintext data key, OnEncrypt MUST generate a random
-     //# plaintext data key and set it on the [encryption materials]
-     //# (structures.md#encryption-materials).
-     ensures
-       && input.materials.plaintextDataKey.None?
-       && output.Success?
-     ==>
-       output.value.materials.plaintextDataKey.Some?
+      //= aws-encryption-sdk-specification/framework/raw-rsa-keyring.md#onencrypt
+      //= type=implication
+      //# If the [encryption materials](structures.md#encryption-materials) do
+      //# not contain a plaintext data key, OnEncrypt MUST generate a random
+      //# plaintext data key and set it on the [encryption materials]
+      //# (structures.md#encryption-materials).
+      ensures
+        && input.materials.plaintextDataKey.None?
+        && output.Success?
+        ==>
+          output.value.materials.plaintextDataKey.Some?
 
-     //= aws-encryption-sdk-specification/framework/raw-rsa-keyring.md#onencrypt
-     //= type=implication
-     //# If RSA encryption was successful, OnEncrypt MUST return the input
-     //# [encryption materials](structures.md#encryption-materials), modified
-     //# in the following ways:
-     //# - The encrypted data key list has a new encrypted data key added,
-     //#   constructed as follows:
-     ensures
-       && output.Success?
-     ==>
-       |output.value.materials.encryptedDataKeys| == |input.materials.encryptedDataKeys| + 1
+      //= aws-encryption-sdk-specification/framework/raw-rsa-keyring.md#onencrypt
+      //= type=implication
+      //# If RSA encryption was successful, OnEncrypt MUST return the input
+      //# [encryption materials](structures.md#encryption-materials), modified
+      //# in the following ways:
+      //# - The encrypted data key list has a new encrypted data key added,
+      //#   constructed as follows:
+      ensures
+        && output.Success?
+        ==>
+          |output.value.materials.encryptedDataKeys| == |input.materials.encryptedDataKeys| + 1
 
-     //= aws-encryption-sdk-specification/framework/raw-rsa-keyring.md#onencrypt
-     //= type=implication
-     //# The keyring MUST NOT derive a public key from a
-     //# specified [private key](#private-key).
-     // NOTE: Attempting to proove this by stating that a Keyring
-     // without a public key but with a private key will not encrypt
-     ensures
-       this.privateKey.Some? && this.publicKey.None?
-     ==>
-       output.Failure?
+      //= aws-encryption-sdk-specification/framework/raw-rsa-keyring.md#onencrypt
+      //= type=implication
+      //# The keyring MUST NOT derive a public key from a
+      //# specified [private key](#private-key).
+      // NOTE: Attempting to proove this by stating that a Keyring
+      // without a public key but with a private key will not encrypt
+      ensures
+        this.privateKey.Some? && this.publicKey.None?
+        ==>
+          output.Failure?
     {
       :- Need(
         this.publicKey.Some? && |this.publicKey.Extract()| > 0,
@@ -246,8 +246,8 @@ module RawRSAKeyring {
       if (wrapOutput.GenerateAndWrapEdkMaterialOutput?) {
         var result :- Materials.EncryptionMaterialAddDataKey(materials, wrapOutput.plaintextDataKey, [edk], symmetricSigningKeyList);
         return Success(Types.OnEncryptOutput(
-          materials := result
-        ));
+                         materials := result
+                       ));
       } else if (wrapOutput.WrapOnlyEdkMaterialOutput?) {
         // wrapped existing pdk. Add new edk to materials.
         var result :- Materials.EncryptionMaterialAddEncryptedDataKeys(
@@ -256,8 +256,8 @@ module RawRSAKeyring {
           symmetricSigningKeyList
         );
         return Success(Types.OnEncryptOutput(
-          materials := result
-        ));
+                         materials := result
+                       ));
       }
     }
 
@@ -277,11 +277,11 @@ module RawRSAKeyring {
       ensures OnDecryptEnsuresPublicly(input, output)
       ensures unchanged(History)
       ensures output.Success?
-      ==>
-        && Materials.DecryptionMaterialsTransitionIsValid(
-          input.materials,
-          output.value.materials
-        )
+              ==>
+                && Materials.DecryptionMaterialsTransitionIsValid(
+                  input.materials,
+                  output.value.materials
+                )
 
       //= aws-encryption-sdk-specification/framework/raw-rsa-keyring.md#ondecrypt
       //= type=implication
@@ -289,8 +289,8 @@ module RawRSAKeyring {
       //# key](#private-key).
       ensures
         privateKey.None? || |privateKey.Extract()| == 0
-      ==>
-        output.Failure?
+        ==>
+          output.Failure?
 
       //= aws-encryption-sdk-specification/framework/raw-rsa-keyring.md#ondecrypt
       //= type=implication
@@ -299,8 +299,8 @@ module RawRSAKeyring {
       //# (structures.md#decryption-materials).
       ensures
         input.materials.plaintextDataKey.Some?
-      ==>
-        output.Failure?
+        ==>
+          output.Failure?
     {
       :- Need(
         this.privateKey.Some? && |this.privateKey.Extract()| > 0,
@@ -326,8 +326,8 @@ module RawRSAKeyring {
 
           var unwrap := new RsaUnwrapKeyMaterial(
             privateKey.Extract(),
-            paddingScheme,
-            cryptoPrimitives
+                               paddingScheme,
+                               cryptoPrimitives
           );
           var unwrapOutput := EdkWrapping.UnwrapEdkMaterial(
             edk.ciphertext,
@@ -354,9 +354,9 @@ module RawRSAKeyring {
           }
         } else {
           errors := errors + [Types.AwsCryptographicMaterialProvidersException( message :=
-            "EncryptedDataKey "
-            + Base10Int2String(i)
-            + " did not match RSAKeyring. ")
+                                                                                  "EncryptedDataKey "
+                                                                                  + Base10Int2String(i)
+                                                                                  + " did not match RSAKeyring. ")
           ];
         }
       }
@@ -364,7 +364,7 @@ module RawRSAKeyring {
       //# If no decryption succeeds, the keyring MUST fail and MUST NOT modify
       //# the [decryption materials](structures.md#decryption-materials).
       return Failure(Types.CollectionOfErrors(list := errors,
-      message := "Raw RSA Key was unable to decrypt any encrypted data key. The list of encountered Exceptions is avaible via `list`."));
+                                              message := "Raw RSA Key was unable to decrypt any encrypted data key. The list of encountered Exceptions is avaible via `list`."));
     }
 
     predicate method ShouldDecryptEDK(edk: Types.EncryptedDataKey)
@@ -389,8 +389,8 @@ module RawRSAKeyring {
         && edk.keyProviderId == this.keyNamespace
 
         && |edk.ciphertext| > 0
-      ==>
-        true
+        ==>
+          true
     {
       && UTF8.ValidUTF8Seq(edk.keyProviderInfo)
       && edk.keyProviderInfo == this.keyName
@@ -435,7 +435,7 @@ module RawRSAKeyring {
       && cryptoPrimitives.ValidState()
       && Modifies == cryptoPrimitives.Modifies
     }
-    
+
     predicate Ensures(
       input: MaterialWrapping.GenerateAndWrapInput,
       res: Result<MaterialWrapping.GenerateAndWrapOutput<RsaWrapInfo>, Types.Error>,
@@ -444,7 +444,7 @@ module RawRSAKeyring {
       reads Modifies
       decreases Modifies
     {
-        res.Success?
+      res.Success?
       ==>
         && Invariant()
     }
@@ -473,7 +473,7 @@ module RawRSAKeyring {
       var plaintextMaterial :- generateBytesResult.MapFailure(
         e => Types.AwsCryptographyPrimitives(AwsCryptographyPrimitives := e)
       );
-      
+
       var wrap := new RsaWrapKeyMaterial(
         publicKey,
         paddingScheme,
@@ -539,16 +539,16 @@ module RawRSAKeyring {
       decreases Modifies
     {
       && (res.Success?
-      ==>
-        && Invariant()
-        && 0 < |cryptoPrimitives.History.RSAEncrypt|
-        && Seq.Last(cryptoPrimitives.History.RSAEncrypt).output.Success?
-        && var RsaEncryptInput := Seq.Last(cryptoPrimitives.History.RSAEncrypt).input;
-        && var RsaEncryptOutput := Seq.Last(cryptoPrimitives.History.RSAEncrypt).output;
-        && RsaEncryptInput.padding == paddingScheme
-        && RsaEncryptInput.publicKey == publicKey
-        && RsaEncryptInput.plaintext == input.plaintextMaterial
-        && RsaEncryptOutput.value == res.value.wrappedMaterial
+          ==>
+            && Invariant()
+            && 0 < |cryptoPrimitives.History.RSAEncrypt|
+            && Seq.Last(cryptoPrimitives.History.RSAEncrypt).output.Success?
+            && var RsaEncryptInput := Seq.Last(cryptoPrimitives.History.RSAEncrypt).input;
+            && var RsaEncryptOutput := Seq.Last(cryptoPrimitives.History.RSAEncrypt).output;
+            && RsaEncryptInput.padding == paddingScheme
+            && RsaEncryptInput.publicKey == publicKey
+            && RsaEncryptInput.plaintext == input.plaintextMaterial
+            && RsaEncryptOutput.value == res.value.wrappedMaterial
       )
     }
 
@@ -568,19 +568,19 @@ module RawRSAKeyring {
       //# The keyring performs [RSA encryption](#rsa) with the
       //# following specifics:
       var RSAEncryptOutput := cryptoPrimitives.RSAEncrypt(Crypto.RSAEncryptInput(
-        //= aws-encryption-sdk-specification/framework/raw-rsa-keyring.md#onencrypt
-        //# - This keyring's [padding scheme](#supported-padding-schemes) is the RSA padding
-        //#   scheme.
-        padding := paddingScheme,
+                                                            //= aws-encryption-sdk-specification/framework/raw-rsa-keyring.md#onencrypt
+                                                            //# - This keyring's [padding scheme](#supported-padding-schemes) is the RSA padding
+                                                            //#   scheme.
+                                                            padding := paddingScheme,
 
-        //= aws-encryption-sdk-specification/framework/raw-rsa-keyring.md#onencrypt
-        //# - This keyring's [public key](#public-key) is the RSA public key.
-        publicKey := publicKey,
+                                                            //= aws-encryption-sdk-specification/framework/raw-rsa-keyring.md#onencrypt
+                                                            //# - This keyring's [public key](#public-key) is the RSA public key.
+                                                            publicKey := publicKey,
 
-        //= aws-encryption-sdk-specification/framework/raw-rsa-keyring.md#onencrypt
-        //# - The plaintext data key is the plaintext input to RSA encryption.
-        plaintext := input.plaintextMaterial
-      ));
+                                                            //= aws-encryption-sdk-specification/framework/raw-rsa-keyring.md#onencrypt
+                                                            //# - The plaintext data key is the plaintext input to RSA encryption.
+                                                            plaintext := input.plaintextMaterial
+                                                          ));
 
       var ciphertext :- RSAEncryptOutput.MapFailure(e => Types.AwsCryptographyPrimitives(e));
 
@@ -625,7 +625,7 @@ module RawRSAKeyring {
       && cryptoPrimitives.ValidState()
       && Modifies == cryptoPrimitives.Modifies
     }
-    
+
     predicate Ensures(
       input: MaterialWrapping.UnwrapInput,
       res: Result<MaterialWrapping.UnwrapOutput<RsaUnwrapInfo>, Types.Error>,
@@ -634,7 +634,7 @@ module RawRSAKeyring {
       reads Modifies
       decreases Modifies
     {
-        res.Success?
+      res.Success?
       ==>
         && Invariant()
         && |cryptoPrimitives.History.RSADecrypt| > 0
@@ -646,7 +646,7 @@ module RawRSAKeyring {
         && decryptInput.cipherText == input.wrappedMaterial
         && decryptOutput == res.value.unwrappedMaterial
     }
-    
+
     method Invoke(
       input: MaterialWrapping.UnwrapInput,
       ghost attemptsState: seq<ActionInvoke<MaterialWrapping.UnwrapInput, Result<MaterialWrapping.UnwrapOutput<RsaUnwrapInfo>, Types.Error>>>
@@ -657,34 +657,34 @@ module RawRSAKeyring {
       ensures Invariant()
       ensures Ensures(input, res, attemptsState)
       ensures res.Success? ==>
-        |res.value.unwrappedMaterial| == AlgorithmSuites.GetEncryptKeyLength(input.algorithmSuite) as nat
+                |res.value.unwrappedMaterial| == AlgorithmSuites.GetEncryptKeyLength(input.algorithmSuite) as nat
     {
       var suite := input.algorithmSuite;
       var wrappedMaterial := input.wrappedMaterial;
       var aad := input.encryptionContext;
 
       var maybeDecryptResult := cryptoPrimitives.RSADecrypt(Crypto.RSADecryptInput(
-        padding := paddingScheme,
-        privateKey := privateKey,
-        cipherText := wrappedMaterial
-      ));
+                                                              padding := paddingScheme,
+                                                              privateKey := privateKey,
+                                                              cipherText := wrappedMaterial
+                                                            ));
 
       var decryptResult :-  maybeDecryptResult
-        .MapFailure(e => Types.AwsCryptographyPrimitives( AwsCryptographyPrimitives := e ));
-      
+      .MapFailure(e => Types.AwsCryptographyPrimitives( AwsCryptographyPrimitives := e ));
+
       :- Need(
         |decryptResult| == AlgorithmSuites.GetEncryptKeyLength(suite) as nat,
-         Types.AwsCryptographicMaterialProvidersException(
+        Types.AwsCryptographicMaterialProvidersException(
           message := "Invalid plaintext length.")
       );
-      
+
       assert |cryptoPrimitives.History.RSADecrypt| > 0;
 
       var output := MaterialWrapping.UnwrapOutput(
         unwrappedMaterial := decryptResult,
         unwrapInfo := RsaUnwrapInfo()
       );
-      
+
       return Success(output);
     }
   }

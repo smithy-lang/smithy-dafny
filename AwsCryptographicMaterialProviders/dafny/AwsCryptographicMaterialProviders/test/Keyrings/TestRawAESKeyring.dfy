@@ -22,11 +22,11 @@ module TestRawAESKeyring {
 
     var namespace, name := TestUtils.NamespaceAndName(0);
     var rawAESKeyring :- expect mpl.CreateRawAesKeyring(Types.CreateRawAesKeyringInput(
-      keyNamespace := namespace,
-      keyName := name,
-      wrappingKey := seq(32, i => 0),
-      wrappingAlg := Types.ALG_AES256_GCM_IV12_TAG16
-    ));
+                                                          keyNamespace := namespace,
+                                                          keyName := name,
+                                                          wrappingKey := seq(32, i => 0),
+                                                          wrappingAlg := Types.ALG_AES256_GCM_IV12_TAG16
+                                                        ));
     var encryptionContext := TestUtils.SmallEncryptionContext(TestUtils.SmallEncryptionContextVariation.A);
 
     var algorithmSuiteId := Types.AlgorithmSuiteId.ESDK(Types.ALG_AES_256_GCM_IV12_TAG16_NO_KDF);
@@ -50,7 +50,7 @@ module TestRawAESKeyring {
     //# not contain a plaintext data key, OnEncrypt MUST generate a random
     //# plaintext data key and set it on the encryption materials
     //# (structures.md#encryption-materials).
-    
+
     //= compliance/framework/raw-aes-keyring.txt#2.7.1
     //= type=test
     //# OnEncrypt MUST output the modified encryption materials
@@ -86,21 +86,21 @@ module TestRawAESKeyring {
     //# plaintext data key to the decryption materials and return the
     //# modified materials.
     expect encryptionMaterialsOut.materials.plaintextDataKey
-    == encryptionMaterialsOut.materials.plaintextDataKey;
+        == encryptionMaterialsOut.materials.plaintextDataKey;
   }
 
   method {:test} TestOnEncryptOnDecryptSuppliedDataKey()
   {
-    
+
     var mpl :- expect MaterialProviders.MaterialProviders();
 
     var namespace, name := TestUtils.NamespaceAndName(0);
     var rawAESKeyring :- expect mpl.CreateRawAesKeyring(Types.CreateRawAesKeyringInput(
-      keyNamespace := namespace,
-      keyName := name,
-      wrappingKey := seq(32, i => 0),
-      wrappingAlg := Types.ALG_AES256_GCM_IV12_TAG16
-    ));
+                                                          keyNamespace := namespace,
+                                                          keyName := name,
+                                                          wrappingKey := seq(32, i => 0),
+                                                          wrappingAlg := Types.ALG_AES256_GCM_IV12_TAG16
+                                                        ));
     var encryptionContext := TestUtils.SmallEncryptionContext(TestUtils.SmallEncryptionContextVariation.A);
 
     var algorithmSuiteId := Types.AlgorithmSuiteId.ESDK(Types.ALG_AES_256_GCM_IV12_TAG16_NO_KDF);
@@ -134,7 +134,7 @@ module TestRawAESKeyring {
         requiredEncryptionContextKeys := []
       )
     );
-    
+
     var decryptionMaterialsOut :- expect rawAESKeyring.OnDecrypt(
       Types.OnDecryptInput(
         materials:=decryptionMaterialsIn,
@@ -157,18 +157,18 @@ module TestRawAESKeyring {
 
     var namespace, name := TestUtils.NamespaceAndName(0);
     var rawAESKeyring :- expect mpl.CreateRawAesKeyring(Types.CreateRawAesKeyringInput(
-      keyNamespace := namespace,
-      keyName := name,
-      wrappingKey := seq(32, i => 0),
-      wrappingAlg := Types.ALG_AES256_GCM_IV12_TAG16
-    ));
+                                                          keyNamespace := namespace,
+                                                          keyName := name,
+                                                          wrappingKey := seq(32, i => 0),
+                                                          wrappingAlg := Types.ALG_AES256_GCM_IV12_TAG16
+                                                        ));
 
     var mismatchedAESKeyring :- expect mpl.CreateRawAesKeyring(Types.CreateRawAesKeyringInput(
-      keyNamespace := namespace,
-      keyName := "mismatched",
-      wrappingKey := seq(32, i => 1 ),
-      wrappingAlg := Types.ALG_AES256_GCM_IV12_TAG16
-    ));
+                                                                 keyNamespace := namespace,
+                                                                 keyName := "mismatched",
+                                                                 wrappingKey := seq(32, i => 1 ),
+                                                                 wrappingAlg := Types.ALG_AES256_GCM_IV12_TAG16
+                                                               ));
 
     var encryptionContext := TestUtils.SmallEncryptionContext(TestUtils.SmallEncryptionContextVariation.A);
 
@@ -214,11 +214,11 @@ module TestRawAESKeyring {
 
     var namespace, name := TestUtils.NamespaceAndName(0);
     var rawAESKeyring :- expect mpl.CreateRawAesKeyring(Types.CreateRawAesKeyringInput(
-      keyNamespace := namespace,
-      keyName := name,
-      wrappingKey := seq(32, i => 0),
-      wrappingAlg := Types.ALG_AES256_GCM_IV12_TAG16
-    ));
+                                                          keyNamespace := namespace,
+                                                          keyName := name,
+                                                          wrappingKey := seq(32, i => 0),
+                                                          wrappingAlg := Types.ALG_AES256_GCM_IV12_TAG16
+                                                        ));
     var encryptionContext := TestUtils.SmallEncryptionContext(TestUtils.SmallEncryptionContextVariation.A);
 
     var algorithmSuiteId := Types.AlgorithmSuiteId.ESDK(Types.ALG_AES_256_GCM_IV12_TAG16_NO_KDF);
@@ -261,7 +261,7 @@ module TestRawAESKeyring {
     );
 
     expect decryptionMaterialsOut.materials.plaintextDataKey
-    == encryptionMaterialsOut.materials.plaintextDataKey;
+        == encryptionMaterialsOut.materials.plaintextDataKey;
   }
 
   method {:test} TestOnDecryptNoEDKs()
@@ -270,11 +270,11 @@ module TestRawAESKeyring {
 
     var namespace, name := TestUtils.NamespaceAndName(0);
     var rawAESKeyring :- expect mpl.CreateRawAesKeyring(Types.CreateRawAesKeyringInput(
-      keyNamespace := namespace,
-      keyName := name,
-      wrappingKey := seq(32, i => 0),
-      wrappingAlg := Types.ALG_AES256_GCM_IV12_TAG16
-    ));
+                                                          keyNamespace := namespace,
+                                                          keyName := name,
+                                                          wrappingKey := seq(32, i => 0),
+                                                          wrappingAlg := Types.ALG_AES256_GCM_IV12_TAG16
+                                                        ));
     var encryptionContext := TestUtils.SmallEncryptionContext(TestUtils.SmallEncryptionContextVariation.A);
 
     var algorithmSuiteId := Types.AlgorithmSuiteId.ESDK(Types.ALG_AES_256_GCM_IV12_TAG16_NO_KDF);
@@ -304,11 +304,11 @@ module TestRawAESKeyring {
 
     var namespace, name := TestUtils.NamespaceAndName(0);
     var rawAESKeyring :- expect mpl.CreateRawAesKeyring(Types.CreateRawAesKeyringInput(
-      keyNamespace := namespace,
-      keyName := name,
-      wrappingKey := seq(32, i => 0),
-      wrappingAlg := Types.ALG_AES256_GCM_IV12_TAG16
-    ));
+                                                          keyNamespace := namespace,
+                                                          keyName := name,
+                                                          wrappingKey := seq(32, i => 0),
+                                                          wrappingAlg := Types.ALG_AES256_GCM_IV12_TAG16
+                                                        ));
     var unserializableEncryptionContext := generateUnserializableEncryptionContext();
 
     var algorithmSuiteId := Types.AlgorithmSuiteId.ESDK(Types.ALG_AES_256_GCM_IV12_TAG16_NO_KDF);
@@ -338,11 +338,11 @@ module TestRawAESKeyring {
 
     var namespace, name := TestUtils.NamespaceAndName(0);
     var rawAESKeyring :- expect mpl.CreateRawAesKeyring(Types.CreateRawAesKeyringInput(
-      keyNamespace := namespace,
-      keyName := name,
-      wrappingKey := seq(32, i => 0),
-      wrappingAlg := Types.ALG_AES256_GCM_IV12_TAG16
-    ));
+                                                          keyNamespace := namespace,
+                                                          keyName := name,
+                                                          wrappingKey := seq(32, i => 0),
+                                                          wrappingAlg := Types.ALG_AES256_GCM_IV12_TAG16
+                                                        ));
     var encryptionContext := TestUtils.SmallEncryptionContext(TestUtils.SmallEncryptionContextVariation.A);
 
     var algorithmSuiteId := Types.AlgorithmSuiteId.ESDK(Types.ALG_AES_256_GCM_IV12_TAG16_NO_KDF);

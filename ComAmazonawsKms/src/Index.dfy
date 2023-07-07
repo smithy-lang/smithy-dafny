@@ -22,11 +22,11 @@ module {:extern "software.amazon.cryptography.services.kms.internaldafny"} Com.A
 
   method {:extern} KMSClientForRegion(region: string)
     returns (res: Result<IKMSClient, Error>)
-    ensures res.Success? ==> 
-    && fresh(res.value)
-    && fresh(res.value.Modifies)
-    && fresh(res.value.History)
-    && res.value.ValidState()
+    ensures res.Success? ==>
+              && fresh(res.value)
+              && fresh(res.value.Modifies)
+              && fresh(res.value.History)
+              && res.value.ValidState()
 
   function method DafnyUserAgentSuffix(runtime: string): string
   {
