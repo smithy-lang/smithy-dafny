@@ -54,7 +54,7 @@ module {:options "/functionSyntax:4" }  StormTracker {
       gracePeriod : Types.PositiveLong := 10,
       graceInterval : Types.PositiveLong := 1,
       fanOut : Types.PositiveLong := 20,
-      inFlightTTL : Types.PositiveLong := 5
+      inFlightTTL : Types.PositiveLong := 20
     )
       requires entryPruningTailSize >= 1
       ensures
@@ -65,10 +65,10 @@ module {:options "/functionSyntax:4" }  StormTracker {
     {
       this.wrapped := new LocalCMC.LocalCMC(entryCapacity, entryPruningTailSize);
       this.inFlight := new MutableMap();
-      this.gracePeriod := gracePeriod;
-      this.graceInterval := graceInterval;
-      this.fanOut := fanOut;
-      this.inFlightTTL := inFlightTTL;
+      this.gracePeriod := if gracePeriod > 0 then gracePeriod else 10;
+      this.graceInterval := if graceInterval > 0 then graceInterval else 1;
+      this.fanOut := if fanOut > 0 then fanOut else 20;
+      this.inFlightTTL := if inFlightTTL > 0 then inFlightTTL else 20;
       this.lastPrune := 0;
     }
 
