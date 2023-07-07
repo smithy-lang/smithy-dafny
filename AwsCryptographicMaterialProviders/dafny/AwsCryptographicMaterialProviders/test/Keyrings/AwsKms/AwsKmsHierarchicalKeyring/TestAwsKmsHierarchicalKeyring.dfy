@@ -13,7 +13,7 @@ module TestAwsKmsHierarchicalKeyring {
   import KMS = Com.Amazonaws.Kms
   import DDB = Com.Amazonaws.Dynamodb
   import DDBTypes = ComAmazonawsDynamodbTypes
-  import KeyStore = KeyStore 
+  import KeyStore = KeyStore
   import KeyStoreTypes = AwsCryptographyKeyStoreTypes
   import Crypto = AwsCryptographyPrimitivesTypes
   import Aws.Cryptography.Primitives
@@ -42,7 +42,7 @@ module TestAwsKmsHierarchicalKeyring {
   const BRANCH_KEY_ID_A := BRANCH_KEY_ID
   const BRANCH_KEY_ID_B := ACTIVE_ACTIVE_BRANCH_KEY_ID
 
-  method GetTestMaterials(suiteId: Types.AlgorithmSuiteId) returns (out: Types.EncryptionMaterials) 
+  method GetTestMaterials(suiteId: Types.AlgorithmSuiteId) returns (out: Types.EncryptionMaterials)
   {
     var mpl :- expect MaterialProviders.MaterialProviders();
 
@@ -61,7 +61,7 @@ module TestAwsKmsHierarchicalKeyring {
 
     return encryptionMaterialsIn;
   }
-  
+
   method {:test} TestHierarchyClientESDKSuite()
   {
     var branchKeyId := BRANCH_KEY_ID;
@@ -71,7 +71,7 @@ module TestAwsKmsHierarchicalKeyring {
     var kmsClient :- expect KMS.KMSClient();
     var ddbClient :- expect DDB.DynamoDBClient();
     var kmsConfig := KeyStoreTypes.KMSConfiguration.kmsKeyArn(keyArn);
-    
+
     var keyStoreConfig := KeyStoreTypes.KeyStoreConfig(
       id := None,
       kmsConfiguration := kmsConfig,
@@ -108,20 +108,20 @@ module TestAwsKmsHierarchicalKeyring {
     TestRoundtrip(hierarchyKeyring, materials, TEST_ESDK_ALG_SUITE_ID, branchKeyId);
   }
 
-  method {:test} TestTwoActiveKeysESDKSuite() 
-  { 
+  method {:test} TestTwoActiveKeysESDKSuite()
+  {
     // The HierarchicalKeyringTestTable has two active keys under the branchKeyId below.
     // They have "create-time" timestamps of: 2023-03-07T17:09Z and 2023-03-07T17:07Z
-    // When sorting them lexicographically, we should be using 2023-03-07T17:09Z as the "newest" 
+    // When sorting them lexicographically, we should be using 2023-03-07T17:09Z as the "newest"
     // branch key since this timestamp is more recent.
     var branchKeyId := ACTIVE_ACTIVE_BRANCH_KEY_ID;
     var ttl : Types.PositiveLong := (1 * 60000) * 10;
     var mpl :- expect MaterialProviders.MaterialProviders();
-    
+
     var kmsClient :- expect KMS.KMSClient();
     var ddbClient :- expect DDB.DynamoDBClient();
     var kmsConfig := KeyStoreTypes.KMSConfiguration.kmsKeyArn(keyArn);
-    
+
     var keyStoreConfig := KeyStoreTypes.KeyStoreConfig(
       id := None,
       kmsConfiguration := kmsConfig,
@@ -150,7 +150,7 @@ module TestAwsKmsHierarchicalKeyring {
 
     var materials := GetTestMaterials(TEST_ESDK_ALG_SUITE_ID);
     TestRoundtrip(hierarchyKeyring, materials, TEST_ESDK_ALG_SUITE_ID, branchKeyId);
-    
+
     //Test with key in the materials
     var suite := AlgorithmSuites.GetSuite(TEST_ESDK_ALG_SUITE_ID);
     var zeroedKey := seq(AlgorithmSuites.GetEncryptKeyLength(suite) as nat, _ => 0); // Key is Zero
@@ -162,11 +162,11 @@ module TestAwsKmsHierarchicalKeyring {
     var branchKeyId := BRANCH_KEY_ID;
     var ttl : Types.PositiveLong := (1 * 60000) * 10;
     var mpl :- expect MaterialProviders.MaterialProviders();
-    
+
     var kmsClient :- expect KMS.KMSClient();
     var ddbClient :- expect DDB.DynamoDBClient();
     var kmsConfig := KeyStoreTypes.KMSConfiguration.kmsKeyArn(keyArn);
-    
+
     var keyStoreConfig := KeyStoreTypes.KeyStoreConfig(
       id := None,
       kmsConfiguration := kmsConfig,
@@ -202,21 +202,21 @@ module TestAwsKmsHierarchicalKeyring {
     materials := materials.(plaintextDataKey := Some(zeroedKey));
     TestRoundtrip(hierarchyKeyring, materials, TEST_DBE_ALG_SUITE_ID, branchKeyId);
   }
-  
-  method {:test} TestTwoActiveKeysDBESuite() 
-  { 
+
+  method {:test} TestTwoActiveKeysDBESuite()
+  {
     // The HierarchicalKeyringTestTable has two active keys under the branchKeyId below.
     // They have "create-time" timestamps of: 2023-03-07T17:09Z and 2023-03-07T17:07Z
-    // When sorting them lexicographically, we should be using 2023-03-07T17:09Z as the "newest" 
+    // When sorting them lexicographically, we should be using 2023-03-07T17:09Z as the "newest"
     // branch key since this timestamp is more recent.
     var branchKeyId := ACTIVE_ACTIVE_BRANCH_KEY_ID;
     var ttl : Types.PositiveLong := (1 * 60000) * 10;
     var mpl :- expect MaterialProviders.MaterialProviders();
-    
+
     var kmsClient :- expect KMS.KMSClient();
     var ddbClient :- expect DDB.DynamoDBClient();
     var kmsConfig := KeyStoreTypes.KMSConfiguration.kmsKeyArn(keyArn);
-    
+
     var keyStoreConfig := KeyStoreTypes.KeyStoreConfig(
       id := None,
       kmsConfiguration := kmsConfig,
@@ -254,16 +254,16 @@ module TestAwsKmsHierarchicalKeyring {
   }
 
 
-  method {:test} TestBranchKeyIdSupplier() 
+  method {:test} TestBranchKeyIdSupplier()
   {
-    var branchKeyIdSupplier: Types.IBranchKeyIdSupplier := new DummyBranchKeyIdSupplier(); 
+    var branchKeyIdSupplier: Types.IBranchKeyIdSupplier := new DummyBranchKeyIdSupplier();
     var ttl : int64 := (1 * 60000) * 10;
     var mpl :- expect MaterialProviders.MaterialProviders();
-    
+
     var kmsClient :- expect KMS.KMSClient();
     var ddbClient :- expect DDB.DynamoDBClient();
     var kmsConfig := KeyStoreTypes.KMSConfiguration.kmsKeyArn(keyArn);
-    
+
     var keyStoreConfig := KeyStoreTypes.KeyStoreConfig(
       id := None,
       kmsConfiguration := kmsConfig,
@@ -289,17 +289,17 @@ module TestAwsKmsHierarchicalKeyring {
         maxCacheSize := Option.Some(10)
       )
     );
-    
+
     // Test Encryption Context with Case A
     var materials := GetTestMaterials(TEST_DBE_ALG_SUITE_ID);
     var contextCaseA := materials.encryptionContext[BRANCH_KEY := CASE_A];
     materials := materials.(encryptionContext := contextCaseA);
-    TestRoundtrip(hierarchyKeyring, materials, TEST_DBE_ALG_SUITE_ID, BRANCH_KEY_ID_A); 
+    TestRoundtrip(hierarchyKeyring, materials, TEST_DBE_ALG_SUITE_ID, BRANCH_KEY_ID_A);
 
     // Test Encryption Context with Case B
     var contextCaseB := materials.encryptionContext[BRANCH_KEY := CASE_B];
     materials := materials.(encryptionContext := contextCaseB);
-    TestRoundtrip(hierarchyKeyring, materials, TEST_DBE_ALG_SUITE_ID, BRANCH_KEY_ID_B); 
+    TestRoundtrip(hierarchyKeyring, materials, TEST_DBE_ALG_SUITE_ID, BRANCH_KEY_ID_B);
   }
 
   method TestRoundtrip(
@@ -315,14 +315,14 @@ module TestAwsKmsHierarchicalKeyring {
     var encryptionMaterialsOut :- expect hierarchyKeyring.OnEncrypt(
       Types.OnEncryptInput(materials:=encryptionMaterialsIn)
     );
-    
+
     var mpl :- expect MaterialProviders.MaterialProviders();
     var _ :- expect mpl.EncryptionMaterialsHasPlaintextDataKey(encryptionMaterialsOut.materials);
 
     expect |encryptionMaterialsOut.materials.encryptedDataKeys| == 1;
 
     var edk := encryptionMaterialsOut.materials.encryptedDataKeys[0];
-    
+
     // Verify the edk was created with the expected branch key
     var expectedBranchKeyIdUTF8 :- expect UTF8.Encode(expectedBranchKeyId);
     expect edk.keyProviderInfo == expectedBranchKeyIdUTF8;
@@ -347,7 +347,7 @@ module TestAwsKmsHierarchicalKeyring {
     //# plaintext data key to the decryption materials and return the
     //# modified materials.
     expect encryptionMaterialsOut.materials.plaintextDataKey
-    == decryptionMaterialsOut.materials.plaintextDataKey;
+        == decryptionMaterialsOut.materials.plaintextDataKey;
   }
 
   // Returns "hierarchy-test-v1" when EC contains kv pair "branchKey":"caseA"
@@ -372,7 +372,7 @@ module TestAwsKmsHierarchicalKeyring {
     {true}
 
     method GetBranchKeyId'(input: Types.GetBranchKeyIdInput)
-        returns (output: Result<Types.GetBranchKeyIdOutput, Types.Error>)
+      returns (output: Result<Types.GetBranchKeyIdOutput, Types.Error>)
       requires ValidState()
       modifies Modifies - {History}
       decreases Modifies - {History}

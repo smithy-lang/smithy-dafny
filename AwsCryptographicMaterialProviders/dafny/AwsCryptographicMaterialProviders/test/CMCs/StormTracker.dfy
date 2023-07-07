@@ -96,7 +96,7 @@ module  {:options "/functionSyntax:4"} TestStormTracker {
     expect res.EmptyWait?;
   }
 
-    method {:test} StormTrackerTTL()
+  method {:test} StormTrackerTTL()
   {
     var st := new StormTracker(
       entryCapacity := 100,

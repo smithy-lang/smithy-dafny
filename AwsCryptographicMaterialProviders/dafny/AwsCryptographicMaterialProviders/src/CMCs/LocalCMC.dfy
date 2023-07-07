@@ -8,7 +8,7 @@ module {:options "/functionSyntax:4" } LocalCMC {
   import opened Wrappers
   import opened StandardLibrary.UInt
   import opened DafnyLibraries
-  import Time 
+  import Time
   import Types = AwsCryptographyMaterialProvidersTypes
   import Seq
 
@@ -72,27 +72,27 @@ module {:options "/functionSyntax:4" } LocalCMC {
       // head and tail properties
       && (0 == |Items| <==> head.Null? && tail.Null?)
       && (0 < |Items| <==>
-        && head.Ptr?
-        && tail.Ptr?
-        && head.deref == Items[0]
-        && tail.deref == Items[|Items| - 1])
+          && head.Ptr?
+          && tail.Ptr?
+          && head.deref == Items[0]
+          && tail.deref == Items[|Items| - 1])
       && (head.Ptr? <==> tail.Ptr?)
       && (head.Ptr? ==> head.deref.prev.Null?)
       && (tail.Ptr? ==> tail.deref.next.Null?)
-      // Every Cell in the DoublyLinkedList MUST be unique.
-      // Otherwise there would be loops in prev and next.
-      // For a Cell at 4, next MUST point to 5 or Null?.
-      // So if a Cell exists as 4 and 7
-      // then it's next would need to point to _both_ 5 and 8.
+         // Every Cell in the DoublyLinkedList MUST be unique.
+         // Otherwise there would be loops in prev and next.
+         // For a Cell at 4, next MUST point to 5 or Null?.
+         // So if a Cell exists as 4 and 7
+         // then it's next would need to point to _both_ 5 and 8.
       && (forall v <- Items :: multiset(Items)[v] == 1)
-      // Proving order is easier by being more specific
-      // and breaking up prev and next.
-      // Order means Cell 4 point to 3 and 5
-      // in prev and next respectively.
+         // Proving order is easier by being more specific
+         // and breaking up prev and next.
+         // Order means Cell 4 point to 3 and 5
+         // in prev and next respectively.
       && (forall i: nat | 0 <= i < |Items| ::
-          && Prev?(i, Items[i], Items)
-          && Next?(i, Items[i], Items)
-        )
+            && Prev?(i, Items[i], Items)
+            && Next?(i, Items[i], Items)
+         )
     }
 
     ghost predicate Prev?(i:nat, c: CacheEntry, Items' : seq<CacheEntry>)
@@ -285,7 +285,7 @@ module {:options "/functionSyntax:4" } LocalCMC {
       && this in Modifies
       && queue in Modifies
       && cache in Modifies
-      // I want to say that `queue.Items` is somehow in Modifies
+                  // I want to say that `queue.Items` is somehow in Modifies
       && (forall i <- queue.Items :: i in Modifies)
       && Invariant()
     }
@@ -294,15 +294,15 @@ module {:options "/functionSyntax:4" } LocalCMC {
       reads this, queue, queue.Items, cache
     {
       && queue.Invariant()
-      // The cache is a cache of Cells, these Cells MUST be unique.
-      // The actual value that the Cell contains MAY be a duplicate.
-      // See the uniqueness comment on the DoublyLinkedList.Invariant.
+         // The cache is a cache of Cells, these Cells MUST be unique.
+         // The actual value that the Cell contains MAY be a duplicate.
+         // See the uniqueness comment on the DoublyLinkedList.Invariant.
       && MutableMapIsInjective(cache)
-      // Given that cache.Values and queue.Items are unique
-      // they MUST contain exactly the same elements.
+         // Given that cache.Values and queue.Items are unique
+         // they MUST contain exactly the same elements.
       && multiset(cache.Values()) == multiset(queue.Items)
-      // To remove the tail the key associated
-      // with the tail MUST be in the cache
+         // To remove the tail the key associated
+         // with the tail MUST be in the cache
       && (forall c <- queue.Items :: c.identifier in cache.Keys() && cache.Select(c.identifier) == c)
 
       && cache.Size() <= entryCapacity
@@ -398,12 +398,12 @@ module {:options "/functionSyntax:4" } LocalCMC {
           assert entry in multiset(queue.Items);
           queue.moveToFront(entry);
           output := Success(Types.GetCacheEntryOutput(
-            materials := entry.materials,
-            creationTime := entry.creationTime,
-            expiryTime := entry.expiryTime,
-            messagesUsed := entry.messagesUsed,
-            bytesUsed := entry.bytesUsed
-          ));
+                              materials := entry.materials,
+                              creationTime := entry.creationTime,
+                              expiryTime := entry.expiryTime,
+                              messagesUsed := entry.messagesUsed,
+                              bytesUsed := entry.bytesUsed
+                            ));
           //= aws-encryption-sdk-specification/framework/local-cryptographic-materials-cache.md#get-cache-entry
           //# When performing a Get Cache Entry operation,
           //# the local CMC MUST [prune TTL-expired cache entries](#pruning).
@@ -439,8 +439,8 @@ module {:options "/functionSyntax:4" } LocalCMC {
 
       if cache.HasKey(input.identifier) {
         var _ :- DeleteCacheEntry'(Types.DeleteCacheEntryInput(
-          identifier := input.identifier
-        ));
+                                     identifier := input.identifier
+                                   ));
       }
       assert input.identifier !in cache.Keys();
       assert 0 < entryCapacity;
@@ -459,8 +459,8 @@ module {:options "/functionSyntax:4" } LocalCMC {
         assert 0 < |multiset(cache.Values())|;
         assert queue.tail.deref.identifier in cache.Keys();
         var _ :- DeleteCacheEntry'(Types.DeleteCacheEntryInput(
-          identifier := queue.tail.deref.identifier
-        ));
+                                     identifier := queue.tail.deref.identifier
+                                   ));
       }
 
       label CAN_ADD:
@@ -471,7 +471,7 @@ module {:options "/functionSyntax:4" } LocalCMC {
         creationTime' := input.creationTime,
         expiryTime' := input.expiryTime,
         messagesUsed' := input.messagesUsed.UnwrapOr(0),
-        bytesUsed' := input.bytesUsed.UnwrapOr(0)
+                                                     bytesUsed' := input.bytesUsed.UnwrapOr(0)
       );
 
       if cell in cache.Values() {
@@ -481,10 +481,10 @@ module {:options "/functionSyntax:4" } LocalCMC {
       //= type=exception
       //# While performing a Put Cache Entry operation,
       //# the local CMC MAY store more entries than the entry capacity.
-      queue.pushCell(cell);  
+      queue.pushCell(cell);
       cache.Put(input.identifier, cell);
       Modifies := Modifies + {cell};
- 
+
       output := Success(());
 
       forall k <- cache.Keys(), k' <- cache.Keys() | k != k' ensures cache.Select(k) != cache.Select(k') {
@@ -513,11 +513,11 @@ module {:options "/functionSyntax:4" } LocalCMC {
       ensures Modifies <= old(Modifies)
       ensures
         && input.identifier in old(cache.Keys())
-      ==>
-        // && output.Success?
-        && (old(cache.Select(input.identifier)) !in queue.Items
-        && cache.Size() == old(cache.Size()) - 1
-        && old(cache.Keys()) - {input.identifier} == cache.Keys())
+        ==>
+          // && output.Success?
+          && (old(cache.Select(input.identifier)) !in queue.Items
+              && cache.Size() == old(cache.Size()) - 1
+              && old(cache.Keys()) - {input.identifier} == cache.Keys())
     {
       if cache.HasKey(input.identifier) {
         assert input.identifier in cache.Keys();
@@ -580,8 +580,8 @@ module {:options "/functionSyntax:4" } LocalCMC {
           cell.messagesUsed, cell.bytesUsed := cell.messagesUsed + 1, cell.bytesUsed + input.bytesUsed;
         } else {
           var _ :- DeleteCacheEntry'(Types.DeleteCacheEntryInput(
-            identifier := input.identifier
-          ));
+                                       identifier := input.identifier
+                                     ));
         }
       }
       return Success(());
@@ -618,8 +618,8 @@ module {:options "/functionSyntax:4" } LocalCMC {
             // This should happen regardless
             // of the current size.
             var _ :- DeleteCacheEntry'(Types.DeleteCacheEntryInput(
-              identifier := queue.tail.deref.identifier
-            ));
+                                         identifier := queue.tail.deref.identifier
+                                       ));
           } else {
             // If this element has not expired,
             // there is no reason to loop,

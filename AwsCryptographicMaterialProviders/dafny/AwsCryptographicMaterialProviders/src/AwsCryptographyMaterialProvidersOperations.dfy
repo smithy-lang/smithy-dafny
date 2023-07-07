@@ -212,8 +212,8 @@ module AwsCryptographyMaterialProvidersOperations refines AbstractAwsCryptograph
     //# region of the KMS client.
     var regionMatch := Kms.RegionMatch(input.kmsClient, input.region);
     :- Need(regionMatch != Some(false),
-      Types.AwsCryptographicMaterialProvidersException(
-        message := "Provided client and region do not match"));
+            Types.AwsCryptographicMaterialProvidersException(
+              message := "Provided client and region do not match"));
 
     var grantTokens :- GetValidGrantTokens(input.grantTokens);
     var keyring := new AwsKmsMrkDiscoveryKeyring.AwsKmsMrkDiscoveryKeyring(input.kmsClient, input.region, input.discoveryFilter, grantTokens);
@@ -255,7 +255,7 @@ module AwsCryptographyMaterialProvidersOperations refines AbstractAwsCryptograph
     returns (output: Result<IKeyring, Error>)
   {
     var maxCacheSize : int32;
-    
+
     //= aws-encryption-sdk-specification/framework/aws-kms/aws-kms-hierarchical-keyring.md#initialization
     //= type=implication
     //# If no max cache size is provided, the crypotgraphic materials cache MUST be configured to a
@@ -274,12 +274,12 @@ module AwsCryptographyMaterialProvidersOperations refines AbstractAwsCryptograph
     }
 
     :- Need(input.branchKeyId.None? || input.branchKeyIdSupplier.None?,
-        Types.AwsCryptographicMaterialProvidersException(
-          message := "Cannot initialize keyring with both a branchKeyId and BranchKeyIdSupplier."));
+            Types.AwsCryptographicMaterialProvidersException(
+              message := "Cannot initialize keyring with both a branchKeyId and BranchKeyIdSupplier."));
 
     :- Need(input.branchKeyId.Some? || input.branchKeyIdSupplier.Some?,
-        Types.AwsCryptographicMaterialProvidersException(
-          message := "Must initialize keyring with either branchKeyId or BranchKeyIdSupplier."));
+            Types.AwsCryptographicMaterialProvidersException(
+              message := "Must initialize keyring with either branchKeyId or BranchKeyIdSupplier."));
 
     var keyring := new AwsKmsHierarchicalKeyring.AwsKmsHierarchicalKeyring(
       keyStore := input.keyStore,
@@ -303,8 +303,8 @@ module AwsCryptographyMaterialProvidersOperations refines AbstractAwsCryptograph
     returns (output: Result<IKeyring, Error>)
   {
     :- Need(input.generator.Some? || |input.childKeyrings| > 0,
-      Types.AwsCryptographicMaterialProvidersException(
-        message := "Must include a generator keyring and/or at least one child keyring"));
+            Types.AwsCryptographicMaterialProvidersException(
+              message := "Must include a generator keyring and/or at least one child keyring"));
 
     var keyring := new MultiKeyring.MultiKeyring(input.generator, input.childKeyrings);
     return Success(keyring);
@@ -316,7 +316,7 @@ module AwsCryptographyMaterialProvidersOperations refines AbstractAwsCryptograph
     //= aws-encryption-sdk-specification/framework/raw-aes-keyring.md#changelog
     //= type=implication
     //# Raw AES keyring MUST NOT accept a key namespace of "aws-kms".
-      input.keyNamespace == "aws-kms"
+    input.keyNamespace == "aws-kms"
     ==>
       output.Failure?
   }
@@ -325,44 +325,44 @@ module AwsCryptographyMaterialProvidersOperations refines AbstractAwsCryptograph
     returns (output: Result<IKeyring, Error>)
   {
     :- Need(input.keyNamespace != "aws-kms",
-      Types.AwsCryptographicMaterialProvidersException(
-        message := "keyNamespace must not be `aws-kms`"));
+            Types.AwsCryptographicMaterialProvidersException(
+              message := "keyNamespace must not be `aws-kms`"));
 
     var wrappingAlg:Crypto.AES_GCM := match input.wrappingAlg
       case ALG_AES128_GCM_IV12_TAG16 => Crypto.AES_GCM(
-          keyLength := 16,
-          tagLength := 16,
-          ivLength := 12
-        )
+        keyLength := 16,
+        tagLength := 16,
+        ivLength := 12
+      )
       case ALG_AES192_GCM_IV12_TAG16 => Crypto.AES_GCM(
-          keyLength := 24,
-          tagLength := 16,
-          ivLength := 12
-        )
+        keyLength := 24,
+        tagLength := 16,
+        ivLength := 12
+      )
       case ALG_AES256_GCM_IV12_TAG16 => Crypto.AES_GCM(
-          keyLength := 32,
-          tagLength := 16,
-          ivLength := 12
-        );
+        keyLength := 32,
+        tagLength := 16,
+        ivLength := 12
+      );
 
     var namespaceAndName :- ParseKeyNamespaceAndName(input.keyNamespace, input.keyName);
     var (namespace, name) := namespaceAndName;
 
     :- Need(|input.wrappingKey| == 16 || |input.wrappingKey| == 24 || |input.wrappingKey| == 32,
-      Types.AwsCryptographicMaterialProvidersException(
-        message := "Invalid wrapping key length"));
+            Types.AwsCryptographicMaterialProvidersException(
+              message := "Invalid wrapping key length"));
     :- Need(|input.wrappingKey| == wrappingAlg.keyLength as int,
-      Types.AwsCryptographicMaterialProvidersException(
-        message := "Wrapping key length does not match specified wrapping algorithm"));
+            Types.AwsCryptographicMaterialProvidersException(
+              message := "Wrapping key length does not match specified wrapping algorithm"));
 
     var keyring := new RawAESKeyring
-      .RawAESKeyring(
-        namespace := namespace,
-        name := name,
-        key := input.wrappingKey,
-        wrappingAlgorithm := wrappingAlg,
-        cryptoPrimitives := config.crypto
-      );
+    .RawAESKeyring(
+      namespace := namespace,
+      name := name,
+      key := input.wrappingKey,
+      wrappingAlgorithm := wrappingAlg,
+      cryptoPrimitives := config.crypto
+    );
     return Success(keyring);
   }
 
@@ -373,22 +373,22 @@ module AwsCryptographyMaterialProvidersOperations refines AbstractAwsCryptograph
     //= type=implication
     //# Raw RSA keyring MUST NOT accept a key namespace of "aws-kms".
     && (input.keyNamespace == "aws-kms"
-    ==>
-      output.Failure?)
+        ==>
+          output.Failure?)
     && (input.publicKey.None? && input.privateKey.None?
-      ==>
-        output.Failure?)
+        ==>
+          output.Failure?)
   }
 
   method CreateRawRsaKeyring ( config: InternalConfig,  input: CreateRawRsaKeyringInput )
     returns (output: Result<IKeyring, Error>)
   {
     :- Need(input.keyNamespace != "aws-kms",
-        Types.AwsCryptographicMaterialProvidersException(
-      message := "keyNamespace must not be `aws-kms`"));
+            Types.AwsCryptographicMaterialProvidersException(
+              message := "keyNamespace must not be `aws-kms`"));
     :- Need(input.publicKey.Some? || input.privateKey.Some?,
-        Types.AwsCryptographicMaterialProvidersException(
-      message := "A publicKey or a privateKey is required"));
+            Types.AwsCryptographicMaterialProvidersException(
+              message := "A publicKey or a privateKey is required"));
 
     var padding: Crypto.RSAPaddingMode := match input.paddingScheme
       case PKCS1 => Crypto.RSAPaddingMode.PKCS1
@@ -396,7 +396,7 @@ module AwsCryptographyMaterialProvidersOperations refines AbstractAwsCryptograph
       case OAEP_SHA256_MGF1 => Crypto.RSAPaddingMode.OAEP_SHA256
       case OAEP_SHA384_MGF1 => Crypto.RSAPaddingMode.OAEP_SHA384
       case OAEP_SHA512_MGF1 => Crypto.RSAPaddingMode.OAEP_SHA512
-    ;
+      ;
 
     var namespaceAndName :- ParseKeyNamespaceAndName(input.keyNamespace, input.keyName);
     var (namespace, name) := namespaceAndName;
@@ -419,23 +419,23 @@ module AwsCryptographyMaterialProvidersOperations refines AbstractAwsCryptograph
     returns (output: Result<IKeyring, Error>)
   {
     :- Need(input.publicKey.Some? || input.kmsClient.Some?,
-      Types.AwsCryptographicMaterialProvidersException(
-        message := "A publicKey or a kmsClient is required"));
+            Types.AwsCryptographicMaterialProvidersException(
+              message := "A publicKey or a kmsClient is required"));
     :- Need(input.encryptionAlgorithm.RSAES_OAEP_SHA_1? || input.encryptionAlgorithm.RSAES_OAEP_SHA_256?,
-      Types.AwsCryptographicMaterialProvidersException(
-        message := "Unsupported EncryptionAlgorithmSpec"));
+            Types.AwsCryptographicMaterialProvidersException(
+              message := "Unsupported EncryptionAlgorithmSpec"));
 
-    //= aws-encryption-sdk-specification/framework/aws-kms/aws-kms-rsa-keyring.md#initialization
-    //= type=implication
-    //# The AWS KMS key identifier MUST NOT be null or empty.
+      //= aws-encryption-sdk-specification/framework/aws-kms/aws-kms-rsa-keyring.md#initialization
+      //= type=implication
+      //# The AWS KMS key identifier MUST NOT be null or empty.
 
-    //= aws-encryption-sdk-specification/framework/aws-kms/aws-kms-rsa-keyring.md#initialization
-    //= type=implication
-    //# The AWS KMS key identifier MUST be [a valid identifier](../../framework/aws-kms/aws-kms-key-arn.md#a-valid-aws-kms-identifier).
+      //= aws-encryption-sdk-specification/framework/aws-kms/aws-kms-rsa-keyring.md#initialization
+      //= type=implication
+      //# The AWS KMS key identifier MUST be [a valid identifier](../../framework/aws-kms/aws-kms-key-arn.md#a-valid-aws-kms-identifier).
 
-    //= aws-encryption-sdk-specification/framework/aws-kms/aws-kms-rsa-keyring.md#initialization
-    //= type=implication
-    //# The AWS KMS key identifier MUST NOT be an AWS KMS alias.
+      //= aws-encryption-sdk-specification/framework/aws-kms/aws-kms-rsa-keyring.md#initialization
+      //= type=implication
+      //# The AWS KMS key identifier MUST NOT be an AWS KMS alias.
     :- Need(
       && KMS.IsValid_KeyIdType(input.kmsKeyId)
       && ParseAwsKmsArn(input.kmsKeyId).Success?,
@@ -449,11 +449,11 @@ module AwsCryptographyMaterialProvidersOperations refines AbstractAwsCryptograph
     //# MUST have an RSA modulus bit length greater than or equal to 2048.
     if (input.publicKey.Some?) {
       var lengthOutputRes := config.crypto.GetRSAKeyModulusLength(
-          Crypto.GetRSAKeyModulusLengthInput(publicKey := input.publicKey.value));
+        Crypto.GetRSAKeyModulusLengthInput(publicKey := input.publicKey.value));
       var lengthOutput :- lengthOutputRes.MapFailure(e => Types.AwsCryptographyPrimitives(e));
       :- Need(lengthOutput.length >= AwsKmsRsaKeyring.MIN_KMS_RSA_KEY_LEN,
-          Types.AwsCryptographicMaterialProvidersException(
-        message := "Invalid public key length"));
+              Types.AwsCryptographicMaterialProvidersException(
+                message := "Invalid public key length"));
     }
 
     var _ :- ValidateKmsKeyId(input.kmsKeyId);
@@ -482,7 +482,7 @@ module AwsCryptographyMaterialProvidersOperations refines AbstractAwsCryptograph
   function method CmpError(s : string) : Error
   {
     Types.AwsCryptographicMaterialProvidersException(
-        message := "A publicKey or a kmsClient is required")
+      message := "A publicKey or a kmsClient is required")
   }
   predicate CreateRequiredEncryptionContextCMMEnsuresPublicly(input: CreateRequiredEncryptionContextCMMInput, output: Result<ICryptographicMaterialsManager, Error>)
   {true}
@@ -508,15 +508,15 @@ module AwsCryptographyMaterialProvidersOperations refines AbstractAwsCryptograph
   method CreateCryptographicMaterialsCache(config: InternalConfig, input: CreateCryptographicMaterialsCacheInput)
     returns (output: Result<ICryptographicMaterialsCache, Error>)
   {
-    :- Need(input.entryCapacity >= 1, 
-      Types.AwsCryptographicMaterialProvidersException(message := "Cache Size MUST be greater than 0"));
-    
+    :- Need(input.entryCapacity >= 1,
+            Types.AwsCryptographicMaterialProvidersException(message := "Cache Size MUST be greater than 0"));
+
     var entryPruningTailSize: nat;
 
     if input.entryPruningTailSize.Some? {
       :- Need(input.entryPruningTailSize.value >= 1,
-        Types.AwsCryptographicMaterialProvidersException(
-          message := "Entry Pruning Tail Size MUST be greater than or equal to 1."));
+              Types.AwsCryptographicMaterialProvidersException(
+                message := "Entry Pruning Tail Size MUST be greater than or equal to 1."));
       entryPruningTailSize := input.entryPruningTailSize.value as nat;
     } else {
       entryPruningTailSize := 1;
@@ -555,35 +555,35 @@ module AwsCryptographyMaterialProvidersOperations refines AbstractAwsCryptograph
   }
 
   function method InitializeEncryptionMaterials ( config: InternalConfig,  input: InitializeEncryptionMaterialsInput )
-  : (output: Result<EncryptionMaterials, Error>)
+    : (output: Result<EncryptionMaterials, Error>)
   {
     Materials.InitializeEncryptionMaterials(input)
   }
 
   function method InitializeDecryptionMaterials ( config: InternalConfig,  input: InitializeDecryptionMaterialsInput )
-  : (output: Result<DecryptionMaterials, Error>)
+    : (output: Result<DecryptionMaterials, Error>)
   {
     Materials.InitializeDecryptionMaterials(input)
   }
 
   function method ValidEncryptionMaterialsTransition ( config: InternalConfig,  input: ValidEncryptionMaterialsTransitionInput )
-  : (output: Result<(), Error>)
+    : (output: Result<(), Error>)
   {
     :- Need(
-      Materials.ValidEncryptionMaterialsTransition(input.start, input.stop),
-      InvalidEncryptionMaterialsTransition( message := "Invalid Encryption Materials Transition" )
-    );
+         Materials.ValidEncryptionMaterialsTransition(input.start, input.stop),
+         InvalidEncryptionMaterialsTransition( message := "Invalid Encryption Materials Transition" )
+       );
 
     Success(())
   }
 
   function method ValidDecryptionMaterialsTransition ( config: InternalConfig,  input: ValidDecryptionMaterialsTransitionInput )
-  : (output: Result<(), Error>)
+    : (output: Result<(), Error>)
   {
     :- Need(
-      Materials.DecryptionMaterialsTransitionIsValid(input.start, input.stop),
-      InvalidDecryptionMaterialsTransition( message := "Invalid Decryption Materials Transition")
-    );
+         Materials.DecryptionMaterialsTransitionIsValid(input.start, input.stop),
+         InvalidDecryptionMaterialsTransition( message := "Invalid Decryption Materials Transition")
+       );
 
     Success(())
   }
@@ -592,9 +592,9 @@ module AwsCryptographyMaterialProvidersOperations refines AbstractAwsCryptograph
     : (output: Result<(), Error>)
   {
     :- Need(
-      Materials.EncryptionMaterialsHasPlaintextDataKey(input),
-      InvalidDecryptionMaterials( message := "Invalid Encryption Materials")
-    );
+         Materials.EncryptionMaterialsHasPlaintextDataKey(input),
+         InvalidDecryptionMaterials( message := "Invalid Encryption Materials")
+       );
 
     Success(())
   }
@@ -602,31 +602,31 @@ module AwsCryptographyMaterialProvidersOperations refines AbstractAwsCryptograph
     : (output: Result<(), Error>)
   {
     :- Need(
-      Materials.DecryptionMaterialsWithPlaintextDataKey(input),
-      InvalidDecryptionMaterials( message := "Invalid Decryption Materials")
-    );
+         Materials.DecryptionMaterialsWithPlaintextDataKey(input),
+         InvalidDecryptionMaterials( message := "Invalid Decryption Materials")
+       );
 
     Success(())
   }
 
   function method GetAlgorithmSuiteInfo ( config: InternalConfig,  input: seq<uint8> )
-  : (output: Result<AlgorithmSuiteInfo, Error>)
+    : (output: Result<AlgorithmSuiteInfo, Error>)
   {
     AlgorithmSuites.GetAlgorithmSuiteInfo(input)
   }
 
   function method ValidAlgorithmSuiteInfo ( config: InternalConfig,  input: AlgorithmSuiteInfo )
-  : (output: Result<(), Error>)
+    : (output: Result<(), Error>)
   {
     :- Need(AlgorithmSuites.AlgorithmSuite?(input),
-      InvalidAlgorithmSuiteInfo( message := "Invalid AlgorithmSuiteInfo" )
-    );
+            InvalidAlgorithmSuiteInfo( message := "Invalid AlgorithmSuiteInfo" )
+       );
 
     Success(())
   }
 
   function method ValidateCommitmentPolicyOnEncrypt ( config: InternalConfig,  input: ValidateCommitmentPolicyOnEncryptInput )
-  : (output: Result<(), Error>)
+    : (output: Result<(), Error>)
   {
     :- Commitment.ValidateCommitmentPolicyOnEncrypt(input.algorithm, input.commitmentPolicy);
 
@@ -634,7 +634,7 @@ module AwsCryptographyMaterialProvidersOperations refines AbstractAwsCryptograph
   }
 
   function method ValidateCommitmentPolicyOnDecrypt ( config: InternalConfig,  input: ValidateCommitmentPolicyOnDecryptInput )
-  : (output: Result<(), Error>)
+    : (output: Result<(), Error>)
   {
     :- Commitment.ValidateCommitmentPolicyOnDecrypt(input.algorithm, input.commitmentPolicy);
 
