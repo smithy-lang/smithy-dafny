@@ -116,14 +116,12 @@ using System.Linq; using System; namespace AWS.Cryptography.KeyStore {
  internal static software.amazon.cryptography.keystore.internaldafny.types.Error_KeyStoreException ToDafny_N3_aws__N12_cryptography__N8_keyStore__S17_KeyStoreException (AWS.Cryptography.KeyStore.KeyStoreException value) {
 
  return new software.amazon.cryptography.keystore.internaldafny.types.Error_KeyStoreException (
- ToDafny_N3_aws__N12_cryptography__N8_keyStore__S17_KeyStoreException__M7_message(value.Message)
+ ToDafny_N3_aws__N12_cryptography__N8_keyStore__S17_KeyStoreException__M7_message(value.getMessage())
  ) ;
 }
  internal static AWS.Cryptography.KeyStore.KMSConfiguration FromDafny_N3_aws__N12_cryptography__N8_keyStore__S16_KMSConfiguration (software.amazon.cryptography.keystore.internaldafny.types._IKMSConfiguration value) {
  software.amazon.cryptography.keystore.internaldafny.types.KMSConfiguration concrete = (software.amazon.cryptography.keystore.internaldafny.types.KMSConfiguration)value;
- // BEGIN MANUAL EDIT
  var converted = new AWS.Cryptography.KeyStore.KMSConfiguration(); if (value.is_kmsKeyArn) {
-// END MANUAL EDIT
  converted.KmsKeyArn = FromDafny_N3_aws__N12_cryptography__N8_keyStore__S16_KMSConfiguration__M9_kmsKeyArn(concrete.dtor_kmsKeyArn);
  return converted;
 }

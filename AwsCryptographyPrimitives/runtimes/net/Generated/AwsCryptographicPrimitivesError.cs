@@ -5,5 +5,6 @@ using System;
  using AWS.Cryptography.Primitives; namespace AWS.Cryptography.Primitives {
  public class AwsCryptographicPrimitivesError : Exception {
  public AwsCryptographicPrimitivesError(string message) : base(message) {}
+public string getMessage() { return this.Message; }
 }
 }

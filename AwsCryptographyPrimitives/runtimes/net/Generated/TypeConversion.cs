@@ -63,7 +63,7 @@ using System.Linq; using System; namespace AWS.Cryptography.Primitives {
  internal static software.amazon.cryptography.primitives.internaldafny.types.Error_AwsCryptographicPrimitivesError ToDafny_N3_aws__N12_cryptography__N10_primitives__S31_AwsCryptographicPrimitivesError (AWS.Cryptography.Primitives.AwsCryptographicPrimitivesError value) {
 
  return new software.amazon.cryptography.primitives.internaldafny.types.Error_AwsCryptographicPrimitivesError (
- ToDafny_N3_aws__N12_cryptography__N10_primitives__S31_AwsCryptographicPrimitivesError__M7_message(value.Message)
+ ToDafny_N3_aws__N12_cryptography__N10_primitives__S31_AwsCryptographicPrimitivesError__M7_message(value.getMessage())
  ) ;
 }
  internal static AWS.Cryptography.Primitives.CryptoConfig FromDafny_N3_aws__N12_cryptography__N10_primitives__S12_CryptoConfig (software.amazon.cryptography.primitives.internaldafny.types._ICryptoConfig value) {

@@ -5,5 +5,6 @@ using System;
  using AWS.Cryptography.MaterialProviders; namespace AWS.Cryptography.MaterialProviders {
  public class InvalidAlgorithmSuiteInfoOnDecrypt : Exception {
  public InvalidAlgorithmSuiteInfoOnDecrypt(string message) : base(message) {}
+public string getMessage() { return this.Message; }
 }
 }
