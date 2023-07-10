@@ -31,6 +31,11 @@ module {:options "/functionSyntax:4" }  StormTracker {
     | EmptyFetch // No data, client should fetch
     | Full(data : Types.GetCacheEntryOutput)
 
+  const DefaultGracePeriod := 10 as Types.PositiveLong
+  const DefaultGraceInterval := 1 as Types.PositiveLong
+  const DefaultFanOut := 20 as Types.PositiveLong
+  const DefaultInFlightTTL := 20 as Types.PositiveLong
+
   class StormTracker {
 
     ghost predicate ValidState()
@@ -51,10 +56,10 @@ module {:options "/functionSyntax:4" }  StormTracker {
     constructor(
       entryCapacity: nat,
       entryPruningTailSize: nat := 1,
-      gracePeriod : Types.PositiveLong := 10,
-      graceInterval : Types.PositiveLong := 1,
-      fanOut : Types.PositiveLong := 20,
-      inFlightTTL : Types.PositiveLong := 20
+      gracePeriod : Types.PositiveLong := DefaultGracePeriod,
+      graceInterval : Types.PositiveLong := DefaultGraceInterval,
+      fanOut : Types.PositiveLong := DefaultFanOut,
+      inFlightTTL : Types.PositiveLong := DefaultInFlightTTL
     )
       requires entryPruningTailSize >= 1
       ensures
@@ -65,10 +70,10 @@ module {:options "/functionSyntax:4" }  StormTracker {
     {
       this.wrapped := new LocalCMC.LocalCMC(entryCapacity, entryPruningTailSize);
       this.inFlight := new MutableMap();
-      this.gracePeriod := if gracePeriod > 0 then gracePeriod else 10;
-      this.graceInterval := if graceInterval > 0 then graceInterval else 1;
-      this.fanOut := if fanOut > 0 then fanOut else 20;
-      this.inFlightTTL := if inFlightTTL > 0 then inFlightTTL else 20;
+      this.gracePeriod := if gracePeriod > 0 then gracePeriod else DefaultGracePeriod;
+      this.graceInterval := if graceInterval > 0 then graceInterval else DefaultGraceInterval;
+      this.fanOut := if fanOut > 0 then fanOut else DefaultFanOut;
+      this.inFlightTTL := if inFlightTTL > 0 then inFlightTTL else DefaultInFlightTTL;
       this.lastPrune := 0;
     }
 

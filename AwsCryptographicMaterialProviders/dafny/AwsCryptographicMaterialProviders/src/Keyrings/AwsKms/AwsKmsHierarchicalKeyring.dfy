@@ -188,10 +188,10 @@ module AwsKmsHierarchicalKeyring {
       var localCMC := new StormTracker.StormTracker(
         entryCapacity := maxCacheSize as nat,
         entryPruningTailSize := 1,
-        gracePeriod := gracePeriod.UnwrapOr(10) as Types.PositiveLong,
-                                            graceInterval := graceInterval.UnwrapOr(1) as Types.PositiveLong,
-                                                                                    fanOut := fanOut.UnwrapOr(20) as Types.PositiveLong,
-                                                                                                              inFlightTTL := inFlightTTL.UnwrapOr(20) as Types.PositiveLong);
+        gracePeriod := gracePeriod.UnwrapOr(StormTracker.DefaultGracePeriod as Types.PositiveInteger) as Types.PositiveLong,
+                                            graceInterval := graceInterval.UnwrapOr(StormTracker.DefaultGraceInterval as Types.PositiveInteger) as Types.PositiveLong,
+                                                                                    fanOut := fanOut.UnwrapOr(StormTracker.DefaultFanOut as Types.PositiveInteger) as Types.PositiveLong,
+                                                                                                              inFlightTTL := inFlightTTL.UnwrapOr(StormTracker.DefaultInFlightTTL as Types.PositiveInteger) as Types.PositiveLong);
       var cmc := new StormTrackingCMC.StormTrackingCMC(localCMC);
 
       this.keyStore            := keyStore;
