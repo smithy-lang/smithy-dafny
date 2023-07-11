@@ -6,6 +6,15 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
+    # Manual trigger for this workflow, either the normal version
+    # or the nightly build that uses the latest Dafny prerelease
+    # (accordingly to the "nightly" parameter).
+    inputs:
+      nightly:
+        description: 'Run the nightly build'
+        required: false
+        type: boolean
   schedule:
     # Nightly build against Dafny's nightly prereleases,
     # for early warning of verification issues or regressions.
