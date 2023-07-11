@@ -77,12 +77,12 @@ module  {:options "/functionSyntax:4"} TestStormTracker {
       entryCapacity := 100,
       entryPruningTailSize := 1,
       trackerSettings := Some(StormTrackerSettings(
-        gracePeriod := 10,
-        graceInterval := 1,
-        fanOut := 3,
-        inFlightTTL := 20,
-        sleepMilli := 20
-      ))
+                              gracePeriod := 10,
+                              graceInterval := 1,
+                              fanOut := 3,
+                              inFlightTTL := 20,
+                              sleepMilli := 20
+    ))
     );
 
     var one := UTF8.EncodeAscii("one");
@@ -106,12 +106,12 @@ module  {:options "/functionSyntax:4"} TestStormTracker {
       entryCapacity := 100,
       entryPruningTailSize := 1,
       trackerSettings := Some(StormTrackerSettings(
-        gracePeriod := 10,
-        graceInterval := 1,
-        fanOut := 3,
-        inFlightTTL := 5,
-        sleepMilli := 20
-      ))
+                              gracePeriod := 10,
+                              graceInterval := 1,
+                              fanOut := 3,
+                              inFlightTTL := 5,
+                              sleepMilli := 20
+    ))
     );
 
     var one := UTF8.EncodeAscii("one");
@@ -141,12 +141,12 @@ module  {:options "/functionSyntax:4"} TestStormTracker {
       entryCapacity := 100,
       entryPruningTailSize := 1,
       trackerSettings := Some(StormTrackerSettings(
-        gracePeriod := 10,
-        graceInterval := 3,
-        fanOut := 10,
-        inFlightTTL := 20,
-        sleepMilli := 20
-      ))
+                              gracePeriod := 10,
+                              graceInterval := 3,
+                              fanOut := 10,
+                              inFlightTTL := 20,
+                              sleepMilli := 20
+    ))
     );
 
     var one := UTF8.EncodeAscii("one");
@@ -169,14 +169,14 @@ module  {:options "/functionSyntax:4"} TestStormTracker {
       entryCapacity := 100,
       entryPruningTailSize := 1,
       trackerSettings := Some(StormTrackerSettings(
-        gracePeriod := 10,
-        graceInterval := 3,
-        fanOut := 10,
-        inFlightTTL := 20,
-        sleepMilli := 20
-      ))
+                              gracePeriod := 10,
+                              graceInterval := 3,
+                              fanOut := 10,
+                              inFlightTTL := 20,
+                              sleepMilli := 20
+    ))
     );
-    
+
     var one := UTF8.EncodeAscii("one");
 
     var res2 :- expect st.PutCacheEntry(MakePut(one, 10010));
