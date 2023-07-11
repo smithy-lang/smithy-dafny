@@ -90,6 +90,7 @@ import software.amazon.cryptography.materialproviders.internaldafny.types.OnEncr
 import software.amazon.cryptography.materialproviders.internaldafny.types.PaddingScheme;
 import software.amazon.cryptography.materialproviders.internaldafny.types.PutCacheEntryInput;
 import software.amazon.cryptography.materialproviders.internaldafny.types.SignatureAlgorithm;
+import software.amazon.cryptography.materialproviders.internaldafny.types.StormTrackerSettings;
 import software.amazon.cryptography.materialproviders.internaldafny.types.SymmetricSignatureAlgorithm;
 import software.amazon.cryptography.materialproviders.internaldafny.types.UpdateUsageMetadataInput;
 import software.amazon.cryptography.materialproviders.internaldafny.types.ValidDecryptionMaterialsTransitionInput;
@@ -243,23 +244,11 @@ public class ToDafny {
     maxCacheSize = Objects.nonNull(nativeValue.maxCacheSize()) ?
         Option.create_Some((nativeValue.maxCacheSize()))
         : Option.create_None();
-    Option<Integer> gracePeriod;
-    gracePeriod = Objects.nonNull(nativeValue.gracePeriod()) ?
-        Option.create_Some((nativeValue.gracePeriod()))
+    Option<StormTrackerSettings> trackerSettings;
+    trackerSettings = Objects.nonNull(nativeValue.trackerSettings()) ?
+        Option.create_Some(ToDafny.StormTrackerSettings(nativeValue.trackerSettings()))
         : Option.create_None();
-    Option<Integer> graceInterval;
-    graceInterval = Objects.nonNull(nativeValue.graceInterval()) ?
-        Option.create_Some((nativeValue.graceInterval()))
-        : Option.create_None();
-    Option<Integer> fanOut;
-    fanOut = Objects.nonNull(nativeValue.fanOut()) ?
-        Option.create_Some((nativeValue.fanOut()))
-        : Option.create_None();
-    Option<Integer> inFlightTTL;
-    inFlightTTL = Objects.nonNull(nativeValue.inFlightTTL()) ?
-        Option.create_Some((nativeValue.inFlightTTL()))
-        : Option.create_None();
-    return new CreateAwsKmsHierarchicalKeyringInput(branchKeyId, branchKeyIdSupplier, keyStore, ttlSeconds, maxCacheSize, gracePeriod, graceInterval, fanOut, inFlightTTL);
+    return new CreateAwsKmsHierarchicalKeyringInput(branchKeyId, branchKeyIdSupplier, keyStore, ttlSeconds, maxCacheSize, trackerSettings);
   }
 
   public static CreateAwsKmsKeyringInput CreateAwsKmsKeyringInput(
@@ -395,23 +384,11 @@ public class ToDafny {
     entryPruningTailSize = Objects.nonNull(nativeValue.entryPruningTailSize()) ?
         Option.create_Some((nativeValue.entryPruningTailSize()))
         : Option.create_None();
-    Option<Integer> gracePeriod;
-    gracePeriod = Objects.nonNull(nativeValue.gracePeriod()) ?
-        Option.create_Some((nativeValue.gracePeriod()))
+    Option<StormTrackerSettings> trackerSettings;
+    trackerSettings = Objects.nonNull(nativeValue.trackerSettings()) ?
+        Option.create_Some(ToDafny.StormTrackerSettings(nativeValue.trackerSettings()))
         : Option.create_None();
-    Option<Integer> graceInterval;
-    graceInterval = Objects.nonNull(nativeValue.graceInterval()) ?
-        Option.create_Some((nativeValue.graceInterval()))
-        : Option.create_None();
-    Option<Integer> fanOut;
-    fanOut = Objects.nonNull(nativeValue.fanOut()) ?
-        Option.create_Some((nativeValue.fanOut()))
-        : Option.create_None();
-    Option<Integer> inFlightTTL;
-    inFlightTTL = Objects.nonNull(nativeValue.inFlightTTL()) ?
-        Option.create_Some((nativeValue.inFlightTTL()))
-        : Option.create_None();
-    return new CreateCryptographicMaterialsCacheInput(entryCapacity, entryPruningTailSize, gracePeriod, graceInterval, fanOut, inFlightTTL);
+    return new CreateCryptographicMaterialsCacheInput(entryCapacity, entryPruningTailSize, trackerSettings);
   }
 
   public static CreateDefaultClientSupplierInput CreateDefaultClientSupplierInput(
@@ -791,6 +768,21 @@ public class ToDafny {
         Option.create_Some((nativeValue.bytesUsed()))
         : Option.create_None();
     return new PutCacheEntryInput(identifier, materials, creationTime, expiryTime, messagesUsed, bytesUsed);
+  }
+
+  public static StormTrackerSettings StormTrackerSettings(
+      software.amazon.cryptography.materialproviders.model.StormTrackerSettings nativeValue) {
+    Integer gracePeriod;
+    gracePeriod = (nativeValue.gracePeriod());
+    Integer graceInterval;
+    graceInterval = (nativeValue.graceInterval());
+    Integer fanOut;
+    fanOut = (nativeValue.fanOut());
+    Integer inFlightTTL;
+    inFlightTTL = (nativeValue.inFlightTTL());
+    Integer sleepMilli;
+    sleepMilli = (nativeValue.sleepMilli());
+    return new StormTrackerSettings(gracePeriod, graceInterval, fanOut, inFlightTTL, sleepMilli);
   }
 
   public static UpdateUsageMetadataInput UpdateUsageMetadataInput(

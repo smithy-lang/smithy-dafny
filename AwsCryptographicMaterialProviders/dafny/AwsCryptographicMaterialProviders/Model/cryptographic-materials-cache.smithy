@@ -3,6 +3,7 @@ namespace aws.cryptography.materialProviders
 use aws.polymorph#reference
 use aws.polymorph#positional
 use aws.polymorph#extendable
+use aws.polymorph#javadoc
 
 @aws.polymorph#mutableLocalState
 @aws.polymorph#extendable
@@ -135,6 +136,34 @@ operation CreateCryptographicMaterialsCache {
   output: CreateCryptographicMaterialsCacheOutput,
 }
 
+structure StormTrackerSettings {
+  @required
+  @range(min: 0)
+  @javadoc("How many seconds before expiration should an attempt be made to refresh the materials.
+  If zero, use a simple cache with no storm tracking.")
+  gracePeriod: PositiveInteger,
+
+  @required
+  @range(min: 1)
+  @javadoc("How many seconds between attempts to refresh the materials.")
+  graceInterval: PositiveInteger,
+
+  @required
+  @range(min: 1)
+  @javadoc("How many simultaneous attempts to refresh the materials.")
+  fanOut: PositiveInteger,
+
+  @required
+  @range(min: 1)
+  @javadoc("How many seconds until an attempt to refresh the materials should be forgotten.")
+  inFlightTTL: PositiveInteger,
+
+  @required
+  @range(min: 1)
+  @javadoc("How many milliseconds should a thread sleep if fanOut is exceeded")
+  sleepMilli: PositiveInteger,
+}
+
 structure CreateCryptographicMaterialsCacheInput {
   //= aws-encryption-sdk-specification/framework/local-cryptographic-materials-cache.md#initialization
   //= type=implication
@@ -151,17 +180,7 @@ structure CreateCryptographicMaterialsCacheInput {
   entryCapacity: PositiveInteger,
 
   @range(min: 0)
-  entryPruningTailSize: PositiveInteger, 
+  entryPruningTailSize: PositiveInteger,
 
-  @range(min: 0)
-  gracePeriod: PositiveInteger,
-
-  @range(min: 0)
-  graceInterval: PositiveInteger,
-
-  @range(min: 0)
-  fanOut: PositiveInteger,
-
-  @range(min: 0)
-  inFlightTTL: PositiveInteger,
+  trackerSettings : StormTrackerSettings
 }

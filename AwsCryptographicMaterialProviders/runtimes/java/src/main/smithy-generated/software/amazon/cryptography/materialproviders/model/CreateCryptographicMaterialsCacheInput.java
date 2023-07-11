@@ -8,21 +8,12 @@ public class CreateCryptographicMaterialsCacheInput {
 
   private final int entryPruningTailSize;
 
-  private final int gracePeriod;
-
-  private final int graceInterval;
-
-  private final int fanOut;
-
-  private final int inFlightTTL;
+  private final StormTrackerSettings trackerSettings;
 
   protected CreateCryptographicMaterialsCacheInput(BuilderImpl builder) {
     this.entryCapacity = builder.entryCapacity();
     this.entryPruningTailSize = builder.entryPruningTailSize();
-    this.gracePeriod = builder.gracePeriod();
-    this.graceInterval = builder.graceInterval();
-    this.fanOut = builder.fanOut();
-    this.inFlightTTL = builder.inFlightTTL();
+    this.trackerSettings = builder.trackerSettings();
   }
 
   public int entryCapacity() {
@@ -33,20 +24,8 @@ public class CreateCryptographicMaterialsCacheInput {
     return this.entryPruningTailSize;
   }
 
-  public int gracePeriod() {
-    return this.gracePeriod;
-  }
-
-  public int graceInterval() {
-    return this.graceInterval;
-  }
-
-  public int fanOut() {
-    return this.fanOut;
-  }
-
-  public int inFlightTTL() {
-    return this.inFlightTTL;
+  public StormTrackerSettings trackerSettings() {
+    return this.trackerSettings;
   }
 
   public Builder toBuilder() {
@@ -66,21 +45,9 @@ public class CreateCryptographicMaterialsCacheInput {
 
     int entryPruningTailSize();
 
-    Builder gracePeriod(int gracePeriod);
+    Builder trackerSettings(StormTrackerSettings trackerSettings);
 
-    int gracePeriod();
-
-    Builder graceInterval(int graceInterval);
-
-    int graceInterval();
-
-    Builder fanOut(int fanOut);
-
-    int fanOut();
-
-    Builder inFlightTTL(int inFlightTTL);
-
-    int inFlightTTL();
+    StormTrackerSettings trackerSettings();
 
     CreateCryptographicMaterialsCacheInput build();
   }
@@ -94,21 +61,7 @@ public class CreateCryptographicMaterialsCacheInput {
 
     private boolean _entryPruningTailSizeSet = false;
 
-    protected int gracePeriod;
-
-    private boolean _gracePeriodSet = false;
-
-    protected int graceInterval;
-
-    private boolean _graceIntervalSet = false;
-
-    protected int fanOut;
-
-    private boolean _fanOutSet = false;
-
-    protected int inFlightTTL;
-
-    private boolean _inFlightTTLSet = false;
+    protected StormTrackerSettings trackerSettings;
 
     protected BuilderImpl() {
     }
@@ -118,14 +71,7 @@ public class CreateCryptographicMaterialsCacheInput {
       this._entryCapacitySet = true;
       this.entryPruningTailSize = model.entryPruningTailSize();
       this._entryPruningTailSizeSet = true;
-      this.gracePeriod = model.gracePeriod();
-      this._gracePeriodSet = true;
-      this.graceInterval = model.graceInterval();
-      this._graceIntervalSet = true;
-      this.fanOut = model.fanOut();
-      this._fanOutSet = true;
-      this.inFlightTTL = model.inFlightTTL();
-      this._inFlightTTLSet = true;
+      this.trackerSettings = model.trackerSettings();
     }
 
     public Builder entryCapacity(int entryCapacity) {
@@ -148,44 +94,13 @@ public class CreateCryptographicMaterialsCacheInput {
       return this.entryPruningTailSize;
     }
 
-    public Builder gracePeriod(int gracePeriod) {
-      this.gracePeriod = gracePeriod;
-      this._gracePeriodSet = true;
+    public Builder trackerSettings(StormTrackerSettings trackerSettings) {
+      this.trackerSettings = trackerSettings;
       return this;
     }
 
-    public int gracePeriod() {
-      return this.gracePeriod;
-    }
-
-    public Builder graceInterval(int graceInterval) {
-      this.graceInterval = graceInterval;
-      this._graceIntervalSet = true;
-      return this;
-    }
-
-    public int graceInterval() {
-      return this.graceInterval;
-    }
-
-    public Builder fanOut(int fanOut) {
-      this.fanOut = fanOut;
-      this._fanOutSet = true;
-      return this;
-    }
-
-    public int fanOut() {
-      return this.fanOut;
-    }
-
-    public Builder inFlightTTL(int inFlightTTL) {
-      this.inFlightTTL = inFlightTTL;
-      this._inFlightTTLSet = true;
-      return this;
-    }
-
-    public int inFlightTTL() {
-      return this.inFlightTTL;
+    public StormTrackerSettings trackerSettings() {
+      return this.trackerSettings;
     }
 
     public CreateCryptographicMaterialsCacheInput build() {
@@ -197,18 +112,6 @@ public class CreateCryptographicMaterialsCacheInput {
       }
       if (this._entryPruningTailSizeSet && this.entryPruningTailSize() < 0) {
         throw new IllegalArgumentException("`entryPruningTailSize` must be greater than or equal to 0");
-      }
-      if (this._gracePeriodSet && this.gracePeriod() < 0) {
-        throw new IllegalArgumentException("`gracePeriod` must be greater than or equal to 0");
-      }
-      if (this._graceIntervalSet && this.graceInterval() < 0) {
-        throw new IllegalArgumentException("`graceInterval` must be greater than or equal to 0");
-      }
-      if (this._fanOutSet && this.fanOut() < 0) {
-        throw new IllegalArgumentException("`fanOut` must be greater than or equal to 0");
-      }
-      if (this._inFlightTTLSet && this.inFlightTTL() < 0) {
-        throw new IllegalArgumentException("`inFlightTTL` must be greater than or equal to 0");
       }
       return new CreateCryptographicMaterialsCacheInput(this);
     }

@@ -45,7 +45,7 @@ module AwsCryptographyMaterialProvidersOperations refines AbstractAwsCryptograph
   import RawAESKeyring
   import RawRSAKeyring
   import opened C = DefaultCMM
-  import opened L = LocalCMC
+  import LocalCMC
   import SynchronizedLocalCMC
   import StormTracker
   import StormTrackingCMC
@@ -287,10 +287,7 @@ module AwsCryptographyMaterialProvidersOperations refines AbstractAwsCryptograph
       branchKeyIdSupplier := input.branchKeyIdSupplier,
       ttlSeconds := input.ttlSeconds,
       maxCacheSize := maxCacheSize,
-      gracePeriod := input.gracePeriod,
-      graceInterval := input.graceInterval,
-      fanOut := input.fanOut,
-      inFlightTTL := input.inFlightTTL,
+      trackerSettings := input.trackerSettings,
       cryptoPrimitives := config.crypto
     );
     return Success(keyring);
@@ -522,23 +519,16 @@ module AwsCryptographyMaterialProvidersOperations refines AbstractAwsCryptograph
       entryPruningTailSize := 1;
     }
 
-    var gracePeriod := input.gracePeriod.UnwrapOr(10);
-    var graceInterval := input.graceInterval.UnwrapOr(1);
-    var fanOut := input.fanOut.UnwrapOr(20);
-    var inFlightTTL := input.inFlightTTL.UnwrapOr(20);
-
-    if gracePeriod <= 0 || graceInterval <= 0 || fanOut <= 0 || inFlightTTL <= 0 {
+    if input.trackerSettings.None? || input.trackerSettings.value.gracePeriod > 0 {
       var cmc := new StormTracker.StormTracker(
         entryCapacity := input.entryCapacity as nat,
         entryPruningTailSize := entryPruningTailSize,
-        gracePeriod := gracePeriod as Types.PositiveLong,
-        graceInterval := graceInterval as Types.PositiveLong,
-        fanOut := fanOut as Types.PositiveLong,
-        inFlightTTL := inFlightTTL as Types.PositiveLong);
+        trackerSettings := input.trackerSettings
+      );
       var synCmc := new StormTrackingCMC.StormTrackingCMC(cmc);
       return Success(synCmc);
     } else {
-      var cmc := new LocalCMC(input.entryCapacity as nat, entryPruningTailSize);
+      var cmc := new LocalCMC.LocalCMC(input.entryCapacity as nat, entryPruningTailSize);
       var synCmc := new SynchronizedLocalCMC.SynchronizedLocalCMC(cmc);
       return Success(synCmc);
     }

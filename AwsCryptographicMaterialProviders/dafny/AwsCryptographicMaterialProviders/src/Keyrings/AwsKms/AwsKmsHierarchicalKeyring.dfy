@@ -12,7 +12,8 @@ include "../../AwsArnParsing.dfy"
 include "AwsKmsUtils.dfy"
 include "../../CMCs/StormTracker.dfy"
 include "../../CMCs/StormTrackingCMC.dfy"
-
+include "../../CMCs/LocalCMC.dfy"
+include "../../CMCs/SynchronizedLocalCMC.dfy"
 include "../../../Model/AwsCryptographyMaterialProvidersTypes.dfy"
 
 module AwsKmsHierarchicalKeyring {
@@ -25,6 +26,8 @@ module AwsKmsHierarchicalKeyring {
   import opened Actions
   import opened Constants
   import opened A = AwsKmsMrkMatchForDecrypt
+  import LocalCMC
+  import SynchronizedLocalCMC
   import StormTracker
   import StormTrackingCMC
   import opened AlgorithmSuites
@@ -161,10 +164,7 @@ module AwsKmsHierarchicalKeyring {
       //= type=implication
       //# - MAY provide a max cache size
       maxCacheSize: Types.PositiveInteger,
-      gracePeriod: Option<Types.PositiveInteger>,
-      graceInterval: Option<Types.PositiveInteger>,
-      fanOut: Option<Types.PositiveInteger>,
-      inFlightTTL: Option<Types.PositiveInteger>,
+      trackerSettings: Option<Types.StormTrackerSettings>,
       cryptoPrimitives : Primitives.AtomicPrimitivesClient
     )
       requires maxCacheSize >= 1
@@ -185,14 +185,18 @@ module AwsKmsHierarchicalKeyring {
         && var maybeSupplierModifies := if branchKeyIdSupplier.Some? then branchKeyIdSupplier.value.Modifies else {};
         && fresh(Modifies - keyStore.Modifies - cryptoPrimitives.Modifies - maybeSupplierModifies)
     {
-      var localCMC := new StormTracker.StormTracker(
-        entryCapacity := maxCacheSize as nat,
-        entryPruningTailSize := 1,
-        gracePeriod := gracePeriod.UnwrapOr(StormTracker.DefaultGracePeriod as Types.PositiveInteger) as Types.PositiveLong,
-                                            graceInterval := graceInterval.UnwrapOr(StormTracker.DefaultGraceInterval as Types.PositiveInteger) as Types.PositiveLong,
-                                                                                    fanOut := fanOut.UnwrapOr(StormTracker.DefaultFanOut as Types.PositiveInteger) as Types.PositiveLong,
-                                                                                                              inFlightTTL := inFlightTTL.UnwrapOr(StormTracker.DefaultInFlightTTL as Types.PositiveInteger) as Types.PositiveLong);
-      var cmc := new StormTrackingCMC.StormTrackingCMC(localCMC);
+      var cmc : Types.ICryptographicMaterialsCache;
+      if trackerSettings.None? || trackerSettings.value.gracePeriod > 0 {
+        var localCmc := new StormTracker.StormTracker(
+          entryCapacity := maxCacheSize as nat,
+          entryPruningTailSize := 1,
+          trackerSettings := trackerSettings
+        );
+        cmc := new StormTrackingCMC.StormTrackingCMC(localCmc);
+      } else {
+        var localCmc := new LocalCMC.LocalCMC(maxCacheSize as nat, 1);
+        cmc := new SynchronizedLocalCMC.SynchronizedLocalCMC(localCmc);
+      }
 
       this.keyStore            := keyStore;
       this.branchKeyId         := branchKeyId;

@@ -35,6 +35,7 @@ module {:options "/functionSyntax:4" }  StormTracker {
   const DefaultGraceInterval := 1 as Types.PositiveLong
   const DefaultFanOut := 20 as Types.PositiveLong
   const DefaultInFlightTTL := 20 as Types.PositiveLong
+  const DefaultSleep := 20 as Types.PositiveLong
 
   class StormTracker {
 
@@ -52,14 +53,12 @@ module {:options "/functionSyntax:4" }  StormTracker {
     var fanOut : Types.PositiveLong // maximum keys in flight at one time
     var inFlightTTL : Types.PositiveLong // maximum time before a key is no longer in flight
     var lastPrune : Types.PositiveLong // timestamp of last call to PruneInFlight
+    var sleepMilli : Types.PositiveLong // how long to sleep, if we sleep
 
     constructor(
       entryCapacity: nat,
       entryPruningTailSize: nat := 1,
-      gracePeriod : Types.PositiveLong := DefaultGracePeriod,
-      graceInterval : Types.PositiveLong := DefaultGraceInterval,
-      fanOut : Types.PositiveLong := DefaultFanOut,
-      inFlightTTL : Types.PositiveLong := DefaultInFlightTTL
+      trackerSettings: Option<Types.StormTrackerSettings> := None
     )
       requires entryPruningTailSize >= 1
       ensures
@@ -70,10 +69,20 @@ module {:options "/functionSyntax:4" }  StormTracker {
     {
       this.wrapped := new LocalCMC.LocalCMC(entryCapacity, entryPruningTailSize);
       this.inFlight := new MutableMap();
-      this.gracePeriod := if gracePeriod > 0 then gracePeriod else DefaultGracePeriod;
-      this.graceInterval := if graceInterval > 0 then graceInterval else DefaultGraceInterval;
-      this.fanOut := if fanOut > 0 then fanOut else DefaultFanOut;
-      this.inFlightTTL := if inFlightTTL > 0 then inFlightTTL else DefaultInFlightTTL;
+      if trackerSettings.Some? {
+        var v := trackerSettings.value;
+        this.gracePeriod := v.gracePeriod as Types.PositiveLong;
+        this.graceInterval := v.graceInterval as Types.PositiveLong;
+        this.fanOut := v.fanOut as Types.PositiveLong;
+        this.inFlightTTL := v.inFlightTTL as Types.PositiveLong;
+        this.sleepMilli := v.sleepMilli as Types.PositiveLong;
+      } else {
+        this.gracePeriod := DefaultGracePeriod;
+        this.graceInterval := DefaultGraceInterval;
+        this.fanOut := DefaultFanOut;
+        this.inFlightTTL := DefaultInFlightTTL;
+        this.sleepMilli := DefaultSleep;
+      }
       this.lastPrune := 0;
     }
 

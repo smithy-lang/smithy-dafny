@@ -67,7 +67,7 @@ public class StormTrackingCMC
             .create_Failure(software.amazon.cryptography.materialproviders.internaldafny.types.Error
                 .create_EntryDoesNotExist(dafny.DafnySequence.asString("Entry does not exist")));
       } else {
-        try {Thread.sleep(50);} catch (Exception e) {}
+        try {Thread.sleep(wrapped.sleepMilli);} catch (Exception e) {}
       }
     }
   }

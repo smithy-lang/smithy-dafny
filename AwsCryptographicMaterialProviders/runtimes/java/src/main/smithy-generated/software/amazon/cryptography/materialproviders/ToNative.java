@@ -99,6 +99,7 @@ import software.amazon.cryptography.materialproviders.model.OpaqueError;
 import software.amazon.cryptography.materialproviders.model.PaddingScheme;
 import software.amazon.cryptography.materialproviders.model.PutCacheEntryInput;
 import software.amazon.cryptography.materialproviders.model.SignatureAlgorithm;
+import software.amazon.cryptography.materialproviders.model.StormTrackerSettings;
 import software.amazon.cryptography.materialproviders.model.SymmetricSignatureAlgorithm;
 import software.amazon.cryptography.materialproviders.model.UpdateUsageMetadataInput;
 import software.amazon.cryptography.materialproviders.model.ValidDecryptionMaterialsTransitionInput;
@@ -300,17 +301,8 @@ public class ToNative {
     if (dafnyValue.dtor_maxCacheSize().is_Some()) {
       nativeBuilder.maxCacheSize((dafnyValue.dtor_maxCacheSize().dtor_value()));
     }
-    if (dafnyValue.dtor_gracePeriod().is_Some()) {
-      nativeBuilder.gracePeriod((dafnyValue.dtor_gracePeriod().dtor_value()));
-    }
-    if (dafnyValue.dtor_graceInterval().is_Some()) {
-      nativeBuilder.graceInterval((dafnyValue.dtor_graceInterval().dtor_value()));
-    }
-    if (dafnyValue.dtor_fanOut().is_Some()) {
-      nativeBuilder.fanOut((dafnyValue.dtor_fanOut().dtor_value()));
-    }
-    if (dafnyValue.dtor_inFlightTTL().is_Some()) {
-      nativeBuilder.inFlightTTL((dafnyValue.dtor_inFlightTTL().dtor_value()));
+    if (dafnyValue.dtor_trackerSettings().is_Some()) {
+      nativeBuilder.trackerSettings(ToNative.StormTrackerSettings(dafnyValue.dtor_trackerSettings().dtor_value()));
     }
     return nativeBuilder.build();
   }
@@ -427,17 +419,8 @@ public class ToNative {
     if (dafnyValue.dtor_entryPruningTailSize().is_Some()) {
       nativeBuilder.entryPruningTailSize((dafnyValue.dtor_entryPruningTailSize().dtor_value()));
     }
-    if (dafnyValue.dtor_gracePeriod().is_Some()) {
-      nativeBuilder.gracePeriod((dafnyValue.dtor_gracePeriod().dtor_value()));
-    }
-    if (dafnyValue.dtor_graceInterval().is_Some()) {
-      nativeBuilder.graceInterval((dafnyValue.dtor_graceInterval().dtor_value()));
-    }
-    if (dafnyValue.dtor_fanOut().is_Some()) {
-      nativeBuilder.fanOut((dafnyValue.dtor_fanOut().dtor_value()));
-    }
-    if (dafnyValue.dtor_inFlightTTL().is_Some()) {
-      nativeBuilder.inFlightTTL((dafnyValue.dtor_inFlightTTL().dtor_value()));
+    if (dafnyValue.dtor_trackerSettings().is_Some()) {
+      nativeBuilder.trackerSettings(ToNative.StormTrackerSettings(dafnyValue.dtor_trackerSettings().dtor_value()));
     }
     return nativeBuilder.build();
   }
@@ -769,6 +752,17 @@ public class ToNative {
     if (dafnyValue.dtor_bytesUsed().is_Some()) {
       nativeBuilder.bytesUsed((dafnyValue.dtor_bytesUsed().dtor_value()));
     }
+    return nativeBuilder.build();
+  }
+
+  public static StormTrackerSettings StormTrackerSettings(
+      software.amazon.cryptography.materialproviders.internaldafny.types.StormTrackerSettings dafnyValue) {
+    StormTrackerSettings.Builder nativeBuilder = StormTrackerSettings.builder();
+    nativeBuilder.gracePeriod((dafnyValue.dtor_gracePeriod()));
+    nativeBuilder.graceInterval((dafnyValue.dtor_graceInterval()));
+    nativeBuilder.fanOut((dafnyValue.dtor_fanOut()));
+    nativeBuilder.inFlightTTL((dafnyValue.dtor_inFlightTTL()));
+    nativeBuilder.sleepMilli((dafnyValue.dtor_sleepMilli()));
     return nativeBuilder.build();
   }
 
