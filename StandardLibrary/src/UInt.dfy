@@ -11,7 +11,6 @@ module StandardLibrary.UInt {
   type uint64 = BoundedInts.uint64
   type int32 = BoundedInts.int32
   type int64 = BoundedInts.int64
-
   const UINT16_LIMIT := BoundedInts.UINT16_MAX as int
   const UINT32_LIMIT := BoundedInts.UINT32_MAX as int
   const UINT64_LIMIT := BoundedInts.UINT64_MAX as int
@@ -21,21 +20,21 @@ module StandardLibrary.UInt {
   predicate method UInt8Less(a: uint8, b: uint8) { a < b }
 
   predicate method HasUint16Len<T>(s: seq<T>) {
-    |s| < UINT16_LIMIT
+    |s| <= UINT16_LIMIT
   }
 
   type seq16<T> = s: seq<T> | HasUint16Len(s)
   type Uint8Seq16 = seq16<uint8>
 
   predicate method HasUint32Len<T>(s: seq<T>) {
-    |s| < UINT32_LIMIT
+    |s| <= UINT32_LIMIT
   }
 
   type seq32<T> = s: seq<T> | HasUint32Len(s)
   type Uint8Seq32 = seq32<uint8>
 
   predicate method HasUint64Len<T>(s: seq<T>) {
-    |s| < UINT64_LIMIT
+    |s| <= UINT64_LIMIT
   }
 
   type seq64<T> = s: seq<T> | HasUint64Len(s)
