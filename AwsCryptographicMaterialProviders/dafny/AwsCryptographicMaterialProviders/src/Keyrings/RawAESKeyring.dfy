@@ -141,6 +141,8 @@ module RawAESKeyring {
 
                 && 1 <= |cryptoPrimitives.History.GenerateRandomBytes|
                 && Seq.Last(cryptoPrimitives.History.GenerateRandomBytes).output.Success?
+      ensures output.Success?
+              ==>
                 && var iv :=  Seq.Last(cryptoPrimitives.History.GenerateRandomBytes).output.value;
                 && |iv| == wrappingAlgorithm.ivLength as nat
 
