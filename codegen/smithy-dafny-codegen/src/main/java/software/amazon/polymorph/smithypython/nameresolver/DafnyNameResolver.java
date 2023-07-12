@@ -16,6 +16,14 @@ public class DafnyNameResolver {
     return shapeId.getNamespace().toLowerCase(Locale.ROOT) + ".internaldafny.types";
   }
 
+  public static String getDafnyImplModuleNamespaceForShape(Shape shape) {
+    return getDafnyImplModuleNamespaceForShape(shape.getId());
+  }
+
+  public static String getDafnyImplModuleNamespaceForShape(ShapeId shapeId) {
+    return shapeId.getNamespace().toLowerCase(Locale.ROOT) + ".internaldafny.impl";
+  }
+
   public static String getDafnyTypeForShape(ShapeId shapeId) {
     if (Utils.isUnitShape(shapeId)) {
       // Dafny models Unit shapes as the Python `None` type

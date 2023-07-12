@@ -17,7 +17,9 @@ import software.amazon.smithy.python.codegen.GenerationContext;
 
 public class ShimFileWriter implements CustomFileWriter {
 
-  public static void generateFile(ServiceShape serviceShape, GenerationContext codegenContext) {
+  @Override
+  public void generateFileForServiceShape(
+      ServiceShape serviceShape, GenerationContext codegenContext) {
     // TODO: refactor to DafnyProtocolFileWriter
     // TODO: Naming of this file?
 
