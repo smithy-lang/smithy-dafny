@@ -16,14 +16,11 @@
 package software.amazon.polymorph.smithypython;
 
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
-import java.util.TreeSet;
-import software.amazon.polymorph.smithypython.DafnyProtocolGenerator.DafnyMemberDeserVisitor;
-import software.amazon.polymorph.smithypython.DafnyProtocolGenerator.DafnyMemberSerVisitor;
-import software.amazon.polymorph.traits.LocalServiceTrait;
+import software.amazon.polymorph.smithypython.customize.ShimFileWriter;
+import software.amazon.polymorph.smithypython.nameresolver.PythonNameResolver;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolReference;
 import software.amazon.smithy.model.shapes.OperationShape;
@@ -57,8 +54,10 @@ public final class DafnyIntegration implements PythonIntegration {
                     .name("DafnyImplInterface")
                     .namespace(".dafnyImplInterface", ".")
                 .build(),
-                // isOptional is marked as true here, but in practice, this is required.
-                // The plugin will add a value immediately after Config is created.
+                // isOptional is marked as true here.
+                // This allows the Config to be instantiated without providing a plugin.
+                // However, this plugin MUST be present before using the client.
+                // Immediately after the Config is instantiated, the client will add the plugin.
                 true, ""))
          ).pythonPlugin(
              SymbolReference.builder()
@@ -77,28 +76,8 @@ public final class DafnyIntegration implements PythonIntegration {
         return List.of(new SendRequestInterceptor());
     }
 
-    // TODO: Refactor into nameresovler
-    public String clientForService(ServiceShape serviceShape) {
-        if (serviceShape.hasTrait(LocalServiceTrait.class)) {
-            return serviceShape.expectTrait(LocalServiceTrait.class).getSdkId() + "Client";
-        } else {
-            throw new UnsupportedOperationException("Non-local services not supported");
-        }
-    }
-    public String shimForService(ServiceShape serviceShape) {
-        if (serviceShape.hasTrait(LocalServiceTrait.class)) {
-            return serviceShape.expectTrait(LocalServiceTrait.class).getSdkId() + "Shim";
-        } else {
-            throw new UnsupportedOperationException("Non-local services not supported");
-        }
-    }
-
-    @Override
-    public void customize(GenerationContext codegenContext) {
-        // TODO: Refactor into a nameResolver and call nameForService
-        // TODO: Support more than 1 service (will throw IndexOutOfBoundsException if >1 service)
-        ServiceShape serviceShape = (ServiceShape) codegenContext.model().getServiceShapes().toArray()[0];
-        String clientName = clientForService(serviceShape);
+    public void customizeForServiceShape(ServiceShape serviceShape, GenerationContext codegenContext) {
+        String clientName = PythonNameResolver.clientForService(serviceShape);
 
         // TODO: nameResolver
         String moduleName =  codegenContext.settings().getModuleName();
@@ -108,29 +87,29 @@ public final class DafnyIntegration implements PythonIntegration {
         // TODO: Naming of this file?
         codegenContext.writerDelegator().useFileWriter(moduleName + "/plugin.py", "", writer -> {
             writer.write(
-            """
-            from .config import Config, Plugin
-            from smithy_python.interfaces.retries import RetryStrategy
-            from smithy_python.exceptions import SmithyRetryException
-            from .dafnyImplInterface import DafnyImplInterface
-            
-            def set_config_impl(config: Config):
-                from $L import $L
-                config.dafnyImplInterface = DafnyImplInterface()
-                config.dafnyImplInterface.impl = $L()
-                config.retry_strategy = NoRetriesStrategy()
-            
-            class NoRetriesToken:
-                retry_delay = 0
-            
-            class NoRetriesStrategy(RetryStrategy):
-                def acquire_initial_retry_token(self):
-                    return NoRetriesToken()
-            
-                def refresh_retry_token_for_retry(self, token_to_renew, error_info):
-                    # Do not retry
-                    raise SmithyRetryException()
-                    """, implModulePrelude, clientName, clientName
+                """
+                from .config import Config, Plugin
+                from smithy_python.interfaces.retries import RetryStrategy
+                from smithy_python.exceptions import SmithyRetryException
+                from .dafnyImplInterface import DafnyImplInterface
+                
+                def set_config_impl(config: Config):
+                    from $L import $L
+                    config.dafnyImplInterface = DafnyImplInterface()
+                    config.dafnyImplInterface.impl = $L()
+                    config.retry_strategy = NoRetriesStrategy()
+                
+                class NoRetriesToken:
+                    retry_delay = 0
+                
+                class NoRetriesStrategy(RetryStrategy):
+                    def acquire_initial_retry_token(self):
+                        return NoRetriesToken()
+                
+                    def refresh_retry_token_for_retry(self, token_to_renew, error_info):
+                        # Do not retry
+                        raise SmithyRetryException()
+                        """, implModulePrelude, clientName, clientName
             );
         });
 
@@ -147,26 +126,26 @@ public final class DafnyIntegration implements PythonIntegration {
         // TODO: Naming of this file?
         codegenContext.writerDelegator().useFileWriter(moduleName + "/dafnyImplInterface.py", "", writer -> {
             writer.write(
-            """
-            from $L import $L
-            
-            class DafnyImplInterface:
-                $L: $L | None = None
-            
-                def handle_request(self, input):
+                """
+                from $L import $L
                 
-                    # TODO: populate map at runtime (since impl is only populated at runtime, and avoids a None exception),
-                    #       but don't re-populate it at every handle_request call, i.e. cache
-                    operation_map = {
-                        $L
-                    }
-            
-                    operation_name = input[0]
-                    if input[1] == None:
-                        return operation_map[operation_name]()
-                    else:
-                        return operation_map[operation_name](input[1])
-            """, implModulePrelude, clientName, "impl", clientName, allOperations
+                class DafnyImplInterface:
+                    $L: $L | None = None
+                
+                    def handle_request(self, input):
+                    
+                        # TODO: populate map at runtime (since impl is only populated at runtime, and avoids a None exception),
+                        #       but don't re-populate it at every handle_request call, i.e. cache
+                        operation_map = {
+                            $L
+                        }
+                
+                        operation_name = input[0]
+                        if input[1] == None:
+                            return operation_map[operation_name]()
+                        else:
+                            return operation_map[operation_name](input[1])
+                """, implModulePrelude, clientName, "impl", clientName, allOperations
             );
         });
 
@@ -190,130 +169,7 @@ public final class DafnyIntegration implements PythonIntegration {
             );
         });
 
-        String typesModulePrelude = serviceShape.getId().getNamespace().toLowerCase(Locale.ROOT) + ".internaldafny.types";
-        // TODO: refactor to DafnyProtocolFileWriter
-        // TODO: Naming of this file?
-
-        // TODO: StringBuilder
-        /*
-        TODO: This is what this SHOULD look like after getting some sort of TypeConversion in
-                        unwrapped_request = TypeConversion.ToNative(input)
-                        try:
-                            wrapped_response = self._impl.get_integer(unwrapped_request)
-                            return Wrappers_Compile.Result_Success(wrapped_response)
-                        catch ex:
-                            return Wrappers_Compile.Result_Failure(ex)
-         */
-        String operationsShim = "";
-        String errorsString = "";
-        Set<ShapeId> allInputShapesSet = new HashSet<>();
-        var deserializingErrorShapes = new TreeSet<ShapeId>();
-        var service = codegenContext.settings().getService(codegenContext.model());
-        for (OperationShape operationShape : codegenContext.model().getOperationShapes()) {
-            deserializingErrorShapes.addAll(operationShape.getErrors(service));
-            String inputName = operationShape.getInputShape().getName();
-            allInputShapesSet.add(operationShape.getInputShape());
-            String doubledInputName = typesModulePrelude + "." + inputName + "_" + inputName;
-            String outputName = operationShape.getOutputShape().getName();
-            String doubledOutputName = typesModulePrelude + "." + outputName + "_" + outputName;
-            String operationSymbol = codegenContext.symbolProvider().toSymbol(operationShape).getName();
-
-            Shape targetShape = codegenContext.model().expectShape(operationShape.getOutputShape());
-            var output = targetShape.accept(new DafnyMemberDeserVisitor(
-                codegenContext,
-                "wrapped_response",
-                true
-            ));
-
-            Shape targetShapeInput = codegenContext.model().expectShape(operationShape.getInputShape());
-            var input = targetShapeInput.accept(new DafnyMemberSerVisitor(
-                codegenContext,
-//          writer,
-                "input",
-                false
-            ));
-
-            operationsShim += """
-                    def %1$s(self, %2$s) -> %3$s:
-                            unwrapped_request: %4$s = %4$s(%6$s)
-                            try:
-                                wrapped_response = asyncio.run(self._impl.%5$s(unwrapped_request))
-                            except ServiceError as e:
-                                return Wrappers_Compile.Result_Failure(smithy_error_to_dafny_error(e))
-                            return Wrappers_Compile.Result_Success(%3$s%7$s)
-                """.formatted(
-                    operationShape.getId().getName(),
-                inputName.equals("Unit") ? "" : "input: " + doubledInputName,
-                outputName.equals("Unit") ? "None" : doubledOutputName,
-                inputName,
-                operationSymbol,
-                input,
-                outputName.equals("Unit") ? "" : "(" + output + ")"
-                );
-        }
-        String allOperationsShim = operationsShim;
-
-        for (ShapeId errorShape : deserializingErrorShapes) {
-            errorsString += """
-if isinstance(e, %1$s):
-        return %2$s%3$s(message=e.message)
-                """.formatted(
-                    errorShape.getName(),
-                errorShape.getNamespace() + ".internaldafny.types.",
-                "Error_" + errorShape.getName()
-            );
-        }
-
-        errorsString += """
-                    if isinstance(e, CollectionOfErrors):
-                        return %1$sError_CollectionOfErrors(message=e.message, list=e.list)
-                """.formatted(
-                    service.getId().getNamespace() + ".internaldafny.types."
-        );
-
-        errorsString += """
-                    if isinstance(e, OpaqueError):
-                        return %1$sError_Opaque(obj=e.obj)
-                """.formatted(
-            service.getId().getNamespace() + ".internaldafny.types."
-        );
-
-        final String finalErrorsString = errorsString;
-
-        codegenContext.writerDelegator().useFileWriter(moduleName + "/shim.py", "", writer -> {
-            for (ShapeId inputShapeId : allInputShapesSet) {
-                writer.addImport(".models", inputShapeId.getName());
-            }
-
-            writer.addImport(".errors", "ServiceError");
-            writer.addImport(".errors", "CollectionOfErrors");
-            writer.addImport(".errors", "OpaqueError");
-
-            for (ShapeId errorShapeId : deserializingErrorShapes) {
-                writer.addImport(".errors", errorShapeId.getName());
-            }
-
-            writer.write(
-                """
-                import Wrappers_Compile
-                import asyncio
-                import $L
-                import $L.smithy_generated.$L.client as client_impl
-               
-                                
-                def smithy_error_to_dafny_error(e: ServiceError):
-                $L
-                                
-                class $L($L.$L):
-                    def __init__(self, _impl: client_impl) :
-                        self._impl = _impl
-                                
-                $L
-                    
-                    """, typesModulePrelude, moduleName, moduleName, finalErrorsString, shimForService(serviceShape),
-                typesModulePrelude, "I" + serviceShape.getId().getName() + "Client", allOperationsShim
-            );
-        });
+        ShimFileWriter.generateFile(serviceShape, codegenContext);
 
         codegenContext.writerDelegator().useFileWriter(moduleName + "/errors.py", "", writer -> {
             writer.addStdlibImport("typing", "Dict");
@@ -453,6 +309,15 @@ if isinstance(e, %1$s):
                     """
             );
         });
+    }
+
+    @Override
+    public void customize(GenerationContext codegenContext) {
+        Set<ServiceShape> serviceShapes = codegenContext.model().getServiceShapes();
+
+        for (ServiceShape serviceShape : serviceShapes) {
+            customizeForServiceShape(serviceShape, codegenContext);
+        }
 
     }
 

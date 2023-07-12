@@ -15,19 +15,16 @@
 
 package software.amazon.polymorph.smithypython;
 
-import static software.amazon.smithy.model.traits.TimestampFormatTrait.Format;
-
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import software.amazon.polymorph.smithypython.nameresolver.DafnyNameResolver;
+import software.amazon.polymorph.smithypython.nameresolver.Utils;
 import software.amazon.smithy.codegen.core.CodegenException;
-import software.amazon.smithy.model.knowledge.HttpBinding.Location;
+import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.model.knowledge.TopDownIndex;
 import software.amazon.smithy.model.shapes.BigDecimalShape;
 import software.amazon.smithy.model.shapes.BigIntegerShape;
@@ -38,9 +35,7 @@ import software.amazon.smithy.model.shapes.DoubleShape;
 import software.amazon.smithy.model.shapes.FloatShape;
 import software.amazon.smithy.model.shapes.IntegerShape;
 import software.amazon.smithy.model.shapes.LongShape;
-import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
-import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.ShapeVisitor;
@@ -57,7 +52,6 @@ import software.amazon.smithy.python.codegen.integration.ProtocolGenerator;
 import software.amazon.smithy.utils.CaseUtils;
 import software.amazon.smithy.utils.CodeSection;
 import software.amazon.smithy.utils.SmithyUnstableApi;
-import software.amazon.smithy.utils.StringUtils;
 
 /**
  *
@@ -89,12 +83,11 @@ public abstract class DafnyProtocolGenerator implements ProtocolGenerator {
 
       delegator.useFileWriter(serFunction.getDefinitionFile(), serFunction.getNamespace(), writer -> {
         writer.pushState(new RequestSerializerSection(operation));
-        // TODO: nameresolver
         writer.write("""
                   async def $L(input: $T, config: $T) -> $L:
                       ${C|}
                   """, serFunction.getName(), inputSymbol, configSymbol,
-            input.getId().getName().equals("Unit") ? "None" : "Dafny" + inputSymbol.getName(),
+            DafnyNameResolver.getDafnyTypeForShape(input),
             writer.consumer(w -> generateRequestSerializer(context, operation, w)));
         writer.popState();
       });
@@ -107,7 +100,6 @@ public abstract class DafnyProtocolGenerator implements ProtocolGenerator {
    * @param operation The operation whose serializer is being generated.
    */
   public record RequestSerializerSection(OperationShape operation) implements CodeSection {}
-
 
   /**
    * Generates the content of the operation request serializer.
@@ -132,47 +124,27 @@ public abstract class DafnyProtocolGenerator implements ProtocolGenerator {
       OperationShape operation,
       PythonWriter writer
   ) {
+
     writer.addDependency(SmithyPythonDependency.SMITHY_PYTHON);
-    ServiceShape serviceShape = ( ServiceShape) context.model().getServiceShapes().toArray()[0];
-    String serviceName = serviceShape.getId().getName();
+    // Import the Dafny type being converted to
+    DafnyNameResolver.importDafnyTypeForShape(writer, operation.getInputShape());
 
-    // TODO: nameresolver
-    String typesModulePrelude = operation.getInputShape().getNamespace().toLowerCase(Locale.ROOT) + ".internaldafny.types";
-    String inputName = operation.getInputShape().getName();
-    if (!inputName.equals("Unit")) {
-      writer.addImport(typesModulePrelude, inputName + "_" + inputName, "Dafny" + inputName);
-    }
+    Shape targetShape = context.model().expectShape(operation.getInputShape());
+    var input = targetShape.accept(new DafnyMemberSerVisitor(
+        context,
+        "input",
+        true
+    ));
 
-
-
-    System.out.println("serring");
-    System.out.println(operation.getInputShape());
-    System.out.println(inputName);
-
-    // TODO better Unit checking
-    if (inputName.equals("Unit")) {
-      writer.write("""
-          return ("$L", None)
-          """, operation.getId().getName()
-      );
-    } else {
-      // TODO: This isn't right... need to support >1 member in structure
-      Shape targetShape = context.model().expectShape(operation.getInputShape());
-      var input = targetShape.accept(new DafnyMemberSerVisitor(
-          context,
-//          writer,
-          "input",
-          true
-      ));
-
-      writer.write("""
-          return ("$L", $L($L))
-          """, operation.getId().getName(), "Dafny" + inputName, input
-      );
-
-    }
-
-
+    writer.write(
+          """
+          return ("$L", $L$L)
+          """,
+        operation.getId().getName(),
+        DafnyNameResolver.getDafnyTypeForShape(operation.getInputShape()),
+        // TODO: refactor
+        Utils.isUnitShape(operation.getInputShape()) ? "" : "(" + input + ")"
+    );
   }
 
   @Override
@@ -198,15 +170,14 @@ public abstract class DafnyProtocolGenerator implements ProtocolGenerator {
                   async def $L(input: $L, config: $T) -> $T:
                     ${C|}
                   """, deserFunction.getName(),
-            output.getId().getName().equals("Unit") ? "None" : "Dafny" + outputSymbol.getName(), configSymbol, outputSymbol,
+            DafnyNameResolver.getDafnyTypeForShape(output), configSymbol, outputSymbol,
             writer.consumer(w -> generateOperationResponseDeserializer(context, operation)));
+
         writer.popState();
       });
-
     }
 
     generateErrorResponseDeserializerSection(context, deserializingErrorShapes);
-
     generateDocumentBodyShapeDeserializers(context, deserializingDocumentShapes);
   }
 
@@ -237,44 +208,29 @@ public abstract class DafnyProtocolGenerator implements ProtocolGenerator {
     delegator.useFileWriter(deserFunction.getDefinitionFile(), deserFunction.getNamespace(), writer -> {
       writer.pushState(new ResponseDeserializerSection(operation));
 
-      // TODO: nameresolver
-      String typesModulePrelude = operation.getOutputShape().getNamespace().toLowerCase(Locale.ROOT)  + ".internaldafny.types";
-      String outputName = operation.getOutputShape().getName();
-      if (!outputName.equals("Unit")) {
-        writer.addImport(typesModulePrelude, outputName + "_" + outputName, "Dafny" + outputName);
-      }
+      ShapeId outputShape = operation.getOutputShape();
+      DafnyNameResolver.importDafnyTypeForShape(writer, outputShape);
 
-      Shape targetShape = context.model().expectShape(operation.getOutputShape());
-      // TODO: support >1 member in structure
-
-      // TODO better Unit checking
       // TODO: If there is no output... how can there be an error?
-      if (outputName.equals("Unit")) {
+      if (Utils.isUnitShape(outputShape)) {
         writer.write("""
-return None
-      """);
-        writer.popState();
+          return None
+          """);
       } else {
-
-        // TODO: This isn't right... need to support >1 member in structure
+        Shape targetShape = context.model().expectShape(outputShape);
         var output = targetShape.accept(new DafnyMemberDeserVisitor(
             context,
-//            writer,
             "input.value",
             false
         ));
 
         writer.write("""
-if input.IsFailure():
-  return await _deserialize_error(input.error)
-return $L($L)
-      """, outputName, output);
-
-        writer.popState();
-
-
+          if input.IsFailure():
+            return await _deserialize_error(input.error)
+          return $L($L)
+          """, outputShape.getName(), output);
       }
-
+      writer.popState();
     });
   }
 
@@ -296,38 +252,31 @@ return $L($L)
     // I have all of the errors I need to write to that file
     // TODO: Is a List<String> for keys the right thing here? Seems too brittle
     // TODO: This whole section feels wrong
-    Map<List<String>, List<ShapeId>> deserFunctionMetadataMap = new HashMap<>();
+    Map<Symbol, List<ShapeId>> deserFunctionToErrorsMap = new HashMap<>();
     for (ShapeId errorId : deserializingErrorShapes) {
       var error = context.model().expectShape(errorId, StructureShape.class);
       var deserFunction = getErrorDeserializationFunction(context, error);
 
-      List<String> deserFunctionMetadata = Arrays.asList(deserFunction.getDefinitionFile(), deserFunction.getNamespace());
-      if (deserFunctionMetadataMap.containsKey(deserFunctionMetadata)) {
-        List<ShapeId> oldList = deserFunctionMetadataMap.get(deserFunctionMetadata);
+      if (deserFunctionToErrorsMap.containsKey(deserFunction)) {
+        List<ShapeId> oldList = deserFunctionToErrorsMap.get(deserFunction);
         oldList.add(errorId);
-        deserFunctionMetadataMap.put(
-            deserFunctionMetadata,
+        deserFunctionToErrorsMap.put(
+            deserFunction,
             oldList
         );
       } else {
-        deserFunctionMetadataMap.put(
-            deserFunctionMetadata,
+        deserFunctionToErrorsMap.put(
+            deserFunction,
             Arrays.asList(errorId)
         );
       }
     }
 
-    
-
-    for (List<String> deserFunctionMetadata : deserFunctionMetadataMap.keySet()) {
+    for (Symbol deserFunction : deserFunctionToErrorsMap.keySet()) {
       var delegator = context.writerDelegator();
-
-      delegator.useFileWriter(deserFunctionMetadata.get(0), deserFunctionMetadata.get(1), writer -> {
+      delegator.useFileWriter(deserFunction.getDefinitionFile(), deserFunction.getNamespace(), writer -> {
 
         writer.addStdlibImport("typing", "Any");
-        // TODO is this right? Or do I want my own thing?
-        // Client appears to unambiguously wrap errors thrown from within Dafny impl as ServiceError.
-        // Do I want that?
         // TODO: This also doesn't seem to be generated if there are no modelled errors...
         writer.addImport(".errors", "ServiceError");
         writer.addImport(".errors", "OpaqueError");
@@ -342,28 +291,25 @@ return $L($L)
                     return CollectionOfErrors(message=error.message, list=error.list)"""
           );
 
-        for (ShapeId errorId : deserFunctionMetadataMap.get(deserFunctionMetadata)) {
+        for (ShapeId errorId : deserFunctionToErrorsMap.get(deserFunction)) {
           var error = context.model().expectShape(errorId, StructureShape.class);
           writer.pushState(new ErrorDeserializerSection(error));
 
+          // Import Smithy-Python modelled-error
           writer.addImport(".errors", errorId.getName());
-          // TODO: I suspect this namespace is probably wrong, particularly for Dependencies...
+          // Import Dafny-modelled error
+          DafnyNameResolver.importDafnyTypeForError(writer, errorId);
+          // TODO: What is this? Generic error?
           writer.addImport(errorId.getNamespace() + ".internaldafny.types", "Error");
-          writer.addImport(errorId.getNamespace() + ".internaldafny.types", "Error_" + errorId.getName());
-          writer.write(
-                  """
+          writer.write("""
                   if error.is_$L:
                     return $L(message=error.message)
                 """, errorId.getName(), errorId.getName()
           );
-
           writer.popState();
         }
-
-
       });
     }
-
   }
 
   /**
@@ -395,27 +341,22 @@ return $L($L)
   // TODO: Since Shim generator needs this... make it its own class
   public static class DafnyMemberSerVisitor extends ShapeVisitor.Default<String> {
     private final GenerationContext context;
-//    private final PythonWriter writer;
     private final String dataSource;
     private final boolean useOtherOrder;
 
     /**
      * @param context The generation context.
-     * @param writer The writer to add dependencies to.
      * @param dataSource The in-code location of the data to provide an output of
      *                   ({@code input.foo}, {@code entry}, etc.)
-     * @param member The member that points to the value being provided.
      */
-    DafnyMemberSerVisitor(
+    public DafnyMemberSerVisitor(
         GenerationContext context,
 //        PythonWriter writer,
         String dataSource,
         boolean useOtherOrder
     ) {
       this.context = context;
-//      this.writer = writer;
       this.dataSource = dataSource;
-      // TODO: Do I even need member here...?
       this.useOtherOrder = useOtherOrder;
     }
 
@@ -444,7 +385,6 @@ return $L($L)
         } else {
           out += "%1$s=%2$s.%3$s,\n".formatted(CaseUtils.toSnakeCase(memberName), dataSource, memberName);
         }
-        // TODO: Investigate what this should be... one of these is accessing a Wrappers_Compile...
       }
       return out;
     }
@@ -516,27 +456,21 @@ return $L($L)
   public static class DafnyMemberDeserVisitor extends ShapeVisitor.Default<String> {
 
     private final GenerationContext context;
-//    private final PythonWriter writer;
     private final String dataSource;
     private final boolean useOtherOrder;
 
     /**
      * @param context The generation context.
-     * @param writer The writer to add dependencies to.
      * @param dataSource The in-code location of the data to provide an output of
      *                   ({@code output.foo}, {@code entry}, etc.)
-     * @param member The member that points to the value being provided.
      */
-    DafnyMemberDeserVisitor(
+    public DafnyMemberDeserVisitor(
         GenerationContext context,
-//        PythonWriter writer,
         String dataSource,
         boolean useOtherOrder
     ) {
       this.context = context;
-//      this.writer = writer;
       this.dataSource = dataSource;
-      // TODO: Do I even need member here...?
       this.useOtherOrder = useOtherOrder;
     }
 
@@ -565,7 +499,6 @@ return $L($L)
         } else {
           out += "%1$s=%2$s.%3$s,\n".formatted(CaseUtils.toSnakeCase(memberName), dataSource, memberName);
         }
-        // TODO: Investigate what this should be... one of these is accessing a Wrappers_Compile...
       }
       return out;
     }
