@@ -9,7 +9,7 @@ public class ModelsFileWriter implements CustomFileWriter {
       ServiceShape serviceShape, GenerationContext codegenContext) {
     String moduleName = codegenContext.settings().getModuleName();
 
-    // TODO: Ideally I don't need to do this, but this almost seems necessarily
+    // TODO: Ideally I don't need to do this, but this almost seems necessary
     // to avoid having to fork Smithy-Python...
     codegenContext.writerDelegator().useFileWriter(moduleName + "/models.py", "", writer -> {
       writer.write(

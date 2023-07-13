@@ -51,6 +51,7 @@ import software.amazon.smithy.python.codegen.SmithyPythonDependency;
 import software.amazon.smithy.python.codegen.integration.ProtocolGenerator;
 import software.amazon.smithy.utils.CaseUtils;
 import software.amazon.smithy.utils.CodeSection;
+import software.amazon.smithy.utils.Pair;
 import software.amazon.smithy.utils.SmithyUnstableApi;
 
 /**
@@ -250,31 +251,32 @@ public abstract class DafnyProtocolGenerator implements ProtocolGenerator {
     // I need to store a map from deserFunction metadata -> Set<errorId>
     // Such that for a given set of metadata (i.e. a given file),
     // I have all of the errors I need to write to that file
-    // TODO: Is a List<String> for keys the right thing here? Seems too brittle
-    // TODO: This whole section feels wrong
-    Map<Symbol, List<ShapeId>> deserFunctionToErrorsMap = new HashMap<>();
+    // TODO: Less brittle datatype than Pair
+    Map<Pair<String, String>, List<ShapeId>> deserFunctionToErrorsMap = new HashMap<>();
     for (ShapeId errorId : deserializingErrorShapes) {
       var error = context.model().expectShape(errorId, StructureShape.class);
       var deserFunction = getErrorDeserializationFunction(context, error);
+      deserFunction.getDefinitionFile();
+      Pair<String, String> deserFunctionMetadata = Pair.of(deserFunction.getDefinitionFile(), deserFunction.getNamespace());
 
       if (deserFunctionToErrorsMap.containsKey(deserFunction)) {
         List<ShapeId> oldList = deserFunctionToErrorsMap.get(deserFunction);
         oldList.add(errorId);
         deserFunctionToErrorsMap.put(
-            deserFunction,
+            deserFunctionMetadata,
             oldList
         );
       } else {
         deserFunctionToErrorsMap.put(
-            deserFunction,
+            deserFunctionMetadata,
             Arrays.asList(errorId)
         );
       }
     }
 
-    for (Symbol deserFunction : deserFunctionToErrorsMap.keySet()) {
+    for (Pair<String, String> deserFunctionMetadata : deserFunctionToErrorsMap.keySet()) {
       var delegator = context.writerDelegator();
-      delegator.useFileWriter(deserFunction.getDefinitionFile(), deserFunction.getNamespace(), writer -> {
+      delegator.useFileWriter(deserFunctionMetadata.getLeft(), deserFunctionMetadata.getRight(), writer -> {
 
         writer.addStdlibImport("typing", "Any");
         // TODO: This also doesn't seem to be generated if there are no modelled errors...
@@ -291,7 +293,7 @@ public abstract class DafnyProtocolGenerator implements ProtocolGenerator {
                     return CollectionOfErrors(message=error.message, list=error.list)"""
           );
 
-        for (ShapeId errorId : deserFunctionToErrorsMap.get(deserFunction)) {
+        for (ShapeId errorId : deserFunctionToErrorsMap.get(deserFunctionMetadata)) {
           var error = context.model().expectShape(errorId, StructureShape.class);
           writer.pushState(new ErrorDeserializerSection(error));
 
@@ -299,7 +301,7 @@ public abstract class DafnyProtocolGenerator implements ProtocolGenerator {
           writer.addImport(".errors", errorId.getName());
           // Import Dafny-modelled error
           DafnyNameResolver.importDafnyTypeForError(writer, errorId);
-          // TODO: What is this? Generic error?
+          // Import generic Dafny error type
           writer.addImport(errorId.getNamespace() + ".internaldafny.types", "Error");
           writer.write("""
                   if error.is_$L:

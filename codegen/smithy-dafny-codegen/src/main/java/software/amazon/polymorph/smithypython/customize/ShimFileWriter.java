@@ -1,53 +1,113 @@
 package software.amazon.polymorph.smithypython.customize;
 
-import static software.amazon.polymorph.smithypython.nameresolver.PythonNameResolver.shimForService;
-
 import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeSet;
 import software.amazon.polymorph.smithypython.DafnyProtocolGenerator.DafnyMemberDeserVisitor;
 import software.amazon.polymorph.smithypython.DafnyProtocolGenerator.DafnyMemberSerVisitor;
 import software.amazon.polymorph.smithypython.nameresolver.DafnyNameResolver;
+import software.amazon.polymorph.smithypython.nameresolver.PythonNameResolver;
 import software.amazon.polymorph.smithypython.nameresolver.Utils;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.python.codegen.GenerationContext;
+import software.amazon.smithy.python.codegen.PythonWriter;
 
 public class ShimFileWriter implements CustomFileWriter {
 
   @Override
   public void generateFileForServiceShape(
       ServiceShape serviceShape, GenerationContext codegenContext) {
-    // TODO: refactor to DafnyProtocolFileWriter
-    // TODO: Naming of this file?
 
-    // TODO: StringBuilder
-        /*
-        TODO: This is what this SHOULD look like after getting some sort of TypeConversion in
-                        unwrapped_request = TypeConversion.ToNative(input)
-                        try:
-                            wrapped_response = self._impl.get_integer(unwrapped_request)
-                            return Wrappers_Compile.Result_Success(wrapped_response)
-                        catch ex:
-                            return Wrappers_Compile.Result_Failure(ex)
-         */
-    String operationsShim = "";
-    String errorsString = "";
     Set<ShapeId> allInputShapesSet = new HashSet<>();
     Set<ShapeId> allOutputShapesSet = new HashSet<>();
-    var deserializingErrorShapes = new TreeSet<ShapeId>();
-    var service = codegenContext.settings().getService(codegenContext.model());
     String typesModulePrelude = DafnyNameResolver.getDafnyTypesModuleNamespaceForShape(serviceShape.getId());
+
+    String moduleName =  codegenContext.settings().getModuleName();
+    codegenContext.writerDelegator().useFileWriter(moduleName + "/shim.py", "", writer -> {
+      writer.addImport(".errors", "ServiceError");
+      writer.addImport(".errors", "CollectionOfErrors");
+      writer.addImport(".errors", "OpaqueError");
+
+      writer.write(
+          """
+          import Wrappers_Compile
+          import asyncio
+          import $L
+          import $L.smithy_generated.$L.client as client_impl
+         
+                          
+          def smithy_error_to_dafny_error(e: ServiceError):
+              ${C|}
+                          
+          class $L($L.$L):
+              def __init__(self, _impl: client_impl) :
+                  self._impl = _impl
+                          
+              ${C|}
+              
+              """, typesModulePrelude, moduleName, moduleName,
+          writer.consumer(w -> generateErrorsBlock(codegenContext, serviceShape, w)),
+          PythonNameResolver.shimForService(serviceShape),
+          typesModulePrelude, DafnyNameResolver.getDafnyClientInterfaceTypeForServiceShape(serviceShape),
+          writer.consumer(w -> generateOperationsBlock(codegenContext, serviceShape, w))
+      );
+    });
+  }
+
+  private void generateErrorsBlock(
+      GenerationContext codegenContext,
+      ServiceShape serviceShape, PythonWriter writer) {
+    // TODO: StringBuilder? Writer?
+
+    // Write modelled error converters
+    for (ShapeId operationShapeId : serviceShape.getAllOperations()) {
+      OperationShape operationShape = codegenContext.model()
+          .expectShape(operationShapeId, OperationShape.class);
+
+      for (ShapeId errorShape : operationShape.getErrors(serviceShape)) {
+        writer.write("""
+                if isinstance(e, $L):
+                    return $L.$L(message=e.message)
+                """,
+            errorShape.getName(),
+            DafnyNameResolver.getDafnyTypesModuleNamespaceForShape(errorShape),
+            DafnyNameResolver.getDafnyTypeForError(errorShape)
+        );
+      }
+
+      // Add service-specific CollectionOfErrors
+      writer.write("""
+              if isinstance(e, CollectionOfErrors):
+                  return $L.Error_CollectionOfErrors(message=e.message, list=e.list)
+              """,
+          DafnyNameResolver.getDafnyTypesModuleNamespaceForShape(serviceShape.getId())
+      );
+      // Add service-specific OpaqueError
+      writer.write("""
+              if isinstance(e, OpaqueError):
+                  return $L.Error_Opaque(obj=e.obj)
+              """,
+          DafnyNameResolver.getDafnyTypesModuleNamespaceForShape(serviceShape.getId())
+      );
+    }
+  }
+
+  private void generateOperationsBlock(
+      GenerationContext codegenContext,
+      ServiceShape serviceShape, PythonWriter writer) {
 
     // TODO: .getAllOperations? Maybe .getOperations? or .getIntroducedOperations?
     // Might learn which one when working on Resources
-    for (ShapeId operationShapeId : service.getAllOperations()) {
+    for (ShapeId operationShapeId : serviceShape.getAllOperations()) {
       OperationShape operationShape = codegenContext.model().expectShape(operationShapeId, OperationShape.class);
-      deserializingErrorShapes.addAll(operationShape.getErrors(service));
-      allInputShapesSet.add(operationShape.getInputShape());
-      allOutputShapesSet.add(operationShape.getOutputShape());
+
+      // Add imports for operation errors
+      for (ShapeId errorShapeId : operationShape.getErrors(serviceShape)) {
+        writer.addImport(".errors", errorShapeId.getName());
+      }
 
       ShapeId inputShape = operationShape.getInputShape();
       ShapeId outputShape = operationShape.getOutputShape();
@@ -55,6 +115,12 @@ public class ShimFileWriter implements CustomFileWriter {
       String dafnyInputType = DafnyNameResolver.getDafnyTypeForShape(inputShape);
       String dafnyOutputType = DafnyNameResolver.getDafnyTypeForShape(outputShape);
       String operationSymbol = codegenContext.symbolProvider().toSymbol(operationShape).getName();
+
+      DafnyNameResolver.importDafnyTypeForShape(writer, inputShape);
+      DafnyNameResolver.importDafnyTypeForShape(writer, outputShape);
+
+      writer.addImport(".models", inputShape.getName());
+      writer.addImport(".models", outputShape.getName());
 
       Shape targetShape = codegenContext.model().expectShape(operationShape.getOutputShape());
       var output = targetShape.accept(new DafnyMemberDeserVisitor(
@@ -70,93 +136,26 @@ public class ShimFileWriter implements CustomFileWriter {
           false
       ));
 
-      operationsShim += """
-                    def %1$s(self, %2$s) -> %3$s:
-                            unwrapped_request: %4$s = %4$s(%6$s)
-                            try:
-                                wrapped_response = asyncio.run(self._impl.%5$s(unwrapped_request))
-                            except ServiceError as e:
-                                return Wrappers_Compile.Result_Failure(smithy_error_to_dafny_error(e))
-                            return Wrappers_Compile.Result_Success(%3$s%7$s)
-                """.formatted(
+      writer.write("""
+          def $L(self, $L) -> $L:
+              unwrapped_request: $L = $L($L)
+              try:
+                  wrapped_response = asyncio.run(self._impl.$L(unwrapped_request))
+              except ServiceError as e:
+                  return Wrappers_Compile.Result_Failure(smithy_error_to_dafny_error(e))
+              return Wrappers_Compile.Result_Success($L$L)
+
+          """,
           operationShape.getId().getName(),
           Utils.isUnitShape(inputShape) ? "" : "input: " + dafnyInputType,
           Utils.isUnitShape(outputShape) ? "None" : dafnyOutputType,
           inputShape.getName(),
-          operationSymbol,
+          inputShape.getName(),
           input,
+          operationSymbol,
+          Utils.isUnitShape(outputShape) ? "None" : dafnyOutputType,
           Utils.isUnitShape(outputShape) ? "" : "(" + output + ")"
       );
     }
-    String allOperationsShim = operationsShim;
-
-    // TODO: StringBuilder? Writer?
-    for (ShapeId errorShape : deserializingErrorShapes) {
-      errorsString += """
-                    if isinstance(e, %1$s):
-                        return %2$s%3$s(message=e.message)
-                """.formatted(
-          errorShape.getName(),
-          errorShape.getNamespace() + ".internaldafny.types.",
-          "Error_" + errorShape.getName()
-      );
-    }
-
-    errorsString += """
-                    if isinstance(e, CollectionOfErrors):
-                        return %1$sError_CollectionOfErrors(message=e.message, list=e.list)
-                """.formatted(
-        service.getId().getNamespace() + ".internaldafny.types."
-    );
-
-    errorsString += """
-                    if isinstance(e, OpaqueError):
-                        return %1$sError_Opaque(obj=e.obj)
-                """.formatted(
-        service.getId().getNamespace() + ".internaldafny.types."
-    );
-
-    final String finalErrorsString = errorsString;
-
-    String moduleName =  codegenContext.settings().getModuleName();
-    codegenContext.writerDelegator().useFileWriter(moduleName + "/shim.py", "", writer -> {
-      for (ShapeId inputShapeId : allInputShapesSet) {
-        writer.addImport(".models", inputShapeId.getName());
-        DafnyNameResolver.importDafnyTypeForShape(writer, inputShapeId);
-      }
-
-      for (ShapeId outputShapeId : allOutputShapesSet) {
-        DafnyNameResolver.importDafnyTypeForShape(writer, outputShapeId);
-      }
-
-      writer.addImport(".errors", "ServiceError");
-      writer.addImport(".errors", "CollectionOfErrors");
-      writer.addImport(".errors", "OpaqueError");
-
-      for (ShapeId errorShapeId : deserializingErrorShapes) {
-        writer.addImport(".errors", errorShapeId.getName());
-      }
-
-      writer.write(
-          """
-          import Wrappers_Compile
-          import asyncio
-          import $L
-          import $L.smithy_generated.$L.client as client_impl
-         
-                          
-          def smithy_error_to_dafny_error(e: ServiceError):
-          $L
-                          
-          class $L($L.$L):
-              def __init__(self, _impl: client_impl) :
-                  self._impl = _impl
-                          
-          $L
-              
-              """, typesModulePrelude, moduleName, moduleName, finalErrorsString, shimForService(serviceShape),
-          typesModulePrelude, "I" + serviceShape.getId().getName() + "Client", allOperationsShim
-      );
-    });
   }
 }

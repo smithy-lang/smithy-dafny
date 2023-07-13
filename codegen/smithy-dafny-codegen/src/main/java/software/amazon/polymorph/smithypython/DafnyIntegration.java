@@ -17,7 +17,6 @@ package software.amazon.polymorph.smithypython;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
 import software.amazon.polymorph.smithypython.customize.DafnyImplInterfaceFileWriter;
 import software.amazon.polymorph.smithypython.customize.DafnyProtocolFileWriter;
@@ -25,10 +24,8 @@ import software.amazon.polymorph.smithypython.customize.ErrorsFileWriter;
 import software.amazon.polymorph.smithypython.customize.ModelsFileWriter;
 import software.amazon.polymorph.smithypython.customize.PluginFileWriter;
 import software.amazon.polymorph.smithypython.customize.ShimFileWriter;
-import software.amazon.polymorph.smithypython.nameresolver.PythonNameResolver;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolReference;
-import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;

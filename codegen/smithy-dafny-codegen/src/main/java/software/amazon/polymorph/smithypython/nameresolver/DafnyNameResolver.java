@@ -2,6 +2,7 @@ package software.amazon.polymorph.smithypython.nameresolver;
 
 import java.util.Locale;
 import software.amazon.polymorph.smithypython.DafnyProtocolGenerator;
+import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.python.codegen.PythonWriter;
@@ -42,6 +43,10 @@ public class DafnyNameResolver {
     importDafnyTypeForShape(writer, shape.getId());
   }
 
+  public static String getDafnyClientInterfaceTypeForServiceShape(ServiceShape serviceShape) {
+    return "I" + serviceShape.getId().getName() + "Client";
+  }
+
   /**
    * Calls writer.addImport to import the corresponding Dafny type
    *   for the provided Smithy ShapeId.
@@ -54,7 +59,17 @@ public class DafnyNameResolver {
     if (!Utils.isUnitShape(shapeId)) {
       writer.addImport(getDafnyTypesModuleNamespaceForShape(shapeId),
           name + "_" + name, getDafnyTypeForShape(shapeId));
+    } else {
+
     }
+  }
+
+  public static String getDafnyTypeForError(Shape shape) {
+    return getDafnyTypeForError(shape.getId());
+  }
+
+  public static String getDafnyTypeForError(ShapeId shapeId) {
+    return "Error_" + shapeId.getName();
   }
 
   /**
@@ -65,8 +80,7 @@ public class DafnyNameResolver {
    * @param shapeId
    */
   public static void importDafnyTypeForError(PythonWriter writer, ShapeId shapeId) {
-    String name = shapeId.getName();
     writer.addImport(getDafnyTypesModuleNamespaceForShape(shapeId),
-      "Error_" + name);
+      getDafnyTypeForError(shapeId));
   }
 }
