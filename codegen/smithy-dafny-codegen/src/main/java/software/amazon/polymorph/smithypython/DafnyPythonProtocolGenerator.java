@@ -45,16 +45,15 @@ import software.amazon.smithy.utils.SmithyUnstableApi;
  * <p>This will implement any handling of components outside the request
  * body and error handling.
  */
-// TODO: Naming of DafnyProtocolGenerator?
 @SmithyUnstableApi
-public abstract class DafnyProtocolGenerator implements ProtocolGenerator {
+public abstract class DafnyPythonProtocolGenerator implements ProtocolGenerator {
 
   private final Set<Shape> serializingDocumentShapes = new TreeSet<>();
   private final Set<Shape> deserializingDocumentShapes = new TreeSet<>();
 
   @Override
   public ApplicationProtocol getApplicationProtocol() {
-    return DafnyIntegration.createDafnyApplicationProtocol();
+    return DafnyPythonIntegration.createDafnyApplicationProtocol();
   }
 
   @Override

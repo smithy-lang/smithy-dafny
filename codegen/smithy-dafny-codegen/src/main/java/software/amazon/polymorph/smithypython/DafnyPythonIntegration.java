@@ -39,8 +39,7 @@ import software.amazon.smithy.python.codegen.integration.PythonIntegration;
 import software.amazon.smithy.utils.CodeInterceptor;
 import software.amazon.smithy.utils.CodeSection;
 
-// TODO: Naming of DafnyIntegration?
-public final class DafnyIntegration implements PythonIntegration {
+public final class DafnyPythonIntegration implements PythonIntegration {
     private RuntimeClientPlugin dafnyImplRuntimeClientPlugin = RuntimeClientPlugin.builder()
         .configFields(
             // Adds a new field in the client class' config.
@@ -128,7 +127,7 @@ public final class DafnyIntegration implements PythonIntegration {
 
     @Override
     public List<ProtocolGenerator> getProtocolGenerators() {
-        return Collections.singletonList(new DafnyProtocolGenerator() {
+        return Collections.singletonList(new DafnyPythonProtocolGenerator() {
             @Override
             protected void generateDocumentBodyShapeDeserializers(GenerationContext context,
                 Set<Shape> shapes) {

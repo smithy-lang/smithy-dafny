@@ -1,7 +1,6 @@
 package software.amazon.polymorph.smithypython.nameresolver;
 
 import java.util.Locale;
-import software.amazon.polymorph.smithypython.DafnyProtocolGenerator;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;

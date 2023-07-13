@@ -3,4 +3,4 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-software.amazon.polymorph.smithypython.DafnyIntegration
+software.amazon.polymorph.smithypython.DafnyPythonIntegration

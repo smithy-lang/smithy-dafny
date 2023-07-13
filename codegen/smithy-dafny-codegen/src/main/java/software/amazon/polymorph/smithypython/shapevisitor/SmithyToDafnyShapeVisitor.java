@@ -19,6 +19,11 @@ import software.amazon.smithy.model.shapes.TimestampShape;
 import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.utils.CaseUtils;
 
+/**
+ * ShapeVisitor that should be dispatched from a shape
+ * to generate code that maps a Smithy-modelled shape's internal attributes
+ * to the corresponding Dafny shape's internal attributes.
+ */
 public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
     private final GenerationContext context;
     private final String dataSource;

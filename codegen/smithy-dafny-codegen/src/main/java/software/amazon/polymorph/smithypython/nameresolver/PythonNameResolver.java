@@ -5,7 +5,6 @@ import software.amazon.smithy.model.shapes.ServiceShape;
 
 public class PythonNameResolver {
 
-  // TODO: Refactor into nameresovler
   public static String clientForService(ServiceShape serviceShape) {
       if (serviceShape.hasTrait(LocalServiceTrait.class)) {
           return serviceShape.expectTrait(LocalServiceTrait.class).getSdkId() + "Client";
@@ -14,7 +13,6 @@ public class PythonNameResolver {
       }
   }
 
-  // TODO: Refactor into nameresovler
   public static String shimForService(ServiceShape serviceShape) {
       if (serviceShape.hasTrait(LocalServiceTrait.class)) {
           return serviceShape.expectTrait(LocalServiceTrait.class).getSdkId() + "Shim";
