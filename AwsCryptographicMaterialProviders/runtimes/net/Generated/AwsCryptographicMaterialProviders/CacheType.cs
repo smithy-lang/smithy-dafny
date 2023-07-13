@@ -4,52 +4,52 @@
 using System;
  using AWS.Cryptography.MaterialProviders; namespace AWS.Cryptography.MaterialProviders {
  public class CacheType {
- private AWS.Cryptography.MaterialProviders.DefaultCache _defaultCache ;
- private AWS.Cryptography.MaterialProviders.NoCache _noCache ;
- private AWS.Cryptography.MaterialProviders.SingleThreadedCache _singleThreadedCache ;
- private AWS.Cryptography.MaterialProviders.MultiThreadedCache _multiThreadedCache ;
- private AWS.Cryptography.MaterialProviders.StormTrackingCache _stormTrackingCache ;
- public AWS.Cryptography.MaterialProviders.DefaultCache DefaultCache {
- get { return this._defaultCache; }
- set { this._defaultCache = value; }
+ private AWS.Cryptography.MaterialProviders.DefaultCache _default ;
+ private AWS.Cryptography.MaterialProviders.NoCache _no ;
+ private AWS.Cryptography.MaterialProviders.SingleThreadedCache _singleThreaded ;
+ private AWS.Cryptography.MaterialProviders.MultiThreadedCache _multiThreaded ;
+ private AWS.Cryptography.MaterialProviders.StormTrackingCache _stormTracking ;
+ public AWS.Cryptography.MaterialProviders.DefaultCache Default {
+ get { return this._default; }
+ set { this._default = value; }
 }
- public bool IsSetDefaultCache () {
- return this._defaultCache != null;
+ public bool IsSetDefault () {
+ return this._default != null;
 }
- public AWS.Cryptography.MaterialProviders.NoCache NoCache {
- get { return this._noCache; }
- set { this._noCache = value; }
+ public AWS.Cryptography.MaterialProviders.NoCache No {
+ get { return this._no; }
+ set { this._no = value; }
 }
- public bool IsSetNoCache () {
- return this._noCache != null;
+ public bool IsSetNo () {
+ return this._no != null;
 }
- public AWS.Cryptography.MaterialProviders.SingleThreadedCache SingleThreadedCache {
- get { return this._singleThreadedCache; }
- set { this._singleThreadedCache = value; }
+ public AWS.Cryptography.MaterialProviders.SingleThreadedCache SingleThreaded {
+ get { return this._singleThreaded; }
+ set { this._singleThreaded = value; }
 }
- public bool IsSetSingleThreadedCache () {
- return this._singleThreadedCache != null;
+ public bool IsSetSingleThreaded () {
+ return this._singleThreaded != null;
 }
- public AWS.Cryptography.MaterialProviders.MultiThreadedCache MultiThreadedCache {
- get { return this._multiThreadedCache; }
- set { this._multiThreadedCache = value; }
+ public AWS.Cryptography.MaterialProviders.MultiThreadedCache MultiThreaded {
+ get { return this._multiThreaded; }
+ set { this._multiThreaded = value; }
 }
- public bool IsSetMultiThreadedCache () {
- return this._multiThreadedCache != null;
+ public bool IsSetMultiThreaded () {
+ return this._multiThreaded != null;
 }
- public AWS.Cryptography.MaterialProviders.StormTrackingCache StormTrackingCache {
- get { return this._stormTrackingCache; }
- set { this._stormTrackingCache = value; }
+ public AWS.Cryptography.MaterialProviders.StormTrackingCache StormTracking {
+ get { return this._stormTracking; }
+ set { this._stormTracking = value; }
 }
- public bool IsSetStormTrackingCache () {
- return this._stormTrackingCache != null;
+ public bool IsSetStormTracking () {
+ return this._stormTracking != null;
 }
  public void Validate() {
- var numberOfPropertiesSet = Convert.ToUInt16(IsSetDefaultCache()) +
- Convert.ToUInt16(IsSetNoCache()) +
- Convert.ToUInt16(IsSetSingleThreadedCache()) +
- Convert.ToUInt16(IsSetMultiThreadedCache()) +
- Convert.ToUInt16(IsSetStormTrackingCache()) ;
+ var numberOfPropertiesSet = Convert.ToUInt16(IsSetDefault()) +
+ Convert.ToUInt16(IsSetNo()) +
+ Convert.ToUInt16(IsSetSingleThreaded()) +
+ Convert.ToUInt16(IsSetMultiThreaded()) +
+ Convert.ToUInt16(IsSetStormTracking()) ;
  if (numberOfPropertiesSet == 0) throw new System.ArgumentException("No union value set");
 
  if (numberOfPropertiesSet > 1) throw new System.ArgumentException("Multiple union values set");

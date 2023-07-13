@@ -62,35 +62,35 @@ throw new System.ArgumentException("Invalid AWS.Cryptography.MaterialProviders.A
 }
  internal static AWS.Cryptography.MaterialProviders.CacheType FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S9_CacheType (software.amazon.cryptography.materialproviders.internaldafny.types._ICacheType value) {
  software.amazon.cryptography.materialproviders.internaldafny.types.CacheType concrete = (software.amazon.cryptography.materialproviders.internaldafny.types.CacheType)value;
- var converted = new AWS.Cryptography.MaterialProviders.CacheType(); if (value.is_DefaultCache) {
- converted.DefaultCache = FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S9_CacheType__M12_defaultCache(concrete.dtor_defaultCache);
+ var converted = new AWS.Cryptography.MaterialProviders.CacheType(); if (value.is_Default) {
+ converted.Default = FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S9_CacheType__M7_Default(concrete.dtor_Default);
  return converted;
-} if (value.is_NoCache) {
- converted.NoCache = FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S9_CacheType__M7_noCache(concrete.dtor_noCache);
+} if (value.is_No) {
+ converted.No = FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S9_CacheType__M2_No(concrete.dtor_No);
  return converted;
-} if (value.is_SingleThreadedCache) {
- converted.SingleThreadedCache = FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S9_CacheType__M19_singleThreadedCache(concrete.dtor_singleThreadedCache);
+} if (value.is_SingleThreaded) {
+ converted.SingleThreaded = FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S9_CacheType__M14_SingleThreaded(concrete.dtor_SingleThreaded);
  return converted;
-} if (value.is_MultiThreadedCache) {
- converted.MultiThreadedCache = FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S9_CacheType__M18_multiThreadedCache(concrete.dtor_multiThreadedCache);
+} if (value.is_MultiThreaded) {
+ converted.MultiThreaded = FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S9_CacheType__M13_MultiThreaded(concrete.dtor_MultiThreaded);
  return converted;
-} if (value.is_StormTrackingCache) {
- converted.StormTrackingCache = FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S9_CacheType__M18_stormTrackingCache(concrete.dtor_stormTrackingCache);
+} if (value.is_StormTracking) {
+ converted.StormTracking = FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S9_CacheType__M13_StormTracking(concrete.dtor_StormTracking);
  return converted;
 }
 throw new System.ArgumentException("Invalid AWS.Cryptography.MaterialProviders.CacheType state");
 }
  internal static software.amazon.cryptography.materialproviders.internaldafny.types._ICacheType ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S9_CacheType (AWS.Cryptography.MaterialProviders.CacheType value) {
- if (value.IsSetDefaultCache()) {
- return software.amazon.cryptography.materialproviders.internaldafny.types.CacheType.create_defaultCache(ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S9_CacheType__M12_defaultCache(value.DefaultCache));
-} if (value.IsSetNoCache()) {
- return software.amazon.cryptography.materialproviders.internaldafny.types.CacheType.create_noCache(ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S9_CacheType__M7_noCache(value.NoCache));
-} if (value.IsSetSingleThreadedCache()) {
- return software.amazon.cryptography.materialproviders.internaldafny.types.CacheType.create_singleThreadedCache(ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S9_CacheType__M19_singleThreadedCache(value.SingleThreadedCache));
-} if (value.IsSetMultiThreadedCache()) {
- return software.amazon.cryptography.materialproviders.internaldafny.types.CacheType.create_multiThreadedCache(ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S9_CacheType__M18_multiThreadedCache(value.MultiThreadedCache));
-} if (value.IsSetStormTrackingCache()) {
- return software.amazon.cryptography.materialproviders.internaldafny.types.CacheType.create_stormTrackingCache(ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S9_CacheType__M18_stormTrackingCache(value.StormTrackingCache));
+ if (value.IsSetDefault()) {
+ return software.amazon.cryptography.materialproviders.internaldafny.types.CacheType.create_Default(ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S9_CacheType__M7_Default(value.Default));
+} if (value.IsSetNo()) {
+ return software.amazon.cryptography.materialproviders.internaldafny.types.CacheType.create_No(ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S9_CacheType__M2_No(value.No));
+} if (value.IsSetSingleThreaded()) {
+ return software.amazon.cryptography.materialproviders.internaldafny.types.CacheType.create_SingleThreaded(ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S9_CacheType__M14_SingleThreaded(value.SingleThreaded));
+} if (value.IsSetMultiThreaded()) {
+ return software.amazon.cryptography.materialproviders.internaldafny.types.CacheType.create_MultiThreaded(ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S9_CacheType__M13_MultiThreaded(value.MultiThreaded));
+} if (value.IsSetStormTracking()) {
+ return software.amazon.cryptography.materialproviders.internaldafny.types.CacheType.create_StormTracking(ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S9_CacheType__M13_StormTracking(value.StormTracking));
 }
 throw new System.ArgumentException("Invalid AWS.Cryptography.MaterialProviders.CacheType state");
 }
@@ -924,34 +924,34 @@ throw new System.ArgumentException("Invalid AWS.Cryptography.MaterialProviders.S
  internal static Dafny.ISequence<char> ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S42_AwsCryptographicMaterialProvidersException__M7_message (string value) {
  return ToDafny_N6_smithy__N3_api__S6_String(value);
 }
- internal static AWS.Cryptography.MaterialProviders.DefaultCache FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S9_CacheType__M12_defaultCache (software.amazon.cryptography.materialproviders.internaldafny.types._IDefaultCache value) {
+ internal static AWS.Cryptography.MaterialProviders.DefaultCache FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S9_CacheType__M7_Default (software.amazon.cryptography.materialproviders.internaldafny.types._IDefaultCache value) {
  return FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S12_DefaultCache(value);
 }
- internal static software.amazon.cryptography.materialproviders.internaldafny.types._IDefaultCache ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S9_CacheType__M12_defaultCache (AWS.Cryptography.MaterialProviders.DefaultCache value) {
+ internal static software.amazon.cryptography.materialproviders.internaldafny.types._IDefaultCache ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S9_CacheType__M7_Default (AWS.Cryptography.MaterialProviders.DefaultCache value) {
  return ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S12_DefaultCache(value);
 }
- internal static AWS.Cryptography.MaterialProviders.NoCache FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S9_CacheType__M7_noCache (software.amazon.cryptography.materialproviders.internaldafny.types._INoCache value) {
+ internal static AWS.Cryptography.MaterialProviders.NoCache FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S9_CacheType__M2_No (software.amazon.cryptography.materialproviders.internaldafny.types._INoCache value) {
  return FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S7_NoCache(value);
 }
- internal static software.amazon.cryptography.materialproviders.internaldafny.types._INoCache ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S9_CacheType__M7_noCache (AWS.Cryptography.MaterialProviders.NoCache value) {
+ internal static software.amazon.cryptography.materialproviders.internaldafny.types._INoCache ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S9_CacheType__M2_No (AWS.Cryptography.MaterialProviders.NoCache value) {
  return ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S7_NoCache(value);
 }
- internal static AWS.Cryptography.MaterialProviders.SingleThreadedCache FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S9_CacheType__M19_singleThreadedCache (software.amazon.cryptography.materialproviders.internaldafny.types._ISingleThreadedCache value) {
+ internal static AWS.Cryptography.MaterialProviders.SingleThreadedCache FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S9_CacheType__M14_SingleThreaded (software.amazon.cryptography.materialproviders.internaldafny.types._ISingleThreadedCache value) {
  return FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S19_SingleThreadedCache(value);
 }
- internal static software.amazon.cryptography.materialproviders.internaldafny.types._ISingleThreadedCache ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S9_CacheType__M19_singleThreadedCache (AWS.Cryptography.MaterialProviders.SingleThreadedCache value) {
+ internal static software.amazon.cryptography.materialproviders.internaldafny.types._ISingleThreadedCache ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S9_CacheType__M14_SingleThreaded (AWS.Cryptography.MaterialProviders.SingleThreadedCache value) {
  return ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S19_SingleThreadedCache(value);
 }
- internal static AWS.Cryptography.MaterialProviders.MultiThreadedCache FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S9_CacheType__M18_multiThreadedCache (software.amazon.cryptography.materialproviders.internaldafny.types._IMultiThreadedCache value) {
+ internal static AWS.Cryptography.MaterialProviders.MultiThreadedCache FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S9_CacheType__M13_MultiThreaded (software.amazon.cryptography.materialproviders.internaldafny.types._IMultiThreadedCache value) {
  return FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S18_MultiThreadedCache(value);
 }
- internal static software.amazon.cryptography.materialproviders.internaldafny.types._IMultiThreadedCache ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S9_CacheType__M18_multiThreadedCache (AWS.Cryptography.MaterialProviders.MultiThreadedCache value) {
+ internal static software.amazon.cryptography.materialproviders.internaldafny.types._IMultiThreadedCache ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S9_CacheType__M13_MultiThreaded (AWS.Cryptography.MaterialProviders.MultiThreadedCache value) {
  return ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S18_MultiThreadedCache(value);
 }
- internal static AWS.Cryptography.MaterialProviders.StormTrackingCache FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S9_CacheType__M18_stormTrackingCache (software.amazon.cryptography.materialproviders.internaldafny.types._IStormTrackingCache value) {
+ internal static AWS.Cryptography.MaterialProviders.StormTrackingCache FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S9_CacheType__M13_StormTracking (software.amazon.cryptography.materialproviders.internaldafny.types._IStormTrackingCache value) {
  return FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S18_StormTrackingCache(value);
 }
- internal static software.amazon.cryptography.materialproviders.internaldafny.types._IStormTrackingCache ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S9_CacheType__M18_stormTrackingCache (AWS.Cryptography.MaterialProviders.StormTrackingCache value) {
+ internal static software.amazon.cryptography.materialproviders.internaldafny.types._IStormTrackingCache ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S9_CacheType__M13_StormTracking (AWS.Cryptography.MaterialProviders.StormTrackingCache value) {
  return ToDafny_N3_aws__N12_cryptography__N17_materialProviders__S18_StormTrackingCache(value);
 }
  internal static AWS.Cryptography.MaterialProviders.ESDKCommitmentPolicy FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S16_CommitmentPolicy__M4_ESDK (software.amazon.cryptography.materialproviders.internaldafny.types._IESDKCommitmentPolicy value) {

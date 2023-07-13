@@ -959,20 +959,20 @@ public class ToNative {
   public static CacheType CacheType(
       software.amazon.cryptography.materialproviders.internaldafny.types.CacheType dafnyValue) {
     CacheType.Builder nativeBuilder = CacheType.builder();
-    if (dafnyValue.is_defaultCache()) {
-      nativeBuilder.defaultCache(ToNative.DefaultCache(dafnyValue.dtor_defaultCache()));
+    if (dafnyValue.is_Default()) {
+      nativeBuilder.Default(ToNative.DefaultCache(dafnyValue.dtor_Default()));
     }
-    if (dafnyValue.is_noCache()) {
-      nativeBuilder.noCache(ToNative.NoCache(dafnyValue.dtor_noCache()));
+    if (dafnyValue.is_No()) {
+      nativeBuilder.No(ToNative.NoCache(dafnyValue.dtor_No()));
     }
-    if (dafnyValue.is_singleThreadedCache()) {
-      nativeBuilder.singleThreadedCache(ToNative.SingleThreadedCache(dafnyValue.dtor_singleThreadedCache()));
+    if (dafnyValue.is_SingleThreaded()) {
+      nativeBuilder.SingleThreaded(ToNative.SingleThreadedCache(dafnyValue.dtor_SingleThreaded()));
     }
-    if (dafnyValue.is_multiThreadedCache()) {
-      nativeBuilder.multiThreadedCache(ToNative.MultiThreadedCache(dafnyValue.dtor_multiThreadedCache()));
+    if (dafnyValue.is_MultiThreaded()) {
+      nativeBuilder.MultiThreaded(ToNative.MultiThreadedCache(dafnyValue.dtor_MultiThreaded()));
     }
-    if (dafnyValue.is_stormTrackingCache()) {
-      nativeBuilder.stormTrackingCache(ToNative.StormTrackingCache(dafnyValue.dtor_stormTrackingCache()));
+    if (dafnyValue.is_StormTracking()) {
+      nativeBuilder.StormTracking(ToNative.StormTrackingCache(dafnyValue.dtor_StormTracking()));
     }
     return nativeBuilder.build();
   }

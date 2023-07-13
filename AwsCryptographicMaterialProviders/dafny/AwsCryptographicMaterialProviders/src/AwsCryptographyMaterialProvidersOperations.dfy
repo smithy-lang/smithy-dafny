@@ -263,7 +263,7 @@ module AwsCryptographyMaterialProvidersOperations refines AbstractAwsCryptograph
     var cache := if input.cache.Some? then
       input.cache.value
     else
-      Types.defaultCache(Types.DefaultCache(entryCapacity := 1000));
+      Types.Default(Types.DefaultCache(entryCapacity := 1000));
 
     :- Need(input.branchKeyId.None? || input.branchKeyIdSupplier.None?,
             Types.AwsCryptographicMaterialProvidersException(
@@ -499,22 +499,22 @@ module AwsCryptographyMaterialProvidersOperations refines AbstractAwsCryptograph
     returns (output: Result<ICryptographicMaterialsCache, Error>)
   {
     match input.cache {
-      case defaultCache(c) =>
+      case Default(c) =>
         var cache := StormTracker.DefaultStorm().(entryCapacity := c.entryCapacity);
         var cmc := new StormTracker.StormTracker(cache);
         var synCmc := new StormTrackingCMC.StormTrackingCMC(cmc);
         return Success(synCmc);
-      case noCache(_) =>
+      case No(_) =>
         var cmc := new LocalCMC.LocalCMC(0, 1);
         return Success(cmc);
-      case singleThreadedCache(c) =>
+      case SingleThreaded(c) =>
         var cmc := new LocalCMC.LocalCMC(c.entryCapacity as nat, c.entryPruningTailSize.UnwrapOr(1) as nat);
         return Success(cmc);
-      case multiThreadedCache(c) =>
+      case MultiThreaded(c) =>
         var cmc := new LocalCMC.LocalCMC(c.entryCapacity as nat, c.entryPruningTailSize.UnwrapOr(1) as nat);
         var synCmc := new SynchronizedLocalCMC.SynchronizedLocalCMC(cmc);
         return Success(synCmc);
-      case stormTrackingCache(c) =>
+      case StormTracking(c) =>
         var cmc := new StormTracker.StormTracker(c);
         var synCmc := new StormTrackingCMC.StormTrackingCMC(cmc);
         return Success(synCmc);

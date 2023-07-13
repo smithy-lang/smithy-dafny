@@ -9,71 +9,71 @@ public class CacheType {
   /**
    * The best choice for most situations. Probably a StormTrackingCache.
    */
-  private final DefaultCache defaultCache;
+  private final DefaultCache Default;
 
   /**
    * Nothing should ever be cached.
    */
-  private final NoCache noCache;
+  private final NoCache No;
 
   /**
    * A cache that is NOT safe for use in a multi threaded environment.
    */
-  private final SingleThreadedCache singleThreadedCache;
+  private final SingleThreadedCache SingleThreaded;
 
   /**
    * A cache that is safe for use in a multi threaded environment, but no extra functionality.
    */
-  private final MultiThreadedCache multiThreadedCache;
+  private final MultiThreadedCache MultiThreaded;
 
   /**
    * A cache that is safe for use in a multi threaded environment,
    * and tries to prevent redundant or overly parallel backend calls.
    */
-  private final StormTrackingCache stormTrackingCache;
+  private final StormTrackingCache StormTracking;
 
   protected CacheType(BuilderImpl builder) {
-    this.defaultCache = builder.defaultCache();
-    this.noCache = builder.noCache();
-    this.singleThreadedCache = builder.singleThreadedCache();
-    this.multiThreadedCache = builder.multiThreadedCache();
-    this.stormTrackingCache = builder.stormTrackingCache();
+    this.Default = builder.Default();
+    this.No = builder.No();
+    this.SingleThreaded = builder.SingleThreaded();
+    this.MultiThreaded = builder.MultiThreaded();
+    this.StormTracking = builder.StormTracking();
   }
 
   /**
    * @return The best choice for most situations. Probably a StormTrackingCache.
    */
-  public DefaultCache defaultCache() {
-    return this.defaultCache;
+  public DefaultCache Default() {
+    return this.Default;
   }
 
   /**
    * @return Nothing should ever be cached.
    */
-  public NoCache noCache() {
-    return this.noCache;
+  public NoCache No() {
+    return this.No;
   }
 
   /**
    * @return A cache that is NOT safe for use in a multi threaded environment.
    */
-  public SingleThreadedCache singleThreadedCache() {
-    return this.singleThreadedCache;
+  public SingleThreadedCache SingleThreaded() {
+    return this.SingleThreaded;
   }
 
   /**
    * @return A cache that is safe for use in a multi threaded environment, but no extra functionality.
    */
-  public MultiThreadedCache multiThreadedCache() {
-    return this.multiThreadedCache;
+  public MultiThreadedCache MultiThreaded() {
+    return this.MultiThreaded;
   }
 
   /**
    * @return A cache that is safe for use in a multi threaded environment,
    * and tries to prevent redundant or overly parallel backend calls.
    */
-  public StormTrackingCache stormTrackingCache() {
-    return this.stormTrackingCache;
+  public StormTrackingCache StormTracking() {
+    return this.StormTracking;
   }
 
   public Builder toBuilder() {
@@ -86,125 +86,125 @@ public class CacheType {
 
   public interface Builder {
     /**
-     * @param defaultCache The best choice for most situations. Probably a StormTrackingCache.
+     * @param Default The best choice for most situations. Probably a StormTrackingCache.
      */
-    Builder defaultCache(DefaultCache defaultCache);
+    Builder Default(DefaultCache Default);
 
     /**
      * @return The best choice for most situations. Probably a StormTrackingCache.
      */
-    DefaultCache defaultCache();
+    DefaultCache Default();
 
     /**
-     * @param noCache Nothing should ever be cached.
+     * @param No Nothing should ever be cached.
      */
-    Builder noCache(NoCache noCache);
+    Builder No(NoCache No);
 
     /**
      * @return Nothing should ever be cached.
      */
-    NoCache noCache();
+    NoCache No();
 
     /**
-     * @param singleThreadedCache A cache that is NOT safe for use in a multi threaded environment.
+     * @param SingleThreaded A cache that is NOT safe for use in a multi threaded environment.
      */
-    Builder singleThreadedCache(SingleThreadedCache singleThreadedCache);
+    Builder SingleThreaded(SingleThreadedCache SingleThreaded);
 
     /**
      * @return A cache that is NOT safe for use in a multi threaded environment.
      */
-    SingleThreadedCache singleThreadedCache();
+    SingleThreadedCache SingleThreaded();
 
     /**
-     * @param multiThreadedCache A cache that is safe for use in a multi threaded environment, but no extra functionality.
+     * @param MultiThreaded A cache that is safe for use in a multi threaded environment, but no extra functionality.
      */
-    Builder multiThreadedCache(MultiThreadedCache multiThreadedCache);
+    Builder MultiThreaded(MultiThreadedCache MultiThreaded);
 
     /**
      * @return A cache that is safe for use in a multi threaded environment, but no extra functionality.
      */
-    MultiThreadedCache multiThreadedCache();
+    MultiThreadedCache MultiThreaded();
 
     /**
-     * @param stormTrackingCache A cache that is safe for use in a multi threaded environment,
+     * @param StormTracking A cache that is safe for use in a multi threaded environment,
      * and tries to prevent redundant or overly parallel backend calls.
      */
-    Builder stormTrackingCache(StormTrackingCache stormTrackingCache);
+    Builder StormTracking(StormTrackingCache StormTracking);
 
     /**
      * @return A cache that is safe for use in a multi threaded environment,
      * and tries to prevent redundant or overly parallel backend calls.
      */
-    StormTrackingCache stormTrackingCache();
+    StormTrackingCache StormTracking();
 
     CacheType build();
   }
 
   static class BuilderImpl implements Builder {
-    protected DefaultCache defaultCache;
+    protected DefaultCache Default;
 
-    protected NoCache noCache;
+    protected NoCache No;
 
-    protected SingleThreadedCache singleThreadedCache;
+    protected SingleThreadedCache SingleThreaded;
 
-    protected MultiThreadedCache multiThreadedCache;
+    protected MultiThreadedCache MultiThreaded;
 
-    protected StormTrackingCache stormTrackingCache;
+    protected StormTrackingCache StormTracking;
 
     protected BuilderImpl() {
     }
 
     protected BuilderImpl(CacheType model) {
-      this.defaultCache = model.defaultCache();
-      this.noCache = model.noCache();
-      this.singleThreadedCache = model.singleThreadedCache();
-      this.multiThreadedCache = model.multiThreadedCache();
-      this.stormTrackingCache = model.stormTrackingCache();
+      this.Default = model.Default();
+      this.No = model.No();
+      this.SingleThreaded = model.SingleThreaded();
+      this.MultiThreaded = model.MultiThreaded();
+      this.StormTracking = model.StormTracking();
     }
 
-    public Builder defaultCache(DefaultCache defaultCache) {
-      this.defaultCache = defaultCache;
+    public Builder Default(DefaultCache Default) {
+      this.Default = Default;
       return this;
     }
 
-    public DefaultCache defaultCache() {
-      return this.defaultCache;
+    public DefaultCache Default() {
+      return this.Default;
     }
 
-    public Builder noCache(NoCache noCache) {
-      this.noCache = noCache;
+    public Builder No(NoCache No) {
+      this.No = No;
       return this;
     }
 
-    public NoCache noCache() {
-      return this.noCache;
+    public NoCache No() {
+      return this.No;
     }
 
-    public Builder singleThreadedCache(SingleThreadedCache singleThreadedCache) {
-      this.singleThreadedCache = singleThreadedCache;
+    public Builder SingleThreaded(SingleThreadedCache SingleThreaded) {
+      this.SingleThreaded = SingleThreaded;
       return this;
     }
 
-    public SingleThreadedCache singleThreadedCache() {
-      return this.singleThreadedCache;
+    public SingleThreadedCache SingleThreaded() {
+      return this.SingleThreaded;
     }
 
-    public Builder multiThreadedCache(MultiThreadedCache multiThreadedCache) {
-      this.multiThreadedCache = multiThreadedCache;
+    public Builder MultiThreaded(MultiThreadedCache MultiThreaded) {
+      this.MultiThreaded = MultiThreaded;
       return this;
     }
 
-    public MultiThreadedCache multiThreadedCache() {
-      return this.multiThreadedCache;
+    public MultiThreadedCache MultiThreaded() {
+      return this.MultiThreaded;
     }
 
-    public Builder stormTrackingCache(StormTrackingCache stormTrackingCache) {
-      this.stormTrackingCache = stormTrackingCache;
+    public Builder StormTracking(StormTrackingCache StormTracking) {
+      this.StormTracking = StormTracking;
       return this;
     }
 
-    public StormTrackingCache stormTrackingCache() {
-      return this.stormTrackingCache;
+    public StormTrackingCache StormTracking() {
+      return this.StormTracking;
     }
 
     public CacheType build() {
@@ -215,7 +215,7 @@ public class CacheType {
     }
 
     private boolean onlyOneNonNull() {
-      Object[] allValues = {this.defaultCache, this.noCache, this.singleThreadedCache, this.multiThreadedCache, this.stormTrackingCache};
+      Object[] allValues = {this.Default, this.No, this.SingleThreaded, this.MultiThreaded, this.StormTracking};
       boolean haveOneNonNull = false;
       for (Object o : allValues) {
         if (Objects.nonNull(o)) {

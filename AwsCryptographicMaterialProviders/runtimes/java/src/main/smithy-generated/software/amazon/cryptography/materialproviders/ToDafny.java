@@ -1065,20 +1065,20 @@ public class ToDafny {
 
   public static CacheType CacheType(
       software.amazon.cryptography.materialproviders.model.CacheType nativeValue) {
-    if (Objects.nonNull(nativeValue.defaultCache())) {
-      return CacheType.create_defaultCache(ToDafny.DefaultCache(nativeValue.defaultCache()));
+    if (Objects.nonNull(nativeValue.Default())) {
+      return CacheType.create_Default(ToDafny.DefaultCache(nativeValue.Default()));
     }
-    if (Objects.nonNull(nativeValue.noCache())) {
-      return CacheType.create_noCache(ToDafny.NoCache(nativeValue.noCache()));
+    if (Objects.nonNull(nativeValue.No())) {
+      return CacheType.create_No(ToDafny.NoCache(nativeValue.No()));
     }
-    if (Objects.nonNull(nativeValue.singleThreadedCache())) {
-      return CacheType.create_singleThreadedCache(ToDafny.SingleThreadedCache(nativeValue.singleThreadedCache()));
+    if (Objects.nonNull(nativeValue.SingleThreaded())) {
+      return CacheType.create_SingleThreaded(ToDafny.SingleThreadedCache(nativeValue.SingleThreaded()));
     }
-    if (Objects.nonNull(nativeValue.multiThreadedCache())) {
-      return CacheType.create_multiThreadedCache(ToDafny.MultiThreadedCache(nativeValue.multiThreadedCache()));
+    if (Objects.nonNull(nativeValue.MultiThreaded())) {
+      return CacheType.create_MultiThreaded(ToDafny.MultiThreadedCache(nativeValue.MultiThreaded()));
     }
-    if (Objects.nonNull(nativeValue.stormTrackingCache())) {
-      return CacheType.create_stormTrackingCache(ToDafny.StormTrackingCache(nativeValue.stormTrackingCache()));
+    if (Objects.nonNull(nativeValue.StormTracking())) {
+      return CacheType.create_StormTracking(ToDafny.StormTrackingCache(nativeValue.StormTracking()));
     }
     throw new IllegalArgumentException("Cannot convert " + nativeValue + " to software.amazon.cryptography.materialproviders.internaldafny.types.CacheType.");
   }

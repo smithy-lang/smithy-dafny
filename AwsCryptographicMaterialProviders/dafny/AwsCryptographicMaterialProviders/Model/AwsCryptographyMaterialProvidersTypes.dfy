@@ -666,11 +666,11 @@ module {:extern "software.amazon.cryptography.materialproviders.internaldafny.ty
 
   }
   datatype CacheType =
-    | defaultCache(defaultCache: DefaultCache)
-    | noCache(noCache: NoCache)
-    | singleThreadedCache(singleThreadedCache: SingleThreadedCache)
-    | multiThreadedCache(multiThreadedCache: MultiThreadedCache)
-    | stormTrackingCache(stormTrackingCache: StormTrackingCache)
+    | Default(Default: DefaultCache)
+    | No(No: NoCache)
+    | SingleThreaded(SingleThreaded: SingleThreadedCache)
+    | MultiThreaded(MultiThreaded: MultiThreadedCache)
+    | StormTracking(StormTracking: StormTrackingCache)
   class IClientSupplierCallHistory {
     ghost constructor() {
       GetClient := [];

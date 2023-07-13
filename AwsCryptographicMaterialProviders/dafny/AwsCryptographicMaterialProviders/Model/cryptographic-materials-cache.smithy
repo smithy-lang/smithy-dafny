@@ -212,11 +212,11 @@ structure StormTrackingCache {
 }
 
 union CacheType {
-  defaultCache : DefaultCache,
-  noCache: NoCache,
-  singleThreadedCache: SingleThreadedCache,
-  multiThreadedCache: MultiThreadedCache,
-  stormTrackingCache: StormTrackingCache
+  Default : DefaultCache,
+  No: NoCache,
+  SingleThreaded: SingleThreadedCache,
+  MultiThreaded: MultiThreadedCache,
+  StormTracking: StormTrackingCache
 }
 
 structure CreateCryptographicMaterialsCacheInput {

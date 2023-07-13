@@ -25,7 +25,7 @@ public class LocalCMCTests {
     .build()
     .CreateCryptographicMaterialsCache(CreateCryptographicMaterialsCacheInput
       .builder()
-      .cache(CacheType.builder().defaultCache(DefaultCache.builder().entryCapacity(10).build()).build())
+      .cache(CacheType.builder().Default(DefaultCache.builder().entryCapacity(10).build()).build())
       .build()
     );
   static private List<String> identifies = Arrays.asList(
