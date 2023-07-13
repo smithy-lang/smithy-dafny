@@ -3,6 +3,10 @@ package software.amazon.polymorph.smithypython.customize;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.python.codegen.GenerationContext;
 
+/**
+ * Extends the Smithy-Python-generated errors.py file
+ * by adding Dafny plugin errors.
+ */
 public class ErrorsFileWriter implements CustomFileWriter {
 
   @Override

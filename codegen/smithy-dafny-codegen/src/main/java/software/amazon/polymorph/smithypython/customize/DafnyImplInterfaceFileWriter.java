@@ -7,6 +7,15 @@ import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonWriter;
 
+/**
+ * Creates a dafnyImplInterface.py file containing a DafnyImplInterface class.
+ * This provides a static (meaning "unchanging") interface for the
+ * Smithy-Python-generated client.py request handler to interact with.
+ *
+ * (We do this because we cannot extensively customize this part of client.py code generation.
+ *  Instead, we plug this interface into the part we can customize,
+ *  and do the rest of the customization in a file we control (this file).)
+ */
 public class DafnyImplInterfaceFileWriter implements CustomFileWriter {
 
   @Override

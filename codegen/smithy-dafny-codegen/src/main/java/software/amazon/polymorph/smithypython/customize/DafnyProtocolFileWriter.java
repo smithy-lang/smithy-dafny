@@ -1,10 +1,11 @@
 package software.amazon.polymorph.smithypython.customize;
 
-import software.amazon.polymorph.smithypython.nameresolver.DafnyNameResolver;
-import software.amazon.polymorph.smithypython.nameresolver.PythonNameResolver;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.python.codegen.GenerationContext;
 
+/**
+ * Writes the dafny_protocol.py file.
+ */
 public class DafnyProtocolFileWriter implements CustomFileWriter {
 
   @Override

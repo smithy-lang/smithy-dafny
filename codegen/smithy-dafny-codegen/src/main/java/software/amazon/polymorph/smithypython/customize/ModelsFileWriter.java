@@ -3,6 +3,11 @@ package software.amazon.polymorph.smithypython.customize;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.python.codegen.GenerationContext;
 
+
+/**
+ * Extends the Smithy-Python-generated models.py file
+ * by adding Dafny plugin models.
+ */
 public class ModelsFileWriter implements CustomFileWriter {
   @Override
   public void generateFileForServiceShape(

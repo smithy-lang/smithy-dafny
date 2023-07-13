@@ -6,6 +6,12 @@ import software.amazon.polymorph.smithypython.nameresolver.PythonNameResolver;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.python.codegen.GenerationContext;
 
+/**
+ * Writes the plugin.py file.
+ * This file contains logic to load the Dafny plugin into the
+ * Smithy-Python client.py's Config member.
+ * It also defines the Config's retry strategy.
+ */
 public class PluginFileWriter implements CustomFileWriter {
 
   @Override

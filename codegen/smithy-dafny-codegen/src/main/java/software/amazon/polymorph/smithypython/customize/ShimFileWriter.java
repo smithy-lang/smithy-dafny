@@ -2,7 +2,6 @@ package software.amazon.polymorph.smithypython.customize;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.TreeSet;
 import software.amazon.polymorph.smithypython.DafnyProtocolGenerator.DafnyMemberDeserVisitor;
 import software.amazon.polymorph.smithypython.DafnyProtocolGenerator.DafnyMemberSerVisitor;
 import software.amazon.polymorph.smithypython.nameresolver.DafnyNameResolver;
@@ -15,14 +14,16 @@ import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonWriter;
 
+/**
+ * Writes the shim.py file.
+ * The shim wraps the client.py implementation (which itself wraps the underlying Dafny implementation).
+ * The shim is used interface with the generated project from other generated Dafny code.
+ */
 public class ShimFileWriter implements CustomFileWriter {
 
   @Override
   public void generateFileForServiceShape(
       ServiceShape serviceShape, GenerationContext codegenContext) {
-
-    Set<ShapeId> allInputShapesSet = new HashSet<>();
-    Set<ShapeId> allOutputShapesSet = new HashSet<>();
     String typesModulePrelude = DafnyNameResolver.getDafnyTypesModuleNamespaceForShape(serviceShape.getId());
 
     String moduleName =  codegenContext.settings().getModuleName();
@@ -60,7 +61,6 @@ public class ShimFileWriter implements CustomFileWriter {
   private void generateErrorsBlock(
       GenerationContext codegenContext,
       ServiceShape serviceShape, PythonWriter writer) {
-    // TODO: StringBuilder? Writer?
 
     // Write modelled error converters
     Set<ShapeId> errorShapeSet = new HashSet<>();
