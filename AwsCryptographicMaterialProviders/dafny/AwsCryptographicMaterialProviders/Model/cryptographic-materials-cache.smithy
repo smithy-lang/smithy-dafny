@@ -5,6 +5,9 @@ use aws.polymorph#positional
 use aws.polymorph#extendable
 use aws.polymorph#javadoc
 
+@range(min: 1)
+integer NaturalNumber
+
 @aws.polymorph#mutableLocalState
 @aws.polymorph#extendable
 resource CryptographicMaterialsCache {
@@ -136,51 +139,88 @@ operation CreateCryptographicMaterialsCache {
   output: CreateCryptographicMaterialsCacheOutput,
 }
 
-structure StormTrackerSettings {
+@javadoc("The best choice for most situations. Probably a StormTrackingCache.")
+structure DefaultCache {
   @required
-  @range(min: 0)
-  @javadoc("How many seconds before expiration should an attempt be made to refresh the materials.
-  If zero, use a simple cache with no storm tracking.")
-  gracePeriod: PositiveInteger,
-
-  @required
-  @range(min: 1)
-  @javadoc("How many seconds between attempts to refresh the materials.")
-  graceInterval: PositiveInteger,
-
-  @required
-  @range(min: 1)
-  @javadoc("How many simultaneous attempts to refresh the materials.")
-  fanOut: PositiveInteger,
-
-  @required
-  @range(min: 1)
-  @javadoc("How many seconds until an attempt to refresh the materials should be forgotten.")
-  inFlightTTL: PositiveInteger,
-
-  @required
-  @range(min: 1)
-  @javadoc("How many milliseconds should a thread sleep if fanOut is exceeded")
-  sleepMilli: PositiveInteger,
+  @javadoc("Maximum number of entries cached.")
+  entryCapacity: NaturalNumber
 }
 
-structure CreateCryptographicMaterialsCacheInput {
+@javadoc("Nothing should ever be cached.")
+structure NoCache {}
+
+@javadoc("A cache that is NOT safe for use in a multi threaded environment.")
+structure SingleThreadedCache {
   //= aws-encryption-sdk-specification/framework/local-cryptographic-materials-cache.md#initialization
   //= type=implication
   //# On initialization of the local CMC,
   //# the caller MUST provide the following:
-  //# 
+  //#
   //# - [Entry Capacity](#entry-capacity)
-  //# 
+  //#
   //# The local CMC MUST also define the following:
-  //# 
+  //#
   //# - [Entry Pruning Tail Size](#entry-pruning-tail-size)
   @required
-  @range(min: 0)
-  entryCapacity: PositiveInteger,
+  @javadoc("Maximum number of entries cached.")
+  entryCapacity: NaturalNumber,
 
-  @range(min: 0)
-  entryPruningTailSize: PositiveInteger,
+  @javadoc("Number of entries to prune at a time.")
+  entryPruningTailSize: NaturalNumber,
+}
 
-  trackerSettings : StormTrackerSettings
+@javadoc("A cache that is safe for use in a multi threaded environment, but no extra functionality.")
+structure MultiThreadedCache {
+  @required
+  @javadoc("Maximum number of entries cached.")
+  entryCapacity: NaturalNumber,
+
+  @javadoc("Number of entries to prune at a time.")
+  entryPruningTailSize: NaturalNumber,
+}
+
+@javadoc("A cache that is safe for use in a multi threaded environment,
+and tries to prevent redundant or overly parallel backend calls.")
+structure StormTrackingCache {
+  @required
+  @javadoc("Maximum number of entries cached.")
+  entryCapacity: NaturalNumber,
+
+  @javadoc("Number of entries to prune at a time.")
+  entryPruningTailSize: NaturalNumber,
+
+  @required
+  @javadoc("How many seconds before expiration should an attempt be made to refresh the materials.
+  If zero, use a simple cache with no storm tracking.")
+  gracePeriod: NaturalNumber,
+
+  @required
+  @javadoc("How many seconds between attempts to refresh the materials.")
+  graceInterval: NaturalNumber,
+
+  @required
+  @javadoc("How many simultaneous attempts to refresh the materials.")
+  fanOut: NaturalNumber,
+
+  @required
+  @javadoc("How many seconds until an attempt to refresh the materials should be forgotten.")
+  inFlightTTL: NaturalNumber,
+
+  @required
+  @javadoc("How many milliseconds should a thread sleep if fanOut is exceeded.")
+  sleepMilli: NaturalNumber,
+}
+
+union CacheType {
+  defaultCache : DefaultCache,
+  noCache: NoCache,
+  singleThreadedCache: SingleThreadedCache,
+  multiThreadedCache: MultiThreadedCache,
+  stormTrackingCache: StormTrackingCache
+}
+
+structure CreateCryptographicMaterialsCacheInput {
+  @required
+  @javadoc("Which type of local cache to use.")
+  cache: CacheType
 }

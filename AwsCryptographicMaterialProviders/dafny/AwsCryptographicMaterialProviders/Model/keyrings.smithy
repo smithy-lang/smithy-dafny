@@ -6,7 +6,7 @@ use aws.polymorph#extendable
 use aws.polymorph#javadoc
 
 use com.amazonaws.kms#EncryptionAlgorithmSpec
-use aws.cryptography.materialProviders#StormTrackerSettings
+use aws.cryptography.materialProviders#CacheType
 
 @extendable
 resource Keyring {
@@ -342,11 +342,8 @@ structure CreateAwsKmsHierarchicalKeyringInput {
     @javadoc("How many seconds the Branch Key material is allowed to be reused within the local cache before it is re-retrieved from Amazon DynamoDB and re-authenticated with AWS KMS.")
     ttlSeconds: PositiveLong,
 
-    @javadoc("How many entries the local cache for Branch Key material can hold before evicting older entries.")
-    maxCacheSize: PositiveInteger,
-
-    @javadoc("Fine tune material refresh settings.")
-    trackerSettings : StormTrackerSettings
+    @javadoc("Which type of local cache to use.")
+    cache : CacheType
 }
 
 // Raw
