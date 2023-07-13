@@ -63,36 +63,41 @@ public class ShimFileWriter implements CustomFileWriter {
     // TODO: StringBuilder? Writer?
 
     // Write modelled error converters
+    Set<ShapeId> errorShapeSet = new HashSet<>();
     for (ShapeId operationShapeId : serviceShape.getAllOperations()) {
       OperationShape operationShape = codegenContext.model()
           .expectShape(operationShapeId, OperationShape.class);
 
-      for (ShapeId errorShape : operationShape.getErrors(serviceShape)) {
-        writer.write("""
-                if isinstance(e, $L):
-                    return $L.$L(message=e.message)
-                """,
-            errorShape.getName(),
-            DafnyNameResolver.getDafnyTypesModuleNamespaceForShape(errorShape),
-            DafnyNameResolver.getDafnyTypeForError(errorShape)
-        );
+      for (ShapeId errorShapeId : operationShape.getErrors(serviceShape)) {
+        errorShapeSet.add(errorShapeId);
       }
+    }
 
-      // Add service-specific CollectionOfErrors
+    for (ShapeId errorShapeId : errorShapeSet) {
       writer.write("""
-              if isinstance(e, CollectionOfErrors):
-                  return $L.Error_CollectionOfErrors(message=e.message, list=e.list)
+              if isinstance(e, $L):
+                  return $L.$L(message=e.message)
               """,
-          DafnyNameResolver.getDafnyTypesModuleNamespaceForShape(serviceShape.getId())
-      );
-      // Add service-specific OpaqueError
-      writer.write("""
-              if isinstance(e, OpaqueError):
-                  return $L.Error_Opaque(obj=e.obj)
-              """,
-          DafnyNameResolver.getDafnyTypesModuleNamespaceForShape(serviceShape.getId())
+          errorShapeId.getName(),
+          DafnyNameResolver.getDafnyTypesModuleNamespaceForShape(errorShapeId),
+          DafnyNameResolver.getDafnyTypeForError(errorShapeId)
       );
     }
+
+    // Add service-specific CollectionOfErrors
+    writer.write("""
+            if isinstance(e, CollectionOfErrors):
+                return $L.Error_CollectionOfErrors(message=e.message, list=e.list)
+            """,
+        DafnyNameResolver.getDafnyTypesModuleNamespaceForShape(serviceShape.getId())
+    );
+    // Add service-specific OpaqueError
+    writer.write("""
+            if isinstance(e, OpaqueError):
+                return $L.Error_Opaque(obj=e.obj)
+            """,
+        DafnyNameResolver.getDafnyTypesModuleNamespaceForShape(serviceShape.getId())
+    );
   }
 
   private void generateOperationsBlock(
