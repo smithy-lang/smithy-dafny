@@ -42,7 +42,7 @@ public class DafnyImplInterfaceFileWriter implements CustomFileWriter {
                     operation_map = None
                           
                     def handle_request(self, input):
-                        if self.operation_map == None:
+                        if self.operation_map is None:
                             self.operation_map = {
                                 ${C|}
                             }
@@ -54,7 +54,7 @@ public class DafnyImplInterfaceFileWriter implements CustomFileWriter {
                          # This code can be thought of as logic our Dafny "server" uses
                          #   to route incoming client requests to the correct request handler code.
                         operation_name = input[0]
-                        if input[1] == None:
+                        if input[1] is None:
                             return self.operation_map[operation_name]()
                         else:
                             return self.operation_map[operation_name](input[1])

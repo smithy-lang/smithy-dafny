@@ -98,7 +98,7 @@ public final class DafnyIntegration implements PythonIntegration {
 
     /**
      * Creates the Dafny ApplicationProtocol object.
-     * This is largely entirely unused boilerplate.
+     * At the moment, this is entirely unused boilerplate.
      * Smithy-Python requires this boilerplate, but the Dafny plugin doesn't use it.
      *
      * @return Returns the created application protocol.
