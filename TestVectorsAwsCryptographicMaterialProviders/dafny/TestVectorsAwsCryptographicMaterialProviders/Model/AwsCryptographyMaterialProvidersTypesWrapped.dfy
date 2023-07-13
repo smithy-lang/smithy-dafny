@@ -2,19 +2,19 @@
 // SPDX-License-Identifier: Apache-2.0
 // Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 include "../../../../StandardLibrary/src/Index.dfy"
-include "../src/Index.dfy"
-abstract module WrappedAbstractAwsCryptographyMaterialProvidersService {
-  import opened Wrappers
-  import opened StandardLibrary.UInt
-  import opened UTF8
-  import opened Types = AwsCryptographyMaterialProvidersTypes
-  import WrappedService : AbstractAwsCryptographyMaterialProvidersService
-  function method WrappedDefaultMaterialProvidersConfig(): MaterialProvidersConfig
-  method {:extern} WrappedMaterialProviders(config: MaterialProvidersConfig := WrappedDefaultMaterialProvidersConfig())
-    returns (res: Result<IAwsCryptographicMaterialProvidersClient, Error>)
-    ensures res.Success? ==>
-              && fresh(res.value)
-              && fresh(res.value.Modifies)
-              && fresh(res.value.History)
-              && res.value.ValidState()
+ include "../src/Index.dfy"
+ abstract module WrappedAbstractAwsCryptographyMaterialProvidersService {
+ import opened Wrappers
+ import opened StandardLibrary.UInt
+ import opened UTF8
+ import opened Types = AwsCryptographyMaterialProvidersTypes
+ import WrappedService : AbstractAwsCryptographyMaterialProvidersService
+ function method WrappedDefaultMaterialProvidersConfig(): MaterialProvidersConfig
+ method {:extern} WrappedMaterialProviders(config: MaterialProvidersConfig := WrappedDefaultMaterialProvidersConfig())
+ returns (res: Result<IAwsCryptographicMaterialProvidersClient, Error>)
+ ensures res.Success? ==> 
+ && fresh(res.value)
+ && fresh(res.value.Modifies)
+ && fresh(res.value.History)
+ && res.value.ValidState()
 }

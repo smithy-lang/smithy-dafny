@@ -47,7 +47,7 @@ module  {:options "/functionSyntax:4"} TestStormTracker {
   }
 
   method {:test} StormTrackerBasics() {
-    var st := new StormTracker(100);
+    var st := new StormTracker(DefaultStorm());
 
     var abc := UTF8.EncodeAscii("abc");
     var cde := UTF8.EncodeAscii("cde");
@@ -73,17 +73,7 @@ module  {:options "/functionSyntax:4"} TestStormTracker {
 
   method {:test} StormTrackerFanOut()
   {
-    var st := new StormTracker(
-      entryCapacity := 100,
-      entryPruningTailSize := 1,
-      trackerSettings := Some(StormTrackerSettings(
-                              gracePeriod := 10,
-                              graceInterval := 1,
-                              fanOut := 3,
-                              inFlightTTL := 20,
-                              sleepMilli := 20
-    ))
-    );
+    var st := new StormTracker(DefaultStorm().(fanOut := 3));
 
     var one := UTF8.EncodeAscii("one");
     var two := UTF8.EncodeAscii("two");
@@ -102,17 +92,7 @@ module  {:options "/functionSyntax:4"} TestStormTracker {
 
   method {:test} StormTrackerTTL()
   {
-    var st := new StormTracker(
-      entryCapacity := 100,
-      entryPruningTailSize := 1,
-      trackerSettings := Some(StormTrackerSettings(
-                              gracePeriod := 10,
-                              graceInterval := 1,
-                              fanOut := 3,
-                              inFlightTTL := 5,
-                              sleepMilli := 20
-    ))
-    );
+    var st := new StormTracker(DefaultStorm().(fanOut := 3, inFlightTTL := 5));
 
     var one := UTF8.EncodeAscii("one");
     var two := UTF8.EncodeAscii("two");
@@ -137,17 +117,7 @@ module  {:options "/functionSyntax:4"} TestStormTracker {
 
   method {:test} StormTrackerGraceInterval()
   {
-    var st := new StormTracker(
-      entryCapacity := 100,
-      entryPruningTailSize := 1,
-      trackerSettings := Some(StormTrackerSettings(
-                              gracePeriod := 10,
-                              graceInterval := 3,
-                              fanOut := 10,
-                              inFlightTTL := 20,
-                              sleepMilli := 20
-    ))
-    );
+    var st := new StormTracker(DefaultStorm().(graceInterval := 3));
 
     var one := UTF8.EncodeAscii("one");
 
@@ -165,17 +135,7 @@ module  {:options "/functionSyntax:4"} TestStormTracker {
 
   method {:test} StormTrackerGracePeriod()
   {
-    var st := new StormTracker(
-      entryCapacity := 100,
-      entryPruningTailSize := 1,
-      trackerSettings := Some(StormTrackerSettings(
-                              gracePeriod := 10,
-                              graceInterval := 3,
-                              fanOut := 10,
-                              inFlightTTL := 20,
-                              sleepMilli := 20
-    ))
-    );
+    var st := new StormTracker(DefaultStorm());
 
     var one := UTF8.EncodeAscii("one");
 

@@ -125,7 +125,6 @@ module AwsKmsHierarchicalKeyring {
     const branchKeyIdSupplier: Option<Types.IBranchKeyIdSupplier>
     const keyStore: KeyStore.IKeyStoreClient
     const ttlSeconds: Types.PositiveLong
-    const maxCacheSize: Types.PositiveInteger
     const cryptoPrimitives: Primitives.AtomicPrimitivesClient
     const cache: Types.ICryptographicMaterialsCache
 
@@ -160,14 +159,10 @@ module AwsKmsHierarchicalKeyring {
       //= type=implication
       //# - MUST provide a cache limit TTL
       ttlSeconds: Types.PositiveLong,
-      //= aws-encryption-sdk-specification/framework/aws-kms/aws-kms-hierarchical-keyring.md#initialization
-      //= type=implication
-      //# - MAY provide a max cache size
-      maxCacheSize: Types.PositiveInteger,
-      trackerSettings: Option<Types.StormTrackerSettings>,
+
+      cmc: Types.ICryptographicMaterialsCache,
       cryptoPrimitives : Primitives.AtomicPrimitivesClient
     )
-      requires maxCacheSize >= 1
       requires ttlSeconds >= 0
       requires keyStore.ValidState() && cryptoPrimitives.ValidState()
       requires branchKeyIdSupplier.Some? ==> branchKeyIdSupplier.value.ValidState()
@@ -177,7 +172,6 @@ module AwsKmsHierarchicalKeyring {
         && this.keyStore     == keyStore
         && this.branchKeyIdSupplier  == branchKeyIdSupplier
         && this.ttlSeconds   == ttlSeconds
-        && this.maxCacheSize == maxCacheSize
       ensures
         && ValidState()
         && fresh(this)
@@ -185,24 +179,10 @@ module AwsKmsHierarchicalKeyring {
         && var maybeSupplierModifies := if branchKeyIdSupplier.Some? then branchKeyIdSupplier.value.Modifies else {};
         && fresh(Modifies - keyStore.Modifies - cryptoPrimitives.Modifies - maybeSupplierModifies)
     {
-      var cmc : Types.ICryptographicMaterialsCache;
-      if trackerSettings.None? || trackerSettings.value.gracePeriod > 0 {
-        var localCmc := new StormTracker.StormTracker(
-          entryCapacity := maxCacheSize as nat,
-          entryPruningTailSize := 1,
-          trackerSettings := trackerSettings
-        );
-        cmc := new StormTrackingCMC.StormTrackingCMC(localCmc);
-      } else {
-        var localCmc := new LocalCMC.LocalCMC(maxCacheSize as nat, 1);
-        cmc := new SynchronizedLocalCMC.SynchronizedLocalCMC(localCmc);
-      }
-
       this.keyStore            := keyStore;
       this.branchKeyId         := branchKeyId;
       this.branchKeyIdSupplier := branchKeyIdSupplier;
       this.ttlSeconds          := ttlSeconds;
-      this.maxCacheSize        := maxCacheSize;
       this.cryptoPrimitives    := cryptoPrimitives;
       this.cache               := cmc;
 

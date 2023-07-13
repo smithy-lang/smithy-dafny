@@ -3,29 +3,23 @@
 // Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 package software.amazon.cryptography.materialproviders.model;
 
+import java.util.Objects;
+
 public class CreateCryptographicMaterialsCacheInput {
-  private final int entryCapacity;
-
-  private final int entryPruningTailSize;
-
-  private final StormTrackerSettings trackerSettings;
+  /**
+   * Which type of local cache to use.
+   */
+  private final CacheType cache;
 
   protected CreateCryptographicMaterialsCacheInput(BuilderImpl builder) {
-    this.entryCapacity = builder.entryCapacity();
-    this.entryPruningTailSize = builder.entryPruningTailSize();
-    this.trackerSettings = builder.trackerSettings();
+    this.cache = builder.cache();
   }
 
-  public int entryCapacity() {
-    return this.entryCapacity;
-  }
-
-  public int entryPruningTailSize() {
-    return this.entryPruningTailSize;
-  }
-
-  public StormTrackerSettings trackerSettings() {
-    return this.trackerSettings;
+  /**
+   * @return Which type of local cache to use.
+   */
+  public CacheType cache() {
+    return this.cache;
   }
 
   public Builder toBuilder() {
@@ -37,81 +31,41 @@ public class CreateCryptographicMaterialsCacheInput {
   }
 
   public interface Builder {
-    Builder entryCapacity(int entryCapacity);
+    /**
+     * @param cache Which type of local cache to use.
+     */
+    Builder cache(CacheType cache);
 
-    int entryCapacity();
-
-    Builder entryPruningTailSize(int entryPruningTailSize);
-
-    int entryPruningTailSize();
-
-    Builder trackerSettings(StormTrackerSettings trackerSettings);
-
-    StormTrackerSettings trackerSettings();
+    /**
+     * @return Which type of local cache to use.
+     */
+    CacheType cache();
 
     CreateCryptographicMaterialsCacheInput build();
   }
 
   static class BuilderImpl implements Builder {
-    protected int entryCapacity;
-
-    private boolean _entryCapacitySet = false;
-
-    protected int entryPruningTailSize;
-
-    private boolean _entryPruningTailSizeSet = false;
-
-    protected StormTrackerSettings trackerSettings;
+    protected CacheType cache;
 
     protected BuilderImpl() {
     }
 
     protected BuilderImpl(CreateCryptographicMaterialsCacheInput model) {
-      this.entryCapacity = model.entryCapacity();
-      this._entryCapacitySet = true;
-      this.entryPruningTailSize = model.entryPruningTailSize();
-      this._entryPruningTailSizeSet = true;
-      this.trackerSettings = model.trackerSettings();
+      this.cache = model.cache();
     }
 
-    public Builder entryCapacity(int entryCapacity) {
-      this.entryCapacity = entryCapacity;
-      this._entryCapacitySet = true;
+    public Builder cache(CacheType cache) {
+      this.cache = cache;
       return this;
     }
 
-    public int entryCapacity() {
-      return this.entryCapacity;
-    }
-
-    public Builder entryPruningTailSize(int entryPruningTailSize) {
-      this.entryPruningTailSize = entryPruningTailSize;
-      this._entryPruningTailSizeSet = true;
-      return this;
-    }
-
-    public int entryPruningTailSize() {
-      return this.entryPruningTailSize;
-    }
-
-    public Builder trackerSettings(StormTrackerSettings trackerSettings) {
-      this.trackerSettings = trackerSettings;
-      return this;
-    }
-
-    public StormTrackerSettings trackerSettings() {
-      return this.trackerSettings;
+    public CacheType cache() {
+      return this.cache;
     }
 
     public CreateCryptographicMaterialsCacheInput build() {
-      if (!this._entryCapacitySet) {
-        throw new IllegalArgumentException("Missing value for required field `entryCapacity`");
-      }
-      if (this._entryCapacitySet && this.entryCapacity() < 0) {
-        throw new IllegalArgumentException("`entryCapacity` must be greater than or equal to 0");
-      }
-      if (this._entryPruningTailSizeSet && this.entryPruningTailSize() < 0) {
-        throw new IllegalArgumentException("`entryPruningTailSize` must be greater than or equal to 0");
+      if (Objects.isNull(this.cache()))  {
+        throw new IllegalArgumentException("Missing value for required field `cache`");
       }
       return new CreateCryptographicMaterialsCacheInput(this);
     }

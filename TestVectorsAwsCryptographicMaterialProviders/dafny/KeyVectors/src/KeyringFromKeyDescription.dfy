@@ -115,8 +115,7 @@ module {:options "-functionSyntax:4"} KeyringFromKeyDescription {
         branchKeyIdSupplier := None,
         keyStore := keyStore,
         ttlSeconds := 0,
-        trackerSettings := None,
-        maxCacheSize := Some(10)
+        cache := None
       );
       var keyring := mpl.CreateAwsKmsHierarchicalKeyring(input);
       return keyring.MapFailure(e => AwsCryptographyMaterialProviders(e));

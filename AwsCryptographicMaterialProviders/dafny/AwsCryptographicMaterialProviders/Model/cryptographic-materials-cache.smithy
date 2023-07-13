@@ -6,7 +6,7 @@ use aws.polymorph#extendable
 use aws.polymorph#javadoc
 
 @range(min: 1)
-integer NaturalNumber
+integer CountingNumber
 
 @aws.polymorph#mutableLocalState
 @aws.polymorph#extendable
@@ -143,7 +143,7 @@ operation CreateCryptographicMaterialsCache {
 structure DefaultCache {
   @required
   @javadoc("Maximum number of entries cached.")
-  entryCapacity: NaturalNumber
+  entryCapacity: CountingNumber
 }
 
 @javadoc("Nothing should ever be cached.")
@@ -163,20 +163,20 @@ structure SingleThreadedCache {
   //# - [Entry Pruning Tail Size](#entry-pruning-tail-size)
   @required
   @javadoc("Maximum number of entries cached.")
-  entryCapacity: NaturalNumber,
+  entryCapacity: CountingNumber,
 
   @javadoc("Number of entries to prune at a time.")
-  entryPruningTailSize: NaturalNumber,
+  entryPruningTailSize: CountingNumber,
 }
 
 @javadoc("A cache that is safe for use in a multi threaded environment, but no extra functionality.")
 structure MultiThreadedCache {
   @required
   @javadoc("Maximum number of entries cached.")
-  entryCapacity: NaturalNumber,
+  entryCapacity: CountingNumber,
 
   @javadoc("Number of entries to prune at a time.")
-  entryPruningTailSize: NaturalNumber,
+  entryPruningTailSize: CountingNumber,
 }
 
 @javadoc("A cache that is safe for use in a multi threaded environment,
@@ -184,31 +184,31 @@ and tries to prevent redundant or overly parallel backend calls.")
 structure StormTrackingCache {
   @required
   @javadoc("Maximum number of entries cached.")
-  entryCapacity: NaturalNumber,
+  entryCapacity: CountingNumber,
 
   @javadoc("Number of entries to prune at a time.")
-  entryPruningTailSize: NaturalNumber,
+  entryPruningTailSize: CountingNumber,
 
   @required
   @javadoc("How many seconds before expiration should an attempt be made to refresh the materials.
   If zero, use a simple cache with no storm tracking.")
-  gracePeriod: NaturalNumber,
+  gracePeriod: CountingNumber,
 
   @required
   @javadoc("How many seconds between attempts to refresh the materials.")
-  graceInterval: NaturalNumber,
+  graceInterval: CountingNumber,
 
   @required
   @javadoc("How many simultaneous attempts to refresh the materials.")
-  fanOut: NaturalNumber,
+  fanOut: CountingNumber,
 
   @required
   @javadoc("How many seconds until an attempt to refresh the materials should be forgotten.")
-  inFlightTTL: NaturalNumber,
+  inFlightTTL: CountingNumber,
 
   @required
   @javadoc("How many milliseconds should a thread sleep if fanOut is exceeded.")
-  sleepMilli: NaturalNumber,
+  sleepMilli: CountingNumber,
 }
 
 union CacheType {

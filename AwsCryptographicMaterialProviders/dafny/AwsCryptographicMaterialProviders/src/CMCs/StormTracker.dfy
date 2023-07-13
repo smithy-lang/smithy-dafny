@@ -31,11 +31,18 @@ module {:options "/functionSyntax:4" }  StormTracker {
     | EmptyFetch // No data, client should fetch
     | Full(data : Types.GetCacheEntryOutput)
 
-  const DefaultGracePeriod := 10 as Types.PositiveLong
-  const DefaultGraceInterval := 1 as Types.PositiveLong
-  const DefaultFanOut := 20 as Types.PositiveLong
-  const DefaultInFlightTTL := 20 as Types.PositiveLong
-  const DefaultSleep := 20 as Types.PositiveLong
+  function DefaultStorm() : Types.StormTrackingCache
+  {
+    Types.StormTrackingCache(
+      entryCapacity := 1000,
+      entryPruningTailSize := Some(1),
+      gracePeriod := 10,
+      graceInterval := 1,
+      fanOut := 20,
+      inFlightTTL := 20,
+      sleepMilli := 20
+    )
+  }
 
   class StormTracker {
 
@@ -56,33 +63,21 @@ module {:options "/functionSyntax:4" }  StormTracker {
     var sleepMilli : Types.PositiveLong // how long to sleep, if we sleep
 
     constructor(
-      entryCapacity: nat,
-      entryPruningTailSize: nat := 1,
-      trackerSettings: Option<Types.StormTrackerSettings> := None
+      cache: Types.StormTrackingCache
     )
-      requires entryPruningTailSize >= 1
       ensures
         && this.ValidState()
         && fresh(this.wrapped)
         && fresh(this.wrapped.Modifies)
         && fresh(this.inFlight)
     {
-      this.wrapped := new LocalCMC.LocalCMC(entryCapacity, entryPruningTailSize);
+      this.wrapped := new LocalCMC.LocalCMC(cache.entryCapacity as nat, cache.entryPruningTailSize.UnwrapOr(1) as nat);
       this.inFlight := new MutableMap();
-      if trackerSettings.Some? {
-        var v := trackerSettings.value;
-        this.gracePeriod := v.gracePeriod as Types.PositiveLong;
-        this.graceInterval := v.graceInterval as Types.PositiveLong;
-        this.fanOut := v.fanOut as Types.PositiveLong;
-        this.inFlightTTL := v.inFlightTTL as Types.PositiveLong;
-        this.sleepMilli := v.sleepMilli as Types.PositiveLong;
-      } else {
-        this.gracePeriod := DefaultGracePeriod;
-        this.graceInterval := DefaultGraceInterval;
-        this.fanOut := DefaultFanOut;
-        this.inFlightTTL := DefaultInFlightTTL;
-        this.sleepMilli := DefaultSleep;
-      }
+      this.gracePeriod := cache.gracePeriod as Types.PositiveLong;
+      this.graceInterval := cache.graceInterval as Types.PositiveLong;
+      this.fanOut := cache.fanOut as Types.PositiveLong;
+      this.inFlightTTL := cache.inFlightTTL as Types.PositiveLong;
+      this.sleepMilli := cache.sleepMilli as Types.PositiveLong;
       this.lastPrune := 0;
     }
 

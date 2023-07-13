@@ -18,6 +18,8 @@ module TestAwsKmsHierarchicalKeyring {
   import Crypto = AwsCryptographyPrimitivesTypes
   import Aws.Cryptography.Primitives
   import MaterialProviders
+  import StormTracker
+  import StormTrackingCMC
   import opened TestUtils
   import opened AlgorithmSuites
   import opened Materials
@@ -48,7 +50,7 @@ module TestAwsKmsHierarchicalKeyring {
 
     var encryptionContext := TestUtils.SmallEncryptionContext(TestUtils.SmallEncryptionContextVariation.A);
     var suite := AlgorithmSuites.GetSuite(suiteId);
-    // Add data key to test the case wherer i have a pdk
+    // Add data key to test the case where i have a pdk
     var encryptionMaterialsIn :- expect mpl.InitializeEncryptionMaterials(
       Types.InitializeEncryptionMaterialsInput(
         algorithmSuiteId := suiteId,
@@ -90,8 +92,7 @@ module TestAwsKmsHierarchicalKeyring {
         branchKeyIdSupplier := None,
         keyStore := keyStore,
         ttlSeconds := ttl,
-        trackerSettings := None,
-        maxCacheSize := Option.Some(10)
+        cache := None
       )
     );
 
@@ -137,8 +138,7 @@ module TestAwsKmsHierarchicalKeyring {
         branchKeyIdSupplier := None,
         keyStore := keyStore,
         ttlSeconds := ttl,
-        trackerSettings := None,
-        maxCacheSize := Option.Some(10)
+        cache := None
       )
     );
 
@@ -179,8 +179,7 @@ module TestAwsKmsHierarchicalKeyring {
         branchKeyIdSupplier := None,
         keyStore := keyStore,
         ttlSeconds := ttl,
-        trackerSettings := None,
-        maxCacheSize := Option.Some(10)
+        cache := None
       )
     );
 
@@ -226,8 +225,7 @@ module TestAwsKmsHierarchicalKeyring {
         branchKeyIdSupplier := None,
         keyStore := keyStore,
         ttlSeconds := ttl,
-        trackerSettings := None,
-        maxCacheSize := Option.Some(10)
+        cache := None
       )
     );
 
@@ -270,8 +268,7 @@ module TestAwsKmsHierarchicalKeyring {
         branchKeyIdSupplier := Some(branchKeyIdSupplier),
         keyStore := keyStore,
         ttlSeconds := ttl,
-        trackerSettings := None,
-        maxCacheSize := Option.Some(10)
+        cache := None
       )
     );
 

@@ -33,22 +33,16 @@ public class CreateAwsKmsHierarchicalKeyringInput {
   private final long ttlSeconds;
 
   /**
-   * How many entries the local cache for Branch Key material can hold before evicting older entries.
+   * Which type of local cache to use.
    */
-  private final int maxCacheSize;
-
-  /**
-   * Fine tune material refresh settings.
-   */
-  private final StormTrackerSettings trackerSettings;
+  private final CacheType cache;
 
   protected CreateAwsKmsHierarchicalKeyringInput(BuilderImpl builder) {
     this.branchKeyId = builder.branchKeyId();
     this.branchKeyIdSupplier = builder.branchKeyIdSupplier();
     this.keyStore = builder.keyStore();
     this.ttlSeconds = builder.ttlSeconds();
-    this.maxCacheSize = builder.maxCacheSize();
-    this.trackerSettings = builder.trackerSettings();
+    this.cache = builder.cache();
   }
 
   /**
@@ -80,17 +74,10 @@ public class CreateAwsKmsHierarchicalKeyringInput {
   }
 
   /**
-   * @return How many entries the local cache for Branch Key material can hold before evicting older entries.
+   * @return Which type of local cache to use.
    */
-  public int maxCacheSize() {
-    return this.maxCacheSize;
-  }
-
-  /**
-   * @return Fine tune material refresh settings.
-   */
-  public StormTrackerSettings trackerSettings() {
-    return this.trackerSettings;
+  public CacheType cache() {
+    return this.cache;
   }
 
   public Builder toBuilder() {
@@ -143,24 +130,14 @@ public class CreateAwsKmsHierarchicalKeyringInput {
     long ttlSeconds();
 
     /**
-     * @param maxCacheSize How many entries the local cache for Branch Key material can hold before evicting older entries.
+     * @param cache Which type of local cache to use.
      */
-    Builder maxCacheSize(int maxCacheSize);
+    Builder cache(CacheType cache);
 
     /**
-     * @return How many entries the local cache for Branch Key material can hold before evicting older entries.
+     * @return Which type of local cache to use.
      */
-    int maxCacheSize();
-
-    /**
-     * @param trackerSettings Fine tune material refresh settings.
-     */
-    Builder trackerSettings(StormTrackerSettings trackerSettings);
-
-    /**
-     * @return Fine tune material refresh settings.
-     */
-    StormTrackerSettings trackerSettings();
+    CacheType cache();
 
     CreateAwsKmsHierarchicalKeyringInput build();
   }
@@ -176,11 +153,7 @@ public class CreateAwsKmsHierarchicalKeyringInput {
 
     private boolean _ttlSecondsSet = false;
 
-    protected int maxCacheSize;
-
-    private boolean _maxCacheSizeSet = false;
-
-    protected StormTrackerSettings trackerSettings;
+    protected CacheType cache;
 
     protected BuilderImpl() {
     }
@@ -191,9 +164,7 @@ public class CreateAwsKmsHierarchicalKeyringInput {
       this.keyStore = model.keyStore();
       this.ttlSeconds = model.ttlSeconds();
       this._ttlSecondsSet = true;
-      this.maxCacheSize = model.maxCacheSize();
-      this._maxCacheSizeSet = true;
-      this.trackerSettings = model.trackerSettings();
+      this.cache = model.cache();
     }
 
     public Builder branchKeyId(String branchKeyId) {
@@ -233,23 +204,13 @@ public class CreateAwsKmsHierarchicalKeyringInput {
       return this.ttlSeconds;
     }
 
-    public Builder maxCacheSize(int maxCacheSize) {
-      this.maxCacheSize = maxCacheSize;
-      this._maxCacheSizeSet = true;
+    public Builder cache(CacheType cache) {
+      this.cache = cache;
       return this;
     }
 
-    public int maxCacheSize() {
-      return this.maxCacheSize;
-    }
-
-    public Builder trackerSettings(StormTrackerSettings trackerSettings) {
-      this.trackerSettings = trackerSettings;
-      return this;
-    }
-
-    public StormTrackerSettings trackerSettings() {
-      return this.trackerSettings;
+    public CacheType cache() {
+      return this.cache;
     }
 
     public CreateAwsKmsHierarchicalKeyringInput build() {
@@ -261,9 +222,6 @@ public class CreateAwsKmsHierarchicalKeyringInput {
       }
       if (this._ttlSecondsSet && this.ttlSeconds() < 0) {
         throw new IllegalArgumentException("`ttlSeconds` must be greater than or equal to 0");
-      }
-      if (this._maxCacheSizeSet && this.maxCacheSize() < 0) {
-        throw new IllegalArgumentException("`maxCacheSize` must be greater than or equal to 0");
       }
       return new CreateAwsKmsHierarchicalKeyringInput(this);
     }
