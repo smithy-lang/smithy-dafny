@@ -230,7 +230,6 @@ public abstract class DafnyProtocolGenerator implements ProtocolGenerator {
       GenerationContext context,
       TreeSet<ShapeId> deserializingErrorShapes)
   {
-
     // I need to store a map from deserFunction metadata -> Set<errorId>
     // Such that for a given set of metadata (i.e. a given file),
     // I have all of the errors I need to write to that file
