@@ -23,33 +23,19 @@ import java.util.Set;
 import java.util.TreeSet;
 import software.amazon.polymorph.smithypython.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithypython.nameresolver.Utils;
-import software.amazon.smithy.codegen.core.CodegenException;
-import software.amazon.smithy.codegen.core.Symbol;
+import software.amazon.polymorph.smithypython.shapevisitor.DafnyToSmithyShapeVisitor;
+import software.amazon.polymorph.smithypython.shapevisitor.SmithyToDafnyShapeVisitor;
 import software.amazon.smithy.model.knowledge.TopDownIndex;
-import software.amazon.smithy.model.shapes.BigDecimalShape;
-import software.amazon.smithy.model.shapes.BigIntegerShape;
-import software.amazon.smithy.model.shapes.BlobShape;
-import software.amazon.smithy.model.shapes.BooleanShape;
-import software.amazon.smithy.model.shapes.ByteShape;
-import software.amazon.smithy.model.shapes.DoubleShape;
-import software.amazon.smithy.model.shapes.FloatShape;
-import software.amazon.smithy.model.shapes.IntegerShape;
-import software.amazon.smithy.model.shapes.LongShape;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
-import software.amazon.smithy.model.shapes.ShapeVisitor;
-import software.amazon.smithy.model.shapes.ShortShape;
-import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
-import software.amazon.smithy.model.shapes.TimestampShape;
 import software.amazon.smithy.python.codegen.ApplicationProtocol;
 import software.amazon.smithy.python.codegen.CodegenUtils;
 import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonWriter;
 import software.amazon.smithy.python.codegen.SmithyPythonDependency;
 import software.amazon.smithy.python.codegen.integration.ProtocolGenerator;
-import software.amazon.smithy.utils.CaseUtils;
 import software.amazon.smithy.utils.CodeSection;
 import software.amazon.smithy.utils.Pair;
 import software.amazon.smithy.utils.SmithyUnstableApi;
@@ -131,10 +117,9 @@ public abstract class DafnyProtocolGenerator implements ProtocolGenerator {
     DafnyNameResolver.importDafnyTypeForShape(writer, operation.getInputShape());
 
     Shape targetShape = context.model().expectShape(operation.getInputShape());
-    var input = targetShape.accept(new DafnyMemberSerVisitor(
+    var input = targetShape.accept(new SmithyToDafnyShapeVisitor(
         context,
-        "input",
-        true
+        "input"
     ));
 
     writer.write(
@@ -143,7 +128,6 @@ public abstract class DafnyProtocolGenerator implements ProtocolGenerator {
           """,
         operation.getId().getName(),
         DafnyNameResolver.getDafnyTypeForShape(operation.getInputShape()),
-        // TODO: refactor
         Utils.isUnitShape(operation.getInputShape()) ? "" : "(" + input + ")"
     );
   }
@@ -219,10 +203,9 @@ public abstract class DafnyProtocolGenerator implements ProtocolGenerator {
           """);
       } else {
         Shape targetShape = context.model().expectShape(outputShape);
-        var output = targetShape.accept(new DafnyMemberDeserVisitor(
+        var output = targetShape.accept(new DafnyToSmithyShapeVisitor(
             context,
-            "input.value",
-            false
+            "input.value"
         ));
 
         writer.write("""
@@ -334,230 +317,4 @@ public abstract class DafnyProtocolGenerator implements ProtocolGenerator {
       Set<Shape> shapes
   );
 
-  /**
-   * Given context and a source of data, generate an input value provider for the
-   * shape. This may use native types or invoke complex type serializers to
-   * manipulate the dataSource into the proper input content.
-   */
-  // TODO: Naming of DafnyMemberSerVisitor?
-  // TODO: Since Shim generator needs this... make it its own class
-  public static class DafnyMemberSerVisitor extends ShapeVisitor.Default<String> {
-    private final GenerationContext context;
-    private final String dataSource;
-    private final boolean useOtherOrder;
-
-    /**
-     * @param context The generation context.
-     * @param dataSource The in-code location of the data to provide an output of
-     *                   ({@code input.foo}, {@code entry}, etc.)
-     */
-    public DafnyMemberSerVisitor(
-        GenerationContext context,
-//        PythonWriter writer,
-        String dataSource,
-        boolean useOtherOrder
-    ) {
-      this.context = context;
-      this.dataSource = dataSource;
-      this.useOtherOrder = useOtherOrder;
-    }
-
-    @Override
-    protected String getDefault(Shape shape) {
-      var protocolName = context.protocolGenerator().getName();
-      throw new CodegenException(String.format(
-          "Unsupported conversion of %s to %s using the %s protocol",
-          shape, shape.getType(), protocolName));
-    }
-
-    @Override
-    public String blobShape(BlobShape shape) {
-      return getDefault(shape);
-    }
-
-    @Override
-    public String structureShape(StructureShape shape) {
-
-      String out = "";
-      // TODO: Change fstring to support >1 shape
-      for (String memberName : shape.getMemberNames()) {
-        // TODO: Need to refactor entire class
-        if (useOtherOrder) {
-          out += "%1$s=%2$s.%3$s,\n".formatted(memberName, dataSource, CaseUtils.toSnakeCase(memberName));
-        } else {
-          out += "%1$s=%2$s.%3$s,\n".formatted(CaseUtils.toSnakeCase(memberName), dataSource, memberName);
-        }
-      }
-      return out;
-    }
-
-    @Override
-    public String booleanShape(BooleanShape shape) {
-      return getDefault(shape);
-    }
-
-    @Override
-    public String stringShape(StringShape shape) {
-      return getDefault(shape);
-    }
-
-    @Override
-    public String byteShape(ByteShape shape) {
-      return getDefault(shape);
-    }
-
-    @Override
-    public String shortShape(ShortShape shape) {
-      return getDefault(shape);
-    }
-
-    @Override
-    public String integerShape(IntegerShape shape) {
-      return getDefault(shape);
-    }
-
-    @Override
-    public String longShape(LongShape shape) {
-      return getDefault(shape);
-    }
-
-    @Override
-    public String bigIntegerShape(BigIntegerShape shape) {
-      return getDefault(shape);
-    }
-
-    @Override
-    public String floatShape(FloatShape shape) {
-      return getDefault(shape);
-    }
-
-    @Override
-    public String doubleShape(DoubleShape shape) {
-      return getDefault(shape);
-    }
-
-    @Override
-    public String bigDecimalShape(BigDecimalShape shape) {
-      return getDefault(shape);
-    }
-
-    @Override
-    public String timestampShape(TimestampShape shape) {
-      return getDefault(shape);
-    }
-  }
-
-  /**
-   * Given context and a source of data, generate an output value provider for the
-   * shape. This may use native types (like generating a datetime for timestamps)
-   * converters (like a b64decode) or invoke complex type deserializers to
-   * manipulate the dataSource into the proper output content.
-   */
-  // TODO: Naming of DafnyMemberDeserVisitor?
-  // TODO: Since Shim generator needs this... make it its own class
-  public static class DafnyMemberDeserVisitor extends ShapeVisitor.Default<String> {
-
-    private final GenerationContext context;
-    private final String dataSource;
-    private final boolean useOtherOrder;
-
-    /**
-     * @param context The generation context.
-     * @param dataSource The in-code location of the data to provide an output of
-     *                   ({@code output.foo}, {@code entry}, etc.)
-     */
-    public DafnyMemberDeserVisitor(
-        GenerationContext context,
-        String dataSource,
-        boolean useOtherOrder
-    ) {
-      this.context = context;
-      this.dataSource = dataSource;
-      this.useOtherOrder = useOtherOrder;
-    }
-
-    @Override
-    protected String getDefault(Shape shape) {
-      var protocolName = context.protocolGenerator().getName();
-      throw new CodegenException(String.format(
-          "Unsupported conversion of %s to %s using the %s protocol",
-          shape, shape.getType(), protocolName));
-    }
-
-    @Override
-    public String blobShape(BlobShape shape) {
-      return getDefault(shape);
-    }
-
-    @Override
-    public String structureShape(StructureShape shape) {
-      
-      String out = "";
-      // TODO: Change fstring to support >1 shape
-      for (String memberName : shape.getMemberNames()) {
-        // TODO: Need to refactor entire class
-        if (useOtherOrder) {
-          out += "%1$s=%2$s.%3$s,\n".formatted(memberName, dataSource, CaseUtils.toSnakeCase(memberName));
-        } else {
-          out += "%1$s=%2$s.%3$s,\n".formatted(CaseUtils.toSnakeCase(memberName), dataSource, memberName);
-        }
-      }
-      return out;
-    }
-
-    @Override
-    public String booleanShape(BooleanShape shape) {
-      return getDefault(shape);
-    }
-
-    @Override
-    public String stringShape(StringShape shape) {
-      return getDefault(shape);
-    }
-
-    @Override
-    public String byteShape(ByteShape shape) {
-      return getDefault(shape);
-    }
-
-    @Override
-    public String shortShape(ShortShape shape) {
-      return getDefault(shape);
-    }
-
-    @Override
-    public String integerShape(IntegerShape shape) {
-      return getDefault(shape);
-    }
-
-    @Override
-    public String longShape(LongShape shape) {
-      return getDefault(shape);
-    }
-
-    @Override
-    public String bigIntegerShape(BigIntegerShape shape) {
-      return getDefault(shape);
-    }
-
-    @Override
-    public String floatShape(FloatShape shape) {
-      return getDefault(shape);
-    }
-
-    @Override
-    public String doubleShape(DoubleShape shape) {
-      return getDefault(shape);
-    }
-
-    @Override
-    public String bigDecimalShape(BigDecimalShape shape) {
-      return getDefault(shape);
-    }
-
-    @Override
-    public String timestampShape(TimestampShape shape) {
-      return getDefault(shape);
-    }
-  }
 }

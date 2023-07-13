@@ -132,7 +132,7 @@ public final class DafnyIntegration implements PythonIntegration {
             @Override
             protected void generateDocumentBodyShapeDeserializers(GenerationContext context,
                 Set<Shape> shapes) {
-                // TODO. What is this?
+                // Do nothing
             }
 
             @Override

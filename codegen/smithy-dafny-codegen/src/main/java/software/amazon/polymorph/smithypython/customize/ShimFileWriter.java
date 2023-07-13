@@ -2,8 +2,8 @@ package software.amazon.polymorph.smithypython.customize;
 
 import java.util.HashSet;
 import java.util.Set;
-import software.amazon.polymorph.smithypython.DafnyProtocolGenerator.DafnyMemberDeserVisitor;
-import software.amazon.polymorph.smithypython.DafnyProtocolGenerator.DafnyMemberSerVisitor;
+import software.amazon.polymorph.smithypython.shapevisitor.DafnyToSmithyShapeVisitor;
+import software.amazon.polymorph.smithypython.shapevisitor.SmithyToDafnyShapeVisitor;
 import software.amazon.polymorph.smithypython.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithypython.nameresolver.PythonNameResolver;
 import software.amazon.polymorph.smithypython.nameresolver.Utils;
@@ -128,17 +128,15 @@ public class ShimFileWriter implements CustomFileWriter {
       writer.addImport(".models", outputShape.getName());
 
       Shape targetShape = codegenContext.model().expectShape(operationShape.getOutputShape());
-      var output = targetShape.accept(new DafnyMemberDeserVisitor(
+      var output = targetShape.accept(new SmithyToDafnyShapeVisitor(
           codegenContext,
-          "wrapped_response",
-          true
+          "wrapped_response"
       ));
 
       Shape targetShapeInput = codegenContext.model().expectShape(operationShape.getInputShape());
-      var input = targetShapeInput.accept(new DafnyMemberSerVisitor(
+      var input = targetShapeInput.accept(new DafnyToSmithyShapeVisitor(
           codegenContext,
-          "input",
-          false
+          "input"
       ));
 
       writer.write("""
