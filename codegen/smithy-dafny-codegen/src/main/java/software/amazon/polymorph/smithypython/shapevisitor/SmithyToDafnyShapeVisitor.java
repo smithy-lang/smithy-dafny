@@ -80,6 +80,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
                 new SmithyToDafnyShapeVisitor(context, dataSource + "." + CaseUtils.toSnakeCase(memberName))
             )));
       }
+      // Close structure
       return builder.append(")").toString();
     }
 
