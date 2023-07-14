@@ -61,6 +61,9 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
     @Override
     public String structureShape(StructureShape shape) {
       StringBuilder builder = new StringBuilder();
+      // Open Dafny structure shape
+      // e.g.
+      // DafnyStructureName(...
       builder.append("%1$s(".formatted(DafnyNameResolver.getDafnyTypeForShape(shape)));
       // Recursively dispatch a new ShapeVisitor for each member of the structure
       for (Entry<String, MemberShape> memberShapeEntry : shape.getAllMembers().entrySet()) {
@@ -68,6 +71,9 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
         MemberShape memberShape = memberShapeEntry.getValue();
         final Shape targetShape = context.model().expectShape(memberShape.getTarget());
 
+        // Adds `DafnyStructureMember=smithy_structure_member(...)`
+        // e.g.
+        // DafnyStructureName(DafnyStructureMember=smithy_structure_member(...), ...)
         builder.append("%1$s=%2$s,\n".formatted(
             memberName,
             targetShape.accept(
@@ -75,14 +81,6 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
             )));
       }
       return builder.append(")").toString();
-
-//      String out = "";
-//      // TODO: Change fstring to support >1 shape
-//      for (String memberName : shape.getMemberNames()) {
-//        // TODO: Need to refactor entire class
-//        out += "%1$s=%2$s.%3$s,\n".formatted(memberName, dataSource, CaseUtils.toSnakeCase(memberName));
-//      }
-//      return out;
     }
 
     @Override

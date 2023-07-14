@@ -62,6 +62,9 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
     @Override
     public String structureShape(StructureShape shape) {
       StringBuilder builder = new StringBuilder();
+      // Open Smithy structure shape
+      // e.g.
+      // smithy_structure_name(...
       builder.append("%1$s(".formatted(shape.getId().getName()));
       // Recursively dispatch a new ShapeVisitor for each member of the structure
       for (Entry<String, MemberShape> memberShapeEntry : shape.getAllMembers().entrySet()) {
@@ -69,12 +72,16 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
         MemberShape memberShape = memberShapeEntry.getValue();
         final Shape targetShape = context.model().expectShape(memberShape.getTarget());
 
+        // Adds `smithy_structure_member=DafnyStructureMember(...)`
+        // e.g.
+        // smithy_structure_name(smithy_structure_member=DafnyStructureMember(...), ...)
         builder.append("%1$s=%2$s,\n".formatted(
             CaseUtils.toSnakeCase(memberName),
             targetShape.accept(
                 new DafnyToSmithyShapeVisitor(context, dataSource + "." + memberName)
             )));
       }
+      // Close structure
       return builder.append(")").toString();
     }
 
