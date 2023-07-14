@@ -126,7 +126,7 @@ public class ShimFileWriter implements CustomFileWriter {
 
       Shape targetShapeInput = codegenContext.model().expectShape(operationShape.getInputShape());
       // Generate code that converts the input from the Dafny type to the corresponding Smithy type
-      String input = targetShapeInput.accept(new DafnyToSmithyShapeVisitor(
+      var input = targetShapeInput.accept(new DafnyToSmithyShapeVisitor(
           codegenContext,
           "input"
       ));

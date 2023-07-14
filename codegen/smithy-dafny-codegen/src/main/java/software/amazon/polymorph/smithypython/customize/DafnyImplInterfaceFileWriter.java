@@ -30,6 +30,7 @@ public class DafnyImplInterfaceFileWriter implements CustomFileWriter {
         writer.write(
             """
                 from $L import $L
+                from .dafny_protocol import DafnyRequest
                           
                 class DafnyImplInterface:
                     $L: $L | None = None
@@ -41,23 +42,19 @@ public class DafnyImplInterfaceFileWriter implements CustomFileWriter {
                     # At runtime, the map is populated once and cached.
                     operation_map = None
                           
-                    def handle_request(self, input):
+                    def handle_request(self, input: DafnyRequest):
                         if self.operation_map is None:
                             self.operation_map = {
                                 ${C|}
                             }
                           
-                         # `input` stores the following:
-                         # - input[0] = operation name
-                         # - input[1] = Dafny-modelled operation input ("serialized")
                          # This logic is where a typical Smithy client would expect the "server" to be.
                          # This code can be thought of as logic our Dafny "server" uses
                          #   to route incoming client requests to the correct request handler code.
-                        operation_name = input[0]
-                        if input[1] is None:
-                            return self.operation_map[operation_name]()
+                        if input.dafny_operation_input is None:
+                            return self.operation_map[input.operation_name]()
                         else:
-                            return self.operation_map[operation_name](input[1])
+                            return self.operation_map[input.operation_name](input.dafny_operation_input)
                 """, implModulePrelude, clientName, "impl", clientName,
             writer.consumer(w -> generateImplInterfaceOperationMap(codegenContext, w)));
       });

@@ -68,12 +68,13 @@ public abstract class DafnyPythonProtocolGenerator implements ProtocolGenerator 
       var inputSymbol = context.symbolProvider().toSymbol(input);
 
       delegator.useFileWriter(serFunction.getDefinitionFile(), serFunction.getNamespace(), writer -> {
+        writer.addImport(".dafny_protocol", "DafnyRequest");
         writer.pushState(new RequestSerializerSection(operation));
         writer.write("""
                   async def $L(input: $T, config: $T) -> $L:
                       ${C|}
                   """, serFunction.getName(), inputSymbol, configSymbol,
-            DafnyNameResolver.getDafnyTypeForShape(input),
+            "DafnyRequest",
             writer.consumer(w -> generateRequestSerializer(context, operation, w)));
         writer.popState();
       });
@@ -123,7 +124,7 @@ public abstract class DafnyPythonProtocolGenerator implements ProtocolGenerator 
 
     writer.write(
           """
-          return ("$L", $L)
+          return DafnyRequest(operation_name="$L", dafny_operation_input=$L)
           """,
         operation.getId().getName(),
         Utils.isUnitShape(operation.getInputShape()) ? "None" : input
@@ -145,15 +146,16 @@ public abstract class DafnyPythonProtocolGenerator implements ProtocolGenerator 
       var output = context.model().expectShape(operation.getOutputShape());
       var outputSymbol = context.symbolProvider().toSymbol(output);
 
-
       delegator.useFileWriter(deserFunction.getDefinitionFile(), deserFunction.getNamespace(), writer -> {
+        writer.addImport(".dafny_protocol", "DafnyResponse");
+
         writer.pushState(new RequestSerializerSection(operation));
 
         writer.write("""
                   async def $L(input: $L, config: $T) -> $T:
                     ${C|}
                   """, deserFunction.getName(),
-            DafnyNameResolver.getDafnyTypeForShape(output), configSymbol, outputSymbol,
+            "DafnyResponse", configSymbol, outputSymbol,
             writer.consumer(w -> generateOperationResponseDeserializer(context, operation)));
 
         writer.popState();

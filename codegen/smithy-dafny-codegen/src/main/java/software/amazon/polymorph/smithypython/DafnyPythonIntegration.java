@@ -109,6 +109,17 @@ public final class DafnyPythonIntegration implements PythonIntegration {
             // TODO: This is just the input/output of a Dafny call, right?
             //       If that is true, is output just wrappers_compile.result?
             //       Then what is input? Maybe DafnyCallEvent?
+            // Input: Not DafnyCallEvent. There is no Dafny-generated type for input.
+            // Input can be the corresponding Dafny class for any of the operation input shapes,
+            // Dafny does not generate some superclass relating these.
+            // If we want to specify this, we must specify it in dafny_protocol.py.
+            // It will look like
+            // DafnyInput = Tuple(
+            //     String,
+            //     Union[forall operations in service: operation.getInputShape()]
+            // )
+            // Output: This is the value returned from the client calling dafnyImplInterface.
+            // I believe this is a Wrappers_Compile.Result, which I should use.
             SymbolReference.builder()
                 .symbol(createDafnySymbol("DafnyRequest"))
                 .build(),
