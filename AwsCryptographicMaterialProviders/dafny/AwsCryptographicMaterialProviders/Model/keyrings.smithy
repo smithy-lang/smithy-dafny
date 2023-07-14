@@ -6,6 +6,7 @@ use aws.polymorph#extendable
 use aws.polymorph#javadoc
 
 use com.amazonaws.kms#EncryptionAlgorithmSpec
+use aws.cryptography.materialProviders#CacheType
 
 @extendable
 resource Keyring {
@@ -318,7 +319,7 @@ structure GetBranchKeyIdInput {
   encryptionContext: EncryptionContext
 }
 
-@javadoc("Outputs for the Branch Key repsonsible for wrapping or unwrapping the data key in this encryption or decryption.")
+@javadoc("Outputs for the Branch Key responsible for wrapping or unwrapping the data key in this encryption or decryption.")
 structure GetBranchKeyIdOutput {
   @required
   @javadoc("The identifier of the Branch Key that should be responsible for wrapping or unwrapping the data key in this encryption or decryption.")
@@ -328,7 +329,7 @@ structure GetBranchKeyIdOutput {
 @javadoc("Inputs for creating a Hierarchical Keyring.")
 structure CreateAwsKmsHierarchicalKeyringInput {
     // branchKeyId XOR BranchKeyIdSupplier required
-    @javadoc("The identifier for the single Branch Key repsonsible for wrapping and unwrapping the data key. Either a Branch Key ID or Branch Key Supplier must be specified.")
+    @javadoc("The identifier for the single Branch Key responsible for wrapping and unwrapping the data key. Either a Branch Key ID or Branch Key Supplier must be specified.")
     branchKeyId: String,
     @javadoc("A Branch Key Supplier which determines what Branch Key to use to wrap and unwrap the data key. Either a Branch Key ID or Branch Key Supplier must be specified.")
     branchKeyIdSupplier: BranchKeyIdSupplierReference,
@@ -341,8 +342,8 @@ structure CreateAwsKmsHierarchicalKeyringInput {
     @javadoc("How many seconds the Branch Key material is allowed to be reused within the local cache before it is re-retrieved from Amazon DynamoDB and re-authenticated with AWS KMS.")
     ttlSeconds: PositiveLong,
 
-    @javadoc("How many entries the local cache for Branch Key material can hold before evicting older entries.")
-    maxCacheSize: PositiveInteger
+    @javadoc("Which type of local cache to use.")
+    cache : CacheType
 }
 
 // Raw

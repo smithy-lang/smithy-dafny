@@ -6,7 +6,7 @@ package software.amazon.cryptography.materialproviders.model;
 import java.util.Objects;
 
 /**
- * Outputs for the Branch Key repsonsible for wrapping or unwrapping the data key in this encryption or decryption.
+ * Outputs for the Branch Key responsible for wrapping or unwrapping the data key in this encryption or decryption.
  */
 public class GetBranchKeyIdOutput {
   /**

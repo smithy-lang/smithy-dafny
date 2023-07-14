@@ -1,14 +1,14 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-include "LocalCMC.dfy"
+include "StormTracker.dfy"
 
-module {:options "/functionSyntax:4" } {:extern "software.amazon.cryptography.internaldafny.SynchronizedLocalCMC" } SynchronizedLocalCMC {
+module {:options "/functionSyntax:4" } {:extern "software.amazon.cryptography.internaldafny.StormTrackingCMC" } StormTrackingCMC {
   import opened Wrappers
   import Types = AwsCryptographyMaterialProvidersTypes
-  import LocalCMC
+  import StormTracker
 
-  class {:extern} SynchronizedLocalCMC extends Types.ICryptographicMaterialsCache {
+  class {:extern} StormTrackingCMC extends Types.ICryptographicMaterialsCache {
 
     ghost predicate ValidState()
       reads this`Modifies, Modifies - {History}
@@ -18,7 +18,7 @@ module {:options "/functionSyntax:4" } {:extern "software.amazon.cryptography.in
     }
 
     constructor {:extern} (
-      wrapped: LocalCMC.LocalCMC
+      wrapped: StormTracker.StormTracker
     )
       ensures
         && ValidState()
@@ -34,7 +34,6 @@ module {:options "/functionSyntax:4" } {:extern "software.amazon.cryptography.in
       modifies Modifies - {History}
       decreases Modifies - {History}
       ensures ValidState()
-      // ensures output.Failure? ==> input.identifier !in cache
       ensures GetCacheEntryEnsuresPublicly(input, output)
       ensures unchanged(History)
 

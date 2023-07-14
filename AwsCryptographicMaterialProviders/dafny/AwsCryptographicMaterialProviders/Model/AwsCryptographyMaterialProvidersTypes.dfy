@@ -665,6 +665,12 @@ module {:extern "software.amazon.cryptography.materialproviders.internaldafny.ty
       ensures unchanged(History)
 
   }
+  datatype CacheType =
+    | Default(Default: DefaultCache)
+    | No(No: NoCache)
+    | SingleThreaded(SingleThreaded: SingleThreadedCache)
+    | MultiThreaded(MultiThreaded: MultiThreadedCache)
+    | StormTracking(StormTracking: StormTrackingCache)
   class IClientSupplierCallHistory {
     ghost constructor() {
       GetClient := [];
@@ -743,6 +749,10 @@ module {:extern "software.amazon.cryptography.materialproviders.internaldafny.ty
   datatype CommitmentPolicy =
     | ESDK(ESDK: ESDKCommitmentPolicy)
     | DBE(DBE: DBECommitmentPolicy)
+  type CountingNumber = x: int32 | IsValid_CountingNumber(x) witness *
+  predicate method IsValid_CountingNumber(x: int32) {
+    ( 1 <= x  )
+  }
   datatype CreateAwsKmsDiscoveryKeyringInput = | CreateAwsKmsDiscoveryKeyringInput (
     nameonly kmsClient: ComAmazonawsKmsTypes.IKMSClient ,
     nameonly discoveryFilter: Option<DiscoveryFilter> ,
@@ -759,7 +769,7 @@ module {:extern "software.amazon.cryptography.materialproviders.internaldafny.ty
     nameonly branchKeyIdSupplier: Option<IBranchKeyIdSupplier> ,
     nameonly keyStore: AwsCryptographyKeyStoreTypes.IKeyStoreClient ,
     nameonly ttlSeconds: PositiveLong ,
-    nameonly maxCacheSize: Option<PositiveInteger>
+    nameonly cache: Option<CacheType>
   )
   datatype CreateAwsKmsKeyringInput = | CreateAwsKmsKeyringInput (
     nameonly kmsKeyId: KmsKeyId ,
@@ -803,8 +813,7 @@ module {:extern "software.amazon.cryptography.materialproviders.internaldafny.ty
     nameonly grantTokens: Option<GrantTokenList>
   )
   datatype CreateCryptographicMaterialsCacheInput = | CreateCryptographicMaterialsCacheInput (
-    nameonly entryCapacity: PositiveInteger ,
-    nameonly entryPruningTailSize: Option<PositiveInteger>
+    nameonly cache: CacheType
   )
   datatype CreateDefaultClientSupplierInput = | CreateDefaultClientSupplierInput (
 
@@ -1133,6 +1142,9 @@ module {:extern "software.amazon.cryptography.materialproviders.internaldafny.ty
   datatype DecryptMaterialsOutput = | DecryptMaterialsOutput (
     nameonly decryptionMaterials: DecryptionMaterials
   )
+  datatype DefaultCache = | DefaultCache (
+    nameonly entryCapacity: CountingNumber
+  )
   datatype DeleteCacheEntryInput = | DeleteCacheEntryInput (
     nameonly identifier: seq<uint8>
   )
@@ -1354,6 +1366,13 @@ module {:extern "software.amazon.cryptography.materialproviders.internaldafny.ty
     | Decryption(Decryption: DecryptionMaterials)
     | BranchKey(BranchKey: AwsCryptographyKeyStoreTypes.BranchKeyMaterials)
     | BeaconKey(BeaconKey: AwsCryptographyKeyStoreTypes.BeaconKeyMaterials)
+  datatype MultiThreadedCache = | MultiThreadedCache (
+    nameonly entryCapacity: CountingNumber ,
+    nameonly entryPruningTailSize: Option<CountingNumber>
+  )
+  datatype NoCache = | NoCache (
+
+                     )
   datatype None = | None (
 
                   )
@@ -1398,6 +1417,19 @@ module {:extern "software.amazon.cryptography.materialproviders.internaldafny.ty
   datatype SignatureAlgorithm =
     | ECDSA(ECDSA: ECDSA)
     | None(None: None)
+  datatype SingleThreadedCache = | SingleThreadedCache (
+    nameonly entryCapacity: CountingNumber ,
+    nameonly entryPruningTailSize: Option<CountingNumber>
+  )
+  datatype StormTrackingCache = | StormTrackingCache (
+    nameonly entryCapacity: CountingNumber ,
+    nameonly entryPruningTailSize: Option<CountingNumber> ,
+    nameonly gracePeriod: CountingNumber ,
+    nameonly graceInterval: CountingNumber ,
+    nameonly fanOut: CountingNumber ,
+    nameonly inFlightTTL: CountingNumber ,
+    nameonly sleepMilli: CountingNumber
+  )
   datatype SymmetricSignatureAlgorithm =
     | HMAC(HMAC: AwsCryptographyPrimitivesTypes.DigestAlgorithm)
     | None(None: None)

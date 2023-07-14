@@ -20,6 +20,8 @@ include "Keyrings/RawRSAKeyring.dfy"
 include "CMMs/DefaultCMM.dfy"
 include "CMCs/LocalCMC.dfy"
 include "CMCs/SynchronizedLocalCMC.dfy"
+include "CMCs/StormTracker.dfy"
+include "CMCs/StormTrackingCMC.dfy"
 include "DefaultClientSupplier.dfy"
 include "Materials.dfy"
 include "Commitment.dfy"
@@ -43,8 +45,10 @@ module AwsCryptographyMaterialProvidersOperations refines AbstractAwsCryptograph
   import RawAESKeyring
   import RawRSAKeyring
   import opened C = DefaultCMM
-  import opened L = LocalCMC
+  import LocalCMC
   import SynchronizedLocalCMC
+  import StormTracker
+  import StormTrackingCMC
   import Crypto = AwsCryptographyPrimitivesTypes
   import Aws.Cryptography.Primitives
   import opened AwsKmsUtils
@@ -256,18 +260,10 @@ module AwsCryptographyMaterialProvidersOperations refines AbstractAwsCryptograph
     //= type=implication
     //# If no max cache size is provided, the crypotgraphic materials cache MUST be configured to a
     //# max cache size of 1000.
-    if input.maxCacheSize.None? {
-      maxCacheSize := 1000;
-    } else {
-      :- Need(
-        input.maxCacheSize.value >= 1,
-        Types.AwsCryptographicMaterialProvidersException(
-          message := "Invalid Cache Size"
-        )
-      );
-
-      maxCacheSize := input.maxCacheSize.value;
-    }
+    var cache := if input.cache.Some? then
+      input.cache.value
+    else
+      Types.Default(Types.DefaultCache(entryCapacity := 1000));
 
     :- Need(input.branchKeyId.None? || input.branchKeyIdSupplier.None?,
             Types.AwsCryptographicMaterialProvidersException(
@@ -277,13 +273,15 @@ module AwsCryptographyMaterialProvidersOperations refines AbstractAwsCryptograph
             Types.AwsCryptographicMaterialProvidersException(
               message := "Must initialize keyring with either branchKeyId or BranchKeyIdSupplier."));
 
+    var cmc :- CreateCryptographicMaterialsCache(config, CreateCryptographicMaterialsCacheInput(cache := cache));
     var keyring := new AwsKmsHierarchicalKeyring.AwsKmsHierarchicalKeyring(
-      input.keyStore,
-      input.branchKeyId,
-      input.branchKeyIdSupplier,
-      input.ttlSeconds,
-      maxCacheSize,
-      config.crypto
+      keyStore := input.keyStore,
+      branchKeyId := input.branchKeyId,
+      branchKeyIdSupplier := input.branchKeyIdSupplier,
+      ttlSeconds := input.ttlSeconds,
+      // maxCacheSize := maxCacheSize,
+      cmc := cmc,
+      cryptoPrimitives := config.crypto
     );
     return Success(keyring);
   }
@@ -500,24 +498,58 @@ module AwsCryptographyMaterialProvidersOperations refines AbstractAwsCryptograph
   method CreateCryptographicMaterialsCache(config: InternalConfig, input: CreateCryptographicMaterialsCacheInput)
     returns (output: Result<ICryptographicMaterialsCache, Error>)
   {
-    :- Need(input.entryCapacity >= 1,
-            Types.AwsCryptographicMaterialProvidersException(message := "Cache Size MUST be greater than 0"));
-
-    var entryPruningTailSize: nat;
-
-    if input.entryPruningTailSize.Some? {
-      :- Need(input.entryPruningTailSize.value >= 1,
-              Types.AwsCryptographicMaterialProvidersException(
-                message := "Entry Prunning Tail Size MUST be greater than or equal to 1."));
-      entryPruningTailSize := input.entryPruningTailSize.value as nat;
-    } else {
-      entryPruningTailSize := 1;
+    match input.cache {
+      case Default(c) =>
+        var cache := StormTracker.DefaultStorm().(entryCapacity := c.entryCapacity);
+        var cmc := new StormTracker.StormTracker(cache);
+        var synCmc := new StormTrackingCMC.StormTrackingCMC(cmc);
+        return Success(synCmc);
+      case No(_) =>
+        var cmc := new LocalCMC.LocalCMC(0, 1);
+        return Success(cmc);
+      case SingleThreaded(c) =>
+        var cmc := new LocalCMC.LocalCMC(c.entryCapacity as nat, c.entryPruningTailSize.UnwrapOr(1) as nat);
+        return Success(cmc);
+      case MultiThreaded(c) =>
+        var cmc := new LocalCMC.LocalCMC(c.entryCapacity as nat, c.entryPruningTailSize.UnwrapOr(1) as nat);
+        var synCmc := new SynchronizedLocalCMC.SynchronizedLocalCMC(cmc);
+        return Success(synCmc);
+      case StormTracking(c) =>
+        var cmc := new StormTracker.StormTracker(c);
+        var synCmc := new StormTrackingCMC.StormTrackingCMC(cmc);
+        return Success(synCmc);
     }
-    var cmc := new LocalCMC(input.entryCapacity as nat, entryPruningTailSize);
-    var synCmc := new SynchronizedLocalCMC.SynchronizedLocalCMC(cmc);
-    return Success(synCmc);
   }
-
+  /*
+      :- Need(input.entryCapacity >= 1,
+              Types.AwsCryptographicMaterialProvidersException(message := "Cache Size MUST be greater than 0"));
+  
+      var entryPruningTailSize: nat;
+  
+      if input.entryPruningTailSize.Some? {
+        :- Need(input.entryPruningTailSize.value >= 1,
+                Types.AwsCryptographicMaterialProvidersException(
+                  message := "Entry Pruning Tail Size MUST be greater than or equal to 1."));
+        entryPruningTailSize := input.entryPruningTailSize.value as nat;
+      } else {
+        entryPruningTailSize := 1;
+      }
+  
+      if input.trackerSettings.None? || input.trackerSettings.value.gracePeriod > 0 {
+        var cmc := new StormTracker.StormTracker(
+          entryCapacity := input.entryCapacity as nat,
+          entryPruningTailSize := entryPruningTailSize,
+          trackerSettings := input.trackerSettings
+        );
+        var synCmc := new StormTrackingCMC.StormTrackingCMC(cmc);
+        return Success(synCmc);
+      } else {
+        var cmc := new LocalCMC.LocalCMC(input.entryCapacity as nat, entryPruningTailSize);
+        var synCmc := new SynchronizedLocalCMC.SynchronizedLocalCMC(cmc);
+        return Success(synCmc);
+      }
+    }
+  */
   predicate CreateDefaultClientSupplierEnsuresPublicly(input: CreateDefaultClientSupplierInput, output: Result<IClientSupplier, Error>)
   {true}
 

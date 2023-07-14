@@ -32,6 +32,7 @@ import software.amazon.cryptography.materialproviders.model.AesWrappingAlg;
 import software.amazon.cryptography.materialproviders.model.AlgorithmSuiteId;
 import software.amazon.cryptography.materialproviders.model.AlgorithmSuiteInfo;
 import software.amazon.cryptography.materialproviders.model.AwsCryptographicMaterialProvidersException;
+import software.amazon.cryptography.materialproviders.model.CacheType;
 import software.amazon.cryptography.materialproviders.model.CollectionOfErrors;
 import software.amazon.cryptography.materialproviders.model.CommitmentPolicy;
 import software.amazon.cryptography.materialproviders.model.CreateAwsKmsDiscoveryKeyringInput;
@@ -57,6 +58,7 @@ import software.amazon.cryptography.materialproviders.model.DIRECT_KEY_WRAPPING;
 import software.amazon.cryptography.materialproviders.model.DecryptMaterialsInput;
 import software.amazon.cryptography.materialproviders.model.DecryptMaterialsOutput;
 import software.amazon.cryptography.materialproviders.model.DecryptionMaterials;
+import software.amazon.cryptography.materialproviders.model.DefaultCache;
 import software.amazon.cryptography.materialproviders.model.DeleteCacheEntryInput;
 import software.amazon.cryptography.materialproviders.model.DerivationAlgorithm;
 import software.amazon.cryptography.materialproviders.model.DiscoveryFilter;
@@ -90,6 +92,8 @@ import software.amazon.cryptography.materialproviders.model.InvalidEncryptionMat
 import software.amazon.cryptography.materialproviders.model.InvalidEncryptionMaterialsTransition;
 import software.amazon.cryptography.materialproviders.model.MaterialProvidersConfig;
 import software.amazon.cryptography.materialproviders.model.Materials;
+import software.amazon.cryptography.materialproviders.model.MultiThreadedCache;
+import software.amazon.cryptography.materialproviders.model.NoCache;
 import software.amazon.cryptography.materialproviders.model.None;
 import software.amazon.cryptography.materialproviders.model.OnDecryptInput;
 import software.amazon.cryptography.materialproviders.model.OnDecryptOutput;
@@ -99,6 +103,8 @@ import software.amazon.cryptography.materialproviders.model.OpaqueError;
 import software.amazon.cryptography.materialproviders.model.PaddingScheme;
 import software.amazon.cryptography.materialproviders.model.PutCacheEntryInput;
 import software.amazon.cryptography.materialproviders.model.SignatureAlgorithm;
+import software.amazon.cryptography.materialproviders.model.SingleThreadedCache;
+import software.amazon.cryptography.materialproviders.model.StormTrackingCache;
 import software.amazon.cryptography.materialproviders.model.SymmetricSignatureAlgorithm;
 import software.amazon.cryptography.materialproviders.model.UpdateUsageMetadataInput;
 import software.amazon.cryptography.materialproviders.model.ValidDecryptionMaterialsTransitionInput;
@@ -297,8 +303,8 @@ public class ToNative {
     }
     nativeBuilder.keyStore(software.amazon.cryptography.keystore.ToNative.KeyStore(dafnyValue.dtor_keyStore()));
     nativeBuilder.ttlSeconds((dafnyValue.dtor_ttlSeconds()));
-    if (dafnyValue.dtor_maxCacheSize().is_Some()) {
-      nativeBuilder.maxCacheSize((dafnyValue.dtor_maxCacheSize().dtor_value()));
+    if (dafnyValue.dtor_cache().is_Some()) {
+      nativeBuilder.cache(ToNative.CacheType(dafnyValue.dtor_cache().dtor_value()));
     }
     return nativeBuilder.build();
   }
@@ -411,10 +417,7 @@ public class ToNative {
   public static CreateCryptographicMaterialsCacheInput CreateCryptographicMaterialsCacheInput(
       software.amazon.cryptography.materialproviders.internaldafny.types.CreateCryptographicMaterialsCacheInput dafnyValue) {
     CreateCryptographicMaterialsCacheInput.Builder nativeBuilder = CreateCryptographicMaterialsCacheInput.builder();
-    nativeBuilder.entryCapacity((dafnyValue.dtor_entryCapacity()));
-    if (dafnyValue.dtor_entryPruningTailSize().is_Some()) {
-      nativeBuilder.entryPruningTailSize((dafnyValue.dtor_entryPruningTailSize().dtor_value()));
-    }
+    nativeBuilder.cache(ToNative.CacheType(dafnyValue.dtor_cache()));
     return nativeBuilder.build();
   }
 
@@ -514,6 +517,13 @@ public class ToNative {
       software.amazon.cryptography.materialproviders.internaldafny.types.DecryptMaterialsOutput dafnyValue) {
     DecryptMaterialsOutput.Builder nativeBuilder = DecryptMaterialsOutput.builder();
     nativeBuilder.decryptionMaterials(ToNative.DecryptionMaterials(dafnyValue.dtor_decryptionMaterials()));
+    return nativeBuilder.build();
+  }
+
+  public static DefaultCache DefaultCache(
+      software.amazon.cryptography.materialproviders.internaldafny.types.DefaultCache dafnyValue) {
+    DefaultCache.Builder nativeBuilder = DefaultCache.builder();
+    nativeBuilder.entryCapacity((dafnyValue.dtor_entryCapacity()));
     return nativeBuilder.build();
   }
 
@@ -697,6 +707,22 @@ public class ToNative {
     return nativeBuilder.build();
   }
 
+  public static MultiThreadedCache MultiThreadedCache(
+      software.amazon.cryptography.materialproviders.internaldafny.types.MultiThreadedCache dafnyValue) {
+    MultiThreadedCache.Builder nativeBuilder = MultiThreadedCache.builder();
+    nativeBuilder.entryCapacity((dafnyValue.dtor_entryCapacity()));
+    if (dafnyValue.dtor_entryPruningTailSize().is_Some()) {
+      nativeBuilder.entryPruningTailSize((dafnyValue.dtor_entryPruningTailSize().dtor_value()));
+    }
+    return nativeBuilder.build();
+  }
+
+  public static NoCache NoCache(
+      software.amazon.cryptography.materialproviders.internaldafny.types.NoCache dafnyValue) {
+    NoCache.Builder nativeBuilder = NoCache.builder();
+    return nativeBuilder.build();
+  }
+
   public static None None(
       software.amazon.cryptography.materialproviders.internaldafny.types.None dafnyValue) {
     None.Builder nativeBuilder = None.builder();
@@ -745,6 +771,31 @@ public class ToNative {
     if (dafnyValue.dtor_bytesUsed().is_Some()) {
       nativeBuilder.bytesUsed((dafnyValue.dtor_bytesUsed().dtor_value()));
     }
+    return nativeBuilder.build();
+  }
+
+  public static SingleThreadedCache SingleThreadedCache(
+      software.amazon.cryptography.materialproviders.internaldafny.types.SingleThreadedCache dafnyValue) {
+    SingleThreadedCache.Builder nativeBuilder = SingleThreadedCache.builder();
+    nativeBuilder.entryCapacity((dafnyValue.dtor_entryCapacity()));
+    if (dafnyValue.dtor_entryPruningTailSize().is_Some()) {
+      nativeBuilder.entryPruningTailSize((dafnyValue.dtor_entryPruningTailSize().dtor_value()));
+    }
+    return nativeBuilder.build();
+  }
+
+  public static StormTrackingCache StormTrackingCache(
+      software.amazon.cryptography.materialproviders.internaldafny.types.StormTrackingCache dafnyValue) {
+    StormTrackingCache.Builder nativeBuilder = StormTrackingCache.builder();
+    nativeBuilder.entryCapacity((dafnyValue.dtor_entryCapacity()));
+    if (dafnyValue.dtor_entryPruningTailSize().is_Some()) {
+      nativeBuilder.entryPruningTailSize((dafnyValue.dtor_entryPruningTailSize().dtor_value()));
+    }
+    nativeBuilder.gracePeriod((dafnyValue.dtor_gracePeriod()));
+    nativeBuilder.graceInterval((dafnyValue.dtor_graceInterval()));
+    nativeBuilder.fanOut((dafnyValue.dtor_fanOut()));
+    nativeBuilder.inFlightTTL((dafnyValue.dtor_inFlightTTL()));
+    nativeBuilder.sleepMilli((dafnyValue.dtor_sleepMilli()));
     return nativeBuilder.build();
   }
 
@@ -901,6 +952,27 @@ public class ToNative {
     }
     if (dafnyValue.is_DBE()) {
       nativeBuilder.DBE(ToNative.DBEAlgorithmSuiteId(dafnyValue.dtor_DBE()));
+    }
+    return nativeBuilder.build();
+  }
+
+  public static CacheType CacheType(
+      software.amazon.cryptography.materialproviders.internaldafny.types.CacheType dafnyValue) {
+    CacheType.Builder nativeBuilder = CacheType.builder();
+    if (dafnyValue.is_Default()) {
+      nativeBuilder.Default(ToNative.DefaultCache(dafnyValue.dtor_Default()));
+    }
+    if (dafnyValue.is_No()) {
+      nativeBuilder.No(ToNative.NoCache(dafnyValue.dtor_No()));
+    }
+    if (dafnyValue.is_SingleThreaded()) {
+      nativeBuilder.SingleThreaded(ToNative.SingleThreadedCache(dafnyValue.dtor_SingleThreaded()));
+    }
+    if (dafnyValue.is_MultiThreaded()) {
+      nativeBuilder.MultiThreaded(ToNative.MultiThreadedCache(dafnyValue.dtor_MultiThreaded()));
+    }
+    if (dafnyValue.is_StormTracking()) {
+      nativeBuilder.StormTracking(ToNative.StormTrackingCache(dafnyValue.dtor_StormTracking()));
     }
     return nativeBuilder.build();
   }

@@ -13,7 +13,7 @@ import software.amazon.cryptography.materialproviders.IBranchKeyIdSupplier;
  */
 public class CreateAwsKmsHierarchicalKeyringInput {
   /**
-   * The identifier for the single Branch Key repsonsible for wrapping and unwrapping the data key. Either a Branch Key ID or Branch Key Supplier must be specified.
+   * The identifier for the single Branch Key responsible for wrapping and unwrapping the data key. Either a Branch Key ID or Branch Key Supplier must be specified.
    */
   private final String branchKeyId;
 
@@ -33,20 +33,20 @@ public class CreateAwsKmsHierarchicalKeyringInput {
   private final long ttlSeconds;
 
   /**
-   * How many entries the local cache for Branch Key material can hold before evicting older entries.
+   * Which type of local cache to use.
    */
-  private final int maxCacheSize;
+  private final CacheType cache;
 
   protected CreateAwsKmsHierarchicalKeyringInput(BuilderImpl builder) {
     this.branchKeyId = builder.branchKeyId();
     this.branchKeyIdSupplier = builder.branchKeyIdSupplier();
     this.keyStore = builder.keyStore();
     this.ttlSeconds = builder.ttlSeconds();
-    this.maxCacheSize = builder.maxCacheSize();
+    this.cache = builder.cache();
   }
 
   /**
-   * @return The identifier for the single Branch Key repsonsible for wrapping and unwrapping the data key. Either a Branch Key ID or Branch Key Supplier must be specified.
+   * @return The identifier for the single Branch Key responsible for wrapping and unwrapping the data key. Either a Branch Key ID or Branch Key Supplier must be specified.
    */
   public String branchKeyId() {
     return this.branchKeyId;
@@ -74,10 +74,10 @@ public class CreateAwsKmsHierarchicalKeyringInput {
   }
 
   /**
-   * @return How many entries the local cache for Branch Key material can hold before evicting older entries.
+   * @return Which type of local cache to use.
    */
-  public int maxCacheSize() {
-    return this.maxCacheSize;
+  public CacheType cache() {
+    return this.cache;
   }
 
   public Builder toBuilder() {
@@ -90,12 +90,12 @@ public class CreateAwsKmsHierarchicalKeyringInput {
 
   public interface Builder {
     /**
-     * @param branchKeyId The identifier for the single Branch Key repsonsible for wrapping and unwrapping the data key. Either a Branch Key ID or Branch Key Supplier must be specified.
+     * @param branchKeyId The identifier for the single Branch Key responsible for wrapping and unwrapping the data key. Either a Branch Key ID or Branch Key Supplier must be specified.
      */
     Builder branchKeyId(String branchKeyId);
 
     /**
-     * @return The identifier for the single Branch Key repsonsible for wrapping and unwrapping the data key. Either a Branch Key ID or Branch Key Supplier must be specified.
+     * @return The identifier for the single Branch Key responsible for wrapping and unwrapping the data key. Either a Branch Key ID or Branch Key Supplier must be specified.
      */
     String branchKeyId();
 
@@ -130,14 +130,14 @@ public class CreateAwsKmsHierarchicalKeyringInput {
     long ttlSeconds();
 
     /**
-     * @param maxCacheSize How many entries the local cache for Branch Key material can hold before evicting older entries.
+     * @param cache Which type of local cache to use.
      */
-    Builder maxCacheSize(int maxCacheSize);
+    Builder cache(CacheType cache);
 
     /**
-     * @return How many entries the local cache for Branch Key material can hold before evicting older entries.
+     * @return Which type of local cache to use.
      */
-    int maxCacheSize();
+    CacheType cache();
 
     CreateAwsKmsHierarchicalKeyringInput build();
   }
@@ -153,9 +153,7 @@ public class CreateAwsKmsHierarchicalKeyringInput {
 
     private boolean _ttlSecondsSet = false;
 
-    protected int maxCacheSize;
-
-    private boolean _maxCacheSizeSet = false;
+    protected CacheType cache;
 
     protected BuilderImpl() {
     }
@@ -166,8 +164,7 @@ public class CreateAwsKmsHierarchicalKeyringInput {
       this.keyStore = model.keyStore();
       this.ttlSeconds = model.ttlSeconds();
       this._ttlSecondsSet = true;
-      this.maxCacheSize = model.maxCacheSize();
-      this._maxCacheSizeSet = true;
+      this.cache = model.cache();
     }
 
     public Builder branchKeyId(String branchKeyId) {
@@ -207,14 +204,13 @@ public class CreateAwsKmsHierarchicalKeyringInput {
       return this.ttlSeconds;
     }
 
-    public Builder maxCacheSize(int maxCacheSize) {
-      this.maxCacheSize = maxCacheSize;
-      this._maxCacheSizeSet = true;
+    public Builder cache(CacheType cache) {
+      this.cache = cache;
       return this;
     }
 
-    public int maxCacheSize() {
-      return this.maxCacheSize;
+    public CacheType cache() {
+      return this.cache;
     }
 
     public CreateAwsKmsHierarchicalKeyringInput build() {
@@ -226,9 +222,6 @@ public class CreateAwsKmsHierarchicalKeyringInput {
       }
       if (this._ttlSecondsSet && this.ttlSeconds() < 0) {
         throw new IllegalArgumentException("`ttlSeconds` must be greater than or equal to 0");
-      }
-      if (this._maxCacheSizeSet && this.maxCacheSize() < 0) {
-        throw new IllegalArgumentException("`maxCacheSize` must be greater than or equal to 0");
       }
       return new CreateAwsKmsHierarchicalKeyringInput(this);
     }

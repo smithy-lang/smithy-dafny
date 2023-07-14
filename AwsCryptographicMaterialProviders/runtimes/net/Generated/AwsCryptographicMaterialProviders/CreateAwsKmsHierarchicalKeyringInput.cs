@@ -8,7 +8,7 @@ using System;
  private AWS.Cryptography.MaterialProviders.IBranchKeyIdSupplier _branchKeyIdSupplier ;
  private AWS.Cryptography.KeyStore.KeyStore _keyStore ;
  private long? _ttlSeconds ;
- private int? _maxCacheSize ;
+ private AWS.Cryptography.MaterialProviders.CacheType _cache ;
  public string BranchKeyId {
  get { return this._branchKeyId; }
  set { this._branchKeyId = value; }
@@ -37,12 +37,12 @@ using System;
  public bool IsSetTtlSeconds () {
  return this._ttlSeconds.HasValue;
 }
- public int MaxCacheSize {
- get { return this._maxCacheSize.GetValueOrDefault(); }
- set { this._maxCacheSize = value; }
+ public AWS.Cryptography.MaterialProviders.CacheType Cache {
+ get { return this._cache; }
+ set { this._cache = value; }
 }
- public bool IsSetMaxCacheSize () {
- return this._maxCacheSize.HasValue;
+ public bool IsSetCache () {
+ return this._cache != null;
 }
  public void Validate() {
  if (!IsSetKeyStore()) throw new System.ArgumentException("Missing value for required property 'KeyStore'");

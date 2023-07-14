@@ -4,24 +4,16 @@
 using System;
  using AWS.Cryptography.MaterialProviders; namespace AWS.Cryptography.MaterialProviders {
  public class CreateCryptographicMaterialsCacheInput {
- private int? _entryCapacity ;
- private int? _entryPruningTailSize ;
- public int EntryCapacity {
- get { return this._entryCapacity.GetValueOrDefault(); }
- set { this._entryCapacity = value; }
+ private AWS.Cryptography.MaterialProviders.CacheType _cache ;
+ public AWS.Cryptography.MaterialProviders.CacheType Cache {
+ get { return this._cache; }
+ set { this._cache = value; }
 }
- public bool IsSetEntryCapacity () {
- return this._entryCapacity.HasValue;
-}
- public int EntryPruningTailSize {
- get { return this._entryPruningTailSize.GetValueOrDefault(); }
- set { this._entryPruningTailSize = value; }
-}
- public bool IsSetEntryPruningTailSize () {
- return this._entryPruningTailSize.HasValue;
+ public bool IsSetCache () {
+ return this._cache != null;
 }
  public void Validate() {
- if (!IsSetEntryCapacity()) throw new System.ArgumentException("Missing value for required property 'EntryCapacity'");
+ if (!IsSetCache()) throw new System.ArgumentException("Missing value for required property 'Cache'");
 
 }
 }

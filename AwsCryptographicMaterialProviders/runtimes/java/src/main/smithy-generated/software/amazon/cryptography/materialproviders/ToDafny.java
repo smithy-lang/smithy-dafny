@@ -22,6 +22,7 @@ import software.amazon.cryptography.keystore.internaldafny.types.IKeyStoreClient
 import software.amazon.cryptography.materialproviders.internaldafny.types.AesWrappingAlg;
 import software.amazon.cryptography.materialproviders.internaldafny.types.AlgorithmSuiteId;
 import software.amazon.cryptography.materialproviders.internaldafny.types.AlgorithmSuiteInfo;
+import software.amazon.cryptography.materialproviders.internaldafny.types.CacheType;
 import software.amazon.cryptography.materialproviders.internaldafny.types.CommitmentPolicy;
 import software.amazon.cryptography.materialproviders.internaldafny.types.CreateAwsKmsDiscoveryKeyringInput;
 import software.amazon.cryptography.materialproviders.internaldafny.types.CreateAwsKmsDiscoveryMultiKeyringInput;
@@ -46,6 +47,7 @@ import software.amazon.cryptography.materialproviders.internaldafny.types.DIRECT
 import software.amazon.cryptography.materialproviders.internaldafny.types.DecryptMaterialsInput;
 import software.amazon.cryptography.materialproviders.internaldafny.types.DecryptMaterialsOutput;
 import software.amazon.cryptography.materialproviders.internaldafny.types.DecryptionMaterials;
+import software.amazon.cryptography.materialproviders.internaldafny.types.DefaultCache;
 import software.amazon.cryptography.materialproviders.internaldafny.types.DeleteCacheEntryInput;
 import software.amazon.cryptography.materialproviders.internaldafny.types.DerivationAlgorithm;
 import software.amazon.cryptography.materialproviders.internaldafny.types.DiscoveryFilter;
@@ -82,6 +84,8 @@ import software.amazon.cryptography.materialproviders.internaldafny.types.Initia
 import software.amazon.cryptography.materialproviders.internaldafny.types.IntermediateKeyWrapping;
 import software.amazon.cryptography.materialproviders.internaldafny.types.MaterialProvidersConfig;
 import software.amazon.cryptography.materialproviders.internaldafny.types.Materials;
+import software.amazon.cryptography.materialproviders.internaldafny.types.MultiThreadedCache;
+import software.amazon.cryptography.materialproviders.internaldafny.types.NoCache;
 import software.amazon.cryptography.materialproviders.internaldafny.types.None;
 import software.amazon.cryptography.materialproviders.internaldafny.types.OnDecryptInput;
 import software.amazon.cryptography.materialproviders.internaldafny.types.OnDecryptOutput;
@@ -90,6 +94,8 @@ import software.amazon.cryptography.materialproviders.internaldafny.types.OnEncr
 import software.amazon.cryptography.materialproviders.internaldafny.types.PaddingScheme;
 import software.amazon.cryptography.materialproviders.internaldafny.types.PutCacheEntryInput;
 import software.amazon.cryptography.materialproviders.internaldafny.types.SignatureAlgorithm;
+import software.amazon.cryptography.materialproviders.internaldafny.types.SingleThreadedCache;
+import software.amazon.cryptography.materialproviders.internaldafny.types.StormTrackingCache;
 import software.amazon.cryptography.materialproviders.internaldafny.types.SymmetricSignatureAlgorithm;
 import software.amazon.cryptography.materialproviders.internaldafny.types.UpdateUsageMetadataInput;
 import software.amazon.cryptography.materialproviders.internaldafny.types.ValidDecryptionMaterialsTransitionInput;
@@ -239,11 +245,11 @@ public class ToDafny {
     keyStore = software.amazon.cryptography.keystore.ToDafny.KeyStore(nativeValue.keyStore());
     Long ttlSeconds;
     ttlSeconds = (nativeValue.ttlSeconds());
-    Option<Integer> maxCacheSize;
-    maxCacheSize = Objects.nonNull(nativeValue.maxCacheSize()) ?
-        Option.create_Some((nativeValue.maxCacheSize()))
+    Option<CacheType> cache;
+    cache = Objects.nonNull(nativeValue.cache()) ?
+        Option.create_Some(ToDafny.CacheType(nativeValue.cache()))
         : Option.create_None();
-    return new CreateAwsKmsHierarchicalKeyringInput(branchKeyId, branchKeyIdSupplier, keyStore, ttlSeconds, maxCacheSize);
+    return new CreateAwsKmsHierarchicalKeyringInput(branchKeyId, branchKeyIdSupplier, keyStore, ttlSeconds, cache);
   }
 
   public static CreateAwsKmsKeyringInput CreateAwsKmsKeyringInput(
@@ -373,13 +379,9 @@ public class ToDafny {
 
   public static CreateCryptographicMaterialsCacheInput CreateCryptographicMaterialsCacheInput(
       software.amazon.cryptography.materialproviders.model.CreateCryptographicMaterialsCacheInput nativeValue) {
-    Integer entryCapacity;
-    entryCapacity = (nativeValue.entryCapacity());
-    Option<Integer> entryPruningTailSize;
-    entryPruningTailSize = Objects.nonNull(nativeValue.entryPruningTailSize()) ?
-        Option.create_Some((nativeValue.entryPruningTailSize()))
-        : Option.create_None();
-    return new CreateCryptographicMaterialsCacheInput(entryCapacity, entryPruningTailSize);
+    CacheType cache;
+    cache = ToDafny.CacheType(nativeValue.cache());
+    return new CreateCryptographicMaterialsCacheInput(cache);
   }
 
   public static CreateDefaultClientSupplierInput CreateDefaultClientSupplierInput(
@@ -497,6 +499,13 @@ public class ToDafny {
     DecryptionMaterials decryptionMaterials;
     decryptionMaterials = ToDafny.DecryptionMaterials(nativeValue.decryptionMaterials());
     return new DecryptMaterialsOutput(decryptionMaterials);
+  }
+
+  public static DefaultCache DefaultCache(
+      software.amazon.cryptography.materialproviders.model.DefaultCache nativeValue) {
+    Integer entryCapacity;
+    entryCapacity = (nativeValue.entryCapacity());
+    return new DefaultCache(entryCapacity);
   }
 
   public static DeleteCacheEntryInput DeleteCacheEntryInput(
@@ -706,6 +715,22 @@ public class ToDafny {
     return new MaterialProvidersConfig();
   }
 
+  public static MultiThreadedCache MultiThreadedCache(
+      software.amazon.cryptography.materialproviders.model.MultiThreadedCache nativeValue) {
+    Integer entryCapacity;
+    entryCapacity = (nativeValue.entryCapacity());
+    Option<Integer> entryPruningTailSize;
+    entryPruningTailSize = Objects.nonNull(nativeValue.entryPruningTailSize()) ?
+        Option.create_Some((nativeValue.entryPruningTailSize()))
+        : Option.create_None();
+    return new MultiThreadedCache(entryCapacity, entryPruningTailSize);
+  }
+
+  public static NoCache NoCache(
+      software.amazon.cryptography.materialproviders.model.NoCache nativeValue) {
+    return new NoCache();
+  }
+
   public static None None(software.amazon.cryptography.materialproviders.model.None nativeValue) {
     return new None();
   }
@@ -759,6 +784,38 @@ public class ToDafny {
         Option.create_Some((nativeValue.bytesUsed()))
         : Option.create_None();
     return new PutCacheEntryInput(identifier, materials, creationTime, expiryTime, messagesUsed, bytesUsed);
+  }
+
+  public static SingleThreadedCache SingleThreadedCache(
+      software.amazon.cryptography.materialproviders.model.SingleThreadedCache nativeValue) {
+    Integer entryCapacity;
+    entryCapacity = (nativeValue.entryCapacity());
+    Option<Integer> entryPruningTailSize;
+    entryPruningTailSize = Objects.nonNull(nativeValue.entryPruningTailSize()) ?
+        Option.create_Some((nativeValue.entryPruningTailSize()))
+        : Option.create_None();
+    return new SingleThreadedCache(entryCapacity, entryPruningTailSize);
+  }
+
+  public static StormTrackingCache StormTrackingCache(
+      software.amazon.cryptography.materialproviders.model.StormTrackingCache nativeValue) {
+    Integer entryCapacity;
+    entryCapacity = (nativeValue.entryCapacity());
+    Option<Integer> entryPruningTailSize;
+    entryPruningTailSize = Objects.nonNull(nativeValue.entryPruningTailSize()) ?
+        Option.create_Some((nativeValue.entryPruningTailSize()))
+        : Option.create_None();
+    Integer gracePeriod;
+    gracePeriod = (nativeValue.gracePeriod());
+    Integer graceInterval;
+    graceInterval = (nativeValue.graceInterval());
+    Integer fanOut;
+    fanOut = (nativeValue.fanOut());
+    Integer inFlightTTL;
+    inFlightTTL = (nativeValue.inFlightTTL());
+    Integer sleepMilli;
+    sleepMilli = (nativeValue.sleepMilli());
+    return new StormTrackingCache(entryCapacity, entryPruningTailSize, gracePeriod, graceInterval, fanOut, inFlightTTL, sleepMilli);
   }
 
   public static UpdateUsageMetadataInput UpdateUsageMetadataInput(
@@ -1004,6 +1061,26 @@ public class ToDafny {
       return AlgorithmSuiteId.create_DBE(ToDafny.DBEAlgorithmSuiteId(nativeValue.DBE()));
     }
     throw new IllegalArgumentException("Cannot convert " + nativeValue + " to software.amazon.cryptography.materialproviders.internaldafny.types.AlgorithmSuiteId.");
+  }
+
+  public static CacheType CacheType(
+      software.amazon.cryptography.materialproviders.model.CacheType nativeValue) {
+    if (Objects.nonNull(nativeValue.Default())) {
+      return CacheType.create_Default(ToDafny.DefaultCache(nativeValue.Default()));
+    }
+    if (Objects.nonNull(nativeValue.No())) {
+      return CacheType.create_No(ToDafny.NoCache(nativeValue.No()));
+    }
+    if (Objects.nonNull(nativeValue.SingleThreaded())) {
+      return CacheType.create_SingleThreaded(ToDafny.SingleThreadedCache(nativeValue.SingleThreaded()));
+    }
+    if (Objects.nonNull(nativeValue.MultiThreaded())) {
+      return CacheType.create_MultiThreaded(ToDafny.MultiThreadedCache(nativeValue.MultiThreaded()));
+    }
+    if (Objects.nonNull(nativeValue.StormTracking())) {
+      return CacheType.create_StormTracking(ToDafny.StormTrackingCache(nativeValue.StormTracking()));
+    }
+    throw new IllegalArgumentException("Cannot convert " + nativeValue + " to software.amazon.cryptography.materialproviders.internaldafny.types.CacheType.");
   }
 
   public static CommitmentPolicy CommitmentPolicy(

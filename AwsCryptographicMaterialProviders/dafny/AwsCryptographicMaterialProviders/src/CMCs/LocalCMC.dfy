@@ -243,7 +243,7 @@ module {:options "/functionSyntax:4" } LocalCMC {
       && (s' == s[..pos] + s[pos+1..])
   {
     var pos := IndexOfCacheEntry(s, v);
-    // Associativity, is is the sum of both sides
+    // Associativity, s[pos..] is the sum of both sides
     assert s == s[..pos] + s[pos..];
     // the 1 v MUST be in the right side
     assert multiset(s[pos..])[v] == 1;
@@ -362,12 +362,25 @@ module {:options "/functionSyntax:4" } LocalCMC {
       modifies Modifies - {History}
       decreases Modifies - {History}
       ensures ValidState()
-      // ensures output.Failure? ==> input.identifier !in cache
       ensures GetCacheEntryEnsuresPublicly(input, output)
       ensures unchanged(History)
+      ensures Modifies <= old(Modifies)
     {
-      if input.identifier in cache.Keys() {
-        var now := Time.GetCurrent();
+      var now := Time.GetCurrent();
+      output := GetCacheEntryWithTime(input, now);
+    }
+
+    method GetCacheEntryWithTime(input: Types.GetCacheEntryInput, now : Types.PositiveLong)
+      returns (output: Result<Types.GetCacheEntryOutput, Types.Error>)
+      requires ValidState()
+      modifies Modifies - {History}
+      decreases Modifies - {History}
+      ensures ValidState()
+      ensures GetCacheEntryEnsuresPublicly(input, output)
+      ensures unchanged(History)
+      ensures Modifies <= old(Modifies)
+    {
+      if cache.HasKey(input.identifier) {
         var entry := cache.Select(input.identifier);
         //= aws-encryption-sdk-specification/framework/cryptographic-materials-cache.md#time-to-live-ttl
         //# After a cache entry's TTL has elapsed,
@@ -394,7 +407,7 @@ module {:options "/functionSyntax:4" } LocalCMC {
           //= aws-encryption-sdk-specification/framework/local-cryptographic-materials-cache.md#get-cache-entry
           //# When performing a Get Cache Entry operation,
           //# the local CMC MUST [prune TTL-expired cache entries](#pruning).
-          var _ :- pruning();
+          var _ :- pruning(now);
         } else {
           // We removed this key,
           // no need to garbage collect
@@ -417,13 +430,14 @@ module {:options "/functionSyntax:4" } LocalCMC {
       ensures ValidState()
       ensures PutCacheEntryEnsuresPublicly(input, output)
       ensures unchanged(History)
+      ensures fresh(Modifies - old(Modifies))
     {
 
       if entryCapacity == 0 {
         return Success(());
       }
 
-      if input.identifier in cache.Keys() {
+      if cache.HasKey(input.identifier) {
         var _ :- DeleteCacheEntry'(Types.DeleteCacheEntryInput(
                                      identifier := input.identifier
                                    ));
@@ -505,7 +519,8 @@ module {:options "/functionSyntax:4" } LocalCMC {
               && cache.Size() == old(cache.Size()) - 1
               && old(cache.Keys()) - {input.identifier} == cache.Keys())
     {
-      if input.identifier in cache.Keys() {
+      if cache.HasKey(input.identifier) {
+        assert input.identifier in cache.Keys();
         var cell := cache.Select(input.identifier);
         assert cell in multiset(queue.Items);
         label CAN_REMOVE:
@@ -548,8 +563,9 @@ module {:options "/functionSyntax:4" } LocalCMC {
       modifies Modifies - {History}
       decreases Modifies - {History}
       ensures ValidState()
+      ensures Modifies <= old(Modifies)
     {
-      if input.identifier in cache.Keys() {
+      if cache.HasKey(input.identifier) {
         var cell := cache.Select(input.identifier);
         assert cell in multiset(cache.Values());
         if
@@ -577,7 +593,7 @@ module {:options "/functionSyntax:4" } LocalCMC {
     //# The local CMC SHOULD also periodically evict all TTL-expired entries
     //# among the `N` least recently used entries.
 
-    method pruning()
+    method pruning(now : Types.PositiveLong)
       returns (output: Result<(), Types.Error>)
       requires ValidState()
       modifies Modifies - {History}
@@ -586,8 +602,6 @@ module {:options "/functionSyntax:4" } LocalCMC {
       ensures unchanged(History)
       ensures Modifies <= old(Modifies)
     {
-
-      var now := Time.GetCurrent();
       //= aws-encryption-sdk-specification/framework/local-cryptographic-materials-cache.md#pruning
       //# To prune TTL-expired cache entries,
       //# the local CMC MUST evict all TTL-expired entries

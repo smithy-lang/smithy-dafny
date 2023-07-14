@@ -3,6 +3,10 @@ namespace aws.cryptography.materialProviders
 use aws.polymorph#reference
 use aws.polymorph#positional
 use aws.polymorph#extendable
+use aws.polymorph#javadoc
+
+@range(min: 1)
+integer CountingNumber
 
 @aws.polymorph#mutableLocalState
 @aws.polymorph#extendable
@@ -135,21 +139,88 @@ operation CreateCryptographicMaterialsCache {
   output: CreateCryptographicMaterialsCacheOutput,
 }
 
-structure CreateCryptographicMaterialsCacheInput {
+@javadoc("The best choice for most situations. Probably a StormTrackingCache.")
+structure DefaultCache {
+  @required
+  @javadoc("Maximum number of entries cached.")
+  entryCapacity: CountingNumber
+}
+
+@javadoc("Nothing should ever be cached.")
+structure NoCache {}
+
+@javadoc("A cache that is NOT safe for use in a multi threaded environment.")
+structure SingleThreadedCache {
   //= aws-encryption-sdk-specification/framework/local-cryptographic-materials-cache.md#initialization
   //= type=implication
   //# On initialization of the local CMC,
   //# the caller MUST provide the following:
-  //# 
+  //#
   //# - [Entry Capacity](#entry-capacity)
-  //# 
+  //#
   //# The local CMC MUST also define the following:
-  //# 
+  //#
   //# - [Entry Pruning Tail Size](#entry-pruning-tail-size)
   @required
-  @range(min: 0)
-  entryCapacity: PositiveInteger,
+  @javadoc("Maximum number of entries cached.")
+  entryCapacity: CountingNumber,
 
-  @range(min: 0)
-  entryPruningTailSize: PositiveInteger, 
+  @javadoc("Number of entries to prune at a time.")
+  entryPruningTailSize: CountingNumber,
+}
+
+@javadoc("A cache that is safe for use in a multi threaded environment, but no extra functionality.")
+structure MultiThreadedCache {
+  @required
+  @javadoc("Maximum number of entries cached.")
+  entryCapacity: CountingNumber,
+
+  @javadoc("Number of entries to prune at a time.")
+  entryPruningTailSize: CountingNumber,
+}
+
+@javadoc("A cache that is safe for use in a multi threaded environment,
+and tries to prevent redundant or overly parallel backend calls.")
+structure StormTrackingCache {
+  @required
+  @javadoc("Maximum number of entries cached.")
+  entryCapacity: CountingNumber,
+
+  @javadoc("Number of entries to prune at a time.")
+  entryPruningTailSize: CountingNumber,
+
+  @required
+  @javadoc("How many seconds before expiration should an attempt be made to refresh the materials.
+  If zero, use a simple cache with no storm tracking.")
+  gracePeriod: CountingNumber,
+
+  @required
+  @javadoc("How many seconds between attempts to refresh the materials.")
+  graceInterval: CountingNumber,
+
+  @required
+  @javadoc("How many simultaneous attempts to refresh the materials.")
+  fanOut: CountingNumber,
+
+  @required
+  @javadoc("How many seconds until an attempt to refresh the materials should be forgotten.")
+  inFlightTTL: CountingNumber,
+
+  @required
+  @javadoc("How many milliseconds should a thread sleep if fanOut is exceeded.")
+  sleepMilli: CountingNumber,
+}
+
+union CacheType {
+  Default : DefaultCache,
+  No: NoCache,
+  SingleThreaded: SingleThreadedCache,
+  MultiThreaded: MultiThreadedCache,
+  StormTracking: StormTrackingCache
+}
+
+structure CreateCryptographicMaterialsCacheInput {
+  @required
+  @javadoc("Which type of local cache to use.")
+  cache: CacheType
 }
