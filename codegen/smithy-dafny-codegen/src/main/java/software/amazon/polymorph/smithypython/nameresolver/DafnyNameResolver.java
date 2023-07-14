@@ -6,6 +6,10 @@ import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.python.codegen.PythonWriter;
 
+/**
+ * Contains utility functions that map Smithy shapes
+ * to useful Dafny strings.
+ */
 public class DafnyNameResolver {
 
   private static String getDafnyTypesModuleNamespaceForShape(Shape shape) {

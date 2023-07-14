@@ -1,5 +1,7 @@
 package software.amazon.polymorph.smithypython.shapevisitor;
 
+import java.util.Map.Entry;
+import software.amazon.polymorph.smithypython.nameresolver.DafnyNameResolver;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.model.shapes.BigDecimalShape;
 import software.amazon.smithy.model.shapes.BigIntegerShape;
@@ -7,9 +9,11 @@ import software.amazon.smithy.model.shapes.BlobShape;
 import software.amazon.smithy.model.shapes.BooleanShape;
 import software.amazon.smithy.model.shapes.ByteShape;
 import software.amazon.smithy.model.shapes.DoubleShape;
+import software.amazon.smithy.model.shapes.EnumShape;
 import software.amazon.smithy.model.shapes.FloatShape;
 import software.amazon.smithy.model.shapes.IntegerShape;
 import software.amazon.smithy.model.shapes.LongShape;
+import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeVisitor;
 import software.amazon.smithy.model.shapes.ShortShape;
@@ -51,29 +55,44 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
 
     @Override
     public String blobShape(BlobShape shape) {
-      return getDefault(shape);
+      return dataSource;
     }
 
     @Override
     public String structureShape(StructureShape shape) {
+      StringBuilder builder = new StringBuilder();
+      builder.append("%1$s(".formatted(DafnyNameResolver.getDafnyTypeForShape(shape)));
+      // Recursively dispatch a new ShapeVisitor for each member of the structure
+      for (Entry<String, MemberShape> memberShapeEntry : shape.getAllMembers().entrySet()) {
+        String memberName = memberShapeEntry.getKey();
+        MemberShape memberShape = memberShapeEntry.getValue();
+        final Shape targetShape = context.model().expectShape(memberShape.getTarget());
 
-      String out = "";
-      // TODO: Change fstring to support >1 shape
-      for (String memberName : shape.getMemberNames()) {
-        // TODO: Need to refactor entire class
-        out += "%1$s=%2$s.%3$s,\n".formatted(memberName, dataSource, CaseUtils.toSnakeCase(memberName));
+        builder.append("%1$s=%2$s,\n".formatted(
+            memberName,
+            targetShape.accept(
+                new SmithyToDafnyShapeVisitor(context, dataSource + "." + CaseUtils.toSnakeCase(memberName))
+            )));
       }
-      return out;
+      return builder.append(")").toString();
+
+//      String out = "";
+//      // TODO: Change fstring to support >1 shape
+//      for (String memberName : shape.getMemberNames()) {
+//        // TODO: Need to refactor entire class
+//        out += "%1$s=%2$s.%3$s,\n".formatted(memberName, dataSource, CaseUtils.toSnakeCase(memberName));
+//      }
+//      return out;
     }
 
     @Override
     public String booleanShape(BooleanShape shape) {
-      return getDefault(shape);
+      return dataSource;
     }
 
     @Override
     public String stringShape(StringShape shape) {
-      return getDefault(shape);
+      return dataSource;
     }
 
     @Override
@@ -88,12 +107,12 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
 
     @Override
     public String integerShape(IntegerShape shape) {
-      return getDefault(shape);
+      return dataSource;
     }
 
     @Override
     public String longShape(LongShape shape) {
-      return getDefault(shape);
+      return dataSource;
     }
 
     @Override
@@ -108,12 +127,17 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
 
     @Override
     public String doubleShape(DoubleShape shape) {
-      return getDefault(shape);
+      return dataSource;
     }
 
     @Override
     public String bigDecimalShape(BigDecimalShape shape) {
       return getDefault(shape);
+    }
+
+    @Override
+    public String enumShape(EnumShape shape) {
+      return dataSource;
     }
 
     @Override

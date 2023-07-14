@@ -3,6 +3,12 @@ package software.amazon.polymorph.smithypython.nameresolver;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 
+/**
+ * Utils class containing NameResolver utility functions.
+ * This should contain helper methods common to >1 name resolver.
+ * TODO: Once Utils class has a more clearly defined scope,
+ *       refactor such that it is not a generic Utils class
+ */
 public class Utils {
 
   public static boolean isUnitShape(ShapeId shapeId) {
@@ -15,12 +21,7 @@ public class Utils {
    * @param shape
    * @return
    */
-
   private static boolean isUnitShape(Shape shape) {
     return isUnitShape(shape.getId());
   }
-  // TODO: Once Utils class has a more clearly defined scope,
-  // refactor such that it is not a generic Utils class
-
-
 }

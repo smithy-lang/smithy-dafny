@@ -17,7 +17,7 @@ import software.amazon.smithy.python.codegen.PythonWriter;
 /**
  * Writes the shim.py file.
  * The shim wraps the client.py implementation (which itself wraps the underlying Dafny implementation).
- * The shim is used interface with the generated project from other generated Dafny code.
+ * Other Dafny-generated Python code will use the Shim class to interact with this project's Dafny implementation.
  */
 public class ShimFileWriter implements CustomFileWriter {
 
@@ -59,8 +59,7 @@ public class ShimFileWriter implements CustomFileWriter {
   }
 
   private void generateErrorsBlock(
-      GenerationContext codegenContext,
-      ServiceShape serviceShape, PythonWriter writer) {
+      GenerationContext codegenContext, ServiceShape serviceShape, PythonWriter writer) {
 
     // Write modelled error converters
     Set<ShapeId> errorShapeSet = new HashSet<>();
@@ -101,8 +100,7 @@ public class ShimFileWriter implements CustomFileWriter {
   }
 
   private void generateOperationsBlock(
-      GenerationContext codegenContext,
-      ServiceShape serviceShape, PythonWriter writer) {
+      GenerationContext codegenContext, ServiceShape serviceShape, PythonWriter writer) {
 
     // TODO: .getAllOperations? Maybe .getOperations? or .getIntroducedOperations?
     // Might learn which one when working on Resources
@@ -123,41 +121,40 @@ public class ShimFileWriter implements CustomFileWriter {
 
       DafnyNameResolver.importDafnyTypeForShape(writer, inputShape);
       DafnyNameResolver.importDafnyTypeForShape(writer, outputShape);
-
       writer.addImport(".models", inputShape.getName());
       writer.addImport(".models", outputShape.getName());
 
-      Shape targetShape = codegenContext.model().expectShape(operationShape.getOutputShape());
-      var output = targetShape.accept(new SmithyToDafnyShapeVisitor(
-          codegenContext,
-          "wrapped_response"
-      ));
-
       Shape targetShapeInput = codegenContext.model().expectShape(operationShape.getInputShape());
-      var input = targetShapeInput.accept(new DafnyToSmithyShapeVisitor(
+      // Generate code that converts the input from the Dafny type to the corresponding Smithy type
+      String input = targetShapeInput.accept(new DafnyToSmithyShapeVisitor(
           codegenContext,
           "input"
       ));
 
+      Shape targetShape = codegenContext.model().expectShape(operationShape.getOutputShape());
+      // Generate code that converts the output from Smithy type to the corresponding Dafny type
+      String output = targetShape.accept(new SmithyToDafnyShapeVisitor(
+          codegenContext,
+          "wrapped_response"
+      ));
+
       writer.write("""
           def $L(self, $L) -> $L:
-              unwrapped_request: $L = $L($L)
+              unwrapped_request: $L = $L
               try:
                   wrapped_response = asyncio.run(self._impl.$L(unwrapped_request))
               except ServiceError as e:
                   return Wrappers_Compile.Result_Failure(smithy_error_to_dafny_error(e))
-              return Wrappers_Compile.Result_Success($L$L)
+              return Wrappers_Compile.Result_Success($L)
 
           """,
           operationShape.getId().getName(),
           Utils.isUnitShape(inputShape) ? "" : "input: " + dafnyInputType,
           Utils.isUnitShape(outputShape) ? "None" : dafnyOutputType,
           inputShape.getName(),
-          inputShape.getName(),
           input,
           operationSymbol,
-          Utils.isUnitShape(outputShape) ? "None" : dafnyOutputType,
-          Utils.isUnitShape(outputShape) ? "" : "(" + output + ")"
+          Utils.isUnitShape(outputShape) ? "None" : output
       );
     }
   }

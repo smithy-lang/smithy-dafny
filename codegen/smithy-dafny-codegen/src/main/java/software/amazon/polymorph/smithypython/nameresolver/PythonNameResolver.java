@@ -3,6 +3,10 @@ package software.amazon.polymorph.smithypython.nameresolver;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.smithy.model.shapes.ServiceShape;
 
+/**
+ * Contains utility functions that map Smithy shapes
+ * to useful strings used in Smithy-Python generated code.
+ */
 public class PythonNameResolver {
 
   public static String clientForService(ServiceShape serviceShape) {

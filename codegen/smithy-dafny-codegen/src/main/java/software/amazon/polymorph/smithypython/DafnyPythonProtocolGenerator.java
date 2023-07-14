@@ -123,11 +123,10 @@ public abstract class DafnyPythonProtocolGenerator implements ProtocolGenerator 
 
     writer.write(
           """
-          return ("$L", $L$L)
+          return ("$L", $L)
           """,
         operation.getId().getName(),
-        DafnyNameResolver.getDafnyTypeForShape(operation.getInputShape()),
-        Utils.isUnitShape(operation.getInputShape()) ? "" : "(" + input + ")"
+        Utils.isUnitShape(operation.getInputShape()) ? "None" : input
     );
   }
 
@@ -210,8 +209,8 @@ public abstract class DafnyPythonProtocolGenerator implements ProtocolGenerator 
         writer.write("""
           if input.IsFailure():
             return await _deserialize_error(input.error)
-          return $L($L)
-          """, outputShape.getName(), output);
+          return $L
+          """, output);
       }
       writer.popState();
     });
