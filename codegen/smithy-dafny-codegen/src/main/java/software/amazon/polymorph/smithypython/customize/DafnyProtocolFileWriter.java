@@ -18,8 +18,6 @@ public class DafnyProtocolFileWriter implements CustomFileWriter {
   public void generateFileForServiceShape(
       ServiceShape serviceShape, GenerationContext codegenContext) {
     String moduleName = codegenContext.settings().getModuleName();
-    // I'm not sure how we use this.. maybe for better type checking?
-    // maybe something like DafnyInput = Union[forall operations: DafnyName(operation)]
 
     Set<ShapeId> inputShapeIds = new HashSet<>();
     Set<ShapeId> outputShapeIds = new HashSet<>();
@@ -30,7 +28,6 @@ public class DafnyProtocolFileWriter implements CustomFileWriter {
 
       inputShapeIds.add(operationShape.getInputShape());
       outputShapeIds.add(operationShape.getOutputShape());
-
     }
 
     codegenContext.writerDelegator().useFileWriter(moduleName + "/dafny_protocol.py", "", writer -> {
