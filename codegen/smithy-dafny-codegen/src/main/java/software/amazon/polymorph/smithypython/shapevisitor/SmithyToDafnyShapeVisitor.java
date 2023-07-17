@@ -12,7 +12,9 @@ import software.amazon.smithy.model.shapes.DoubleShape;
 import software.amazon.smithy.model.shapes.EnumShape;
 import software.amazon.smithy.model.shapes.FloatShape;
 import software.amazon.smithy.model.shapes.IntegerShape;
+import software.amazon.smithy.model.shapes.ListShape;
 import software.amazon.smithy.model.shapes.LongShape;
+import software.amazon.smithy.model.shapes.MapShape;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeVisitor;
@@ -21,6 +23,7 @@ import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.TimestampShape;
 import software.amazon.smithy.python.codegen.GenerationContext;
+import software.amazon.smithy.python.codegen.PythonWriter;
 import software.amazon.smithy.utils.CaseUtils;
 
 /**
@@ -31,6 +34,7 @@ import software.amazon.smithy.utils.CaseUtils;
 public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
     private final GenerationContext context;
     private final String dataSource;
+    private final PythonWriter writer;
 
     /**
      * @param context The generation context.
@@ -39,10 +43,12 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
      */
     public SmithyToDafnyShapeVisitor(
         GenerationContext context,
-        String dataSource
+        String dataSource,
+        PythonWriter writer
     ) {
       this.context = context;
       this.dataSource = dataSource;
+      this.writer = writer;
     }
 
     @Override
@@ -60,6 +66,8 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
 
     @Override
     public String structureShape(StructureShape shape) {
+      DafnyNameResolver.importDafnyTypeForShape(writer, shape.getId());
+      writer.addImport("Wrappers_Compile", "Option_Some");
       StringBuilder builder = new StringBuilder();
       // Open Dafny structure shape
       // e.g.
@@ -74,14 +82,66 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
         // Adds `DafnyStructureMember=smithy_structure_member(...)`
         // e.g.
         // DafnyStructureName(DafnyStructureMember=smithy_structure_member(...), ...)
-        builder.append("%1$s=%2$s,\n".formatted(
+        builder.append("%1$s=%2$s%3$s%4$s,\n".formatted(
             memberName,
+            memberShape.isOptional() ? "Option_Some(" : "",
             targetShape.accept(
-                new SmithyToDafnyShapeVisitor(context, dataSource + "." + CaseUtils.toSnakeCase(memberName))
-            )));
+                new SmithyToDafnyShapeVisitor(context,
+                        dataSource + "." + CaseUtils.toSnakeCase(memberName),
+            writer)),
+            memberShape.isOptional() ? ")" : ""
+            ));
       }
       // Close structure
       return builder.append(")").toString();
+    }
+
+  @Override
+  public String mapShape(MapShape shape) {
+    StringBuilder builder = new StringBuilder();
+
+    writer.addImport("_dafny", "Map");
+
+    builder.append("Map({");
+    MemberShape keyMemberShape = shape.getKey();
+    final Shape keyTargetShape = context.model().expectShape(keyMemberShape.getTarget());
+    MemberShape valueMemberShape = shape.getValue();
+    final Shape valueTargetShape = context.model().expectShape(valueMemberShape.getTarget());
+
+    builder.append("%1$s: ".formatted(
+        keyTargetShape.accept(
+            new SmithyToDafnyShapeVisitor(context, "key", writer)
+        )
+    ));
+
+    builder.append("%1$s".formatted(
+        valueTargetShape.accept(
+            new SmithyToDafnyShapeVisitor(context, "value", writer)
+        )
+    ));
+
+    // Close structure
+    return builder.append(" for (key, value) in %1$s.items() })".formatted(dataSource)).toString();
+  }
+
+    @Override
+    public String listShape(ListShape shape) {
+
+      writer.addImport("_dafny", "Seq");
+
+      StringBuilder builder = new StringBuilder();
+
+      builder.append("Seq([");
+      MemberShape memberShape = shape.getMember();
+      final Shape targetShape = context.model().expectShape(memberShape.getTarget());
+
+      builder.append("%1$s".formatted(
+          targetShape.accept(
+              new SmithyToDafnyShapeVisitor(context, "list_element", writer)
+          )));
+
+      // Close structure
+      return builder.append(" for list_element in %1$s])".formatted(dataSource)).toString();
     }
 
     @Override
