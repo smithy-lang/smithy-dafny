@@ -225,7 +225,9 @@ public class ServiceCodegen {
         // TODO Need to extend for a common class for this namespace
         final TokenTree classHeader = Token.of("public class %s : Exception".formatted(exceptionName));
         // TODO need to model _all_ possible members here...
-        final TokenTree messageCtor = Token.of("public %s(string message) : base(message) {}".formatted(exceptionName));
+        final TokenTree messageCtor = Token.of("""
+                                                public %s(string message) : base(message) {}
+                                                public string getMessage() { return this.Message; }""".formatted(exceptionName));
         return TokenTree.of(classHeader, messageCtor.braced()).namespaced(Token.of(nameResolver.namespaceForService()));
     }
 

@@ -6,14 +6,7 @@ package software.amazon.polymorph.smithydotnet;
 import com.google.common.annotations.VisibleForTesting;
 
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -47,6 +40,21 @@ import static software.amazon.polymorph.smithydotnet.TypeConversionDirection.TO_
  */
 public class TypeConversionCodegen {
     public static final String C_SHARP_SYSTEM_EXCEPTION = "System.Exception";
+    // Edge case for constructors of Exceptions that extend the base Exception class.
+    public static final List<String> ERROR_CTOR = Arrays.asList(
+            "AwsCryptographicMaterialProvidersException",
+            "EntryAlreadyExists",
+            "EntryDoesNotExist",
+            "InvalidAlgorithmSuiteInfo",
+            "InvalidAlgorithmSuiteInfoOnDecrypt",
+            "InvalidAlgorithmSuiteInfoOnEncrypt",
+            "InvalidDecryptionMaterials",
+            "InvalidDecryptionMaterialsTransition",
+            "InvalidEncryptionMaterials",
+            "InvalidEncryptionMaterialsTransition",
+            "KeyStoreException",
+            "KeyVectorException"
+    );
 
     /**
      * A pair of type converter methods that converts between the compiled Dafny representation and the idiomatic C#
@@ -461,6 +469,10 @@ public class TypeConversionCodegen {
                     typeConverterForShape(memberShape.getId(), TO_DAFNY),
                     nameResolver.classPropertyForStructureMember(memberShape));
         }
+        if (ERROR_CTOR.contains(memberShape.getContainer().getName()) || memberShape.getContainer().getName().endsWith("Error"))  {
+            return "%s(value.getMessage())".formatted(
+                     typeConverterForShape(memberShape.getId(), TO_DAFNY));
+        }
         return "%s(value.%s)".formatted(
                 typeConverterForShape(memberShape.getId(), TO_DAFNY),
                 nameResolver.classPropertyForStructureMember(memberShape));
@@ -546,6 +558,7 @@ public class TypeConversionCodegen {
             .of(defNames
                 .stream()
                 .map(memberShape -> {
+                    final String propertyNameEdgeCase = StringUtils.equals(nameResolver.classPropertyForStructureMember(memberShape), "KmsKeyArn") ? "kmsKeyArn" : nameResolver.classPropertyForStructureMember(memberShape);
                     final String propertyName = nameResolver.classPropertyForStructureMember(memberShape);
                     final String memberFromDafnyConverterName = typeConverterForShape(
                             memberShape.getId(), FROM_DAFNY);
@@ -556,7 +569,7 @@ public class TypeConversionCodegen {
                         destructorValue = DafnyNameResolverHelpers.dafnyCompilesExtra_(memberShape.getMemberName());
                     }
                     return TokenTree
-                            .of("if (value.is_%s)".formatted(propertyName))
+                            .of("if (value.is_%s)".formatted(propertyNameEdgeCase))
                             .append(TokenTree
                                     .of(
                                             "converted.%s = %s(concrete.dtor_%s);"
@@ -1136,7 +1149,7 @@ public class TypeConversionCodegen {
         assert errorShape.getMember("message").isPresent();
         final ShapeId messageShapeId = errorShape.getId().withMember("message");
 
-        final Token fromDafnyBody = Token.of("return new %s(%s(value.message));".formatted(
+        final Token fromDafnyBody = Token.of("return new %s(%s(value.Message));".formatted(
                 nameResolver.baseTypeForShape(errorShape.getId()),
                 typeConverterForShape(messageShapeId, FROM_DAFNY)
         ));
