@@ -1,0 +1,11 @@
+{
+    "version": "1.0",
+    "plugins": {
+        "dafny-client-codegen": {
+            "service": "simple.aggregate#SimpleAggregate",
+            "module": "simple_aggregate",
+            "moduleVersion": "0.0.1",
+            "protocol": "aws.polymorph#localService"
+        }
+    }
+}
