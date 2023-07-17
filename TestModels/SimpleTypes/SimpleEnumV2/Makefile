@@ -67,6 +67,7 @@ transpile_implementation_net:
 		-runAllTests:1 \
 		-compile:0 \
 		-optimizeErasableDatatypeWrapper:0 \
+		$(COMPILE_SUFFIX_OPTION) \
 		-useRuntimeLib \
 		-out runtimes/net/ImplementationFromDafny \
 		./src/Index.dfy \
@@ -81,6 +82,7 @@ transpile_test_net:
 		-runAllTests:1 \
 		-compile:0 \
 		-optimizeErasableDatatypeWrapper:0 \
+		$(COMPILE_SUFFIX_OPTION) \
 		-useRuntimeLib \
 		-out runtimes/net/tests/TestsFromDafny \
 		`find ./test -name '*.dfy'` \
