@@ -1,4 +1,4 @@
-package Sets;
+package SortedSets;
 
 import dafny.DafnySequence;
 import java.util.Arrays;

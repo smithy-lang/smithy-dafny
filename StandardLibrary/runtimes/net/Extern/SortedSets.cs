@@ -5,7 +5,7 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 
-namespace Sets {
+namespace SortedSets {
 
   public partial class __default {
       public static Dafny.ISequence<Dafny.ISequence<T>> SetToOrderedSequence<T>(Dafny.ISet<Dafny.ISequence<T>> set, Func<T,T,bool> less) {
