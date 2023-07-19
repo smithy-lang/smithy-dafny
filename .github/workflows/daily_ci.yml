@@ -3,7 +3,7 @@ name: Daily CI
 
 on:
   schedule:
-    - cron: "00 15 * * 1,5"
+    - cron: "00 15 * * 1-5"
 
 jobs:
   daily-ci-verification:
