@@ -13,14 +13,14 @@ on:
 
 jobs:
   push-ci-verification:
-    uses: .github/workflows/library_dafny_verification.yml
+    uses: ./.github/workflows/library_dafny_verification.yml
     with:
       dafny: ${{ inputs.dafny }}
   push-ci-java:
-    uses: .github/workflows/library_java_tests.yml
+    uses: ./.github/workflows/library_java_tests.yml
     with:
       dafny: ${{ inputs.dafny }}
   push-ci-net:
-    uses: .github/workflows/library_net_tests.yml
+    uses: ./.github/workflows/library_net_tests.yml
     with:
       dafny: ${{ inputs.dafny }}
