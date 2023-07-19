@@ -35,6 +35,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
     private final GenerationContext context;
     private final String dataSource;
     private final PythonWriter writer;
+    private final boolean isConfigShape;
 
     /**
      * @param context    The generation context.
@@ -44,11 +45,13 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
     public DafnyToSmithyShapeVisitor(
         GenerationContext context,
         String dataSource,
-        PythonWriter writer
+        PythonWriter writer,
+        boolean isConfigShape
     ) {
       this.context = context;
       this.dataSource = dataSource;
       this.writer = writer;
+      this.isConfigShape = isConfigShape;
     }
 
     @Override
@@ -66,7 +69,9 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
 
     @Override
     public String structureShape(StructureShape shape) {
-      writer.addImport(".models", shape.getId().getName());
+      if (!isConfigShape) {
+        writer.addImport(".models", shape.getId().getName());
+      }
 
       StringBuilder builder = new StringBuilder();
       // Open Smithy structure shape
@@ -85,7 +90,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
         builder.append("%1$s=%2$s,\n".formatted(
             CaseUtils.toSnakeCase(memberName),
             targetShape.accept(
-                new DafnyToSmithyShapeVisitor(context, dataSource + "." + memberName + (memberShape.isOptional() ? ".value" : ""), writer)
+                new DafnyToSmithyShapeVisitor(context, dataSource + "." + memberName + (memberShape.isOptional() ? ".value" : ""), writer, isConfigShape)
             )
             ));
       }
@@ -104,7 +109,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
 
       builder.append("%1$s".formatted(
           targetShape.accept(
-              new DafnyToSmithyShapeVisitor(context, "list_element", writer)
+              new DafnyToSmithyShapeVisitor(context, "list_element", writer, isConfigShape)
           )));
 
       // Close structure
@@ -123,13 +128,13 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
 
     builder.append("%1$s: ".formatted(
         keyTargetShape.accept(
-            new DafnyToSmithyShapeVisitor(context, "key", writer)
+            new DafnyToSmithyShapeVisitor(context, "key", writer, isConfigShape)
         )
     ));
 
     builder.append("%1$s".formatted(
         valueTargetShape.accept(
-            new DafnyToSmithyShapeVisitor(context, "value", writer)
+            new DafnyToSmithyShapeVisitor(context, "value", writer, isConfigShape)
         )
     ));
 

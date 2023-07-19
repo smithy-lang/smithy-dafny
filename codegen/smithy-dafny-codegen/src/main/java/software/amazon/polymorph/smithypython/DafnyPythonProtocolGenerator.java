@@ -120,7 +120,8 @@ public abstract class DafnyPythonProtocolGenerator implements ProtocolGenerator 
     var input = targetShape.accept(new SmithyToDafnyShapeVisitor(
         context,
         "input",
-        writer
+        writer,
+        false
     ));
 
     writer.write(
@@ -207,7 +208,8 @@ public abstract class DafnyPythonProtocolGenerator implements ProtocolGenerator 
         var output = targetShape.accept(new DafnyToSmithyShapeVisitor(
             context,
             "input.value",
-            writer
+            writer,
+            false
         ));
 
         writer.write("""

@@ -1,7 +1,7 @@
 package software.amazon.polymorph.smithypython.customize;
 
 import software.amazon.polymorph.smithypython.nameresolver.DafnyNameResolver;
-import software.amazon.polymorph.smithypython.nameresolver.PythonNameResolver;
+import software.amazon.polymorph.smithypython.nameresolver.SmithyNameResolver;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.python.codegen.GenerationContext;
@@ -22,7 +22,7 @@ public class DafnyImplInterfaceFileWriter implements CustomFileWriter {
   public void generateFileForServiceShape(
       ServiceShape serviceShape, GenerationContext codegenContext) {
     String moduleName = codegenContext.settings().getModuleName();
-    String clientName = PythonNameResolver.clientForService(serviceShape);
+    String clientName = SmithyNameResolver.clientForService(serviceShape);
     String implModulePrelude = DafnyNameResolver.getDafnyImplModuleNamespaceForShape(serviceShape);
 
     codegenContext.writerDelegator()

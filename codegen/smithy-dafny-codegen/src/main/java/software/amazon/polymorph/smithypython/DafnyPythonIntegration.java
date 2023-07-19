@@ -18,6 +18,7 @@ package software.amazon.polymorph.smithypython;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import software.amazon.polymorph.smithypython.customize.ConfigFileWriter;
 import software.amazon.polymorph.smithypython.customize.DafnyImplInterfaceFileWriter;
 import software.amazon.polymorph.smithypython.customize.DafnyProtocolFileWriter;
 import software.amazon.polymorph.smithypython.customize.ErrorsFileWriter;
@@ -93,6 +94,7 @@ public final class DafnyPythonIntegration implements PythonIntegration {
         new ShimFileWriter().generateFileForServiceShape(serviceShape, codegenContext);
         new ErrorsFileWriter().generateFileForServiceShape(serviceShape, codegenContext);
         new ModelsFileWriter().generateFileForServiceShape(serviceShape, codegenContext);
+        new ConfigFileWriter().generateFileForServiceShape(serviceShape, codegenContext);
     }
 
     /**

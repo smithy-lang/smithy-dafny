@@ -7,7 +7,7 @@ import software.amazon.smithy.model.shapes.ServiceShape;
  * Contains utility functions that map Smithy shapes
  * to useful strings used in Smithy-Python generated code.
  */
-public class PythonNameResolver {
+public class SmithyNameResolver {
 
   public static String clientForService(ServiceShape serviceShape) {
       if (serviceShape.hasTrait(LocalServiceTrait.class)) {
