@@ -1,25 +1,32 @@
-
-
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import software.amazon.cryptography.keystore.model.BeaconKeyMaterials;
-import software.amazon.cryptography.materialproviders.ICryptographicMaterialsCache;
-import software.amazon.cryptography.materialproviders.MaterialProviders;
-import software.amazon.cryptography.materialproviders.model.*;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
-import static org.testng.Assert.assertEquals;
+import Random_Compile.ExternRandom;
+
+import software.amazon.cryptography.keystore.model.BeaconKeyMaterials;
+import software.amazon.cryptography.materialproviders.ICryptographicMaterialsCache;
+import software.amazon.cryptography.materialproviders.MaterialProviders;
+import software.amazon.cryptography.materialproviders.model.CacheType;
+import software.amazon.cryptography.materialproviders.model.CreateCryptographicMaterialsCacheInput;
+import software.amazon.cryptography.materialproviders.model.DefaultCache;
+import software.amazon.cryptography.materialproviders.model.EntryDoesNotExist;
+import software.amazon.cryptography.materialproviders.model.GetCacheEntryInput;
+import software.amazon.cryptography.materialproviders.model.GetCacheEntryOutput;
+import software.amazon.cryptography.materialproviders.model.MaterialProvidersConfig;
+import software.amazon.cryptography.materialproviders.model.Materials;
+import software.amazon.cryptography.materialproviders.model.PutCacheEntryInput;
 
 
 public class LocalCMCTests {
 
-  static private ICryptographicMaterialsCache test = MaterialProviders
+  static private final ICryptographicMaterialsCache test = MaterialProviders
     .builder()
     .MaterialProvidersConfig(MaterialProvidersConfig.builder().build())
     .build()
@@ -28,7 +35,7 @@ public class LocalCMCTests {
       .cache(CacheType.builder().Default(DefaultCache.builder().entryCapacity(10).build()).build())
       .build()
     );
-  static private List<String> identifies = Arrays.asList(
+  static private final List<String> identifies = Collections.unmodifiableList(Arrays.asList(
     "one",
     "two",
     "three",
@@ -50,13 +57,13 @@ public class LocalCMCTests {
     "nineteen",
     "twenty",
     "twenty one"
-  );
-  static private Random rand = new Random();
-
+  ));
+  private static final int IDS_SIZE = identifies.size();
 
   @Test(threadPoolSize = 10, invocationCount = 300000, timeOut = 10000)
   public void TestALotOfAdding() {
-    String beaconKeyIdentifier = identifies.get(rand.nextInt(identifies.size()));
+    Random rand = ExternRandom.getSecureRandom();
+    String beaconKeyIdentifier = identifies.get(rand.nextInt(IDS_SIZE));
 
     ByteBuffer cacheIdentifier = ByteBuffer.wrap(beaconKeyIdentifier.getBytes(StandardCharsets.UTF_8));
 
