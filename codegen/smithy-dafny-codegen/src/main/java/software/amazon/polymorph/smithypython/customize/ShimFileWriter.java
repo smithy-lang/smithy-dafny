@@ -104,7 +104,7 @@ public class ShimFileWriter implements CustomFileWriter {
 
     // TODO: .getAllOperations? Maybe .getOperations? or .getIntroducedOperations?
     // Might learn which one when working on Resources
-    for (ShapeId operationShapeId : serviceShape.getAllOperations()) {
+    for (ShapeId operationShapeId : serviceShape.getOperations()) {
       OperationShape operationShape = codegenContext.model().expectShape(operationShapeId, OperationShape.class);
 
       // Add imports for operation errors

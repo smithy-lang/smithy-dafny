@@ -4,6 +4,7 @@ import software.amazon.polymorph.smithypython.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithypython.nameresolver.SmithyNameResolver;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
+import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonWriter;
 
@@ -56,13 +57,14 @@ public class DafnyImplInterfaceFileWriter implements CustomFileWriter {
                         else:
                             return self.operation_map[input.operation_name](input.dafny_operation_input)
                 """, implModulePrelude, clientName, "impl", clientName,
-            writer.consumer(w -> generateImplInterfaceOperationMap(codegenContext, w)));
+            writer.consumer(w -> generateImplInterfaceOperationMap(serviceShape, codegenContext, w)));
       });
   }
 
   private void generateImplInterfaceOperationMap(
-      GenerationContext codegenContext, PythonWriter writer) {
-    for (OperationShape operationShape : codegenContext.model().getOperationShapes()) {
+      ServiceShape serviceShape, GenerationContext codegenContext, PythonWriter writer) {
+    for (ShapeId operationShapeId : serviceShape.getOperations()) {
+      final OperationShape operationShape = codegenContext.model().expectShape(operationShapeId, OperationShape.class);
       writer.write("""
           "$L": self.$L.$L,""",
           operationShape.getId().getName(), "impl", operationShape.getId().getName());
