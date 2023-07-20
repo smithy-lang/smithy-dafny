@@ -38,6 +38,18 @@ structure DdbClientReference {}
 )
 service KeyStore {
   version: "2023-04-01",
+
+  //= aws-encryption-sdk-specification/framework/branch-key-store.md#operations
+  //= type=implication
+  //# The Keystore MUST support the following operations:
+  //#
+  //#- [GetKeyStoreInfo](#getKeyStoreInfo)
+  //#- [CreateKeyStore](#createkeystore)
+  //#- [CreateKey](#createkey)
+  //#- [VersionKey](#versionkey)
+  //#- [GetActiveBranchKey](#getactivebranchkey)
+  //#- [GetBranchKeyVersion](#getbranchkeyversion)
+  //#- [GetBeaconKey](#beacon-key)
   operations: [
     GetKeyStoreInfo,
     CreateKeyStore,
@@ -45,13 +57,21 @@ service KeyStore {
     VersionKey,
     GetActiveBranchKey,
     GetBranchKeyVersion,
-    GetBeaconKey,
-    BranchKeyStatusResolution
+    GetBeaconKey
   ],
   errors: [KeyStoreException]
 }
 
 structure KeyStoreConfig {
+
+  //= aws-encryption-sdk-specification/framework/branch-key-store.md#initialization
+  //= type=implication
+  //# The following inputs MUST be specified to create a KeyStore:
+  //# 
+  //# - [Table Name](#table-name)
+  //# - [AWS KMS Configuration](#aws-kms-configuration)
+  //# - [Logical KeyStore Name](#logical-keystore-name)
+
   @required
   @javadoc("The DynamoDB table name that backs this Key Store.")
   ddbTableName: TableName,
@@ -61,6 +81,15 @@ structure KeyStoreConfig {
   @required
   @javadoc("The logical name for this Key Store, which is cryptographically bound to the keys it holds.")
   logicalKeyStoreName: String,
+
+  //= aws-encryption-sdk-specification/framework/branch-key-store.md#initialization
+  //= type=implication
+  //# The following inputs MAY be specified to create a KeyStore:
+  //# 
+  //# - [ID](#keystore-id)
+  //# - [AWS KMS Grant Tokens](#aws-kms-grant-tokens)
+  //# - [DynamoDb Client](#dynamodb-client)
+  //# - [KMS Client](#kms-client)
   
   @javadoc("An identifier for this Key Store.")
   id: String,
@@ -73,7 +102,7 @@ structure KeyStoreConfig {
 }
 
 union KMSConfiguration {
-  kmsKeyArn: KmsKeyArn
+  kmsKeyArn: com.amazonaws.kms#KeyIdType
 }
 
 @javadoc("Returns the configuration information for a Key Store.")
@@ -106,6 +135,7 @@ operation CreateKeyStore {
   output: CreateKeyStoreOutput
 }
 
+
 structure CreateKeyStoreInput {
 }
 
@@ -126,8 +156,17 @@ operation CreateKey {
   output: CreateKeyOutput
 }
 
+//= aws-encryption-sdk-specification/framework/branch-key-store.md#createkey
+//= type=implication
+//# The CreateKey caller MUST provide:
+//# - An optional branch key id
+//# - An optional encryption context
 structure CreateKeyInput {
+  @javadoc("The identifier for the created Branch Key.")
+  branchKeyIdentifier: String
 
+  @javadoc("Custom encryption context for the Branch Key.")
+  encryptionContext: EncryptionContext
 }
 
 @javadoc("Outputs for Branch Key creation.")
@@ -143,14 +182,23 @@ structure CreateKeyOutput {
 // rotate the beacon key under the branchKeyIdentifier.
 @javadoc("Create a new ACTIVE version of an existing Branch Key in the Key Store, and set the previously ACTIVE version to DECRYPT_ONLY.")
 operation VersionKey {
-  input: VersionKeyInput
+  input: VersionKeyInput,
+  output: VersionKeyOutput
 }
 
 @javadoc("Inputs for versioning a Branch Key.")
 structure VersionKeyInput {
+
+  //= aws-encryption-sdk-specification/framework/branch-key-store.md#versionkey
+  //= type=implication
+  //# - MUST supply a `branch-key-id`
   @required
   @javadoc("The identifier for the Branch Key to be versioned.")
   branchKeyIdentifier: String
+}
+
+@javadoc("Outputs for versioning a Branch Key.")
+structure VersionKeyOutput {
 }
 
 @javadoc("Get the ACTIVE version for a particular Branch Key from the Key Store.")
@@ -168,6 +216,10 @@ structure GetActiveBranchKeyInput {
 
 @javadoc("Outputs for getting a Branch Key's ACTIVE version.")
 structure GetActiveBranchKeyOutput {
+
+  //= aws-encryption-sdk-specification/framework/branch-key-store.md#getactivebranchkey
+  //= type=implication
+  //# - MUST supply a `branch-key-id`
   @required
   @javadoc("The materials for the Branch Key.")
   branchKeyMaterials: BranchKeyMaterials,
@@ -181,10 +233,16 @@ operation GetBranchKeyVersion {
 
 @javadoc("Inputs for getting a version of a Branch Key.")
 structure GetBranchKeyVersionInput {
+  //= aws-encryption-sdk-specification/framework/branch-key-store.md#getbranchkeyversion
+  //= type=implication
+  //# - MUST supply a `branch-key-id`
   @required
   @javadoc("The identifier for the Branch Key to get a particular version for.")
   branchKeyIdentifier: String,
 
+  //= aws-encryption-sdk-specification/framework/branch-key-store.md#getbranchkeyversion
+  //= type=implication
+  //# - MUST supply a `branchKeyVersion`
   @required
   @javadoc("The version to get.")
   branchKeyVersion: String
@@ -205,6 +263,9 @@ operation GetBeaconKey {
 
 @javadoc("Inputs for getting a Beacon Key")
 structure GetBeaconKeyInput {
+  //= aws-encryption-sdk-specification/framework/branch-key-store.md#getbeaconkey
+  //= type=implication
+  //# - MUST supply a `branch-key-id`
   @required
   @javadoc("The identifier of the Branch Key the Beacon Key is associated with.")
   branchKeyIdentifier: String
@@ -217,30 +278,27 @@ structure GetBeaconKeyOutput {
   beaconKeyMaterials: BeaconKeyMaterials,
 }
 
-@javadoc("In the case that the Key Store contains two ACTIVE Branch Key versions (this should not be possible in normal operation), attempt to resolve to one by making one ACTIVE version DECRYPT_ONLY.")
-operation BranchKeyStatusResolution {
-  input: BranchKeyStatusResolutionInput
-}
-
-@javadoc("Inputs for resolving a multiple ACTIVE versions state.")
-structure BranchKeyStatusResolutionInput {
-  @required
-  @javadoc("The identifier for the Branch Key which has more than one ACTIVE version")
-  branchKeyIdentifier: String
-}
-
-string KmsKeyArn
-
 list GrantTokenList {
   member: String
 }
 
+//= aws-encryption-sdk-specification/framework/structures.md#structure-3
+//= type=implication
+//# This structure MUST include all of the following fields:
+//# 
+//# - [Branch Key](#branch-key)
+//# - [Branch Key Id](#branch-key-id)
+//# - [Branch Key Version](#branch-key-version)
+//# - [Encryption Context](#encryption-context-3)
 structure BranchKeyMaterials {
     @required
     branchKeyIdentifier: String,
 
     @required
     branchKeyVersion: Utf8Bytes,
+
+    @required
+    encryptionContext: EncryptionContext
 
     @required
     branchKey: Secret,
@@ -251,8 +309,12 @@ structure BeaconKeyMaterials {
   //= type=implication
   //# This structure MUST include the following fields:
   //# - [Beacon Key Id](#beacon-key-id)
+  //# - [Encryption Context](#encryption-context-4)
   @required
   beaconKeyIdentifier: String,
+
+  @required
+  encryptionContext: EncryptionContext
 
   //= aws-encryption-sdk-specification/framework/structures.md#structure-4
   //= type=implication
@@ -274,6 +336,11 @@ map HmacKeyMap {
 
 @sensitive
 blob Secret
+
+map EncryptionContext {
+  key: Utf8Bytes,
+  value: Utf8Bytes,
+}
 
 ///////////////////
 // Errors

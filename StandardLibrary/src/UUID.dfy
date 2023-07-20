@@ -20,4 +20,5 @@ module {:extern "UUID"} UUID {
   // meaning that 2 consecutive calls would still produce the same result
   // because functions MUST NOT mutate the heap.
   method {:extern "GenerateUUID"} GenerateUUID() returns (res: Result<string, string>)
+    ensures res.Success? ==> 0 < |res.value|
 }

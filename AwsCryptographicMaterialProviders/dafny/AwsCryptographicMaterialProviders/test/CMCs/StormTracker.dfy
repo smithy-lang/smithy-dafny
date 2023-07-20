@@ -17,7 +17,8 @@ module  {:options "/functionSyntax:4"} TestStormTracker {
     BranchKey(BranchKey := BranchKeyMaterials (
                 branchKeyIdentifier := "spoo",
                 branchKeyVersion := data,
-                branchKey := data
+                branchKey := data,
+                encryptionContext := map[]
               ))
   }
 

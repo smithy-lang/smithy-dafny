@@ -3,6 +3,7 @@
 
 include "../src/Index.dfy"
 include "../../AwsCryptographicMaterialProviders/src/AwsArnParsing.dfy"
+include "Fixtures.dfy"
 
 module TestCreateKeyStore {
   import Types = AwsCryptographyKeyStoreTypes
@@ -11,12 +12,7 @@ module TestCreateKeyStore {
   import KeyStore
   import opened Wrappers
   import opened AwsArnParsing
-
-  const keyStoreName := "KeyStoreTestTable";
-  const logicalKeyStoreName := keyStoreName;
-
-  // THESE ARE TESTING RESOURCES DO NOT USE IN A PRODUCTION ENVIRONMENT
-  const keyArn := "arn:aws:kms:us-west-2:370957321024:key/9d989aa2-2f9c-438c-a745-cc57d3ad0126";
+  import opened Fixtures
 
   method {:test} TestCreateKeyStore()
   {
@@ -29,7 +25,7 @@ module TestCreateKeyStore {
       kmsConfiguration := kmsConfig,
       logicalKeyStoreName := logicalKeyStoreName,
       grantTokens := None,
-      ddbTableName := keyStoreName,
+      ddbTableName := branchKeyStoreName,
       ddbClient := Some(ddbClient),
       kmsClient := Some(kmsClient)
     );
@@ -40,6 +36,6 @@ module TestCreateKeyStore {
     var keyStoreArn :- expect keyStore.CreateKeyStore(Types.CreateKeyStoreInput());
 
     expect AwsArnParsing.ParseAmazonDynamodbTableName(keyStoreArn.tableArn).Success?;
-    expect AwsArnParsing.ParseAmazonDynamodbTableName(keyStoreArn.tableArn).value == keyStoreName;
+    expect AwsArnParsing.ParseAmazonDynamodbTableName(keyStoreArn.tableArn).value == branchKeyStoreName;
   }
 }

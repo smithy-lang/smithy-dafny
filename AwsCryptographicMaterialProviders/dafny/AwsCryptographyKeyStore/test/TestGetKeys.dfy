@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 include "../src/Index.dfy"
+include "Fixtures.dfy"
 
 module TestGetKeys {
   import Types = AwsCryptographyKeyStoreTypes
@@ -10,14 +11,10 @@ module TestGetKeys {
   import DDB = Com.Amazonaws.Dynamodb
   import KeyStore
   import opened Wrappers
+  import opened Fixtures
+  import UTF8
 
-  const branchKeyStoreName := "KeyStoreTestTable";
-  const logicalKeyStoreName := branchKeyStoreName;
   const incorrectLogicalName := "MySuperAwesomeTableName";
-  const branchKeyId := "71c83ce3-aad6-4aab-a4c4-d02bb9273305";
-  // THESE ARE TESTING RESOURCES DO NOT USE IN A PRODUCTION ENVIRONMENT
-  const keyArn := "arn:aws:kms:us-west-2:370957321024:key/9d989aa2-2f9c-438c-a745-cc57d3ad0126";
-  const mkrKeyArn := "arn:aws:kms:us-west-2:370957321024:key/mrk-63d386cb70614ea59b32ad65c9315297";
 
   method {:test} TestGetBeaconKey()
   {
@@ -37,9 +34,11 @@ module TestGetKeys {
 
     var keyStore :- expect KeyStore.KeyStore(keyStoreConfig);
 
-    var beaconKeyResult :- expect keyStore.GetBeaconKey(Types.GetBeaconKeyInput(
-                                                          branchKeyIdentifier := branchKeyId
-                                                        ));
+    var beaconKeyResult :- expect keyStore.GetBeaconKey(
+      Types.GetBeaconKeyInput(
+        branchKeyIdentifier := branchKeyId
+      ));
+    expect beaconKeyResult.beaconKeyMaterials.beaconKeyIdentifier == branchKeyId;
     expect beaconKeyResult.beaconKeyMaterials.beaconKey.Some?;
     expect |beaconKeyResult.beaconKeyMaterials.beaconKey.value| == 32;
   }
@@ -62,12 +61,47 @@ module TestGetKeys {
 
     var keyStore :- expect KeyStore.KeyStore(keyStoreConfig);
 
-    var activeResult :- expect keyStore.GetActiveBranchKey(Types.GetActiveBranchKeyInput(
-                                                             branchKeyIdentifier := branchKeyId
-                                                           ));
+    var activeResult :- expect keyStore.GetActiveBranchKey(
+      Types.GetActiveBranchKeyInput(
+        branchKeyIdentifier := branchKeyId
+      ));
 
+    expect activeResult.branchKeyMaterials.branchKeyIdentifier == branchKeyId;
+    expect activeResult.branchKeyMaterials.branchKeyVersion == branchKeyIdActiveVersionUtf8Bytes;
     expect |activeResult.branchKeyMaterials.branchKey| == 32;
   }
+
+  method {:test} TestGetBranchKeyVersion()
+  {
+    var kmsClient :- expect KMS.KMSClient();
+    var ddbClient :- expect DDB.DynamoDBClient();
+    var kmsConfig := Types.KMSConfiguration.kmsKeyArn(keyArn);
+
+    var keyStoreConfig := Types.KeyStoreConfig(
+      id := None,
+      kmsConfiguration := kmsConfig,
+      logicalKeyStoreName := logicalKeyStoreName,
+      grantTokens := None,
+      ddbTableName := branchKeyStoreName,
+      ddbClient := Some(ddbClient),
+      kmsClient := Some(kmsClient)
+    );
+
+    var keyStore :- expect KeyStore.KeyStore(keyStoreConfig);
+
+    var versionResult :- expect keyStore.GetBranchKeyVersion(
+      Types.GetBranchKeyVersionInput(
+        branchKeyIdentifier := branchKeyId,
+        branchKeyVersion := branchKeyIdActiveVersion
+      ));
+
+    var testBytes :- expect UTF8.Encode(branchKeyIdActiveVersion);
+
+    expect versionResult.branchKeyMaterials.branchKeyIdentifier == branchKeyId;
+    expect versionResult.branchKeyMaterials.branchKeyVersion == branchKeyIdActiveVersionUtf8Bytes == testBytes;
+    expect |versionResult.branchKeyMaterials.branchKey| == 32;
+  }
+
 
   method {:test} TestGetActiveKeyWithIncorrectKmsKeyArn() {
     var kmsClient :- expect KMS.KMSClient();
@@ -86,13 +120,12 @@ module TestGetKeys {
 
     var keyStore :- expect KeyStore.KeyStore(keyStoreConfig);
 
-    var activeResult := keyStore.GetActiveBranchKey(Types.GetActiveBranchKeyInput(
-                                                      branchKeyIdentifier := branchKeyId
-                                                    ));
+    var activeResult := keyStore.GetActiveBranchKey(
+      Types.GetActiveBranchKeyInput(
+        branchKeyIdentifier := branchKeyId
+      ));
 
     expect activeResult.Failure?;
-    expect activeResult.error == Types.KeyStoreException(
-                                   message := "Configured AWS KMS Key ARN does not match KMS Key ARN for branch-key-id: " + branchKeyId);
   }
 
   method {:test} TestGetActiveKeyWrongLogicalKeyStoreName() {
@@ -112,9 +145,10 @@ module TestGetKeys {
 
     var keyStore :- expect KeyStore.KeyStore(keyStoreConfig);
 
-    var activeResult := keyStore.GetActiveBranchKey(Types.GetActiveBranchKeyInput(
-                                                      branchKeyIdentifier := branchKeyId
-                                                    ));
+    var activeResult := keyStore.GetActiveBranchKey(
+      Types.GetActiveBranchKeyInput(
+        branchKeyIdentifier := branchKeyId
+      ));
 
     expect activeResult.Failure?;
   }
@@ -134,9 +168,10 @@ module TestGetKeys {
 
     var keyStore :- expect KeyStore.KeyStore(keyStoreConfig);
 
-    var activeResult :- expect keyStore.GetActiveBranchKey(Types.GetActiveBranchKeyInput(
-                                                             branchKeyIdentifier := branchKeyId
-                                                           ));
+    var activeResult :- expect keyStore.GetActiveBranchKey(
+      Types.GetActiveBranchKeyInput(
+        branchKeyIdentifier := branchKeyId
+      ));
 
     expect |activeResult.branchKeyMaterials.branchKey| == 32;
   }

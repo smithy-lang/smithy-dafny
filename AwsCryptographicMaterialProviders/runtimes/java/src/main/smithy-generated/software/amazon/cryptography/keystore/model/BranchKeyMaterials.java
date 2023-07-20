@@ -4,6 +4,7 @@
 package software.amazon.cryptography.keystore.model;
 
 import java.nio.ByteBuffer;
+import java.util.Map;
 import java.util.Objects;
 
 public class BranchKeyMaterials {
@@ -11,11 +12,14 @@ public class BranchKeyMaterials {
 
   private final String branchKeyVersion;
 
+  private final Map<String, String> encryptionContext;
+
   private final ByteBuffer branchKey;
 
   protected BranchKeyMaterials(BuilderImpl builder) {
     this.branchKeyIdentifier = builder.branchKeyIdentifier();
     this.branchKeyVersion = builder.branchKeyVersion();
+    this.encryptionContext = builder.encryptionContext();
     this.branchKey = builder.branchKey();
   }
 
@@ -25,6 +29,10 @@ public class BranchKeyMaterials {
 
   public String branchKeyVersion() {
     return this.branchKeyVersion;
+  }
+
+  public Map<String, String> encryptionContext() {
+    return this.encryptionContext;
   }
 
   public ByteBuffer branchKey() {
@@ -48,6 +56,10 @@ public class BranchKeyMaterials {
 
     String branchKeyVersion();
 
+    Builder encryptionContext(Map<String, String> encryptionContext);
+
+    Map<String, String> encryptionContext();
+
     Builder branchKey(ByteBuffer branchKey);
 
     ByteBuffer branchKey();
@@ -60,6 +72,8 @@ public class BranchKeyMaterials {
 
     protected String branchKeyVersion;
 
+    protected Map<String, String> encryptionContext;
+
     protected ByteBuffer branchKey;
 
     protected BuilderImpl() {
@@ -68,6 +82,7 @@ public class BranchKeyMaterials {
     protected BuilderImpl(BranchKeyMaterials model) {
       this.branchKeyIdentifier = model.branchKeyIdentifier();
       this.branchKeyVersion = model.branchKeyVersion();
+      this.encryptionContext = model.encryptionContext();
       this.branchKey = model.branchKey();
     }
 
@@ -89,6 +104,15 @@ public class BranchKeyMaterials {
       return this.branchKeyVersion;
     }
 
+    public Builder encryptionContext(Map<String, String> encryptionContext) {
+      this.encryptionContext = encryptionContext;
+      return this;
+    }
+
+    public Map<String, String> encryptionContext() {
+      return this.encryptionContext;
+    }
+
     public Builder branchKey(ByteBuffer branchKey) {
       this.branchKey = branchKey;
       return this;
@@ -104,6 +128,9 @@ public class BranchKeyMaterials {
       }
       if (Objects.isNull(this.branchKeyVersion()))  {
         throw new IllegalArgumentException("Missing value for required field `branchKeyVersion`");
+      }
+      if (Objects.isNull(this.encryptionContext()))  {
+        throw new IllegalArgumentException("Missing value for required field `encryptionContext`");
       }
       if (Objects.isNull(this.branchKey()))  {
         throw new IllegalArgumentException("Missing value for required field `branchKey`");

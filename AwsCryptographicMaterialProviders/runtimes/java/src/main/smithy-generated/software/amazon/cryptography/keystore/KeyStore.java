@@ -4,14 +4,12 @@
 package software.amazon.cryptography.keystore;
 
 import Wrappers_Compile.Result;
-import dafny.Tuple0;
 import java.lang.IllegalArgumentException;
 import java.util.Objects;
 import software.amazon.cryptography.keystore.internaldafny.KeyStoreClient;
 import software.amazon.cryptography.keystore.internaldafny.__default;
 import software.amazon.cryptography.keystore.internaldafny.types.Error;
 import software.amazon.cryptography.keystore.internaldafny.types.IKeyStoreClient;
-import software.amazon.cryptography.keystore.model.BranchKeyStatusResolutionInput;
 import software.amazon.cryptography.keystore.model.CreateKeyInput;
 import software.amazon.cryptography.keystore.model.CreateKeyOutput;
 import software.amazon.cryptography.keystore.model.CreateKeyStoreInput;
@@ -25,6 +23,7 @@ import software.amazon.cryptography.keystore.model.GetBranchKeyVersionOutput;
 import software.amazon.cryptography.keystore.model.GetKeyStoreInfoOutput;
 import software.amazon.cryptography.keystore.model.KeyStoreConfig;
 import software.amazon.cryptography.keystore.model.VersionKeyInput;
+import software.amazon.cryptography.keystore.model.VersionKeyOutput;
 
 public class KeyStore {
   private final IKeyStoreClient _impl;
@@ -45,20 +44,6 @@ public class KeyStore {
 
   public static Builder builder() {
     return new BuilderImpl();
-  }
-
-  /**
-   * In the case that the Key Store contains two ACTIVE Branch Key versions (this should not be possible in normal operation), attempt to resolve to one by making one ACTIVE version DECRYPT_ONLY.
-   *
-   * @param input Inputs for resolving a multiple ACTIVE versions state.
-   *
-   */
-  public void BranchKeyStatusResolution(BranchKeyStatusResolutionInput input) {
-    software.amazon.cryptography.keystore.internaldafny.types.BranchKeyStatusResolutionInput dafnyValue = ToDafny.BranchKeyStatusResolutionInput(input);
-    Result<Tuple0, Error> result = this._impl.BranchKeyStatusResolution(dafnyValue);
-    if (result.is_Failure()) {
-      throw ToNative.Error(result.dtor_error());
-    }
   }
 
   /**
@@ -148,14 +133,15 @@ public class KeyStore {
    * Create a new ACTIVE version of an existing Branch Key in the Key Store, and set the previously ACTIVE version to DECRYPT_ONLY.
    *
    * @param input Inputs for versioning a Branch Key.
-   *
+   * @return Outputs for versioning a Branch Key.
    */
-  public void VersionKey(VersionKeyInput input) {
+  public VersionKeyOutput VersionKey(VersionKeyInput input) {
     software.amazon.cryptography.keystore.internaldafny.types.VersionKeyInput dafnyValue = ToDafny.VersionKeyInput(input);
-    Result<Tuple0, Error> result = this._impl.VersionKey(dafnyValue);
+    Result<software.amazon.cryptography.keystore.internaldafny.types.VersionKeyOutput, Error> result = this._impl.VersionKey(dafnyValue);
     if (result.is_Failure()) {
       throw ToNative.Error(result.dtor_error());
     }
+    return ToNative.VersionKeyOutput(result.dtor_value());
   }
 
   protected IKeyStoreClient impl() {

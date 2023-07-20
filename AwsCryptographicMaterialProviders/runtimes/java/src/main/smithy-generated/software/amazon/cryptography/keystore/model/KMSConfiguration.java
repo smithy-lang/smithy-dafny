@@ -52,6 +52,12 @@ public class KMSConfiguration {
     }
 
     public KMSConfiguration build() {
+      if (Objects.nonNull(this.kmsKeyArn()) && this.kmsKeyArn().length() < 1) {
+        throw new IllegalArgumentException("The size of `kmsKeyArn` must be greater than or equal to 1");
+      }
+      if (Objects.nonNull(this.kmsKeyArn()) && this.kmsKeyArn().length() > 2048) {
+        throw new IllegalArgumentException("The size of `kmsKeyArn` must be less than or equal to 2048");
+      }
       if (!onlyOneNonNull()) {
         throw new IllegalArgumentException("`KMSConfiguration` is a Union. A Union MUST have one and only one value set.");
       }

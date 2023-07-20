@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+import java.util.HashMap;
 
 import Random_Compile.ExternRandom;
 
@@ -86,6 +87,7 @@ public class LocalCMCTests {
           // The cacheIdentifier is used as the material
           // because we are not testing the cryptography here.
           .beaconKey(cacheIdentifier)
+          .encryptionContext(new HashMap<String, String>())
           .build())
         .build();
 

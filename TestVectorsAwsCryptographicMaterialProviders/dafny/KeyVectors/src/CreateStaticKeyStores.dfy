@@ -73,7 +73,8 @@ module {:options "-functionSyntax:4"} CreateStaticKeyStores {
                           branchKeyMaterials := BranchKeyMaterials(
                             branchKeyIdentifier := input.branchKeyIdentifier,
                             branchKeyVersion := staticKeyMaterial.branchKeyVersion,
-                            branchKey := staticKeyMaterial.branchKey
+                            branchKey := staticKeyMaterial.branchKey,
+                            encryptionContext := map[]
                           )
                         ));
 
@@ -100,7 +101,8 @@ module {:options "-functionSyntax:4"} CreateStaticKeyStores {
                           branchKeyMaterials := BranchKeyMaterials(
                             branchKeyIdentifier := input.branchKeyIdentifier,
                             branchKeyVersion := staticKeyMaterial.branchKeyVersion,
-                            branchKey := staticKeyMaterial.branchKey
+                            branchKey := staticKeyMaterial.branchKey,
+                            encryptionContext := map[]
                           )
                         ));
       History.GetBranchKeyVersion := History.GetBranchKeyVersion + [DafnyCallEvent(input, output)];
@@ -127,7 +129,8 @@ module {:options "-functionSyntax:4"} CreateStaticKeyStores {
                           beaconKeyMaterials := BeaconKeyMaterials(
                             beaconKeyIdentifier := input.branchKeyIdentifier,
                             beaconKey := Some(staticKeyMaterial.beaconKey),
-                            hmacKeys := None
+                            hmacKeys := None,
+                            encryptionContext := map[]
                           )));
       History.GetBeaconKey := History.GetBeaconKey + [DafnyCallEvent(input, output)];
     }
@@ -194,11 +197,11 @@ module {:options "-functionSyntax:4"} CreateStaticKeyStores {
       History.CreateKey := History.CreateKey + [DafnyCallEvent(input, output)];
     }
 
-    ghost predicate VersionKeyEnsuresPublicly(input: VersionKeyInput , output: Result<(), Error>)
+    ghost predicate VersionKeyEnsuresPublicly(input: VersionKeyInput , output: Result<VersionKeyOutput, Error>)
     {true}
     // The public method to be called by library consumers
     method VersionKey ( input: VersionKeyInput )
-      returns (output: Result<(), Error>)
+      returns (output: Result<VersionKeyOutput, Error>)
       requires
         && ValidState()
       modifies Modifies - {History} ,
@@ -212,26 +215,6 @@ module {:options "-functionSyntax:4"} CreateStaticKeyStores {
     {
       output := Failure(KeyStoreException( message := "Not Supported"));
       History.VersionKey := History.VersionKey + [DafnyCallEvent(input, output)];
-    }
-
-    ghost predicate BranchKeyStatusResolutionEnsuresPublicly(input: BranchKeyStatusResolutionInput , output: Result<(), Error>)
-    {true}
-    // The public method to be called by library consumers
-    method BranchKeyStatusResolution ( input: BranchKeyStatusResolutionInput )
-      returns (output: Result<(), Error>)
-      requires
-        && ValidState()
-      modifies Modifies - {History} ,
-               History`BranchKeyStatusResolution
-      // Dafny will skip type parameters when generating a default decreases clause.
-      decreases Modifies - {History}
-      ensures
-        && ValidState()
-      ensures BranchKeyStatusResolutionEnsuresPublicly(input, output)
-      ensures History.BranchKeyStatusResolution == old(History.BranchKeyStatusResolution) + [DafnyCallEvent(input, output)]
-    {
-      output := Failure(KeyStoreException( message := "Not Supported"));
-      History.BranchKeyStatusResolution := History.BranchKeyStatusResolution + [DafnyCallEvent(input, output)];
     }
 
   }

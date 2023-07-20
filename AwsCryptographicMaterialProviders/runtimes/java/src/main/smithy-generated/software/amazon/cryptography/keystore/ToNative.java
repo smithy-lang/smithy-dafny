@@ -19,7 +19,6 @@ import software.amazon.cryptography.keystore.internaldafny.types.Error_Opaque;
 import software.amazon.cryptography.keystore.internaldafny.types.IKeyStoreClient;
 import software.amazon.cryptography.keystore.model.BeaconKeyMaterials;
 import software.amazon.cryptography.keystore.model.BranchKeyMaterials;
-import software.amazon.cryptography.keystore.model.BranchKeyStatusResolutionInput;
 import software.amazon.cryptography.keystore.model.CollectionOfErrors;
 import software.amazon.cryptography.keystore.model.CreateKeyInput;
 import software.amazon.cryptography.keystore.model.CreateKeyOutput;
@@ -37,6 +36,7 @@ import software.amazon.cryptography.keystore.model.KeyStoreConfig;
 import software.amazon.cryptography.keystore.model.KeyStoreException;
 import software.amazon.cryptography.keystore.model.OpaqueError;
 import software.amazon.cryptography.keystore.model.VersionKeyInput;
+import software.amazon.cryptography.keystore.model.VersionKeyOutput;
 
 public class ToNative {
   public static OpaqueError Error(Error_Opaque dafnyValue) {
@@ -86,6 +86,7 @@ public class ToNative {
       software.amazon.cryptography.keystore.internaldafny.types.BeaconKeyMaterials dafnyValue) {
     BeaconKeyMaterials.Builder nativeBuilder = BeaconKeyMaterials.builder();
     nativeBuilder.beaconKeyIdentifier(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_beaconKeyIdentifier()));
+    nativeBuilder.encryptionContext(ToNative.EncryptionContext(dafnyValue.dtor_encryptionContext()));
     if (dafnyValue.dtor_beaconKey().is_Some()) {
       nativeBuilder.beaconKey(software.amazon.smithy.dafny.conversion.ToNative.Simple.ByteBuffer(dafnyValue.dtor_beaconKey().dtor_value()));
     }
@@ -100,20 +101,20 @@ public class ToNative {
     BranchKeyMaterials.Builder nativeBuilder = BranchKeyMaterials.builder();
     nativeBuilder.branchKeyIdentifier(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_branchKeyIdentifier()));
     nativeBuilder.branchKeyVersion(software.amazon.smithy.dafny.conversion.ToNative.Simple.DafnyUtf8Bytes(dafnyValue.dtor_branchKeyVersion()));
+    nativeBuilder.encryptionContext(ToNative.EncryptionContext(dafnyValue.dtor_encryptionContext()));
     nativeBuilder.branchKey(software.amazon.smithy.dafny.conversion.ToNative.Simple.ByteBuffer(dafnyValue.dtor_branchKey()));
-    return nativeBuilder.build();
-  }
-
-  public static BranchKeyStatusResolutionInput BranchKeyStatusResolutionInput(
-      software.amazon.cryptography.keystore.internaldafny.types.BranchKeyStatusResolutionInput dafnyValue) {
-    BranchKeyStatusResolutionInput.Builder nativeBuilder = BranchKeyStatusResolutionInput.builder();
-    nativeBuilder.branchKeyIdentifier(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_branchKeyIdentifier()));
     return nativeBuilder.build();
   }
 
   public static CreateKeyInput CreateKeyInput(
       software.amazon.cryptography.keystore.internaldafny.types.CreateKeyInput dafnyValue) {
     CreateKeyInput.Builder nativeBuilder = CreateKeyInput.builder();
+    if (dafnyValue.dtor_branchKeyIdentifier().is_Some()) {
+      nativeBuilder.branchKeyIdentifier(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_branchKeyIdentifier().dtor_value()));
+    }
+    if (dafnyValue.dtor_encryptionContext().is_Some()) {
+      nativeBuilder.encryptionContext(ToNative.EncryptionContext(dafnyValue.dtor_encryptionContext().dtor_value()));
+    }
     return nativeBuilder.build();
   }
 
@@ -219,6 +220,12 @@ public class ToNative {
     return nativeBuilder.build();
   }
 
+  public static VersionKeyOutput VersionKeyOutput(
+      software.amazon.cryptography.keystore.internaldafny.types.VersionKeyOutput dafnyValue) {
+    VersionKeyOutput.Builder nativeBuilder = VersionKeyOutput.builder();
+    return nativeBuilder.build();
+  }
+
   public static KMSConfiguration KMSConfiguration(
       software.amazon.cryptography.keystore.internaldafny.types.KMSConfiguration dafnyValue) {
     KMSConfiguration.Builder nativeBuilder = KMSConfiguration.builder();
@@ -233,6 +240,14 @@ public class ToNative {
     return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToList(
         dafnyValue, 
         software.amazon.smithy.dafny.conversion.ToNative.Simple::String);
+  }
+
+  public static Map<String, String> EncryptionContext(
+      DafnyMap<? extends DafnySequence<? extends Byte>, ? extends DafnySequence<? extends Byte>> dafnyValue) {
+    return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToMap(
+        dafnyValue, 
+        software.amazon.smithy.dafny.conversion.ToNative.Simple::DafnyUtf8Bytes, 
+        software.amazon.smithy.dafny.conversion.ToNative.Simple::DafnyUtf8Bytes);
   }
 
   public static Map<String, ByteBuffer> HmacKeyMap(

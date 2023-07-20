@@ -10,18 +10,25 @@ import java.util.Objects;
 public class BeaconKeyMaterials {
   private final String beaconKeyIdentifier;
 
+  private final Map<String, String> encryptionContext;
+
   private final ByteBuffer beaconKey;
 
   private final Map<String, ByteBuffer> hmacKeys;
 
   protected BeaconKeyMaterials(BuilderImpl builder) {
     this.beaconKeyIdentifier = builder.beaconKeyIdentifier();
+    this.encryptionContext = builder.encryptionContext();
     this.beaconKey = builder.beaconKey();
     this.hmacKeys = builder.hmacKeys();
   }
 
   public String beaconKeyIdentifier() {
     return this.beaconKeyIdentifier;
+  }
+
+  public Map<String, String> encryptionContext() {
+    return this.encryptionContext;
   }
 
   public ByteBuffer beaconKey() {
@@ -45,6 +52,10 @@ public class BeaconKeyMaterials {
 
     String beaconKeyIdentifier();
 
+    Builder encryptionContext(Map<String, String> encryptionContext);
+
+    Map<String, String> encryptionContext();
+
     Builder beaconKey(ByteBuffer beaconKey);
 
     ByteBuffer beaconKey();
@@ -59,6 +70,8 @@ public class BeaconKeyMaterials {
   static class BuilderImpl implements Builder {
     protected String beaconKeyIdentifier;
 
+    protected Map<String, String> encryptionContext;
+
     protected ByteBuffer beaconKey;
 
     protected Map<String, ByteBuffer> hmacKeys;
@@ -68,6 +81,7 @@ public class BeaconKeyMaterials {
 
     protected BuilderImpl(BeaconKeyMaterials model) {
       this.beaconKeyIdentifier = model.beaconKeyIdentifier();
+      this.encryptionContext = model.encryptionContext();
       this.beaconKey = model.beaconKey();
       this.hmacKeys = model.hmacKeys();
     }
@@ -79,6 +93,15 @@ public class BeaconKeyMaterials {
 
     public String beaconKeyIdentifier() {
       return this.beaconKeyIdentifier;
+    }
+
+    public Builder encryptionContext(Map<String, String> encryptionContext) {
+      this.encryptionContext = encryptionContext;
+      return this;
+    }
+
+    public Map<String, String> encryptionContext() {
+      return this.encryptionContext;
     }
 
     public Builder beaconKey(ByteBuffer beaconKey) {
@@ -102,6 +125,9 @@ public class BeaconKeyMaterials {
     public BeaconKeyMaterials build() {
       if (Objects.isNull(this.beaconKeyIdentifier()))  {
         throw new IllegalArgumentException("Missing value for required field `beaconKeyIdentifier`");
+      }
+      if (Objects.isNull(this.encryptionContext()))  {
+        throw new IllegalArgumentException("Missing value for required field `encryptionContext`");
       }
       return new BeaconKeyMaterials(this);
     }

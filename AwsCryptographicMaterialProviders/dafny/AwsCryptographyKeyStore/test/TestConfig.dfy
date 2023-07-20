@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 include "../src/Index.dfy"
+include "Fixtures.dfy"
 
 module TestConfig {
   import Types = AwsCryptographyKeyStoreTypes
@@ -10,12 +11,8 @@ module TestConfig {
   import DDB = Com.Amazonaws.Dynamodb
   import KeyStore
   import opened Wrappers
-
-  const branchKeyStoreName := "KeyStoreTestTable";
-  const logicalKeyStoreName := "KeyStoreTestTable";
-  // THIS IS A TESTING RESOURCE DO NOT USE IN A PRODUCTION ENVIRONMENT
-  const keyArn := "arn:aws:kms:us-west-2:370957321024:key/9d989aa2-2f9c-438c-a745-cc57d3ad0126";
-  const keyId := "9d989aa2-2f9c-438c-a745-cc57d3ad0126";
+  import opened Fixtures
+  import UUID
 
   method {:test} TestInvalidKmsKeyArnConfig() {
     var kmsClient :- expect KMS.KMSClient();
@@ -54,6 +51,20 @@ module TestConfig {
 
     var keyStore := KeyStore.KeyStore(keyStoreConfig);
     expect keyStore.Success?;
+
+    var conf :- expect keyStore.value.GetKeyStoreInfo();
+
+    //= aws-encryption-sdk-specification/framework/branch-key-store.md#keystore-id
+    //= type=test
+    //# If one is not supplied, then a [version 4 UUID](https://www.ietf.org/rfc/rfc4122.txt) MUST be used.
+    var idByteUUID :- expect UUID.ToByteArray(conf.keyStoreId);
+    var idRoundTrip :- expect UUID.FromByteArray(idByteUUID);
+    expect idRoundTrip == conf.keyStoreId;
+
+    expect conf.keyStoreName == branchKeyStoreName;
+    expect conf.logicalKeyStoreName == logicalKeyStoreName;
+    expect conf.kmsConfiguration == kmsConfig;
+
   }
 
   method {:test} TestValidConfigNoClients() {

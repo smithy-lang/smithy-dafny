@@ -6,6 +6,8 @@ include "../../../TestUtils.dfy"
 include "../../../../src/AlgorithmSuites.dfy"
 include "../../../../src/Materials.dfy"
 
+// This file depends on resources that exist for the Keystore
+include "../../../../../AwsCryptographyKeyStore/test/Fixtures.dfy"
 
 module TestAwsKmsHierarchicalKeyring {
   import Types = AwsCryptographyMaterialProvidersTypes
@@ -26,23 +28,24 @@ module TestAwsKmsHierarchicalKeyring {
   import opened UInt = StandardLibrary.UInt
   import opened Wrappers
 
-  const TEST_ESDK_ALG_SUITE_ID := Types.AlgorithmSuiteId.ESDK(Types.ALG_AES_256_GCM_IV12_TAG16_NO_KDF);
-  const TEST_DBE_ALG_SUITE_ID := Types.AlgorithmSuiteId.DBE(Types.ALG_AES_256_GCM_HKDF_SHA512_COMMIT_KEY_SYMSIG_HMAC_SHA384);
+  import Fixtures
+
+  const TEST_ESDK_ALG_SUITE_ID := Types.AlgorithmSuiteId.ESDK(Types.ALG_AES_256_GCM_IV12_TAG16_NO_KDF)
+  const TEST_DBE_ALG_SUITE_ID := Types.AlgorithmSuiteId.DBE(Types.ALG_AES_256_GCM_HKDF_SHA512_COMMIT_KEY_SYMSIG_HMAC_SHA384)
   // THIS IS A TESTING RESOURCE DO NOT USE IN A PRODUCTION ENVIRONMENT
-  const keyArn := "arn:aws:kms:us-west-2:370957321024:key/9d989aa2-2f9c-438c-a745-cc57d3ad0126";
-  const branchKeyStoreName: DDBTypes.TableName := "KeyStoreTestTable";
-  const logicalKeyStoreName := branchKeyStoreName;
+  const keyArn := Fixtures.keyArn
+  const branchKeyStoreName: DDBTypes.TableName := Fixtures.branchKeyStoreName
+  const logicalKeyStoreName := branchKeyStoreName
 
   // These tests require a keystore populated with these keys
-  const BRANCH_KEY_ID := "71c83ce3-aad6-4aab-a4c4-d02bb9273305";
-  const ACTIVE_ACTIVE_BRANCH_KEY_ID := "9b5dea9b-6838-4af4-84a6-b48dca977b7a";
+  const BRANCH_KEY_ID := Fixtures.branchKeyId
 
   // Constants for TestBranchKeySupplier
-  const BRANCH_KEY := UTF8.EncodeAscii("branchKey");
-  const CASE_A := UTF8.EncodeAscii("caseA");
-  const CASE_B := UTF8.EncodeAscii("caseB");
+  const BRANCH_KEY := UTF8.EncodeAscii("branchKey")
+  const CASE_A := UTF8.EncodeAscii("caseA")
+  const CASE_B := UTF8.EncodeAscii("caseB")
   const BRANCH_KEY_ID_A := BRANCH_KEY_ID
-  const BRANCH_KEY_ID_B := ACTIVE_ACTIVE_BRANCH_KEY_ID
+  const BRANCH_KEY_ID_B := Fixtures.branchKeyIdWithEC
 
   method GetTestMaterials(suiteId: Types.AlgorithmSuiteId) returns (out: Types.EncryptionMaterials)
   {
@@ -67,52 +70,6 @@ module TestAwsKmsHierarchicalKeyring {
   method {:test} TestHierarchyClientESDKSuite()
   {
     var branchKeyId := BRANCH_KEY_ID;
-    var ttl : Types.PositiveLong := (1 * 60000) * 10;
-    var mpl :- expect MaterialProviders.MaterialProviders();
-
-    var kmsClient :- expect KMS.KMSClient();
-    var ddbClient :- expect DDB.DynamoDBClient();
-    var kmsConfig := KeyStoreTypes.KMSConfiguration.kmsKeyArn(keyArn);
-
-    var keyStoreConfig := KeyStoreTypes.KeyStoreConfig(
-      id := None,
-      kmsConfiguration := kmsConfig,
-      logicalKeyStoreName := logicalKeyStoreName,
-      grantTokens := None,
-      ddbTableName := branchKeyStoreName,
-      ddbClient := Some(ddbClient),
-      kmsClient := Some(kmsClient)
-    );
-
-    var keyStore :- expect KeyStore.KeyStore(keyStoreConfig);
-
-    var hierarchyKeyring :- expect mpl.CreateAwsKmsHierarchicalKeyring(
-      Types.CreateAwsKmsHierarchicalKeyringInput(
-        branchKeyId := Some(branchKeyId),
-        branchKeyIdSupplier := None,
-        keyStore := keyStore,
-        ttlSeconds := ttl,
-        cache := None
-      )
-    );
-
-    var materials := GetTestMaterials(TEST_ESDK_ALG_SUITE_ID);
-    TestRoundtrip(hierarchyKeyring, materials, TEST_ESDK_ALG_SUITE_ID, branchKeyId);
-
-    //Test with key in the materials
-    var suite := AlgorithmSuites.GetSuite(TEST_ESDK_ALG_SUITE_ID);
-    var zeroedKey := seq(AlgorithmSuites.GetEncryptKeyLength(suite) as nat, _ => 0); // Key is Zero
-    materials := materials.(plaintextDataKey := Some(zeroedKey));
-    TestRoundtrip(hierarchyKeyring, materials, TEST_ESDK_ALG_SUITE_ID, branchKeyId);
-  }
-
-  method {:test} TestTwoActiveKeysESDKSuite()
-  {
-    // The HierarchicalKeyringTestTable has two active keys under the branchKeyId below.
-    // They have "create-time" timestamps of: 2023-03-07T17:09Z and 2023-03-07T17:07Z
-    // When sorting them lexicographically, we should be using 2023-03-07T17:09Z as the "newest"
-    // branch key since this timestamp is more recent.
-    var branchKeyId := ACTIVE_ACTIVE_BRANCH_KEY_ID;
     var ttl : Types.PositiveLong := (1 * 60000) * 10;
     var mpl :- expect MaterialProviders.MaterialProviders();
 
@@ -192,53 +149,6 @@ module TestAwsKmsHierarchicalKeyring {
     materials := materials.(plaintextDataKey := Some(zeroedKey));
     TestRoundtrip(hierarchyKeyring, materials, TEST_DBE_ALG_SUITE_ID, branchKeyId);
   }
-
-  method {:test} TestTwoActiveKeysDBESuite()
-  {
-    // The HierarchicalKeyringTestTable has two active keys under the branchKeyId below.
-    // They have "create-time" timestamps of: 2023-03-07T17:09Z and 2023-03-07T17:07Z
-    // When sorting them lexicographically, we should be using 2023-03-07T17:09Z as the "newest"
-    // branch key since this timestamp is more recent.
-    var branchKeyId := ACTIVE_ACTIVE_BRANCH_KEY_ID;
-    var ttl : Types.PositiveLong := (1 * 60000) * 10;
-    var mpl :- expect MaterialProviders.MaterialProviders();
-
-    var kmsClient :- expect KMS.KMSClient();
-    var ddbClient :- expect DDB.DynamoDBClient();
-    var kmsConfig := KeyStoreTypes.KMSConfiguration.kmsKeyArn(keyArn);
-
-    var keyStoreConfig := KeyStoreTypes.KeyStoreConfig(
-      id := None,
-      kmsConfiguration := kmsConfig,
-      logicalKeyStoreName := logicalKeyStoreName,
-      grantTokens := None,
-      ddbTableName := branchKeyStoreName,
-      ddbClient := Some(ddbClient),
-      kmsClient := Some(kmsClient)
-    );
-
-    var keyStore :- expect KeyStore.KeyStore(keyStoreConfig);
-
-    var hierarchyKeyring :- expect mpl.CreateAwsKmsHierarchicalKeyring(
-      Types.CreateAwsKmsHierarchicalKeyringInput(
-        branchKeyId := Some(branchKeyId),
-        branchKeyIdSupplier := None,
-        keyStore := keyStore,
-        ttlSeconds := ttl,
-        cache := None
-      )
-    );
-
-    var materials := GetTestMaterials(TEST_DBE_ALG_SUITE_ID);
-    TestRoundtrip(hierarchyKeyring, materials, TEST_DBE_ALG_SUITE_ID, branchKeyId);
-
-    //Test with key in the materials
-    var suite := AlgorithmSuites.GetSuite(TEST_DBE_ALG_SUITE_ID);
-    var zeroedKey := seq(AlgorithmSuites.GetEncryptKeyLength(suite) as nat, _ => 0); // Key is Zero
-    materials := materials.(plaintextDataKey := Some(zeroedKey));
-    TestRoundtrip(hierarchyKeyring, materials, TEST_DBE_ALG_SUITE_ID, branchKeyId);
-  }
-
 
   method {:test} TestBranchKeyIdSupplier()
   {

@@ -5,6 +5,7 @@ using System;
  using AWS.Cryptography.KeyStore; namespace AWS.Cryptography.KeyStore {
  public class BeaconKeyMaterials {
  private string _beaconKeyIdentifier ;
+ private System.Collections.Generic.Dictionary<string, string> _encryptionContext ;
  private System.IO.MemoryStream _beaconKey ;
  private System.Collections.Generic.Dictionary<string, System.IO.MemoryStream> _hmacKeys ;
  public string BeaconKeyIdentifier {
@@ -13,6 +14,13 @@ using System;
 }
  public bool IsSetBeaconKeyIdentifier () {
  return this._beaconKeyIdentifier != null;
+}
+ public System.Collections.Generic.Dictionary<string, string> EncryptionContext {
+ get { return this._encryptionContext; }
+ set { this._encryptionContext = value; }
+}
+ public bool IsSetEncryptionContext () {
+ return this._encryptionContext != null;
 }
  public System.IO.MemoryStream BeaconKey {
  get { return this._beaconKey; }
@@ -30,6 +38,7 @@ using System;
 }
  public void Validate() {
  if (!IsSetBeaconKeyIdentifier()) throw new System.ArgumentException("Missing value for required property 'BeaconKeyIdentifier'");
+ if (!IsSetEncryptionContext()) throw new System.ArgumentException("Missing value for required property 'EncryptionContext'");
 
 }
 }
