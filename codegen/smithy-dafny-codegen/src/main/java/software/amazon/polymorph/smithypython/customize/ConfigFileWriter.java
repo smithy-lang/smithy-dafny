@@ -4,19 +4,21 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import software.amazon.polymorph.smithypython.nameresolver.DafnyNameResolver;
-import software.amazon.polymorph.smithypython.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.smithypython.shapevisitor.DafnyToSmithyShapeVisitor;
 import software.amazon.polymorph.smithypython.shapevisitor.SmithyToDafnyShapeVisitor;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
-import software.amazon.smithy.model.shapes.Shape;
-import software.amazon.smithy.model.shapes.ShapeType;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonWriter;
 import software.amazon.smithy.utils.CaseUtils;
 
+/**
+ * Extends the Smithy-Python-generated config.py file
+ * by writing a shape for the localService config shape
+ * and adding type conversions between it and the Dafny config shape.
+ */
 public class ConfigFileWriter implements CustomFileWriter {
 
   @Override
@@ -26,8 +28,6 @@ public class ConfigFileWriter implements CustomFileWriter {
     final StructureShape configShape = codegenContext.model().expectShape(localServiceTrait.getConfigId(), StructureShape.class);
 
     String moduleName = codegenContext.settings().getModuleName();
-
-
     codegenContext.writerDelegator()
         .useFileWriter(moduleName + "/config.py", "", writer -> {
           DafnyNameResolver.importDafnyTypeForShape(writer, configShape.getId());

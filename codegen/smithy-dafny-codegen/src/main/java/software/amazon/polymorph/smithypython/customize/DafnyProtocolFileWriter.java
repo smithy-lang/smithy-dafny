@@ -11,6 +11,8 @@ import software.amazon.smithy.python.codegen.PythonWriter;
 
 /**
  * Writes the dafny_protocol.py file.
+ * This file defines the types that are sent to and from
+ * the dafnyImplInterface.
  */
 public class DafnyProtocolFileWriter implements CustomFileWriter {
 
