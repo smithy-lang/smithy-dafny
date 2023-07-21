@@ -229,6 +229,7 @@ public class ModelUtils {
         return dependentShapes.stream()
             .map(shapeId -> model.expectShape(shapeId, Shape.class))
             .filter(shape -> shape.asMemberShape().isPresent())
+            .peek(shape -> System.out.println(shape.getId()))
             .map(shape -> shape.asMemberShape().get())
             .filter(shape -> model.expectShape(shape.getTarget(), Shape.class).hasTrait(ReferenceTrait.class))
             .collect(Collectors.toSet());
@@ -264,16 +265,20 @@ public class ModelUtils {
             Set<ShapeId> initialShapeIds,
             Model model
     ) {
+        System.out.println("findAllDependentShapes");
         final Set<ShapeId> shapes = new LinkedHashSet<>();
         // Breadth-first search via getDependencyShapeIds
         final Queue<ShapeId> toTraverse = new LinkedList<>(initialShapeIds);
         while (!toTraverse.isEmpty()) {
             final ShapeId currentShapeId = toTraverse.remove();
+            System.out.println("at");
+            System.out.println(currentShapeId);
             if (shapes.add(currentShapeId)) {
                 final Shape currentShape = model.expectShape(currentShapeId);
                 getDependencyShapeIds(currentShape).forEach(toTraverse::add);
             }
         }
+        System.out.println(shapes);
         return shapes;
     }
 

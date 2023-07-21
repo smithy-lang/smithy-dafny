@@ -1,10 +1,18 @@
 package software.amazon.polymorph.smithypython.customize;
 
-import software.amazon.polymorph.smithypython.nameresolver.DafnyNameResolver;
+import java.util.HashSet;
+import java.util.Set;
 import software.amazon.polymorph.traits.LocalServiceTrait;
+import software.amazon.polymorph.traits.ReferenceTrait;
+import software.amazon.polymorph.utils.ModelUtils;
+import software.amazon.smithy.model.shapes.MemberShape;
+import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
+import software.amazon.smithy.model.shapes.Shape;
+import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.python.codegen.GenerationContext;
+import software.amazon.smithy.python.codegen.PythonWriter;
 
 
 /**
@@ -42,11 +50,71 @@ public class ModelsFileWriter implements CustomFileWriter {
     codegenContext.writerDelegator().useFileWriter(moduleName + "/models.py", "", writer -> {
       writer.write(
           """
+             ${C|}
+             
              class Unit:
                  pass
-              """
+              """,
+          writer.consumer(w -> generateServiceOperationModelShapes(codegenContext, serviceShape, w))
       );
     });
   }
+
+  private void generateServiceOperationModelShapes(
+      GenerationContext codegenContext, ServiceShape serviceShape, PythonWriter writer) {
+
+    Set<ShapeId> inputShapeIds = new HashSet<>();
+    Set<ShapeId> outputShapeIds = new HashSet<>();
+    for (ShapeId operationShapeId : serviceShape.getOperations()) {
+      OperationShape operationShape = codegenContext.model()
+          .expectShape(operationShapeId, OperationShape.class);
+      inputShapeIds.add(operationShape.getInputShape());
+      outputShapeIds.add(operationShape.getOutputShape());
+    }
+
+    Set<MemberShape> referenceMemberShapes = new HashSet<>();
+    referenceMemberShapes.addAll(
+        ModelUtils.findAllDependentMemberReferenceShapes(inputShapeIds, codegenContext.model()));
+    referenceMemberShapes.addAll(
+        ModelUtils.findAllDependentMemberReferenceShapes(outputShapeIds, codegenContext.model()));
+
+    // TODO: Separate service vs resource shapes
+    Set<Shape> referenceChildShape = new HashSet<>();
+    for (MemberShape referenceMemberShape : referenceMemberShapes) {
+      Shape referenceShape = codegenContext.model().expectShape(referenceMemberShape.getTarget());
+      ReferenceTrait referenceTrait = referenceShape.expectTrait(ReferenceTrait.class);
+      System.out.println(referenceTrait.getReferentId());
+      Shape resourceOrService = codegenContext.model().expectShape(referenceTrait.getReferentId());
+      referenceChildShape.add(resourceOrService);
+    }
+
+    for(Shape resourceOrService : referenceChildShape) {
+      writer.write("""
+        class $L:
+            _impl: Any
+            
+            def __init__(self, _impl):
+                self._impl = _impl
+                
+            ${C|}
+        """,
+          resourceOrService.getId().getName(),
+          writer.consumer(w -> generateSmithyOperationFunctionDefinitionForResource(
+              codegenContext, resourceOrService, w)
+          )
+      );
+    }
+  }
+
+  private void generateSmithyOperationFunctionDefinitionForResource(
+      GenerationContext codegenContext, Shape resourceOrService, PythonWriter writer) {
+    for (ShapeId operationShapeId : resourceOrService.asResourceShape().get().getOperations()) {
+      writer.write("""
+          def $L(self, dafny_input):
+              return self._impl.$L(dafny_input)
+          """, operationShapeId.getName(), operationShapeId.getName());
+    }
+  }
+
 
 }

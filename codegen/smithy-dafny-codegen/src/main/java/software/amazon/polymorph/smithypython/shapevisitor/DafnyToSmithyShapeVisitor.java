@@ -1,7 +1,7 @@
 package software.amazon.polymorph.smithypython.shapevisitor;
 
 import java.util.Map.Entry;
-import software.amazon.polymorph.smithypython.nameresolver.DafnyNameResolver;
+import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.model.shapes.BigDecimalShape;
 import software.amazon.smithy.model.shapes.BigIntegerShape;
@@ -54,6 +54,13 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
       this.isConfigShape = isConfigShape;
     }
 
+    protected String referenceStructureShape(StructureShape shape) {
+      ReferenceTrait referenceTrait = shape.expectTrait(ReferenceTrait.class);
+      Shape resourceOrService = context.model().expectShape(referenceTrait.getReferentId());
+      writer.addImport(".models", resourceOrService.getId().getName());
+      return "%1$s(_impl=%2$s)".formatted(resourceOrService.getId().getName(), dataSource);
+    }
+
     @Override
     protected String getDefault(Shape shape) {
       var protocolName = context.protocolGenerator().getName();
@@ -69,6 +76,9 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
 
     @Override
     public String structureShape(StructureShape shape) {
+      if (shape.hasTrait(ReferenceTrait.class)) {
+        return referenceStructureShape(shape);
+      }
       if (!isConfigShape) {
         writer.addImport(".models", shape.getId().getName());
       }

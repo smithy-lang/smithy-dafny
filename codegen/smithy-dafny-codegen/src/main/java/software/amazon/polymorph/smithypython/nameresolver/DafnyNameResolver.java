@@ -1,6 +1,7 @@
 package software.amazon.polymorph.smithypython.nameresolver;
 
 import java.util.Locale;
+import software.amazon.smithy.model.shapes.ResourceShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
@@ -75,6 +76,22 @@ public class DafnyNameResolver {
    */
   public static String getDafnyClientInterfaceTypeForServiceShape(ServiceShape serviceShape) {
     return "I" + serviceShape.getId().getName() + "Client";
+  }
+
+  /**
+   * Returns a String representing the interface type for the provided resourceShape.
+   * @param resourceShape
+   * @return
+   */
+  public static String getDafnyClientInterfaceTypeForResourceShape(ResourceShape resourceShape) {
+    return "I" + resourceShape.getId().getName();
+  }
+
+  public static void importDafnyTypeForResourceShape(PythonWriter writer, ResourceShape resourceShape) {
+    writer.addImport(
+        getDafnyTypesModuleNamespaceForShape(resourceShape.getId()),
+        getDafnyClientInterfaceTypeForResourceShape(resourceShape)
+    );
   }
 
   /**

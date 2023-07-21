@@ -2,6 +2,7 @@ package software.amazon.polymorph.smithypython.shapevisitor;
 
 import java.util.Map.Entry;
 import software.amazon.polymorph.smithypython.nameresolver.DafnyNameResolver;
+import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.model.shapes.BigDecimalShape;
 import software.amazon.smithy.model.shapes.BigIntegerShape;
@@ -16,7 +17,9 @@ import software.amazon.smithy.model.shapes.ListShape;
 import software.amazon.smithy.model.shapes.LongShape;
 import software.amazon.smithy.model.shapes.MapShape;
 import software.amazon.smithy.model.shapes.MemberShape;
+import software.amazon.smithy.model.shapes.ResourceShape;
 import software.amazon.smithy.model.shapes.Shape;
+import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.ShapeVisitor;
 import software.amazon.smithy.model.shapes.ShortShape;
 import software.amazon.smithy.model.shapes.StringShape;
@@ -54,6 +57,19 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
       this.isConfigShape = isConfigShape;
     }
 
+  protected String referenceStructureShape(StructureShape shape) {
+    ReferenceTrait referenceTrait = shape.expectTrait(ReferenceTrait.class);
+    Shape resourceOrService = context.model().expectShape(referenceTrait.getReferentId());
+
+    if (resourceOrService.asResourceShape().isPresent()) {
+      ResourceShape resourceShape = resourceOrService.asResourceShape().get();
+      DafnyNameResolver.importDafnyTypeForResourceShape(writer, resourceShape);
+      return dataSource;
+    }
+
+    throw new UnsupportedOperationException("Unknown referenceStructureShape type: " + shape);
+  }
+
     @Override
     protected String getDefault(Shape shape) {
       var protocolName = context.protocolGenerator().getName();
@@ -69,6 +85,9 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
 
     @Override
     public String structureShape(StructureShape shape) {
+      if (shape.hasTrait(ReferenceTrait.class)) {
+        return referenceStructureShape(shape);
+      }
       DafnyNameResolver.importDafnyTypeForShape(writer, shape.getId());
       writer.addImport("Wrappers_Compile", "Option_Some");
       StringBuilder builder = new StringBuilder();
