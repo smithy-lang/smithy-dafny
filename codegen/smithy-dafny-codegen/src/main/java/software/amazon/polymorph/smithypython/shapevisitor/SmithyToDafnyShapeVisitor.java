@@ -90,6 +90,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
       }
       DafnyNameResolver.importDafnyTypeForShape(writer, shape.getId());
       writer.addImport("Wrappers_Compile", "Option_Some");
+      writer.addImport("Wrappers_Compile", "Option_None");
       StringBuilder builder = new StringBuilder();
       // Open Dafny structure shape
       // e.g.
@@ -104,15 +105,42 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
         // Adds `DafnyStructureMember=smithy_structure_member(...)`
         // e.g.
         // DafnyStructureName(DafnyStructureMember=smithy_structure_member(...), ...)
-        builder.append("%1$s=%2$s%3$s%4$s,\n".formatted(
-            memberName,
-            memberShape.isOptional() && !isConfigShape ? "Option_Some(" : "",
-            targetShape.accept(
-                new SmithyToDafnyShapeVisitor(context,
-                        dataSource + "." + CaseUtils.toSnakeCase(memberName),
-            writer, isConfigShape)),
-            memberShape.isOptional() && !isConfigShape ? ")" : ""
-            ));
+        builder.append("%1$s=".formatted(memberName));
+        if (!isConfigShape && memberShape.isOptional()) {
+          builder.append("((Option_Some(%1$s)) if (%2$s is not None) else (Option_None())),\n".formatted(
+              targetShape.accept(
+                new SmithyToDafnyShapeVisitor(
+                    context,
+                    dataSource + "." + CaseUtils.toSnakeCase(memberName),
+                    writer,
+                    isConfigShape
+                )
+              ),
+              dataSource + "." + CaseUtils.toSnakeCase(memberName)
+          ));
+        } else {
+          builder.append("%1$s,\n".formatted(
+              targetShape.accept(
+                new SmithyToDafnyShapeVisitor(
+                    context,
+                    dataSource + "." + CaseUtils.toSnakeCase(memberName),
+                    writer,
+                    isConfigShape
+                )
+              )
+          ));
+        }
+
+//        builder.append("%1$s=%2$s%3$s%4$s,\n".formatted(
+//            memberName,
+//            !isConfigShape
+//            memberShape.isOptional() && !isConfigShape ? "Option_Some(" : "",
+//            targetShape.accept(
+//                new SmithyToDafnyShapeVisitor(context,
+//                        dataSource + "." + CaseUtils.toSnakeCase(memberName),
+//            writer, isConfigShape)),
+//            memberShape.isOptional() && !isConfigShape ? ")" : ""
+//            ));
       }
       // Close structure
       return builder.append(")").toString();

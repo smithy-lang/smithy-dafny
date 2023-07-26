@@ -97,12 +97,28 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
         // Adds `smithy_structure_member=DafnyStructureMember(...)`
         // e.g.
         // smithy_structure_name(smithy_structure_member=DafnyStructureMember(...), ...)
-        builder.append("%1$s=%2$s,\n".formatted(
-            CaseUtils.toSnakeCase(memberName),
-            targetShape.accept(
-                new DafnyToSmithyShapeVisitor(context, dataSource + "." + memberName + (memberShape.isOptional() ? ".value" : ""), writer, isConfigShape)
-            )
-            ));
+        builder.append("%1$s=".formatted(CaseUtils.toSnakeCase(memberName)));
+        if (memberShape.isOptional()) {
+          builder.append("%1$s,\n".formatted(
+              targetShape.accept(
+                  new DafnyToSmithyShapeVisitor(
+                      context,
+                      dataSource + "." + memberName + ".UnwrapOr(None)",
+                      writer,
+                      isConfigShape)
+              )
+          ));
+        } else {
+          builder.append("%1$s,\n".formatted(
+              targetShape.accept(
+                  new DafnyToSmithyShapeVisitor(
+                      context,
+                      dataSource + "." + memberName,
+                      writer,
+                      isConfigShape)
+              )
+          ));
+        }
       }
       // Close structure
       return builder.append(")").toString();

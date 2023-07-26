@@ -17,19 +17,25 @@ package software.amazon.polymorph.smithypython;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 import software.amazon.polymorph.smithypython.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithypython.nameresolver.Utils;
 import software.amazon.polymorph.smithypython.shapevisitor.DafnyToSmithyShapeVisitor;
 import software.amazon.polymorph.smithypython.shapevisitor.SmithyToDafnyShapeVisitor;
+import software.amazon.polymorph.traits.ReferenceTrait;
+import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.smithy.model.knowledge.TopDownIndex;
+import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
+import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.python.codegen.ApplicationProtocol;
 import software.amazon.smithy.python.codegen.CodegenUtils;
 import software.amazon.smithy.python.codegen.GenerationContext;
@@ -137,12 +143,56 @@ public abstract class DafnyPythonProtocolGenerator implements ProtocolGenerator 
   public void generateResponseDeserializers(GenerationContext context) {
     var topDownIndex = TopDownIndex.of(context.model());
     var service = context.settings().getService(context.model());
-    var deserializingErrorShapes = new TreeSet<ShapeId>();
     var delegator = context.writerDelegator();
     var configSymbol = CodegenUtils.getConfigSymbol(context.settings());
 
+    var deserializingErrorShapes = new TreeSet<ShapeId>(
+        context.model().getStructureShapesWithTrait(ErrorTrait.class)
+            .stream()
+            .filter(structureShape -> structureShape.getId().getNamespace()
+                .equals(context.settings().getService().getNamespace()))
+            .map(Shape::getId)
+            .collect(Collectors.toSet()));
+
     for (OperationShape operation : topDownIndex.getContainedOperations(context.settings().getService())) {
-      deserializingErrorShapes.addAll(operation.getErrors(service));
+//      deserializingErrorShapes.addAll(operation.getErrors(service));
+//
+//      Set<ShapeId> inputShapeIds = new HashSet<>();
+//      Set<ShapeId> outputShapeIds = new HashSet<>();
+//      inputShapeIds.add(operation.getInputShape());
+//      outputShapeIds.add(operation.getOutputShape());
+//
+//      Set<MemberShape> referenceMemberShapes = new HashSet<>();
+//      referenceMemberShapes.addAll(
+//          ModelUtils.findAllDependentMemberReferenceShapes(inputShapeIds, context.model()));
+//      referenceMemberShapes.addAll(
+//          ModelUtils.findAllDependentMemberReferenceShapes(outputShapeIds, context.model()));
+//
+//      Set<Shape> referenceChildShape = new HashSet<>();
+//      for (MemberShape referenceMemberShape : referenceMemberShapes) {
+//        Shape referenceShape = context.model().expectShape(referenceMemberShape.getTarget());
+//        ReferenceTrait referenceTrait = referenceShape.expectTrait(ReferenceTrait.class);
+//        System.out.println(referenceTrait.getReferentId());
+//        Shape resourceOrService = context.model().expectShape(referenceTrait.getReferentId());
+//        referenceChildShape.add(resourceOrService);
+//      }
+//
+//      for(Shape resourceOrService : referenceChildShape) {
+//        resourceOrService
+//        System.out.println("resourceOrService");
+//        System.out.println(resourceOrService);
+//        Set<ShapeId> resourceOperationShapeIds = resourceOrService.asResourceShape().get().getResources()
+//        System.out.println("resourceOperationShapeIds");
+//        System.out.println(resourceOperationShapeIds);
+//        for (ShapeId shapeId : resourceOperationShapeIds) {
+//          OperationShape operationShape = context.model()
+//              .expectShape(shapeId, OperationShape.class);
+//          System.out.println("operationShape");
+//          System.out.println(operationShape);
+//          System.out.println(operationShape.getErrors());
+//          deserializingErrorShapes.addAll(operationShape.getErrors());
+//        }
+//      }
 
       var deserFunction = getDeserializationFunction(context, operation);
       var output = context.model().expectShape(operation.getOutputShape());
@@ -164,6 +214,15 @@ public abstract class DafnyPythonProtocolGenerator implements ProtocolGenerator 
       });
     }
 
+
+    System.out.println("service.getErrors()");
+    System.out.println(service.getErrors());
+
+
+
+    System.out.println("deserializingErrorShapes");
+
+    System.out.println(deserializingErrorShapes);
     generateErrorResponseDeserializerSection(context, deserializingErrorShapes);
     generateDocumentBodyShapeDeserializers(context, deserializingDocumentShapes);
   }
