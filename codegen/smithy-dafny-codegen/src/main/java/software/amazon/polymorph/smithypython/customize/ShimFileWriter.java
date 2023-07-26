@@ -2,6 +2,8 @@ package software.amazon.polymorph.smithypython.customize;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 import software.amazon.polymorph.smithypython.shapevisitor.DafnyToSmithyShapeVisitor;
 import software.amazon.polymorph.smithypython.shapevisitor.SmithyToDafnyShapeVisitor;
 import software.amazon.polymorph.smithypython.nameresolver.DafnyNameResolver;
@@ -13,6 +15,7 @@ import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
+import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonWriter;
 
@@ -62,17 +65,17 @@ public class ShimFileWriter implements CustomFileWriter {
       GenerationContext codegenContext, ServiceShape serviceShape, PythonWriter writer) {
 
     // Write modelled error converters
-    Set<ShapeId> errorShapeSet = new HashSet<>();
-    for (ShapeId operationShapeId : serviceShape.getAllOperations()) {
-      OperationShape operationShape = codegenContext.model()
-          .expectShape(operationShapeId, OperationShape.class);
 
-      for (ShapeId errorShapeId : operationShape.getErrors(serviceShape)) {
-        errorShapeSet.add(errorShapeId);
-      }
-    }
+    var errorShapeSet = new TreeSet<ShapeId>(
+        codegenContext.model().getStructureShapesWithTrait(ErrorTrait.class)
+            .stream()
+            .filter(structureShape -> structureShape.getId().getNamespace()
+                .equals(codegenContext.settings().getService().getNamespace()))
+            .map(Shape::getId)
+            .collect(Collectors.toSet()));
 
     for (ShapeId errorShapeId : errorShapeSet) {
+      writer.addImport(".errors", errorShapeId.getName());
       writer.write("""
               if isinstance(e, $L):
                   return $L.$L(message=e.message)
