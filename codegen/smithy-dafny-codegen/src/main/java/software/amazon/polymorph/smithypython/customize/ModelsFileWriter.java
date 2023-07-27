@@ -1,6 +1,7 @@
 package software.amazon.polymorph.smithypython.customize;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
@@ -89,8 +90,33 @@ public class ModelsFileWriter implements CustomFileWriter {
     }
 
     for(Shape resourceOrService : referenceChildShape) {
+
+      writer.addStdlibImport("abc");
+
+      // Write interface
       writer.write("""
-        class $L:
+        
+        class I$L(metaclass=abc.ABCMeta):
+            @classmethod
+            def __subclasshook__(cls, subclass):
+                return (
+                    ${C|}
+                )
+                
+            ${C|}
+        """,
+          resourceOrService.getId().getName(),
+          writer.consumer(w -> generateInterfaceSubclasshookExpressionForResource(
+              codegenContext, resourceOrService, w)
+          ),
+          writer.consumer(w -> generateInterfaceOperationFunctionDefinitionForResource(
+              codegenContext, resourceOrService, w)
+          )
+      );
+
+      // Write implementation
+      writer.write("""
+        class $L(I$L):
             _impl: Any
             
             def __init__(self, _impl):
@@ -99,10 +125,42 @@ public class ModelsFileWriter implements CustomFileWriter {
             ${C|}
         """,
           resourceOrService.getId().getName(),
+          resourceOrService.getId().getName(),
           writer.consumer(w -> generateSmithyOperationFunctionDefinitionForResource(
               codegenContext, resourceOrService, w)
           )
       );
+    }
+  }
+
+  private void generateInterfaceSubclasshookExpressionForResource(
+      GenerationContext codegenContext, Shape resourceOrService, PythonWriter writer) {
+    List<ShapeId> operationList = resourceOrService.asResourceShape().get().getOperations().stream().toList();
+
+    // For all but the last shape, generate `hasattr and callable and`...
+    for (ShapeId operationShapeId : operationList.subList(0, operationList.size()-1)) {
+      writer.write("""
+          hasattr(subclass, "$L") and callable(subclass.$L) and""",
+          operationShapeId.getName(), operationShapeId.getName()
+      );
+    }
+
+    // For the last shape, generate `hasattr and callable`
+    ShapeId lastOperationShape = operationList.get(operationList.size()-1);
+    writer.write("""
+          hasattr(subclass, "$L") and callable(subclass.$L)""",
+        lastOperationShape.getName(), lastOperationShape.getName()
+    );
+  }
+
+  private void generateInterfaceOperationFunctionDefinitionForResource(
+      GenerationContext codegenContext, Shape resourceOrService, PythonWriter writer) {
+    for (ShapeId operationShapeId : resourceOrService.asResourceShape().get().getOperations()) {
+      writer.write("""
+          @abc.abstractmethod
+          def $L(self, dafny_input):
+              raise NotImplementedError
+          """, operationShapeId.getName());
     }
   }
 
