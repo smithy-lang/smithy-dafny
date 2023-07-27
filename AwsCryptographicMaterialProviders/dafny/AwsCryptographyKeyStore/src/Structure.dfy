@@ -27,9 +27,6 @@ module {:options "/functionSyntax:4" } Structure {
   const BEACON_KEY_TYPE_VALUE := "beacon:ACTIVE"
   const ENCRYPTION_CONTEXT_PREFIX := "aws-crypto-ec:"
 
-  // A GenerateDataKeyWithoutPlaintext of request size 32 returns a ciphertext size of 184 bytes.
-  const KMS_GEN_KEY_NO_PLAINTEXT_LENGTH_32 := 184
-
   type BranchKeyContext = m: map<string, string> | BranchKeyContext?(m) witness *
   predicate BranchKeyContext?(m: map<string, string>) {
     //= aws-encryption-sdk-specification/framework/branch-key-store.md#encryption-context

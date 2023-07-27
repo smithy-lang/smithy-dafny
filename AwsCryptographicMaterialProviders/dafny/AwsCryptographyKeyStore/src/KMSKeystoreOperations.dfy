@@ -47,7 +47,6 @@ module {:options "/functionSyntax:4" } KMSKeystoreOperations {
     ensures res.Success? ==>
               && res.value.KeyId.Some?
               && res.value.CiphertextBlob.Some?
-              && |res.value.CiphertextBlob.value| == Structure.KMS_GEN_KEY_NO_PLAINTEXT_LENGTH_32
               && KMS.IsValid_CiphertextType(res.value.CiphertextBlob.value)
               && var kmsOperationOutput := Seq.Last(kmsClient.History.GenerateDataKeyWithoutPlaintext).output;
               && kmsOperationOutput.Success?
@@ -67,17 +66,15 @@ module {:options "/functionSyntax:4" } KMSKeystoreOperations {
 
     :- Need(
       && generateResponse.KeyId.Some?,
-      // && ParseAwsKmsIdentifier(generateResponse.KeyId.value).Success?,
       Types.KeyStoreException(
         message := "Invalid response from KMS GenerateDataKey:: Invalid Key Id")
     );
 
     :- Need(
       && generateResponse.CiphertextBlob.Some?
-      && |generateResponse.CiphertextBlob.value| == Structure.KMS_GEN_KEY_NO_PLAINTEXT_LENGTH_32
       && KMS.IsValid_CiphertextType(generateResponse.CiphertextBlob.value),
       Types.KeyStoreException(
-        message := "Invalid response from AWS KMS GeneratedDataKey: Invalid ciphertext")
+        message := "Invalid response from AWS KMS GenerateDataKey: Invalid ciphertext")
     );
 
     return Success(generateResponse);
@@ -161,7 +158,7 @@ module {:options "/functionSyntax:4" } KMSKeystoreOperations {
       && reEncryptResponse.CiphertextBlob.Some?
       && KMS.IsValid_CiphertextType(reEncryptResponse.CiphertextBlob.value),
       Types.KeyStoreException(
-        message := "Invalid response from AWS KMS GeneratedDataKey: Invalid ciphertext")
+        message := "Invalid response from AWS KMS ReEncrypt: Invalid ciphertext.")
     );
 
     return Success(reEncryptResponse);

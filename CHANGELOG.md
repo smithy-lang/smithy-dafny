@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.1 2023-07-26
+
+### Fix
+- Fixes a runtime check in `VersionKey` Key Store API that no longer checks for the CipherText length
+  on the output of a KMS ReEncrypt API call. 
+
 ## 1.0.0 2023-07-21
 
 ### Features
