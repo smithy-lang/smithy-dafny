@@ -1,0 +1,20 @@
+[project]
+name = "simple_dependencies"
+description = "simple_dependencies test package"
+version = "0.1.0"
+authors = [
+    { name = "AWS Crypto Tools", email = "aws-crypto-tools@amazon.com" }
+]
+
+[tool.poetry]
+packages = [
+    { include = "simple_dependencies", from = "src" },
+]
+
+[tool.poetry.dependencies]
+python = "^3.7"
+smithy_python = "^0.0.1"
+simple_errors = { path = "../../../Errors/runtimes/python/src" }
+simple_extendable_resources = { path = "../../../Extendable/runtimes/python/src" }
+simple_resources = { path = "../../../Resource/runtimes/python/src" }
+simple_constraints = { path = "../../../Constraints/runtimes/python/src" }

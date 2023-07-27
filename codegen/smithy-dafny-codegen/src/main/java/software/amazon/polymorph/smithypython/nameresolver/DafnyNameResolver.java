@@ -94,6 +94,13 @@ public class DafnyNameResolver {
     );
   }
 
+  public static void importDafnyTypeForServiceShape(PythonWriter writer, ServiceShape serviceShape) {
+    writer.addImport(
+        getDafnyTypesModuleNamespaceForShape(serviceShape.getId()),
+        getDafnyClientInterfaceTypeForServiceShape(serviceShape)
+    );
+  }
+
   /**
    * Returns a String representing the corresponding Dafny type
    *   for the provided Error shape.

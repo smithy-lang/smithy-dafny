@@ -103,6 +103,8 @@ public class ModelsFileWriter implements CustomFileWriter {
                     ${C|}
                 )
                 
+            # TODO: Add impl with typehint to ABC
+                
             ${C|}
         """,
           resourceOrService.getId().getName(),
@@ -117,6 +119,7 @@ public class ModelsFileWriter implements CustomFileWriter {
       // Write implementation
       writer.write("""
         class $L(I$L):
+            # TODO: typehint
             _impl: Any
             
             def __init__(self, _impl):

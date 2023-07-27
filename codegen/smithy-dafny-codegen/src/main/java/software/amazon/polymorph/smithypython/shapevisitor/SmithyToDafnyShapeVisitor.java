@@ -18,6 +18,7 @@ import software.amazon.smithy.model.shapes.LongShape;
 import software.amazon.smithy.model.shapes.MapShape;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.ResourceShape;
+import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.ShapeVisitor;
@@ -64,6 +65,10 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
     if (resourceOrService.asResourceShape().isPresent()) {
       ResourceShape resourceShape = resourceOrService.asResourceShape().get();
       DafnyNameResolver.importDafnyTypeForResourceShape(writer, resourceShape);
+      return dataSource;
+    } else if (resourceOrService.asServiceShape().isPresent()) {
+      ServiceShape serviceShape = resourceOrService.asServiceShape().get();
+      DafnyNameResolver.importDafnyTypeForServiceShape(writer, serviceShape);
       return dataSource;
     }
 

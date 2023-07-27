@@ -108,7 +108,7 @@ build_implementation:
 		--function-syntax:3 \
 		--optimize-erasable-datatype-wrapper:false \
 		--library:$(PROJECT_ROOT)/dafny-dependencies/StandardLibrary/src/Index.dfy \
-		$(patsubst %, -library:$(PROJECT_ROOT)/%/src/Index.dfy, $(LIBRARIES))
+		$(patsubst %, --library:$(PROJECT_ROOT)/%/src/Index.dfy, $(LIBRARIES))
 
 build_test:
 	dafny build \
@@ -325,6 +325,7 @@ _clean:
 	rm -rf $(LIBRARY_ROOT)/runtimes/net/Generated $(LIBRARY_ROOT)/runtimes/net/bin $(LIBRARY_ROOT)/runtimes/net/obj
 	rm -rf $(LIBRARY_ROOT)/runtimes/net/tests/bin $(LIBRARY_ROOT)/runtimes/net/tests/obj
 	rm -rf $(LIBRARY_ROOT)/runtimes/python/src/**/dafny_generated $(LIBRARY_ROOT)/runtimes/python/src/**/smithy_generated
+	rm -rf $(LIBRARY_ROOT)/runtimes/python/build
 
 ########################## Python targets
 
