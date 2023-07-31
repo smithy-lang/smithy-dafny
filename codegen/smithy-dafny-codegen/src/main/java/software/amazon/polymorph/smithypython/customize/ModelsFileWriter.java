@@ -1,6 +1,7 @@
 package software.amazon.polymorph.smithypython.customize;
 
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import software.amazon.polymorph.traits.LocalServiceTrait;
@@ -25,30 +26,11 @@ public class ModelsFileWriter implements CustomFileWriter {
   public void generateFileForServiceShape(
       ServiceShape serviceShape, GenerationContext codegenContext) {
     String moduleName = codegenContext.settings().getModuleName();
-
-    final LocalServiceTrait localServiceTrait = serviceShape.expectTrait(LocalServiceTrait.class);
-    final StructureShape configShape = codegenContext.model().expectShape(localServiceTrait.getConfigId(), StructureShape.class);
-    System.out.println(configShape.getAllMembers());
-
-
-    /*
-        blob_value: Any
-        boolean_value: Any
-        string_value: Any
-        integer_value: Any
-        long_value: Any
-
-        def __init__(self, blob_value, boolean_value, string_value, integer_value, long_value):
-            self.long_value = long_value
-            self.blob_value = blob_value
-            self.boolean_value = boolean_value
-            self.string_value = string_value
-            self.integer_value = integer_value
-     */
-
-    // TODO: Ideally I don't need to do this, but this almost seems necessary
-    // to avoid having to fork Smithy-Python...
     codegenContext.writerDelegator().useFileWriter(moduleName + "/models.py", "", writer -> {
+
+      // This block defines an empty `Unit` class used by Smithy-Python generated code
+      // Defining this seems necessary to avoid forking Smithy-Python
+      // TODO: Find some way to not need this, or decide this is OK
       writer.write(
           """
              ${C|}
@@ -64,36 +46,45 @@ public class ModelsFileWriter implements CustomFileWriter {
   private void generateServiceOperationModelShapes(
       GenerationContext codegenContext, ServiceShape serviceShape, PythonWriter writer) {
 
-    Set<ShapeId> inputShapeIds = new HashSet<>();
-    Set<ShapeId> outputShapeIds = new HashSet<>();
+    // Parse operation input and output shapes to retrieve any reference shapes
+    Set<ShapeId> inputAndOutputShapeIds = new HashSet<>();
     for (ShapeId operationShapeId : serviceShape.getOperations()) {
       OperationShape operationShape = codegenContext.model()
           .expectShape(operationShapeId, OperationShape.class);
-      inputShapeIds.add(operationShape.getInputShape());
-      outputShapeIds.add(operationShape.getOutputShape());
+      inputAndOutputShapeIds.add(operationShape.getInputShape());
+      inputAndOutputShapeIds.add(operationShape.getOutputShape());
     }
-
     Set<MemberShape> referenceMemberShapes = new HashSet<>();
     referenceMemberShapes.addAll(
-        ModelUtils.findAllDependentMemberReferenceShapes(inputShapeIds, codegenContext.model()));
-    referenceMemberShapes.addAll(
-        ModelUtils.findAllDependentMemberReferenceShapes(outputShapeIds, codegenContext.model()));
+        ModelUtils.findAllDependentMemberReferenceShapes(inputAndOutputShapeIds, codegenContext.model()));
 
+    // Parse reference shapes to retrieve the underlying Resource or Service shape
     // TODO: Separate service vs resource shapes
     Set<Shape> referenceChildShape = new HashSet<>();
     for (MemberShape referenceMemberShape : referenceMemberShapes) {
       Shape referenceShape = codegenContext.model().expectShape(referenceMemberShape.getTarget());
       ReferenceTrait referenceTrait = referenceShape.expectTrait(ReferenceTrait.class);
-      System.out.println(referenceTrait.getReferentId());
       Shape resourceOrService = codegenContext.model().expectShape(referenceTrait.getReferentId());
       referenceChildShape.add(resourceOrService);
     }
 
-    for(Shape resourceOrService : referenceChildShape) {
-
+    // For each reference shape, generate an interface and an implementation shape
+    for(Shape resourceOrServiceShape : referenceChildShape) {
+      // TODO: Services
+      // Write reference interface.
+      // We use the `abc` (Abstract Base Class) library to define a stricter interface contract
+      //   for references in Python than a standard Python subclass contract.
+      // The generated code will use the ABC library to enforce constraints at object-create time.
+      // In particular, when the object is constructed, the constructor will validate that the
+      //   object's class implements all callable operations defined in the reference's Smithy model.
+      // This differs from standard Python duck-typing, where classes implementing an "interface" are
+      //   only checked that an "interface" operation is implemented at operation call-time.
+      // We do this for a number of reasons:
+      //   1) This is a Smithy-Dafny code generator, and Dafny has this stricter interface
+      //      contract. We decide to generate code that biases toward the Dafny behavior;
+      //   2) A strict interface contract will detect issues implementing an interface sooner.
+      // This is opinionated and may change.
       writer.addStdlibImport("abc");
-
-      // Write interface
       writer.write("""
         
         class I$L(metaclass=abc.ABCMeta):
@@ -105,12 +96,12 @@ public class ModelsFileWriter implements CustomFileWriter {
                 
             ${C|}
         """,
-          resourceOrService.getId().getName(),
+          resourceOrServiceShape.getId().getName(),
           writer.consumer(w -> generateInterfaceSubclasshookExpressionForResource(
-              codegenContext, resourceOrService, w)
+              codegenContext, resourceOrServiceShape, w)
           ),
           writer.consumer(w -> generateInterfaceOperationFunctionDefinitionForResource(
-              codegenContext, resourceOrService, w)
+              codegenContext, resourceOrServiceShape, w)
           )
       );
 
@@ -124,10 +115,10 @@ public class ModelsFileWriter implements CustomFileWriter {
                 
             ${C|}
         """,
-          resourceOrService.getId().getName(),
-          resourceOrService.getId().getName(),
+          resourceOrServiceShape.getId().getName(),
+          resourceOrServiceShape.getId().getName(),
           writer.consumer(w -> generateSmithyOperationFunctionDefinitionForResource(
-              codegenContext, resourceOrService, w)
+              codegenContext, resourceOrServiceShape, w)
           )
       );
     }
@@ -136,21 +127,20 @@ public class ModelsFileWriter implements CustomFileWriter {
   private void generateInterfaceSubclasshookExpressionForResource(
       GenerationContext codegenContext, Shape resourceOrService, PythonWriter writer) {
     List<ShapeId> operationList = resourceOrService.asResourceShape().get().getOperations().stream().toList();
+    Iterator<ShapeId> operationListIterator = operationList.iterator();
 
-    // For all but the last shape, generate `hasattr and callable and`...
-    for (ShapeId operationShapeId : operationList.subList(0, operationList.size()-1)) {
-      writer.write("""
-          hasattr(subclass, "$L") and callable(subclass.$L) and""",
+    // For all but the last operation shape, generate `hasattr and callable and`
+    // For the last shape, generate `hasattr and callable`
+    while (operationListIterator.hasNext()) {
+      ShapeId operationShapeId = operationListIterator.next();
+      writer.writeInline("""
+          hasattr(subclass, "$L") and callable(subclass.$L)""",
           operationShapeId.getName(), operationShapeId.getName()
       );
+      if (operationListIterator.hasNext()) {
+        writer.write(" and");
+      }
     }
-
-    // For the last shape, generate `hasattr and callable`
-    ShapeId lastOperationShape = operationList.get(operationList.size()-1);
-    writer.write("""
-          hasattr(subclass, "$L") and callable(subclass.$L)""",
-        lastOperationShape.getName(), lastOperationShape.getName()
-    );
   }
 
   private void generateInterfaceOperationFunctionDefinitionForResource(
