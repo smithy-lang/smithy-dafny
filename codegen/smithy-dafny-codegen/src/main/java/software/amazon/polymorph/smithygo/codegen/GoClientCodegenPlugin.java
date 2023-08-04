@@ -1,12 +1,13 @@
-package software.amazon.polymorph.smithygo;
+package software.amazon.polymorph.smithygo.codegen;
 
-import software.amazon.polymorph.smithygo.integration.GoIntegration;
+import software.amazon.polymorph.smithygo.codegen.integration.GoIntegration;
 import software.amazon.smithy.build.PluginContext;
+import software.amazon.smithy.build.SmithyBuildPlugin;
 import software.amazon.smithy.codegen.core.directed.CodegenDirector;
 
-public class DafnyGoPluginModule {
+public class GoClientCodegenPlugin implements SmithyBuildPlugin {
     public void run(PluginContext context) {
-        CodegenDirector<GoWriter, GoIntegration, GoCodegenContext, GoSettings> runner
+        CodegenDirector<GoWriter, GoIntegration, GenerationContext, GoSettings> runner
                 = new CodegenDirector<>();
 
         runner.directedCodegen(new DirectedGoCodegen());
@@ -33,5 +34,15 @@ public class DafnyGoPluginModule {
 
         // Run it!
         runner.run();
+    }
+
+    @Override
+    public String getName() {
+        return "go-client-codegen";
+    }
+
+    @Override
+    public void execute(PluginContext context) {
+        this.run(context);
     }
 }

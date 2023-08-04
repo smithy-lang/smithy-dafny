@@ -1,4 +1,4 @@
-package software.amazon.polymorph.smithygo;
+package software.amazon.polymorph.smithygo.codegen;
 
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.Symbol;
@@ -510,6 +510,11 @@ public class GoWriter extends SymbolWriter<GoWriter, ImportDeclarations> {
      */
     public GoWriter addImport(String packageName, String as) {
         imports.addImport(packageName, as);
+        return this;
+    }
+
+    public GoWriter addImport(String packageName) {
+        imports.addImport(packageName, "");
         return this;
     }
 

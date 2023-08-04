@@ -3,65 +3,117 @@
 
 package software.amazon.polymorph.smithygo;
 
+import software.amazon.polymorph.smithygo.codegen.GenerationContext;
+import software.amazon.polymorph.smithygo.codegen.GoWriter;
+import software.amazon.polymorph.smithygo.codegen.StructureGenerator;
+import software.amazon.polymorph.smithygo.nameresolver.DafnyNameResolver;
+import software.amazon.polymorph.smithygo.shapevisitor.DafnyToSmithyShapeVisitor;
+import software.amazon.polymorph.smithygo.shapevisitor.SmithyToDafnyShapeVisitor;
 import software.amazon.polymorph.traits.LocalServiceTrait;
-import software.amazon.smithy.codegen.core.Symbol;
-import software.amazon.smithy.codegen.core.SymbolProvider;
-import software.amazon.smithy.model.Model;
+import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
+import software.amazon.smithy.model.shapes.Shape;
 
-public class LocalServiceGenerator implements ShapeGenerator<ServiceShape> {
-    private Model model;
-    private final GoDelegator writerDelegator;
-    private SymbolProvider symbolProvider;
 
-    public LocalServiceGenerator(GoDelegator writerDelegator, Model model, SymbolProvider symbolProvider) {
-        this.writerDelegator = writerDelegator;
-        this.model = model;
-        this.symbolProvider = symbolProvider;
+public class LocalServiceGenerator implements Runnable {
+    private final GenerationContext context;
+    private final ServiceShape service;
+
+    public LocalServiceGenerator(GenerationContext context, ServiceShape service) {
+        this.context = context;
+        this.service = service;
     }
 
     @Override
-    public void generate(ServiceShape service) {
+    public void run() {
+        context.writerDelegator().useShapeWriter(service, this::generateService);
+    }
+
+    private void generateService(GoWriter writer) {
+        generateClient(writer);
+        generateShim(writer);
+    }
+    void generateClient(GoWriter writer) {
         // Generate each operation for the service. We do this here instead of via the operation visitor method to
         // limit it to the operations bound to the service.
-        Symbol serviceSymbol = symbolProvider.toSymbol(service);
-        LocalServiceTrait serviceTrait = service.expectTrait(LocalServiceTrait.class);
-        Symbol configSymbol = symbolProvider.toSymbol(model.expectShape(serviceTrait.getConfigId()));
-        writerDelegator.useShapeWriter(service, goWriter -> {
-            String namespace = service.toShapeId().getNamespace().replace(".", "");
-            goWriter.addImport(String.format("%sinternaldafnytypes", namespace), "");
-            goWriter.addImport(String.format("%sinternaldafny", namespace), "");
-            goWriter.addImport("types","");
-            goWriter.addImport("typeconversion","");
-            goWriter.addImport("context","");
+        var symbolProvider = context.symbolProvider();
+        var model = context.model();
+        var serviceSymbol = context.symbolProvider().toSymbol(service);
+        final LocalServiceTrait serviceTrait = service.expectTrait(LocalServiceTrait.class);
+        var configSymbol = symbolProvider.toSymbol(model.expectShape(serviceTrait.getConfigId()));
+        context.writerDelegator().useFileWriter("types/types.go", writer1 -> {
+                                                    new StructureGenerator(model, symbolProvider, writer1, model.expectShape(serviceTrait.getConfigId()).asStructureShape().get()).run();
+                                                });
 
-            goWriter.write("type $T struct {", serviceSymbol);
+        writer.addImport(DafnyNameResolver.dafnyTypesNamespace(context.settings()));
+        writer.addImport(DafnyNameResolver.dafnyNamespace(context.settings()));
+        writer.addImport("types");
+        writer.addImport("context");
+        var dafnyClient = DafnyNameResolver.getDafnyClient(context.settings(), serviceTrait.getSdkId());
+        writer.write("""
+                             type $T struct {
+                                 dafnyClient *$L
+                             }
+                                                                 
+                             func NewClient(clientConfig $T) (*$T, error) {
+                                 var dafnyConfig = $L(clientConfig)
+                                 var response = $L(dafnyConfig)
+                                 var dafnyClient = response.Extract().(*$L)
+                                 client := &$T { dafnyClient }
+                                 return client, nil
+                             }
+                             """,
+                     serviceSymbol, dafnyClient , configSymbol, serviceSymbol,DafnyNameResolver.getToDafnyMethodName(context, serviceTrait.getConfigId()), DafnyNameResolver.createDafnyClient(context.settings(), serviceTrait.getSdkId()), dafnyClient, serviceSymbol);
 
-            goWriter.write("clientConfig $T", configSymbol);
-            goWriter.write("}");
-
-            goWriter.write("func NewClient(clientConfig $T) (*$T, error) {", configSymbol, serviceSymbol);
-            goWriter.write("client := &$T { clientConfig }", serviceSymbol);
-            goWriter.write("return client, nil");
-            goWriter.write("}");
-
-            service.getAllOperations().forEach(operation -> {
-                String operationName = operation.getName();
-                String inputType = model.expectShape(model.expectShape(operation).asOperationShape().get().getInputShape()).toShapeId().getName();
-                String outputType = model.expectShape(model.expectShape(operation).asOperationShape().get().getOutputShape()).toShapeId().getName();
-                goWriter.write("func (client *$T) $L(ctx context.Context, params types.$L) (types.$L, error) {", serviceSymbol, operationName, inputType, outputType);
-                goWriter.write("""
-                                       	var dafnyType, _ = typeconversion.FromNativeToDafny$L(params)
-                                       	result, _ := $Linternaldafny.New_$LClient_().$L(dafnyType).Extract().($Linternaldafnytypes.$L)
-                                        var nativeType, _ = typeconversion.FromDafnyToNative$L(result)
-                                       	return nativeType, nil
-                                       }
-                                       """,
-                               inputType, namespace, serviceTrait.getSdkId(), operationName, namespace, outputType, outputType
-                               );
-            });
-
-            new StructureGenerator(model, symbolProvider, writerDelegator).generate(model.expectShape(serviceTrait.getConfigId()).asStructureShape().get());
+        service.getAllOperations().forEach(operation -> {
+            final OperationShape operationShape = model.expectShape(operation, OperationShape.class);
+            final Shape inputShape = model.expectShape(operationShape.getInputShape());
+            final Shape outputShape = model.expectShape(operationShape.getOutputShape());
+            final String inputType = model.expectShape(model.expectShape(operation).asOperationShape().get().getInputShape()).toShapeId().getName();
+            final String outputType = model.expectShape(model.expectShape(operation).asOperationShape().get().getOutputShape()).toShapeId().getName();
+            writer.write("""
+                                   func (client *$T) $L(ctx context.Context, params types.$L) (*types.$L, error) {
+                                       var dafny_request $L = $L(params)
+                                       var dafny_response = client.dafnyClient.$L(dafny_request)
+                                       var native_response = $L(dafny_response.Extract().($L))
+                                       return &native_response, nil
+                                   }
+                                 """,
+                         serviceSymbol,
+                         operationShape.getId().getName(),
+                         inputType, outputType,
+                         DafnyNameResolver.getDafnyType(context.settings(), symbolProvider.toSymbol(inputShape)),
+                         DafnyNameResolver.getToDafnyMethodName(context, operationShape),
+                         operationShape.getId().getName(),
+                         DafnyNameResolver.getFromDafnyMethodName(context, operationShape), DafnyNameResolver.getDafnyType(context.settings(), symbolProvider.toSymbol(outputShape)));
         });
+    }
+
+    void generateShim(GoWriter writer) {
+//        service.getAllOperations().forEach(operation -> {
+//            final OperationShape operationShape = model.expectShape(operation, OperationShape.class);
+//            final Shape inputShape = model.expectShape(operationShape.getInputShape());
+//            var i = inputShape.accept(new DafnyToSmithyShapeVisitor(model, "input", false));
+//            final Shape outputShape = model.expectShape(operationShape.getOutputShape());
+//            final String inputType = model.expectShape(model.expectShape(operation).asOperationShape().get().getInputShape()).toShapeId().getName();
+//            final String outputType = model.expectShape(model.expectShape(operation).asOperationShape().get().getOutputShape()).toShapeId().getName();
+//            var o = outputShape.accept(new SmithyToDafnyShapeVisitor(model, "wrapped_response", false));
+//            writer.write("""
+//                                   func (client *$T) $L(ctx context.Context, params types.$L) (types.$L, error) {
+//                                       var unwrapped_request: $L = $L
+//                                       wrapped_response, err = $L
+//                                       if err != OK {
+//                                           return nil, err
+//                                       }
+//                                       return $L, nil
+//                                 """,
+//                         serviceSymbol,
+//                         operationShape.getId().getName(),
+//                         inputType, outputType,
+//                         operationShape.getInputShape().getName(),
+//                         i,
+//                         symbolProvider.toSymbol(operationShape).getName(),
+//                         o);
+//        });
     }
 }

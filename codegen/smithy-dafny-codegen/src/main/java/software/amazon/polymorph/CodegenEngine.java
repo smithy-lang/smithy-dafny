@@ -28,7 +28,7 @@ import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.utils.IoUtils;
 import software.amazon.smithy.build.PluginContext;
-import software.amazon.polymorph.smithygo.DafnyGoPluginModule;
+import software.amazon.polymorph.smithygo.codegen.GoClientCodegenPlugin;
 
 
 import java.io.IOException;
@@ -113,7 +113,7 @@ public class CodegenEngine {
                 case DAFNY -> generateDafny(outputDir);
                 case JAVA -> generateJava(outputDir);
                 case DOTNET -> generateDotnet(outputDir);
-                case GO -> new DafnyGoPluginModule().run(this.pluginContext);
+                case GO -> new GoClientCodegenPlugin().run(this.pluginContext);
                 default -> throw new UnsupportedOperationException("Cannot generate code for target language %s"
                         .formatted(lang.name()));
             }

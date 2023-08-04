@@ -13,7 +13,7 @@
  * permissions and limitations under the License.
  */
 
-package software.amazon.polymorph.smithygo;
+package software.amazon.polymorph.smithygo.codegen;
 
 import software.amazon.smithy.codegen.core.SymbolDependency;
 import software.amazon.smithy.codegen.core.SymbolDependencyContainer;

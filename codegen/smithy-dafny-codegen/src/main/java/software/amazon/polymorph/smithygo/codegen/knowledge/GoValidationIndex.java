@@ -28,7 +28,7 @@
  * permissions and limitations under the License.
  */
 
-package software.amazon.polymorph.smithygo.knowledge;
+package software.amazon.polymorph.smithygo.codegen.knowledge;
 
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.KnowledgeIndex;

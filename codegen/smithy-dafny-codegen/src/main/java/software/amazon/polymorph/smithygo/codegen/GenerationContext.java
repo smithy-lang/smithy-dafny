@@ -1,6 +1,7 @@
-package software.amazon.polymorph.smithygo;
+package software.amazon.polymorph.smithygo.codegen;
 
-import software.amazon.polymorph.smithygo.integration.GoIntegration;
+import software.amazon.polymorph.smithygo.codegen.integration.GoIntegration;
+import software.amazon.polymorph.smithygo.codegen.integration.ProtocolGenerator;
 import software.amazon.smithy.build.FileManifest;
 import software.amazon.smithy.codegen.core.CodegenContext;
 import software.amazon.smithy.codegen.core.SymbolProvider;
@@ -10,21 +11,30 @@ import software.amazon.smithy.utils.SmithyBuilder;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GoCodegenContext implements CodegenContext<GoSettings, GoWriter, GoIntegration> {
+public class GenerationContext implements CodegenContext<GoSettings, GoWriter, GoIntegration> {
     private final Model model;
     private final GoSettings settings;
     private final SymbolProvider symbolProvider;
     private final FileManifest fileManifest;
     private final GoDelegator writerDelegator;
     private final List<GoIntegration> integrations;
+    private final ProtocolGenerator protocolGenerator;
 
-    private GoCodegenContext(Builder builder) {
+    /**
+     * @return Returns the protocol generator to use in code generation.
+     */
+    public ProtocolGenerator protocolGenerator() {
+        return protocolGenerator;
+    }
+
+    private GenerationContext(Builder builder) {
         model = SmithyBuilder.requiredState("model", builder.model);
         settings = SmithyBuilder.requiredState("settings", builder.settings);
         symbolProvider = SmithyBuilder.requiredState("symbolProvider", builder.symbolProvider);
         fileManifest = SmithyBuilder.requiredState("fileManifest", builder.fileManifest);
         writerDelegator = SmithyBuilder.requiredState("writerDelegator", builder.writerDelegator);
         integrations = SmithyBuilder.requiredState("integrations", builder.integrations);
+        protocolGenerator = SmithyBuilder.requiredState("protocolGenerator", builder.protocolGenerator);
     }
 
     @Override
@@ -65,19 +75,20 @@ public class GoCodegenContext implements CodegenContext<GoSettings, GoWriter, Go
     }
 
     /**
-     * Builds {@link GoCodegenContext}s.
+     * Builds {@link GenerationContext}s.
      */
-    public static final class Builder implements SmithyBuilder<GoCodegenContext> {
+    public static final class Builder implements SmithyBuilder<GenerationContext> {
         private Model model;
         private GoSettings settings;
         private SymbolProvider symbolProvider;
         private FileManifest fileManifest;
         private GoDelegator writerDelegator;
         private List<GoIntegration> integrations = new ArrayList<>();
+        private ProtocolGenerator protocolGenerator;
 
         @Override
-        public GoCodegenContext build() {
-            return new GoCodegenContext(this);
+        public GenerationContext build() {
+            return new GenerationContext(this);
         }
 
         /**
@@ -134,5 +145,15 @@ public class GoCodegenContext implements CodegenContext<GoSettings, GoWriter, Go
             this.integrations.addAll(integrations);
             return this;
         }
+
+        /**
+         * @param protocolGenerator The resolved protocol generator to use.
+         * @return Returns the builder.
+         */
+        public Builder protocolGenerator(ProtocolGenerator protocolGenerator) {
+            this.protocolGenerator = protocolGenerator;
+            return this;
+        }
+
     }
 }

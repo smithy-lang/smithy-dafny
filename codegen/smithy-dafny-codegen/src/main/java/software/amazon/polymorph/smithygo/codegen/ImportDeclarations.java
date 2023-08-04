@@ -1,4 +1,4 @@
-package software.amazon.polymorph.smithygo;
+package software.amazon.polymorph.smithygo.codegen;
 
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.ImportContainer;

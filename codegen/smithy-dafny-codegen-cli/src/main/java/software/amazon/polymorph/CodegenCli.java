@@ -4,7 +4,6 @@
 package software.amazon.polymorph;
 
 import software.amazon.polymorph.CodegenEngine.TargetLanguage;
-import software.amazon.polymorph.smithygo.GoSettings;
 import software.amazon.polymorph.smithyjava.generator.CodegenSubject.AwsSdkVersion;
 
 import org.apache.commons.cli.CommandLine;
@@ -17,7 +16,6 @@ import org.apache.commons.cli.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.smithy.build.FileManifest;
 import software.amazon.smithy.build.PluginContext;
@@ -81,6 +79,7 @@ public class CodegenCli {
                                                          .fileManifest(FileManifest.create(cliArguments.outputGoDir().orElse(cliArguments.modelPath)))
                                                          .settings(ObjectNode.builder()
                                                                              .withMember("service", serviceShape.toShapeId().toString())
+                                                                           .withMember("moduleName", cliArguments.namespace)
                                                                              .build())
                                                          .build();
 

@@ -13,7 +13,7 @@
  * permissions and limitations under the License.
  */
 
-package software.amazon.polymorph.smithygo;
+package software.amazon.polymorph.smithygo.codegen;
 
 import software.amazon.smithy.build.FileManifest;
 import software.amazon.smithy.codegen.core.SymbolProvider;
@@ -24,7 +24,7 @@ import software.amazon.smithy.codegen.core.WriterDelegator;
  * for getting shape specific GoWriters.
  */
 public final class GoDelegator extends WriterDelegator<GoWriter> {
-    GoDelegator(FileManifest fileManifest, SymbolProvider symbolProvider) {
+    public GoDelegator(FileManifest fileManifest, SymbolProvider symbolProvider) {
         super(fileManifest, symbolProvider, new GoWriter.GoWriterFactory());
     }
 }

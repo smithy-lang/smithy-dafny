@@ -13,7 +13,7 @@
  * permissions and limitations under the License.
  */
 
-package software.amazon.polymorph.smithygo;
+package software.amazon.polymorph.smithygo.codegen;
 
 /**
  * A class of constants for dependencies used by this package.

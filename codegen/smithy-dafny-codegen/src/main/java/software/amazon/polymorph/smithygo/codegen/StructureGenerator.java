@@ -13,12 +13,14 @@
  * permissions and limitations under the License.
  */
 
-package software.amazon.polymorph.smithygo;
+package software.amazon.polymorph.smithygo.codegen;
 
+import software.amazon.polymorph.smithygo.codegen.integration.ProtocolGenerator;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.MemberShape;
+import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.StreamingTrait;
@@ -29,28 +31,53 @@ import java.util.Set;
 /**
  * Renders structures.
  */
-public final class StructureGenerator implements ShapeGenerator<StructureShape> {
+public final class StructureGenerator implements Runnable {
     private static final Set<String> ERROR_MEMBER_NAMES = SetUtils.of("ErrorMessage", "Message", "ErrorCodeOverride");
 
     private final Model model;
     private final SymbolProvider symbolProvider;
-    private final GoDelegator writerDelegator;
+    private final GoWriter writer;
+    private final StructureShape shape;
+
     public StructureGenerator(
             Model model,
             SymbolProvider symbolProvider,
-            GoDelegator writerDelegator
-    ) {
+            GoWriter writer,
+            StructureShape shape) {
         this.model = model;
         this.symbolProvider = symbolProvider;
-        this.writerDelegator = writerDelegator;
+        this.writer = writer;
+        this.shape = shape;
+    }
+
+    @Override
+    public void run() {
+        if (!shape.hasTrait(ErrorTrait.class)) {
+            renderStructure(() -> {
+            });
+        } else {
+            renderErrorStructure();
+        }
     }
 
     /**
      * Renders a non-error structure.
      *
+     * @param runnable A runnable that runs before the structure definition is closed. This can be used to write
+     *                 additional members.
+     */
+    public void renderStructure(Runnable runnable) {
+        renderStructure(runnable, false);
+    }
+
+    /**
+     * Renders a non-error structure.
+     *
+     * @param runnable         A runnable that runs before the structure definition is closed. This can be used to write
+     *                         additional members.
      * @param isInputStructure A boolean indicating if input variants for member symbols should be used.
      */
-    public void renderStructure(GoWriter writer, StructureShape shape, boolean isInputStructure) {
+    public void renderStructure(Runnable runnable, boolean isInputStructure) {
         Symbol symbol = symbolProvider.toSymbol(shape);
         System.out.println(shape.getId());
         writer.openBlock("type $L struct {", symbol.getName());
@@ -80,8 +107,7 @@ public final class StructureGenerator implements ShapeGenerator<StructureShape> 
     /**
      * Renders an error structure and supporting methods.
      */
-    private void renderErrorStructure(StructureShape shape) {
-        writerDelegator.useShapeWriter(shape, writer -> {
+    private void renderErrorStructure() {
             Symbol structureSymbol = symbolProvider.toSymbol(shape);
             writer.addUseImports(SmithyGoDependency.SMITHY);
             writer.addUseImports(SmithyGoDependency.FMT);
@@ -125,17 +151,5 @@ public final class StructureGenerator implements ShapeGenerator<StructureShape> 
                 fault = "smithy.FaultServer";
             }
             writer.write("func (e *$L) ErrorFault() smithy.ErrorFault { return $L }", structureSymbol.getName(), fault);
-        });
-    }
-
-    @Override
-    public void generate(StructureShape shape) {
-        if (!shape.hasTrait(ErrorTrait.class)) {
-            writerDelegator.useShapeWriter(shape, writer -> {
-                renderStructure(writer, shape, false);
-            });
-        } else {
-            renderErrorStructure(shape);
-        }
     }
 }

@@ -13,9 +13,9 @@
  * permissions and limitations under the License.
  */
 
-package software.amazon.polymorph.smithygo;
+package software.amazon.polymorph.smithygo.codegen;
 
-import software.amazon.polymorph.smithygo.knowledge.GoPointableIndex;
+import software.amazon.polymorph.smithygo.codegen.knowledge.GoPointableIndex;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;

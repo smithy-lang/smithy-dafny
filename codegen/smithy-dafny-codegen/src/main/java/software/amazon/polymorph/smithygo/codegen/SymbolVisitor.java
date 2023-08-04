@@ -13,9 +13,9 @@
  * permissions and limitations under the License.
  */
 
-package software.amazon.polymorph.smithygo;
+package software.amazon.polymorph.smithygo.codegen;
 
-import software.amazon.polymorph.smithygo.knowledge.GoPointableIndex;
+import software.amazon.polymorph.smithygo.codegen.knowledge.GoPointableIndex;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.ReservedWordSymbolProvider;
 import software.amazon.smithy.codegen.core.ReservedWords;
@@ -24,7 +24,6 @@ import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.NeighborProviderIndex;
-import software.amazon.smithy.model.knowledge.OperationIndex;
 import software.amazon.smithy.model.neighbor.NeighborProvider;
 import software.amazon.smithy.model.neighbor.Relationship;
 import software.amazon.smithy.model.neighbor.RelationshipType;
@@ -49,7 +48,6 @@ import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.SetShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
-import software.amazon.smithy.model.shapes.ShapeType;
 import software.amazon.smithy.model.shapes.ShapeVisitor;
 import software.amazon.smithy.model.shapes.ShortShape;
 import software.amazon.smithy.model.shapes.StringShape;
@@ -66,13 +64,16 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Logger;
 
+import static software.amazon.polymorph.smithygo.nameresolver.Constants.BLANK;
+import static software.amazon.polymorph.smithygo.nameresolver.Constants.DOT;
+
 /**
  * Responsible for type mapping and file/identifier formatting.
  *
  * <p>Reserved words for Go are automatically escaped so that they are
  * suffixed with "_". See "reserved-words.txt" for the list of words.
  */
-final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
+public class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     private static final Logger LOGGER = Logger.getLogger(SymbolVisitor.class.getName());
 
     private final Model model;
@@ -84,10 +85,10 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
     private final GoPointableIndex pointableIndex;
     private final GoSettings settings;
 
-    SymbolVisitor(Model model, GoSettings settings) {
+    public SymbolVisitor(Model model, GoSettings settings) {
         this.model = model;
         this.settings = settings;
-        this.rootModuleName = settings.getModuleName().toLowerCase();
+        this.rootModuleName = settings.getModuleName().replace(DOT, BLANK).toLowerCase();
         this.typesPackageName = this.rootModuleName + "/types";
         this.pointableIndex = GoPointableIndex.of(model);
 
@@ -280,14 +281,9 @@ final class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
 
     @Override
     public Symbol booleanShape(BooleanShape shape) {
-        return symbolBuilderFor(shape, "bool").definitionFile("./typeconversion/typeconversion.go").namespace("typeconversion", "")
-                .putProperty(SymbolUtils.GO_UNIVERSE_TYPE, true)
-                .putProperty("native", symbolBuilderFor(shape, "bool").definitionFile("./typeconversion/typeconversion.go").build())
-                .putProperty("dafny", symbolBuilderFor(shape, "Wrappers_Compile.Option").addDependency("Wrappers_Compile", "").definitionFile("./typeconversion/typeconversion.go").build())
-                       .putProperty("ToNative", "val.Dtor_value().(bool)")
-                                              .putProperty("ToDafny", "Wrappers_Compile.Companion_Option_.Create_Some_(val)")
-
-                                              .build();
+        return symbolBuilderFor(shape, "bool")
+                       .putProperty(SymbolUtils.GO_UNIVERSE_TYPE, true)
+                       .build();
     }
 
     @Override
