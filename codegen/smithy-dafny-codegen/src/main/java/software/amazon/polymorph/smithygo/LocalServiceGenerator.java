@@ -52,7 +52,7 @@ public class LocalServiceGenerator implements Runnable {
         var dafnyClient = DafnyNameResolver.getDafnyClient(context.settings(), serviceTrait.getSdkId());
         writer.write("""
                              type $T struct {
-                                 dafnyClient *$L
+                                 DafnyClient *$L
                              }
                                                                  
                              func NewClient(clientConfig $T) (*$T, error) {
@@ -74,7 +74,7 @@ public class LocalServiceGenerator implements Runnable {
             writer.write("""
                                    func (client *$T) $L(ctx context.Context, params types.$L) (*types.$L, error) {
                                        var dafny_request $L = $L(params)
-                                       var dafny_response = client.dafnyClient.$L(dafny_request)
+                                       var dafny_response = client.DafnyClient.$L(dafny_request)
                                        var native_response = $L(dafny_response.Extract().($L))
                                        return &native_response, nil
                                    }
@@ -89,7 +89,29 @@ public class LocalServiceGenerator implements Runnable {
         });
     }
 
-    void generateShim(GoWriter writer) {
+    void generateShim(GoWriter writer1) {
+        var symbolProvider = context.symbolProvider();
+        var model = context.model();
+        final LocalServiceTrait serviceTrait = service.expectTrait(LocalServiceTrait.class);
+        var configSymbol = symbolProvider.toSymbol(model.expectShape(serviceTrait.getConfigId()));
+        var dafnyClient = DafnyNameResolver.getDafnyClient(context.settings(), serviceTrait.getSdkId());
+        var namespace = "%swrapped".formatted(DafnyNameResolver.dafnyNamespace(context.settings()));
+        context.writerDelegator().useFileWriter("shim.go", namespace, writer -> {
+                                                    writer.addImport(DafnyNameResolver.dafnyTypesNamespace(context.settings()));
+                                                    writer.addImport("Wrappers");
+            writer.addImport(DafnyNameResolver.serviceNamespace(service));
+
+            writer.write("""                   
+                                                                         func Wrapped$L(inputConfig $L) (Wrappers.Result) {
+                                                                             var nativeConfig = $L.$L(inputConfig)
+                                                                             var nativeClient, _ = $L.NewClient(nativeConfig)
+                                                                             return Wrappers.Companion_Result_.Create_Success_(nativeClient.DafnyClient)
+                                                                         }
+                                                                         """,
+                                                                 serviceTrait.getSdkId(), DafnyNameResolver.getDafnyType(context.settings(), configSymbol), DafnyNameResolver.serviceNamespace(service), DafnyNameResolver.getFromDafnyMethodName(context, serviceTrait.getConfigId()), DafnyNameResolver.serviceNamespace(service));
+                                                });
+
+
 //        service.getAllOperations().forEach(operation -> {
 //            final OperationShape operationShape = model.expectShape(operation, OperationShape.class);
 //            final Shape inputShape = model.expectShape(operationShape.getInputShape());
