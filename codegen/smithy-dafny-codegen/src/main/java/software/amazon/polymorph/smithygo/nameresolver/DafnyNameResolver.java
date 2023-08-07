@@ -22,19 +22,7 @@ public class DafnyNameResolver {
     }
 
     public static String serviceNamespace(final ServiceShape serviceShape) {
-        return serviceShape.toShapeId().getNamespace().replace(DOT, BLANK);
-    }
-
-    public static String getCallInput() {
-        return "typeconversion.FromNativeToDafny$L(params)";
-    }
-
-    public static String getDafnyCall() {
-        return "$Linternaldafny.New_$LClient_().$L(dafnyType).Extract().($Linternaldafnytypes.$L)";
-    }
-
-    public static String getCallOuput() {
-        return "typeconversion.FromDafnyToNative$L(result)";
+        return serviceShape.toShapeId().getNamespace().replace(DOT, BLANK).toLowerCase();
     }
 
     public static String getDafnyType(final GoSettings settings, final Symbol symbol) {

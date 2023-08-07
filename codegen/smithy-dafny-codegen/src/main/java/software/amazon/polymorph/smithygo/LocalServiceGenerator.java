@@ -31,7 +31,7 @@ public class LocalServiceGenerator implements Runnable {
 
     private void generateService(GoWriter writer) {
         generateClient(writer);
-        generateShim(writer);
+        generateShim();
     }
     void generateClient(GoWriter writer) {
         // Generate each operation for the service. We do this here instead of via the operation visitor method to
@@ -89,12 +89,11 @@ public class LocalServiceGenerator implements Runnable {
         });
     }
 
-    void generateShim(GoWriter writer1) {
+    void generateShim() {
         var symbolProvider = context.symbolProvider();
         var model = context.model();
         final LocalServiceTrait serviceTrait = service.expectTrait(LocalServiceTrait.class);
         var configSymbol = symbolProvider.toSymbol(model.expectShape(serviceTrait.getConfigId()));
-        var dafnyClient = DafnyNameResolver.getDafnyClient(context.settings(), serviceTrait.getSdkId());
         var namespace = "%swrapped".formatted(DafnyNameResolver.dafnyNamespace(context.settings()));
         context.writerDelegator().useFileWriter("shim.go", namespace, writer -> {
                                                     writer.addImport(DafnyNameResolver.dafnyTypesNamespace(context.settings()));
@@ -110,32 +109,5 @@ public class LocalServiceGenerator implements Runnable {
                                                                          """,
                                                                  serviceTrait.getSdkId(), DafnyNameResolver.getDafnyType(context.settings(), configSymbol), DafnyNameResolver.serviceNamespace(service), DafnyNameResolver.getFromDafnyMethodName(context, serviceTrait.getConfigId()), DafnyNameResolver.serviceNamespace(service));
                                                 });
-
-
-//        service.getAllOperations().forEach(operation -> {
-//            final OperationShape operationShape = model.expectShape(operation, OperationShape.class);
-//            final Shape inputShape = model.expectShape(operationShape.getInputShape());
-//            var i = inputShape.accept(new DafnyToSmithyShapeVisitor(model, "input", false));
-//            final Shape outputShape = model.expectShape(operationShape.getOutputShape());
-//            final String inputType = model.expectShape(model.expectShape(operation).asOperationShape().get().getInputShape()).toShapeId().getName();
-//            final String outputType = model.expectShape(model.expectShape(operation).asOperationShape().get().getOutputShape()).toShapeId().getName();
-//            var o = outputShape.accept(new SmithyToDafnyShapeVisitor(model, "wrapped_response", false));
-//            writer.write("""
-//                                   func (client *$T) $L(ctx context.Context, params types.$L) (types.$L, error) {
-//                                       var unwrapped_request: $L = $L
-//                                       wrapped_response, err = $L
-//                                       if err != OK {
-//                                           return nil, err
-//                                       }
-//                                       return $L, nil
-//                                 """,
-//                         serviceSymbol,
-//                         operationShape.getId().getName(),
-//                         inputType, outputType,
-//                         operationShape.getInputShape().getName(),
-//                         i,
-//                         symbolProvider.toSymbol(operationShape).getName(),
-//                         o);
-//        });
     }
 }

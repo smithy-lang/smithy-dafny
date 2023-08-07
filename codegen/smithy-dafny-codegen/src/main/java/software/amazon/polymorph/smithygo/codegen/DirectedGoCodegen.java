@@ -15,6 +15,7 @@ import software.amazon.smithy.codegen.core.directed.GenerateServiceDirective;
 import software.amazon.smithy.codegen.core.directed.GenerateStructureDirective;
 import software.amazon.smithy.codegen.core.directed.GenerateUnionDirective;
 import software.amazon.smithy.model.Model;
+import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.InputTrait;
 import software.amazon.smithy.model.traits.OutputTrait;
 
@@ -91,11 +92,16 @@ public class DirectedGoCodegen implements DirectedCodegen<GenerationContext, GoS
 
     @Override
     public void generateEnumShape(GenerateEnumDirective<GenerationContext, GoSettings> directive) {
-
+        directive.context().writerDelegator().useShapeWriter(directive.shape(), writer -> {
+            EnumGenerator enumGenerator = new EnumGenerator(directive.symbolProvider(), writer, directive.shape());
+            enumGenerator.run();
+        });
     }
 
     @Override
     public void generateIntEnumShape(GenerateIntEnumDirective<GenerationContext, GoSettings> directive) {
-
+        directive.context().writerDelegator().useShapeWriter(directive.shape(), writer -> {
+            IntEnumGenerator intEnumGenerator = new IntEnumGenerator(directive.symbolProvider(), writer, directive.shape().asIntEnumShape().get());
+        });
     }
 }

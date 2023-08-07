@@ -21,12 +21,14 @@ import software.amazon.smithy.model.shapes.ListShape;
 import software.amazon.smithy.model.shapes.LongShape;
 import software.amazon.smithy.model.shapes.MapShape;
 import software.amazon.smithy.model.shapes.MemberShape;
+import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeVisitor;
 import software.amazon.smithy.model.shapes.ShortShape;
 import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.TimestampShape;
+import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.utils.CaseUtils;
 
 public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
@@ -57,7 +59,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
 
     @Override
     public String blobShape(BlobShape shape) {
-        return dataSource;
+        return getTypeAssertedShape(shape);
     }
 
     @Override
@@ -102,7 +104,11 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
 
     @Override
     public String stringShape(StringShape shape) {
-        return dataSource;
+        if (shape.hasTrait(EnumTrait.class)) {
+            final String[] refName = context.symbolProvider().toSymbol(shape).getFullName().split("/");
+            return "%s.(%s)".formatted(dataSource, refName[refName.length - 1]);
+        }
+        return getTypeAssertedShape(shape);
     }
 
     @Override
@@ -117,12 +123,12 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
 
     @Override
     public String integerShape(IntegerShape shape) {
-        return dataSource;
+        return getTypeAssertedShape(shape);
     }
 
     @Override
     public String longShape(LongShape shape) {
-        return dataSource;
+        return getTypeAssertedShape(shape);
     }
 
     @Override
@@ -137,7 +143,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
 
     @Override
     public String doubleShape(DoubleShape shape) {
-        return dataSource;
+        return getTypeAssertedShape(shape);
     }
 
     @Override
@@ -147,11 +153,15 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
 
     @Override
     public String enumShape(EnumShape shape) {
-        return dataSource;
+        return "%s.(%s)".formatted(dataSource, context.symbolProvider().toSymbol(shape).getNamespace());
     }
 
     @Override
     public String timestampShape(TimestampShape shape) {
         return getDefault(shape);
+    }
+
+    private String getTypeAssertedShape(final Shape shape) {
+        return "%s.(*%s)".formatted(dataSource, context.symbolProvider().toSymbol(shape));
     }
 }
