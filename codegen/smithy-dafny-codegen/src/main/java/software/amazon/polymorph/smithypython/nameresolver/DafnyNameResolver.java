@@ -26,7 +26,7 @@ public class DafnyNameResolver {
   }
 
   public static String getDafnyImplModuleNamespaceForShape(ShapeId shapeId) {
-    return shapeId.getNamespace().toLowerCase(Locale.ROOT) + ".internaldafny.impl";
+    return shapeId.getNamespace().toLowerCase(Locale.ROOT) + ".internaldafny.index";
   }
 
   /**

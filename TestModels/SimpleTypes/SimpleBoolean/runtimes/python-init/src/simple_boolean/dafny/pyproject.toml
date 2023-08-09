@@ -1,0 +1,19 @@
+[project]
+name = "internaldafny"
+version = "0.1.0"
+authors = [
+    { name = "AWS", email = "aws-arg-dafny@amazon.com" }
+]
+
+[tool.poetry]
+name = "internaldafny"
+version = "0.1.0"
+description = ""
+authors = ["AWS <aws-arg-dafny@amazon.com>"]
+packages = [
+    { include = "*.py" },
+]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

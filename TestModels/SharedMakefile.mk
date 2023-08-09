@@ -240,7 +240,7 @@ polymorph_java: _polymorph_wrapped
 polymorph_java: POLYMORPH_LANGUAGE_TARGET=java
 polymorph_java: _polymorph_dependencies
 
-polymorph_python: OUTPUT_PYTHON=--output-python $(LIBRARY_ROOT)/runtimes/python/src/$(PYTHON_MODULE_NAME)/smithy_generated
+polymorph_python: OUTPUT_PYTHON=--output-python $(LIBRARY_ROOT)/runtimes/python/src/
 polymorph_python: SMITHY_BUILD=--smithy-build $(LIBRARY_ROOT)/smithy-build.json
 polymorph_python: _polymorph
 
@@ -335,29 +335,26 @@ clean_dafny_python:
 	rm -rf runtimes/python/src/dafny_generated
 
 build_implementation_python: TARGET=py
-build_implementation_python: OUT=runtimes/python/src/dafny_generated
+build_implementation_python: OUT=runtimes/python/src
 build_implementation_python: build_implementation
 
 # `transpile_implementation_python` is not directly used, but is indirectly used via `transpile_dependencies`
 transpile_implementation_python: TARGET=py
-transpile_implementation_python: OUT=runtimes/python/src/dafny_generated
+transpile_implementation_python: OUT=runtimes/python/src
 transpile_implementation_python: transpile_implementation
 transpile_implementation_python:
-	rm -rf runtimes/python/src/dafny_generated
-	mv runtimes/python/src/dafny_generated-py runtimes/python/src/dafny_generated
+	rm -rf runtimes/python/src
+	mv runtimes/python/src-py runtimes/python/src
 
 transpile_dependencies_python: LANG=python
 transpile_dependencies_python: transpile_dependencies
-transpile_dependencies_python:
-	mkdir -p runtimes/python/src/dafny_generated-py
-	cp -r $(STANDARD_LIBRARY_PATH)/runtimes/python/src/dafny_generated/. runtimes/python/src/dafny_generated-py
 
 # Dafny-compiled Python has issues stemming from the --library flag
 # This is blocking us from separating src/ and test/ directories
 # This is also why Python has a separate transpile_test target
 # https://sim.amazon.com/issues/CrypTool-5190
 transpile_test_python: TARGET=py
-transpile_test_python: OUT=runtimes/python/src/dafny_generated
+transpile_test_python: OUT=runtimes/python/test
 transpile_test_python:
 	dafny \
 		-vcsCores:$(CORES) \
@@ -371,7 +368,20 @@ transpile_test_python:
 		-useRuntimeLib \
 		-out $(OUT) \
 		-compile:0 \
-		`find ./test -name '*.dfy'`
+		`find ./test -name '*.dfy'` \
+		-library:src/Index.dfy
+
+build_test_python: TARGET=py
+build_test_python: OUT=runtimes/python/test
+build_test_python:
+	dafny build \
+		-t:$(TARGET) \
+		`find ./test -name '*.dfy'` \
+		-o $(OUT) \
+		--quantifier-syntax:3 \
+		--function-syntax:3 \
+		--optimize-erasable-datatype-wrapper:false \
+		--library:src/Index.dfy
 
 # TODO: This is not OK. Create SIM to replace this...
 # TODO: Check with Dafny on what I should be doing here...
@@ -381,14 +391,16 @@ transpile_test_python:
 # We must import the Extern module within Dafny code, since only the Dafny code uses it.
 # But we do not control Dafny code generation, so we cannot import the Extern module...
 hack_to_import_extern:
-	sed -i '' '2s/^/from $(PYTHON_MODULE_NAME).extern import Extern\n/' 'runtimes/python/src/dafny_generated-py/dafny_generated.py'
+	sed -i '' '2s/^/from $(PYTHON_MODULE_NAME).extern import Extern\n/' 'runtimes/python/test-py/test.py'
 
 mv_files_python:
-	mv runtimes/python/src/dafny_generated-py runtimes/python/src/$(PYTHON_MODULE_NAME)/dafny_generated
+	mv runtimes/python/test-py runtimes/python/test
 
 test_python:
 	# Installs the Python project in pip before using it
+#	poetry install --with test --directory runtimes/python
 	python -m pip install runtimes/python
-	python runtimes/python/src/$(PYTHON_MODULE_NAME)/dafny_generated/dafny_generated.py
+	PYTHONPATH=.:runtimes/python/test
+	python runtimes/python/test/extern/extern.py
 
 clean: _clean

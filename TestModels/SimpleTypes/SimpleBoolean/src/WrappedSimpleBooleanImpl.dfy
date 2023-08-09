@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 include "../Model/SimpleTypesBooleanTypesWrapped.dfy"
 
-module {:extern "simple.types.boolean.internaldafny.wrapped"} WrappedSimpleTypesBooleanService refines WrappedAbstractSimpleTypesBooleanService {
+module {:extern "simple_types_boolean_internaldafny_wrapped"} WrappedSimpleTypesBooleanService refines WrappedAbstractSimpleTypesBooleanService {
     import WrappedService = SimpleBoolean
     function method WrappedDefaultSimpleBooleanConfig(): SimpleBooleanConfig {
         SimpleBooleanConfig

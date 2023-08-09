@@ -1,0 +1,21 @@
+[project]
+name = "simple-boolean"
+version = "0.1.0"
+authors = [
+    { name = "AWS", email = "aws-arg-dafny@amazon.com" }
+]
+
+[tool.poetry]
+name = "simple-boolean"
+version = "0.1.0"
+description = ""
+authors = ["AWS <aws-arg-dafny@amazon.com>"]
+packages = [
+    { include = "simple_boolean", from = "src" },
+]
+[tool.poetry.dependencies]
+internaldafny = { path = "./src/simple_boolean/dafny", develop = false}
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

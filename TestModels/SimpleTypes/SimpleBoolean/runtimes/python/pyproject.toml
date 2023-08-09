@@ -1,11 +1,30 @@
 [project]
-name = "simpleboolean"
+name = "simple-boolean"
 version = "0.1.0"
 authors = [
     { name = "AWS", email = "aws-arg-dafny@amazon.com" }
 ]
 
 [tool.poetry]
+name = "simple-boolean"
+version = "0.1.0"
+description = ""
+authors = ["AWS <aws-arg-dafny@amazon.com>"]
 packages = [
     { include = "simple_boolean", from = "src" },
 ]
+
+[tool.poetry.dependencies]
+python = "^3.11.0"
+simple-boolean-internaldafny = { path = "./src/simple_boolean/dafny", develop = false}
+standard-library = { path = "../../../../dafny-dependencies/StandardLibrary/runtimes/python", develop = false}
+# TODO: Depend on PyPi once Smithy-Python publishes their Python package there
+smithy-python = { path = "../../../../lib/python/smithy-python", develop = false}
+
+[tool.poetry.group.test.dependencies]
+pytest = "^7.4.0"
+simple-boolean-test-internaldafny = { path = "./test/dafny", develop = false}
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
