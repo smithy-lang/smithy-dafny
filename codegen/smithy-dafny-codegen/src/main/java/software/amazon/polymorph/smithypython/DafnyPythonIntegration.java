@@ -109,7 +109,7 @@ public final class DafnyPythonIntegration implements PythonIntegration {
             "dafny",
             // TODO: Naming of these symbols?
             // TODO: This is just the input/output of a Dafny call, right?
-            //       If that is true, is output just wrappers_compile.result?
+            //       If that is true, is output just Wrappers.result?
             //       Then what is input? Maybe DafnyCallEvent?
             // Input: Not DafnyCallEvent. There is no Dafny-generated type for input.
             // Input can be the corresponding Dafny class for any of the operation input shapes,
@@ -121,7 +121,7 @@ public final class DafnyPythonIntegration implements PythonIntegration {
             //     Union[forall operations in service: operation.getInputShape()]
             // )
             // Output: This is the value returned from the client calling dafnyImplInterface.
-            // I believe this is a Wrappers_Compile.Result, which I should use.
+            // I believe this is a Wrappers.Result, which I should use.
             SymbolReference.builder()
                 .symbol(createDafnySymbol("DafnyRequest"))
                 .build(),

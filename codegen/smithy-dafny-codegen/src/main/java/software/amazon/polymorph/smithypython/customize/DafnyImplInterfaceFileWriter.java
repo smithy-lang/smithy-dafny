@@ -24,7 +24,7 @@ public class DafnyImplInterfaceFileWriter implements CustomFileWriter {
       ServiceShape serviceShape, GenerationContext codegenContext) {
     String moduleName = codegenContext.settings().getModuleName();
     String clientName = SmithyNameResolver.clientForService(serviceShape);
-    String implModulePrelude = DafnyNameResolver.getDafnyImplModuleNamespaceForShape(serviceShape);
+    String implModulePrelude = DafnyNameResolver.getDafnyIndexModuleNamespaceForShape(serviceShape);
 
     codegenContext.writerDelegator()
       .useFileWriter(moduleName + "/dafnyImplInterface.py", "", writer -> {

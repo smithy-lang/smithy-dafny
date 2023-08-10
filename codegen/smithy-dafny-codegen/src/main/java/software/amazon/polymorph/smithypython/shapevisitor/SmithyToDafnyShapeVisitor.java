@@ -94,8 +94,8 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
         return referenceStructureShape(shape);
       }
       DafnyNameResolver.importDafnyTypeForShape(writer, shape.getId());
-      writer.addImport("Wrappers_Compile", "Option_Some");
-      writer.addImport("Wrappers_Compile", "Option_None");
+      writer.addImport("Wrappers", "Option_Some");
+      writer.addImport("Wrappers", "Option_None");
       StringBuilder builder = new StringBuilder();
       // Open Dafny structure shape
       // e.g.

@@ -36,6 +36,10 @@ transpile_net: | transpile_implementation_net transpile_test_net
 # StandardLibrary as a dependency
 transpile_java: | transpile_implementation_java transpile_test_java
 
+# Override SharedMakefile's transpile_python to not transpile
+# StandardLibrary as a dependency
+transpile_python: | transpile_implementation_python transpile_test_python
+
 transpile_dependencies:
 	echo "Skipping transpile_dependencies for StandardLibrary"
 

@@ -18,15 +18,15 @@ public class DafnyNameResolver {
   }
 
   public static String getDafnyTypesModuleNamespaceForShape(ShapeId shapeId) {
-    return shapeId.getNamespace().toLowerCase(Locale.ROOT) + ".internaldafny.types";
+    return shapeId.getNamespace().toLowerCase(Locale.ROOT).replace(".", "_") + "_internaldafny_types";
   }
 
-  public static String getDafnyImplModuleNamespaceForShape(Shape shape) {
-    return getDafnyImplModuleNamespaceForShape(shape.getId());
+  public static String getDafnyIndexModuleNamespaceForShape(Shape shape) {
+    return getDafnyIndexModuleNamespaceForShape(shape.getId());
   }
 
-  public static String getDafnyImplModuleNamespaceForShape(ShapeId shapeId) {
-    return shapeId.getNamespace().toLowerCase(Locale.ROOT) + ".internaldafny.index";
+  public static String getDafnyIndexModuleNamespaceForShape(ShapeId shapeId) {
+    return shapeId.getNamespace().toLowerCase(Locale.ROOT).replace(".", "_") + "_internaldafny_index";
   }
 
   /**

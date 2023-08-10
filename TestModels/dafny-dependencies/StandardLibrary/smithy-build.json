@@ -2,6 +2,7 @@
     "version": "1.0",
     "plugins": {
         "dafny-client-codegen": {
+            "module": "standard_library"
         }
     }
 }

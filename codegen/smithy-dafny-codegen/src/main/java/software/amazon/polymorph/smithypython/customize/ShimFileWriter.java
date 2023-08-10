@@ -38,10 +38,10 @@ public class ShimFileWriter implements CustomFileWriter {
 
       writer.write(
           """
-          import Wrappers_Compile
+          import Wrappers
           import asyncio
           import $L
-          import $L.smithy_generated.$L.client as client_impl
+          import $L.smithygenerated.client as client_impl
                           
           def smithy_error_to_dafny_error(e: ServiceError):
               ${C|}
@@ -52,7 +52,7 @@ public class ShimFileWriter implements CustomFileWriter {
                           
               ${C|}
               
-              """, typesModulePrelude, moduleName, moduleName,
+              """, typesModulePrelude, moduleName,
           writer.consumer(w -> generateErrorsBlock(codegenContext, serviceShape, w)),
           SmithyNameResolver.shimForService(serviceShape),
           typesModulePrelude, DafnyNameResolver.getDafnyClientInterfaceTypeForServiceShape(serviceShape),
@@ -151,8 +151,8 @@ public class ShimFileWriter implements CustomFileWriter {
               try:
                   wrapped_response = asyncio.run(self._impl.$L(unwrapped_request))
               except ServiceError as e:
-                  return Wrappers_Compile.Result_Failure(smithy_error_to_dafny_error(e))
-              return Wrappers_Compile.Result_Success($L)
+                  return Wrappers.Result_Failure(smithy_error_to_dafny_error(e))
+              return Wrappers.Result_Success($L)
 
           """,
           operationShape.getId().getName(),
