@@ -4,8 +4,13 @@ version = "0.1.0"
 description = ""
 authors = ["AWS <aws-arg-dafny@amazon.com>"]
 packages = [
+    # Globally publish all internaldafny modules
+    # such that a module X can be imported with `import X`
     { include = "*.py" },
 ]
+# Include all Dafny-generated code in package distributions,
+# even though this is in .gitignore
+include = ["*.py"]
 
 [tool.poetry.dependencies]
 python = "^3.11"
