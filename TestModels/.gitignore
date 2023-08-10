@@ -10,7 +10,7 @@
 **/runtimes/java/src/test/dafny-generated/
 
 # Dafny Generated Python
-**/runtimes/python/src/**/dafny_generated/
+**/runtimes/python/src/**/dafnygenerated/
 
 # Polymorph Generated Dafny
 **/Model/*Types.dfy
@@ -24,7 +24,7 @@
 **/runtimes/java/src/main/smithy-generated/
 
 # Polymorph Generated Python
-**/runtimes/python/src/**/smithy_generated/
+**/runtimes/python/src/**/smithygenerated/
 
 # .NET Artifacts
 **/bin
