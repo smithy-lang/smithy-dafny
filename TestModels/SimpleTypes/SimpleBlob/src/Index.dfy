@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 include "SimpleBlobImpl.dfy"
 
-module {:extern "simple.types.blob.internaldafny.index" } SimpleBlob refines AbstractSimpleTypesBlobService {
+module {:extern "simple.types.blob.internaldafny" } SimpleBlob refines AbstractSimpleTypesBlobService {
     import Operations = SimpleBlobImpl
 
  function method DefaultSimpleBlobConfig(): SimpleBlobConfig {

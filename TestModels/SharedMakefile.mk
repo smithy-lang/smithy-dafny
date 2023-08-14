@@ -337,7 +337,6 @@ _clean:
 ########################## Python targets
 
 build_python: _python_underscore_extern_names
-# TODO: Fix dependencies
 build_python: transpile_dependencies_python
 build_python: build_implementation_python
 build_python: transpile_test_python
@@ -370,14 +369,14 @@ transpile_test_python: OUT=runtimes/python/test
 transpile_test_python: transpile_test
 
 _python_underscore_extern_names:
-	find src -regex ".*\.dfy" -type f -exec sed -i "" '/module {:extern \".*\"/s/\./_/g' {} \;
-	find Model -regex ".*\.dfy" -type f -exec sed -i "" '/module {:extern \".*\"/s/\./_/g' {} \;
-	find test -regex ".*\.dfy" -type f -exec sed -i "" '/module {:extern \".*\"/s/\./_/g' {} \;
+	find src -regex ".*\.dfy" -type f -exec sed -i "" '/.*{:extern \".*\".*/s/\./_/g' {} \;
+	find Model -regex ".*\.dfy" -type f -exec sed -i "" '/.*{:extern \".*\.*"/s/\./_/g' {} \;
+	find test -regex ".*\.dfy" -type f -exec sed -i "" '/.*{:extern \".*\".*/s/\./_/g' {} \;
 
 _python_revert_underscore_extern_names:
-	find src -regex ".*\.dfy" -type f -exec sed -i "" '/module {:extern \".*\"/s/_/\./g' {} \;
-	find Model -regex ".*\.dfy" -type f -exec sed -i "" '/module {:extern \".*\"/s/_/\./g' {} \; 2>/dev/null
-	find test -regex ".*\.dfy" -type f -exec sed -i "" '/module {:extern \".*\"/s/_/\./g' {} \;
+	find src -regex ".*\.dfy" -type f -exec sed -i "" '/.*{:extern \".*\".*/s/_/\./g' {} \;
+	find Model -regex ".*\.dfy" -type f -exec sed -i "" '/.*{:extern \".*\".*/s/_/\./g' {} \; 2>/dev/null
+	find test -regex ".*\.dfy" -type f -exec sed -i "" '/.*{:extern \".*\".*/s/_/\./g' {} \;
 
 _mv_dafnygenerated_python:
 	# Remove everything EXCEPT the pyproject.toml

@@ -4,7 +4,7 @@ include "SimpleBooleanImpl.dfy"
 
 // TODO: Ask about the language-specific extern name feature
 // This is fine for now since Python won't be merged to upstream until Smithy-Python is public
-module {:extern "simple.types_boolean_internaldafny.index" } SimpleBoolean refines AbstractSimpleTypesBooleanService {
+module {:extern "simple.types_boolean_internaldafny" } SimpleBoolean refines AbstractSimpleTypesBooleanService {
     import Operations = SimpleBooleanImpl
 
  function method DefaultSimpleBooleanConfig(): SimpleBooleanConfig {

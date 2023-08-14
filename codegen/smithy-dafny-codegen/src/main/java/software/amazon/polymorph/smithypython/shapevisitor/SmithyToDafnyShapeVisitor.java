@@ -94,8 +94,8 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
         return referenceStructureShape(shape);
       }
       DafnyNameResolver.importDafnyTypeForShape(writer, shape.getId());
-      writer.addImport("Wrappers", "Option_Some");
-      writer.addImport("Wrappers", "Option_None");
+      writer.addStdlibImport("Wrappers", "Option_Some");
+      writer.addStdlibImport("Wrappers", "Option_None");
       StringBuilder builder = new StringBuilder();
       // Open Dafny structure shape
       // e.g.
@@ -155,7 +155,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
   public String mapShape(MapShape shape) {
     StringBuilder builder = new StringBuilder();
 
-    writer.addImport("_dafny", "Map");
+    writer.addStdlibImport("_dafny", "Map");
 
     builder.append("Map({");
     MemberShape keyMemberShape = shape.getKey();
@@ -182,7 +182,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
     @Override
     public String listShape(ListShape shape) {
 
-      writer.addImport("_dafny", "Seq");
+      writer.addStdlibImport("_dafny", "Seq");
 
       StringBuilder builder = new StringBuilder();
 

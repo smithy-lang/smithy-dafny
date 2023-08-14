@@ -347,7 +347,7 @@ public abstract class DafnyPythonProtocolGenerator implements ProtocolGenerator 
           // Import Dafny-modelled error
           DafnyNameResolver.importDafnyTypeForError(writer, errorId);
           // Import generic Dafny error type
-          writer.addImport(errorId.getNamespace() + ".internaldafny.types", "Error");
+          DafnyNameResolver.importGenericDafnyErrorTypeForNamespace(writer, errorId.getNamespace());
           writer.write("""
                   if error.is_$L:
                     return $L(message=error.message)
