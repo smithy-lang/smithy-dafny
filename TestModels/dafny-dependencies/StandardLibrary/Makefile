@@ -40,6 +40,17 @@ transpile_java: | transpile_implementation_java transpile_test_java
 # StandardLibrary as a dependency
 transpile_python: | transpile_implementation_python transpile_test_python
 
+_python_underscore_extern_names:
+	find src -regex ".*\.dfy" -type f -exec sed -i "" '/module {:extern \".*\"/s/\./_/g' {} \;
+	echo "Skipping Model modification for StandardLibrary"
+	find test -regex ".*\.dfy" -type f -exec sed -i "" '/module {:extern \".*\"/s/\./_/g' {} \;
+
+_python_revert_underscore_extern_names:
+	find src -regex ".*\.dfy" -type f -exec sed -i "" '/module {:extern \".*\"/s/_/\./g' {} \;
+	echo "Skipping Model modification for StandardLibrary"
+	find test -regex ".*\.dfy" -type f -exec sed -i "" '/module {:extern \".*\"/s/_/\./g' {} \;
+
+
 transpile_dependencies:
 	echo "Skipping transpile_dependencies for StandardLibrary"
 

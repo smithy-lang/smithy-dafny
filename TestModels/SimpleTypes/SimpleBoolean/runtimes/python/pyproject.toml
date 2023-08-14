@@ -6,6 +6,9 @@ authors = ["AWS <aws-arg-dafny@amazon.com>"]
 packages = [
     { include = "simple_boolean", from = "src" }
 ]
+# Include all Smithy- and Dafny-generated code in package distributions,
+# even though they are not included in version control
+include = ["**/smithygenerated/*.py", "**/dafnygenerated/*.py"]
 
 [tool.poetry.dependencies]
 python = "^3.11.0"

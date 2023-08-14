@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 include "SimpleIntegerImpl.dfy"
 
-module {:extern "simple.types.integer.internaldafny.impl" } SimpleInteger refines AbstractSimpleTypesIntegerService {
+module {:extern "simple.types.integer.internaldafny.index" } SimpleInteger refines AbstractSimpleTypesIntegerService {
     import Operations = SimpleIntegerImpl
 
     function method DefaultSimpleIntegerConfig(): SimpleIntegerConfig {

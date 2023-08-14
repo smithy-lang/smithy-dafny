@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "simple-boolean-test-internaldafny"
+name = "simple-integer-test-internaldafny"
 version = "0.1.0"
 description = ""
 authors = ["AWS <aws-arg-dafny@amazon.com>"]
