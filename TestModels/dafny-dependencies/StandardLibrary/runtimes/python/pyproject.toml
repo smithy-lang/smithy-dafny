@@ -13,6 +13,7 @@ standard-library-internaldafny = { path = "src/standard_library/dafnygenerated",
 
 [tool.poetry.group.test.dependencies]
 pytest = "^7.4.0"
+standard-library-test-internaldafny = { path = "test/dafnygenerated", develop = false}
 
 [build-system]
 requires = ["poetry-core"]
