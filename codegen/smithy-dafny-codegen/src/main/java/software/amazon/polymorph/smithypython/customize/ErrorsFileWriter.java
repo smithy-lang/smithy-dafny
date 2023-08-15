@@ -1,7 +1,16 @@
 package software.amazon.polymorph.smithypython.customize;
 
+import java.util.TreeSet;
+import java.util.stream.Collectors;
+import software.amazon.smithy.codegen.core.CodegenContext;
 import software.amazon.smithy.model.shapes.ServiceShape;
+import software.amazon.smithy.model.shapes.Shape;
+import software.amazon.smithy.model.shapes.ShapeId;
+import software.amazon.smithy.model.shapes.StructureShape;
+import software.amazon.smithy.model.traits.ErrorTrait;
+import software.amazon.smithy.python.codegen.CodegenUtils;
 import software.amazon.smithy.python.codegen.GenerationContext;
+import software.amazon.smithy.python.codegen.PythonWriter;
 
 /**
  * Extends the Smithy-Python-generated errors.py file
@@ -18,13 +27,23 @@ public class ErrorsFileWriter implements CustomFileWriter {
       writer.addStdlibImport("typing", "Dict");
       writer.addStdlibImport("typing", "Any");
 
+      var deserializingErrorShapes = new TreeSet<StructureShape>(
+          codegenContext.model().getStructureShapesWithTrait(ErrorTrait.class)
+              .stream()
+              .filter(structureShape -> structureShape.getId().getNamespace()
+                  .equals(codegenContext.settings().getService().getNamespace()))
+              .collect(Collectors.toSet()));
+
+      for (StructureShape errorShape : deserializingErrorShapes) {
+        renderError(codegenContext, writer, errorShape);
+      }
+
       writer.write(
           """
-             # TODO: Should this extend ApiError...?
              class CollectionOfErrors(ApiError[Literal["CollectionOfErrors"]]):
                  code: Literal["CollectionOfErrors"] = "CollectionOfErrors"
                  message: str
-                 # TODO: To add `list` here, I'd need a typehint... what should the object type be? i.e. list[?]
+                 # TODO: To add `list` here, I'd need a typehint... what should the object type be?
                  def __init__(
                      self,
                      *,
@@ -84,13 +103,14 @@ public class ErrorsFileWriter implements CustomFileWriter {
              # Probably not... as this doesn't have a message attribute...
              class OpaqueError(ApiError[Literal["OpaqueError"]]):
                  code: Literal["OpaqueError"] = "OpaqueError"
-                 # TODO: obj *probably* should not have a typehint, so probably no-op here, but I should think more deeply about this...
+                 # TODO: The type of obj is only known at runtime, and therefore should *probably* should not have a typehint
+                 # Probably no-op here, but we should think more deeply about this...
                  def __init__(
                      self,
                      *,
                      obj
                  ):
-                     # TODO: Remove this if I decide this shouldn't extend ApiError
+                     # TODO: Remove superclass construction if we decide this shouldn't extend ApiError
                      super().__init__("")
                      self.obj = obj
                              
@@ -143,6 +163,24 @@ public class ErrorsFileWriter implements CustomFileWriter {
       );
     });
 
+  }
+
+  // This is lifted from Smithy-Python, where it is not sufficiently customizable
+  // to be used for Resource error generation.
+  // TODO: Reconcile this with Smithy-Python
+  private void renderError(GenerationContext context, PythonWriter writer, StructureShape shape) {
+    writer.addStdlibImport("typing", "Dict");
+    writer.addStdlibImport("typing", "Any");
+    writer.addStdlibImport("typing", "Literal");
+
+    var code = shape.getId().getName();
+    var symbol = context.symbolProvider().toSymbol(shape);
+    var apiError = CodegenUtils.getApiError(context.settings());
+    writer.openBlock("class $L($T[Literal[$S]]):", "", symbol.getName(), apiError, code, () -> {
+      writer.write("code: Literal[$1S] = $1S", code);
+      writer.write("message: str");
+    });
+    writer.write("");
   }
 
 }

@@ -2,6 +2,8 @@ package software.amazon.polymorph.smithypython.customize;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 import software.amazon.polymorph.smithypython.shapevisitor.DafnyToSmithyShapeVisitor;
 import software.amazon.polymorph.smithypython.shapevisitor.SmithyToDafnyShapeVisitor;
 import software.amazon.polymorph.smithypython.nameresolver.DafnyNameResolver;
@@ -13,6 +15,7 @@ import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
+import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonWriter;
 
@@ -35,10 +38,10 @@ public class ShimFileWriter implements CustomFileWriter {
 
       writer.write(
           """
-          import Wrappers_Compile
+          import Wrappers
           import asyncio
           import $L
-          import $L.smithy_generated.$L.client as client_impl
+          import $L.smithygenerated.client as client_impl
                           
           def smithy_error_to_dafny_error(e: ServiceError):
               ${C|}
@@ -49,7 +52,7 @@ public class ShimFileWriter implements CustomFileWriter {
                           
               ${C|}
               
-              """, typesModulePrelude, moduleName, moduleName,
+              """, typesModulePrelude, moduleName,
           writer.consumer(w -> generateErrorsBlock(codegenContext, serviceShape, w)),
           SmithyNameResolver.shimForService(serviceShape),
           typesModulePrelude, DafnyNameResolver.getDafnyClientInterfaceTypeForServiceShape(serviceShape),
@@ -62,17 +65,17 @@ public class ShimFileWriter implements CustomFileWriter {
       GenerationContext codegenContext, ServiceShape serviceShape, PythonWriter writer) {
 
     // Write modelled error converters
-    Set<ShapeId> errorShapeSet = new HashSet<>();
-    for (ShapeId operationShapeId : serviceShape.getAllOperations()) {
-      OperationShape operationShape = codegenContext.model()
-          .expectShape(operationShapeId, OperationShape.class);
 
-      for (ShapeId errorShapeId : operationShape.getErrors(serviceShape)) {
-        errorShapeSet.add(errorShapeId);
-      }
-    }
+    var errorShapeSet = new TreeSet<ShapeId>(
+        codegenContext.model().getStructureShapesWithTrait(ErrorTrait.class)
+            .stream()
+            .filter(structureShape -> structureShape.getId().getNamespace()
+                .equals(codegenContext.settings().getService().getNamespace()))
+            .map(Shape::getId)
+            .collect(Collectors.toSet()));
 
     for (ShapeId errorShapeId : errorShapeSet) {
+      writer.addImport(".errors", errorShapeId.getName());
       writer.write("""
               if isinstance(e, $L):
                   return $L.$L(message=e.message)
@@ -102,9 +105,7 @@ public class ShimFileWriter implements CustomFileWriter {
   private void generateOperationsBlock(
       GenerationContext codegenContext, ServiceShape serviceShape, PythonWriter writer) {
 
-    // TODO: .getAllOperations? Maybe .getOperations? or .getIntroducedOperations?
-    // Might learn which one when working on Resources
-    for (ShapeId operationShapeId : serviceShape.getAllOperations()) {
+    for (ShapeId operationShapeId : serviceShape.getOperations()) {
       OperationShape operationShape = codegenContext.model().expectShape(operationShapeId, OperationShape.class);
 
       // Add imports for operation errors
@@ -148,8 +149,8 @@ public class ShimFileWriter implements CustomFileWriter {
               try:
                   wrapped_response = asyncio.run(self._impl.$L(unwrapped_request))
               except ServiceError as e:
-                  return Wrappers_Compile.Result_Failure(smithy_error_to_dafny_error(e))
-              return Wrappers_Compile.Result_Success($L)
+                  return Wrappers.Result_Failure(smithy_error_to_dafny_error(e))
+              return Wrappers.Result_Success($L)
 
           """,
           operationShape.getId().getName(),

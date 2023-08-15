@@ -11,16 +11,16 @@ import software.amazon.smithy.model.shapes.ShapeId;
  */
 public class Utils {
 
-  public static boolean isUnitShape(ShapeId shapeId) {
-  return shapeId.getNamespace().equals("smithy.api")
-      && shapeId.getName().equals("Unit");
-}
-
   /**
-   * Returns a String representing the name of the Dafny type for the provided shape.
-   * @param shape
+   * Returns true if `shapeId` is a Smithy Unit shape.
+   * @param shapeId
    * @return
    */
+  public static boolean isUnitShape(ShapeId shapeId) {
+    return shapeId.getNamespace().equals("smithy.api")
+        && shapeId.getName().equals("Unit");
+  }
+
   private static boolean isUnitShape(Shape shape) {
     return isUnitShape(shape.getId());
   }

@@ -36,6 +36,25 @@ transpile_net: | transpile_implementation_net transpile_test_net
 # StandardLibrary as a dependency
 transpile_java: | transpile_implementation_java transpile_test_java
 
+# Override SharedMakefile's transpile_python to not transpile
+# StandardLibrary as a dependency
+transpile_python: | transpile_implementation_python transpile_test_python
+
+# Hacky workaround until Dafny supports per-language extern names.
+# Replaces `.`s with `_`s in strings like `{:extern ".*"}`.
+# This is flawed logic and should be removed, but is a reasonable band-aid for now.
+# TODO: Once Dafny supports per-language extern names, remove and replace with Pythonic extern names.
+# This may require new Smithy-Dafny logic to generate Pythonic extern names.
+_python_underscore_extern_names:
+	find src -regex ".*\.dfy" -type f -exec sed -i "" '/module {:extern \".*\"/s/\./_/g' {} \;
+	echo "Skipping Model modification for StandardLibrary"
+	find test -regex ".*\.dfy" -type f -exec sed -i "" '/module {:extern \".*\"/s/\./_/g' {} \;
+
+_python_revert_underscore_extern_names:
+	find src -regex ".*\.dfy" -type f -exec sed -i "" '/module {:extern \".*\"/s/_/\./g' {} \;
+	echo "Skipping Model modification for StandardLibrary"
+	find test -regex ".*\.dfy" -type f -exec sed -i "" '/module {:extern \".*\"/s/_/\./g' {} \;
+
 transpile_dependencies:
 	echo "Skipping transpile_dependencies for StandardLibrary"
 

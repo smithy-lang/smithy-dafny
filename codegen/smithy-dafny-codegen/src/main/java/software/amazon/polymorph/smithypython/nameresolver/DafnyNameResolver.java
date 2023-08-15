@@ -1,6 +1,7 @@
 package software.amazon.polymorph.smithypython.nameresolver;
 
 import java.util.Locale;
+import software.amazon.smithy.model.shapes.ResourceShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
@@ -17,15 +18,23 @@ public class DafnyNameResolver {
   }
 
   public static String getDafnyTypesModuleNamespaceForShape(ShapeId shapeId) {
-    return shapeId.getNamespace().toLowerCase(Locale.ROOT) + ".internaldafny.types";
+    return getDafnyTypesModuleNamespaceForSmithyNamespace(shapeId.getNamespace());
   }
 
-  public static String getDafnyImplModuleNamespaceForShape(Shape shape) {
-    return getDafnyImplModuleNamespaceForShape(shape.getId());
+  public static String getDafnyIndexModuleNamespaceForShape(Shape shape) {
+    return getDafnyIndexModuleNamespaceForShape(shape.getId());
   }
 
-  public static String getDafnyImplModuleNamespaceForShape(ShapeId shapeId) {
-    return shapeId.getNamespace().toLowerCase(Locale.ROOT) + ".internaldafny.impl";
+  public static String getDafnyIndexModuleNamespaceForShape(ShapeId shapeId) {
+    return getDafnyIndexModuleNamespaceForSmithyNamespace(shapeId.getNamespace());
+  }
+
+  public static String getDafnyIndexModuleNamespaceForSmithyNamespace(String smithyNamespace) {
+    return smithyNamespace.toLowerCase(Locale.ROOT).replace(".", "_") + "_internaldafny";
+  }
+
+  public static String getDafnyTypesModuleNamespaceForSmithyNamespace(String smithyNamespace) {
+    return getDafnyIndexModuleNamespaceForSmithyNamespace(smithyNamespace) + "_types";
   }
 
   /**
@@ -63,7 +72,7 @@ public class DafnyNameResolver {
   public static void importDafnyTypeForShape(PythonWriter writer, ShapeId shapeId) {
     String name = shapeId.getName();
     if (!Utils.isUnitShape(shapeId)) {
-      writer.addImport(getDafnyTypesModuleNamespaceForShape(shapeId),
+      writer.addStdlibImport(getDafnyTypesModuleNamespaceForShape(shapeId),
           name + "_" + name, getDafnyTypeForShape(shapeId));
     }
   }
@@ -75,6 +84,29 @@ public class DafnyNameResolver {
    */
   public static String getDafnyClientInterfaceTypeForServiceShape(ServiceShape serviceShape) {
     return "I" + serviceShape.getId().getName() + "Client";
+  }
+
+  /**
+   * Returns a String representing the interface type for the provided resourceShape.
+   * @param resourceShape
+   * @return
+   */
+  public static String getDafnyClientInterfaceTypeForResourceShape(ResourceShape resourceShape) {
+    return "I" + resourceShape.getId().getName();
+  }
+
+  public static void importDafnyTypeForResourceShape(PythonWriter writer, ResourceShape resourceShape) {
+    writer.addStdlibImport(
+        getDafnyTypesModuleNamespaceForShape(resourceShape.getId()),
+        getDafnyClientInterfaceTypeForResourceShape(resourceShape)
+    );
+  }
+
+  public static void importDafnyTypeForServiceShape(PythonWriter writer, ServiceShape serviceShape) {
+    writer.addStdlibImport(
+        getDafnyTypesModuleNamespaceForShape(serviceShape.getId()),
+        getDafnyClientInterfaceTypeForServiceShape(serviceShape)
+    );
   }
 
   /**
@@ -100,7 +132,11 @@ public class DafnyNameResolver {
    * @param shapeId
    */
   public static void importDafnyTypeForError(PythonWriter writer, ShapeId shapeId) {
-    writer.addImport(getDafnyTypesModuleNamespaceForShape(shapeId),
+    writer.addStdlibImport(getDafnyTypesModuleNamespaceForShape(shapeId),
       getDafnyTypeForError(shapeId));
+  }
+
+  public static void importGenericDafnyErrorTypeForNamespace(PythonWriter writer, String namespace) {
+    writer.addStdlibImport(getDafnyTypesModuleNamespaceForSmithyNamespace(namespace), "Error");
   }
 }

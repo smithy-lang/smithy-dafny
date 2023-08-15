@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "standard-library"
+version = "0.1.0"
+description = ""
+authors = ["AWS <aws-arg-dafny@amazon.com>"]
+packages = [
+    { include = "standard_library", from = "src" },
+]
+
+[tool.poetry.dependencies]
+python = "^3.11.0"
+standard-library-internaldafny = { path = "src/standard_library/dafnygenerated", develop = false }
+
+[tool.poetry.group.test.dependencies]
+pytest = "^7.4.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

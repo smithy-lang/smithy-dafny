@@ -16,6 +16,17 @@ allprojects {
     version = "0.1.0"
 }
 
+// This allows smithy-python-codegen to build
+// Its build.gradle does not declare its usage of `java-library` nor Maven central,
+// and it does not pick it up from its parent project (smithy-python).
+subprojects {
+    apply(plugin="java-library")
+
+    repositories {
+        mavenCentral()
+    }
+}
+
 // The root project doesn't produce a JAR.
 tasks["jar"].enabled = false
 
@@ -56,7 +67,8 @@ subprojects {
      * Java
      * ====================================================
      */
-    if (subproject.name != "smithy-dafny-codegen-test") {
+    if (subproject.name != "smithy-dafny-codegen-test"
+            && subproject.name != "smithy-python-codegen") {
         if (subproject.name == "smithy-dafny-codegen-cli") {
             apply(plugin = "application")
         } else {

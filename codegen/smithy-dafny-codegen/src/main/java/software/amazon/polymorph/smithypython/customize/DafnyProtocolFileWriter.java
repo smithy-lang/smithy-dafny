@@ -35,7 +35,7 @@ public class DafnyProtocolFileWriter implements CustomFileWriter {
     codegenContext.writerDelegator().useFileWriter(moduleName + "/dafny_protocol.py", "", writer -> {
       writer.write(
           """
-              import Wrappers_Compile
+              import Wrappers
               from typing import Union
                         
               class DafnyRequest:
@@ -48,7 +48,7 @@ public class DafnyProtocolFileWriter implements CustomFileWriter {
                       self.operation_name = operation_name
                       self.dafny_operation_input = dafny_operation_input
                   
-              class DafnyResponse(Wrappers_Compile.Result):
+              class DafnyResponse(Wrappers.Result):
                   def __init__(self):
                       super.__init__(self)
               """,

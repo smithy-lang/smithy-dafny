@@ -31,7 +31,7 @@ import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.python.codegen.ApplicationProtocol;
-import software.amazon.smithy.python.codegen.ConfigField;
+import software.amazon.smithy.python.codegen.ConfigProperty;
 import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonWriter;
 import software.amazon.smithy.python.codegen.integration.ProtocolGenerator;
@@ -42,7 +42,7 @@ import software.amazon.smithy.utils.CodeSection;
 
 public final class DafnyPythonIntegration implements PythonIntegration {
     private RuntimeClientPlugin dafnyImplRuntimeClientPlugin = RuntimeClientPlugin.builder()
-        .configFields(
+        .configProperties(
             // Adds a new field in the client class' config.
             // This is an interface for the Dafny implementation code.
             // The Smithy-Dafny Python plugin generates a dafnyImplInterface file
@@ -51,16 +51,22 @@ public final class DafnyPythonIntegration implements PythonIntegration {
             // We use an interface as we cannot plug the model into the RuntimeClientPlugin definition,
             // but we can point the RuntimeClientPlugin to an interface and plug the model in there.
             // TODO: Naming of DafnyImplInterface?
-            Collections.singletonList(new ConfigField("dafnyImplInterface",
-                Symbol.builder()
-                    .name("DafnyImplInterface")
-                    .namespace(".dafnyImplInterface", ".")
-                .build(),
-                // isOptional is marked as true here.
+            Collections.singletonList(ConfigProperty.builder()
+                .name("dafnyImplInterface")
+                .type(
+                    Symbol.builder()
+                        .name("DafnyImplInterface")
+                        .namespace(".dafnyImplInterface", ".")
+                    .build()
+                )
+                // nullable is marked as true here.
                 // This allows the Config to be instantiated without providing a plugin.
                 // However, this plugin MUST be present before using the client.
                 // Immediately after the Config is instantiated, the client will add the plugin.
-                true, ""))
+                .nullable(true)
+                .documentation("")
+                .build()
+            )
          ).pythonPlugin(
              SymbolReference.builder()
              .symbol(
@@ -109,7 +115,7 @@ public final class DafnyPythonIntegration implements PythonIntegration {
             "dafny",
             // TODO: Naming of these symbols?
             // TODO: This is just the input/output of a Dafny call, right?
-            //       If that is true, is output just wrappers_compile.result?
+            //       If that is true, is output just Wrappers.result?
             //       Then what is input? Maybe DafnyCallEvent?
             // Input: Not DafnyCallEvent. There is no Dafny-generated type for input.
             // Input can be the corresponding Dafny class for any of the operation input shapes,
@@ -121,7 +127,7 @@ public final class DafnyPythonIntegration implements PythonIntegration {
             //     Union[forall operations in service: operation.getInputShape()]
             // )
             // Output: This is the value returned from the client calling dafnyImplInterface.
-            // I believe this is a Wrappers_Compile.Result, which I should use.
+            // I believe this is a Wrappers.Result, which I should use.
             SymbolReference.builder()
                 .symbol(createDafnySymbol("DafnyRequest"))
                 .build(),

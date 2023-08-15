@@ -1,0 +1,125 @@
+# This workflow performs tests in Python.
+name: Library Python tests
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main-1.x
+  workflow_dispatch:
+    # Manual trigger for this workflow, either the normal version
+    # or the nightly build that uses the latest Dafny prerelease
+    # (accordingly to the "nightly" parameter).
+    inputs:
+      nightly:
+        description: 'Run the nightly build'
+        required: false
+        type: boolean
+  schedule:
+    # Nightly build against Dafny's nightly prereleases,
+    # for early warning of verification issues or regressions.
+    # Timing chosen to be adequately after Dafny's own nightly build,
+    # but this might need to be tweaked:
+    # https://github.com/dafny-lang/dafny/blob/master/.github/workflows/deep-tests.yml#L16
+    - cron: "30 16 * * *"
+
+jobs:
+  testPython:
+    # Don't run the nightly build on forks
+    if: github.event_name != 'schedule' || github.repository_owner == 'awslabs'
+    strategy:
+      matrix:
+        library: [
+          TestModels/dafny-dependencies/StandardLibrary, # This stores current Polymorph dependencies that all TestModels depend on
+          TestModels/Aggregate,
+          # TestModels/AggregateReferences,
+          TestModels/Constraints,
+          TestModels/Constructor,
+          # TestModels/Dependencies,
+          TestModels/Errors,
+          TestModels/Extendable,
+          # TestModels/Extern,
+          # TestModels/LocalService,
+          TestModels/Refinement,
+          TestModels/Resource,
+          # TestModels/SimpleTypes/BigDecimal,
+          # TestModels/SimpleTypes/BigInteger,
+          TestModels/SimpleTypes/SimpleBlob,
+          TestModels/SimpleTypes/SimpleBoolean,
+          # TestModels/SimpleTypes/SimpleByte,
+          TestModels/SimpleTypes/SimpleDouble,
+          TestModels/SimpleTypes/SimpleEnum,
+          # TestModels/SimpleTypes/SimpleEnumV2,
+          # TestModels/SimpleTypes/SimpleFloat,
+          TestModels/SimpleTypes/SimpleInteger,
+          TestModels/SimpleTypes/SimpleLong,
+          # TestModels/SimpleTypes/SimpleShort,
+          TestModels/SimpleTypes/SimpleString,
+          # TestModels/SimpleTypes/SimpleTimestamp,
+          # TestModels/Union,
+          # TestModels/aws-sdks/ddb,
+          # TestModels/aws-sdks/kms,
+        ]
+    runs-on: "ubuntu-latest"
+    permissions:
+      id-token: write
+      contents: read
+    env:
+      DOTNET_CLI_TELEMETRY_OPTOUT: 1
+      DOTNET_NOLOGO: 1
+    steps:
+      - name: Support longpaths on Git checkout
+        run: |
+          git config --global core.longpaths true
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-region: us-west-2
+          role-to-assume: arn:aws:iam::370957321024:role/GitHub-CI-PolymorphTestModels-Role-us-west-2
+          role-session-name: PythonTests
+
+      - uses: actions/checkout@v3
+        with:
+          - submodules: recursive
+
+      - name: Setup Dafny
+        uses: dafny-lang/setup-dafny-action@v1.6.1
+        with:
+          # A && B || C is the closest thing to an if .. then ... else ... or ?: expression the GitHub Actions syntax supports.
+          dafny-version: ${{ (github.event_name == 'schedule' || inputs.nightly) && 'nightly-latest' || '4.1.0' }}
+
+      - name: Setup Python for running tests
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+          architecture: x64
+
+      - name: Setup Java 17 for codegen
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'corretto'
+          java-version: '17'
+
+      - name: Setup submodules
+
+      - name: Generate Polymorph Dafny and Python code
+        shell: bash
+        working-directory: ./${{ matrix.library }}
+        run: |
+          make polymorph_dafny
+          make polymorph_python
+
+      - name: Compile ${{ matrix.library }} implementation
+        shell: bash
+        working-directory: ./${{ matrix.library }}
+        run: |
+          # This works because `node` is installed by default on GHA runners
+          CORES=$(node -e 'console.log(os.cpus().length)')
+          make build_python CORES=$CORES
+
+      - name: Test ${{ matrix.library }}
+        working-directory: ./${{ matrix.library }}
+        shell: bash
+        run: |
+          make test_python

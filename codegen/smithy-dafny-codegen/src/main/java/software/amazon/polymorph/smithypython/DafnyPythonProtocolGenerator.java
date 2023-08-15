@@ -17,19 +17,25 @@ package software.amazon.polymorph.smithypython;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 import software.amazon.polymorph.smithypython.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithypython.nameresolver.Utils;
 import software.amazon.polymorph.smithypython.shapevisitor.DafnyToSmithyShapeVisitor;
 import software.amazon.polymorph.smithypython.shapevisitor.SmithyToDafnyShapeVisitor;
+import software.amazon.polymorph.traits.ReferenceTrait;
+import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.smithy.model.knowledge.TopDownIndex;
+import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
+import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.python.codegen.ApplicationProtocol;
 import software.amazon.smithy.python.codegen.CodegenUtils;
 import software.amazon.smithy.python.codegen.GenerationContext;
@@ -136,14 +142,18 @@ public abstract class DafnyPythonProtocolGenerator implements ProtocolGenerator 
   @Override
   public void generateResponseDeserializers(GenerationContext context) {
     var topDownIndex = TopDownIndex.of(context.model());
-    var service = context.settings().getService(context.model());
-    var deserializingErrorShapes = new TreeSet<ShapeId>();
     var delegator = context.writerDelegator();
     var configSymbol = CodegenUtils.getConfigSymbol(context.settings());
 
-    for (OperationShape operation : topDownIndex.getContainedOperations(context.settings().getService())) {
-      deserializingErrorShapes.addAll(operation.getErrors(service));
+    var deserializingErrorShapes = new TreeSet<ShapeId>(
+        context.model().getStructureShapesWithTrait(ErrorTrait.class)
+            .stream()
+            .filter(structureShape -> structureShape.getId().getNamespace()
+                .equals(context.settings().getService().getNamespace()))
+            .map(Shape::getId)
+            .collect(Collectors.toSet()));
 
+    for (OperationShape operation : topDownIndex.getContainedOperations(context.settings().getService())) {
       var deserFunction = getDeserializationFunction(context, operation);
       var output = context.model().expectShape(operation.getOutputShape());
       var outputSymbol = context.symbolProvider().toSymbol(output);
@@ -265,7 +275,7 @@ public abstract class DafnyPythonProtocolGenerator implements ProtocolGenerator 
       delegator.useFileWriter(deserFunctionMetadata.getLeft(), deserFunctionMetadata.getRight(), writer -> {
 
         writer.addStdlibImport("typing", "Any");
-        // TODO: This also doesn't seem to be generated if there are no modelled errors...
+        // TODO: Is this generated if there are no modelled errors...?
         writer.addImport(".errors", "ServiceError");
         writer.addImport(".errors", "OpaqueError");
         writer.addImport(".errors", "CollectionOfErrors");
@@ -288,7 +298,7 @@ public abstract class DafnyPythonProtocolGenerator implements ProtocolGenerator 
           // Import Dafny-modelled error
           DafnyNameResolver.importDafnyTypeForError(writer, errorId);
           // Import generic Dafny error type
-          writer.addImport(errorId.getNamespace() + ".internaldafny.types", "Error");
+          DafnyNameResolver.importGenericDafnyErrorTypeForNamespace(writer, errorId.getNamespace());
           writer.write("""
                   if error.is_$L:
                     return $L(message=error.message)

@@ -9,6 +9,7 @@ module
 {
   import Types = SimpleExtendableResourcesTypes
   
-  method {:extern "DafnyFactory"} DafnyFactory() returns (output: Types.IExtendableResource)
+  method {:extern "DafnyFactory"} DafnyFactory()
+    returns (output: Types.IExtendableResource)
     ensures output.ValidState() && fresh(output.History) && fresh(output.Modifies)  
 }

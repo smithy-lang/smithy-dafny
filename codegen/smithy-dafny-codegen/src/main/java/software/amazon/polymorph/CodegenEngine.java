@@ -248,6 +248,10 @@ public class CodegenEngine {
 
     private void generatePython() {
         PythonClientCodegenPlugin pythonClientCodegenPlugin = new PythonClientCodegenPlugin();
+        // TODO: Determine which of these we need, and create a PR against Smithy-Python
+        // with the required changes from lucasmcdonald3/smithy-python
+        pythonClientCodegenPlugin.disablePerformDefaultCodegenTransforms();
+        pythonClientCodegenPlugin.disableCreateDedicatedInputsAndOutputs();
         pythonClientCodegenPlugin.execute(pluginContext);
     }
 

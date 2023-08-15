@@ -66,6 +66,7 @@ public class ConfigFileWriter implements CustomFileWriter {
     for (Entry<String, MemberShape> memberShapeEntry : memberShapeSet.entrySet()) {
       String memberName = memberShapeEntry.getKey();
       // TODO: Instead of `Any`, map the targetShape.getType() Smithy type to the Python type
+      // Prototype code commented out...
 //      MemberShape memberShape = memberShapeEntry.getValue();
 //      final Shape targetShape = codegenContext.model().expectShape(memberShape.getTarget());
 //      final ShapeType targetShapeType = targetShape.getType();

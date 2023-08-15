@@ -1,7 +1,7 @@
 package software.amazon.polymorph.smithypython.shapevisitor;
 
 import java.util.Map.Entry;
-import software.amazon.polymorph.smithypython.nameresolver.DafnyNameResolver;
+import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.model.shapes.BigDecimalShape;
 import software.amazon.smithy.model.shapes.BigIntegerShape;
@@ -38,9 +38,12 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
     private final boolean isConfigShape;
 
     /**
-     * @param context    The generation context.
-     * @param dataSource The in-code location of the data to provide an output of
-     *                   ({@code output.foo}, {@code entry}, etc.)
+     * @param context       The generation context.
+     * @param dataSource    The in-code location of the data to provide an output of
+     *                      ({@code output.foo}, {@code entry}, etc.)
+     * @param writer        The PythonWriter being used
+     * @param isConfigShape Flag indicating whether the shape being visited is a Config shape,
+     *                      which has special logic around optional members
      */
     public DafnyToSmithyShapeVisitor(
         GenerationContext context,
@@ -52,6 +55,13 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
       this.dataSource = dataSource;
       this.writer = writer;
       this.isConfigShape = isConfigShape;
+    }
+
+    protected String referenceStructureShape(StructureShape shape) {
+      ReferenceTrait referenceTrait = shape.expectTrait(ReferenceTrait.class);
+      Shape resourceOrService = context.model().expectShape(referenceTrait.getReferentId());
+      writer.addImport(".models", resourceOrService.getId().getName());
+      return "%1$s(_impl=%2$s)".formatted(resourceOrService.getId().getName(), dataSource);
     }
 
     @Override
@@ -69,6 +79,9 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
 
     @Override
     public String structureShape(StructureShape shape) {
+      if (shape.hasTrait(ReferenceTrait.class)) {
+        return referenceStructureShape(shape);
+      }
       if (!isConfigShape) {
         writer.addImport(".models", shape.getId().getName());
       }
@@ -87,32 +100,52 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
         // Adds `smithy_structure_member=DafnyStructureMember(...)`
         // e.g.
         // smithy_structure_name(smithy_structure_member=DafnyStructureMember(...), ...)
-        builder.append("%1$s=%2$s,\n".formatted(
-            CaseUtils.toSnakeCase(memberName),
-            targetShape.accept(
-                new DafnyToSmithyShapeVisitor(context, dataSource + "." + memberName + (memberShape.isOptional() ? ".value" : ""), writer, isConfigShape)
-            )
-            ));
+        builder.append("%1$s=".formatted(CaseUtils.toSnakeCase(memberName)));
+        if (memberShape.isOptional()) {
+          builder.append("%1$s,\n".formatted(
+              targetShape.accept(
+                  new DafnyToSmithyShapeVisitor(
+                      context,
+                      dataSource + "." + memberName + ".UnwrapOr(None)",
+                      writer,
+                      isConfigShape)
+              )
+          ));
+        } else {
+          builder.append("%1$s,\n".formatted(
+              targetShape.accept(
+                  new DafnyToSmithyShapeVisitor(
+                      context,
+                      dataSource + "." + memberName,
+                      writer,
+                      isConfigShape)
+              )
+          ));
+        }
       }
       // Close structure
       return builder.append(")").toString();
     }
 
-    // TODO: smithy-dafny-conversion library
     @Override
     public String listShape(ListShape shape) {
       StringBuilder builder = new StringBuilder();
 
+      // Open list:
+      // `[`
       builder.append("[");
       MemberShape memberShape = shape.getMember();
       final Shape targetShape = context.model().expectShape(memberShape.getTarget());
 
+      // Add converted list elements into the list:
+      // `[list_element for list_element in `DafnyToSmithy(targetShape)``
       builder.append("%1$s".formatted(
           targetShape.accept(
               new DafnyToSmithyShapeVisitor(context, "list_element", writer, isConfigShape)
           )));
 
-      // Close structure
+      // Close structure:
+      // `[list_element for list_element in `DafnyToSmithy(targetShape)`]`
       return builder.append(" for list_element in %1$s]".formatted(dataSource)).toString();
     }
 
@@ -120,26 +153,33 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
   public String mapShape(MapShape shape) {
     StringBuilder builder = new StringBuilder();
 
+    // Open map:
+    // `{`
     builder.append("{");
     MemberShape keyMemberShape = shape.getKey();
     final Shape keyTargetShape = context.model().expectShape(keyMemberShape.getTarget());
     MemberShape valueMemberShape = shape.getValue();
     final Shape valueTargetShape = context.model().expectShape(valueMemberShape.getTarget());
 
+    // Write converted map keys into the map:
+    // `{`DafnyToSmithy(key)`:`
     builder.append("%1$s: ".formatted(
         keyTargetShape.accept(
             new DafnyToSmithyShapeVisitor(context, "key", writer, isConfigShape)
         )
     ));
 
+    // Write converted map values into the map:
+    // `{`DafnyToSmithy(key)`: `DafnyToSmithy(value)``
     builder.append("%1$s".formatted(
         valueTargetShape.accept(
             new DafnyToSmithyShapeVisitor(context, "value", writer, isConfigShape)
         )
     ));
 
-    // Close structure
-    // No () on items call because Dafny doesn't use them TODO explain why
+    // Complete map comprehension and close map
+    // `{`DafnyToSmithy(key)`: `DafnyToSmithy(value)`` for (key, value) in `dataSource`.items }`
+    // No () on items call; `dataSource` is a Dafny map, where `items` is a @property and not a method.
     return builder.append(" for (key, value) in %1$s.items }".formatted(dataSource)).toString();
   }
 

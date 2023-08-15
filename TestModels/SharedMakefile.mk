@@ -108,7 +108,7 @@ build_implementation:
 		--function-syntax:3 \
 		--optimize-erasable-datatype-wrapper:false \
 		--library:$(PROJECT_ROOT)/dafny-dependencies/StandardLibrary/src/Index.dfy \
-		$(patsubst %, -library:$(PROJECT_ROOT)/%/src/Index.dfy, $(LIBRARIES))
+		$(patsubst %, --library:$(PROJECT_ROOT)/%/src/Index.dfy, $(LIBRARIES))
 
 build_test:
 	dafny build \
@@ -240,9 +240,14 @@ polymorph_java: _polymorph_wrapped
 polymorph_java: POLYMORPH_LANGUAGE_TARGET=java
 polymorph_java: _polymorph_dependencies
 
-polymorph_python: OUTPUT_PYTHON=--output-python $(LIBRARY_ROOT)/runtimes/python/src/$(PYTHON_MODULE_NAME)/smithy_generated
+polymorph_python: OUTPUT_PYTHON=--output-python $(LIBRARY_ROOT)/runtimes/python/smithygenerated
 polymorph_python: SMITHY_BUILD=--smithy-build $(LIBRARY_ROOT)/smithy-build.json
 polymorph_python: _polymorph
+polymorph_python:
+	rm -rf runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated
+	mkdir runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated
+	mv runtimes/python/smithygenerated/$(PYTHON_MODULE_NAME)/* runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated
+	rm -rf runtimes/python/smithygenerated
 
 ########################## .NET targets
 
@@ -324,70 +329,95 @@ _clean:
 	rm -rf $(LIBRARY_ROOT)/TestResults
 	rm -rf $(LIBRARY_ROOT)/runtimes/net/Generated $(LIBRARY_ROOT)/runtimes/net/bin $(LIBRARY_ROOT)/runtimes/net/obj
 	rm -rf $(LIBRARY_ROOT)/runtimes/net/tests/bin $(LIBRARY_ROOT)/runtimes/net/tests/obj
-	rm -rf $(LIBRARY_ROOT)/runtimes/python/src/**/dafny_generated $(LIBRARY_ROOT)/runtimes/python/src/**/smithy_generated
+	rm -rf $(LIBRARY_ROOT)/runtimes/python/src/**/dafnygenerated/*.py
+	rm -rf $(LIBRARY_ROOT)/runtimes/python/src/**/smithygenerated
+	rm -rf $(LIBRARY_ROOT)/runtimes/python/test/dafnygenerated/*.py
+	rm -rf $(LIBRARY_ROOT)/runtimes/python/.tox
+	rm -rf $(LIBRARY_ROOT)/runtimes/python/poetry.lock
+	rm -rf $(LIBRARY_ROOT)/runtimes/python/build
 
 ########################## Python targets
 
-build_python: | clean_dafny_python transpile_dependencies_python build_implementation_python transpile_test_python hack_to_import_extern mv_files_python
-
-clean_dafny_python:
-	rm -rf runtimes/python/src/dafny_generated
+build_python: _python_underscore_extern_names
+build_python: transpile_dependencies_python
+build_python: build_implementation_python
+build_python: transpile_test_python
+build_python: _python_revert_underscore_extern_names
+build_python: _mv_dafnygenerated_python
+build_python: _modify_dafnygenerated_python
 
 build_implementation_python: TARGET=py
-build_implementation_python: OUT=runtimes/python/src/dafny_generated
+build_implementation_python: OUT=runtimes/python/dafny_src
 build_implementation_python: build_implementation
 
 # `transpile_implementation_python` is not directly used, but is indirectly used via `transpile_dependencies`
-transpile_implementation_python: TARGET=py
-transpile_implementation_python: OUT=runtimes/python/src/dafny_generated
-transpile_implementation_python: transpile_implementation
-transpile_implementation_python:
-	rm -rf runtimes/python/src/dafny_generated
-	mv runtimes/python/src/dafny_generated-py runtimes/python/src/dafny_generated
+# The `transpile` target does NOT include the Dafny runtime library (_dafny.py) in the generated code
+# while the `build` target does
+transpile_implementation_python: _python_underscore_extern_names
+transpile_implementation_python: transpile_dependencies_python
+transpile_implementation_python: transpile_src_python
+transpile_implementation_python: transpile_test_python
+transpile_implementation_python: _python_revert_underscore_extern_names
+transpile_implementation_python: _mv_dafnygenerated_python
+transpile_implementation_python: _modify_dafnygenerated_python
+
+transpile_src_python: TARGET=py
+transpile_src_python: OUT=runtimes/python/dafny_src
+transpile_src_python: transpile_implementation
+
+transpile_test_python: TARGET=py
+transpile_test_python: OUT=runtimes/python/test
+transpile_test_python: transpile_test
+
+# Hacky workaround until Dafny supports per-language extern names.
+# Replaces `.`s with `_`s in strings like `{:extern ".*"}`.
+# This is flawed logic and should be removed, but is a reasonable band-aid for now.
+# TODO: Once Dafny supports per-language extern names, remove and replace with Pythonic extern names.
+# This may require new Smithy-Dafny logic to generate Pythonic extern names.
+_python_underscore_extern_names:
+	find src -regex ".*\.dfy" -type f -exec sed -i "" '/.*{:extern \".*\".*/s/\./_/g' {} \;
+	find Model -regex ".*\.dfy" -type f -exec sed -i "" '/.*{:extern \".*\.*"/s/\./_/g' {} \;
+	find test -regex ".*\.dfy" -type f -exec sed -i "" '/.*{:extern \".*\".*/s/\./_/g' {} \;
+
+_python_revert_underscore_extern_names:
+	find src -regex ".*\.dfy" -type f -exec sed -i "" '/.*{:extern \".*\".*/s/_/\./g' {} \;
+	find Model -regex ".*\.dfy" -type f -exec sed -i "" '/.*{:extern \".*\".*/s/_/\./g' {} \; 2>/dev/null
+	find test -regex ".*\.dfy" -type f -exec sed -i "" '/.*{:extern \".*\".*/s/_/\./g' {} \;
+
+# Move Dafny-generated code into its expected location in the Python module
+_mv_dafnygenerated_python:
+	# Remove everything EXCEPT the pyproject.toml
+	rm -rf runtimes/python/src/$(PYTHON_MODULE_NAME)/dafnygenerated/*.py
+	mv runtimes/python/dafny_src-py/*.py runtimes/python/src/$(PYTHON_MODULE_NAME)/dafnygenerated
+	rm -rf runtimes/python/dafny_src-py
+	# Remove everything EXCEPT the pyproject.toml
+	rm -rf runtimes/python/test/dafnygenerated/*.py
+	mv runtimes/python/test-py/*.py runtimes/python/test/dafnygenerated
+	rm -rf runtimes/python/test-py
+
+# Any modifications to Dafny-generated Python should be called here
+# to bound the scope of modifications to this step
+_modify_dafnygenerated_python: _comment_out_module_assertions_python
+_modify_dafnygenerated_python: _comment_out_import_module_python
+
+# TODO: Cut ticket to Dafny team
+_comment_out_module_assertions_python:
+	# For a Dafny-generated module X, comment out `assert "X" == __name__`
+	# This assertion is invalid in the context of multiple Python modules
+	find runtimes/python/src/$(PYTHON_MODULE_NAME)/dafnygenerated -type f -exec sed -i "" '/assert \".*\" \=\= \_\_name\_\_/s/^/# /g' {} \;
+	find runtimes/python/test/dafnygenerated -type f -exec sed -i "" '/assert \".*\" \=\= \_\_name\_\_/s/^/# /g' {} \;
+
+# TODO: Cut ticket to Dafny team
+_comment_out_import_module_python:
+	# For a Dafny-generated module X, comment out `import module_`
+	# This import results in circular dependencies
+	find runtimes/python/src/$(PYTHON_MODULE_NAME)/dafnygenerated -type f -exec sed -i "" '/import module\_/s/^/# /g' {} \;
+	find runtimes/python/test/dafnygenerated -type f -exec sed -i "" '/import module\_/s/^/# /g' {} \;
 
 transpile_dependencies_python: LANG=python
 transpile_dependencies_python: transpile_dependencies
-transpile_dependencies_python:
-	mkdir -p runtimes/python/src/dafny_generated-py
-	cp -r $(STANDARD_LIBRARY_PATH)/runtimes/python/src/dafny_generated/. runtimes/python/src/dafny_generated-py
-
-# Dafny-compiled Python has issues stemming from the --library flag
-# This is blocking us from separating src/ and test/ directories
-# This is also why Python has a separate transpile_test target
-# https://sim.amazon.com/issues/CrypTool-5190
-transpile_test_python: TARGET=py
-transpile_test_python: OUT=runtimes/python/src/dafny_generated
-transpile_test_python:
-	dafny \
-		-vcsCores:$(CORES) \
-		-compileTarget:$(TARGET) \
-		-spillTargetCode:3 \
-		-runAllTests:1 \
-		-quantifierSyntax:3 \
-		-unicodeChar:0 \
-		-functionSyntax:3 \
-		-optimizeErasableDatatypeWrapper:0 \
-		-useRuntimeLib \
-		-out $(OUT) \
-		-compile:0 \
-		`find ./test -name '*.dfy'`
-
-# TODO: This is not OK. Create SIM to replace this...
-# TODO: Check with Dafny on what I should be doing here...
-# This inserts (ex for simple boolean). "from simple_boolean.extern import Extern"
-#   at the second line of dafny_generated.py (after the copyright line).
-# To the best of my knowledge, you MUST import a module for it to be loaded in your Python runtime.
-# We must import the Extern module within Dafny code, since only the Dafny code uses it.
-# But we do not control Dafny code generation, so we cannot import the Extern module...
-hack_to_import_extern:
-	sed -i '' '2s/^/from $(PYTHON_MODULE_NAME).extern import Extern\n/' 'runtimes/python/src/dafny_generated-py/dafny_generated.py'
-
-mv_files_python:
-	mv runtimes/python/src/dafny_generated-py runtimes/python/src/$(PYTHON_MODULE_NAME)/dafny_generated
 
 test_python:
-	# Installs the Python project in pip before using it
-	python -m pip install runtimes/python
-	python runtimes/python/src/$(PYTHON_MODULE_NAME)/dafny_generated/dafny_generated.py
+	tox -c runtimes/python
 
 clean: _clean
