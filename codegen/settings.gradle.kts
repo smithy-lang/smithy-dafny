@@ -4,7 +4,8 @@
 rootProject.name = "smithy-dafny"
 include(":smithy-dafny-codegen")
 include(":smithy-dafny-codegen-cli")
-//include(":smithy-dafny-codegen-test")
+include(":smithy-python-codegen")
+project(":smithy-python-codegen").projectDir = file("../submodules/smithy-python/codegen/smithy-python-codegen")
 
 pluginManagement {
     repositories {

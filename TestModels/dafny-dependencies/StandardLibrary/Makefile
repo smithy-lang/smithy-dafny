@@ -50,7 +50,6 @@ _python_revert_underscore_extern_names:
 	echo "Skipping Model modification for StandardLibrary"
 	find test -regex ".*\.dfy" -type f -exec sed -i "" '/module {:extern \".*\"/s/_/\./g' {} \;
 
-
 transpile_dependencies:
 	echo "Skipping transpile_dependencies for StandardLibrary"
 

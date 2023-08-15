@@ -80,6 +80,8 @@ jobs:
           role-session-name: PythonTests
 
       - uses: actions/checkout@v3
+        with:
+          - submodules: recursive
 
       - name: Setup Dafny
         uses: dafny-lang/setup-dafny-action@v1.6.1
@@ -98,6 +100,8 @@ jobs:
         with:
           distribution: 'corretto'
           java-version: '17'
+
+      - name: Setup submodules
 
       - name: Generate Polymorph Dafny and Python code
         shell: bash

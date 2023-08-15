@@ -56,7 +56,8 @@ subprojects {
      * Java
      * ====================================================
      */
-    if (subproject.name != "smithy-dafny-codegen-test") {
+    if (subproject.name != "smithy-dafny-codegen-test"
+            && subproject.name != "smithy-python-codegen") {
         if (subproject.name == "smithy-dafny-codegen-cli") {
             apply(plugin = "application")
         } else {

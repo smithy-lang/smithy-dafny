@@ -8,7 +8,7 @@ packages = [
     # such that a module X can be imported with `import X`
     { include = "*.py" },
 ]
-# Include all Dafny-generated code in package distributions,
+# Include all of the following .gitignored files in package distributions,
 # even though this is in .gitignore
 include = ["*.py"]
 

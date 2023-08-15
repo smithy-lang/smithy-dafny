@@ -329,9 +329,9 @@ _clean:
 	rm -rf $(LIBRARY_ROOT)/TestResults
 	rm -rf $(LIBRARY_ROOT)/runtimes/net/Generated $(LIBRARY_ROOT)/runtimes/net/bin $(LIBRARY_ROOT)/runtimes/net/obj
 	rm -rf $(LIBRARY_ROOT)/runtimes/net/tests/bin $(LIBRARY_ROOT)/runtimes/net/tests/obj
-	rm -rf $(LIBRARY_ROOT)/runtimes/python/src/**/dafnygenerated/**/*.py  $(LIBRARY_ROOT)/runtimes/python/src/**/dafnygenerated/*.py
-	rm -rf $(LIBRARY_ROOT)/runtimes/python/src/**/smithygenerated
-	rm -rf $(LIBRARY_ROOT)/runtimes/python/test/**/dafnygenerated/**/*.py $(LIBRARY_ROOT)/runtimes/python/test/**/dafnygenerated/*.py
+	rm -rf $(LIBRARY_ROOT)/runtimes/python/src/dafnygenerated/*.py
+	rm -rf $(LIBRARY_ROOT)/runtimes/python/src/smithygenerated
+	rm -rf $(LIBRARY_ROOT)/runtimes/python/test/dafnygenerated/*.py
 	rm -rf $(LIBRARY_ROOT)/runtimes/python/build
 
 ########################## Python targets
@@ -351,18 +351,17 @@ build_implementation_python: build_implementation
 # `transpile_implementation_python` is not directly used, but is indirectly used via `transpile_dependencies`
 # The `transpile` target does NOT include the Dafny runtime library (_dafny.py) in the generated code
 # while the `build` target does
+transpile_implementation_python: _python_underscore_extern_names
+transpile_implementation_python: transpile_dependencies_python
+transpile_implementation_python: transpile_src_python
+transpile_implementation_python: transpile_test_python
+transpile_implementation_python: _python_revert_underscore_extern_names
+transpile_implementation_python: _mv_dafnygenerated_python
+transpile_implementation_python: _modify_dafnygenerated_python
 
-transpile_python: _python_underscore_extern_names
-transpile_python: transpile_dependencies_python
-transpile_python: transpile_implementation_python
-transpile_python: transpile_test_python
-transpile_python: _python_revert_underscore_extern_names
-transpile_python: _mv_dafnygenerated_python
-transpile_python: _modify_dafnygenerated_python
-
-transpile_implementation_python: TARGET=py
-transpile_implementation_python: OUT=runtimes/python/dafny_src
-transpile_implementation_python: transpile_implementation
+transpile_src_python: TARGET=py
+transpile_src_python: OUT=runtimes/python/dafny_src
+transpile_src_python: transpile_implementation
 
 transpile_test_python: TARGET=py
 transpile_test_python: OUT=runtimes/python/test

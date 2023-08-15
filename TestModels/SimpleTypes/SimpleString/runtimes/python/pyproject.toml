@@ -6,7 +6,7 @@ authors = ["AWS <aws-arg-dafny@amazon.com>"]
 packages = [
     { include = "simple_string", from = "src" }
 ]
-# Include all Dafny-generated code in package distributions,
+# Include all of the following .gitignored files in package distributions,
 # even though it is not included in version control
 include = ["**/smithygenerated/*.py", "**/dafnygenerated/*.py"]
 
