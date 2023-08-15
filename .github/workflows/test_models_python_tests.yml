@@ -101,8 +101,6 @@ jobs:
           distribution: 'corretto'
           java-version: '17'
 
-      - name: Setup submodules
-
       - name: Generate Polymorph Dafny and Python code
         shell: bash
         working-directory: ./${{ matrix.library }}
