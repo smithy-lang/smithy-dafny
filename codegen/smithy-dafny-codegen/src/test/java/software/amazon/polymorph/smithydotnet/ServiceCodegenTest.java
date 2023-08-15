@@ -563,6 +563,7 @@ public class ServiceCodegenTest {
                 namespace Test.Foobar {
                     public class UnfortunateException : Exception {
                         public UnfortunateException(string message) : base(message) {}
+                        public string getMessage() { return this.Message;}
                     }
                 }
                 """);
