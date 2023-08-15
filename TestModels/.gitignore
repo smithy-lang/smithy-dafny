@@ -37,6 +37,7 @@
 **/runtimes/python/.tox
 **/runtimes/python/build
 **/runtimes/python/poetry.lock
+**/runtimes/python/**/poetry.lock
 
 # JetBrains
 **/.idea/

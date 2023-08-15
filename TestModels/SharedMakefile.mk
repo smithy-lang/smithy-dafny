@@ -369,6 +369,11 @@ transpile_test_python: TARGET=py
 transpile_test_python: OUT=runtimes/python/test
 transpile_test_python: transpile_test
 
+# Hacky workaround until Dafny supports per-language extern names.
+# Replaces `.`s with `_`s in strings like `{:extern ".*"}`.
+# This is flawed logic and should be removed, but is a reasonable band-aid for now.
+# TODO: Once Dafny supports per-language extern names, remove and replace with Pythonic extern names.
+# This may require new Smithy-Dafny logic to generate Pythonic extern names.
 _python_underscore_extern_names:
 	find src -regex ".*\.dfy" -type f -exec sed -i "" '/.*{:extern \".*\".*/s/\./_/g' {} \;
 	find Model -regex ".*\.dfy" -type f -exec sed -i "" '/.*{:extern \".*\.*"/s/\./_/g' {} \;
@@ -379,6 +384,7 @@ _python_revert_underscore_extern_names:
 	find Model -regex ".*\.dfy" -type f -exec sed -i "" '/.*{:extern \".*\".*/s/_/\./g' {} \; 2>/dev/null
 	find test -regex ".*\.dfy" -type f -exec sed -i "" '/.*{:extern \".*\".*/s/_/\./g' {} \;
 
+# Move Dafny-generated code into its expected location in the Python module
 _mv_dafnygenerated_python:
 	# Remove everything EXCEPT the pyproject.toml
 	rm -rf runtimes/python/src/$(PYTHON_MODULE_NAME)/dafnygenerated/*.py
@@ -394,12 +400,14 @@ _mv_dafnygenerated_python:
 _modify_dafnygenerated_python: _comment_out_module_assertions_python
 _modify_dafnygenerated_python: _comment_out_import_module_python
 
+# TODO: Cut ticket to Dafny team
 _comment_out_module_assertions_python:
 	# For a Dafny-generated module X, comment out `assert "X" == __name__`
 	# This assertion is invalid in the context of multiple Python modules
 	find runtimes/python/src/$(PYTHON_MODULE_NAME)/dafnygenerated -type f -exec sed -i "" '/assert \".*\" \=\= \_\_name\_\_/s/^/# /g' {} \;
 	find runtimes/python/test/dafnygenerated -type f -exec sed -i "" '/assert \".*\" \=\= \_\_name\_\_/s/^/# /g' {} \;
 
+# TODO: Cut ticket to Dafny team
 _comment_out_import_module_python:
 	# For a Dafny-generated module X, comment out `import module_`
 	# This import results in circular dependencies
