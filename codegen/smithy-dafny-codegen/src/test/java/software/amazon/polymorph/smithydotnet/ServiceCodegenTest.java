@@ -36,7 +36,7 @@ import static software.amazon.polymorph.util.TestModel.SERVICE_SHAPE_ID;
 
 public class ServiceCodegenTest {
     // TODO: Apply ServiceCodegen changes to tests
-    // https://github.com/awslabs/polymorph/issues/27
+    // https://github.com/smithy-lang/smithy-dafny/issues/27
     @Test
     public void testGenerateEmptyService() {
         final Model model = TestModel.setupModel();

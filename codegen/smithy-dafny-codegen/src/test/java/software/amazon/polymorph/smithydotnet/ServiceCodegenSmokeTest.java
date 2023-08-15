@@ -23,7 +23,7 @@ import static org.junit.Assert.*;
 
 public class ServiceCodegenSmokeTest {
     // TODO: Apply ServiceCodegen changes to tests
-    // https://github.com/awslabs/polymorph/issues/27
+    // https://github.com/smithy-lang/smithy-dafny/issues/27
     @Test
     public void testCorrectFilesGenerated() {
         final URL modelUrl = Objects.requireNonNull(this.getClass().getClassLoader().getResource("model.smithy"));

@@ -22,7 +22,7 @@ import static software.amazon.polymorph.util.TestModel.SERVICE_SHAPE_ID;
 
 public class ShimCodegenTest {
     // TODO: Apply ShimCodegen refactor to tests
-    // https://github.com/awslabs/polymorph/issues/28
+    // https://github.com/smithy-lange/smithy-dafmy/issues/28
     private static ShimCodegen setupCodegen(final BiConsumer<ServiceShape.Builder, ModelAssembler> updater) {
         final Model model = TestModel.setupModel(updater);
         final ServiceShape serviceShape = model.expectShape(SERVICE_SHAPE_ID, ServiceShape.class);
