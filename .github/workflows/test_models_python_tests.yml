@@ -112,6 +112,7 @@ jobs:
         shell: bash
         working-directory: ./${{ matrix.library }}
         run: |
+          ls -R
           # This works because `node` is installed by default on GHA runners
           CORES=$(node -e 'console.log(os.cpus().length)')
           make build_python CORES=$CORES
@@ -120,4 +121,5 @@ jobs:
         working-directory: ./${{ matrix.library }}
         shell: bash
         run: |
+          ls -R
           make test_python
