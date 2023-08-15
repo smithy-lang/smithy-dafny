@@ -14,7 +14,7 @@ include = ["**/smithygenerated/*.py", "**/dafnygenerated/*.py"]
 python = "^3.11.0"
 simple-resources-internaldafny = { path = "src/simple_resources/dafnygenerated", develop = false}
 # TODO: Depend on PyPi once Smithy-Python publishes their Python package there
-smithy-python = { path = "../../../lib/python/smithy-python", develop = false}
+smithy-python = { path = "../../../../submodules/smithy-python/python-packages/smithy-python", develop = false}
 standard-library = {path = "../../../dafny-dependencies/StandardLibrary/runtimes/python", develop = false}
 
 [tool.poetry.group.test.dependencies]

@@ -10,7 +10,6 @@ project(":smithy-python-codegen").projectDir = file("../submodules/smithy-python
 pluginManagement {
     repositories {
         mavenLocal()
-        mavenCentral()
         gradlePluginPortal()
     }
 }

@@ -248,6 +248,7 @@ public class CodegenEngine {
 
     private void generatePython() {
         PythonClientCodegenPlugin pythonClientCodegenPlugin = new PythonClientCodegenPlugin();
+        pythonClientCodegenPlugin.disablePerformDefaultCodegenTransforms();
         pythonClientCodegenPlugin.execute(pluginContext);
     }
 
