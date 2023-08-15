@@ -38,9 +38,12 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
     private final boolean isConfigShape;
 
     /**
-     * @param context    The generation context.
-     * @param dataSource The in-code location of the data to provide an output of
-     *                   ({@code output.foo}, {@code entry}, etc.)
+     * @param context       The generation context.
+     * @param dataSource    The in-code location of the data to provide an output of
+     *                      ({@code output.foo}, {@code entry}, etc.)
+     * @param writer        The PythonWriter being used
+     * @param isConfigShape Flag indicating whether the shape being visited is a Config shape,
+     *                      which has special logic around optional members
      */
     public DafnyToSmithyShapeVisitor(
         GenerationContext context,
@@ -124,21 +127,25 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
       return builder.append(")").toString();
     }
 
-    // TODO: smithy-dafny-conversion library
     @Override
     public String listShape(ListShape shape) {
       StringBuilder builder = new StringBuilder();
 
+      // Open list:
+      // `[`
       builder.append("[");
       MemberShape memberShape = shape.getMember();
       final Shape targetShape = context.model().expectShape(memberShape.getTarget());
 
+      // Add converted list elements into the list:
+      // `[list_element for list_element in `DafnyToSmithy(targetShape)``
       builder.append("%1$s".formatted(
           targetShape.accept(
               new DafnyToSmithyShapeVisitor(context, "list_element", writer, isConfigShape)
           )));
 
-      // Close structure
+      // Close structure:
+      // `[list_element for list_element in `DafnyToSmithy(targetShape)`]`
       return builder.append(" for list_element in %1$s]".formatted(dataSource)).toString();
     }
 
@@ -146,26 +153,33 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
   public String mapShape(MapShape shape) {
     StringBuilder builder = new StringBuilder();
 
+    // Open map:
+    // `{`
     builder.append("{");
     MemberShape keyMemberShape = shape.getKey();
     final Shape keyTargetShape = context.model().expectShape(keyMemberShape.getTarget());
     MemberShape valueMemberShape = shape.getValue();
     final Shape valueTargetShape = context.model().expectShape(valueMemberShape.getTarget());
 
+    // Write converted map keys into the map:
+    // `{`DafnyToSmithy(key)`:`
     builder.append("%1$s: ".formatted(
         keyTargetShape.accept(
             new DafnyToSmithyShapeVisitor(context, "key", writer, isConfigShape)
         )
     ));
 
+    // Write converted map values into the map:
+    // `{`DafnyToSmithy(key)`: `DafnyToSmithy(value)``
     builder.append("%1$s".formatted(
         valueTargetShape.accept(
             new DafnyToSmithyShapeVisitor(context, "value", writer, isConfigShape)
         )
     ));
 
-    // Close structure
-    // No () on items call; this is a Dafny map, where `items` is a @property and not a method.
+    // Complete map comprehension and close map
+    // `{`DafnyToSmithy(key)`: `DafnyToSmithy(value)`` for (key, value) in `dataSource`.items }`
+    // No () on items call; `dataSource` is a Dafny map, where `items` is a @property and not a method.
     return builder.append(" for (key, value) in %1$s.items }".formatted(dataSource)).toString();
   }
 

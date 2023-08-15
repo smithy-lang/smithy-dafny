@@ -135,68 +135,66 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
               )
           ));
         }
-
-//        builder.append("%1$s=%2$s%3$s%4$s,\n".formatted(
-//            memberName,
-//            !isConfigShape
-//            memberShape.isOptional() && !isConfigShape ? "Option_Some(" : "",
-//            targetShape.accept(
-//                new SmithyToDafnyShapeVisitor(context,
-//                        dataSource + "." + CaseUtils.toSnakeCase(memberName),
-//            writer, isConfigShape)),
-//            memberShape.isOptional() && !isConfigShape ? ")" : ""
-//            ));
       }
       // Close structure
       return builder.append(")").toString();
     }
 
-  @Override
-  public String mapShape(MapShape shape) {
-    StringBuilder builder = new StringBuilder();
-
-    writer.addStdlibImport("_dafny", "Map");
-
-    builder.append("Map({");
-    MemberShape keyMemberShape = shape.getKey();
-    final Shape keyTargetShape = context.model().expectShape(keyMemberShape.getTarget());
-    MemberShape valueMemberShape = shape.getValue();
-    final Shape valueTargetShape = context.model().expectShape(valueMemberShape.getTarget());
-
-    builder.append("%1$s: ".formatted(
-        keyTargetShape.accept(
-            new SmithyToDafnyShapeVisitor(context, "key", writer, isConfigShape)
-        )
-    ));
-
-    builder.append("%1$s".formatted(
-        valueTargetShape.accept(
-            new SmithyToDafnyShapeVisitor(context, "value", writer, isConfigShape)
-        )
-    ));
-
-    // Close structure
-    return builder.append(" for (key, value) in %1$s.items() })".formatted(dataSource)).toString();
-  }
-
     @Override
     public String listShape(ListShape shape) {
-
       writer.addStdlibImport("_dafny", "Seq");
-
       StringBuilder builder = new StringBuilder();
 
+      // Open Dafny sequence:
+      // `Seq([`
       builder.append("Seq([");
       MemberShape memberShape = shape.getMember();
       final Shape targetShape = context.model().expectShape(memberShape.getTarget());
 
+      // Add converted list elements into the list:
+      // `Seq([`SmithyToDafny(list_element)``
       builder.append("%1$s".formatted(
           targetShape.accept(
               new SmithyToDafnyShapeVisitor(context, "list_element", writer, isConfigShape)
           )));
 
       // Close structure
+      // `Seq([`SmithyToDafny(list_element)` for list_element in `dataSource`])``
       return builder.append(" for list_element in %1$s])".formatted(dataSource)).toString();
+    }
+
+    @Override
+    public String mapShape(MapShape shape) {
+      StringBuilder builder = new StringBuilder();
+      writer.addStdlibImport("_dafny", "Map");
+
+      // Open Dafny map:
+      // `Map({`
+      builder.append("Map({");
+      MemberShape keyMemberShape = shape.getKey();
+      final Shape keyTargetShape = context.model().expectShape(keyMemberShape.getTarget());
+      MemberShape valueMemberShape = shape.getValue();
+      final Shape valueTargetShape = context.model().expectShape(valueMemberShape.getTarget());
+
+      // Write converted map keys into the map:
+      // `{`SmithyToDafny(key)`:`
+      builder.append("%1$s: ".formatted(
+          keyTargetShape.accept(
+              new SmithyToDafnyShapeVisitor(context, "key", writer, isConfigShape)
+          )
+      ));
+
+      // Write converted map values into the map:
+      // `{`SmithyToDafny(key)`: `SmithyToDafny(value)``
+      builder.append("%1$s".formatted(
+          valueTargetShape.accept(
+              new SmithyToDafnyShapeVisitor(context, "value", writer, isConfigShape)
+          )
+      ));
+
+      // Complete map comprehension and close map
+      // `{`SmithyToDafny(key)`: `SmithyToDafny(value)`` for (key, value) in `dataSource`.items() }`
+      return builder.append(" for (key, value) in %1$s.items() })".formatted(dataSource)).toString();
     }
 
     @Override

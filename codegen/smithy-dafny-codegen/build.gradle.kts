@@ -16,7 +16,6 @@ buildscript {
     dependencies {
         "classpath"("software.amazon.smithy:smithy-cli:$smithyVersion")
     }
-
 }
 
 dependencies {
