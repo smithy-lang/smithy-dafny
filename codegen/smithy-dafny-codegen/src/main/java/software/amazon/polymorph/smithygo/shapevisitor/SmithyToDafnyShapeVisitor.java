@@ -31,6 +31,7 @@ import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.TimestampShape;
 import software.amazon.smithy.utils.CaseUtils;
+import software.amazon.smithy.utils.StringUtils;
 
 public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
     private final GenerationContext context;
@@ -54,7 +55,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
     protected String getDefault(Shape shape) {
         throw new CodegenException(String.format(
                 "Unsupported conversion of %s to %s using the %s protocol",
-                shape, shape.getType()));
+                shape, shape.getType(), context.protocolGenerator().getName()));
     }
 
     @Override
@@ -68,19 +69,22 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
         writer.addImport("Wrappers");
         writer.addImport(DafnyNameResolver.dafnyTypesNamespace(context.settings()));
         builder.append("%1$s(".formatted(DafnyNameResolver.getDafnyCompanionTypeCreate(context.settings(), context.symbolProvider().toSymbol(shape))));
+        String fieldSeparator = "";
         for (final var memberShapeEntry : shape.getAllMembers().entrySet()) {
+            builder.append(fieldSeparator);
             final var memberName = memberShapeEntry.getKey();
             final var memberShape = memberShapeEntry.getValue();
             final var targetShape = context.model().expectShape(memberShape.getTarget());
             builder.append("%1$s%2$s%3$s%4$s".formatted(
                     memberShape.isOptional() && !isConfigShape ? "Wrappers.Companion_Option_.Create_Some_(" : "",
-                    GoPointableIndex.of(context.model()).isPointable(memberShape) ? "*" : "",
+                    GoPointableIndex.of(context.model()).isPointable(memberShape) && !targetShape.isStructureShape()? "*" : "",
                     targetShape.accept(
                             new SmithyToDafnyShapeVisitor(context,
-                                                          dataSource + "." + CaseUtils.toPascalCase(memberName),
+                                                          dataSource + "." + StringUtils.capitalize(memberName),
                                                           writer, isConfigShape)),
                     memberShape.isOptional() && !isConfigShape ? ")" : ""
             ));
+            fieldSeparator = ",";
         }
 
 
@@ -89,12 +93,12 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
 
     @Override
     public String mapShape(MapShape shape) {
-        return getDefault(shape);
+        return dataSource;
     }
 
     @Override
     public String listShape(ListShape shape) {
-        return getDefault(shape);
+        return dataSource;
     }
 
     @Override

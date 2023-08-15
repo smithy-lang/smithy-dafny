@@ -27,7 +27,7 @@ public class DafnyTypeConversionProtocol implements ProtocolGenerator {
 
     @Override
     public ShapeId getProtocol() {
-        return null;
+        return ShapeId.from("aws.polymorph#localService");
     }
 
     @Override
@@ -120,7 +120,7 @@ public class DafnyTypeConversionProtocol implements ProtocolGenerator {
             final var targetShape = context.model().expectShape(outputShape);
             final var output = targetShape.accept(new DafnyToSmithyShapeVisitor(
                     context,
-                    "input.Dtor_value()",
+                    "input",
                     writer,
                     false
             ));

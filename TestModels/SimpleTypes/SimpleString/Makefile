@@ -7,6 +7,9 @@ include ../../SharedMakefile.mk
 
 NAMESPACE=simple.types.smithyString
 
+GO_NAMESPACE=simpletypessmithystring
+
+
 # This project has no dependencies 
 # DEPENDENT-MODELS:= 
 # LIBRARIES :=
