@@ -28,6 +28,9 @@ polymorph_net :
 polymorph_java :
 	echo "Skipping polymorph_java for StandardLibrary"
 
+polymorph_python :
+	echo "Skipping polymorph_python for StandardLibrary"
+
 # Override SharedMakefile's transpile_net to not transpile
 # StandardLibrary as a dependency
 transpile_net: | transpile_implementation_net transpile_test_net
