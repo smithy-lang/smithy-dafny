@@ -13,7 +13,7 @@ Parameters:
   GitHubRepo:
     Type: String
     Description: GitHub Repo that invokes CI
-    Default: awslabs/smithy-dafny
+    Default: smithy-lang/smithy-dafny
 
 Resources:
   DDBDafnyTestTable:
