@@ -39,7 +39,7 @@ import static software.amazon.polymorph.util.Tokenizer.tokenizeAndAssertEqual;
 
 public class TypeConversionCodegenTest {
     // TODO: Apply TypeConversionCodegen refactor to tests
-    // https://github.com/awslabs/polymorph/issues/29
+    // https://github.com/smithy-lang/smithy-dafny/issues/29
     private static TypeConversionCodegen setupCodegen(final BiConsumer<ServiceShape.Builder, ModelAssembler> updater) {
         final Model model = TestModel.setupModel(updater);
         final ServiceShape serviceShape = model.expectShape(SERVICE_SHAPE_ID, ServiceShape.class);

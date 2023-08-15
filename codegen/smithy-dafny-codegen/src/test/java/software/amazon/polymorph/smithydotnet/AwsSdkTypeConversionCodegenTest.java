@@ -16,7 +16,7 @@ import static org.junit.Assert.assertTrue;
 
 public class AwsSdkTypeConversionCodegenTest {
     // TODO: Apply "Errors" refactor to Tests
-    // https://github.com/awslabs/polymorph/issues/25
+    // https://github.com/smithy-lang/smithy-dafny/issues/25
     private static final String SERVICE_NAMESPACE = "com.amazonaws.foobar";
     private static final String SERVICE_NAME = "FoobarService";
     private static final ShapeId SERVICE_SHAPE_ID = ShapeId.fromParts(SERVICE_NAMESPACE, SERVICE_NAME);
