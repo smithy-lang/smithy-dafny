@@ -195,7 +195,7 @@ public class ToNative {
         ) {
             // From the Smithy Docs:
             // "Implementations SHOULD use insertion ordered sets"
-            // https://awslabs.github.io/smithy/1.0/spec/core/model.html#set
+            // https://smithy.io/1.0/spec/core/model.html#set
             // Thus, we use a LinkedHashSet
             Set<R> returnSet = new LinkedHashSet<>(dafnyValues.size(), 1);
             dafnyValues.Elements().forEach(value ->

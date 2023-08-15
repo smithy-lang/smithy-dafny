@@ -52,7 +52,7 @@ which is not yet published anywhere outside of this repository.
 We'd like to provide this functionality as another Smithy build plugin in the future, 
 likely named something like `dafny-library-codegen`.
 If you're interested in this use case we'd love to hear from you -
-feel free to [cut us an issue](https://github.com/awslabs/smithy-dafny/issues/new)!
+feel free to [cut us an issue](https://github.com/smithy-lang/smithy-dafny/issues/new)!
 
 See the [`codegen/smithy-dafny-codegen-cli`](codegen/smithy-dafny-codegen-cli) directory for further details and examples.
 
