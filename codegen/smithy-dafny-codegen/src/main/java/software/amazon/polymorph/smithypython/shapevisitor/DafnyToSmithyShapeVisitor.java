@@ -165,7 +165,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
     ));
 
     // Close structure
-    // No () on items call because Dafny doesn't use them TODO explain why
+    // No () on items call; this is a Dafny map, where `items` is a @property and not a method.
     return builder.append(" for (key, value) in %1$s.items }".formatted(dataSource)).toString();
   }
 

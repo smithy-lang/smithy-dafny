@@ -40,11 +40,10 @@ public class ErrorsFileWriter implements CustomFileWriter {
 
       writer.write(
           """
-             # TODO: Should this extend ApiError...?
              class CollectionOfErrors(ApiError[Literal["CollectionOfErrors"]]):
                  code: Literal["CollectionOfErrors"] = "CollectionOfErrors"
                  message: str
-                 # TODO: To add `list` here, I'd need a typehint... what should the object type be? i.e. list[?]
+                 # TODO: To add `list` here, I'd need a typehint... what should the object type be?
                  def __init__(
                      self,
                      *,
@@ -104,13 +103,14 @@ public class ErrorsFileWriter implements CustomFileWriter {
              # Probably not... as this doesn't have a message attribute...
              class OpaqueError(ApiError[Literal["OpaqueError"]]):
                  code: Literal["OpaqueError"] = "OpaqueError"
-                 # TODO: obj *probably* should not have a typehint, so probably no-op here, but I should think more deeply about this...
+                 # TODO: The type of obj is only known at runtime, and therefore should *probably* should not have a typehint
+                 # Probably no-op here, but we should think more deeply about this...
                  def __init__(
                      self,
                      *,
                      obj
                  ):
-                     # TODO: Remove this if I decide this shouldn't extend ApiError
+                     # TODO: Remove superclass construction if we decide this shouldn't extend ApiError
                      super().__init__("")
                      self.obj = obj
                              
@@ -169,11 +169,10 @@ public class ErrorsFileWriter implements CustomFileWriter {
   // to be used for Resource error generation.
   // TODO: Reconcile this with Smithy-Python
   private void renderError(GenerationContext context, PythonWriter writer, StructureShape shape) {
-
     writer.addStdlibImport("typing", "Dict");
     writer.addStdlibImport("typing", "Any");
     writer.addStdlibImport("typing", "Literal");
-    // TODO: Implement protocol-level customization of the error code
+
     var code = shape.getId().getName();
     var symbol = context.symbolProvider().toSymbol(shape);
     var apiError = CodegenUtils.getApiError(context.settings());

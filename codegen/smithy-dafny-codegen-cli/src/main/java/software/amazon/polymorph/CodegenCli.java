@@ -93,8 +93,6 @@ public class CodegenCli {
                 throw new RuntimeException("IOException while reading smithy-build.json", e);
             }
 
-            System.out.println(json);
-
             JsonFactory factory = new JsonFactory();
             ObjectMapper mapper = new ObjectMapper(factory);
             JsonNode rootNode;

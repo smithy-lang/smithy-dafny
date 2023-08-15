@@ -142,7 +142,6 @@ public abstract class DafnyPythonProtocolGenerator implements ProtocolGenerator 
   @Override
   public void generateResponseDeserializers(GenerationContext context) {
     var topDownIndex = TopDownIndex.of(context.model());
-    var service = context.settings().getService(context.model());
     var delegator = context.writerDelegator();
     var configSymbol = CodegenUtils.getConfigSymbol(context.settings());
 
@@ -155,45 +154,6 @@ public abstract class DafnyPythonProtocolGenerator implements ProtocolGenerator 
             .collect(Collectors.toSet()));
 
     for (OperationShape operation : topDownIndex.getContainedOperations(context.settings().getService())) {
-//      deserializingErrorShapes.addAll(operation.getErrors(service));
-//
-//      Set<ShapeId> inputShapeIds = new HashSet<>();
-//      Set<ShapeId> outputShapeIds = new HashSet<>();
-//      inputShapeIds.add(operation.getInputShape());
-//      outputShapeIds.add(operation.getOutputShape());
-//
-//      Set<MemberShape> referenceMemberShapes = new HashSet<>();
-//      referenceMemberShapes.addAll(
-//          ModelUtils.findAllDependentMemberReferenceShapes(inputShapeIds, context.model()));
-//      referenceMemberShapes.addAll(
-//          ModelUtils.findAllDependentMemberReferenceShapes(outputShapeIds, context.model()));
-//
-//      Set<Shape> referenceChildShape = new HashSet<>();
-//      for (MemberShape referenceMemberShape : referenceMemberShapes) {
-//        Shape referenceShape = context.model().expectShape(referenceMemberShape.getTarget());
-//        ReferenceTrait referenceTrait = referenceShape.expectTrait(ReferenceTrait.class);
-//        System.out.println(referenceTrait.getReferentId());
-//        Shape resourceOrService = context.model().expectShape(referenceTrait.getReferentId());
-//        referenceChildShape.add(resourceOrService);
-//      }
-//
-//      for(Shape resourceOrService : referenceChildShape) {
-//        resourceOrService
-//        System.out.println("resourceOrService");
-//        System.out.println(resourceOrService);
-//        Set<ShapeId> resourceOperationShapeIds = resourceOrService.asResourceShape().get().getResources()
-//        System.out.println("resourceOperationShapeIds");
-//        System.out.println(resourceOperationShapeIds);
-//        for (ShapeId shapeId : resourceOperationShapeIds) {
-//          OperationShape operationShape = context.model()
-//              .expectShape(shapeId, OperationShape.class);
-//          System.out.println("operationShape");
-//          System.out.println(operationShape);
-//          System.out.println(operationShape.getErrors());
-//          deserializingErrorShapes.addAll(operationShape.getErrors());
-//        }
-//      }
-
       var deserFunction = getDeserializationFunction(context, operation);
       var output = context.model().expectShape(operation.getOutputShape());
       var outputSymbol = context.symbolProvider().toSymbol(output);
@@ -214,15 +174,6 @@ public abstract class DafnyPythonProtocolGenerator implements ProtocolGenerator 
       });
     }
 
-
-    System.out.println("service.getErrors()");
-    System.out.println(service.getErrors());
-
-
-
-    System.out.println("deserializingErrorShapes");
-
-    System.out.println(deserializingErrorShapes);
     generateErrorResponseDeserializerSection(context, deserializingErrorShapes);
     generateDocumentBodyShapeDeserializers(context, deserializingDocumentShapes);
   }
@@ -324,7 +275,7 @@ public abstract class DafnyPythonProtocolGenerator implements ProtocolGenerator 
       delegator.useFileWriter(deserFunctionMetadata.getLeft(), deserFunctionMetadata.getRight(), writer -> {
 
         writer.addStdlibImport("typing", "Any");
-        // TODO: This also doesn't seem to be generated if there are no modelled errors...
+        // TODO: Is this generated if there are no modelled errors...?
         writer.addImport(".errors", "ServiceError");
         writer.addImport(".errors", "OpaqueError");
         writer.addImport(".errors", "CollectionOfErrors");

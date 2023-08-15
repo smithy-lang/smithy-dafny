@@ -329,9 +329,11 @@ _clean:
 	rm -rf $(LIBRARY_ROOT)/TestResults
 	rm -rf $(LIBRARY_ROOT)/runtimes/net/Generated $(LIBRARY_ROOT)/runtimes/net/bin $(LIBRARY_ROOT)/runtimes/net/obj
 	rm -rf $(LIBRARY_ROOT)/runtimes/net/tests/bin $(LIBRARY_ROOT)/runtimes/net/tests/obj
-	rm -rf $(LIBRARY_ROOT)/runtimes/python/src/dafnygenerated/*.py
-	rm -rf $(LIBRARY_ROOT)/runtimes/python/src/smithygenerated
+	rm -rf $(LIBRARY_ROOT)/runtimes/python/src/**/dafnygenerated/*.py
+	rm -rf $(LIBRARY_ROOT)/runtimes/python/src/**/smithygenerated
 	rm -rf $(LIBRARY_ROOT)/runtimes/python/test/dafnygenerated/*.py
+	rm -rf $(LIBRARY_ROOT)/runtimes/python/.tox
+	rm -rf $(LIBRARY_ROOT)/runtimes/python/poetry.lock
 	rm -rf $(LIBRARY_ROOT)/runtimes/python/build
 
 ########################## Python targets
