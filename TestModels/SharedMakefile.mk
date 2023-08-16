@@ -41,6 +41,13 @@ else
 	COMPILE_SUFFIX_OPTION :=
 endif
 
+OS := $(shell uname)
+ifeq ($(OS), Darwin)
+  SED := ""
+else
+  SED :=
+endif
+
 STANDARD_LIBRARY_PATH := $(PROJECT_ROOT)/dafny-dependencies/StandardLibrary
 CODEGEN_CLI_ROOT := $(PROJECT_ROOT)/../codegen/smithy-dafny-codegen-cli
 GRADLEW := $(PROJECT_ROOT)/../codegen/gradlew
@@ -133,6 +140,9 @@ build_test:
 		--library:src/Index.dfy
 
 transpile_implementation:
+	@if [ $(TARGET) = "py" ]; then\
+		COMPILE_SUFFIX_OPTION :=
+	fi
 	dafny \
 		-vcsCores:$(CORES) \
 		-compileTarget:$(TARGET) \
@@ -150,6 +160,9 @@ transpile_implementation:
 		$(patsubst %, -library:$(PROJECT_ROOT)/%/src/Index.dfy, $(LIBRARIES))
 
 transpile_test:
+	@if [ $(TARGET) = "py" ]; then\
+		COMPILE_SUFFIX_OPTION :=
+	fi
 	dafny \
 		-vcsCores:$(CORES) \
 		-compileTarget:$(TARGET) \
@@ -389,14 +402,14 @@ transpile_test_python: transpile_test
 # TODO: Once Dafny supports per-language extern names, remove and replace with Pythonic extern names.
 # This may require new Smithy-Dafny logic to generate Pythonic extern names.
 _python_underscore_extern_names:
-	find src -regex ".*\.dfy" -type f -exec sed -i "" '/.*{:extern \".*\".*/s/\./_/g' {} \;
-	find Model -regex ".*\.dfy" -type f -exec sed -i "" '/.*{:extern \".*\.*"/s/\./_/g' {} \;
-	find test -regex ".*\.dfy" -type f -exec sed -i "" '/.*{:extern \".*\".*/s/\./_/g' {} \;
+	find src -regex ".*\.dfy" -type f -exec sed -i $(SED) '/.*{:extern \".*\".*/s/\./_/g' {} \;
+	find Model -regex ".*\.dfy" -type f -exec sed -i $(SED) '/.*{:extern \".*\.*"/s/\./_/g' {} \;
+	find test -regex ".*\.dfy" -type f -exec sed -i $(SED) '/.*{:extern \".*\".*/s/\./_/g' {} \;
 
 _python_revert_underscore_extern_names:
-	find src -regex ".*\.dfy" -type f -exec sed -i "" '/.*{:extern \".*\".*/s/_/\./g' {} \;
-	find Model -regex ".*\.dfy" -type f -exec sed -i "" '/.*{:extern \".*\".*/s/_/\./g' {} \; 2>/dev/null
-	find test -regex ".*\.dfy" -type f -exec sed -i "" '/.*{:extern \".*\".*/s/_/\./g' {} \;
+	find src -regex ".*\.dfy" -type f -exec sed -i $(SED) '/.*{:extern \".*\".*/s/_/\./g' {} \;
+	find Model -regex ".*\.dfy" -type f -exec sed -i $(SED) '/.*{:extern \".*\".*/s/_/\./g' {} \; 2>/dev/null
+	find test -regex ".*\.dfy" -type f -exec sed -i $(SED) '/.*{:extern \".*\".*/s/_/\./g' {} \;
 
 # Move Dafny-generated code into its expected location in the Python module
 _mv_dafnygenerated_python:
@@ -418,15 +431,15 @@ _modify_dafnygenerated_python: _comment_out_import_module_python
 _comment_out_module_assertions_python:
 	# For a Dafny-generated module X, comment out `assert "X" == __name__`
 	# This assertion is invalid in the context of multiple Python modules
-	find runtimes/python/src/$(PYTHON_MODULE_NAME)/dafnygenerated -type f -exec sed -i "" '/assert \".*\" \=\= \_\_name\_\_/s/^/# /g' {} \;
-	find runtimes/python/test/dafnygenerated -type f -exec sed -i "" '/assert \".*\" \=\= \_\_name\_\_/s/^/# /g' {} \;
+	find runtimes/python/src/$(PYTHON_MODULE_NAME)/dafnygenerated -type f -exec sed -i $(SED) '/assert \".*\" \=\= \_\_name\_\_/s/^/# /g' {} \;
+	find runtimes/python/test/dafnygenerated -type f -exec sed -i $(SED) '/assert \".*\" \=\= \_\_name\_\_/s/^/# /g' {} \;
 
 # TODO: Cut ticket to Dafny team
 _comment_out_import_module_python:
 	# For a Dafny-generated module X, comment out `import module_`
 	# This import results in circular dependencies
-	find runtimes/python/src/$(PYTHON_MODULE_NAME)/dafnygenerated -type f -exec sed -i "" '/import module\_/s/^/# /g' {} \;
-	find runtimes/python/test/dafnygenerated -type f -exec sed -i "" '/import module\_/s/^/# /g' {} \;
+	find runtimes/python/src/$(PYTHON_MODULE_NAME)/dafnygenerated -type f -exec sed -i $(SED) '/import module\_/s/^/# /g' {} \;
+	find runtimes/python/test/dafnygenerated -type f -exec sed -i $(SED) '/import module\_/s/^/# /g' {} \;
 
 transpile_dependencies_python: LANG=python
 transpile_dependencies_python: transpile_dependencies
