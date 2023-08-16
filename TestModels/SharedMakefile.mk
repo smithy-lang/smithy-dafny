@@ -140,9 +140,6 @@ build_test:
 		--library:src/Index.dfy
 
 transpile_implementation:
-	@if [ $(TARGET) = "py" ]; then\
-		COMPILE_SUFFIX_OPTION :=
-	fi
 	dafny \
 		-vcsCores:$(CORES) \
 		-compileTarget:$(TARGET) \
@@ -160,9 +157,6 @@ transpile_implementation:
 		$(patsubst %, -library:$(PROJECT_ROOT)/%/src/Index.dfy, $(LIBRARIES))
 
 transpile_test:
-	@if [ $(TARGET) = "py" ]; then\
-		COMPILE_SUFFIX_OPTION :=
-	fi
 	dafny \
 		-vcsCores:$(CORES) \
 		-compileTarget:$(TARGET) \
@@ -375,6 +369,7 @@ build_python: _modify_dafnygenerated_python
 
 build_implementation_python: TARGET=py
 build_implementation_python: OUT=runtimes/python/dafny_src
+build_implementation_python: COMPILE_SUFFIX_OPTION=
 build_implementation_python: build_implementation
 
 # `transpile_implementation_python` is not directly used, but is indirectly used via `transpile_dependencies`
@@ -390,10 +385,12 @@ transpile_implementation_python: _modify_dafnygenerated_python
 
 transpile_src_python: TARGET=py
 transpile_src_python: OUT=runtimes/python/dafny_src
+transpile_src_python: COMPILE_SUFFIX_OPTION=
 transpile_src_python: transpile_implementation
 
 transpile_test_python: TARGET=py
 transpile_test_python: OUT=runtimes/python/test
+transpile_test_python: COMPILE_SUFFIX_OPTION=
 transpile_test_python: transpile_test
 
 # Hacky workaround until Dafny supports per-language extern names.
