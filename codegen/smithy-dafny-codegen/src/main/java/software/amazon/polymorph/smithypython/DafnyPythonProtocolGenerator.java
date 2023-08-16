@@ -164,7 +164,7 @@ public abstract class DafnyPythonProtocolGenerator implements ProtocolGenerator 
       var outputSymbol = context.symbolProvider().toSymbol(output);
 
       delegator.useFileWriter(deserFunction.getDefinitionFile(), deserFunction.getNamespace(), writer -> {
-        writer.addImport("", Constants.DAFNY_PROTOCOL_RESPONSE);
+        writer.addImport(Constants.DAFNY_PROTOCOL_PYTHON_FILENAME, Constants.DAFNY_PROTOCOL_RESPONSE);
 
         writer.pushState(new RequestSerializerSection(operation));
 
