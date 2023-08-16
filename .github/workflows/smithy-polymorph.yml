@@ -41,10 +41,10 @@ jobs:
       # Required for building Smithy-Dafny
       # TODO: This step can and should be removed once Smithy-Python is on Maven central
       - name: Locally cache smithy-python-codegen
-          uses: gradle/gradle-build-action@v2
-          with:
-            arguments: :smithy-python-codegen:publishToMavenLocal
-            build-root-directory: submodules/smithy-python/codegen
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: :smithy-python-codegen:publishToMavenLocal
+          build-root-directory: submodules/smithy-python/codegen
 
       - name: Sanity-check SQS test model via plugin
         uses: gradle/gradle-build-action@v2
