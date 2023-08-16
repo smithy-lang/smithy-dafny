@@ -75,6 +75,11 @@ jobs:
         with:
           submodules: recursive
 
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'corretto'
+          java-version: '17'
+
       - name: Setup Dafny
         uses: dafny-lang/setup-dafny-action@v1.6.1
         with:
