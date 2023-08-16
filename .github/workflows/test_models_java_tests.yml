@@ -80,6 +80,8 @@ jobs:
           role-session-name: JavaTests
 
       - uses: actions/checkout@v3
+        with:
+          submodules: recursive
 
       - name: Setup Dafny
         uses: dafny-lang/setup-dafny-action@v1.6.1
