@@ -17,7 +17,6 @@ package software.amazon.polymorph.smithypython;
 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -27,10 +26,7 @@ import software.amazon.polymorph.smithypython.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithypython.nameresolver.Utils;
 import software.amazon.polymorph.smithypython.shapevisitor.DafnyToSmithyShapeVisitor;
 import software.amazon.polymorph.smithypython.shapevisitor.SmithyToDafnyShapeVisitor;
-import software.amazon.polymorph.traits.ReferenceTrait;
-import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.smithy.model.knowledge.TopDownIndex;
-import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
@@ -54,7 +50,6 @@ import software.amazon.smithy.utils.SmithyUnstableApi;
 @SmithyUnstableApi
 public abstract class DafnyPythonProtocolGenerator implements ProtocolGenerator {
 
-  private final Set<Shape> serializingDocumentShapes = new TreeSet<>();
   private final Set<Shape> deserializingDocumentShapes = new TreeSet<>();
 
   @Override
@@ -62,25 +57,34 @@ public abstract class DafnyPythonProtocolGenerator implements ProtocolGenerator 
     return DafnyPythonIntegration.createDafnyApplicationProtocol();
   }
 
+  /**
+   * For all operations in the model, generate a conversion method
+   *   that takes in a Smithy shape and converts it to a DafnyRequest.
+   * @param context
+   */
   @Override
   public void generateRequestSerializers(GenerationContext context) {
     var topDownIndex = TopDownIndex.of(context.model());
     var delegator = context.writerDelegator();
     var configSymbol = CodegenUtils.getConfigSymbol(context.settings());
 
+    // For each operation in the model, generate a `serialize_{operation input}` method
     for (OperationShape operation : topDownIndex.getContainedOperations(context.settings().getService())) {
       var serFunction = getSerializationFunction(context, operation);
       var input = context.model().expectShape(operation.getInputShape());
       var inputSymbol = context.symbolProvider().toSymbol(input);
 
       delegator.useFileWriter(serFunction.getDefinitionFile(), serFunction.getNamespace(), writer -> {
-        writer.addImport(".dafny_protocol", "DafnyRequest");
+        writer.addImport(Constants.DAFNY_PROTOCOL_PYTHON_FILENAME, Constants.DAFNY_PROTOCOL_REQUEST);
         writer.pushState(new RequestSerializerSection(operation));
         writer.write("""
                   async def $L(input: $T, config: $T) -> $L:
                       ${C|}
-                  """, serFunction.getName(), inputSymbol, configSymbol,
-            "DafnyRequest",
+                  """,
+            serFunction.getName(),
+            inputSymbol,
+            configSymbol,
+            Constants.DAFNY_PROTOCOL_REQUEST,
             writer.consumer(w -> generateRequestSerializer(context, operation, w)));
         writer.popState();
       });
@@ -89,6 +93,9 @@ public abstract class DafnyPythonProtocolGenerator implements ProtocolGenerator 
 
   /**
    * A section that controls writing out the entire serialization function.
+   * By pushing and popping this section, we allow other developers
+   *   to create plugins that intercept this section and inject their
+   *   own code here.
    *
    * @param operation The operation whose serializer is being generated.
    */
@@ -105,12 +112,6 @@ public abstract class DafnyPythonProtocolGenerator implements ProtocolGenerator 
    * The Dafny plugin will not 'serialize' here, but will instead
    * transform POJOs of Smithy-modelled objects
    * into POJOs of Dafny-compiled objects.
-   *
-   * <p>This function has the following in scope:
-   * <ul>
-   *     <li>input - the operation's input</li>
-   *     <li>config - the client config</li>
-   * </ul>
    */
   private void generateRequestSerializer(
       GenerationContext context,
@@ -122,6 +123,7 @@ public abstract class DafnyPythonProtocolGenerator implements ProtocolGenerator 
     // Import the Dafny type being converted to
     DafnyNameResolver.importDafnyTypeForShape(writer, operation.getInputShape());
 
+    // Determine conversion code from Smithy to Dafny
     Shape targetShape = context.model().expectShape(operation.getInputShape());
     var input = targetShape.accept(new SmithyToDafnyShapeVisitor(
         context,
@@ -130,6 +132,7 @@ public abstract class DafnyPythonProtocolGenerator implements ProtocolGenerator 
         false
     ));
 
+    // Write conversion method body
     writer.write(
           """
           return DafnyRequest(operation_name="$L", dafny_operation_input=$L)
@@ -145,6 +148,7 @@ public abstract class DafnyPythonProtocolGenerator implements ProtocolGenerator 
     var delegator = context.writerDelegator();
     var configSymbol = CodegenUtils.getConfigSymbol(context.settings());
 
+    // Find all modelled error shapes
     var deserializingErrorShapes = new TreeSet<ShapeId>(
         context.model().getStructureShapesWithTrait(ErrorTrait.class)
             .stream()
@@ -153,22 +157,27 @@ public abstract class DafnyPythonProtocolGenerator implements ProtocolGenerator 
             .map(Shape::getId)
             .collect(Collectors.toSet()));
 
+    // For each operation in the model, generate a `deserialize_{operation input}` method
     for (OperationShape operation : topDownIndex.getContainedOperations(context.settings().getService())) {
       var deserFunction = getDeserializationFunction(context, operation);
       var output = context.model().expectShape(operation.getOutputShape());
       var outputSymbol = context.symbolProvider().toSymbol(output);
 
       delegator.useFileWriter(deserFunction.getDefinitionFile(), deserFunction.getNamespace(), writer -> {
-        writer.addImport(".dafny_protocol", "DafnyResponse");
+        writer.addImport("", Constants.DAFNY_PROTOCOL_RESPONSE);
 
         writer.pushState(new RequestSerializerSection(operation));
 
         writer.write("""
                   async def $L(input: $L, config: $T) -> $T:
                     ${C|}
-                  """, deserFunction.getName(),
-            "DafnyResponse", configSymbol, outputSymbol,
-            writer.consumer(w -> generateOperationResponseDeserializer(context, operation)));
+                  """,
+            deserFunction.getName(),
+            Constants.DAFNY_PROTOCOL_RESPONSE,
+            configSymbol,
+            outputSymbol,
+            writer.consumer(w -> generateOperationResponseDeserializer(context, operation))
+        );
 
         writer.popState();
       });
@@ -189,12 +198,6 @@ public abstract class DafnyPythonProtocolGenerator implements ProtocolGenerator 
    * The Dafny plugin will not 'deserialize' here, but will instead
    * transform POJOs of Dafny-compiled objects
    * into POJOs of Smithy-modelled objects.
-   *
-   * <p>This function has the following in scope:
-   * <ul>
-   *     <li>dafny_response - the Dafny-level response</li>
-   *     <li>config - the client config</li>
-   * </ul>
    */
   private void generateOperationResponseDeserializer(
       GenerationContext context,
@@ -208,12 +211,13 @@ public abstract class DafnyPythonProtocolGenerator implements ProtocolGenerator 
       ShapeId outputShape = operation.getOutputShape();
       DafnyNameResolver.importDafnyTypeForShape(writer, outputShape);
 
-      // TODO: If there is no output... how can there be an error?
+      // Smithy Unit shapes have no data, and do not need deserialization
       if (Utils.isUnitShape(outputShape)) {
         writer.write("""
           return None
           """);
       } else {
+        // Determine the deserialization function
         Shape targetShape = context.model().expectShape(outputShape);
         var output = targetShape.accept(new DafnyToSmithyShapeVisitor(
             context,
@@ -234,12 +238,14 @@ public abstract class DafnyPythonProtocolGenerator implements ProtocolGenerator 
 
   /**
    * A section that controls writing out the entire deserialization function for an operation.
+   * By pushing and popping this section, we allow other developers
+   *   to create plugins that intercept this section and inject their
+   *   own code here.
    *
    * @param operation The operation whose deserializer is being generated.
    */
   public record ResponseDeserializerSection(OperationShape operation) implements CodeSection {}
 
-  // TODO: CodeSection-ize this?
   private void generateErrorResponseDeserializerSection(
       GenerationContext context,
       TreeSet<ShapeId> deserializingErrorShapes)

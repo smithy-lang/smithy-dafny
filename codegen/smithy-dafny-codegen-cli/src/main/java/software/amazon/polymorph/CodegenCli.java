@@ -83,8 +83,7 @@ public class CodegenCli {
         cliArguments.outputPythonDir.ifPresent(path -> outputDirs.put(TargetLanguage.PYTHON, path));
 
         ObjectNode.Builder objectNodeBuilder = ObjectNode.builder();
-        // If a smithy-build.json is provided, parse it for settings
-        // that will be piped into the PluginContext
+        // If a smithy-build.json is provided, parse it for settings to pipe into PluginContext
         if (cliArguments.smithyBuildFilePath.isPresent()) {
             String json;
             try {

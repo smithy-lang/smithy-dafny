@@ -29,12 +29,14 @@ final class SendRequestInterceptor implements
                     raise Exception("No impl found on the operation config.")
                 
                 context_with_response = cast(
-                    InterceptorContext[Input, None, DafnyRequest, DafnyResponse], context
+                    InterceptorContext[Input, None, $L, $L], context
                 )
                                 
                 context_with_response._transport_response = config.dafnyImplInterface.handle_request(
                     input=context_with_response.transport_request
                 )
-        """);
+        """,
+        Constants.DAFNY_PROTOCOL_REQUEST,
+        Constants.DAFNY_PROTOCOL_RESPONSE);
   }
 }

@@ -1,5 +1,6 @@
 package software.amazon.polymorph.smithypython.customize;
 
+import software.amazon.polymorph.smithypython.Constants;
 import software.amazon.polymorph.smithypython.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithypython.nameresolver.SmithyNameResolver;
 import software.amazon.smithy.model.shapes.OperationShape;
@@ -31,7 +32,7 @@ public class DafnyImplInterfaceFileWriter implements CustomFileWriter {
         writer.write(
             """
                 from $L import $L
-                from .dafny_protocol import DafnyRequest
+                from $L import $L
                           
                 class DafnyImplInterface:
                     $L: $L | None = None
@@ -56,7 +57,13 @@ public class DafnyImplInterfaceFileWriter implements CustomFileWriter {
                             return self.operation_map[input.operation_name]()
                         else:
                             return self.operation_map[input.operation_name](input.dafny_operation_input)
-                """, implModulePrelude, clientName, "impl", clientName,
+                """,
+            implModulePrelude,
+            clientName,
+            Constants.DAFNY_PROTOCOL_PYTHON_FILENAME,
+            Constants.DAFNY_PROTOCOL_REQUEST,
+            "impl",
+            clientName,
             writer.consumer(w -> generateImplInterfaceOperationMap(serviceShape, codegenContext, w)));
       });
   }

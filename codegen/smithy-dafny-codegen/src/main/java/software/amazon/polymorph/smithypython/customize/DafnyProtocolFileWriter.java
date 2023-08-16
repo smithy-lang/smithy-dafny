@@ -2,6 +2,7 @@ package software.amazon.polymorph.smithypython.customize;
 
 import java.util.HashSet;
 import java.util.Set;
+import software.amazon.polymorph.smithypython.Constants;
 import software.amazon.polymorph.smithypython.nameresolver.DafnyNameResolver;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
@@ -38,7 +39,7 @@ public class DafnyProtocolFileWriter implements CustomFileWriter {
               import Wrappers
               from typing import Union
                         
-              class DafnyRequest:
+              class $L:
                   operation_name: str
                   dafny_operation_input: Union[
                       ${C|}
@@ -48,12 +49,14 @@ public class DafnyProtocolFileWriter implements CustomFileWriter {
                       self.operation_name = operation_name
                       self.dafny_operation_input = dafny_operation_input
                   
-              class DafnyResponse(Wrappers.Result):
+              class $L(Wrappers.Result):
                   def __init__(self):
                       super.__init__(self)
               """,
-          writer.consumer(w -> generateDafnyOperationInputUnionValues(inputShapeIds, w))
-      );
+          Constants.DAFNY_PROTOCOL_REQUEST,
+          writer.consumer(w -> generateDafnyOperationInputUnionValues(inputShapeIds, w)),
+          Constants.DAFNY_PROTOCOL_RESPONSE
+          );
     });
   }
 

@@ -44,12 +44,14 @@ public final class DafnyPythonIntegration implements PythonIntegration {
     private RuntimeClientPlugin dafnyImplRuntimeClientPlugin = RuntimeClientPlugin.builder()
         .configProperties(
             // Adds a new field in the client class' config.
-            // This is an interface for the Dafny implementation code.
+            // `dafnyImplInterface` is a static interface for accessing Dafny implementation code.
             // The Smithy-Dafny Python plugin generates a dafnyImplInterface file
-            // and populates it with the relevant information from the model
-            // to interact with the Dafny implementation.
-            // We use an interface as we cannot plug the model into the RuntimeClientPlugin definition,
-            // but we can point the RuntimeClientPlugin to an interface and plug the model in there.
+            //   and populates it with the relevant information from the model
+            //   to interact with the Dafny implementation.
+            // We use a static interface as we cannot plug the model into this RuntimeClientPlugin definition,
+            //   so this class cannot be aware of model shapes.
+            // To work around this, we can point the RuntimeClientPlugin to a static interface
+            //   that IS aware of model shapes, and plug the model in there.
             // TODO: Naming of DafnyImplInterface?
             Collections.singletonList(ConfigProperty.builder()
                 .name("dafnyImplInterface")
@@ -94,6 +96,7 @@ public final class DafnyPythonIntegration implements PythonIntegration {
     }
 
     private void customizeForServiceShape(ServiceShape serviceShape, GenerationContext codegenContext) {
+        // Call every class in ./customize
         new PluginFileWriter().generateFileForServiceShape(serviceShape, codegenContext);
         new DafnyImplInterfaceFileWriter().generateFileForServiceShape(serviceShape, codegenContext);
         new DafnyProtocolFileWriter().generateFileForServiceShape(serviceShape, codegenContext);
@@ -105,41 +108,31 @@ public final class DafnyPythonIntegration implements PythonIntegration {
 
     /**
      * Creates the Dafny ApplicationProtocol object.
-     * At the moment, this is entirely unused boilerplate.
-     * Smithy-Python requires this boilerplate, but the Dafny plugin doesn't use it.
      *
      * @return Returns the created application protocol.
      */
     public static ApplicationProtocol createDafnyApplicationProtocol() {
         return new ApplicationProtocol(
-            "dafny",
-            // TODO: Naming of these symbols?
-            // TODO: This is just the input/output of a Dafny call, right?
-            //       If that is true, is output just Wrappers.result?
-            //       Then what is input? Maybe DafnyCallEvent?
-            // Input: Not DafnyCallEvent. There is no Dafny-generated type for input.
-            // Input can be the corresponding Dafny class for any of the operation input shapes,
-            // Dafny does not generate some superclass relating these.
-            // If we want to specify this, we must specify it in dafny_protocol.py.
-            // It will look like
-            // DafnyInput = Tuple(
-            //     String,
-            //     Union[forall operations in service: operation.getInputShape()]
-            // )
-            // Output: This is the value returned from the client calling dafnyImplInterface.
-            // I believe this is a Wrappers.Result, which I should use.
+            // Define the `dafny` ApplicationProtocol.
+            // This protocol's request and response shapes are defined in DafnyProtocolFileWriter.
+            Constants.DAFNY_APPLICATION_PROTOCOL_NAME,
             SymbolReference.builder()
-                .symbol(createDafnySymbol("DafnyRequest"))
+                .symbol(createDafnyApplicationProtocolSymbol(Constants.DAFNY_PROTOCOL_REQUEST))
                 .build(),
             SymbolReference.builder()
-                .symbol(createDafnySymbol("DafnyResponse"))
+                .symbol(createDafnyApplicationProtocolSymbol(Constants.DAFNY_PROTOCOL_RESPONSE))
                 .build()
         );
     }
 
-    private static Symbol createDafnySymbol(String symbolName) {
+    /**
+     * Create a Symbol representing shapes inside the generated .dafny_protocol file.
+     * @param symbolName
+     * @return
+     */
+    private static Symbol createDafnyApplicationProtocolSymbol(String symbolName) {
         return Symbol.builder()
-            .namespace(".dafny_protocol", ".")
+            .namespace(Constants.DAFNY_PROTOCOL_PYTHON_FILENAME, ".")
             .name(symbolName)
             .build();
     }
