@@ -62,7 +62,7 @@ public class DotNetNameResolver {
      * Returns the C# namespace containing the C# implementation/interface for the given shape ID.
      */
     public String namespaceForShapeId(final ShapeId shapeId) {
-        // TODO remove special AWS SDK special-case when https://github.com/awslabs/polymorph/issues/7 is resolved
+        // TODO remove special AWS SDK special-case when https://github.com/smithy-lang/smithy-dafny/issues/7 is resolved
         final Function<String, String> segmentMapper = AwsSdkNameResolverHelpers.isInAwsSdkNamespace(shapeId)
                 ? StringUtils::capitalize
                 : DotNetNameResolver::capitalizeNamespaceSegment;

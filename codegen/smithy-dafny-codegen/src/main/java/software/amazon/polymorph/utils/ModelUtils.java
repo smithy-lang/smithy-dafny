@@ -33,7 +33,7 @@ public class ModelUtils {
     // Require title-case alphanumeric names, so we don't need to check for keyword conflicts.
     //
     // The spec recommends a similar stricter definition for consistency (uppercase instead of title-case):
-    // https://awslabs.github.io/smithy/1.0/spec/core/constraint-traits.html?highlight=enum#enum-trait
+    // https://smithy.io/1.0/spec/core/constraint-traits.html?highlight=enum#enum-trait
     private static final Pattern ENUM_NAME_PATTERN = Pattern.compile("^[A-Z]+[A-Za-z_0-9]*$");
 
     /**
