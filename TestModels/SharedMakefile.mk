@@ -415,6 +415,7 @@ _mv_dafnygenerated_python:
 # to bound the scope of modifications to this step
 _modify_dafnygenerated_python: _comment_out_module_assertions_python
 _modify_dafnygenerated_python: _comment_out_import_module_python
+_modify_dafnygenerated_python: _correct_escaped_python
 
 # TODO: Cut ticket to Dafny team
 _comment_out_module_assertions_python:
@@ -431,6 +432,10 @@ _comment_out_import_module_python:
 	rm runtimes/python/src/$(PYTHON_MODULE_NAME)/dafnygenerated/module_.py
 	find runtimes/python/test/dafnygenerated -type f -exec sed -i $(SED_PARAMETER) '/import module\_/s/^/# /g' {} \;
 	find runtimes/python/test/dafnygenerated/test.py -type f -exec sed -i $(SED_PARAMETER) '/# import module\_/s/^# //g' {} \;
+
+# TODO: Cut ticket to Dafny team
+_correct_escaped_python:
+	find runtimes/python/src/$(PYTHON_MODULE_NAME)/dafnygenerated/_dafny.py -type f -exec sed -i $(SED_PARAMETER) '/.*lambda c\: c\.__escaped__.*/s/lambda c: c\.__escaped__/lambda c: CodePoint(c).__escaped__/g' {} \;
 
 transpile_dependencies_python: LANG=python
 transpile_dependencies_python: transpile_dependencies

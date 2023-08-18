@@ -34,7 +34,7 @@ jobs:
           TestModels/Aggregate,
           # TestModels/AggregateReferences,
           TestModels/Constraints,
-           TestModels/Constructor,
+          TestModels/Constructor,
           # TestModels/Dependencies,
           # TestModels/Errors, # Dafny str issues
           # TestModels/Extendable, # Dafny namespace issues
