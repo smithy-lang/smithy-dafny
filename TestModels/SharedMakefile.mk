@@ -351,11 +351,13 @@ _clean:
 
 ########################## Python targets
 
+build_python: _python_underscore_dependency_extern_names
 build_python: _python_underscore_extern_names
 build_python: transpile_dependencies_python
 build_python: build_implementation_python
 build_python: transpile_test_python
 build_python: _python_revert_underscore_extern_names
+build_python: _python_revert_underscore_dependency_extern_names
 build_python: _mv_dafnygenerated_python
 build_python: _modify_dafnygenerated_python
 
@@ -367,11 +369,9 @@ build_implementation_python: build_implementation
 # `transpile_implementation_python` is not directly used, but is indirectly used via `transpile_dependencies`
 # The `transpile` target does NOT include the Dafny runtime library (_dafny.py) in the generated code
 # while the `build` target does
-transpile_implementation_python: _python_underscore_extern_names
 transpile_implementation_python: transpile_dependencies_python
 transpile_implementation_python: transpile_src_python
 transpile_implementation_python: transpile_test_python
-transpile_implementation_python: _python_revert_underscore_extern_names
 transpile_implementation_python: _mv_dafnygenerated_python
 transpile_implementation_python: _modify_dafnygenerated_python
 
@@ -395,10 +395,18 @@ _python_underscore_extern_names:
 	find Model -regex ".*\.dfy" -type f -exec sed -i $(SED_PARAMETER) '/.*{:extern \".*\.*"/s/\./_/g' {} \;
 	find test -regex ".*\.dfy" -type f -exec sed -i $(SED_PARAMETER) '/.*{:extern \".*\".*/s/\./_/g' {} \;
 
+_python_underscore_dependency_extern_names:
+	$(MAKE) -C $(STANDARD_LIBRARY_PATH) _python_underscore_extern_names
+	$(patsubst %, $(MAKE) -C $(PROJECT_ROOT)/% _python_underscore_extern_names;, $(LIBRARIES))
+
 _python_revert_underscore_extern_names:
 	find src -regex ".*\.dfy" -type f -exec sed -i $(SED_PARAMETER) '/.*{:extern \".*\".*/s/_/\./g' {} \;
 	find Model -regex ".*\.dfy" -type f -exec sed -i $(SED_PARAMETER) '/.*{:extern \".*\".*/s/_/\./g' {} \; 2>/dev/null
 	find test -regex ".*\.dfy" -type f -exec sed -i $(SED_PARAMETER) '/.*{:extern \".*\".*/s/_/\./g' {} \;
+
+_python_revert_underscore_dependency_extern_names:
+	$(MAKE) -C $(STANDARD_LIBRARY_PATH) _python_revert_underscore_extern_names
+	$(patsubst %, $(MAKE) -C $(PROJECT_ROOT)/% _python_revert_underscore_extern_names;, $(LIBRARIES))
 
 # Move Dafny-generated code into its expected location in the Python module
 _mv_dafnygenerated_python:

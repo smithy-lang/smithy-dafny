@@ -21,7 +21,7 @@ import software.amazon.smithy.python.codegen.PythonWriter;
 public class DafnyImplInterfaceFileWriter implements CustomFileWriter {
 
   @Override
-  public void generateFileForServiceShape(
+  public void customizeFileForServiceShape(
       ServiceShape serviceShape, GenerationContext codegenContext) {
     String moduleName = codegenContext.settings().getModuleName();
     String clientName = SmithyNameResolver.clientForService(serviceShape);

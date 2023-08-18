@@ -7,14 +7,17 @@ import java.util.Set;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.polymorph.utils.ModelUtils;
+import software.amazon.smithy.codegen.core.TopologicalIndex;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
+import software.amazon.smithy.model.shapes.ResourceShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonWriter;
+import software.amazon.smithy.python.codegen.StructureGenerator;
 
 
 /**
@@ -23,7 +26,7 @@ import software.amazon.smithy.python.codegen.PythonWriter;
  */
 public class ModelsFileWriter implements CustomFileWriter {
   @Override
-  public void generateFileForServiceShape(
+  public void customizeFileForServiceShape(
       ServiceShape serviceShape, GenerationContext codegenContext) {
     String moduleName = codegenContext.settings().getModuleName();
     codegenContext.writerDelegator().useFileWriter(moduleName + "/models.py", "", writer -> {
@@ -99,10 +102,10 @@ public class ModelsFileWriter implements CustomFileWriter {
             ${C|}
         """,
           resourceOrServiceShape.getId().getName(),
-          writer.consumer(w -> generateInterfaceSubclasshookExpressionForResource(
+          writer.consumer(w -> generateInterfaceSubclasshookExpressionForResourceOrService(
               codegenContext, resourceOrServiceShape, w)
           ),
-          writer.consumer(w -> generateInterfaceOperationFunctionDefinitionForResource(
+          writer.consumer(w -> generateInterfaceOperationFunctionDefinitionForResourceOrService(
               codegenContext, resourceOrServiceShape, w)
           )
       );
@@ -120,18 +123,44 @@ public class ModelsFileWriter implements CustomFileWriter {
         """,
           resourceOrServiceShape.getId().getName(),
           resourceOrServiceShape.getId().getName(),
-          writer.consumer(w -> generateSmithyOperationFunctionDefinitionForResource(
+          writer.consumer(w -> generateSmithyOperationFunctionDefinitionForResourceOrService(
               codegenContext, resourceOrServiceShape, w)
           )
       );
     }
   }
 
-  private void generateInterfaceSubclasshookExpressionForResource(
+  private void generateInterfaceSubclasshookExpressionForResourceOrService(
       GenerationContext codegenContext, Shape resourceOrService, PythonWriter writer) {
-    List<ShapeId> operationList = resourceOrService.asResourceShape().get().getOperations().stream().toList();
+    if (resourceOrService.asServiceShape().isPresent()) {
+      generateInterfaceSubclasshookExpressionForService(codegenContext,
+          resourceOrService.asServiceShape().get(), writer);
+    } else if (resourceOrService.asResourceShape().isPresent()) {
+      generateInterfaceSubclasshookExpressionForResource(codegenContext,
+          resourceOrService.asResourceShape().get(), writer);
+    } else {
+      throw new IllegalArgumentException("Shape MUST be a resource or a service: " + resourceOrService);
+    }
+  }
+
+  private void generateInterfaceSubclasshookExpressionForService(
+      GenerationContext codegenContext, ServiceShape serviceShape, PythonWriter writer) {
+    List<ShapeId> operationList = serviceShape.getOperations().stream().toList();
     Iterator<ShapeId> operationListIterator = operationList.iterator();
 
+    generateInterfaceSubclasshookExpressionForOperations(codegenContext, operationListIterator, writer);
+  }
+
+  private void generateInterfaceSubclasshookExpressionForResource(
+      GenerationContext codegenContext, ResourceShape resourceShape, PythonWriter writer) {
+    List<ShapeId> operationList = resourceShape.getOperations().stream().toList();
+    Iterator<ShapeId> operationListIterator = operationList.iterator();
+
+    generateInterfaceSubclasshookExpressionForOperations(codegenContext, operationListIterator, writer);
+  }
+
+  private void generateInterfaceSubclasshookExpressionForOperations(
+      GenerationContext codegenContext, Iterator<ShapeId> operationListIterator, PythonWriter writer) {
     // For all but the last operation shape, generate `hasattr and callable and`
     // For the last shape, generate `hasattr and callable`
     while (operationListIterator.hasNext()) {
@@ -146,9 +175,18 @@ public class ModelsFileWriter implements CustomFileWriter {
     }
   }
 
-  private void generateInterfaceOperationFunctionDefinitionForResource(
+  private void generateInterfaceOperationFunctionDefinitionForResourceOrService(
       GenerationContext codegenContext, Shape resourceOrService, PythonWriter writer) {
-    for (ShapeId operationShapeId : resourceOrService.asResourceShape().get().getOperations()) {
+    Set<ShapeId> operationShapeIds;
+    if (resourceOrService.asServiceShape().isPresent()) {
+      operationShapeIds = resourceOrService.asServiceShape().get().getOperations();
+    } else if (resourceOrService.asResourceShape().isPresent()) {
+      operationShapeIds = resourceOrService.asResourceShape().get().getOperations();
+    } else {
+      throw new IllegalArgumentException("Shape MUST be a resource or a service: " + resourceOrService);
+    }
+
+    for (ShapeId operationShapeId : operationShapeIds) {
       writer.write("""
           @abc.abstractmethod
           def $L(self, dafny_input):
@@ -157,9 +195,18 @@ public class ModelsFileWriter implements CustomFileWriter {
     }
   }
 
-  private void generateSmithyOperationFunctionDefinitionForResource(
+  private void generateSmithyOperationFunctionDefinitionForResourceOrService(
       GenerationContext codegenContext, Shape resourceOrService, PythonWriter writer) {
-    for (ShapeId operationShapeId : resourceOrService.asResourceShape().get().getOperations()) {
+    Set<ShapeId> operationShapeIds;
+    if (resourceOrService.asServiceShape().isPresent()) {
+      operationShapeIds = resourceOrService.asServiceShape().get().getOperations();
+    } else if (resourceOrService.asResourceShape().isPresent()) {
+      operationShapeIds = resourceOrService.asResourceShape().get().getOperations();
+    } else {
+      throw new IllegalArgumentException("Shape MUST be a resource or a service: " + resourceOrService);
+    }
+
+    for (ShapeId operationShapeId : operationShapeIds) {
       writer.write("""
           def $L(self, dafny_input):
               return self._impl.$L(dafny_input)
@@ -167,5 +214,33 @@ public class ModelsFileWriter implements CustomFileWriter {
     }
   }
 
+  @Override
+  public void customizeFileForNonServiceOperationShapes(Set<ShapeId> operationShapeIds, GenerationContext codegenContext) {
+    for(ShapeId operationShapeId : operationShapeIds) {
+      System.out.println("customizeFileForNonServiceOperationShapes");
+      System.out.println(operationShapeId);
+      OperationShape operationShape = codegenContext.model().expectShape(operationShapeId, OperationShape.class);
+      StructureShape inputShape = codegenContext.model().expectShape(operationShape.getInputShape(), StructureShape.class);
+      writeStructureShape(inputShape, codegenContext);
+      StructureShape outputShape = codegenContext.model().expectShape(operationShape.getOutputShape(), StructureShape.class);
+      writeStructureShape(outputShape, codegenContext);
+    }
+  }
 
+  private void writeStructureShape(StructureShape structureShape, GenerationContext codegenContext) {
+    codegenContext.writerDelegator().useShapeWriter(
+        structureShape,
+        writer -> {
+          StructureGenerator generator = new StructureGenerator(
+              codegenContext.model(),
+              codegenContext.settings(),
+              codegenContext.symbolProvider(),
+              writer,
+              structureShape,
+              TopologicalIndex.of(codegenContext.model()).getRecursiveShapes()
+          );
+          generator.run();
+        }
+    );
+  }
 }

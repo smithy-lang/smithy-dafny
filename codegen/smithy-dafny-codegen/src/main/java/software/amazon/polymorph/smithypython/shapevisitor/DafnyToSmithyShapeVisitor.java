@@ -1,6 +1,7 @@
 package software.amazon.polymorph.smithypython.shapevisitor;
 
 import java.util.Map.Entry;
+import software.amazon.polymorph.smithypython.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.model.shapes.BigDecimalShape;
@@ -60,7 +61,24 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
     protected String referenceStructureShape(StructureShape shape) {
       ReferenceTrait referenceTrait = shape.expectTrait(ReferenceTrait.class);
       Shape resourceOrService = context.model().expectShape(referenceTrait.getReferentId());
-      writer.addImport(".models", resourceOrService.getId().getName());
+      // TODO: This `models`/`client` logic seems flawed and probably needs to be revisited...
+      String importFile;
+      if (resourceOrService.isResourceShape()) {
+        importFile = ".models";
+      } else if (resourceOrService.isServiceShape()) {
+        importFile = ".client";
+      } else {
+        throw new IllegalArgumentException("MUST be a Service or Resource: " + resourceOrService);
+      }
+      System.out.println("importting2");
+      System.out.println(SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(
+          resourceOrService.getId().getNamespace(), context
+      ) + importFile);
+      writer.addImport(
+          SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(
+              resourceOrService.getId().getNamespace(), context
+          ) + importFile,
+          resourceOrService.getId().getName());
       return "%1$s(_impl=%2$s)".formatted(resourceOrService.getId().getName(), dataSource);
     }
 
@@ -83,7 +101,17 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
         return referenceStructureShape(shape);
       }
       if (!isConfigShape) {
-        writer.addImport(".models", shape.getId().getName());
+        System.out.println("importting1");
+        System.out.println(SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(
+            shape.getId().getNamespace(),
+            context
+        ) + ".models");
+
+        writer.addImport(
+            SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(
+                shape.getId().getNamespace(),
+                context
+            ) + ".models", shape.getId().getName());
       }
 
       StringBuilder builder = new StringBuilder();

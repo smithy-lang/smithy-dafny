@@ -15,9 +15,11 @@
 
 package software.amazon.polymorph.smithypython;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import software.amazon.polymorph.smithypython.customize.ConfigFileWriter;
 import software.amazon.polymorph.smithypython.customize.DafnyImplInterfaceFileWriter;
 import software.amazon.polymorph.smithypython.customize.DafnyProtocolFileWriter;
@@ -27,6 +29,7 @@ import software.amazon.polymorph.smithypython.customize.PluginFileWriter;
 import software.amazon.polymorph.smithypython.customize.ShimFileWriter;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolReference;
+import software.amazon.smithy.model.shapes.EntityShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
@@ -88,22 +91,41 @@ public final class DafnyPythonIntegration implements PythonIntegration {
 
     @Override
     public void customize(GenerationContext codegenContext) {
+        // Generate for service shapes in model
         Set<ServiceShape> serviceShapes = codegenContext.model().getServiceShapes();
 
         for (ServiceShape serviceShape : serviceShapes) {
             customizeForServiceShape(serviceShape, codegenContext);
         }
+
+        // Get non-service operation shapes = model operation shapes - service operation shapes
+        Set<ShapeId> serviceOperationShapes = serviceShapes.stream()
+            .map(EntityShape::getOperations)
+            .flatMap(Collection::stream)
+            .collect(Collectors.toSet());
+        Set<ShapeId> modelOperationShapes = codegenContext.model().getOperationShapes().stream()
+            .map(Shape::getId)
+            .collect(Collectors.toSet());
+        modelOperationShapes.removeAll(serviceOperationShapes);
+        Set<ShapeId> nonServiceOperationShapes = modelOperationShapes;
+        System.out.println("nonServiceOperationShapes");
+        System.out.println(nonServiceOperationShapes);
+
+        customizeForNonServiceOperationShapes(nonServiceOperationShapes, codegenContext);
+    }
+
+    private void customizeForNonServiceOperationShapes(Set<ShapeId> operationShapeIds, GenerationContext codegenContext) {
+        new ModelsFileWriter().customizeFileForNonServiceOperationShapes(operationShapeIds, codegenContext);
     }
 
     private void customizeForServiceShape(ServiceShape serviceShape, GenerationContext codegenContext) {
-        // Call every class in ./customize
-        new PluginFileWriter().generateFileForServiceShape(serviceShape, codegenContext);
-        new DafnyImplInterfaceFileWriter().generateFileForServiceShape(serviceShape, codegenContext);
-        new DafnyProtocolFileWriter().generateFileForServiceShape(serviceShape, codegenContext);
-        new ShimFileWriter().generateFileForServiceShape(serviceShape, codegenContext);
-        new ErrorsFileWriter().generateFileForServiceShape(serviceShape, codegenContext);
-        new ModelsFileWriter().generateFileForServiceShape(serviceShape, codegenContext);
-        new ConfigFileWriter().generateFileForServiceShape(serviceShape, codegenContext);
+        new PluginFileWriter().customizeFileForServiceShape(serviceShape, codegenContext);
+        new DafnyImplInterfaceFileWriter().customizeFileForServiceShape(serviceShape, codegenContext);
+        new DafnyProtocolFileWriter().customizeFileForServiceShape(serviceShape, codegenContext);
+        new ShimFileWriter().customizeFileForServiceShape(serviceShape, codegenContext);
+        new ErrorsFileWriter().customizeFileForServiceShape(serviceShape, codegenContext);
+        new ModelsFileWriter().customizeFileForServiceShape(serviceShape, codegenContext);
+        new ConfigFileWriter().customizeFileForServiceShape(serviceShape, codegenContext);
     }
 
     /**

@@ -23,6 +23,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 import software.amazon.polymorph.smithypython.nameresolver.DafnyNameResolver;
+import software.amazon.polymorph.smithypython.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.smithypython.nameresolver.Utils;
 import software.amazon.polymorph.smithypython.shapevisitor.DafnyToSmithyShapeVisitor;
 import software.amazon.polymorph.smithypython.shapevisitor.SmithyToDafnyShapeVisitor;
@@ -69,10 +70,27 @@ public abstract class DafnyPythonProtocolGenerator implements ProtocolGenerator 
     var configSymbol = CodegenUtils.getConfigSymbol(context.settings());
 
     // For each operation in the model, generate a `serialize_{operation input}` method
-    for (OperationShape operation : topDownIndex.getContainedOperations(context.settings().getService())) {
+    for (OperationShape operation : context.model().getOperationShapes()) {
       var serFunction = getSerializationFunction(context, operation);
       var input = context.model().expectShape(operation.getInputShape());
       var inputSymbol = context.symbolProvider().toSymbol(input);
+
+      System.out.println("input before inputSymbol");
+      System.out.println(input);
+
+      System.out.println("inputSymbol");
+      System.out.println(inputSymbol);
+
+      System.out.println(context.settings().getModuleName());
+
+      // Override Smithy-Python SymbolBuilder
+      var inputSymbolTransformed = inputSymbol.toBuilder()
+            .namespace(SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(input.getId().getNamespace(), context) + ".models", ".")
+            .definitionFile("")
+            .build();
+
+      System.out.println("posttransform inputSymbol");
+      System.out.println(inputSymbolTransformed);
 
       delegator.useFileWriter(serFunction.getDefinitionFile(), serFunction.getNamespace(), writer -> {
         writer.addImport(Constants.DAFNY_PROTOCOL_PYTHON_FILENAME, Constants.DAFNY_PROTOCOL_REQUEST);
@@ -82,7 +100,7 @@ public abstract class DafnyPythonProtocolGenerator implements ProtocolGenerator 
                       ${C|}
                   """,
             serFunction.getName(),
-            inputSymbol,
+            inputSymbolTransformed,
             configSymbol,
             Constants.DAFNY_PROTOCOL_REQUEST,
             writer.consumer(w -> generateRequestSerializer(context, operation, w)));
@@ -144,7 +162,6 @@ public abstract class DafnyPythonProtocolGenerator implements ProtocolGenerator 
 
   @Override
   public void generateResponseDeserializers(GenerationContext context) {
-    var topDownIndex = TopDownIndex.of(context.model());
     var delegator = context.writerDelegator();
     var configSymbol = CodegenUtils.getConfigSymbol(context.settings());
 
@@ -158,10 +175,15 @@ public abstract class DafnyPythonProtocolGenerator implements ProtocolGenerator 
             .collect(Collectors.toSet()));
 
     // For each operation in the model, generate a `deserialize_{operation input}` method
-    for (OperationShape operation : topDownIndex.getContainedOperations(context.settings().getService())) {
+    for (OperationShape operation : context.model().getOperationShapes()) {
       var deserFunction = getDeserializationFunction(context, operation);
       var output = context.model().expectShape(operation.getOutputShape());
       var outputSymbol = context.symbolProvider().toSymbol(output);
+
+      var outputSymbolTransformed = outputSymbol.toBuilder()
+          .namespace(SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(output.getId().getNamespace(), context) + ".models", ".")
+          .definitionFile("")
+          .build();
 
       delegator.useFileWriter(deserFunction.getDefinitionFile(), deserFunction.getNamespace(), writer -> {
         writer.addImport(Constants.DAFNY_PROTOCOL_PYTHON_FILENAME, Constants.DAFNY_PROTOCOL_RESPONSE);
@@ -175,7 +197,7 @@ public abstract class DafnyPythonProtocolGenerator implements ProtocolGenerator 
             deserFunction.getName(),
             Constants.DAFNY_PROTOCOL_RESPONSE,
             configSymbol,
-            outputSymbol,
+            outputSymbolTransformed,
             writer.consumer(w -> generateOperationResponseDeserializer(context, operation))
         );
 

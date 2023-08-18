@@ -22,7 +22,7 @@ import software.amazon.smithy.utils.CaseUtils;
 public class ConfigFileWriter implements CustomFileWriter {
 
   @Override
-  public void generateFileForServiceShape(
+  public void customizeFileForServiceShape(
       ServiceShape serviceShape, GenerationContext codegenContext) {
     final LocalServiceTrait localServiceTrait = serviceShape.expectTrait(LocalServiceTrait.class);
     final StructureShape configShape = codegenContext.model().expectShape(localServiceTrait.getConfigId(), StructureShape.class);

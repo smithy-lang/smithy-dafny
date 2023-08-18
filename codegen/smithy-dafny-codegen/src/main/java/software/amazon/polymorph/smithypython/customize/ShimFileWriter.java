@@ -1,7 +1,5 @@
 package software.amazon.polymorph.smithypython.customize;
 
-import java.util.HashSet;
-import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 import software.amazon.polymorph.smithypython.shapevisitor.DafnyToSmithyShapeVisitor;
@@ -9,12 +7,10 @@ import software.amazon.polymorph.smithypython.shapevisitor.SmithyToDafnyShapeVis
 import software.amazon.polymorph.smithypython.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithypython.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.smithypython.nameresolver.Utils;
-import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
-import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonWriter;
@@ -27,7 +23,7 @@ import software.amazon.smithy.python.codegen.PythonWriter;
 public class ShimFileWriter implements CustomFileWriter {
 
   @Override
-  public void generateFileForServiceShape(
+  public void customizeFileForServiceShape(
       ServiceShape serviceShape, GenerationContext codegenContext) {
     String typesModulePrelude = DafnyNameResolver.getDafnyTypesModuleNamespaceForShape(serviceShape.getId());
     String moduleName = codegenContext.settings().getModuleName();
@@ -74,8 +70,13 @@ public class ShimFileWriter implements CustomFileWriter {
             .map(Shape::getId)
             .collect(Collectors.toSet()));
 
+    System.out.println(errorShapeSet);
+
     for (ShapeId errorShapeId : errorShapeSet) {
-      writer.addImport(".errors", errorShapeId.getName());
+      writer.addImport(SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(
+          errorShapeId.getNamespace(),
+          codegenContext
+      ) + ".errors", errorShapeId.getName());
       writer.write("""
               if isinstance(e, $L):
                   return $L.$L(message=e.message)
@@ -110,7 +111,10 @@ public class ShimFileWriter implements CustomFileWriter {
 
       // Add imports for operation errors
       for (ShapeId errorShapeId : operationShape.getErrors(serviceShape)) {
-        writer.addImport(".errors", errorShapeId.getName());
+        writer.addImport(SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(
+            errorShapeId.getNamespace(),
+            codegenContext
+        ) + ".errors", errorShapeId.getName());
       }
 
       ShapeId inputShape = operationShape.getInputShape();
@@ -120,10 +124,26 @@ public class ShimFileWriter implements CustomFileWriter {
       String dafnyOutputType = DafnyNameResolver.getDafnyTypeForShape(outputShape);
       String operationSymbol = codegenContext.symbolProvider().toSymbol(operationShape).getName();
 
+      System.out.println("inputShape: " + inputShape);
+      System.out.println(SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(
+              inputShape.getNamespace(), codegenContext));
+      System.out.println("outputShape: " + outputShape);
+      System.out.println(SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(
+          outputShape.getNamespace(),codegenContext ));
+
+
       DafnyNameResolver.importDafnyTypeForShape(writer, inputShape);
       DafnyNameResolver.importDafnyTypeForShape(writer, outputShape);
-      writer.addImport(".models", inputShape.getName());
-      writer.addImport(".models", outputShape.getName());
+      writer.addImport(
+          SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(
+            inputShape.getNamespace(), codegenContext
+          ) + ".models", inputShape.getName()
+      );
+      writer.addImport(
+          SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(
+            outputShape.getNamespace(), codegenContext
+          ) + ".models", outputShape.getName()
+      );
 
       Shape targetShapeInput = codegenContext.model().expectShape(operationShape.getInputShape());
       // Generate code that converts the input from the Dafny type to the corresponding Smithy type
