@@ -428,7 +428,7 @@ _comment_out_import_module_python:
 	# For a Dafny-generated module X, comment out `import module_`
 	# This import results in circular dependencies
 	find runtimes/python/src/$(PYTHON_MODULE_NAME)/dafnygenerated -type f -exec sed -i $(SED_PARAMETER) '/import module\_/s/^/# /g' {} \;
-#	rm runtimes/python/src/$(PYTHON_MODULE_NAME)/dafnygenerated/module_.py
+	rm runtimes/python/src/$(PYTHON_MODULE_NAME)/dafnygenerated/module_.py
 	find runtimes/python/test/dafnygenerated -type f -exec sed -i $(SED_PARAMETER) '/import module\_/s/^/# /g' {} \;
 	find runtimes/python/test/dafnygenerated/test.py -type f -exec sed -i $(SED_PARAMETER) '/# import module\_/s/^# //g' {} \;
 
