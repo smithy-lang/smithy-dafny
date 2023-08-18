@@ -1,4 +1,4 @@
-from simple_integer.smithygenerated import client
+from . import client
 from . import models
 
 __all__ = (
