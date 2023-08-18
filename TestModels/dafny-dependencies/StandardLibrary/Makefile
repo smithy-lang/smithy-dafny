@@ -93,6 +93,9 @@ build_implementation:
 build_java: transpile_java
 	gradle -p runtimes/java build
 
+_correct_escaped_python:
+	echo "Skipping _correct_escaped_python for StandardLibrary"
+
 # Override SharedMakefile's mvn_local_deploy to
 # issue warning
 mvn_local_deploy:
