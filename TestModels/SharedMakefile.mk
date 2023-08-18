@@ -435,7 +435,7 @@ _comment_out_import_module_python:
 
 # TODO: Cut ticket to Dafny team
 _correct_escaped_python:
-	find runtimes/python/src/$(PYTHON_MODULE_NAME)/dafnygenerated/_dafny.py -type f -exec sed -i $(SED_PARAMETER) '/.*lambda c\: c\.__escaped__.*/s/lambda c: c\.__escaped__/lambda c: CodePoint(c).__escaped__/g' {} \;
+	test -d runtimes/python/src/$(PYTHON_MODULE_NAME)/dafnygenerated/_dafny.py && find runtimes/python/src/$(PYTHON_MODULE_NAME)/dafnygenerated/_dafny.py -type f -exec sed -i $(SED_PARAMETER) '/.*lambda c\: c\.__escaped__.*/s/lambda c: c\.__escaped__/lambda c: CodePoint(c).__escaped__/g' {} \;
 
 transpile_dependencies_python: LANG=python
 transpile_dependencies_python: transpile_dependencies
