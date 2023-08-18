@@ -36,11 +36,11 @@ jobs:
           TestModels/Constraints,
           TestModels/Constructor,
           # TestModels/Dependencies,
-          # TestModels/Errors, # Dafny str issues
+          TestModels/Errors,
           # TestModels/Extendable, # Dafny namespace issues
           # TestModels/Extern,
           # TestModels/LocalService,
-          # TestModels/Refinement, # Dafny str issues
+          TestModels/Refinement,
           TestModels/Resource,
           # TestModels/SimpleTypes/BigDecimal,
           # TestModels/SimpleTypes/BigInteger,
