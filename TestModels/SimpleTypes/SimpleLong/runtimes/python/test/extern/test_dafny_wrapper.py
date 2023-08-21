@@ -18,7 +18,7 @@ from simple_long.extern import wrapped_simple_long
 # End import modules required for Dafny-generated tests
 
 def test_dafny():
-  dafny_modules = glob.glob(join("/".join(__file__.split("/")[:-2]) + "/dafny/**/", "*.py"), recursive=True)
+  dafny_modules = glob.glob(join("/".join(__file__.split("/")[:-2]) + "/dafnygenerated/", "*.py"), recursive=True)
   for f in dafny_modules:
     if isfile(f) and f.endswith('test.py'):
       fname = str(f).split("/")[-1].split(".")[0]

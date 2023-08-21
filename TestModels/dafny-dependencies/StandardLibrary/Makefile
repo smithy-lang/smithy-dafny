@@ -78,10 +78,23 @@ transpile_implementation:
 		-out $(OUT) \
 		./src/Index.dfy
 
+build_implementation:
+	dafny build \
+		-t:$(TARGET) \
+		./src/Index.dfy \
+		-o $(OUT) \
+		--quantifier-syntax:3 \
+		--function-syntax:3 \
+		--optimize-erasable-datatype-wrapper:false \
+		./src/Index.dfy
+
 # Override SharedMakefile's build_java to not install
 # StandardLibrary as a dependency
 build_java: transpile_java
 	gradle -p runtimes/java build
+
+_correct_escaped_python:
+	echo "Skipping _correct_escaped_python for StandardLibrary"
 
 # Override SharedMakefile's mvn_local_deploy to
 # issue warning

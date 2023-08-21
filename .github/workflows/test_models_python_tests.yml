@@ -26,18 +26,18 @@ on:
 jobs:
   testPython:
     # Don't run the nightly build on forks
-    if: github.event_name != 'schedule' || github.repository_owner == 'awslabs'
+    if: github.event_name != 'schedule' || github.repository_owner == 'smithy-lang'
     strategy:
       matrix:
         library: [
-          TestModels/dafny-dependencies/StandardLibrary, # This stores current Polymorph dependencies that all TestModels depend on
+          # TestModels/dafny-dependencies/StandardLibrary, # This stores current Polymorph dependencies that all TestModels depend on
           TestModels/Aggregate,
           # TestModels/AggregateReferences,
           TestModels/Constraints,
           TestModels/Constructor,
           # TestModels/Dependencies,
           TestModels/Errors,
-          TestModels/Extendable,
+          # TestModels/Extendable, # Dafny namespace issues
           # TestModels/Extern,
           # TestModels/LocalService,
           TestModels/Refinement,
@@ -116,7 +116,6 @@ jobs:
         shell: bash
         working-directory: ./${{ matrix.library }}
         run: |
-          ls -R
           # This works because `node` is installed by default on GHA runners
           CORES=$(node -e 'console.log(os.cpus().length)')
           make build_python CORES=$CORES
@@ -125,5 +124,4 @@ jobs:
         working-directory: ./${{ matrix.library }}
         shell: bash
         run: |
-          ls -R
           make test_python

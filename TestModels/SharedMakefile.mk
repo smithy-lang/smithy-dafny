@@ -128,6 +128,7 @@ build_implementation:
 		--quantifier-syntax:3 \
 		--function-syntax:3 \
 		--optimize-erasable-datatype-wrapper:false \
+		--unicode-char:false \
 		--library:$(PROJECT_ROOT)/dafny-dependencies/StandardLibrary/src/Index.dfy \
 		$(patsubst %, --library:$(PROJECT_ROOT)/%/src/Index.dfy, $(LIBRARIES))
 
@@ -359,7 +360,7 @@ build_python: transpile_test_python
 build_python: _python_revert_underscore_extern_names
 build_python: _python_revert_underscore_dependency_extern_names
 build_python: _mv_dafnygenerated_python
-build_python: _modify_dafnygenerated_python
+build_python: _remove_src_module_python
 
 build_implementation_python: TARGET=py
 build_implementation_python: OUT=runtimes/python/dafny_src
@@ -373,7 +374,7 @@ transpile_implementation_python: transpile_dependencies_python
 transpile_implementation_python: transpile_src_python
 transpile_implementation_python: transpile_test_python
 transpile_implementation_python: _mv_dafnygenerated_python
-transpile_implementation_python: _modify_dafnygenerated_python
+transpile_implementation_python: _remove_src_module_python
 
 transpile_src_python: TARGET=py
 transpile_src_python: OUT=runtimes/python/dafny_src
@@ -389,6 +390,7 @@ transpile_test_python: transpile_test
 # Replaces `.`s with `_`s in strings like `{:extern ".*"}`.
 # This is flawed logic and should be removed, but is a reasonable band-aid for now.
 # TODO: Once Dafny supports per-language extern names, remove and replace with Pythonic extern names.
+# This is tracked in https://github.com/dafny-lang/dafny/issues/4322.
 # This may require new Smithy-Dafny logic to generate Pythonic extern names.
 _python_underscore_extern_names:
 	find src -regex ".*\.dfy" -type f -exec sed -i $(SED_PARAMETER) '/.*{:extern \".*\".*/s/\./_/g' {} \;
@@ -419,29 +421,16 @@ _mv_dafnygenerated_python:
 	mv runtimes/python/test-py/*.py runtimes/python/test/dafnygenerated
 	rm -rf runtimes/python/test-py
 
-# Any modifications to Dafny-generated Python should be called here
-# to bound the scope of modifications to this step
-_modify_dafnygenerated_python: _comment_out_module_assertions_python
-_modify_dafnygenerated_python: _comment_out_import_module_python
-
-# TODO: Cut ticket to Dafny team
-_comment_out_module_assertions_python:
-	# For a Dafny-generated module X, comment out `assert "X" == __name__`
-	# This assertion is invalid in the context of multiple Python modules
-	find runtimes/python/src/$(PYTHON_MODULE_NAME)/dafnygenerated -type f -exec sed -i $(SED_PARAMETER) '/assert \".*\" \=\= \_\_name\_\_/s/^/# /g' {} \;
-	find runtimes/python/test/dafnygenerated -type f -exec sed -i $(SED_PARAMETER) '/assert \".*\" \=\= \_\_name\_\_/s/^/# /g' {} \;
-
-# TODO: Cut ticket to Dafny team
-_comment_out_import_module_python:
-	# For a Dafny-generated module X, comment out `import module_`
-	# This import results in circular dependencies
-	find runtimes/python/src/$(PYTHON_MODULE_NAME)/dafnygenerated -type f -exec sed -i $(SED_PARAMETER) '/import module\_/s/^/# /g' {} \;
-	find runtimes/python/test/dafnygenerated -type f -exec sed -i $(SED_PARAMETER) '/import module\_/s/^/# /g' {} \;
+_remove_src_module_python:
+	# Remove the source `module_.py` file
+	# There is a race condition between the src/ and test/ installation of this file
+	# This will need to be changed but works for now
+	rm runtimes/python/src/$(PYTHON_MODULE_NAME)/dafnygenerated/module_.py
 
 transpile_dependencies_python: LANG=python
 transpile_dependencies_python: transpile_dependencies
 
 test_python:
-	tox -c runtimes/python
+	tox -c runtimes/python --verbose
 
 clean: _clean
