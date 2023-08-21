@@ -70,6 +70,8 @@ public class DafnyNameResolver {
    * @param shapeId
    */
   public static void importDafnyTypeForShape(PythonWriter writer, ShapeId shapeId) {
+    // When generating a Dafny import, must ALWAYS first import module_ to avoid circular dependencies
+    writer.addStdlibImport("module_");
     String name = shapeId.getName();
     if (!Utils.isUnitShape(shapeId)) {
       writer.addStdlibImport(getDafnyTypesModuleNamespaceForShape(shapeId),
@@ -96,6 +98,8 @@ public class DafnyNameResolver {
   }
 
   public static void importDafnyTypeForResourceShape(PythonWriter writer, ResourceShape resourceShape) {
+    // When generating a Dafny import, must ALWAYS first import module_ to avoid circular dependencies
+    writer.addStdlibImport("module_");
     writer.addStdlibImport(
         getDafnyTypesModuleNamespaceForShape(resourceShape.getId()),
         getDafnyClientInterfaceTypeForResourceShape(resourceShape)
@@ -103,6 +107,8 @@ public class DafnyNameResolver {
   }
 
   public static void importDafnyTypeForServiceShape(PythonWriter writer, ServiceShape serviceShape) {
+    // When generating a Dafny import, must ALWAYS first import module_ to avoid circular dependencies
+    writer.addStdlibImport("module_");
     writer.addStdlibImport(
         getDafnyTypesModuleNamespaceForShape(serviceShape.getId()),
         getDafnyClientInterfaceTypeForServiceShape(serviceShape)
@@ -132,11 +138,15 @@ public class DafnyNameResolver {
    * @param shapeId
    */
   public static void importDafnyTypeForError(PythonWriter writer, ShapeId shapeId) {
+    // When generating a Dafny import, must ALWAYS first import module_ to avoid circular dependencies
+    writer.addStdlibImport("module_");
     writer.addStdlibImport(getDafnyTypesModuleNamespaceForShape(shapeId),
       getDafnyTypeForError(shapeId));
   }
 
   public static void importGenericDafnyErrorTypeForNamespace(PythonWriter writer, String namespace) {
+    // When generating a Dafny import, must ALWAYS first import module_ to avoid circular dependencies
+    writer.addStdlibImport("module_");
     writer.addStdlibImport(getDafnyTypesModuleNamespaceForSmithyNamespace(namespace), "Error");
   }
 }
