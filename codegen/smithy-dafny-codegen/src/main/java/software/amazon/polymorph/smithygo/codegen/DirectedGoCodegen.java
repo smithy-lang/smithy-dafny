@@ -1,10 +1,8 @@
 package software.amazon.polymorph.smithygo.codegen;
 
 import software.amazon.polymorph.smithygo.DafnyTypeConversionProtocol;
-import software.amazon.polymorph.smithygo.LocalServiceGenerator;
 import software.amazon.polymorph.smithygo.codegen.integration.GoIntegration;
 import software.amazon.smithy.codegen.core.SymbolProvider;
-import software.amazon.smithy.codegen.core.TopologicalIndex;
 import software.amazon.smithy.codegen.core.directed.CreateContextDirective;
 import software.amazon.smithy.codegen.core.directed.CreateSymbolProviderDirective;
 import software.amazon.smithy.codegen.core.directed.DirectedCodegen;
@@ -14,10 +12,6 @@ import software.amazon.smithy.codegen.core.directed.GenerateIntEnumDirective;
 import software.amazon.smithy.codegen.core.directed.GenerateServiceDirective;
 import software.amazon.smithy.codegen.core.directed.GenerateStructureDirective;
 import software.amazon.smithy.codegen.core.directed.GenerateUnionDirective;
-import software.amazon.smithy.model.Model;
-import software.amazon.smithy.model.traits.EnumTrait;
-import software.amazon.smithy.model.traits.InputTrait;
-import software.amazon.smithy.model.traits.OutputTrait;
 
 import java.util.logging.Logger;
 
@@ -50,13 +44,10 @@ public class DirectedGoCodegen implements DirectedCodegen<GenerationContext, GoS
             return;
         }
 
-        protocolGenerator.generateSharedSerializerComponents(directive.context());
-        protocolGenerator.generateRequestSerializers(directive.context());
+        protocolGenerator.generateSerializers(directive.context());
 
-        protocolGenerator.generateSharedDeserializerComponents(directive.context());
-        protocolGenerator.generateResponseDeserializers(directive.context());
+        protocolGenerator.generateDeserializers(directive.context());
 
-        protocolGenerator.generateProtocolTests(directive.context());
     }
 
     @Override

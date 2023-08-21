@@ -75,14 +75,13 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
             final var memberName = memberShapeEntry.getKey();
             final var memberShape = memberShapeEntry.getValue();
             final var targetShape = context.model().expectShape(memberShape.getTarget());
-            builder.append("%1$s%2$s%3$s%4$s".formatted(
-                    memberShape.isOptional() && !isConfigShape ? "Wrappers.Companion_Option_.Create_Some_(" : "",
-                    GoPointableIndex.of(context.model()).isPointable(memberShape) && !targetShape.isStructureShape()? "*" : "",
+            builder.append("%1$s%2$s%3$s".formatted(
+                    memberShape.isOptional() ? "Wrappers.Companion_Option_.Create_Some_(" : "",
                     targetShape.accept(
-                            new SmithyToDafnyShapeVisitor(context,
-                                                          dataSource + "." + StringUtils.capitalize(memberName),
+                            new SmithyToDafnyShapeVisitor(context,                     GoPointableIndex.of(context.model()).isPointable(memberShape) && !targetShape.isStructureShape()?
+                                                                                       "*%s".formatted(dataSource + "." + StringUtils.capitalize(memberName)) : dataSource + "." + StringUtils.capitalize(memberName),
                                                           writer, isConfigShape)),
-                    memberShape.isOptional() && !isConfigShape ? ")" : ""
+                    memberShape.isOptional() ? ")" : ""
             ));
             fieldSeparator = ",";
         }
@@ -108,7 +107,8 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
 
     @Override
     public String stringShape(StringShape shape) {
-        return dataSource;
+        writer.addImport("dafny");
+        return "dafny.SeqOfChars([]dafny.Char(%s)...)".formatted(dataSource);
     }
 
     @Override

@@ -52,7 +52,7 @@ public class LocalServiceGenerator implements Runnable {
         var dafnyClient = DafnyNameResolver.getDafnyClient(context.settings(), serviceTrait.getSdkId());
         writer.write("""
                              type $T struct {
-                                 DafnyClient *$L
+                                 dafnyClient *$L
                              }
                                                                  
                              func NewClient(clientConfig $T) (*$T, error) {
@@ -63,7 +63,7 @@ public class LocalServiceGenerator implements Runnable {
                                  return client, nil
                              }
                              """,
-                     serviceSymbol, dafnyClient , configSymbol, serviceSymbol,DafnyNameResolver.getToDafnyMethodName(context, serviceTrait.getConfigId()), DafnyNameResolver.createDafnyClient(context.settings(), serviceTrait.getSdkId()), dafnyClient, serviceSymbol);
+                     serviceSymbol, dafnyClient , configSymbol, serviceSymbol,DafnyNameResolver.getInputToDafnyMethodName(context, serviceTrait.getConfigId()), DafnyNameResolver.createDafnyClient(context.settings(), serviceTrait.getSdkId()), dafnyClient, serviceSymbol);
 
         service.getAllOperations().forEach(operation -> {
             final OperationShape operationShape = model.expectShape(operation, OperationShape.class);
@@ -74,7 +74,7 @@ public class LocalServiceGenerator implements Runnable {
             writer.write("""
                                    func (client *$T) $L(ctx context.Context, params types.$L) (*types.$L, error) {
                                        var dafny_request $L = $L(params)
-                                       var dafny_response = client.DafnyClient.$L(dafny_request)
+                                       var dafny_response = client.dafnyClient.$L(dafny_request)
                                        var native_response = $L(dafny_response.Extract().($L))
                                        return &native_response, nil
                                    }
@@ -83,9 +83,9 @@ public class LocalServiceGenerator implements Runnable {
                          operationShape.getId().getName(),
                          inputType, outputType,
                          DafnyNameResolver.getDafnyType(context.settings(), symbolProvider.toSymbol(inputShape)),
-                         DafnyNameResolver.getToDafnyMethodName(context, operationShape),
+                         DafnyNameResolver.getInputToDafnyMethodName(context, operationShape),
                          operationShape.getId().getName(),
-                         DafnyNameResolver.getFromDafnyMethodName(context, operationShape), DafnyNameResolver.getDafnyType(context.settings(), symbolProvider.toSymbol(outputShape)));
+                         DafnyNameResolver.getOutputFromDafnyMethodName(context, operationShape), DafnyNameResolver.getDafnyType(context.settings(), symbolProvider.toSymbol(outputShape)));
         });
     }
 
@@ -96,18 +96,56 @@ public class LocalServiceGenerator implements Runnable {
         var configSymbol = symbolProvider.toSymbol(model.expectShape(serviceTrait.getConfigId()));
         var namespace = "%swrapped".formatted(DafnyNameResolver.dafnyNamespace(context.settings()));
         context.writerDelegator().useFileWriter("shim.go", namespace, writer -> {
-                                                    writer.addImport(DafnyNameResolver.dafnyTypesNamespace(context.settings()));
-                                                    writer.addImport("Wrappers");
+            writer.addImport(DafnyNameResolver.dafnyTypesNamespace(context.settings()));
+            writer.addImport("Wrappers");
+            writer.addImport("context");
             writer.addImport(DafnyNameResolver.serviceNamespace(service));
 
-            writer.write("""                   
-                                                                         func Wrapped$L(inputConfig $L) (Wrappers.Result) {
-                                                                             var nativeConfig = $L.$L(inputConfig)
-                                                                             var nativeClient, _ = $L.NewClient(nativeConfig)
-                                                                             return Wrappers.Companion_Result_.Create_Success_(nativeClient.DafnyClient)
-                                                                         }
-                                                                         """,
-                                                                 serviceTrait.getSdkId(), DafnyNameResolver.getDafnyType(context.settings(), configSymbol), DafnyNameResolver.serviceNamespace(service), DafnyNameResolver.getFromDafnyMethodName(context, serviceTrait.getConfigId()), DafnyNameResolver.serviceNamespace(service));
-                                                });
+            writer.write("""
+                                 type Shim struct {
+                                     $L
+                                     client *$L.Client
+                                 }
+                                 """,
+                         DafnyNameResolver.getDafnyInterfaceClient(context.settings(), serviceTrait.getSdkId()),
+                         DafnyNameResolver.serviceNamespace(service)
+            );
+            writer.write("""
+                                                   
+                                 func Wrapped$L(inputConfig $L) Wrappers.Result {
+                                     var nativeConfig = $L.$L(inputConfig)
+                                     var nativeClient, _ = $L.NewClient(nativeConfig)
+                                     return Wrappers.Companion_Result_.Create_Success_(&Shim{client: nativeClient})
+                                 }
+                                 """,
+                         serviceTrait.getSdkId(), DafnyNameResolver.getDafnyType(context.settings(), configSymbol),
+                         DafnyNameResolver.serviceNamespace(service),
+                         DafnyNameResolver.getOutputFromDafnyMethodName(context, serviceTrait.getConfigId()),
+                         DafnyNameResolver.serviceNamespace(service)
+            );
+
+            service.getAllOperations().forEach(operation -> {
+                final OperationShape operationShape = model.expectShape(operation, OperationShape.class);
+                final Shape inputShape = model.expectShape(operationShape.getInputShape());
+                final Shape outputShape = model.expectShape(operationShape.getOutputShape());
+                final String inputType = model.expectShape(model.expectShape(operation).asOperationShape().get().getInputShape()).toShapeId().getName();
+                final String outputType = model.expectShape(model.expectShape(operation).asOperationShape().get().getOutputShape()).toShapeId().getName();
+                writer.write("""
+                                       func (shim *Shim) $L(input $L) Wrappers.Result {
+                                           var native_request = $L.$L(input)
+                                           var native_response, _ = shim.client.$L(context.Background(), native_request)
+                                           var dafny_response = $L.$L(*native_response)
+                                           return Wrappers.Companion_Result_.Create_Success_(dafny_response)
+                                       }
+                                     """,
+                             operationShape.getId().getName(),
+                             DafnyNameResolver.getDafnyType(context.settings(), symbolProvider.toSymbol(inputShape)),
+                             DafnyNameResolver.serviceNamespace(service),
+                             DafnyNameResolver.getInputFromDafnyMethodName(context, operationShape),
+                             operationShape.getId().getName(),
+                             DafnyNameResolver.serviceNamespace(service),
+                             DafnyNameResolver.getOutputToDafnyMethodName(context, operationShape));
+            });
+        });
     }
 }

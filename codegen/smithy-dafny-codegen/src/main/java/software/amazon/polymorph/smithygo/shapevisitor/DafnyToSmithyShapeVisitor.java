@@ -62,7 +62,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
 
     @Override
     public String blobShape(BlobShape shape) {
-        return getTypeAssertedShape(shape);
+        return "%s.Dtor_value().(%s)".formatted(dataSource, context.symbolProvider().toSymbol(shape));
     }
 
     @Override
@@ -119,7 +119,20 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
             final String[] refName = context.symbolProvider().toSymbol(shape).getFullName().split("/");
             return "%s.(%s)".formatted(dataSource, refName[refName.length - 1]);
         }
-        return getTypeAssertedShape(shape);
+        writer.addImport("dafny");
+        return """
+                func() (*string) {
+                    var s string
+                    for i := dafny.Iterate(%s.Dtor_value()) ; ; {
+                        val, ok := i()
+                        if !ok {
+                            return &[]string{s}[0]
+                        } else {
+                            s = s + string(val.(dafny.Char))
+                        }
+                   }
+               }(),
+                """.formatted(dataSource);
     }
 
     @Override

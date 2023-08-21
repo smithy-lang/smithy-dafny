@@ -37,19 +37,41 @@ public class DafnyNameResolver {
         return DafnyNameResolver.getDafnyCompanionType(settings, symbol).concat(DOT).concat("Create_%s_".formatted(symbol.getName()));
     }
 
-    public static String getToDafnyMethodName(final GenerationContext context, final ToShapeId shapeId) {
-        var name = context.settings().getService(context.model()).getContextualName(shapeId);
-        return name.concat("_Input_ToDafny");
+    public static String getInputToDafnyMethodName(final GenerationContext context, final ToShapeId shapeId) {
+        return getToDafnyMethodName(context, shapeId, "_Input");
     }
 
-    public static String getFromDafnyMethodName(final GenerationContext context, final ToShapeId shapeId) {
+    public static String getOutputToDafnyMethodName(final GenerationContext context, final ToShapeId shapeId) {
+        return getToDafnyMethodName(context, shapeId, "_Output");
+    }
+
+    public static String getToDafnyMethodName(final GenerationContext context, final ToShapeId shapeId, final String disambiguator) {
         var name = context.settings().getService(context.model()).getContextualName(shapeId);
-        return name.concat("_Output_FromDafny");
+        return name.concat(disambiguator).concat("_ToDafny");
+    }
+
+    public static String getFromDafnyMethodName(final GenerationContext context, final ToShapeId shapeId, final String disambiguator) {
+        var name = context.settings().getService(context.model()).getContextualName(shapeId);
+        return name.concat(disambiguator).concat("_FromDafny");
+    }
+
+    public static String getOutputFromDafnyMethodName(final GenerationContext context, final ToShapeId shapeId) {
+        var name = context.settings().getService(context.model()).getContextualName(shapeId);
+        return getFromDafnyMethodName(context, shapeId, "_Output");
+    }
+
+    public static String getInputFromDafnyMethodName(final GenerationContext context, final ToShapeId shapeId) {
+        var name = context.settings().getService(context.model()).getContextualName(shapeId);
+        return getFromDafnyMethodName(context, shapeId, "_Input");
     }
 
     public static String getDafnyClient(final GoSettings settings, final String sdkId) {
         return DafnyNameResolver.dafnyNamespace(settings).concat(DOT).concat(sdkId).concat("Client");
     }
+    public static String getDafnyInterfaceClient(final GoSettings settings, final String sdkId) {
+        return DafnyNameResolver.dafnyTypesNamespace(settings).concat(DOT).concat("I").concat(settings.getService().getName()).concat("Client");
+    }
+
 
     public static String createDafnyClient(final GoSettings settings, final String sdkId) {
         return DafnyNameResolver.dafnyNamespace(settings).concat(".Companion_Default___").concat(DOT).concat(sdkId);
