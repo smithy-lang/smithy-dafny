@@ -15,16 +15,9 @@ class NativeResource(IExtendableResource):
     self._impl = _impl
 
   def GetExtendableResourceData(self, nativeInput):
-    print("nativeInput")
-    print(nativeInput)
-    a = self._impl.GetExtendableResourceData(nativeInput)
-    print("a")
-    print(a)
-    return a
+    return self._impl.GetExtendableResourceData(nativeInput)
 
   def AlwaysModeledError(self, nativeInput):
-    print("AlwaysModeledError")
-    print(nativeInput)
     return self._impl.AlwaysModeledError(nativeInput)
 
   def AlwaysMultipleErrors(self, nativeInput):
@@ -42,11 +35,7 @@ class NativeResourceFactory:
     dafny_resource = ExtendableResource.ExtendableResource()
     dafny_resource.ctor__()
     native_resource = NativeResource(dafny_resource)
-
-    # to_dafny
     return native_resource
 
 
 simple_extendable_resources_internaldafny_nativeresourcefactory.default__ = NativeResourceFactory
-
-DafnyFactory = NativeResourceFactory
