@@ -358,7 +358,7 @@ build_python: build_implementation_python
 build_python: transpile_test_python
 build_python: _python_revert_underscore_extern_names
 build_python: _mv_dafnygenerated_python
-build_python: _modify_dafnygenerated_python
+#build_python: _modify_dafnygenerated_python
 
 build_implementation_python: TARGET=py
 build_implementation_python: OUT=runtimes/python/dafny_src
@@ -374,7 +374,7 @@ transpile_implementation_python: transpile_src_python
 transpile_implementation_python: transpile_test_python
 transpile_implementation_python: _python_revert_underscore_extern_names
 transpile_implementation_python: _mv_dafnygenerated_python
-transpile_implementation_python: _modify_dafnygenerated_python
+#transpile_implementation_python: _modify_dafnygenerated_python
 
 transpile_src_python: TARGET=py
 transpile_src_python: OUT=runtimes/python/dafny_src
@@ -414,15 +414,7 @@ _mv_dafnygenerated_python:
 
 # Any modifications to Dafny-generated Python should be called here
 # to bound the scope of modifications to this step
-#_modify_dafnygenerated_python: _comment_out_module_assertions_python
 #_modify_dafnygenerated_python: _comment_out_import_module_python
-
-# TODO: Cut ticket to Dafny team
-_comment_out_module_assertions_python:
-	# For a Dafny-generated module X, comment out `assert "X" == __name__`
-	# This assertion is invalid in the context of multiple Python modules
-	find runtimes/python/src/$(PYTHON_MODULE_NAME)/dafnygenerated -type f -exec sed -i $(SED_PARAMETER) '/assert \".*\" \=\= \_\_name\_\_/s/^/# /g' {} \;
-	find runtimes/python/test/dafnygenerated -type f -exec sed -i $(SED_PARAMETER) '/assert \".*\" \=\= \_\_name\_\_/s/^/# /g' {} \;
 
 # TODO: Cut ticket to Dafny team
 _comment_out_import_module_python:
