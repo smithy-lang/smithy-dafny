@@ -415,7 +415,7 @@ _mv_dafnygenerated_python:
 # Any modifications to Dafny-generated Python should be called here
 # to bound the scope of modifications to this step
 #_modify_dafnygenerated_python: _comment_out_module_assertions_python
-_modify_dafnygenerated_python: _comment_out_import_module_python
+#_modify_dafnygenerated_python: _comment_out_import_module_python
 
 # TODO: Cut ticket to Dafny team
 _comment_out_module_assertions_python:
