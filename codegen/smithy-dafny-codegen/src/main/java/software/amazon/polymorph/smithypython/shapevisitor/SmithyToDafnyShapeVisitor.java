@@ -2,6 +2,7 @@ package software.amazon.polymorph.smithypython.shapevisitor;
 
 import java.util.Map.Entry;
 import software.amazon.polymorph.smithypython.nameresolver.DafnyNameResolver;
+import software.amazon.polymorph.smithypython.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.model.shapes.BigDecimalShape;
@@ -93,6 +94,10 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
       if (shape.hasTrait(ReferenceTrait.class)) {
         return referenceStructureShape(shape);
       }
+      if (SmithyNameResolver.getLocalServiceConfigShapes(context).contains(shape.getId())) {
+        return "DafnyService(python_module_name.smithy_config_to_dafny_config(%1$s.config))";
+      }
+
       DafnyNameResolver.importDafnyTypeForShape(writer, shape.getId());
       writer.addStdlibImport("Wrappers", "Option_Some");
       writer.addStdlibImport("Wrappers", "Option_None");

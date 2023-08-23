@@ -27,6 +27,8 @@ import software.amazon.polymorph.smithypython.customize.ErrorsFileWriter;
 import software.amazon.polymorph.smithypython.customize.ModelsFileWriter;
 import software.amazon.polymorph.smithypython.customize.PluginFileWriter;
 import software.amazon.polymorph.smithypython.customize.ShimFileWriter;
+import software.amazon.polymorph.traits.LocalServiceTrait;
+import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolReference;
 import software.amazon.smithy.model.shapes.EntityShape;
@@ -91,12 +93,19 @@ public final class DafnyPythonIntegration implements PythonIntegration {
 
     @Override
     public void customize(GenerationContext codegenContext) {
-        // Generate for service shapes in model
-        Set<ServiceShape> serviceShapes = codegenContext.model().getServiceShapes();
+        // Generate for service shapes with localService trait
+        Set<ServiceShape> serviceShapes = Set.of(
+            codegenContext.model().expectShape(codegenContext.settings().getService()).asServiceShape().get());
 
-        for (ServiceShape serviceShape : serviceShapes) {
-            customizeForServiceShape(serviceShape, codegenContext);
-        }
+//        System.out.println("FFFFF");
+//        System.out.println(serviceShapes);
+//        System.out.println(codegenContext.settings().getModuleName());
+//        System.out.println(codegenContext.settings().getService());
+//        System.out.println(codegenContext.model().getMetadata().entrySet());
+
+        ServiceShape serviceShape = codegenContext.model().expectShape(codegenContext.settings().getService()).asServiceShape().get();
+
+        customizeForServiceShape(serviceShape, codegenContext);
 
         // Get non-service operation shapes = model operation shapes - service operation shapes
         Set<ShapeId> serviceOperationShapes = serviceShapes.stream()
@@ -105,6 +114,7 @@ public final class DafnyPythonIntegration implements PythonIntegration {
             .collect(Collectors.toSet());
         Set<ShapeId> modelOperationShapes = codegenContext.model().getOperationShapes().stream()
             .map(Shape::getId)
+            .filter(operationShapeId -> operationShapeId.getNamespace().equals(serviceShape.getId().getNamespace()))
             .collect(Collectors.toSet());
         modelOperationShapes.removeAll(serviceOperationShapes);
         Set<ShapeId> nonServiceOperationShapes = modelOperationShapes;

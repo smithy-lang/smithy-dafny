@@ -79,7 +79,13 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
               resourceOrService.getId().getNamespace(), context
           ) + importFile,
           resourceOrService.getId().getName());
-      return "%1$s(_impl=%2$s)".formatted(resourceOrService.getId().getName(), dataSource);
+      if (resourceOrService.isResourceShape()) {
+        return "%1$s(_impl=%2$s)".formatted(resourceOrService.getId().getName(), dataSource);
+      } else if (resourceOrService.isServiceShape()) {
+        return "%1$s(%2$s)".formatted(resourceOrService.getId().getName(), dataSource);
+      } else {
+        throw new CodegenException("Unsupported reference shape: " + shape);
+      }
     }
 
     @Override
@@ -112,6 +118,15 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
                 shape.getId().getNamespace(),
                 context
             ) + ".models", shape.getId().getName());
+      } else {
+        // Generate import if this shape is not in the current namespace
+        if (!SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(shape.getId().getNamespace()).contains(context.settings().getModuleName())) {
+          writer.addImport(
+              SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(
+                  shape.getId().getNamespace(),
+                  context
+              ) + ".config", shape.getId().getName());
+        }
       }
 
       StringBuilder builder = new StringBuilder();

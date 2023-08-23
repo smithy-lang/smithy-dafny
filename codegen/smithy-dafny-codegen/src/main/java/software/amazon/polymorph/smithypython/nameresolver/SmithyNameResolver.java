@@ -1,8 +1,14 @@
 package software.amazon.polymorph.smithypython.nameresolver;
 
+import java.util.HashSet;
 import java.util.Locale;
+import java.util.Set;
+import java.util.stream.Collectors;
 import software.amazon.polymorph.traits.LocalServiceTrait;
+import software.amazon.smithy.codegen.core.CodegenContext;
 import software.amazon.smithy.model.shapes.ServiceShape;
+import software.amazon.smithy.model.shapes.ShapeId;
+import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.python.codegen.GenerationContext;
 
 /**
@@ -43,5 +49,18 @@ public class SmithyNameResolver {
         getPythonModuleNamespaceForSmithyNamespace(smithyNamespace).contains(codegenContext.settings().getModuleName())
         ? ""
         :  getPythonModuleNamespaceForSmithyNamespace(smithyNamespace) + ".smithygenerated";
+  }
+
+  static Set<ShapeId> localServiceConfigShapes = new HashSet<>();
+
+  public static Set<ShapeId> getLocalServiceConfigShapes(CodegenContext codegenContext) {
+
+    if (localServiceConfigShapes.isEmpty()) {
+      localServiceConfigShapes =  codegenContext.model().getServiceShapes().stream()
+          .map(serviceShape1 -> serviceShape1.expectTrait(LocalServiceTrait.class))
+          .map(localServiceTrait -> localServiceTrait.getConfigId())
+          .collect(Collectors.toSet());
+    }
+    return localServiceConfigShapes;
   }
 }
