@@ -13,7 +13,7 @@ import software.amazon.smithy.python.codegen.PythonWriter;
  */
 public class DafnyNameResolver {
 
-  private static String getDafnyTypesModuleNamespaceForShape(Shape shape) {
+  public static String getDafnyTypesModuleNamespaceForShape(Shape shape) {
     return getDafnyTypesModuleNamespaceForShape(shape.getId());
   }
 

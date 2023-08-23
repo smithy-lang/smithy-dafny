@@ -43,10 +43,10 @@ public class ConfigFileWriter implements CustomFileWriter {
                       ${C|}
                     
               def dafny_config_to_smithy_config(dafny_config) -> $L:
-                  return ${C|}
+                  ${C|}
                   
               def smithy_config_to_dafny_config(smithy_config) -> $L:
-                  return ${C|}
+                  ${C|}
               """,
               configShape.getId().getName(),
               writer.consumer(w -> generateConfigClassFields(configShape, codegenContext, w)),
@@ -100,7 +100,7 @@ public class ConfigFileWriter implements CustomFileWriter {
         writer,
         true
     ));
-    writer.write(output);
+    writer.write("return " + output);
   }
 
   private void generateSmithyConfigToDafnyConfigFunctionBody(
@@ -111,7 +111,7 @@ public class ConfigFileWriter implements CustomFileWriter {
         writer,
         true
     ));
-    writer.write(output);
+    writer.write("return " + output);
   }
 
 }

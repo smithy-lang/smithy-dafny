@@ -27,12 +27,15 @@ import software.amazon.polymorph.smithypython.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.smithypython.nameresolver.Utils;
 import software.amazon.polymorph.smithypython.shapevisitor.DafnyToSmithyShapeVisitor;
 import software.amazon.polymorph.smithypython.shapevisitor.SmithyToDafnyShapeVisitor;
+import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.smithy.model.knowledge.TopDownIndex;
 import software.amazon.smithy.model.shapes.OperationShape;
+import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.ErrorTrait;
+import software.amazon.smithy.model.traits.Trait;
 import software.amazon.smithy.python.codegen.ApplicationProtocol;
 import software.amazon.smithy.python.codegen.CodegenUtils;
 import software.amazon.smithy.python.codegen.GenerationContext;
@@ -272,6 +275,30 @@ public abstract class DafnyPythonProtocolGenerator implements ProtocolGenerator 
       GenerationContext context,
       TreeSet<ShapeId> deserializingErrorShapes)
   {
+    // Write out deserializers for errors that all localServices will have
+    ShapeId serviceShapeId = context.settings().getService();
+    ServiceShape serviceShape = context.model().expectShape(serviceShapeId).asServiceShape().get();
+
+
+    var delegatorMy = context.writerDelegator();
+    String moduleName = context.settings().getModuleName();
+    delegatorMy.useFileWriter(moduleName + "/deserialize.py", ".", writer -> {
+      writer.addStdlibImport("typing", "Any");
+      // TODO: Is this generated if there are no modelled errors...?
+      DafnyNameResolver.importGenericDafnyErrorTypeForNamespace(writer, serviceShape.getId().getNamespace());
+      writer.addImport(".errors", "ServiceError");
+      writer.addImport(".errors", "OpaqueError");
+      writer.addImport(".errors", "CollectionOfErrors");
+      writer.write("""
+                async def _deserialize_error(
+                    error: Error
+                ) -> ServiceError:
+                  if error.is_Opaque:
+                    return OpaqueError(obj=error.obj)
+                  if error.is_CollectionOfErrors:
+                    return CollectionOfErrors(message=error.message, list=error.list)"""
+      );
+
     // I need to store a map from deserFunction metadata -> Set<errorId>
     // Such that for a given set of metadata (i.e. a given file),
     // I have all of the errors I need to write to that file
@@ -281,7 +308,9 @@ public abstract class DafnyPythonProtocolGenerator implements ProtocolGenerator 
       var error = context.model().expectShape(errorId, StructureShape.class);
       var deserFunction = getErrorDeserializationFunction(context, error);
       deserFunction.getDefinitionFile();
+      System.out.println("deserFunction");
       Pair<String, String> deserFunctionMetadata = Pair.of(deserFunction.getDefinitionFile(), deserFunction.getNamespace());
+      System.out.println(deserFunctionMetadata);
 
       if (deserFunctionToErrorsMap.containsKey(deserFunction)) {
         List<ShapeId> oldList = deserFunctionToErrorsMap.get(deserFunction);
@@ -299,43 +328,67 @@ public abstract class DafnyPythonProtocolGenerator implements ProtocolGenerator 
     }
 
     for (Pair<String, String> deserFunctionMetadata : deserFunctionToErrorsMap.keySet()) {
-      var delegator = context.writerDelegator();
-      delegator.useFileWriter(deserFunctionMetadata.getLeft(), deserFunctionMetadata.getRight(), writer -> {
 
-        writer.addStdlibImport("typing", "Any");
-        // TODO: Is this generated if there are no modelled errors...?
-        writer.addImport(".errors", "ServiceError");
-        writer.addImport(".errors", "OpaqueError");
-        writer.addImport(".errors", "CollectionOfErrors");
+      for (ShapeId errorId : deserFunctionToErrorsMap.get(deserFunctionMetadata)) {
+        var error = context.model().expectShape(errorId, StructureShape.class);
+//          writer.pushState(new ErrorDeserializerSection(error));
+
+        // Import Smithy-Python modelled-error
+        writer.addImport(".errors", errorId.getName());
+        // Import Dafny-modelled error
+        DafnyNameResolver.importDafnyTypeForError(writer, errorId);
+        // Import generic Dafny error type
+        DafnyNameResolver.importGenericDafnyErrorTypeForNamespace(writer, errorId.getNamespace());
         writer.write("""
-                async def _deserialize_error(
-                    error: Error
-                ) -> ServiceError:
-                  if error.is_Opaque:
-                    return OpaqueError(obj=error.obj)
-                  if error.is_CollectionOfErrors:
-                    return CollectionOfErrors(message=error.message, list=error.list)"""
-          );
-
-        for (ShapeId errorId : deserFunctionToErrorsMap.get(deserFunctionMetadata)) {
-          var error = context.model().expectShape(errorId, StructureShape.class);
-          writer.pushState(new ErrorDeserializerSection(error));
-
-          // Import Smithy-Python modelled-error
-          writer.addImport(".errors", errorId.getName());
-          // Import Dafny-modelled error
-          DafnyNameResolver.importDafnyTypeForError(writer, errorId);
-          // Import generic Dafny error type
-          DafnyNameResolver.importGenericDafnyErrorTypeForNamespace(writer, errorId.getNamespace());
-          writer.write("""
-                  if error.is_$L:
-                    return $L(message=error.message)
-                """, errorId.getName(), errorId.getName()
-          );
-          writer.popState();
-        }
-      });
+              if error.is_$L:
+                return $L(message=error.message)
+            """, errorId.getName(), errorId.getName()
+        );
+//          writer.popState();
+      }
     }
+
+//        ShapeId serviceShapeId = context.settings().getService();
+//        ServiceShape serviceShape = context.model().expectShape(serviceShapeId).asServiceShape().get();
+        LocalServiceTrait localServiceTrait = serviceShape.getTrait(LocalServiceTrait.class).get();
+        Set<ShapeId> serviceDependencyShapeIds = localServiceTrait.getDependencies();
+        System.out.println("serviceDependencyShapeIds");
+      System.out.println(serviceDependencyShapeIds);
+      for (ShapeId serviceDependencyShapeId : serviceDependencyShapeIds) {
+//          writer.pushState(new ErrorDeserializerSection(error));
+          // Import Smithy-Python modelled-error
+          // Import Dafny-modelled error
+        System.out.println("dependencyServiceShape");
+        ServiceShape dependencyServiceShape = context.model().expectShape(serviceDependencyShapeId).asServiceShape().get();
+
+
+        writer.addImport(".errors", serviceDependencyShapeId.getName());
+//        DafnyNameResolver.importDafnyTypeForError(writer, serviceDependencyShapeId);
+          // Import generic Dafny error type
+          writer.addImport(
+              SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(serviceDependencyShapeId.getNamespace())
+              + ".smithygenerated.deserialize",
+              "_deserialize_error",
+              SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(serviceDependencyShapeId.getNamespace())
+              + "_deserialize_error"
+          );
+//          DafnyNameResolver.importGenericDafnyErrorTypeForNamespace(writer, serviceDependencyShapeId.getNamespace());
+          writer.write("""
+            if error.is_$L:
+              return $L(await $L(error.$L))
+          """, serviceDependencyShapeId.getName(), serviceDependencyShapeId.getName(),
+              SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(serviceDependencyShapeId.getNamespace())
+                  + "_deserialize_error",
+              serviceDependencyShapeId.getName()
+          );
+//          writer.popState();
+//        }
+      }
+
+    }
+    );
+
+
   }
 
   /**

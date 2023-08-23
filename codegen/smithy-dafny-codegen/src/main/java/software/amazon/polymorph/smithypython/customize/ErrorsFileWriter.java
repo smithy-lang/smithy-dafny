@@ -1,7 +1,11 @@
 package software.amazon.polymorph.smithypython.customize;
 
+import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
+import software.amazon.polymorph.smithypython.nameresolver.DafnyNameResolver;
+import software.amazon.polymorph.smithypython.nameresolver.SmithyNameResolver;
+import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.smithy.codegen.core.CodegenContext;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
@@ -38,6 +42,14 @@ public class ErrorsFileWriter implements CustomFileWriter {
         renderError(codegenContext, writer, errorShape);
       }
 
+      LocalServiceTrait localServiceTrait = serviceShape.getTrait(LocalServiceTrait.class).get();
+      Set<ShapeId> serviceDependencyShapeIds = localServiceTrait.getDependencies();
+      System.out.println("serviceDependencyShapeIds");
+      System.out.println(serviceDependencyShapeIds);
+      for (ShapeId serviceDependencyShapeId : serviceDependencyShapeIds) {
+        renderDependencyWrappingError(codegenContext, writer, serviceDependencyShapeId);
+
+      }
       writer.write(
           """
              class CollectionOfErrors(ApiError[Literal["CollectionOfErrors"]]):
@@ -179,6 +191,21 @@ public class ErrorsFileWriter implements CustomFileWriter {
     writer.openBlock("class $L($T[Literal[$S]]):", "", symbol.getName(), apiError, code, () -> {
       writer.write("code: Literal[$1S] = $1S", code);
       writer.write("message: str");
+    });
+    writer.write("");
+  }
+
+  private void renderDependencyWrappingError(GenerationContext context, PythonWriter writer, ShapeId serviceDependencyShapeId) {
+    writer.addStdlibImport("typing", "Dict");
+    writer.addStdlibImport("typing", "Any");
+    writer.addStdlibImport("typing", "Literal");
+
+    Shape serviceDependencyShape = context.model().expectShape(serviceDependencyShapeId);
+    var code = serviceDependencyShapeId.getName();
+    var symbol = context.symbolProvider().toSymbol(serviceDependencyShape);
+    var apiError = CodegenUtils.getApiError(context.settings());
+    writer.openBlock("class $L($T[Literal[$S]]):", "", symbol.getName(), apiError, code, () -> {
+      writer.write("$L: Any", symbol.getName());
     });
     writer.write("");
   }

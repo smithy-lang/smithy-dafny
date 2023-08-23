@@ -66,11 +66,40 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
     if (resourceOrService.asResourceShape().isPresent()) {
       ResourceShape resourceShape = resourceOrService.asResourceShape().get();
       DafnyNameResolver.importDafnyTypeForResourceShape(writer, resourceShape);
-      return dataSource;
+      writer.addStdlibImport(DafnyNameResolver.getDafnyIndexModuleNamespaceForShape(resourceShape));
+      writer.addStdlibImport(resourceShape.getId().getName(),
+          resourceShape.getId().getName(),
+          "Dafny" + resourceShape.getId().getName());
+      writer.addStdlibImport(SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(resourceShape.getId().getNamespace(), context));
+      writer.write("$L_resource = $L()",
+          SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(resourceShape.getId().getNamespace()),
+//          "Dafny" + resourceShape.getId().getName(),
+          "Dafny" + resourceShape.getId().getName()
+      );
+//      writer.write("$L_resource.ctor__($L.smithy_config_to_dafny_config($L._config))",
+//          SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(resourceShape.getId().getNamespace()),
+//          SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(resourceShape.getId().getNamespace())
+//              + ".smithygenerated.config",
+//          dataSource
+//      );
+      return "%1$s_resource".formatted(SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(resourceShape.getId().getNamespace()));
     } else if (resourceOrService.asServiceShape().isPresent()) {
       ServiceShape serviceShape = resourceOrService.asServiceShape().get();
       DafnyNameResolver.importDafnyTypeForServiceShape(writer, serviceShape);
-      return dataSource;
+      writer.addStdlibImport(SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(serviceShape.getId().getNamespace(), context));
+      writer.addStdlibImport(DafnyNameResolver.getDafnyIndexModuleNamespaceForShape(serviceShape));
+      writer.write("$L_client = $L.$LClient()",
+          SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(serviceShape.getId().getNamespace()),
+          DafnyNameResolver.getDafnyIndexModuleNamespaceForShape(serviceShape),
+          serviceShape.getId().getName()
+      );
+      writer.write("$L_client.ctor__($L.smithy_config_to_dafny_config($L._config))",
+          SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(serviceShape.getId().getNamespace()),
+          SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(serviceShape.getId().getNamespace())
+              + ".smithygenerated.config",
+          dataSource
+          );
+      return "%1$s_client".formatted(SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(serviceShape.getId().getNamespace()));
     }
 
     throw new UnsupportedOperationException("Unknown referenceStructureShape type: " + shape);
@@ -95,7 +124,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
         return referenceStructureShape(shape);
       }
       if (SmithyNameResolver.getLocalServiceConfigShapes(context).contains(shape.getId())) {
-        return "DafnyService(python_module_name.smithy_config_to_dafny_config(%1$s.config))";
+//        return "DafnyService(python_module_name.smithy_config_to_dafny_config(%1$s.config))";
       }
 
       DafnyNameResolver.importDafnyTypeForShape(writer, shape.getId());
