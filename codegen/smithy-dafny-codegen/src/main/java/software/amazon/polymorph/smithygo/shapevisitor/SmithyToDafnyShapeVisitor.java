@@ -30,6 +30,7 @@ import software.amazon.smithy.model.shapes.ShortShape;
 import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.TimestampShape;
+import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.utils.CaseUtils;
 import software.amazon.smithy.utils.StringUtils;
 
@@ -60,7 +61,16 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
 
     @Override
     public String blobShape(BlobShape shape) {
-        return dataSource;
+        writer.addImport("dafny");
+        return """
+                func () dafny.Sequence {
+                    var v []interface{}
+                    for _, e := range %s {
+                    	v = append(v, e)
+                    }
+                    return dafny.SeqOf(v...);
+                }(),
+                """.formatted(dataSource);
     }
 
     @Override
@@ -108,7 +118,30 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
     @Override
     public String stringShape(StringShape shape) {
         writer.addImport("dafny");
-        return "dafny.SeqOfChars([]dafny.Char(%s)...)".formatted(dataSource);
+        if (shape.hasTrait(EnumTrait.class)) {
+            return """
+        func () interface{} {
+		var index int
+		for _, enumVal := range %s.Values() {
+			index++
+			if enumVal == %s{
+				break;
+			}
+		}
+		var enum interface{}
+		for allEnums, i := dafny.Iterate(%s{}.AllSingletonConstructors()), 0; i < index; i++ {
+			var ok bool
+			enum, ok = allEnums()
+			if !ok {
+				break;
+			}
+		}
+		return enum
+	}(),
+                    """.formatted(dataSource, dataSource, DafnyNameResolver.getDafnyCompanionStructType(context.settings(), context.symbolProvider().toSymbol(shape)));
+        } else {
+            return "dafny.SeqOfChars([]dafny.Char(%s)...)".formatted(dataSource);
+        }
     }
 
     @Override
@@ -143,7 +176,22 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
 
     @Override
     public String doubleShape(DoubleShape shape) {
-        return dataSource;
+        writer.addImport("dafny");
+        writer.addImport("encoding/binary");
+        writer.addImport("math");
+        return """
+                func () dafny.Sequence {
+    	            var bits = math.Float64bits(%s)
+                    var bytes = make([]byte, 8)
+                    binary.LittleEndian.PutUint64(bytes, bits)
+    	            var v []interface{}
+    	            for _, e := range bytes {
+    		            v = append(v, e)
+    	            }
+    	            return dafny.SeqOf(v...);
+                }(),
+	
+    """.formatted(dataSource);
     }
 
     @Override

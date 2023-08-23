@@ -33,6 +33,10 @@ public class DafnyNameResolver {
         return DafnyNameResolver.dafnyTypesNamespace(settings).concat(DOT).concat("Companion_%s_".formatted(symbol.getName()));
     }
 
+    public static String getDafnyCompanionStructType(final GoSettings settings, final Symbol symbol) {
+        return DafnyNameResolver.dafnyTypesNamespace(settings).concat(DOT).concat("CompanionStruct_%s_".formatted(symbol.getName()));
+    }
+
     public static String getDafnyCompanionTypeCreate(final GoSettings settings, final Symbol symbol) {
         return DafnyNameResolver.getDafnyCompanionType(settings, symbol).concat(DOT).concat("Create_%s_".formatted(symbol.getName()));
     }

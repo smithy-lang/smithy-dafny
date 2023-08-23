@@ -62,7 +62,20 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
 
     @Override
     public String blobShape(BlobShape shape) {
-        return "%s.Dtor_value().(%s)".formatted(dataSource, context.symbolProvider().toSymbol(shape));
+        writer.addImport("dafny");
+        return """
+        func () []byte {
+        var b []byte
+        for i := dafny.Iterate(%s.Dtor_value()) ; ; {
+            val, ok := i()
+            if !ok {
+                return b
+            } else {
+                b = append(b, val.(byte))
+            }
+        }
+        }(),
+        """.formatted(dataSource);
     }
 
     @Override
@@ -77,18 +90,12 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
             final var memberShape = memberShapeEntry.getValue();
             final var targetShape = context.model().expectShape(memberShape.getTarget());
 
-            if (targetShape.isStructureShape()) {
-                final String[] refName = context.symbolProvider().toSymbol(memberShape).getFullName().split("/");
-                 builder.append("%s: %s.Dtor_%s().Dtor_value().(*%s)".formatted(context.symbolProvider().toSymbol(memberShape).getName(), dataSource, memberName, refName[refName.length - 1]));
-            } else {
-
                 builder.append("%1$s: %2$s".formatted(
                         StringUtils.capitalize(memberName),
                         targetShape.accept(
                                 new DafnyToSmithyShapeVisitor(context, dataSource + (memberShape.isOptional() ? ".Dtor_%s()".formatted(memberName) : ""), writer, isConfigShape)
                         )
                 ));
-            }
             fieldSeparator = ",";
         }
 
@@ -115,11 +122,27 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
 
     @Override
     public String stringShape(StringShape shape) {
-        if (shape.hasTrait(EnumTrait.class)) {
-            final String[] refName = context.symbolProvider().toSymbol(shape).getFullName().split("/");
-            return "%s.(%s)".formatted(dataSource, refName[refName.length - 1]);
-        }
         writer.addImport("dafny");
+        if (shape.hasTrait(EnumTrait.class)) {
+            return """
+    func () types.%s {
+		inputEnum := %s.Dtor_value().(%s)
+		index := -1;
+		for allEnums := dafny.Iterate(%s{}.AllSingletonConstructors()); ; {
+			enum, ok := allEnums()
+			if ok {
+				index++
+				if enum.(%s).Equals(inputEnum) {
+					break;
+				}
+			}
+		}
+		var u types.%s
+		return u.Values()[index]
+	}(),
+	""".formatted(context.symbolProvider().toSymbol(shape).getName(), dataSource, DafnyNameResolver.getDafnyType(context.settings(), context.symbolProvider().toSymbol(shape)), DafnyNameResolver.getDafnyCompanionStructType(context.settings(), context.symbolProvider().toSymbol(shape)),
+                  DafnyNameResolver.getDafnyType(context.settings(), context.symbolProvider().toSymbol(shape)), context.symbolProvider().toSymbol(shape).getName());
+        }
         return """
                 func() (*string) {
                     var s string
@@ -147,12 +170,12 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
 
     @Override
     public String integerShape(IntegerShape shape) {
-        return getTypeAssertedShape(shape);
+        return "&[]int32{%s.Dtor_value().(int32)}[0]".formatted(dataSource);
     }
 
     @Override
     public String longShape(LongShape shape) {
-        return getTypeAssertedShape(shape);
+        return "&[]int64{%s.Dtor_value().(int64)}[0]".formatted(dataSource);
     }
 
     @Override
@@ -167,7 +190,21 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
 
     @Override
     public String doubleShape(DoubleShape shape) {
-        return getTypeAssertedShape(shape);
+        writer.addImport("dafny");
+        writer.addImport("math");
+        return """
+                func () *float64 {
+                    var b []byte
+                    for i := dafny.Iterate(%s.Dtor_value()) ; ; {
+                        val, ok := i()
+                	    if !ok {
+    		                return &[]float64{math.Float64frombits(binary.LittleEndian.Uint64(b))}[0]
+    	                } else {
+    		                b = append(b, val.(byte))
+    	                }
+                    }
+                }(),
+    """.formatted(dataSource);
     }
 
     @Override
