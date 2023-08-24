@@ -97,29 +97,26 @@ public final class DafnyPythonIntegration implements PythonIntegration {
         Set<ServiceShape> serviceShapes = Set.of(
             codegenContext.model().expectShape(codegenContext.settings().getService()).asServiceShape().get());
 
-//        System.out.println("FFFFF");
-//        System.out.println(serviceShapes);
-//        System.out.println(codegenContext.settings().getModuleName());
-//        System.out.println(codegenContext.settings().getService());
-//        System.out.println(codegenContext.model().getMetadata().entrySet());
-
         ServiceShape serviceShape = codegenContext.model().expectShape(codegenContext.settings().getService()).asServiceShape().get();
 
         customizeForServiceShape(serviceShape, codegenContext);
 
-        // Get non-service operation shapes = model operation shapes - service operation shapes
+        // Get set(non-service operation shapes) = set(model operation shapes) - set(service operation shapes)
+        // This is related to forking Smithy-Python. TODO: resolve when resolving fork.
+        // Smithy-Python will only generate code for shapes which are used by the service.
+        // Polymorph has a requirement to generate code for all shapes in the model,
+        //   even if the service does not use those shapes.
+        // (The use case is that other models may depend on shapes that are defined in this model,
+        //   though not used in this model.)
         Set<ShapeId> serviceOperationShapes = serviceShapes.stream()
             .map(EntityShape::getOperations)
             .flatMap(Collection::stream)
             .collect(Collectors.toSet());
-        Set<ShapeId> modelOperationShapes = codegenContext.model().getOperationShapes().stream()
+        Set<ShapeId> nonServiceOperationShapes = codegenContext.model().getOperationShapes().stream()
             .map(Shape::getId)
             .filter(operationShapeId -> operationShapeId.getNamespace().equals(serviceShape.getId().getNamespace()))
             .collect(Collectors.toSet());
-        modelOperationShapes.removeAll(serviceOperationShapes);
-        Set<ShapeId> nonServiceOperationShapes = modelOperationShapes;
-        System.out.println("nonServiceOperationShapes");
-        System.out.println(nonServiceOperationShapes);
+        nonServiceOperationShapes.removeAll(serviceOperationShapes);
 
         customizeForNonServiceOperationShapes(nonServiceOperationShapes, codegenContext);
     }

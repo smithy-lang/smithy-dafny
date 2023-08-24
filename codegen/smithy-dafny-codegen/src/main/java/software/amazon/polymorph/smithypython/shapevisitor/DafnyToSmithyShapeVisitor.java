@@ -86,7 +86,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
 
     @Override
     protected String getDefault(Shape shape) {
-      var protocolName = context.protocolGenerator().getName();
+      String protocolName = context.protocolGenerator().getName();
       throw new CodegenException(String.format(
           "Unsupported conversion of %s to %s using the %s protocol",
           shape, shape.getType(), protocolName));
@@ -274,7 +274,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
       return dataSource;
     }
 
-  @Override
+    @Override
     public String timestampShape(TimestampShape shape) {
       return getDefault(shape);
     }

@@ -28,6 +28,8 @@ import software.amazon.polymorph.smithypython.nameresolver.Utils;
 import software.amazon.polymorph.smithypython.shapevisitor.DafnyToSmithyShapeVisitor;
 import software.amazon.polymorph.smithypython.shapevisitor.SmithyToDafnyShapeVisitor;
 import software.amazon.polymorph.traits.LocalServiceTrait;
+import software.amazon.smithy.codegen.core.Symbol;
+import software.amazon.smithy.codegen.core.WriterDelegator;
 import software.amazon.smithy.model.knowledge.TopDownIndex;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
@@ -47,19 +49,42 @@ import software.amazon.smithy.utils.Pair;
 import software.amazon.smithy.utils.SmithyUnstableApi;
 
 /**
- *
- * <p>This will implement any handling of components outside the request
+ * This will implement any handling of components outside the request
  * body and error handling.
  */
 @SmithyUnstableApi
 public abstract class DafnyPythonProtocolGenerator implements ProtocolGenerator {
 
-  private final Set<Shape> deserializingDocumentShapes = new TreeSet<>();
-
   @Override
   public ApplicationProtocol getApplicationProtocol() {
     return DafnyPythonIntegration.createDafnyApplicationProtocol();
   }
+
+  /**
+   * A section that controls writing out the entire serialization function.
+   *
+   * By pushing and popping CodeSections, other developers
+   *   can create plugins that intercept a CodeSection and inject their
+   *   own code here.
+   *
+   * @param operation The operation whose serializer is being generated.
+   */
+  public record RequestSerializerSection(OperationShape operation) implements CodeSection {}
+
+  /**
+   * A section that controls writing out the entire deserialization function.
+   *
+   * @param operation The operation whose serializer is being generated.
+   */
+  public record RequestDeserializerSection(OperationShape operation) implements CodeSection {}
+
+  /**
+   * A section that controls writing out the entire deserialization function for an error.
+   *
+   * @param error The error whose deserializer is being generated.
+   */
+  public record ErrorDeserializerSection(StructureShape error) implements CodeSection {}
+
 
   /**
    * For all operations in the model, generate a conversion method
@@ -68,40 +93,31 @@ public abstract class DafnyPythonProtocolGenerator implements ProtocolGenerator 
    */
   @Override
   public void generateRequestSerializers(GenerationContext context) {
-    var topDownIndex = TopDownIndex.of(context.model());
-    var delegator = context.writerDelegator();
-    var configSymbol = CodegenUtils.getConfigSymbol(context.settings());
+    WriterDelegator<PythonWriter> delegator = context.writerDelegator();
+    Symbol configSymbol = CodegenUtils.getConfigSymbol(context.settings());
 
     // For each operation in the model, generate a `serialize_{operation input}` method
     for (OperationShape operation : context.model().getOperationShapes()) {
-      var serFunction = getSerializationFunction(context, operation);
-      var input = context.model().expectShape(operation.getInputShape());
-      var inputSymbol = context.symbolProvider().toSymbol(input);
+      Symbol serFunction = getSerializationFunction(context, operation);
+      Shape input = context.model().expectShape(operation.getInputShape());
+      Symbol inputSymbol = context.symbolProvider().toSymbol(input);
 
-      System.out.println("input before inputSymbol");
-      System.out.println(input);
-
-      System.out.println("inputSymbol");
-      System.out.println(inputSymbol);
-
-      System.out.println(context.settings().getModuleName());
-
-      // Override Smithy-Python SymbolBuilder
-      var inputSymbolTransformed = inputSymbol.toBuilder()
+      // Override Smithy-Python SymbolBuilder.
+      // Smithy-Python does not understand how the LocalService attribute's dependencies work.
+      // We override its symbol definition here.
+      Symbol inputSymbolTransformed = inputSymbol.toBuilder()
             .namespace(SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(input.getId().getNamespace(), context) + ".models", ".")
             .definitionFile("")
             .build();
 
-      System.out.println("posttransform inputSymbol");
-      System.out.println(inputSymbolTransformed);
-
+      // Write out the serialization operation
       delegator.useFileWriter(serFunction.getDefinitionFile(), serFunction.getNamespace(), writer -> {
         writer.addImport(Constants.DAFNY_PROTOCOL_PYTHON_FILENAME, Constants.DAFNY_PROTOCOL_REQUEST);
         writer.pushState(new RequestSerializerSection(operation));
         writer.write("""
-                  async def $L(input: $T, config: $T) -> $L:
-                      ${C|}
-                  """,
+            async def $L(input: $T, config: $T) -> $L:
+                ${C|}
+            """,
             serFunction.getName(),
             inputSymbolTransformed,
             configSymbol,
@@ -111,16 +127,6 @@ public abstract class DafnyPythonProtocolGenerator implements ProtocolGenerator 
       });
     }
   }
-
-  /**
-   * A section that controls writing out the entire serialization function.
-   * By pushing and popping this section, we allow other developers
-   *   to create plugins that intercept this section and inject their
-   *   own code here.
-   *
-   * @param operation The operation whose serializer is being generated.
-   */
-  public record RequestSerializerSection(OperationShape operation) implements CodeSection {}
 
   /**
    * Generates the content of the operation request serializer.
@@ -146,7 +152,7 @@ public abstract class DafnyPythonProtocolGenerator implements ProtocolGenerator 
 
     // Determine conversion code from Smithy to Dafny
     Shape targetShape = context.model().expectShape(operation.getInputShape());
-    var input = targetShape.accept(new SmithyToDafnyShapeVisitor(
+    String input = targetShape.accept(new SmithyToDafnyShapeVisitor(
         context,
         "input",
         writer,
@@ -165,25 +171,16 @@ public abstract class DafnyPythonProtocolGenerator implements ProtocolGenerator 
 
   @Override
   public void generateResponseDeserializers(GenerationContext context) {
-    var delegator = context.writerDelegator();
-    var configSymbol = CodegenUtils.getConfigSymbol(context.settings());
-
-    // Find all modelled error shapes
-    var deserializingErrorShapes = new TreeSet<ShapeId>(
-        context.model().getStructureShapesWithTrait(ErrorTrait.class)
-            .stream()
-            .filter(structureShape -> structureShape.getId().getNamespace()
-                .equals(context.settings().getService().getNamespace()))
-            .map(Shape::getId)
-            .collect(Collectors.toSet()));
+    WriterDelegator<PythonWriter> delegator = context.writerDelegator();
+    Symbol configSymbol = CodegenUtils.getConfigSymbol(context.settings());
 
     // For each operation in the model, generate a `deserialize_{operation input}` method
     for (OperationShape operation : context.model().getOperationShapes()) {
-      var deserFunction = getDeserializationFunction(context, operation);
-      var output = context.model().expectShape(operation.getOutputShape());
-      var outputSymbol = context.symbolProvider().toSymbol(output);
+      Symbol deserFunction = getDeserializationFunction(context, operation);
+      Shape output = context.model().expectShape(operation.getOutputShape());
+      Symbol outputSymbol = context.symbolProvider().toSymbol(output);
 
-      var outputSymbolTransformed = outputSymbol.toBuilder()
+      Symbol outputSymbolTransformed = outputSymbol.toBuilder()
           .namespace(SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(output.getId().getNamespace(), context) + ".models", ".")
           .definitionFile("")
           .build();
@@ -191,12 +188,12 @@ public abstract class DafnyPythonProtocolGenerator implements ProtocolGenerator 
       delegator.useFileWriter(deserFunction.getDefinitionFile(), deserFunction.getNamespace(), writer -> {
         writer.addImport(Constants.DAFNY_PROTOCOL_PYTHON_FILENAME, Constants.DAFNY_PROTOCOL_RESPONSE);
 
-        writer.pushState(new RequestSerializerSection(operation));
+        writer.pushState(new RequestDeserializerSection(operation));
 
         writer.write("""
-                  async def $L(input: $L, config: $T) -> $T:
-                    ${C|}
-                  """,
+            async def $L(input: $L, config: $T) -> $T:
+              ${C|}
+            """,
             deserFunction.getName(),
             Constants.DAFNY_PROTOCOL_RESPONSE,
             configSymbol,
@@ -208,8 +205,7 @@ public abstract class DafnyPythonProtocolGenerator implements ProtocolGenerator 
       });
     }
 
-    generateErrorResponseDeserializerSection(context, deserializingErrorShapes);
-    generateDocumentBodyShapeDeserializers(context, deserializingDocumentShapes);
+    generateErrorResponseDeserializerSection(context);
   }
 
   /**
@@ -228,8 +224,9 @@ public abstract class DafnyPythonProtocolGenerator implements ProtocolGenerator 
       GenerationContext context,
       OperationShape operation
   ) {
-    var delegator = context.writerDelegator();
-    var deserFunction = getDeserializationFunction(context, operation);
+    WriterDelegator<PythonWriter> delegator = context.writerDelegator();
+    Symbol deserFunction = getDeserializationFunction(context, operation);
+
     delegator.useFileWriter(deserFunction.getDefinitionFile(), deserFunction.getNamespace(), writer -> {
       writer.pushState(new ResponseDeserializerSection(operation));
 
@@ -244,7 +241,7 @@ public abstract class DafnyPythonProtocolGenerator implements ProtocolGenerator 
       } else {
         // Determine the deserialization function
         Shape targetShape = context.model().expectShape(outputShape);
-        var output = targetShape.accept(new DafnyToSmithyShapeVisitor(
+        String output = targetShape.accept(new DafnyToSmithyShapeVisitor(
             context,
             "input.value",
             writer,
@@ -255,7 +252,9 @@ public abstract class DafnyPythonProtocolGenerator implements ProtocolGenerator 
           if input.IsFailure():
             return await _deserialize_error(input.error)
           return $L
-          """, output);
+          """,
+          output
+        );
       }
       writer.popState();
     });
@@ -271,20 +270,15 @@ public abstract class DafnyPythonProtocolGenerator implements ProtocolGenerator 
    */
   public record ResponseDeserializerSection(OperationShape operation) implements CodeSection {}
 
-  private void generateErrorResponseDeserializerSection(
-      GenerationContext context,
-      TreeSet<ShapeId> deserializingErrorShapes)
-  {
-    // Write out deserializers for errors that all localServices will have
+  private void generateErrorResponseDeserializerSection(GenerationContext context) {
     ShapeId serviceShapeId = context.settings().getService();
     ServiceShape serviceShape = context.model().expectShape(serviceShapeId).asServiceShape().get();
-
-
-    var delegatorMy = context.writerDelegator();
+    WriterDelegator<PythonWriter> writerDelegator = context.writerDelegator();
     String moduleName = context.settings().getModuleName();
-    delegatorMy.useFileWriter(moduleName + "/deserialize.py", ".", writer -> {
+
+    // Write out deserializers for unmodelled errors
+    writerDelegator.useFileWriter(moduleName + "/deserialize.py", ".", writer -> {
       writer.addStdlibImport("typing", "Any");
-      // TODO: Is this generated if there are no modelled errors...?
       DafnyNameResolver.importGenericDafnyErrorTypeForNamespace(writer, serviceShape.getId().getNamespace());
       writer.addImport(".errors", "ServiceError");
       writer.addImport(".errors", "OpaqueError");
@@ -299,39 +293,19 @@ public abstract class DafnyPythonProtocolGenerator implements ProtocolGenerator 
                     return CollectionOfErrors(message=error.message, list=error.list)"""
       );
 
-    // I need to store a map from deserFunction metadata -> Set<errorId>
-    // Such that for a given set of metadata (i.e. a given file),
-    // I have all of the errors I need to write to that file
-    // TODO: Less brittle datatype than Pair
-    Map<Pair<String, String>, List<ShapeId>> deserFunctionToErrorsMap = new HashMap<>();
-    for (ShapeId errorId : deserializingErrorShapes) {
-      var error = context.model().expectShape(errorId, StructureShape.class);
-      var deserFunction = getErrorDeserializationFunction(context, error);
-      deserFunction.getDefinitionFile();
-      System.out.println("deserFunction");
-      Pair<String, String> deserFunctionMetadata = Pair.of(deserFunction.getDefinitionFile(), deserFunction.getNamespace());
-      System.out.println(deserFunctionMetadata);
+      // Get all of this service's modelled errors
+      TreeSet<ShapeId> deserializingErrorShapes = new TreeSet<ShapeId>(
+          context.model().getStructureShapesWithTrait(ErrorTrait.class)
+              .stream()
+              .filter(structureShape -> structureShape.getId().getNamespace()
+                  .equals(context.settings().getService().getNamespace()))
+              .map(Shape::getId)
+              .collect(Collectors.toSet()));
 
-      if (deserFunctionToErrorsMap.containsKey(deserFunction)) {
-        List<ShapeId> oldList = deserFunctionToErrorsMap.get(deserFunction);
-        oldList.add(errorId);
-        deserFunctionToErrorsMap.put(
-            deserFunctionMetadata,
-            oldList
-        );
-      } else {
-        deserFunctionToErrorsMap.put(
-            deserFunctionMetadata,
-            Arrays.asList(errorId)
-        );
-      }
-    }
-
-    for (Pair<String, String> deserFunctionMetadata : deserFunctionToErrorsMap.keySet()) {
-
-      for (ShapeId errorId : deserFunctionToErrorsMap.get(deserFunctionMetadata)) {
-        var error = context.model().expectShape(errorId, StructureShape.class);
-//          writer.pushState(new ErrorDeserializerSection(error));
+      // Write out deserializers for this service's modelled errors
+      for (ShapeId errorId : deserializingErrorShapes) {
+        StructureShape error = context.model().expectShape(errorId, StructureShape.class);
+        writer.pushState(new ErrorDeserializerSection(error));
 
         // Import Smithy-Python modelled-error
         writer.addImport(".errors", errorId.getName());
@@ -339,76 +313,46 @@ public abstract class DafnyPythonProtocolGenerator implements ProtocolGenerator 
         DafnyNameResolver.importDafnyTypeForError(writer, errorId);
         // Import generic Dafny error type
         DafnyNameResolver.importGenericDafnyErrorTypeForNamespace(writer, errorId.getNamespace());
-        writer.write("""
+        writer.write(
+            """
               if error.is_$L:
                 return $L(message=error.message)
-            """, errorId.getName(), errorId.getName()
+            """,
+            errorId.getName(),
+            errorId.getName()
         );
-//          writer.popState();
+        writer.popState();
       }
-    }
 
-//        ShapeId serviceShapeId = context.settings().getService();
-//        ServiceShape serviceShape = context.model().expectShape(serviceShapeId).asServiceShape().get();
-        LocalServiceTrait localServiceTrait = serviceShape.getTrait(LocalServiceTrait.class).get();
-        Set<ShapeId> serviceDependencyShapeIds = localServiceTrait.getDependencies();
-        System.out.println("serviceDependencyShapeIds");
-      System.out.println(serviceDependencyShapeIds);
+      LocalServiceTrait localServiceTrait = serviceShape.getTrait(LocalServiceTrait.class).get();
+      Set<ShapeId> serviceDependencyShapeIds = localServiceTrait.getDependencies();
+      // Write out deserializers for dependency errors
       for (ShapeId serviceDependencyShapeId : serviceDependencyShapeIds) {
-//          writer.pushState(new ErrorDeserializerSection(error));
-          // Import Smithy-Python modelled-error
-          // Import Dafny-modelled error
-        System.out.println("dependencyServiceShape");
-        ServiceShape dependencyServiceShape = context.model().expectShape(serviceDependencyShapeId).asServiceShape().get();
-
-
         writer.addImport(".errors", serviceDependencyShapeId.getName());
-//        DafnyNameResolver.importDafnyTypeForError(writer, serviceDependencyShapeId);
-          // Import generic Dafny error type
-          writer.addImport(
-              SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(serviceDependencyShapeId.getNamespace())
-              + ".smithygenerated.deserialize",
-              "_deserialize_error",
-              SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(serviceDependencyShapeId.getNamespace())
+
+        // Import dependency `_deserialize_error` function so this service can defer to it:
+        // `from dependency.smithygenerated.deserialize import _deserialize_error as dependency_deserialize_error`
+        writer.addImport(
+            // `from dependency.smithygenerated.deserialize`
+            SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(serviceDependencyShapeId.getNamespace())
+                + ".smithygenerated.deserialize",
+            // `import _deserialize_error`
+            "_deserialize_error",
+            // `as dependency_deserialize_error`
+            SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(serviceDependencyShapeId.getNamespace())
               + "_deserialize_error"
-          );
-//          DafnyNameResolver.importGenericDafnyErrorTypeForNamespace(writer, serviceDependencyShapeId.getNamespace());
-          writer.write("""
+        );
+        // Generate deserializer for dependency that defers to its `_deserialize_error`
+        writer.write("""
             if error.is_$L:
               return $L(await $L(error.$L))
-          """, serviceDependencyShapeId.getName(), serviceDependencyShapeId.getName(),
-              SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(serviceDependencyShapeId.getNamespace())
-                  + "_deserialize_error",
-              serviceDependencyShapeId.getName()
-          );
-//          writer.popState();
-//        }
+          """,
+          serviceDependencyShapeId.getName(), serviceDependencyShapeId.getName(),
+          SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(serviceDependencyShapeId.getNamespace())
+              + "_deserialize_error",
+          serviceDependencyShapeId.getName()
+        );
       }
-
-    }
-    );
-
-
+    });
   }
-
-  /**
-   * A section that controls writing out the entire deserialization function for an error.
-   *
-   * @param error The error whose deserializer is being generated.
-   */
-  public record ErrorDeserializerSection(StructureShape error) implements CodeSection {}
-
-  /**
-   * Generates deserialization functions for shapes in the given set.
-   *
-   * <p>These are the functions that deserializeDocumentBody will call out to.
-   *
-   * @param context The generation context.
-   * @param shapes The shapes to generate deserialization for.
-   */
-  protected abstract void generateDocumentBodyShapeDeserializers(
-      GenerationContext context,
-      Set<Shape> shapes
-  );
-
 }

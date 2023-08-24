@@ -63,7 +63,7 @@ public class ShimFileWriter implements CustomFileWriter {
       GenerationContext codegenContext, ServiceShape serviceShape, PythonWriter writer) {
 
     // Write modelled error converters for this service
-    var errorShapeSet = new TreeSet<ShapeId>(
+    TreeSet<ShapeId> errorShapeSet = new TreeSet<ShapeId>(
         codegenContext.model().getStructureShapesWithTrait(ErrorTrait.class)
             .stream()
             .filter(structureShape -> structureShape.getId().getNamespace()
@@ -173,13 +173,17 @@ public class ShimFileWriter implements CustomFileWriter {
             //   and cannot be constructed inline.
             // Polymorph will create an object representing the service's client, instantiate it,
             //   then reference that object in its `input` string.
-            var input = targetShapeInput.accept(new DafnyToSmithyShapeVisitor(
+            String input = targetShapeInput.accept(new DafnyToSmithyShapeVisitor(
                 codegenContext,
                 "input",
                 writer,
                 false
             ));
 
+            // Generate code that:
+            // 1) "unwraps" the request (converts from the Dafny type to the Smithy type),
+            // 2) calls Smithy client,
+            // 3) wraps Smithy failures as Dafny failures
             writer.write(
               """
               unwrapped_request: $L = $L
@@ -204,6 +208,7 @@ public class ShimFileWriter implements CustomFileWriter {
                 false
             ));
 
+            // Generate code that wraps Smithy success shapes as Dafny success shapes
             writer.write(
                 """
                 return Wrappers.Result_Success($L)

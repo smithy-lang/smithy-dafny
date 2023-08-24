@@ -107,7 +107,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
 
     @Override
     protected String getDefault(Shape shape) {
-      var protocolName = context.protocolGenerator().getName();
+      String protocolName = context.protocolGenerator().getName();
       throw new CodegenException(String.format(
           "Unsupported conversion of %s to %s using the %s protocol",
           shape, shape.getType(), protocolName));
