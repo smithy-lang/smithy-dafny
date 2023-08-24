@@ -3,7 +3,6 @@ package software.amazon.polymorph.smithypython.customize;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
-import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.polymorph.smithypython.shapevisitor.DafnyToSmithyShapeVisitor;
 import software.amazon.polymorph.smithypython.shapevisitor.SmithyToDafnyShapeVisitor;
 import software.amazon.polymorph.smithypython.nameresolver.DafnyNameResolver;
@@ -63,8 +62,7 @@ public class ShimFileWriter implements CustomFileWriter {
   private void generateErrorsBlock(
       GenerationContext codegenContext, ServiceShape serviceShape, PythonWriter writer) {
 
-    // Write modelled error converters
-
+    // Write modelled error converters for this service
     var errorShapeSet = new TreeSet<ShapeId>(
         codegenContext.model().getStructureShapesWithTrait(ErrorTrait.class)
             .stream()
@@ -72,14 +70,8 @@ public class ShimFileWriter implements CustomFileWriter {
                 .equals(codegenContext.settings().getService().getNamespace()))
             .map(Shape::getId)
             .collect(Collectors.toSet()));
-
-    System.out.println(errorShapeSet);
-
     for (ShapeId errorShapeId : errorShapeSet) {
-      writer.addImport(SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(
-          errorShapeId.getNamespace(),
-          codegenContext
-      ) + ".errors", errorShapeId.getName());
+      SmithyNameResolver.importSmithyGeneratedTypeForShape(writer, errorShapeId, codegenContext);
       writer.write("""
               if isinstance(e, $L):
                   return $L.$L(message=e.message)
@@ -90,7 +82,14 @@ public class ShimFileWriter implements CustomFileWriter {
       );
     }
 
-    // Dependency errors
+    // Write out wrapping errors for dependencies.
+    // This service will generate a dependency-specific error for each dependency.
+    // This dependency-specific error is only known to this service, and not to the dependency service.
+    // The Dafny type for this error contains one member: the dependency's name.
+    // ex. Dafny type for MyDependency: `Error_MyDependency(Error...) = { MyDependency: ... }`
+    // This member's value can take on any of the error types modelled in the dependency.
+    // Polymorph will generate a similar error structure in the primary service's errors.py file.
+    // ex. Smithy type for MyDependency: `MyDependency(ApiError...) = { MyDependency: ... }`
     LocalServiceTrait localServiceTrait = serviceShape.getTrait(LocalServiceTrait.class).get();
     Set<ShapeId> serviceDependencyShapeIds = localServiceTrait.getDependencies();
     for (ShapeId serviceDependencyShapeId : serviceDependencyShapeIds) {
@@ -101,6 +100,9 @@ public class ShimFileWriter implements CustomFileWriter {
           SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(serviceDependencyShapeId.getNamespace())
               + "_smithy_error_to_dafny_error"
       );
+      writer.addImport(".errors", serviceDependencyShapeId.getName());
+      // Generate conversion method that says:
+      // "If this is a dependency-specific error, defer to the dependency's `smithy_error_to_dafny_error`"
       writer.write("""
               if isinstance(e, $L):
                   return $L.Error_$L($L(e.message))
@@ -111,7 +113,6 @@ public class ShimFileWriter implements CustomFileWriter {
           SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(serviceDependencyShapeId.getNamespace())
               + "_smithy_error_to_dafny_error"
       );
-      writer.addImport(".errors", serviceDependencyShapeId.getName());
     }
 
     // Add service-specific CollectionOfErrors
@@ -138,49 +139,40 @@ public class ShimFileWriter implements CustomFileWriter {
 
       // Add imports for operation errors
       for (ShapeId errorShapeId : operationShape.getErrors(serviceShape)) {
-        writer.addImport(SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(
-            errorShapeId.getNamespace(),
-            codegenContext
-        ) + ".errors", errorShapeId.getName());
+        SmithyNameResolver.importSmithyGeneratedTypeForShape(writer, errorShapeId, codegenContext);
       }
 
       ShapeId inputShape = operationShape.getInputShape();
       ShapeId outputShape = operationShape.getOutputShape();
-
-      String dafnyInputType = DafnyNameResolver.getDafnyTypeForShape(inputShape);
-      String dafnyOutputType = DafnyNameResolver.getDafnyTypeForShape(outputShape);
-      String operationSymbol = codegenContext.symbolProvider().toSymbol(operationShape).getName();
-
-      System.out.println("inputShape: " + inputShape);
-      System.out.println(SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(
-              inputShape.getNamespace(), codegenContext));
-      System.out.println("outputShape: " + outputShape);
-      System.out.println(SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(
-          outputShape.getNamespace(),codegenContext ));
-
-
+      // Import Dafny types for inputs and outputs
       DafnyNameResolver.importDafnyTypeForShape(writer, inputShape);
       DafnyNameResolver.importDafnyTypeForShape(writer, outputShape);
-      writer.addImport(
-          SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(
-            inputShape.getNamespace(), codegenContext
-          ) + ".models", inputShape.getName()
-      );
-      writer.addImport(
-          SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(
-            outputShape.getNamespace(), codegenContext
-          ) + ".models", outputShape.getName()
-      );
-
+      // Import Smithy types for inputs and outputs
+      SmithyNameResolver.importSmithyGeneratedTypeForShape(writer, inputShape, codegenContext);
+      SmithyNameResolver.importSmithyGeneratedTypeForShape(writer, outputShape, codegenContext);
+      
+      // Write the Shim operation block.
+      // This takes in a Dafny input and returns a Dafny output.
+      // This operation will:
+      //  1) Convert the Dafny input to a Smithy-modelled input,
+      //  2) Call the Smithy-generated client with the transformed input, and
+      //  3) Convert the Smithy output to the Dafny type.
       writer.openBlock("def $L(self, $L) -> $L:", "",
           operationShape.getId().getName(),
-          Utils.isUnitShape(inputShape) ? "" : "input: " + dafnyInputType,
-          Utils.isUnitShape(outputShape) ? "None" : dafnyOutputType,
+          // Do not generate an `input` parameter if the operation does not take in an input
+          Utils.isUnitShape(inputShape) ? "" : "input: " + DafnyNameResolver.getDafnyTypeForShape(inputShape),
+          // Return `None` type if the operation does not return an output
+          Utils.isUnitShape(outputShape) ? "None" : DafnyNameResolver.getDafnyTypeForShape(outputShape),
           () -> {
 
             Shape targetShapeInput = codegenContext.model().expectShape(operationShape.getInputShape());
             // Generate code that converts the input from the Dafny type to the corresponding Smithy type
-            // This has a side effect of writing any transformation code
+            // `input` will hold a string that converts the Dafny `input` to the Smithy-modelled output.
+            // This has a side effect of possibly writing transformation code at the writer's current position.
+            // For example, a service shape may require some calls to `ctor__()` after it is created,
+            //   and cannot be constructed inline.
+            // Polymorph will create an object representing the service's client, instantiate it,
+            //   then reference that object in its `input` string.
             var input = targetShapeInput.accept(new DafnyToSmithyShapeVisitor(
                 codegenContext,
                 "input",
@@ -188,21 +180,23 @@ public class ShimFileWriter implements CustomFileWriter {
                 false
             ));
 
-            writer.write("""
-          unwrapped_request: $L = $L
-          try:
-              wrapped_response = asyncio.run(self._impl.$L(unwrapped_request))
-          except ServiceError as e:
-              return Wrappers.Result_Failure(smithy_error_to_dafny_error(e))
-                  
-          """,
-                inputShape.getName(),
-                input,
-                operationSymbol);
+            writer.write(
+              """
+              unwrapped_request: $L = $L
+              try:
+                  wrapped_response = asyncio.run(self._impl.$L(unwrapped_request))
+              except ServiceError as e:
+                  return Wrappers.Result_Failure(smithy_error_to_dafny_error(e))
+                      
+              """,
+              inputShape.getName(),
+              input,
+              codegenContext.symbolProvider().toSymbol(operationShape).getName()
+            );
 
             Shape targetShape = codegenContext.model().expectShape(operationShape.getOutputShape());
             // Generate code that converts the output from Smithy type to the corresponding Dafny type
-            // This has a side effect of writing any transformation code
+            // This has a side effect of possibly writing transformation code at the writer's current position.
             String output = targetShape.accept(new SmithyToDafnyShapeVisitor(
                 codegenContext,
                 "wrapped_response",
@@ -210,12 +204,13 @@ public class ShimFileWriter implements CustomFileWriter {
                 false
             ));
 
-            writer.write("""
-          return Wrappers.Result_Success($L)
-          """,
-                Utils.isUnitShape(outputShape) ? "None" : output);
+            writer.write(
+                """
+                return Wrappers.Result_Success($L)
+                """,
+                Utils.isUnitShape(outputShape) ? "None" : output
+            );
           }
-
       );
     }
   }

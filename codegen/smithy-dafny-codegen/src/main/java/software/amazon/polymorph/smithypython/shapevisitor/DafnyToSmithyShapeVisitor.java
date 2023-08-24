@@ -70,10 +70,6 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
       } else {
         throw new IllegalArgumentException("MUST be a Service or Resource: " + resourceOrService);
       }
-      System.out.println("importting2");
-      System.out.println(SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(
-          resourceOrService.getId().getNamespace(), context
-      ) + importFile);
       writer.addImport(
           SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(
               resourceOrService.getId().getNamespace(), context
@@ -103,16 +99,13 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
 
     @Override
     public String structureShape(StructureShape shape) {
+      // Reference shapes
       if (shape.hasTrait(ReferenceTrait.class)) {
         return referenceStructureShape(shape);
       }
+      // TODO refactor this logic
       if (!isConfigShape) {
-        System.out.println("importting1");
-        System.out.println(SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(
-            shape.getId().getNamespace(),
-            context
-        ) + ".models");
-
+        //
         writer.addImport(
             SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(
                 shape.getId().getNamespace(),
