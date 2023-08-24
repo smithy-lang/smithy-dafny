@@ -79,7 +79,6 @@ public final class StructureGenerator implements Runnable {
      */
     public void renderStructure(Runnable runnable, boolean isInputStructure) {
         Symbol symbol = symbolProvider.toSymbol(shape);
-        System.out.println(shape.getId());
         writer.openBlock("type $L struct {", symbol.getName());
 
         CodegenUtils.SortedMembers sortedMembers = new CodegenUtils.SortedMembers(symbolProvider);

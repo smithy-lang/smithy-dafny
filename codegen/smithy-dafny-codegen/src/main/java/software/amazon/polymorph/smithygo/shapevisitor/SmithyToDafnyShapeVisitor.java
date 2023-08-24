@@ -102,13 +102,58 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
 
     @Override
     public String mapShape(MapShape shape) {
-        return dataSource;
-    }
+        StringBuilder builder = new StringBuilder();
+
+        writer.addImport("dafny");
+
+        MemberShape keyMemberShape = shape.getKey();
+        final Shape keyTargetShape = context.model().expectShape(keyMemberShape.getTarget());
+        MemberShape valueMemberShape = shape.getValue();
+        final Shape valueTargetShape = context.model().expectShape(valueMemberShape.getTarget());
+
+        builder.append("""
+                func () dafny.Map {
+		fieldValue := dafny.NewMapBuilder()
+		for key, val := range %s {
+			fieldValue.Add(%s, %s)
+		}
+		return fieldValue.ToMap()
+	}(),""".formatted(dataSource,
+                keyTargetShape.accept(
+                        new SmithyToDafnyShapeVisitor(context, "key", writer, isConfigShape)
+                )
+        ,valueTargetShape.accept(
+                        new SmithyToDafnyShapeVisitor(context, "val", writer, isConfigShape)
+                )
+        ));
+
+        // Close structure
+        return builder.toString();    }
 
     @Override
     public String listShape(ListShape shape) {
-        return dataSource;
-    }
+        writer.addImport("dafny");
+
+        StringBuilder builder = new StringBuilder();
+
+        MemberShape memberShape = shape.getMember();
+        final Shape targetShape = context.model().expectShape(memberShape.getTarget());
+
+        builder.append("""
+                func () dafny.Sequence {
+		var fieldValue []interface{} = make([]interface{}, 0)
+		for _, val := range %s {
+			element := %s
+			fieldValue = append(fieldValue, element)
+		}
+		return dafny.SeqOf(fieldValue...)
+	}(),""".formatted(dataSource,
+                targetShape.accept(
+                        new SmithyToDafnyShapeVisitor(context, "val", writer, isConfigShape)
+                )));
+
+        // Close structure
+        return builder.toString();    }
 
     @Override
     public String booleanShape(BooleanShape shape) {
