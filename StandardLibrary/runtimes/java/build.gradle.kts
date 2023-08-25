@@ -51,7 +51,7 @@ repositories {
 }
 
 dependencies {
-    implementation("org.dafny:DafnyRuntime:4.1.0")
+    implementation("org.dafny:DafnyRuntime:4.2.0")
     implementation("software.amazon.smithy.dafny:conversion:0.1")
 }
 publishing {
