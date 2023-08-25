@@ -170,12 +170,6 @@ public final class DafnyPythonIntegration implements PythonIntegration {
     public List<ProtocolGenerator> getProtocolGenerators() {
         return Collections.singletonList(new DafnyPythonProtocolGenerator() {
             @Override
-            protected void generateDocumentBodyShapeDeserializers(GenerationContext context,
-                Set<Shape> shapes) {
-                // Do nothing
-            }
-
-            @Override
             public ShapeId getProtocol() {
                 return ShapeId.from("aws.polymorph#localService");
             }

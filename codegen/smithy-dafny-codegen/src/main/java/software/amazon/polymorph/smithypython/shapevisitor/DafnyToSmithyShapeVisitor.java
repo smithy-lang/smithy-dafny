@@ -105,20 +105,19 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
       }
       // TODO refactor this logic
       if (!isConfigShape) {
-        //
         writer.addImport(
-            SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(
-                shape.getId().getNamespace(),
-                context
-            ) + ".models", shape.getId().getName());
+          SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(
+              shape.getId().getNamespace(),
+              context
+          ) + ".models", shape.getId().getName());
       } else {
         // Generate import if this shape is not in the current namespace
         if (!SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(shape.getId().getNamespace()).contains(context.settings().getModuleName())) {
           writer.addImport(
-              SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(
-                  shape.getId().getNamespace(),
-                  context
-              ) + ".config", shape.getId().getName());
+            SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(
+                shape.getId().getNamespace(),
+                context
+            ) + ".config", shape.getId().getName());
         }
       }
 
@@ -137,27 +136,16 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
         // e.g.
         // smithy_structure_name(smithy_structure_member=DafnyStructureMember(...), ...)
         builder.append("%1$s=".formatted(CaseUtils.toSnakeCase(memberName)));
-        if (memberShape.isOptional()) {
-          builder.append("%1$s,\n".formatted(
-              targetShape.accept(
-                  new DafnyToSmithyShapeVisitor(
-                      context,
-                      dataSource + "." + memberName + ".UnwrapOr(None)",
-                      writer,
-                      isConfigShape)
-              )
-          ));
-        } else {
-          builder.append("%1$s,\n".formatted(
-              targetShape.accept(
-                  new DafnyToSmithyShapeVisitor(
-                      context,
-                      dataSource + "." + memberName,
-                      writer,
-                      isConfigShape)
-              )
-          ));
-        }
+        builder.append("%1$s,\n".formatted(
+            targetShape.accept(
+                new DafnyToSmithyShapeVisitor(
+                    context,
+                    dataSource + "." + memberName
+                        + (memberShape.isOptional() ? ".UnwrapOr(None)" : ""),
+                    writer,
+                    isConfigShape)
+            )
+        ));
       }
       // Close structure
       return builder.append(")").toString();

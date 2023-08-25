@@ -276,7 +276,7 @@ public abstract class DafnyPythonProtocolGenerator implements ProtocolGenerator 
     WriterDelegator<PythonWriter> writerDelegator = context.writerDelegator();
     String moduleName = context.settings().getModuleName();
 
-    // Write out deserializers for unmodelled errors
+    // Write out deserializers for unmodeled errors
     writerDelegator.useFileWriter(moduleName + "/deserialize.py", ".", writer -> {
       writer.addStdlibImport("typing", "Any");
       DafnyNameResolver.importGenericDafnyErrorTypeForNamespace(writer, serviceShape.getId().getNamespace());

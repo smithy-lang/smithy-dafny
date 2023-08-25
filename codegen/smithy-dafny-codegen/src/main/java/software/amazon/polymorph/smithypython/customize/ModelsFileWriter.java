@@ -216,9 +216,8 @@ public class ModelsFileWriter implements CustomFileWriter {
 
   @Override
   public void customizeFileForNonServiceOperationShapes(Set<ShapeId> operationShapeIds, GenerationContext codegenContext) {
-    for(ShapeId operationShapeId : operationShapeIds) {
-      System.out.println("customizeFileForNonServiceOperationShapes");
-      System.out.println(operationShapeId);
+    // Write out a Smithy-modelled structure for all operation shapes.
+    for (ShapeId operationShapeId : operationShapeIds) {
       OperationShape operationShape = codegenContext.model().expectShape(operationShapeId, OperationShape.class);
       StructureShape inputShape = codegenContext.model().expectShape(operationShape.getInputShape(), StructureShape.class);
       writeStructureShape(inputShape, codegenContext);
@@ -227,20 +226,31 @@ public class ModelsFileWriter implements CustomFileWriter {
     }
   }
 
+  /**
+   * Writes code modelling the provided StructureShape.
+   * This relies on a fork of Smithy-Python which makes its StructureGenerator public.
+   * Smithy-Python does not generate code to model shapes that are not used
+   *   by the service under generation.
+   * Polymorph takes Smithy-Python's StructureGenerator and executes it for these shapes,
+   *   as it must generate code modelling shapes that are not directly used by the service
+   *   under generation. (Services that rely on this service may still use these operations/shapes.)
+   * @param structureShape
+   * @param codegenContext
+   */
   private void writeStructureShape(StructureShape structureShape, GenerationContext codegenContext) {
     codegenContext.writerDelegator().useShapeWriter(
-        structureShape,
-        writer -> {
-          StructureGenerator generator = new StructureGenerator(
-              codegenContext.model(),
-              codegenContext.settings(),
-              codegenContext.symbolProvider(),
-              writer,
-              structureShape,
-              TopologicalIndex.of(codegenContext.model()).getRecursiveShapes()
-          );
-          generator.run();
-        }
+      structureShape,
+      writer -> {
+        StructureGenerator generator = new StructureGenerator(
+          codegenContext.model(),
+          codegenContext.settings(),
+          codegenContext.symbolProvider(),
+          writer,
+          structureShape,
+          TopologicalIndex.of(codegenContext.model()).getRecursiveShapes()
+        );
+        generator.run();
+      }
     );
   }
 }
