@@ -1,5 +1,6 @@
 package software.amazon.polymorph.smithypython.customize;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -44,10 +45,15 @@ public class ErrorsFileWriter implements CustomFileWriter {
       }
 
       // Generate Smithy shapes that wrap each dependency service's modelled and umodelled errors
-      LocalServiceTrait localServiceTrait = serviceShape.getTrait(LocalServiceTrait.class).get();
-      Set<ShapeId> serviceDependencyShapeIds = localServiceTrait.getDependencies();
-      for (ShapeId serviceDependencyShapeId : serviceDependencyShapeIds) {
-        renderDependencyWrappingError(codegenContext, writer, serviceDependencyShapeId);
+      Optional<LocalServiceTrait> maybeLocalServiceTrait = serviceShape.getTrait(LocalServiceTrait.class);
+      if (maybeLocalServiceTrait.isPresent()) {
+        LocalServiceTrait localServiceTrait = maybeLocalServiceTrait.get();
+        Set<ShapeId> serviceDependencyShapeIds = localServiceTrait.getDependencies();
+        if (serviceDependencyShapeIds != null) {
+          for (ShapeId serviceDependencyShapeId : serviceDependencyShapeIds) {
+            renderDependencyWrappingError(codegenContext, writer, serviceDependencyShapeId);
+          }
+        }
       }
 
       // Generate Smithy shapes for each of this service's umodelled errors

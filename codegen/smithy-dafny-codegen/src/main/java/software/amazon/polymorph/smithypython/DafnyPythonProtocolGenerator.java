@@ -19,6 +19,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -324,34 +325,38 @@ public abstract class DafnyPythonProtocolGenerator implements ProtocolGenerator 
         writer.popState();
       }
 
-      LocalServiceTrait localServiceTrait = serviceShape.getTrait(LocalServiceTrait.class).get();
-      Set<ShapeId> serviceDependencyShapeIds = localServiceTrait.getDependencies();
-      // Write out deserializers for dependency errors
-      for (ShapeId serviceDependencyShapeId : serviceDependencyShapeIds) {
-        writer.addImport(".errors", serviceDependencyShapeId.getName());
+      Optional<LocalServiceTrait> maybeLocalServiceTrait = serviceShape.getTrait(LocalServiceTrait.class);
+      if (maybeLocalServiceTrait.isPresent()) {
+        LocalServiceTrait localServiceTrait = maybeLocalServiceTrait.get();
+        Set<ShapeId> serviceDependencyShapeIds = localServiceTrait.getDependencies();
+        if (serviceDependencyShapeIds != null) {
+          for (ShapeId serviceDependencyShapeId : serviceDependencyShapeIds) {
+            writer.addImport(".errors", serviceDependencyShapeId.getName());
 
-        // Import dependency `_deserialize_error` function so this service can defer to it:
-        // `from dependency.smithygenerated.deserialize import _deserialize_error as dependency_deserialize_error`
-        writer.addImport(
-            // `from dependency.smithygenerated.deserialize`
-            SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(serviceDependencyShapeId.getNamespace())
-                + ".smithygenerated.deserialize",
-            // `import _deserialize_error`
-            "_deserialize_error",
-            // `as dependency_deserialize_error`
-            SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(serviceDependencyShapeId.getNamespace())
-              + "_deserialize_error"
-        );
-        // Generate deserializer for dependency that defers to its `_deserialize_error`
-        writer.write("""
-            if error.is_$L:
-              return $L(await $L(error.$L))
-          """,
-          serviceDependencyShapeId.getName(), serviceDependencyShapeId.getName(),
-          SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(serviceDependencyShapeId.getNamespace())
-              + "_deserialize_error",
-          serviceDependencyShapeId.getName()
-        );
+            // Import dependency `_deserialize_error` function so this service can defer to it:
+            // `from dependency.smithygenerated.deserialize import _deserialize_error as dependency_deserialize_error`
+            writer.addImport(
+              // `from dependency.smithygenerated.deserialize`
+              SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(serviceDependencyShapeId.getNamespace())
+                  + ".smithygenerated.deserialize",
+              // `import _deserialize_error`
+              "_deserialize_error",
+              // `as dependency_deserialize_error`
+              SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(serviceDependencyShapeId.getNamespace())
+                  + "_deserialize_error"
+            );
+            // Generate deserializer for dependency that defers to its `_deserialize_error`
+            writer.write("""
+                  if error.is_$L:
+                    return $L(await $L(error.$L))
+              """,
+              serviceDependencyShapeId.getName(), serviceDependencyShapeId.getName(),
+              SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(serviceDependencyShapeId.getNamespace())
+                  + "_deserialize_error",
+              serviceDependencyShapeId.getName()
+            );
+          }
+        }
       }
     });
   }

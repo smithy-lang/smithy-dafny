@@ -1,5 +1,6 @@
 package software.amazon.polymorph.smithypython.customize;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -90,29 +91,37 @@ public class ShimFileWriter implements CustomFileWriter {
     // This member's value can take on any of the error types modelled in the dependency.
     // Polymorph will generate a similar error structure in the primary service's errors.py file.
     // ex. Smithy type for MyDependency: `MyDependency(ApiError...) = { MyDependency: ... }`
-    LocalServiceTrait localServiceTrait = serviceShape.getTrait(LocalServiceTrait.class).get();
-    Set<ShapeId> serviceDependencyShapeIds = localServiceTrait.getDependencies();
-    for (ShapeId serviceDependencyShapeId : serviceDependencyShapeIds) {
-      writer.addImport(
-          SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(serviceDependencyShapeId.getNamespace())
-              + ".smithygenerated.shim",
-          "smithy_error_to_dafny_error",
-          SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(serviceDependencyShapeId.getNamespace())
-              + "_smithy_error_to_dafny_error"
-      );
-      writer.addImport(".errors", serviceDependencyShapeId.getName());
-      // Generate conversion method that says:
-      // "If this is a dependency-specific error, defer to the dependency's `smithy_error_to_dafny_error`"
-      writer.write("""
-              if isinstance(e, $L):
-                  return $L.Error_$L($L(e.message))
-              """,
-          serviceDependencyShapeId.getName(),
-          DafnyNameResolver.getDafnyTypesModuleNamespaceForShape(serviceShape),
-          serviceDependencyShapeId.getName(),
-          SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(serviceDependencyShapeId.getNamespace())
-              + "_smithy_error_to_dafny_error"
-      );
+    Optional<LocalServiceTrait> maybeLocalServiceTrait = serviceShape.getTrait(LocalServiceTrait.class);
+    if (maybeLocalServiceTrait.isPresent()) {
+      LocalServiceTrait localServiceTrait = maybeLocalServiceTrait.get();
+      Set<ShapeId> serviceDependencyShapeIds = localServiceTrait.getDependencies();
+      if (serviceDependencyShapeIds != null) {
+        for (ShapeId serviceDependencyShapeId : serviceDependencyShapeIds) {
+          writer.addImport(
+              SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(
+                  serviceDependencyShapeId.getNamespace())
+                  + ".smithygenerated.shim",
+              "smithy_error_to_dafny_error",
+              SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(
+                  serviceDependencyShapeId.getNamespace())
+                  + "_smithy_error_to_dafny_error"
+          );
+          writer.addImport(".errors", serviceDependencyShapeId.getName());
+          // Generate conversion method that says:
+          // "If this is a dependency-specific error, defer to the dependency's `smithy_error_to_dafny_error`"
+          writer.write("""
+                  if isinstance(e, $L):
+                      return $L.Error_$L($L(e.message))
+                  """,
+              serviceDependencyShapeId.getName(),
+              DafnyNameResolver.getDafnyTypesModuleNamespaceForShape(serviceShape),
+              serviceDependencyShapeId.getName(),
+              SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(
+                  serviceDependencyShapeId.getNamespace())
+                  + "_smithy_error_to_dafny_error"
+          );
+        }
+      }
     }
 
     // Add service-specific CollectionOfErrors

@@ -62,6 +62,12 @@ public class DafnyProtocolFileWriter implements CustomFileWriter {
 
   private void generateDafnyOperationInputUnionValues(
       Set<ShapeId> inputShapeIds, PythonWriter writer) {
+    // If all operations on the service take no inputs,
+    // or if the service has no operations,
+    // write `None`
+    if (inputShapeIds.size() == 0) {
+      writer.write("None");
+    }
     for (ShapeId inputShapeId : inputShapeIds) {
       DafnyNameResolver.importDafnyTypeForShape(writer, inputShapeId);
       writer.write("$L,", DafnyNameResolver.getDafnyTypeForShape(inputShapeId));
