@@ -28,9 +28,25 @@ public class DafnyNameResolver {
     public static String getDafnyType(final GoSettings settings, final Symbol symbol) {
         return DafnyNameResolver.dafnyTypesNamespace(settings).concat(DOT).concat(symbol.getName());
     }
+    public static String getDafnySubErrorType(final GoSettings settings, final Symbol symbol) {
+        return DafnyNameResolver.getDafnyBaseErrorType(settings).concat("_").concat(symbol.getName());
+    }
+
+    public static String getDafnyBaseErrorType(final GoSettings settings) {
+        return DafnyNameResolver.dafnyTypesNamespace(settings).concat(DOT).concat("Error");
+    }
+
 
     public static String getDafnyCompanionType(final GoSettings settings, final Symbol symbol) {
         return DafnyNameResolver.dafnyTypesNamespace(settings).concat(DOT).concat("Companion_%s_".formatted(symbol.getName()));
+    }
+
+    public static String getDafnyErrorCompanion(final GoSettings settings) {
+        return DafnyNameResolver.dafnyTypesNamespace(settings).concat(DOT).concat("Companion_Error_");
+    }
+
+    public static String getDafnyErrorCompanionCreate(final GoSettings settings, final Symbol symbol) {
+        return DafnyNameResolver.getDafnyErrorCompanion(settings).concat(DOT).concat("Create_%s_".formatted(symbol.getName()));
     }
 
     public static String getDafnyCompanionStructType(final GoSettings settings, final Symbol symbol) {

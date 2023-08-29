@@ -108,7 +108,6 @@ public final class StructureGenerator implements Runnable {
      */
     private void renderErrorStructure() {
             Symbol structureSymbol = symbolProvider.toSymbol(shape);
-            writer.addUseImports(SmithyGoDependency.SMITHY);
             writer.addUseImports(SmithyGoDependency.FMT);
             ErrorTrait errorTrait = shape.expectTrait(ErrorTrait.class);
 
@@ -130,25 +129,8 @@ public final class StructureGenerator implements Runnable {
             }).write("");
 
             // write the Error method to satisfy the standard error interface
-            writer.openBlock("func (e *$L) Error() string {", "}", structureSymbol.getName(), () -> {
-                writer.write("return fmt.Sprintf(\"%s: %s\", e.ErrorCode(), e.ErrorMessage())");
+            writer.openBlock("func (e $L) Error() string {", "}", structureSymbol.getName(), () -> {
+                writer.write("return fmt.Sprintf(\"%s: %s\", e.ErrorCodeOverride, e.Message)");
             });
-
-            // Write out methods to satisfy the APIError interface. All but the message are known ahead of time,
-            // and for those we just encode the information in the method itself.
-            writer.openBlock("func (e *$L) ErrorMessage() string {", "}", structureSymbol.getName(), () -> {
-                writer.openBlock("if e.Message == nil {", "}", () -> {
-                    writer.write("return \"\"");
-                });
-                writer.write("return *e.Message");
-            });
-
-            String fault = "smithy.FaultUnknown";
-            if (errorTrait.isClientError()) {
-                fault = "smithy.FaultClient";
-            } else if (errorTrait.isServerError()) {
-                fault = "smithy.FaultServer";
-            }
-            writer.write("func (e *$L) ErrorFault() smithy.ErrorFault { return $L }", structureSymbol.getName(), fault);
     }
 }

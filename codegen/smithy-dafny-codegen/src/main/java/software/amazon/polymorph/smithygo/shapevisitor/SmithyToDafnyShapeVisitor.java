@@ -31,6 +31,7 @@ import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.TimestampShape;
 import software.amazon.smithy.model.traits.EnumTrait;
+import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.utils.CaseUtils;
 import software.amazon.smithy.utils.StringUtils;
 
@@ -78,7 +79,13 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
         final var builder = new StringBuilder();
         writer.addImport("Wrappers");
         writer.addImport(DafnyNameResolver.dafnyTypesNamespace(context.settings()));
-        builder.append("%1$s(".formatted(DafnyNameResolver.getDafnyCompanionTypeCreate(context.settings(), context.symbolProvider().toSymbol(shape))));
+        String companionStruct;
+        if (shape.hasTrait(ErrorTrait.class)) {
+            companionStruct = DafnyNameResolver.getDafnyErrorCompanionCreate(context.settings(), context.symbolProvider().toSymbol(shape));
+        } else {
+            companionStruct = DafnyNameResolver.getDafnyCompanionTypeCreate(context.settings(), context.symbolProvider().toSymbol(shape));
+        }
+        builder.append("%1$s(".formatted(companionStruct));
         String fieldSeparator = "";
         for (final var memberShapeEntry : shape.getAllMembers().entrySet()) {
             builder.append(fieldSeparator);

@@ -13,6 +13,9 @@ import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
+import software.amazon.smithy.model.traits.ErrorTrait;
+
+import java.util.function.Function;
 
 
 public class LocalServiceGenerator implements Runnable {
@@ -57,8 +60,11 @@ public class LocalServiceGenerator implements Runnable {
                                                                  
                              func NewClient(clientConfig $T) (*$T, error) {
                                  var dafnyConfig = $L(clientConfig)
-                                 var response = $L(dafnyConfig)
-                                 var dafnyClient = response.Extract().(*$L)
+                                 var dafny_response = $L(dafnyConfig)
+                                 if (dafny_response.Is_Failure()) {
+                                      panic("Client construction failed. This should never happen")
+                                 }
+                                 var dafnyClient = dafny_response.Extract().(*$L)
                                  client := &$T { dafnyClient }
                                  return client, nil
                              }
@@ -71,10 +77,21 @@ public class LocalServiceGenerator implements Runnable {
             final Shape outputShape = model.expectShape(operationShape.getOutputShape());
             final String inputType = model.expectShape(model.expectShape(operation).asOperationShape().get().getInputShape()).toShapeId().getName();
             final String outputType = model.expectShape(model.expectShape(operation).asOperationShape().get().getOutputShape()).toShapeId().getName();
+            final Function<String, String> checkErrorClass = (String x) -> {
+                return """
+                                               if err.Is_$L() {
+                                               return nil, $L_Output_FromDafny(err.Get().($L.Error_$L))
+                                           }
+                        """.formatted(x, x, x);
+            };
             writer.write("""
                                    func (client *$T) $L(ctx context.Context, params types.$L) (*types.$L, error) {
                                        var dafny_request $L = $L(params)
                                        var dafny_response = client.dafnyClient.$L(dafny_request)
+                                       if (dafny_response.Is_Failure()) {
+                                           err := dafny_response.Dtor_error().($L.Error);
+                                           ${C|}
+                                       }
                                        var native_response = $L(dafny_response.Extract().($L))
                                        return &native_response, nil
                                    }
@@ -85,6 +102,17 @@ public class LocalServiceGenerator implements Runnable {
                          DafnyNameResolver.getDafnyType(context.settings(), symbolProvider.toSymbol(inputShape)),
                          DafnyNameResolver.getInputToDafnyMethodName(context, operationShape),
                          operationShape.getId().getName(),
+                         DafnyNameResolver.dafnyTypesNamespace(context.settings()),
+                         writer.consumer( w -> {
+                             for (var errorShape :
+                                     model.getShapesWithTrait(ErrorTrait.class)) {
+                                 w.write("""
+                                                                             if err.Is_$L() {
+                                                                             return nil, $L_Output_FromDafny(err)
+                                                                         }
+                                                      """, errorShape.toShapeId().getName(), errorShape.toShapeId().getName());
+                             }
+                         }),
                          DafnyNameResolver.getOutputFromDafnyMethodName(context, operationShape), DafnyNameResolver.getDafnyType(context.settings(), symbolProvider.toSymbol(outputShape)));
         });
     }
@@ -99,6 +127,7 @@ public class LocalServiceGenerator implements Runnable {
             writer.addImport(DafnyNameResolver.dafnyTypesNamespace(context.settings()));
             writer.addImport("Wrappers");
             writer.addImport("context");
+            writer.addImport("types");
             writer.addImport(DafnyNameResolver.serviceNamespace(service));
 
             writer.write("""
@@ -114,14 +143,17 @@ public class LocalServiceGenerator implements Runnable {
                                                    
                                  func Wrapped$L(inputConfig $L) Wrappers.Result {
                                      var nativeConfig = $L.$L(inputConfig)
-                                     var nativeClient, _ = $L.NewClient(nativeConfig)
+                                     var nativeClient, nativeError = $L.NewClient(nativeConfig)
+                                     if nativeError != nil {
+                                        return Wrappers.Companion_Result_.Create_Failure_($L.Companion_Error_.Create_Opaque_(nativeError))
+                                     }
                                      return Wrappers.Companion_Result_.Create_Success_(&Shim{client: nativeClient})
                                  }
                                  """,
                          serviceTrait.getSdkId(), DafnyNameResolver.getDafnyType(context.settings(), configSymbol),
                          DafnyNameResolver.serviceNamespace(service),
                          DafnyNameResolver.getOutputFromDafnyMethodName(context, serviceTrait.getConfigId()),
-                         DafnyNameResolver.serviceNamespace(service)
+                         DafnyNameResolver.serviceNamespace(service), DafnyNameResolver.dafnyTypesNamespace(context.settings())
             );
 
             service.getAllOperations().forEach(operation -> {
@@ -133,7 +165,10 @@ public class LocalServiceGenerator implements Runnable {
                 writer.write("""
                                        func (shim *Shim) $L(input $L) Wrappers.Result {
                                            var native_request = $L.$L(input)
-                                           var native_response, _ = shim.client.$L(context.Background(), native_request)
+                                           var native_response, native_error = shim.client.$L(context.Background(), native_request)
+                                           if native_error != nil {
+                                               return Wrappers.Companion_Result_.Create_Failure_(simpleerrors.SimpleErrorsException_Input_ToDafny(native_error.(types.SimpleErrorsException)))
+                                           }
                                            var dafny_response = $L.$L(*native_response)
                                            return Wrappers.Companion_Result_.Create_Success_(dafny_response)
                                        }
