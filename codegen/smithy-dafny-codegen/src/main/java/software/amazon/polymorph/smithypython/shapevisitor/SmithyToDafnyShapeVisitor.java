@@ -27,6 +27,7 @@ import software.amazon.smithy.model.shapes.ShortShape;
 import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.TimestampShape;
+import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonWriter;
 import software.amazon.smithy.utils.CaseUtils;
@@ -290,4 +291,70 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
     public String timestampShape(TimestampShape shape) {
       return getDefault(shape);
     }
+
+  @Override
+  public String unionShape(UnionShape shape) {
+
+    var memberShapeEntrySetIterator = shape.getAllMembers().entrySet().iterator();
+    if (memberShapeEntrySetIterator.hasNext()) {
+
+      var entry = memberShapeEntrySetIterator.next();
+      var key = entry.getKey();
+      var value = entry.getValue();
+
+      System.out.println(key);
+      System.out.println(value);
+
+      writer.write("""
+                if isinstance($L, $L):
+                    $L_union_value = $L($L.$L)
+                """,
+          dataSource,
+          shape.getId().getName() + value.getMemberName(),
+          shape.getId().getName(),
+          // TODO: DafnyNameResolver.typeforshape
+          shape.getId().getName() + "_" + value.getMemberName(),
+          dataSource,
+          "value"
+      );
+
+      writer.addStdlibImport(
+          DafnyNameResolver.getDafnyTypesModuleNamespaceForShape(shape),
+          shape.getId().getName() + "_" + value.getMemberName()
+      );
+      writer.addImport(".models", shape.getId().getName() + value.getMemberName());
+
+    }
+    while (memberShapeEntrySetIterator.hasNext()) {
+      var entry = memberShapeEntrySetIterator.next();
+      var value = entry.getValue();
+
+      writer.write("""
+                elif isinstance($L, $L):
+                    $L_union_value = $L($L.$L)
+                """,
+          dataSource,
+          shape.getId().getName() + value.getMemberName(),
+          shape.getId().getName(),
+          // TODO: DafnyNameResolver.typeforshape
+          shape.getId().getName() + "_" + value.getMemberName(),
+          dataSource,
+          "value"
+      );
+      writer.addStdlibImport(
+          DafnyNameResolver.getDafnyTypesModuleNamespaceForShape(shape),
+          shape.getId().getName() + "_" + value.getMemberName()
+      );
+      writer.addImport(".models", shape.getId().getName() + value.getMemberName());
+
+
+    }
+    writer.write("""
+          else:
+              raise Exception("TODO: Add exception message")
+          """
+    );
+
+    return "%1$s_union_value".formatted(shape.getId().getName());
+  }
 }
