@@ -34,6 +34,16 @@ class GetStringEvent extends Event {
     this.input := input;
     this.output := output;
   }
+  static predicate WasNthLastWith(history: History, n: nat, p: GetStringEvent -> bool) 
+    reads history
+  {
+    && n < |history.events| 
+    && var e: Event := history.events[|history.events| - 1 - n];
+    && e is GetStringEvent
+    && var e' := e as GetStringEvent;
+    && p(e')
+  }
+
 }
 class GetStringSingleValueEvent extends Event {
   const input: GetStringInput
@@ -45,6 +55,15 @@ class GetStringSingleValueEvent extends Event {
     this.input := input;
     this.output := output;
   }
+  static predicate WasNthLastWith(history: History, n: nat, p: GetStringSingleValueEvent -> bool) 
+    reads history
+  {
+    && n < |history.events| 
+    && var e: Event := history.events[|history.events| - 1 - n];
+    && e is GetStringSingleValueEvent
+    && var e' := e as GetStringSingleValueEvent;
+    && p(e')
+  }
 }
 class GetStringUTF8Event extends Event {
   const input: GetStringInput
@@ -55,6 +74,15 @@ class GetStringUTF8Event extends Event {
   {
     this.input := input;
     this.output := output;
+  }
+  static predicate WasNthLastWith(history: History, n: nat, p: GetStringUTF8Event -> bool) 
+    reads history
+  {
+    && n < |history.events| 
+    && var e: Event := history.events[|history.events| - 1 - n];
+    && e is GetStringUTF8Event
+    && var e' := e as GetStringUTF8Event;
+    && p(e')
   }
 }
 
