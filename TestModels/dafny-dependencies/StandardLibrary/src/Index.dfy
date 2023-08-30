@@ -4,3 +4,4 @@
 include "./StandardLibrary.dfy"
 include "./UInt.dfy"
 include "./UTF8.dfy"
+include "./History.dfy"
