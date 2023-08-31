@@ -306,7 +306,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
 
   protected String referenceServiceShape(ServiceShape serviceShape) {
     DafnyNameResolver.importDafnyTypeForServiceShape(writer, serviceShape);
-    writer.addStdlibImport(SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(
+    writer.addStdlibImport(SmithyNameResolver.getSmithyGeneratedConfigFilepathForSmithyNamespace(
         serviceShape.getId().getNamespace(), context));
     writer.addStdlibImport(DafnyNameResolver.getDafnyIndexModuleNamespaceForShape(serviceShape));
     // `my_module_client = my_module_internaldafny.MyModuleClient()`
@@ -334,17 +334,22 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
     writer.addStdlibImport(resourceShape.getId().getName(),
         resourceShape.getId().getName(),
         "Dafny" + resourceShape.getId().getName());
-    writer.addStdlibImport(SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(
-        resourceShape.getId().getNamespace(), context));
+//    writer.addStdlibImport(SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(
+//        resourceShape.getId().getNamespace(), context));
 
     // `my_module_resource = DafnyMyModuleResource()`
     // TODO: Does this need the config..?
-    writer.write("$L_resource = $L()",
+//    writer.write("$L_resource = $L()",
+//        SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(resourceShape.getId().getNamespace()),
+//        "Dafny" + resourceShape.getId().getName()
+//    );
+    writer.write("$L_resource = $L._impl",
         SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(resourceShape.getId().getNamespace()),
-        "Dafny" + resourceShape.getId().getName()
+        dataSource
     );
     // Use result of resource conversion inline
     return "%1$s_resource".formatted(SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(
         resourceShape.getId().getNamespace()));
+//    return dataSource;
   }
 }
