@@ -472,7 +472,7 @@ module AwsCryptographyMaterialProvidersOperations refines AbstractAwsCryptograph
   function method CmpError(s : string) : Error
   {
     Types.AwsCryptographicMaterialProvidersException(
-      message := "A publicKey or a kmsClient is required")
+      message := s)
   }
   predicate CreateRequiredEncryptionContextCMMEnsuresPublicly(input: CreateRequiredEncryptionContextCMMInput, output: Result<ICryptographicMaterialsManager, Error>)
   {true}
