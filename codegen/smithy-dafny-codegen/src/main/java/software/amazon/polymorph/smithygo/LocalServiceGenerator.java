@@ -5,6 +5,8 @@ package software.amazon.polymorph.smithygo;
 
 import software.amazon.polymorph.smithygo.codegen.GenerationContext;
 import software.amazon.polymorph.smithygo.codegen.GoWriter;
+import software.amazon.polymorph.smithygo.codegen.ImportDeclarations;
+import software.amazon.polymorph.smithygo.codegen.SmithyGoDependency;
 import software.amazon.polymorph.smithygo.codegen.StructureGenerator;
 import software.amazon.polymorph.smithygo.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithygo.shapevisitor.DafnyToSmithyShapeVisitor;
@@ -35,6 +37,7 @@ public class LocalServiceGenerator implements Runnable {
     private void generateService(GoWriter writer) {
         generateClient(writer);
         generateShim();
+        generateUnmodelledErrors(context);
     }
     void generateClient(GoWriter writer) {
         // Generate each operation for the service. We do this here instead of via the operation visitor method to
@@ -91,6 +94,12 @@ public class LocalServiceGenerator implements Runnable {
                                        if (dafny_response.Is_Failure()) {
                                            err := dafny_response.Dtor_error().($L.Error);
                                            ${C|}
+                                           if err.Is_CollectionOfErrors() {
+                                               return nil, CollectionOfErrors_Output_FromDafny(err)
+                                           }
+                                           if err.Is_Opaque() {
+                                               return nil, OpaqueError_Output_FromDafny(err)
+                                           }
                                        }
                                        var native_response = $L(dafny_response.Extract().($L))
                                        return &native_response, nil
@@ -167,7 +176,13 @@ public class LocalServiceGenerator implements Runnable {
                                            var native_request = $L.$L(input)
                                            var native_response, native_error = shim.client.$L(context.Background(), native_request)
                                            if native_error != nil {
-                                               return Wrappers.Companion_Result_.Create_Failure_(simpleerrors.SimpleErrorsException_Input_ToDafny(native_error.(types.SimpleErrorsException)))
+                                               switch native_error.(type) {
+                                                ${C|}
+                                                case types.CollectionOfErrors:
+                                                    return Wrappers.Companion_Result_.Create_Failure_($L.CollectionOfErrors_Input_ToDafny(native_error.(types.CollectionOfErrors)))
+                                                default:
+                                                    return Wrappers.Companion_Result_.Create_Failure_($L.OpaqueError_Input_ToDafny(native_error.(types.OpaqueError)))
+                                                }
                                            }
                                            var dafny_response = $L.$L(*native_response)
                                            return Wrappers.Companion_Result_.Create_Success_(dafny_response)
@@ -178,9 +193,48 @@ public class LocalServiceGenerator implements Runnable {
                              DafnyNameResolver.serviceNamespace(service),
                              DafnyNameResolver.getInputFromDafnyMethodName(context, operationShape),
                              operationShape.getId().getName(),
+                             writer.consumer(w -> c(w)),
+                             DafnyNameResolver.serviceNamespace(service),
+                             DafnyNameResolver.serviceNamespace(service),
                              DafnyNameResolver.serviceNamespace(service),
                              DafnyNameResolver.getOutputToDafnyMethodName(context, operationShape));
             });
+        });
+    }
+
+    void c(GoWriter writer) {
+        for (Shape error:
+             context.model().getShapesWithTrait(ErrorTrait.class)) {
+            writer.write("""
+                                 case types.$L:
+                                      return Wrappers.Companion_Result_.Create_Failure_($L.$L_Input_ToDafny(native_error.(types.$L)))
+                                           
+                                                
+                                 """, context.symbolProvider().toSymbol(error).getName(), DafnyNameResolver.serviceNamespace(context.settings().getService(context.model())), context.symbolProvider().toSymbol(error).getName(), context.symbolProvider().toSymbol(error).getName());
+        }
+    }
+
+    void generateUnmodelledErrors(GenerationContext context) {
+        context.writerDelegator().useFileWriter("types/unmodelled_errors.go", "types", writer -> {
+            writer.addUseImports(SmithyGoDependency.FMT);
+            writer.write("""
+                                 type CollectionOfErrors struct {
+                                     ListOfErrors []error
+                                     Message string
+                                 }
+                                 
+                                 func (e CollectionOfErrors) Error() string {
+                                 	return fmt.Sprintf("message: %s\\n err %v", e.Message, e.ListOfErrors)
+                                 }
+                                 
+                                 type OpaqueError struct {
+                                    ErrObject interface{}
+                                 }
+                                 
+                                 func (e OpaqueError) Error() string {
+                                    return fmt.Sprintf("message: %v", e.ErrObject )
+                                 }
+                                 """);
         });
     }
 }

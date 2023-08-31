@@ -11,9 +11,13 @@ import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.smithy.model.knowledge.TopDownIndex;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
+import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.ErrorTrait;
+
+import java.util.Collections;
+import java.util.Set;
 
 import static software.amazon.polymorph.smithygo.nameresolver.Constants.BLANK;
 import static software.amazon.polymorph.smithygo.nameresolver.Constants.DOT;
@@ -256,6 +260,34 @@ public class DafnyTypeConversionProtocol implements ProtocolGenerator {
                              }));
             });
         }
+
+            context.writerDelegator().useFileWriter(TO_DAFNY, writer -> {
+                writer.write("""
+func CollectionOfErrors_Input_ToDafny(nativeInput types.CollectionOfErrors)(simpleerrorsinternaldafnytypes.Error) {
+	var e []interface{}
+	for _, i2 := range nativeInput.ListOfErrors {
+	    switch i2.(type) {
+            ${C|}
+            case types.CollectionOfErrors:
+                e = append(e, CollectionOfErrors_Input_ToDafny(i2.(types.CollectionOfErrors)))
+            default:
+                e = append(e, OpaqueError_Input_ToDafny(i2.(types.OpaqueError)))
+            }
+	}
+	return simpleerrorsinternaldafnytypes.Companion_Error_.Create_CollectionOfErrors_(dafny.SeqOf(e...), dafny.SeqOfChars([]dafny.Char(nativeInput.Message)...))
+}
+func OpaqueError_Input_ToDafny(nativeInput types.OpaqueError)($L.Error) {
+	return $L.Companion_Error_.Create_Opaque_(nativeInput.ErrObject)
+}""", writer.consumer(w -> {
+                    for (Shape error:
+                            context.model().getShapesWithTrait(ErrorTrait.class)) {
+                        w.write("""
+                                 case types.$L:
+                                      e = append(e, $L_Input_ToDafny(i2.(types.$L)))
+                                 """, context.symbolProvider().toSymbol(error).getName(), context.symbolProvider().toSymbol(error).getName(), context.symbolProvider().toSymbol(error).getName());
+                    }
+                }), DafnyNameResolver.dafnyTypesNamespace(context.settings()), DafnyNameResolver.dafnyTypesNamespace(context.settings()));
+            });
     }
 
     private void generateConfigDeserializer(final GenerationContext context) {
@@ -286,7 +318,6 @@ public class DafnyTypeConversionProtocol implements ProtocolGenerator {
     private void generateErrorDeserializer(final GenerationContext context) {
 
         final var errorShapes = context.model().getShapesWithTrait(ErrorTrait.class);
-
         for (var errorShape :
                 errorShapes) {
             context.writerDelegator().useFileWriter(FROM_DAFNY, writer -> {
@@ -308,5 +339,56 @@ public class DafnyTypeConversionProtocol implements ProtocolGenerator {
                              }));
             });
         }
+
+        context.writerDelegator().useFileWriter(FROM_DAFNY, writer -> {
+            writer.write("""
+func CollectionOfErrors_Output_FromDafny(dafnyOutput simpleerrorsinternaldafnytypes.Error)(types.CollectionOfErrors) {
+    listOfErrors := dafnyOutput.Dtor_list()
+    message := dafnyOutput.Dtor_message()
+    t := types.CollectionOfErrors {}
+    for i := dafny.Iterate(listOfErrors) ; ; {
+        val, ok := i()
+        if !ok {
+            break;
+        }
+        err := val.(simpleerrorsinternaldafnytypes.Error)
+        ${C|}
+                                           if err.Is_CollectionOfErrors() {
+            t.ListOfErrors = append(t.ListOfErrors, CollectionOfErrors_Output_FromDafny(err))
+                                           }
+                                           if err.Is_Opaque() {
+            t.ListOfErrors = append(t.ListOfErrors, OpaqueError_Output_FromDafny(err))
+                                           }
+    }
+    t.Message = *func() (*string) {
+        var s string
+        for i := dafny.Iterate(message) ; ; {
+            val, ok := i()
+            if !ok {
+                return &[]string{s}[0]
+            } else {
+                s = s + string(val.(dafny.Char))
+            }
+        }
+    }()
+    return t
+}
+func OpaqueError_Output_FromDafny(dafnyOutput $L.Error)(types.OpaqueError) {
+    return types.OpaqueError {
+        ErrObject: dafnyOutput.Dtor_obj(),
+    }
+}""", writer.consumer( w -> {
+                for (var errorShape :
+                        context.model().getShapesWithTrait(ErrorTrait.class)) {
+                    w.write("""
+                                                                             if err.Is_$L() {
+                                                                              t.ListOfErrors = append(t.ListOfErrors,  $L_Output_FromDafny(err))
+                                                                         }
+                                                      """, errorShape.toShapeId().getName(), errorShape.toShapeId().getName());
+                }
+            }), DafnyNameResolver.dafnyTypesNamespace(context.settings()));
+
+
+            });
     }
 }
