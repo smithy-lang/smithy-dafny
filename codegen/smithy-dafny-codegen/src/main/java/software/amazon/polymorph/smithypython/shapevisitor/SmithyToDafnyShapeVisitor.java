@@ -21,7 +21,6 @@ import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.ResourceShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
-import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.ShapeVisitor;
 import software.amazon.smithy.model.shapes.ShortShape;
 import software.amazon.smithy.model.shapes.StringShape;
@@ -59,52 +58,6 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
       this.writer = writer;
       this.isConfigShape = isConfigShape;
     }
-
-  protected String referenceStructureShape(StructureShape shape) {
-    ReferenceTrait referenceTrait = shape.expectTrait(ReferenceTrait.class);
-    Shape resourceOrService = context.model().expectShape(referenceTrait.getReferentId());
-
-    if (resourceOrService.asResourceShape().isPresent()) {
-      ResourceShape resourceShape = resourceOrService.asResourceShape().get();
-      DafnyNameResolver.importDafnyTypeForResourceShape(writer, resourceShape);
-      writer.addStdlibImport(DafnyNameResolver.getDafnyIndexModuleNamespaceForShape(resourceShape));
-      writer.addStdlibImport(resourceShape.getId().getName(),
-          resourceShape.getId().getName(),
-          "Dafny" + resourceShape.getId().getName());
-      writer.addStdlibImport(SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(resourceShape.getId().getNamespace(), context));
-      writer.write("$L_resource = $L()",
-          SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(resourceShape.getId().getNamespace()),
-//          "Dafny" + resourceShape.getId().getName(),
-          "Dafny" + resourceShape.getId().getName()
-      );
-//      writer.write("$L_resource.ctor__($L.smithy_config_to_dafny_config($L._config))",
-//          SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(resourceShape.getId().getNamespace()),
-//          SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(resourceShape.getId().getNamespace())
-//              + ".smithygenerated.config",
-//          dataSource
-//      );
-      return "%1$s_resource".formatted(SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(resourceShape.getId().getNamespace()));
-    } else if (resourceOrService.asServiceShape().isPresent()) {
-      ServiceShape serviceShape = resourceOrService.asServiceShape().get();
-      DafnyNameResolver.importDafnyTypeForServiceShape(writer, serviceShape);
-      writer.addStdlibImport(SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(serviceShape.getId().getNamespace(), context));
-      writer.addStdlibImport(DafnyNameResolver.getDafnyIndexModuleNamespaceForShape(serviceShape));
-      writer.write("$L_client = $L.$LClient()",
-          SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(serviceShape.getId().getNamespace()),
-          DafnyNameResolver.getDafnyIndexModuleNamespaceForShape(serviceShape),
-          serviceShape.getId().getName()
-      );
-      writer.write("$L_client.ctor__($L.smithy_config_to_dafny_config($L._config))",
-          SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(serviceShape.getId().getNamespace()),
-          SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(serviceShape.getId().getNamespace())
-              + ".smithygenerated.config",
-          dataSource
-          );
-      return "%1$s_client".formatted(SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(serviceShape.getId().getNamespace()));
-    }
-
-    throw new UnsupportedOperationException("Unknown referenceStructureShape type: " + shape);
-  }
 
     @Override
     protected String getDefault(Shape shape) {
@@ -293,68 +246,105 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
     }
 
   @Override
-  public String unionShape(UnionShape shape) {
+  public String unionShape(UnionShape unionShape) {
+    // Union conversion cannot be done inline,
+    // so PythonWriter writes a conversion block above the inline statement
+    writer.writeComment("Convert %1$s".formatted(
+        unionShape.getId().getName()
+    ));
 
-    var memberShapeEntrySetIterator = shape.getAllMembers().entrySet().iterator();
-    if (memberShapeEntrySetIterator.hasNext()) {
-
-      var entry = memberShapeEntrySetIterator.next();
-      var key = entry.getKey();
-      var value = entry.getValue();
-
-      System.out.println(key);
-      System.out.println(value);
-
+    // First union value opens a new `if` block; others do not need to
+    boolean shouldOpenNewIfBlock = true;
+    for (MemberShape memberShape : unionShape.getAllMembers().values()) {
       writer.write("""
-                if isinstance($L, $L):
-                    $L_union_value = $L($L.$L)
-                """,
+                $L isinstance($L, $L):
+                    $L_union_value = $L($L.$L)""",
+          // If we need a new `if` block, open one; otherwise, expand on existing one with `elif`
+          shouldOpenNewIfBlock ? "if" : "elif",
           dataSource,
-          shape.getId().getName() + value.getMemberName(),
-          shape.getId().getName(),
-          // TODO: DafnyNameResolver.typeforshape
-          shape.getId().getName() + "_" + value.getMemberName(),
+          SmithyNameResolver.getSmithyGeneratedTypeForUnion(unionShape, memberShape),
+          unionShape.getId().getName(),
+          DafnyNameResolver.getDafnyTypeForUnion(unionShape, memberShape),
           dataSource,
           "value"
       );
+      shouldOpenNewIfBlock = false;
 
-      writer.addStdlibImport(
-          DafnyNameResolver.getDafnyTypesModuleNamespaceForShape(shape),
-          shape.getId().getName() + "_" + value.getMemberName()
-      );
-      writer.addImport(".models", shape.getId().getName() + value.getMemberName());
-
+      DafnyNameResolver.importDafnyTypeForUnion(writer, unionShape, memberShape);
+      SmithyNameResolver.importSmithyGeneratedTypeForUnion(writer, context, unionShape, memberShape);
     }
-    while (memberShapeEntrySetIterator.hasNext()) {
-      var entry = memberShapeEntrySetIterator.next();
-      var value = entry.getValue();
 
-      writer.write("""
-                elif isinstance($L, $L):
-                    $L_union_value = $L($L.$L)
-                """,
-          dataSource,
-          shape.getId().getName() + value.getMemberName(),
-          shape.getId().getName(),
-          // TODO: DafnyNameResolver.typeforshape
-          shape.getId().getName() + "_" + value.getMemberName(),
-          dataSource,
-          "value"
-      );
-      writer.addStdlibImport(
-          DafnyNameResolver.getDafnyTypesModuleNamespaceForShape(shape),
-          shape.getId().getName() + "_" + value.getMemberName()
-      );
-      writer.addImport(".models", shape.getId().getName() + value.getMemberName());
-
-
-    }
+    // Handle no member in union.
     writer.write("""
           else:
-              raise Exception("TODO: Add exception message")
-          """
+              raise Exception("No recognized union value in union type: " + $L)
+          """,
+        dataSource
     );
 
-    return "%1$s_union_value".formatted(shape.getId().getName());
+    // Use the result of the union conversion inline
+    return "%1$s_union_value".formatted(unionShape.getId().getName());
+  }
+
+  /**
+   * Called from the StructureShape converter when the StructureShape has a Polymorph Reference trait.
+   * @param shape
+   * @return
+   */
+  protected String referenceStructureShape(StructureShape shape) {
+    ReferenceTrait referenceTrait = shape.expectTrait(ReferenceTrait.class);
+    Shape resourceOrService = context.model().expectShape(referenceTrait.getReferentId());
+
+    if (resourceOrService.isResourceShape()) {
+      return referenceResourceShape(resourceOrService.asResourceShape().get());
+    } else if (resourceOrService.isServiceShape()) {
+      return referenceServiceShape(resourceOrService.asServiceShape().get());
+    } else {
+      throw new UnsupportedOperationException("Unknown referenceStructureShape type: " + shape);
+    }
+  }
+
+  protected String referenceServiceShape(ServiceShape serviceShape) {
+    DafnyNameResolver.importDafnyTypeForServiceShape(writer, serviceShape);
+    writer.addStdlibImport(SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(
+        serviceShape.getId().getNamespace(), context));
+    writer.addStdlibImport(DafnyNameResolver.getDafnyIndexModuleNamespaceForShape(serviceShape));
+    // `my_module_client = my_module_internaldafny.MyModuleClient()`
+    writer.write("$L_client = $L.$L()",
+        SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(serviceShape.getId().getNamespace()),
+        DafnyNameResolver.getDafnyIndexModuleNamespaceForShape(serviceShape),
+        DafnyNameResolver.getDafnyClientTypeForServiceShape(serviceShape)
+    );
+    // `my_module_client.ctor__(my_module.smithygenerated.config.smithy_config_to_dafny_config(input._config))`
+    writer.write("$L_client.ctor__($L.smithy_config_to_dafny_config($L._config))",
+        SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(serviceShape.getId().getNamespace()),
+        SmithyNameResolver.getSmithyGeneratedConfigFilepathForSmithyNamespace(
+            serviceShape.getId().getNamespace(), context),
+        dataSource
+    );
+    return "%1$s_client".formatted(SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(
+        serviceShape.getId().getNamespace()));
+  }
+
+  protected String referenceResourceShape(ResourceShape resourceShape) {
+    DafnyNameResolver.importDafnyTypeForResourceShape(writer, resourceShape);
+
+    // Resource-specific imports
+    writer.addStdlibImport(DafnyNameResolver.getDafnyIndexModuleNamespaceForShape(resourceShape));
+    writer.addStdlibImport(resourceShape.getId().getName(),
+        resourceShape.getId().getName(),
+        "Dafny" + resourceShape.getId().getName());
+    writer.addStdlibImport(SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(
+        resourceShape.getId().getNamespace(), context));
+
+    // `my_module_resource = DafnyMyModuleResource()`
+    // TODO: Does this need the config..?
+    writer.write("$L_resource = $L()",
+        SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(resourceShape.getId().getNamespace()),
+        "Dafny" + resourceShape.getId().getName()
+    );
+    // Use result of resource conversion inline
+    return "%1$s_resource".formatted(SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(
+        resourceShape.getId().getNamespace()));
   }
 }

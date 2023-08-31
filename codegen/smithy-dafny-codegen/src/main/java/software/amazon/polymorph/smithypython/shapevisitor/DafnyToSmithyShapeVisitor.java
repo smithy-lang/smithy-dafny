@@ -1,8 +1,6 @@
 package software.amazon.polymorph.smithypython.shapevisitor;
 
-import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import software.amazon.polymorph.smithypython.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithypython.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.traits.ReferenceTrait;
@@ -20,6 +18,8 @@ import software.amazon.smithy.model.shapes.ListShape;
 import software.amazon.smithy.model.shapes.LongShape;
 import software.amazon.smithy.model.shapes.MapShape;
 import software.amazon.smithy.model.shapes.MemberShape;
+import software.amazon.smithy.model.shapes.ResourceShape;
+import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeVisitor;
 import software.amazon.smithy.model.shapes.ShortShape;
@@ -60,32 +60,6 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
       this.dataSource = dataSource;
       this.writer = writer;
       this.isConfigShape = isConfigShape;
-    }
-
-    protected String referenceStructureShape(StructureShape shape) {
-      ReferenceTrait referenceTrait = shape.expectTrait(ReferenceTrait.class);
-      Shape resourceOrService = context.model().expectShape(referenceTrait.getReferentId());
-      // TODO: This `models`/`client` logic seems flawed and probably needs to be revisited...
-      String importFile;
-      if (resourceOrService.isResourceShape()) {
-        importFile = ".models";
-      } else if (resourceOrService.isServiceShape()) {
-        importFile = ".client";
-      } else {
-        throw new IllegalArgumentException("MUST be a Service or Resource: " + resourceOrService);
-      }
-      writer.addImport(
-          SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(
-              resourceOrService.getId().getNamespace(), context
-          ) + importFile,
-          resourceOrService.getId().getName());
-      if (resourceOrService.isResourceShape()) {
-        return "%1$s(_impl=%2$s)".formatted(resourceOrService.getId().getName(), dataSource);
-      } else if (resourceOrService.isServiceShape()) {
-        return "%1$s(%2$s)".formatted(resourceOrService.getId().getName(), dataSource);
-      } else {
-        throw new CodegenException("Unsupported reference shape: " + shape);
-      }
     }
 
     @Override
@@ -272,68 +246,79 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
     }
 
     @Override
-    public String unionShape(UnionShape shape) {
+    public String unionShape(UnionShape unionShape) {
+      // Union conversion cannot be done inline,
+      // so PythonWriter writes a conversion block above the inline statement
+      writer.writeComment("Convert %1$s".formatted(
+          unionShape.getId().getName()
+      ));
 
-      var memberShapeEntrySetIterator = shape.getAllMembers().entrySet().iterator();
-      if (memberShapeEntrySetIterator.hasNext()) {
-
-        var entry = memberShapeEntrySetIterator.next();
-        var key = entry.getKey();
-        var value = entry.getValue();
-
-        System.out.println(key);
-        System.out.println(value);
-
+      // First union value opens a new `if` block; others do not need to
+      boolean shouldOpenNewIfBlock = true;
+      for (MemberShape memberShape : unionShape.getAllMembers().values()) {
         writer.write("""
-                if isinstance($L, $L):
-                    $L_union_value = $L($L.$L)
-                """,
+                $L isinstance($L, $L):
+                    $L_union_value = $L($L.$L)""",
+            // If we need a new `if` block, open one; otherwise, expand on existing one with `elif`
+            shouldOpenNewIfBlock ? "if" : "elif",
             dataSource,
-            shape.getId().getName() + "_" + value.getMemberName(),
-            shape.getId().getName(),
-            // TODO: DafnyNameResolver.typeforshape
-            shape.getId().getName() + value.getMemberName(),
+            DafnyNameResolver.getDafnyTypeForUnion(unionShape, memberShape),
+            unionShape.getId().getName(),
+            SmithyNameResolver.getSmithyGeneratedTypeForUnion(unionShape, memberShape),
             dataSource,
-            value.getMemberName()
+            memberShape.getMemberName()
         );
+        shouldOpenNewIfBlock = false;
 
-        writer.addStdlibImport(
-            DafnyNameResolver.getDafnyTypesModuleNamespaceForShape(shape),
-            shape.getId().getName() + "_" + value.getMemberName()
-        );
-        writer.addImport(".models", shape.getId().getName() + value.getMemberName());
+        DafnyNameResolver.importDafnyTypeForUnion(writer, unionShape, memberShape);
+        SmithyNameResolver.importSmithyGeneratedTypeForUnion(writer, context, unionShape, memberShape);
       }
-      while (memberShapeEntrySetIterator.hasNext()) {
-        var entry = memberShapeEntrySetIterator.next();
-        var value = entry.getValue();
 
-        writer.write("""
-                elif isinstance($L, $L):
-                    $L_union_value = $L($L.$L)
-                """,
-            dataSource,
-            shape.getId().getName() + "_" + value.getMemberName(),
-            shape.getId().getName(),
-            // TODO: DafnyNameResolver.typeforshape
-            shape.getId().getName() + value.getMemberName(),
-            dataSource,
-            value.getMemberName()
-        );
-        writer.addStdlibImport(
-            DafnyNameResolver.getDafnyTypesModuleNamespaceForShape(shape),
-            shape.getId().getName() + "_" + value.getMemberName()
-        );
-        writer.addImport(".models", shape.getId().getName() + value.getMemberName());
-
-      }
+      // Handle no member in union.
       writer.write("""
           else:
-              raise Exception("TODO: Add exception message")
-          """
+              raise Exception("No recognized union value in union type: " + $L)
+          """,
+          dataSource
       );
 
-      return "%1$s_union_value".formatted(
-          shape.getId().getName()
-          );
+      // Use the result of the union conversion inline
+      return "%1$s_union_value".formatted(unionShape.getId().getName());
+    }
+
+    /**
+     * Called from the StructureShape converter when the StructureShape has a Polymorph Reference trait.
+     * @param shape
+     * @return
+     */
+    protected String referenceStructureShape(StructureShape shape) {
+      ReferenceTrait referenceTrait = shape.expectTrait(ReferenceTrait.class);
+      Shape resourceOrService = context.model().expectShape(referenceTrait.getReferentId());
+
+      if (resourceOrService.isResourceShape()) {
+        return referenceResourceShape(resourceOrService.asResourceShape().get());
+      } else if (resourceOrService.isServiceShape()) {
+        return referenceServiceShape(resourceOrService.asServiceShape().get());
+      } else {
+        throw new UnsupportedOperationException("Unknown referenceStructureShape type: " + shape);
+      }
+    }
+
+    protected String referenceResourceShape(ResourceShape resourceShape) {
+      writer.addImport(
+          SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(
+              resourceShape.getId().getNamespace(), context
+          ) + ".models",
+          resourceShape.getId().getName());
+      return "%1$s(_impl=%2$s)".formatted(resourceShape.getId().getName(), dataSource);
+    }
+
+    protected String referenceServiceShape(ServiceShape serviceShape) {
+      writer.addImport(
+          SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(
+              serviceShape.getId().getNamespace(), context
+          ) + ".client",
+          serviceShape.getId().getName());
+      return "%1$s(%2$s)".formatted(serviceShape.getId().getName(), dataSource);
     }
 }
