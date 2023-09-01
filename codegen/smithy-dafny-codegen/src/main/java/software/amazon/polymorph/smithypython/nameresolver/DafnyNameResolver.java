@@ -1,10 +1,13 @@
 package software.amazon.polymorph.smithypython.nameresolver;
 
 import java.util.Locale;
+import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.ResourceShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
+import software.amazon.smithy.model.shapes.UnionShape;
+import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonWriter;
 
 /**
@@ -80,7 +83,8 @@ public class DafnyNameResolver {
   }
 
   /**
-   * Returns a String representing the client interface type for the provided serviceShape.
+   * Returns a String representing the client interface type for the provided serviceShape
+   *   as Dafny models the interface type.
    * @param serviceShape
    * @return
    */
@@ -89,11 +93,22 @@ public class DafnyNameResolver {
   }
 
   /**
-   * Returns a String representing the interface type for the provided resourceShape.
+   * Returns a String representing the client interface type for the provided serviceShape
+   *   as Dafny models the interface type.
+   * @param serviceShape
+   * @return
+   */
+  public static String getDafnyClientTypeForServiceShape(ServiceShape serviceShape) {
+    return serviceShape.getId().getName() + "Client";
+  }
+
+  /**
+   * Returns a String representing the interface type for the provided resourceShape
+   *   as Dafny models the interface type.
    * @param resourceShape
    * @return
    */
-  public static String getDafnyClientInterfaceTypeForResourceShape(ResourceShape resourceShape) {
+  public static String getDafnyInterfaceTypeForResourceShape(ResourceShape resourceShape) {
     return "I" + resourceShape.getId().getName();
   }
 
@@ -102,7 +117,7 @@ public class DafnyNameResolver {
     writer.addStdlibImport("module_");
     writer.addStdlibImport(
         getDafnyTypesModuleNamespaceForShape(resourceShape.getId()),
-        getDafnyClientInterfaceTypeForResourceShape(resourceShape)
+        getDafnyInterfaceTypeForResourceShape(resourceShape)
     );
   }
 
@@ -128,6 +143,27 @@ public class DafnyNameResolver {
 
   public static String getDafnyTypeForError(ShapeId shapeId) {
     return "Error_" + shapeId.getName();
+  }
+
+  /**
+   * Returns a String representing the corresponding Dafny type
+   *   for the provided UnionShape and one of its MemberShapes.
+   * This MUST ONLY be used for unions and their members; for other shapes use `getDafnyTypeForShape`.
+   * @param unionShape
+   * @param memberShape
+   * @return
+   */
+  public static String getDafnyTypeForUnion(UnionShape unionShape,
+      MemberShape memberShape) {
+    return unionShape.getId().getName() + "_" + memberShape.getMemberName();
+  }
+
+  public static void importDafnyTypeForUnion(PythonWriter writer,
+      UnionShape unionShape, MemberShape memberShape) {
+    writer.addStdlibImport(
+        getDafnyTypesModuleNamespaceForShape(unionShape),
+        getDafnyTypeForUnion(unionShape, memberShape)
+    );
   }
 
   /**

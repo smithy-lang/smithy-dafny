@@ -7,9 +7,11 @@ import java.util.stream.Collectors;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.codegen.core.CodegenContext;
+import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
+import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonWriter;
@@ -105,6 +107,19 @@ public class SmithyNameResolver {
     }
   }
 
+  public static String getSmithyGeneratedTypeForUnion(UnionShape unionShape,
+      MemberShape memberShape) {
+    return unionShape.getId().getName() + memberShape.getMemberName();
+  }
+
+  public static void importSmithyGeneratedTypeForUnion(PythonWriter writer,
+      GenerationContext context, UnionShape unionShape, MemberShape memberShape) {
+    writer.addImport(
+        getSmithyGeneratedModelLocationForShapeId(unionShape.getId(), context),
+        getSmithyGeneratedTypeForUnion(unionShape, memberShape)
+    );
+  }
+
   /**
    * Given the namespace of a Smithy shape, returns a Pythonic access path to the namespace
    * that can be used to import shapes from the namespace.
@@ -124,6 +139,12 @@ public class SmithyNameResolver {
         // return the other namespace's smithygenerated module;
         // i.e. `other_module.smithygenerated`
         :  getPythonModuleNamespaceForSmithyNamespace(smithyNamespace) + ".smithygenerated";
+  }
+
+  public static String getSmithyGeneratedConfigFilepathForSmithyNamespace(String smithyNamespace,
+      GenerationContext codegenContext) {
+    return getSmithyGeneratedModuleNamespaceForSmithyNamespace(smithyNamespace, codegenContext)
+        + ".config";
   }
 
   static Set<ShapeId> localServiceConfigShapes = new HashSet<>();

@@ -347,8 +347,8 @@ public abstract class DafnyPythonProtocolGenerator implements ProtocolGenerator 
             );
             // Generate deserializer for dependency that defers to its `_deserialize_error`
             writer.write("""
-                  if error.is_$L:
-                    return $L(await $L(error.$L))
+                if error.is_$L:
+                  return $L(await $L(error.$L))
               """,
               serviceDependencyShapeId.getName(), serviceDependencyShapeId.getName(),
               SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(serviceDependencyShapeId.getNamespace())
