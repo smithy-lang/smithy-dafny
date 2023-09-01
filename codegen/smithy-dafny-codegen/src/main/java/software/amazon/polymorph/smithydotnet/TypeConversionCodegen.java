@@ -948,7 +948,7 @@ public class TypeConversionCodegen {
             Set<String> dependentNamespaces = ModelUtils.findAllDependentNamespaces(
                 new HashSet<ShapeId>(Collections.singleton(localServiceTrait.getConfigId())), model);
             
-            if (!localServiceTrait.getDependencies().isEmpty()) {
+            if (localServiceTrait.getDependencies() != null) {
                 localServiceTrait.getDependencies().stream()
                         .map(model::expectShape)
                         .map(Shape::asServiceShape)
