@@ -36,7 +36,7 @@ LIBRARY_ROOT = $(PWD)
 # we need to provide it.
 COMPILE_SUFFIX_OPTION_CHECK_EXIT_CODE := $(shell dafny /help | grep -q /compileSuffix; echo $$?)
 ifeq ($(COMPILE_SUFFIX_OPTION_CHECK_EXIT_CODE), 0)
-	COMPILE_SUFFIX_OPTION := -compileSuffix:1
+	COMPILE_SUFFIX_OPTION := -compileSuffix:0
 else
 	COMPILE_SUFFIX_OPTION :=
 endif
@@ -313,7 +313,8 @@ transpile_dependencies_go: LANG=go
 transpile_dependencies_go: transpile_dependencies
 
 clean_go:
-	rm -rf $(LIBRARY_ROOT)/runtimes/go
+	rm -rf $(LIBRARY_ROOT)/runtimes/go/ImplementationFromDafny-go
+	rm -rf $(LIBRARY_ROOT)/runtimes/go/TestsFromDafny-go
 
 migrate_go:
 	cd $(LIBRARY_ROOT)/runtimes/go

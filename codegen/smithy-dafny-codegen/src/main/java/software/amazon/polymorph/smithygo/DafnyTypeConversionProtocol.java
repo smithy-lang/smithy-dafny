@@ -263,7 +263,7 @@ public class DafnyTypeConversionProtocol implements ProtocolGenerator {
 
             context.writerDelegator().useFileWriter(TO_DAFNY, writer -> {
                 writer.write("""
-func CollectionOfErrors_Input_ToDafny(nativeInput types.CollectionOfErrors)(simpleerrorsinternaldafnytypes.Error) {
+func CollectionOfErrors_Input_ToDafny(nativeInput types.CollectionOfErrors)($L.Error) {
 	var e []interface{}
 	for _, i2 := range nativeInput.ListOfErrors {
 	    switch i2.(type) {
@@ -274,11 +274,11 @@ func CollectionOfErrors_Input_ToDafny(nativeInput types.CollectionOfErrors)(simp
                 e = append(e, OpaqueError_Input_ToDafny(i2.(types.OpaqueError)))
             }
 	}
-	return simpleerrorsinternaldafnytypes.Companion_Error_.Create_CollectionOfErrors_(dafny.SeqOf(e...), dafny.SeqOfChars([]dafny.Char(nativeInput.Message)...))
+	return $L.Companion_Error_.Create_CollectionOfErrors_(dafny.SeqOf(e...), dafny.SeqOfChars([]dafny.Char(nativeInput.Message)...))
 }
 func OpaqueError_Input_ToDafny(nativeInput types.OpaqueError)($L.Error) {
 	return $L.Companion_Error_.Create_Opaque_(nativeInput.ErrObject)
-}""", writer.consumer(w -> {
+}""", DafnyNameResolver.dafnyTypesNamespace(context.settings()), writer.consumer(w -> {
                     for (Shape error:
                             context.model().getShapesWithTrait(ErrorTrait.class)) {
                         w.write("""
@@ -286,7 +286,7 @@ func OpaqueError_Input_ToDafny(nativeInput types.OpaqueError)($L.Error) {
                                       e = append(e, $L_Input_ToDafny(i2.(types.$L)))
                                  """, context.symbolProvider().toSymbol(error).getName(), context.symbolProvider().toSymbol(error).getName(), context.symbolProvider().toSymbol(error).getName());
                     }
-                }), DafnyNameResolver.dafnyTypesNamespace(context.settings()), DafnyNameResolver.dafnyTypesNamespace(context.settings()));
+                }), DafnyNameResolver.dafnyTypesNamespace(context.settings()), DafnyNameResolver.dafnyTypesNamespace(context.settings()), DafnyNameResolver.dafnyTypesNamespace(context.settings()));
             });
     }
 
@@ -342,7 +342,7 @@ func OpaqueError_Input_ToDafny(nativeInput types.OpaqueError)($L.Error) {
 
         context.writerDelegator().useFileWriter(FROM_DAFNY, writer -> {
             writer.write("""
-func CollectionOfErrors_Output_FromDafny(dafnyOutput simpleerrorsinternaldafnytypes.Error)(types.CollectionOfErrors) {
+func CollectionOfErrors_Output_FromDafny(dafnyOutput $L.Error)(types.CollectionOfErrors) {
     listOfErrors := dafnyOutput.Dtor_list()
     message := dafnyOutput.Dtor_message()
     t := types.CollectionOfErrors {}
@@ -351,7 +351,7 @@ func CollectionOfErrors_Output_FromDafny(dafnyOutput simpleerrorsinternaldafnyty
         if !ok {
             break;
         }
-        err := val.(simpleerrorsinternaldafnytypes.Error)
+        err := val.($L.Error)
         ${C|}
                                            if err.Is_CollectionOfErrors() {
             t.ListOfErrors = append(t.ListOfErrors, CollectionOfErrors_Output_FromDafny(err))
@@ -377,7 +377,7 @@ func OpaqueError_Output_FromDafny(dafnyOutput $L.Error)(types.OpaqueError) {
     return types.OpaqueError {
         ErrObject: dafnyOutput.Dtor_obj(),
     }
-}""", writer.consumer( w -> {
+}""", DafnyNameResolver.dafnyTypesNamespace(context.settings()), DafnyNameResolver.dafnyTypesNamespace(context.settings()), writer.consumer( w -> {
                 for (var errorShape :
                         context.model().getShapesWithTrait(ErrorTrait.class)) {
                     w.write("""
