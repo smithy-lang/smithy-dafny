@@ -16,6 +16,7 @@ import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.traits.ErrorTrait;
+import software.amazon.smithy.model.traits.UnitTypeTrait;
 
 import java.util.function.Function;
 
@@ -78,51 +79,66 @@ public class LocalServiceGenerator implements Runnable {
             final OperationShape operationShape = model.expectShape(operation, OperationShape.class);
             final Shape inputShape = model.expectShape(operationShape.getInputShape());
             final Shape outputShape = model.expectShape(operationShape.getOutputShape());
-            final String inputType = model.expectShape(model.expectShape(operation).asOperationShape().get().getInputShape()).toShapeId().getName();
-            final String outputType = model.expectShape(model.expectShape(operation).asOperationShape().get().getOutputShape()).toShapeId().getName();
-            final Function<String, String> checkErrorClass = (String x) -> {
-                return """
-                                               if err.Is_$L() {
-                                               return nil, $L_Output_FromDafny(err.Get().($L.Error_$L))
-                                           }
-                        """.formatted(x, x, x);
-            };
+            final String inputType = inputShape.hasTrait(UnitTypeTrait.class) ? "" : ", params types.%s".formatted(inputShape.toShapeId().getName());
+            final String outputType = outputShape.hasTrait(UnitTypeTrait.class) ? "" : "*types.%s,".formatted(outputShape.toShapeId().getName());
+
+            String baseClientCall;
+            if (inputShape.hasTrait(UnitTypeTrait.class)) {
+                baseClientCall = "var dafny_response = client.dafnyClient.%s()".formatted(operationShape.getId().getName());
+            } else {
+                baseClientCall = """
+                        var dafny_request %s = %s(params)
+                        var dafny_response = client.dafnyClient.%s(dafny_request)
+                        """.formatted(DafnyNameResolver.getDafnyType(context.settings(), symbolProvider.toSymbol(inputShape)),
+                                      DafnyNameResolver.getInputToDafnyMethodName(context, operationShape), operationShape.getId().getName());
+            }
+
+            String returnResponse, returnError;
+            if (outputShape.hasTrait(UnitTypeTrait.class)) {
+                returnResponse = "return nil";
+                returnError = "return";
+            } else {
+                returnResponse = """
+                        var native_response = %s(dafny_response.Extract().(%s))
+                        return &native_response, nil
+                        """.formatted(DafnyNameResolver.getOutputFromDafnyMethodName(context, operationShape),
+                                      DafnyNameResolver.getDafnyType(context.settings(), symbolProvider.toSymbol(outputShape)));
+                returnError = "return nil,";
+            }
+
+
             writer.write("""
-                                   func (client *$T) $L(ctx context.Context, params types.$L) (*types.$L, error) {
-                                       var dafny_request $L = $L(params)
-                                       var dafny_response = client.dafnyClient.$L(dafny_request)
+                                   func (client *$T) $L(ctx context.Context $L) ($L error) {
+                                       $L
                                        if (dafny_response.Is_Failure()) {
                                            err := dafny_response.Dtor_error().($L.Error);
                                            ${C|}
                                            if err.Is_CollectionOfErrors() {
-                                               return nil, CollectionOfErrors_Output_FromDafny(err)
+                                               $L CollectionOfErrors_Output_FromDafny(err)
                                            }
                                            if err.Is_Opaque() {
-                                               return nil, OpaqueError_Output_FromDafny(err)
+                                               $L OpaqueError_Output_FromDafny(err)
                                            }
                                        }
-                                       var native_response = $L(dafny_response.Extract().($L))
-                                       return &native_response, nil
+                                       $L
                                    }
                                  """,
                          serviceSymbol,
                          operationShape.getId().getName(),
                          inputType, outputType,
-                         DafnyNameResolver.getDafnyType(context.settings(), symbolProvider.toSymbol(inputShape)),
-                         DafnyNameResolver.getInputToDafnyMethodName(context, operationShape),
-                         operationShape.getId().getName(),
+                         baseClientCall,
                          DafnyNameResolver.dafnyTypesNamespace(context.settings()),
                          writer.consumer( w -> {
                              for (var errorShape :
                                      model.getShapesWithTrait(ErrorTrait.class)) {
                                  w.write("""
                                                                              if err.Is_$L() {
-                                                                             return nil, $L_Output_FromDafny(err)
+                                                                             $L $L_Output_FromDafny(err)
                                                                          }
-                                                      """, errorShape.toShapeId().getName(), errorShape.toShapeId().getName());
+                                                      """, errorShape.toShapeId().getName(), returnError, errorShape.toShapeId().getName());
                              }
-                         }),
-                         DafnyNameResolver.getOutputFromDafnyMethodName(context, operationShape), DafnyNameResolver.getDafnyType(context.settings(), symbolProvider.toSymbol(outputShape)));
+                         }),returnError, returnError, returnResponse
+                         );
         });
     }
 
@@ -169,12 +185,26 @@ public class LocalServiceGenerator implements Runnable {
                 final OperationShape operationShape = model.expectShape(operation, OperationShape.class);
                 final Shape inputShape = model.expectShape(operationShape.getInputShape());
                 final Shape outputShape = model.expectShape(operationShape.getOutputShape());
-                final String inputType = model.expectShape(model.expectShape(operation).asOperationShape().get().getInputShape()).toShapeId().getName();
-                final String outputType = model.expectShape(model.expectShape(operation).asOperationShape().get().getOutputShape()).toShapeId().getName();
+                final String inputType = inputShape.hasTrait(UnitTypeTrait.class) ? "" : "input %s".formatted(DafnyNameResolver.getDafnyType(context.settings(), symbolProvider.toSymbol(inputShape)));
+                final String outputType = outputShape.hasTrait(UnitTypeTrait.class) ? "" : "*types.%s,".formatted(outputShape.toShapeId().getName());
+
+                final String typeConversion = inputShape.hasTrait(UnitTypeTrait.class) ? "" : "var native_request = %s.%s(input)".formatted(DafnyNameResolver.serviceNamespace(service),
+                                                                                                                                      DafnyNameResolver.getInputFromDafnyMethodName(context, operationShape));
+                final String clientCall =  "shim.client.%s(context.Background() %s)".formatted(operationShape.getId().getName(), inputShape.hasTrait(UnitTypeTrait.class) ? "" : ", native_request");
+                String clientResponse, returnResponse;
+                if (outputShape.hasTrait(UnitTypeTrait.class)) {
+                    clientResponse = "var native_error";
+                    returnResponse = "dafny.TupleOf()";
+                    writer.addImport("dafny");
+                } else {
+                    clientResponse = "var native_response, native_error";
+                    returnResponse = "%s.%s(*native_response)".formatted(DafnyNameResolver.serviceNamespace(service),
+                                                                         DafnyNameResolver.getOutputToDafnyMethodName(context, operationShape));
+                }
                 writer.write("""
-                                       func (shim *Shim) $L(input $L) Wrappers.Result {
-                                           var native_request = $L.$L(input)
-                                           var native_response, native_error = shim.client.$L(context.Background(), native_request)
+                                       func (shim *Shim) $L($L) Wrappers.Result {
+                                           $L
+                                           $L = $L
                                            if native_error != nil {
                                                switch native_error.(type) {
                                                 ${C|}
@@ -184,20 +214,16 @@ public class LocalServiceGenerator implements Runnable {
                                                     return Wrappers.Companion_Result_.Create_Failure_($L.OpaqueError_Input_ToDafny(native_error.(types.OpaqueError)))
                                                 }
                                            }
-                                           var dafny_response = $L.$L(*native_response)
-                                           return Wrappers.Companion_Result_.Create_Success_(dafny_response)
+                                           return Wrappers.Companion_Result_.Create_Success_($L)
                                        }
                                      """,
                              operationShape.getId().getName(),
-                             DafnyNameResolver.getDafnyType(context.settings(), symbolProvider.toSymbol(inputShape)),
-                             DafnyNameResolver.serviceNamespace(service),
-                             DafnyNameResolver.getInputFromDafnyMethodName(context, operationShape),
-                             operationShape.getId().getName(),
+                             inputType, typeConversion, clientResponse, clientCall,
                              writer.consumer(w -> c(w)),
                              DafnyNameResolver.serviceNamespace(service),
                              DafnyNameResolver.serviceNamespace(service),
-                             DafnyNameResolver.serviceNamespace(service),
-                             DafnyNameResolver.getOutputToDafnyMethodName(context, operationShape));
+                             returnResponse
+                             );
             });
         });
     }

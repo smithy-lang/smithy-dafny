@@ -15,6 +15,7 @@ import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.ErrorTrait;
+import software.amazon.smithy.model.traits.UnitTypeTrait;
 
 import java.util.Collections;
 import java.util.Set;
@@ -50,29 +51,33 @@ public class DafnyTypeConversionProtocol implements ProtocolGenerator {
         for (final var operation : topDownIndex.getContainedOperations(serviceShape)) {
             final var inputToDafnyMethodName = getInputToDafnyMethodName(context, operation);
             final var input = model.expectShape(operation.getInputShape());
-            final var inputSymbol = symbolProvider.toSymbol(input);
-            writerDelegator.useFileWriter(TO_DAFNY, context.settings().getModuleName().replace(DOT, BLANK).toLowerCase(), writer -> {
-                writer.addImport("types");
-                writer.write("""
-                  func $L(nativeInput $T)($L) {
-                      ${C|}
-                  }""", inputToDafnyMethodName, inputSymbol,
-                             DafnyNameResolver.getDafnyType(context.settings(), inputSymbol),
-                             writer.consumer(w -> generateRequestSerializer(context, operation, context.writerDelegator())));
-            });
+            if (!input.hasTrait(UnitTypeTrait.class)) {
+                final var inputSymbol = symbolProvider.toSymbol(input);
+                writerDelegator.useFileWriter(TO_DAFNY, context.settings().getModuleName().replace(DOT, BLANK).toLowerCase(), writer -> {
+                    writer.addImport("types");
+                    writer.write("""
+                                         func $L(nativeInput $T)($L) {
+                                             ${C|}
+                                         }""", inputToDafnyMethodName, inputSymbol,
+                                 DafnyNameResolver.getDafnyType(context.settings(), inputSymbol),
+                                 writer.consumer(w -> generateRequestSerializer(context, operation, context.writerDelegator())));
+                });
+            }
 
             final var outputToDafnyMethodName = getOutputToDafnyMethodName(context, operation);
             final var output = model.expectShape(operation.getOutputShape());
-            final var outputSymbol = symbolProvider.toSymbol(output);
-            writerDelegator.useFileWriter(TO_DAFNY, context.settings().getModuleName().replace(DOT, BLANK).toLowerCase(), writer -> {
-                writer.addImport("types");
-                writer.write("""
-                  func $L(nativeOutput $T)($L) {
-                      ${C|}
-                  }""", outputToDafnyMethodName, outputSymbol,
-                             DafnyNameResolver.getDafnyType(context.settings(), outputSymbol),
-                             writer.consumer(w -> generateResponseSerializer(context, operation, context.writerDelegator())));
-            });
+            if (!output.hasTrait(UnitTypeTrait.class)) {
+                final var outputSymbol = symbolProvider.toSymbol(output);
+                writerDelegator.useFileWriter(TO_DAFNY, context.settings().getModuleName().replace(DOT, BLANK).toLowerCase(), writer -> {
+                    writer.addImport("types");
+                    writer.write("""
+                                         func $L(nativeOutput $T)($L) {
+                                             ${C|}
+                                         }""", outputToDafnyMethodName, outputSymbol,
+                                 DafnyNameResolver.getDafnyType(context.settings(), outputSymbol),
+                                 writer.consumer(w -> generateResponseSerializer(context, operation, context.writerDelegator())));
+                });
+            }
         }
         generateErrorSerializer(context);
         generateConfigSerializer(context);
@@ -88,33 +93,37 @@ public class DafnyTypeConversionProtocol implements ProtocolGenerator {
 
             final var inputFromDafnyMethodName = getInputFromDafnyMethodName(context, operation);
             final var input = context.model().expectShape(operation.getInputShape());
-            final var inputSymbol = context.symbolProvider().toSymbol(input);
+            if (!input.hasTrait(UnitTypeTrait.class)) {
+                final var inputSymbol = context.symbolProvider().toSymbol(input);
 
-            delegator.useFileWriter(FROM_DAFNY, context.settings().getModuleName().replace(DOT, BLANK).toLowerCase(), writer -> {
-                writer.addImport("types");
+                delegator.useFileWriter(FROM_DAFNY, context.settings().getModuleName().replace(DOT, BLANK).toLowerCase(), writer -> {
+                    writer.addImport("types");
 
-                writer.write("""
-                  func $L(dafnyInput $L)($T) {
-                      ${C|}
-                  }""", inputFromDafnyMethodName, DafnyNameResolver.getDafnyType(context.settings(), inputSymbol),
-                             inputSymbol,
-                             writer.consumer(w -> generateRequestDeserializer(context, operation, context.writerDelegator())));
-            });
+                    writer.write("""
+                                         func $L(dafnyInput $L)($T) {
+                                             ${C|}
+                                         }""", inputFromDafnyMethodName, DafnyNameResolver.getDafnyType(context.settings(), inputSymbol),
+                                 inputSymbol,
+                                 writer.consumer(w -> generateRequestDeserializer(context, operation, context.writerDelegator())));
+                });
+            }
 
             final var outputFromDafnyMethodName = getOutputFromDafnyMethodName(context, operation);
             final var output = context.model().expectShape(operation.getOutputShape());
-            final var outputSymbol = context.symbolProvider().toSymbol(output);
+            if (!output.hasTrait(UnitTypeTrait.class)) {
+                final var outputSymbol = context.symbolProvider().toSymbol(output);
 
-            delegator.useFileWriter(FROM_DAFNY, context.settings().getModuleName().replace(DOT, BLANK).toLowerCase(), writer -> {
-                writer.addImport("types");
+                delegator.useFileWriter(FROM_DAFNY, context.settings().getModuleName().replace(DOT, BLANK).toLowerCase(), writer -> {
+                    writer.addImport("types");
 
-                writer.write("""
-                  func $L(dafnyOutput $L)($T) {
-                      ${C|}
-                  }""", outputFromDafnyMethodName, DafnyNameResolver.getDafnyType(context.settings(), outputSymbol),
-                             outputSymbol,
-                             writer.consumer(w -> generateResponseDeserializer(context, operation, context.writerDelegator())));
-            });
+                    writer.write("""
+                                         func $L(dafnyOutput $L)($T) {
+                                             ${C|}
+                                         }""", outputFromDafnyMethodName, DafnyNameResolver.getDafnyType(context.settings(), outputSymbol),
+                                 outputSymbol,
+                                 writer.consumer(w -> generateResponseDeserializer(context, operation, context.writerDelegator())));
+                });
+            }
         }
         generateErrorDeserializer(context);
         generateConfigDeserializer(context);
