@@ -35,13 +35,14 @@ jobs:
       - name: Support longpaths on Git checkout
         run: |
           git config --global core.longpaths true
-      - name: Configure AWS Credentials
+      # KMS and MPL tests need to use credentials which can call KMS
+      - name: Configure AWS Credentials for Tests
         uses: aws-actions/configure-aws-credentials@v2
+        if: matrix.library == 'ComAmazonawsKms' || matrix.library == 'ComAmazonawsDynamodb' || matrix.library == 'AwsCryptographicMaterialProviders' || matrix.library == 'TestVectorsAwsCryptographicMaterialProviders'
         with:
           aws-region: us-west-2
-          # This role was manually created.
-          role-to-assume: arn:aws:iam::370957321024:role/ESDK-Dafny-Private-CA-Read
-          role-session-name: JavaPrivateESDKDafnyTests
+          role-to-assume: arn:aws:iam::370957321024:role/GitHub-CI-MPL-Dafny-Role-us-west-2
+          role-session-name: JavaTests
 
       - uses: actions/checkout@v3
       # The specification submodule is private so we don't have access, but we don't need
@@ -66,15 +67,6 @@ jobs:
           # This works because `node` is installed by default on GHA runners
           CORES=$(node -e 'console.log(os.cpus().length)')
           make build_java CORES=$CORES
-
-      # KMS and MPL tests need to use credentials which can call KMS
-      - name: Configure AWS Credentials for Tests
-        uses: aws-actions/configure-aws-credentials@v2
-        if: matrix.library == 'ComAmazonawsKms' || matrix.library == 'ComAmazonawsDynamodb' || matrix.library == 'AwsCryptographicMaterialProviders' || matrix.library == 'TestVectorsAwsCryptographicMaterialProviders'
-        with:
-          aws-region: us-west-2
-          role-to-assume: arn:aws:iam::370957321024:role/GitHub-CI-MPL-Dafny-Role-us-west-2
-          role-session-name: JavaTests
 
       - name: Test ${{ matrix.library }}
         working-directory: ./${{ matrix.library }}
