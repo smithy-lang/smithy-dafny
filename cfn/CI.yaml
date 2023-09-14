@@ -51,6 +51,7 @@ Resources:
                 "StringEquals": {
                   "aws:PrincipalArn": [
                     "arn:aws:iam::587316601012:role/service-role/codebuild-AWS-MPL-Java-service-role-release",
+                    "arn:aws:iam::587316601012:role/service-role/codebuild-AWS-MPL-DotNet-service-role-release",
                     "arn:aws:iam::370957321024:role/ToolsDevelopment"
                   ]
                 }
