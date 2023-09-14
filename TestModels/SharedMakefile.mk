@@ -343,9 +343,9 @@ _clean:
 	rm -rf $(LIBRARY_ROOT)/TestResults
 	rm -rf $(LIBRARY_ROOT)/runtimes/net/Generated $(LIBRARY_ROOT)/runtimes/net/bin $(LIBRARY_ROOT)/runtimes/net/obj
 	rm -rf $(LIBRARY_ROOT)/runtimes/net/tests/bin $(LIBRARY_ROOT)/runtimes/net/tests/obj
-	rm -rf $(LIBRARY_ROOT)/runtimes/python/src/**/dafnygenerated/*.py
+	rm -rf $(LIBRARY_ROOT)/runtimes/python/src/**/internal_generated_dafny/*.py
 	rm -rf $(LIBRARY_ROOT)/runtimes/python/src/**/smithygenerated
-	rm -rf $(LIBRARY_ROOT)/runtimes/python/test/dafnygenerated/*.py
+	rm -rf $(LIBRARY_ROOT)/runtimes/python/test/internal_generated_dafny/*.py
 	rm -rf $(LIBRARY_ROOT)/runtimes/python/.tox
 	rm -rf $(LIBRARY_ROOT)/runtimes/python/poetry.lock
 	rm -rf $(LIBRARY_ROOT)/runtimes/python/build
@@ -359,7 +359,7 @@ build_python: build_implementation_python
 build_python: transpile_test_python
 build_python: _python_revert_underscore_extern_names
 build_python: _python_revert_underscore_dependency_extern_names
-build_python: _mv_dafnygenerated_python
+build_python: _mv_internal_generated_dafny_python
 build_python: _remove_src_module_python
 
 build_implementation_python: TARGET=py
@@ -373,7 +373,7 @@ build_implementation_python: build_implementation
 transpile_implementation_python: transpile_dependencies_python
 transpile_implementation_python: transpile_src_python
 transpile_implementation_python: transpile_test_python
-transpile_implementation_python: _mv_dafnygenerated_python
+transpile_implementation_python: _mv_internal_generated_dafny_python
 transpile_implementation_python: _remove_src_module_python
 
 transpile_src_python: TARGET=py
@@ -411,21 +411,21 @@ _python_revert_underscore_dependency_extern_names:
 	$(patsubst %, $(MAKE) -C $(PROJECT_ROOT)/% _python_revert_underscore_extern_names;, $(LIBRARIES))
 
 # Move Dafny-generated code into its expected location in the Python module
-_mv_dafnygenerated_python:
+_mv_internal_generated_dafny_python:
 	# Remove everything EXCEPT the pyproject.toml
-	rm -rf runtimes/python/src/$(PYTHON_MODULE_NAME)/dafnygenerated/*.py
-	mv runtimes/python/dafny_src-py/*.py runtimes/python/src/$(PYTHON_MODULE_NAME)/dafnygenerated
+	rm -rf runtimes/python/src/$(PYTHON_MODULE_NAME)/internal_generated_dafny/*.py
+	mv runtimes/python/dafny_src-py/*.py runtimes/python/src/$(PYTHON_MODULE_NAME)/internal_generated_dafny
 	rm -rf runtimes/python/dafny_src-py
 	# Remove everything EXCEPT the pyproject.toml
-	rm -rf runtimes/python/test/dafnygenerated/*.py
-	mv runtimes/python/test-py/*.py runtimes/python/test/dafnygenerated
+	rm -rf runtimes/python/test/internal_generated_dafny/*.py
+	mv runtimes/python/test-py/*.py runtimes/python/test/internal_generated_dafny
 	rm -rf runtimes/python/test-py
 
 _remove_src_module_python:
 	# Remove the source `module_.py` file
 	# There is a race condition between the src/ and test/ installation of this file
 	# This will need to be changed but works for now
-	rm runtimes/python/src/$(PYTHON_MODULE_NAME)/dafnygenerated/module_.py
+	rm runtimes/python/src/$(PYTHON_MODULE_NAME)/internal_generated_dafny/module_.py
 
 transpile_dependencies_python: LANG=python
 transpile_dependencies_python: transpile_dependencies

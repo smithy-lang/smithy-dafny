@@ -19,7 +19,7 @@ from simple_extendable_resources.extern import native_resource
 # End import modules required for Dafny-generated tests
 
 def test_dafny():
-  dafny_modules = glob.glob(join("/".join(__file__.split("/")[:-2]) + "/dafnygenerated/", "*.py"), recursive=True)
+  dafny_modules = glob.glob(join("/".join(__file__.split("/")[:-2]) + "/internal_generated_dafny/", "*.py"), recursive=True)
   for f in dafny_modules:
     if isfile(f) and f.endswith('test.py'):
       fname = str(f).split("/")[-1].split(".")[0]

@@ -528,7 +528,7 @@ files = []
 develop = false
 
 [package.dependencies]
-simple-constraints-internaldafny = {path = "src/simple_constraints/dafnygenerated"}
+simple-constraints-internaldafny = {path = "src/simple_constraints/internal_generated_dafny"}
 smithy-python = {path = "../../../../submodules/smithy-python/python-packages/smithy-python"}
 standard-library = {path = "../../../dafny-dependencies/StandardLibrary/runtimes/python"}
 
@@ -547,7 +547,7 @@ develop = false
 
 [package.source]
 type = "directory"
-url = "../../../Constraints/runtimes/python/src/simple_constraints/dafnygenerated"
+url = "../../../Constraints/runtimes/python/src/simple_constraints/internal_generated_dafny"
 
 [[package]]
 name = "simple-dependencies-internaldafny"
@@ -560,7 +560,7 @@ develop = false
 
 [package.source]
 type = "directory"
-url = "src/simple_dependencies/dafnygenerated"
+url = "src/simple_dependencies/internal_generated_dafny"
 
 [[package]]
 name = "simple-dependencies-test-internaldafny"
@@ -573,7 +573,7 @@ develop = false
 
 [package.source]
 type = "directory"
-url = "test/dafnygenerated"
+url = "test/internal_generated_dafny"
 
 [[package]]
 name = "simple-errors"
@@ -585,7 +585,7 @@ files = []
 develop = false
 
 [package.dependencies]
-simple-errors-internaldafny = {path = "src/simple_errors/dafnygenerated"}
+simple-errors-internaldafny = {path = "src/simple_errors/internal_generated_dafny"}
 smithy-python = {path = "../../../../submodules/smithy-python/python-packages/smithy-python"}
 standard-library = {path = "../../../dafny-dependencies/StandardLibrary/runtimes/python"}
 
@@ -604,7 +604,7 @@ develop = false
 
 [package.source]
 type = "directory"
-url = "../../../Errors/runtimes/python/src/simple_errors/dafnygenerated"
+url = "../../../Errors/runtimes/python/src/simple_errors/internal_generated_dafny"
 
 [[package]]
 name = "simple-extendable-resources"
@@ -616,7 +616,7 @@ files = []
 develop = false
 
 [package.dependencies]
-simple-extendable-resources-internaldafny = {path = "src/simple_extendable_resources/dafnygenerated"}
+simple-extendable-resources-internaldafny = {path = "src/simple_extendable_resources/internal_generated_dafny"}
 smithy-python = {path = "../../../../submodules/smithy-python/python-packages/smithy-python"}
 standard-library = {path = "../../../dafny-dependencies/StandardLibrary/runtimes/python"}
 
@@ -635,7 +635,7 @@ develop = false
 
 [package.source]
 type = "directory"
-url = "../../../Extendable/runtimes/python/src/simple_extendable_resources/dafnygenerated"
+url = "../../../Extendable/runtimes/python/src/simple_extendable_resources/internal_generated_dafny"
 
 [[package]]
 name = "simple-resources"
@@ -647,7 +647,7 @@ files = []
 develop = false
 
 [package.dependencies]
-simple-resources-internaldafny = {path = "src/simple_resources/dafnygenerated"}
+simple-resources-internaldafny = {path = "src/simple_resources/internal_generated_dafny"}
 smithy-python = {path = "../../../../submodules/smithy-python/python-packages/smithy-python"}
 standard-library = {path = "../../../dafny-dependencies/StandardLibrary/runtimes/python"}
 
@@ -666,7 +666,7 @@ develop = false
 
 [package.source]
 type = "directory"
-url = "../../../Resource/runtimes/python/src/simple_resources/dafnygenerated"
+url = "../../../Resource/runtimes/python/src/simple_resources/internal_generated_dafny"
 
 [[package]]
 name = "smithy-python"
@@ -695,7 +695,7 @@ files = []
 develop = false
 
 [package.dependencies]
-standard-library-internaldafny = {path = "src/standard_library/dafnygenerated"}
+standard-library-internaldafny = {path = "src/standard_library/internal_generated_dafny"}
 
 [package.source]
 type = "directory"
@@ -712,7 +712,7 @@ develop = false
 
 [package.source]
 type = "directory"
-url = "../../../dafny-dependencies/StandardLibrary/runtimes/python/src/standard_library/dafnygenerated"
+url = "../../../dafny-dependencies/StandardLibrary/runtimes/python/src/standard_library/internal_generated_dafny"
 
 [[package]]
 name = "yarl"

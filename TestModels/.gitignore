@@ -10,8 +10,8 @@
 **/runtimes/java/src/test/dafny-generated/
 
 # Dafny Generated Python
-**/runtimes/python/src/**/dafnygenerated/*.py
-**/runtimes/python/test/dafnygenerated/*.py
+**/runtimes/python/src/**/internal_generated_dafny/*.py
+**/runtimes/python/test/internal_generated_dafny/*.py
 
 # Polymorph Generated Dafny
 **/Model/*Types.dfy
