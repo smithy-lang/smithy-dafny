@@ -1,10 +1,10 @@
 [tool.poetry]
-name = "simple-boolean"
+name = "simple-types-boolean"
 version = "0.1.0"
 description = ""
 authors = ["AWS <aws-arg-dafny@amazon.com>"]
 packages = [
-    { include = "simple_boolean", from = "src" }
+    { include = "simple_types_boolean", from = "src" }
 ]
 # Include all Smithy- and Dafny-generated code in package distributions,
 # even though they are not included in version control
@@ -12,7 +12,7 @@ include = ["**/smithygenerated/*.py", "**/internal_generated_dafny/*.py"]
 
 [tool.poetry.dependencies]
 python = "^3.11.0"
-simple-boolean-internaldafny = { path = "src/simple_boolean/internal_generated_dafny", develop = false}
+simple-boolean-internaldafny = { path = "src/simple_types_boolean/internal_generated_dafny", develop = false}
 # TODO: Depend on PyPi once Smithy-Python publishes their Python package there
 smithy-python = { path = "../../../../../submodules/smithy-python/python-packages/smithy-python", develop = false}
 standard-library = {path = "../../../../dafny-dependencies/StandardLibrary/runtimes/python", develop = false}
