@@ -101,15 +101,7 @@ public abstract class DafnyPythonProtocolGenerator implements ProtocolGenerator 
     for (OperationShape operation : context.model().getOperationShapes()) {
       Symbol serFunction = getSerializationFunction(context, operation);
       Shape input = context.model().expectShape(operation.getInputShape());
-      Symbol inputSymbol = context.symbolProvider().toSymbol(input);
-
-      // Override Smithy-Python SymbolBuilder.
-      // Smithy-Python does not understand how the LocalService attribute's dependencies work.
-      // We override its symbol definition here.
-      Symbol inputSymbolTransformed = inputSymbol.toBuilder()
-            .namespace(SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(input.getId().getNamespace(), context) + ".models", ".")
-            .definitionFile("")
-            .build();
+      Symbol inputSymbol = SmithyNameResolver.transformSmithySymbolForDafnyCodegen(context, input);
 
       // Write out the serialization operation
       delegator.useFileWriter(serFunction.getDefinitionFile(), serFunction.getNamespace(), writer -> {
@@ -120,7 +112,7 @@ public abstract class DafnyPythonProtocolGenerator implements ProtocolGenerator 
                 ${C|}
             """,
             serFunction.getName(),
-            inputSymbolTransformed,
+            inputSymbol,
             configSymbol,
             Constants.DAFNY_PROTOCOL_REQUEST,
             writer.consumer(w -> generateRequestSerializer(context, operation, w)));
@@ -157,7 +149,7 @@ public abstract class DafnyPythonProtocolGenerator implements ProtocolGenerator 
         context,
         "input",
         writer,
-        false
+        "serialize"
     ));
 
     // Write conversion method body
@@ -179,12 +171,7 @@ public abstract class DafnyPythonProtocolGenerator implements ProtocolGenerator 
     for (OperationShape operation : context.model().getOperationShapes()) {
       Symbol deserFunction = getDeserializationFunction(context, operation);
       Shape output = context.model().expectShape(operation.getOutputShape());
-      Symbol outputSymbol = context.symbolProvider().toSymbol(output);
-
-      Symbol outputSymbolTransformed = outputSymbol.toBuilder()
-          .namespace(SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(output.getId().getNamespace(), context) + ".models", ".")
-          .definitionFile("")
-          .build();
+      Symbol outputSymbol = SmithyNameResolver.transformSmithySymbolForDafnyCodegen(context, output);
 
       delegator.useFileWriter(deserFunction.getDefinitionFile(), deserFunction.getNamespace(), writer -> {
         writer.addImport(Constants.DAFNY_PROTOCOL_PYTHON_FILENAME, Constants.DAFNY_PROTOCOL_RESPONSE);
@@ -198,7 +185,7 @@ public abstract class DafnyPythonProtocolGenerator implements ProtocolGenerator 
             deserFunction.getName(),
             Constants.DAFNY_PROTOCOL_RESPONSE,
             configSymbol,
-            outputSymbolTransformed,
+            outputSymbol,
             writer.consumer(w -> generateOperationResponseDeserializer(context, operation))
         );
 
@@ -246,7 +233,7 @@ public abstract class DafnyPythonProtocolGenerator implements ProtocolGenerator 
             context,
             "input.value",
             writer,
-            false
+            "deserialize"
         ));
 
         writer.write("""

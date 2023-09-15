@@ -4,6 +4,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import software.amazon.polymorph.smithypython.shapevisitor.DafnyToSmithyShapeVisitor;
+import software.amazon.polymorph.smithypython.shapevisitor.SmithyToDafnyShapeVisitor;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.polymorph.utils.ModelUtils;
@@ -189,7 +191,7 @@ public class ModelsFileWriter implements CustomFileWriter {
     for (ShapeId operationShapeId : operationShapeIds) {
       writer.write("""
           @abc.abstractmethod
-          def $L(self, dafny_input):
+          def $L(self, native_input):
               raise NotImplementedError
           """, operationShapeId.getName());
     }
@@ -207,10 +209,39 @@ public class ModelsFileWriter implements CustomFileWriter {
     }
 
     for (ShapeId operationShapeId : operationShapeIds) {
+      OperationShape operationShape = codegenContext.model().expectShape(operationShapeId, OperationShape.class);
+
+      Shape targetShapeInput = codegenContext.model().expectShape(operationShape.getInputShape());
+      // Generate code that converts the input from the Dafny type to the corresponding Smithy type
+      // `input` will hold a string that converts the Dafny `input` to the Smithy-modelled output.
+      // This has a side effect of possibly writing transformation code at the writer's current position.
+      // For example, a service shape may require some calls to `ctor__()` after it is created,
+      //   and cannot be constructed inline.
+      // Polymorph will create an object representing the service's client, instantiate it,
+      //   then reference that object in its `input` string.
+      String input = targetShapeInput.accept(new SmithyToDafnyShapeVisitor(
+          codegenContext,
+          "native_input",
+          writer,
+          "models"
+      ));
+
+      Shape targetShape = codegenContext.model().expectShape(operationShape.getOutputShape());
+      String output = targetShape.accept(new DafnyToSmithyShapeVisitor(
+          codegenContext,
+          "dafny_output",
+          writer,
+          "models"
+      ));
+
       writer.write("""
-          def $L(self, dafny_input):
-              return self._impl.$L(dafny_input)
-          """, operationShapeId.getName(), operationShapeId.getName());
+          def $L(self, native_input):
+              dafny_output = self._impl.$L($L)
+              return $L
+          """, operationShapeId.getName(),
+          operationShapeId.getName(),
+          input,
+          output);
     }
   }
 

@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.codegen.core.CodegenContext;
+import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
@@ -57,10 +58,26 @@ public class SmithyNameResolver {
    */
   public static String getSmithyGeneratedModelLocationForShapeId(ShapeId shapeId,
       GenerationContext codegenContext) {
+    if (Utils.isUnitShape(shapeId)) {
+      return ".models";
+    }
     String moduleNamespace = getSmithyGeneratedModuleNamespaceForSmithyNamespace(shapeId.getNamespace(),
         codegenContext);
     String moduleFilename = getSmithyGeneratedModuleFilenameForSmithyShape(shapeId, codegenContext);
     return moduleNamespace + moduleFilename;
+  }
+
+  public static Symbol transformSmithySymbolForDafnyCodegen(GenerationContext context, Shape shape) {
+    Symbol shapeSymbol = context.symbolProvider().toSymbol(shape);
+    if (Utils.isUnitShape(shape.getId())) {
+      return shapeSymbol;
+    } else {
+      return shapeSymbol.toBuilder()
+          .namespace(SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(
+              shape.getId().getNamespace(), context) + ".models", ".")
+          .definitionFile("")
+          .build();
+    }
   }
 
   public static void importSmithyGeneratedTypeForShape(PythonWriter writer, Shape shape,
@@ -76,6 +93,10 @@ public class SmithyNameResolver {
    */
   public static void importSmithyGeneratedTypeForShape(PythonWriter writer, ShapeId shapeId,
       GenerationContext codegenContext) {
+    System.out.println(SmithyNameResolver.getSmithyGeneratedModelLocationForShapeId(
+            shapeId, codegenContext
+        ) +
+        shapeId.getName());
     writer.addImport(
         SmithyNameResolver.getSmithyGeneratedModelLocationForShapeId(
             shapeId, codegenContext
@@ -91,7 +112,7 @@ public class SmithyNameResolver {
    * @param codegenContext
    * @return
    */
-  private static String getSmithyGeneratedModuleFilenameForSmithyShape(ShapeId shapeId,
+  public static String getSmithyGeneratedModuleFilenameForSmithyShape(ShapeId shapeId,
       GenerationContext codegenContext) {
     Shape shape = codegenContext.model().expectShape(shapeId);
     if (shape.hasTrait(ReferenceTrait.class)

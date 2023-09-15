@@ -101,7 +101,7 @@ public class ConfigFileWriter implements CustomFileWriter {
         codegenContext,
         "dafny_config",
         writer,
-        true
+        "config"
     ));
     writer.write("return " + output);
   }
@@ -112,7 +112,7 @@ public class ConfigFileWriter implements CustomFileWriter {
         codegenContext,
         "smithy_config",
         writer,
-        true
+        "config"
     ));
     writer.write("return " + output);
   }

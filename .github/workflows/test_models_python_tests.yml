@@ -86,7 +86,6 @@ jobs:
       - name: Setup Dafny
         uses: dafny-lang/setup-dafny-action@v1.6.1
         with:
-          # A && B || C is the closest thing to an if .. then ... else ... or ?: expression the GitHub Actions syntax supports.
           dafny-version: 'nightly-latest'
 
       - name: Setup Python for running tests

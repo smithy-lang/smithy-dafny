@@ -3,6 +3,7 @@ package software.amazon.polymorph.smithypython.shapevisitor;
 import java.util.Map.Entry;
 import software.amazon.polymorph.smithypython.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithypython.nameresolver.SmithyNameResolver;
+import software.amazon.polymorph.smithypython.nameresolver.Utils;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.model.shapes.BigDecimalShape;
@@ -40,26 +41,26 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
     private final GenerationContext context;
     private final String dataSource;
     private final PythonWriter writer;
-    private final boolean isConfigShape;
+    private final String filename;
 
     /**
-     * @param context       The generation context.
-     * @param dataSource    The in-code location of the data to provide an output of
-     *                      ({@code output.foo}, {@code entry}, etc.)
-     * @param writer        The PythonWriter being used
-     * @param isConfigShape Flag indicating whether the shape being visited is a Config shape,
-     *                      which has special logic around optional members
+     * @param context     The generation context.
+     * @param dataSource  The in-code location of the data to provide an output of
+     *                    ({@code output.foo}, {@code entry}, etc.)
+     * @param writer      The PythonWriter being used
+     * @param filename    Filename where code is being generated.
+     *                    This is used to avoid generating an import for the current file.
      */
     public DafnyToSmithyShapeVisitor(
         GenerationContext context,
         String dataSource,
         PythonWriter writer,
-        boolean isConfigShape
+        String filename
     ) {
       this.context = context;
       this.dataSource = dataSource;
       this.writer = writer;
-      this.isConfigShape = isConfigShape;
+      this.filename = filename;
     }
 
     @Override
@@ -81,14 +82,12 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
       if (shape.hasTrait(ReferenceTrait.class)) {
         return referenceStructureShape(shape);
       }
+      System.out.println("new");
+      System.out.println(shape.getId());
+      System.out.println(SmithyNameResolver.getSmithyGeneratedModuleFilenameForSmithyShape(shape.getId(), context));
+      System.out.println(filename);
       // TODO refactor this logic
-      if (!isConfigShape) {
-        writer.addImport(
-          SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(
-              shape.getId().getNamespace(),
-              context
-          ) + ".models", shape.getId().getName());
-      } else {
+      if (filename.equals("config")) {
         // Generate import if this shape is not in the current namespace
         if (!SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(shape.getId().getNamespace()).contains(context.settings().getModuleName())) {
           writer.addImport(
@@ -97,6 +96,9 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
                 context
             ) + ".config", shape.getId().getName());
         }
+      }
+      else if (!SmithyNameResolver.getSmithyGeneratedModuleFilenameForSmithyShape(shape.getId(), context).contains(filename)) {
+        SmithyNameResolver.importSmithyGeneratedTypeForShape(writer, shape, context);
       }
 
       StringBuilder builder = new StringBuilder();
@@ -121,7 +123,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
                     dataSource + "." + memberName
                         + (memberShape.isOptional() ? ".UnwrapOr(None)" : ""),
                     writer,
-                    isConfigShape)
+                    filename)
             )
         ));
       }
@@ -143,7 +145,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
       // `[list_element for list_element in `DafnyToSmithy(targetShape)``
       builder.append("%1$s".formatted(
           targetShape.accept(
-              new DafnyToSmithyShapeVisitor(context, "list_element", writer, isConfigShape)
+              new DafnyToSmithyShapeVisitor(context, "list_element", writer, filename)
           )));
 
       // Close structure:
@@ -167,7 +169,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
     // `{`DafnyToSmithy(key)`:`
     builder.append("%1$s: ".formatted(
         keyTargetShape.accept(
-            new DafnyToSmithyShapeVisitor(context, "key", writer, isConfigShape)
+            new DafnyToSmithyShapeVisitor(context, "key", writer, filename)
         )
     ));
 
@@ -175,7 +177,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
     // `{`DafnyToSmithy(key)`: `DafnyToSmithy(value)``
     builder.append("%1$s".formatted(
         valueTargetShape.accept(
-            new DafnyToSmithyShapeVisitor(context, "value", writer, isConfigShape)
+            new DafnyToSmithyShapeVisitor(context, "value", writer, filename)
         )
     ));
 

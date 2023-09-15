@@ -186,7 +186,7 @@ public class ShimFileWriter implements CustomFileWriter {
                 codegenContext,
                 "input",
                 writer,
-                false
+                "shim"
             ));
 
             // Generate code that:
@@ -214,7 +214,7 @@ public class ShimFileWriter implements CustomFileWriter {
                 codegenContext,
                 "wrapped_response",
                 writer,
-                false
+                "shim"
             ));
 
             // Generate code that wraps Smithy success shapes as Dafny success shapes
