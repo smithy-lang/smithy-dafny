@@ -3,7 +3,7 @@
     "plugins": {
         "dafny-client-codegen": {
             "service": "simple.types.smithyLong#SimpleTypesLong",
-            "module": "simple_long",
+            "module": "simple_types_long",
             "moduleVersion": "0.0.1",
             "protocol": "aws.polymorph#localService"
         }

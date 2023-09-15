@@ -3,7 +3,7 @@
     "plugins": {
         "dafny-client-codegen": {
             "service": "simple.types.smithyDouble#SimpleTypesDouble",
-            "module": "simple_double",
+            "module": "simple_types_double",
             "moduleVersion": "0.0.1",
             "protocol": "aws.polymorph#localService"
         }
