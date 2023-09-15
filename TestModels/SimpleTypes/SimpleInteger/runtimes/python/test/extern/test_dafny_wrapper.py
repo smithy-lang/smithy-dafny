@@ -13,7 +13,7 @@ import importlib
 # Import modules required for Dafny-generated tests.
 # This is not generated; these must be manually added.
 
-from simple_integer.extern import wrapped_simple_integer
+from simple_types_integer.extern import wrapped_simple_integer
 
 # End import modules required for Dafny-generated tests
 

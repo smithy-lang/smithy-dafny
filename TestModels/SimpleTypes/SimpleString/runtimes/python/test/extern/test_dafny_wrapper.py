@@ -13,7 +13,7 @@ import importlib
 # Import modules required for Dafny-generated tests.
 # This is not generated; these must be manually added.
 
-from simple_string.extern import wrapped_simple_string
+from simple_types_string.extern import wrapped_simple_string
 
 # End import modules required for Dafny-generated tests
 

@@ -13,7 +13,7 @@ import importlib
 # Import modules required for Dafny-generated tests.
 # This is not generated; these must be manually added.
 
-from simple_blob.extern import wrapped_simple_blob
+from simple_types_blob.extern import wrapped_simple_blob
 
 # End import modules required for Dafny-generated tests
 

@@ -2,8 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import simple_types_smithystring_internaldafny_wrapped
-from simple_string.smithygenerated.client import SimpleTypesString
-from simple_string.smithygenerated.shim import SimpleStringShim
+from simple_types_string.smithygenerated.client import SimpleTypesString
+from simple_types_string.smithygenerated.shim import SimpleStringShim
 import Wrappers
 
 @staticmethod

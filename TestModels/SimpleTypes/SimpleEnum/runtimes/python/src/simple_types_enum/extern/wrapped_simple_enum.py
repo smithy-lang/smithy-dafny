@@ -2,8 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import simple_types_smithyenum_internaldafny_wrapped
-from simple_enum.smithygenerated.client import SimpleTypesEnum
-from simple_enum.smithygenerated.shim import SimpleEnumShim
+from simple_types_enum.smithygenerated.client import SimpleTypesEnum
+from simple_types_enum.smithygenerated.shim import SimpleEnumShim
 import Wrappers
 
 @staticmethod

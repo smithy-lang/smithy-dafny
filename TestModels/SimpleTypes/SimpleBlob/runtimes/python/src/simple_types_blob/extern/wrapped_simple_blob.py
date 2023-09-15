@@ -2,8 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import simple_types_blob_internaldafny_wrapped
-from simple_blob.smithygenerated.client import SimpleTypesBlob
-from simple_blob.smithygenerated.shim import SimpleBlobShim
+from simple_types_blob.smithygenerated.client import SimpleTypesBlob
+from simple_types_blob.smithygenerated.shim import SimpleBlobShim
 import Wrappers
 
 @staticmethod

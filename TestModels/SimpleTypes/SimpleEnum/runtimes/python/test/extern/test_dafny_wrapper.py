@@ -13,7 +13,7 @@ import importlib
 # Import modules required for Dafny-generated tests.
 # This is not generated; these must be manually added.
 
-from simple_enum.extern import wrapped_simple_enum
+from simple_types_enum.extern import wrapped_simple_enum
 
 # End import modules required for Dafny-generated tests
 

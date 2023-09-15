@@ -13,7 +13,7 @@ import importlib
 # Import modules required for Dafny-generated tests.
 # This is not generated; these must be manually added.
 
-from simple_boolean.extern import wrapped_simple_boolean
+from simple_types_boolean.extern import wrapped_simple_boolean
 
 # End import modules required for Dafny-generated tests
 
