@@ -44,7 +44,7 @@ public class ErrorsFileWriter implements CustomFileWriter {
         renderError(codegenContext, writer, errorShape);
       }
 
-      // Generate Smithy shapes that wrap each dependency service's modelled and umodelled errors
+      // Generate Smithy shapes that wrap each dependency service's modelled and un-modelled errors
       Optional<LocalServiceTrait> maybeLocalServiceTrait = serviceShape.getTrait(LocalServiceTrait.class);
       if (maybeLocalServiceTrait.isPresent()) {
         LocalServiceTrait localServiceTrait = maybeLocalServiceTrait.get();
@@ -56,7 +56,7 @@ public class ErrorsFileWriter implements CustomFileWriter {
         }
       }
 
-      // Generate Smithy shapes for each of this service's umodelled errors
+      // Generate Smithy shapes for each of this service's un-modelled errors
       writer.write(
           """
              class CollectionOfErrors(ApiError[Literal["CollectionOfErrors"]]):

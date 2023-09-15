@@ -53,11 +53,10 @@ public final class DafnyPythonIntegration implements PythonIntegration {
             // The Smithy-Dafny Python plugin generates a dafnyImplInterface file
             //   and populates it with the relevant information from the model
             //   to interact with the Dafny implementation.
-            // We use a static interface as we cannot plug the model into this RuntimeClientPlugin definition,
-            //   so this class cannot be aware of model shapes.
+            // We use a static interface as we cannot plug the model into this RuntimeClientPlugin
+            //   definition, so this class cannot be aware of model shapes.
             // To work around this, we can point the RuntimeClientPlugin to a static interface
             //   that IS aware of model shapes, and plug the model in there.
-            // TODO: Naming of DafnyImplInterface?
             Collections.singletonList(ConfigProperty.builder()
                 .name("dafnyImplInterface")
                 .type(
@@ -67,9 +66,11 @@ public final class DafnyPythonIntegration implements PythonIntegration {
                     .build()
                 )
                 // nullable is marked as true here.
-                // This allows the Config to be instantiated without providing a plugin.
+                // This allows the Config to be instantiated without providing a plugin, which
+                //   is required because of how Smithy-Python generates the code.
                 // However, this plugin MUST be present before using the client.
-                // Immediately after the Config is instantiated, the client will add the plugin.
+                // Immediately after the Config is instantiated, the Dafny plugin
+                //   will add our plugin to the Config.
                 .nullable(true)
                 .documentation("")
                 .build()
@@ -103,7 +104,7 @@ public final class DafnyPythonIntegration implements PythonIntegration {
 
         // Get set(non-service operation shapes) = set(model operation shapes) - set(service operation shapes)
         // This is related to forking Smithy-Python. TODO: resolve when resolving fork.
-        // Smithy-Python will only generate code for shapes which are used by the service.
+        // Smithy-Python will only generate code for shapes which are used by the protocol.
         // Polymorph has a requirement to generate code for all shapes in the model,
         //   even if the service does not use those shapes.
         // (The use case is that other models may depend on shapes that are defined in this model,

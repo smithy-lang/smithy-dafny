@@ -15,10 +15,6 @@
 
 package software.amazon.polymorph.smithypython;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
@@ -31,14 +27,12 @@ import software.amazon.polymorph.smithypython.shapevisitor.SmithyToDafnyShapeVis
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.WriterDelegator;
-import software.amazon.smithy.model.knowledge.TopDownIndex;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.ErrorTrait;
-import software.amazon.smithy.model.traits.Trait;
 import software.amazon.smithy.python.codegen.ApplicationProtocol;
 import software.amazon.smithy.python.codegen.CodegenUtils;
 import software.amazon.smithy.python.codegen.GenerationContext;
@@ -46,7 +40,6 @@ import software.amazon.smithy.python.codegen.PythonWriter;
 import software.amazon.smithy.python.codegen.SmithyPythonDependency;
 import software.amazon.smithy.python.codegen.integration.ProtocolGenerator;
 import software.amazon.smithy.utils.CodeSection;
-import software.amazon.smithy.utils.Pair;
 import software.amazon.smithy.utils.SmithyUnstableApi;
 
 /**
@@ -101,7 +94,7 @@ public abstract class DafnyPythonProtocolGenerator implements ProtocolGenerator 
     for (OperationShape operation : context.model().getOperationShapes()) {
       Symbol serFunction = getSerializationFunction(context, operation);
       Shape input = context.model().expectShape(operation.getInputShape());
-      Symbol inputSymbol = SmithyNameResolver.transformSmithySymbolForDafnyCodegen(context, input);
+      Symbol inputSymbol = SmithyNameResolver.generateSmithyDafnySymbolForShape(context, input);
 
       // Write out the serialization operation
       delegator.useFileWriter(serFunction.getDefinitionFile(), serFunction.getNamespace(), writer -> {
@@ -171,7 +164,7 @@ public abstract class DafnyPythonProtocolGenerator implements ProtocolGenerator 
     for (OperationShape operation : context.model().getOperationShapes()) {
       Symbol deserFunction = getDeserializationFunction(context, operation);
       Shape output = context.model().expectShape(operation.getOutputShape());
-      Symbol outputSymbol = SmithyNameResolver.transformSmithySymbolForDafnyCodegen(context, output);
+      Symbol outputSymbol = SmithyNameResolver.generateSmithyDafnySymbolForShape(context, output);
 
       delegator.useFileWriter(deserFunction.getDefinitionFile(), deserFunction.getNamespace(), writer -> {
         writer.addImport(Constants.DAFNY_PROTOCOL_PYTHON_FILENAME, Constants.DAFNY_PROTOCOL_RESPONSE);

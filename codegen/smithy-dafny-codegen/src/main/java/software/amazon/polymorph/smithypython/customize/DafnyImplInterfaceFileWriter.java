@@ -25,7 +25,7 @@ public class DafnyImplInterfaceFileWriter implements CustomFileWriter {
       ServiceShape serviceShape, GenerationContext codegenContext) {
     String moduleName = codegenContext.settings().getModuleName();
     String clientName = SmithyNameResolver.clientForService(serviceShape);
-    String implModulePrelude = DafnyNameResolver.getDafnyIndexModuleNamespaceForShape(serviceShape);
+    String implModulePrelude = DafnyNameResolver.getDafnyPythonIndexModuleNameForShape(serviceShape);
 
     codegenContext.writerDelegator()
       .useFileWriter(moduleName + "/dafnyImplInterface.py", "", writer -> {
@@ -68,6 +68,13 @@ public class DafnyImplInterfaceFileWriter implements CustomFileWriter {
       });
   }
 
+  /**
+   * Generates the map from the operation name to the Dafny implementation operation
+   *   for the provided localService.
+   * @param serviceShape
+   * @param codegenContext
+   * @param writer
+   */
   private void generateImplInterfaceOperationMap(
       ServiceShape serviceShape, GenerationContext codegenContext, PythonWriter writer) {
     for (ShapeId operationShapeId : serviceShape.getOperations()) {

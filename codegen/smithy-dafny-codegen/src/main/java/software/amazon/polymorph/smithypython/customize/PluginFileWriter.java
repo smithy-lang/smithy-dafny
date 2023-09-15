@@ -18,7 +18,7 @@ public class PluginFileWriter implements CustomFileWriter {
       ServiceShape serviceShape, GenerationContext codegenContext) {
     String moduleName = codegenContext.settings().getModuleName();
     String clientName = SmithyNameResolver.clientForService(serviceShape);
-    String implModulePrelude = DafnyNameResolver.getDafnyIndexModuleNamespaceForShape(serviceShape);
+    String implModulePrelude = DafnyNameResolver.getDafnyPythonIndexModuleNameForShape(serviceShape);
 
     codegenContext.writerDelegator().useFileWriter(moduleName + "/plugin.py", "", writer -> {
       writer.write(

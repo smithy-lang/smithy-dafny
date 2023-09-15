@@ -7,7 +7,6 @@ import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.UnionShape;
-import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonWriter;
 
 /**
@@ -16,28 +15,64 @@ import software.amazon.smithy.python.codegen.PythonWriter;
  */
 public class DafnyNameResolver {
 
-  public static String getDafnyTypesModuleNamespaceForShape(Shape shape) {
-    return getDafnyTypesModuleNamespaceForShape(shape.getId());
+  /**
+   * Returns the name of the Python module containing Dafny-generated Python code
+   *   from the `types` module from the same Dafny project for the provided Shape.
+   * @param shape
+   * @return
+   */
+  public static String getDafnyPythonTypesModuleNameForShape(Shape shape) {
+    return getDafnyPythonTypesModuleNameForShape(shape.getId());
   }
 
-  public static String getDafnyTypesModuleNamespaceForShape(ShapeId shapeId) {
-    return getDafnyTypesModuleNamespaceForSmithyNamespace(shapeId.getNamespace());
+  /**
+   * Returns the name of the Python module containing Dafny-generated Python code
+   *   from the `types` module from the same Dafny project for the provided Shape.
+   * @param shapeId
+   * @return
+   */
+  public static String getDafnyPythonTypesModuleNameForShape(ShapeId shapeId) {
+    return getDafnyTypesModuleNameForSmithyNamespace(shapeId.getNamespace());
   }
 
-  public static String getDafnyIndexModuleNamespaceForShape(Shape shape) {
-    return getDafnyIndexModuleNamespaceForShape(shape.getId());
+  /**
+   * Returns the name of the Python module containing Dafny-generated Python code
+   *   from the `index` module from the same Dafny project for the provided Shape.
+   * @param shape
+   * @return
+   */
+  public static String getDafnyPythonIndexModuleNameForShape(Shape shape) {
+    return getDafnyPythonIndexModuleNameForShape(shape.getId());
   }
 
-  public static String getDafnyIndexModuleNamespaceForShape(ShapeId shapeId) {
-    return getDafnyIndexModuleNamespaceForSmithyNamespace(shapeId.getNamespace());
+  /**
+   * Returns the name of the Python module containing Dafny-generated Python code
+   *   from the `index` module from the same Dafny project for the provided Shape.
+   * @param shapeId
+   * @return
+   */
+  public static String getDafnyPythonIndexModuleNameForShape(ShapeId shapeId) {
+    return getDafnyIndexModuleNameForSmithyNamespace(shapeId.getNamespace());
   }
 
-  public static String getDafnyIndexModuleNamespaceForSmithyNamespace(String smithyNamespace) {
+  /**
+   * Returns the name of the Python module containing Dafny-generated Python code
+   *   from the `index` module from the same Dafny project for the provided smithyNamespace.
+   * @param smithyNamespace
+   * @return
+   */
+  public static String getDafnyIndexModuleNameForSmithyNamespace(String smithyNamespace) {
     return smithyNamespace.toLowerCase(Locale.ROOT).replace(".", "_") + "_internaldafny";
   }
 
-  public static String getDafnyTypesModuleNamespaceForSmithyNamespace(String smithyNamespace) {
-    return getDafnyIndexModuleNamespaceForSmithyNamespace(smithyNamespace) + "_types";
+  /**
+   * Returns the name of the Python module containing Dafny-generated Python code
+   *   from the `types` module from the same Dafny project for the provided smithyNamespace.
+   * @param smithyNamespace
+   * @return
+   */
+  public static String getDafnyTypesModuleNameForSmithyNamespace(String smithyNamespace) {
+    return getDafnyIndexModuleNameForSmithyNamespace(smithyNamespace) + "_types";
   }
 
   /**
@@ -57,10 +92,20 @@ public class DafnyNameResolver {
     }
   }
 
+  /**
+   * Returns a String representing the Dafny-generated Python type corresponding to the provided Shape.
+   * @param shape
+   * @return
+   */
   public static String getDafnyTypeForShape(Shape shape) {
     return getDafnyTypeForShape(shape.getId());
   }
 
+  /**
+   * Imports the Dafny-generated Python type corresponding to the provided shape.
+   * @param shape
+   * @return
+   */
   private static void importDafnyTypeForShape(PythonWriter writer, Shape shape) {
     importDafnyTypeForShape(writer, shape.getId());
   }
@@ -77,7 +122,7 @@ public class DafnyNameResolver {
     writer.addStdlibImport("module_");
     String name = shapeId.getName();
     if (!Utils.isUnitShape(shapeId)) {
-      writer.addStdlibImport(getDafnyTypesModuleNamespaceForShape(shapeId),
+      writer.addStdlibImport(getDafnyPythonTypesModuleNameForShape(shapeId),
           name + "_" + name, getDafnyTypeForShape(shapeId));
     }
   }
@@ -112,20 +157,30 @@ public class DafnyNameResolver {
     return "I" + resourceShape.getId().getName();
   }
 
+  /**
+   * Imports the Dafny-generated Python type corresponding to the provided resourceShape.
+   * @param resourceShape
+   * @return
+   */
   public static void importDafnyTypeForResourceShape(PythonWriter writer, ResourceShape resourceShape) {
     // When generating a Dafny import, must ALWAYS first import module_ to avoid circular dependencies
     writer.addStdlibImport("module_");
     writer.addStdlibImport(
-        getDafnyTypesModuleNamespaceForShape(resourceShape.getId()),
+        getDafnyPythonTypesModuleNameForShape(resourceShape.getId()),
         getDafnyInterfaceTypeForResourceShape(resourceShape)
     );
   }
 
+  /**
+   * Imports the Dafny-generated Python type corresponding to the provided serviceShape.
+   * @param serviceShape
+   * @return
+   */
   public static void importDafnyTypeForServiceShape(PythonWriter writer, ServiceShape serviceShape) {
     // When generating a Dafny import, must ALWAYS first import module_ to avoid circular dependencies
     writer.addStdlibImport("module_");
     writer.addStdlibImport(
-        getDafnyTypesModuleNamespaceForShape(serviceShape.getId()),
+        getDafnyPythonTypesModuleNameForShape(serviceShape.getId()),
         getDafnyClientInterfaceTypeForServiceShape(serviceShape)
     );
   }
@@ -141,6 +196,11 @@ public class DafnyNameResolver {
     return getDafnyTypeForError(shape.getId());
   }
 
+  /**
+   * Returns a String representing the Dafny-generated Python type corresponding to the provided error shape.
+   * @param shapeId
+   * @return
+   */
   public static String getDafnyTypeForError(ShapeId shapeId) {
     return "Error_" + shapeId.getName();
   }
@@ -158,10 +218,15 @@ public class DafnyNameResolver {
     return unionShape.getId().getName() + "_" + memberShape.getMemberName();
   }
 
+  /**
+   * Imports the Dafny-generated Python type corresponding to the provided unionShape.
+   * @param unionShape
+   * @return
+   */
   public static void importDafnyTypeForUnion(PythonWriter writer,
       UnionShape unionShape, MemberShape memberShape) {
     writer.addStdlibImport(
-        getDafnyTypesModuleNamespaceForShape(unionShape),
+        getDafnyPythonTypesModuleNameForShape(unionShape),
         getDafnyTypeForUnion(unionShape, memberShape)
     );
   }
@@ -176,13 +241,18 @@ public class DafnyNameResolver {
   public static void importDafnyTypeForError(PythonWriter writer, ShapeId shapeId) {
     // When generating a Dafny import, must ALWAYS first import module_ to avoid circular dependencies
     writer.addStdlibImport("module_");
-    writer.addStdlibImport(getDafnyTypesModuleNamespaceForShape(shapeId),
+    writer.addStdlibImport(getDafnyPythonTypesModuleNameForShape(shapeId),
       getDafnyTypeForError(shapeId));
   }
 
+  /**
+   * Imports the generic Dafny error type for the provided namespace.
+   * @param writer
+   * @param namespace
+   */
   public static void importGenericDafnyErrorTypeForNamespace(PythonWriter writer, String namespace) {
     // When generating a Dafny import, must ALWAYS first import module_ to avoid circular dependencies
     writer.addStdlibImport("module_");
-    writer.addStdlibImport(getDafnyTypesModuleNamespaceForSmithyNamespace(namespace), "Error");
+    writer.addStdlibImport(getDafnyTypesModuleNameForSmithyNamespace(namespace), "Error");
   }
 }

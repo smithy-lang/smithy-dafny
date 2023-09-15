@@ -22,15 +22,12 @@ public class DafnyProtocolFileWriter implements CustomFileWriter {
       ServiceShape serviceShape, GenerationContext codegenContext) {
     String moduleName = codegenContext.settings().getModuleName();
 
+    // Collect all `inputShapeIds` to identify all possible types `dafny_operation_input` can take on
     Set<ShapeId> inputShapeIds = new HashSet<>();
-    Set<ShapeId> outputShapeIds = new HashSet<>();
-
     for (ShapeId operationShapeId : serviceShape.getAllOperations()) {
       OperationShape operationShape = codegenContext.model()
           .expectShape(operationShapeId, OperationShape.class);
-
       inputShapeIds.add(operationShape.getInputShape());
-      outputShapeIds.add(operationShape.getOutputShape());
     }
 
     codegenContext.writerDelegator().useFileWriter(moduleName + "/dafny_protocol.py", "", writer -> {
@@ -41,6 +38,9 @@ public class DafnyProtocolFileWriter implements CustomFileWriter {
                         
               class $L:
                   operation_name: str
+                  
+                  # dafny_operation_input can take on any one of the types
+                  # of the input values passed to the Dafny implementation
                   dafny_operation_input: Union[
                       ${C|}
                   ]
@@ -56,10 +56,15 @@ public class DafnyProtocolFileWriter implements CustomFileWriter {
           Constants.DAFNY_PROTOCOL_REQUEST,
           writer.consumer(w -> generateDafnyOperationInputUnionValues(inputShapeIds, w)),
           Constants.DAFNY_PROTOCOL_RESPONSE
-          );
+      );
     });
   }
 
+  /**
+   * Generates the list of types that compose the Union of types that `dafny_operation_input` can take on.
+   * @param inputShapeIds
+   * @param writer
+   */
   private void generateDafnyOperationInputUnionValues(
       Set<ShapeId> inputShapeIds, PythonWriter writer) {
     // If all operations on the service take no inputs,

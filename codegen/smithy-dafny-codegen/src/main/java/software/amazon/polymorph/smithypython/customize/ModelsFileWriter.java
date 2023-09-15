@@ -48,10 +48,20 @@ public class ModelsFileWriter implements CustomFileWriter {
     });
   }
 
+  /**
+   * Generate service operation input and output shapes.
+   * Operations on the service are defined in client.py.
+   * This client will expect to take in the input shape types defined here,
+   *   and will return the output shape types defined here.
+   * @param codegenContext
+   * @param serviceShape
+   * @param writer
+   */
   private void generateServiceOperationModelShapes(
       GenerationContext codegenContext, ServiceShape serviceShape, PythonWriter writer) {
 
-    // Parse operation input and output shapes to retrieve any reference shapes
+    // Parse operation input and output shapes to retrieve any reference shapes,
+    //   which are shapes tagged with the `@aws.polymorph#reference` trait.
     Set<ShapeId> inputAndOutputShapeIds = new HashSet<>();
     for (ShapeId operationShapeId : serviceShape.getOperations()) {
       OperationShape operationShape = codegenContext.model()
@@ -61,10 +71,10 @@ public class ModelsFileWriter implements CustomFileWriter {
     }
     Set<MemberShape> referenceMemberShapes = new HashSet<>();
     referenceMemberShapes.addAll(
-        ModelUtils.findAllDependentMemberReferenceShapes(inputAndOutputShapeIds, codegenContext.model()));
+        ModelUtils.findAllDependentMemberReferenceShapes(inputAndOutputShapeIds, codegenContext.model())
+    );
 
     // Parse reference shapes to retrieve the underlying Resource or Service shape
-    // TODO: Separate service vs resource shapes
     Set<Shape> referenceChildShape = new HashSet<>();
     for (MemberShape referenceMemberShape : referenceMemberShapes) {
       Shape referenceShape = codegenContext.model().expectShape(referenceMemberShape.getTarget());
@@ -75,7 +85,6 @@ public class ModelsFileWriter implements CustomFileWriter {
 
     // For each reference shape, generate an interface and an implementation shape
     for(Shape resourceOrServiceShape : referenceChildShape) {
-      // TODO: Services
       // Write reference interface.
       // We use the `abc` (Abstract Base Class) library to define a stricter interface contract
       //   for references in Python than a standard Python subclass contract.
@@ -112,7 +121,7 @@ public class ModelsFileWriter implements CustomFileWriter {
           )
       );
 
-      // Write implementation
+      // Write implementation for reference shape
       writer.write("""
         class $L(I$L):
             # TODO: typehint
@@ -132,6 +141,13 @@ public class ModelsFileWriter implements CustomFileWriter {
     }
   }
 
+  /**
+   * Generates the expression that validates that a class that claims to implement an interface
+   *   implements all required operations.
+   * @param codegenContext
+   * @param resourceOrService
+   * @param writer
+   */
   private void generateInterfaceSubclasshookExpressionForResourceOrService(
       GenerationContext codegenContext, Shape resourceOrService, PythonWriter writer) {
     if (resourceOrService.asServiceShape().isPresent()) {
@@ -145,6 +161,13 @@ public class ModelsFileWriter implements CustomFileWriter {
     }
   }
 
+  /**
+   * Generates the expression that validates that a class that claims to implement a service interface
+   *   implements all required operations.
+   * @param codegenContext
+   * @param serviceShape
+   * @param writer
+   */
   private void generateInterfaceSubclasshookExpressionForService(
       GenerationContext codegenContext, ServiceShape serviceShape, PythonWriter writer) {
     List<ShapeId> operationList = serviceShape.getOperations().stream().toList();
@@ -153,6 +176,13 @@ public class ModelsFileWriter implements CustomFileWriter {
     generateInterfaceSubclasshookExpressionForOperations(codegenContext, operationListIterator, writer);
   }
 
+  /**
+   * Generates the expression that validates that a class that claims to implement a resource interface
+   *   implements all required operations.
+   * @param codegenContext
+   * @param resourceShape
+   * @param writer
+   */
   private void generateInterfaceSubclasshookExpressionForResource(
       GenerationContext codegenContext, ResourceShape resourceShape, PythonWriter writer) {
     List<ShapeId> operationList = resourceShape.getOperations().stream().toList();
@@ -161,6 +191,13 @@ public class ModelsFileWriter implements CustomFileWriter {
     generateInterfaceSubclasshookExpressionForOperations(codegenContext, operationListIterator, writer);
   }
 
+  /**
+   * Generates the expression that validates that a class that claims to implement the resource
+   *   or service with the provided list of operations implements all of the operations.
+   * @param codegenContext
+   * @param operationListIterator
+   * @param writer
+   */
   private void generateInterfaceSubclasshookExpressionForOperations(
       GenerationContext codegenContext, Iterator<ShapeId> operationListIterator, PythonWriter writer) {
     // For all but the last operation shape, generate `hasattr and callable and`
@@ -177,6 +214,13 @@ public class ModelsFileWriter implements CustomFileWriter {
     }
   }
 
+  /**
+   * Generates abstract methods for all operations on the provided resourceOrService.
+   * This is called from a resourceOrService interface to generate its abstract methods.
+   * @param codegenContext
+   * @param resourceOrService
+   * @param writer
+   */
   private void generateInterfaceOperationFunctionDefinitionForResourceOrService(
       GenerationContext codegenContext, Shape resourceOrService, PythonWriter writer) {
     Set<ShapeId> operationShapeIds;
@@ -197,6 +241,19 @@ public class ModelsFileWriter implements CustomFileWriter {
     }
   }
 
+  /**
+   * Generates methods for all operations on the provided resourceOrService.
+   * The generated method takes in a native type input and returns a native type output.
+   * Internally, the method will convert the native type to a Dafny type,
+   *   call the Dafny implementation with the Dafny type,
+   *   receive a Dafny type from the Dafny implementation,
+   *   convert the Dafny type back to the corresponding native type,
+   *   and then return the native type.
+   * This is called from a concrete resourceOrService.
+   * @param codegenContext
+   * @param resourceOrService
+   * @param writer
+   */
   private void generateSmithyOperationFunctionDefinitionForResourceOrService(
       GenerationContext codegenContext, Shape resourceOrService, PythonWriter writer) {
     Set<ShapeId> operationShapeIds;
@@ -227,6 +284,8 @@ public class ModelsFileWriter implements CustomFileWriter {
       ));
 
       Shape targetShape = codegenContext.model().expectShape(operationShape.getOutputShape());
+      // Generate output code converting the return value of the Dafny implementation into
+      // its corresponding native-modelled type.
       String output = targetShape.accept(new DafnyToSmithyShapeVisitor(
           codegenContext,
           "dafny_output",
@@ -245,6 +304,13 @@ public class ModelsFileWriter implements CustomFileWriter {
     }
   }
 
+  /**
+   * Writes code modelling inputs and outputs for the provided operationShapeIds.
+   * These operationShapeIds MUST NOT be members of the localService provided in the
+   *   `customizeFileForServiceShape` method in this file.
+   * @param operationShapeIds
+   * @param codegenContext
+   */
   @Override
   public void customizeFileForNonServiceOperationShapes(Set<ShapeId> operationShapeIds, GenerationContext codegenContext) {
     // Write out a Smithy-modelled structure for all operation shapes.

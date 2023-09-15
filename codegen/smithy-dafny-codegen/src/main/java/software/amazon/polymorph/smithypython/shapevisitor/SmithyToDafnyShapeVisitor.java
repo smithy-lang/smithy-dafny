@@ -306,19 +306,19 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
 
   protected String referenceServiceShape(ServiceShape serviceShape) {
     DafnyNameResolver.importDafnyTypeForServiceShape(writer, serviceShape);
-    writer.addStdlibImport(SmithyNameResolver.getSmithyGeneratedConfigFilepathForSmithyNamespace(
+    writer.addStdlibImport(SmithyNameResolver.getSmithyGeneratedConfigModulePathForSmithyNamespace(
         serviceShape.getId().getNamespace(), context));
-    writer.addStdlibImport(DafnyNameResolver.getDafnyIndexModuleNamespaceForShape(serviceShape));
+    writer.addStdlibImport(DafnyNameResolver.getDafnyPythonIndexModuleNameForShape(serviceShape));
     // `my_module_client = my_module_internaldafny.MyModuleClient()`
     writer.write("$L_client = $L.$L()",
         SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(serviceShape.getId().getNamespace()),
-        DafnyNameResolver.getDafnyIndexModuleNamespaceForShape(serviceShape),
+        DafnyNameResolver.getDafnyPythonIndexModuleNameForShape(serviceShape),
         DafnyNameResolver.getDafnyClientTypeForServiceShape(serviceShape)
     );
     // `my_module_client.ctor__(my_module.smithygenerated.config.smithy_config_to_dafny_config(input._config))`
     writer.write("$L_client.ctor__($L.smithy_config_to_dafny_config($L._config))",
         SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(serviceShape.getId().getNamespace()),
-        SmithyNameResolver.getSmithyGeneratedConfigFilepathForSmithyNamespace(
+        SmithyNameResolver.getSmithyGeneratedConfigModulePathForSmithyNamespace(
             serviceShape.getId().getNamespace(), context),
         dataSource
     );
@@ -330,7 +330,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
     DafnyNameResolver.importDafnyTypeForResourceShape(writer, resourceShape);
 
     // Resource-specific imports
-    writer.addStdlibImport(DafnyNameResolver.getDafnyIndexModuleNamespaceForShape(resourceShape));
+    writer.addStdlibImport(DafnyNameResolver.getDafnyPythonIndexModuleNameForShape(resourceShape));
     writer.addStdlibImport(resourceShape.getId().getName(),
         resourceShape.getId().getName(),
         "Dafny" + resourceShape.getId().getName());
