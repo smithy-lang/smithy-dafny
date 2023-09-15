@@ -1,13 +1,34 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <RootNamespace>AWS Cryptographic Materials Provider Library</RootNamespace>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>disable</Nullable>
-        <LangVersion>10</LangVersion>
-        <TargetFrameworks>net6.0</TargetFrameworks>
-        <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
-    </PropertyGroup>
+      <OutputType>Library</OutputType>
+      <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+      <IsPackable>true</IsPackable>
+      
+      <Version>1.0.0</Version>
+      
+      <AssemblyName>AWS.Cryptography.Material.Providers.Library</AssemblyName>
+      <PackageId>AWS.Cryptography.Material.Providers.Library</PackageId>
+      <Title>AwsCryptographicMaterialProvidersLibrary</Title>
+      <Description>The AWS Cryptographic Material Providers Library abstracts lower level cryptographic materials management of encryption and decryption materials. It uses cryptographic best practices to protect the data keys that protect your data.</Description>
+      <Authors>Amazon Web Services</Authors>
+      <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+      <RepositoryUrl>https://github.com/aws/aws-cryptographic-material-providers-library-net</RepositoryUrl>
+      <PackageIcon>icon.png</PackageIcon>
+      <PackageReadmeFile>README.md</PackageReadmeFile>
+      <PackageTags>AWS;Amazon;KMS;Encryption;Cryptography</PackageTags>
+      
+      <ImplicitUsings>enable</ImplicitUsings>
+      <Nullable>disable</Nullable>
+      <LangVersion>10</LangVersion>
+      <TargetFrameworks>net6.0</TargetFrameworks>
+      <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+      <!--
+        Ignore errors from generated code. Ideally this would be scoped to just the relevant files.
+        CS0105: duplicate namespace, CS0618: obsolete members
+      -->
+      <NoWarn>CS0105,CS0618</NoWarn>
+  </PropertyGroup>
 
     <ItemGroup>
         <PackageReference Include="AWSSDK.Core" Version="3.7.103" />
@@ -34,16 +55,8 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Generated" />
+      <None Include="..\..\..\icon.png" Pack="true" PackagePath="" />
+      <None Include="..\..\..\README.md" Pack="true" PackagePath="" />
     </ItemGroup>
-
-    <!--
-      TODO .NET assemblies are expected to have an ICON.
-      This MUST be replaced before launch.
-    -->
-    <!-- <ItemGroup>
-      <None Include="..\icon.png" Pack="true" PackagePath="" />
-      <None Include="..\README.md" Pack="true" PackagePath="" />
-    </ItemGroup> -->
 
 </Project>
