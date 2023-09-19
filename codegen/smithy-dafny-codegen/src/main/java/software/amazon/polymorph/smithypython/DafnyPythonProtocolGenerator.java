@@ -26,6 +26,7 @@ import software.amazon.polymorph.smithypython.shapevisitor.DafnyToSmithyShapeVis
 import software.amazon.polymorph.smithypython.shapevisitor.SmithyToDafnyShapeVisitor;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.smithy.codegen.core.Symbol;
+import software.amazon.smithy.codegen.core.SymbolReference;
 import software.amazon.smithy.codegen.core.WriterDelegator;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
@@ -49,9 +50,37 @@ import software.amazon.smithy.utils.SmithyUnstableApi;
 @SmithyUnstableApi
 public abstract class DafnyPythonProtocolGenerator implements ProtocolGenerator {
 
+  /**
+   * Create a Symbol representing shapes inside the generated .dafny_protocol file.
+   * @param symbolName
+   * @return
+   */
+  private static Symbol createDafnyApplicationProtocolSymbol(String symbolName) {
+    return Symbol.builder()
+        .namespace(Constants.DAFNY_PROTOCOL_PYTHON_FILENAME, ".")
+        .name(symbolName)
+        .build();
+  }
+
+  /**
+   * Creates the Dafny ApplicationProtocol object.
+   * Smithy-Python requests this object as part of the ProtocolGenerator implementation.
+   *
+   * @return Returns the created application protocol.
+   */
   @Override
   public ApplicationProtocol getApplicationProtocol() {
-    return DafnyPythonIntegration.createDafnyApplicationProtocol();
+    return new ApplicationProtocol(
+        // Define the `dafny` ApplicationProtocol.
+        // This protocol's request and response shapes are defined in DafnyProtocolFileWriter.
+        Constants.DAFNY_APPLICATION_PROTOCOL_NAME,
+        SymbolReference.builder()
+            .symbol(createDafnyApplicationProtocolSymbol(Constants.DAFNY_PROTOCOL_REQUEST))
+            .build(),
+        SymbolReference.builder()
+            .symbol(createDafnyApplicationProtocolSymbol(Constants.DAFNY_PROTOCOL_RESPONSE))
+            .build()
+    );
   }
 
   /**

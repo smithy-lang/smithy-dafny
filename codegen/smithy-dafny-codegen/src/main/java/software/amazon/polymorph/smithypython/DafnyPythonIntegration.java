@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import software.amazon.polymorph.smithypython.Constants.GenerationType;
 import software.amazon.polymorph.smithypython.customize.ConfigFileWriter;
 import software.amazon.polymorph.smithypython.customize.DafnyImplInterfaceFileWriter;
 import software.amazon.polymorph.smithypython.customize.DafnyProtocolFileWriter;
@@ -27,6 +28,7 @@ import software.amazon.polymorph.smithypython.customize.ErrorsFileWriter;
 import software.amazon.polymorph.smithypython.customize.ModelsFileWriter;
 import software.amazon.polymorph.smithypython.customize.PluginFileWriter;
 import software.amazon.polymorph.smithypython.customize.ShimFileWriter;
+import software.amazon.polymorph.smithypython.extensions.DafnyPythonSettings;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.codegen.core.Symbol;
@@ -46,7 +48,8 @@ import software.amazon.smithy.utils.CodeInterceptor;
 import software.amazon.smithy.utils.CodeSection;
 
 public final class DafnyPythonIntegration implements PythonIntegration {
-    private RuntimeClientPlugin dafnyImplRuntimeClientPlugin = RuntimeClientPlugin.builder()
+
+    private final RuntimeClientPlugin dafnyImplRuntimeClientPlugin = RuntimeClientPlugin.builder()
         .configProperties(
             // Adds a new field in the client class' config.
             // `dafnyImplInterface` is a static interface for accessing Dafny implementation code.
@@ -63,7 +66,7 @@ public final class DafnyPythonIntegration implements PythonIntegration {
                     Symbol.builder()
                         .name("DafnyImplInterface")
                         .namespace(".dafnyImplInterface", ".")
-                    .build()
+                        .build()
                 )
                 // nullable is marked as true here.
                 // This allows the Config to be instantiated without providing a plugin, which
@@ -75,15 +78,15 @@ public final class DafnyPythonIntegration implements PythonIntegration {
                 .documentation("")
                 .build()
             )
-         ).pythonPlugin(
-             SymbolReference.builder()
-             .symbol(
-                 Symbol.builder()
-                 .name("set_config_impl")
-                 .namespace(".plugin", ".")
-                 .build())
-             .build()
-         )
+        ).pythonPlugin(
+            SymbolReference.builder()
+                .symbol(
+                    Symbol.builder()
+                        .name("set_config_impl")
+                        .namespace(".plugin", ".")
+                        .build())
+                .build()
+        )
         .build();
 
     @Override
@@ -92,13 +95,21 @@ public final class DafnyPythonIntegration implements PythonIntegration {
         return List.of(new SendRequestInterceptor());
     }
 
+    /**
+     * Generate all Smithy-Dafny custom Python code.
+     *
+     * @param codegenContext Code generation context that can be queried when writing additional
+     *                       files.
+     */
     @Override
     public void customize(GenerationContext codegenContext) {
         // Generate for service shapes with localService trait
         Set<ServiceShape> serviceShapes = Set.of(
-            codegenContext.model().expectShape(codegenContext.settings().getService()).asServiceShape().get());
+            codegenContext.model().expectShape(codegenContext.settings().getService())
+                .asServiceShape().get());
 
-        ServiceShape serviceShape = codegenContext.model().expectShape(codegenContext.settings().getService()).asServiceShape().get();
+        ServiceShape serviceShape = codegenContext.model()
+            .expectShape(codegenContext.settings().getService()).asServiceShape().get();
 
         customizeForServiceShape(serviceShape, codegenContext);
 
@@ -113,58 +124,75 @@ public final class DafnyPythonIntegration implements PythonIntegration {
             .map(EntityShape::getOperations)
             .flatMap(Collection::stream)
             .collect(Collectors.toSet());
-        Set<ShapeId> nonServiceOperationShapes = codegenContext.model().getOperationShapes().stream()
+        Set<ShapeId> nonServiceOperationShapes = codegenContext.model().getOperationShapes()
+            .stream()
             .map(Shape::getId)
-            .filter(operationShapeId -> operationShapeId.getNamespace().equals(serviceShape.getId().getNamespace()))
+            .filter(operationShapeId -> operationShapeId.getNamespace()
+                .equals(serviceShape.getId().getNamespace()))
             .collect(Collectors.toSet());
         nonServiceOperationShapes.removeAll(serviceOperationShapes);
 
         customizeForNonServiceOperationShapes(nonServiceOperationShapes, codegenContext);
     }
 
-    private void customizeForNonServiceOperationShapes(Set<ShapeId> operationShapeIds, GenerationContext codegenContext) {
-        new ModelsFileWriter().customizeFileForNonServiceOperationShapes(operationShapeIds, codegenContext);
-    }
-
-    private void customizeForServiceShape(ServiceShape serviceShape, GenerationContext codegenContext) {
-        new PluginFileWriter().customizeFileForServiceShape(serviceShape, codegenContext);
-        new DafnyImplInterfaceFileWriter().customizeFileForServiceShape(serviceShape, codegenContext);
-        new DafnyProtocolFileWriter().customizeFileForServiceShape(serviceShape, codegenContext);
-        new ShimFileWriter().customizeFileForServiceShape(serviceShape, codegenContext);
-        new ErrorsFileWriter().customizeFileForServiceShape(serviceShape, codegenContext);
-        new ModelsFileWriter().customizeFileForServiceShape(serviceShape, codegenContext);
-        new ConfigFileWriter().customizeFileForServiceShape(serviceShape, codegenContext);
-    }
-
     /**
-     * Creates the Dafny ApplicationProtocol object.
+     * Generate any code for operation shapes that are NOT part of the localService.
      *
-     * @return Returns the created application protocol.
+     * @param operationShapeIds
+     * @param codegenContext
      */
-    public static ApplicationProtocol createDafnyApplicationProtocol() {
-        return new ApplicationProtocol(
-            // Define the `dafny` ApplicationProtocol.
-            // This protocol's request and response shapes are defined in DafnyProtocolFileWriter.
-            Constants.DAFNY_APPLICATION_PROTOCOL_NAME,
-            SymbolReference.builder()
-                .symbol(createDafnyApplicationProtocolSymbol(Constants.DAFNY_PROTOCOL_REQUEST))
-                .build(),
-            SymbolReference.builder()
-                .symbol(createDafnyApplicationProtocolSymbol(Constants.DAFNY_PROTOCOL_RESPONSE))
-                .build()
-        );
+    private void customizeForNonServiceOperationShapes(Set<ShapeId> operationShapeIds,
+            GenerationContext codegenContext) {
+        if (shouldGenerateLocalService(codegenContext)) {
+            new ModelsFileWriter().customizeFileForNonServiceOperationShapes(operationShapeIds,
+                codegenContext);
+        }
     }
 
     /**
-     * Create a Symbol representing shapes inside the generated .dafny_protocol file.
-     * @param symbolName
+     * Generate any code for the localService.
+     *
+     * @param serviceShape
+     * @param codegenContext
+     */
+    private void customizeForServiceShape(ServiceShape serviceShape,
+            GenerationContext codegenContext) {
+        if (shouldGenerateLocalService(codegenContext)) {
+            new PluginFileWriter().customizeFileForServiceShape(serviceShape, codegenContext);
+            new DafnyImplInterfaceFileWriter().customizeFileForServiceShape(serviceShape,
+                codegenContext);
+            new DafnyProtocolFileWriter().customizeFileForServiceShape(serviceShape,
+                codegenContext);
+            new ErrorsFileWriter().customizeFileForServiceShape(serviceShape, codegenContext);
+            new ModelsFileWriter().customizeFileForServiceShape(serviceShape, codegenContext);
+            new ConfigFileWriter().customizeFileForServiceShape(serviceShape, codegenContext);
+        } if (shouldGenerateTestShim(codegenContext)) {
+            new ShimFileWriter().customizeFileForServiceShape(serviceShape, codegenContext);
+        }
+    }
+
+    /**
+     * Returns true if Smithy-Dafny should generate code modelling a Dafny-generated Python localService.
+     * @param codegenContext
      * @return
      */
-    private static Symbol createDafnyApplicationProtocolSymbol(String symbolName) {
-        return Symbol.builder()
-            .namespace(Constants.DAFNY_PROTOCOL_PYTHON_FILENAME, ".")
-            .name(symbolName)
-            .build();
+    private boolean shouldGenerateLocalService(GenerationContext codegenContext) {
+        // For local service OR wrapped local service test, generate local service
+        return ((DafnyPythonSettings) codegenContext.settings()).getGenerationType()
+                    .equals(GenerationType.LOCAL_SERVICE)
+                || ((DafnyPythonSettings) codegenContext.settings()).getGenerationType()
+                    .equals(GenerationType.WRAPPED_LOCAL_SERVICE_TEST);
+    }
+
+    /**
+     * Returns true if Smithy-Dafny should generate code for a shim testing the localService.
+     * @param codegenContext
+     * @return
+     */
+    private boolean shouldGenerateTestShim(GenerationContext codegenContext) {
+        // For wrapped local service test, generate the Shim
+        return ((DafnyPythonSettings) codegenContext.settings()).getGenerationType()
+            .equals(GenerationType.WRAPPED_LOCAL_SERVICE_TEST);
     }
 
     @Override

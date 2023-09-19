@@ -204,11 +204,13 @@ _polymorph_wrapped:
 	$(OUTPUT_DAFNY_WRAPPED) \
 	$(OUTPUT_DOTNET_WRAPPED) \
 	$(OUTPUT_JAVA_WRAPPED) \
+	$(OUTPUT_PYTHON_WRAPPED) \
 	--model $(LIBRARY_ROOT)/Model \
 	--dependent-model $(PROJECT_ROOT)/dafny-dependencies/Model \
 	$(patsubst %, --dependent-model $(PROJECT_ROOT)/%/Model, $(LIBRARIES)) \
 	--namespace $(NAMESPACE) \
 	$(OUTPUT_LOCAL_SERVICE) \
+	$(SMITHY_BUILD) \
 	$(AWS_SDK_CMD)";
 
 _polymorph_dependencies:
@@ -254,9 +256,13 @@ polymorph_java: _polymorph_wrapped
 polymorph_java: POLYMORPH_LANGUAGE_TARGET=java
 polymorph_java: _polymorph_dependencies
 
-polymorph_python: OUTPUT_PYTHON=--output-python $(LIBRARY_ROOT)/runtimes/python/smithygenerated
+# For python, _polymorph_wrapped includes _polymorph (i.e. local service generation AND wrapped test)
+# To generate only the local service, use the `_polymorph` target
+# There is not a good way to generate only the wrapped test without the local service...
 polymorph_python: SMITHY_BUILD=--smithy-build $(LIBRARY_ROOT)/smithy-build.json
-polymorph_python: _polymorph
+polymorph_python: OUTPUT_PYTHON_WRAPPED=--output-python $(LIBRARY_ROOT)/runtimes/python/smithygenerated
+polymorph_python: OUTPUT_LOCAL_SERVICE=--local-service-test
+polymorph_python: _polymorph_wrapped
 polymorph_python:
 	rm -rf runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated
 	mkdir runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated
