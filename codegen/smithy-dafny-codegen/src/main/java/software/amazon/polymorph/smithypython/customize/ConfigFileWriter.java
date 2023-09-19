@@ -1,17 +1,13 @@
 package software.amazon.polymorph.smithypython.customize;
 
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import software.amazon.polymorph.smithypython.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithypython.shapevisitor.DafnyToSmithyShapeVisitor;
 import software.amazon.polymorph.smithypython.shapevisitor.SmithyToDafnyShapeVisitor;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.smithy.model.shapes.MemberShape;
-import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
-import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonWriter;
@@ -38,6 +34,9 @@ public class ConfigFileWriter implements CustomFileWriter {
           writer.write(
               """
               class $L(Config):
+                  '''
+                  Smithy-modelled localService Config shape for this localService.
+                  '''
                   # TODO: Add types to Config members
                   ${C|}
                   
@@ -46,9 +45,17 @@ public class ConfigFileWriter implements CustomFileWriter {
                       ${C|}
                     
               def dafny_config_to_smithy_config(dafny_config) -> $L:
+                  '''
+                  Converts the provided Dafny shape for this localService's config
+                  into the corresponding Smithy-modelled shape.
+                  '''
                   ${C|}
                   
               def smithy_config_to_dafny_config(smithy_config) -> $L:
+                  '''
+                  Converts the provided Smithy-modelled shape for this localService's config
+                  into the corresponding Dafny shape.
+                  '''
                   ${C|}
               """,
               configShape.getId().getName(),
@@ -63,6 +70,13 @@ public class ConfigFileWriter implements CustomFileWriter {
         });
   }
 
+  /**
+   * Generates the members of the Smithy-modelled localService Config shape's class.
+   * Called when writing the class.
+   * @param configShape
+   * @param codegenContext
+   * @param writer
+   */
   private void generateConfigClassFields(
       StructureShape configShape, GenerationContext codegenContext, PythonWriter writer) {
     Map<String, MemberShape> memberShapeSet = configShape.getAllMembers();
@@ -77,6 +91,13 @@ public class ConfigFileWriter implements CustomFileWriter {
     }
   }
 
+  /**
+   * Generates constructor parameters for the localService's Config class.
+   * Called when writing parameters for the Config class' constructor (__init__ method).
+   * @param configShape
+   * @param codegenContext
+   * @param writer
+   */
   private void generateConfigConstructorParameters(
       StructureShape configShape, GenerationContext codegenContext, PythonWriter writer) {
     Map<String, MemberShape> memberShapeSet = configShape.getAllMembers();
@@ -86,6 +107,13 @@ public class ConfigFileWriter implements CustomFileWriter {
     }
   }
 
+  /**
+   * Generates assignments to fields for the localService's Config class.
+   * Called when writing the Config class' constructor.
+   * @param configShape
+   * @param codegenContext
+   * @param writer
+   */
   private void generateConfigConstructorFieldAssignments(
       StructureShape configShape, GenerationContext codegenContext, PythonWriter writer) {
     Map<String, MemberShape> memberShapeSet = configShape.getAllMembers();
@@ -95,24 +123,38 @@ public class ConfigFileWriter implements CustomFileWriter {
     }
   }
 
+  /**
+   * Generates the body converting the Dafny Config class (from internaldafny code)
+   *   to the Smithy-modelled Config class defined in this file.
+   * @param configShape
+   * @param codegenContext
+   * @param writer
+   */
   private void generateDafnyConfigToSmithyConfigFunctionBody(
       StructureShape configShape, GenerationContext codegenContext, PythonWriter writer) {
     String output = configShape.accept(new DafnyToSmithyShapeVisitor(
         codegenContext,
         "dafny_config",
         writer,
-        true
+        "config"
     ));
     writer.write("return " + output);
   }
 
+  /**
+   * Generates the body converting the Smithy-modelled Config class defined in this file
+   *   to the Dafny Config class.
+   * @param configShape
+   * @param codegenContext
+   * @param writer
+   */
   private void generateSmithyConfigToDafnyConfigFunctionBody(
       StructureShape configShape, GenerationContext codegenContext, PythonWriter writer) {
     String output = configShape.accept(new SmithyToDafnyShapeVisitor(
         codegenContext,
         "smithy_config",
         writer,
-        true
+        "config"
     ));
     writer.write("return " + output);
   }

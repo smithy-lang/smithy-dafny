@@ -21,14 +21,14 @@ import software.amazon.smithy.python.codegen.PythonWriter;
 /**
  * Writes the shim.py file.
  * The shim wraps the client.py implementation (which itself wraps the underlying Dafny implementation).
- * Other Dafny-generated Python code will use the Shim class to interact with this project's Dafny implementation.
+ * Other Dafny-generated Python code will use the shim to interact with this project's Dafny implementation.
  */
 public class ShimFileWriter implements CustomFileWriter {
 
   @Override
   public void customizeFileForServiceShape(
       ServiceShape serviceShape, GenerationContext codegenContext) {
-    String typesModulePrelude = DafnyNameResolver.getDafnyTypesModuleNamespaceForShape(serviceShape.getId());
+    String typesModulePrelude = DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(serviceShape.getId());
     String moduleName = codegenContext.settings().getModuleName();
     codegenContext.writerDelegator().useFileWriter(moduleName + "/shim.py", "", writer -> {
       writer.addImport(".errors", "ServiceError");
@@ -43,6 +43,10 @@ public class ShimFileWriter implements CustomFileWriter {
           import $L.smithygenerated.client as client_impl
                           
           def smithy_error_to_dafny_error(e: ServiceError):
+              '''
+              Converts the provided native Smithy-modelled error
+              into the corresponding Dafny error.
+              '''
               ${C|}
                           
           class $L($L.$L):
@@ -52,7 +56,7 @@ public class ShimFileWriter implements CustomFileWriter {
               ${C|}
               
               """, typesModulePrelude, moduleName,
-          writer.consumer(w -> generateErrorsBlock(codegenContext, serviceShape, w)),
+          writer.consumer(w -> generateSmithyErrorToDafnyErrorBlock(codegenContext, serviceShape, w)),
           SmithyNameResolver.shimForService(serviceShape),
           typesModulePrelude, DafnyNameResolver.getDafnyClientInterfaceTypeForServiceShape(serviceShape),
           writer.consumer(w -> generateOperationsBlock(codegenContext, serviceShape, w))
@@ -60,7 +64,13 @@ public class ShimFileWriter implements CustomFileWriter {
     });
   }
 
-  private void generateErrorsBlock(
+  /**
+   * Generate the method body for the `smithy_error_to_dafny_error` method.
+   * @param codegenContext
+   * @param serviceShape
+   * @param writer
+   */
+  private void generateSmithyErrorToDafnyErrorBlock(
       GenerationContext codegenContext, ServiceShape serviceShape, PythonWriter writer) {
 
     // Write modelled error converters for this service
@@ -78,7 +88,7 @@ public class ShimFileWriter implements CustomFileWriter {
                   return $L.$L(message=e.message)
               """,
           errorShapeId.getName(),
-          DafnyNameResolver.getDafnyTypesModuleNamespaceForShape(errorShapeId),
+          DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(errorShapeId),
           DafnyNameResolver.getDafnyTypeForError(errorShapeId)
       );
     }
@@ -114,7 +124,7 @@ public class ShimFileWriter implements CustomFileWriter {
                       return $L.Error_$L($L(e.message))
                   """,
               serviceDependencyShapeId.getName(),
-              DafnyNameResolver.getDafnyTypesModuleNamespaceForShape(serviceShape),
+              DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(serviceShape),
               serviceDependencyShapeId.getName(),
               SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(
                   serviceDependencyShapeId.getNamespace())
@@ -129,17 +139,29 @@ public class ShimFileWriter implements CustomFileWriter {
             if isinstance(e, CollectionOfErrors):
                 return $L.Error_CollectionOfErrors(message=e.message, list=e.list)
             """,
-        DafnyNameResolver.getDafnyTypesModuleNamespaceForShape(serviceShape.getId())
+        DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(serviceShape.getId())
     );
     // Add service-specific OpaqueError
     writer.write("""
             if isinstance(e, OpaqueError):
                 return $L.Error_Opaque(obj=e.obj)
             """,
-        DafnyNameResolver.getDafnyTypesModuleNamespaceForShape(serviceShape.getId())
+        DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(serviceShape.getId())
     );
   }
 
+  /**
+   * Generate shim methods for all operations in the localService.
+   * Each method will take in a Dafny type as input and return a Dafny type as output.
+   * Internally, each method will convert the Dafny input into native Smithy-modelled input,
+   *   call the native Smithy client with the native input,
+   *   receive a native Smithy-modelled output from the client,
+   *   convert the native output type into its corresponding Dafny type,
+   *   and return the Dafny type.
+   * @param codegenContext
+   * @param serviceShape
+   * @param writer
+   */
   private void generateOperationsBlock(
       GenerationContext codegenContext, ServiceShape serviceShape, PythonWriter writer) {
 
@@ -186,7 +208,7 @@ public class ShimFileWriter implements CustomFileWriter {
                 codegenContext,
                 "input",
                 writer,
-                false
+                "shim"
             ));
 
             // Generate code that:
@@ -214,7 +236,7 @@ public class ShimFileWriter implements CustomFileWriter {
                 codegenContext,
                 "wrapped_response",
                 writer,
-                false
+                "shim"
             ));
 
             // Generate code that wraps Smithy success shapes as Dafny success shapes

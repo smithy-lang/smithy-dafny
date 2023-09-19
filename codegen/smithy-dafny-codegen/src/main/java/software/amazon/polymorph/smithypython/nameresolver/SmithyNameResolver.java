@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.codegen.core.CodegenContext;
+import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
@@ -22,6 +23,12 @@ import software.amazon.smithy.python.codegen.PythonWriter;
  */
 public class SmithyNameResolver {
 
+  /**
+   * Returns the name of the Smithy-generated client for the provided serviceShape.
+   * The serviceShape SHOULD be a localService.
+   * @param serviceShape
+   * @return
+   */
   public static String clientForService(ServiceShape serviceShape) {
       if (serviceShape.hasTrait(LocalServiceTrait.class)) {
           return serviceShape.expectTrait(LocalServiceTrait.class).getSdkId() + "Client";
@@ -30,6 +37,12 @@ public class SmithyNameResolver {
       }
   }
 
+  /**
+   * Returns the name of the Smithy-generated shim for the provided serviceShape.
+   * The serviceShape SHOULD be a localService.
+   * @param serviceShape
+   * @return
+   */
   public static String shimForService(ServiceShape serviceShape) {
       if (serviceShape.hasTrait(LocalServiceTrait.class)) {
           return serviceShape.expectTrait(LocalServiceTrait.class).getSdkId() + "Shim";
@@ -38,13 +51,26 @@ public class SmithyNameResolver {
       }
   }
 
+  /**
+   * Returns the name of the Python module containing Smithy code for the provided smithyNamespace.
+   * @param smithyNamespace
+   * @return
+   */
   public static String getPythonModuleNamespaceForSmithyNamespace(String smithyNamespace) {
     return smithyNamespace.toLowerCase(Locale.ROOT).replace(".", "_");
   }
 
+  /**
+   * For a given ShapeId, returns a String representing the path where that shape is generated.
+   * The return value can be directly used to import that shape; e.g.
+   *   `from {returnValue} import {my_shape.getId()}`
+   * @param shape
+   * @param codegenContext
+   * @return
+   */
   public static String getSmithyGeneratedModelLocationForShape(Shape shape,
       GenerationContext codegenContext) {
-    return getSmithyGeneratedModelLocationForShapeId(shape.getId(), codegenContext);
+    return getSmithyGeneratedModelLocationForShape(shape.getId(), codegenContext);
   }
 
   /**
@@ -55,14 +81,46 @@ public class SmithyNameResolver {
    * @param codegenContext
    * @return
    */
-  public static String getSmithyGeneratedModelLocationForShapeId(ShapeId shapeId,
+  public static String getSmithyGeneratedModelLocationForShape(ShapeId shapeId,
       GenerationContext codegenContext) {
+    if (Utils.isUnitShape(shapeId)) {
+      return ".models";
+    }
     String moduleNamespace = getSmithyGeneratedModuleNamespaceForSmithyNamespace(shapeId.getNamespace(),
         codegenContext);
     String moduleFilename = getSmithyGeneratedModuleFilenameForSmithyShape(shapeId, codegenContext);
     return moduleNamespace + moduleFilename;
   }
 
+  /**
+   * Generates a Symbol for the provided shape.
+   * The default Smithy-Python SymbolProvider assumes that all shapes are in the current namespace,
+   *   and does not understand how to generate Symbols for Shapes in other namespaces.
+   * Its behavior must be overridden so Smithy-Dafny generates correct Python code in cases
+   *   where the shape is in a dependency namespace.
+   * @param context
+   * @param shape
+   * @return
+   */
+  public static Symbol generateSmithyDafnySymbolForShape(GenerationContext context, Shape shape) {
+    Symbol shapeSymbol = context.symbolProvider().toSymbol(shape);
+    if (Utils.isUnitShape(shape.getId())) {
+      return shapeSymbol;
+    } else {
+      return shapeSymbol.toBuilder()
+          .namespace(SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(
+              shape.getId().getNamespace(), context) + ".models", ".")
+          .definitionFile("")
+          .build();
+    }
+  }
+
+  /**
+   * For a given ShapeId and PythonWriter, writes an import for the corresponding generated shape.
+   * @param shape
+   * @param codegenContext
+   * @param writer
+   */
   public static void importSmithyGeneratedTypeForShape(PythonWriter writer, Shape shape,
       GenerationContext codegenContext) {
     importSmithyGeneratedTypeForShape(writer, shape.getId(), codegenContext);
@@ -76,8 +134,12 @@ public class SmithyNameResolver {
    */
   public static void importSmithyGeneratedTypeForShape(PythonWriter writer, ShapeId shapeId,
       GenerationContext codegenContext) {
+    System.out.println(SmithyNameResolver.getSmithyGeneratedModelLocationForShape(
+            shapeId, codegenContext
+        ) +
+        shapeId.getName());
     writer.addImport(
-        SmithyNameResolver.getSmithyGeneratedModelLocationForShapeId(
+        SmithyNameResolver.getSmithyGeneratedModelLocationForShape(
             shapeId, codegenContext
         ),
         shapeId.getName()
@@ -91,7 +153,7 @@ public class SmithyNameResolver {
    * @param codegenContext
    * @return
    */
-  private static String getSmithyGeneratedModuleFilenameForSmithyShape(ShapeId shapeId,
+  public static String getSmithyGeneratedModuleFilenameForSmithyShape(ShapeId shapeId,
       GenerationContext codegenContext) {
     Shape shape = codegenContext.model().expectShape(shapeId);
     if (shape.hasTrait(ReferenceTrait.class)
@@ -107,15 +169,29 @@ public class SmithyNameResolver {
     }
   }
 
+  /**
+   * Returns the name of the Smithy-generated type for the provided UnionShape
+   *   and corresponding union value as its MemberShape.
+   * @param unionShape
+   * @param memberShape
+   * @return
+   */
   public static String getSmithyGeneratedTypeForUnion(UnionShape unionShape,
       MemberShape memberShape) {
     return unionShape.getId().getName() + memberShape.getMemberName();
   }
 
+  /**
+   * Imports the type for the provided UnionShape
+   *   and corresponding union value as its MemberShape.
+   * @param unionShape
+   * @param memberShape
+   * @return
+   */
   public static void importSmithyGeneratedTypeForUnion(PythonWriter writer,
       GenerationContext context, UnionShape unionShape, MemberShape memberShape) {
     writer.addImport(
-        getSmithyGeneratedModelLocationForShapeId(unionShape.getId(), context),
+        getSmithyGeneratedModelLocationForShape(unionShape.getId(), context),
         getSmithyGeneratedTypeForUnion(unionShape, memberShape)
     );
   }
@@ -141,7 +217,13 @@ public class SmithyNameResolver {
         :  getPythonModuleNamespaceForSmithyNamespace(smithyNamespace) + ".smithygenerated";
   }
 
-  public static String getSmithyGeneratedConfigFilepathForSmithyNamespace(String smithyNamespace,
+  /**
+   * Returns the module accessor path to the config file for the provided smithyNamespace.
+   * @param smithyNamespace
+   * @param codegenContext
+   * @return
+   */
+  public static String getSmithyGeneratedConfigModulePathForSmithyNamespace(String smithyNamespace,
       GenerationContext codegenContext) {
     return getSmithyGeneratedModuleNamespaceForSmithyNamespace(smithyNamespace, codegenContext)
         + ".config";
@@ -149,6 +231,11 @@ public class SmithyNameResolver {
 
   static Set<ShapeId> localServiceConfigShapes = new HashSet<>();
 
+  /**
+   * Returns a set of serviceShapes in the model that have the `@aws.polymorph#localService` trait.
+   * @param codegenContext
+   * @return
+   */
   public static Set<ShapeId> getLocalServiceConfigShapes(CodegenContext codegenContext) {
 
     if (localServiceConfigShapes.isEmpty()) {

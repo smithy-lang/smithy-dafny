@@ -35,11 +35,11 @@ jobs:
           # TestModels/AggregateReferences,
           TestModels/Constraints,
           TestModels/Constructor,
-          # TestModels/Dependencies,
+          TestModels/Dependencies,
           TestModels/Errors,
-          # TestModels/Extendable, # Dafny namespace issues
-          # TestModels/Extern,
-          # TestModels/LocalService,
+          TestModels/Extendable,
+          TestModels/Extern,
+          TestModels/LocalService,
           TestModels/Refinement,
           TestModels/Resource,
           # TestModels/SimpleTypes/BigDecimal,
@@ -56,7 +56,7 @@ jobs:
           # TestModels/SimpleTypes/SimpleShort,
           TestModels/SimpleTypes/SimpleString,
           # TestModels/SimpleTypes/SimpleTimestamp,
-          # TestModels/Union,
+          TestModels/Union,
           # TestModels/aws-sdks/ddb,
           # TestModels/aws-sdks/kms,
         ]
@@ -86,8 +86,7 @@ jobs:
       - name: Setup Dafny
         uses: dafny-lang/setup-dafny-action@v1.6.1
         with:
-          # A && B || C is the closest thing to an if .. then ... else ... or ?: expression the GitHub Actions syntax supports.
-          dafny-version: ${{ (github.event_name == 'schedule' || inputs.nightly) && 'nightly-latest' || '4.2.0' }}
+          dafny-version: 'nightly-latest'
 
       - name: Setup Python for running tests
         uses: actions/setup-python@v4

@@ -1,4 +1,4 @@
-from simple_dafnyextern.dafnygenerated.ExternConstructor import *
+from simple_dafnyextern.internal_generated_dafny.ExternConstructor import *
 import simple_dafnyextern_internaldafny_types
 import Wrappers
 import _dafny

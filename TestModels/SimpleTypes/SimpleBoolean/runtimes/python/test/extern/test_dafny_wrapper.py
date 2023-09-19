@@ -13,12 +13,12 @@ import importlib
 # Import modules required for Dafny-generated tests.
 # This is not generated; these must be manually added.
 
-from simple_boolean.extern import wrapped_simple_boolean
+from simple_types_boolean.extern import wrapped_simple_boolean
 
 # End import modules required for Dafny-generated tests
 
 def test_dafny():
-  dafny_modules = glob.glob(join("/".join(__file__.split("/")[:-2]) + "/dafnygenerated/", "*.py"), recursive=True)
+  dafny_modules = glob.glob(join("/".join(__file__.split("/")[:-2]) + "/internal_generated_dafny/", "*.py"), recursive=True)
   for f in dafny_modules:
     if isfile(f) and f.endswith('test.py'):
       fname = str(f).split("/")[-1].split(".")[0]

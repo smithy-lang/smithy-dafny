@@ -3,7 +3,7 @@
     "plugins": {
         "dafny-client-codegen": {
             "service": "simple.types.boolean#SimpleTypesBoolean",
-            "module": "simple_boolean",
+            "module": "simple_types_boolean",
             "moduleVersion": "0.0.1",
             "targetLanguages": ["PYTHON"],
             "edition" : "2023",

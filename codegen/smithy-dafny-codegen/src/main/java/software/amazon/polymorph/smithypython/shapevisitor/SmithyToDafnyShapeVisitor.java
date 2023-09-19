@@ -40,7 +40,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
     private final GenerationContext context;
     private final String dataSource;
     private final PythonWriter writer;
-    private final boolean isConfigShape;
+    private final String filename;
 
     /**
      * @param context The generation context.
@@ -51,12 +51,12 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
         GenerationContext context,
         String dataSource,
         PythonWriter writer,
-        boolean isConfigShape
+        String filename
     ) {
       this.context = context;
       this.dataSource = dataSource;
       this.writer = writer;
-      this.isConfigShape = isConfigShape;
+      this.filename = filename;
     }
 
     @Override
@@ -99,14 +99,14 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
         // e.g.
         // DafnyStructureName(DafnyStructureMember=smithy_structure_member(...), ...)
         builder.append("%1$s=".formatted(memberName));
-        if (!isConfigShape && memberShape.isOptional()) {
+        if (!filename.equals("config") && memberShape.isOptional()) {
           builder.append("((Option_Some(%1$s)) if (%2$s is not None) else (Option_None())),\n".formatted(
               targetShape.accept(
                 new SmithyToDafnyShapeVisitor(
                     context,
                     dataSource + "." + CaseUtils.toSnakeCase(memberName),
                     writer,
-                    isConfigShape
+                    filename
                 )
               ),
               dataSource + "." + CaseUtils.toSnakeCase(memberName)
@@ -118,7 +118,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
                     context,
                     dataSource + "." + CaseUtils.toSnakeCase(memberName),
                     writer,
-                    isConfigShape
+                    filename
                 )
               )
           ));
@@ -143,7 +143,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
       // `Seq([`SmithyToDafny(list_element)``
       builder.append("%1$s".formatted(
           targetShape.accept(
-              new SmithyToDafnyShapeVisitor(context, "list_element", writer, isConfigShape)
+              new SmithyToDafnyShapeVisitor(context, "list_element", writer, filename)
           )));
 
       // Close structure
@@ -168,7 +168,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
       // `{`SmithyToDafny(key)`:`
       builder.append("%1$s: ".formatted(
           keyTargetShape.accept(
-              new SmithyToDafnyShapeVisitor(context, "key", writer, isConfigShape)
+              new SmithyToDafnyShapeVisitor(context, "key", writer, filename)
           )
       ));
 
@@ -176,7 +176,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
       // `{`SmithyToDafny(key)`: `SmithyToDafny(value)``
       builder.append("%1$s".formatted(
           valueTargetShape.accept(
-              new SmithyToDafnyShapeVisitor(context, "value", writer, isConfigShape)
+              new SmithyToDafnyShapeVisitor(context, "value", writer, filename)
           )
       ));
 
@@ -306,19 +306,19 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
 
   protected String referenceServiceShape(ServiceShape serviceShape) {
     DafnyNameResolver.importDafnyTypeForServiceShape(writer, serviceShape);
-    writer.addStdlibImport(SmithyNameResolver.getSmithyGeneratedConfigFilepathForSmithyNamespace(
+    writer.addStdlibImport(SmithyNameResolver.getSmithyGeneratedConfigModulePathForSmithyNamespace(
         serviceShape.getId().getNamespace(), context));
-    writer.addStdlibImport(DafnyNameResolver.getDafnyIndexModuleNamespaceForShape(serviceShape));
+    writer.addStdlibImport(DafnyNameResolver.getDafnyPythonIndexModuleNameForShape(serviceShape));
     // `my_module_client = my_module_internaldafny.MyModuleClient()`
     writer.write("$L_client = $L.$L()",
         SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(serviceShape.getId().getNamespace()),
-        DafnyNameResolver.getDafnyIndexModuleNamespaceForShape(serviceShape),
+        DafnyNameResolver.getDafnyPythonIndexModuleNameForShape(serviceShape),
         DafnyNameResolver.getDafnyClientTypeForServiceShape(serviceShape)
     );
     // `my_module_client.ctor__(my_module.smithygenerated.config.smithy_config_to_dafny_config(input._config))`
     writer.write("$L_client.ctor__($L.smithy_config_to_dafny_config($L._config))",
         SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(serviceShape.getId().getNamespace()),
-        SmithyNameResolver.getSmithyGeneratedConfigFilepathForSmithyNamespace(
+        SmithyNameResolver.getSmithyGeneratedConfigModulePathForSmithyNamespace(
             serviceShape.getId().getNamespace(), context),
         dataSource
     );
@@ -330,7 +330,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
     DafnyNameResolver.importDafnyTypeForResourceShape(writer, resourceShape);
 
     // Resource-specific imports
-    writer.addStdlibImport(DafnyNameResolver.getDafnyIndexModuleNamespaceForShape(resourceShape));
+    writer.addStdlibImport(DafnyNameResolver.getDafnyPythonIndexModuleNameForShape(resourceShape));
     writer.addStdlibImport(resourceShape.getId().getName(),
         resourceShape.getId().getName(),
         "Dafny" + resourceShape.getId().getName());

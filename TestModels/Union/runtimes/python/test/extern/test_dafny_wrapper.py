@@ -18,7 +18,7 @@ from simple_union.extern import wrapped_simple_union
 # End import modules required for Dafny-generated tests
 
 def test_dafny():
-  dafny_modules = glob.glob(join("/".join(__file__.split("/")[:-2]) + "/dafnygenerated/", "*.py"), recursive=True)
+  dafny_modules = glob.glob(join("/".join(__file__.split("/")[:-2]) + "/internal_generated_dafny/", "*.py"), recursive=True)
   print(dafny_modules)
   for f in dafny_modules:
     if isfile(f) and f.endswith('test.py'):

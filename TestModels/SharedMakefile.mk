@@ -204,11 +204,13 @@ _polymorph_wrapped:
 	$(OUTPUT_DAFNY_WRAPPED) \
 	$(OUTPUT_DOTNET_WRAPPED) \
 	$(OUTPUT_JAVA_WRAPPED) \
+	$(OUTPUT_PYTHON_WRAPPED) \
 	--model $(LIBRARY_ROOT)/Model \
 	--dependent-model $(PROJECT_ROOT)/dafny-dependencies/Model \
 	$(patsubst %, --dependent-model $(PROJECT_ROOT)/%/Model, $(LIBRARIES)) \
 	--namespace $(NAMESPACE) \
 	$(OUTPUT_LOCAL_SERVICE) \
+	$(SMITHY_BUILD) \
 	$(AWS_SDK_CMD)";
 
 _polymorph_dependencies:
@@ -254,14 +256,20 @@ polymorph_java: _polymorph_wrapped
 polymorph_java: POLYMORPH_LANGUAGE_TARGET=java
 polymorph_java: _polymorph_dependencies
 
-polymorph_python: OUTPUT_PYTHON=--output-python $(LIBRARY_ROOT)/runtimes/python/smithygenerated
+# For python, _polymorph_wrapped includes _polymorph (i.e. local service generation AND wrapped test)
+# To generate only the local service, use the `_polymorph` target
+# There is not a good way to generate only the wrapped test without the local service...
 polymorph_python: SMITHY_BUILD=--smithy-build $(LIBRARY_ROOT)/smithy-build.json
-polymorph_python: _polymorph
+polymorph_python: OUTPUT_PYTHON_WRAPPED=--output-python $(LIBRARY_ROOT)/runtimes/python/smithygenerated
+polymorph_python: OUTPUT_LOCAL_SERVICE=--local-service-test
+polymorph_python: _polymorph_wrapped
 polymorph_python:
 	rm -rf runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated
 	mkdir runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated
 	mv runtimes/python/smithygenerated/$(PYTHON_MODULE_NAME)/* runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated
 	rm -rf runtimes/python/smithygenerated
+polymorph_python: POLYMORPH_LANGUAGE_TARGET=python
+polymorph_python: _polymorph_dependencies
 
 ########################## .NET targets
 
@@ -343,9 +351,9 @@ _clean:
 	rm -rf $(LIBRARY_ROOT)/TestResults
 	rm -rf $(LIBRARY_ROOT)/runtimes/net/Generated $(LIBRARY_ROOT)/runtimes/net/bin $(LIBRARY_ROOT)/runtimes/net/obj
 	rm -rf $(LIBRARY_ROOT)/runtimes/net/tests/bin $(LIBRARY_ROOT)/runtimes/net/tests/obj
-	rm -rf $(LIBRARY_ROOT)/runtimes/python/src/**/dafnygenerated/*.py
+	rm -rf $(LIBRARY_ROOT)/runtimes/python/src/**/internal_generated_dafny/*.py
 	rm -rf $(LIBRARY_ROOT)/runtimes/python/src/**/smithygenerated
-	rm -rf $(LIBRARY_ROOT)/runtimes/python/test/dafnygenerated/*.py
+	rm -rf $(LIBRARY_ROOT)/runtimes/python/test/internal_generated_dafny/*.py
 	rm -rf $(LIBRARY_ROOT)/runtimes/python/.tox
 	rm -rf $(LIBRARY_ROOT)/runtimes/python/poetry.lock
 	rm -rf $(LIBRARY_ROOT)/runtimes/python/build
@@ -359,7 +367,7 @@ build_python: build_implementation_python
 build_python: transpile_test_python
 build_python: _python_revert_underscore_extern_names
 build_python: _python_revert_underscore_dependency_extern_names
-build_python: _mv_dafnygenerated_python
+build_python: _mv_internal_generated_dafny_python
 build_python: _remove_src_module_python
 
 build_implementation_python: TARGET=py
@@ -373,7 +381,7 @@ build_implementation_python: build_implementation
 transpile_implementation_python: transpile_dependencies_python
 transpile_implementation_python: transpile_src_python
 transpile_implementation_python: transpile_test_python
-transpile_implementation_python: _mv_dafnygenerated_python
+transpile_implementation_python: _mv_internal_generated_dafny_python
 transpile_implementation_python: _remove_src_module_python
 
 transpile_src_python: TARGET=py
@@ -411,21 +419,21 @@ _python_revert_underscore_dependency_extern_names:
 	$(patsubst %, $(MAKE) -C $(PROJECT_ROOT)/% _python_revert_underscore_extern_names;, $(LIBRARIES))
 
 # Move Dafny-generated code into its expected location in the Python module
-_mv_dafnygenerated_python:
+_mv_internal_generated_dafny_python:
 	# Remove everything EXCEPT the pyproject.toml
-	rm -rf runtimes/python/src/$(PYTHON_MODULE_NAME)/dafnygenerated/*.py
-	mv runtimes/python/dafny_src-py/*.py runtimes/python/src/$(PYTHON_MODULE_NAME)/dafnygenerated
+	rm -rf runtimes/python/src/$(PYTHON_MODULE_NAME)/internal_generated_dafny/*.py
+	mv runtimes/python/dafny_src-py/*.py runtimes/python/src/$(PYTHON_MODULE_NAME)/internal_generated_dafny
 	rm -rf runtimes/python/dafny_src-py
 	# Remove everything EXCEPT the pyproject.toml
-	rm -rf runtimes/python/test/dafnygenerated/*.py
-	mv runtimes/python/test-py/*.py runtimes/python/test/dafnygenerated
+	rm -rf runtimes/python/test/internal_generated_dafny/*.py
+	mv runtimes/python/test-py/*.py runtimes/python/test/internal_generated_dafny
 	rm -rf runtimes/python/test-py
 
 _remove_src_module_python:
 	# Remove the source `module_.py` file
 	# There is a race condition between the src/ and test/ installation of this file
 	# This will need to be changed but works for now
-	rm runtimes/python/src/$(PYTHON_MODULE_NAME)/dafnygenerated/module_.py
+	rm runtimes/python/src/$(PYTHON_MODULE_NAME)/internal_generated_dafny/module_.py
 
 transpile_dependencies_python: LANG=python
 transpile_dependencies_python: transpile_dependencies

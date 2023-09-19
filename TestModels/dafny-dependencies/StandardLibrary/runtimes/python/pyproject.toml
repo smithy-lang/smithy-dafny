@@ -9,11 +9,11 @@ packages = [
 
 [tool.poetry.dependencies]
 python = "^3.11.0"
-standard-library-internaldafny = { path = "src/standard_library/dafnygenerated", develop = false }
+standard-library-internaldafny = { path = "src/standard_library/internal_generated_dafny", develop = false }
 
 [tool.poetry.group.test.dependencies]
 pytest = "^7.4.0"
-standard-library-test-internaldafny = { path = "test/dafnygenerated", develop = false}
+standard-library-test-internaldafny = { path = "test/internal_generated_dafny", develop = false}
 
 [build-system]
 requires = ["poetry-core"]

@@ -21,6 +21,8 @@ import software.amazon.polymorph.smithyjava.generator.awssdk.v1.JavaAwsSdkV1;
 import software.amazon.polymorph.smithyjava.generator.awssdk.v2.JavaAwsSdkV2;
 import software.amazon.polymorph.smithyjava.generator.library.JavaLibrary;
 import software.amazon.polymorph.smithyjava.generator.library.TestJavaLibrary;
+import software.amazon.polymorph.smithypython.Constants.GenerationType;
+import software.amazon.polymorph.smithypython.extensions.DafnyPythonClientCodegenPlugin;
 import software.amazon.polymorph.utils.IOUtils;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.smithy.aws.traits.ServiceTrait;
@@ -247,11 +249,19 @@ public class CodegenEngine {
     }
 
     private void generatePython() {
-        PythonClientCodegenPlugin pythonClientCodegenPlugin = new PythonClientCodegenPlugin();
+        DafnyPythonClientCodegenPlugin pythonClientCodegenPlugin = new DafnyPythonClientCodegenPlugin();
         // TODO: Determine which of these we need, and create a PR against Smithy-Python
         // with the required changes from lucasmcdonald3/smithy-python
         pythonClientCodegenPlugin.disablePerformDefaultCodegenTransforms();
         pythonClientCodegenPlugin.disableCreateDedicatedInputsAndOutputs();
+        if (this.awsSdkStyle) {
+            pythonClientCodegenPlugin.setGenerationType(GenerationType.AWS_SDK);
+        } else if (this.localServiceTest) {
+            pythonClientCodegenPlugin.setGenerationType(GenerationType.WRAPPED_LOCAL_SERVICE_TEST);
+        } else {
+            pythonClientCodegenPlugin.setGenerationType(GenerationType.LOCAL_SERVICE);
+        }
+
         pythonClientCodegenPlugin.execute(pluginContext);
     }
 

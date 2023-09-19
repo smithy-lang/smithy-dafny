@@ -3,7 +3,7 @@
     "plugins": {
         "dafny-client-codegen": {
             "service": "simple.types.integer#SimpleTypesInteger",
-            "module": "simple_integer",
+            "module": "simple_types_integer",
             "moduleVersion": "0.0.1",
             "protocol": "aws.polymorph#localService"
         }

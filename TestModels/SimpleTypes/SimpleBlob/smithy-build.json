@@ -3,7 +3,7 @@
     "plugins": {
         "dafny-client-codegen": {
             "service": "simple.types.blob#SimpleTypesBlob",
-            "module": "simple_blob",
+            "module": "simple_types_blob",
             "moduleVersion": "0.0.1",
             "protocol": "aws.polymorph#localService"
         }
