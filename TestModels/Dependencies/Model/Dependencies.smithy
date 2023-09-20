@@ -15,9 +15,8 @@ use simple.extendable.resources#SimpleExtendableResources
     SimpleResources,
     SimpleConstraints,
     SimpleExtendableResources,
-    // for reference on why this is commented out and next steps see:  https://sim.amazon.com/issues/CrypTool-5231
-// TODO: Uncomment out as part of https://sim.amazon.com/issues/CrypTool-5231
-//use simple.errors#SimpleErrors
+    // TODO: Uncomment out as part of https://sim.amazon.com/issues/CrypTool-5231
+    // SimpleErrors
   ]
 )
 service SimpleDependencies {
