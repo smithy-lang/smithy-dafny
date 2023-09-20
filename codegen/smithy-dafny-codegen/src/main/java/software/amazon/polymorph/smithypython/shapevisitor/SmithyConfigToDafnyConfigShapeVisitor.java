@@ -83,58 +83,62 @@ public class SmithyConfigToDafnyConfigShapeVisitor extends SmithyToDafnyShapeVis
      */
     @Override
     public String structureShape(StructureShape shape) {
-      if (!SmithyNameResolver.getLocalServiceConfigShapes(context).contains(shape.getId())) {
-        throw new CodegenException("Provided shape " + shape + " MUST be a localService config shape");
-      }
-
-      DafnyNameResolver.importDafnyTypeForShape(writer, shape.getId());
-      StringBuilder builder = new StringBuilder();
-      // Open Dafny structure shape
-      // e.g.
-      // DafnyStructureName(...
-      builder.append("%1$s(".formatted(DafnyNameResolver.getDafnyTypeForShape(shape)));
-      // Recursively dispatch a new ShapeVisitor for each member of the structure
-      for (Entry<String, MemberShape> memberShapeEntry : shape.getAllMembers().entrySet()) {
-        String memberName = memberShapeEntry.getKey();
-        MemberShape memberShape = memberShapeEntry.getValue();
-        final Shape targetShape = context.model().expectShape(memberShape.getTarget());
-
-        // Adds `DafnyStructureMember=smithy_structure_member(...)`
-        // e.g.
-        // DafnyStructureName(DafnyStructureMember=smithy_structure_member(...), ...)
-        // The nature of the `smithy_structure_member` conversion depends on the properties of the shape,
-        //   as described below
-        builder.append("%1$s=".formatted(memberName));
-
-        // If this is (another!) localService config shape, defer conversion to the config ShapeVisitor
-        if (SmithyNameResolver.getLocalServiceConfigShapes(context).contains(targetShape.getId())) {
-          builder.append("%1$s,\n".formatted(
-              targetShape.accept(
-                  new SmithyConfigToDafnyConfigShapeVisitor(
-                      context,
-                      dataSource + "." + CaseUtils.toSnakeCase(memberName),
-                      writer,
-                      filename
-                  )
-              )
-          ));
-        }
-        // Otherwise, treat this member as required, and defer to standard shape visitor
-        else {
-          builder.append("%1$s,\n".formatted(
-              targetShape.accept(
-                  new SmithyToDafnyShapeVisitor(
-                      context,
-                      dataSource + "." + CaseUtils.toSnakeCase(memberName),
-                      writer,
-                      filename
-                  )
-              )
-          ));
-        }
-      }
-
-      // Close structure
-      return builder.append(")").toString();
+      return shape.accept(
+          new SmithyToDafnyShapeVisitor(context, dataSource, writer, filename)
+      );
+//
+//      if (!SmithyNameResolver.getLocalServiceConfigShapes(context).contains(shape.getId())) {
+//        throw new CodegenException("Provided shape " + shape + " MUST be a localService config shape");
+//      }
+//
+//      DafnyNameResolver.importDafnyTypeForShape(writer, shape.getId());
+//      StringBuilder builder = new StringBuilder();
+//      // Open Dafny structure shape
+//      // e.g.
+//      // DafnyStructureName(...
+//      builder.append("%1$s(".formatted(DafnyNameResolver.getDafnyTypeForShape(shape)));
+//      // Recursively dispatch a new ShapeVisitor for each member of the structure
+//      for (Entry<String, MemberShape> memberShapeEntry : shape.getAllMembers().entrySet()) {
+//        String memberName = memberShapeEntry.getKey();
+//        MemberShape memberShape = memberShapeEntry.getValue();
+//        final Shape targetShape = context.model().expectShape(memberShape.getTarget());
+//
+//        // Adds `DafnyStructureMember=smithy_structure_member(...)`
+//        // e.g.
+//        // DafnyStructureName(DafnyStructureMember=smithy_structure_member(...), ...)
+//        // The nature of the `smithy_structure_member` conversion depends on the properties of the shape,
+//        //   as described below
+//        builder.append("%1$s=".formatted(memberName));
+//
+//        // If this is (another!) localService config shape, defer conversion to the config ShapeVisitor
+//        if (SmithyNameResolver.getLocalServiceConfigShapes(context).contains(targetShape.getId())) {
+//          builder.append("%1$s,\n".formatted(
+//              targetShape.accept(
+//                  new SmithyConfigToDafnyConfigShapeVisitor(
+//                      context,
+//                      dataSource + "." + CaseUtils.toSnakeCase(memberName),
+//                      writer,
+//                      filename
+//                  )
+//              )
+//          ));
+//        }
+//        // Otherwise, treat this member as required, and defer to standard shape visitor
+//        else {
+//          builder.append("%1$s,\n".formatted(
+//              targetShape.accept(
+//                  new SmithyToDafnyShapeVisitor(
+//                      context,
+//                      dataSource + "." + CaseUtils.toSnakeCase(memberName),
+//                      writer,
+//                      filename
+//                  )
+//              )
+//          ));
+//        }
+//      }
+//
+//      // Close structure
+//      return builder.append(")").toString();
     }
 }

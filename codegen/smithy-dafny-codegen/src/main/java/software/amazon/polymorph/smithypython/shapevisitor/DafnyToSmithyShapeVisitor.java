@@ -83,8 +83,10 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
         return referenceStructureShape(shape);
       }
 
+
+
       // If generating from the Config file
-      if (filename.equals("config")) {
+      if (SmithyNameResolver.getLocalServiceConfigShapes(context).contains(shape.getId())) {
         // Generate import if this shape is not in the current namespace
         if (!SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(shape.getId().getNamespace()).contains(context.settings().getModuleName())) {
           writer.addImport(
