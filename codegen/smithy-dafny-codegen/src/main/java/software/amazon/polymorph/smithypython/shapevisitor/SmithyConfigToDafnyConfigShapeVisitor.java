@@ -36,8 +36,8 @@ import software.amazon.smithy.utils.CaseUtils;
  * to generate code that maps a Smithy-modelled config shape's internal attributes
  * to the corresponding Dafny config shape's internal attributes.
  *
- * This largely defers to the SmithyToDafnyShapeVisitor implementation, with one exception:
- *
+ * This largely defers to the SmithyToDafnyShapeVisitor implementation, except for StructureShapes.
+ * Config StructureShapes are
  */
 public class SmithyConfigToDafnyConfigShapeVisitor extends SmithyToDafnyShapeVisitor.Default<String> {
     private final GenerationContext context;
