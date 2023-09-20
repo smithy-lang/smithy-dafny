@@ -150,6 +150,9 @@ public class ConfigFileWriter implements CustomFileWriter {
    */
   private void generateSmithyConfigToDafnyConfigFunctionBody(
       StructureShape configShape, GenerationContext codegenContext, PythonWriter writer) {
+    // Dafny-generated config shapes contain a piece of unmodelled behavior,
+    //   which is that every config member is required.
+    //
     String output = configShape.accept(new SmithyToDafnyShapeVisitor(
         codegenContext,
         "smithy_config",

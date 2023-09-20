@@ -77,13 +77,8 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
       if (shape.hasTrait(ReferenceTrait.class)) {
         return referenceStructureShape(shape);
       }
-      if (SmithyNameResolver.getLocalServiceConfigShapes(context).contains(shape.getId())) {
-//        return "DafnyService(python_module_name.smithy_config_to_dafny_config(%1$s.config))";
-      }
 
       DafnyNameResolver.importDafnyTypeForShape(writer, shape.getId());
-      writer.addStdlibImport("Wrappers", "Option_Some");
-      writer.addStdlibImport("Wrappers", "Option_None");
       StringBuilder builder = new StringBuilder();
       // Open Dafny structure shape
       // e.g.
@@ -98,20 +93,45 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
         // Adds `DafnyStructureMember=smithy_structure_member(...)`
         // e.g.
         // DafnyStructureName(DafnyStructureMember=smithy_structure_member(...), ...)
+        // The nature of the `smithy_structure_member` conversion depends on the properties of the shape,
+        //   as described below
         builder.append("%1$s=".formatted(memberName));
-        if (!filename.equals("config") && memberShape.isOptional()) {
-          builder.append("((Option_Some(%1$s)) if (%2$s is not None) else (Option_None())),\n".formatted(
+
+        // If this is a localService config shape, defer conversion to the config ShapeVisitor
+        if (SmithyNameResolver.getLocalServiceConfigShapes(context).contains(targetShape.getId())) {
+          builder.append("%1$s,\n".formatted(
               targetShape.accept(
-                new SmithyToDafnyShapeVisitor(
-                    context,
-                    dataSource + "." + CaseUtils.toSnakeCase(memberName),
-                    writer,
-                    filename
-                )
-              ),
-              dataSource + "." + CaseUtils.toSnakeCase(memberName)
+                  new SmithyConfigToDafnyConfigShapeVisitor(
+                      context,
+                      dataSource + "." + CaseUtils.toSnakeCase(memberName),
+                      writer,
+                      filename
+                  )
+              )
           ));
-        } else {
+        }
+
+        // If this shape is optional, write conversion logic to detect and possibly pass
+        //   an empty optional at runtime
+        else if (memberShape.isOptional()) {
+          writer.addStdlibImport("Wrappers", "Option_Some");
+          writer.addStdlibImport("Wrappers", "Option_None");
+          builder.append(
+              "((Option_Some(%1$s)) if (%2$s is not None) else (Option_None())),\n".formatted(
+                  targetShape.accept(
+                      new SmithyToDafnyShapeVisitor(
+                          context,
+                          dataSource + "." + CaseUtils.toSnakeCase(memberName),
+                          writer,
+                          filename
+                      )
+                  ),
+                  dataSource + "." + CaseUtils.toSnakeCase(memberName)
+              ));
+        }
+
+        // If this shape is required, always unambiguously pass in the shape for conversion
+        else {
           builder.append("%1$s,\n".formatted(
               targetShape.accept(
                 new SmithyToDafnyShapeVisitor(
@@ -253,9 +273,12 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
         unionShape.getId().getName()
     ));
 
-    // First union value opens a new `if` block; others do not need to
+    // First union value opens a new `if` block; others do not need to and write `elif`
     boolean shouldOpenNewIfBlock = true;
     for (MemberShape memberShape : unionShape.getAllMembers().values()) {
+      // Write out conversion:
+      // if isinstance(my_union.member, union_type.possible_member):
+      //     my_union_union_value = DafnyMyUnionPossibleMember(my_union.member.value)
       writer.write("""
                 $L isinstance($L, $L):
                     $L_union_value = $L($L.$L)""",
@@ -309,6 +332,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
     writer.addStdlibImport(SmithyNameResolver.getSmithyGeneratedConfigModulePathForSmithyNamespace(
         serviceShape.getId().getNamespace(), context));
     writer.addStdlibImport(DafnyNameResolver.getDafnyPythonIndexModuleNameForShape(serviceShape));
+
     // `my_module_client = my_module_internaldafny.MyModuleClient()`
     writer.write("$L_client = $L.$L()",
         SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(serviceShape.getId().getNamespace()),
@@ -334,22 +358,15 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
     writer.addStdlibImport(resourceShape.getId().getName(),
         resourceShape.getId().getName(),
         "Dafny" + resourceShape.getId().getName());
-//    writer.addStdlibImport(SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(
-//        resourceShape.getId().getNamespace(), context));
 
     // `my_module_resource = DafnyMyModuleResource()`
-    // TODO: Does this need the config..?
-//    writer.write("$L_resource = $L()",
-//        SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(resourceShape.getId().getNamespace()),
-//        "Dafny" + resourceShape.getId().getName()
-//    );
     writer.write("$L_resource = $L._impl",
         SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(resourceShape.getId().getNamespace()),
         dataSource
     );
+    // TODO: Inline the above conversion...??
     // Use result of resource conversion inline
     return "%1$s_resource".formatted(SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(
         resourceShape.getId().getNamespace()));
-//    return dataSource;
   }
 }

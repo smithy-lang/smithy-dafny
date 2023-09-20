@@ -78,15 +78,12 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
 
     @Override
     public String structureShape(StructureShape shape) {
-      // Reference shapes
+      // Reference shapes have different logic
       if (shape.hasTrait(ReferenceTrait.class)) {
         return referenceStructureShape(shape);
       }
-      System.out.println("new");
-      System.out.println(shape.getId());
-      System.out.println(SmithyNameResolver.getSmithyGeneratedModuleFilenameForSmithyShape(shape.getId(), context));
-      System.out.println(filename);
-      // TODO refactor this logic
+
+      // If generating from the Config file
       if (filename.equals("config")) {
         // Generate import if this shape is not in the current namespace
         if (!SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(shape.getId().getNamespace()).contains(context.settings().getModuleName())) {
