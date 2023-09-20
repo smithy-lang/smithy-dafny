@@ -948,6 +948,17 @@ public class TypeConversionCodegen {
             Set<String> dependentNamespaces = ModelUtils.findAllDependentNamespaces(
                 new HashSet<ShapeId>(Collections.singleton(localServiceTrait.getConfigId())), model);
 
+            if (localServiceTrait.getDependencies() != null) {
+                localServiceTrait.getDependencies().stream()
+                        .map(model::expectShape)
+                        .map(Shape::asServiceShape)
+                        .filter(Optional::isPresent)
+                        .map(Optional::get)
+                        .forEach( serviceShape ->
+                                dependentNamespaces.add(serviceShape.getId().getNamespace())
+                        );
+            }
+
             if (dependentNamespaces.size() > 0) {
                 Set<TokenTree> cases = new HashSet<>();
                 for (String dependentNamespace : dependentNamespaces) {
