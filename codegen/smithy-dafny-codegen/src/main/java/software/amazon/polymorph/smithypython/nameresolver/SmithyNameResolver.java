@@ -134,16 +134,24 @@ public class SmithyNameResolver {
    */
   public static void importSmithyGeneratedTypeForShape(PythonWriter writer, ShapeId shapeId,
       GenerationContext codegenContext) {
-    System.out.println(SmithyNameResolver.getSmithyGeneratedModelLocationForShape(
-            shapeId, codegenContext
-        ) +
-        shapeId.getName());
     writer.addImport(
         SmithyNameResolver.getSmithyGeneratedModelLocationForShape(
             shapeId, codegenContext
         ),
         shapeId.getName()
     );
+  }
+
+  /**
+   * For any ShapeId, returns the filename inside `.smithygenerated`
+   *   where that Shape is generated.
+   * @param shape
+   * @param codegenContext
+   * @return
+   */
+  public static String getSmithyGeneratedModuleFilenameForSmithyShape(Shape shape,
+      GenerationContext codegenContext) {
+    return getSmithyGeneratedModuleFilenameForSmithyShape(shape.getId(), codegenContext);
   }
 
   /**
@@ -161,9 +169,10 @@ public class SmithyNameResolver {
         && shape.hasTrait(LocalServiceTrait.class)) {
       // LocalService clients are generated at `my_module.smithygenerated.client`
       return ".client";
-    }
-    else if (shape.hasTrait(ErrorTrait.class)) {
+    } else if (shape.hasTrait(ErrorTrait.class)) {
       return ".errors";
+    } else if (getLocalServiceConfigShapes(codegenContext).contains(shapeId)) {
+      return ".config";
     } else {
       return ".models";
     }

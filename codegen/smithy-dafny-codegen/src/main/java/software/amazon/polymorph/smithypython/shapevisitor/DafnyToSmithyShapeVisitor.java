@@ -83,20 +83,12 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
         return referenceStructureShape(shape);
       }
 
+      // Only generate an import for this shape if it is not in the file under generation
+      if (!SmithyNameResolver.getSmithyGeneratedModuleFilenameForSmithyShape(shape, context)
+              .contains(filename)
+          || !SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(shape.getId().getNamespace())
+              .contains(context.settings().getModuleName())) {
 
-
-      // If generating from the Config file
-      if (SmithyNameResolver.getLocalServiceConfigShapes(context).contains(shape.getId())) {
-        // Generate import if this shape is not in the current namespace
-        if (!SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(shape.getId().getNamespace()).contains(context.settings().getModuleName())) {
-          writer.addImport(
-            SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(
-                shape.getId().getNamespace(),
-                context
-            ) + ".config", shape.getId().getName());
-        }
-      }
-      else if (!SmithyNameResolver.getSmithyGeneratedModuleFilenameForSmithyShape(shape.getId(), context).contains(filename)) {
         SmithyNameResolver.importSmithyGeneratedTypeForShape(writer, shape, context);
       }
 
