@@ -252,8 +252,6 @@ public class SmithyNameResolver {
           .map(serviceShape1 -> serviceShape1.expectTrait(LocalServiceTrait.class))
           .map(localServiceTrait -> localServiceTrait.getConfigId())
           .collect(Collectors.toSet());
-      System.out.println("localsd");
-      System.out.println(localServiceConfigShapes);
     }
     return localServiceConfigShapes;
   }

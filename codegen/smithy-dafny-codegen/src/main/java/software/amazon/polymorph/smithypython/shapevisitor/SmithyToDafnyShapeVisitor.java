@@ -99,7 +99,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
 
         // If this shape is optional, write conversion logic to detect and possibly pass
         //   an empty optional at runtime
-         if (memberShape.isOptional()) {
+        if (memberShape.isOptional()) {
           writer.addStdlibImport("Wrappers", "Option_Some");
           writer.addStdlibImport("Wrappers", "Option_None");
           builder.append(
