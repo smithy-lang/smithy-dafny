@@ -7,8 +7,8 @@
       
       <Version>1.0.0</Version>
       
-      <AssemblyName>AWS.Cryptography.Material.Providers.Library</AssemblyName>
-      <PackageId>AWS.Cryptography.Material.Providers.Library</PackageId>
+      <AssemblyName>AWS.Cryptography.MaterialProviders</AssemblyName>
+      <PackageId>AWS.Cryptography.MaterialProviders</PackageId>
       <Title>AwsCryptographicMaterialProvidersLibrary</Title>
       <Description>The AWS Cryptographic Material Providers Library abstracts lower level cryptographic materials management of encryption and decryption materials. It uses cryptographic best practices to protect the data keys that protect your data.</Description>
       <Authors>Amazon Web Services</Authors>

@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <RootNamespace>TEST_Crypto Primatives</RootNamespace>
-    <ImplicitUsings>enable</ImplicitUsings>
+    <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>disable</Nullable>
     <TargetFrameworks>net6.0</TargetFrameworks>
     <LangVersion>10</LangVersion>

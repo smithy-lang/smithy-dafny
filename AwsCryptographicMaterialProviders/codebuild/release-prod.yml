@@ -1,0 +1,36 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      dotnet: 6.0
+      python: 3.x
+    commands:
+      - cd ..
+      # Get Dafny
+      - curl https://github.com/dafny-lang/dafny/releases/download/v4.2.0/dafny-4.2.0-x64-ubuntu-20.04.zip  -L -o dafny.zip
+      - unzip -qq dafny.zip && rm dafny.zip
+      - export PATH="$PWD/dafny:$PATH"
+      # Switch back to the main directory
+      - cd aws-cryptographic-material-providers-library-dafny
+  pre_build:
+    commands:
+      # UNIQUE_ID should be passed in as an environment variable. It is used to tie
+      # the different parts of the asynchronous signing process together
+      - echo "Using unique id for flow $UNIQUE_ID"
+      # Build unsigned source
+      - cd AwsCryptographicMaterialProviders 
+      - make transpile_net
+      - dotnet build runtimes/net /p:Configuration=Release -nowarn:CS0162,CS0168
+      # This step assumes signing has already happened and we just need to retrieve
+      # the signed artifacts
+      - export ASSEMBLY_NAME="AWS.Cryptography.MaterialProviders.dll"
+      - export BASE=../codebuild/net
+      - python $BASE/retrieve_signed_assembly.py --target net6.0 --unique-id $UNIQUE_ID
+  build:
+    commands:
+      - mkdir build
+      - export VERSION=`grep '<Version>' runtimes/net/MPL.csproj | sed 's/.*<Version>\(.*\)<\/Version>/\1/'`
+      - dotnet pack runtimes/net/MPL.csproj --no-build /p:Configuration=Release --output build
+      - export API_ACCESS_KEY=$(python $BASE/retrieve_api_access_key.py)
+      - dotnet nuget push build/AWS.Cryptography.MaterialProviders.$VERSION.nupkg --api-key "$API_ACCESS_KEY" --source https://api.nuget.org/v3/index.json

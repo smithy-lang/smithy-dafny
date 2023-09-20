@@ -26,8 +26,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\..\AwsCryptographicMaterialProviders\runtimes\net\MPL.csproj" />
-      <ProjectReference Include="..\..\..\StandardLibrary\runtimes\net\STD.csproj" />
+      <ProjectReference Include="../../../AwsCryptographicMaterialProviders/runtimes/net/MPL.csproj" />
     </ItemGroup>
 
     <!--

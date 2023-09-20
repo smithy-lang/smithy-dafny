@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <RootNamespace>TEST_AWS Cryptographic Materials Provider Library</RootNamespace>
-    <ImplicitUsings>enable</ImplicitUsings>
+    <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>disable</Nullable>
     <TargetFrameworks>net6.0</TargetFrameworks>
     <LangVersion>10</LangVersion>
@@ -25,10 +25,5 @@
     <Compile Include="TestsFromDafny.cs" />
   </ItemGroup>
 
-
-  <!-- <ItemGroup>
-    <None Include="..\icon.png" Pack="true" PackagePath="" />
-    <None Include="..\README.md" Pack="true" PackagePath="" />
-  </ItemGroup> -->
 
 </Project>

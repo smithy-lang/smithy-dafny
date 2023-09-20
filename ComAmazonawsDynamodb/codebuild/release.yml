@@ -1,0 +1,39 @@
+version: 0.2
+
+batch:
+  fast-fail: true
+  build-graph:
+    - identifier: sign
+      buildspec: ComAmazonawsDynamodb/codebuild/sign.yml
+      env:
+        type: LINUX_CONTAINER
+        image: aws/codebuild/standard:6.0
+    - identifier: verify
+      buildspec: ComAmazonawsDynamodb/codebuild/verify.yml
+      env:
+        type: WINDOWS_SERVER_2019_CONTAINER
+        image: aws/codebuild/windows-base:2019-2.0
+      depend-on:
+        - sign
+    - identifier: release_staging
+      buildspec: ComAmazonawsDynamodb/codebuild/release-staging.yml
+      env:
+        type: LINUX_CONTAINER
+        image: aws/codebuild/standard:6.0
+      depend-on:
+        - verify
+    - identifier: release_prod
+      buildspec: ComAmazonawsDynamodb/codebuild/release-prod.yml
+      env:
+        type: LINUX_CONTAINER
+        image: aws/codebuild/standard:6.0
+      depend-on:
+        - verify
+        - release_staging
+    - identifier: test_prod
+      buildspec: ComAmazonawsDynamodb/codebuild/test-prod.yml
+      env:
+        type: LINUX_CONTAINER
+        image: aws/codebuild/standard:6.0
+      depend-on:
+        - release_prod

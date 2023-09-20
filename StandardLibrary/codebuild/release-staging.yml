@@ -1,0 +1,54 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      dotnet: 6.0
+      python: 3.x
+    commands:
+      - cd ..
+      # Get Dafny
+      - curl https://github.com/dafny-lang/dafny/releases/download/v4.2.0/dafny-4.2.0-x64-ubuntu-20.04.zip  -L -o dafny.zip
+      - unzip -qq dafny.zip && rm dafny.zip
+      - export PATH="$PWD/dafny:$PATH"
+      # Switch back to the main directory
+      - cd aws-cryptographic-material-providers-library-dafny
+  pre_build:
+    commands:                                                                                                                                                
+      # UNIQUE_ID should be passed in as an environment variable. It is used to tie
+      # the different parts of the asynchronous signing process together
+      - echo "Using unique id for flow $UNIQUE_ID"
+      # Build unsigned source
+      - cd StandardLibrary
+      - make transpile_net
+      - dotnet build runtimes/net /p:Configuration=Release -nowarn:CS0162,CS0168
+      # This step assumes signing has already happened and we just need to retrieve
+      # the signed artifacts
+      - export ASSEMBLY_NAME="AWS.Cryptography.Internal.StandardLibrary.dll"
+      - export BASE=../codebuild/net
+      - python $BASE/retrieve_signed_assembly.py --target net6.0 --unique-id $UNIQUE_ID
+  build:
+    commands:
+      - mkdir build
+      - >-
+        aws codeartifact login \
+          --tool dotnet \
+          --repository mpl-net-staging \
+          --domain crypto-tools-internal \
+          --domain-owner 587316601012 \
+          --region us-east-1
+      # Set a unique version for releasing to staging, because this may fail and we don't
+      # want to collide with previous runs
+      - export VERSION=`grep '<Version>' runtimes/net/STD.csproj | sed 's/.*<Version>\(.*\)<\/Version>/\1/'`
+      - export UNIQUE_VERSION=$VERSION-`git rev-parse --short HEAD`
+      - dotnet pack runtimes/net/STD.csproj --no-build /p:Configuration=Release,Version=$UNIQUE_VERSION --output build
+      - dotnet nuget push build/AWS.Cryptography.Internal.StandardLibrary.$UNIQUE_VERSION.nupkg --source crypto-tools-internal/mpl-net-staging
+      # Now validate we can run the tests
+      - sed -i.backup  "/\<ProjectReference Include=\"..\/STD.csproj\" \/>/d" runtimes/net/tests/Test-STD.csproj
+      - dotnet add runtimes/net/tests/Test-STD.csproj package AWS.Cryptography.Internal.StandardLibrary --version $UNIQUE_VERSION
+      # Run examples for just one supported version.
+      # Since all frameworks and OS's are tested on commit, we mainly want to
+      # run this as a smoke test and the confirm we can find the dependency,
+      # rather than a comprehensive test suite.
+      - make test_net
+

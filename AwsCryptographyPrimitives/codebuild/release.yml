@@ -1,0 +1,39 @@
+version: 0.2
+
+batch:
+  fast-fail: true
+  build-graph:
+    - identifier: sign
+      buildspec: AwsCryptographyPrimitives/codebuild/sign.yml
+      env:
+        type: LINUX_CONTAINER
+        image: aws/codebuild/standard:6.0
+    - identifier: verify
+      buildspec: AwsCryptographyPrimitives/codebuild/verify.yml
+      env:
+        type: WINDOWS_SERVER_2019_CONTAINER
+        image: aws/codebuild/windows-base:2019-2.0
+      depend-on:
+        - sign
+    - identifier: release_staging
+      buildspec: AwsCryptographyPrimitives/codebuild/release-staging.yml
+      env:
+        type: LINUX_CONTAINER
+        image: aws/codebuild/standard:6.0
+      depend-on:
+        - verify
+    - identifier: release_prod
+      buildspec: AwsCryptographyPrimitives/codebuild/release-prod.yml
+      env:
+        type: LINUX_CONTAINER
+        image: aws/codebuild/standard:6.0
+      depend-on:
+        - verify
+        - release_staging
+    - identifier: test_prod
+      buildspec: AwsCryptographyPrimitives/codebuild/test-prod.yml
+      env:
+        type: LINUX_CONTAINER
+        image: aws/codebuild/standard:6.0
+      depend-on:
+        - release_prod
