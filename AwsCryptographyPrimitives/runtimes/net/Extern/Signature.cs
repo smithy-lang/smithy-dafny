@@ -21,19 +21,28 @@ using _IError = software.amazon.cryptography.primitives.internaldafny.types._IEr
 using Error_Opaque = software.amazon.cryptography.primitives.internaldafny.types.Error_Opaque;
 using Error_AwsCryptographicPrimitivesError = software.amazon.cryptography.primitives.internaldafny.types.Error_AwsCryptographicPrimitivesError;
 
-namespace Signature {
+namespace Signature
+{
 
-    public partial class ECDSA {
-        public static _IResult<SignatureKeyPair, _IError> ExternKeyGen(_IECDSASignatureAlgorithm x) {
-            try {
+    public partial class ECDSA
+    {
+        public static _IResult<SignatureKeyPair, _IError> ExternKeyGen(_IECDSASignatureAlgorithm x)
+        {
+            try
+            {
                 ECKeyPairGenerator generator = new ECKeyPairGenerator();
                 SecureRandom rng = new SecureRandom();
                 X9ECParameters p;
-                if (x.is_ECDSA__P384) {
+                if (x.is_ECDSA__P384)
+                {
                     p = ECNamedCurveTable.GetByName("secp384r1");
-                } else if (x.is_ECDSA__P256) {
+                }
+                else if (x.is_ECDSA__P256)
+                {
                     p = ECNamedCurveTable.GetByName("secp256r1");
-                } else {
+                }
+                else
+                {
                     return Result<SignatureKeyPair, _IError>
                         .create_Failure(new Error_AwsCryptographicPrimitivesError(
                             Dafny.Sequence<char>.FromString(String.Format("Unsupported ECDSA parameters: {0}", x))));
@@ -46,7 +55,9 @@ namespace Signature {
                 var signingKey = byteseq.FromArray(((ECPrivateKeyParameters)kp.Private).D.ToByteArray());
                 return Result<SignatureKeyPair, _IError>
                     .create_Success(new SignatureKeyPair(verificationKey, signingKey));
-            } catch (Exception e) {
+            }
+            catch (Exception e)
+            {
                 return Result<SignatureKeyPair, _IError>
                     .create_Failure(new Error_Opaque(e));
             }
@@ -61,14 +72,16 @@ namespace Signature {
         ///     placed in the remainder of the octet string
         /// Requires: keyParams.Parameters.Curve is a prime curve (if not, a cast exception will be thrown)
         /// </summary>
-        public static ibyteseq SerializePublicKey(ECPublicKeyParameters keyParams) {
+        public static ibyteseq SerializePublicKey(ECPublicKeyParameters keyParams)
+        {
             ECPoint pt = keyParams.Q;
 
             // zero-pad x coordinate
             var xBytes = pt.AffineXCoord.GetEncoded();
             var curve = (FpCurve)keyParams.Parameters.Curve;
             int fieldByteSize = (curve.FieldSize + 7) / 8;
-            if (xBytes.Length < fieldByteSize) {
+            if (xBytes.Length < fieldByteSize)
+            {
                 var paddingLength = fieldByteSize - xBytes.Length;
                 var paddedX = new byte[fieldByteSize];
                 System.Array.Clear(paddedX, 0, paddingLength);
@@ -90,19 +103,26 @@ namespace Signature {
           ibyteseq vk,
           ibyteseq msg,
           ibyteseq sig
-        ) {
-            try {
+        )
+        {
+            try
+            {
                 X9ECParameters parameters;
-                if (x.is_ECDSA__P384) {
+                if (x.is_ECDSA__P384)
+                {
                     parameters = ECNamedCurveTable.GetByName("secp384r1");
-                } else if (x.is_ECDSA__P256) {
+                }
+                else if (x.is_ECDSA__P256)
+                {
                     parameters = ECNamedCurveTable.GetByName("secp256r1");
-                } else {
+                }
+                else
+                {
                     return Result<bool, _IError>
                         .create_Failure(new Error_AwsCryptographicPrimitivesError(
                             Dafny.Sequence<char>.FromString(String.Format("Unsupported ECDSA parameters: {0}", x))));
                 }
-                
+
                 byte[] digest = InternalDigest(x, msg);
 
                 ECDomainParameters dp = new ECDomainParameters(parameters.Curve, parameters.G, parameters.N, parameters.H);
@@ -113,20 +133,29 @@ namespace Signature {
                 BigInteger r, s;
                 DERDeserialize(sig.Elements, out r, out s);
                 return Result<bool, _IError>.create_Success(sign.VerifySignature(digest, r, s));
-            } catch (Exception e) {
+            }
+            catch (Exception e)
+            {
                 return Result<bool, _IError>
                     .create_Failure(new Error_Opaque(e));
             }
         }
 
-        public static _IResult<ibyteseq, _IError> Sign(_IECDSASignatureAlgorithm x, ibyteseq sk, ibyteseq msg) {
-            try {
+        public static _IResult<ibyteseq, _IError> Sign(_IECDSASignatureAlgorithm x, ibyteseq sk, ibyteseq msg)
+        {
+            try
+            {
                 X9ECParameters parameters;
-                if (x.is_ECDSA__P384) {
+                if (x.is_ECDSA__P384)
+                {
                     parameters = ECNamedCurveTable.GetByName("secp384r1");
-                } else if (x.is_ECDSA__P256) {
+                }
+                else if (x.is_ECDSA__P256)
+                {
                     parameters = ECNamedCurveTable.GetByName("secp256r1");
-                } else {
+                }
+                else
+                {
                     return Result<ibyteseq, _IError>
                         .create_Failure(new Error_AwsCryptographicPrimitivesError(
                             Dafny.Sequence<char>.FromString(String.Format("Unsupported ECDSA parameters: {0}", x))));
@@ -140,41 +169,53 @@ namespace Signature {
                 byte[] serializedSignature;
                 // This loop can in theory run forever, but the chances of that are negligible.
                 // We may want to consider failing, after some number of loops, if we can do so in a way consistent with other ESDKs.
-                do {
+                do
+                {
                     // sig is array of two integers: r and s
                     BigInteger[] sig = sign.GenerateSignature(digest);
                     serializedSignature = DERSerialize(sig[0], sig[1]);
-                    if (serializedSignature.Length != Signature.__default.SignatureLength(x)) {
+                    if (serializedSignature.Length != Signature.__default.SignatureLength(x))
+                    {
                         // Most of the time, a signature of the wrong length can be fixed
                         // by negating s in the signature relative to the group order.
                         serializedSignature = DERSerialize(sig[0], parameters.N.Subtract(sig[1]));
                     }
                 } while (serializedSignature.Length != Signature.__default.SignatureLength(x));
                 return Result<ibyteseq, _IError>.create_Success(byteseq.FromArray(serializedSignature));
-            } catch (Exception e) {
+            }
+            catch (Exception e)
+            {
                 return Result<ibyteseq, _IError>
                     .create_Failure(new Error_Opaque(e));
             }
         }
 
-        private static byte[] InternalDigest(_IECDSASignatureAlgorithm x, ibyteseq msg) {
+        private static byte[] InternalDigest(_IECDSASignatureAlgorithm x, ibyteseq msg)
+        {
             System.Security.Cryptography.HashAlgorithm alg;
-            if (x.is_ECDSA__P384) {
+            if (x.is_ECDSA__P384)
+            {
                 alg = System.Security.Cryptography.SHA384.Create();
-            } else if (x.is_ECDSA__P256) {
+            }
+            else if (x.is_ECDSA__P256)
+            {
                 alg = System.Security.Cryptography.SHA256.Create();
-            } else {
+            }
+            else
+            {
                 throw new System.Exception(String.Format("Unsupported Curve: {0}", x));
             }
             return alg.ComputeHash(msg.Elements);
         }
 
-        private static byte[] DERSerialize(BigInteger r, BigInteger s) {
+        private static byte[] DERSerialize(BigInteger r, BigInteger s)
+        {
             DerSequence derSeq = new DerSequence(new DerInteger(r), new DerInteger(s));
             return derSeq.GetEncoded();
         }
 
-        private static void DERDeserialize(byte[] bytes, out BigInteger r, out BigInteger s) {
+        private static void DERDeserialize(byte[] bytes, out BigInteger r, out BigInteger s)
+        {
             Asn1InputStream asn1 = new Asn1InputStream(bytes);
             var seq = (Asn1Sequence)asn1.ReadObject();
             var dr = (DerInteger)seq[0];

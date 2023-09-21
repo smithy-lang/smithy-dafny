@@ -11,9 +11,11 @@ using byteseq = Dafny.Sequence<byte>;
 using _IDigestAlgorithm = software.amazon.cryptography.primitives.internaldafny.types._IDigestAlgorithm;
 using Error_Opaque = software.amazon.cryptography.primitives.internaldafny.types.Error_Opaque;
 
-namespace HMAC {
+namespace HMAC
+{
 
-    public partial class __default {
+    public partial class __default
+    {
         public static _IResult<ibyteseq, _IError> Digest(_IHMacInput input)
         {
             var maybeHmac = HMac.Build(input.dtor_digestAlgorithm);
@@ -29,7 +31,8 @@ namespace HMAC {
         }
     }
 
-    public partial class HMac {
+    public partial class HMac
+    {
 
         private Org.BouncyCastle.Crypto.Macs.HMac hmac;
 
@@ -44,27 +47,35 @@ namespace HMAC {
                 return Wrappers_Compile.Result<HMac, _IError>
                     .create_Failure(AWS.Cryptography.Primitives.TypeConversion.ToDafny_CommonError(ex));
             }
-            
+
         }
 
-        public HMac(_IDigestAlgorithm digest) {
+        public HMac(_IDigestAlgorithm digest)
+        {
             Org.BouncyCastle.Crypto.IDigest bouncyCastleDigest;
-            if(digest.is_SHA__256) {
+            if (digest.is_SHA__256)
+            {
                 bouncyCastleDigest = new Org.BouncyCastle.Crypto.Digests.Sha256Digest();
-            } else if(digest.is_SHA__384) {
+            }
+            else if (digest.is_SHA__384)
+            {
                 bouncyCastleDigest = new Org.BouncyCastle.Crypto.Digests.Sha384Digest();
-            } else if(digest.is_SHA__512) {
+            }
+            else if (digest.is_SHA__512)
+            {
                 bouncyCastleDigest = new Org.BouncyCastle.Crypto.Digests.Sha512Digest();
-            } else
+            }
+            else
             {
                 throw new System.Exception(String.Format("Unsupported digest: {0}", digest.ToString()));
             }
             hmac = new Org.BouncyCastle.Crypto.Macs.HMac(bouncyCastleDigest);
         }
 
-        public void Init(ibyteseq input) {
+        public void Init(ibyteseq input)
+        {
             // KeyParameter/ Init should not mutate input, but this is safer than using input.Elements directly
-            byte[] elemCopy = (byte[]) input.Elements.Clone();
+            byte[] elemCopy = (byte[])input.Elements.Clone();
             var keyParams = new Org.BouncyCastle.Crypto.Parameters.KeyParameter(elemCopy);
             hmac.Init(keyParams);
             // elemCopy may contain sensitive info; zeroize it to reduce time this lives in memory
@@ -72,20 +83,22 @@ namespace HMAC {
             elemCopy = null;
         }
 
-        public void BlockUpdate(ibyteseq input) {
+        public void BlockUpdate(ibyteseq input)
+        {
             // BlockUpdate should not mutate input, but this is safer than using input.Elements directly
-            byte[] elemCopy = (byte[]) input.Elements.Clone();
+            byte[] elemCopy = (byte[])input.Elements.Clone();
             hmac.BlockUpdate(elemCopy, 0, elemCopy.Length);
             // elemCopy may contain sensitive info; zeroize it to reduce time this lives in memory
             Array.Clear(elemCopy, 0, elemCopy.Length);
             elemCopy = null;
         }
 
-        public ibyteseq GetResult() {
+        public ibyteseq GetResult()
+        {
             byte[] output = new byte[hmac.GetMacSize()];
             hmac.DoFinal(output, 0);
             return byteseq.FromArray(output);
         }
-        
+
     }
 }

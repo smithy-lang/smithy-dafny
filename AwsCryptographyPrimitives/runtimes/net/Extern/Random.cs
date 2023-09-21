@@ -9,13 +9,17 @@ using ibyteseq = Dafny.ISequence<byte>;
 using _IError = software.amazon.cryptography.primitives.internaldafny.types._IError;
 using Error_Opaque = software.amazon.cryptography.primitives.internaldafny.types.Error_Opaque;
 
-namespace ExternRandom {
-    public partial class __default {
+namespace ExternRandom
+{
+    public partial class __default
+    {
         public static Wrappers_Compile._IResult<
             ibyteseq,
             software.amazon.cryptography.primitives.internaldafny.types._IError
-        > GenerateBytes(int i) {
-            try {
+        > GenerateBytes(int i)
+        {
+            try
+            {
                 //= compliance/data-format/message-header.txt#2.5.1.6
                 //# While
                 //# implementations cannot guarantee complete uniqueness, implementations
@@ -26,7 +30,9 @@ namespace ExternRandom {
                 rng.GetBytes(z);
                 return Wrappers_Compile.Result<ibyteseq, _IError>
                     .create_Success(Dafny.Sequence<byte>.FromArray(z));
-            } catch (Exception e) {
+            }
+            catch (Exception e)
+            {
                 return Wrappers_Compile.Result<ibyteseq, _IError>
                     .create_Failure(new Error_Opaque(e));
             }

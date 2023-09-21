@@ -17,8 +17,10 @@ using _IError = software.amazon.cryptography.primitives.internaldafny.types._IEr
 using Error_Opaque = software.amazon.cryptography.primitives.internaldafny.types.Error_Opaque;
 
 
-namespace AESEncryption {
-    public partial class AES_GCM {
+namespace AESEncryption
+{
+    public partial class AES_GCM
+    {
         public static _IResult<_IAESEncryptOutput, _IError> AESEncryptExtern(
             _IAES__GCM encAlg,
             ibyteseq iv,
@@ -69,7 +71,8 @@ namespace AESEncryption {
             ibyteseq authTag,
             ibyteseq iv,
             ibyteseq aad
-        ) {
+        )
+        {
             var keyBytes = key.Elements;
             var nonceBytes = iv.Elements;
             var ciphertextBytes = cipherText.Elements;
@@ -78,7 +81,8 @@ namespace AESEncryption {
 
             var plaintext = new byte[ciphertextBytes.Length];
 
-            try {
+            try
+            {
 #if NETFRAMEWORK
                 var ciphertextAndTag = ciphertextBytes.Concat(tagBytes).ToArray();
                 var param = new AeadParameters(

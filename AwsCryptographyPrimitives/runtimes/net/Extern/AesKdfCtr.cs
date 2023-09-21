@@ -9,12 +9,14 @@ using byteseq = Dafny.Sequence<byte>;
 using _IError = software.amazon.cryptography.primitives.internaldafny.types._IError;
 using Error_Opaque = software.amazon.cryptography.primitives.internaldafny.types.Error_Opaque;
 
-namespace AesKdfCtr {
-   public partial class __default {
-        public static _IResult<ibyteseq, _IError> AesKdfCtrStream (
+namespace AesKdfCtr
+{
+    public partial class __default
+    {
+        public static _IResult<ibyteseq, _IError> AesKdfCtrStream(
             ibyteseq iv,
             ibyteseq key,
-	    uint length
+        uint length
         )
         {
             var keyBytes = key.Elements;

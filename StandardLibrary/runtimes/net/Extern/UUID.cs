@@ -8,37 +8,48 @@ using byteseq = Dafny.Sequence<byte>;
 using icharseq = Dafny.ISequence<char>;
 using charseq = Dafny.Sequence<char>;
 
-namespace UUID {
-    public partial class __default {
-        public static _IResult<ibyteseq, icharseq> ToByteArray(icharseq s) {
-            try {
+namespace UUID
+{
+    public partial class __default
+    {
+        public static _IResult<ibyteseq, icharseq> ToByteArray(icharseq s)
+        {
+            try
+            {
                 Guid fromString = new Guid(new String(s.CloneAsArray()));
                 byte[] bytes = ReOrderUuidBytes(fromString.ToByteArray());
                 return Result<ibyteseq, icharseq>.create_Success(byteseq.FromArray(bytes));
-            } catch (Exception e) when (e is ArgumentNullException or FormatException or OverflowException) {
+            }
+            catch (Exception e) when (e is ArgumentNullException or FormatException or OverflowException)
+            {
                 return Result<ibyteseq, icharseq>
                     .create_Failure(Dafny.Sequence<char>.FromString("Unable to convert input to a UUID"));
             }
         }
-        public static _IResult<icharseq, icharseq> FromByteArray(ibyteseq b) {
-            try {
+        public static _IResult<icharseq, icharseq> FromByteArray(ibyteseq b)
+        {
+            try
+            {
                 byte[] bytes = ReOrderUuidBytes(b.CloneAsArray());
                 Guid fromBytes = new Guid(bytes);
                 return Result<icharseq, icharseq>.create_Success(charseq.FromString(fromBytes.ToString()));
             }
-            catch (Exception e) when (e is ArgumentNullException or ArgumentException) {
+            catch (Exception e) when (e is ArgumentNullException or ArgumentException)
+            {
                 return Result<icharseq, icharseq>.create_Failure(
                     charseq.FromString("Unable to convert bytes to valid UUID"));
             }
         }
 
-        public static _IResult<icharseq, icharseq> GenerateUUID() { 
+        public static _IResult<icharseq, icharseq> GenerateUUID()
+        {
             Guid uuid = Guid.NewGuid();
             return Result<icharseq, icharseq>.create_Success(charseq.FromString(uuid.ToString()));
         }
 
         // https://learn.microsoft.com/en-us/dotnet/api/system.guid.tobytearray?redirectedfrom=MSDN&view=net-7.0#remarks
-        private static byte[] ReOrderUuidBytes(byte[] uuid) {
+        private static byte[] ReOrderUuidBytes(byte[] uuid)
+        {
             // When using the .ToByteArray() method the byte 
             // representation is different than that of the 
             // string representation. 
@@ -65,6 +76,6 @@ namespace UUID {
                 uuid[15]
             };
             return bytes;
-        } 
+        }
     }
 }

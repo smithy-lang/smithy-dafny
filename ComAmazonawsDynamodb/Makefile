@@ -13,3 +13,6 @@ MAX_RESOURCE_COUNT=10000000
 AWS_SDK_CMD := --aws-sdk
 STD_LIBRARY=StandardLibrary
 SMITHY_DEPS=model
+
+format_net:
+	pushd runtimes/net && dotnet format && popd

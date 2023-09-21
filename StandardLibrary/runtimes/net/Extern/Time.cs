@@ -10,13 +10,15 @@ using byteseq = Dafny.Sequence<byte>;
 using icharseq = Dafny.ISequence<char>;
 using charseq = Dafny.Sequence<char>;
 
-namespace Time {
+namespace Time
+{
 
-    public partial class __default {
+    public partial class __default
+    {
         public static long CurrentRelativeTime()
         {
             var timespan = DateTime.Now - DateTime.MinValue;
-            return (long) timespan.TotalSeconds;
+            return (long)timespan.TotalSeconds;
         }
 
         public static _IResult<icharseq, icharseq> GetCurrentTimeStamp()

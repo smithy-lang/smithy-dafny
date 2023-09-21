@@ -35,16 +35,16 @@ namespace software.amazon.cryptography.services.dynamodb.internaldafny
                 Dafny.ISequence<char> regionDafnyString
             )
         {
-          string regionStr = TypeConversion.FromDafny_N6_smithy__N3_api__S6_String(regionDafnyString);
-          var region = RegionEndpoint.GetBySystemName(regionStr);
+            string regionStr = TypeConversion.FromDafny_N6_smithy__N3_api__S6_String(regionDafnyString);
+            var region = RegionEndpoint.GetBySystemName(regionStr);
 
-          var client = new AmazonDynamoDBClient(region);
-          
-          return Result<
-            types.IDynamoDBClient,
-            types._IError
-          >
-            .create_Success(new DynamoDBv2Shim(client));
-            }
+            var client = new AmazonDynamoDBClient(region);
+
+            return Result<
+              types.IDynamoDBClient,
+              types._IError
+            >
+              .create_Success(new DynamoDBv2Shim(client));
+        }
     }
 }

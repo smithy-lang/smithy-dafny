@@ -13,27 +13,28 @@ using charseq = Dafny.Sequence<char>;
 namespace ConcurrentCall
 {
 
-  public partial class __default
-  {
-    public static void ConcurrentCall(ConcurrentCall.Callee callee, uint serialIters, uint concurrentIters)
+    public partial class __default
     {
-      Thread[] threadsArray = new Thread[concurrentIters];
-      for (uint i = 0; i < concurrentIters; i++)
-      {
-        uint localNum = i;
-        threadsArray[i] = new Thread(() =>
+        public static void ConcurrentCall(ConcurrentCall.Callee callee, uint serialIters, uint concurrentIters)
         {
-          for (uint j = 0; j < serialIters; ++j) {
-            (callee).call(j, localNum);
-          };
-        });
-      }
-      for (uint i = 0; i < concurrentIters; i++)
-        threadsArray[i].Start();
+            Thread[] threadsArray = new Thread[concurrentIters];
+            for (uint i = 0; i < concurrentIters; i++)
+            {
+                uint localNum = i;
+                threadsArray[i] = new Thread(() =>
+                {
+                    for (uint j = 0; j < serialIters; ++j)
+                    {
+                        (callee).call(j, localNum);
+                    };
+                });
+            }
+            for (uint i = 0; i < concurrentIters; i++)
+                threadsArray[i].Start();
 
-      for (uint i = 0; i < concurrentIters; i++)
-        threadsArray[i].Join();
+            for (uint i = 0; i < concurrentIters; i++)
+                threadsArray[i].Join();
 
+        }
     }
-  }
 }

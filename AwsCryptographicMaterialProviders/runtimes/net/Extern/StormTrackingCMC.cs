@@ -41,32 +41,41 @@ namespace software.amazon.cryptography.internaldafny.StormTrackingCMC
     // This is the synchronization for GetCacheEntry and GetCacheEntry_k
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.Synchronized)]
     public Wrappers_Compile._IResult<StormTracker_Compile._ICacheState, software.amazon.cryptography.materialproviders.internaldafny.types._IError>
-      GetFromCacheInner(software.amazon.cryptography.materialproviders.internaldafny.types._IGetCacheEntryInput input) {
+      GetFromCacheInner(software.amazon.cryptography.materialproviders.internaldafny.types._IGetCacheEntryInput input)
+    {
       return wrapped.GetFromCache(input);
     }
 
     // NOT synchronized, as some sleeping might be involved
     public Wrappers_Compile._IResult<software.amazon.cryptography.materialproviders.internaldafny.types._IGetCacheEntryOutput, software.amazon.cryptography.materialproviders.internaldafny.types._IError> GetCacheEntry_k(software.amazon.cryptography.materialproviders.internaldafny.types._IGetCacheEntryInput input)
     {
-      while (true) {
+      while (true)
+      {
         Wrappers_Compile._IResult<StormTracker_Compile._ICacheState, software.amazon.cryptography.materialproviders.internaldafny.types._IError>
           result = GetFromCacheInner(input);
-        if (result.is_Failure) {
+        if (result.is_Failure)
+        {
           return Wrappers_Compile.Result<software.amazon.cryptography.materialproviders.internaldafny.types._IGetCacheEntryOutput, software.amazon.cryptography.materialproviders.internaldafny.types._IError>
             .create_Failure((result).dtor_error);
-        } else if (result.dtor_value.is_Full) {
+        }
+        else if (result.dtor_value.is_Full)
+        {
           return Wrappers_Compile.Result<software.amazon.cryptography.materialproviders.internaldafny.types._IGetCacheEntryOutput, software.amazon.cryptography.materialproviders.internaldafny.types._IError>
             .create_Success(result.dtor_value.dtor_data);
-        } else if (result.dtor_value.is_EmptyFetch) {
+        }
+        else if (result.dtor_value.is_EmptyFetch)
+        {
           return Wrappers_Compile.Result<software.amazon.cryptography.materialproviders.internaldafny.types._IGetCacheEntryOutput, software.amazon.cryptography.materialproviders.internaldafny.types._IError>
               .create_Failure(software.amazon.cryptography.materialproviders.internaldafny.types.Error
                   .create_EntryDoesNotExist(Dafny.Sequence<char>.FromString("Entry does not exist")));
-        } else {
+        }
+        else
+        {
           Thread.Sleep(50);
         }
       }
     }
-    
+
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.Synchronized)]
     public Wrappers_Compile._IResult<_System._ITuple0, software.amazon.cryptography.materialproviders.internaldafny.types._IError> PutCacheEntry_k(software.amazon.cryptography.materialproviders.internaldafny.types._IPutCacheEntryInput input)
     {
