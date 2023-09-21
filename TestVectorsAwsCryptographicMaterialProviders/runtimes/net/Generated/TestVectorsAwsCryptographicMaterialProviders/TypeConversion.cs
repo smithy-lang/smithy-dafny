@@ -2594,7 +2594,24 @@ throw new System.ArgumentException("Invalid AWS.Cryptography.Primitives.ECDSASig
  public static System.Exception FromDafny_CommonError(software.amazon.cryptography.materialproviders.internaldafny.types._IError value) {
  switch(value)
  {
-
+ case software.amazon.cryptography.materialproviders.internaldafny.types.Error_ComAmazonawsDynamodb dafnyVal:
+  return Com.Amazonaws.Dynamodb.TypeConversion.FromDafny_CommonError(
+    dafnyVal._ComAmazonawsDynamodb
+  );
+ case software.amazon.cryptography.materialproviders.internaldafny.types.Error_AwsCryptographyKeyStore dafnyVal:
+  return AWS.Cryptography.KeyStore.TypeConversion.FromDafny_CommonError(
+    dafnyVal._AwsCryptographyKeyStore
+  );
+ case software.amazon.cryptography.materialproviders.internaldafny.types.Error_AwsCryptographyPrimitives dafnyVal:
+  return AWS.Cryptography.Primitives.TypeConversion.FromDafny_CommonError(
+    dafnyVal._AwsCryptographyPrimitives
+  );
+ case software.amazon.cryptography.materialproviders.internaldafny.types.Error_ComAmazonawsKms dafnyVal:
+  // BEGIN MANUAL EDIT
+  return Com.Amazonaws.Kms.TypeConversion.FromDafny_CommonError(
+  // END MANUAL EDIT 
+    dafnyVal._ComAmazonawsKms
+  );
  case software.amazon.cryptography.materialproviders.internaldafny.types.Error_AwsCryptographicMaterialProvidersException dafnyVal:
 return FromDafny_N3_aws__N12_cryptography__N17_materialProviders__S42_AwsCryptographicMaterialProvidersException(dafnyVal);
  case software.amazon.cryptography.materialproviders.internaldafny.types.Error_EntryAlreadyExists dafnyVal:
