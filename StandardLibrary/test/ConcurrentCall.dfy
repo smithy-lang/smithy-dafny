@@ -40,7 +40,9 @@ module TestCallMany {
   method {:test} TestBasic() {
     var c := new MyCallee();
     ConcurrentCall.ConcurrentCall(callee := c, serialIters := 2, concurrentIters := 3);
-    expect c.count == 6;
+    // MyCallee's call is not thread safe, so we expect this value to usually be 6,
+    // but it may be less.
+    expect 2 <= c.count <= 6;
   }
 
 }
