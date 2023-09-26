@@ -21,7 +21,8 @@ import software.amazon.smithy.python.codegen.PythonWriter;
 /**
  * Writes the shim.py file.
  * The shim wraps the client.py implementation (which itself wraps the underlying Dafny implementation).
- * Other Dafny-generated Python code may use the shim to interact with this project's Dafny implementation.
+ * Other Dafny-generated Python code may use the shim to interact with this project's Dafny implementation
+ *   through the Polymorph wrapper.
  */
 public class ShimFileWriter implements CustomFileWriter {
 
