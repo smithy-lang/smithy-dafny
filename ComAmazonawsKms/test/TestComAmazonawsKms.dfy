@@ -7,7 +7,7 @@ module TestComAmazonawsKms {
   import Com.Amazonaws.Kms
   import opened StandardLibrary.UInt
 
-  const keyId :=  "arn:aws:kms:us-west-2:658956600833:key/b3537ef1-d8dc-4780-9f5a-55776cbb2f7f";
+  const keyId :=  "arn:aws:kms:us-west-2:658956600833:key/b3537ef1-d8dc-4780-9f5a-55776cbb2f7f"
   // One test depends on knowing the region it is being run it.
   // For now, hardcode this value to the region we are currently using to test,
   // which is the same region that our test KMS Key lives in.
@@ -15,7 +15,7 @@ module TestComAmazonawsKms {
   // grab this value from some config.
   // For now, we prefer to have brittleness in these tests vs. missing a test case
   // that cannot be formally verified.
-  const TEST_REGION := "us-west-2";
+  const TEST_REGION := "us-west-2"
 
   // This is required because
   // https://github.com/dafny-lang/dafny/issues/2311

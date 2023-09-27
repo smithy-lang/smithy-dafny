@@ -62,7 +62,7 @@ module  AwsKmsMrkMatchForDecrypt {
         !AwsKmsMrkMatchForDecrypt(
           AwsKmsArnIdentifier(c.value),
           AwsKmsArnIdentifier(m.value)
-        );
+        )
     //= aws-encryption-sdk-specification/framework/aws-kms/aws-kms-mrk-match-for-decrypt.md#implementation
     //= type=implication
     //# Otherwise if both inputs are
@@ -86,6 +86,6 @@ module  AwsKmsMrkMatchForDecrypt {
           && m.value.service   == c.value.service
           && m.value.account   == c.value.account
           && m.value.resource  == c.value.resource
-             );
+             )
   {}
 }

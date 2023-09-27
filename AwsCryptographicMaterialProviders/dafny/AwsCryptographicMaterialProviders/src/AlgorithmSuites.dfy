@@ -313,27 +313,27 @@ module AlgorithmSuites {
   type AlgorithmSuite = a: AlgorithmSuiteInfo | AlgorithmSuite?(a)
     witness *
 
-  const Bits256 := 32 as int32;
-  const Bits192 := 24 as int32;
-  const Bits128 := 16 as int32;
-  const TagLen := 16 as int32;
-  const IvLen := 12 as int32;
+  const Bits256 := 32 as int32
+  const Bits192 := 24 as int32
+  const Bits128 := 16 as int32
+  const TagLen := 16 as int32
+  const IvLen := 12 as int32
 
   const AES_128_GCM_IV12_TAG16 := Encrypt.AES_GCM(AwsCryptographyPrimitivesTypes.AES_GCM(
                                                     keyLength := Bits128,
                                                     tagLength := TagLen,
                                                     ivLength := IvLen
-                                                  ));
+                                                  ))
   const AES_192_GCM_IV12_TAG16 := Encrypt.AES_GCM(AwsCryptographyPrimitivesTypes.AES_GCM(
                                                     keyLength := Bits192,
                                                     tagLength := TagLen,
                                                     ivLength := IvLen
-                                                  ));
+                                                  ))
   const AES_256_GCM_IV12_TAG16 := Encrypt.AES_GCM(AwsCryptographyPrimitivesTypes.AES_GCM(
                                                     keyLength := Bits256,
                                                     tagLength := TagLen,
                                                     ivLength := IvLen
-                                                  ));
+                                                  ))
 
   function method HKDF_SHA_256(
     keyLength: AwsCryptographyPrimitivesTypes.SymmetricKeyLength
@@ -572,7 +572,7 @@ module AlgorithmSuites {
   const SupportedDBEAlgorithmSuites: map<DBEAlgorithmSuiteId, AlgorithmSuite> := map[
                                                                                    DBEAlgorithmSuiteId.ALG_AES_256_GCM_HKDF_SHA512_COMMIT_KEY_SYMSIG_HMAC_SHA384 := DBE_ALG_AES_256_GCM_HKDF_SHA512_COMMIT_KEY_SYMSIG_HMAC_SHA384,
                                                                                    DBEAlgorithmSuiteId.ALG_AES_256_GCM_HKDF_SHA512_COMMIT_KEY_ECDSA_P384_SYMSIG_HMAC_SHA384 := DBE_ALG_AES_256_GCM_HKDF_SHA512_COMMIT_KEY_ECDSA_P384_SYMSIG_HMAC_SHA384
-                                                                                 ];
+                                                                                 ]
 
   lemma LemmaSupportedDBEAlgorithmSuitesIsComplete(id: DBEAlgorithmSuiteId)
     ensures id in SupportedDBEAlgorithmSuites
@@ -614,7 +614,7 @@ module AlgorithmSuites {
                                                                                      ESDKAlgorithmSuiteId.ALG_AES_256_GCM_IV12_TAG16_HKDF_SHA384_ECDSA_P384 := ESDK_ALG_AES_256_GCM_IV12_TAG16_HKDF_SHA384_ECDSA_P384,
                                                                                      ESDKAlgorithmSuiteId.ALG_AES_256_GCM_HKDF_SHA512_COMMIT_KEY := ESDK_ALG_AES_256_GCM_HKDF_SHA512_COMMIT_KEY,
                                                                                      ESDKAlgorithmSuiteId.ALG_AES_256_GCM_HKDF_SHA512_COMMIT_KEY_ECDSA_P384 := ESDK_ALG_AES_256_GCM_HKDF_SHA512_COMMIT_KEY_ECDSA_P384
-                                                                                   ];
+                                                                                   ]
 
   lemma LemmaSupportedESDKAlgorithmSuitesIsComplete(id: ESDKAlgorithmSuiteId)
     ensures id in SupportedESDKAlgorithmSuites
@@ -690,7 +690,7 @@ module AlgorithmSuites {
                                                                            [0x05, 0x78] := ESDK_ALG_AES_256_GCM_HKDF_SHA512_COMMIT_KEY_ECDSA_P384,
                                                                            [0x67, 0x00] := DBE_ALG_AES_256_GCM_HKDF_SHA512_COMMIT_KEY_SYMSIG_HMAC_SHA384,
                                                                            [0x67, 0x01] := DBE_ALG_AES_256_GCM_HKDF_SHA512_COMMIT_KEY_ECDSA_P384_SYMSIG_HMAC_SHA384
-                                                                         ];
+                                                                         ]
 
   lemma AlgorithmSuiteInfoByBinaryIdIsComplete(a: AlgorithmSuite)
     ensures a == AlgorithmSuiteInfoByBinaryId[a.binaryId]

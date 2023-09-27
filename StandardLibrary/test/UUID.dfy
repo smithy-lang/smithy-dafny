@@ -8,16 +8,16 @@ module TestUUID {
   import opened UUID
   import opened UInt = StandardLibrary.UInt
 
-  const uuid := "92382658-b7a0-4d97-9c49-cee4e672a3b3";
+  const uuid := "92382658-b7a0-4d97-9c49-cee4e672a3b3"
   const byteUuid: seq<uint8> := [146, 56, 38, 88,
                                  183, 160, 77, 151,
                                  156, 73, 206, 228,
-                                 230, 114, 163, 179];
+                                 230, 114, 163, 179]
 
   const wrongByteUuid: seq<uint8> := [146, 56, 38, 88,
                                       183, 160, 77, 151,
                                       156, 73, 206, 228,
-                                      230, 114, 163, 178];
+                                      230, 114, 163, 178]
 
   method {:test} TestFromBytesSuccess() {
     var fromBytes :- expect UUID.FromByteArray(byteUuid);

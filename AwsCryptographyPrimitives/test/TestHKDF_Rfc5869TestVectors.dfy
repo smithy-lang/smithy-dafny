@@ -12,7 +12,7 @@ module TestHKDF_Rfc5869TestVectors {
   import opened TestAwsCryptographyPrimitivesHKDF
 
   // https://tools.ietf.org/html/rfc5869#appendix-A
-  const testVectors: seq<RFCTestVector> := [a1, a2, a3];
+  const testVectors: seq<RFCTestVector> := [a1, a2, a3]
 
   //   A.1.  Test Case 1
 
@@ -62,7 +62,7 @@ module TestHKDF_Rfc5869TestVectors {
                   86, 236, 196, 197, 191,  52,   0, 114,   8,
                   213, 184, 135,  24,  88, 101
                 ]
-              );
+              )
 
   // A.2.  Test Case 2
 
@@ -142,7 +142,7 @@ module TestHKDF_Rfc5869TestVectors {
                                                172, 163, 219, 113, 204,  48, 197, 129, 121, 236,  62, 135,
                                                193,  76,   1, 213, 193, 243,  67,  79,  29, 135
                                              ]
-                                           );
+                                           )
 
   // A.3.  Test Case 3
 
@@ -184,7 +184,7 @@ module TestHKDF_Rfc5869TestVectors {
                   95,  60, 115, 141,  45, 157,  32,  19, 149,
                   250, 164, 182,  26, 150, 200
                 ]
-              );
+              )
 
   // A.4.  Test Case 4
   // A.5.  Test Case 5

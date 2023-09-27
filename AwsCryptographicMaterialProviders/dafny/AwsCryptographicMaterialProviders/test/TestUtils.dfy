@@ -22,14 +22,14 @@ module TestUtils {
                               + "r3avzrg5xBHmzR7u1FTab22Op3Hgb2dBLZH43wNKAceVwKqKA8UNAxashFON7xK9\n"
                               + "yy4kfOL0Z/nhxRKe4jRZ/5v508qIzgzCksYy7Y3QbMejAtiYnr7s5/d5KWw0swou\n"
                               + "twIDAQAB\n"
-                              + "-----END PUBLIC KEY-----";
-  const KMS_RSA_PRIVATE_KEY_ARN := "arn:aws:kms:us-west-2:370957321024:key/mrk-63d386cb70614ea59b32ad65c9315297";
+                              + "-----END PUBLIC KEY-----"
+  const KMS_RSA_PRIVATE_KEY_ARN := "arn:aws:kms:us-west-2:370957321024:key/mrk-63d386cb70614ea59b32ad65c9315297"
 
-  const SHARED_TEST_KEY_ARN := "arn:aws:kms:us-west-2:658956600833:key/b3537ef1-d8dc-4780-9f5a-55776cbb2f7f";
+  const SHARED_TEST_KEY_ARN := "arn:aws:kms:us-west-2:658956600833:key/b3537ef1-d8dc-4780-9f5a-55776cbb2f7f"
 
-  const ACCOUNT_IDS := ["658956600833"];
+  const ACCOUNT_IDS := ["658956600833"]
 
-  const PARTITION := "aws";
+  const PARTITION := "aws"
 
   // This axiom should only be used by tests to skip UTF8 verification of long sequences
   // long to be serialized in 16 bytes, in order to avoid a false negative for from verification.

@@ -18,8 +18,8 @@ module KdfCtr {
   import HMAC
   import Digest
 
-  const SEPARATION_INDICATOR: seq<uint8> := [0x00];
-  const COUNTER_START_VALUE: uint32 := 1;
+  const SEPARATION_INDICATOR: seq<uint8> := [0x00]
+  const COUNTER_START_VALUE: uint32 := 1
 
   // This implementation of te spec is restricted to only deriving
   // 32 bytes of key material. We will have to consider the effect of allowing different

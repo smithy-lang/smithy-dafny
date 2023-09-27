@@ -29,8 +29,8 @@ module RawAESKeyring {
 
   import Aws.Cryptography.Primitives
 
-  const AUTH_TAG_LEN_LEN := 4;
-  const IV_LEN_LEN       := 4;
+  const AUTH_TAG_LEN_LEN := 4
+  const IV_LEN_LEN       := 4
 
   class RawAESKeyring
     extends

@@ -18,7 +18,7 @@ module {:options "-functionSyntax:4"} TestAwsCryptographyPrimitivesRSA {
                            + "18xpy9M19By1yuC9mlNcpE5v5A8fq/qLLT4s34/6dnVxKX6gIoWDzDrUNrnPe0p5\n"
                            + "pqZ1SHalrELMf/liXPrf94+0cF8g1fYVGGo+MZsG5/HRngLiskP25w5smMT51U1y\n"
                            + "gQIDAQAB\n"
-                           + "-----END PUBLIC KEY-----";
+                           + "-----END PUBLIC KEY-----"
 
   const RSA_PUBLIC_3072 := "-----BEGIN PUBLIC KEY-----\n"
                            + "MIIBojANBgkqhkiG9w0BAQEFAAOCAY8AMIIBigKCAYEAnrUonUAKKpZE+LbQfq6I\n"
@@ -30,7 +30,7 @@ module {:options "-functionSyntax:4"} TestAwsCryptographyPrimitivesRSA {
                            + "Nb/4Psr7ZvbKSlaMwEpyReHvYYqM7dd6A4Y9FirnrpAPaqlfm8UFtHKQvUckxRoR\n"
                            + "05kzNN2jIRJtMwGpn+40tiei7eBGMmIn41/dnkM7GOJau4BarSJMiREK1yH9hh1C\n"
                            + "GbrQu6i0F9G0uBDITen9/uPX9cxK5pNHAxeWzr2UP1UzAgMBAAE=\n"
-                           + "-----END PUBLIC KEY-----";
+                           + "-----END PUBLIC KEY-----"
 
   const RSA_PUBLIC_4096 := "-----BEGIN PUBLIC KEY-----\n"
                            + "MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAs86OIUN9RbdEdyQb2tGQ\n"
@@ -45,7 +45,7 @@ module {:options "-functionSyntax:4"} TestAwsCryptographyPrimitivesRSA {
                            + "GF27MXqykKHxcmOb0UfGIfI0eUtkid4gJdCxhidiILj6SHpEr+oa/Oogz01rVCdm\n"
                            + "mbWmgFxmiKse8NXNQR+7qhMYX5GgdeSbp/Lg24HF9mvnd0S2wHkC86lGyQtvzrsd\n"
                            + "DdUJZ2jqiKvMLdMKNFHFGGUCAwEAAQ==\n"
-                           + "-----END PUBLIC KEY-----";
+                           + "-----END PUBLIC KEY-----"
 
   method {:test} RSAEncryptTests() {
     var client :- expect Primitives.AtomicPrimitives();

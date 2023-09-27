@@ -300,11 +300,11 @@ abstract module AbstractAwsCryptographyKeyStoreService
               && fresh(res.value)
               && fresh(res.value.Modifies
                        - ( if config.ddbClient.Some? then
-                       config.ddbClient.value.Modifies
-                       else {}
+                             config.ddbClient.value.Modifies
+                           else {}
                        ) - ( if config.kmsClient.Some? then
-                       config.kmsClient.value.Modifies
-                       else {}
+                               config.kmsClient.value.Modifies
+                             else {}
                        ) )
               && fresh(res.value.History)
               && res.value.ValidState()

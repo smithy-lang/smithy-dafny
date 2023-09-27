@@ -56,7 +56,7 @@ module KeyringExpectations {
     modifies keyring.Modifies
     ensures keyring.ValidState()
 
-    ensures results.encryptionMaterials.plaintextDataKey == results.decryptionMaterials.plaintextDataKey;
+    ensures results.encryptionMaterials.plaintextDataKey == results.decryptionMaterials.plaintextDataKey
     // More?
   {
 

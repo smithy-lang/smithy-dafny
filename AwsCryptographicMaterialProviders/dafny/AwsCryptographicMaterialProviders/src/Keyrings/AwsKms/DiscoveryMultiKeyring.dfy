@@ -126,7 +126,7 @@ module DiscoveryMultiKeyring {
 
     var keyring := new MultiKeyring.MultiKeyring(
       None(),
-           children
+      children
     );
 
     return Success(keyring);

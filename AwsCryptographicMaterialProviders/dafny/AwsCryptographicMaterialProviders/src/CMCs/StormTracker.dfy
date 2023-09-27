@@ -53,7 +53,7 @@ module {:options "/functionSyntax:4" }  StormTracker {
       && inFlight !in wrapped.Modifies
       && wrapped.ValidState()
     }
-    var wrapped : LocalCMC.LocalCMC; // the actual cache
+    var wrapped : LocalCMC.LocalCMC // the actual cache
     var inFlight: MutableMap<seq<uint8>, Types.PositiveLong> // the time at which this key became in flight
     var gracePeriod : Types.PositiveLong // seconds before expiration that we start putting things in flight
     var graceInterval : Types.PositiveLong // minimum seconds before putting the same key in flight again

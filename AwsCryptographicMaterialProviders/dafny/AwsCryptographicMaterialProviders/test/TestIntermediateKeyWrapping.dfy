@@ -16,9 +16,9 @@ module TestIntermediateKeyWrapping {
   import MaterialWrapping
   import AlgorithmSuites
 
-  const TEST_ALG_SUITE := AlgorithmSuites.DBE_ALG_AES_256_GCM_HKDF_SHA512_COMMIT_KEY_ECDSA_P384_SYMSIG_HMAC_SHA384;
-  const PLAINTEXT_MAT : seq<uint8> := seq(TEST_ALG_SUITE.encrypt.AES_GCM.keyLength as int, _ => 1);
-  const WRAPPED_MAT : seq<uint8> := seq(TEST_ALG_SUITE.encrypt.AES_GCM.keyLength as int, _ => 2);
+  const TEST_ALG_SUITE := AlgorithmSuites.DBE_ALG_AES_256_GCM_HKDF_SHA512_COMMIT_KEY_ECDSA_P384_SYMSIG_HMAC_SHA384
+  const PLAINTEXT_MAT : seq<uint8> := seq(TEST_ALG_SUITE.encrypt.AES_GCM.keyLength as int, _ => 1)
+  const WRAPPED_MAT : seq<uint8> := seq(TEST_ALG_SUITE.encrypt.AES_GCM.keyLength as int, _ => 2)
 
   method {:test} IntermediateWrapUnwrapTest() {
     var encCtx := map[];

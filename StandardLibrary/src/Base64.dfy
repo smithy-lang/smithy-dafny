@@ -58,7 +58,7 @@ module Base64 {
 
   lemma CharToIndexToChar(x: char)
     requires IsBase64Char(x)
-    ensures IndexToChar(CharToIndex(x)) == x;
+    ensures IndexToChar(CharToIndex(x)) == x
   {}
 
   lemma IndexToCharToIndex(x: index)
@@ -411,9 +411,9 @@ module Base64 {
   }
 
   lemma ConcatMod4Sequences<T>(s: seq<T>, t: seq<T>)
-    requires |s| % 4 == 0;
-    requires |t| % 4 == 0;
-    ensures |s + t| % 4 == 0;
+    requires |s| % 4 == 0
+    requires |t| % 4 == 0
+    ensures |s + t| % 4 == 0
   {
   }
 

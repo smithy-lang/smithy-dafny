@@ -12,8 +12,8 @@ module TestSignature {
   import opened Wrappers
   import Signature
 
-  const P256: Types.ECDSASignatureAlgorithm := Types.ECDSASignatureAlgorithm.ECDSA_P256;
-  const P384: Types.ECDSASignatureAlgorithm := Types.ECDSASignatureAlgorithm.ECDSA_P384;
+  const P256: Types.ECDSASignatureAlgorithm := Types.ECDSASignatureAlgorithm.ECDSA_P256
+  const P384: Types.ECDSASignatureAlgorithm := Types.ECDSASignatureAlgorithm.ECDSA_P384
 
   method RequireGoodKeyLengths(
     alg: Types.ECDSASignatureAlgorithm,

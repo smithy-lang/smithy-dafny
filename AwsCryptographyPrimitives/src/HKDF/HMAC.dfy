@@ -35,7 +35,7 @@ module {:options "-functionSyntax:4"} {:extern "HMAC"} HMAC {
     method {:extern "Init"} Init(key: seq<uint8>)
       requires 0 < |key|
       modifies this
-      ensures this.GetKey() == key;
+      ensures this.GetKey() == key
       ensures this.GetDigest() == old(this.GetDigest())
       ensures this.GetInputSoFar() == []
 
@@ -54,7 +54,7 @@ module {:options "-functionSyntax:4"} {:extern "HMAC"} HMAC {
       ensures this.GetInputSoFar() == []
       ensures this.GetDigest() == old(this.GetDigest())
       ensures this.GetKey() == old(this.GetKey())
-      ensures this.HashSignature(old(this.GetInputSoFar()), s);
+      ensures this.HashSignature(old(this.GetInputSoFar()), s)
 
     predicate {:axiom} HashSignature(message: seq<uint8>, s: seq<uint8>)
 

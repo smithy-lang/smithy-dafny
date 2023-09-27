@@ -10,7 +10,7 @@ module TestComAmazonawsDynamoDB {
 
   // Use the infra we have already set up for KeyStore testing
   // to test DynamoDb. Currently relies on some KeyStore specific logic to test.
-  const tableNameTest : DDB.Types.TableName := "KeyStoreTestTable";
+  const tableNameTest : DDB.Types.TableName := "KeyStoreTestTable"
   const secIndex : DDB.Types.IndexName := "Active-Keys"
 
   // Basic smoke test for DDB client.

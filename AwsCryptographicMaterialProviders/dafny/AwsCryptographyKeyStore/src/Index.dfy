@@ -37,10 +37,10 @@ module {:extern "software.amazon.cryptography.keystore.internaldafny"}
               && KMS.IsValid_KeyIdType(res.value.config.kmsConfiguration.kmsKeyArn)
               && DDB.IsValid_TableName(config.ddbTableName)
               && GetValidGrantTokens(config.grantTokens).Success?
-              && config.kmsClient.Some? ==> res.value.config.kmsClient == config.kmsClient.value
-                                            && config.ddbClient.Some? ==> res.value.config.ddbClient == config.ddbClient.value
-                                                                          && res.value.config.kmsClient.ValidState()
-                                                                          && res.value.config.ddbClient.ValidState()
+              && (config.kmsClient.Some? ==> res.value.config.kmsClient == config.kmsClient.value)
+              && (config.ddbClient.Some? ==> res.value.config.ddbClient == config.ddbClient.value
+                                             && res.value.config.kmsClient.ValidState()
+                                             && res.value.config.ddbClient.ValidState())
     ensures
       && !DDB.IsValid_TableName(config.ddbTableName)
       && !KMS.IsValid_KeyIdType(config.kmsConfiguration.kmsKeyArn)
@@ -119,7 +119,7 @@ module {:extern "software.amazon.cryptography.keystore.internaldafny"}
       grantTokens := grantTokens.value,
       kmsClient := kmsClient,
       ddbClient := ddbClient
-    )
+      )
     );
     return Success(client);
   }

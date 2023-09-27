@@ -188,7 +188,7 @@ module {:options "/functionSyntax:4" } KMSKeystoreOperations {
            KeyId := Some(kmsConfiguration.kmsKeyArn),
            EncryptionAlgorithm := None
          )
-         == Seq.Last(kmsClient.History.Decrypt).input;
+         == Seq.Last(kmsClient.History.Decrypt).input
     ensures output.Success?
             ==>
               && Seq.Last(kmsClient.History.Decrypt).output.Success?

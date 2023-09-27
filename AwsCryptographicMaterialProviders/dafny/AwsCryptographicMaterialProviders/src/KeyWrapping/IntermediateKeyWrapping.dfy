@@ -21,8 +21,8 @@ module IntermediateKeyWrapping {
   import HKDF
   import CanonicalEncryptionContext
 
-  const KEYWRAP_MAC_INFO := UTF8.EncodeAscii("AWS_MPL_INTERMEDIATE_KEYWRAP_MAC");
-  const KEYWRAP_ENC_INFO := UTF8.EncodeAscii("AWS_MPL_INTERMEDIATE_KEYWRAP_ENC");
+  const KEYWRAP_MAC_INFO := UTF8.EncodeAscii("AWS_MPL_INTERMEDIATE_KEYWRAP_MAC")
+  const KEYWRAP_ENC_INFO := UTF8.EncodeAscii("AWS_MPL_INTERMEDIATE_KEYWRAP_ENC")
 
   datatype IntermediateUnwrapOutput<T> = IntermediateUnwrapOutput(
     nameonly plaintextDataKey: seq<uint8>,

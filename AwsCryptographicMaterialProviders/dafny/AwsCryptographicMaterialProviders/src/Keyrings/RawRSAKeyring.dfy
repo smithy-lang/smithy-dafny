@@ -326,8 +326,8 @@ module RawRSAKeyring {
 
           var unwrap := new RsaUnwrapKeyMaterial(
             privateKey.Extract(),
-                               paddingScheme,
-                               cryptoPrimitives
+            paddingScheme,
+            cryptoPrimitives
           );
           var unwrapOutput := EdkWrapping.UnwrapEdkMaterial(
             edk.ciphertext,

@@ -116,7 +116,7 @@ module FloatCompareTest {
     "+10e-1",
     "+10.e-1",
     "+100.0e-2"
-  ];
+  ]
 
   // 30 different interesting representations of 2
   const TWO := [
@@ -150,7 +150,7 @@ module FloatCompareTest {
     "+20e-1",
     "+20.e-1",
     "+200.0e-2"
-  ];
+  ]
 
   method TestCompareFloat(x : string, y : string, ret : CompareType)
     ensures CompareFloat(x, y) == ret

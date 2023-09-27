@@ -13,11 +13,11 @@ module TestKDFK_TestVectors {
   import opened TestKDF
 
   // UTF-8 encoded "aws-kms-hierarchy"
-  const PURPOSE: UTF8.ValidUTF8Bytes := UTF8.EncodeAscii("aws-kms-hierarchy");
+  const PURPOSE: UTF8.ValidUTF8Bytes := UTF8.EncodeAscii("aws-kms-hierarchy")
   // https://tiny.amazon.com/bhksn4so
-  const rawTestVectors: seq<InternalTestVector> := [b1, b2, b3, b4, b5];
+  const rawTestVectors: seq<InternalTestVector> := [b1, b2, b3, b4, b5]
 
-  const testVectors: seq<TestVector> := [c1, c2, c3, c4, c5];
+  const testVectors: seq<TestVector> := [c1, c2, c3, c4, c5]
 
   // Internal Test Vectors SHOULD only call RawDerive
   const b1 := InternalTestVector(
@@ -45,7 +45,7 @@ module TestKDFK_TestVectors {
                   55, 213, 193, 255, 250, 149, 105,
                   16, 231, 199, 121
                 ]
-              );
+              )
 
   const b2 := InternalTestVector(
                 name := "B.2  Test Case 2",
@@ -71,7 +71,7 @@ module TestKDFK_TestVectors {
                   37, 182,  24, 193,  94, 225, 209, 157,
                   69, 203,  55, 106,  28, 142,  35, 116
                 ]
-              );
+              )
 
   const b3 := InternalTestVector(
                 name := "B.3  Test Case 3",
@@ -98,7 +98,7 @@ module TestKDFK_TestVectors {
                   89, 199,  64, 123,  30, 229, 121, 37,
                   81,  36, 175,  24, 155, 224, 181, 86
                 ]
-              );
+              )
 
   const b4 := InternalTestVector(
                 name := "B.4  Test Case 4",
@@ -124,7 +124,7 @@ module TestKDFK_TestVectors {
                   8, 155, 193, 114, 218,  90,  30, 127,
                   102,  45, 212, 165, 149,  51, 154, 183
                 ]
-              );
+              )
 
   const b5 := InternalTestVector(
                 name := "B.5  Test Case 5",
@@ -150,7 +150,7 @@ module TestKDFK_TestVectors {
                   132, 112,  13, 153, 118,  38, 146, 234,
                   26,  66,  92, 204,   2, 117, 232, 245
                 ]
-              );
+              )
 
   // Generated Test Vectors CAN call KdfCounterMode
   const c1 := TestVector(
@@ -176,7 +176,7 @@ module TestKDFK_TestVectors {
                   116, 231,  41, 253, 206,  18, 124,
                   247, 109, 183, 204
                 ]
-              );
+              )
 
   const c2 := TestVector(
                 name := "C.2 Test Case 2",
@@ -201,7 +201,7 @@ module TestKDFK_TestVectors {
                   114,  98, 204, 236, 138,  57, 162, 118,
                   85,  92, 199, 232, 240, 252,  92,  97
                 ]
-              );
+              )
 
   const c3 := TestVector(
                 name := "C.3 Test Case 3",
@@ -227,7 +227,7 @@ module TestKDFK_TestVectors {
                   163, 205, 200, 116, 193,  20, 147,
                   112, 254, 210, 194
                 ]
-              );
+              )
 
   const c4 := TestVector(
                 name := "C.4 Test Case 4",
@@ -253,7 +253,7 @@ module TestKDFK_TestVectors {
                   97,  35,  51, 160, 121, 235,  42,  64,
                   145, 105,  15, 153, 162,  89,   9, 156
                 ]
-              );
+              )
 
   const c5 := TestVector(
                 name := "C.5 Test Case 5",
@@ -278,7 +278,7 @@ module TestKDFK_TestVectors {
                   88, 132, 189, 175,  95,  96,  61,  44,
                   98, 160, 212, 136, 140, 222,  57, 151
                 ]
-              );
+              )
 
   method {:test} ExpectInternalTestVectors() {
     for i := 0 to |rawTestVectors| {

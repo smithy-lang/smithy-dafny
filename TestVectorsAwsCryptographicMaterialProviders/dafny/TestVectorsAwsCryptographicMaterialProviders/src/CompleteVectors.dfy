@@ -46,8 +46,8 @@ module {:options "-functionSyntax:4"} CompleteVectors {
       Types.CommitmentPolicy.DBE(Types.DBECommitmentPolicy.REQUIRE_ENCRYPT_REQUIRE_DECRYPT)
   }
 
-  const ESDKAlgorithmSuites := set id: Types.ESDKAlgorithmSuiteId :: AlgorithmSuites.GetESDKSuite(id);
-  const DBEAlgorithmSuites := set id: Types.DBEAlgorithmSuiteId :: AlgorithmSuites.GetDBESuite(id);
+  const ESDKAlgorithmSuites := set id: Types.ESDKAlgorithmSuiteId :: AlgorithmSuites.GetESDKSuite(id)
+  const DBEAlgorithmSuites := set id: Types.DBEAlgorithmSuiteId :: AlgorithmSuites.GetDBESuite(id)
 
   lemma AllAlgorithmSuitesIsComplete(id: Types.AlgorithmSuiteId)
     ensures AlgorithmSuites.GetSuite(id) in ESDKAlgorithmSuites + DBEAlgorithmSuites
@@ -75,7 +75,7 @@ module {:options "-functionSyntax:4"} CompleteVectors {
           description := "Generated RawAES " + key,
           encrypt := keyDescription,
           decrypt := keyDescription
-        );
+        )
 
   // These are all the PositiveKeyDescription for the RawRSAKeyring
   const rsaPersistentKeyNamesWithoutPublicPrivate := [ "rsa-4096" ]
@@ -117,7 +117,7 @@ module {:options "-functionSyntax:4"} CompleteVectors {
             sharedOptions +
             [("key", String(key + "-private"))]
           )
-        );
+        )
 
   const AllAwsKMSKeys := [ "us-west-2-decryptable", "us-west-2-mrk" ]
   const AllKMSInfo :=
@@ -132,7 +132,7 @@ module {:options "-functionSyntax:4"} CompleteVectors {
           description := "Generated KMS " + key,
           encrypt := keyDescription,
           decrypt := keyDescription
-        );
+        )
 
   const AllAwsKMSMrkKeys := [ "us-west-2-mrk", "us-east-1-mrk" ]
   const AllKmsMrkAware :=
@@ -150,19 +150,19 @@ module {:options "-functionSyntax:4"} CompleteVectors {
                               ("type", String("aws-kms-mrk-aware")),
                               ("key", String(decryptKey))
                             ])
-        );
+        )
 
   // These values MUST corospond to the KMS keys above
   // At this time, this list is simplisitic
-  const AwsPartitions := [ "aws" ];
-  const AWSAccounts := [ "658956600833" ];
+  const AwsPartitions := [ "aws" ]
+  const AWSAccounts := [ "658956600833" ]
   const AllDiscoveryFilters: set<Option<Types.DiscoveryFilter>> := {
     Some(Types.DiscoveryFilter(
            partition := "aws",
            accountIds := [ "658956600833" ]
          )),
     None
-  };
+  }
 
   const AllKmsMrkAwareDiscovery :=
     set
@@ -195,7 +195,7 @@ module {:options "-functionSyntax:4"} CompleteVectors {
             Object([
                      ("type", String("aws-kms-mrk-aware-discovery")),
                      ("default-mrk-region", String("us-west-2"))])
-        );
+        )
 
   const AllHierarchy :=
     set
@@ -211,16 +211,16 @@ module {:options "-functionSyntax:4"} CompleteVectors {
                               ("type", String("aws-kms-hierarchy")),
                               ("key", String(keyId))
                             ])
-        );
+        )
 
   const AllEncryptionAlgorithmSpec :=
     set e: ComAmazonawsKmsTypes.EncryptionAlgorithmSpec
       | !e.SYMMETRIC_DEFAULT?
       :: match e
          case RSAES_OAEP_SHA_1() => "RSAES_OAEP_SHA_1"
-         case RSAES_OAEP_SHA_256() => "RSAES_OAEP_SHA_256";
-  const AllKmsRsaKeys := [ "us-west-2-rsa-mrk" ];
-  const KmsRsa := "KMS RSA ";
+         case RSAES_OAEP_SHA_256() => "RSAES_OAEP_SHA_256"
+  const AllKmsRsaKeys := [ "us-west-2-rsa-mrk" ]
+  const KmsRsa := "KMS RSA "
 
   const AllKmsRsa :=
     set
@@ -239,7 +239,7 @@ module {:options "-functionSyntax:4"} CompleteVectors {
                               ("key", String(keyId)),
                               ("encryption-algorithm", String(algorithmSpec))
                             ])
-        );
+        )
 
 
 
@@ -268,7 +268,7 @@ module {:options "-functionSyntax:4"} CompleteVectors {
                  ("requiredEncryptionContextKeys", Array([])),
                  ("encryptKeyDescription", postiveKeyDescription.encrypt),
                  ("decryptKeyDescription", postiveKeyDescription.decrypt)
-               ]);
+               ])
 
   method WriteStuff() {
 

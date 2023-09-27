@@ -14,7 +14,7 @@ module TestGetKeys {
   import opened Fixtures
   import UTF8
 
-  const incorrectLogicalName := "MySuperAwesomeTableName";
+  const incorrectLogicalName := "MySuperAwesomeTableName"
 
   method {:test} TestGetBeaconKey()
   {

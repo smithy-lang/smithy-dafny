@@ -51,26 +51,26 @@ module AwsKmsHierarchicalKeyring {
   import opened AESEncryption
   import Aws.Cryptography.Primitives
 
-  const BRANCH_KEY_STORE_GSI := "Active-Keys";
-  const BRANCH_KEY_FIELD := "enc";
-  const VERSION_FIELD := "version";
-  const BRANCH_KEY_IDENTIFIER_FIELD := "branch-key-id";
+  const BRANCH_KEY_STORE_GSI := "Active-Keys"
+  const BRANCH_KEY_FIELD := "enc"
+  const VERSION_FIELD := "version"
+  const BRANCH_KEY_IDENTIFIER_FIELD := "branch-key-id"
 
-  const KEY_CONDITION_EXPRESSION := "#status = :status and #branch_key_id = :branch_key_id";
+  const KEY_CONDITION_EXPRESSION := "#status = :status and #branch_key_id = :branch_key_id"
   const EXPRESSION_ATTRIBUTE_NAMES := map[
                                         "#status"       := "status",
                                         "#branch_key_id" := "branch-key-id"
-                                      ];
-  const EXPRESSION_ATTRIBUTE_VALUE_STATUS_KEY := ":status";
-  const EXPRESSION_ATTRIBUTE_VALUE_STATUS_VALUE := "ACTIVE";
-  const EXPRESSION_ATTRIBUTE_VALUE_BRANCH_KEY := ":branch_key_id";
+                                      ]
+  const EXPRESSION_ATTRIBUTE_VALUE_STATUS_KEY := ":status"
+  const EXPRESSION_ATTRIBUTE_VALUE_STATUS_VALUE := "ACTIVE"
+  const EXPRESSION_ATTRIBUTE_VALUE_BRANCH_KEY := ":branch_key_id"
 
-  const H_WRAP_SALT_LEN: Types.PositiveInteger := 16;
-  const H_WRAP_NONCE_LEN: Types.PositiveInteger := 12;
-  const DERIVED_BRANCH_KEY_EXPECTED_LENGTH: Types.PositiveInteger := 32;
-  const AES_256_ENC_KEY_LENGTH: int32 := 32;
-  const AES_256_ENC_TAG_LENGTH: int32 := 16;
-  const AES_256_ENC_IV_LENGTH: int32 := 12;
+  const H_WRAP_SALT_LEN: Types.PositiveInteger := 16
+  const H_WRAP_NONCE_LEN: Types.PositiveInteger := 12
+  const DERIVED_BRANCH_KEY_EXPECTED_LENGTH: Types.PositiveInteger := 32
+  const AES_256_ENC_KEY_LENGTH: int32 := 32
+  const AES_256_ENC_TAG_LENGTH: int32 := 16
+  const AES_256_ENC_IV_LENGTH: int32 := 12
   const AES_256_ENC_ALG := Crypto.AES_GCM(
                              keyLength := AES_256_ENC_KEY_LENGTH,
                              //= aws-encryption-sdk-specification/framework/aws-kms/aws-kms-hierarchical-keyring.md#branch-key-wrapping
@@ -78,13 +78,13 @@ module AwsKmsHierarchicalKeyring {
                              //# MUST use an authentication tag byte of length 16.
                              tagLength := AES_256_ENC_TAG_LENGTH,
                              ivLength := AES_256_ENC_IV_LENGTH
-                           );
+                           )
 
-  const EDK_CIPHERTEXT_VERSION_LENGTH: int32 := 16;
-  const EDK_CIPHERTEXT_BRANCH_KEY_VERSION_INDEX := H_WRAP_SALT_LEN + H_WRAP_NONCE_LEN;
-  const EDK_CIPHERTEXT_VERSION_INDEX := EDK_CIPHERTEXT_BRANCH_KEY_VERSION_INDEX + EDK_CIPHERTEXT_VERSION_LENGTH;
+  const EDK_CIPHERTEXT_VERSION_LENGTH: int32 := 16
+  const EDK_CIPHERTEXT_BRANCH_KEY_VERSION_INDEX := H_WRAP_SALT_LEN + H_WRAP_NONCE_LEN
+  const EDK_CIPHERTEXT_VERSION_INDEX := EDK_CIPHERTEXT_BRANCH_KEY_VERSION_INDEX + EDK_CIPHERTEXT_VERSION_LENGTH
   // Salt = 16, IV = 12, Version = 16, Authentication Tag = 16
-  const EXPECTED_EDK_CIPHERTEXT_OVERHEAD := EDK_CIPHERTEXT_VERSION_INDEX + AES_256_ENC_TAG_LENGTH;
+  const EXPECTED_EDK_CIPHERTEXT_OVERHEAD := EDK_CIPHERTEXT_VERSION_INDEX + AES_256_ENC_TAG_LENGTH
 
   // We add this axiom here because verifying the mutability of the share state of the
   // cache. Dafny does not support concurrency and proving the state of mutable frames

@@ -341,8 +341,8 @@ module TestMultiKeyring {
    * A keyring which always returns a specific static set of materials. Used for testing.
    */
   class StaticKeyring extends Types.IKeyring {
-    const encryptionMaterials: Option<Types.EncryptionMaterials>;
-    const decryptionMaterials: Option<Types.DecryptionMaterials>;
+    const encryptionMaterials: Option<Types.EncryptionMaterials>
+    const decryptionMaterials: Option<Types.DecryptionMaterials>
 
     predicate ValidState()
       ensures ValidState() ==> History in Modifies

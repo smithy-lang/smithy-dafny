@@ -185,7 +185,7 @@ module MultiKeyring {
 
       for i := 0 to |this.childKeyrings|
         invariant returnMaterials.plaintextDataKey.Some?
-        invariant unchanged(History);
+        invariant unchanged(History)
         invariant i < |this.childKeyrings| ==> this.childKeyrings[i].Modifies <= Modifies
       {
         var onEncryptInput := Types.OnEncryptInput(materials := returnMaterials);
@@ -365,17 +365,17 @@ module MultiKeyring {
     (mod: set<object>)
   {
     (
-    set m: object, k: Types.IKeyring
-    |
-    && k in childKeyrings
-    && m in k.Modifies
-      :: m
+      set m: object, k: Types.IKeyring
+        |
+        && k in childKeyrings
+        && m in k.Modifies
+        :: m
     )
     + (
-    if generatorKeyring.Some? then
-    generatorKeyring.value.Modifies
-    else
-    {}
+      if generatorKeyring.Some? then
+        generatorKeyring.value.Modifies
+      else
+        {}
     )
   }
 }

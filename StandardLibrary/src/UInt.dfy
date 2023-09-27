@@ -171,22 +171,22 @@ module StandardLibrary.UInt {
                   + s[7] as uint64);
     ==
       var b0 := ((s[0] as uint64 * 0x100_0000_0000_0000
-                + s[1] as uint64 * 0x1_0000_0000_0000
-                + s[2] as uint64 * 0x100_0000_0000
-                + s[3] as uint64 * 0x1_0000_0000
-                + s[4] as uint64 * 0x100_0000
-                + s[5] as uint64 * 0x1_0000
-                + s[6] as uint64 * 0x100
-                + s[7] as uint64) / 0x100_0000_0000_0000) as uint8;
+                  + s[1] as uint64 * 0x1_0000_0000_0000
+                  + s[2] as uint64 * 0x100_0000_0000
+                  + s[3] as uint64 * 0x1_0000_0000
+                  + s[4] as uint64 * 0x100_0000
+                  + s[5] as uint64 * 0x1_0000
+                  + s[6] as uint64 * 0x100
+                  + s[7] as uint64) / 0x100_0000_0000_0000) as uint8;
       assert b0 == s[0];
       var x0 := (s[0] as uint64 * 0x100_0000_0000_0000
-                + s[1] as uint64 * 0x1_0000_0000_0000
-                + s[2] as uint64 * 0x100_0000_0000
-                + s[3] as uint64 * 0x1_0000_0000
-                + s[4] as uint64 * 0x100_0000
-                + s[5] as uint64 * 0x1_0000
-                + s[6] as uint64 * 0x100
-                + s[7] as uint64) - (b0 as uint64 * 0x100_0000_0000_0000);
+                 + s[1] as uint64 * 0x1_0000_0000_0000
+                 + s[2] as uint64 * 0x100_0000_0000
+                 + s[3] as uint64 * 0x1_0000_0000
+                 + s[4] as uint64 * 0x100_0000
+                 + s[5] as uint64 * 0x1_0000
+                 + s[6] as uint64 * 0x100
+                 + s[7] as uint64) - (b0 as uint64 * 0x100_0000_0000_0000);
       assert x0 == (s[1] as uint64 * 0x1_0000_0000_0000
                     + s[2] as uint64 * 0x100_0000_0000
                     + s[3] as uint64 * 0x1_0000_0000
@@ -305,18 +305,18 @@ module StandardLibrary.UInt {
         * 0x100 + s[3] as nat;
       ==  { assert s[..3][..2] == s[..2] && s[..3][2] == s[2]; }
         (SeqToNat(s[..2])
-        * 0x100 + s[2] as nat)
+         * 0x100 + s[2] as nat)
         * 0x100 + s[3] as nat;
       ==  { assert s[..2][..1] == s[..1] && s[..2][1] == s[1]; }
         ((SeqToNat(s[..1])
-        * 0x100 + s[1] as nat)
-        * 0x100 + s[2] as nat)
+          * 0x100 + s[1] as nat)
+         * 0x100 + s[2] as nat)
         * 0x100 + s[3] as nat;
       ==  { assert s[..1][..0] == s[..0] && s[..1][0] == s[0]; }
         (((SeqToNat(s[..0])
-        * 0x100 + s[0] as nat)
-        * 0x100 + s[1] as nat)
-        * 0x100 + s[2] as nat)
+           * 0x100 + s[0] as nat)
+          * 0x100 + s[1] as nat)
+         * 0x100 + s[2] as nat)
         * 0x100 + s[3] as nat;
       ==
         n;

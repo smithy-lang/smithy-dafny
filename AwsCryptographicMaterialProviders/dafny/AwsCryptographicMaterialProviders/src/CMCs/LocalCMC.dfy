@@ -17,9 +17,9 @@ module {:options "/functionSyntax:4" } LocalCMC {
     | Null
 
   // A const Null to avoid creating them all the time
-  const NULL : Ref<CacheEntry> := Null;
-  const INT32_MAX_VALUE: int32 := 0x7999_9999;
-  const INT64_MAX_VALUE: int64 := 0x7999_9999_9999_9999;
+  const NULL : Ref<CacheEntry> := Null
+  const INT32_MAX_VALUE: int32 := 0x7999_9999
+  const INT64_MAX_VALUE: int64 := 0x7999_9999_9999_9999
 
   class CacheEntry {
     var prev: Ref<CacheEntry>
@@ -471,7 +471,7 @@ module {:options "/functionSyntax:4" } LocalCMC {
         creationTime' := input.creationTime,
         expiryTime' := input.expiryTime,
         messagesUsed' := input.messagesUsed.UnwrapOr(0),
-                                                     bytesUsed' := input.bytesUsed.UnwrapOr(0)
+        bytesUsed' := input.bytesUsed.UnwrapOr(0)
       );
 
       if cell in cache.Values() {

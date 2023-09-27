@@ -34,7 +34,7 @@ module AwsKmsRsaKeyring {
   import EdkWrapping
   import AwsKmsUtils
 
-  const MIN_KMS_RSA_KEY_LEN: Crypto.RSAModulusLengthBits := 2048;
+  const MIN_KMS_RSA_KEY_LEN: Crypto.RSAModulusLengthBits := 2048
 
   class AwsKmsRsaKeyring
     extends Keyring.VerifiableInterface

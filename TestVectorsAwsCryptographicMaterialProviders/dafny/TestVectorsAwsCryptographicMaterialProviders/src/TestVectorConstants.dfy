@@ -53,7 +53,7 @@ module TestVectorConstants {
   const AllDBEAlgorithmSuiteIds := [
     Types.ALG_AES_256_GCM_HKDF_SHA512_COMMIT_KEY_SYMSIG_HMAC_SHA384,
     Types.ALG_AES_256_GCM_HKDF_SHA512_COMMIT_KEY_ECDSA_P384_SYMSIG_HMAC_SHA384
-  ];
+  ]
   lemma AllDBEAlgorithmSuiteIdsIsComplete(i: Types.DBEAlgorithmSuiteId)
     ensures AllSeqIsComplete(i, AllDBEAlgorithmSuiteIds)
   {}
