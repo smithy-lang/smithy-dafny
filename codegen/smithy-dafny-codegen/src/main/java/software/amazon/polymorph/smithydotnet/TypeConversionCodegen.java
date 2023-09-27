@@ -558,7 +558,6 @@ public class TypeConversionCodegen {
             .of(defNames
                 .stream()
                 .map(memberShape -> {
-                    final String propertyNameEdgeCase = StringUtils.equals(nameResolver.classPropertyForStructureMember(memberShape), "KmsKeyArn") ? "kmsKeyArn" : nameResolver.classPropertyForStructureMember(memberShape);
                     final String propertyName = nameResolver.classPropertyForStructureMember(memberShape);
                     final String memberFromDafnyConverterName = typeConverterForShape(
                             memberShape.getId(), FROM_DAFNY);
