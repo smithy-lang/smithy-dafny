@@ -1,4 +1,5 @@
-
+# Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: Apache-2.0
 
 verify:
 	$(MAKE) -C StandardLibrary verify CORES=4
@@ -29,7 +30,7 @@ duvet_report:
 		report \
 		--spec-pattern "compliance/**/*.toml" \
 		--source-pattern "AwsCryptographicMaterialProviders/dafny/**/src/**/*.dfy" \
-		--source-pattern "AwsCryptographicMaterialProviders/dafny/AwsCryptographyKeyStore/test/**/*.dfy" \
+		--source-pattern "AwsCryptographicMaterialProviders/dafny/**/test/**/*.dfy" \
 		--source-pattern "AwsCryptographicMaterialProviders/dafny/**/Model/**/*.smithy" \
 		--source-pattern "AwsCryptographicMaterialProviders/compliance_exceptions/**/*.txt" \
 		--source-pattern "(# //=,# //#).github/workflows/duvet.yaml" \

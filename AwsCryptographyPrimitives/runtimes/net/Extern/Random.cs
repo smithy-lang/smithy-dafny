@@ -20,7 +20,7 @@ namespace ExternRandom
         {
             try
             {
-                //= compliance/data-format/message-header.txt#2.5.1.6
+                //= aws-encryption-sdk-specification/data-format/message-header.md#2.5.1.6
                 //# While
                 //# implementations cannot guarantee complete uniqueness, implementations
                 //# MUST use a good source of randomness when generating messages IDs in

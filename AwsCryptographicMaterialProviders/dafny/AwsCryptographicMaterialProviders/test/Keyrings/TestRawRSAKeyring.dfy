@@ -64,10 +64,10 @@ module TestRawRSAKeying {
       )
     );
 
-    //= compliance/framework/raw-rsa-keyring.txt#2.6.1
+    //= aws-encryption-sdk-specification/framework/raw-rsa-keyring.md#onencrypt
     //= type=test
     //# The keyring MUST attempt to encrypt the plaintext data key in the
-    //# encryption materials (structures.md#encryption-materials) using RSA.
+    //# [encryption materials](structures.md#encryption-materials) using RSA.
     // We demonstrate this by showing OnEncrypt then OnDecrypt gets us the same pdk back.
     expect decryptionMaterialsOut.materials.plaintextDataKey
         == encryptionMaterialsOut.materials.plaintextDataKey;
@@ -193,10 +193,10 @@ module TestRawRSAKeying {
       )
     );
 
-    //= compliance/framework/raw-rsa-keyring.txt#2.6.2
+    //= aws-encryption-sdk-specification/framework/raw-rsa-keyring.md#ondecrypt
     //= type=test
     //# If no decryption succeeds, the keyring MUST fail and MUST NOT modify
-    //# the decryption materials (structures.md#decryption-materials).
+    //# the [decryption materials](structures.md#decryption-materials).
     expect decryptionMaterialsOut.IsFailure();
   }
 
@@ -255,7 +255,7 @@ module TestRawRSAKeying {
       ciphertext := seq(|edk.ciphertext|, i => 0)
     );
 
-    //= compliance/framework/raw-rsa-keyring.txt#2.6.2
+    //= aws-encryption-sdk-specification/framework/raw-rsa-keyring.md#ondecrypt
     //= type=test
     //# The keyring MUST attempt to decrypt the input encrypted data keys, in
     //# list order, until it successfully decrypts one.
@@ -265,10 +265,10 @@ module TestRawRSAKeying {
         encryptedDataKeys:=[fakeEdk, edk]
       )
     );
-    //= compliance/framework/raw-rsa-keyring.txt#2.6.2
+    //= aws-encryption-sdk-specification/framework/raw-rsa-keyring.md#ondecrypt
     //= type=test
     //# If any decryption succeeds, this keyring MUST immediately return the
-    //# input decryption materials (structures.md#decryption-materials),
+    //# input [decryption materials](structures.md#decryption-materials),
     //# modified in the following ways:
     expect decryptionMaterialsOut.materials.plaintextDataKey
         == encryptionMaterialsOut.materials.plaintextDataKey;

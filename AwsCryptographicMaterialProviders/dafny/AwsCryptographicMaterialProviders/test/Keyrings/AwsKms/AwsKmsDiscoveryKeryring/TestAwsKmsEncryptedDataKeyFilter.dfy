@@ -16,10 +16,10 @@ module TestAwsKmsEncryptedDataKeyFilter {
   import AwsKmsDiscoveryKeyring
   import Actions
 
-  //= compliance/framework/aws-kms/aws-kms-discovery-keyring.txt#2.8
+  //= aws-encryption-sdk-specification/framework/aws-kms/aws-kms-discovery-keyring.md#ondecrypt
   //= type=test
-  //# *  The provider info MUST be a valid AWS KMS ARN (aws-kms-key-
-  //# arn.md#a-valid-aws-kms-arn) with a resource type of "key" or
+  //# - The provider info MUST be a [valid AWS KMS ARN](aws-kms-key
+  //# -arn.md#a-valid-aws-kms-arn) with a resource type of `key` or
   //# OnDecrypt MUST fail.
   method {:test} TestFailsNonKeyResource()
   {
@@ -35,10 +35,10 @@ module TestAwsKmsEncryptedDataKeyFilter {
     expect test.message == "Only AWS KMS Keys supported";
   }
 
-  //= compliance/framework/aws-kms/aws-kms-discovery-keyring.txt#2.8
+  //= aws-encryption-sdk-specification/framework/aws-kms/aws-kms-discovery-keyring.md#ondecrypt
   //= type=test
   //# The set of encrypted data keys MUST first be filtered to match this
-  //# keyring's configuration.
+  //# keyring’s configuration.
   method {:test} TestMatchesKeyringsConfiguration()
   {
     var matchingEdk := TestUtils.GenerateMockEncryptedDataKey("aws-kms", TestUtils.SHARED_TEST_KEY_ARN);

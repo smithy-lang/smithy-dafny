@@ -233,7 +233,7 @@ module TestAwsKmsHierarchicalKeyring {
       )
     );
 
-    //= compliance/framework/raw-aes-keyring.txt#2.7.2
+    //= aws-encryption-sdk-specification/framework/aws-kms/aws-kms-hierarchical-keyring.md#ondecrypt
     //= type=test
     //# If a decryption succeeds, this keyring MUST add the resulting
     //# plaintext data key to the decryption materials and return the

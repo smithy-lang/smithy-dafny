@@ -32,7 +32,7 @@ module {:extern "Signature"} Signature {
   ) returns (res: Result<Types.GenerateECDSASignatureKeyOutput, Types.Error>)
     ensures match res
             case Success(sigKeyPair) =>
-              //= compliance/framework/structures.txt#2.3.3.2.5
+              //= aws-encryption-sdk-specification/framework/structures.md#2.3.3.2.5
               //= type=implication
               //# The signing key MUST fit the specification described by the signature
               //# algorithm (algorithm-suites.md#signature-algorithm) included in this

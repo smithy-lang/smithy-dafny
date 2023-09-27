@@ -44,23 +44,23 @@ module TestRawAESKeyring {
       Types.OnEncryptInput(materials:=encryptionMaterialsIn)
     );
 
-    //= compliance/framework/raw-aes-keyring.txt#2.7.1
+    //= aws-encryption-sdk-specification/framework/raw-aes-keyring.md#onencrypt
     //= type=test
-    //# If the encryption materials (structures.md#encryption-materials) do
+    //# If the [encryption materials](structures.md#encryption-materials) do
     //# not contain a plaintext data key, OnEncrypt MUST generate a random
-    //# plaintext data key and set it on the encryption materials
+    //# plaintext data key and set it on the [encryption materials]
     //# (structures.md#encryption-materials).
 
-    //= compliance/framework/raw-aes-keyring.txt#2.7.1
+    //= aws-encryption-sdk-specification/framework/raw-aes-keyring.md#onencrypt
     //= type=test
-    //# OnEncrypt MUST output the modified encryption materials
+    //# OnEncrypt MUST output the modified [encryption materials]
     //# (structures.md#encryption-materials).
     var _ :- expect mpl.EncryptionMaterialsHasPlaintextDataKey(encryptionMaterialsOut.materials);
 
-    //= compliance/framework/raw-aes-keyring.txt#2.7.1
+    //= aws-encryption-sdk-specification/framework/raw-aes-keyring.md#onencrypt
     //= type=test
     //# The keyring MUST append the constructed encrypted data key to the
-    //# encrypted data key list in the encryption materials
+    //# encrypted data key list in the [encryption materials]
     //# (structures.md#encryption-materials).
     expect |encryptionMaterialsOut.materials.encryptedDataKeys| == 1;
 
@@ -79,8 +79,7 @@ module TestRawAESKeyring {
         encryptedDataKeys:=[edk]
       )
     );
-
-    //= compliance/framework/raw-aes-keyring.txt#2.7.2
+    //= aws-encryption-sdk-specification/framework/raw-aes-keyring.md#ondecrypt
     //= type=test
     //# If a decryption succeeds, this keyring MUST add the resulting
     //# plaintext data key to the decryption materials and return the
@@ -142,10 +141,10 @@ module TestRawAESKeyring {
       )
     );
 
-    //= compliance/framework/raw-aes-keyring.txt#2.7.1
+    //= aws-encryption-sdk-specification/framework/raw-aes-keyring.md#onencrypt
     //= type=test
-    //# The keyring MUST encrypt the plaintext data key in the encryption
-    //# materials (structures.md#encryption-materials) using AES-GCM.
+    //# The keyring MUST encrypt the plaintext data key in the [encryption
+    //# materials](structures.md#encryption-materials) using AES-GCM.
     // We demonstrate this by showing OnEncrypt then OnDecrypt gets us the same pdk back.
     expect decryptionMaterialsOut.materials.plaintextDataKey == Some(pdk);
   }
