@@ -82,3 +82,12 @@ jobs:
           else
             make test_net
           fi
+
+      - name: Test Cache Thread Safety
+        if: matrix.library == 'AwsCryptographicMaterialProviders'
+        working-directory: ./${{ matrix.library }}/runtimes/net/tests/LocalCMC.Tests/
+        shell: bash
+        run: |
+          dotnet restore
+          dotnet build
+          dotnet test
