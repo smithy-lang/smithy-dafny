@@ -19,4 +19,4 @@ from simple_types_blob.extern import wrapped_simple_blob
 
 def test_dafny():
   # Dafny tests are executed when importing `internaldafny_test_executor`
-  import internaldafny_test_executor
+  import __main__

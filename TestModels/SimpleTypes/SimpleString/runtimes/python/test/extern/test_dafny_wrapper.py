@@ -19,4 +19,4 @@ from simple_types_smithystring.extern import wrapped_simple_string
 
 def test_dafny():
   # Dafny tests are executed when importing `internaldafny_test_executor`
-  import internaldafny_test_executor
+  import __main__
