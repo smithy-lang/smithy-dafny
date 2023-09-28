@@ -3,7 +3,7 @@ Wrapper file for executing Dafny tests from pytest.
 This allows us to import modules required by Dafny-generated tests
 before executing Dafny-generated tests.
 pytest will find and execute the `test_dafny` method below,
-which will execute the `test.py` file in the `dafny` directory.
+which will execute the `internaldafny_test_executor.py` file in the `dafny` directory.
 """
 
 import glob
@@ -18,10 +18,5 @@ from simple_resources.extern import wrapped_simple_resources
 # End import modules required for Dafny-generated tests
 
 def test_dafny():
-  dafny_modules = glob.glob(join("/".join(__file__.split("/")[:-2]) + "/internal_generated_dafny/", "*.py"), recursive=True)
-  for f in dafny_modules:
-    if isfile(f) and f.endswith('test.py'):
-      fname = str(f).split("/")[-1].split(".")[0]
-      spec = importlib.util.spec_from_file_location(fname, f)
-      module = importlib.util.module_from_spec(spec)
-      spec.loader.exec_module(module)
+  # Dafny tests are executed when importing `internaldafny_test_executor`
+  import internaldafny_test_executor

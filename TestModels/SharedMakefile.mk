@@ -390,7 +390,11 @@ transpile_src_python: COMPILE_SUFFIX_OPTION=
 transpile_src_python: transpile_implementation
 
 transpile_test_python: TARGET=py
-transpile_test_python: OUT=runtimes/python/test
+# Note internaldafny_test_executor is specifically chosen
+# so as to not be picked up by pytest,
+# which finds test_*.py or *_test.py files.
+# This is neither, and will not be picked up by pytest.
+transpile_test_python: OUT=runtimes/python/internaldafny_test_executor
 transpile_test_python: COMPILE_SUFFIX_OPTION=
 transpile_test_python: transpile_test
 
@@ -426,8 +430,8 @@ _mv_internal_generated_dafny_python:
 	rm -rf runtimes/python/dafny_src-py
 	# Remove everything EXCEPT the pyproject.toml
 	rm -rf runtimes/python/test/internal_generated_dafny/*.py
-	mv runtimes/python/test-py/*.py runtimes/python/test/internal_generated_dafny
-	rm -rf runtimes/python/test-py
+	mv runtimes/python/internaldafny_test_executor-py/*.py runtimes/python/test/internal_generated_dafny
+	rm -rf runtimes/python/internaldafny_test_executor-py
 
 _remove_src_module_python:
 	# Remove the source `module_.py` file
@@ -439,6 +443,7 @@ transpile_dependencies_python: LANG=python
 transpile_dependencies_python: transpile_dependencies
 
 test_python:
+	rm -rf runtimes/python/.tox
 	tox -c runtimes/python --verbose
 
 clean: _clean
