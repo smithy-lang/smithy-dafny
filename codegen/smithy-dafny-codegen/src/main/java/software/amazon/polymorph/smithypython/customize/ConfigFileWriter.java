@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import software.amazon.polymorph.smithypython.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithypython.shapevisitor.DafnyToSmithyShapeVisitor;
+import software.amazon.polymorph.smithypython.shapevisitor.SmithyConfigToDafnyConfigShapeVisitor;
 import software.amazon.polymorph.smithypython.shapevisitor.SmithyToDafnyShapeVisitor;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.smithy.model.shapes.MemberShape;
@@ -153,7 +154,7 @@ public class ConfigFileWriter implements CustomFileWriter {
     // Dafny-generated config shapes contain a piece of unmodelled behavior,
     //   which is that every config member is required.
     //
-    String output = configShape.accept(new SmithyToDafnyShapeVisitor(
+    String output = configShape.accept(new SmithyConfigToDafnyConfigShapeVisitor(
         codegenContext,
         "smithy_config",
         writer,

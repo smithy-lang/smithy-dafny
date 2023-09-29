@@ -434,7 +434,10 @@ _mv_internal_generated_dafny_python:
 	mv runtimes/python/__main__-py/*.py runtimes/python/test/internal_generated_dafny
 	rm -rf runtimes/python/__main__-py
 
-# Versions of Dafny as of 9/28 seem to ALWAYS write output to __main__.py?
+# Versions of Dafny as of ~9/28 seem to ALWAYS write output to __main__.py,
+#   regardless of the OUT parameter...?
+# We should figure out what happened and get a workaround
+# For now, always write OUT to __main__, then manually rename the primary file...
 _rename_test_main_python:
 	mv runtimes/python/test/internal_generated_dafny/__main__.py runtimes/python/test/internal_generated_dafny/internaldafny_test_executor.py
 

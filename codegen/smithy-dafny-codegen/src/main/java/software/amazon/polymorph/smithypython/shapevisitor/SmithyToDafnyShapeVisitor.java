@@ -97,9 +97,23 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
         //   as described below
         builder.append("%1$s=".formatted(memberName));
 
+        // If this is a localService config shape, defer conversion to the config ShapeVisitor
+        if (SmithyNameResolver.getLocalServiceConfigShapes(context).contains(targetShape.getId())) {
+          builder.append("%1$s,\n".formatted(
+              targetShape.accept(
+                  new SmithyConfigToDafnyConfigShapeVisitor(
+                      context,
+                      dataSource + "." + CaseUtils.toSnakeCase(memberName),
+                      writer,
+                      filename
+                  )
+              )
+          ));
+        }
+
         // If this shape is optional, write conversion logic to detect and possibly pass
         //   an empty optional at runtime
-        if (memberShape.isOptional()) {
+        else if (memberShape.isOptional()) {
           writer.addStdlibImport("Wrappers", "Option_Some");
           writer.addStdlibImport("Wrappers", "Option_None");
           builder.append(
