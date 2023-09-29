@@ -34,6 +34,7 @@
     <PackageReference Include="DafnyRuntime" Version="4.2.0" />
     <PackageReference Include="AWSSDK.Core" Version="3.7.103" />
     <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.7.101.8" />
+    <PackageReference Include="AWS.Cryptography.Internal.StandardLibrary" Version="1.1.1" />
     <!--
       System.Collections.Immutable can be removed once dafny.msbuild is updated with
       https://github.com/dafny-lang/dafny.msbuild/pull/10 and versioned
@@ -45,10 +46,6 @@
     <Compile Include="Extern/**/*.cs" />
     <Compile Include="Generated/**/*.cs" />
     <Compile Include="ImplementationFromDafny.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="../../../StandardLibrary/runtimes/net/STD.csproj" />
   </ItemGroup>
 
   <ItemGroup>

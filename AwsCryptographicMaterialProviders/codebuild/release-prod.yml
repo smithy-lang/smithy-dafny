@@ -27,6 +27,7 @@ phases:
       - export ASSEMBLY_NAME="AWS.Cryptography.MaterialProviders.dll"
       - export BASE=../codebuild/net
       - python $BASE/retrieve_signed_assembly.py --target net6.0 --unique-id $UNIQUE_ID
+      - python $BASE/retrieve_signed_assembly.py --target net48 --unique-id $UNIQUE_ID
   build:
     commands:
       - mkdir build
