@@ -2,13 +2,14 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import simple_types_smithyenum_internaldafny_wrapped
+from simple_types_smithyenum.smithygenerated.config import dafny_config_to_smithy_config
 from simple_types_smithyenum.smithygenerated.client import SimpleTypesEnum
 from simple_types_smithyenum.smithygenerated.shim import SimpleEnumShim
 import Wrappers
 
 @staticmethod
 def WrappedSimpleEnum(config):
-    wrapped_config = config
+    wrapped_config = dafny_config_to_smithy_config(config)
     impl = SimpleTypesEnum(wrapped_config)
     wrapped_client = SimpleEnumShim(impl)
     return Wrappers.Result_Success(wrapped_client)
