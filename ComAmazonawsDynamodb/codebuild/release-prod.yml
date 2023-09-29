@@ -31,7 +31,7 @@ phases:
   build:
     commands:
       - mkdir build
-      - export VERSION=`grep '<Version>' runtimes/net/ComAmazonawsDynamodb.csproj.csproj | sed 's/.*<Version>\(.*\)<\/Version>/\1/'`
-      - dotnet pack runtimes/net/ComAmazonawsDynamodb.csproj.csproj --no-build /p:Configuration=Release --output build
+      - export VERSION=`grep '<Version>' runtimes/net/ComAmazonawsDynamodb.csproj | sed 's/.*<Version>\(.*\)<\/Version>/\1/'`
+      - dotnet pack runtimes/net/ComAmazonawsDynamodb.csproj --no-build /p:Configuration=Release --output build
       - export API_ACCESS_KEY=$(python $BASE/retrieve_api_access_key.py)
       - dotnet nuget push build/AWS.Cryptography.Internal.ComAmazonawsDynamodb.$VERSION.nupkg --api-key "$API_ACCESS_KEY" --source https://api.nuget.org/v3/index.json
