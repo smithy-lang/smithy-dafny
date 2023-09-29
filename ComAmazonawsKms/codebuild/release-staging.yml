@@ -40,12 +40,11 @@ phases:
       # Set a unique version for releasing to staging, because this may fail and we don't
       # want to collide with previous runs
       - export VERSION=`grep '<Version>' runtimes/net/AWS-KMS.csproj | sed 's/.*<Version>\(.*\)<\/Version>/\1/'`
-      - export UNIQUE_VERSION=$VERSION-`git rev-parse --short HEAD`
-      - dotnet pack runtimes/net/AWS-KMS.csproj --no-build /p:Configuration=Release,Version=$UNIQUE_VERSION --output build
-      - dotnet nuget push build/AWS.Cryptography.Internal.ComAmazonawsKms.$UNIQUE_VERSION.nupkg --source crypto-tools-internal/mpl-net-staging
+      - dotnet pack runtimes/net/AWS-KMS.csproj --no-build /p:Configuration=Release --output build
+      - dotnet nuget push build/AWS.Cryptography.Internal.ComAmazonawsKms.$VERSION.nupkg --source crypto-tools-internal/mpl-net-staging
       # Now validate we can run the tests
       - sed -i.backup  "/\<ProjectReference Include=\"..\/AWS-KMS.csproj\" \/>/d" runtimes/net/tests/Test-AWS-KMS.csproj
-      - dotnet add runtimes/net/tests/Test-AWS-KMS.csproj package AWS.Cryptography.Internal.ComAmazonawsKms --version $UNIQUE_VERSION
+      - dotnet add runtimes/net/tests/Test-AWS-KMS.csproj package AWS.Cryptography.Internal.ComAmazonawsKms --version $VERSION
       
         # run tests
       - TMP_ROLE=$(aws sts assume-role --role-arn "arn:aws:iam::370957321024:role/GitHub-CI-MPL-Dafny-Role-us-west-2" --role-session-name "CB-TestVectorResources")

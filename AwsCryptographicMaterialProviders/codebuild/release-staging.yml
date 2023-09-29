@@ -40,12 +40,11 @@ phases:
       # Set a unique version for releasing to staging, because this may fail and we don't
       # want to collide with previous runs
       - export VERSION=`grep '<Version>' runtimes/net/MPL.csproj | sed 's/.*<Version>\(.*\)<\/Version>/\1/'`
-      - export UNIQUE_VERSION=$VERSION-`git rev-parse --short HEAD`
-      - dotnet pack runtimes/net/MPL.csproj --no-build /p:Configuration=Release,Version=$UNIQUE_VERSION --output build
-      - dotnet nuget push build/AWS.Cryptography.MaterialProviders.$UNIQUE_VERSION.nupkg --source crypto-tools-internal/mpl-net-staging
+      - dotnet pack runtimes/net/MPL.csproj --no-build /p:Configuration=Release --output build
+      - dotnet nuget push build/AWS.Cryptography.MaterialProviders.$VERSION.nupkg --source crypto-tools-internal/mpl-net-staging
       # Now validate we can run the tests
       - sed -i.backup  "/\<ProjectReference Include=\"..\/MPL.csproj\" \/>/d" runtimes/net/tests/Test-MPL.csproj
-      - dotnet add runtimes/net/tests/Test-MPL.csproj package AWS.Cryptography.MaterialProviders --version $UNIQUE_VERSION
+      - dotnet add runtimes/net/tests/Test-MPL.csproj package AWS.Cryptography.MaterialProviders --version $VERSION
       
       # run tests
       - TMP_ROLE=$(aws sts assume-role --role-arn "arn:aws:iam::370957321024:role/GitHub-CI-MPL-Dafny-Role-us-west-2" --role-session-name "CB-TestVectorResources")
@@ -59,6 +58,6 @@ phases:
       # run test vectors
       - cd ../TestVectorsAwsCryptographicMaterialProviders
       - sed -i.backup  "/\<ProjectReference Include=\"..\/..\/..\/AwsCryptographicMaterialProviders\/runtimes\/net\/MPL.csproj\" \/>/d" runtimes/net/TestVectors.csproj
-      - dotnet add runtimes/net/TestVectors.csproj package AWS.Cryptography.MaterialProviders --version $UNIQUE_VERSION
+      - dotnet add runtimes/net/TestVectors.csproj package AWS.Cryptography.MaterialProviders --version $VERSION
       - make transpile_net
       - make test_net

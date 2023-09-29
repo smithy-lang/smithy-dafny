@@ -40,12 +40,11 @@ phases:
       # Set a unique version for releasing to staging, because this may fail and we don't
       # want to collide with previous runs
       - export VERSION=`grep '<Version>' runtimes/net/STD.csproj | sed 's/.*<Version>\(.*\)<\/Version>/\1/'`
-      - export UNIQUE_VERSION=$VERSION-`git rev-parse --short HEAD`
-      - dotnet pack runtimes/net/STD.csproj --no-build /p:Configuration=Release,Version=$UNIQUE_VERSION --output build
-      - dotnet nuget push build/AWS.Cryptography.Internal.StandardLibrary.$UNIQUE_VERSION.nupkg --source crypto-tools-internal/mpl-net-staging
+      - dotnet pack runtimes/net/STD.csproj --no-build /p:Configuration=Release --output build
+      - dotnet nuget push build/AWS.Cryptography.Internal.StandardLibrary.$VERSION.nupkg --source crypto-tools-internal/mpl-net-staging
       # Now validate we can run the tests
       - sed -i.backup  "/\<ProjectReference Include=\"..\/STD.csproj\" \/>/d" runtimes/net/tests/Test-STD.csproj
-      - dotnet add runtimes/net/tests/Test-STD.csproj package AWS.Cryptography.Internal.StandardLibrary --version $UNIQUE_VERSION
+      - dotnet add runtimes/net/tests/Test-STD.csproj package AWS.Cryptography.Internal.StandardLibrary --version $VERSION
       # Run examples for just one supported version.
       # Since all frameworks and OS's are tested on commit, we mainly want to
       # run this as a smoke test and the confirm we can find the dependency,
