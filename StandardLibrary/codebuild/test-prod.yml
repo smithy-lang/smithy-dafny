@@ -29,3 +29,7 @@ phases:
       # run this as a smoke test and the confirm we can find the dependency,
       # rather than a comprehensive test suite.
       - make test_net
+      - >-
+        dotnet run \
+          --project runtimes/net/tests/ \
+          --framework net48
