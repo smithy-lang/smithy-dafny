@@ -6,10 +6,6 @@ pytest will find and execute the `test_dafny` method below,
 which will execute the `internaldafny_test_executor.py` file in the `dafny` directory.
 """
 
-import glob
-from os.path import isfile, join
-import importlib
-
 # Import modules required for Dafny-generated tests.
 # This is not generated; these must be manually added.
 
