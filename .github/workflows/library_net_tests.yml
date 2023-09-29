@@ -100,9 +100,13 @@ jobs:
 
       - name: Test Cache Thread Safety
         if: matrix.library == 'AwsCryptographicMaterialProviders'
-        working-directory: ./${{ matrix.library }}/runtimes/net/tests/LocalCMC.Tests/
+        working-directory: ./${{ matrix.library }}
         shell: bash
+        ## Run .NET 6.0 and .NET Framework net48
         run: |
-          dotnet restore
-          dotnet build
-          dotnet test
+          dotnet restore runtimes/net/tests/LocalCMC.Tests/
+          dotnet build runtimes/net/tests/LocalCMC.Tests/
+          dotnet test runtimes/net/tests/LocalCMC.Tests/ \
+              --framework net6.0
+          dotnet test runtimes/net/tests/LocalCMC.Tests/ \
+              --framework net48

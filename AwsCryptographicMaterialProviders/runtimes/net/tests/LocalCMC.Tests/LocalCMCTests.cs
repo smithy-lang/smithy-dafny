@@ -83,8 +83,8 @@ public class LocalCMCTests
       PutCacheEntryInput putCacheEntryInput = new PutCacheEntryInput
       {
         Identifier = cacheIdentifier,
-        CreationTime = DateTimeOffset.UnixEpoch.Second,
-        ExpiryTime = DateTimeOffset.UnixEpoch.Second + 1,
+        CreationTime = DateTimeOffset.UtcNow.Second,
+        ExpiryTime = DateTimeOffset.UtcNow.Second + 1,
         Materials = materials
       };
 
