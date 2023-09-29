@@ -16,7 +16,7 @@ phases:
       # Check signature on net48 dll
       - mkdir net48
       - python codebuild/net/retrieve_signed_assembly.py --target net48 --unique-id $Env:UNIQUE_ID --output net48
-      - $sig = Get-AuthenticodeSignature -FilePath net6.0/$Env:FILE_NAME
+      - $sig = Get-AuthenticodeSignature -FilePath net48/$Env:FILE_NAME
       - $sig | Format-List -Property *
       # Check signature on net6.0 dll
       - mkdir net6.0
