@@ -19,4 +19,4 @@ from simple_errors.extern import wrapped_simple_errors
 
 def test_dafny():
   # Dafny tests are executed when importing `internaldafny_test_executor`
-  import __main__
+  import internaldafny_test_executor

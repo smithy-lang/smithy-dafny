@@ -19,4 +19,4 @@ from simple_aggregate.extern import wrapped_simple_aggregate
 
 def test_dafny():
   # Dafny tests are executed when importing `internaldafny_test_executor`
-  import __main__
+  import internaldafny_test_executor

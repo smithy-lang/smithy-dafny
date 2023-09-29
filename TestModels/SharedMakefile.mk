@@ -369,6 +369,7 @@ build_python: _python_revert_underscore_extern_names
 build_python: _python_revert_underscore_dependency_extern_names
 build_python: _mv_internal_generated_dafny_python
 build_python: _remove_src_module_python
+build_python: _rename_test_main_python
 
 build_implementation_python: TARGET=py
 build_implementation_python: OUT=runtimes/python/dafny_src
@@ -394,7 +395,7 @@ transpile_test_python: TARGET=py
 # so as to not be picked up by pytest,
 # which finds test_*.py or *_test.py files.
 # This is neither, and will not be picked up by pytest.
-transpile_test_python: OUT=runtimes/python/internaldafny_test_executor
+transpile_test_python: OUT=runtimes/python/__main__
 transpile_test_python: COMPILE_SUFFIX_OPTION=
 transpile_test_python: transpile_test
 
@@ -430,8 +431,12 @@ _mv_internal_generated_dafny_python:
 	rm -rf runtimes/python/dafny_src-py
 	# Remove everything EXCEPT the pyproject.toml
 	rm -rf runtimes/python/test/internal_generated_dafny/*.py
-	mv runtimes/python/internaldafny_test_executor-py/*.py runtimes/python/test/internal_generated_dafny
-	rm -rf runtimes/python/internaldafny_test_executor-py
+	mv runtimes/python/__main__-py/*.py runtimes/python/test/internal_generated_dafny
+	rm -rf runtimes/python/__main__-py
+
+# Versions of Dafny as of 9/28 seem to ALWAYS write output to __main__.py?
+_rename_test_main_python:
+	mv runtimes/python/test/internal_generated_dafny/__main__.py runtimes/python/test/internal_generated_dafny/internaldafny_test_executor.py
 
 _remove_src_module_python:
 	# Remove the source `module_.py` file
