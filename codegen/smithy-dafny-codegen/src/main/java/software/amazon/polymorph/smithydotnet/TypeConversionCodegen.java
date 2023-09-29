@@ -558,7 +558,6 @@ public class TypeConversionCodegen {
             .of(defNames
                 .stream()
                 .map(memberShape -> {
-                    final String propertyNameEdgeCase = StringUtils.equals(nameResolver.classPropertyForStructureMember(memberShape), "KmsKeyArn") ? "kmsKeyArn" : nameResolver.classPropertyForStructureMember(memberShape);
                     final String propertyName = nameResolver.classPropertyForStructureMember(memberShape);
                     final String memberFromDafnyConverterName = typeConverterForShape(
                             memberShape.getId(), FROM_DAFNY);
@@ -569,7 +568,7 @@ public class TypeConversionCodegen {
                         destructorValue = DafnyNameResolverHelpers.dafnyCompilesExtra_(memberShape.getMemberName());
                     }
                     return TokenTree
-                            .of("if (value.is_%s)".formatted(propertyNameEdgeCase))
+                            .of("if (value.is_%s)".formatted(memberShape.getMemberName()))
                             .append(TokenTree
                                     .of(
                                             "converted.%s = %s(concrete.dtor_%s);"
@@ -947,6 +946,17 @@ public class TypeConversionCodegen {
 
             Set<String> dependentNamespaces = ModelUtils.findAllDependentNamespaces(
                 new HashSet<ShapeId>(Collections.singleton(localServiceTrait.getConfigId())), model);
+
+            if (localServiceTrait.getDependencies() != null) {
+                localServiceTrait.getDependencies().stream()
+                        .map(model::expectShape)
+                        .map(Shape::asServiceShape)
+                        .filter(Optional::isPresent)
+                        .map(Optional::get)
+                        .forEach( serviceShape ->
+                                dependentNamespaces.add(serviceShape.getId().getNamespace())
+                        );
+            }
 
             if (dependentNamespaces.size() > 0) {
                 Set<TokenTree> cases = new HashSet<>();
