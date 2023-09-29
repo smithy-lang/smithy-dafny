@@ -1,11 +1,9 @@
-using System.Runtime.Loader;
 using Amazon;
 using Amazon.KeyManagementService;
 using Wrappers_Compile;
 using Amazon.Runtime;
 using Amazon.Runtime.Internal;
 using Amazon.Util;
-using System.Threading.Tasks;
 using Com.Amazonaws.Kms;
 
 // This extern is identified in Dafny code
