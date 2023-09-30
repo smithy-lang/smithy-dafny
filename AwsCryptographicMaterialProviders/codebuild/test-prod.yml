@@ -35,6 +35,6 @@ phases:
       # run test vectors
       - cd ../TestVectorsAwsCryptographicMaterialProviders
       - sed -i.backup  "/\<ProjectReference Include=\"..\/..\/..\/AwsCryptographicMaterialProviders\/runtimes\/net\/MPL.csproj\" \/>/d" runtimes/net/TestVectors.csproj
-      - dotnet add runtimes/net/TestVectors.csproj package AWS.Cryptography.MaterialProviders --version $UNIQUE_VERSION
+      - dotnet add runtimes/net/TestVectors.csproj package AWS.Cryptography.MaterialProviders --version $VERSION
       - make transpile_net
       - make test_net
