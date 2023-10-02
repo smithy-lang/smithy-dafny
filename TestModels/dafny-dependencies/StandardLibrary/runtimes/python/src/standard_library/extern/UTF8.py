@@ -54,7 +54,7 @@ class default__(standard_library.internal_generated_dafny.UTF8.default__):
     try:
       utf8_str = bytes(s).decode('utf-8')
       unicode_escaped_utf8_str = default__._reverse_strict_tostring(utf8_str)
-      return Wrappers.Result_Success(out)
+      return Wrappers.Result_Success(unicode_escaped_utf8_str)
     # Catch both Encode and Decode errors.
     # The `try` block involves both encoding and decoding.
     except (UnicodeDecodeError, UnicodeEncodeError):
