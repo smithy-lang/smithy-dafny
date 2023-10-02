@@ -19,6 +19,7 @@ import software.amazon.polymorph.traits.ExtendableTrait;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
+import software.amazon.polymorph.utils.AwsSdkNameResolverHelpers;
 import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.polymorph.utils.Token;
@@ -485,15 +486,25 @@ public class TypeConversionCodegen {
     public TokenTree generateExtractOptionalMember(final MemberShape memberShape) {
         final String type = nameResolver.baseTypeForShape(memberShape.getId());
         final String varName = nameResolver.variableNameForClassProperty(memberShape);
-        final String isSetMethod = nameResolver.isSetMethodForStructureMember(memberShape);
         final String propertyName = nameResolver.classPropertyForStructureMember(memberShape);
-        return TokenTree.of(
+        if (AwsSdkNameResolverHelpers.isInAwsSdkNamespace(memberShape.getId())) {
+            return TokenTree.of(
+                type,
+                varName,
+                "= value.%s != null".formatted(propertyName),
+                "? value.%s :".formatted(propertyName),
+                "(%s) null;".formatted(type)
+            );
+        } else {
+            final String isSetMethod = nameResolver.isSetMethodForStructureMember(memberShape);
+            return TokenTree.of(
                 type,
                 varName,
                 "= value.%s()".formatted(isSetMethod),
                 "? value.%s :".formatted(propertyName),
                 "(%s) null;".formatted(type)
-        );
+            );
+        }
     }
 
     public TypeConverter generateMemberConverter(final MemberShape memberShape) {
