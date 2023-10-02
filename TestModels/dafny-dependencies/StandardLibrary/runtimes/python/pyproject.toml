@@ -9,7 +9,7 @@ packages = [
 
 [tool.poetry.dependencies]
 python = "^3.11.0"
-standard-library-internaldafny = { path = "src/standard_library/internal_generated_dafny", develop = false }
+standard-library-externs = { path = "src/standard_library/extern", develop = false }
 
 [tool.poetry.group.test.dependencies]
 pytest = "^7.4.0"

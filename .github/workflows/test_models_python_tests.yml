@@ -30,7 +30,7 @@ jobs:
     strategy:
       matrix:
         library: [
-          # TestModels/dafny-dependencies/StandardLibrary, # This stores current Polymorph dependencies that all TestModels depend on
+          TestModels/dafny-dependencies/StandardLibrary,
           TestModels/Aggregate,
           # TestModels/AggregateReferences,
           TestModels/Constraints,
