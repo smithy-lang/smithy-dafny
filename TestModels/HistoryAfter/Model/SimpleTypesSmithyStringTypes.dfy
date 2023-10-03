@@ -34,14 +34,15 @@ class GetStringEvent extends Event {
     this.input := input;
     this.output := output;
   }
-  static predicate WasNthLastWith(history: History, n: nat, p: GetStringEvent -> bool) 
+  static function NthLast(history: History, n: nat): GetStringEvent
+    requires 
+      && n < |history.events|
+      && var e: Event := history.events[|history.events| - 1 - n];
+      && e is GetStringEvent
     reads history
   {
-    && n < |history.events| 
-    && var e: Event := history.events[|history.events| - 1 - n];
-    && e is GetStringEvent
-    && var e' := e as GetStringEvent;
-    && p(e')
+    var e: Event := history.events[|history.events| - 1 - n];
+    e as GetStringEvent
   }
 
 }
@@ -55,14 +56,15 @@ class GetStringSingleValueEvent extends Event {
     this.input := input;
     this.output := output;
   }
-  static predicate WasNthLastWith(history: History, n: nat, p: GetStringSingleValueEvent -> bool) 
+  static function NthLast(history: History, n: nat): GetStringSingleValueEvent
+    requires 
+      && n < |history.events|
+      && var e: Event := history.events[|history.events| - 1 - n];
+      && e is GetStringSingleValueEvent
     reads history
   {
-    && n < |history.events| 
-    && var e: Event := history.events[|history.events| - 1 - n];
-    && e is GetStringSingleValueEvent
-    && var e' := e as GetStringSingleValueEvent;
-    && p(e')
+    var e: Event := history.events[|history.events| - 1 - n];
+    e as GetStringSingleValueEvent
   }
 }
 class GetStringUTF8Event extends Event {
@@ -75,14 +77,15 @@ class GetStringUTF8Event extends Event {
     this.input := input;
     this.output := output;
   }
-  static predicate WasNthLastWith(history: History, n: nat, p: GetStringUTF8Event -> bool) 
+  static function NthLast(history: History, n: nat): GetStringUTF8Event
+    requires 
+      && n < |history.events|
+      && var e: Event := history.events[|history.events| - 1 - n];
+      && e is GetStringUTF8Event
     reads history
   {
-    && n < |history.events| 
-    && var e: Event := history.events[|history.events| - 1 - n];
-    && e is GetStringUTF8Event
-    && var e' := e as GetStringUTF8Event;
-    && p(e')
+    var e: Event := history.events[|history.events| - 1 - n];
+    e as GetStringUTF8Event
   }
 }
 

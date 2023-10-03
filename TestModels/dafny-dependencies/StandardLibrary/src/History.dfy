@@ -15,17 +15,22 @@ module Histories {
     ghost method AddEvent(e: Event) 
       modifies this
       ensures events == old(events) + [e]
-      // ensures forall p: Event -> bool | p(e) :: NewEventSuchThat(p)
     {
       events := events + [e];
     }
 
-    twostate predicate NewEventSuchThat(p: Event -> bool) 
-      reads this 
+    function NthLastEvent(n: nat): Event
+      requires n < |events|
+      reads this
     {
-      && |events| == |old(events)| + 1
-      && events[..(|events| - 1)] == old(events)
-      && p(events[|events| - 1])
+      events[|events| - 1 - n]
+    }
+
+    function LastEvent(): Event
+      requires 0 < |events|
+      reads this
+    {
+      NthLastEvent(0)
     }
   }
 }

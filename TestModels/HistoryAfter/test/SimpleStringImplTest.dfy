@@ -23,9 +23,9 @@ module  SimpleStringImplTest {
 
         var ret :- expect client.GetString(SimpleString.Types.GetStringInput(value:= Some("TEST_SIMPLE_STRING_VALUE")), history);
         
-        assert GetStringEvent.WasNthLastWith(history, 0, (e: GetStringEvent) =>
-            && e.input.value == Some("TEST_SIMPLE_STRING_VALUE")
-            && e.output == Success(ret));
+        var e: GetStringEvent := history.LastEvent();
+        assert e.input.value == Some("TEST_SIMPLE_STRING_VALUE");
+        assert e.output == Success(ret);
     }
 
     method TestMultipleCallsToSameOperation(client: ISimpleTypesStringClient)
@@ -38,12 +38,13 @@ module  SimpleStringImplTest {
         var ret :- expect client.GetString(SimpleString.Types.GetStringInput(value:= Some("TEST_SIMPLE_STRING_VALUE")), history);
         var ret2 :- expect client.GetString(SimpleString.Types.GetStringInput(value:= Some("TEST_SIMPLE_STRING_VALUE_2")), history);
 
-        assert GetStringEvent.WasNthLastWith(history, 1, (e: GetStringEvent) =>
-            && e.input.value == Some("TEST_SIMPLE_STRING_VALUE")
-            && e.output == Success(ret));
-        assert GetStringEvent.WasNthLastWith(history, 0, (e: GetStringEvent) =>
-            && e.input.value == Some("TEST_SIMPLE_STRING_VALUE_2")
-            && e.output == Success(ret2));
+        var e: GetStringEvent := history.NthLastEvent(1);
+        assert e.input.value == Some("TEST_SIMPLE_STRING_VALUE");
+        assert e.output == Success(ret);
+
+        var e2: GetStringEvent := history.NthLastEvent(0);
+        assert e2.input.value == Some("TEST_SIMPLE_STRING_VALUE_2");
+        assert e2.output == Success(ret2);
     }
 
     method TestMultipleCallsToDifferentOperations(client: ISimpleTypesStringClient)
@@ -58,13 +59,21 @@ module  SimpleStringImplTest {
 
         assert |history.events| == 2;
         
-        assert GetStringEvent.WasNthLastWith(history, 1, (e: GetStringEvent) =>
-            && e.input.value == Some("TEST_SIMPLE_STRING_VALUE")
-            && e.output == Success(ret));
-        assert GetStringUTF8Event.WasNthLastWith(history, 0, (e: GetStringUTF8Event) =>
-            && e.input.value == Some("TEST_SIMPLE_STRING_VALUE_2")
-            && e.output == Success(ret2));
+        var e: GetStringEvent := history.NthLastEvent(1);
+        assert e.input.value == Some("TEST_SIMPLE_STRING_VALUE");
+        assert e.output == Success(ret);
+        var e2: GetStringUTF8Event := history.LastEvent();
+        assert e2.input.value == Some("TEST_SIMPLE_STRING_VALUE_2");
+        assert e2.output == Success(ret2);
     }
+
+    // method GetLongerString(client: ISimpleTypesStringClient, history: History) returns (longerString: Result<string, string>)
+
+    // {
+    //     var ret :- expect client.GetString(SimpleString.Types.GetStringInput(value:= Some("One")), history);
+    //     var ret2 :- expect client.GetStringUTF8(SimpleString.Types.GetStringInput(value:= Some("Two")), history);
+
+    // }
     
     // Normally from Seq.dfy in dafny-lang/libraries:
 
