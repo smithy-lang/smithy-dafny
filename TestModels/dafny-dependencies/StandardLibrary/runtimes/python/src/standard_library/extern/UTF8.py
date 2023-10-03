@@ -23,9 +23,11 @@ class default__(standard_library.internal_generated_dafny.UTF8.default__):
       return Wrappers.Result_Success(_dafny.Seq(
           default__._strict_tostring(s).encode('utf-8')
       ))
-    # Catch both Encode and Decode errors.
+    # Catch both UnicodeEncodeError and UnicodeDecodeError.
     # The `try` block involves both encoding and decoding.
-    except (UnicodeEncodeError, UnicodeDecodeError):
+    # OverflowError is possibly raised at `_strict_tostring`'s `ord(c).to_bytes`
+    #   if the char `c` is not valid.
+    except (UnicodeDecodeError, UnicodeEncodeError, OverflowError):
       return Wrappers.Result_Failure(_dafny.Seq("Could not encode input to Dafny Bytes."))
 
   @staticmethod
@@ -55,9 +57,11 @@ class default__(standard_library.internal_generated_dafny.UTF8.default__):
       utf8_str = bytes(s).decode('utf-8')
       unicode_escaped_utf8_str = default__._reverse_strict_tostring(utf8_str)
       return Wrappers.Result_Success(unicode_escaped_utf8_str)
-    # Catch both Encode and Decode errors.
+    # Catch both UnicodeEncodeError and UnicodeDecodeError.
     # The `try` block involves both encoding and decoding.
-    except (UnicodeDecodeError, UnicodeEncodeError):
+    # ValueError and TypeError are possibly raised at `_reverse_strict_tostring`'s `chr()`.
+    # struct.error is possibly raised at `struct.unpack`.
+    except (UnicodeDecodeError, UnicodeEncodeError, ValueError, TypeError, struct.error):
       return Wrappers.Result_Failure(_dafny.Seq("Could not decode input from Dafny Bytes."))
 
 
