@@ -61,8 +61,6 @@ define GetFromSmithyBuild
 $(shell jq -r '.plugins."dafny-client-codegen".$(1)' smithy-build.json)
 endef
 
-# node -p "require('runtimes/python/smithy-build.json').plugins.dafny-client-codegen.module"
-
 PYTHON_MODULE_NAME := $(call GetFromSmithyBuild,module)
 
 ########################## Dafny targets
@@ -362,9 +360,9 @@ _clean:
 
 build_python: _python_underscore_dependency_extern_names
 build_python: _python_underscore_extern_names
-build_python: transpile_dependencies_python
 build_python: build_implementation_python
 build_python: transpile_test_python
+build_python: transpile_dependencies_python
 build_python: _python_revert_underscore_extern_names
 build_python: _python_revert_underscore_dependency_extern_names
 build_python: _mv_internal_generated_dafny_python
