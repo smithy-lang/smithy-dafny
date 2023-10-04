@@ -1,5 +1,5 @@
-from standard_library.internaldafny.UTF8 import *
-import standard_library.internaldafny.UTF8
+from standard_library.internaldafny.generated.UTF8 import *
+import standard_library.internaldafny.generated.UTF8
 import _dafny
 import struct
 
@@ -15,7 +15,7 @@ To decode, we reverse the encode step. (`_reverse_strict_tostring`)
 '''
 
 # Extend the Dafny-generated class with our extern methods
-class default__(standard_library.internaldafny.UTF8.default__):
+class default__(standard_library.internaldafny.generated.UTF8.default__):
 
   @staticmethod
   def Encode(s):
@@ -87,4 +87,4 @@ class default__(standard_library.internaldafny.UTF8.default__):
       out.append(char_representation)
     return _dafny.Seq(out)
 
-standard_library.internaldafny.UTF8.default__ = default__
+standard_library.internaldafny.generated.UTF8.default__ = default__
