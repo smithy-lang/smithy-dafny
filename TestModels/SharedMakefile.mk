@@ -195,6 +195,9 @@ _polymorph:
 	$(SMITHY_BUILD) \
 	$(AWS_SDK_CMD)";
 
+# If the target language of _polymorph_wrapped includes Python,
+# a Python localService will also be generated
+# (i.e. the _polymorph target is also executed for Python).
 _polymorph_wrapped:
 	@: $(if ${CODEGEN_CLI_ROOT},,$(error You must pass the path CODEGEN_CLI_ROOT: CODEGEN_CLI_ROOT=/path/to/smithy-dafny/codegen/smithy-dafny-codegen-cli));
 	cd $(CODEGEN_CLI_ROOT); \
@@ -342,20 +345,6 @@ mvn_local_deploy:
 test_java:
 	gradle -p runtimes/java runTests
 
-_clean:
-	rm -f $(LIBRARY_ROOT)/Model/*Types.dfy $(LIBRARY_ROOT)/Model/*TypesWrapped.dfy
-	rm -f $(LIBRARY_ROOT)/runtimes/net/ImplementationFromDafny.cs
-	rm -f $(LIBRARY_ROOT)/runtimes/net/tests/TestFromDafny.cs
-	rm -rf $(LIBRARY_ROOT)/TestResults
-	rm -rf $(LIBRARY_ROOT)/runtimes/net/Generated $(LIBRARY_ROOT)/runtimes/net/bin $(LIBRARY_ROOT)/runtimes/net/obj
-	rm -rf $(LIBRARY_ROOT)/runtimes/net/tests/bin $(LIBRARY_ROOT)/runtimes/net/tests/obj
-	rm -rf $(LIBRARY_ROOT)/runtimes/python/src/**/internal_generated_dafny/*.py
-	rm -rf $(LIBRARY_ROOT)/runtimes/python/src/**/smithygenerated
-	rm -rf $(LIBRARY_ROOT)/runtimes/python/test/internal_generated_dafny/*.py
-	rm -rf $(LIBRARY_ROOT)/runtimes/python/.tox
-	rm -rf $(LIBRARY_ROOT)/runtimes/python/poetry.lock
-	rm -rf $(LIBRARY_ROOT)/runtimes/python/build
-
 ########################## Python targets
 
 build_python: _python_underscore_dependency_extern_names
@@ -365,8 +354,8 @@ build_python: transpile_test_python
 build_python: transpile_dependencies_python
 build_python: _python_revert_underscore_extern_names
 build_python: _python_revert_underscore_dependency_extern_names
-build_python: _mv_internal_generated_dafny_python
-build_python: _remove_src_module_python
+build_python: _mv_internaldafny_python
+#build_python: _remove_src_module_python
 build_python: _rename_test_main_python
 
 build_implementation_python: TARGET=py
@@ -380,7 +369,7 @@ build_implementation_python: build_implementation
 transpile_implementation_python: transpile_dependencies_python
 transpile_implementation_python: transpile_src_python
 transpile_implementation_python: transpile_test_python
-transpile_implementation_python: _mv_internal_generated_dafny_python
+transpile_implementation_python: _mv_internaldafny_python
 transpile_implementation_python: _remove_src_module_python
 
 transpile_src_python: TARGET=py
@@ -389,10 +378,6 @@ transpile_src_python: COMPILE_SUFFIX_OPTION=
 transpile_src_python: transpile_implementation
 
 transpile_test_python: TARGET=py
-# Note internaldafny_test_executor is specifically chosen
-# so as to not be picked up by pytest,
-# which finds test_*.py or *_test.py files.
-# This is neither, and will not be picked up by pytest.
 transpile_test_python: OUT=runtimes/python/__main__
 transpile_test_python: COMPILE_SUFFIX_OPTION=
 transpile_test_python: transpile_test
@@ -422,28 +407,38 @@ _python_revert_underscore_dependency_extern_names:
 	$(patsubst %, $(MAKE) -C $(PROJECT_ROOT)/% _python_revert_underscore_extern_names;, $(LIBRARIES))
 
 # Move Dafny-generated code into its expected location in the Python module
-_mv_internal_generated_dafny_python:
-	# Remove everything EXCEPT the pyproject.toml
-	rm -rf runtimes/python/src/$(PYTHON_MODULE_NAME)/internal_generated_dafny/*.py
-	mv runtimes/python/dafny_src-py/*.py runtimes/python/src/$(PYTHON_MODULE_NAME)/internal_generated_dafny
+_mv_internaldafny_python:
+	# Remove any previously generated Dafny code in src/, then copy in newly-generated code
+	rm -rf runtimes/python/src/$(PYTHON_MODULE_NAME)/internaldafny/generated/
+	mkdir runtimes/python/src/$(PYTHON_MODULE_NAME)/internaldafny/generated/
+	mv runtimes/python/dafny_src-py/*.py runtimes/python/src/$(PYTHON_MODULE_NAME)/internaldafny/generated
 	rm -rf runtimes/python/dafny_src-py
-	# Remove everything EXCEPT the pyproject.toml
-	rm -rf runtimes/python/test/internal_generated_dafny/*.py
-	mv runtimes/python/__main__-py/*.py runtimes/python/test/internal_generated_dafny
+	# Remove any previously generated Dafny code in test/, then copy in newly-generated code
+	rm -rf runtimes/python/test/internaldafny/generated
+	mkdir runtimes/python/test/internaldafny/generated
+	mv runtimes/python/__main__-py/*.py runtimes/python/test/internaldafny/generated
 	rm -rf runtimes/python/__main__-py
 
 # Versions of Dafny as of ~9/28 seem to ALWAYS write output to __main__.py,
 #   regardless of the OUT parameter...?
 # We should figure out what happened and get a workaround
 # For now, always write OUT to __main__, then manually rename the primary file...
+# Note the name internaldafny_test_executor is specifically chosen
+# so as to not be picked up by pytest,
+# which finds test_*.py or *_test.py files.
+# This is neither, and will not be picked up by pytest.
+# This file SHOULD not be run from a context that has not imported the wrapping shim,
+#   otherwise the tests will fail.
+# We write an extern which WILL be picked up by pytest.
+# This extern will import the wrapping shim, then import this `internaldafny_test_executor` to run the tests.
 _rename_test_main_python:
-	mv runtimes/python/test/internal_generated_dafny/__main__.py runtimes/python/test/internal_generated_dafny/internaldafny_test_executor.py
+	mv runtimes/python/test/internaldafny/generated/__main__.py runtimes/python/test/internaldafny/generated/internaldafny_test_executor.py
 
 _remove_src_module_python:
 	# Remove the source `module_.py` file
 	# There is a race condition between the src/ and test/ installation of this file
 	# This will need to be changed but works for now
-	rm runtimes/python/src/$(PYTHON_MODULE_NAME)/internal_generated_dafny/module_.py
+	rm runtimes/python/src/$(PYTHON_MODULE_NAME)/internaldafny/generated/module_.py
 
 transpile_dependencies_python: LANG=python
 transpile_dependencies_python: transpile_dependencies
@@ -452,4 +447,20 @@ test_python:
 	rm -rf runtimes/python/.tox
 	tox -c runtimes/python --verbose
 
+########################## Clean targets (for all languages)
+
 clean: _clean
+
+_clean:
+	rm -f $(LIBRARY_ROOT)/Model/*Types.dfy $(LIBRARY_ROOT)/Model/*TypesWrapped.dfy
+	rm -f $(LIBRARY_ROOT)/runtimes/net/ImplementationFromDafny.cs
+	rm -f $(LIBRARY_ROOT)/runtimes/net/tests/TestFromDafny.cs
+	rm -rf $(LIBRARY_ROOT)/TestResults
+	rm -rf $(LIBRARY_ROOT)/runtimes/net/Generated $(LIBRARY_ROOT)/runtimes/net/bin $(LIBRARY_ROOT)/runtimes/net/obj
+	rm -rf $(LIBRARY_ROOT)/runtimes/net/tests/bin $(LIBRARY_ROOT)/runtimes/net/tests/obj
+	rm -rf $(LIBRARY_ROOT)/runtimes/python/src/**/internaldafny/*.py
+	rm -rf $(LIBRARY_ROOT)/runtimes/python/src/**/smithygenerated
+	rm -rf $(LIBRARY_ROOT)/runtimes/python/test/internaldafny/*.py
+	rm -rf $(LIBRARY_ROOT)/runtimes/python/.tox
+	rm -rf $(LIBRARY_ROOT)/runtimes/python/poetry.lock
+	rm -rf $(LIBRARY_ROOT)/runtimes/python/build

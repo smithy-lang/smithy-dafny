@@ -4,18 +4,27 @@ version = "0.1.0"
 description = ""
 authors = ["AWS <aws-arg-dafny@amazon.com>"]
 packages = [
-    # Globally install all internaldafny modules
+    # Globally install all extern modules
     # such that a module X can be imported with `import X`
-    # from anywhere in the Python runtime that installs this module
+    # from anywhere in the Python runtime that installs this module.
+    # Dafny-generated code assumes any generated or extern module `X`
+    # can always be imported via `import X`,
+    # regardless of namespacing.
     { include = "*.py" },
 ]
 # Include all of the following .gitignored files in package distributions,
-# even though it is not included in version control
+# even though they are not included in version control.
+# Poetry will exclude .gitignored files from package distributions by default.
 include = ["*.py"]
 
 [tool.poetry.dependencies]
 python = "^3.11.0"
-standard-library-internaldafny = { path = "../internal_generated_dafny", develop = false}
+# Extern modules MUST depend on the internaldafny modules
+# so that an internaldafny module `X` is installed before an extern module `X`.
+# The extern module will overwrite the installed internaldafny module.
+# The extern module MUST extend the internaldafny module
+# so that the final installed module has properties of both the extern AND the internaldafny module.
+standard-library-internaldafny = { path = "../internaldafny", develop = false}
 
 [build-system]
 requires = ["poetry-core"]
