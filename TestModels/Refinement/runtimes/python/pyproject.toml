@@ -8,7 +8,7 @@ packages = [
 ]
 # Include all of the following .gitignored files in package distributions,
 # even though it is not included in version control
-include = ["**/smithygenerated/*.py", "**/internaldafny/*.py"]
+include = ["**/smithygenerated/*.py", "**/internaldafny/generated/*.py"]
 
 [tool.poetry.dependencies]
 python = "^3.11.0"

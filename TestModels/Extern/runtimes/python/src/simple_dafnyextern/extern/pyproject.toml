@@ -12,10 +12,6 @@ packages = [
     # regardless of namespacing.
     { include = "*.py" },
 ]
-# Include all of the following .gitignored files in package distributions,
-# even though they are not included in version control.
-# Poetry will exclude .gitignored files from package distributions by default.
-include = ["generated/*.py"]
 
 [tool.poetry.dependencies]
 python = "^3.11.0"
