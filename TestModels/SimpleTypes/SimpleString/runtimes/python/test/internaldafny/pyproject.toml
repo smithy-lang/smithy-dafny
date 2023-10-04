@@ -21,7 +21,7 @@ python = "^3.11.0"
 # MUST depend on the src extern pyproject.toml
 #   (or src internaldafny pyproject.toml, if no src extern pyproject.toml is present)
 # to overwrite any src-generated files with the test-generated files (e.g. module_.py).
-simple-dependencies-internaldafny = { path = "../../src/simple_types_smithystring/internaldafny", develop = false}
+simple-string-internaldafny = { path = "../../src/simple_types_smithystring/internaldafny", develop = false}
 
 [build-system]
 requires = ["poetry-core"]
