@@ -357,7 +357,7 @@ build_python: transpile_dependencies_python
 build_python: _python_revert_underscore_extern_names
 build_python: _python_revert_underscore_dependency_extern_names
 build_python: _mv_internaldafny_python
-#build_python: _remove_src_module_python
+build_python: _remove_src_module_python
 build_python: _rename_test_main_python
 
 build_implementation_python: TARGET=py
