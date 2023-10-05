@@ -16,12 +16,6 @@ include = ["generated/*.py"]
 
 [tool.poetry.dependencies]
 python = "^3.11.0"
-# The test extern pyproject.toml
-#   (or test internaldafny pyproject.toml, if no test extern pyproject.toml is present)
-# MUST depend on the src extern pyproject.toml
-#   (or src internaldafny pyproject.toml, if no src extern pyproject.toml is present)
-# to overwrite any src-generated files with the test-generated files (e.g. module_.py).
-simple-errors-internaldafny = { path = "../../src/simple_errors/internaldafny", develop = false}
 
 [build-system]
 requires = ["poetry-core"]

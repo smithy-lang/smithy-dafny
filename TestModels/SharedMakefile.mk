@@ -118,6 +118,8 @@ dafny-reportgenerator:
 
 # On Python, `dafny build` adds Dafny runtime modules (ex. `_dafny.py`).
 # Python runs `build` targets for the target module, and `transpile` targets for dependencies and tests.
+# Dafny team should upload DafnyRuntime (_dafny.py) to PyPi,
+# TODO: Once DafnyRuntime is on PyPi, reference that and migrate Python builds to `transpile_implementation`.
 build_implementation:
 	dafny build \
 		-t:$(TARGET) \
@@ -423,6 +425,7 @@ _mv_internaldafny_python:
 #   regardless of the OUT parameter...?
 # We should figure out what happened and get a workaround
 # For now, always write OUT to __main__, then manually rename the primary file...
+# TODO: Resolve this before releasing libraries
 # Note the name internaldafny_test_executor is specifically chosen
 # so as to not be picked up by pytest,
 # which finds test_*.py or *_test.py files.
@@ -435,9 +438,12 @@ _rename_test_main_python:
 	mv runtimes/python/test/internaldafny/generated/__main__.py runtimes/python/test/internaldafny/generated/internaldafny_test_executor.py
 
 _remove_src_module_python:
-	# Remove the source `module_.py` file
-	# There is a race condition between the src/ and test/ installation of this file
-	# This will need to be changed but works for now
+	# Remove the src/ `module_.py` file.
+	# There is a race condition between the src/ and test/ installation of this file.
+	# The file that is installed least recently is overwritten by the file installed most recently.
+	# The test/ file contains code to execute tests. The src/ file is largely empty.
+	# If the src/ file is installed most recently, tests will fail to run.
+	# By removing the src/ file, we ensure the test/ file is always the installed file.
 	rm runtimes/python/src/$(PYTHON_MODULE_NAME)/internaldafny/generated/module_.py
 
 transpile_dependencies_python: LANG=python
