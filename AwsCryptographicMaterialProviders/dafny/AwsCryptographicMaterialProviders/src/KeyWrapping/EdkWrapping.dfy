@@ -170,7 +170,7 @@ module EdkWrapping {
   {
     :- Need(Materials.ValidEncryptionMaterials(encryptionMaterials),
             Types.AwsCryptographicMaterialProvidersException(
-              message := "Invalid materials for decryption."));
+              message := "Invalid materials for encryption."));
 
     if (encryptionMaterials.plaintextDataKey.Some? &&
         encryptionMaterials.algorithmSuite.edkWrapping.DIRECT_KEY_WRAPPING?)  {
