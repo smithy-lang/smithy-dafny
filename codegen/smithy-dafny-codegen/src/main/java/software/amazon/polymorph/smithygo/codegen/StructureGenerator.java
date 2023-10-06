@@ -16,6 +16,7 @@
 package software.amazon.polymorph.smithygo.codegen;
 
 import software.amazon.polymorph.smithygo.codegen.integration.ProtocolGenerator;
+import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
@@ -94,6 +95,10 @@ public final class StructureGenerator implements Runnable {
                     if (isInputStructure) {
                         memberSymbol = memberSymbol.getProperty(SymbolUtils.INPUT_VARIANT, Symbol.class)
                                 .orElse(memberSymbol);
+                    }
+
+                    if (model.expectShape(member.getTarget()).hasTrait(ReferenceTrait.class)) {
+                        memberSymbol = memberSymbol.getProperty("Referred", Symbol.class).get();
                     }
 
                     writer.write("$L $P", memberName, memberSymbol);

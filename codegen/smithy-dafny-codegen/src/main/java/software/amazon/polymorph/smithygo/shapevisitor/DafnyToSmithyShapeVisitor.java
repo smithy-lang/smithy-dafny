@@ -7,6 +7,7 @@ import software.amazon.polymorph.smithygo.codegen.GoWriter;
 import software.amazon.polymorph.smithygo.codegen.SymbolUtils;
 import software.amazon.polymorph.smithygo.codegen.knowledge.GoPointableIndex;
 import software.amazon.polymorph.smithygo.nameresolver.DafnyNameResolver;
+import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.model.Model;
@@ -25,6 +26,7 @@ import software.amazon.smithy.model.shapes.MapShape;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
+import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.ShapeVisitor;
 import software.amazon.smithy.model.shapes.ShortShape;
 import software.amazon.smithy.model.shapes.StringShape;
@@ -64,6 +66,12 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
         this.isMemberShape = isMemberShape;
     }
 
+    protected String referenceStructureShape(StructureShape shape) {
+        ReferenceTrait referenceTrait = shape.expectTrait(ReferenceTrait.class);
+        Shape resourceOrService = context.model().expectShape(referenceTrait.getReferentId());
+        return "%1$s{%2$s}".formatted(resourceOrService.toShapeId().getName(), dataSource);
+    }
+
     @Override
     protected String getDefault(Shape shape) {
         throw new CodegenException(String.format(
@@ -75,23 +83,30 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
     public String blobShape(BlobShape shape) {
         writer.addImport("dafny");
         return """
-        func () []byte {
-        var b []byte
-        for i := dafny.Iterate(%s) ; ; {
-            val, ok := i()
-            if !ok {
-                return b
-            } else {
-                b = append(b, val.(byte))
-            }
-        }
-        }()""".formatted(dataSource);
+                func () []byte {
+                var b []byte
+                if %s == nil {
+                    return nil
+                }
+                for i := dafny.Iterate(%s) ; ; {
+                    val, ok := i()
+                    if !ok {
+                        return b
+                    } else {
+                        b = append(b, val.(byte))
+                    }
+                }
+                }()""".formatted(dataSource, dataSource);
     }
 
     @Override
     public String structureShape(final StructureShape shape) {
+        if (shape.hasTrait(ReferenceTrait.class)) {
+            return referenceStructureShape(shape);
+        }
         final var builder = new StringBuilder();
         writer.addImport(DafnyNameResolver.dafnyTypesNamespace(context.settings()));
+
         builder.append("%1$s{".formatted("types.".concat(shape.getId().getName())));
         String fieldSeparator = ",";
         for (final var memberShapeEntry : shape.getAllMembers().entrySet()) {
@@ -101,7 +116,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
             final var derivedDataSource = "%1$s%2$s%3$s%4$s".formatted(dataSource,
                                                                        isMemberShape ? ".(%s)".formatted(DafnyNameResolver.getDafnyType(context.settings(), context.symbolProvider().toSymbol(shape))) : "",
                                                                        ".Dtor_%s()".formatted(memberName),
-                                                                       (memberShape.isOptional() ? ".Dtor_value()" : ""));
+                                                                       (memberShape.isOptional() ? ".UnwrapOr(nil)" : ""));
                 builder.append("%1$s: %2$s%3$s,".formatted(
                         StringUtils.capitalize(memberName),
                         targetShape.isStructureShape() ? "&" : "",
@@ -125,13 +140,16 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
         builder.append("""
                        func() []%s{
                        var fieldValue []%s
+                if %s == nil {
+                    return nil
+                }
 		for i := dafny.Iterate(%s.(dafny.Sequence)); ; {
 			val, ok := i()
 			if !ok {
 				break
 			}
 			fieldValue = append(fieldValue, %s%s)}
-			""".formatted(typeName[typeName.length - 1], typeName[typeName.length - 1], dataSource,
+			""".formatted(typeName[typeName.length - 1], typeName[typeName.length - 1], dataSource, dataSource,
                 targetShape.isStructureShape() ? "" : "*",
                 targetShape.accept(
                         new DafnyToSmithyShapeVisitor(context, "val", writer, isConfigShape, true)
@@ -153,6 +171,9 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
         builder.append("""
                                func() map[string]%s {
                                var m map[string]%s = make(map[string]%s)
+                if %s == nil {
+                    return nil
+                }
 	for i := dafny.Iterate(%s.(dafny.Map).Items());; {
 		val, ok := i()
 		if !ok {
@@ -161,7 +182,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
 		m[*%s] = *%s
 	}
 	return m
-                               }()""".formatted(type, type, type, dataSource, keyTargetShape.accept(
+                               }()""".formatted(type, type, type, dataSource, dataSource, keyTargetShape.accept(
                 new DafnyToSmithyShapeVisitor(context, "(*val.(dafny.Tuple).IndexInt(0))", writer, isConfigShape)
         ),
                 valueTargetShape.accept(
@@ -173,7 +194,15 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
 
     @Override
     public String booleanShape(BooleanShape shape) {
-        return "&[]bool{%s.(%s)}[0]".formatted(dataSource, context.symbolProvider().toSymbol(shape));
+        return """
+                func() *bool {
+                    var b bool
+                    if %s == nil {
+                        return nil
+                    }
+                    b = %s.(%s)
+                    return &b
+                }()""".formatted(dataSource, dataSource, context.symbolProvider().toSymbol(shape));
     }
 
     @Override
@@ -181,7 +210,11 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
         writer.addImport("dafny");
         if (shape.hasTrait(EnumTrait.class)) {
             return """
-    func () types.%s {
+    func () *types.%s {
+    var u types.%s
+                if %s == nil {
+                    return nil
+                }
 		inputEnum := %s.(%s)
 		index := -1;
 		for allEnums := dafny.Iterate(%s{}.AllSingletonConstructors()); ; {
@@ -193,14 +226,17 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
 				}
 			}
 		}
-		var u types.%s
-		return u.Values()[index]
-	}()""".formatted(context.symbolProvider().toSymbol(shape).getName(), dataSource, DafnyNameResolver.getDafnyType(context.settings(), context.symbolProvider().toSymbol(shape)), DafnyNameResolver.getDafnyCompanionStructType(context.settings(), context.symbolProvider().toSymbol(shape)),
-                  DafnyNameResolver.getDafnyType(context.settings(), context.symbolProvider().toSymbol(shape)), context.symbolProvider().toSymbol(shape).getName());
+		
+		return &u.Values()[index]
+	}()""".formatted(context.symbolProvider().toSymbol(shape).getName(), context.symbolProvider().toSymbol(shape).getName(), dataSource, dataSource, DafnyNameResolver.getDafnyType(context.settings(), context.symbolProvider().toSymbol(shape)), DafnyNameResolver.getDafnyCompanionStructType(context.settings(), context.symbolProvider().toSymbol(shape)),
+                  DafnyNameResolver.getDafnyType(context.settings(), context.symbolProvider().toSymbol(shape)));
         }
         return """
                 func() (*string) {
                     var s string
+                if %s == nil {
+                    return nil
+                }
                     for i := dafny.Iterate(%s) ; ; {
                         val, ok := i()
                         if !ok {
@@ -209,37 +245,33 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
                             s = s + string(val.(dafny.Char))
                         }
                    }
-               }()""".formatted(dataSource);
-    }
-
-    @Override
-    public String byteShape(ByteShape shape) {
-        return getDefault(shape);
-    }
-
-    @Override
-    public String shortShape(ShortShape shape) {
-        return getDefault(shape);
+               }()""".formatted(dataSource, dataSource);
     }
 
     @Override
     public String integerShape(IntegerShape shape) {
-        return "&[]int32{%s.(int32)}[0]".formatted(dataSource);
+        return ("""
+                func() *int32 {
+                    var b int32
+                    if %s == nil {
+                        return nil
+                    }
+                    b = %s.(int32)
+                    return &b
+                }()""").formatted(dataSource, dataSource);
     }
 
     @Override
     public String longShape(LongShape shape) {
-        return "&[]int64{%s.(int64)}[0]".formatted(dataSource);
-    }
-
-    @Override
-    public String bigIntegerShape(BigIntegerShape shape) {
-        return getDefault(shape);
-    }
-
-    @Override
-    public String floatShape(FloatShape shape) {
-        return getDefault(shape);
+        return ("""
+                func() *int64 {
+                    var b int64
+                    if %s == nil {
+                        return nil
+                    }
+                    b = %s.(int64)
+                    return &b
+                }()""").formatted(dataSource, dataSource);
     }
 
     @Override
@@ -249,6 +281,9 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
         return """
                 func () *float64 {
                     var b []byte
+                if %s == nil {
+                    return nil
+                }
                     for i := dafny.Iterate(%s) ; ; {
                         val, ok := i()
                 	    if !ok {
@@ -257,25 +292,6 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
     		                b = append(b, val.(byte))
     	                }
                     }
-                }()""".formatted(dataSource);
-    }
-
-    @Override
-    public String bigDecimalShape(BigDecimalShape shape) {
-        return getDefault(shape);
-    }
-
-    @Override
-    public String enumShape(EnumShape shape) {
-        return "%s.(%s)".formatted(dataSource, context.symbolProvider().toSymbol(shape).getNamespace());
-    }
-
-    @Override
-    public String timestampShape(TimestampShape shape) {
-        return getDefault(shape);
-    }
-
-    private String getTypeAssertedShape(final Shape shape) {
-        return "%s.(*%s)".formatted(dataSource, context.symbolProvider().toSymbol(shape));
+                }()""".formatted(dataSource, dataSource);
     }
 }

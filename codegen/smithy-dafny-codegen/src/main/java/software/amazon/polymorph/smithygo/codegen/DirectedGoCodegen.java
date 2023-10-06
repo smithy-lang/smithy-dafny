@@ -9,6 +9,7 @@ import software.amazon.smithy.codegen.core.directed.DirectedCodegen;
 import software.amazon.smithy.codegen.core.directed.GenerateEnumDirective;
 import software.amazon.smithy.codegen.core.directed.GenerateErrorDirective;
 import software.amazon.smithy.codegen.core.directed.GenerateIntEnumDirective;
+import software.amazon.smithy.codegen.core.directed.GenerateResourceDirective;
 import software.amazon.smithy.codegen.core.directed.GenerateServiceDirective;
 import software.amazon.smithy.codegen.core.directed.GenerateStructureDirective;
 import software.amazon.smithy.codegen.core.directed.GenerateUnionDirective;
@@ -93,6 +94,13 @@ public class DirectedGoCodegen implements DirectedCodegen<GenerationContext, GoS
     public void generateIntEnumShape(GenerateIntEnumDirective<GenerationContext, GoSettings> directive) {
         directive.context().writerDelegator().useShapeWriter(directive.shape(), writer -> {
             IntEnumGenerator intEnumGenerator = new IntEnumGenerator(directive.symbolProvider(), writer, directive.shape().asIntEnumShape().get());
+        });
+    }
+
+    @Override
+    public void generateResource(GenerateResourceDirective<GenerationContext, GoSettings> directive) {
+        System.out.println("##############" + directive.shape());
+        directive.context().writerDelegator().useShapeWriter(directive.shape(), writer -> {
         });
     }
 }

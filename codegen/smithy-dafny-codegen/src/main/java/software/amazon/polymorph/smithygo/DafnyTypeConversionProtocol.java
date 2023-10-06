@@ -8,6 +8,7 @@ import software.amazon.polymorph.smithygo.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithygo.shapevisitor.DafnyToSmithyShapeVisitor;
 import software.amazon.polymorph.smithygo.shapevisitor.SmithyToDafnyShapeVisitor;
 import software.amazon.polymorph.traits.LocalServiceTrait;
+import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.model.knowledge.TopDownIndex;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
@@ -79,6 +80,41 @@ public class DafnyTypeConversionProtocol implements ProtocolGenerator {
                 });
             }
         }
+        var refResources = context.model().getShapesWithTrait(ReferenceTrait.class);
+        for (var refResource : refResources) {
+            var resource = refResource.expectTrait(ReferenceTrait.class).getReferentId();
+            for (final var operation : topDownIndex.getContainedOperations(resource)) {
+                final var inputToDafnyMethodName = getInputToDafnyMethodName(context, operation);
+                final var input = model.expectShape(operation.getInputShape());
+                if (!input.hasTrait(UnitTypeTrait.class)) {
+                    final var inputSymbol = symbolProvider.toSymbol(input);
+                    writerDelegator.useFileWriter(TO_DAFNY, context.settings().getModuleName().replace(DOT, BLANK).toLowerCase(), writer -> {
+                        writer.addImport("types");
+                        writer.write("""
+                                             func $L(nativeInput $T)($L) {
+                                                 ${C|}
+                                             }""", inputToDafnyMethodName, inputSymbol,
+                                     DafnyNameResolver.getDafnyType(context.settings(), inputSymbol),
+                                     writer.consumer(w -> generateRequestSerializer(context, operation, context.writerDelegator())));
+                    });
+                }
+
+                final var outputToDafnyMethodName = getOutputToDafnyMethodName(context, operation);
+                final var output = model.expectShape(operation.getOutputShape());
+                if (!output.hasTrait(UnitTypeTrait.class)) {
+                    final var outputSymbol = symbolProvider.toSymbol(output);
+                    writerDelegator.useFileWriter(TO_DAFNY, context.settings().getModuleName().replace(DOT, BLANK).toLowerCase(), writer -> {
+                        writer.addImport("types");
+                        writer.write("""
+                                             func $L(nativeOutput $T)($L) {
+                                                 ${C|}
+                                             }""", outputToDafnyMethodName, outputSymbol,
+                                     DafnyNameResolver.getDafnyType(context.settings(), outputSymbol),
+                                     writer.consumer(w -> generateResponseSerializer(context, operation, context.writerDelegator())));
+                    });
+                }
+            }
+        }
         generateErrorSerializer(context);
         generateConfigSerializer(context);
     }
@@ -125,6 +161,46 @@ public class DafnyTypeConversionProtocol implements ProtocolGenerator {
                 });
             }
         }
+        var refResources = context.model().getShapesWithTrait(ReferenceTrait.class);
+        for (var refResource : refResources) {
+            var resource = refResource.expectTrait(ReferenceTrait.class).getReferentId();
+            for (final var operation : topDownIndex.getContainedOperations(resource)) {
+
+                final var inputFromDafnyMethodName = getInputFromDafnyMethodName(context, operation);
+                final var input = context.model().expectShape(operation.getInputShape());
+                if (!input.hasTrait(UnitTypeTrait.class)) {
+                    final var inputSymbol = context.symbolProvider().toSymbol(input);
+
+                    delegator.useFileWriter(FROM_DAFNY, context.settings().getModuleName().replace(DOT, BLANK).toLowerCase(), writer -> {
+                        writer.addImport("types");
+
+                        writer.write("""
+                                             func $L(dafnyInput $L)($T) {
+                                                 ${C|}
+                                             }""", inputFromDafnyMethodName, DafnyNameResolver.getDafnyType(context.settings(), inputSymbol),
+                                     inputSymbol,
+                                     writer.consumer(w -> generateRequestDeserializer(context, operation, context.writerDelegator())));
+                    });
+                }
+
+                final var outputFromDafnyMethodName = getOutputFromDafnyMethodName(context, operation);
+                final var output = context.model().expectShape(operation.getOutputShape());
+                if (!output.hasTrait(UnitTypeTrait.class)) {
+                    final var outputSymbol = context.symbolProvider().toSymbol(output);
+
+                    delegator.useFileWriter(FROM_DAFNY, context.settings().getModuleName().replace(DOT, BLANK).toLowerCase(), writer -> {
+                        writer.addImport("types");
+
+                        writer.write("""
+                                             func $L(dafnyOutput $L)($T) {
+                                                 ${C|}
+                                             }""", outputFromDafnyMethodName, DafnyNameResolver.getDafnyType(context.settings(), outputSymbol),
+                                     outputSymbol,
+                                     writer.consumer(w -> generateResponseDeserializer(context, operation, context.writerDelegator())));
+                    });
+                }
+            }
+        }
         generateErrorDeserializer(context);
         generateConfigDeserializer(context);
 
@@ -141,7 +217,7 @@ public class DafnyTypeConversionProtocol implements ProtocolGenerator {
                                                             context,
                                                             "nativeInput",
                                                             writer,
-                                                            false
+                                                            false, false, false
                                                     ));
                                                     writer.write("""
                                                                          return $L
@@ -162,7 +238,7 @@ public class DafnyTypeConversionProtocol implements ProtocolGenerator {
                                             context,
                                             "nativeOutput",
                                             writer,
-                                            false
+                                            false, false, false
                                     ));
                                     writer.write("""
                                                                          return $L
@@ -234,7 +310,7 @@ public class DafnyTypeConversionProtocol implements ProtocolGenerator {
                                      context,
                                      "nativeInput",
                                      writer,
-                                     true
+                                     true, false, false
                              ));
                              writer.write("""
                                                   return $L
@@ -261,7 +337,7 @@ public class DafnyTypeConversionProtocol implements ProtocolGenerator {
                                          context,
                                          "nativeInput",
                                          writer,
-                                         false
+                                         false, false, false
                                  ));
                                  writer.write("""
                                                       return $L
@@ -369,12 +445,12 @@ func CollectionOfErrors_Output_FromDafny(dafnyOutput $L.Error)(types.CollectionO
             t.ListOfErrors = append(t.ListOfErrors, OpaqueError_Output_FromDafny(err))
                                            }
     }
-    t.Message = *func() (*string) {
+    t.Message = func() (string) {
         var s string
         for i := dafny.Iterate(message) ; ; {
             val, ok := i()
             if !ok {
-                return &[]string{s}[0]
+                return s
             } else {
                 s = s + string(val.(dafny.Char))
             }

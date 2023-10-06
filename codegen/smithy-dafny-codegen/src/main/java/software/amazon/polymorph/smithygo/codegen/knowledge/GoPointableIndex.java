@@ -155,7 +155,7 @@ public class GoPointableIndex implements KnowledgeIndex {
             return false;
         }
 
-        if (INHERENTLY_VALUE.contains(targetShape.getType()) || isShapeEnum(targetShape)) {
+        if (INHERENTLY_VALUE.contains(targetShape.getType())) {
             return false;
         }
 
@@ -194,7 +194,7 @@ public class GoPointableIndex implements KnowledgeIndex {
             return true;
         }
 
-        if (INHERENTLY_VALUE.contains(shape.getType()) || isShapeEnum(shape)) {
+        if (INHERENTLY_VALUE.contains(shape.getType())) {
             return false;
         }
 

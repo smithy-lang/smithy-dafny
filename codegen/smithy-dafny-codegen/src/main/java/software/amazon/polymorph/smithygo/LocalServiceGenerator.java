@@ -12,22 +12,29 @@ import software.amazon.polymorph.smithygo.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithygo.shapevisitor.DafnyToSmithyShapeVisitor;
 import software.amazon.polymorph.smithygo.shapevisitor.SmithyToDafnyShapeVisitor;
 import software.amazon.polymorph.traits.LocalServiceTrait;
+import software.amazon.polymorph.traits.ReferenceTrait;
+import software.amazon.polymorph.utils.ModelUtils;
+import software.amazon.smithy.model.knowledge.TopDownIndex;
 import software.amazon.smithy.model.shapes.OperationShape;
+import software.amazon.smithy.model.shapes.ResourceShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.UnitTypeTrait;
 
+import java.util.Set;
 import java.util.function.Function;
 
 
 public class LocalServiceGenerator implements Runnable {
     private final GenerationContext context;
     private final ServiceShape service;
+    private final TopDownIndex topDownIndex;
 
     public LocalServiceGenerator(GenerationContext context, ServiceShape service) {
         this.context = context;
         this.service = service;
+        topDownIndex = TopDownIndex.of(context.model());
     }
 
     @Override
@@ -39,6 +46,7 @@ public class LocalServiceGenerator implements Runnable {
         generateClient(writer);
         generateShim();
         generateUnmodelledErrors(context);
+        generateReferencedResources(context);
     }
     void generateClient(GoWriter writer) {
         // Generate each operation for the service. We do this here instead of via the operation visitor method to
@@ -75,8 +83,7 @@ public class LocalServiceGenerator implements Runnable {
                              """,
                      serviceSymbol, dafnyClient , configSymbol, serviceSymbol,DafnyNameResolver.getInputToDafnyMethodName(context, serviceTrait.getConfigId()), DafnyNameResolver.createDafnyClient(context.settings(), serviceTrait.getSdkId()), dafnyClient, serviceSymbol);
 
-        service.getAllOperations().forEach(operation -> {
-            final OperationShape operationShape = model.expectShape(operation, OperationShape.class);
+        topDownIndex.getContainedOperations(service).forEach(operationShape -> {
             final Shape inputShape = model.expectShape(operationShape.getInputShape());
             final Shape outputShape = model.expectShape(operationShape.getOutputShape());
             final String inputType = inputShape.hasTrait(UnitTypeTrait.class) ? "" : ", params types.%s".formatted(inputShape.toShapeId().getName());
@@ -139,6 +146,7 @@ public class LocalServiceGenerator implements Runnable {
                              }
                          }),returnError, returnError, returnResponse
                          );
+            //ModelUtils.findAllDependentMemberReferenceShapes(operationShape.all)
         });
     }
 
@@ -181,8 +189,7 @@ public class LocalServiceGenerator implements Runnable {
                          DafnyNameResolver.serviceNamespace(service), DafnyNameResolver.dafnyTypesNamespace(context.settings())
             );
 
-            service.getAllOperations().forEach(operation -> {
-                final OperationShape operationShape = model.expectShape(operation, OperationShape.class);
+            topDownIndex.getContainedOperations(service).forEach(operationShape -> {
                 final Shape inputShape = model.expectShape(operationShape.getInputShape());
                 final Shape outputShape = model.expectShape(operationShape.getOutputShape());
                 final String inputType = inputShape.hasTrait(UnitTypeTrait.class) ? "" : "input %s".formatted(DafnyNameResolver.getDafnyType(context.settings(), symbolProvider.toSymbol(inputShape)));
@@ -262,5 +269,107 @@ public class LocalServiceGenerator implements Runnable {
                                  }
                                  """);
         });
+    }
+
+    void generateReferencedResources(GenerationContext context) {
+        var refResources = context.model().getShapesWithTrait(ReferenceTrait.class);
+        var model = context.model();
+        var symbolProvider = context.symbolProvider();
+        for (var refResource : refResources) {
+            var resource = refResource.expectTrait(ReferenceTrait.class).getReferentId();
+            context.writerDelegator().useFileWriter("types/types.go", writer -> { writer.write("""
+                                     type I$L interface {
+                                     ${C|}
+                                     }
+                                     """, resource.getName(), writer.consumer((w) -> {
+                topDownIndex.getContainedOperations(resource).forEach(operationShape -> {
+                    w.write("""
+                                             $L($L) $L
+                                             """, operationShape.getId().getName(), operationShape.getInputShape().getName(), operationShape.getOutputShape().getName());
+                });
+            }));});
+            context.writerDelegator().useFileWriter(resource.getName() + ".go", DafnyNameResolver.serviceNamespace(service), writer -> {
+                writer.addImport("types");
+                writer.addImport("context");
+                writer.addImport(DafnyNameResolver.dafnyTypesNamespace(context.settings()));
+                writer.write("""
+                                     type %s struct {
+                                         impl %s.I%s
+                                     }
+                                     """.formatted(resource.getName(), DafnyNameResolver.dafnyTypesNamespace(context.settings()), resource.getName()));
+
+                topDownIndex.getContainedOperations(resource).forEach(operationShape -> {
+                    final Shape inputShape = model.expectShape(operationShape.getInputShape());
+                    context.writerDelegator().useShapeWriter(inputShape, w -> new StructureGenerator(model, symbolProvider, w, inputShape.asStructureShape().get()).run());
+
+
+                    final Shape outputShape = model.expectShape(operationShape.getOutputShape());
+                    context.writerDelegator().useShapeWriter(outputShape, w -> new StructureGenerator(model, symbolProvider, w, outputShape.asStructureShape().get()).run());
+                    final String inputType = inputShape.hasTrait(UnitTypeTrait.class) ? "" : ", params types.%s".formatted(inputShape.toShapeId().getName());
+                    final String outputType = outputShape.hasTrait(UnitTypeTrait.class) ? "" : "*types.%s,".formatted(outputShape.toShapeId().getName());
+
+                    String baseClientCall;
+                    if (inputShape.hasTrait(UnitTypeTrait.class)) {
+                        baseClientCall = "var dafny_response = client.dafnyClient.%s()".formatted(operationShape.getId().getName());
+                    } else {
+                        baseClientCall = """
+                        var dafny_request %s = %s(params)
+                        var dafny_response = client.dafnyClient.%s(dafny_request)
+                        """.formatted(DafnyNameResolver.getDafnyType(context.settings(), symbolProvider.toSymbol(inputShape)),
+                                      DafnyNameResolver.getInputToDafnyMethodName(context, operationShape), operationShape.getId().getName());
+                    }
+
+                    String returnResponse, returnError;
+                    if (outputShape.hasTrait(UnitTypeTrait.class)) {
+                        returnResponse = "return nil";
+                        returnError = "return";
+                    } else {
+                        returnResponse = """
+                        var native_response = %s(dafny_response.Extract().(%s))
+                        return &native_response, nil
+                        """.formatted(DafnyNameResolver.getOutputFromDafnyMethodName(context, operationShape),
+                                      DafnyNameResolver.getDafnyType(context.settings(), symbolProvider.toSymbol(outputShape)));
+                        returnError = "return nil,";
+                    }
+
+
+                    writer.write("""
+                                   func (client *$T) $L(ctx context.Context $L) ($L error) {
+                                       $L
+                                       if (dafny_response.Is_Failure()) {
+                                           err := dafny_response.Dtor_error().($L.Error);
+                                           ${C|}
+                                           if err.Is_CollectionOfErrors() {
+                                               $L CollectionOfErrors_Output_FromDafny(err)
+                                           }
+                                           if err.Is_Opaque() {
+                                               $L OpaqueError_Output_FromDafny(err)
+                                           }
+                                       }
+                                       $L
+                                   }
+                                 """,
+                                 symbolProvider.toSymbol(model.expectShape(resource)),
+                                 operationShape.getId().getName(),
+                                 inputType, outputType,
+                                 baseClientCall,
+                                 DafnyNameResolver.dafnyTypesNamespace(context.settings()),
+                                 writer.consumer( w -> {
+                                     for (var errorShape :
+                                             model.getShapesWithTrait(ErrorTrait.class)) {
+                                         w.write("""
+                                                                             if err.Is_$L() {
+                                                                             $L $L_Output_FromDafny(err)
+                                                                         }
+                                                      """, errorShape.toShapeId().getName(), returnError, errorShape.toShapeId().getName());
+                                     }
+                                 }),returnError, returnError, returnResponse
+                    );
+                    //ModelUtils.findAllDependentMemberReferenceShapes(operationShape.all)
+                });
+            });
+        }
+
+
     }
 }

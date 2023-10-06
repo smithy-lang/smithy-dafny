@@ -16,6 +16,7 @@
 package software.amazon.polymorph.smithygo.codegen;
 
 import software.amazon.polymorph.smithygo.codegen.knowledge.GoPointableIndex;
+import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.ReservedWordSymbolProvider;
 import software.amazon.smithy.codegen.core.ReservedWords;
@@ -463,6 +464,11 @@ public class SymbolVisitor implements SymbolProvider, ShapeVisitor<Symbol> {
             builder.definitionFile("./types/errors.go");
         } else {
             builder.definitionFile("./types/types.go");
+        }
+
+        if (shape.hasTrait(ReferenceTrait.class)) {
+            builder.putProperty("Referred", symbolBuilderFor(model.expectShape(shape.expectTrait(ReferenceTrait.class).getReferentId()), "I" + getDefaultShapeName(model.expectShape(shape.expectTrait(ReferenceTrait.class).getReferentId())))
+                                                    .putProperty(SymbolUtils.POINTABLE, false).build());
         }
 
         return builder.build();
