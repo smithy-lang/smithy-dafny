@@ -542,9 +542,13 @@ public class TypeConversionCodegen {
         final String dafnyOptionType = nameResolver.dafnyConcreteTypeForOptionalMember(memberShape);
         final TokenTree fromDafnyBody = Token.of("return value.is_None ? (%s) null : %s(value.Extract());"
                 .formatted(cSharpOptionType, targetFromDafnyConverterName));
+        String checkCount = "";
+        if ((targetShape.getType() == ShapeType.MAP) || (targetShape.getType() == ShapeType.LIST)){
+            checkCount = " || value.Count == 0";
+        }
         final TokenTree toDafnyBody = Token.of(
-                "return value == null ? %s.create_None() : %s.create_Some(%s((%s) value));"
-                .formatted(dafnyOptionType, dafnyOptionType, targetToDafnyConverterName, cSharpType));
+                "return value == null%s ? %s.create_None() : %s.create_Some(%s((%s) value));"
+                .formatted(checkCount, dafnyOptionType, dafnyOptionType, targetToDafnyConverterName, cSharpType));
         return buildConverterFromMethodBodies(memberShape, fromDafnyBody, toDafnyBody);
     }
 
