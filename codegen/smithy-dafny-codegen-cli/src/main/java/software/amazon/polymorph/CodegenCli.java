@@ -114,7 +114,6 @@ public class CodegenCli {
             }
         }
 
-        final ServiceShape serviceShape = ModelUtils.serviceFromNamespace(serviceModel, cliArguments.namespace);
         final PluginContext pluginContext = PluginContext.builder()
             .model(serviceModel)
             .fileManifest(FileManifest.create(cliArguments.outputPythonDir().orElse(cliArguments.modelPath)))

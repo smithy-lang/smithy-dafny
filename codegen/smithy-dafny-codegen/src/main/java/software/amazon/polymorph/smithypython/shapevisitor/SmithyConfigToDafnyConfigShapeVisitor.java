@@ -5,6 +5,7 @@ import software.amazon.polymorph.smithypython.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithypython.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.codegen.core.CodegenException;
+import software.amazon.smithy.codegen.core.WriterDelegator;
 import software.amazon.smithy.model.shapes.BigDecimalShape;
 import software.amazon.smithy.model.shapes.BigIntegerShape;
 import software.amazon.smithy.model.shapes.BlobShape;
@@ -44,7 +45,7 @@ import software.amazon.smithy.utils.CaseUtils;
  */
 public class SmithyConfigToDafnyConfigShapeVisitor extends SmithyToDafnyShapeVisitor.Default<String> {
   private final GenerationContext context;
-  private final String dataSource;
+  private String dataSource;
   private final PythonWriter writer;
   private final String filename;
 
@@ -77,6 +78,13 @@ public class SmithyConfigToDafnyConfigShapeVisitor extends SmithyToDafnyShapeVis
     );
   }
 
+  protected String getSmithyConfigToDafnyConfigFunctionNameForShape(Shape shape) {
+    writer.addImport(".smithy_to_dafny", SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(shape.getId().getNamespace())
+        + "_" + shape.getId().getName());
+    return SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(shape.getId().getNamespace())
+        + "_" + shape.getId().getName();
+  }
+
   /**
    * Generates SmithyToDafny conversion logic for a Polymorph localService Config shape.
    * The provided StructureShape MUST be a Polymorph localService Config shape.
@@ -86,11 +94,47 @@ public class SmithyConfigToDafnyConfigShapeVisitor extends SmithyToDafnyShapeVis
    */
   @Override
   public String structureShape(StructureShape shape) {
-    if (!SmithyNameResolver.getLocalServiceConfigShapes(context).contains(shape.getId())) {
-      throw new CodegenException("Provided shape " + shape + " MUST be a localService config shape");
+    String outStr = "%1$s(%2$s)".formatted(
+        getSmithyConfigToDafnyConfigFunctionNameForShape(shape),
+        dataSource
+    );
+
+    if (!SmithyToDafnyShapeVisitor.generatedShapes.contains(shape)) {
+      SmithyToDafnyShapeVisitor.generatedShapes.add(shape);
+      writeStructureShapeConverter(shape);
     }
 
-    DafnyNameResolver.importDafnyTypeForShape(writer, shape.getId());
+    return outStr;
+
+
+  }
+  public void writeStructureShapeConverter(StructureShape shape) {
+    WriterDelegator<PythonWriter> delegator = context.writerDelegator();
+    String moduleName = context.settings().getModuleName();
+
+    // TODO: Refactor
+    this.dataSource = "input";
+
+    delegator.useFileWriter(moduleName + "/smithy_to_dafny.py", "", writerInstance -> {
+      writerInstance.write(
+          """
+          def $L(input):
+            return $L
+          """,
+          getSmithyConfigToDafnyConfigFunctionNameForShape(shape),
+          getStructureShapeConverterBody(shape, writerInstance)
+      );
+    });
+  }
+
+  public String getStructureShapeConverterBody(StructureShape shape, PythonWriter writerInstance) {
+
+    if (!SmithyNameResolver.getLocalServiceConfigShapes(context).contains(shape.getId())) {
+      throw new CodegenException(
+          "Provided shape " + shape + " MUST be a localService config shape");
+    }
+
+    DafnyNameResolver.importDafnyTypeForShape(writerInstance, shape.getId());
     StringBuilder builder = new StringBuilder();
     // Open Dafny structure shape
     // e.g.

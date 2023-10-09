@@ -1,11 +1,15 @@
 package software.amazon.polymorph.smithypython.shapevisitor;
 
+import java.util.HashSet;
 import java.util.Map.Entry;
+import java.util.Set;
 import software.amazon.polymorph.smithypython.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithypython.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.smithypython.nameresolver.Utils;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.codegen.core.CodegenException;
+import software.amazon.smithy.codegen.core.Symbol;
+import software.amazon.smithy.codegen.core.WriterDelegator;
 import software.amazon.smithy.model.shapes.BigDecimalShape;
 import software.amazon.smithy.model.shapes.BigIntegerShape;
 import software.amazon.smithy.model.shapes.BlobShape;
@@ -39,9 +43,11 @@ import software.amazon.smithy.utils.CaseUtils;
  */
 public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
     private final GenerationContext context;
-    private final String dataSource;
+    private String dataSource;
     private final PythonWriter writer;
     private final String filename;
+    // Store a set of shapes that previously had
+    private static final Set<Shape> generatedShapes = new HashSet<>();
 
     /**
      * @param context     The generation context.
@@ -63,6 +69,13 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
       this.filename = filename;
     }
 
+    protected String getDafnyToSmithyFunctionNameForShape(Shape shape) {
+      writer.addImport(".dafny_to_smithy", SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(shape.getId().getNamespace())
+          + "_" + shape.getId().getName());
+      return SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(shape.getId().getNamespace())
+          + "_" + shape.getId().getName();
+    }
+
     @Override
     protected String getDefault(Shape shape) {
       String protocolName = context.protocolGenerator().getName();
@@ -78,6 +91,40 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
 
     @Override
     public String structureShape(StructureShape shape) {
+      String outStr = "%1$s(%2$s)".formatted(
+          getDafnyToSmithyFunctionNameForShape(shape),
+          dataSource
+      );
+
+      if (!generatedShapes.contains(shape)) {
+        generatedShapes.add(shape);
+        writeStructureShapeConverter(shape);
+      }
+
+      return outStr;
+    }
+
+    public void writeStructureShapeConverter(StructureShape shape) {
+      WriterDelegator<PythonWriter> delegator = context.writerDelegator();
+      String moduleName = context.settings().getModuleName();
+
+      // TODO: Refactor
+      this.dataSource = "input";
+
+      delegator.useFileWriter(moduleName + "/dafny_to_smithy.py", "", writerInstance -> {
+        writerInstance.write(
+        """
+        def $L(input):
+          return $L
+        """,
+            getDafnyToSmithyFunctionNameForShape(shape),
+            getStructureShapeConverterBody(shape, writerInstance)
+        );
+      });
+    }
+
+    public String getStructureShapeConverterBody(StructureShape shape, PythonWriter writerInstance) {
+
       // Reference shapes have different logic
       if (shape.hasTrait(ReferenceTrait.class)) {
         return referenceStructureShape(shape);
@@ -85,11 +132,11 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
 
       // Only generate an import for this shape if it is not in the file under generation
       if (!SmithyNameResolver.getSmithyGeneratedModuleFilenameForSmithyShape(shape, context)
-              .contains(filename)
+          .contains(filename)
           || !SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(shape.getId().getNamespace())
-              .contains(context.settings().getModuleName())) {
+          .contains(context.settings().getModuleName())) {
 
-        SmithyNameResolver.importSmithyGeneratedTypeForShape(writer, shape, context);
+        SmithyNameResolver.importSmithyGeneratedTypeForShape(writerInstance, shape, context);
       }
 
       StringBuilder builder = new StringBuilder();
