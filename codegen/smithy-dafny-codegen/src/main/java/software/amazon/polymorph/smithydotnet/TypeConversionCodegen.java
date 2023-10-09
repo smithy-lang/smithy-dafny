@@ -579,7 +579,7 @@ public class TypeConversionCodegen {
                         destructorValue = DafnyNameResolverHelpers.dafnyCompilesExtra_(memberShape.getMemberName());
                     }
                     return TokenTree
-                            .of("if (value.is_%s)".formatted(memberShape.getMemberName()))
+                            .of("if (value.is_%s)".formatted(DafnyNameResolverHelpers.dafnyCompilesExtra_(memberShape.getMemberName())))
                             .append(TokenTree
                                     .of(
                                             "converted.%s = %s(concrete.dtor_%s);"
