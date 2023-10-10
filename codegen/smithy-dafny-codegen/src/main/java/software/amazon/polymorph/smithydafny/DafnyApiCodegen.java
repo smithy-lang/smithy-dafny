@@ -903,12 +903,50 @@ public class DafnyApiCodegen {
         Token.of(!implementationType.equals(ImplementationType.ABSTRACT)
           ? "&& %s()".formatted(validStateInvariantName)
           : "&& %s(config)".formatted(nameResolver.validConfigPredicate())),
+        MutableResourcesOnlyAddFreshObjects(operationShape),
         outputReferencesThatNeedValidState
       )
       .dropEmpty()
       .lineSeparated()
       .prependToNonEmpty(Token.of("ensures"))
       .lineSeparated();
+  }
+
+  private TokenTree MutableResourcesOnlyAddFreshObjects(
+    OperationShape operationShape
+  ) {
+      return operationShape
+        .getInput()
+        .map(shapeId -> model.expectShape(shapeId, StructureShape.class))
+        .map(structureShape -> ModelUtils
+          .streamStructureMembers(structureShape)
+          // Only structures are currently supported
+          // A list would require a more complicated `forall`
+          .filter(member -> model.expectShape(member.getTarget()).getType() == ShapeType.STRUCTURE)
+          // Input members with a ReferenceTrait MAY have mutable state.
+          // To effectively prove disjoint `Modifies` only fresh objects can be added to `Modifies`
+          .filter(this::OnlyReferenceStructures)
+          .filter(member -> {
+              ShapeId referentId = model
+                .expectShape(member.getTarget())
+                .expectTrait(ReferenceTrait.class)
+                .getReferentId();
+              return model
+                .getShape(referentId)
+                .orElseThrow()
+                .hasTrait(MutableLocalStateTrait.class);
+          })
+          .map(m -> TokenTree.of(
+            "&& fresh(%1$s.Modifies - old(%1$s.Modifies))"
+              .formatted(
+                m.isOptional()
+                  ? "input." + m.getMemberName() + ".value"
+                  : "input." + m.getMemberName()
+              ))
+          )
+        )
+        .map(TokenTree::of)
+        .orElse(TokenTree.empty());
   }
 
     private Boolean OnlyReferenceStructures(MemberShape member) {
