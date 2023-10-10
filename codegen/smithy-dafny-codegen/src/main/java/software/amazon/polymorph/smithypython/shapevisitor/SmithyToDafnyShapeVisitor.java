@@ -109,12 +109,21 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
       writerInstance.write(
           """
           def $L(input):
+            $L
             return $L
           """,
           getSmithyToDafnyFunctionNameForShape(shape),
+          writeInlineConversions(shape, writerInstance),
           getStructureShapeConverterBody(shape, writerInstance)
       );
     });
+  }
+
+  public String writeInlineConversions(StructureShape shape, PythonWriter writerInstance) {
+    if (shape.hasTrait(ReferenceTrait.class)) {
+      return referenceStructureShapeInlineConversions(shape, writerInstance);
+    }
+    return "";
   }
 
   public String getStructureShapeConverterBody(StructureShape shape, PythonWriter writerInstance) {
@@ -413,25 +422,48 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
     }
   }
 
+  protected String referenceStructureShapeInlineConversions(StructureShape shape, PythonWriter writerInstance) {
+    ReferenceTrait referenceTrait = shape.expectTrait(ReferenceTrait.class);
+    Shape resourceOrService = context.model().expectShape(referenceTrait.getReferentId());
+
+    if (resourceOrService.isResourceShape()) {
+      return "";
+    } else if (resourceOrService.isServiceShape()) {
+      return referenceServiceShapeInlineConversions(resourceOrService.asServiceShape().get(), writerInstance);
+    } else {
+      throw new UnsupportedOperationException("Unknown referenceStructureShape type: " + shape);
+    }
+  }
+
+  protected String referenceServiceShapeInlineConversions(ServiceShape serviceShape, PythonWriter writerInstance) {
+    DafnyNameResolver.importDafnyTypeForServiceShape(writerInstance, serviceShape);
+    writerInstance.addStdlibImport(SmithyNameResolver.getSmithyGeneratedConfigModulePathForSmithyNamespace(
+        serviceShape.getId().getNamespace(), context));
+    writerInstance.addStdlibImport(DafnyNameResolver.getDafnyPythonIndexModuleNameForShape(serviceShape));
+
+    StringBuilder builder = new StringBuilder();
+    // `my_module_client = my_module_internaldafny.MyModuleClient()`
+    builder.append("%1$s_client = %2$s.%3$s()\n".formatted(
+        SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(serviceShape.getId().getNamespace()),
+        DafnyNameResolver.getDafnyPythonIndexModuleNameForShape(serviceShape),
+        DafnyNameResolver.getDafnyClientTypeForServiceShape(serviceShape)
+    ));
+    // `my_module_client.ctor__(my_module.smithygenerated.config.smithy_config_to_dafny_config(input._config))`
+    builder.append("  %1$s_client.ctor__(%2$s.smithy_config_to_dafny_config(%3$s._config))".formatted(
+        SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(serviceShape.getId().getNamespace()),
+        SmithyNameResolver.getSmithyGeneratedConfigModulePathForSmithyNamespace(
+            serviceShape.getId().getNamespace(), context),
+        dataSource
+    ));
+    return builder.toString();
+  }
+
   protected String referenceServiceShape(ServiceShape serviceShape) {
     DafnyNameResolver.importDafnyTypeForServiceShape(writer, serviceShape);
     writer.addStdlibImport(SmithyNameResolver.getSmithyGeneratedConfigModulePathForSmithyNamespace(
         serviceShape.getId().getNamespace(), context));
     writer.addStdlibImport(DafnyNameResolver.getDafnyPythonIndexModuleNameForShape(serviceShape));
 
-    // `my_module_client = my_module_internaldafny.MyModuleClient()`
-    writer.write("$L_client = $L.$L()",
-        SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(serviceShape.getId().getNamespace()),
-        DafnyNameResolver.getDafnyPythonIndexModuleNameForShape(serviceShape),
-        DafnyNameResolver.getDafnyClientTypeForServiceShape(serviceShape)
-    );
-    // `my_module_client.ctor__(my_module.smithygenerated.config.smithy_config_to_dafny_config(input._config))`
-    writer.write("$L_client.ctor__($L.smithy_config_to_dafny_config($L._config))",
-        SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(serviceShape.getId().getNamespace()),
-        SmithyNameResolver.getSmithyGeneratedConfigModulePathForSmithyNamespace(
-            serviceShape.getId().getNamespace(), context),
-        dataSource
-    );
     return "%1$s_client".formatted(SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(
         serviceShape.getId().getNamespace()));
   }
