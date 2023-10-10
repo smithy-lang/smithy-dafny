@@ -129,13 +129,13 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
     }
 
     public String getStructureShapeConverterBody(StructureShape shape, PythonWriter conversionWriter) {
-      // Reference shapes have different logic
-      if (shape.hasTrait(ReferenceTrait.class)) {
-        return referenceStructureShape(shape);
-      }
-
       // Within the conversion function, the dataSource becomes the function's input
       String dataSourceInsideConversionFunction = "input";
+
+      // Reference shapes have different logic
+      if (shape.hasTrait(ReferenceTrait.class)) {
+        return referenceStructureShape(shape, dataSourceInsideConversionFunction);
+      }
 
       SmithyNameResolver.importSmithyGeneratedTypeForShape(conversionWriter, shape, context);
       StringBuilder builder = new StringBuilder();
@@ -373,12 +373,12 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
      * @param shape
      * @return
      */
-    protected String referenceStructureShape(StructureShape shape) {
+    protected String referenceStructureShape(StructureShape shape, String dataSourceInsideConversionFunction) {
       ReferenceTrait referenceTrait = shape.expectTrait(ReferenceTrait.class);
       Shape resourceOrService = context.model().expectShape(referenceTrait.getReferentId());
 
       if (resourceOrService.isResourceShape()) {
-        return referenceResourceShape(resourceOrService.asResourceShape().get());
+        return referenceResourceShape(resourceOrService.asResourceShape().get(), dataSourceInsideConversionFunction);
       } else if (resourceOrService.isServiceShape()) {
         return referenceServiceShape(resourceOrService.asServiceShape().get());
       } else {
@@ -386,7 +386,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
       }
     }
 
-    protected String referenceResourceShape(ResourceShape resourceShape) {
+    protected String referenceResourceShape(ResourceShape resourceShape, String dataSourceInsideConversionFunction) {
       WriterDelegator<PythonWriter> delegator = context.writerDelegator();
       String moduleName = context.settings().getModuleName();
       delegator.useFileWriter(moduleName + "/dafny_to_smithy.py", "", conversionWriter -> {
@@ -397,10 +397,10 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
             resourceShape.getId().getName());
       });
 
-      return "%1$s(_impl=%2$s)".formatted(resourceShape.getId().getName(), dataSource);
+      return "%1$s(_impl=%2$s)".formatted(resourceShape.getId().getName(), dataSourceInsideConversionFunction);
     }
 
-    protected String referenceServiceShape(ServiceShape serviceShape) {
+    protected String referenceServiceShape(ServiceShape serviceShape, String dataSourceInsideConversionFunction) {
       WriterDelegator<PythonWriter> delegator = context.writerDelegator();
       String moduleName = context.settings().getModuleName();
       delegator.useFileWriter(moduleName + "/dafny_to_smithy.py", "", conversionWriter -> {
@@ -411,6 +411,6 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
             serviceShape.getId().getName());
           });
 
-      return "%1$s(%2$s)".formatted(serviceShape.getId().getName(), dataSource);
+      return "%1$s(%2$s)".formatted(serviceShape.getId().getName(), dataSourceInsideConversionFunction);
     }
 }
