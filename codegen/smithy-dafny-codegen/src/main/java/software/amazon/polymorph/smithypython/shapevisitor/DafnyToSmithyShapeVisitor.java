@@ -312,45 +312,85 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
       return getDefault(shape);
     }
 
-    @Override
-    public String unionShape(UnionShape unionShape) {
-      // Union conversion cannot be done inline,
-      // so PythonWriter writes a conversion block above the inline statement
-      writer.writeComment("Convert %1$s".formatted(
-          unionShape.getId().getName()
-      ));
+  public String getUnionShapeConverterBody(UnionShape unionShape, PythonWriter writerInstance) {
+    // Union conversion cannot be done inline,
+    // so PythonWriter writes a conversion block above the inline statement
 
-      // First union value opens a new `if` block; others do not need to
-      boolean shouldOpenNewIfBlock = true;
-      for (MemberShape memberShape : unionShape.getAllMembers().values()) {
-        writer.write("""
-                $L isinstance($L, $L):
-                    $L_union_value = $L($L.$L)""",
-            // If we need a new `if` block, open one; otherwise, expand on existing one with `elif`
-            shouldOpenNewIfBlock ? "if" : "elif",
-            dataSource,
-            DafnyNameResolver.getDafnyTypeForUnion(unionShape, memberShape),
-            unionShape.getId().getName(),
-            SmithyNameResolver.getSmithyGeneratedTypeForUnion(unionShape, memberShape),
-            dataSource,
-            memberShape.getMemberName()
-        );
-        shouldOpenNewIfBlock = false;
 
-        DafnyNameResolver.importDafnyTypeForUnion(writer, unionShape, memberShape);
-        SmithyNameResolver.importSmithyGeneratedTypeForUnion(writer, context, unionShape, memberShape);
-      }
+    // Use the result of the union conversion inline
+    return "%1$s_union_value".formatted(unionShape.getId().getName());
+  }
 
-      // Handle no member in union.
-      writer.write("""
+  public void writeUnionShapeConverter(UnionShape unionShape) {
+    WriterDelegator<PythonWriter> delegator = context.writerDelegator();
+    String moduleName = context.settings().getModuleName();
+
+    // TODO: Refactor
+    this.dataSource = "input";
+
+    delegator.useFileWriter(moduleName + "/dafny_to_smithy.py", "", writerInstance -> {
+      //writer.openBlock("class $L($T[Literal[$S]]):", "", symbol.getName(), apiError, code, () -> {
+      writerInstance.openBlock(
+          "def $L(input):", "", getDafnyToSmithyFunctionNameForShape(unionShape), () -> {
+            writerInstance.writeComment("Convert %1$s".formatted(
+                unionShape.getId().getName()
+            ));
+
+            // First union value opens a new `if` block; others do not need to
+            boolean shouldOpenNewIfBlock = true;
+            for (MemberShape memberShape : unionShape.getAllMembers().values()) {
+              writerInstance.write(
+                  """
+                  $L isinstance($L, $L):
+                      $L_union_value = $L($L.$L)""",
+                  // If we need a new `if` block, open one; otherwise, expand on existing one with `elif`
+                  shouldOpenNewIfBlock ? "if" : "elif",
+                  dataSource,
+                  DafnyNameResolver.getDafnyTypeForUnion(unionShape, memberShape),
+                  unionShape.getId().getName(),
+                  SmithyNameResolver.getSmithyGeneratedTypeForUnion(unionShape, memberShape),
+                  dataSource,
+                  memberShape.getMemberName()
+              );
+              shouldOpenNewIfBlock = false;
+
+              DafnyNameResolver.importDafnyTypeForUnion(writerInstance, unionShape, memberShape);
+              SmithyNameResolver.importSmithyGeneratedTypeForUnion(writerInstance, context, unionShape, memberShape);
+            }
+
+            // Handle no member in union.
+            writerInstance.write("""
           else:
               raise Exception("No recognized union value in union type: " + $L)
           """,
+                dataSource
+            );
+
+            writerInstance.write(
+                """
+                return $L
+                """,
+                getUnionShapeConverterBody(unionShape, writerInstance));
+          }
+      );
+    });
+  }
+
+    @Override
+    public String unionShape(UnionShape unionShape) {
+      String outStr = "%1$s(%2$s)".formatted(
+          getDafnyToSmithyFunctionNameForShape(unionShape),
           dataSource
       );
 
-      // Use the result of the union conversion inline
-      return "%1$s_union_value".formatted(unionShape.getId().getName());
+      if (!generatedShapes.contains(unionShape)) {
+        generatedShapes.add(unionShape);
+        writeUnionShapeConverter(unionShape);
+      }
+
+      return outStr;
+
+
     }
 
     /**
