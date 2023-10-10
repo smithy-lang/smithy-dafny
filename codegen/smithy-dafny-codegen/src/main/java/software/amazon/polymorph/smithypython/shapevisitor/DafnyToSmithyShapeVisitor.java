@@ -380,7 +380,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
       if (resourceOrService.isResourceShape()) {
         return referenceResourceShape(resourceOrService.asResourceShape().get(), dataSourceInsideConversionFunction);
       } else if (resourceOrService.isServiceShape()) {
-        return referenceServiceShape(resourceOrService.asServiceShape().get());
+        return referenceServiceShape(resourceOrService.asServiceShape().get(), dataSourceInsideConversionFunction);
       } else {
         throw new UnsupportedOperationException("Unknown referenceStructureShape type: " + shape);
       }
