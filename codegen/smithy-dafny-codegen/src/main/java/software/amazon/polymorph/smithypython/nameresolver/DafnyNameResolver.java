@@ -7,6 +7,8 @@ import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.UnionShape;
+import software.amazon.smithy.model.traits.ErrorTrait;
+import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonWriter;
 
 /**
@@ -106,8 +108,8 @@ public class DafnyNameResolver {
    * @param shape
    * @return
    */
-  private static void importDafnyTypeForShape(PythonWriter writer, Shape shape) {
-    importDafnyTypeForShape(writer, shape.getId());
+  private static void importDafnyTypeForShape(PythonWriter writer, Shape shape, GenerationContext context) {
+    importDafnyTypeForShape(writer, shape.getId(), context);
   }
 
   /**
@@ -117,7 +119,11 @@ public class DafnyNameResolver {
    * @param writer
    * @param shapeId
    */
-  public static void importDafnyTypeForShape(PythonWriter writer, ShapeId shapeId) {
+  public static void importDafnyTypeForShape(PythonWriter writer, ShapeId shapeId, GenerationContext context) {
+    if (context.model().expectShape(shapeId).hasTrait(ErrorTrait.class)) {
+      throw new IllegalArgumentException(
+          "Error shapes are not supported in importDafnyTypeForShape. Provided " + shapeId);
+    }
     // When generating a Dafny import, must ALWAYS first import module_ to avoid circular dependencies
     writer.addStdlibImport("module_");
     String name = shapeId.getName();
@@ -238,7 +244,11 @@ public class DafnyNameResolver {
    * @param writer
    * @param shapeId
    */
-  public static void importDafnyTypeForError(PythonWriter writer, ShapeId shapeId) {
+  public static void importDafnyTypeForError(PythonWriter writer, ShapeId shapeId, GenerationContext context) {
+    if (!context.model().expectShape(shapeId).hasTrait(ErrorTrait.class)) {
+      throw new IllegalArgumentException(
+          "Must provide an error shape to importDafnyTypeForError. Provided " + shapeId);
+    }
     // When generating a Dafny import, must ALWAYS first import module_ to avoid circular dependencies
     writer.addStdlibImport("module_");
     writer.addStdlibImport(getDafnyPythonTypesModuleNameForShape(shapeId),

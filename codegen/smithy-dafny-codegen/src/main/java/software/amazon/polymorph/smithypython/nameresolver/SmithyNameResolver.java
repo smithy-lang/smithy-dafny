@@ -246,6 +246,36 @@ public class SmithyNameResolver {
         + ".config";
   }
 
+  /**
+   * Returns the name of the function that converts the provided shape's Dafny-modelled type
+   *   to the corresponding Smithy-modelled type.
+   * This function will be defined in the `dafny_to_smithy.py` file.
+   * @param shape
+   * @return
+   */
+  public static String getDafnyToSmithyFunctionNameForShape(Shape shape) {
+    // ex. for shape example.namespace.ExampleShape
+    // returns `DafnyToSmithy_example_namespace_ExampleShape`
+    return "DafnyToSmithy_"
+        + SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(shape.getId().getNamespace())
+        + "_" + shape.getId().getName();
+  }
+
+  /**
+   * Returns the name of the function that converts the provided shape's Dafny-modelled type
+   *   to the corresponding Smithy-modelled type.
+   * This function will be defined in the `dafny_to_smithy.py` file.
+   * @param shape
+   * @return
+   */
+  public static String getSmithyToDafnyFunctionNameForShape(Shape shape) {
+    // ex. for shape example.namespace.ExampleShape
+    // returns `SmithyToDafny_example_namespace_ExampleShape`
+    return "SmithyToDafny_"
+        + SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(shape.getId().getNamespace())
+        + "_" + shape.getId().getName();
+  }
+
   static Set<ShapeId> localServiceConfigShapes = new HashSet<>();
 
   /**

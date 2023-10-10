@@ -177,8 +177,8 @@ public class ShimFileWriter implements CustomFileWriter {
       ShapeId inputShape = operationShape.getInputShape();
       ShapeId outputShape = operationShape.getOutputShape();
       // Import Dafny types for inputs and outputs
-      DafnyNameResolver.importDafnyTypeForShape(writer, inputShape);
-      DafnyNameResolver.importDafnyTypeForShape(writer, outputShape);
+      DafnyNameResolver.importDafnyTypeForShape(writer, inputShape, codegenContext);
+      DafnyNameResolver.importDafnyTypeForShape(writer, outputShape, codegenContext);
       // Import Smithy types for inputs and outputs
       SmithyNameResolver.importSmithyGeneratedTypeForShape(writer, inputShape, codegenContext);
       SmithyNameResolver.importSmithyGeneratedTypeForShape(writer, outputShape, codegenContext);
@@ -218,6 +218,7 @@ public class ShimFileWriter implements CustomFileWriter {
             // 3) wraps Smithy failures as Dafny failures
             writer.write(
               """
+              # Import dafny_to_smithy at runtime to prevent introducing circular dependency on shim file
               from . import dafny_to_smithy
               unwrapped_request: $L = dafny_to_smithy.$L
               try:

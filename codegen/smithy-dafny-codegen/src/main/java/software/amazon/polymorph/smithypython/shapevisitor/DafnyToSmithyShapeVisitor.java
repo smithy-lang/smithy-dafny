@@ -40,13 +40,35 @@ import software.amazon.smithy.utils.CaseUtils;
  * ShapeVisitor that should be dispatched from a shape
  * to generate code that maps a Dafny shape's internal attributes
  * to the corresponding Smithy shape's internal attributes.
+ *
+ * This generates code in a `dafny_to_smithy.py` file.
+ * The generated code consists of methods that convert from a Dafny-modelled shape
+ *   to a Smithy-modelled shape.
+ * Code that requires these conversions will call out to this file.
+ *
+ * Note that the `dafny_to_smithy.py` file this generates SHOULD NOT be imported at the top-level.
+ * Doing so introduces circular import dependencies, which Python cannot handle.
+ * To work around this, this file SHOULD be used by importing it within function code
+ *   immediately before it is used.
+ * (The circular dependency occurs when dafny_to_smithy imports the shapes it is converting to,
+ *  but the files those shapes are in contain logic to call dafny_to_smithy.
+ *  These files are resource shapes, service shapes, and config shapes.
+ *  This is unavoidable. (dafny_to_smithy MUST know about the shapes it is converting to,
+ *    and the functions in these files MUST call out to dafny_to_smithy.)
+ * (An alternative that is NOT implemented is to import shapes being converted at runtime,
+ *  rather than importing dafny_to_smithy at runtime.
+ *  This is not preferred, as it would defer many more imports to runtime.
+ *  Deferring imports defers detection of issues with imported files;
+ *  deferring imports on a shape-by-shape basis will defer detection of issues with those shapes;
+ *  by having all deferred imports refer to the same file, the risk is mitigated.)
  */
 public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
     private final GenerationContext context;
     private String dataSource;
     private final PythonWriter writer;
     private final String filename;
-    // Store a set of shapes that previously had
+    // Store the set of shapes for which this ShapeVisitor (and ShapeVisitors that extend this)
+    // have already generated a conversion function, so we only write each conversion function once.
     private static final Set<Shape> generatedShapes = new HashSet<>();
 
     /**
@@ -67,23 +89,6 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
       this.dataSource = dataSource;
       this.writer = writer;
       this.filename = filename;
-    }
-
-    protected String getDafnyToSmithyFunctionNameForShape(Shape shape) {
-
-//      if (SmithyNameResolver.getLocalServiceConfigShapes(context).contains(shape.getId())) {
-//        writer.addStdlibImport("dafny_to_smithy." + "DafnyToSmithy_" + SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(shape.getId().getNamespace())
-//            + "_" + shape.getId().getName());
-//      } else {
-
-//        writer.addImport(".dafny_to_smithy",  "DafnyToSmithy_" + SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(shape.getId().getNamespace())
-//            + "_" + shape.getId().getName());
-////      }
-
-//      writer.write("from .dafny_to_smithy import " + SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(shape.getId().getNamespace())
-//          + "_" + shape.getId().getName());
-      return  "DafnyToSmithy_" + SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(shape.getId().getNamespace())
-          + "_" + shape.getId().getName();
     }
 
     @Override
@@ -107,29 +112,32 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
       }
 
       return "%1$s(%2$s)".formatted(
-          getDafnyToSmithyFunctionNameForShape(shape),
+          SmithyNameResolver.getDafnyToSmithyFunctionNameForShape(shape),
           dataSource
       );
     }
 
-    public void writeStructureShapeConverter(StructureShape shape) {
+    private void writeStructureShapeConverter(StructureShape shape) {
       WriterDelegator<PythonWriter> delegator = context.writerDelegator();
       String moduleName = context.settings().getModuleName();
-
+      // Create a new writer.
+      // The `writer` on this object points to the location in the code where this converter was called.
+      // This new writer to writes the dafny_to_smithy converter function.
       delegator.useFileWriter(moduleName + "/dafny_to_smithy.py", "", conversionWriter -> {
         conversionWriter.write(
         """
         def $L(input):
-          return $L
+            return $L
         """,
-            getDafnyToSmithyFunctionNameForShape(shape),
+            SmithyNameResolver.getDafnyToSmithyFunctionNameForShape(shape),
             getStructureShapeConverterBody(shape, conversionWriter)
         );
       });
     }
 
-    public String getStructureShapeConverterBody(StructureShape shape, PythonWriter conversionWriter) {
+    private String getStructureShapeConverterBody(StructureShape shape, PythonWriter conversionWriter) {
       // Within the conversion function, the dataSource becomes the function's input
+      // This hardcodes the input parameter name for a conversion function to always be "input"
       String dataSourceInsideConversionFunction = "input";
 
       // Reference shapes have different logic
@@ -152,8 +160,8 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
         // Adds `smithy_structure_member=DafnyStructureMember(...)`
         // e.g.
         // smithy_structure_name(smithy_structure_member=DafnyStructureMember(...), ...)
-        builder.append("%1$s=".formatted(CaseUtils.toSnakeCase(memberName)));
-        builder.append("%1$s,\n".formatted(
+        builder.append("\n        %1$s=%2$s,".formatted(
+            CaseUtils.toSnakeCase(memberName),
             targetShape.accept(
                 new DafnyToSmithyShapeVisitor(
                     context,
@@ -162,10 +170,10 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
                     writer,
                     filename)
             )
-        ));
+          ));
       }
       // Close structure
-      return builder.append(")").toString();
+      return builder.append("\n    )").toString();
     }
 
     @Override
@@ -292,7 +300,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
       }
 
       return "%1$s(%2$s)".formatted(
-          getDafnyToSmithyFunctionNameForShape(unionShape),
+          SmithyNameResolver.getDafnyToSmithyFunctionNameForShape(unionShape),
           dataSource
       );
     }
@@ -313,7 +321,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
         conversionWriter.openBlock(
             "def $L($L):",
             "",
-            getDafnyToSmithyFunctionNameForShape(unionShape),
+            SmithyNameResolver.getDafnyToSmithyFunctionNameForShape(unionShape),
             dataSourceInsideConversionFunction,
             () -> {
               conversionWriter.writeComment("Convert %1$s".formatted(

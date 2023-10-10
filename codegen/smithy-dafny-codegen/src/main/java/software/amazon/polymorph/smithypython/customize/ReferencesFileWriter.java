@@ -291,6 +291,7 @@ public class ReferencesFileWriter implements CustomFileWriter {
       writer.write("""
           def $L(self, native_input):
               dafny_output = self._impl.$L($L)
+              # Import dafny_to_smithy at runtime to prevent introducing circular dependency on references file.
               from . import dafny_to_smithy
               return dafny_to_smithy.$L
           """, operationShapeId.getName(),

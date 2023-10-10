@@ -163,7 +163,7 @@ public abstract class DafnyPythonProtocolGenerator implements ProtocolGenerator 
 
     writer.addDependency(SmithyPythonDependency.SMITHY_PYTHON);
     // Import the Dafny type being converted to
-    DafnyNameResolver.importDafnyTypeForShape(writer, operation.getInputShape());
+    DafnyNameResolver.importDafnyTypeForShape(writer, operation.getInputShape(), context);
 
     // Determine conversion code from Smithy to Dafny
     Shape targetShape = context.model().expectShape(operation.getInputShape());
@@ -241,7 +241,7 @@ public abstract class DafnyPythonProtocolGenerator implements ProtocolGenerator 
       writer.pushState(new ResponseDeserializerSection(operation));
 
       ShapeId outputShape = operation.getOutputShape();
-      DafnyNameResolver.importDafnyTypeForShape(writer, outputShape);
+      DafnyNameResolver.importDafnyTypeForShape(writer, outputShape, context);
 
       // Smithy Unit shapes have no data, and do not need deserialization
       if (Utils.isUnitShape(outputShape)) {
@@ -261,6 +261,7 @@ public abstract class DafnyPythonProtocolGenerator implements ProtocolGenerator 
         writer.write("""
           if input.IsFailure():
             return await _deserialize_error(input.error)
+          # Import dafny_to_smithy at runtime to prevent introducing circular dependency on deserialize file.
           from . import dafny_to_smithy
           return dafny_to_smithy.$L
           """,
@@ -321,7 +322,7 @@ public abstract class DafnyPythonProtocolGenerator implements ProtocolGenerator 
         // Import Smithy-Python modelled-error
         writer.addImport(".errors", errorId.getName());
         // Import Dafny-modelled error
-        DafnyNameResolver.importDafnyTypeForError(writer, errorId);
+        DafnyNameResolver.importDafnyTypeForError(writer, errorId, context);
         // Import generic Dafny error type
         DafnyNameResolver.importGenericDafnyErrorTypeForNamespace(writer, errorId.getNamespace());
         writer.write(

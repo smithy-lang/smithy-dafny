@@ -134,7 +134,7 @@ public class SmithyConfigToDafnyConfigShapeVisitor extends SmithyToDafnyShapeVis
           "Provided shape " + shape + " MUST be a localService config shape");
     }
 
-    DafnyNameResolver.importDafnyTypeForShape(writerInstance, shape.getId());
+    DafnyNameResolver.importDafnyTypeForShape(writerInstance, shape.getId(), context);
     StringBuilder builder = new StringBuilder();
     // Open Dafny structure shape
     // e.g.

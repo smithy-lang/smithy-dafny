@@ -54,7 +54,7 @@ public class DafnyProtocolFileWriter implements CustomFileWriter {
                       super.__init__(self)
               """,
           Constants.DAFNY_PROTOCOL_REQUEST,
-          writer.consumer(w -> generateDafnyOperationInputUnionValues(inputShapeIds, w)),
+          writer.consumer(w -> generateDafnyOperationInputUnionValues(inputShapeIds, w, codegenContext)),
           Constants.DAFNY_PROTOCOL_RESPONSE
       );
     });
@@ -66,7 +66,7 @@ public class DafnyProtocolFileWriter implements CustomFileWriter {
    * @param writer
    */
   private void generateDafnyOperationInputUnionValues(
-      Set<ShapeId> inputShapeIds, PythonWriter writer) {
+      Set<ShapeId> inputShapeIds, PythonWriter writer, GenerationContext context) {
     // If all operations on the service take no inputs,
     // or if the service has no operations,
     // write `None`
@@ -74,7 +74,7 @@ public class DafnyProtocolFileWriter implements CustomFileWriter {
       writer.write("None");
     }
     for (ShapeId inputShapeId : inputShapeIds) {
-      DafnyNameResolver.importDafnyTypeForShape(writer, inputShapeId);
+      DafnyNameResolver.importDafnyTypeForShape(writer, inputShapeId, context);
       writer.write("$L,", DafnyNameResolver.getDafnyTypeForShape(inputShapeId));
     }
   }

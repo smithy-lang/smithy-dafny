@@ -30,7 +30,7 @@ public class ConfigFileWriter implements CustomFileWriter {
     String moduleName = codegenContext.settings().getModuleName();
     codegenContext.writerDelegator()
         .useFileWriter(moduleName + "/config.py", "", writer -> {
-          DafnyNameResolver.importDafnyTypeForShape(writer, configShape.getId());
+          DafnyNameResolver.importDafnyTypeForShape(writer, configShape.getId(), codegenContext);
 
           writer.write(
               """
@@ -139,6 +139,7 @@ public class ConfigFileWriter implements CustomFileWriter {
         writer,
         "config"
     ));
+    writer.writeComment("Import dafny_to_smithy at runtime to prevent introducing circular dependency on config file.");
     writer.write("from . import dafny_to_smithy");
     writer.write("return dafny_to_smithy." + output);
   }
