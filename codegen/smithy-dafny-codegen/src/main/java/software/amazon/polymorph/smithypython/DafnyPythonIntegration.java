@@ -145,7 +145,7 @@ public final class DafnyPythonIntegration implements PythonIntegration {
     private void customizeForNonServiceOperationShapes(Set<ShapeId> operationShapeIds,
             GenerationContext codegenContext) {
         if (shouldGenerateLocalService(codegenContext)) {
-            new ModelsFileWriter().customizeFileForNonServiceOperationShapes(operationShapeIds,
+            new ReferencesFileWriter().customizeFileForNonServiceOperationShapes(operationShapeIds,
                 codegenContext);
         }
     }
