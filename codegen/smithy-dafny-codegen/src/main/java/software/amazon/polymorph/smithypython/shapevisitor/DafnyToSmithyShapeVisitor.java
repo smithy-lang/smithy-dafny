@@ -70,9 +70,19 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
     }
 
     protected String getDafnyToSmithyFunctionNameForShape(Shape shape) {
-      writer.addImport(".dafny_to_smithy", SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(shape.getId().getNamespace())
-          + "_" + shape.getId().getName());
-      return SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(shape.getId().getNamespace())
+
+//      if (SmithyNameResolver.getLocalServiceConfigShapes(context).contains(shape.getId())) {
+//        writer.addStdlibImport("dafny_to_smithy." + "DafnyToSmithy_" + SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(shape.getId().getNamespace())
+//            + "_" + shape.getId().getName());
+//      } else {
+
+//        writer.addImport(".dafny_to_smithy",  "DafnyToSmithy_" + SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(shape.getId().getNamespace())
+//            + "_" + shape.getId().getName());
+////      }
+
+//      writer.write("from .dafny_to_smithy import " + SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(shape.getId().getNamespace())
+//          + "_" + shape.getId().getName());
+      return  "DafnyToSmithy_" + SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(shape.getId().getNamespace())
           + "_" + shape.getId().getName();
     }
 
@@ -118,9 +128,18 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
           return $L
         """,
             getDafnyToSmithyFunctionNameForShape(shape),
+//            getLocalStructureImportStatement(shape),
             getStructureShapeConverterBody(shape, writerInstance)
         );
       });
+    }
+
+    public String getLocalStructureImportStatement(StructureShape shape) {
+      return "from %1$s import %2$s".formatted(
+          SmithyNameResolver.getSmithyGeneratedModelLocationForShape(
+              shape.getId(), context
+          ),
+          shape.getId().getName());
     }
 
     public String getStructureShapeConverterBody(StructureShape shape, PythonWriter writerInstance) {
@@ -131,13 +150,21 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
       }
 
       // Only generate an import for this shape if it is not in the file under generation
-      if (!SmithyNameResolver.getSmithyGeneratedModuleFilenameForSmithyShape(shape, context)
-          .contains(filename)
-          || !SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(shape.getId().getNamespace())
-          .contains(context.settings().getModuleName())) {
+      SmithyNameResolver.importSmithyGeneratedTypeForShape(writerInstance, shape, context);
 
-        SmithyNameResolver.importSmithyGeneratedTypeForShape(writerInstance, shape, context);
-      }
+//
+//      if (!SmithyNameResolver.getSmithyGeneratedModuleFilenameForSmithyShape(shape, context)
+//          .contains(filename)
+//          || !SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(shape.getId().getNamespace())
+//          .contains(context.settings().getModuleName())) {
+//        writerInstance.write("from %1$s import %2$s".formatted(
+//            SmithyNameResolver.getSmithyGeneratedModelLocationForShape(
+//                shape.getId(), context
+//            ),
+//            shape.getId().getName()
+//        ));
+//        SmithyNameResolver.importSmithyGeneratedTypeForShape(writer, shape, context);
+//      }
 
       StringBuilder builder = new StringBuilder();
       // Open Smithy structure shape
@@ -345,20 +372,30 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
     }
 
     protected String referenceResourceShape(ResourceShape resourceShape) {
-      writer.addImport(
-          SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(
-              resourceShape.getId().getNamespace(), context
-          ) + ".models",
-          resourceShape.getId().getName());
+      WriterDelegator<PythonWriter> delegator = context.writerDelegator();
+      String moduleName = context.settings().getModuleName();
+      delegator.useFileWriter(moduleName + "/dafny_to_smithy.py", "", writerInstance -> {
+        writerInstance.addImport(
+            SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(
+                resourceShape.getId().getNamespace(), context
+            ) + ".references",
+            resourceShape.getId().getName());
+      });
+
       return "%1$s(_impl=%2$s)".formatted(resourceShape.getId().getName(), dataSource);
     }
 
     protected String referenceServiceShape(ServiceShape serviceShape) {
-      writer.addImport(
-          SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(
-              serviceShape.getId().getNamespace(), context
-          ) + ".client",
-          serviceShape.getId().getName());
+      WriterDelegator<PythonWriter> delegator = context.writerDelegator();
+      String moduleName = context.settings().getModuleName();
+      delegator.useFileWriter(moduleName + "/dafny_to_smithy.py", "", writerInstance -> {
+        writerInstance.addImport(
+            SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(
+                serviceShape.getId().getNamespace(), context
+            ) + ".client",
+            serviceShape.getId().getName());
+          });
+
       return "%1$s(%2$s)".formatted(serviceShape.getId().getName(), dataSource);
     }
 }

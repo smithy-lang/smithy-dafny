@@ -72,9 +72,9 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
     }
 
   protected String getSmithyToDafnyFunctionNameForShape(Shape shape) {
-      writer.addImport(".smithy_to_dafny", SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(shape.getId().getNamespace())
+      writer.addImport(".smithy_to_dafny",  "SmithyToDafny_" + SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(shape.getId().getNamespace())
           + "_" + shape.getId().getName());
-    return SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(shape.getId().getNamespace())
+    return "SmithyToDafny_" + SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(shape.getId().getNamespace())
         + "_" + shape.getId().getName();
     }
 
@@ -118,7 +118,6 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
   }
 
   public String getStructureShapeConverterBody(StructureShape shape, PythonWriter writerInstance) {
-
     if (shape.hasTrait(ReferenceTrait.class)) {
       return referenceStructureShape(shape);
     }
@@ -408,22 +407,34 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
   }
 
   protected String referenceResourceShape(ResourceShape resourceShape) {
-    DafnyNameResolver.importDafnyTypeForResourceShape(writer, resourceShape);
+    StringBuilder builder = new StringBuilder();
 
-    // Resource-specific imports
-    writer.addStdlibImport(DafnyNameResolver.getDafnyPythonIndexModuleNameForShape(resourceShape));
-    writer.addStdlibImport(resourceShape.getId().getName(),
-        resourceShape.getId().getName(),
-        "Dafny" + resourceShape.getId().getName());
 
-    // `my_module_resource = DafnyMyModuleResource()`
-    writer.write("$L_resource = $L._impl",
-        SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(resourceShape.getId().getNamespace()),
-        dataSource
-    );
-    // TODO: Inline the above conversion...??
-    // Use result of resource conversion inline
-    return "%1$s_resource".formatted(SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(
-        resourceShape.getId().getNamespace()));
+    WriterDelegator<PythonWriter> delegator = context.writerDelegator();
+    String moduleName = context.settings().getModuleName();
+
+    return "input._impl";
+//    delegator.useFileWriter(moduleName + "/smithy_to_dafny.py", "", writerInstance -> {
+//      DafnyNameResolver.importDafnyTypeForResourceShape(writer, resourceShape);
+//
+//      // Resource-specific imports
+//      writerInstance.addStdlibImport(DafnyNameResolver.getDafnyPythonIndexModuleNameForShape(resourceShape));
+//      writerInstance.addStdlibImport(resourceShape.getId().getName(),
+//          resourceShape.getId().getName(),
+//          "Dafny" + resourceShape.getId().getName());
+//
+//      // `my_module_resource = DafnyMyModuleResource()`
+//      builder.append("%1$s_resource = %2$s._impl\n".formatted(
+//          SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(resourceShape.getId().getNamespace()),
+//          dataSource
+//      ));
+//    });
+//
+//
+//    // TODO: Inline the above conversion...??
+//    // Use result of resource conversion inline
+//    builder.append("%1$s_resource".formatted(SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(
+//        resourceShape.getId().getNamespace())));
+//    return builder.toString();
   }
 }

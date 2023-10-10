@@ -79,9 +79,9 @@ public class SmithyConfigToDafnyConfigShapeVisitor extends SmithyToDafnyShapeVis
   }
 
   protected String getSmithyConfigToDafnyConfigFunctionNameForShape(Shape shape) {
-    writer.addImport(".smithy_to_dafny", SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(shape.getId().getNamespace())
+    writer.addImport(".smithy_to_dafny", "SmithyToDafny_" + SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(shape.getId().getNamespace())
         + "_" + shape.getId().getName());
-    return SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(shape.getId().getNamespace())
+    return "SmithyToDafny_" + SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(shape.getId().getNamespace())
         + "_" + shape.getId().getName();
   }
 

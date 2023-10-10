@@ -27,6 +27,7 @@ import software.amazon.polymorph.smithypython.customize.DafnyProtocolFileWriter;
 import software.amazon.polymorph.smithypython.customize.ErrorsFileWriter;
 import software.amazon.polymorph.smithypython.customize.ModelsFileWriter;
 import software.amazon.polymorph.smithypython.customize.PluginFileWriter;
+import software.amazon.polymorph.smithypython.customize.ReferencesFileWriter;
 import software.amazon.polymorph.smithypython.customize.ShimFileWriter;
 import software.amazon.polymorph.smithypython.extensions.DafnyPythonSettings;
 import software.amazon.polymorph.traits.LocalServiceTrait;
@@ -166,6 +167,7 @@ public final class DafnyPythonIntegration implements PythonIntegration {
             new ErrorsFileWriter().customizeFileForServiceShape(serviceShape, codegenContext);
             new ModelsFileWriter().customizeFileForServiceShape(serviceShape, codegenContext);
             new ConfigFileWriter().customizeFileForServiceShape(serviceShape, codegenContext);
+            new ReferencesFileWriter().customizeFileForServiceShape(serviceShape, codegenContext);
         } if (shouldGenerateTestShim(codegenContext)) {
             new ShimFileWriter().customizeFileForServiceShape(serviceShape, codegenContext);
         }

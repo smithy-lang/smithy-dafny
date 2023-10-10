@@ -107,9 +107,15 @@ public class SmithyNameResolver {
     if (Utils.isUnitShape(shape.getId())) {
       return shapeSymbol;
     } else {
+      String file;
+      if (shape.getAllTraits().containsKey(ReferenceTrait.class)) {
+        file = ".references";
+      } else {
+        file = ".models";
+      }
       return shapeSymbol.toBuilder()
           .namespace(SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(
-              shape.getId().getNamespace(), context) + ".models", ".")
+              shape.getId().getNamespace(), context) + file, ".")
           .definitionFile("")
           .build();
     }
@@ -173,6 +179,8 @@ public class SmithyNameResolver {
       return ".errors";
     } else if (getLocalServiceConfigShapes(codegenContext).contains(shapeId)) {
       return ".config";
+    } else if (shape.hasTrait(ReferenceTrait.class)) {
+      return ".references";
     } else {
       return ".models";
     }

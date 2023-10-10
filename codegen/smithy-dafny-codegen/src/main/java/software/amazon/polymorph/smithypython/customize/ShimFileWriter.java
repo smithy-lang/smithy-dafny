@@ -218,7 +218,8 @@ public class ShimFileWriter implements CustomFileWriter {
             // 3) wraps Smithy failures as Dafny failures
             writer.write(
               """
-              unwrapped_request: $L = $L
+              from . import dafny_to_smithy
+              unwrapped_request: $L = dafny_to_smithy.$L
               try:
                   wrapped_response = asyncio.run(self._impl.$L(unwrapped_request))
               except ServiceError as e:

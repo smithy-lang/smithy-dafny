@@ -261,7 +261,8 @@ public abstract class DafnyPythonProtocolGenerator implements ProtocolGenerator 
         writer.write("""
           if input.IsFailure():
             return await _deserialize_error(input.error)
-          return $L
+          from . import dafny_to_smithy
+          return dafny_to_smithy.$L
           """,
           output
         );

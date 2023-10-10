@@ -139,7 +139,8 @@ public class ConfigFileWriter implements CustomFileWriter {
         writer,
         "config"
     ));
-    writer.write("return " + output);
+    writer.write("from . import dafny_to_smithy");
+    writer.write("return dafny_to_smithy." + output);
   }
 
   /**

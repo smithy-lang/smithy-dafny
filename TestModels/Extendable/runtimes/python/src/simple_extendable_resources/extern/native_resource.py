@@ -5,7 +5,7 @@ from simple_extendable_resources_internaldafny_types import (
   IExtendableResource as DafnyIExtendableResource
 )
 import ExtendableResource
-from simple_extendable_resources.smithygenerated.models import IExtendableResource
+from simple_extendable_resources.smithygenerated.references import IExtendableResource
 import simple_extendable_resources_internaldafny_nativeresourcefactory
 
 class NativeResource(IExtendableResource):
