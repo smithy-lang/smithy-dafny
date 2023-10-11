@@ -109,12 +109,12 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
     WriterDelegator<PythonWriter> delegator = context.writerDelegator();
     String moduleName = context.settings().getModuleName();
 
-    delegator.useFileWriter(moduleName + "/smithy_to_dafny.py", "", writerInstance -> {
+    delegator.useFileWriter(moduleName + "/smithy_to_dafny.py", "", conversionWriter -> {
       // Within the conversion function, the dataSource becomes the function's input
       // This hardcodes the input parameter name for a conversion function to always be "input"
       String dataSourceInsideConversionFunction = "input";
 
-      writerInstance.write(
+      conversionWriter.write(
           """
           def $L($L):
             $L
@@ -122,25 +122,25 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
           """,
           SmithyNameResolver.getSmithyToDafnyFunctionNameForShape(shape),
           dataSourceInsideConversionFunction,
-          writeInlineConversions(shape, writerInstance, dataSourceInsideConversionFunction),
-          getStructureShapeConverterBody(shape, writerInstance, dataSourceInsideConversionFunction)
+          writeInlineConversions(shape, conversionWriter, dataSourceInsideConversionFunction),
+          getStructureShapeConverterBody(shape, conversionWriter, dataSourceInsideConversionFunction)
       );
     });
   }
 
-  public String writeInlineConversions(StructureShape shape, PythonWriter writerInstance, String dataSourceInsideConversionFunction) {
+  public String writeInlineConversions(StructureShape shape, PythonWriter conversionWriter, String dataSourceInsideConversionFunction) {
     if (shape.hasTrait(ReferenceTrait.class)) {
-      return referenceStructureShapeInlineConversions(shape, writerInstance, dataSourceInsideConversionFunction);
+      return referenceStructureShapeInlineConversions(shape, conversionWriter, dataSourceInsideConversionFunction);
     }
     return "";
   }
 
-  public String getStructureShapeConverterBody(StructureShape shape, PythonWriter writerInstance, String dataSourceInsideConversionFunction) {
+  public String getStructureShapeConverterBody(StructureShape shape, PythonWriter conversionWriter, String dataSourceInsideConversionFunction) {
     if (shape.hasTrait(ReferenceTrait.class)) {
       return referenceStructureShape(shape, dataSourceInsideConversionFunction);
     }
 
-    DafnyNameResolver.importDafnyTypeForShape(writerInstance, shape.getId(), context);
+    DafnyNameResolver.importDafnyTypeForShape(conversionWriter, shape.getId(), context);
     StringBuilder builder = new StringBuilder();
     // Open Dafny structure shape
     // e.g.
@@ -176,8 +176,8 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
       // If this shape is optional, write conversion logic to detect and possibly pass
       //   an empty optional at runtime
       else if (memberShape.isOptional()) {
-        writerInstance.addStdlibImport("Wrappers", "Option_Some");
-        writerInstance.addStdlibImport("Wrappers", "Option_None");
+        conversionWriter.addStdlibImport("Wrappers", "Option_Some");
+        conversionWriter.addStdlibImport("Wrappers", "Option_None");
         builder.append(
             "((Option_Some(%1$s)) if (%2$s is not None) else (Option_None())),\n".formatted(
                 targetShape.accept(
@@ -216,8 +216,8 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
       String moduleName = context.settings().getModuleName();
 
       // Import Seq within the smithy_to_dafny conversion file
-      delegator.useFileWriter(moduleName + "/smithy_to_dafny.py", "", writerInstance -> {
-        writerInstance.addStdlibImport("_dafny", "Seq");
+      delegator.useFileWriter(moduleName + "/smithy_to_dafny.py", "", conversionWriter -> {
+        conversionWriter.addStdlibImport("_dafny", "Seq");
       });
 
       StringBuilder builder = new StringBuilder();
@@ -246,10 +246,9 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
       WriterDelegator<PythonWriter> delegator = context.writerDelegator();
       String moduleName = context.settings().getModuleName();
 
-      delegator.useFileWriter(moduleName + "/smithy_to_dafny.py", "", writerInstance -> {
-        writerInstance.addStdlibImport("_dafny", "Map");
+      delegator.useFileWriter(moduleName + "/smithy_to_dafny.py", "", conversionWriter -> {
+        conversionWriter.addStdlibImport("_dafny", "Map");
       });
-
 
       // Open Dafny map:
       // `Map({`
@@ -340,7 +339,6 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
       return getDefault(shape);
     }
 
-
     @Override
     public String unionShape(UnionShape unionShape) {
       // If this ShapeVisitor has not yet generated a conversion method for this shape,
@@ -363,35 +361,43 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
       );
     }
 
+  /**
+   * Writes a function definition to convert a Smithy-modelled union shape
+   *   into the corresponding Dafny-modelled union shape.
+   * The function definition is written into `smithy_to_dafny.py`.
+   * This SHOULD only be called once so only one function definition is written.
+   * @param unionShape
+   */
     public void writeUnionShapeConverter(UnionShape unionShape) {
       WriterDelegator<PythonWriter> delegator = context.writerDelegator();
       String moduleName = context.settings().getModuleName();
 
-      delegator.useFileWriter(moduleName + "/smithy_to_dafny.py", "", writerInstance -> {
+      delegator.useFileWriter(moduleName + "/smithy_to_dafny.py", "", conversionWriter -> {
+
         // Within the conversion function, the dataSource becomes the function's input
         // This hardcodes the input parameter name for a conversion function to always be "input"
         String dataSourceInsideConversionFunction = "input";
 
-        writerInstance.openBlock(
+        // ex. shape: simple.union.ExampleUnion
+        // Writes `def SmithyToDafny_simple_union_ExampleUnion(input):`
+        //   and wraps inner code inside function definition
+        conversionWriter.openBlock(
             "def $L($L):",
             "",
             SmithyNameResolver.getSmithyToDafnyFunctionNameForShape(unionShape),
             dataSourceInsideConversionFunction,
             () -> {
 
-              // Union conversion cannot be done inline,
-              // so PythonWriter writes a conversion block above the inline statement
-              writerInstance.writeComment("Convert %1$s".formatted(
-                  unionShape.getId().getName()
-              ));
-
               // First union value opens a new `if` block; others do not need to and write `elif`
               boolean shouldOpenNewIfBlock = true;
               for (MemberShape memberShape : unionShape.getAllMembers().values()) {
                 // Write out conversion:
-                // if isinstance(my_union.member, union_type.possible_member):
-                //     my_union_union_value = DafnyMyUnionPossibleMember(my_union.member.value)
-                writerInstance.write("""
+                // ex. if ExampleUnion can take on either of (IntegerValue, StringValue), write:
+                // if isinstance(input, ExampleUnion.IntegerValue):
+                //   example_union_union_value = DafnyExampleUnionIntegerValue(input.member.value)
+                // elif isinstance(input, ExampleUnion.StringValue):
+                //   example_union_union_value = DafnyExampleUnionIntegerValue(input.member.value)
+                conversionWriter.write("""
                         $L isinstance($L, $L):
                             $L_union_value = $L($L.$L)""",
                     // If we need a new `if` block, open one; otherwise, expand on existing one with `elif`
@@ -405,21 +411,22 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
                 );
                 shouldOpenNewIfBlock = false;
 
-                DafnyNameResolver.importDafnyTypeForUnion(writerInstance, unionShape, memberShape);
-                SmithyNameResolver.importSmithyGeneratedTypeForUnion(writerInstance, context, unionShape,
+                DafnyNameResolver.importDafnyTypeForUnion(conversionWriter, unionShape, memberShape);
+                SmithyNameResolver.importSmithyGeneratedTypeForUnion(conversionWriter, context, unionShape,
                     memberShape);
               }
 
-              // Handle no member in union.
-              writerInstance.write("""
+              // Write case to handle if union member does not match any of the above cases
+              conversionWriter.write("""
                       else:
                           raise ValueError("No recognized union value in union type: " + $L)
                       """,
                   dataSourceInsideConversionFunction
               );
 
-              // Use the result of the union conversion inline
-              writerInstance.write("return %1$s_union_value".formatted(unionShape.getId().getName()));
+              // Return the result of the union conversion
+              // `return example_union_union_value`
+              conversionWriter.write("return %1$s_union_value".formatted(unionShape.getId().getName()));
             });
       });
     }
@@ -445,11 +452,6 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
   }
 
   protected String referenceServiceShape(ServiceShape serviceShape) {
-    DafnyNameResolver.importDafnyTypeForServiceShape(writer, serviceShape);
-    writer.addStdlibImport(SmithyNameResolver.getSmithyGeneratedConfigModulePathForSmithyNamespace(
-        serviceShape.getId().getNamespace(), context));
-    writer.addStdlibImport(DafnyNameResolver.getDafnyPythonIndexModuleNameForShape(serviceShape));
-
     return "%1$s_client".formatted(SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(
         serviceShape.getId().getNamespace()));
   }
@@ -461,32 +463,33 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
   }
 
   /**
-   * Writes any pre-
+   * Writes any inline conversions for reference shapes before returning some value.
    * @param shape
-   * @param writerInstance
+   * @param conversionWriter
    * @return
    */
   protected String referenceStructureShapeInlineConversions(StructureShape shape,
-      PythonWriter writerInstance, String dataSourceInsideConversionFunction) {
+      PythonWriter conversionWriter, String dataSourceInsideConversionFunction) {
     ReferenceTrait referenceTrait = shape.expectTrait(ReferenceTrait.class);
     Shape resourceOrService = context.model().expectShape(referenceTrait.getReferentId());
 
+    // Resources do not require any inline conversions, but are still a valid reference shape.
     if (resourceOrService.isResourceShape()) {
       return "";
     } else if (resourceOrService.isServiceShape()) {
       return referenceServiceShapeInlineConversions(resourceOrService.asServiceShape().get(),
-          writerInstance, dataSourceInsideConversionFunction);
+          conversionWriter, dataSourceInsideConversionFunction);
     } else {
       throw new UnsupportedOperationException("Unknown referenceStructureShape type: " + shape);
     }
   }
 
   protected String referenceServiceShapeInlineConversions(ServiceShape serviceShape,
-      PythonWriter writerInstance, String dataSourceInsideConversionFunction) {
-    DafnyNameResolver.importDafnyTypeForServiceShape(writerInstance, serviceShape);
-    writerInstance.addStdlibImport(SmithyNameResolver.getSmithyGeneratedConfigModulePathForSmithyNamespace(
+      PythonWriter conversionWriter, String dataSourceInsideConversionFunction) {
+    DafnyNameResolver.importDafnyTypeForServiceShape(conversionWriter, serviceShape);
+    conversionWriter.addStdlibImport(SmithyNameResolver.getSmithyGeneratedConfigModulePathForSmithyNamespace(
         serviceShape.getId().getNamespace(), context));
-    writerInstance.addStdlibImport(DafnyNameResolver.getDafnyPythonIndexModuleNameForShape(serviceShape));
+    conversionWriter.addStdlibImport(DafnyNameResolver.getDafnyPythonIndexModuleNameForShape(serviceShape));
 
     StringBuilder builder = new StringBuilder();
     // `my_module_client = my_module_internaldafny.MyModuleClient()`

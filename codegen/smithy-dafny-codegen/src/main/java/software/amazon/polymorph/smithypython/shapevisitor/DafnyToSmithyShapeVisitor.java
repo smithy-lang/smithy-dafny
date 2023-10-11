@@ -305,7 +305,14 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
       );
     }
 
-    public void writeUnionShapeConverter(UnionShape unionShape) {
+  /**
+   * Writes a function definition to convert a Dafny-modelled union shape
+   *   into the corresponding Smithy-modelled union shape.
+   * The function definition is written into `dafny_to_smithy.py`.
+   * This SHOULD only be called once so only one function definition is written.
+   * @param unionShape
+   */
+  public void writeUnionShapeConverter(UnionShape unionShape) {
       WriterDelegator<PythonWriter> delegator = context.writerDelegator();
       String moduleName = context.settings().getModuleName();
 
@@ -328,8 +335,9 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
                   unionShape.getId().getName()
               ));
 
-              // First union value opens a new `if` block; others do not need to
+              // First union value opens a new `if` block; others do not need to and write `elif`
               boolean shouldOpenNewIfBlock = true;
+              // Write out conversion:
               // ex. if ExampleUnion can take on either of (IntegerValue, StringValue), write:
               // if isinstance(input, ExampleUnion_IntegerValue):
               //   ExampleUnion_union_value = ExampleUnionIntegerValue(input.IntegerValue)
@@ -358,7 +366,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
               // Write case to handle if union member does not match any of the above cases
               conversionWriter.write("""
                   else:
-                      raise Exception("No recognized union value in union type: " + $L)
+                      raise ValueError("No recognized union value in union type: " + $L)
                   """,
                   dataSourceInsideConversionFunction
               );

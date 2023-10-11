@@ -20,6 +20,7 @@ public class DafnyNameResolver {
   /**
    * Returns the name of the Python module containing Dafny-generated Python code
    *   from the `types` module from the same Dafny project for the provided Shape.
+   * ex. example.namespace.ExampleShape -> "example_namespace_internaldafny_types"
    * @param shape
    * @return
    */
@@ -30,6 +31,7 @@ public class DafnyNameResolver {
   /**
    * Returns the name of the Python module containing Dafny-generated Python code
    *   from the `types` module from the same Dafny project for the provided Shape.
+   * ex. example.namespace.ExampleShape -> "example_namespace_internaldafny_types"
    * @param shapeId
    * @return
    */
@@ -40,6 +42,7 @@ public class DafnyNameResolver {
   /**
    * Returns the name of the Python module containing Dafny-generated Python code
    *   from the `index` module from the same Dafny project for the provided Shape.
+   * ex. example.namespace.ExampleShape -> "example_namespace_internaldafny"
    * @param shape
    * @return
    */
@@ -50,6 +53,7 @@ public class DafnyNameResolver {
   /**
    * Returns the name of the Python module containing Dafny-generated Python code
    *   from the `index` module from the same Dafny project for the provided Shape.
+   * ex. example.namespace.ExampleShape -> "example_namespace_internaldafny"
    * @param shapeId
    * @return
    */
@@ -60,6 +64,7 @@ public class DafnyNameResolver {
   /**
    * Returns the name of the Python module containing Dafny-generated Python code
    *   from the `index` module from the same Dafny project for the provided smithyNamespace.
+   * ex. example.namespace.ExampleShape -> "example_namespace_internaldafny"
    * @param smithyNamespace
    * @return
    */
@@ -70,6 +75,7 @@ public class DafnyNameResolver {
   /**
    * Returns the name of the Python module containing Dafny-generated Python code
    *   from the `types` module from the same Dafny project for the provided smithyNamespace.
+   * ex. example.namespace.ExampleShape -> "example_namespace_internaldafny_types"
    * @param smithyNamespace
    * @return
    */
@@ -81,6 +87,7 @@ public class DafnyNameResolver {
    * Returns a String representing the corresponding Dafny type
    *   for the provided shape.
    * This MUST NOT be used for errors; for errors use `getDafnyTypeForError`.
+   * ex. example.namespace.ExampleShape -> "DafnyExampleShape"
    * @param shapeId
    * @return
    */
@@ -96,6 +103,7 @@ public class DafnyNameResolver {
 
   /**
    * Returns a String representing the Dafny-generated Python type corresponding to the provided Shape.
+   * ex. example.namespace.ExampleShape -> "DafnyExampleShape"
    * @param shape
    * @return
    */
@@ -105,6 +113,7 @@ public class DafnyNameResolver {
 
   /**
    * Imports the Dafny-generated Python type corresponding to the provided shape.
+   * ex. example.namespace.ExampleShape -> "from example_namespace_internaldafny_types import DafnyExampleShape"
    * @param shape
    * @return
    */
@@ -116,6 +125,7 @@ public class DafnyNameResolver {
    * Calls writer.addImport to import the corresponding Dafny type
    *   for the provided Smithy ShapeId.
    * This MUST NOT be used to import errors; use `importDafnyTypeForError`.
+   * ex. example.namespace.ExampleShape -> "from example_namespace_internaldafny_types import DafnyExampleShape"
    * @param writer
    * @param shapeId
    */
@@ -136,6 +146,7 @@ public class DafnyNameResolver {
   /**
    * Returns a String representing the client interface type for the provided serviceShape
    *   as Dafny models the interface type.
+   * ex. example.namespace.ExampleService -> "IExampleServiceClient"
    * @param serviceShape
    * @return
    */
@@ -146,6 +157,7 @@ public class DafnyNameResolver {
   /**
    * Returns a String representing the client interface type for the provided serviceShape
    *   as Dafny models the interface type.
+   * ex. example.namespace.ExampleService -> "ExampleServiceClient"
    * @param serviceShape
    * @return
    */
@@ -156,6 +168,7 @@ public class DafnyNameResolver {
   /**
    * Returns a String representing the interface type for the provided resourceShape
    *   as Dafny models the interface type.
+   * ex. example.namespace.ExampleResource -> "IExampleResource"
    * @param resourceShape
    * @return
    */
@@ -166,6 +179,7 @@ public class DafnyNameResolver {
   /**
    * Imports the Dafny-generated Python type corresponding to the provided resourceShape.
    * @param resourceShape
+   * ex. example.namespace.ExampleResource -> "from example_namespace_internaldafny_types import IExampleResource"
    * @return
    */
   public static void importDafnyTypeForResourceShape(PythonWriter writer, ResourceShape resourceShape) {
@@ -179,6 +193,7 @@ public class DafnyNameResolver {
 
   /**
    * Imports the Dafny-generated Python type corresponding to the provided serviceShape.
+   * ex. example.namespace.ExampleService -> "from example_namespace_internaldafny_types import IExampleServiceClient"
    * @param serviceShape
    * @return
    */
@@ -195,6 +210,7 @@ public class DafnyNameResolver {
    * Returns a String representing the corresponding Dafny type
    *   for the provided Error shape.
    * This MUST ONLY be used for errors; for other shapes use `getDafnyTypeForShape`.
+   * ex. example.namespace.ExampleError -> "Error_ExampleError"
    * @param shape
    * @return
    */
@@ -204,6 +220,7 @@ public class DafnyNameResolver {
 
   /**
    * Returns a String representing the Dafny-generated Python type corresponding to the provided error shape.
+   * ex. example.namespace.ExampleError -> "Error_ExampleError"
    * @param shapeId
    * @return
    */
@@ -215,6 +232,7 @@ public class DafnyNameResolver {
    * Returns a String representing the corresponding Dafny type
    *   for the provided UnionShape and one of its MemberShapes.
    * This MUST ONLY be used for unions and their members; for other shapes use `getDafnyTypeForShape`.
+   * ex. example.namespace.ExampleUnion:IntegerValue -> "ExampleUnion_IntegerValue"
    * @param unionShape
    * @param memberShape
    * @return
@@ -226,6 +244,8 @@ public class DafnyNameResolver {
 
   /**
    * Imports the Dafny-generated Python type corresponding to the provided unionShape.
+   * ex. example.namespace.ExampleUnion:IntegerValue -> "from example_namespace_internaldafny_types
+   *      import ExampleUnion_IntegerValue"
    * @param unionShape
    * @return
    */
@@ -241,6 +261,8 @@ public class DafnyNameResolver {
    * Calls writer.addImport to import the corresponding Dafny type
    *   for the provided Smithy ShapeId.
    * This MUST ONLY be used for errors; for other shapes use `importDafnyTypeForShape`.
+   * ex. example.namespace.ExampleUnion:IntegerValue -> "from example_namespace_internaldafny_types
+   *      import ExampleUnion_IntegerValue"
    * @param writer
    * @param shapeId
    */
@@ -257,6 +279,7 @@ public class DafnyNameResolver {
 
   /**
    * Imports the generic Dafny error type for the provided namespace.
+   * ex. example.namespace -> "from example_namespace_internaldafny_types import Error"
    * @param writer
    * @param namespace
    */
