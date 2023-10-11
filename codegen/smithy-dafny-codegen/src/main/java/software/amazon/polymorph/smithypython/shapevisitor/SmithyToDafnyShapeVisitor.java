@@ -110,31 +110,32 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
     String moduleName = context.settings().getModuleName();
 
     delegator.useFileWriter(moduleName + "/smithy_to_dafny.py", "", writerInstance -> {
+      // Within the conversion function, the dataSource becomes the function's input
+      // This hardcodes the input parameter name for a conversion function to always be "input"
+      String dataSourceInsideConversionFunction = "input";
+
       writerInstance.write(
           """
-          def $L(input):
+          def $L($L):
             $L
             return $L
           """,
           SmithyNameResolver.getSmithyToDafnyFunctionNameForShape(shape),
-          writeInlineConversions(shape, writerInstance),
-          getStructureShapeConverterBody(shape, writerInstance)
+          dataSourceInsideConversionFunction,
+          writeInlineConversions(shape, writerInstance, dataSourceInsideConversionFunction),
+          getStructureShapeConverterBody(shape, writerInstance, dataSourceInsideConversionFunction)
       );
     });
   }
 
-  public String writeInlineConversions(StructureShape shape, PythonWriter writerInstance) {
+  public String writeInlineConversions(StructureShape shape, PythonWriter writerInstance, String dataSourceInsideConversionFunction) {
     if (shape.hasTrait(ReferenceTrait.class)) {
-      return referenceStructureShapeInlineConversions(shape, writerInstance);
+      return referenceStructureShapeInlineConversions(shape, writerInstance, dataSourceInsideConversionFunction);
     }
     return "";
   }
 
-  public String getStructureShapeConverterBody(StructureShape shape, PythonWriter writerInstance) {
-    // Within the conversion function, the dataSource becomes the function's input
-    // This hardcodes the input parameter name for a conversion function to always be "input"
-    String dataSourceInsideConversionFunction = "input";
-
+  public String getStructureShapeConverterBody(StructureShape shape, PythonWriter writerInstance, String dataSourceInsideConversionFunction) {
     if (shape.hasTrait(ReferenceTrait.class)) {
       return referenceStructureShape(shape, dataSourceInsideConversionFunction);
     }
@@ -465,20 +466,23 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
    * @param writerInstance
    * @return
    */
-  protected String referenceStructureShapeInlineConversions(StructureShape shape, PythonWriter writerInstance) {
+  protected String referenceStructureShapeInlineConversions(StructureShape shape,
+      PythonWriter writerInstance, String dataSourceInsideConversionFunction) {
     ReferenceTrait referenceTrait = shape.expectTrait(ReferenceTrait.class);
     Shape resourceOrService = context.model().expectShape(referenceTrait.getReferentId());
 
     if (resourceOrService.isResourceShape()) {
       return "";
     } else if (resourceOrService.isServiceShape()) {
-      return referenceServiceShapeInlineConversions(resourceOrService.asServiceShape().get(), writerInstance);
+      return referenceServiceShapeInlineConversions(resourceOrService.asServiceShape().get(),
+          writerInstance, dataSourceInsideConversionFunction);
     } else {
       throw new UnsupportedOperationException("Unknown referenceStructureShape type: " + shape);
     }
   }
 
-  protected String referenceServiceShapeInlineConversions(ServiceShape serviceShape, PythonWriter writerInstance) {
+  protected String referenceServiceShapeInlineConversions(ServiceShape serviceShape,
+      PythonWriter writerInstance, String dataSourceInsideConversionFunction) {
     DafnyNameResolver.importDafnyTypeForServiceShape(writerInstance, serviceShape);
     writerInstance.addStdlibImport(SmithyNameResolver.getSmithyGeneratedConfigModulePathForSmithyNamespace(
         serviceShape.getId().getNamespace(), context));
@@ -496,7 +500,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
         SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(serviceShape.getId().getNamespace()),
         SmithyNameResolver.getSmithyGeneratedConfigModulePathForSmithyNamespace(
             serviceShape.getId().getNamespace(), context),
-        dataSource
+        dataSourceInsideConversionFunction
     ));
     return builder.toString();
   }

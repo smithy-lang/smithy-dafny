@@ -89,31 +89,34 @@ public class SmithyConfigToDafnyConfigShapeVisitor extends SmithyToDafnyShapeVis
    * Generates SmithyToDafny conversion logic for a Polymorph localService Config shape.
    * The provided StructureShape MUST be a Polymorph localService Config shape.
    * The primary
-   * @param shape
+   * @param structureShape
    * @return
    */
   @Override
-  public String structureShape(StructureShape shape) {
-    String outStr = "%1$s(%2$s)".formatted(
-        getSmithyConfigToDafnyConfigFunctionNameForShape(shape),
-        dataSource
-    );
-
-    if (!SmithyToDafnyShapeVisitor.generatedShapes.contains(shape)) {
-      SmithyToDafnyShapeVisitor.generatedShapes.add(shape);
-      writeStructureShapeConverter(shape);
+  public String structureShape(StructureShape structureShape) {
+    // If this ShapeVisitor has not yet generated a conversion method for this shape,
+    //   generate a conversion method
+    if (!SmithyToDafnyShapeVisitor.generatedShapes.contains(structureShape)) {
+      SmithyToDafnyShapeVisitor.generatedShapes.add(structureShape);
+      writeStructureShapeConverter(structureShape);
     }
 
-    return outStr;
+    // Import the smithy_to_dafny converter from where the ShapeVisitor was called
+    writer.addImport(".smithy_to_dafny",
+        SmithyNameResolver.getSmithyToDafnyFunctionNameForShape(structureShape));
 
-
+    // Return a reference to the generated conversion method
+    // ex. for shape example.namespace.ExampleShape
+    // returns `SmithyToDafny_example_namespace_ExampleShape(input)`
+    return "%1$s(%2$s)".formatted(
+        SmithyNameResolver.getSmithyToDafnyFunctionNameForShape(structureShape),
+        dataSource
+    );
   }
+
   public void writeStructureShapeConverter(StructureShape shape) {
     WriterDelegator<PythonWriter> delegator = context.writerDelegator();
     String moduleName = context.settings().getModuleName();
-
-    // TODO: Refactor
-    this.dataSource = "input";
 
     delegator.useFileWriter(moduleName + "/smithy_to_dafny.py", "", writerInstance -> {
       writerInstance.write(
@@ -128,6 +131,9 @@ public class SmithyConfigToDafnyConfigShapeVisitor extends SmithyToDafnyShapeVis
   }
 
   public String getStructureShapeConverterBody(StructureShape shape, PythonWriter writerInstance) {
+    // Within the conversion function, the dataSource becomes the function's input
+    // This hardcodes the input parameter name for a conversion function to always be "input"
+    String dataSourceInsideConversionFunction = "input";
 
     if (!SmithyNameResolver.getLocalServiceConfigShapes(context).contains(shape.getId())) {
       throw new CodegenException(
@@ -159,7 +165,7 @@ public class SmithyConfigToDafnyConfigShapeVisitor extends SmithyToDafnyShapeVis
             targetShape.accept(
                 new SmithyConfigToDafnyConfigShapeVisitor(
                     context,
-                    dataSource + "." + CaseUtils.toSnakeCase(memberName),
+                    dataSourceInsideConversionFunction + "." + CaseUtils.toSnakeCase(memberName),
                     writer,
                     filename
                 )
@@ -172,7 +178,7 @@ public class SmithyConfigToDafnyConfigShapeVisitor extends SmithyToDafnyShapeVis
             targetShape.accept(
                 new SmithyToDafnyShapeVisitor(
                     context,
-                    dataSource + "." + CaseUtils.toSnakeCase(memberName),
+                    dataSourceInsideConversionFunction + "." + CaseUtils.toSnakeCase(memberName),
                     writer,
                     filename
                 )
