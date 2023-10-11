@@ -33,6 +33,7 @@ import software.amazon.smithy.model.shapes.ShortShape;
 import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.TimestampShape;
+import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.utils.CaseUtils;
@@ -113,7 +114,6 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
         writer.addImport("Wrappers");
         writer.addImport(DafnyNameResolver.dafnyTypesNamespace(context.settings()));
 
-        String nilWrapIfRequired = "nil";
         String someWrapIfRequired = "%s";
 
         String companionStruct;
@@ -125,6 +125,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
             companionStruct = DafnyNameResolver.getDafnyCompanionTypeCreate(context.settings(), context.symbolProvider().toSymbol(shape));
             returnType = DafnyNameResolver.getDafnyType(context.settings(), context.symbolProvider().toSymbol(shape));
         }
+        String nilWrapIfRequired = returnType.concat("{}");
 
         if (this.isOptional) {
             nilWrapIfRequired = "Wrappers.Companion_Option_.Create_None_()";
@@ -405,5 +406,15 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
     	            }
     	            return %s;
                 }()""".formatted(returnType, nilCheck, dereferenceIfRequired, dataSource, someWrapIfRequired.formatted("dafny.SeqOf(v...)"));
+    }
+
+    @Override
+    public String unionShape(UnionShape shape) {
+        return "Unionnnnnn";
+    }
+
+    @Override
+    public String timestampShape(TimestampShape shape) {
+        return "Timestampppppp";
     }
 }

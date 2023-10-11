@@ -94,13 +94,14 @@ public class DirectedGoCodegen implements DirectedCodegen<GenerationContext, GoS
     public void generateIntEnumShape(GenerateIntEnumDirective<GenerationContext, GoSettings> directive) {
         directive.context().writerDelegator().useShapeWriter(directive.shape(), writer -> {
             IntEnumGenerator intEnumGenerator = new IntEnumGenerator(directive.symbolProvider(), writer, directive.shape().asIntEnumShape().get());
+            intEnumGenerator.run();
         });
     }
 
     @Override
     public void generateResource(GenerateResourceDirective<GenerationContext, GoSettings> directive) {
-        System.out.println("##############" + directive.shape());
-        directive.context().writerDelegator().useShapeWriter(directive.shape(), writer -> {
-        });
+//        System.out.println("##############" + directive.shape());
+//        directive.context().writerDelegator().useShapeWriter(directive.shape(), writer -> {
+//        });
     }
 }

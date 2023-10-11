@@ -11,6 +11,7 @@ import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.model.knowledge.TopDownIndex;
 import software.amazon.smithy.model.shapes.OperationShape;
+import software.amazon.smithy.model.shapes.ResourceShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
@@ -49,7 +50,8 @@ public class DafnyTypeConversionProtocol implements ProtocolGenerator {
         final var symbolProvider = context.symbolProvider();
         final var writerDelegator = context.writerDelegator();
         final var topDownIndex = TopDownIndex.of(model);
-        for (final var operation : topDownIndex.getContainedOperations(serviceShape)) {
+        serviceShape.getOperations().forEach(eachOperation -> {
+            var operation = model.expectShape(eachOperation, OperationShape.class);
             final var inputToDafnyMethodName = getInputToDafnyMethodName(context, operation);
             final var input = model.expectShape(operation.getInputShape());
             if (!input.hasTrait(UnitTypeTrait.class)) {
@@ -79,11 +81,12 @@ public class DafnyTypeConversionProtocol implements ProtocolGenerator {
                                  writer.consumer(w -> generateResponseSerializer(context, operation, context.writerDelegator())));
                 });
             }
-        }
+        });
         var refResources = context.model().getShapesWithTrait(ReferenceTrait.class);
         for (var refResource : refResources) {
             var resource = refResource.expectTrait(ReferenceTrait.class).getReferentId();
-            for (final var operation : topDownIndex.getContainedOperations(resource)) {
+            model.expectShape(resource, ResourceShape.class).getOperations().forEach(eachOperation -> {
+                var operation = model.expectShape(eachOperation, OperationShape.class);
                 final var inputToDafnyMethodName = getInputToDafnyMethodName(context, operation);
                 final var input = model.expectShape(operation.getInputShape());
                 if (!input.hasTrait(UnitTypeTrait.class)) {
@@ -113,10 +116,12 @@ public class DafnyTypeConversionProtocol implements ProtocolGenerator {
                                      writer.consumer(w -> generateResponseSerializer(context, operation, context.writerDelegator())));
                     });
                 }
-            }
+            });
         }
         generateErrorSerializer(context);
-        generateConfigSerializer(context);
+        if (serviceShape.hasTrait(LocalServiceTrait.class)) {
+            generateConfigSerializer(context);
+        }
     }
 
     @Override
@@ -125,7 +130,8 @@ public class DafnyTypeConversionProtocol implements ProtocolGenerator {
         final var service = context.settings().getService(context.model());
         final var delegator = context.writerDelegator();
 
-        for (final var operation : topDownIndex.getContainedOperations(service)) {
+        service.getOperations().forEach(eachOperation -> {
+                                                 var operation = context.model().expectShape(eachOperation, OperationShape.class);
 
             final var inputFromDafnyMethodName = getInputFromDafnyMethodName(context, operation);
             final var input = context.model().expectShape(operation.getInputShape());
@@ -160,12 +166,13 @@ public class DafnyTypeConversionProtocol implements ProtocolGenerator {
                                  writer.consumer(w -> generateResponseDeserializer(context, operation, context.writerDelegator())));
                 });
             }
-        }
+        });
+
         var refResources = context.model().getShapesWithTrait(ReferenceTrait.class);
         for (var refResource : refResources) {
             var resource = refResource.expectTrait(ReferenceTrait.class).getReferentId();
-            for (final var operation : topDownIndex.getContainedOperations(resource)) {
-
+            context.model().expectShape(resource, ResourceShape.class).getOperations().forEach(eachOperation -> {
+                var operation = context.model().expectShape(eachOperation, OperationShape.class);
                 final var inputFromDafnyMethodName = getInputFromDafnyMethodName(context, operation);
                 final var input = context.model().expectShape(operation.getInputShape());
                 if (!input.hasTrait(UnitTypeTrait.class)) {
@@ -199,10 +206,12 @@ public class DafnyTypeConversionProtocol implements ProtocolGenerator {
                                      writer.consumer(w -> generateResponseDeserializer(context, operation, context.writerDelegator())));
                     });
                 }
-            }
+            });
         }
         generateErrorDeserializer(context);
-        generateConfigDeserializer(context);
+        if (service.hasTrait(LocalServiceTrait.class)) {
+            generateConfigDeserializer(context);
+        }
 
     }
 

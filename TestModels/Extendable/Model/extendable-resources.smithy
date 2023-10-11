@@ -16,7 +16,7 @@ service SimpleExtendableResources {
     UseExtendableResourceAlwaysMultipleErrors,
     UseExtendableResourceAlwaysOpaqueError
   ],
-  errors: [],
+  errors: [ SimpleExtendableResourcesException ],
 }
 
 structure SimpleExtendableResourcesConfig {}
@@ -86,7 +86,6 @@ resource ExtendableResource {
     AlwaysMultipleErrors,
     AlwaysOpaqueError,
   ],
-  errors: [ SimpleExtendableResourcesException ],
 }
 
 operation GetExtendableResourceData {

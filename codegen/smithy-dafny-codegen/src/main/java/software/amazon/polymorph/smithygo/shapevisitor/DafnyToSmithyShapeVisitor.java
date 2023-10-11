@@ -32,6 +32,7 @@ import software.amazon.smithy.model.shapes.ShortShape;
 import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.TimestampShape;
+import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.utils.CaseUtils;
 import software.amazon.smithy.utils.StringUtils;
@@ -114,9 +115,9 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
             final var memberShape = memberShapeEntry.getValue();
             final var targetShape = context.model().expectShape(memberShape.getTarget());
             final var derivedDataSource = "%1$s%2$s%3$s%4$s".formatted(dataSource,
-                                                                       isMemberShape ? ".(%s)".formatted(DafnyNameResolver.getDafnyType(context.settings(), context.symbolProvider().toSymbol(shape))) : "",
+                                                                       memberShape.isOptional() && memberShape.isStructureShape() ? ".(%s)".formatted(DafnyNameResolver.getDafnyType(context.settings(), context.symbolProvider().toSymbol(memberShape))) : "",
                                                                        ".Dtor_%s()".formatted(memberName),
-                                                                       (memberShape.isOptional() ? ".UnwrapOr(nil)" : ""));
+                                                                       memberShape.isOptional() ? ".UnwrapOr(nil)" : "");
                 builder.append("%1$s: %2$s%3$s,".formatted(
                         StringUtils.capitalize(memberName),
                         targetShape.isStructureShape() ? "&" : "",
@@ -293,5 +294,15 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
     	                }
                     }
                 }()""".formatted(dataSource, dataSource);
+    }
+
+    @Override
+    public String unionShape(UnionShape shape) {
+        return "Unionnnnnn";
+    }
+
+    @Override
+    public String timestampShape(TimestampShape shape) {
+        return "Timestampppppp";
     }
 }
