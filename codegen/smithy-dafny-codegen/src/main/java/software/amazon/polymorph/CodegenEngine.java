@@ -26,6 +26,7 @@ import software.amazon.polymorph.smithypython.extensions.DafnyPythonClientCodege
 import software.amazon.polymorph.utils.IOUtils;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.smithy.aws.traits.ServiceTrait;
+import software.amazon.smithy.build.FileManifest;
 import software.amazon.smithy.build.PluginContext;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.ServiceShape;
@@ -55,7 +56,7 @@ public class CodegenEngine {
     // To be initialized in constructor
     private final Model model;
     private final ServiceShape serviceShape;
-    private final PluginContext pluginContext;
+    private final PluginContext.Builder pluginContextBuilder;
 
     /**
      * This should only be called by {@link Builder#build()},
@@ -72,7 +73,7 @@ public class CodegenEngine {
             final boolean awsSdkStyle,
             final boolean localServiceTest,
             final boolean generateProjectFiles,
-            final PluginContext pluginContext
+            final PluginContext.Builder pluginContextBuilder
     ) {
         // To be provided to constructor
         this.dependentModelPaths = dependentModelPaths;
@@ -90,7 +91,7 @@ public class CodegenEngine {
                 : serviceModel;
 
         this.serviceShape = ModelUtils.serviceFromNamespace(this.model, this.namespace);
-        this.pluginContext = pluginContext;
+        this.pluginContextBuilder = pluginContextBuilder;
     }
 
     /**
@@ -250,10 +251,7 @@ public class CodegenEngine {
 
     private void generatePython() {
         DafnyPythonClientCodegenPlugin pythonClientCodegenPlugin = new DafnyPythonClientCodegenPlugin();
-        // TODO: Determine which of these we need, and create a PR against Smithy-Python
-        // with the required changes from lucasmcdonald3/smithy-python
-        pythonClientCodegenPlugin.disablePerformDefaultCodegenTransforms();
-        pythonClientCodegenPlugin.disableCreateDedicatedInputsAndOutputs();
+
         if (this.awsSdkStyle) {
             pythonClientCodegenPlugin.setGenerationType(GenerationType.AWS_SDK);
         } else if (this.localServiceTest) {
@@ -262,7 +260,11 @@ public class CodegenEngine {
             pythonClientCodegenPlugin.setGenerationType(GenerationType.LOCAL_SERVICE);
         }
 
-        pythonClientCodegenPlugin.execute(pluginContext);
+        PluginContext pythonPluginContext = pluginContextBuilder
+            .fileManifest(FileManifest.create(targetLangOutputDirs.get(TargetLanguage.PYTHON)))
+            .build();
+
+        pythonClientCodegenPlugin.execute(pythonPluginContext);
     }
 
     public static class Builder {
@@ -275,7 +277,7 @@ public class CodegenEngine {
         private boolean awsSdkStyle = false;
         private boolean localServiceTest = false;
         private boolean generateProjectFiles = false;
-        private PluginContext pluginContext;
+        private PluginContext.Builder pluginContextBuilder;
 
         public Builder() {}
 
@@ -354,8 +356,8 @@ public class CodegenEngine {
             return this;
         }
 
-        public Builder withPluginContext(final PluginContext pluginContext) {
-            this.pluginContext = pluginContext;
+        public Builder withPluginContextBuilder(final PluginContext.Builder pluginContextBuilder) {
+            this.pluginContextBuilder = pluginContextBuilder;
             return this;
         }
 
@@ -396,7 +398,7 @@ public class CodegenEngine {
                     this.awsSdkStyle,
                     this.localServiceTest,
                     this.generateProjectFiles,
-                    this.pluginContext
+                    this.pluginContextBuilder
             );
         }
     }

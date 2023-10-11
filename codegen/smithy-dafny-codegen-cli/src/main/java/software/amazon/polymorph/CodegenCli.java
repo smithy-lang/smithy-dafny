@@ -82,43 +82,16 @@ public class CodegenCli {
         cliArguments.outputDotnetDir.ifPresent(path -> outputDirs.put(TargetLanguage.DOTNET, path));
         cliArguments.outputPythonDir.ifPresent(path -> outputDirs.put(TargetLanguage.PYTHON, path));
 
-        ObjectNode.Builder objectNodeBuilder = ObjectNode.builder();
-        // If a smithy-build.json is provided, parse it for settings to pipe into PluginContext
-        if (cliArguments.smithyBuildFilePath.isPresent()) {
-            String json;
-            try {
-                json = Files.readString(cliArguments.smithyBuildFilePath.get());
-            } catch (IOException e) {
-                throw new RuntimeException("IOException while reading smithy-build.json", e);
-            }
+        final ObjectNode pluginContextSettings = parseSmithyBuildJsonIfCliArgumentPresent(cliArguments);
 
-            JsonFactory factory = new JsonFactory();
-            ObjectMapper mapper = new ObjectMapper(factory);
-            JsonNode rootNode;
-            try {
-                rootNode = mapper.readTree(json);
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException("JsonProcessingException while processing smithy-build.json", e);
-            }
-
-            Iterator<Entry<String, JsonNode>> attributes = rootNode
-                // MUST be "plugins" per smithy-build.json spec
-                .findValue("plugins")
-                // MUST be same plugin name as the Dafny codegen plugin
-                .findValue(DafnyClientCodegenPlugin.pluginName).fields();
-
-            while(attributes.hasNext()) {
-                Entry<String, JsonNode> entry = attributes.next();
-                // Remove leading and trailing " on the attribute value before adding it to settings
-                objectNodeBuilder.withMember(entry.getKey(), entry.getValue().toString().replace("\"", ""));
-            }
-        }
-
-        final PluginContext pluginContext = PluginContext.builder()
+        // Note that this PluginContext may be incomplete.
+        // Target languages that rely on PluginContext (Python, and others based on Smithy code generators)
+        //   will need to set language-specific FileManifest on the PluginContext
+        //   before providing it to the codegen plugin.
+        // The code below sets attributes common to all code generators that rely on PluginContext.
+        final PluginContext.Builder pluginContextBuilder = PluginContext.builder()
             .model(serviceModel)
-            .fileManifest(FileManifest.create(cliArguments.outputPythonDir().orElse(cliArguments.modelPath)))
-            .settings(objectNodeBuilder.build())
-            .build();
+            .settings(pluginContextSettings);
 
         final CodegenEngine.Builder engineBuilder = new CodegenEngine.Builder()
                 .withServiceModel(serviceModel)
@@ -126,7 +99,7 @@ public class CodegenCli {
                 .withNamespace(cliArguments.namespace)
                 .withTargetLangOutputDirs(outputDirs)
                 .withAwsSdkStyle(cliArguments.awsSdkStyle)
-                .withPluginContext(pluginContext)
+                .withPluginContextBuilder(pluginContextBuilder)
                 .withLocalServiceTest(cliArguments.localServiceTest);
         cliArguments.javaAwsSdkVersion.ifPresent(engineBuilder::withJavaAwsSdkVersion);
         cliArguments.includeDafnyFile.ifPresent(engineBuilder::withIncludeDafnyFile);
@@ -287,5 +260,49 @@ public class CodegenCli {
                     localServiceTest
             ));
         }
+    }
+
+    /**
+     * Parses settings used by Codegen from smithy-build.json.
+     * Only parses settings if the CLI argument pointing to smithy-build.json is provided.
+     * If the CLI argument is not provided, returns an empty ObjectNode.
+     * @param cliArguments
+     * @return
+     */
+    private static ObjectNode parseSmithyBuildJsonIfCliArgumentPresent(CliArguments cliArguments) {
+        ObjectNode.Builder objectNodeBuilder = ObjectNode.builder();
+
+        // If a smithy-build.json is provided, parse it for settings to pipe into PluginContext
+        if (cliArguments.smithyBuildFilePath.isPresent()) {
+            String json;
+            try {
+                json = Files.readString(cliArguments.smithyBuildFilePath.get());
+            } catch (IOException e) {
+                throw new RuntimeException("IOException while reading smithy-build.json", e);
+            }
+
+            JsonFactory factory = new JsonFactory();
+            ObjectMapper mapper = new ObjectMapper(factory);
+            JsonNode rootNode;
+            try {
+                rootNode = mapper.readTree(json);
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException("JsonProcessingException while processing smithy-build.json", e);
+            }
+
+            Iterator<Entry<String, JsonNode>> attributes = rootNode
+                // MUST be "plugins" per smithy-build.json spec
+                .findValue("plugins")
+                // MUST be same plugin name as the Dafny codegen plugin
+                .findValue(DafnyClientCodegenPlugin.pluginName).fields();
+
+            while(attributes.hasNext()) {
+                Entry<String, JsonNode> entry = attributes.next();
+                // Remove leading and trailing " on the attribute value before adding it to settings
+                objectNodeBuilder.withMember(entry.getKey(), entry.getValue().toString().replace("\"", ""));
+            }
+        }
+
+        return objectNodeBuilder.build();
     }
 }
