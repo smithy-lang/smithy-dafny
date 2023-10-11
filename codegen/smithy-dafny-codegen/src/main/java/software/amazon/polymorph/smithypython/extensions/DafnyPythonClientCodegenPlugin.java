@@ -27,25 +27,21 @@ import software.amazon.smithy.python.codegen.integration.PythonIntegration;
 import software.amazon.smithy.utils.SmithyUnstableApi;
 
 /**
- * Plugin to trigger Python code generation.
+ * Plugin to trigger Smithy-Dafny Python code generation.
+ * This differs from the PythonClientCodegenPlugin by not calling
+ *     runner.performDefaultCodegenTransforms();
+ * and
+ *     runner.createDedicatedInputsAndOutputs();
+ * These methods transform the model in ways that the model does not align with
+ *   the generated Dafny code.
  */
 @SmithyUnstableApi
 public final class DafnyPythonClientCodegenPlugin implements SmithyBuildPlugin {
-  private boolean shouldPerformDefaultCodegenTransforms = true;
-  private boolean shouldCreateDedicatedInputsAndOutputs = true;
   private GenerationType generationType;
 
   @Override
   public String getName() {
     return "dafny-python-client-codegen";
-  }
-
-  public void disablePerformDefaultCodegenTransforms() {
-    shouldPerformDefaultCodegenTransforms = false;
-  }
-
-  public void disableCreateDedicatedInputsAndOutputs() {
-    shouldCreateDedicatedInputsAndOutputs = false;
   }
 
   public void setGenerationType(GenerationType generationType) {
@@ -65,12 +61,6 @@ public final class DafnyPythonClientCodegenPlugin implements SmithyBuildPlugin {
     runner.service(settings.getService());
     runner.model(context.getModel());
     runner.integrationClass(PythonIntegration.class);
-    if (shouldPerformDefaultCodegenTransforms) {
-      runner.performDefaultCodegenTransforms();
-    }
-    if (shouldCreateDedicatedInputsAndOutputs) {
-      runner.createDedicatedInputsAndOutputs();
-    }
     runner.run();
   }
 }
