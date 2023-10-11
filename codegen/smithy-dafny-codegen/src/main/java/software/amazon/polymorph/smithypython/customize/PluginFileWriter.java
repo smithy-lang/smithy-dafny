@@ -9,7 +9,7 @@ import software.amazon.smithy.python.codegen.GenerationContext;
  * Writes the plugin.py file.
  * This file contains logic to load the Dafny plugin into the
  * Smithy-Python client.py's Config member.
- * It also defines the Config's retry strategy.
+ * It also defines the Config's retry strategy ("never retry" -- this is not a service).
  */
 public class PluginFileWriter implements CustomFileWriter {
 
