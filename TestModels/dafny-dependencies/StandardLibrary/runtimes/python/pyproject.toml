@@ -25,4 +25,4 @@ build-backend = "poetry.core.masonry.api"
 
 [aws.polymorph.config]
 # The string below defines where Polymorph will move code.
-package_name = "standard_library"
+polymorph_package_name = "standard_library"
