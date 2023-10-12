@@ -19,11 +19,10 @@ import java.util.Map;
 
 public final class DafnyClientCodegenPlugin implements SmithyBuildPlugin {
     private static final Logger LOGGER = LoggerFactory.getLogger(DafnyClientCodegenPlugin.class);
-    public static final String pluginName = "dafny-client-codegen";
 
     @Override
     public String getName() {
-        return pluginName;
+        return "dafny-client-codegen";
     }
 
     @Override
@@ -55,7 +54,6 @@ public final class DafnyClientCodegenPlugin implements SmithyBuildPlugin {
                 .withAwsSdkStyle(true)  // this plugin only generates AWS SDK-style code
                 .withIncludeDafnyFile(settings.includeDafnyFile)
                 .withGenerateProjectFiles(true)
-                .withPluginContextBuilder(context.toBuilder())
                 .build();
         codegenEngine.run();
     }
