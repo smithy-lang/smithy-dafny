@@ -53,11 +53,8 @@ STANDARD_LIBRARY_PATH := $(PROJECT_ROOT)/dafny-dependencies/StandardLibrary
 CODEGEN_CLI_ROOT := $(PROJECT_ROOT)/../codegen/smithy-dafny-codegen-cli
 GRADLEW := $(PROJECT_ROOT)/../codegen/gradlew
 
-# Returns the name of the Python module under Make.
-# This cannot be statically defined, as this changes with dependency generation.
-define GetPythonModuleName
-$(shell grep -m 1 polymorph_package_name runtimes/python/pyproject.toml | tr -s ' ' | tr -d '"' | tr -d "'" | cut -d' ' -f3)
-endef
+# Returns the name of the Python module as stored in the project's build configuration file (pyproject.toml).
+PYTHON_MODULE_NAME := $(shell grep -m 1 polymorph_package_name $(LIBRARY_ROOT)/runtimes/python/pyproject.toml | tr -s ' ' | tr -d '"' | tr -d "'" | cut -d' ' -f3)
 
 ########################## Dafny targets
 
@@ -406,7 +403,6 @@ _python_revert_underscore_dependency_extern_names:
 	$(patsubst %, $(MAKE) -C $(PROJECT_ROOT)/% _python_revert_underscore_extern_names;, $(LIBRARIES))
 
 # Move Dafny-generated code into its expected location in the Python module
-_mv_internaldafny_python: PYTHON_MODULE_NAME=$(call GetPythonModuleName)
 _mv_internaldafny_python:
 	# Remove any previously generated Dafny code in src/, then copy in newly-generated code
 	rm -rf runtimes/python/src/$(PYTHON_MODULE_NAME)/internaldafny/generated/
