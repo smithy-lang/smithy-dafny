@@ -3,6 +3,8 @@ name = "standard-library"
 version = "0.1.0"
 description = ""
 authors = ["AWS <aws-arg-dafny@amazon.com>"]
+# The string below defines where Polymorph will move code.
+package_name = "standard_library"
 packages = [
     { include = "standard_library", from = "src" },
 ]

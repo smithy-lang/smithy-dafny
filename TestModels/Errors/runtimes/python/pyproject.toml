@@ -3,6 +3,8 @@ name = "simple-errors"
 version = "0.1.0"
 description = ""
 authors = ["AWS <aws-arg-dafny@amazon.com>"]
+# The string below defines where Polymorph will move code.
+polymorph_package_name = "simple_errors"
 packages = [
     { include = "simple_errors", from = "src" }
 ]

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 include "../Model/SimpleRefinementTypesWrapped.dfy"
 
-module {:extern "simple.refinement.internaldafny.wrapped"} WrappedSimpleRefinementService refines WrappedAbstractSimpleRefinementService {
+module {:extern "simple_refinement_internaldafny_wrapped"} WrappedSimpleRefinementService refines WrappedAbstractSimpleRefinementService {
     import WrappedService = SimpleRefinement
     function method WrappedDefaultSimpleRefinementConfig(): SimpleRefinementConfig {
         SimpleRefinementConfig

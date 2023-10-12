@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 include "SimpleRefinementImpl.dfy"
 
-module {:extern "simple.refinement.internaldafny"} SimpleRefinement refines AbstractSimpleRefinementService {
+module {:extern "simple_refinement_internaldafny"} SimpleRefinement refines AbstractSimpleRefinementService {
     import Operations = SimpleRefinementImpl
 
     function method DefaultSimpleRefinementConfig(): SimpleRefinementConfig {

@@ -53,6 +53,12 @@ STANDARD_LIBRARY_PATH := $(PROJECT_ROOT)/dafny-dependencies/StandardLibrary
 CODEGEN_CLI_ROOT := $(PROJECT_ROOT)/../codegen/smithy-dafny-codegen-cli
 GRADLEW := $(PROJECT_ROOT)/../codegen/gradlew
 
+# Returns the name of the Python module under Make.
+# This cannot be statically defined, as this changes with dependency generation.
+define GetPythonModuleName
+$(shell grep -m 1 polymorph_package_name runtimes/python/pyproject.toml | tr -s ' ' | tr -d '"' | tr -d "'" | cut -d' ' -f3)
+endef
+
 ########################## Dafny targets
 
 verify:
@@ -256,10 +262,11 @@ polymorph_python: SMITHY_BUILD=--smithy-build $(LIBRARY_ROOT)/smithy-build.json
 polymorph_python: OUTPUT_PYTHON_WRAPPED=--output-python $(LIBRARY_ROOT)/runtimes/python/smithygenerated
 polymorph_python: OUTPUT_LOCAL_SERVICE=--local-service-test
 polymorph_python: _polymorph_wrapped
+polymorph_python: PYTHON_MODULE_NAME=$(call GetPythonModuleName)
 polymorph_python:
-	rm -rf runtimes/python/src/$(shell echo $(NAMESPACE) | sed -r 's/\./_/g' | tr  '[:upper:]' '[:lower:]')/smithygenerated
-	mkdir runtimes/python/src/$(shell echo $(NAMESPACE) | sed -r 's/\./_/g' | tr  '[:upper:]' '[:lower:]')/smithygenerated
-	mv runtimes/python/smithygenerated/$(shell echo $(NAMESPACE) | sed -r 's/\./_/g' | tr  '[:upper:]' '[:lower:]')/* runtimes/python/src/$(shell echo $(NAMESPACE) | sed -r 's/\./_/g' | tr  '[:upper:]' '[:lower:]')/smithygenerated
+	rm -rf runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated
+	mkdir runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated
+	mv runtimes/python/smithygenerated/$(PYTHON_MODULE_NAME)/* runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated
 	rm -rf runtimes/python/smithygenerated
 polymorph_python: POLYMORPH_LANGUAGE_TARGET=python
 polymorph_python: _polymorph_dependencies
@@ -399,14 +406,12 @@ _python_revert_underscore_dependency_extern_names:
 	$(patsubst %, $(MAKE) -C $(PROJECT_ROOT)/% _python_revert_underscore_extern_names;, $(LIBRARIES))
 
 # Move Dafny-generated code into its expected location in the Python module
-#	PYTHON_MODULE_NAME=$(echo $(NAMESPACE) | sed -r 's/\./_/g' | tr  '[:upper:]' '[:lower:]')
-
-#_mv_internaldafny_python: PYTHON_MODULE_NAME=$(shell echo $(NAMESPACE) | sed -r 's/\./_/g' | tr  '[:upper:]' '[:lower:]')
+_mv_internaldafny_python: PYTHON_MODULE_NAME=$(call GetPythonModuleName)
 _mv_internaldafny_python:
 	# Remove any previously generated Dafny code in src/, then copy in newly-generated code
-	rm -rf runtimes/python/src/$(shell echo $(NAMESPACE) | sed -r 's/\./_/g' | tr  '[:upper:]' '[:lower:]')/internaldafny/generated/
-	mkdir runtimes/python/src/$(shell echo $(NAMESPACE) | sed -r 's/\./_/g' | tr  '[:upper:]' '[:lower:]')/internaldafny/generated/
-	mv runtimes/python/dafny_src-py/*.py runtimes/python/src/$(shell echo $(NAMESPACE) | sed -r 's/\./_/g' | tr  '[:upper:]' '[:lower:]')/internaldafny/generated
+	rm -rf runtimes/python/src/$(PYTHON_MODULE_NAME)/internaldafny/generated/
+	mkdir runtimes/python/src/$(PYTHON_MODULE_NAME)/internaldafny/generated/
+	mv runtimes/python/dafny_src-py/*.py runtimes/python/src/$(PYTHON_MODULE_NAME)/internaldafny/generated
 	rm -rf runtimes/python/dafny_src-py
 	# Remove any previously generated Dafny code in test/, then copy in newly-generated code
 	rm -rf runtimes/python/test/internaldafny/generated
@@ -430,6 +435,7 @@ _mv_internaldafny_python:
 _rename_test_main_python:
 	mv runtimes/python/test/internaldafny/generated/__main__.py runtimes/python/test/internaldafny/generated/internaldafny_test_executor.py
 
+_remove_src_module_python: PYTHON_MODULE_NAME=$(call GetPythonModuleName)
 _remove_src_module_python:
 	# Remove the src/ `module_.py` file.
 	# There is a race condition between the src/ and test/ installation of this file.
@@ -437,7 +443,7 @@ _remove_src_module_python:
 	# The test/ file contains code to execute tests. The src/ file is largely empty.
 	# If the src/ file is installed most recently, tests will fail to run.
 	# By removing the src/ file, we ensure the test/ file is always the installed file.
-	rm runtimes/python/src/$(shell echo $(NAMESPACE) | sed -r 's/\./_/g' | tr  '[:upper:]' '[:lower:]')/internaldafny/generated/module_.py
+	rm runtimes/python/src/$(PYTHON_MODULE_NAME)/internaldafny/generated/module_.py
 
 transpile_dependencies_python: LANG=python
 transpile_dependencies_python: transpile_dependencies

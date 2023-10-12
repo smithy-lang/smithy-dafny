@@ -3,6 +3,8 @@ name = "simple-types-smithydouble"
 version = "0.1.0"
 description = ""
 authors = ["AWS <aws-arg-dafny@amazon.com>"]
+# The string below defines where Polymorph will move code.
+polymorph_package_name = "simple_types_smithydouble"
 packages = [
     { include = "simple_types_smithydouble", from = "src" }
 ]

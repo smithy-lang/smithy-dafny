@@ -3,6 +3,8 @@ name = "simple-constraints"
 version = "0.1.0"
 description = ""
 authors = ["AWS <aws-arg-dafny@amazon.com>"]
+# The string below defines where Polymorph will move code.
+polymorph_package_name = "simple_constraints"
 packages = [
     { include = "simple_constraints", from = "src" }
 ]
