@@ -3,8 +3,6 @@ name = "simple-types-blob"
 version = "0.1.0"
 description = ""
 authors = ["AWS <aws-arg-dafny@amazon.com>"]
-# The string below defines where Polymorph will move code.
-polymorph_package_name = "simple_types_blob"
 packages = [
     { include = "simple_types_blob", from = "src" }
 ]
@@ -26,3 +24,7 @@ simple-blob-test-internaldafny = { path = "test/internaldafny", develop = false}
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[aws.polymorph.config]
+# The string below defines where Polymorph will move code.
+polymorph_package_name = "simple_types_blob"

@@ -3,8 +3,6 @@ name = "simple-errors"
 version = "0.1.0"
 description = ""
 authors = ["AWS <aws-arg-dafny@amazon.com>"]
-# The string below defines where Polymorph will move code.
-polymorph_package_name = "simple_errors"
 packages = [
     { include = "simple_errors", from = "src" }
 ]
@@ -26,3 +24,7 @@ simple-errors-test-internaldafny = { path = "test/internaldafny", develop = fals
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[aws.polymorph.config]
+# The string below defines where Polymorph will move code.
+polymorph_package_name = "simple_errors"

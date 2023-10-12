@@ -3,8 +3,6 @@ name = "simple-localservice"
 version = "0.1.0"
 description = ""
 authors = ["AWS <aws-arg-dafny@amazon.com>"]
-# The string below defines where Polymorph will move code.
-polymorph_package_name = "simple_localservice"
 packages = [
     { include = "simple_localservice", from = "src" }
 ]
@@ -26,3 +24,7 @@ simple-localservice-test-internaldafny = { path = "test/internaldafny", develop 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[aws.polymorph.config]
+# The string below defines where Polymorph will move code.
+polymorph_package_name = "simple_localservice"

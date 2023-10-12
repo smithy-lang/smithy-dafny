@@ -3,8 +3,6 @@ name = "simple-extendable-resources"
 version = "0.1.0"
 description = ""
 authors = ["AWS <aws-arg-dafny@amazon.com>"]
-# The string below defines where Polymorph will move code.
-polymorph_package_name = "simple_extendable_resources"
 packages = [
     { include = "simple_extendable_resources", from = "src" }
 ]
@@ -26,3 +24,7 @@ simple-extendable-resources-test-internaldafny = { path = "test/internaldafny", 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[aws.polymorph.config]
+# The string below defines where Polymorph will move code.
+polymorph_package_name = "simple_extendable_resources"
