@@ -55,8 +55,6 @@ GRADLEW := $(PROJECT_ROOT)/../codegen/gradlew
 
 # Returns the name of the Python module as stored in the project's build configuration file (pyproject.toml).
 PYTHON_MODULE_NAME := $(shell grep -m 1 polymorph_package_name $(LIBRARY_ROOT)/runtimes/python/pyproject.toml | tr -s ' ' | tr -d '"' | tr -d "'" | cut -d' ' -f3)
-# $(shell grep -m 1 polymorph_package_name runtimes/python/pyproject.toml | tr -s ' ' | tr -d '"' | tr -d "'" | cut -d' ' -f3)
-# grep -m 1 polymorph_package_name runtimes/python/pyproject.toml | tr -s ' ' | tr -d '"' | tr -d "'" | cut -d' ' -f3
 
 ########################## Dafny targets
 
