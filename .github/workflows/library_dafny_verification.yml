@@ -13,14 +13,14 @@ jobs:
     strategy:
       matrix:
         library: [
+          TestVectorsAwsCryptographicMaterialProviders,
           AwsCryptographyPrimitives,
           ComAmazonawsKms,
           ComAmazonawsDynamodb,
           AwsCryptographicMaterialProviders, 
-          TestVectorsAwsCryptographicMaterialProviders,
           StandardLibrary,
         ]
-        os: [ macos-latest ]
+        os: [ macos-latest-large ]
     runs-on: ${{ matrix.os }}
     env:
       DOTNET_CLI_TELEMETRY_OPTOUT: 1
@@ -40,6 +40,13 @@ jobs:
         with:
           dafny-version: ${{ inputs.dafny }}
 
+      # dafny-reportgenerator requires next6
+      # but only 7.0 is installed on macos-latest-large
+      - name: Setup .NET Core SDK '6.0.x'
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '6.0.x'
+
       - name: Verify ${{ matrix.library }} Dafny code
         shell: bash
         working-directory: ./${{ matrix.library }}
@@ -49,6 +56,7 @@ jobs:
           make verify CORES=$CORES
 
       - name: Check solver resource use
+        if: success() || failure()
         shell: bash
         working-directory: ./${{ matrix.library }}
         run: |

@@ -514,6 +514,7 @@ module AwsKmsMrkKeyring {
                                                                     message := "No Configured KMS Key was able to decrypt the Data Key. The list of encountered Exceptions is available via `list`."));
 
       assert decryptClosure.Ensures(Last(attempts).input, Success(SealedDecryptionMaterials), DropLast(attempts));
+      assert Last(attempts).input in input.encryptedDataKeys;
 
       return Success(Types.OnDecryptOutput(
                        materials := SealedDecryptionMaterials

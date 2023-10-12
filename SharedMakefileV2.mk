@@ -63,10 +63,24 @@ COMPILE_SUFFIX_OPTION := -compileSuffix:1
 
 ########################## Dafny targets
 
+# Proof of correctness for the math below
+#  function Z3_PROCESSES(cpus:nat): nat
+#  { if cpus >= 3 then 2 else 1 }
+
+#  function DAFNY_PROCESSES(cpus: nat): nat
+#   requires 0 < cpus // 0 cpus would do no work!
+#  { (cpus - 1 )/Z3_PROCESSES(cpus) }
+
+#  lemma Correct(cpus:nat)
+#    ensures DAFNY_PROCESSES(cpus) * Z3_PROCESSES(cpus) <= cpus
+#  {}
+
 # Verify the entire project
+verify:Z3_PROCESSES=$(shell echo $$(( $(CORES) >= 3 ? 2 : 1 )))
+verify:DAFNY_PROCESSES=$(shell echo $$(( ($(CORES) - 1 ) / ($(CORES) >= 3 ? 2 : 1))))
 verify:
-	dafny \
-		-vcsCores:$(CORES) \
+	find . -name '*.dfy' | xargs -n 1 -P $(DAFNY_PROCESSES) -I % dafny \
+		-vcsCores:$(Z3_PROCESSES) \
 		-compile:0 \
 		-definiteAssignment:3 \
 		-quantifierSyntax:3 \
@@ -75,13 +89,12 @@ verify:
 		-verificationLogger:csv \
 		-timeLimit:100 \
 		-trace \
-		`find . -name *.dfy`
+		%
 
 # Verify single file FILE with text logger.
 # This is useful for debugging resource count usage within a file.
 # Use PROC to further scope the verification
 verify_single:
-	@: $(if ${CORES},,CORES=2);
 	dafny \
 		-vcsCores:$(CORES) \
 		-compile:0 \

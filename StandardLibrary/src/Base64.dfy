@@ -378,6 +378,7 @@ module Base64 {
       if s == [] {
       } else if Is1Padding(suffix) {
         assert !Is2Padding(suffix);
+        assert |prefix| % 4 == 0;
         var x, y := DecodeUnpadded(prefix), Decode1Padding(suffix);
         assert b == x + y;
         assert |x| == |x| / 3 * 3 && |y| == 2;

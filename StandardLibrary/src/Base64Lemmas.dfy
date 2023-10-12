@@ -58,9 +58,12 @@ module Base64Lemmas {
       Encode(DecodeValid(s));
     ==
       assert |DecodeValid(s)| % 3 == 2;
+      assert 2 <= |DecodeValid(s)|;
       EncodeUnpadded(DecodeValid(s)[..(|DecodeValid(s)| - 2)]) + Encode1Padding(DecodeValid(s)[(|DecodeValid(s)| - 2)..]);
     == { DecodeValidUnpaddedPartialFrom1PaddedSeq(s); }
-      assert IsUnpaddedBase64String(s[..(|s| - 4)]);
+      assert IsUnpaddedBase64String(s[..(|s| - 4)]) by {
+        assert |s| % 4 == 0;
+      }
       EncodeUnpadded(DecodeUnpadded(s[..(|s| - 4)])) + Encode1Padding(DecodeValid(s)[(|DecodeValid(s)| - 2)..]);
     == { DecodeEncodeUnpadded(s[..(|s| - 4)]); }
       s[..(|s| - 4)] + Encode1Padding(DecodeValid(s)[(|DecodeValid(s)| - 2)..]);
