@@ -637,7 +637,7 @@ public class TypeConversionCodegen {
                             .of("if (value.Is%sSet)".formatted(propertyName));
                         } else if (listTypes.contains(propertyName)) {
                             checkIfValuePresent = TokenTree
-                            .of("if (!value.%s.Any())".formatted(propertyName));
+                            .of("if (value.%s.Any())".formatted(propertyName));
                         } else if ("NULL".equals(propertyName)) {
                             checkIfValuePresent =  TokenTree
                             .of("if (value.%s == true)".formatted(propertyName));
