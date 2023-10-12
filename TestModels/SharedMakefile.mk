@@ -53,16 +53,6 @@ STANDARD_LIBRARY_PATH := $(PROJECT_ROOT)/dafny-dependencies/StandardLibrary
 CODEGEN_CLI_ROOT := $(PROJECT_ROOT)/../codegen/smithy-dafny-codegen-cli
 GRADLEW := $(PROJECT_ROOT)/../codegen/gradlew
 
-# Run as
-# $(call GetFromSmithyBuild,[property])
-# ex. $(call GetFromSmithyBuild,module)
-# This accesses properties in `smithy-build.json` for use by CLI
-define GetFromSmithyBuild
-$(shell jq -r '.plugins."dafny-client-codegen".$(1)' smithy-build.json)
-endef
-
-PYTHON_MODULE_NAME := $(call GetFromSmithyBuild,module)
-
 ########################## Dafny targets
 
 verify:
@@ -265,6 +255,7 @@ polymorph_java: _polymorph_dependencies
 polymorph_python: SMITHY_BUILD=--smithy-build $(LIBRARY_ROOT)/smithy-build.json
 polymorph_python: OUTPUT_PYTHON_WRAPPED=--output-python $(LIBRARY_ROOT)/runtimes/python/smithygenerated
 polymorph_python: OUTPUT_LOCAL_SERVICE=--local-service-test
+polymorph_python: PYTHON_MODULE_NAME=$(shell echo $(NAMESPACE) | sed -r 's/\./_/g' | tr  '[:upper:]' '[:lower:]')
 polymorph_python: _polymorph_wrapped
 polymorph_python:
 	rm -rf runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated
@@ -409,6 +400,9 @@ _python_revert_underscore_dependency_extern_names:
 	$(patsubst %, $(MAKE) -C $(PROJECT_ROOT)/% _python_revert_underscore_extern_names;, $(LIBRARIES))
 
 # Move Dafny-generated code into its expected location in the Python module
+#	PYTHON_MODULE_NAME=$(echo $(NAMESPACE) | sed -r 's/\./_/g' | tr  '[:upper:]' '[:lower:]')
+
+_mv_internaldafny_python: PYTHON_MODULE_NAME=$(shell echo $(NAMESPACE) | sed -r 's/\./_/g' | tr  '[:upper:]' '[:lower:]')
 _mv_internaldafny_python:
 	# Remove any previously generated Dafny code in src/, then copy in newly-generated code
 	rm -rf runtimes/python/src/$(PYTHON_MODULE_NAME)/internaldafny/generated/
@@ -437,6 +431,7 @@ _mv_internaldafny_python:
 _rename_test_main_python:
 	mv runtimes/python/test/internaldafny/generated/__main__.py runtimes/python/test/internaldafny/generated/internaldafny_test_executor.py
 
+_remove_src_module_python: PYTHON_MODULE_NAME=$(shell echo $(NAMESPACE) | sed -r 's/\./_/g' | tr  '[:upper:]' '[:lower:]')
 _remove_src_module_python:
 	# Remove the src/ `module_.py` file.
 	# There is a race condition between the src/ and test/ installation of this file.
