@@ -259,7 +259,6 @@ polymorph_python: SMITHY_BUILD=--smithy-build $(LIBRARY_ROOT)/smithy-build.json
 polymorph_python: OUTPUT_PYTHON_WRAPPED=--output-python $(LIBRARY_ROOT)/runtimes/python/smithygenerated
 polymorph_python: OUTPUT_LOCAL_SERVICE=--local-service-test
 polymorph_python: _polymorph_wrapped
-polymorph_python: PYTHON_MODULE_NAME=$(call GetPythonModuleName)
 polymorph_python:
 	rm -rf $(LIBRARY_ROOT)/runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated
 	mkdir $(LIBRARY_ROOT)/runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated
@@ -431,7 +430,6 @@ _mv_internaldafny_python:
 _rename_test_main_python:
 	mv runtimes/python/test/internaldafny/generated/__main__.py runtimes/python/test/internaldafny/generated/internaldafny_test_executor.py
 
-_remove_src_module_python: PYTHON_MODULE_NAME=$(call GetPythonModuleName)
 _remove_src_module_python:
 	# Remove the src/ `module_.py` file.
 	# There is a race condition between the src/ and test/ installation of this file.
