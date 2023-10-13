@@ -26,6 +26,5 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [aws.polymorph.config]
+# The string below defines where Polymorph will move code.
 polymorph_package_name = "simple_aggregate"
-# The string below defines the expected location of code inside the src/ directory.
-# Polymorph will write Dafny and Smithy code into the location defined here.
