@@ -22,8 +22,6 @@ import software.amazon.polymorph.smithyjava.generator.awssdk.v1.JavaAwsSdkV1;
 import software.amazon.polymorph.smithyjava.generator.awssdk.v2.JavaAwsSdkV2;
 import software.amazon.polymorph.smithyjava.generator.library.JavaLibrary;
 import software.amazon.polymorph.smithyjava.generator.library.TestJavaLibrary;
-import software.amazon.polymorph.smithypython.Constants.GenerationType;
-import software.amazon.polymorph.smithypython.extensions.DafnyPythonClientCodegenPlugin;
 import software.amazon.polymorph.utils.IOUtils;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.smithy.aws.traits.ServiceTrait;
@@ -32,9 +30,7 @@ import software.amazon.smithy.build.PluginContext;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.node.ObjectNode;
 import software.amazon.smithy.model.shapes.ServiceShape;
-import software.amazon.smithy.utils.CaseUtils;
 import software.amazon.smithy.utils.IoUtils;
-import software.amazon.smithy.python.codegen.PythonClientCodegenPlugin;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -257,7 +253,7 @@ public class CodegenEngine {
             // possibly at `dafny-client-codegen.targetLanguages.python.moduleVersion`.
             // This is Smithy-Python specific configuration.
             // This dictates the name of the generated Python package.
-            // This depends on Dafny extending the `dafny-client-codegen.targetLanguages` key
+            // TODO: This depends on Dafny extending the `dafny-client-codegen.targetLanguages` key
             // to support storing language-specific configuration.
             // For now, assume `module` is a slight transformation of the model namespace.
             .withMember("module", namespace.replace(".", "_").toLowerCase(Locale.ROOT))
@@ -268,7 +264,7 @@ public class CodegenEngine {
             // This dictates the version of the smithygenerated code, but this is unused;
             //   Polymorph wraps the smithygenerated code in a module with an independent
             //   module version.
-            // This depends on Dafny extending the `dafny-client-codegen.targetLanguages` key
+            // TODO: This depends on Dafny extending the `dafny-client-codegen.targetLanguages` key
             // to support storing language-specific configuration.
             // For now, hardcode this to 0.0.1.
             .withMember("moduleVersion", "0.0.1")
