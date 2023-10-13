@@ -444,12 +444,12 @@ class TrentServiceShim(software_amazon_cryptography_services_kms_internaldafny_t
         ))
 
     def Decrypt(self, input: DafnyDecryptRequest) -> DafnyDecryptResponse:
-        unwrapped_request: DecryptRequest = DecryptRequest(ciphertext_blob=input.CiphertextBlob,
-        encryption_context={key: value for (key, value) in input.EncryptionContext.UnwrapOr(None).items} if input.EncryptionContext.UnwrapOr(None) is not None else {},
-        grant_tokens=[list_element for list_element in input.GrantTokens.UnwrapOr(None)] if input.GrantTokens.UnwrapOr(None) is not None else [],
-        key_id=input.KeyId.UnwrapOr(None),
-        encryption_algorithm=input.EncryptionAlgorithm.UnwrapOr(None),
-        )
+        # unwrapped_request: DecryptRequest = DecryptRequest(ciphertext_blob=input.CiphertextBlob,
+        # encryption_context={key: value for (key, value) in input.EncryptionContext.UnwrapOr(None).items} if input.EncryptionContext.UnwrapOr(None) is not None else {},
+        # grant_tokens=[list_element for list_element in input.GrantTokens.UnwrapOr(None)] if input.GrantTokens.UnwrapOr(None) is not None else [],
+        # key_id=input.KeyId.UnwrapOr(None),
+        # encryption_algorithm=input.EncryptionAlgorithm.UnwrapOr(None),
+        # )
         try:
             wrapped_response = self._impl.decrypt(CiphertextBlob=bytes(input.CiphertextBlob),
                                                               EncryptionContext={key: value for (key, value) in input.EncryptionContext.UnwrapOr(None).items} if input.EncryptionContext.UnwrapOr(None) is not None else {},
