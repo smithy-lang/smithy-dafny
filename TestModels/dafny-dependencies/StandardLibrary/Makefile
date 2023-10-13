@@ -6,6 +6,7 @@ CORES=2
 include ../../SharedMakefile.mk
 
 MAX_RESOURCE_COUNT=500000000
+PYTHON_MODULE_NAME=standard_library
 LIBRARIES :=
 
 # define standard colors

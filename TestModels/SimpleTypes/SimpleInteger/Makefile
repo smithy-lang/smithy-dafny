@@ -6,6 +6,8 @@ CORES=2
 include ../../SharedMakefile.mk
 
 NAMESPACE=simple.types.integer
+# TODO: Move to smithy-build.json once language-specific config is supported
+PYTHON_MODULE_NAME=simple_types_integer
 
 # This project has no dependencies
 # DEPENDENT-MODELS:=

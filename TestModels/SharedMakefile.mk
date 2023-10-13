@@ -54,9 +54,9 @@ CODEGEN_CLI_ROOT := $(PROJECT_ROOT)/../codegen/smithy-dafny-codegen-cli
 GRADLEW := $(PROJECT_ROOT)/../codegen/gradlew
 
 # Returns the name of the Python module as stored in the project's build configuration file (pyproject.toml).
-define GetPythonModuleName
-$(shell grep -m 1 polymorph_package_name runtimes/python/pyproject.toml | tr -s ' ' | tr -d '"' | tr -d "'" | cut -d' ' -f3)
-endef
+#define GetPythonModuleName
+#$(shell grep -m 1 polymorph_package_name runtimes/python/pyproject.toml | tr -s ' ' | tr -d '"' | tr -d "'" | cut -d' ' -f3)
+#endef
 
 ########################## Dafny targets
 
@@ -189,7 +189,6 @@ _polymorph:
 	--dependent-model $(PROJECT_ROOT)/dafny-dependencies/Model \
 	$(patsubst %, --dependent-model $(PROJECT_ROOT)/%/Model, $(LIBRARIES)) \
 	--namespace $(NAMESPACE) \
-	$(SMITHY_BUILD) \
 	$(AWS_SDK_CMD)";
 
 # If the target language of _polymorph_wrapped includes Python,
@@ -208,7 +207,6 @@ _polymorph_wrapped:
 	$(patsubst %, --dependent-model $(PROJECT_ROOT)/%/Model, $(LIBRARIES)) \
 	--namespace $(NAMESPACE) \
 	$(OUTPUT_LOCAL_SERVICE) \
-	$(SMITHY_BUILD) \
 	$(AWS_SDK_CMD)";
 
 _polymorph_dependencies:
@@ -257,14 +255,13 @@ polymorph_java: _polymorph_dependencies
 # For python, _polymorph_wrapped includes _polymorph (i.e. local service generation AND wrapped test)
 # To generate only the local service, use the `_polymorph` target
 # There is not a good way to generate only the wrapped test without the local service...
-polymorph_python: SMITHY_BUILD=--smithy-build $(LIBRARY_ROOT)/smithy-build.json
 polymorph_python: OUTPUT_PYTHON_WRAPPED=--output-python $(LIBRARY_ROOT)/runtimes/python/smithygenerated
 polymorph_python: OUTPUT_LOCAL_SERVICE=--local-service-test
 polymorph_python: _polymorph_wrapped
 polymorph_python:
-	rm -rf runtimes/python/src/$(call GetPythonModuleName)/smithygenerated
-	mkdir runtimes/python/src/$(call GetPythonModuleName)/smithygenerated
-	mv runtimes/python/smithygenerated/$(call GetPythonModuleName)/* runtimes/python/src/$(call GetPythonModuleName)/smithygenerated
+	rm -rf runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated
+	mkdir runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated
+	mv runtimes/python/smithygenerated/$(PYTHON_MODULE_NAME)/* runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated
 	rm -rf runtimes/python/smithygenerated
 polymorph_python: POLYMORPH_LANGUAGE_TARGET=python
 polymorph_python: _polymorph_dependencies
@@ -406,9 +403,9 @@ _python_revert_underscore_dependency_extern_names:
 # Move Dafny-generated code into its expected location in the Python module
 _mv_internaldafny_python:
 	# Remove any previously generated Dafny code in src/, then copy in newly-generated code
-	rm -rf runtimes/python/src/$(call GetPythonModuleName)/internaldafny/generated/
-	mkdir runtimes/python/src/$(call GetPythonModuleName)/internaldafny/generated/
-	mv runtimes/python/dafny_src-py/*.py runtimes/python/src/$(call GetPythonModuleName)/internaldafny/generated
+	rm -rf runtimes/python/src/$(PYTHON_MODULE_NAME)/internaldafny/generated/
+	mkdir runtimes/python/src/$(PYTHON_MODULE_NAME)/internaldafny/generated/
+	mv runtimes/python/dafny_src-py/*.py runtimes/python/src/$(PYTHON_MODULE_NAME)/internaldafny/generated
 	rm -rf runtimes/python/dafny_src-py
 	# Remove any previously generated Dafny code in test/, then copy in newly-generated code
 	rm -rf runtimes/python/test/internaldafny/generated
@@ -439,7 +436,7 @@ _remove_src_module_python:
 	# The test/ file contains code to execute tests. The src/ file is largely empty.
 	# If the src/ file is installed most recently, tests will fail to run.
 	# By removing the src/ file, we ensure the test/ file is always the installed file.
-	rm runtimes/python/src/$(call GetPythonModuleName)/internaldafny/generated/module_.py
+	rm runtimes/python/src/$(PYTHON_MODULE_NAME)/internaldafny/generated/module_.py
 
 transpile_dependencies_python: LANG=python
 transpile_dependencies_python: transpile_dependencies

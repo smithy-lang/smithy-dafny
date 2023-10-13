@@ -25,6 +25,3 @@ simple-double-test-internaldafny = { path = "test/internaldafny", develop = fals
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
-[aws.polymorph.config]
-# The string below defines where Polymorph will move code.
-polymorph_package_name = "simple_types_smithydouble"

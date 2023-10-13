@@ -6,6 +6,8 @@ CORES=2
 include ../SharedMakefile.mk
 
 NAMESPACE=simple.extendable.resources
+# TODO: Move to smithy-build.json once language-specific config is supported
+PYTHON_MODULE_NAME=simple_extendable_resources
 
 # This project has no dependencies 
 # DEPENDENT-MODELS:= 

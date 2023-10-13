@@ -22,7 +22,3 @@ standard-library-test-internaldafny = { path = "test/internaldafny", develop = f
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
-
-[aws.polymorph.config]
-# The string below defines where Polymorph will move code.
-polymorph_package_name = "standard_library"

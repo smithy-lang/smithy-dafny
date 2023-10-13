@@ -28,7 +28,3 @@ simple-dependencies-test-internaldafny = { path = "test/internaldafny", develop 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
-
-[aws.polymorph.config]
-# The string below defines where Polymorph will move code.
-polymorph_package_name = "simple_dependencies"
