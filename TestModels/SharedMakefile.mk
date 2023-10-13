@@ -54,7 +54,9 @@ CODEGEN_CLI_ROOT := $(PROJECT_ROOT)/../codegen/smithy-dafny-codegen-cli
 GRADLEW := $(PROJECT_ROOT)/../codegen/gradlew
 
 # Returns the name of the Python module as stored in the project's build configuration file (pyproject.toml).
-PYTHON_MODULE_NAME := $(shell grep -m 1 polymorph_package_name $(LIBRARY_ROOT)/runtimes/python/pyproject.toml | tr -s ' ' | tr -d '"' | tr -d "'" | cut -d' ' -f3)
+define GetPythonModuleName
+$(shell grep -m 1 polymorph_package_name runtimes/python/pyproject.toml | tr -s ' ' | tr -d '"' | tr -d "'" | cut -d' ' -f3)
+endef
 
 ########################## Dafny targets
 
@@ -260,10 +262,10 @@ polymorph_python: OUTPUT_PYTHON_WRAPPED=--output-python $(LIBRARY_ROOT)/runtimes
 polymorph_python: OUTPUT_LOCAL_SERVICE=--local-service-test
 polymorph_python: _polymorph_wrapped
 polymorph_python:
-	rm -rf $(LIBRARY_ROOT)/runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated
-	mkdir $(LIBRARY_ROOT)/runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated
-	mv $(LIBRARY_ROOT)/runtimes/python/smithygenerated/$(PYTHON_MODULE_NAME)/* runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated
-	rm -rf $(LIBRARY_ROOT)/runtimes/python/smithygenerated
+	rm -rf runtimes/python/src/$(call GetPythonModuleName)/smithygenerated
+	mkdir runtimes/python/src/$(call GetPythonModuleName)/smithygenerated
+	mv runtimes/python/smithygenerated/$(call GetPythonModuleName)/* runtimes/python/src/$(call GetPythonModuleName)/smithygenerated
+	rm -rf runtimes/python/smithygenerated
 polymorph_python: POLYMORPH_LANGUAGE_TARGET=python
 polymorph_python: _polymorph_dependencies
 
@@ -404,15 +406,15 @@ _python_revert_underscore_dependency_extern_names:
 # Move Dafny-generated code into its expected location in the Python module
 _mv_internaldafny_python:
 	# Remove any previously generated Dafny code in src/, then copy in newly-generated code
-	rm -rf $(LIBRARY_ROOT)/runtimes/python/src/$(PYTHON_MODULE_NAME)/internaldafny/generated/
-	mkdir $(LIBRARY_ROOT)/runtimes/python/src/$(PYTHON_MODULE_NAME)/internaldafny/generated/
-	mv dafny_src-py/*.py $(LIBRARY_ROOT)/runtimes/python/src/$(PYTHON_MODULE_NAME)/internaldafny/generated
-	rm -rf $(LIBRARY_ROOT)/runtimes/python/dafny_src-py
+	rm -rf runtimes/python/src/$(call GetPythonModuleName)/internaldafny/generated/
+	mkdir runtimes/python/src/$(call GetPythonModuleName)/internaldafny/generated/
+	mv runtimes/python/dafny_src-py/*.py runtimes/python/src/$(call GetPythonModuleName)/internaldafny/generated
+	rm -rf runtimes/python/dafny_src-py
 	# Remove any previously generated Dafny code in test/, then copy in newly-generated code
-	rm -rf $(LIBRARY_ROOT)/runtimes/python/test/internaldafny/generated
-	mkdir $(LIBRARY_ROOT)/runtimes/python/test/internaldafny/generated
-	mv $(LIBRARY_ROOT)/runtimes/python/__main__-py/*.py $(LIBRARY_ROOT)/runtimes/python/test/internaldafny/generated
-	rm -rf $(LIBRARY_ROOT)/runtimes/python/__main__-py
+	rm -rf runtimes/python/test/internaldafny/generated
+	mkdir runtimes/python/test/internaldafny/generated
+	mv runtimes/python/__main__-py/*.py runtimes/python/test/internaldafny/generated
+	rm -rf runtimes/python/__main__-py
 
 # Versions of Dafny as of ~9/28 seem to ALWAYS write output to __main__.py,
 #   regardless of the OUT parameter...?
@@ -437,7 +439,7 @@ _remove_src_module_python:
 	# The test/ file contains code to execute tests. The src/ file is largely empty.
 	# If the src/ file is installed most recently, tests will fail to run.
 	# By removing the src/ file, we ensure the test/ file is always the installed file.
-	rm $(LIBRARY_ROOT)/runtimes/python/src/$(PYTHON_MODULE_NAME)/internaldafny/generated/module_.py
+	rm runtimes/python/src/$(call GetPythonModuleName)/internaldafny/generated/module_.py
 
 transpile_dependencies_python: LANG=python
 transpile_dependencies_python: transpile_dependencies
