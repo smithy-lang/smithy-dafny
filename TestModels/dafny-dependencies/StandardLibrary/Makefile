@@ -6,6 +6,7 @@ CORES=2
 include ../../SharedMakefile.mk
 
 MAX_RESOURCE_COUNT=500000000
+PYTHON_MODULE_NAME=standard_library
 LIBRARIES :=
 
 # define standard colors
@@ -92,9 +93,6 @@ build_implementation:
 # StandardLibrary as a dependency
 build_java: transpile_java
 	gradle -p runtimes/java build
-
-_correct_escaped_python:
-	echo "Skipping _correct_escaped_python for StandardLibrary"
 
 # Override SharedMakefile's mvn_local_deploy to
 # issue warning

@@ -386,7 +386,12 @@ public class DotNetNameResolver {
             // therefore it MAY have specific naming requirements.
             // These requirements SHOULD be handled in the `AwsSdkDotNetNameResolver`.
             final ServiceShape awsSdkService = AwsSdkNameResolverHelpers.getAwsServiceShape(model, shapeId);
-            return new AwsSdkDotNetNameResolver(model, awsSdkService).baseTypeSwitch(shape);
+            String value = new AwsSdkDotNetNameResolver(model, awsSdkService).baseTypeSwitch(shape);
+            if (value.equals("Com.Amazonaws.Dynamodb.AttributeValue")) {
+                return "Amazon.DynamoDBv2.Model.AttributeValue";
+            } else {
+                return value;
+            }
         }
     }
 

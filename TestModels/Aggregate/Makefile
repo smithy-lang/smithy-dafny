@@ -6,6 +6,8 @@ CORES=2
 include ../SharedMakefile.mk
 
 NAMESPACE=simple.aggregate
+# TODO: Move to smithy-build.json once Dafny plugin supports language-specific config
+PYTHON_MODULE_NAME=simple_aggregate
 
 # This project has no dependencies 
 # DEPENDENT-MODELS:= 

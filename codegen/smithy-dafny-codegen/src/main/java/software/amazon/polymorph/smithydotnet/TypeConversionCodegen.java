@@ -19,6 +19,7 @@ import software.amazon.polymorph.traits.ExtendableTrait;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
+import software.amazon.polymorph.utils.AwsSdkNameResolverHelpers;
 import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.polymorph.utils.Token;
@@ -485,15 +486,25 @@ public class TypeConversionCodegen {
     public TokenTree generateExtractOptionalMember(final MemberShape memberShape) {
         final String type = nameResolver.baseTypeForShape(memberShape.getId());
         final String varName = nameResolver.variableNameForClassProperty(memberShape);
-        final String isSetMethod = nameResolver.isSetMethodForStructureMember(memberShape);
         final String propertyName = nameResolver.classPropertyForStructureMember(memberShape);
-        return TokenTree.of(
+        if (AwsSdkNameResolverHelpers.isInAwsSdkNamespace(memberShape.getId())) {
+            return TokenTree.of(
+                type,
+                varName,
+                "= value.%s != null".formatted(propertyName),
+                "? value.%s :".formatted(propertyName),
+                "(%s) null;".formatted(type)
+            );
+        } else {
+            final String isSetMethod = nameResolver.isSetMethodForStructureMember(memberShape);
+            return TokenTree.of(
                 type,
                 varName,
                 "= value.%s()".formatted(isSetMethod),
                 "? value.%s :".formatted(propertyName),
                 "(%s) null;".formatted(type)
-        );
+            );
+        }
     }
 
     public TypeConverter generateMemberConverter(final MemberShape memberShape) {
@@ -558,7 +569,6 @@ public class TypeConversionCodegen {
             .of(defNames
                 .stream()
                 .map(memberShape -> {
-                    final String propertyNameEdgeCase = StringUtils.equals(nameResolver.classPropertyForStructureMember(memberShape), "KmsKeyArn") ? "kmsKeyArn" : nameResolver.classPropertyForStructureMember(memberShape);
                     final String propertyName = nameResolver.classPropertyForStructureMember(memberShape);
                     final String memberFromDafnyConverterName = typeConverterForShape(
                             memberShape.getId(), FROM_DAFNY);
@@ -569,7 +579,7 @@ public class TypeConversionCodegen {
                         destructorValue = DafnyNameResolverHelpers.dafnyCompilesExtra_(memberShape.getMemberName());
                     }
                     return TokenTree
-                            .of("if (value.is_%s)".formatted(propertyNameEdgeCase))
+                            .of("if (value.is_%s)".formatted(DafnyNameResolverHelpers.dafnyCompilesExtra_(memberShape.getMemberName())))
                             .append(TokenTree
                                     .of(
                                             "converted.%s = %s(concrete.dtor_%s);"
@@ -627,7 +637,7 @@ public class TypeConversionCodegen {
                             .of("if (value.Is%sSet)".formatted(propertyName));
                         } else if (listTypes.contains(propertyName)) {
                             checkIfValuePresent = TokenTree
-                            .of("if (!value.%s.Any())".formatted(propertyName));
+                            .of("if (value.%s.Any())".formatted(propertyName));
                         } else if ("NULL".equals(propertyName)) {
                             checkIfValuePresent =  TokenTree
                             .of("if (value.%s == true)".formatted(propertyName));
@@ -947,6 +957,17 @@ public class TypeConversionCodegen {
 
             Set<String> dependentNamespaces = ModelUtils.findAllDependentNamespaces(
                 new HashSet<ShapeId>(Collections.singleton(localServiceTrait.getConfigId())), model);
+
+            if (localServiceTrait.getDependencies() != null) {
+                localServiceTrait.getDependencies().stream()
+                        .map(model::expectShape)
+                        .map(Shape::asServiceShape)
+                        .filter(Optional::isPresent)
+                        .map(Optional::get)
+                        .forEach( serviceShape ->
+                                dependentNamespaces.add(serviceShape.getId().getNamespace())
+                        );
+            }
 
             if (dependentNamespaces.size() > 0) {
                 Set<TokenTree> cases = new HashSet<>();

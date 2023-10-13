@@ -163,7 +163,7 @@ public abstract class DafnyPythonProtocolGenerator implements ProtocolGenerator 
 
     writer.addDependency(SmithyPythonDependency.SMITHY_PYTHON);
     // Import the Dafny type being converted to
-    DafnyNameResolver.importDafnyTypeForShape(writer, operation.getInputShape());
+    DafnyNameResolver.importDafnyTypeForShape(writer, operation.getInputShape(), context);
 
     // Determine conversion code from Smithy to Dafny
     Shape targetShape = context.model().expectShape(operation.getInputShape());
@@ -241,7 +241,7 @@ public abstract class DafnyPythonProtocolGenerator implements ProtocolGenerator 
       writer.pushState(new ResponseDeserializerSection(operation));
 
       ShapeId outputShape = operation.getOutputShape();
-      DafnyNameResolver.importDafnyTypeForShape(writer, outputShape);
+      DafnyNameResolver.importDafnyTypeForShape(writer, outputShape, context);
 
       // Smithy Unit shapes have no data, and do not need deserialization
       if (Utils.isUnitShape(outputShape)) {
@@ -261,7 +261,9 @@ public abstract class DafnyPythonProtocolGenerator implements ProtocolGenerator 
         writer.write("""
           if input.IsFailure():
             return await _deserialize_error(input.error)
-          return $L
+          # Import dafny_to_smithy at runtime to prevent introducing circular dependency on deserialize file.
+          from . import dafny_to_smithy
+          return dafny_to_smithy.$L
           """,
           output
         );
@@ -286,65 +288,90 @@ public abstract class DafnyPythonProtocolGenerator implements ProtocolGenerator 
     WriterDelegator<PythonWriter> writerDelegator = context.writerDelegator();
     String moduleName = context.settings().getModuleName();
 
-    // Write out deserializers for unmodeled errors
     writerDelegator.useFileWriter(moduleName + "/deserialize.py", ".", writer -> {
       writer.addStdlibImport("typing", "Any");
-      DafnyNameResolver.importGenericDafnyErrorTypeForNamespace(writer, serviceShape.getId().getNamespace());
+      DafnyNameResolver.importGenericDafnyErrorTypeForNamespace(writer,
+          serviceShape.getId().getNamespace());
       writer.addImport(".errors", "ServiceError");
       writer.addImport(".errors", "OpaqueError");
       writer.addImport(".errors", "CollectionOfErrors");
-      writer.write("""
-                async def _deserialize_error(
-                    error: Error
-                ) -> ServiceError:
-                  if error.is_Opaque:
-                    return OpaqueError(obj=error.obj)
-                  if error.is_CollectionOfErrors:
-                    return CollectionOfErrors(message=error.message, list=error.list)"""
+      writer.openBlock(
+          "async def _deserialize_error(error: Error) -> ServiceError:",
+          "",
+          () -> {
+            writer.write("""
+                if error.is_Opaque:
+                  return OpaqueError(obj=error.obj)
+                elif error.is_CollectionOfErrors:
+                  return CollectionOfErrors(message=error.message, list=error.list)""");
+
+                // Write converters for errors modelled on this local service
+                generateErrorResponseDeserializerSectionForLocalServiceErrors(context, serviceShape, writer);
+
+                // Write delegators to dependency services' `_deserialize_error` for dependency services
+                generateErrorResponseDeserializerSectionForLocalServiceDependencyErrors(context, serviceShape, writer);
+
+                // Generate handler for unmatched Dafny Error.
+                // Since we don't know anything about this Dafny Error object,
+                //   just pass the Dafny Error object into the Smithy object.
+                writer.write("""
+                    else:
+                        return OpaqueError(obj=error)"""
+                );
+          });
+
+    });
+  }
+
+  private void generateErrorResponseDeserializerSectionForLocalServiceErrors(GenerationContext context,
+      ServiceShape serviceShape, PythonWriter writer) {
+
+    // Get all of this service's modelled errors
+    TreeSet<ShapeId> deserializingErrorShapes = new TreeSet<ShapeId>(
+        context.model().getStructureShapesWithTrait(ErrorTrait.class)
+            .stream()
+            .filter(structureShape -> structureShape.getId().getNamespace()
+                .equals(context.settings().getService().getNamespace()))
+            .map(Shape::getId)
+            .collect(Collectors.toSet()));
+
+    // Write out deserializers for this service's modelled errors
+    for (ShapeId errorId : deserializingErrorShapes) {
+      StructureShape error = context.model().expectShape(errorId, StructureShape.class);
+      writer.pushState(new ErrorDeserializerSection(error));
+
+      // Import Smithy-Python modelled-error
+      writer.addImport(".errors", errorId.getName());
+      // Import Dafny-modelled error
+      DafnyNameResolver.importDafnyTypeForError(writer, errorId, context);
+      // Import generic Dafny error type
+      DafnyNameResolver.importGenericDafnyErrorTypeForNamespace(writer, errorId.getNamespace());
+      writer.write(
+          """
+            elif error.is_$L:
+              return $L(message=error.message)""",
+          errorId.getName(),
+          errorId.getName()
       );
+      writer.popState();
+    }
+  }
 
-      // Get all of this service's modelled errors
-      TreeSet<ShapeId> deserializingErrorShapes = new TreeSet<ShapeId>(
-          context.model().getStructureShapesWithTrait(ErrorTrait.class)
-              .stream()
-              .filter(structureShape -> structureShape.getId().getNamespace()
-                  .equals(context.settings().getService().getNamespace()))
-              .map(Shape::getId)
-              .collect(Collectors.toSet()));
+  private void generateErrorResponseDeserializerSectionForLocalServiceDependencyErrors(GenerationContext context,
+      ServiceShape serviceShape, PythonWriter writer) {
 
-      // Write out deserializers for this service's modelled errors
-      for (ShapeId errorId : deserializingErrorShapes) {
-        StructureShape error = context.model().expectShape(errorId, StructureShape.class);
-        writer.pushState(new ErrorDeserializerSection(error));
+    // Generate converters for dependency services that defer to their `_deserialize_error`
+    Optional<LocalServiceTrait> maybeLocalServiceTrait = serviceShape.getTrait(LocalServiceTrait.class);
+    if (maybeLocalServiceTrait.isPresent()) {
+      LocalServiceTrait localServiceTrait = maybeLocalServiceTrait.get();
+      Set<ShapeId> serviceDependencyShapeIds = localServiceTrait.getDependencies();
+      if (serviceDependencyShapeIds != null) {
+        for (ShapeId serviceDependencyShapeId : serviceDependencyShapeIds) {
+          writer.addImport(".errors", serviceDependencyShapeId.getName());
 
-        // Import Smithy-Python modelled-error
-        writer.addImport(".errors", errorId.getName());
-        // Import Dafny-modelled error
-        DafnyNameResolver.importDafnyTypeForError(writer, errorId);
-        // Import generic Dafny error type
-        DafnyNameResolver.importGenericDafnyErrorTypeForNamespace(writer, errorId.getNamespace());
-        writer.write(
-            """
-              if error.is_$L:
-                return $L(message=error.message)
-            """,
-            errorId.getName(),
-            errorId.getName()
-        );
-        writer.popState();
-      }
-
-      Optional<LocalServiceTrait> maybeLocalServiceTrait = serviceShape.getTrait(LocalServiceTrait.class);
-      if (maybeLocalServiceTrait.isPresent()) {
-        LocalServiceTrait localServiceTrait = maybeLocalServiceTrait.get();
-        Set<ShapeId> serviceDependencyShapeIds = localServiceTrait.getDependencies();
-        if (serviceDependencyShapeIds != null) {
-          for (ShapeId serviceDependencyShapeId : serviceDependencyShapeIds) {
-            writer.addImport(".errors", serviceDependencyShapeId.getName());
-
-            // Import dependency `_deserialize_error` function so this service can defer to it:
-            // `from dependency.smithygenerated.deserialize import _deserialize_error as dependency_deserialize_error`
-            writer.addImport(
+          // Import dependency `_deserialize_error` function so this service can defer to it:
+          // `from dependency.smithygenerated.deserialize import _deserialize_error as dependency_deserialize_error`
+          writer.addImport(
               // `from dependency.smithygenerated.deserialize`
               SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(serviceDependencyShapeId.getNamespace())
                   + ".smithygenerated.deserialize",
@@ -353,20 +380,19 @@ public abstract class DafnyPythonProtocolGenerator implements ProtocolGenerator 
               // `as dependency_deserialize_error`
               SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(serviceDependencyShapeId.getNamespace())
                   + "_deserialize_error"
-            );
-            // Generate deserializer for dependency that defers to its `_deserialize_error`
-            writer.write("""
-                if error.is_$L:
-                  return $L(await $L(error.$L))
-              """,
+          );
+          // Generate deserializer for dependency that defers to its `_deserialize_error`
+          writer.write(
+              """
+              elif error.is_$L:
+                  return $L(await $L(error.$L))""",
               serviceDependencyShapeId.getName(), serviceDependencyShapeId.getName(),
               SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(serviceDependencyShapeId.getNamespace())
                   + "_deserialize_error",
               serviceDependencyShapeId.getName()
-            );
-          }
+          );
         }
       }
-    });
+    }
   }
 }

@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import software.amazon.polymorph.smithypython.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithypython.shapevisitor.DafnyToSmithyShapeVisitor;
+import software.amazon.polymorph.smithypython.shapevisitor.SmithyConfigToDafnyConfigShapeVisitor;
 import software.amazon.polymorph.smithypython.shapevisitor.SmithyToDafnyShapeVisitor;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.smithy.model.shapes.MemberShape;
@@ -29,7 +30,7 @@ public class ConfigFileWriter implements CustomFileWriter {
     String moduleName = codegenContext.settings().getModuleName();
     codegenContext.writerDelegator()
         .useFileWriter(moduleName + "/config.py", "", writer -> {
-          DafnyNameResolver.importDafnyTypeForShape(writer, configShape.getId());
+          DafnyNameResolver.importDafnyTypeForShape(writer, configShape.getId(), codegenContext);
 
           writer.write(
               """
@@ -138,7 +139,9 @@ public class ConfigFileWriter implements CustomFileWriter {
         writer,
         "config"
     ));
-    writer.write("return " + output);
+    writer.writeComment("Import dafny_to_smithy at runtime to prevent introducing circular dependency on config file.");
+    writer.write("from . import dafny_to_smithy");
+    writer.write("return dafny_to_smithy." + output);
   }
 
   /**
@@ -150,7 +153,10 @@ public class ConfigFileWriter implements CustomFileWriter {
    */
   private void generateSmithyConfigToDafnyConfigFunctionBody(
       StructureShape configShape, GenerationContext codegenContext, PythonWriter writer) {
-    String output = configShape.accept(new SmithyToDafnyShapeVisitor(
+    // Dafny-generated config shapes contain a piece of unmodelled behavior,
+    //   which is that every config member is required.
+    //
+    String output = configShape.accept(new SmithyConfigToDafnyConfigShapeVisitor(
         codegenContext,
         "smithy_config",
         writer,

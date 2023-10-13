@@ -21,7 +21,8 @@ import software.amazon.smithy.python.codegen.PythonWriter;
 /**
  * Writes the shim.py file.
  * The shim wraps the client.py implementation (which itself wraps the underlying Dafny implementation).
- * Other Dafny-generated Python code will use the shim to interact with this project's Dafny implementation.
+ * Other Dafny-generated Python code may use the shim to interact with this project's Dafny implementation
+ *   through the Polymorph wrapper.
  */
 public class ShimFileWriter implements CustomFileWriter {
 
@@ -176,8 +177,8 @@ public class ShimFileWriter implements CustomFileWriter {
       ShapeId inputShape = operationShape.getInputShape();
       ShapeId outputShape = operationShape.getOutputShape();
       // Import Dafny types for inputs and outputs
-      DafnyNameResolver.importDafnyTypeForShape(writer, inputShape);
-      DafnyNameResolver.importDafnyTypeForShape(writer, outputShape);
+      DafnyNameResolver.importDafnyTypeForShape(writer, inputShape, codegenContext);
+      DafnyNameResolver.importDafnyTypeForShape(writer, outputShape, codegenContext);
       // Import Smithy types for inputs and outputs
       SmithyNameResolver.importSmithyGeneratedTypeForShape(writer, inputShape, codegenContext);
       SmithyNameResolver.importSmithyGeneratedTypeForShape(writer, outputShape, codegenContext);
@@ -217,7 +218,9 @@ public class ShimFileWriter implements CustomFileWriter {
             // 3) wraps Smithy failures as Dafny failures
             writer.write(
               """
-              unwrapped_request: $L = $L
+              # Import dafny_to_smithy at runtime to prevent introducing circular dependency on shim file
+              from . import dafny_to_smithy
+              unwrapped_request: $L = dafny_to_smithy.$L
               try:
                   wrapped_response = asyncio.run(self._impl.$L(unwrapped_request))
               except ServiceError as e:

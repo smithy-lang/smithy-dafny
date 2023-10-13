@@ -5,6 +5,7 @@ package software.amazon.polymorph;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
+import java.util.Locale;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.polymorph.smithydafny.DafnyApiCodegen;
@@ -26,11 +27,12 @@ import software.amazon.polymorph.smithypython.extensions.DafnyPythonClientCodege
 import software.amazon.polymorph.utils.IOUtils;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.smithy.aws.traits.ServiceTrait;
+import software.amazon.smithy.build.FileManifest;
 import software.amazon.smithy.build.PluginContext;
 import software.amazon.smithy.model.Model;
+import software.amazon.smithy.model.node.ObjectNode;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.utils.IoUtils;
-import software.amazon.smithy.python.codegen.PythonClientCodegenPlugin;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -55,7 +57,6 @@ public class CodegenEngine {
     // To be initialized in constructor
     private final Model model;
     private final ServiceShape serviceShape;
-    private final PluginContext pluginContext;
 
     /**
      * This should only be called by {@link Builder#build()},
@@ -71,8 +72,7 @@ public class CodegenEngine {
             final Optional<Path> includeDafnyFile,
             final boolean awsSdkStyle,
             final boolean localServiceTest,
-            final boolean generateProjectFiles,
-            final PluginContext pluginContext
+            final boolean generateProjectFiles
     ) {
         // To be provided to constructor
         this.dependentModelPaths = dependentModelPaths;
@@ -90,7 +90,6 @@ public class CodegenEngine {
                 : serviceModel;
 
         this.serviceShape = ModelUtils.serviceFromNamespace(this.model, this.namespace);
-        this.pluginContext = pluginContext;
     }
 
     /**
@@ -249,11 +248,45 @@ public class CodegenEngine {
     }
 
     private void generatePython() {
+        ObjectNode pythonSettings = ObjectNode.builder()
+            .withMember("service", serviceShape.getId().toString())
+
+            // TODO-Python: `module` SHOULD be configured within the `smithy-build.json` file;
+            // possibly at `dafny-client-codegen.targetLanguages.python.moduleVersion`.
+            // This is Smithy-Python specific configuration.
+            // This dictates the name of the generated Python package.
+            // TODO: This depends on Dafny extending the `dafny-client-codegen.targetLanguages` key
+            // to support storing language-specific configuration.
+            // For now, assume `module` is a slight transformation of the model namespace.
+            .withMember("module", namespace.replace(".", "_").toLowerCase(Locale.ROOT))
+
+            // TODO-Python: `moduleVersion` SHOULD be configured within the `smithy-build.json` file;
+            // possibly at `dafny-client-codegen.targetLanguages.python.moduleVersion`.
+            // This is Smithy-Python specific configuration.
+            // This dictates the version of the smithygenerated code, but this is unused;
+            //   Polymorph wraps the smithygenerated code in a module with an independent
+            //   module version.
+            // TODO: This depends on Dafny extending the `dafny-client-codegen.targetLanguages` key
+            // to support storing language-specific configuration.
+            // For now, hardcode this to 0.0.1.
+            .withMember("moduleVersion", "0.0.1")
+
+            // TODO-Python: Extend as part of AWS SDKs and refactor to look at `.awsSdkStyle` config.
+            // TODO: DafnyClientCodegenPlugin MUST add support for other protocols besides AWS SDKs.
+            // Right now, DafnyClientCodegenPlugin hardcodes AwsSdkStyle to true.
+            // This would prevent us from using the standard Smithy build process
+            //   to build any Polymorph localServices.
+            .withMember("protocol", "aws.polymorph#localService")
+            .build();
+
+        final PluginContext pluginContext = PluginContext.builder()
+            .model(model)
+            .fileManifest(FileManifest.create(targetLangOutputDirs.get(TargetLanguage.PYTHON)))
+            .settings(pythonSettings)
+            .build();
+
         DafnyPythonClientCodegenPlugin pythonClientCodegenPlugin = new DafnyPythonClientCodegenPlugin();
-        // TODO: Determine which of these we need, and create a PR against Smithy-Python
-        // with the required changes from lucasmcdonald3/smithy-python
-        pythonClientCodegenPlugin.disablePerformDefaultCodegenTransforms();
-        pythonClientCodegenPlugin.disableCreateDedicatedInputsAndOutputs();
+
         if (this.awsSdkStyle) {
             pythonClientCodegenPlugin.setGenerationType(GenerationType.AWS_SDK);
         } else if (this.localServiceTest) {
@@ -275,7 +308,6 @@ public class CodegenEngine {
         private boolean awsSdkStyle = false;
         private boolean localServiceTest = false;
         private boolean generateProjectFiles = false;
-        private PluginContext pluginContext;
 
         public Builder() {}
 
@@ -354,11 +386,6 @@ public class CodegenEngine {
             return this;
         }
 
-        public Builder withPluginContext(final PluginContext pluginContext) {
-            this.pluginContext = pluginContext;
-            return this;
-        }
-
         public CodegenEngine build() {
             final Model serviceModel = Objects.requireNonNull(this.serviceModel);
             final Path[] dependentModelPaths = this.dependentModelPaths == null
@@ -395,8 +422,7 @@ public class CodegenEngine {
                     includeDafnyFile,
                     this.awsSdkStyle,
                     this.localServiceTest,
-                    this.generateProjectFiles,
-                    this.pluginContext
+                    this.generateProjectFiles
             );
         }
     }

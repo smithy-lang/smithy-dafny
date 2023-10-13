@@ -30,7 +30,7 @@ jobs:
     strategy:
       matrix:
         library: [
-          # TestModels/dafny-dependencies/StandardLibrary, # This stores current Polymorph dependencies that all TestModels depend on
+          TestModels/dafny-dependencies/StandardLibrary,
           TestModels/Aggregate,
           # TestModels/AggregateReferences,
           TestModels/Constraints,
@@ -86,7 +86,7 @@ jobs:
       - name: Setup Dafny
         uses: dafny-lang/setup-dafny-action@v1.6.1
         with:
-          dafny-version: 'nightly-latest'
+          dafny-version: '4.3.0'
 
       - name: Setup Python for running tests
         uses: actions/setup-python@v4

@@ -3,15 +3,6 @@
 
 package software.amazon.polymorph;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.util.Iterator;
-import java.util.Map.Entry;
-
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
@@ -24,14 +15,8 @@ import org.slf4j.LoggerFactory;
 
 import software.amazon.polymorph.CodegenEngine.TargetLanguage;
 import software.amazon.polymorph.smithyjava.generator.CodegenSubject.AwsSdkVersion;
-import software.amazon.polymorph.utils.ModelUtils;
-import software.amazon.smithy.build.FileManifest;
-import software.amazon.smithy.build.PluginContext;
-import software.amazon.smithy.dafny.codegen.DafnyClientCodegenPlugin;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.loader.ModelAssembler;
-import software.amazon.smithy.model.node.ObjectNode;
-import software.amazon.smithy.model.shapes.ServiceShape;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -82,52 +67,12 @@ public class CodegenCli {
         cliArguments.outputDotnetDir.ifPresent(path -> outputDirs.put(TargetLanguage.DOTNET, path));
         cliArguments.outputPythonDir.ifPresent(path -> outputDirs.put(TargetLanguage.PYTHON, path));
 
-        ObjectNode.Builder objectNodeBuilder = ObjectNode.builder();
-        // If a smithy-build.json is provided, parse it for settings to pipe into PluginContext
-        if (cliArguments.smithyBuildFilePath.isPresent()) {
-            String json;
-            try {
-                json = Files.readString(cliArguments.smithyBuildFilePath.get());
-            } catch (IOException e) {
-                throw new RuntimeException("IOException while reading smithy-build.json", e);
-            }
-
-            JsonFactory factory = new JsonFactory();
-            ObjectMapper mapper = new ObjectMapper(factory);
-            JsonNode rootNode;
-            try {
-                rootNode = mapper.readTree(json);
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException("JsonProcessingException while processing smithy-build.json", e);
-            }
-
-            Iterator<Entry<String, JsonNode>> attributes = rootNode
-                // MUST be "plugins" per smithy-build.json spec
-                .findValue("plugins")
-                // MUST be same plugin name as the Dafny codegen plugin
-                .findValue(DafnyClientCodegenPlugin.pluginName).fields();
-
-            while(attributes.hasNext()) {
-                Entry<String, JsonNode> entry = attributes.next();
-                // Remove leading and trailing " on the attribute value before adding it to settings
-                objectNodeBuilder.withMember(entry.getKey(), entry.getValue().toString().replace("\"", ""));
-            }
-        }
-
-        final ServiceShape serviceShape = ModelUtils.serviceFromNamespace(serviceModel, cliArguments.namespace);
-        final PluginContext pluginContext = PluginContext.builder()
-            .model(serviceModel)
-            .fileManifest(FileManifest.create(cliArguments.outputPythonDir().orElse(cliArguments.modelPath)))
-            .settings(objectNodeBuilder.build())
-            .build();
-
         final CodegenEngine.Builder engineBuilder = new CodegenEngine.Builder()
                 .withServiceModel(serviceModel)
                 .withDependentModelPaths(cliArguments.dependentModelPaths)
                 .withNamespace(cliArguments.namespace)
                 .withTargetLangOutputDirs(outputDirs)
                 .withAwsSdkStyle(cliArguments.awsSdkStyle)
-                .withPluginContext(pluginContext)
                 .withLocalServiceTest(cliArguments.localServiceTest);
         cliArguments.javaAwsSdkVersion.ifPresent(engineBuilder::withJavaAwsSdkVersion);
         cliArguments.includeDafnyFile.ifPresent(engineBuilder::withIncludeDafnyFile);
@@ -146,11 +91,6 @@ public class CodegenCli {
             .desc("directory for the model file[s] (.smithy or json format).")
             .hasArg()
             .required()
-            .build())
-          .addOption(Option.builder()
-            .longOpt("smithy-build")
-            .desc("path to the smithy-build.json file")
-            .hasArg()
             .build())
           .addOption(Option.builder("d")
             .longOpt("dependent-model")
@@ -211,7 +151,6 @@ public class CodegenCli {
 
     private record CliArguments(
             Path modelPath,
-            Optional<Path> smithyBuildFilePath,
             Path[] dependentModelPaths,
             String namespace,
             Optional<Path> outputDotnetDir,
@@ -237,8 +176,6 @@ public class CodegenCli {
             }
 
             final Path modelPath = Path.of(commandLine.getOptionValue('m'));
-            final Optional<Path> smithyBuildFilePath = Optional.ofNullable(commandLine.getOptionValue("smithy-build"))
-                    .map(Paths::get);
 
             final Path[] dependentModelPaths = Arrays
               .stream(commandLine.getOptionValues('d'))
@@ -282,7 +219,7 @@ public class CodegenCli {
             }
 
             return Optional.of(new CliArguments(
-                    modelPath, smithyBuildFilePath, dependentModelPaths, namespace,
+                    modelPath, dependentModelPaths, namespace,
                     outputDotnetDir, outputJavaDir, outputPythonDir, outputDafnyDir,
                     javaAwsSdkVersion, includeDafnyFile, awsSdkStyle,
                     localServiceTest
