@@ -406,7 +406,7 @@ _mv_internaldafny_python:
 	# Remove any previously generated Dafny code in src/, then copy in newly-generated code
 	rm -rf $(LIBRARY_ROOT)/runtimes/python/src/$(PYTHON_MODULE_NAME)/internaldafny/generated/
 	mkdir $(LIBRARY_ROOT)/runtimes/python/src/$(PYTHON_MODULE_NAME)/internaldafny/generated/
-	mv runtimes/python/dafny_src-py/*.py $(LIBRARY_ROOT)/runtimes/python/src/$(PYTHON_MODULE_NAME)/internaldafny/generated
+	mv dafny_src-py/*.py $(LIBRARY_ROOT)/runtimes/python/src/$(PYTHON_MODULE_NAME)/internaldafny/generated
 	rm -rf $(LIBRARY_ROOT)/runtimes/python/dafny_src-py
 	# Remove any previously generated Dafny code in test/, then copy in newly-generated code
 	rm -rf $(LIBRARY_ROOT)/runtimes/python/test/internaldafny/generated
