@@ -6,7 +6,7 @@ CORES=2
 include ../SharedMakefile.mk
 
 NAMESPACE=simple.localService
-# TODO: Move to smithy-build.json once language-specific config is supported
+# TODO: Move to smithy-build.json once Dafny plugin supports language-specific config
 PYTHON_MODULE_NAME=simple_localservice
 
 # This project has no dependencies 
