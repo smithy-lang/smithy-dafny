@@ -73,6 +73,11 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
             return dataSource + ".(*%s).impl".formatted(resourceShape.toShapeId().getName());
         }
 
+        if (resourceOrService.asServiceShape().isPresent()) {
+            ServiceShape resourceShape = resourceOrService.asServiceShape().get();
+            return dataSource + ".(*%s).impl".formatted(resourceShape.toShapeId().getName());
+        }
+
         throw new UnsupportedOperationException("Unknown referenceStructureShape type: " + shape);
     }
 
