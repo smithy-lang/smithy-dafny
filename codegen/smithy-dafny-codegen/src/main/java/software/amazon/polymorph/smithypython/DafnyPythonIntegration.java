@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import software.amazon.polymorph.smithypython.Constants.GenerationType;
+import software.amazon.polymorph.smithypython.customize.AwsSdkShimFileWriter;
 import software.amazon.polymorph.smithypython.customize.ConfigFileWriter;
 import software.amazon.polymorph.smithypython.customize.DafnyImplInterfaceFileWriter;
 import software.amazon.polymorph.smithypython.customize.DafnyProtocolFileWriter;
@@ -167,6 +168,8 @@ public final class DafnyPythonIntegration implements PythonIntegration {
             new ReferencesFileWriter().customizeFileForServiceShape(serviceShape, codegenContext);
         } if (shouldGenerateTestShim(codegenContext)) {
             new ShimFileWriter().customizeFileForServiceShape(serviceShape, codegenContext);
+        } if (shouldGenerateAwsSdkShim(codegenContext)) {
+            new AwsSdkShimFileWriter().customizeFileForServiceShape(serviceShape, codegenContext);
         }
     }
 
@@ -191,8 +194,11 @@ public final class DafnyPythonIntegration implements PythonIntegration {
     private boolean shouldGenerateTestShim(GenerationContext codegenContext) {
         // For wrapped local service test, generate the Shim
         return ((DafnyPythonSettings) codegenContext.settings()).getGenerationType()
-            .equals(GenerationType.WRAPPED_LOCAL_SERVICE_TEST)
-            || ((DafnyPythonSettings) codegenContext.settings()).getGenerationType()
+            .equals(GenerationType.WRAPPED_LOCAL_SERVICE_TEST);
+    }
+
+    private boolean shouldGenerateAwsSdkShim(GenerationContext codegenContext) {
+        return ((DafnyPythonSettings) codegenContext.settings()).getGenerationType()
             .equals(GenerationType.AWS_SDK);
     }
 

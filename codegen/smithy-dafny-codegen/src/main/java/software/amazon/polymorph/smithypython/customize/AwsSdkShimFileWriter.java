@@ -7,13 +7,13 @@ import java.util.stream.Collectors;
 import software.amazon.polymorph.smithypython.Constants.GenerationType;
 import software.amazon.polymorph.smithypython.extensions.DafnyPythonSettings;
 import software.amazon.polymorph.smithypython.nameresolver.AwsSdkNameResolver;
+import software.amazon.polymorph.smithypython.nameresolver.DafnyNameResolver;
+import software.amazon.polymorph.smithypython.nameresolver.SmithyNameResolver;
+import software.amazon.polymorph.smithypython.nameresolver.Utils;
 import software.amazon.polymorph.smithypython.shapevisitor.AwsSdkToDafnyShapeVisitor;
 import software.amazon.polymorph.smithypython.shapevisitor.DafnyToAwsSdkShapeVisitor;
 import software.amazon.polymorph.smithypython.shapevisitor.DafnyToSmithyShapeVisitor;
 import software.amazon.polymorph.smithypython.shapevisitor.SmithyToDafnyShapeVisitor;
-import software.amazon.polymorph.smithypython.nameresolver.DafnyNameResolver;
-import software.amazon.polymorph.smithypython.nameresolver.SmithyNameResolver;
-import software.amazon.polymorph.smithypython.nameresolver.Utils;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
@@ -29,42 +29,39 @@ import software.amazon.smithy.python.codegen.PythonWriter;
  * Other Dafny-generated Python code may use the shim to interact with this project's Dafny implementation
  *   through the Polymorph wrapper.
  */
-public class ShimFileWriter implements CustomFileWriter {
+public class AwsSdkShimFileWriter implements CustomFileWriter {
 
   @Override
   public void customizeFileForServiceShape(
       ServiceShape serviceShape, GenerationContext codegenContext) {
-    String typesModulePrelude = DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(serviceShape.getId());
+    String typesModulePrelude = AwsSdkNameResolver.getDafnyPythonTypesModuleNameForShape(serviceShape.getId());
     String moduleName = codegenContext.settings().getModuleName();
     codegenContext.writerDelegator().useFileWriter(moduleName + "/shim.py", "", writer -> {
-      writer.addImport(".errors", "ServiceError");
-      writer.addImport(".errors", "CollectionOfErrors");
-      writer.addImport(".errors", "OpaqueError");
-
       writer.write(
           """
           import Wrappers
-          import asyncio
+          from botocore.exceptions import ClientError
           import $L
-          import $L.smithygenerated.client as client_impl
                           
-          def smithy_error_to_dafny_error(e: ServiceError):
+          def smithy_error_to_dafny_error(e: ClientError):
               '''
               Converts the provided native Smithy-modelled error
               into the corresponding Dafny error.
               '''
               ${C|}
                           
-          class $L($L.$L):
-              def __init__(self, _impl: client_impl) :
+          # TODO: Typehint the shim class
+          class $L:
+              def __init__(self, _impl) :
                   self._impl = _impl
                           
               ${C|}
               
-              """, typesModulePrelude, moduleName,
-          writer.consumer(w -> generateSmithyErrorToDafnyErrorBlock(codegenContext, serviceShape, w)),
+              """, typesModulePrelude,
+          writer.consumer(w -> generateAwsSdkErrorToDafnyErrorBlock(codegenContext, serviceShape, w)),
           SmithyNameResolver.shimForService(serviceShape),
-          typesModulePrelude, DafnyNameResolver.getDafnyClientInterfaceTypeForServiceShape(serviceShape),
+          // TODO: Uncomment to type out the shim class
+          // typesModulePrelude, DafnyNameResolver.getDafnyClientInterfaceTypeForServiceShape(serviceShape),
           writer.consumer(w -> generateOperationsBlock(codegenContext, serviceShape, w))
       );
     });
@@ -76,7 +73,7 @@ public class ShimFileWriter implements CustomFileWriter {
    * @param serviceShape
    * @param writer
    */
-  private void generateSmithyErrorToDafnyErrorBlock(
+  private void generateAwsSdkErrorToDafnyErrorBlock(
       GenerationContext codegenContext, ServiceShape serviceShape, PythonWriter writer) {
 
     // Write modelled error converters for this service
@@ -90,11 +87,11 @@ public class ShimFileWriter implements CustomFileWriter {
     for (ShapeId errorShapeId : errorShapeSet) {
       SmithyNameResolver.importSmithyGeneratedTypeForShape(writer, errorShapeId, codegenContext);
       writer.write("""
-              if isinstance(e, $L):
-                  return $L.$L(message=e.message)
+              if e.response['Error']['Code'] == "$L":
+                  return $L.$L(message=e.response['Error']['Code'])
               """,
           errorShapeId.getName(),
-          DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(errorShapeId),
+          AwsSdkNameResolver.getDafnyPythonTypesModuleNameForShape(errorShapeId),
           DafnyNameResolver.getDafnyTypeForError(errorShapeId)
       );
     }
@@ -246,8 +243,8 @@ public class ShimFileWriter implements CustomFileWriter {
               from . import $L
               unwrapped_request: $L = $L.$L
               try:
-                  wrapped_response = $Lself._impl.$L(unwrapped_request)$L
-              except ServiceError as e:
+                  wrapped_response = $Lself._impl.$L(**unwrapped_request)$L
+              except ClientError as e:
                   return Wrappers.Result_Failure(smithy_error_to_dafny_error(e))
                       
               """,

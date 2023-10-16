@@ -1,10 +1,10 @@
 [tool.poetry]
-name = "trent-service"
+name = "amazon-cryptography-internal-dafny-shim-kms"
 version = "0.1.0"
 description = ""
 authors = ["AWS <aws-arg-dafny@amazon.com>"]
 packages = [
-    { include = "trent_service", from = "src" }
+    { include = "com_amazonaws_kms", from = "src" }
 ]
 # Include all of the following .gitignored files in package distributions,
 # even though it is not included in version control
@@ -13,14 +13,14 @@ include = ["**/smithygenerated/*.py", "**/dafnygenerated/*.py"]
 [tool.poetry.dependencies]
 python = "^3.11.0"
 boto3 = "^1.28.38"
-trent-service-externs = { path = "src/trent_service/extern", develop = false}
+amazon-cryptography-internal-dafny-shim-kms-externs = { path = "src/com_amazonaws_kms/extern", develop = false}
 # TODO: Depend on PyPi once Smithy-Python publishes their Python package there
 smithy-python = { path = "../../../../../submodules/smithy-python/python-packages/smithy-python", develop = false}
 standard-library = {path = "../../../../dafny-dependencies/StandardLibrary/runtimes/python", develop = false}
 
 [tool.poetry.group.test.dependencies]
 pytest = "^7.4.0"
-trent-service-test-internaldafny = { path = "test/internaldafny", develop = false}
+amazon-cryptography-internal-dafny-shim-kms-test-internaldafny = { path = "test/internaldafny", develop = false}
 
 [build-system]
 requires = ["poetry-core"]

@@ -6,7 +6,7 @@ CORES=2
 include ../../SharedMakefile.mk
 
 NAMESPACE=com.amazonaws.kms
-PYTHON_MODULE_NAME=trent_service
+PYTHON_MODULE_NAME=com_amazonaws_kms
 AWS_SDK_CMD=--aws-sdk
 
 # This project has no dependencies

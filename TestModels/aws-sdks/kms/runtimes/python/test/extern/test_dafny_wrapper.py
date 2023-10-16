@@ -6,14 +6,10 @@ pytest will find and execute the `test_dafny` method below,
 which will execute the `test.py` file in the `dafny` directory.
 """
 
-import glob
-from os.path import isfile, join
-import importlib
-
 # Import modules required for Dafny-generated tests.
 # This is not generated; these must be manually added.
 
-from trent_service.extern import wrapped_trent_service
+from com_amazonaws_kms.extern import wrapped_kms_shim
 
 # End import modules required for Dafny-generated tests
 

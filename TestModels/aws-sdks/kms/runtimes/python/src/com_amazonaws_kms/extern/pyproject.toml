@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "trent-service-externs"
+name = "amazon-cryptography-internal-dafny-shim-kms-externs"
 version = "0.1.0"
 description = ""
 authors = ["AWS <aws-arg-dafny@amazon.com>"]
@@ -15,7 +15,7 @@ include = ["*.py"]
 
 [tool.poetry.dependencies]
 python = "^3.11.0"
-trent-service-internaldafny = { path = "../internaldafny", develop = false}
+amazon-cryptography-internal-dafny-shim-kms-internaldafny = { path = "../internaldafny", develop = false}
 
 [build-system]
 requires = ["poetry-core"]

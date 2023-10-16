@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "trent-service-internaldafny"
+name = "amazon-cryptography-internal-dafny-shim-kms-internaldafny"
 version = "0.1.0"
 description = ""
 authors = ["AWS <aws-arg-dafny@amazon.com>"]

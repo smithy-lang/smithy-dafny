@@ -2,16 +2,9 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import software_amazon_cryptography_services_kms_internaldafny
-from trent_service.smithygenerated.shim import TrentServiceShim
+from com_amazonaws_kms.smithygenerated.shim import TrentServiceShim
 import Wrappers
 import boto3
-
-# @staticmethod
-# def WrappedTrentService(config):
-#     wrapped_config = dafny_config_to_smithy_config(config)
-#     impl = TrentService(wrapped_config)
-#     wrapped_client = TrentServiceShim(impl)
-#     return Wrappers.Result_Success(wrapped_client)
 
 @staticmethod
 def WrappedTrentService():
