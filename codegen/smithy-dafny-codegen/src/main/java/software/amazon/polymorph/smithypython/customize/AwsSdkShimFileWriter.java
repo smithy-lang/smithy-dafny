@@ -85,7 +85,7 @@ public class AwsSdkShimFileWriter implements CustomFileWriter {
             .map(Shape::getId)
             .collect(Collectors.toSet()));
     for (ShapeId errorShapeId : errorShapeSet) {
-      SmithyNameResolver.importSmithyGeneratedTypeForShape(writer, errorShapeId, codegenContext);
+//      SmithyNameResolver.importSmithyGeneratedTypeForShape(writer, errorShapeId, codegenContext);
       writer.write("""
               if e.response['Error']['Code'] == "$L":
                   return $L.$L(message=e.response['Error']['Code'])
@@ -136,21 +136,6 @@ public class AwsSdkShimFileWriter implements CustomFileWriter {
         }
       }
     }
-
-    // Add service-specific CollectionOfErrors
-    writer.write("""
-            if isinstance(e, CollectionOfErrors):
-                return $L.Error_CollectionOfErrors(message=e.message, list=e.list)
-            """,
-        DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(serviceShape.getId())
-    );
-    // Add service-specific OpaqueError
-    writer.write("""
-            if isinstance(e, OpaqueError):
-                return $L.Error_Opaque(obj=e.obj)
-            """,
-        DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(serviceShape.getId())
-    );
   }
 
   /**
@@ -172,9 +157,9 @@ public class AwsSdkShimFileWriter implements CustomFileWriter {
       OperationShape operationShape = codegenContext.model().expectShape(operationShapeId, OperationShape.class);
 
       // Add imports for operation errors
-      for (ShapeId errorShapeId : operationShape.getErrors(serviceShape)) {
-        SmithyNameResolver.importSmithyGeneratedTypeForShape(writer, errorShapeId, codegenContext);
-      }
+//      for (ShapeId errorShapeId : operationShape.getErrors(serviceShape)) {
+//        SmithyNameResolver.importSmithyGeneratedTypeForShape(writer, errorShapeId, codegenContext);
+//      }
 
       ShapeId inputShape = operationShape.getInputShape();
       ShapeId outputShape = operationShape.getOutputShape();
