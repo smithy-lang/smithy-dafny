@@ -172,7 +172,7 @@ module MultiKeyring {
           //# - If the generator keyring fails OnEncrypt, this OnEncrypt MUST also
           //# fail.
         :- Need(onEncryptOutput.Success?,
-                Types.AwsCryptographicMaterialProvidersException( message := "Generator keyring failed to generate plaintext data key"));
+                if onEncryptOutput.Failure? then onEncryptOutput.error else Types.AwsCryptographicMaterialProvidersException( message := "Unexpected failure. Input to Need is !Success.") );
 
           //= aws-encryption-sdk-specification/framework/multi-keyring.md#onencrypt
           //# - If the generator keyring returns encryption materials missing a
