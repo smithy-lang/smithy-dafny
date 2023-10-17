@@ -508,48 +508,48 @@ module AwsCryptographyMaterialProvidersOperations refines AbstractAwsCryptograph
         var cmc := new LocalCMC.LocalCMC(0, 1);
         return Success(cmc);
       case SingleThreaded(c) =>
-        var cmc := new LocalCMC.LocalCMC(c.entryCapacity as nat, c.entryPruningTailSize.UnwrapOr(1) as nat);
+        var cmc := new LocalCMC.LocalCMC(
+          c.entryCapacity as nat,
+          OptionalCountingNumber(c.entryPruningTailSize).UnwrapOr(1) as nat
+        );
         return Success(cmc);
       case MultiThreaded(c) =>
-        var cmc := new LocalCMC.LocalCMC(c.entryCapacity as nat, c.entryPruningTailSize.UnwrapOr(1) as nat);
+        var cmc := new LocalCMC.LocalCMC(
+          c.entryCapacity as nat,
+          OptionalCountingNumber(c.entryPruningTailSize).UnwrapOr(1) as nat
+        );
         var synCmc := new SynchronizedLocalCMC.SynchronizedLocalCMC(cmc);
         return Success(synCmc);
       case StormTracking(c) =>
-        var cmc := new StormTracker.StormTracker(c);
+        var cmc := new StormTracker.StormTracker(
+          c.( entryPruningTailSize := OptionalCountingNumber(c.entryPruningTailSize) )
+        );
         var synCmc := new StormTrackingCMC.StormTrackingCMC(cmc);
         return Success(synCmc);
     }
   }
-  /*
-      :- Need(input.entryCapacity >= 1,
-              Types.AwsCryptographicMaterialProvidersException(message := "Cache Size MUST be greater than 0"));
-  
-      var entryPruningTailSize: nat;
-  
-      if input.entryPruningTailSize.Some? {
-        :- Need(input.entryPruningTailSize.value >= 1,
-                Types.AwsCryptographicMaterialProvidersException(
-                  message := "Entry Pruning Tail Size MUST be greater than or equal to 1."));
-        entryPruningTailSize := input.entryPruningTailSize.value as nat;
-      } else {
-        entryPruningTailSize := 1;
-      }
-  
-      if input.trackerSettings.None? || input.trackerSettings.value.gracePeriod > 0 {
-        var cmc := new StormTracker.StormTracker(
-          entryCapacity := input.entryCapacity as nat,
-          entryPruningTailSize := entryPruningTailSize,
-          trackerSettings := input.trackerSettings
-        );
-        var synCmc := new StormTrackingCMC.StormTrackingCMC(cmc);
-        return Success(synCmc);
-      } else {
-        var cmc := new LocalCMC.LocalCMC(input.entryCapacity as nat, entryPruningTailSize);
-        var synCmc := new SynchronizedLocalCMC.SynchronizedLocalCMC(cmc);
-        return Success(synCmc);
-      }
-    }
-  */
+
+  // Smithy-Dafny currently uses `int` in Java to represent
+  // a `integer` in Smithy.
+  // This is problematic because in Java `int` can not be `null`.
+  // This means that an unset `int` will be `0`.
+  // When crossing back and forth between Dafny and Java then
+  // an optional integer will never be `None`.
+  // For `CountingNumber` this can be identified by checking for `0`
+  function method OptionalCountingNumber(c: Option<int32>)
+    : Option<CountingNumber>
+  {
+    if c.Some? && c.value <= 0 then
+      Wrappers.None
+    else
+      c
+  }
+
+  lemma OptionalCountingNumberCorrect(c: int32)
+    ensures 1 <= c ==> OptionalCountingNumber(Some(c)) == Some(c)
+    ensures c <= 0 ==> OptionalCountingNumber(Some(c)) == Wrappers.None
+  {}
+
   predicate CreateDefaultClientSupplierEnsuresPublicly(input: CreateDefaultClientSupplierInput, output: Result<IClientSupplier, Error>)
   {true}
 
