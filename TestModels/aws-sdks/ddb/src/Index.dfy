@@ -3,7 +3,7 @@
 
 include "../Model/ComAmazonawsDynamodbTypes.dfy"
 
-module {:extern "software.amazon.cryptography.services.dynamodb.internaldafny"} Com.Amazonaws.Dynamodb refines AbstractComAmazonawsDynamodbService {
+module {:extern "software_amazon_cryptography_services_dynamodb_internaldafny"} Com_Amazonaws_Dynamodb refines AbstractComAmazonawsDynamodbService {
 
   function method DefaultDynamoDBClientConfigType() : DynamoDBClientConfigType {
     DynamoDBClientConfigType

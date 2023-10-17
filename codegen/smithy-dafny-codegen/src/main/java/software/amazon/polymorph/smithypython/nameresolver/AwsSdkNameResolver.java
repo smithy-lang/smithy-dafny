@@ -93,6 +93,8 @@ public class AwsSdkNameResolver {
     switch (smithyNamespace) {
       case "com.amazonaws.kms":
         return "software.amazon.cryptography.services.kms";
+      case "com.amazonaws.dynamodb":
+        return "software.amazon.cryptography.services.dynamodb";
       default:
         throw new IllegalArgumentException("Python codegen for smithyNamespace not supported: " + smithyNamespace);
     }
@@ -156,5 +158,34 @@ public class AwsSdkNameResolver {
    */
   public static String getDafnyTypeForShape(Shape shape) {
     return getDafnyTypeForShape(shape.getId());
+  }
+
+  /**
+   * Imports the Dafny-generated Python type corresponding to the provided unionShape.
+   * ex. example.namespace.ExampleUnion:IntegerValue -> "from example_namespace_internaldafny_types
+   *      import ExampleUnion_IntegerValue"
+   * @param unionShape
+   * @return
+   */
+  public static void importDafnyTypeForUnion(PythonWriter writer,
+      UnionShape unionShape, MemberShape memberShape) {
+    writer.addStdlibImport(
+        getDafnyPythonTypesModuleNameForShape(unionShape.getId()),
+        getDafnyTypeForUnion(unionShape, memberShape)
+    );
+  }
+
+  /**
+   * Returns a String representing the corresponding Dafny type
+   *   for the provided UnionShape and one of its MemberShapes.
+   * This MUST ONLY be used for unions and their members; for other shapes use `getDafnyTypeForShape`.
+   * ex. example.namespace.ExampleUnion:IntegerValue -> "ExampleUnion_IntegerValue"
+   * @param unionShape
+   * @param memberShape
+   * @return
+   */
+  public static String getDafnyTypeForUnion(UnionShape unionShape,
+      MemberShape memberShape) {
+    return unionShape.getId().getName() + "_" + memberShape.getMemberName();
   }
 }

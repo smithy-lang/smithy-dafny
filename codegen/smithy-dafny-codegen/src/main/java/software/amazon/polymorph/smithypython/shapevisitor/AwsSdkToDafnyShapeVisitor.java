@@ -342,7 +342,7 @@ EncryptionAlgorithm=Option_Some(Seq(input["EncryptionAlgorithm"]))
 
     @Override
     public String timestampShape(TimestampShape shape) {
-      return getDefault(shape);
+      return dataSource;
     }
 
     @Override
@@ -417,9 +417,7 @@ EncryptionAlgorithm=Option_Some(Seq(input["EncryptionAlgorithm"]))
                 );
                 shouldOpenNewIfBlock = false;
 
-                DafnyNameResolver.importDafnyTypeForUnion(conversionWriter, unionShape, memberShape);
-                SmithyNameResolver.importSmithyGeneratedTypeForUnion(conversionWriter, context, unionShape,
-                    memberShape);
+                AwsSdkNameResolver.importDafnyTypeForUnion(conversionWriter, unionShape, memberShape);
               }
 
               // Write case to handle if union member does not match any of the above cases

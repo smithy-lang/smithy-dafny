@@ -292,7 +292,7 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
 
     @Override
     public String timestampShape(TimestampShape shape) {
-      return getDefault(shape);
+      return dataSource;
     }
 
     @Override
