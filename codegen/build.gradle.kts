@@ -84,11 +84,11 @@ subprojects {
             archiveClassifier.set("sources")
         }
 
-        /*tasks.register<Jar>("javadocJar") {
+        tasks.register<Jar>("javadocJar") {
             metaInf.with(licenseSpec)
             from(tasks.javadoc)
             archiveClassifier.set("javadoc")
-        }*/
+        }
 
         // Configure jars to include license related info
         tasks.jar {
@@ -100,7 +100,7 @@ subprojects {
         }
 
         // Always run javadoc after build.
-        /*tasks["build"].finalizedBy(tasks["javadoc"])*/
+        tasks["build"].finalizedBy(tasks["javadoc"])
 
         /*
          * Maven
@@ -131,7 +131,7 @@ subprojects {
 
                     // Ship the source and javadoc jars.
                     artifact(tasks["sourcesJar"])
-                    /*artifact(tasks["javadocJar"])*/
+                    artifact(tasks["javadocJar"])
 
                     // Include extra information in the POMs.
                     afterEvaluate {
