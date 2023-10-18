@@ -13,12 +13,13 @@
  * permissions and limitations under the License.
  */
 
-package software.amazon.polymorph.smithypython;
+package software.amazon.polymorph.smithypython.localservice;
 
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
+import software.amazon.polymorph.smithypython.Constants;
 import software.amazon.polymorph.smithypython.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithypython.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.smithypython.nameresolver.Utils;
@@ -48,7 +49,7 @@ import software.amazon.smithy.utils.SmithyUnstableApi;
  * body and error handling.
  */
 @SmithyUnstableApi
-public abstract class DafnyPythonProtocolGenerator implements ProtocolGenerator {
+public abstract class DafnyPythonLocalServiceProtocolGenerator implements ProtocolGenerator {
 
   /**
    * Create a Symbol representing shapes inside the generated .dafny_protocol file.

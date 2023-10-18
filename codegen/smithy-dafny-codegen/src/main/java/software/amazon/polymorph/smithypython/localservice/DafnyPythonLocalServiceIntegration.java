@@ -13,7 +13,7 @@
  * permissions and limitations under the License.
  */
 
-package software.amazon.polymorph.smithypython;
+package software.amazon.polymorph.smithypython.localservice;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import software.amazon.polymorph.smithypython.Constants.GenerationType;
+import software.amazon.polymorph.smithypython.localservice.SendRequestInterceptor;
 import software.amazon.polymorph.smithypython.customize.AwsSdkShimFileWriter;
 import software.amazon.polymorph.smithypython.customize.ConfigFileWriter;
 import software.amazon.polymorph.smithypython.customize.DafnyImplInterfaceFileWriter;
@@ -31,6 +32,7 @@ import software.amazon.polymorph.smithypython.customize.PluginFileWriter;
 import software.amazon.polymorph.smithypython.customize.ReferencesFileWriter;
 import software.amazon.polymorph.smithypython.customize.ShimFileWriter;
 import software.amazon.polymorph.smithypython.extensions.DafnyPythonSettings;
+import software.amazon.polymorph.smithypython.localservice.DafnyPythonLocalServiceProtocolGenerator;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolReference;
 import software.amazon.smithy.model.shapes.EntityShape;
@@ -46,7 +48,7 @@ import software.amazon.smithy.python.codegen.integration.PythonIntegration;
 import software.amazon.smithy.utils.CodeInterceptor;
 import software.amazon.smithy.utils.CodeSection;
 
-public final class DafnyPythonIntegration implements PythonIntegration {
+public final class DafnyPythonLocalServiceIntegration implements PythonIntegration {
 
     private final RuntimeClientPlugin dafnyImplRuntimeClientPlugin = RuntimeClientPlugin.builder()
         .configProperties(
@@ -149,10 +151,8 @@ public final class DafnyPythonIntegration implements PythonIntegration {
      */
     private void customizeForNonServiceOperationShapes(Set<ShapeId> operationShapeIds,
             GenerationContext codegenContext) {
-        if (shouldGenerateLocalService(codegenContext)) {
             new ReferencesFileWriter().customizeFileForNonServiceOperationShapes(operationShapeIds,
                 codegenContext);
-        }
     }
 
     /**
@@ -163,7 +163,7 @@ public final class DafnyPythonIntegration implements PythonIntegration {
      */
     private void customizeForServiceShape(ServiceShape serviceShape,
             GenerationContext codegenContext) {
-        if (shouldGenerateLocalService(codegenContext)) {
+//        if (shouldGenerateLocalService(codegenContext)) {
             new PluginFileWriter().customizeFileForServiceShape(serviceShape, codegenContext);
             new DafnyImplInterfaceFileWriter().customizeFileForServiceShape(serviceShape,
                 codegenContext);
@@ -173,45 +173,16 @@ public final class DafnyPythonIntegration implements PythonIntegration {
             new ModelsFileWriter().customizeFileForServiceShape(serviceShape, codegenContext);
             new ConfigFileWriter().customizeFileForServiceShape(serviceShape, codegenContext);
             new ReferencesFileWriter().customizeFileForServiceShape(serviceShape, codegenContext);
-        } if (shouldGenerateTestShim(codegenContext)) {
+//        } if (shouldGenerateTestShim(codegenContext)) {
             new ShimFileWriter().customizeFileForServiceShape(serviceShape, codegenContext);
-        } if (shouldGenerateAwsSdkShim(codegenContext)) {
-            new AwsSdkShimFileWriter().customizeFileForServiceShape(serviceShape, codegenContext);
-        }
-    }
-
-    /**
-     * Returns true if Smithy-Dafny should generate code modelling a Dafny-generated Python localService.
-     * @param codegenContext
-     * @return
-     */
-    private boolean shouldGenerateLocalService(GenerationContext codegenContext) {
-        // For local service OR wrapped local service test, generate local service
-        return ((DafnyPythonSettings) codegenContext.settings()).getGenerationType()
-                    .equals(GenerationType.LOCAL_SERVICE)
-                || ((DafnyPythonSettings) codegenContext.settings()).getGenerationType()
-                    .equals(GenerationType.WRAPPED_LOCAL_SERVICE_TEST);
-    }
-
-    /**
-     * Returns true if Smithy-Dafny should generate code for a shim testing the localService.
-     * @param codegenContext
-     * @return
-     */
-    private boolean shouldGenerateTestShim(GenerationContext codegenContext) {
-        // For wrapped local service test, generate the Shim
-        return ((DafnyPythonSettings) codegenContext.settings()).getGenerationType()
-            .equals(GenerationType.WRAPPED_LOCAL_SERVICE_TEST);
-    }
-
-    private boolean shouldGenerateAwsSdkShim(GenerationContext codegenContext) {
-        return ((DafnyPythonSettings) codegenContext.settings()).getGenerationType()
-            .equals(GenerationType.AWS_SDK);
+//        } if (shouldGenerateAwsSdkShim(codegenContext)) {
+//            new AwsSdkShimFileWriter().customizeFileForServiceShape(serviceShape, codegenContext);
+//        }
     }
 
     @Override
     public List<ProtocolGenerator> getProtocolGenerators() {
-        return Collections.singletonList(new DafnyPythonProtocolGenerator() {
+        return Collections.singletonList(new DafnyPythonLocalServiceProtocolGenerator() {
             @Override
             public ShapeId getProtocol() {
                 return ShapeId.from("aws.polymorph#localService");

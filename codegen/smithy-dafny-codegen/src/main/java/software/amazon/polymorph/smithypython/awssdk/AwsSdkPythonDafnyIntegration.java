@@ -15,83 +15,24 @@
 
 package software.amazon.polymorph.smithypython.awssdk;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 import software.amazon.polymorph.smithypython.Constants.GenerationType;
-import software.amazon.polymorph.smithypython.DafnyPythonProtocolGenerator;
 import software.amazon.polymorph.smithypython.awssdk.extensions.DafnyPythonAwsSdkProtocolGenerator;
 import software.amazon.polymorph.smithypython.customize.AwsSdkShimFileWriter;
-import software.amazon.polymorph.smithypython.customize.ConfigFileWriter;
-import software.amazon.polymorph.smithypython.customize.DafnyImplInterfaceFileWriter;
-import software.amazon.polymorph.smithypython.customize.DafnyProtocolFileWriter;
-import software.amazon.polymorph.smithypython.customize.ErrorsFileWriter;
-import software.amazon.polymorph.smithypython.customize.ModelsFileWriter;
-import software.amazon.polymorph.smithypython.customize.PluginFileWriter;
-import software.amazon.polymorph.smithypython.customize.ReferencesFileWriter;
-import software.amazon.polymorph.smithypython.customize.ShimFileWriter;
 import software.amazon.polymorph.smithypython.extensions.DafnyPythonSettings;
-import software.amazon.smithy.aws.traits.protocols.RestJson1Trait;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolReference;
-import software.amazon.smithy.codegen.core.directed.GenerateServiceDirective;
-import software.amazon.smithy.model.shapes.EntityShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
-import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.python.codegen.ConfigProperty;
 import software.amazon.smithy.python.codegen.GenerationContext;
-import software.amazon.smithy.python.codegen.PythonSettings;
-import software.amazon.smithy.python.codegen.PythonWriter;
 import software.amazon.smithy.python.codegen.integration.ProtocolGenerator;
 import software.amazon.smithy.python.codegen.integration.PythonIntegration;
 import software.amazon.smithy.python.codegen.integration.RuntimeClientPlugin;
-import software.amazon.smithy.utils.CodeInterceptor;
-import software.amazon.smithy.utils.CodeSection;
 
 public final class AwsSdkPythonDafnyIntegration implements PythonIntegration {
-
-    private final RuntimeClientPlugin dafnyImplRuntimeClientPlugin = RuntimeClientPlugin.builder()
-        .configProperties(
-            // Adds a new field in the client class' config.
-            // `dafnyImplInterface` is a static interface for accessing Dafny implementation code.
-            // The Smithy-Dafny Python plugin generates a dafnyImplInterface file
-            //   and populates it with the relevant information from the model
-            //   to interact with the Dafny implementation.
-            // We use a static interface as we cannot plug the model into this RuntimeClientPlugin
-            //   definition, so this class cannot be aware of model shapes.
-            // To work around this, we can point the RuntimeClientPlugin to a static interface
-            //   that IS aware of model shapes, and plug the model in there.
-            Collections.singletonList(ConfigProperty.builder()
-                .name("dafnyImplInterface")
-                .type(
-                    Symbol.builder()
-                        .name("DafnyImplInterface")
-                        .namespace(".dafnyImplInterface", ".")
-                        .build()
-                )
-                // nullable is marked as true here.
-                // This allows the Config to be instantiated without providing a plugin, which
-                //   is required because of how Smithy-Python generates the code.
-                // However, this plugin MUST be present before using the client.
-                // Immediately after the Config is instantiated, the Dafny plugin
-                //   will add our plugin to the Config.
-                .nullable(true)
-                .documentation("")
-                .build()
-            )
-        ).pythonPlugin(
-            SymbolReference.builder()
-                .symbol(
-                    Symbol.builder()
-                        .name("set_config_impl")
-                        .namespace(".plugin", ".")
-                        .build())
-                .build()
-        )
-        .build();
 
 //    @Override
 //    public List<? extends CodeInterceptor<? extends CodeSection, PythonWriter>>
@@ -107,6 +48,12 @@ public final class AwsSdkPythonDafnyIntegration implements PythonIntegration {
      */
     @Override
     public void customize(GenerationContext codegenContext) {
+        if (!codegenContext.applicationProtocol().equals(
+            getProtocolGenerators().get(0).getApplicationProtocol()
+        )) {
+            return;
+        }
+
         // Generate for service shapes with localService trait
         Set<ServiceShape> serviceShapes = Set.of(
             codegenContext.model().expectShape(codegenContext.settings().getService())
@@ -145,35 +92,6 @@ public final class AwsSdkPythonDafnyIntegration implements PythonIntegration {
 //        }
     }
 
-    /**
-     * Returns true if Smithy-Dafny should generate code modelling a Dafny-generated Python localService.
-     * @param codegenContext
-     * @return
-     */
-    private boolean shouldGenerateLocalService(GenerationContext codegenContext) {
-        // For local service OR wrapped local service test, generate local service
-        return ((DafnyPythonSettings) codegenContext.settings()).getGenerationType()
-                    .equals(GenerationType.LOCAL_SERVICE)
-                || ((DafnyPythonSettings) codegenContext.settings()).getGenerationType()
-                    .equals(GenerationType.WRAPPED_LOCAL_SERVICE_TEST);
-    }
-
-    /**
-     * Returns true if Smithy-Dafny should generate code for a shim testing the localService.
-     * @param codegenContext
-     * @return
-     */
-    private boolean shouldGenerateTestShim(GenerationContext codegenContext) {
-        // For wrapped local service test, generate the Shim
-        return ((DafnyPythonSettings) codegenContext.settings()).getGenerationType()
-            .equals(GenerationType.WRAPPED_LOCAL_SERVICE_TEST);
-    }
-
-    private boolean shouldGenerateAwsSdkShim(GenerationContext codegenContext) {
-        return ((DafnyPythonSettings) codegenContext.settings()).getGenerationType()
-            .equals(GenerationType.AWS_SDK);
-    }
-
     @Override
     public List<ProtocolGenerator> getProtocolGenerators() {
         return Collections.singletonList(new DafnyPythonAwsSdkProtocolGenerator() {
@@ -184,10 +102,5 @@ public final class AwsSdkPythonDafnyIntegration implements PythonIntegration {
                 return null;
             }
         });
-    }
-
-    @Override
-    public List<RuntimeClientPlugin> getClientPlugins() {
-        return Collections.singletonList(dafnyImplRuntimeClientPlugin);
     }
 }

@@ -1,5 +1,6 @@
-package software.amazon.polymorph.smithypython;
+package software.amazon.polymorph.smithypython.localservice;
 
+import software.amazon.polymorph.smithypython.Constants;
 import software.amazon.smithy.python.codegen.PythonWriter;
 import software.amazon.smithy.python.codegen.sections.SendRequestSection;
 import software.amazon.smithy.utils.CodeInterceptor.Appender;

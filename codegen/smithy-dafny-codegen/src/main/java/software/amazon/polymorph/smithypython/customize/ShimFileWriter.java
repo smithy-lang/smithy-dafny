@@ -182,20 +182,13 @@ public class ShimFileWriter implements CustomFileWriter {
       ShapeId inputShape = operationShape.getInputShape();
       ShapeId outputShape = operationShape.getOutputShape();
 
-      if (((DafnyPythonSettings) (codegenContext.settings())).getGenerationType().equals(
-          GenerationType.AWS_SDK)) {
-        // Import Dafny types for inputs and outputs
-        AwsSdkNameResolver.importDafnyTypeForAwsSdkShape(writer, inputShape, codegenContext);
-        AwsSdkNameResolver.importDafnyTypeForAwsSdkShape(writer, outputShape, codegenContext);
-      } else {
-        // Import Dafny types for inputs and outputs
-        DafnyNameResolver.importDafnyTypeForShape(writer, inputShape, codegenContext);
-        DafnyNameResolver.importDafnyTypeForShape(writer, outputShape, codegenContext);
-        // Import Smithy types for inputs and outputs
-        SmithyNameResolver.importSmithyGeneratedTypeForShape(writer, inputShape, codegenContext);
-        SmithyNameResolver.importSmithyGeneratedTypeForShape(writer, outputShape, codegenContext);
-      }
-      
+      // Import Dafny types for inputs and outputs
+      DafnyNameResolver.importDafnyTypeForShape(writer, inputShape, codegenContext);
+      DafnyNameResolver.importDafnyTypeForShape(writer, outputShape, codegenContext);
+      // Import Smithy types for inputs and outputs
+      SmithyNameResolver.importSmithyGeneratedTypeForShape(writer, inputShape, codegenContext);
+      SmithyNameResolver.importSmithyGeneratedTypeForShape(writer, outputShape, codegenContext);
+
       // Write the Shim operation block.
       // This takes in a Dafny input and returns a Dafny output.
       // This operation will:
@@ -218,23 +211,12 @@ public class ShimFileWriter implements CustomFileWriter {
             //   and cannot be constructed inline.
             // Polymorph will create an object representing the service's client, instantiate it,
             //   then reference that object in its `input` string.
-            String input;
-            if (((DafnyPythonSettings) (codegenContext.settings())).getGenerationType().equals(
-                GenerationType.AWS_SDK)) {
-              input = targetShapeInput.accept(new DafnyToAwsSdkShapeVisitor(
-                  codegenContext,
-                  "input",
-                  writer,
-                  "shim"
-              ));
-            } else {
-              input = targetShapeInput.accept(new DafnyToSmithyShapeVisitor(
-                  codegenContext,
-                  "input",
-                  writer,
-                  "shim"
-              ));
-            }
+            String input = targetShapeInput.accept(new DafnyToSmithyShapeVisitor(
+                codegenContext,
+                "input",
+                writer,
+                "shim"
+            ));
 
             // Generate code that:
             // 1) "unwraps" the request (converts from the Dafny type to the Smithy type),
@@ -243,55 +225,28 @@ public class ShimFileWriter implements CustomFileWriter {
             writer.write(
               """
               # Import dafny_to_smithy at runtime to prevent introducing circular dependency on shim file
-              from . import $L
-              unwrapped_request: $L = $L.$L
+              from . import dafny_to_smithy
+              unwrapped_request: $L = dafny_to_smithy.$L
               try:
-                  wrapped_response = $Lself._impl.$L(unwrapped_request)$L
+                  wrapped_response = asyncio.run(self._impl.$L(unwrapped_request))
               except ServiceError as e:
                   return Wrappers.Result_Failure(smithy_error_to_dafny_error(e))
                       
               """,
-                ((DafnyPythonSettings) (codegenContext.settings())).getGenerationType().equals(
-                    GenerationType.AWS_SDK)
-                    ? "dafny_to_aws_sdk"
-                    : "dafny_to_smithy",
               inputShape.getName(),
-                ((DafnyPythonSettings) (codegenContext.settings())).getGenerationType().equals(
-                    GenerationType.AWS_SDK)
-                ? "dafny_to_aws_sdk"
-                : "dafny_to_smithy",
               input,
-                ((DafnyPythonSettings) (codegenContext.settings())).getGenerationType().equals(
-                    GenerationType.AWS_SDK)
-                    ? ""
-                    : "asyncio.run(",
-              codegenContext.symbolProvider().toSymbol(operationShape).getName(),
-                ((DafnyPythonSettings) (codegenContext.settings())).getGenerationType().equals(
-                    GenerationType.AWS_SDK)
-                    ? ""
-                    : ")"
+              codegenContext.symbolProvider().toSymbol(operationShape).getName()
             );
 
             Shape targetShape = codegenContext.model().expectShape(operationShape.getOutputShape());
             // Generate code that converts the output from Smithy type to the corresponding Dafny type
             // This has a side effect of possibly writing transformation code at the writer's current position.
-            String output;
-            if (((DafnyPythonSettings) (codegenContext.settings())).getGenerationType().equals(
-                GenerationType.AWS_SDK)) {
-              output = targetShape.accept(new AwsSdkToDafnyShapeVisitor(
-                  codegenContext,
-                  "wrapped_response",
-                  writer,
-                  "shim"
-              ));
-            } else {
-              output = targetShape.accept(new SmithyToDafnyShapeVisitor(
-                  codegenContext,
-                  "wrapped_response",
-                  writer,
-                  "shim"
-              ));
-            }
+            String output = targetShape.accept(new SmithyToDafnyShapeVisitor(
+                codegenContext,
+                "wrapped_response",
+                writer,
+                "shim"
+            ));
 
             // Generate code that wraps Smithy success shapes as Dafny success shapes
             writer.write(
