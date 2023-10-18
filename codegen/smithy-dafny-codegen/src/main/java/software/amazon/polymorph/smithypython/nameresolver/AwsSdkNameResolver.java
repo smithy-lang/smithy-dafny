@@ -1,13 +1,7 @@
 package software.amazon.polymorph.smithypython.nameresolver;
 
-import java.util.HashSet;
 import java.util.Locale;
-import java.util.Set;
-import java.util.stream.Collectors;
 import software.amazon.polymorph.traits.LocalServiceTrait;
-import software.amazon.polymorph.traits.ReferenceTrait;
-import software.amazon.smithy.codegen.core.CodegenContext;
-import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
@@ -106,8 +100,8 @@ public class AwsSdkNameResolver {
    * @param shape
    * @return
    */
-  private static void importDafnyTypeForShape(PythonWriter writer, Shape shape, GenerationContext context) {
-    importDafnyTypeForShape(writer, shape.getId(), context);
+  private static void importDafnyTypeForAwsSdkShape(PythonWriter writer, Shape shape, GenerationContext context) {
+    importDafnyTypeForAwsSdkShape(writer, shape.getId(), context);
   }
 
   /**
@@ -118,7 +112,7 @@ public class AwsSdkNameResolver {
    * @param writer
    * @param shapeId
    */
-  public static void importDafnyTypeForShape(PythonWriter writer, ShapeId shapeId, GenerationContext context) {
+  public static void importDafnyTypeForAwsSdkShape(PythonWriter writer, ShapeId shapeId, GenerationContext context) {
     if (context.model().expectShape(shapeId).hasTrait(ErrorTrait.class)) {
       throw new IllegalArgumentException(
           "Error shapes are not supported in importDafnyTypeForShape. Provided " + shapeId);

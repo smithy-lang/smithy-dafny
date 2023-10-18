@@ -185,8 +185,8 @@ public class ShimFileWriter implements CustomFileWriter {
       if (((DafnyPythonSettings) (codegenContext.settings())).getGenerationType().equals(
           GenerationType.AWS_SDK)) {
         // Import Dafny types for inputs and outputs
-        AwsSdkNameResolver.importDafnyTypeForShape(writer, inputShape, codegenContext);
-        AwsSdkNameResolver.importDafnyTypeForShape(writer, outputShape, codegenContext);
+        AwsSdkNameResolver.importDafnyTypeForAwsSdkShape(writer, inputShape, codegenContext);
+        AwsSdkNameResolver.importDafnyTypeForAwsSdkShape(writer, outputShape, codegenContext);
       } else {
         // Import Dafny types for inputs and outputs
         DafnyNameResolver.importDafnyTypeForShape(writer, inputShape, codegenContext);

@@ -50,7 +50,13 @@ class default__:
         d_1_client_ = (d_2_valueOrError0_).Extract()
         d_3_ret_: Wrappers.Result
         out1_: Wrappers.Result
-        out1_ = (d_1_client_).Decrypt(input)
+        try:
+            out1_ = (d_1_client_).Decrypt(input)
+        except Exception as e:
+            print("EX")
+            print(e)
+        print("FAIL")
+        print(out1_)
         d_3_ret_ = out1_
         if not((d_3_ret_).is_Success):
             raise _dafny.HaltException("test/TestComAmazonawsKms.dfy(93,4): " + _dafny.string_of(_dafny.Seq("expectation violation")))

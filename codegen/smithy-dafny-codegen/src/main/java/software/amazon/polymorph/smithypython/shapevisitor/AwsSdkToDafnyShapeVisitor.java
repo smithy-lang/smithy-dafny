@@ -3,10 +3,8 @@ package software.amazon.polymorph.smithypython.shapevisitor;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.Set;
-import software.amazon.polymorph.smithypython.customize.AwsSdkToDafnyFileWriter;
-import software.amazon.polymorph.smithypython.nameresolver.AwsSdkNameResolver;
+import software.amazon.polymorph.smithypython.shapevisitor.conversionwriters.AwsSdkToDafnyConversionFunctionWriter;
 import software.amazon.polymorph.smithypython.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithypython.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.traits.ReferenceTrait;
@@ -36,7 +34,6 @@ import software.amazon.smithy.model.shapes.TimestampShape;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonWriter;
-import software.amazon.smithy.utils.CaseUtils;
 
 /**
  * ShapeVisitor that should be dispatched from a shape
@@ -53,13 +50,15 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
     private String dataSource;
     private final PythonWriter writer;
     private final String filename;
-    // Store the set of shapes for which this ShapeVisitor (and ShapeVisitors that extend this)
-    // have already generated a conversion function, so we only write each conversion function once.
-    static final Set<Shape> generatedShapes = new HashSet<>();
-  // Store the set of shapes for which this ShapeVisitor (and ShapeVisitors that extend this)
-  // have already generated a conversion function, so we only write each conversion function once.
-  static final List<Shape> shapesToGenerate = new ArrayList<>();
-  static boolean generating = false;
+    private final AwsSdkToDafnyConversionFunctionWriter awsSdkToDafnyConversionFunctionWriter
+        = AwsSdkToDafnyConversionFunctionWriter.getWriter();
+//    // Store the set of shapes for which this ShapeVisitor (and ShapeVisitors that extend this)
+//    // have already generated a conversion function, so we only write each conversion function once.
+//    static final Set<Shape> generatedShapes = new HashSet<>();
+//  // Store the set of shapes for which this ShapeVisitor (and ShapeVisitors that extend this)
+//  // have already generated a conversion function, so we only write each conversion function once.
+//  static final List<Shape> shapesToGenerate = new ArrayList<>();
+//  static boolean generating = false;
 
     /**
      * @param context The generation context.
@@ -98,7 +97,7 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
 
     @Override
     public String structureShape(StructureShape structureShape) {
-      AwsSdkToDafnyFileWriter.writeShapeConversionFunction(structureShape, context, writer, filename);
+      awsSdkToDafnyConversionFunctionWriter.writeConverterForShapeAndMembers(structureShape, context, writer, filename);
 
       // Import the aws_sdk_to_dafny converter from where the ShapeVisitor was called
       writer.addImport(".aws_sdk_to_dafny",
@@ -250,7 +249,7 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
 
     @Override
     public String unionShape(UnionShape unionShape) {
-      AwsSdkToDafnyFileWriter.writeShapeConversionFunction(unionShape, context, writer, filename);
+      awsSdkToDafnyConversionFunctionWriter.writeConverterForShapeAndMembers(unionShape, context, writer, filename);
 
       // Import the aws_sdk_to_dafny converter from where the ShapeVisitor was called
       writer.addImport(".aws_sdk_to_dafny",
