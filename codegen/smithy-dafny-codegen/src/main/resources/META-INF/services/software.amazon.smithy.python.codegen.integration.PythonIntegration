@@ -4,3 +4,4 @@
 #
 
 software.amazon.polymorph.smithypython.DafnyPythonIntegration
+software.amazon.polymorph.smithypython.awssdk.AwsSdkPythonDafnyIntegration

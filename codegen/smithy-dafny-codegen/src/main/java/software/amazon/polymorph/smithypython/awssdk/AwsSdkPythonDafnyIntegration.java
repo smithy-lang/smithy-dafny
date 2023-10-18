@@ -13,7 +13,7 @@
  * permissions and limitations under the License.
  */
 
-package software.amazon.polymorph.smithypython;
+package software.amazon.polymorph.smithypython.awssdk;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import software.amazon.polymorph.smithypython.Constants.GenerationType;
+import software.amazon.polymorph.smithypython.DafnyPythonProtocolGenerator;
+import software.amazon.polymorph.smithypython.awssdk.extensions.DafnyPythonAwsSdkProtocolGenerator;
 import software.amazon.polymorph.smithypython.customize.AwsSdkShimFileWriter;
 import software.amazon.polymorph.smithypython.customize.ConfigFileWriter;
 import software.amazon.polymorph.smithypython.customize.DafnyImplInterfaceFileWriter;
@@ -31,22 +33,25 @@ import software.amazon.polymorph.smithypython.customize.PluginFileWriter;
 import software.amazon.polymorph.smithypython.customize.ReferencesFileWriter;
 import software.amazon.polymorph.smithypython.customize.ShimFileWriter;
 import software.amazon.polymorph.smithypython.extensions.DafnyPythonSettings;
+import software.amazon.smithy.aws.traits.protocols.RestJson1Trait;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolReference;
+import software.amazon.smithy.codegen.core.directed.GenerateServiceDirective;
 import software.amazon.smithy.model.shapes.EntityShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.python.codegen.ConfigProperty;
 import software.amazon.smithy.python.codegen.GenerationContext;
+import software.amazon.smithy.python.codegen.PythonSettings;
 import software.amazon.smithy.python.codegen.PythonWriter;
 import software.amazon.smithy.python.codegen.integration.ProtocolGenerator;
-import software.amazon.smithy.python.codegen.integration.RuntimeClientPlugin;
 import software.amazon.smithy.python.codegen.integration.PythonIntegration;
+import software.amazon.smithy.python.codegen.integration.RuntimeClientPlugin;
 import software.amazon.smithy.utils.CodeInterceptor;
 import software.amazon.smithy.utils.CodeSection;
 
-public final class DafnyPythonIntegration implements PythonIntegration {
+public final class AwsSdkPythonDafnyIntegration implements PythonIntegration {
 
     private final RuntimeClientPlugin dafnyImplRuntimeClientPlugin = RuntimeClientPlugin.builder()
         .configProperties(
@@ -88,11 +93,11 @@ public final class DafnyPythonIntegration implements PythonIntegration {
         )
         .build();
 
-    @Override
-    public List<? extends CodeInterceptor<? extends CodeSection, PythonWriter>>
-    interceptors(GenerationContext codegenContext) {
-        return List.of(new SendRequestInterceptor());
-    }
+//    @Override
+//    public List<? extends CodeInterceptor<? extends CodeSection, PythonWriter>>
+//    interceptors(GenerationContext codegenContext) {
+//        return List.of(new SendRequestInterceptor());
+//    }
 
     /**
      * Generate all Smithy-Dafny custom Python code.
@@ -102,13 +107,6 @@ public final class DafnyPythonIntegration implements PythonIntegration {
      */
     @Override
     public void customize(GenerationContext codegenContext) {
-        System.out.println("PROTOCOL");
-        System.out.println(codegenContext.applicationProtocol());
-        if (!codegenContext.applicationProtocol().equals(
-            getProtocolGenerators().get(0).getApplicationProtocol()
-        )) {
-            return;
-        }
         // Generate for service shapes with localService trait
         Set<ServiceShape> serviceShapes = Set.of(
             codegenContext.model().expectShape(codegenContext.settings().getService())
@@ -119,41 +117,8 @@ public final class DafnyPythonIntegration implements PythonIntegration {
 
         customizeForServiceShape(serviceShape, codegenContext);
 
-        // Get set(non-service operation shapes) = set(model operation shapes) - set(service operation shapes)
-        // This is related to forking Smithy-Python. TODO: resolve when resolving fork.
-        // Smithy-Python will only generate code for shapes which are used by the protocol.
-        // Polymorph has a requirement to generate code for all shapes in the model,
-        //   even if the service does not use those shapes.
-        // (The use case is that other models may depend on shapes that are defined in this model,
-        //   though not used in this model.)
-        Set<ShapeId> serviceOperationShapes = serviceShapes.stream()
-            .map(EntityShape::getOperations)
-            .flatMap(Collection::stream)
-            .collect(Collectors.toSet());
-        Set<ShapeId> nonServiceOperationShapes = codegenContext.model().getOperationShapes()
-            .stream()
-            .map(Shape::getId)
-            .filter(operationShapeId -> operationShapeId.getNamespace()
-                .equals(serviceShape.getId().getNamespace()))
-            .collect(Collectors.toSet());
-        nonServiceOperationShapes.removeAll(serviceOperationShapes);
-
-        customizeForNonServiceOperationShapes(nonServiceOperationShapes, codegenContext);
     }
 
-    /**
-     * Generate any code for operation shapes that are NOT part of the localService.
-     *
-     * @param operationShapeIds
-     * @param codegenContext
-     */
-    private void customizeForNonServiceOperationShapes(Set<ShapeId> operationShapeIds,
-            GenerationContext codegenContext) {
-        if (shouldGenerateLocalService(codegenContext)) {
-            new ReferencesFileWriter().customizeFileForNonServiceOperationShapes(operationShapeIds,
-                codegenContext);
-        }
-    }
 
     /**
      * Generate any code for the localService.
@@ -163,21 +128,21 @@ public final class DafnyPythonIntegration implements PythonIntegration {
      */
     private void customizeForServiceShape(ServiceShape serviceShape,
             GenerationContext codegenContext) {
-        if (shouldGenerateLocalService(codegenContext)) {
-            new PluginFileWriter().customizeFileForServiceShape(serviceShape, codegenContext);
-            new DafnyImplInterfaceFileWriter().customizeFileForServiceShape(serviceShape,
-                codegenContext);
-            new DafnyProtocolFileWriter().customizeFileForServiceShape(serviceShape,
-                codegenContext);
-            new ErrorsFileWriter().customizeFileForServiceShape(serviceShape, codegenContext);
-            new ModelsFileWriter().customizeFileForServiceShape(serviceShape, codegenContext);
-            new ConfigFileWriter().customizeFileForServiceShape(serviceShape, codegenContext);
-            new ReferencesFileWriter().customizeFileForServiceShape(serviceShape, codegenContext);
-        } if (shouldGenerateTestShim(codegenContext)) {
-            new ShimFileWriter().customizeFileForServiceShape(serviceShape, codegenContext);
-        } if (shouldGenerateAwsSdkShim(codegenContext)) {
+//        if (shouldGenerateLocalService(codegenContext)) {
+//            new PluginFileWriter().customizeFileForServiceShape(serviceShape, codegenContext);
+//            new DafnyImplInterfaceFileWriter().customizeFileForServiceShape(serviceShape,
+//                codegenContext);
+//            new DafnyProtocolFileWriter().customizeFileForServiceShape(serviceShape,
+//                codegenContext);
+//            new ErrorsFileWriter().customizeFileForServiceShape(serviceShape, codegenContext);
+//            new ModelsFileWriter().customizeFileForServiceShape(serviceShape, codegenContext);
+//            new ConfigFileWriter().customizeFileForServiceShape(serviceShape, codegenContext);
+//            new ReferencesFileWriter().customizeFileForServiceShape(serviceShape, codegenContext);
+//        } if (shouldGenerateTestShim(codegenContext)) {
+//            new ShimFileWriter().customizeFileForServiceShape(serviceShape, codegenContext);
+//        } if (shouldGenerateAwsSdkShim(codegenContext)) {
             new AwsSdkShimFileWriter().customizeFileForServiceShape(serviceShape, codegenContext);
-        }
+//        }
     }
 
     /**
@@ -211,10 +176,12 @@ public final class DafnyPythonIntegration implements PythonIntegration {
 
     @Override
     public List<ProtocolGenerator> getProtocolGenerators() {
-        return Collections.singletonList(new DafnyPythonProtocolGenerator() {
+        return Collections.singletonList(new DafnyPythonAwsSdkProtocolGenerator() {
+            // No protocol!
+            //
             @Override
             public ShapeId getProtocol() {
-                return ShapeId.from("aws.polymorph#localService");
+                return null;
             }
         });
     }

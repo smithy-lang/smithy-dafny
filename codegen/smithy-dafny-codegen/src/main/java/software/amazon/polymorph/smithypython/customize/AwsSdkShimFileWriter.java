@@ -3,7 +3,6 @@ package software.amazon.polymorph.smithypython.customize;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 import software.amazon.polymorph.smithypython.Constants.GenerationType;
-import software.amazon.polymorph.smithypython.extensions.DafnyPythonSettings;
 import software.amazon.polymorph.smithypython.nameresolver.AwsSdkNameResolver;
 import software.amazon.polymorph.smithypython.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithypython.nameresolver.SmithyNameResolver;
@@ -55,7 +54,7 @@ public class AwsSdkShimFileWriter implements CustomFileWriter {
               
               """, typesModulePrelude,
           writer.consumer(w -> generateAwsSdkErrorToDafnyErrorBlock(codegenContext, serviceShape, w)),
-          SmithyNameResolver.shimForService(serviceShape),
+          AwsSdkNameResolver.shimForService(serviceShape),
           // TODO: Uncomment to type out the shim class
           // typesModulePrelude, DafnyNameResolver.getDafnyClientInterfaceTypeForServiceShape(serviceShape),
           writer.consumer(w -> generateOperationsBlock(codegenContext, serviceShape, w))
@@ -168,24 +167,12 @@ public class AwsSdkShimFileWriter implements CustomFileWriter {
             //   and cannot be constructed inline.
             // Polymorph will create an object representing the service's client, instantiate it,
             //   then reference that object in its `input` string.
-            String input;
-            if (((DafnyPythonSettings) (codegenContext.settings())).getGenerationType().equals(
-                GenerationType.AWS_SDK)) {
-              input = targetShapeInput.accept(new DafnyToAwsSdkShapeVisitor(
+            String input = targetShapeInput.accept(new DafnyToAwsSdkShapeVisitor(
                   codegenContext,
                   "input",
                   writer,
                   "shim"
               ));
-            } else {
-              input = targetShapeInput.accept(new DafnyToSmithyShapeVisitor(
-                  codegenContext,
-                  "input",
-                  writer,
-                  "shim"
-              ));
-            }
-
             writer.addImport(".", "dafny_to_aws_sdk");
 
             // Generate code that:

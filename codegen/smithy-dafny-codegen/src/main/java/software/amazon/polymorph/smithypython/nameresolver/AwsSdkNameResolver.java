@@ -42,8 +42,9 @@ public class AwsSdkNameResolver {
    */
   public static String shimForService(ServiceShape serviceShape) {
     // TODO: Hardcode (ex) Trent -> KMS?
-      if (serviceShape.hasTrait(LocalServiceTrait.class)) {
-          return serviceShape.expectTrait(LocalServiceTrait.class).getSdkId() + "Shim";
+      ShapeId awsServiceApiTrait = ShapeId.fromParts("aws.api", "service");
+      if (serviceShape.hasTrait(awsServiceApiTrait)) {
+          return serviceShape.getId().getName() + "Shim";
       } else {
           throw new UnsupportedOperationException("Non-local services not supported");
       }

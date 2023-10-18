@@ -23,6 +23,7 @@ import software.amazon.polymorph.smithyjava.generator.awssdk.v2.JavaAwsSdkV2;
 import software.amazon.polymorph.smithyjava.generator.library.JavaLibrary;
 import software.amazon.polymorph.smithyjava.generator.library.TestJavaLibrary;
 import software.amazon.polymorph.smithypython.Constants.GenerationType;
+import software.amazon.polymorph.smithypython.awssdk.extensions.DafnyPythonAwsSdkClientCodegenPlugin;
 import software.amazon.polymorph.smithypython.extensions.DafnyPythonClientCodegenPlugin;
 import software.amazon.polymorph.utils.IOUtils;
 import software.amazon.polymorph.utils.ModelUtils;
@@ -248,7 +249,7 @@ public class CodegenEngine {
     }
 
     private void generatePython() {
-        ObjectNode pythonSettings = ObjectNode.builder()
+        ObjectNode.Builder pythonSettingsBuilder = ObjectNode.builder()
             .withMember("service", serviceShape.getId().toString())
 
             // TODO-Python: `module` SHOULD be configured within the `smithy-build.json` file;
@@ -269,33 +270,36 @@ public class CodegenEngine {
             // TODO: This depends on Dafny extending the `dafny-client-codegen.targetLanguages` key
             // to support storing language-specific configuration.
             // For now, hardcode this to 0.0.1.
-            .withMember("moduleVersion", "0.0.1")
+            .withMember("moduleVersion", "0.0.1");
 
             // TODO-Python: Extend as part of AWS SDKs and refactor to look at `.awsSdkStyle` config.
             // TODO: DafnyClientCodegenPlugin MUST add support for other protocols besides AWS SDKs.
             // Right now, DafnyClientCodegenPlugin hardcodes AwsSdkStyle to true.
             // This would prevent us from using the standard Smithy build process
             //   to build any Polymorph localServices.
-            .withMember("protocol", "aws.polymorph#localService")
-            .build();
+            if (awsSdkStyle) {
+                pythonSettingsBuilder.withMember("protocol", "aws.protocols#awsJson1_1");
+            } else {
+                pythonSettingsBuilder.withMember("protocol", "aws.polymorph#localService");
+            }
 
         final PluginContext pluginContext = PluginContext.builder()
             .model(model)
             .fileManifest(FileManifest.create(targetLangOutputDirs.get(TargetLanguage.PYTHON)))
-            .settings(pythonSettings)
+            .settings(pythonSettingsBuilder.build())
             .build();
 
-        DafnyPythonClientCodegenPlugin pythonClientCodegenPlugin = new DafnyPythonClientCodegenPlugin();
-
         if (this.awsSdkStyle) {
-            pythonClientCodegenPlugin.setGenerationType(GenerationType.AWS_SDK);
+            DafnyPythonAwsSdkClientCodegenPlugin dafnyPythonAwsSdkClientCodegenPlugin
+                = new DafnyPythonAwsSdkClientCodegenPlugin();
+            dafnyPythonAwsSdkClientCodegenPlugin.execute(pluginContext);
         } else if (this.localServiceTest) {
-            pythonClientCodegenPlugin.setGenerationType(GenerationType.WRAPPED_LOCAL_SERVICE_TEST);
+            DafnyPythonClientCodegenPlugin pythonClientCodegenPlugin = new DafnyPythonClientCodegenPlugin();
+            pythonClientCodegenPlugin.execute(pluginContext);
         } else {
-            pythonClientCodegenPlugin.setGenerationType(GenerationType.LOCAL_SERVICE);
+            DafnyPythonClientCodegenPlugin pythonClientCodegenPlugin = new DafnyPythonClientCodegenPlugin();
+            pythonClientCodegenPlugin.execute(pluginContext);
         }
-
-        pythonClientCodegenPlugin.execute(pluginContext);
     }
 
     public static class Builder {
