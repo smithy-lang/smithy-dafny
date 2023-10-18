@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.0.2 (2023-10-18)
+
+### Bug Fixes
+
+    * CmpError must return custom error message (#118) (86abacc)
+    * Deafult entryPruningTailSize (#93) (0344e9f)
+    * Fix brittle concurrent test (#105) (#60) (c043162)
+    * fix typo in encryption materials validation (cd6b0aa), closes #84
+    * fix typo in encryption materials validation (89a234c)
+    * Forward the underlying error (#90) (bc21551)
+
 ## 1.0.1 2023-07-26
 
 ### Fix
