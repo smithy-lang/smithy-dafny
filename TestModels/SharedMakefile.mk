@@ -193,7 +193,7 @@ _polymorph:
 
 # If the target language of _polymorph_wrapped includes Python,
 # a Python localService will also be generated
-# (i.e. the _polymorph target is also executed for Python).
+# (i.e. the _polymorph target is effectively also executed).
 _polymorph_wrapped:
 	@: $(if ${CODEGEN_CLI_ROOT},,$(error You must pass the path CODEGEN_CLI_ROOT: CODEGEN_CLI_ROOT=/path/to/smithy-dafny/codegen/smithy-dafny-codegen-cli));
 	cd $(CODEGEN_CLI_ROOT); \
@@ -254,13 +254,18 @@ polymorph_java: _polymorph_dependencies
 
 # For python, _polymorph_wrapped includes _polymorph (i.e. local service generation AND wrapped test)
 # To generate only the local service, use the `_polymorph` target
-# There is not a good way to generate only the wrapped test without the local service...
-polymorph_python: OUTPUT_PYTHON_WRAPPED=--output-python $(LIBRARY_ROOT)/runtimes/python/smithygenerated
+# (There is not a good way to generate only the wrapped test, without the local service...)
+# We run code generation twice in particular as AWS SDK Polymorph code generation assumes
+#  that _polymorph will execute, but this also keeps Makefile targets consistent between languages.
+polymorph_python: OUTPUT_PYTHON=--output-python $(LIBRARY_ROOT)/runtimes/python/smithygenerated
+polymorph_python: _polymorph
+polymorph_python: OUTPUT_PYTHON_WRAPPED=--output-python $(LIBRARY_ROOT)/runtimes/python/smithygenerated_wrapped
 polymorph_python: OUTPUT_LOCAL_SERVICE=--local-service-test
 polymorph_python: _polymorph_wrapped
 polymorph_python:
 	rm -rf runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated
 	mkdir runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated
+	cp runtimes/python/smithygenerated_wrapped/$(PYTHON_MODULE_NAME)/* runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated
 	mv runtimes/python/smithygenerated/$(PYTHON_MODULE_NAME)/* runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated
 	rm -rf runtimes/python/smithygenerated
 polymorph_python: POLYMORPH_LANGUAGE_TARGET=python

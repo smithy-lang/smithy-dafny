@@ -20,19 +20,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import software.amazon.polymorph.smithypython.Constants.GenerationType;
-import software.amazon.polymorph.smithypython.localservice.SendRequestInterceptor;
-import software.amazon.polymorph.smithypython.customize.AwsSdkShimFileWriter;
-import software.amazon.polymorph.smithypython.customize.ConfigFileWriter;
-import software.amazon.polymorph.smithypython.customize.DafnyImplInterfaceFileWriter;
-import software.amazon.polymorph.smithypython.customize.DafnyProtocolFileWriter;
-import software.amazon.polymorph.smithypython.customize.ErrorsFileWriter;
-import software.amazon.polymorph.smithypython.customize.ModelsFileWriter;
-import software.amazon.polymorph.smithypython.customize.PluginFileWriter;
-import software.amazon.polymorph.smithypython.customize.ReferencesFileWriter;
-import software.amazon.polymorph.smithypython.customize.ShimFileWriter;
-import software.amazon.polymorph.smithypython.extensions.DafnyPythonSettings;
-import software.amazon.polymorph.smithypython.localservice.DafnyPythonLocalServiceProtocolGenerator;
+import software.amazon.polymorph.smithypython.localservice.customize.ConfigFileWriter;
+import software.amazon.polymorph.smithypython.localservice.customize.DafnyImplInterfaceFileWriter;
+import software.amazon.polymorph.smithypython.localservice.customize.DafnyProtocolFileWriter;
+import software.amazon.polymorph.smithypython.localservice.customize.ErrorsFileWriter;
+import software.amazon.polymorph.smithypython.localservice.customize.ModelsFileWriter;
+import software.amazon.polymorph.smithypython.localservice.customize.PluginFileWriter;
+import software.amazon.polymorph.smithypython.localservice.customize.ReferencesFileWriter;
+import software.amazon.polymorph.smithypython.wrappedlocalservice.extensions.DafnyPythonWrappedLocalServiceProtocolGenerator;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolReference;
 import software.amazon.smithy.model.shapes.EntityShape;
@@ -104,13 +99,11 @@ public final class DafnyPythonLocalServiceIntegration implements PythonIntegrati
      */
     @Override
     public void customize(GenerationContext codegenContext) {
-        System.out.println("PROTOCOL");
-        System.out.println(codegenContext.applicationProtocol());
         if (!codegenContext.applicationProtocol().equals(
-            getProtocolGenerators().get(0).getApplicationProtocol()
-        )) {
+                DafnyPythonLocalServiceProtocolGenerator.DAFNY_PYTHON_LOCAL_SERVICE_APPLICATION_PROTOCOL)) {
             return;
         }
+
         // Generate for service shapes with localService trait
         Set<ServiceShape> serviceShapes = Set.of(
             codegenContext.model().expectShape(codegenContext.settings().getService())
@@ -151,7 +144,7 @@ public final class DafnyPythonLocalServiceIntegration implements PythonIntegrati
      */
     private void customizeForNonServiceOperationShapes(Set<ShapeId> operationShapeIds,
             GenerationContext codegenContext) {
-            new ReferencesFileWriter().customizeFileForNonServiceOperationShapes(operationShapeIds,
+        new ReferencesFileWriter().customizeFileForNonServiceOperationShapes(operationShapeIds,
                 codegenContext);
     }
 
@@ -174,7 +167,7 @@ public final class DafnyPythonLocalServiceIntegration implements PythonIntegrati
             new ConfigFileWriter().customizeFileForServiceShape(serviceShape, codegenContext);
             new ReferencesFileWriter().customizeFileForServiceShape(serviceShape, codegenContext);
 //        } if (shouldGenerateTestShim(codegenContext)) {
-            new ShimFileWriter().customizeFileForServiceShape(serviceShape, codegenContext);
+//            new ShimFileWriter().customizeFileForServiceShape(serviceShape, codegenContext);
 //        } if (shouldGenerateAwsSdkShim(codegenContext)) {
 //            new AwsSdkShimFileWriter().customizeFileForServiceShape(serviceShape, codegenContext);
 //        }

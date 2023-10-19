@@ -4,4 +4,5 @@
 #
 
 software.amazon.polymorph.smithypython.localservice.DafnyPythonLocalServiceIntegration
-software.amazon.polymorph.smithypython.awssdk.AwsSdkPythonDafnyIntegration
+software.amazon.polymorph.smithypython.wrappedlocalservice.DafnyPythonWrappedLocalServiceIntegration
+software.amazon.polymorph.smithypython.awssdk.DafnyPythonAwsSdkIntegration

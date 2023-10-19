@@ -22,9 +22,9 @@ import software.amazon.polymorph.smithyjava.generator.awssdk.v1.JavaAwsSdkV1;
 import software.amazon.polymorph.smithyjava.generator.awssdk.v2.JavaAwsSdkV2;
 import software.amazon.polymorph.smithyjava.generator.library.JavaLibrary;
 import software.amazon.polymorph.smithyjava.generator.library.TestJavaLibrary;
-import software.amazon.polymorph.smithypython.Constants.GenerationType;
 import software.amazon.polymorph.smithypython.awssdk.extensions.DafnyPythonAwsSdkClientCodegenPlugin;
-import software.amazon.polymorph.smithypython.extensions.DafnyPythonClientCodegenPlugin;
+import software.amazon.polymorph.smithypython.localservice.extensions.DafnyPythonLocalServiceClientCodegenPlugin;
+import software.amazon.polymorph.smithypython.wrappedlocalservice.DafnyPythonWrappedLocalServiceClientCodegenPlugin;
 import software.amazon.polymorph.utils.IOUtils;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.smithy.aws.traits.ServiceTrait;
@@ -272,16 +272,16 @@ public class CodegenEngine {
             // For now, hardcode this to 0.0.1.
             .withMember("moduleVersion", "0.0.1");
 
-            // TODO-Python: Extend as part of AWS SDKs and refactor to look at `.awsSdkStyle` config.
-            // TODO: DafnyClientCodegenPlugin MUST add support for other protocols besides AWS SDKs.
-            // Right now, DafnyClientCodegenPlugin hardcodes AwsSdkStyle to true.
-            // This would prevent us from using the standard Smithy build process
-            //   to build any Polymorph localServices.
-            if (awsSdkStyle) {
-                pythonSettingsBuilder.withMember("protocol", "aws.protocols#awsJson1_1");
-            } else {
-                pythonSettingsBuilder.withMember("protocol", "aws.polymorph#localService");
-            }
+//            // TODO-Python: Extend as part of AWS SDKs and refactor to look at `.awsSdkStyle` config.
+//            // TODO: DafnyClientCodegenPlugin MUST add support for other protocols besides AWS SDKs.
+//            // Right now, DafnyClientCodegenPlugin hardcodes AwsSdkStyle to true.
+//            // This would prevent us from using the standard Smithy build process
+//            //   to build any Polymorph localServices.
+//            if (awsSdkStyle) {
+//                pythonSettingsBuilder.withMember("protocol", "aws.protocols#awsJson1_1");
+//            } else {
+//                pythonSettingsBuilder.withMember("protocol", "aws.polymorph#localService");
+//            }
 
         final PluginContext pluginContext = PluginContext.builder()
             .model(model)
@@ -294,10 +294,11 @@ public class CodegenEngine {
                 = new DafnyPythonAwsSdkClientCodegenPlugin();
             dafnyPythonAwsSdkClientCodegenPlugin.execute(pluginContext);
         } else if (this.localServiceTest) {
-            DafnyPythonClientCodegenPlugin pythonClientCodegenPlugin = new DafnyPythonClientCodegenPlugin();
+            DafnyPythonWrappedLocalServiceClientCodegenPlugin pythonClientCodegenPlugin = new DafnyPythonWrappedLocalServiceClientCodegenPlugin();
+            System.out.println("oh no");
             pythonClientCodegenPlugin.execute(pluginContext);
         } else {
-            DafnyPythonClientCodegenPlugin pythonClientCodegenPlugin = new DafnyPythonClientCodegenPlugin();
+            DafnyPythonLocalServiceClientCodegenPlugin pythonClientCodegenPlugin = new DafnyPythonLocalServiceClientCodegenPlugin();
             pythonClientCodegenPlugin.execute(pluginContext);
         }
     }

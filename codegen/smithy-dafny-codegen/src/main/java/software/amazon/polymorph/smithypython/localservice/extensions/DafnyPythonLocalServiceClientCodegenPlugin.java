@@ -1,4 +1,3 @@
-
 /*
  * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
  *
@@ -14,17 +13,21 @@
  * permissions and limitations under the License.
  */
 
-package software.amazon.polymorph.smithypython.awssdk.extensions;
+package software.amazon.polymorph.smithypython.localservice.extensions;
 
-import software.amazon.polymorph.smithypython.awssdk.DafnyAwsSdkProtocolTrait;
-import software.amazon.polymorph.smithypython.wrappedlocalservice.WrappedLocalServiceTrait;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.smithy.build.PluginContext;
 import software.amazon.smithy.build.SmithyBuildPlugin;
 import software.amazon.smithy.codegen.core.directed.CodegenDirector;
 import software.amazon.smithy.model.Model;
+import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
+import software.amazon.smithy.model.shapes.ShapeId;
+import software.amazon.smithy.model.shapes.StructureShape;
+import software.amazon.smithy.model.traits.ErrorTrait;
+import software.amazon.smithy.model.traits.TraitDefinition;
 import software.amazon.smithy.model.transform.ModelTransformer;
+import software.amazon.smithy.python.codegen.DirectedPythonCodegen;
 import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonSettings;
 import software.amazon.smithy.python.codegen.PythonWriter;
@@ -41,10 +44,11 @@ import software.amazon.smithy.utils.SmithyUnstableApi;
  *   the generated Dafny code.
  */
 @SmithyUnstableApi
-public final class DafnyPythonAwsSdkClientCodegenPlugin implements SmithyBuildPlugin {
+public final class DafnyPythonLocalServiceClientCodegenPlugin implements SmithyBuildPlugin {
+
   @Override
   public String getName() {
-    return "dafny-python-aws-sdk-client-codegen";
+    return "dafny-python-localservice-client-codegen";
   }
 
   @Override
@@ -53,29 +57,13 @@ public final class DafnyPythonAwsSdkClientCodegenPlugin implements SmithyBuildPl
         = new CodegenDirector<>();
 
     PythonSettings settings = PythonSettings.from(context.getSettings());
-    settings.setProtocol(DafnyAwsSdkProtocolTrait.ID);
     runner.settings(settings);
-    runner.directedCodegen(new DirectedDafnyPythonAwsSdkCodegen());
+    runner.directedCodegen(new DirectedPythonCodegen());
     runner.fileManifest(context.getFileManifest());
     runner.service(settings.getService());
     runner.model(context.getModel());
     runner.integrationClass(PythonIntegration.class);
-
-    // Add a DafnyAwsSdkLocal to the service as a contextual indicator that code generation requires
-    //   wrapped local service generation
-    ServiceShape serviceShape = context.getModel().expectShape(settings.getService()).asServiceShape().get();
-    runner.model(addAwsSdkProtocolTrait(context.getModel(), serviceShape));
-
     runner.run();
   }
 
-  public static Model addAwsSdkProtocolTrait(Model model, ServiceShape serviceShape) {
-    return ModelTransformer.create().mapShapes(model, shape -> {
-      if (shape instanceof ServiceShape && shape.hasTrait(LocalServiceTrait.class)) {
-        return serviceShape.toBuilder().addTrait(DafnyAwsSdkProtocolTrait.builder().build()).build();
-      } else {
-        return shape;
-      }
-    });
-  }
 }
