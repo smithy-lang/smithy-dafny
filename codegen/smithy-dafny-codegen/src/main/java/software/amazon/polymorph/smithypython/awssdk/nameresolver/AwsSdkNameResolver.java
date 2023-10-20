@@ -1,8 +1,8 @@
 package software.amazon.polymorph.smithypython.awssdk.nameresolver;
 
 import java.util.Locale;
+import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.Utils;
-import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
@@ -19,30 +19,13 @@ import software.amazon.smithy.python.codegen.PythonWriter;
 public class AwsSdkNameResolver {
 
   /**
-   * Returns the name of the Smithy-generated client for the provided serviceShape.
-   * The serviceShape SHOULD be a localService.
-   * ex. example.namespace.ExampleService -> "ExampleServiceClient"
-   * @param serviceShape
-   * @return
-   */
-  public static String clientForService(ServiceShape serviceShape) {
-      // TODO: Hardcode (ex) Trent -> KMS?
-      if (serviceShape.hasTrait(LocalServiceTrait.class)) {
-          return serviceShape.expectTrait(LocalServiceTrait.class).getSdkId() + "Client";
-      } else {
-          throw new UnsupportedOperationException("Non-local services not supported");
-      }
-  }
-
-  /**
    * Returns the name of the Smithy-generated shim for the provided serviceShape.
-   * The serviceShape SHOULD be a localService.
+   * The serviceShape SHOULD be an AWS SDK.
    * ex. example.namespace.ExampleService -> "ExampleServiceShim"
    * @param serviceShape
    * @return
    */
   public static String shimForService(ServiceShape serviceShape) {
-    // TODO: Hardcode (ex) Trent -> KMS?
     if ("TrentService".equals(serviceShape.getId().getName())) {
       return "KMSClientShim";
     }
@@ -69,7 +52,7 @@ public class AwsSdkNameResolver {
    * @return
    */
   public static String getDafnyTypesModuleNameForSmithyNamespace(String smithyNamespace) {
-    return getDafnyIndexModuleNameForSmithyNamespace(smithyNamespace) + "_types";
+    return getDafnyIndexModuleNameForAwsSdkNamespace(smithyNamespace) + "_types";
   }
 
   /**
@@ -79,7 +62,7 @@ public class AwsSdkNameResolver {
    * @param smithyNamespace
    * @return
    */
-  public static String getDafnyIndexModuleNameForSmithyNamespace(String smithyNamespace) {
+  public static String getDafnyIndexModuleNameForAwsSdkNamespace(String smithyNamespace) {
     String dafnyExternNamespace = resolveAwsSdkSmithyModelNamespaceToDafnyExternNamespace(smithyNamespace);
     return dafnyExternNamespace.toLowerCase(Locale.ROOT).replace(".", "_") + "_internaldafny";
   }
@@ -183,4 +166,31 @@ public class AwsSdkNameResolver {
       MemberShape memberShape) {
     return unionShape.getId().getName() + "_" + memberShape.getMemberName();
   }
-}
+
+  /**
+   * Returns the name of the function that converts the provided shape's Dafny-modelled type
+   *   to the corresponding AWS SDK-modelled type.
+   * This function will be defined in the `dafny_to_aws_sdk.py` file.
+   * ex. example.namespace.ExampleShape -> "DafnyToAwsSdk_example_namespace_ExampleShape"
+   * @param shape
+   * @return
+   */
+  public static String getDafnyToAwsSdkFunctionNameForShape(Shape shape) {
+    return "DafnyToAwsSdk_"
+        + SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(shape.getId().getNamespace())
+        + "_" + shape.getId().getName();
+  }
+
+  /**
+   * Returns the name of the function that converts the provided shape's AWS SDK-modelled type
+   *   to the corresponding Dafny-modelled type.
+   * This function will be defined in the `aws_sdk_to_dafny.py` file.
+   * ex. example.namespace.ExampleShape -> "AwsSdkToDafny_example_namespace_ExampleShape"
+   * @param shape
+   * @return
+   */
+  public static String getAwsSdkToDafnyFunctionNameForShape(Shape shape) {
+    return "AwsSdkToDafny_"
+        + SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(shape.getId().getNamespace())
+        + "_" + shape.getId().getName();
+  }}

@@ -4,8 +4,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import software.amazon.polymorph.smithypython.common.customize.CustomFileWriter;
 import software.amazon.polymorph.smithypython.common.nameresolver.DafnyNameResolver;
-import software.amazon.polymorph.smithypython.localservice.shapevisitor.DafnyToSmithyShapeVisitor;
-import software.amazon.polymorph.smithypython.localservice.shapevisitor.SmithyConfigToDafnyConfigShapeVisitor;
+import software.amazon.polymorph.smithypython.localservice.shapevisitor.DafnyToLocalServiceShapeVisitor;
+import software.amazon.polymorph.smithypython.localservice.shapevisitor.LocalServiceConfigToDafnyConfigShapeVisitor;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
@@ -133,11 +133,10 @@ public class ConfigFileWriter implements CustomFileWriter {
    */
   private void generateDafnyConfigToSmithyConfigFunctionBody(
       StructureShape configShape, GenerationContext codegenContext, PythonWriter writer) {
-    String output = configShape.accept(new DafnyToSmithyShapeVisitor(
+    String output = configShape.accept(new DafnyToLocalServiceShapeVisitor(
         codegenContext,
         "dafny_config",
-        writer,
-        "config"
+        writer
     ));
     writer.writeComment("Import dafny_to_smithy at runtime to prevent introducing circular dependency on config file.");
     writer.write("from . import dafny_to_smithy");
@@ -156,11 +155,10 @@ public class ConfigFileWriter implements CustomFileWriter {
     // Dafny-generated config shapes contain a piece of unmodelled behavior,
     //   which is that every config member is required.
     //
-    String output = configShape.accept(new SmithyConfigToDafnyConfigShapeVisitor(
+    String output = configShape.accept(new LocalServiceConfigToDafnyConfigShapeVisitor(
         codegenContext,
         "smithy_config",
-        writer,
-        "config"
+        writer
     ));
     writer.write("return " + output);
   }

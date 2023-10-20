@@ -264,9 +264,9 @@ public class SmithyNameResolver {
   }
 
   /**
-   * Returns the name of the function that converts the provided shape's Dafny-modelled type
-   *   to the corresponding Smithy-modelled type.
-   * This function will be defined in the `dafny_to_smithy.py` file.
+   * Returns the name of the function that converts the provided shape's Smithy-modelled type
+   *   to the corresponding Dafny-modelled type.
+   * This function will be defined in the `smithy_to_dafny.py` file.
    * ex. example.namespace.ExampleShape -> "SmithyToDafny_example_namespace_ExampleShape"
    * @param shape
    * @return

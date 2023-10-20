@@ -1,10 +1,14 @@
-package software.amazon.polymorph.smithypython.awssdk.shapevisitor;
+package software.amazon.polymorph.smithypython.localservice.shapevisitor;
 
 import java.util.HashSet;
+import java.util.Map.Entry;
 import java.util.Set;
-import software.amazon.polymorph.smithypython.awssdk.shapevisitor.conversionwriters.DafnyToAwsSdkConversionFunctionWriter;
+import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
+import software.amazon.polymorph.smithypython.common.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.Utils;
+import software.amazon.polymorph.smithypython.localservice.shapevisitor.conversionwriter.DafnyToLocalServiceConversionFunctionWriter;
+import software.amazon.polymorph.smithypython.localservice.shapevisitor.conversionwriter.LocalServiceToDafnyConversionFunctionWriter;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.WriterDelegator;
@@ -32,34 +36,45 @@ import software.amazon.smithy.model.shapes.TimestampShape;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonWriter;
+import software.amazon.smithy.utils.CaseUtils;
 
 /**
  * ShapeVisitor that should be dispatched from a shape
  * to generate code that maps a Dafny shape's internal attributes
  * to the corresponding Smithy shape's internal attributes.
  *
- * This generates code in a `dafny_to_aws_sdk.py` file.
+ * This generates code in a `dafny_to_smithy.py` file.
  * The generated code consists of methods that convert from a Dafny-modelled shape
  *   to a Smithy-modelled shape.
  * Code that requires these conversions will call out to this file.
+ *
+ * Note that the `dafny_to_smithy.py` file this generates SHOULD NOT be imported at the top-level.
+ * Doing so introduces circular import dependencies, which Python cannot handle.
+ * To work around this, this file SHOULD be used by importing it within function code
+ *   immediately before it is used.
+ * (The circular dependency occurs when dafny_to_smithy imports the shapes it is converting to,
+ *  but the files those shapes are in contain logic to call dafny_to_smithy.
+ *  These files are resource shapes, service shapes, and config shapes.
+ *  This is unavoidable. (dafny_to_smithy MUST know about the shapes it is converting to,
+ *    and the functions in these files MUST call out to dafny_to_smithy.)
+ * (An alternative that is NOT implemented is to import shapes being converted at runtime,
+ *  rather than importing dafny_to_smithy at runtime.
+ *  This is not preferred, as it would defer many more imports to runtime.
+ *  Deferring imports defers detection of issues with imported files;
+ *  deferring imports on a shape-by-shape basis will defer detection of issues with those shapes;
+ *  by having all deferred imports refer to the same file, the risk is mitigated.)
  */
-public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
+public class DafnyToLocalServiceShapeVisitor extends ShapeVisitor.Default<String> {
     private final GenerationContext context;
     private String dataSource;
     private final PythonWriter writer;
-    // Store the set of shapes for which this ShapeVisitor (and ShapeVisitors that extend this)
-    // have already generated a conversion function, so we only write each conversion function once.
-    private static final Set<Shape> generatedShapes = new HashSet<>();
-    static final Set<Shape> shapesToGenerate = new HashSet<>();
-    static boolean generating = false;
-
     /**
      * @param context     The generation context.
      * @param dataSource  The in-code location of the data to provide an output of
      *                    ({@code output.foo}, {@code entry}, etc.)
      * @param writer      The PythonWriter being used
      */
-    public DafnyToAwsSdkShapeVisitor(
+    public DafnyToLocalServiceShapeVisitor(
         GenerationContext context,
         String dataSource,
         PythonWriter writer
@@ -79,26 +94,23 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
 
     @Override
     public String blobShape(BlobShape shape) {
-      return "bytes(%1$s)".formatted(dataSource);
+      return dataSource;
     }
 
     @Override
     public String structureShape(StructureShape structureShape) {
-//      // Dafny does not generate a type for Unit shape
-//      if (Utils.isUnitShape(structureShape.getId())) {
-//        return "None";
-//      }
-
-      DafnyToAwsSdkConversionFunctionWriter.writeConverterForShapeAndMembers(structureShape, context, writer);
+      LocalServiceToDafnyConversionFunctionWriter.writeConverterForShapeAndMembers(structureShape,
+          context, writer);
+      DafnyToLocalServiceConversionFunctionWriter.writeConverterForShapeAndMembers(structureShape,
+          context, writer);
 
       return "%1$s(%2$s)".formatted(
           SmithyNameResolver.getDafnyToSmithyFunctionNameForShape(structureShape),
-          dataSource
+          Utils.isUnitShape(structureShape.getId()) ? "" : dataSource
       );
     }
 
     @Override
-    // TODO
     public String listShape(ListShape shape) {
       StringBuilder builder = new StringBuilder();
 
@@ -112,7 +124,7 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
       // `[list_element for list_element in `DafnyToSmithy(targetShape)``
       builder.append("%1$s".formatted(
           targetShape.accept(
-              new DafnyToAwsSdkShapeVisitor(context, "list_element", writer)
+              new DafnyToLocalServiceShapeVisitor(context, "list_element", writer)
           )));
 
       // Close structure:
@@ -121,7 +133,6 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
     }
 
   @Override
-  // TODO
   public String mapShape(MapShape shape) {
     StringBuilder builder = new StringBuilder();
 
@@ -137,7 +148,7 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
     // `{`DafnyToSmithy(key)`:`
     builder.append("%1$s: ".formatted(
         keyTargetShape.accept(
-            new DafnyToAwsSdkShapeVisitor(context, "key", writer)
+            new DafnyToLocalServiceShapeVisitor(context, "key", writer)
         )
     ));
 
@@ -145,7 +156,7 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
     // `{`DafnyToSmithy(key)`: `DafnyToSmithy(value)``
     builder.append("%1$s".formatted(
         valueTargetShape.accept(
-            new DafnyToAwsSdkShapeVisitor(context, "value", writer)
+            new DafnyToLocalServiceShapeVisitor(context, "value", writer)
         )
     ));
 
@@ -162,7 +173,7 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
 
     @Override
     public String stringShape(StringShape shape) {
-      return dataSource + ".VerbatimString(False)";
+      return dataSource;
     }
 
     @Override
@@ -212,13 +223,15 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
 
     @Override
     public String timestampShape(TimestampShape shape) {
-      // TODO: This lets code generate, but is untested
       return dataSource;
     }
 
     @Override
     public String unionShape(UnionShape unionShape) {
-      DafnyToAwsSdkConversionFunctionWriter.writeConverterForShapeAndMembers(unionShape, context, writer);
+      LocalServiceToDafnyConversionFunctionWriter.writeConverterForShapeAndMembers(unionShape,
+          context, writer);
+      DafnyToLocalServiceConversionFunctionWriter.writeConverterForShapeAndMembers(unionShape,
+          context, writer);
 
       return "%1$s(%2$s)".formatted(
           SmithyNameResolver.getDafnyToSmithyFunctionNameForShape(unionShape),
@@ -226,49 +239,4 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
       );
     }
 
-    /**
-     * Called from the StructureShape converter when the StructureShape has a Polymorph Reference trait.
-     * @param shape
-     * @return
-     */
-    protected String referenceStructureShape(StructureShape shape, String dataSourceInsideConversionFunction) {
-      ReferenceTrait referenceTrait = shape.expectTrait(ReferenceTrait.class);
-      Shape resourceOrService = context.model().expectShape(referenceTrait.getReferentId());
-
-      if (resourceOrService.isResourceShape()) {
-        return referenceResourceShape(resourceOrService.asResourceShape().get(), dataSourceInsideConversionFunction);
-      } else if (resourceOrService.isServiceShape()) {
-        return referenceServiceShape(resourceOrService.asServiceShape().get(), dataSourceInsideConversionFunction);
-      } else {
-        throw new UnsupportedOperationException("Unknown referenceStructureShape type: " + shape);
-      }
-    }
-
-    protected String referenceResourceShape(ResourceShape resourceShape, String dataSourceInsideConversionFunction) {
-      WriterDelegator<PythonWriter> delegator = context.writerDelegator();
-      String moduleName = context.settings().getModuleName();
-      delegator.useFileWriter(moduleName + "/dafny_to_aws_sdk.py", "", conversionWriter -> {
-        conversionWriter.addImport(
-            SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(
-                resourceShape.getId().getNamespace(), context
-            ) + ".references",
-            resourceShape.getId().getName());
-      });
-
-      return "%1$s(_impl=%2$s)".formatted(resourceShape.getId().getName(), dataSourceInsideConversionFunction);
-    }
-
-    protected String referenceServiceShape(ServiceShape serviceShape, String dataSourceInsideConversionFunction) {
-      WriterDelegator<PythonWriter> delegator = context.writerDelegator();
-      String moduleName = context.settings().getModuleName();
-      delegator.useFileWriter(moduleName + "/dafny_to_aws_sdk.py", "", conversionWriter -> {
-        conversionWriter.addImport(
-            SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(
-                serviceShape.getId().getNamespace(), context
-            ) + ".client",
-            serviceShape.getId().getName());
-          });
-
-      return "%1$s(%2$s)".formatted(serviceShape.getId().getName(), dataSourceInsideConversionFunction);
-    }
 }

@@ -177,9 +177,8 @@ public class AwsSdkShimFileWriter implements CustomFileWriter {
             String input = targetShapeInput.accept(new DafnyToAwsSdkShapeVisitor(
                   codegenContext,
                   "input",
-                  writer,
-                  "shim"
-              ));
+                  writer
+            ));
             writer.addImport(".", "dafny_to_aws_sdk");
 
             // Generate code that:
@@ -204,8 +203,7 @@ public class AwsSdkShimFileWriter implements CustomFileWriter {
             String output = targetShape.accept(new AwsSdkToDafnyShapeVisitor(
                 codegenContext,
                 "wrapped_response",
-                writer,
-                "shim"
+                writer
             ));
 
             // Generate code that wraps SDK success shapes as Dafny success shapes

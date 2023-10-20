@@ -5,8 +5,8 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 import software.amazon.polymorph.smithypython.common.customize.CustomFileWriter;
-import software.amazon.polymorph.smithypython.localservice.shapevisitor.DafnyToSmithyShapeVisitor;
-import software.amazon.polymorph.smithypython.localservice.shapevisitor.SmithyToDafnyShapeVisitor;
+import software.amazon.polymorph.smithypython.localservice.shapevisitor.DafnyToLocalServiceShapeVisitor;
+import software.amazon.polymorph.smithypython.localservice.shapevisitor.LocalServiceToDafnyShapeVisitor;
 import software.amazon.polymorph.smithypython.common.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.Utils;
@@ -207,11 +207,10 @@ public class ShimFileWriter implements CustomFileWriter {
             //   and cannot be constructed inline.
             // Polymorph will create an object representing the service's client, instantiate it,
             //   then reference that object in its `input` string.
-            String input = targetShapeInput.accept(new DafnyToSmithyShapeVisitor(
+            String input = targetShapeInput.accept(new DafnyToLocalServiceShapeVisitor(
                 codegenContext,
                 "input",
-                writer,
-                "shim"
+                writer
             ));
 
             // Generate code that:
@@ -222,9 +221,9 @@ public class ShimFileWriter implements CustomFileWriter {
               """
               # Import dafny_to_smithy at runtime to prevent introducing circular dependency on shim file
               from . import dafny_to_smithy
-              unwrapped_request: $L = dafny_to_smithy.$L
+              smithy_client_request: $L = dafny_to_smithy.$L
               try:
-                  wrapped_response = asyncio.run(self._impl.$L(unwrapped_request))
+                  smithy_client_response = asyncio.run(self._impl.$L(smithy_client_request))
               except ServiceError as e:
                   return Wrappers.Result_Failure(smithy_error_to_dafny_error(e))
                       
@@ -237,11 +236,10 @@ public class ShimFileWriter implements CustomFileWriter {
             Shape targetShape = codegenContext.model().expectShape(operationShape.getOutputShape());
             // Generate code that converts the output from Smithy type to the corresponding Dafny type
             // This has a side effect of possibly writing transformation code at the writer's current position.
-            String output = targetShape.accept(new SmithyToDafnyShapeVisitor(
+            String output = targetShape.accept(new LocalServiceToDafnyShapeVisitor(
                 codegenContext,
-                "wrapped_response",
-                writer,
-                "shim"
+                "smithy_client_response",
+                writer
             ));
 
             // Generate code that wraps Smithy success shapes as Dafny success shapes

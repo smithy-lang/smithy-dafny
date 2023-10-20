@@ -5,8 +5,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import software.amazon.polymorph.smithypython.common.customize.CustomFileWriter;
-import software.amazon.polymorph.smithypython.localservice.shapevisitor.DafnyToSmithyShapeVisitor;
-import software.amazon.polymorph.smithypython.localservice.shapevisitor.SmithyToDafnyShapeVisitor;
+import software.amazon.polymorph.smithypython.localservice.shapevisitor.DafnyToLocalServiceShapeVisitor;
+import software.amazon.polymorph.smithypython.localservice.shapevisitor.LocalServiceToDafnyShapeVisitor;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.smithy.codegen.core.TopologicalIndex;
@@ -272,21 +272,19 @@ public class ReferencesFileWriter implements CustomFileWriter {
       //   and cannot be constructed inline.
       // Polymorph will create an object representing the service's client, instantiate it,
       //   then reference that object in its `input` string.
-      String input = targetShapeInput.accept(new SmithyToDafnyShapeVisitor(
+      String input = targetShapeInput.accept(new LocalServiceToDafnyShapeVisitor(
           codegenContext,
           "native_input",
-          writer,
-          "references"
+          writer
       ));
 
       Shape targetShape = codegenContext.model().expectShape(operationShape.getOutputShape());
       // Generate output code converting the return value of the Dafny implementation into
       // its corresponding native-modelled type.
-      String output = targetShape.accept(new DafnyToSmithyShapeVisitor(
+      String output = targetShape.accept(new DafnyToLocalServiceShapeVisitor(
           codegenContext,
           "dafny_output",
-          writer,
-          "references"
+          writer
       ));
 
       writer.write("""

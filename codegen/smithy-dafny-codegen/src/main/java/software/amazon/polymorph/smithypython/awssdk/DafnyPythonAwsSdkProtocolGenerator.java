@@ -15,35 +15,9 @@
 
 package software.amazon.polymorph.smithypython.awssdk;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
-import software.amazon.polymorph.smithypython.common.Constants;
-import software.amazon.polymorph.smithypython.common.nameresolver.DafnyNameResolver;
-import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
-import software.amazon.polymorph.smithypython.common.nameresolver.Utils;
-import software.amazon.polymorph.smithypython.localservice.shapevisitor.DafnyToSmithyShapeVisitor;
-import software.amazon.polymorph.smithypython.localservice.shapevisitor.SmithyToDafnyShapeVisitor;
-import software.amazon.polymorph.traits.LocalServiceTrait;
-import software.amazon.smithy.codegen.core.Symbol;
-import software.amazon.smithy.codegen.core.SymbolReference;
-import software.amazon.smithy.codegen.core.WriterDelegator;
-import software.amazon.smithy.model.shapes.OperationShape;
-import software.amazon.smithy.model.shapes.ServiceShape;
-import software.amazon.smithy.model.shapes.Shape;
-import software.amazon.smithy.model.shapes.ShapeId;
-import software.amazon.smithy.model.shapes.StructureShape;
-import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.python.codegen.ApplicationProtocol;
-import software.amazon.smithy.python.codegen.CodegenUtils;
 import software.amazon.smithy.python.codegen.GenerationContext;
-import software.amazon.smithy.python.codegen.PythonWriter;
-import software.amazon.smithy.python.codegen.SmithyPythonDependency;
 import software.amazon.smithy.python.codegen.integration.ProtocolGenerator;
-import software.amazon.smithy.utils.CodeSection;
 import software.amazon.smithy.utils.SmithyUnstableApi;
 
 /**

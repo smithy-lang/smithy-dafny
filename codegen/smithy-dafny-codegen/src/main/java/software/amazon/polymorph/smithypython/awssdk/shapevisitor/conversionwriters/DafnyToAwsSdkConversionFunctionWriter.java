@@ -1,15 +1,12 @@
 package software.amazon.polymorph.smithypython.awssdk.shapevisitor.conversionwriters;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map.Entry;
-import java.util.Set;
+
 import software.amazon.polymorph.smithypython.awssdk.nameresolver.AwsSdkNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.smithypython.awssdk.shapevisitor.DafnyToAwsSdkShapeVisitor;
-import software.amazon.polymorph.smithypython.common.shapevisitor.conversionwriters.BaseConversionWriter;
+import software.amazon.polymorph.smithypython.common.shapevisitor.conversionwriter.BaseConversionWriter;
 import software.amazon.smithy.codegen.core.WriterDelegator;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.Shape;
@@ -19,87 +16,100 @@ import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonWriter;
 
 /**
- * Writes the shim.py file.
- * The shim wraps the client.py implementation (which itself wraps the underlying Dafny implementation).
- * Other Dafny-generated Python code may use the shim to interact with this project's Dafny implementation
- *   through the Polymorph wrapper.
+ * Writes the dafny_to_aws_sdk.py file.
  */
 public class DafnyToAwsSdkConversionFunctionWriter extends BaseConversionWriter {
 
-  static DafnyToAwsSdkConversionFunctionWriter singleton = null;
+  // Use a singleton to preserve generatedShapes through multiple generations
+  static DafnyToAwsSdkConversionFunctionWriter singleton;
 
   private DafnyToAwsSdkConversionFunctionWriter() { }
 
-  public static DafnyToAwsSdkConversionFunctionWriter getWriter() {
-    if (singleton == null) {
-      singleton = new DafnyToAwsSdkConversionFunctionWriter();
-    }
-    return singleton;
+  // Instantiate singleton at class-load time
+  static {
+    singleton = new DafnyToAwsSdkConversionFunctionWriter();
   }
 
-  public void writeStructureShapeConverter(StructureShape structureShape, GenerationContext context,
-      PythonWriter writer, String filename) {
+  /**
+   * Delegate writing conversion methods for the provided shape and its member shapes
+   * @param shape
+   * @param context
+   * @param writer
+   */
+  public static void writeConverterForShapeAndMembers(Shape shape, GenerationContext context,
+      PythonWriter writer) {
+    singleton.baseWriteConverterForShapeAndMembers(shape, context, writer);
+  }
+
+  protected void writeStructureShapeConverter(StructureShape structureShape) {
     WriterDelegator<PythonWriter> delegator = context.writerDelegator();
     String moduleName = context.settings().getModuleName();
     // Create a new writer.
     // The `writer` on this object points to the location in the code where this converter was called.
     // This new writer to writes the dafny_to_aws_sdk converter function.
     delegator.useFileWriter(moduleName + "/dafny_to_aws_sdk.py", "", conversionWriter -> {
+
+      // Within the conversion function, the dataSource becomes the function's input
+      // This hardcodes the input parameter name for a conversion function to always be "input"
+      String dataSourceInsideConversionFunction = "input";
+
       conversionWriter.openBlock(
-          "def $L(input):",
+          "def $L($L):",
           "",
-          SmithyNameResolver.getDafnyToSmithyFunctionNameForShape(structureShape),
+          AwsSdkNameResolver.getDafnyToAwsSdkFunctionNameForShape(structureShape),
+          dataSourceInsideConversionFunction,
           () -> {
-            writeStructureShapeConverterBody(structureShape, conversionWriter, context, writer, filename);
+            // boto3 takes in kwargs
+            // Create a dictionary indexed by keys, then cast to kwargs in API call
+            conversionWriter.write("output = {}");
+
+            // Recursively dispatch a new ShapeVisitor for each member of the structure
+            for (Entry<String, MemberShape> memberShapeEntry : structureShape.getAllMembers().entrySet()) {
+              String memberName = memberShapeEntry.getKey();
+              MemberShape memberShape = memberShapeEntry.getValue();
+              final Shape targetShape = context.model().expectShape(memberShape.getTarget());
+
+              // Optional shapes require an `is_Some` check and their value is accessed via `.value`
+              // ex. kms.KeyId in DecryptRequest (optional parameter):
+              // if input.KeyId.is_Some:
+              //        output["KeyId"] = input.KeyId.value.VerbatimString(False)
+              // (`VerbatimString(False)` comes from the DafnyToAwsSdkShapeVisitor)
+              if (memberShape.isOptional()) {
+                conversionWriter.openBlock("if $L.$L.is_Some:",
+                    "",
+                    dataSourceInsideConversionFunction,
+                    memberName,
+                    () -> {
+                      conversionWriter.write("output[\"$L\"] = $L",
+                          memberName,
+                          targetShape.accept(new DafnyToAwsSdkShapeVisitor(
+                              context,
+                              dataSourceInsideConversionFunction + "." + memberName + ".value",
+                              writer
+                          )));
+                    });
+              // Required shapes are assigned directly
+              // ex. kms.CiphertextBlob in DecryptRequest (required parameter):
+              // output["CiphertextBlob"] = bytes(input.CiphertextBlob)
+              // (`bytes()` comes from the DafnyToAwsSdkShapeVisitor)
+              } else {
+                conversionWriter.write("output[\"$L\"] = $L",
+                    memberName,
+                    targetShape.accept(new DafnyToAwsSdkShapeVisitor(
+                        context,
+                        dataSourceInsideConversionFunction + "." + memberName,
+                        writer
+                    )));
+              }
+            }
+
+            conversionWriter.write("return output");
           }
       );
     });
 
   }
 
-  public void writeStructureShapeConverterBody(StructureShape shape, PythonWriter conversionWriter, GenerationContext context,
-      PythonWriter writer, String filename) {
-    // Within the conversion function, the dataSource becomes the function's input
-    // This hardcodes the input parameter name for a conversion function to always be "input"
-    String dataSourceInsideConversionFunction = "input";
-
-    conversionWriter.write("output = {}");
-
-    // Recursively dispatch a new ShapeVisitor for each member of the structure
-    for (Entry<String, MemberShape> memberShapeEntry : shape.getAllMembers().entrySet()) {
-      String memberName = memberShapeEntry.getKey();
-      MemberShape memberShape = memberShapeEntry.getValue();
-      final Shape targetShape = context.model().expectShape(memberShape.getTarget());
-
-      if (memberShape.isOptional()) {
-        conversionWriter.openBlock("if $L.$L.is_Some:",
-            "",
-            dataSourceInsideConversionFunction,
-            memberName,
-            () -> {
-              conversionWriter.write("output[\"$L\"] = $L",
-                  memberName,
-                  targetShape.accept(new DafnyToAwsSdkShapeVisitor(
-                      context,
-                      dataSourceInsideConversionFunction + "." + memberName + ".value",
-                      writer,
-                      filename
-                  )));
-            });
-      } else {
-        conversionWriter.write("output[\"$L\"] = $L",
-            memberName,
-            targetShape.accept(new DafnyToAwsSdkShapeVisitor(
-                context,
-                dataSourceInsideConversionFunction + "." + memberName,
-                writer,
-                filename
-            )));
-      }
-    }
-
-    conversionWriter.write("return output");
-  }
 
   /**
    * Writes a function definition to convert a Dafny-modelled union shape
@@ -108,7 +118,7 @@ public class DafnyToAwsSdkConversionFunctionWriter extends BaseConversionWriter 
    * This SHOULD only be called once so only one function definition is written.
    * @param unionShape
    */
-  public void writeUnionShapeConverter(UnionShape unionShape, GenerationContext context, PythonWriter writer, String filename) {
+  public void writeUnionShapeConverter(UnionShape unionShape) {
     WriterDelegator<PythonWriter> delegator = context.writerDelegator();
     String moduleName = context.settings().getModuleName();
 
@@ -155,8 +165,7 @@ public class DafnyToAwsSdkConversionFunctionWriter extends BaseConversionWriter 
                   targetShape.accept(new DafnyToAwsSdkShapeVisitor(
                       context,
                       dataSourceInsideConversionFunction + "." + memberShape.getMemberName(),
-                      writer,
-                      filename
+                      writer
                   ))
               );
               shouldOpenNewIfBlock = false;
