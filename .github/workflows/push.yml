@@ -8,7 +8,7 @@ on:
 
 jobs:
   push-ci-format:
-    uses: ./.github/workflows/library_dafny_format.yml
+    uses: ./.github/workflows/library_format.yml
     with:
       dafny: '4.2.0'
   push-ci-verification:

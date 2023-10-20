@@ -8,6 +8,9 @@ tasks.wrapper {
 plugins {
     `java-library`
     `maven-publish`
+    if (JavaVersion.current() >= JavaVersion.VERSION_11) {
+        id("com.diffplug.spotless") version "6.22.0"
+    }
 }
 
 group = "software.amazon.cryptography"
@@ -94,3 +97,10 @@ tasks.register<Copy>("copyKeysJSON") {
     from(layout.projectDirectory.file("../../dafny/TestVectorsAwsCryptographicMaterialProviders/test/keys.json"))
     into(layout.projectDirectory.dir("dafny/TestVectorsAwsCryptographicMaterialProviders/test"))
 }
+
+// Commented out until the format has been updated
+// spotless {
+//   java {
+//     googleJavaFormat()
+//   }
+// }

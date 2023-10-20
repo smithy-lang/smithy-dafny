@@ -1,5 +1,5 @@
 # This workflow performs static analysis checks.
-name: Library Dafny format check
+name: Library format check
 
 on:
   workflow_call:
@@ -49,4 +49,21 @@ jobs:
         run: |
           # This works because `node` is installed by default on GHA runners
           CORES=$(node -e 'console.log(os.cpus().length)')
-          make format-check
+          make format_dafny-check
+
+      # Commented out until the format has been updated
+      # - name: Check format of ${{ matrix.library }} Net code
+      #   shell: bash
+      #   working-directory: ./${{ matrix.library }}
+      #   run: |
+      #     # This works because `node` is installed by default on GHA runners
+      #     CORES=$(node -e 'console.log(os.cpus().length)')
+      #     make format_net-check
+
+      # - name: Check format of ${{ matrix.library }} Java code
+      #   shell: bash
+      #   working-directory: ./${{ matrix.library }}
+      #   run: |
+      #     # This works because `node` is installed by default on GHA runners
+      #     CORES=$(node -e 'console.log(os.cpus().length)')
+      #     make format_java-check

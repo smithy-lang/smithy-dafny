@@ -44,5 +44,3 @@ SERVICE_DEPS_AwsCryptographyKeyStore := \
 	ComAmazonawsDynamodb \
 	AwsCryptographicMaterialProviders/dafny/AwsCryptographicMaterialProviders \
 
-format_net:
-	pushd runtimes/net && dotnet format && popd
