@@ -32,7 +32,7 @@ public class AwsSdkShimFileWriter implements CustomFileWriter {
   @Override
   public void customizeFileForServiceShape(
       ServiceShape serviceShape, GenerationContext codegenContext) {
-    String typesModulePrelude = AwsSdkNameResolver.getDafnyPythonTypesModuleNameForShape(serviceShape.getId());
+    String typesModulePrelude = DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(serviceShape.getId());
     String moduleName = codegenContext.settings().getModuleName();
     codegenContext.writerDelegator().useFileWriter(moduleName + "/shim.py", "", writer -> {
       writer.write(
@@ -59,7 +59,7 @@ public class AwsSdkShimFileWriter implements CustomFileWriter {
               """, typesModulePrelude,
           writer.consumer(w -> generateAwsSdkErrorToDafnyErrorBlock(codegenContext, serviceShape, w)),
           AwsSdkNameResolver.shimForService(serviceShape),
-          // TODO-Python: Uncomment to type out the shim class
+          // TODO-Python: Uncomment to type the shim class
           // typesModulePrelude, DafnyNameResolver.getDafnyClientInterfaceTypeForServiceShape(serviceShape),
           writer.consumer(w -> generateOperationsBlock(codegenContext, serviceShape, w))
       );
@@ -100,7 +100,7 @@ public class AwsSdkShimFileWriter implements CustomFileWriter {
           errorShapeId.getName(),
           () -> {
             writer.write("return $L.$L(message=e.response['Error']['Message'])",
-                AwsSdkNameResolver.getDafnyPythonTypesModuleNameForShape(errorShapeId),
+                DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(errorShapeId),
                 DafnyNameResolver.getDafnyTypeForError(errorShapeId));
           }
       );
@@ -113,7 +113,7 @@ public class AwsSdkShimFileWriter implements CustomFileWriter {
       writer.write("""
         return $L.Error_Opaque(obj=e)
         """,
-          AwsSdkNameResolver.getDafnyPythonTypesModuleNameForShape(serviceShape.getId())
+          DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(serviceShape.getId())
       );
     } else {
       // If `shouldOpenNewIfBlock` is false, then codegen wrote at least one error,
@@ -122,7 +122,7 @@ public class AwsSdkShimFileWriter implements CustomFileWriter {
         else:
             return $L.Error_Opaque(obj=e)
         """,
-          AwsSdkNameResolver.getDafnyPythonTypesModuleNameForShape(serviceShape.getId())
+          DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(serviceShape.getId())
       );
     }
   }
@@ -149,8 +149,8 @@ public class AwsSdkShimFileWriter implements CustomFileWriter {
       ShapeId inputShape = operationShape.getInputShape();
       ShapeId outputShape = operationShape.getOutputShape();
 
-      AwsSdkNameResolver.importDafnyTypeForAwsSdkShape(writer, inputShape, codegenContext);
-      AwsSdkNameResolver.importDafnyTypeForAwsSdkShape(writer, outputShape, codegenContext);
+      DafnyNameResolver.importDafnyTypeForShape(writer, inputShape, codegenContext);
+      DafnyNameResolver.importDafnyTypeForShape(writer, outputShape, codegenContext);
       
       // Write the Shim operation block.
       // This takes in a Dafny input and returns a Dafny output.
@@ -187,12 +187,11 @@ public class AwsSdkShimFileWriter implements CustomFileWriter {
             // 3) wraps Smithy failures as Dafny failures
             writer.write(
               """
-              unwrapped_request = dafny_to_aws_sdk.$L
+              boto_request_dict = dafny_to_aws_sdk.$L
               try:
-                  wrapped_response = self._impl.$L(**unwrapped_request)
+                  boto_response_dict = self._impl.$L(**boto_request_dict)
               except ClientError as e:
                   return Wrappers.Result_Failure(sdk_error_to_dafny_error(e))
-                  
               """,
               input,
               codegenContext.symbolProvider().toSymbol(operationShape).getName()
@@ -202,7 +201,7 @@ public class AwsSdkShimFileWriter implements CustomFileWriter {
             // Generate code that converts the output from SDK type to the corresponding Dafny type
             String output = targetShape.accept(new AwsSdkToDafnyShapeVisitor(
                 codegenContext,
-                "wrapped_response",
+                "boto_response_dict",
                 writer
             ));
 

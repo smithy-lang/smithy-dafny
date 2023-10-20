@@ -3,6 +3,7 @@ package software.amazon.polymorph.smithypython.awssdk.shapevisitor;
 import java.util.HashSet;
 import java.util.Set;
 import software.amazon.polymorph.smithypython.awssdk.nameresolver.AwsSdkNameResolver;
+import software.amazon.polymorph.smithypython.awssdk.shapevisitor.conversionwriters.AwsSdkToDafnyConversionFunctionWriter;
 import software.amazon.polymorph.smithypython.awssdk.shapevisitor.conversionwriters.DafnyToAwsSdkConversionFunctionWriter;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.Utils;
@@ -37,22 +38,12 @@ import software.amazon.smithy.python.codegen.PythonWriter;
 /**
  * ShapeVisitor that should be dispatched from a shape
  * to generate code that maps a Dafny shape's internal attributes
- * to the corresponding Smithy shape's internal attributes.
- *
- * This generates code in a `dafny_to_aws_sdk.py` file.
- * The generated code consists of methods that convert from a Dafny-modelled shape
- *   to a Smithy-modelled shape.
- * Code that requires these conversions will call out to this file.
+ * to the corresponding AWS SDK kwarg-indexed dictionary.
  */
 public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
     private final GenerationContext context;
     private String dataSource;
     private final PythonWriter writer;
-    // Store the set of shapes for which this ShapeVisitor (and ShapeVisitors that extend this)
-    // have already generated a conversion function, so we only write each conversion function once.
-    private static final Set<Shape> generatedShapes = new HashSet<>();
-    static final Set<Shape> shapesToGenerate = new HashSet<>();
-    static boolean generating = false;
 
     /**
      * @param context     The generation context.
@@ -85,12 +76,10 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
 
     @Override
     public String structureShape(StructureShape structureShape) {
-//      // Dafny does not generate a type for Unit shape
-//      if (Utils.isUnitShape(structureShape.getId())) {
-//        return "None";
-//      }
-
-      DafnyToAwsSdkConversionFunctionWriter.writeConverterForShapeAndMembers(structureShape, context, writer);
+      AwsSdkToDafnyConversionFunctionWriter.writeConverterForShapeAndMembers(structureShape,
+          context, writer);
+      DafnyToAwsSdkConversionFunctionWriter.writeConverterForShapeAndMembers(structureShape,
+          context, writer);
 
       return "%1$s(%2$s)".formatted(
           AwsSdkNameResolver.getDafnyToAwsSdkFunctionNameForShape(structureShape),
@@ -213,19 +202,23 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
 
     @Override
     public String timestampShape(TimestampShape shape) {
-      // TODO: This lets code generate, but is untested
-      return dataSource;
+      // TODO-Python: BLOCKING: This lets code generate, but will fail when code hits it
+      return "TypeError(\"TimestampShape not supported\")";
     }
 
     @Override
     public String unionShape(UnionShape unionShape) {
-      DafnyToAwsSdkConversionFunctionWriter.writeConverterForShapeAndMembers(unionShape, context, writer);
+      DafnyToAwsSdkConversionFunctionWriter.writeConverterForShapeAndMembers(unionShape,
+          context, writer);
+      AwsSdkToDafnyConversionFunctionWriter.writeConverterForShapeAndMembers(unionShape,
+          context, writer);
 
+      // Return a reference to the generated conversion method
+      // ex. for shape example.namespace.ExampleShape
+      // returns `DafnyToAwsSdk_example_namespace_ExampleShape(input)`
       return "%1$s(%2$s)".formatted(
           AwsSdkNameResolver.getDafnyToAwsSdkFunctionNameForShape(unionShape),
           dataSource
       );
     }
-
-
 }

@@ -12,33 +12,46 @@ import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonWriter;
 
 /**
- * Abstract class for writing Dafny-to-X and X-to-Dafny conversion functions. (X = AWS SDK or LocalService.)
- * ShapeVisitors should call out to subclasses to write conversions for aggregate shapes (Unions and Structures
- *   TODO-Python: Can lists/maps contain themselves infinitely..?).
- * These shapes are special in that they can contain themselves as members,
- *   and require a function to
- * Sugclasses will write conversion functions for the provided shape and its members,
- *   unless it has already
+ * Abstract class for writing Dafny-to-X and X-to-Dafny conversion functions. (X = AWS-SDK or LocalService.)
+ * Subclasses of this class generate files that contain methods that
+ *   convert from AWS SDK shapes (i.e. boto3 request/response dictionaries)
+ *   to Dafny shapes (Smithy-Dafny generated Dafny code transpiled into Python).
+ *
+ * ShapeVisitors should call out to subclasses of this class to write conversions for aggregate shapes
+ *   that can contain themselves as members (Unions and Structures).
+ * These shapes require delegating conversions to functions that recurse at runtime,
+ *   and not at code generation time.
  */
 public abstract class BaseConversionWriter {
-  // Store the set of shapes for which this ShapeVisitor (and ShapeVisitors that extend this)
-  // have already generated a conversion function, so we only write each conversion function once.
+  // Store the set of shapes for which the subclass has already generated conversion methods
   final Set<Shape> generatedShapes = new HashSet<>();
+  // Queue of shapes to generate
   final List<Shape> shapesToGenerate = new ArrayList<>();
+  // Flag to block generating while another conversion method's generation is in-progress
   boolean generating = false;
+
   protected GenerationContext context;
+  // Writer pointing to the in-code location where the ShapeVisitor calling the subclass is writing
   protected PythonWriter writer;
 
   /**
    * Writes a function that converts from the AWS SDK dict to the Dafny-modelled shape.
-   *
+   * If the shape has members that also require writing a conversion function,
+   *   this function will also write conversion methods for those shapes (recursively).
+   * If this method is called for the same shape multiple times,
+   *   subsequent calls will not write a conversion method for the shape.
+   * This is the ONLY interface by which clients of this class' subclasses can request
+   *   writing a new shape.
    * @param shape
    * @param context
    * @param writer
    */
   public void baseWriteConverterForShapeAndMembers(Shape shape, GenerationContext context,
       PythonWriter writer) {
+
     this.context = context;
+    // Store where this is being written from where the original ShapeVisitor was dispatched (e.g. serialize, shim);
+    // This allows us to write imports in the original file
     this.writer = writer;
     // Do NOT write any converters for wrapped localServices.
     // The wrapped localService should ONLY generate a Shim class.
@@ -57,7 +70,8 @@ public abstract class BaseConversionWriter {
     // do NOT write the new converter inside the definition of the in-progress converter.
     // `shape` will be picked up once the in-progress converter is finished.
     while (!generating && !shapesToGenerate.isEmpty()) {
-      // Indicate to recursive calls that this class is writing a converter to delay w
+      // Indicate to recursive calls that this class is writing a converter to
+      //   prevent writing multiple conversion methods at once
       generating = true;
 
       Shape toGenerate = shapesToGenerate.remove(0);

@@ -15,10 +15,18 @@ import software.amazon.smithy.utils.SmithyBuilder;
 import software.amazon.smithy.utils.ToSmithyBuilder;
 
 /**
- * A trait that signals that a service is a wrapped LocalService.
+ * A trait that signals that a service is an AWS SDK serviceShape.
  * This trait should NOT be added to Smithy model files.
  * This is a trait that can be added at runtime by a SmithyBuildPlugin
- *   to signal that the code generation process should generate a wrapped LocalService.
+ *   to signal that the code generation process should generate an AWS SDK shim.
+ * This is needed because SmithyBuildPlugins require that SOME protocol is present on the
+ *   provided ServiceShape.
+ * However, the protocols on our AWS SDK Smithy model files are either inconsistent or nonexistent;
+ *   in addition, we should not declare some usage of any provided protocol (e.g. `awsJson1_1`)
+ *   to allow the SmithyBuildPlugin to perform code generation, then ignore that protocol entirely.
+ * Since Smithy-Dafny CodegenEngine and subclasses of DirectedPythonCodegen are aware of the
+ *   ServiceShape that is under generation, they can attach a new protocol at runtime
+ *   to fulfill requirements from Smithy that SmithyBuildPlugins have a protocol.
  */
 public class DafnyAwsSdkProtocolTrait extends AbstractTrait implements ToSmithyBuilder<DafnyAwsSdkProtocolTrait> {
     public static final ShapeId ID = ShapeId.from("aws.polymorph#awsSdk");

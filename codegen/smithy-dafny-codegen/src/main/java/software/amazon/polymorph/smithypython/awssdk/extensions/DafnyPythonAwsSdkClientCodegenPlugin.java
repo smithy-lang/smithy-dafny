@@ -32,13 +32,15 @@ import software.amazon.smithy.python.codegen.integration.PythonIntegration;
 import software.amazon.smithy.utils.SmithyUnstableApi;
 
 /**
- * Plugin to trigger Smithy-Dafny Python code generation.
- * This differs from the PythonClientCodegenPlugin by not calling
+ * Plugin to trigger Smithy-Dafny Python code generation for AWS SDK services.
+ * This Plugin differs from the PythonClientCodegenPlugin by not calling
  *     runner.performDefaultCodegenTransforms();
  * and
  *     runner.createDedicatedInputsAndOutputs();
  * These methods transform the model in ways that the model does not align with
  *   the generated Dafny code.
+ * This Plugin also attaches a DafnyAwsSdkProtocolTrait to the ServiceShape provided in settings.
+ * AWS SDKs do not consistently label a protocol,
  */
 @SmithyUnstableApi
 public final class DafnyPythonAwsSdkClientCodegenPlugin implements SmithyBuildPlugin {
@@ -61,8 +63,8 @@ public final class DafnyPythonAwsSdkClientCodegenPlugin implements SmithyBuildPl
     runner.model(context.getModel());
     runner.integrationClass(PythonIntegration.class);
 
-    // Add a DafnyAwsSdkLocal to the service as a contextual indicator that code generation requires
-    //   wrapped local service generation
+    // Add a DafnyAwsSdkProtocolTrait to the service as a contextual indicator highlighting
+    //   that the DafnyPythonAwsSdk protocol should be used.
     ServiceShape serviceShape = context.getModel().expectShape(settings.getService()).asServiceShape().get();
     runner.model(addAwsSdkProtocolTrait(context.getModel(), serviceShape));
 

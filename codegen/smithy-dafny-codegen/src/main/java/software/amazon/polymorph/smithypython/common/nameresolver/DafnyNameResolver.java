@@ -1,6 +1,7 @@
 package software.amazon.polymorph.smithypython.common.nameresolver;
 
 import java.util.Locale;
+import software.amazon.polymorph.smithypython.awssdk.nameresolver.AwsSdkNameResolver;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.ResourceShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
@@ -69,7 +70,10 @@ public class DafnyNameResolver {
    * @return
    */
   public static String getDafnyIndexModuleNameForSmithyNamespace(String smithyNamespace) {
-    return smithyNamespace.toLowerCase(Locale.ROOT).replace(".", "_") + "_internaldafny";
+    // If this is an AWS SDK shape, rewrite its namespace to match the Dafny extern namespace
+    String resolvedSmithyNamespace =
+        AwsSdkNameResolver.resolveAwsSdkSmithyModelNamespaceToDafnyExternNamespace(smithyNamespace);
+    return resolvedSmithyNamespace.toLowerCase(Locale.ROOT).replace(".", "_") + "_internaldafny";
   }
 
   /**

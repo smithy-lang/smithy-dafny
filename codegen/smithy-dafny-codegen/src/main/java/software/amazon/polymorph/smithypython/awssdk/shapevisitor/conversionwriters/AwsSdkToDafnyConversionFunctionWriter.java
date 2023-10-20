@@ -15,10 +15,7 @@ import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonWriter;
 
 /**
- * Writes the shim.py file.
- * The shim wraps the client.py implementation (which itself wraps the underlying Dafny implementation).
- * Other Dafny-generated Python code may use the shim to interact with this project's Dafny implementation
- *   through the Polymorph wrapper.
+ * Writes the aws_sdk_to_dafny.py file via the BaseConversionWriter implementation.
  */
 public class AwsSdkToDafnyConversionFunctionWriter extends BaseConversionWriter {
 
@@ -52,21 +49,21 @@ public class AwsSdkToDafnyConversionFunctionWriter extends BaseConversionWriter 
       // This hardcodes the input parameter name for a conversion function to always be "input"
       String dataSourceInsideConversionFunction = "input";
 
+      DafnyNameResolver.importDafnyTypeForShape(conversionWriter, structureShape.getId(), context);
+
       conversionWriter.openBlock(
           "def $L($L):",
           "",
           AwsSdkNameResolver.getAwsSdkToDafnyFunctionNameForShape(structureShape),
           dataSourceInsideConversionFunction,
           () -> {
-            AwsSdkNameResolver.importDafnyTypeForAwsSdkShape(conversionWriter, structureShape.getId(), context);
-//            StringBuilder builder = new StringBuilder();
             // Open Dafny structure shape
             // e.g.
             // DafnyStructureName(...
             conversionWriter.openBlock(
                 "return $L(",
                 ")",
-                AwsSdkNameResolver.getDafnyTypeForShape(structureShape),
+                DafnyNameResolver.getDafnyTypeForShape(structureShape),
                 () -> {
                   for (Entry<String, MemberShape> memberShapeEntry : structureShape.getAllMembers().entrySet()) {
                     String memberName = memberShapeEntry.getKey();
@@ -79,7 +76,6 @@ public class AwsSdkToDafnyConversionFunctionWriter extends BaseConversionWriter 
                     // The nature of the `smithy_structure_member` conversion depends on the properties of the shape,
                     //   as described below
                     conversionWriter.writeInline("$L=", memberName);
-//              builder.append("%1$s=".formatted(memberName));
 
                     // If this shape is optional, write conversion logic to detect and possibly pass
                     //   an empty optional at runtime
@@ -113,21 +109,8 @@ public class AwsSdkToDafnyConversionFunctionWriter extends BaseConversionWriter 
                     }
                   }
                 });
-//            builder.append("%1$s(".formatted(AwsSdkNameResolver.getDafnyTypeForShape(structureShape)));
-            // Recursively dispatch a new ShapeVisitor for each member of the structure
-
           }
       );
-
-//      conversionWriter.write(
-//          """
-//          def $L($L):
-//            return $L
-//          """,
-//          SmithyNameResolver.getSmithyToDafnyFunctionNameForShape(structureShape),
-//          dataSourceInsideConversionFunction,
-//          getStructureShapeConverterBody(structureShape, conversionWriter, dataSourceInsideConversionFunction, context, writer, filename)
-//      );
     });
   }
 
@@ -188,7 +171,7 @@ public class AwsSdkToDafnyConversionFunctionWriter extends BaseConversionWriter 
               );
               shouldOpenNewIfBlock = false;
 
-              AwsSdkNameResolver.importDafnyTypeForUnion(conversionWriter, unionShape, memberShape);
+              DafnyNameResolver.importDafnyTypeForUnion(conversionWriter, unionShape, memberShape);
             }
 
             // Write case to handle if union member does not match any of the above cases

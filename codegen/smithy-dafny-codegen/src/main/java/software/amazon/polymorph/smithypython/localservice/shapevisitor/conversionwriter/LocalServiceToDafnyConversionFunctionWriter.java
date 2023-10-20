@@ -23,10 +23,7 @@ import software.amazon.smithy.python.codegen.PythonWriter;
 import software.amazon.smithy.utils.CaseUtils;
 
 /**
- * Writes the shim.py file.
- * The shim wraps the client.py implementation (which itself wraps the underlying Dafny implementation).
- * Other Dafny-generated Python code may use the shim to interact with this project's Dafny implementation
- *   through the Polymorph wrapper.
+ * Writes the smithy_to_dafny.py file via the BaseConversionWriter implementation
  */
 public class LocalServiceToDafnyConversionFunctionWriter extends BaseConversionWriter {
 

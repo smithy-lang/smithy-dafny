@@ -16,7 +16,7 @@ import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonWriter;
 
 /**
- * Writes the dafny_to_aws_sdk.py file.
+ * Writes the dafny_to_aws_sdk.py file via the BaseConversionWriter implementation.
  */
 public class DafnyToAwsSdkConversionFunctionWriter extends BaseConversionWriter {
 
@@ -170,7 +170,7 @@ public class DafnyToAwsSdkConversionFunctionWriter extends BaseConversionWriter 
               );
               shouldOpenNewIfBlock = false;
 
-              AwsSdkNameResolver.importDafnyTypeForUnion(conversionWriter, unionShape, memberShape);
+              DafnyNameResolver.importDafnyTypeForUnion(conversionWriter, unionShape, memberShape);
             }
 
             // Write case to handle if union member does not match any of the above cases

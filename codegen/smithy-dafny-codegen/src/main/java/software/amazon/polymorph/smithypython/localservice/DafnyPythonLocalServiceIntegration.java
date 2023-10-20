@@ -148,28 +148,21 @@ public final class DafnyPythonLocalServiceIntegration implements PythonIntegrati
     }
 
     /**
-     * Generate any code for the localService.
+     * Generate any code for the localService ServiceShape.
      *
      * @param serviceShape
      * @param codegenContext
      */
-    private void customizeForServiceShape(ServiceShape serviceShape,
-            GenerationContext codegenContext) {
-//        if (shouldGenerateLocalService(codegenContext)) {
-            new PluginFileWriter().customizeFileForServiceShape(serviceShape, codegenContext);
-            new DafnyImplInterfaceFileWriter().customizeFileForServiceShape(serviceShape,
-                codegenContext);
-            new DafnyProtocolFileWriter().customizeFileForServiceShape(serviceShape,
-                codegenContext);
-            new ErrorsFileWriter().customizeFileForServiceShape(serviceShape, codegenContext);
-            new ModelsFileWriter().customizeFileForServiceShape(serviceShape, codegenContext);
-            new ConfigFileWriter().customizeFileForServiceShape(serviceShape, codegenContext);
-            new ReferencesFileWriter().customizeFileForServiceShape(serviceShape, codegenContext);
-//        } if (shouldGenerateTestShim(codegenContext)) {
-//            new ShimFileWriter().customizeFileForServiceShape(serviceShape, codegenContext);
-//        } if (shouldGenerateAwsSdkShim(codegenContext)) {
-//            new AwsSdkShimFileWriter().customizeFileForServiceShape(serviceShape, codegenContext);
-//        }
+    private void customizeForServiceShape(ServiceShape serviceShape, GenerationContext codegenContext) {
+        new PluginFileWriter().customizeFileForServiceShape(serviceShape, codegenContext);
+        new DafnyImplInterfaceFileWriter().customizeFileForServiceShape(serviceShape,
+            codegenContext);
+        new DafnyProtocolFileWriter().customizeFileForServiceShape(serviceShape,
+            codegenContext);
+        new ErrorsFileWriter().customizeFileForServiceShape(serviceShape, codegenContext);
+        new ModelsFileWriter().customizeFileForServiceShape(serviceShape, codegenContext);
+        new ConfigFileWriter().customizeFileForServiceShape(serviceShape, codegenContext);
+        new ReferencesFileWriter().customizeFileForServiceShape(serviceShape, codegenContext);
     }
 
     @Override

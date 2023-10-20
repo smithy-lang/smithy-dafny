@@ -13,30 +13,30 @@
  * permissions and limitations under the License.
  */
 
-package software.amazon.polymorph.smithypython.awssdk;
+package software.amazon.polymorph.smithypython.wrappedlocalservice;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import software.amazon.polymorph.smithypython.awssdk.customize.AwsSdkShimFileWriter;
+import software.amazon.polymorph.smithypython.wrappedlocalservice.customize.ShimFileWriter;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.integration.ProtocolGenerator;
 import software.amazon.smithy.python.codegen.integration.PythonIntegration;
 
-public final class DafnyPythonAwsSdkIntegration implements PythonIntegration {
+public final class DafnyPythonWrappedLocalServiceIntegration implements PythonIntegration {
 
     /**
-     * Generate all Smithy-Dafny Python AWS SDK custom code.
+     * Generate all custom code for wrapped LocalServices.
      *
      * @param codegenContext Code generation context that can be queried when writing additional
      *                       files.
      */
     @Override
     public void customize(GenerationContext codegenContext) {
-        // ONLY run this integration's customizations IF the codegen is using its ApplicationProtocol
+        // ONLY run this integration's customizations if the codegen is using wrapped localService
         if (!codegenContext.applicationProtocol().equals(
-                DafnyPythonAwsSdkProtocolGenerator.DAFNY_PYTHON_AWS_SDK_PROTOCOL)) {
+                DafnyPythonWrappedLocalServiceProtocolGenerator.DAFNY_PYTHON_WRAPPED_LOCAL_SERVICE_PROTOCOL)) {
             return;
         }
 
@@ -51,30 +51,16 @@ public final class DafnyPythonAwsSdkIntegration implements PythonIntegration {
      */
     private void customizeForServiceShape(ServiceShape serviceShape,
             GenerationContext codegenContext) {
-        new AwsSdkShimFileWriter().customizeFileForServiceShape(serviceShape, codegenContext);
+        new ShimFileWriter().customizeFileForServiceShape(serviceShape, codegenContext);
     }
 
-
-    /**
-     * Creates the Dafny ApplicationProtocol object.
-     * Smithy-Python requests this object as part of the ProtocolGenerator implementation.
-     *
-     * @return Returns the created application protocol.
-     */
     @Override
     public List<ProtocolGenerator> getProtocolGenerators() {
-        List<ProtocolGenerator> protocolGenerators = new ArrayList<>();
-        protocolGenerators.add(new DafnyPythonAwsSdkProtocolGenerator() {
-            // Setting `awsJson1_1` here allows any services that have this protocol trait
-            //   to be generated using this PythonIntegration.
-            // In practice, each service SHOULD only define one protocol trait,
-            //   else it is infeasible to determine which protocol will be used.
+        return Collections.singletonList(new DafnyPythonWrappedLocalServiceProtocolGenerator() {
             @Override
             public ShapeId getProtocol() {
-                return ShapeId.fromParts("aws.polymorph", "awsSdk");
+                return ShapeId.from("aws.polymorph#wrappedLocalService");
             }
         });
-
-        return protocolGenerators;
     }
 }

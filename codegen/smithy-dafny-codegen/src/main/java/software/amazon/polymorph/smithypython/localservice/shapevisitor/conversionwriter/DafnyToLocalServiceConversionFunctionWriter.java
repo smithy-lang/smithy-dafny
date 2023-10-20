@@ -21,10 +21,7 @@ import software.amazon.smithy.python.codegen.PythonWriter;
 import software.amazon.smithy.utils.CaseUtils;
 
 /**
- * Writes the shim.py file.
- * The shim wraps the client.py implementation (which itself wraps the underlying Dafny implementation).
- * Other Dafny-generated Python code may use the shim to interact with this project's Dafny implementation
- *   through the Polymorph wrapper.
+ * Writes the dafny_to_smithy.py file via the BaseConversionWriter implementation.
  */
 public class DafnyToLocalServiceConversionFunctionWriter extends BaseConversionWriter {
 
@@ -134,9 +131,6 @@ public class DafnyToLocalServiceConversionFunctionWriter extends BaseConversionW
 
   private void writeServiceShapeConverter(ResourceShape resourceShape, PythonWriter conversionWriter,
       String dataSourceInsideConversionFunction) {
-    WriterDelegator<PythonWriter> delegator = context.writerDelegator();
-    String moduleName = context.settings().getModuleName();
-
     conversionWriter.addImport(
         SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(
             resourceShape.getId().getNamespace(), context
