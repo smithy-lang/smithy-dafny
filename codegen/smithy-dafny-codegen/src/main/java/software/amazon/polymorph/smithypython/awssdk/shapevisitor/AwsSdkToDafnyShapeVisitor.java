@@ -1,5 +1,6 @@
 package software.amazon.polymorph.smithypython.awssdk.shapevisitor;
 
+import software.amazon.polymorph.smithypython.awssdk.nameresolver.AwsSdkNameResolver;
 import software.amazon.polymorph.smithypython.awssdk.shapevisitor.conversionwriters.AwsSdkToDafnyConversionFunctionWriter;
 import software.amazon.polymorph.smithypython.common.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
@@ -89,13 +90,13 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
 
       // Import the aws_sdk_to_dafny converter from where the ShapeVisitor was called
       writer.addImport(".aws_sdk_to_dafny",
-          SmithyNameResolver.getSmithyToDafnyFunctionNameForShape(structureShape));
+          AwsSdkNameResolver.getAwsSdkToDafnyFunctionNameForShape(structureShape));
 
       // Return a reference to the generated conversion method
       // ex. for shape example.namespace.ExampleShape
       // returns `SmithyToDafny_example_namespace_ExampleShape(input)`
       return "%1$s(%2$s)".formatted(
-          SmithyNameResolver.getSmithyToDafnyFunctionNameForShape(structureShape),
+          AwsSdkNameResolver.getAwsSdkToDafnyFunctionNameForShape(structureShape),
           dataSource
       );
     }
@@ -241,13 +242,13 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
 
       // Import the aws_sdk_to_dafny converter from where the ShapeVisitor was called
       writer.addImport(".aws_sdk_to_dafny",
-          SmithyNameResolver.getSmithyToDafnyFunctionNameForShape(unionShape));
+          AwsSdkNameResolver.getAwsSdkToDafnyFunctionNameForShape(unionShape));
 
       // Return a reference to the generated conversion method
       // ex. for shape example.namespace.ExampleShape
       // returns `SmithyToDafny_example_namespace_ExampleShape(input)`
       return "%1$s(%2$s)".formatted(
-          SmithyNameResolver.getSmithyToDafnyFunctionNameForShape(unionShape),
+          AwsSdkNameResolver.getAwsSdkToDafnyFunctionNameForShape(unionShape),
           dataSource
       );
     }

@@ -2,6 +2,7 @@ package software.amazon.polymorph.smithypython.awssdk.shapevisitor;
 
 import java.util.HashSet;
 import java.util.Set;
+import software.amazon.polymorph.smithypython.awssdk.nameresolver.AwsSdkNameResolver;
 import software.amazon.polymorph.smithypython.awssdk.shapevisitor.conversionwriters.DafnyToAwsSdkConversionFunctionWriter;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.Utils;
@@ -92,7 +93,7 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
       DafnyToAwsSdkConversionFunctionWriter.writeConverterForShapeAndMembers(structureShape, context, writer);
 
       return "%1$s(%2$s)".formatted(
-          SmithyNameResolver.getDafnyToSmithyFunctionNameForShape(structureShape),
+          AwsSdkNameResolver.getDafnyToAwsSdkFunctionNameForShape(structureShape),
           dataSource
       );
     }
@@ -221,54 +222,10 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
       DafnyToAwsSdkConversionFunctionWriter.writeConverterForShapeAndMembers(unionShape, context, writer);
 
       return "%1$s(%2$s)".formatted(
-          SmithyNameResolver.getDafnyToSmithyFunctionNameForShape(unionShape),
+          AwsSdkNameResolver.getDafnyToAwsSdkFunctionNameForShape(unionShape),
           dataSource
       );
     }
 
-    /**
-     * Called from the StructureShape converter when the StructureShape has a Polymorph Reference trait.
-     * @param shape
-     * @return
-     */
-    protected String referenceStructureShape(StructureShape shape, String dataSourceInsideConversionFunction) {
-      ReferenceTrait referenceTrait = shape.expectTrait(ReferenceTrait.class);
-      Shape resourceOrService = context.model().expectShape(referenceTrait.getReferentId());
 
-      if (resourceOrService.isResourceShape()) {
-        return referenceResourceShape(resourceOrService.asResourceShape().get(), dataSourceInsideConversionFunction);
-      } else if (resourceOrService.isServiceShape()) {
-        return referenceServiceShape(resourceOrService.asServiceShape().get(), dataSourceInsideConversionFunction);
-      } else {
-        throw new UnsupportedOperationException("Unknown referenceStructureShape type: " + shape);
-      }
-    }
-
-    protected String referenceResourceShape(ResourceShape resourceShape, String dataSourceInsideConversionFunction) {
-      WriterDelegator<PythonWriter> delegator = context.writerDelegator();
-      String moduleName = context.settings().getModuleName();
-      delegator.useFileWriter(moduleName + "/dafny_to_aws_sdk.py", "", conversionWriter -> {
-        conversionWriter.addImport(
-            SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(
-                resourceShape.getId().getNamespace(), context
-            ) + ".references",
-            resourceShape.getId().getName());
-      });
-
-      return "%1$s(_impl=%2$s)".formatted(resourceShape.getId().getName(), dataSourceInsideConversionFunction);
-    }
-
-    protected String referenceServiceShape(ServiceShape serviceShape, String dataSourceInsideConversionFunction) {
-      WriterDelegator<PythonWriter> delegator = context.writerDelegator();
-      String moduleName = context.settings().getModuleName();
-      delegator.useFileWriter(moduleName + "/dafny_to_aws_sdk.py", "", conversionWriter -> {
-        conversionWriter.addImport(
-            SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(
-                serviceShape.getId().getNamespace(), context
-            ) + ".client",
-            serviceShape.getId().getName());
-          });
-
-      return "%1$s(%2$s)".formatted(serviceShape.getId().getName(), dataSourceInsideConversionFunction);
-    }
 }
