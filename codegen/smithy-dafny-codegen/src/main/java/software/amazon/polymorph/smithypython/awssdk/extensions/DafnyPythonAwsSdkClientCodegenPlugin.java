@@ -72,7 +72,9 @@ public final class DafnyPythonAwsSdkClientCodegenPlugin implements SmithyBuildPl
   public static Model addAwsSdkProtocolTrait(Model model, ServiceShape serviceShape) {
     return ModelTransformer.create().mapShapes(model, shape -> {
       if (shape instanceof ServiceShape && shape.hasTrait(LocalServiceTrait.class)) {
-        return serviceShape.toBuilder().addTrait(DafnyAwsSdkProtocolTrait.builder().build()).build();
+        return serviceShape.toBuilder()
+            .addTrait(DafnyAwsSdkProtocolTrait.builder().build())
+            .build();
       } else {
         return shape;
       }

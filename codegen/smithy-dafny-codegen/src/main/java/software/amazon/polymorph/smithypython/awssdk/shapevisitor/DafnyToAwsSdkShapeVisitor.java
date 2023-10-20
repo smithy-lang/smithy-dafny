@@ -2,6 +2,7 @@ package software.amazon.polymorph.smithypython.awssdk.shapevisitor;
 
 import java.util.HashSet;
 import java.util.Set;
+import software.amazon.polymorph.smithypython.awssdk.shapevisitor.conversionwriters.AwsSdkToDafnyConversionFunctionWriter;
 import software.amazon.polymorph.smithypython.awssdk.shapevisitor.conversionwriters.DafnyToAwsSdkConversionFunctionWriter;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.traits.ReferenceTrait;
@@ -47,6 +48,8 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
     private String dataSource;
     private final PythonWriter writer;
     private final String filename;
+  private final DafnyToAwsSdkConversionFunctionWriter dafnyToAwsSdkConversionFunctionWriter
+      = DafnyToAwsSdkConversionFunctionWriter.getWriter();
     // Store the set of shapes for which this ShapeVisitor (and ShapeVisitors that extend this)
     // have already generated a conversion function, so we only write each conversion function once.
     private static final Set<Shape> generatedShapes = new HashSet<>();
@@ -88,7 +91,7 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
 
     @Override
     public String structureShape(StructureShape structureShape) {
-      DafnyToAwsSdkConversionFunctionWriter.writeShapeConversionFunction(structureShape, context, writer, filename);
+      dafnyToAwsSdkConversionFunctionWriter.writeConverterForShapeAndMembers(structureShape, context, writer, filename);
 
       return "%1$s(%2$s)".formatted(
           SmithyNameResolver.getDafnyToSmithyFunctionNameForShape(structureShape),
@@ -232,12 +235,13 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
 
     @Override
     public String timestampShape(TimestampShape shape) {
+      // TODO: This lets code generate, but is untested
       return dataSource;
     }
 
     @Override
     public String unionShape(UnionShape unionShape) {
-      DafnyToAwsSdkConversionFunctionWriter.writeShapeConversionFunction(unionShape, context, writer, filename);
+      dafnyToAwsSdkConversionFunctionWriter.writeConverterForShapeAndMembers(unionShape, context, writer, filename);
 
       return "%1$s(%2$s)".formatted(
           SmithyNameResolver.getDafnyToSmithyFunctionNameForShape(unionShape),

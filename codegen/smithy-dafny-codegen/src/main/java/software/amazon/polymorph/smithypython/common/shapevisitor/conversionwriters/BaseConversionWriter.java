@@ -16,7 +16,6 @@ public abstract class BaseConversionWriter {
   final Set<Shape> generatedShapes = new HashSet<>();
   final List<Shape> shapesToGenerate = new ArrayList<>();
   boolean generating = false;
-  static boolean test = false;
 
   /**
    * Writes a function that converts from the AWS SDK dict to the Dafny-modelled shape.

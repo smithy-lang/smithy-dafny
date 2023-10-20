@@ -74,5 +74,11 @@ public class DirectedDafnyPythonWrappedLocalServiceCodegen extends DirectedPytho
     } catch (CodegenException e) {
       LOGGER.warning("Unable to remove errors.py:" + e);
     }
+
+    // TODO-Python: Remove dafny_to_smithy and smithy_to_dafny generated files;
+    // I want to do this from deeper within the codegen,
+    // by refactoring the ShapeVisitors into ConversionWriters
+    // that can detect whether this is generating a Wrapped LocalService
+    // and then pass on writing any files from there
   }
 }

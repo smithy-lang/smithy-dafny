@@ -8,9 +8,9 @@ import boto3
 
 @staticmethod
 def WrappedDdbClient():
-    # wrapped_config = dafny_config_to_smithy_config(config)
     impl = boto3.client("dynamodb")
-    wrapped_client = DynamoDB_20120810Shim(impl)
+    region = boto3.session.Session().region_name
+    wrapped_client = DynamoDB_20120810Shim(impl, region)
     return Wrappers.Result_Success(wrapped_client)
 
 software_amazon_cryptography_services_dynamodb_internaldafny.default__.DynamoDBClient = WrappedDdbClient

@@ -16,8 +16,8 @@ import software.amazon.smithy.utils.ToSmithyBuilder;
 
 /**
  * A trait that signals that a service is a wrapped LocalService.
- * This trait should NOT be added to Smithy model files.
- * This is a trait that can be added at runtime by a SmithyBuildPlugin
+ * This trait should NOT be added to Smithy model files;
+ *   it is intended to ONLY be added at runtime by SmithyBuildPlugins
  *   to signal that the code generation process should generate a wrapped LocalService.
  */
 public class WrappedLocalServiceTrait extends AbstractTrait implements ToSmithyBuilder<WrappedLocalServiceTrait> {

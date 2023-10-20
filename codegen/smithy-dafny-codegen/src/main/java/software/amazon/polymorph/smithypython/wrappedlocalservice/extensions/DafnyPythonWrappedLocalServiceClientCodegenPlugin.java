@@ -14,7 +14,7 @@
  * permissions and limitations under the License.
  */
 
-package software.amazon.polymorph.smithypython.wrappedlocalservice;
+package software.amazon.polymorph.smithypython.wrappedlocalservice.extensions;
 
 import software.amazon.polymorph.smithypython.wrappedlocalservice.extensions.DirectedDafnyPythonWrappedLocalServiceCodegen;
 import software.amazon.polymorph.traits.LocalServiceTrait;
@@ -60,17 +60,17 @@ public final class DafnyPythonWrappedLocalServiceClientCodegenPlugin implements 
 
     PythonSettings settings = PythonSettings.from(context.getSettings());
     settings.setProtocol(WrappedLocalServiceTrait.ID);
-    System.out.println(settings.getProtocol());
     runner.settings(settings);
     runner.directedCodegen(new DirectedDafnyPythonWrappedLocalServiceCodegen());
     runner.fileManifest(context.getFileManifest());
     runner.service(settings.getService());
     runner.integrationClass(PythonIntegration.class);
 
-    // Add a WrappedLocalServiceTrait to the service as a contextual indicator that code generation requires
-    //   wrapped local service generation
+    // Add a WrappedLocalServiceTrait to the serviceShape to indicate to codegen
+    //   that this shape requires
     ServiceShape serviceShape = context.getModel().expectShape(settings.getService()).asServiceShape().get();
-    runner.model(addWrappedLocalServiceTrait(context.getModel(), serviceShape));
+    Model transformedModel = addWrappedLocalServiceTrait(context.getModel(), serviceShape);
+    runner.model(transformedModel);
 
     runner.run();
   }

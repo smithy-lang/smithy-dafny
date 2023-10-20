@@ -9,6 +9,7 @@ import software.amazon.polymorph.smithypython.awssdk.nameresolver.AwsSdkNameReso
 import software.amazon.polymorph.smithypython.common.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.smithypython.awssdk.shapevisitor.DafnyToAwsSdkShapeVisitor;
+import software.amazon.polymorph.smithypython.common.shapevisitor.conversionwriters.BaseConversionWriter;
 import software.amazon.smithy.codegen.core.WriterDelegator;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.Shape;
@@ -23,38 +24,20 @@ import software.amazon.smithy.python.codegen.PythonWriter;
  * Other Dafny-generated Python code may use the shim to interact with this project's Dafny implementation
  *   through the Polymorph wrapper.
  */
-public class DafnyToAwsSdkConversionFunctionWriter {
+public class DafnyToAwsSdkConversionFunctionWriter extends BaseConversionWriter {
 
-  // Store the set of shapes for which this ShapeVisitor (and ShapeVisitors that extend this)
-  // have already generated a conversion function, so we only write each conversion function once.
-  private static final Set<Shape> generatedShapes = new HashSet<>();
-  static final List<Shape> shapesToGenerate = new ArrayList<>();
-  static boolean generating = false;
+  static DafnyToAwsSdkConversionFunctionWriter singleton = null;
 
-  public static void writeShapeConversionFunction(Shape shape, GenerationContext context,
-      PythonWriter writer, String filename) {
-    if (!generatedShapes.contains(shape) && !shapesToGenerate.contains(shape)) {
-      shapesToGenerate.add(shape);
+  private DafnyToAwsSdkConversionFunctionWriter() { }
+
+  public static DafnyToAwsSdkConversionFunctionWriter getWriter() {
+    if (singleton == null) {
+      singleton = new DafnyToAwsSdkConversionFunctionWriter();
     }
-
-    while (!generating && !shapesToGenerate.isEmpty()) {
-      generating = true;
-
-      Shape toGenerate = shapesToGenerate.remove(0);
-      generatedShapes.add(toGenerate);
-
-      if (toGenerate.isStructureShape()) {
-        writeStructureShapeConversionFunction(toGenerate.asStructureShape().get(), context, writer, filename);
-      } else if (toGenerate.isUnionShape()) {
-        writeUnionShapeConverter(toGenerate.asUnionShape().get(), context, writer, filename);
-      }
-
-      generating = false;
-    }
-
+    return singleton;
   }
 
-  private static void writeStructureShapeConversionFunction(StructureShape structureShape, GenerationContext context,
+  public void writeStructureShapeConverter(StructureShape structureShape, GenerationContext context,
       PythonWriter writer, String filename) {
     WriterDelegator<PythonWriter> delegator = context.writerDelegator();
     String moduleName = context.settings().getModuleName();
@@ -74,15 +57,13 @@ public class DafnyToAwsSdkConversionFunctionWriter {
 
   }
 
-  private static void writeStructureShapeConverterBody(StructureShape shape, PythonWriter conversionWriter, GenerationContext context,
+  public void writeStructureShapeConverterBody(StructureShape shape, PythonWriter conversionWriter, GenerationContext context,
       PythonWriter writer, String filename) {
     // Within the conversion function, the dataSource becomes the function's input
     // This hardcodes the input parameter name for a conversion function to always be "input"
     String dataSourceInsideConversionFunction = "input";
 
     conversionWriter.write("output = {}");
-
-    System.out.println(shape.getAllMembers());
 
     // Recursively dispatch a new ShapeVisitor for each member of the structure
     for (Entry<String, MemberShape> memberShapeEntry : shape.getAllMembers().entrySet()) {
@@ -127,7 +108,7 @@ public class DafnyToAwsSdkConversionFunctionWriter {
    * This SHOULD only be called once so only one function definition is written.
    * @param unionShape
    */
-  public static void writeUnionShapeConverter(UnionShape unionShape, GenerationContext context, PythonWriter writer, String filename) {
+  public void writeUnionShapeConverter(UnionShape unionShape, GenerationContext context, PythonWriter writer, String filename) {
     WriterDelegator<PythonWriter> delegator = context.writerDelegator();
     String moduleName = context.settings().getModuleName();
 

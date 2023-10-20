@@ -24,7 +24,7 @@ import software.amazon.polymorph.smithyjava.generator.library.JavaLibrary;
 import software.amazon.polymorph.smithyjava.generator.library.TestJavaLibrary;
 import software.amazon.polymorph.smithypython.awssdk.extensions.DafnyPythonAwsSdkClientCodegenPlugin;
 import software.amazon.polymorph.smithypython.localservice.extensions.DafnyPythonLocalServiceClientCodegenPlugin;
-import software.amazon.polymorph.smithypython.wrappedlocalservice.DafnyPythonWrappedLocalServiceClientCodegenPlugin;
+import software.amazon.polymorph.smithypython.wrappedlocalservice.extensions.DafnyPythonWrappedLocalServiceClientCodegenPlugin;
 import software.amazon.polymorph.utils.IOUtils;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.smithy.aws.traits.ServiceTrait;
@@ -295,7 +295,6 @@ public class CodegenEngine {
             dafnyPythonAwsSdkClientCodegenPlugin.execute(pluginContext);
         } else if (this.localServiceTest) {
             DafnyPythonWrappedLocalServiceClientCodegenPlugin pythonClientCodegenPlugin = new DafnyPythonWrappedLocalServiceClientCodegenPlugin();
-            System.out.println("oh no");
             pythonClientCodegenPlugin.execute(pluginContext);
         } else {
             DafnyPythonLocalServiceClientCodegenPlugin pythonClientCodegenPlugin = new DafnyPythonLocalServiceClientCodegenPlugin();

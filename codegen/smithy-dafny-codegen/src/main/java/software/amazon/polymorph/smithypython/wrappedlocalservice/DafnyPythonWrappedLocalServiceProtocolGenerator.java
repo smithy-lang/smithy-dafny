@@ -13,7 +13,7 @@
  * permissions and limitations under the License.
  */
 
-package software.amazon.polymorph.smithypython.wrappedlocalservice.extensions;
+package software.amazon.polymorph.smithypython.wrappedlocalservice;
 
 import software.amazon.smithy.python.codegen.ApplicationProtocol;
 import software.amazon.smithy.python.codegen.GenerationContext;
@@ -28,9 +28,8 @@ import software.amazon.smithy.utils.SmithyUnstableApi;
 public abstract class DafnyPythonWrappedLocalServiceProtocolGenerator implements ProtocolGenerator {
 
   public static ApplicationProtocol DAFNY_PYTHON_WRAPPED_LOCAL_SERVICE_PROTOCOL = new ApplicationProtocol(
-      // Define the `dafny-python-aws-sdk-protocol` ApplicationProtocol.
+      // Define the `dafny-python-wrapped-local-service-application-protocol` ApplicationProtocol.
       // ApplicationProtocol is distinct from the Protocols used in ProtocolGenerators.
-      // We define an ApplicationProtocol that will be used by all Dafny-Python AWS SDK protocols.
       // The ApplicationProtocol is used within our code to determine which code should be generated.
       // The `null`s reflect that this ApplicationProtocol does not have request
       //   or response object types, since it does not use Smithy-generated clients.

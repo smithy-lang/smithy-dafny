@@ -27,7 +27,6 @@ import software.amazon.polymorph.smithypython.localservice.customize.ErrorsFileW
 import software.amazon.polymorph.smithypython.localservice.customize.ModelsFileWriter;
 import software.amazon.polymorph.smithypython.localservice.customize.PluginFileWriter;
 import software.amazon.polymorph.smithypython.localservice.customize.ReferencesFileWriter;
-import software.amazon.polymorph.smithypython.wrappedlocalservice.extensions.DafnyPythonWrappedLocalServiceProtocolGenerator;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolReference;
 import software.amazon.smithy.model.shapes.EntityShape;
