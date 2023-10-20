@@ -25,6 +25,12 @@ import static software.amazon.smithy.dafny.conversion.ToNative.Simple.String;
 // and reset the coder everytime.
 public class __default extends UTF8._ExternBase___default {
 
+    private static final dafny.TypeDescriptor<DafnySequence<? extends Byte>> BYTE_SEQUENCE_TYPE_DESCRIPTOR = 
+            dafny.DafnySequence.<Byte>_typeDescriptor(dafny.TypeDescriptor.BYTE);
+    private static final dafny.TypeDescriptor<DafnySequence<? extends Character>> CHARACTER_SEQUENCE_TYPE_DESCRIPTOR =
+            dafny.DafnySequence.<Character>_typeDescriptor(dafny.TypeDescriptor.CHAR);
+    
+
     // This is largely copied from Polymorph's dafny-java-conversion:
     // software.amazon.smithy.dafny.conversion.ToDafny.Simple.DafnyUtf8Bytes
     public static Result<
@@ -42,9 +48,11 @@ public class __default extends UTF8._ExternBase___default {
             // By taking just the limit, we ensure we do not include
             // any allocated but un-filled space.
             return Result.create_Success(
+                    BYTE_SEQUENCE_TYPE_DESCRIPTOR, CHARACTER_SEQUENCE_TYPE_DESCRIPTOR,
                     (DafnySequence<? extends Byte>) ByteSequence(outBuffer, 0, outBuffer.limit()));
         } catch (CharacterCodingException ex) {
             return Result.create_Failure(
+                    BYTE_SEQUENCE_TYPE_DESCRIPTOR, CHARACTER_SEQUENCE_TYPE_DESCRIPTOR,
                     (DafnySequence<? extends Character>) CharacterSequence("Could not encode input to Dafny Bytes."));
         }
     }
@@ -64,9 +72,11 @@ public class __default extends UTF8._ExternBase___default {
             CharBuffer outBuffer = coder.decode(inBuffer);
             outBuffer.position(0);
             return Result.create_Success(
+                    CHARACTER_SEQUENCE_TYPE_DESCRIPTOR, CHARACTER_SEQUENCE_TYPE_DESCRIPTOR,
                     (DafnySequence<? extends Character>) CharacterSequence(outBuffer.toString()));
         } catch (CharacterCodingException ex) {
             return Result.create_Failure(
+                    CHARACTER_SEQUENCE_TYPE_DESCRIPTOR, CHARACTER_SEQUENCE_TYPE_DESCRIPTOR,
                     (DafnySequence<? extends Character>) CharacterSequence("Could not encode input to Dafny Bytes."));
         }
     }
