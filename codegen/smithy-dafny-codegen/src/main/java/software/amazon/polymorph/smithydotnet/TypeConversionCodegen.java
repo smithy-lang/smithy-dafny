@@ -579,7 +579,7 @@ public class TypeConversionCodegen {
                         destructorValue = DafnyNameResolverHelpers.dafnyCompilesExtra_(memberShape.getMemberName());
                     }
                     return TokenTree
-                            .of("if (value.is_%s)".formatted(memberShape.getMemberName()))
+                            .of("if (value.is_%s)".formatted(DafnyNameResolverHelpers.dafnyCompilesExtra_(memberShape.getMemberName())))
                             .append(TokenTree
                                     .of(
                                             "converted.%s = %s(concrete.dtor_%s);"
@@ -637,7 +637,7 @@ public class TypeConversionCodegen {
                             .of("if (value.Is%sSet)".formatted(propertyName));
                         } else if (listTypes.contains(propertyName)) {
                             checkIfValuePresent = TokenTree
-                            .of("if (!value.%s.Any())".formatted(propertyName));
+                            .of("if (value.%s.Any())".formatted(propertyName));
                         } else if ("NULL".equals(propertyName)) {
                             checkIfValuePresent =  TokenTree
                             .of("if (value.%s == true)".formatted(propertyName));
