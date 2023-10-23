@@ -304,13 +304,13 @@ public class ReferencesFileWriter implements CustomFileWriter {
    * Writes code modelling inputs and outputs for the provided operationShapeIds.
    * These operationShapeIds MUST NOT be members of the localService provided in the
    *   `customizeFileForServiceShape` method in this file.
-   * @param operationShapeIds
+   * @param shapeIds
    * @param codegenContext
    */
   @Override
-  public void customizeFileForNonServiceOperationShapes(Set<ShapeId> operationShapeIds, GenerationContext codegenContext) {
+  public void customizeFileForNonServiceShapes(Set<ShapeId> shapeIds, GenerationContext codegenContext) {
     // Write out a Smithy-modelled structure for all operation shapes.
-    for (ShapeId operationShapeId : operationShapeIds) {
+    for (ShapeId operationShapeId : shapeIds) {
       OperationShape operationShape = codegenContext.model().expectShape(operationShapeId, OperationShape.class);
       StructureShape inputShape = codegenContext.model().expectShape(operationShape.getInputShape(), StructureShape.class);
       writeStructureShape(inputShape, codegenContext);

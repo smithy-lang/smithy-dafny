@@ -14,7 +14,7 @@ import software.amazon.smithy.python.codegen.PythonWriter;
 /**
  * Abstract class for writing Dafny-to-X and X-to-Dafny conversion functions. (X = AWS-SDK or LocalService.)
  * Subclasses of this class generate files that contain methods that
- *   convert from AWS SDK shapes (i.e. boto3 request/response dictionaries)
+ *   convert from AWS SDK shapes (i.e. boto3 request/response dictionaries) or native Python Smithy shapes
  *   to Dafny shapes (Smithy-Dafny generated Dafny code transpiled into Python).
  *
  * ShapeVisitors should call out to subclasses of this class to write conversions for aggregate shapes
@@ -27,7 +27,8 @@ public abstract class BaseConversionWriter {
   final Set<Shape> generatedShapes = new HashSet<>();
   // Queue of shapes to generate
   final List<Shape> shapesToGenerate = new ArrayList<>();
-  // Flag to block generating while another conversion method's generation is in-progress
+  // Flag to block generating inside a file while already generating another function
+  // (prevents generating a function inside another function)
   boolean generating = false;
 
   protected GenerationContext context;

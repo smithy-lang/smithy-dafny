@@ -77,7 +77,11 @@ public final class DafnyPythonWrappedLocalServiceClientCodegenPlugin implements 
 
   public static Model addWrappedLocalServiceTrait(Model model, ServiceShape serviceShape) {
     return ModelTransformer.create().mapShapes(model, shape -> {
-      if (shape instanceof ServiceShape && shape.hasTrait(LocalServiceTrait.class)) {
+      if (shape.equals(serviceShape)) {
+        if (!shape.hasTrait(LocalServiceTrait.class)) {
+          throw new IllegalArgumentException("ServiceShape for LocalService test MUST have a LocalServiceTrait: "
+              + serviceShape);
+        }
         return serviceShape.toBuilder()
             .addTrait(WrappedLocalServiceTrait.builder().build())
             .build();

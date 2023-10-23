@@ -155,8 +155,8 @@ public class AwsSdkShimFileWriter implements CustomFileWriter {
       // Write the Shim operation block.
       // This takes in a Dafny input and returns a Dafny output.
       // This operation will:
-      //  1) Convert the Dafny input to a Smithy-modelled input,
-      //  2) Call the Smithy-generated client with the transformed input, and
+      //  1) Convert the Dafny input to a dictionary with keys as AWS SDK API input names;
+      //  2) Call boto3 client with the input transformed to kwargs; and
       //  3) Convert the Smithy output to the Dafny type.
       writer.openBlock("def $L(self, $L) -> $L:", "",
           operationShape.getId().getName(),
@@ -182,9 +182,9 @@ public class AwsSdkShimFileWriter implements CustomFileWriter {
             writer.addImport(".", "dafny_to_aws_sdk");
 
             // Generate code that:
-            // 1) "unwraps" the request (converts from the Dafny type to the Smithy type),
-            // 2) calls Smithy client,
-            // 3) wraps Smithy failures as Dafny failures
+            // 1) "unwraps" the request (converts from the Dafny type to the AWS SDK type);
+            // 2) calls boto3;
+            // 3) wraps boto3 ClientErrors as Dafny failures
             writer.write(
               """
               boto_request_dict = dafny_to_aws_sdk.$L

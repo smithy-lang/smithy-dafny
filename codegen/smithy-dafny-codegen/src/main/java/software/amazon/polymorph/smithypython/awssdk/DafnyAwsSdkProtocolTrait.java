@@ -17,7 +17,8 @@ import software.amazon.smithy.utils.ToSmithyBuilder;
 /**
  * A trait that signals that a service is an AWS SDK serviceShape.
  * This trait should NOT be added to Smithy model files.
- * This is a trait that can be added at runtime by a SmithyBuildPlugin
+ * This is a trait that can be added at runtime by
+ *   Polymorph code generators that implement SmithyBuildPlugins
  *   to signal that the code generation process should generate an AWS SDK shim.
  * This is needed because SmithyBuildPlugins require that SOME protocol is present on the
  *   provided ServiceShape.

@@ -208,7 +208,7 @@ public class LocalServiceToDafnyConversionFunctionWriter extends BaseConversionW
       PythonWriter conversionWriter, String dataSourceInsideConversionFunction) {
     // Smithy resource shapes ALWAYS store the underlying Dafny resource in `_impl`.
     // TODO: Typing
-    conversionWriter.write("return %$L._impl",
+    conversionWriter.write("return $L._impl",
         dataSourceInsideConversionFunction);
   }
 

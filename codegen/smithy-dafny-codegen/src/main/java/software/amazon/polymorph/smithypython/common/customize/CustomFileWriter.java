@@ -19,12 +19,13 @@ public interface CustomFileWriter {
   default void customizeFileForServiceShape(ServiceShape serviceShape, GenerationContext codegenContext) { }
 
   /**
-   * Given the provided operationShapeIds, write code specific to the file targeted by the CustomFileWriter.
-   * The operationShapeIds MUST NOT be attached to a ServiceShape that was passed to this file in
+   * Given the provided shapeIds, write code specific to the file targeted by the CustomFileWriter.
+   * The shapeIds MUST NOT be attached to a ServiceShape
+   *   (or attached that was passed to this file in
    *   a call to `customizeFileForServiceShape`.
-   * This function will generate code for operations that are NOT attached to a localService.
-   * @param operationShapeIds
+   * This function will generate code for shapes that are NOT attached to a localService.
+   * @param shapeIds
    * @param codegenContext
    */
-  default void customizeFileForNonServiceOperationShapes(Set<ShapeId> operationShapeIds, GenerationContext codegenContext) { }
+  default void customizeFileForNonServiceShapes(Set<ShapeId> shapeIds, GenerationContext codegenContext) { }
 }

@@ -143,7 +143,7 @@ public final class DafnyPythonLocalServiceIntegration implements PythonIntegrati
      */
     private void customizeForNonServiceOperationShapes(Set<ShapeId> operationShapeIds,
             GenerationContext codegenContext) {
-        new ReferencesFileWriter().customizeFileForNonServiceOperationShapes(operationShapeIds,
+        new ReferencesFileWriter().customizeFileForNonServiceShapes(operationShapeIds,
                 codegenContext);
     }
 
