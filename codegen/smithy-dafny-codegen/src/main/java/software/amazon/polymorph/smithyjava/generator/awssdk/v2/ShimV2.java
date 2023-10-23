@@ -3,6 +3,7 @@
 package software.amazon.polymorph.smithyjava.generator.awssdk.v2;
 
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
@@ -138,20 +139,26 @@ public class ShimV2 extends Generator {
                         subject.nativeNameResolver.typeForShape(inputShapeId),
                         StringUtils.capitalize(inputShapeId.getName()))
                 .beginControlFlow("try");
+        CodeBlock successTypeDescriptor;
         if (outputShapeId.equals(SMITHY_API_UNIT)) {
+            successTypeDescriptor = CodeBlock.of(DAFNY_TUPLE0_CLASS_NAME + "._typeDescriptor()");
             builder.addStatement("_impl.$L(converted)",
                             StringUtils.uncapitalize(operationName))
-                    .addStatement("return $T.create_Success($T.create())",
-                            DAFNY_RESULT_CLASS_NAME, DAFNY_TUPLE0_CLASS_NAME);
+                    .addStatement("return $T.create_Success($L, Error._typeDescriptor(), $T.create())",
+                            DAFNY_RESULT_CLASS_NAME,
+                            successTypeDescriptor,
+                            DAFNY_TUPLE0_CLASS_NAME);
         } else {
+            successTypeDescriptor = subject.dafnyNameResolver.typeDescriptor(outputShapeId);
             builder.addStatement("$T result = _impl.$L(converted)",
                             subject.nativeNameResolver.typeForOperationOutput(outputShapeId),
                             StringUtils.uncapitalize(operationName))
                     .addStatement("$T dafnyResponse = ToDafny.$L(result)",
                             dafnyOutput,
                             StringUtils.capitalize(outputShapeId.getName()))
-                    .addStatement("return $T.create_Success(dafnyResponse)",
-                            DAFNY_RESULT_CLASS_NAME);
+                    .addStatement("return $T.create_Success($L, Error._typeDescriptor(), dafnyResponse)",
+                            DAFNY_RESULT_CLASS_NAME,
+                            successTypeDescriptor);
         }
 
         operationShape.getErrors().stream().sorted().forEach(shapeId -> {
@@ -164,13 +171,15 @@ public class ShimV2 extends Generator {
 
             builder
                 .nextControlFlow("catch ($T ex)", subject.nativeNameResolver.typeForShape(shapeId))
-                .addStatement("return $T.create_Failure(Error._typeDescriptor(), ToDafny.Error(ex))",
-                    DAFNY_RESULT_CLASS_NAME);
+                .addStatement("return $T.create_Failure($L, Error._typeDescriptor(), ToDafny.Error(ex))",
+                    DAFNY_RESULT_CLASS_NAME,
+                    successTypeDescriptor);
         });
         return Optional.of(builder
                 .nextControlFlow("catch ($T ex)", subject.nativeNameResolver.baseErrorForService())
-                .addStatement("return $T.create_Failure(Error._typeDescriptor(), ToDafny.Error(ex))",
-                        DAFNY_RESULT_CLASS_NAME)
+                .addStatement("return $T.create_Failure($L, Error._typeDescriptor(), ToDafny.Error(ex))",
+                        DAFNY_RESULT_CLASS_NAME,
+                        successTypeDescriptor)
                 .endControlFlow()
                 .build());
     }

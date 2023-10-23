@@ -49,7 +49,7 @@ import static software.amazon.smithy.utils.StringUtils.capitalize;
 public class Dafny extends NameResolver {
     @SuppressWarnings("unused")
     private static final Logger LOGGER = LoggerFactory.getLogger(Dafny.class);
-    protected static final Map<ShapeType, CodeBlock> TYPE_DESCRIPTOR_BY_SHAPE_TYPE;
+    public static final Map<ShapeType, CodeBlock> TYPE_DESCRIPTOR_BY_SHAPE_TYPE;
     static {
         TYPE_DESCRIPTOR_BY_SHAPE_TYPE = Map.ofEntries(
                 Map.entry(ShapeType.STRING, CodeBlock.of("$T._typeDescriptor($T.CHAR)", Constants.DAFNY_SEQUENCE_CLASS_NAME, Constants.DAFNY_TYPE_DESCRIPTOR_CLASS_NAME)),

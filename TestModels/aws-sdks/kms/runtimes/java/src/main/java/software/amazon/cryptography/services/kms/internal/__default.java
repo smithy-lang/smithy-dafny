@@ -26,11 +26,11 @@ public class __default extends software.amazon.cryptography.services.kms.interna
             String region = regionProvider.getRegion().toString();
             KmsClient client = builder.build();
             IKMSClient shim = new Shim(client, region);
-            return Result.create_Success(shim);
+            return Result.create_Success(dafny.TypeDescriptor.reference(IKMSClient.class), Error._typeDescriptor(), shim);
         } catch (Exception e) {
             Error dafny_error = Error.create_KMSInternalException(
-                    Option.create_Some(CharacterSequence(e.getMessage())));
-            return Result.create_Failure(dafny_error);
+                    Option.create_Some(dafny.DafnySequence._typeDescriptor(dafny.TypeDescriptor.CHAR), CharacterSequence(e.getMessage())));
+            return Result.create_Failure(dafny.TypeDescriptor.reference(IKMSClient.class), Error._typeDescriptor(), dafny_error);
         }
     }
 
@@ -39,11 +39,11 @@ public class __default extends software.amazon.cryptography.services.kms.interna
             KmsClientBuilder builder = KmsClient.builder();
             KmsClient client = builder.region(Region.of(region)).build();
             IKMSClient shim = new Shim(client, region);
-            return Result.create_Success(shim);
+            return Result.create_Success(dafny.TypeDescriptor.reference(IKMSClient.class), Error._typeDescriptor(), shim);
         } catch (Exception e) {
             Error dafny_error = Error.create_KMSInternalException(
-                    Option.create_Some(CharacterSequence(e.getMessage())));
-            return Result.create_Failure(dafny_error);
+                    Option.create_Some(dafny.DafnySequence._typeDescriptor(dafny.TypeDescriptor.CHAR), CharacterSequence(e.getMessage())));
+            return Result.create_Failure(dafny.TypeDescriptor.reference(IKMSClient.class), Error._typeDescriptor(), dafny_error);
         }
     }
 
@@ -60,13 +60,13 @@ public class __default extends software.amazon.cryptography.services.kms.interna
         // have no way to determine what region it is
         // configured with.
         if (shim.region() == null) {
-            return Option.create_None();
+            return Option.create_None(dafny.TypeDescriptor.BOOLEAN);
         }
 
         // Otherwise we kept record of the region
         // when we created the client.
         String shimRegion = shim.region();
         String regionStr = String(region);
-        return Option.create_Some(regionStr.equals(shimRegion));
+        return Option.create_Some(dafny.TypeDescriptor.BOOLEAN, regionStr.equals(shimRegion));
     }
 }
