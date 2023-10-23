@@ -257,7 +257,7 @@ public class ServiceCodegen {
           public readonly object obj;
           public OpaqueError(Exception ex) : base("OpaqueError:", ex) { this.obj = ex; }
           public OpaqueError() : base("Unknown Unexpected Error") { }
-          public OpaqueError(object obj) : base("Opaque obj is not an Exception.") { this.obj = obj;}
+          public OpaqueError(object obj) : base(obj is Exception ? "OpaqueError:" : "Opaque obj is not an Exception.", obj as Exception) { this.obj = obj;}
         }
           """
         ).namespaced(Token.of(nameResolver.namespaceForService()));
