@@ -346,6 +346,7 @@ public class ToDafnyAwsV1 extends ToDafny {
         );
         // This is memberAssignment from above,
         // but with calls to dafnyNameResolver replaced with their expected response.
+//        CodeBlock typeDescriptor = subject.dafnyNameResolver.typeDescriptor(ShapeType.STRING);
         CodeBlock memberAssignment = CodeBlock.of(
                 "$L = $T.nonNull($L) ?\n$T.create_Some($T.$L($L))\n: $T.create_None()",
                 "message",
