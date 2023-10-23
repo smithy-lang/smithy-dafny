@@ -259,6 +259,19 @@ public class Dafny extends NameResolver {
                 return CodeBlock.of("$L", typeDescriptor);
             }
         }
+        if (shape.getType().isShapeType(ShapeType.LIST)) {
+            CodeBlock elementTypeDescriptor = typeDescriptor(shape.asListShape().get().getMember().getTarget());
+            return CodeBlock.of("$T._typeDescriptor($L)", Constants.DAFNY_SEQUENCE_CLASS_NAME, elementTypeDescriptor);
+        }
+        if (shape.getType().isShapeType(ShapeType.SET)) {
+            CodeBlock elementTypeDescriptor = typeDescriptor(shape.asSetShape().get().getMember().getTarget());
+            return CodeBlock.of("$T._typeDescriptor($L)", Constants.DAFNY_SET_CLASS_NAME, elementTypeDescriptor);
+        }
+        if (shape.getType().isShapeType(ShapeType.MAP)) {
+            CodeBlock keyTypeDescriptor = typeDescriptor(shape.asMapShape().get().getKey().getTarget());
+            CodeBlock valueTypeDescriptor = typeDescriptor(shape.asMapShape().get().getValue().getTarget());
+            return CodeBlock.of("$T._typeDescriptor($L, $L)", Constants.DAFNY_MAP_CLASS_NAME, keyTypeDescriptor, valueTypeDescriptor);
+        }
         return CodeBlock.of("$L()",
                 new MethodReference(classForNotErrorNotUnitShape(shape), "_typeDescriptor").asNormalReference());
     }
