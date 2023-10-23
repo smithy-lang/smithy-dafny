@@ -28,7 +28,7 @@ public class __default extends software.amazon.cryptography.services.dynamodb.in
             return Result.create_Success(dafny.TypeDescriptor.reference(IDynamoDBClient.class), Error._typeDescriptor(), shim);
         } catch (Exception e) {
             Error dafny_error = Error.create_InternalServerError(
-                    Option.create_Some(CharacterSequence(e.getMessage())));
+                    Option.create_Some(dafny.DafnySequence._typeDescriptor(dafny.TypeDescriptor.CHAR), CharacterSequence(e.getMessage())));
             return Result.create_Failure(dafny.TypeDescriptor.reference(IDynamoDBClient.class), Error._typeDescriptor(), dafny_error);
         }
     }
