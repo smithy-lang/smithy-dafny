@@ -22,7 +22,7 @@ public class __default extends _ExternBase___default {
         simple.extendable.resources.model.SimpleExtendableResourcesConfig wrappedConfig = ToNative.SimpleExtendableResourcesConfig(config);
         simple.extendable.resources.SimpleExtendableResources impl = SimpleExtendableResources.builder().SimpleExtendableResourcesConfig(wrappedConfig).build();
         TestSimpleExtendableResources wrappedClient = TestSimpleExtendableResources.builder().impl(impl).build();
-        return Result.create_Success(wrappedClient);
+        return Result.create_Success(dafny.TypeDescriptor.reference(ISimpleExtendableResourcesClient.class), Error._typeDescriptor(), wrappedClient);
     }
 
     /**
