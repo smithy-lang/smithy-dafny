@@ -15,7 +15,7 @@ jobs:
   manual-ci-format:
     uses: ./.github/workflows/library_format.yml
     with:
-      dafny: '4.2.0'
+      dafny: ${{ inputs.dafny }}
   manual-ci-verification:
     uses: ./.github/workflows/library_dafny_verification.yml
     with:
