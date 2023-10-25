@@ -117,23 +117,19 @@ public class LocalServiceToDafnyShapeVisitor extends ShapeVisitor.Default<String
 //          ) + ".smithy_to_dafny",
 //          SmithyNameResolver.getSmithyToDafnyFunctionNameForShape(structureShape, context)
 //      );
-      System.out.println("TE2");
       String pythonModuleName = SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(
           structureShape.getId().getNamespace(),
           context
       );
-      System.out.println(pythonModuleName);
       if (!filename.equals("smithy_to_dafny"))  {
-        writer.addStdlibImport(pythonModuleName + "smithy_to_dafny");
+        writer.addStdlibImport(pythonModuleName + ".smithy_to_dafny");
       }
 
       // Return a reference to the generated conversion method
       // ex. for shape example.namespace.ExampleShape
       // returns `SmithyToDafny_example_namespace_ExampleShape(input)`
-      return "%1$s%2$s(%3$s)".formatted(
-          filename.equals("smithy_to_dafny")
-              ? ""
-              : pythonModuleName + ".smithy_to_dafny.",
+      return "%1$s.smithy_to_dafny.%2$s(%3$s)".formatted(
+          pythonModuleName,
           SmithyNameResolver.getSmithyToDafnyFunctionNameForShape(structureShape, context),
           dataSource
       );

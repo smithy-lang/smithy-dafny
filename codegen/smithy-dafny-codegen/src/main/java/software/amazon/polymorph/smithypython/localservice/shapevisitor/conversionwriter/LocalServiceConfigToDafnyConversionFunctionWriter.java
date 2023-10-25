@@ -50,9 +50,6 @@ public class LocalServiceConfigToDafnyConversionFunctionWriter extends LocalServ
   }
 
   protected String getSmithyConfigToDafnyConfigFunctionNameForShape(Shape shape) {
-    writer.addImport(".smithy_to_dafny", "SmithyToDafny_"
-        + SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(shape.getId().getNamespace())
-        + "_" + shape.getId().getName());
     return "SmithyToDafny_" + SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(shape.getId().getNamespace())
         + "_" + shape.getId().getName();
   }

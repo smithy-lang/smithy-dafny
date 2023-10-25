@@ -82,7 +82,9 @@ public class DafnyToLocalServiceConversionFunctionWriter extends BaseConversionW
     conversionWriter.openBlock(
         "return $L(",
         ")",
-        shape.getId().getName(),
+        SmithyNameResolver.getSmithyGeneratedModelLocationForShape(
+            shape.getId(), context
+        ) + "." + shape.getId().getName(),
         () -> {
           // Recursively dispatch a new ShapeVisitor for each member of the structure
           for (Entry<String, MemberShape> memberShapeEntry : shape.getAllMembers().entrySet()) {

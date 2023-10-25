@@ -128,13 +128,11 @@ public class DafnyToLocalServiceShapeVisitor extends ShapeVisitor.Default<String
       );
       System.out.println(pythonModuleName);
       if (!filename.equals("dafny_to_smithy"))  {
-        writer.addStdlibImport(pythonModuleName + "dafny_to_smithy");
+        writer.addStdlibImport(pythonModuleName + ".dafny_to_smithy");
       }
 
-      return "%1$s%2$s(%3$s)".formatted(
-          filename.equals("dafny_to_smithy")
-              ? ""
-              : pythonModuleName + ".dafny_to_smithy.",
+      return "%1$s.dafny_to_smithy.%2$s(%3$s)".formatted(
+          pythonModuleName,
           SmithyNameResolver.getDafnyToSmithyFunctionNameForShape(structureShape, context),
           Utils.isUnitShape(structureShape.getId()) ? "" : dataSource
       );

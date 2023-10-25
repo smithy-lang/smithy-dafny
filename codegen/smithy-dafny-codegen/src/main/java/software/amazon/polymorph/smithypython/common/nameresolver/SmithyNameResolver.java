@@ -140,11 +140,10 @@ public class SmithyNameResolver {
    */
   public static void importSmithyGeneratedTypeForShape(PythonWriter writer, ShapeId shapeId,
       GenerationContext codegenContext) {
-    writer.addImport(
+    writer.addStdlibImport(
         SmithyNameResolver.getSmithyGeneratedModelLocationForShape(
             shapeId, codegenContext
-        ),
-        shapeId.getName()
+        )
     );
   }
 
@@ -227,14 +226,16 @@ public class SmithyNameResolver {
       GenerationContext codegenContext) {
     return
         getPythonModuleNamespaceForSmithyNamespace(smithyNamespace)
-            .equals(codegenContext.settings().getModuleName())
-        // If the provided namespace is the current namespace (i.e. the module being generated),
-        // return an empty string, as "." represents the current module
-        ? ""
-        // If the provided namespace is not the current namespace (i.e. a dependency namespace),
-        // return the other namespace's smithygenerated module;
-        // i.e. `other_module.smithygenerated`
-        : getPythonModuleNamespaceForSmithyNamespace(smithyNamespace) + ".smithygenerated";
+        + ".smithygenerated";
+//        getPythonModuleNamespaceForSmithyNamespace(smithyNamespace)
+//            .equals(codegenContext.settings().getModuleName())
+//        // If the provided namespace is the current namespace (i.e. the module being generated),
+//        // return an empty string, as "." represents the current module
+//        ? ""
+//        // If the provided namespace is not the current namespace (i.e. a dependency namespace),
+//        // return the other namespace's smithygenerated module;
+//        // i.e. `other_module.smithygenerated`
+//        : getPythonModuleNamespaceForSmithyNamespace(smithyNamespace) + ".smithygenerated";
   }
 
   /**
@@ -259,13 +260,7 @@ public class SmithyNameResolver {
    * @return
    */
   public static String getDafnyToSmithyFunctionNameForShape(Shape shape, GenerationContext context) {
-    String prefix = getSmithyGeneratedModuleNamespaceForSmithyNamespace(shape.getId().getNamespace(),
-        context);
-    if (!Strings.isNullOrEmpty(prefix)) {
-      prefix += ".dafny_to_smithy.";
-    }
-    return prefix
-        + "DafnyToSmithy_"
+    return "DafnyToSmithy_"
         + SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(shape.getId().getNamespace())
         + "_" + shape.getId().getName();
   }
@@ -279,13 +274,7 @@ public class SmithyNameResolver {
    * @return
    */
   public static String getSmithyToDafnyFunctionNameForShape(Shape shape, GenerationContext context) {
-    String prefix = getSmithyGeneratedModuleNamespaceForSmithyNamespace(shape.getId().getNamespace(),
-        context);
-    if (!Strings.isNullOrEmpty(prefix)) {
-      prefix += ".smithy_to_dafny.";
-    }
-    return prefix
-        + "SmithyToDafny_"
+    return "SmithyToDafny_"
         + SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(shape.getId().getNamespace())
         + "_" + shape.getId().getName();
   }

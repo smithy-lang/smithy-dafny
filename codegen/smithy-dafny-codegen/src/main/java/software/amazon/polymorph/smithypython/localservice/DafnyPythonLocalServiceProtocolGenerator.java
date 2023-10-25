@@ -133,12 +133,14 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator implements Protoc
       delegator.useFileWriter(serFunction.getDefinitionFile(), serFunction.getNamespace(), writer -> {
         writer.addImport(Constants.DAFNY_PROTOCOL_PYTHON_FILENAME, Constants.DAFNY_PROTOCOL_REQUEST);
         writer.pushState(new RequestSerializerSection(operation));
+        // TODO: RE-type the inputSymbol
+        // Does not import correctly...
         writer.write("""
-            async def $L(input: $T, config: $T) -> $L:
+            async def $L(input, config: $T) -> $L:
                 ${C|}
             """,
             serFunction.getName(),
-            inputSymbol,
+//            inputSymbol,
             configSymbol,
             Constants.DAFNY_PROTOCOL_REQUEST,
             writer.consumer(w -> generateRequestSerializer(context, operation, w)));
@@ -203,14 +205,17 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator implements Protoc
 
         writer.pushState(new RequestDeserializerSection(operation));
 
+        // TODO: Re-type the return value of the function via outputSymbol
+        // The $T is not imported correctly...
+
         writer.write("""
-            async def $L(input: $L, config: $T) -> $T:
+            async def $L(input: $L, config: $T):
               ${C|}
             """,
             deserFunction.getName(),
             Constants.DAFNY_PROTOCOL_RESPONSE,
             configSymbol,
-            outputSymbol,
+//            outputSymbol,
             writer.consumer(w -> generateOperationResponseDeserializer(context, operation))
         );
 
