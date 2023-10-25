@@ -57,8 +57,8 @@ jobs:
           TestModels/SimpleTypes/SimpleString,
           # TestModels/SimpleTypes/SimpleTimestamp,
           TestModels/Union,
-          # TestModels/aws-sdks/ddb,
-          # TestModels/aws-sdks/kms,
+          TestModels/aws-sdks/ddb,
+          TestModels/aws-sdks/kms,
         ]
     runs-on: "ubuntu-latest"
     permissions:
