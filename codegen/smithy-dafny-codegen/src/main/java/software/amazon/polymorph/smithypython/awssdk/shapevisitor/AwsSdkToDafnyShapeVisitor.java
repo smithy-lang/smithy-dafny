@@ -243,12 +243,12 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
       // Import the aws_sdk_to_dafny converter from where the ShapeVisitor was called
 //      writer.addImport(".aws_sdk_to_dafny",
 //          AwsSdkNameResolver.getAwsSdkToDafnyFunctionNameForShape(unionShape));
-      writer.addImport(
-          SmithyNameResolver.getSmithyGeneratedModelLocationForShape(
-              unionShape.getId(), context
-          ),
-          unionShape.getId().getName()
-      );
+//      writer.addImport(
+//          SmithyNameResolver.getSmithyGeneratedModelLocationForShape(
+//              unionShape.getId(), context
+//          ),
+//          unionShape.getId().getName()
+//      );
 
       // Return a reference to the generated conversion method
       // ex. for shape example.namespace.ExampleShape

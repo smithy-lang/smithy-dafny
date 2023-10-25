@@ -137,7 +137,7 @@ public class AwsSdkToDafnyConversionFunctionWriter extends BaseConversionWriter 
       conversionWriter.openBlock(
           "def $L($L):",
           "",
-          SmithyNameResolver.getSmithyToDafnyFunctionNameForShape(unionShape, context),
+          AwsSdkNameResolver.getAwsSdkToDafnyFunctionNameForShape(unionShape),
           dataSourceInsideConversionFunction,
           () -> {
 
