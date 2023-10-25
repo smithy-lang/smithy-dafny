@@ -69,7 +69,7 @@ public class LocalServiceToDafnyConversionFunctionWriter extends BaseConversionW
       conversionWriter.openBlock(
           "def $L($L):",
           "",
-          SmithyNameResolver.getSmithyToDafnyFunctionNameForShape(structureShape),
+          SmithyNameResolver.getSmithyToDafnyFunctionNameForShape(structureShape, context),
           dataSourceInsideConversionFunction,
           () -> {
             if (Utils.isUnitShape(structureShape.getId())) {
@@ -116,7 +116,11 @@ public class LocalServiceToDafnyConversionFunctionWriter extends BaseConversionW
                       new LocalServiceConfigToDafnyConfigShapeVisitor(
                           context,
                           dataSourceInsideConversionFunction + "." + CaseUtils.toSnakeCase(memberName),
-                          writer
+                          // Pass the `conversionWriter` as our source writer;
+                          // if we need to add imports, the imports will only be needed
+                          // from the conversionwriter file
+                          conversionWriter,
+                          "smithy_to_dafny"
                       )
                   )
               );
@@ -133,7 +137,8 @@ public class LocalServiceToDafnyConversionFunctionWriter extends BaseConversionW
                       new LocalServiceToDafnyShapeVisitor(
                           context,
                           dataSourceInsideConversionFunction + "." + CaseUtils.toSnakeCase(memberName),
-                          writer
+                          conversionWriter,
+                          "smithy_to_dafny"
                       )
                   ),
                   dataSourceInsideConversionFunction + "." + CaseUtils.toSnakeCase(memberName)
@@ -147,7 +152,8 @@ public class LocalServiceToDafnyConversionFunctionWriter extends BaseConversionW
                       new LocalServiceToDafnyShapeVisitor(
                           context,
                           dataSourceInsideConversionFunction + "." + CaseUtils.toSnakeCase(memberName),
-                          writer
+                          conversionWriter,
+                          "smithy_to_dafny"
                       )
                   )
               );
@@ -181,8 +187,14 @@ public class LocalServiceToDafnyConversionFunctionWriter extends BaseConversionW
   protected void writeServiceShapeConverter(ServiceShape serviceShape,
       PythonWriter conversionWriter, String dataSourceInsideConversionFunction) {
     DafnyNameResolver.importDafnyTypeForServiceShape(conversionWriter, serviceShape);
-    conversionWriter.addStdlibImport(SmithyNameResolver.getSmithyGeneratedConfigModulePathForSmithyNamespace(
-        serviceShape.getId().getNamespace(), context));
+
+    conversionWriter.write("import $L",
+        SmithyNameResolver.getSmithyGeneratedConfigModulePathForSmithyNamespace(
+            serviceShape.getId().getNamespace(), context)
+    );
+
+//    conversionWriter.addStdlibImport(SmithyNameResolver.getSmithyGeneratedConfigModulePathForSmithyNamespace(
+//        serviceShape.getId().getNamespace(), context));
     conversionWriter.addStdlibImport(DafnyNameResolver.getDafnyPythonIndexModuleNameForShape(serviceShape));
 
     // `my_module_client = my_module_internaldafny.MyModuleClient()`
@@ -235,7 +247,7 @@ public class LocalServiceToDafnyConversionFunctionWriter extends BaseConversionW
       conversionWriter.openBlock(
           "def $L($L):",
           "",
-          SmithyNameResolver.getSmithyToDafnyFunctionNameForShape(unionShape),
+          SmithyNameResolver.getSmithyToDafnyFunctionNameForShape(unionShape, context),
           dataSourceInsideConversionFunction,
           () -> {
 

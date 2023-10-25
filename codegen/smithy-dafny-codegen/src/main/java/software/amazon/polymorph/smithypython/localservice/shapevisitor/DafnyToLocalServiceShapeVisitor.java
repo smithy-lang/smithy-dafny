@@ -3,12 +3,14 @@ package software.amazon.polymorph.smithypython.localservice.shapevisitor;
 import java.util.HashSet;
 import java.util.Map.Entry;
 import java.util.Set;
+import org.assertj.core.util.Strings;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.polymorph.smithypython.common.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.Utils;
 import software.amazon.polymorph.smithypython.localservice.shapevisitor.conversionwriter.DafnyToLocalServiceConversionFunctionWriter;
 import software.amazon.polymorph.smithypython.localservice.shapevisitor.conversionwriter.LocalServiceToDafnyConversionFunctionWriter;
+import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.WriterDelegator;
@@ -68,6 +70,7 @@ public class DafnyToLocalServiceShapeVisitor extends ShapeVisitor.Default<String
     private final GenerationContext context;
     private String dataSource;
     private final PythonWriter writer;
+    private final String filename;
     /**
      * @param context     The generation context.
      * @param dataSource  The in-code location of the data to provide an output of
@@ -82,7 +85,20 @@ public class DafnyToLocalServiceShapeVisitor extends ShapeVisitor.Default<String
       this.context = context;
       this.dataSource = dataSource;
       this.writer = writer;
+      this.filename = "";
     }
+
+  public DafnyToLocalServiceShapeVisitor(
+      GenerationContext context,
+      String dataSource,
+      PythonWriter writer,
+      String filename
+  ) {
+    this.context = context;
+    this.dataSource = dataSource;
+    this.writer = writer;
+    this.filename = filename;
+  }
 
     @Override
     protected String getDefault(Shape shape) {
@@ -94,18 +110,32 @@ public class DafnyToLocalServiceShapeVisitor extends ShapeVisitor.Default<String
 
     @Override
     public String blobShape(BlobShape shape) {
-      return dataSource;
+      return "bytes(%1$s)".formatted(dataSource);
     }
 
     @Override
     public String structureShape(StructureShape structureShape) {
-      LocalServiceToDafnyConversionFunctionWriter.writeConverterForShapeAndMembers(structureShape,
-          context, writer);
-      DafnyToLocalServiceConversionFunctionWriter.writeConverterForShapeAndMembers(structureShape,
-          context, writer);
+      if (structureShape.getId().getNamespace().equals(context.settings().getService().getNamespace())) {
+        LocalServiceToDafnyConversionFunctionWriter.writeConverterForShapeAndMembers(structureShape,
+            context, writer);
+        DafnyToLocalServiceConversionFunctionWriter.writeConverterForShapeAndMembers(structureShape,
+            context, writer);
+      }
 
-      return "%1$s(%2$s)".formatted(
-          SmithyNameResolver.getDafnyToSmithyFunctionNameForShape(structureShape),
+      String pythonModuleName = SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(
+          structureShape.getId().getNamespace(),
+          context
+      );
+      System.out.println(pythonModuleName);
+      if (!filename.equals("dafny_to_smithy"))  {
+        writer.addStdlibImport(pythonModuleName + "dafny_to_smithy");
+      }
+
+      return "%1$s%2$s(%3$s)".formatted(
+          filename.equals("dafny_to_smithy")
+              ? ""
+              : pythonModuleName + ".dafny_to_smithy.",
+          SmithyNameResolver.getDafnyToSmithyFunctionNameForShape(structureShape, context),
           Utils.isUnitShape(structureShape.getId()) ? "" : dataSource
       );
     }
@@ -173,7 +203,10 @@ public class DafnyToLocalServiceShapeVisitor extends ShapeVisitor.Default<String
 
     @Override
     public String stringShape(StringShape shape) {
-      return dataSource;
+      if (shape.hasTrait(DafnyUtf8BytesTrait.class)) {
+        return "bytes(%1$s)".formatted(dataSource);
+      }
+      return dataSource + ".VerbatimString(False)";
     }
 
     @Override
@@ -234,7 +267,7 @@ public class DafnyToLocalServiceShapeVisitor extends ShapeVisitor.Default<String
           context, writer);
 
       return "%1$s(%2$s)".formatted(
-          SmithyNameResolver.getDafnyToSmithyFunctionNameForShape(unionShape),
+          SmithyNameResolver.getDafnyToSmithyFunctionNameForShape(unionShape, context),
           dataSource
       );
     }

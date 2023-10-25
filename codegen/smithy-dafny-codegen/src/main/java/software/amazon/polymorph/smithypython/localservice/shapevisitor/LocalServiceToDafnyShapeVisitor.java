@@ -3,6 +3,7 @@ package software.amazon.polymorph.smithypython.localservice.shapevisitor;
 import java.util.HashSet;
 import java.util.Map.Entry;
 import java.util.Set;
+import org.assertj.core.util.Strings;
 import software.amazon.polymorph.smithypython.common.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.Utils;
@@ -51,6 +52,7 @@ public class LocalServiceToDafnyShapeVisitor extends ShapeVisitor.Default<String
     private final GenerationContext context;
     private String dataSource;
     private final PythonWriter writer;
+    private final String filename;
 
     /**
      * @param context The generation context.
@@ -60,12 +62,25 @@ public class LocalServiceToDafnyShapeVisitor extends ShapeVisitor.Default<String
     public LocalServiceToDafnyShapeVisitor(
         GenerationContext context,
         String dataSource,
-        PythonWriter writer
+        PythonWriter writer,
+        String filename
     ) {
       this.context = context;
       this.dataSource = dataSource;
       this.writer = writer;
+      this.filename = filename;
     }
+
+  public LocalServiceToDafnyShapeVisitor(
+      GenerationContext context,
+      String dataSource,
+      PythonWriter writer
+  ) {
+    this.context = context;
+    this.dataSource = dataSource;
+    this.writer = writer;
+    this.filename = "";
+  }
 
     @Override
     protected String getDefault(Shape shape) {
@@ -77,25 +92,49 @@ public class LocalServiceToDafnyShapeVisitor extends ShapeVisitor.Default<String
 
     @Override
     public String blobShape(BlobShape shape) {
-      return dataSource;
+      writer.addStdlibImport("_dafny", "Seq");
+      return "Seq(" + dataSource + ")";
     }
 
     @Override
     public String structureShape(StructureShape structureShape) {
-      LocalServiceToDafnyConversionFunctionWriter.writeConverterForShapeAndMembers(structureShape,
-          context, writer);
-      DafnyToLocalServiceConversionFunctionWriter.writeConverterForShapeAndMembers(structureShape,
-          context, writer);
+      System.out.println("TE");
+      System.out.println(structureShape.getId().getNamespace());
+      System.out.println(context.settings().getService().getNamespace());
+      if (structureShape.getId().getNamespace().equals(context.settings().getService().getNamespace())) {
+        LocalServiceToDafnyConversionFunctionWriter.writeConverterForShapeAndMembers(structureShape,
+            context, writer);
+        DafnyToLocalServiceConversionFunctionWriter.writeConverterForShapeAndMembers(structureShape,
+            context, writer);
+      }
 
       // Import the smithy_to_dafny converter from where the ShapeVisitor was called
-      writer.addImport(".smithy_to_dafny",
-          SmithyNameResolver.getSmithyToDafnyFunctionNameForShape(structureShape));
+//      writer.addImport(".smithy_to_dafny",
+//          SmithyNameResolver.getSmithyToDafnyFunctionNameForShape(structureShape));
+//      writer.addImport(
+//          SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(
+//              structureShape.getId().getNamespace(), context
+//          ) + ".smithy_to_dafny",
+//          SmithyNameResolver.getSmithyToDafnyFunctionNameForShape(structureShape, context)
+//      );
+      System.out.println("TE2");
+      String pythonModuleName = SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(
+          structureShape.getId().getNamespace(),
+          context
+      );
+      System.out.println(pythonModuleName);
+      if (!filename.equals("smithy_to_dafny"))  {
+        writer.addStdlibImport(pythonModuleName + "smithy_to_dafny");
+      }
 
       // Return a reference to the generated conversion method
       // ex. for shape example.namespace.ExampleShape
       // returns `SmithyToDafny_example_namespace_ExampleShape(input)`
-      return "%1$s(%2$s)".formatted(
-          SmithyNameResolver.getSmithyToDafnyFunctionNameForShape(structureShape),
+      return "%1$s%2$s(%3$s)".formatted(
+          filename.equals("smithy_to_dafny")
+              ? ""
+              : pythonModuleName + ".smithy_to_dafny.",
+          SmithyNameResolver.getSmithyToDafnyFunctionNameForShape(structureShape, context),
           dataSource
       );
     }
@@ -176,7 +215,8 @@ public class LocalServiceToDafnyShapeVisitor extends ShapeVisitor.Default<String
 
     @Override
     public String stringShape(StringShape shape) {
-      return dataSource;
+      writer.addStdlibImport("_dafny", "Seq");
+      return "Seq(" + dataSource + ")";
     }
 
     @Override
@@ -238,13 +278,13 @@ public class LocalServiceToDafnyShapeVisitor extends ShapeVisitor.Default<String
 
       // Import the smithy_to_dafny converter from where the ShapeVisitor was called
       writer.addImport(".smithy_to_dafny",
-          SmithyNameResolver.getSmithyToDafnyFunctionNameForShape(unionShape));
+          SmithyNameResolver.getSmithyToDafnyFunctionNameForShape(unionShape, context));
 
       // Return a reference to the generated conversion method
       // ex. for shape example.namespace.ExampleShape
       // returns `SmithyToDafny_example_namespace_ExampleShape(input)`
       return "%1$s(%2$s)".formatted(
-          SmithyNameResolver.getSmithyToDafnyFunctionNameForShape(unionShape),
+          SmithyNameResolver.getSmithyToDafnyFunctionNameForShape(unionShape, context),
           dataSource
       );
     }

@@ -60,7 +60,7 @@ public class DafnyToLocalServiceConversionFunctionWriter extends BaseConversionW
       conversionWriter.openBlock(
           "def $L($L):",
           "",
-          SmithyNameResolver.getDafnyToSmithyFunctionNameForShape(structureShape),
+          SmithyNameResolver.getDafnyToSmithyFunctionNameForShape(structureShape, context),
           Utils.isUnitShape(structureShape.getId()) ? "" : dataSourceInsideConversionFunction,
           () -> {
             if (structureShape.hasTrait(ReferenceTrait.class)) {
@@ -100,7 +100,8 @@ public class DafnyToLocalServiceConversionFunctionWriter extends BaseConversionW
                         context,
                         dataSourceInsideConversionFunction + "." + memberName
                             + (memberShape.isOptional() ? ".UnwrapOr(None)" : ""),
-                        writer
+                        conversionWriter,
+                        "dafny_to_smithy"
                     )
                 ));
           }
@@ -131,12 +132,14 @@ public class DafnyToLocalServiceConversionFunctionWriter extends BaseConversionW
 
   private void writeServiceShapeConverter(ResourceShape resourceShape, PythonWriter conversionWriter,
       String dataSourceInsideConversionFunction) {
-    conversionWriter.addImport(
-        SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(
-            resourceShape.getId().getNamespace(), context
-        ) + ".references",
-        resourceShape.getId().getName()
-    );
+//    conversionWriter.write()
+
+        conversionWriter.write("from $L import $L",
+            SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(
+                resourceShape.getId().getNamespace(), context
+            ) + ".references",
+            resourceShape.getId().getName()
+            );
 
     conversionWriter.write("return $L(_impl=$L)",
         resourceShape.getId().getName(),
@@ -145,11 +148,12 @@ public class DafnyToLocalServiceConversionFunctionWriter extends BaseConversionW
 
   private void writeResourceShapeConverter(ServiceShape serviceShape, PythonWriter conversionWriter,
       String dataSourceInsideConversionFunction) {
-    conversionWriter.addImport(
+    conversionWriter.write("from $L import $L",
         SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(
             serviceShape.getId().getNamespace(), context
         ) + ".client",
-        serviceShape.getId().getName());
+        serviceShape.getId().getName()
+    );
 
     conversionWriter.write("return $L($L)",
         serviceShape.getId().getName(), dataSourceInsideConversionFunction);
@@ -178,7 +182,7 @@ public class DafnyToLocalServiceConversionFunctionWriter extends BaseConversionW
       conversionWriter.openBlock(
           "def $L($L):",
           "",
-          SmithyNameResolver.getDafnyToSmithyFunctionNameForShape(unionShape),
+          SmithyNameResolver.getDafnyToSmithyFunctionNameForShape(unionShape, context),
           dataSourceInsideConversionFunction,
           () -> {
             conversionWriter.writeComment("Convert %1$s".formatted(

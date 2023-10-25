@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import software.amazon.polymorph.smithypython.common.customize.CustomFileWriter;
 import software.amazon.polymorph.smithypython.common.nameresolver.DafnyNameResolver;
+import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.smithypython.localservice.shapevisitor.DafnyToLocalServiceShapeVisitor;
 import software.amazon.polymorph.smithypython.localservice.shapevisitor.LocalServiceConfigToDafnyConfigShapeVisitor;
 import software.amazon.polymorph.traits.LocalServiceTrait;
@@ -139,8 +140,20 @@ public class ConfigFileWriter implements CustomFileWriter {
         writer
     ));
     writer.writeComment("Import dafny_to_smithy at runtime to prevent introducing circular dependency on config file.");
-    writer.write("from . import dafny_to_smithy");
-    writer.write("return dafny_to_smithy." + output);
+    writer.write("$L",
+        "".equals(SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(
+            configShape.getId().getNamespace(), codegenContext
+        ))
+        ? "from .dafny_to_smithy import %1$s".formatted(
+            SmithyNameResolver.getDafnyToSmithyFunctionNameForShape(
+                configShape,
+                codegenContext
+            ))
+        : "import %1$s.dafny_to_smithy".formatted(SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(
+            configShape.getId().getNamespace(), codegenContext
+        ))
+    );
+    writer.write("return " + output);
   }
 
   /**
@@ -160,7 +173,7 @@ public class ConfigFileWriter implements CustomFileWriter {
         "smithy_config",
         writer
     ));
-    writer.write("return " + output);
+    writer.write("return smithy_to_dafny." + output);
   }
 
 }

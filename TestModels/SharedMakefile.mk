@@ -260,10 +260,8 @@ polymorph_python: _polymorph_wrapped
 polymorph_python:
 	rm -rf runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated
 	mkdir runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated
-	mkdir -p runtimes/python/smithygenerated_wrapped/$(PYTHON_MODULE_NAME)
-	mv runtimes/python/smithygenerated_wrapped/$(PYTHON_MODULE_NAME) runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated/$(PYTHON_MODULE_NAME)
-	mkdir -p runtimes/python/smithygenerated/$(PYTHON_MODULE_NAME)
-	mv runtimes/python/smithygenerated/$(PYTHON_MODULE_NAME) runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated/$(PYTHON_MODULE_NAME)
+	mv runtimes/python/smithygenerated_wrapped/$(PYTHON_MODULE_NAME)/* runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated
+	mv runtimes/python/smithygenerated/$(PYTHON_MODULE_NAME)/* runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated
 	rm -rf runtimes/python/smithygenerated
 polymorph_python: POLYMORPH_LANGUAGE_TARGET=python
 polymorph_python: _polymorph_dependencies

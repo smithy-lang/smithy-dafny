@@ -264,9 +264,20 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator implements Protoc
           if input.IsFailure():
             return await _deserialize_error(input.error)
           # Import dafny_to_smithy at runtime to prevent introducing circular dependency on deserialize file.
-          from . import dafny_to_smithy
-          return dafny_to_smithy.$L
+          $L
+          return $L
           """,
+            "".equals(SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(
+                outputShape.getNamespace(), context
+            ))
+                ? "from .dafny_to_smithy import %1$s".formatted(
+                SmithyNameResolver.getDafnyToSmithyFunctionNameForShape(
+                    context.model().expectShape(outputShape),
+                    context
+                ))
+                : "import %1$s.dafny_to_smithy".formatted(SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(
+                    outputShape.getNamespace(), context
+                )),
           output
         );
       }

@@ -109,7 +109,8 @@ public class LocalServiceConfigToDafnyConversionFunctionWriter extends LocalServ
                               new LocalServiceConfigToDafnyConfigShapeVisitor(
                                   context,
                                   dataSourceInsideConversionFunction + "." + CaseUtils.toSnakeCase(memberName),
-                                  writer
+                                  conversionWriter,
+                                  "smithy_to_dafny"
                               )
                           )
                       );
@@ -123,7 +124,8 @@ public class LocalServiceConfigToDafnyConversionFunctionWriter extends LocalServ
                               new LocalServiceToDafnyShapeVisitor(
                                   context,
                                   dataSourceInsideConversionFunction + "." + CaseUtils.toSnakeCase(memberName),
-                                  writer
+                                  conversionWriter,
+                                  "smithy_to_dafny"
                               )
                           )
                       );
