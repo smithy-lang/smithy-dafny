@@ -86,9 +86,12 @@ public class ShimFileWriter implements CustomFileWriter {
     for (ShapeId errorShapeId : errorShapeSet) {
       SmithyNameResolver.importSmithyGeneratedTypeForShape(writer, errorShapeId, codegenContext);
       writer.write("""
-              if isinstance(e, $L):
+              if isinstance(e, $L.$L):
                   return $L.$L(message=e.message)
               """,
+          SmithyNameResolver.getSmithyGeneratedModelLocationForShape(
+              errorShapeId, codegenContext
+          ),
           errorShapeId.getName(),
           DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(errorShapeId),
           DafnyNameResolver.getDafnyTypeForError(errorShapeId)

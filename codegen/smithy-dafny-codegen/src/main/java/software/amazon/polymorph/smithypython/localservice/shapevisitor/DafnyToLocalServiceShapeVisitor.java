@@ -127,9 +127,9 @@ public class DafnyToLocalServiceShapeVisitor extends ShapeVisitor.Default<String
           context
       );
       System.out.println(pythonModuleName);
-      if (!filename.equals("dafny_to_smithy"))  {
+//      if (!structureShape.getId().getNamespace().equals(context.settings().getService().getNamespace()))  {
         writer.addStdlibImport(pythonModuleName + ".dafny_to_smithy");
-      }
+//      }
 
       return "%1$s.dafny_to_smithy.%2$s(%3$s)".formatted(
           pythonModuleName,

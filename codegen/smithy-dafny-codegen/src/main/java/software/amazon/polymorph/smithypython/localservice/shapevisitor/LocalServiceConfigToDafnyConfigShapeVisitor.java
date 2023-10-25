@@ -95,9 +95,9 @@ public class LocalServiceConfigToDafnyConfigShapeVisitor extends LocalServiceToD
         context
     );
     System.out.println(pythonModuleName);
-    if (!filename.equals("smithy_to_dafny"))  {
+//    if (!structureShape.getId().getNamespace().equals(context.settings().getService().getNamespace()))  {
       writer.addStdlibImport(pythonModuleName + ".smithy_to_dafny");
-    }
+//    }
 
     // Return a reference to the generated conversion method
     // ex. for shape example.namespace.ExampleShape
