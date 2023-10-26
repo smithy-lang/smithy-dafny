@@ -7,7 +7,10 @@ import com_amazonaws_kms.internaldafny.generated.software_amazon_cryptography_se
 import boto3
 from botocore.config import Config
 
+TEST_REGION = "us-west-2"
+
 class default__(com_amazonaws_kms.internaldafny.generated.software_amazon_cryptography_services_kms_internaldafny.default__):
+
     @staticmethod
     def KMSClient(region=None):
         if region is not None:
@@ -16,7 +19,7 @@ class default__(com_amazonaws_kms.internaldafny.generated.software_amazon_crypto
             )
             impl = boto3.client("kms", config=boto_config)
         else:
-            impl = boto3.client("kms")
+            impl = boto3.client("kms", region_name=TEST_REGION)
             region = boto3.session.Session().region_name
         wrapped_client = KMSClientShim(impl, region)
         return Wrappers.Result_Success(wrapped_client)
