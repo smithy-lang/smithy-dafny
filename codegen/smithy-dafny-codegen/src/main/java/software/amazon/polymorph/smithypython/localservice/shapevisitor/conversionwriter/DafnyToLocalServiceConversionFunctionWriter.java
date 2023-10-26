@@ -92,20 +92,35 @@ public class DafnyToLocalServiceConversionFunctionWriter extends BaseConversionW
             MemberShape memberShape = memberShapeEntry.getValue();
             final Shape targetShape = context.model().expectShape(memberShape.getTarget());
 
-            // Adds `smithy_structure_member=DafnyStructureMember(...)`
-            // e.g.
-            // smithy_structure_name(smithy_structure_member=DafnyStructureMember(...), ...)
-            conversionWriter.write("$L=$L,",
-                CaseUtils.toSnakeCase(memberName),
+            conversionWriter.writeInline("$L=", CaseUtils.toSnakeCase(memberName));
+
+            if (memberShape.isOptional()) {
+              conversionWriter.write("($L) if ($L.is_Some) else None,",
                 targetShape.accept(
                     new DafnyToLocalServiceShapeVisitor(
                         context,
-                        dataSourceInsideConversionFunction + "." + memberName
-                            + (memberShape.isOptional() ? ".UnwrapOr(None)" : ""),
+                        dataSourceInsideConversionFunction + "." + memberName + ".value",
                         conversionWriter,
                         "dafny_to_smithy"
                     )
-                ));
+                ),
+                dataSourceInsideConversionFunction + "." + memberName
+              );
+            } else {
+              // Adds `smithy_structure_member=DafnyStructureMember(...)`
+              // e.g.
+              // smithy_structure_name(smithy_structure_member=DafnyStructureMember(...), ...)
+              conversionWriter.write("$L,",
+                  targetShape.accept(
+                      new DafnyToLocalServiceShapeVisitor(
+                          context,
+                          dataSourceInsideConversionFunction + "." + memberName,
+                          conversionWriter,
+                          "dafny_to_smithy"
+                      )
+                  )
+              );
+            }
           }
         }
     );
