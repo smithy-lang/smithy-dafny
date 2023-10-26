@@ -260,12 +260,22 @@ public class DafnyToLocalServiceShapeVisitor extends ShapeVisitor.Default<String
 
     @Override
     public String unionShape(UnionShape unionShape) {
-      LocalServiceToDafnyConversionFunctionWriter.writeConverterForShapeAndMembers(unionShape,
-          context, writer);
-      DafnyToLocalServiceConversionFunctionWriter.writeConverterForShapeAndMembers(unionShape,
-          context, writer);
+      if (unionShape.getId().getNamespace().equals(context.settings().getService().getNamespace())) {
+        LocalServiceToDafnyConversionFunctionWriter.writeConverterForShapeAndMembers(unionShape,
+            context, writer);
+        DafnyToLocalServiceConversionFunctionWriter.writeConverterForShapeAndMembers(unionShape,
+            context, writer);
+      }
 
-      return "%1$s(%2$s)".formatted(
+      String pythonModuleName = SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(
+          unionShape.getId().getNamespace(),
+          context
+      );
+
+      writer.addStdlibImport(pythonModuleName + ".dafny_to_smithy");
+
+      return "%1$s.dafny_to_smithy.%2$s(%3$s)".formatted(
+          pythonModuleName,
           SmithyNameResolver.getDafnyToSmithyFunctionNameForShape(unionShape, context),
           dataSource
       );

@@ -209,9 +209,9 @@ public class SmithyNameResolver {
    */
   public static void importSmithyGeneratedTypeForUnion(PythonWriter writer,
       GenerationContext context, UnionShape unionShape, MemberShape memberShape) {
-    writer.addImport(
-        getSmithyGeneratedModelLocationForShape(unionShape.getId(), context),
-        getSmithyGeneratedTypeForUnion(unionShape, memberShape)
+    writer.addStdlibImport(
+        getSmithyGeneratedModelLocationForShape(unionShape.getId(), context)
+//        getSmithyGeneratedTypeForUnion(unionShape, memberShape)
     );
   }
 

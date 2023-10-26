@@ -261,11 +261,12 @@ public class LocalServiceToDafnyConversionFunctionWriter extends BaseConversionW
               // elif isinstance(input, ExampleUnion.StringValue):
               //   example_union_union_value = DafnyExampleUnionIntegerValue(input.member.value)
               conversionWriter.write("""
-                        $L isinstance($L, $L):
+                        $L isinstance($L, $L.$L):
                             $L_union_value = $L($L.$L)""",
                   // If we need a new `if` block, open one; otherwise, expand on existing one with `elif`
                   shouldOpenNewIfBlock ? "if" : "elif",
                   dataSourceInsideConversionFunction,
+                  SmithyNameResolver.getSmithyGeneratedModelLocationForShape(unionShape.getId(), context),
                   SmithyNameResolver.getSmithyGeneratedTypeForUnion(unionShape, memberShape),
                   unionShape.getId().getName(),
                   DafnyNameResolver.getDafnyTypeForUnion(unionShape, memberShape),

@@ -265,19 +265,25 @@ public class LocalServiceToDafnyShapeVisitor extends ShapeVisitor.Default<String
 
     @Override
     public String unionShape(UnionShape unionShape) {
-      LocalServiceToDafnyConversionFunctionWriter.writeConverterForShapeAndMembers(unionShape,
-          context, writer);
-      DafnyToLocalServiceConversionFunctionWriter.writeConverterForShapeAndMembers(unionShape,
-          context, writer);
+      if (unionShape.getId().getNamespace().equals(context.settings().getService().getNamespace())) {
+        LocalServiceToDafnyConversionFunctionWriter.writeConverterForShapeAndMembers(unionShape,
+            context, writer);
+        DafnyToLocalServiceConversionFunctionWriter.writeConverterForShapeAndMembers(unionShape,
+            context, writer);
+      }
 
       // Import the smithy_to_dafny converter from where the ShapeVisitor was called
-      writer.addImport(".smithy_to_dafny",
-          SmithyNameResolver.getSmithyToDafnyFunctionNameForShape(unionShape, context));
+      String pythonModuleName = SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(
+          unionShape.getId().getNamespace(),
+          context
+      );
+      writer.addStdlibImport(pythonModuleName + ".smithy_to_dafny");
 
       // Return a reference to the generated conversion method
       // ex. for shape example.namespace.ExampleShape
       // returns `SmithyToDafny_example_namespace_ExampleShape(input)`
-      return "%1$s(%2$s)".formatted(
+      return "%1$s.smithy_to_dafny.%2$s(%3$s)".formatted(
+          pythonModuleName,
           SmithyNameResolver.getSmithyToDafnyFunctionNameForShape(unionShape, context),
           dataSource
       );
