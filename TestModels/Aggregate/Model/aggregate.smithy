@@ -41,7 +41,6 @@ structure GetAggregateOutput {
   simpleIntegerMap: SimpleIntegerMap,
   nestedStructure: NestedStructure,
 //  recursiveStructure: RecursiveStructure,
-  nestedList: NestedList
 }
 
 //structure RecursiveStructure {
