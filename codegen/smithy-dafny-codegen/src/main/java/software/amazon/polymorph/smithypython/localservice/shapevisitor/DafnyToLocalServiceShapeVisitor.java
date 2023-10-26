@@ -115,7 +115,8 @@ public class DafnyToLocalServiceShapeVisitor extends ShapeVisitor.Default<String
 
     @Override
     public String structureShape(StructureShape structureShape) {
-      if (structureShape.getId().getNamespace().equals(context.settings().getService().getNamespace())) {
+      if (structureShape.getId().getNamespace().equals(context.settings().getService().getNamespace())
+      || Utils.isUnitShape(structureShape.getId())) {
         LocalServiceToDafnyConversionFunctionWriter.writeConverterForShapeAndMembers(structureShape,
             context, writer);
         DafnyToLocalServiceConversionFunctionWriter.writeConverterForShapeAndMembers(structureShape,
@@ -127,9 +128,9 @@ public class DafnyToLocalServiceShapeVisitor extends ShapeVisitor.Default<String
           context
       );
       System.out.println(pythonModuleName);
-//      if (!structureShape.getId().getNamespace().equals(context.settings().getService().getNamespace()))  {
+      if (!Utils.isUnitShape(structureShape.getId()))  {
         writer.addStdlibImport(pythonModuleName + ".dafny_to_smithy");
-//      }
+      }
 
       return "%1$s.dafny_to_smithy.%2$s(%3$s)".formatted(
           pythonModuleName,

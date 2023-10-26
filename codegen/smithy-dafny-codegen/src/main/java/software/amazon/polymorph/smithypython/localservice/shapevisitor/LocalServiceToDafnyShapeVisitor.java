@@ -98,10 +98,8 @@ public class LocalServiceToDafnyShapeVisitor extends ShapeVisitor.Default<String
 
     @Override
     public String structureShape(StructureShape structureShape) {
-      System.out.println("TE");
-      System.out.println(structureShape.getId().getNamespace());
-      System.out.println(context.settings().getService().getNamespace());
-      if (structureShape.getId().getNamespace().equals(context.settings().getService().getNamespace())) {
+      if (structureShape.getId().getNamespace().equals(context.settings().getService().getNamespace())
+      || Utils.isUnitShape(structureShape.getId())) {
         LocalServiceToDafnyConversionFunctionWriter.writeConverterForShapeAndMembers(structureShape,
             context, writer);
         DafnyToLocalServiceConversionFunctionWriter.writeConverterForShapeAndMembers(structureShape,

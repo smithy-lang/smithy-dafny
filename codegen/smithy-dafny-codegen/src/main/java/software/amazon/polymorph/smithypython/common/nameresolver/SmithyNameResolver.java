@@ -87,9 +87,9 @@ public class SmithyNameResolver {
    */
   public static String getSmithyGeneratedModelLocationForShape(ShapeId shapeId,
       GenerationContext codegenContext) {
-    if (Utils.isUnitShape(shapeId)) {
-      return ".models";
-    }
+//    if (Utils.isUnitShape(shapeId)) {
+//      return ".models";
+//    }
     String moduleNamespace = getSmithyGeneratedModuleNamespaceForSmithyNamespace(shapeId.getNamespace(),
         codegenContext);
     String moduleFilename = getSmithyGeneratedModuleFilenameForSmithyShape(shapeId, codegenContext);
@@ -224,8 +224,12 @@ public class SmithyNameResolver {
    */
   public static String getSmithyGeneratedModuleNamespaceForSmithyNamespace(String smithyNamespace,
       GenerationContext codegenContext) {
+        if ("smithy.api".equals(smithyNamespace)) {
+          return getPythonModuleNamespaceForSmithyNamespace(
+              codegenContext.settings().getService().getNamespace()) + ".smithygenerated";
+        }
     return
-        getPythonModuleNamespaceForSmithyNamespace(smithyNamespace)
+         getPythonModuleNamespaceForSmithyNamespace(smithyNamespace)
         + ".smithygenerated";
 //        getPythonModuleNamespaceForSmithyNamespace(smithyNamespace)
 //            .equals(codegenContext.settings().getModuleName())

@@ -4,6 +4,7 @@ import java.util.Map.Entry;
 import org.assertj.core.util.Strings;
 import software.amazon.polymorph.smithypython.common.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
+import software.amazon.polymorph.smithypython.common.nameresolver.Utils;
 import software.amazon.polymorph.smithypython.localservice.shapevisitor.conversionwriter.LocalServiceConfigToDafnyConversionFunctionWriter;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.WriterDelegator;
@@ -94,10 +95,9 @@ public class LocalServiceConfigToDafnyConfigShapeVisitor extends LocalServiceToD
         structureShape.getId().getNamespace(),
         context
     );
-    System.out.println(pythonModuleName);
-//    if (!structureShape.getId().getNamespace().equals(context.settings().getService().getNamespace()))  {
+    if (!Utils.isUnitShape(structureShape.getId()))  {
       writer.addStdlibImport(pythonModuleName + ".smithy_to_dafny");
-//    }
+    }
 
     // Return a reference to the generated conversion method
     // ex. for shape example.namespace.ExampleShape
