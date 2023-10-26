@@ -34,6 +34,7 @@ import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.TimestampShape;
 import software.amazon.smithy.model.shapes.UnionShape;
+import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonWriter;
 import software.amazon.smithy.utils.CaseUtils;
@@ -209,6 +210,10 @@ public class LocalServiceToDafnyShapeVisitor extends ShapeVisitor.Default<String
 
     @Override
     public String stringShape(StringShape shape) {
+      // Smithy has deprecated EnumTrait, but Polymorph still uses it
+      if (shape.hasTrait(EnumTrait.class)) {
+        return dataSource;
+      }
       writer.addStdlibImport("_dafny", "Seq");
       return "Seq(" + dataSource + ")";
     }
