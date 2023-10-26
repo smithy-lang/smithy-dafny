@@ -18,6 +18,10 @@ def WrappedSimpleDependencies(config):
     # SIM: https://sim.amazon.com/issues/CrypTool-5230
     impl._config.dafnyImplInterface.impl = simple_dependencies_internaldafny.default__.SimpleDependencies(config).value
     wrapped_client = SimpleDependenciesShim(impl)
+    print("wrapped_client")
+    print(wrapped_client)
+    print(wrapped_client._impl)
+    print(wrapped_client._impl._config)
     return Wrappers.Result_Success(wrapped_client)
 
 simple_dependencies_internaldafny_wrapped.default__.WrappedSimpleDependencies = WrappedSimpleDependencies

@@ -94,7 +94,21 @@ public class DafnyToLocalServiceConversionFunctionWriter extends BaseConversionW
 
             conversionWriter.writeInline("$L=", CaseUtils.toSnakeCase(memberName));
 
-            if (memberShape.isOptional()) {
+            if (context.model().expectShape(memberShape.getTarget()).hasTrait(ReferenceTrait.class)) {
+              conversionWriter.write("$L,",
+                  targetShape.accept(
+                      new DafnyToLocalServiceShapeVisitor(
+                          context,
+                          dataSourceInsideConversionFunction + "." + memberName
+                          + (memberShape.isOptional() ? ".UnwrapOr(None)" : ""),
+                          conversionWriter,
+                          "dafny_to_smithy"
+                      )
+                  )
+              );
+            }
+
+            else if (memberShape.isOptional()) {
               conversionWriter.write("($L) if ($L.is_Some) else None,",
                 targetShape.accept(
                     new DafnyToLocalServiceShapeVisitor(
