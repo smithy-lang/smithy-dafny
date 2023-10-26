@@ -5,6 +5,7 @@ import software.amazon.polymorph.smithypython.common.nameresolver.DafnyNameResol
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.Utils;
 import software.amazon.polymorph.smithypython.common.shapevisitor.conversionwriter.BaseConversionWriter;
+import software.amazon.polymorph.smithypython.common.shapevisitor.conversionwriter.ShapeVisitorResolver;
 import software.amazon.polymorph.smithypython.localservice.shapevisitor.DafnyToLocalServiceShapeVisitor;
 import software.amazon.polymorph.smithypython.localservice.shapevisitor.LocalServiceConfigToDafnyConfigShapeVisitor;
 import software.amazon.polymorph.smithypython.localservice.shapevisitor.LocalServiceToDafnyShapeVisitor;
@@ -97,7 +98,7 @@ public class DafnyToLocalServiceConversionFunctionWriter extends BaseConversionW
             if (context.model().expectShape(memberShape.getTarget()).hasTrait(ReferenceTrait.class)) {
               conversionWriter.write("$L,",
                   targetShape.accept(
-                      new DafnyToLocalServiceShapeVisitor(
+                      ShapeVisitorResolver.getToNativeShapeVisitorForShape(targetShape, 
                           context,
                           dataSourceInsideConversionFunction + "." + memberName
                           + (memberShape.isOptional() ? ".UnwrapOr(None)" : ""),
@@ -111,7 +112,7 @@ public class DafnyToLocalServiceConversionFunctionWriter extends BaseConversionW
             else if (memberShape.isOptional()) {
               conversionWriter.write("($L) if ($L.is_Some) else None,",
                 targetShape.accept(
-                    new DafnyToLocalServiceShapeVisitor(
+                    ShapeVisitorResolver.getToNativeShapeVisitorForShape(targetShape, 
                         context,
                         dataSourceInsideConversionFunction + "." + memberName + ".value",
                         conversionWriter,
@@ -126,7 +127,7 @@ public class DafnyToLocalServiceConversionFunctionWriter extends BaseConversionW
               // smithy_structure_name(smithy_structure_member=DafnyStructureMember(...), ...)
               conversionWriter.write("$L,",
                   targetShape.accept(
-                      new DafnyToLocalServiceShapeVisitor(
+                      ShapeVisitorResolver.getToNativeShapeVisitorForShape(targetShape,
                           context,
                           dataSourceInsideConversionFunction + "." + memberName,
                           conversionWriter,

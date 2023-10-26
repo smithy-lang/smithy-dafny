@@ -8,6 +8,7 @@ import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.polymorph.smithypython.common.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.Utils;
+import software.amazon.polymorph.smithypython.common.shapevisitor.conversionwriter.ShapeVisitorResolver;
 import software.amazon.polymorph.smithypython.localservice.shapevisitor.conversionwriter.DafnyToLocalServiceConversionFunctionWriter;
 import software.amazon.polymorph.smithypython.localservice.shapevisitor.conversionwriter.LocalServiceToDafnyConversionFunctionWriter;
 import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
@@ -154,7 +155,7 @@ public class DafnyToLocalServiceShapeVisitor extends ShapeVisitor.Default<String
       // `[list_element for list_element in `DafnyToSmithy(targetShape)``
       builder.append("%1$s".formatted(
           targetShape.accept(
-              new DafnyToLocalServiceShapeVisitor(context, "list_element", writer)
+              ShapeVisitorResolver.getToNativeShapeVisitorForShape(targetShape, context, "list_element", writer)
           )));
 
       // Close structure:
@@ -178,7 +179,7 @@ public class DafnyToLocalServiceShapeVisitor extends ShapeVisitor.Default<String
     // `{`DafnyToSmithy(key)`:`
     builder.append("%1$s: ".formatted(
         keyTargetShape.accept(
-            new DafnyToLocalServiceShapeVisitor(context, "key", writer)
+            ShapeVisitorResolver.getToNativeShapeVisitorForShape(keyTargetShape, context, "key", writer)
         )
     ));
 
@@ -186,7 +187,7 @@ public class DafnyToLocalServiceShapeVisitor extends ShapeVisitor.Default<String
     // `{`DafnyToSmithy(key)`: `DafnyToSmithy(value)``
     builder.append("%1$s".formatted(
         valueTargetShape.accept(
-            new DafnyToLocalServiceShapeVisitor(context, "value", writer)
+            ShapeVisitorResolver.getToNativeShapeVisitorForShape(valueTargetShape, context, "value", writer)
         )
     ));
 

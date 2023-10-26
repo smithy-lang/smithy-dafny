@@ -5,6 +5,7 @@ import java.util.Map.Entry;
 import software.amazon.polymorph.smithypython.common.customize.CustomFileWriter;
 import software.amazon.polymorph.smithypython.common.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
+import software.amazon.polymorph.smithypython.common.shapevisitor.conversionwriter.ShapeVisitorResolver;
 import software.amazon.polymorph.smithypython.localservice.shapevisitor.DafnyToLocalServiceShapeVisitor;
 import software.amazon.polymorph.smithypython.localservice.shapevisitor.LocalServiceConfigToDafnyConfigShapeVisitor;
 import software.amazon.polymorph.traits.LocalServiceTrait;
@@ -134,7 +135,7 @@ public class ConfigFileWriter implements CustomFileWriter {
    */
   private void generateDafnyConfigToSmithyConfigFunctionBody(
       StructureShape configShape, GenerationContext codegenContext, PythonWriter writer) {
-    String output = configShape.accept(new DafnyToLocalServiceShapeVisitor(
+    String output = configShape.accept(ShapeVisitorResolver.getToNativeShapeVisitorForShape(configShape,
         codegenContext,
         "dafny_config",
         writer

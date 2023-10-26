@@ -5,6 +5,7 @@ import org.assertj.core.util.Strings;
 import software.amazon.polymorph.smithypython.common.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.Utils;
+import software.amazon.polymorph.smithypython.common.shapevisitor.conversionwriter.ShapeVisitorResolver;
 import software.amazon.polymorph.smithypython.localservice.shapevisitor.conversionwriter.LocalServiceConfigToDafnyConversionFunctionWriter;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.WriterDelegator;
@@ -67,7 +68,7 @@ public class LocalServiceConfigToDafnyConfigShapeVisitor extends LocalServiceToD
   @Override
   protected String getDefault(Shape shape) {
     return shape.accept(
-        new LocalServiceToDafnyShapeVisitor(context, dataSource, writer)
+        ShapeVisitorResolver.getToDafnyShapeVisitorForShape(shape, context, dataSource, writer)
     );
   }
 

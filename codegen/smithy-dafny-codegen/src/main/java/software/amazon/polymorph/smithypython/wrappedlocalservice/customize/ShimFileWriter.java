@@ -5,6 +5,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 import software.amazon.polymorph.smithypython.common.customize.CustomFileWriter;
+import software.amazon.polymorph.smithypython.common.shapevisitor.conversionwriter.ShapeVisitorResolver;
 import software.amazon.polymorph.smithypython.localservice.shapevisitor.DafnyToLocalServiceShapeVisitor;
 import software.amazon.polymorph.smithypython.localservice.shapevisitor.LocalServiceToDafnyShapeVisitor;
 import software.amazon.polymorph.smithypython.common.nameresolver.DafnyNameResolver;
@@ -210,7 +211,7 @@ public class ShimFileWriter implements CustomFileWriter {
             //   and cannot be constructed inline.
             // Polymorph will create an object representing the service's client, instantiate it,
             //   then reference that object in its `input` string.
-            String input = targetShapeInput.accept(new DafnyToLocalServiceShapeVisitor(
+            String input = targetShapeInput.accept(ShapeVisitorResolver.getToNativeShapeVisitorForShape(targetShapeInput,
                 codegenContext,
                 "input",
                 writer
@@ -258,7 +259,7 @@ public class ShimFileWriter implements CustomFileWriter {
             Shape targetShape = codegenContext.model().expectShape(operationShape.getOutputShape());
             // Generate code that converts the output from Smithy type to the corresponding Dafny type
             // This has a side effect of possibly writing transformation code at the writer's current position.
-            String output = targetShape.accept(new LocalServiceToDafnyShapeVisitor(
+            String output = targetShape.accept(ShapeVisitorResolver.getToDafnyShapeVisitorForShape(targetShape, 
                 codegenContext,
                 "smithy_client_response",
                 writer

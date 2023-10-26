@@ -23,6 +23,7 @@ import software.amazon.polymorph.smithypython.common.Constants;
 import software.amazon.polymorph.smithypython.common.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.Utils;
+import software.amazon.polymorph.smithypython.common.shapevisitor.conversionwriter.ShapeVisitorResolver;
 import software.amazon.polymorph.smithypython.localservice.shapevisitor.DafnyToLocalServiceShapeVisitor;
 import software.amazon.polymorph.smithypython.localservice.shapevisitor.LocalServiceToDafnyShapeVisitor;
 import software.amazon.polymorph.traits.LocalServiceTrait;
@@ -173,7 +174,7 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator implements Protoc
 
     // Determine conversion code from Smithy to Dafny
     Shape targetShape = context.model().expectShape(operation.getInputShape());
-    String input = targetShape.accept(new LocalServiceToDafnyShapeVisitor(
+    String input = targetShape.accept(ShapeVisitorResolver.getToDafnyShapeVisitorForShape(targetShape,
         context,
         "input",
         writer
@@ -259,7 +260,7 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator implements Protoc
       } else {
         // Determine the deserialization function
         Shape targetShape = context.model().expectShape(outputShape);
-        String output = targetShape.accept(new DafnyToLocalServiceShapeVisitor(
+        String output = targetShape.accept(ShapeVisitorResolver.getToNativeShapeVisitorForShape(targetShape, 
             context,
             "input.value",
             writer

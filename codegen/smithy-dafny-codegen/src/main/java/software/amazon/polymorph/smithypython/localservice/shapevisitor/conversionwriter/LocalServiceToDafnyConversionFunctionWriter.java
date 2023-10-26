@@ -7,6 +7,7 @@ import software.amazon.polymorph.smithypython.common.nameresolver.DafnyNameResol
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.Utils;
 import software.amazon.polymorph.smithypython.common.shapevisitor.conversionwriter.BaseConversionWriter;
+import software.amazon.polymorph.smithypython.common.shapevisitor.conversionwriter.ShapeVisitorResolver;
 import software.amazon.polymorph.smithypython.localservice.shapevisitor.LocalServiceConfigToDafnyConfigShapeVisitor;
 import software.amazon.polymorph.smithypython.localservice.shapevisitor.LocalServiceToDafnyShapeVisitor;
 import software.amazon.polymorph.traits.ReferenceTrait;
@@ -134,7 +135,7 @@ public class LocalServiceToDafnyConversionFunctionWriter extends BaseConversionW
               conversionWriter.write(
                   "((Option_Some($L)) if ($L is not None) else (Option_None())),",
                   targetShape.accept(
-                      new LocalServiceToDafnyShapeVisitor(
+                      ShapeVisitorResolver.getToDafnyShapeVisitorForShape(targetShape, 
                           context,
                           dataSourceInsideConversionFunction + "." + CaseUtils.toSnakeCase(memberName),
                           conversionWriter,
@@ -149,7 +150,7 @@ public class LocalServiceToDafnyConversionFunctionWriter extends BaseConversionW
             else {
               conversionWriter.write("$L,",
                   targetShape.accept(
-                      new LocalServiceToDafnyShapeVisitor(
+                      ShapeVisitorResolver.getToDafnyShapeVisitorForShape(targetShape,
                           context,
                           dataSourceInsideConversionFunction + "." + CaseUtils.toSnakeCase(memberName),
                           conversionWriter,

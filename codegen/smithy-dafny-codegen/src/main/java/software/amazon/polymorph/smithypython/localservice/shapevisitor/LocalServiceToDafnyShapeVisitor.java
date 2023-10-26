@@ -7,6 +7,7 @@ import org.assertj.core.util.Strings;
 import software.amazon.polymorph.smithypython.common.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.Utils;
+import software.amazon.polymorph.smithypython.common.shapevisitor.conversionwriter.ShapeVisitorResolver;
 import software.amazon.polymorph.smithypython.localservice.shapevisitor.conversionwriter.DafnyToLocalServiceConversionFunctionWriter;
 import software.amazon.polymorph.smithypython.localservice.shapevisitor.conversionwriter.LocalServiceToDafnyConversionFunctionWriter;
 import software.amazon.polymorph.traits.ReferenceTrait;
@@ -156,7 +157,7 @@ public class LocalServiceToDafnyShapeVisitor extends ShapeVisitor.Default<String
       // `Seq([`SmithyToDafny(list_element)``
       builder.append("%1$s".formatted(
           targetShape.accept(
-              new LocalServiceToDafnyShapeVisitor(context, "list_element", writer)
+              ShapeVisitorResolver.getToDafnyShapeVisitorForShape(targetShape, context, "list_element", writer)
           )));
 
       // Close structure
@@ -186,7 +187,7 @@ public class LocalServiceToDafnyShapeVisitor extends ShapeVisitor.Default<String
       // `{`SmithyToDafny(key)`:`
       builder.append("%1$s: ".formatted(
           keyTargetShape.accept(
-              new LocalServiceToDafnyShapeVisitor(context, "key", writer)
+              ShapeVisitorResolver.getToDafnyShapeVisitorForShape(keyTargetShape, context, "key", writer)
           )
       ));
 
@@ -194,7 +195,7 @@ public class LocalServiceToDafnyShapeVisitor extends ShapeVisitor.Default<String
       // `{`SmithyToDafny(key)`: `SmithyToDafny(value)``
       builder.append("%1$s".formatted(
           valueTargetShape.accept(
-              new LocalServiceToDafnyShapeVisitor(context, "value", writer)
+              ShapeVisitorResolver.getToDafnyShapeVisitorForShape(valueTargetShape, context, "value", writer)
           )
       ));
 

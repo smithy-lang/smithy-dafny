@@ -4,6 +4,7 @@ import java.util.Map.Entry;
 import software.amazon.polymorph.smithypython.common.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.smithypython.common.shapevisitor.conversionwriter.BaseConversionWriter;
+import software.amazon.polymorph.smithypython.common.shapevisitor.conversionwriter.ShapeVisitorResolver;
 import software.amazon.polymorph.smithypython.localservice.shapevisitor.LocalServiceConfigToDafnyConfigShapeVisitor;
 import software.amazon.polymorph.smithypython.localservice.shapevisitor.LocalServiceToDafnyShapeVisitor;
 import software.amazon.polymorph.traits.ReferenceTrait;
@@ -118,7 +119,7 @@ public class LocalServiceConfigToDafnyConversionFunctionWriter extends LocalServ
                     else {
                       conversionWriter.write("$L,",
                           targetShape.accept(
-                              new LocalServiceToDafnyShapeVisitor(
+                              ShapeVisitorResolver.getToDafnyShapeVisitorForShape(targetShape,
                                   context,
                                   dataSourceInsideConversionFunction + "." + CaseUtils.toSnakeCase(memberName),
                                   conversionWriter,

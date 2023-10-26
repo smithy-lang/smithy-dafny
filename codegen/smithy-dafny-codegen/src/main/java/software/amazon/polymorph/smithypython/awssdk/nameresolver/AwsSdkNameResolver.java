@@ -18,6 +18,17 @@ import software.amazon.smithy.python.codegen.PythonWriter;
  */
 public class AwsSdkNameResolver {
 
+  public static boolean isAwsSdkShape(Shape shape) {
+    return isAwsSdkShape(shape.getId());
+  }
+
+  public static boolean isAwsSdkShape(ShapeId shapeId) {
+    // If the shape namespace is not in our list of known SDK namespaces,
+    // it is not a (known) SDK namespace
+    return !resolveAwsSdkSmithyModelNamespaceToDafnyExternNamespace(shapeId.getNamespace())
+        .equals(shapeId.getNamespace());
+  }
+
   /**
    * Returns the name of the Smithy-generated shim for the provided AWS SDK serviceShape.
    * The serviceShape SHOULD be an AWS SDK.
