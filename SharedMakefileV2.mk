@@ -355,12 +355,6 @@ format_net-check:
 build_java: transpile_java mvn_local_deploy_dependencies
 	./runtimes/java/gradlew -p runtimes/java build
 
-format_java:
-	./runtimes/java/gradlew -p runtimes/java spotlessApply
-
-format_java-check:
-	./runtimes/java/gradlew -p runtimes/java spotlessCheck
-
 transpile_java: | transpile_implementation_java transpile_test_java transpile_dependencies_java
 
 transpile_implementation_java: TARGET=java

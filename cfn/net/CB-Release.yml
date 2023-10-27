@@ -111,7 +111,7 @@ Resources:
               }
           ]
         }
-  
+
   AssumeArtifactRolePolicy:
     Type: "AWS::IAM::ManagedPolicy"
     Properties:

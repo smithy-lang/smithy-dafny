@@ -1,11 +1,13 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
-// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
+// Do not modify this file. This file is machine generated, and any changes to it will be
+// overwritten.
 package software.amazon.cryptography.materialproviderstestvectorkeys.model;
 
 import java.util.Objects;
 
 public class RawAES {
+
   private final String keyId;
 
   private final String providerId;
@@ -44,12 +46,12 @@ public class RawAES {
   }
 
   static class BuilderImpl implements Builder {
+
     protected String keyId;
 
     protected String providerId;
 
-    protected BuilderImpl() {
-    }
+    protected BuilderImpl() {}
 
     protected BuilderImpl(RawAES model) {
       this.keyId = model.keyId();
@@ -75,11 +77,15 @@ public class RawAES {
     }
 
     public RawAES build() {
-      if (Objects.isNull(this.keyId()))  {
-        throw new IllegalArgumentException("Missing value for required field `keyId`");
+      if (Objects.isNull(this.keyId())) {
+        throw new IllegalArgumentException(
+          "Missing value for required field `keyId`"
+        );
       }
-      if (Objects.isNull(this.providerId()))  {
-        throw new IllegalArgumentException("Missing value for required field `providerId`");
+      if (Objects.isNull(this.providerId())) {
+        throw new IllegalArgumentException(
+          "Missing value for required field `providerId`"
+        );
       }
       return new RawAES(this);
     }

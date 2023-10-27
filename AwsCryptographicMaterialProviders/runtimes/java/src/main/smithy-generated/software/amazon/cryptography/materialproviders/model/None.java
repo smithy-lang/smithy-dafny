@@ -1,11 +1,12 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
-// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
+// Do not modify this file. This file is machine generated, and any changes to it will be
+// overwritten.
 package software.amazon.cryptography.materialproviders.model;
 
 public class None {
-  protected None(BuilderImpl builder) {
-  }
+
+  protected None(BuilderImpl builder) {}
 
   public Builder toBuilder() {
     return new BuilderImpl(this);
@@ -20,11 +21,10 @@ public class None {
   }
 
   static class BuilderImpl implements Builder {
-    protected BuilderImpl() {
-    }
 
-    protected BuilderImpl(None model) {
-    }
+    protected BuilderImpl() {}
+
+    protected BuilderImpl(None model) {}
 
     public None build() {
       return new None(this);

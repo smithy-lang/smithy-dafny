@@ -1,17 +1,15 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
-// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
+// Do not modify this file. This file is machine generated, and any changes to it will be
+// overwritten.
 package software.amazon.cryptography.keystore.model;
 
 import java.util.Objects;
 
-/**
- * Outputs for getting a Branch Key's ACTIVE version.
- */
+/** Outputs for getting a Branch Key's ACTIVE version. */
 public class GetActiveBranchKeyOutput {
-  /**
-   * The materials for the Branch Key.
-   */
+
+  /** The materials for the Branch Key. */
   private final BranchKeyMaterials branchKeyMaterials;
 
   protected GetActiveBranchKeyOutput(BuilderImpl builder) {
@@ -48,10 +46,10 @@ public class GetActiveBranchKeyOutput {
   }
 
   static class BuilderImpl implements Builder {
+
     protected BranchKeyMaterials branchKeyMaterials;
 
-    protected BuilderImpl() {
-    }
+    protected BuilderImpl() {}
 
     protected BuilderImpl(GetActiveBranchKeyOutput model) {
       this.branchKeyMaterials = model.branchKeyMaterials();
@@ -67,8 +65,10 @@ public class GetActiveBranchKeyOutput {
     }
 
     public GetActiveBranchKeyOutput build() {
-      if (Objects.isNull(this.branchKeyMaterials()))  {
-        throw new IllegalArgumentException("Missing value for required field `branchKeyMaterials`");
+      if (Objects.isNull(this.branchKeyMaterials())) {
+        throw new IllegalArgumentException(
+          "Missing value for required field `branchKeyMaterials`"
+        );
       }
       return new GetActiveBranchKeyOutput(this);
     }

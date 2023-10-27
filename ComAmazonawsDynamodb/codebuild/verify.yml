@@ -5,7 +5,6 @@ env:
     FILE_NAME: "AWS.Cryptography.Internal.ComAmazonawsDynamodb.dll"
     ASSEMBLY_NAME: "AWS.Cryptography.Internal.ComAmazonawsDynamodb.dll"
 
-
 phases:
   install:
     runtime-versions:

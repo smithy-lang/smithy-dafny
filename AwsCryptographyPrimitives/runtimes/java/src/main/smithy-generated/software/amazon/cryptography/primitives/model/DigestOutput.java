@@ -1,12 +1,14 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
-// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
+// Do not modify this file. This file is machine generated, and any changes to it will be
+// overwritten.
 package software.amazon.cryptography.primitives.model;
 
 import java.nio.ByteBuffer;
 import java.util.Objects;
 
 public class DigestOutput {
+
   private final ByteBuffer digest;
 
   protected DigestOutput(BuilderImpl builder) {
@@ -34,10 +36,10 @@ public class DigestOutput {
   }
 
   static class BuilderImpl implements Builder {
+
     protected ByteBuffer digest;
 
-    protected BuilderImpl() {
-    }
+    protected BuilderImpl() {}
 
     protected BuilderImpl(DigestOutput model) {
       this.digest = model.digest();
@@ -53,8 +55,10 @@ public class DigestOutput {
     }
 
     public DigestOutput build() {
-      if (Objects.isNull(this.digest()))  {
-        throw new IllegalArgumentException("Missing value for required field `digest`");
+      if (Objects.isNull(this.digest())) {
+        throw new IllegalArgumentException(
+          "Missing value for required field `digest`"
+        );
       }
       return new DigestOutput(this);
     }

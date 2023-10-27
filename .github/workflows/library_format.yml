@@ -5,25 +5,26 @@ on:
   workflow_call:
     inputs:
       dafny:
-        description: 'The Dafny version to run'
+        description: "The Dafny version to run"
         required: true
         type: string
 
 jobs:
-  format:
+  format_projects:
     # Don't run the nightly build on forks
     if: github.event_name != 'schedule' || github.repository_owner == 'aws'
     strategy:
       matrix:
-        library: [
-          AwsCryptographyPrimitives,
-          ComAmazonawsKms,
-          ComAmazonawsDynamodb,
-          AwsCryptographicMaterialProviders, 
-          TestVectorsAwsCryptographicMaterialProviders,
-          StandardLibrary,
-        ]
-        os: [ ubuntu-latest ]
+        library:
+          [
+            AwsCryptographyPrimitives,
+            ComAmazonawsKms,
+            ComAmazonawsDynamodb,
+            AwsCryptographicMaterialProviders,
+            TestVectorsAwsCryptographicMaterialProviders,
+            StandardLibrary,
+          ]
+        os: [ubuntu-latest]
     runs-on: ${{ matrix.os }}
     env:
       DOTNET_CLI_TELEMETRY_OPTOUT: 1
@@ -51,19 +52,25 @@ jobs:
           CORES=$(node -e 'console.log(os.cpus().length)')
           make format_dafny-check
 
-      # Commented out until the format has been updated
-      # - name: Check format of ${{ matrix.library }} Net code
-      #   shell: bash
-      #   working-directory: ./${{ matrix.library }}
-      #   run: |
-      #     # This works because `node` is installed by default on GHA runners
-      #     CORES=$(node -e 'console.log(os.cpus().length)')
-      #     make format_net-check
+      - name: Check format of ${{ matrix.library }} Net code
+        shell: bash
+        working-directory: ./${{ matrix.library }}
+        run: |
+          # This works because `node` is installed by default on GHA runners
+          CORES=$(node -e 'console.log(os.cpus().length)')
+          make format_net-check
+  format_java_misc:
+    # Don't run the nightly build on forks
+    if: github.event_name != 'schedule' || github.repository_owner == 'aws'
+    runs-on: ubuntu-latest
 
-      # - name: Check format of ${{ matrix.library }} Java code
-      #   shell: bash
-      #   working-directory: ./${{ matrix.library }}
-      #   run: |
-      #     # This works because `node` is installed by default on GHA runners
-      #     CORES=$(node -e 'console.log(os.cpus().length)')
-      #     make format_java-check
+    steps:
+      - name: Support longpaths
+        run: |
+          git config --global core.longpaths true
+      - uses: actions/checkout@v2
+      - name: Check format of Java, yaml, and md
+        shell: bash
+        run: |
+          make setup_prettier
+          make format_java_misc-check

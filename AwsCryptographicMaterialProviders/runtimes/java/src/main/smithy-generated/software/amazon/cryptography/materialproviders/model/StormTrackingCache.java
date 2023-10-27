@@ -1,47 +1,37 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
-// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
+// Do not modify this file. This file is machine generated, and any changes to it will be
+// overwritten.
 package software.amazon.cryptography.materialproviders.model;
 
 /**
- * A cache that is safe for use in a multi threaded environment,
- * and tries to prevent redundant or overly parallel backend calls.
+ * A cache that is safe for use in a multi threaded environment, and tries to prevent redundant or
+ * overly parallel backend calls.
  */
 public class StormTrackingCache {
-  /**
-   * Maximum number of entries cached.
-   */
+
+  /** Maximum number of entries cached. */
   private final int entryCapacity;
 
-  /**
-   * Number of entries to prune at a time.
-   */
+  /** Number of entries to prune at a time. */
   private final int entryPruningTailSize;
 
   /**
-   * How many seconds before expiration should an attempt be made to refresh the materials.
-   *   If zero, use a simple cache with no storm tracking.
+   * How many seconds before expiration should an attempt be made to refresh the materials. If zero,
+   * use a simple cache with no storm tracking.
    */
   private final int gracePeriod;
 
-  /**
-   * How many seconds between attempts to refresh the materials.
-   */
+  /** How many seconds between attempts to refresh the materials. */
   private final int graceInterval;
 
-  /**
-   * How many simultaneous attempts to refresh the materials.
-   */
+  /** How many simultaneous attempts to refresh the materials. */
   private final int fanOut;
 
-  /**
-   * How many seconds until an attempt to refresh the materials should be forgotten.
-   */
+  /** How many seconds until an attempt to refresh the materials should be forgotten. */
   private final int inFlightTTL;
 
-  /**
-   * How many milliseconds should a thread sleep if fanOut is exceeded.
-   */
+  /** How many milliseconds should a thread sleep if fanOut is exceeded. */
   private final int sleepMilli;
 
   protected StormTrackingCache(BuilderImpl builder) {
@@ -70,7 +60,7 @@ public class StormTrackingCache {
 
   /**
    * @return How many seconds before expiration should an attempt be made to refresh the materials.
-   *   If zero, use a simple cache with no storm tracking.
+   *     If zero, use a simple cache with no storm tracking.
    */
   public int gracePeriod() {
     return this.gracePeriod;
@@ -134,14 +124,14 @@ public class StormTrackingCache {
     int entryPruningTailSize();
 
     /**
-     * @param gracePeriod How many seconds before expiration should an attempt be made to refresh the materials.
-     *   If zero, use a simple cache with no storm tracking.
+     * @param gracePeriod How many seconds before expiration should an attempt be made to refresh
+     *     the materials. If zero, use a simple cache with no storm tracking.
      */
     Builder gracePeriod(int gracePeriod);
 
     /**
-     * @return How many seconds before expiration should an attempt be made to refresh the materials.
-     *   If zero, use a simple cache with no storm tracking.
+     * @return How many seconds before expiration should an attempt be made to refresh the
+     *     materials. If zero, use a simple cache with no storm tracking.
      */
     int gracePeriod();
 
@@ -166,7 +156,8 @@ public class StormTrackingCache {
     int fanOut();
 
     /**
-     * @param inFlightTTL How many seconds until an attempt to refresh the materials should be forgotten.
+     * @param inFlightTTL How many seconds until an attempt to refresh the materials should be
+     *     forgotten.
      */
     Builder inFlightTTL(int inFlightTTL);
 
@@ -189,6 +180,7 @@ public class StormTrackingCache {
   }
 
   static class BuilderImpl implements Builder {
+
     protected int entryCapacity;
 
     private boolean _entryCapacitySet = false;
@@ -217,8 +209,7 @@ public class StormTrackingCache {
 
     private boolean _sleepMilliSet = false;
 
-    protected BuilderImpl() {
-    }
+    protected BuilderImpl() {}
 
     protected BuilderImpl(StormTrackingCache model) {
       this.entryCapacity = model.entryCapacity();
@@ -309,43 +300,69 @@ public class StormTrackingCache {
 
     public StormTrackingCache build() {
       if (!this._entryCapacitySet) {
-        throw new IllegalArgumentException("Missing value for required field `entryCapacity`");
+        throw new IllegalArgumentException(
+          "Missing value for required field `entryCapacity`"
+        );
       }
       if (this._entryCapacitySet && this.entryCapacity() < 1) {
-        throw new IllegalArgumentException("`entryCapacity` must be greater than or equal to 1");
+        throw new IllegalArgumentException(
+          "`entryCapacity` must be greater than or equal to 1"
+        );
       }
       if (this._entryPruningTailSizeSet && this.entryPruningTailSize() < 1) {
-        throw new IllegalArgumentException("`entryPruningTailSize` must be greater than or equal to 1");
+        throw new IllegalArgumentException(
+          "`entryPruningTailSize` must be greater than or equal to 1"
+        );
       }
       if (!this._gracePeriodSet) {
-        throw new IllegalArgumentException("Missing value for required field `gracePeriod`");
+        throw new IllegalArgumentException(
+          "Missing value for required field `gracePeriod`"
+        );
       }
       if (this._gracePeriodSet && this.gracePeriod() < 1) {
-        throw new IllegalArgumentException("`gracePeriod` must be greater than or equal to 1");
+        throw new IllegalArgumentException(
+          "`gracePeriod` must be greater than or equal to 1"
+        );
       }
       if (!this._graceIntervalSet) {
-        throw new IllegalArgumentException("Missing value for required field `graceInterval`");
+        throw new IllegalArgumentException(
+          "Missing value for required field `graceInterval`"
+        );
       }
       if (this._graceIntervalSet && this.graceInterval() < 1) {
-        throw new IllegalArgumentException("`graceInterval` must be greater than or equal to 1");
+        throw new IllegalArgumentException(
+          "`graceInterval` must be greater than or equal to 1"
+        );
       }
       if (!this._fanOutSet) {
-        throw new IllegalArgumentException("Missing value for required field `fanOut`");
+        throw new IllegalArgumentException(
+          "Missing value for required field `fanOut`"
+        );
       }
       if (this._fanOutSet && this.fanOut() < 1) {
-        throw new IllegalArgumentException("`fanOut` must be greater than or equal to 1");
+        throw new IllegalArgumentException(
+          "`fanOut` must be greater than or equal to 1"
+        );
       }
       if (!this._inFlightTTLSet) {
-        throw new IllegalArgumentException("Missing value for required field `inFlightTTL`");
+        throw new IllegalArgumentException(
+          "Missing value for required field `inFlightTTL`"
+        );
       }
       if (this._inFlightTTLSet && this.inFlightTTL() < 1) {
-        throw new IllegalArgumentException("`inFlightTTL` must be greater than or equal to 1");
+        throw new IllegalArgumentException(
+          "`inFlightTTL` must be greater than or equal to 1"
+        );
       }
       if (!this._sleepMilliSet) {
-        throw new IllegalArgumentException("Missing value for required field `sleepMilli`");
+        throw new IllegalArgumentException(
+          "Missing value for required field `sleepMilli`"
+        );
       }
       if (this._sleepMilliSet && this.sleepMilli() < 1) {
-        throw new IllegalArgumentException("`sleepMilli` must be greater than or equal to 1");
+        throw new IllegalArgumentException(
+          "`sleepMilli` must be greater than or equal to 1"
+        );
       }
       return new StormTrackingCache(this);
     }

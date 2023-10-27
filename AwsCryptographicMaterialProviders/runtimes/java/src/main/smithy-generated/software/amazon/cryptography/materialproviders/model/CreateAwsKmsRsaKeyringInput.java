@@ -1,6 +1,7 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
-// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
+// Do not modify this file. This file is machine generated, and any changes to it will be
+// overwritten.
 package software.amazon.cryptography.materialproviders.model;
 
 import java.nio.ByteBuffer;
@@ -9,33 +10,29 @@ import java.util.Objects;
 import software.amazon.awssdk.services.kms.KmsClient;
 import software.amazon.awssdk.services.kms.model.EncryptionAlgorithmSpec;
 
-/**
- * Inputs for creating a AWS KMS RSA Keyring.
- */
+/** Inputs for creating a AWS KMS RSA Keyring. */
 public class CreateAwsKmsRsaKeyringInput {
+
   /**
-   * The public RSA Key responsible for wrapping data keys, as a UTF8 encoded, PEM encoded X.509 SubjectPublicKeyInfo structure. This should be the public key as exported from KMS. If not specified, this Keyring cannot be used on encrypt.
+   * The public RSA Key responsible for wrapping data keys, as a UTF8 encoded, PEM encoded X.509
+   * SubjectPublicKeyInfo structure. This should be the public key as exported from KMS. If not
+   * specified, this Keyring cannot be used on encrypt.
    */
   private final ByteBuffer publicKey;
 
   /**
-   * The ARN for the asymmetric AWS KMS Key for RSA responsible for wrapping and unwrapping data keys.
+   * The ARN for the asymmetric AWS KMS Key for RSA responsible for wrapping and unwrapping data
+   * keys.
    */
   private final String kmsKeyId;
 
-  /**
-   * The RSA algorithm used to wrap and unwrap data keys.
-   */
+  /** The RSA algorithm used to wrap and unwrap data keys. */
   private final EncryptionAlgorithmSpec encryptionAlgorithm;
 
-  /**
-   * The KMS Client this Keyring will use to call KMS.
-   */
+  /** The KMS Client this Keyring will use to call KMS. */
   private final KmsClient kmsClient;
 
-  /**
-   * A list of grant tokens to be used when calling KMS.
-   */
+  /** A list of grant tokens to be used when calling KMS. */
   private final List<String> grantTokens;
 
   protected CreateAwsKmsRsaKeyringInput(BuilderImpl builder) {
@@ -47,14 +44,17 @@ public class CreateAwsKmsRsaKeyringInput {
   }
 
   /**
-   * @return The public RSA Key responsible for wrapping data keys, as a UTF8 encoded, PEM encoded X.509 SubjectPublicKeyInfo structure. This should be the public key as exported from KMS. If not specified, this Keyring cannot be used on encrypt.
+   * @return The public RSA Key responsible for wrapping data keys, as a UTF8 encoded, PEM encoded
+   *     X.509 SubjectPublicKeyInfo structure. This should be the public key as exported from KMS.
+   *     If not specified, this Keyring cannot be used on encrypt.
    */
   public ByteBuffer publicKey() {
     return this.publicKey;
   }
 
   /**
-   * @return The ARN for the asymmetric AWS KMS Key for RSA responsible for wrapping and unwrapping data keys.
+   * @return The ARN for the asymmetric AWS KMS Key for RSA responsible for wrapping and unwrapping
+   *     data keys.
    */
   public String kmsKeyId() {
     return this.kmsKeyId;
@@ -91,22 +91,28 @@ public class CreateAwsKmsRsaKeyringInput {
 
   public interface Builder {
     /**
-     * @param publicKey The public RSA Key responsible for wrapping data keys, as a UTF8 encoded, PEM encoded X.509 SubjectPublicKeyInfo structure. This should be the public key as exported from KMS. If not specified, this Keyring cannot be used on encrypt.
+     * @param publicKey The public RSA Key responsible for wrapping data keys, as a UTF8 encoded,
+     *     PEM encoded X.509 SubjectPublicKeyInfo structure. This should be the public key as
+     *     exported from KMS. If not specified, this Keyring cannot be used on encrypt.
      */
     Builder publicKey(ByteBuffer publicKey);
 
     /**
-     * @return The public RSA Key responsible for wrapping data keys, as a UTF8 encoded, PEM encoded X.509 SubjectPublicKeyInfo structure. This should be the public key as exported from KMS. If not specified, this Keyring cannot be used on encrypt.
+     * @return The public RSA Key responsible for wrapping data keys, as a UTF8 encoded, PEM encoded
+     *     X.509 SubjectPublicKeyInfo structure. This should be the public key as exported from KMS.
+     *     If not specified, this Keyring cannot be used on encrypt.
      */
     ByteBuffer publicKey();
 
     /**
-     * @param kmsKeyId The ARN for the asymmetric AWS KMS Key for RSA responsible for wrapping and unwrapping data keys.
+     * @param kmsKeyId The ARN for the asymmetric AWS KMS Key for RSA responsible for wrapping and
+     *     unwrapping data keys.
      */
     Builder kmsKeyId(String kmsKeyId);
 
     /**
-     * @return The ARN for the asymmetric AWS KMS Key for RSA responsible for wrapping and unwrapping data keys.
+     * @return The ARN for the asymmetric AWS KMS Key for RSA responsible for wrapping and
+     *     unwrapping data keys.
      */
     String kmsKeyId();
 
@@ -144,6 +150,7 @@ public class CreateAwsKmsRsaKeyringInput {
   }
 
   static class BuilderImpl implements Builder {
+
     protected ByteBuffer publicKey;
 
     protected String kmsKeyId;
@@ -154,8 +161,7 @@ public class CreateAwsKmsRsaKeyringInput {
 
     protected List<String> grantTokens;
 
-    protected BuilderImpl() {
-    }
+    protected BuilderImpl() {}
 
     protected BuilderImpl(CreateAwsKmsRsaKeyringInput model) {
       this.publicKey = model.publicKey();
@@ -183,7 +189,9 @@ public class CreateAwsKmsRsaKeyringInput {
       return this.kmsKeyId;
     }
 
-    public Builder encryptionAlgorithm(EncryptionAlgorithmSpec encryptionAlgorithm) {
+    public Builder encryptionAlgorithm(
+      EncryptionAlgorithmSpec encryptionAlgorithm
+    ) {
       this.encryptionAlgorithm = encryptionAlgorithm;
       return this;
     }
@@ -211,11 +219,15 @@ public class CreateAwsKmsRsaKeyringInput {
     }
 
     public CreateAwsKmsRsaKeyringInput build() {
-      if (Objects.isNull(this.kmsKeyId()))  {
-        throw new IllegalArgumentException("Missing value for required field `kmsKeyId`");
+      if (Objects.isNull(this.kmsKeyId())) {
+        throw new IllegalArgumentException(
+          "Missing value for required field `kmsKeyId`"
+        );
       }
-      if (Objects.isNull(this.encryptionAlgorithm()))  {
-        throw new IllegalArgumentException("Missing value for required field `encryptionAlgorithm`");
+      if (Objects.isNull(this.encryptionAlgorithm())) {
+        throw new IllegalArgumentException(
+          "Missing value for required field `encryptionAlgorithm`"
+        );
       }
       return new CreateAwsKmsRsaKeyringInput(this);
     }

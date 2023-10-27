@@ -16,6 +16,3 @@ LIBRARIES :=
 transpile_implementation: STD_LIBRARY=
 transpile_test: STD_LIBRARY=
 transpile_dependencies: STD_LIBRARY=
-
-format_net:
-	pushd runtimes/net && dotnet format && popd

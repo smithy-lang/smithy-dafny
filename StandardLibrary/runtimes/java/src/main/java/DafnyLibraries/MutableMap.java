@@ -1,25 +1,29 @@
 package DafnyLibraries;
 
-import dafny.DafnySet;
 import dafny.DafnyMap;
+import dafny.DafnySet;
 import dafny.Tuple2;
-
-import java.util.concurrent.*;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Map;
-import java.math.BigInteger;
+import java.util.concurrent.*;
 
-public class MutableMap<K,V> extends DafnyLibraries._ExternBase_MutableMap<K,V> {
-  private ConcurrentHashMap<K,V> m;
+public class MutableMap<K, V>
+  extends DafnyLibraries._ExternBase_MutableMap<K, V> {
 
-  public MutableMap(dafny.TypeDescriptor<K> _td_K, dafny.TypeDescriptor<V> _td_V) {
+  private ConcurrentHashMap<K, V> m;
+
+  public MutableMap(
+    dafny.TypeDescriptor<K> _td_K,
+    dafny.TypeDescriptor<V> _td_V
+  ) {
     super(_td_K, _td_V);
-    m = new ConcurrentHashMap<K,V>();
+    m = new ConcurrentHashMap<K, V>();
   }
 
   @Override
-  public DafnyMap<K,V> content() {
-    return new DafnyMap<K,V>(m);
+  public DafnyMap<K, V> content() {
+    return new DafnyMap<K, V>(m);
   }
 
   @Override
@@ -43,7 +47,7 @@ public class MutableMap<K,V> extends DafnyLibraries._ExternBase_MutableMap<K,V> 
   }
 
   @Override
-  public DafnySet<? extends Tuple2<K,V>> Items() {
+  public DafnySet<? extends Tuple2<K, V>> Items() {
     ArrayList<Tuple2<K, V>> list = new ArrayList<Tuple2<K, V>>();
     for (Map.Entry<K, V> entry : m.entrySet()) {
       list.add(new Tuple2<K, V>(entry.getKey(), entry.getValue()));

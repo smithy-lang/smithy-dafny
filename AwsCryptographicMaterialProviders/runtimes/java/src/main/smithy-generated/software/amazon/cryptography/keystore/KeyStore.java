@@ -1,10 +1,10 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
-// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
+// Do not modify this file. This file is machine generated, and any changes to it will be
+// overwritten.
 package software.amazon.cryptography.keystore;
 
 import Wrappers_Compile.Result;
-import java.lang.IllegalArgumentException;
 import java.util.Objects;
 import software.amazon.cryptography.keystore.internaldafny.KeyStoreClient;
 import software.amazon.cryptography.keystore.internaldafny.__default;
@@ -26,11 +26,13 @@ import software.amazon.cryptography.keystore.model.VersionKeyInput;
 import software.amazon.cryptography.keystore.model.VersionKeyOutput;
 
 public class KeyStore {
+
   private final IKeyStoreClient _impl;
 
   protected KeyStore(BuilderImpl builder) {
     KeyStoreConfig input = builder.KeyStoreConfig();
-    software.amazon.cryptography.keystore.internaldafny.types.KeyStoreConfig dafnyValue = ToDafny.KeyStoreConfig(input);
+    software.amazon.cryptography.keystore.internaldafny.types.KeyStoreConfig dafnyValue =
+      ToDafny.KeyStoreConfig(input);
     Result<KeyStoreClient, Error> result = __default.KeyStore(dafnyValue);
     if (result.is_Failure()) {
       throw ToNative.Error(result.dtor_error());
@@ -47,12 +49,18 @@ public class KeyStore {
   }
 
   /**
-   * Create a new Branch Key in the Key Store. Additionally create a Beacon Key that is tied to this Branch Key.
+   * Create a new Branch Key in the Key Store. Additionally create a Beacon Key that is tied to this
+   * Branch Key.
+   *
    * @return Outputs for Branch Key creation.
    */
   public CreateKeyOutput CreateKey(CreateKeyInput input) {
-    software.amazon.cryptography.keystore.internaldafny.types.CreateKeyInput dafnyValue = ToDafny.CreateKeyInput(input);
-    Result<software.amazon.cryptography.keystore.internaldafny.types.CreateKeyOutput, Error> result = this._impl.CreateKey(dafnyValue);
+    software.amazon.cryptography.keystore.internaldafny.types.CreateKeyInput dafnyValue =
+      ToDafny.CreateKeyInput(input);
+    Result<
+      software.amazon.cryptography.keystore.internaldafny.types.CreateKeyOutput,
+      Error
+    > result = this._impl.CreateKey(dafnyValue);
     if (result.is_Failure()) {
       throw ToNative.Error(result.dtor_error());
     }
@@ -60,12 +68,18 @@ public class KeyStore {
   }
 
   /**
-   * Create the DynamoDB table that backs this Key Store based on the Key Store configuration. If a table already exists, validate it is configured as expected.
+   * Create the DynamoDB table that backs this Key Store based on the Key Store configuration. If a
+   * table already exists, validate it is configured as expected.
+   *
    * @return Outputs for Key Store DynamoDB table creation.
    */
   public CreateKeyStoreOutput CreateKeyStore(CreateKeyStoreInput input) {
-    software.amazon.cryptography.keystore.internaldafny.types.CreateKeyStoreInput dafnyValue = ToDafny.CreateKeyStoreInput(input);
-    Result<software.amazon.cryptography.keystore.internaldafny.types.CreateKeyStoreOutput, Error> result = this._impl.CreateKeyStore(dafnyValue);
+    software.amazon.cryptography.keystore.internaldafny.types.CreateKeyStoreInput dafnyValue =
+      ToDafny.CreateKeyStoreInput(input);
+    Result<
+      software.amazon.cryptography.keystore.internaldafny.types.CreateKeyStoreOutput,
+      Error
+    > result = this._impl.CreateKeyStore(dafnyValue);
     if (result.is_Failure()) {
       throw ToNative.Error(result.dtor_error());
     }
@@ -78,9 +92,15 @@ public class KeyStore {
    * @param input Inputs for getting a Branch Key's ACTIVE version.
    * @return Outputs for getting a Branch Key's ACTIVE version.
    */
-  public GetActiveBranchKeyOutput GetActiveBranchKey(GetActiveBranchKeyInput input) {
-    software.amazon.cryptography.keystore.internaldafny.types.GetActiveBranchKeyInput dafnyValue = ToDafny.GetActiveBranchKeyInput(input);
-    Result<software.amazon.cryptography.keystore.internaldafny.types.GetActiveBranchKeyOutput, Error> result = this._impl.GetActiveBranchKey(dafnyValue);
+  public GetActiveBranchKeyOutput GetActiveBranchKey(
+    GetActiveBranchKeyInput input
+  ) {
+    software.amazon.cryptography.keystore.internaldafny.types.GetActiveBranchKeyInput dafnyValue =
+      ToDafny.GetActiveBranchKeyInput(input);
+    Result<
+      software.amazon.cryptography.keystore.internaldafny.types.GetActiveBranchKeyOutput,
+      Error
+    > result = this._impl.GetActiveBranchKey(dafnyValue);
     if (result.is_Failure()) {
       throw ToNative.Error(result.dtor_error());
     }
@@ -94,8 +114,12 @@ public class KeyStore {
    * @return Outputs for getting a Beacon Key
    */
   public GetBeaconKeyOutput GetBeaconKey(GetBeaconKeyInput input) {
-    software.amazon.cryptography.keystore.internaldafny.types.GetBeaconKeyInput dafnyValue = ToDafny.GetBeaconKeyInput(input);
-    Result<software.amazon.cryptography.keystore.internaldafny.types.GetBeaconKeyOutput, Error> result = this._impl.GetBeaconKey(dafnyValue);
+    software.amazon.cryptography.keystore.internaldafny.types.GetBeaconKeyInput dafnyValue =
+      ToDafny.GetBeaconKeyInput(input);
+    Result<
+      software.amazon.cryptography.keystore.internaldafny.types.GetBeaconKeyOutput,
+      Error
+    > result = this._impl.GetBeaconKey(dafnyValue);
     if (result.is_Failure()) {
       throw ToNative.Error(result.dtor_error());
     }
@@ -108,9 +132,15 @@ public class KeyStore {
    * @param input Inputs for getting a version of a Branch Key.
    * @return Outputs for getting a version of a Branch Key.
    */
-  public GetBranchKeyVersionOutput GetBranchKeyVersion(GetBranchKeyVersionInput input) {
-    software.amazon.cryptography.keystore.internaldafny.types.GetBranchKeyVersionInput dafnyValue = ToDafny.GetBranchKeyVersionInput(input);
-    Result<software.amazon.cryptography.keystore.internaldafny.types.GetBranchKeyVersionOutput, Error> result = this._impl.GetBranchKeyVersion(dafnyValue);
+  public GetBranchKeyVersionOutput GetBranchKeyVersion(
+    GetBranchKeyVersionInput input
+  ) {
+    software.amazon.cryptography.keystore.internaldafny.types.GetBranchKeyVersionInput dafnyValue =
+      ToDafny.GetBranchKeyVersionInput(input);
+    Result<
+      software.amazon.cryptography.keystore.internaldafny.types.GetBranchKeyVersionOutput,
+      Error
+    > result = this._impl.GetBranchKeyVersion(dafnyValue);
     if (result.is_Failure()) {
       throw ToNative.Error(result.dtor_error());
     }
@@ -119,10 +149,14 @@ public class KeyStore {
 
   /**
    * Returns the configuration information for a Key Store.
+   *
    * @return The configuration information for a Key Store.
    */
   public GetKeyStoreInfoOutput GetKeyStoreInfo() {
-    Result<software.amazon.cryptography.keystore.internaldafny.types.GetKeyStoreInfoOutput, Error> result = this._impl.GetKeyStoreInfo();
+    Result<
+      software.amazon.cryptography.keystore.internaldafny.types.GetKeyStoreInfoOutput,
+      Error
+    > result = this._impl.GetKeyStoreInfo();
     if (result.is_Failure()) {
       throw ToNative.Error(result.dtor_error());
     }
@@ -130,14 +164,19 @@ public class KeyStore {
   }
 
   /**
-   * Create a new ACTIVE version of an existing Branch Key in the Key Store, and set the previously ACTIVE version to DECRYPT_ONLY.
+   * Create a new ACTIVE version of an existing Branch Key in the Key Store, and set the previously
+   * ACTIVE version to DECRYPT_ONLY.
    *
    * @param input Inputs for versioning a Branch Key.
    * @return Outputs for versioning a Branch Key.
    */
   public VersionKeyOutput VersionKey(VersionKeyInput input) {
-    software.amazon.cryptography.keystore.internaldafny.types.VersionKeyInput dafnyValue = ToDafny.VersionKeyInput(input);
-    Result<software.amazon.cryptography.keystore.internaldafny.types.VersionKeyOutput, Error> result = this._impl.VersionKey(dafnyValue);
+    software.amazon.cryptography.keystore.internaldafny.types.VersionKeyInput dafnyValue =
+      ToDafny.VersionKeyInput(input);
+    Result<
+      software.amazon.cryptography.keystore.internaldafny.types.VersionKeyOutput,
+      Error
+    > result = this._impl.VersionKey(dafnyValue);
     if (result.is_Failure()) {
       throw ToNative.Error(result.dtor_error());
     }
@@ -157,10 +196,10 @@ public class KeyStore {
   }
 
   static class BuilderImpl implements Builder {
+
     protected KeyStoreConfig KeyStoreConfig;
 
-    protected BuilderImpl() {
-    }
+    protected BuilderImpl() {}
 
     public Builder KeyStoreConfig(KeyStoreConfig KeyStoreConfig) {
       this.KeyStoreConfig = KeyStoreConfig;
@@ -172,8 +211,10 @@ public class KeyStore {
     }
 
     public KeyStore build() {
-      if (Objects.isNull(this.KeyStoreConfig()))  {
-        throw new IllegalArgumentException("Missing value for required field `KeyStoreConfig`");
+      if (Objects.isNull(this.KeyStoreConfig())) {
+        throw new IllegalArgumentException(
+          "Missing value for required field `KeyStoreConfig`"
+        );
       }
       return new KeyStore(this);
     }

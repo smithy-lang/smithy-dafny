@@ -1,47 +1,39 @@
 package HMAC;
 
-import software.amazon.cryptography.primitives.internaldafny.types.DigestAlgorithm;
-import software.amazon.cryptography.primitives.internaldafny.types.Error;
 import Wrappers_Compile.Result;
 import dafny.Array;
 import dafny.DafnySequence;
-import org.bouncycastle.util.Bytes;
-import software.amazon.cryptography.primitives.ToDafny;
-import software.amazon.cryptography.primitives.model.AwsCryptographicPrimitivesError;
-
-import javax.crypto.Mac;
-import javax.crypto.ShortBufferException;
-import javax.crypto.spec.SecretKeySpec;
-import java.lang.IllegalStateException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.Collections;
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+import software.amazon.cryptography.primitives.ToDafny;
+import software.amazon.cryptography.primitives.internaldafny.types.DigestAlgorithm;
+import software.amazon.cryptography.primitives.internaldafny.types.Error;
+import software.amazon.cryptography.primitives.model.AwsCryptographicPrimitivesError;
 
 public class HMac extends _ExternBase_HMac {
 
   private String algorithm;
   private Mac hmac;
 
-  public static Result<HMAC.HMac, Error> Build(DigestAlgorithm digest)
-  {
+  public static Result<HMAC.HMac, Error> Build(DigestAlgorithm digest) {
     try {
       final HMac output = new HMac(digest);
       return Result.create_Success(output);
-    } catch ( NoSuchAlgorithmException ex) {
-
+    } catch (NoSuchAlgorithmException ex) {
       final Error err = ToDafny.Error(
         AwsCryptographicPrimitivesError
           .builder()
           .message("Requested digest Algorithm is not supported.")
           .cause(ex)
-          .build());
+          .build()
+      );
       return Result.create_Failure(err);
     }
   }
 
-  public HMac(DigestAlgorithm digest) throws NoSuchAlgorithmException
-  {
-
+  public HMac(DigestAlgorithm digest) throws NoSuchAlgorithmException {
     if (digest.is_SHA__256()) {
       algorithm = "HmacSHA256";
     } else if (digest.is_SHA__384()) {
@@ -55,7 +47,7 @@ public class HMac extends _ExternBase_HMac {
     hmac = Mac.getInstance(algorithm);
   }
 
-  public void Init(DafnySequence<? extends Byte> key)  {
+  public void Init(DafnySequence<? extends Byte> key) {
     final byte[] keyBytes = (byte[]) Array.unwrap(key.toArray());
     try {
       final SecretKeySpec secretKey = new SecretKeySpec(keyBytes, algorithm);
@@ -64,7 +56,9 @@ public class HMac extends _ExternBase_HMac {
       // Dafny preconditions should ensure it is impossible to enter here.
       // In case this is ever not true, translate to a RuntimeException
       // which will be bubbled up.
-      throw new IllegalStateException("Encountered InvalidKeyException: " + e.getMessage());
+      throw new IllegalStateException(
+        "Encountered InvalidKeyException: " + e.getMessage()
+      );
     }
   }
 

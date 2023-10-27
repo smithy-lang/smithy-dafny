@@ -1,6 +1,7 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
-// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
+// Do not modify this file. This file is machine generated, and any changes to it will be
+// overwritten.
 package software.amazon.cryptography.materialproviders.model;
 
 import java.nio.ByteBuffer;
@@ -9,6 +10,7 @@ import java.util.Map;
 import java.util.Objects;
 
 public class InitializeEncryptionMaterialsInput {
+
   private final AlgorithmSuiteId algorithmSuiteId;
 
   private final Map<String, String> encryptionContext;
@@ -22,7 +24,8 @@ public class InitializeEncryptionMaterialsInput {
   protected InitializeEncryptionMaterialsInput(BuilderImpl builder) {
     this.algorithmSuiteId = builder.algorithmSuiteId();
     this.encryptionContext = builder.encryptionContext();
-    this.requiredEncryptionContextKeys = builder.requiredEncryptionContextKeys();
+    this.requiredEncryptionContextKeys =
+      builder.requiredEncryptionContextKeys();
     this.signingKey = builder.signingKey();
     this.verificationKey = builder.verificationKey();
   }
@@ -64,7 +67,9 @@ public class InitializeEncryptionMaterialsInput {
 
     Map<String, String> encryptionContext();
 
-    Builder requiredEncryptionContextKeys(List<String> requiredEncryptionContextKeys);
+    Builder requiredEncryptionContextKeys(
+      List<String> requiredEncryptionContextKeys
+    );
 
     List<String> requiredEncryptionContextKeys();
 
@@ -80,6 +85,7 @@ public class InitializeEncryptionMaterialsInput {
   }
 
   static class BuilderImpl implements Builder {
+
     protected AlgorithmSuiteId algorithmSuiteId;
 
     protected Map<String, String> encryptionContext;
@@ -90,13 +96,13 @@ public class InitializeEncryptionMaterialsInput {
 
     protected ByteBuffer verificationKey;
 
-    protected BuilderImpl() {
-    }
+    protected BuilderImpl() {}
 
     protected BuilderImpl(InitializeEncryptionMaterialsInput model) {
       this.algorithmSuiteId = model.algorithmSuiteId();
       this.encryptionContext = model.encryptionContext();
-      this.requiredEncryptionContextKeys = model.requiredEncryptionContextKeys();
+      this.requiredEncryptionContextKeys =
+        model.requiredEncryptionContextKeys();
       this.signingKey = model.signingKey();
       this.verificationKey = model.verificationKey();
     }
@@ -119,7 +125,9 @@ public class InitializeEncryptionMaterialsInput {
       return this.encryptionContext;
     }
 
-    public Builder requiredEncryptionContextKeys(List<String> requiredEncryptionContextKeys) {
+    public Builder requiredEncryptionContextKeys(
+      List<String> requiredEncryptionContextKeys
+    ) {
       this.requiredEncryptionContextKeys = requiredEncryptionContextKeys;
       return this;
     }
@@ -147,14 +155,20 @@ public class InitializeEncryptionMaterialsInput {
     }
 
     public InitializeEncryptionMaterialsInput build() {
-      if (Objects.isNull(this.algorithmSuiteId()))  {
-        throw new IllegalArgumentException("Missing value for required field `algorithmSuiteId`");
+      if (Objects.isNull(this.algorithmSuiteId())) {
+        throw new IllegalArgumentException(
+          "Missing value for required field `algorithmSuiteId`"
+        );
       }
-      if (Objects.isNull(this.encryptionContext()))  {
-        throw new IllegalArgumentException("Missing value for required field `encryptionContext`");
+      if (Objects.isNull(this.encryptionContext())) {
+        throw new IllegalArgumentException(
+          "Missing value for required field `encryptionContext`"
+        );
       }
-      if (Objects.isNull(this.requiredEncryptionContextKeys()))  {
-        throw new IllegalArgumentException("Missing value for required field `requiredEncryptionContextKeys`");
+      if (Objects.isNull(this.requiredEncryptionContextKeys())) {
+        throw new IllegalArgumentException(
+          "Missing value for required field `requiredEncryptionContextKeys`"
+        );
       }
       return new InitializeEncryptionMaterialsInput(this);
     }

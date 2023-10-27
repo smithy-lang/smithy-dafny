@@ -1,6 +1,7 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
-// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
+// Do not modify this file. This file is machine generated, and any changes to it will be
+// overwritten.
 package software.amazon.cryptography.materialproviders.model;
 
 import java.nio.ByteBuffer;
@@ -9,6 +10,7 @@ import java.util.Map;
 import java.util.Objects;
 
 public class DecryptionMaterials {
+
   private final AlgorithmSuiteInfo algorithmSuite;
 
   private final Map<String, String> encryptionContext;
@@ -24,7 +26,8 @@ public class DecryptionMaterials {
   protected DecryptionMaterials(BuilderImpl builder) {
     this.algorithmSuite = builder.algorithmSuite();
     this.encryptionContext = builder.encryptionContext();
-    this.requiredEncryptionContextKeys = builder.requiredEncryptionContextKeys();
+    this.requiredEncryptionContextKeys =
+      builder.requiredEncryptionContextKeys();
     this.plaintextDataKey = builder.plaintextDataKey();
     this.verificationKey = builder.verificationKey();
     this.symmetricSigningKey = builder.symmetricSigningKey();
@@ -71,7 +74,9 @@ public class DecryptionMaterials {
 
     Map<String, String> encryptionContext();
 
-    Builder requiredEncryptionContextKeys(List<String> requiredEncryptionContextKeys);
+    Builder requiredEncryptionContextKeys(
+      List<String> requiredEncryptionContextKeys
+    );
 
     List<String> requiredEncryptionContextKeys();
 
@@ -91,6 +96,7 @@ public class DecryptionMaterials {
   }
 
   static class BuilderImpl implements Builder {
+
     protected AlgorithmSuiteInfo algorithmSuite;
 
     protected Map<String, String> encryptionContext;
@@ -103,13 +109,13 @@ public class DecryptionMaterials {
 
     protected ByteBuffer symmetricSigningKey;
 
-    protected BuilderImpl() {
-    }
+    protected BuilderImpl() {}
 
     protected BuilderImpl(DecryptionMaterials model) {
       this.algorithmSuite = model.algorithmSuite();
       this.encryptionContext = model.encryptionContext();
-      this.requiredEncryptionContextKeys = model.requiredEncryptionContextKeys();
+      this.requiredEncryptionContextKeys =
+        model.requiredEncryptionContextKeys();
       this.plaintextDataKey = model.plaintextDataKey();
       this.verificationKey = model.verificationKey();
       this.symmetricSigningKey = model.symmetricSigningKey();
@@ -133,7 +139,9 @@ public class DecryptionMaterials {
       return this.encryptionContext;
     }
 
-    public Builder requiredEncryptionContextKeys(List<String> requiredEncryptionContextKeys) {
+    public Builder requiredEncryptionContextKeys(
+      List<String> requiredEncryptionContextKeys
+    ) {
       this.requiredEncryptionContextKeys = requiredEncryptionContextKeys;
       return this;
     }
@@ -170,14 +178,20 @@ public class DecryptionMaterials {
     }
 
     public DecryptionMaterials build() {
-      if (Objects.isNull(this.algorithmSuite()))  {
-        throw new IllegalArgumentException("Missing value for required field `algorithmSuite`");
+      if (Objects.isNull(this.algorithmSuite())) {
+        throw new IllegalArgumentException(
+          "Missing value for required field `algorithmSuite`"
+        );
       }
-      if (Objects.isNull(this.encryptionContext()))  {
-        throw new IllegalArgumentException("Missing value for required field `encryptionContext`");
+      if (Objects.isNull(this.encryptionContext())) {
+        throw new IllegalArgumentException(
+          "Missing value for required field `encryptionContext`"
+        );
       }
-      if (Objects.isNull(this.requiredEncryptionContextKeys()))  {
-        throw new IllegalArgumentException("Missing value for required field `requiredEncryptionContextKeys`");
+      if (Objects.isNull(this.requiredEncryptionContextKeys())) {
+        throw new IllegalArgumentException(
+          "Missing value for required field `requiredEncryptionContextKeys`"
+        );
       }
       return new DecryptionMaterials(this);
     }

@@ -5,7 +5,6 @@ env:
     FILE_NAME: "AWS.Cryptography.Internal.AwsCryptographyPrimitives.dll"
     ASSEMBLY_NAME: "AWS.Cryptography.Internal.AwsCryptographyPrimitives.dll"
 
-
 phases:
   install:
     runtime-versions:

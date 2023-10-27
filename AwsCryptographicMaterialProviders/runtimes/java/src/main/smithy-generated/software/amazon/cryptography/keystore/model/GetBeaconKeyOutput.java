@@ -1,17 +1,15 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
-// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
+// Do not modify this file. This file is machine generated, and any changes to it will be
+// overwritten.
 package software.amazon.cryptography.keystore.model;
 
 import java.util.Objects;
 
-/**
- * Outputs for getting a Beacon Key
- */
+/** Outputs for getting a Beacon Key */
 public class GetBeaconKeyOutput {
-  /**
-   * The materials for the Beacon Key.
-   */
+
+  /** The materials for the Beacon Key. */
   private final BeaconKeyMaterials beaconKeyMaterials;
 
   protected GetBeaconKeyOutput(BuilderImpl builder) {
@@ -48,10 +46,10 @@ public class GetBeaconKeyOutput {
   }
 
   static class BuilderImpl implements Builder {
+
     protected BeaconKeyMaterials beaconKeyMaterials;
 
-    protected BuilderImpl() {
-    }
+    protected BuilderImpl() {}
 
     protected BuilderImpl(GetBeaconKeyOutput model) {
       this.beaconKeyMaterials = model.beaconKeyMaterials();
@@ -67,8 +65,10 @@ public class GetBeaconKeyOutput {
     }
 
     public GetBeaconKeyOutput build() {
-      if (Objects.isNull(this.beaconKeyMaterials()))  {
-        throw new IllegalArgumentException("Missing value for required field `beaconKeyMaterials`");
+      if (Objects.isNull(this.beaconKeyMaterials())) {
+        throw new IllegalArgumentException(
+          "Missing value for required field `beaconKeyMaterials`"
+        );
       }
       return new GetBeaconKeyOutput(this);
     }

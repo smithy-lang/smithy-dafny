@@ -30,10 +30,14 @@ format_net:
 		$(MAKE) -C $(PROJECT) format_net && \
 	) true
 
-format_java:
-	$(foreach PROJECT, $(PROJECTS), \
-		$(MAKE) -C $(PROJECT) format_java && \
-	) true
+format_java_misc:
+	npx prettier --plugin=prettier-plugin-java . --write
+
+format_java_misc-check:
+	npx prettier --plugin=prettier-plugin-java . --check
+
+setup_prettier:
+	npm i --no-save prettier prettier-plugin-java
 
 polymorph_code_gen:
 	$(foreach PROJECT, $(PROJECTS), \

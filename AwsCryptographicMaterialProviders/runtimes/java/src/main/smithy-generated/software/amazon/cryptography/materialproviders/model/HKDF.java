@@ -1,12 +1,14 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
-// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
+// Do not modify this file. This file is machine generated, and any changes to it will be
+// overwritten.
 package software.amazon.cryptography.materialproviders.model;
 
 import java.util.Objects;
 import software.amazon.cryptography.primitives.model.DigestAlgorithm;
 
 public class HKDF {
+
   private final DigestAlgorithm hmac;
 
   private final int saltLength;
@@ -67,6 +69,7 @@ public class HKDF {
   }
 
   static class BuilderImpl implements Builder {
+
     protected DigestAlgorithm hmac;
 
     protected int saltLength;
@@ -81,8 +84,7 @@ public class HKDF {
 
     private boolean _outputKeyLengthSet = false;
 
-    protected BuilderImpl() {
-    }
+    protected BuilderImpl() {}
 
     protected BuilderImpl(HKDF model) {
       this.hmac = model.hmac();
@@ -134,32 +136,50 @@ public class HKDF {
     }
 
     public HKDF build() {
-      if (Objects.isNull(this.hmac()))  {
-        throw new IllegalArgumentException("Missing value for required field `hmac`");
+      if (Objects.isNull(this.hmac())) {
+        throw new IllegalArgumentException(
+          "Missing value for required field `hmac`"
+        );
       }
       if (!this._saltLengthSet) {
-        throw new IllegalArgumentException("Missing value for required field `saltLength`");
+        throw new IllegalArgumentException(
+          "Missing value for required field `saltLength`"
+        );
       }
       if (this._saltLengthSet && this.saltLength() < 0) {
-        throw new IllegalArgumentException("`saltLength` must be greater than or equal to 0");
+        throw new IllegalArgumentException(
+          "`saltLength` must be greater than or equal to 0"
+        );
       }
       if (!this._inputKeyLengthSet) {
-        throw new IllegalArgumentException("Missing value for required field `inputKeyLength`");
+        throw new IllegalArgumentException(
+          "Missing value for required field `inputKeyLength`"
+        );
       }
       if (this._inputKeyLengthSet && this.inputKeyLength() < 1) {
-        throw new IllegalArgumentException("`inputKeyLength` must be greater than or equal to 1");
+        throw new IllegalArgumentException(
+          "`inputKeyLength` must be greater than or equal to 1"
+        );
       }
       if (this._inputKeyLengthSet && this.inputKeyLength() > 32) {
-        throw new IllegalArgumentException("`inputKeyLength` must be less than or equal to 32.");
+        throw new IllegalArgumentException(
+          "`inputKeyLength` must be less than or equal to 32."
+        );
       }
       if (!this._outputKeyLengthSet) {
-        throw new IllegalArgumentException("Missing value for required field `outputKeyLength`");
+        throw new IllegalArgumentException(
+          "Missing value for required field `outputKeyLength`"
+        );
       }
       if (this._outputKeyLengthSet && this.outputKeyLength() < 1) {
-        throw new IllegalArgumentException("`outputKeyLength` must be greater than or equal to 1");
+        throw new IllegalArgumentException(
+          "`outputKeyLength` must be greater than or equal to 1"
+        );
       }
       if (this._outputKeyLengthSet && this.outputKeyLength() > 32) {
-        throw new IllegalArgumentException("`outputKeyLength` must be less than or equal to 32.");
+        throw new IllegalArgumentException(
+          "`outputKeyLength` must be less than or equal to 32."
+        );
       }
       return new HKDF(this);
     }

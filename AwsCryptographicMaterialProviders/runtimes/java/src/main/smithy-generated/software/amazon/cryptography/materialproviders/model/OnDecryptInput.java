@@ -1,12 +1,14 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
-// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
+// Do not modify this file. This file is machine generated, and any changes to it will be
+// overwritten.
 package software.amazon.cryptography.materialproviders.model;
 
 import java.util.List;
 import java.util.Objects;
 
 public class OnDecryptInput {
+
   private final DecryptionMaterials materials;
 
   private final List<EncryptedDataKey> encryptedDataKeys;
@@ -45,12 +47,12 @@ public class OnDecryptInput {
   }
 
   static class BuilderImpl implements Builder {
+
     protected DecryptionMaterials materials;
 
     protected List<EncryptedDataKey> encryptedDataKeys;
 
-    protected BuilderImpl() {
-    }
+    protected BuilderImpl() {}
 
     protected BuilderImpl(OnDecryptInput model) {
       this.materials = model.materials();
@@ -76,11 +78,15 @@ public class OnDecryptInput {
     }
 
     public OnDecryptInput build() {
-      if (Objects.isNull(this.materials()))  {
-        throw new IllegalArgumentException("Missing value for required field `materials`");
+      if (Objects.isNull(this.materials())) {
+        throw new IllegalArgumentException(
+          "Missing value for required field `materials`"
+        );
       }
-      if (Objects.isNull(this.encryptedDataKeys()))  {
-        throw new IllegalArgumentException("Missing value for required field `encryptedDataKeys`");
+      if (Objects.isNull(this.encryptedDataKeys())) {
+        throw new IllegalArgumentException(
+          "Missing value for required field `encryptedDataKeys`"
+        );
       }
       return new OnDecryptInput(this);
     }

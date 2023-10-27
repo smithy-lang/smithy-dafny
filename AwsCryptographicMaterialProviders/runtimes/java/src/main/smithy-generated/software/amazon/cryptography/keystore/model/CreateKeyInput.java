@@ -1,19 +1,17 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
-// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
+// Do not modify this file. This file is machine generated, and any changes to it will be
+// overwritten.
 package software.amazon.cryptography.keystore.model;
 
 import java.util.Map;
 
 public class CreateKeyInput {
-  /**
-   * The identifier for the created Branch Key.
-   */
+
+  /** The identifier for the created Branch Key. */
   private final String branchKeyIdentifier;
 
-  /**
-   * Custom encryption context for the Branch Key.
-   */
+  /** Custom encryption context for the Branch Key. */
   private final Map<String, String> encryptionContext;
 
   protected CreateKeyInput(BuilderImpl builder) {
@@ -68,12 +66,12 @@ public class CreateKeyInput {
   }
 
   static class BuilderImpl implements Builder {
+
     protected String branchKeyIdentifier;
 
     protected Map<String, String> encryptionContext;
 
-    protected BuilderImpl() {
-    }
+    protected BuilderImpl() {}
 
     protected BuilderImpl(CreateKeyInput model) {
       this.branchKeyIdentifier = model.branchKeyIdentifier();

@@ -1,11 +1,13 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
-// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
+// Do not modify this file. This file is machine generated, and any changes to it will be
+// overwritten.
 package software.amazon.cryptography.materialproviders.model;
 
 import java.util.Objects;
 
 public class CommitmentPolicy {
+
   private final ESDKCommitmentPolicy ESDK;
 
   private final DBECommitmentPolicy DBE;
@@ -44,12 +46,12 @@ public class CommitmentPolicy {
   }
 
   static class BuilderImpl implements Builder {
+
     protected ESDKCommitmentPolicy ESDK;
 
     protected DBECommitmentPolicy DBE;
 
-    protected BuilderImpl() {
-    }
+    protected BuilderImpl() {}
 
     protected BuilderImpl(CommitmentPolicy model) {
       this.ESDK = model.ESDK();
@@ -76,13 +78,15 @@ public class CommitmentPolicy {
 
     public CommitmentPolicy build() {
       if (!onlyOneNonNull()) {
-        throw new IllegalArgumentException("`CommitmentPolicy` is a Union. A Union MUST have one and only one value set.");
+        throw new IllegalArgumentException(
+          "`CommitmentPolicy` is a Union. A Union MUST have one and only one value set."
+        );
       }
       return new CommitmentPolicy(this);
     }
 
     private boolean onlyOneNonNull() {
-      Object[] allValues = {this.ESDK, this.DBE};
+      Object[] allValues = { this.ESDK, this.DBE };
       boolean haveOneNonNull = false;
       for (Object o : allValues) {
         if (Objects.nonNull(o)) {

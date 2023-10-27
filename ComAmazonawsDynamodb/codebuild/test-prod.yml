@@ -16,19 +16,19 @@ phases:
       - cd aws-cryptographic-material-providers-library-dafny
   pre_build:
     commands:
-      - cd ComAmazonawsDynamodb 
+      - cd ComAmazonawsDynamodb
       - make transpile_net
   build:
     commands:
       - export VERSION=`grep '<Version>' runtimes/net/ComAmazonawsDynamodb.csproj.csproj | sed 's/.*<Version>\(.*\)<\/Version>/\1/'`
       - sed -i.backup  "/\<ProjectReference Include=\"..\/ComAmazonawsDynamodb.csproj.csproj\" \/>/d" runtimes/net/tests/TestComAmazonawsDynamodb.csproj.csproj
       - dotnet add runtimes/net/tests/TestComAmazonawsDynamodb.csproj.csproj package AWS.Cryptography.Internal.ComAmazonawsDynamodb --version $VERSION
-      
-       # run tests
+
+        # run tests
       - TMP_ROLE=$(aws sts assume-role --role-arn "arn:aws:iam::370957321024:role/GitHub-CI-MPL-Dafny-Role-us-west-2" --role-session-name "CB-TestVectorResources")
-      - export TMP_ROLE                                                                                                                                          
-      - export AWS_ACCESS_KEY_ID=$(echo "${TMP_ROLE}" | jq -r '.Credentials.AccessKeyId')                                                                        
-      - export AWS_SECRET_ACCESS_KEY=$(echo "${TMP_ROLE}" | jq -r '.Credentials.SecretAccessKey')                                                                
-      - export AWS_SESSION_TOKEN=$(echo "${TMP_ROLE}" | jq -r '.Credentials.SessionToken')                                                                       
+      - export TMP_ROLE
+      - export AWS_ACCESS_KEY_ID=$(echo "${TMP_ROLE}" | jq -r '.Credentials.AccessKeyId')
+      - export AWS_SECRET_ACCESS_KEY=$(echo "${TMP_ROLE}" | jq -r '.Credentials.SecretAccessKey')
+      - export AWS_SESSION_TOKEN=$(echo "${TMP_ROLE}" | jq -r '.Credentials.SessionToken')
       - aws sts get-caller-identity
       - make test_net

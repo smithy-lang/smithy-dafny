@@ -5,7 +5,7 @@ on:
   workflow_call:
     inputs:
       dafny:
-        description: 'The Dafny version to run'
+        description: "The Dafny version to run"
         required: true
         type: string
 
@@ -13,20 +13,17 @@ jobs:
   testDotNet:
     strategy:
       matrix:
-        library: [
-          StandardLibrary,
-          AwsCryptographyPrimitives,
-          ComAmazonawsKms,
-          ComAmazonawsDynamodb,
-          AwsCryptographicMaterialProviders,
-          TestVectorsAwsCryptographicMaterialProviders,
-        ]
-        dotnet-version: [ '6.0.x' ]
-        os: [
-          windows-latest,
-          ubuntu-latest,
-          macos-latest,
-        ]
+        library:
+          [
+            StandardLibrary,
+            AwsCryptographyPrimitives,
+            ComAmazonawsKms,
+            ComAmazonawsDynamodb,
+            AwsCryptographicMaterialProviders,
+            TestVectorsAwsCryptographicMaterialProviders,
+          ]
+        dotnet-version: ["6.0.x"]
+        os: [windows-latest, ubuntu-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     permissions:
       id-token: write
@@ -61,7 +58,7 @@ jobs:
         with:
           dafny-version: ${{ inputs.dafny }}
 
-      - name: Download Dependencies 
+      - name: Download Dependencies
         working-directory: ./${{ matrix.library }}
         run: make setup_net
 

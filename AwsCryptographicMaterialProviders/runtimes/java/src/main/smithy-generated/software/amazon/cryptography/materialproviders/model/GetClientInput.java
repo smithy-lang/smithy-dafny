@@ -1,17 +1,15 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
-// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
+// Do not modify this file. This file is machine generated, and any changes to it will be
+// overwritten.
 package software.amazon.cryptography.materialproviders.model;
 
 import java.util.Objects;
 
-/**
- * Inputs for getting a AWS KMS Client.
- */
+/** Inputs for getting a AWS KMS Client. */
 public class GetClientInput {
-  /**
-   * The region the client should be created in.
-   */
+
+  /** The region the client should be created in. */
   private final String region;
 
   protected GetClientInput(BuilderImpl builder) {
@@ -48,10 +46,10 @@ public class GetClientInput {
   }
 
   static class BuilderImpl implements Builder {
+
     protected String region;
 
-    protected BuilderImpl() {
-    }
+    protected BuilderImpl() {}
 
     protected BuilderImpl(GetClientInput model) {
       this.region = model.region();
@@ -67,8 +65,10 @@ public class GetClientInput {
     }
 
     public GetClientInput build() {
-      if (Objects.isNull(this.region()))  {
-        throw new IllegalArgumentException("Missing value for required field `region`");
+      if (Objects.isNull(this.region())) {
+        throw new IllegalArgumentException(
+          "Missing value for required field `region`"
+        );
       }
       return new GetClientInput(this);
     }

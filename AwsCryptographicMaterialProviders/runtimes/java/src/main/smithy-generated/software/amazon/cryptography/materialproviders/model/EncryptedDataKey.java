@@ -1,12 +1,14 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
-// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
+// Do not modify this file. This file is machine generated, and any changes to it will be
+// overwritten.
 package software.amazon.cryptography.materialproviders.model;
 
 import java.nio.ByteBuffer;
 import java.util.Objects;
 
 public class EncryptedDataKey {
+
   private final String keyProviderId;
 
   private final ByteBuffer keyProviderInfo;
@@ -56,14 +58,14 @@ public class EncryptedDataKey {
   }
 
   static class BuilderImpl implements Builder {
+
     protected String keyProviderId;
 
     protected ByteBuffer keyProviderInfo;
 
     protected ByteBuffer ciphertext;
 
-    protected BuilderImpl() {
-    }
+    protected BuilderImpl() {}
 
     protected BuilderImpl(EncryptedDataKey model) {
       this.keyProviderId = model.keyProviderId();
@@ -99,14 +101,20 @@ public class EncryptedDataKey {
     }
 
     public EncryptedDataKey build() {
-      if (Objects.isNull(this.keyProviderId()))  {
-        throw new IllegalArgumentException("Missing value for required field `keyProviderId`");
+      if (Objects.isNull(this.keyProviderId())) {
+        throw new IllegalArgumentException(
+          "Missing value for required field `keyProviderId`"
+        );
       }
-      if (Objects.isNull(this.keyProviderInfo()))  {
-        throw new IllegalArgumentException("Missing value for required field `keyProviderInfo`");
+      if (Objects.isNull(this.keyProviderInfo())) {
+        throw new IllegalArgumentException(
+          "Missing value for required field `keyProviderInfo`"
+        );
       }
-      if (Objects.isNull(this.ciphertext()))  {
-        throw new IllegalArgumentException("Missing value for required field `ciphertext`");
+      if (Objects.isNull(this.ciphertext())) {
+        throw new IllegalArgumentException(
+          "Missing value for required field `ciphertext`"
+        );
       }
       return new EncryptedDataKey(this);
     }

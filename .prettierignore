@@ -1,0 +1,18 @@
+# Submodules that take care of their own specifications
+aws-encryption-sdk-specification
+libraries
+
+# Runtime build objects
+*/runtimes/java/build/*
+*/runtimes/net/obj/*
+*/runtimes/net/bin/*
+
+# Dafny generated java
+*/runtimes/java/src/*/dafny-generated/*
+
+# The manifest files
+test.json
+keys.json
+
+# The smithy model files
+model.json

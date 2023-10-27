@@ -1,38 +1,28 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
-// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
+// Do not modify this file. This file is machine generated, and any changes to it will be
+// overwritten.
 package software.amazon.cryptography.keystore.model;
 
 import java.util.List;
 import java.util.Objects;
 
-/**
- * The configuration information for a Key Store.
- */
+/** The configuration information for a Key Store. */
 public class GetKeyStoreInfoOutput {
-  /**
-   * An identifier for this Key Store.
-   */
+
+  /** An identifier for this Key Store. */
   private final String keyStoreId;
 
-  /**
-   * The DynamoDB table name that backs this Key Store.
-   */
+  /** The DynamoDB table name that backs this Key Store. */
   private final String keyStoreName;
 
-  /**
-   * The logical name for this Key Store, which is cryptographically bound to the keys it holds.
-   */
+  /** The logical name for this Key Store, which is cryptographically bound to the keys it holds. */
   private final String logicalKeyStoreName;
 
-  /**
-   * The AWS KMS grant tokens that are used when this Key Store calls to AWS KMS.
-   */
+  /** The AWS KMS grant tokens that are used when this Key Store calls to AWS KMS. */
   private final List<String> grantTokens;
 
-  /**
-   * The AWS KMS Key that protects this Key Store.
-   */
+  /** The AWS KMS Key that protects this Key Store. */
   private final KMSConfiguration kmsConfiguration;
 
   protected GetKeyStoreInfoOutput(BuilderImpl builder) {
@@ -58,7 +48,8 @@ public class GetKeyStoreInfoOutput {
   }
 
   /**
-   * @return The logical name for this Key Store, which is cryptographically bound to the keys it holds.
+   * @return The logical name for this Key Store, which is cryptographically bound to the keys it
+   *     holds.
    */
   public String logicalKeyStoreName() {
     return this.logicalKeyStoreName;
@@ -108,17 +99,20 @@ public class GetKeyStoreInfoOutput {
     String keyStoreName();
 
     /**
-     * @param logicalKeyStoreName The logical name for this Key Store, which is cryptographically bound to the keys it holds.
+     * @param logicalKeyStoreName The logical name for this Key Store, which is cryptographically
+     *     bound to the keys it holds.
      */
     Builder logicalKeyStoreName(String logicalKeyStoreName);
 
     /**
-     * @return The logical name for this Key Store, which is cryptographically bound to the keys it holds.
+     * @return The logical name for this Key Store, which is cryptographically bound to the keys it
+     *     holds.
      */
     String logicalKeyStoreName();
 
     /**
-     * @param grantTokens The AWS KMS grant tokens that are used when this Key Store calls to AWS KMS.
+     * @param grantTokens The AWS KMS grant tokens that are used when this Key Store calls to AWS
+     *     KMS.
      */
     Builder grantTokens(List<String> grantTokens);
 
@@ -141,6 +135,7 @@ public class GetKeyStoreInfoOutput {
   }
 
   static class BuilderImpl implements Builder {
+
     protected String keyStoreId;
 
     protected String keyStoreName;
@@ -151,8 +146,7 @@ public class GetKeyStoreInfoOutput {
 
     protected KMSConfiguration kmsConfiguration;
 
-    protected BuilderImpl() {
-    }
+    protected BuilderImpl() {}
 
     protected BuilderImpl(GetKeyStoreInfoOutput model) {
       this.keyStoreId = model.keyStoreId();
@@ -208,26 +202,45 @@ public class GetKeyStoreInfoOutput {
     }
 
     public GetKeyStoreInfoOutput build() {
-      if (Objects.isNull(this.keyStoreId()))  {
-        throw new IllegalArgumentException("Missing value for required field `keyStoreId`");
+      if (Objects.isNull(this.keyStoreId())) {
+        throw new IllegalArgumentException(
+          "Missing value for required field `keyStoreId`"
+        );
       }
-      if (Objects.isNull(this.keyStoreName()))  {
-        throw new IllegalArgumentException("Missing value for required field `keyStoreName`");
+      if (Objects.isNull(this.keyStoreName())) {
+        throw new IllegalArgumentException(
+          "Missing value for required field `keyStoreName`"
+        );
       }
-      if (Objects.nonNull(this.keyStoreName()) && this.keyStoreName().length() < 3) {
-        throw new IllegalArgumentException("The size of `keyStoreName` must be greater than or equal to 3");
+      if (
+        Objects.nonNull(this.keyStoreName()) && this.keyStoreName().length() < 3
+      ) {
+        throw new IllegalArgumentException(
+          "The size of `keyStoreName` must be greater than or equal to 3"
+        );
       }
-      if (Objects.nonNull(this.keyStoreName()) && this.keyStoreName().length() > 255) {
-        throw new IllegalArgumentException("The size of `keyStoreName` must be less than or equal to 255");
+      if (
+        Objects.nonNull(this.keyStoreName()) &&
+        this.keyStoreName().length() > 255
+      ) {
+        throw new IllegalArgumentException(
+          "The size of `keyStoreName` must be less than or equal to 255"
+        );
       }
-      if (Objects.isNull(this.logicalKeyStoreName()))  {
-        throw new IllegalArgumentException("Missing value for required field `logicalKeyStoreName`");
+      if (Objects.isNull(this.logicalKeyStoreName())) {
+        throw new IllegalArgumentException(
+          "Missing value for required field `logicalKeyStoreName`"
+        );
       }
-      if (Objects.isNull(this.grantTokens()))  {
-        throw new IllegalArgumentException("Missing value for required field `grantTokens`");
+      if (Objects.isNull(this.grantTokens())) {
+        throw new IllegalArgumentException(
+          "Missing value for required field `grantTokens`"
+        );
       }
-      if (Objects.isNull(this.kmsConfiguration()))  {
-        throw new IllegalArgumentException("Missing value for required field `kmsConfiguration`");
+      if (Objects.isNull(this.kmsConfiguration())) {
+        throw new IllegalArgumentException(
+          "Missing value for required field `kmsConfiguration`"
+        );
       }
       return new GetKeyStoreInfoOutput(this);
     }

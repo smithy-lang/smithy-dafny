@@ -1,18 +1,21 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
-// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
+// Do not modify this file. This file is machine generated, and any changes to it will be
+// overwritten.
 package software.amazon.cryptography.materialproviderstestvectorkeys.model;
 
 import java.util.Objects;
 import software.amazon.cryptography.materialproviders.model.DiscoveryFilter;
 
 public class KmsMrkAwareDiscovery {
+
   private final String keyId;
 
   private final String defaultMrkRegion;
 
   /**
-   * A filter which defines what AWS partition and AWS accounts a KMS Key may be in for a Keyring to be allowed to attempt to decrypt it.
+   * A filter which defines what AWS partition and AWS accounts a KMS Key may be in for a Keyring to
+   * be allowed to attempt to decrypt it.
    */
   private final DiscoveryFilter awsKmsDiscoveryFilter;
 
@@ -31,7 +34,8 @@ public class KmsMrkAwareDiscovery {
   }
 
   /**
-   * @return A filter which defines what AWS partition and AWS accounts a KMS Key may be in for a Keyring to be allowed to attempt to decrypt it.
+   * @return A filter which defines what AWS partition and AWS accounts a KMS Key may be in for a
+   *     Keyring to be allowed to attempt to decrypt it.
    */
   public DiscoveryFilter awsKmsDiscoveryFilter() {
     return this.awsKmsDiscoveryFilter;
@@ -55,12 +59,14 @@ public class KmsMrkAwareDiscovery {
     String defaultMrkRegion();
 
     /**
-     * @param awsKmsDiscoveryFilter A filter which defines what AWS partition and AWS accounts a KMS Key may be in for a Keyring to be allowed to attempt to decrypt it.
+     * @param awsKmsDiscoveryFilter A filter which defines what AWS partition and AWS accounts a KMS
+     *     Key may be in for a Keyring to be allowed to attempt to decrypt it.
      */
     Builder awsKmsDiscoveryFilter(DiscoveryFilter awsKmsDiscoveryFilter);
 
     /**
-     * @return A filter which defines what AWS partition and AWS accounts a KMS Key may be in for a Keyring to be allowed to attempt to decrypt it.
+     * @return A filter which defines what AWS partition and AWS accounts a KMS Key may be in for a
+     *     Keyring to be allowed to attempt to decrypt it.
      */
     DiscoveryFilter awsKmsDiscoveryFilter();
 
@@ -68,14 +74,14 @@ public class KmsMrkAwareDiscovery {
   }
 
   static class BuilderImpl implements Builder {
+
     protected String keyId;
 
     protected String defaultMrkRegion;
 
     protected DiscoveryFilter awsKmsDiscoveryFilter;
 
-    protected BuilderImpl() {
-    }
+    protected BuilderImpl() {}
 
     protected BuilderImpl(KmsMrkAwareDiscovery model) {
       this.keyId = model.keyId();
@@ -101,7 +107,9 @@ public class KmsMrkAwareDiscovery {
       return this.defaultMrkRegion;
     }
 
-    public Builder awsKmsDiscoveryFilter(DiscoveryFilter awsKmsDiscoveryFilter) {
+    public Builder awsKmsDiscoveryFilter(
+      DiscoveryFilter awsKmsDiscoveryFilter
+    ) {
       this.awsKmsDiscoveryFilter = awsKmsDiscoveryFilter;
       return this;
     }
@@ -111,11 +119,15 @@ public class KmsMrkAwareDiscovery {
     }
 
     public KmsMrkAwareDiscovery build() {
-      if (Objects.isNull(this.keyId()))  {
-        throw new IllegalArgumentException("Missing value for required field `keyId`");
+      if (Objects.isNull(this.keyId())) {
+        throw new IllegalArgumentException(
+          "Missing value for required field `keyId`"
+        );
       }
-      if (Objects.isNull(this.defaultMrkRegion()))  {
-        throw new IllegalArgumentException("Missing value for required field `defaultMrkRegion`");
+      if (Objects.isNull(this.defaultMrkRegion())) {
+        throw new IllegalArgumentException(
+          "Missing value for required field `defaultMrkRegion`"
+        );
       }
       return new KmsMrkAwareDiscovery(this);
     }

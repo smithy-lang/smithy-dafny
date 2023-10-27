@@ -1,11 +1,13 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
-// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
+// Do not modify this file. This file is machine generated, and any changes to it will be
+// overwritten.
 package software.amazon.cryptography.materialproviders.model;
 
 import java.util.Objects;
 
 public class ValidDecryptionMaterialsTransitionInput {
+
   private final DecryptionMaterials start;
 
   private final DecryptionMaterials stop;
@@ -44,12 +46,12 @@ public class ValidDecryptionMaterialsTransitionInput {
   }
 
   static class BuilderImpl implements Builder {
+
     protected DecryptionMaterials start;
 
     protected DecryptionMaterials stop;
 
-    protected BuilderImpl() {
-    }
+    protected BuilderImpl() {}
 
     protected BuilderImpl(ValidDecryptionMaterialsTransitionInput model) {
       this.start = model.start();
@@ -75,11 +77,15 @@ public class ValidDecryptionMaterialsTransitionInput {
     }
 
     public ValidDecryptionMaterialsTransitionInput build() {
-      if (Objects.isNull(this.start()))  {
-        throw new IllegalArgumentException("Missing value for required field `start`");
+      if (Objects.isNull(this.start())) {
+        throw new IllegalArgumentException(
+          "Missing value for required field `start`"
+        );
       }
-      if (Objects.isNull(this.stop()))  {
-        throw new IllegalArgumentException("Missing value for required field `stop`");
+      if (Objects.isNull(this.stop())) {
+        throw new IllegalArgumentException(
+          "Missing value for required field `stop`"
+        );
       }
       return new ValidDecryptionMaterialsTransitionInput(this);
     }

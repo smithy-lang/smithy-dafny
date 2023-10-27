@@ -7,9 +7,6 @@ import javax.annotation.Nullable
 plugins {
     `java-library`
     `maven-publish`
-    if (JavaVersion.current() >= JavaVersion.VERSION_11) {
-      id("com.diffplug.spotless") version "6.22.0"
-    }
 }
 
 var props = Properties().apply {
@@ -89,10 +86,3 @@ tasks {
         classpath = sourceSets["test"].runtimeClasspath
     }
 }
-
-// Commented out until the format has been updated
-// spotless {
-//   java {
-//     googleJavaFormat()
-//   }
-// }

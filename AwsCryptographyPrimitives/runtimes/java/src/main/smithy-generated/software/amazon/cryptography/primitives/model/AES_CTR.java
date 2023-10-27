@@ -1,9 +1,11 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
-// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
+// Do not modify this file. This file is machine generated, and any changes to it will be
+// overwritten.
 package software.amazon.cryptography.primitives.model;
 
 public class AES_CTR {
+
   private final int keyLength;
 
   private final int nonceLength;
@@ -42,6 +44,7 @@ public class AES_CTR {
   }
 
   static class BuilderImpl implements Builder {
+
     protected int keyLength;
 
     private boolean _keyLengthSet = false;
@@ -50,8 +53,7 @@ public class AES_CTR {
 
     private boolean _nonceLengthSet = false;
 
-    protected BuilderImpl() {
-    }
+    protected BuilderImpl() {}
 
     protected BuilderImpl(AES_CTR model) {
       this.keyLength = model.keyLength();
@@ -82,22 +84,34 @@ public class AES_CTR {
 
     public AES_CTR build() {
       if (!this._keyLengthSet) {
-        throw new IllegalArgumentException("Missing value for required field `keyLength`");
+        throw new IllegalArgumentException(
+          "Missing value for required field `keyLength`"
+        );
       }
       if (this._keyLengthSet && this.keyLength() < 1) {
-        throw new IllegalArgumentException("`keyLength` must be greater than or equal to 1");
+        throw new IllegalArgumentException(
+          "`keyLength` must be greater than or equal to 1"
+        );
       }
       if (this._keyLengthSet && this.keyLength() > 32) {
-        throw new IllegalArgumentException("`keyLength` must be less than or equal to 32.");
+        throw new IllegalArgumentException(
+          "`keyLength` must be less than or equal to 32."
+        );
       }
       if (!this._nonceLengthSet) {
-        throw new IllegalArgumentException("Missing value for required field `nonceLength`");
+        throw new IllegalArgumentException(
+          "Missing value for required field `nonceLength`"
+        );
       }
       if (this._nonceLengthSet && this.nonceLength() < 0) {
-        throw new IllegalArgumentException("`nonceLength` must be greater than or equal to 0");
+        throw new IllegalArgumentException(
+          "`nonceLength` must be greater than or equal to 0"
+        );
       }
       if (this._nonceLengthSet && this.nonceLength() > 255) {
-        throw new IllegalArgumentException("`nonceLength` must be less than or equal to 255.");
+        throw new IllegalArgumentException(
+          "`nonceLength` must be less than or equal to 255."
+        );
       }
       return new AES_CTR(this);
     }

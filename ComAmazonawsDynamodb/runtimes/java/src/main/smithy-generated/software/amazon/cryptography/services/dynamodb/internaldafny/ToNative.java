@@ -1,14 +1,11 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
-// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
+// Do not modify this file. This file is machine generated, and any changes to it will be
+// overwritten.
 package software.amazon.cryptography.services.dynamodb.internaldafny;
 
 import dafny.DafnyMap;
 import dafny.DafnySequence;
-import java.lang.Byte;
-import java.lang.Character;
-import java.lang.Double;
-import java.lang.String;
 import java.util.List;
 import java.util.Map;
 import software.amazon.awssdk.core.SdkBytes;
@@ -352,6 +349,8 @@ import software.amazon.cryptography.services.dynamodb.internaldafny.types.Error_
 import software.amazon.cryptography.services.dynamodb.internaldafny.types.Error_InvalidRestoreTimeException;
 import software.amazon.cryptography.services.dynamodb.internaldafny.types.Error_ItemCollectionSizeLimitExceededException;
 import software.amazon.cryptography.services.dynamodb.internaldafny.types.Error_LimitExceededException;
+import software.amazon.cryptography.services.dynamodb.internaldafny.types.Error_Opaque;
+// END MANUAL EDIT
 import software.amazon.cryptography.services.dynamodb.internaldafny.types.Error_PointInTimeRecoveryUnavailableException;
 import software.amazon.cryptography.services.dynamodb.internaldafny.types.Error_ProvisionedThroughputExceededException;
 import software.amazon.cryptography.services.dynamodb.internaldafny.types.Error_ReplicaAlreadyExistsException;
@@ -366,8 +365,6 @@ import software.amazon.cryptography.services.dynamodb.internaldafny.types.Error_
 import software.amazon.cryptography.services.dynamodb.internaldafny.types.Error_TransactionConflictException;
 import software.amazon.cryptography.services.dynamodb.internaldafny.types.Error_TransactionInProgressException;
 // BEGIN MANUAL EDIT
-import software.amazon.cryptography.services.dynamodb.internaldafny.types.Error_Opaque;
-// END MANUAL EDIT
 import software.amazon.cryptography.services.dynamodb.internaldafny.types.ExecuteStatementInput;
 import software.amazon.cryptography.services.dynamodb.internaldafny.types.ExecuteStatementOutput;
 import software.amazon.cryptography.services.dynamodb.internaldafny.types.ExecuteTransactionInput;
@@ -427,6 +424,7 @@ import software.amazon.cryptography.services.dynamodb.internaldafny.types.Update
 import software.amazon.cryptography.services.dynamodb.internaldafny.types.UpdateTimeToLiveOutput;
 
 public class ToNative {
+
   // BEGIN MANUAL EDIT
   public static RuntimeException Error(Error_Opaque dafnyValue) {
     if (dafnyValue.dtor_obj() instanceof DynamoDbException) {
@@ -437,25 +435,40 @@ public class ToNative {
     // Bubble up some error to indicate this failure state.
     return new IllegalStateException("Unknown error recieved from DynamoDb.");
   }
+
   // END MANUAL EDIT
 
   public static ArchivalSummary ArchivalSummary(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.ArchivalSummary dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.ArchivalSummary dafnyValue
+  ) {
     ArchivalSummary.Builder builder = ArchivalSummary.builder();
     if (dafnyValue.dtor_ArchivalBackupArn().is_Some()) {
-      builder.archivalBackupArn(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_ArchivalBackupArn().dtor_value()));
+      builder.archivalBackupArn(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_ArchivalBackupArn().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ArchivalDateTime().is_Some()) {
-      builder.archivalDateTime(software.amazon.smithy.dafny.conversion.ToNative.Simple.Instant(dafnyValue.dtor_ArchivalDateTime().dtor_value()));
+      builder.archivalDateTime(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.Instant(
+          dafnyValue.dtor_ArchivalDateTime().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ArchivalReason().is_Some()) {
-      builder.archivalReason(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_ArchivalReason().dtor_value()));
+      builder.archivalReason(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_ArchivalReason().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
   public static AttributeAction AttributeAction(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.AttributeAction dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.AttributeAction dafnyValue
+  ) {
     if (dafnyValue.is_ADD()) {
       return AttributeAction.ADD;
     }
@@ -469,54 +482,88 @@ public class ToNative {
   }
 
   public static AttributeDefinition AttributeDefinition(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.AttributeDefinition dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.AttributeDefinition dafnyValue
+  ) {
     AttributeDefinition.Builder builder = AttributeDefinition.builder();
-    builder.attributeName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_AttributeName()));
-    builder.attributeType(ToNative.ScalarAttributeType(dafnyValue.dtor_AttributeType()));
+    builder.attributeName(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_AttributeName()
+      )
+    );
+    builder.attributeType(
+      ToNative.ScalarAttributeType(dafnyValue.dtor_AttributeType())
+    );
     return builder.build();
   }
 
   public static List<AttributeDefinition> AttributeDefinitions(
-      DafnySequence<? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.AttributeDefinition> dafnyValue) {
+    DafnySequence<
+      ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.AttributeDefinition
+    > dafnyValue
+  ) {
     return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToList(
-        dafnyValue, 
-        software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::AttributeDefinition);
+      dafnyValue,
+      software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::AttributeDefinition
+    );
   }
 
   public static Map<String, AttributeValue> AttributeMap(
-      DafnyMap<? extends DafnySequence<? extends Character>, ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.AttributeValue> dafnyValue) {
+    DafnyMap<
+      ? extends DafnySequence<? extends Character>,
+      ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.AttributeValue
+    > dafnyValue
+  ) {
     return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToMap(
-        dafnyValue, 
-        software.amazon.smithy.dafny.conversion.ToNative.Simple::String, 
-        software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::AttributeValue);
+      dafnyValue,
+      software.amazon.smithy.dafny.conversion.ToNative.Simple::String,
+      software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::AttributeValue
+    );
   }
 
   public static List<String> AttributeNameList(
-      DafnySequence<? extends DafnySequence<? extends Character>> dafnyValue) {
+    DafnySequence<? extends DafnySequence<? extends Character>> dafnyValue
+  ) {
     return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToList(
-        dafnyValue, 
-        software.amazon.smithy.dafny.conversion.ToNative.Simple::String);
+      dafnyValue,
+      software.amazon.smithy.dafny.conversion.ToNative.Simple::String
+    );
   }
 
   public static Map<String, AttributeValueUpdate> AttributeUpdates(
-      DafnyMap<? extends DafnySequence<? extends Character>, ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.AttributeValueUpdate> dafnyValue) {
+    DafnyMap<
+      ? extends DafnySequence<? extends Character>,
+      ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.AttributeValueUpdate
+    > dafnyValue
+  ) {
     return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToMap(
-        dafnyValue, 
-        software.amazon.smithy.dafny.conversion.ToNative.Simple::String, 
-        software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::AttributeValueUpdate);
+      dafnyValue,
+      software.amazon.smithy.dafny.conversion.ToNative.Simple::String,
+      software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::AttributeValueUpdate
+    );
   }
 
   public static AttributeValue AttributeValue(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.AttributeValue dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.AttributeValue dafnyValue
+  ) {
     AttributeValue.Builder builder = AttributeValue.builder();
     if (dafnyValue.is_S()) {
-      builder.s(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_S()));
+      builder.s(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_S()
+        )
+      );
     }
     if (dafnyValue.is_N()) {
-      builder.n(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_N()));
+      builder.n(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_N()
+        )
+      );
     }
     if (dafnyValue.is_B()) {
-      builder.b(SdkBytes.fromByteArray((byte[]) (dafnyValue.dtor_B().toRawArray())));
+      builder.b(
+        SdkBytes.fromByteArray((byte[]) (dafnyValue.dtor_B().toRawArray()))
+      );
     }
     if (dafnyValue.is_SS()) {
       builder.ss(ToNative.StringSetAttributeValue(dafnyValue.dtor_SS()));
@@ -543,61 +590,105 @@ public class ToNative {
   }
 
   public static List<AttributeValue> AttributeValueList(
-      DafnySequence<? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.AttributeValue> dafnyValue) {
+    DafnySequence<
+      ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.AttributeValue
+    > dafnyValue
+  ) {
     return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToList(
-        dafnyValue, 
-        software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::AttributeValue);
+      dafnyValue,
+      software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::AttributeValue
+    );
   }
 
   public static AttributeValueUpdate AttributeValueUpdate(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.AttributeValueUpdate dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.AttributeValueUpdate dafnyValue
+  ) {
     AttributeValueUpdate.Builder builder = AttributeValueUpdate.builder();
     if (dafnyValue.dtor_Action().is_Some()) {
-      builder.action(ToNative.AttributeAction(dafnyValue.dtor_Action().dtor_value()));
+      builder.action(
+        ToNative.AttributeAction(dafnyValue.dtor_Action().dtor_value())
+      );
     }
     if (dafnyValue.dtor_Value().is_Some()) {
-      builder.value(ToNative.AttributeValue(dafnyValue.dtor_Value().dtor_value()));
+      builder.value(
+        ToNative.AttributeValue(dafnyValue.dtor_Value().dtor_value())
+      );
     }
     return builder.build();
   }
 
   public static AutoScalingPolicyDescription AutoScalingPolicyDescription(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.AutoScalingPolicyDescription dafnyValue) {
-    AutoScalingPolicyDescription.Builder builder = AutoScalingPolicyDescription.builder();
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.AutoScalingPolicyDescription dafnyValue
+  ) {
+    AutoScalingPolicyDescription.Builder builder =
+      AutoScalingPolicyDescription.builder();
     if (dafnyValue.dtor_PolicyName().is_Some()) {
-      builder.policyName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_PolicyName().dtor_value()));
+      builder.policyName(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_PolicyName().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_TargetTrackingScalingPolicyConfiguration().is_Some()) {
-      builder.targetTrackingScalingPolicyConfiguration(ToNative.AutoScalingTargetTrackingScalingPolicyConfigurationDescription(dafnyValue.dtor_TargetTrackingScalingPolicyConfiguration().dtor_value()));
+      builder.targetTrackingScalingPolicyConfiguration(
+        ToNative.AutoScalingTargetTrackingScalingPolicyConfigurationDescription(
+          dafnyValue
+            .dtor_TargetTrackingScalingPolicyConfiguration()
+            .dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
-  public static List<AutoScalingPolicyDescription> AutoScalingPolicyDescriptionList(
-      DafnySequence<? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.AutoScalingPolicyDescription> dafnyValue) {
+  public static List<
+    AutoScalingPolicyDescription
+  > AutoScalingPolicyDescriptionList(
+    DafnySequence<
+      ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.AutoScalingPolicyDescription
+    > dafnyValue
+  ) {
     return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToList(
-        dafnyValue, 
-        software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::AutoScalingPolicyDescription);
+      dafnyValue,
+      software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::AutoScalingPolicyDescription
+    );
   }
 
   public static AutoScalingPolicyUpdate AutoScalingPolicyUpdate(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.AutoScalingPolicyUpdate dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.AutoScalingPolicyUpdate dafnyValue
+  ) {
     AutoScalingPolicyUpdate.Builder builder = AutoScalingPolicyUpdate.builder();
     if (dafnyValue.dtor_PolicyName().is_Some()) {
-      builder.policyName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_PolicyName().dtor_value()));
+      builder.policyName(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_PolicyName().dtor_value()
+        )
+      );
     }
-    builder.targetTrackingScalingPolicyConfiguration(ToNative.AutoScalingTargetTrackingScalingPolicyConfigurationUpdate(dafnyValue.dtor_TargetTrackingScalingPolicyConfiguration()));
+    builder.targetTrackingScalingPolicyConfiguration(
+      ToNative.AutoScalingTargetTrackingScalingPolicyConfigurationUpdate(
+        dafnyValue.dtor_TargetTrackingScalingPolicyConfiguration()
+      )
+    );
     return builder.build();
   }
 
   public static AutoScalingSettingsDescription AutoScalingSettingsDescription(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.AutoScalingSettingsDescription dafnyValue) {
-    AutoScalingSettingsDescription.Builder builder = AutoScalingSettingsDescription.builder();
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.AutoScalingSettingsDescription dafnyValue
+  ) {
+    AutoScalingSettingsDescription.Builder builder =
+      AutoScalingSettingsDescription.builder();
     if (dafnyValue.dtor_AutoScalingDisabled().is_Some()) {
-      builder.autoScalingDisabled((dafnyValue.dtor_AutoScalingDisabled().dtor_value()));
+      builder.autoScalingDisabled(
+        (dafnyValue.dtor_AutoScalingDisabled().dtor_value())
+      );
     }
     if (dafnyValue.dtor_AutoScalingRoleArn().is_Some()) {
-      builder.autoScalingRoleArn(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_AutoScalingRoleArn().dtor_value()));
+      builder.autoScalingRoleArn(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_AutoScalingRoleArn().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_MaximumUnits().is_Some()) {
       builder.maximumUnits((dafnyValue.dtor_MaximumUnits().dtor_value()));
@@ -606,19 +697,31 @@ public class ToNative {
       builder.minimumUnits((dafnyValue.dtor_MinimumUnits().dtor_value()));
     }
     if (dafnyValue.dtor_ScalingPolicies().is_Some()) {
-      builder.scalingPolicies(ToNative.AutoScalingPolicyDescriptionList(dafnyValue.dtor_ScalingPolicies().dtor_value()));
+      builder.scalingPolicies(
+        ToNative.AutoScalingPolicyDescriptionList(
+          dafnyValue.dtor_ScalingPolicies().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
   public static AutoScalingSettingsUpdate AutoScalingSettingsUpdate(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.AutoScalingSettingsUpdate dafnyValue) {
-    AutoScalingSettingsUpdate.Builder builder = AutoScalingSettingsUpdate.builder();
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.AutoScalingSettingsUpdate dafnyValue
+  ) {
+    AutoScalingSettingsUpdate.Builder builder =
+      AutoScalingSettingsUpdate.builder();
     if (dafnyValue.dtor_AutoScalingDisabled().is_Some()) {
-      builder.autoScalingDisabled((dafnyValue.dtor_AutoScalingDisabled().dtor_value()));
+      builder.autoScalingDisabled(
+        (dafnyValue.dtor_AutoScalingDisabled().dtor_value())
+      );
     }
     if (dafnyValue.dtor_AutoScalingRoleArn().is_Some()) {
-      builder.autoScalingRoleArn(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_AutoScalingRoleArn().dtor_value()));
+      builder.autoScalingRoleArn(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_AutoScalingRoleArn().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_MaximumUnits().is_Some()) {
       builder.maximumUnits((dafnyValue.dtor_MaximumUnits().dtor_value()));
@@ -627,14 +730,20 @@ public class ToNative {
       builder.minimumUnits((dafnyValue.dtor_MinimumUnits().dtor_value()));
     }
     if (dafnyValue.dtor_ScalingPolicyUpdate().is_Some()) {
-      builder.scalingPolicyUpdate(ToNative.AutoScalingPolicyUpdate(dafnyValue.dtor_ScalingPolicyUpdate().dtor_value()));
+      builder.scalingPolicyUpdate(
+        ToNative.AutoScalingPolicyUpdate(
+          dafnyValue.dtor_ScalingPolicyUpdate().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
   public static AutoScalingTargetTrackingScalingPolicyConfigurationDescription AutoScalingTargetTrackingScalingPolicyConfigurationDescription(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.AutoScalingTargetTrackingScalingPolicyConfigurationDescription dafnyValue) {
-    AutoScalingTargetTrackingScalingPolicyConfigurationDescription.Builder builder = AutoScalingTargetTrackingScalingPolicyConfigurationDescription.builder();
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.AutoScalingTargetTrackingScalingPolicyConfigurationDescription dafnyValue
+  ) {
+    AutoScalingTargetTrackingScalingPolicyConfigurationDescription.Builder builder =
+      AutoScalingTargetTrackingScalingPolicyConfigurationDescription.builder();
     if (dafnyValue.dtor_DisableScaleIn().is_Some()) {
       builder.disableScaleIn((dafnyValue.dtor_DisableScaleIn().dtor_value()));
     }
@@ -642,15 +751,23 @@ public class ToNative {
       builder.scaleInCooldown((dafnyValue.dtor_ScaleInCooldown().dtor_value()));
     }
     if (dafnyValue.dtor_ScaleOutCooldown().is_Some()) {
-      builder.scaleOutCooldown((dafnyValue.dtor_ScaleOutCooldown().dtor_value()));
+      builder.scaleOutCooldown(
+        (dafnyValue.dtor_ScaleOutCooldown().dtor_value())
+      );
     }
-    builder.targetValue(software.amazon.smithy.dafny.conversion.ToNative.Simple.Double(dafnyValue.dtor_TargetValue()));
+    builder.targetValue(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.Double(
+        dafnyValue.dtor_TargetValue()
+      )
+    );
     return builder.build();
   }
 
   public static AutoScalingTargetTrackingScalingPolicyConfigurationUpdate AutoScalingTargetTrackingScalingPolicyConfigurationUpdate(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.AutoScalingTargetTrackingScalingPolicyConfigurationUpdate dafnyValue) {
-    AutoScalingTargetTrackingScalingPolicyConfigurationUpdate.Builder builder = AutoScalingTargetTrackingScalingPolicyConfigurationUpdate.builder();
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.AutoScalingTargetTrackingScalingPolicyConfigurationUpdate dafnyValue
+  ) {
+    AutoScalingTargetTrackingScalingPolicyConfigurationUpdate.Builder builder =
+      AutoScalingTargetTrackingScalingPolicyConfigurationUpdate.builder();
     if (dafnyValue.dtor_DisableScaleIn().is_Some()) {
       builder.disableScaleIn((dafnyValue.dtor_DisableScaleIn().dtor_value()));
     }
@@ -658,36 +775,70 @@ public class ToNative {
       builder.scaleInCooldown((dafnyValue.dtor_ScaleInCooldown().dtor_value()));
     }
     if (dafnyValue.dtor_ScaleOutCooldown().is_Some()) {
-      builder.scaleOutCooldown((dafnyValue.dtor_ScaleOutCooldown().dtor_value()));
+      builder.scaleOutCooldown(
+        (dafnyValue.dtor_ScaleOutCooldown().dtor_value())
+      );
     }
-    builder.targetValue(software.amazon.smithy.dafny.conversion.ToNative.Simple.Double(dafnyValue.dtor_TargetValue()));
+    builder.targetValue(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.Double(
+        dafnyValue.dtor_TargetValue()
+      )
+    );
     return builder.build();
   }
 
   public static BackupDescription BackupDescription(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.BackupDescription dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.BackupDescription dafnyValue
+  ) {
     BackupDescription.Builder builder = BackupDescription.builder();
     if (dafnyValue.dtor_BackupDetails().is_Some()) {
-      builder.backupDetails(ToNative.BackupDetails(dafnyValue.dtor_BackupDetails().dtor_value()));
+      builder.backupDetails(
+        ToNative.BackupDetails(dafnyValue.dtor_BackupDetails().dtor_value())
+      );
     }
     if (dafnyValue.dtor_SourceTableDetails().is_Some()) {
-      builder.sourceTableDetails(ToNative.SourceTableDetails(dafnyValue.dtor_SourceTableDetails().dtor_value()));
+      builder.sourceTableDetails(
+        ToNative.SourceTableDetails(
+          dafnyValue.dtor_SourceTableDetails().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_SourceTableFeatureDetails().is_Some()) {
-      builder.sourceTableFeatureDetails(ToNative.SourceTableFeatureDetails(dafnyValue.dtor_SourceTableFeatureDetails().dtor_value()));
+      builder.sourceTableFeatureDetails(
+        ToNative.SourceTableFeatureDetails(
+          dafnyValue.dtor_SourceTableFeatureDetails().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
   public static BackupDetails BackupDetails(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.BackupDetails dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.BackupDetails dafnyValue
+  ) {
     BackupDetails.Builder builder = BackupDetails.builder();
-    builder.backupArn(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_BackupArn()));
-    builder.backupCreationDateTime(software.amazon.smithy.dafny.conversion.ToNative.Simple.Instant(dafnyValue.dtor_BackupCreationDateTime()));
+    builder.backupArn(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_BackupArn()
+      )
+    );
+    builder.backupCreationDateTime(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.Instant(
+        dafnyValue.dtor_BackupCreationDateTime()
+      )
+    );
     if (dafnyValue.dtor_BackupExpiryDateTime().is_Some()) {
-      builder.backupExpiryDateTime(software.amazon.smithy.dafny.conversion.ToNative.Simple.Instant(dafnyValue.dtor_BackupExpiryDateTime().dtor_value()));
+      builder.backupExpiryDateTime(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.Instant(
+          dafnyValue.dtor_BackupExpiryDateTime().dtor_value()
+        )
+      );
     }
-    builder.backupName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_BackupName()));
+    builder.backupName(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_BackupName()
+      )
+    );
     if (dafnyValue.dtor_BackupSizeBytes().is_Some()) {
       builder.backupSizeBytes((dafnyValue.dtor_BackupSizeBytes().dtor_value()));
     }
@@ -697,7 +848,8 @@ public class ToNative {
   }
 
   public static BackupStatus BackupStatus(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.BackupStatus dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.BackupStatus dafnyValue
+  ) {
     if (dafnyValue.is_CREATING()) {
       return BackupStatus.CREATING;
     }
@@ -711,50 +863,88 @@ public class ToNative {
   }
 
   public static List<BackupSummary> BackupSummaries(
-      DafnySequence<? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.BackupSummary> dafnyValue) {
+    DafnySequence<
+      ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.BackupSummary
+    > dafnyValue
+  ) {
     return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToList(
-        dafnyValue, 
-        software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::BackupSummary);
+      dafnyValue,
+      software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::BackupSummary
+    );
   }
 
   public static BackupSummary BackupSummary(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.BackupSummary dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.BackupSummary dafnyValue
+  ) {
     BackupSummary.Builder builder = BackupSummary.builder();
     if (dafnyValue.dtor_BackupArn().is_Some()) {
-      builder.backupArn(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_BackupArn().dtor_value()));
+      builder.backupArn(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_BackupArn().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_BackupCreationDateTime().is_Some()) {
-      builder.backupCreationDateTime(software.amazon.smithy.dafny.conversion.ToNative.Simple.Instant(dafnyValue.dtor_BackupCreationDateTime().dtor_value()));
+      builder.backupCreationDateTime(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.Instant(
+          dafnyValue.dtor_BackupCreationDateTime().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_BackupExpiryDateTime().is_Some()) {
-      builder.backupExpiryDateTime(software.amazon.smithy.dafny.conversion.ToNative.Simple.Instant(dafnyValue.dtor_BackupExpiryDateTime().dtor_value()));
+      builder.backupExpiryDateTime(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.Instant(
+          dafnyValue.dtor_BackupExpiryDateTime().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_BackupName().is_Some()) {
-      builder.backupName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_BackupName().dtor_value()));
+      builder.backupName(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_BackupName().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_BackupSizeBytes().is_Some()) {
       builder.backupSizeBytes((dafnyValue.dtor_BackupSizeBytes().dtor_value()));
     }
     if (dafnyValue.dtor_BackupStatus().is_Some()) {
-      builder.backupStatus(ToNative.BackupStatus(dafnyValue.dtor_BackupStatus().dtor_value()));
+      builder.backupStatus(
+        ToNative.BackupStatus(dafnyValue.dtor_BackupStatus().dtor_value())
+      );
     }
     if (dafnyValue.dtor_BackupType().is_Some()) {
-      builder.backupType(ToNative.BackupType(dafnyValue.dtor_BackupType().dtor_value()));
+      builder.backupType(
+        ToNative.BackupType(dafnyValue.dtor_BackupType().dtor_value())
+      );
     }
     if (dafnyValue.dtor_TableArn().is_Some()) {
-      builder.tableArn(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_TableArn().dtor_value()));
+      builder.tableArn(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_TableArn().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_TableId().is_Some()) {
-      builder.tableId(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_TableId().dtor_value()));
+      builder.tableId(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_TableId().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_TableName().is_Some()) {
-      builder.tableName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_TableName().dtor_value()));
+      builder.tableName(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_TableName().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
   public static BackupType BackupType(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.BackupType dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.BackupType dafnyValue
+  ) {
     if (dafnyValue.is_USER()) {
       return BackupType.USER;
     }
@@ -768,7 +958,8 @@ public class ToNative {
   }
 
   public static BackupTypeFilter BackupTypeFilter(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.BackupTypeFilter dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.BackupTypeFilter dafnyValue
+  ) {
     if (dafnyValue.is_USER()) {
       return BackupTypeFilter.USER;
     }
@@ -785,80 +976,144 @@ public class ToNative {
   }
 
   public static BatchExecuteStatementRequest BatchExecuteStatementInput(
-      BatchExecuteStatementInput dafnyValue) {
-    BatchExecuteStatementRequest.Builder builder = BatchExecuteStatementRequest.builder();
+    BatchExecuteStatementInput dafnyValue
+  ) {
+    BatchExecuteStatementRequest.Builder builder =
+      BatchExecuteStatementRequest.builder();
     if (dafnyValue.dtor_ReturnConsumedCapacity().is_Some()) {
-      builder.returnConsumedCapacity(ToNative.ReturnConsumedCapacity(dafnyValue.dtor_ReturnConsumedCapacity().dtor_value()));
+      builder.returnConsumedCapacity(
+        ToNative.ReturnConsumedCapacity(
+          dafnyValue.dtor_ReturnConsumedCapacity().dtor_value()
+        )
+      );
     }
-    builder.statements(ToNative.PartiQLBatchRequest(dafnyValue.dtor_Statements()));
+    builder.statements(
+      ToNative.PartiQLBatchRequest(dafnyValue.dtor_Statements())
+    );
     return builder.build();
   }
 
   public static BatchExecuteStatementResponse BatchExecuteStatementOutput(
-      BatchExecuteStatementOutput dafnyValue) {
-    BatchExecuteStatementResponse.Builder builder = BatchExecuteStatementResponse.builder();
+    BatchExecuteStatementOutput dafnyValue
+  ) {
+    BatchExecuteStatementResponse.Builder builder =
+      BatchExecuteStatementResponse.builder();
     if (dafnyValue.dtor_ConsumedCapacity().is_Some()) {
-      builder.consumedCapacity(ToNative.ConsumedCapacityMultiple(dafnyValue.dtor_ConsumedCapacity().dtor_value()));
+      builder.consumedCapacity(
+        ToNative.ConsumedCapacityMultiple(
+          dafnyValue.dtor_ConsumedCapacity().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_Responses().is_Some()) {
-      builder.responses(ToNative.PartiQLBatchResponse(dafnyValue.dtor_Responses().dtor_value()));
+      builder.responses(
+        ToNative.PartiQLBatchResponse(dafnyValue.dtor_Responses().dtor_value())
+      );
     }
     return builder.build();
   }
 
-  public static BatchGetItemRequest BatchGetItemInput(BatchGetItemInput dafnyValue) {
+  public static BatchGetItemRequest BatchGetItemInput(
+    BatchGetItemInput dafnyValue
+  ) {
     BatchGetItemRequest.Builder builder = BatchGetItemRequest.builder();
-    builder.requestItems(ToNative.BatchGetRequestMap(dafnyValue.dtor_RequestItems()));
+    builder.requestItems(
+      ToNative.BatchGetRequestMap(dafnyValue.dtor_RequestItems())
+    );
     if (dafnyValue.dtor_ReturnConsumedCapacity().is_Some()) {
-      builder.returnConsumedCapacity(ToNative.ReturnConsumedCapacity(dafnyValue.dtor_ReturnConsumedCapacity().dtor_value()));
+      builder.returnConsumedCapacity(
+        ToNative.ReturnConsumedCapacity(
+          dafnyValue.dtor_ReturnConsumedCapacity().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
-  public static BatchGetItemResponse BatchGetItemOutput(BatchGetItemOutput dafnyValue) {
+  public static BatchGetItemResponse BatchGetItemOutput(
+    BatchGetItemOutput dafnyValue
+  ) {
     BatchGetItemResponse.Builder builder = BatchGetItemResponse.builder();
     if (dafnyValue.dtor_ConsumedCapacity().is_Some()) {
-      builder.consumedCapacity(ToNative.ConsumedCapacityMultiple(dafnyValue.dtor_ConsumedCapacity().dtor_value()));
+      builder.consumedCapacity(
+        ToNative.ConsumedCapacityMultiple(
+          dafnyValue.dtor_ConsumedCapacity().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_Responses().is_Some()) {
-      builder.responses(ToNative.BatchGetResponseMap(dafnyValue.dtor_Responses().dtor_value()));
+      builder.responses(
+        ToNative.BatchGetResponseMap(dafnyValue.dtor_Responses().dtor_value())
+      );
     }
     if (dafnyValue.dtor_UnprocessedKeys().is_Some()) {
-      builder.unprocessedKeys(ToNative.BatchGetRequestMap(dafnyValue.dtor_UnprocessedKeys().dtor_value()));
+      builder.unprocessedKeys(
+        ToNative.BatchGetRequestMap(
+          dafnyValue.dtor_UnprocessedKeys().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
   public static Map<String, KeysAndAttributes> BatchGetRequestMap(
-      DafnyMap<? extends DafnySequence<? extends Character>, ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.KeysAndAttributes> dafnyValue) {
+    DafnyMap<
+      ? extends DafnySequence<? extends Character>,
+      ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.KeysAndAttributes
+    > dafnyValue
+  ) {
     return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToMap(
-        dafnyValue, 
-        software.amazon.smithy.dafny.conversion.ToNative.Simple::String, 
-        software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::KeysAndAttributes);
+      dafnyValue,
+      software.amazon.smithy.dafny.conversion.ToNative.Simple::String,
+      software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::KeysAndAttributes
+    );
   }
 
-  public static Map<String, List<Map<String, AttributeValue>>> BatchGetResponseMap(
-      DafnyMap<? extends DafnySequence<? extends Character>, ? extends DafnySequence<? extends DafnyMap<? extends DafnySequence<? extends Character>, ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.AttributeValue>>> dafnyValue) {
+  public static Map<
+    String,
+    List<Map<String, AttributeValue>>
+  > BatchGetResponseMap(
+    DafnyMap<
+      ? extends DafnySequence<? extends Character>,
+      ? extends DafnySequence<
+        ? extends DafnyMap<
+          ? extends DafnySequence<? extends Character>,
+          ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.AttributeValue
+        >
+      >
+    > dafnyValue
+  ) {
     return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToMap(
-        dafnyValue, 
-        software.amazon.smithy.dafny.conversion.ToNative.Simple::String, 
-        software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::ItemList);
+      dafnyValue,
+      software.amazon.smithy.dafny.conversion.ToNative.Simple::String,
+      software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::ItemList
+    );
   }
 
   public static BatchStatementError BatchStatementError(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.BatchStatementError dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.BatchStatementError dafnyValue
+  ) {
     BatchStatementError.Builder builder = BatchStatementError.builder();
     if (dafnyValue.dtor_Code().is_Some()) {
-      builder.code(ToNative.BatchStatementErrorCodeEnum(dafnyValue.dtor_Code().dtor_value()));
+      builder.code(
+        ToNative.BatchStatementErrorCodeEnum(
+          dafnyValue.dtor_Code().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_Message().is_Some()) {
-      builder.message(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_Message().dtor_value()));
+      builder.message(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_Message().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
   public static BatchStatementErrorCodeEnum BatchStatementErrorCodeEnum(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.BatchStatementErrorCodeEnum dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.BatchStatementErrorCodeEnum dafnyValue
+  ) {
     if (dafnyValue.is_ConditionalCheckFailed()) {
       return BatchStatementErrorCodeEnum.CONDITIONAL_CHECK_FAILED;
     }
@@ -896,69 +1151,119 @@ public class ToNative {
   }
 
   public static BatchStatementRequest BatchStatementRequest(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.BatchStatementRequest dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.BatchStatementRequest dafnyValue
+  ) {
     BatchStatementRequest.Builder builder = BatchStatementRequest.builder();
     if (dafnyValue.dtor_ConsistentRead().is_Some()) {
       builder.consistentRead((dafnyValue.dtor_ConsistentRead().dtor_value()));
     }
     if (dafnyValue.dtor_Parameters().is_Some()) {
-      builder.parameters(ToNative.PreparedStatementParameters(dafnyValue.dtor_Parameters().dtor_value()));
+      builder.parameters(
+        ToNative.PreparedStatementParameters(
+          dafnyValue.dtor_Parameters().dtor_value()
+        )
+      );
     }
-    builder.statement(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_Statement()));
+    builder.statement(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_Statement()
+      )
+    );
     return builder.build();
   }
 
   public static BatchStatementResponse BatchStatementResponse(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.BatchStatementResponse dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.BatchStatementResponse dafnyValue
+  ) {
     BatchStatementResponse.Builder builder = BatchStatementResponse.builder();
     if (dafnyValue.dtor_Error().is_Some()) {
-      builder.error(ToNative.BatchStatementError(dafnyValue.dtor_Error().dtor_value()));
+      builder.error(
+        ToNative.BatchStatementError(dafnyValue.dtor_Error().dtor_value())
+      );
     }
     if (dafnyValue.dtor_Item().is_Some()) {
       builder.item(ToNative.AttributeMap(dafnyValue.dtor_Item().dtor_value()));
     }
     if (dafnyValue.dtor_TableName().is_Some()) {
-      builder.tableName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_TableName().dtor_value()));
+      builder.tableName(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_TableName().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
-  public static BatchWriteItemRequest BatchWriteItemInput(BatchWriteItemInput dafnyValue) {
+  public static BatchWriteItemRequest BatchWriteItemInput(
+    BatchWriteItemInput dafnyValue
+  ) {
     BatchWriteItemRequest.Builder builder = BatchWriteItemRequest.builder();
-    builder.requestItems(ToNative.BatchWriteItemRequestMap(dafnyValue.dtor_RequestItems()));
+    builder.requestItems(
+      ToNative.BatchWriteItemRequestMap(dafnyValue.dtor_RequestItems())
+    );
     if (dafnyValue.dtor_ReturnConsumedCapacity().is_Some()) {
-      builder.returnConsumedCapacity(ToNative.ReturnConsumedCapacity(dafnyValue.dtor_ReturnConsumedCapacity().dtor_value()));
+      builder.returnConsumedCapacity(
+        ToNative.ReturnConsumedCapacity(
+          dafnyValue.dtor_ReturnConsumedCapacity().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ReturnItemCollectionMetrics().is_Some()) {
-      builder.returnItemCollectionMetrics(ToNative.ReturnItemCollectionMetrics(dafnyValue.dtor_ReturnItemCollectionMetrics().dtor_value()));
+      builder.returnItemCollectionMetrics(
+        ToNative.ReturnItemCollectionMetrics(
+          dafnyValue.dtor_ReturnItemCollectionMetrics().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
-  public static BatchWriteItemResponse BatchWriteItemOutput(BatchWriteItemOutput dafnyValue) {
+  public static BatchWriteItemResponse BatchWriteItemOutput(
+    BatchWriteItemOutput dafnyValue
+  ) {
     BatchWriteItemResponse.Builder builder = BatchWriteItemResponse.builder();
     if (dafnyValue.dtor_ConsumedCapacity().is_Some()) {
-      builder.consumedCapacity(ToNative.ConsumedCapacityMultiple(dafnyValue.dtor_ConsumedCapacity().dtor_value()));
+      builder.consumedCapacity(
+        ToNative.ConsumedCapacityMultiple(
+          dafnyValue.dtor_ConsumedCapacity().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ItemCollectionMetrics().is_Some()) {
-      builder.itemCollectionMetrics(ToNative.ItemCollectionMetricsPerTable(dafnyValue.dtor_ItemCollectionMetrics().dtor_value()));
+      builder.itemCollectionMetrics(
+        ToNative.ItemCollectionMetricsPerTable(
+          dafnyValue.dtor_ItemCollectionMetrics().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_UnprocessedItems().is_Some()) {
-      builder.unprocessedItems(ToNative.BatchWriteItemRequestMap(dafnyValue.dtor_UnprocessedItems().dtor_value()));
+      builder.unprocessedItems(
+        ToNative.BatchWriteItemRequestMap(
+          dafnyValue.dtor_UnprocessedItems().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
   public static Map<String, List<WriteRequest>> BatchWriteItemRequestMap(
-      DafnyMap<? extends DafnySequence<? extends Character>, ? extends DafnySequence<? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.WriteRequest>> dafnyValue) {
+    DafnyMap<
+      ? extends DafnySequence<? extends Character>,
+      ? extends DafnySequence<
+        ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.WriteRequest
+      >
+    > dafnyValue
+  ) {
     return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToMap(
-        dafnyValue, 
-        software.amazon.smithy.dafny.conversion.ToNative.Simple::String, 
-        software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::WriteRequests);
+      dafnyValue,
+      software.amazon.smithy.dafny.conversion.ToNative.Simple::String,
+      software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::WriteRequests
+    );
   }
 
   public static BillingMode BillingMode(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.BillingMode dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.BillingMode dafnyValue
+  ) {
     if (dafnyValue.is_PROVISIONED()) {
       return BillingMode.PROVISIONED;
     }
@@ -969,67 +1274,106 @@ public class ToNative {
   }
 
   public static BillingModeSummary BillingModeSummary(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.BillingModeSummary dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.BillingModeSummary dafnyValue
+  ) {
     BillingModeSummary.Builder builder = BillingModeSummary.builder();
     if (dafnyValue.dtor_BillingMode().is_Some()) {
-      builder.billingMode(ToNative.BillingMode(dafnyValue.dtor_BillingMode().dtor_value()));
+      builder.billingMode(
+        ToNative.BillingMode(dafnyValue.dtor_BillingMode().dtor_value())
+      );
     }
     if (dafnyValue.dtor_LastUpdateToPayPerRequestDateTime().is_Some()) {
-      builder.lastUpdateToPayPerRequestDateTime(software.amazon.smithy.dafny.conversion.ToNative.Simple.Instant(dafnyValue.dtor_LastUpdateToPayPerRequestDateTime().dtor_value()));
+      builder.lastUpdateToPayPerRequestDateTime(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.Instant(
+          dafnyValue.dtor_LastUpdateToPayPerRequestDateTime().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
   public static List<SdkBytes> BinarySetAttributeValue(
-      DafnySequence<? extends DafnySequence<? extends Byte>> dafnyValue) {
-        List<SdkBytes> returnList = new java.util.ArrayList<SdkBytes>();
+    DafnySequence<? extends DafnySequence<? extends Byte>> dafnyValue
+  ) {
+    List<SdkBytes> returnList = new java.util.ArrayList<SdkBytes>();
 
-        dafnyValue.forEach((value) -> {
-            returnList.add(software.amazon.awssdk.core.SdkBytes.fromByteArray((byte[]) value.toRawArray()));
-        });
+    dafnyValue.forEach(value -> {
+      returnList.add(
+        software.amazon.awssdk.core.SdkBytes.fromByteArray(
+          (byte[]) value.toRawArray()
+        )
+      );
+    });
 
-        return returnList;
+    return returnList;
   }
 
   public static CancellationReason CancellationReason(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.CancellationReason dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.CancellationReason dafnyValue
+  ) {
     CancellationReason.Builder builder = CancellationReason.builder();
     if (dafnyValue.dtor_Code().is_Some()) {
-      builder.code(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_Code().dtor_value()));
+      builder.code(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_Code().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_Item().is_Some()) {
       builder.item(ToNative.AttributeMap(dafnyValue.dtor_Item().dtor_value()));
     }
     if (dafnyValue.dtor_Message().is_Some()) {
-      builder.message(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_Message().dtor_value()));
+      builder.message(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_Message().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
   public static List<CancellationReason> CancellationReasonList(
-      DafnySequence<? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.CancellationReason> dafnyValue) {
+    DafnySequence<
+      ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.CancellationReason
+    > dafnyValue
+  ) {
     return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToList(
-        dafnyValue, 
-        software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::CancellationReason);
+      dafnyValue,
+      software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::CancellationReason
+    );
   }
 
   public static Capacity Capacity(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.Capacity dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.Capacity dafnyValue
+  ) {
     Capacity.Builder builder = Capacity.builder();
     if (dafnyValue.dtor_CapacityUnits().is_Some()) {
-      builder.capacityUnits(software.amazon.smithy.dafny.conversion.ToNative.Simple.Double(dafnyValue.dtor_CapacityUnits().dtor_value()));
+      builder.capacityUnits(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.Double(
+          dafnyValue.dtor_CapacityUnits().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ReadCapacityUnits().is_Some()) {
-      builder.readCapacityUnits(software.amazon.smithy.dafny.conversion.ToNative.Simple.Double(dafnyValue.dtor_ReadCapacityUnits().dtor_value()));
+      builder.readCapacityUnits(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.Double(
+          dafnyValue.dtor_ReadCapacityUnits().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_WriteCapacityUnits().is_Some()) {
-      builder.writeCapacityUnits(software.amazon.smithy.dafny.conversion.ToNative.Simple.Double(dafnyValue.dtor_WriteCapacityUnits().dtor_value()));
+      builder.writeCapacityUnits(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.Double(
+          dafnyValue.dtor_WriteCapacityUnits().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
   public static ComparisonOperator ComparisonOperator(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.ComparisonOperator dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.ComparisonOperator dafnyValue
+  ) {
     if (dafnyValue.is_EQ()) {
       return ComparisonOperator.EQ;
     }
@@ -1073,17 +1417,25 @@ public class ToNative {
   }
 
   public static Condition Condition(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.Condition dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.Condition dafnyValue
+  ) {
     Condition.Builder builder = Condition.builder();
     if (dafnyValue.dtor_AttributeValueList().is_Some()) {
-      builder.attributeValueList(ToNative.AttributeValueList(dafnyValue.dtor_AttributeValueList().dtor_value()));
+      builder.attributeValueList(
+        ToNative.AttributeValueList(
+          dafnyValue.dtor_AttributeValueList().dtor_value()
+        )
+      );
     }
-    builder.comparisonOperator(ToNative.ComparisonOperator(dafnyValue.dtor_ComparisonOperator()));
+    builder.comparisonOperator(
+      ToNative.ComparisonOperator(dafnyValue.dtor_ComparisonOperator())
+    );
     return builder.build();
   }
 
   public static ConditionalOperator ConditionalOperator(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.ConditionalOperator dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.ConditionalOperator dafnyValue
+  ) {
     if (dafnyValue.is_AND()) {
       return ConditionalOperator.AND;
     }
@@ -1094,69 +1446,130 @@ public class ToNative {
   }
 
   public static ConditionCheck ConditionCheck(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.ConditionCheck dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.ConditionCheck dafnyValue
+  ) {
     ConditionCheck.Builder builder = ConditionCheck.builder();
-    builder.conditionExpression(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_ConditionExpression()));
+    builder.conditionExpression(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_ConditionExpression()
+      )
+    );
     if (dafnyValue.dtor_ExpressionAttributeNames().is_Some()) {
-      builder.expressionAttributeNames(ToNative.ExpressionAttributeNameMap(dafnyValue.dtor_ExpressionAttributeNames().dtor_value()));
+      builder.expressionAttributeNames(
+        ToNative.ExpressionAttributeNameMap(
+          dafnyValue.dtor_ExpressionAttributeNames().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ExpressionAttributeValues().is_Some()) {
-      builder.expressionAttributeValues(ToNative.ExpressionAttributeValueMap(dafnyValue.dtor_ExpressionAttributeValues().dtor_value()));
+      builder.expressionAttributeValues(
+        ToNative.ExpressionAttributeValueMap(
+          dafnyValue.dtor_ExpressionAttributeValues().dtor_value()
+        )
+      );
     }
     builder.key(ToNative.Key(dafnyValue.dtor_Key()));
     if (dafnyValue.dtor_ReturnValuesOnConditionCheckFailure().is_Some()) {
-      builder.returnValuesOnConditionCheckFailure(ToNative.ReturnValuesOnConditionCheckFailure(dafnyValue.dtor_ReturnValuesOnConditionCheckFailure().dtor_value()));
+      builder.returnValuesOnConditionCheckFailure(
+        ToNative.ReturnValuesOnConditionCheckFailure(
+          dafnyValue.dtor_ReturnValuesOnConditionCheckFailure().dtor_value()
+        )
+      );
     }
-    builder.tableName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_TableName()));
+    builder.tableName(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_TableName()
+      )
+    );
     return builder.build();
   }
 
   public static ConsumedCapacity ConsumedCapacity(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.ConsumedCapacity dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.ConsumedCapacity dafnyValue
+  ) {
     ConsumedCapacity.Builder builder = ConsumedCapacity.builder();
     if (dafnyValue.dtor_CapacityUnits().is_Some()) {
-      builder.capacityUnits(software.amazon.smithy.dafny.conversion.ToNative.Simple.Double(dafnyValue.dtor_CapacityUnits().dtor_value()));
+      builder.capacityUnits(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.Double(
+          dafnyValue.dtor_CapacityUnits().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_GlobalSecondaryIndexes().is_Some()) {
-      builder.globalSecondaryIndexes(ToNative.SecondaryIndexesCapacityMap(dafnyValue.dtor_GlobalSecondaryIndexes().dtor_value()));
+      builder.globalSecondaryIndexes(
+        ToNative.SecondaryIndexesCapacityMap(
+          dafnyValue.dtor_GlobalSecondaryIndexes().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_LocalSecondaryIndexes().is_Some()) {
-      builder.localSecondaryIndexes(ToNative.SecondaryIndexesCapacityMap(dafnyValue.dtor_LocalSecondaryIndexes().dtor_value()));
+      builder.localSecondaryIndexes(
+        ToNative.SecondaryIndexesCapacityMap(
+          dafnyValue.dtor_LocalSecondaryIndexes().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ReadCapacityUnits().is_Some()) {
-      builder.readCapacityUnits(software.amazon.smithy.dafny.conversion.ToNative.Simple.Double(dafnyValue.dtor_ReadCapacityUnits().dtor_value()));
+      builder.readCapacityUnits(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.Double(
+          dafnyValue.dtor_ReadCapacityUnits().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_Table().is_Some()) {
       builder.table(ToNative.Capacity(dafnyValue.dtor_Table().dtor_value()));
     }
     if (dafnyValue.dtor_TableName().is_Some()) {
-      builder.tableName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_TableName().dtor_value()));
+      builder.tableName(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_TableName().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_WriteCapacityUnits().is_Some()) {
-      builder.writeCapacityUnits(software.amazon.smithy.dafny.conversion.ToNative.Simple.Double(dafnyValue.dtor_WriteCapacityUnits().dtor_value()));
+      builder.writeCapacityUnits(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.Double(
+          dafnyValue.dtor_WriteCapacityUnits().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
   public static List<ConsumedCapacity> ConsumedCapacityMultiple(
-      DafnySequence<? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.ConsumedCapacity> dafnyValue) {
+    DafnySequence<
+      ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.ConsumedCapacity
+    > dafnyValue
+  ) {
     return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToList(
-        dafnyValue, 
-        software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::ConsumedCapacity);
+      dafnyValue,
+      software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::ConsumedCapacity
+    );
   }
 
   public static ContinuousBackupsDescription ContinuousBackupsDescription(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.ContinuousBackupsDescription dafnyValue) {
-    ContinuousBackupsDescription.Builder builder = ContinuousBackupsDescription.builder();
-    builder.continuousBackupsStatus(ToNative.ContinuousBackupsStatus(dafnyValue.dtor_ContinuousBackupsStatus()));
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.ContinuousBackupsDescription dafnyValue
+  ) {
+    ContinuousBackupsDescription.Builder builder =
+      ContinuousBackupsDescription.builder();
+    builder.continuousBackupsStatus(
+      ToNative.ContinuousBackupsStatus(
+        dafnyValue.dtor_ContinuousBackupsStatus()
+      )
+    );
     if (dafnyValue.dtor_PointInTimeRecoveryDescription().is_Some()) {
-      builder.pointInTimeRecoveryDescription(ToNative.PointInTimeRecoveryDescription(dafnyValue.dtor_PointInTimeRecoveryDescription().dtor_value()));
+      builder.pointInTimeRecoveryDescription(
+        ToNative.PointInTimeRecoveryDescription(
+          dafnyValue.dtor_PointInTimeRecoveryDescription().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
   public static ContinuousBackupsStatus ContinuousBackupsStatus(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.ContinuousBackupsStatus dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.ContinuousBackupsStatus dafnyValue
+  ) {
     if (dafnyValue.is_ENABLED()) {
       return ContinuousBackupsStatus.ENABLED;
     }
@@ -1167,7 +1580,8 @@ public class ToNative {
   }
 
   public static ContributorInsightsAction ContributorInsightsAction(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.ContributorInsightsAction dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.ContributorInsightsAction dafnyValue
+  ) {
     if (dafnyValue.is_ENABLE()) {
       return ContributorInsightsAction.ENABLE;
     }
@@ -1178,14 +1592,17 @@ public class ToNative {
   }
 
   public static List<String> ContributorInsightsRuleList(
-      DafnySequence<? extends DafnySequence<? extends Character>> dafnyValue) {
+    DafnySequence<? extends DafnySequence<? extends Character>> dafnyValue
+  ) {
     return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToList(
-        dafnyValue, 
-        software.amazon.smithy.dafny.conversion.ToNative.Simple::String);
+      dafnyValue,
+      software.amazon.smithy.dafny.conversion.ToNative.Simple::String
+    );
   }
 
   public static ContributorInsightsStatus ContributorInsightsStatus(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.ContributorInsightsStatus dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.ContributorInsightsStatus dafnyValue
+  ) {
     if (dafnyValue.is_ENABLING()) {
       return ContributorInsightsStatus.ENABLING;
     }
@@ -1205,501 +1622,913 @@ public class ToNative {
   }
 
   public static List<ContributorInsightsSummary> ContributorInsightsSummaries(
-      DafnySequence<? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.ContributorInsightsSummary> dafnyValue) {
+    DafnySequence<
+      ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.ContributorInsightsSummary
+    > dafnyValue
+  ) {
     return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToList(
-        dafnyValue, 
-        software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::ContributorInsightsSummary);
+      dafnyValue,
+      software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::ContributorInsightsSummary
+    );
   }
 
   public static ContributorInsightsSummary ContributorInsightsSummary(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.ContributorInsightsSummary dafnyValue) {
-    ContributorInsightsSummary.Builder builder = ContributorInsightsSummary.builder();
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.ContributorInsightsSummary dafnyValue
+  ) {
+    ContributorInsightsSummary.Builder builder =
+      ContributorInsightsSummary.builder();
     if (dafnyValue.dtor_ContributorInsightsStatus().is_Some()) {
-      builder.contributorInsightsStatus(ToNative.ContributorInsightsStatus(dafnyValue.dtor_ContributorInsightsStatus().dtor_value()));
+      builder.contributorInsightsStatus(
+        ToNative.ContributorInsightsStatus(
+          dafnyValue.dtor_ContributorInsightsStatus().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_IndexName().is_Some()) {
-      builder.indexName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_IndexName().dtor_value()));
+      builder.indexName(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_IndexName().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_TableName().is_Some()) {
-      builder.tableName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_TableName().dtor_value()));
+      builder.tableName(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_TableName().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
-  public static CreateBackupRequest CreateBackupInput(CreateBackupInput dafnyValue) {
+  public static CreateBackupRequest CreateBackupInput(
+    CreateBackupInput dafnyValue
+  ) {
     CreateBackupRequest.Builder builder = CreateBackupRequest.builder();
-    builder.backupName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_BackupName()));
-    builder.tableName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_TableName()));
+    builder.backupName(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_BackupName()
+      )
+    );
+    builder.tableName(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_TableName()
+      )
+    );
     return builder.build();
   }
 
-  public static CreateBackupResponse CreateBackupOutput(CreateBackupOutput dafnyValue) {
+  public static CreateBackupResponse CreateBackupOutput(
+    CreateBackupOutput dafnyValue
+  ) {
     CreateBackupResponse.Builder builder = CreateBackupResponse.builder();
     if (dafnyValue.dtor_BackupDetails().is_Some()) {
-      builder.backupDetails(ToNative.BackupDetails(dafnyValue.dtor_BackupDetails().dtor_value()));
+      builder.backupDetails(
+        ToNative.BackupDetails(dafnyValue.dtor_BackupDetails().dtor_value())
+      );
     }
     return builder.build();
   }
 
   public static CreateGlobalSecondaryIndexAction CreateGlobalSecondaryIndexAction(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.CreateGlobalSecondaryIndexAction dafnyValue) {
-    CreateGlobalSecondaryIndexAction.Builder builder = CreateGlobalSecondaryIndexAction.builder();
-    builder.indexName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_IndexName()));
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.CreateGlobalSecondaryIndexAction dafnyValue
+  ) {
+    CreateGlobalSecondaryIndexAction.Builder builder =
+      CreateGlobalSecondaryIndexAction.builder();
+    builder.indexName(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_IndexName()
+      )
+    );
     builder.keySchema(ToNative.KeySchema(dafnyValue.dtor_KeySchema()));
     builder.projection(ToNative.Projection(dafnyValue.dtor_Projection()));
     if (dafnyValue.dtor_ProvisionedThroughput().is_Some()) {
-      builder.provisionedThroughput(ToNative.ProvisionedThroughput(dafnyValue.dtor_ProvisionedThroughput().dtor_value()));
+      builder.provisionedThroughput(
+        ToNative.ProvisionedThroughput(
+          dafnyValue.dtor_ProvisionedThroughput().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
-  public static CreateGlobalTableRequest CreateGlobalTableInput(CreateGlobalTableInput dafnyValue) {
-    CreateGlobalTableRequest.Builder builder = CreateGlobalTableRequest.builder();
-    builder.globalTableName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_GlobalTableName()));
-    builder.replicationGroup(ToNative.ReplicaList(dafnyValue.dtor_ReplicationGroup()));
+  public static CreateGlobalTableRequest CreateGlobalTableInput(
+    CreateGlobalTableInput dafnyValue
+  ) {
+    CreateGlobalTableRequest.Builder builder =
+      CreateGlobalTableRequest.builder();
+    builder.globalTableName(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_GlobalTableName()
+      )
+    );
+    builder.replicationGroup(
+      ToNative.ReplicaList(dafnyValue.dtor_ReplicationGroup())
+    );
     return builder.build();
   }
 
   public static CreateGlobalTableResponse CreateGlobalTableOutput(
-      CreateGlobalTableOutput dafnyValue) {
-    CreateGlobalTableResponse.Builder builder = CreateGlobalTableResponse.builder();
+    CreateGlobalTableOutput dafnyValue
+  ) {
+    CreateGlobalTableResponse.Builder builder =
+      CreateGlobalTableResponse.builder();
     if (dafnyValue.dtor_GlobalTableDescription().is_Some()) {
-      builder.globalTableDescription(ToNative.GlobalTableDescription(dafnyValue.dtor_GlobalTableDescription().dtor_value()));
+      builder.globalTableDescription(
+        ToNative.GlobalTableDescription(
+          dafnyValue.dtor_GlobalTableDescription().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
   public static CreateReplicaAction CreateReplicaAction(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.CreateReplicaAction dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.CreateReplicaAction dafnyValue
+  ) {
     CreateReplicaAction.Builder builder = CreateReplicaAction.builder();
-    builder.regionName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_RegionName()));
+    builder.regionName(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_RegionName()
+      )
+    );
     return builder.build();
   }
 
   public static CreateReplicationGroupMemberAction CreateReplicationGroupMemberAction(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.CreateReplicationGroupMemberAction dafnyValue) {
-    CreateReplicationGroupMemberAction.Builder builder = CreateReplicationGroupMemberAction.builder();
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.CreateReplicationGroupMemberAction dafnyValue
+  ) {
+    CreateReplicationGroupMemberAction.Builder builder =
+      CreateReplicationGroupMemberAction.builder();
     if (dafnyValue.dtor_GlobalSecondaryIndexes().is_Some()) {
-      builder.globalSecondaryIndexes(ToNative.ReplicaGlobalSecondaryIndexList(dafnyValue.dtor_GlobalSecondaryIndexes().dtor_value()));
+      builder.globalSecondaryIndexes(
+        ToNative.ReplicaGlobalSecondaryIndexList(
+          dafnyValue.dtor_GlobalSecondaryIndexes().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_KMSMasterKeyId().is_Some()) {
-      builder.kmsMasterKeyId(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_KMSMasterKeyId().dtor_value()));
+      builder.kmsMasterKeyId(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_KMSMasterKeyId().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ProvisionedThroughputOverride().is_Some()) {
-      builder.provisionedThroughputOverride(ToNative.ProvisionedThroughputOverride(dafnyValue.dtor_ProvisionedThroughputOverride().dtor_value()));
+      builder.provisionedThroughputOverride(
+        ToNative.ProvisionedThroughputOverride(
+          dafnyValue.dtor_ProvisionedThroughputOverride().dtor_value()
+        )
+      );
     }
-    builder.regionName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_RegionName()));
+    builder.regionName(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_RegionName()
+      )
+    );
     if (dafnyValue.dtor_TableClassOverride().is_Some()) {
-      builder.tableClassOverride(ToNative.TableClass(dafnyValue.dtor_TableClassOverride().dtor_value()));
+      builder.tableClassOverride(
+        ToNative.TableClass(dafnyValue.dtor_TableClassOverride().dtor_value())
+      );
     }
     return builder.build();
   }
 
-  public static CreateTableRequest CreateTableInput(CreateTableInput dafnyValue) {
+  public static CreateTableRequest CreateTableInput(
+    CreateTableInput dafnyValue
+  ) {
     CreateTableRequest.Builder builder = CreateTableRequest.builder();
-    builder.attributeDefinitions(ToNative.AttributeDefinitions(dafnyValue.dtor_AttributeDefinitions()));
+    builder.attributeDefinitions(
+      ToNative.AttributeDefinitions(dafnyValue.dtor_AttributeDefinitions())
+    );
     if (dafnyValue.dtor_BillingMode().is_Some()) {
-      builder.billingMode(ToNative.BillingMode(dafnyValue.dtor_BillingMode().dtor_value()));
+      builder.billingMode(
+        ToNative.BillingMode(dafnyValue.dtor_BillingMode().dtor_value())
+      );
     }
     if (dafnyValue.dtor_GlobalSecondaryIndexes().is_Some()) {
-      builder.globalSecondaryIndexes(ToNative.GlobalSecondaryIndexList(dafnyValue.dtor_GlobalSecondaryIndexes().dtor_value()));
+      builder.globalSecondaryIndexes(
+        ToNative.GlobalSecondaryIndexList(
+          dafnyValue.dtor_GlobalSecondaryIndexes().dtor_value()
+        )
+      );
     }
     builder.keySchema(ToNative.KeySchema(dafnyValue.dtor_KeySchema()));
     if (dafnyValue.dtor_LocalSecondaryIndexes().is_Some()) {
-      builder.localSecondaryIndexes(ToNative.LocalSecondaryIndexList(dafnyValue.dtor_LocalSecondaryIndexes().dtor_value()));
+      builder.localSecondaryIndexes(
+        ToNative.LocalSecondaryIndexList(
+          dafnyValue.dtor_LocalSecondaryIndexes().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ProvisionedThroughput().is_Some()) {
-      builder.provisionedThroughput(ToNative.ProvisionedThroughput(dafnyValue.dtor_ProvisionedThroughput().dtor_value()));
+      builder.provisionedThroughput(
+        ToNative.ProvisionedThroughput(
+          dafnyValue.dtor_ProvisionedThroughput().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_SSESpecification().is_Some()) {
-      builder.sseSpecification(ToNative.SSESpecification(dafnyValue.dtor_SSESpecification().dtor_value()));
+      builder.sseSpecification(
+        ToNative.SSESpecification(
+          dafnyValue.dtor_SSESpecification().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_StreamSpecification().is_Some()) {
-      builder.streamSpecification(ToNative.StreamSpecification(dafnyValue.dtor_StreamSpecification().dtor_value()));
+      builder.streamSpecification(
+        ToNative.StreamSpecification(
+          dafnyValue.dtor_StreamSpecification().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_TableClass().is_Some()) {
-      builder.tableClass(ToNative.TableClass(dafnyValue.dtor_TableClass().dtor_value()));
+      builder.tableClass(
+        ToNative.TableClass(dafnyValue.dtor_TableClass().dtor_value())
+      );
     }
-    builder.tableName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_TableName()));
+    builder.tableName(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_TableName()
+      )
+    );
     if (dafnyValue.dtor_Tags().is_Some()) {
       builder.tags(ToNative.TagList(dafnyValue.dtor_Tags().dtor_value()));
     }
     return builder.build();
   }
 
-  public static CreateTableResponse CreateTableOutput(CreateTableOutput dafnyValue) {
+  public static CreateTableResponse CreateTableOutput(
+    CreateTableOutput dafnyValue
+  ) {
     CreateTableResponse.Builder builder = CreateTableResponse.builder();
     if (dafnyValue.dtor_TableDescription().is_Some()) {
-      builder.tableDescription(ToNative.TableDescription(dafnyValue.dtor_TableDescription().dtor_value()));
+      builder.tableDescription(
+        ToNative.TableDescription(
+          dafnyValue.dtor_TableDescription().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
   public static List<String> CsvHeaderList(
-      DafnySequence<? extends DafnySequence<? extends Character>> dafnyValue) {
+    DafnySequence<? extends DafnySequence<? extends Character>> dafnyValue
+  ) {
     return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToList(
-        dafnyValue, 
-        software.amazon.smithy.dafny.conversion.ToNative.Simple::String);
+      dafnyValue,
+      software.amazon.smithy.dafny.conversion.ToNative.Simple::String
+    );
   }
 
   public static CsvOptions CsvOptions(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.CsvOptions dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.CsvOptions dafnyValue
+  ) {
     CsvOptions.Builder builder = CsvOptions.builder();
     if (dafnyValue.dtor_Delimiter().is_Some()) {
-      builder.delimiter(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_Delimiter().dtor_value()));
+      builder.delimiter(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_Delimiter().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_HeaderList().is_Some()) {
-      builder.headerList(ToNative.CsvHeaderList(dafnyValue.dtor_HeaderList().dtor_value()));
+      builder.headerList(
+        ToNative.CsvHeaderList(dafnyValue.dtor_HeaderList().dtor_value())
+      );
     }
     return builder.build();
   }
 
   public static Delete Delete(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.Delete dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.Delete dafnyValue
+  ) {
     Delete.Builder builder = Delete.builder();
     if (dafnyValue.dtor_ConditionExpression().is_Some()) {
-      builder.conditionExpression(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_ConditionExpression().dtor_value()));
+      builder.conditionExpression(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_ConditionExpression().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ExpressionAttributeNames().is_Some()) {
-      builder.expressionAttributeNames(ToNative.ExpressionAttributeNameMap(dafnyValue.dtor_ExpressionAttributeNames().dtor_value()));
+      builder.expressionAttributeNames(
+        ToNative.ExpressionAttributeNameMap(
+          dafnyValue.dtor_ExpressionAttributeNames().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ExpressionAttributeValues().is_Some()) {
-      builder.expressionAttributeValues(ToNative.ExpressionAttributeValueMap(dafnyValue.dtor_ExpressionAttributeValues().dtor_value()));
+      builder.expressionAttributeValues(
+        ToNative.ExpressionAttributeValueMap(
+          dafnyValue.dtor_ExpressionAttributeValues().dtor_value()
+        )
+      );
     }
     builder.key(ToNative.Key(dafnyValue.dtor_Key()));
     if (dafnyValue.dtor_ReturnValuesOnConditionCheckFailure().is_Some()) {
-      builder.returnValuesOnConditionCheckFailure(ToNative.ReturnValuesOnConditionCheckFailure(dafnyValue.dtor_ReturnValuesOnConditionCheckFailure().dtor_value()));
+      builder.returnValuesOnConditionCheckFailure(
+        ToNative.ReturnValuesOnConditionCheckFailure(
+          dafnyValue.dtor_ReturnValuesOnConditionCheckFailure().dtor_value()
+        )
+      );
     }
-    builder.tableName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_TableName()));
+    builder.tableName(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_TableName()
+      )
+    );
     return builder.build();
   }
 
-  public static DeleteBackupRequest DeleteBackupInput(DeleteBackupInput dafnyValue) {
+  public static DeleteBackupRequest DeleteBackupInput(
+    DeleteBackupInput dafnyValue
+  ) {
     DeleteBackupRequest.Builder builder = DeleteBackupRequest.builder();
-    builder.backupArn(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_BackupArn()));
+    builder.backupArn(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_BackupArn()
+      )
+    );
     return builder.build();
   }
 
-  public static DeleteBackupResponse DeleteBackupOutput(DeleteBackupOutput dafnyValue) {
+  public static DeleteBackupResponse DeleteBackupOutput(
+    DeleteBackupOutput dafnyValue
+  ) {
     DeleteBackupResponse.Builder builder = DeleteBackupResponse.builder();
     if (dafnyValue.dtor_BackupDescription().is_Some()) {
-      builder.backupDescription(ToNative.BackupDescription(dafnyValue.dtor_BackupDescription().dtor_value()));
+      builder.backupDescription(
+        ToNative.BackupDescription(
+          dafnyValue.dtor_BackupDescription().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
   public static DeleteGlobalSecondaryIndexAction DeleteGlobalSecondaryIndexAction(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.DeleteGlobalSecondaryIndexAction dafnyValue) {
-    DeleteGlobalSecondaryIndexAction.Builder builder = DeleteGlobalSecondaryIndexAction.builder();
-    builder.indexName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_IndexName()));
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.DeleteGlobalSecondaryIndexAction dafnyValue
+  ) {
+    DeleteGlobalSecondaryIndexAction.Builder builder =
+      DeleteGlobalSecondaryIndexAction.builder();
+    builder.indexName(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_IndexName()
+      )
+    );
     return builder.build();
   }
 
   public static DeleteItemRequest DeleteItemInput(DeleteItemInput dafnyValue) {
     DeleteItemRequest.Builder builder = DeleteItemRequest.builder();
     if (dafnyValue.dtor_ConditionalOperator().is_Some()) {
-      builder.conditionalOperator(ToNative.ConditionalOperator(dafnyValue.dtor_ConditionalOperator().dtor_value()));
+      builder.conditionalOperator(
+        ToNative.ConditionalOperator(
+          dafnyValue.dtor_ConditionalOperator().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ConditionExpression().is_Some()) {
-      builder.conditionExpression(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_ConditionExpression().dtor_value()));
+      builder.conditionExpression(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_ConditionExpression().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_Expected().is_Some()) {
-      builder.expected(ToNative.ExpectedAttributeMap(dafnyValue.dtor_Expected().dtor_value()));
+      builder.expected(
+        ToNative.ExpectedAttributeMap(dafnyValue.dtor_Expected().dtor_value())
+      );
     }
     if (dafnyValue.dtor_ExpressionAttributeNames().is_Some()) {
-      builder.expressionAttributeNames(ToNative.ExpressionAttributeNameMap(dafnyValue.dtor_ExpressionAttributeNames().dtor_value()));
+      builder.expressionAttributeNames(
+        ToNative.ExpressionAttributeNameMap(
+          dafnyValue.dtor_ExpressionAttributeNames().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ExpressionAttributeValues().is_Some()) {
-      builder.expressionAttributeValues(ToNative.ExpressionAttributeValueMap(dafnyValue.dtor_ExpressionAttributeValues().dtor_value()));
+      builder.expressionAttributeValues(
+        ToNative.ExpressionAttributeValueMap(
+          dafnyValue.dtor_ExpressionAttributeValues().dtor_value()
+        )
+      );
     }
     builder.key(ToNative.Key(dafnyValue.dtor_Key()));
     if (dafnyValue.dtor_ReturnConsumedCapacity().is_Some()) {
-      builder.returnConsumedCapacity(ToNative.ReturnConsumedCapacity(dafnyValue.dtor_ReturnConsumedCapacity().dtor_value()));
+      builder.returnConsumedCapacity(
+        ToNative.ReturnConsumedCapacity(
+          dafnyValue.dtor_ReturnConsumedCapacity().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ReturnItemCollectionMetrics().is_Some()) {
-      builder.returnItemCollectionMetrics(ToNative.ReturnItemCollectionMetrics(dafnyValue.dtor_ReturnItemCollectionMetrics().dtor_value()));
+      builder.returnItemCollectionMetrics(
+        ToNative.ReturnItemCollectionMetrics(
+          dafnyValue.dtor_ReturnItemCollectionMetrics().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ReturnValues().is_Some()) {
-      builder.returnValues(ToNative.ReturnValue(dafnyValue.dtor_ReturnValues().dtor_value()));
+      builder.returnValues(
+        ToNative.ReturnValue(dafnyValue.dtor_ReturnValues().dtor_value())
+      );
     }
-    builder.tableName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_TableName()));
+    builder.tableName(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_TableName()
+      )
+    );
     return builder.build();
   }
 
-  public static DeleteItemResponse DeleteItemOutput(DeleteItemOutput dafnyValue) {
+  public static DeleteItemResponse DeleteItemOutput(
+    DeleteItemOutput dafnyValue
+  ) {
     DeleteItemResponse.Builder builder = DeleteItemResponse.builder();
     if (dafnyValue.dtor_Attributes().is_Some()) {
-      builder.attributes(ToNative.AttributeMap(dafnyValue.dtor_Attributes().dtor_value()));
+      builder.attributes(
+        ToNative.AttributeMap(dafnyValue.dtor_Attributes().dtor_value())
+      );
     }
     if (dafnyValue.dtor_ConsumedCapacity().is_Some()) {
-      builder.consumedCapacity(ToNative.ConsumedCapacity(dafnyValue.dtor_ConsumedCapacity().dtor_value()));
+      builder.consumedCapacity(
+        ToNative.ConsumedCapacity(
+          dafnyValue.dtor_ConsumedCapacity().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ItemCollectionMetrics().is_Some()) {
-      builder.itemCollectionMetrics(ToNative.ItemCollectionMetrics(dafnyValue.dtor_ItemCollectionMetrics().dtor_value()));
+      builder.itemCollectionMetrics(
+        ToNative.ItemCollectionMetrics(
+          dafnyValue.dtor_ItemCollectionMetrics().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
   public static DeleteReplicaAction DeleteReplicaAction(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.DeleteReplicaAction dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.DeleteReplicaAction dafnyValue
+  ) {
     DeleteReplicaAction.Builder builder = DeleteReplicaAction.builder();
-    builder.regionName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_RegionName()));
+    builder.regionName(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_RegionName()
+      )
+    );
     return builder.build();
   }
 
   public static DeleteReplicationGroupMemberAction DeleteReplicationGroupMemberAction(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.DeleteReplicationGroupMemberAction dafnyValue) {
-    DeleteReplicationGroupMemberAction.Builder builder = DeleteReplicationGroupMemberAction.builder();
-    builder.regionName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_RegionName()));
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.DeleteReplicationGroupMemberAction dafnyValue
+  ) {
+    DeleteReplicationGroupMemberAction.Builder builder =
+      DeleteReplicationGroupMemberAction.builder();
+    builder.regionName(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_RegionName()
+      )
+    );
     return builder.build();
   }
 
   public static DeleteRequest DeleteRequest(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.DeleteRequest dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.DeleteRequest dafnyValue
+  ) {
     DeleteRequest.Builder builder = DeleteRequest.builder();
     builder.key(ToNative.Key(dafnyValue.dtor_Key()));
     return builder.build();
   }
 
-  public static DeleteTableRequest DeleteTableInput(DeleteTableInput dafnyValue) {
+  public static DeleteTableRequest DeleteTableInput(
+    DeleteTableInput dafnyValue
+  ) {
     DeleteTableRequest.Builder builder = DeleteTableRequest.builder();
-    builder.tableName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_TableName()));
+    builder.tableName(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_TableName()
+      )
+    );
     return builder.build();
   }
 
-  public static DeleteTableResponse DeleteTableOutput(DeleteTableOutput dafnyValue) {
+  public static DeleteTableResponse DeleteTableOutput(
+    DeleteTableOutput dafnyValue
+  ) {
     DeleteTableResponse.Builder builder = DeleteTableResponse.builder();
     if (dafnyValue.dtor_TableDescription().is_Some()) {
-      builder.tableDescription(ToNative.TableDescription(dafnyValue.dtor_TableDescription().dtor_value()));
+      builder.tableDescription(
+        ToNative.TableDescription(
+          dafnyValue.dtor_TableDescription().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
-  public static DescribeBackupRequest DescribeBackupInput(DescribeBackupInput dafnyValue) {
+  public static DescribeBackupRequest DescribeBackupInput(
+    DescribeBackupInput dafnyValue
+  ) {
     DescribeBackupRequest.Builder builder = DescribeBackupRequest.builder();
-    builder.backupArn(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_BackupArn()));
+    builder.backupArn(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_BackupArn()
+      )
+    );
     return builder.build();
   }
 
-  public static DescribeBackupResponse DescribeBackupOutput(DescribeBackupOutput dafnyValue) {
+  public static DescribeBackupResponse DescribeBackupOutput(
+    DescribeBackupOutput dafnyValue
+  ) {
     DescribeBackupResponse.Builder builder = DescribeBackupResponse.builder();
     if (dafnyValue.dtor_BackupDescription().is_Some()) {
-      builder.backupDescription(ToNative.BackupDescription(dafnyValue.dtor_BackupDescription().dtor_value()));
+      builder.backupDescription(
+        ToNative.BackupDescription(
+          dafnyValue.dtor_BackupDescription().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
   public static DescribeContinuousBackupsRequest DescribeContinuousBackupsInput(
-      DescribeContinuousBackupsInput dafnyValue) {
-    DescribeContinuousBackupsRequest.Builder builder = DescribeContinuousBackupsRequest.builder();
-    builder.tableName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_TableName()));
+    DescribeContinuousBackupsInput dafnyValue
+  ) {
+    DescribeContinuousBackupsRequest.Builder builder =
+      DescribeContinuousBackupsRequest.builder();
+    builder.tableName(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_TableName()
+      )
+    );
     return builder.build();
   }
 
   public static DescribeContinuousBackupsResponse DescribeContinuousBackupsOutput(
-      DescribeContinuousBackupsOutput dafnyValue) {
-    DescribeContinuousBackupsResponse.Builder builder = DescribeContinuousBackupsResponse.builder();
+    DescribeContinuousBackupsOutput dafnyValue
+  ) {
+    DescribeContinuousBackupsResponse.Builder builder =
+      DescribeContinuousBackupsResponse.builder();
     if (dafnyValue.dtor_ContinuousBackupsDescription().is_Some()) {
-      builder.continuousBackupsDescription(ToNative.ContinuousBackupsDescription(dafnyValue.dtor_ContinuousBackupsDescription().dtor_value()));
+      builder.continuousBackupsDescription(
+        ToNative.ContinuousBackupsDescription(
+          dafnyValue.dtor_ContinuousBackupsDescription().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
   public static DescribeContributorInsightsRequest DescribeContributorInsightsInput(
-      DescribeContributorInsightsInput dafnyValue) {
-    DescribeContributorInsightsRequest.Builder builder = DescribeContributorInsightsRequest.builder();
+    DescribeContributorInsightsInput dafnyValue
+  ) {
+    DescribeContributorInsightsRequest.Builder builder =
+      DescribeContributorInsightsRequest.builder();
     if (dafnyValue.dtor_IndexName().is_Some()) {
-      builder.indexName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_IndexName().dtor_value()));
+      builder.indexName(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_IndexName().dtor_value()
+        )
+      );
     }
-    builder.tableName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_TableName()));
+    builder.tableName(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_TableName()
+      )
+    );
     return builder.build();
   }
 
   public static DescribeContributorInsightsResponse DescribeContributorInsightsOutput(
-      DescribeContributorInsightsOutput dafnyValue) {
-    DescribeContributorInsightsResponse.Builder builder = DescribeContributorInsightsResponse.builder();
+    DescribeContributorInsightsOutput dafnyValue
+  ) {
+    DescribeContributorInsightsResponse.Builder builder =
+      DescribeContributorInsightsResponse.builder();
     if (dafnyValue.dtor_ContributorInsightsRuleList().is_Some()) {
-      builder.contributorInsightsRuleList(ToNative.ContributorInsightsRuleList(dafnyValue.dtor_ContributorInsightsRuleList().dtor_value()));
+      builder.contributorInsightsRuleList(
+        ToNative.ContributorInsightsRuleList(
+          dafnyValue.dtor_ContributorInsightsRuleList().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ContributorInsightsStatus().is_Some()) {
-      builder.contributorInsightsStatus(ToNative.ContributorInsightsStatus(dafnyValue.dtor_ContributorInsightsStatus().dtor_value()));
+      builder.contributorInsightsStatus(
+        ToNative.ContributorInsightsStatus(
+          dafnyValue.dtor_ContributorInsightsStatus().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_FailureException().is_Some()) {
-      builder.failureException(ToNative.FailureException(dafnyValue.dtor_FailureException().dtor_value()));
+      builder.failureException(
+        ToNative.FailureException(
+          dafnyValue.dtor_FailureException().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_IndexName().is_Some()) {
-      builder.indexName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_IndexName().dtor_value()));
+      builder.indexName(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_IndexName().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_LastUpdateDateTime().is_Some()) {
-      builder.lastUpdateDateTime(software.amazon.smithy.dafny.conversion.ToNative.Simple.Instant(dafnyValue.dtor_LastUpdateDateTime().dtor_value()));
+      builder.lastUpdateDateTime(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.Instant(
+          dafnyValue.dtor_LastUpdateDateTime().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_TableName().is_Some()) {
-      builder.tableName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_TableName().dtor_value()));
+      builder.tableName(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_TableName().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
   public static DescribeEndpointsRequest DescribeEndpointsRequest(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.DescribeEndpointsRequest dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.DescribeEndpointsRequest dafnyValue
+  ) {
     return DescribeEndpointsRequest.builder().build();
   }
 
   public static DescribeEndpointsResponse DescribeEndpointsResponse(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.DescribeEndpointsResponse dafnyValue) {
-    DescribeEndpointsResponse.Builder builder = DescribeEndpointsResponse.builder();
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.DescribeEndpointsResponse dafnyValue
+  ) {
+    DescribeEndpointsResponse.Builder builder =
+      DescribeEndpointsResponse.builder();
     builder.endpoints(ToNative.Endpoints(dafnyValue.dtor_Endpoints()));
     return builder.build();
   }
 
-  public static DescribeExportRequest DescribeExportInput(DescribeExportInput dafnyValue) {
+  public static DescribeExportRequest DescribeExportInput(
+    DescribeExportInput dafnyValue
+  ) {
     DescribeExportRequest.Builder builder = DescribeExportRequest.builder();
-    builder.exportArn(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_ExportArn()));
+    builder.exportArn(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_ExportArn()
+      )
+    );
     return builder.build();
   }
 
-  public static DescribeExportResponse DescribeExportOutput(DescribeExportOutput dafnyValue) {
+  public static DescribeExportResponse DescribeExportOutput(
+    DescribeExportOutput dafnyValue
+  ) {
     DescribeExportResponse.Builder builder = DescribeExportResponse.builder();
     if (dafnyValue.dtor_ExportDescription().is_Some()) {
-      builder.exportDescription(ToNative.ExportDescription(dafnyValue.dtor_ExportDescription().dtor_value()));
+      builder.exportDescription(
+        ToNative.ExportDescription(
+          dafnyValue.dtor_ExportDescription().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
   public static DescribeGlobalTableRequest DescribeGlobalTableInput(
-      DescribeGlobalTableInput dafnyValue) {
-    DescribeGlobalTableRequest.Builder builder = DescribeGlobalTableRequest.builder();
-    builder.globalTableName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_GlobalTableName()));
+    DescribeGlobalTableInput dafnyValue
+  ) {
+    DescribeGlobalTableRequest.Builder builder =
+      DescribeGlobalTableRequest.builder();
+    builder.globalTableName(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_GlobalTableName()
+      )
+    );
     return builder.build();
   }
 
   public static DescribeGlobalTableResponse DescribeGlobalTableOutput(
-      DescribeGlobalTableOutput dafnyValue) {
-    DescribeGlobalTableResponse.Builder builder = DescribeGlobalTableResponse.builder();
+    DescribeGlobalTableOutput dafnyValue
+  ) {
+    DescribeGlobalTableResponse.Builder builder =
+      DescribeGlobalTableResponse.builder();
     if (dafnyValue.dtor_GlobalTableDescription().is_Some()) {
-      builder.globalTableDescription(ToNative.GlobalTableDescription(dafnyValue.dtor_GlobalTableDescription().dtor_value()));
+      builder.globalTableDescription(
+        ToNative.GlobalTableDescription(
+          dafnyValue.dtor_GlobalTableDescription().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
   public static DescribeGlobalTableSettingsRequest DescribeGlobalTableSettingsInput(
-      DescribeGlobalTableSettingsInput dafnyValue) {
-    DescribeGlobalTableSettingsRequest.Builder builder = DescribeGlobalTableSettingsRequest.builder();
-    builder.globalTableName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_GlobalTableName()));
+    DescribeGlobalTableSettingsInput dafnyValue
+  ) {
+    DescribeGlobalTableSettingsRequest.Builder builder =
+      DescribeGlobalTableSettingsRequest.builder();
+    builder.globalTableName(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_GlobalTableName()
+      )
+    );
     return builder.build();
   }
 
   public static DescribeGlobalTableSettingsResponse DescribeGlobalTableSettingsOutput(
-      DescribeGlobalTableSettingsOutput dafnyValue) {
-    DescribeGlobalTableSettingsResponse.Builder builder = DescribeGlobalTableSettingsResponse.builder();
+    DescribeGlobalTableSettingsOutput dafnyValue
+  ) {
+    DescribeGlobalTableSettingsResponse.Builder builder =
+      DescribeGlobalTableSettingsResponse.builder();
     if (dafnyValue.dtor_GlobalTableName().is_Some()) {
-      builder.globalTableName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_GlobalTableName().dtor_value()));
+      builder.globalTableName(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_GlobalTableName().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ReplicaSettings().is_Some()) {
-      builder.replicaSettings(ToNative.ReplicaSettingsDescriptionList(dafnyValue.dtor_ReplicaSettings().dtor_value()));
+      builder.replicaSettings(
+        ToNative.ReplicaSettingsDescriptionList(
+          dafnyValue.dtor_ReplicaSettings().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
-  public static DescribeImportRequest DescribeImportInput(DescribeImportInput dafnyValue) {
+  public static DescribeImportRequest DescribeImportInput(
+    DescribeImportInput dafnyValue
+  ) {
     DescribeImportRequest.Builder builder = DescribeImportRequest.builder();
-    builder.importArn(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_ImportArn()));
+    builder.importArn(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_ImportArn()
+      )
+    );
     return builder.build();
   }
 
-  public static DescribeImportResponse DescribeImportOutput(DescribeImportOutput dafnyValue) {
+  public static DescribeImportResponse DescribeImportOutput(
+    DescribeImportOutput dafnyValue
+  ) {
     DescribeImportResponse.Builder builder = DescribeImportResponse.builder();
-    builder.importTableDescription(ToNative.ImportTableDescription(dafnyValue.dtor_ImportTableDescription()));
+    builder.importTableDescription(
+      ToNative.ImportTableDescription(dafnyValue.dtor_ImportTableDescription())
+    );
     return builder.build();
   }
 
   public static DescribeKinesisStreamingDestinationRequest DescribeKinesisStreamingDestinationInput(
-      DescribeKinesisStreamingDestinationInput dafnyValue) {
-    DescribeKinesisStreamingDestinationRequest.Builder builder = DescribeKinesisStreamingDestinationRequest.builder();
-    builder.tableName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_TableName()));
+    DescribeKinesisStreamingDestinationInput dafnyValue
+  ) {
+    DescribeKinesisStreamingDestinationRequest.Builder builder =
+      DescribeKinesisStreamingDestinationRequest.builder();
+    builder.tableName(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_TableName()
+      )
+    );
     return builder.build();
   }
 
   public static DescribeKinesisStreamingDestinationResponse DescribeKinesisStreamingDestinationOutput(
-      DescribeKinesisStreamingDestinationOutput dafnyValue) {
-    DescribeKinesisStreamingDestinationResponse.Builder builder = DescribeKinesisStreamingDestinationResponse.builder();
+    DescribeKinesisStreamingDestinationOutput dafnyValue
+  ) {
+    DescribeKinesisStreamingDestinationResponse.Builder builder =
+      DescribeKinesisStreamingDestinationResponse.builder();
     if (dafnyValue.dtor_KinesisDataStreamDestinations().is_Some()) {
-      builder.kinesisDataStreamDestinations(ToNative.KinesisDataStreamDestinations(dafnyValue.dtor_KinesisDataStreamDestinations().dtor_value()));
+      builder.kinesisDataStreamDestinations(
+        ToNative.KinesisDataStreamDestinations(
+          dafnyValue.dtor_KinesisDataStreamDestinations().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_TableName().is_Some()) {
-      builder.tableName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_TableName().dtor_value()));
+      builder.tableName(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_TableName().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
-  public static DescribeLimitsRequest DescribeLimitsInput(DescribeLimitsInput dafnyValue) {
+  public static DescribeLimitsRequest DescribeLimitsInput(
+    DescribeLimitsInput dafnyValue
+  ) {
     return DescribeLimitsRequest.builder().build();
   }
 
-  public static DescribeLimitsResponse DescribeLimitsOutput(DescribeLimitsOutput dafnyValue) {
+  public static DescribeLimitsResponse DescribeLimitsOutput(
+    DescribeLimitsOutput dafnyValue
+  ) {
     DescribeLimitsResponse.Builder builder = DescribeLimitsResponse.builder();
     if (dafnyValue.dtor_AccountMaxReadCapacityUnits().is_Some()) {
-      builder.accountMaxReadCapacityUnits((dafnyValue.dtor_AccountMaxReadCapacityUnits().dtor_value()));
+      builder.accountMaxReadCapacityUnits(
+        (dafnyValue.dtor_AccountMaxReadCapacityUnits().dtor_value())
+      );
     }
     if (dafnyValue.dtor_AccountMaxWriteCapacityUnits().is_Some()) {
-      builder.accountMaxWriteCapacityUnits((dafnyValue.dtor_AccountMaxWriteCapacityUnits().dtor_value()));
+      builder.accountMaxWriteCapacityUnits(
+        (dafnyValue.dtor_AccountMaxWriteCapacityUnits().dtor_value())
+      );
     }
     if (dafnyValue.dtor_TableMaxReadCapacityUnits().is_Some()) {
-      builder.tableMaxReadCapacityUnits((dafnyValue.dtor_TableMaxReadCapacityUnits().dtor_value()));
+      builder.tableMaxReadCapacityUnits(
+        (dafnyValue.dtor_TableMaxReadCapacityUnits().dtor_value())
+      );
     }
     if (dafnyValue.dtor_TableMaxWriteCapacityUnits().is_Some()) {
-      builder.tableMaxWriteCapacityUnits((dafnyValue.dtor_TableMaxWriteCapacityUnits().dtor_value()));
+      builder.tableMaxWriteCapacityUnits(
+        (dafnyValue.dtor_TableMaxWriteCapacityUnits().dtor_value())
+      );
     }
     return builder.build();
   }
 
-  public static DescribeTableRequest DescribeTableInput(DescribeTableInput dafnyValue) {
+  public static DescribeTableRequest DescribeTableInput(
+    DescribeTableInput dafnyValue
+  ) {
     DescribeTableRequest.Builder builder = DescribeTableRequest.builder();
-    builder.tableName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_TableName()));
+    builder.tableName(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_TableName()
+      )
+    );
     return builder.build();
   }
 
-  public static DescribeTableResponse DescribeTableOutput(DescribeTableOutput dafnyValue) {
+  public static DescribeTableResponse DescribeTableOutput(
+    DescribeTableOutput dafnyValue
+  ) {
     DescribeTableResponse.Builder builder = DescribeTableResponse.builder();
     if (dafnyValue.dtor_Table().is_Some()) {
-      builder.table(ToNative.TableDescription(dafnyValue.dtor_Table().dtor_value()));
+      builder.table(
+        ToNative.TableDescription(dafnyValue.dtor_Table().dtor_value())
+      );
     }
     return builder.build();
   }
 
   public static DescribeTableReplicaAutoScalingRequest DescribeTableReplicaAutoScalingInput(
-      DescribeTableReplicaAutoScalingInput dafnyValue) {
-    DescribeTableReplicaAutoScalingRequest.Builder builder = DescribeTableReplicaAutoScalingRequest.builder();
-    builder.tableName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_TableName()));
+    DescribeTableReplicaAutoScalingInput dafnyValue
+  ) {
+    DescribeTableReplicaAutoScalingRequest.Builder builder =
+      DescribeTableReplicaAutoScalingRequest.builder();
+    builder.tableName(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_TableName()
+      )
+    );
     return builder.build();
   }
 
   public static DescribeTableReplicaAutoScalingResponse DescribeTableReplicaAutoScalingOutput(
-      DescribeTableReplicaAutoScalingOutput dafnyValue) {
-    DescribeTableReplicaAutoScalingResponse.Builder builder = DescribeTableReplicaAutoScalingResponse.builder();
+    DescribeTableReplicaAutoScalingOutput dafnyValue
+  ) {
+    DescribeTableReplicaAutoScalingResponse.Builder builder =
+      DescribeTableReplicaAutoScalingResponse.builder();
     if (dafnyValue.dtor_TableAutoScalingDescription().is_Some()) {
-      builder.tableAutoScalingDescription(ToNative.TableAutoScalingDescription(dafnyValue.dtor_TableAutoScalingDescription().dtor_value()));
+      builder.tableAutoScalingDescription(
+        ToNative.TableAutoScalingDescription(
+          dafnyValue.dtor_TableAutoScalingDescription().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
   public static DescribeTimeToLiveRequest DescribeTimeToLiveInput(
-      DescribeTimeToLiveInput dafnyValue) {
-    DescribeTimeToLiveRequest.Builder builder = DescribeTimeToLiveRequest.builder();
-    builder.tableName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_TableName()));
+    DescribeTimeToLiveInput dafnyValue
+  ) {
+    DescribeTimeToLiveRequest.Builder builder =
+      DescribeTimeToLiveRequest.builder();
+    builder.tableName(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_TableName()
+      )
+    );
     return builder.build();
   }
 
   public static DescribeTimeToLiveResponse DescribeTimeToLiveOutput(
-      DescribeTimeToLiveOutput dafnyValue) {
-    DescribeTimeToLiveResponse.Builder builder = DescribeTimeToLiveResponse.builder();
+    DescribeTimeToLiveOutput dafnyValue
+  ) {
+    DescribeTimeToLiveResponse.Builder builder =
+      DescribeTimeToLiveResponse.builder();
     if (dafnyValue.dtor_TimeToLiveDescription().is_Some()) {
-      builder.timeToLiveDescription(ToNative.TimeToLiveDescription(dafnyValue.dtor_TimeToLiveDescription().dtor_value()));
+      builder.timeToLiveDescription(
+        ToNative.TimeToLiveDescription(
+          dafnyValue.dtor_TimeToLiveDescription().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
   public static DestinationStatus DestinationStatus(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.DestinationStatus dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.DestinationStatus dafnyValue
+  ) {
     if (dafnyValue.is_ENABLING()) {
       return DestinationStatus.ENABLING;
     }
@@ -1719,67 +2548,126 @@ public class ToNative {
   }
 
   public static DisableKinesisStreamingDestinationRequest DisableKinesisStreamingDestinationInput(
-      DisableKinesisStreamingDestinationInput dafnyValue) {
-    DisableKinesisStreamingDestinationRequest.Builder builder = DisableKinesisStreamingDestinationRequest.builder();
-    builder.streamArn(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_StreamArn()));
-    builder.tableName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_TableName()));
+    DisableKinesisStreamingDestinationInput dafnyValue
+  ) {
+    DisableKinesisStreamingDestinationRequest.Builder builder =
+      DisableKinesisStreamingDestinationRequest.builder();
+    builder.streamArn(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_StreamArn()
+      )
+    );
+    builder.tableName(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_TableName()
+      )
+    );
     return builder.build();
   }
 
   public static DisableKinesisStreamingDestinationResponse DisableKinesisStreamingDestinationOutput(
-      DisableKinesisStreamingDestinationOutput dafnyValue) {
-    DisableKinesisStreamingDestinationResponse.Builder builder = DisableKinesisStreamingDestinationResponse.builder();
+    DisableKinesisStreamingDestinationOutput dafnyValue
+  ) {
+    DisableKinesisStreamingDestinationResponse.Builder builder =
+      DisableKinesisStreamingDestinationResponse.builder();
     if (dafnyValue.dtor_DestinationStatus().is_Some()) {
-      builder.destinationStatus(ToNative.DestinationStatus(dafnyValue.dtor_DestinationStatus().dtor_value()));
+      builder.destinationStatus(
+        ToNative.DestinationStatus(
+          dafnyValue.dtor_DestinationStatus().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_StreamArn().is_Some()) {
-      builder.streamArn(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_StreamArn().dtor_value()));
+      builder.streamArn(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_StreamArn().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_TableName().is_Some()) {
-      builder.tableName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_TableName().dtor_value()));
+      builder.tableName(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_TableName().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
   public static EnableKinesisStreamingDestinationRequest EnableKinesisStreamingDestinationInput(
-      EnableKinesisStreamingDestinationInput dafnyValue) {
-    EnableKinesisStreamingDestinationRequest.Builder builder = EnableKinesisStreamingDestinationRequest.builder();
-    builder.streamArn(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_StreamArn()));
-    builder.tableName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_TableName()));
+    EnableKinesisStreamingDestinationInput dafnyValue
+  ) {
+    EnableKinesisStreamingDestinationRequest.Builder builder =
+      EnableKinesisStreamingDestinationRequest.builder();
+    builder.streamArn(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_StreamArn()
+      )
+    );
+    builder.tableName(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_TableName()
+      )
+    );
     return builder.build();
   }
 
   public static EnableKinesisStreamingDestinationResponse EnableKinesisStreamingDestinationOutput(
-      EnableKinesisStreamingDestinationOutput dafnyValue) {
-    EnableKinesisStreamingDestinationResponse.Builder builder = EnableKinesisStreamingDestinationResponse.builder();
+    EnableKinesisStreamingDestinationOutput dafnyValue
+  ) {
+    EnableKinesisStreamingDestinationResponse.Builder builder =
+      EnableKinesisStreamingDestinationResponse.builder();
     if (dafnyValue.dtor_DestinationStatus().is_Some()) {
-      builder.destinationStatus(ToNative.DestinationStatus(dafnyValue.dtor_DestinationStatus().dtor_value()));
+      builder.destinationStatus(
+        ToNative.DestinationStatus(
+          dafnyValue.dtor_DestinationStatus().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_StreamArn().is_Some()) {
-      builder.streamArn(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_StreamArn().dtor_value()));
+      builder.streamArn(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_StreamArn().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_TableName().is_Some()) {
-      builder.tableName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_TableName().dtor_value()));
+      builder.tableName(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_TableName().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
   public static Endpoint Endpoint(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.Endpoint dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.Endpoint dafnyValue
+  ) {
     Endpoint.Builder builder = Endpoint.builder();
-    builder.address(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_Address()));
+    builder.address(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_Address()
+      )
+    );
     builder.cachePeriodInMinutes((dafnyValue.dtor_CachePeriodInMinutes()));
     return builder.build();
   }
 
   public static List<Endpoint> Endpoints(
-      DafnySequence<? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.Endpoint> dafnyValue) {
+    DafnySequence<
+      ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.Endpoint
+    > dafnyValue
+  ) {
     return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToList(
-        dafnyValue, 
-        software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::Endpoint);
+      dafnyValue,
+      software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::Endpoint
+    );
   }
 
-  public static ExecuteStatementRequest ExecuteStatementInput(ExecuteStatementInput dafnyValue) {
+  public static ExecuteStatementRequest ExecuteStatementInput(
+    ExecuteStatementInput dafnyValue
+  ) {
     ExecuteStatementRequest.Builder builder = ExecuteStatementRequest.builder();
     if (dafnyValue.dtor_ConsistentRead().is_Some()) {
       builder.consistentRead((dafnyValue.dtor_ConsistentRead().dtor_value()));
@@ -1788,151 +2676,280 @@ public class ToNative {
       builder.limit((dafnyValue.dtor_Limit().dtor_value()));
     }
     if (dafnyValue.dtor_NextToken().is_Some()) {
-      builder.nextToken(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_NextToken().dtor_value()));
+      builder.nextToken(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_NextToken().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_Parameters().is_Some()) {
-      builder.parameters(ToNative.PreparedStatementParameters(dafnyValue.dtor_Parameters().dtor_value()));
+      builder.parameters(
+        ToNative.PreparedStatementParameters(
+          dafnyValue.dtor_Parameters().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ReturnConsumedCapacity().is_Some()) {
-      builder.returnConsumedCapacity(ToNative.ReturnConsumedCapacity(dafnyValue.dtor_ReturnConsumedCapacity().dtor_value()));
+      builder.returnConsumedCapacity(
+        ToNative.ReturnConsumedCapacity(
+          dafnyValue.dtor_ReturnConsumedCapacity().dtor_value()
+        )
+      );
     }
-    builder.statement(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_Statement()));
+    builder.statement(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_Statement()
+      )
+    );
     return builder.build();
   }
 
-  public static ExecuteStatementResponse ExecuteStatementOutput(ExecuteStatementOutput dafnyValue) {
-    ExecuteStatementResponse.Builder builder = ExecuteStatementResponse.builder();
+  public static ExecuteStatementResponse ExecuteStatementOutput(
+    ExecuteStatementOutput dafnyValue
+  ) {
+    ExecuteStatementResponse.Builder builder =
+      ExecuteStatementResponse.builder();
     if (dafnyValue.dtor_ConsumedCapacity().is_Some()) {
-      builder.consumedCapacity(ToNative.ConsumedCapacity(dafnyValue.dtor_ConsumedCapacity().dtor_value()));
+      builder.consumedCapacity(
+        ToNative.ConsumedCapacity(
+          dafnyValue.dtor_ConsumedCapacity().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_Items().is_Some()) {
       builder.items(ToNative.ItemList(dafnyValue.dtor_Items().dtor_value()));
     }
     if (dafnyValue.dtor_LastEvaluatedKey().is_Some()) {
-      builder.lastEvaluatedKey(ToNative.Key(dafnyValue.dtor_LastEvaluatedKey().dtor_value()));
+      builder.lastEvaluatedKey(
+        ToNative.Key(dafnyValue.dtor_LastEvaluatedKey().dtor_value())
+      );
     }
     if (dafnyValue.dtor_NextToken().is_Some()) {
-      builder.nextToken(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_NextToken().dtor_value()));
+      builder.nextToken(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_NextToken().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
   public static ExecuteTransactionRequest ExecuteTransactionInput(
-      ExecuteTransactionInput dafnyValue) {
-    ExecuteTransactionRequest.Builder builder = ExecuteTransactionRequest.builder();
+    ExecuteTransactionInput dafnyValue
+  ) {
+    ExecuteTransactionRequest.Builder builder =
+      ExecuteTransactionRequest.builder();
     if (dafnyValue.dtor_ClientRequestToken().is_Some()) {
-      builder.clientRequestToken(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_ClientRequestToken().dtor_value()));
+      builder.clientRequestToken(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_ClientRequestToken().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ReturnConsumedCapacity().is_Some()) {
-      builder.returnConsumedCapacity(ToNative.ReturnConsumedCapacity(dafnyValue.dtor_ReturnConsumedCapacity().dtor_value()));
+      builder.returnConsumedCapacity(
+        ToNative.ReturnConsumedCapacity(
+          dafnyValue.dtor_ReturnConsumedCapacity().dtor_value()
+        )
+      );
     }
-    builder.transactStatements(ToNative.ParameterizedStatements(dafnyValue.dtor_TransactStatements()));
+    builder.transactStatements(
+      ToNative.ParameterizedStatements(dafnyValue.dtor_TransactStatements())
+    );
     return builder.build();
   }
 
   public static ExecuteTransactionResponse ExecuteTransactionOutput(
-      ExecuteTransactionOutput dafnyValue) {
-    ExecuteTransactionResponse.Builder builder = ExecuteTransactionResponse.builder();
+    ExecuteTransactionOutput dafnyValue
+  ) {
+    ExecuteTransactionResponse.Builder builder =
+      ExecuteTransactionResponse.builder();
     if (dafnyValue.dtor_ConsumedCapacity().is_Some()) {
-      builder.consumedCapacity(ToNative.ConsumedCapacityMultiple(dafnyValue.dtor_ConsumedCapacity().dtor_value()));
+      builder.consumedCapacity(
+        ToNative.ConsumedCapacityMultiple(
+          dafnyValue.dtor_ConsumedCapacity().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_Responses().is_Some()) {
-      builder.responses(ToNative.ItemResponseList(dafnyValue.dtor_Responses().dtor_value()));
+      builder.responses(
+        ToNative.ItemResponseList(dafnyValue.dtor_Responses().dtor_value())
+      );
     }
     return builder.build();
   }
 
   public static Map<String, ExpectedAttributeValue> ExpectedAttributeMap(
-      DafnyMap<? extends DafnySequence<? extends Character>, ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.ExpectedAttributeValue> dafnyValue) {
+    DafnyMap<
+      ? extends DafnySequence<? extends Character>,
+      ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.ExpectedAttributeValue
+    > dafnyValue
+  ) {
     return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToMap(
-        dafnyValue, 
-        software.amazon.smithy.dafny.conversion.ToNative.Simple::String, 
-        software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::ExpectedAttributeValue);
+      dafnyValue,
+      software.amazon.smithy.dafny.conversion.ToNative.Simple::String,
+      software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::ExpectedAttributeValue
+    );
   }
 
   public static ExpectedAttributeValue ExpectedAttributeValue(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.ExpectedAttributeValue dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.ExpectedAttributeValue dafnyValue
+  ) {
     ExpectedAttributeValue.Builder builder = ExpectedAttributeValue.builder();
     if (dafnyValue.dtor_AttributeValueList().is_Some()) {
-      builder.attributeValueList(ToNative.AttributeValueList(dafnyValue.dtor_AttributeValueList().dtor_value()));
+      builder.attributeValueList(
+        ToNative.AttributeValueList(
+          dafnyValue.dtor_AttributeValueList().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ComparisonOperator().is_Some()) {
-      builder.comparisonOperator(ToNative.ComparisonOperator(dafnyValue.dtor_ComparisonOperator().dtor_value()));
+      builder.comparisonOperator(
+        ToNative.ComparisonOperator(
+          dafnyValue.dtor_ComparisonOperator().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_Exists().is_Some()) {
       builder.exists((dafnyValue.dtor_Exists().dtor_value()));
     }
     if (dafnyValue.dtor_Value().is_Some()) {
-      builder.value(ToNative.AttributeValue(dafnyValue.dtor_Value().dtor_value()));
+      builder.value(
+        ToNative.AttributeValue(dafnyValue.dtor_Value().dtor_value())
+      );
     }
     return builder.build();
   }
 
   public static ExportDescription ExportDescription(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.ExportDescription dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.ExportDescription dafnyValue
+  ) {
     ExportDescription.Builder builder = ExportDescription.builder();
     if (dafnyValue.dtor_BilledSizeBytes().is_Some()) {
       builder.billedSizeBytes((dafnyValue.dtor_BilledSizeBytes().dtor_value()));
     }
     if (dafnyValue.dtor_ClientToken().is_Some()) {
-      builder.clientToken(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_ClientToken().dtor_value()));
+      builder.clientToken(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_ClientToken().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_EndTime().is_Some()) {
-      builder.endTime(software.amazon.smithy.dafny.conversion.ToNative.Simple.Instant(dafnyValue.dtor_EndTime().dtor_value()));
+      builder.endTime(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.Instant(
+          dafnyValue.dtor_EndTime().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ExportArn().is_Some()) {
-      builder.exportArn(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_ExportArn().dtor_value()));
+      builder.exportArn(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_ExportArn().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ExportFormat().is_Some()) {
-      builder.exportFormat(ToNative.ExportFormat(dafnyValue.dtor_ExportFormat().dtor_value()));
+      builder.exportFormat(
+        ToNative.ExportFormat(dafnyValue.dtor_ExportFormat().dtor_value())
+      );
     }
     if (dafnyValue.dtor_ExportManifest().is_Some()) {
-      builder.exportManifest(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_ExportManifest().dtor_value()));
+      builder.exportManifest(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_ExportManifest().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ExportStatus().is_Some()) {
-      builder.exportStatus(ToNative.ExportStatus(dafnyValue.dtor_ExportStatus().dtor_value()));
+      builder.exportStatus(
+        ToNative.ExportStatus(dafnyValue.dtor_ExportStatus().dtor_value())
+      );
     }
     if (dafnyValue.dtor_ExportTime().is_Some()) {
-      builder.exportTime(software.amazon.smithy.dafny.conversion.ToNative.Simple.Instant(dafnyValue.dtor_ExportTime().dtor_value()));
+      builder.exportTime(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.Instant(
+          dafnyValue.dtor_ExportTime().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_FailureCode().is_Some()) {
-      builder.failureCode(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_FailureCode().dtor_value()));
+      builder.failureCode(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_FailureCode().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_FailureMessage().is_Some()) {
-      builder.failureMessage(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_FailureMessage().dtor_value()));
+      builder.failureMessage(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_FailureMessage().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ItemCount().is_Some()) {
       builder.itemCount((dafnyValue.dtor_ItemCount().dtor_value()));
     }
     if (dafnyValue.dtor_S3Bucket().is_Some()) {
-      builder.s3Bucket(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_S3Bucket().dtor_value()));
+      builder.s3Bucket(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_S3Bucket().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_S3BucketOwner().is_Some()) {
-      builder.s3BucketOwner(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_S3BucketOwner().dtor_value()));
+      builder.s3BucketOwner(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_S3BucketOwner().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_S3Prefix().is_Some()) {
-      builder.s3Prefix(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_S3Prefix().dtor_value()));
+      builder.s3Prefix(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_S3Prefix().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_S3SseAlgorithm().is_Some()) {
-      builder.s3SseAlgorithm(ToNative.S3SseAlgorithm(dafnyValue.dtor_S3SseAlgorithm().dtor_value()));
+      builder.s3SseAlgorithm(
+        ToNative.S3SseAlgorithm(dafnyValue.dtor_S3SseAlgorithm().dtor_value())
+      );
     }
     if (dafnyValue.dtor_S3SseKmsKeyId().is_Some()) {
-      builder.s3SseKmsKeyId(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_S3SseKmsKeyId().dtor_value()));
+      builder.s3SseKmsKeyId(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_S3SseKmsKeyId().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_StartTime().is_Some()) {
-      builder.startTime(software.amazon.smithy.dafny.conversion.ToNative.Simple.Instant(dafnyValue.dtor_StartTime().dtor_value()));
+      builder.startTime(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.Instant(
+          dafnyValue.dtor_StartTime().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_TableArn().is_Some()) {
-      builder.tableArn(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_TableArn().dtor_value()));
+      builder.tableArn(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_TableArn().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_TableId().is_Some()) {
-      builder.tableId(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_TableId().dtor_value()));
+      builder.tableId(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_TableId().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
   public static ExportFormat ExportFormat(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.ExportFormat dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.ExportFormat dafnyValue
+  ) {
     if (dafnyValue.is_DYNAMODB__JSON()) {
       return ExportFormat.DYNAMODB_JSON;
     }
@@ -1943,7 +2960,8 @@ public class ToNative {
   }
 
   public static ExportStatus ExportStatus(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.ExportStatus dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.ExportStatus dafnyValue
+  ) {
     if (dafnyValue.is_IN__PROGRESS()) {
       return ExportStatus.IN_PROGRESS;
     }
@@ -1957,138 +2975,250 @@ public class ToNative {
   }
 
   public static List<ExportSummary> ExportSummaries(
-      DafnySequence<? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.ExportSummary> dafnyValue) {
+    DafnySequence<
+      ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.ExportSummary
+    > dafnyValue
+  ) {
     return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToList(
-        dafnyValue, 
-        software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::ExportSummary);
+      dafnyValue,
+      software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::ExportSummary
+    );
   }
 
   public static ExportSummary ExportSummary(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.ExportSummary dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.ExportSummary dafnyValue
+  ) {
     ExportSummary.Builder builder = ExportSummary.builder();
     if (dafnyValue.dtor_ExportArn().is_Some()) {
-      builder.exportArn(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_ExportArn().dtor_value()));
+      builder.exportArn(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_ExportArn().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ExportStatus().is_Some()) {
-      builder.exportStatus(ToNative.ExportStatus(dafnyValue.dtor_ExportStatus().dtor_value()));
+      builder.exportStatus(
+        ToNative.ExportStatus(dafnyValue.dtor_ExportStatus().dtor_value())
+      );
     }
     return builder.build();
   }
 
   public static ExportTableToPointInTimeRequest ExportTableToPointInTimeInput(
-      ExportTableToPointInTimeInput dafnyValue) {
-    ExportTableToPointInTimeRequest.Builder builder = ExportTableToPointInTimeRequest.builder();
+    ExportTableToPointInTimeInput dafnyValue
+  ) {
+    ExportTableToPointInTimeRequest.Builder builder =
+      ExportTableToPointInTimeRequest.builder();
     if (dafnyValue.dtor_ClientToken().is_Some()) {
-      builder.clientToken(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_ClientToken().dtor_value()));
+      builder.clientToken(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_ClientToken().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ExportFormat().is_Some()) {
-      builder.exportFormat(ToNative.ExportFormat(dafnyValue.dtor_ExportFormat().dtor_value()));
+      builder.exportFormat(
+        ToNative.ExportFormat(dafnyValue.dtor_ExportFormat().dtor_value())
+      );
     }
     if (dafnyValue.dtor_ExportTime().is_Some()) {
-      builder.exportTime(software.amazon.smithy.dafny.conversion.ToNative.Simple.Instant(dafnyValue.dtor_ExportTime().dtor_value()));
+      builder.exportTime(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.Instant(
+          dafnyValue.dtor_ExportTime().dtor_value()
+        )
+      );
     }
-    builder.s3Bucket(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_S3Bucket()));
+    builder.s3Bucket(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_S3Bucket()
+      )
+    );
     if (dafnyValue.dtor_S3BucketOwner().is_Some()) {
-      builder.s3BucketOwner(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_S3BucketOwner().dtor_value()));
+      builder.s3BucketOwner(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_S3BucketOwner().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_S3Prefix().is_Some()) {
-      builder.s3Prefix(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_S3Prefix().dtor_value()));
+      builder.s3Prefix(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_S3Prefix().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_S3SseAlgorithm().is_Some()) {
-      builder.s3SseAlgorithm(ToNative.S3SseAlgorithm(dafnyValue.dtor_S3SseAlgorithm().dtor_value()));
+      builder.s3SseAlgorithm(
+        ToNative.S3SseAlgorithm(dafnyValue.dtor_S3SseAlgorithm().dtor_value())
+      );
     }
     if (dafnyValue.dtor_S3SseKmsKeyId().is_Some()) {
-      builder.s3SseKmsKeyId(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_S3SseKmsKeyId().dtor_value()));
+      builder.s3SseKmsKeyId(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_S3SseKmsKeyId().dtor_value()
+        )
+      );
     }
-    builder.tableArn(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_TableArn()));
+    builder.tableArn(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_TableArn()
+      )
+    );
     return builder.build();
   }
 
   public static ExportTableToPointInTimeResponse ExportTableToPointInTimeOutput(
-      ExportTableToPointInTimeOutput dafnyValue) {
-    ExportTableToPointInTimeResponse.Builder builder = ExportTableToPointInTimeResponse.builder();
+    ExportTableToPointInTimeOutput dafnyValue
+  ) {
+    ExportTableToPointInTimeResponse.Builder builder =
+      ExportTableToPointInTimeResponse.builder();
     if (dafnyValue.dtor_ExportDescription().is_Some()) {
-      builder.exportDescription(ToNative.ExportDescription(dafnyValue.dtor_ExportDescription().dtor_value()));
+      builder.exportDescription(
+        ToNative.ExportDescription(
+          dafnyValue.dtor_ExportDescription().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
   public static Map<String, String> ExpressionAttributeNameMap(
-      DafnyMap<? extends DafnySequence<? extends Character>, ? extends DafnySequence<? extends Character>> dafnyValue) {
+    DafnyMap<
+      ? extends DafnySequence<? extends Character>,
+      ? extends DafnySequence<? extends Character>
+    > dafnyValue
+  ) {
     return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToMap(
-        dafnyValue, 
-        software.amazon.smithy.dafny.conversion.ToNative.Simple::String, 
-        software.amazon.smithy.dafny.conversion.ToNative.Simple::String);
+      dafnyValue,
+      software.amazon.smithy.dafny.conversion.ToNative.Simple::String,
+      software.amazon.smithy.dafny.conversion.ToNative.Simple::String
+    );
   }
 
   public static Map<String, AttributeValue> ExpressionAttributeValueMap(
-      DafnyMap<? extends DafnySequence<? extends Character>, ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.AttributeValue> dafnyValue) {
+    DafnyMap<
+      ? extends DafnySequence<? extends Character>,
+      ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.AttributeValue
+    > dafnyValue
+  ) {
     return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToMap(
-        dafnyValue, 
-        software.amazon.smithy.dafny.conversion.ToNative.Simple::String, 
-        software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::AttributeValue);
+      dafnyValue,
+      software.amazon.smithy.dafny.conversion.ToNative.Simple::String,
+      software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::AttributeValue
+    );
   }
 
   public static FailureException FailureException(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.FailureException dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.FailureException dafnyValue
+  ) {
     FailureException.Builder builder = FailureException.builder();
     if (dafnyValue.dtor_ExceptionDescription().is_Some()) {
-      builder.exceptionDescription(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_ExceptionDescription().dtor_value()));
+      builder.exceptionDescription(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_ExceptionDescription().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ExceptionName().is_Some()) {
-      builder.exceptionName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_ExceptionName().dtor_value()));
+      builder.exceptionName(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_ExceptionName().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
   public static Map<String, Condition> FilterConditionMap(
-      DafnyMap<? extends DafnySequence<? extends Character>, ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.Condition> dafnyValue) {
+    DafnyMap<
+      ? extends DafnySequence<? extends Character>,
+      ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.Condition
+    > dafnyValue
+  ) {
     return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToMap(
-        dafnyValue, 
-        software.amazon.smithy.dafny.conversion.ToNative.Simple::String, 
-        software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::Condition);
+      dafnyValue,
+      software.amazon.smithy.dafny.conversion.ToNative.Simple::String,
+      software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::Condition
+    );
   }
 
   public static Get Get(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.Get dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.Get dafnyValue
+  ) {
     Get.Builder builder = Get.builder();
     if (dafnyValue.dtor_ExpressionAttributeNames().is_Some()) {
-      builder.expressionAttributeNames(ToNative.ExpressionAttributeNameMap(dafnyValue.dtor_ExpressionAttributeNames().dtor_value()));
+      builder.expressionAttributeNames(
+        ToNative.ExpressionAttributeNameMap(
+          dafnyValue.dtor_ExpressionAttributeNames().dtor_value()
+        )
+      );
     }
     builder.key(ToNative.Key(dafnyValue.dtor_Key()));
     if (dafnyValue.dtor_ProjectionExpression().is_Some()) {
-      builder.projectionExpression(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_ProjectionExpression().dtor_value()));
+      builder.projectionExpression(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_ProjectionExpression().dtor_value()
+        )
+      );
     }
-    builder.tableName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_TableName()));
+    builder.tableName(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_TableName()
+      )
+    );
     return builder.build();
   }
 
   public static GetItemRequest GetItemInput(GetItemInput dafnyValue) {
     GetItemRequest.Builder builder = GetItemRequest.builder();
     if (dafnyValue.dtor_AttributesToGet().is_Some()) {
-      builder.attributesToGet(ToNative.AttributeNameList(dafnyValue.dtor_AttributesToGet().dtor_value()));
+      builder.attributesToGet(
+        ToNative.AttributeNameList(
+          dafnyValue.dtor_AttributesToGet().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ConsistentRead().is_Some()) {
       builder.consistentRead((dafnyValue.dtor_ConsistentRead().dtor_value()));
     }
     if (dafnyValue.dtor_ExpressionAttributeNames().is_Some()) {
-      builder.expressionAttributeNames(ToNative.ExpressionAttributeNameMap(dafnyValue.dtor_ExpressionAttributeNames().dtor_value()));
+      builder.expressionAttributeNames(
+        ToNative.ExpressionAttributeNameMap(
+          dafnyValue.dtor_ExpressionAttributeNames().dtor_value()
+        )
+      );
     }
     builder.key(ToNative.Key(dafnyValue.dtor_Key()));
     if (dafnyValue.dtor_ProjectionExpression().is_Some()) {
-      builder.projectionExpression(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_ProjectionExpression().dtor_value()));
+      builder.projectionExpression(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_ProjectionExpression().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ReturnConsumedCapacity().is_Some()) {
-      builder.returnConsumedCapacity(ToNative.ReturnConsumedCapacity(dafnyValue.dtor_ReturnConsumedCapacity().dtor_value()));
+      builder.returnConsumedCapacity(
+        ToNative.ReturnConsumedCapacity(
+          dafnyValue.dtor_ReturnConsumedCapacity().dtor_value()
+        )
+      );
     }
-    builder.tableName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_TableName()));
+    builder.tableName(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_TableName()
+      )
+    );
     return builder.build();
   }
 
   public static GetItemResponse GetItemOutput(GetItemOutput dafnyValue) {
     GetItemResponse.Builder builder = GetItemResponse.builder();
     if (dafnyValue.dtor_ConsumedCapacity().is_Some()) {
-      builder.consumedCapacity(ToNative.ConsumedCapacity(dafnyValue.dtor_ConsumedCapacity().dtor_value()));
+      builder.consumedCapacity(
+        ToNative.ConsumedCapacity(
+          dafnyValue.dtor_ConsumedCapacity().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_Item().is_Some()) {
       builder.item(ToNative.AttributeMap(dafnyValue.dtor_Item().dtor_value()));
@@ -2097,192 +3227,342 @@ public class ToNative {
   }
 
   public static GlobalSecondaryIndex GlobalSecondaryIndex(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.GlobalSecondaryIndex dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.GlobalSecondaryIndex dafnyValue
+  ) {
     GlobalSecondaryIndex.Builder builder = GlobalSecondaryIndex.builder();
-    builder.indexName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_IndexName()));
+    builder.indexName(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_IndexName()
+      )
+    );
     builder.keySchema(ToNative.KeySchema(dafnyValue.dtor_KeySchema()));
     builder.projection(ToNative.Projection(dafnyValue.dtor_Projection()));
     if (dafnyValue.dtor_ProvisionedThroughput().is_Some()) {
-      builder.provisionedThroughput(ToNative.ProvisionedThroughput(dafnyValue.dtor_ProvisionedThroughput().dtor_value()));
+      builder.provisionedThroughput(
+        ToNative.ProvisionedThroughput(
+          dafnyValue.dtor_ProvisionedThroughput().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
   public static GlobalSecondaryIndexAutoScalingUpdate GlobalSecondaryIndexAutoScalingUpdate(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.GlobalSecondaryIndexAutoScalingUpdate dafnyValue) {
-    GlobalSecondaryIndexAutoScalingUpdate.Builder builder = GlobalSecondaryIndexAutoScalingUpdate.builder();
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.GlobalSecondaryIndexAutoScalingUpdate dafnyValue
+  ) {
+    GlobalSecondaryIndexAutoScalingUpdate.Builder builder =
+      GlobalSecondaryIndexAutoScalingUpdate.builder();
     if (dafnyValue.dtor_IndexName().is_Some()) {
-      builder.indexName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_IndexName().dtor_value()));
+      builder.indexName(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_IndexName().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ProvisionedWriteCapacityAutoScalingUpdate().is_Some()) {
-      builder.provisionedWriteCapacityAutoScalingUpdate(ToNative.AutoScalingSettingsUpdate(dafnyValue.dtor_ProvisionedWriteCapacityAutoScalingUpdate().dtor_value()));
+      builder.provisionedWriteCapacityAutoScalingUpdate(
+        ToNative.AutoScalingSettingsUpdate(
+          dafnyValue
+            .dtor_ProvisionedWriteCapacityAutoScalingUpdate()
+            .dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
-  public static List<GlobalSecondaryIndexAutoScalingUpdate> GlobalSecondaryIndexAutoScalingUpdateList(
-      DafnySequence<? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.GlobalSecondaryIndexAutoScalingUpdate> dafnyValue) {
+  public static List<
+    GlobalSecondaryIndexAutoScalingUpdate
+  > GlobalSecondaryIndexAutoScalingUpdateList(
+    DafnySequence<
+      ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.GlobalSecondaryIndexAutoScalingUpdate
+    > dafnyValue
+  ) {
     return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToList(
-        dafnyValue, 
-        software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::GlobalSecondaryIndexAutoScalingUpdate);
+      dafnyValue,
+      software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::GlobalSecondaryIndexAutoScalingUpdate
+    );
   }
 
   public static GlobalSecondaryIndexDescription GlobalSecondaryIndexDescription(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.GlobalSecondaryIndexDescription dafnyValue) {
-    GlobalSecondaryIndexDescription.Builder builder = GlobalSecondaryIndexDescription.builder();
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.GlobalSecondaryIndexDescription dafnyValue
+  ) {
+    GlobalSecondaryIndexDescription.Builder builder =
+      GlobalSecondaryIndexDescription.builder();
     if (dafnyValue.dtor_Backfilling().is_Some()) {
       builder.backfilling((dafnyValue.dtor_Backfilling().dtor_value()));
     }
     if (dafnyValue.dtor_IndexArn().is_Some()) {
-      builder.indexArn(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_IndexArn().dtor_value()));
+      builder.indexArn(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_IndexArn().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_IndexName().is_Some()) {
-      builder.indexName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_IndexName().dtor_value()));
+      builder.indexName(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_IndexName().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_IndexSizeBytes().is_Some()) {
       builder.indexSizeBytes((dafnyValue.dtor_IndexSizeBytes().dtor_value()));
     }
     if (dafnyValue.dtor_IndexStatus().is_Some()) {
-      builder.indexStatus(ToNative.IndexStatus(dafnyValue.dtor_IndexStatus().dtor_value()));
+      builder.indexStatus(
+        ToNative.IndexStatus(dafnyValue.dtor_IndexStatus().dtor_value())
+      );
     }
     if (dafnyValue.dtor_ItemCount().is_Some()) {
       builder.itemCount((dafnyValue.dtor_ItemCount().dtor_value()));
     }
     if (dafnyValue.dtor_KeySchema().is_Some()) {
-      builder.keySchema(ToNative.KeySchema(dafnyValue.dtor_KeySchema().dtor_value()));
+      builder.keySchema(
+        ToNative.KeySchema(dafnyValue.dtor_KeySchema().dtor_value())
+      );
     }
     if (dafnyValue.dtor_Projection().is_Some()) {
-      builder.projection(ToNative.Projection(dafnyValue.dtor_Projection().dtor_value()));
+      builder.projection(
+        ToNative.Projection(dafnyValue.dtor_Projection().dtor_value())
+      );
     }
     if (dafnyValue.dtor_ProvisionedThroughput().is_Some()) {
-      builder.provisionedThroughput(ToNative.ProvisionedThroughputDescription(dafnyValue.dtor_ProvisionedThroughput().dtor_value()));
+      builder.provisionedThroughput(
+        ToNative.ProvisionedThroughputDescription(
+          dafnyValue.dtor_ProvisionedThroughput().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
-  public static List<GlobalSecondaryIndexDescription> GlobalSecondaryIndexDescriptionList(
-      DafnySequence<? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.GlobalSecondaryIndexDescription> dafnyValue) {
+  public static List<
+    GlobalSecondaryIndexDescription
+  > GlobalSecondaryIndexDescriptionList(
+    DafnySequence<
+      ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.GlobalSecondaryIndexDescription
+    > dafnyValue
+  ) {
     return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToList(
-        dafnyValue, 
-        software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::GlobalSecondaryIndexDescription);
+      dafnyValue,
+      software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::GlobalSecondaryIndexDescription
+    );
   }
 
   public static List<GlobalSecondaryIndexInfo> GlobalSecondaryIndexes(
-      DafnySequence<? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.GlobalSecondaryIndexInfo> dafnyValue) {
+    DafnySequence<
+      ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.GlobalSecondaryIndexInfo
+    > dafnyValue
+  ) {
     return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToList(
-        dafnyValue, 
-        software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::GlobalSecondaryIndexInfo);
+      dafnyValue,
+      software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::GlobalSecondaryIndexInfo
+    );
   }
 
   public static GlobalSecondaryIndexInfo GlobalSecondaryIndexInfo(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.GlobalSecondaryIndexInfo dafnyValue) {
-    GlobalSecondaryIndexInfo.Builder builder = GlobalSecondaryIndexInfo.builder();
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.GlobalSecondaryIndexInfo dafnyValue
+  ) {
+    GlobalSecondaryIndexInfo.Builder builder =
+      GlobalSecondaryIndexInfo.builder();
     if (dafnyValue.dtor_IndexName().is_Some()) {
-      builder.indexName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_IndexName().dtor_value()));
+      builder.indexName(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_IndexName().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_KeySchema().is_Some()) {
-      builder.keySchema(ToNative.KeySchema(dafnyValue.dtor_KeySchema().dtor_value()));
+      builder.keySchema(
+        ToNative.KeySchema(dafnyValue.dtor_KeySchema().dtor_value())
+      );
     }
     if (dafnyValue.dtor_Projection().is_Some()) {
-      builder.projection(ToNative.Projection(dafnyValue.dtor_Projection().dtor_value()));
+      builder.projection(
+        ToNative.Projection(dafnyValue.dtor_Projection().dtor_value())
+      );
     }
     if (dafnyValue.dtor_ProvisionedThroughput().is_Some()) {
-      builder.provisionedThroughput(ToNative.ProvisionedThroughput(dafnyValue.dtor_ProvisionedThroughput().dtor_value()));
+      builder.provisionedThroughput(
+        ToNative.ProvisionedThroughput(
+          dafnyValue.dtor_ProvisionedThroughput().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
   public static List<GlobalSecondaryIndex> GlobalSecondaryIndexList(
-      DafnySequence<? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.GlobalSecondaryIndex> dafnyValue) {
+    DafnySequence<
+      ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.GlobalSecondaryIndex
+    > dafnyValue
+  ) {
     return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToList(
-        dafnyValue, 
-        software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::GlobalSecondaryIndex);
+      dafnyValue,
+      software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::GlobalSecondaryIndex
+    );
   }
 
   public static GlobalSecondaryIndexUpdate GlobalSecondaryIndexUpdate(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.GlobalSecondaryIndexUpdate dafnyValue) {
-    GlobalSecondaryIndexUpdate.Builder builder = GlobalSecondaryIndexUpdate.builder();
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.GlobalSecondaryIndexUpdate dafnyValue
+  ) {
+    GlobalSecondaryIndexUpdate.Builder builder =
+      GlobalSecondaryIndexUpdate.builder();
     if (dafnyValue.dtor_Create().is_Some()) {
-      builder.create(ToNative.CreateGlobalSecondaryIndexAction(dafnyValue.dtor_Create().dtor_value()));
+      builder.create(
+        ToNative.CreateGlobalSecondaryIndexAction(
+          dafnyValue.dtor_Create().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_Delete().is_Some()) {
-      builder.delete(ToNative.DeleteGlobalSecondaryIndexAction(dafnyValue.dtor_Delete().dtor_value()));
+      builder.delete(
+        ToNative.DeleteGlobalSecondaryIndexAction(
+          dafnyValue.dtor_Delete().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_Update().is_Some()) {
-      builder.update(ToNative.UpdateGlobalSecondaryIndexAction(dafnyValue.dtor_Update().dtor_value()));
+      builder.update(
+        ToNative.UpdateGlobalSecondaryIndexAction(
+          dafnyValue.dtor_Update().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
   public static List<GlobalSecondaryIndexUpdate> GlobalSecondaryIndexUpdateList(
-      DafnySequence<? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.GlobalSecondaryIndexUpdate> dafnyValue) {
+    DafnySequence<
+      ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.GlobalSecondaryIndexUpdate
+    > dafnyValue
+  ) {
     return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToList(
-        dafnyValue, 
-        software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::GlobalSecondaryIndexUpdate);
+      dafnyValue,
+      software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::GlobalSecondaryIndexUpdate
+    );
   }
 
   public static GlobalTable GlobalTable(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.GlobalTable dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.GlobalTable dafnyValue
+  ) {
     GlobalTable.Builder builder = GlobalTable.builder();
     if (dafnyValue.dtor_GlobalTableName().is_Some()) {
-      builder.globalTableName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_GlobalTableName().dtor_value()));
+      builder.globalTableName(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_GlobalTableName().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ReplicationGroup().is_Some()) {
-      builder.replicationGroup(ToNative.ReplicaList(dafnyValue.dtor_ReplicationGroup().dtor_value()));
+      builder.replicationGroup(
+        ToNative.ReplicaList(dafnyValue.dtor_ReplicationGroup().dtor_value())
+      );
     }
     return builder.build();
   }
 
   public static GlobalTableDescription GlobalTableDescription(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.GlobalTableDescription dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.GlobalTableDescription dafnyValue
+  ) {
     GlobalTableDescription.Builder builder = GlobalTableDescription.builder();
     if (dafnyValue.dtor_CreationDateTime().is_Some()) {
-      builder.creationDateTime(software.amazon.smithy.dafny.conversion.ToNative.Simple.Instant(dafnyValue.dtor_CreationDateTime().dtor_value()));
+      builder.creationDateTime(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.Instant(
+          dafnyValue.dtor_CreationDateTime().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_GlobalTableArn().is_Some()) {
-      builder.globalTableArn(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_GlobalTableArn().dtor_value()));
+      builder.globalTableArn(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_GlobalTableArn().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_GlobalTableName().is_Some()) {
-      builder.globalTableName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_GlobalTableName().dtor_value()));
+      builder.globalTableName(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_GlobalTableName().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_GlobalTableStatus().is_Some()) {
-      builder.globalTableStatus(ToNative.GlobalTableStatus(dafnyValue.dtor_GlobalTableStatus().dtor_value()));
+      builder.globalTableStatus(
+        ToNative.GlobalTableStatus(
+          dafnyValue.dtor_GlobalTableStatus().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ReplicationGroup().is_Some()) {
-      builder.replicationGroup(ToNative.ReplicaDescriptionList(dafnyValue.dtor_ReplicationGroup().dtor_value()));
+      builder.replicationGroup(
+        ToNative.ReplicaDescriptionList(
+          dafnyValue.dtor_ReplicationGroup().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
   public static GlobalTableGlobalSecondaryIndexSettingsUpdate GlobalTableGlobalSecondaryIndexSettingsUpdate(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.GlobalTableGlobalSecondaryIndexSettingsUpdate dafnyValue) {
-    GlobalTableGlobalSecondaryIndexSettingsUpdate.Builder builder = GlobalTableGlobalSecondaryIndexSettingsUpdate.builder();
-    builder.indexName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_IndexName()));
-    if (dafnyValue.dtor_ProvisionedWriteCapacityAutoScalingSettingsUpdate().is_Some()) {
-      builder.provisionedWriteCapacityAutoScalingSettingsUpdate(ToNative.AutoScalingSettingsUpdate(dafnyValue.dtor_ProvisionedWriteCapacityAutoScalingSettingsUpdate().dtor_value()));
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.GlobalTableGlobalSecondaryIndexSettingsUpdate dafnyValue
+  ) {
+    GlobalTableGlobalSecondaryIndexSettingsUpdate.Builder builder =
+      GlobalTableGlobalSecondaryIndexSettingsUpdate.builder();
+    builder.indexName(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_IndexName()
+      )
+    );
+    if (
+      dafnyValue
+        .dtor_ProvisionedWriteCapacityAutoScalingSettingsUpdate()
+        .is_Some()
+    ) {
+      builder.provisionedWriteCapacityAutoScalingSettingsUpdate(
+        ToNative.AutoScalingSettingsUpdate(
+          dafnyValue
+            .dtor_ProvisionedWriteCapacityAutoScalingSettingsUpdate()
+            .dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ProvisionedWriteCapacityUnits().is_Some()) {
-      builder.provisionedWriteCapacityUnits((dafnyValue.dtor_ProvisionedWriteCapacityUnits().dtor_value()));
+      builder.provisionedWriteCapacityUnits(
+        (dafnyValue.dtor_ProvisionedWriteCapacityUnits().dtor_value())
+      );
     }
     return builder.build();
   }
 
-  public static List<GlobalTableGlobalSecondaryIndexSettingsUpdate> GlobalTableGlobalSecondaryIndexSettingsUpdateList(
-      DafnySequence<? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.GlobalTableGlobalSecondaryIndexSettingsUpdate> dafnyValue) {
+  public static List<
+    GlobalTableGlobalSecondaryIndexSettingsUpdate
+  > GlobalTableGlobalSecondaryIndexSettingsUpdateList(
+    DafnySequence<
+      ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.GlobalTableGlobalSecondaryIndexSettingsUpdate
+    > dafnyValue
+  ) {
     return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToList(
-        dafnyValue, 
-        software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::GlobalTableGlobalSecondaryIndexSettingsUpdate);
+      dafnyValue,
+      software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::GlobalTableGlobalSecondaryIndexSettingsUpdate
+    );
   }
 
   public static List<GlobalTable> GlobalTableList(
-      DafnySequence<? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.GlobalTable> dafnyValue) {
+    DafnySequence<
+      ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.GlobalTable
+    > dafnyValue
+  ) {
     return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToList(
-        dafnyValue, 
-        software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::GlobalTable);
+      dafnyValue,
+      software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::GlobalTable
+    );
   }
 
   public static GlobalTableStatus GlobalTableStatus(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.GlobalTableStatus dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.GlobalTableStatus dafnyValue
+  ) {
     if (dafnyValue.is_CREATING()) {
       return GlobalTableStatus.CREATING;
     }
@@ -2299,7 +3579,8 @@ public class ToNative {
   }
 
   public static ImportStatus ImportStatus(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.ImportStatus dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.ImportStatus dafnyValue
+  ) {
     if (dafnyValue.is_IN__PROGRESS()) {
       return ImportStatus.IN_PROGRESS;
     }
@@ -2319,130 +3600,247 @@ public class ToNative {
   }
 
   public static ImportSummary ImportSummary(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.ImportSummary dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.ImportSummary dafnyValue
+  ) {
     ImportSummary.Builder builder = ImportSummary.builder();
     if (dafnyValue.dtor_CloudWatchLogGroupArn().is_Some()) {
-      builder.cloudWatchLogGroupArn(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_CloudWatchLogGroupArn().dtor_value()));
+      builder.cloudWatchLogGroupArn(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_CloudWatchLogGroupArn().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_EndTime().is_Some()) {
-      builder.endTime(software.amazon.smithy.dafny.conversion.ToNative.Simple.Instant(dafnyValue.dtor_EndTime().dtor_value()));
+      builder.endTime(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.Instant(
+          dafnyValue.dtor_EndTime().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ImportArn().is_Some()) {
-      builder.importArn(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_ImportArn().dtor_value()));
+      builder.importArn(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_ImportArn().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ImportStatus().is_Some()) {
-      builder.importStatus(ToNative.ImportStatus(dafnyValue.dtor_ImportStatus().dtor_value()));
+      builder.importStatus(
+        ToNative.ImportStatus(dafnyValue.dtor_ImportStatus().dtor_value())
+      );
     }
     if (dafnyValue.dtor_InputFormat().is_Some()) {
-      builder.inputFormat(ToNative.InputFormat(dafnyValue.dtor_InputFormat().dtor_value()));
+      builder.inputFormat(
+        ToNative.InputFormat(dafnyValue.dtor_InputFormat().dtor_value())
+      );
     }
     if (dafnyValue.dtor_S3BucketSource().is_Some()) {
-      builder.s3BucketSource(ToNative.S3BucketSource(dafnyValue.dtor_S3BucketSource().dtor_value()));
+      builder.s3BucketSource(
+        ToNative.S3BucketSource(dafnyValue.dtor_S3BucketSource().dtor_value())
+      );
     }
     if (dafnyValue.dtor_StartTime().is_Some()) {
-      builder.startTime(software.amazon.smithy.dafny.conversion.ToNative.Simple.Instant(dafnyValue.dtor_StartTime().dtor_value()));
+      builder.startTime(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.Instant(
+          dafnyValue.dtor_StartTime().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_TableArn().is_Some()) {
-      builder.tableArn(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_TableArn().dtor_value()));
+      builder.tableArn(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_TableArn().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
   public static List<ImportSummary> ImportSummaryList(
-      DafnySequence<? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.ImportSummary> dafnyValue) {
+    DafnySequence<
+      ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.ImportSummary
+    > dafnyValue
+  ) {
     return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToList(
-        dafnyValue, 
-        software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::ImportSummary);
+      dafnyValue,
+      software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::ImportSummary
+    );
   }
 
   public static ImportTableDescription ImportTableDescription(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.ImportTableDescription dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.ImportTableDescription dafnyValue
+  ) {
     ImportTableDescription.Builder builder = ImportTableDescription.builder();
     if (dafnyValue.dtor_ClientToken().is_Some()) {
-      builder.clientToken(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_ClientToken().dtor_value()));
+      builder.clientToken(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_ClientToken().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_CloudWatchLogGroupArn().is_Some()) {
-      builder.cloudWatchLogGroupArn(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_CloudWatchLogGroupArn().dtor_value()));
+      builder.cloudWatchLogGroupArn(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_CloudWatchLogGroupArn().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_EndTime().is_Some()) {
-      builder.endTime(software.amazon.smithy.dafny.conversion.ToNative.Simple.Instant(dafnyValue.dtor_EndTime().dtor_value()));
+      builder.endTime(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.Instant(
+          dafnyValue.dtor_EndTime().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ErrorCount().is_Some()) {
       builder.errorCount((dafnyValue.dtor_ErrorCount().dtor_value()));
     }
     if (dafnyValue.dtor_FailureCode().is_Some()) {
-      builder.failureCode(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_FailureCode().dtor_value()));
+      builder.failureCode(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_FailureCode().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_FailureMessage().is_Some()) {
-      builder.failureMessage(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_FailureMessage().dtor_value()));
+      builder.failureMessage(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_FailureMessage().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ImportArn().is_Some()) {
-      builder.importArn(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_ImportArn().dtor_value()));
+      builder.importArn(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_ImportArn().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ImportedItemCount().is_Some()) {
-      builder.importedItemCount((dafnyValue.dtor_ImportedItemCount().dtor_value()));
+      builder.importedItemCount(
+        (dafnyValue.dtor_ImportedItemCount().dtor_value())
+      );
     }
     if (dafnyValue.dtor_ImportStatus().is_Some()) {
-      builder.importStatus(ToNative.ImportStatus(dafnyValue.dtor_ImportStatus().dtor_value()));
+      builder.importStatus(
+        ToNative.ImportStatus(dafnyValue.dtor_ImportStatus().dtor_value())
+      );
     }
     if (dafnyValue.dtor_InputCompressionType().is_Some()) {
-      builder.inputCompressionType(ToNative.InputCompressionType(dafnyValue.dtor_InputCompressionType().dtor_value()));
+      builder.inputCompressionType(
+        ToNative.InputCompressionType(
+          dafnyValue.dtor_InputCompressionType().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_InputFormat().is_Some()) {
-      builder.inputFormat(ToNative.InputFormat(dafnyValue.dtor_InputFormat().dtor_value()));
+      builder.inputFormat(
+        ToNative.InputFormat(dafnyValue.dtor_InputFormat().dtor_value())
+      );
     }
     if (dafnyValue.dtor_InputFormatOptions().is_Some()) {
-      builder.inputFormatOptions(ToNative.InputFormatOptions(dafnyValue.dtor_InputFormatOptions().dtor_value()));
+      builder.inputFormatOptions(
+        ToNative.InputFormatOptions(
+          dafnyValue.dtor_InputFormatOptions().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ProcessedItemCount().is_Some()) {
-      builder.processedItemCount((dafnyValue.dtor_ProcessedItemCount().dtor_value()));
+      builder.processedItemCount(
+        (dafnyValue.dtor_ProcessedItemCount().dtor_value())
+      );
     }
     if (dafnyValue.dtor_ProcessedSizeBytes().is_Some()) {
-      builder.processedSizeBytes((dafnyValue.dtor_ProcessedSizeBytes().dtor_value()));
+      builder.processedSizeBytes(
+        (dafnyValue.dtor_ProcessedSizeBytes().dtor_value())
+      );
     }
     if (dafnyValue.dtor_S3BucketSource().is_Some()) {
-      builder.s3BucketSource(ToNative.S3BucketSource(dafnyValue.dtor_S3BucketSource().dtor_value()));
+      builder.s3BucketSource(
+        ToNative.S3BucketSource(dafnyValue.dtor_S3BucketSource().dtor_value())
+      );
     }
     if (dafnyValue.dtor_StartTime().is_Some()) {
-      builder.startTime(software.amazon.smithy.dafny.conversion.ToNative.Simple.Instant(dafnyValue.dtor_StartTime().dtor_value()));
+      builder.startTime(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.Instant(
+          dafnyValue.dtor_StartTime().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_TableArn().is_Some()) {
-      builder.tableArn(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_TableArn().dtor_value()));
+      builder.tableArn(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_TableArn().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_TableCreationParameters().is_Some()) {
-      builder.tableCreationParameters(ToNative.TableCreationParameters(dafnyValue.dtor_TableCreationParameters().dtor_value()));
+      builder.tableCreationParameters(
+        ToNative.TableCreationParameters(
+          dafnyValue.dtor_TableCreationParameters().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_TableId().is_Some()) {
-      builder.tableId(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_TableId().dtor_value()));
+      builder.tableId(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_TableId().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
-  public static ImportTableRequest ImportTableInput(ImportTableInput dafnyValue) {
+  public static ImportTableRequest ImportTableInput(
+    ImportTableInput dafnyValue
+  ) {
     ImportTableRequest.Builder builder = ImportTableRequest.builder();
     if (dafnyValue.dtor_ClientToken().is_Some()) {
-      builder.clientToken(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_ClientToken().dtor_value()));
+      builder.clientToken(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_ClientToken().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_InputCompressionType().is_Some()) {
-      builder.inputCompressionType(ToNative.InputCompressionType(dafnyValue.dtor_InputCompressionType().dtor_value()));
+      builder.inputCompressionType(
+        ToNative.InputCompressionType(
+          dafnyValue.dtor_InputCompressionType().dtor_value()
+        )
+      );
     }
     builder.inputFormat(ToNative.InputFormat(dafnyValue.dtor_InputFormat()));
     if (dafnyValue.dtor_InputFormatOptions().is_Some()) {
-      builder.inputFormatOptions(ToNative.InputFormatOptions(dafnyValue.dtor_InputFormatOptions().dtor_value()));
+      builder.inputFormatOptions(
+        ToNative.InputFormatOptions(
+          dafnyValue.dtor_InputFormatOptions().dtor_value()
+        )
+      );
     }
-    builder.s3BucketSource(ToNative.S3BucketSource(dafnyValue.dtor_S3BucketSource()));
-    builder.tableCreationParameters(ToNative.TableCreationParameters(dafnyValue.dtor_TableCreationParameters()));
+    builder.s3BucketSource(
+      ToNative.S3BucketSource(dafnyValue.dtor_S3BucketSource())
+    );
+    builder.tableCreationParameters(
+      ToNative.TableCreationParameters(
+        dafnyValue.dtor_TableCreationParameters()
+      )
+    );
     return builder.build();
   }
 
-  public static ImportTableResponse ImportTableOutput(ImportTableOutput dafnyValue) {
+  public static ImportTableResponse ImportTableOutput(
+    ImportTableOutput dafnyValue
+  ) {
     ImportTableResponse.Builder builder = ImportTableResponse.builder();
-    builder.importTableDescription(ToNative.ImportTableDescription(dafnyValue.dtor_ImportTableDescription()));
+    builder.importTableDescription(
+      ToNative.ImportTableDescription(dafnyValue.dtor_ImportTableDescription())
+    );
     return builder.build();
   }
 
   public static IndexStatus IndexStatus(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.IndexStatus dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.IndexStatus dafnyValue
+  ) {
     if (dafnyValue.is_CREATING()) {
       return IndexStatus.CREATING;
     }
@@ -2459,7 +3857,8 @@ public class ToNative {
   }
 
   public static InputCompressionType InputCompressionType(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.InputCompressionType dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.InputCompressionType dafnyValue
+  ) {
     if (dafnyValue.is_GZIP()) {
       return InputCompressionType.GZIP;
     }
@@ -2473,7 +3872,8 @@ public class ToNative {
   }
 
   public static InputFormat InputFormat(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.InputFormat dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.InputFormat dafnyValue
+  ) {
     if (dafnyValue.is_DYNAMODB__JSON()) {
       return InputFormat.DYNAMODB_JSON;
     }
@@ -2487,7 +3887,8 @@ public class ToNative {
   }
 
   public static InputFormatOptions InputFormatOptions(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.InputFormatOptions dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.InputFormatOptions dafnyValue
+  ) {
     InputFormatOptions.Builder builder = InputFormatOptions.builder();
     if (dafnyValue.dtor_Csv().is_Some()) {
       builder.csv(ToNative.CsvOptions(dafnyValue.dtor_Csv().dtor_value()));
@@ -2496,56 +3897,94 @@ public class ToNative {
   }
 
   public static Map<String, AttributeValue> ItemCollectionKeyAttributeMap(
-      DafnyMap<? extends DafnySequence<? extends Character>, ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.AttributeValue> dafnyValue) {
+    DafnyMap<
+      ? extends DafnySequence<? extends Character>,
+      ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.AttributeValue
+    > dafnyValue
+  ) {
     return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToMap(
-        dafnyValue, 
-        software.amazon.smithy.dafny.conversion.ToNative.Simple::String, 
-        software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::AttributeValue);
+      dafnyValue,
+      software.amazon.smithy.dafny.conversion.ToNative.Simple::String,
+      software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::AttributeValue
+    );
   }
 
   public static ItemCollectionMetrics ItemCollectionMetrics(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.ItemCollectionMetrics dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.ItemCollectionMetrics dafnyValue
+  ) {
     ItemCollectionMetrics.Builder builder = ItemCollectionMetrics.builder();
     if (dafnyValue.dtor_ItemCollectionKey().is_Some()) {
-      builder.itemCollectionKey(ToNative.ItemCollectionKeyAttributeMap(dafnyValue.dtor_ItemCollectionKey().dtor_value()));
+      builder.itemCollectionKey(
+        ToNative.ItemCollectionKeyAttributeMap(
+          dafnyValue.dtor_ItemCollectionKey().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_SizeEstimateRangeGB().is_Some()) {
-      builder.sizeEstimateRangeGB(ToNative.ItemCollectionSizeEstimateRange(dafnyValue.dtor_SizeEstimateRangeGB().dtor_value()));
+      builder.sizeEstimateRangeGB(
+        ToNative.ItemCollectionSizeEstimateRange(
+          dafnyValue.dtor_SizeEstimateRangeGB().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
   public static List<ItemCollectionMetrics> ItemCollectionMetricsMultiple(
-      DafnySequence<? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.ItemCollectionMetrics> dafnyValue) {
+    DafnySequence<
+      ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.ItemCollectionMetrics
+    > dafnyValue
+  ) {
     return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToList(
-        dafnyValue, 
-        software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::ItemCollectionMetrics);
+      dafnyValue,
+      software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::ItemCollectionMetrics
+    );
   }
 
-  public static Map<String, List<ItemCollectionMetrics>> ItemCollectionMetricsPerTable(
-      DafnyMap<? extends DafnySequence<? extends Character>, ? extends DafnySequence<? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.ItemCollectionMetrics>> dafnyValue) {
+  public static Map<
+    String,
+    List<ItemCollectionMetrics>
+  > ItemCollectionMetricsPerTable(
+    DafnyMap<
+      ? extends DafnySequence<? extends Character>,
+      ? extends DafnySequence<
+        ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.ItemCollectionMetrics
+      >
+    > dafnyValue
+  ) {
     return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToMap(
-        dafnyValue, 
-        software.amazon.smithy.dafny.conversion.ToNative.Simple::String, 
-        software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::ItemCollectionMetricsMultiple);
+      dafnyValue,
+      software.amazon.smithy.dafny.conversion.ToNative.Simple::String,
+      software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::ItemCollectionMetricsMultiple
+    );
   }
 
   public static List<Double> ItemCollectionSizeEstimateRange(
-      DafnySequence<? extends DafnySequence<? extends Byte>> dafnyValue) {
+    DafnySequence<? extends DafnySequence<? extends Byte>> dafnyValue
+  ) {
     return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToList(
-        dafnyValue, 
-        software.amazon.smithy.dafny.conversion.ToNative.Simple::Double);
+      dafnyValue,
+      software.amazon.smithy.dafny.conversion.ToNative.Simple::Double
+    );
   }
 
   public static List<Map<String, AttributeValue>> ItemList(
-      DafnySequence<? extends DafnyMap<? extends DafnySequence<? extends Character>, ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.AttributeValue>> dafnyValue) {
+    DafnySequence<
+      ? extends DafnyMap<
+        ? extends DafnySequence<? extends Character>,
+        ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.AttributeValue
+      >
+    > dafnyValue
+  ) {
     return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToList(
-        dafnyValue, 
-        software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::AttributeMap);
+      dafnyValue,
+      software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::AttributeMap
+    );
   }
 
   public static ItemResponse ItemResponse(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.ItemResponse dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.ItemResponse dafnyValue
+  ) {
     ItemResponse.Builder builder = ItemResponse.builder();
     if (dafnyValue.dtor_Item().is_Some()) {
       builder.item(ToNative.AttributeMap(dafnyValue.dtor_Item().dtor_value()));
@@ -2554,71 +3993,115 @@ public class ToNative {
   }
 
   public static List<ItemResponse> ItemResponseList(
-      DafnySequence<? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.ItemResponse> dafnyValue) {
+    DafnySequence<
+      ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.ItemResponse
+    > dafnyValue
+  ) {
     return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToList(
-        dafnyValue, 
-        software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::ItemResponse);
+      dafnyValue,
+      software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::ItemResponse
+    );
   }
 
   public static Map<String, AttributeValue> Key(
-      DafnyMap<? extends DafnySequence<? extends Character>, ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.AttributeValue> dafnyValue) {
+    DafnyMap<
+      ? extends DafnySequence<? extends Character>,
+      ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.AttributeValue
+    > dafnyValue
+  ) {
     return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToMap(
-        dafnyValue, 
-        software.amazon.smithy.dafny.conversion.ToNative.Simple::String, 
-        software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::AttributeValue);
+      dafnyValue,
+      software.amazon.smithy.dafny.conversion.ToNative.Simple::String,
+      software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::AttributeValue
+    );
   }
 
   public static Map<String, Condition> KeyConditions(
-      DafnyMap<? extends DafnySequence<? extends Character>, ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.Condition> dafnyValue) {
+    DafnyMap<
+      ? extends DafnySequence<? extends Character>,
+      ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.Condition
+    > dafnyValue
+  ) {
     return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToMap(
-        dafnyValue, 
-        software.amazon.smithy.dafny.conversion.ToNative.Simple::String, 
-        software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::Condition);
+      dafnyValue,
+      software.amazon.smithy.dafny.conversion.ToNative.Simple::String,
+      software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::Condition
+    );
   }
 
   public static List<Map<String, AttributeValue>> KeyList(
-      DafnySequence<? extends DafnyMap<? extends DafnySequence<? extends Character>, ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.AttributeValue>> dafnyValue) {
+    DafnySequence<
+      ? extends DafnyMap<
+        ? extends DafnySequence<? extends Character>,
+        ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.AttributeValue
+      >
+    > dafnyValue
+  ) {
     return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToList(
-        dafnyValue, 
-        software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::Key);
+      dafnyValue,
+      software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::Key
+    );
   }
 
   public static KeysAndAttributes KeysAndAttributes(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.KeysAndAttributes dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.KeysAndAttributes dafnyValue
+  ) {
     KeysAndAttributes.Builder builder = KeysAndAttributes.builder();
     if (dafnyValue.dtor_AttributesToGet().is_Some()) {
-      builder.attributesToGet(ToNative.AttributeNameList(dafnyValue.dtor_AttributesToGet().dtor_value()));
+      builder.attributesToGet(
+        ToNative.AttributeNameList(
+          dafnyValue.dtor_AttributesToGet().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ConsistentRead().is_Some()) {
       builder.consistentRead((dafnyValue.dtor_ConsistentRead().dtor_value()));
     }
     if (dafnyValue.dtor_ExpressionAttributeNames().is_Some()) {
-      builder.expressionAttributeNames(ToNative.ExpressionAttributeNameMap(dafnyValue.dtor_ExpressionAttributeNames().dtor_value()));
+      builder.expressionAttributeNames(
+        ToNative.ExpressionAttributeNameMap(
+          dafnyValue.dtor_ExpressionAttributeNames().dtor_value()
+        )
+      );
     }
     builder.keys(ToNative.KeyList(dafnyValue.dtor_Keys()));
     if (dafnyValue.dtor_ProjectionExpression().is_Some()) {
-      builder.projectionExpression(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_ProjectionExpression().dtor_value()));
+      builder.projectionExpression(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_ProjectionExpression().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
   public static List<KeySchemaElement> KeySchema(
-      DafnySequence<? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.KeySchemaElement> dafnyValue) {
+    DafnySequence<
+      ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.KeySchemaElement
+    > dafnyValue
+  ) {
     return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToList(
-        dafnyValue, 
-        software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::KeySchemaElement);
+      dafnyValue,
+      software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::KeySchemaElement
+    );
   }
 
   public static KeySchemaElement KeySchemaElement(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.KeySchemaElement dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.KeySchemaElement dafnyValue
+  ) {
     KeySchemaElement.Builder builder = KeySchemaElement.builder();
-    builder.attributeName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_AttributeName()));
+    builder.attributeName(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_AttributeName()
+      )
+    );
     builder.keyType(ToNative.KeyType(dafnyValue.dtor_KeyType()));
     return builder.build();
   }
 
   public static KeyType KeyType(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.KeyType dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.KeyType dafnyValue
+  ) {
     if (dafnyValue.is_HASH()) {
       return KeyType.HASH;
     }
@@ -2629,166 +4112,295 @@ public class ToNative {
   }
 
   public static KinesisDataStreamDestination KinesisDataStreamDestination(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.KinesisDataStreamDestination dafnyValue) {
-    KinesisDataStreamDestination.Builder builder = KinesisDataStreamDestination.builder();
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.KinesisDataStreamDestination dafnyValue
+  ) {
+    KinesisDataStreamDestination.Builder builder =
+      KinesisDataStreamDestination.builder();
     if (dafnyValue.dtor_DestinationStatus().is_Some()) {
-      builder.destinationStatus(ToNative.DestinationStatus(dafnyValue.dtor_DestinationStatus().dtor_value()));
+      builder.destinationStatus(
+        ToNative.DestinationStatus(
+          dafnyValue.dtor_DestinationStatus().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_DestinationStatusDescription().is_Some()) {
-      builder.destinationStatusDescription(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_DestinationStatusDescription().dtor_value()));
+      builder.destinationStatusDescription(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_DestinationStatusDescription().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_StreamArn().is_Some()) {
-      builder.streamArn(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_StreamArn().dtor_value()));
+      builder.streamArn(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_StreamArn().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
-  public static List<KinesisDataStreamDestination> KinesisDataStreamDestinations(
-      DafnySequence<? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.KinesisDataStreamDestination> dafnyValue) {
+  public static List<
+    KinesisDataStreamDestination
+  > KinesisDataStreamDestinations(
+    DafnySequence<
+      ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.KinesisDataStreamDestination
+    > dafnyValue
+  ) {
     return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToList(
-        dafnyValue, 
-        software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::KinesisDataStreamDestination);
+      dafnyValue,
+      software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::KinesisDataStreamDestination
+    );
   }
 
   public static List<AttributeValue> ListAttributeValue(
-      DafnySequence<? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.AttributeValue> dafnyValue) {
+    DafnySequence<
+      ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.AttributeValue
+    > dafnyValue
+  ) {
     return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToList(
-        dafnyValue, 
-        software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::AttributeValue);
+      dafnyValue,
+      software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::AttributeValue
+    );
   }
 
-  public static ListBackupsRequest ListBackupsInput(ListBackupsInput dafnyValue) {
+  public static ListBackupsRequest ListBackupsInput(
+    ListBackupsInput dafnyValue
+  ) {
     ListBackupsRequest.Builder builder = ListBackupsRequest.builder();
     if (dafnyValue.dtor_BackupType().is_Some()) {
-      builder.backupType(ToNative.BackupTypeFilter(dafnyValue.dtor_BackupType().dtor_value()));
+      builder.backupType(
+        ToNative.BackupTypeFilter(dafnyValue.dtor_BackupType().dtor_value())
+      );
     }
     if (dafnyValue.dtor_ExclusiveStartBackupArn().is_Some()) {
-      builder.exclusiveStartBackupArn(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_ExclusiveStartBackupArn().dtor_value()));
+      builder.exclusiveStartBackupArn(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_ExclusiveStartBackupArn().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_Limit().is_Some()) {
       builder.limit((dafnyValue.dtor_Limit().dtor_value()));
     }
     if (dafnyValue.dtor_TableName().is_Some()) {
-      builder.tableName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_TableName().dtor_value()));
+      builder.tableName(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_TableName().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_TimeRangeLowerBound().is_Some()) {
-      builder.timeRangeLowerBound(software.amazon.smithy.dafny.conversion.ToNative.Simple.Instant(dafnyValue.dtor_TimeRangeLowerBound().dtor_value()));
+      builder.timeRangeLowerBound(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.Instant(
+          dafnyValue.dtor_TimeRangeLowerBound().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_TimeRangeUpperBound().is_Some()) {
-      builder.timeRangeUpperBound(software.amazon.smithy.dafny.conversion.ToNative.Simple.Instant(dafnyValue.dtor_TimeRangeUpperBound().dtor_value()));
+      builder.timeRangeUpperBound(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.Instant(
+          dafnyValue.dtor_TimeRangeUpperBound().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
-  public static ListBackupsResponse ListBackupsOutput(ListBackupsOutput dafnyValue) {
+  public static ListBackupsResponse ListBackupsOutput(
+    ListBackupsOutput dafnyValue
+  ) {
     ListBackupsResponse.Builder builder = ListBackupsResponse.builder();
     if (dafnyValue.dtor_BackupSummaries().is_Some()) {
-      builder.backupSummaries(ToNative.BackupSummaries(dafnyValue.dtor_BackupSummaries().dtor_value()));
+      builder.backupSummaries(
+        ToNative.BackupSummaries(dafnyValue.dtor_BackupSummaries().dtor_value())
+      );
     }
     if (dafnyValue.dtor_LastEvaluatedBackupArn().is_Some()) {
-      builder.lastEvaluatedBackupArn(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_LastEvaluatedBackupArn().dtor_value()));
+      builder.lastEvaluatedBackupArn(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_LastEvaluatedBackupArn().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
   public static ListContributorInsightsRequest ListContributorInsightsInput(
-      ListContributorInsightsInput dafnyValue) {
-    ListContributorInsightsRequest.Builder builder = ListContributorInsightsRequest.builder();
+    ListContributorInsightsInput dafnyValue
+  ) {
+    ListContributorInsightsRequest.Builder builder =
+      ListContributorInsightsRequest.builder();
     if (dafnyValue.dtor_MaxResults().is_Some()) {
       builder.maxResults((dafnyValue.dtor_MaxResults().dtor_value()));
     }
     if (dafnyValue.dtor_NextToken().is_Some()) {
-      builder.nextToken(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_NextToken().dtor_value()));
+      builder.nextToken(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_NextToken().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_TableName().is_Some()) {
-      builder.tableName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_TableName().dtor_value()));
+      builder.tableName(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_TableName().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
   public static ListContributorInsightsResponse ListContributorInsightsOutput(
-      ListContributorInsightsOutput dafnyValue) {
-    ListContributorInsightsResponse.Builder builder = ListContributorInsightsResponse.builder();
+    ListContributorInsightsOutput dafnyValue
+  ) {
+    ListContributorInsightsResponse.Builder builder =
+      ListContributorInsightsResponse.builder();
     if (dafnyValue.dtor_ContributorInsightsSummaries().is_Some()) {
-      builder.contributorInsightsSummaries(ToNative.ContributorInsightsSummaries(dafnyValue.dtor_ContributorInsightsSummaries().dtor_value()));
+      builder.contributorInsightsSummaries(
+        ToNative.ContributorInsightsSummaries(
+          dafnyValue.dtor_ContributorInsightsSummaries().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_NextToken().is_Some()) {
-      builder.nextToken(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_NextToken().dtor_value()));
+      builder.nextToken(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_NextToken().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
-  public static ListExportsRequest ListExportsInput(ListExportsInput dafnyValue) {
+  public static ListExportsRequest ListExportsInput(
+    ListExportsInput dafnyValue
+  ) {
     ListExportsRequest.Builder builder = ListExportsRequest.builder();
     if (dafnyValue.dtor_MaxResults().is_Some()) {
       builder.maxResults((dafnyValue.dtor_MaxResults().dtor_value()));
     }
     if (dafnyValue.dtor_NextToken().is_Some()) {
-      builder.nextToken(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_NextToken().dtor_value()));
+      builder.nextToken(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_NextToken().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_TableArn().is_Some()) {
-      builder.tableArn(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_TableArn().dtor_value()));
+      builder.tableArn(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_TableArn().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
-  public static ListExportsResponse ListExportsOutput(ListExportsOutput dafnyValue) {
+  public static ListExportsResponse ListExportsOutput(
+    ListExportsOutput dafnyValue
+  ) {
     ListExportsResponse.Builder builder = ListExportsResponse.builder();
     if (dafnyValue.dtor_ExportSummaries().is_Some()) {
-      builder.exportSummaries(ToNative.ExportSummaries(dafnyValue.dtor_ExportSummaries().dtor_value()));
+      builder.exportSummaries(
+        ToNative.ExportSummaries(dafnyValue.dtor_ExportSummaries().dtor_value())
+      );
     }
     if (dafnyValue.dtor_NextToken().is_Some()) {
-      builder.nextToken(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_NextToken().dtor_value()));
+      builder.nextToken(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_NextToken().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
-  public static ListGlobalTablesRequest ListGlobalTablesInput(ListGlobalTablesInput dafnyValue) {
+  public static ListGlobalTablesRequest ListGlobalTablesInput(
+    ListGlobalTablesInput dafnyValue
+  ) {
     ListGlobalTablesRequest.Builder builder = ListGlobalTablesRequest.builder();
     if (dafnyValue.dtor_ExclusiveStartGlobalTableName().is_Some()) {
-      builder.exclusiveStartGlobalTableName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_ExclusiveStartGlobalTableName().dtor_value()));
+      builder.exclusiveStartGlobalTableName(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_ExclusiveStartGlobalTableName().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_Limit().is_Some()) {
       builder.limit((dafnyValue.dtor_Limit().dtor_value()));
     }
     if (dafnyValue.dtor_RegionName().is_Some()) {
-      builder.regionName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_RegionName().dtor_value()));
+      builder.regionName(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_RegionName().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
-  public static ListGlobalTablesResponse ListGlobalTablesOutput(ListGlobalTablesOutput dafnyValue) {
-    ListGlobalTablesResponse.Builder builder = ListGlobalTablesResponse.builder();
+  public static ListGlobalTablesResponse ListGlobalTablesOutput(
+    ListGlobalTablesOutput dafnyValue
+  ) {
+    ListGlobalTablesResponse.Builder builder =
+      ListGlobalTablesResponse.builder();
     if (dafnyValue.dtor_GlobalTables().is_Some()) {
-      builder.globalTables(ToNative.GlobalTableList(dafnyValue.dtor_GlobalTables().dtor_value()));
+      builder.globalTables(
+        ToNative.GlobalTableList(dafnyValue.dtor_GlobalTables().dtor_value())
+      );
     }
     if (dafnyValue.dtor_LastEvaluatedGlobalTableName().is_Some()) {
-      builder.lastEvaluatedGlobalTableName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_LastEvaluatedGlobalTableName().dtor_value()));
+      builder.lastEvaluatedGlobalTableName(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_LastEvaluatedGlobalTableName().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
-  public static ListImportsRequest ListImportsInput(ListImportsInput dafnyValue) {
+  public static ListImportsRequest ListImportsInput(
+    ListImportsInput dafnyValue
+  ) {
     ListImportsRequest.Builder builder = ListImportsRequest.builder();
     if (dafnyValue.dtor_NextToken().is_Some()) {
-      builder.nextToken(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_NextToken().dtor_value()));
+      builder.nextToken(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_NextToken().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_PageSize().is_Some()) {
       builder.pageSize((dafnyValue.dtor_PageSize().dtor_value()));
     }
     if (dafnyValue.dtor_TableArn().is_Some()) {
-      builder.tableArn(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_TableArn().dtor_value()));
+      builder.tableArn(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_TableArn().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
-  public static ListImportsResponse ListImportsOutput(ListImportsOutput dafnyValue) {
+  public static ListImportsResponse ListImportsOutput(
+    ListImportsOutput dafnyValue
+  ) {
     ListImportsResponse.Builder builder = ListImportsResponse.builder();
     if (dafnyValue.dtor_ImportSummaryList().is_Some()) {
-      builder.importSummaryList(ToNative.ImportSummaryList(dafnyValue.dtor_ImportSummaryList().dtor_value()));
+      builder.importSummaryList(
+        ToNative.ImportSummaryList(
+          dafnyValue.dtor_ImportSummaryList().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_NextToken().is_Some()) {
-      builder.nextToken(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_NextToken().dtor_value()));
+      builder.nextToken(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_NextToken().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
@@ -2796,7 +4408,11 @@ public class ToNative {
   public static ListTablesRequest ListTablesInput(ListTablesInput dafnyValue) {
     ListTablesRequest.Builder builder = ListTablesRequest.builder();
     if (dafnyValue.dtor_ExclusiveStartTableName().is_Some()) {
-      builder.exclusiveStartTableName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_ExclusiveStartTableName().dtor_value()));
+      builder.exclusiveStartTableName(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_ExclusiveStartTableName().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_Limit().is_Some()) {
       builder.limit((dafnyValue.dtor_Limit().dtor_value()));
@@ -2804,32 +4420,56 @@ public class ToNative {
     return builder.build();
   }
 
-  public static ListTablesResponse ListTablesOutput(ListTablesOutput dafnyValue) {
+  public static ListTablesResponse ListTablesOutput(
+    ListTablesOutput dafnyValue
+  ) {
     ListTablesResponse.Builder builder = ListTablesResponse.builder();
     if (dafnyValue.dtor_LastEvaluatedTableName().is_Some()) {
-      builder.lastEvaluatedTableName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_LastEvaluatedTableName().dtor_value()));
+      builder.lastEvaluatedTableName(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_LastEvaluatedTableName().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_TableNames().is_Some()) {
-      builder.tableNames(ToNative.TableNameList(dafnyValue.dtor_TableNames().dtor_value()));
+      builder.tableNames(
+        ToNative.TableNameList(dafnyValue.dtor_TableNames().dtor_value())
+      );
     }
     return builder.build();
   }
 
   public static ListTagsOfResourceRequest ListTagsOfResourceInput(
-      ListTagsOfResourceInput dafnyValue) {
-    ListTagsOfResourceRequest.Builder builder = ListTagsOfResourceRequest.builder();
+    ListTagsOfResourceInput dafnyValue
+  ) {
+    ListTagsOfResourceRequest.Builder builder =
+      ListTagsOfResourceRequest.builder();
     if (dafnyValue.dtor_NextToken().is_Some()) {
-      builder.nextToken(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_NextToken().dtor_value()));
+      builder.nextToken(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_NextToken().dtor_value()
+        )
+      );
     }
-    builder.resourceArn(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_ResourceArn()));
+    builder.resourceArn(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_ResourceArn()
+      )
+    );
     return builder.build();
   }
 
   public static ListTagsOfResourceResponse ListTagsOfResourceOutput(
-      ListTagsOfResourceOutput dafnyValue) {
-    ListTagsOfResourceResponse.Builder builder = ListTagsOfResourceResponse.builder();
+    ListTagsOfResourceOutput dafnyValue
+  ) {
+    ListTagsOfResourceResponse.Builder builder =
+      ListTagsOfResourceResponse.builder();
     if (dafnyValue.dtor_NextToken().is_Some()) {
-      builder.nextToken(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_NextToken().dtor_value()));
+      builder.nextToken(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_NextToken().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_Tags().is_Some()) {
       builder.tags(ToNative.TagList(dafnyValue.dtor_Tags().dtor_value()));
@@ -2838,22 +4478,37 @@ public class ToNative {
   }
 
   public static LocalSecondaryIndex LocalSecondaryIndex(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.LocalSecondaryIndex dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.LocalSecondaryIndex dafnyValue
+  ) {
     LocalSecondaryIndex.Builder builder = LocalSecondaryIndex.builder();
-    builder.indexName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_IndexName()));
+    builder.indexName(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_IndexName()
+      )
+    );
     builder.keySchema(ToNative.KeySchema(dafnyValue.dtor_KeySchema()));
     builder.projection(ToNative.Projection(dafnyValue.dtor_Projection()));
     return builder.build();
   }
 
   public static LocalSecondaryIndexDescription LocalSecondaryIndexDescription(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.LocalSecondaryIndexDescription dafnyValue) {
-    LocalSecondaryIndexDescription.Builder builder = LocalSecondaryIndexDescription.builder();
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.LocalSecondaryIndexDescription dafnyValue
+  ) {
+    LocalSecondaryIndexDescription.Builder builder =
+      LocalSecondaryIndexDescription.builder();
     if (dafnyValue.dtor_IndexArn().is_Some()) {
-      builder.indexArn(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_IndexArn().dtor_value()));
+      builder.indexArn(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_IndexArn().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_IndexName().is_Some()) {
-      builder.indexName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_IndexName().dtor_value()));
+      builder.indexName(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_IndexName().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_IndexSizeBytes().is_Some()) {
       builder.indexSizeBytes((dafnyValue.dtor_IndexSizeBytes().dtor_value()));
@@ -2862,127 +4517,203 @@ public class ToNative {
       builder.itemCount((dafnyValue.dtor_ItemCount().dtor_value()));
     }
     if (dafnyValue.dtor_KeySchema().is_Some()) {
-      builder.keySchema(ToNative.KeySchema(dafnyValue.dtor_KeySchema().dtor_value()));
+      builder.keySchema(
+        ToNative.KeySchema(dafnyValue.dtor_KeySchema().dtor_value())
+      );
     }
     if (dafnyValue.dtor_Projection().is_Some()) {
-      builder.projection(ToNative.Projection(dafnyValue.dtor_Projection().dtor_value()));
+      builder.projection(
+        ToNative.Projection(dafnyValue.dtor_Projection().dtor_value())
+      );
     }
     return builder.build();
   }
 
-  public static List<LocalSecondaryIndexDescription> LocalSecondaryIndexDescriptionList(
-      DafnySequence<? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.LocalSecondaryIndexDescription> dafnyValue) {
+  public static List<
+    LocalSecondaryIndexDescription
+  > LocalSecondaryIndexDescriptionList(
+    DafnySequence<
+      ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.LocalSecondaryIndexDescription
+    > dafnyValue
+  ) {
     return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToList(
-        dafnyValue, 
-        software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::LocalSecondaryIndexDescription);
+      dafnyValue,
+      software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::LocalSecondaryIndexDescription
+    );
   }
 
   public static List<LocalSecondaryIndexInfo> LocalSecondaryIndexes(
-      DafnySequence<? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.LocalSecondaryIndexInfo> dafnyValue) {
+    DafnySequence<
+      ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.LocalSecondaryIndexInfo
+    > dafnyValue
+  ) {
     return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToList(
-        dafnyValue, 
-        software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::LocalSecondaryIndexInfo);
+      dafnyValue,
+      software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::LocalSecondaryIndexInfo
+    );
   }
 
   public static LocalSecondaryIndexInfo LocalSecondaryIndexInfo(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.LocalSecondaryIndexInfo dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.LocalSecondaryIndexInfo dafnyValue
+  ) {
     LocalSecondaryIndexInfo.Builder builder = LocalSecondaryIndexInfo.builder();
     if (dafnyValue.dtor_IndexName().is_Some()) {
-      builder.indexName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_IndexName().dtor_value()));
+      builder.indexName(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_IndexName().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_KeySchema().is_Some()) {
-      builder.keySchema(ToNative.KeySchema(dafnyValue.dtor_KeySchema().dtor_value()));
+      builder.keySchema(
+        ToNative.KeySchema(dafnyValue.dtor_KeySchema().dtor_value())
+      );
     }
     if (dafnyValue.dtor_Projection().is_Some()) {
-      builder.projection(ToNative.Projection(dafnyValue.dtor_Projection().dtor_value()));
+      builder.projection(
+        ToNative.Projection(dafnyValue.dtor_Projection().dtor_value())
+      );
     }
     return builder.build();
   }
 
   public static List<LocalSecondaryIndex> LocalSecondaryIndexList(
-      DafnySequence<? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.LocalSecondaryIndex> dafnyValue) {
+    DafnySequence<
+      ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.LocalSecondaryIndex
+    > dafnyValue
+  ) {
     return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToList(
-        dafnyValue, 
-        software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::LocalSecondaryIndex);
+      dafnyValue,
+      software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::LocalSecondaryIndex
+    );
   }
 
   public static Map<String, AttributeValue> MapAttributeValue(
-      DafnyMap<? extends DafnySequence<? extends Character>, ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.AttributeValue> dafnyValue) {
+    DafnyMap<
+      ? extends DafnySequence<? extends Character>,
+      ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.AttributeValue
+    > dafnyValue
+  ) {
     return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToMap(
-        dafnyValue, 
-        software.amazon.smithy.dafny.conversion.ToNative.Simple::String, 
-        software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::AttributeValue);
+      dafnyValue,
+      software.amazon.smithy.dafny.conversion.ToNative.Simple::String,
+      software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::AttributeValue
+    );
   }
 
   public static List<String> NonKeyAttributeNameList(
-      DafnySequence<? extends DafnySequence<? extends Character>> dafnyValue) {
+    DafnySequence<? extends DafnySequence<? extends Character>> dafnyValue
+  ) {
     return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToList(
-        dafnyValue, 
-        software.amazon.smithy.dafny.conversion.ToNative.Simple::String);
+      dafnyValue,
+      software.amazon.smithy.dafny.conversion.ToNative.Simple::String
+    );
   }
 
   public static List<String> NumberSetAttributeValue(
-      DafnySequence<? extends DafnySequence<? extends Character>> dafnyValue) {
+    DafnySequence<? extends DafnySequence<? extends Character>> dafnyValue
+  ) {
     return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToList(
-        dafnyValue, 
-        software.amazon.smithy.dafny.conversion.ToNative.Simple::String);
+      dafnyValue,
+      software.amazon.smithy.dafny.conversion.ToNative.Simple::String
+    );
   }
 
   public static ParameterizedStatement ParameterizedStatement(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.ParameterizedStatement dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.ParameterizedStatement dafnyValue
+  ) {
     ParameterizedStatement.Builder builder = ParameterizedStatement.builder();
     if (dafnyValue.dtor_Parameters().is_Some()) {
-      builder.parameters(ToNative.PreparedStatementParameters(dafnyValue.dtor_Parameters().dtor_value()));
+      builder.parameters(
+        ToNative.PreparedStatementParameters(
+          dafnyValue.dtor_Parameters().dtor_value()
+        )
+      );
     }
-    builder.statement(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_Statement()));
+    builder.statement(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_Statement()
+      )
+    );
     return builder.build();
   }
 
   public static List<ParameterizedStatement> ParameterizedStatements(
-      DafnySequence<? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.ParameterizedStatement> dafnyValue) {
+    DafnySequence<
+      ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.ParameterizedStatement
+    > dafnyValue
+  ) {
     return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToList(
-        dafnyValue, 
-        software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::ParameterizedStatement);
+      dafnyValue,
+      software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::ParameterizedStatement
+    );
   }
 
   public static List<BatchStatementRequest> PartiQLBatchRequest(
-      DafnySequence<? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.BatchStatementRequest> dafnyValue) {
+    DafnySequence<
+      ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.BatchStatementRequest
+    > dafnyValue
+  ) {
     return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToList(
-        dafnyValue, 
-        software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::BatchStatementRequest);
+      dafnyValue,
+      software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::BatchStatementRequest
+    );
   }
 
   public static List<BatchStatementResponse> PartiQLBatchResponse(
-      DafnySequence<? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.BatchStatementResponse> dafnyValue) {
+    DafnySequence<
+      ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.BatchStatementResponse
+    > dafnyValue
+  ) {
     return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToList(
-        dafnyValue, 
-        software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::BatchStatementResponse);
+      dafnyValue,
+      software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::BatchStatementResponse
+    );
   }
 
   public static PointInTimeRecoveryDescription PointInTimeRecoveryDescription(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.PointInTimeRecoveryDescription dafnyValue) {
-    PointInTimeRecoveryDescription.Builder builder = PointInTimeRecoveryDescription.builder();
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.PointInTimeRecoveryDescription dafnyValue
+  ) {
+    PointInTimeRecoveryDescription.Builder builder =
+      PointInTimeRecoveryDescription.builder();
     if (dafnyValue.dtor_EarliestRestorableDateTime().is_Some()) {
-      builder.earliestRestorableDateTime(software.amazon.smithy.dafny.conversion.ToNative.Simple.Instant(dafnyValue.dtor_EarliestRestorableDateTime().dtor_value()));
+      builder.earliestRestorableDateTime(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.Instant(
+          dafnyValue.dtor_EarliestRestorableDateTime().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_LatestRestorableDateTime().is_Some()) {
-      builder.latestRestorableDateTime(software.amazon.smithy.dafny.conversion.ToNative.Simple.Instant(dafnyValue.dtor_LatestRestorableDateTime().dtor_value()));
+      builder.latestRestorableDateTime(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.Instant(
+          dafnyValue.dtor_LatestRestorableDateTime().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_PointInTimeRecoveryStatus().is_Some()) {
-      builder.pointInTimeRecoveryStatus(ToNative.PointInTimeRecoveryStatus(dafnyValue.dtor_PointInTimeRecoveryStatus().dtor_value()));
+      builder.pointInTimeRecoveryStatus(
+        ToNative.PointInTimeRecoveryStatus(
+          dafnyValue.dtor_PointInTimeRecoveryStatus().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
   public static PointInTimeRecoverySpecification PointInTimeRecoverySpecification(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.PointInTimeRecoverySpecification dafnyValue) {
-    PointInTimeRecoverySpecification.Builder builder = PointInTimeRecoverySpecification.builder();
-    builder.pointInTimeRecoveryEnabled((dafnyValue.dtor_PointInTimeRecoveryEnabled()));
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.PointInTimeRecoverySpecification dafnyValue
+  ) {
+    PointInTimeRecoverySpecification.Builder builder =
+      PointInTimeRecoverySpecification.builder();
+    builder.pointInTimeRecoveryEnabled(
+      (dafnyValue.dtor_PointInTimeRecoveryEnabled())
+    );
     return builder.build();
   }
 
   public static PointInTimeRecoveryStatus PointInTimeRecoveryStatus(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.PointInTimeRecoveryStatus dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.PointInTimeRecoveryStatus dafnyValue
+  ) {
     if (dafnyValue.is_ENABLED()) {
       return PointInTimeRecoveryStatus.ENABLED;
     }
@@ -2993,26 +4724,38 @@ public class ToNative {
   }
 
   public static List<AttributeValue> PreparedStatementParameters(
-      DafnySequence<? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.AttributeValue> dafnyValue) {
+    DafnySequence<
+      ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.AttributeValue
+    > dafnyValue
+  ) {
     return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToList(
-        dafnyValue, 
-        software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::AttributeValue);
+      dafnyValue,
+      software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::AttributeValue
+    );
   }
 
   public static Projection Projection(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.Projection dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.Projection dafnyValue
+  ) {
     Projection.Builder builder = Projection.builder();
     if (dafnyValue.dtor_NonKeyAttributes().is_Some()) {
-      builder.nonKeyAttributes(ToNative.NonKeyAttributeNameList(dafnyValue.dtor_NonKeyAttributes().dtor_value()));
+      builder.nonKeyAttributes(
+        ToNative.NonKeyAttributeNameList(
+          dafnyValue.dtor_NonKeyAttributes().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ProjectionType().is_Some()) {
-      builder.projectionType(ToNative.ProjectionType(dafnyValue.dtor_ProjectionType().dtor_value()));
+      builder.projectionType(
+        ToNative.ProjectionType(dafnyValue.dtor_ProjectionType().dtor_value())
+      );
     }
     return builder.build();
   }
 
   public static ProjectionType ProjectionType(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.ProjectionType dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.ProjectionType dafnyValue
+  ) {
     if (dafnyValue.is_ALL()) {
       return ProjectionType.ALL;
     }
@@ -3026,7 +4769,8 @@ public class ToNative {
   }
 
   public static ProvisionedThroughput ProvisionedThroughput(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.ProvisionedThroughput dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.ProvisionedThroughput dafnyValue
+  ) {
     ProvisionedThroughput.Builder builder = ProvisionedThroughput.builder();
     builder.readCapacityUnits((dafnyValue.dtor_ReadCapacityUnits()));
     builder.writeCapacityUnits((dafnyValue.dtor_WriteCapacityUnits()));
@@ -3034,110 +4778,199 @@ public class ToNative {
   }
 
   public static ProvisionedThroughputDescription ProvisionedThroughputDescription(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.ProvisionedThroughputDescription dafnyValue) {
-    ProvisionedThroughputDescription.Builder builder = ProvisionedThroughputDescription.builder();
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.ProvisionedThroughputDescription dafnyValue
+  ) {
+    ProvisionedThroughputDescription.Builder builder =
+      ProvisionedThroughputDescription.builder();
     if (dafnyValue.dtor_LastDecreaseDateTime().is_Some()) {
-      builder.lastDecreaseDateTime(software.amazon.smithy.dafny.conversion.ToNative.Simple.Instant(dafnyValue.dtor_LastDecreaseDateTime().dtor_value()));
+      builder.lastDecreaseDateTime(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.Instant(
+          dafnyValue.dtor_LastDecreaseDateTime().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_LastIncreaseDateTime().is_Some()) {
-      builder.lastIncreaseDateTime(software.amazon.smithy.dafny.conversion.ToNative.Simple.Instant(dafnyValue.dtor_LastIncreaseDateTime().dtor_value()));
+      builder.lastIncreaseDateTime(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.Instant(
+          dafnyValue.dtor_LastIncreaseDateTime().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_NumberOfDecreasesToday().is_Some()) {
-      builder.numberOfDecreasesToday((dafnyValue.dtor_NumberOfDecreasesToday().dtor_value()));
+      builder.numberOfDecreasesToday(
+        (dafnyValue.dtor_NumberOfDecreasesToday().dtor_value())
+      );
     }
     if (dafnyValue.dtor_ReadCapacityUnits().is_Some()) {
-      builder.readCapacityUnits((dafnyValue.dtor_ReadCapacityUnits().dtor_value()));
+      builder.readCapacityUnits(
+        (dafnyValue.dtor_ReadCapacityUnits().dtor_value())
+      );
     }
     if (dafnyValue.dtor_WriteCapacityUnits().is_Some()) {
-      builder.writeCapacityUnits((dafnyValue.dtor_WriteCapacityUnits().dtor_value()));
+      builder.writeCapacityUnits(
+        (dafnyValue.dtor_WriteCapacityUnits().dtor_value())
+      );
     }
     return builder.build();
   }
 
   public static ProvisionedThroughputOverride ProvisionedThroughputOverride(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.ProvisionedThroughputOverride dafnyValue) {
-    ProvisionedThroughputOverride.Builder builder = ProvisionedThroughputOverride.builder();
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.ProvisionedThroughputOverride dafnyValue
+  ) {
+    ProvisionedThroughputOverride.Builder builder =
+      ProvisionedThroughputOverride.builder();
     if (dafnyValue.dtor_ReadCapacityUnits().is_Some()) {
-      builder.readCapacityUnits((dafnyValue.dtor_ReadCapacityUnits().dtor_value()));
+      builder.readCapacityUnits(
+        (dafnyValue.dtor_ReadCapacityUnits().dtor_value())
+      );
     }
     return builder.build();
   }
 
   public static Put Put(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.Put dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.Put dafnyValue
+  ) {
     Put.Builder builder = Put.builder();
     if (dafnyValue.dtor_ConditionExpression().is_Some()) {
-      builder.conditionExpression(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_ConditionExpression().dtor_value()));
+      builder.conditionExpression(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_ConditionExpression().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ExpressionAttributeNames().is_Some()) {
-      builder.expressionAttributeNames(ToNative.ExpressionAttributeNameMap(dafnyValue.dtor_ExpressionAttributeNames().dtor_value()));
+      builder.expressionAttributeNames(
+        ToNative.ExpressionAttributeNameMap(
+          dafnyValue.dtor_ExpressionAttributeNames().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ExpressionAttributeValues().is_Some()) {
-      builder.expressionAttributeValues(ToNative.ExpressionAttributeValueMap(dafnyValue.dtor_ExpressionAttributeValues().dtor_value()));
+      builder.expressionAttributeValues(
+        ToNative.ExpressionAttributeValueMap(
+          dafnyValue.dtor_ExpressionAttributeValues().dtor_value()
+        )
+      );
     }
     builder.item(ToNative.PutItemInputAttributeMap(dafnyValue.dtor_Item()));
     if (dafnyValue.dtor_ReturnValuesOnConditionCheckFailure().is_Some()) {
-      builder.returnValuesOnConditionCheckFailure(ToNative.ReturnValuesOnConditionCheckFailure(dafnyValue.dtor_ReturnValuesOnConditionCheckFailure().dtor_value()));
+      builder.returnValuesOnConditionCheckFailure(
+        ToNative.ReturnValuesOnConditionCheckFailure(
+          dafnyValue.dtor_ReturnValuesOnConditionCheckFailure().dtor_value()
+        )
+      );
     }
-    builder.tableName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_TableName()));
+    builder.tableName(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_TableName()
+      )
+    );
     return builder.build();
   }
 
   public static PutItemRequest PutItemInput(PutItemInput dafnyValue) {
     PutItemRequest.Builder builder = PutItemRequest.builder();
     if (dafnyValue.dtor_ConditionalOperator().is_Some()) {
-      builder.conditionalOperator(ToNative.ConditionalOperator(dafnyValue.dtor_ConditionalOperator().dtor_value()));
+      builder.conditionalOperator(
+        ToNative.ConditionalOperator(
+          dafnyValue.dtor_ConditionalOperator().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ConditionExpression().is_Some()) {
-      builder.conditionExpression(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_ConditionExpression().dtor_value()));
+      builder.conditionExpression(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_ConditionExpression().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_Expected().is_Some()) {
-      builder.expected(ToNative.ExpectedAttributeMap(dafnyValue.dtor_Expected().dtor_value()));
+      builder.expected(
+        ToNative.ExpectedAttributeMap(dafnyValue.dtor_Expected().dtor_value())
+      );
     }
     if (dafnyValue.dtor_ExpressionAttributeNames().is_Some()) {
-      builder.expressionAttributeNames(ToNative.ExpressionAttributeNameMap(dafnyValue.dtor_ExpressionAttributeNames().dtor_value()));
+      builder.expressionAttributeNames(
+        ToNative.ExpressionAttributeNameMap(
+          dafnyValue.dtor_ExpressionAttributeNames().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ExpressionAttributeValues().is_Some()) {
-      builder.expressionAttributeValues(ToNative.ExpressionAttributeValueMap(dafnyValue.dtor_ExpressionAttributeValues().dtor_value()));
+      builder.expressionAttributeValues(
+        ToNative.ExpressionAttributeValueMap(
+          dafnyValue.dtor_ExpressionAttributeValues().dtor_value()
+        )
+      );
     }
     builder.item(ToNative.PutItemInputAttributeMap(dafnyValue.dtor_Item()));
     if (dafnyValue.dtor_ReturnConsumedCapacity().is_Some()) {
-      builder.returnConsumedCapacity(ToNative.ReturnConsumedCapacity(dafnyValue.dtor_ReturnConsumedCapacity().dtor_value()));
+      builder.returnConsumedCapacity(
+        ToNative.ReturnConsumedCapacity(
+          dafnyValue.dtor_ReturnConsumedCapacity().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ReturnItemCollectionMetrics().is_Some()) {
-      builder.returnItemCollectionMetrics(ToNative.ReturnItemCollectionMetrics(dafnyValue.dtor_ReturnItemCollectionMetrics().dtor_value()));
+      builder.returnItemCollectionMetrics(
+        ToNative.ReturnItemCollectionMetrics(
+          dafnyValue.dtor_ReturnItemCollectionMetrics().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ReturnValues().is_Some()) {
-      builder.returnValues(ToNative.ReturnValue(dafnyValue.dtor_ReturnValues().dtor_value()));
+      builder.returnValues(
+        ToNative.ReturnValue(dafnyValue.dtor_ReturnValues().dtor_value())
+      );
     }
-    builder.tableName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_TableName()));
+    builder.tableName(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_TableName()
+      )
+    );
     return builder.build();
   }
 
   public static Map<String, AttributeValue> PutItemInputAttributeMap(
-      DafnyMap<? extends DafnySequence<? extends Character>, ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.AttributeValue> dafnyValue) {
+    DafnyMap<
+      ? extends DafnySequence<? extends Character>,
+      ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.AttributeValue
+    > dafnyValue
+  ) {
     return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToMap(
-        dafnyValue, 
-        software.amazon.smithy.dafny.conversion.ToNative.Simple::String, 
-        software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::AttributeValue);
+      dafnyValue,
+      software.amazon.smithy.dafny.conversion.ToNative.Simple::String,
+      software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::AttributeValue
+    );
   }
 
   public static PutItemResponse PutItemOutput(PutItemOutput dafnyValue) {
     PutItemResponse.Builder builder = PutItemResponse.builder();
     if (dafnyValue.dtor_Attributes().is_Some()) {
-      builder.attributes(ToNative.AttributeMap(dafnyValue.dtor_Attributes().dtor_value()));
+      builder.attributes(
+        ToNative.AttributeMap(dafnyValue.dtor_Attributes().dtor_value())
+      );
     }
     if (dafnyValue.dtor_ConsumedCapacity().is_Some()) {
-      builder.consumedCapacity(ToNative.ConsumedCapacity(dafnyValue.dtor_ConsumedCapacity().dtor_value()));
+      builder.consumedCapacity(
+        ToNative.ConsumedCapacity(
+          dafnyValue.dtor_ConsumedCapacity().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ItemCollectionMetrics().is_Some()) {
-      builder.itemCollectionMetrics(ToNative.ItemCollectionMetrics(dafnyValue.dtor_ItemCollectionMetrics().dtor_value()));
+      builder.itemCollectionMetrics(
+        ToNative.ItemCollectionMetrics(
+          dafnyValue.dtor_ItemCollectionMetrics().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
   public static PutRequest PutRequest(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.PutRequest dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.PutRequest dafnyValue
+  ) {
     PutRequest.Builder builder = PutRequest.builder();
     builder.item(ToNative.PutItemInputAttributeMap(dafnyValue.dtor_Item()));
     return builder.build();
@@ -3146,61 +4979,113 @@ public class ToNative {
   public static QueryRequest QueryInput(QueryInput dafnyValue) {
     QueryRequest.Builder builder = QueryRequest.builder();
     if (dafnyValue.dtor_AttributesToGet().is_Some()) {
-      builder.attributesToGet(ToNative.AttributeNameList(dafnyValue.dtor_AttributesToGet().dtor_value()));
+      builder.attributesToGet(
+        ToNative.AttributeNameList(
+          dafnyValue.dtor_AttributesToGet().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ConditionalOperator().is_Some()) {
-      builder.conditionalOperator(ToNative.ConditionalOperator(dafnyValue.dtor_ConditionalOperator().dtor_value()));
+      builder.conditionalOperator(
+        ToNative.ConditionalOperator(
+          dafnyValue.dtor_ConditionalOperator().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ConsistentRead().is_Some()) {
       builder.consistentRead((dafnyValue.dtor_ConsistentRead().dtor_value()));
     }
     if (dafnyValue.dtor_ExclusiveStartKey().is_Some()) {
-      builder.exclusiveStartKey(ToNative.Key(dafnyValue.dtor_ExclusiveStartKey().dtor_value()));
+      builder.exclusiveStartKey(
+        ToNative.Key(dafnyValue.dtor_ExclusiveStartKey().dtor_value())
+      );
     }
     if (dafnyValue.dtor_ExpressionAttributeNames().is_Some()) {
-      builder.expressionAttributeNames(ToNative.ExpressionAttributeNameMap(dafnyValue.dtor_ExpressionAttributeNames().dtor_value()));
+      builder.expressionAttributeNames(
+        ToNative.ExpressionAttributeNameMap(
+          dafnyValue.dtor_ExpressionAttributeNames().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ExpressionAttributeValues().is_Some()) {
-      builder.expressionAttributeValues(ToNative.ExpressionAttributeValueMap(dafnyValue.dtor_ExpressionAttributeValues().dtor_value()));
+      builder.expressionAttributeValues(
+        ToNative.ExpressionAttributeValueMap(
+          dafnyValue.dtor_ExpressionAttributeValues().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_FilterExpression().is_Some()) {
-      builder.filterExpression(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_FilterExpression().dtor_value()));
+      builder.filterExpression(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_FilterExpression().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_IndexName().is_Some()) {
-      builder.indexName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_IndexName().dtor_value()));
+      builder.indexName(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_IndexName().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_KeyConditionExpression().is_Some()) {
-      builder.keyConditionExpression(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_KeyConditionExpression().dtor_value()));
+      builder.keyConditionExpression(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_KeyConditionExpression().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_KeyConditions().is_Some()) {
-      builder.keyConditions(ToNative.KeyConditions(dafnyValue.dtor_KeyConditions().dtor_value()));
+      builder.keyConditions(
+        ToNative.KeyConditions(dafnyValue.dtor_KeyConditions().dtor_value())
+      );
     }
     if (dafnyValue.dtor_Limit().is_Some()) {
       builder.limit((dafnyValue.dtor_Limit().dtor_value()));
     }
     if (dafnyValue.dtor_ProjectionExpression().is_Some()) {
-      builder.projectionExpression(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_ProjectionExpression().dtor_value()));
+      builder.projectionExpression(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_ProjectionExpression().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_QueryFilter().is_Some()) {
-      builder.queryFilter(ToNative.FilterConditionMap(dafnyValue.dtor_QueryFilter().dtor_value()));
+      builder.queryFilter(
+        ToNative.FilterConditionMap(dafnyValue.dtor_QueryFilter().dtor_value())
+      );
     }
     if (dafnyValue.dtor_ReturnConsumedCapacity().is_Some()) {
-      builder.returnConsumedCapacity(ToNative.ReturnConsumedCapacity(dafnyValue.dtor_ReturnConsumedCapacity().dtor_value()));
+      builder.returnConsumedCapacity(
+        ToNative.ReturnConsumedCapacity(
+          dafnyValue.dtor_ReturnConsumedCapacity().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ScanIndexForward().is_Some()) {
-      builder.scanIndexForward((dafnyValue.dtor_ScanIndexForward().dtor_value()));
+      builder.scanIndexForward(
+        (dafnyValue.dtor_ScanIndexForward().dtor_value())
+      );
     }
     if (dafnyValue.dtor_Select().is_Some()) {
       builder.select(ToNative.Select(dafnyValue.dtor_Select().dtor_value()));
     }
-    builder.tableName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_TableName()));
+    builder.tableName(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_TableName()
+      )
+    );
     return builder.build();
   }
 
   public static QueryResponse QueryOutput(QueryOutput dafnyValue) {
     QueryResponse.Builder builder = QueryResponse.builder();
     if (dafnyValue.dtor_ConsumedCapacity().is_Some()) {
-      builder.consumedCapacity(ToNative.ConsumedCapacity(dafnyValue.dtor_ConsumedCapacity().dtor_value()));
+      builder.consumedCapacity(
+        ToNative.ConsumedCapacity(
+          dafnyValue.dtor_ConsumedCapacity().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_Count().is_Some()) {
       builder.count((dafnyValue.dtor_Count().dtor_value()));
@@ -3209,7 +5094,9 @@ public class ToNative {
       builder.items(ToNative.ItemList(dafnyValue.dtor_Items().dtor_value()));
     }
     if (dafnyValue.dtor_LastEvaluatedKey().is_Some()) {
-      builder.lastEvaluatedKey(ToNative.Key(dafnyValue.dtor_LastEvaluatedKey().dtor_value()));
+      builder.lastEvaluatedKey(
+        ToNative.Key(dafnyValue.dtor_LastEvaluatedKey().dtor_value())
+      );
     }
     if (dafnyValue.dtor_ScannedCount().is_Some()) {
       builder.scannedCount((dafnyValue.dtor_ScannedCount().dtor_value()));
@@ -3218,304 +5105,630 @@ public class ToNative {
   }
 
   public static Replica Replica(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.Replica dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.Replica dafnyValue
+  ) {
     Replica.Builder builder = Replica.builder();
     if (dafnyValue.dtor_RegionName().is_Some()) {
-      builder.regionName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_RegionName().dtor_value()));
+      builder.regionName(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_RegionName().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
   public static ReplicaAutoScalingDescription ReplicaAutoScalingDescription(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.ReplicaAutoScalingDescription dafnyValue) {
-    ReplicaAutoScalingDescription.Builder builder = ReplicaAutoScalingDescription.builder();
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.ReplicaAutoScalingDescription dafnyValue
+  ) {
+    ReplicaAutoScalingDescription.Builder builder =
+      ReplicaAutoScalingDescription.builder();
     if (dafnyValue.dtor_GlobalSecondaryIndexes().is_Some()) {
-      builder.globalSecondaryIndexes(ToNative.ReplicaGlobalSecondaryIndexAutoScalingDescriptionList(dafnyValue.dtor_GlobalSecondaryIndexes().dtor_value()));
+      builder.globalSecondaryIndexes(
+        ToNative.ReplicaGlobalSecondaryIndexAutoScalingDescriptionList(
+          dafnyValue.dtor_GlobalSecondaryIndexes().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_RegionName().is_Some()) {
-      builder.regionName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_RegionName().dtor_value()));
+      builder.regionName(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_RegionName().dtor_value()
+        )
+      );
     }
-    if (dafnyValue.dtor_ReplicaProvisionedReadCapacityAutoScalingSettings().is_Some()) {
-      builder.replicaProvisionedReadCapacityAutoScalingSettings(ToNative.AutoScalingSettingsDescription(dafnyValue.dtor_ReplicaProvisionedReadCapacityAutoScalingSettings().dtor_value()));
+    if (
+      dafnyValue
+        .dtor_ReplicaProvisionedReadCapacityAutoScalingSettings()
+        .is_Some()
+    ) {
+      builder.replicaProvisionedReadCapacityAutoScalingSettings(
+        ToNative.AutoScalingSettingsDescription(
+          dafnyValue
+            .dtor_ReplicaProvisionedReadCapacityAutoScalingSettings()
+            .dtor_value()
+        )
+      );
     }
-    if (dafnyValue.dtor_ReplicaProvisionedWriteCapacityAutoScalingSettings().is_Some()) {
-      builder.replicaProvisionedWriteCapacityAutoScalingSettings(ToNative.AutoScalingSettingsDescription(dafnyValue.dtor_ReplicaProvisionedWriteCapacityAutoScalingSettings().dtor_value()));
+    if (
+      dafnyValue
+        .dtor_ReplicaProvisionedWriteCapacityAutoScalingSettings()
+        .is_Some()
+    ) {
+      builder.replicaProvisionedWriteCapacityAutoScalingSettings(
+        ToNative.AutoScalingSettingsDescription(
+          dafnyValue
+            .dtor_ReplicaProvisionedWriteCapacityAutoScalingSettings()
+            .dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ReplicaStatus().is_Some()) {
-      builder.replicaStatus(ToNative.ReplicaStatus(dafnyValue.dtor_ReplicaStatus().dtor_value()));
+      builder.replicaStatus(
+        ToNative.ReplicaStatus(dafnyValue.dtor_ReplicaStatus().dtor_value())
+      );
     }
     return builder.build();
   }
 
-  public static List<ReplicaAutoScalingDescription> ReplicaAutoScalingDescriptionList(
-      DafnySequence<? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.ReplicaAutoScalingDescription> dafnyValue) {
+  public static List<
+    ReplicaAutoScalingDescription
+  > ReplicaAutoScalingDescriptionList(
+    DafnySequence<
+      ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.ReplicaAutoScalingDescription
+    > dafnyValue
+  ) {
     return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToList(
-        dafnyValue, 
-        software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::ReplicaAutoScalingDescription);
+      dafnyValue,
+      software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::ReplicaAutoScalingDescription
+    );
   }
 
   public static ReplicaAutoScalingUpdate ReplicaAutoScalingUpdate(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.ReplicaAutoScalingUpdate dafnyValue) {
-    ReplicaAutoScalingUpdate.Builder builder = ReplicaAutoScalingUpdate.builder();
-    builder.regionName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_RegionName()));
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.ReplicaAutoScalingUpdate dafnyValue
+  ) {
+    ReplicaAutoScalingUpdate.Builder builder =
+      ReplicaAutoScalingUpdate.builder();
+    builder.regionName(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_RegionName()
+      )
+    );
     if (dafnyValue.dtor_ReplicaGlobalSecondaryIndexUpdates().is_Some()) {
-      builder.replicaGlobalSecondaryIndexUpdates(ToNative.ReplicaGlobalSecondaryIndexAutoScalingUpdateList(dafnyValue.dtor_ReplicaGlobalSecondaryIndexUpdates().dtor_value()));
+      builder.replicaGlobalSecondaryIndexUpdates(
+        ToNative.ReplicaGlobalSecondaryIndexAutoScalingUpdateList(
+          dafnyValue.dtor_ReplicaGlobalSecondaryIndexUpdates().dtor_value()
+        )
+      );
     }
-    if (dafnyValue.dtor_ReplicaProvisionedReadCapacityAutoScalingUpdate().is_Some()) {
-      builder.replicaProvisionedReadCapacityAutoScalingUpdate(ToNative.AutoScalingSettingsUpdate(dafnyValue.dtor_ReplicaProvisionedReadCapacityAutoScalingUpdate().dtor_value()));
+    if (
+      dafnyValue
+        .dtor_ReplicaProvisionedReadCapacityAutoScalingUpdate()
+        .is_Some()
+    ) {
+      builder.replicaProvisionedReadCapacityAutoScalingUpdate(
+        ToNative.AutoScalingSettingsUpdate(
+          dafnyValue
+            .dtor_ReplicaProvisionedReadCapacityAutoScalingUpdate()
+            .dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
   public static List<ReplicaAutoScalingUpdate> ReplicaAutoScalingUpdateList(
-      DafnySequence<? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.ReplicaAutoScalingUpdate> dafnyValue) {
+    DafnySequence<
+      ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.ReplicaAutoScalingUpdate
+    > dafnyValue
+  ) {
     return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToList(
-        dafnyValue, 
-        software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::ReplicaAutoScalingUpdate);
+      dafnyValue,
+      software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::ReplicaAutoScalingUpdate
+    );
   }
 
   public static ReplicaDescription ReplicaDescription(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.ReplicaDescription dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.ReplicaDescription dafnyValue
+  ) {
     ReplicaDescription.Builder builder = ReplicaDescription.builder();
     if (dafnyValue.dtor_GlobalSecondaryIndexes().is_Some()) {
-      builder.globalSecondaryIndexes(ToNative.ReplicaGlobalSecondaryIndexDescriptionList(dafnyValue.dtor_GlobalSecondaryIndexes().dtor_value()));
+      builder.globalSecondaryIndexes(
+        ToNative.ReplicaGlobalSecondaryIndexDescriptionList(
+          dafnyValue.dtor_GlobalSecondaryIndexes().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_KMSMasterKeyId().is_Some()) {
-      builder.kmsMasterKeyId(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_KMSMasterKeyId().dtor_value()));
+      builder.kmsMasterKeyId(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_KMSMasterKeyId().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ProvisionedThroughputOverride().is_Some()) {
-      builder.provisionedThroughputOverride(ToNative.ProvisionedThroughputOverride(dafnyValue.dtor_ProvisionedThroughputOverride().dtor_value()));
+      builder.provisionedThroughputOverride(
+        ToNative.ProvisionedThroughputOverride(
+          dafnyValue.dtor_ProvisionedThroughputOverride().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_RegionName().is_Some()) {
-      builder.regionName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_RegionName().dtor_value()));
+      builder.regionName(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_RegionName().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ReplicaInaccessibleDateTime().is_Some()) {
-      builder.replicaInaccessibleDateTime(software.amazon.smithy.dafny.conversion.ToNative.Simple.Instant(dafnyValue.dtor_ReplicaInaccessibleDateTime().dtor_value()));
+      builder.replicaInaccessibleDateTime(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.Instant(
+          dafnyValue.dtor_ReplicaInaccessibleDateTime().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ReplicaStatus().is_Some()) {
-      builder.replicaStatus(ToNative.ReplicaStatus(dafnyValue.dtor_ReplicaStatus().dtor_value()));
+      builder.replicaStatus(
+        ToNative.ReplicaStatus(dafnyValue.dtor_ReplicaStatus().dtor_value())
+      );
     }
     if (dafnyValue.dtor_ReplicaStatusDescription().is_Some()) {
-      builder.replicaStatusDescription(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_ReplicaStatusDescription().dtor_value()));
+      builder.replicaStatusDescription(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_ReplicaStatusDescription().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ReplicaStatusPercentProgress().is_Some()) {
-      builder.replicaStatusPercentProgress(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_ReplicaStatusPercentProgress().dtor_value()));
+      builder.replicaStatusPercentProgress(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_ReplicaStatusPercentProgress().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ReplicaTableClassSummary().is_Some()) {
-      builder.replicaTableClassSummary(ToNative.TableClassSummary(dafnyValue.dtor_ReplicaTableClassSummary().dtor_value()));
+      builder.replicaTableClassSummary(
+        ToNative.TableClassSummary(
+          dafnyValue.dtor_ReplicaTableClassSummary().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
   public static List<ReplicaDescription> ReplicaDescriptionList(
-      DafnySequence<? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.ReplicaDescription> dafnyValue) {
+    DafnySequence<
+      ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.ReplicaDescription
+    > dafnyValue
+  ) {
     return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToList(
-        dafnyValue, 
-        software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::ReplicaDescription);
+      dafnyValue,
+      software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::ReplicaDescription
+    );
   }
 
   public static ReplicaGlobalSecondaryIndex ReplicaGlobalSecondaryIndex(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.ReplicaGlobalSecondaryIndex dafnyValue) {
-    ReplicaGlobalSecondaryIndex.Builder builder = ReplicaGlobalSecondaryIndex.builder();
-    builder.indexName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_IndexName()));
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.ReplicaGlobalSecondaryIndex dafnyValue
+  ) {
+    ReplicaGlobalSecondaryIndex.Builder builder =
+      ReplicaGlobalSecondaryIndex.builder();
+    builder.indexName(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_IndexName()
+      )
+    );
     if (dafnyValue.dtor_ProvisionedThroughputOverride().is_Some()) {
-      builder.provisionedThroughputOverride(ToNative.ProvisionedThroughputOverride(dafnyValue.dtor_ProvisionedThroughputOverride().dtor_value()));
+      builder.provisionedThroughputOverride(
+        ToNative.ProvisionedThroughputOverride(
+          dafnyValue.dtor_ProvisionedThroughputOverride().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
   public static ReplicaGlobalSecondaryIndexAutoScalingDescription ReplicaGlobalSecondaryIndexAutoScalingDescription(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.ReplicaGlobalSecondaryIndexAutoScalingDescription dafnyValue) {
-    ReplicaGlobalSecondaryIndexAutoScalingDescription.Builder builder = ReplicaGlobalSecondaryIndexAutoScalingDescription.builder();
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.ReplicaGlobalSecondaryIndexAutoScalingDescription dafnyValue
+  ) {
+    ReplicaGlobalSecondaryIndexAutoScalingDescription.Builder builder =
+      ReplicaGlobalSecondaryIndexAutoScalingDescription.builder();
     if (dafnyValue.dtor_IndexName().is_Some()) {
-      builder.indexName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_IndexName().dtor_value()));
+      builder.indexName(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_IndexName().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_IndexStatus().is_Some()) {
-      builder.indexStatus(ToNative.IndexStatus(dafnyValue.dtor_IndexStatus().dtor_value()));
+      builder.indexStatus(
+        ToNative.IndexStatus(dafnyValue.dtor_IndexStatus().dtor_value())
+      );
     }
-    if (dafnyValue.dtor_ProvisionedReadCapacityAutoScalingSettings().is_Some()) {
-      builder.provisionedReadCapacityAutoScalingSettings(ToNative.AutoScalingSettingsDescription(dafnyValue.dtor_ProvisionedReadCapacityAutoScalingSettings().dtor_value()));
+    if (
+      dafnyValue.dtor_ProvisionedReadCapacityAutoScalingSettings().is_Some()
+    ) {
+      builder.provisionedReadCapacityAutoScalingSettings(
+        ToNative.AutoScalingSettingsDescription(
+          dafnyValue
+            .dtor_ProvisionedReadCapacityAutoScalingSettings()
+            .dtor_value()
+        )
+      );
     }
-    if (dafnyValue.dtor_ProvisionedWriteCapacityAutoScalingSettings().is_Some()) {
-      builder.provisionedWriteCapacityAutoScalingSettings(ToNative.AutoScalingSettingsDescription(dafnyValue.dtor_ProvisionedWriteCapacityAutoScalingSettings().dtor_value()));
+    if (
+      dafnyValue.dtor_ProvisionedWriteCapacityAutoScalingSettings().is_Some()
+    ) {
+      builder.provisionedWriteCapacityAutoScalingSettings(
+        ToNative.AutoScalingSettingsDescription(
+          dafnyValue
+            .dtor_ProvisionedWriteCapacityAutoScalingSettings()
+            .dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
-  public static List<ReplicaGlobalSecondaryIndexAutoScalingDescription> ReplicaGlobalSecondaryIndexAutoScalingDescriptionList(
-      DafnySequence<? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.ReplicaGlobalSecondaryIndexAutoScalingDescription> dafnyValue) {
+  public static List<
+    ReplicaGlobalSecondaryIndexAutoScalingDescription
+  > ReplicaGlobalSecondaryIndexAutoScalingDescriptionList(
+    DafnySequence<
+      ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.ReplicaGlobalSecondaryIndexAutoScalingDescription
+    > dafnyValue
+  ) {
     return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToList(
-        dafnyValue, 
-        software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::ReplicaGlobalSecondaryIndexAutoScalingDescription);
+      dafnyValue,
+      software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::ReplicaGlobalSecondaryIndexAutoScalingDescription
+    );
   }
 
   public static ReplicaGlobalSecondaryIndexAutoScalingUpdate ReplicaGlobalSecondaryIndexAutoScalingUpdate(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.ReplicaGlobalSecondaryIndexAutoScalingUpdate dafnyValue) {
-    ReplicaGlobalSecondaryIndexAutoScalingUpdate.Builder builder = ReplicaGlobalSecondaryIndexAutoScalingUpdate.builder();
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.ReplicaGlobalSecondaryIndexAutoScalingUpdate dafnyValue
+  ) {
+    ReplicaGlobalSecondaryIndexAutoScalingUpdate.Builder builder =
+      ReplicaGlobalSecondaryIndexAutoScalingUpdate.builder();
     if (dafnyValue.dtor_IndexName().is_Some()) {
-      builder.indexName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_IndexName().dtor_value()));
+      builder.indexName(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_IndexName().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ProvisionedReadCapacityAutoScalingUpdate().is_Some()) {
-      builder.provisionedReadCapacityAutoScalingUpdate(ToNative.AutoScalingSettingsUpdate(dafnyValue.dtor_ProvisionedReadCapacityAutoScalingUpdate().dtor_value()));
+      builder.provisionedReadCapacityAutoScalingUpdate(
+        ToNative.AutoScalingSettingsUpdate(
+          dafnyValue
+            .dtor_ProvisionedReadCapacityAutoScalingUpdate()
+            .dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
-  public static List<ReplicaGlobalSecondaryIndexAutoScalingUpdate> ReplicaGlobalSecondaryIndexAutoScalingUpdateList(
-      DafnySequence<? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.ReplicaGlobalSecondaryIndexAutoScalingUpdate> dafnyValue) {
+  public static List<
+    ReplicaGlobalSecondaryIndexAutoScalingUpdate
+  > ReplicaGlobalSecondaryIndexAutoScalingUpdateList(
+    DafnySequence<
+      ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.ReplicaGlobalSecondaryIndexAutoScalingUpdate
+    > dafnyValue
+  ) {
     return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToList(
-        dafnyValue, 
-        software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::ReplicaGlobalSecondaryIndexAutoScalingUpdate);
+      dafnyValue,
+      software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::ReplicaGlobalSecondaryIndexAutoScalingUpdate
+    );
   }
 
   public static ReplicaGlobalSecondaryIndexDescription ReplicaGlobalSecondaryIndexDescription(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.ReplicaGlobalSecondaryIndexDescription dafnyValue) {
-    ReplicaGlobalSecondaryIndexDescription.Builder builder = ReplicaGlobalSecondaryIndexDescription.builder();
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.ReplicaGlobalSecondaryIndexDescription dafnyValue
+  ) {
+    ReplicaGlobalSecondaryIndexDescription.Builder builder =
+      ReplicaGlobalSecondaryIndexDescription.builder();
     if (dafnyValue.dtor_IndexName().is_Some()) {
-      builder.indexName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_IndexName().dtor_value()));
+      builder.indexName(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_IndexName().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ProvisionedThroughputOverride().is_Some()) {
-      builder.provisionedThroughputOverride(ToNative.ProvisionedThroughputOverride(dafnyValue.dtor_ProvisionedThroughputOverride().dtor_value()));
+      builder.provisionedThroughputOverride(
+        ToNative.ProvisionedThroughputOverride(
+          dafnyValue.dtor_ProvisionedThroughputOverride().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
-  public static List<ReplicaGlobalSecondaryIndexDescription> ReplicaGlobalSecondaryIndexDescriptionList(
-      DafnySequence<? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.ReplicaGlobalSecondaryIndexDescription> dafnyValue) {
+  public static List<
+    ReplicaGlobalSecondaryIndexDescription
+  > ReplicaGlobalSecondaryIndexDescriptionList(
+    DafnySequence<
+      ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.ReplicaGlobalSecondaryIndexDescription
+    > dafnyValue
+  ) {
     return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToList(
-        dafnyValue, 
-        software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::ReplicaGlobalSecondaryIndexDescription);
+      dafnyValue,
+      software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::ReplicaGlobalSecondaryIndexDescription
+    );
   }
 
-  public static List<ReplicaGlobalSecondaryIndex> ReplicaGlobalSecondaryIndexList(
-      DafnySequence<? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.ReplicaGlobalSecondaryIndex> dafnyValue) {
+  public static List<
+    ReplicaGlobalSecondaryIndex
+  > ReplicaGlobalSecondaryIndexList(
+    DafnySequence<
+      ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.ReplicaGlobalSecondaryIndex
+    > dafnyValue
+  ) {
     return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToList(
-        dafnyValue, 
-        software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::ReplicaGlobalSecondaryIndex);
+      dafnyValue,
+      software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::ReplicaGlobalSecondaryIndex
+    );
   }
 
   public static ReplicaGlobalSecondaryIndexSettingsDescription ReplicaGlobalSecondaryIndexSettingsDescription(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.ReplicaGlobalSecondaryIndexSettingsDescription dafnyValue) {
-    ReplicaGlobalSecondaryIndexSettingsDescription.Builder builder = ReplicaGlobalSecondaryIndexSettingsDescription.builder();
-    builder.indexName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_IndexName()));
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.ReplicaGlobalSecondaryIndexSettingsDescription dafnyValue
+  ) {
+    ReplicaGlobalSecondaryIndexSettingsDescription.Builder builder =
+      ReplicaGlobalSecondaryIndexSettingsDescription.builder();
+    builder.indexName(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_IndexName()
+      )
+    );
     if (dafnyValue.dtor_IndexStatus().is_Some()) {
-      builder.indexStatus(ToNative.IndexStatus(dafnyValue.dtor_IndexStatus().dtor_value()));
+      builder.indexStatus(
+        ToNative.IndexStatus(dafnyValue.dtor_IndexStatus().dtor_value())
+      );
     }
-    if (dafnyValue.dtor_ProvisionedReadCapacityAutoScalingSettings().is_Some()) {
-      builder.provisionedReadCapacityAutoScalingSettings(ToNative.AutoScalingSettingsDescription(dafnyValue.dtor_ProvisionedReadCapacityAutoScalingSettings().dtor_value()));
+    if (
+      dafnyValue.dtor_ProvisionedReadCapacityAutoScalingSettings().is_Some()
+    ) {
+      builder.provisionedReadCapacityAutoScalingSettings(
+        ToNative.AutoScalingSettingsDescription(
+          dafnyValue
+            .dtor_ProvisionedReadCapacityAutoScalingSettings()
+            .dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ProvisionedReadCapacityUnits().is_Some()) {
-      builder.provisionedReadCapacityUnits((dafnyValue.dtor_ProvisionedReadCapacityUnits().dtor_value()));
+      builder.provisionedReadCapacityUnits(
+        (dafnyValue.dtor_ProvisionedReadCapacityUnits().dtor_value())
+      );
     }
-    if (dafnyValue.dtor_ProvisionedWriteCapacityAutoScalingSettings().is_Some()) {
-      builder.provisionedWriteCapacityAutoScalingSettings(ToNative.AutoScalingSettingsDescription(dafnyValue.dtor_ProvisionedWriteCapacityAutoScalingSettings().dtor_value()));
+    if (
+      dafnyValue.dtor_ProvisionedWriteCapacityAutoScalingSettings().is_Some()
+    ) {
+      builder.provisionedWriteCapacityAutoScalingSettings(
+        ToNative.AutoScalingSettingsDescription(
+          dafnyValue
+            .dtor_ProvisionedWriteCapacityAutoScalingSettings()
+            .dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ProvisionedWriteCapacityUnits().is_Some()) {
-      builder.provisionedWriteCapacityUnits((dafnyValue.dtor_ProvisionedWriteCapacityUnits().dtor_value()));
+      builder.provisionedWriteCapacityUnits(
+        (dafnyValue.dtor_ProvisionedWriteCapacityUnits().dtor_value())
+      );
     }
     return builder.build();
   }
 
-  public static List<ReplicaGlobalSecondaryIndexSettingsDescription> ReplicaGlobalSecondaryIndexSettingsDescriptionList(
-      DafnySequence<? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.ReplicaGlobalSecondaryIndexSettingsDescription> dafnyValue) {
+  public static List<
+    ReplicaGlobalSecondaryIndexSettingsDescription
+  > ReplicaGlobalSecondaryIndexSettingsDescriptionList(
+    DafnySequence<
+      ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.ReplicaGlobalSecondaryIndexSettingsDescription
+    > dafnyValue
+  ) {
     return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToList(
-        dafnyValue, 
-        software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::ReplicaGlobalSecondaryIndexSettingsDescription);
+      dafnyValue,
+      software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::ReplicaGlobalSecondaryIndexSettingsDescription
+    );
   }
 
   public static ReplicaGlobalSecondaryIndexSettingsUpdate ReplicaGlobalSecondaryIndexSettingsUpdate(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.ReplicaGlobalSecondaryIndexSettingsUpdate dafnyValue) {
-    ReplicaGlobalSecondaryIndexSettingsUpdate.Builder builder = ReplicaGlobalSecondaryIndexSettingsUpdate.builder();
-    builder.indexName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_IndexName()));
-    if (dafnyValue.dtor_ProvisionedReadCapacityAutoScalingSettingsUpdate().is_Some()) {
-      builder.provisionedReadCapacityAutoScalingSettingsUpdate(ToNative.AutoScalingSettingsUpdate(dafnyValue.dtor_ProvisionedReadCapacityAutoScalingSettingsUpdate().dtor_value()));
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.ReplicaGlobalSecondaryIndexSettingsUpdate dafnyValue
+  ) {
+    ReplicaGlobalSecondaryIndexSettingsUpdate.Builder builder =
+      ReplicaGlobalSecondaryIndexSettingsUpdate.builder();
+    builder.indexName(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_IndexName()
+      )
+    );
+    if (
+      dafnyValue
+        .dtor_ProvisionedReadCapacityAutoScalingSettingsUpdate()
+        .is_Some()
+    ) {
+      builder.provisionedReadCapacityAutoScalingSettingsUpdate(
+        ToNative.AutoScalingSettingsUpdate(
+          dafnyValue
+            .dtor_ProvisionedReadCapacityAutoScalingSettingsUpdate()
+            .dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ProvisionedReadCapacityUnits().is_Some()) {
-      builder.provisionedReadCapacityUnits((dafnyValue.dtor_ProvisionedReadCapacityUnits().dtor_value()));
+      builder.provisionedReadCapacityUnits(
+        (dafnyValue.dtor_ProvisionedReadCapacityUnits().dtor_value())
+      );
     }
     return builder.build();
   }
 
-  public static List<ReplicaGlobalSecondaryIndexSettingsUpdate> ReplicaGlobalSecondaryIndexSettingsUpdateList(
-      DafnySequence<? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.ReplicaGlobalSecondaryIndexSettingsUpdate> dafnyValue) {
+  public static List<
+    ReplicaGlobalSecondaryIndexSettingsUpdate
+  > ReplicaGlobalSecondaryIndexSettingsUpdateList(
+    DafnySequence<
+      ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.ReplicaGlobalSecondaryIndexSettingsUpdate
+    > dafnyValue
+  ) {
     return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToList(
-        dafnyValue, 
-        software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::ReplicaGlobalSecondaryIndexSettingsUpdate);
+      dafnyValue,
+      software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::ReplicaGlobalSecondaryIndexSettingsUpdate
+    );
   }
 
   public static List<Replica> ReplicaList(
-      DafnySequence<? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.Replica> dafnyValue) {
+    DafnySequence<
+      ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.Replica
+    > dafnyValue
+  ) {
     return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToList(
-        dafnyValue, 
-        software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::Replica);
+      dafnyValue,
+      software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::Replica
+    );
   }
 
   public static ReplicaSettingsDescription ReplicaSettingsDescription(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.ReplicaSettingsDescription dafnyValue) {
-    ReplicaSettingsDescription.Builder builder = ReplicaSettingsDescription.builder();
-    builder.regionName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_RegionName()));
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.ReplicaSettingsDescription dafnyValue
+  ) {
+    ReplicaSettingsDescription.Builder builder =
+      ReplicaSettingsDescription.builder();
+    builder.regionName(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_RegionName()
+      )
+    );
     if (dafnyValue.dtor_ReplicaBillingModeSummary().is_Some()) {
-      builder.replicaBillingModeSummary(ToNative.BillingModeSummary(dafnyValue.dtor_ReplicaBillingModeSummary().dtor_value()));
+      builder.replicaBillingModeSummary(
+        ToNative.BillingModeSummary(
+          dafnyValue.dtor_ReplicaBillingModeSummary().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ReplicaGlobalSecondaryIndexSettings().is_Some()) {
-      builder.replicaGlobalSecondaryIndexSettings(ToNative.ReplicaGlobalSecondaryIndexSettingsDescriptionList(dafnyValue.dtor_ReplicaGlobalSecondaryIndexSettings().dtor_value()));
+      builder.replicaGlobalSecondaryIndexSettings(
+        ToNative.ReplicaGlobalSecondaryIndexSettingsDescriptionList(
+          dafnyValue.dtor_ReplicaGlobalSecondaryIndexSettings().dtor_value()
+        )
+      );
     }
-    if (dafnyValue.dtor_ReplicaProvisionedReadCapacityAutoScalingSettings().is_Some()) {
-      builder.replicaProvisionedReadCapacityAutoScalingSettings(ToNative.AutoScalingSettingsDescription(dafnyValue.dtor_ReplicaProvisionedReadCapacityAutoScalingSettings().dtor_value()));
+    if (
+      dafnyValue
+        .dtor_ReplicaProvisionedReadCapacityAutoScalingSettings()
+        .is_Some()
+    ) {
+      builder.replicaProvisionedReadCapacityAutoScalingSettings(
+        ToNative.AutoScalingSettingsDescription(
+          dafnyValue
+            .dtor_ReplicaProvisionedReadCapacityAutoScalingSettings()
+            .dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ReplicaProvisionedReadCapacityUnits().is_Some()) {
-      builder.replicaProvisionedReadCapacityUnits((dafnyValue.dtor_ReplicaProvisionedReadCapacityUnits().dtor_value()));
+      builder.replicaProvisionedReadCapacityUnits(
+        (dafnyValue.dtor_ReplicaProvisionedReadCapacityUnits().dtor_value())
+      );
     }
-    if (dafnyValue.dtor_ReplicaProvisionedWriteCapacityAutoScalingSettings().is_Some()) {
-      builder.replicaProvisionedWriteCapacityAutoScalingSettings(ToNative.AutoScalingSettingsDescription(dafnyValue.dtor_ReplicaProvisionedWriteCapacityAutoScalingSettings().dtor_value()));
+    if (
+      dafnyValue
+        .dtor_ReplicaProvisionedWriteCapacityAutoScalingSettings()
+        .is_Some()
+    ) {
+      builder.replicaProvisionedWriteCapacityAutoScalingSettings(
+        ToNative.AutoScalingSettingsDescription(
+          dafnyValue
+            .dtor_ReplicaProvisionedWriteCapacityAutoScalingSettings()
+            .dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ReplicaProvisionedWriteCapacityUnits().is_Some()) {
-      builder.replicaProvisionedWriteCapacityUnits((dafnyValue.dtor_ReplicaProvisionedWriteCapacityUnits().dtor_value()));
+      builder.replicaProvisionedWriteCapacityUnits(
+        (dafnyValue.dtor_ReplicaProvisionedWriteCapacityUnits().dtor_value())
+      );
     }
     if (dafnyValue.dtor_ReplicaStatus().is_Some()) {
-      builder.replicaStatus(ToNative.ReplicaStatus(dafnyValue.dtor_ReplicaStatus().dtor_value()));
+      builder.replicaStatus(
+        ToNative.ReplicaStatus(dafnyValue.dtor_ReplicaStatus().dtor_value())
+      );
     }
     if (dafnyValue.dtor_ReplicaTableClassSummary().is_Some()) {
-      builder.replicaTableClassSummary(ToNative.TableClassSummary(dafnyValue.dtor_ReplicaTableClassSummary().dtor_value()));
+      builder.replicaTableClassSummary(
+        ToNative.TableClassSummary(
+          dafnyValue.dtor_ReplicaTableClassSummary().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
   public static List<ReplicaSettingsDescription> ReplicaSettingsDescriptionList(
-      DafnySequence<? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.ReplicaSettingsDescription> dafnyValue) {
+    DafnySequence<
+      ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.ReplicaSettingsDescription
+    > dafnyValue
+  ) {
     return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToList(
-        dafnyValue, 
-        software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::ReplicaSettingsDescription);
+      dafnyValue,
+      software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::ReplicaSettingsDescription
+    );
   }
 
   public static ReplicaSettingsUpdate ReplicaSettingsUpdate(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.ReplicaSettingsUpdate dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.ReplicaSettingsUpdate dafnyValue
+  ) {
     ReplicaSettingsUpdate.Builder builder = ReplicaSettingsUpdate.builder();
-    builder.regionName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_RegionName()));
+    builder.regionName(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_RegionName()
+      )
+    );
     if (dafnyValue.dtor_ReplicaGlobalSecondaryIndexSettingsUpdate().is_Some()) {
-      builder.replicaGlobalSecondaryIndexSettingsUpdate(ToNative.ReplicaGlobalSecondaryIndexSettingsUpdateList(dafnyValue.dtor_ReplicaGlobalSecondaryIndexSettingsUpdate().dtor_value()));
+      builder.replicaGlobalSecondaryIndexSettingsUpdate(
+        ToNative.ReplicaGlobalSecondaryIndexSettingsUpdateList(
+          dafnyValue
+            .dtor_ReplicaGlobalSecondaryIndexSettingsUpdate()
+            .dtor_value()
+        )
+      );
     }
-    if (dafnyValue.dtor_ReplicaProvisionedReadCapacityAutoScalingSettingsUpdate().is_Some()) {
-      builder.replicaProvisionedReadCapacityAutoScalingSettingsUpdate(ToNative.AutoScalingSettingsUpdate(dafnyValue.dtor_ReplicaProvisionedReadCapacityAutoScalingSettingsUpdate().dtor_value()));
+    if (
+      dafnyValue
+        .dtor_ReplicaProvisionedReadCapacityAutoScalingSettingsUpdate()
+        .is_Some()
+    ) {
+      builder.replicaProvisionedReadCapacityAutoScalingSettingsUpdate(
+        ToNative.AutoScalingSettingsUpdate(
+          dafnyValue
+            .dtor_ReplicaProvisionedReadCapacityAutoScalingSettingsUpdate()
+            .dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ReplicaProvisionedReadCapacityUnits().is_Some()) {
-      builder.replicaProvisionedReadCapacityUnits((dafnyValue.dtor_ReplicaProvisionedReadCapacityUnits().dtor_value()));
+      builder.replicaProvisionedReadCapacityUnits(
+        (dafnyValue.dtor_ReplicaProvisionedReadCapacityUnits().dtor_value())
+      );
     }
     if (dafnyValue.dtor_ReplicaTableClass().is_Some()) {
-      builder.replicaTableClass(ToNative.TableClass(dafnyValue.dtor_ReplicaTableClass().dtor_value()));
+      builder.replicaTableClass(
+        ToNative.TableClass(dafnyValue.dtor_ReplicaTableClass().dtor_value())
+      );
     }
     return builder.build();
   }
 
   public static List<ReplicaSettingsUpdate> ReplicaSettingsUpdateList(
-      DafnySequence<? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.ReplicaSettingsUpdate> dafnyValue) {
+    DafnySequence<
+      ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.ReplicaSettingsUpdate
+    > dafnyValue
+  ) {
     return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToList(
-        dafnyValue, 
-        software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::ReplicaSettingsUpdate);
+      dafnyValue,
+      software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::ReplicaSettingsUpdate
+    );
   }
 
   public static ReplicaStatus ReplicaStatus(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.ReplicaStatus dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.ReplicaStatus dafnyValue
+  ) {
     if (dafnyValue.is_CREATING()) {
       return ReplicaStatus.CREATING;
     }
@@ -3541,137 +5754,255 @@ public class ToNative {
   }
 
   public static ReplicationGroupUpdate ReplicationGroupUpdate(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.ReplicationGroupUpdate dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.ReplicationGroupUpdate dafnyValue
+  ) {
     ReplicationGroupUpdate.Builder builder = ReplicationGroupUpdate.builder();
     if (dafnyValue.dtor_Create().is_Some()) {
-      builder.create(ToNative.CreateReplicationGroupMemberAction(dafnyValue.dtor_Create().dtor_value()));
+      builder.create(
+        ToNative.CreateReplicationGroupMemberAction(
+          dafnyValue.dtor_Create().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_Delete().is_Some()) {
-      builder.delete(ToNative.DeleteReplicationGroupMemberAction(dafnyValue.dtor_Delete().dtor_value()));
+      builder.delete(
+        ToNative.DeleteReplicationGroupMemberAction(
+          dafnyValue.dtor_Delete().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_Update().is_Some()) {
-      builder.update(ToNative.UpdateReplicationGroupMemberAction(dafnyValue.dtor_Update().dtor_value()));
+      builder.update(
+        ToNative.UpdateReplicationGroupMemberAction(
+          dafnyValue.dtor_Update().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
   public static List<ReplicationGroupUpdate> ReplicationGroupUpdateList(
-      DafnySequence<? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.ReplicationGroupUpdate> dafnyValue) {
+    DafnySequence<
+      ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.ReplicationGroupUpdate
+    > dafnyValue
+  ) {
     return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToList(
-        dafnyValue, 
-        software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::ReplicationGroupUpdate);
+      dafnyValue,
+      software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::ReplicationGroupUpdate
+    );
   }
 
   public static ReplicaUpdate ReplicaUpdate(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.ReplicaUpdate dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.ReplicaUpdate dafnyValue
+  ) {
     ReplicaUpdate.Builder builder = ReplicaUpdate.builder();
     if (dafnyValue.dtor_Create().is_Some()) {
-      builder.create(ToNative.CreateReplicaAction(dafnyValue.dtor_Create().dtor_value()));
+      builder.create(
+        ToNative.CreateReplicaAction(dafnyValue.dtor_Create().dtor_value())
+      );
     }
     if (dafnyValue.dtor_Delete().is_Some()) {
-      builder.delete(ToNative.DeleteReplicaAction(dafnyValue.dtor_Delete().dtor_value()));
+      builder.delete(
+        ToNative.DeleteReplicaAction(dafnyValue.dtor_Delete().dtor_value())
+      );
     }
     return builder.build();
   }
 
   public static List<ReplicaUpdate> ReplicaUpdateList(
-      DafnySequence<? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.ReplicaUpdate> dafnyValue) {
+    DafnySequence<
+      ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.ReplicaUpdate
+    > dafnyValue
+  ) {
     return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToList(
-        dafnyValue, 
-        software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::ReplicaUpdate);
+      dafnyValue,
+      software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::ReplicaUpdate
+    );
   }
 
   public static RestoreSummary RestoreSummary(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.RestoreSummary dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.RestoreSummary dafnyValue
+  ) {
     RestoreSummary.Builder builder = RestoreSummary.builder();
-    builder.restoreDateTime(software.amazon.smithy.dafny.conversion.ToNative.Simple.Instant(dafnyValue.dtor_RestoreDateTime()));
+    builder.restoreDateTime(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.Instant(
+        dafnyValue.dtor_RestoreDateTime()
+      )
+    );
     builder.restoreInProgress((dafnyValue.dtor_RestoreInProgress()));
     if (dafnyValue.dtor_SourceBackupArn().is_Some()) {
-      builder.sourceBackupArn(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_SourceBackupArn().dtor_value()));
+      builder.sourceBackupArn(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_SourceBackupArn().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_SourceTableArn().is_Some()) {
-      builder.sourceTableArn(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_SourceTableArn().dtor_value()));
+      builder.sourceTableArn(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_SourceTableArn().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
   public static RestoreTableFromBackupRequest RestoreTableFromBackupInput(
-      RestoreTableFromBackupInput dafnyValue) {
-    RestoreTableFromBackupRequest.Builder builder = RestoreTableFromBackupRequest.builder();
-    builder.backupArn(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_BackupArn()));
+    RestoreTableFromBackupInput dafnyValue
+  ) {
+    RestoreTableFromBackupRequest.Builder builder =
+      RestoreTableFromBackupRequest.builder();
+    builder.backupArn(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_BackupArn()
+      )
+    );
     if (dafnyValue.dtor_BillingModeOverride().is_Some()) {
-      builder.billingModeOverride(ToNative.BillingMode(dafnyValue.dtor_BillingModeOverride().dtor_value()));
+      builder.billingModeOverride(
+        ToNative.BillingMode(dafnyValue.dtor_BillingModeOverride().dtor_value())
+      );
     }
     if (dafnyValue.dtor_GlobalSecondaryIndexOverride().is_Some()) {
-      builder.globalSecondaryIndexOverride(ToNative.GlobalSecondaryIndexList(dafnyValue.dtor_GlobalSecondaryIndexOverride().dtor_value()));
+      builder.globalSecondaryIndexOverride(
+        ToNative.GlobalSecondaryIndexList(
+          dafnyValue.dtor_GlobalSecondaryIndexOverride().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_LocalSecondaryIndexOverride().is_Some()) {
-      builder.localSecondaryIndexOverride(ToNative.LocalSecondaryIndexList(dafnyValue.dtor_LocalSecondaryIndexOverride().dtor_value()));
+      builder.localSecondaryIndexOverride(
+        ToNative.LocalSecondaryIndexList(
+          dafnyValue.dtor_LocalSecondaryIndexOverride().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ProvisionedThroughputOverride().is_Some()) {
-      builder.provisionedThroughputOverride(ToNative.ProvisionedThroughput(dafnyValue.dtor_ProvisionedThroughputOverride().dtor_value()));
+      builder.provisionedThroughputOverride(
+        ToNative.ProvisionedThroughput(
+          dafnyValue.dtor_ProvisionedThroughputOverride().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_SSESpecificationOverride().is_Some()) {
-      builder.sseSpecificationOverride(ToNative.SSESpecification(dafnyValue.dtor_SSESpecificationOverride().dtor_value()));
+      builder.sseSpecificationOverride(
+        ToNative.SSESpecification(
+          dafnyValue.dtor_SSESpecificationOverride().dtor_value()
+        )
+      );
     }
-    builder.targetTableName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_TargetTableName()));
+    builder.targetTableName(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_TargetTableName()
+      )
+    );
     return builder.build();
   }
 
   public static RestoreTableFromBackupResponse RestoreTableFromBackupOutput(
-      RestoreTableFromBackupOutput dafnyValue) {
-    RestoreTableFromBackupResponse.Builder builder = RestoreTableFromBackupResponse.builder();
+    RestoreTableFromBackupOutput dafnyValue
+  ) {
+    RestoreTableFromBackupResponse.Builder builder =
+      RestoreTableFromBackupResponse.builder();
     if (dafnyValue.dtor_TableDescription().is_Some()) {
-      builder.tableDescription(ToNative.TableDescription(dafnyValue.dtor_TableDescription().dtor_value()));
+      builder.tableDescription(
+        ToNative.TableDescription(
+          dafnyValue.dtor_TableDescription().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
   public static RestoreTableToPointInTimeRequest RestoreTableToPointInTimeInput(
-      RestoreTableToPointInTimeInput dafnyValue) {
-    RestoreTableToPointInTimeRequest.Builder builder = RestoreTableToPointInTimeRequest.builder();
+    RestoreTableToPointInTimeInput dafnyValue
+  ) {
+    RestoreTableToPointInTimeRequest.Builder builder =
+      RestoreTableToPointInTimeRequest.builder();
     if (dafnyValue.dtor_BillingModeOverride().is_Some()) {
-      builder.billingModeOverride(ToNative.BillingMode(dafnyValue.dtor_BillingModeOverride().dtor_value()));
+      builder.billingModeOverride(
+        ToNative.BillingMode(dafnyValue.dtor_BillingModeOverride().dtor_value())
+      );
     }
     if (dafnyValue.dtor_GlobalSecondaryIndexOverride().is_Some()) {
-      builder.globalSecondaryIndexOverride(ToNative.GlobalSecondaryIndexList(dafnyValue.dtor_GlobalSecondaryIndexOverride().dtor_value()));
+      builder.globalSecondaryIndexOverride(
+        ToNative.GlobalSecondaryIndexList(
+          dafnyValue.dtor_GlobalSecondaryIndexOverride().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_LocalSecondaryIndexOverride().is_Some()) {
-      builder.localSecondaryIndexOverride(ToNative.LocalSecondaryIndexList(dafnyValue.dtor_LocalSecondaryIndexOverride().dtor_value()));
+      builder.localSecondaryIndexOverride(
+        ToNative.LocalSecondaryIndexList(
+          dafnyValue.dtor_LocalSecondaryIndexOverride().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ProvisionedThroughputOverride().is_Some()) {
-      builder.provisionedThroughputOverride(ToNative.ProvisionedThroughput(dafnyValue.dtor_ProvisionedThroughputOverride().dtor_value()));
+      builder.provisionedThroughputOverride(
+        ToNative.ProvisionedThroughput(
+          dafnyValue.dtor_ProvisionedThroughputOverride().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_RestoreDateTime().is_Some()) {
-      builder.restoreDateTime(software.amazon.smithy.dafny.conversion.ToNative.Simple.Instant(dafnyValue.dtor_RestoreDateTime().dtor_value()));
+      builder.restoreDateTime(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.Instant(
+          dafnyValue.dtor_RestoreDateTime().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_SourceTableArn().is_Some()) {
-      builder.sourceTableArn(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_SourceTableArn().dtor_value()));
+      builder.sourceTableArn(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_SourceTableArn().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_SourceTableName().is_Some()) {
-      builder.sourceTableName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_SourceTableName().dtor_value()));
+      builder.sourceTableName(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_SourceTableName().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_SSESpecificationOverride().is_Some()) {
-      builder.sseSpecificationOverride(ToNative.SSESpecification(dafnyValue.dtor_SSESpecificationOverride().dtor_value()));
+      builder.sseSpecificationOverride(
+        ToNative.SSESpecification(
+          dafnyValue.dtor_SSESpecificationOverride().dtor_value()
+        )
+      );
     }
-    builder.targetTableName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_TargetTableName()));
+    builder.targetTableName(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_TargetTableName()
+      )
+    );
     if (dafnyValue.dtor_UseLatestRestorableTime().is_Some()) {
-      builder.useLatestRestorableTime((dafnyValue.dtor_UseLatestRestorableTime().dtor_value()));
+      builder.useLatestRestorableTime(
+        (dafnyValue.dtor_UseLatestRestorableTime().dtor_value())
+      );
     }
     return builder.build();
   }
 
   public static RestoreTableToPointInTimeResponse RestoreTableToPointInTimeOutput(
-      RestoreTableToPointInTimeOutput dafnyValue) {
-    RestoreTableToPointInTimeResponse.Builder builder = RestoreTableToPointInTimeResponse.builder();
+    RestoreTableToPointInTimeOutput dafnyValue
+  ) {
+    RestoreTableToPointInTimeResponse.Builder builder =
+      RestoreTableToPointInTimeResponse.builder();
     if (dafnyValue.dtor_TableDescription().is_Some()) {
-      builder.tableDescription(ToNative.TableDescription(dafnyValue.dtor_TableDescription().dtor_value()));
+      builder.tableDescription(
+        ToNative.TableDescription(
+          dafnyValue.dtor_TableDescription().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
   public static ReturnConsumedCapacity ReturnConsumedCapacity(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.ReturnConsumedCapacity dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.ReturnConsumedCapacity dafnyValue
+  ) {
     if (dafnyValue.is_INDEXES()) {
       return ReturnConsumedCapacity.INDEXES;
     }
@@ -3685,7 +6016,8 @@ public class ToNative {
   }
 
   public static ReturnItemCollectionMetrics ReturnItemCollectionMetrics(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.ReturnItemCollectionMetrics dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.ReturnItemCollectionMetrics dafnyValue
+  ) {
     if (dafnyValue.is_SIZE()) {
       return ReturnItemCollectionMetrics.SIZE;
     }
@@ -3696,7 +6028,8 @@ public class ToNative {
   }
 
   public static ReturnValue ReturnValue(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.ReturnValue dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.ReturnValue dafnyValue
+  ) {
     if (dafnyValue.is_NONE()) {
       return ReturnValue.NONE;
     }
@@ -3716,7 +6049,8 @@ public class ToNative {
   }
 
   public static ReturnValuesOnConditionCheckFailure ReturnValuesOnConditionCheckFailure(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.ReturnValuesOnConditionCheckFailure dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.ReturnValuesOnConditionCheckFailure dafnyValue
+  ) {
     if (dafnyValue.is_ALL__OLD()) {
       return ReturnValuesOnConditionCheckFailure.ALL_OLD;
     }
@@ -3727,20 +6061,34 @@ public class ToNative {
   }
 
   public static S3BucketSource S3BucketSource(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.S3BucketSource dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.S3BucketSource dafnyValue
+  ) {
     S3BucketSource.Builder builder = S3BucketSource.builder();
-    builder.s3Bucket(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_S3Bucket()));
+    builder.s3Bucket(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_S3Bucket()
+      )
+    );
     if (dafnyValue.dtor_S3BucketOwner().is_Some()) {
-      builder.s3BucketOwner(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_S3BucketOwner().dtor_value()));
+      builder.s3BucketOwner(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_S3BucketOwner().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_S3KeyPrefix().is_Some()) {
-      builder.s3KeyPrefix(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_S3KeyPrefix().dtor_value()));
+      builder.s3KeyPrefix(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_S3KeyPrefix().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
   public static S3SseAlgorithm S3SseAlgorithm(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.S3SseAlgorithm dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.S3SseAlgorithm dafnyValue
+  ) {
     if (dafnyValue.is_AES256()) {
       return S3SseAlgorithm.AES256;
     }
@@ -3751,7 +6099,8 @@ public class ToNative {
   }
 
   public static ScalarAttributeType ScalarAttributeType(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.ScalarAttributeType dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.ScalarAttributeType dafnyValue
+  ) {
     if (dafnyValue.is_S()) {
       return ScalarAttributeType.S;
     }
@@ -3767,40 +6116,76 @@ public class ToNative {
   public static ScanRequest ScanInput(ScanInput dafnyValue) {
     ScanRequest.Builder builder = ScanRequest.builder();
     if (dafnyValue.dtor_AttributesToGet().is_Some()) {
-      builder.attributesToGet(ToNative.AttributeNameList(dafnyValue.dtor_AttributesToGet().dtor_value()));
+      builder.attributesToGet(
+        ToNative.AttributeNameList(
+          dafnyValue.dtor_AttributesToGet().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ConditionalOperator().is_Some()) {
-      builder.conditionalOperator(ToNative.ConditionalOperator(dafnyValue.dtor_ConditionalOperator().dtor_value()));
+      builder.conditionalOperator(
+        ToNative.ConditionalOperator(
+          dafnyValue.dtor_ConditionalOperator().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ConsistentRead().is_Some()) {
       builder.consistentRead((dafnyValue.dtor_ConsistentRead().dtor_value()));
     }
     if (dafnyValue.dtor_ExclusiveStartKey().is_Some()) {
-      builder.exclusiveStartKey(ToNative.Key(dafnyValue.dtor_ExclusiveStartKey().dtor_value()));
+      builder.exclusiveStartKey(
+        ToNative.Key(dafnyValue.dtor_ExclusiveStartKey().dtor_value())
+      );
     }
     if (dafnyValue.dtor_ExpressionAttributeNames().is_Some()) {
-      builder.expressionAttributeNames(ToNative.ExpressionAttributeNameMap(dafnyValue.dtor_ExpressionAttributeNames().dtor_value()));
+      builder.expressionAttributeNames(
+        ToNative.ExpressionAttributeNameMap(
+          dafnyValue.dtor_ExpressionAttributeNames().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ExpressionAttributeValues().is_Some()) {
-      builder.expressionAttributeValues(ToNative.ExpressionAttributeValueMap(dafnyValue.dtor_ExpressionAttributeValues().dtor_value()));
+      builder.expressionAttributeValues(
+        ToNative.ExpressionAttributeValueMap(
+          dafnyValue.dtor_ExpressionAttributeValues().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_FilterExpression().is_Some()) {
-      builder.filterExpression(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_FilterExpression().dtor_value()));
+      builder.filterExpression(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_FilterExpression().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_IndexName().is_Some()) {
-      builder.indexName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_IndexName().dtor_value()));
+      builder.indexName(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_IndexName().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_Limit().is_Some()) {
       builder.limit((dafnyValue.dtor_Limit().dtor_value()));
     }
     if (dafnyValue.dtor_ProjectionExpression().is_Some()) {
-      builder.projectionExpression(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_ProjectionExpression().dtor_value()));
+      builder.projectionExpression(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_ProjectionExpression().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ReturnConsumedCapacity().is_Some()) {
-      builder.returnConsumedCapacity(ToNative.ReturnConsumedCapacity(dafnyValue.dtor_ReturnConsumedCapacity().dtor_value()));
+      builder.returnConsumedCapacity(
+        ToNative.ReturnConsumedCapacity(
+          dafnyValue.dtor_ReturnConsumedCapacity().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ScanFilter().is_Some()) {
-      builder.scanFilter(ToNative.FilterConditionMap(dafnyValue.dtor_ScanFilter().dtor_value()));
+      builder.scanFilter(
+        ToNative.FilterConditionMap(dafnyValue.dtor_ScanFilter().dtor_value())
+      );
     }
     if (dafnyValue.dtor_Segment().is_Some()) {
       builder.segment((dafnyValue.dtor_Segment().dtor_value()));
@@ -3808,7 +6193,11 @@ public class ToNative {
     if (dafnyValue.dtor_Select().is_Some()) {
       builder.select(ToNative.Select(dafnyValue.dtor_Select().dtor_value()));
     }
-    builder.tableName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_TableName()));
+    builder.tableName(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_TableName()
+      )
+    );
     if (dafnyValue.dtor_TotalSegments().is_Some()) {
       builder.totalSegments((dafnyValue.dtor_TotalSegments().dtor_value()));
     }
@@ -3818,7 +6207,11 @@ public class ToNative {
   public static ScanResponse ScanOutput(ScanOutput dafnyValue) {
     ScanResponse.Builder builder = ScanResponse.builder();
     if (dafnyValue.dtor_ConsumedCapacity().is_Some()) {
-      builder.consumedCapacity(ToNative.ConsumedCapacity(dafnyValue.dtor_ConsumedCapacity().dtor_value()));
+      builder.consumedCapacity(
+        ToNative.ConsumedCapacity(
+          dafnyValue.dtor_ConsumedCapacity().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_Count().is_Some()) {
       builder.count((dafnyValue.dtor_Count().dtor_value()));
@@ -3827,7 +6220,9 @@ public class ToNative {
       builder.items(ToNative.ItemList(dafnyValue.dtor_Items().dtor_value()));
     }
     if (dafnyValue.dtor_LastEvaluatedKey().is_Some()) {
-      builder.lastEvaluatedKey(ToNative.Key(dafnyValue.dtor_LastEvaluatedKey().dtor_value()));
+      builder.lastEvaluatedKey(
+        ToNative.Key(dafnyValue.dtor_LastEvaluatedKey().dtor_value())
+      );
     }
     if (dafnyValue.dtor_ScannedCount().is_Some()) {
       builder.scannedCount((dafnyValue.dtor_ScannedCount().dtor_value()));
@@ -3836,15 +6231,21 @@ public class ToNative {
   }
 
   public static Map<String, Capacity> SecondaryIndexesCapacityMap(
-      DafnyMap<? extends DafnySequence<? extends Character>, ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.Capacity> dafnyValue) {
+    DafnyMap<
+      ? extends DafnySequence<? extends Character>,
+      ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.Capacity
+    > dafnyValue
+  ) {
     return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToMap(
-        dafnyValue, 
-        software.amazon.smithy.dafny.conversion.ToNative.Simple::String, 
-        software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::Capacity);
+      dafnyValue,
+      software.amazon.smithy.dafny.conversion.ToNative.Simple::String,
+      software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::Capacity
+    );
   }
 
   public static Select Select(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.Select dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.Select dafnyValue
+  ) {
     if (dafnyValue.is_ALL__ATTRIBUTES()) {
       return Select.ALL_ATTRIBUTES;
     }
@@ -3861,22 +6262,43 @@ public class ToNative {
   }
 
   public static SourceTableDetails SourceTableDetails(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.SourceTableDetails dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.SourceTableDetails dafnyValue
+  ) {
     SourceTableDetails.Builder builder = SourceTableDetails.builder();
     if (dafnyValue.dtor_BillingMode().is_Some()) {
-      builder.billingMode(ToNative.BillingMode(dafnyValue.dtor_BillingMode().dtor_value()));
+      builder.billingMode(
+        ToNative.BillingMode(dafnyValue.dtor_BillingMode().dtor_value())
+      );
     }
     if (dafnyValue.dtor_ItemCount().is_Some()) {
       builder.itemCount((dafnyValue.dtor_ItemCount().dtor_value()));
     }
     builder.keySchema(ToNative.KeySchema(dafnyValue.dtor_KeySchema()));
-    builder.provisionedThroughput(ToNative.ProvisionedThroughput(dafnyValue.dtor_ProvisionedThroughput()));
+    builder.provisionedThroughput(
+      ToNative.ProvisionedThroughput(dafnyValue.dtor_ProvisionedThroughput())
+    );
     if (dafnyValue.dtor_TableArn().is_Some()) {
-      builder.tableArn(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_TableArn().dtor_value()));
+      builder.tableArn(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_TableArn().dtor_value()
+        )
+      );
     }
-    builder.tableCreationDateTime(software.amazon.smithy.dafny.conversion.ToNative.Simple.Instant(dafnyValue.dtor_TableCreationDateTime()));
-    builder.tableId(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_TableId()));
-    builder.tableName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_TableName()));
+    builder.tableCreationDateTime(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.Instant(
+        dafnyValue.dtor_TableCreationDateTime()
+      )
+    );
+    builder.tableId(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_TableId()
+      )
+    );
+    builder.tableName(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_TableName()
+      )
+    );
     if (dafnyValue.dtor_TableSizeBytes().is_Some()) {
       builder.tableSizeBytes((dafnyValue.dtor_TableSizeBytes().dtor_value()));
     }
@@ -3884,34 +6306,63 @@ public class ToNative {
   }
 
   public static SourceTableFeatureDetails SourceTableFeatureDetails(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.SourceTableFeatureDetails dafnyValue) {
-    SourceTableFeatureDetails.Builder builder = SourceTableFeatureDetails.builder();
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.SourceTableFeatureDetails dafnyValue
+  ) {
+    SourceTableFeatureDetails.Builder builder =
+      SourceTableFeatureDetails.builder();
     if (dafnyValue.dtor_GlobalSecondaryIndexes().is_Some()) {
-      builder.globalSecondaryIndexes(ToNative.GlobalSecondaryIndexes(dafnyValue.dtor_GlobalSecondaryIndexes().dtor_value()));
+      builder.globalSecondaryIndexes(
+        ToNative.GlobalSecondaryIndexes(
+          dafnyValue.dtor_GlobalSecondaryIndexes().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_LocalSecondaryIndexes().is_Some()) {
-      builder.localSecondaryIndexes(ToNative.LocalSecondaryIndexes(dafnyValue.dtor_LocalSecondaryIndexes().dtor_value()));
+      builder.localSecondaryIndexes(
+        ToNative.LocalSecondaryIndexes(
+          dafnyValue.dtor_LocalSecondaryIndexes().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_SSEDescription().is_Some()) {
-      builder.sseDescription(ToNative.SSEDescription(dafnyValue.dtor_SSEDescription().dtor_value()));
+      builder.sseDescription(
+        ToNative.SSEDescription(dafnyValue.dtor_SSEDescription().dtor_value())
+      );
     }
     if (dafnyValue.dtor_StreamDescription().is_Some()) {
-      builder.streamDescription(ToNative.StreamSpecification(dafnyValue.dtor_StreamDescription().dtor_value()));
+      builder.streamDescription(
+        ToNative.StreamSpecification(
+          dafnyValue.dtor_StreamDescription().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_TimeToLiveDescription().is_Some()) {
-      builder.timeToLiveDescription(ToNative.TimeToLiveDescription(dafnyValue.dtor_TimeToLiveDescription().dtor_value()));
+      builder.timeToLiveDescription(
+        ToNative.TimeToLiveDescription(
+          dafnyValue.dtor_TimeToLiveDescription().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
   public static SSEDescription SSEDescription(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.SSEDescription dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.SSEDescription dafnyValue
+  ) {
     SSEDescription.Builder builder = SSEDescription.builder();
     if (dafnyValue.dtor_InaccessibleEncryptionDateTime().is_Some()) {
-      builder.inaccessibleEncryptionDateTime(software.amazon.smithy.dafny.conversion.ToNative.Simple.Instant(dafnyValue.dtor_InaccessibleEncryptionDateTime().dtor_value()));
+      builder.inaccessibleEncryptionDateTime(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.Instant(
+          dafnyValue.dtor_InaccessibleEncryptionDateTime().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_KMSMasterKeyArn().is_Some()) {
-      builder.kmsMasterKeyArn(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_KMSMasterKeyArn().dtor_value()));
+      builder.kmsMasterKeyArn(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_KMSMasterKeyArn().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_SSEType().is_Some()) {
       builder.sseType(ToNative.SSEType(dafnyValue.dtor_SSEType().dtor_value()));
@@ -3923,13 +6374,18 @@ public class ToNative {
   }
 
   public static SSESpecification SSESpecification(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.SSESpecification dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.SSESpecification dafnyValue
+  ) {
     SSESpecification.Builder builder = SSESpecification.builder();
     if (dafnyValue.dtor_Enabled().is_Some()) {
       builder.enabled((dafnyValue.dtor_Enabled().dtor_value()));
     }
     if (dafnyValue.dtor_KMSMasterKeyId().is_Some()) {
-      builder.kmsMasterKeyId(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_KMSMasterKeyId().dtor_value()));
+      builder.kmsMasterKeyId(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_KMSMasterKeyId().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_SSEType().is_Some()) {
       builder.sseType(ToNative.SSEType(dafnyValue.dtor_SSEType().dtor_value()));
@@ -3938,7 +6394,8 @@ public class ToNative {
   }
 
   public static SSEStatus SSEStatus(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.SSEStatus dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.SSEStatus dafnyValue
+  ) {
     if (dafnyValue.is_ENABLING()) {
       return SSEStatus.ENABLING;
     }
@@ -3958,7 +6415,8 @@ public class ToNative {
   }
 
   public static SSEType SSEType(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.SSEType dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.SSEType dafnyValue
+  ) {
     if (dafnyValue.is_AES256()) {
       return SSEType.AES256;
     }
@@ -3969,17 +6427,21 @@ public class ToNative {
   }
 
   public static StreamSpecification StreamSpecification(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.StreamSpecification dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.StreamSpecification dafnyValue
+  ) {
     StreamSpecification.Builder builder = StreamSpecification.builder();
     builder.streamEnabled((dafnyValue.dtor_StreamEnabled()));
     if (dafnyValue.dtor_StreamViewType().is_Some()) {
-      builder.streamViewType(ToNative.StreamViewType(dafnyValue.dtor_StreamViewType().dtor_value()));
+      builder.streamViewType(
+        ToNative.StreamViewType(dafnyValue.dtor_StreamViewType().dtor_value())
+      );
     }
     return builder.build();
   }
 
   public static StreamViewType StreamViewType(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.StreamViewType dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.StreamViewType dafnyValue
+  ) {
     if (dafnyValue.is_NEW__IMAGE()) {
       return StreamViewType.NEW_IMAGE;
     }
@@ -3996,29 +6458,44 @@ public class ToNative {
   }
 
   public static List<String> StringSetAttributeValue(
-      DafnySequence<? extends DafnySequence<? extends Character>> dafnyValue) {
+    DafnySequence<? extends DafnySequence<? extends Character>> dafnyValue
+  ) {
     return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToList(
-        dafnyValue, 
-        software.amazon.smithy.dafny.conversion.ToNative.Simple::String);
+      dafnyValue,
+      software.amazon.smithy.dafny.conversion.ToNative.Simple::String
+    );
   }
 
   public static TableAutoScalingDescription TableAutoScalingDescription(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.TableAutoScalingDescription dafnyValue) {
-    TableAutoScalingDescription.Builder builder = TableAutoScalingDescription.builder();
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.TableAutoScalingDescription dafnyValue
+  ) {
+    TableAutoScalingDescription.Builder builder =
+      TableAutoScalingDescription.builder();
     if (dafnyValue.dtor_Replicas().is_Some()) {
-      builder.replicas(ToNative.ReplicaAutoScalingDescriptionList(dafnyValue.dtor_Replicas().dtor_value()));
+      builder.replicas(
+        ToNative.ReplicaAutoScalingDescriptionList(
+          dafnyValue.dtor_Replicas().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_TableName().is_Some()) {
-      builder.tableName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_TableName().dtor_value()));
+      builder.tableName(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_TableName().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_TableStatus().is_Some()) {
-      builder.tableStatus(ToNative.TableStatus(dafnyValue.dtor_TableStatus().dtor_value()));
+      builder.tableStatus(
+        ToNative.TableStatus(dafnyValue.dtor_TableStatus().dtor_value())
+      );
     }
     return builder.build();
   }
 
   public static TableClass TableClass(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.TableClass dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.TableClass dafnyValue
+  ) {
     if (dafnyValue.is_STANDARD()) {
       return TableClass.STANDARD;
     }
@@ -4029,119 +6506,219 @@ public class ToNative {
   }
 
   public static TableClassSummary TableClassSummary(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.TableClassSummary dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.TableClassSummary dafnyValue
+  ) {
     TableClassSummary.Builder builder = TableClassSummary.builder();
     if (dafnyValue.dtor_LastUpdateDateTime().is_Some()) {
-      builder.lastUpdateDateTime(software.amazon.smithy.dafny.conversion.ToNative.Simple.Instant(dafnyValue.dtor_LastUpdateDateTime().dtor_value()));
+      builder.lastUpdateDateTime(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.Instant(
+          dafnyValue.dtor_LastUpdateDateTime().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_TableClass().is_Some()) {
-      builder.tableClass(ToNative.TableClass(dafnyValue.dtor_TableClass().dtor_value()));
+      builder.tableClass(
+        ToNative.TableClass(dafnyValue.dtor_TableClass().dtor_value())
+      );
     }
     return builder.build();
   }
 
   public static TableCreationParameters TableCreationParameters(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.TableCreationParameters dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.TableCreationParameters dafnyValue
+  ) {
     TableCreationParameters.Builder builder = TableCreationParameters.builder();
-    builder.attributeDefinitions(ToNative.AttributeDefinitions(dafnyValue.dtor_AttributeDefinitions()));
+    builder.attributeDefinitions(
+      ToNative.AttributeDefinitions(dafnyValue.dtor_AttributeDefinitions())
+    );
     if (dafnyValue.dtor_BillingMode().is_Some()) {
-      builder.billingMode(ToNative.BillingMode(dafnyValue.dtor_BillingMode().dtor_value()));
+      builder.billingMode(
+        ToNative.BillingMode(dafnyValue.dtor_BillingMode().dtor_value())
+      );
     }
     if (dafnyValue.dtor_GlobalSecondaryIndexes().is_Some()) {
-      builder.globalSecondaryIndexes(ToNative.GlobalSecondaryIndexList(dafnyValue.dtor_GlobalSecondaryIndexes().dtor_value()));
+      builder.globalSecondaryIndexes(
+        ToNative.GlobalSecondaryIndexList(
+          dafnyValue.dtor_GlobalSecondaryIndexes().dtor_value()
+        )
+      );
     }
     builder.keySchema(ToNative.KeySchema(dafnyValue.dtor_KeySchema()));
     if (dafnyValue.dtor_ProvisionedThroughput().is_Some()) {
-      builder.provisionedThroughput(ToNative.ProvisionedThroughput(dafnyValue.dtor_ProvisionedThroughput().dtor_value()));
+      builder.provisionedThroughput(
+        ToNative.ProvisionedThroughput(
+          dafnyValue.dtor_ProvisionedThroughput().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_SSESpecification().is_Some()) {
-      builder.sseSpecification(ToNative.SSESpecification(dafnyValue.dtor_SSESpecification().dtor_value()));
+      builder.sseSpecification(
+        ToNative.SSESpecification(
+          dafnyValue.dtor_SSESpecification().dtor_value()
+        )
+      );
     }
-    builder.tableName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_TableName()));
+    builder.tableName(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_TableName()
+      )
+    );
     return builder.build();
   }
 
   public static TableDescription TableDescription(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.TableDescription dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.TableDescription dafnyValue
+  ) {
     TableDescription.Builder builder = TableDescription.builder();
     if (dafnyValue.dtor_ArchivalSummary().is_Some()) {
-      builder.archivalSummary(ToNative.ArchivalSummary(dafnyValue.dtor_ArchivalSummary().dtor_value()));
+      builder.archivalSummary(
+        ToNative.ArchivalSummary(dafnyValue.dtor_ArchivalSummary().dtor_value())
+      );
     }
     if (dafnyValue.dtor_AttributeDefinitions().is_Some()) {
-      builder.attributeDefinitions(ToNative.AttributeDefinitions(dafnyValue.dtor_AttributeDefinitions().dtor_value()));
+      builder.attributeDefinitions(
+        ToNative.AttributeDefinitions(
+          dafnyValue.dtor_AttributeDefinitions().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_BillingModeSummary().is_Some()) {
-      builder.billingModeSummary(ToNative.BillingModeSummary(dafnyValue.dtor_BillingModeSummary().dtor_value()));
+      builder.billingModeSummary(
+        ToNative.BillingModeSummary(
+          dafnyValue.dtor_BillingModeSummary().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_CreationDateTime().is_Some()) {
-      builder.creationDateTime(software.amazon.smithy.dafny.conversion.ToNative.Simple.Instant(dafnyValue.dtor_CreationDateTime().dtor_value()));
+      builder.creationDateTime(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.Instant(
+          dafnyValue.dtor_CreationDateTime().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_GlobalSecondaryIndexes().is_Some()) {
-      builder.globalSecondaryIndexes(ToNative.GlobalSecondaryIndexDescriptionList(dafnyValue.dtor_GlobalSecondaryIndexes().dtor_value()));
+      builder.globalSecondaryIndexes(
+        ToNative.GlobalSecondaryIndexDescriptionList(
+          dafnyValue.dtor_GlobalSecondaryIndexes().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_GlobalTableVersion().is_Some()) {
-      builder.globalTableVersion(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_GlobalTableVersion().dtor_value()));
+      builder.globalTableVersion(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_GlobalTableVersion().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ItemCount().is_Some()) {
       builder.itemCount((dafnyValue.dtor_ItemCount().dtor_value()));
     }
     if (dafnyValue.dtor_KeySchema().is_Some()) {
-      builder.keySchema(ToNative.KeySchema(dafnyValue.dtor_KeySchema().dtor_value()));
+      builder.keySchema(
+        ToNative.KeySchema(dafnyValue.dtor_KeySchema().dtor_value())
+      );
     }
     if (dafnyValue.dtor_LatestStreamArn().is_Some()) {
-      builder.latestStreamArn(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_LatestStreamArn().dtor_value()));
+      builder.latestStreamArn(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_LatestStreamArn().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_LatestStreamLabel().is_Some()) {
-      builder.latestStreamLabel(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_LatestStreamLabel().dtor_value()));
+      builder.latestStreamLabel(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_LatestStreamLabel().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_LocalSecondaryIndexes().is_Some()) {
-      builder.localSecondaryIndexes(ToNative.LocalSecondaryIndexDescriptionList(dafnyValue.dtor_LocalSecondaryIndexes().dtor_value()));
+      builder.localSecondaryIndexes(
+        ToNative.LocalSecondaryIndexDescriptionList(
+          dafnyValue.dtor_LocalSecondaryIndexes().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ProvisionedThroughput().is_Some()) {
-      builder.provisionedThroughput(ToNative.ProvisionedThroughputDescription(dafnyValue.dtor_ProvisionedThroughput().dtor_value()));
+      builder.provisionedThroughput(
+        ToNative.ProvisionedThroughputDescription(
+          dafnyValue.dtor_ProvisionedThroughput().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_Replicas().is_Some()) {
-      builder.replicas(ToNative.ReplicaDescriptionList(dafnyValue.dtor_Replicas().dtor_value()));
+      builder.replicas(
+        ToNative.ReplicaDescriptionList(dafnyValue.dtor_Replicas().dtor_value())
+      );
     }
     if (dafnyValue.dtor_RestoreSummary().is_Some()) {
-      builder.restoreSummary(ToNative.RestoreSummary(dafnyValue.dtor_RestoreSummary().dtor_value()));
+      builder.restoreSummary(
+        ToNative.RestoreSummary(dafnyValue.dtor_RestoreSummary().dtor_value())
+      );
     }
     if (dafnyValue.dtor_SSEDescription().is_Some()) {
-      builder.sseDescription(ToNative.SSEDescription(dafnyValue.dtor_SSEDescription().dtor_value()));
+      builder.sseDescription(
+        ToNative.SSEDescription(dafnyValue.dtor_SSEDescription().dtor_value())
+      );
     }
     if (dafnyValue.dtor_StreamSpecification().is_Some()) {
-      builder.streamSpecification(ToNative.StreamSpecification(dafnyValue.dtor_StreamSpecification().dtor_value()));
+      builder.streamSpecification(
+        ToNative.StreamSpecification(
+          dafnyValue.dtor_StreamSpecification().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_TableArn().is_Some()) {
-      builder.tableArn(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_TableArn().dtor_value()));
+      builder.tableArn(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_TableArn().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_TableClassSummary().is_Some()) {
-      builder.tableClassSummary(ToNative.TableClassSummary(dafnyValue.dtor_TableClassSummary().dtor_value()));
+      builder.tableClassSummary(
+        ToNative.TableClassSummary(
+          dafnyValue.dtor_TableClassSummary().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_TableId().is_Some()) {
-      builder.tableId(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_TableId().dtor_value()));
+      builder.tableId(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_TableId().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_TableName().is_Some()) {
-      builder.tableName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_TableName().dtor_value()));
+      builder.tableName(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_TableName().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_TableSizeBytes().is_Some()) {
       builder.tableSizeBytes((dafnyValue.dtor_TableSizeBytes().dtor_value()));
     }
     if (dafnyValue.dtor_TableStatus().is_Some()) {
-      builder.tableStatus(ToNative.TableStatus(dafnyValue.dtor_TableStatus().dtor_value()));
+      builder.tableStatus(
+        ToNative.TableStatus(dafnyValue.dtor_TableStatus().dtor_value())
+      );
     }
     return builder.build();
   }
 
   public static List<String> TableNameList(
-      DafnySequence<? extends DafnySequence<? extends Character>> dafnyValue) {
+    DafnySequence<? extends DafnySequence<? extends Character>> dafnyValue
+  ) {
     return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToList(
-        dafnyValue, 
-        software.amazon.smithy.dafny.conversion.ToNative.Simple::String);
+      dafnyValue,
+      software.amazon.smithy.dafny.conversion.ToNative.Simple::String
+    );
   }
 
   public static TableStatus TableStatus(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.TableStatus dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.TableStatus dafnyValue
+  ) {
     if (dafnyValue.is_CREATING()) {
       return TableStatus.CREATING;
     }
@@ -4167,56 +6744,92 @@ public class ToNative {
   }
 
   public static Tag Tag(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.Tag dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.Tag dafnyValue
+  ) {
     Tag.Builder builder = Tag.builder();
-    builder.key(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_Key()));
-    builder.value(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_Value()));
+    builder.key(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_Key()
+      )
+    );
+    builder.value(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_Value()
+      )
+    );
     return builder.build();
   }
 
   public static List<String> TagKeyList(
-      DafnySequence<? extends DafnySequence<? extends Character>> dafnyValue) {
+    DafnySequence<? extends DafnySequence<? extends Character>> dafnyValue
+  ) {
     return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToList(
-        dafnyValue, 
-        software.amazon.smithy.dafny.conversion.ToNative.Simple::String);
+      dafnyValue,
+      software.amazon.smithy.dafny.conversion.ToNative.Simple::String
+    );
   }
 
   public static List<Tag> TagList(
-      DafnySequence<? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.Tag> dafnyValue) {
+    DafnySequence<
+      ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.Tag
+    > dafnyValue
+  ) {
     return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToList(
-        dafnyValue, 
-        software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::Tag);
+      dafnyValue,
+      software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::Tag
+    );
   }
 
-  public static TagResourceRequest TagResourceInput(TagResourceInput dafnyValue) {
+  public static TagResourceRequest TagResourceInput(
+    TagResourceInput dafnyValue
+  ) {
     TagResourceRequest.Builder builder = TagResourceRequest.builder();
-    builder.resourceArn(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_ResourceArn()));
+    builder.resourceArn(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_ResourceArn()
+      )
+    );
     builder.tags(ToNative.TagList(dafnyValue.dtor_Tags()));
     return builder.build();
   }
 
   public static TimeToLiveDescription TimeToLiveDescription(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.TimeToLiveDescription dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.TimeToLiveDescription dafnyValue
+  ) {
     TimeToLiveDescription.Builder builder = TimeToLiveDescription.builder();
     if (dafnyValue.dtor_AttributeName().is_Some()) {
-      builder.attributeName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_AttributeName().dtor_value()));
+      builder.attributeName(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_AttributeName().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_TimeToLiveStatus().is_Some()) {
-      builder.timeToLiveStatus(ToNative.TimeToLiveStatus(dafnyValue.dtor_TimeToLiveStatus().dtor_value()));
+      builder.timeToLiveStatus(
+        ToNative.TimeToLiveStatus(
+          dafnyValue.dtor_TimeToLiveStatus().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
   public static TimeToLiveSpecification TimeToLiveSpecification(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.TimeToLiveSpecification dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.TimeToLiveSpecification dafnyValue
+  ) {
     TimeToLiveSpecification.Builder builder = TimeToLiveSpecification.builder();
-    builder.attributeName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_AttributeName()));
+    builder.attributeName(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_AttributeName()
+      )
+    );
     builder.enabled((dafnyValue.dtor_Enabled()));
     return builder.build();
   }
 
   public static TimeToLiveStatus TimeToLiveStatus(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.TimeToLiveStatus dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.TimeToLiveStatus dafnyValue
+  ) {
     if (dafnyValue.is_ENABLING()) {
       return TimeToLiveStatus.ENABLING;
     }
@@ -4233,44 +6846,69 @@ public class ToNative {
   }
 
   public static TransactGetItem TransactGetItem(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.TransactGetItem dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.TransactGetItem dafnyValue
+  ) {
     TransactGetItem.Builder builder = TransactGetItem.builder();
     builder.get(ToNative.Get(dafnyValue.dtor_Get()));
     return builder.build();
   }
 
   public static List<TransactGetItem> TransactGetItemList(
-      DafnySequence<? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.TransactGetItem> dafnyValue) {
+    DafnySequence<
+      ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.TransactGetItem
+    > dafnyValue
+  ) {
     return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToList(
-        dafnyValue, 
-        software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::TransactGetItem);
+      dafnyValue,
+      software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::TransactGetItem
+    );
   }
 
-  public static TransactGetItemsRequest TransactGetItemsInput(TransactGetItemsInput dafnyValue) {
+  public static TransactGetItemsRequest TransactGetItemsInput(
+    TransactGetItemsInput dafnyValue
+  ) {
     TransactGetItemsRequest.Builder builder = TransactGetItemsRequest.builder();
     if (dafnyValue.dtor_ReturnConsumedCapacity().is_Some()) {
-      builder.returnConsumedCapacity(ToNative.ReturnConsumedCapacity(dafnyValue.dtor_ReturnConsumedCapacity().dtor_value()));
+      builder.returnConsumedCapacity(
+        ToNative.ReturnConsumedCapacity(
+          dafnyValue.dtor_ReturnConsumedCapacity().dtor_value()
+        )
+      );
     }
-    builder.transactItems(ToNative.TransactGetItemList(dafnyValue.dtor_TransactItems()));
+    builder.transactItems(
+      ToNative.TransactGetItemList(dafnyValue.dtor_TransactItems())
+    );
     return builder.build();
   }
 
-  public static TransactGetItemsResponse TransactGetItemsOutput(TransactGetItemsOutput dafnyValue) {
-    TransactGetItemsResponse.Builder builder = TransactGetItemsResponse.builder();
+  public static TransactGetItemsResponse TransactGetItemsOutput(
+    TransactGetItemsOutput dafnyValue
+  ) {
+    TransactGetItemsResponse.Builder builder =
+      TransactGetItemsResponse.builder();
     if (dafnyValue.dtor_ConsumedCapacity().is_Some()) {
-      builder.consumedCapacity(ToNative.ConsumedCapacityMultiple(dafnyValue.dtor_ConsumedCapacity().dtor_value()));
+      builder.consumedCapacity(
+        ToNative.ConsumedCapacityMultiple(
+          dafnyValue.dtor_ConsumedCapacity().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_Responses().is_Some()) {
-      builder.responses(ToNative.ItemResponseList(dafnyValue.dtor_Responses().dtor_value()));
+      builder.responses(
+        ToNative.ItemResponseList(dafnyValue.dtor_Responses().dtor_value())
+      );
     }
     return builder.build();
   }
 
   public static TransactWriteItem TransactWriteItem(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.TransactWriteItem dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.TransactWriteItem dafnyValue
+  ) {
     TransactWriteItem.Builder builder = TransactWriteItem.builder();
     if (dafnyValue.dtor_ConditionCheck().is_Some()) {
-      builder.conditionCheck(ToNative.ConditionCheck(dafnyValue.dtor_ConditionCheck().dtor_value()));
+      builder.conditionCheck(
+        ToNative.ConditionCheck(dafnyValue.dtor_ConditionCheck().dtor_value())
+      );
     }
     if (dafnyValue.dtor_Delete().is_Some()) {
       builder.delete(ToNative.Delete(dafnyValue.dtor_Delete().dtor_value()));
@@ -4285,165 +6923,339 @@ public class ToNative {
   }
 
   public static List<TransactWriteItem> TransactWriteItemList(
-      DafnySequence<? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.TransactWriteItem> dafnyValue) {
+    DafnySequence<
+      ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.TransactWriteItem
+    > dafnyValue
+  ) {
     return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToList(
-        dafnyValue, 
-        software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::TransactWriteItem);
+      dafnyValue,
+      software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::TransactWriteItem
+    );
   }
 
   public static TransactWriteItemsRequest TransactWriteItemsInput(
-      TransactWriteItemsInput dafnyValue) {
-    TransactWriteItemsRequest.Builder builder = TransactWriteItemsRequest.builder();
+    TransactWriteItemsInput dafnyValue
+  ) {
+    TransactWriteItemsRequest.Builder builder =
+      TransactWriteItemsRequest.builder();
     if (dafnyValue.dtor_ClientRequestToken().is_Some()) {
-      builder.clientRequestToken(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_ClientRequestToken().dtor_value()));
+      builder.clientRequestToken(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_ClientRequestToken().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ReturnConsumedCapacity().is_Some()) {
-      builder.returnConsumedCapacity(ToNative.ReturnConsumedCapacity(dafnyValue.dtor_ReturnConsumedCapacity().dtor_value()));
+      builder.returnConsumedCapacity(
+        ToNative.ReturnConsumedCapacity(
+          dafnyValue.dtor_ReturnConsumedCapacity().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ReturnItemCollectionMetrics().is_Some()) {
-      builder.returnItemCollectionMetrics(ToNative.ReturnItemCollectionMetrics(dafnyValue.dtor_ReturnItemCollectionMetrics().dtor_value()));
+      builder.returnItemCollectionMetrics(
+        ToNative.ReturnItemCollectionMetrics(
+          dafnyValue.dtor_ReturnItemCollectionMetrics().dtor_value()
+        )
+      );
     }
-    builder.transactItems(ToNative.TransactWriteItemList(dafnyValue.dtor_TransactItems()));
+    builder.transactItems(
+      ToNative.TransactWriteItemList(dafnyValue.dtor_TransactItems())
+    );
     return builder.build();
   }
 
   public static TransactWriteItemsResponse TransactWriteItemsOutput(
-      TransactWriteItemsOutput dafnyValue) {
-    TransactWriteItemsResponse.Builder builder = TransactWriteItemsResponse.builder();
+    TransactWriteItemsOutput dafnyValue
+  ) {
+    TransactWriteItemsResponse.Builder builder =
+      TransactWriteItemsResponse.builder();
     if (dafnyValue.dtor_ConsumedCapacity().is_Some()) {
-      builder.consumedCapacity(ToNative.ConsumedCapacityMultiple(dafnyValue.dtor_ConsumedCapacity().dtor_value()));
+      builder.consumedCapacity(
+        ToNative.ConsumedCapacityMultiple(
+          dafnyValue.dtor_ConsumedCapacity().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ItemCollectionMetrics().is_Some()) {
-      builder.itemCollectionMetrics(ToNative.ItemCollectionMetricsPerTable(dafnyValue.dtor_ItemCollectionMetrics().dtor_value()));
+      builder.itemCollectionMetrics(
+        ToNative.ItemCollectionMetricsPerTable(
+          dafnyValue.dtor_ItemCollectionMetrics().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
-  public static UntagResourceRequest UntagResourceInput(UntagResourceInput dafnyValue) {
+  public static UntagResourceRequest UntagResourceInput(
+    UntagResourceInput dafnyValue
+  ) {
     UntagResourceRequest.Builder builder = UntagResourceRequest.builder();
-    builder.resourceArn(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_ResourceArn()));
+    builder.resourceArn(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_ResourceArn()
+      )
+    );
     builder.tagKeys(ToNative.TagKeyList(dafnyValue.dtor_TagKeys()));
     return builder.build();
   }
 
   public static Update Update(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.Update dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.Update dafnyValue
+  ) {
     Update.Builder builder = Update.builder();
     if (dafnyValue.dtor_ConditionExpression().is_Some()) {
-      builder.conditionExpression(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_ConditionExpression().dtor_value()));
+      builder.conditionExpression(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_ConditionExpression().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ExpressionAttributeNames().is_Some()) {
-      builder.expressionAttributeNames(ToNative.ExpressionAttributeNameMap(dafnyValue.dtor_ExpressionAttributeNames().dtor_value()));
+      builder.expressionAttributeNames(
+        ToNative.ExpressionAttributeNameMap(
+          dafnyValue.dtor_ExpressionAttributeNames().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ExpressionAttributeValues().is_Some()) {
-      builder.expressionAttributeValues(ToNative.ExpressionAttributeValueMap(dafnyValue.dtor_ExpressionAttributeValues().dtor_value()));
+      builder.expressionAttributeValues(
+        ToNative.ExpressionAttributeValueMap(
+          dafnyValue.dtor_ExpressionAttributeValues().dtor_value()
+        )
+      );
     }
     builder.key(ToNative.Key(dafnyValue.dtor_Key()));
     if (dafnyValue.dtor_ReturnValuesOnConditionCheckFailure().is_Some()) {
-      builder.returnValuesOnConditionCheckFailure(ToNative.ReturnValuesOnConditionCheckFailure(dafnyValue.dtor_ReturnValuesOnConditionCheckFailure().dtor_value()));
+      builder.returnValuesOnConditionCheckFailure(
+        ToNative.ReturnValuesOnConditionCheckFailure(
+          dafnyValue.dtor_ReturnValuesOnConditionCheckFailure().dtor_value()
+        )
+      );
     }
-    builder.tableName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_TableName()));
-    builder.updateExpression(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_UpdateExpression()));
+    builder.tableName(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_TableName()
+      )
+    );
+    builder.updateExpression(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_UpdateExpression()
+      )
+    );
     return builder.build();
   }
 
   public static UpdateContinuousBackupsRequest UpdateContinuousBackupsInput(
-      UpdateContinuousBackupsInput dafnyValue) {
-    UpdateContinuousBackupsRequest.Builder builder = UpdateContinuousBackupsRequest.builder();
-    builder.pointInTimeRecoverySpecification(ToNative.PointInTimeRecoverySpecification(dafnyValue.dtor_PointInTimeRecoverySpecification()));
-    builder.tableName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_TableName()));
+    UpdateContinuousBackupsInput dafnyValue
+  ) {
+    UpdateContinuousBackupsRequest.Builder builder =
+      UpdateContinuousBackupsRequest.builder();
+    builder.pointInTimeRecoverySpecification(
+      ToNative.PointInTimeRecoverySpecification(
+        dafnyValue.dtor_PointInTimeRecoverySpecification()
+      )
+    );
+    builder.tableName(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_TableName()
+      )
+    );
     return builder.build();
   }
 
   public static UpdateContinuousBackupsResponse UpdateContinuousBackupsOutput(
-      UpdateContinuousBackupsOutput dafnyValue) {
-    UpdateContinuousBackupsResponse.Builder builder = UpdateContinuousBackupsResponse.builder();
+    UpdateContinuousBackupsOutput dafnyValue
+  ) {
+    UpdateContinuousBackupsResponse.Builder builder =
+      UpdateContinuousBackupsResponse.builder();
     if (dafnyValue.dtor_ContinuousBackupsDescription().is_Some()) {
-      builder.continuousBackupsDescription(ToNative.ContinuousBackupsDescription(dafnyValue.dtor_ContinuousBackupsDescription().dtor_value()));
+      builder.continuousBackupsDescription(
+        ToNative.ContinuousBackupsDescription(
+          dafnyValue.dtor_ContinuousBackupsDescription().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
   public static UpdateContributorInsightsRequest UpdateContributorInsightsInput(
-      UpdateContributorInsightsInput dafnyValue) {
-    UpdateContributorInsightsRequest.Builder builder = UpdateContributorInsightsRequest.builder();
-    builder.contributorInsightsAction(ToNative.ContributorInsightsAction(dafnyValue.dtor_ContributorInsightsAction()));
+    UpdateContributorInsightsInput dafnyValue
+  ) {
+    UpdateContributorInsightsRequest.Builder builder =
+      UpdateContributorInsightsRequest.builder();
+    builder.contributorInsightsAction(
+      ToNative.ContributorInsightsAction(
+        dafnyValue.dtor_ContributorInsightsAction()
+      )
+    );
     if (dafnyValue.dtor_IndexName().is_Some()) {
-      builder.indexName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_IndexName().dtor_value()));
+      builder.indexName(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_IndexName().dtor_value()
+        )
+      );
     }
-    builder.tableName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_TableName()));
+    builder.tableName(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_TableName()
+      )
+    );
     return builder.build();
   }
 
   public static UpdateContributorInsightsResponse UpdateContributorInsightsOutput(
-      UpdateContributorInsightsOutput dafnyValue) {
-    UpdateContributorInsightsResponse.Builder builder = UpdateContributorInsightsResponse.builder();
+    UpdateContributorInsightsOutput dafnyValue
+  ) {
+    UpdateContributorInsightsResponse.Builder builder =
+      UpdateContributorInsightsResponse.builder();
     if (dafnyValue.dtor_ContributorInsightsStatus().is_Some()) {
-      builder.contributorInsightsStatus(ToNative.ContributorInsightsStatus(dafnyValue.dtor_ContributorInsightsStatus().dtor_value()));
+      builder.contributorInsightsStatus(
+        ToNative.ContributorInsightsStatus(
+          dafnyValue.dtor_ContributorInsightsStatus().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_IndexName().is_Some()) {
-      builder.indexName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_IndexName().dtor_value()));
+      builder.indexName(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_IndexName().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_TableName().is_Some()) {
-      builder.tableName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_TableName().dtor_value()));
+      builder.tableName(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_TableName().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
   public static UpdateGlobalSecondaryIndexAction UpdateGlobalSecondaryIndexAction(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.UpdateGlobalSecondaryIndexAction dafnyValue) {
-    UpdateGlobalSecondaryIndexAction.Builder builder = UpdateGlobalSecondaryIndexAction.builder();
-    builder.indexName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_IndexName()));
-    builder.provisionedThroughput(ToNative.ProvisionedThroughput(dafnyValue.dtor_ProvisionedThroughput()));
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.UpdateGlobalSecondaryIndexAction dafnyValue
+  ) {
+    UpdateGlobalSecondaryIndexAction.Builder builder =
+      UpdateGlobalSecondaryIndexAction.builder();
+    builder.indexName(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_IndexName()
+      )
+    );
+    builder.provisionedThroughput(
+      ToNative.ProvisionedThroughput(dafnyValue.dtor_ProvisionedThroughput())
+    );
     return builder.build();
   }
 
-  public static UpdateGlobalTableRequest UpdateGlobalTableInput(UpdateGlobalTableInput dafnyValue) {
-    UpdateGlobalTableRequest.Builder builder = UpdateGlobalTableRequest.builder();
-    builder.globalTableName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_GlobalTableName()));
-    builder.replicaUpdates(ToNative.ReplicaUpdateList(dafnyValue.dtor_ReplicaUpdates()));
+  public static UpdateGlobalTableRequest UpdateGlobalTableInput(
+    UpdateGlobalTableInput dafnyValue
+  ) {
+    UpdateGlobalTableRequest.Builder builder =
+      UpdateGlobalTableRequest.builder();
+    builder.globalTableName(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_GlobalTableName()
+      )
+    );
+    builder.replicaUpdates(
+      ToNative.ReplicaUpdateList(dafnyValue.dtor_ReplicaUpdates())
+    );
     return builder.build();
   }
 
   public static UpdateGlobalTableResponse UpdateGlobalTableOutput(
-      UpdateGlobalTableOutput dafnyValue) {
-    UpdateGlobalTableResponse.Builder builder = UpdateGlobalTableResponse.builder();
+    UpdateGlobalTableOutput dafnyValue
+  ) {
+    UpdateGlobalTableResponse.Builder builder =
+      UpdateGlobalTableResponse.builder();
     if (dafnyValue.dtor_GlobalTableDescription().is_Some()) {
-      builder.globalTableDescription(ToNative.GlobalTableDescription(dafnyValue.dtor_GlobalTableDescription().dtor_value()));
+      builder.globalTableDescription(
+        ToNative.GlobalTableDescription(
+          dafnyValue.dtor_GlobalTableDescription().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
   public static UpdateGlobalTableSettingsRequest UpdateGlobalTableSettingsInput(
-      UpdateGlobalTableSettingsInput dafnyValue) {
-    UpdateGlobalTableSettingsRequest.Builder builder = UpdateGlobalTableSettingsRequest.builder();
+    UpdateGlobalTableSettingsInput dafnyValue
+  ) {
+    UpdateGlobalTableSettingsRequest.Builder builder =
+      UpdateGlobalTableSettingsRequest.builder();
     if (dafnyValue.dtor_GlobalTableBillingMode().is_Some()) {
-      builder.globalTableBillingMode(ToNative.BillingMode(dafnyValue.dtor_GlobalTableBillingMode().dtor_value()));
+      builder.globalTableBillingMode(
+        ToNative.BillingMode(
+          dafnyValue.dtor_GlobalTableBillingMode().dtor_value()
+        )
+      );
     }
-    if (dafnyValue.dtor_GlobalTableGlobalSecondaryIndexSettingsUpdate().is_Some()) {
-      builder.globalTableGlobalSecondaryIndexSettingsUpdate(ToNative.GlobalTableGlobalSecondaryIndexSettingsUpdateList(dafnyValue.dtor_GlobalTableGlobalSecondaryIndexSettingsUpdate().dtor_value()));
+    if (
+      dafnyValue.dtor_GlobalTableGlobalSecondaryIndexSettingsUpdate().is_Some()
+    ) {
+      builder.globalTableGlobalSecondaryIndexSettingsUpdate(
+        ToNative.GlobalTableGlobalSecondaryIndexSettingsUpdateList(
+          dafnyValue
+            .dtor_GlobalTableGlobalSecondaryIndexSettingsUpdate()
+            .dtor_value()
+        )
+      );
     }
-    builder.globalTableName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_GlobalTableName()));
-    if (dafnyValue.dtor_GlobalTableProvisionedWriteCapacityAutoScalingSettingsUpdate().is_Some()) {
-      builder.globalTableProvisionedWriteCapacityAutoScalingSettingsUpdate(ToNative.AutoScalingSettingsUpdate(dafnyValue.dtor_GlobalTableProvisionedWriteCapacityAutoScalingSettingsUpdate().dtor_value()));
+    builder.globalTableName(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_GlobalTableName()
+      )
+    );
+    if (
+      dafnyValue
+        .dtor_GlobalTableProvisionedWriteCapacityAutoScalingSettingsUpdate()
+        .is_Some()
+    ) {
+      builder.globalTableProvisionedWriteCapacityAutoScalingSettingsUpdate(
+        ToNative.AutoScalingSettingsUpdate(
+          dafnyValue
+            .dtor_GlobalTableProvisionedWriteCapacityAutoScalingSettingsUpdate()
+            .dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_GlobalTableProvisionedWriteCapacityUnits().is_Some()) {
-      builder.globalTableProvisionedWriteCapacityUnits((dafnyValue.dtor_GlobalTableProvisionedWriteCapacityUnits().dtor_value()));
+      builder.globalTableProvisionedWriteCapacityUnits(
+        (dafnyValue
+            .dtor_GlobalTableProvisionedWriteCapacityUnits()
+            .dtor_value())
+      );
     }
     if (dafnyValue.dtor_ReplicaSettingsUpdate().is_Some()) {
-      builder.replicaSettingsUpdate(ToNative.ReplicaSettingsUpdateList(dafnyValue.dtor_ReplicaSettingsUpdate().dtor_value()));
+      builder.replicaSettingsUpdate(
+        ToNative.ReplicaSettingsUpdateList(
+          dafnyValue.dtor_ReplicaSettingsUpdate().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
   public static UpdateGlobalTableSettingsResponse UpdateGlobalTableSettingsOutput(
-      UpdateGlobalTableSettingsOutput dafnyValue) {
-    UpdateGlobalTableSettingsResponse.Builder builder = UpdateGlobalTableSettingsResponse.builder();
+    UpdateGlobalTableSettingsOutput dafnyValue
+  ) {
+    UpdateGlobalTableSettingsResponse.Builder builder =
+      UpdateGlobalTableSettingsResponse.builder();
     if (dafnyValue.dtor_GlobalTableName().is_Some()) {
-      builder.globalTableName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_GlobalTableName().dtor_value()));
+      builder.globalTableName(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_GlobalTableName().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ReplicaSettings().is_Some()) {
-      builder.replicaSettings(ToNative.ReplicaSettingsDescriptionList(dafnyValue.dtor_ReplicaSettings().dtor_value()));
+      builder.replicaSettings(
+        ToNative.ReplicaSettingsDescriptionList(
+          dafnyValue.dtor_ReplicaSettings().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
@@ -4451,432 +7263,798 @@ public class ToNative {
   public static UpdateItemRequest UpdateItemInput(UpdateItemInput dafnyValue) {
     UpdateItemRequest.Builder builder = UpdateItemRequest.builder();
     if (dafnyValue.dtor_AttributeUpdates().is_Some()) {
-      builder.attributeUpdates(ToNative.AttributeUpdates(dafnyValue.dtor_AttributeUpdates().dtor_value()));
+      builder.attributeUpdates(
+        ToNative.AttributeUpdates(
+          dafnyValue.dtor_AttributeUpdates().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ConditionalOperator().is_Some()) {
-      builder.conditionalOperator(ToNative.ConditionalOperator(dafnyValue.dtor_ConditionalOperator().dtor_value()));
+      builder.conditionalOperator(
+        ToNative.ConditionalOperator(
+          dafnyValue.dtor_ConditionalOperator().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ConditionExpression().is_Some()) {
-      builder.conditionExpression(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_ConditionExpression().dtor_value()));
+      builder.conditionExpression(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_ConditionExpression().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_Expected().is_Some()) {
-      builder.expected(ToNative.ExpectedAttributeMap(dafnyValue.dtor_Expected().dtor_value()));
+      builder.expected(
+        ToNative.ExpectedAttributeMap(dafnyValue.dtor_Expected().dtor_value())
+      );
     }
     if (dafnyValue.dtor_ExpressionAttributeNames().is_Some()) {
-      builder.expressionAttributeNames(ToNative.ExpressionAttributeNameMap(dafnyValue.dtor_ExpressionAttributeNames().dtor_value()));
+      builder.expressionAttributeNames(
+        ToNative.ExpressionAttributeNameMap(
+          dafnyValue.dtor_ExpressionAttributeNames().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ExpressionAttributeValues().is_Some()) {
-      builder.expressionAttributeValues(ToNative.ExpressionAttributeValueMap(dafnyValue.dtor_ExpressionAttributeValues().dtor_value()));
+      builder.expressionAttributeValues(
+        ToNative.ExpressionAttributeValueMap(
+          dafnyValue.dtor_ExpressionAttributeValues().dtor_value()
+        )
+      );
     }
     builder.key(ToNative.Key(dafnyValue.dtor_Key()));
     if (dafnyValue.dtor_ReturnConsumedCapacity().is_Some()) {
-      builder.returnConsumedCapacity(ToNative.ReturnConsumedCapacity(dafnyValue.dtor_ReturnConsumedCapacity().dtor_value()));
+      builder.returnConsumedCapacity(
+        ToNative.ReturnConsumedCapacity(
+          dafnyValue.dtor_ReturnConsumedCapacity().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ReturnItemCollectionMetrics().is_Some()) {
-      builder.returnItemCollectionMetrics(ToNative.ReturnItemCollectionMetrics(dafnyValue.dtor_ReturnItemCollectionMetrics().dtor_value()));
+      builder.returnItemCollectionMetrics(
+        ToNative.ReturnItemCollectionMetrics(
+          dafnyValue.dtor_ReturnItemCollectionMetrics().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ReturnValues().is_Some()) {
-      builder.returnValues(ToNative.ReturnValue(dafnyValue.dtor_ReturnValues().dtor_value()));
+      builder.returnValues(
+        ToNative.ReturnValue(dafnyValue.dtor_ReturnValues().dtor_value())
+      );
     }
-    builder.tableName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_TableName()));
+    builder.tableName(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_TableName()
+      )
+    );
     if (dafnyValue.dtor_UpdateExpression().is_Some()) {
-      builder.updateExpression(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_UpdateExpression().dtor_value()));
+      builder.updateExpression(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_UpdateExpression().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
-  public static UpdateItemResponse UpdateItemOutput(UpdateItemOutput dafnyValue) {
+  public static UpdateItemResponse UpdateItemOutput(
+    UpdateItemOutput dafnyValue
+  ) {
     UpdateItemResponse.Builder builder = UpdateItemResponse.builder();
     if (dafnyValue.dtor_Attributes().is_Some()) {
-      builder.attributes(ToNative.AttributeMap(dafnyValue.dtor_Attributes().dtor_value()));
+      builder.attributes(
+        ToNative.AttributeMap(dafnyValue.dtor_Attributes().dtor_value())
+      );
     }
     if (dafnyValue.dtor_ConsumedCapacity().is_Some()) {
-      builder.consumedCapacity(ToNative.ConsumedCapacity(dafnyValue.dtor_ConsumedCapacity().dtor_value()));
+      builder.consumedCapacity(
+        ToNative.ConsumedCapacity(
+          dafnyValue.dtor_ConsumedCapacity().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ItemCollectionMetrics().is_Some()) {
-      builder.itemCollectionMetrics(ToNative.ItemCollectionMetrics(dafnyValue.dtor_ItemCollectionMetrics().dtor_value()));
+      builder.itemCollectionMetrics(
+        ToNative.ItemCollectionMetrics(
+          dafnyValue.dtor_ItemCollectionMetrics().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
   public static UpdateReplicationGroupMemberAction UpdateReplicationGroupMemberAction(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.UpdateReplicationGroupMemberAction dafnyValue) {
-    UpdateReplicationGroupMemberAction.Builder builder = UpdateReplicationGroupMemberAction.builder();
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.UpdateReplicationGroupMemberAction dafnyValue
+  ) {
+    UpdateReplicationGroupMemberAction.Builder builder =
+      UpdateReplicationGroupMemberAction.builder();
     if (dafnyValue.dtor_GlobalSecondaryIndexes().is_Some()) {
-      builder.globalSecondaryIndexes(ToNative.ReplicaGlobalSecondaryIndexList(dafnyValue.dtor_GlobalSecondaryIndexes().dtor_value()));
+      builder.globalSecondaryIndexes(
+        ToNative.ReplicaGlobalSecondaryIndexList(
+          dafnyValue.dtor_GlobalSecondaryIndexes().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_KMSMasterKeyId().is_Some()) {
-      builder.kmsMasterKeyId(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_KMSMasterKeyId().dtor_value()));
+      builder.kmsMasterKeyId(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_KMSMasterKeyId().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ProvisionedThroughputOverride().is_Some()) {
-      builder.provisionedThroughputOverride(ToNative.ProvisionedThroughputOverride(dafnyValue.dtor_ProvisionedThroughputOverride().dtor_value()));
+      builder.provisionedThroughputOverride(
+        ToNative.ProvisionedThroughputOverride(
+          dafnyValue.dtor_ProvisionedThroughputOverride().dtor_value()
+        )
+      );
     }
-    builder.regionName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_RegionName()));
+    builder.regionName(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_RegionName()
+      )
+    );
     if (dafnyValue.dtor_TableClassOverride().is_Some()) {
-      builder.tableClassOverride(ToNative.TableClass(dafnyValue.dtor_TableClassOverride().dtor_value()));
+      builder.tableClassOverride(
+        ToNative.TableClass(dafnyValue.dtor_TableClassOverride().dtor_value())
+      );
     }
     return builder.build();
   }
 
-  public static UpdateTableRequest UpdateTableInput(UpdateTableInput dafnyValue) {
+  public static UpdateTableRequest UpdateTableInput(
+    UpdateTableInput dafnyValue
+  ) {
     UpdateTableRequest.Builder builder = UpdateTableRequest.builder();
     if (dafnyValue.dtor_AttributeDefinitions().is_Some()) {
-      builder.attributeDefinitions(ToNative.AttributeDefinitions(dafnyValue.dtor_AttributeDefinitions().dtor_value()));
+      builder.attributeDefinitions(
+        ToNative.AttributeDefinitions(
+          dafnyValue.dtor_AttributeDefinitions().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_BillingMode().is_Some()) {
-      builder.billingMode(ToNative.BillingMode(dafnyValue.dtor_BillingMode().dtor_value()));
+      builder.billingMode(
+        ToNative.BillingMode(dafnyValue.dtor_BillingMode().dtor_value())
+      );
     }
     if (dafnyValue.dtor_GlobalSecondaryIndexUpdates().is_Some()) {
-      builder.globalSecondaryIndexUpdates(ToNative.GlobalSecondaryIndexUpdateList(dafnyValue.dtor_GlobalSecondaryIndexUpdates().dtor_value()));
+      builder.globalSecondaryIndexUpdates(
+        ToNative.GlobalSecondaryIndexUpdateList(
+          dafnyValue.dtor_GlobalSecondaryIndexUpdates().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ProvisionedThroughput().is_Some()) {
-      builder.provisionedThroughput(ToNative.ProvisionedThroughput(dafnyValue.dtor_ProvisionedThroughput().dtor_value()));
+      builder.provisionedThroughput(
+        ToNative.ProvisionedThroughput(
+          dafnyValue.dtor_ProvisionedThroughput().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ReplicaUpdates().is_Some()) {
-      builder.replicaUpdates(ToNative.ReplicationGroupUpdateList(dafnyValue.dtor_ReplicaUpdates().dtor_value()));
+      builder.replicaUpdates(
+        ToNative.ReplicationGroupUpdateList(
+          dafnyValue.dtor_ReplicaUpdates().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_SSESpecification().is_Some()) {
-      builder.sseSpecification(ToNative.SSESpecification(dafnyValue.dtor_SSESpecification().dtor_value()));
+      builder.sseSpecification(
+        ToNative.SSESpecification(
+          dafnyValue.dtor_SSESpecification().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_StreamSpecification().is_Some()) {
-      builder.streamSpecification(ToNative.StreamSpecification(dafnyValue.dtor_StreamSpecification().dtor_value()));
+      builder.streamSpecification(
+        ToNative.StreamSpecification(
+          dafnyValue.dtor_StreamSpecification().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_TableClass().is_Some()) {
-      builder.tableClass(ToNative.TableClass(dafnyValue.dtor_TableClass().dtor_value()));
+      builder.tableClass(
+        ToNative.TableClass(dafnyValue.dtor_TableClass().dtor_value())
+      );
     }
-    builder.tableName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_TableName()));
+    builder.tableName(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_TableName()
+      )
+    );
     return builder.build();
   }
 
-  public static UpdateTableResponse UpdateTableOutput(UpdateTableOutput dafnyValue) {
+  public static UpdateTableResponse UpdateTableOutput(
+    UpdateTableOutput dafnyValue
+  ) {
     UpdateTableResponse.Builder builder = UpdateTableResponse.builder();
     if (dafnyValue.dtor_TableDescription().is_Some()) {
-      builder.tableDescription(ToNative.TableDescription(dafnyValue.dtor_TableDescription().dtor_value()));
+      builder.tableDescription(
+        ToNative.TableDescription(
+          dafnyValue.dtor_TableDescription().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
   public static UpdateTableReplicaAutoScalingRequest UpdateTableReplicaAutoScalingInput(
-      UpdateTableReplicaAutoScalingInput dafnyValue) {
-    UpdateTableReplicaAutoScalingRequest.Builder builder = UpdateTableReplicaAutoScalingRequest.builder();
+    UpdateTableReplicaAutoScalingInput dafnyValue
+  ) {
+    UpdateTableReplicaAutoScalingRequest.Builder builder =
+      UpdateTableReplicaAutoScalingRequest.builder();
     if (dafnyValue.dtor_GlobalSecondaryIndexUpdates().is_Some()) {
-      builder.globalSecondaryIndexUpdates(ToNative.GlobalSecondaryIndexAutoScalingUpdateList(dafnyValue.dtor_GlobalSecondaryIndexUpdates().dtor_value()));
+      builder.globalSecondaryIndexUpdates(
+        ToNative.GlobalSecondaryIndexAutoScalingUpdateList(
+          dafnyValue.dtor_GlobalSecondaryIndexUpdates().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ProvisionedWriteCapacityAutoScalingUpdate().is_Some()) {
-      builder.provisionedWriteCapacityAutoScalingUpdate(ToNative.AutoScalingSettingsUpdate(dafnyValue.dtor_ProvisionedWriteCapacityAutoScalingUpdate().dtor_value()));
+      builder.provisionedWriteCapacityAutoScalingUpdate(
+        ToNative.AutoScalingSettingsUpdate(
+          dafnyValue
+            .dtor_ProvisionedWriteCapacityAutoScalingUpdate()
+            .dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_ReplicaUpdates().is_Some()) {
-      builder.replicaUpdates(ToNative.ReplicaAutoScalingUpdateList(dafnyValue.dtor_ReplicaUpdates().dtor_value()));
+      builder.replicaUpdates(
+        ToNative.ReplicaAutoScalingUpdateList(
+          dafnyValue.dtor_ReplicaUpdates().dtor_value()
+        )
+      );
     }
-    builder.tableName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_TableName()));
+    builder.tableName(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_TableName()
+      )
+    );
     return builder.build();
   }
 
   public static UpdateTableReplicaAutoScalingResponse UpdateTableReplicaAutoScalingOutput(
-      UpdateTableReplicaAutoScalingOutput dafnyValue) {
-    UpdateTableReplicaAutoScalingResponse.Builder builder = UpdateTableReplicaAutoScalingResponse.builder();
+    UpdateTableReplicaAutoScalingOutput dafnyValue
+  ) {
+    UpdateTableReplicaAutoScalingResponse.Builder builder =
+      UpdateTableReplicaAutoScalingResponse.builder();
     if (dafnyValue.dtor_TableAutoScalingDescription().is_Some()) {
-      builder.tableAutoScalingDescription(ToNative.TableAutoScalingDescription(dafnyValue.dtor_TableAutoScalingDescription().dtor_value()));
+      builder.tableAutoScalingDescription(
+        ToNative.TableAutoScalingDescription(
+          dafnyValue.dtor_TableAutoScalingDescription().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
-  public static UpdateTimeToLiveRequest UpdateTimeToLiveInput(UpdateTimeToLiveInput dafnyValue) {
+  public static UpdateTimeToLiveRequest UpdateTimeToLiveInput(
+    UpdateTimeToLiveInput dafnyValue
+  ) {
     UpdateTimeToLiveRequest.Builder builder = UpdateTimeToLiveRequest.builder();
-    builder.tableName(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_TableName()));
-    builder.timeToLiveSpecification(ToNative.TimeToLiveSpecification(dafnyValue.dtor_TimeToLiveSpecification()));
+    builder.tableName(
+      software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+        dafnyValue.dtor_TableName()
+      )
+    );
+    builder.timeToLiveSpecification(
+      ToNative.TimeToLiveSpecification(
+        dafnyValue.dtor_TimeToLiveSpecification()
+      )
+    );
     return builder.build();
   }
 
-  public static UpdateTimeToLiveResponse UpdateTimeToLiveOutput(UpdateTimeToLiveOutput dafnyValue) {
-    UpdateTimeToLiveResponse.Builder builder = UpdateTimeToLiveResponse.builder();
+  public static UpdateTimeToLiveResponse UpdateTimeToLiveOutput(
+    UpdateTimeToLiveOutput dafnyValue
+  ) {
+    UpdateTimeToLiveResponse.Builder builder =
+      UpdateTimeToLiveResponse.builder();
     if (dafnyValue.dtor_TimeToLiveSpecification().is_Some()) {
-      builder.timeToLiveSpecification(ToNative.TimeToLiveSpecification(dafnyValue.dtor_TimeToLiveSpecification().dtor_value()));
+      builder.timeToLiveSpecification(
+        ToNative.TimeToLiveSpecification(
+          dafnyValue.dtor_TimeToLiveSpecification().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
   public static WriteRequest WriteRequest(
-      software.amazon.cryptography.services.dynamodb.internaldafny.types.WriteRequest dafnyValue) {
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.WriteRequest dafnyValue
+  ) {
     WriteRequest.Builder builder = WriteRequest.builder();
     if (dafnyValue.dtor_DeleteRequest().is_Some()) {
-      builder.deleteRequest(ToNative.DeleteRequest(dafnyValue.dtor_DeleteRequest().dtor_value()));
+      builder.deleteRequest(
+        ToNative.DeleteRequest(dafnyValue.dtor_DeleteRequest().dtor_value())
+      );
     }
     if (dafnyValue.dtor_PutRequest().is_Some()) {
-      builder.putRequest(ToNative.PutRequest(dafnyValue.dtor_PutRequest().dtor_value()));
+      builder.putRequest(
+        ToNative.PutRequest(dafnyValue.dtor_PutRequest().dtor_value())
+      );
     }
     return builder.build();
   }
 
   public static List<WriteRequest> WriteRequests(
-      DafnySequence<? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.WriteRequest> dafnyValue) {
+    DafnySequence<
+      ? extends software.amazon.cryptography.services.dynamodb.internaldafny.types.WriteRequest
+    > dafnyValue
+  ) {
     return software.amazon.smithy.dafny.conversion.ToNative.Aggregate.GenericToList(
-        dafnyValue, 
-        software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::WriteRequest);
+      dafnyValue,
+      software.amazon.cryptography.services.dynamodb.internaldafny.ToNative::WriteRequest
+    );
   }
 
-  public static BackupInUseException Error(Error_BackupInUseException dafnyValue) {
+  public static BackupInUseException Error(
+    Error_BackupInUseException dafnyValue
+  ) {
     BackupInUseException.Builder builder = BackupInUseException.builder();
     if (dafnyValue.dtor_message().is_Some()) {
-      builder.message(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_message().dtor_value()));
+      builder.message(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_message().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
-  public static BackupNotFoundException Error(Error_BackupNotFoundException dafnyValue) {
+  public static BackupNotFoundException Error(
+    Error_BackupNotFoundException dafnyValue
+  ) {
     BackupNotFoundException.Builder builder = BackupNotFoundException.builder();
     if (dafnyValue.dtor_message().is_Some()) {
-      builder.message(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_message().dtor_value()));
+      builder.message(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_message().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
   public static ConditionalCheckFailedException Error(
-      Error_ConditionalCheckFailedException dafnyValue) {
-    ConditionalCheckFailedException.Builder builder = ConditionalCheckFailedException.builder();
+    Error_ConditionalCheckFailedException dafnyValue
+  ) {
+    ConditionalCheckFailedException.Builder builder =
+      ConditionalCheckFailedException.builder();
     if (dafnyValue.dtor_message().is_Some()) {
-      builder.message(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_message().dtor_value()));
+      builder.message(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_message().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
   public static ContinuousBackupsUnavailableException Error(
-      Error_ContinuousBackupsUnavailableException dafnyValue) {
-    ContinuousBackupsUnavailableException.Builder builder = ContinuousBackupsUnavailableException.builder();
+    Error_ContinuousBackupsUnavailableException dafnyValue
+  ) {
+    ContinuousBackupsUnavailableException.Builder builder =
+      ContinuousBackupsUnavailableException.builder();
     if (dafnyValue.dtor_message().is_Some()) {
-      builder.message(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_message().dtor_value()));
+      builder.message(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_message().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
-  public static DuplicateItemException Error(Error_DuplicateItemException dafnyValue) {
+  public static DuplicateItemException Error(
+    Error_DuplicateItemException dafnyValue
+  ) {
     DuplicateItemException.Builder builder = DuplicateItemException.builder();
     if (dafnyValue.dtor_message().is_Some()) {
-      builder.message(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_message().dtor_value()));
+      builder.message(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_message().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
-  public static ExportConflictException Error(Error_ExportConflictException dafnyValue) {
+  public static ExportConflictException Error(
+    Error_ExportConflictException dafnyValue
+  ) {
     ExportConflictException.Builder builder = ExportConflictException.builder();
     if (dafnyValue.dtor_message().is_Some()) {
-      builder.message(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_message().dtor_value()));
+      builder.message(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_message().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
-  public static ExportNotFoundException Error(Error_ExportNotFoundException dafnyValue) {
+  public static ExportNotFoundException Error(
+    Error_ExportNotFoundException dafnyValue
+  ) {
     ExportNotFoundException.Builder builder = ExportNotFoundException.builder();
     if (dafnyValue.dtor_message().is_Some()) {
-      builder.message(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_message().dtor_value()));
+      builder.message(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_message().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
   public static GlobalTableAlreadyExistsException Error(
-      Error_GlobalTableAlreadyExistsException dafnyValue) {
-    GlobalTableAlreadyExistsException.Builder builder = GlobalTableAlreadyExistsException.builder();
+    Error_GlobalTableAlreadyExistsException dafnyValue
+  ) {
+    GlobalTableAlreadyExistsException.Builder builder =
+      GlobalTableAlreadyExistsException.builder();
     if (dafnyValue.dtor_message().is_Some()) {
-      builder.message(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_message().dtor_value()));
+      builder.message(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_message().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
-  public static GlobalTableNotFoundException Error(Error_GlobalTableNotFoundException dafnyValue) {
-    GlobalTableNotFoundException.Builder builder = GlobalTableNotFoundException.builder();
+  public static GlobalTableNotFoundException Error(
+    Error_GlobalTableNotFoundException dafnyValue
+  ) {
+    GlobalTableNotFoundException.Builder builder =
+      GlobalTableNotFoundException.builder();
     if (dafnyValue.dtor_message().is_Some()) {
-      builder.message(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_message().dtor_value()));
+      builder.message(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_message().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
   public static IdempotentParameterMismatchException Error(
-      Error_IdempotentParameterMismatchException dafnyValue) {
-    IdempotentParameterMismatchException.Builder builder = IdempotentParameterMismatchException.builder();
+    Error_IdempotentParameterMismatchException dafnyValue
+  ) {
+    IdempotentParameterMismatchException.Builder builder =
+      IdempotentParameterMismatchException.builder();
     if (dafnyValue.dtor_Message().is_Some()) {
-      builder.message(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_Message().dtor_value()));
+      builder.message(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_Message().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
-  public static ImportConflictException Error(Error_ImportConflictException dafnyValue) {
+  public static ImportConflictException Error(
+    Error_ImportConflictException dafnyValue
+  ) {
     ImportConflictException.Builder builder = ImportConflictException.builder();
     if (dafnyValue.dtor_message().is_Some()) {
-      builder.message(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_message().dtor_value()));
+      builder.message(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_message().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
-  public static ImportNotFoundException Error(Error_ImportNotFoundException dafnyValue) {
+  public static ImportNotFoundException Error(
+    Error_ImportNotFoundException dafnyValue
+  ) {
     ImportNotFoundException.Builder builder = ImportNotFoundException.builder();
     if (dafnyValue.dtor_message().is_Some()) {
-      builder.message(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_message().dtor_value()));
+      builder.message(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_message().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
-  public static IndexNotFoundException Error(Error_IndexNotFoundException dafnyValue) {
+  public static IndexNotFoundException Error(
+    Error_IndexNotFoundException dafnyValue
+  ) {
     IndexNotFoundException.Builder builder = IndexNotFoundException.builder();
     if (dafnyValue.dtor_message().is_Some()) {
-      builder.message(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_message().dtor_value()));
+      builder.message(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_message().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
-  public static InternalServerErrorException Error(Error_InternalServerError dafnyValue) {
-    InternalServerErrorException.Builder builder = InternalServerErrorException.builder();
+  public static InternalServerErrorException Error(
+    Error_InternalServerError dafnyValue
+  ) {
+    InternalServerErrorException.Builder builder =
+      InternalServerErrorException.builder();
     if (dafnyValue.dtor_message().is_Some()) {
-      builder.message(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_message().dtor_value()));
+      builder.message(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_message().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
-  public static InvalidExportTimeException Error(Error_InvalidExportTimeException dafnyValue) {
-    InvalidExportTimeException.Builder builder = InvalidExportTimeException.builder();
+  public static InvalidExportTimeException Error(
+    Error_InvalidExportTimeException dafnyValue
+  ) {
+    InvalidExportTimeException.Builder builder =
+      InvalidExportTimeException.builder();
     if (dafnyValue.dtor_message().is_Some()) {
-      builder.message(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_message().dtor_value()));
+      builder.message(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_message().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
-  public static InvalidRestoreTimeException Error(Error_InvalidRestoreTimeException dafnyValue) {
-    InvalidRestoreTimeException.Builder builder = InvalidRestoreTimeException.builder();
+  public static InvalidRestoreTimeException Error(
+    Error_InvalidRestoreTimeException dafnyValue
+  ) {
+    InvalidRestoreTimeException.Builder builder =
+      InvalidRestoreTimeException.builder();
     if (dafnyValue.dtor_message().is_Some()) {
-      builder.message(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_message().dtor_value()));
+      builder.message(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_message().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
   public static ItemCollectionSizeLimitExceededException Error(
-      Error_ItemCollectionSizeLimitExceededException dafnyValue) {
-    ItemCollectionSizeLimitExceededException.Builder builder = ItemCollectionSizeLimitExceededException.builder();
+    Error_ItemCollectionSizeLimitExceededException dafnyValue
+  ) {
+    ItemCollectionSizeLimitExceededException.Builder builder =
+      ItemCollectionSizeLimitExceededException.builder();
     if (dafnyValue.dtor_message().is_Some()) {
-      builder.message(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_message().dtor_value()));
+      builder.message(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_message().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
-  public static LimitExceededException Error(Error_LimitExceededException dafnyValue) {
+  public static LimitExceededException Error(
+    Error_LimitExceededException dafnyValue
+  ) {
     LimitExceededException.Builder builder = LimitExceededException.builder();
     if (dafnyValue.dtor_message().is_Some()) {
-      builder.message(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_message().dtor_value()));
+      builder.message(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_message().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
   public static PointInTimeRecoveryUnavailableException Error(
-      Error_PointInTimeRecoveryUnavailableException dafnyValue) {
-    PointInTimeRecoveryUnavailableException.Builder builder = PointInTimeRecoveryUnavailableException.builder();
+    Error_PointInTimeRecoveryUnavailableException dafnyValue
+  ) {
+    PointInTimeRecoveryUnavailableException.Builder builder =
+      PointInTimeRecoveryUnavailableException.builder();
     if (dafnyValue.dtor_message().is_Some()) {
-      builder.message(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_message().dtor_value()));
+      builder.message(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_message().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
   public static ProvisionedThroughputExceededException Error(
-      Error_ProvisionedThroughputExceededException dafnyValue) {
-    ProvisionedThroughputExceededException.Builder builder = ProvisionedThroughputExceededException.builder();
+    Error_ProvisionedThroughputExceededException dafnyValue
+  ) {
+    ProvisionedThroughputExceededException.Builder builder =
+      ProvisionedThroughputExceededException.builder();
     if (dafnyValue.dtor_message().is_Some()) {
-      builder.message(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_message().dtor_value()));
+      builder.message(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_message().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
   public static ReplicaAlreadyExistsException Error(
-      Error_ReplicaAlreadyExistsException dafnyValue) {
-    ReplicaAlreadyExistsException.Builder builder = ReplicaAlreadyExistsException.builder();
+    Error_ReplicaAlreadyExistsException dafnyValue
+  ) {
+    ReplicaAlreadyExistsException.Builder builder =
+      ReplicaAlreadyExistsException.builder();
     if (dafnyValue.dtor_message().is_Some()) {
-      builder.message(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_message().dtor_value()));
+      builder.message(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_message().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
-  public static ReplicaNotFoundException Error(Error_ReplicaNotFoundException dafnyValue) {
-    ReplicaNotFoundException.Builder builder = ReplicaNotFoundException.builder();
+  public static ReplicaNotFoundException Error(
+    Error_ReplicaNotFoundException dafnyValue
+  ) {
+    ReplicaNotFoundException.Builder builder =
+      ReplicaNotFoundException.builder();
     if (dafnyValue.dtor_message().is_Some()) {
-      builder.message(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_message().dtor_value()));
+      builder.message(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_message().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
-  public static RequestLimitExceededException Error(Error_RequestLimitExceeded dafnyValue) {
-    RequestLimitExceededException.Builder builder = RequestLimitExceededException.builder();
+  public static RequestLimitExceededException Error(
+    Error_RequestLimitExceeded dafnyValue
+  ) {
+    RequestLimitExceededException.Builder builder =
+      RequestLimitExceededException.builder();
     if (dafnyValue.dtor_message().is_Some()) {
-      builder.message(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_message().dtor_value()));
+      builder.message(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_message().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
-  public static ResourceInUseException Error(Error_ResourceInUseException dafnyValue) {
+  public static ResourceInUseException Error(
+    Error_ResourceInUseException dafnyValue
+  ) {
     ResourceInUseException.Builder builder = ResourceInUseException.builder();
     if (dafnyValue.dtor_message().is_Some()) {
-      builder.message(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_message().dtor_value()));
+      builder.message(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_message().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
-  public static ResourceNotFoundException Error(Error_ResourceNotFoundException dafnyValue) {
-    ResourceNotFoundException.Builder builder = ResourceNotFoundException.builder();
+  public static ResourceNotFoundException Error(
+    Error_ResourceNotFoundException dafnyValue
+  ) {
+    ResourceNotFoundException.Builder builder =
+      ResourceNotFoundException.builder();
     if (dafnyValue.dtor_message().is_Some()) {
-      builder.message(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_message().dtor_value()));
+      builder.message(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_message().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
-  public static TableAlreadyExistsException Error(Error_TableAlreadyExistsException dafnyValue) {
-    TableAlreadyExistsException.Builder builder = TableAlreadyExistsException.builder();
+  public static TableAlreadyExistsException Error(
+    Error_TableAlreadyExistsException dafnyValue
+  ) {
+    TableAlreadyExistsException.Builder builder =
+      TableAlreadyExistsException.builder();
     if (dafnyValue.dtor_message().is_Some()) {
-      builder.message(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_message().dtor_value()));
+      builder.message(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_message().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
-  public static TableInUseException Error(Error_TableInUseException dafnyValue) {
+  public static TableInUseException Error(
+    Error_TableInUseException dafnyValue
+  ) {
     TableInUseException.Builder builder = TableInUseException.builder();
     if (dafnyValue.dtor_message().is_Some()) {
-      builder.message(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_message().dtor_value()));
+      builder.message(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_message().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
-  public static TableNotFoundException Error(Error_TableNotFoundException dafnyValue) {
+  public static TableNotFoundException Error(
+    Error_TableNotFoundException dafnyValue
+  ) {
     TableNotFoundException.Builder builder = TableNotFoundException.builder();
     if (dafnyValue.dtor_message().is_Some()) {
-      builder.message(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_message().dtor_value()));
+      builder.message(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_message().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
-  public static TransactionCanceledException Error(Error_TransactionCanceledException dafnyValue) {
-    TransactionCanceledException.Builder builder = TransactionCanceledException.builder();
+  public static TransactionCanceledException Error(
+    Error_TransactionCanceledException dafnyValue
+  ) {
+    TransactionCanceledException.Builder builder =
+      TransactionCanceledException.builder();
     if (dafnyValue.dtor_CancellationReasons().is_Some()) {
-      builder.cancellationReasons(ToNative.CancellationReasonList(dafnyValue.dtor_CancellationReasons().dtor_value()));
+      builder.cancellationReasons(
+        ToNative.CancellationReasonList(
+          dafnyValue.dtor_CancellationReasons().dtor_value()
+        )
+      );
     }
     if (dafnyValue.dtor_Message().is_Some()) {
-      builder.message(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_Message().dtor_value()));
+      builder.message(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_Message().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
-  public static TransactionConflictException Error(Error_TransactionConflictException dafnyValue) {
-    TransactionConflictException.Builder builder = TransactionConflictException.builder();
+  public static TransactionConflictException Error(
+    Error_TransactionConflictException dafnyValue
+  ) {
+    TransactionConflictException.Builder builder =
+      TransactionConflictException.builder();
     if (dafnyValue.dtor_message().is_Some()) {
-      builder.message(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_message().dtor_value()));
+      builder.message(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_message().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
   public static TransactionInProgressException Error(
-      Error_TransactionInProgressException dafnyValue) {
-    TransactionInProgressException.Builder builder = TransactionInProgressException.builder();
+    Error_TransactionInProgressException dafnyValue
+  ) {
+    TransactionInProgressException.Builder builder =
+      TransactionInProgressException.builder();
     if (dafnyValue.dtor_Message().is_Some()) {
-      builder.message(software.amazon.smithy.dafny.conversion.ToNative.Simple.String(dafnyValue.dtor_Message().dtor_value()));
+      builder.message(
+        software.amazon.smithy.dafny.conversion.ToNative.Simple.String(
+          dafnyValue.dtor_Message().dtor_value()
+        )
+      );
     }
     return builder.build();
   }
 
   // BEGIN MANUAL EDIT
-  public static RuntimeException Error(software.amazon.cryptography.services.dynamodb.internaldafny.types.Error dafnyValue) {
+  public static RuntimeException Error(
+    software.amazon.cryptography.services.dynamodb.internaldafny.types.Error dafnyValue
+  ) {
     if (dafnyValue.is_BackupInUseException()) {
       return ToNative.Error((Error_BackupInUseException) dafnyValue);
     }
@@ -4887,7 +8065,9 @@ public class ToNative {
       return ToNative.Error((Error_ConditionalCheckFailedException) dafnyValue);
     }
     if (dafnyValue.is_ContinuousBackupsUnavailableException()) {
-      return ToNative.Error((Error_ContinuousBackupsUnavailableException) dafnyValue);
+      return ToNative.Error(
+        (Error_ContinuousBackupsUnavailableException) dafnyValue
+      );
     }
     if (dafnyValue.is_DuplicateItemException()) {
       return ToNative.Error((Error_DuplicateItemException) dafnyValue);
@@ -4899,13 +8079,17 @@ public class ToNative {
       return ToNative.Error((Error_ExportNotFoundException) dafnyValue);
     }
     if (dafnyValue.is_GlobalTableAlreadyExistsException()) {
-      return ToNative.Error((Error_GlobalTableAlreadyExistsException) dafnyValue);
+      return ToNative.Error(
+        (Error_GlobalTableAlreadyExistsException) dafnyValue
+      );
     }
     if (dafnyValue.is_GlobalTableNotFoundException()) {
       return ToNative.Error((Error_GlobalTableNotFoundException) dafnyValue);
     }
     if (dafnyValue.is_IdempotentParameterMismatchException()) {
-      return ToNative.Error((Error_IdempotentParameterMismatchException) dafnyValue);
+      return ToNative.Error(
+        (Error_IdempotentParameterMismatchException) dafnyValue
+      );
     }
     if (dafnyValue.is_ImportConflictException()) {
       return ToNative.Error((Error_ImportConflictException) dafnyValue);
@@ -4926,16 +8110,22 @@ public class ToNative {
       return ToNative.Error((Error_InvalidRestoreTimeException) dafnyValue);
     }
     if (dafnyValue.is_ItemCollectionSizeLimitExceededException()) {
-      return ToNative.Error((Error_ItemCollectionSizeLimitExceededException) dafnyValue);
+      return ToNative.Error(
+        (Error_ItemCollectionSizeLimitExceededException) dafnyValue
+      );
     }
     if (dafnyValue.is_LimitExceededException()) {
       return ToNative.Error((Error_LimitExceededException) dafnyValue);
     }
     if (dafnyValue.is_PointInTimeRecoveryUnavailableException()) {
-      return ToNative.Error((Error_PointInTimeRecoveryUnavailableException) dafnyValue);
+      return ToNative.Error(
+        (Error_PointInTimeRecoveryUnavailableException) dafnyValue
+      );
     }
     if (dafnyValue.is_ProvisionedThroughputExceededException()) {
-      return ToNative.Error((Error_ProvisionedThroughputExceededException) dafnyValue);
+      return ToNative.Error(
+        (Error_ProvisionedThroughputExceededException) dafnyValue
+      );
     }
     if (dafnyValue.is_ReplicaAlreadyExistsException()) {
       return ToNative.Error((Error_ReplicaAlreadyExistsException) dafnyValue);
@@ -4976,7 +8166,8 @@ public class ToNative {
     // TODO This should indicate a codegen bug
     return new IllegalStateException("Unknown error recieved from DynamoDb.");
   }
-// END MANUAL EDIT
+
+  // END MANUAL EDIT
 
   public static DynamoDbClient DynamoDB_20120810(IDynamoDBClient dafnyValue) {
     return ((Shim) dafnyValue).impl();

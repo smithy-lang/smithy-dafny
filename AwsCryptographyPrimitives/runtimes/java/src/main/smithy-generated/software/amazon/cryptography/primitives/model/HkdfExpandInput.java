@@ -1,12 +1,14 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
-// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
+// Do not modify this file. This file is machine generated, and any changes to it will be
+// overwritten.
 package software.amazon.cryptography.primitives.model;
 
 import java.nio.ByteBuffer;
 import java.util.Objects;
 
 public class HkdfExpandInput {
+
   private final DigestAlgorithm digestAlgorithm;
 
   private final ByteBuffer prk;
@@ -67,6 +69,7 @@ public class HkdfExpandInput {
   }
 
   static class BuilderImpl implements Builder {
+
     protected DigestAlgorithm digestAlgorithm;
 
     protected ByteBuffer prk;
@@ -77,8 +80,7 @@ public class HkdfExpandInput {
 
     private boolean _expectedLengthSet = false;
 
-    protected BuilderImpl() {
-    }
+    protected BuilderImpl() {}
 
     protected BuilderImpl(HkdfExpandInput model) {
       this.digestAlgorithm = model.digestAlgorithm();
@@ -126,20 +128,30 @@ public class HkdfExpandInput {
     }
 
     public HkdfExpandInput build() {
-      if (Objects.isNull(this.digestAlgorithm()))  {
-        throw new IllegalArgumentException("Missing value for required field `digestAlgorithm`");
+      if (Objects.isNull(this.digestAlgorithm())) {
+        throw new IllegalArgumentException(
+          "Missing value for required field `digestAlgorithm`"
+        );
       }
-      if (Objects.isNull(this.prk()))  {
-        throw new IllegalArgumentException("Missing value for required field `prk`");
+      if (Objects.isNull(this.prk())) {
+        throw new IllegalArgumentException(
+          "Missing value for required field `prk`"
+        );
       }
-      if (Objects.isNull(this.info()))  {
-        throw new IllegalArgumentException("Missing value for required field `info`");
+      if (Objects.isNull(this.info())) {
+        throw new IllegalArgumentException(
+          "Missing value for required field `info`"
+        );
       }
       if (!this._expectedLengthSet) {
-        throw new IllegalArgumentException("Missing value for required field `expectedLength`");
+        throw new IllegalArgumentException(
+          "Missing value for required field `expectedLength`"
+        );
       }
       if (this._expectedLengthSet && this.expectedLength() < 0) {
-        throw new IllegalArgumentException("`expectedLength` must be greater than or equal to 0");
+        throw new IllegalArgumentException(
+          "`expectedLength` must be greater than or equal to 0"
+        );
       }
       return new HkdfExpandInput(this);
     }

@@ -22,19 +22,19 @@ Outputs:
     Description: "Arn for IAM Policy github-mpl-CA-ReadWriteDelete"
     Value: !Ref CAReadWriteDeletePolicy
     Export:
-      Name: !Sub '${AWS::StackName}-GitHubCAReadWriteDeletePolicyArn'
+      Name: !Sub "${AWS::StackName}-GitHubCAReadWriteDeletePolicyArn"
   # This policy SHOULD be given to the ESDK-Dafny & Gazelle Repos
   GitHubCAReadPolicyArn:
     Description: "Arn for IAM Policy github-mpl-CA-Read"
     Value: !Ref CAReadPolicy
     Export:
-      Name: !Sub '${AWS::StackName}-GitHubCAReadPolicyArn'
+      Name: !Sub "${AWS::StackName}-GitHubCAReadPolicyArn"
   # This policy COULD be imported by stack that creates the ToolsDevelopment role
   ToolDevelopmentAssumePolicyArn:
     Description: "Arn for IAM Policy that can Assume Roles created for MPL CA"
     Value: !Ref ToolDevelopmentAssumePolicy
     Export:
-      Name: !Sub '${AWS::StackName}-ToolDevelopmentAssumePolicyArn'
+      Name: !Sub "${AWS::StackName}-ToolDevelopmentAssumePolicyArn"
 
 Resources:
   Domain:
@@ -56,7 +56,7 @@ Resources:
       Description: "Allow Read, Write, and Delete of CodeArtifact Domain github-mpl"
       ManagedPolicyName: !Sub "${DomainName}-CA-ReadWriteDelete-${AWS::Region}"
       PolicyDocument:
-        Version: '2012-10-17'
+        Version: "2012-10-17"
         Statement:
           - Effect: Allow
             Action:
@@ -89,7 +89,7 @@ Resources:
             Resource: "*"
             Condition:
               StringEquals:
-                'sts:AWSServiceName': "codeartifact.amazonaws.com"
+                "sts:AWSServiceName": "codeartifact.amazonaws.com"
 
   # This policy SHOULD be given to the ESDK-Dafny & Gazelle Repos
   CAReadPolicy:
@@ -98,7 +98,7 @@ Resources:
       Description: "Allow Read of CodeArtifact Domain github-mpl"
       ManagedPolicyName: !Sub "${DomainName}-CA-Read-${AWS::Region}"
       PolicyDocument:
-        Version: '2012-10-17'
+        Version: "2012-10-17"
         Statement:
           - Effect: Allow
             Action:
@@ -125,10 +125,10 @@ Resources:
             Resource: "*"
             Condition:
               StringEquals:
-                'sts:AWSServiceName': "codeartifact.amazonaws.com"
+                "sts:AWSServiceName": "codeartifact.amazonaws.com"
 
   CASourceRole:
-    Type: 'AWS::IAM::Role'
+    Type: "AWS::IAM::Role"
     Properties:
       RoleName: !Sub "${ProjectName}-CA-SourceRole-${AWS::Region}"
       Description: "For the Source Repo, allows Publish, Pull, and Delete"
@@ -139,16 +139,16 @@ Resources:
           - Effect: Allow
             Principal:
               AWS: !Sub "arn:aws:iam::${AWS::AccountId}:root"
-            Action: 'sts:AssumeRole'
+            Action: "sts:AssumeRole"
           - Effect: Allow
             Principal:
               AWS: !Sub "arn:aws:iam::${AWS::AccountId}:role/ToolsDevelopment"
-            Action: 'sts:AssumeRole'
+            Action: "sts:AssumeRole"
           - Effect: Allow
             Principal:
               Federated: !Sub "arn:aws:iam::${AWS::AccountId}:oidc-provider/token.actions.githubusercontent.com"
             Action:
-              - 'sts:AssumeRoleWithWebIdentity'
+              - "sts:AssumeRoleWithWebIdentity"
             Condition:
               StringEquals:
                 "token.actions.githubusercontent.com:aud": "sts.amazonaws.com"
@@ -158,8 +158,8 @@ Resources:
             Principal:
               AWS: "arn:aws:iam::370957321024:role/GitHub-CI-MPL-Dafny-Role-us-west-2"
             Action:
-              - 'sts:AssumeRole'
-              - 'sts:AssumeRoleWithWebIdentity'
+              - "sts:AssumeRole"
+              - "sts:AssumeRoleWithWebIdentity"
             Condition:
               StringEquals:
                 "token.actions.githubusercontent.com:aud": "sts.amazonaws.com"
@@ -167,7 +167,7 @@ Resources:
                 "token.actions.githubusercontent.com:sub": "repo:aws/aws-cryptographic-material-providers-library-java:*"
 
   CAPullRole:
-    Type: 'AWS::IAM::Role'
+    Type: "AWS::IAM::Role"
     Properties:
       RoleName: !Sub "${ProjectName}-CA-PullRole-${AWS::Region}"
       Description: "For consuming Repos, only allows Pull"
@@ -180,11 +180,11 @@ Resources:
           - Effect: Allow
             Principal:
               AWS: !Sub "arn:aws:iam::${AWS::AccountId}:root"
-            Action: 'sts:AssumeRole'
+            Action: "sts:AssumeRole"
           - Effect: Allow
             Principal:
               AWS: !Sub "arn:aws:iam::${AWS::AccountId}:role/ToolsDevelopment"
-            Action: 'sts:AssumeRole'
+            Action: "sts:AssumeRole"
 
   ToolDevelopmentAssumePolicy:
     Type: "AWS::IAM::ManagedPolicy"
@@ -192,13 +192,13 @@ Resources:
       Description: "Allows Tools Development to assume roles defined for mpl CA"
       ManagedPolicyName: !Sub "Assume-${ProjectName}-CA-Roles-${AWS::Region}"
       PolicyDocument:
-        Version: '2012-10-17'
+        Version: "2012-10-17"
         Statement:
           - Effect: Allow
             Action:
-              - 'sts:AssumeRole'
-              - 'sts:AssumeRoleWithSAML'
-              - 'sts:AssumeRoleWithWebIdentity'
+              - "sts:AssumeRole"
+              - "sts:AssumeRoleWithSAML"
+              - "sts:AssumeRoleWithWebIdentity"
             Resource:
               - !GetAtt CASourceRole.Arn
               - !GetAtt CAPullRole.Arn

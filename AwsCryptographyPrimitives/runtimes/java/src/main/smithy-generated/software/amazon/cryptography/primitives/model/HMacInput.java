@@ -1,12 +1,14 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
-// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
+// Do not modify this file. This file is machine generated, and any changes to it will be
+// overwritten.
 package software.amazon.cryptography.primitives.model;
 
 import java.nio.ByteBuffer;
 import java.util.Objects;
 
 public class HMacInput {
+
   private final DigestAlgorithm digestAlgorithm;
 
   private final ByteBuffer key;
@@ -56,14 +58,14 @@ public class HMacInput {
   }
 
   static class BuilderImpl implements Builder {
+
     protected DigestAlgorithm digestAlgorithm;
 
     protected ByteBuffer key;
 
     protected ByteBuffer message;
 
-    protected BuilderImpl() {
-    }
+    protected BuilderImpl() {}
 
     protected BuilderImpl(HMacInput model) {
       this.digestAlgorithm = model.digestAlgorithm();
@@ -99,14 +101,20 @@ public class HMacInput {
     }
 
     public HMacInput build() {
-      if (Objects.isNull(this.digestAlgorithm()))  {
-        throw new IllegalArgumentException("Missing value for required field `digestAlgorithm`");
+      if (Objects.isNull(this.digestAlgorithm())) {
+        throw new IllegalArgumentException(
+          "Missing value for required field `digestAlgorithm`"
+        );
       }
-      if (Objects.isNull(this.key()))  {
-        throw new IllegalArgumentException("Missing value for required field `key`");
+      if (Objects.isNull(this.key())) {
+        throw new IllegalArgumentException(
+          "Missing value for required field `key`"
+        );
       }
-      if (Objects.isNull(this.message()))  {
-        throw new IllegalArgumentException("Missing value for required field `message`");
+      if (Objects.isNull(this.message())) {
+        throw new IllegalArgumentException(
+          "Missing value for required field `message`"
+        );
       }
       return new HMacInput(this);
     }

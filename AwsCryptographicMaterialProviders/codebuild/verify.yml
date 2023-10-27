@@ -5,7 +5,6 @@ env:
     FILE_NAME: "AWS.Cryptography.MaterialProviders.dll"
     ASSEMBLY_NAME: "AWS.Cryptography.MaterialProviders.dll"
 
-
 phases:
   install:
     runtime-versions:

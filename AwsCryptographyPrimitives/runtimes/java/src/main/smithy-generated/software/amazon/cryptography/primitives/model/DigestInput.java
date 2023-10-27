@@ -1,12 +1,14 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
-// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
+// Do not modify this file. This file is machine generated, and any changes to it will be
+// overwritten.
 package software.amazon.cryptography.primitives.model;
 
 import java.nio.ByteBuffer;
 import java.util.Objects;
 
 public class DigestInput {
+
   private final DigestAlgorithm digestAlgorithm;
 
   private final ByteBuffer message;
@@ -45,12 +47,12 @@ public class DigestInput {
   }
 
   static class BuilderImpl implements Builder {
+
     protected DigestAlgorithm digestAlgorithm;
 
     protected ByteBuffer message;
 
-    protected BuilderImpl() {
-    }
+    protected BuilderImpl() {}
 
     protected BuilderImpl(DigestInput model) {
       this.digestAlgorithm = model.digestAlgorithm();
@@ -76,11 +78,15 @@ public class DigestInput {
     }
 
     public DigestInput build() {
-      if (Objects.isNull(this.digestAlgorithm()))  {
-        throw new IllegalArgumentException("Missing value for required field `digestAlgorithm`");
+      if (Objects.isNull(this.digestAlgorithm())) {
+        throw new IllegalArgumentException(
+          "Missing value for required field `digestAlgorithm`"
+        );
       }
-      if (Objects.isNull(this.message()))  {
-        throw new IllegalArgumentException("Missing value for required field `message`");
+      if (Objects.isNull(this.message())) {
+        throw new IllegalArgumentException(
+          "Missing value for required field `message`"
+        );
       }
       return new DigestInput(this);
     }

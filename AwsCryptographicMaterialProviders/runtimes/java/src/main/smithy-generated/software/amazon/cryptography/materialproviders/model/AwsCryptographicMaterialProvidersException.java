@@ -1,11 +1,14 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
-// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
+// Do not modify this file. This file is machine generated, and any changes to it will be
+// overwritten.
 package software.amazon.cryptography.materialproviders.model;
 
 import java.util.Objects;
 
-public class AwsCryptographicMaterialProvidersException extends RuntimeException {
+public class AwsCryptographicMaterialProvidersException
+  extends RuntimeException {
+
   protected AwsCryptographicMaterialProvidersException(BuilderImpl builder) {
     super(messageFromBuilder(builder), builder.cause());
   }
@@ -20,16 +23,12 @@ public class AwsCryptographicMaterialProvidersException extends RuntimeException
     return null;
   }
 
-  /**
-   * See {@link Throwable#getMessage()}.
-   */
+  /** See {@link Throwable#getMessage()}. */
   public String message() {
     return this.getMessage();
   }
 
-  /**
-   * See {@link Throwable#getCause()}.
-   */
+  /** See {@link Throwable#getCause()}. */
   public Throwable cause() {
     return this.getCause();
   }
@@ -44,22 +43,27 @@ public class AwsCryptographicMaterialProvidersException extends RuntimeException
 
   public interface Builder {
     /**
-     * @param message The detailed message. The detail message is saved for later retrieval by the {@link #getMessage()} method.
+     * @param message The detailed message. The detail message is saved for later retrieval by the
+     *     {@link #getMessage()} method.
      */
     Builder message(String message);
 
     /**
-     * @return The detailed message. The detail message is saved for later retrieval by the {@link #getMessage()} method.
+     * @return The detailed message. The detail message is saved for later retrieval by the {@link
+     *     #getMessage()} method.
      */
     String message();
 
     /**
-     * @param cause The cause (which is saved for later retrieval by the {@link #getCause()} method). (A {@code null} value is permitted, and indicates that the cause is nonexistent or unknown.)
+     * @param cause The cause (which is saved for later retrieval by the {@link #getCause()}
+     *     method). (A {@code null} value is permitted, and indicates that the cause is nonexistent
+     *     or unknown.)
      */
     Builder cause(Throwable cause);
 
     /**
-     * @return The cause (which is saved for later retrieval by the {@link #getCause()} method). (A {@code null} value is permitted, and indicates that the cause is nonexistent or unknown.)
+     * @return The cause (which is saved for later retrieval by the {@link #getCause()} method). (A
+     *     {@code null} value is permitted, and indicates that the cause is nonexistent or unknown.)
      */
     Throwable cause();
 
@@ -67,12 +71,12 @@ public class AwsCryptographicMaterialProvidersException extends RuntimeException
   }
 
   static class BuilderImpl implements Builder {
+
     protected String message;
 
     protected Throwable cause;
 
-    protected BuilderImpl() {
-    }
+    protected BuilderImpl() {}
 
     protected BuilderImpl(AwsCryptographicMaterialProvidersException model) {
       this.message = model.message();
@@ -98,8 +102,10 @@ public class AwsCryptographicMaterialProvidersException extends RuntimeException
     }
 
     public AwsCryptographicMaterialProvidersException build() {
-      if (Objects.isNull(this.message()))  {
-        throw new IllegalArgumentException("Missing value for required field `message`");
+      if (Objects.isNull(this.message())) {
+        throw new IllegalArgumentException(
+          "Missing value for required field `message`"
+        );
       }
       return new AwsCryptographicMaterialProvidersException(this);
     }

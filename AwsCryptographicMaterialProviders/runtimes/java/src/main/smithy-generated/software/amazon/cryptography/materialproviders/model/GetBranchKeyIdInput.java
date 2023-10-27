@@ -1,18 +1,19 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
-// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
+// Do not modify this file. This file is machine generated, and any changes to it will be
+// overwritten.
 package software.amazon.cryptography.materialproviders.model;
 
 import java.util.Map;
 import java.util.Objects;
 
 /**
- * Inputs for determining the Branch Key which should be used to wrap or unwrap the data key for this encryption or decryption
+ * Inputs for determining the Branch Key which should be used to wrap or unwrap the data key for
+ * this encryption or decryption
  */
 public class GetBranchKeyIdInput {
-  /**
-   * The Encryption Context used with this encryption or decryption.
-   */
+
+  /** The Encryption Context used with this encryption or decryption. */
   private final Map<String, String> encryptionContext;
 
   protected GetBranchKeyIdInput(BuilderImpl builder) {
@@ -49,10 +50,10 @@ public class GetBranchKeyIdInput {
   }
 
   static class BuilderImpl implements Builder {
+
     protected Map<String, String> encryptionContext;
 
-    protected BuilderImpl() {
-    }
+    protected BuilderImpl() {}
 
     protected BuilderImpl(GetBranchKeyIdInput model) {
       this.encryptionContext = model.encryptionContext();
@@ -68,8 +69,10 @@ public class GetBranchKeyIdInput {
     }
 
     public GetBranchKeyIdInput build() {
-      if (Objects.isNull(this.encryptionContext()))  {
-        throw new IllegalArgumentException("Missing value for required field `encryptionContext`");
+      if (Objects.isNull(this.encryptionContext())) {
+        throw new IllegalArgumentException(
+          "Missing value for required field `encryptionContext`"
+        );
       }
       return new GetBranchKeyIdInput(this);
     }

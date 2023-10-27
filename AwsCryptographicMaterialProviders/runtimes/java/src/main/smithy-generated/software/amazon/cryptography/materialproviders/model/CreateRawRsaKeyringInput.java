@@ -1,37 +1,35 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
-// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
+// Do not modify this file. This file is machine generated, and any changes to it will be
+// overwritten.
 package software.amazon.cryptography.materialproviders.model;
 
 import java.nio.ByteBuffer;
 import java.util.Objects;
 
-/**
- * Inputs for creating a Raw RAW Keyring.
- */
+/** Inputs for creating a Raw RAW Keyring. */
 public class CreateRawRsaKeyringInput {
-  /**
-   * A namespace associated with this wrapping key.
-   */
+
+  /** A namespace associated with this wrapping key. */
   private final String keyNamespace;
 
-  /**
-   * A name associated with this wrapping key.
-   */
+  /** A name associated with this wrapping key. */
   private final String keyName;
 
-  /**
-   * The RSA padding scheme to use with this keyring.
-   */
+  /** The RSA padding scheme to use with this keyring. */
   private final PaddingScheme paddingScheme;
 
   /**
-   * The public RSA Key responsible for wrapping data keys, as a UTF8 encoded, PEM encoded X.509 SubjectPublicKeyInfo structure. If not specified, this Keyring cannot be used on encrypt. A public key and/or a private key must be specified.
+   * The public RSA Key responsible for wrapping data keys, as a UTF8 encoded, PEM encoded X.509
+   * SubjectPublicKeyInfo structure. If not specified, this Keyring cannot be used on encrypt. A
+   * public key and/or a private key must be specified.
    */
   private final ByteBuffer publicKey;
 
   /**
-   * The private RSA Key responsible for wrapping data keys, as a UTF8 encoded, PEM encoded PKCS #8 PrivateKeyInfo structure. If not specified, this Keyring cannot be used on decrypt. A public key and/or a private key must be specified.
+   * The private RSA Key responsible for wrapping data keys, as a UTF8 encoded, PEM encoded PKCS #8
+   * PrivateKeyInfo structure. If not specified, this Keyring cannot be used on decrypt. A public
+   * key and/or a private key must be specified.
    */
   private final ByteBuffer privateKey;
 
@@ -65,14 +63,18 @@ public class CreateRawRsaKeyringInput {
   }
 
   /**
-   * @return The public RSA Key responsible for wrapping data keys, as a UTF8 encoded, PEM encoded X.509 SubjectPublicKeyInfo structure. If not specified, this Keyring cannot be used on encrypt. A public key and/or a private key must be specified.
+   * @return The public RSA Key responsible for wrapping data keys, as a UTF8 encoded, PEM encoded
+   *     X.509 SubjectPublicKeyInfo structure. If not specified, this Keyring cannot be used on
+   *     encrypt. A public key and/or a private key must be specified.
    */
   public ByteBuffer publicKey() {
     return this.publicKey;
   }
 
   /**
-   * @return The private RSA Key responsible for wrapping data keys, as a UTF8 encoded, PEM encoded PKCS #8 PrivateKeyInfo structure. If not specified, this Keyring cannot be used on decrypt. A public key and/or a private key must be specified.
+   * @return The private RSA Key responsible for wrapping data keys, as a UTF8 encoded, PEM encoded
+   *     PKCS #8 PrivateKeyInfo structure. If not specified, this Keyring cannot be used on decrypt.
+   *     A public key and/or a private key must be specified.
    */
   public ByteBuffer privateKey() {
     return this.privateKey;
@@ -118,22 +120,30 @@ public class CreateRawRsaKeyringInput {
     PaddingScheme paddingScheme();
 
     /**
-     * @param publicKey The public RSA Key responsible for wrapping data keys, as a UTF8 encoded, PEM encoded X.509 SubjectPublicKeyInfo structure. If not specified, this Keyring cannot be used on encrypt. A public key and/or a private key must be specified.
+     * @param publicKey The public RSA Key responsible for wrapping data keys, as a UTF8 encoded,
+     *     PEM encoded X.509 SubjectPublicKeyInfo structure. If not specified, this Keyring cannot
+     *     be used on encrypt. A public key and/or a private key must be specified.
      */
     Builder publicKey(ByteBuffer publicKey);
 
     /**
-     * @return The public RSA Key responsible for wrapping data keys, as a UTF8 encoded, PEM encoded X.509 SubjectPublicKeyInfo structure. If not specified, this Keyring cannot be used on encrypt. A public key and/or a private key must be specified.
+     * @return The public RSA Key responsible for wrapping data keys, as a UTF8 encoded, PEM encoded
+     *     X.509 SubjectPublicKeyInfo structure. If not specified, this Keyring cannot be used on
+     *     encrypt. A public key and/or a private key must be specified.
      */
     ByteBuffer publicKey();
 
     /**
-     * @param privateKey The private RSA Key responsible for wrapping data keys, as a UTF8 encoded, PEM encoded PKCS #8 PrivateKeyInfo structure. If not specified, this Keyring cannot be used on decrypt. A public key and/or a private key must be specified.
+     * @param privateKey The private RSA Key responsible for wrapping data keys, as a UTF8 encoded,
+     *     PEM encoded PKCS #8 PrivateKeyInfo structure. If not specified, this Keyring cannot be
+     *     used on decrypt. A public key and/or a private key must be specified.
      */
     Builder privateKey(ByteBuffer privateKey);
 
     /**
-     * @return The private RSA Key responsible for wrapping data keys, as a UTF8 encoded, PEM encoded PKCS #8 PrivateKeyInfo structure. If not specified, this Keyring cannot be used on decrypt. A public key and/or a private key must be specified.
+     * @return The private RSA Key responsible for wrapping data keys, as a UTF8 encoded, PEM
+     *     encoded PKCS #8 PrivateKeyInfo structure. If not specified, this Keyring cannot be used
+     *     on decrypt. A public key and/or a private key must be specified.
      */
     ByteBuffer privateKey();
 
@@ -141,6 +151,7 @@ public class CreateRawRsaKeyringInput {
   }
 
   static class BuilderImpl implements Builder {
+
     protected String keyNamespace;
 
     protected String keyName;
@@ -151,8 +162,7 @@ public class CreateRawRsaKeyringInput {
 
     protected ByteBuffer privateKey;
 
-    protected BuilderImpl() {
-    }
+    protected BuilderImpl() {}
 
     protected BuilderImpl(CreateRawRsaKeyringInput model) {
       this.keyNamespace = model.keyNamespace();
@@ -208,14 +218,20 @@ public class CreateRawRsaKeyringInput {
     }
 
     public CreateRawRsaKeyringInput build() {
-      if (Objects.isNull(this.keyNamespace()))  {
-        throw new IllegalArgumentException("Missing value for required field `keyNamespace`");
+      if (Objects.isNull(this.keyNamespace())) {
+        throw new IllegalArgumentException(
+          "Missing value for required field `keyNamespace`"
+        );
       }
-      if (Objects.isNull(this.keyName()))  {
-        throw new IllegalArgumentException("Missing value for required field `keyName`");
+      if (Objects.isNull(this.keyName())) {
+        throw new IllegalArgumentException(
+          "Missing value for required field `keyName`"
+        );
       }
-      if (Objects.isNull(this.paddingScheme()))  {
-        throw new IllegalArgumentException("Missing value for required field `paddingScheme`");
+      if (Objects.isNull(this.paddingScheme())) {
+        throw new IllegalArgumentException(
+          "Missing value for required field `paddingScheme`"
+        );
       }
       return new CreateRawRsaKeyringInput(this);
     }

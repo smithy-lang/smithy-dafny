@@ -1,6 +1,7 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
-// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
+// Do not modify this file. This file is machine generated, and any changes to it will be
+// overwritten.
 package software.amazon.cryptography.materialproviders.model;
 
 import java.util.List;
@@ -8,17 +9,19 @@ import java.util.Objects;
 import software.amazon.cryptography.materialproviders.IKeyring;
 import software.amazon.cryptography.materialproviders.Keyring;
 
-/**
- * Inputs for creating a Multi-Keyring.
- */
+/** Inputs for creating a Multi-Keyring. */
 public class CreateMultiKeyringInput {
+
   /**
-   * A keyring responsible for wrapping and unwrapping the data key. This is the first keyring that will be used to wrap the data key, and may be responsible for additionally generating the data key.
+   * A keyring responsible for wrapping and unwrapping the data key. This is the first keyring that
+   * will be used to wrap the data key, and may be responsible for additionally generating the data
+   * key.
    */
   private final IKeyring generator;
 
   /**
-   * A list of keyrings (other than the generator) responsible for wrapping and unwrapping the data key.
+   * A list of keyrings (other than the generator) responsible for wrapping and unwrapping the data
+   * key.
    */
   private final List<IKeyring> childKeyrings;
 
@@ -28,14 +31,17 @@ public class CreateMultiKeyringInput {
   }
 
   /**
-   * @return A keyring responsible for wrapping and unwrapping the data key. This is the first keyring that will be used to wrap the data key, and may be responsible for additionally generating the data key.
+   * @return A keyring responsible for wrapping and unwrapping the data key. This is the first
+   *     keyring that will be used to wrap the data key, and may be responsible for additionally
+   *     generating the data key.
    */
   public IKeyring generator() {
     return this.generator;
   }
 
   /**
-   * @return A list of keyrings (other than the generator) responsible for wrapping and unwrapping the data key.
+   * @return A list of keyrings (other than the generator) responsible for wrapping and unwrapping
+   *     the data key.
    */
   public List<IKeyring> childKeyrings() {
     return this.childKeyrings;
@@ -51,22 +57,28 @@ public class CreateMultiKeyringInput {
 
   public interface Builder {
     /**
-     * @param generator A keyring responsible for wrapping and unwrapping the data key. This is the first keyring that will be used to wrap the data key, and may be responsible for additionally generating the data key.
+     * @param generator A keyring responsible for wrapping and unwrapping the data key. This is the
+     *     first keyring that will be used to wrap the data key, and may be responsible for
+     *     additionally generating the data key.
      */
     Builder generator(IKeyring generator);
 
     /**
-     * @return A keyring responsible for wrapping and unwrapping the data key. This is the first keyring that will be used to wrap the data key, and may be responsible for additionally generating the data key.
+     * @return A keyring responsible for wrapping and unwrapping the data key. This is the first
+     *     keyring that will be used to wrap the data key, and may be responsible for additionally
+     *     generating the data key.
      */
     IKeyring generator();
 
     /**
-     * @param childKeyrings A list of keyrings (other than the generator) responsible for wrapping and unwrapping the data key.
+     * @param childKeyrings A list of keyrings (other than the generator) responsible for wrapping
+     *     and unwrapping the data key.
      */
     Builder childKeyrings(List<IKeyring> childKeyrings);
 
     /**
-     * @return A list of keyrings (other than the generator) responsible for wrapping and unwrapping the data key.
+     * @return A list of keyrings (other than the generator) responsible for wrapping and unwrapping
+     *     the data key.
      */
     List<IKeyring> childKeyrings();
 
@@ -74,12 +86,12 @@ public class CreateMultiKeyringInput {
   }
 
   static class BuilderImpl implements Builder {
+
     protected IKeyring generator;
 
     protected List<IKeyring> childKeyrings;
 
-    protected BuilderImpl() {
-    }
+    protected BuilderImpl() {}
 
     protected BuilderImpl(CreateMultiKeyringInput model) {
       this.generator = model.generator();
@@ -105,8 +117,10 @@ public class CreateMultiKeyringInput {
     }
 
     public CreateMultiKeyringInput build() {
-      if (Objects.isNull(this.childKeyrings()))  {
-        throw new IllegalArgumentException("Missing value for required field `childKeyrings`");
+      if (Objects.isNull(this.childKeyrings())) {
+        throw new IllegalArgumentException(
+          "Missing value for required field `childKeyrings`"
+        );
       }
       return new CreateMultiKeyringInput(this);
     }

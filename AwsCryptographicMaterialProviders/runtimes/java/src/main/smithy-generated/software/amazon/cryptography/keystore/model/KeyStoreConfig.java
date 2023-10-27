@@ -1,6 +1,7 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
-// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
+// Do not modify this file. This file is machine generated, and any changes to it will be
+// overwritten.
 package software.amazon.cryptography.keystore.model;
 
 import java.util.List;
@@ -9,39 +10,26 @@ import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.kms.KmsClient;
 
 public class KeyStoreConfig {
-  /**
-   * The DynamoDB table name that backs this Key Store.
-   */
+
+  /** The DynamoDB table name that backs this Key Store. */
   private final String ddbTableName;
 
-  /**
-   * The AWS KMS Key that protects this Key Store.
-   */
+  /** The AWS KMS Key that protects this Key Store. */
   private final KMSConfiguration kmsConfiguration;
 
-  /**
-   * The logical name for this Key Store, which is cryptographically bound to the keys it holds.
-   */
+  /** The logical name for this Key Store, which is cryptographically bound to the keys it holds. */
   private final String logicalKeyStoreName;
 
-  /**
-   * An identifier for this Key Store.
-   */
+  /** An identifier for this Key Store. */
   private final String id;
 
-  /**
-   * The AWS KMS grant tokens that are used when this Key Store calls to AWS KMS.
-   */
+  /** The AWS KMS grant tokens that are used when this Key Store calls to AWS KMS. */
   private final List<String> grantTokens;
 
-  /**
-   * The DynamoDB client this Key Store uses to call Amazon DynamoDB.
-   */
+  /** The DynamoDB client this Key Store uses to call Amazon DynamoDB. */
   private final DynamoDbClient ddbClient;
 
-  /**
-   * The KMS client this Key Store uses to call AWS KMS.
-   */
+  /** The KMS client this Key Store uses to call AWS KMS. */
   private final KmsClient kmsClient;
 
   protected KeyStoreConfig(BuilderImpl builder) {
@@ -69,7 +57,8 @@ public class KeyStoreConfig {
   }
 
   /**
-   * @return The logical name for this Key Store, which is cryptographically bound to the keys it holds.
+   * @return The logical name for this Key Store, which is cryptographically bound to the keys it
+   *     holds.
    */
   public String logicalKeyStoreName() {
     return this.logicalKeyStoreName;
@@ -133,12 +122,14 @@ public class KeyStoreConfig {
     KMSConfiguration kmsConfiguration();
 
     /**
-     * @param logicalKeyStoreName The logical name for this Key Store, which is cryptographically bound to the keys it holds.
+     * @param logicalKeyStoreName The logical name for this Key Store, which is cryptographically
+     *     bound to the keys it holds.
      */
     Builder logicalKeyStoreName(String logicalKeyStoreName);
 
     /**
-     * @return The logical name for this Key Store, which is cryptographically bound to the keys it holds.
+     * @return The logical name for this Key Store, which is cryptographically bound to the keys it
+     *     holds.
      */
     String logicalKeyStoreName();
 
@@ -153,7 +144,8 @@ public class KeyStoreConfig {
     String id();
 
     /**
-     * @param grantTokens The AWS KMS grant tokens that are used when this Key Store calls to AWS KMS.
+     * @param grantTokens The AWS KMS grant tokens that are used when this Key Store calls to AWS
+     *     KMS.
      */
     Builder grantTokens(List<String> grantTokens);
 
@@ -186,6 +178,7 @@ public class KeyStoreConfig {
   }
 
   static class BuilderImpl implements Builder {
+
     protected String ddbTableName;
 
     protected KMSConfiguration kmsConfiguration;
@@ -200,8 +193,7 @@ public class KeyStoreConfig {
 
     protected KmsClient kmsClient;
 
-    protected BuilderImpl() {
-    }
+    protected BuilderImpl() {}
 
     protected BuilderImpl(KeyStoreConfig model) {
       this.ddbTableName = model.ddbTableName();
@@ -277,20 +269,35 @@ public class KeyStoreConfig {
     }
 
     public KeyStoreConfig build() {
-      if (Objects.isNull(this.ddbTableName()))  {
-        throw new IllegalArgumentException("Missing value for required field `ddbTableName`");
+      if (Objects.isNull(this.ddbTableName())) {
+        throw new IllegalArgumentException(
+          "Missing value for required field `ddbTableName`"
+        );
       }
-      if (Objects.nonNull(this.ddbTableName()) && this.ddbTableName().length() < 3) {
-        throw new IllegalArgumentException("The size of `ddbTableName` must be greater than or equal to 3");
+      if (
+        Objects.nonNull(this.ddbTableName()) && this.ddbTableName().length() < 3
+      ) {
+        throw new IllegalArgumentException(
+          "The size of `ddbTableName` must be greater than or equal to 3"
+        );
       }
-      if (Objects.nonNull(this.ddbTableName()) && this.ddbTableName().length() > 255) {
-        throw new IllegalArgumentException("The size of `ddbTableName` must be less than or equal to 255");
+      if (
+        Objects.nonNull(this.ddbTableName()) &&
+        this.ddbTableName().length() > 255
+      ) {
+        throw new IllegalArgumentException(
+          "The size of `ddbTableName` must be less than or equal to 255"
+        );
       }
-      if (Objects.isNull(this.kmsConfiguration()))  {
-        throw new IllegalArgumentException("Missing value for required field `kmsConfiguration`");
+      if (Objects.isNull(this.kmsConfiguration())) {
+        throw new IllegalArgumentException(
+          "Missing value for required field `kmsConfiguration`"
+        );
       }
-      if (Objects.isNull(this.logicalKeyStoreName()))  {
-        throw new IllegalArgumentException("Missing value for required field `logicalKeyStoreName`");
+      if (Objects.isNull(this.logicalKeyStoreName())) {
+        throw new IllegalArgumentException(
+          "Missing value for required field `logicalKeyStoreName`"
+        );
       }
       return new KeyStoreConfig(this);
     }

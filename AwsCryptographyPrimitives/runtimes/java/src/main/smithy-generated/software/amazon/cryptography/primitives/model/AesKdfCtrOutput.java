@@ -1,12 +1,14 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
-// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
+// Do not modify this file. This file is machine generated, and any changes to it will be
+// overwritten.
 package software.amazon.cryptography.primitives.model;
 
 import java.nio.ByteBuffer;
 import java.util.Objects;
 
 public class AesKdfCtrOutput {
+
   private final ByteBuffer okm;
 
   protected AesKdfCtrOutput(BuilderImpl builder) {
@@ -34,10 +36,10 @@ public class AesKdfCtrOutput {
   }
 
   static class BuilderImpl implements Builder {
+
     protected ByteBuffer okm;
 
-    protected BuilderImpl() {
-    }
+    protected BuilderImpl() {}
 
     protected BuilderImpl(AesKdfCtrOutput model) {
       this.okm = model.okm();
@@ -53,8 +55,10 @@ public class AesKdfCtrOutput {
     }
 
     public AesKdfCtrOutput build() {
-      if (Objects.isNull(this.okm()))  {
-        throw new IllegalArgumentException("Missing value for required field `okm`");
+      if (Objects.isNull(this.okm())) {
+        throw new IllegalArgumentException(
+          "Missing value for required field `okm`"
+        );
       }
       return new AesKdfCtrOutput(this);
     }

@@ -15,7 +15,7 @@ phases:
       # Switch back to the main directory
       - cd aws-cryptographic-material-providers-library-dafny
   pre_build:
-    commands:                                                                                                                                                
+    commands:
       # UNIQUE_ID should be passed in as an environment variable. It is used to tie
       # the different parts of the asynchronous signing process together
       - echo "Using unique id for flow $UNIQUE_ID"

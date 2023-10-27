@@ -5,22 +5,23 @@ on:
   workflow_call:
     inputs:
       dafny:
-        description: 'The Dafny version to run'
+        description: "The Dafny version to run"
         required: true
         type: string
 jobs:
   verification:
     strategy:
       matrix:
-        library: [
-          TestVectorsAwsCryptographicMaterialProviders,
-          AwsCryptographyPrimitives,
-          ComAmazonawsKms,
-          ComAmazonawsDynamodb,
-          AwsCryptographicMaterialProviders, 
-          StandardLibrary,
-        ]
-        os: [ macos-latest-large ]
+        library:
+          [
+            TestVectorsAwsCryptographicMaterialProviders,
+            AwsCryptographyPrimitives,
+            ComAmazonawsKms,
+            ComAmazonawsDynamodb,
+            AwsCryptographicMaterialProviders,
+            StandardLibrary,
+          ]
+        os: [macos-latest-large]
     runs-on: ${{ matrix.os }}
     env:
       DOTNET_CLI_TELEMETRY_OPTOUT: 1
@@ -45,7 +46,7 @@ jobs:
       - name: Setup .NET Core SDK '6.0.x'
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: '6.0.x'
+          dotnet-version: "6.0.x"
 
       - name: Verify ${{ matrix.library }} Dafny code
         shell: bash

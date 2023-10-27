@@ -15,12 +15,12 @@ phases:
       # Switch back to the main directory
       - cd aws-cryptographic-material-providers-library-dafny
   pre_build:
-    commands:                                                                                                                                                
+    commands:
       # UNIQUE_ID should be passed in as an environment variable. It is used to tie
       # the different parts of the asynchronous signing process together
       - echo "Using unique id for flow $UNIQUE_ID"
       # Build unsigned source
-      - cd AwsCryptographyPrimitives 
+      - cd AwsCryptographyPrimitives
       - make transpile_net
       - dotnet build runtimes/net /p:Configuration=Release -nowarn:CS0162,CS0168
       # This step assumes signing has already happened and we just need to retrieve
@@ -47,13 +47,12 @@ phases:
       # Now validate we can run the tests
       - sed -i.backup  "/\<ProjectReference Include=\"..\/Crypto.csproj\" \/>/d" runtimes/net/tests/Test-Crypto.csproj
       - dotnet add runtimes/net/tests/Test-Crypto.csproj package AWS.Cryptography.Internal.AwsCryptographyPrimitives --version $VERSION
-      
+
         # run tests
       - TMP_ROLE=$(aws sts assume-role --role-arn "arn:aws:iam::370957321024:role/GitHub-CI-MPL-Dafny-Role-us-west-2" --role-session-name "CB-TestVectorResources")
-      - export TMP_ROLE                                                                                                                                          
-      - export AWS_ACCESS_KEY_ID=$(echo "${TMP_ROLE}" | jq -r '.Credentials.AccessKeyId')                                                                        
-      - export AWS_SECRET_ACCESS_KEY=$(echo "${TMP_ROLE}" | jq -r '.Credentials.SecretAccessKey')                                                                
-      - export AWS_SESSION_TOKEN=$(echo "${TMP_ROLE}" | jq -r '.Credentials.SessionToken')                                                                       
+      - export TMP_ROLE
+      - export AWS_ACCESS_KEY_ID=$(echo "${TMP_ROLE}" | jq -r '.Credentials.AccessKeyId')
+      - export AWS_SECRET_ACCESS_KEY=$(echo "${TMP_ROLE}" | jq -r '.Credentials.SecretAccessKey')
+      - export AWS_SESSION_TOKEN=$(echo "${TMP_ROLE}" | jq -r '.Credentials.SessionToken')
       - aws sts get-caller-identity
       - make test_net
-

@@ -1,33 +1,25 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
-// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
+// Do not modify this file. This file is machine generated, and any changes to it will be
+// overwritten.
 package software.amazon.cryptography.materialproviders.model;
 
 import java.nio.ByteBuffer;
 import java.util.Objects;
 
-/**
- * Inputs for creating a Raw AES Keyring.
- */
+/** Inputs for creating a Raw AES Keyring. */
 public class CreateRawAesKeyringInput {
-  /**
-   * A namespace associated with this wrapping key.
-   */
+
+  /** A namespace associated with this wrapping key. */
   private final String keyNamespace;
 
-  /**
-   * A name associated with this wrapping key.
-   */
+  /** A name associated with this wrapping key. */
   private final String keyName;
 
-  /**
-   * The AES key used with AES_GCM encryption and decryption.
-   */
+  /** The AES key used with AES_GCM encryption and decryption. */
   private final ByteBuffer wrappingKey;
 
-  /**
-   * The AES_GCM algorithm this Keyring uses to wrap and unwrap data keys.
-   */
+  /** The AES_GCM algorithm this Keyring uses to wrap and unwrap data keys. */
   private final AesWrappingAlg wrappingAlg;
 
   protected CreateRawAesKeyringInput(BuilderImpl builder) {
@@ -118,6 +110,7 @@ public class CreateRawAesKeyringInput {
   }
 
   static class BuilderImpl implements Builder {
+
     protected String keyNamespace;
 
     protected String keyName;
@@ -126,8 +119,7 @@ public class CreateRawAesKeyringInput {
 
     protected AesWrappingAlg wrappingAlg;
 
-    protected BuilderImpl() {
-    }
+    protected BuilderImpl() {}
 
     protected BuilderImpl(CreateRawAesKeyringInput model) {
       this.keyNamespace = model.keyNamespace();
@@ -173,17 +165,25 @@ public class CreateRawAesKeyringInput {
     }
 
     public CreateRawAesKeyringInput build() {
-      if (Objects.isNull(this.keyNamespace()))  {
-        throw new IllegalArgumentException("Missing value for required field `keyNamespace`");
+      if (Objects.isNull(this.keyNamespace())) {
+        throw new IllegalArgumentException(
+          "Missing value for required field `keyNamespace`"
+        );
       }
-      if (Objects.isNull(this.keyName()))  {
-        throw new IllegalArgumentException("Missing value for required field `keyName`");
+      if (Objects.isNull(this.keyName())) {
+        throw new IllegalArgumentException(
+          "Missing value for required field `keyName`"
+        );
       }
-      if (Objects.isNull(this.wrappingKey()))  {
-        throw new IllegalArgumentException("Missing value for required field `wrappingKey`");
+      if (Objects.isNull(this.wrappingKey())) {
+        throw new IllegalArgumentException(
+          "Missing value for required field `wrappingKey`"
+        );
       }
-      if (Objects.isNull(this.wrappingAlg()))  {
-        throw new IllegalArgumentException("Missing value for required field `wrappingAlg`");
+      if (Objects.isNull(this.wrappingAlg())) {
+        throw new IllegalArgumentException(
+          "Missing value for required field `wrappingAlg`"
+        );
       }
       return new CreateRawAesKeyringInput(this);
     }

@@ -1,12 +1,14 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
-// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
+// Do not modify this file. This file is machine generated, and any changes to it will be
+// overwritten.
 package software.amazon.cryptography.primitives.model;
 
 import java.nio.ByteBuffer;
 import java.util.Objects;
 
 public class AESDecryptInput {
+
   private final AES_GCM encAlg;
 
   private final ByteBuffer key;
@@ -89,6 +91,7 @@ public class AESDecryptInput {
   }
 
   static class BuilderImpl implements Builder {
+
     protected AES_GCM encAlg;
 
     protected ByteBuffer key;
@@ -101,8 +104,7 @@ public class AESDecryptInput {
 
     protected ByteBuffer aad;
 
-    protected BuilderImpl() {
-    }
+    protected BuilderImpl() {}
 
     protected BuilderImpl(AESDecryptInput model) {
       this.encAlg = model.encAlg();
@@ -168,23 +170,35 @@ public class AESDecryptInput {
     }
 
     public AESDecryptInput build() {
-      if (Objects.isNull(this.encAlg()))  {
-        throw new IllegalArgumentException("Missing value for required field `encAlg`");
+      if (Objects.isNull(this.encAlg())) {
+        throw new IllegalArgumentException(
+          "Missing value for required field `encAlg`"
+        );
       }
-      if (Objects.isNull(this.key()))  {
-        throw new IllegalArgumentException("Missing value for required field `key`");
+      if (Objects.isNull(this.key())) {
+        throw new IllegalArgumentException(
+          "Missing value for required field `key`"
+        );
       }
-      if (Objects.isNull(this.cipherTxt()))  {
-        throw new IllegalArgumentException("Missing value for required field `cipherTxt`");
+      if (Objects.isNull(this.cipherTxt())) {
+        throw new IllegalArgumentException(
+          "Missing value for required field `cipherTxt`"
+        );
       }
-      if (Objects.isNull(this.authTag()))  {
-        throw new IllegalArgumentException("Missing value for required field `authTag`");
+      if (Objects.isNull(this.authTag())) {
+        throw new IllegalArgumentException(
+          "Missing value for required field `authTag`"
+        );
       }
-      if (Objects.isNull(this.iv()))  {
-        throw new IllegalArgumentException("Missing value for required field `iv`");
+      if (Objects.isNull(this.iv())) {
+        throw new IllegalArgumentException(
+          "Missing value for required field `iv`"
+        );
       }
-      if (Objects.isNull(this.aad()))  {
-        throw new IllegalArgumentException("Missing value for required field `aad`");
+      if (Objects.isNull(this.aad())) {
+        throw new IllegalArgumentException(
+          "Missing value for required field `aad`"
+        );
       }
       return new AESDecryptInput(this);
     }

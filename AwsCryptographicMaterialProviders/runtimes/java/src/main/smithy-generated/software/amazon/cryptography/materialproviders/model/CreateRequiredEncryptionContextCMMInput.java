@@ -1,6 +1,7 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
-// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
+// Do not modify this file. This file is machine generated, and any changes to it will be
+// overwritten.
 package software.amazon.cryptography.materialproviders.model;
 
 import java.util.List;
@@ -10,47 +11,61 @@ import software.amazon.cryptography.materialproviders.ICryptographicMaterialsMan
 import software.amazon.cryptography.materialproviders.IKeyring;
 import software.amazon.cryptography.materialproviders.Keyring;
 
-/**
- * Inputs for creating an Required Encryption Context Cryptographic Materials Manager.
- */
+/** Inputs for creating an Required Encryption Context Cryptographic Materials Manager. */
 public class CreateRequiredEncryptionContextCMMInput {
+
   /**
-   * The Cryprographic Materials Manager that the created Required Encryption Context Cryptographic Materials Manager will delegate to. Either a Keyring or underlying Cryprographic Materials Manager must be specified.
+   * The Cryprographic Materials Manager that the created Required Encryption Context Cryptographic
+   * Materials Manager will delegate to. Either a Keyring or underlying Cryprographic Materials
+   * Manager must be specified.
    */
   private final ICryptographicMaterialsManager underlyingCMM;
 
   /**
-   * The Keyring that the created Cryprographic Materials Manager will use to wrap data keys. The created Required Encryption Context CMM will delegate to a Default Cryptographic Materials Manager created with this Keyring. Either a Keyring or an underlying Cryprographic Materials Manager must be specified as input.
+   * The Keyring that the created Cryprographic Materials Manager will use to wrap data keys. The
+   * created Required Encryption Context CMM will delegate to a Default Cryptographic Materials
+   * Manager created with this Keyring. Either a Keyring or an underlying Cryprographic Materials
+   * Manager must be specified as input.
    */
   private final IKeyring keyring;
 
   /**
-   * A list of Encryption Context keys which are required to be supplied during encryption and decryption, and correspond to Encryption Context key-value pairs which are not stored on the resulting message.
+   * A list of Encryption Context keys which are required to be supplied during encryption and
+   * decryption, and correspond to Encryption Context key-value pairs which are not stored on the
+   * resulting message.
    */
   private final List<String> requiredEncryptionContextKeys;
 
   protected CreateRequiredEncryptionContextCMMInput(BuilderImpl builder) {
     this.underlyingCMM = builder.underlyingCMM();
     this.keyring = builder.keyring();
-    this.requiredEncryptionContextKeys = builder.requiredEncryptionContextKeys();
+    this.requiredEncryptionContextKeys =
+      builder.requiredEncryptionContextKeys();
   }
 
   /**
-   * @return The Cryprographic Materials Manager that the created Required Encryption Context Cryptographic Materials Manager will delegate to. Either a Keyring or underlying Cryprographic Materials Manager must be specified.
+   * @return The Cryprographic Materials Manager that the created Required Encryption Context
+   *     Cryptographic Materials Manager will delegate to. Either a Keyring or underlying
+   *     Cryprographic Materials Manager must be specified.
    */
   public ICryptographicMaterialsManager underlyingCMM() {
     return this.underlyingCMM;
   }
 
   /**
-   * @return The Keyring that the created Cryprographic Materials Manager will use to wrap data keys. The created Required Encryption Context CMM will delegate to a Default Cryptographic Materials Manager created with this Keyring. Either a Keyring or an underlying Cryprographic Materials Manager must be specified as input.
+   * @return The Keyring that the created Cryprographic Materials Manager will use to wrap data
+   *     keys. The created Required Encryption Context CMM will delegate to a Default Cryptographic
+   *     Materials Manager created with this Keyring. Either a Keyring or an underlying
+   *     Cryprographic Materials Manager must be specified as input.
    */
   public IKeyring keyring() {
     return this.keyring;
   }
 
   /**
-   * @return A list of Encryption Context keys which are required to be supplied during encryption and decryption, and correspond to Encryption Context key-value pairs which are not stored on the resulting message.
+   * @return A list of Encryption Context keys which are required to be supplied during encryption
+   *     and decryption, and correspond to Encryption Context key-value pairs which are not stored
+   *     on the resulting message.
    */
   public List<String> requiredEncryptionContextKeys() {
     return this.requiredEncryptionContextKeys;
@@ -66,32 +81,48 @@ public class CreateRequiredEncryptionContextCMMInput {
 
   public interface Builder {
     /**
-     * @param underlyingCMM The Cryprographic Materials Manager that the created Required Encryption Context Cryptographic Materials Manager will delegate to. Either a Keyring or underlying Cryprographic Materials Manager must be specified.
+     * @param underlyingCMM The Cryprographic Materials Manager that the created Required Encryption
+     *     Context Cryptographic Materials Manager will delegate to. Either a Keyring or underlying
+     *     Cryprographic Materials Manager must be specified.
      */
     Builder underlyingCMM(ICryptographicMaterialsManager underlyingCMM);
 
     /**
-     * @return The Cryprographic Materials Manager that the created Required Encryption Context Cryptographic Materials Manager will delegate to. Either a Keyring or underlying Cryprographic Materials Manager must be specified.
+     * @return The Cryprographic Materials Manager that the created Required Encryption Context
+     *     Cryptographic Materials Manager will delegate to. Either a Keyring or underlying
+     *     Cryprographic Materials Manager must be specified.
      */
     ICryptographicMaterialsManager underlyingCMM();
 
     /**
-     * @param keyring The Keyring that the created Cryprographic Materials Manager will use to wrap data keys. The created Required Encryption Context CMM will delegate to a Default Cryptographic Materials Manager created with this Keyring. Either a Keyring or an underlying Cryprographic Materials Manager must be specified as input.
+     * @param keyring The Keyring that the created Cryprographic Materials Manager will use to wrap
+     *     data keys. The created Required Encryption Context CMM will delegate to a Default
+     *     Cryptographic Materials Manager created with this Keyring. Either a Keyring or an
+     *     underlying Cryprographic Materials Manager must be specified as input.
      */
     Builder keyring(IKeyring keyring);
 
     /**
-     * @return The Keyring that the created Cryprographic Materials Manager will use to wrap data keys. The created Required Encryption Context CMM will delegate to a Default Cryptographic Materials Manager created with this Keyring. Either a Keyring or an underlying Cryprographic Materials Manager must be specified as input.
+     * @return The Keyring that the created Cryprographic Materials Manager will use to wrap data
+     *     keys. The created Required Encryption Context CMM will delegate to a Default
+     *     Cryptographic Materials Manager created with this Keyring. Either a Keyring or an
+     *     underlying Cryprographic Materials Manager must be specified as input.
      */
     IKeyring keyring();
 
     /**
-     * @param requiredEncryptionContextKeys A list of Encryption Context keys which are required to be supplied during encryption and decryption, and correspond to Encryption Context key-value pairs which are not stored on the resulting message.
+     * @param requiredEncryptionContextKeys A list of Encryption Context keys which are required to
+     *     be supplied during encryption and decryption, and correspond to Encryption Context
+     *     key-value pairs which are not stored on the resulting message.
      */
-    Builder requiredEncryptionContextKeys(List<String> requiredEncryptionContextKeys);
+    Builder requiredEncryptionContextKeys(
+      List<String> requiredEncryptionContextKeys
+    );
 
     /**
-     * @return A list of Encryption Context keys which are required to be supplied during encryption and decryption, and correspond to Encryption Context key-value pairs which are not stored on the resulting message.
+     * @return A list of Encryption Context keys which are required to be supplied during encryption
+     *     and decryption, and correspond to Encryption Context key-value pairs which are not stored
+     *     on the resulting message.
      */
     List<String> requiredEncryptionContextKeys();
 
@@ -99,19 +130,20 @@ public class CreateRequiredEncryptionContextCMMInput {
   }
 
   static class BuilderImpl implements Builder {
+
     protected ICryptographicMaterialsManager underlyingCMM;
 
     protected IKeyring keyring;
 
     protected List<String> requiredEncryptionContextKeys;
 
-    protected BuilderImpl() {
-    }
+    protected BuilderImpl() {}
 
     protected BuilderImpl(CreateRequiredEncryptionContextCMMInput model) {
       this.underlyingCMM = model.underlyingCMM();
       this.keyring = model.keyring();
-      this.requiredEncryptionContextKeys = model.requiredEncryptionContextKeys();
+      this.requiredEncryptionContextKeys =
+        model.requiredEncryptionContextKeys();
     }
 
     public Builder underlyingCMM(ICryptographicMaterialsManager underlyingCMM) {
@@ -132,7 +164,9 @@ public class CreateRequiredEncryptionContextCMMInput {
       return this.keyring;
     }
 
-    public Builder requiredEncryptionContextKeys(List<String> requiredEncryptionContextKeys) {
+    public Builder requiredEncryptionContextKeys(
+      List<String> requiredEncryptionContextKeys
+    ) {
       this.requiredEncryptionContextKeys = requiredEncryptionContextKeys;
       return this;
     }
@@ -142,8 +176,10 @@ public class CreateRequiredEncryptionContextCMMInput {
     }
 
     public CreateRequiredEncryptionContextCMMInput build() {
-      if (Objects.isNull(this.requiredEncryptionContextKeys()))  {
-        throw new IllegalArgumentException("Missing value for required field `requiredEncryptionContextKeys`");
+      if (Objects.isNull(this.requiredEncryptionContextKeys())) {
+        throw new IllegalArgumentException(
+          "Missing value for required field `requiredEncryptionContextKeys`"
+        );
       }
       return new CreateRequiredEncryptionContextCMMInput(this);
     }

@@ -11,7 +11,7 @@ env:
   secrets-manager:
     GPG_KEY: Maven-GPG-Keys-Release-Credentials:Keyname
     GPG_PASS: Maven-GPG-Keys-Release-Credentials:Passphrase
-    SONA_USERNAME: Sonatype-Team-Account:Username 
+    SONA_USERNAME: Sonatype-Team-Account:Username
     SONA_PASSWORD: Sonatype-Team-Account:Password
 
 phases:
@@ -65,5 +65,3 @@ phases:
       # Publish to Sonatype
       - gradle -p runtimes/java publishMavenPublicationToSonatypeRepository closeSonatypeStagingRepository
       - gradle -p runtimes/java findSonatypeStagingRepository releaseSonatypeStagingRepository
-
-

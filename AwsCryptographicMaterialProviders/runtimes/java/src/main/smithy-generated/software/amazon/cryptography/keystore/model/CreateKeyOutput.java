@@ -1,17 +1,15 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
-// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
+// Do not modify this file. This file is machine generated, and any changes to it will be
+// overwritten.
 package software.amazon.cryptography.keystore.model;
 
 import java.util.Objects;
 
-/**
- * Outputs for Branch Key creation.
- */
+/** Outputs for Branch Key creation. */
 public class CreateKeyOutput {
-  /**
-   * A identifier for the created Branch Key.
-   */
+
+  /** A identifier for the created Branch Key. */
   private final String branchKeyIdentifier;
 
   protected CreateKeyOutput(BuilderImpl builder) {
@@ -48,10 +46,10 @@ public class CreateKeyOutput {
   }
 
   static class BuilderImpl implements Builder {
+
     protected String branchKeyIdentifier;
 
-    protected BuilderImpl() {
-    }
+    protected BuilderImpl() {}
 
     protected BuilderImpl(CreateKeyOutput model) {
       this.branchKeyIdentifier = model.branchKeyIdentifier();
@@ -67,8 +65,10 @@ public class CreateKeyOutput {
     }
 
     public CreateKeyOutput build() {
-      if (Objects.isNull(this.branchKeyIdentifier()))  {
-        throw new IllegalArgumentException("Missing value for required field `branchKeyIdentifier`");
+      if (Objects.isNull(this.branchKeyIdentifier())) {
+        throw new IllegalArgumentException(
+          "Missing value for required field `branchKeyIdentifier`"
+        );
       }
       return new CreateKeyOutput(this);
     }

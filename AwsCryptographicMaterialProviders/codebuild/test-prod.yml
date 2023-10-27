@@ -16,23 +16,23 @@ phases:
       - cd aws-cryptographic-material-providers-library-dafny
   pre_build:
     commands:
-      - cd AwsCryptographicMaterialProviders 
+      - cd AwsCryptographicMaterialProviders
       - make transpile_net
   build:
     commands:
       - export VERSION=`grep '<Version>' runtimes/net/MPL.csproj | sed 's/.*<Version>\(.*\)<\/Version>/\1/'`
       - sed -i.backup  "/\<ProjectReference Include=\"..\/MPL.csproj\" \/>/d" runtimes/net/tests/Test-MPL.csproj
       - dotnet add runtimes/net/tests/Test-MPL.csproj package AWS.Cryptography.MaterialProviders --version $VERSION
-      
-       # run tests
+
+        # run tests
       - TMP_ROLE=$(aws sts assume-role --role-arn "arn:aws:iam::370957321024:role/GitHub-CI-MPL-Dafny-Role-us-west-2" --role-session-name "CB-TestVectorResources")
-      - export TMP_ROLE                                                                                                                                          
-      - export AWS_ACCESS_KEY_ID=$(echo "${TMP_ROLE}" | jq -r '.Credentials.AccessKeyId')                                                                        
-      - export AWS_SECRET_ACCESS_KEY=$(echo "${TMP_ROLE}" | jq -r '.Credentials.SecretAccessKey')                                                                
-      - export AWS_SESSION_TOKEN=$(echo "${TMP_ROLE}" | jq -r '.Credentials.SessionToken')                                                                       
+      - export TMP_ROLE
+      - export AWS_ACCESS_KEY_ID=$(echo "${TMP_ROLE}" | jq -r '.Credentials.AccessKeyId')
+      - export AWS_SECRET_ACCESS_KEY=$(echo "${TMP_ROLE}" | jq -r '.Credentials.SecretAccessKey')
+      - export AWS_SESSION_TOKEN=$(echo "${TMP_ROLE}" | jq -r '.Credentials.SessionToken')
       - aws sts get-caller-identity
       - make test_net
-      
+
       # run test vectors
       - cd ../TestVectorsAwsCryptographicMaterialProviders
       - sed -i.backup  "/\<ProjectReference Include=\"..\/..\/..\/AwsCryptographicMaterialProviders\/runtimes\/net\/MPL.csproj\" \/>/d" runtimes/net/TestVectors.csproj

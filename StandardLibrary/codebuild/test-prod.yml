@@ -15,7 +15,7 @@ phases:
       # Switch back to the main directory
       - cd aws-cryptographic-material-providers-library-dafny
   pre_build:
-    commands:                                                                                                                                                
+    commands:
       # Build unsigned source
       - cd StandardLibrary
       - make transpile_net

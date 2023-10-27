@@ -1,34 +1,29 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
-// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
+// Do not modify this file. This file is machine generated, and any changes to it will be
+// overwritten.
 package software.amazon.cryptography.materialproviders.model;
 
 import java.util.List;
 import java.util.Objects;
 import software.amazon.awssdk.services.kms.KmsClient;
 
-/**
- * Inputs for for creating a AWS KMS MRK Discovery Keyring.
- */
+/** Inputs for for creating a AWS KMS MRK Discovery Keyring. */
 public class CreateAwsKmsMrkDiscoveryKeyringInput {
-  /**
-   * The KMS Client this Keyring will use to call KMS.
-   */
+
+  /** The KMS Client this Keyring will use to call KMS. */
   private final KmsClient kmsClient;
 
   /**
-   * A filter which restricts which KMS Keys this Keyring may attempt to decrypt with by AWS partition and account.
+   * A filter which restricts which KMS Keys this Keyring may attempt to decrypt with by AWS
+   * partition and account.
    */
   private final DiscoveryFilter discoveryFilter;
 
-  /**
-   * A list of grant tokens to be used when calling KMS.
-   */
+  /** A list of grant tokens to be used when calling KMS. */
   private final List<String> grantTokens;
 
-  /**
-   * The region the input 'kmsClient' is in.
-   */
+  /** The region the input 'kmsClient' is in. */
   private final String region;
 
   protected CreateAwsKmsMrkDiscoveryKeyringInput(BuilderImpl builder) {
@@ -46,7 +41,8 @@ public class CreateAwsKmsMrkDiscoveryKeyringInput {
   }
 
   /**
-   * @return A filter which restricts which KMS Keys this Keyring may attempt to decrypt with by AWS partition and account.
+   * @return A filter which restricts which KMS Keys this Keyring may attempt to decrypt with by AWS
+   *     partition and account.
    */
   public DiscoveryFilter discoveryFilter() {
     return this.discoveryFilter;
@@ -86,12 +82,14 @@ public class CreateAwsKmsMrkDiscoveryKeyringInput {
     KmsClient kmsClient();
 
     /**
-     * @param discoveryFilter A filter which restricts which KMS Keys this Keyring may attempt to decrypt with by AWS partition and account.
+     * @param discoveryFilter A filter which restricts which KMS Keys this Keyring may attempt to
+     *     decrypt with by AWS partition and account.
      */
     Builder discoveryFilter(DiscoveryFilter discoveryFilter);
 
     /**
-     * @return A filter which restricts which KMS Keys this Keyring may attempt to decrypt with by AWS partition and account.
+     * @return A filter which restricts which KMS Keys this Keyring may attempt to decrypt with by
+     *     AWS partition and account.
      */
     DiscoveryFilter discoveryFilter();
 
@@ -119,6 +117,7 @@ public class CreateAwsKmsMrkDiscoveryKeyringInput {
   }
 
   static class BuilderImpl implements Builder {
+
     protected KmsClient kmsClient;
 
     protected DiscoveryFilter discoveryFilter;
@@ -127,8 +126,7 @@ public class CreateAwsKmsMrkDiscoveryKeyringInput {
 
     protected String region;
 
-    protected BuilderImpl() {
-    }
+    protected BuilderImpl() {}
 
     protected BuilderImpl(CreateAwsKmsMrkDiscoveryKeyringInput model) {
       this.kmsClient = model.kmsClient();
@@ -174,11 +172,15 @@ public class CreateAwsKmsMrkDiscoveryKeyringInput {
     }
 
     public CreateAwsKmsMrkDiscoveryKeyringInput build() {
-      if (Objects.isNull(this.kmsClient()))  {
-        throw new IllegalArgumentException("Missing value for required field `kmsClient`");
+      if (Objects.isNull(this.kmsClient())) {
+        throw new IllegalArgumentException(
+          "Missing value for required field `kmsClient`"
+        );
       }
-      if (Objects.isNull(this.region()))  {
-        throw new IllegalArgumentException("Missing value for required field `region`");
+      if (Objects.isNull(this.region())) {
+        throw new IllegalArgumentException(
+          "Missing value for required field `region`"
+        );
       }
       return new CreateAwsKmsMrkDiscoveryKeyringInput(this);
     }

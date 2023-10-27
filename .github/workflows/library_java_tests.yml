@@ -5,7 +5,7 @@ on:
   workflow_call:
     inputs:
       dafny:
-        description: 'The Dafny version to run'
+        description: "The Dafny version to run"
         required: true
         type: string
 
@@ -13,20 +13,21 @@ jobs:
   testJava:
     strategy:
       matrix:
-        library: [
-          AwsCryptographyPrimitives,
-          ComAmazonawsKms,
-          ComAmazonawsDynamodb,
-          AwsCryptographicMaterialProviders,
-          TestVectorsAwsCryptographicMaterialProviders,
-          StandardLibrary,
-        ]
+        library:
+          [
+            AwsCryptographyPrimitives,
+            ComAmazonawsKms,
+            ComAmazonawsDynamodb,
+            AwsCryptographicMaterialProviders,
+            TestVectorsAwsCryptographicMaterialProviders,
+            StandardLibrary,
+          ]
         os: [
-          # TODO just test on mac for now
-          # windows-latest,
-          ubuntu-latest,
-          macos-latest
-        ]
+            # TODO just test on mac for now
+            # windows-latest,
+            ubuntu-latest,
+            macos-latest,
+          ]
     runs-on: ${{ matrix.os }}
     permissions:
       id-token: write
@@ -57,8 +58,8 @@ jobs:
       - name: Setup Java 8
         uses: actions/setup-java@v3
         with:
-          distribution: 'corretto'
-          java-version:  8
+          distribution: "corretto"
+          java-version: 8
 
       - name: Build ${{ matrix.library }} implementation
         shell: bash
@@ -76,15 +77,15 @@ jobs:
       - name: Setup Java 11
         uses: actions/setup-java@v3
         with:
-          distribution: 'corretto'
+          distribution: "corretto"
           java-version: 11
 
       - name: Clean for next Java
         uses: gradle/gradle-build-action@v2
         with:
           arguments: clean
-          build-root-directory: ./${{ matrix.library }}/runtimes/java          
-          
+          build-root-directory: ./${{ matrix.library }}/runtimes/java
+
       - name: Compile Java 11
         uses: gradle/gradle-build-action@v2
         with:
@@ -96,11 +97,11 @@ jobs:
         with:
           arguments: runTests
           build-root-directory: ./${{ matrix.library }}/runtimes/java
-            
+
       - name: Setup Java 16
         uses: actions/setup-java@v3
         with:
-          distribution: 'corretto'
+          distribution: "corretto"
           java-version: 16
 
       - name: Clean for next Java
@@ -119,12 +120,12 @@ jobs:
         uses: gradle/gradle-build-action@v2
         with:
           arguments: runTests
-          build-root-directory: ./${{ matrix.library }}/runtimes/java     
-            
+          build-root-directory: ./${{ matrix.library }}/runtimes/java
+
       - name: Setup Java 17
         uses: actions/setup-java@v3
         with:
-          distribution: 'corretto'
+          distribution: "corretto"
           java-version: 17
 
       - name: Clean for next Java
@@ -143,4 +144,4 @@ jobs:
         uses: gradle/gradle-build-action@v2
         with:
           arguments: runTests
-          build-root-directory: ./${{ matrix.library }}/runtimes/java      
+          build-root-directory: ./${{ matrix.library }}/runtimes/java

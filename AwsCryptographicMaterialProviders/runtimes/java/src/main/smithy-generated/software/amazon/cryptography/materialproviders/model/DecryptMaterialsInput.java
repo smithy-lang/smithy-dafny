@@ -1,6 +1,7 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
-// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
+// Do not modify this file. This file is machine generated, and any changes to it will be
+// overwritten.
 package software.amazon.cryptography.materialproviders.model;
 
 import java.util.List;
@@ -8,6 +9,7 @@ import java.util.Map;
 import java.util.Objects;
 
 public class DecryptMaterialsInput {
+
   private final AlgorithmSuiteId algorithmSuiteId;
 
   private final CommitmentPolicy commitmentPolicy;
@@ -71,7 +73,9 @@ public class DecryptMaterialsInput {
 
     Map<String, String> encryptionContext();
 
-    Builder reproducedEncryptionContext(Map<String, String> reproducedEncryptionContext);
+    Builder reproducedEncryptionContext(
+      Map<String, String> reproducedEncryptionContext
+    );
 
     Map<String, String> reproducedEncryptionContext();
 
@@ -79,6 +83,7 @@ public class DecryptMaterialsInput {
   }
 
   static class BuilderImpl implements Builder {
+
     protected AlgorithmSuiteId algorithmSuiteId;
 
     protected CommitmentPolicy commitmentPolicy;
@@ -89,8 +94,7 @@ public class DecryptMaterialsInput {
 
     protected Map<String, String> reproducedEncryptionContext;
 
-    protected BuilderImpl() {
-    }
+    protected BuilderImpl() {}
 
     protected BuilderImpl(DecryptMaterialsInput model) {
       this.algorithmSuiteId = model.algorithmSuiteId();
@@ -136,7 +140,9 @@ public class DecryptMaterialsInput {
       return this.encryptionContext;
     }
 
-    public Builder reproducedEncryptionContext(Map<String, String> reproducedEncryptionContext) {
+    public Builder reproducedEncryptionContext(
+      Map<String, String> reproducedEncryptionContext
+    ) {
       this.reproducedEncryptionContext = reproducedEncryptionContext;
       return this;
     }
@@ -146,17 +152,25 @@ public class DecryptMaterialsInput {
     }
 
     public DecryptMaterialsInput build() {
-      if (Objects.isNull(this.algorithmSuiteId()))  {
-        throw new IllegalArgumentException("Missing value for required field `algorithmSuiteId`");
+      if (Objects.isNull(this.algorithmSuiteId())) {
+        throw new IllegalArgumentException(
+          "Missing value for required field `algorithmSuiteId`"
+        );
       }
-      if (Objects.isNull(this.commitmentPolicy()))  {
-        throw new IllegalArgumentException("Missing value for required field `commitmentPolicy`");
+      if (Objects.isNull(this.commitmentPolicy())) {
+        throw new IllegalArgumentException(
+          "Missing value for required field `commitmentPolicy`"
+        );
       }
-      if (Objects.isNull(this.encryptedDataKeys()))  {
-        throw new IllegalArgumentException("Missing value for required field `encryptedDataKeys`");
+      if (Objects.isNull(this.encryptedDataKeys())) {
+        throw new IllegalArgumentException(
+          "Missing value for required field `encryptedDataKeys`"
+        );
       }
-      if (Objects.isNull(this.encryptionContext()))  {
-        throw new IllegalArgumentException("Missing value for required field `encryptionContext`");
+      if (Objects.isNull(this.encryptionContext())) {
+        throw new IllegalArgumentException(
+          "Missing value for required field `encryptionContext`"
+        );
       }
       return new DecryptMaterialsInput(this);
     }

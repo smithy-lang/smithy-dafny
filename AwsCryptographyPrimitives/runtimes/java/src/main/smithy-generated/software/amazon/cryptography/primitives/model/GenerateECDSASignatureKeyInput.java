@@ -1,11 +1,13 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
-// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
+// Do not modify this file. This file is machine generated, and any changes to it will be
+// overwritten.
 package software.amazon.cryptography.primitives.model;
 
 import java.util.Objects;
 
 public class GenerateECDSASignatureKeyInput {
+
   private final ECDSASignatureAlgorithm signatureAlgorithm;
 
   protected GenerateECDSASignatureKeyInput(BuilderImpl builder) {
@@ -33,16 +35,18 @@ public class GenerateECDSASignatureKeyInput {
   }
 
   static class BuilderImpl implements Builder {
+
     protected ECDSASignatureAlgorithm signatureAlgorithm;
 
-    protected BuilderImpl() {
-    }
+    protected BuilderImpl() {}
 
     protected BuilderImpl(GenerateECDSASignatureKeyInput model) {
       this.signatureAlgorithm = model.signatureAlgorithm();
     }
 
-    public Builder signatureAlgorithm(ECDSASignatureAlgorithm signatureAlgorithm) {
+    public Builder signatureAlgorithm(
+      ECDSASignatureAlgorithm signatureAlgorithm
+    ) {
       this.signatureAlgorithm = signatureAlgorithm;
       return this;
     }
@@ -52,8 +56,10 @@ public class GenerateECDSASignatureKeyInput {
     }
 
     public GenerateECDSASignatureKeyInput build() {
-      if (Objects.isNull(this.signatureAlgorithm()))  {
-        throw new IllegalArgumentException("Missing value for required field `signatureAlgorithm`");
+      if (Objects.isNull(this.signatureAlgorithm())) {
+        throw new IllegalArgumentException(
+          "Missing value for required field `signatureAlgorithm`"
+        );
       }
       return new GenerateECDSASignatureKeyInput(this);
     }

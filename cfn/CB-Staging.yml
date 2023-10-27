@@ -96,7 +96,7 @@ Resources:
         - !Ref CodeBuildCISTSAllow
         - "arn:aws:iam::aws:policy/AWSCodeArtifactReadOnlyAccess"
         - "arn:aws:iam::aws:policy/AWSCodeArtifactAdminAccess"
-  
+
   CodeBuildCISTSAllow:
     Type: "AWS::IAM::ManagedPolicy"
     Properties:
