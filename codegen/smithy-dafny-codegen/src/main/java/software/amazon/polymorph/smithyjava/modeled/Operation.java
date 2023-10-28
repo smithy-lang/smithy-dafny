@@ -63,10 +63,10 @@ public class Operation {
                 successTypeDescriptor = CodeBlock.of("dafny.Tuple0._typeDescriptor()");
                 method
                         .addStatement(invoke(operationName))
-                        .addStatement("return $T.create_Success($L, Error._typeDescriptor(), $T.create())",
-                                DAFNY_RESULT_CLASS_NAME,
-                                successTypeDescriptor,
-                                DAFNY_TUPLE0_CLASS_NAME);
+                        .addStatement("return $L",
+                                subject.dafnyNameResolver.createSuccess(
+                                        successTypeDescriptor,
+                                        CodeBlock.of("$T.create()", DAFNY_TUPLE0_CLASS_NAME)));
             } else {
                 // operation is not void
                 successTypeDescriptor = subject.dafnyNameResolver.typeDescriptor(outputResolved.resolvedId());
@@ -74,17 +74,19 @@ public class Operation {
                 method
                         .addStatement(declareNativeOutputAndInvoke(operationName, nativeOutputType))
                         .addStatement(declareDafnyOutputAndConvert(outputResolved, subject))
-                        .addStatement("return $T.create_Success($L, Error._typeDescriptor(), $L)",
-                                DAFNY_RESULT_CLASS_NAME,
-                                successTypeDescriptor,
-                                DAFNY_OUTPUT);
+                        .addStatement("return $L",
+                                subject.dafnyNameResolver.createSuccess(
+                                        successTypeDescriptor,
+                                        CodeBlock.of(DAFNY_OUTPUT)));
             }
             // catch Errors in this Namespace
             method
                     .nextControlFlow("catch ($T ex)",
                             ClassName.get(RuntimeException.class))
-                    .addStatement("return $T.create_Failure($L, Error._typeDescriptor(), $T.Error(ex))",
-                            DAFNY_RESULT_CLASS_NAME, successTypeDescriptor, shimLibrary.toDafnyClassName)
+                    .addStatement("return $L",
+                            subject.dafnyNameResolver.createFailure(
+                                    successTypeDescriptor,
+                                    CodeBlock.of("$T.Error(ex)", shimLibrary.toDafnyClassName)))
                     .endControlFlow();
             return method.build();
         }

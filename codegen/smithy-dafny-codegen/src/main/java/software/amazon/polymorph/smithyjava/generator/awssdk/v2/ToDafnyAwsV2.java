@@ -522,17 +522,16 @@ public class ToDafnyAwsV2 extends ToDafny {
         // but with calls to dafnyNameResolver replaced with their expected response.
         CodeBlock stringTypeDescriptor = Dafny.TYPE_DESCRIPTOR_BY_SHAPE_TYPE.get(ShapeType.STRING);
         CodeBlock memberAssignment = CodeBlock.of(
-                "$L = $T.nonNull($L) ?\n$T.create_Some($L, $T.$L($L))\n: $T.create_None($L)",
+                "$L = $T.nonNull($L) ?\n$L\n: $L",
                 "message",
                 ClassName.get(Objects.class),
                 "nativeValue.getMessage()",
-                ClassName.get("Wrappers_Compile", "Option"),
-                stringTypeDescriptor,
-                COMMON_TO_DAFNY_SIMPLE,
-                SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(ShapeType.STRING).methodName(),
-                "nativeValue.getMessage()",
-                ClassName.get("Wrappers_Compile", "Option"),
-                stringTypeDescriptor
+                subject.dafnyNameResolver.createSome(stringTypeDescriptor,
+                        CodeBlock.of("$T.$L($L)",
+                                COMMON_TO_DAFNY_SIMPLE,
+                                SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(ShapeType.STRING).methodName(),
+                                "nativeValue.getMessage()")),
+                subject.dafnyNameResolver.createNone(stringTypeDescriptor)
         );
         return MethodSpec.methodBuilder("Error")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)

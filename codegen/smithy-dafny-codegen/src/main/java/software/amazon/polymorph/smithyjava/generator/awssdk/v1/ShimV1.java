@@ -144,10 +144,10 @@ public class ShimV1 extends Generator {
             successTypeDescriptor = CodeBlock.of(DAFNY_TUPLE0_CLASS_NAME + "._typeDescriptor()");
             builder.addStatement("_impl.$L(converted)",
                             StringUtils.uncapitalize(operationName))
-                    .addStatement("return $T.create_Success($L, Error._typeDescriptor(), $T.create())",
-                            DAFNY_RESULT_CLASS_NAME,
-                            successTypeDescriptor,
-                            DAFNY_TUPLE0_CLASS_NAME);
+                    .addStatement("return $L",
+                            subject.dafnyNameResolver.createSuccess(
+                                    successTypeDescriptor,
+                                    CodeBlock.of("$T.create()", DAFNY_TUPLE0_CLASS_NAME)));
         } else {
             successTypeDescriptor = subject.dafnyNameResolver.typeDescriptor(outputShapeId);
             builder.addStatement("$T result = _impl.$L(converted)",
@@ -156,23 +156,26 @@ public class ShimV1 extends Generator {
                     .addStatement("$T dafnyResponse = ToDafny.$L(result)",
                             dafnyOutput,
                             StringUtils.capitalize(outputShapeId.getName()))
-                    .addStatement("return $T.create_Success($L, Error._typeDescriptor(), dafnyResponse)",
-                            DAFNY_RESULT_CLASS_NAME,
-                            successTypeDescriptor);
+                    .addStatement("return $L",
+                            subject.dafnyNameResolver.createSuccess(
+                                    successTypeDescriptor,
+                                    CodeBlock.of("dafnyResponse")));
         }
 
         operationShape.getErrors().stream().sorted().forEach(shapeId ->
                 builder
                         .nextControlFlow("catch ($T ex)", subject.nativeNameResolver.typeForShape(shapeId))
-                        .addStatement("return $T.create_Failure($L, Error._typeDescriptor(), ToDafny.Error(ex))",
-                                DAFNY_RESULT_CLASS_NAME,
-                                successTypeDescriptor)
+                        .addStatement("return $L",
+                                subject.dafnyNameResolver.createFailure(
+                                        successTypeDescriptor,
+                                        CodeBlock.of("ToDafny.Error(ex)")))
         );
         return Optional.of(builder
                 .nextControlFlow("catch ($T ex)", subject.nativeNameResolver.baseErrorForService())
-                .addStatement("return $T.create_Failure($L, Error._typeDescriptor(), ToDafny.Error(ex))",
-                        DAFNY_RESULT_CLASS_NAME,
-                        successTypeDescriptor)
+                .addStatement("return $L",
+                        subject.dafnyNameResolver.createFailure(
+                                successTypeDescriptor,
+                                CodeBlock.of("ToDafny.Error(ex)")))
                 .endControlFlow()
                 .build());
     }

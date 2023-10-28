@@ -65,17 +65,21 @@ public class Dafny extends NameResolver {
         );
     }
 
+    private final String dafnyVersion;
+
     public Dafny(
             final String packageName,
             final Model model,
             final ServiceShape serviceShape,
-            CodegenSubject.AwsSdkVersion awsSdkVersion) {
+            CodegenSubject.AwsSdkVersion awsSdkVersion,
+            final String dafnyVersion) {
         super(
                 packageName,
                 serviceShape,
                 model,
                 modelPackageNameForServiceShape(serviceShape),
                 awsSdkVersion);
+        this.dafnyVersion = dafnyVersion;
     }
 
     /**
@@ -90,6 +94,69 @@ public class Dafny extends NameResolver {
             return "create";
         }
         return "create_" + DafnyNameResolverHelpers.dafnyCompilesExtra_(name);
+    }
+
+    private boolean datatypeConstructorsNeedTypeDescriptors() {
+        // TODO: proper version comparison
+        return dafnyVersion.compareTo("4.2") >= 0;
+    }
+
+    public CodeBlock createNone(CodeBlock typeDescriptor) {
+        if (datatypeConstructorsNeedTypeDescriptors()) {
+            return CodeBlock.of(
+                    "$T.create_None($L)",
+                    ClassName.get("Wrappers_Compile", "Option"),
+                    typeDescriptor);
+        } else {
+            return CodeBlock.of(
+                    "$T.create_None()",
+                    ClassName.get("Wrappers_Compile", "Option"));
+        }
+    }
+
+    public CodeBlock createSome(CodeBlock typeDescriptor, CodeBlock value) {
+        if (datatypeConstructorsNeedTypeDescriptors()) {
+            return CodeBlock.of(
+                    "$T.create_Some($L, $L)",
+                    Constants.DAFNY_OPTION_CLASS_NAME,
+                    typeDescriptor,
+                    value);
+        } else {
+            return CodeBlock.of(
+                    "$T.create_Some($L)",
+                    Constants.DAFNY_OPTION_CLASS_NAME,
+                    value);
+        }
+    }
+
+    public CodeBlock createSuccess(CodeBlock valueTypeDescriptor, CodeBlock value) {
+        if (datatypeConstructorsNeedTypeDescriptors()) {
+            return CodeBlock.of(
+                    "$T.create_Success($L, Error._typeDescriptor(), $L)",
+                    Constants.DAFNY_RESULT_CLASS_NAME,
+                    valueTypeDescriptor,
+                    value);
+        } else {
+            return CodeBlock.of(
+                    "$T.create_Success($L)",
+                    Constants.DAFNY_RESULT_CLASS_NAME,
+                    value);
+        }
+    }
+
+    public CodeBlock createFailure(CodeBlock typeDescriptor, CodeBlock error) {
+        if (datatypeConstructorsNeedTypeDescriptors()) {
+            return CodeBlock.of(
+                    "$T.create_Failure($L, Error._typeDescriptor(), $L)",
+                    Constants.DAFNY_RESULT_CLASS_NAME,
+                    typeDescriptor,
+                    error);
+        } else {
+            return CodeBlock.of(
+                    "$T.create_Failure($L)",
+                    Constants.DAFNY_RESULT_CLASS_NAME,
+                    error);
+        }
     }
 
     public static String datatypeConstructorIs(String name) {

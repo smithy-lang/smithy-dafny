@@ -196,14 +196,11 @@ public abstract class ToDafny extends Generator {
         }
         CodeBlock typeDescriptor = subject.dafnyNameResolver.typeDescriptor(memberShape.getTarget());
         return CodeBlock.of(
-                "$L = $L ?\n$T.create_Some($L, $L)\n: $T.create_None($L)",
+                "$L = $L ?\n$L\n: $L",
                 outputVar,
                 isSetCheck,
-                ClassName.get("Wrappers_Compile", "Option"),
-                typeDescriptor,
-                memberConversion,
-                ClassName.get("Wrappers_Compile", "Option"),
-                typeDescriptor
+                subject.dafnyNameResolver.createSome(typeDescriptor, memberConversion),
+                subject.dafnyNameResolver.createNone(typeDescriptor)
         );
     }
 

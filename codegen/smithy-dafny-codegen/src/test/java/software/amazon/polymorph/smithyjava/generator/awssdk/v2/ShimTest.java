@@ -14,6 +14,9 @@ import java.util.Map;
 
 import javax.lang.model.element.Modifier;
 
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import software.amazon.polymorph.smithyjava.ForEachDafnyTest;
 import software.amazon.polymorph.smithyjava.ModelConstants;
 import software.amazon.polymorph.smithyjava.generator.awssdk.TestSetupUtils;
 import software.amazon.polymorph.util.Tokenizer;
@@ -27,15 +30,14 @@ import static software.amazon.polymorph.smithyjava.generator.awssdk.v2.Constants
 import static software.amazon.polymorph.smithyjava.generator.awssdk.v2.Constants.DoVoidOperation;
 import static software.amazon.polymorph.smithyjava.generator.awssdk.v2.Constants.MockKmsShim;
 
-public class ShimTest {
+public class ShimTest extends ForEachDafnyTest {
     protected ShimV2 underTest;
     protected Model model;
     protected JavaAwsSdkV2 subject;
 
-    @Before
-    public void setup() {
+    public ShimTest(String dafnyVersion) {
         model = TestSetupUtils.setupLocalModel(ModelConstants.MOCK_KMS);
-        subject = TestSetupUtils.setupAwsSdkV2(model, "kms");
+        subject = TestSetupUtils.setupAwsSdkV2(model, "kms", dafnyVersion);
         underTest = new ShimV2(subject);
     }
 

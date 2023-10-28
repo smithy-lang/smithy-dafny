@@ -25,8 +25,8 @@ import static software.amazon.smithy.utils.StringUtils.uncapitalize;
 
 public class AwsSdkDafnyV2 extends Dafny {
 
-    public AwsSdkDafnyV2(ServiceShape serviceShape, Model model) {
-        super(packageNameForServiceShape(serviceShape), model, serviceShape, CodegenSubject.AwsSdkVersion.V2);
+    public AwsSdkDafnyV2(ServiceShape serviceShape, Model model, String dafnyVersion) {
+        super(packageNameForServiceShape(serviceShape), model, serviceShape, CodegenSubject.AwsSdkVersion.V2, dafnyVersion);
     }
 
     @Override

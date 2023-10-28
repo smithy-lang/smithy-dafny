@@ -18,8 +18,8 @@ import static software.amazon.polymorph.smithydafny.DafnyNameResolver.traitNameF
 
 public class AwsSdkDafnyV1 extends Dafny {
 
-    public AwsSdkDafnyV1(ServiceShape serviceShape, Model model) {
-        super(packageNameForServiceShape(serviceShape), model, serviceShape, CodegenSubject.AwsSdkVersion.V1);
+    public AwsSdkDafnyV1(ServiceShape serviceShape, Model model, String dafnyVersion) {
+        super(packageNameForServiceShape(serviceShape), model, serviceShape, CodegenSubject.AwsSdkVersion.V1, dafnyVersion);
     }
 
     @Override

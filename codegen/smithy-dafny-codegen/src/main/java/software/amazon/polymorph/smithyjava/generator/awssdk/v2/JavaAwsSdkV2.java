@@ -47,8 +47,8 @@ public class JavaAwsSdkV2 extends CodegenSubject {
         this.packageName = dafnyNameResolver.packageName();
     }
 
-    public static JavaAwsSdkV2 createJavaAwsSdkV2(ServiceShape serviceShape, Model model) {
-        final AwsSdkDafnyV2 dafnyNameResolver = new AwsSdkDafnyV2(serviceShape, model);
+    public static JavaAwsSdkV2 createJavaAwsSdkV2(ServiceShape serviceShape, Model model, String dafnyVersion) {
+        final AwsSdkDafnyV2 dafnyNameResolver = new AwsSdkDafnyV2(serviceShape, model, dafnyVersion);
         final AwsSdkNativeV2 nativeNameResolver = new AwsSdkNativeV2(serviceShape, model);
         return new JavaAwsSdkV2(serviceShape, model, dafnyNameResolver, nativeNameResolver);
     }

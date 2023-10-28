@@ -19,8 +19,8 @@ public class TestJavaLibrary extends JavaLibrary {
     @SuppressWarnings("unused")
     private static final Logger LOGGER = LoggerFactory.getLogger(TestJavaLibrary.class);
 
-    public TestJavaLibrary(Model model, ServiceShape serviceShape, AwsSdkVersion sdkVersion) {
-        super(model, serviceShape, sdkVersion);
+    public TestJavaLibrary(Model model, ServiceShape serviceShape, AwsSdkVersion sdkVersion, String dafnyVersion) {
+        super(model, serviceShape, sdkVersion, dafnyVersion);
     }
 
     @Override
