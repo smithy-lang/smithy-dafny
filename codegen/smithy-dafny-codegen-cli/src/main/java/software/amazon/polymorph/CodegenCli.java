@@ -75,6 +75,7 @@ public class CodegenCli {
                 .withAwsSdkStyle(cliArguments.awsSdkStyle)
                 .withLocalServiceTest(cliArguments.localServiceTest);
         cliArguments.javaAwsSdkVersion.ifPresent(engineBuilder::withJavaAwsSdkVersion);
+        cliArguments.dafnyVersion.ifPresent(engineBuilder::withDafnyVersion);
         cliArguments.includeDafnyFile.ifPresent(engineBuilder::withIncludeDafnyFile);
         final CodegenEngine engine = engineBuilder.build();
         engine.run();
@@ -120,6 +121,11 @@ public class CodegenCli {
             .hasArg()
             .build())
           .addOption(Option.builder()
+            .longOpt("dafny-version")
+            .desc("<optional> Dafny version to use. Defaults to 4.1.")
+            .hasArg()
+            .build())
+          .addOption(Option.builder()
             .longOpt("aws-sdk")
             .desc("<optional> generate AWS SDK-style API and shims")
             .build())
@@ -152,6 +158,7 @@ public class CodegenCli {
             Optional<Path> outputJavaDir,
             Optional<Path> outputDafnyDir,
             Optional<AwsSdkVersion> javaAwsSdkVersion,
+            Optional<String> dafnyVersion,
             Optional<Path> includeDafnyFile,
             boolean awsSdkStyle,
             boolean localServiceTest
@@ -205,6 +212,12 @@ public class CodegenCli {
                 }
             }
 
+            Optional<String> dafnyVersion = Optional.empty();
+            if (commandLine.hasOption("dafny-version")) {
+                final String versionStr = commandLine.getOptionValue("dafny-version").trim().toUpperCase();
+                dafnyVersion = Optional.of(versionStr);
+            }
+
             Optional<Path> includeDafnyFile = Optional.empty();
             if (outputDafnyDir.isPresent()) {
                 includeDafnyFile = Optional.of(Paths.get(commandLine.getOptionValue("include-dafny")));
@@ -213,7 +226,7 @@ public class CodegenCli {
             return Optional.of(new CliArguments(
                     modelPath, dependentModelPaths, namespace,
                     outputDotnetDir, outputJavaDir, outputDafnyDir,
-                    javaAwsSdkVersion, includeDafnyFile, awsSdkStyle,
+                    javaAwsSdkVersion, dafnyVersion, includeDafnyFile, awsSdkStyle,
                     localServiceTest
             ));
         }
