@@ -114,7 +114,7 @@ jobs:
         working-directory: ./${{ matrix.library }}
         run: |
           make polymorph_dafny
-          make polymorph_java
+          make polymorph_java DAFNY_VERSION="--dafny-version ${{ matrix.dafny-version }}"
 
       - name: Setup Java 8 for running tests
         uses: actions/setup-java@v3

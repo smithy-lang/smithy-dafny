@@ -6,7 +6,6 @@ CORES=2
 include ../SharedMakefile.mk
 
 NAMESPACE=simple.resources
-DAFNY_VERSION=--dafny-version 4.3
 
 # This project has no dependencies 
 # DEPENDENT-MODELS:= 
