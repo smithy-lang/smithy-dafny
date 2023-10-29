@@ -29,12 +29,28 @@ module {:extern "UTF8"} UTF8 {
     // If it weren't, then data would be lost.
     ensures res.Success? ==> Decode(res.value).Success? && Decode(res.value).value == s
 
+  function method CreateEncodeSuccess(bytes: ValidUTF8Bytes): Result<ValidUTF8Bytes, string> {
+    Success(bytes)
+  }
+
+  function method CreateEncodeFailure(error: string): Result<ValidUTF8Bytes, string> {
+    Failure(error)
+  }
+
   // Decode return a Result, therefore doesn't need to require utf8 input
   function method {:extern "Decode"} Decode(b: seq<uint8>): (res: Result<string, string>)
     ensures res.Success? ==> ValidUTF8Seq(b)
 
   predicate method IsASCIIString(s: string) {
     forall i :: 0 <= i < |s| ==> s[i] as int < 128
+  }
+
+  function method CreateDecodeSuccess(s: string): Result<string, string> {
+    Success(s)
+  }
+
+  function method CreateDecodeFailure(error: string): Result<string, string> {
+    Failure(error)
   }
 
   // Encode ASCII as UTF8 in a function, to allow use in ensures clause
