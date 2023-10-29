@@ -3,6 +3,7 @@
 package software.amazon.polymorph.smithyjava.generator.library.shims;
 
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
@@ -22,6 +23,7 @@ import software.amazon.smithy.model.shapes.ServiceShape;
 
 import static javax.lang.model.element.Modifier.PROTECTED;
 import static javax.lang.model.element.Modifier.PUBLIC;
+import static javax.lang.model.element.Modifier.STATIC;
 
 public class TestServiceShim extends ServiceShim {
     /** The Service Shape this Shim Tests. */
@@ -59,6 +61,8 @@ public class TestServiceShim extends ServiceShim {
         spec.addMethod(testServiceConstructor(builderSpecs));
         // Add public static method for creating a builder
         spec.addMethod(builderSpecs.builderMethod());
+        // Add public static method for creating a Success(client)
+        spec.addMethod(successOfTestServiceConstructor());
 
         spec.addMethods(getOperationsForTarget().stream()
                 .map(shape -> Operation.AsDafny.operation(shape, this.subject, this))
@@ -105,6 +109,18 @@ public class TestServiceShim extends ServiceShim {
                 .addModifiers(PROTECTED)
                 .addParameter(builderSpecs.builderImplName(), BuilderSpecs.BUILDER_VAR);
         method.addStatement("this.$L = $L.$L()", getField().name, BuilderSpecs.BUILDER_VAR, getArg().name);
+        return method.build();
+    }
+
+    private MethodSpec successOfTestServiceConstructor() {
+        MethodSpec.Builder method = MethodSpec
+                .methodBuilder("createSuccessOfClient")
+                .addModifiers(STATIC, PROTECTED)
+                .addParameter(thisClassName, "client");
+        method.addStatement("return $L",
+                subject.dafnyNameResolver.createSuccess(
+                        subject.dafnyNameResolver.typeDescriptor(targetShape.toShapeId()),
+                        CodeBlock.of("client")));
         return method.build();
     }
 

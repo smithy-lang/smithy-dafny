@@ -16,13 +16,15 @@ import Wrappers_Compile.Result;
 
 import static simple.extendable.resources.internaldafny.nativeresourcefactory.__default.DafnyFactory;
 
+import UTF8._ExternBase___default;
+
 public class __default extends _ExternBase___default {
     public static Result<ISimpleExtendableResourcesClient, Error> WrappedSimpleExtendableResources(SimpleExtendableResourcesConfig config) {
         TestUnwrapExtendable();
         simple.extendable.resources.model.SimpleExtendableResourcesConfig wrappedConfig = ToNative.SimpleExtendableResourcesConfig(config);
         simple.extendable.resources.SimpleExtendableResources impl = SimpleExtendableResources.builder().SimpleExtendableResourcesConfig(wrappedConfig).build();
         TestSimpleExtendableResources wrappedClient = TestSimpleExtendableResources.builder().impl(impl).build();
-        return Result.create_Success(dafny.TypeDescriptor.reference(ISimpleExtendableResourcesClient.class), Error._typeDescriptor(), wrappedClient);
+        return TestSimpleExtendableResources.createSuccessOfClient(wrappedClient);
     }
 
     /**

@@ -16,6 +16,6 @@ public class __default extends _ExternBase___default {
         simple.constraints.model.SimpleConstraintsConfig wrappedConfig = ToNative.SimpleConstraintsConfig(config);
         simple.constraints.SimpleConstraints impl = SimpleConstraints.builder().SimpleConstraintsConfig(wrappedConfig).build();
         TestSimpleConstraints wrappedClient = TestSimpleConstraints.builder().impl(impl).build();
-        return Result.create_Success(dafny.TypeDescriptor.reference(ISimpleConstraintsClient.class), Error._typeDescriptor(), wrappedClient);
+        return TestSimpleConstraints.createSuccessOfClient(wrappedClient);
     }
 }
