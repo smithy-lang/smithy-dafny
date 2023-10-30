@@ -16,8 +16,6 @@ import Wrappers_Compile.Result;
 
 import static simple.extendable.resources.internaldafny.nativeresourcefactory.__default.DafnyFactory;
 
-import UTF8._ExternBase___default;
-
 public class __default extends _ExternBase___default {
     public static Result<ISimpleExtendableResourcesClient, Error> WrappedSimpleExtendableResources(SimpleExtendableResourcesConfig config) {
         TestUnwrapExtendable();

@@ -66,7 +66,7 @@ public abstract class Shim extends Generator {
                 ));
         method.addStatement("return $L",
                 subject.dafnyNameResolver.createSome(
-                        subject.dafnyNameResolver.TYPE_DESCRIPTOR_BY_SHAPE_TYPE.get(ShapeType.BOOLEAN),
+                        subject.dafnyNameResolver.TYPE_DESCRIPTOR_BY_SHAPE_TYPE.get(ShapeType.STRING),
                         CodeBlock.of("s")));
         return method.build();
     }
@@ -81,7 +81,7 @@ public abstract class Shim extends Generator {
                 ));
         method.addStatement("return $L",
                 subject.dafnyNameResolver.createNone(
-                        subject.dafnyNameResolver.TYPE_DESCRIPTOR_BY_SHAPE_TYPE.get(ShapeType.BOOLEAN)));
+                        subject.dafnyNameResolver.TYPE_DESCRIPTOR_BY_SHAPE_TYPE.get(ShapeType.STRING)));
         return method.build();
     }
 
