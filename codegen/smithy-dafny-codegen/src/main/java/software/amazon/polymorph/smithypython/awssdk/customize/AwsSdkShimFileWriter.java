@@ -154,7 +154,7 @@ public class AwsSdkShimFileWriter implements CustomFileWriter {
       DafnyNameResolver.importDafnyTypeForShape(writer, outputShape, codegenContext);
 
       // No 'native' type to import; native AWS SDK types are modelled in dictionaries
-      
+
       // Write the Shim operation block.
       // This takes in a Dafny input and returns a Dafny output.
       // This operation will:
@@ -187,7 +187,7 @@ public class AwsSdkShimFileWriter implements CustomFileWriter {
             // 3) wraps boto3 ClientErrors as Dafny failures
             writer.write(
               """
-              boto_request_dict = dafny_to_aws_sdk.$L
+              boto_request_dict = $L
               try:
                   boto_response_dict = self._impl.$L(**boto_request_dict)
               except ClientError as e:
