@@ -29,7 +29,7 @@ public class __default extends software.amazon.cryptography.services.dynamodb.in
         } catch (Exception e) {
             Error dafny_error = Error.create_InternalServerError(
                     Shim.createStringSome(CharacterSequence(e.getMessage())));
-            return Shim.createFailureOfError(e);
+            return Shim.createFailureOfError(dafny_error);
         }
     }
 }
