@@ -27,7 +27,7 @@ public class __default extends software.amazon.cryptography.services.dynamodb.in
             IDynamoDBClient shim = new Shim(ddbClient, region.toString());
             return Shim.createSuccessOfClient(shim);
         } catch (Exception e) {
-            return Shim.createFailureOfError(e);
+            return Shim.createFailureOfException(e);
         }
     }
 }

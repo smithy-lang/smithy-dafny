@@ -1,3 +1,5 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 package software.amazon.polymorph.smithyjava.generator.awssdk;
 
 import com.squareup.javapoet.ClassName;
@@ -47,7 +49,7 @@ public abstract class Shim extends Generator {
         CodeBlock stringTypeDescriptor = Dafny.TYPE_DESCRIPTOR_BY_SHAPE_TYPE.get(ShapeType.STRING);
         method.addStatement("Error dafny_error = Error.create_InternalServerError($L)",
                 subject.dafnyNameResolver.createSome(stringTypeDescriptor,
-                        CodeBlock.of("CharacterSequence(exception.getMessage())")));
+                        CodeBlock.of("software.amazon.smithy.dafny.conversion.ToDafny.Simple.CharacterSequence(exception.getMessage())")));
         method.addStatement("return $L",
                 subject.dafnyNameResolver.createFailure(
                         subject.dafnyNameResolver.typeDescriptor(subject.serviceShape.toShapeId()),
