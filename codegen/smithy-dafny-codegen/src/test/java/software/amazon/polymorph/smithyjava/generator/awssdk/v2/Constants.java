@@ -188,11 +188,11 @@ public class Constants {
                   
                   public static Option<DafnySequence<? extends Character>> createStringSome(
                       DafnySequence<? extends Character> s) {
-                    return Option.create_Some(TypeDescriptor.BOOLEAN, s);
+                    return Option.create_Some(DafnySequence._typeDescriptor(TypeDescriptor.CHAR), s);
                   }
                               
                   public static Option<DafnySequence<? extends Character>> createStringNone() {
-                    return Option.create_None(TypeDescriptor.BOOLEAN);
+                    return Option.create_None(DafnySequence._typeDescriptor(TypeDescriptor.CHAR));
                   }
                           
                   public static Option<Boolean> createBooleanSome(Boolean b) {

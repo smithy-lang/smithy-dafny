@@ -10,6 +10,7 @@ import org.antlr.v4.runtime.Token;
 import software.amazon.polymorph.antlr.CSharpLexer;
 
 import java.util.List;
+import java.util.Objects;
 
 import org.junit.Assert;
 
@@ -31,9 +32,13 @@ public class Tokenizer {
     public static record ParseToken(String text, int type) {}
 
     public static void tokenizeAndAssertEqual(String expected, String actual) {
-//        Assert.assertEquals(expected, actual);
         final List<ParseToken> actualTokens = tokenize(actual);
         final List<ParseToken> expectedTokens = tokenize(expected);
-        Assert.assertEquals(expectedTokens, actualTokens);
+        if (!Objects.equals(expectedTokens, actualTokens)) {
+            // If the tokens aren't equal, assert the original strings are equal
+            // knowing it is guaranteed to fail,
+            // just so that we get a much more readable diff in tooling.
+            Assert.assertEquals(expected, actual);
+        }
     }
 }
