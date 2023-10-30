@@ -1,3 +1,6 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
+
 package software.amazon.polymorph.smithypython.localservice.customize;
 
 import java.util.HashSet;
@@ -5,8 +8,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import software.amazon.polymorph.smithypython.common.customize.CustomFileWriter;
-import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
-import software.amazon.polymorph.smithypython.common.shapevisitor.conversionwriter.ShapeVisitorResolver;
+import software.amazon.polymorph.smithypython.common.shapevisitor.ShapeVisitorResolver;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.smithy.codegen.core.TopologicalIndex;

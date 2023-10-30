@@ -1,4 +1,7 @@
-package software.amazon.polymorph.smithypython.common.shapevisitor.conversionwriter;
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
+
+package software.amazon.polymorph.smithypython.common.shapevisitor;
 
 import software.amazon.polymorph.smithypython.awssdk.nameresolver.AwsSdkNameResolver;
 import software.amazon.polymorph.smithypython.awssdk.shapevisitor.AwsSdkToDafnyShapeVisitor;

@@ -1,3 +1,6 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
+
 package software.amazon.polymorph.smithypython.localservice.shapevisitor.conversionwriter;
 
 import java.util.Map.Entry;
@@ -5,7 +8,7 @@ import software.amazon.polymorph.smithypython.common.nameresolver.DafnyNameResol
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.Utils;
 import software.amazon.polymorph.smithypython.common.shapevisitor.conversionwriter.BaseConversionWriter;
-import software.amazon.polymorph.smithypython.common.shapevisitor.conversionwriter.ShapeVisitorResolver;
+import software.amazon.polymorph.smithypython.common.shapevisitor.ShapeVisitorResolver;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.codegen.core.WriterDelegator;
 import software.amazon.smithy.model.shapes.MemberShape;

@@ -1,17 +1,5 @@
-/*
- * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License").
- * You may not use this file except in compliance with the License.
- * A copy of the License is located at
- *
- *   http://aws.amazon.com/apache2.0
- *
- * or in the "license" file accompanying this file. This file is distributed
- * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied. See the License for the specific language governing
- * permissions and limitations under the License.
- */
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 
 package software.amazon.polymorph.smithypython.localservice;
 
@@ -23,7 +11,7 @@ import software.amazon.polymorph.smithypython.common.Constants;
 import software.amazon.polymorph.smithypython.common.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.Utils;
-import software.amazon.polymorph.smithypython.common.shapevisitor.conversionwriter.ShapeVisitorResolver;
+import software.amazon.polymorph.smithypython.common.shapevisitor.ShapeVisitorResolver;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolReference;
@@ -126,20 +114,17 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator implements Protoc
     for (OperationShape operation : context.model().getOperationShapes()) {
       Symbol serFunction = getSerializationFunction(context, operation);
       Shape input = context.model().expectShape(operation.getInputShape());
-      Symbol inputSymbol = SmithyNameResolver.generateSmithyDafnySymbolForShape(context, input);
 
       // Write out the serialization operation
       delegator.useFileWriter(serFunction.getDefinitionFile(), serFunction.getNamespace(), writer -> {
         writer.addImport(Constants.DAFNY_PROTOCOL_PYTHON_FILENAME, Constants.DAFNY_PROTOCOL_REQUEST);
         writer.pushState(new RequestSerializerSection(operation));
-        // TODO: RE-type the inputSymbol
-        // Does not import correctly...
+
         writer.write("""
             async def $L(input, config: $T) -> $L:
                 ${C|}
             """,
             serFunction.getName(),
-//            inputSymbol,
             configSymbol,
             Constants.DAFNY_PROTOCOL_REQUEST,
             writer.consumer(w -> generateRequestSerializer(context, operation, w)));
@@ -153,12 +138,12 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator implements Protoc
    *
    * Smithy-Python uses the word 'serialize' in this part of the code.
    * This name stems from its default HTTP-style application protocol
-   * as this code would, by default, transform POJOs of Smithy-modelled objects
+   * as this code would, by default, transform Smithy-modelled Python objects
    * into serialized HTTP objects.
    *
    * The Dafny plugin will not 'serialize' here, but will instead
-   * transform POJOs of Smithy-modelled objects
-   * into POJOs of Dafny-compiled objects.
+   * transform Smithy-modelled Python objects
+   * into native Python code modelling Dafny-compiled objects.
    */
   private void generateRequestSerializer(
       GenerationContext context,
@@ -204,9 +189,6 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator implements Protoc
 
         writer.pushState(new RequestDeserializerSection(operation));
 
-        // TODO: Re-type the return value of the function via outputSymbol
-        // The $T is not imported correctly...
-
         writer.write("""
             async def $L(input: $L, config: $T):
               ${C|}
@@ -214,7 +196,6 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator implements Protoc
             deserFunction.getName(),
             Constants.DAFNY_PROTOCOL_RESPONSE,
             configSymbol,
-//            outputSymbol,
             writer.consumer(w -> generateOperationResponseDeserializer(context, operation))
         );
 
