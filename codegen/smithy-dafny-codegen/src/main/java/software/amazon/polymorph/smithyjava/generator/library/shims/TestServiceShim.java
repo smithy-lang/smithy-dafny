@@ -116,7 +116,8 @@ public class TestServiceShim extends ServiceShim {
         MethodSpec.Builder method = MethodSpec
                 .methodBuilder("createSuccessOfClient")
                 .addModifiers(STATIC, PROTECTED)
-                .addParameter(thisClassName, "client");
+                .addParameter(thisClassName, "client")
+                .returns(subject.dafnyNameResolver.classNameForInterface(this.targetShape));
         method.addStatement("return $L",
                 subject.dafnyNameResolver.createSuccess(
                         subject.dafnyNameResolver.typeDescriptor(targetShape.toShapeId()),

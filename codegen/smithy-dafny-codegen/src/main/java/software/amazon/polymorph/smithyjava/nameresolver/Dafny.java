@@ -213,6 +213,13 @@ public class Dafny extends NameResolver {
         );
     }
 
+    public static TypeName asDafnyOption(TypeName value) {
+        return ParameterizedTypeName.get(
+                Constants.DAFNY_OPTION_CLASS_NAME,
+                value
+        );
+    }
+
     public String packageName() {
         return this.packageName;
     }
