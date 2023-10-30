@@ -63,7 +63,7 @@ public class ErrorsFileWriter implements CustomFileWriter {
              class CollectionOfErrors(ApiError[Literal["CollectionOfErrors"]]):
                  code: Literal["CollectionOfErrors"] = "CollectionOfErrors"
                  message: str
-                 # TODO: To add `list` here, I'd need a typehint... what should the object type be?
+                 # TODO-Python: To add `list` here, I'd need a typehint... what should the object type be?
                  def __init__(
                      self,
                      *,
@@ -119,18 +119,18 @@ public class ErrorsFileWriter implements CustomFileWriter {
                          for a in attributes
                      )
                              
-             # TODO: Should this extend ApiError...?
+             # TODO-Python: Should this extend ApiError...?
              # Probably not... as this doesn't have a message attribute...
              class OpaqueError(ApiError[Literal["OpaqueError"]]):
                  code: Literal["OpaqueError"] = "OpaqueError"
-                 # TODO: The type of obj is only known at runtime, and therefore should *probably* should not have a typehint
+                 # TODO-Python: The type of obj is only known at runtime, and therefore should *probably* should not have a typehint
                  # Probably no-op here, but we should think more deeply about this...
                  def __init__(
                      self,
                      *,
                      obj
                  ):
-                     # TODO: Remove superclass construction if we decide this shouldn't extend ApiError
+                     # TODO-Python: Remove superclass construction if we decide this shouldn't extend ApiError
                      super().__init__("")
                      self.obj = obj
                              
@@ -186,7 +186,7 @@ public class ErrorsFileWriter implements CustomFileWriter {
 
   // This is lifted from Smithy-Python, where it is not sufficiently customizable
   // to be used for our purposes.
-  // TODO: Reconcile this with Smithy-Python.
+  // TODO-Python: Reconcile this with Smithy-Python.
   private void renderError(GenerationContext context, PythonWriter writer, StructureShape shape) {
     writer.addStdlibImport("typing", "Dict");
     writer.addStdlibImport("typing", "Literal");
@@ -203,7 +203,7 @@ public class ErrorsFileWriter implements CustomFileWriter {
 
   // This is lifted from Smithy-Python, where it is not sufficiently customizable
   // to be used for our purposes.
-  // TODO: Reconcile this with Smithy-Python.
+  // TODO-Python: Reconcile this with Smithy-Python.
   private void renderDependencyWrappingError(GenerationContext context, PythonWriter writer, ShapeId serviceDependencyShapeId) {
     writer.addStdlibImport("typing", "Dict");
     writer.addStdlibImport("typing", "Any");

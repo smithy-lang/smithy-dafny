@@ -272,17 +272,6 @@ public class CodegenEngine {
             // For now, hardcode this to 0.0.1.
             .withMember("moduleVersion", "0.0.1");
 
-//            // TODO-Python: Extend as part of AWS SDKs and refactor to look at `.awsSdkStyle` config.
-//            // TODO: DafnyClientCodegenPlugin MUST add support for other protocols besides AWS SDKs.
-//            // Right now, DafnyClientCodegenPlugin hardcodes AwsSdkStyle to true.
-//            // This would prevent us from using the standard Smithy build process
-//            //   to build any Polymorph localServices.
-//            if (awsSdkStyle) {
-//                pythonSettingsBuilder.withMember("protocol", "aws.protocols#awsJson1_1");
-//            } else {
-//                pythonSettingsBuilder.withMember("protocol", "aws.polymorph#localService");
-//            }
-
         final PluginContext pluginContext = PluginContext.builder()
             .model(model)
             .fileManifest(FileManifest.create(targetLangOutputDirs.get(TargetLanguage.PYTHON)))

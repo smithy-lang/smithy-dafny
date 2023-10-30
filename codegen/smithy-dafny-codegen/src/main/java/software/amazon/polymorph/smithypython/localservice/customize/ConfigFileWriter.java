@@ -41,7 +41,7 @@ public class ConfigFileWriter implements CustomFileWriter {
                   '''
                   Smithy-modelled localService Config shape for this localService.
                   '''
-                  # TODO: Add types to Config members
+                  # TODO-Python: Add types to Config members
                   ${C|}
                   
                   def __init__(self, ${C|}):
@@ -86,7 +86,7 @@ public class ConfigFileWriter implements CustomFileWriter {
     Map<String, MemberShape> memberShapeSet = configShape.getAllMembers();
     for (Entry<String, MemberShape> memberShapeEntry : memberShapeSet.entrySet()) {
       String memberName = memberShapeEntry.getKey();
-      // TODO: Instead of `Any`, map the targetShape.getType() Smithy type to the Python type
+      // TODO-Python: Instead of `Any`, map the targetShape.getType() Smithy type to the Python type
       // Prototype code commented out...
 //      MemberShape memberShape = memberShapeEntry.getValue();
 //      final Shape targetShape = codegenContext.model().expectShape(memberShape.getTarget());
@@ -106,7 +106,7 @@ public class ConfigFileWriter implements CustomFileWriter {
       StructureShape configShape, GenerationContext codegenContext, PythonWriter writer) {
     Map<String, MemberShape> memberShapeSet = configShape.getAllMembers();
     for (String memberName : memberShapeSet.keySet()) {
-      // TODO: Instead of `Any`, map the targetShape.getType Smithy type to the Python type
+      // TODO-Python: Instead of `Any`, map the targetShape.getType Smithy type to the Python type
       writer.writeInline("$L, ", CaseUtils.toSnakeCase(memberName));
     }
   }
@@ -122,7 +122,7 @@ public class ConfigFileWriter implements CustomFileWriter {
       StructureShape configShape, GenerationContext codegenContext, PythonWriter writer) {
     Map<String, MemberShape> memberShapeSet = configShape.getAllMembers();
     for (String memberName : memberShapeSet.keySet()) {
-      // TODO: Instead of `Any`, map the targetShape.getType Smithy type to the Python type
+      // TODO-Python: Instead of `Any`, map the targetShape.getType Smithy type to the Python type
       writer.write("self.$L = $L", CaseUtils.toSnakeCase(memberName), CaseUtils.toSnakeCase(memberName));
     }
   }

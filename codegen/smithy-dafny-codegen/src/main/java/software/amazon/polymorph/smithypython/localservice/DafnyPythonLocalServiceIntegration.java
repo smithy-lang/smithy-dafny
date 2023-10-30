@@ -102,7 +102,7 @@ public final class DafnyPythonLocalServiceIntegration implements PythonIntegrati
         customizeForServiceShape(serviceShape, codegenContext);
 
         // Get set(non-service operation shapes) = set(model operation shapes) - set(service operation shapes)
-        // This is related to forking Smithy-Python. TODO: resolve when resolving fork.
+        // This is related to forking Smithy-Python. TODO-Python: resolve when resolving fork.
         // Smithy-Python will only generate code for shapes which are used by the protocol.
         // Polymorph has a requirement to generate code for all shapes in the model,
         //   even if the service does not use those shapes.

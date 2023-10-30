@@ -22,7 +22,7 @@ public class ModelsFileWriter implements CustomFileWriter {
 
       // This block defines an empty `Unit` class used by Smithy-Python generated code
       // Defining this seems necessary to avoid forking Smithy-Python
-      // TODO: Find some way to not need this, or decide this is OK
+      // TODO-Python: Find some way to not need this, or decide this is OK
       writer.write(
           """             
               class Unit:

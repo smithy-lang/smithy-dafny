@@ -104,7 +104,7 @@ public class ReferencesFileWriter implements CustomFileWriter {
                     ${C|}
                 )
                 
-            # TODO: Add impl with typehint to ABC
+            # TODO-Python: Add impl with typehint to ABC
                 
             ${C|}
         """,
@@ -122,7 +122,7 @@ public class ReferencesFileWriter implements CustomFileWriter {
       // Write implementation for reference shape
       writer.write("""
         class $L(I$L):
-            # TODO: typehint
+            # TODO-Python: typehint
             _impl: Any
             
             def __init__(self, _impl):
