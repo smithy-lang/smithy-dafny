@@ -87,7 +87,7 @@ public class AwsSdkToDafnyConversionFunctionWriter extends BaseConversionWriter 
                               new AwsSdkToDafnyShapeVisitor(
                                   context,
                                   dataSourceInsideConversionFunction + "[\"" + memberName + "\"]",
-                                  writer
+                                  conversionWriter
                               )
                           ),
                           memberName,
@@ -102,7 +102,7 @@ public class AwsSdkToDafnyConversionFunctionWriter extends BaseConversionWriter 
                               new AwsSdkToDafnyShapeVisitor(
                                   context,
                                   dataSourceInsideConversionFunction + "[\"" + memberName + "\"]",
-                                  writer
+                                  conversionWriter
                               )
                           )
                       );
@@ -165,7 +165,7 @@ public class AwsSdkToDafnyConversionFunctionWriter extends BaseConversionWriter 
                       new AwsSdkToDafnyShapeVisitor(
                           context,
                           dataSourceInsideConversionFunction + "[\"" + memberShape.getMemberName() + "\"]",
-                          writer
+                          conversionWriter
                       )
                   )
               );

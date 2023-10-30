@@ -85,7 +85,7 @@ public class DafnyToAwsSdkConversionFunctionWriter extends BaseConversionWriter 
                           targetShape.accept(new DafnyToAwsSdkShapeVisitor(
                               context,
                               dataSourceInsideConversionFunction + "." + memberName + ".value",
-                              writer
+                              conversionWriter
                           )));
                     });
               // Required shapes are assigned directly
@@ -98,7 +98,7 @@ public class DafnyToAwsSdkConversionFunctionWriter extends BaseConversionWriter 
                     targetShape.accept(new DafnyToAwsSdkShapeVisitor(
                         context,
                         dataSourceInsideConversionFunction + "." + memberName,
-                        writer
+                        conversionWriter
                     )));
               }
             }
@@ -165,7 +165,7 @@ public class DafnyToAwsSdkConversionFunctionWriter extends BaseConversionWriter 
                   targetShape.accept(new DafnyToAwsSdkShapeVisitor(
                       context,
                       dataSourceInsideConversionFunction + "." + memberShape.getMemberName(),
-                      writer
+                      conversionWriter
                   ))
               );
               shouldOpenNewIfBlock = false;
