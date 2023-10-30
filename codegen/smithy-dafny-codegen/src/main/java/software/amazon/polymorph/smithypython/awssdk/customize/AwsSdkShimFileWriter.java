@@ -87,7 +87,7 @@ public class AwsSdkShimFileWriter implements CustomFileWriter {
             .collect(Collectors.toSet()));
 
     // First error case opens a new `if` block; others do not need to, and write `elif`
-    boolean shouldOpenNewIfBlock = true;
+    boolean hasOpenedIfBlock = false;
 
     for (ShapeId errorShapeId : errorShapeSet) {
       // ex. for KMS.InvalidImportTokenException:
@@ -96,7 +96,7 @@ public class AwsSdkShimFileWriter implements CustomFileWriter {
       writer.openBlock(
           "$L e.response['Error']['Code'] == '$L':",
           "",
-          shouldOpenNewIfBlock ? "if" : "elif",
+          hasOpenedIfBlock ? "if" : "elif",
           errorShapeId.getName(),
           () -> {
             writer.write("return $L.$L(message=e.response['Error']['Message'])",
@@ -104,11 +104,11 @@ public class AwsSdkShimFileWriter implements CustomFileWriter {
                 DafnyNameResolver.getDafnyTypeForError(errorShapeId));
           }
       );
-      shouldOpenNewIfBlock = false;
+      hasOpenedIfBlock = true;
     }
 
-    if (shouldOpenNewIfBlock) {
-      // If `shouldOpenNewIfBlock` is true, then codegen never wrote any errors,
+    if (hasOpenedIfBlock) {
+      // If `hasOpenedIfBlock` is false, then codegen never wrote any errors,
       // and this function should only cast to Opaque errors
       writer.write("""
         return $L.Error_Opaque(obj=e)
@@ -116,8 +116,8 @@ public class AwsSdkShimFileWriter implements CustomFileWriter {
           DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(serviceShape.getId())
       );
     } else {
-      // If `shouldOpenNewIfBlock` is false, then codegen wrote at least one error,
-      // and this function should only cast to Opaque error if other `if` blocks were False
+      // If `hasOpenedIfBlock` is true, then codegen wrote at least one error,
+      // and this function should only cast to Opaque error via `else`
       writer.write("""
         else:
             return $L.Error_Opaque(obj=e)
@@ -149,8 +149,11 @@ public class AwsSdkShimFileWriter implements CustomFileWriter {
       ShapeId inputShape = operationShape.getInputShape();
       ShapeId outputShape = operationShape.getOutputShape();
 
+      // Import input/output shape types
       DafnyNameResolver.importDafnyTypeForShape(writer, inputShape, codegenContext);
       DafnyNameResolver.importDafnyTypeForShape(writer, outputShape, codegenContext);
+
+      // No 'native' type to import; native AWS SDK types are modelled in dictionaries
       
       // Write the Shim operation block.
       // This takes in a Dafny input and returns a Dafny output.
@@ -169,11 +172,8 @@ public class AwsSdkShimFileWriter implements CustomFileWriter {
             Shape targetShapeInput = codegenContext.model().expectShape(operationShape.getInputShape());
             // Generate code that converts the input from the Dafny type to the corresponding Smithy type
             // `input` will hold a string that converts the Dafny `input` to the Smithy-modelled output.
-            // This has a side effect of possibly writing transformation code at the writer's current position.
-            // For example, a service shape may require some calls to `ctor__()` after it is created,
-            //   and cannot be constructed inline.
-            // Polymorph will create an object representing the service's client, instantiate it,
-            //   then reference that object in its `input` string.
+            // If this is a type that allows for self-recursion (unions or sets: can contain themselves as a member),
+            //   this will delegate to DafnyToAwsSdkConversionFunctionWriter
             String input = targetShapeInput.accept(new DafnyToAwsSdkShapeVisitor(
                   codegenContext,
                   "input",

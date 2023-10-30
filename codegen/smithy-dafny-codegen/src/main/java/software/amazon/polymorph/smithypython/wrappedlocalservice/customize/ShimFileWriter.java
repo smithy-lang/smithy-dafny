@@ -216,6 +216,7 @@ public class ShimFileWriter implements CustomFileWriter {
                 "input",
                 writer
             ));
+            writer.addImport(".", "dafny_to_smithy");
 
             // Generate code that:
             // 1) "unwraps" the request (converts from the Dafny type to the Smithy type),
@@ -223,38 +224,17 @@ public class ShimFileWriter implements CustomFileWriter {
             // 3) wraps Smithy failures as Dafny failures
             writer.write(
               """
-              # Import dafny_to_smithy at runtime to prevent introducing circular dependency on shim file
-              $L
-              smithy_client_request: $L = $L
+              smithy_client_request: $L = dafny_to_smithy.$L
               try:
                   smithy_client_response = asyncio.run(self._impl.$L(smithy_client_request))
               except ServiceError as e:
                   return Wrappers.Result_Failure(smithy_error_to_dafny_error(e))
                       
               """,
-                "".equals(SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(
-                    inputShape.getNamespace(), codegenContext
-                ))
-                    ? "from .dafny_to_smithy import %1$s".formatted(
-                    SmithyNameResolver.getDafnyToSmithyFunctionNameForShape(
-                        codegenContext.model().expectShape(inputShape),
-                        codegenContext
-                    ))
-                    : "import %1$s.dafny_to_smithy".formatted(SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(
-                        inputShape.getNamespace(), codegenContext
-                    )),
               inputShape.getName(),
               input,
               codegenContext.symbolProvider().toSymbol(operationShape).getName()
             );
-//
-//            writer.addImport(
-//                SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(
-//                    structureShape.getId().getNamespace(), context
-//                ) + ".dafny_to_smithy",
-//                SmithyNameResolver.getSmithyToDafnyFunctionNameForShape(structureShape)
-//            );
-
 
             Shape targetShape = codegenContext.model().expectShape(operationShape.getOutputShape());
             // Generate code that converts the output from Smithy type to the corresponding Dafny type
