@@ -14,8 +14,6 @@ public class Constants {
     WRAPPED_LOCAL_SERVICE_TEST,
     AWS_SDK;
 
-
-
     @Override
     public String toString() {
       return switch (this) {

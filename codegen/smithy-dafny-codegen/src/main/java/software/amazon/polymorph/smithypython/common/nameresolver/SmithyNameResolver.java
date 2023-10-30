@@ -1,6 +1,5 @@
 package software.amazon.polymorph.smithypython.common.nameresolver;
 
-import com.google.common.base.Strings;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
@@ -21,6 +20,7 @@ import software.amazon.smithy.python.codegen.PythonWriter;
 /**
  * Contains utility functions that map Smithy shapes
  * to useful strings used in Smithy-Python generated code.
+ * i.e. strings in this file match behavior of Smithy-Python- (or Smithy-Dafny-Python-) generated code
  */
 public class SmithyNameResolver {
 
@@ -87,10 +87,7 @@ public class SmithyNameResolver {
    */
   public static String getSmithyGeneratedModelLocationForShape(ShapeId shapeId,
       GenerationContext codegenContext) {
-//    if (Utils.isUnitShape(shapeId)) {
-//      return ".models";
-//    }
-    String moduleNamespace = getSmithyGeneratedModuleNamespaceForSmithyNamespace(shapeId.getNamespace(),
+    String moduleNamespace = getPythonModuleSmithygeneratedPathForSmithyNamespace(shapeId.getNamespace(),
         codegenContext);
     String moduleFilename = getSmithyGeneratedModuleFilenameForSmithyShape(shapeId, codegenContext);
     return moduleNamespace + moduleFilename;
@@ -102,6 +99,7 @@ public class SmithyNameResolver {
    *   and does not understand how to generate Symbols for Shapes in other namespaces (i.e. Dependencies).
    * Its behavior must be overridden so Smithy-Dafny generates correct Python code in cases
    *   where the shape is in a dependency namespace.
+   * TODO-Python: This MAY be moved back upstream to Smithy-Python, but it is not necessary
    * @param context
    * @param shape
    * @return
@@ -199,47 +197,23 @@ public class SmithyNameResolver {
   }
 
   /**
-   * Imports the type for the provided UnionShape
-   *   and corresponding union value as its MemberShape.
-   * ex. example.namespace.ExampleUnion:ExampleMember -> "from example_namespace.smithygenerated.models
-   *      import ExampleUnionExampleMember"
-   * @param unionShape
-   * @param memberShape
-   * @return
-   */
-  public static void importSmithyGeneratedTypeForUnion(PythonWriter writer,
-      GenerationContext context, UnionShape unionShape, MemberShape memberShape) {
-    writer.addStdlibImport(
-        getSmithyGeneratedModelLocationForShape(unionShape.getId(), context)
-//        getSmithyGeneratedTypeForUnion(unionShape, memberShape)
-    );
-  }
-
-  /**
    * Given the namespace of a Smithy shape, returns a Pythonic access path to the namespace
-   * that can be used to import shapes from the namespace.
+   * that can be used to import shapes from its `smithygenerated` namespace.
    * @param smithyNamespace
    * @param codegenContext
    * @return
    */
-  public static String getSmithyGeneratedModuleNamespaceForSmithyNamespace(String smithyNamespace,
+  public static String getPythonModuleSmithygeneratedPathForSmithyNamespace(String smithyNamespace,
       GenerationContext codegenContext) {
-        if ("smithy.api".equals(smithyNamespace)) {
-          return getPythonModuleNamespaceForSmithyNamespace(
-              codegenContext.settings().getService().getNamespace()) + ".smithygenerated";
-        }
+    // `smithy.api.Unit:`
+    // Smithy-Dafny generates a stand-in shape in the service
+    if ("smithy.api".equals(smithyNamespace)) {
+      return getPythonModuleNamespaceForSmithyNamespace(
+          codegenContext.settings().getService().getNamespace()) + ".smithygenerated";
+    }
     return
          getPythonModuleNamespaceForSmithyNamespace(smithyNamespace)
         + ".smithygenerated";
-//        getPythonModuleNamespaceForSmithyNamespace(smithyNamespace)
-//            .equals(codegenContext.settings().getModuleName())
-//        // If the provided namespace is the current namespace (i.e. the module being generated),
-//        // return an empty string, as "." represents the current module
-//        ? ""
-//        // If the provided namespace is not the current namespace (i.e. a dependency namespace),
-//        // return the other namespace's smithygenerated module;
-//        // i.e. `other_module.smithygenerated`
-//        : getPythonModuleNamespaceForSmithyNamespace(smithyNamespace) + ".smithygenerated";
   }
 
   /**
@@ -251,7 +225,7 @@ public class SmithyNameResolver {
    */
   public static String getSmithyGeneratedConfigModulePathForSmithyNamespace(String smithyNamespace,
       GenerationContext codegenContext) {
-    return getSmithyGeneratedModuleNamespaceForSmithyNamespace(smithyNamespace, codegenContext)
+    return getPythonModuleSmithygeneratedPathForSmithyNamespace(smithyNamespace, codegenContext)
         + ".config";
   }
 

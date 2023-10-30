@@ -3,10 +3,8 @@ package software.amazon.polymorph.smithypython.awssdk.shapevisitor;
 import software.amazon.polymorph.smithypython.awssdk.nameresolver.AwsSdkNameResolver;
 import software.amazon.polymorph.smithypython.awssdk.shapevisitor.conversionwriters.AwsSdkToDafnyConversionFunctionWriter;
 import software.amazon.polymorph.smithypython.awssdk.shapevisitor.conversionwriters.DafnyToAwsSdkConversionFunctionWriter;
-import software.amazon.polymorph.smithypython.common.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.Utils;
-import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.WriterDelegator;
 import software.amazon.smithy.model.shapes.BigDecimalShape;
@@ -22,8 +20,6 @@ import software.amazon.smithy.model.shapes.ListShape;
 import software.amazon.smithy.model.shapes.LongShape;
 import software.amazon.smithy.model.shapes.MapShape;
 import software.amazon.smithy.model.shapes.MemberShape;
-import software.amazon.smithy.model.shapes.ResourceShape;
-import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeVisitor;
 import software.amazon.smithy.model.shapes.ShortShape;
@@ -45,11 +41,11 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
     private final PythonWriter writer;
 
     /**
-     * @param context The generation context.
-     * @param dataSource The in-code location of the data to provide an output of
-     *                   ({@code input.foo}, {@code entry}, etc.)
-     * @param writer A PythonWriter pointing to the in-code location where the
-     *               root
+     * @param context     The generation context.
+     * @param dataSource  The in-code location of the data to provide an output of
+     *                    ({@code output.foo}, {@code entry}, etc.)
+     * @param writer      A PythonWriter pointing to the in-code location where the
+     *                    ShapeVisitor was called from
      */
     public AwsSdkToDafnyShapeVisitor(
         GenerationContext context,
@@ -87,14 +83,19 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
       DafnyToAwsSdkConversionFunctionWriter.writeConverterForShapeAndMembers(structureShape,
           context, writer);
 
-      // Import the aws_sdk_to_dafny converter from where the ShapeVisitor was called
-      writer.addImport(".aws_sdk_to_dafny",
-          AwsSdkNameResolver.getAwsSdkToDafnyFunctionNameForShape(structureShape));
+      // Import the converter from where the ShapeVisitor was called
+      String pythonModuleName = SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
+          structureShape.getId().getNamespace(),
+          context
+      );
+      writer.addStdlibImport(pythonModuleName + ".aws_sdk_to_dafny");
 
       // Return a reference to the generated conversion method
       // ex. for shape example.namespace.ExampleShape
-      // returns `SmithyToDafny_example_namespace_ExampleShape(input)`
-      return "%1$s(%2$s)".formatted(
+      // returns
+      // `example_namespace.smithygenerated.aws_sdk_to_dafny.AwsSdkToDafny_example_namespace_ExampleShape(input)`
+      return "%1$s.aws_sdk_to_dafny.%2$s(%3$s)".formatted(
+          pythonModuleName,
           AwsSdkNameResolver.getAwsSdkToDafnyFunctionNameForShape(structureShape),
           dataSource
       );
@@ -102,14 +103,7 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
 
     @Override
     public String listShape(ListShape shape) {
-      WriterDelegator<PythonWriter> delegator = context.writerDelegator();
-      String moduleName = context.settings().getModuleName();
-
-      // Import Seq within the aws_sdk_to_dafny conversion file
-      delegator.useFileWriter(moduleName + "/aws_sdk_to_dafny.py", "", conversionWriter -> {
-        conversionWriter.addStdlibImport("_dafny", "Seq");
-        writer.addStdlibImport("_dafny", "Seq");
-      });
+      writer.addStdlibImport("_dafny", "Seq");
 
       StringBuilder builder = new StringBuilder();
 
@@ -133,14 +127,9 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
 
     @Override
     public String mapShape(MapShape shape) {
-      StringBuilder builder = new StringBuilder();
-      WriterDelegator<PythonWriter> delegator = context.writerDelegator();
-      String moduleName = context.settings().getModuleName();
+      writer.addStdlibImport("_dafny", "Map");
 
-      delegator.useFileWriter(moduleName + "/aws_sdk_to_dafny.py", "", conversionWriter -> {
-        conversionWriter.addStdlibImport("_dafny", "Map");
-        writer.addStdlibImport("_dafny", "Map");
-      });
+      StringBuilder builder = new StringBuilder();
 
       // Open Dafny map:
       // `Map({`
@@ -229,7 +218,7 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
 
     @Override
     public String timestampShape(TimestampShape shape) {
-      // TODO-Python: BLOCKING: This lets code generate, but will fail when code hits it
+      // TODO-Python BLOCKING: This lets code generate, but will fail when code uses it
       return "TypeError(\"TimestampShape not supported\")";
     }
 
@@ -240,20 +229,19 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
       AwsSdkToDafnyConversionFunctionWriter.writeConverterForShapeAndMembers(unionShape,
           context, writer);
 
-      // Import the aws_sdk_to_dafny converter from where the ShapeVisitor was called
-//      writer.addImport(".aws_sdk_to_dafny",
-//          AwsSdkNameResolver.getAwsSdkToDafnyFunctionNameForShape(unionShape));
-//      writer.addImport(
-//          SmithyNameResolver.getSmithyGeneratedModelLocationForShape(
-//              unionShape.getId(), context
-//          ),
-//          unionShape.getId().getName()
-//      );
+      // Import the converter from where the ShapeVisitor was called
+      String pythonModuleName = SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
+          unionShape.getId().getNamespace(),
+          context
+      );
+      writer.addStdlibImport(pythonModuleName + ".aws_sdk_to_dafny");
 
       // Return a reference to the generated conversion method
       // ex. for shape example.namespace.ExampleShape
-      // returns `AwsSdkToDafny_example_namespace_ExampleShape(input)`
-      return "%1$s(%2$s)".formatted(
+      // returns
+      // `example_namespace.smithygenerated.aws_sdk_to_dafny.AwsSdkToDafny_example_namespace_ExampleShape(input)`
+      return "%1$s.aws_sdk_to_dafny.%2$s(%3$s)".formatted(
+          pythonModuleName,
           AwsSdkNameResolver.getAwsSdkToDafnyFunctionNameForShape(unionShape),
           dataSource
       );

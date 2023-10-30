@@ -277,8 +277,7 @@ public class LocalServiceToDafnyConversionFunctionWriter extends BaseConversionW
               shouldOpenNewIfBlock = false;
 
               DafnyNameResolver.importDafnyTypeForUnion(conversionWriter, unionShape, memberShape);
-              SmithyNameResolver.importSmithyGeneratedTypeForUnion(conversionWriter, context, unionShape,
-                  memberShape);
+              SmithyNameResolver.importSmithyGeneratedTypeForShape(conversionWriter, unionShape, context);
             }
 
             // Write case to handle if union member does not match any of the above cases

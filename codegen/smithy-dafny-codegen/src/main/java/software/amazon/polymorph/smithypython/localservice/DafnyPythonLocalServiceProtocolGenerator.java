@@ -24,8 +24,6 @@ import software.amazon.polymorph.smithypython.common.nameresolver.DafnyNameResol
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.Utils;
 import software.amazon.polymorph.smithypython.common.shapevisitor.conversionwriter.ShapeVisitorResolver;
-import software.amazon.polymorph.smithypython.localservice.shapevisitor.DafnyToLocalServiceShapeVisitor;
-import software.amazon.polymorph.smithypython.localservice.shapevisitor.LocalServiceToDafnyShapeVisitor;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolReference;
@@ -269,21 +267,8 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator implements Protoc
         writer.write("""
           if input.IsFailure():
             return await _deserialize_error(input.error)
-          # Import dafny_to_smithy at runtime to prevent introducing circular dependency on deserialize file.
-          $L
           return $L
           """,
-            "".equals(SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(
-                outputShape.getNamespace(), context
-            ))
-                ? "from .dafny_to_smithy import %1$s".formatted(
-                SmithyNameResolver.getDafnyToSmithyFunctionNameForShape(
-                    context.model().expectShape(outputShape),
-                    context
-                ))
-                : "import %1$s.dafny_to_smithy".formatted(SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(
-                    outputShape.getNamespace(), context
-                )),
           output
         );
       }

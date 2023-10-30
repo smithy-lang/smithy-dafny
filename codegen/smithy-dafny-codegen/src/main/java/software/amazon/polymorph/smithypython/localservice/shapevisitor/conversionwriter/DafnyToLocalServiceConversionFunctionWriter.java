@@ -6,9 +6,6 @@ import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameReso
 import software.amazon.polymorph.smithypython.common.nameresolver.Utils;
 import software.amazon.polymorph.smithypython.common.shapevisitor.conversionwriter.BaseConversionWriter;
 import software.amazon.polymorph.smithypython.common.shapevisitor.conversionwriter.ShapeVisitorResolver;
-import software.amazon.polymorph.smithypython.localservice.shapevisitor.DafnyToLocalServiceShapeVisitor;
-import software.amazon.polymorph.smithypython.localservice.shapevisitor.LocalServiceConfigToDafnyConfigShapeVisitor;
-import software.amazon.polymorph.smithypython.localservice.shapevisitor.LocalServiceToDafnyShapeVisitor;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.codegen.core.WriterDelegator;
 import software.amazon.smithy.model.shapes.MemberShape;
@@ -167,7 +164,7 @@ public class DafnyToLocalServiceConversionFunctionWriter extends BaseConversionW
 //    conversionWriter.write()
 
         conversionWriter.write("from $L import $L",
-            SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(
+            SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
                 resourceShape.getId().getNamespace(), context
             ) + ".references",
             resourceShape.getId().getName()
@@ -181,7 +178,7 @@ public class DafnyToLocalServiceConversionFunctionWriter extends BaseConversionW
   private void writeResourceShapeConverter(ServiceShape serviceShape, PythonWriter conversionWriter,
       String dataSourceInsideConversionFunction) {
     conversionWriter.write("from $L import $L",
-        SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(
+        SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
             serviceShape.getId().getNamespace(), context
         ) + ".client",
         serviceShape.getId().getName()
@@ -247,7 +244,7 @@ public class DafnyToLocalServiceConversionFunctionWriter extends BaseConversionW
               shouldOpenNewIfBlock = false;
 
               DafnyNameResolver.importDafnyTypeForUnion(conversionWriter, unionShape, memberShape);
-              SmithyNameResolver.importSmithyGeneratedTypeForUnion(conversionWriter, context, unionShape, memberShape);
+              SmithyNameResolver.importSmithyGeneratedTypeForShape(conversionWriter, unionShape, context);
             }
 
             // Write case to handle if union member does not match any of the above cases

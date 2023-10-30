@@ -10,6 +10,23 @@ import software.amazon.smithy.model.shapes.ShapeVisitor;
 import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonWriter;
 
+/**
+ * Utility class to return the correct ShapeVisitor for the provided Shape.
+ * If the shape is an AWS SDK shape, returns an AWS SDK ShapeVisitor;
+ *   otherwise, returns a LocalService ShapeVisitor.
+ * Two usage notes:
+ *
+ * 1)
+ * LocalService ShapeVisitor MUST NOT directly defer to another LocalService ShapeVisitor.
+ *   LocalService shapes can depend on AWS SDK shapes, and this class is responsible
+ *   for determining which ShapeVisitor to defer to.
+ * AWS SDK ShapeVisitors CAN defer directly to an AWS SDK ShapeVisitor,
+ *   since AWS SDK shapes do not defer to LocalService shapes.
+ *
+ * 2)
+ * LocalService ShapeVisitor CAN defer directly to a LocalService ShapeVisitor and not use this class
+ *   if the targetShape is a LocalService Config shape.
+ */
 public class ShapeVisitorResolver {
 
   public static ShapeVisitor.Default<String> getToNativeShapeVisitorForShape(

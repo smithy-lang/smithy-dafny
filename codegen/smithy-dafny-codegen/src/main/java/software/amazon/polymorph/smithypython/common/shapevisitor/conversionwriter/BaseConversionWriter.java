@@ -28,7 +28,7 @@ public abstract class BaseConversionWriter {
   // Queue of shapes to generate
   final List<Shape> shapesToGenerate = new ArrayList<>();
   // Flag to block generating inside a file while already generating another function
-  // (prevents generating a function inside another function)
+  // (prevents generating a conversion function inside another conversion function)
   boolean generating = false;
 
   protected GenerationContext context;

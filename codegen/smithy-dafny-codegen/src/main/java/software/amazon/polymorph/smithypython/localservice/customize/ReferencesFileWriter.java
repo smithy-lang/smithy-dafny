@@ -7,8 +7,6 @@ import java.util.Set;
 import software.amazon.polymorph.smithypython.common.customize.CustomFileWriter;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.smithypython.common.shapevisitor.conversionwriter.ShapeVisitorResolver;
-import software.amazon.polymorph.smithypython.localservice.shapevisitor.DafnyToLocalServiceShapeVisitor;
-import software.amazon.polymorph.smithypython.localservice.shapevisitor.LocalServiceToDafnyShapeVisitor;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.smithy.codegen.core.TopologicalIndex;
@@ -292,26 +290,12 @@ public class ReferencesFileWriter implements CustomFileWriter {
       writer.write("""
           def $L(self, native_input):
               dafny_output = self._impl.$L($L)
-              # Import dafny_to_smithy at runtime to prevent introducing circular dependency on references file.
-              $L
               return $L
           """, operationShapeId.getName(),
           operationShapeId.getName(),
           input,
-          "".equals(SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(
-              operationShape.getOutputShape().getNamespace(), codegenContext
-          ))
-              ? "from .dafny_to_smithy import %1$s".formatted(
-                  SmithyNameResolver.getDafnyToSmithyFunctionNameForShape(
-                      codegenContext.model().expectShape(operationShape.getOutputShape()),
-                      codegenContext
-                  )
-
-          )
-              : "import %1$s.dafny_to_smithy".formatted(SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(
-                  operationShape.getOutputShape().getNamespace(), codegenContext
-              )),
-          output);
+          output
+      );
     }
   }
 

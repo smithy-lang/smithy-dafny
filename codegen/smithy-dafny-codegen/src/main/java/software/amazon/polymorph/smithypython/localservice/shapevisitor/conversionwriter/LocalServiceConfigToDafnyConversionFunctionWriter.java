@@ -50,11 +50,6 @@ public class LocalServiceConfigToDafnyConversionFunctionWriter extends LocalServ
     singleton.baseWriteConverterForShapeAndMembers(shape, context, writer);
   }
 
-  protected String getSmithyConfigToDafnyConfigFunctionNameForShape(Shape shape) {
-    return "SmithyToDafny_" + SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(shape.getId().getNamespace())
-        + "_" + shape.getId().getName();
-  }
-
   protected void writeStructureShapeConverter(StructureShape structureShape) {
     // Defer non-localService config shapes to the non-localService config shape converter
     if (!SmithyNameResolver.getLocalServiceConfigShapes(context).contains(structureShape.getId())) {
@@ -74,11 +69,10 @@ public class LocalServiceConfigToDafnyConversionFunctionWriter extends LocalServ
       conversionWriter.openBlock(
           "def $L($L):",
           "",
-          getSmithyConfigToDafnyConfigFunctionNameForShape(structureShape),
+          SmithyNameResolver.getSmithyToDafnyFunctionNameForShape(structureShape, context),
           dataSourceInsideConversionFunction,
           () -> {
             DafnyNameResolver.importDafnyTypeForShape(conversionWriter, structureShape.getId(), context);
-            StringBuilder builder = new StringBuilder();
             // Open Dafny structure shape
             // e.g.
             // DafnyStructureName(...
@@ -114,7 +108,7 @@ public class LocalServiceConfigToDafnyConversionFunctionWriter extends LocalServ
                       );
                     }
                     // Otherwise, treat this member as required,
-                    // even though the Smithy model marks it as optional,
+                    // even though the Smithy model does not specify it as required,
                     // and defer to standard shape visitor
                     else {
                       conversionWriter.write("$L,",

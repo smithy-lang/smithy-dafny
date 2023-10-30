@@ -1,20 +1,13 @@
 package software.amazon.polymorph.smithypython.localservice.shapevisitor;
 
-import java.util.Map.Entry;
-import org.assertj.core.util.Strings;
-import software.amazon.polymorph.smithypython.common.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.Utils;
 import software.amazon.polymorph.smithypython.common.shapevisitor.conversionwriter.ShapeVisitorResolver;
 import software.amazon.polymorph.smithypython.localservice.shapevisitor.conversionwriter.LocalServiceConfigToDafnyConversionFunctionWriter;
-import software.amazon.smithy.codegen.core.CodegenException;
-import software.amazon.smithy.codegen.core.WriterDelegator;
-import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonWriter;
-import software.amazon.smithy.utils.CaseUtils;
 
 /**
  * ShapeVisitor that should be dispatched from a Polymorph localService config shape
@@ -75,34 +68,34 @@ public class LocalServiceConfigToDafnyConfigShapeVisitor extends LocalServiceToD
   /**
    * Generates SmithyToDafny conversion logic for a Polymorph localService Config shape.
    * The provided StructureShape MUST be a Polymorph localService Config shape.
-   * The primary
    * @param structureShape
    * @return
    */
   @Override
   public String structureShape(StructureShape structureShape) {
-    if (structureShape.getId().getNamespace().equals(context.settings().getService().getNamespace())) {
+    if (!SmithyNameResolver.getLocalServiceConfigShapes(context).contains(structureShape.getId())) {
+      throw new IllegalArgumentException(
+          "structureShape provided to LocalServiceConfigToDafnyConfigShapeVisitor is not a localService"
+              + "config shape: " + structureShape.getId());
+    }
 
+    // ONLY write converters if the shape under generation is in the current namespace (or Unit shape)
+    if (structureShape.getId().getNamespace().equals(context.settings().getService().getNamespace())) {
       LocalServiceConfigToDafnyConversionFunctionWriter.writeConverterForShapeAndMembers(structureShape,
         context, writer);
     }
 
-
-//    // Import the smithy_to_dafny converter from where the ShapeVisitor was called
-//    writer.addImport(".smithy_to_dafny",
-//        SmithyNameResolver.getSmithyToDafnyFunctionNameForShape(structureShape, context));
-
-    String pythonModuleName = SmithyNameResolver.getSmithyGeneratedModuleNamespaceForSmithyNamespace(
+    // Import the converter from where the ShapeVisitor was called
+    String pythonModuleName = SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
         structureShape.getId().getNamespace(),
         context
     );
-    if (!Utils.isUnitShape(structureShape.getId()))  {
-      writer.addStdlibImport(pythonModuleName + ".smithy_to_dafny");
-    }
+    writer.addStdlibImport(pythonModuleName + ".smithy_to_dafny");
 
     // Return a reference to the generated conversion method
     // ex. for shape example.namespace.ExampleShape
-    // returns `SmithyToDafny_example_namespace_ExampleShape(input)`
+    // returns
+    // `example_namespace.smithygenerated.smithy_to_dafny.SmithyToDafny_example_namespace_ExampleShape(input)`
     return "%1$s.smithy_to_dafny.%2$s(%3$s)".formatted(
         pythonModuleName,
         SmithyNameResolver.getSmithyToDafnyFunctionNameForShape(structureShape, context),
