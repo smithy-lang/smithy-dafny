@@ -18,7 +18,7 @@ public class __default extends _ExternBase___default {
         simple.localservice.SimpleLocalService impl = SimpleLocalService.builder().SimpleLocalServiceConfig(wrappedConfig).build();
         TestToNativeAndToDafnyLocalService(impl);
         TestSimpleLocalService wrappedClient = TestSimpleLocalService.builder().impl(impl).build();
-        return Result.create_Success(dafny.TypeDescriptor.reference(ISimpleLocalServiceClient.class), Error._typeDescriptor(), wrappedClient);
+        return TestSimpleLocalService.createSuccessOfClient(wrappedClient);
     }
 
     // TODO: Determine how to replace this test with Dafny Source Code

@@ -13,6 +13,7 @@ import java.util.Map;
 import software.amazon.polymorph.smithyjava.ForEachDafnyTest;
 import software.amazon.polymorph.smithyjava.ModelConstants;
 import software.amazon.polymorph.smithyjava.generator.awssdk.TestSetupUtils;
+import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.ShapeId;
@@ -76,7 +77,10 @@ public class ToDafnyAwsV2Test extends ForEachDafnyTest {
 
     @Test
     public void generateConvertOpaqueError() {
-        tokenizeAndAssertEqual(ToDafnyAwsV2Constants.GENERATE_CONVERT_OPAQUE_ERROR, underTest.generateConvertOpaqueError().toString());
+        final String expected = Dafny.datatypeConstructorsNeedTypeDescriptors(dafnyVersion) ?
+                ToDafnyAwsV2Constants.GENERATE_CONVERT_OPAQUE_ERROR_WITH_TYPE_DESCRIPTORS
+                : ToDafnyAwsV2Constants.GENERATE_CONVERT_OPAQUE_ERROR;
+        tokenizeAndAssertEqual(expected, underTest.generateConvertOpaqueError().toString());
     }
 
     @Test

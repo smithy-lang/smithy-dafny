@@ -96,9 +96,13 @@ public class Dafny extends NameResolver {
         return "create_" + DafnyNameResolverHelpers.dafnyCompilesExtra_(name);
     }
 
-    private boolean datatypeConstructorsNeedTypeDescriptors() {
+    public static boolean datatypeConstructorsNeedTypeDescriptors(String dafnyVersion) {
         // TODO: proper version comparison
         return dafnyVersion.compareTo("4.2") >= 0;
+    }
+
+    private boolean datatypeConstructorsNeedTypeDescriptors() {
+        return datatypeConstructorsNeedTypeDescriptors(dafnyVersion);
     }
 
     public CodeBlock createNone(CodeBlock typeDescriptor) {

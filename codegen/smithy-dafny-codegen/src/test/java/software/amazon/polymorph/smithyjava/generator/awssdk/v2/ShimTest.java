@@ -34,8 +34,10 @@ public class ShimTest extends ForEachDafnyTest {
     protected ShimV2 underTest;
     protected Model model;
     protected JavaAwsSdkV2 subject;
+    protected final String dafnyVersion;
 
     public ShimTest(String dafnyVersion) {
+        this.dafnyVersion = dafnyVersion;
         model = TestSetupUtils.setupLocalModel(ModelConstants.MOCK_KMS);
         subject = TestSetupUtils.setupAwsSdkV2(model, "kms", dafnyVersion);
         underTest = new ShimV2(subject);
@@ -69,9 +71,9 @@ public class ShimTest extends ForEachDafnyTest {
 
                         Expected:
                         %s""").formatted(
-                        actualString, DoSomethingOperation
+                        actualString, DoSomethingOperation(dafnyVersion)
                 ),
-                actualString.contains(DoSomethingOperation)
+                actualString.contains(DoSomethingOperation(dafnyVersion))
         );
     }
 
@@ -103,9 +105,9 @@ public class ShimTest extends ForEachDafnyTest {
 
                         Expected:
                         %s""").formatted(
-                        actualString, DoVoidOperation
+                        actualString, DoVoidOperation(dafnyVersion)
                 ),
-                actualString.contains(DoVoidOperation)
+                actualString.contains(DoVoidOperation(dafnyVersion))
         );
     }
 
@@ -119,8 +121,9 @@ public class ShimTest extends ForEachDafnyTest {
         final Path actualPath = actual.keySet().toArray(temp)[0];
         assertEquals(expectedPath, actualPath);
         final String actualSource = actual.get(actualPath).toString();
+        final String mockKmsShim = MockKmsShim(dafnyVersion);
         System.out.println(actualSource);
-        System.out.print(MockKmsShim);
-        Tokenizer.tokenizeAndAssertEqual(MockKmsShim, actualSource);
+        System.out.print(mockKmsShim);
+        Tokenizer.tokenizeAndAssertEqual(mockKmsShim, actualSource);
     }
 }
