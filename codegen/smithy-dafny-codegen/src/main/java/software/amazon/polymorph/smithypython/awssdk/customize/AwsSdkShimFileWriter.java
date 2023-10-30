@@ -96,7 +96,7 @@ public class AwsSdkShimFileWriter implements CustomFileWriter {
       writer.openBlock(
           "$L e.response['Error']['Code'] == '$L':",
           "",
-          hasOpenedIfBlock ? "if" : "elif",
+          hasOpenedIfBlock ? "elif" : "if",
           errorShapeId.getName(),
           () -> {
             writer.write("return $L.$L(message=e.response['Error']['Message'])",
