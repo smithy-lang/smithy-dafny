@@ -29,6 +29,15 @@ module {:extern "UTF8"} UTF8 {
     // If it weren't, then data would be lost.
     ensures res.Success? ==> Decode(res.value).Success? && Decode(res.value).value == s
 
+  // Decode return a Result, therefore doesn't need to require utf8 input
+  function method {:extern "Decode"} Decode(b: seq<uint8>): (res: Result<string, string>)
+    ensures res.Success? ==> ValidUTF8Seq(b)
+
+  // The next four functions are for the benefit of the extern implementation to call,
+  // avoiding direct references to generic datatype constructors
+  // since their calling pattern is different between different versions of Dafny
+  // (i.e. after 4.2, explicit type descriptors are required).
+  
   function method CreateEncodeSuccess(bytes: ValidUTF8Bytes): Result<ValidUTF8Bytes, string> {
     Success(bytes)
   }
@@ -37,20 +46,16 @@ module {:extern "UTF8"} UTF8 {
     Failure(error)
   }
 
-  // Decode return a Result, therefore doesn't need to require utf8 input
-  function method {:extern "Decode"} Decode(b: seq<uint8>): (res: Result<string, string>)
-    ensures res.Success? ==> ValidUTF8Seq(b)
-
-  predicate method IsASCIIString(s: string) {
-    forall i :: 0 <= i < |s| ==> s[i] as int < 128
-  }
-
   function method CreateDecodeSuccess(s: string): Result<string, string> {
     Success(s)
   }
 
   function method CreateDecodeFailure(error: string): Result<string, string> {
     Failure(error)
+  }
+  
+  predicate method IsASCIIString(s: string) {
+    forall i :: 0 <= i < |s| ==> s[i] as int < 128
   }
 
   // Encode ASCII as UTF8 in a function, to allow use in ensures clause

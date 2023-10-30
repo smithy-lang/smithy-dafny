@@ -122,7 +122,7 @@ public class CodegenCli {
             .build())
           .addOption(Option.builder()
             .longOpt("dafny-version")
-            .desc("<optional> Dafny version to use. Defaults to 4.1.")
+            .desc("<optional> Dafny version to use. Defaults to 4.1.0")
             .hasArg()
             .build())
           .addOption(Option.builder()

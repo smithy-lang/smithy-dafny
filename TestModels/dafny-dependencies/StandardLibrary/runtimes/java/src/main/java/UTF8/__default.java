@@ -25,12 +25,6 @@ import static software.amazon.smithy.dafny.conversion.ToNative.Simple.String;
 // and reset the coder everytime.
 public class __default extends UTF8._ExternBase___default {
 
-    private static final dafny.TypeDescriptor<DafnySequence<? extends Byte>> BYTE_SEQUENCE_TYPE_DESCRIPTOR = 
-            dafny.DafnySequence.<Byte>_typeDescriptor(dafny.TypeDescriptor.BYTE);
-    private static final dafny.TypeDescriptor<DafnySequence<? extends Character>> CHARACTER_SEQUENCE_TYPE_DESCRIPTOR =
-            dafny.DafnySequence.<Character>_typeDescriptor(dafny.TypeDescriptor.CHAR);
-    
-
     // This is largely copied from Polymorph's dafny-java-conversion:
     // software.amazon.smithy.dafny.conversion.ToDafny.Simple.DafnyUtf8Bytes
     public static Result<
