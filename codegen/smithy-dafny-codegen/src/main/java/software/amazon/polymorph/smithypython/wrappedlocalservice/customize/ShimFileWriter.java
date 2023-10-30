@@ -101,7 +101,8 @@ public class ShimFileWriter implements CustomFileWriter {
 
     // Write out wrapping errors for dependencies.
     // This service will generate a dependency-specific error for each dependency.
-    // This dependency-specific error is only known to this service, and not to the dependency service.
+    // This dependency-specific error generated for only this service, and not for the dependency service;
+    //   this error type will wrap any dependency service's error for processing by this service.
     // The Dafny type for this error contains one member: the dependency's name.
     // ex. Dafny type for MyDependency: `Error_MyDependency(Error...) = { MyDependency: ... }`
     // This member's value can take on any of the error types modelled in the dependency.
@@ -111,8 +112,11 @@ public class ShimFileWriter implements CustomFileWriter {
     if (maybeLocalServiceTrait.isPresent()) {
       LocalServiceTrait localServiceTrait = maybeLocalServiceTrait.get();
       Set<ShapeId> serviceDependencyShapeIds = localServiceTrait.getDependencies();
+
       if (serviceDependencyShapeIds != null) {
         for (ShapeId serviceDependencyShapeId : serviceDependencyShapeIds) {
+          // Import the dependency service's `smithy_error_to_dafny_error` so this service
+          //   can defer error conversion to the dependency
           writer.addImport(
               SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(
                   serviceDependencyShapeId.getNamespace())
@@ -122,9 +126,13 @@ public class ShimFileWriter implements CustomFileWriter {
                   serviceDependencyShapeId.getNamespace())
                   + "_smithy_error_to_dafny_error"
           );
+
+          // Import this service's error that wraps the dependency service's errors
           writer.addImport(".errors", serviceDependencyShapeId.getName());
           // Generate conversion method that says:
           // "If this is a dependency-specific error, defer to the dependency's `smithy_error_to_dafny_error`"
+          // if isinstance(e, MyDependency):
+          //   return MyService.Error_MyDependency(MyDependency_smithy_error_to_dafny_error(e.message))
           writer.write("""
                   if isinstance(e, $L):
                       return $L.Error_$L($L(e.message))
@@ -182,10 +190,10 @@ public class ShimFileWriter implements CustomFileWriter {
       ShapeId inputShape = operationShape.getInputShape();
       ShapeId outputShape = operationShape.getOutputShape();
 
-      // Import Dafny types for inputs and outputs
+      // Import Dafny types for inputs and outputs (shim function input and output)
       DafnyNameResolver.importDafnyTypeForShape(writer, inputShape, codegenContext);
       DafnyNameResolver.importDafnyTypeForShape(writer, outputShape, codegenContext);
-      // Import Smithy types for inputs and outputs
+      // Import Smithy types for inputs and outputs (Smithy client call input and output)
       SmithyNameResolver.importSmithyGeneratedTypeForShape(writer, inputShape, codegenContext);
       SmithyNameResolver.importSmithyGeneratedTypeForShape(writer, outputShape, codegenContext);
 
@@ -206,17 +214,11 @@ public class ShimFileWriter implements CustomFileWriter {
             Shape targetShapeInput = codegenContext.model().expectShape(operationShape.getInputShape());
             // Generate code that converts the input from the Dafny type to the corresponding Smithy type
             // `input` will hold a string that converts the Dafny `input` to the Smithy-modelled output.
-            // This has a side effect of possibly writing transformation code at the writer's current position.
-            // For example, a service shape may require some calls to `ctor__()` after it is created,
-            //   and cannot be constructed inline.
-            // Polymorph will create an object representing the service's client, instantiate it,
-            //   then reference that object in its `input` string.
             String input = targetShapeInput.accept(ShapeVisitorResolver.getToNativeShapeVisitorForShape(targetShapeInput,
                 codegenContext,
                 "input",
                 writer
             ));
-            writer.addImport(".", "dafny_to_smithy");
 
             // Generate code that:
             // 1) "unwraps" the request (converts from the Dafny type to the Smithy type),
@@ -224,7 +226,7 @@ public class ShimFileWriter implements CustomFileWriter {
             // 3) wraps Smithy failures as Dafny failures
             writer.write(
               """
-              smithy_client_request: $L = dafny_to_smithy.$L
+              smithy_client_request: $L = $L
               try:
                   smithy_client_response = asyncio.run(self._impl.$L(smithy_client_request))
               except ServiceError as e:
