@@ -21,13 +21,14 @@ public abstract class Shim extends Generator {
 
     protected MethodSpec successOfClientConstructor() {
         ClassName clientType = subject.dafnyNameResolver.classNameForInterface(subject.serviceShape);
+        ClassName errorType = subject.dafnyNameResolver.abstractClassForError();
         MethodSpec.Builder method = MethodSpec
                 .methodBuilder("createSuccessOfClient")
                 .addModifiers(STATIC, PUBLIC)
                 .addParameter(clientType, "client")
                 .returns(Dafny.asDafnyResult(
                         clientType,
-                        subject.dafnyNameResolver.abstractClassForError()
+                        errorType
                 ));
         method.addStatement("return $L",
                 subject.dafnyNameResolver.createSuccess(
@@ -36,24 +37,51 @@ public abstract class Shim extends Generator {
         return method.build();
     }
 
-    protected MethodSpec failureOfExceptionConstructor() {
+    protected MethodSpec failureOfErrorConstructor() {
         ClassName clientType = subject.dafnyNameResolver.classNameForInterface(subject.serviceShape);
+        ClassName errorType = subject.dafnyNameResolver.abstractClassForError();
         MethodSpec.Builder method = MethodSpec
-                .methodBuilder("createFailureOfException")
+                .methodBuilder("createFailureOfError")
                 .addModifiers(STATIC, PUBLIC)
-                .addParameter(ClassName.get(Exception.class), "exception")
+                .addParameter(errorType, "error")
                 .returns(Dafny.asDafnyResult(
                         clientType,
                         subject.dafnyNameResolver.abstractClassForError()
                 ));
-        CodeBlock stringTypeDescriptor = Dafny.TYPE_DESCRIPTOR_BY_SHAPE_TYPE.get(ShapeType.STRING);
-        method.addStatement("Error dafny_error = Error.create_InternalServerError($L)",
-                subject.dafnyNameResolver.createSome(stringTypeDescriptor,
-                        CodeBlock.of("software.amazon.smithy.dafny.conversion.ToDafny.Simple.CharacterSequence(exception.getMessage())")));
         method.addStatement("return $L",
                 subject.dafnyNameResolver.createFailure(
                         subject.dafnyNameResolver.typeDescriptor(subject.serviceShape.toShapeId()),
-                        CodeBlock.of("dafny_error")));
+                        CodeBlock.of("error")));
+        return method.build();
+    }
+
+    protected MethodSpec stringSomeConstructor() {
+        TypeName stringType = subject.dafnyNameResolver.typeForCharacterSequence();
+        MethodSpec.Builder method = MethodSpec
+                .methodBuilder("createStringSome")
+                .addModifiers(STATIC, PUBLIC)
+                .addParameter(stringType, "s")
+                .returns(Dafny.asDafnyOption(
+                        stringType
+                ));
+        method.addStatement("return $L",
+                subject.dafnyNameResolver.createSome(
+                        subject.dafnyNameResolver.TYPE_DESCRIPTOR_BY_SHAPE_TYPE.get(ShapeType.BOOLEAN),
+                        CodeBlock.of("s")));
+        return method.build();
+    }
+
+    protected MethodSpec stringNoneConstructor() {
+        TypeName stringType = subject.dafnyNameResolver.typeForCharacterSequence();
+        MethodSpec.Builder method = MethodSpec
+                .methodBuilder("createStringNone")
+                .addModifiers(STATIC, PUBLIC)
+                .returns(Dafny.asDafnyOption(
+                        stringType
+                ));
+        method.addStatement("return $L",
+                subject.dafnyNameResolver.createNone(
+                        subject.dafnyNameResolver.TYPE_DESCRIPTOR_BY_SHAPE_TYPE.get(ShapeType.BOOLEAN)));
         return method.build();
     }
 

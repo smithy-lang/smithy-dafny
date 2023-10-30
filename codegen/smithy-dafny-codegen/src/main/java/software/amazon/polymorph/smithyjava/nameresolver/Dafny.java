@@ -395,7 +395,7 @@ public class Dafny extends NameResolver {
         return typeForCharacterSequence();
     }
 
-    TypeName typeForCharacterSequence() {
+    public TypeName typeForCharacterSequence() {
         return ParameterizedTypeName.get(
                 Constants.DAFNY_SEQUENCE_CLASS_NAME,
                 WildcardTypeName.subtypeOf(Character.class)

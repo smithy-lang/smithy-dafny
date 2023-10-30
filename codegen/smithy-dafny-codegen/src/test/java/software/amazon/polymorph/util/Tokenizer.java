@@ -31,6 +31,7 @@ public class Tokenizer {
     public static record ParseToken(String text, int type) {}
 
     public static void tokenizeAndAssertEqual(String expected, String actual) {
+//        Assert.assertEquals(expected, actual);
         final List<ParseToken> actualTokens = tokenize(actual);
         final List<ParseToken> expectedTokens = tokenize(expected);
         Assert.assertEquals(expectedTokens, actualTokens);

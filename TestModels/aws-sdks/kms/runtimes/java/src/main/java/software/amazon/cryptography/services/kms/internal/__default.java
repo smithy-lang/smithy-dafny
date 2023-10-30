@@ -28,7 +28,9 @@ public class __default extends software.amazon.cryptography.services.kms.interna
             IKMSClient shim = new Shim(client, region);
             return Shim.createSuccessOfClient(shim);
         } catch (Exception e) {
-            return Shim.createFailureOfException(e);
+            Error dafny_error = Error.create_KMSInternalException(
+                    Shim.createStringSome(CharacterSequence(e.getMessage())));
+            return Shim.createFailureOfError(dafny_error);
         }
     }
 
@@ -39,7 +41,9 @@ public class __default extends software.amazon.cryptography.services.kms.interna
             IKMSClient shim = new Shim(client, region);
             return Shim.createSuccessOfClient(shim);
         } catch (Exception e) {
-            return Shim.createFailureOfException(e);
+            Error dafny_error = Error.create_KMSInternalException(
+                    Shim.createStringSome(CharacterSequence(e.getMessage())));
+            return Shim.createFailureOfError(dafny_error);
         }
     }
 

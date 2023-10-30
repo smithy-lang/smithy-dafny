@@ -71,7 +71,9 @@ public class ShimV2 extends Shim {
                         ClassName.get(String.class),
                         "region", Modifier.PRIVATE, Modifier.FINAL)
                 .addMethod(successOfClientConstructor())
-                .addMethod(failureOfExceptionConstructor())
+                .addMethod(failureOfErrorConstructor())
+                .addMethod(stringSomeConstructor())
+                .addMethod(stringNoneConstructor())
                 .addMethod(booleanSomeConstructor())
                 .addMethod(booleanNoneConstructor())
                 .addMethod(constructor())

@@ -82,9 +82,10 @@ public class Constants {
                             
                 import Wrappers_Compile.Option;
                 import Wrappers_Compile.Result;
+                import dafny.DafnySequence;
                 import dafny.Tuple0;
                 import java.lang.Boolean;
-                import java.lang.Exception;
+                import java.lang.Character;
                 import java.lang.Override;
                 import java.lang.String;
                 import software.amazon.awssdk.services.kms.KmsClient;
@@ -110,17 +111,24 @@ public class Constants {
                       IKeyManagementServiceClient client) {
                     return Result.create_Success(client);
                   }
-              
-                  public static Result<IKeyManagementServiceClient, Error> createFailureOfException(
-                      Exception exception) {
-                    Error dafny_error = Error.create_InternalServerError(Option.create_Some(CharacterSequence(exception.getMessage())));
-                    return Result.create_Failure(dafny_error);
+                             
+                  public static Result<IKeyManagementServiceClient, Error> createFailureOfError(Error error) {
+                    return Result.create_Failure(error);
                   }
-              
+                             
+                  public static Option<DafnySequence<? extends Character>> createStringSome(
+                      DafnySequence<? extends Character> s) {
+                    return Option.create_Some(s);
+                  }
+                             
+                  public static Option<DafnySequence<? extends Character>> createStringNone() {
+                    return Option.create_None();
+                  }
+                             
                   public static Option<Boolean> createBooleanSome(Boolean b) {
                     return Option.create_Some(b);
                   }
-              
+                             
                   public static Option<Boolean> createBooleanNone() {
                     return Option.create_None();
                   }
@@ -147,7 +155,7 @@ public class Constants {
                 import dafny.Tuple0;
                 import dafny.TypeDescriptor;
                 import java.lang.Boolean;
-                import java.lang.Exception;
+                import java.lang.Character;
                 import java.lang.Override;
                 import java.lang.String;
                 import software.amazon.awssdk.services.kms.KmsClient;
@@ -173,17 +181,24 @@ public class Constants {
                       IKeyManagementServiceClient client) {
                     return Result.create_Success(TypeDescriptor.reference(IKeyManagementServiceClient.class), Error._typeDescriptor(), client);
                   }
-              
-                  public static Result<IKeyManagementServiceClient, Error> createFailureOfException(
-                      Exception exception) {
-                    Error dafny_error = Error.create_InternalServerError(Option.create_Some(DafnySequence._typeDescriptor(TypeDescriptor.CHAR), CharacterSequence(exception.getMessage())));
-                    return Result.create_Failure(TypeDescriptor.reference(IKeyManagementServiceClient.class), Error._typeDescriptor(), dafny_error);
+                              
+                  public static Result<IKeyManagementServiceClient, Error> createFailureOfError(Error error) {
+                    return Result.create_Failure(TypeDescriptor.reference(IKeyManagementServiceClient.class), Error._typeDescriptor(), error);
                   }
-              
+                  
+                  public static Option<DafnySequence<? extends Character>> createStringSome(
+                      DafnySequence<? extends Character> s) {
+                    return Option.create_Some(TypeDescriptor.BOOLEAN, s);
+                  }
+                              
+                  public static Option<DafnySequence<? extends Character>> createStringNone() {
+                    return Option.create_None(TypeDescriptor.BOOLEAN);
+                  }
+                          
                   public static Option<Boolean> createBooleanSome(Boolean b) {
                     return Option.create_Some(TypeDescriptor.BOOLEAN, b);
                   }
-              
+                              
                   public static Option<Boolean> createBooleanNone() {
                     return Option.create_None(TypeDescriptor.BOOLEAN);
                   }
