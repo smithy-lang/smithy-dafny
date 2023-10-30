@@ -6,7 +6,7 @@ CORES=2
 include ../../SharedMakefile.mk
 
 NAMESPACE=simple.types.blob
-# TODO: Move to smithy-build.json once Dafny plugin supports language-specific config
+# TODO-Python: Move to smithy-build.json once Dafny SmithyBuildPlugin supports language-specific config
 PYTHON_MODULE_NAME=simple_types_blob
 
 # This project has no dependencies 

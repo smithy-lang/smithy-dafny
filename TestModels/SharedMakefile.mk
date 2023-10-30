@@ -53,11 +53,6 @@ STANDARD_LIBRARY_PATH := $(PROJECT_ROOT)/dafny-dependencies/StandardLibrary
 CODEGEN_CLI_ROOT := $(PROJECT_ROOT)/../codegen/smithy-dafny-codegen-cli
 GRADLEW := $(PROJECT_ROOT)/../codegen/gradlew
 
-# Returns the name of the Python module as stored in the project's build configuration file (pyproject.toml).
-#define GetPythonModuleName
-#$(shell grep -m 1 polymorph_package_name runtimes/python/pyproject.toml | tr -s ' ' | tr -d '"' | tr -d "'" | cut -d' ' -f3)
-#endef
-
 ########################## Dafny targets
 
 verify:
@@ -379,7 +374,7 @@ transpile_test_python: transpile_test
 # Hacky workaround until Dafny supports per-language extern names.
 # Replaces `.`s with `_`s in strings like `{:extern ".*"}`.
 # This is flawed logic and should be removed, but is a reasonable band-aid for now.
-# TODO: Once Dafny supports per-language extern names, remove and replace with Pythonic extern names.
+# TODO-Python BLOCKING: Once Dafny supports per-language extern names, remove and replace with Pythonic extern names.
 # This is tracked in https://github.com/dafny-lang/dafny/issues/4322.
 # This may require new Smithy-Dafny logic to generate Pythonic extern names.
 _python_underscore_extern_names:
@@ -417,7 +412,7 @@ _mv_internaldafny_python:
 #   regardless of the OUT parameter...?
 # We should figure out what happened and get a workaround
 # For now, always write OUT to __main__, then manually rename the primary file...
-# TODO: Resolve this before releasing libraries
+# TODO-Python BLOCKING: Resolve this before releasing libraries
 # Note the name internaldafny_test_executor is specifically chosen
 # so as to not be picked up by pytest,
 # which finds test_*.py or *_test.py files.
