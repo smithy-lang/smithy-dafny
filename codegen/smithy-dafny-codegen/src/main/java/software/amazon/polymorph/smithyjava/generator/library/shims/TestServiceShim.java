@@ -19,6 +19,7 @@ import software.amazon.polymorph.smithyjava.BuilderMemberSpec;
 import software.amazon.polymorph.smithyjava.BuilderSpecs;
 import software.amazon.polymorph.smithyjava.generator.library.JavaLibrary;
 import software.amazon.polymorph.smithyjava.modeled.Operation;
+import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.smithy.model.shapes.ServiceShape;
 
 import static javax.lang.model.element.Modifier.PROTECTED;
@@ -117,7 +118,10 @@ public class TestServiceShim extends ServiceShim {
                 .methodBuilder("createSuccessOfClient")
                 .addModifiers(STATIC, PROTECTED)
                 .addParameter(thisClassName, "client")
-                .returns(subject.dafnyNameResolver.classNameForInterface(this.targetShape));
+                .returns(Dafny.asDafnyResult(
+                        subject.dafnyNameResolver.classNameForInterface(this.targetShape),
+                        subject.dafnyNameResolver.abstractClassForError()
+                ));
         method.addStatement("return $L",
                 subject.dafnyNameResolver.createSuccess(
                         subject.dafnyNameResolver.typeDescriptor(targetShape.toShapeId()),

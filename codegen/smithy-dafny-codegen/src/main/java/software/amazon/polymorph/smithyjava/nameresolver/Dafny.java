@@ -313,7 +313,7 @@ public class Dafny extends NameResolver {
             return CodeBlock.of("$L()",
                     new MethodReference(abstractClassForError(), "_typeDescriptor").asNormalReference());
         }
-        if (shape.hasTrait(ReferenceTrait.class)) {
+        if (shape.hasTrait(ReferenceTrait.class) || shape.isServiceShape()) {
             // It is safe to use typeForShape here, as ReferenceTrait will always turn into a Resource or Service
             TypeName interfaceClassName = typeForShape(shapeId);
             return  CodeBlock.of("$T.reference($T.class)", Constants.DAFNY_TYPE_DESCRIPTOR_CLASS_NAME, interfaceClassName);
