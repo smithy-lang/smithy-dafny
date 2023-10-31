@@ -81,48 +81,55 @@ public class LocalServiceConfigToDafnyConversionFunctionWriter extends LocalServ
                   for (Entry<String, MemberShape> memberShapeEntry : structureShape.getAllMembers().entrySet()) {
                     String memberName = memberShapeEntry.getKey();
                     MemberShape memberShape = memberShapeEntry.getValue();
-                    final Shape targetShape = context.model().expectShape(memberShape.getTarget());
-
-                    // Adds `DafnyStructureMember=smithy_structure_member(...)`
-                    // e.g.
-                    // DafnyStructureName(DafnyStructureMember=smithy_structure_member(...), ...)
-                    // The nature of the `smithy_structure_member` conversion depends on the properties of the shape,
-                    //   as described below
-                    conversionWriter.writeInline("$L=", memberName);
-
-                    // If this is (another!) localService config shape, defer conversion to the config ShapeVisitor
-                    if (SmithyNameResolver.getLocalServiceConfigShapes(context).contains(targetShape.getId())) {
-                      conversionWriter.write("$L,",
-                          targetShape.accept(
-                              new LocalServiceConfigToDafnyConfigShapeVisitor(
-                                  context,
-                                  dataSourceInsideConversionFunction + "." + CaseUtils.toSnakeCase(memberName),
-                                  conversionWriter,
-                                  "smithy_to_dafny"
-                              )
-                          )
-                      );
-                    }
-                    // Otherwise, treat this member as required,
-                    // even though the Smithy model does not specify it as required,
-                    // and defer to standard shape visitor
-                    else {
-                      conversionWriter.write("$L,",
-                          targetShape.accept(
-                              ShapeVisitorResolver.getToDafnyShapeVisitorForShape(targetShape,
-                                  context,
-                                  dataSourceInsideConversionFunction + "." + CaseUtils.toSnakeCase(memberName),
-                                  conversionWriter,
-                                  "smithy_to_dafny"
-                              )
-                          )
-                      );
-                    }
+                    writeStructureShapeMemberConverter(conversionWriter,
+                        dataSourceInsideConversionFunction, memberName, memberShape);
                   }
                 }
             );
           }
       );
     });
+  }
+
+  private void writeStructureShapeMemberConverter(PythonWriter conversionWriter,
+      String dataSourceInsideConversionFunction, String memberName, MemberShape memberShape) {
+
+    final Shape targetShape = context.model().expectShape(memberShape.getTarget());
+
+    // Adds `DafnyStructureMember=smithy_structure_member(...)`
+    // e.g.
+    // DafnyStructureName(DafnyStructureMember=smithy_structure_member(...), ...)
+    // The nature of the `smithy_structure_member` conversion depends on the properties of the shape,
+    //   as described below
+    conversionWriter.writeInline("$L=", memberName);
+
+    // If this is (another!) localService config shape, defer conversion to the config ShapeVisitor
+    if (SmithyNameResolver.getLocalServiceConfigShapes(context).contains(targetShape.getId())) {
+      conversionWriter.write("$L,",
+          targetShape.accept(
+              new LocalServiceConfigToDafnyConfigShapeVisitor(
+                  context,
+                  dataSourceInsideConversionFunction + "." + CaseUtils.toSnakeCase(memberName),
+                  conversionWriter,
+                  "smithy_to_dafny"
+              )
+          )
+      );
+    }
+    // Otherwise, treat this member as required,
+    // even though the Smithy model does not specify it as required,
+    // and defer to standard shape visitor
+    else {
+      conversionWriter.write("$L,",
+          targetShape.accept(
+              ShapeVisitorResolver.getToDafnyShapeVisitorForShape(targetShape,
+                  context,
+                  dataSourceInsideConversionFunction + "." + CaseUtils.toSnakeCase(memberName),
+                  conversionWriter,
+                  "smithy_to_dafny"
+              )
+          )
+      );
+    }
   }
 }

@@ -87,58 +87,71 @@ public class DafnyToLocalServiceConversionFunctionWriter extends BaseConversionW
             shape.getId(), context
         ) + "." + shape.getId().getName(),
         () -> {
+
           // Recursively dispatch a new ShapeVisitor for each member of the structure
           for (Entry<String, MemberShape> memberShapeEntry : shape.getAllMembers().entrySet()) {
             String memberName = memberShapeEntry.getKey();
             MemberShape memberShape = memberShapeEntry.getValue();
-            final Shape targetShape = context.model().expectShape(memberShape.getTarget());
-
-            conversionWriter.writeInline("$L=", CaseUtils.toSnakeCase(memberName));
-
-            if (context.model().expectShape(memberShape.getTarget()).hasTrait(ReferenceTrait.class)) {
-              conversionWriter.write("$L,",
-                  targetShape.accept(
-                      ShapeVisitorResolver.getToNativeShapeVisitorForShape(targetShape, 
-                          context,
-                          dataSourceInsideConversionFunction + "." + memberName
-                          + (memberShape.isOptional() ? ".UnwrapOr(None)" : ""),
-                          conversionWriter,
-                          "dafny_to_smithy"
-                      )
-                  )
-              );
-            }
-
-            else if (memberShape.isOptional()) {
-              conversionWriter.write("($L) if ($L.is_Some) else None,",
-                targetShape.accept(
-                    ShapeVisitorResolver.getToNativeShapeVisitorForShape(targetShape, 
-                        context,
-                        dataSourceInsideConversionFunction + "." + memberName + ".value",
-                        conversionWriter,
-                        "dafny_to_smithy"
-                    )
-                ),
-                dataSourceInsideConversionFunction + "." + memberName
-              );
-            } else {
-              // Adds `smithy_structure_member=DafnyStructureMember(...)`
-              // e.g.
-              // smithy_structure_name(smithy_structure_member=DafnyStructureMember(...), ...)
-              conversionWriter.write("$L,",
-                  targetShape.accept(
-                      ShapeVisitorResolver.getToNativeShapeVisitorForShape(targetShape,
-                          context,
-                          dataSourceInsideConversionFunction + "." + memberName,
-                          conversionWriter,
-                          "dafny_to_smithy"
-                      )
-                  )
-              );
-            }
+            writeNonReferenceStructureShapeMemberConverter(conversionWriter,
+                dataSourceInsideConversionFunction, memberName, memberShape);
           }
         }
     );
+  }
+
+  private void writeNonReferenceStructureShapeMemberConverter(PythonWriter conversionWriter,
+      String dataSourceInsideConversionFunction, String memberName, MemberShape memberShape) {
+
+    final Shape targetShape = context.model().expectShape(memberShape.getTarget());
+
+    conversionWriter.writeInline("$L=", CaseUtils.toSnakeCase(memberName));
+
+    // Reference member shapes:
+    // Optional: `member_name=ShapeVisitor(input.MemberName.UnwrapOr(None))`
+    // Required: `member_name=ShapeVisitor(input.MemberName)`
+    if (context.model().expectShape(memberShape.getTarget()).hasTrait(ReferenceTrait.class)) {
+      conversionWriter.write("$L,",
+          targetShape.accept(
+              ShapeVisitorResolver.getToNativeShapeVisitorForShape(targetShape,
+                  context,
+                  dataSourceInsideConversionFunction + "." + memberName
+                      + (memberShape.isOptional() ? ".UnwrapOr(None)" : ""),
+                  conversionWriter,
+                  "dafny_to_smithy"
+              )
+          )
+      );
+    }
+
+    // Optional non-reference member shapes:
+    // `(ShapeVisitor(input.value)) if (input.value.is_Some) else None`
+    else if (memberShape.isOptional()) {
+      conversionWriter.write("($L) if ($L.is_Some) else None,",
+          targetShape.accept(
+              ShapeVisitorResolver.getToNativeShapeVisitorForShape(targetShape,
+                  context,
+                  dataSourceInsideConversionFunction + "." + memberName + ".value",
+                  conversionWriter,
+                  "dafny_to_smithy"
+              )
+          ),
+          dataSourceInsideConversionFunction + "." + memberName
+      );
+
+    // Required non-reference member shapes:
+    // `ShapeVisitor(input.value)`
+    } else {
+      conversionWriter.write("$L,",
+          targetShape.accept(
+              ShapeVisitorResolver.getToNativeShapeVisitorForShape(targetShape,
+                  context,
+                  dataSourceInsideConversionFunction + "." + memberName,
+                  conversionWriter,
+                  "dafny_to_smithy"
+              )
+          )
+      );
+    }
   }
 
   /**
@@ -152,34 +165,36 @@ public class DafnyToLocalServiceConversionFunctionWriter extends BaseConversionW
     Shape resourceOrService = context.model().expectShape(referenceTrait.getReferentId());
 
     if (resourceOrService.isResourceShape()) {
-      writeServiceShapeConverter(resourceOrService.asResourceShape().get(), conversionWriter,
+      writeResourceShapeConverter(resourceOrService.asResourceShape().get(), conversionWriter,
           dataSourceInsideConversionFunction);
     } else if (resourceOrService.isServiceShape()) {
-      writeResourceShapeConverter(resourceOrService.asServiceShape().get(), conversionWriter,
+      writeServiceShapeConverter(resourceOrService.asServiceShape().get(), conversionWriter,
           dataSourceInsideConversionFunction);
     } else {
       throw new UnsupportedOperationException("Unknown referenceStructureShape type: " + structureShape);
     }
   }
 
-  private void writeServiceShapeConverter(ResourceShape resourceShape, PythonWriter conversionWriter,
+  private void writeResourceShapeConverter(ResourceShape resourceShape, PythonWriter conversionWriter,
       String dataSourceInsideConversionFunction) {
-//    conversionWriter.write()
 
-        conversionWriter.write("from $L import $L",
-            SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
-                resourceShape.getId().getNamespace(), context
-            ) + ".references",
-            resourceShape.getId().getName()
-            );
+    // Import resource at runtime to avoid circular dependency
+    conversionWriter.write("from $L import $L",
+        SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
+            resourceShape.getId().getNamespace(), context
+        ) + ".references",
+        resourceShape.getId().getName()
+    );
 
     conversionWriter.write("return $L(_impl=$L)",
         resourceShape.getId().getName(),
         dataSourceInsideConversionFunction);
   }
 
-  private void writeResourceShapeConverter(ServiceShape serviceShape, PythonWriter conversionWriter,
+  private void writeServiceShapeConverter(ServiceShape serviceShape, PythonWriter conversionWriter,
       String dataSourceInsideConversionFunction) {
+
+    // Import resource at runtime to avoid circular dependency
     conversionWriter.write("from $L import $L",
         SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
             serviceShape.getId().getNamespace(), context

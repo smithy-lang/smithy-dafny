@@ -100,67 +100,73 @@ public class LocalServiceToDafnyConversionFunctionWriter extends BaseConversionW
           for (Entry<String, MemberShape> memberShapeEntry : shape.getAllMembers().entrySet()) {
             String memberName = memberShapeEntry.getKey();
             MemberShape memberShape = memberShapeEntry.getValue();
-            final Shape targetShape = context.model().expectShape(memberShape.getTarget());
-
-            // Adds `DafnyStructureMember=smithy_structure_member(...)`
-            // e.g.
-            // DafnyStructureName(DafnyStructureMember=smithy_structure_member(...), ...)
-            // The nature of the `smithy_structure_member` conversion depends on the properties of the shape,
-            //   as described below
-            conversionWriter.writeInline("$L=", memberName);
-
-            // If this is a localService config shape, defer conversion to the config ShapeVisitor
-            if (SmithyNameResolver.getLocalServiceConfigShapes(context).contains(targetShape.getId())) {
-              conversionWriter.write("$L,",
-                  targetShape.accept(
-                      new LocalServiceConfigToDafnyConfigShapeVisitor(
-                          context,
-                          dataSourceInsideConversionFunction + "." + CaseUtils.toSnakeCase(memberName),
-                          // Pass the `conversionWriter` as our source writer;
-                          // if we need to add imports, the imports will only be needed
-                          // from the conversionwriter file
-                          conversionWriter,
-                          "smithy_to_dafny"
-                      )
-                  )
-              );
-            }
-
-            // If this shape is optional, write conversion logic to detect and possibly pass
-            //   an empty optional at runtime
-            else if (memberShape.isOptional()) {
-              conversionWriter.addStdlibImport("Wrappers", "Option_Some");
-              conversionWriter.addStdlibImport("Wrappers", "Option_None");
-              conversionWriter.write(
-                  "((Option_Some($L)) if ($L is not None) else (Option_None())),",
-                  targetShape.accept(
-                      ShapeVisitorResolver.getToDafnyShapeVisitorForShape(targetShape, 
-                          context,
-                          dataSourceInsideConversionFunction + "." + CaseUtils.toSnakeCase(memberName),
-                          conversionWriter,
-                          "smithy_to_dafny"
-                      )
-                  ),
-                  dataSourceInsideConversionFunction + "." + CaseUtils.toSnakeCase(memberName)
-              );
-            }
-
-            // If this shape is required, pass in the shape for conversion without any optional-checking
-            else {
-              conversionWriter.write("$L,",
-                  targetShape.accept(
-                      ShapeVisitorResolver.getToDafnyShapeVisitorForShape(targetShape,
-                          context,
-                          dataSourceInsideConversionFunction + "." + CaseUtils.toSnakeCase(memberName),
-                          conversionWriter,
-                          "smithy_to_dafny"
-                      )
-                  )
-              );
-            }
+            writeNonReferenceStructureShapeMemberConverter(conversionWriter,
+                dataSourceInsideConversionFunction, memberName, memberShape);
           }
         }
     );
+  }
+
+  private void writeNonReferenceStructureShapeMemberConverter(PythonWriter conversionWriter,
+      String dataSourceInsideConversionFunction, String memberName, MemberShape memberShape) {
+    final Shape targetShape = context.model().expectShape(memberShape.getTarget());
+
+    // Adds `DafnyStructureMember=smithy_structure_member(...)`
+    // e.g.
+    // DafnyStructureName(DafnyStructureMember=smithy_structure_member(...), ...)
+    // The nature of the `smithy_structure_member` conversion depends on the properties of the shape,
+    //   as described below
+    conversionWriter.writeInline("$L=", memberName);
+
+    // If this is a localService config shape, defer conversion to the config ShapeVisitor
+    if (SmithyNameResolver.getLocalServiceConfigShapes(context).contains(targetShape.getId())) {
+      conversionWriter.write("$L,",
+          targetShape.accept(
+              new LocalServiceConfigToDafnyConfigShapeVisitor(
+                  context,
+                  dataSourceInsideConversionFunction + "." + CaseUtils.toSnakeCase(memberName),
+                  // Pass the `conversionWriter` as our source writer;
+                  // if we need to add imports, the imports will only be needed
+                  // from the conversionwriter file
+                  conversionWriter,
+                  "smithy_to_dafny"
+              )
+          )
+      );
+    }
+
+    // If this shape is optional, write conversion logic to detect and possibly pass
+    //   an empty optional at runtime
+    else if (memberShape.isOptional()) {
+      conversionWriter.addStdlibImport("Wrappers", "Option_Some");
+      conversionWriter.addStdlibImport("Wrappers", "Option_None");
+      conversionWriter.write(
+          "((Option_Some($L)) if ($L is not None) else (Option_None())),",
+          targetShape.accept(
+              ShapeVisitorResolver.getToDafnyShapeVisitorForShape(targetShape,
+                  context,
+                  dataSourceInsideConversionFunction + "." + CaseUtils.toSnakeCase(memberName),
+                  conversionWriter,
+                  "smithy_to_dafny"
+              )
+          ),
+          dataSourceInsideConversionFunction + "." + CaseUtils.toSnakeCase(memberName)
+      );
+    }
+
+    // If this shape is required, pass in the shape for conversion without any optional-checking
+    else {
+      conversionWriter.write("$L,",
+          targetShape.accept(
+              ShapeVisitorResolver.getToDafnyShapeVisitorForShape(targetShape,
+                  context,
+                  dataSourceInsideConversionFunction + "." + CaseUtils.toSnakeCase(memberName),
+                  conversionWriter,
+                  "smithy_to_dafny"
+              )
+          )
+      );
+    }
   }
 
   /**
@@ -188,13 +194,12 @@ public class LocalServiceToDafnyConversionFunctionWriter extends BaseConversionW
       PythonWriter conversionWriter, String dataSourceInsideConversionFunction) {
     DafnyNameResolver.importDafnyTypeForServiceShape(conversionWriter, serviceShape);
 
+    // Import service inline to avoid circular dependency
     conversionWriter.write("import $L",
         SmithyNameResolver.getSmithyGeneratedConfigModulePathForSmithyNamespace(
             serviceShape.getId().getNamespace(), context)
     );
 
-//    conversionWriter.addStdlibImport(SmithyNameResolver.getSmithyGeneratedConfigModulePathForSmithyNamespace(
-//        serviceShape.getId().getNamespace(), context));
     conversionWriter.addStdlibImport(DafnyNameResolver.getDafnyPythonIndexModuleNameForShape(serviceShape));
 
     // `my_module_client = my_module_internaldafny.MyModuleClient()`

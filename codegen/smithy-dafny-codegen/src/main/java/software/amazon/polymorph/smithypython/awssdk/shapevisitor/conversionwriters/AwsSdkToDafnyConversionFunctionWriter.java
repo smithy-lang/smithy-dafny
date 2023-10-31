@@ -70,50 +70,57 @@ public class AwsSdkToDafnyConversionFunctionWriter extends BaseConversionWriter 
                   for (Entry<String, MemberShape> memberShapeEntry : structureShape.getAllMembers().entrySet()) {
                     String memberName = memberShapeEntry.getKey();
                     MemberShape memberShape = memberShapeEntry.getValue();
-                    final Shape targetShape = context.model().expectShape(memberShape.getTarget());
-
-                    // Adds `DafnyStructureMember=smithy_structure_member(...)`
-                    // e.g.
-                    // DafnyStructureName(DafnyStructureMember=smithy_structure_member(...), ...)
-                    // The nature of the `smithy_structure_member` conversion depends on the properties of the shape,
-                    //   as described below
-                    conversionWriter.writeInline("$L=", memberName);
-
-                    // If this shape is optional, write conversion logic to detect and possibly pass
-                    //   an empty optional at runtime
-                    if (memberShape.isOptional()) {
-                      conversionWriter.addStdlibImport("Wrappers", "Option_Some");
-                      conversionWriter.addStdlibImport("Wrappers", "Option_None");
-                      conversionWriter.write("Option_Some($L) if \"$L\" in $L.keys() else Option_None(),",
-                          targetShape.accept(
-                              new AwsSdkToDafnyShapeVisitor(
-                                  context,
-                                  dataSourceInsideConversionFunction + "[\"" + memberName + "\"]",
-                                  conversionWriter
-                              )
-                          ),
-                          memberName,
-                          dataSourceInsideConversionFunction
-                      );
-                    }
-
-                    // If this shape is required, pass in the shape for conversion without any optional-checking
-                    else {
-                      conversionWriter.write("$L,",
-                          targetShape.accept(
-                              new AwsSdkToDafnyShapeVisitor(
-                                  context,
-                                  dataSourceInsideConversionFunction + "[\"" + memberName + "\"]",
-                                  conversionWriter
-                              )
-                          )
-                      );
-                    }
+                    writeStructureShapeMemberConverter(conversionWriter,
+                        dataSourceInsideConversionFunction, memberName, memberShape);
                   }
-                });
+                }
+            );
           }
       );
     });
+  }
+
+  private void writeStructureShapeMemberConverter(PythonWriter conversionWriter,
+      String dataSourceInsideConversionFunction, String memberName, MemberShape memberShape) {
+    final Shape targetShape = context.model().expectShape(memberShape.getTarget());
+
+    // Adds `DafnyStructureMember=smithy_structure_member(...)`
+    // e.g.
+    // DafnyStructureName(DafnyStructureMember=smithy_structure_member(...), ...)
+    // The nature of the `smithy_structure_member` conversion depends on the properties of the shape,
+    //   as described below
+    conversionWriter.writeInline("$L=", memberName);
+
+    // If this shape is optional, write conversion logic to detect and possibly pass
+    //   an empty optional at runtime
+    if (memberShape.isOptional()) {
+      conversionWriter.addStdlibImport("Wrappers", "Option_Some");
+      conversionWriter.addStdlibImport("Wrappers", "Option_None");
+      conversionWriter.write("Option_Some($L) if \"$L\" in $L.keys() else Option_None(),",
+          targetShape.accept(
+              new AwsSdkToDafnyShapeVisitor(
+                  context,
+                  dataSourceInsideConversionFunction + "[\"" + memberName + "\"]",
+                  conversionWriter
+              )
+          ),
+          memberName,
+          dataSourceInsideConversionFunction
+      );
+    }
+
+    // If this shape is required, pass in the shape for conversion without any optional-checking
+    else {
+      conversionWriter.write("$L,",
+          targetShape.accept(
+              new AwsSdkToDafnyShapeVisitor(
+                  context,
+                  dataSourceInsideConversionFunction + "[\"" + memberName + "\"]",
+                  conversionWriter
+              )
+          )
+      );
+    }
   }
 
   /**

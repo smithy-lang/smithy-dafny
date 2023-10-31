@@ -70,47 +70,53 @@ public class DafnyToAwsSdkConversionFunctionWriter extends BaseConversionWriter 
             for (Entry<String, MemberShape> memberShapeEntry : structureShape.getAllMembers().entrySet()) {
               String memberName = memberShapeEntry.getKey();
               MemberShape memberShape = memberShapeEntry.getValue();
-              final Shape targetShape = context.model().expectShape(memberShape.getTarget());
-
-              // Optional shapes require an `is_Some` check and their value is accessed via `.value`
-              // ex. kms.KeyId in DecryptRequest (optional parameter):
-              // if input.KeyId.is_Some:
-              //        output["KeyId"] = input.KeyId.value.VerbatimString(False)
-              // (`VerbatimString(False)` comes from the DafnyToAwsSdkShapeVisitor)
-              if (memberShape.isOptional()) {
-                conversionWriter.openBlock("if $L.$L.is_Some:",
-                    "",
-                    dataSourceInsideConversionFunction,
-                    memberName,
-                    () -> {
-                      conversionWriter.write("output[\"$L\"] = $L",
-                          memberName,
-                          targetShape.accept(new DafnyToAwsSdkShapeVisitor(
-                              context,
-                              dataSourceInsideConversionFunction + "." + memberName + ".value",
-                              conversionWriter
-                          )));
-                    });
-              // Required shapes are assigned directly
-              // ex. kms.CiphertextBlob in DecryptRequest (required parameter):
-              // output["CiphertextBlob"] = bytes(input.CiphertextBlob)
-              // (`bytes()` comes from the DafnyToAwsSdkShapeVisitor)
-              } else {
-                conversionWriter.write("output[\"$L\"] = $L",
-                    memberName,
-                    targetShape.accept(new DafnyToAwsSdkShapeVisitor(
-                        context,
-                        dataSourceInsideConversionFunction + "." + memberName,
-                        conversionWriter
-                    )));
-              }
+              writeStructureShapeMemberConverter(conversionWriter,
+                  dataSourceInsideConversionFunction, memberName, memberShape);
             }
 
             conversionWriter.write("return output");
           }
       );
     });
+  }
 
+  private void writeStructureShapeMemberConverter(PythonWriter conversionWriter,
+      String dataSourceInsideConversionFunction, String memberName, MemberShape memberShape) {
+
+    final Shape targetShape = context.model().expectShape(memberShape.getTarget());
+
+    // Optional shapes require an `is_Some` check and their value is accessed via `.value`
+    // ex. kms.KeyId in DecryptRequest (optional parameter):
+    // if input.KeyId.is_Some:
+    //        output["KeyId"] = input.KeyId.value.VerbatimString(False)
+    // (`VerbatimString(False)` comes from the DafnyToAwsSdkShapeVisitor)
+    if (memberShape.isOptional()) {
+      conversionWriter.openBlock("if $L.$L.is_Some:",
+          "",
+          dataSourceInsideConversionFunction,
+          memberName,
+          () -> {
+            conversionWriter.write("output[\"$L\"] = $L",
+                memberName,
+                targetShape.accept(new DafnyToAwsSdkShapeVisitor(
+                    context,
+                    dataSourceInsideConversionFunction + "." + memberName + ".value",
+                    conversionWriter
+                )));
+          });
+      // Required shapes are assigned directly
+      // ex. kms.CiphertextBlob in DecryptRequest (required parameter):
+      // output["CiphertextBlob"] = bytes(input.CiphertextBlob)
+      // (`bytes()` comes from the DafnyToAwsSdkShapeVisitor)
+    } else {
+      conversionWriter.write("output[\"$L\"] = $L",
+          memberName,
+          targetShape.accept(new DafnyToAwsSdkShapeVisitor(
+              context,
+              dataSourceInsideConversionFunction + "." + memberName,
+              conversionWriter
+          )));
+    }
   }
 
 
