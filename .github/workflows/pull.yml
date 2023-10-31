@@ -1,0 +1,37 @@
+# This workflow runs for every pull request
+name: PR CI
+
+on:
+  pull_request:
+
+jobs:
+  pr-ci-verification:
+    strategy:
+      matrix:
+        dafny-version: [
+          4.1.0,
+          4.3.0
+        ]
+    uses: ./.github/workflows/test_models_dafny_verification.yml
+    with:
+      dafny: ${{ matrix.dafny-version }}
+  pr-ci-java:
+    strategy:
+      matrix:
+        dafny-version: [
+          4.1.0,
+          4.3.0
+        ]
+    uses: ./.github/workflows/test_models_java_tests.yml
+    with:
+      dafny: ${{ matrix.dafny-version }}
+  pr-ci-net:
+    strategy:
+      matrix:
+        dafny-version: [
+          4.1.0,
+          4.3.0
+        ]
+    uses: ./.github/workflows/test_models_net_tests.yml
+    with:
+      dafny: ${{ matrix.dafny-version }}

@@ -1,0 +1,39 @@
+# This workflow runs for every push to main-1.x
+name: Push CI
+
+on:
+  push:
+    branches:
+      - main-1.x    
+
+jobs:
+  push-ci-verification:
+    strategy:
+      matrix:
+        dafny-version: [
+          4.1.0,
+          4.3.0
+        ]
+    uses: ./.github/workflows/test_models_dafny_verification.yml
+    with:
+      dafny: ${{ matrix.dafny-version }}
+  push-ci-java:
+    strategy:
+      matrix:
+        dafny-version: [
+          4.1.0,
+          4.3.0
+        ]
+    uses: ./.github/workflows/test_models_java_tests.yml
+    with:
+      dafny: ${{ matrix.dafny-version }}
+  push-ci-net:
+    strategy:
+      matrix:
+        dafny-version: [
+          4.1.0,
+          4.3.0
+        ]
+    uses: ./.github/workflows/test_models_net_tests.yml
+    with:
+      dafny: ${{ matrix.dafny-version }}
