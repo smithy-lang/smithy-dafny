@@ -16,6 +16,7 @@ import javax.lang.model.element.Modifier;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import software.amazon.polymorph.smithydafny.DafnyVersion;
 import software.amazon.polymorph.smithyjava.ForEachDafnyTest;
 import software.amazon.polymorph.smithyjava.ModelConstants;
 import software.amazon.polymorph.smithyjava.generator.awssdk.TestSetupUtils;
@@ -34,9 +35,9 @@ public class ShimTest extends ForEachDafnyTest {
     protected ShimV2 underTest;
     protected Model model;
     protected JavaAwsSdkV2 subject;
-    protected final String dafnyVersion;
+    protected final DafnyVersion dafnyVersion;
 
-    public ShimTest(String dafnyVersion) {
+    public ShimTest(DafnyVersion dafnyVersion) {
         this.dafnyVersion = dafnyVersion;
         model = TestSetupUtils.setupLocalModel(ModelConstants.MOCK_KMS);
         subject = TestSetupUtils.setupAwsSdkV2(model, "kms", dafnyVersion);

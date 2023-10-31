@@ -7,6 +7,7 @@ import com.squareup.javapoet.JavaFile;
 import org.junit.Before;
 import org.junit.Test;
 
+import software.amazon.polymorph.smithydafny.DafnyVersion;
 import software.amazon.polymorph.smithyjava.ForEachDafnyTest;
 import software.amazon.polymorph.smithyjava.ModelConstants;
 import software.amazon.polymorph.smithyjava.generator.awssdk.TestSetupUtils;
@@ -20,7 +21,7 @@ public class ModelCodegenTest extends ForEachDafnyTest {
     protected ModelCodegen underTest;
     protected Model model;
 
-    public ModelCodegenTest(String dafnyVersion) {
+    public ModelCodegenTest(DafnyVersion dafnyVersion) {
         model = TestSetupUtils.setupLocalModel(ModelConstants.CRYPTOGRAPHY_A_STRING_OPERATION);
         underTest = new ModelCodegen(TestSetupUtils.setupLibrary(model, "aws.cryptography.test", dafnyVersion));
     }

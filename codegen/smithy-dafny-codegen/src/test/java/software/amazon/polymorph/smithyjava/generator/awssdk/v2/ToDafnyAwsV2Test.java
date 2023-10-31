@@ -10,6 +10,7 @@ import org.junit.Test;
 import java.nio.file.Path;
 import java.util.Map;
 
+import software.amazon.polymorph.smithydafny.DafnyVersion;
 import software.amazon.polymorph.smithyjava.ForEachDafnyTest;
 import software.amazon.polymorph.smithyjava.ModelConstants;
 import software.amazon.polymorph.smithyjava.generator.awssdk.TestSetupUtils;
@@ -26,9 +27,9 @@ import static software.amazon.polymorph.util.Tokenizer.tokenizeAndAssertEqual;
 public class ToDafnyAwsV2Test extends ForEachDafnyTest {
     protected final ToDafnyAwsV2 underTest;
     protected final Model model;
-    protected final String dafnyVersion;
+    protected final DafnyVersion dafnyVersion;
 
-    public ToDafnyAwsV2Test(String dafnyVersion) {
+    public ToDafnyAwsV2Test(DafnyVersion dafnyVersion) {
         this.dafnyVersion = dafnyVersion;
         model = TestSetupUtils.setupTwoLocalModel(ModelConstants.KMS_KITCHEN, ModelConstants.OTHER_NAMESPACE);
         underTest = new ToDafnyAwsV2(TestSetupUtils.setupAwsSdkV2(model, "kms", dafnyVersion));

@@ -5,6 +5,7 @@ package software.amazon.smithy.dafny.codegen;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.polymorph.CodegenEngine;
+import software.amazon.polymorph.smithydafny.DafnyVersion;
 import software.amazon.smithy.build.FileManifest;
 import software.amazon.smithy.model.node.Node;
 import software.amazon.smithy.model.node.ObjectNode;
@@ -60,14 +61,14 @@ class DafnyClientCodegenPluginSettings {
      * which shim code generation currently depends on.
      * Required when the edition is 2023.10 or later.
      */
-    public final String dafnyVersion;
+    public final DafnyVersion dafnyVersion;
 
     private DafnyClientCodegenPluginSettings(
             final DafnyClientCodegenEdition edition,
             final ShapeId serviceId,
             final Set<CodegenEngine.TargetLanguage> targetLanguages,
             final Path includeDafnyFile,
-            final String dafnyVersion
+            final DafnyVersion dafnyVersion
     ) {
         this.edition = edition;
         this.serviceId = serviceId;
@@ -119,17 +120,17 @@ class DafnyClientCodegenPluginSettings {
                     includeDafnyFileNormalized);
         }
 
-        final String dafnyVersion;
+        final String dafnyVersionString;
         if (edition.ordinal() >= DafnyClientCodegenEdition.EDITION_2023_10.ordinal()) {
             // Required from this edition on
-            dafnyVersion = node.expectStringMember("dafnyVersion").getValue();
+            dafnyVersionString = node.expectStringMember("dafnyVersion").getValue();
         } else {
-            dafnyVersion = node.getStringMemberOrDefault("dafnyVersion", "4.1");
+            dafnyVersionString = node.getStringMemberOrDefault("dafnyVersion", "4.1");
         }
 
         return Optional.of(
                 new DafnyClientCodegenPluginSettings(edition, serviceId, targetLanguages, includeDafnyFileNormalized,
-                                                     dafnyVersion));
+                                                     DafnyVersion.parse(dafnyVersionString)));
     }
 
     /**

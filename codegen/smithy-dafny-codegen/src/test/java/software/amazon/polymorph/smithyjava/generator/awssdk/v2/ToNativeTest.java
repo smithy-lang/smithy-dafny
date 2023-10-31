@@ -17,6 +17,7 @@ import java.util.Set;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import software.amazon.polymorph.smithydafny.DafnyVersion;
 import software.amazon.polymorph.smithyjava.ForEachDafnyTest;
 import software.amazon.polymorph.smithyjava.MethodReference;
 import software.amazon.polymorph.smithyjava.ModelConstants;
@@ -54,7 +55,7 @@ public class ToNativeTest extends ForEachDafnyTest {
     protected ToNativeAwsV2 underTest;
     protected ToNativeTestImpl underTestAbstract;
     protected Model model;
-    protected final String dafnyVersion;
+    protected final DafnyVersion dafnyVersion;
 
     class ToNativeTestImpl extends ToNativeAwsV2 {
 
@@ -99,7 +100,7 @@ public class ToNativeTest extends ForEachDafnyTest {
         }
     }
 
-    public ToNativeTest(String dafnyVersion) {
+    public ToNativeTest(DafnyVersion dafnyVersion) {
         this.dafnyVersion = dafnyVersion;
         model = TestSetupUtils.setupTwoLocalModel(ModelConstants.KMS_KITCHEN, ModelConstants.OTHER_NAMESPACE);
         underTest  = new ToNativeAwsV2(TestSetupUtils.setupAwsSdkV2(model, "kms", dafnyVersion));

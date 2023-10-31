@@ -10,6 +10,7 @@ import org.junit.Test;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import software.amazon.polymorph.smithydafny.DafnyVersion;
 import software.amazon.polymorph.smithyjava.ForEachDafnyTest;
 import software.amazon.polymorph.smithyjava.ModelConstants;
 import software.amazon.polymorph.smithyjava.generator.CodegenSubject;
@@ -32,7 +33,7 @@ public class DafnyTest extends ForEachDafnyTest {
     Dafny underTest;
     protected Model model;
 
-    public DafnyTest(String dafnyVersion) {
+    public DafnyTest(DafnyVersion dafnyVersion) {
         String rawModel = """
                 namespace smithy.example
                 service Example {}

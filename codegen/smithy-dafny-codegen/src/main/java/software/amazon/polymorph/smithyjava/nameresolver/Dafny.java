@@ -19,6 +19,7 @@ import java.util.Objects;
 import javax.annotation.Nullable;
 
 import software.amazon.polymorph.smithydafny.DafnyNameResolver;
+import software.amazon.polymorph.smithydafny.DafnyVersion;
 import software.amazon.polymorph.smithyjava.MethodReference;
 import software.amazon.polymorph.smithyjava.generator.CodegenSubject;
 import software.amazon.polymorph.smithyjava.generator.Generator;
@@ -65,14 +66,14 @@ public class Dafny extends NameResolver {
         );
     }
 
-    private final String dafnyVersion;
+    private final DafnyVersion dafnyVersion;
 
     public Dafny(
             final String packageName,
             final Model model,
             final ServiceShape serviceShape,
-            CodegenSubject.AwsSdkVersion awsSdkVersion,
-            final String dafnyVersion) {
+            final CodegenSubject.AwsSdkVersion awsSdkVersion,
+            final DafnyVersion dafnyVersion) {
         super(
                 packageName,
                 serviceShape,
@@ -96,9 +97,10 @@ public class Dafny extends NameResolver {
         return "create_" + DafnyNameResolverHelpers.dafnyCompilesExtra_(name);
     }
 
-    public static boolean datatypeConstructorsNeedTypeDescriptors(String dafnyVersion) {
-        // TODO: proper version comparison
-        return dafnyVersion.compareTo("4.2") >= 0;
+    private static final DafnyVersion NEEDS_TYPE_DESCRIPTORS_WHEN_CONSTRUCTING_DATATYPES = new DafnyVersion(4, 2, 0);
+
+    public static boolean datatypeConstructorsNeedTypeDescriptors(DafnyVersion dafnyVersion) {
+        return dafnyVersion.compareTo(NEEDS_TYPE_DESCRIPTORS_WHEN_CONSTRUCTING_DATATYPES) >= 0;
     }
 
     private boolean datatypeConstructorsNeedTypeDescriptors() {

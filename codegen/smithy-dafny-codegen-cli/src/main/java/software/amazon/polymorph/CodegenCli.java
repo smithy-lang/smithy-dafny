@@ -4,6 +4,7 @@
 package software.amazon.polymorph;
 
 import software.amazon.polymorph.CodegenEngine.TargetLanguage;
+import software.amazon.polymorph.smithydafny.DafnyVersion;
 import software.amazon.polymorph.smithyjava.generator.CodegenSubject.AwsSdkVersion;
 
 import org.apache.commons.cli.CommandLine;
@@ -158,7 +159,7 @@ public class CodegenCli {
             Optional<Path> outputJavaDir,
             Optional<Path> outputDafnyDir,
             Optional<AwsSdkVersion> javaAwsSdkVersion,
-            Optional<String> dafnyVersion,
+            Optional<DafnyVersion> dafnyVersion,
             Optional<Path> includeDafnyFile,
             boolean awsSdkStyle,
             boolean localServiceTest
@@ -212,10 +213,10 @@ public class CodegenCli {
                 }
             }
 
-            Optional<String> dafnyVersion = Optional.empty();
+            Optional<DafnyVersion> dafnyVersion = Optional.empty();
             if (commandLine.hasOption("dafny-version")) {
                 final String versionStr = commandLine.getOptionValue("dafny-version").trim().toUpperCase();
-                dafnyVersion = Optional.of(versionStr);
+                dafnyVersion = Optional.of(DafnyVersion.parse(versionStr));
             }
 
             Optional<Path> includeDafnyFile = Optional.empty();

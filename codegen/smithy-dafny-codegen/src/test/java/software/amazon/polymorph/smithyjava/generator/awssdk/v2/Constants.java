@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 package software.amazon.polymorph.smithyjava.generator.awssdk.v2;
 
+import software.amazon.polymorph.smithydafny.DafnyVersion;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 
 public class Constants {
@@ -37,7 +38,7 @@ public class Constants {
               }
             """;
 
-    static String DoSomethingOperation(String dafnyVersion) {
+    static String DoSomethingOperation(DafnyVersion dafnyVersion) {
         return Dafny.datatypeConstructorsNeedTypeDescriptors(dafnyVersion) ?
                 DoSomethingOperationWithTypeDescriptors : DoSomethingOperation;
     }
@@ -72,7 +73,7 @@ public class Constants {
               }
             """;
 
-    static String DoVoidOperation(String dafnyVersion) {
+    static String DoVoidOperation(DafnyVersion dafnyVersion) {
         return Dafny.datatypeConstructorsNeedTypeDescriptors(dafnyVersion) ?
                 DoVoidOperationWithTypeDescriptors : DoVoidOperation;
     }
@@ -216,7 +217,7 @@ public class Constants {
                 }
                 """.formatted(DoSomethingOperationWithTypeDescriptors, DoVoidOperationWithTypeDescriptors);
 
-    static String MockKmsShim(String dafnyVersion) {
+    static String MockKmsShim(DafnyVersion dafnyVersion) {
         return Dafny.datatypeConstructorsNeedTypeDescriptors(dafnyVersion) ?
                 MockKmsShimWithTypeDescriptors : MockKmsShim;
     }
