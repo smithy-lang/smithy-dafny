@@ -186,9 +186,6 @@ _polymorph:
 	--namespace $(NAMESPACE) \
 	$(AWS_SDK_CMD)";
 
-# If the target language of _polymorph_wrapped includes Python,
-# a Python localService will also be generated
-# (i.e. the _polymorph target is effectively also executed).
 _polymorph_wrapped:
 	@: $(if ${CODEGEN_CLI_ROOT},,$(error You must pass the path CODEGEN_CLI_ROOT: CODEGEN_CLI_ROOT=/path/to/smithy-dafny/codegen/smithy-dafny-codegen-cli));
 	cd $(CODEGEN_CLI_ROOT); \
@@ -249,6 +246,8 @@ polymorph_java: _polymorph_dependencies
 
 polymorph_python: OUTPUT_PYTHON=--output-python $(LIBRARY_ROOT)/runtimes/python/smithygenerated
 polymorph_python: _polymorph
+# TODO-Python: Right now, wrapped code generation requires an isolated directory,
+#   as it runs `rm models.py` and `rm errors.py` after generating.
 polymorph_python: OUTPUT_PYTHON_WRAPPED=--output-python $(LIBRARY_ROOT)/runtimes/python/smithygenerated_wrapped
 polymorph_python: OUTPUT_LOCAL_SERVICE=--local-service-test
 polymorph_python: _polymorph_wrapped
@@ -258,6 +257,7 @@ polymorph_python:
 	mv runtimes/python/smithygenerated_wrapped/$(PYTHON_MODULE_NAME)/* runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated
 	mv runtimes/python/smithygenerated/$(PYTHON_MODULE_NAME)/* runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated
 	rm -rf runtimes/python/smithygenerated
+	rm -rf runtimes/python/smithygenerated_wrapped
 polymorph_python: POLYMORPH_LANGUAGE_TARGET=python
 polymorph_python: _polymorph_dependencies
 
