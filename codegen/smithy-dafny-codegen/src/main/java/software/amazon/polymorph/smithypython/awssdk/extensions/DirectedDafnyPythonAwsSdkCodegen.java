@@ -69,8 +69,9 @@ public class DirectedDafnyPythonAwsSdkCodegen extends DirectedPythonCodegen {
     // This is in contrast to `serialize`, `deserialize`, `config`, and `client`,
     //   for which DirectedDafnyPythonAwsSdkCodegen does NOT generate any code
     //   by overriding DirectedPythonCodegen in its method above.
-    // If we wish to avoid such a blase removal of these files,
-    //   we should consider a deeper rewrite of SymbolVisitor interactions.
+    // If we wish to avoid such a removal of these files,
+    //   we should do a deeper rewrite of SymbolVisitor interactions,
+    //   rather than hack around with PythonWriters or DirectedPythonCodegen's customizeAfterIntegrations.
     try {
       LOGGER.info("Attempting to remove models.py");
       CodegenUtils.runCommand("rm models.py", generationPath).strip();

@@ -45,6 +45,7 @@ public final class DafnyPythonWrappedLocalServiceIntegration implements PythonIn
     @Override
     public List<ProtocolGenerator> getProtocolGenerators() {
         return Collections.singletonList(new DafnyPythonWrappedLocalServiceProtocolGenerator() {
+            // See the WrappedLocalServiceTrait class in this directory.
             @Override
             public ShapeId getProtocol() {
                 return ShapeId.from("aws.polymorph#wrappedLocalService");

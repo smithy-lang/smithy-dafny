@@ -53,10 +53,9 @@ public final class DafnyPythonAwsSdkIntegration implements PythonIntegration {
     public List<ProtocolGenerator> getProtocolGenerators() {
         List<ProtocolGenerator> protocolGenerators = new ArrayList<>();
         protocolGenerators.add(new DafnyPythonAwsSdkProtocolGenerator() {
-            // Setting `awsJson1_1` here allows any services that have this protocol trait
-            //   to be generated using this PythonIntegration.
-            // In practice, each service SHOULD only define one protocol trait,
-            //   else it is infeasible to determine which protocol will be used.
+            // Setting a Polymorph-specific protocol allows any services that
+            //  have this protocol trait to be generated using this PythonIntegration.
+            // See the DafnyAwsSdkProtocolTrait class in this directory.
             @Override
             public ShapeId getProtocol() {
                 return ShapeId.fromParts("aws.polymorph", "awsSdk");
