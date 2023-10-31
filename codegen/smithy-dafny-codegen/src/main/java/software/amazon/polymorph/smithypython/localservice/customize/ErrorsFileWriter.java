@@ -33,6 +33,7 @@ public class ErrorsFileWriter implements CustomFileWriter {
     codegenContext.writerDelegator().useFileWriter(moduleName + "/errors.py", "", writer -> {
       writer.addStdlibImport("typing", "Dict");
       writer.addStdlibImport("typing", "Any");
+      writer.addStdlibImport("typing", "List");
 
       // Generate Smithy shapes for each of this service's modelled errors
       TreeSet<StructureShape> deserializingErrorShapes = new TreeSet<StructureShape>(
@@ -63,7 +64,8 @@ public class ErrorsFileWriter implements CustomFileWriter {
              class CollectionOfErrors(ApiError[Literal["CollectionOfErrors"]]):
                  code: Literal["CollectionOfErrors"] = "CollectionOfErrors"
                  message: str
-                 # TODO-Python: To add `list` here, I'd need a typehint... what should the object type be?
+                 list: List[ServiceError]
+                 
                  def __init__(
                      self,
                      *,
@@ -119,18 +121,15 @@ public class ErrorsFileWriter implements CustomFileWriter {
                          for a in attributes
                      )
                              
-             # TODO-Python: Should this extend ApiError...?
-             # Probably not... as this doesn't have a message attribute...
              class OpaqueError(ApiError[Literal["OpaqueError"]]):
                  code: Literal["OpaqueError"] = "OpaqueError"
-                 # TODO-Python: The type of obj is only known at runtime, and therefore should *probably* should not have a typehint
-                 # Probably no-op here, but we should think more deeply about this...
+                 obj: Any  # As an OpaqueError, type of obj is unknown
+
                  def __init__(
                      self,
                      *,
                      obj
                  ):
-                     # TODO-Python: Remove superclass construction if we decide this shouldn't extend ApiError
                      super().__init__("")
                      self.obj = obj
                              
