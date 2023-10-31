@@ -73,7 +73,7 @@ jobs:
 
       - name: Setup Dafny
         # TODO: temporary until https://github.com/dafny-lang/setup-dafny-action/pull/19 is merged
-        uses: dafny-lang/setup-dafny-action@5ae5aac
+        uses: dafny-lang/setup-dafny-action@5ae5aacfdf373c46cb08f0bb852223f26cc9ecb3
         with:
           dafny-version: ${{ inputs.dafny }}
 
