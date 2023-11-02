@@ -217,7 +217,7 @@ public class CodegenCli {
             String versionStr = commandLine.getOptionValue("dafny-version");
             if (versionStr == null) {
                 LOGGER.error("--dafny-version option is required");
-                return Optional.empty();
+                System.exit(-1);
             }
             try {
                 dafnyVersion = DafnyVersion.parse(versionStr.trim());

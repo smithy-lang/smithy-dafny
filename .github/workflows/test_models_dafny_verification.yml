@@ -66,7 +66,7 @@ jobs:
         shell: bash
         working-directory: ./${{ matrix.library }}
         run: |
-          make polymorph_dafny
+          make polymorph_dafny DAFNY_VERSION_OPTION="--dafny-version $DAFNY_VERSION"
 
       - name: Verify ${{ matrix.library }} Dafny code
         shell: bash
