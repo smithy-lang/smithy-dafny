@@ -1,6 +1,14 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
+
 include "../../libraries/src/Wrappers.dfy"
 
-// TODO: document
+//
+// Helper functions for extern code to call in order to create common wrapper types.
+// Currently necessary to abstract away from differences in TypeDescriptor usage
+// in the Java backend across different versions of Dafny,
+// but may be useful for other target languages in the future as well.
+//
 module StandardLibrary.Interop {
 
   import opened Wrappers
