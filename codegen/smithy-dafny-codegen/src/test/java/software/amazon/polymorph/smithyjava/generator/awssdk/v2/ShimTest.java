@@ -123,8 +123,6 @@ public class ShimTest extends ForEachDafnyTest {
         assertEquals(expectedPath, actualPath);
         final String actualSource = actual.get(actualPath).toString();
         final String mockKmsShim = MockKmsShim(dafnyVersion);
-        System.out.println(actualSource);
-        System.out.print(mockKmsShim);
         Tokenizer.tokenizeAndAssertEqual(mockKmsShim, actualSource);
     }
 }
