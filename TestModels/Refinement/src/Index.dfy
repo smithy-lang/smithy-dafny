@@ -12,7 +12,7 @@ module {:extern "simple.refinement.internaldafny"} SimpleRefinement refines Abst
     method SimpleRefinement(
         config: SimpleRefinementConfig
     ) returns (
-        res: Result<SimpleRefinementClient, Error>
+        res: Result<ISimpleRefinementClient, Error>
     ) {
         var client := new SimpleRefinementClient(Operations.Config);
         return Success(client);
