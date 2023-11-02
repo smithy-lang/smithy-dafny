@@ -12,6 +12,7 @@ on:
 jobs:
   verification:
     strategy:
+      fail-fast: false
       matrix:
         library: [
           TestModels/dafny-dependencies/StandardLibrary, # This stores current Polymorph dependencies that all TestModels depend on
