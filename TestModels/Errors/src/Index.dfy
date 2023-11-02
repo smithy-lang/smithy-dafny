@@ -10,7 +10,7 @@ module {:extern "simple.errors.internaldafny" } SimpleErrors refines AbstractSim
   }
 
   method SimpleErrors(config: SimpleErrorsConfig)
-    returns (res: Result<SimpleErrorsClient, Error>)
+    returns (res: Result<ISimpleErrorsClient, Error>)
   {
     var client := new SimpleErrorsClient(Operations.Config);
     return Success(client);

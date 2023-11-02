@@ -7,6 +7,7 @@ on:
 jobs:
   pr-ci-verification:
     strategy:
+      fail-fast: false
       matrix:
         dafny-version: [
           4.1.0,
@@ -17,6 +18,7 @@ jobs:
       dafny: ${{ matrix.dafny-version }}
   pr-ci-java:
     strategy:
+      fail-fast: false
       matrix:
         dafny-version: [
           4.1.0,
@@ -27,6 +29,7 @@ jobs:
       dafny: ${{ matrix.dafny-version }}
   pr-ci-net:
     strategy:
+      fail-fast: false
       matrix:
         dafny-version: [
           4.1.0,

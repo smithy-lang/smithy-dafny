@@ -9,6 +9,7 @@ on:
 jobs:
   push-ci-verification:
     strategy:
+      fail-fast: false
       matrix:
         dafny-version: [
           4.1.0,
@@ -19,6 +20,7 @@ jobs:
       dafny: ${{ matrix.dafny-version }}
   push-ci-java:
     strategy:
+      fail-fast: false
       matrix:
         dafny-version: [
           4.1.0,
@@ -29,6 +31,7 @@ jobs:
       dafny: ${{ matrix.dafny-version }}
   push-ci-net:
     strategy:
+      fail-fast: false
       matrix:
         dafny-version: [
           4.1.0,
