@@ -4,6 +4,7 @@ package software.amazon.cryptography.services.dynamodb.internaldafny;
 
 import software.amazon.cryptography.services.dynamodb.internaldafny.types.IDynamoDBClient;
 import software.amazon.cryptography.services.dynamodb.internaldafny.types.Error;
+import StandardLibrary_Compile.Interop_Compile.WrappersInterop;
 import Wrappers_Compile.Option;
 import Wrappers_Compile.Result;
 import software.amazon.awssdk.auth.credentials.ProfileCredentialsProvider;
@@ -25,11 +26,11 @@ public class __default extends software.amazon.cryptography.services.dynamodb.in
                     .build();
 
             IDynamoDBClient shim = new Shim(ddbClient, region.toString());
-            return Shim.createSuccessOfClient(shim);
+            return CreateSuccessOfClient(shim);
         } catch (Exception e) {
             Error dafny_error = Error.create_InternalServerError(
-                    Shim.createStringSome(CharacterSequence(e.getMessage())));
-            return Shim.createFailureOfError(dafny_error);
+                    WrappersInterop.CreateStringSome(CharacterSequence(e.getMessage())));
+            return CreateFailureOfError(dafny_error);
         }
     }
 }
