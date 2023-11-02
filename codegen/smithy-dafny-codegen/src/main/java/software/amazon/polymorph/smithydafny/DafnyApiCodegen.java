@@ -1859,7 +1859,7 @@ public class DafnyApiCodegen {
     public TokenTree generateAbstractLocalService(ServiceShape serviceShape)  {
         if (!serviceShape.hasTrait(LocalServiceTrait.class)) throw new IllegalStateException("MUST be an LocalService");
         final LocalServiceTrait localServiceTrait = serviceShape.expectTrait(LocalServiceTrait.class);
-        final String dafnyClientTrait = "I%sClient".formatted(localServiceTrait.getSdkId());
+        final String dafnyClientTrait = nameResolver.traitForServiceClient(serviceShape);
 
         final String configTypeName = nameResolver.baseTypeForShape(localServiceTrait.getConfigId());
         final String defaultFunctionMethodName = "Default%s".formatted(localServiceTrait.getConfigId().getName());
