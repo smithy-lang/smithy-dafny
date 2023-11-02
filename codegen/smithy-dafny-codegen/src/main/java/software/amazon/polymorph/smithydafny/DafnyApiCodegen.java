@@ -2013,6 +2013,7 @@ public class DafnyApiCodegen {
         if (!serviceShape.hasTrait(ServiceTrait.class)) throw new IllegalStateException("MUST be an AWS Service API");
         final ServiceTrait serviceTrait = serviceShape.expectTrait(ServiceTrait.class);
         final String sdkId = serviceTrait.getSdkId();
+        final String dafnyClientTrait = nameResolver.traitForServiceClient(serviceShape);
 
         final String configTypeName = "%sClientConfigType".formatted(sdkId);
         final TokenTree configType = TokenTree
@@ -2026,7 +2027,7 @@ public class DafnyApiCodegen {
         final TokenTree factory = TokenTree
           .of(
             "method {:extern} %sClient()".formatted(serviceTrait.getSdkId()),
-            "returns (res: Result<%s, Error>)".formatted(nameResolver.traitForServiceClient(serviceShape)),
+            "returns (res: Result<%s, Error>)".formatted(dafnyClientTrait),
             "ensures res.Success? ==> ",
             "&& fresh(res.value)",
             "&& fresh(res.value.%s)".formatted(nameResolver.mutableStateFunctionName()),
@@ -2034,11 +2035,28 @@ public class DafnyApiCodegen {
             "&& res.value.%s()".formatted(nameResolver.validStateInvariantName())
           ).lineSeparated();
 
+        final TokenTree createSuccessOfClient = TokenTree
+          .of(
+            "// Helper function for the benefit of native code to create a Success(client) without referring to Dafny internals",
+            "function method CreateSuccessOfClient(client: %s): Result<%s, Error> {".formatted(dafnyClientTrait, dafnyClientTrait),
+            "  Success(client)",
+            "}"
+          ).lineSeparated();
+        final TokenTree createFailureOfError = TokenTree
+          .of(
+            "// Helper function for the benefit of native code to create a Failure(error) without referring to Dafny internals",
+            "function method CreateFailureOfError(error: Error): Result<%s, Error> {".formatted(dafnyClientTrait),
+            "  Failure(error)",
+            "}"
+          ).lineSeparated();
+
         return TokenTree
           .of(
             configType,
             defaultConfig,
-            factory
+            factory,
+            createSuccessOfClient,
+            createFailureOfError
           )
           .lineSeparated();
     }

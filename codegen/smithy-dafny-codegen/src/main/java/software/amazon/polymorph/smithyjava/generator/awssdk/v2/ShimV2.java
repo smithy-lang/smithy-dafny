@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 
 import javax.lang.model.element.Modifier;
 
-import software.amazon.polymorph.smithyjava.generator.awssdk.Shim;
+import software.amazon.polymorph.smithyjava.generator.Generator;
 import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.smithy.model.shapes.OperationShape;
@@ -34,7 +34,7 @@ import static software.amazon.polymorph.smithyjava.nameresolver.Constants.SMITHY
  * Generates an AWS SDK Shim for the AWS SDK for Java V2
  * exposing an AWS Service's operations to Dafny Generated Java.
  */
-public class ShimV2 extends Shim {
+public class ShimV2 extends Generator {
     public static final String SHIM = "Shim";
     // Hack to override CodegenSubject
     // See code comment on ../library/ModelCodegen for details.
@@ -70,12 +70,6 @@ public class ShimV2 extends Shim {
                 .addField(
                         ClassName.get(String.class),
                         "region", Modifier.PRIVATE, Modifier.FINAL)
-                .addMethod(successOfClientConstructor())
-                .addMethod(failureOfErrorConstructor())
-                .addMethod(stringSomeConstructor())
-                .addMethod(stringNoneConstructor())
-                .addMethod(booleanSomeConstructor())
-                .addMethod(booleanNoneConstructor())
                 .addMethod(constructor())
                 .addMethod(impl())
                 .addMethod(region())

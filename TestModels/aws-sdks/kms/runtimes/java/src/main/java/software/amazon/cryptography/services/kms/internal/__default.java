@@ -12,6 +12,7 @@ import software.amazon.awssdk.services.kms.KmsClientBuilder;
 
 import software.amazon.cryptography.services.kms.internaldafny.types.Error;
 import software.amazon.cryptography.services.kms.internaldafny.types.IKMSClient;
+import StandardLibrary_Compile.Interop_Compile.WrappersInterop;
 import Wrappers_Compile.Option;
 import Wrappers_Compile.Result;
 
@@ -26,11 +27,11 @@ public class __default extends software.amazon.cryptography.services.kms.interna
             String region = regionProvider.getRegion().toString();
             KmsClient client = builder.build();
             IKMSClient shim = new Shim(client, region);
-            return Shim.createSuccessOfClient(shim);
+            return CreateSuccessOfClient(shim);
         } catch (Exception e) {
             Error dafny_error = Error.create_KMSInternalException(
-                    Shim.createStringSome(CharacterSequence(e.getMessage())));
-            return Shim.createFailureOfError(dafny_error);
+                    WrappersInterop.CreateStringSome(CharacterSequence(e.getMessage())));
+            return CreateFailureOfError(dafny_error);
         }
     }
 
@@ -39,11 +40,11 @@ public class __default extends software.amazon.cryptography.services.kms.interna
             KmsClientBuilder builder = KmsClient.builder();
             KmsClient client = builder.region(Region.of(region)).build();
             IKMSClient shim = new Shim(client, region);
-            return Shim.createSuccessOfClient(shim);
+            return CreateSuccessOfClient(shim);
         } catch (Exception e) {
             Error dafny_error = Error.create_KMSInternalException(
-                    Shim.createStringSome(CharacterSequence(e.getMessage())));
-            return Shim.createFailureOfError(dafny_error);
+                    WrappersInterop.CreateStringSome(CharacterSequence(e.getMessage())));
+            return CreateFailureOfError(dafny_error);
         }
     }
 
@@ -60,13 +61,13 @@ public class __default extends software.amazon.cryptography.services.kms.interna
         // have no way to determine what region it is
         // configured with.
         if (shim.region() == null) {
-            return Shim.createBooleanNone();
+            return WrappersInterop.CreateBooleanNone();
         }
 
         // Otherwise we kept record of the region
         // when we created the client.
         String shimRegion = shim.region();
         String regionStr = String(region);
-        return Shim.createBooleanSome(regionStr.equals(shimRegion));
+        return WrappersInterop.CreateBooleanSome(regionStr.equals(shimRegion));
     }
 }
