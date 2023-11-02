@@ -101,7 +101,7 @@ jobs:
         # Use $DAFNY_VERSION from setup-dafny-action to handle nightlies correctly
         run: |
           make polymorph_dafny
-          make polymorph_java DAFNY_VERSION="--dafny-version $DAFNY_VERSION"
+          make polymorph_java DAFNY_VERSION_OPTION="--dafny-version $DAFNY_VERSION"
 
       - name: Setup Java 8 for running tests
         uses: actions/setup-java@v3

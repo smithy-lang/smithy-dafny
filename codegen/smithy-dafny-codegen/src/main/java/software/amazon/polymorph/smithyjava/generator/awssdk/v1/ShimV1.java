@@ -30,6 +30,7 @@ import software.amazon.smithy.utils.StringUtils;
 import static software.amazon.polymorph.smithyjava.nameresolver.Constants.DAFNY_TUPLE0_CLASS_NAME;
 import static software.amazon.polymorph.smithyjava.nameresolver.Constants.SMITHY_API_UNIT;
 
+//TODO: Create abstract class for V1 & V2 to extend
 /**
  * Generates an AWS SDK Shim for the AWS SKD for Java V1
  * exposing an AWS Service's operations to Dafny Generated Java.

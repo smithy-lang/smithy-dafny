@@ -74,9 +74,9 @@ public class CodegenCli {
                 .withNamespace(cliArguments.namespace)
                 .withTargetLangOutputDirs(outputDirs)
                 .withAwsSdkStyle(cliArguments.awsSdkStyle)
-                .withLocalServiceTest(cliArguments.localServiceTest);
+                .withLocalServiceTest(cliArguments.localServiceTest)
+                .withDafnyVersion(cliArguments.dafnyVersion);
         cliArguments.javaAwsSdkVersion.ifPresent(engineBuilder::withJavaAwsSdkVersion);
-        cliArguments.dafnyVersion.ifPresent(engineBuilder::withDafnyVersion);
         cliArguments.includeDafnyFile.ifPresent(engineBuilder::withIncludeDafnyFile);
         final CodegenEngine engine = engineBuilder.build();
         engine.run();
@@ -123,7 +123,7 @@ public class CodegenCli {
             .build())
           .addOption(Option.builder()
             .longOpt("dafny-version")
-            .desc("<optional> Dafny version to use. Defaults to 4.1.0")
+            .desc("Dafny version to generate code for")
             .hasArg()
             .build())
           .addOption(Option.builder()
@@ -159,7 +159,7 @@ public class CodegenCli {
             Optional<Path> outputJavaDir,
             Optional<Path> outputDafnyDir,
             Optional<AwsSdkVersion> javaAwsSdkVersion,
-            Optional<DafnyVersion> dafnyVersion,
+            DafnyVersion dafnyVersion,
             Optional<Path> includeDafnyFile,
             boolean awsSdkStyle,
             boolean localServiceTest
@@ -213,10 +213,17 @@ public class CodegenCli {
                 }
             }
 
-            Optional<DafnyVersion> dafnyVersion = Optional.empty();
-            if (commandLine.hasOption("dafny-version")) {
-                final String versionStr = commandLine.getOptionValue("dafny-version").trim().toUpperCase();
-                dafnyVersion = Optional.of(DafnyVersion.parse(versionStr));
+            DafnyVersion dafnyVersion;
+            String versionStr = commandLine.getOptionValue("dafny-version");
+            if (versionStr == null) {
+                LOGGER.error("--dafny-version option is required");
+                return Optional.empty();
+            }
+            try {
+                dafnyVersion = DafnyVersion.parse(versionStr.trim());
+            } catch (IllegalArgumentException ex) {
+                LOGGER.error("Could not parse --dafny-version: {}", versionStr);
+                throw ex;
             }
 
             Optional<Path> includeDafnyFile = Optional.empty();

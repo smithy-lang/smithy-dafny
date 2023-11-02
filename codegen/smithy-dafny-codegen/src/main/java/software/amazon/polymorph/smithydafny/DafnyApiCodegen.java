@@ -1954,7 +1954,7 @@ public class DafnyApiCodegen {
           .of(
             defaultConfig,
             serviceMethod,
-            generateResultOfClientHelperFunctions("I%sClient".formatted(localServiceTrait.getSdkId()))
+            generateResultOfClientHelperFunctions("%sClient".formatted(localServiceTrait.getSdkId()))
           )
           .lineSeparated();
     }
