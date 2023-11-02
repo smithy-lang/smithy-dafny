@@ -4,7 +4,7 @@ package software.amazon.cryptography.services.dynamodb.internaldafny;
 
 import software.amazon.cryptography.services.dynamodb.internaldafny.types.IDynamoDBClient;
 import software.amazon.cryptography.services.dynamodb.internaldafny.types.Error;
-import StandardLibrary_Compile.Interop_Compile.WrappersInterop;
+import StandardLibrary_mInterop_Compile.WrappersInterop;
 import Wrappers_Compile.Option;
 import Wrappers_Compile.Result;
 import software.amazon.awssdk.auth.credentials.ProfileCredentialsProvider;

@@ -12,7 +12,7 @@ import software.amazon.awssdk.services.kms.KmsClientBuilder;
 
 import software.amazon.cryptography.services.kms.internaldafny.types.Error;
 import software.amazon.cryptography.services.kms.internaldafny.types.IKMSClient;
-import StandardLibrary_Compile.Interop_Compile.WrappersInterop;
+import StandardLibrary_mInterop_Compile.WrappersInterop;
 import Wrappers_Compile.Option;
 import Wrappers_Compile.Result;
 
