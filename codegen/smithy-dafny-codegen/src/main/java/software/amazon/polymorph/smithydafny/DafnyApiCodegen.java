@@ -1953,7 +1953,8 @@ public class DafnyApiCodegen {
         return TokenTree
           .of(
             defaultConfig,
-            serviceMethod
+            serviceMethod,
+            generateResultOfClientHelperFunctions("I%sClient".formatted(localServiceTrait.getSdkId()))
           )
           .lineSeparated();
     }
@@ -2055,10 +2056,27 @@ public class DafnyApiCodegen {
             configType,
             defaultConfig,
             factory,
-            createSuccessOfClient,
-            createFailureOfError
+            generateResultOfClientHelperFunctions(dafnyClientTrait)
           )
           .lineSeparated();
+    }
+
+    private static TokenTree generateResultOfClientHelperFunctions(String dafnyClientTrait) {
+        final TokenTree createSuccessOfClient = TokenTree
+          .of(
+            "// Helper function for the benefit of native code to create a Success(client) without referring to Dafny internals",
+            "function method CreateSuccessOfClient(client: %s): Result<%s, Error> {".formatted(dafnyClientTrait, dafnyClientTrait),
+            "  Success(client)",
+            "}"
+          ).lineSeparated();
+        final TokenTree createFailureOfError = TokenTree
+          .of(
+            "// Helper function for the benefit of native code to create a Failure(error) without referring to Dafny internals",
+            "function method CreateFailureOfError(error: Error): Result<%s, Error> {".formatted(dafnyClientTrait),
+            "  Failure(error)",
+            "}"
+          ).lineSeparated();
+        return TokenTree.of(createSuccessOfClient, createFailureOfError);
     }
 
     private static TokenTree generateLengthConstraint(final LengthTrait lengthTrait) {

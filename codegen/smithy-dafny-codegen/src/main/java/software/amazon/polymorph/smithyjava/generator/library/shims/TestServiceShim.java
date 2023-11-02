@@ -62,8 +62,6 @@ public class TestServiceShim extends ServiceShim {
         spec.addMethod(testServiceConstructor(builderSpecs));
         // Add public static method for creating a builder
         spec.addMethod(builderSpecs.builderMethod());
-        // Add public static method for creating a Success(client)
-        spec.addMethod(successOfTestServiceConstructor());
 
         spec.addMethods(getOperationsForTarget().stream()
                 .map(shape -> Operation.AsDafny.operation(shape, this.subject, this))
@@ -110,22 +108,6 @@ public class TestServiceShim extends ServiceShim {
                 .addModifiers(PROTECTED)
                 .addParameter(builderSpecs.builderImplName(), BuilderSpecs.BUILDER_VAR);
         method.addStatement("this.$L = $L.$L()", getField().name, BuilderSpecs.BUILDER_VAR, getArg().name);
-        return method.build();
-    }
-
-    private MethodSpec successOfTestServiceConstructor() {
-        MethodSpec.Builder method = MethodSpec
-                .methodBuilder("createSuccessOfClient")
-                .addModifiers(STATIC, PUBLIC)
-                .addParameter(thisClassName, "client")
-                .returns(Dafny.asDafnyResult(
-                        subject.dafnyNameResolver.classNameForInterface(this.targetShape),
-                        subject.dafnyNameResolver.abstractClassForError()
-                ));
-        method.addStatement("return $L",
-                subject.dafnyNameResolver.createSuccess(
-                        subject.dafnyNameResolver.typeDescriptor(targetShape.toShapeId()),
-                        CodeBlock.of("client")));
         return method.build();
     }
 
