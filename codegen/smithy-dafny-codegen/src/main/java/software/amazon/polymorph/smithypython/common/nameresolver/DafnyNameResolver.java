@@ -4,12 +4,15 @@
 package software.amazon.polymorph.smithypython.common.nameresolver;
 
 import java.util.Locale;
+import java.util.Optional;
 import software.amazon.polymorph.smithypython.awssdk.nameresolver.AwsSdkNameResolver;
+import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.ResourceShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
+import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.python.codegen.GenerationContext;
@@ -141,14 +144,27 @@ public class DafnyNameResolver {
     if (context.model().expectShape(shapeId).hasTrait(ErrorTrait.class)) {
       throw new IllegalArgumentException(
           "Error shapes are not supported in importDafnyTypeForShape. Provided " + shapeId);
+    } else if (context.model().expectShape(shapeId).hasTrait(PositionalTrait.class)) {
+      Optional<StructureShape> maybeStructureShape
+          = context.model().expectShape(shapeId).asStructureShape();
+      if (maybeStructureShape.isEmpty()) {
+        throw new IllegalArgumentException(
+            "PositionalShapes can only be applied to StructureShapes; was applied to " + shapeId);
+      }
+      final MemberShape onlyMember = PositionalTrait.onlyMember(maybeStructureShape.get());
+//      writer.addStdlibImport(getDafnyPythonTypesModuleNameForShape(onlyMember.getId()),
+//          onlyMember.getMemberName() + "_" + onlyMember.getMemberName(), getDafnyTypeForShape(onlyMember.getId()) );
+      // TODO Positional
+    } else {
+      // When generating a Dafny import, must ALWAYS first import module_ to avoid circular dependencies
+      writer.addStdlibImport("module_");
+      String name = shapeId.getName();
+      if (!Utils.isUnitShape(shapeId)) {
+        writer.addStdlibImport(getDafnyPythonTypesModuleNameForShape(shapeId),
+            name.replace("_", "__") + "_" + name.replace("_", "__"), getDafnyTypeForShape(shapeId));
+      }
     }
-    // When generating a Dafny import, must ALWAYS first import module_ to avoid circular dependencies
-    writer.addStdlibImport("module_");
-    String name = shapeId.getName();
-    if (!Utils.isUnitShape(shapeId)) {
-      writer.addStdlibImport(getDafnyPythonTypesModuleNameForShape(shapeId),
-          name + "_" + name, getDafnyTypeForShape(shapeId));
-    }
+
   }
 
   /**
@@ -159,7 +175,12 @@ public class DafnyNameResolver {
    * @return
    */
   public static String getDafnyClientInterfaceTypeForServiceShape(ServiceShape serviceShape) {
-    return "I" + serviceShape.getId().getName() + "Client";
+    if ("DynamoDB_20120810".equals(serviceShape.getId().getName())) {
+      return "IDynamoDBClient";
+    } else if ("TrentService".equals(serviceShape.getId().getName())) {
+      return "IKMSClient";
+    }
+      return "I" + serviceShape.getId().getName() + "Client";
   }
 
   /**
@@ -247,7 +268,7 @@ public class DafnyNameResolver {
    */
   public static String getDafnyTypeForUnion(UnionShape unionShape,
       MemberShape memberShape) {
-    return unionShape.getId().getName() + "_" + memberShape.getMemberName();
+    return unionShape.getId().getName().replace("_", "__") + "_" + memberShape.getMemberName().replace("_", "__");
   }
 
   /**

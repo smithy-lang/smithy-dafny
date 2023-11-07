@@ -3,7 +3,9 @@
 
 package software.amazon.polymorph.smithypython.localservice.extensions;
 
+import software.amazon.polymorph.smithypython.wrappedlocalservice.WrappedLocalServiceTrait;
 import software.amazon.polymorph.traits.LocalServiceTrait;
+import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.build.PluginContext;
 import software.amazon.smithy.build.SmithyBuildPlugin;
 import software.amazon.smithy.codegen.core.directed.CodegenDirector;
@@ -46,12 +48,38 @@ public final class DafnyPythonLocalServiceClientCodegenPlugin implements SmithyB
 
     PythonSettings settings = PythonSettings.from(context.getSettings());
     runner.settings(settings);
-    runner.directedCodegen(new DirectedPythonCodegen());
+    runner.directedCodegen(new DirectedDafnyPythonLocalServiceCodegen());
     runner.fileManifest(context.getFileManifest());
     runner.service(settings.getService());
     runner.model(context.getModel());
     runner.integrationClass(PythonIntegration.class);
+
+    ServiceShape serviceShape = context.getModel().expectShape(settings.getService()).asServiceShape().get();
+    Model transformedModel = transformServiceShapeToAddReferenceResources(context.getModel(), serviceShape);
+    runner.model(transformedModel);
+
     runner.run();
   }
 
+  public static Model transformServiceShapeToAddReferenceResources(Model model, ServiceShape serviceShape) {
+
+    ServiceShape.Builder transformedServiceShapeBuilder = serviceShape.toBuilder();
+    ModelTransformer.create().mapShapes(model, shape -> {
+      if (shape.hasTrait(ReferenceTrait.class)) {
+        ShapeId referenceShapeId = shape.expectTrait(ReferenceTrait.class).getReferentId();
+        if (model.expectShape(referenceShapeId).isResourceShape()) {
+          transformedServiceShapeBuilder.addResource(referenceShapeId);
+        }
+      }
+      return shape;
+    });
+
+    return ModelTransformer.create().mapShapes(model, shape -> {
+      if (shape.equals(serviceShape)) {
+        return transformedServiceShapeBuilder.build();
+      } else {
+        return shape;
+      }
+    });
+  }
 }

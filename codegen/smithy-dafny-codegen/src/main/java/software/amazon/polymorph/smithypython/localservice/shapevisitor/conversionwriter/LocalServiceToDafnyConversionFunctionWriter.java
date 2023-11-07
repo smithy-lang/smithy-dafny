@@ -10,12 +10,14 @@ import software.amazon.polymorph.smithypython.common.nameresolver.Utils;
 import software.amazon.polymorph.smithypython.common.shapevisitor.conversionwriter.BaseConversionWriter;
 import software.amazon.polymorph.smithypython.common.shapevisitor.ShapeVisitorResolver;
 import software.amazon.polymorph.smithypython.localservice.shapevisitor.LocalServiceConfigToDafnyConfigShapeVisitor;
+import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.codegen.core.WriterDelegator;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.ResourceShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
+import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.python.codegen.GenerationContext;
@@ -76,6 +78,8 @@ public class LocalServiceToDafnyConversionFunctionWriter extends BaseConversionW
               conversionWriter.write("return None");
             } else if (structureShape.hasTrait(ReferenceTrait.class)) {
               writeReferenceStructureShapeConverter(structureShape, conversionWriter, dataSourceInsideConversionFunction);
+            } else if (structureShape.hasTrait(PositionalTrait.class)) {
+              writePositionalStructureShapeConverter(structureShape, conversionWriter, dataSourceInsideConversionFunction);
             } else {
               writeNonReferenceStructureShapeConverter(structureShape, conversionWriter, dataSourceInsideConversionFunction);
             }
@@ -167,6 +171,27 @@ public class LocalServiceToDafnyConversionFunctionWriter extends BaseConversionW
           )
       );
     }
+  }
+
+  /**
+   * Called from the StructureShape converter when the StructureShape has a Polymorph Positional trait.
+   * @return
+   */
+  protected void writePositionalStructureShapeConverter(StructureShape structureShape, PythonWriter conversionWriter,
+      String dataSourceInsideConversionFunction) {
+    final MemberShape onlyMember = PositionalTrait.onlyMember(structureShape);
+    final Shape targetShape = context.model().expectShape(onlyMember.getTarget());
+
+    conversionWriter.write("return $L",
+        targetShape.accept(
+            ShapeVisitorResolver.getToDafnyShapeVisitorForShape(targetShape,
+                context,
+                dataSourceInsideConversionFunction + "." + CaseUtils.toSnakeCase(onlyMember.getMemberName()),
+                conversionWriter,
+                "smithy_to_dafny"
+            )
+        )
+    );
   }
 
   /**

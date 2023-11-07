@@ -8,6 +8,7 @@ import java.util.Set;
 import software.amazon.polymorph.smithypython.common.Constants;
 import software.amazon.polymorph.smithypython.common.customize.CustomFileWriter;
 import software.amazon.polymorph.smithypython.common.nameresolver.DafnyNameResolver;
+import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.ShapeId;
@@ -78,8 +79,16 @@ public class DafnyProtocolFileWriter implements CustomFileWriter {
       writer.write("None");
     }
     for (ShapeId inputShapeId : inputShapeIds) {
-      DafnyNameResolver.importDafnyTypeForShape(writer, inputShapeId, context);
-      writer.write("$L,", DafnyNameResolver.getDafnyTypeForShape(inputShapeId));
+      if (context.model().expectShape(inputShapeId).isStructureShape()
+        && context.model().expectShape(inputShapeId).asStructureShape().get().hasTrait(
+          PositionalTrait.class)) {
+        // TODO: Typing positionals, and somehow typing the base classes
+        // Blob, boolean...
+      } else {
+        DafnyNameResolver.importDafnyTypeForShape(writer, inputShapeId, context);
+        writer.write("$L,", DafnyNameResolver.getDafnyTypeForShape(inputShapeId));
+      }
+
     }
   }
 

@@ -28,8 +28,7 @@ public class AwsSdkNameResolver {
   public static boolean isAwsSdkShape(ShapeId shapeId) {
     // If the shape namespace is not in our list of known SDK namespaces,
     // it is not a (known) SDK namespace
-    return !resolveAwsSdkSmithyModelNamespaceToDafnyExternNamespace(shapeId.getNamespace())
-        .equals(shapeId.getNamespace());
+    return shapeId.getNamespace().startsWith("com.amazonaws");
   }
 
   /**
@@ -55,12 +54,30 @@ public class AwsSdkNameResolver {
    * @return
    */
   public static String resolveAwsSdkSmithyModelNamespaceToDafnyExternNamespace(String smithyNamespace) {
-    return switch (smithyNamespace) {
-      case "com.amazonaws.kms" -> "software.amazon.cryptography.services.kms";
-      case "com.amazonaws.dynamodb" -> "software.amazon.cryptography.services.dynamodb";
-      default -> smithyNamespace;
-    };
+    String rtn = smithyNamespace.toLowerCase();
+    if (smithyNamespace.startsWith("aws")) {
+      rtn = rtn.replaceFirst("aws", "software.amazon");
+    } else if (smithyNamespace.startsWith("com.amazonaws")) {
+      rtn = rtn.replaceFirst("com.amazonaws", "software.amazon.cryptography.services");
+    }
+    return rtn;
+//    return switch (smithyNamespace) {
+//      case "com.amazonaws.kms" -> "software.amazon.cryptography.services.kms";
+//      case "com.amazonaws.dynamodb" -> "software.amazon.cryptography.services.dynamodb";
+//      default -> smithyNamespace;
+//    };
   }
+
+  /*
+  public static String standardize(String namespace) {
+        String rtn = namespace.toLowerCase();
+        if (namespace.startsWith("aws")) {
+            rtn = rtn.replaceFirst("aws", "software.amazon");
+        } else if (namespace.startsWith("com.amazonaws")) {
+            rtn = rtn.replaceFirst("com.amazonaws", "software.amazon.cryptography.services");
+        }
+    }
+   */
 
   /**
    * Returns the name of the function that converts the provided shape's Dafny-modelled type

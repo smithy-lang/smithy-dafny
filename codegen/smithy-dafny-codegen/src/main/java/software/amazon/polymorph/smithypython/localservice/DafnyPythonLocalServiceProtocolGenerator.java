@@ -13,6 +13,7 @@ import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameReso
 import software.amazon.polymorph.smithypython.common.nameresolver.Utils;
 import software.amazon.polymorph.smithypython.common.shapevisitor.ShapeVisitorResolver;
 import software.amazon.polymorph.traits.LocalServiceTrait;
+import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolReference;
 import software.amazon.smithy.codegen.core.WriterDelegator;
@@ -153,7 +154,15 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator implements Protoc
 
     writer.addDependency(SmithyPythonDependency.SMITHY_PYTHON);
     // Import the Dafny type being converted to
-    DafnyNameResolver.importDafnyTypeForShape(writer, operation.getInputShape(), context);
+    if (context.model().expectShape(operation.getInputShape()).isStructureShape()
+        && context.model().expectShape(operation.getInputShape()).asStructureShape().get().hasTrait(
+        PositionalTrait.class)) {
+      // TODO: Typing positionals, and somehow typing the base classes
+      // Blob, boolean...
+    } else {
+      DafnyNameResolver.importDafnyTypeForShape(writer, operation.getInputShape(), context);
+    }
+
 
     // Determine conversion code from Smithy to Dafny
     Shape targetShape = context.model().expectShape(operation.getInputShape());
@@ -229,7 +238,15 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator implements Protoc
       writer.pushState(new ResponseDeserializerSection(operation));
 
       ShapeId outputShape = operation.getOutputShape();
-      DafnyNameResolver.importDafnyTypeForShape(writer, outputShape, context);
+
+      if (context.model().expectShape(operation.getInputShape()).isStructureShape()
+          && context.model().expectShape(operation.getInputShape()).asStructureShape().get().hasTrait(
+          PositionalTrait.class)) {
+        // TODO: Typing positionals, and somehow typing the base classes
+        // Blob, boolean...
+      } else {
+        DafnyNameResolver.importDafnyTypeForShape(writer, outputShape, context);
+      }
 
       // Smithy Unit shapes have no data, and do not need deserialization
       if (Utils.isUnitShape(outputShape)) {
@@ -349,7 +366,9 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator implements Protoc
     Optional<LocalServiceTrait> maybeLocalServiceTrait = serviceShape.getTrait(LocalServiceTrait.class);
     if (maybeLocalServiceTrait.isPresent()) {
       LocalServiceTrait localServiceTrait = maybeLocalServiceTrait.get();
-      Set<ShapeId> serviceDependencyShapeIds = localServiceTrait.getDependencies();
+      Set<ShapeId> serviceDependencyShapeIds = localServiceTrait.getDependencies().stream()
+          .filter(shapeId -> context.model().expectShape(shapeId).hasTrait(LocalServiceTrait.class)).collect(
+              Collectors.toSet());
       if (serviceDependencyShapeIds != null) {
         for (ShapeId serviceDependencyShapeId : serviceDependencyShapeIds) {
           writer.addImport(".errors", serviceDependencyShapeId.getName());

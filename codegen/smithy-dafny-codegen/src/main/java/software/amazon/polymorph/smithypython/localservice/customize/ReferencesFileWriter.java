@@ -19,9 +19,12 @@ import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
+import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonWriter;
 import software.amazon.smithy.python.codegen.StructureGenerator;
+import software.amazon.smithy.python.codegen.SymbolVisitor;
+import software.amazon.smithy.python.codegen.UnionGenerator;
 
 
 /**
@@ -81,21 +84,26 @@ public class ReferencesFileWriter implements CustomFileWriter {
 
     // For each reference shape, generate an interface and an implementation shape
     for(Shape resourceOrServiceShape : referenceChildShape) {
-      // Write reference interface.
-      // We use the `abc` (Abstract Base Class) library to define a stricter interface contract
-      //   for references in Python than a standard Python subclass contract.
-      // The generated code will use the ABC library to enforce constraints at object-create time.
-      // In particular, when the object is constructed, the constructor will validate that the
-      //   object's class implements all callable operations defined in the reference's Smithy model.
-      // This differs from standard Python duck-typing, where classes implementing an "interface" are
-      //   only checked that an "interface" operation is implemented at operation call-time.
-      // We do this for a number of reasons:
-      //   1) This is a Smithy-Dafny code generator, and Dafny has this stricter interface
-      //      contract. We decide to generate code that biases toward the Dafny behavior;
-      //   2) A strict interface contract will detect issues implementing an interface sooner.
-      // This is opinionated and may change.
-      writer.addStdlibImport("abc");
-      writer.write("""
+
+    }
+  }
+
+  public void generateResourceStuff(Shape resourceOrServiceShape, GenerationContext context, PythonWriter writer) {
+    // Write reference interface.
+    // We use the `abc` (Abstract Base Class) library to define a stricter interface contract
+    //   for references in Python than a standard Python subclass contract.
+    // The generated code will use the ABC library to enforce constraints at object-create time.
+    // In particular, when the object is constructed, the constructor will validate that the
+    //   object's class implements all callable operations defined in the reference's Smithy model.
+    // This differs from standard Python duck-typing, where classes implementing an "interface" are
+    //   only checked that an "interface" operation is implemented at operation call-time.
+    // We do this for a number of reasons:
+    //   1) This is a Smithy-Dafny code generator, and Dafny has this stricter interface
+    //      contract. We decide to generate code that biases toward the Dafny behavior;
+    //   2) A strict interface contract will detect issues implementing an interface sooner.
+    // This is opinionated and may change.
+    writer.addStdlibImport("abc");
+    writer.write("""
         
         class I$L(metaclass=abc.ABCMeta):
             @classmethod
@@ -108,19 +116,19 @@ public class ReferencesFileWriter implements CustomFileWriter {
                 
             ${C|}
         """,
-          resourceOrServiceShape.getId().getName(),
-          writer.consumer(w -> generateInterfaceSubclasshookExpressionForResourceOrService(
-              codegenContext, resourceOrServiceShape, w)
-          ),
-          writer.consumer(w -> generateInterfaceOperationFunctionDefinitionForResourceOrService(
-              codegenContext, resourceOrServiceShape, w)
-          )
-      );
+        resourceOrServiceShape.getId().getName(),
+        writer.consumer(w -> generateInterfaceSubclasshookExpressionForResourceOrService(
+            context, resourceOrServiceShape, w)
+        ),
+        writer.consumer(w -> generateInterfaceOperationFunctionDefinitionForResourceOrService(
+            context, resourceOrServiceShape, w)
+        )
+    );
 
-      writer.addStdlibImport("typing", "Any");
+    writer.addStdlibImport("typing", "Any");
 
-      // Write implementation for reference shape
-      writer.write("""
+    // Write implementation for reference shape
+    writer.write("""
         class $L(I$L):
             # TODO-Python: typehint
             _impl: Any
@@ -130,13 +138,12 @@ public class ReferencesFileWriter implements CustomFileWriter {
                 
             ${C|}
         """,
-          resourceOrServiceShape.getId().getName(),
-          resourceOrServiceShape.getId().getName(),
-          writer.consumer(w -> generateSmithyOperationFunctionDefinitionForResourceOrService(
-              codegenContext, resourceOrServiceShape, w)
-          )
-      );
-    }
+        resourceOrServiceShape.getId().getName(),
+        resourceOrServiceShape.getId().getName(),
+        writer.consumer(w -> generateSmithyOperationFunctionDefinitionForResourceOrService(
+            context, resourceOrServiceShape, w)
+        )
+    );
   }
 
   /**
@@ -267,6 +274,7 @@ public class ReferencesFileWriter implements CustomFileWriter {
       OperationShape operationShape = codegenContext.model().expectShape(operationShapeId, OperationShape.class);
 
       Shape targetShapeInput = codegenContext.model().expectShape(operationShape.getInputShape());
+      var inputSymbol = codegenContext.symbolProvider().toSymbol(targetShapeInput);
       // Generate code that converts the input from the Dafny type to the corresponding Smithy type
       // `input` will hold a string that converts the Dafny `input` to the Smithy-modelled output.
       // This has a side effect of possibly writing transformation code at the writer's current position.
@@ -281,6 +289,7 @@ public class ReferencesFileWriter implements CustomFileWriter {
       ));
 
       Shape targetShape = codegenContext.model().expectShape(operationShape.getOutputShape());
+      var outputSymbol = codegenContext.symbolProvider().toSymbol(targetShape);
       // Generate output code converting the return value of the Dafny implementation into
       // its corresponding native-modelled type.
       String output = targetShape.accept(ShapeVisitorResolver.getToNativeShapeVisitorForShape(targetShape, 
@@ -312,11 +321,30 @@ public class ReferencesFileWriter implements CustomFileWriter {
   public void customizeFileForNonServiceShapes(Set<ShapeId> shapeIds, GenerationContext codegenContext) {
     // Write out a Smithy-modelled structure for all operation shapes.
     for (ShapeId operationShapeId : shapeIds) {
+      System.out.println(operationShapeId);
       OperationShape operationShape = codegenContext.model().expectShape(operationShapeId, OperationShape.class);
       StructureShape inputShape = codegenContext.model().expectShape(operationShape.getInputShape(), StructureShape.class);
-      writeStructureShape(inputShape, codegenContext);
+//      writeStructureShape(inputShape, codegenContext);
+      var inputSymbol = codegenContext.symbolProvider().toSymbol(inputShape);
       StructureShape outputShape = codegenContext.model().expectShape(operationShape.getOutputShape(), StructureShape.class);
-      writeStructureShape(outputShape, codegenContext);
+//      writeStructureShape(outputShape, codegenContext);
+      var outputSymbol = codegenContext.symbolProvider().toSymbol(outputShape);
+
+      String moduleName = codegenContext.settings().getModuleName();
+      codegenContext.writerDelegator().useFileWriter(moduleName + "/models.py", "", writer -> {
+
+//        inputShape.accept(new SymbolVisitor(codegenContext.model(), codegenContext.settings()));
+//        outputShape.accept(new SymbolVisitor(codegenContext.model(), codegenContext.settings()));
+//        inputShape.accept(ShapeVisitorResolver.getToNativeShapeVisitorForShape(inputShape, codegenContext, "input", writer));
+//        outputShape.accept(ShapeVisitorResolver.getToNativeShapeVisitorForShape(outputShape, codegenContext, "input", writer));
+
+
+        inputShape.accept(ShapeVisitorResolver.getToDafnyShapeVisitorForShape(inputShape, codegenContext, "input", writer));
+        outputShape.accept(ShapeVisitorResolver.getToDafnyShapeVisitorForShape(outputShape, codegenContext, "input", writer));
+        inputShape.accept(ShapeVisitorResolver.getToNativeShapeVisitorForShape(inputShape, codegenContext, "input", writer));
+        outputShape.accept(ShapeVisitorResolver.getToNativeShapeVisitorForShape(outputShape, codegenContext, "input", writer));
+
+      });
     }
   }
 
@@ -346,5 +374,37 @@ public class ReferencesFileWriter implements CustomFileWriter {
         generator.run();
       }
     );
+
+    for (MemberShape memberShape : structureShape.getAllMembers().values()) {
+      if (codegenContext.model().expectShape(memberShape.getTarget()).isStructureShape()) {
+        writeStructureShape(codegenContext.model().expectShape(memberShape.getTarget()).asStructureShape().get(), codegenContext);
+      } else if (codegenContext.model().expectShape(memberShape.getTarget()).isUnionShape()) {
+        writeUnionShape(codegenContext.model().expectShape(memberShape.getTarget()).asUnionShape().get(), codegenContext);
+      }
+    }
+  }
+
+  private void writeUnionShape(UnionShape unionShape, GenerationContext codegenContext) {
+    codegenContext.writerDelegator().useShapeWriter(
+        unionShape,
+        writer -> {
+          UnionGenerator generator = new UnionGenerator(
+              codegenContext.model(),
+              codegenContext.symbolProvider(),
+              writer,
+              unionShape,
+              TopologicalIndex.of(codegenContext.model()).getRecursiveShapes()
+          );
+          generator.run();
+        }
+    );
+
+    for (MemberShape memberShape : unionShape.getAllMembers().values()) {
+      if (codegenContext.model().expectShape(memberShape.getTarget()).isStructureShape()) {
+        writeStructureShape(codegenContext.model().expectShape(memberShape.getTarget()).asStructureShape().get(), codegenContext);
+      } else if (codegenContext.model().expectShape(memberShape.getTarget()).isUnionShape()) {
+        writeUnionShape(codegenContext.model().expectShape(memberShape.getTarget()).asUnionShape().get(), codegenContext);
+      }
+    }
   }
 }

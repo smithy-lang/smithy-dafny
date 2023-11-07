@@ -9,6 +9,7 @@ import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameReso
 import software.amazon.polymorph.smithypython.common.nameresolver.Utils;
 import software.amazon.polymorph.smithypython.common.shapevisitor.conversionwriter.BaseConversionWriter;
 import software.amazon.polymorph.smithypython.common.shapevisitor.ShapeVisitorResolver;
+import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.codegen.core.WriterDelegator;
 import software.amazon.smithy.model.shapes.MemberShape;
@@ -66,6 +67,8 @@ public class DafnyToLocalServiceConversionFunctionWriter extends BaseConversionW
           () -> {
             if (structureShape.hasTrait(ReferenceTrait.class)) {
               writeReferenceStructureShapeConverter(structureShape, conversionWriter, dataSourceInsideConversionFunction);
+            } else if (structureShape.hasTrait(PositionalTrait.class)) {
+              writePositionalStructureShapeConverter(structureShape, conversionWriter, dataSourceInsideConversionFunction);
             } else {
               writeNonReferenceStructureShapeConverter(structureShape, conversionWriter, dataSourceInsideConversionFunction);
             }
@@ -151,6 +154,39 @@ public class DafnyToLocalServiceConversionFunctionWriter extends BaseConversionW
               )
           )
       );
+    }
+  }
+
+  /**
+   * Called from the StructureShape converter when the StructureShape has a Polymorph Positional trait.
+   * @return
+   */
+  protected void writePositionalStructureShapeConverter(StructureShape structureShape, PythonWriter conversionWriter,
+      String dataSourceInsideConversionFunction) {
+    final MemberShape onlyMember = PositionalTrait.onlyMember(structureShape);
+    final Shape targetShape = context.model().expectShape(onlyMember.getTarget());
+
+    String returnValue =
+      targetShape.accept(
+          ShapeVisitorResolver.getToNativeShapeVisitorForShape(targetShape,
+              context,
+              dataSourceInsideConversionFunction,
+              conversionWriter,
+              "dafny_to_smithy"
+          )
+    );
+
+    if (onlyMember.isOptional()) {
+      conversionWriter.openBlock(
+          "if $L.is_Some:",
+          "",
+          dataSourceInsideConversionFunction,
+          () -> {
+            conversionWriter.write("return $L", returnValue);
+          }
+      );
+    } else {
+      conversionWriter.write("return $L", returnValue);
     }
   }
 

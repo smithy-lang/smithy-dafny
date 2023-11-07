@@ -3,11 +3,15 @@
 
 package software.amazon.polymorph.smithypython.localservice;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import software.amazon.awssdk.codegen.CodeGenerator;
 import software.amazon.polymorph.smithypython.localservice.customize.ConfigFileWriter;
 import software.amazon.polymorph.smithypython.localservice.customize.DafnyImplInterfaceFileWriter;
 import software.amazon.polymorph.smithypython.localservice.customize.DafnyProtocolFileWriter;
@@ -15,8 +19,12 @@ import software.amazon.polymorph.smithypython.localservice.customize.ErrorsFileW
 import software.amazon.polymorph.smithypython.localservice.customize.ModelsFileWriter;
 import software.amazon.polymorph.smithypython.localservice.customize.PluginFileWriter;
 import software.amazon.polymorph.smithypython.localservice.customize.ReferencesFileWriter;
+import software.amazon.polymorph.smithypython.localservice.extensions.DirectedDafnyPythonLocalServiceCodegen;
+import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolReference;
+import software.amazon.smithy.codegen.core.TopologicalIndex;
+import software.amazon.smithy.model.neighbor.Walker;
 import software.amazon.smithy.model.shapes.EntityShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
@@ -24,6 +32,7 @@ import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.python.codegen.ConfigProperty;
 import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonWriter;
+import software.amazon.smithy.python.codegen.SymbolVisitor;
 import software.amazon.smithy.python.codegen.integration.ProtocolGenerator;
 import software.amazon.smithy.python.codegen.integration.RuntimeClientPlugin;
 import software.amazon.smithy.python.codegen.integration.PythonIntegration;
@@ -101,6 +110,8 @@ public final class DafnyPythonLocalServiceIntegration implements PythonIntegrati
 
         customizeForServiceShape(serviceShape, codegenContext);
 
+
+
         // Get set(non-service operation shapes) = set(model operation shapes) - set(service operation shapes)
         // This is related to forking Smithy-Python. TODO-Python: resolve when resolving fork.
         // Smithy-Python will only generate code for shapes which are used by the protocol.
@@ -108,19 +119,48 @@ public final class DafnyPythonLocalServiceIntegration implements PythonIntegrati
         //   even if the service does not use those shapes.
         // (The use case is that other models may depend on shapes that are defined in this model,
         //   though not used in this model.)
-        Set<ShapeId> serviceOperationShapes = serviceShapes.stream()
-            .map(EntityShape::getOperations)
-            .flatMap(Collection::stream)
-            .collect(Collectors.toSet());
-        Set<ShapeId> nonServiceOperationShapes = codegenContext.model().getOperationShapes()
-            .stream()
-            .map(Shape::getId)
-            .filter(operationShapeId -> operationShapeId.getNamespace()
-                .equals(serviceShape.getId().getNamespace()))
-            .collect(Collectors.toSet());
-        nonServiceOperationShapes.removeAll(serviceOperationShapes);
+//
+//        Set<Shape> resourceOperationShapes = codegenContext.model().getShapesWithTrait(
+//            ReferenceTrait.class).stream()
+//            .map(shape -> shape.expectTrait(ReferenceTrait.class).getReferentId())
+//            .map(shapeId -> codegenContext.model().expectShape(shapeId))
+//            .filter(Shape::isResourceShape)
+//            .collect(Collectors.toSet());
+//        Set<Shape> walkedServiceShapes = new Walker(codegenContext.model()).walkShapes(serviceShape);
+//        Set<Shape> walkedReferenceShapes = new HashSet<>();
+//        for (Shape resourceOperationShape : resourceOperationShapes) {
+//            for (Shape walkedShape : new Walker(codegenContext.model()).walkShapes(resourceOperationShape)) {
+//                walkedReferenceShapes.add(walkedShape);
+//            }
+//        }
+//
+//        walkedReferenceShapes.removeAll(walkedServiceShapes);
+//
+//        for (Shape shape : walkedServiceShapes) {
+//            System.out.println("passing to symbolvisitor " + shape.getId());
+//            if (shape.isResourceShape()) {
+//            }
+//        }
+//
+//        System.out.println("walked");
+//        System.out.println(walkedReferenceShapes);
 
-        customizeForNonServiceOperationShapes(nonServiceOperationShapes, codegenContext);
+        // Get all shapes in resources NOT in service shapes...
+
+//        Set<ShapeId> serviceOperationShapes = serviceShapes.stream()
+//            .map(EntityShape::getOperations)
+//            .flatMap(Collection::stream)
+//            .collect(Collectors.toSet());
+//        Set<ShapeId> nonServiceOperationShapes = codegenContext.model().getOperationShapes()
+//            .stream()
+//            .map(Shape::getId)
+//            .filter(operationShapeId -> operationShapeId.getNamespace()
+//                .equals(serviceShape.getId().getNamespace()))
+//            .collect(Collectors.toSet());
+//        nonServiceOperationShapes.removeAll(serviceOperationShapes);
+
+//        customizeForNonServiceOperationShapes(nonServiceOperationShapes, codegenContext);
+
     }
 
     /**
