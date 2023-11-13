@@ -1296,27 +1296,15 @@ public class TypeConversionCodegen {
         }
         final String cSharpType = type;
 
-
-
-        // TODO It may be more stable to have _all_ converters be public.
-        // Right now the expectation is that a reference to a resource
-        // is the _only_ way to share types.
-        // By making them all public the surface area is increased.
-
         // For any module that takes a dependency on this module,
         // they will need to wrap and unwrap reference types.
         // This is more controlled than exposing
         // the NativeWrapper and the Dafny wrapped type.
-        // However, if this type is already exposed
-        // from a dependent module
-        // leave that as the _only_ public converter
-        // and this converter is internal.
         final boolean isDependantModuleType = ModelUtils.isReferenceDependantModuleType(shape,
             nameResolver.namespaceForService());
 
-        final String visibility = shape.hasTrait(ReferenceTrait.class) && !isDependantModuleType
-                ? "public"
-                : "internal";
+	// Make all converters public, because most need to be and it's not worth the trouble to hide the remaining few.
+        final String visibility = "public";
 
         final String fromDafnyConverterName = typeConverterForShape(id, FROM_DAFNY);
         final TokenTree fromDafnyConverterSignature = TokenTree.of(
