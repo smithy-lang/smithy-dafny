@@ -6,7 +6,14 @@ include "../src/Sets.dfy"
   // Just to make sure we don't conflict with dafny-lang/libraries' Sets.dfy
 include "../../libraries/src/Collections/Sets/Sets.dfy"
 
-module TestSeqReaderReadElements {
+// This function is commonly used for sorting
+// But there are also subtle order effects
+// that are important for cryptographic libraries.
+// These order functions and externs MUST
+// be interoperable across runtimes
+// to be used for canonical ordering
+
+module TestComputeSetToOrderedSequenceUInt8Less {
   import opened StandardLibrary
   import opened UInt = StandardLibrary.UInt
   import opened SortedSets
@@ -17,43 +24,55 @@ module TestSeqReaderReadElements {
 
   method {:test} TestSetToOrderedSequenceEmpty() {
     var output := ComputeSetToOrderedSequence({}, UInt8Less);
+    var output2 := ComputeSetToOrderedSequence2({}, UInt8Less);
     var expected := [];
     expect output == expected;
+    expect output2 == expected;
   }
 
   method {:test} TestSetToOrderedSequenceOneItem() {
     var a := {[0]};
     var output := ComputeSetToOrderedSequence(a, UInt8Less);
+    var output2 := ComputeSetToOrderedSequence2(a, UInt8Less);
     var expected := [[0]];
     expect output == expected;
+    expect output2 == expected;
   }
 
   method {:test} TestSetToOrderedSequenceSimple() {
     var a := {[0, 2], [0, 1]};
     var output := ComputeSetToOrderedSequence(a, UInt8Less);
+    var output2 := ComputeSetToOrderedSequence2(a, UInt8Less);
     var expected := [[0, 1], [0, 2]];
     expect output == expected;
+    expect output2 == expected;
   }
 
   method {:test} TestSetToOrderedSequencePrefix() {
     var a := {[0, 1, 2], [0, 1]};
     var output := ComputeSetToOrderedSequence(a, UInt8Less);
+    var output2 := ComputeSetToOrderedSequence2(a, UInt8Less);
     var expected := [[0, 1], [0, 1, 2]];
     expect output == expected;
+    expect output2 == expected;
   }
 
   method {:test} TestSetToOrderedSequenceComplex() {
     var a := {[0, 1, 2], [1, 1, 2], [0, 1]};
     var output := ComputeSetToOrderedSequence(a, UInt8Less);
+    var output2 := ComputeSetToOrderedSequence2(a, UInt8Less);
     var expected := [[0, 1], [0, 1, 2], [1, 1, 2]];
     expect output == expected;
+    expect output2 == expected;
   }
 
   method {:test} TestSetToOrderedSequenceComplexReverse() {
     var a := {[0, 1, 2], [1, 1, 2], [0, 1]};
     var output := ComputeSetToOrderedSequence(a, UInt8Greater);
+    var output2 := ComputeSetToOrderedSequence2(a, UInt8Greater);
     var expected := [[1, 1, 2], [0, 1], [0, 1, 2]];
     expect output == expected;
+    expect output2 == expected;
   }
 
   method {:test} TestSetSequence() {
@@ -65,8 +84,10 @@ module TestSeqReaderReadElements {
   method {:test} TestSetToOrderedSequenceManyItems() {
     var a := set x:uint16 | 0 <= x < 0xFFFF :: UInt16ToSeq(x);
     var output := ComputeSetToOrderedSequence(a, UInt8Less);
+    var output2 := ComputeSetToOrderedSequence2(a, UInt8Less);
     var expected : seq<seq<uint8>> := seq(0xFFFF, i requires 0 <= i < 0xFFFF => UInt16ToSeq(i as uint16));
     expect output == expected;
+    expect output2 == expected;
   }
 
 }
