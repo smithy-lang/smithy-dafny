@@ -4,7 +4,7 @@
 rootProject.name = "smithy-dafny"
 include(":smithy-dafny-codegen")
 include(":smithy-dafny-codegen-cli")
-//include(":smithy-dafny-codegen-test")
+include(":smithy-dafny-codegen-test")
 
 pluginManagement {
     repositories {

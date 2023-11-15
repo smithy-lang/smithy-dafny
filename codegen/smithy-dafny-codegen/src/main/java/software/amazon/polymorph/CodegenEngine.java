@@ -27,6 +27,9 @@ import software.amazon.smithy.aws.traits.ServiceTrait;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.utils.IoUtils;
+import software.amazon.smithy.build.PluginContext;
+import software.amazon.polymorph.smithygo.DafnyGoPluginModule;
+
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -51,6 +54,7 @@ public class CodegenEngine {
     // To be initialized in constructor
     private final Model model;
     private final ServiceShape serviceShape;
+    private final PluginContext pluginContext;
 
     /**
      * This should only be called by {@link Builder#build()},
@@ -66,7 +70,8 @@ public class CodegenEngine {
             final Optional<Path> includeDafnyFile,
             final boolean awsSdkStyle,
             final boolean localServiceTest,
-            final boolean generateProjectFiles
+            final boolean generateProjectFiles,
+            final PluginContext pluginContext
     ) {
         // To be provided to constructor
         this.dependentModelPaths = dependentModelPaths;
@@ -77,7 +82,7 @@ public class CodegenEngine {
         this.awsSdkStyle = awsSdkStyle;
         this.localServiceTest = localServiceTest;
         this.generateProjectFiles = generateProjectFiles;
-
+        this.pluginContext = pluginContext;
         this.model = this.awsSdkStyle
                 // TODO: move this into a DirectedCodegen.customizeBeforeShapeGeneration implementation
                 ? ModelUtils.addMissingErrorMessageMembers(serviceModel)
@@ -108,6 +113,7 @@ public class CodegenEngine {
                 case DAFNY -> generateDafny(outputDir);
                 case JAVA -> generateJava(outputDir);
                 case DOTNET -> generateDotnet(outputDir);
+                case GO -> new DafnyGoPluginModule().run(this.pluginContext);
                 default -> throw new UnsupportedOperationException("Cannot generate code for target language %s"
                         .formatted(lang.name()));
             }
@@ -243,6 +249,7 @@ public class CodegenEngine {
     public static class Builder {
         private Model serviceModel;
         private Path[] dependentModelPaths;
+        private PluginContext pluginContext;
         private String namespace;
         private Map<TargetLanguage, Path> targetLangOutputDirs;
         private AwsSdkVersion javaAwsSdkVersion = AwsSdkVersion.V2;
@@ -258,6 +265,11 @@ public class CodegenEngine {
          */
         public Builder withServiceModel(final Model serviceModel) {
             this.serviceModel = serviceModel;
+            return this;
+        }
+
+        public Builder withPluginContext(final PluginContext serviceModel) {
+            this.pluginContext = serviceModel;
             return this;
         }
 
@@ -364,7 +376,8 @@ public class CodegenEngine {
                     includeDafnyFile,
                     this.awsSdkStyle,
                     this.localServiceTest,
-                    this.generateProjectFiles
+                    this.generateProjectFiles,
+                    this.pluginContext
             );
         }
     }
@@ -373,5 +386,6 @@ public class CodegenEngine {
         DAFNY,
         JAVA,
         DOTNET,
+        GO,
     }
 }

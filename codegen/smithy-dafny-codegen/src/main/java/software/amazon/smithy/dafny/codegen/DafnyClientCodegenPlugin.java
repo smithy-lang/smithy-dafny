@@ -35,7 +35,7 @@ public final class DafnyClientCodegenPlugin implements SmithyBuildPlugin {
                 .orElseThrow(() -> new RuntimeException("Invalid plugin settings; aborting"));
 
         final Map<TargetLanguage, Path> outputDirs = new HashMap<>();
-        outputDirs.put(TargetLanguage.DAFNY, manifest.resolvePath(Paths.get("Model")));
+        //outputDirs.put(TargetLanguage.DAFNY, manifest.resolvePath(Paths.get("Model")));
         settings.targetLanguages.forEach(lang -> {
             final Path dir = Paths.get("runtimes", lang.name().toLowerCase(), "Generated");
             outputDirs.put(lang, manifest.resolvePath(dir));
@@ -54,6 +54,7 @@ public final class DafnyClientCodegenPlugin implements SmithyBuildPlugin {
                 .withAwsSdkStyle(true)  // this plugin only generates AWS SDK-style code
                 .withIncludeDafnyFile(settings.includeDafnyFile)
                 .withGenerateProjectFiles(true)
+                .withPluginContext(context)
                 .build();
         codegenEngine.run();
     }
