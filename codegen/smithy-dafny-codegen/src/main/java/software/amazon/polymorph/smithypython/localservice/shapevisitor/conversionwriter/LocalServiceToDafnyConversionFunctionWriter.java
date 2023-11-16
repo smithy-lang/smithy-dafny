@@ -253,7 +253,7 @@ public class LocalServiceToDafnyConversionFunctionWriter extends BaseConversionW
 
       conversionWriter.write("""
           import $L
-          client = $L.$L()
+          client = $L.default__.$L()
           client.impl = input
           return client
           """,
