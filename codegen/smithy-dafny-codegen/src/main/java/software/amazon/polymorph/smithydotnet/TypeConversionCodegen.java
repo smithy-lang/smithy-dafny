@@ -480,7 +480,7 @@ public class TypeConversionCodegen {
     }
 
     // return false if this struct/member is one of the special ones with a IsXxxSet member
-    public boolean IsNormal(final MemberShape memberShape)
+    public boolean memberSupportsIsSet(final MemberShape memberShape)
     {
 	String parent = memberShape.getId().getName();
 	String member = nameResolver.classPropertyForStructureMember(memberShape);
@@ -488,13 +488,13 @@ public class TypeConversionCodegen {
 	    if (member.equals("TotalSegments") ||
 		member.equals("Segment") ||
 		member.equals("Limit")) {
-		return false;
+		return true;
 	    }
 	}
         if (parent.equals("QueryInput") && member.equals("Limit")) {
-	    return false;
+	    return true;
 	}
-	return true;
+	return false;
    }
 
     /**
@@ -506,7 +506,16 @@ public class TypeConversionCodegen {
         final String varName = nameResolver.variableNameForClassProperty(memberShape);
         final String propertyName = nameResolver.classPropertyForStructureMember(memberShape);
         if (AwsSdkNameResolverHelpers.isInAwsSdkNamespace(memberShape.getId())) {
-	    if (IsNormal(memberShape)) {
+	    if (memberSupportsIsSet(memberShape)) {
+		final String isSetMember = nameResolver.isSetMemberForStructureMember(memberShape);
+		return TokenTree.of(
+                   type,
+                   varName,
+                   "= value.%s".formatted(isSetMember),
+                   "? value.%s :".formatted(propertyName),
+                   "(%s) null;".formatted(type)
+		);
+	    } else {
 		return TokenTree.of(
                    type,
                    varName,
@@ -514,15 +523,6 @@ public class TypeConversionCodegen {
                    "? value.%s :".formatted(propertyName),
                    "(%s) null;".formatted(type)
                 );
-	    } else {
-		final String isSetMethod = nameResolver.isSetMemberForStructureMember(memberShape);
-		return TokenTree.of(
-                   type,
-                   varName,
-                   "= value.%s".formatted(isSetMethod),
-                   "? value.%s :".formatted(propertyName),
-                   "(%s) null;".formatted(type)
-		);
 	    }
       } else {
             final String isSetMethod = nameResolver.isSetMethodForStructureMember(memberShape);
