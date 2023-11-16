@@ -479,6 +479,24 @@ public class TypeConversionCodegen {
                 nameResolver.classPropertyForStructureMember(memberShape));
     }
 
+    // return false if this struct/member is one of the special ones with a IsXxxSet member
+    public boolean IsNormal(final MemberShape memberShape)
+    {
+	String parent = memberShape.getId().getName();
+	String member = nameResolver.classPropertyForStructureMember(memberShape);
+	if (parent.equals("ScanInput")) {
+	    if (member.equals("TotalSegments") ||
+		member.equals("Segment") ||
+		member.equals("Limit")) {
+		return false;
+	    }
+	}
+        if (parent.equals("QueryInput") && member.equals("Limit")) {
+	    return false;
+	}
+	return true;
+   }
+
     /**
      * Returns:
      * "type varName = value.IsSetPropertyName() ? value.PropertyName : (type) null;"
@@ -488,14 +506,25 @@ public class TypeConversionCodegen {
         final String varName = nameResolver.variableNameForClassProperty(memberShape);
         final String propertyName = nameResolver.classPropertyForStructureMember(memberShape);
         if (AwsSdkNameResolverHelpers.isInAwsSdkNamespace(memberShape.getId())) {
-            return TokenTree.of(
-                type,
-                varName,
-                "= value.%s != null".formatted(propertyName),
-                "? value.%s :".formatted(propertyName),
-                "(%s) null;".formatted(type)
-            );
-        } else {
+	    if (IsNormal(memberShape)) {
+		return TokenTree.of(
+                   type,
+                   varName,
+                   "= value.%s != null".formatted(propertyName),
+                   "? value.%s :".formatted(propertyName),
+                   "(%s) null;".formatted(type)
+                );
+	    } else {
+		final String isSetMethod = nameResolver.isSetMemberForStructureMember(memberShape);
+		return TokenTree.of(
+                   type,
+                   varName,
+                   "= value.%s".formatted(isSetMethod),
+                   "? value.%s :".formatted(propertyName),
+                   "(%s) null;".formatted(type)
+		);
+	    }
+      } else {
             final String isSetMethod = nameResolver.isSetMethodForStructureMember(memberShape);
             return TokenTree.of(
                 type,
