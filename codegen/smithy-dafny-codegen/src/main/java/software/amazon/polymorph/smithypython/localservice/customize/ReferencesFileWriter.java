@@ -36,6 +36,7 @@ public class ReferencesFileWriter implements CustomFileWriter {
   public void customizeFileForServiceShape(
       ServiceShape serviceShape, GenerationContext codegenContext) {
     String moduleName = codegenContext.settings().getModuleName();
+    System.out.println("customize references for serviceshape " + serviceShape.getId());
     codegenContext.writerDelegator().useFileWriter(moduleName + "/references.py", "", writer -> {
 
       writer.write(
@@ -84,11 +85,15 @@ public class ReferencesFileWriter implements CustomFileWriter {
 
     // For each reference shape, generate an interface and an implementation shape
     for(Shape resourceOrServiceShape : referenceChildShape) {
-
+      generateResourceStuff(resourceOrServiceShape, codegenContext, writer);
     }
   }
 
   public void generateResourceStuff(Shape resourceOrServiceShape, GenerationContext context, PythonWriter writer) {
+    if (!resourceOrServiceShape.getId().getNamespace().equals(context.settings().getService().getNamespace())) {
+      return;
+    }
+    System.out.println("generating resourcestuff for " + resourceOrServiceShape.getId());
     // Write reference interface.
     // We use the `abc` (Abstract Base Class) library to define a stricter interface contract
     //   for references in Python than a standard Python subclass contract.
@@ -320,32 +325,40 @@ public class ReferencesFileWriter implements CustomFileWriter {
   @Override
   public void customizeFileForNonServiceShapes(Set<ShapeId> shapeIds, GenerationContext codegenContext) {
     // Write out a Smithy-modelled structure for all operation shapes.
-    for (ShapeId operationShapeId : shapeIds) {
-      System.out.println(operationShapeId);
-      OperationShape operationShape = codegenContext.model().expectShape(operationShapeId, OperationShape.class);
-      StructureShape inputShape = codegenContext.model().expectShape(operationShape.getInputShape(), StructureShape.class);
-//      writeStructureShape(inputShape, codegenContext);
-      var inputSymbol = codegenContext.symbolProvider().toSymbol(inputShape);
-      StructureShape outputShape = codegenContext.model().expectShape(operationShape.getOutputShape(), StructureShape.class);
-//      writeStructureShape(outputShape, codegenContext);
-      var outputSymbol = codegenContext.symbolProvider().toSymbol(outputShape);
-
-      String moduleName = codegenContext.settings().getModuleName();
-      codegenContext.writerDelegator().useFileWriter(moduleName + "/models.py", "", writer -> {
-
-//        inputShape.accept(new SymbolVisitor(codegenContext.model(), codegenContext.settings()));
-//        outputShape.accept(new SymbolVisitor(codegenContext.model(), codegenContext.settings()));
-//        inputShape.accept(ShapeVisitorResolver.getToNativeShapeVisitorForShape(inputShape, codegenContext, "input", writer));
-//        outputShape.accept(ShapeVisitorResolver.getToNativeShapeVisitorForShape(outputShape, codegenContext, "input", writer));
-
-
-        inputShape.accept(ShapeVisitorResolver.getToDafnyShapeVisitorForShape(inputShape, codegenContext, "input", writer));
-        outputShape.accept(ShapeVisitorResolver.getToDafnyShapeVisitorForShape(outputShape, codegenContext, "input", writer));
-        inputShape.accept(ShapeVisitorResolver.getToNativeShapeVisitorForShape(inputShape, codegenContext, "input", writer));
-        outputShape.accept(ShapeVisitorResolver.getToNativeShapeVisitorForShape(outputShape, codegenContext, "input", writer));
-
-      });
-    }
+//    for (ShapeId operationShapeId : shapeIds) {
+//
+//      if (codegenContext.model().expectShape(operationShapeId).isOperationShape()) {
+//        //      System.out.println(operationShapeId);
+//        OperationShape operationShape = codegenContext.model().expectShape(operationShapeId, OperationShape.class);
+//        StructureShape inputShape = codegenContext.model().expectShape(operationShape.getInputShape(), StructureShape.class);
+////      writeStructureShape(inputShape, codegenContext);
+//        var inputSymbol = codegenContext.symbolProvider().toSymbol(inputShape);
+//        StructureShape outputShape = codegenContext.model().expectShape(operationShape.getOutputShape(), StructureShape.class);
+////      writeStructureShape(outputShape, codegenContext);
+//        var outputSymbol = codegenContext.symbolProvider().toSymbol(outputShape);
+//
+//        String moduleName = codegenContext.settings().getModuleName();
+//        codegenContext.writerDelegator().useFileWriter(moduleName + "/models.py", "", writer -> {
+//
+////        inputShape.accept(new SymbolVisitor(codegenContext.model(), codegenContext.settings()));
+////        outputShape.accept(new SymbolVisitor(codegenContext.model(), codegenContext.settings()));
+////        inputShape.accept(ShapeVisitorResolver.getToNativeShapeVisitorForShape(inputShape, codegenContext, "input", writer));
+////        outputShape.accept(ShapeVisitorResolver.getToNativeShapeVisitorForShape(outputShape, codegenContext, "input", writer));
+//
+////
+////        inputShape.accept(ShapeVisitorResolver.getToDafnyShapeVisitorForShape(inputShape, codegenContext, "input", writer));
+////        outputShape.accept(ShapeVisitorResolver.getToDafnyShapeVisitorForShape(outputShape, codegenContext, "input", writer));
+////        inputShape.accept(ShapeVisitorResolver.getToNativeShapeVisitorForShape(inputShape, codegenContext, "input", writer));
+////        outputShape.accept(ShapeVisitorResolver.getToNativeShapeVisitorForShape(outputShape, codegenContext, "input", writer));
+//
+//        });
+//      }
+//
+//      else {
+//
+//      }
+//
+//    }
   }
 
   /**
@@ -360,50 +373,63 @@ public class ReferencesFileWriter implements CustomFileWriter {
    * @param codegenContext
    */
   private void writeStructureShape(StructureShape structureShape, GenerationContext codegenContext) {
-    codegenContext.writerDelegator().useShapeWriter(
-      structureShape,
-      writer -> {
-        StructureGenerator generator = new StructureGenerator(
-          codegenContext.model(),
-          codegenContext.settings(),
-          codegenContext.symbolProvider(),
-          writer,
+    if (structureShape.getId().getNamespace().equals(codegenContext.settings().getService().getNamespace())) {
+      codegenContext.writerDelegator().useShapeWriter(
           structureShape,
-          TopologicalIndex.of(codegenContext.model()).getRecursiveShapes()
-        );
-        generator.run();
-      }
-    );
+          writer -> {
+            StructureGenerator generator = new StructureGenerator(
+                codegenContext.model(),
+                codegenContext.settings(),
+                codegenContext.symbolProvider(),
+                writer,
+                structureShape,
+                TopologicalIndex.of(codegenContext.model()).getRecursiveShapes()
+            );
+            generator.run();
+          }
+      );
 
-    for (MemberShape memberShape : structureShape.getAllMembers().values()) {
-      if (codegenContext.model().expectShape(memberShape.getTarget()).isStructureShape()) {
-        writeStructureShape(codegenContext.model().expectShape(memberShape.getTarget()).asStructureShape().get(), codegenContext);
-      } else if (codegenContext.model().expectShape(memberShape.getTarget()).isUnionShape()) {
-        writeUnionShape(codegenContext.model().expectShape(memberShape.getTarget()).asUnionShape().get(), codegenContext);
+      // TODO-Python: Necessary?
+      for (MemberShape memberShape : structureShape.getAllMembers().values()) {
+        if (codegenContext.model().expectShape(memberShape.getTarget()).isStructureShape()) {
+          writeStructureShape(codegenContext.model().expectShape(memberShape.getTarget()).asStructureShape().get(), codegenContext);
+        } else if (codegenContext.model().expectShape(memberShape.getTarget()).isUnionShape()) {
+          writeUnionShape(codegenContext.model().expectShape(memberShape.getTarget()).asUnionShape().get(), codegenContext);
+        }
       }
     }
+
   }
 
   private void writeUnionShape(UnionShape unionShape, GenerationContext codegenContext) {
-    codegenContext.writerDelegator().useShapeWriter(
-        unionShape,
-        writer -> {
-          UnionGenerator generator = new UnionGenerator(
-              codegenContext.model(),
-              codegenContext.symbolProvider(),
-              writer,
-              unionShape,
-              TopologicalIndex.of(codegenContext.model()).getRecursiveShapes()
-          );
-          generator.run();
-        }
-    );
+    if (unionShape.getId().getNamespace()
+        .equals(codegenContext.settings().getService().getNamespace())) {
 
-    for (MemberShape memberShape : unionShape.getAllMembers().values()) {
-      if (codegenContext.model().expectShape(memberShape.getTarget()).isStructureShape()) {
-        writeStructureShape(codegenContext.model().expectShape(memberShape.getTarget()).asStructureShape().get(), codegenContext);
-      } else if (codegenContext.model().expectShape(memberShape.getTarget()).isUnionShape()) {
-        writeUnionShape(codegenContext.model().expectShape(memberShape.getTarget()).asUnionShape().get(), codegenContext);
+      codegenContext.writerDelegator().useShapeWriter(
+          unionShape,
+          writer -> {
+            UnionGenerator generator = new UnionGenerator(
+                codegenContext.model(),
+                codegenContext.symbolProvider(),
+                writer,
+                unionShape,
+                TopologicalIndex.of(codegenContext.model()).getRecursiveShapes()
+            );
+            generator.run();
+          }
+      );
+
+      // TODO-Python: Necessary?
+      for (MemberShape memberShape : unionShape.getAllMembers().values()) {
+        if (codegenContext.model().expectShape(memberShape.getTarget()).isStructureShape()) {
+          writeStructureShape(
+              codegenContext.model().expectShape(memberShape.getTarget()).asStructureShape().get(),
+              codegenContext);
+        } else if (codegenContext.model().expectShape(memberShape.getTarget()).isUnionShape()) {
+          writeUnionShape(
+              codegenContext.model().expectShape(memberShape.getTarget()).asUnionShape().get(),
+              codegenContext);
+        }
       }
     }
   }

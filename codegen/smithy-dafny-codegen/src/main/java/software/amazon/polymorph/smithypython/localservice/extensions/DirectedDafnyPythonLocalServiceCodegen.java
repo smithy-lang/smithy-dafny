@@ -4,6 +4,7 @@
 package software.amazon.polymorph.smithypython.localservice.extensions;
 
 import java.nio.file.Path;
+import java.sql.Ref;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Logger;
@@ -13,11 +14,14 @@ import software.amazon.polymorph.smithypython.localservice.customize.ReferencesF
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.build.FileManifest;
 import software.amazon.smithy.codegen.core.CodegenException;
+import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.codegen.core.TopologicalIndex;
+import software.amazon.smithy.codegen.core.directed.CreateSymbolProviderDirective;
 import software.amazon.smithy.codegen.core.directed.CustomizeDirective;
 import software.amazon.smithy.codegen.core.directed.GenerateResourceDirective;
 import software.amazon.smithy.codegen.core.directed.GenerateServiceDirective;
 import software.amazon.smithy.codegen.core.directed.GenerateStructureDirective;
+import software.amazon.smithy.codegen.core.directed.GenerateUnionDirective;
 import software.amazon.smithy.model.neighbor.Walker;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.python.codegen.CodegenUtils;
@@ -26,6 +30,7 @@ import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonSettings;
 import software.amazon.smithy.python.codegen.StructureGenerator;
 import software.amazon.smithy.python.codegen.SymbolVisitor;
+import software.amazon.smithy.python.codegen.UnionGenerator;
 
 /**
  * DirectedCodegen for Dafny Python wrapped LocalServices.
@@ -39,6 +44,12 @@ public class DirectedDafnyPythonLocalServiceCodegen extends DirectedPythonCodege
 
   private static final Logger LOGGER = Logger.getLogger(
       DirectedDafnyPythonLocalServiceCodegen.class.getName());
+
+  @Override
+  public SymbolProvider createSymbolProvider(
+      CreateSymbolProviderDirective<PythonSettings> directive) {
+    return new DafnyPythonLocalServiceSymbolVisitor(directive.model(), directive.settings());
+  }
 
 //  @Override
 //  public void customizeBeforeShapeGeneration(
@@ -89,19 +100,69 @@ public class DirectedDafnyPythonLocalServiceCodegen extends DirectedPythonCodege
   @Override
   public void generateStructure(
       GenerateStructureDirective<GenerationContext, PythonSettings> directive) {
-    if (directive.shape().hasTrait(ReferenceTrait.class)
-        && SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(directive.shape().getId().getNamespace()).equals(directive.settings().getModuleName())) {
-      System.out.println("STRUCTURE REFERENCE " + directive.shape().getId());
-      Shape ref = directive.model().expectShape(directive.shape().expectTrait(ReferenceTrait.class).getReferentId());
-      String moduleName = directive.context().settings().getModuleName();
-      directive.context().writerDelegator().useFileWriter(moduleName + "/references.py", "", writer -> {
-        new ReferencesFileWriter().generateResourceStuff(ref, directive.context(),
-            writer);
+    if (directive.shape().getId().getNamespace()
+        .equals(directive.context().settings().getService().getNamespace())) {
+
+      directive.context().writerDelegator().useShapeWriter(directive.shape(), writer -> {
+        DafnyPythonLocalServiceStructureGenerator generator = new DafnyPythonLocalServiceStructureGenerator(
+            directive.model(),
+            directive.settings(),
+            directive.symbolProvider(),
+            writer,
+            directive.shape(),
+            TopologicalIndex.of(directive.model()).getRecursiveShapes()
+        );
+        generator.run();
       });
     }
-    else {
-      super.generateStructure(directive);
+  }
+
+  @Override
+  public void generateUnion(
+      GenerateUnionDirective<GenerationContext, PythonSettings> directive) {
+    if (directive.shape().getId().getNamespace()
+        .equals(directive.context().settings().getService().getNamespace())) {
+
+      directive.context().writerDelegator().useShapeWriter(directive.shape(), writer -> {
+        UnionGenerator generator = new UnionGenerator(
+            directive.model(),
+            directive.symbolProvider(),
+            writer,
+            directive.shape(),
+            TopologicalIndex.of(directive.model()).getRecursiveShapes()
+        );
+        generator.run();
+      });
     }
   }
+
+
+
+//    if (directive.shape().hasTrait(ReferenceTrait.class)
+//      && directive.shape().getId().getNamespace().equals(directive.context().settings().getService().getNamespace())) {
+////        && SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(directive.shape().getId().getNamespace()).equals(directive.settings().getModuleName())) {
+//      System.out.println("STRUCTURE REFERENCE " + directive.shape().getId());
+//      Shape ref = directive.model().expectShape(directive.shape().expectTrait(ReferenceTrait.class).getReferentId());
+//      String moduleName = directive.context().settings().getModuleName();
+//      directive.context().writerDelegator().useFileWriter(moduleName + "/references.py", "", writer -> {
+//        // TOOD: Services are different.
+//        // NEED TO GENERATESERVICESTUFF.
+//        if (ref.isResourceShape()) {
+//          new ReferencesFileWriter().generateResourceStuff(ref, directive.context(),
+//              writer);
+//        } else if (ref.isServiceShape()) {
+//          new ReferencesFileWriter().customizeFileForServiceShape(ref.asServiceShape().get(), directive.context());
+//        }
+//
+//      });
+//    }
+//    else {
+//      if (directive.shape().getId().getNamespace().equals(directive.context().settings().getService().getNamespace())) {
+//        super.generateStructure(directive);
+//
+//      }
+//    }
+
+
 
 }

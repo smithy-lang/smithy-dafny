@@ -9,8 +9,11 @@ import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameReso
 import software.amazon.polymorph.smithypython.common.nameresolver.Utils;
 import software.amazon.polymorph.smithypython.common.shapevisitor.conversionwriter.BaseConversionWriter;
 import software.amazon.polymorph.smithypython.common.shapevisitor.ShapeVisitorResolver;
+import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
+import software.amazon.smithy.codegen.core.Symbol;
+import software.amazon.smithy.codegen.core.SymbolReference;
 import software.amazon.smithy.codegen.core.WriterDelegator;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.ResourceShape;
@@ -230,16 +233,21 @@ public class DafnyToLocalServiceConversionFunctionWriter extends BaseConversionW
   private void writeServiceShapeConverter(ServiceShape serviceShape, PythonWriter conversionWriter,
       String dataSourceInsideConversionFunction) {
 
-    // Import resource at runtime to avoid circular dependency
-    conversionWriter.write("from $L import $L",
-        SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
-            serviceShape.getId().getNamespace(), context
-        ) + ".client",
-        serviceShape.getId().getName()
-    );
+    if (serviceShape.hasTrait(LocalServiceTrait.class)) {
+      // Import resource at runtime to avoid circular dependency
+      conversionWriter.write("from $L import $L",
+          SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
+              serviceShape.getId().getNamespace(), context
+          ) + ".client",
+          serviceShape.getId().getName()
+      );
 
-    conversionWriter.write("return $L($L)",
-        serviceShape.getId().getName(), dataSourceInsideConversionFunction);
+      conversionWriter.write("return $L($L)",
+          serviceShape.getId().getName(), dataSourceInsideConversionFunction);
+    } else {
+      conversionWriter.write("return input.impl");
+    }
+
   }
 
   /**
@@ -293,7 +301,14 @@ public class DafnyToLocalServiceConversionFunctionWriter extends BaseConversionW
                   SmithyNameResolver.getSmithyGeneratedModelLocationForShape(unionShape.getId(), context),
                   SmithyNameResolver.getSmithyGeneratedTypeForUnion(unionShape, memberShape),
                   dataSourceInsideConversionFunction,
-                  memberShape.getMemberName()
+                  context.symbolProvider().toMemberName(memberShape)
+//                  SymbolReference.builder()
+//                      .symbol(
+//                          Symbol.builder()
+//                              .name(memberShape.getMemberName())
+//                              .namespace(".models", memberShape.getId().getNamespace())
+//                              .build())
+//                      .build()
               );
               shouldOpenNewIfBlock = false;
 

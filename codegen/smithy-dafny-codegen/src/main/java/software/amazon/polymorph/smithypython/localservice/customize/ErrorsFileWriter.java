@@ -212,8 +212,8 @@ public class ErrorsFileWriter implements CustomFileWriter {
     String code = serviceDependencyShapeId.getName();
     Symbol symbol = context.symbolProvider().toSymbol(serviceDependencyShape);
     Symbol apiError = CodegenUtils.getApiError(context.settings());
-    writer.openBlock("class $L($T[Literal[$S]]):", "", symbol.getName(), apiError, code, () -> {
-      writer.write("$L: Any", symbol.getName());
+    writer.openBlock("class $L($T[Literal[$S]]):", "", code, apiError, code, () -> {
+      writer.write("$L: Any", code);
     });
     writer.write("");
   }
