@@ -479,7 +479,7 @@ public class TypeConversionCodegen {
                 nameResolver.classPropertyForStructureMember(memberShape));
     }
 
-    // return false if this struct/member is one of the special ones with a IsXxxSet member
+    // return true if this struct/member is one of the special ones with a IsXxxSet member
     public boolean memberSupportsIsSet(final MemberShape memberShape)
     {
 	String parent = memberShape.getId().getName();
