@@ -53,9 +53,15 @@ public class __default
     final DafnySequence<? extends Character> region
   ) {
     try {
-      final String regionString = new String(
-        (char[]) region.toArray().unwrap()
-      );
+      final char[] inputRegion = (char[]) region.toArray().unwrap();
+      // The ESDK uses empty string as a kind of none.
+      // In the case of an AWS KMS raw key identifier there is no region element
+      // an so "" is used in this case.
+      if (inputRegion.length == 0) {
+        return KMSClient();
+      }
+
+      final String regionString = new String(inputRegion);
       final KmsClientBuilder builder = KmsClient.builder();
       final KmsClient client = builder
         .region(Region.of(regionString))
