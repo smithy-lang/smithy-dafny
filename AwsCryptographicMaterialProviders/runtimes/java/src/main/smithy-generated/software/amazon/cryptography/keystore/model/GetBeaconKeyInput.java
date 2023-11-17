@@ -1,15 +1,18 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
-// Do not modify this file. This file is machine generated, and any changes to it will be
-// overwritten.
+// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 package software.amazon.cryptography.keystore.model;
 
 import java.util.Objects;
 
-/** Inputs for getting a Beacon Key */
+/**
+ * Inputs for getting a Beacon Key
+ */
 public class GetBeaconKeyInput {
 
-  /** The identifier of the Branch Key the Beacon Key is associated with. */
+  /**
+   * The identifier of the Branch Key the Beacon Key is associated with.
+   */
   private final String branchKeyIdentifier;
 
   protected GetBeaconKeyInput(BuilderImpl builder) {
@@ -33,8 +36,7 @@ public class GetBeaconKeyInput {
 
   public interface Builder {
     /**
-     * @param branchKeyIdentifier The identifier of the Branch Key the Beacon Key is associated
-     *     with.
+     * @param branchKeyIdentifier The identifier of the Branch Key the Beacon Key is associated with.
      */
     Builder branchKeyIdentifier(String branchKeyIdentifier);
 

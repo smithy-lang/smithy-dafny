@@ -1,7 +1,6 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
-// Do not modify this file. This file is machine generated, and any changes to it will be
-// overwritten.
+// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 package software.amazon.cryptography.materialproviders.model;
 
 import java.util.List;
@@ -9,26 +8,29 @@ import java.util.Objects;
 import software.amazon.cryptography.materialproviders.ClientSupplier;
 import software.amazon.cryptography.materialproviders.IClientSupplier;
 
-/** Inputs for for creating a AWS KMS MRK Discovery Multi-Keyring. */
+/**
+ * Inputs for for creating a AWS KMS MRK Discovery Multi-Keyring.
+ */
 public class CreateAwsKmsMrkDiscoveryMultiKeyringInput {
 
-  /** The list of regions this Keyring will creates KMS clients for. */
+  /**
+   * The list of regions this Keyring will creates KMS clients for.
+   */
   private final List<String> regions;
 
   /**
-   * A filter which restricts which KMS Keys this Keyring may attempt to decrypt with by AWS
-   * partition and account.
+   * A filter which restricts which KMS Keys this Keyring may attempt to decrypt with by AWS partition and account.
    */
   private final DiscoveryFilter discoveryFilter;
 
   /**
-   * The Client Supplier which will be used to get KMS Clients for use with this Keyring. If not
-   * specified on input, a Default Client Supplier is created which creates a KMS Client for each
-   * region in the 'regions' input.
+   * The Client Supplier which will be used to get KMS Clients for use with this Keyring. If not specified on input, a Default Client Supplier is created which creates a KMS Client for each region in the 'regions' input.
    */
   private final IClientSupplier clientSupplier;
 
-  /** A list of grant tokens to be used when calling KMS. */
+  /**
+   * A list of grant tokens to be used when calling KMS.
+   */
   private final List<String> grantTokens;
 
   protected CreateAwsKmsMrkDiscoveryMultiKeyringInput(BuilderImpl builder) {
@@ -46,17 +48,14 @@ public class CreateAwsKmsMrkDiscoveryMultiKeyringInput {
   }
 
   /**
-   * @return A filter which restricts which KMS Keys this Keyring may attempt to decrypt with by AWS
-   *     partition and account.
+   * @return A filter which restricts which KMS Keys this Keyring may attempt to decrypt with by AWS partition and account.
    */
   public DiscoveryFilter discoveryFilter() {
     return this.discoveryFilter;
   }
 
   /**
-   * @return The Client Supplier which will be used to get KMS Clients for use with this Keyring. If
-   *     not specified on input, a Default Client Supplier is created which creates a KMS Client for
-   *     each region in the 'regions' input.
+   * @return The Client Supplier which will be used to get KMS Clients for use with this Keyring. If not specified on input, a Default Client Supplier is created which creates a KMS Client for each region in the 'regions' input.
    */
   public IClientSupplier clientSupplier() {
     return this.clientSupplier;
@@ -89,28 +88,22 @@ public class CreateAwsKmsMrkDiscoveryMultiKeyringInput {
     List<String> regions();
 
     /**
-     * @param discoveryFilter A filter which restricts which KMS Keys this Keyring may attempt to
-     *     decrypt with by AWS partition and account.
+     * @param discoveryFilter A filter which restricts which KMS Keys this Keyring may attempt to decrypt with by AWS partition and account.
      */
     Builder discoveryFilter(DiscoveryFilter discoveryFilter);
 
     /**
-     * @return A filter which restricts which KMS Keys this Keyring may attempt to decrypt with by
-     *     AWS partition and account.
+     * @return A filter which restricts which KMS Keys this Keyring may attempt to decrypt with by AWS partition and account.
      */
     DiscoveryFilter discoveryFilter();
 
     /**
-     * @param clientSupplier The Client Supplier which will be used to get KMS Clients for use with
-     *     this Keyring. If not specified on input, a Default Client Supplier is created which
-     *     creates a KMS Client for each region in the 'regions' input.
+     * @param clientSupplier The Client Supplier which will be used to get KMS Clients for use with this Keyring. If not specified on input, a Default Client Supplier is created which creates a KMS Client for each region in the 'regions' input.
      */
     Builder clientSupplier(IClientSupplier clientSupplier);
 
     /**
-     * @return The Client Supplier which will be used to get KMS Clients for use with this Keyring.
-     *     If not specified on input, a Default Client Supplier is created which creates a KMS
-     *     Client for each region in the 'regions' input.
+     * @return The Client Supplier which will be used to get KMS Clients for use with this Keyring. If not specified on input, a Default Client Supplier is created which creates a KMS Client for each region in the 'regions' input.
      */
     IClientSupplier clientSupplier();
 

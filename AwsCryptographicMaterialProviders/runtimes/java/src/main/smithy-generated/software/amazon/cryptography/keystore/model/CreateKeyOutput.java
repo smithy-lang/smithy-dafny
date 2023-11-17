@@ -1,15 +1,18 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
-// Do not modify this file. This file is machine generated, and any changes to it will be
-// overwritten.
+// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 package software.amazon.cryptography.keystore.model;
 
 import java.util.Objects;
 
-/** Outputs for Branch Key creation. */
+/**
+ * Outputs for Branch Key creation.
+ */
 public class CreateKeyOutput {
 
-  /** A identifier for the created Branch Key. */
+  /**
+   * A identifier for the created Branch Key.
+   */
   private final String branchKeyIdentifier;
 
   protected CreateKeyOutput(BuilderImpl builder) {

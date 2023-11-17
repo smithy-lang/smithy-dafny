@@ -1,26 +1,30 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
-// Do not modify this file. This file is machine generated, and any changes to it will be
-// overwritten.
+// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 package software.amazon.cryptography.materialproviders.model;
 
 import java.util.List;
 import java.util.Objects;
 import software.amazon.awssdk.services.kms.KmsClient;
 
-/** Inputs for for creating a AWS KMS Discovery Keyring. */
+/**
+ * Inputs for for creating a AWS KMS Discovery Keyring.
+ */
 public class CreateAwsKmsDiscoveryKeyringInput {
 
-  /** The KMS Client this Keyring will use to call KMS. */
+  /**
+   * The KMS Client this Keyring will use to call KMS.
+   */
   private final KmsClient kmsClient;
 
   /**
-   * A filter which restricts which KMS Keys this Keyring may attempt to decrypt with by AWS
-   * partition and account.
+   * A filter which restricts which KMS Keys this Keyring may attempt to decrypt with by AWS partition and account.
    */
   private final DiscoveryFilter discoveryFilter;
 
-  /** A list of grant tokens to be used when calling KMS. */
+  /**
+   * A list of grant tokens to be used when calling KMS.
+   */
   private final List<String> grantTokens;
 
   protected CreateAwsKmsDiscoveryKeyringInput(BuilderImpl builder) {
@@ -37,8 +41,7 @@ public class CreateAwsKmsDiscoveryKeyringInput {
   }
 
   /**
-   * @return A filter which restricts which KMS Keys this Keyring may attempt to decrypt with by AWS
-   *     partition and account.
+   * @return A filter which restricts which KMS Keys this Keyring may attempt to decrypt with by AWS partition and account.
    */
   public DiscoveryFilter discoveryFilter() {
     return this.discoveryFilter;
@@ -71,14 +74,12 @@ public class CreateAwsKmsDiscoveryKeyringInput {
     KmsClient kmsClient();
 
     /**
-     * @param discoveryFilter A filter which restricts which KMS Keys this Keyring may attempt to
-     *     decrypt with by AWS partition and account.
+     * @param discoveryFilter A filter which restricts which KMS Keys this Keyring may attempt to decrypt with by AWS partition and account.
      */
     Builder discoveryFilter(DiscoveryFilter discoveryFilter);
 
     /**
-     * @return A filter which restricts which KMS Keys this Keyring may attempt to decrypt with by
-     *     AWS partition and account.
+     * @return A filter which restricts which KMS Keys this Keyring may attempt to decrypt with by AWS partition and account.
      */
     DiscoveryFilter discoveryFilter();
 

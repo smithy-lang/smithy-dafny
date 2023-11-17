@@ -1,7 +1,6 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
-// Do not modify this file. This file is machine generated, and any changes to it will be
-// overwritten.
+// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 package software.amazon.cryptography.keystore.model;
 
 import java.util.List;
@@ -11,25 +10,39 @@ import software.amazon.awssdk.services.kms.KmsClient;
 
 public class KeyStoreConfig {
 
-  /** The DynamoDB table name that backs this Key Store. */
+  /**
+   * The DynamoDB table name that backs this Key Store.
+   */
   private final String ddbTableName;
 
-  /** The AWS KMS Key that protects this Key Store. */
+  /**
+   * The AWS KMS Key that protects this Key Store.
+   */
   private final KMSConfiguration kmsConfiguration;
 
-  /** The logical name for this Key Store, which is cryptographically bound to the keys it holds. */
+  /**
+   * The logical name for this Key Store, which is cryptographically bound to the keys it holds.
+   */
   private final String logicalKeyStoreName;
 
-  /** An identifier for this Key Store. */
+  /**
+   * An identifier for this Key Store.
+   */
   private final String id;
 
-  /** The AWS KMS grant tokens that are used when this Key Store calls to AWS KMS. */
+  /**
+   * The AWS KMS grant tokens that are used when this Key Store calls to AWS KMS.
+   */
   private final List<String> grantTokens;
 
-  /** The DynamoDB client this Key Store uses to call Amazon DynamoDB. */
+  /**
+   * The DynamoDB client this Key Store uses to call Amazon DynamoDB.
+   */
   private final DynamoDbClient ddbClient;
 
-  /** The KMS client this Key Store uses to call AWS KMS. */
+  /**
+   * The KMS client this Key Store uses to call AWS KMS.
+   */
   private final KmsClient kmsClient;
 
   protected KeyStoreConfig(BuilderImpl builder) {
@@ -57,8 +70,7 @@ public class KeyStoreConfig {
   }
 
   /**
-   * @return The logical name for this Key Store, which is cryptographically bound to the keys it
-   *     holds.
+   * @return The logical name for this Key Store, which is cryptographically bound to the keys it holds.
    */
   public String logicalKeyStoreName() {
     return this.logicalKeyStoreName;
@@ -122,14 +134,12 @@ public class KeyStoreConfig {
     KMSConfiguration kmsConfiguration();
 
     /**
-     * @param logicalKeyStoreName The logical name for this Key Store, which is cryptographically
-     *     bound to the keys it holds.
+     * @param logicalKeyStoreName The logical name for this Key Store, which is cryptographically bound to the keys it holds.
      */
     Builder logicalKeyStoreName(String logicalKeyStoreName);
 
     /**
-     * @return The logical name for this Key Store, which is cryptographically bound to the keys it
-     *     holds.
+     * @return The logical name for this Key Store, which is cryptographically bound to the keys it holds.
      */
     String logicalKeyStoreName();
 
@@ -144,8 +154,7 @@ public class KeyStoreConfig {
     String id();
 
     /**
-     * @param grantTokens The AWS KMS grant tokens that are used when this Key Store calls to AWS
-     *     KMS.
+     * @param grantTokens The AWS KMS grant tokens that are used when this Key Store calls to AWS KMS.
      */
     Builder grantTokens(List<String> grantTokens);
 

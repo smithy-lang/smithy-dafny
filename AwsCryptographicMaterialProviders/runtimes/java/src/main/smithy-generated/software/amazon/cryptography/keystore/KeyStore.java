@@ -1,10 +1,10 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
-// Do not modify this file. This file is machine generated, and any changes to it will be
-// overwritten.
+// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 package software.amazon.cryptography.keystore;
 
 import Wrappers_Compile.Result;
+import java.lang.IllegalArgumentException;
 import java.util.Objects;
 import software.amazon.cryptography.keystore.internaldafny.KeyStoreClient;
 import software.amazon.cryptography.keystore.internaldafny.__default;
@@ -49,9 +49,7 @@ public class KeyStore {
   }
 
   /**
-   * Create a new Branch Key in the Key Store. Additionally create a Beacon Key that is tied to this
-   * Branch Key.
-   *
+   * Create a new Branch Key in the Key Store. Additionally create a Beacon Key that is tied to this Branch Key.
    * @return Outputs for Branch Key creation.
    */
   public CreateKeyOutput CreateKey(CreateKeyInput input) {
@@ -68,9 +66,7 @@ public class KeyStore {
   }
 
   /**
-   * Create the DynamoDB table that backs this Key Store based on the Key Store configuration. If a
-   * table already exists, validate it is configured as expected.
-   *
+   * Create the DynamoDB table that backs this Key Store based on the Key Store configuration. If a table already exists, validate it is configured as expected.
    * @return Outputs for Key Store DynamoDB table creation.
    */
   public CreateKeyStoreOutput CreateKeyStore(CreateKeyStoreInput input) {
@@ -149,7 +145,6 @@ public class KeyStore {
 
   /**
    * Returns the configuration information for a Key Store.
-   *
    * @return The configuration information for a Key Store.
    */
   public GetKeyStoreInfoOutput GetKeyStoreInfo() {
@@ -164,8 +159,7 @@ public class KeyStore {
   }
 
   /**
-   * Create a new ACTIVE version of an existing Branch Key in the Key Store, and set the previously
-   * ACTIVE version to DECRYPT_ONLY.
+   * Create a new ACTIVE version of an existing Branch Key in the Key Store, and set the previously ACTIVE version to DECRYPT_ONLY.
    *
    * @param input Inputs for versioning a Branch Key.
    * @return Outputs for versioning a Branch Key.

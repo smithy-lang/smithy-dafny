@@ -1,20 +1,17 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
-// Do not modify this file. This file is machine generated, and any changes to it will be
-// overwritten.
+// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 package software.amazon.cryptography.materialproviders.model;
 
 import java.util.Objects;
 
 /**
- * Outputs for the Branch Key responsible for wrapping or unwrapping the data key in this encryption
- * or decryption.
+ * Outputs for the Branch Key responsible for wrapping or unwrapping the data key in this encryption or decryption.
  */
 public class GetBranchKeyIdOutput {
 
   /**
-   * The identifier of the Branch Key that should be responsible for wrapping or unwrapping the data
-   * key in this encryption or decryption.
+   * The identifier of the Branch Key that should be responsible for wrapping or unwrapping the data key in this encryption or decryption.
    */
   private final String branchKeyId;
 
@@ -23,8 +20,7 @@ public class GetBranchKeyIdOutput {
   }
 
   /**
-   * @return The identifier of the Branch Key that should be responsible for wrapping or unwrapping
-   *     the data key in this encryption or decryption.
+   * @return The identifier of the Branch Key that should be responsible for wrapping or unwrapping the data key in this encryption or decryption.
    */
   public String branchKeyId() {
     return this.branchKeyId;
@@ -40,14 +36,12 @@ public class GetBranchKeyIdOutput {
 
   public interface Builder {
     /**
-     * @param branchKeyId The identifier of the Branch Key that should be responsible for wrapping
-     *     or unwrapping the data key in this encryption or decryption.
+     * @param branchKeyId The identifier of the Branch Key that should be responsible for wrapping or unwrapping the data key in this encryption or decryption.
      */
     Builder branchKeyId(String branchKeyId);
 
     /**
-     * @return The identifier of the Branch Key that should be responsible for wrapping or
-     *     unwrapping the data key in this encryption or decryption.
+     * @return The identifier of the Branch Key that should be responsible for wrapping or unwrapping the data key in this encryption or decryption.
      */
     String branchKeyId();
 

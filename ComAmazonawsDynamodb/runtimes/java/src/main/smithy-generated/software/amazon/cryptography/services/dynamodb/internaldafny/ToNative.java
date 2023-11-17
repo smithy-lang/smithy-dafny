@@ -1,11 +1,14 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
-// Do not modify this file. This file is machine generated, and any changes to it will be
-// overwritten.
+// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 package software.amazon.cryptography.services.dynamodb.internaldafny;
 
 import dafny.DafnyMap;
 import dafny.DafnySequence;
+import java.lang.Byte;
+import java.lang.Character;
+import java.lang.Double;
+import java.lang.String;
 import java.util.List;
 import java.util.Map;
 import software.amazon.awssdk.core.SdkBytes;
@@ -349,6 +352,7 @@ import software.amazon.cryptography.services.dynamodb.internaldafny.types.Error_
 import software.amazon.cryptography.services.dynamodb.internaldafny.types.Error_InvalidRestoreTimeException;
 import software.amazon.cryptography.services.dynamodb.internaldafny.types.Error_ItemCollectionSizeLimitExceededException;
 import software.amazon.cryptography.services.dynamodb.internaldafny.types.Error_LimitExceededException;
+// BEGIN MANUAL EDIT
 import software.amazon.cryptography.services.dynamodb.internaldafny.types.Error_Opaque;
 // END MANUAL EDIT
 import software.amazon.cryptography.services.dynamodb.internaldafny.types.Error_PointInTimeRecoveryUnavailableException;
@@ -364,7 +368,6 @@ import software.amazon.cryptography.services.dynamodb.internaldafny.types.Error_
 import software.amazon.cryptography.services.dynamodb.internaldafny.types.Error_TransactionCanceledException;
 import software.amazon.cryptography.services.dynamodb.internaldafny.types.Error_TransactionConflictException;
 import software.amazon.cryptography.services.dynamodb.internaldafny.types.Error_TransactionInProgressException;
-// BEGIN MANUAL EDIT
 import software.amazon.cryptography.services.dynamodb.internaldafny.types.ExecuteStatementInput;
 import software.amazon.cryptography.services.dynamodb.internaldafny.types.ExecuteStatementOutput;
 import software.amazon.cryptography.services.dynamodb.internaldafny.types.ExecuteTransactionInput;

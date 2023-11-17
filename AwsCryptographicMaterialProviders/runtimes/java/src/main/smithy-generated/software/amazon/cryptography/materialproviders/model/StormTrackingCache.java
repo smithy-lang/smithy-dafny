@@ -1,37 +1,48 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
-// Do not modify this file. This file is machine generated, and any changes to it will be
-// overwritten.
+// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 package software.amazon.cryptography.materialproviders.model;
 
 /**
- * A cache that is safe for use in a multi threaded environment, and tries to prevent redundant or
- * overly parallel backend calls.
+ * A cache that is safe for use in a multi threaded environment,
+ * and tries to prevent redundant or overly parallel backend calls.
  */
 public class StormTrackingCache {
 
-  /** Maximum number of entries cached. */
+  /**
+   * Maximum number of entries cached.
+   */
   private final int entryCapacity;
 
-  /** Number of entries to prune at a time. */
+  /**
+   * Number of entries to prune at a time.
+   */
   private final int entryPruningTailSize;
 
   /**
-   * How many seconds before expiration should an attempt be made to refresh the materials. If zero,
-   * use a simple cache with no storm tracking.
+   * How many seconds before expiration should an attempt be made to refresh the materials.
+   *   If zero, use a simple cache with no storm tracking.
    */
   private final int gracePeriod;
 
-  /** How many seconds between attempts to refresh the materials. */
+  /**
+   * How many seconds between attempts to refresh the materials.
+   */
   private final int graceInterval;
 
-  /** How many simultaneous attempts to refresh the materials. */
+  /**
+   * How many simultaneous attempts to refresh the materials.
+   */
   private final int fanOut;
 
-  /** How many seconds until an attempt to refresh the materials should be forgotten. */
+  /**
+   * How many seconds until an attempt to refresh the materials should be forgotten.
+   */
   private final int inFlightTTL;
 
-  /** How many milliseconds should a thread sleep if fanOut is exceeded. */
+  /**
+   * How many milliseconds should a thread sleep if fanOut is exceeded.
+   */
   private final int sleepMilli;
 
   protected StormTrackingCache(BuilderImpl builder) {
@@ -60,7 +71,7 @@ public class StormTrackingCache {
 
   /**
    * @return How many seconds before expiration should an attempt be made to refresh the materials.
-   *     If zero, use a simple cache with no storm tracking.
+   *   If zero, use a simple cache with no storm tracking.
    */
   public int gracePeriod() {
     return this.gracePeriod;
@@ -124,14 +135,14 @@ public class StormTrackingCache {
     int entryPruningTailSize();
 
     /**
-     * @param gracePeriod How many seconds before expiration should an attempt be made to refresh
-     *     the materials. If zero, use a simple cache with no storm tracking.
+     * @param gracePeriod How many seconds before expiration should an attempt be made to refresh the materials.
+     *   If zero, use a simple cache with no storm tracking.
      */
     Builder gracePeriod(int gracePeriod);
 
     /**
-     * @return How many seconds before expiration should an attempt be made to refresh the
-     *     materials. If zero, use a simple cache with no storm tracking.
+     * @return How many seconds before expiration should an attempt be made to refresh the materials.
+     *   If zero, use a simple cache with no storm tracking.
      */
     int gracePeriod();
 
@@ -156,8 +167,7 @@ public class StormTrackingCache {
     int fanOut();
 
     /**
-     * @param inFlightTTL How many seconds until an attempt to refresh the materials should be
-     *     forgotten.
+     * @param inFlightTTL How many seconds until an attempt to refresh the materials should be forgotten.
      */
     Builder inFlightTTL(int inFlightTTL);
 

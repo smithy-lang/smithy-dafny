@@ -1,15 +1,18 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
-// Do not modify this file. This file is machine generated, and any changes to it will be
-// overwritten.
+// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 package software.amazon.cryptography.keystore.model;
 
 import java.util.Objects;
 
-/** Outputs for Key Store DynamoDB table creation. */
+/**
+ * Outputs for Key Store DynamoDB table creation.
+ */
 public class CreateKeyStoreOutput {
 
-  /** The ARN of the DynamoDB table that backs this Key Store. */
+  /**
+   * The ARN of the DynamoDB table that backs this Key Store.
+   */
   private final String tableArn;
 
   protected CreateKeyStoreOutput(BuilderImpl builder) {

@@ -1,14 +1,15 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
-// Do not modify this file. This file is machine generated, and any changes to it will be
-// overwritten.
+// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 package software.amazon.cryptography.primitives.model;
 
 import java.util.List;
 
 public class CollectionOfErrors extends RuntimeException {
 
-  /** The list of Exceptions encountered. */
+  /**
+   * The list of Exceptions encountered.
+   */
   private final List<RuntimeException> list;
 
   protected CollectionOfErrors(BuilderImpl builder) {
@@ -26,12 +27,16 @@ public class CollectionOfErrors extends RuntimeException {
     return null;
   }
 
-  /** See {@link Throwable#getMessage()}. */
+  /**
+   * See {@link Throwable#getMessage()}.
+   */
   public String message() {
     return this.getMessage();
   }
 
-  /** See {@link Throwable#getCause()}. */
+  /**
+   * See {@link Throwable#getCause()}.
+   */
   public Throwable cause() {
     return this.getCause();
   }
@@ -53,27 +58,22 @@ public class CollectionOfErrors extends RuntimeException {
 
   public interface Builder {
     /**
-     * @param message The detailed message. The detail message is saved for later retrieval by the
-     *     {@link #getMessage()} method.
+     * @param message The detailed message. The detail message is saved for later retrieval by the {@link #getMessage()} method.
      */
     Builder message(String message);
 
     /**
-     * @return The detailed message. The detail message is saved for later retrieval by the {@link
-     *     #getMessage()} method.
+     * @return The detailed message. The detail message is saved for later retrieval by the {@link #getMessage()} method.
      */
     String message();
 
     /**
-     * @param cause The cause (which is saved for later retrieval by the {@link #getCause()}
-     *     method). (A {@code null} value is permitted, and indicates that the cause is nonexistent
-     *     or unknown.)
+     * @param cause The cause (which is saved for later retrieval by the {@link #getCause()} method). (A {@code null} value is permitted, and indicates that the cause is nonexistent or unknown.)
      */
     Builder cause(Throwable cause);
 
     /**
-     * @return The cause (which is saved for later retrieval by the {@link #getCause()} method). (A
-     *     {@code null} value is permitted, and indicates that the cause is nonexistent or unknown.)
+     * @return The cause (which is saved for later retrieval by the {@link #getCause()} method). (A {@code null} value is permitted, and indicates that the cause is nonexistent or unknown.)
      */
     Throwable cause();
 

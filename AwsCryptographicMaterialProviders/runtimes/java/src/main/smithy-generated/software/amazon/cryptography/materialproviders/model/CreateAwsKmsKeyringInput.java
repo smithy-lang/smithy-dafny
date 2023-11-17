@@ -1,26 +1,30 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
-// Do not modify this file. This file is machine generated, and any changes to it will be
-// overwritten.
+// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 package software.amazon.cryptography.materialproviders.model;
 
 import java.util.List;
 import java.util.Objects;
 import software.amazon.awssdk.services.kms.KmsClient;
 
-/** Inputs for for creating a AWS KMS Keyring. */
+/**
+ * Inputs for for creating a AWS KMS Keyring.
+ */
 public class CreateAwsKmsKeyringInput {
 
   /**
-   * The identifier for the symmetric AWS KMS Key responsible for wrapping and unwrapping data keys.
-   * This should not be a AWS KMS Multi-Region Key.
+   * The identifier for the symmetric AWS KMS Key responsible for wrapping and unwrapping data keys. This should not be a AWS KMS Multi-Region Key.
    */
   private final String kmsKeyId;
 
-  /** The KMS Client this Keyring will use to call KMS. */
+  /**
+   * The KMS Client this Keyring will use to call KMS.
+   */
   private final KmsClient kmsClient;
 
-  /** A list of grant tokens to be used when calling KMS. */
+  /**
+   * A list of grant tokens to be used when calling KMS.
+   */
   private final List<String> grantTokens;
 
   protected CreateAwsKmsKeyringInput(BuilderImpl builder) {
@@ -30,8 +34,7 @@ public class CreateAwsKmsKeyringInput {
   }
 
   /**
-   * @return The identifier for the symmetric AWS KMS Key responsible for wrapping and unwrapping
-   *     data keys. This should not be a AWS KMS Multi-Region Key.
+   * @return The identifier for the symmetric AWS KMS Key responsible for wrapping and unwrapping data keys. This should not be a AWS KMS Multi-Region Key.
    */
   public String kmsKeyId() {
     return this.kmsKeyId;
@@ -61,14 +64,12 @@ public class CreateAwsKmsKeyringInput {
 
   public interface Builder {
     /**
-     * @param kmsKeyId The identifier for the symmetric AWS KMS Key responsible for wrapping and
-     *     unwrapping data keys. This should not be a AWS KMS Multi-Region Key.
+     * @param kmsKeyId The identifier for the symmetric AWS KMS Key responsible for wrapping and unwrapping data keys. This should not be a AWS KMS Multi-Region Key.
      */
     Builder kmsKeyId(String kmsKeyId);
 
     /**
-     * @return The identifier for the symmetric AWS KMS Key responsible for wrapping and unwrapping
-     *     data keys. This should not be a AWS KMS Multi-Region Key.
+     * @return The identifier for the symmetric AWS KMS Key responsible for wrapping and unwrapping data keys. This should not be a AWS KMS Multi-Region Key.
      */
     String kmsKeyId();
 

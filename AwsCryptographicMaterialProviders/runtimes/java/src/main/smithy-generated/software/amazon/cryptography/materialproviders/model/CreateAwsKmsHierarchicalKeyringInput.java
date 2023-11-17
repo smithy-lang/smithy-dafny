@@ -1,7 +1,6 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
-// Do not modify this file. This file is machine generated, and any changes to it will be
-// overwritten.
+// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 package software.amazon.cryptography.materialproviders.model;
 
 import java.util.Objects;
@@ -9,34 +8,34 @@ import software.amazon.cryptography.keystore.KeyStore;
 import software.amazon.cryptography.materialproviders.BranchKeyIdSupplier;
 import software.amazon.cryptography.materialproviders.IBranchKeyIdSupplier;
 
-/** Inputs for creating a Hierarchical Keyring. */
+/**
+ * Inputs for creating a Hierarchical Keyring.
+ */
 public class CreateAwsKmsHierarchicalKeyringInput {
 
   /**
-   * The identifier for the single Branch Key responsible for wrapping and unwrapping the data key.
-   * Either a Branch Key ID or Branch Key Supplier must be specified.
+   * The identifier for the single Branch Key responsible for wrapping and unwrapping the data key. Either a Branch Key ID or Branch Key Supplier must be specified.
    */
   private final String branchKeyId;
 
   /**
-   * A Branch Key Supplier which determines what Branch Key to use to wrap and unwrap the data key.
-   * Either a Branch Key ID or Branch Key Supplier must be specified.
+   * A Branch Key Supplier which determines what Branch Key to use to wrap and unwrap the data key. Either a Branch Key ID or Branch Key Supplier must be specified.
    */
   private final IBranchKeyIdSupplier branchKeyIdSupplier;
 
   /**
-   * The Key Store which contains the Branch Key(s) responsible for wrapping and unwrapping data
-   * keys.
+   * The Key Store which contains the Branch Key(s) responsible for wrapping and unwrapping data keys.
    */
   private final KeyStore keyStore;
 
   /**
-   * How many seconds the Branch Key material is allowed to be reused within the local cache before
-   * it is re-retrieved from Amazon DynamoDB and re-authenticated with AWS KMS.
+   * How many seconds the Branch Key material is allowed to be reused within the local cache before it is re-retrieved from Amazon DynamoDB and re-authenticated with AWS KMS.
    */
   private final long ttlSeconds;
 
-  /** Which type of local cache to use. */
+  /**
+   * Which type of local cache to use.
+   */
   private final CacheType cache;
 
   protected CreateAwsKmsHierarchicalKeyringInput(BuilderImpl builder) {
@@ -48,32 +47,28 @@ public class CreateAwsKmsHierarchicalKeyringInput {
   }
 
   /**
-   * @return The identifier for the single Branch Key responsible for wrapping and unwrapping the
-   *     data key. Either a Branch Key ID or Branch Key Supplier must be specified.
+   * @return The identifier for the single Branch Key responsible for wrapping and unwrapping the data key. Either a Branch Key ID or Branch Key Supplier must be specified.
    */
   public String branchKeyId() {
     return this.branchKeyId;
   }
 
   /**
-   * @return A Branch Key Supplier which determines what Branch Key to use to wrap and unwrap the
-   *     data key. Either a Branch Key ID or Branch Key Supplier must be specified.
+   * @return A Branch Key Supplier which determines what Branch Key to use to wrap and unwrap the data key. Either a Branch Key ID or Branch Key Supplier must be specified.
    */
   public IBranchKeyIdSupplier branchKeyIdSupplier() {
     return this.branchKeyIdSupplier;
   }
 
   /**
-   * @return The Key Store which contains the Branch Key(s) responsible for wrapping and unwrapping
-   *     data keys.
+   * @return The Key Store which contains the Branch Key(s) responsible for wrapping and unwrapping data keys.
    */
   public KeyStore keyStore() {
     return this.keyStore;
   }
 
   /**
-   * @return How many seconds the Branch Key material is allowed to be reused within the local cache
-   *     before it is re-retrieved from Amazon DynamoDB and re-authenticated with AWS KMS.
+   * @return How many seconds the Branch Key material is allowed to be reused within the local cache before it is re-retrieved from Amazon DynamoDB and re-authenticated with AWS KMS.
    */
   public long ttlSeconds() {
     return this.ttlSeconds;
@@ -96,52 +91,42 @@ public class CreateAwsKmsHierarchicalKeyringInput {
 
   public interface Builder {
     /**
-     * @param branchKeyId The identifier for the single Branch Key responsible for wrapping and
-     *     unwrapping the data key. Either a Branch Key ID or Branch Key Supplier must be specified.
+     * @param branchKeyId The identifier for the single Branch Key responsible for wrapping and unwrapping the data key. Either a Branch Key ID or Branch Key Supplier must be specified.
      */
     Builder branchKeyId(String branchKeyId);
 
     /**
-     * @return The identifier for the single Branch Key responsible for wrapping and unwrapping the
-     *     data key. Either a Branch Key ID or Branch Key Supplier must be specified.
+     * @return The identifier for the single Branch Key responsible for wrapping and unwrapping the data key. Either a Branch Key ID or Branch Key Supplier must be specified.
      */
     String branchKeyId();
 
     /**
-     * @param branchKeyIdSupplier A Branch Key Supplier which determines what Branch Key to use to
-     *     wrap and unwrap the data key. Either a Branch Key ID or Branch Key Supplier must be
-     *     specified.
+     * @param branchKeyIdSupplier A Branch Key Supplier which determines what Branch Key to use to wrap and unwrap the data key. Either a Branch Key ID or Branch Key Supplier must be specified.
      */
     Builder branchKeyIdSupplier(IBranchKeyIdSupplier branchKeyIdSupplier);
 
     /**
-     * @return A Branch Key Supplier which determines what Branch Key to use to wrap and unwrap the
-     *     data key. Either a Branch Key ID or Branch Key Supplier must be specified.
+     * @return A Branch Key Supplier which determines what Branch Key to use to wrap and unwrap the data key. Either a Branch Key ID or Branch Key Supplier must be specified.
      */
     IBranchKeyIdSupplier branchKeyIdSupplier();
 
     /**
-     * @param keyStore The Key Store which contains the Branch Key(s) responsible for wrapping and
-     *     unwrapping data keys.
+     * @param keyStore The Key Store which contains the Branch Key(s) responsible for wrapping and unwrapping data keys.
      */
     Builder keyStore(KeyStore keyStore);
 
     /**
-     * @return The Key Store which contains the Branch Key(s) responsible for wrapping and
-     *     unwrapping data keys.
+     * @return The Key Store which contains the Branch Key(s) responsible for wrapping and unwrapping data keys.
      */
     KeyStore keyStore();
 
     /**
-     * @param ttlSeconds How many seconds the Branch Key material is allowed to be reused within the
-     *     local cache before it is re-retrieved from Amazon DynamoDB and re-authenticated with AWS
-     *     KMS.
+     * @param ttlSeconds How many seconds the Branch Key material is allowed to be reused within the local cache before it is re-retrieved from Amazon DynamoDB and re-authenticated with AWS KMS.
      */
     Builder ttlSeconds(long ttlSeconds);
 
     /**
-     * @return How many seconds the Branch Key material is allowed to be reused within the local
-     *     cache before it is re-retrieved from Amazon DynamoDB and re-authenticated with AWS KMS.
+     * @return How many seconds the Branch Key material is allowed to be reused within the local cache before it is re-retrieved from Amazon DynamoDB and re-authenticated with AWS KMS.
      */
     long ttlSeconds();
 

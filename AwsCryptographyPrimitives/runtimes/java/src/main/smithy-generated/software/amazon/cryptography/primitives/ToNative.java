@@ -1,10 +1,13 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
-// Do not modify this file. This file is machine generated, and any changes to it will be
-// overwritten.
+// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 package software.amazon.cryptography.primitives;
 
 import dafny.DafnySequence;
+import java.lang.Boolean;
+import java.lang.Byte;
+import java.lang.IllegalArgumentException;
+import java.lang.RuntimeException;
 import java.nio.ByteBuffer;
 import software.amazon.cryptography.primitives.internaldafny.types.AES__CTR;
 import software.amazon.cryptography.primitives.internaldafny.types.AES__GCM;

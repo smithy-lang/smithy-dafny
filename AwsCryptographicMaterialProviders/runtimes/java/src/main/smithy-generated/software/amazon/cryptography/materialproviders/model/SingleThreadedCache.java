@@ -1,16 +1,21 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
-// Do not modify this file. This file is machine generated, and any changes to it will be
-// overwritten.
+// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 package software.amazon.cryptography.materialproviders.model;
 
-/** A cache that is NOT safe for use in a multi threaded environment. */
+/**
+ * A cache that is NOT safe for use in a multi threaded environment.
+ */
 public class SingleThreadedCache {
 
-  /** Maximum number of entries cached. */
+  /**
+   * Maximum number of entries cached.
+   */
   private final int entryCapacity;
 
-  /** Number of entries to prune at a time. */
+  /**
+   * Number of entries to prune at a time.
+   */
   private final int entryPruningTailSize;
 
   protected SingleThreadedCache(BuilderImpl builder) {

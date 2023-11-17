@@ -1,22 +1,24 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
-// Do not modify this file. This file is machine generated, and any changes to it will be
-// overwritten.
+// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 package software.amazon.cryptography.materialproviders.model;
 
 import java.util.List;
 import java.util.Objects;
 
 /**
- * A filter which defines what AWS partition and AWS accounts a KMS Key may be in for a Keyring to
- * be allowed to attempt to decrypt it.
+ * A filter which defines what AWS partition and AWS accounts a KMS Key may be in for a Keyring to be allowed to attempt to decrypt it.
  */
 public class DiscoveryFilter {
 
-  /** A list of allowed AWS account IDs. */
+  /**
+   * A list of allowed AWS account IDs.
+   */
   private final List<String> accountIds;
 
-  /** The AWS partition which is allowed. */
+  /**
+   * The AWS partition which is allowed.
+   */
   private final String partition;
 
   protected DiscoveryFilter(BuilderImpl builder) {

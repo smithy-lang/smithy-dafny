@@ -57,7 +57,7 @@
 
 
   <ItemGroup>
-    <PackageReference Include="AWSSDK.Core" Version="3.7.103" />
+    <PackageReference Include="AWSSDK.Core" Version="3.7.300.2" />
     <PackageReference Include="DafnyRuntime" Version="$(DafnyVersion)" />
     <PackageReference Include="BouncyCastle.Cryptography" Version="2.2.1" />
     <PackageReference Include="AWS.Cryptography.Internal.StandardLibrary" Version="1.1.1" />

@@ -1,12 +1,13 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
-// Do not modify this file. This file is machine generated, and any changes to it will be
-// overwritten.
+// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 package software.amazon.cryptography.materialproviders;
 
 import Wrappers_Compile.Result;
 import dafny.DafnySequence;
 import dafny.Tuple0;
+import java.lang.Byte;
+import java.lang.IllegalArgumentException;
 import java.nio.ByteBuffer;
 import java.util.Objects;
 import software.amazon.cryptography.materialproviders.internaldafny.MaterialProvidersClient;
@@ -67,8 +68,7 @@ public class MaterialProviders {
   }
 
   /**
-   * Creates an AWS KMS Discovery Keyring, which supports unwrapping data keys wrapped by a
-   * symmetric AWS KMS Key for a single region.
+   * Creates an AWS KMS Discovery Keyring, which supports unwrapping data keys wrapped by a symmetric AWS KMS Key for a single region.
    *
    * @param input Inputs for for creating a AWS KMS Discovery Keyring.
    * @return Outputs for creating a Keyring.
@@ -89,8 +89,7 @@ public class MaterialProviders {
   }
 
   /**
-   * Creates an AWS KMS Discovery Multi-Keyring, which supports unwrapping data keys wrapped by a
-   * symmetric AWS KMS Key, for multiple regions.
+   * Creates an AWS KMS Discovery Multi-Keyring, which supports unwrapping data keys wrapped by a symmetric AWS KMS Key, for multiple regions.
    *
    * @param input Inputs for for creating an AWS KMS Discovery Multi-Keyring.
    * @return Outputs for creating a Keyring.
@@ -111,9 +110,7 @@ public class MaterialProviders {
   }
 
   /**
-   * Creates a Hierarchical Keyring, which supports wrapping and unwrapping data keys using Branch
-   * Keys persisted in DynamoDB and protected by a symmetric AWS KMS Key or AWS KMS Multi-Region
-   * Key.
+   * Creates a Hierarchical Keyring, which supports wrapping and unwrapping data keys using Branch Keys persisted in DynamoDB and protected by a symmetric AWS KMS Key or AWS KMS Multi-Region Key.
    *
    * @param input Inputs for creating a Hierarchical Keyring.
    * @return Outputs for creating a Keyring.
@@ -134,8 +131,7 @@ public class MaterialProviders {
   }
 
   /**
-   * Creates an AWS KMS Keyring, which wraps and unwraps data keys using single symmetric AWS KMS
-   * Key.
+   * Creates an AWS KMS Keyring, which wraps and unwraps data keys using single symmetric AWS KMS Key.
    *
    * @param input Inputs for for creating a AWS KMS Keyring.
    * @return Outputs for creating a Keyring.
@@ -154,8 +150,7 @@ public class MaterialProviders {
   }
 
   /**
-   * Creates an AWS KMS MRK Discovery Keyring, which supports unwrapping data keys wrapped by a
-   * symmetric AWS KMS Key or AWS KMS Multi-Region Key in a particular region.
+   * Creates an AWS KMS MRK Discovery Keyring, which supports unwrapping data keys wrapped by a symmetric AWS KMS Key or AWS KMS Multi-Region Key in a particular region.
    *
    * @param input Inputs for for creating a AWS KMS MRK Discovery Keyring.
    * @return Outputs for creating a Keyring.
@@ -176,8 +171,7 @@ public class MaterialProviders {
   }
 
   /**
-   * Creates an AWS KMS MRK Discovery Multi-Keyring that supports unwrapping data keys wrapped by a
-   * symmetric AWS KMS Key or AWS KMS Multi-Region Key, for a single region.
+   * Creates an AWS KMS MRK Discovery Multi-Keyring that supports unwrapping data keys wrapped by a symmetric AWS KMS Key or AWS KMS Multi-Region Key, for a single region.
    *
    * @param input Inputs for for creating a AWS KMS MRK Discovery Multi-Keyring.
    * @return Outputs for creating a Keyring.
@@ -198,8 +192,7 @@ public class MaterialProviders {
   }
 
   /**
-   * Creates an AWS KMS MRK Keyring, which wraps and unwraps data keys using single symmetric AWS
-   * KMS Key or AWS KMS Multi-Region Key.
+   * Creates an AWS KMS MRK Keyring, which wraps and unwraps data keys using single symmetric AWS KMS Key or AWS KMS Multi-Region Key.
    *
    * @param input Inputs for for creating an AWS KMS MRK Keyring.
    * @return Outputs for creating a Keyring.
@@ -218,8 +211,7 @@ public class MaterialProviders {
   }
 
   /**
-   * Creates an AWS KMS MRK Multi-Keyring, which wraps and unwraps data keys using one or more
-   * symmetric AWS KMS Keys or AWS KMS Multi-Region Keys.
+   * Creates an AWS KMS MRK Multi-Keyring, which wraps and unwraps data keys using one or more symmetric AWS KMS Keys or AWS KMS Multi-Region Keys.
    *
    * @param input Inputs for for creating a AWS KMS MRK Multi-Keyring.
    * @return Outputs for creating a Keyring.
@@ -240,8 +232,7 @@ public class MaterialProviders {
   }
 
   /**
-   * Creates an AWS KMS Multi-Keyring, which wraps and unwraps data keys using one or more symmetric
-   * AWS KMS Keys.
+   * Creates an AWS KMS Multi-Keyring, which wraps and unwraps data keys using one or more symmetric AWS KMS Keys.
    *
    * @param input Inputs for for creating a AWS KMS Multi-Keyring.
    * @return Outputs for creating a Keyring.
@@ -262,8 +253,7 @@ public class MaterialProviders {
   }
 
   /**
-   * Creates an AWS KMS RSA Keyring, which wraps and unwraps data keys using a single asymmetric AWS
-   * KMS Key for RSA.
+   * Creates an AWS KMS RSA Keyring, which wraps and unwraps data keys using a single asymmetric AWS KMS Key for RSA.
    *
    * @param input Inputs for creating a AWS KMS RSA Keyring.
    * @return Outputs for creating a Keyring.
@@ -393,8 +383,7 @@ public class MaterialProviders {
   /**
    * Creates an Required Encryption Context Cryptographic Materials Manager.
    *
-   * @param input Inputs for creating an Required Encryption Context Cryptographic Materials
-   *     Manager.
+   * @param input Inputs for creating an Required Encryption Context Cryptographic Materials Manager.
    * @return Outputs for creating an Required Encryption Context Cryptographic Materials Manager.
    */
   public ICryptographicMaterialsManager CreateRequiredEncryptionContextCMM(

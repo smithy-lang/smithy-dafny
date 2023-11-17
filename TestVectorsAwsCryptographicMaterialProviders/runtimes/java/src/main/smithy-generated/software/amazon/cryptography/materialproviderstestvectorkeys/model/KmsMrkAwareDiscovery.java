@@ -1,7 +1,6 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
-// Do not modify this file. This file is machine generated, and any changes to it will be
-// overwritten.
+// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 package software.amazon.cryptography.materialproviderstestvectorkeys.model;
 
 import java.util.Objects;
@@ -14,8 +13,7 @@ public class KmsMrkAwareDiscovery {
   private final String defaultMrkRegion;
 
   /**
-   * A filter which defines what AWS partition and AWS accounts a KMS Key may be in for a Keyring to
-   * be allowed to attempt to decrypt it.
+   * A filter which defines what AWS partition and AWS accounts a KMS Key may be in for a Keyring to be allowed to attempt to decrypt it.
    */
   private final DiscoveryFilter awsKmsDiscoveryFilter;
 
@@ -34,8 +32,7 @@ public class KmsMrkAwareDiscovery {
   }
 
   /**
-   * @return A filter which defines what AWS partition and AWS accounts a KMS Key may be in for a
-   *     Keyring to be allowed to attempt to decrypt it.
+   * @return A filter which defines what AWS partition and AWS accounts a KMS Key may be in for a Keyring to be allowed to attempt to decrypt it.
    */
   public DiscoveryFilter awsKmsDiscoveryFilter() {
     return this.awsKmsDiscoveryFilter;
@@ -59,14 +56,12 @@ public class KmsMrkAwareDiscovery {
     String defaultMrkRegion();
 
     /**
-     * @param awsKmsDiscoveryFilter A filter which defines what AWS partition and AWS accounts a KMS
-     *     Key may be in for a Keyring to be allowed to attempt to decrypt it.
+     * @param awsKmsDiscoveryFilter A filter which defines what AWS partition and AWS accounts a KMS Key may be in for a Keyring to be allowed to attempt to decrypt it.
      */
     Builder awsKmsDiscoveryFilter(DiscoveryFilter awsKmsDiscoveryFilter);
 
     /**
-     * @return A filter which defines what AWS partition and AWS accounts a KMS Key may be in for a
-     *     Keyring to be allowed to attempt to decrypt it.
+     * @return A filter which defines what AWS partition and AWS accounts a KMS Key may be in for a Keyring to be allowed to attempt to decrypt it.
      */
     DiscoveryFilter awsKmsDiscoveryFilter();
 

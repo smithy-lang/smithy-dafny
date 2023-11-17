@@ -1,19 +1,19 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
-// Do not modify this file. This file is machine generated, and any changes to it will be
-// overwritten.
+// Do not modify this file. This file is machine generated, and any changes to it will be overwritten.
 package software.amazon.cryptography.materialproviders.model;
 
 import java.util.Objects;
 import software.amazon.cryptography.materialproviders.IKeyring;
 import software.amazon.cryptography.materialproviders.Keyring;
 
-/** Inputs for creating a Default Cryptographic Materials Manager. */
+/**
+ * Inputs for creating a Default Cryptographic Materials Manager.
+ */
 public class CreateDefaultCryptographicMaterialsManagerInput {
 
   /**
-   * The Keyring that the created Default Cryprographic Materials Manager will use to wrap data
-   * keys.
+   * The Keyring that the created Default Cryprographic Materials Manager will use to wrap data keys.
    */
   private final IKeyring keyring;
 
@@ -24,8 +24,7 @@ public class CreateDefaultCryptographicMaterialsManagerInput {
   }
 
   /**
-   * @return The Keyring that the created Default Cryprographic Materials Manager will use to wrap
-   *     data keys.
+   * @return The Keyring that the created Default Cryprographic Materials Manager will use to wrap data keys.
    */
   public IKeyring keyring() {
     return this.keyring;
@@ -41,14 +40,12 @@ public class CreateDefaultCryptographicMaterialsManagerInput {
 
   public interface Builder {
     /**
-     * @param keyring The Keyring that the created Default Cryprographic Materials Manager will use
-     *     to wrap data keys.
+     * @param keyring The Keyring that the created Default Cryprographic Materials Manager will use to wrap data keys.
      */
     Builder keyring(IKeyring keyring);
 
     /**
-     * @return The Keyring that the created Default Cryprographic Materials Manager will use to wrap
-     *     data keys.
+     * @return The Keyring that the created Default Cryprographic Materials Manager will use to wrap data keys.
      */
     IKeyring keyring();
 
