@@ -24,6 +24,7 @@ import javax.lang.model.element.Modifier;
 
 import software.amazon.polymorph.smithyjava.generator.ToDafny;
 import software.amazon.polymorph.smithyjava.nameresolver.Constants;
+import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.polymorph.utils.AwsSdkNameResolverHelpers;
 import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
 import software.amazon.polymorph.utils.ModelUtils;
@@ -346,16 +347,19 @@ public class ToDafnyAwsV1 extends ToDafny {
         );
         // This is memberAssignment from above,
         // but with calls to dafnyNameResolver replaced with their expected response.
+        CodeBlock stringTypeDescriptor = Dafny.TYPE_DESCRIPTOR_BY_SHAPE_TYPE.get(ShapeType.STRING);
         CodeBlock memberAssignment = CodeBlock.of(
-                "$L = $T.nonNull($L) ?\n$T.create_Some($T.$L($L))\n: $T.create_None()",
+                "$L = $T.nonNull($L) ?\n$T.create_Some($L, $T.$L($L))\n: $T.create_None($L)",
                 "message",
                 ClassName.get(Objects.class),
                 "nativeValue.getMessage()",
                 ClassName.get("Wrappers_Compile", "Option"),
+                stringTypeDescriptor,
                 COMMON_TO_DAFNY_SIMPLE,
                 SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(ShapeType.STRING).methodName(),
                 "nativeValue.getMessage()",
-                ClassName.get("Wrappers_Compile", "Option")
+                ClassName.get("Wrappers_Compile", "Option"),
+                stringTypeDescriptor
         );
         return MethodSpec.methodBuilder("Error")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)

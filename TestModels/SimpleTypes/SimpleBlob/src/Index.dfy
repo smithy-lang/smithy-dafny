@@ -10,7 +10,7 @@ module {:extern "simple.types.blob.internaldafny" } SimpleBlob refines AbstractS
  }
 
  method SimpleBlob(config: SimpleBlobConfig)
- returns (res: Result<SimpleBlobClient, Error>) {
+ returns (res: Result<ISimpleTypesBlobClient, Error>) {
     var client := new SimpleBlobClient(Operations.Config);
     return Success(client);
  }

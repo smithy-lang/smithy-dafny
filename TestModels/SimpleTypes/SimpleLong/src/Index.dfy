@@ -10,7 +10,7 @@ module {:extern "simple.types.smithylong.internaldafny" } SimpleLong refines Abs
  }
 
  method SimpleLong(config: SimpleLongConfig)
- returns (res: Result<SimpleLongClient, Error>) {
+ returns (res: Result<ISimpleTypesLongClient, Error>) {
     var client := new SimpleLongClient(Operations.Config);
     return Success(client);
  }

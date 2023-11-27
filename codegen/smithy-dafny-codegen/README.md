@@ -86,9 +86,10 @@ are as follows:
         "version": "1.0",
         "plugins": {
             "dafny-client-codegen": {
-                "edition": "2023",
+                "edition": "2023.10",
                 "service": "smithy.example#ExampleService",
                 "targetLanguages": ["dotnet"],
+                "dafnyVersion": "4.3.0",
                 "includeDafnyFile": "[relative]/[path]/[to]/StandardLibrary/src/Index.dfy"
             }
         }

@@ -8,6 +8,7 @@ import com.google.common.collect.ImmutableMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.polymorph.smithydafny.DafnyApiCodegen;
+import software.amazon.polymorph.smithydafny.DafnyVersion;
 import software.amazon.polymorph.smithydotnet.AwsSdkShimCodegen;
 import software.amazon.polymorph.smithydotnet.AwsSdkTypeConversionCodegen;
 import software.amazon.polymorph.smithydotnet.ServiceCodegen;
@@ -21,6 +22,7 @@ import software.amazon.polymorph.smithyjava.generator.awssdk.v1.JavaAwsSdkV1;
 import software.amazon.polymorph.smithyjava.generator.awssdk.v2.JavaAwsSdkV2;
 import software.amazon.polymorph.smithyjava.generator.library.JavaLibrary;
 import software.amazon.polymorph.smithyjava.generator.library.TestJavaLibrary;
+import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.polymorph.utils.IOUtils;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.smithy.aws.traits.ServiceTrait;
@@ -44,6 +46,7 @@ public class CodegenEngine {
     private final Path[] dependentModelPaths;
     private final String namespace;
     private final Map<TargetLanguage, Path> targetLangOutputDirs;
+    private final DafnyVersion dafnyVersion;
     // refactor this to only be required if generating Java
     private final AwsSdkVersion javaAwsSdkVersion;
     private final Optional<Path> includeDafnyFile;
@@ -66,6 +69,7 @@ public class CodegenEngine {
             final Path[] dependentModelPaths,
             final String namespace,
             final Map<TargetLanguage, Path> targetLangOutputDirs,
+            final DafnyVersion dafnyVersion,
             final AwsSdkVersion javaAwsSdkVersion,
             final Optional<Path> includeDafnyFile,
             final boolean awsSdkStyle,
@@ -77,6 +81,7 @@ public class CodegenEngine {
         this.dependentModelPaths = dependentModelPaths;
         this.namespace = namespace;
         this.targetLangOutputDirs = targetLangOutputDirs;
+        this.dafnyVersion = dafnyVersion;
         this.javaAwsSdkVersion = javaAwsSdkVersion;
         this.includeDafnyFile = includeDafnyFile;
         this.awsSdkStyle = awsSdkStyle;
@@ -156,13 +161,13 @@ public class CodegenEngine {
     }
 
     private void javaLocalService(final Path outputDir) {
-        final JavaLibrary javaLibrary = new JavaLibrary(this.model, this.serviceShape, this.javaAwsSdkVersion);
+        final JavaLibrary javaLibrary = new JavaLibrary(this.model, this.serviceShape, this.javaAwsSdkVersion, this.dafnyVersion);
         IOUtils.writeTokenTreesIntoDir(javaLibrary.generate(), outputDir);
         LOGGER.info("Java code generated in {}", outputDir);
     }
 
     private void javaWrappedLocalService(final Path outputDir) {
-        final TestJavaLibrary testJavaLibrary = new TestJavaLibrary(model, serviceShape, this.javaAwsSdkVersion);
+        final TestJavaLibrary testJavaLibrary = new TestJavaLibrary(model, serviceShape, this.javaAwsSdkVersion, this.dafnyVersion);
         IOUtils.writeTokenTreesIntoDir(testJavaLibrary.generate(), outputDir);
         LOGGER.info("Java that tests a local service generated in {}", outputDir);
     }
@@ -174,7 +179,7 @@ public class CodegenEngine {
     }
 
     private void javaAwsSdkV2(final Path outputDir) {
-        final JavaAwsSdkV2 javaV2ShimCodegen = JavaAwsSdkV2.createJavaAwsSdkV2(serviceShape, model);
+        final JavaAwsSdkV2 javaV2ShimCodegen = JavaAwsSdkV2.createJavaAwsSdkV2(serviceShape, model, dafnyVersion);
         IOUtils.writeTokenTreesIntoDir(javaV2ShimCodegen.generate(), outputDir);
         LOGGER.info("Java V2 code generated in {}", outputDir);
     }
@@ -252,6 +257,7 @@ public class CodegenEngine {
         private PluginContext pluginContext;
         private String namespace;
         private Map<TargetLanguage, Path> targetLangOutputDirs;
+        private DafnyVersion dafnyVersion = new DafnyVersion(4, 1, 0);
         private AwsSdkVersion javaAwsSdkVersion = AwsSdkVersion.V2;
         private Path includeDafnyFile;
         private boolean awsSdkStyle = false;
@@ -295,6 +301,17 @@ public class CodegenEngine {
          */
         public Builder withTargetLangOutputDirs(final Map<TargetLanguage, Path> targetLangOutputDirs) {
             this.targetLangOutputDirs = targetLangOutputDirs;
+            return this;
+        }
+
+        /**
+         * Sets the Dafny version for which generated code should be compatible.
+         * This is used to ensure both Dafny source compatibility
+         * and compatibility with the Dafny compiler and runtime internals,
+         * which shim code generation currently depends on.
+         */
+        public Builder withDafnyVersion(final DafnyVersion dafnyVersion) {
+            this.dafnyVersion = dafnyVersion;
             return this;
         }
 
@@ -353,6 +370,7 @@ public class CodegenEngine {
             targetLangOutputDirsRaw.replaceAll((_lang, path) -> path.toAbsolutePath().normalize());
             final Map<TargetLanguage, Path> targetLangOutputDirs = ImmutableMap.copyOf(targetLangOutputDirsRaw);
 
+            final DafnyVersion dafnyVersion = Objects.requireNonNull(this.dafnyVersion);
             final AwsSdkVersion javaAwsSdkVersion = Objects.requireNonNull(this.javaAwsSdkVersion);
 
             if (targetLangOutputDirs.containsKey(TargetLanguage.DAFNY)
@@ -372,6 +390,7 @@ public class CodegenEngine {
                     dependentModelPaths,
                     this.namespace,
                     targetLangOutputDirs,
+                    dafnyVersion,
                     javaAwsSdkVersion,
                     includeDafnyFile,
                     this.awsSdkStyle,

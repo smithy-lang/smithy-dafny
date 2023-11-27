@@ -4,6 +4,7 @@
 package software.amazon.polymorph;
 
 import software.amazon.polymorph.CodegenEngine.TargetLanguage;
+import software.amazon.polymorph.smithydafny.DafnyVersion;
 import software.amazon.polymorph.smithyjava.generator.CodegenSubject.AwsSdkVersion;
 
 import org.apache.commons.cli.CommandLine;
@@ -84,13 +85,14 @@ public class CodegenCli {
                                                          .build();
 
         final CodegenEngine.Builder engineBuilder = new CodegenEngine.Builder()
-                                                            .withServiceModel(serviceModel)
-                                                            .withDependentModelPaths(cliArguments.dependentModelPaths)
-                                                            .withNamespace(cliArguments.namespace)
-                                                            .withTargetLangOutputDirs(outputDirs)
-                                                            .withAwsSdkStyle(cliArguments.awsSdkStyle)
-                                                            .withPluginContext(pluginContext)
-                                                            .withLocalServiceTest(cliArguments.localServiceTest);
+                .withServiceModel(serviceModel)
+                .withDependentModelPaths(cliArguments.dependentModelPaths)
+                .withNamespace(cliArguments.namespace)
+                .withTargetLangOutputDirs(outputDirs)
+                .withAwsSdkStyle(cliArguments.awsSdkStyle)
+                .withLocalServiceTest(cliArguments.localServiceTest)
+                .withDafnyVersion(cliArguments.dafnyVersion)
+                .withPluginContext(pluginContext);
         cliArguments.javaAwsSdkVersion.ifPresent(engineBuilder::withJavaAwsSdkVersion);
         cliArguments.includeDafnyFile.ifPresent(engineBuilder::withIncludeDafnyFile);
         final CodegenEngine engine = engineBuilder.build();
@@ -142,6 +144,11 @@ public class CodegenCli {
             .hasArg()
             .build())
           .addOption(Option.builder()
+            .longOpt("dafny-version")
+            .desc("Dafny version to generate code for")
+            .hasArg()
+            .build())
+          .addOption(Option.builder()
             .longOpt("aws-sdk")
             .desc("<optional> generate AWS SDK-style API and shims")
             .build())
@@ -175,6 +182,7 @@ public class CodegenCli {
             Optional<Path> outputDafnyDir,
             Optional<Path> outputGoDir,
             Optional<AwsSdkVersion> javaAwsSdkVersion,
+            DafnyVersion dafnyVersion,
             Optional<Path> includeDafnyFile,
             boolean awsSdkStyle,
             boolean localServiceTest
@@ -230,6 +238,19 @@ public class CodegenCli {
                 }
             }
 
+            DafnyVersion dafnyVersion;
+            String versionStr = commandLine.getOptionValue("dafny-version");
+            if (versionStr == null) {
+                LOGGER.error("--dafny-version option is required");
+                System.exit(-1);
+            }
+            try {
+                dafnyVersion = DafnyVersion.parse(versionStr.trim());
+            } catch (IllegalArgumentException ex) {
+                LOGGER.error("Could not parse --dafny-version: {}", versionStr);
+                throw ex;
+            }
+
             Optional<Path> includeDafnyFile = Optional.empty();
             if (outputDafnyDir.isPresent()) {
                 includeDafnyFile = Optional.of(Paths.get(commandLine.getOptionValue("include-dafny")));
@@ -237,8 +258,9 @@ public class CodegenCli {
 
             return Optional.of(new CliArguments(
                     modelPath, dependentModelPaths, namespace,
+
                     outputDotnetDir, outputJavaDir, outputDafnyDir, outputGoDir,
-                    javaAwsSdkVersion, includeDafnyFile, awsSdkStyle,
+                    javaAwsSdkVersion, dafnyVersion, includeDafnyFile, awsSdkStyle,
                     localServiceTest
             ));
         }

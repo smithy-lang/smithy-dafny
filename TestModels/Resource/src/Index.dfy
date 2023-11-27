@@ -20,7 +20,7 @@ module
   method SimpleResources(
     config: SimpleResourcesConfig
   ) returns (
-    res: Result<SimpleResourcesClient, Error>
+    res: Result<ISimpleResourcesClient, Error>
   )
   {
     var internalConfig: Operations.InternalConfig := Operations.Config(
