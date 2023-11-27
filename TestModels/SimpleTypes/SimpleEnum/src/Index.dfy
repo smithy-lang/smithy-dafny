@@ -10,7 +10,7 @@ module {:extern "simple.types.smithyenum.internaldafny" } SimpleEnum refines Abs
  }
 
  method SimpleEnum(config: SimpleEnumConfig)
- returns (res: Result<SimpleEnumClient, Error>) {
+ returns (res: Result<ISimpleTypesEnumClient, Error>) {
     var client := new SimpleEnumClient(Operations.Config);
     return Success(client);
  }

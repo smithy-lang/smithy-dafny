@@ -16,6 +16,6 @@ public class __default extends _ExternBase___default {
         simple.errors.model.SimpleErrorsConfig wrappedConfig = ToNative.SimpleErrorsConfig(config);
         simple.errors.SimpleErrors impl = SimpleErrors.builder().SimpleErrorsConfig(wrappedConfig).build();
         TestSimpleErrors wrappedClient = TestSimpleErrors.builder().impl(impl).build();
-        return Result.create_Success(wrappedClient);
+        return simple.errors.internaldafny.__default.CreateSuccessOfClient(wrappedClient);
     }
 }

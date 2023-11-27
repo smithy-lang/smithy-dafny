@@ -16,6 +16,6 @@ public class __default extends _ExternBase___default {
         simple.resources.model.SimpleResourcesConfig wrappedConfig = ToNative.SimpleResourcesConfig(config);
         simple.resources.SimpleResources impl = SimpleResources.builder().SimpleResourcesConfig(wrappedConfig).build();
         TestSimpleResources wrappedClient = TestSimpleResources.builder().impl(impl).build();
-        return Result.create_Success(wrappedClient);
+        return simple.resources.internaldafny.__default.CreateSuccessOfClient(wrappedClient);
     }
 }
