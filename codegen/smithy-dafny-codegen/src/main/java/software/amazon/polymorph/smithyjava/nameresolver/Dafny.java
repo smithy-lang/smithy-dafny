@@ -100,6 +100,9 @@ public class Dafny extends NameResolver {
     //  Dafnys greater than or equal to this will need Type Descriptors for constructing datatypes  
     private static final DafnyVersion NEEDS_TYPE_DESCRIPTORS_WHEN_CONSTRUCTING_DATATYPES = new DafnyVersion(4, 2, 0);
 
+    /**
+     * @return Whether the given Dafny version requires type descriptor values when instantiating datatype constructors.
+     */
     public static boolean datatypeConstructorsNeedTypeDescriptors(DafnyVersion dafnyVersion) {
         return dafnyVersion.compareTo(NEEDS_TYPE_DESCRIPTORS_WHEN_CONSTRUCTING_DATATYPES) >= 0;
     }
@@ -108,6 +111,11 @@ public class Dafny extends NameResolver {
         return datatypeConstructorsNeedTypeDescriptors(dafnyVersion);
     }
 
+    /**
+     * Code to create an instance of the None constructor of Wrappers.Option<T>.
+     * @param typeDescriptor the code to create a TypeDescriptor for the type T,
+     *                       which is needed if datatypeConstructorsNeedTypeDescriptors()
+     */
     public CodeBlock createNone(CodeBlock typeDescriptor) {
         if (datatypeConstructorsNeedTypeDescriptors()) {
             return CodeBlock.of(
@@ -121,6 +129,11 @@ public class Dafny extends NameResolver {
         }
     }
 
+    /**
+     * Code to create an instance of the Some(value: T) constructor of Wrappers.Option<T>.
+     * @param typeDescriptor the code to create a TypeDescriptor for the type T,
+     *                       which is needed if datatypeConstructorsNeedTypeDescriptors()
+     */
     public CodeBlock createSome(CodeBlock typeDescriptor, CodeBlock value) {
         if (datatypeConstructorsNeedTypeDescriptors()) {
             return CodeBlock.of(
@@ -136,6 +149,11 @@ public class Dafny extends NameResolver {
         }
     }
 
+    /**
+     * Code to create an instance of the Success(value: T) constructor of Wrappers.Result<T, Error>.
+     * @param valueTypeDescriptor the code to create a TypeDescriptor for the type T,
+     *                       which is needed if datatypeConstructorsNeedTypeDescriptors()
+     */
     public CodeBlock createSuccess(CodeBlock valueTypeDescriptor, CodeBlock value) {
         if (datatypeConstructorsNeedTypeDescriptors()) {
             return CodeBlock.of(
@@ -151,12 +169,17 @@ public class Dafny extends NameResolver {
         }
     }
 
-    public CodeBlock createFailure(CodeBlock typeDescriptor, CodeBlock error) {
+    /**
+     * Code to create an instance of the Failure(error: Error) constructor of Wrappers.Result<T, Error>.
+     * @param valueTypeDescriptor the code to create a TypeDescriptor for the type T,
+     *                            which is needed if datatypeConstructorsNeedTypeDescriptors()
+     */
+    public CodeBlock createFailure(CodeBlock valueTypeDescriptor, CodeBlock error) {
         if (datatypeConstructorsNeedTypeDescriptors()) {
             return CodeBlock.of(
                     "$T.create_Failure($L, Error._typeDescriptor(), $L)",
                     Constants.DAFNY_RESULT_CLASS_NAME,
-                    typeDescriptor,
+                    valueTypeDescriptor,
                     error);
         } else {
             return CodeBlock.of(

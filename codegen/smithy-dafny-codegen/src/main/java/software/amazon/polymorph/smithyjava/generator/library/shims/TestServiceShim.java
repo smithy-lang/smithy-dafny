@@ -3,7 +3,6 @@
 package software.amazon.polymorph.smithyjava.generator.library.shims;
 
 import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
@@ -19,12 +18,10 @@ import software.amazon.polymorph.smithyjava.BuilderMemberSpec;
 import software.amazon.polymorph.smithyjava.BuilderSpecs;
 import software.amazon.polymorph.smithyjava.generator.library.JavaLibrary;
 import software.amazon.polymorph.smithyjava.modeled.Operation;
-import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.smithy.model.shapes.ServiceShape;
 
 import static javax.lang.model.element.Modifier.PROTECTED;
 import static javax.lang.model.element.Modifier.PUBLIC;
-import static javax.lang.model.element.Modifier.STATIC;
 
 public class TestServiceShim extends ServiceShim {
     /** The Service Shape this Shim Tests. */
