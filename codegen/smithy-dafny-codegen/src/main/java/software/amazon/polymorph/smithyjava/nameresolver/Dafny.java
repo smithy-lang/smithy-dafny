@@ -97,6 +97,7 @@ public class Dafny extends NameResolver {
         return "create_" + DafnyNameResolverHelpers.dafnyCompilesExtra_(name);
     }
 
+    //  Dafnys greater than or equal to this will need Type Descriptors for constructing datatypes  
     private static final DafnyVersion NEEDS_TYPE_DESCRIPTORS_WHEN_CONSTRUCTING_DATATYPES = new DafnyVersion(4, 2, 0);
 
     public static boolean datatypeConstructorsNeedTypeDescriptors(DafnyVersion dafnyVersion) {
@@ -397,7 +398,7 @@ public class Dafny extends NameResolver {
         return typeForCharacterSequence();
     }
 
-    public TypeName typeForCharacterSequence() {
+   TypeName typeForCharacterSequence() {
         return ParameterizedTypeName.get(
                 Constants.DAFNY_SEQUENCE_CLASS_NAME,
                 WildcardTypeName.subtypeOf(Character.class)
