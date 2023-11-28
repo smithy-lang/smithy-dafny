@@ -14,7 +14,7 @@ jobs:
   dafny-nightly-format:
     # Don't run the cron builds on forks
     if: github.event_name != 'schedule' || github.repository_owner == 'aws'
-    uses: ./.github/workflows/library_dafny_verification.yml
+    uses: ./.github/workflows/library_format.yml
     with:
       dafny: "nightly-latest"
   dafny-nightly-verification:
