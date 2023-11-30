@@ -136,6 +136,24 @@ public class DirectedDafnyPythonLocalServiceCodegen extends DirectedPythonCodege
     }
   }
 
+  @Override
+  public void generateService(GenerateServiceDirective<GenerationContext, PythonSettings> directive) {
+      new SynchronousClientGenerator(directive.context(), directive.service()).run();
+
+      var protocolGenerator = directive.context().protocolGenerator();
+      if (protocolGenerator == null) {
+          return;
+      }
+
+      protocolGenerator.generateSharedSerializerComponents(directive.context());
+      protocolGenerator.generateRequestSerializers(directive.context());
+
+      protocolGenerator.generateSharedDeserializerComponents(directive.context());
+      protocolGenerator.generateResponseDeserializers(directive.context());
+
+      protocolGenerator.generateProtocolTests(directive.context());
+  }
+
 
 
 //    if (directive.shape().hasTrait(ReferenceTrait.class)

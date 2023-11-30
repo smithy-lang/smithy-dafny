@@ -19,6 +19,7 @@ import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.ResourceShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
+import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.python.codegen.GenerationContext;
@@ -242,10 +243,10 @@ public class DafnyToLocalServiceConversionFunctionWriter extends BaseConversionW
           serviceShape.getId().getName()
       );
 
-      conversionWriter.write("return $L($L)",
+      conversionWriter.write("return $L(config=None, dafny_client=$L)",
           serviceShape.getId().getName(), dataSourceInsideConversionFunction);
     } else {
-      conversionWriter.write("return input.impl");
+      conversionWriter.write("return input._impl");
     }
 
   }
@@ -335,6 +336,10 @@ public class DafnyToLocalServiceConversionFunctionWriter extends BaseConversionW
           }
       );
     });
+  }
+
+  protected void writeStringEnumShapeConverter(StringShape stringShapeWithEnumTrait) {
+
   }
 
 }

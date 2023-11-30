@@ -11,8 +11,11 @@ import software.amazon.polymorph.smithypython.common.shapevisitor.conversionwrit
 import software.amazon.smithy.codegen.core.WriterDelegator;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.Shape;
+import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.UnionShape;
+import software.amazon.smithy.model.traits.EnumDefinition;
+import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonWriter;
 
@@ -198,4 +201,68 @@ public class AwsSdkToDafnyConversionFunctionWriter extends BaseConversionWriter 
     });
   }
 
+  /**
+   * @param stringShapeWithEnumTrait
+   */
+  public void writeStringEnumShapeConverter(StringShape stringShapeWithEnumTrait) {
+    WriterDelegator<PythonWriter> delegator = context.writerDelegator();
+    String moduleName = context.settings().getModuleName();
+
+    // Write out common conversion function inside dafny_to_aws_sdk
+    delegator.useFileWriter(moduleName + "/aws_sdk_to_dafny.py", "", conversionWriter -> {
+
+      // Within the conversion function, the dataSource becomes the function's input
+      String dataSourceInsideConversionFunction = "input";
+
+      // ex. shape: simple.union.ExampleUnion
+      // Writes `def DafnyToSmithy_simple_union_ExampleUnion(input):`
+      //   and wraps inner code inside function definition
+      conversionWriter.openBlock(
+          "def $L($L):",
+          "",
+          AwsSdkNameResolver.getAwsSdkToDafnyFunctionNameForShape(stringShapeWithEnumTrait),
+          dataSourceInsideConversionFunction,
+          () -> {
+            conversionWriter.writeComment("Convert %1$s".formatted(
+                stringShapeWithEnumTrait.getId().getName()
+            ));
+
+            // First union value opens a new `if` block; others do not need to and write `elif`
+            boolean shouldOpenNewIfBlock = true;
+            // Write out conversion:
+            // ex. if ExampleUnion can take on either of (IntegerValue, StringValue), write:
+            // if isinstance(input, ExampleUnion_IntegerValue):
+            //   ExampleUnion_union_value = ExampleUnionIntegerValue(input.IntegerValue)
+            // elif isinstance(input, ExampleUnion_StringValue):
+            //   ExampleUnion_union_value = ExampleUnionStringValue(input.StringValue)
+
+            for (EnumDefinition enumDefinition : stringShapeWithEnumTrait.getTrait(EnumTrait.class).get().getValues()) {
+              String value = enumDefinition.getValue();
+              conversionWriter.write(
+                  """
+                  $L $L == "$L":
+                      return $L()""",
+                  // If we need a new `if` block, open one; otherwise, expand on existing one with `elif`
+                  shouldOpenNewIfBlock ? "if" : "elif",
+                  dataSourceInsideConversionFunction,
+                  value,
+                  DafnyNameResolver.getDafnyTypeForStringShapeWithEnumTrait(stringShapeWithEnumTrait, value)
+                  );
+              shouldOpenNewIfBlock = false;
+
+              DafnyNameResolver.importDafnyTypeForStringShapeWithEnumTrait(conversionWriter, stringShapeWithEnumTrait, value);
+
+            }
+
+            // Write case to handle if union member does not match any of the above cases
+            conversionWriter.write("""
+                  else:
+                      raise ValueError("No recognized enum value in enum type: " + $L)
+                  """,
+                dataSourceInsideConversionFunction
+            );
+          }
+      );
+    });
+  }
 }

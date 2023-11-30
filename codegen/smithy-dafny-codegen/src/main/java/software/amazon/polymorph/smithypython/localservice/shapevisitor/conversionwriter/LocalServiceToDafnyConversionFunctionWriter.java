@@ -20,6 +20,7 @@ import software.amazon.smithy.model.shapes.ResourceShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
+import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.python.codegen.GenerationContext;
@@ -221,33 +222,35 @@ public class LocalServiceToDafnyConversionFunctionWriter extends BaseConversionW
       PythonWriter conversionWriter, String dataSourceInsideConversionFunction) {
 
     if (serviceShape.hasTrait(LocalServiceTrait.class)) {
-      DafnyNameResolver.importDafnyTypeForServiceShape(conversionWriter, serviceShape);
+      conversionWriter.write("return input._config.dafnyImplInterface._impl");
 
-      // Import service inline to avoid circular dependency
-      conversionWriter.write("import $L",
-          SmithyNameResolver.getSmithyGeneratedConfigModulePathForSmithyNamespace(
-              serviceShape.getId().getNamespace(), context)
-      );
-
-      conversionWriter.addStdlibImport(DafnyNameResolver.getDafnyPythonIndexModuleNameForShape(serviceShape));
-
-      // `my_module_client = my_module_internaldafny.MyModuleClient()`
-      conversionWriter.write("$L_client = $L.$L()",
-          SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(serviceShape.getId().getNamespace()),
-          DafnyNameResolver.getDafnyPythonIndexModuleNameForShape(serviceShape),
-          DafnyNameResolver.getDafnyClientTypeForServiceShape(serviceShape)
-      );
-
-      // `my_module_client.ctor__(my_module.smithygenerated.config.smithy_config_to_dafny_config(input._config))`
-      conversionWriter.write("$L_client.ctor__($L.smithy_config_to_dafny_config($L._config))",
-          SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(serviceShape.getId().getNamespace()),
-          SmithyNameResolver.getSmithyGeneratedConfigModulePathForSmithyNamespace(
-              serviceShape.getId().getNamespace(), context),
-          dataSourceInsideConversionFunction
-      );
-
-      conversionWriter.write("return $L_client",
-          SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(serviceShape.getId().getNamespace()));
+//      DafnyNameResolver.importDafnyTypeForServiceShape(conversionWriter, serviceShape);
+//
+//      // Import service inline to avoid circular dependency
+//      conversionWriter.write("import $L",
+//          SmithyNameResolver.getSmithyGeneratedConfigModulePathForSmithyNamespace(
+//              serviceShape.getId().getNamespace(), context)
+//      );
+//
+//      conversionWriter.addStdlibImport(DafnyNameResolver.getDafnyPythonIndexModuleNameForShape(serviceShape));
+//
+//      // `my_module_client = my_module_internaldafny.MyModuleClient()`
+//      conversionWriter.write("$L_client = $L.$L()",
+//          SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(serviceShape.getId().getNamespace()),
+//          DafnyNameResolver.getDafnyPythonIndexModuleNameForShape(serviceShape),
+//          DafnyNameResolver.getDafnyClientTypeForServiceShape(serviceShape)
+//      );
+//
+//      // `my_module_client.ctor__(my_module.smithygenerated.config.smithy_config_to_dafny_config(input._config))`
+//      conversionWriter.write("$L_client.ctor__($L.smithy_config_to_dafny_config($L._config))",
+//          SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(serviceShape.getId().getNamespace()),
+//          SmithyNameResolver.getSmithyGeneratedConfigModulePathForSmithyNamespace(
+//              serviceShape.getId().getNamespace(), context),
+//          dataSourceInsideConversionFunction
+//      );
+//
+//      conversionWriter.write("return $L_client",
+//          SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(serviceShape.getId().getNamespace()));
     } else {
       DafnyNameResolver.importDafnyTypeForServiceShape(conversionWriter, serviceShape);
 
@@ -271,7 +274,6 @@ public class LocalServiceToDafnyConversionFunctionWriter extends BaseConversionW
   protected void writeResourceShapeConverter(ResourceShape resourceShape,
       PythonWriter conversionWriter, String dataSourceInsideConversionFunction) {
     // Smithy resource shapes ALWAYS store the underlying Dafny resource in `_impl`.
-    // TODO-Python: Typing
     conversionWriter.write("return $L._impl",
         dataSourceInsideConversionFunction);
   }
@@ -344,6 +346,10 @@ public class LocalServiceToDafnyConversionFunctionWriter extends BaseConversionW
             conversionWriter.write("return %1$s_union_value".formatted(unionShape.getId().getName()));
           });
     });
+  }
+
+  protected void writeStringEnumShapeConverter(StringShape stringShapeWithEnumTrait) {
+
   }
 
 }

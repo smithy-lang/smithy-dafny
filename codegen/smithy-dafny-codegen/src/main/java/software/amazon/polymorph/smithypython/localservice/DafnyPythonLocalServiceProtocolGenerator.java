@@ -112,14 +112,15 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator implements Protoc
     Symbol configSymbol = CodegenUtils.getConfigSymbol(context.settings());
 
     // For each operation in the model, generate a `serialize_{operation input}` method
-    for (OperationShape operation : context.model().getOperationShapes()) {
-      Symbol serFunction = getSerializationFunction(context, operation);
-      Shape input = context.model().expectShape(operation.getInputShape());
+    for (ShapeId operationShapeId : context.model().expectShape(context.settings().getService()).asServiceShape().get().getAllOperations()) {
+      OperationShape operationShape = context.model().expectShape(operationShapeId).asOperationShape().get();
+      Symbol serFunction = getSerializationFunction(context, operationShape);
+      Shape input = context.model().expectShape(operationShape.getInputShape());
 
       // Write out the serialization operation
       delegator.useFileWriter(serFunction.getDefinitionFile(), serFunction.getNamespace(), writer -> {
         writer.addImport(Constants.DAFNY_PROTOCOL_PYTHON_FILENAME, Constants.DAFNY_PROTOCOL_REQUEST);
-        writer.pushState(new RequestSerializerSection(operation));
+        writer.pushState(new RequestSerializerSection(operationShape));
 
         writer.write("""
             async def $L(input, config: $T) -> $L:
@@ -128,7 +129,7 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator implements Protoc
             serFunction.getName(),
             configSymbol,
             Constants.DAFNY_PROTOCOL_REQUEST,
-            writer.consumer(w -> generateRequestSerializer(context, operation, w)));
+            writer.consumer(w -> generateRequestSerializer(context, operationShape, w)));
         writer.popState();
       });
     }
@@ -188,15 +189,16 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator implements Protoc
     Symbol configSymbol = CodegenUtils.getConfigSymbol(context.settings());
 
     // For each operation in the model, generate a `deserialize_{operation input}` method
-    for (OperationShape operation : context.model().getOperationShapes()) {
-      Symbol deserFunction = getDeserializationFunction(context, operation);
-      Shape output = context.model().expectShape(operation.getOutputShape());
+    for (ShapeId operationShapeId : context.model().expectShape(context.settings().getService()).asServiceShape().get().getAllOperations()) {
+      OperationShape operationShape = context.model().expectShape(operationShapeId).asOperationShape().get();
+      Symbol deserFunction = getDeserializationFunction(context, operationShape);
+      Shape output = context.model().expectShape(operationShape.getOutputShape());
       Symbol outputSymbol = SmithyNameResolver.generateSmithyDafnySymbolForShape(context, output);
 
       delegator.useFileWriter(deserFunction.getDefinitionFile(), deserFunction.getNamespace(), writer -> {
         writer.addImport(Constants.DAFNY_PROTOCOL_PYTHON_FILENAME, Constants.DAFNY_PROTOCOL_RESPONSE);
 
-        writer.pushState(new RequestDeserializerSection(operation));
+        writer.pushState(new RequestDeserializerSection(operationShape));
 
         writer.write("""
             async def $L(input: $L, config: $T):
@@ -205,7 +207,7 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator implements Protoc
             deserFunction.getName(),
             Constants.DAFNY_PROTOCOL_RESPONSE,
             configSymbol,
-            writer.consumer(w -> generateOperationResponseDeserializer(context, operation))
+            writer.consumer(w -> generateOperationResponseDeserializer(context, operationShape))
         );
 
         writer.popState();
@@ -366,36 +368,39 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator implements Protoc
     Optional<LocalServiceTrait> maybeLocalServiceTrait = serviceShape.getTrait(LocalServiceTrait.class);
     if (maybeLocalServiceTrait.isPresent()) {
       LocalServiceTrait localServiceTrait = maybeLocalServiceTrait.get();
+      if (localServiceTrait.getDependencies() == null
+            || localServiceTrait.getDependencies().isEmpty()) {
+        return;
+      }
       Set<ShapeId> serviceDependencyShapeIds = localServiceTrait.getDependencies().stream()
           .filter(shapeId -> context.model().expectShape(shapeId).hasTrait(LocalServiceTrait.class)).collect(
               Collectors.toSet());
-      if (serviceDependencyShapeIds != null) {
-        for (ShapeId serviceDependencyShapeId : serviceDependencyShapeIds) {
-          writer.addImport(".errors", serviceDependencyShapeId.getName());
 
-          // Import dependency `_deserialize_error` function so this service can defer to it:
-          // `from dependency.smithygenerated.deserialize import _deserialize_error as dependency_deserialize_error`
-          writer.addImport(
-              // `from dependency.smithygenerated.deserialize`
-              SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(serviceDependencyShapeId.getNamespace())
-                  + ".smithygenerated.deserialize",
-              // `import _deserialize_error`
-              "_deserialize_error",
-              // `as dependency_deserialize_error`
-              SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(serviceDependencyShapeId.getNamespace())
-                  + "_deserialize_error"
-          );
-          // Generate deserializer for dependency that defers to its `_deserialize_error`
-          writer.write(
-              """
-              elif error.is_$L:
-                  return $L(await $L(error.$L))""",
-              serviceDependencyShapeId.getName(), serviceDependencyShapeId.getName(),
-              SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(serviceDependencyShapeId.getNamespace())
-                  + "_deserialize_error",
-              serviceDependencyShapeId.getName()
-          );
-        }
+      for (ShapeId serviceDependencyShapeId : serviceDependencyShapeIds) {
+        writer.addImport(".errors", serviceDependencyShapeId.getName());
+
+        // Import dependency `_deserialize_error` function so this service can defer to it:
+        // `from dependency.smithygenerated.deserialize import _deserialize_error as dependency_deserialize_error`
+        writer.addImport(
+            // `from dependency.smithygenerated.deserialize`
+            SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(serviceDependencyShapeId.getNamespace())
+                + ".smithygenerated.deserialize",
+            // `import _deserialize_error`
+            "_deserialize_error",
+            // `as dependency_deserialize_error`
+            SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(serviceDependencyShapeId.getNamespace())
+                + "_deserialize_error"
+        );
+        // Generate deserializer for dependency that defers to its `_deserialize_error`
+        writer.write(
+            """
+            elif error.is_$L:
+                return $L(await $L(error.$L))""",
+            serviceDependencyShapeId.getName(), serviceDependencyShapeId.getName(),
+            SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(serviceDependencyShapeId.getNamespace())
+                + "_deserialize_error",
+            serviceDependencyShapeId.getName()
+        );
       }
     }
   }

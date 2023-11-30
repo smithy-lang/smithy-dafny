@@ -12,8 +12,10 @@ import software.amazon.smithy.model.shapes.ResourceShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
+import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.UnionShape;
+import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonWriter;
@@ -120,6 +122,35 @@ public class DafnyNameResolver {
    */
   public static String getDafnyTypeForShape(Shape shape) {
     return getDafnyTypeForShape(shape.getId());
+  }
+
+  /**
+   * Returns a String representing the Dafny-generated Python type corresponding to the provided Shape.
+   * ex. example.namespace.ExampleShape -> "DafnyExampleShape"
+   * @param shape
+   * @return
+   */
+  public static String getDafnyTypeForStringShapeWithEnumTrait(StringShape stringShape, String enumValue) {
+    if (!stringShape.hasTrait(EnumTrait.class) || !stringShape.isStringShape()) {
+      throw new IllegalArgumentException("Argument is not a StringShape with EnumTrait: " + stringShape.getId());
+    }
+
+    return stringShape.getId().getName() + "_" + enumValue.replace("_", "__");
+  }
+
+  public static void importDafnyTypeForStringShapeWithEnumTrait(PythonWriter writer, StringShape stringShape, String enumValue) {
+    if (!stringShape.hasTrait(EnumTrait.class) || !stringShape.isStringShape()) {
+      throw new IllegalArgumentException(
+          "Argument is not a StringShape with EnumTrait: " + stringShape.getId());
+    }
+
+    // When generating a Dafny import, must ALWAYS first import module_ to avoid circular dependencies
+    writer.addStdlibImport("module_");
+    writer.addStdlibImport(
+        getDafnyTypesModuleNameForSmithyNamespace(stringShape.getId().getNamespace()),
+        getDafnyTypeForStringShapeWithEnumTrait(stringShape, enumValue)
+    );
+
   }
 
   /**

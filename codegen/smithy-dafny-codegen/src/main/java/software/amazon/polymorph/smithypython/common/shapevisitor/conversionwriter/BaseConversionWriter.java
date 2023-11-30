@@ -9,8 +9,10 @@ import java.util.List;
 import java.util.Set;
 import software.amazon.polymorph.smithypython.wrappedlocalservice.DafnyPythonWrappedLocalServiceProtocolGenerator;
 import software.amazon.smithy.model.shapes.Shape;
+import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.UnionShape;
+import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonWriter;
 
@@ -85,6 +87,8 @@ public abstract class BaseConversionWriter {
         writeStructureShapeConverter(toGenerate.asStructureShape().get());
       } else if (toGenerate.isUnionShape()) {
         writeUnionShapeConverter(toGenerate.asUnionShape().get());
+      } else if (toGenerate.isStringShape() && toGenerate.hasTrait(EnumTrait.class)) {
+        writeStringEnumShapeConverter(toGenerate.asStringShape().get());
       }
       generating = false;
     }
@@ -93,5 +97,7 @@ public abstract class BaseConversionWriter {
   protected abstract void writeStructureShapeConverter(StructureShape structureShape);
 
   protected abstract void writeUnionShapeConverter(UnionShape unionShape);
+
+  protected abstract void writeStringEnumShapeConverter(StringShape stringShapeWithEnumTrait);
 
 }

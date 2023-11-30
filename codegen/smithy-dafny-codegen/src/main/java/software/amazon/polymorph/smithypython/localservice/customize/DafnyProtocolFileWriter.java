@@ -56,7 +56,7 @@ public class DafnyProtocolFileWriter implements CustomFileWriter {
                   
               class $L(Wrappers.Result):
                   def __init__(self):
-                      super.__init__(self)
+                      super().__init__(self)
               """,
           Constants.DAFNY_PROTOCOL_REQUEST,
           writer.consumer(w -> generateDafnyOperationInputUnionValues(inputShapeIds, w, codegenContext)),

@@ -63,6 +63,7 @@ public class AwsSdkShimFileWriter implements CustomFileWriter {
           writer.consumer(w -> generateAwsSdkErrorToDafnyErrorBlock(codegenContext, serviceShape, w)),
           AwsSdkNameResolver.shimForService(serviceShape),
           // TODO-Python: Uncomment to type the shim class
+          // Needs some help to do that 
           // typesModulePrelude, DafnyNameResolver.getDafnyClientInterfaceTypeForServiceShape(serviceShape),
           writer.consumer(w -> generateOperationsBlock(codegenContext, serviceShape, w))
       );

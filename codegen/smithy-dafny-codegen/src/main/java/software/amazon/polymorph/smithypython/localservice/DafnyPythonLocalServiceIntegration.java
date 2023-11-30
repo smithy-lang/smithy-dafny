@@ -97,14 +97,14 @@ public final class DafnyPythonLocalServiceIntegration implements PythonIntegrati
      */
     @Override
     public void customize(GenerationContext codegenContext) {
-//        System.out.println(codegenContext.model().getShapeIds());
-
+        // Only perform customizations if generating using the 
+        // DAFNY_PYTHON_LOCAL_SERVICE_APPLICATION_PROTOCOL
         if (!codegenContext.applicationProtocol().equals(
                 DafnyPythonLocalServiceProtocolGenerator.DAFNY_PYTHON_LOCAL_SERVICE_APPLICATION_PROTOCOL)) {
             return;
         }
 
-        // Generate for service shapes with localService trait
+        // Generate customizations for service shapes with localService trait
         Set<ServiceShape> serviceShapes = Set.of(
             codegenContext.model().expectShape(codegenContext.settings().getService())
                 .asServiceShape().get());

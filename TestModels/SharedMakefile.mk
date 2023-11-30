@@ -122,6 +122,7 @@ build_implementation:
 		--library:$(PROJECT_ROOT)/dafny-dependencies/StandardLibrary/src/Index.dfy \
 		$(patsubst %, --library:$(PROJECT_ROOT)/%/src/Index.dfy, $(LIBRARIES))
 
+
 transpile_implementation:
 	dafny \
 		-vcsCores:$(CORES) \
@@ -350,7 +351,12 @@ build_python: _rename_test_main_python
 build_implementation_python: TARGET=py
 build_implementation_python: OUT=runtimes/python/dafny_src
 build_implementation_python: COMPILE_SUFFIX_OPTION=
+build_implementation_python: _build_implementation_python_debug
 build_implementation_python: build_implementation
+
+_build_implementation_python_debug:
+	echo "test" | dafny --version
+	dafny --version
 
 # `transpile_implementation_python` is not directly used, but is indirectly used via `transpile_dependencies`
 # The `transpile` target does NOT include the Dafny runtime library (_dafny.py) in the generated code
