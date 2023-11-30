@@ -848,7 +848,7 @@ module AwsKmsKeyring {
       && client.Modifies == Modifies
     }
 
-    predicate Ensures(
+    predicate {:vcs_split_on_every_assert} Ensures(
       input: MaterialWrapping.GenerateAndWrapInput,
       res: Result<MaterialWrapping.GenerateAndWrapOutput<KmsWrapInfo>, Types.Error>,
       attemptsState: seq<ActionInvoke<MaterialWrapping.GenerateAndWrapInput, Result<MaterialWrapping.GenerateAndWrapOutput<KmsWrapInfo>, Types.Error>>>

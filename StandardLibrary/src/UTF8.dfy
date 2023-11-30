@@ -181,20 +181,9 @@ module {:extern "UTF8"} UTF8 {
         lo := lo + 4;
       }
     }
-    calc {
-      ValidUTF8Seq(s + t);
-    ==  // def.ValidUTF8Seq
-      ValidUTF8Range(s + t, 0, |s + t|);
-    ==  // loop invariant
-      ValidUTF8Range(s + t, lo, |s + t|);
-    ==  { assert s + t == s + t + [] && lo == |s| && |s + t| == |s| + |t|; }
-      ValidUTF8Range(s + t + [], |s|, |s| + |t|);
-    ==  { ValidUTF8Embed(s, t, [], 0, |t|); }
-      ValidUTF8Range(t, 0, |t|);
-    ==  // def.ValidUTF8Seq
-      ValidUTF8Seq(t);
-    ==  // precondition
-      true;
+    assert ValidUTF8Seq(s + t) by {
+      ValidUTF8Embed(s, t, [], 0, |t|);
+      assert s + t == s + t + [] && lo == |s|;
     }
   }
 }

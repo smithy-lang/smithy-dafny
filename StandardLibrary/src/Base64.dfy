@@ -363,7 +363,7 @@ module Base64 {
       DecodeUnpadded(s)
   }
 
-  lemma AboutDecodeValid(s: seq<char>, b: seq<uint8>)
+  lemma {:vcs_split_on_every_assert} AboutDecodeValid(s: seq<char>, b: seq<uint8>)
     requires IsBase64String(s) && b == DecodeValid(s)
     ensures 4 <= |s| ==> var finalBlockStart := |s| - 4;
                          var prefix, suffix := s[..finalBlockStart], s[finalBlockStart..];
