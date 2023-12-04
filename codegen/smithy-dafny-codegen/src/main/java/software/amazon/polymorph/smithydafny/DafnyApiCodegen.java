@@ -375,8 +375,12 @@ public class DafnyApiCodegen {
     }
 
     private TokenTree generateStructureTypeParameter(final MemberShape memberShape) {
-        return Token.of("nameonly %s: %s".formatted(
-                memberShape.getMemberName(), nameResolver.baseTypeForShape(memberShape.getId())));
+        String dflt = "";
+        if (ModelUtils.memberShapeIsOptional(model, memberShape)) {
+            dflt = " := Option.None";
+        }
+        return Token.of("nameonly %s: %s%s".formatted(
+            memberShape.getMemberName(), nameResolver.baseTypeForShape(memberShape.getId()), dflt));
     }
 
     public TokenTree generateServiceTraitDefinition(ServiceShape serviceShape) {
