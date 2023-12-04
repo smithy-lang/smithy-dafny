@@ -189,8 +189,8 @@ public class DafnyApiCodegenTest {
 
         final List<ParseToken> expectedTokens = Tokenizer.tokenize("""
                 datatype Foobar = | Foobar(
-                    nameonly someInt: Option<int32>,
-                    nameonly someString: Option<string>,
+					   nameonly someInt: Option<int32> := None,
+					   nameonly someString: Option<string> := None,
                     nameonly someBool: bool
                 )
                 """);
