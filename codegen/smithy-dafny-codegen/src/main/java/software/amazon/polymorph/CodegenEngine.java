@@ -76,6 +76,8 @@ public class CodegenEngine {
             final boolean generateProjectFiles
     ) {
         // To be provided to constructor
+        // TODO-Python: Refactor by passing module_name into CLI?
+
         this.dependentModelPaths = dependentModelPaths;
         this.namespace = namespace;
         this.targetLangOutputDirs = targetLangOutputDirs;

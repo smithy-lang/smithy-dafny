@@ -110,18 +110,6 @@ dafny-reportgenerator:
 # Python runs `build` targets for the target module, and `transpile` targets for dependencies and tests.
 # Dafny team should upload DafnyRuntime (_dafny.py) to PyPi,
 # TODO: Once DafnyRuntime is on PyPi, reference that and migrate Python builds to `transpile_implementation`.
-build_implementation:
-	dafny build \
-		-t:$(TARGET) \
-		./src/Index.dfy \
-		-o $(OUT) \
-		--quantifier-syntax:3 \
-		--function-syntax:3 \
-		--optimize-erasable-datatype-wrapper:false \
-		--unicode-char:false \
-		--library:$(PROJECT_ROOT)/dafny-dependencies/StandardLibrary/src/Index.dfy \
-		$(patsubst %, --library:$(PROJECT_ROOT)/%/src/Index.dfy, $(LIBRARIES))
-
 
 transpile_implementation:
 	dafny \
@@ -249,14 +237,18 @@ polymorph_python: OUTPUT_PYTHON=--output-python $(LIBRARY_ROOT)/runtimes/python/
 polymorph_python: _polymorph
 # TODO-Python: Right now, wrapped code generation requires an isolated directory,
 #   as it runs `rm models.py` and `rm errors.py` after generating.
+# Work is planned to not do this by writing a SymbolVisitor specific to wrapped localService generation.
+# This will resolve some of the weirdness in this section.
 polymorph_python: OUTPUT_PYTHON_WRAPPED=--output-python $(LIBRARY_ROOT)/runtimes/python/smithygenerated_wrapped
 polymorph_python: OUTPUT_LOCAL_SERVICE=--local-service-test
 polymorph_python: _polymorph_wrapped
 polymorph_python:
 	rm -rf runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated
 	mkdir runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated
-	mv runtimes/python/smithygenerated_wrapped/$(PYTHON_MODULE_NAME)/* runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated
-	mv runtimes/python/smithygenerated/$(PYTHON_MODULE_NAME)/* runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated
+	cp -r runtimes/python/smithygenerated_wrapped/* runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated
+	cp -r runtimes/python/smithygenerated/* runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated
+	rm runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated/README.md
+	rm runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated/pyproject.toml
 	rm -rf runtimes/python/smithygenerated
 	rm -rf runtimes/python/smithygenerated_wrapped
 polymorph_python: POLYMORPH_LANGUAGE_TARGET=python
@@ -297,7 +289,7 @@ setup_net:
 
 ########################## Java targets
 
-build_java: transpile_java mvn_local_deploy_dependencies
+transpile_java: transpile_java mvn_local_deploy_dependencies
 	gradle -p runtimes/java build
 
 transpile_java: | transpile_implementation_java transpile_test_java transpile_dependencies_java
@@ -337,26 +329,21 @@ test_java:
 
 ########################## Python targets
 
-build_python: _python_underscore_dependency_extern_names
-build_python: _python_underscore_extern_names
-build_python: build_implementation_python
-build_python: transpile_test_python
-build_python: transpile_dependencies_python
-build_python: _python_revert_underscore_extern_names
-build_python: _python_revert_underscore_dependency_extern_names
-build_python: _mv_internaldafny_python
-build_python: _remove_src_module_python
-build_python: _rename_test_main_python
+transpile_python: _python_underscore_dependency_extern_names
+transpile_python: _python_underscore_extern_names
+transpile_python: transpile_implementation_python
+transpile_python: transpile_test_python
+transpile_python: transpile_dependencies_python
+transpile_python: _python_revert_underscore_extern_names
+transpile_python: _python_revert_underscore_dependency_extern_names
+transpile_python: _mv_internaldafny_python
+transpile_python: _remove_src_module_python
+transpile_python: _rename_test_main_python
 
-build_implementation_python: TARGET=py
-build_implementation_python: OUT=runtimes/python/dafny_src
-build_implementation_python: COMPILE_SUFFIX_OPTION=
-build_implementation_python: _build_implementation_python_debug
-build_implementation_python: build_implementation
-
-_build_implementation_python_debug:
-	echo "test" | dafny --version
-	dafny --version
+transpile_implementation_python: TARGET=py
+transpile_implementation_python: OUT=runtimes/python/dafny_src
+transpile_implementation_python: COMPILE_SUFFIX_OPTION=
+transpile_implementation_python: transpile_implementation
 
 # `transpile_implementation_python` is not directly used, but is indirectly used via `transpile_dependencies`
 # The `transpile` target does NOT include the Dafny runtime library (_dafny.py) in the generated code

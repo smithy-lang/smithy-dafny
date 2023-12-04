@@ -6,10 +6,17 @@ pytest will find and execute the `test_dafny` method below,
 which will execute the `internaldafny_test_executor.py` file in the `dafny` directory.
 """
 
+import sys
+
+internaldafny_dir = '/'.join(__file__.split("/")[:-1])
+
+sys.path.append(internaldafny_dir + "/extern")
+sys.path.append(internaldafny_dir + "/generated")
+
 # Import modules required for Dafny-generated tests.
 # This is not generated; these must be manually added.
 
-from simple_constraints.extern import wrapped_simple_constraints
+from constraints.internaldafny.extern import wrapped_simple_constraints
 
 # End import modules required for Dafny-generated tests
 

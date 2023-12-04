@@ -7,7 +7,7 @@ include ../SharedMakefile.mk
 
 NAMESPACE=simple.constraints
 # TODO-Python: Move to smithy-build.json once Dafny SmithyBuildPlugin supports language-specific config
-PYTHON_MODULE_NAME=simple_constraints
+PYTHON_MODULE_NAME=constraints
 
 # This project has no dependencies 
 # DEPENDENT-MODELS:= 

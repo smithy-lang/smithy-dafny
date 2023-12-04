@@ -2,9 +2,9 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import simple_constraints_internaldafny_wrapped
-from simple_constraints.smithygenerated.config import dafny_config_to_smithy_config
-from simple_constraints.smithygenerated.client import SimpleConstraints
-from simple_constraints.smithygenerated.shim import SimpleConstraintsShim
+from constraints.smithygenerated.simple_constraints.config import dafny_config_to_smithy_config
+from constraints.smithygenerated.simple_constraints.client import SimpleConstraints
+from constraints.smithygenerated.simple_constraints.shim import SimpleConstraintsShim
 import Wrappers
 
 @staticmethod

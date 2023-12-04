@@ -42,7 +42,6 @@ public class ShimFileWriter implements CustomFileWriter {
       writer.write(
           """
           import Wrappers
-          import asyncio
           import $L
           import $L.smithygenerated.client as client_impl
                           
@@ -229,7 +228,7 @@ public class ShimFileWriter implements CustomFileWriter {
               """
               smithy_client_request: $L = $L
               try:
-                  smithy_client_response = asyncio.run(self._impl.$L(smithy_client_request))
+                  smithy_client_response = self._impl.$L(smithy_client_request)
               except ServiceError as e:
                   return Wrappers.Result_Failure(smithy_error_to_dafny_error(e))
                       

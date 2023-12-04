@@ -211,12 +211,14 @@ public class SmithyNameResolver {
     // `smithy.api.Unit:`
     // Smithy-Dafny generates a stand-in shape in the service
     if ("smithy.api".equals(smithyNamespace)) {
-      return getPythonModuleNamespaceForSmithyNamespace(
-          codegenContext.settings().getService().getNamespace()) + ".smithygenerated";
+      return codegenContext.settings().getModuleName()
+          + ".smithygenerated."
+          + getPythonModuleNamespaceForSmithyNamespace(
+          codegenContext.settings().getService().getNamespace());
     }
-    return
-         getPythonModuleNamespaceForSmithyNamespace(smithyNamespace)
-        + ".smithygenerated";
+    return codegenContext.settings().getModuleName()
+        + ".smithygenerated."
+        + getPythonModuleNamespaceForSmithyNamespace(smithyNamespace);
   }
 
   /**
