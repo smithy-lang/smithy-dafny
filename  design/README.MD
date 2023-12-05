@@ -360,7 +360,7 @@ Looking at the TestModels directory you can see examples.
 The native project can be set up however is best for the native language.
 However the native project needs to bind the following things together
 
-1. `smithy-dafny` generate Polymorph code
+1. `smithy-dafny` generated Polymorph code
 1. Translated Dafny implementation code
 1. Translated Dafny test code
 1. Native `smithy-dafny` dependencies
