@@ -235,7 +235,7 @@ If it does exist then:
 `polymorph-X` MUST use the same native types as `smithy-X`.
 
 If it does not exists then look at the AWS SDK in X:
-`polymorph-X` SHOULD use the same native types as the native AWS SKD in X runtime.
+`polymorph-X` SHOULD use the same native types as the native AWS SDK in X runtime.
 
 Regardless `polymorph-X` MUST convert these native types
 to the Dafny types produced by `smithy-dafny`.
