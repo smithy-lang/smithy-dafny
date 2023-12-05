@@ -219,7 +219,8 @@ WrappingInterface --> DafnyTest
 
 The goal is for Dafny developers
 to approximate native calls into Dafny libraries.
-`smithy-dafny` uses this feature to verify its features.
+`smithy-dafny` uses the wrapped library feature
+to test the correctness of polymorph-runtime features.
 
 Like this: `var output := ToDafny(ToNative(Work(ToDafny(ToNative(input)))))`
 
