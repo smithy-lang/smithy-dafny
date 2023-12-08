@@ -47,6 +47,7 @@ public class CodegenEngine {
 
     private final Path[] dependentModelPaths;
     private final String namespace;
+    private final Optional<String> pythonModuleName;
     private final Map<TargetLanguage, Path> targetLangOutputDirs;
     // refactor this to only be required if generating Java
     private final AwsSdkVersion javaAwsSdkVersion;
@@ -68,6 +69,7 @@ public class CodegenEngine {
             final Model serviceModel,
             final Path[] dependentModelPaths,
             final String namespace,
+            final Optional<String> pythonModuleName,
             final Map<TargetLanguage, Path> targetLangOutputDirs,
             final AwsSdkVersion javaAwsSdkVersion,
             final Optional<Path> includeDafnyFile,
@@ -80,6 +82,7 @@ public class CodegenEngine {
 
         this.dependentModelPaths = dependentModelPaths;
         this.namespace = namespace;
+        this.pythonModuleName = pythonModuleName;
         this.targetLangOutputDirs = targetLangOutputDirs;
         this.javaAwsSdkVersion = javaAwsSdkVersion;
         this.includeDafnyFile = includeDafnyFile;
@@ -261,7 +264,7 @@ public class CodegenEngine {
             // TODO: This depends on Dafny extending the `dafny-client-codegen.targetLanguages` key
             // to support storing language-specific configuration.
             // For now, assume `module` is a slight transformation of the model namespace.
-            .withMember("module", namespace.replace(".", "_").toLowerCase(Locale.ROOT))
+            .withMember("module", pythonModuleName.get())
 
             // TODO-Python: `moduleVersion` SHOULD be configured within the `smithy-build.json` file;
             // possibly at `dafny-client-codegen.targetLanguages.python.moduleVersion`.
@@ -297,6 +300,7 @@ public class CodegenEngine {
         private Model serviceModel;
         private Path[] dependentModelPaths;
         private String namespace;
+        private String pythonModuleName;
         private Map<TargetLanguage, Path> targetLangOutputDirs;
         private AwsSdkVersion javaAwsSdkVersion = AwsSdkVersion.V2;
         private Path includeDafnyFile;
@@ -329,6 +333,15 @@ public class CodegenEngine {
             this.namespace = namespace;
             return this;
         }
+
+        /**
+         * Sets the Python module name for any generated Python code.
+         */
+        public Builder withPythonModuleName(final String pythonModuleName) {
+            this.pythonModuleName = pythonModuleName;
+            return this;
+        }
+
 
         /**
          * Sets the target language(s) for which to generate code,
@@ -390,6 +403,8 @@ public class CodegenEngine {
                 throw new IllegalStateException("No namespace provided");
             }
 
+            final Optional<String> pythonModuleName = Optional.ofNullable(this.pythonModuleName);
+
             final Map<TargetLanguage, Path> targetLangOutputDirsRaw = Objects.requireNonNull(this.targetLangOutputDirs);
             targetLangOutputDirsRaw.replaceAll((_lang, path) -> path.toAbsolutePath().normalize());
             final Map<TargetLanguage, Path> targetLangOutputDirs = ImmutableMap.copyOf(targetLangOutputDirsRaw);
@@ -412,6 +427,7 @@ public class CodegenEngine {
                     serviceModel,
                     dependentModelPaths,
                     this.namespace,
+                    pythonModuleName,
                     targetLangOutputDirs,
                     javaAwsSdkVersion,
                     includeDafnyFile,

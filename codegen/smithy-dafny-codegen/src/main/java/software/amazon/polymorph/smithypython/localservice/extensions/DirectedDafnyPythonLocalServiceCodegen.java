@@ -13,24 +13,14 @@ import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameReso
 import software.amazon.polymorph.smithypython.localservice.customize.ReferencesFileWriter;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.build.FileManifest;
-import software.amazon.smithy.codegen.core.CodegenException;
-import software.amazon.smithy.codegen.core.SymbolProvider;
-import software.amazon.smithy.codegen.core.TopologicalIndex;
-import software.amazon.smithy.codegen.core.directed.CreateSymbolProviderDirective;
-import software.amazon.smithy.codegen.core.directed.CustomizeDirective;
-import software.amazon.smithy.codegen.core.directed.GenerateResourceDirective;
-import software.amazon.smithy.codegen.core.directed.GenerateServiceDirective;
-import software.amazon.smithy.codegen.core.directed.GenerateStructureDirective;
-import software.amazon.smithy.codegen.core.directed.GenerateUnionDirective;
+import software.amazon.smithy.codegen.core.*;
+import software.amazon.smithy.codegen.core.directed.*;
+import software.amazon.smithy.model.knowledge.ServiceIndex;
 import software.amazon.smithy.model.neighbor.Walker;
 import software.amazon.smithy.model.shapes.Shape;
-import software.amazon.smithy.python.codegen.CodegenUtils;
-import software.amazon.smithy.python.codegen.DirectedPythonCodegen;
-import software.amazon.smithy.python.codegen.GenerationContext;
-import software.amazon.smithy.python.codegen.PythonSettings;
-import software.amazon.smithy.python.codegen.StructureGenerator;
-import software.amazon.smithy.python.codegen.SymbolVisitor;
-import software.amazon.smithy.python.codegen.UnionGenerator;
+import software.amazon.smithy.python.codegen.*;
+
+import static java.lang.String.format;
 
 /**
  * DirectedCodegen for Dafny Python wrapped LocalServices.
@@ -50,6 +40,61 @@ public class DirectedDafnyPythonLocalServiceCodegen extends DirectedPythonCodege
       CreateSymbolProviderDirective<PythonSettings> directive) {
     return new DafnyPythonLocalServiceSymbolVisitor(directive.model(), directive.settings());
   }
+
+    @Override
+    public void customizeBeforeShapeGeneration(CustomizeDirective<GenerationContext, PythonSettings> directive) {
+        generateServiceErrors(directive.settings(), directive.context().writerDelegator());
+        new DafnyPythonLocalServiceConfigGenerator(directive.settings(), directive.context()).run();
+    }
+
+    @Override
+    protected void generateServiceErrors(PythonSettings settings, WriterDelegator<PythonWriter> writers) {
+//        var serviceError = CodegenUtils.getServiceError(settings);
+        var serviceError = Symbol.builder()
+                .name("ServiceError")
+                .namespace(format("%s.errors", SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(settings.getService().getNamespace(), settings)), ".")
+                .definitionFile(format("./%s/errors.py", SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(settings.getService().getNamespace())))
+                .build();
+        writers.useFileWriter(serviceError.getDefinitionFile(), serviceError.getNamespace(), writer -> {
+            // TODO: subclass a shared error
+            writer.openBlock("class $L(Exception):", "", serviceError.getName(), () -> {
+                writer.writeDocs("Base error for all errors in the service.");
+                writer.write("pass");
+            });
+        });
+
+//        var apiError = CodegenUtils.getApiError(settings);
+        var apiError = Symbol.builder()
+                .name("ApiError")
+                .namespace(format("%s.errors", SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(settings.getService().getNamespace(), settings)), ".")
+                .definitionFile(format("./%s/errors.py", SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(settings.getService().getNamespace())))
+                .build();
+        writers.useFileWriter(apiError.getDefinitionFile(), apiError.getNamespace(), writer -> {
+            writer.addStdlibImport("typing", "Generic");
+            writer.addStdlibImport("typing", "TypeVar");
+            writer.write("T = TypeVar('T')");
+            writer.openBlock("class $L($T, Generic[T]):", "", apiError.getName(), serviceError, () -> {
+                writer.writeDocs("Base error for all api errors in the service.");
+                writer.write("code: T");
+                writer.openBlock("def __init__(self, message: str):", "", () -> {
+                    writer.write("super().__init__(message)");
+                    writer.write("self.message = message");
+                });
+            });
+
+//            var unknownApiError = CodegenUtils.getUnknownApiError(settings);
+            var unknownApiError = Symbol.builder()
+                    .name("UnknownApiError")
+                    .namespace(format("%s.errors", SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(settings.getService().getNamespace(), settings)), ".")
+                    .definitionFile(format("./%s/errors.py", SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(settings.getService().getNamespace())))
+                    .build();
+            writer.addStdlibImport("typing", "Literal");
+            writer.openBlock("class $L($T[Literal['Unknown']]):", "", unknownApiError.getName(), apiError, () -> {
+                writer.writeDocs("Error representing any unknown api errors");
+                writer.write("code: Literal['Unknown'] = 'Unknown'");
+            });
+        });
+    }
 
 //  @Override
 //  public void customizeBeforeShapeGeneration(
@@ -91,7 +136,7 @@ public class DirectedDafnyPythonLocalServiceCodegen extends DirectedPythonCodege
   @Override
   public void generateResource(
       GenerateResourceDirective<GenerationContext, PythonSettings> directive) {
-    String moduleName = directive.context().settings().getModuleName();
+    String moduleName = SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(directive.context().settings().getService().getNamespace());
     directive.context().writerDelegator().useFileWriter(moduleName + "/references.py", "", writer -> {
       new ReferencesFileWriter().generateResourceStuff(directive.shape(), directive.context(), writer);
     });
@@ -116,6 +161,25 @@ public class DirectedDafnyPythonLocalServiceCodegen extends DirectedPythonCodege
       });
     }
   }
+
+    @Override
+    public void generateError(GenerateErrorDirective<GenerationContext, PythonSettings> directive) {
+        if (directive.shape().getId().getNamespace()
+                .equals(directive.context().settings().getService().getNamespace())) {
+
+            directive.context().writerDelegator().useShapeWriter(directive.shape(), writer -> {
+                DafnyPythonLocalServiceStructureGenerator generator = new DafnyPythonLocalServiceStructureGenerator(
+                        directive.model(),
+                        directive.settings(),
+                        directive.symbolProvider(),
+                        writer,
+                        directive.shape(),
+                        TopologicalIndex.of(directive.model()).getRecursiveShapes()
+                );
+                generator.run();
+            });
+        }
+    }
 
   @Override
   public void generateUnion(

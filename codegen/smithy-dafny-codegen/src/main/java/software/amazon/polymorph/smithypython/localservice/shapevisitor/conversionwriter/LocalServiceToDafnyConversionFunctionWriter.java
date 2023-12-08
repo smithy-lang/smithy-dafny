@@ -4,6 +4,8 @@
 package software.amazon.polymorph.smithypython.localservice.shapevisitor.conversionwriter;
 
 import java.util.Map.Entry;
+
+import software.amazon.polymorph.smithypython.awssdk.nameresolver.AwsSdkNameResolver;
 import software.amazon.polymorph.smithypython.awssdk.shapevisitor.conversionwriters.AwsSdkToDafnyConversionFunctionWriter;
 import software.amazon.polymorph.smithypython.common.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
@@ -64,7 +66,7 @@ public class LocalServiceToDafnyConversionFunctionWriter extends BaseConversionW
     }
 
     WriterDelegator<PythonWriter> delegator = context.writerDelegator();
-    String moduleName = context.settings().getModuleName();
+    String moduleName = SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(context.settings().getService().getNamespace());
 
     delegator.useFileWriter(moduleName + "/smithy_to_dafny.py", "", conversionWriter -> {
       // Within the conversion function, the dataSource becomes the function's input
@@ -125,8 +127,37 @@ public class LocalServiceToDafnyConversionFunctionWriter extends BaseConversionW
     //   as described below
     conversionWriter.writeInline("$L=", memberName);
 
+    if (context.model().expectShape(memberShape.getTarget()).hasTrait(ReferenceTrait.class)) {
+      if (memberShape.isOptional()) {
+        conversionWriter.write(
+                "((Option_Some($1L)) if ($1L is not None) else (Option_None())),",
+                targetShape.accept(
+                        ShapeVisitorResolver.getToDafnyShapeVisitorForShape(targetShape,
+                                context,
+                                dataSourceInsideConversionFunction + "." + CaseUtils.toSnakeCase(memberName),
+                                conversionWriter,
+                                "smithy_to_dafny"
+                        )
+                )
+        );
+      } else {
+        conversionWriter.write(
+                "$L,",
+                targetShape.accept(
+                        ShapeVisitorResolver.getToDafnyShapeVisitorForShape(targetShape,
+                                context,
+                                dataSourceInsideConversionFunction + "." + CaseUtils.toSnakeCase(memberName),
+                                conversionWriter,
+                                "smithy_to_dafny"
+                        )
+                )
+        );
+      }
+
+    }
+
     // If this is a localService config shape, defer conversion to the config ShapeVisitor
-    if (SmithyNameResolver.getLocalServiceConfigShapes(context).contains(targetShape.getId())) {
+    else if (SmithyNameResolver.getLocalServiceConfigShapes(context).contains(targetShape.getId())) {
       conversionWriter.write("$L,",
           targetShape.accept(
               new LocalServiceConfigToDafnyConfigShapeVisitor(
@@ -189,7 +220,7 @@ public class LocalServiceToDafnyConversionFunctionWriter extends BaseConversionW
         targetShape.accept(
             ShapeVisitorResolver.getToDafnyShapeVisitorForShape(targetShape,
                 context,
-                dataSourceInsideConversionFunction + "." + CaseUtils.toSnakeCase(onlyMember.getMemberName()),
+                dataSourceInsideConversionFunction,
                 conversionWriter,
                 "smithy_to_dafny"
             )
@@ -222,7 +253,7 @@ public class LocalServiceToDafnyConversionFunctionWriter extends BaseConversionW
       PythonWriter conversionWriter, String dataSourceInsideConversionFunction) {
 
     if (serviceShape.hasTrait(LocalServiceTrait.class)) {
-      conversionWriter.write("return input._config.dafnyImplInterface._impl");
+      conversionWriter.write("return input._config.dafnyImplInterface.impl");
 
 //      DafnyNameResolver.importDafnyTypeForServiceShape(conversionWriter, serviceShape);
 //
@@ -256,17 +287,19 @@ public class LocalServiceToDafnyConversionFunctionWriter extends BaseConversionW
 
       conversionWriter.write("""
           import $L
-          client = $L.default__.$L()
-          client.impl = input
-          return client
+          client = $L.default__.$L(boto_client = $L)
+          client.value.impl = input
+          return client.value
           """,
           DafnyNameResolver.getDafnyPythonIndexModuleNameForShape(serviceShape),
           DafnyNameResolver.getDafnyPythonIndexModuleNameForShape(serviceShape),
           // TODO-Python: No
           serviceShape.getId().getName().equals("TrentService")
           ? "KMSClient"
-              : "DynamoDBClient"
-          );
+              : "DynamoDBClient",
+              dataSourceInsideConversionFunction
+
+              );
     }
 
   }
@@ -287,7 +320,7 @@ public class LocalServiceToDafnyConversionFunctionWriter extends BaseConversionW
    */
   public void writeUnionShapeConverter(UnionShape unionShape) {
     WriterDelegator<PythonWriter> delegator = context.writerDelegator();
-    String moduleName = context.settings().getModuleName();
+    String moduleName = SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(context.settings().getService().getNamespace());
 
     delegator.useFileWriter(moduleName + "/smithy_to_dafny.py", "", conversionWriter -> {
 

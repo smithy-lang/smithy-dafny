@@ -8,7 +8,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import software.amazon.polymorph.smithypython.common.customize.CustomFileWriter;
+import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.smithypython.common.shapevisitor.ShapeVisitorResolver;
+import software.amazon.polymorph.smithypython.localservice.extensions.DafnyPythonLocalServiceStructureGenerator;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.smithy.codegen.core.TopologicalIndex;
@@ -25,6 +27,7 @@ import software.amazon.smithy.python.codegen.PythonWriter;
 import software.amazon.smithy.python.codegen.StructureGenerator;
 import software.amazon.smithy.python.codegen.SymbolVisitor;
 import software.amazon.smithy.python.codegen.UnionGenerator;
+import software.amazon.smithy.utils.CaseUtils;
 
 
 /**
@@ -35,7 +38,7 @@ public class ReferencesFileWriter implements CustomFileWriter {
   @Override
   public void customizeFileForServiceShape(
       ServiceShape serviceShape, GenerationContext codegenContext) {
-    String moduleName = codegenContext.settings().getModuleName();
+    String moduleName = SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(codegenContext.settings().getService().getNamespace());
     System.out.println("customize references for serviceshape " + serviceShape.getId());
     codegenContext.writerDelegator().useFileWriter(moduleName + "/references.py", "", writer -> {
 
@@ -337,7 +340,7 @@ public class ReferencesFileWriter implements CustomFileWriter {
 ////      writeStructureShape(outputShape, codegenContext);
 //        var outputSymbol = codegenContext.symbolProvider().toSymbol(outputShape);
 //
-//        String moduleName = codegenContext.settings().getModuleName();
+//        String moduleName = SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(codegenContext.settings().getService().getNamespace());
 //        codegenContext.writerDelegator().useFileWriter(moduleName + "/models.py", "", writer -> {
 //
 ////        inputShape.accept(new SymbolVisitor(codegenContext.model(), codegenContext.settings()));
@@ -377,7 +380,7 @@ public class ReferencesFileWriter implements CustomFileWriter {
       codegenContext.writerDelegator().useShapeWriter(
           structureShape,
           writer -> {
-            StructureGenerator generator = new StructureGenerator(
+            DafnyPythonLocalServiceStructureGenerator generator = new DafnyPythonLocalServiceStructureGenerator(
                 codegenContext.model(),
                 codegenContext.settings(),
                 codegenContext.symbolProvider(),

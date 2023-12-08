@@ -38,6 +38,7 @@ import software.amazon.smithy.python.codegen.SymbolVisitor;
 import software.amazon.smithy.python.codegen.integration.ProtocolGenerator;
 import software.amazon.smithy.python.codegen.integration.RuntimeClientPlugin;
 import software.amazon.smithy.python.codegen.integration.PythonIntegration;
+import software.amazon.smithy.utils.CaseUtils;
 import software.amazon.smithy.utils.CodeInterceptor;
 import software.amazon.smithy.utils.CodeSection;
 
@@ -196,7 +197,7 @@ public final class DafnyPythonLocalServiceIntegration implements PythonIntegrati
             .map(shapeId -> codegenContext.model().expectShape(shapeId))
             .collect(Collectors.toSet());
 
-        String moduleName = codegenContext.settings().getModuleName();
+        String moduleName = SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(codegenContext.settings().getService().getNamespace());
 
         System.out.println("referenceShapes " + referenceShapes);
 

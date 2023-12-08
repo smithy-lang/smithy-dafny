@@ -8,12 +8,14 @@ import java.util.Set;
 import software.amazon.polymorph.smithypython.common.Constants;
 import software.amazon.polymorph.smithypython.common.customize.CustomFileWriter;
 import software.amazon.polymorph.smithypython.common.nameresolver.DafnyNameResolver;
+import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonWriter;
+import software.amazon.smithy.utils.CaseUtils;
 
 /**
  * Writes the dafny_protocol.py file.
@@ -25,7 +27,7 @@ public class DafnyProtocolFileWriter implements CustomFileWriter {
   @Override
   public void customizeFileForServiceShape(
       ServiceShape serviceShape, GenerationContext codegenContext) {
-    String moduleName = codegenContext.settings().getModuleName();
+    String moduleName = SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(codegenContext.settings().getService().getNamespace());
 
     // Collect all `inputShapeIds` to identify all possible types `dafny_operation_input` can take on
     Set<ShapeId> inputShapeIds = new HashSet<>();

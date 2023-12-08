@@ -17,11 +17,7 @@ import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolReference;
 import software.amazon.smithy.codegen.core.WriterDelegator;
-import software.amazon.smithy.model.shapes.OperationShape;
-import software.amazon.smithy.model.shapes.ServiceShape;
-import software.amazon.smithy.model.shapes.Shape;
-import software.amazon.smithy.model.shapes.ShapeId;
-import software.amazon.smithy.model.shapes.StructureShape;
+import software.amazon.smithy.model.shapes.*;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.python.codegen.ApplicationProtocol;
 import software.amazon.smithy.python.codegen.CodegenUtils;
@@ -29,8 +25,11 @@ import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonWriter;
 import software.amazon.smithy.python.codegen.SmithyPythonDependency;
 import software.amazon.smithy.python.codegen.integration.ProtocolGenerator;
+import software.amazon.smithy.utils.CaseUtils;
 import software.amazon.smithy.utils.CodeSection;
 import software.amazon.smithy.utils.SmithyUnstableApi;
+
+import static java.lang.String.format;
 
 /**
  * This will implement any handling of components outside the request
@@ -109,7 +108,11 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator implements Protoc
   @Override
   public void generateRequestSerializers(GenerationContext context) {
     WriterDelegator<PythonWriter> delegator = context.writerDelegator();
-    Symbol configSymbol = CodegenUtils.getConfigSymbol(context.settings());
+    Symbol configSymbol = Symbol.builder()
+            .name("Config")
+            .namespace(format("%s.config", SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(context.settings().getService().getNamespace(), context)), ".")
+            .definitionFile(format("./%s/config.py",  SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(context.settings().getService().getNamespace())))
+            .build();
 
     // For each operation in the model, generate a `serialize_{operation input}` method
     for (ShapeId operationShapeId : context.model().expectShape(context.settings().getService()).asServiceShape().get().getAllOperations()) {
@@ -133,6 +136,22 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator implements Protoc
         writer.popState();
       });
     }
+  }
+
+  /**
+   * Generates the symbol for a serializer function for shapes of a service that is not protocol-specific.
+   *
+   * @param context The code generation context.
+   * @param shapeId The shape the serializer function is being generated for.
+   * @return Returns the generated symbol.
+   */
+  @Override
+  public Symbol getSerializationFunction(GenerationContext context, ToShapeId shapeId) {
+    return Symbol.builder()
+            .name(getSerializationFunctionName(context, shapeId))
+            .namespace(format("%s.serialize", SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(shapeId.toShapeId().getNamespace(), context)), "")
+            .definitionFile(format("./%s/serialize.py", SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(shapeId.toShapeId().getNamespace())))
+            .build();
   }
 
   /**
@@ -186,7 +205,11 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator implements Protoc
   @Override
   public void generateResponseDeserializers(GenerationContext context) {
     WriterDelegator<PythonWriter> delegator = context.writerDelegator();
-    Symbol configSymbol = CodegenUtils.getConfigSymbol(context.settings());
+    Symbol configSymbol = Symbol.builder()
+            .name("Config")
+            .namespace(format("%s.config", SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(context.settings().getService().getNamespace(), context)), ".")
+            .definitionFile(format("./%s/config.py",  SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(context.settings().getService().getNamespace())))
+            .build();
 
     // For each operation in the model, generate a `deserialize_{operation input}` method
     for (ShapeId operationShapeId : context.model().expectShape(context.settings().getService()).asServiceShape().get().getAllOperations()) {
@@ -276,6 +299,16 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator implements Protoc
     });
   }
 
+  @Override
+  public Symbol getDeserializationFunction(GenerationContext context, ToShapeId shapeId) {
+    return Symbol.builder()
+            .name(getDeserializationFunctionName(context, shapeId))
+            .namespace(format("%s.deserialize", SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(shapeId.toShapeId().getNamespace(), context)), "")
+            .definitionFile(format("./%s/deserialize.py", SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(shapeId.toShapeId().getNamespace())))
+            .build();
+  }
+
+
   /**
    * A section that controls writing out the entire deserialization function for an operation.
    * By pushing and popping this section, we allow other developers
@@ -290,7 +323,7 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator implements Protoc
     ShapeId serviceShapeId = context.settings().getService();
     ServiceShape serviceShape = context.model().expectShape(serviceShapeId).asServiceShape().get();
     WriterDelegator<PythonWriter> writerDelegator = context.writerDelegator();
-    String moduleName = context.settings().getModuleName();
+    String moduleName = SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(context.settings().getService().getNamespace());
 
     writerDelegator.useFileWriter(moduleName + "/deserialize.py", ".", writer -> {
       writer.addStdlibImport("typing", "Any");
@@ -383,8 +416,8 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator implements Protoc
         // `from dependency.smithygenerated.deserialize import _deserialize_error as dependency_deserialize_error`
         writer.addImport(
             // `from dependency.smithygenerated.deserialize`
-            SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(serviceDependencyShapeId.getNamespace())
-                + ".smithygenerated.deserialize",
+            SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(serviceDependencyShapeId.getNamespace(), context)
+                + ".deserialize",
             // `import _deserialize_error`
             "_deserialize_error",
             // `as dependency_deserialize_error`

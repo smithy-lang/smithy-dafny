@@ -76,6 +76,7 @@ public class CodegenCli {
                 .withLocalServiceTest(cliArguments.localServiceTest);
         cliArguments.javaAwsSdkVersion.ifPresent(engineBuilder::withJavaAwsSdkVersion);
         cliArguments.includeDafnyFile.ifPresent(engineBuilder::withIncludeDafnyFile);
+        cliArguments.pythonModuleName.ifPresent(engineBuilder::withPythonModuleName);
         final CodegenEngine engine = engineBuilder.build();
         engine.run();
     }
@@ -103,6 +104,11 @@ public class CodegenCli {
             .desc("smithy namespace to generate code for, such as 'com.foo'")
             .hasArg()
             .required()
+            .build())
+          .addOption(Option.builder("pmn")
+            .longOpt("python-module-name")
+            .desc("if generating python code, the name of the python module")
+            .hasArg()
             .build())
           .addOption(Option.builder()
             .longOpt("output-dotnet")
@@ -153,6 +159,7 @@ public class CodegenCli {
             Path modelPath,
             Path[] dependentModelPaths,
             String namespace,
+            Optional<String> pythonModuleName,
             Optional<Path> outputDotnetDir,
             Optional<Path> outputJavaDir,
             Optional<Path> outputPythonDir,
@@ -183,6 +190,7 @@ public class CodegenCli {
               .toArray(Path[]::new);
 
             final String namespace = commandLine.getOptionValue('n');
+            final Optional<String> pythonModuleName = Optional.ofNullable(commandLine.getOptionValue("python-module-name"));
 
             Optional<Path> outputDafnyDir = Optional.ofNullable(commandLine.getOptionValue("output-dafny"))
                     .map(Paths::get);
@@ -219,7 +227,7 @@ public class CodegenCli {
             }
 
             return Optional.of(new CliArguments(
-                    modelPath, dependentModelPaths, namespace,
+                    modelPath, dependentModelPaths, namespace, pythonModuleName,
                     outputDotnetDir, outputJavaDir, outputPythonDir, outputDafnyDir,
                     javaAwsSdkVersion, includeDafnyFile, awsSdkStyle,
                     localServiceTest

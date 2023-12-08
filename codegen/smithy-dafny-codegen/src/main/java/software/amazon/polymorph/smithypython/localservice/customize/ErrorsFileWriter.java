@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 import software.amazon.polymorph.smithypython.common.customize.CustomFileWriter;
+import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.model.shapes.ServiceShape;
@@ -18,6 +19,9 @@ import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.python.codegen.CodegenUtils;
 import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonWriter;
+import software.amazon.smithy.utils.CaseUtils;
+
+import static java.lang.String.format;
 
 /**
  * Extends the Smithy-Python-generated errors.py file
@@ -28,12 +32,16 @@ public class ErrorsFileWriter implements CustomFileWriter {
   @Override
   public void customizeFileForServiceShape(
       ServiceShape serviceShape, GenerationContext codegenContext) {
-    String moduleName = codegenContext.settings().getModuleName();
+    String moduleName = SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(codegenContext.settings().getService().getNamespace());
 
-    codegenContext.writerDelegator().useFileWriter(moduleName + "/errors.py", "", writer -> {
+    System.out.println("moduleName: " + moduleName);
+
+    codegenContext.writerDelegator().useFileWriter( moduleName + "/errors.py", "", writer -> {
       writer.addStdlibImport("typing", "Dict");
       writer.addStdlibImport("typing", "Any");
       writer.addStdlibImport("typing", "List");
+
+      System.out.println("moduleName INSIDE!: " + moduleName);
 
       // Generate Smithy shapes for each of this service's modelled errors
       TreeSet<StructureShape> deserializingErrorShapes = new TreeSet<StructureShape>(
@@ -53,6 +61,7 @@ public class ErrorsFileWriter implements CustomFileWriter {
         Set<ShapeId> serviceDependencyShapeIds = localServiceTrait.getDependencies();
         if (serviceDependencyShapeIds != null) {
           for (ShapeId serviceDependencyShapeId : serviceDependencyShapeIds) {
+            System.out.println("serviceDependencyShapeId: " + serviceDependencyShapeId);
             renderDependencyWrappingError(codegenContext, writer, serviceDependencyShapeId);
           }
         }
@@ -192,8 +201,11 @@ public class ErrorsFileWriter implements CustomFileWriter {
 
     String code = shape.getId().getName();
     Symbol symbol = context.symbolProvider().toSymbol(shape);
-    Symbol apiError = CodegenUtils.getApiError(context.settings());
-    writer.openBlock("class $L($T[Literal[$S]]):", "", symbol.getName(), apiError, code, () -> {
+    var apiError = Symbol.builder()
+            .name("ApiError")
+            .namespace(format("%s.errors", SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(context.settings().getService().getNamespace(), context)), ".")
+            .definitionFile(format("./%s/errors.py", SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(context.settings().getService().getNamespace())))
+            .build();    writer.openBlock("class $L($T[Literal[$S]]):", "", symbol.getName(), apiError, code, () -> {
       writer.write("code: Literal[$1S] = $1S", code);
       writer.write("message: str");
     });
@@ -211,8 +223,13 @@ public class ErrorsFileWriter implements CustomFileWriter {
     Shape serviceDependencyShape = context.model().expectShape(serviceDependencyShapeId);
     String code = serviceDependencyShapeId.getName();
     Symbol symbol = context.symbolProvider().toSymbol(serviceDependencyShape);
-    Symbol apiError = CodegenUtils.getApiError(context.settings());
-    writer.openBlock("class $L($T[Literal[$S]]):", "", code, apiError, code, () -> {
+    System.out.println("code = " + code);
+    var apiError = Symbol.builder()
+            .name("ApiError")
+            .namespace(format("%s.errors", SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(context.settings().getService().getNamespace(), context)), ".")
+            .definitionFile(format("./%s/errors.py", SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(context.settings().getService().getNamespace())))
+            .build();
+      writer.openBlock("class $L($T[Literal[$S]]):", "", code, apiError, code, () -> {
       writer.write("$L: Any", code);
     });
     writer.write("");

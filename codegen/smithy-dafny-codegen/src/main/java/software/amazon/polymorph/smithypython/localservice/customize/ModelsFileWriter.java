@@ -4,8 +4,10 @@
 package software.amazon.polymorph.smithypython.localservice.customize;
 
 import software.amazon.polymorph.smithypython.common.customize.CustomFileWriter;
+import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.python.codegen.GenerationContext;
+import software.amazon.smithy.utils.CaseUtils;
 
 
 /**
@@ -17,7 +19,7 @@ public class ModelsFileWriter implements CustomFileWriter {
   @Override
   public void customizeFileForServiceShape(
       ServiceShape serviceShape, GenerationContext codegenContext) {
-    String moduleName = codegenContext.settings().getModuleName();
+    String moduleName = SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(codegenContext.settings().getService().getNamespace());
     codegenContext.writerDelegator().useFileWriter(moduleName + "/models.py", "", writer -> {
 
       // This block defines an empty `Unit` class used by Smithy-Python generated code

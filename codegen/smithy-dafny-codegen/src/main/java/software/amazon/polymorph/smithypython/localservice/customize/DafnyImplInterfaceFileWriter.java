@@ -12,6 +12,7 @@ import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonWriter;
+import software.amazon.smithy.utils.CaseUtils;
 
 /**
  * Creates a dafnyImplInterface.py file containing a DafnyImplInterface class.
@@ -27,7 +28,7 @@ public class DafnyImplInterfaceFileWriter implements CustomFileWriter {
   @Override
   public void customizeFileForServiceShape(
       ServiceShape serviceShape, GenerationContext codegenContext) {
-    String moduleName = codegenContext.settings().getModuleName();
+    String moduleName = SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(codegenContext.settings().getService().getNamespace());
     String clientName = SmithyNameResolver.clientForService(serviceShape);
     String implModulePrelude = DafnyNameResolver.getDafnyPythonIndexModuleNameForShape(serviceShape);
 

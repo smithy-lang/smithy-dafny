@@ -6,8 +6,11 @@ package software.amazon.polymorph.smithypython.localservice.customize;
 import software.amazon.polymorph.smithypython.common.customize.CustomFileWriter;
 import software.amazon.polymorph.smithypython.common.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
+import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.smithy.model.shapes.ServiceShape;
+import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.python.codegen.GenerationContext;
+import software.amazon.smithy.utils.CaseUtils;
 
 /**
  * Writes the plugin.py file.
@@ -20,9 +23,11 @@ public class PluginFileWriter implements CustomFileWriter {
   @Override
   public void customizeFileForServiceShape(
       ServiceShape serviceShape, GenerationContext codegenContext) {
-    String moduleName = codegenContext.settings().getModuleName();
+    String moduleName = SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(codegenContext.settings().getService().getNamespace());
     String clientName = SmithyNameResolver.clientForService(serviceShape);
     String implModulePrelude = DafnyNameResolver.getDafnyPythonIndexModuleNameForShape(serviceShape);
+    final LocalServiceTrait localServiceTrait = serviceShape.expectTrait(LocalServiceTrait.class);
+    final StructureShape configShape = codegenContext.model().expectShape(localServiceTrait.getConfigId(), StructureShape.class);
 
     codegenContext.writerDelegator().useFileWriter(moduleName + "/plugin.py", "", writer -> {
       writer.write(
@@ -37,10 +42,11 @@ public class PluginFileWriter implements CustomFileWriter {
               Set the Dafny-compiled implementation in the Smithy-Python client Config
               and load our custom NoRetriesStrategy.
               '''
-              from $L import $L
               config.dafnyImplInterface = DafnyImplInterface()
-              config.dafnyImplInterface.impl = $L()
-              config.dafnyImplInterface.impl.ctor__(smithy_config_to_dafny_config(config))
+              if isinstance(config, $T):
+                  from $L import $L
+                  config.dafnyImplInterface.impl = $L()
+                  config.dafnyImplInterface.impl.ctor__(smithy_config_to_dafny_config(config))
               config.retry_strategy = NoRetriesStrategy()
           
           class ZeroRetryDelayToken:
@@ -61,7 +67,7 @@ public class PluginFileWriter implements CustomFileWriter {
               def refresh_retry_token_for_retry(self, token_to_renew, error_info):
                   # Do not retry
                   raise SmithyRetryException()
-                  """, implModulePrelude, clientName, clientName
+                  """, codegenContext.symbolProvider().toSymbol(configShape), implModulePrelude, clientName, clientName
       );
     });
   }

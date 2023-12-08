@@ -56,7 +56,7 @@ public class DafnyToLocalServiceConversionFunctionWriter extends BaseConversionW
 
   protected void writeStructureShapeConverter(StructureShape structureShape) {
     WriterDelegator<PythonWriter> delegator = context.writerDelegator();
-    String moduleName = context.settings().getModuleName();
+    String moduleName = SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(context.settings().getService().getNamespace());
 
     delegator.useFileWriter(moduleName + "/dafny_to_smithy.py", "", conversionWriter -> {
       // Within the conversion function, the dataSource becomes the function's input
@@ -260,7 +260,7 @@ public class DafnyToLocalServiceConversionFunctionWriter extends BaseConversionW
    */
   protected void writeUnionShapeConverter(UnionShape unionShape) {
     WriterDelegator<PythonWriter> delegator = context.writerDelegator();
-    String moduleName = context.settings().getModuleName();
+    String moduleName = SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(context.settings().getService().getNamespace());
 
     // Write out common conversion function inside dafny_to_smithy
     delegator.useFileWriter(moduleName + "/dafny_to_smithy.py", "", conversionWriter -> {

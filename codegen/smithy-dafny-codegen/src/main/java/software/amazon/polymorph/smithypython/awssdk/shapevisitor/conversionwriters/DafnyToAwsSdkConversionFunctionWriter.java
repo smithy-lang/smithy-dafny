@@ -20,6 +20,7 @@ import software.amazon.smithy.model.traits.EnumDefinition;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonWriter;
+import software.amazon.smithy.utils.CaseUtils;
 
 /**
  * Writes the dafny_to_aws_sdk.py file via the BaseConversionWriter implementation.
@@ -49,7 +50,7 @@ public class DafnyToAwsSdkConversionFunctionWriter extends BaseConversionWriter 
 
   protected void writeStructureShapeConverter(StructureShape structureShape) {
     WriterDelegator<PythonWriter> delegator = context.writerDelegator();
-    String moduleName = context.settings().getModuleName();
+    String moduleName = SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(context.settings().getService().getNamespace());
     // Create a new writer.
     // The `writer` on this object points to the location in the code where this converter was called.
     // This new writer to writes the dafny_to_aws_sdk converter function.
@@ -132,7 +133,7 @@ public class DafnyToAwsSdkConversionFunctionWriter extends BaseConversionWriter 
    */
   public void writeUnionShapeConverter(UnionShape unionShape) {
     WriterDelegator<PythonWriter> delegator = context.writerDelegator();
-    String moduleName = context.settings().getModuleName();
+    String moduleName = SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(context.settings().getService().getNamespace());
 
     // Write out common conversion function inside dafny_to_aws_sdk
     delegator.useFileWriter(moduleName + "/dafny_to_aws_sdk.py", "", conversionWriter -> {
@@ -211,7 +212,7 @@ public class DafnyToAwsSdkConversionFunctionWriter extends BaseConversionWriter 
    */
   public void writeStringEnumShapeConverter(StringShape stringShapeWithEnumTrait) {
     WriterDelegator<PythonWriter> delegator = context.writerDelegator();
-    String moduleName = context.settings().getModuleName();
+    String moduleName = SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(context.settings().getService().getNamespace());
 
     // Write out common conversion function inside dafny_to_aws_sdk
     delegator.useFileWriter(moduleName + "/dafny_to_aws_sdk.py", "", conversionWriter -> {

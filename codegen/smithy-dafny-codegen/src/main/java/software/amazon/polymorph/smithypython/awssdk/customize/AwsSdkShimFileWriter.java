@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import software.amazon.polymorph.smithypython.common.customize.CustomFileWriter;
 import software.amazon.polymorph.smithypython.awssdk.nameresolver.AwsSdkNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.DafnyNameResolver;
+import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.Utils;
 import software.amazon.polymorph.smithypython.awssdk.shapevisitor.AwsSdkToDafnyShapeVisitor;
 import software.amazon.polymorph.smithypython.awssdk.shapevisitor.DafnyToAwsSdkShapeVisitor;
@@ -18,6 +19,7 @@ import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonWriter;
+import software.amazon.smithy.utils.CaseUtils;
 
 /**
  * Writes the shim.py file for AWS SDKs.
@@ -36,7 +38,7 @@ public class AwsSdkShimFileWriter implements CustomFileWriter {
   public void customizeFileForServiceShape(
       ServiceShape serviceShape, GenerationContext codegenContext) {
     String typesModulePrelude = DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(serviceShape.getId());
-    String moduleName = codegenContext.settings().getModuleName();
+    String moduleName = SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(codegenContext.settings().getService().getNamespace());
     codegenContext.writerDelegator().useFileWriter(moduleName + "/shim.py", "", writer -> {
       writer.write(
           """

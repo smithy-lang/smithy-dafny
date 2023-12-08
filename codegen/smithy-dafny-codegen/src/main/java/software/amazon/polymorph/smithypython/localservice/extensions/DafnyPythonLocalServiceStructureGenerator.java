@@ -4,7 +4,11 @@ import static java.lang.String.format;
 
 import java.util.ArrayList;
 import java.util.Set;
+
+import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
+import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
+import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.NullableIndex;
@@ -13,6 +17,8 @@ import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.DefaultTrait;
+import software.amazon.smithy.model.traits.ErrorTrait;
+import software.amazon.smithy.python.codegen.CodegenUtils;
 import software.amazon.smithy.python.codegen.PythonSettings;
 import software.amazon.smithy.python.codegen.PythonWriter;
 import software.amazon.smithy.python.codegen.StructureGenerator;
@@ -28,6 +34,46 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
       Set<Shape> recursiveShapes
   ) {
     super(model, settings, symbolProvider, writer, shape, recursiveShapes);
+  }
+
+  @Override
+  public void run() {
+    if (shape.hasTrait(PositionalTrait.class)) {
+      // TODO-Python: I don't think I need to render any part of positionals?
+      return;
+    }
+    if (!shape.hasTrait(ErrorTrait.class)) {
+      renderStructure();
+    } else {
+      renderError();
+    }
+  }
+
+  @Override
+  protected void renderError() {
+    writer.addStdlibImport("typing", "Dict");
+    writer.addStdlibImport("typing", "Any");
+    writer.addStdlibImport("typing", "Literal");
+    // TODO: Implement protocol-level customization of the error code
+    var code = shape.getId().getName();
+    var symbol = symbolProvider.toSymbol(shape);
+    System.out.println("ERR");
+    var apiError = Symbol.builder()
+            .name("ApiError")
+            .namespace(format("%s.errors", SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(settings.getService().getNamespace(), settings)), ".")
+            .definitionFile(format("./%s/errors.py", SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(settings.getService().getNamespace())))
+            .build();
+    writer.openBlock("class $L($T[Literal[$S]]):", "", symbol.getName(), apiError, code, () -> {
+      writer.write("code: Literal[$1S] = $1S", code);
+      writer.write("message: str");
+      writeProperties(true);
+      writeInit(true);
+      writeAsDict(true);
+      writeFromDict(true);
+      writeRepr(true);
+      writeEq(true);
+    });
+    writer.write("");
   }
 
   @Override

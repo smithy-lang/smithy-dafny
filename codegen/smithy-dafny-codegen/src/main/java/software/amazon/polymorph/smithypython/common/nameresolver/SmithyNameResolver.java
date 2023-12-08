@@ -11,6 +11,7 @@ import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.codegen.core.CodegenContext;
 import software.amazon.smithy.codegen.core.Symbol;
+import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
@@ -18,6 +19,7 @@ import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.python.codegen.GenerationContext;
+import software.amazon.smithy.python.codegen.PythonSettings;
 import software.amazon.smithy.python.codegen.PythonWriter;
 
 /**
@@ -208,17 +210,34 @@ public class SmithyNameResolver {
    */
   public static String getPythonModuleSmithygeneratedPathForSmithyNamespace(String smithyNamespace,
       GenerationContext codegenContext) {
+    return getPythonModuleSmithygeneratedPathForSmithyNamespace(smithyNamespace, codegenContext.settings());
+  }
+
+  /**
+   * Given the namespace of a Smithy shape, returns a Pythonic access path to the namespace
+   * that can be used to import shapes from its `smithygenerated` namespace.
+   * @param smithyNamespace
+   * @param codegenContext
+   * @return
+   */
+  public static String getPythonModuleSmithygeneratedPathForSmithyNamespace(String smithyNamespace,
+                                                                            PythonSettings settings) {
     // `smithy.api.Unit:`
     // Smithy-Dafny generates a stand-in shape in the service
     if ("smithy.api".equals(smithyNamespace)) {
-      return codegenContext.settings().getModuleName()
-          + ".smithygenerated."
-          + getPythonModuleNamespaceForSmithyNamespace(
-          codegenContext.settings().getService().getNamespace());
+      // return codegenContext.settings().getModuleName()
+      //     + ".smithygenerated."
+      //     + getPythonModuleNamespaceForSmithyNamespace(
+      //     codegenContext.settings().getService().getNamespace());
+      return "smithygenerated."
+              + getPythonModuleNamespaceForSmithyNamespace(
+              settings.getService().getNamespace());
     }
-    return codegenContext.settings().getModuleName()
-        + ".smithygenerated."
-        + getPythonModuleNamespaceForSmithyNamespace(smithyNamespace);
+    // return codegenContext.settings().getModuleName()
+    //     + ".smithygenerated."
+    //     + getPythonModuleNamespaceForSmithyNamespace(smithyNamespace);
+    return "smithygenerated."
+            + getPythonModuleNamespaceForSmithyNamespace(smithyNamespace);
   }
 
   /**
@@ -271,12 +290,17 @@ public class SmithyNameResolver {
    */
   public static Set<ShapeId> getLocalServiceConfigShapes(CodegenContext codegenContext) {
 
+    return getLocalServiceConfigShapes(codegenContext.model());
+  }
+
+  public static Set<ShapeId> getLocalServiceConfigShapes(Model model) {
+
     if (localServiceConfigShapes.isEmpty()) {
-      localServiceConfigShapes =  codegenContext.model().getServiceShapes().stream()
-          .filter(serviceShape -> serviceShape.hasTrait(LocalServiceTrait.class))
-          .map(serviceShape -> serviceShape.expectTrait(LocalServiceTrait.class))
-          .map(localServiceTrait -> localServiceTrait.getConfigId())
-          .collect(Collectors.toSet());
+      localServiceConfigShapes =  model.getServiceShapes().stream()
+              .filter(serviceShape -> serviceShape.hasTrait(LocalServiceTrait.class))
+              .map(serviceShape -> serviceShape.expectTrait(LocalServiceTrait.class))
+              .map(localServiceTrait -> localServiceTrait.getConfigId())
+              .collect(Collectors.toSet());
     }
     return localServiceConfigShapes;
   }
