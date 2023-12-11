@@ -3,10 +3,6 @@
 include "../src/WrappedSimpleExternV2Impl.dfy"
 include "SimpleExternV2ImplTest.dfy"
 
-module {:extern "simple.dafnyexternv2.internaldafny.wrapped"} DotNamespacedWrappedSimpleExternV2Service replaces WrappedSimpleExternV2Service {
-
-}
-
 module WrappedSimpleExternV2Test {
     import WrappedSimpleExternV2Service
     import opened SimpleDafnyExternV2Types

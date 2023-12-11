@@ -2,8 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 include "../Model/SimpleDafnyExternV2Types.dfy"
 
-// IndexDotNamespaced.dfy `replaces` this with `ExternV2Constructor`
-replaceable module ExternV2Constructor {
+module {:extern "ExternV2Constructor"} ExternV2Constructor {
     import opened Wrappers
     import opened SimpleDafnyExternV2Types
 

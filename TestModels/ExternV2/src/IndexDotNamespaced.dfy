@@ -1,3 +1,3 @@
 include "Index.dfy"
 
-module {:extern "ExternV2Constructor"} DotNamespacedExternConstructor replaces ExternV2Constructor {}
+module {:extern "simple.dafnyexternv2.internaldafny"} UnderscoreNamespacedSimpleExternV2 replaces SimpleExternV2 {}

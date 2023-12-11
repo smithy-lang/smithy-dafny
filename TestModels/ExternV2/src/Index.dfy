@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 include "SimpleExternV2Impl.dfy"
 
-module {:extern "simple.dafnyexternv2.internaldafny" } SimpleExternV2 refines AbstractSimpleDafnyExternV2Service {
+replaceable module SimpleExternV2 refines AbstractSimpleDafnyExternV2Service {
     import Operations = SimpleExternV2Impl
 
     function method DefaultSimpleExternV2Config(): SimpleExternV2Config {

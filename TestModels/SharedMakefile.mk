@@ -98,7 +98,6 @@ dafny-reportgenerator:
 # Since such targets are all shared,
 # this is tractable.
 transpile_implementation:
-
 	dafny \
         -vcsCores:$(CORES) \
         -compileTarget:$(TARGET) \
@@ -111,24 +110,9 @@ transpile_implementation:
         -functionSyntax:3 \
         -useRuntimeLib \
         -out $(OUT) \
-        $(DOT_NAMESPACE_INDEX) \
+        $(DOT_NAMESPACE_SRC_INDEX) \
         -library:$(PROJECT_ROOT)/dafny-dependencies/StandardLibrary/src/Index.dfy \
         $(patsubst %, -library:$(PROJECT_ROOT)/%/src/Index.dfy, $(LIBRARIES))
-#
-# 	dafny translate \
-# 		$(TARGET) \
-# 		--cores:$(CORES) \
-# 		--optimize-erasable-datatype-wrapper:false \
-# 		--quantifier-syntax:3 \
-# 		--unicode-char:false \
-# 		--function-syntax:3 \
-# 		--include-runtime \
-# 		--output $(OUT) \
-# 		./src/IndexDotNamespaced.dfy \
-# 		--library:$(PROJECT_ROOT)/dafny-dependencies/StandardLibrary/src/Index.dfy \
-# 		$(patsubst %, --library:$(PROJECT_ROOT)/%/src/Index.dfy, $(LIBRARIES))
-#
-
 
 transpile_test:
 	dafny \
@@ -144,37 +128,8 @@ transpile_test:
 		-functionSyntax:3 \
 		-useRuntimeLib \
 		-out $(OUT) \
-		`find ./test -name '*.dfy'` \
-		-library:$(DOT_NAMESPACE_INDEX)
-
-# 	dafny translate \
-# 		$(TARGET) \
-# 		--cores:$(CORES) \
-# 		--optimize-erasable-datatype-wrapper:false \
-# 		--quantifier-syntax:3 \
-# 		--unicode-char:false \
-# 		--function-syntax:3 \
-# 		--include-runtime \
-# 		--output $(OUT) \
-# 		`find ./test -name '*.dfy'` \
-# 		--library:src/Index.dfy
-
-# 	dafny \
-# 		-vcsCores:$(CORES) \
-# 		-compileTarget:$(TARGET) \
-# 		-spillTargetCode:3 \
-# 		-runAllTests:1 \
-# 		-compile:0 \
-# 		-optimizeErasableDatatypeWrapper:0 \
-# 		$(COMPILE_SUFFIX_OPTION) \
-# 		-quantifierSyntax:3 \
-# 		-unicodeChar:0 \
-# 		-functionSyntax:3 \
-# 		-useRuntimeLib \
-# 		-out $(OUT) \
-# 		$(OUTER_MODULE) \
-# 		`find ./test -name '*.dfy'` \
-# 		-library:src/Index.dfy
+		$(DOT_NAMESPACE_TEST_INDEX) \
+		-library:$(DOT_NAMESPACE_SRC_INDEX)
 
 transpile_dependencies:
 	$(MAKE) -C $(STANDARD_LIBRARY_PATH) transpile_implementation_$(LANG)
