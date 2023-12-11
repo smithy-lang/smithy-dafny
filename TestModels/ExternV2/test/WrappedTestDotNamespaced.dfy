@@ -4,4 +4,4 @@ include "../src/WrappedSimpleExternV2Impl.dfy"
 include "SimpleExternV2ImplTest.dfy"
 include "WrappedSimpleExternV2ImplTest.dfy"
 
-module {:extern "simple_dafnyexternv2_internaldafny_wrapped"} DotNamespacedWrappedSimpleExternV2Service replaces WrappedSimpleExternV2Service {}
+module {:extern "simple.dafnyexternv2.internaldafny.wrapped"} DotNamespacedWrappedSimpleExternV2Service replaces WrappedSimpleExternV2Service {}
