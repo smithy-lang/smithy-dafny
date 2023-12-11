@@ -6,7 +6,6 @@ CORES=2
 include ../SharedMakefile.mk
 
 NAMESPACE=simple.dafnyExtern
-DOT_NAMESPACE_INDEX=src/Index.dfy
 
 # This project has no dependencies 
 # DEPENDENT-MODELS:= 

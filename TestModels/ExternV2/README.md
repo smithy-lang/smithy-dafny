@@ -1,12 +1,18 @@
 # SimpleExternV2
 
 This project tests implementing a [dafny extern](https://homepage.cs.uiowa.edu/~tinelli/classes/181/Papers/dafny-reference.pdf#15) using the "V2 Extern" system.
-The operations on this model are identical to operations in the `Extern` TestModel, only with "V2" suffixes appended.
+This models and its shapes are identical to operations in the `Extern` TestModel, only with "V2" suffixes appended.
 
-This V2 extern system uses the `replaceable` and `replaces` keywords to allow a module to have a unique extern name in each target language.
-Under this system, the `replaceable` keyword marks a `module` that will be compiled as an `extern` `module` in a target language.
-Another module `replaces` the `replaceable` module; the `replaces` module will be tagged with an `extern` whose name is idiomatic for the target language.
+This V2 extern system uses the `replaceable` and `replaces` keywords in conjunction with the `outer-module` compile flag to allow a module to have idiomatic extern names in each target language.
 
+Under this V2 system, manually-written Dafny source code should mark `module`s that are intended to be `extern` as `replaceable`.
+Another manually-written module `replaces` the `replaceable` module;
+The `replaces` module will be tagged with an `extern` whose name is idiomatic for the target language.
+
+(TODO: Implement this)
+Under this V2 system, Smithy-Dafny generated Dafny code will not declare modules as extern.
+These modules will instead be given a language-idiomatic extern name through the `outer-module` compile flag.
+(This is not implemented yet. The `outer-module` flag is not available on the legacy Dafny CLI. We can either migrate Smithy-Dafny's Makefile to `dafny translate` or migrate the `outerModule` flag to the legacy Dafny CLI.)
 
 ## Build
 ### .NET
