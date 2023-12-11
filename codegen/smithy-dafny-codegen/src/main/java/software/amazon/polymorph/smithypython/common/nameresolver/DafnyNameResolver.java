@@ -173,8 +173,7 @@ public class DafnyNameResolver {
    */
   public static void importDafnyTypeForShape(PythonWriter writer, ShapeId shapeId, GenerationContext context) {
     if (context.model().expectShape(shapeId).hasTrait(ErrorTrait.class)) {
-      throw new IllegalArgumentException(
-          "Error shapes are not supported in importDafnyTypeForShape. Provided " + shapeId);
+      importDafnyTypeForError(writer, shapeId, context);
     } else if (context.model().expectShape(shapeId).hasTrait(PositionalTrait.class)) {
       Optional<StructureShape> maybeStructureShape
           = context.model().expectShape(shapeId).asStructureShape();

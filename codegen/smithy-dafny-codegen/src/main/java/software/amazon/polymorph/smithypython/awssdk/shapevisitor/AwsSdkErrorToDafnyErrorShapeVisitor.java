@@ -9,27 +9,7 @@ import software.amazon.polymorph.smithypython.awssdk.shapevisitor.conversionwrit
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.Utils;
 import software.amazon.smithy.codegen.core.CodegenException;
-import software.amazon.smithy.codegen.core.WriterDelegator;
-import software.amazon.smithy.model.shapes.BigDecimalShape;
-import software.amazon.smithy.model.shapes.BigIntegerShape;
-import software.amazon.smithy.model.shapes.BlobShape;
-import software.amazon.smithy.model.shapes.BooleanShape;
-import software.amazon.smithy.model.shapes.ByteShape;
-import software.amazon.smithy.model.shapes.DoubleShape;
-import software.amazon.smithy.model.shapes.EnumShape;
-import software.amazon.smithy.model.shapes.FloatShape;
-import software.amazon.smithy.model.shapes.IntegerShape;
-import software.amazon.smithy.model.shapes.ListShape;
-import software.amazon.smithy.model.shapes.LongShape;
-import software.amazon.smithy.model.shapes.MapShape;
-import software.amazon.smithy.model.shapes.MemberShape;
-import software.amazon.smithy.model.shapes.Shape;
-import software.amazon.smithy.model.shapes.ShapeVisitor;
-import software.amazon.smithy.model.shapes.ShortShape;
-import software.amazon.smithy.model.shapes.StringShape;
-import software.amazon.smithy.model.shapes.StructureShape;
-import software.amazon.smithy.model.shapes.TimestampShape;
-import software.amazon.smithy.model.shapes.UnionShape;
+import software.amazon.smithy.model.shapes.*;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.python.codegen.GenerationContext;
@@ -40,7 +20,7 @@ import software.amazon.smithy.python.codegen.PythonWriter;
  * to generate code that maps a AWS SDK kwarg-indexed dictionary
  * to the corresponding Dafny shape's internal attributes.
  */
-public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
+public class AwsSdkErrorToDafnyErrorShapeVisitor extends ShapeVisitor.Default<String> {
     private final GenerationContext context;
     private String dataSource;
     private final PythonWriter writer;
@@ -52,7 +32,7 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
      * @param writer      A PythonWriter pointing to the in-code location where the
      *                    ShapeVisitor was called from
      */
-    public AwsSdkToDafnyShapeVisitor(
+    public AwsSdkErrorToDafnyErrorShapeVisitor(
         GenerationContext context,
         String dataSource,
         PythonWriter writer
@@ -83,9 +63,9 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
         return "None";
       }
 
-      if (structureShape.hasTrait(ErrorTrait.class)) {
+      if (!structureShape.hasTrait(ErrorTrait.class)) {
           return structureShape.accept(
-                  new AwsSdkErrorToDafnyErrorShapeVisitor(context, dataSource, writer)
+                  new AwsSdkToDafnyShapeVisitor(context, dataSource, writer)
           );
       }
 
@@ -128,7 +108,7 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
       // `Seq([`SmithyToDafny(list_element)``
       builder.append("%1$s".formatted(
           targetShape.accept(
-              new AwsSdkToDafnyShapeVisitor(context, "list_element", writer)
+              new AwsSdkErrorToDafnyErrorShapeVisitor(context, "list_element", writer)
           )));
 
       // Close structure
@@ -154,7 +134,7 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
       // `{`SmithyToDafny(key)`:`
       builder.append("%1$s: ".formatted(
           keyTargetShape.accept(
-              new AwsSdkToDafnyShapeVisitor(context, "key", writer)
+              new AwsSdkErrorToDafnyErrorShapeVisitor(context, "key", writer)
           )
       ));
 
@@ -162,7 +142,7 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
       // `{`SmithyToDafny(key)`: `SmithyToDafny(value)``
       builder.append("%1$s".formatted(
           valueTargetShape.accept(
-              new AwsSdkToDafnyShapeVisitor(context, "value", writer)
+              new AwsSdkErrorToDafnyErrorShapeVisitor(context, "value", writer)
           )
       ));
 

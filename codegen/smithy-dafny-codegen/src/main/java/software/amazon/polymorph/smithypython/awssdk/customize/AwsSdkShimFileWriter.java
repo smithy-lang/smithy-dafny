@@ -99,15 +99,26 @@ public class AwsSdkShimFileWriter implements CustomFileWriter {
       // ex. for KMS.InvalidImportTokenException:
       // if e.response['Error']['Code'] == 'InvalidImportTokenException':
       //        return software_amazon_cryptography_services_kms_internaldafny_types.Error_InvalidImportTokenException(message=e.response['Error']['Code'])
+      Shape errorShape = codegenContext.model().expectShape(errorShapeId);
       writer.openBlock(
           "$L e.response['Error']['Code'] == '$L':",
           "",
           hasOpenedIfBlock ? "elif" : "if",
           errorShapeId.getName(),
           () -> {
-            writer.write("return $L.$L(message=e.response['Error']['Message'])",
-                DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(errorShapeId),
-                DafnyNameResolver.getDafnyTypeForError(errorShapeId));
+              writer.write("return %1$s".formatted(
+                      errorShape.accept(new AwsSdkToDafnyShapeVisitor(
+                              codegenContext,
+                              "e",
+                              writer
+                      ))));
+//                      DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(errorShapeId),
+//                      DafnyNameResolver.getDafnyTypeForError(errorShapeId),
+//                      () -> {
+//
+//                      }
+//            writer.write("return $L.$L(message=e.response['Error']['Message'])",
+
           }
       );
       hasOpenedIfBlock = true;

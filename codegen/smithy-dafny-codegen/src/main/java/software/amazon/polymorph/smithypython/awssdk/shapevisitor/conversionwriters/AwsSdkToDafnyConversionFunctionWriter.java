@@ -5,6 +5,7 @@ package software.amazon.polymorph.smithypython.awssdk.shapevisitor.conversionwri
 
 import java.util.Map.Entry;
 import software.amazon.polymorph.smithypython.awssdk.nameresolver.AwsSdkNameResolver;
+import software.amazon.polymorph.smithypython.awssdk.shapevisitor.AwsSdkErrorToDafnyErrorShapeVisitor;
 import software.amazon.polymorph.smithypython.common.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithypython.awssdk.shapevisitor.AwsSdkToDafnyShapeVisitor;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
@@ -17,6 +18,7 @@ import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumDefinition;
 import software.amazon.smithy.model.traits.EnumTrait;
+import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonWriter;
 import software.amazon.smithy.utils.CaseUtils;
@@ -51,10 +53,18 @@ public class AwsSdkToDafnyConversionFunctionWriter extends BaseConversionWriter 
     WriterDelegator<PythonWriter> delegator = context.writerDelegator();
     String moduleName = SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(context.settings().getService().getNamespace());
 
+//    if (structureShape.hasTrait(ErrorTrait.class)) {
+//          writeErrorStructureShapeConverter(structureShape);
+//    }
+
     delegator.useFileWriter(moduleName + "/aws_sdk_to_dafny.py", "", conversionWriter -> {
       // Within the conversion function, the dataSource becomes the function's input
       // This hardcodes the input parameter name for a conversion function to always be "input"
-      String dataSourceInsideConversionFunction = "input";
+
+      String dataSourceInsideConversionFunction =
+              structureShape.hasTrait(ErrorTrait.class)
+        ? "input['Error']"
+      : "input";
 
       DafnyNameResolver.importDafnyTypeForShape(conversionWriter, structureShape.getId(), context);
 
@@ -70,13 +80,24 @@ public class AwsSdkToDafnyConversionFunctionWriter extends BaseConversionWriter 
             conversionWriter.openBlock(
                 "return $L(",
                 ")",
-                DafnyNameResolver.getDafnyTypeForShape(structureShape),
+                    // TODO-Python: Import error XX as DafnyXX?
+                    structureShape.hasTrait(ErrorTrait.class)
+                    ? DafnyNameResolver.getDafnyTypeForError(structureShape)
+                            : DafnyNameResolver.getDafnyTypeForShape(structureShape),
                 () -> {
                   for (Entry<String, MemberShape> memberShapeEntry : structureShape.getAllMembers().entrySet()) {
                     String memberName = memberShapeEntry.getKey();
                     MemberShape memberShape = memberShapeEntry.getValue();
-                    writeStructureShapeMemberConverter(conversionWriter,
-                        dataSourceInsideConversionFunction, memberName, memberShape);
+//
+//                    if (structureShape.hasTrait(ErrorTrait.class)) {
+//                      writeErrorStructureShapeMemberConverter(conversionWriter,
+//                          dataSourceInsideConversionFunction, memberName, memberShape);
+//                    } else {
+
+                        writeStructureShapeMemberConverter(conversionWriter,
+                                dataSourceInsideConversionFunction, memberName, memberShape);
+//                    }
+
                   }
                 }
             );
@@ -84,6 +105,70 @@ public class AwsSdkToDafnyConversionFunctionWriter extends BaseConversionWriter 
       );
     });
   }
+
+    protected void writeErrorStructureShapeConverter(StructureShape structureShape) {
+        WriterDelegator<PythonWriter> delegator = context.writerDelegator();
+        String moduleName = SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(context.settings().getService().getNamespace());
+
+        delegator.useFileWriter(moduleName + "/aws_sdk_to_dafny.py", "", conversionWriter -> {
+            // Within the conversion function, the dataSource becomes the function's input
+            // This hardcodes the input parameter name for a conversion function to always be "input"
+            String dataSourceInsideConversionFunction = "input";
+
+            DafnyNameResolver.importDafnyTypeForShape(conversionWriter, structureShape.getId(), context);
+
+            conversionWriter.openBlock(
+                    "def $L($L):",
+                    "",
+                    AwsSdkNameResolver.getAwsSdkToDafnyFunctionNameForShape(structureShape),
+                    dataSourceInsideConversionFunction,
+                    () -> {
+                        // Open Dafny structure shape
+                        // e.g.
+                        // DafnyStructureName(...
+                        conversionWriter.openBlock(
+                                "return $L(",
+                                ")",
+                                // TODO-Python: Import error XX as DafnyXX?
+                                structureShape.hasTrait(ErrorTrait.class)
+                                        ? DafnyNameResolver.getDafnyTypeForError(structureShape)
+                                        : DafnyNameResolver.getDafnyTypeForShape(structureShape),
+                                () -> {
+                                    for (Entry<String, MemberShape> memberShapeEntry : structureShape.getAllMembers().entrySet()) {
+                                        String memberName = memberShapeEntry.getKey();
+                                        MemberShape memberShape = memberShapeEntry.getValue();
+                                        writeErrorStructureShapeMemberConverter(conversionWriter,
+                                                dataSourceInsideConversionFunction, memberName, memberShape);
+                                    }
+                                }
+                        );
+                    }
+            );
+        });
+    }
+
+    private void writeErrorStructureShapeMemberConverter(PythonWriter conversionWriter,
+                            String dataSourceInsideConversionFunction, String memberName, MemberShape memberShape) {
+        final Shape targetShape = context.model().expectShape(memberShape.getTarget());
+
+        // Adds `DafnyStructureMember=smithy_structure_member(...)`
+        // e.g.
+        // DafnyStructureName(DafnyStructureMember=smithy_structure_member(...), ...)
+        // The nature of the `smithy_structure_member` conversion depends on the properties of the shape,
+        //   as described below
+        conversionWriter.writeInline("$L=", memberName);
+
+        // it seems like error structure shapes are always required?
+            conversionWriter.write("$L,",
+                    targetShape.accept(
+                            new AwsSdkErrorToDafnyErrorShapeVisitor(
+                                    context,
+                                    dataSourceInsideConversionFunction + "." + memberName,
+                                    conversionWriter
+                            )
+                    )
+            );
+    }
 
   private void writeStructureShapeMemberConverter(PythonWriter conversionWriter,
       String dataSourceInsideConversionFunction, String memberName, MemberShape memberShape) {
