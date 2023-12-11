@@ -98,21 +98,37 @@ dafny-reportgenerator:
 # Since such targets are all shared,
 # this is tractable.
 transpile_implementation:
+
 	dafny \
-		-vcsCores:$(CORES) \
-		-compileTarget:$(TARGET) \
-		-spillTargetCode:3 \
-		-compile:0 \
-		-optimizeErasableDatatypeWrapper:0 \
-		$(COMPILE_SUFFIX_OPTION) \
-		-quantifierSyntax:3 \
-		-unicodeChar:0 \
-		-functionSyntax:3 \
-		-useRuntimeLib \
-		-out $(OUT) \
-		./src/Index.dfy \
-		-library:$(PROJECT_ROOT)/dafny-dependencies/StandardLibrary/src/Index.dfy \
-		$(patsubst %, -library:$(PROJECT_ROOT)/%/src/Index.dfy, $(LIBRARIES))
+        -vcsCores:$(CORES) \
+        -compileTarget:$(TARGET) \
+        -spillTargetCode:3 \
+        -compile:0 \
+        -optimizeErasableDatatypeWrapper:0 \
+        $(COMPILE_SUFFIX_OPTION) \
+        -quantifierSyntax:3 \
+        -unicodeChar:0 \
+        -functionSyntax:3 \
+        -useRuntimeLib \
+        -out $(OUT) \
+        $(DOT_NAMESPACE_INDEX) \
+        -library:$(PROJECT_ROOT)/dafny-dependencies/StandardLibrary/src/Index.dfy \
+        $(patsubst %, -library:$(PROJECT_ROOT)/%/src/Index.dfy, $(LIBRARIES))
+#
+# 	dafny translate \
+# 		$(TARGET) \
+# 		--cores:$(CORES) \
+# 		--optimize-erasable-datatype-wrapper:false \
+# 		--quantifier-syntax:3 \
+# 		--unicode-char:false \
+# 		--function-syntax:3 \
+# 		--include-runtime \
+# 		--output $(OUT) \
+# 		./src/IndexDotNamespaced.dfy \
+# 		--library:$(PROJECT_ROOT)/dafny-dependencies/StandardLibrary/src/Index.dfy \
+# 		$(patsubst %, --library:$(PROJECT_ROOT)/%/src/Index.dfy, $(LIBRARIES))
+#
+
 
 transpile_test:
 	dafny \
@@ -129,7 +145,36 @@ transpile_test:
 		-useRuntimeLib \
 		-out $(OUT) \
 		`find ./test -name '*.dfy'` \
-		-library:src/Index.dfy
+		-library:$(DOT_NAMESPACE_INDEX)
+
+# 	dafny translate \
+# 		$(TARGET) \
+# 		--cores:$(CORES) \
+# 		--optimize-erasable-datatype-wrapper:false \
+# 		--quantifier-syntax:3 \
+# 		--unicode-char:false \
+# 		--function-syntax:3 \
+# 		--include-runtime \
+# 		--output $(OUT) \
+# 		`find ./test -name '*.dfy'` \
+# 		--library:src/Index.dfy
+
+# 	dafny \
+# 		-vcsCores:$(CORES) \
+# 		-compileTarget:$(TARGET) \
+# 		-spillTargetCode:3 \
+# 		-runAllTests:1 \
+# 		-compile:0 \
+# 		-optimizeErasableDatatypeWrapper:0 \
+# 		$(COMPILE_SUFFIX_OPTION) \
+# 		-quantifierSyntax:3 \
+# 		-unicodeChar:0 \
+# 		-functionSyntax:3 \
+# 		-useRuntimeLib \
+# 		-out $(OUT) \
+# 		$(OUTER_MODULE) \
+# 		`find ./test -name '*.dfy'` \
+# 		-library:src/Index.dfy
 
 transpile_dependencies:
 	$(MAKE) -C $(STANDARD_LIBRARY_PATH) transpile_implementation_$(LANG)
@@ -225,10 +270,12 @@ transpile_net: | transpile_implementation_net transpile_test_net transpile_depen
 
 transpile_implementation_net: TARGET=cs
 transpile_implementation_net: OUT=runtimes/net/ImplementationFromDafny
+transpile_implementation_net: OUTER_MODULE=--outer-module:$(NAMESPACE)
 transpile_implementation_net: transpile_implementation
 
 transpile_test_net: TARGET=cs
 transpile_test_net: OUT=runtimes/net/tests/TestsFromDafny
+transpile_test_net: OUTER_MODULE=--outer-module:$(NAMESPACE)
 transpile_test_net: transpile_test
 
 transpile_dependencies_net: LANG=net
@@ -261,10 +308,12 @@ transpile_java: | transpile_implementation_java transpile_test_java transpile_de
 
 transpile_implementation_java: TARGET=java
 transpile_implementation_java: OUT=runtimes/java/ImplementationFromDafny
+transpile_implementation_java: OUTER_MODULE=--outer-package $(NAMESPACE)
 transpile_implementation_java: transpile_implementation _mv_implementation_java
 
 transpile_test_java: TARGET=java
 transpile_test_java: OUT=runtimes/java/TestsFromDafny
+transpile_test_java: OUTER_MODULE=--outer-package $(NAMESPACE)
 transpile_test_java: transpile_test _mv_test_java
 
 # Currently Dafny compiles to Java by changing the directory name.
