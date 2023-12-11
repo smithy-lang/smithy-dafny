@@ -48,6 +48,14 @@ jobs:
         ]
         dotnet-version: [ '6.0.x' ]
         os: [ ubuntu-latest ]
+        dafny-version: ${{ inputs.dafny }}
+        exclude:
+          # ExternV2 is only supported on Dafny >4.4.0 (unreleased; only on nightly as of commit)
+          # Assuming only other tested versions are 4.1.0 and 4.3.0
+          - library: TestModels/ExternV2
+            dafny-version: 4.1.0
+          - library: TestModels/ExternV2
+            dafny-version: 4.3.0
     runs-on: ${{ matrix.os }}
     permissions:
       id-token: write
