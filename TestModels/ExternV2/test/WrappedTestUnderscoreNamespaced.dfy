@@ -5,4 +5,6 @@ include "SimpleExternV2ImplTest.dfy"
 include "WrappedSimpleExternV2ImplTest.dfy"
 
 // TOOD: Python will use this syntax.
-module {:extern "simple_dafnyexternv2_internaldafny_wrapped"} UnderscoreNamespacedWrappedSimpleExternV2Service replaces WrappedSimpleExternV2Service {}
+module {:extern "simple_dafnyexternv2_internaldafny_wrapped"} UnderscoreNamespacedWrappedSimpleExternV2Service replaces WrappedSimpleExternV2Service {
+
+}
