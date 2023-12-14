@@ -168,23 +168,37 @@ transpile_test:
 #     the project MUST supply variables here pointing to Index files that
 #     `replace` any `replaceable` modules with extern names that are idiomatic
 #     to the language under generation.
+# This is a PLACEHOLDER command. This is intended to be based on `dafny translate`
+#   to allow use of `outer-module`.
+# However, `dafny translate` lacks a `runAllTests` option.
+# TODO: Add tracking GHI
 transpile_test_v2: SRC_INDEX_TRANSPILE=$(if $(SRC_INDEX),$(SRC_INDEX),src/Index.dfy)
 transpile_test_v2: TEST_INDEX_TRANSPILE=$(if $(TEST_INDEX),$(TEST_INDEX),`find ./test -name '*.dfy'`)
 transpile_test_v2:
-	dafny translate \
-	    $(TARGET) \
-        $(TEST_INDEX_TRANSPILE) \
-        --cores:$(CORES) \
-        --optimize-erasable-datatype-wrapper:false \
-        --quantifier-syntax:3 \
-        --unicode-char:false \
-        --function-syntax:3 \
-        --output:$(OUT) \
-        --library:$(SRC_INDEX_TRANSPILE) \
+	dafny \
+		-vcsCores:$(CORES) \
+		-compileTarget:$(TARGET) \
+		-spillTargetCode:3 \
+		-runAllTests:1 \
+		-compile:0 \
+		-optimizeErasableDatatypeWrapper:0 \
+		-quantifierSyntax:3 \
+		-unicodeChar:0 \
+		-functionSyntax:3 \
+		-useRuntimeLib \
+		-out $(OUT) \
+		`find ./test -name '*.dfy'` \
+		-library:$(SRC_INDEX_TRANSPILE)
 
 transpile_dependencies:
 	$(MAKE) -C $(STANDARD_LIBRARY_PATH) transpile_implementation_$(LANG)
 	$(patsubst %, $(MAKE) -C $(PROJECT_ROOT)/% transpile_implementation_$(LANG);, $(LIBRARIES))
+
+# We need this target to signal to some dependencies
+# That they should transpile v2-compatible code
+transpile_dependencies_v2:
+	$(MAKE) -C $(STANDARD_LIBRARY_PATH) transpile_implementation_v2_$(LANG)
+	$(patsubst %, $(MAKE) -C $(PROJECT_ROOT)/% transpile_implementation_v2_$(LANG);, $(LIBRARIES))
 
 ########################## Code-Gen targets
 
@@ -273,20 +287,32 @@ polymorph_java: _polymorph_dependencies
 ########################## .NET targets
 
 transpile_net: | transpile_implementation_net transpile_test_net transpile_dependencies_net
+transpile_net_v2: | transpile_implementation_v2_net transpile_test_v2_net transpile_dependencies_v2_net
 
 transpile_implementation_net: TARGET=cs
 transpile_implementation_net: OUT=runtimes/net/ImplementationFromDafny
-transpile_implementation_net: SRC_INDEX=$(NET_SRC_INDEX)
 transpile_implementation_net: transpile_implementation
+
+transpile_implementation_v2_net: TARGET=cs
+transpile_implementation_v2_net: OUT=runtimes/net/ImplementationFromDafny
+transpile_implementation_v2_net: SRC_INDEX=$(NET_SRC_INDEX)
+transpile_implementation_v2_net: transpile_implementation_v2
 
 transpile_test_net: TARGET=cs
 transpile_test_net: OUT=runtimes/net/tests/TestsFromDafny
-transpile_test_net: SRC_INDEX=$(NET_SRC_INDEX)
-transpile_test_net: TEST_INDEX=$(NET_TEST_INDEX)
 transpile_test_net: transpile_test
+
+transpile_test_v2_net: TARGET=cs
+transpile_test_v2_net: OUT=runtimes/net/tests/TestsFromDafny
+transpile_test_v2_net: SRC_INDEX=$(NET_SRC_INDEX)
+transpile_test_v2_net: TEST_INDEX=$(NET_TEST_INDEX)
+transpile_test_v2_net: transpile_test
 
 transpile_dependencies_net: LANG=net
 transpile_dependencies_net: transpile_dependencies
+
+transpile_dependencies_v2_net: LANG=net
+transpile_dependencies_v2_net: transpile_dependencies_v2
 
 test_net:
 	dotnet run \

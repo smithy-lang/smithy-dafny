@@ -7,9 +7,19 @@ This models and its shapes are based on to operations in the `Extern` TestModel.
 
 This V2 extern system uses the `replaceable` and `replaces` keywords in conjunction with the `outer-module` compile flag to allow a module to have idiomatic extern names in each target language.
 
-Under this V2 system, manually-written Dafny source code should mark `module`s that are intended to be `extern` as `replaceable`.
-Another manually-written module `replaces` the `replaceable` module;
-The `replaces` module will be tagged with an `extern` whose name is idiomatic for the target language.
+Under this V2 system, a Dafny developer should not mark a module as `extern` if the path to the extern module depends on language-specific features. (e.g. an `:extern "sample.namespace.MyExternModule"` makes sense for Java externs, but the `.`s will break Python externs.)
+Instead of marking this module as `extern`, the developer should mark the module as `replaceable`.
+Then, they should create a new module that `replaces` the `replaceable` module.
+The developer should add the `extern` attribute to this new module.
+This module's `extern` attribute will define a namespace-path-syntax-specific extern name (e.g. `.`s vs `_`s).
+For each path syntax, the developer should create a separate module that `replaces` the `replaceable` module.
+This TestModel demonstrates this in the `ExternV2Constructor` module and in the `WrappedTestDotNamespaced` module.
+
+If an extern module requires per-language behavior, the extern should NOT be replaced in the path-syntax specific module.
+Instead, the developer should write a new file per-language that:
+1. `include`s the path-syntax specific module. (This includes any shared extern definitions in the target language.)
+2. `replaces` the `replaceable` extern module. Here, the developer can add Dafny code specific to the language under generation.
+   This TestModel demonstrates this in the `SimpleExternV2` module.
 
 (TODO: Implement this)
 Under this V2 system, Smithy-Dafny generated Dafny code will not declare modules as extern.

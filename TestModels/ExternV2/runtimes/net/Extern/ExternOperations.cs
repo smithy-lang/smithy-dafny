@@ -4,10 +4,10 @@ using System;
 using Dafny;
 using simple.dafnyexternv2.internaldafny.types;
 using Simple.DafnyExternV2;
-using outer.Wrappers;
+using Wrappers;
 using GetExternV2Output = simple.dafnyexternv2.internaldafny.types.GetExternV2Output;
 
-namespace SimpleExternV2Impl_Compile
+namespace SimpleExternV2Impl
 {
     public partial class __default
     {
@@ -32,7 +32,7 @@ namespace SimpleExternV2Impl_Compile
     }
 }
 
-namespace ExternV2Constructor
+namespace simple.dafnyexternv2.internaldafny.ExternV2Constructor
 {
     public class ExternV2ConstructorClass
     {

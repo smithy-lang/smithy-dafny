@@ -57,20 +57,19 @@ transpile_implementation:
 		-out $(OUT) \
 		./src/Index.dfy
 
-# transpile_implementation_v2:
-# 	dafny translate \
-# 	    $(TARGET) \
-#         ./src/Index.dfy \
-#         --cores:$(CORES) \
-#         --optimize-erasable-datatype-wrapper:false \
-#         --quantifier-syntax:3 \
-#         --unicode-char:false \
-#         --function-syntax:3 \
-#         --outer-module:TODO \
-#         --output:$(OUT) \
-#
-# transpile_test: | transpile_test_v2
-# 	exit 0
+transpile_implementation_v2:
+	dafny translate \
+	    $(TARGET) \
+        ./src/Index.dfy \
+        --cores:$(CORES) \
+        --optimize-erasable-datatype-wrapper:false \
+        --quantifier-syntax:3 \
+        --unicode-char:false \
+        --function-syntax:3 \
+        --output:$(OUT) \
+
+transpile_test: | transpile_test_v2
+	exit 0
 
 # Override SharedMakefile's build_java to not install
 # StandardLibrary as a dependency

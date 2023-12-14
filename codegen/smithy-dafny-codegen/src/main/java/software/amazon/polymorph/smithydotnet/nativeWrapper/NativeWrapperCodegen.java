@@ -54,7 +54,7 @@ public class NativeWrapperCodegen {
     protected static final List<String> UNCONDITIONAL_IMPORTS = List.of(
             "System",
             "_System",
-            "outer.Wrappers"
+            "Wrappers"
     );
 
     public NativeWrapperCodegen(

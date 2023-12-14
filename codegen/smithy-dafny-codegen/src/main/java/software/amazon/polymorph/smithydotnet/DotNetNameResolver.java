@@ -713,7 +713,7 @@ public class DotNetNameResolver {
 
         final String baseType = dafnyTypeForShape(memberShape.getTarget());
         final String prefix = concrete ? "" : "_I";
-        return "outer.Wrappers.%sOption<%s>".formatted(prefix, baseType);
+        return "Wrappers.%sOption<%s>".formatted(prefix, baseType);
     }
 
     private String dafnyTypeForService(final ServiceShape serviceShape) {
@@ -843,7 +843,7 @@ public class DotNetNameResolver {
 
     private String dafnyTypeForResult(final String valueType, final String errorType, final boolean concrete) {
         final String resultType = concrete ? "Result" : "_IResult";
-        return "outer.Wrappers.%s<%s, %s>".formatted(resultType, valueType, errorType);
+        return "Wrappers.%s<%s, %s>".formatted(resultType, valueType, errorType);
     }
 
     public String dafnyTypeForUnit() {

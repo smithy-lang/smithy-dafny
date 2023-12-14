@@ -21,14 +21,19 @@ UNDERSCORE_NAMESPACE_TEST_INDEX=test/WrappedTestUnderscoreNamespaced.dfy
 # For this examples, the `test` modules do not have language-specific behavior,
 # so a language-specific Index file is not needed.
 # If language-specific behavior is added, this would need to be changed.
-NET_TEST_INDEX=$(DOT_NAMESPACE_TEST_INDEX)
 JAVA_TEST_INDEX=$(DOT_NAMESPACE_TEST_INDEX)
 
-# Opt this project in to V2 extern transpilation
+# This project MUST be transpiled with V2
 transpile_implementation: | transpile_implementation_v2
 	exit 0
 
 transpile_test: | transpile_test_v2
+	exit 0
+
+transpile_dependencies: | transpile_dependencies_v2
+	exit 0
+
+transpile_net: | transpile_net_v2
 	exit 0
 
 # This project has no dependencies 
