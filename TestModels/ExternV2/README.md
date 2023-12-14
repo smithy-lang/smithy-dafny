@@ -1,7 +1,9 @@
 # SimpleExternV2
 
 This project tests implementing a [dafny extern](https://homepage.cs.uiowa.edu/~tinelli/classes/181/Papers/dafny-reference.pdf#15) using the "V2 Extern" system.
-This models and its shapes are identical to operations in the `Extern` TestModel, only with "V2" suffixes appended.
+This models and its shapes are based on to operations in the `Extern` TestModel. The differences are:
+* V2 suffixes are appended to classes and operations
+* The NET implementation of the extern "simple.dafnyexternv2.internaldafny"
 
 This V2 extern system uses the `replaceable` and `replaces` keywords in conjunction with the `outer-module` compile flag to allow a module to have idiomatic extern names in each target language.
 

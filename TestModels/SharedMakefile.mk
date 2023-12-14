@@ -97,7 +97,6 @@ dafny-reportgenerator:
 # and can be the same for all such runtimes.
 # Since such targets are all shared,
 # this is tractable.
-transpile_implementation: SRC_INDEX_TRANSPILE=$(if $(SRC_INDEX),$(SRC_INDEX),src/Index.dfy)
 transpile_implementation:
 	dafny \
         -vcsCores:$(CORES) \
@@ -111,12 +110,35 @@ transpile_implementation:
         -functionSyntax:3 \
         -useRuntimeLib \
         -out $(OUT) \
-        $(SRC_INDEX_TRANSPILE) \
+        src/Index.dfy \
         -library:$(PROJECT_ROOT)/dafny-dependencies/StandardLibrary/src/Index.dfy \
         $(patsubst %, -library:$(PROJECT_ROOT)/%/src/Index.dfy, $(LIBRARIES))
 
-transpile_test: SRC_INDEX_TRANSPILE=$(if $(SRC_INDEX),$(SRC_INDEX),src/Index.dfy)
-transpile_test: TEST_INDEX_TRANSPILE=$(if $(TEST_INDEX),$(TEST_INDEX),`find ./test -name '*.dfy'`)
+# transpile_implementation_v2 has the following changes from transpile_implementation:
+# - No option to append a `_Compile` suffix to module names without :extern.
+#   This option is legacy, and is not exposed to `dafny translate`.
+#   This flag will never be appended to code generated using this target.
+#   When migrating a project to build using transpile_implementation_v2,
+#     the developer must replace manually-written references to `_Compile`.
+# - Makefiles may optionally supply a string pointing to the Index of generated code.
+#   If the project under generation uses the V2 extern system (`replaceable` modules),
+#     the project MUST supply a variable here pointing to an Index file that
+#     `replaces` any `replaceable` modules with extern names that are idiomatic
+#     to the language under generation.
+transpile_implementation_v2: SRC_INDEX_TRANSPILE=$(if $(SRC_INDEX),$(SRC_INDEX),src/Index.dfy)
+transpile_implementation_v2:
+	dafny translate \
+	    $(TARGET) \
+        $(SRC_INDEX_TRANSPILE) \
+        --cores:$(CORES) \
+        --optimize-erasable-datatype-wrapper:false \
+        --quantifier-syntax:3 \
+        --unicode-char:false \
+        --function-syntax:3 \
+        --output:$(OUT) \
+        --library:$(PROJECT_ROOT)/dafny-dependencies/StandardLibrary/src/Index.dfy \
+        $(patsubst %, --library:$(PROJECT_ROOT)/%/$(SRC_INDEX_TRANSPILE), $(LIBRARIES))
+
 transpile_test:
 	dafny \
 		-vcsCores:$(CORES) \
@@ -131,8 +153,34 @@ transpile_test:
 		-functionSyntax:3 \
 		-useRuntimeLib \
 		-out $(OUT) \
-		$(TEST_INDEX_TRANSPILE) \
+		`find ./test -name '*.dfy'` \
 		-library:$(SRC_INDEX_TRANSPILE)
+
+# transpile_test_v2 has the following changes from transpile_test:
+# - No option to append a `_Compile` suffix to module names without :extern.
+#   This option is legacy, and is not exposed to `dafny translate`.
+#   This flag will never be appended to code generated using this target.
+#   When migrating a project to build using transpile_implementation_v2,
+#     the developer must replace manually-written references to `_Compile`.
+# - Makefiles may optionally supply a string pointing to the Index of generated code,
+#     and the Index of test code.
+#   If the project under generation uses the V2 extern system (`replaceable` modules),
+#     the project MUST supply variables here pointing to Index files that
+#     `replace` any `replaceable` modules with extern names that are idiomatic
+#     to the language under generation.
+transpile_test_v2: SRC_INDEX_TRANSPILE=$(if $(SRC_INDEX),$(SRC_INDEX),src/Index.dfy)
+transpile_test_v2: TEST_INDEX_TRANSPILE=$(if $(TEST_INDEX),$(TEST_INDEX),`find ./test -name '*.dfy'`)
+transpile_test_v2:
+	dafny translate \
+	    $(TARGET) \
+        $(TEST_INDEX_TRANSPILE) \
+        --cores:$(CORES) \
+        --optimize-erasable-datatype-wrapper:false \
+        --quantifier-syntax:3 \
+        --unicode-char:false \
+        --function-syntax:3 \
+        --output:$(OUT) \
+        --library:$(SRC_INDEX_TRANSPILE) \
 
 transpile_dependencies:
 	$(MAKE) -C $(STANDARD_LIBRARY_PATH) transpile_implementation_$(LANG)
@@ -228,13 +276,13 @@ transpile_net: | transpile_implementation_net transpile_test_net transpile_depen
 
 transpile_implementation_net: TARGET=cs
 transpile_implementation_net: OUT=runtimes/net/ImplementationFromDafny
-transpile_implementation_net: SRC_INDEX=$(DOT_NAMESPACE_SRC_INDEX)
+transpile_implementation_net: SRC_INDEX=$(NET_SRC_INDEX)
 transpile_implementation_net: transpile_implementation
 
 transpile_test_net: TARGET=cs
 transpile_test_net: OUT=runtimes/net/tests/TestsFromDafny
-transpile_test_net: SRC_INDEX=$(DOT_NAMESPACE_SRC_INDEX)
-transpile_test_net: TEST_INDEX=$(DOT_NAMESPACE_TEST_INDEX)
+transpile_test_net: SRC_INDEX=$(NET_SRC_INDEX)
+transpile_test_net: TEST_INDEX=$(NET_TEST_INDEX)
 transpile_test_net: transpile_test
 
 transpile_dependencies_net: LANG=net
@@ -267,10 +315,13 @@ transpile_java: | transpile_implementation_java transpile_test_java transpile_de
 
 transpile_implementation_java: TARGET=java
 transpile_implementation_java: OUT=runtimes/java/ImplementationFromDafny
+transpile_implementation_java: SRC_INDEX=$(JAVA_SRC_INDEX)
 transpile_implementation_java: transpile_implementation _mv_implementation_java
 
 transpile_test_java: TARGET=java
 transpile_test_java: OUT=runtimes/java/TestsFromDafny
+transpile_test_java: SRC_INDEX=$(JAVA_SRC_INDEX)
+transpile_test_java: TEST_INDEX=$(JAVA_TEST_INDEX)
 transpile_test_java: transpile_test _mv_test_java
 
 # Currently Dafny compiles to Java by changing the directory name.
