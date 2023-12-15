@@ -83,6 +83,11 @@ dafny-reportgenerator:
 
 # Dafny helper targets
 
+# Transpile the entire project's impl
+_transpile_implementation_all: TRANSPILE_TARGETS=$(if ${DIR_STRUCTURE_V2}, $(patsubst %, ./dafny/%/src/Index.dfy, $(PROJECT_SERVICES)), src/Index.dfy)
+_transpile_implementation_all: TRANSPILE_DEPENDENCIES=$(patsubst %, -library:$(PROJECT_ROOT)/%, $(PROJECT_INDEX))
+_transpile_implementation_all: transpile_implementation
+
 # The `$(OUT)` and $(TARGET) variables are problematic.
 # Idealy they are different for every target call.
 # However the way make evaluates variables
@@ -98,24 +103,46 @@ dafny-reportgenerator:
 # Since such targets are all shared,
 # this is tractable.
 transpile_implementation:
-	dafny \
-		-vcsCores:$(CORES) \
-		-compileTarget:$(TARGET) \
-		-spillTargetCode:3 \
-		-compile:0 \
-		-optimizeErasableDatatypeWrapper:0 \
-		$(COMPILE_SUFFIX_OPTION) \
-		-quantifierSyntax:3 \
-		-unicodeChar:0 \
-		-functionSyntax:3 \
-		-useRuntimeLib \
-		-out $(OUT) \
-		./src/Index.dfy \
-		-library:$(PROJECT_ROOT)/dafny-dependencies/StandardLibrary/src/Index.dfy \
-		$(patsubst %, -library:$(PROJECT_ROOT)/%/src/Index.dfy, $(LIBRARIES))
+	find ./dafny/**/src ./src -name 'Index.dfy' | sed -e 's/^/include "/' -e 's/$$/"/' | dafny \
+        -stdin \
+        -noVerify \
+        -vcsCores:$(CORES) \
+        -compileTarget:$(TARGET) \
+        -spillTargetCode:3 \
+        -compile:0 \
+        -optimizeErasableDatatypeWrapper:0 \
+        $(COMPILE_SUFFIX_OPTION) \
+        -quantifierSyntax:3 \
+        -unicodeChar:0 \
+        -functionSyntax:3 \
+        -useRuntimeLib \
+        -out $(OUT) \
+        $(if $(strip $(STD_LIBRARY)) , -library:$(PROJECT_ROOT)/dafny-dependencies/StandardLibrary/src/Index.dfy, ) \
+        $(patsubst %, -library:$(PROJECT_ROOT)/%/src/Index.dfy, $(LIBRARIES))
+
+# 	dafny \
+# 		-vcsCores:$(CORES) \
+# 		-compileTarget:$(TARGET) \
+# 		-spillTargetCode:3 \
+# 		-compile:0 \
+# 		-optimizeErasableDatatypeWrapper:0 \
+# 		$(COMPILE_SUFFIX_OPTION) \
+# 		-quantifierSyntax:3 \
+# 		-unicodeChar:0 \
+# 		-functionSyntax:3 \
+# 		-useRuntimeLib \
+# 		-out $(OUT) \
+# 		./src/Index.dfy \
+# 		-library:$(PROJECT_ROOT)/dafny-dependencies/StandardLibrary/src/Index.dfy \
+# 		$(patsubst %, -library:$(PROJECT_ROOT)/%/src/Index.dfy, $(LIBRARIES))
+
+_transpile_test_all: TRANSPILE_DEPENDENCIES=$(if ${DIR_STRUCTURE_V2}, $(patsubst %, -library:dafny/%/src/Index.dfy, $(PROJECT_SERVICES)), -library:src/Index.dfy)
+_transpile_test_all: transpile_test
 
 transpile_test:
-	dafny \
+	find ./dafny/**/test ./test -name "*.dfy" -name '*.dfy' | sed -e 's/^/include "/' -e 's/$$/"/' | dafny \
+		-stdin \
+		-noVerify \
 		-vcsCores:$(CORES) \
 		-compileTarget:$(TARGET) \
 		-spillTargetCode:3 \
@@ -128,8 +155,25 @@ transpile_test:
 		-functionSyntax:3 \
 		-useRuntimeLib \
 		-out $(OUT) \
-		`find ./test -name '*.dfy'` \
-		-library:src/Index.dfy
+		$(if $(strip $(STD_LIBRARY)) , -library:$(PROJECT_ROOT)/dafny-dependencies/StandardLibrary/src/Index.dfy, ) \
+		$(TRANSPILE_DEPENDENCIES)
+
+
+# 	dafny \
+# 		-vcsCores:$(CORES) \
+# 		-compileTarget:$(TARGET) \
+# 		-spillTargetCode:3 \
+# 		-runAllTests:1 \
+# 		-compile:0 \
+# 		-optimizeErasableDatatypeWrapper:0 \
+# 		$(COMPILE_SUFFIX_OPTION) \
+# 		-quantifierSyntax:3 \
+# 		-unicodeChar:0 \
+# 		-functionSyntax:3 \
+# 		-useRuntimeLib \
+# 		-out $(OUT) \
+# 		`find ./test -name '*.dfy'` \
+# 		-library:src/Index.dfy
 
 transpile_dependencies:
 	$(MAKE) -C $(STANDARD_LIBRARY_PATH) transpile_implementation_$(LANG)
@@ -155,10 +199,10 @@ _polymorph:
 	$(OUTPUT_DAFNY) \
 	$(OUTPUT_DOTNET) \
 	$(OUTPUT_JAVA) \
-	--model $(LIBRARY_ROOT)/Model \
-	--dependent-model $(PROJECT_ROOT)/dafny-dependencies/Model \
-	$(patsubst %, --dependent-model $(PROJECT_ROOT)/%/Model, $(LIBRARIES)) \
-	--namespace $(NAMESPACE) \
+	--model $(if $(DIR_STRUCTURE_V2),$(LIBRARY_ROOT)/dafny/$(SERVICE)/Model,$(LIBRARY_ROOT)/Model) \
+	--dependent-model $(PROJECT_ROOT)/$(SMITHY_DEPS) \
+	$(patsubst %, --dependent-model $(PROJECT_ROOT)/%/Model, $($(service_deps_var))) \
+	--namespace $($(namespace_var)) \
 	$(AWS_SDK_CMD)";
 
 _polymorph_wrapped:
@@ -169,10 +213,10 @@ _polymorph_wrapped:
 	$(OUTPUT_DAFNY_WRAPPED) \
 	$(OUTPUT_DOTNET_WRAPPED) \
 	$(OUTPUT_JAVA_WRAPPED) \
-	--model $(LIBRARY_ROOT)/Model \
-	--dependent-model $(PROJECT_ROOT)/dafny-dependencies/Model \
-	$(patsubst %, --dependent-model $(PROJECT_ROOT)/%/Model, $(LIBRARIES)) \
-	--namespace $(NAMESPACE) \
+	--model $(if $(DIR_STRUCTURE_V2),$(LIBRARY_ROOT)/dafny/$(SERVICE)/Model,$(LIBRARY_ROOT)/Model) \
+	--dependent-model $(PROJECT_ROOT)/$(SMITHY_DEPS) \
+	$(patsubst %, --dependent-model $(PROJECT_ROOT)/%/Model, $($(service_deps_var))) \
+	--namespace $($(namespace_var)) \
 	$(OUTPUT_LOCAL_SERVICE) \
 	$(AWS_SDK_CMD)";
 
@@ -183,41 +227,104 @@ _polymorph_dependencies:
  			   $(MAKE) -C $(PROJECT_ROOT)/$(dependency) polymorph_$(POLYMORPH_LANGUAGE_TARGET); \
 	   )
 
-# `polymorph_code_gen` is the generate-for-multiple-languages target
-polymorph_code_gen: OUTPUT_DAFNY=--output-dafny $(LIBRARY_ROOT)/Model --include-dafny $(STANDARD_LIBRARY_PATH)/src/Index.dfy
-polymorph_code_gen: OUTPUT_DOTNET=--output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/
-polymorph_code_gen: _polymorph
-# Generate wrapped code for all languages that support wrapped services
+# # `polymorph_code_gen` is the generate-for-multiple-languages target
+# polymorph_code_gen: OUTPUT_DAFNY=--output-dafny $(LIBRARY_ROOT)/Model --include-dafny $(STANDARD_LIBRARY_PATH)/src/Index.dfy
+# polymorph_code_gen: OUTPUT_DOTNET=--output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/
+# polymorph_code_gen: _polymorph
+# # Generate wrapped code for all languages that support wrapped services
 polymorph_code_gen: OUTPUT_DAFNY_WRAPPED=--output-dafny $(LIBRARY_ROOT)/Model --include-dafny $(STANDARD_LIBRARY_PATH)/src/Index.dfy
 polymorph_code_gen: OUTPUT_DOTNET_WRAPPED=--output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/Wrapped
 polymorph_code_gen: OUTPUT_LOCAL_SERVICE=--local-service-test
-polymorph_code_gen: _polymorph_wrapped
-polymorph_code_gen: POLYMORPH_LANGUAGE_TARGET=code_gen
-polymorph_code_gen: _polymorph_dependencies
+# polymorph_code_gen: _polymorph_wrapped
+# polymorph_code_gen: POLYMORPH_LANGUAGE_TARGET=code_gen
+# polymorph_code_gen: _polymorph_dependencies
 
-polymorph_dafny: OUTPUT_DAFNY=--output-dafny $(LIBRARY_ROOT)/Model --include-dafny $(STANDARD_LIBRARY_PATH)/src/Index.dfy
-polymorph_dafny: _polymorph
-polymorph_dafny: OUTPUT_DAFNY_WRAPPED=--output-dafny $(LIBRARY_ROOT)/Model --include-dafny $(STANDARD_LIBRARY_PATH)/src/Index.dfy
-polymorph_dafny: OUTPUT_LOCAL_SERVICE=--local-service-test
-polymorph_dafny: _polymorph_wrapped
-polymorph_dafny: POLYMORPH_LANGUAGE_TARGET=dafny
-polymorph_dafny: _polymorph_dependencies
+# Generates all target runtime code for all namespaces in this project.
+.PHONY: polymorph_code_gen
+polymorph_code_gen:
+	for service in $(PROJECT_SERVICES) ; do \
+		export service_deps_var=SERVICE_DEPS_$${service} ; \
+		export namespace_var=SERVICE_NAMESPACE_$${service} ; \
+		export SERVICE=$${service} ; \
+		$(MAKE) _polymorph_code_gen || exit 1; \
+	done
 
-polymorph_net: OUTPUT_DOTNET=--output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/
-polymorph_net: _polymorph
-polymorph_net: OUTPUT_DOTNET_WRAPPED=--output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/Wrapped
-polymorph_net: OUTPUT_LOCAL_SERVICE=--local-service-test
-polymorph_net: _polymorph_wrapped
-polymorph_net: POLYMORPH_LANGUAGE_TARGET=net
-polymorph_net: _polymorph_dependencies
+_polymorph_code_gen: OUTPUT_DAFNY=\
+    --output-dafny $(if $(DIR_STRUCTURE_V2), $(LIBRARY_ROOT)/dafny/$(SERVICE)/Model, $(LIBRARY_ROOT)/Model) \
+	--include-dafny $(STANDARD_LIBRARY_PATH)/src/Index.dfy
+_polymorph_code_gen: OUTPUT_DOTNET=\
+    $(if $(DIR_STRUCTURE_V2), --output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/$(SERVICE)/, --output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/)
+_polymorph_code_gen: OUTPUT_JAVA=--output-java $(LIBRARY_ROOT)/runtimes/java/src/main/smithy-generated
+_polymorph_code_gen: _polymorph
+_polymorph_code_gen: OUTPUT_DAFNY_WRAPPED=\
+    --output-dafny $(if $(DIR_STRUCTURE_V2), $(LIBRARY_ROOT)/dafny/$(SERVICE)/Model, $(LIBRARY_ROOT)/Model) \
+	--include-dafny $(STANDARD_LIBRARY_PATH)/src/Index.dfy
+_polymorph_code_gen: OUTPUT_DOTNET_WRAPPED=\
+    $(if $(DIR_STRUCTURE_V2), --output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/Wrapped/$(SERVICE)/, --output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/Wrapped)
+_polymorph_code_gen: OUTPUT_LOCAL_SERVICE=--local-service-test
+_polymorph_code_gen: _polymorph_wrapped
+_polymorph_code_gen: POLYMORPH_LANGUAGE_TARGET=code_gen
+_polymorph_code_gen: _polymorph_dependencies
 
-polymorph_java: OUTPUT_JAVA=--output-java $(LIBRARY_ROOT)/runtimes/java/src/main/smithy-generated
-polymorph_java: _polymorph
-polymorph_java: OUTPUT_JAVA_WRAPPED=--output-java $(LIBRARY_ROOT)/runtimes/java/src/main/smithy-generated
-polymorph_java: OUTPUT_LOCAL_SERVICE=--local-service-test
-polymorph_java: _polymorph_wrapped
-polymorph_java: POLYMORPH_LANGUAGE_TARGET=java
-polymorph_java: _polymorph_dependencies
+# Generates dafny code for all namespaces in this project
+.PHONY: polymorph_dafny
+polymorph_dafny:
+	for service in $(PROJECT_SERVICES) ; do \
+		export service_deps_var=SERVICE_DEPS_$${service} ; \
+		export namespace_var=SERVICE_NAMESPACE_$${service} ; \
+		export SERVICE=$${service} ; \
+		$(MAKE) _polymorph_dafny || exit 1; \
+	done
+
+_polymorph_dafny: OUTPUT_DAFNY=\
+    --output-dafny $(if $(DIR_STRUCTURE_V2), $(LIBRARY_ROOT)/dafny/$(SERVICE)/Model, $(LIBRARY_ROOT)/Model) \
+	--include-dafny $(STANDARD_LIBRARY_PATH)/src/Index.dfy
+_polymorph_dafny: _polymorph
+_polymorph_dafny: OUTPUT_DAFNY_WRAPPED=\
+    --output-dafny $(if $(DIR_STRUCTURE_V2), $(LIBRARY_ROOT)/dafny/$(SERVICE)/Model, $(LIBRARY_ROOT)/Model) \
+    --include-dafny $(STANDARD_LIBRARY_PATH)/src/Index.dfy
+_polymorph_dafny: OUTPUT_LOCAL_SERVICE=--local-service-test
+_polymorph_dafny: _polymorph_wrapped
+_polymorph_dafny: POLYMORPH_LANGUAGE_TARGET=dafny
+_polymorph_dafny: _polymorph_dependencies
+
+# Generates dotnet code for all namespaces in this project
+.PHONY: polymorph_net
+polymorph_net:
+	for service in $(PROJECT_SERVICES) ; do \
+		export service_deps_var=SERVICE_DEPS_$${service} ; \
+		export namespace_var=SERVICE_NAMESPACE_$${service} ; \
+		export SERVICE=$${service} ; \
+		$(MAKE) _polymorph_net || exit 1; \
+	done
+
+_polymorph_net: OUTPUT_DOTNET=\
+    $(if $(DIR_STRUCTURE_V2), --output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/$(SERVICE)/, --output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/)
+_polymorph_net: _polymorph
+_polymorph_net: OUTPUT_DOTNET_WRAPPED=\
+    $(if $(DIR_STRUCTURE_V2), --output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/Wrapped/$(SERVICE)/, --output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/Wrapped)
+_polymorph_net: OUTPUT_LOCAL_SERVICE=--local-service-test
+_polymorph_net: _polymorph_wrapped
+_polymorph_net: POLYMORPH_LANGUAGE_TARGET=net
+_polymorph_net: _polymorph_dependencies
+
+# Generates java code for all namespaces in this project
+.PHONY: polymorph_java
+polymorph_java:
+	for service in $(PROJECT_SERVICES) ; do \
+		export service_deps_var=SERVICE_DEPS_$${service} ; \
+		export namespace_var=SERVICE_NAMESPACE_$${service} ; \
+		export SERVICE=$${service} ; \
+		$(MAKE) _polymorph_java || exit 1; \
+	done
+
+_polymorph_java: OUTPUT_JAVA=--output-java $(LIBRARY_ROOT)/runtimes/java/src/main/smithy-generated
+_polymorph_java: _polymorph
+_polymorph_java: OUTPUT_JAVA_WRAPPED=--output-java $(LIBRARY_ROOT)/runtimes/java/src/main/smithy-generated
+_polymorph_java: OUTPUT_LOCAL_SERVICE=--local-service-test
+_polymorph_java: _polymorph_wrapped
+_polymorph_java: POLYMORPH_LANGUAGE_TARGET=java
+_polymorph_java: _polymorph_dependencies
 
 ########################## .NET targets
 
@@ -225,11 +332,11 @@ transpile_net: | transpile_implementation_net transpile_test_net transpile_depen
 
 transpile_implementation_net: TARGET=cs
 transpile_implementation_net: OUT=runtimes/net/ImplementationFromDafny
-transpile_implementation_net: transpile_implementation
+transpile_implementation_net: _transpile_implementation_all
 
 transpile_test_net: TARGET=cs
 transpile_test_net: OUT=runtimes/net/tests/TestsFromDafny
-transpile_test_net: transpile_test
+transpile_test_net: _transpile_test_all
 
 transpile_dependencies_net: LANG=net
 transpile_dependencies_net: transpile_dependencies
@@ -261,11 +368,11 @@ transpile_java: | transpile_implementation_java transpile_test_java transpile_de
 
 transpile_implementation_java: TARGET=java
 transpile_implementation_java: OUT=runtimes/java/ImplementationFromDafny
-transpile_implementation_java: transpile_implementation _mv_implementation_java
+transpile_implementation_java: _transpile_implementation_all _mv_implementation_java
 
 transpile_test_java: TARGET=java
 transpile_test_java: OUT=runtimes/java/TestsFromDafny
-transpile_test_java: transpile_test _mv_test_java
+transpile_test_java: _transpile_test_all _mv_test_java
 
 # Currently Dafny compiles to Java by changing the directory name.
 # Java puts things under a `java` directory.
