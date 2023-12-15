@@ -134,7 +134,7 @@ transpile_implementation_v2:
         -functionSyntax:3 \
         -useRuntimeLib \
         -out $(OUT) \
-        src/Index.dfy \
+        $(SRC_INDEX_TRANSPILE) \
         -library:$(PROJECT_ROOT)/dafny-dependencies/StandardLibrary/src/Index.dfy \
         $(patsubst %, -library:$(PROJECT_ROOT)/%/src/Index.dfy, $(LIBRARIES))
 
@@ -149,6 +149,7 @@ transpile_implementation_v2:
 #     the project MUST supply a variable here pointing to an Index file that
 #     `replaces` any `replaceable` modules with extern names that are idiomatic
 #     to the language under generation.
+#
 # 	dafny translate \
 # 	    $(TARGET) \
 #         $(SRC_INDEX_TRANSPILE) \
@@ -176,9 +177,9 @@ transpile_test:
 		-useRuntimeLib \
 		-out $(OUT) \
 		`find ./test -name '*.dfy'` \
-		-library:$(SRC_INDEX_TRANSPILE)
+		-library:src/Index.dfy
 
-# transpile_test_v2 has the following changes from transpile_test:
+# transpile_test_v2 will have the following changes from transpile_test:
 # - No option to append a `_Compile` suffix to module names without :extern.
 #   This option is legacy, and is not exposed to `dafny translate`.
 #   This flag will never be appended to code generated using this target.
@@ -204,12 +205,13 @@ transpile_test_v2:
 		-runAllTests:1 \
 		-compile:0 \
 		-optimizeErasableDatatypeWrapper:0 \
+		$(COMPILE_SUFFIX_OPTION) \
 		-quantifierSyntax:3 \
 		-unicodeChar:0 \
 		-functionSyntax:3 \
 		-useRuntimeLib \
 		-out $(OUT) \
-		`find ./test -name '*.dfy'` \
+		$(TEST_INDEX_TRANSPILE) \
 		-library:$(SRC_INDEX_TRANSPILE)
 
 transpile_dependencies:

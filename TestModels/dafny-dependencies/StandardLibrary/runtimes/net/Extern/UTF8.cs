@@ -4,7 +4,7 @@
 using System;
 using System.Text;
 
-using Wrappers;
+using Wrappers_Compile;
 using ibyteseq = Dafny.ISequence<byte>;
 using byteseq = Dafny.Sequence<byte>;
 using icharseq = Dafny.ISequence<char>;

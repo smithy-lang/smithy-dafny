@@ -1,6 +1,6 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
-using Wrappers;
+using Wrappers_Compile;
 using Simple.DafnyExternV2;
 using Simple.DafnyExternV2.Wrapped;
 using TypeConversion = Simple.DafnyExternV2.TypeConversion ;
