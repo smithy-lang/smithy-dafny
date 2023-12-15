@@ -1,3 +1,5 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 package SimpleExternV2Impl_Compile;
 
 import Wrappers;
@@ -8,6 +10,7 @@ import simple.dafnyexternv2.internaldafny.types.ExternV2MustErrorInput;
 import simple.dafnyexternv2.internaldafny.types.GetExternV2Input;
 import simple.dafnyexternv2.internaldafny.types.ExternV2MustErrorOutput;
 
+// TODO: Complete implementation. https://sim.amazon.com/issues/CrypTool-5259
 public class __default {
     public static Result<GetExternV2Output, Error> GetExternV2(Config config, GetExternV2Input input) {
         GetExternV2Output output = new GetExternV2Output(
