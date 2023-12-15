@@ -47,6 +47,10 @@ GRADLEW := $(PROJECT_ROOT)/../codegen/gradlew
 
 ########################## Dafny targets
 
+# TODO: This target does not work for projects using replaceable module syntax.
+# It will fail with error
+# Error: modules 'A' and 'B' both have CompileName 'same.extern.name'
+# Fix this as part of https://sim.amazon.com/issues/CrypTool-5259
 verify:
 	dafny \
 		-vcsCores:$(CORES) \
