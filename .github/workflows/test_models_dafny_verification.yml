@@ -49,6 +49,14 @@ jobs:
           TestModels/aws-sdks/sqs-via-cli,
         ]
         os: [ ubuntu-latest ]
+        include:
+          # One-offs until TestModels migrate to 4.4.0
+          - library: TestModels/ExternV2
+            dafny-version: 4.4.0
+            os: [ ubuntu-latest ]
+          - library: TestModels/Extendable
+            dafny-version: 4.4.0
+            os: [ ubuntu-latest ]
         exclude:
           # This model tickles a tricky Dafny verification regression to be fixed in 4.4
           # https://github.com/dafny-lang/dafny/pull/4800
