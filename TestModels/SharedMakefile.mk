@@ -114,7 +114,31 @@ transpile_implementation:
         -library:$(PROJECT_ROOT)/dafny-dependencies/StandardLibrary/src/Index.dfy \
         $(patsubst %, -library:$(PROJECT_ROOT)/%/src/Index.dfy, $(LIBRARIES))
 
-# transpile_implementation_v2 has the following changes from transpile_implementation:
+# transpile_implementation_v2 SHOULD be based on `dafny translate` to use `outer-module`.
+# This requires some Smithy-Dafny Dotnet codegen changes to drop the `_Compile` suffix from generated .NET code,
+#   which requires that we identify how to decide when to include the `_Compile` suffix.
+# One option is to generate `_Compile` for older Dafny versions,
+#   and peg some Dafny version as the version that requires Smithy-Dafny to use `outer-module`.
+# For now, leave as `dafny`, and comment out the corresponding `dafny translate` command.
+transpile_implementation_v2: SRC_INDEX_TRANSPILE=$(if $(SRC_INDEX),$(SRC_INDEX),src/Index.dfy)
+transpile_implementation_v2:
+	dafny \
+        -vcsCores:$(CORES) \
+        -compileTarget:$(TARGET) \
+        -spillTargetCode:3 \
+        -compile:0 \
+        -optimizeErasableDatatypeWrapper:0 \
+        $(COMPILE_SUFFIX_OPTION) \
+        -quantifierSyntax:3 \
+        -unicodeChar:0 \
+        -functionSyntax:3 \
+        -useRuntimeLib \
+        -out $(OUT) \
+        src/Index.dfy \
+        -library:$(PROJECT_ROOT)/dafny-dependencies/StandardLibrary/src/Index.dfy \
+        $(patsubst %, -library:$(PROJECT_ROOT)/%/src/Index.dfy, $(LIBRARIES))
+
+# transpile_implementation_v2 will have the following changes from transpile_implementation:
 # - No option to append a `_Compile` suffix to module names without :extern.
 #   This option is legacy, and is not exposed to `dafny translate`.
 #   This flag will never be appended to code generated using this target.
@@ -125,19 +149,17 @@ transpile_implementation:
 #     the project MUST supply a variable here pointing to an Index file that
 #     `replaces` any `replaceable` modules with extern names that are idiomatic
 #     to the language under generation.
-transpile_implementation_v2: SRC_INDEX_TRANSPILE=$(if $(SRC_INDEX),$(SRC_INDEX),src/Index.dfy)
-transpile_implementation_v2:
-	dafny translate \
-	    $(TARGET) \
-        $(SRC_INDEX_TRANSPILE) \
-        --cores:$(CORES) \
-        --optimize-erasable-datatype-wrapper:false \
-        --quantifier-syntax:3 \
-        --unicode-char:false \
-        --function-syntax:3 \
-        --output:$(OUT) \
-        --library:$(PROJECT_ROOT)/dafny-dependencies/StandardLibrary/src/Index.dfy \
-        $(patsubst %, --library:$(PROJECT_ROOT)/%/$(SRC_INDEX_TRANSPILE), $(LIBRARIES))
+# 	dafny translate \
+# 	    $(TARGET) \
+#         $(SRC_INDEX_TRANSPILE) \
+#         --cores:$(CORES) \
+#         --optimize-erasable-datatype-wrapper:false \
+#         --quantifier-syntax:3 \
+#         --unicode-char:false \
+#         --function-syntax:3 \
+#         --output:$(OUT) \
+#         --library:$(PROJECT_ROOT)/dafny-dependencies/StandardLibrary/src/Index.dfy \
+#         $(patsubst %, --library:$(PROJECT_ROOT)/%/$(SRC_INDEX_TRANSPILE), $(LIBRARIES))
 
 transpile_test:
 	dafny \
@@ -171,7 +193,7 @@ transpile_test:
 # This is a PLACEHOLDER command. This is intended to be based on `dafny translate`
 #   to allow use of `outer-module`.
 # However, `dafny translate` lacks a `runAllTests` option.
-# TODO: Add tracking GHI
+# GHI: https://github.com/dafny-lang/dafny/issues/4888
 transpile_test_v2: SRC_INDEX_TRANSPILE=$(if $(SRC_INDEX),$(SRC_INDEX),src/Index.dfy)
 transpile_test_v2: TEST_INDEX_TRANSPILE=$(if $(TEST_INDEX),$(TEST_INDEX),`find ./test -name '*.dfy'`)
 transpile_test_v2:
@@ -341,13 +363,10 @@ transpile_java: | transpile_implementation_java transpile_test_java transpile_de
 
 transpile_implementation_java: TARGET=java
 transpile_implementation_java: OUT=runtimes/java/ImplementationFromDafny
-transpile_implementation_java: SRC_INDEX=$(JAVA_SRC_INDEX)
 transpile_implementation_java: transpile_implementation _mv_implementation_java
 
 transpile_test_java: TARGET=java
 transpile_test_java: OUT=runtimes/java/TestsFromDafny
-transpile_test_java: SRC_INDEX=$(JAVA_SRC_INDEX)
-transpile_test_java: TEST_INDEX=$(JAVA_TEST_INDEX)
 transpile_test_java: transpile_test _mv_test_java
 
 # Currently Dafny compiles to Java by changing the directory name.

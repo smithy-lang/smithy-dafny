@@ -57,6 +57,7 @@ transpile_implementation:
 		-out $(OUT) \
 		./src/Index.dfy
 
+# Compatible with v2 extern-compiled modules
 transpile_implementation_v2:
 	dafny translate \
 	    $(TARGET) \

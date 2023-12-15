@@ -3,7 +3,8 @@
 This project tests implementing a [dafny extern](https://homepage.cs.uiowa.edu/~tinelli/classes/181/Papers/dafny-reference.pdf#15) using the "V2 Extern" system.
 This models and its shapes are based on to operations in the `Extern` TestModel. The differences are:
 * V2 suffixes are appended to classes and operations
-* The NET implementation of the extern "simple.dafnyexternv2.internaldafny"
+* The NET implementation of the `simple.dafnyexternv2.internaldafny` extern contains an extern method that is not present in other languages (as a demonstration; see below)
+* The `ExternV2Constructor` is moved to `simple.dafnyexternv2.internaldafny.ExternV2Constructor`
 
 This V2 extern system uses the `replaceable` and `replaces` keywords in conjunction with the `outer-module` compile flag to allow a module to have idiomatic extern names in each target language.
 
@@ -15,16 +16,14 @@ This module's `extern` attribute will define a namespace-path-syntax-specific ex
 For each path syntax, the developer should create a separate module that `replaces` the `replaceable` module.
 This TestModel demonstrates this in the `ExternV2Constructor` module and in the `WrappedTestDotNamespaced` module.
 
-If an extern module requires per-language behavior, the extern should NOT be replaced in the path-syntax specific module.
+If an extern module requires specific behavior in a particular language, the extern should NOT be replaced in the path-syntax specific module.
 Instead, the developer should write a new file per-language that:
 1. `include`s the path-syntax specific module. (This includes any shared extern definitions in the target language.)
 2. `replaces` the `replaceable` extern module. Here, the developer can add Dafny code specific to the language under generation.
-   This TestModel demonstrates this in the `SimpleExternV2` module.
 
-(TODO: Implement this)
-Under this V2 system, Smithy-Dafny generated Dafny code will not declare modules as extern.
-These modules will instead be given a language-idiomatic extern name through the `outer-module` compile flag.
-(This is not implemented yet. The `outer-module` flag is not available on the legacy Dafny CLI. We can either migrate Smithy-Dafny's Makefile to `dafny translate` or migrate the `outerModule` flag to the legacy Dafny CLI.)
+This TestModel demonstrates this in the `SimpleExternV2` module.
+
+(TODO: Implement outer-module or similar mechanism: https://sim.amazon.com/issues/CrypTool-5260)
 
 ## Build
 ### .NET
