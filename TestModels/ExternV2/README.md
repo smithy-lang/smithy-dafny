@@ -1,7 +1,7 @@
 # SimpleExternV2
 
 This project tests implementing a [dafny extern](https://homepage.cs.uiowa.edu/~tinelli/classes/181/Papers/dafny-reference.pdf#15) using the "V2 Extern" system.
-This models and its shapes are based on to operations in the `Extern` TestModel.
+The model and its shapes are based on to operations in the `Extern` TestModel.
 
 The differences between these two TestModels are:
 * V2 suffixes are appended to classes and operations
