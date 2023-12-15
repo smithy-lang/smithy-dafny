@@ -7,6 +7,8 @@ include ../SharedMakefile.mk
 
 NAMESPACE=simple.dafnyExternV2
 
+# Paths to concrete indices for src/ and test/.
+
 DOT_NAMESPACE_SRC_INDEX=src/IndexDotNamespaced.dfy
 UNDERSCORE_NAMESPACE_SRC_INDEX=src/IndexUnderscoreNamespaced.dfy
 

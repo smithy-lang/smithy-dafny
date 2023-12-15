@@ -7,7 +7,6 @@ include ../../SharedMakefile.mk
 
 MAX_RESOURCE_COUNT=500000000
 LIBRARIES :=
-NAMESPACE=standardlibrary
 
 # define standard colors
 ifneq (,$(findstring xterm,${TERM}))
@@ -58,6 +57,7 @@ transpile_implementation:
 		./src/Index.dfy
 
 # Compatible with v2 extern-compiled modules
+# This is redundant for now, but will be useful with `outer-module`
 transpile_implementation_v2:
 	dafny \
 		-vcsCores:$(CORES) \
@@ -72,9 +72,6 @@ transpile_implementation_v2:
 		-useRuntimeLib \
 		-out $(OUT) \
 		./src/Index.dfy
-
-transpile_test: | transpile_test_v2
-	exit 0
 
 # Override SharedMakefile's build_java to not install
 # StandardLibrary as a dependency
