@@ -18,7 +18,7 @@ jobs:
       matrix:
         dafny-version: [
           4.1.0,
-          4.3.0
+          4.4.0
         ]
         library: [
           TestModels/dafny-dependencies/StandardLibrary, # This stores current Polymorph dependencies that all TestModels depend on
