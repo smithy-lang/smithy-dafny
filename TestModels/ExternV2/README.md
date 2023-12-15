@@ -8,7 +8,6 @@ The differences between these two TestModels are:
 * The NET implementation of the `simple.dafnyexternv2.internaldafny` extern contains an extern method that is not present in other languages (as a demonstration; see below)
 * The `ExternV2Constructor` is moved to `simple.dafnyexternv2.internaldafny.ExternV2Constructor` 
 
-This TestModel also demonstrates a "V2" extern system.
 
 The "V1" extern system applies an `{:extern "..."}` attribute to a module to signal an extern.
 This worked for .NET and Java, where this extern string was valid in both languages.
