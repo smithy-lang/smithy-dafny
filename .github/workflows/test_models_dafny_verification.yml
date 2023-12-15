@@ -26,7 +26,7 @@ jobs:
           TestModels/Errors,
           TestModels/Extendable,
           TestModels/Extern,
-          # TestModels/ExternV2,
+          # TestModels/ExternV2, # Verified with Dafny 4.4.0 only
           TestModels/LocalService,
           TestModels/Refinement,
           TestModels/Resource,
