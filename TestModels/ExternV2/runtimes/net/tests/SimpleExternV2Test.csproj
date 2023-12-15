@@ -20,8 +20,12 @@
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
 
     <ProjectReference Include="../SimpleExternV2.csproj" />
-    <Compile Include="../Extern/**" />
-    <Compile Include="../Generated/**" />
+    <!--
+        NOTE: The WrappedSimpleExternService MUST be added separately.
+        We cannot include src/ code in both the src and test csproj files.
+        src/ Externs' partial classes are not properly compiled if they are included in tests.
+    -->
+    <Compile Include="Extern/**" />
     <Compile Include="TestsFromDafny.cs" />
   </ItemGroup>
 

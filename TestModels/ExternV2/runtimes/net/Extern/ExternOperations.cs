@@ -32,6 +32,18 @@ namespace SimpleExternV2Impl_Compile
     }
 }
 
+namespace simple.dafnyexternv2.internaldafny
+{
+  public partial class __default
+  {
+    public static Wrappers_Compile._IResult<Dafny.ISequence<char>, simple.dafnyexternv2.internaldafny.types._IError>
+            ExampleOnlyNet(Dafny.ISequence<char> input)
+        {
+            return Wrappers_Compile.Result<Dafny.ISequence<char>, simple.dafnyexternv2.internaldafny.types._IError>.create_Success(input);
+        }
+    }
+}
+
 namespace simple.dafnyexternv2.internaldafny.ExternV2Constructor
 {
     public class ExternV2ConstructorClass
