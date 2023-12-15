@@ -34,8 +34,4 @@ module {:extern "simple.dafnyexternv2.internaldafny"} NetSimpleExternV2 replaces
         return externOutput;
     }
 
-
 }
-
-// If we needed to `replace` other `replaceable` modules, we would do this here.
-// If there are some `replaceable` modules that do not

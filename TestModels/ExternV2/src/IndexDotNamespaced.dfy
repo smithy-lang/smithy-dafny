@@ -2,12 +2,17 @@
 // SPDX-License-Identifier: Apache-2.0
 include "Index.dfy"
 
+// Java and .NET share this extern name, and this extern does not require per-language behavior.
+// Define this here to limit repetition.
 module {:extern "simple.dafnyexternv2.internaldafny.ExternV2Constructor"} DotNamespacedExternV2Constructor replaces ExternV2Constructor {
+
     // For the sake of example, assume we do not have per-language behavior for this module.
     // Then, we can define it in a `DotNamespaced` module.
-    // Languages that use `.`-namespacing can include this file from their language-specifix Index files
+    // Languages that use `.`-namespacing can include this file from their language-specific Index files
     // to share the module extern definition.
 }
+
+// If we needed to `replace` other `replaceable` modules, we would add those `replaces` here.
 
 // Note that even though `JavaSimpleExternV2` and `NetSimpleExternV2` share the same `extern` name,
 //   we cannot define that here and `replace` it from those files.
