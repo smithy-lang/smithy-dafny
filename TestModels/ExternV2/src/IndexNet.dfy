@@ -18,12 +18,22 @@ module {:extern "simple.dafnyexternv2.internaldafny"} NetSimpleExternV2 replaces
     //   you can verify part of the extern's behavior in Dafny via `requires`/`modifies`/`ensures`
     //   and narrow down the amount of unverified code in extern modules.
 
-    static method {:extern "ExampleOnlyNet"} OnlyNetMethodExample(input: string)
+    method {:extern "ExampleOnlyNet"} OnlyNetMethodExample(input: string)
         // Note: No need to `import opened Wrappers` for `Result`; it is included from `SimpleExternV2`.
         returns (output: Result<string, Error>)
         ensures output.Success?
         ==>
-            && output.value == "dot net"
+            && output.value == input
+
+    // We can also write some glue code that calls this extern, and validate that
+    // the glue code is verified by Dafny.
+    method CallOnlyNetMethod(input: string) returns (output: string)
+        ensures output == input
+    {
+        var externOutput :- expect OnlyNetMethodExample(input);
+        return externOutput;
+    }
+
 
 }
 
