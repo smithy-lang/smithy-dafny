@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 include "LanguageSpecificLogicImpl.dfy"
 
-replaceable module LanguageSpecificLogic refines AbstractSimpleDafnyExternV2Service {
+replaceable module LanguageSpecificLogic refines AbstractLanguageSpecificLogicService {
     import Operations = LanguageSpecificLogicImpl
 
     function method DefaultLanguageSpecificLogicConfig(): LanguageSpecificLogicConfig {

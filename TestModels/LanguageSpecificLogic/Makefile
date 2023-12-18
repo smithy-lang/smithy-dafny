@@ -5,7 +5,7 @@ CORES=2
 
 include ../SharedMakefile.mk
 
-NAMESPACE=simple.dafnyExternV2
+NAMESPACE=language.specific.logic
 
 # Paths to concrete indices for src/ and test/.
 
@@ -14,7 +14,7 @@ UNDERSCORE_NAMESPACE_SRC_INDEX=src/IndexUnderscoreNamespaced.dfy
 
 # For this example, the `src` modules have language-specific behavior,
 # so they cannot share src Index files.
-NET_SRC_INDEX=src/IndexNet.dfy
+NET_SRC_INDEX=src/replaces/net/Index.dfy
 JAVA_SRC_INDEX=src/IndexJava.dfy
 
 DOT_NAMESPACE_TEST_INDEX=test/WrappedTestDotNamespaced.dfy
@@ -23,7 +23,7 @@ UNDERSCORE_NAMESPACE_TEST_INDEX=test/WrappedTestUnderscoreNamespaced.dfy
 # For these examples, the `test` modules do not have language-specific behavior,
 # so a language-specific Index file is not needed.
 # If language-specific behavior is added, this would need to be changed.
-NET_TEST_INDEX=test/NetTestIndex.dfy
+NET_TEST_INDEX=test/replaces/net/Index.dfy
 JAVA_TEST_INDEX=$(DOT_NAMESPACE_TEST_INDEX)
 
 # This project MUST be transpiled with V2
