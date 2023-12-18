@@ -101,31 +101,8 @@ dafny-reportgenerator:
 # and can be the same for all such runtimes.
 # Since such targets are all shared,
 # this is tractable.
+transpile_implementation: SRC_INDEX_TRANSPILE=$(if $(SRC_INDEX),$(SRC_INDEX),src/Index.dfy)
 transpile_implementation:
-	dafny \
-        -vcsCores:$(CORES) \
-        -compileTarget:$(TARGET) \
-        -spillTargetCode:3 \
-        -compile:0 \
-        -optimizeErasableDatatypeWrapper:0 \
-        $(COMPILE_SUFFIX_OPTION) \
-        -quantifierSyntax:3 \
-        -unicodeChar:0 \
-        -functionSyntax:3 \
-        -useRuntimeLib \
-        -out $(OUT) \
-        src/Index.dfy \
-        -library:$(PROJECT_ROOT)/dafny-dependencies/StandardLibrary/src/Index.dfy \
-        $(patsubst %, -library:$(PROJECT_ROOT)/%/src/Index.dfy, $(LIBRARIES))
-
-# transpile_implementation_v2 SHOULD be based on `dafny translate` to use `outer-module`.
-# This requires some Smithy-Dafny Dotnet codegen changes to drop the `_Compile` suffix from generated .NET code,
-#   which requires that we identify how to decide when to include the `_Compile` suffix.
-# One option is to generate `_Compile` for older Dafny versions,
-#   and peg some Dafny version as the version that requires Smithy-Dafny to use `outer-module`.
-# For now, leave as `dafny`, and comment out the corresponding `dafny translate` command.
-transpile_implementation_v2: SRC_INDEX_TRANSPILE=$(if $(SRC_INDEX),$(SRC_INDEX),src/Index.dfy)
-transpile_implementation_v2:
 	dafny \
         -vcsCores:$(CORES) \
         -compileTarget:$(TARGET) \
@@ -142,66 +119,9 @@ transpile_implementation_v2:
         -library:$(PROJECT_ROOT)/dafny-dependencies/StandardLibrary/src/Index.dfy \
         $(patsubst %, -library:$(PROJECT_ROOT)/%/src/Index.dfy, $(LIBRARIES))
 
-# transpile_implementation_v2 will have the following changes from transpile_implementation:
-# - No option to append a `_Compile` suffix to module names without :extern.
-#   This option is legacy, and is not exposed to `dafny translate`.
-#   This flag will never be appended to code generated using this target.
-#   When migrating a project to build using transpile_implementation_v2,
-#     the developer must replace manually-written references to `_Compile`.
-# - Makefiles may optionally supply a string pointing to the Index of generated code.
-#   If the project under generation uses the V2 extern system (`replaceable` modules),
-#     the project MUST supply a variable here pointing to an Index file that
-#     `replaces` any `replaceable` modules with extern names that are idiomatic
-#     to the language under generation.
-#
-# 	dafny translate \
-# 	    $(TARGET) \
-#         $(SRC_INDEX_TRANSPILE) \
-#         --cores:$(CORES) \
-#         --optimize-erasable-datatype-wrapper:false \
-#         --quantifier-syntax:3 \
-#         --unicode-char:false \
-#         --function-syntax:3 \
-#         --output:$(OUT) \
-#         --library:$(PROJECT_ROOT)/dafny-dependencies/StandardLibrary/src/Index.dfy \
-#         $(patsubst %, --library:$(PROJECT_ROOT)/%/$(SRC_INDEX_TRANSPILE), $(LIBRARIES))
-
+transpile_test: SRC_INDEX_TRANSPILE=$(if $(SRC_INDEX),$(SRC_INDEX),src/Index.dfy)
+transpile_test: TEST_INDEX_TRANSPILE=$(if $(TEST_INDEX),$(TEST_INDEX),`find ./test -name '*.dfy'`)
 transpile_test:
-	dafny \
-		-vcsCores:$(CORES) \
-		-compileTarget:$(TARGET) \
-		-spillTargetCode:3 \
-		-runAllTests:1 \
-		-compile:0 \
-		-optimizeErasableDatatypeWrapper:0 \
-		$(COMPILE_SUFFIX_OPTION) \
-		-quantifierSyntax:3 \
-		-unicodeChar:0 \
-		-functionSyntax:3 \
-		-useRuntimeLib \
-		-out $(OUT) \
-		`find ./test -name '*.dfy'` \
-		-library:src/Index.dfy
-
-# transpile_test_v2 will have the following changes from transpile_test:
-# - No option to append a `_Compile` suffix to module names without :extern.
-#   This option is legacy, and is not exposed to `dafny translate`.
-#   This flag will never be appended to code generated using this target.
-#   When migrating a project to build using transpile_implementation_v2,
-#     the developer must replace manually-written references to `_Compile`.
-# - Makefiles may optionally supply a string pointing to the Index of generated code,
-#     and the Index of test code.
-#   If the project under generation uses the V2 extern system (`replaceable` modules),
-#     the project MUST supply variables here pointing to Index files that
-#     `replace` any `replaceable` modules with extern names that are idiomatic
-#     to the language under generation.
-# This is a PLACEHOLDER command. This is intended to be based on `dafny translate`
-#   to allow use of `outer-module`.
-# However, `dafny translate` lacks a `runAllTests` option.
-# GHI: https://github.com/dafny-lang/dafny/issues/4888
-transpile_test_v2: SRC_INDEX_TRANSPILE=$(if $(SRC_INDEX),$(SRC_INDEX),src/Index.dfy)
-transpile_test_v2: TEST_INDEX_TRANSPILE=$(if $(TEST_INDEX),$(TEST_INDEX),`find ./test -name '*.dfy'`)
-transpile_test_v2:
 	dafny \
 		-vcsCores:$(CORES) \
 		-compileTarget:$(TARGET) \
@@ -221,12 +141,6 @@ transpile_test_v2:
 transpile_dependencies:
 	$(MAKE) -C $(STANDARD_LIBRARY_PATH) transpile_implementation_$(LANG)
 	$(patsubst %, $(MAKE) -C $(PROJECT_ROOT)/% transpile_implementation_$(LANG);, $(LIBRARIES))
-
-# We need this target to signal to some dependencies
-# That they should transpile v2-compatible code
-transpile_dependencies_v2:
-	$(MAKE) -C $(STANDARD_LIBRARY_PATH) transpile_implementation_v2_$(LANG)
-	$(patsubst %, $(MAKE) -C $(PROJECT_ROOT)/% transpile_implementation_v2_$(LANG);, $(LIBRARIES))
 
 ########################## Code-Gen targets
 
@@ -319,28 +233,17 @@ transpile_net_v2: | transpile_implementation_v2_net transpile_test_v2_net transp
 
 transpile_implementation_net: TARGET=cs
 transpile_implementation_net: OUT=runtimes/net/ImplementationFromDafny
+transpile_implementation_net: SRC_INDEX=$(NET_SRC_INDEX)
 transpile_implementation_net: transpile_implementation
-
-transpile_implementation_v2_net: TARGET=cs
-transpile_implementation_v2_net: OUT=runtimes/net/ImplementationFromDafny
-transpile_implementation_v2_net: SRC_INDEX=$(NET_SRC_INDEX)
-transpile_implementation_v2_net: transpile_implementation_v2
 
 transpile_test_net: TARGET=cs
 transpile_test_net: OUT=runtimes/net/tests/TestsFromDafny
+transpile_test_net: SRC_INDEX=$(NET_SRC_INDEX)
+transpile_test_net: TEST_INDEX=$(NET_TEST_INDEX)
 transpile_test_net: transpile_test
-
-transpile_test_v2_net: TARGET=cs
-transpile_test_v2_net: OUT=runtimes/net/tests/TestsFromDafny
-transpile_test_v2_net: SRC_INDEX=$(NET_SRC_INDEX)
-transpile_test_v2_net: TEST_INDEX=$(NET_TEST_INDEX)
-transpile_test_v2_net: transpile_test
 
 transpile_dependencies_net: LANG=net
 transpile_dependencies_net: transpile_dependencies
-
-transpile_dependencies_v2_net: LANG=net
-transpile_dependencies_v2_net: transpile_dependencies_v2
 
 test_net:
 	dotnet run \

@@ -15,9 +15,6 @@ service LanguageSpecificLogic {
 
 structure LanguageSpecificLogicConfig {}
 
-// This operation eventualy calls an extern
-// This is to test writing/passing externs
-// in every runtime.
 operation GetRuntimeInformation {
   input: Unit,
   output: GetRuntimeInformationOutput,
