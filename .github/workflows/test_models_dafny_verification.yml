@@ -14,7 +14,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        dafny: 
+        dafny-version: 
           - ${{ inputs.dafny }}
         library: [
           TestModels/dafny-dependencies/StandardLibrary, # This stores current Polymorph dependencies that all TestModels depend on
@@ -26,7 +26,7 @@ jobs:
           TestModels/Errors,
           TestModels/Extendable,
           TestModels/Extern,
-          # TestModels/ExternV2,
+          # TestModels/LanguageSpecificLogic, # requires >4.4.0
           TestModels/LocalService,
           TestModels/Refinement,
           TestModels/Resource,
@@ -52,10 +52,9 @@ jobs:
         os: [ ubuntu-latest ]
         include:
           # One-offs until TestModels migrate to 4.4.0
-          # Removed due to `replaceable` module verification issue
-          #- library: TestModels/ExternV2
-          #  dafny: 4.4.0
-          #  os: ubuntu-latest
+          - library: TestModels/LanguageSpecificLogic
+            dafny: 4.4.0
+            os: ubuntu-latest
           - library: TestModels/Extendable
             dafny: 4.4.0
             os: ubuntu-latest
@@ -78,7 +77,7 @@ jobs:
       - name: Setup Dafny
         uses: dafny-lang/setup-dafny-action@v1.7.0
         with:
-          dafny-version: ${{ matrix.dafny }}
+          dafny-version: ${{ matrix.dafny-version }}
 
       - name: Generate Polymorph Wrapper Dafny code
         shell: bash

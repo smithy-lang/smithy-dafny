@@ -55,24 +55,7 @@ transpile_implementation:
 		-useRuntimeLib \
 		-out $(OUT) \
 		./src/Index.dfy
-
-# Compatible with v2 extern-compiled modules
-# This is redundant for now, but will be useful with `outer-module`
-transpile_implementation_v2:
-	dafny \
-		-vcsCores:$(CORES) \
-		-compileTarget:$(TARGET) \
-		-spillTargetCode:3 \
-		-compile:0 \
-		-optimizeErasableDatatypeWrapper:0 \
-		$(COMPILE_SUFFIX_OPTION) \
-		-quantifierSyntax:3 \
-		-unicodeChar:0 \
-		-functionSyntax:3 \
-		-useRuntimeLib \
-		-out $(OUT) \
-		./src/Index.dfy
-
+		
 # Override SharedMakefile's build_java to not install
 # StandardLibrary as a dependency
 build_java: transpile_java

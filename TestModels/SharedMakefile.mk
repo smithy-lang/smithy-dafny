@@ -104,20 +104,20 @@ dafny-reportgenerator:
 transpile_implementation: SRC_INDEX_TRANSPILE=$(if $(SRC_INDEX),$(SRC_INDEX),src/Index.dfy)
 transpile_implementation:
 	dafny \
-        -vcsCores:$(CORES) \
-        -compileTarget:$(TARGET) \
-        -spillTargetCode:3 \
-        -compile:0 \
-        -optimizeErasableDatatypeWrapper:0 \
-        $(COMPILE_SUFFIX_OPTION) \
-        -quantifierSyntax:3 \
-        -unicodeChar:0 \
-        -functionSyntax:3 \
-        -useRuntimeLib \
-        -out $(OUT) \
-        $(SRC_INDEX_TRANSPILE) \
-        -library:$(PROJECT_ROOT)/dafny-dependencies/StandardLibrary/src/Index.dfy \
-        $(patsubst %, -library:$(PROJECT_ROOT)/%/src/Index.dfy, $(LIBRARIES))
+			-vcsCores:$(CORES) \
+			-compileTarget:$(TARGET) \
+			-spillTargetCode:3 \
+			-compile:0 \
+			-optimizeErasableDatatypeWrapper:0 \
+			$(COMPILE_SUFFIX_OPTION) \
+			-quantifierSyntax:3 \
+			-unicodeChar:0 \
+			-functionSyntax:3 \
+			-useRuntimeLib \
+			-out $(OUT) \
+			$(SRC_INDEX_TRANSPILE) \
+			-library:$(PROJECT_ROOT)/dafny-dependencies/StandardLibrary/src/Index.dfy \
+			$(patsubst %, -library:$(PROJECT_ROOT)/%/src/Index.dfy, $(LIBRARIES))
 
 transpile_test: SRC_INDEX_TRANSPILE=$(if $(SRC_INDEX),$(SRC_INDEX),src/Index.dfy)
 transpile_test: TEST_INDEX_TRANSPILE=$(if $(TEST_INDEX),$(TEST_INDEX),`find ./test -name '*.dfy'`)
@@ -229,7 +229,6 @@ polymorph_java: _polymorph_dependencies
 ########################## .NET targets
 
 transpile_net: | transpile_implementation_net transpile_test_net transpile_dependencies_net
-transpile_net_v2: | transpile_implementation_v2_net transpile_test_v2_net transpile_dependencies_v2_net
 
 transpile_implementation_net: TARGET=cs
 transpile_implementation_net: OUT=runtimes/net/ImplementationFromDafny

@@ -26,7 +26,7 @@ jobs:
           TestModels/Errors,
           TestModels/Extendable,
           TestModels/Extern,
-          # TestModels/ExternV2, # Tested only for 4.4.0 below
+          # TestModels/LanguageSpecificLogic, # Tested only for 4.4.0 below
           # TestModels/LocalService,
           TestModels/Refinement,
           TestModels/Resource,          
@@ -53,7 +53,7 @@ jobs:
         os: [ ubuntu-latest ]
         include:
           # One-off until TestModels migrate to 4.4.0
-          - library: TestModels/ExternV2
+          - library: TestModels/LanguageSpecificLogic
             dafny-version: 4.4.0
             dotnet-version: '6.0.x'
             os: ubuntu-latest
