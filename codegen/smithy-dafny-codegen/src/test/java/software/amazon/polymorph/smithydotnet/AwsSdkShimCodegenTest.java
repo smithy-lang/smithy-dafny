@@ -150,6 +150,9 @@ public class AwsSdkShimCodegenTest {
                     catch (System.AggregateException aggregate) {
                         return Wrappers_Compile.Result<%1$s>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
                     }
+                    catch (System.Exception ex) {
+                        return Wrappers_Compile.Result<%1$s>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
+                    }
                 }
                 """.formatted(resultTypeParams, requestFromDafnyConverter, responseToDafnyConverter));
 
