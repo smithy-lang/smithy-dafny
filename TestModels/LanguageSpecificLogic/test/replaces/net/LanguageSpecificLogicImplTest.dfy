@@ -19,7 +19,7 @@ module NetLanguageSpecificLogicImplTest replaces LanguageSpecificLogicImplTest {
         expect output.Success?;
         // For NET-only tests, we can assert the output language is NET
         expect output.value.language == "NET";
-        // We could also assert some result on the extern's result (i.e. runtime version)
+        // We could also assert some result on the extern's result (i.e. runtime version), but won't
         print"NET language: ", output.value.language, "; NET runtime: ", output.value.runtime;
     }
 }
