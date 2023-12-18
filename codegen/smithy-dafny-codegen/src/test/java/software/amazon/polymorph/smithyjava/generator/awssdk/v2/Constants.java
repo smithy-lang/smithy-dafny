@@ -19,7 +19,7 @@ public class Constants {
                 } catch (KmsException ex) {
                   return Result.create_Failure(ToDafny.Error(ex));
                 } catch (Exception ex) {
-                  return Result.create_Failure( Error.create_Opaque(ex.toString()));
+                  return Result.create_Failure(Error.create_Opaque(ex.toString()));
                 }
               }
             """;
@@ -37,7 +37,7 @@ public class Constants {
                 } catch (KmsException ex) {
                   return Result.create_Failure(DoSomethingResponse._typeDescriptor(), Error._typeDescriptor(), ToDafny.Error(ex));
                 } catch (Exception ex) {
-                  return Result.create_Failure( Error.create_Opaque(ex.toString()));
+                  return Result.create_Failure(DoSomethingResponse._typeDescriptor(), Error._typeDescriptor(), Error.create_Opaque(ex.toString()));
                 }
               }
             """;
@@ -59,7 +59,7 @@ public class Constants {
                 } catch (KmsException ex) {
                   return Result.create_Failure(ToDafny.Error(ex));
                 } catch (Exception ex) {
-                  return Result.create_Failure( Error.create_Opaque(ex.toString()));
+                  return Result.create_Failure(Error.create_Opaque(ex.toString()));
                 }
               }
             """;
@@ -76,7 +76,7 @@ public class Constants {
                 } catch (KmsException ex) {
                   return Result.create_Failure(dafny.Tuple0._typeDescriptor(), Error._typeDescriptor(), ToDafny.Error(ex));
                 } catch (Exception ex) {
-                  return Result.create_Failure( Error.create_Opaque(ex.toString()));
+                  return Result.create_Failure(dafny.Tuple0._typeDescriptor(), Error._typeDescriptor(), Error.create_Opaque(ex.toString()));
                 }
               }
             """;
