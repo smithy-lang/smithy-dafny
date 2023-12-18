@@ -1,22 +1,22 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
-include "SimpleExternV2Impl.dfy"
+include "LanguageSpecificLogicImpl.dfy"
 
-replaceable module SimpleExternV2 refines AbstractSimpleDafnyExternV2Service {
-    import Operations = SimpleExternV2Impl
+replaceable module LanguageSpecificLogic refines AbstractSimpleDafnyExternV2Service {
+    import Operations = LanguageSpecificLogicImpl
 
-    function method DefaultSimpleExternV2Config(): SimpleExternV2Config {
-        SimpleExternV2Config
+    function method DefaultLanguageSpecificLogicConfig(): LanguageSpecificLogicConfig {
+        LanguageSpecificLogicConfig
     }
 
-    method SimpleExternV2(config: SimpleExternV2Config)
-        returns (res: Result<ISimpleExternV2Client, Error>)
+    method LanguageSpecificLogic(config: LanguageSpecificLogicConfig)
+        returns (res: Result<ILanguageSpecificLogicClient, Error>)
     {
-        var client := new SimpleExternV2Client(Operations.Config);
+        var client := new LanguageSpecificLogicClient(Operations.Config);
         return Success(client);
     }
 
-    class SimpleExternV2Client... {
+    class LanguageSpecificLogicClient... {
         predicate ValidState() {
             && Operations.ValidInternalConfig?(config)
             && Modifies == Operations.ModifiesInternalConfig(config) + {History}
@@ -24,7 +24,7 @@ replaceable module SimpleExternV2 refines AbstractSimpleDafnyExternV2Service {
 
         constructor(config: Operations.InternalConfig) {
             this.config := config;
-            History := new ISimpleExternV2ClientCallHistory();
+            History := new ILanguageSpecificLogicClientCallHistory();
             Modifies := Operations.ModifiesInternalConfig(config) + {History};
         }
     }

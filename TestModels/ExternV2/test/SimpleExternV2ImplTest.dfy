@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 include "../src/Index.dfy"
 
-module SimpleExternV2ImplTest {
+replaceable module SimpleExternV2ImplTest {
     import SimpleExternV2
     import StandardLibrary.UInt
     import opened SimpleDafnyExternV2Types

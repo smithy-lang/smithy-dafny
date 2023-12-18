@@ -4,7 +4,7 @@ include "Index.dfy"
 
 // Java and .NET share this extern name, and this extern does not require per-language behavior.
 // Define this here to limit repetition.
-module {:extern "simple.dafnyexternv2.internaldafny.ExternV2Constructor"} DotNamespacedExternV2Constructor replaces ExternV2Constructor {
+module {:extern "language.specific.logic.internaldafny.LanguageSpecificLogicConstructor"} DotNamespacedLanguageSpecificLogicConstructor replaces LanguageSpecificLogicConstructor {
 
     // For the sake of example, assume we do not have per-language behavior for this module.
     // Then, we can define it in a `DotNamespaced` module.

@@ -23,7 +23,7 @@ UNDERSCORE_NAMESPACE_TEST_INDEX=test/WrappedTestUnderscoreNamespaced.dfy
 # For these examples, the `test` modules do not have language-specific behavior,
 # so a language-specific Index file is not needed.
 # If language-specific behavior is added, this would need to be changed.
-NET_TEST_INDEX=$(DOT_NAMESPACE_TEST_INDEX)
+NET_TEST_INDEX=test/NetTestIndex.dfy
 JAVA_TEST_INDEX=$(DOT_NAMESPACE_TEST_INDEX)
 
 # This project MUST be transpiled with V2

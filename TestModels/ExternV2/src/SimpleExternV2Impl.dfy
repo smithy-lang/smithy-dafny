@@ -3,7 +3,7 @@
 include "../Model/SimpleDafnyExternV2Types.dfy"
 include "ExternV2Constructor.dfy"
 
-module SimpleExternV2Impl refines AbstractSimpleDafnyExternV2Operations  {
+replaceable module SimpleExternV2Impl refines AbstractSimpleDafnyExternV2Operations  {
     import opened ExternV2Constructor
     datatype Config = Config
     type InternalConfig = Config
