@@ -176,14 +176,17 @@ public class ShimV2 extends Generator {
                                 successTypeDescriptor,
                                 CodeBlock.of("ToDafny.Error(ex)")));
         });
-        return Optional.of(builder
-                .nextControlFlow("catch ($T ex)", subject.nativeNameResolver.baseErrorForService())
-                .addStatement("return $L",
-                        subject.dafnyNameResolver.createFailure(
-                                successTypeDescriptor,
-                                CodeBlock.of("ToDafny.Error(ex)")))
-                .endControlFlow()
-                .build());
+        TypeName dafnyError = subject.dafnyNameResolver.abstractClassForError();
+        builder
+         .nextControlFlow("catch ($T ex)", subject.nativeNameResolver.baseErrorForService())
+         .addStatement("return $L",
+            subject.dafnyNameResolver.createFailure(
+              successTypeDescriptor,
+              CodeBlock.of("ToDafny.Error(ex)")));
+	 builder
+          .nextControlFlow("catch (Exception ex)")
+          .addStatement("return Result.create_Failure( $T.create_Opaque(ex.toString()))", dafnyError);
+        return Optional.of(builder.endControlFlow().build());
     }
 
 }
