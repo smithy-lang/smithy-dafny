@@ -1,3 +1,5 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 include "Index.dfy"
 
 // A nuance of replacing a `replaceable` module that has tests:
