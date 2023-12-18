@@ -183,9 +183,12 @@ public class ShimV2 extends Generator {
             subject.dafnyNameResolver.createFailure(
               successTypeDescriptor,
               CodeBlock.of("ToDafny.Error(ex)")));
-	 builder
+        builder
           .nextControlFlow("catch (Exception ex)")
-          .addStatement("return Result.create_Failure( $T.create_Opaque(ex.toString()))", dafnyError);
+          .addStatement("return $L",
+            subject.dafnyNameResolver.createFailure(
+              successTypeDescriptor,
+              CodeBlock.of("$T.create_Opaque(ex.toString())", dafnyError)));
         return Optional.of(builder.endControlFlow().build());
     }
 
