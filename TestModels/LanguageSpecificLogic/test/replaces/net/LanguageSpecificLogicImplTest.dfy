@@ -1,10 +1,12 @@
 include "Index.dfy"
 
+// A nuance of replacing a `replaceable` module that has tests:
+// Tests in the `replaceable` module will run once in the context of the replaceable module,
+//   then again in the context of the replacing module.
 module NetLanguageSpecificLogicImplTest replaces LanguageSpecificLogicImplTest {
-    import NetLanguageSpecificLogic
 
     method{:test} NetSpecificTests() {
-        var client :- expect NetLanguageSpecificLogic.LanguageSpecificLogic();
+        var client :- expect LanguageSpecificLogic.LanguageSpecificLogic();
         TestNetClient(client);
     }
 

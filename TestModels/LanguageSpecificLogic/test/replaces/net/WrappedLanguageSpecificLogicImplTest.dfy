@@ -4,8 +4,6 @@ include "../../../src/WrappedLanguageSpecificLogicImpl.dfy"
 include "../../WrappedLanguageSpecificLogicImplTest.dfy"
 include "LanguageSpecificLogicImplTest.dfy"
 
-// Note: We do NOT declare an extern here, but we DO declare a replaceable module.
-// We only need language-specific behavior here, not language-specific externs. 
 module NetWrappedLanguageSpecificLogicTest replaces WrappedLanguageSpecificLogicTest {
     import NetLanguageSpecificLogicImplTest
     
