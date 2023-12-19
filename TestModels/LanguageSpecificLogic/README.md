@@ -27,10 +27,10 @@ write a (concrete) module that `replaces` it,
 and add language-specific behavior to the concrete module.
 
 In addition, this project also demonstrates language-specific tests.
-This allows developers to write abstract tests that apply to every language inside a `replaceable` module,
-then add language-specific tests inside replacing modules.
-The abstract tests will run once from the abstract context,
-then again with a language-specific context.
+This allows developers to write abstract tests that are passed to every module that `replaces` a `replaceable` module.
+These tests are executed once inside the context of the `replaceable` module,
+and again inside the context of the module that `replaces` it.
+Developers can also add language-specific tests inside the replacing module.
 
 ## Build
 ### .NET
