@@ -1,11 +1,42 @@
 # Composite
 
-This project contains two Smithy model files in one TestModel.
-Polymorph-generated projects are expected to be able to handle any number of Smithy model files in one project.
-These model files should share their generated Dafny code.
-This is not a "TestModel" per se, but is a validation that a language can handle this.
+This project contains two Smithy model files in one "composite" project.
+Smithy-Dafny-generated projects are expected to be able to handle any number of Smithy model files in one project; i.e.
 
-This requires the "Dependencies" TestModel to work, as the two model files have a dependency structure.
+```
+└── MyProject/
+    └── dafny/
+        └── SubProjectA/
+        │   ├── Model/
+        │   │   └── subproject-a.smithy/
+        │   ├── src/ # Dafny source code
+        │   └── test/ # Dafny test code
+        ├── SubProjectB/
+        │   ├── Model/
+        │   │   └── subproject-b.smithy/
+        │   ├── src/
+        │   ├── test/
+        └── SubProjectC/
+            ├── Model/
+            │   └── subproject-c.smithy/
+            ├── src/
+            └── test/
+        ... (and so on)
+```
+
+These model files should **share** their generated Dafny implementation.
+While the Dafny source code is located in separate folders,
+the generated Dafny code should be **shared** across all subprojects.
+**This behavior is not validated by this TestModel.**
+The Smithy-Dafny developer should ensure both projects in this TestModel
+refer to a **shared** Dafny implementation.
+
+This TestModel should not require any code generation work to pass.
+This TestModel may require project management changes to handle multiple Model files
+and/or refer to a shared Dafny implementation.
+
+This TestModel requires the "Dependencies" TestModel as a prerequisite,
+as the two model files in this project have a dependency structure.
 
 ## Build
 ### .NET

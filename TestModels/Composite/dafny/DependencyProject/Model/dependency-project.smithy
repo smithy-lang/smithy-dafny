@@ -6,21 +6,17 @@ namespace simple.composite.dependencyproject
 ) service DependencyProject {
   version: "2021-11-01",
   resources: [],
-  operations: [ IdentityOperation ],
+  operations: [ SomeDependencyOperation ],
   errors: [],
 }
 
 structure DependencyProjectConfig {}
 
-operation IdentityOperation {
-  input: IdentityOperationInput,
-  output: IdentityOperationOutput,
+operation SomeDependencyOperation {
+  input: SomeDependencyOperationInput,
+  output: SomeDependencyOperationOutput,
 }
 
-structure IdentityOperationInput {
-  value: String
-}
+structure SomeDependencyOperationInput {}
 
-structure IdentityOperationOutput {
-  value: String
-}
+structure SomeDependencyOperationOutput {}

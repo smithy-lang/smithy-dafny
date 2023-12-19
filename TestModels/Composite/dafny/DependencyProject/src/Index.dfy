@@ -1,16 +1,16 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
-include "DependencyProjectImpl.dfy"
+include "SimpleCompositeDependencyprojectImpl.dfy"
 
-module {:extern "simple.composite.dependencyproject.internaldafny" } DependencyProject refines AbstractSimpleTypesIntegerService {
-    import Operations = DependencyProjectImpl
+module {:extern "simple.composite.dependencyproject.internaldafny" } SimpleCompositeDependencyprojectService refines AbstractSimpleCompositeDependencyprojectService {
+    import Operations = SimpleCompositeDependencyprojectImpl
 
     function method DefaultDependencyProjectConfig(): DependencyProjectConfig {
        DependencyProjectConfig
     }
 
     method DependencyProject(config: DependencyProjectConfig)
-    returns (res: Result<ISimpleTypesIntegerClient, Error>) {
+    returns (res: Result<IDependencyProjectClient, Error>) {
         var client := new DependencyProjectClient(Operations.Config);
         return Success(client);
     }
@@ -23,7 +23,7 @@ module {:extern "simple.composite.dependencyproject.internaldafny" } DependencyP
         }
         constructor(config: Operations.InternalConfig) {
             this.config := config;
-            History := new ISimpleTypesIntegerClientCallHistory();
+            History := new IDependencyProjectClientCallHistory();
             Modifies := Operations.ModifiesInternalConfig(config) + {History};
         }
     }

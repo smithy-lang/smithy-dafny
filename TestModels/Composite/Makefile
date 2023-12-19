@@ -23,6 +23,7 @@ SERVICE_DEPS_PrimaryProject := \
 	Composite/dafny/DependencyProject \
 
 SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
+STD_LIBRARY=yes
 
 # DEPENDENT-MODELS:=
 # LIBRARIES :=

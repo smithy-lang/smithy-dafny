@@ -1,3 +1,30 @@
-module PrimaryProject {
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
+include "SimpleCompositePrimaryprojectImpl.dfy"
 
+module {:extern "simple.composite.primaryproject.internaldafny" } SimpleCompositePrimaryprojectService refines AbstractSimpleCompositePrimaryprojectService {
+    import Operations = SimpleCompositePrimaryprojectImpl
+
+    function method DefaultPrimaryProjectConfig(): PrimaryProjectConfig {
+       PrimaryProjectConfig
+    }
+
+    method PrimaryProject(config: PrimaryProjectConfig)
+    returns (res: Result<IPrimaryProjectClient, Error>) {
+        var client := new PrimaryProjectClient(Operations.Config);
+        return Success(client);
+    }
+
+    class PrimaryProjectClient... {
+        predicate ValidState()
+        {
+            && Operations.ValidInternalConfig?(config)
+            && Modifies == Operations.ModifiesInternalConfig(config) + {History}
+        }
+        constructor(config: Operations.InternalConfig) {
+            this.config := config;
+            History := new IPrimaryProjectClientCallHistory();
+            Modifies := Operations.ModifiesInternalConfig(config) + {History};
+        }
+    }
 }
