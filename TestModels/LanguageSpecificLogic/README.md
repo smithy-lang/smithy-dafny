@@ -1,8 +1,9 @@
 # LanguageSpecificLogic
 
 This project demonstrates generating target-language-specific code from Dafny.
-This allows developers to write Dafny code that is only generated and run for a particular target language.
-This allows developers to increase the amount of language-specific code that is verified by Dafny.
+This allows developers to write and **verify** Dafny code 
+that is only generated and run 
+for a particular target language.
 
 This directory contains a basic project demonstrating how to do this.
 The generated client for this TestModel contains one operation: GetRuntimeInformation.
