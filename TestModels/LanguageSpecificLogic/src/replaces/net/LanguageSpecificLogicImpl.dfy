@@ -16,7 +16,7 @@ module NetLanguageSpecificLogicImpl replaces LanguageSpecificLogicImpl  {
         var runtimeInfo :- expect GetRuntimeInformationNetExternMethod(config);
         var getRuntimeInformationOutput := GetRuntimeInformationOutput(
             language := "NET",
-            runtime := runtimeInfo.value
+            runtime := runtimeInfo
         );
         return Success(getRuntimeInformationOutput);
     }
