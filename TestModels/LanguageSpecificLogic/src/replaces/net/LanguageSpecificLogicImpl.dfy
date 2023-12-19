@@ -9,9 +9,11 @@ module NetLanguageSpecificLogicImpl replaces LanguageSpecificLogicImpl  {
     // This provides a consistent interface for users.
     method GetRuntimeInformation(config: InternalConfig)
         returns (output: Result<GetRuntimeInformationOutput, Error>)
-        ensures output.Success? ==> output.value.language == "NET"
+        ensures output.Success? ==>
+            && output.value.language == "NET"
+            && output.value.runtime != ""
     {
-        var runtimeInfo := GetRuntimeInformationNetExternMethod(config);
+        var runtimeInfo :- expect GetRuntimeInformationNetExternMethod(config);
         var getRuntimeInformationOutput := GetRuntimeInformationOutput(
             language := "NET",
             runtime := runtimeInfo.value
@@ -26,4 +28,5 @@ module NetLanguageSpecificLogicImpl replaces LanguageSpecificLogicImpl  {
     //   and call this method from there.
     method {:extern "GetNetRuntimeVersion" } GetRuntimeInformationNetExternMethod(config: InternalConfig)
         returns (output: Result<string, Error>)
+        ensures output.Success ==> output.value != ""
 }
