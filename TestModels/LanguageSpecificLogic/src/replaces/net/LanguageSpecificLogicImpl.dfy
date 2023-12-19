@@ -28,5 +28,5 @@ module NetLanguageSpecificLogicImpl replaces LanguageSpecificLogicImpl  {
     //   and call this method from there.
     method {:extern "GetNetRuntimeVersion" } GetRuntimeInformationNetExternMethod(config: InternalConfig)
         returns (output: Result<string, Error>)
-        ensures output.Success ==> output.value != ""
+        ensures output.Success? ==> output.value != ""
 }
