@@ -6,4 +6,3 @@ include "../../Index.dfy"
 
 // Include NET-specific replacements
 include "LanguageSpecificLogicImpl.dfy"
-// WrappedLanguageSpecificLogicImpl is NOT used in src Index; only test Index

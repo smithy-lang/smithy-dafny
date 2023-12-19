@@ -2,9 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 include "Index.dfy"
 
-// A nuance of replacing a `replaceable` module that has tests:
-// Tests in the `replaceable` module will run once in the context of the replaceable module,
-//   then again in the context of the replacing module.
+// Note that by replacing a `replaceable` module, this file will also run tests from that module.
 module NetLanguageSpecificLogicImplTest replaces LanguageSpecificLogicImplTest {
 
     method{:test} NetSpecificTests() {
@@ -22,6 +20,9 @@ module NetLanguageSpecificLogicImplTest replaces LanguageSpecificLogicImplTest {
         // For NET-only tests, we can assert the output language is NET
         expect output.value.language == "NET";
         // We could also assert some result on the extern's result (i.e. runtime version), but won't
+
+        // We should ONLY see printed values like "NET language: NET".
+        // We should ALSO see printed values like "Generic language: NET" from the `replaceable` tests.
         print"NET language: ", output.value.language, "; NET runtime: ", output.value.runtime;
     }
 }

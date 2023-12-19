@@ -12,11 +12,11 @@ module NetLanguageSpecificLogicImpl replaces LanguageSpecificLogicImpl  {
         ensures output.Success? ==> output.value.language == "NET"
     {
         var runtimeInfo := GetRuntimeInformationNetExternMethod(config);
-        var packedOutput := GetRuntimeInformationOutput(
+        var getRuntimeInformationOutput := GetRuntimeInformationOutput(
             language := "NET",
             runtime := runtimeInfo.value
         );
-        return Success(packedOutput);
+        return Success(getRuntimeInformationOutput);
     }
 
     // This method is NOT listed as an operation on the service in the Smithy model.

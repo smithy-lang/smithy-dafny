@@ -4,6 +4,7 @@ include "../../../src/WrappedLanguageSpecificLogicImpl.dfy"
 include "../../WrappedLanguageSpecificLogicImplTest.dfy"
 include "LanguageSpecificLogicImplTest.dfy"
 
+// Note that by replacing a `replaceable` module, this file will also run tests from that module.
 module NetWrappedLanguageSpecificLogicTest replaces WrappedLanguageSpecificLogicTest {
     import NetLanguageSpecificLogicImplTest
     
