@@ -7,7 +7,7 @@ namespace simple.composite.dependencyproject
   version: "2021-11-01",
   resources: [],
   operations: [ SomeDependencyOperation ],
-  errors: [],
+  errors: [ DependencyProjectEmptyError ],
 }
 
 structure DependencyProjectConfig {}
@@ -20,3 +20,7 @@ operation SomeDependencyOperation {
 structure SomeDependencyOperationInput {}
 
 structure SomeDependencyOperationOutput {}
+
+@error("client")
+// Required until 
+structure DependencyProjectEmptyError {}

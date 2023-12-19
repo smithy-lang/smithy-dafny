@@ -9,7 +9,7 @@ use simple.composite.dependencyproject#SomeDependencyOperation
   version: "2021-11-01",
   resources: [],
   operations: [ SomePrimaryOperation, SomeDependencyOperation ],
-  errors: [],
+  errors: [ PrimaryProjectEmptyError ],
 }
 
 structure PrimaryProjectConfig {}
@@ -22,3 +22,6 @@ operation SomePrimaryOperation {
 structure SomePrimaryOperationInput {}
 
 structure SomePrimaryOperationOutput {}
+
+@error("client")
+structure PrimaryProjectEmptyError {}
