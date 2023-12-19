@@ -47,9 +47,11 @@ GRADLEW := $(PROJECT_ROOT)/../codegen/gradlew
 
 ########################## Dafny targets
 
-# TODO: This target does not work for projects using replaceable module syntax.
-# It will fail with error
+# TODO: This target will not work for projects that use `replaceable` 
+#       module syntax with multiple language targets.
+# It will fail with error:
 # Error: modules 'A' and 'B' both have CompileName 'same.extern.name'
+# We need to come up with some way to verify files per-language.
 # Rewrite this as part of https://sim.amazon.com/issues/CrypTool-5259
 verify:
 	dafny \

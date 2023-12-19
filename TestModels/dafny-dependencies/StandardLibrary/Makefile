@@ -55,7 +55,7 @@ transpile_implementation:
 		-useRuntimeLib \
 		-out $(OUT) \
 		./src/Index.dfy
-		
+
 # Override SharedMakefile's build_java to not install
 # StandardLibrary as a dependency
 build_java: transpile_java
