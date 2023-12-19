@@ -8,8 +8,8 @@ This directory contains a basic project demonstrating how to do this.
 The generated client for this TestModel contains one operation: GetRuntimeInformation.
 The output of this operation has two components: `language` and `runtime`.
 
-`language` is a string that is set from Dafny-generated code
-that is only generated and run for a particular target language.
+`language` is a string that is set from Dafny-generated code.
+This code is only generated and run for a particular target language.
 This allows us to use Dafny verification (`requires`/`ensures` clauses)
 to validate that the `language` attribute contains some expected value.
 `language` *could* also be set from `extern` code.
