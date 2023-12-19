@@ -53,15 +53,15 @@ jobs:
         include:
           # One-offs until TestModels migrate to 4.4.0
           - library: TestModels/LanguageSpecificLogic
-            dafny: 4.4.0
+            dafny-version: 4.4.0
             os: ubuntu-latest
           - library: TestModels/Extendable
-            dafny: 4.4.0
+            dafny-version: 4.4.0
             os: ubuntu-latest
         exclude:
           # This model tickles a tricky Dafny verification regression to be fixed in 4.4
           # https://github.com/dafny-lang/dafny/pull/4800
-          - dafny: 4.3.0
+          - dafny-version: 4.3.0
             library: TestModels/Extendable
     runs-on: ${{ matrix.os }}
     env:
