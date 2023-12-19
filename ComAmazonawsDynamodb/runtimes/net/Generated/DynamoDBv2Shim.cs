@@ -25,6 +25,10 @@ namespace Com.Amazonaws.Dynamodb
             {
                 return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IBatchExecuteStatementOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
             }
+            catch (System.Exception ex)
+            {
+                return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IBatchExecuteStatementOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
+            }
 
         }
         public Wrappers_Compile._IResult<software.amazon.cryptography.services.dynamodb.internaldafny.types._IBatchGetItemOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError> BatchGetItem(software.amazon.cryptography.services.dynamodb.internaldafny.types._IBatchGetItemInput request)
@@ -38,6 +42,10 @@ namespace Com.Amazonaws.Dynamodb
             catch (System.AggregateException aggregate)
             {
                 return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IBatchGetItemOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
+            }
+            catch (System.Exception ex)
+            {
+                return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IBatchGetItemOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
             }
 
         }
@@ -53,6 +61,10 @@ namespace Com.Amazonaws.Dynamodb
             {
                 return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IBatchWriteItemOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
             }
+            catch (System.Exception ex)
+            {
+                return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IBatchWriteItemOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
+            }
 
         }
         public Wrappers_Compile._IResult<software.amazon.cryptography.services.dynamodb.internaldafny.types._ICreateBackupOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError> CreateBackup(software.amazon.cryptography.services.dynamodb.internaldafny.types._ICreateBackupInput request)
@@ -66,6 +78,10 @@ namespace Com.Amazonaws.Dynamodb
             catch (System.AggregateException aggregate)
             {
                 return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._ICreateBackupOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
+            }
+            catch (System.Exception ex)
+            {
+                return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._ICreateBackupOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
             }
 
         }
@@ -81,6 +97,10 @@ namespace Com.Amazonaws.Dynamodb
             {
                 return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._ICreateGlobalTableOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
             }
+            catch (System.Exception ex)
+            {
+                return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._ICreateGlobalTableOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
+            }
 
         }
         public Wrappers_Compile._IResult<software.amazon.cryptography.services.dynamodb.internaldafny.types._ICreateTableOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError> CreateTable(software.amazon.cryptography.services.dynamodb.internaldafny.types._ICreateTableInput request)
@@ -94,6 +114,10 @@ namespace Com.Amazonaws.Dynamodb
             catch (System.AggregateException aggregate)
             {
                 return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._ICreateTableOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
+            }
+            catch (System.Exception ex)
+            {
+                return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._ICreateTableOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
             }
 
         }
@@ -109,6 +133,10 @@ namespace Com.Amazonaws.Dynamodb
             {
                 return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IDeleteBackupOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
             }
+            catch (System.Exception ex)
+            {
+                return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IDeleteBackupOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
+            }
 
         }
         public Wrappers_Compile._IResult<software.amazon.cryptography.services.dynamodb.internaldafny.types._IDeleteItemOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError> DeleteItem(software.amazon.cryptography.services.dynamodb.internaldafny.types._IDeleteItemInput request)
@@ -122,6 +150,10 @@ namespace Com.Amazonaws.Dynamodb
             catch (System.AggregateException aggregate)
             {
                 return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IDeleteItemOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
+            }
+            catch (System.Exception ex)
+            {
+                return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IDeleteItemOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
             }
 
         }
@@ -137,6 +169,10 @@ namespace Com.Amazonaws.Dynamodb
             {
                 return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IDeleteTableOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
             }
+            catch (System.Exception ex)
+            {
+                return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IDeleteTableOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
+            }
 
         }
         public Wrappers_Compile._IResult<software.amazon.cryptography.services.dynamodb.internaldafny.types._IDescribeBackupOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError> DescribeBackup(software.amazon.cryptography.services.dynamodb.internaldafny.types._IDescribeBackupInput request)
@@ -150,6 +186,10 @@ namespace Com.Amazonaws.Dynamodb
             catch (System.AggregateException aggregate)
             {
                 return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IDescribeBackupOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
+            }
+            catch (System.Exception ex)
+            {
+                return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IDescribeBackupOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
             }
 
         }
@@ -165,6 +205,10 @@ namespace Com.Amazonaws.Dynamodb
             {
                 return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IDescribeContinuousBackupsOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
             }
+            catch (System.Exception ex)
+            {
+                return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IDescribeContinuousBackupsOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
+            }
 
         }
         public Wrappers_Compile._IResult<software.amazon.cryptography.services.dynamodb.internaldafny.types._IDescribeContributorInsightsOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError> DescribeContributorInsights(software.amazon.cryptography.services.dynamodb.internaldafny.types._IDescribeContributorInsightsInput request)
@@ -178,6 +222,10 @@ namespace Com.Amazonaws.Dynamodb
             catch (System.AggregateException aggregate)
             {
                 return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IDescribeContributorInsightsOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
+            }
+            catch (System.Exception ex)
+            {
+                return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IDescribeContributorInsightsOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
             }
 
         }
@@ -193,6 +241,10 @@ namespace Com.Amazonaws.Dynamodb
             {
                 return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IDescribeEndpointsResponse, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
             }
+            catch (System.Exception ex)
+            {
+                return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IDescribeEndpointsResponse, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
+            }
 
         }
         public Wrappers_Compile._IResult<software.amazon.cryptography.services.dynamodb.internaldafny.types._IDescribeExportOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError> DescribeExport(software.amazon.cryptography.services.dynamodb.internaldafny.types._IDescribeExportInput request)
@@ -206,6 +258,10 @@ namespace Com.Amazonaws.Dynamodb
             catch (System.AggregateException aggregate)
             {
                 return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IDescribeExportOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
+            }
+            catch (System.Exception ex)
+            {
+                return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IDescribeExportOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
             }
 
         }
@@ -221,6 +277,10 @@ namespace Com.Amazonaws.Dynamodb
             {
                 return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IDescribeGlobalTableOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
             }
+            catch (System.Exception ex)
+            {
+                return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IDescribeGlobalTableOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
+            }
 
         }
         public Wrappers_Compile._IResult<software.amazon.cryptography.services.dynamodb.internaldafny.types._IDescribeGlobalTableSettingsOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError> DescribeGlobalTableSettings(software.amazon.cryptography.services.dynamodb.internaldafny.types._IDescribeGlobalTableSettingsInput request)
@@ -234,6 +294,10 @@ namespace Com.Amazonaws.Dynamodb
             catch (System.AggregateException aggregate)
             {
                 return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IDescribeGlobalTableSettingsOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
+            }
+            catch (System.Exception ex)
+            {
+                return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IDescribeGlobalTableSettingsOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
             }
 
         }
@@ -249,6 +313,10 @@ namespace Com.Amazonaws.Dynamodb
             {
                 return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IDescribeImportOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
             }
+            catch (System.Exception ex)
+            {
+                return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IDescribeImportOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
+            }
 
         }
         public Wrappers_Compile._IResult<software.amazon.cryptography.services.dynamodb.internaldafny.types._IDescribeKinesisStreamingDestinationOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError> DescribeKinesisStreamingDestination(software.amazon.cryptography.services.dynamodb.internaldafny.types._IDescribeKinesisStreamingDestinationInput request)
@@ -262,6 +330,10 @@ namespace Com.Amazonaws.Dynamodb
             catch (System.AggregateException aggregate)
             {
                 return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IDescribeKinesisStreamingDestinationOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
+            }
+            catch (System.Exception ex)
+            {
+                return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IDescribeKinesisStreamingDestinationOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
             }
 
         }
@@ -277,6 +349,10 @@ namespace Com.Amazonaws.Dynamodb
             {
                 return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IDescribeLimitsOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
             }
+            catch (System.Exception ex)
+            {
+                return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IDescribeLimitsOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
+            }
 
         }
         public Wrappers_Compile._IResult<software.amazon.cryptography.services.dynamodb.internaldafny.types._IDescribeTableOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError> DescribeTable(software.amazon.cryptography.services.dynamodb.internaldafny.types._IDescribeTableInput request)
@@ -290,6 +366,10 @@ namespace Com.Amazonaws.Dynamodb
             catch (System.AggregateException aggregate)
             {
                 return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IDescribeTableOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
+            }
+            catch (System.Exception ex)
+            {
+                return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IDescribeTableOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
             }
 
         }
@@ -305,6 +385,10 @@ namespace Com.Amazonaws.Dynamodb
             {
                 return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IDescribeTableReplicaAutoScalingOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
             }
+            catch (System.Exception ex)
+            {
+                return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IDescribeTableReplicaAutoScalingOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
+            }
 
         }
         public Wrappers_Compile._IResult<software.amazon.cryptography.services.dynamodb.internaldafny.types._IDescribeTimeToLiveOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError> DescribeTimeToLive(software.amazon.cryptography.services.dynamodb.internaldafny.types._IDescribeTimeToLiveInput request)
@@ -318,6 +402,10 @@ namespace Com.Amazonaws.Dynamodb
             catch (System.AggregateException aggregate)
             {
                 return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IDescribeTimeToLiveOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
+            }
+            catch (System.Exception ex)
+            {
+                return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IDescribeTimeToLiveOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
             }
 
         }
@@ -333,6 +421,10 @@ namespace Com.Amazonaws.Dynamodb
             {
                 return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IDisableKinesisStreamingDestinationOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
             }
+            catch (System.Exception ex)
+            {
+                return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IDisableKinesisStreamingDestinationOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
+            }
 
         }
         public Wrappers_Compile._IResult<software.amazon.cryptography.services.dynamodb.internaldafny.types._IEnableKinesisStreamingDestinationOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError> EnableKinesisStreamingDestination(software.amazon.cryptography.services.dynamodb.internaldafny.types._IEnableKinesisStreamingDestinationInput request)
@@ -346,6 +438,10 @@ namespace Com.Amazonaws.Dynamodb
             catch (System.AggregateException aggregate)
             {
                 return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IEnableKinesisStreamingDestinationOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
+            }
+            catch (System.Exception ex)
+            {
+                return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IEnableKinesisStreamingDestinationOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
             }
 
         }
@@ -361,6 +457,10 @@ namespace Com.Amazonaws.Dynamodb
             {
                 return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IExecuteStatementOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
             }
+            catch (System.Exception ex)
+            {
+                return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IExecuteStatementOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
+            }
 
         }
         public Wrappers_Compile._IResult<software.amazon.cryptography.services.dynamodb.internaldafny.types._IExecuteTransactionOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError> ExecuteTransaction(software.amazon.cryptography.services.dynamodb.internaldafny.types._IExecuteTransactionInput request)
@@ -374,6 +474,10 @@ namespace Com.Amazonaws.Dynamodb
             catch (System.AggregateException aggregate)
             {
                 return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IExecuteTransactionOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
+            }
+            catch (System.Exception ex)
+            {
+                return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IExecuteTransactionOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
             }
 
         }
@@ -389,6 +493,10 @@ namespace Com.Amazonaws.Dynamodb
             {
                 return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IExportTableToPointInTimeOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
             }
+            catch (System.Exception ex)
+            {
+                return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IExportTableToPointInTimeOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
+            }
 
         }
         public Wrappers_Compile._IResult<software.amazon.cryptography.services.dynamodb.internaldafny.types._IGetItemOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError> GetItem(software.amazon.cryptography.services.dynamodb.internaldafny.types._IGetItemInput request)
@@ -402,6 +510,10 @@ namespace Com.Amazonaws.Dynamodb
             catch (System.AggregateException aggregate)
             {
                 return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IGetItemOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
+            }
+            catch (System.Exception ex)
+            {
+                return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IGetItemOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
             }
 
         }
@@ -417,6 +529,10 @@ namespace Com.Amazonaws.Dynamodb
             {
                 return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IImportTableOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
             }
+            catch (System.Exception ex)
+            {
+                return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IImportTableOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
+            }
 
         }
         public Wrappers_Compile._IResult<software.amazon.cryptography.services.dynamodb.internaldafny.types._IListBackupsOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError> ListBackups(software.amazon.cryptography.services.dynamodb.internaldafny.types._IListBackupsInput request)
@@ -430,6 +546,10 @@ namespace Com.Amazonaws.Dynamodb
             catch (System.AggregateException aggregate)
             {
                 return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IListBackupsOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
+            }
+            catch (System.Exception ex)
+            {
+                return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IListBackupsOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
             }
 
         }
@@ -445,6 +565,10 @@ namespace Com.Amazonaws.Dynamodb
             {
                 return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IListContributorInsightsOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
             }
+            catch (System.Exception ex)
+            {
+                return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IListContributorInsightsOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
+            }
 
         }
         public Wrappers_Compile._IResult<software.amazon.cryptography.services.dynamodb.internaldafny.types._IListExportsOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError> ListExports(software.amazon.cryptography.services.dynamodb.internaldafny.types._IListExportsInput request)
@@ -458,6 +582,10 @@ namespace Com.Amazonaws.Dynamodb
             catch (System.AggregateException aggregate)
             {
                 return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IListExportsOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
+            }
+            catch (System.Exception ex)
+            {
+                return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IListExportsOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
             }
 
         }
@@ -473,6 +601,10 @@ namespace Com.Amazonaws.Dynamodb
             {
                 return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IListGlobalTablesOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
             }
+            catch (System.Exception ex)
+            {
+                return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IListGlobalTablesOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
+            }
 
         }
         public Wrappers_Compile._IResult<software.amazon.cryptography.services.dynamodb.internaldafny.types._IListImportsOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError> ListImports(software.amazon.cryptography.services.dynamodb.internaldafny.types._IListImportsInput request)
@@ -486,6 +618,10 @@ namespace Com.Amazonaws.Dynamodb
             catch (System.AggregateException aggregate)
             {
                 return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IListImportsOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
+            }
+            catch (System.Exception ex)
+            {
+                return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IListImportsOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
             }
 
         }
@@ -501,6 +637,10 @@ namespace Com.Amazonaws.Dynamodb
             {
                 return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IListTablesOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
             }
+            catch (System.Exception ex)
+            {
+                return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IListTablesOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
+            }
 
         }
         public Wrappers_Compile._IResult<software.amazon.cryptography.services.dynamodb.internaldafny.types._IListTagsOfResourceOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError> ListTagsOfResource(software.amazon.cryptography.services.dynamodb.internaldafny.types._IListTagsOfResourceInput request)
@@ -514,6 +654,10 @@ namespace Com.Amazonaws.Dynamodb
             catch (System.AggregateException aggregate)
             {
                 return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IListTagsOfResourceOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
+            }
+            catch (System.Exception ex)
+            {
+                return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IListTagsOfResourceOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
             }
 
         }
@@ -529,6 +673,10 @@ namespace Com.Amazonaws.Dynamodb
             {
                 return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IPutItemOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
             }
+            catch (System.Exception ex)
+            {
+                return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IPutItemOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
+            }
 
         }
         public Wrappers_Compile._IResult<software.amazon.cryptography.services.dynamodb.internaldafny.types._IQueryOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError> Query(software.amazon.cryptography.services.dynamodb.internaldafny.types._IQueryInput request)
@@ -542,6 +690,10 @@ namespace Com.Amazonaws.Dynamodb
             catch (System.AggregateException aggregate)
             {
                 return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IQueryOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
+            }
+            catch (System.Exception ex)
+            {
+                return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IQueryOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
             }
 
         }
@@ -557,6 +709,10 @@ namespace Com.Amazonaws.Dynamodb
             {
                 return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IRestoreTableFromBackupOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
             }
+            catch (System.Exception ex)
+            {
+                return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IRestoreTableFromBackupOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
+            }
 
         }
         public Wrappers_Compile._IResult<software.amazon.cryptography.services.dynamodb.internaldafny.types._IRestoreTableToPointInTimeOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError> RestoreTableToPointInTime(software.amazon.cryptography.services.dynamodb.internaldafny.types._IRestoreTableToPointInTimeInput request)
@@ -570,6 +726,10 @@ namespace Com.Amazonaws.Dynamodb
             catch (System.AggregateException aggregate)
             {
                 return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IRestoreTableToPointInTimeOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
+            }
+            catch (System.Exception ex)
+            {
+                return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IRestoreTableToPointInTimeOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
             }
 
         }
@@ -585,6 +745,10 @@ namespace Com.Amazonaws.Dynamodb
             {
                 return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IScanOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
             }
+            catch (System.Exception ex)
+            {
+                return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IScanOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
+            }
 
         }
         public Wrappers_Compile._IResult<_System._ITuple0, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError> TagResource(software.amazon.cryptography.services.dynamodb.internaldafny.types._ITagResourceInput request)
@@ -598,6 +762,10 @@ namespace Com.Amazonaws.Dynamodb
             catch (System.AggregateException aggregate)
             {
                 return Wrappers_Compile.Result<_System._ITuple0, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
+            }
+            catch (System.Exception ex)
+            {
+                return Wrappers_Compile.Result<_System._ITuple0, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
             }
 
         }
@@ -613,6 +781,10 @@ namespace Com.Amazonaws.Dynamodb
             {
                 return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._ITransactGetItemsOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
             }
+            catch (System.Exception ex)
+            {
+                return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._ITransactGetItemsOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
+            }
 
         }
         public Wrappers_Compile._IResult<software.amazon.cryptography.services.dynamodb.internaldafny.types._ITransactWriteItemsOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError> TransactWriteItems(software.amazon.cryptography.services.dynamodb.internaldafny.types._ITransactWriteItemsInput request)
@@ -626,6 +798,10 @@ namespace Com.Amazonaws.Dynamodb
             catch (System.AggregateException aggregate)
             {
                 return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._ITransactWriteItemsOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
+            }
+            catch (System.Exception ex)
+            {
+                return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._ITransactWriteItemsOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
             }
 
         }
@@ -641,6 +817,10 @@ namespace Com.Amazonaws.Dynamodb
             {
                 return Wrappers_Compile.Result<_System._ITuple0, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
             }
+            catch (System.Exception ex)
+            {
+                return Wrappers_Compile.Result<_System._ITuple0, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
+            }
 
         }
         public Wrappers_Compile._IResult<software.amazon.cryptography.services.dynamodb.internaldafny.types._IUpdateContinuousBackupsOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError> UpdateContinuousBackups(software.amazon.cryptography.services.dynamodb.internaldafny.types._IUpdateContinuousBackupsInput request)
@@ -654,6 +834,10 @@ namespace Com.Amazonaws.Dynamodb
             catch (System.AggregateException aggregate)
             {
                 return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IUpdateContinuousBackupsOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
+            }
+            catch (System.Exception ex)
+            {
+                return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IUpdateContinuousBackupsOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
             }
 
         }
@@ -669,6 +853,10 @@ namespace Com.Amazonaws.Dynamodb
             {
                 return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IUpdateContributorInsightsOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
             }
+            catch (System.Exception ex)
+            {
+                return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IUpdateContributorInsightsOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
+            }
 
         }
         public Wrappers_Compile._IResult<software.amazon.cryptography.services.dynamodb.internaldafny.types._IUpdateGlobalTableOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError> UpdateGlobalTable(software.amazon.cryptography.services.dynamodb.internaldafny.types._IUpdateGlobalTableInput request)
@@ -682,6 +870,10 @@ namespace Com.Amazonaws.Dynamodb
             catch (System.AggregateException aggregate)
             {
                 return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IUpdateGlobalTableOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
+            }
+            catch (System.Exception ex)
+            {
+                return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IUpdateGlobalTableOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
             }
 
         }
@@ -697,6 +889,10 @@ namespace Com.Amazonaws.Dynamodb
             {
                 return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IUpdateGlobalTableSettingsOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
             }
+            catch (System.Exception ex)
+            {
+                return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IUpdateGlobalTableSettingsOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
+            }
 
         }
         public Wrappers_Compile._IResult<software.amazon.cryptography.services.dynamodb.internaldafny.types._IUpdateItemOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError> UpdateItem(software.amazon.cryptography.services.dynamodb.internaldafny.types._IUpdateItemInput request)
@@ -710,6 +906,10 @@ namespace Com.Amazonaws.Dynamodb
             catch (System.AggregateException aggregate)
             {
                 return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IUpdateItemOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
+            }
+            catch (System.Exception ex)
+            {
+                return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IUpdateItemOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
             }
 
         }
@@ -725,6 +925,10 @@ namespace Com.Amazonaws.Dynamodb
             {
                 return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IUpdateTableOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
             }
+            catch (System.Exception ex)
+            {
+                return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IUpdateTableOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
+            }
 
         }
         public Wrappers_Compile._IResult<software.amazon.cryptography.services.dynamodb.internaldafny.types._IUpdateTableReplicaAutoScalingOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError> UpdateTableReplicaAutoScaling(software.amazon.cryptography.services.dynamodb.internaldafny.types._IUpdateTableReplicaAutoScalingInput request)
@@ -739,6 +943,10 @@ namespace Com.Amazonaws.Dynamodb
             {
                 return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IUpdateTableReplicaAutoScalingOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
             }
+            catch (System.Exception ex)
+            {
+                return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IUpdateTableReplicaAutoScalingOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
+            }
 
         }
         public Wrappers_Compile._IResult<software.amazon.cryptography.services.dynamodb.internaldafny.types._IUpdateTimeToLiveOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError> UpdateTimeToLive(software.amazon.cryptography.services.dynamodb.internaldafny.types._IUpdateTimeToLiveInput request)
@@ -752,6 +960,10 @@ namespace Com.Amazonaws.Dynamodb
             catch (System.AggregateException aggregate)
             {
                 return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IUpdateTimeToLiveOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
+            }
+            catch (System.Exception ex)
+            {
+                return Wrappers_Compile.Result<software.amazon.cryptography.services.dynamodb.internaldafny.types._IUpdateTimeToLiveOutput, software.amazon.cryptography.services.dynamodb.internaldafny.types._IError>.create_Failure(TypeConversion.ToDafny_CommonError(ex));
             }
 
         }

@@ -287,6 +287,8 @@ public class Shim implements IDynamoDBClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (DynamoDbException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -309,6 +311,8 @@ public class Shim implements IDynamoDBClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (DynamoDbException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -333,6 +337,8 @@ public class Shim implements IDynamoDBClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (DynamoDbException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -359,6 +365,8 @@ public class Shim implements IDynamoDBClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (DynamoDbException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -383,6 +391,8 @@ public class Shim implements IDynamoDBClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (DynamoDbException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -401,6 +411,8 @@ public class Shim implements IDynamoDBClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (DynamoDbException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -423,6 +435,8 @@ public class Shim implements IDynamoDBClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (DynamoDbException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -449,6 +463,8 @@ public class Shim implements IDynamoDBClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (DynamoDbException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -469,6 +485,8 @@ public class Shim implements IDynamoDBClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (DynamoDbException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -487,6 +505,8 @@ public class Shim implements IDynamoDBClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (DynamoDbException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -509,6 +529,8 @@ public class Shim implements IDynamoDBClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (DynamoDbException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -531,6 +553,8 @@ public class Shim implements IDynamoDBClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (DynamoDbException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -548,6 +572,8 @@ public class Shim implements IDynamoDBClient {
       return Result.create_Success(dafnyResponse);
     } catch (DynamoDbException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -568,6 +594,8 @@ public class Shim implements IDynamoDBClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (DynamoDbException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -589,6 +617,8 @@ public class Shim implements IDynamoDBClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (DynamoDbException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -611,6 +641,8 @@ public class Shim implements IDynamoDBClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (DynamoDbException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -627,6 +659,8 @@ public class Shim implements IDynamoDBClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (DynamoDbException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -651,6 +685,8 @@ public class Shim implements IDynamoDBClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (DynamoDbException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -667,6 +703,8 @@ public class Shim implements IDynamoDBClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (DynamoDbException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -685,6 +723,8 @@ public class Shim implements IDynamoDBClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (DynamoDbException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -709,6 +749,8 @@ public class Shim implements IDynamoDBClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (DynamoDbException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -731,6 +773,8 @@ public class Shim implements IDynamoDBClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (DynamoDbException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -759,6 +803,8 @@ public class Shim implements IDynamoDBClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (DynamoDbException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -787,6 +833,8 @@ public class Shim implements IDynamoDBClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (DynamoDbException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -819,6 +867,8 @@ public class Shim implements IDynamoDBClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (DynamoDbException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -851,6 +901,8 @@ public class Shim implements IDynamoDBClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (DynamoDbException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -881,6 +933,8 @@ public class Shim implements IDynamoDBClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (DynamoDbException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -901,6 +955,8 @@ public class Shim implements IDynamoDBClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (DynamoDbException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -919,6 +975,8 @@ public class Shim implements IDynamoDBClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (DynamoDbException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -933,6 +991,8 @@ public class Shim implements IDynamoDBClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (DynamoDbException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -955,6 +1015,8 @@ public class Shim implements IDynamoDBClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (DynamoDbException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -971,6 +1033,8 @@ public class Shim implements IDynamoDBClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (DynamoDbException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -989,6 +1053,8 @@ public class Shim implements IDynamoDBClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (DynamoDbException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -1003,6 +1069,8 @@ public class Shim implements IDynamoDBClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (DynamoDbException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -1017,6 +1085,8 @@ public class Shim implements IDynamoDBClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (DynamoDbException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -1039,6 +1109,8 @@ public class Shim implements IDynamoDBClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (DynamoDbException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -1065,6 +1137,8 @@ public class Shim implements IDynamoDBClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (DynamoDbException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -1085,6 +1159,8 @@ public class Shim implements IDynamoDBClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (DynamoDbException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -1115,6 +1191,8 @@ public class Shim implements IDynamoDBClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (DynamoDbException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -1147,6 +1225,8 @@ public class Shim implements IDynamoDBClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (DynamoDbException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -1167,6 +1247,8 @@ public class Shim implements IDynamoDBClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (DynamoDbException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -1186,6 +1268,8 @@ public class Shim implements IDynamoDBClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (DynamoDbException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -1212,6 +1296,8 @@ public class Shim implements IDynamoDBClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (DynamoDbException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -1244,6 +1330,8 @@ public class Shim implements IDynamoDBClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (DynamoDbException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -1263,6 +1351,8 @@ public class Shim implements IDynamoDBClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (DynamoDbException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -1287,6 +1377,8 @@ public class Shim implements IDynamoDBClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (DynamoDbException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -1309,6 +1401,8 @@ public class Shim implements IDynamoDBClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (DynamoDbException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -1335,6 +1429,8 @@ public class Shim implements IDynamoDBClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (DynamoDbException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -1365,6 +1461,8 @@ public class Shim implements IDynamoDBClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (DynamoDbException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -1391,6 +1489,8 @@ public class Shim implements IDynamoDBClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (DynamoDbException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -1411,6 +1511,8 @@ public class Shim implements IDynamoDBClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (DynamoDbException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -1437,6 +1539,8 @@ public class Shim implements IDynamoDBClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (DynamoDbException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -1461,6 +1565,8 @@ public class Shim implements IDynamoDBClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (DynamoDbException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 }
