@@ -52,7 +52,7 @@ GRADLEW := $(PROJECT_ROOT)/../codegen/gradlew
 # It will fail with error:
 # Error: modules 'A' and 'B' both have CompileName 'same.extern.name'
 # We need to come up with some way to verify files per-language.
-# Rewrite this as part of https://sim.amazon.com/issues/CrypTool-5259
+# Rewrite this as part of Java implementation of LanguageSpecificLogic TestModel.
 verify:
 	dafny \
 		-vcsCores:$(CORES) \
