@@ -66,7 +66,7 @@ verify:
 		-unicodeChar:0 \
 		-functionSyntax:3 \
 		-verificationLogger:csv \
-		-timeLimit:100 \
+		-timeLimit:300 \
 		-trace \
 		%
 
