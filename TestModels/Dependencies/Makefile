@@ -8,6 +8,7 @@ include ../SharedMakefile.mk
 PROJECT_SERVICES := \
 	SimpleDependencies
 
+# Dependencies external to this project
 # Order is important
 # In java they MUST be built
 # in the order they depend on each other

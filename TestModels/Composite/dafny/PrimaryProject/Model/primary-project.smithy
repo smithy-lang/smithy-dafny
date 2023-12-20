@@ -11,7 +11,7 @@ use simple.composite.dependencyproject#SomeDependencyOperation
   version: "2021-11-01",
   resources: [],
   operations: [ SomePrimaryOperation, SomeDependencyOperation ],
-  errors: [ PrimaryProjectEmptyError ],
+  errors: [ PrimaryProjectError ],
 }
 
 structure PrimaryProjectConfig {}
@@ -27,4 +27,7 @@ structure SomePrimaryOperationOutput {}
 
 @error("client")
 // Required until https://sim.amazon.com/issues/CrypTool-5263 is fixed
-structure PrimaryProjectEmptyError {}
+structure PrimaryProjectError {
+  @required
+  message: String
+}

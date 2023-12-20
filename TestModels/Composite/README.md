@@ -31,7 +31,7 @@ the generated Dafny code should be **shared** across all subprojects.
 The Smithy-Dafny developer should ensure both projects in this TestModel
 refer to a **shared** Dafny implementation.
 
-This TestModel should not require any code generation work to pass.
+This TestModel should not require much, or any code generation work to pass.
 This TestModel may require project management changes to handle multiple Model files
 and/or refer to a shared Dafny implementation.
 
@@ -42,17 +42,19 @@ as the two model files in this project have a dependency structure.
 ### .NET
 1. Generate the Wrappers using `polymorph`
 ```
-make polymorph_net
+make polymorph_dafny DAFNY_VERSION_OPTION="--dafny-version A.B.C" \
+&& make polymorph_net DAFNY_VERSION_OPTION="--dafny-version A.B.C" \
+&& make polymorph_java DAFNY_VERSION_OPTION="--dafny-version A.B.C"
 ```
 
 2. Transpile the tests (and implementation) to the target runtime.
 ```
-make transpile_net
+make transpile_net && make transpile_java
 ```
 
 3. Generate the executable in the .NET and execute the tests
 ```
-make test_net
+make test_net && make test_java
 ```
 
 ## Development

@@ -15,9 +15,10 @@ SERVICE_NAMESPACE_PrimaryProject=simple.composite.primaryproject
 SERVICE_NAMESPACE_DependencyProject=simple.composite.dependencyproject
 
 # This project has no dependencies (external to this project)
+PROJECT_DEPENDENCIES := 
+
 # Dependencies for each local service
-SERVICE_DEPS_DependencyProject := \
-	Composite/dafny/PrimaryProject \
+SERVICE_DEPS_DependencyProject := 
 
 SERVICE_DEPS_PrimaryProject := \
 	Composite/dafny/DependencyProject \

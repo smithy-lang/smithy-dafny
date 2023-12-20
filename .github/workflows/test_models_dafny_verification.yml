@@ -20,6 +20,7 @@ jobs:
           TestModels/dafny-dependencies/StandardLibrary, # This stores current Polymorph dependencies that all TestModels depend on
           TestModels/Aggregate,
           TestModels/AggregateReferences,
+          TestModels/Composite,
           TestModels/Constraints,
           TestModels/Constructor,
           TestModels/Dependencies,

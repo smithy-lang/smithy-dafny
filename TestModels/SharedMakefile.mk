@@ -157,13 +157,9 @@ transpile_test:
 
 transpile_dependencies:
 	$(MAKE) -C $(STANDARD_LIBRARY_PATH) transpile_implementation_$(LANG)
-	@$(foreach service, \
-		$(PROJECT_SERVICES), \
-		$(foreach dependency, \
-			$(SERVICE_DEPS_$(service)), \
-			cd $(PROJECT_ROOT)/$(dependency); \
-			$(MAKE) -C $(PROJECT_ROOT)/$(dependency) transpile_implementation_$(LANG); \
-	   ) \
+	@$(foreach dependency, \
+		$(PROJECT_DEPENDENCIES), \
+		$(MAKE) -C $(PROJECT_ROOT)/$(dependency) transpile_implementation_$(LANG); \
 	)
 
 ########################## Code-Gen targets
@@ -208,26 +204,10 @@ _polymorph_wrapped:
 	$(AWS_SDK_CMD)";
 
 _polymorph_dependencies:
-	@$(foreach service, \
- 		$(PROJECT_SERVICES), \
-		$(foreach dependency, \
-			$(SERVICE_DEPS_$(service)), \
-			cd $(PROJECT_ROOT)/$(dependency); \
-			$(MAKE) -C $(PROJECT_ROOT)/$(dependency) polymorph_$(POLYMORPH_LANGUAGE_TARGET); \
-	   ) \
+	@$(foreach dependency, \
+		$(PROJECT_DEPENDENCIES), \
+		$(MAKE) -C $(PROJECT_ROOT)/$(dependency) polymorph_$(POLYMORPH_LANGUAGE_TARGET); \
 	)
-
-# # `polymorph_code_gen` is the generate-for-multiple-languages target
-# polymorph_code_gen: OUTPUT_DAFNY=--output-dafny $(LIBRARY_ROOT)/Model --include-dafny $(STANDARD_LIBRARY_PATH)/src/Index.dfy
-# polymorph_code_gen: OUTPUT_DOTNET=--output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/
-# polymorph_code_gen: _polymorph
-# # Generate wrapped code for all languages that support wrapped services
-polymorph_code_gen: OUTPUT_DAFNY_WRAPPED=--output-dafny $(LIBRARY_ROOT)/Model --include-dafny $(STANDARD_LIBRARY_PATH)/src/Index.dfy
-polymorph_code_gen: OUTPUT_DOTNET_WRAPPED=--output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/Wrapped
-polymorph_code_gen: OUTPUT_LOCAL_SERVICE=--local-service-test
-# polymorph_code_gen: _polymorph_wrapped
-# polymorph_code_gen: POLYMORPH_LANGUAGE_TARGET=code_gen
-# polymorph_code_gen: _polymorph_dependencies
 
 # Generates all target runtime code for all namespaces in this project.
 .PHONY: polymorph_code_gen

@@ -9,7 +9,7 @@ namespace simple.composite.dependencyproject
   version: "2021-11-01",
   resources: [],
   operations: [ SomeDependencyOperation ],
-  errors: [ DependencyProjectEmptyError ],
+  errors: [ DependencyProjectError ],
 }
 
 structure DependencyProjectConfig {}
@@ -25,4 +25,7 @@ structure SomeDependencyOperationOutput {}
 
 @error("client")
 // Required until https://sim.amazon.com/issues/CrypTool-5263 is fixed
-structure DependencyProjectEmptyError {}
+structure DependencyProjectError {
+  @required
+  message: String
+}
