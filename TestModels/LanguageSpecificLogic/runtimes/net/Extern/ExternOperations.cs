@@ -6,7 +6,7 @@ using language.specific.logic.internaldafny.types;
 using Language.Specific.Logic;
 using Wrappers_Compile;
 
-namespace LanguageSpecificLogicImpl_Compile
+namespace NetLanguageSpecificLogicImpl_Compile
 {
   public partial class __default
   {
