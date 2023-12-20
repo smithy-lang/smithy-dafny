@@ -5,12 +5,10 @@ CORES=2
 
 include ../SharedMakefile.mk
 
-NAMESPACE=simple.dependencies
-
 PROJECT_SERVICES := \
 	SimpleDependencies
 
-SERVICE_NAMESPACE_SimpleDependencies=simple.aggregate
+SERVICE_NAMESPACE_SimpleDependencies=simple.dependencies
 
 SERVICE_DEPS_SimpleDependencies := \
 	Resource

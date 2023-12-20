@@ -5,7 +5,15 @@ CORES=2
 
 include ../SharedMakefile.mk
 
-NAMESPACE=simple.aggregate.references
+PROJECT_SERVICES := \
+	SimpleAggregateReferences
+
+SERVICE_NAMESPACE_SimpleAggregateReferences=simple.aggregate.references
+
+SERVICE_DEPS_SimpleAggregateReferences :=
+
+SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
+
 OUTPUT_DAFNY=--output-dafny $(LIBRARY_ROOT)/Model --include-dafny $(STANDARD_LIBRARY_PATH)/src/Index.dfy
 
 # Override wrapped target, since wrapping isn't supported for this module

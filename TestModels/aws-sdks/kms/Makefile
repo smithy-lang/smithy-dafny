@@ -6,6 +6,16 @@ CORES=2
 include ../../SharedMakefile.mk
 
 NAMESPACE=com.amazonaws.kms
+
+PROJECT_SERVICES := \
+	ComAmazonawsKms\
+
+SERVICE_NAMESPACE_ComAmazonawsKms=com.amazonaws.kms
+
+SERVICE_DEPS_ComAmazonawsKms :=
+
+SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
+
 AWS_SDK_CMD=--aws-sdk
 
 # This project has no dependencies
