@@ -11,10 +11,10 @@ PROJECT_SERVICES := \
 SERVICE_NAMESPACE_SimpleDependencies=simple.dependencies
 
 SERVICE_DEPS_SimpleDependencies := \
-	Resource
-	Errors
-	Extendable
-	Constraints
+	Resource \
+	Errors \
+	Extendable \
+	Constraints \
 
 SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 

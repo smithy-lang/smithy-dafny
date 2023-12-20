@@ -1,3 +1,5 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 namespace simple.composite.primaryproject
 
 use simple.composite.dependencyproject#SomeDependencyOperation
