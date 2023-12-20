@@ -16,7 +16,7 @@ PROJECT_DEPENDENCIES := \
 	Resource \
 	Errors \
 	Extendable \
-	Constraints \
+	Constraints
 
 PROJECT_INDEX := \
 	Resource/src/Index.dfy \
@@ -31,24 +31,9 @@ SERVICE_DEPS_SimpleDependencies := \
 	Resource \
 	Errors \
 	Extendable \
-	Constraints \
+	Constraints
 
 SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
-
-# This project takes dependencies on:
-# - SimpleResource
-# - SimpleErrors
-# - SimpleExtendableResource
-# - and SimpleConstraints modules.
-# DEPENDENT-MODELS:= \
-# 	Resource \
-# 	Errors \
-# 	Extendable \
-# 	Constraints
-# LIBRARIES := Resource \
-# 	Errors \
-# 	Extendable \
-# 	Constraints
 
 clean: _clean
 	rm -rf $(LIBRARY_ROOT)/runtimes/java/src/main/dafny-generated
