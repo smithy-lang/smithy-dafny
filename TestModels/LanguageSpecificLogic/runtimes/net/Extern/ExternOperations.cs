@@ -16,7 +16,7 @@ namespace NetLanguageSpecificLogicImpl_Compile
         language.specific.logic.internaldafny.types._IError
       >
       GetNetRuntimeVersion (
-        LanguageSpecificLogicImpl_Compile._IConfig config
+        NetLanguageSpecificLogicImpl_Compile._IConfig config
       ) {
         return Wrappers_Compile.Result<
           Dafny.ISequence<char>,
