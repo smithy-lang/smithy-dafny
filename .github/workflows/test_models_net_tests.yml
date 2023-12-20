@@ -14,6 +14,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        dafny-version:
+          - ${{ inputs.dafny }}
         library: [
           TestModels/dafny-dependencies/StandardLibrary, # This stores current Polymorph dependencies that all TestModels depend on
           TestModels/Aggregate,
@@ -24,6 +26,7 @@ jobs:
           TestModels/Errors,
           TestModels/Extendable,
           TestModels/Extern,
+          # TestModels/LanguageSpecificLogic, # Tested only for 4.4.0 below
           # TestModels/LocalService,
           TestModels/Refinement,
           TestModels/Resource,          
@@ -48,6 +51,12 @@ jobs:
         ]
         dotnet-version: [ '6.0.x' ]
         os: [ ubuntu-latest ]
+        include:
+          # One-off until TestModels migrate to 4.4.0
+          - library: TestModels/LanguageSpecificLogic
+            dafny-version: 4.4.0
+            dotnet-version: '6.0.x'
+            os: ubuntu-latest
     runs-on: ${{ matrix.os }}
     permissions:
       id-token: write
@@ -72,7 +81,7 @@ jobs:
       - name: Setup Dafny
         uses: dafny-lang/setup-dafny-action@v1.7.0
         with:
-          dafny-version: ${{ inputs.dafny }}
+          dafny-version: ${{ matrix.dafny-version }}
 
       - name: Setup .NET Core SDK ${{ matrix.dotnet-version }}
         uses: actions/setup-dotnet@v3
