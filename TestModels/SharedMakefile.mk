@@ -47,6 +47,12 @@ GRADLEW := $(PROJECT_ROOT)/../codegen/gradlew
 
 ########################## Dafny targets
 
+# TODO: This target will not work for projects that use `replaceable` 
+#       module syntax with multiple language targets.
+# It will fail with error:
+# Error: modules 'A' and 'B' both have CompileName 'same.extern.name'
+# We need to come up with some way to verify files per-language.
+# Rewrite this as part of Java implementation of LanguageSpecificLogic TestModel.
 verify:
 	dafny \
 		-vcsCores:$(CORES) \
@@ -97,23 +103,26 @@ dafny-reportgenerator:
 # and can be the same for all such runtimes.
 # Since such targets are all shared,
 # this is tractable.
+transpile_implementation: SRC_INDEX_TRANSPILE=$(if $(SRC_INDEX),$(SRC_INDEX),src/Index.dfy)
 transpile_implementation:
 	dafny \
-		-vcsCores:$(CORES) \
-		-compileTarget:$(TARGET) \
-		-spillTargetCode:3 \
-		-compile:0 \
-		-optimizeErasableDatatypeWrapper:0 \
-		$(COMPILE_SUFFIX_OPTION) \
-		-quantifierSyntax:3 \
-		-unicodeChar:0 \
-		-functionSyntax:3 \
-		-useRuntimeLib \
-		-out $(OUT) \
-		./src/Index.dfy \
-		-library:$(PROJECT_ROOT)/dafny-dependencies/StandardLibrary/src/Index.dfy \
-		$(patsubst %, -library:$(PROJECT_ROOT)/%/src/Index.dfy, $(LIBRARIES))
+			-vcsCores:$(CORES) \
+			-compileTarget:$(TARGET) \
+			-spillTargetCode:3 \
+			-compile:0 \
+			-optimizeErasableDatatypeWrapper:0 \
+			$(COMPILE_SUFFIX_OPTION) \
+			-quantifierSyntax:3 \
+			-unicodeChar:0 \
+			-functionSyntax:3 \
+			-useRuntimeLib \
+			-out $(OUT) \
+			$(SRC_INDEX_TRANSPILE) \
+			-library:$(PROJECT_ROOT)/dafny-dependencies/StandardLibrary/src/Index.dfy \
+			$(patsubst %, -library:$(PROJECT_ROOT)/%/src/Index.dfy, $(LIBRARIES))
 
+transpile_test: SRC_INDEX_TRANSPILE=$(if $(SRC_INDEX),$(SRC_INDEX),src/Index.dfy)
+transpile_test: TEST_INDEX_TRANSPILE=$(if $(TEST_INDEX),$(TEST_INDEX),`find ./test -name '*.dfy'`)
 transpile_test:
 	dafny \
 		-vcsCores:$(CORES) \
@@ -128,8 +137,8 @@ transpile_test:
 		-functionSyntax:3 \
 		-useRuntimeLib \
 		-out $(OUT) \
-		`find ./test -name '*.dfy'` \
-		-library:src/Index.dfy
+		$(TEST_INDEX_TRANSPILE) \
+		-library:$(SRC_INDEX_TRANSPILE)
 
 transpile_dependencies:
 	$(MAKE) -C $(STANDARD_LIBRARY_PATH) transpile_implementation_$(LANG)
@@ -225,10 +234,13 @@ transpile_net: | transpile_implementation_net transpile_test_net transpile_depen
 
 transpile_implementation_net: TARGET=cs
 transpile_implementation_net: OUT=runtimes/net/ImplementationFromDafny
+transpile_implementation_net: SRC_INDEX=$(NET_SRC_INDEX)
 transpile_implementation_net: transpile_implementation
 
 transpile_test_net: TARGET=cs
 transpile_test_net: OUT=runtimes/net/tests/TestsFromDafny
+transpile_test_net: SRC_INDEX=$(NET_SRC_INDEX)
+transpile_test_net: TEST_INDEX=$(NET_TEST_INDEX)
 transpile_test_net: transpile_test
 
 transpile_dependencies_net: LANG=net
