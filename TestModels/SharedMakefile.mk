@@ -94,7 +94,6 @@ dafny-reportgenerator:
 # Dafny helper targets
 
 # Transpile the entire project's impl
-_transpile_implementation_all: TRANSPILE_TARGETS=$(if ${DIR_STRUCTURE_V2}, $(patsubst %, ./dafny/%/src/Index.dfy, $(PROJECT_SERVICES)), src/Index.dfy)
 _transpile_implementation_all: TRANSPILE_DEPENDENCIES=$(patsubst %, -library:$(PROJECT_ROOT)/%, $(PROJECT_INDEX))
 _transpile_implementation_all: transpile_implementation
 
@@ -130,7 +129,7 @@ transpile_implementation:
         -useRuntimeLib \
         -out $(OUT) \
         -library:$(PROJECT_ROOT)/dafny-dependencies/StandardLibrary/src/Index.dfy \
-        $(patsubst %, -library:$(PROJECT_ROOT)/%/src/Index.dfy, $(LIBRARIES))
+        $(TRANSPILE_DEPENDENCIES)
 
 _transpile_test_all: TRANSPILE_DEPENDENCIES=$(if ${DIR_STRUCTURE_V2}, $(patsubst %, -library:dafny/%/src/Index.dfy, $(PROJECT_SERVICES)), -library:src/Index.dfy)
 _transpile_test_all: transpile_test
@@ -166,7 +165,7 @@ transpile_dependencies:
 			$(MAKE) -C $(PROJECT_ROOT)/$(dependency) transpile_implementation_$(LANG); \
 	   ) \
 	)
-	
+
 ########################## Code-Gen targets
 
 # The OUTPUT variables are created this way

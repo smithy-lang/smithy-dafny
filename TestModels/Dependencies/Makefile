@@ -8,8 +8,24 @@ include ../SharedMakefile.mk
 PROJECT_SERVICES := \
 	SimpleDependencies
 
+# Order is important
+# In java they MUST be built
+# in the order they depend on each other
+PROJECT_DEPENDENCIES := \
+	Resource \
+	Errors \
+	Extendable \
+	Constraints \
+
+PROJECT_INDEX := \
+	Resource/src/Index.dfy \
+	Errors/src/Index.dfy \
+	Extendable/src/Index.dfy \
+	Constraints/src/Index.dfy
+
 SERVICE_NAMESPACE_SimpleDependencies=simple.dependencies
 
+# Dependencies for each local service
 SERVICE_DEPS_SimpleDependencies := \
 	Resource \
 	Errors \
