@@ -47,18 +47,21 @@ GRADLEW := $(PROJECT_ROOT)/../codegen/gradlew
 
 ########################## Dafny targets
 
+# Verify the entire project
+verify:Z3_PROCESSES=$(shell echo $$(( $(CORES) >= 3 ? 2 : 1 )))
+verify:DAFNY_PROCESSES=$(shell echo $$(( ($(CORES) - 1 ) / ($(CORES) >= 3 ? 2 : 1))))
 verify:
-	dafny \
-		-vcsCores:$(CORES) \
+	find . -name '*.dfy' | xargs -n 1 -P $(DAFNY_PROCESSES) -I % dafny \
+		-vcsCores:$(Z3_PROCESSES) \
 		-compile:0 \
 		-definiteAssignment:3 \
 		-quantifierSyntax:3 \
 		-unicodeChar:0 \
 		-functionSyntax:3 \
 		-verificationLogger:csv \
-		-timeLimit:300 \
+		-timeLimit:100 \
 		-trace \
-		`find . -name '*.dfy'`
+		%
 
 format:
 	dafny format \
@@ -120,22 +123,6 @@ transpile_implementation:
         $(if $(strip $(STD_LIBRARY)) , -library:$(PROJECT_ROOT)/dafny-dependencies/StandardLibrary/src/Index.dfy, ) \
         $(patsubst %, -library:$(PROJECT_ROOT)/%/src/Index.dfy, $(LIBRARIES))
 
-# 	dafny \
-# 		-vcsCores:$(CORES) \
-# 		-compileTarget:$(TARGET) \
-# 		-spillTargetCode:3 \
-# 		-compile:0 \
-# 		-optimizeErasableDatatypeWrapper:0 \
-# 		$(COMPILE_SUFFIX_OPTION) \
-# 		-quantifierSyntax:3 \
-# 		-unicodeChar:0 \
-# 		-functionSyntax:3 \
-# 		-useRuntimeLib \
-# 		-out $(OUT) \
-# 		./src/Index.dfy \
-# 		-library:$(PROJECT_ROOT)/dafny-dependencies/StandardLibrary/src/Index.dfy \
-# 		$(patsubst %, -library:$(PROJECT_ROOT)/%/src/Index.dfy, $(LIBRARIES))
-
 _transpile_test_all: TRANSPILE_DEPENDENCIES=$(if ${DIR_STRUCTURE_V2}, $(patsubst %, -library:dafny/%/src/Index.dfy, $(PROJECT_SERVICES)), -library:src/Index.dfy)
 _transpile_test_all: transpile_test
 
@@ -157,23 +144,6 @@ transpile_test:
 		-out $(OUT) \
 		$(if $(strip $(STD_LIBRARY)) , -library:$(PROJECT_ROOT)/dafny-dependencies/StandardLibrary/src/Index.dfy, ) \
 		$(TRANSPILE_DEPENDENCIES)
-
-
-# 	dafny \
-# 		-vcsCores:$(CORES) \
-# 		-compileTarget:$(TARGET) \
-# 		-spillTargetCode:3 \
-# 		-runAllTests:1 \
-# 		-compile:0 \
-# 		-optimizeErasableDatatypeWrapper:0 \
-# 		$(COMPILE_SUFFIX_OPTION) \
-# 		-quantifierSyntax:3 \
-# 		-unicodeChar:0 \
-# 		-functionSyntax:3 \
-# 		-useRuntimeLib \
-# 		-out $(OUT) \
-# 		`find ./test -name '*.dfy'` \
-# 		-library:src/Index.dfy
 
 transpile_dependencies:
 	$(MAKE) -C $(STANDARD_LIBRARY_PATH) transpile_implementation_$(LANG)

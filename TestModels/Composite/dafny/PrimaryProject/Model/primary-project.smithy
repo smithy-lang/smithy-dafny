@@ -24,4 +24,5 @@ structure SomePrimaryOperationInput {}
 structure SomePrimaryOperationOutput {}
 
 @error("client")
+// Required until https://sim.amazon.com/issues/CrypTool-5263 is fixed
 structure PrimaryProjectEmptyError {}

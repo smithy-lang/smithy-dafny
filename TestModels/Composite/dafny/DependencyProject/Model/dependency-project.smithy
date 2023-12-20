@@ -22,5 +22,5 @@ structure SomeDependencyOperationInput {}
 structure SomeDependencyOperationOutput {}
 
 @error("client")
-// Required until 
+// Required until https://sim.amazon.com/issues/CrypTool-5263 is fixed
 structure DependencyProjectEmptyError {}
