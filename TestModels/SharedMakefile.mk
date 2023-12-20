@@ -158,8 +158,15 @@ transpile_test:
 
 transpile_dependencies:
 	$(MAKE) -C $(STANDARD_LIBRARY_PATH) transpile_implementation_$(LANG)
-	$(patsubst %, $(MAKE) -C $(PROJECT_ROOT)/% transpile_implementation_$(LANG);, $(LIBRARIES))
-
+	@$(foreach service, \
+		$(PROJECT_SERVICES), \
+		$(foreach dependency, \
+			$(SERVICE_DEPS_$(service)), \
+			cd $(PROJECT_ROOT)/$(dependency); \
+			$(MAKE) -C $(PROJECT_ROOT)/$(dependency) transpile_implementation_$(LANG); \
+	   ) \
+	)
+	
 ########################## Code-Gen targets
 
 # The OUTPUT variables are created this way
@@ -202,11 +209,14 @@ _polymorph_wrapped:
 	$(AWS_SDK_CMD)";
 
 _polymorph_dependencies:
-	@$(foreach dependency, \
- 			   $(DEPENDENT-MODELS), \
- 			   cd $(PROJECT_ROOT)/$(dependency); \
- 			   $(MAKE) -C $(PROJECT_ROOT)/$(dependency) polymorph_$(POLYMORPH_LANGUAGE_TARGET); \
-	   )
+	@$(foreach service, \
+ 		$(PROJECT_SERVICES), \
+		$(foreach dependency, \
+			$(SERVICE_DEPS_$(service)), \
+			cd $(PROJECT_ROOT)/$(dependency); \
+			$(MAKE) -C $(PROJECT_ROOT)/$(dependency) polymorph_$(POLYMORPH_LANGUAGE_TARGET); \
+	   ) \
+	)
 
 # # `polymorph_code_gen` is the generate-for-multiple-languages target
 # polymorph_code_gen: OUTPUT_DAFNY=--output-dafny $(LIBRARY_ROOT)/Model --include-dafny $(STANDARD_LIBRARY_PATH)/src/Index.dfy
