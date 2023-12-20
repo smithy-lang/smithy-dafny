@@ -47,6 +47,13 @@ GRADLEW := $(PROJECT_ROOT)/../codegen/gradlew
 
 ########################## Dafny targets
 
+# TODO: This target will not work for projects that use `replaceable` 
+#       module syntax with multiple language targets.
+# It will fail with error:
+# Error: modules 'A' and 'B' both have CompileName 'same.extern.name'
+# We need to come up with some way to verify files per-language.
+# Rewrite this as part of Java implementation of LanguageSpecificLogic TestModel.
+
 # Verify the entire project
 verify:Z3_PROCESSES=$(shell echo $$(( $(CORES) >= 3 ? 2 : 1 )))
 verify:DAFNY_PROCESSES=$(shell echo $$(( ($(CORES) - 1 ) / ($(CORES) >= 3 ? 2 : 1))))
@@ -105,8 +112,10 @@ _transpile_implementation_all: transpile_implementation
 # and can be the same for all such runtimes.
 # Since such targets are all shared,
 # this is tractable.
+
+transpile_implementation: SRC_INDEX_TRANSPILE=$(if $(SRC_INDEX),$(SRC_INDEX),src)
 transpile_implementation:
-	find ./dafny/**/src ./src -name 'Index.dfy' | sed -e 's/^/include "/' -e 's/$$/"/' | dafny \
+	find ./dafny/**/$(SRC_INDEX_TRANSPILE)/ ./$(SRC_INDEX_TRANSPILE)/ -name 'Index.dfy' | sed -e 's/^/include "/' -e 's/$$/"/' | dafny \
         -stdin \
         -noVerify \
         -vcsCores:$(CORES) \
@@ -126,8 +135,10 @@ transpile_implementation:
 _transpile_test_all: TRANSPILE_DEPENDENCIES=$(if ${DIR_STRUCTURE_V2}, $(patsubst %, -library:dafny/%/src/Index.dfy, $(PROJECT_SERVICES)), -library:src/Index.dfy)
 _transpile_test_all: transpile_test
 
+transpile_test: SRC_INDEX_TRANSPILE=$(if $(SRC_INDEX),$(SRC_INDEX),src)
+transpile_test: TEST_INDEX_TRANSPILE=$(if $(TEST_INDEX),$(TEST_INDEX),test)
 transpile_test:
-	find ./dafny/**/test ./test -name "*.dfy" -name '*.dfy' | sed -e 's/^/include "/' -e 's/$$/"/' | dafny \
+	find ./dafny/**/$(TEST_INDEX_TRANSPILE) ./$(TEST_INDEX_TRANSPILE) -name "*.dfy" -name '*.dfy' | sed -e 's/^/include "/' -e 's/$$/"/' | dafny \
 		-stdin \
 		-noVerify \
 		-vcsCores:$(CORES) \
@@ -143,7 +154,7 @@ transpile_test:
 		-useRuntimeLib \
 		-out $(OUT) \
 		-library:$(PROJECT_ROOT)/dafny-dependencies/StandardLibrary/src/Index.dfy \
-		$(TRANSPILE_DEPENDENCIES)
+		$(TRANSPILE_DEPENDENCIES) \
 
 transpile_dependencies:
 	$(MAKE) -C $(STANDARD_LIBRARY_PATH) transpile_implementation_$(LANG)
@@ -302,8 +313,11 @@ transpile_net: | transpile_implementation_net transpile_test_net transpile_depen
 
 transpile_implementation_net: TARGET=cs
 transpile_implementation_net: OUT=runtimes/net/ImplementationFromDafny
+transpile_implementation_net: SRC_INDEX=$(NET_SRC_INDEX)
 transpile_implementation_net: _transpile_implementation_all
 
+transpile_test_net: SRC_INDEX=$(NET_SRC_INDEX)
+transpile_test_net: TEST_INDEX=$(NET_TEST_INDEX)
 transpile_test_net: TARGET=cs
 transpile_test_net: OUT=runtimes/net/tests/TestsFromDafny
 transpile_test_net: _transpile_test_all

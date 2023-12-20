@@ -30,6 +30,7 @@ jobs:
           TestModels/Errors,
           TestModels/Extendable,
           # TestModels/Extern,
+          # TestModels/LanguageSpecificLogic,
           TestModels/LocalService,
           # TestModels/Refinement,
           TestModels/Resource,
