@@ -5,14 +5,12 @@ CORES=2
 
 include ../SharedMakefile.mk
 
-NAMESPACE=simple.constraints
-
 PROJECT_SERVICES := \
-	SimpleAggregate
+	SimpleConstraints
 
-SERVICE_NAMESPACE_SimpleAggregate=simple.aggregate
+SERVICE_NAMESPACE_SimpleConstraints=simple.constraints
 
-SERVICE_DEPS_SimpleAggregate :=
+SERVICE_DEPS_SimpleConstraints :=
 
 SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 

@@ -120,7 +120,7 @@ transpile_implementation:
         -functionSyntax:3 \
         -useRuntimeLib \
         -out $(OUT) \
-        -library:$(PROJECT_ROOT)/dafny-dependencies/StandardLibrary/src/Index.dfy, \
+        -library:$(PROJECT_ROOT)/dafny-dependencies/StandardLibrary/src/Index.dfy \
         $(patsubst %, -library:$(PROJECT_ROOT)/%/src/Index.dfy, $(LIBRARIES))
 
 _transpile_test_all: TRANSPILE_DEPENDENCIES=$(if ${DIR_STRUCTURE_V2}, $(patsubst %, -library:dafny/%/src/Index.dfy, $(PROJECT_SERVICES)), -library:src/Index.dfy)
@@ -142,7 +142,7 @@ transpile_test:
 		-functionSyntax:3 \
 		-useRuntimeLib \
 		-out $(OUT) \
-		-library:$(PROJECT_ROOT)/dafny-dependencies/StandardLibrary/src/Index.dfy, \
+		-library:$(PROJECT_ROOT)/dafny-dependencies/StandardLibrary/src/Index.dfy \
 		$(TRANSPILE_DEPENDENCIES)
 
 transpile_dependencies:

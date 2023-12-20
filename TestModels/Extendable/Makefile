@@ -8,11 +8,11 @@ include ../SharedMakefile.mk
 NAMESPACE=simple.extendable.resources
 
 PROJECT_SERVICES := \
-	SimpleAggregate
+	SimpleExtendableResources
 
-SERVICE_NAMESPACE_SimpleAggregate=simple.aggregate
+SERVICE_NAMESPACE_SimpleExtendableResources=simple.extendable.resources
 
-SERVICE_DEPS_SimpleAggregate :=
+SERVICE_DEPS_SimpleExtendableResources :=
 
 SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 
