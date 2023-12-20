@@ -23,12 +23,6 @@ SERVICE_DEPS_PrimaryProject := \
 	Composite/dafny/DependencyProject \
 
 SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
-STD_LIBRARY=yes
 
 # DEPENDENT-MODELS:=
 # LIBRARIES :=
-
-clean: _clean
-	rm -rf $(LIBRARY_ROOT)/runtimes/java/src/main/dafny-generated
-	rm -rf $(LIBRARY_ROOT)/runtimes/java/src/main/smithy-generated
-	rm -rf $(LIBRARY_ROOT)/runtimes/java/src/test/dafny-generated

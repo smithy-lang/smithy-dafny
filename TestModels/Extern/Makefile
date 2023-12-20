@@ -5,7 +5,14 @@ CORES=2
 
 include ../SharedMakefile.mk
 
-NAMESPACE=simple.dafnyExtern
+PROJECT_SERVICES := \
+	SimpleExtern
+
+SERVICE_NAMESPACE_SimpleExtern=simple.dafnyExtern
+
+SERVICE_DEPS_SimpleExtern :=
+
+SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 
 # This project has no dependencies 
 # DEPENDENT-MODELS:= 

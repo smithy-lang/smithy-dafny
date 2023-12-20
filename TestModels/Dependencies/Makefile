@@ -7,20 +7,33 @@ include ../SharedMakefile.mk
 
 NAMESPACE=simple.dependencies
 
+PROJECT_SERVICES := \
+	SimpleDependencies
+
+SERVICE_NAMESPACE_SimpleDependencies=simple.aggregate
+
+SERVICE_DEPS_SimpleDependencies := \
+	Resource
+	Errors
+	Extendable
+	Constraints
+
+SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
+
 # This project takes dependencies on:
 # - SimpleResource
 # - SimpleErrors
 # - SimpleExtendableResource
 # - and SimpleConstraints modules.
-DEPENDENT-MODELS:= \
-	Resource \
-	Errors \
-	Extendable \
-	Constraints
-LIBRARIES := Resource \
-	Errors \
-	Extendable \
-	Constraints
+# DEPENDENT-MODELS:= \
+# 	Resource \
+# 	Errors \
+# 	Extendable \
+# 	Constraints
+# LIBRARIES := Resource \
+# 	Errors \
+# 	Extendable \
+# 	Constraints
 
 clean: _clean
 	rm -rf $(LIBRARY_ROOT)/runtimes/java/src/main/dafny-generated
