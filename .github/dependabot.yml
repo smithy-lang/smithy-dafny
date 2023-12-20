@@ -8,3 +8,33 @@ updates:
     directory: ".github/workflows"
     schedule:
       interval: "daily"
+  # STD NET
+  - package-ecosystem: "nuget"
+    directory: "StandardLibrary/runtimes/net/STD.csproj"
+    schedule:
+      interval: "daily"
+  # KMS NET
+  - package-ecosystem: "nuget"
+    directory: "ComAmazonawsKms/runtimes/net/AWS-KMS.csproj"
+    schedule:
+      interval: "daily"
+  # DDB NET
+  - package-ecosystem: "nuget"
+    directory: "ComAmazonawsDynamodb/runtimes/net/ComAmazonawsDynamodb.csproj"
+    schedule:
+      interval: "daily"
+  # Crypto NET
+  - package-ecosystem: "nuget"
+    directory: "AwsCryptographyPrimitives/runtimes/net/Crypto.csproj"
+    schedule:
+      interval: "daily"
+  # MPL NET
+  - package-ecosystem: "nuget"
+    directory: "AwsCryptographicMaterialProviders/runtimes/net/MPL.csproj"
+    schedule:
+      interval: "daily"
+  # Test Vectors NET
+  - package-ecosystem: "nuget"
+    directory: "TestVectorsAwsCryptographicMaterialProviders/runtimes/net/TestVectors.csproj"
+    schedule:
+      interval: "daily"
