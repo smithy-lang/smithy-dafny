@@ -118,7 +118,7 @@ _transpile_implementation_all: transpile_implementation
 #   it MUST define a SRC_INDEX variable per language.
 # SRC_INDEX points to the folder containing the `Index.dfy` file for a particular language
 #   that `include`s all of that language's `replaces` modules.
-# This might look like `src/replaces/net` or `src/replaces/java`.
+# This variable's value might look like (ex.) `src/replaces/net` or `src/replaces/java`.
 # If this variable is not provided, assume the project does not have `replaceable` modules,
 #   and look for `Index.dfy` in the `src/` directory.
 transpile_implementation: SRC_INDEX_TRANSPILE=$(if $(SRC_INDEX),$(SRC_INDEX),src)
@@ -149,7 +149,7 @@ _transpile_test_all: SRC_INDEX_TRANSPILE=$(if $(SRC_INDEX),$(SRC_INDEX),src)
 #   it MUST define a TEST_INDEX variable per language.
 # TEST_INDEX points to the folder containing all test files for a particular language.
 # These files should use Dafny `include`s to include the generic test files as well.
-# This might look like `test/replaces/net` or `test/replaces/java`.
+# This variable's value might look like (ex.) `test/replaces/net` or `test/replaces/java`.
 # If this variable is not provided, assume the project does not have `replaceable` modules,
 #   and look for test files in the `test/` directory.
 _transpile_test_all: TEST_INDEX_TRANSPILE=$(if $(TEST_INDEX),$(TEST_INDEX),test)
