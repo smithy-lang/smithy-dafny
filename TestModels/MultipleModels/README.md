@@ -8,21 +8,31 @@ Smithy-Dafny-generated projects are expected to be able to handle any number of 
     └── dafny/
         └── SubProjectA/
         │   ├── Model/
-        │   │   └── subproject-a.smithy/
+        │   │   ├── localservice-a.smithy
+        │   │   ├── subproject-a-child1.smithy
+        │   │   └── ... (any number of child models for localservice-a.smithy)
         │   ├── src/ # Dafny source code
         │   └── test/ # Dafny test code
         ├── SubProjectB/
         │   ├── Model/
-        │   │   └── subproject-b.smithy/
+        │   │   └── localservice-b.smithy
+        │   │   ├── subproject-b-child1.smithy
+        │   │   └── ... (any number of child models for localservice-b.smithy)
         │   ├── src/
         │   ├── test/
         └── SubProjectC/
             ├── Model/
-            │   └── subproject-c.smithy/
+            │   └── awssdk-service-c.smithy
             ├── src/
             └── test/
         ... (and so on)
 ```
+
+If a single Smithy-Dafny project (ex. MyProject)
+has multiple subprojects (ex. SubProjects A, B, and C), then:
+1. Each subproject MUST have ONLY ONE single service shape under generation; and
+2. The subprojects, their Smithy model(s), and their Dafny code MUST be laid out in this structure.
+3. The project's Makefile MUST set the `DIR_STRUCTURE_V2` variable to a non-empty value.
 
 These model files should **share** their generated Dafny implementation.
 While the Dafny source code is located in separate folders,

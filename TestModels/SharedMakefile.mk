@@ -94,6 +94,8 @@ dafny-reportgenerator:
 # Dafny helper targets
 
 # Transpile the entire project's impl
+# For each index file listed in the project Makefile's PROJECT_INDEX variable,
+#   append a `-library:TestModels/$(PROJECT_INDEX) to the transpiliation target
 _transpile_implementation_all: TRANSPILE_DEPENDENCIES=$(patsubst %, -library:$(PROJECT_ROOT)/%, $(PROJECT_INDEX))
 _transpile_implementation_all: transpile_implementation
 
@@ -112,7 +114,15 @@ _transpile_implementation_all: transpile_implementation
 # Since such targets are all shared,
 # this is tractable.
 
+# If the project under transpilation uses `replaceable` modules,
+#   it MUST define a SRC_INDEX variable per language.
+# SRC_INDEX points to the folder containing the `Index.dfy` file for a particular language
+#   that `include`s all of that language's `replaces` modules.
+# This might look like `src/replaces/net` or `src/replaces/java`.
+# If this variable is not provided, assume the project does not have `replaceable` modules,
+#   and look for `Index.dfy` in the `src/` directory.
 transpile_implementation: SRC_INDEX_TRANSPILE=$(if $(SRC_INDEX),$(SRC_INDEX),src)
+# `find` looks for `Index.dfy` files in either V1 or V2-styled project directories (single vs. multiple model files).
 transpile_implementation:
 	find ./dafny/**/$(SRC_INDEX_TRANSPILE)/ ./$(SRC_INDEX_TRANSPILE)/ -name 'Index.dfy' | sed -e 's/^/include "/' -e 's/$$/"/' | dafny \
         -stdin \
@@ -131,11 +141,28 @@ transpile_implementation:
         -library:$(PROJECT_ROOT)/dafny-dependencies/StandardLibrary/src/Index.dfy \
         $(TRANSPILE_DEPENDENCIES)
 
+# If the project under transpilation uses `replaceable` modules,
+#   it MUST define a SRC_INDEX variable per language.
+# The purpose and usage of this is described in the `transpile_implementation` comments.
 _transpile_test_all: SRC_INDEX_TRANSPILE=$(if $(SRC_INDEX),$(SRC_INDEX),src)
+# If the project under transpilation uses `replaceable` modules in its tests
+#   it MUST define a TEST_INDEX variable per language.
+# TEST_INDEX points to the folder containing all test files for a particular language.
+# These files should use Dafny `include`s to include the generic test files as well.
+# This might look like `test/replaces/net` or `test/replaces/java`.
+# If this variable is not provided, assume the project does not have `replaceable` modules,
+#   and look for test files in the `test/` directory.
 _transpile_test_all: TEST_INDEX_TRANSPILE=$(if $(TEST_INDEX),$(TEST_INDEX),test)
+# If the Makefile defines DIR_STRUCTURE_V2 (i.e. multiple models/subprojects/services in project), then:
+#   For each of this project's services defined in PROJECT_SERVICES:
+#     append `-library:/path/to/Index.dfy` to the transpile target
+# Else: (i.e. single model/service in project), then:
+#   append `-library:/path/to/Index.dfy` to the transpile target
 _transpile_test_all: TRANSPILE_DEPENDENCIES=$(if ${DIR_STRUCTURE_V2}, $(patsubst %, -library:dafny/%/$(SRC_INDEX_TRANSPILE)/Index.dfy, $(PROJECT_SERVICES)), -library:$(SRC_INDEX_TRANSPILE)/Index.dfy)
+# Transpile the entire project's tests
 _transpile_test_all: transpile_test
 
+# `find` looks for tests in either V1 or V2-styled project directories (single vs. multiple model files).
 transpile_test:
 	find ./dafny/**/$(TEST_INDEX_TRANSPILE) ./$(TEST_INDEX_TRANSPILE) -name "*.dfy" -name '*.dfy' | sed -e 's/^/include "/' -e 's/$$/"/' | dafny \
 		-stdin \
