@@ -61,7 +61,3 @@ make test_net && make test_java
 1. To add another target runtime support, edit the `Makefile` and add the appropriate recipe to generate the `polymorph` wrappers, and dafny transpilation.
 2. Provide any glue code between dafny and target runtime if required.
 3. Build, execute, and test in the target runtime.
-
-*Example*
-
-`--output-dotnet <PATH>` in the `gradlew run` is used to generate the polymorph wrappers. Similarly `--compileTarget:<RUNTIME>` flags is used in dafny recipe to transpile to C#.
