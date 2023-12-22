@@ -5,9 +5,16 @@ CORES=2
 
 include ../SharedMakefile.mk
 
-NAMESPACE=simple.dafnyExtern
-# TODO-Python: Move to smithy-build.json once Dafny SmithyBuildPlugin supports language-specific config
 PYTHON_MODULE_NAME=simple_dafnyextern
+
+PROJECT_SERVICES := \
+	SimpleExtern
+
+SERVICE_NAMESPACE_SimpleExtern=simple.dafnyExtern
+
+SERVICE_DEPS_SimpleExtern :=
+
+SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 
 # This project has no dependencies 
 # DEPENDENT-MODELS:= 

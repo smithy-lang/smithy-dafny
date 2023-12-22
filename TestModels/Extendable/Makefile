@@ -9,6 +9,15 @@ NAMESPACE=simple.extendable.resources
 # TODO-Python: Move to smithy-build.json once Dafny SmithyBuildPlugin supports language-specific config
 PYTHON_MODULE_NAME=simple_extendable_resources
 
+PROJECT_SERVICES := \
+	SimpleExtendableResources
+
+SERVICE_NAMESPACE_SimpleExtendableResources=simple.extendable.resources
+
+SERVICE_DEPS_SimpleExtendableResources :=
+
+SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
+
 # This project has no dependencies 
 # DEPENDENT-MODELS:= 
 # LIBRARIES :=

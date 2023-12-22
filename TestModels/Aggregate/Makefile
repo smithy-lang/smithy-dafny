@@ -5,9 +5,17 @@ CORES=2
 
 include ../SharedMakefile.mk
 
-NAMESPACE=simple.aggregate
 # TODO-Python: Move to smithy-build.json once Dafny SmithyBuildPlugin supports language-specific config
 PYTHON_MODULE_NAME=simple_aggregate
+
+PROJECT_SERVICES := \
+	SimpleAggregate
+
+SERVICE_NAMESPACE_SimpleAggregate=simple.aggregate
+
+SERVICE_DEPS_SimpleAggregate :=
+
+SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 
 # This project has no dependencies 
 # DEPENDENT-MODELS:= 

@@ -5,9 +5,16 @@ CORES=2
 
 include ../SharedMakefile.mk
 
-NAMESPACE=simple.constraints
-# TODO-Python: Move to smithy-build.json once Dafny SmithyBuildPlugin supports language-specific config
 PYTHON_MODULE_NAME=constraints
+
+PROJECT_SERVICES := \
+	SimpleConstraints
+
+SERVICE_NAMESPACE_SimpleConstraints=simple.constraints
+
+SERVICE_DEPS_SimpleConstraints :=
+
+SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 
 # This project has no dependencies 
 # DEPENDENT-MODELS:= 

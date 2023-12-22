@@ -28,6 +28,7 @@ jobs:
           TestModels/Extern,
           # TestModels/LanguageSpecificLogic, # Tested only for 4.4.0 below
           # TestModels/LocalService,
+          TestModels/MultipleModels,
           TestModels/Refinement,
           TestModels/Resource,          
           # TestModels/SimpleTypes/BigDecimal,

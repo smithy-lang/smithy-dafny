@@ -9,6 +9,15 @@ NAMESPACE=simple.types.integer
 # TODO-Python: Move to smithy-build.json once Dafny SmithyBuildPlugin supports language-specific config
 PYTHON_MODULE_NAME=simple_types_integer
 
+PROJECT_SERVICES := \
+	SimpleInteger
+
+SERVICE_NAMESPACE_SimpleInteger=simple.types.integer
+
+SERVICE_DEPS_SimpleInteger :=
+
+SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
+
 # This project has no dependencies
 # DEPENDENT-MODELS:=
 # LIBRARIES :=

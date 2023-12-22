@@ -5,9 +5,16 @@ CORES=2
 
 include ../SharedMakefile.mk
 
-NAMESPACE=simple.errors
-# TODO-Python: Move to smithy-build.json once Dafny SmithyBuildPlugin supports language-specific config
 PYTHON_MODULE_NAME=simple_errors
+
+PROJECT_SERVICES := \
+	SimpleErrors
+
+SERVICE_NAMESPACE_SimpleErrors=simple.errors
+
+SERVICE_DEPS_SimpleErrors :=
+
+SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 
 # This project has no dependencies 
 # DEPENDENT-MODELS:= 

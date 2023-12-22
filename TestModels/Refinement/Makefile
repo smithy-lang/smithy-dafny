@@ -9,6 +9,15 @@ NAMESPACE=simple.refinement
 # TODO-Python: Move to smithy-build.json once Dafny SmithyBuildPlugin supports language-specific config
 PYTHON_MODULE_NAME=simple_refinement
 
+PROJECT_SERVICES := \
+	SimpleRefinement
+
+SERVICE_NAMESPACE_SimpleRefinement=simple.refinement
+
+SERVICE_DEPS_SimpleRefinement :=
+
+SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
+
 # This project has no dependencies 
 # DEPENDENT-MODELS:= 
 # LIBRARIES :=

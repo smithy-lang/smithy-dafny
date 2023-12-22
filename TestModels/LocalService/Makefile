@@ -9,6 +9,15 @@ NAMESPACE=simple.localService
 # TODO-Python: Move to smithy-build.json once Dafny SmithyBuildPlugin supports language-specific config
 PYTHON_MODULE_NAME=simple_localservice
 
+PROJECT_SERVICES := \
+	SimpleLocalService
+
+SERVICE_NAMESPACE_SimpleLocalService=simple.localService
+
+SERVICE_DEPS_SimpleLocalService :=
+
+SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
+
 # This project has no dependencies 
 # DEPENDENT-MODELS:= 
 # LIBRARIES :=
