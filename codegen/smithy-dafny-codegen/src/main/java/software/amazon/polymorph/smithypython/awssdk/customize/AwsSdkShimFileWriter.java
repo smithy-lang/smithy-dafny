@@ -53,7 +53,6 @@ public class AwsSdkShimFileWriter implements CustomFileWriter {
               '''
               ${C|}
                           
-          # TODO-Python: Typehint the shim class
           class $L:
               def __init__(self, _impl, _region):
                   self._impl = _impl
@@ -64,9 +63,6 @@ public class AwsSdkShimFileWriter implements CustomFileWriter {
               """, typesModulePrelude,
           writer.consumer(w -> generateAwsSdkErrorToDafnyErrorBlock(codegenContext, serviceShape, w)),
           AwsSdkNameResolver.shimForService(serviceShape),
-          // TODO-Python: Uncomment to type the shim class
-          // Needs some help to do that 
-          // typesModulePrelude, DafnyNameResolver.getDafnyClientInterfaceTypeForServiceShape(serviceShape),
           writer.consumer(w -> generateOperationsBlock(codegenContext, serviceShape, w))
       );
     });
@@ -109,7 +105,7 @@ public class AwsSdkShimFileWriter implements CustomFileWriter {
               writer.write("return %1$s".formatted(
                       errorShape.accept(new AwsSdkToDafnyShapeVisitor(
                               codegenContext,
-                              "e",
+                              "e.response",
                               writer
                       ))));
 //                      DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(errorShapeId),

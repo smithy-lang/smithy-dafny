@@ -5,9 +5,17 @@ package software.amazon.polymorph.smithypython.wrappedlocalservice.extensions;
 
 import java.nio.file.Path;
 import java.util.logging.Logger;
+
+import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
+import software.amazon.polymorph.smithypython.localservice.customize.ReferencesFileWriter;
+import software.amazon.polymorph.smithypython.localservice.extensions.DafnyPythonWrappedLocalServiceSymbolVisitor;
+import software.amazon.polymorph.smithypython.localservice.extensions.DirectedDafnyPythonLocalServiceCodegen;
 import software.amazon.smithy.build.FileManifest;
 import software.amazon.smithy.codegen.core.CodegenException;
+import software.amazon.smithy.codegen.core.SymbolProvider;
+import software.amazon.smithy.codegen.core.directed.CreateSymbolProviderDirective;
 import software.amazon.smithy.codegen.core.directed.CustomizeDirective;
+import software.amazon.smithy.codegen.core.directed.GenerateResourceDirective;
 import software.amazon.smithy.codegen.core.directed.GenerateServiceDirective;
 import software.amazon.smithy.python.codegen.CodegenUtils;
 import software.amazon.smithy.python.codegen.DirectedPythonCodegen;
@@ -22,10 +30,23 @@ import software.amazon.smithy.python.codegen.PythonSettings;
  * Wrapped LocalService generation does NOT involve generating a Smithy client;
  *   it will only generate a shim wrapping the LocalService-generated Smithy client.
  */
-public class DirectedDafnyPythonWrappedLocalServiceCodegen extends DirectedPythonCodegen {
+public class DirectedDafnyPythonWrappedLocalServiceCodegen
+        extends DirectedDafnyPythonLocalServiceCodegen {
 
   private static final Logger LOGGER = Logger.getLogger(
       DirectedDafnyPythonWrappedLocalServiceCodegen.class.getName());
+
+  @Override
+  public SymbolProvider createSymbolProvider(
+      CreateSymbolProviderDirective<PythonSettings> directive) {
+    return new DafnyPythonWrappedLocalServiceSymbolVisitor(directive.model(), directive.settings());
+  }
+
+  @Override
+  public void generateResource(
+          GenerateResourceDirective<GenerationContext, PythonSettings> directive) {
+
+  }
 
   /**
    * Do NOT generate any service config code for Dafny Python AWS SDKs (i.e. `config.py`).
@@ -62,7 +83,10 @@ public class DirectedDafnyPythonWrappedLocalServiceCodegen extends DirectedPytho
 
     FileManifest fileManifest = directive.fileManifest();
     Path generationPath = Path.of(
-        fileManifest.getBaseDir() + "/" + directive.context().settings().getModuleName());
+        fileManifest.getBaseDir() + "/" +
+                SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(directive.context().settings().getService().getNamespace()));
+    System.out.println("generationPath");
+    System.out.println(generationPath);
 
     // models.py and errors.py are written to from DEEP within Smithy-Python.
     // Any time a SymbolVisitor encounters a complex shape (structure, union. etc.)
@@ -77,16 +101,9 @@ public class DirectedDafnyPythonWrappedLocalServiceCodegen extends DirectedPytho
     //   rather than hack around with PythonWriters or DirectedPythonCodegen's customizeAfterIntegrations.
     try {
       LOGGER.info("Attempting to remove models.py");
-      CodegenUtils.runCommand("rm models.py", generationPath).strip();
+      CodegenUtils.runCommand("rm wrapped_codegen_todelete.py", generationPath).strip();
     } catch (CodegenException e) {
-      LOGGER.warning("Unable to remove models.py: " + e);
-    }
-
-    try {
-      LOGGER.info("Attempting to remove errors.py");
-      CodegenUtils.runCommand("rm errors.py", generationPath).strip();
-    } catch (CodegenException e) {
-      LOGGER.warning("Unable to remove errors.py:" + e);
+      LOGGER.warning("Unable to remove wrapped_codegen_todelete.py: " + e);
     }
   }
 }

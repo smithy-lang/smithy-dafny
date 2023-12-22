@@ -61,22 +61,18 @@ public class AwsSdkToDafnyConversionFunctionWriter extends BaseConversionWriter 
       // Within the conversion function, the dataSource becomes the function's input
       // This hardcodes the input parameter name for a conversion function to always be "input"
 
-      String dataSourceInsideConversionFunction =
-              structureShape.hasTrait(ErrorTrait.class)
-        ? "input['Error']"
-      : "input";
-
       DafnyNameResolver.importDafnyTypeForShape(conversionWriter, structureShape.getId(), context);
 
       conversionWriter.openBlock(
           "def $L($L):",
           "",
           AwsSdkNameResolver.getAwsSdkToDafnyFunctionNameForShape(structureShape),
-          dataSourceInsideConversionFunction,
+          "input",
           () -> {
             // Open Dafny structure shape
             // e.g.
             // DafnyStructureName(...
+                  String dataSourceInsideConversionFunction = "input";
             conversionWriter.openBlock(
                 "return $L(",
                 ")",
@@ -88,15 +84,15 @@ public class AwsSdkToDafnyConversionFunctionWriter extends BaseConversionWriter 
                   for (Entry<String, MemberShape> memberShapeEntry : structureShape.getAllMembers().entrySet()) {
                     String memberName = memberShapeEntry.getKey();
                     MemberShape memberShape = memberShapeEntry.getValue();
-//
-//                    if (structureShape.hasTrait(ErrorTrait.class)) {
-//                      writeErrorStructureShapeMemberConverter(conversionWriter,
-//                          dataSourceInsideConversionFunction, memberName, memberShape);
-//                    } else {
+
+                   if (structureShape.hasTrait(ErrorTrait.class)) {
+                     writeErrorStructureShapeMemberConverter(conversionWriter,
+                         dataSourceInsideConversionFunction, memberName, memberShape);
+                   } else {
 
                         writeStructureShapeMemberConverter(conversionWriter,
                                 dataSourceInsideConversionFunction, memberName, memberShape);
-//                    }
+                   }
 
                   }
                 }
@@ -163,7 +159,7 @@ public class AwsSdkToDafnyConversionFunctionWriter extends BaseConversionWriter 
                     targetShape.accept(
                             new AwsSdkErrorToDafnyErrorShapeVisitor(
                                     context,
-                                    dataSourceInsideConversionFunction + "." + memberName,
+                                    dataSourceInsideConversionFunction + "[\"" + memberName + "\"]",
                                     conversionWriter
                             )
                     )
@@ -201,6 +197,7 @@ public class AwsSdkToDafnyConversionFunctionWriter extends BaseConversionWriter 
 
     // If this shape is required, pass in the shape for conversion without any optional-checking
     else {
+
       conversionWriter.write("$L,",
           targetShape.accept(
               new AwsSdkToDafnyShapeVisitor(
