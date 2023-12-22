@@ -109,8 +109,8 @@ jobs:
         shell: bash
         working-directory: ./${{ matrix.library }}
         run: |
-          make polymorph_dafny
-          make polymorph_python
+          make polymorph_dafny DAFNY_VERSION_OPTION="--dafny-version $DAFNY_VERSION"
+          make polymorph_python DAFNY_VERSION_OPTION="--dafny-version $DAFNY_VERSION"
 
       - name: Compile ${{ matrix.library }} implementation
         shell: bash
