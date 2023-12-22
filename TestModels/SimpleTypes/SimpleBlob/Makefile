@@ -7,6 +7,15 @@ include ../../SharedMakefile.mk
 
 NAMESPACE=simple.types.blob
 
+PROJECT_SERVICES := \
+	SimpleBlob
+
+SERVICE_NAMESPACE_SimpleBlob=simple.types.blob
+
+SERVICE_DEPS_SimpleBlob :=
+
+SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
+
 # This project has no dependencies 
 # DEPENDENT-MODELS:= 
 # LIBRARIES :=

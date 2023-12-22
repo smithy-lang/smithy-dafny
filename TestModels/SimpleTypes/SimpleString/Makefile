@@ -9,6 +9,14 @@ NAMESPACE=simple.types.smithyString
 
 GO_NAMESPACE=simpletypessmithystring
 
+PROJECT_SERVICES := \
+	SimpleString
+
+SERVICE_NAMESPACE_SimpleString=simple.types.smithyString
+
+SERVICE_DEPS_SimpleString :=
+
+SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 
 # This project has no dependencies 
 # DEPENDENT-MODELS:= 

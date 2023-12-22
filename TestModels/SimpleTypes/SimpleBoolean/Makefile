@@ -11,6 +11,14 @@ include ../../SharedMakefile.mk
 NAMESPACE=simple.types.boolean
 
 GO_NAMESPACE=simpletypesboolean
+PROJECT_SERVICES := \
+	SimpleBoolean
+
+SERVICE_NAMESPACE_SimpleBoolean=simple.types.boolean
+
+SERVICE_DEPS_SimpleBoolean :=
+
+SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 
 # This project has no dependencies 
 # DEPENDENT-MODELS:= 

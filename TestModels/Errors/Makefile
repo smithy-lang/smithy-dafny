@@ -5,7 +5,14 @@ CORES=2
 
 include ../SharedMakefile.mk
 
-NAMESPACE=simple.errors
+PROJECT_SERVICES := \
+	SimpleErrors
+
+SERVICE_NAMESPACE_SimpleErrors=simple.errors
+
+SERVICE_DEPS_SimpleErrors :=
+
+SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 
 # This project has no dependencies 
 # DEPENDENT-MODELS:= 

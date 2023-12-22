@@ -7,6 +7,15 @@ include ../SharedMakefile.mk
 
 NAMESPACE=simple.extendable.resources
 
+PROJECT_SERVICES := \
+	SimpleExtendableResources
+
+SERVICE_NAMESPACE_SimpleExtendableResources=simple.extendable.resources
+
+SERVICE_DEPS_SimpleExtendableResources :=
+
+SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
+
 # This project has no dependencies 
 # DEPENDENT-MODELS:= 
 # LIBRARIES :=

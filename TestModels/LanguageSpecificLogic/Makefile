@@ -5,11 +5,18 @@ CORES=2
 
 include ../SharedMakefile.mk
 
-NAMESPACE=language.specific.logic
+PROJECT_SERVICES := \
+	LanguageSpecificLogic
+
+SERVICE_NAMESPACE_LanguageSpecificLogic=language.specific.logic
+
+SERVICE_DEPS_LanguageSpecificLogic :=
+
+SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 
 # Projects using replaceable modules must explicitly define these values.
-NET_SRC_INDEX=src/replaces/net/Index.dfy
-NET_TEST_INDEX=test/replaces/net/Index.dfy
+NET_SRC_INDEX=src/replaces/net
+NET_TEST_INDEX=test/replaces/net
 
 # This project has no dependencies 
 # DEPENDENT-MODELS:= 

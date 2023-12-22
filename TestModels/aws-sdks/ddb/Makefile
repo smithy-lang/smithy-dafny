@@ -5,7 +5,15 @@ CORES=2
 
 include ../../SharedMakefile.mk
 
-NAMESPACE=com.amazonaws.dynamodb
+PROJECT_SERVICES := \
+	ComAmazonawsDynamodb \
+
+SERVICE_NAMESPACE_ComAmazonawsDynamodb=com.amazonaws.dynamodb
+
+SERVICE_DEPS_ComAmazonawsDynamodb :=
+
+SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
+
 AWS_SDK_CMD=--aws-sdk
 
 # This project has no dependencies 
