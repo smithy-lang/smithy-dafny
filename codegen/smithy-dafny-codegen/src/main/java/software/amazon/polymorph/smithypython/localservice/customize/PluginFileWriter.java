@@ -13,30 +13,38 @@ import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.utils.CaseUtils;
 
 /**
- * Writes the plugin.py file.
- * This file contains logic to load the Dafny plugin into the
- * Smithy-Python client.py's Config member.
- * It also defines the Config's retry strategy ("never retry" -- this is not a service).
+ * Writes the plugin.py file. This file contains logic to load the Dafny plugin into the
+ * Smithy-Python client.py's Config member. It also defines the Config's retry strategy ("never
+ * retry" -- this is not a service).
  */
 public class PluginFileWriter implements CustomFileWriter {
 
   @Override
   public void customizeFileForServiceShape(
       ServiceShape serviceShape, GenerationContext codegenContext) {
-    String moduleName = SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(codegenContext.settings().getService().getNamespace());
+    String moduleName =
+        SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(
+            codegenContext.settings().getService().getNamespace());
     String clientName = SmithyNameResolver.clientForService(serviceShape);
-    String implModulePrelude = DafnyNameResolver.getDafnyPythonIndexModuleNameForShape(serviceShape);
+    String implModulePrelude =
+        DafnyNameResolver.getDafnyPythonIndexModuleNameForShape(serviceShape);
     final LocalServiceTrait localServiceTrait = serviceShape.expectTrait(LocalServiceTrait.class);
-    final StructureShape configShape = codegenContext.model().expectShape(localServiceTrait.getConfigId(), StructureShape.class);
+    final StructureShape configShape =
+        codegenContext.model().expectShape(localServiceTrait.getConfigId(), StructureShape.class);
 
-    codegenContext.writerDelegator().useFileWriter(moduleName + "/plugin.py", "", writer -> {
-      writer.write(
-          """
+    codegenContext
+        .writerDelegator()
+        .useFileWriter(
+            moduleName + "/plugin.py",
+            "",
+            writer -> {
+              writer.write(
+                  """
           from .config import Config, Plugin, smithy_config_to_dafny_config
           from smithy_python.interfaces.retries import RetryStrategy
           from smithy_python.exceptions import SmithyRetryException
           from .dafnyImplInterface import DafnyImplInterface
-          
+
           def set_config_impl(config: Config):
               '''
               Set the Dafny-compiled implementation in the Smithy-Python client Config
@@ -48,14 +56,14 @@ public class PluginFileWriter implements CustomFileWriter {
                   config.dafnyImplInterface.impl = $L()
                   config.dafnyImplInterface.impl.ctor__(smithy_config_to_dafny_config(config))
               config.retry_strategy = NoRetriesStrategy()
-          
+
           class ZeroRetryDelayToken:
               '''
               Placeholder class required by Smithy-Python client implementation.
               Do not wait to retry.
               '''
               retry_delay = 0
-          
+
           class NoRetriesStrategy(RetryStrategy):
               '''
               Placeholder class required by Smithy-Python client implementation.
@@ -63,12 +71,15 @@ public class PluginFileWriter implements CustomFileWriter {
               '''
               def acquire_initial_retry_token(self):
                   return ZeroRetryDelayToken()
-          
+
               def refresh_retry_token_for_retry(self, token_to_renew, error_info):
                   # Do not retry
                   raise SmithyRetryException()
-                  """, codegenContext.symbolProvider().toSymbol(configShape), implModulePrelude, clientName, clientName
-      );
-    });
+                  """,
+                  codegenContext.symbolProvider().toSymbol(configShape),
+                  implModulePrelude,
+                  clientName,
+                  clientName);
+            });
   }
 }

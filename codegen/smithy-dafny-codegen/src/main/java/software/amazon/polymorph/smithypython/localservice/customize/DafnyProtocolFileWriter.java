@@ -18,57 +18,67 @@ import software.amazon.smithy.python.codegen.PythonWriter;
 import software.amazon.smithy.utils.CaseUtils;
 
 /**
- * Writes the dafny_protocol.py file.
- * This file defines the types that are sent to and from
- * the dafnyImplInterface.
+ * Writes the dafny_protocol.py file. This file defines the types that are sent to and from the
+ * dafnyImplInterface.
  */
 public class DafnyProtocolFileWriter implements CustomFileWriter {
 
   @Override
   public void customizeFileForServiceShape(
       ServiceShape serviceShape, GenerationContext codegenContext) {
-    String moduleName = SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(codegenContext.settings().getService().getNamespace());
+    String moduleName =
+        SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(
+            codegenContext.settings().getService().getNamespace());
 
-    // Collect all `inputShapeIds` to identify all possible types `dafny_operation_input` can take on
+    // Collect all `inputShapeIds` to identify all possible types `dafny_operation_input` can take
+    // on
     Set<ShapeId> inputShapeIds = new HashSet<>();
     for (ShapeId operationShapeId : serviceShape.getAllOperations()) {
-      OperationShape operationShape = codegenContext.model()
-          .expectShape(operationShapeId, OperationShape.class);
+      OperationShape operationShape =
+          codegenContext.model().expectShape(operationShapeId, OperationShape.class);
       inputShapeIds.add(operationShape.getInputShape());
     }
 
-    codegenContext.writerDelegator().useFileWriter(moduleName + "/dafny_protocol.py", "", writer -> {
-      writer.write(
-          """
+    codegenContext
+        .writerDelegator()
+        .useFileWriter(
+            moduleName + "/dafny_protocol.py",
+            "",
+            writer -> {
+              writer.write(
+                  """
               import Wrappers
               from typing import Union
-                        
+
               class $L:
                   operation_name: str
-                  
+
                   # dafny_operation_input can take on any one of the types
                   # of the input values passed to the Dafny implementation
                   dafny_operation_input: Union[
                       ${C|}
                   ]
-                  
+
                   def __init__(self, operation_name, dafny_operation_input):
                       self.operation_name = operation_name
                       self.dafny_operation_input = dafny_operation_input
-                  
+
               class $L(Wrappers.Result):
                   def __init__(self):
                       super().__init__(self)
               """,
-          Constants.DAFNY_PROTOCOL_REQUEST,
-          writer.consumer(w -> generateDafnyOperationInputUnionValues(inputShapeIds, w, codegenContext)),
-          Constants.DAFNY_PROTOCOL_RESPONSE
-      );
-    });
+                  Constants.DAFNY_PROTOCOL_REQUEST,
+                  writer.consumer(
+                      w ->
+                          generateDafnyOperationInputUnionValues(inputShapeIds, w, codegenContext)),
+                  Constants.DAFNY_PROTOCOL_RESPONSE);
+            });
   }
 
   /**
-   * Generates the list of types that compose the Union of types that `dafny_operation_input` can take on.
+   * Generates the list of types that compose the Union of types that `dafny_operation_input` can
+   * take on.
+   *
    * @param inputShapeIds
    * @param writer
    */
@@ -82,16 +92,18 @@ public class DafnyProtocolFileWriter implements CustomFileWriter {
     }
     for (ShapeId inputShapeId : inputShapeIds) {
       if (context.model().expectShape(inputShapeId).isStructureShape()
-        && context.model().expectShape(inputShapeId).asStructureShape().get().hasTrait(
-          PositionalTrait.class)) {
+          && context
+              .model()
+              .expectShape(inputShapeId)
+              .asStructureShape()
+              .get()
+              .hasTrait(PositionalTrait.class)) {
         // TODO: Typing positionals, and somehow typing the base classes
         // Blob, boolean...
       } else {
         DafnyNameResolver.importDafnyTypeForShape(writer, inputShapeId, context);
         writer.write("$L,", DafnyNameResolver.getDafnyTypeForShape(inputShapeId));
       }
-
     }
   }
-
 }

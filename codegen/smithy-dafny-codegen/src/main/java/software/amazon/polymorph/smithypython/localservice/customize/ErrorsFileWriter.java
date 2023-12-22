@@ -23,58 +23,69 @@ import software.amazon.smithy.utils.CaseUtils;
 
 import static java.lang.String.format;
 
-/**
- * Extends the Smithy-Python-generated errors.py file
- * by adding Dafny plugin errors.
- */
+/** Extends the Smithy-Python-generated errors.py file by adding Dafny plugin errors. */
 public class ErrorsFileWriter implements CustomFileWriter {
 
   @Override
   public void customizeFileForServiceShape(
       ServiceShape serviceShape, GenerationContext codegenContext) {
-    String moduleName = SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(codegenContext.settings().getService().getNamespace());
+    String moduleName =
+        SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(
+            codegenContext.settings().getService().getNamespace());
 
     System.out.println("moduleName: " + moduleName);
 
-    codegenContext.writerDelegator().useFileWriter( moduleName + "/errors.py", "", writer -> {
-      writer.addStdlibImport("typing", "Dict");
-      writer.addStdlibImport("typing", "Any");
-      writer.addStdlibImport("typing", "List");
+    codegenContext
+        .writerDelegator()
+        .useFileWriter(
+            moduleName + "/errors.py",
+            "",
+            writer -> {
+              writer.addStdlibImport("typing", "Dict");
+              writer.addStdlibImport("typing", "Any");
+              writer.addStdlibImport("typing", "List");
 
-      System.out.println("moduleName INSIDE!: " + moduleName);
+              System.out.println("moduleName INSIDE!: " + moduleName);
 
-      // Generate Smithy shapes for each of this service's modelled errors
-      TreeSet<StructureShape> deserializingErrorShapes = new TreeSet<StructureShape>(
-          codegenContext.model().getStructureShapesWithTrait(ErrorTrait.class)
-              .stream()
-              .filter(structureShape -> structureShape.getId().getNamespace()
-                  .equals(codegenContext.settings().getService().getNamespace()))
-              .collect(Collectors.toSet()));
-      for (StructureShape errorShape : deserializingErrorShapes) {
-        renderError(codegenContext, writer, errorShape);
-      }
+              // Generate Smithy shapes for each of this service's modelled errors
+              TreeSet<StructureShape> deserializingErrorShapes =
+                  new TreeSet<StructureShape>(
+                      codegenContext.model().getStructureShapesWithTrait(ErrorTrait.class).stream()
+                          .filter(
+                              structureShape ->
+                                  structureShape
+                                      .getId()
+                                      .getNamespace()
+                                      .equals(
+                                          codegenContext.settings().getService().getNamespace()))
+                          .collect(Collectors.toSet()));
+              for (StructureShape errorShape : deserializingErrorShapes) {
+                renderError(codegenContext, writer, errorShape);
+              }
 
-      // Generate Smithy shapes that wrap each dependency service's modelled and un-modelled errors
-      Optional<LocalServiceTrait> maybeLocalServiceTrait = serviceShape.getTrait(LocalServiceTrait.class);
-      if (maybeLocalServiceTrait.isPresent()) {
-        LocalServiceTrait localServiceTrait = maybeLocalServiceTrait.get();
-        Set<ShapeId> serviceDependencyShapeIds = localServiceTrait.getDependencies();
-        if (serviceDependencyShapeIds != null) {
-          for (ShapeId serviceDependencyShapeId : serviceDependencyShapeIds) {
-            System.out.println("serviceDependencyShapeId: " + serviceDependencyShapeId);
-            renderDependencyWrappingError(codegenContext, writer, serviceDependencyShapeId);
-          }
-        }
-      }
+              // Generate Smithy shapes that wrap each dependency service's modelled and un-modelled
+              // errors
+              Optional<LocalServiceTrait> maybeLocalServiceTrait =
+                  serviceShape.getTrait(LocalServiceTrait.class);
+              if (maybeLocalServiceTrait.isPresent()) {
+                LocalServiceTrait localServiceTrait = maybeLocalServiceTrait.get();
+                Set<ShapeId> serviceDependencyShapeIds = localServiceTrait.getDependencies();
+                if (serviceDependencyShapeIds != null) {
+                  for (ShapeId serviceDependencyShapeId : serviceDependencyShapeIds) {
+                    System.out.println("serviceDependencyShapeId: " + serviceDependencyShapeId);
+                    renderDependencyWrappingError(codegenContext, writer, serviceDependencyShapeId);
+                  }
+                }
+              }
 
-      // Generate Smithy shapes for each of this service's un-modelled errors
-      writer.write(
-          """
+              // Generate Smithy shapes for each of this service's un-modelled errors
+              writer.write(
+                  """
              class CollectionOfErrors(ApiError[Literal["CollectionOfErrors"]]):
                  code: Literal["CollectionOfErrors"] = "CollectionOfErrors"
                  message: str
                  list: List[ServiceError]
-                 
+
                  def __init__(
                      self,
                      *,
@@ -83,10 +94,10 @@ public class ErrorsFileWriter implements CustomFileWriter {
                  ):
                      super().__init__(message)
                      self.list = list
-                             
+
                  def as_dict(self) -> Dict[str, Any]:
                      ""\"Converts the CollectionOfErrors to a dictionary.
-                             
+
                      The dictionary uses the modeled shape names rather than the parameter names as
                      keys to be mostly compatible with boto3.
                      ""\"
@@ -95,11 +106,11 @@ public class ErrorsFileWriter implements CustomFileWriter {
                          'code': self.code,
                          'list': self.list,
                      }
-                             
+
                  @staticmethod
                  def from_dict(d: Dict[str, Any]) -> "CollectionOfErrors":
                      ""\"Creates a CollectionOfErrors from a dictionary.
-                             
+
                      The dictionary is expected to use the modeled shape names rather than the
                      parameter names as keys to be mostly compatible with boto3.
                      ""\"
@@ -107,9 +118,9 @@ public class ErrorsFileWriter implements CustomFileWriter {
                          'message': d['message'],
                          'list': d['list']
                      }
-                             
+
                      return CollectionOfErrors(**kwargs)
-                             
+
                  def __repr__(self) -> str:
                      result = "CollectionOfErrors("
                      result += f'message={self.message},'
@@ -118,7 +129,7 @@ public class ErrorsFileWriter implements CustomFileWriter {
                      result += f'list={self.list}'
                      result += ")"
                      return result
-                             
+
                  def __eq__(self, other: Any) -> bool:
                      if not isinstance(other, CollectionOfErrors):
                          return False
@@ -129,7 +140,7 @@ public class ErrorsFileWriter implements CustomFileWriter {
                          getattr(self, a) == getattr(other, a)
                          for a in attributes
                      )
-                             
+
              class OpaqueError(ApiError[Literal["OpaqueError"]]):
                  code: Literal["OpaqueError"] = "OpaqueError"
                  obj: Any  # As an OpaqueError, type of obj is unknown
@@ -141,10 +152,10 @@ public class ErrorsFileWriter implements CustomFileWriter {
                  ):
                      super().__init__("")
                      self.obj = obj
-                             
+
                  def as_dict(self) -> Dict[str, Any]:
                      ""\"Converts the OpaqueError to a dictionary.
-                             
+
                      The dictionary uses the modeled shape names rather than the parameter names as
                      keys to be mostly compatible with boto3.
                      ""\"
@@ -153,11 +164,11 @@ public class ErrorsFileWriter implements CustomFileWriter {
                          'code': self.code,
                          'obj': self.obj,
                      }
-                             
+
                  @staticmethod
                  def from_dict(d: Dict[str, Any]) -> "OpaqueError":
                      ""\"Creates a OpaqueError from a dictionary.
-                             
+
                      The dictionary is expected to use the modeled shape names rather than the
                      parameter names as keys to be mostly compatible with boto3.
                      ""\"
@@ -165,9 +176,9 @@ public class ErrorsFileWriter implements CustomFileWriter {
                          'message': d['message'],
                          'obj': d['obj']
                      }
-                             
+
                      return OpaqueError(**kwargs)
-                             
+
                  def __repr__(self) -> str:
                      result = "OpaqueError("
                      result += f'message={self.message},'
@@ -176,7 +187,7 @@ public class ErrorsFileWriter implements CustomFileWriter {
                      result += f'obj={self.obj}'
                      result += ")"
                      return result
-                             
+
                  def __eq__(self, other: Any) -> bool:
                      if not isinstance(other, OpaqueError):
                          return False
@@ -187,9 +198,8 @@ public class ErrorsFileWriter implements CustomFileWriter {
                          getattr(self, a) == getattr(other, a)
                          for a in attributes
                      )
-              """
-      );
-    });
+              """);
+            });
   }
 
   // This is lifted from Smithy-Python, where it is not sufficiently customizable
@@ -201,21 +211,39 @@ public class ErrorsFileWriter implements CustomFileWriter {
 
     String code = shape.getId().getName();
     Symbol symbol = context.symbolProvider().toSymbol(shape);
-    var apiError = Symbol.builder()
+    var apiError =
+        Symbol.builder()
             .name("ApiError")
-            .namespace(format("%s.errors", SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(context.settings().getService().getNamespace(), context)), ".")
-            .definitionFile(format("./%s/errors.py", SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(context.settings().getService().getNamespace())))
-            .build();    writer.openBlock("class $L($T[Literal[$S]]):", "", symbol.getName(), apiError, code, () -> {
-      writer.write("code: Literal[$1S] = $1S", code);
-      writer.write("message: str");
-    });
+            .namespace(
+                format(
+                    "%s.errors",
+                    SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
+                        context.settings().getService().getNamespace(), context)),
+                ".")
+            .definitionFile(
+                format(
+                    "./%s/errors.py",
+                    SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(
+                        context.settings().getService().getNamespace())))
+            .build();
+    writer.openBlock(
+        "class $L($T[Literal[$S]]):",
+        "",
+        symbol.getName(),
+        apiError,
+        code,
+        () -> {
+          writer.write("code: Literal[$1S] = $1S", code);
+          writer.write("message: str");
+        });
     writer.write("");
   }
 
   // This is lifted from Smithy-Python, where it is not sufficiently customizable
   // to be used for our purposes.
   // TODO-Python: Reconcile this with Smithy-Python.
-  private void renderDependencyWrappingError(GenerationContext context, PythonWriter writer, ShapeId serviceDependencyShapeId) {
+  private void renderDependencyWrappingError(
+      GenerationContext context, PythonWriter writer, ShapeId serviceDependencyShapeId) {
     writer.addStdlibImport("typing", "Dict");
     writer.addStdlibImport("typing", "Any");
     writer.addStdlibImport("typing", "Literal");
@@ -224,15 +252,30 @@ public class ErrorsFileWriter implements CustomFileWriter {
     String code = serviceDependencyShapeId.getName();
     Symbol symbol = context.symbolProvider().toSymbol(serviceDependencyShape);
     System.out.println("code = " + code);
-    var apiError = Symbol.builder()
+    var apiError =
+        Symbol.builder()
             .name("ApiError")
-            .namespace(format("%s.errors", SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(context.settings().getService().getNamespace(), context)), ".")
-            .definitionFile(format("./%s/errors.py", SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(context.settings().getService().getNamespace())))
+            .namespace(
+                format(
+                    "%s.errors",
+                    SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
+                        context.settings().getService().getNamespace(), context)),
+                ".")
+            .definitionFile(
+                format(
+                    "./%s/errors.py",
+                    SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(
+                        context.settings().getService().getNamespace())))
             .build();
-      writer.openBlock("class $L($T[Literal[$S]]):", "", code, apiError, code, () -> {
-      writer.write("$L: Any", code);
-    });
+    writer.openBlock(
+        "class $L($T[Literal[$S]]):",
+        "",
+        code,
+        apiError,
+        code,
+        () -> {
+          writer.write("$L: Any", code);
+        });
     writer.write("");
   }
-
 }

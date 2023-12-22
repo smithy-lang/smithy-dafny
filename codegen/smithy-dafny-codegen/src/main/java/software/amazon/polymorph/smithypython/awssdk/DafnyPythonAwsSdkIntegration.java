@@ -14,54 +14,56 @@ import software.amazon.smithy.python.codegen.integration.PythonIntegration;
 
 public final class DafnyPythonAwsSdkIntegration implements PythonIntegration {
 
-    /**
-     * Generate all Smithy-Dafny Python AWS SDK custom code.
-     *
-     * @param codegenContext Code generation context that can be queried when writing additional
-     *                       files.
-     */
-    @Override
-    public void customize(GenerationContext codegenContext) {
-        // ONLY run this integration's customizations IF the codegen is using its ApplicationProtocol
-        if (!codegenContext.applicationProtocol().equals(
-                DafnyPythonAwsSdkProtocolGenerator.DAFNY_PYTHON_AWS_SDK_PROTOCOL)) {
-            return;
-        }
-
-        customizeForServiceShape(codegenContext.settings().getService(codegenContext.model()), codegenContext);
+  /**
+   * Generate all Smithy-Dafny Python AWS SDK custom code.
+   *
+   * @param codegenContext Code generation context that can be queried when writing additional
+   *     files.
+   */
+  @Override
+  public void customize(GenerationContext codegenContext) {
+    // ONLY run this integration's customizations IF the codegen is using its ApplicationProtocol
+    if (!codegenContext
+        .applicationProtocol()
+        .equals(DafnyPythonAwsSdkProtocolGenerator.DAFNY_PYTHON_AWS_SDK_PROTOCOL)) {
+      return;
     }
 
-    /**
-     * Generate any code for the serviceShape.
-     *
-     * @param serviceShape
-     * @param codegenContext
-     */
-    private void customizeForServiceShape(ServiceShape serviceShape,
-            GenerationContext codegenContext) {
-        new AwsSdkShimFileWriter().customizeFileForServiceShape(serviceShape, codegenContext);
-    }
+    customizeForServiceShape(
+        codegenContext.settings().getService(codegenContext.model()), codegenContext);
+  }
 
+  /**
+   * Generate any code for the serviceShape.
+   *
+   * @param serviceShape
+   * @param codegenContext
+   */
+  private void customizeForServiceShape(
+      ServiceShape serviceShape, GenerationContext codegenContext) {
+    new AwsSdkShimFileWriter().customizeFileForServiceShape(serviceShape, codegenContext);
+  }
 
-    /**
-     * Creates the Dafny ApplicationProtocol object.
-     * Smithy-Python requests this object as part of the ProtocolGenerator implementation.
-     *
-     * @return Returns the created application protocol.
-     */
-    @Override
-    public List<ProtocolGenerator> getProtocolGenerators() {
-        List<ProtocolGenerator> protocolGenerators = new ArrayList<>();
-        protocolGenerators.add(new DafnyPythonAwsSdkProtocolGenerator() {
-            // Setting a Polymorph-specific protocol allows any services that
-            //  have this protocol trait to be generated using this PythonIntegration.
-            // See the DafnyAwsSdkProtocolTrait class in this directory.
-            @Override
-            public ShapeId getProtocol() {
-                return ShapeId.fromParts("aws.polymorph", "awsSdk");
-            }
+  /**
+   * Creates the Dafny ApplicationProtocol object. Smithy-Python requests this object as part of the
+   * ProtocolGenerator implementation.
+   *
+   * @return Returns the created application protocol.
+   */
+  @Override
+  public List<ProtocolGenerator> getProtocolGenerators() {
+    List<ProtocolGenerator> protocolGenerators = new ArrayList<>();
+    protocolGenerators.add(
+        new DafnyPythonAwsSdkProtocolGenerator() {
+          // Setting a Polymorph-specific protocol allows any services that
+          //  have this protocol trait to be generated using this PythonIntegration.
+          // See the DafnyAwsSdkProtocolTrait class in this directory.
+          @Override
+          public ShapeId getProtocol() {
+            return ShapeId.fromParts("aws.polymorph", "awsSdk");
+          }
         });
 
-        return protocolGenerators;
-    }
+    return protocolGenerators;
+  }
 }

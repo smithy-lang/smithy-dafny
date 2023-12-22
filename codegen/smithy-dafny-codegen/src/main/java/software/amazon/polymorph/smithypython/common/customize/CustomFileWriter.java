@@ -8,25 +8,29 @@ import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.python.codegen.GenerationContext;
 
-/**
- * Interface for writing custom Dafny-Python code to files.
- */
+/** Interface for writing custom Dafny-Python code to files. */
 public interface CustomFileWriter {
 
   /**
-   * Writes code specific to the file targeted by the CustomFileWriter for the provided ServiceShape.
-   * The ServiceShape SHOULD be a shape annotated with the `aws.polymorph#localService` trait.
+   * Writes code specific to the file targeted by the CustomFileWriter for the provided
+   * ServiceShape. The ServiceShape SHOULD be a shape annotated with the
+   * `aws.polymorph#localService` trait.
+   *
    * @param serviceShape
    * @param codegenContext
    */
-  default void customizeFileForServiceShape(ServiceShape serviceShape, GenerationContext codegenContext) { }
+  default void customizeFileForServiceShape(
+      ServiceShape serviceShape, GenerationContext codegenContext) {}
 
   /**
    * Given the provided shapeIds, write code specific to the file targeted by the CustomFileWriter.
-   * The shapeIds MUST NOT be attached to a ServiceShape that was passed in a call to `customizeFileForServiceShape`.
-   * This function will generate code for shapes that are NOT attached to a localService.
+   * The shapeIds MUST NOT be attached to a ServiceShape that was passed in a call to
+   * `customizeFileForServiceShape`. This function will generate code for shapes that are NOT
+   * attached to a localService.
+   *
    * @param shapeIds
    * @param codegenContext
    */
-  default void customizeFileForNonServiceShapes(Set<ShapeId> shapeIds, GenerationContext codegenContext) { }
+  default void customizeFileForNonServiceShapes(
+      Set<ShapeId> shapeIds, GenerationContext codegenContext) {}
 }
