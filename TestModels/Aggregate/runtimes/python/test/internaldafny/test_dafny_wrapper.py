@@ -6,7 +6,7 @@ pytest will find and execute the `test_dafny` method below,
 which will execute the `internaldafny_test_executor.py` file in the `dafny` directory.
 """
 
-# TODO-Python-PYTHONPATH: Remove
+# TODO-Python: Remove PYTHONPATH workaround, use fully-qualified module names via dfyproject.toml.
 import sys
 
 internaldafny_dir = '/'.join(__file__.split("/")[:-1])
@@ -18,11 +18,11 @@ sys.path.append(internaldafny_dir + "/generated")
 # This is not generated; these must be manually added.
 # This can be removed once PYTHONPATH workaround is removed,
 # and all Dafny-generated imports are fully qualified.
-# TODO-Python-PYTHONPATH: Remove
-import simple_constructor
-import wrapped_simple_constructor
+
+import simple_aggregate
+
+# End import modules required for Dafny-generated tests
 
 def test_dafny():
   # Dafny tests are executed when importing `internaldafny_test_executor`
-  # TODO-Python-PYTHONPATH: Qualify import
   import internaldafny_test_executor
