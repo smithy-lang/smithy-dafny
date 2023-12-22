@@ -217,8 +217,8 @@ _polymorph:
 	$(OUTPUT_DAFNY) \
 	$(OUTPUT_DOTNET) \
 	$(OUTPUT_JAVA) \
-  $(OUTPUT_PYTHON) \
-  $(POLYMORPH_PYTHON_MODULE_NAME) \
+    $(OUTPUT_PYTHON) \
+    $(POLYMORPH_PYTHON_MODULE_NAME) \
 	--model $(if $(DIR_STRUCTURE_V2),$(LIBRARY_ROOT)/dafny/$(SERVICE)/Model,$(LIBRARY_ROOT)/Model) \
 	--dependent-model $(PROJECT_ROOT)/$(SMITHY_DEPS) \
 	$(patsubst %, --dependent-model $(PROJECT_ROOT)/%/Model, $($(service_deps_var))) \
@@ -234,7 +234,7 @@ _polymorph_wrapped:
 	$(OUTPUT_DOTNET_WRAPPED) \
 	$(OUTPUT_JAVA_WRAPPED) \
 	$(OUTPUT_PYTHON_WRAPPED) \
-  $(POLYMORPH_PYTHON_MODULE_NAME) \
+    $(POLYMORPH_PYTHON_MODULE_NAME) \
 	--model $(if $(DIR_STRUCTURE_V2),$(LIBRARY_ROOT)/dafny/$(SERVICE)/Model,$(LIBRARY_ROOT)/Model) \
 	--dependent-model $(PROJECT_ROOT)/$(SMITHY_DEPS) \
 	$(patsubst %, --dependent-model $(PROJECT_ROOT)/%/Model, $($(service_deps_var))) \
@@ -335,17 +335,26 @@ _polymorph_java: _polymorph_wrapped
 _polymorph_java: POLYMORPH_LANGUAGE_TARGET=java
 _polymorph_java: _polymorph_dependencies
 
-polymorph_python: OUTPUT_PYTHON=--output-python $(LIBRARY_ROOT)/runtimes/python/smithygenerated
-polymorph_python: POLYMORPH_PYTHON_MODULE_NAME=--python-module-name $(PYTHON_MODULE_NAME)
-polymorph_python: _polymorph
+.PHONY: polymorph_python
+polymorph_python:
+	for service in $(PROJECT_SERVICES) ; do \
+		export service_deps_var=SERVICE_DEPS_$${service} ; \
+		export namespace_var=SERVICE_NAMESPACE_$${service} ; \
+		export SERVICE=$${service} ; \
+		$(MAKE) _polymorph_python || exit 1; \
+	done
+
+_polymorph_python: OUTPUT_PYTHON=--output-python $(LIBRARY_ROOT)/runtimes/python/smithygenerated
+_polymorph_python: POLYMORPH_PYTHON_MODULE_NAME=--python-module-name $(PYTHON_MODULE_NAME)
+_polymorph_python: _polymorph
 # TODO-Python: Right now, wrapped code generation requires an isolated directory,
 #   as it runs `rm models.py` and `rm errors.py` after generating.
 # Work is planned to not do this by writing a SymbolVisitor specific to wrapped localService generation.
 # This will resolve some of the weirdness in this section.
-polymorph_python: OUTPUT_PYTHON_WRAPPED=--output-python $(LIBRARY_ROOT)/runtimes/python/smithygenerated_wrapped
-polymorph_python: OUTPUT_LOCAL_SERVICE=--local-service-test
-polymorph_python: _polymorph_wrapped
-polymorph_python:
+_polymorph_python: OUTPUT_PYTHON_WRAPPED=--output-python $(LIBRARY_ROOT)/runtimes/python/smithygenerated_wrapped
+_polymorph_python: OUTPUT_LOCAL_SERVICE=--local-service-test
+_polymorph_python: _polymorph_wrapped
+_polymorph_python:
 	rm -rf runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated
 	mkdir runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated
 	cp -r runtimes/python/smithygenerated_wrapped/* runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated
@@ -354,8 +363,8 @@ polymorph_python:
 	rm runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated/pyproject.toml
 	rm -rf runtimes/python/smithygenerated
 	rm -rf runtimes/python/smithygenerated_wrapped
-polymorph_python: POLYMORPH_LANGUAGE_TARGET=python
-polymorph_python: _polymorph_dependencies
+_polymorph_python: POLYMORPH_LANGUAGE_TARGET=python
+_polymorph_python: _polymorph_dependencies
 
 ########################## .NET targets
 

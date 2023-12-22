@@ -8,7 +8,7 @@ import java.util.logging.Logger;
 
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.smithypython.localservice.customize.ReferencesFileWriter;
-import software.amazon.polymorph.smithypython.localservice.extensions.DafnyPythonWrappedLocalServiceSymbolVisitor;
+import software.amazon.polymorph.smithypython.wrappedlocalservice.extensions.DafnyPythonWrappedLocalServiceSymbolVisitor;
 import software.amazon.polymorph.smithypython.localservice.extensions.DirectedDafnyPythonLocalServiceCodegen;
 import software.amazon.smithy.build.FileManifest;
 import software.amazon.smithy.codegen.core.CodegenException;
