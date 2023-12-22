@@ -240,13 +240,13 @@ public class SmithyNameResolver {
       //     + ".smithygenerated."
       //     + getPythonModuleNamespaceForSmithyNamespace(
       //     codegenContext.settings().getService().getNamespace());
-      return /*"smithygenerated." + */
+      return "smithygenerated." +
           getPythonModuleNamespaceForSmithyNamespace(settings.getService().getNamespace());
     }
     // return codegenContext.settings().getModuleName()
     //     + ".smithygenerated."
     //     + getPythonModuleNamespaceForSmithyNamespace(smithyNamespace);
-    return /*"smithygenerated." + */getPythonModuleNamespaceForSmithyNamespace(smithyNamespace);
+    return "smithygenerated." + getPythonModuleNamespaceForSmithyNamespace(smithyNamespace);
   }
 
   /**
