@@ -16,6 +16,7 @@ sys.path.append(module_root_dir + "/internaldafny/generated")
 sys.path.append(module_root_dir)
 
 # Import extern
-# This is needed due to PYTHONPATH workaround
+# This is needed due to PYTHONPATH workaround and can be removed as part of removing that
+# TODO-Python: Remove PYTHONPATH workaround, use fully-qualified module names via dfyproject.toml.
 # This adds the extern to the test's generated class
 from .internaldafny.extern import simple_constructor_internaldafny_wrapped
