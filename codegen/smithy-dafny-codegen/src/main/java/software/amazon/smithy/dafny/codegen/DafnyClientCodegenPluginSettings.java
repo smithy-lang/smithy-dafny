@@ -5,7 +5,9 @@ package software.amazon.smithy.dafny.codegen;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.polymorph.CodegenEngine;
+import software.amazon.polymorph.smithydafny.DafnyVersion;
 import software.amazon.smithy.build.FileManifest;
+import software.amazon.smithy.model.node.Node;
 import software.amazon.smithy.model.node.ObjectNode;
 import software.amazon.smithy.model.node.StringNode;
 import software.amazon.smithy.model.shapes.ShapeId;
@@ -52,16 +54,27 @@ class DafnyClientCodegenPluginSettings {
      */
     public final Path includeDafnyFile;
 
+    /**
+     * The Dafny version to generate code compatible with.
+     * This is used to ensure both Dafny source compatibility
+     * and compatibility with the Dafny compiler and runtime internals,
+     * which shim code generation currently depends on.
+     * Required when the edition is 2023.10 or later.
+     */
+    public final DafnyVersion dafnyVersion;
+
     private DafnyClientCodegenPluginSettings(
             final DafnyClientCodegenEdition edition,
             final ShapeId serviceId,
             final Set<CodegenEngine.TargetLanguage> targetLanguages,
-            final Path includeDafnyFile
+            final Path includeDafnyFile,
+            final DafnyVersion dafnyVersion
     ) {
         this.edition = edition;
         this.serviceId = serviceId;
         this.targetLanguages = targetLanguages;
         this.includeDafnyFile = includeDafnyFile;
+        this.dafnyVersion = dafnyVersion;
     }
 
     static Optional<DafnyClientCodegenPluginSettings> fromObject(final ObjectNode node, final FileManifest manifest) {
@@ -108,8 +121,17 @@ class DafnyClientCodegenPluginSettings {
                     includeDafnyFileNormalized);
         }
 
+        final String dafnyVersionString;
+        if (edition.ordinal() >= DafnyClientCodegenEdition.EDITION_2023_10.ordinal()) {
+            // Required from this edition on
+            dafnyVersionString = node.expectStringMember("dafnyVersion").getValue();
+        } else {
+            dafnyVersionString = node.getStringMemberOrDefault("dafnyVersion", "4.1");
+        }
+
         return Optional.of(
-                new DafnyClientCodegenPluginSettings(edition, serviceId, targetLanguages, includeDafnyFileNormalized));
+                new DafnyClientCodegenPluginSettings(edition, serviceId, targetLanguages, includeDafnyFileNormalized,
+                                                     DafnyVersion.parse(dafnyVersionString)));
     }
 
     /**

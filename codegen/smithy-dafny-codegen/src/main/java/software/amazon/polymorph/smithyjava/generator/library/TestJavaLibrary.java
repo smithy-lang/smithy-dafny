@@ -9,6 +9,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import software.amazon.polymorph.smithydafny.DafnyVersion;
 import software.amazon.polymorph.smithyjava.generator.library.shims.TestServiceShim;
 import software.amazon.polymorph.utils.TokenTree;
 
@@ -19,8 +20,8 @@ public class TestJavaLibrary extends JavaLibrary {
     @SuppressWarnings("unused")
     private static final Logger LOGGER = LoggerFactory.getLogger(TestJavaLibrary.class);
 
-    public TestJavaLibrary(Model model, ServiceShape serviceShape, AwsSdkVersion sdkVersion) {
-        super(model, serviceShape, sdkVersion);
+    public TestJavaLibrary(Model model, ServiceShape serviceShape, AwsSdkVersion sdkVersion, DafnyVersion dafnyVersion) {
+        super(model, serviceShape, sdkVersion, dafnyVersion);
     }
 
     @Override

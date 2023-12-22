@@ -2,9 +2,9 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import simple_constructor_internaldafny_wrapped
-from simple_constructor.smithygenerated.client import SimpleConstructor
-from simple_constructor.smithygenerated.shim import SimpleConstructorShim
-from simple_constructor.smithygenerated.config import dafny_config_to_smithy_config
+from simple_constructor.client import SimpleConstructor
+from simple_constructor.shim import SimpleConstructorShim
+from simple_constructor.config import dafny_config_to_smithy_config
 import Wrappers
 
 @staticmethod

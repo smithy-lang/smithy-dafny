@@ -9,6 +9,7 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.TypeName;
 
 import software.amazon.polymorph.smithydafny.DafnyNameResolver;
+import software.amazon.polymorph.smithydafny.DafnyVersion;
 import software.amazon.polymorph.smithyjava.generator.CodegenSubject;
 import software.amazon.polymorph.utils.AwsSdkNameResolverHelpers;
 import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
@@ -25,8 +26,8 @@ import static software.amazon.smithy.utils.StringUtils.uncapitalize;
 
 public class AwsSdkDafnyV2 extends Dafny {
 
-    public AwsSdkDafnyV2(ServiceShape serviceShape, Model model) {
-        super(packageNameForServiceShape(serviceShape), model, serviceShape, CodegenSubject.AwsSdkVersion.V2);
+    public AwsSdkDafnyV2(ServiceShape serviceShape, Model model, DafnyVersion dafnyVersion) {
+        super(packageNameForServiceShape(serviceShape), model, serviceShape, CodegenSubject.AwsSdkVersion.V2, dafnyVersion);
     }
 
     @Override

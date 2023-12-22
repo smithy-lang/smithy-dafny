@@ -10,7 +10,7 @@ module {:extern "simple.dafnyextern.internaldafny" } SimpleExtern refines Abstra
     }
 
     method SimpleExtern(config: SimpleExternConfig)
-        returns (res: Result<SimpleExternClient, Error>)
+        returns (res: Result<ISimpleExternClient, Error>)
     {
         var client := new SimpleExternClient(Operations.Config);
         return Success(client);

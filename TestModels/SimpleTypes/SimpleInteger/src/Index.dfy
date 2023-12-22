@@ -10,7 +10,7 @@ module {:extern "simple.types.integer.internaldafny" } SimpleInteger refines Abs
     }
 
     method SimpleInteger(config: SimpleIntegerConfig)
-    returns (res: Result<SimpleIntegerClient, Error>) {
+    returns (res: Result<ISimpleTypesIntegerClient, Error>) {
         var client := new SimpleIntegerClient(Operations.Config);
         return Success(client);
     }

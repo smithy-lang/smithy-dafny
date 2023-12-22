@@ -55,6 +55,12 @@ GRADLEW := $(PROJECT_ROOT)/../codegen/gradlew
 
 ########################## Dafny targets
 
+# TODO: This target will not work for projects that use `replaceable` 
+#       module syntax with multiple language targets.
+# It will fail with error:
+# Error: modules 'A' and 'B' both have CompileName 'same.extern.name'
+# We need to come up with some way to verify files per-language.
+# Rewrite this as part of Java implementation of LanguageSpecificLogic TestModel.
 verify:
 	dafny \
 		-vcsCores:$(CORES) \
@@ -105,29 +111,26 @@ dafny-reportgenerator:
 # and can be the same for all such runtimes.
 # Since such targets are all shared,
 # this is tractable.
-
-# On Python, `dafny build` adds Dafny runtime modules (ex. `_dafny.py`).
-# Python runs `build` targets for the target module, and `transpile` targets for dependencies and tests.
-# Dafny team should upload DafnyRuntime (_dafny.py) to PyPi,
-# TODO: Once DafnyRuntime is on PyPi, reference that and migrate Python builds to `transpile_implementation`.
-
+transpile_implementation: SRC_INDEX_TRANSPILE=$(if $(SRC_INDEX),$(SRC_INDEX),src/Index.dfy)
 transpile_implementation:
 	dafny \
-		-vcsCores:$(CORES) \
-		-compileTarget:$(TARGET) \
-		-spillTargetCode:3 \
-		-compile:0 \
-		-optimizeErasableDatatypeWrapper:0 \
-		$(COMPILE_SUFFIX_OPTION) \
-		-quantifierSyntax:3 \
-		-unicodeChar:0 \
-		-functionSyntax:3 \
-		-useRuntimeLib \
-		-out $(OUT) \
-		./src/Index.dfy \
-		-library:$(PROJECT_ROOT)/dafny-dependencies/StandardLibrary/src/Index.dfy \
-		$(patsubst %, -library:$(PROJECT_ROOT)/%/src/Index.dfy, $(LIBRARIES))
+			-vcsCores:$(CORES) \
+			-compileTarget:$(TARGET) \
+			-spillTargetCode:3 \
+			-compile:0 \
+			-optimizeErasableDatatypeWrapper:0 \
+			$(COMPILE_SUFFIX_OPTION) \
+			-quantifierSyntax:3 \
+			-unicodeChar:0 \
+			-functionSyntax:3 \
+			-useRuntimeLib \
+			-out $(OUT) \
+			$(SRC_INDEX_TRANSPILE) \
+			-library:$(PROJECT_ROOT)/dafny-dependencies/StandardLibrary/src/Index.dfy \
+			$(patsubst %, -library:$(PROJECT_ROOT)/%/src/Index.dfy, $(LIBRARIES))
 
+transpile_test: SRC_INDEX_TRANSPILE=$(if $(SRC_INDEX),$(SRC_INDEX),src/Index.dfy)
+transpile_test: TEST_INDEX_TRANSPILE=$(if $(TEST_INDEX),$(TEST_INDEX),`find ./test -name '*.dfy'`)
 transpile_test:
 	dafny \
 		-vcsCores:$(CORES) \
@@ -142,8 +145,8 @@ transpile_test:
 		-functionSyntax:3 \
 		-useRuntimeLib \
 		-out $(OUT) \
-		`find ./test -name '*.dfy'` \
-		-library:src/Index.dfy
+		$(TEST_INDEX_TRANSPILE) \
+		-library:$(SRC_INDEX_TRANSPILE)
 
 transpile_dependencies:
 	$(MAKE) -C $(STANDARD_LIBRARY_PATH) transpile_implementation_$(LANG)
@@ -165,10 +168,12 @@ _polymorph:
 	@: $(if ${CODEGEN_CLI_ROOT},,$(error You must pass the path CODEGEN_CLI_ROOT: CODEGEN_CLI_ROOT=/path/to/smithy-dafny/codegen/smithy-dafny-codegen-cli));
 	cd $(CODEGEN_CLI_ROOT); \
 	$(GRADLEW) run --args="\
+	$(DAFNY_VERSION_OPTION) \
 	$(OUTPUT_DAFNY) \
 	$(OUTPUT_DOTNET) \
 	$(OUTPUT_JAVA) \
 	$(OUTPUT_PYTHON) \
+    $(POLYMORPH_PYTHON_MODULE_NAME) \
 	--model $(LIBRARY_ROOT)/Model \
 	--dependent-model $(PROJECT_ROOT)/dafny-dependencies/Model \
 	$(patsubst %, --dependent-model $(PROJECT_ROOT)/%/Model, $(LIBRARIES)) \
@@ -179,10 +184,12 @@ _polymorph_wrapped:
 	@: $(if ${CODEGEN_CLI_ROOT},,$(error You must pass the path CODEGEN_CLI_ROOT: CODEGEN_CLI_ROOT=/path/to/smithy-dafny/codegen/smithy-dafny-codegen-cli));
 	cd $(CODEGEN_CLI_ROOT); \
 	$(GRADLEW) run --args="\
+	$(DAFNY_VERSION_OPTION) \
 	$(OUTPUT_DAFNY_WRAPPED) \
 	$(OUTPUT_DOTNET_WRAPPED) \
 	$(OUTPUT_JAVA_WRAPPED) \
 	$(OUTPUT_PYTHON_WRAPPED) \
+    $(POLYMORPH_PYTHON_MODULE_NAME) \
 	--model $(LIBRARY_ROOT)/Model \
 	--dependent-model $(PROJECT_ROOT)/dafny-dependencies/Model \
 	$(patsubst %, --dependent-model $(PROJECT_ROOT)/%/Model, $(LIBRARIES)) \
@@ -234,6 +241,7 @@ polymorph_java: POLYMORPH_LANGUAGE_TARGET=java
 polymorph_java: _polymorph_dependencies
 
 polymorph_python: OUTPUT_PYTHON=--output-python $(LIBRARY_ROOT)/runtimes/python/smithygenerated
+polymorph_python: POLYMORPH_PYTHON_MODULE_NAME=--python-module-name $(PYTHON_MODULE_NAME)
 polymorph_python: _polymorph
 # TODO-Python: Right now, wrapped code generation requires an isolated directory,
 #   as it runs `rm models.py` and `rm errors.py` after generating.
@@ -260,10 +268,13 @@ transpile_net: | transpile_implementation_net transpile_test_net transpile_depen
 
 transpile_implementation_net: TARGET=cs
 transpile_implementation_net: OUT=runtimes/net/ImplementationFromDafny
+transpile_implementation_net: SRC_INDEX=$(NET_SRC_INDEX)
 transpile_implementation_net: transpile_implementation
 
 transpile_test_net: TARGET=cs
 transpile_test_net: OUT=runtimes/net/tests/TestsFromDafny
+transpile_test_net: SRC_INDEX=$(NET_SRC_INDEX)
+transpile_test_net: TEST_INDEX=$(NET_TEST_INDEX)
 transpile_test_net: transpile_test
 
 transpile_dependencies_net: LANG=net

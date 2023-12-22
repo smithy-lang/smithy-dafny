@@ -4,6 +4,7 @@ package software.amazon.polymorph.smithyjava.generator.awssdk;
 
 import java.util.function.BiConsumer;
 
+import software.amazon.polymorph.smithydafny.DafnyVersion;
 import software.amazon.polymorph.smithyjava.generator.awssdk.v1.JavaAwsSdkV1;
 import software.amazon.polymorph.smithyjava.generator.awssdk.v2.JavaAwsSdkV2;
 import software.amazon.polymorph.smithyjava.generator.CodegenSubject;
@@ -32,13 +33,13 @@ public class TestSetupUtils {
                 localModel, namespaceForService(awsName));
         return JavaAwsSdkV1.createJavaAwsSdkV1(serviceShape, localModel);
     }
-    public static JavaAwsSdkV2 setupAwsSdkV2(Model localModel, String awsName) {
+    public static JavaAwsSdkV2 setupAwsSdkV2(Model localModel, String awsName, DafnyVersion dafnyVersion) {
         ServiceShape serviceShape = serviceFromNamespace(
             localModel, namespaceForService(awsName));
-        return JavaAwsSdkV2.createJavaAwsSdkV2(serviceShape, localModel);
+        return JavaAwsSdkV2.createJavaAwsSdkV2(serviceShape, localModel, dafnyVersion);
     }
-    public static JavaLibrary setupLibrary(Model localModel, String namespace) {
+    public static JavaLibrary setupLibrary(Model localModel, String namespace, DafnyVersion dafnyVersion) {
         ServiceShape serviceShape = serviceFromNamespace(localModel, namespace);
-        return new JavaLibrary(localModel, serviceShape, CodegenSubject.AwsSdkVersion.V1);
+        return new JavaLibrary(localModel, serviceShape, CodegenSubject.AwsSdkVersion.V1, dafnyVersion);
     }
 }

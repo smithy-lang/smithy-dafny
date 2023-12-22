@@ -3,6 +3,7 @@
 package software.amazon.polymorph.smithyjava.generator.awssdk.v1;
 
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
@@ -26,7 +27,6 @@ import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.utils.StringUtils;
 
-import static software.amazon.polymorph.smithyjava.nameresolver.Constants.DAFNY_RESULT_CLASS_NAME;
 import static software.amazon.polymorph.smithyjava.nameresolver.Constants.DAFNY_TUPLE0_CLASS_NAME;
 import static software.amazon.polymorph.smithyjava.nameresolver.Constants.SMITHY_API_UNIT;
 
@@ -138,32 +138,43 @@ public class ShimV1 extends Generator {
                         subject.nativeNameResolver.typeForShape(inputShapeId),
                         StringUtils.capitalize(inputShapeId.getName()))
                 .beginControlFlow("try");
+        CodeBlock successTypeDescriptor;
         if (outputShapeId.equals(SMITHY_API_UNIT)) {
+            successTypeDescriptor = CodeBlock.of(DAFNY_TUPLE0_CLASS_NAME + "._typeDescriptor()");
             builder.addStatement("_impl.$L(converted)",
                             StringUtils.uncapitalize(operationName))
-                    .addStatement("return $T.create_Success($T.create())",
-                            DAFNY_RESULT_CLASS_NAME, DAFNY_TUPLE0_CLASS_NAME);
+                    .addStatement("return $L",
+                            subject.dafnyNameResolver.createSuccess(
+                                    successTypeDescriptor,
+                                    CodeBlock.of("$T.create()", DAFNY_TUPLE0_CLASS_NAME)));
         } else {
+            successTypeDescriptor = subject.dafnyNameResolver.typeDescriptor(outputShapeId);
             builder.addStatement("$T result = _impl.$L(converted)",
                             subject.nativeNameResolver.typeForOperationOutput(outputShapeId),
                             StringUtils.uncapitalize(operationName))
                     .addStatement("$T dafnyResponse = ToDafny.$L(result)",
                             dafnyOutput,
                             StringUtils.capitalize(outputShapeId.getName()))
-                    .addStatement("return $T.create_Success(dafnyResponse)",
-                            DAFNY_RESULT_CLASS_NAME);
+                    .addStatement("return $L",
+                            subject.dafnyNameResolver.createSuccess(
+                                    successTypeDescriptor,
+                                    CodeBlock.of("dafnyResponse")));
         }
 
         operationShape.getErrors().stream().sorted().forEach(shapeId ->
                 builder
                         .nextControlFlow("catch ($T ex)", subject.nativeNameResolver.typeForShape(shapeId))
-                        .addStatement("return $T.create_Failure(ToDafny.Error(ex))",
-                                DAFNY_RESULT_CLASS_NAME)
+                        .addStatement("return $L",
+                                subject.dafnyNameResolver.createFailure(
+                                        successTypeDescriptor,
+                                        CodeBlock.of("ToDafny.Error(ex)")))
         );
         return Optional.of(builder
                 .nextControlFlow("catch ($T ex)", subject.nativeNameResolver.baseErrorForService())
-                .addStatement("return $T.create_Failure(ToDafny.Error(ex))",
-                        DAFNY_RESULT_CLASS_NAME)
+                .addStatement("return $L",
+                        subject.dafnyNameResolver.createFailure(
+                                successTypeDescriptor,
+                                CodeBlock.of("ToDafny.Error(ex)")))
                 .endControlFlow()
                 .build());
     }

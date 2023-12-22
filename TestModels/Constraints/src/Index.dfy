@@ -10,7 +10,7 @@ module {:extern "simple.constraints.internaldafny" } SimpleConstraints refines A
   }
 
   method SimpleConstraints(config: SimpleConstraintsConfig)
-    returns (res: Result<SimpleConstraintsClient, Error>)
+    returns (res: Result<ISimpleConstraintsClient, Error>)
   {
     var client := new SimpleConstraintsClient(Operations.Config);
     return Success(client);

@@ -114,9 +114,10 @@ public class AwsSdkShimCodegen {
         final TokenTree catchBlock = Token.of("""
                 catch (System.AggregateException aggregate) {
                     return %s.create_Failure(TypeConversion.ToDafny_CommonError(aggregate.InnerException));
+                } catch (System.Exception ex) {
+                    return %s.create_Failure(TypeConversion.ToDafny_CommonError(ex));
                 }
-                """.formatted(
-                        dafnyOutputType));
+                """.formatted(dafnyOutputType, dafnyOutputType));
 
         final TokenTree methodSignature = generateOperationShimSignature(operationShape);
         final TokenTree methodBody = TokenTree.of(sdkRequest, tryBlock, catchBlock);
