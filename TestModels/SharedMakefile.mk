@@ -356,7 +356,7 @@ _polymorph_python: OUTPUT_LOCAL_SERVICE=--local-service-test
 _polymorph_python: _polymorph_wrapped
 _polymorph_python:
 	rm -rf runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated
-	mkdir runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated
+	mkdir -p runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated
 	cp -r runtimes/python/smithygenerated_wrapped/* runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated
 	cp -r runtimes/python/smithygenerated/* runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated
 	rm runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated/README.md
