@@ -507,12 +507,12 @@ _python_revert_underscore_dependency_extern_names:
 _mv_internaldafny_python:
 	# Remove any previously generated Dafny code in src/, then copy in newly-generated code
 	rm -rf runtimes/python/src/$(PYTHON_MODULE_NAME)/internaldafny/generated/
-	mkdir runtimes/python/src/$(PYTHON_MODULE_NAME)/internaldafny/generated/
+	mkdir -p runtimes/python/src/$(PYTHON_MODULE_NAME)/internaldafny/generated/
 	mv runtimes/python/dafny_src-py/*.py runtimes/python/src/$(PYTHON_MODULE_NAME)/internaldafny/generated
 	rm -rf runtimes/python/dafny_src-py
 	# Remove any previously generated Dafny code in test/, then copy in newly-generated code
 	rm -rf runtimes/python/test/internaldafny/generated
-	mkdir runtimes/python/test/internaldafny/generated
+	mkdir -p runtimes/python/test/internaldafny/generated
 	mv runtimes/python/__main__-py/*.py runtimes/python/test/internaldafny/generated
 	rm -rf runtimes/python/__main__-py
 
