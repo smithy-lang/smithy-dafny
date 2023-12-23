@@ -4,7 +4,7 @@ version = "0.1.0"
 description = ""
 authors = ["AWS <aws-arg-dafny@amazon.com>"]
 packages = [
-    { include = "constraints", from = "src" }
+    { include = "simple_constraints", from = "src" }
 ]
 # Include all of the following .gitignored files in package distributions,
 # even though it is not included in version control

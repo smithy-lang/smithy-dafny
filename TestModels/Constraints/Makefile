@@ -5,7 +5,7 @@ CORES=2
 
 include ../SharedMakefile.mk
 
-PYTHON_MODULE_NAME=constraints
+PYTHON_MODULE_NAME=simple_constraints
 
 PROJECT_SERVICES := \
 	SimpleConstraints

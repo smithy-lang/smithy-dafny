@@ -218,12 +218,10 @@ public class ShimFileWriter implements CustomFileWriter {
       //  1) Convert the Dafny input to a Smithy-modelled input,
       //  2) Call the Smithy-generated client with the transformed input, and
       //  3) Convert the Smithy output to the Dafny type.
-      writer.openBlock("def $L(self, $L) -> $L:", "",
+      writer.openBlock("def $L(self, $L):", "",
           operationShape.getId().getName(),
           // Do not generate an `input` parameter if the operation does not take in an input
-          "input", //Utils.isUnitShape(inputShape) ? "" : "input: " + DafnyNameResolver.getDafnyTypeForShape(inputShape),
-          // Return `None` type if the operation does not return an output
-          "Any", // Utils.isUnitShape(outputShape) ? "None" : DafnyNameResolver.getDafnyTypeForShape(outputShape),
+          Utils.isUnitShape(inputShape) ? "" : "input",
           () -> {
 
             Shape targetShapeInput = codegenContext.model().expectShape(operationShape.getInputShape());

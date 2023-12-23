@@ -1,7 +1,15 @@
-import sys
+# __init__.py for a Smithy-Dafny generated Python project
 
 # TODO-Python: Remove PYTHONPATH workaround, use fully-qualified module names via dfyproject.toml.
+# Import project dependencies.
+# This can be removed  (TODO-Python-PYTHONPATH: Remove)
+import standard_library
+
+# Add internaldafny and smithygenerated code to PYTHONPATH (TODO-Python-PYTHONPATH: Remove)
+import sys
+
 module_root_dir = '/'.join(__file__.split("/")[:-1])
+
 sys.path.append(module_root_dir + "/internaldafny/extern")
 sys.path.append(module_root_dir + "/internaldafny/generated")
 # It would be nice if this were " + smithygenerated"
@@ -13,9 +21,3 @@ sys.path.append(module_root_dir + "/internaldafny/generated")
 # but instead to pass dependency module names from a dfyproject.toml file to Smithy
 # so it knows the fully qualified path to access smithygenerated code.
 sys.path.append(module_root_dir)
-
-# Import extern
-# This is needed due to PYTHONPATH workaround and can be removed as part of removing that
-# TODO-Python: Remove PYTHONPATH workaround, use fully-qualified module names via dfyproject.toml.
-# This adds the extern to the test's generated class
-from .internaldafny.extern import simple_aggregate_internaldafny_wrapped
