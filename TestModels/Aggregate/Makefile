@@ -5,7 +5,7 @@ CORES=2
 
 include ../SharedMakefile.mk
 
-# TODO-Python: Move to smithy-build.json once Dafny SmithyBuildPlugin supports language-specific config
+
 PYTHON_MODULE_NAME=simple_aggregate
 
 PROJECT_SERVICES := \

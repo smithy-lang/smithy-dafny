@@ -458,11 +458,7 @@ transpile_python: _rename_test_main_python
 transpile_implementation_python: TARGET=py
 transpile_implementation_python: OUT=runtimes/python/dafny_src
 transpile_implementation_python: COMPILE_SUFFIX_OPTION=
-transpile_implementation_python: transpile_implementation
-
-# `transpile_implementation_python` is not directly used, but is indirectly used via `transpile_dependencies`
-# The `transpile` target does NOT include the Dafny runtime library (_dafny.py) in the generated code
-# while the `build` target does
+transpile_implementation_python: _transpile_implementation_all
 transpile_implementation_python: transpile_dependencies_python
 transpile_implementation_python: transpile_src_python
 transpile_implementation_python: transpile_test_python
@@ -472,12 +468,12 @@ transpile_implementation_python: _remove_src_module_python
 transpile_src_python: TARGET=py
 transpile_src_python: OUT=runtimes/python/dafny_src
 transpile_src_python: COMPILE_SUFFIX_OPTION=
-transpile_src_python: transpile_implementation
+transpile_src_python: _transpile_implementation_all
 
 transpile_test_python: TARGET=py
 transpile_test_python: OUT=runtimes/python/__main__
 transpile_test_python: COMPILE_SUFFIX_OPTION=
-transpile_test_python: transpile_test
+transpile_test_python: _transpile_test_all
 
 # Hacky workaround until Dafny supports per-language extern names.
 # Replaces `.`s with `_`s in strings like `{:extern ".*"}`.

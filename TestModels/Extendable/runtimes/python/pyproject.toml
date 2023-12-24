@@ -12,14 +12,13 @@ include = ["**/smithygenerated/*.py", "**/internaldafny/generated/*.py"]
 
 [tool.poetry.dependencies]
 python = "^3.11.0"
-simple-extendable-resources-internaldafny = { path = "src/simple_extendable_resources/internaldafny", develop = false}
 # TODO: Depend on PyPi once Smithy-Python publishes their Python package there
 smithy-python = { path = "../../../../submodules/smithy-python/python-packages/smithy-python", develop = false}
 standard-library = {path = "../../../dafny-dependencies/StandardLibrary/runtimes/python", develop = false}
+python-dafny-runtime = { path = "../../../PythonDafnyRuntime", develop = false }
 
 [tool.poetry.group.test.dependencies]
 pytest = "^7.4.0"
-simple-extendable-resources-test-internaldafny = { path = "test/internaldafny", develop = false}
 
 [build-system]
 requires = ["poetry-core"]

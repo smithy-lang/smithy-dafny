@@ -6,7 +6,7 @@ CORES=2
 include ../../SharedMakefile.mk
 
 NAMESPACE=simple.types.smithyString
-# TODO-Python: Move to smithy-build.json once Dafny SmithyBuildPlugin supports language-specific config
+
 PYTHON_MODULE_NAME=simple_types_smithystring
 
 PROJECT_SERVICES := \
