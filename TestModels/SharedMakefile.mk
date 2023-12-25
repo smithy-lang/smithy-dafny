@@ -351,18 +351,16 @@ _polymorph_python: _polymorph
 #   as it runs `rm models.py` and `rm errors.py` after generating.
 # Work is planned to not do this by writing a SymbolVisitor specific to wrapped localService generation.
 # This will resolve some of the weirdness in this section.
-_polymorph_python: OUTPUT_PYTHON_WRAPPED=--output-python $(LIBRARY_ROOT)/runtimes/python/smithygenerated_wrapped
+_polymorph_python: OUTPUT_PYTHON_WRAPPED=--output-python $(LIBRARY_ROOT)/runtimes/python/smithygenerated
 _polymorph_python: OUTPUT_LOCAL_SERVICE=--local-service-test
 _polymorph_python: _polymorph_wrapped
 _polymorph_python:
 	rm -rf runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated
 	mkdir -p runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated
-	cp -r runtimes/python/smithygenerated_wrapped/* runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated
 	cp -r runtimes/python/smithygenerated/* runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated
 	rm runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated/README.md
 	rm runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated/pyproject.toml
 	rm -rf runtimes/python/smithygenerated
-	rm -rf runtimes/python/smithygenerated_wrapped
 _polymorph_python: POLYMORPH_LANGUAGE_TARGET=python
 _polymorph_python: _polymorph_dependencies
 

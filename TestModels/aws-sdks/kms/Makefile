@@ -27,15 +27,7 @@ _polymorph_wrapped: ;
 _polymorph_wrapped_dafny: ;
 _polymorph_wrapped_net: ;
 _polymorph_wrapped_java: ;
-polymorph_python: OUTPUT_PYTHON=--output-python $(LIBRARY_ROOT)/runtimes/python/smithygenerated
-polymorph_python: _polymorph
-polymorph_python:
-	rm -rf runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated
-	mkdir runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated
-	mv runtimes/python/smithygenerated/$(PYTHON_MODULE_NAME)/* runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated
-	rm -rf runtimes/python/smithygenerated
-polymorph_python: POLYMORPH_LANGUAGE_TARGET=python
-polymorph_python: _polymorph_dependencies
+_polymorph_wrapped_python: ;
 
 clean: _clean
 	rm -rf $(LIBRARY_ROOT)/runtimes/java/src/main/dafny-generated
