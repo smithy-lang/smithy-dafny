@@ -16,6 +16,7 @@ sys.path.append(internaldafny_dir + "/generated")
 
 # Import modules required for Dafny-generated tests.
 # This is not generated; these must be manually added.
+# These are only imported to populate the PYTHONPATH.
 # This can be removed once PYTHONPATH workaround is removed,
 # and all Dafny-generated imports are fully qualified.
 # TODO-Python-PYTHONPATH: Remove
