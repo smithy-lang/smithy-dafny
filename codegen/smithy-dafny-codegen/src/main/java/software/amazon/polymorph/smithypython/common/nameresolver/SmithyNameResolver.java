@@ -5,6 +5,7 @@ package software.amazon.polymorph.smithypython.common.nameresolver;
 
 import java.util.HashSet;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import software.amazon.polymorph.traits.LocalServiceTrait;
@@ -28,6 +29,12 @@ import software.amazon.smithy.python.codegen.PythonWriter;
  * Smithy-Dafny-Python-) generated code
  */
 public class SmithyNameResolver {
+
+  private static Map<String, String> smithyNamespaceToPythonModuleNameMap;
+
+  public static void setSmithyNamespaceToPythonModuleNameMap(Map<String, String> smithyNamespaceToPythonModuleNameMap) {
+    SmithyNameResolver.smithyNamespaceToPythonModuleNameMap = smithyNamespaceToPythonModuleNameMap;
+  }
 
   /**
    * Returns the name of the Smithy-generated client for the provided serviceShape. The serviceShape
@@ -233,10 +240,6 @@ public class SmithyNameResolver {
    */
   public static String getPythonModuleSmithygeneratedPathForSmithyNamespace(
       String smithyNamespace, PythonSettings settings) {
-    String pythonModuleName = Utils.getSmithyNamespaceToPythonModuleNameMap().get(smithyNamespace);
-    System.out.println("getPythonModuleSmithygeneratedPathForSmithyNamespace");
-    System.out.println(pythonModuleName);
-    System.out.println(smithyNamespace);
 
     // `smithy.api.Unit:`
     // Smithy-Dafny generates a stand-in shape in the service
@@ -245,13 +248,16 @@ public class SmithyNameResolver {
 //           + ".smithygenerated."
 //           + getPythonModuleNamespaceForSmithyNamespace(
 //           codegenContext.settings().getService().getNamespace());
-      return pythonModuleName + ".smithygenerated." +
+      return getPythonModuleNamespaceForSmithyNamespace(settings.getService().getNamespace()) + ".smithygenerated." +
           getPythonModuleNamespaceForSmithyNamespace(settings.getService().getNamespace());
+    } else {
+      String pythonModuleName = smithyNamespaceToPythonModuleNameMap.get(smithyNamespace);
+      return pythonModuleName + ".smithygenerated." + getPythonModuleNamespaceForSmithyNamespace(smithyNamespace);
+
     }
     // return codegenContext.settings().getModuleName()
     //     + ".smithygenerated."
     //     + getPythonModuleNamespaceForSmithyNamespace(smithyNamespace);
-    return pythonModuleName + ".smithygenerated." + getPythonModuleNamespaceForSmithyNamespace(smithyNamespace);
   }
 
   /**

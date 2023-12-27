@@ -15,16 +15,6 @@ import java.util.Map;
  */
 public class Utils {
 
-  private static Map<String, String> smithyNamespaceToPythonModuleNameMap;
-
-  public static void setSmithyNamespaceToPythonModuleNameMap(Map<String, String> smithyNamespaceToPythonModuleNameMap) {
-    Utils.smithyNamespaceToPythonModuleNameMap = smithyNamespaceToPythonModuleNameMap;
-  }
-
-  public static Map<String, String> getSmithyNamespaceToPythonModuleNameMap() {
-    return smithyNamespaceToPythonModuleNameMap;
-  }
-
   /**
    * Returns true if `shapeId` is a Smithy Unit shape.
    *

@@ -24,11 +24,12 @@ public class DafnyPythonLocalServiceSymbolVisitor extends SymbolVisitor {
   }
 
   public String getNamespacePathForNamespace(String namespace) {
-    String pythonModuleName = Utils.getSmithyNamespaceToPythonModuleNameMap().get(namespace);
     if ("smithy.api".equals(namespace)) {
-      return pythonModuleName + ".smithygenerated." + SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(settings.getService().getNamespace());
+      return SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(settings.getService().getNamespace()) + ".smithygenerated." + SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(settings.getService().getNamespace());
     }
-     return pythonModuleName + ".smithygenerated." + SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(namespace);
+    String pythonModuleName = SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(namespace);
+
+    return pythonModuleName + ".smithygenerated." + SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(namespace);
 //    return namespace.equals(settings.getService().getNamespace())
 //        ? SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(namespace)
 //        : "smithygenerated." + SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(namespace);

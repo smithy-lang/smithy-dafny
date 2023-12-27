@@ -3,6 +3,7 @@
 
 package software.amazon.polymorph.smithypython.localservice.extensions;
 
+import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.Utils;
 import software.amazon.polymorph.smithypython.wrappedlocalservice.WrappedLocalServiceTrait;
 import software.amazon.polymorph.traits.LocalServiceTrait;
@@ -41,7 +42,7 @@ public final class DafnyPythonLocalServiceClientCodegenPlugin implements SmithyB
 
   public DafnyPythonLocalServiceClientCodegenPlugin(Map<String, String> smithyNamespaceToPythonModuleNameMap) {
     super();
-    Utils.setSmithyNamespaceToPythonModuleNameMap(smithyNamespaceToPythonModuleNameMap);
+    SmithyNameResolver.setSmithyNamespaceToPythonModuleNameMap(smithyNamespaceToPythonModuleNameMap);
   }
 
   @Override
