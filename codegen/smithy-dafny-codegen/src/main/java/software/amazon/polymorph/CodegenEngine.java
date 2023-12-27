@@ -296,7 +296,7 @@ public class CodegenEngine {
 
         if (this.awsSdkStyle) {
             DafnyPythonAwsSdkClientCodegenPlugin dafnyPythonAwsSdkClientCodegenPlugin
-                = new DafnyPythonAwsSdkClientCodegenPlugin();
+                = new DafnyPythonAwsSdkClientCodegenPlugin(smithyNamespaceToPythonModuleNameMap);
             dafnyPythonAwsSdkClientCodegenPlugin.execute(pluginContext);
         } else if (this.localServiceTest) {
             DafnyPythonWrappedLocalServiceClientCodegenPlugin pythonClientCodegenPlugin

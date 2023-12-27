@@ -4,6 +4,7 @@
 package software.amazon.polymorph.smithypython.awssdk.extensions;
 
 import software.amazon.polymorph.smithypython.awssdk.DafnyAwsSdkProtocolTrait;
+import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.smithy.build.PluginContext;
 import software.amazon.smithy.build.SmithyBuildPlugin;
@@ -17,6 +18,8 @@ import software.amazon.smithy.python.codegen.PythonWriter;
 import software.amazon.smithy.python.codegen.integration.PythonIntegration;
 import software.amazon.smithy.utils.SmithyUnstableApi;
 
+import java.util.Map;
+
 /**
  * Plugin to trigger Smithy-Dafny Python code generation for AWS SDK services. This Plugin differs
  * from the PythonClientCodegenPlugin by not calling runner.performDefaultCodegenTransforms(); and
@@ -27,6 +30,12 @@ import software.amazon.smithy.utils.SmithyUnstableApi;
  */
 @SmithyUnstableApi
 public final class DafnyPythonAwsSdkClientCodegenPlugin implements SmithyBuildPlugin {
+
+  public DafnyPythonAwsSdkClientCodegenPlugin(Map<String, String> smithyNamespaceToPythonModuleNameMap) {
+    super();
+    SmithyNameResolver.setSmithyNamespaceToPythonModuleNameMap(smithyNamespaceToPythonModuleNameMap);
+  }
+
   public static Model addAwsSdkProtocolTrait(Model model, ServiceShape serviceShape) {
     return ModelTransformer.create()
         .mapShapes(
