@@ -12,7 +12,7 @@ include = ["**/smithygenerated/**/*.py", "**/internaldafny/generated/*.py"]
 
 [tool.poetry.dependencies]
 python = "^3.11.0"
-python-dafny-runtime = { path = "../../../PythonDafnyRuntime", develop = false }
+python-dafny-runtime = { path = "../../../../PythonDafnyRuntime", develop = false }
 
 [tool.poetry.group.test.dependencies]
 pytest = "^7.4.0"
