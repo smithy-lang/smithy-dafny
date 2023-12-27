@@ -1,11 +1,11 @@
-import LanguageSpecificLogicImpl
+import PythonLanguageSpecificLogicImpl
 import sys
 import Wrappers
 import _dafny
 
-class default__(LanguageSpecificLogicImpl.default__):
+class default__(PythonLanguageSpecificLogicImpl.default__):
     @staticmethod
     def GetPythonRuntimeVersion(config):
         return Wrappers.Result_Success(_dafny.Seq(str(sys.version)))
 
-LanguageSpecificLogicImpl.default__ = default__
+PythonLanguageSpecificLogicImpl.default__ = default__
