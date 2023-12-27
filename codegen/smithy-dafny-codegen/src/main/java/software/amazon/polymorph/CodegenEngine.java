@@ -5,7 +5,6 @@ package software.amazon.polymorph;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
-import java.util.Locale;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.polymorph.smithydafny.DafnyApiCodegen;
@@ -23,7 +22,6 @@ import software.amazon.polymorph.smithyjava.generator.awssdk.v1.JavaAwsSdkV1;
 import software.amazon.polymorph.smithyjava.generator.awssdk.v2.JavaAwsSdkV2;
 import software.amazon.polymorph.smithyjava.generator.library.JavaLibrary;
 import software.amazon.polymorph.smithyjava.generator.library.TestJavaLibrary;
-import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.polymorph.smithypython.awssdk.extensions.DafnyPythonAwsSdkClientCodegenPlugin;
 import software.amazon.polymorph.smithypython.localservice.extensions.DafnyPythonLocalServiceClientCodegenPlugin;
 import software.amazon.polymorph.smithypython.wrappedlocalservice.extensions.DafnyPythonWrappedLocalServiceClientCodegenPlugin;
@@ -40,6 +38,7 @@ import software.amazon.smithy.utils.IoUtils;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -48,8 +47,9 @@ public class CodegenEngine {
     private static final Logger LOGGER = LoggerFactory.getLogger(CodegenEngine.class);
 
     private final Path[] dependentModelPaths;
+    private final Map<String, String> dependencyModuleNames;
     private final String namespace;
-    private final Optional<String> pythonModuleName;
+    private final Optional<String> moduleName;
     private final Map<TargetLanguage, Path> targetLangOutputDirs;
     private final DafnyVersion dafnyVersion;
     // refactor this to only be required if generating Java
@@ -71,8 +71,9 @@ public class CodegenEngine {
     private CodegenEngine(
             final Model serviceModel,
             final Path[] dependentModelPaths,
+            final Map<String, String> dependencyModuleNames,
             final String namespace,
-            final Optional<String> pythonModuleName,
+            final Optional<String> moduleName,
             final Map<TargetLanguage, Path> targetLangOutputDirs,
             final DafnyVersion dafnyVersion,
             final AwsSdkVersion javaAwsSdkVersion,
@@ -85,8 +86,9 @@ public class CodegenEngine {
         // TODO-Python: Refactor by passing module_name into CLI?
 
         this.dependentModelPaths = dependentModelPaths;
+        this.dependencyModuleNames = dependencyModuleNames;
         this.namespace = namespace;
-        this.pythonModuleName = pythonModuleName;
+        this.moduleName = moduleName;
         this.targetLangOutputDirs = targetLangOutputDirs;
         this.dafnyVersion = dafnyVersion;
         this.javaAwsSdkVersion = javaAwsSdkVersion;
@@ -269,7 +271,7 @@ public class CodegenEngine {
             // TODO: This depends on Dafny extending the `dafny-client-codegen.targetLanguages` key
             // to support storing language-specific configuration.
             // For now, assume `module` is a slight transformation of the model namespace.
-            .withMember("module", pythonModuleName.get())
+            .withMember("module", moduleName.get())
 
             // TODO-Python: `moduleVersion` SHOULD be configured within the `smithy-build.json` file;
             // possibly at `dafny-client-codegen.targetLanguages.python.moduleVersion`.
@@ -288,15 +290,21 @@ public class CodegenEngine {
             .settings(pythonSettingsBuilder.build())
             .build();
 
+        final Map<String, String> smithyNamespaceToPythonModuleNameMap = new HashMap<>();
+        smithyNamespaceToPythonModuleNameMap.putAll(dependencyModuleNames);
+        smithyNamespaceToPythonModuleNameMap.put(serviceShape.getId().getNamespace(), moduleName.get());
+
         if (this.awsSdkStyle) {
             DafnyPythonAwsSdkClientCodegenPlugin dafnyPythonAwsSdkClientCodegenPlugin
                 = new DafnyPythonAwsSdkClientCodegenPlugin();
             dafnyPythonAwsSdkClientCodegenPlugin.execute(pluginContext);
         } else if (this.localServiceTest) {
-            DafnyPythonWrappedLocalServiceClientCodegenPlugin pythonClientCodegenPlugin = new DafnyPythonWrappedLocalServiceClientCodegenPlugin();
+            DafnyPythonWrappedLocalServiceClientCodegenPlugin pythonClientCodegenPlugin
+                    = new DafnyPythonWrappedLocalServiceClientCodegenPlugin(smithyNamespaceToPythonModuleNameMap);
             pythonClientCodegenPlugin.execute(pluginContext);
         } else {
-            DafnyPythonLocalServiceClientCodegenPlugin pythonClientCodegenPlugin = new DafnyPythonLocalServiceClientCodegenPlugin();
+            DafnyPythonLocalServiceClientCodegenPlugin pythonClientCodegenPlugin
+                    = new DafnyPythonLocalServiceClientCodegenPlugin(smithyNamespaceToPythonModuleNameMap);
             pythonClientCodegenPlugin.execute(pluginContext);
         }
     }
@@ -304,8 +312,9 @@ public class CodegenEngine {
     public static class Builder {
         private Model serviceModel;
         private Path[] dependentModelPaths;
+        private Map<String, String> dependencyModuleNames;
         private String namespace;
-        private String pythonModuleName;
+        private String moduleName;
         private Map<TargetLanguage, Path> targetLangOutputDirs;
         private DafnyVersion dafnyVersion = new DafnyVersion(4, 1, 0);
         private AwsSdkVersion javaAwsSdkVersion = AwsSdkVersion.V2;
@@ -333,6 +342,14 @@ public class CodegenEngine {
         }
 
         /**
+         * Sets the directories in which to search for dependent model file(s).
+         */
+        public Builder withDependencyModuleNames(final Map<String, String> dependencyModuleNames) {
+            this.dependencyModuleNames = dependencyModuleNames;
+            return this;
+        }
+
+        /**
          * Sets the Smithy namespace for which to generate code (e.g. "com.foo").
          */
         public Builder withNamespace(final String namespace) {
@@ -343,11 +360,10 @@ public class CodegenEngine {
         /**
          * Sets the Python module name for any generated Python code.
          */
-        public Builder withPythonModuleName(final String pythonModuleName) {
-            this.pythonModuleName = pythonModuleName;
+        public Builder withModuleName(final String moduleName) {
+            this.moduleName = moduleName;
             return this;
         }
-
 
         /**
          * Sets the target language(s) for which to generate code,
@@ -416,11 +432,14 @@ public class CodegenEngine {
             final Path[] dependentModelPaths = this.dependentModelPaths == null
                     ? new Path[] {}
                     : this.dependentModelPaths.clone();
+            final Map<String, String> dependencyModuleNames = this.dependencyModuleNames == null
+                    ? new HashMap<>()
+                    : this.dependencyModuleNames;
             if (Strings.isNullOrEmpty(this.namespace)) {
                 throw new IllegalStateException("No namespace provided");
             }
 
-            final Optional<String> pythonModuleName = Optional.ofNullable(this.pythonModuleName);
+            final Optional<String> moduleName = Optional.ofNullable(this.moduleName);
 
             final Map<TargetLanguage, Path> targetLangOutputDirsRaw = Objects.requireNonNull(this.targetLangOutputDirs);
             targetLangOutputDirsRaw.replaceAll((_lang, path) -> path.toAbsolutePath().normalize());
@@ -444,8 +463,9 @@ public class CodegenEngine {
             return new CodegenEngine(
                     serviceModel,
                     dependentModelPaths,
+                    dependencyModuleNames,
                     this.namespace,
-                    pythonModuleName,
+                    moduleName,
                     targetLangOutputDirs,
                     dafnyVersion,
                     javaAwsSdkVersion,

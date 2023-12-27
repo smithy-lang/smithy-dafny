@@ -8,11 +8,10 @@ packages = [
 ]
 # Include all of the following .gitignored files in package distributions,
 # even though it is not included in version control
-include = ["**/smithygenerated/*.py", "**/internaldafny/generated/*.py"]
+include = ["**/smithygenerated/**/*.py", "**/internaldafny/generated/*.py"]
 
 [tool.poetry.dependencies]
 python = "^3.11.0"
-simple-dependencies-internaldafny = { path = "src/simple_dependencies/internaldafny", develop = false}
 # TODO: Depend on PyPi once Smithy-Python publishes their Python package there
 smithy-python = { path = "../../../../submodules/smithy-python/python-packages/smithy-python", develop = false}
 standard-library = {path = "../../../dafny-dependencies/StandardLibrary/runtimes/python", develop = false}
@@ -20,10 +19,10 @@ simple-resources = { path = "../../../Resource/runtimes/python", develop = false
 simple-errors = { path = "../../../Errors/runtimes/python", develop = false}
 simple-extendable-resources = { path = "../../../Extendable/runtimes/python", develop = false}
 simple-constraints = { path = "../../../Constraints/runtimes/python", develop = false}
+python-dafny-runtime = { path = "../../../PythonDafnyRuntime", develop = false}
 
 [tool.poetry.group.test.dependencies]
 pytest = "^7.4.0"
-simple-dependencies-test-internaldafny = { path = "test/internaldafny", develop = false}
 
 [build-system]
 requires = ["poetry-core"]

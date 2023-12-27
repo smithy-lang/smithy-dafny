@@ -3,6 +3,7 @@
 
 package software.amazon.polymorph.smithypython.wrappedlocalservice.extensions;
 
+import software.amazon.polymorph.smithypython.common.nameresolver.Utils;
 import software.amazon.polymorph.smithypython.wrappedlocalservice.extensions.DirectedDafnyPythonWrappedLocalServiceCodegen;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.smithypython.wrappedlocalservice.WrappedLocalServiceTrait;
@@ -18,6 +19,8 @@ import software.amazon.smithy.python.codegen.PythonSettings;
 import software.amazon.smithy.python.codegen.PythonWriter;
 import software.amazon.smithy.python.codegen.integration.PythonIntegration;
 import software.amazon.smithy.utils.SmithyUnstableApi;
+
+import java.util.Map;
 
 /**
  * Plugin to trigger Smithy-Dafny Python code generation for a wrapped localService.
@@ -35,6 +38,10 @@ import software.amazon.smithy.utils.SmithyUnstableApi;
 @SmithyUnstableApi
 public final class DafnyPythonWrappedLocalServiceClientCodegenPlugin implements SmithyBuildPlugin {
 
+  public DafnyPythonWrappedLocalServiceClientCodegenPlugin(Map<String, String> smithyNamespaceToPythonModuleNameMap) {
+    super();
+    Utils.setSmithyNamespaceToPythonModuleNameMap(smithyNamespaceToPythonModuleNameMap);
+  }
   @Override
   public String getName() {
     return "dafny-python-wrapped-local-service-client-codegen";

@@ -3,6 +3,7 @@
 
 package software.amazon.polymorph.smithypython.localservice.extensions;
 
+import software.amazon.polymorph.smithypython.common.nameresolver.Utils;
 import software.amazon.polymorph.smithypython.wrappedlocalservice.WrappedLocalServiceTrait;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
@@ -24,6 +25,8 @@ import software.amazon.smithy.python.codegen.PythonWriter;
 import software.amazon.smithy.python.codegen.integration.PythonIntegration;
 import software.amazon.smithy.utils.SmithyUnstableApi;
 
+import java.util.Map;
+
 /**
  * Plugin to trigger Smithy-Dafny Python code generation.
  * This differs from the PythonClientCodegenPlugin by not calling
@@ -35,6 +38,11 @@ import software.amazon.smithy.utils.SmithyUnstableApi;
  */
 @SmithyUnstableApi
 public final class DafnyPythonLocalServiceClientCodegenPlugin implements SmithyBuildPlugin {
+
+  public DafnyPythonLocalServiceClientCodegenPlugin(Map<String, String> smithyNamespaceToPythonModuleNameMap) {
+    super();
+    Utils.setSmithyNamespaceToPythonModuleNameMap(smithyNamespaceToPythonModuleNameMap);
+  }
 
   @Override
   public String getName() {

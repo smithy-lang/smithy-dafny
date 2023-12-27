@@ -6,12 +6,24 @@ package software.amazon.polymorph.smithypython.common.nameresolver;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 
+import java.util.Map;
+
 /**
  * Utils class containing NameResolver utility functions. This should contain helper methods common
  * to >1 name resolver. TODO-Python: Once Utils class has a more clearly defined scope, refactor
  * such that it is not a generic Utils class
  */
 public class Utils {
+
+  private static Map<String, String> smithyNamespaceToPythonModuleNameMap;
+
+  public static void setSmithyNamespaceToPythonModuleNameMap(Map<String, String> smithyNamespaceToPythonModuleNameMap) {
+    Utils.smithyNamespaceToPythonModuleNameMap = smithyNamespaceToPythonModuleNameMap;
+  }
+
+  public static Map<String, String> getSmithyNamespaceToPythonModuleNameMap() {
+    return smithyNamespaceToPythonModuleNameMap;
+  }
 
   /**
    * Returns true if `shapeId` is a Smithy Unit shape.

@@ -3,9 +3,9 @@
 
 # TODO-Python-PYTHONPATH: Qualify imports
 import simple_errors_internaldafny_wrapped
-from smithygenerated.simple_errors.client import SimpleErrors
-from smithygenerated.simple_errors.shim import SimpleErrorsShim
-from smithygenerated.simple_errors.config import dafny_config_to_smithy_config
+from simple_errors.smithygenerated.simple_errors.client import SimpleErrors
+from simple_errors.smithygenerated.simple_errors.shim import SimpleErrorsShim
+from simple_errors.smithygenerated.simple_errors.config import dafny_config_to_smithy_config
 import Wrappers
 
 class default__(simple_errors_internaldafny_wrapped.default__):

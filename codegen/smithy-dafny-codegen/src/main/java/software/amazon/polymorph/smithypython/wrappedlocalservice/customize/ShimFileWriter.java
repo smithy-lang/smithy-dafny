@@ -45,7 +45,7 @@ public class ShimFileWriter implements CustomFileWriter {
           """
           import Wrappers
           import $L
-          import smithygenerated.$L.client as client_impl
+          import $L.smithygenerated.$L.client as client_impl
                           
           def smithy_error_to_dafny_error(e: ServiceError):
               '''
@@ -60,7 +60,9 @@ public class ShimFileWriter implements CustomFileWriter {
                           
               ${C|}
               
-              """, typesModulePrelude, moduleName,
+              """, typesModulePrelude,
+          Utils.getSmithyNamespaceToPythonModuleNameMap().get(serviceShape.getId().getNamespace()),
+          moduleName,
           writer.consumer(w -> generateSmithyErrorToDafnyErrorBlock(codegenContext, serviceShape, w)),
           SmithyNameResolver.shimForService(serviceShape),
           typesModulePrelude, DafnyNameResolver.getDafnyClientInterfaceTypeForServiceShape(serviceShape),
@@ -127,8 +129,9 @@ public class ShimFileWriter implements CustomFileWriter {
 
                   // Import the dependency service's `smithy_error_to_dafny_error` so this service
           //   can defer error conversion to the dependency
+          String pythonModuleName = Utils.getSmithyNamespaceToPythonModuleNameMap().get(serviceDependencyShapeId.getNamespace());
           writer.addImport(
-              "smithygenerated." + SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(
+                  pythonModuleName + ".smithygenerated." + SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(
                   serviceDependencyShapeId.getNamespace())
                   + ".shim",
                   nativeToDafnyErrorName,

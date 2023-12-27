@@ -233,20 +233,25 @@ public class SmithyNameResolver {
    */
   public static String getPythonModuleSmithygeneratedPathForSmithyNamespace(
       String smithyNamespace, PythonSettings settings) {
+    String pythonModuleName = Utils.getSmithyNamespaceToPythonModuleNameMap().get(smithyNamespace);
+    System.out.println("getPythonModuleSmithygeneratedPathForSmithyNamespace");
+    System.out.println(pythonModuleName);
+    System.out.println(smithyNamespace);
+
     // `smithy.api.Unit:`
     // Smithy-Dafny generates a stand-in shape in the service
     if ("smithy.api".equals(smithyNamespace)) {
-      // return codegenContext.settings().getModuleName()
-      //     + ".smithygenerated."
-      //     + getPythonModuleNamespaceForSmithyNamespace(
-      //     codegenContext.settings().getService().getNamespace());
-      return "smithygenerated." +
+//       return codegenContext.settings().getModuleName()
+//           + ".smithygenerated."
+//           + getPythonModuleNamespaceForSmithyNamespace(
+//           codegenContext.settings().getService().getNamespace());
+      return pythonModuleName + ".smithygenerated." +
           getPythonModuleNamespaceForSmithyNamespace(settings.getService().getNamespace());
     }
     // return codegenContext.settings().getModuleName()
     //     + ".smithygenerated."
     //     + getPythonModuleNamespaceForSmithyNamespace(smithyNamespace);
-    return "smithygenerated." + getPythonModuleNamespaceForSmithyNamespace(smithyNamespace);
+    return pythonModuleName + ".smithygenerated." + getPythonModuleNamespaceForSmithyNamespace(smithyNamespace);
   }
 
   /**

@@ -3,9 +3,9 @@
 
 # TODO-Python-PYTHONPATH: Qualify imports
 import simple_constructor_internaldafny_wrapped
-from smithygenerated.simple_constructor.client import SimpleConstructor
-from smithygenerated.simple_constructor.shim import SimpleConstructorShim
-from smithygenerated.simple_constructor.config import dafny_config_to_smithy_config
+from simple_constructor.smithygenerated.simple_constructor.client import SimpleConstructor
+from simple_constructor.smithygenerated.simple_constructor.shim import SimpleConstructorShim
+from simple_constructor.smithygenerated.simple_constructor.config import dafny_config_to_smithy_config
 import Wrappers
 
 class default__(simple_constructor_internaldafny_wrapped.default__):

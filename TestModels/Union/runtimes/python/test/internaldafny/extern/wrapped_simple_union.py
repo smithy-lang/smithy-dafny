@@ -3,9 +3,9 @@
 
 # TODO-Python-PYTHONPATH: Qualify imports
 import simple_union_internaldafny_wrapped
-from smithygenerated.simple_union.client import SimpleUnion
-from smithygenerated.simple_union.shim import SimpleUnionShim
-from smithygenerated.simple_union.config import dafny_config_to_smithy_config
+from simple_union.smithygenerated.simple_union.client import SimpleUnion
+from simple_union.smithygenerated.simple_union.shim import SimpleUnionShim
+from simple_union.smithygenerated.simple_union.config import dafny_config_to_smithy_config
 import Wrappers
 
 class default__(simple_union_internaldafny_wrapped.default__):

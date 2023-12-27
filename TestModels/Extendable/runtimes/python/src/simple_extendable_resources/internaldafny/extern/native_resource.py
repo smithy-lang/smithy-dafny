@@ -2,8 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import ExtendableResource
-from smithygenerated.simple_extendable_resources.references import IExtendableResource
-import simple_extendable_resources_internaldafny_nativeresourcefactory
+from simple_extendable_resources.smithygenerated.simple_extendable_resources.references import IExtendableResource
 
 class default__(IExtendableResource):
   # Importing the type at top-level results in circular dependency import issue
@@ -37,4 +36,14 @@ class NativeResourceFactory:
     return native_resource
 
 
-simple_extendable_resources_internaldafny_nativeresourcefactory.default__ = NativeResourceFactory
+# TODO-Python-PYTHONPATH: Remove import and try/catch, only needed for path issues
+# Problem: simple_extendable_resources_internaldafny_nativeresourcefactory is only built in tests,
+#   but SimpleDependencies relies on this current file,
+#   and ExtendableResource's tests are not built for another file's src.
+# Workaround: Only import if able.
+# Fix: Remove PYTHONPATH workaround.
+try:
+  import simple_extendable_resources_internaldafny_nativeresourcefactory
+  simple_extendable_resources_internaldafny_nativeresourcefactory.default__ = NativeResourceFactory
+except ModuleNotFoundError:
+  pass

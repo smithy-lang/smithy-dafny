@@ -218,10 +218,11 @@ _polymorph:
 	$(OUTPUT_DOTNET) \
 	$(OUTPUT_JAVA) \
     $(OUTPUT_PYTHON) \
-    $(POLYMORPH_PYTHON_MODULE_NAME) \
+    $(MODULE_NAME) \
 	--model $(if $(DIR_STRUCTURE_V2),$(LIBRARY_ROOT)/dafny/$(SERVICE)/Model,$(LIBRARY_ROOT)/Model) \
 	--dependent-model $(PROJECT_ROOT)/$(SMITHY_DEPS) \
 	$(patsubst %, --dependent-model $(PROJECT_ROOT)/%/Model, $($(service_deps_var))) \
+	$(DEPENDENCY_MODULE_NAMES) \
 	--namespace $($(namespace_var)) \
 	$(AWS_SDK_CMD)";
 
@@ -234,10 +235,11 @@ _polymorph_wrapped:
 	$(OUTPUT_DOTNET_WRAPPED) \
 	$(OUTPUT_JAVA_WRAPPED) \
 	$(OUTPUT_PYTHON_WRAPPED) \
-    $(POLYMORPH_PYTHON_MODULE_NAME) \
+    $(MODULE_NAME) \
 	--model $(if $(DIR_STRUCTURE_V2),$(LIBRARY_ROOT)/dafny/$(SERVICE)/Model,$(LIBRARY_ROOT)/Model) \
 	--dependent-model $(PROJECT_ROOT)/$(SMITHY_DEPS) \
 	$(patsubst %, --dependent-model $(PROJECT_ROOT)/%/Model, $($(service_deps_var))) \
+	$(DEPENDENCY_MODULE_NAMES) \
 	--namespace $($(namespace_var)) \
 	$(OUTPUT_LOCAL_SERVICE) \
 	$(AWS_SDK_CMD)";
@@ -345,7 +347,12 @@ polymorph_python:
 	done
 
 _polymorph_python: OUTPUT_PYTHON=--output-python $(LIBRARY_ROOT)/runtimes/python/smithygenerated
-_polymorph_python: POLYMORPH_PYTHON_MODULE_NAME=--python-module-name $(PYTHON_MODULE_NAME)
+_polymorph_python: MODULE_NAME=--module-name $(PYTHON_MODULE_NAME)
+# Python codegen MUST know dependencies' module names.
+_polymorph_python: DEPENDENCY_MODULE_NAMES=$(foreach dependency, \
+		$(PROJECT_DEPENDENCIES), \
+		--dependency-module-name=$(shell cat $(PROJECT_ROOT)/$(dependency)/Makefile | grep ^SERVICE_NAMESPACE_ | cut -d "=" -f 2)=$(shell cat $(PROJECT_ROOT)/$(dependency)/Makefile | grep ^PYTHON_MODULE_NAME | cut -d "=" -f 2)\
+	)
 _polymorph_python: _polymorph
 # TODO-Python: Right now, wrapped code generation requires an isolated directory,
 #   as it runs `rm models.py` and `rm errors.py` after generating.
@@ -486,7 +493,10 @@ _python_underscore_extern_names:
 
 _python_underscore_dependency_extern_names:
 	$(MAKE) -C $(STANDARD_LIBRARY_PATH) _python_underscore_extern_names
-	$(patsubst %, $(MAKE) -C $(PROJECT_ROOT)/% _python_underscore_extern_names;, $(LIBRARIES))
+	@$(foreach dependency, \
+		$(PROJECT_DEPENDENCIES), \
+		$(MAKE) -C $(PROJECT_ROOT)/$(dependency) _python_underscore_extern_names; \
+	)
 
 _python_revert_underscore_extern_names:
 	find src -regex ".*\.dfy" -type f -exec sed -i $(SED_PARAMETER) '/.*{:extern \".*\".*/s/_/\./g' {} \;
@@ -495,8 +505,10 @@ _python_revert_underscore_extern_names:
 
 _python_revert_underscore_dependency_extern_names:
 	$(MAKE) -C $(STANDARD_LIBRARY_PATH) _python_revert_underscore_extern_names
-	$(patsubst %, $(MAKE) -C $(PROJECT_ROOT)/% _python_revert_underscore_extern_names;, $(LIBRARIES))
-
+	@$(foreach dependency, \
+		$(PROJECT_DEPENDENCIES), \
+		$(MAKE) -C $(PROJECT_ROOT)/$(dependency) _python_revert_underscore_extern_names; \
+	)
 # Move Dafny-generated code into its expected location in the Python module
 _mv_internaldafny_python:
 	# Remove any previously generated Dafny code in src/, then copy in newly-generated code

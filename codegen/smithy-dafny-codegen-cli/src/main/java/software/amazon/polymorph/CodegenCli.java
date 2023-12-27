@@ -17,8 +17,6 @@ import org.apache.commons.cli.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import software.amazon.polymorph.CodegenEngine.TargetLanguage;
-import software.amazon.polymorph.smithyjava.generator.CodegenSubject.AwsSdkVersion;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.loader.ModelAssembler;
 
@@ -28,6 +26,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Arrays;
+import java.util.stream.Collectors;
 
 public class CodegenCli {
     private static final Logger LOGGER = LoggerFactory.getLogger(CodegenCli.class);
@@ -74,6 +73,7 @@ public class CodegenCli {
         final CodegenEngine.Builder engineBuilder = new CodegenEngine.Builder()
                 .withServiceModel(serviceModel)
                 .withDependentModelPaths(cliArguments.dependentModelPaths)
+                .withDependencyModuleNames(cliArguments.dependencyModuleNames)
                 .withNamespace(cliArguments.namespace)
                 .withTargetLangOutputDirs(outputDirs)
                 .withAwsSdkStyle(cliArguments.awsSdkStyle)
@@ -81,7 +81,7 @@ public class CodegenCli {
                 .withDafnyVersion(cliArguments.dafnyVersion);
         cliArguments.javaAwsSdkVersion.ifPresent(engineBuilder::withJavaAwsSdkVersion);
         cliArguments.includeDafnyFile.ifPresent(engineBuilder::withIncludeDafnyFile);
-        cliArguments.pythonModuleName.ifPresent(engineBuilder::withPythonModuleName);
+        cliArguments.moduleName.ifPresent(engineBuilder::withModuleName);
         final CodegenEngine engine = engineBuilder.build();
         engine.run();
     }
@@ -104,14 +104,19 @@ public class CodegenCli {
             .hasArg()
             .required()
             .build())
+          .addOption(Option.builder("dmn")
+            .longOpt("dependency-module-name")
+            .desc("directory for dependent model file[s] (.smithy format)")
+            .hasArg()
+            .build())
           .addOption(Option.builder("n")
             .longOpt("namespace")
             .desc("smithy namespace to generate code for, such as 'com.foo'")
             .hasArg()
             .required()
             .build())
-          .addOption(Option.builder("pmn")
-            .longOpt("python-module-name")
+          .addOption(Option.builder("mn")
+            .longOpt("module-name")
             .desc("if generating python code, the name of the python module")
             .hasArg()
             .build())
@@ -168,8 +173,9 @@ public class CodegenCli {
     private record CliArguments(
             Path modelPath,
             Path[] dependentModelPaths,
+            Map<String, String> dependencyModuleNames,
             String namespace,
-            Optional<String> pythonModuleName,
+            Optional<String> moduleName,
             Optional<Path> outputDotnetDir,
             Optional<Path> outputJavaDir,
             Optional<Path> outputPythonDir,
@@ -199,9 +205,37 @@ public class CodegenCli {
               .stream(commandLine.getOptionValues('d'))
               .map(Path::of)
               .toArray(Path[]::new);
+//
+//            System.out.println("1");
+//            System.out.println(commandLine.hasOption("dependency-module-name"));
+//            System.out.println(commandLine.getOptionValue("dependency-module-name"));
+//            System.out.println(commandLine.getOptionValue("dependency-module-name").split("=")[0]);
+//            System.out.println(commandLine.getOptionValue("dependency-module-name").split("=")[1]);
+
+
+            final Map<String, String> dependencyNamespacesToModuleNamesMapDebug =
+                commandLine.hasOption("dependency-module-name")
+                        ? Arrays.stream(commandLine.getOptionValues("dependency-module-name"))
+                        .peek(System.out::println)
+                        .map(s -> s.split("="))
+                        .peek(System.out::println)
+                        .collect(Collectors.toMap(i -> i[0], i -> i[1]))
+
+                        : new HashMap<>();
+
+            System.out.println("2");
+            final Map<String, String> dependencyNamespacesToModuleNamesMap =
+                    commandLine.hasOption("dependency-module-name")
+                    ? Arrays.stream(commandLine.getOptionValues("dmn"))
+                        .map(s -> s.split("="))
+                        .collect(Collectors.toMap(i -> i[0], i -> i[1]))
+                    : new HashMap<>();
+
+//            System.out.println("cli");
+//            System.out.println(dependencyNamespacesToModuleNamesMap);
 
             final String namespace = commandLine.getOptionValue('n');
-            final Optional<String> pythonModuleName = Optional.ofNullable(commandLine.getOptionValue("python-module-name"));
+            final Optional<String> moduleName = Optional.ofNullable(commandLine.getOptionValue("module-name"));
 
             Optional<Path> outputDafnyDir = Optional.ofNullable(commandLine.getOptionValue("output-dafny"))
                     .map(Paths::get);
@@ -251,9 +285,9 @@ public class CodegenCli {
             }
 
             return Optional.of(new CliArguments(
-                    modelPath, dependentModelPaths, namespace, pythonModuleName,
-                    outputDotnetDir, outputJavaDir, outputPythonDir, outputDafnyDir,
-                    javaAwsSdkVersion, dafnyVersion, includeDafnyFile, awsSdkStyle,
+                    modelPath, dependentModelPaths, dependencyNamespacesToModuleNamesMap,
+                    namespace, moduleName,  outputDotnetDir, outputJavaDir, outputPythonDir,
+                    outputDafnyDir, javaAwsSdkVersion, dafnyVersion, includeDafnyFile, awsSdkStyle,
                     localServiceTest
             ));
         }

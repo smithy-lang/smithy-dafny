@@ -40,7 +40,7 @@ public class PluginFileWriter implements CustomFileWriter {
             writer -> {
               writer.write(
                   """
-          from .config import Config, Plugin, smithy_config_to_dafny_config
+          from .config import Config, Plugin, smithy_config_to_dafny_config, $L
           from smithy_python.interfaces.retries import RetryStrategy
           from smithy_python.exceptions import SmithyRetryException
           from .dafnyImplInterface import DafnyImplInterface
@@ -51,7 +51,7 @@ public class PluginFileWriter implements CustomFileWriter {
               and load our custom NoRetriesStrategy.
               '''
               config.dafnyImplInterface = DafnyImplInterface()
-              if isinstance(config, $T):
+              if isinstance(config, $L):
                   from $L import $L
                   config.dafnyImplInterface.impl = $L()
                   config.dafnyImplInterface.impl.ctor__(smithy_config_to_dafny_config(config))
@@ -76,7 +76,8 @@ public class PluginFileWriter implements CustomFileWriter {
                   # Do not retry
                   raise SmithyRetryException()
                   """,
-                  codegenContext.symbolProvider().toSymbol(configShape),
+                  configShape.getId().getName(),
+                  configShape.getId().getName(),
                   implModulePrelude,
                   clientName,
                   clientName);
