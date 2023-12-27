@@ -30,6 +30,7 @@ jobs:
     strategy:
       fail-fast: false # at least for development; see all errors
       matrix:
+        dafny-version: "4.4.0"
         library: [
           TestModels/dafny-dependencies/StandardLibrary,
           TestModels/Aggregate,
@@ -40,7 +41,7 @@ jobs:
           TestModels/Errors,
           TestModels/Extendable,
           TestModels/Extern,
-          # TestModels/LanguageSpecificLogic, # Tested only for 4.4.0 below
+          TestModels/LanguageSpecificLogic,
           TestModels/LocalService,
           TestModels/Refinement,
           TestModels/Resource,
@@ -62,12 +63,6 @@ jobs:
           TestModels/aws-sdks/ddb,
           TestModels/aws-sdks/kms,
         ]
-        include:
-          # One-off until TestModels migrate to 4.4.0
-          - library: TestModels/LanguageSpecificLogic
-            dafny-version: 4.4.0
-            dotnet-version: '6.0.x'
-            os: ubuntu-latest
     runs-on: "ubuntu-latest"
     permissions:
       id-token: write
@@ -94,7 +89,7 @@ jobs:
       - name: Setup Dafny
         uses: dafny-lang/setup-dafny-action@v1.7.0
         with:
-          dafny-version: '4.3.0'
+          dafny-version: ${{ matrix.dafny-version }}
 
       - name: Setup Python for running tests
         uses: actions/setup-python@v4
