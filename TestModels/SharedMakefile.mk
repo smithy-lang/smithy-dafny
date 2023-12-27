@@ -463,6 +463,7 @@ transpile_python: _rename_test_main_python
 transpile_implementation_python: TARGET=py
 transpile_implementation_python: OUT=runtimes/python/dafny_src
 transpile_implementation_python: COMPILE_SUFFIX_OPTION=
+transpile_implementation_python: SRC_INDEX=$(PYTHON_SRC_INDEX)
 transpile_implementation_python: _transpile_implementation_all
 transpile_implementation_python: transpile_dependencies_python
 transpile_implementation_python: transpile_src_python
@@ -473,11 +474,14 @@ transpile_implementation_python: _remove_src_module_python
 transpile_src_python: TARGET=py
 transpile_src_python: OUT=runtimes/python/dafny_src
 transpile_src_python: COMPILE_SUFFIX_OPTION=
+transpile_src_python: SRC_INDEX=$(PYTHON_SRC_INDEX)
 transpile_src_python: _transpile_implementation_all
 
 transpile_test_python: TARGET=py
 transpile_test_python: OUT=runtimes/python/__main__
 transpile_test_python: COMPILE_SUFFIX_OPTION=
+transpile_test_python: SRC_INDEX=$(PYTHON_SRC_INDEX)
+transpile_test_python: TEST_INDEX=$(PYTHON_TEST_INDEX)
 transpile_test_python: _transpile_test_all
 
 # Hacky workaround until Dafny supports per-language extern names.
