@@ -491,9 +491,9 @@ transpile_test_python: _transpile_test_all
 # This is tracked in https://github.com/dafny-lang/dafny/issues/4322.
 # This may require new Smithy-Dafny logic to generate Pythonic extern names.
 _python_underscore_extern_names:
-	find src -regex ".*\.dfy" -type f -exec sed -i $(SED_PARAMETER) '/.*{:extern \".*\".*/s/\./_/g' {} \;
-	find Model -regex ".*\.dfy" -type f -exec sed -i $(SED_PARAMETER) '/.*{:extern \".*\.*"/s/\./_/g' {} \;
-	find test -regex ".*\.dfy" -type f -exec sed -i $(SED_PARAMETER) '/.*{:extern \".*\".*/s/\./_/g' {} \;
+	find $(if ${DIR_STRUCTURE_V2},dafny/**/src,src)  -regex ".*\.dfy" -type f -exec sed -i $(SED_PARAMETER) '/.*{:extern \".*\".*/s/\./_/g' {} \;
+	find $(if ${DIR_STRUCTURE_V2},dafny/**/Model,Model) -regex ".*\.dfy" -type f -exec sed -i $(SED_PARAMETER) '/.*{:extern \".*\.*"/s/\./_/g' {} \;
+	find $(if ${DIR_STRUCTURE_V2},dafny/**/test,test) -regex ".*\.dfy" -type f -exec sed -i $(SED_PARAMETER) '/.*{:extern \".*\".*/s/\./_/g' {} \;
 
 _python_underscore_dependency_extern_names:
 	$(MAKE) -C $(STANDARD_LIBRARY_PATH) _python_underscore_extern_names
@@ -503,9 +503,9 @@ _python_underscore_dependency_extern_names:
 	)
 
 _python_revert_underscore_extern_names:
-	find src -regex ".*\.dfy" -type f -exec sed -i $(SED_PARAMETER) '/.*{:extern \".*\".*/s/_/\./g' {} \;
-	find Model -regex ".*\.dfy" -type f -exec sed -i $(SED_PARAMETER) '/.*{:extern \".*\".*/s/_/\./g' {} \; 2>/dev/null
-	find test -regex ".*\.dfy" -type f -exec sed -i $(SED_PARAMETER) '/.*{:extern \".*\".*/s/_/\./g' {} \;
+	find $(if ${DIR_STRUCTURE_V2},dafny/**/src,src) -regex ".*\.dfy" -type f -exec sed -i $(SED_PARAMETER) '/.*{:extern \".*\".*/s/_/\./g' {} \;
+	find $(if ${DIR_STRUCTURE_V2},dafny/**/Model,Model)  -regex ".*\.dfy" -type f -exec sed -i $(SED_PARAMETER) '/.*{:extern \".*\".*/s/_/\./g' {} \; 2>/dev/null
+	find $(if ${DIR_STRUCTURE_V2},dafny/**/test,test) -regex ".*\.dfy" -type f -exec sed -i $(SED_PARAMETER) '/.*{:extern \".*\".*/s/_/\./g' {} \;
 
 _python_revert_underscore_dependency_extern_names:
 	$(MAKE) -C $(STANDARD_LIBRARY_PATH) _python_revert_underscore_extern_names

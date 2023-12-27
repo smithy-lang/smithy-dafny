@@ -26,5 +26,7 @@ SERVICE_DEPS_PrimaryProject := \
 
 SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 
+PYTHON_MODULE_NAME=multiple_models
+
 # DEPENDENT-MODELS:=
 # LIBRARIES :=
