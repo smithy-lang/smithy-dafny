@@ -24,15 +24,16 @@ public class DafnyPythonLocalServiceSymbolVisitor extends SymbolVisitor {
   }
 
   public String getNamespacePathForNamespace(String namespace) {
-    if ("smithy.api".equals(namespace)) {
-      return SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(settings.getService().getNamespace()) + ".smithygenerated." + SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(settings.getService().getNamespace());
-    }
-    String pythonModuleName = SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(namespace);
-
-    return pythonModuleName + ".smithygenerated." + SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(namespace);
-//    return namespace.equals(settings.getService().getNamespace())
-//        ? SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(namespace)
-//        : "smithygenerated." + SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(namespace);
+    return SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(namespace, settings);
+//    if ("smithy.api".equals(namespace)) {
+//      return SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(settings.getService().getNamespace()) + ".smithygenerated." + SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(settings.getService().getNamespace());
+//    }
+//    String pythonModuleName = SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(namespace);
+//
+//    return pythonModuleName + ".smithygenerated." + SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(namespace);
+////    return namespace.equals(settings.getService().getNamespace())
+////        ? SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(namespace)
+////        : "smithygenerated." + SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(namespace);
   }
 
   public String getDefinitionFilePathForNamespace(String namespace) {

@@ -344,14 +344,20 @@ polymorph_python:
 		export namespace_var=SERVICE_NAMESPACE_$${service} ; \
 		export SERVICE=$${service} ; \
 		$(MAKE) _polymorph_python || exit 1; \
-	done
+	done;
+	rm -rf runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated
+	mkdir -p runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated
+	cp -r runtimes/python/smithygenerated/* runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated
+	rm runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated/README.md
+	rm runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated/pyproject.toml
+	rm -rf runtimes/python/smithygenerated
 
 _polymorph_python: OUTPUT_PYTHON=--output-python $(LIBRARY_ROOT)/runtimes/python/smithygenerated
 _polymorph_python: MODULE_NAME=--module-name $(PYTHON_MODULE_NAME)
-# Python codegen MUST know dependencies' module names.
+# Python codegen MUST know dependencies' module names...
 _polymorph_python: DEPENDENCY_MODULE_NAMES=$(foreach dependency, \
-		$(PROJECT_DEPENDENCIES), \
-		--dependency-module-name=$(shell cat $(PROJECT_ROOT)/$(dependency)/Makefile | grep ^SERVICE_NAMESPACE_ | cut -d "=" -f 2)=$(shell cat $(PROJECT_ROOT)/$(dependency)/Makefile | grep ^PYTHON_MODULE_NAME | cut -d "=" -f 2)\
+		$($(service_deps_var)), \
+		--dependency-module-name=$(shell cat $(if $(DIR_STRUCTURE_V2),$(PROJECT_ROOT)/$(dependency)/../../Makefile,$(PROJECT_ROOT)/$(dependency)/Makefile) | grep ^SERVICE_NAMESPACE_$(if $(DIR_STRUCTURE_V2),$(shell echo $(dependency) | cut -d "/" -f 3),$(shell echo $($(dependency)))) | cut -d "=" -f 2)=$(shell cat $(if $(DIR_STRUCTURE_V2),$(PROJECT_ROOT)/$(dependency)/../../Makefile,$(PROJECT_ROOT)/$(dependency)/Makefile) | grep ^PYTHON_MODULE_NAME | cut -d "=" -f 2)\
 	)
 _polymorph_python: _polymorph
 # TODO-Python: Right now, wrapped code generation requires an isolated directory,
@@ -361,13 +367,6 @@ _polymorph_python: _polymorph
 _polymorph_python: OUTPUT_PYTHON_WRAPPED=--output-python $(LIBRARY_ROOT)/runtimes/python/smithygenerated
 _polymorph_python: OUTPUT_LOCAL_SERVICE=--local-service-test
 _polymorph_python: _polymorph_wrapped
-_polymorph_python:
-	rm -rf runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated
-	mkdir -p runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated
-	cp -r runtimes/python/smithygenerated/* runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated
-	rm runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated/README.md
-	rm runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated/pyproject.toml
-	rm -rf runtimes/python/smithygenerated
 _polymorph_python: POLYMORPH_LANGUAGE_TARGET=python
 _polymorph_python: _polymorph_dependencies
 
