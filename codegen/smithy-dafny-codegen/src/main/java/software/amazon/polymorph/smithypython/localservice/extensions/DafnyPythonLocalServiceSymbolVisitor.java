@@ -14,6 +14,10 @@ import software.amazon.smithy.utils.StringUtils;
 
 import java.util.Set;
 
+/**
+ * Override Smithy-Python's SymbolVisitor
+ * to support namespaces in other modules.
+ */
 public class DafnyPythonLocalServiceSymbolVisitor extends SymbolVisitor {
 
   public DafnyPythonLocalServiceSymbolVisitor(Model model, PythonSettings settings) {

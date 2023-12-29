@@ -19,6 +19,10 @@ import software.amazon.smithy.python.codegen.PythonSettings;
 import software.amazon.smithy.python.codegen.PythonWriter;
 import software.amazon.smithy.python.codegen.StructureGenerator;
 
+/**
+ * Override Smithy-Python's StructureGenerator
+ * to support namespaces in other modules.
+ */
 public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerator  {
 
   public DafnyPythonLocalServiceStructureGenerator(

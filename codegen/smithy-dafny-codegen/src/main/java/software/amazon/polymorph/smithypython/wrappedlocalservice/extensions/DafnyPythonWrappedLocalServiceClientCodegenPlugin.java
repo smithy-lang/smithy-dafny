@@ -5,7 +5,7 @@ package software.amazon.polymorph.smithypython.wrappedlocalservice.extensions;
 
 import java.util.Map;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
-import software.amazon.polymorph.smithypython.wrappedlocalservice.WrappedLocalServiceTrait;
+import software.amazon.polymorph.traits.WrappedLocalServiceTrait;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.smithy.build.PluginContext;
 import software.amazon.smithy.build.SmithyBuildPlugin;

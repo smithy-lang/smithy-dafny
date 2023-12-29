@@ -10,6 +10,10 @@ import software.amazon.smithy.python.codegen.*;
 
 import static java.lang.String.format;
 
+/**
+ * Override Smithy-Python's ConfigGenerator
+ * to support namespaces in other modules.
+ */
 public class DafnyPythonLocalServiceConfigGenerator extends ConfigGenerator {
 
     public DafnyPythonLocalServiceConfigGenerator(PythonSettings settings, GenerationContext context) {
@@ -23,16 +27,12 @@ public class DafnyPythonLocalServiceConfigGenerator extends ConfigGenerator {
                 .namespace(format("%s.config", SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(settings.getService().getNamespace(), context)), ".")
                 .definitionFile(format("./%s/config.py",  SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(settings.getService().getNamespace())))
                 .build();
-//        var config = CodegenUtils.getConfigSymbol(context.settings());
         context.writerDelegator().useFileWriter
                 (config.getDefinitionFile(), config.getNamespace(), writer -> {
             writeInterceptorsType(writer);
             generateConfig(context, writer);
         });
 
-        // Generate the plugin symbol. This is just a callable. We could do something
-        // like have a class to implement, but that seems unnecessarily burdensome for
-        // a single function.
         var plugin = Symbol.builder()
                 .name("Plugin")
                 .namespace(format("%s.config", SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(settings.getService().getNamespace(), context)), ".")
@@ -84,7 +84,6 @@ public class DafnyPythonLocalServiceConfigGenerator extends ConfigGenerator {
                     interceptorOutputSymbol = symbolProvider.toSymbol(operationOutputShape);
                 }
 
-                // TODO: pull the transport request/response types off of the application protocol
                 writer.addStdlibImport("typing", "Any");
                 writer.writeInline("Interceptor[$T, $T, Any, Any]", interceptorInputSymbol, interceptorOutputSymbol);
                 if (iter.hasNext()) {

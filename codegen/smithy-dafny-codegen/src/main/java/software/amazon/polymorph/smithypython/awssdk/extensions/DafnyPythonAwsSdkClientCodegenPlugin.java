@@ -3,7 +3,7 @@
 
 package software.amazon.polymorph.smithypython.awssdk.extensions;
 
-import software.amazon.polymorph.smithypython.awssdk.DafnyAwsSdkProtocolTrait;
+import software.amazon.polymorph.traits.DafnyAwsSdkProtocolTrait;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.smithy.build.PluginContext;

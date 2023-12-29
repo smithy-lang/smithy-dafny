@@ -1,9 +1,8 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-package software.amazon.polymorph.smithypython.wrappedlocalservice;
+package software.amazon.polymorph.traits;
 
-import software.amazon.polymorph.traits.MutableLocalStateTrait;
 import software.amazon.smithy.model.node.Node;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;

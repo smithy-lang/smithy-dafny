@@ -290,8 +290,7 @@ public class CodegenEngine {
             .settings(pythonSettingsBuilder.build())
             .build();
 
-        final Map<String, String> smithyNamespaceToPythonModuleNameMap = new HashMap<>();
-        smithyNamespaceToPythonModuleNameMap.putAll(dependencyModuleNames);
+        final Map<String, String> smithyNamespaceToPythonModuleNameMap = new HashMap<>(dependencyModuleNames);
         smithyNamespaceToPythonModuleNameMap.put(serviceShape.getId().getNamespace(), moduleName.get());
 
         if (this.awsSdkStyle) {

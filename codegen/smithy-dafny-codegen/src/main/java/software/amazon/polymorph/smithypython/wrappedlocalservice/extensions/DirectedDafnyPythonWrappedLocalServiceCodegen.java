@@ -3,9 +3,10 @@
 
 package software.amazon.polymorph.smithypython.wrappedlocalservice.extensions;
 
+import static java.lang.String.format;
+
 import java.nio.file.Path;
 import java.util.logging.Logger;
-
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.smithypython.localservice.extensions.DirectedDafnyPythonLocalServiceCodegen;
 import software.amazon.polymorph.smithypython.wrappedlocalservice.WrappedCodegenConstants;
@@ -19,8 +20,6 @@ import software.amazon.smithy.codegen.core.directed.GenerateServiceDirective;
 import software.amazon.smithy.python.codegen.CodegenUtils;
 import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonSettings;
-
-import static java.lang.String.format;
 
 /**
  * DirectedCodegen for Dafny Python wrapped LocalServices. This overrides DirectedPythonCodegen to
@@ -98,11 +97,22 @@ public class DirectedDafnyPythonWrappedLocalServiceCodegen
      * codegen plugin.
      */
     try {
-      LOGGER.info(format("Attempting to remove %s.py", WrappedCodegenConstants.WRAPPED_CODEGEN_SYMBOLWRITER_OUTPUT_FILENAME));
-      CodegenUtils.runCommand(format("rm %s.py", WrappedCodegenConstants.WRAPPED_CODEGEN_SYMBOLWRITER_OUTPUT_FILENAME), generationPath).strip();
+      LOGGER.info(
+          format(
+              "Attempting to remove %s.py",
+              WrappedCodegenConstants.WRAPPED_CODEGEN_SYMBOLWRITER_OUTPUT_FILENAME));
+      CodegenUtils.runCommand(
+              format(
+                  "rm %s.py", WrappedCodegenConstants.WRAPPED_CODEGEN_SYMBOLWRITER_OUTPUT_FILENAME),
+              generationPath)
+          .strip();
     } catch (CodegenException e) {
       // Fail loudly. We do not want to accidentally distribute this file.
-      throw new RuntimeException(format("Unable to remove %s.py", WrappedCodegenConstants.WRAPPED_CODEGEN_SYMBOLWRITER_OUTPUT_FILENAME), e);
+      throw new RuntimeException(
+          format(
+              "Unable to remove %s.py",
+              WrappedCodegenConstants.WRAPPED_CODEGEN_SYMBOLWRITER_OUTPUT_FILENAME),
+          e);
     }
   }
 }
