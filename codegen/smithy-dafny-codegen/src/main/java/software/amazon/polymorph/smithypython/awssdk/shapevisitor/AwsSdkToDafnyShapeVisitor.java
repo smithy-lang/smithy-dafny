@@ -30,7 +30,6 @@ import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.TimestampShape;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumTrait;
-import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonWriter;
 
@@ -40,8 +39,8 @@ import software.amazon.smithy.python.codegen.PythonWriter;
  */
 public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
   private final GenerationContext context;
-  private String dataSource;
   private final PythonWriter writer;
+  private final String dataSource;
 
   /**
    * @param context The generation context.
@@ -79,17 +78,13 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
       return "None";
     }
 
-    if (structureShape.hasTrait(ErrorTrait.class)) {
-      return structureShape.accept(
-          new AwsSdkErrorToDafnyErrorShapeVisitor(context, dataSource, writer));
-    }
-
+    // Conditionally write to/from conversion functions for structureShape
     AwsSdkToDafnyConversionFunctionWriter.writeConverterForShapeAndMembers(
         structureShape, context, writer);
     DafnyToAwsSdkConversionFunctionWriter.writeConverterForShapeAndMembers(
         structureShape, context, writer);
 
-    // Import the converter from where the ShapeVisitor was called
+    // Import the conversion function module from where the ShapeVisitor was called
     String pythonModuleName =
         SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
             structureShape.getId().getNamespace(), context);
@@ -173,6 +168,7 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
   public String stringShape(StringShape shape) {
     writer.addStdlibImport("_dafny", "Seq");
 
+    // String shapes with the enum trait have their own converters
     if (shape.hasTrait(EnumTrait.class)) {
       DafnyToAwsSdkConversionFunctionWriter.writeConverterForShapeAndMembers(
           shape, context, writer);

@@ -4,7 +4,6 @@
 package software.amazon.polymorph.smithypython.awssdk.shapevisitor.conversionwriters;
 
 import software.amazon.polymorph.smithypython.awssdk.nameresolver.AwsSdkNameResolver;
-import software.amazon.polymorph.smithypython.awssdk.shapevisitor.AwsSdkErrorToDafnyErrorShapeVisitor;
 import software.amazon.polymorph.smithypython.awssdk.shapevisitor.AwsSdkToDafnyShapeVisitor;
 import software.amazon.polymorph.smithypython.common.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
@@ -47,7 +46,7 @@ public class AwsSdkToDafnyConversionFunctionWriter extends BaseConversionWriter 
   protected void writeStructureShapeConverter(StructureShape structureShape) {
     WriterDelegator<PythonWriter> delegator = context.writerDelegator();
     String moduleName =
-        SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(
+        SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
             context.settings().getService().getNamespace());
 
     delegator.useFileWriter(
@@ -107,7 +106,7 @@ public class AwsSdkToDafnyConversionFunctionWriter extends BaseConversionWriter 
   protected void writeErrorStructureShapeConverter(StructureShape structureShape) {
     WriterDelegator<PythonWriter> delegator = context.writerDelegator();
     String moduleName =
-        SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(
+        SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
             context.settings().getService().getNamespace());
 
     delegator.useFileWriter(
@@ -172,7 +171,8 @@ public class AwsSdkToDafnyConversionFunctionWriter extends BaseConversionWriter 
     conversionWriter.write(
         "$L,",
         targetShape.accept(
-            new AwsSdkErrorToDafnyErrorShapeVisitor(
+            // TODO-Python: I removed a AwsSdkErrorToDafnyErrorShapeVisitor... see if this causes issues
+            new AwsSdkToDafnyShapeVisitor(
                 context,
                 dataSourceInsideConversionFunction + "[\"" + memberName + "\"]",
                 conversionWriter)));
@@ -231,7 +231,7 @@ public class AwsSdkToDafnyConversionFunctionWriter extends BaseConversionWriter 
   protected void writeUnionShapeConverter(UnionShape unionShape) {
     WriterDelegator<PythonWriter> delegator = context.writerDelegator();
     String moduleName =
-        SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(
+        SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
             context.settings().getService().getNamespace());
 
     delegator.useFileWriter(
@@ -310,7 +310,7 @@ public class AwsSdkToDafnyConversionFunctionWriter extends BaseConversionWriter 
   public void writeStringEnumShapeConverter(StringShape stringShapeWithEnumTrait) {
     WriterDelegator<PythonWriter> delegator = context.writerDelegator();
     String moduleName =
-        SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(
+        SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
             context.settings().getService().getNamespace());
 
     // Write out common conversion function inside dafny_to_aws_sdk

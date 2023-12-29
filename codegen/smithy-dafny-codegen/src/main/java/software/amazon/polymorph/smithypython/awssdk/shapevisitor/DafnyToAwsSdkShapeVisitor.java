@@ -28,7 +28,6 @@ import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.TimestampShape;
 import software.amazon.smithy.model.shapes.UnionShape;
-import software.amazon.smithy.model.traits.EnumDefinition;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonWriter;
@@ -39,8 +38,8 @@ import software.amazon.smithy.python.codegen.PythonWriter;
  */
 public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
   private final GenerationContext context;
-  private String dataSource;
   private final PythonWriter writer;
+  private final String dataSource;
 
   /**
    * @param context The generation context.
@@ -157,7 +156,6 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
 
   @Override
   public String stringShape(StringShape shape) {
-    System.out.println("stringshape " + shape.getId());
     if (shape.hasTrait(EnumTrait.class)) {
       DafnyToAwsSdkConversionFunctionWriter.writeConverterForShapeAndMembers(
           shape, context, writer);

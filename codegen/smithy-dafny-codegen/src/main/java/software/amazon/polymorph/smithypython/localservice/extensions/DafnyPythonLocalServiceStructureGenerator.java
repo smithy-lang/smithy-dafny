@@ -2,7 +2,6 @@ package software.amazon.polymorph.smithypython.localservice.extensions;
 
 import static java.lang.String.format;
 
-import java.util.ArrayList;
 import java.util.Set;
 
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
@@ -14,11 +13,8 @@ import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.NullableIndex;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.Shape;
-import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
-import software.amazon.smithy.model.traits.DefaultTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
-import software.amazon.smithy.python.codegen.CodegenUtils;
 import software.amazon.smithy.python.codegen.PythonSettings;
 import software.amazon.smithy.python.codegen.PythonWriter;
 import software.amazon.smithy.python.codegen.StructureGenerator;
@@ -57,11 +53,10 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
     // TODO: Implement protocol-level customization of the error code
     var code = shape.getId().getName();
     var symbol = symbolProvider.toSymbol(shape);
-    System.out.println("ERR");
     var apiError = Symbol.builder()
             .name("ApiError")
             .namespace(format("%s.errors", SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(settings.getService().getNamespace(), settings)), ".")
-            .definitionFile(format("./%s/errors.py", SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(settings.getService().getNamespace())))
+            .definitionFile(format("./%s/errors.py", SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(settings.getService().getNamespace())))
             .build();
     writer.openBlock("class $L($T[Literal[$S]]):", "", symbol.getName(), apiError, code, () -> {
       writer.write("code: Literal[$1S] = $1S", code);
@@ -83,8 +78,6 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
     if (target.hasTrait(ReferenceTrait.class)) {
       Shape referentShape = model.expectShape(target.expectTrait(ReferenceTrait.class).getReferentId());
       String memberName = symbolProvider.toMemberName(memberShape);
-
-      System.out.println("writeproperty " + referentShape.getId());
 
       NullableIndex index = NullableIndex.of(model);
 

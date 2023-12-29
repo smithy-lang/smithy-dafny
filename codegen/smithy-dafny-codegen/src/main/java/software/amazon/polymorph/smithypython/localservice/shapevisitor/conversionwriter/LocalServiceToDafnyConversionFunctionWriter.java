@@ -5,8 +5,6 @@ package software.amazon.polymorph.smithypython.localservice.shapevisitor.convers
 
 import java.util.Map.Entry;
 
-import software.amazon.polymorph.smithypython.awssdk.nameresolver.AwsSdkNameResolver;
-import software.amazon.polymorph.smithypython.awssdk.shapevisitor.conversionwriters.AwsSdkToDafnyConversionFunctionWriter;
 import software.amazon.polymorph.smithypython.common.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.Utils;
@@ -21,7 +19,6 @@ import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.ResourceShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
-import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.UnionShape;
@@ -66,7 +63,7 @@ public class LocalServiceToDafnyConversionFunctionWriter extends BaseConversionW
     }
 
     WriterDelegator<PythonWriter> delegator = context.writerDelegator();
-    String moduleName = SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(context.settings().getService().getNamespace());
+    String moduleName = SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(context.settings().getService().getNamespace());
 
     delegator.useFileWriter(moduleName + "/smithy_to_dafny.py", "", conversionWriter -> {
       // Within the conversion function, the dataSource becomes the function's input
@@ -320,7 +317,7 @@ public class LocalServiceToDafnyConversionFunctionWriter extends BaseConversionW
    */
   public void writeUnionShapeConverter(UnionShape unionShape) {
     WriterDelegator<PythonWriter> delegator = context.writerDelegator();
-    String moduleName = SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(context.settings().getService().getNamespace());
+    String moduleName = SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(context.settings().getService().getNamespace());
 
     delegator.useFileWriter(moduleName + "/smithy_to_dafny.py", "", conversionWriter -> {
 

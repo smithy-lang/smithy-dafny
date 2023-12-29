@@ -34,7 +34,7 @@ public class SynchronousClientGenerator extends ClientGenerator {
         var pluginSymbol = Symbol.builder()
                 .name("Plugin")
                 .namespace(format("%s.config", SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(context.settings().getService().getNamespace(), context)), ".")
-                .definitionFile(format("./%s/config.py",  SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(context.settings().getService().getNamespace())))
+                .definitionFile(format("./%s/config.py",  SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(context.settings().getService().getNamespace())))
                 .build();
         
         var configShapeId = service.getTrait(LocalServiceTrait.class).get().getConfigId();
@@ -206,12 +206,12 @@ public class SynchronousClientGenerator extends ClientGenerator {
         var errorSymbol = Symbol.builder()
                 .name("ServiceError")
                 .namespace(format("%s.errors", SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(context.settings().getService().getNamespace(), context)), ".")
-                .definitionFile(format("./%s/errors.py", SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(context.settings().getService().getNamespace())))
+                .definitionFile(format("./%s/errors.py", SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(context.settings().getService().getNamespace())))
                 .build();
         var pluginSymbol = Symbol.builder()
                 .name("Plugin")
                 .namespace(format("%s.config", SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(context.settings().getService().getNamespace(), context)), ".")
-                .definitionFile(format("./%s/config.py",  SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(context.settings().getService().getNamespace())))
+                .definitionFile(format("./%s/config.py",  SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(context.settings().getService().getNamespace())))
                 .build();
 
         var configSymbol = CodegenUtils.getConfigSymbol(context.settings());

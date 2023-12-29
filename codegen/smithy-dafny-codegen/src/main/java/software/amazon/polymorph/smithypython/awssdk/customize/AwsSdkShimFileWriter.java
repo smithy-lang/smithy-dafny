@@ -21,11 +21,11 @@ import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonWriter;
 
 /**
- * Writes the shim.py file for AWS SDKs. The shim wraps boto3 calls. Its inputs are Dafny-modelled
+ * Writes the shim.py file for AWS SDKs.The shim wraps boto3 calls. Its inputs are Dafny-modelled
  * requests; its outputs are Dafny-modelled responses. Internally, the shim will convert the
  * Dafny-modelled requests to dictionaries passed to boto3 via kwargs, call boto3 with the request
  * and receive a response, convert the boto3 response dictionary into a Dafny-modelled response, and
- * return the Dafny-modelled response. Other Dafny-generated Python code may use the shim to call
+ * return the Dafny-modelled response. Other Dafny-generated Python code will use the shim to call
  * AWS services (e.g. KMS, DDB).
  */
 public class AwsSdkShimFileWriter implements CustomFileWriter {
@@ -36,7 +36,7 @@ public class AwsSdkShimFileWriter implements CustomFileWriter {
     String typesModulePrelude =
         DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(serviceShape.getId());
     String moduleName =
-        SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(
+        SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
             codegenContext.settings().getService().getNamespace());
     codegenContext
         .writerDelegator()

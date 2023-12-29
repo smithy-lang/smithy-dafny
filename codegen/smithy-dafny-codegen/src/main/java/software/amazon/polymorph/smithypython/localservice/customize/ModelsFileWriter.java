@@ -7,7 +7,6 @@ import software.amazon.polymorph.smithypython.common.customize.CustomFileWriter;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.python.codegen.GenerationContext;
-import software.amazon.smithy.utils.CaseUtils;
 
 /** Extends the Smithy-Python-generated models.py file by adding Dafny plugin models. */
 public class ModelsFileWriter implements CustomFileWriter {
@@ -16,7 +15,7 @@ public class ModelsFileWriter implements CustomFileWriter {
   public void customizeFileForServiceShape(
       ServiceShape serviceShape, GenerationContext codegenContext) {
     String moduleName =
-        SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(
+        SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
             codegenContext.settings().getService().getNamespace());
     codegenContext
         .writerDelegator()
@@ -27,7 +26,7 @@ public class ModelsFileWriter implements CustomFileWriter {
 
               // This block defines an empty `Unit` class used by Smithy-Python generated code
               // Defining this seems necessary to avoid forking Smithy-Python
-              // TODO-Python: Find some way to not need this, or decide this is OK
+              // TODO-Python: Find some way to not need this, or decide this is OK. Low priority
               writer.write(
                   """
               class Unit:

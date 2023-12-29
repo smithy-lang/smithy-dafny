@@ -26,7 +26,9 @@ import java.util.Map;
  * runner.createDedicatedInputsAndOutputs(); These methods transform the model in ways that the
  * model does not align with the generated Dafny code. This Plugin also attaches a
  * DafnyAwsSdkProtocolTrait to the ServiceShape provided in settings. AWS SDKs do not consistently
- * label a protocol,
+ * label a protocol, and Smithy-Python requires that a protocol is assigned. Rather than declare
+ * that we are using some protocol (e.g. `restJson1`) then not use that in practice, it is more
+ * proper to define some custom protocol and use that.
  */
 @SmithyUnstableApi
 public final class DafnyPythonAwsSdkClientCodegenPlugin implements SmithyBuildPlugin {

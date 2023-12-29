@@ -3,15 +3,12 @@
 
 package software.amazon.polymorph.smithypython.localservice;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import software.amazon.awssdk.codegen.CodeGenerator;
+
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.smithypython.localservice.customize.ConfigFileWriter;
 import software.amazon.polymorph.smithypython.localservice.customize.DafnyImplInterfaceFileWriter;
@@ -20,25 +17,19 @@ import software.amazon.polymorph.smithypython.localservice.customize.ErrorsFileW
 import software.amazon.polymorph.smithypython.localservice.customize.ModelsFileWriter;
 import software.amazon.polymorph.smithypython.localservice.customize.PluginFileWriter;
 import software.amazon.polymorph.smithypython.localservice.customize.ReferencesFileWriter;
-import software.amazon.polymorph.smithypython.localservice.extensions.DirectedDafnyPythonLocalServiceCodegen;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolReference;
-import software.amazon.smithy.codegen.core.TopologicalIndex;
-import software.amazon.smithy.model.neighbor.Walker;
 import software.amazon.smithy.model.shapes.EntityShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
-import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.python.codegen.ConfigProperty;
 import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonWriter;
-import software.amazon.smithy.python.codegen.SymbolVisitor;
 import software.amazon.smithy.python.codegen.integration.ProtocolGenerator;
 import software.amazon.smithy.python.codegen.integration.RuntimeClientPlugin;
 import software.amazon.smithy.python.codegen.integration.PythonIntegration;
-import software.amazon.smithy.utils.CaseUtils;
 import software.amazon.smithy.utils.CodeInterceptor;
 import software.amazon.smithy.utils.CodeSection;
 
@@ -197,13 +188,11 @@ public final class DafnyPythonLocalServiceIntegration implements PythonIntegrati
             .map(shapeId -> codegenContext.model().expectShape(shapeId))
             .collect(Collectors.toSet());
 
-        String moduleName = SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(codegenContext.settings().getService().getNamespace());
-
-        System.out.println("referenceShapes " + referenceShapes);
+        String moduleName = SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(codegenContext.settings().getService().getNamespace());
 
         codegenContext.writerDelegator().useFileWriter(moduleName + "/references.py", "", writer -> {
             for (Shape referenceShape : referenceShapes) {
-                new ReferencesFileWriter().generateResourceStuff(referenceShape, codegenContext, writer);
+                new ReferencesFileWriter().generateResourceInterface(referenceShape, codegenContext, writer);
 
             }
         });
@@ -217,7 +206,6 @@ public final class DafnyPythonLocalServiceIntegration implements PythonIntegrati
      */
     private void customizeForNonServiceOperationShapes(Set<ShapeId> operationShapeIds,
             GenerationContext codegenContext) {
-        System.out.println("customizenonserviceopeartion " + operationShapeIds);
         new ReferencesFileWriter().customizeFileForNonServiceShapes(operationShapeIds,
                 codegenContext);
     }

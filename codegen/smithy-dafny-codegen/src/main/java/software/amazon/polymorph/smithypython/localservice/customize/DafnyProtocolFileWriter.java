@@ -15,7 +15,6 @@ import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonWriter;
-import software.amazon.smithy.utils.CaseUtils;
 
 /**
  * Writes the dafny_protocol.py file. This file defines the types that are sent to and from the
@@ -27,7 +26,7 @@ public class DafnyProtocolFileWriter implements CustomFileWriter {
   public void customizeFileForServiceShape(
       ServiceShape serviceShape, GenerationContext codegenContext) {
     String moduleName =
-        SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(
+        SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
             codegenContext.settings().getService().getNamespace());
 
     // Collect all `inputShapeIds` to identify all possible types `dafny_operation_input` can take

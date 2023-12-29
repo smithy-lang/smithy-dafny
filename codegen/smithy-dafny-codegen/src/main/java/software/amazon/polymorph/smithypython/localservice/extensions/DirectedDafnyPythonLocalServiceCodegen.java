@@ -3,21 +3,12 @@
 
 package software.amazon.polymorph.smithypython.localservice.extensions;
 
-import java.nio.file.Path;
-import java.sql.Ref;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
+
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.smithypython.localservice.customize.ReferencesFileWriter;
-import software.amazon.polymorph.traits.ReferenceTrait;
-import software.amazon.smithy.build.FileManifest;
 import software.amazon.smithy.codegen.core.*;
 import software.amazon.smithy.codegen.core.directed.*;
-import software.amazon.smithy.model.knowledge.ServiceIndex;
-import software.amazon.smithy.model.neighbor.Walker;
-import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.python.codegen.*;
 
 import static java.lang.String.format;
@@ -53,7 +44,7 @@ public class DirectedDafnyPythonLocalServiceCodegen extends DirectedPythonCodege
         var serviceError = Symbol.builder()
                 .name("ServiceError")
                 .namespace(format("%s.errors", SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(settings.getService().getNamespace(), settings)), ".")
-                .definitionFile(format("./%s/errors.py", SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(settings.getService().getNamespace())))
+                .definitionFile(format("./%s/errors.py", SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(settings.getService().getNamespace())))
                 .build();
         writers.useFileWriter(serviceError.getDefinitionFile(), serviceError.getNamespace(), writer -> {
             // TODO: subclass a shared error
@@ -67,7 +58,7 @@ public class DirectedDafnyPythonLocalServiceCodegen extends DirectedPythonCodege
         var apiError = Symbol.builder()
                 .name("ApiError")
                 .namespace(format("%s.errors", SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(settings.getService().getNamespace(), settings)), ".")
-                .definitionFile(format("./%s/errors.py", SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(settings.getService().getNamespace())))
+                .definitionFile(format("./%s/errors.py", SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(settings.getService().getNamespace())))
                 .build();
         writers.useFileWriter(apiError.getDefinitionFile(), apiError.getNamespace(), writer -> {
             writer.addStdlibImport("typing", "Generic");
@@ -86,7 +77,7 @@ public class DirectedDafnyPythonLocalServiceCodegen extends DirectedPythonCodege
             var unknownApiError = Symbol.builder()
                     .name("UnknownApiError")
                     .namespace(format("%s.errors", SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(settings.getService().getNamespace(), settings)), ".")
-                    .definitionFile(format("./%s/errors.py", SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(settings.getService().getNamespace())))
+                    .definitionFile(format("./%s/errors.py", SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(settings.getService().getNamespace())))
                     .build();
             writer.addStdlibImport("typing", "Literal");
             writer.openBlock("class $L($T[Literal['Unknown']]):", "", unknownApiError.getName(), apiError, () -> {
@@ -138,9 +129,9 @@ public class DirectedDafnyPythonLocalServiceCodegen extends DirectedPythonCodege
       GenerateResourceDirective<GenerationContext, PythonSettings> directive) {
   if (directive.shape().getId().getNamespace()
           .equals(directive.context().settings().getService().getNamespace())) {
-      String moduleName = SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(directive.context().settings().getService().getNamespace());
+      String moduleName = SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(directive.context().settings().getService().getNamespace());
       directive.context().writerDelegator().useFileWriter(moduleName + "/references.py", "", writer -> {
-          new ReferencesFileWriter().generateResourceStuff(directive.shape(), directive.context(), writer);
+          new ReferencesFileWriter().generateResourceInterface(directive.shape(), directive.context(), writer);
       });
   }
   }

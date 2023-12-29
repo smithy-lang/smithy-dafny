@@ -7,7 +7,6 @@ import software.amazon.smithy.model.knowledge.TopDownIndex;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.python.codegen.*;
-import software.amazon.smithy.utils.CaseUtils;
 
 import static java.lang.String.format;
 
@@ -22,7 +21,7 @@ public class DafnyPythonLocalServiceConfigGenerator extends ConfigGenerator {
         var config = Symbol.builder()
                 .name("Config")
                 .namespace(format("%s.config", SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(settings.getService().getNamespace(), context)), ".")
-                .definitionFile(format("./%s/config.py",  SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(settings.getService().getNamespace())))
+                .definitionFile(format("./%s/config.py",  SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(settings.getService().getNamespace())))
                 .build();
 //        var config = CodegenUtils.getConfigSymbol(context.settings());
         context.writerDelegator().useFileWriter
@@ -37,7 +36,7 @@ public class DafnyPythonLocalServiceConfigGenerator extends ConfigGenerator {
         var plugin = Symbol.builder()
                 .name("Plugin")
                 .namespace(format("%s.config", SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(settings.getService().getNamespace(), context)), ".")
-                .definitionFile(format("./%s/config.py",  SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(settings.getService().getNamespace())))
+                .definitionFile(format("./%s/config.py",  SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(settings.getService().getNamespace())))
                 .build();
         context.writerDelegator().useFileWriter(plugin.getDefinitionFile(), plugin.getNamespace(), writer -> {
             writer.addStdlibImport("typing", "Callable");

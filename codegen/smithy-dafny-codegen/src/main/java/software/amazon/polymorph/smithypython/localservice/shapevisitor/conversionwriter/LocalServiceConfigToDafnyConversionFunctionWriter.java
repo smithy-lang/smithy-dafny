@@ -55,7 +55,7 @@ public class LocalServiceConfigToDafnyConversionFunctionWriter extends LocalServ
     }
 
     WriterDelegator<PythonWriter> delegator = context.writerDelegator();
-    String moduleName = SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(context.settings().getService().getNamespace());
+    String moduleName = SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(context.settings().getService().getNamespace());
 
     delegator.useFileWriter(moduleName + "/smithy_to_dafny.py", "", conversionWriter -> {
       // Within the conversion function, the dataSource becomes the function's input

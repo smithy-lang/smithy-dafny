@@ -16,10 +16,8 @@ import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.ErrorTrait;
-import software.amazon.smithy.python.codegen.CodegenUtils;
 import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonWriter;
-import software.amazon.smithy.utils.CaseUtils;
 
 import static java.lang.String.format;
 
@@ -30,10 +28,8 @@ public class ErrorsFileWriter implements CustomFileWriter {
   public void customizeFileForServiceShape(
       ServiceShape serviceShape, GenerationContext codegenContext) {
     String moduleName =
-        SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(
+        SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
             codegenContext.settings().getService().getNamespace());
-
-    System.out.println("moduleName: " + moduleName);
 
     codegenContext
         .writerDelegator()
@@ -44,8 +40,6 @@ public class ErrorsFileWriter implements CustomFileWriter {
               writer.addStdlibImport("typing", "Dict");
               writer.addStdlibImport("typing", "Any");
               writer.addStdlibImport("typing", "List");
-
-              System.out.println("moduleName INSIDE!: " + moduleName);
 
               // Generate Smithy shapes for each of this service's modelled errors
               TreeSet<StructureShape> deserializingErrorShapes =
@@ -72,7 +66,6 @@ public class ErrorsFileWriter implements CustomFileWriter {
                 Set<ShapeId> serviceDependencyShapeIds = localServiceTrait.getDependencies();
                 if (serviceDependencyShapeIds != null) {
                   for (ShapeId serviceDependencyShapeId : serviceDependencyShapeIds) {
-                    System.out.println("serviceDependencyShapeId: " + serviceDependencyShapeId);
                     renderDependencyWrappingError(codegenContext, writer, serviceDependencyShapeId);
                   }
                 }
@@ -202,9 +195,9 @@ public class ErrorsFileWriter implements CustomFileWriter {
             });
   }
 
-  // This is lifted from Smithy-Python, where it is not sufficiently customizable
-  // to be used for our purposes.
-  // TODO-Python: Reconcile this with Smithy-Python.
+  // This is lifted from Smithy-Python.
+  // Smithy-Python has no concept of dependencies or other namespaces.
+  // This allows errors in other namespaces to be rendered correctly.
   private void renderError(GenerationContext context, PythonWriter writer, StructureShape shape) {
     writer.addStdlibImport("typing", "Dict");
     writer.addStdlibImport("typing", "Literal");
@@ -223,7 +216,7 @@ public class ErrorsFileWriter implements CustomFileWriter {
             .definitionFile(
                 format(
                     "./%s/errors.py",
-                    SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(
+                    SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
                         context.settings().getService().getNamespace())))
             .build();
     writer.openBlock(
@@ -239,9 +232,9 @@ public class ErrorsFileWriter implements CustomFileWriter {
     writer.write("");
   }
 
-  // This is lifted from Smithy-Python, where it is not sufficiently customizable
-  // to be used for our purposes.
-  // TODO-Python: Reconcile this with Smithy-Python.
+  // This is lifted from Smithy-Python.
+  // Smithy-Python has no concept of dependencies or other namespaces.
+  // This allows errors in other namespaces to be rendered correctly.
   private void renderDependencyWrappingError(
       GenerationContext context, PythonWriter writer, ShapeId serviceDependencyShapeId) {
     writer.addStdlibImport("typing", "Dict");
@@ -251,7 +244,6 @@ public class ErrorsFileWriter implements CustomFileWriter {
     Shape serviceDependencyShape = context.model().expectShape(serviceDependencyShapeId);
     String code = serviceDependencyShapeId.getName();
     Symbol symbol = context.symbolProvider().toSymbol(serviceDependencyShape);
-    System.out.println("code = " + code);
     var apiError =
         Symbol.builder()
             .name("ApiError")
@@ -264,7 +256,7 @@ public class ErrorsFileWriter implements CustomFileWriter {
             .definitionFile(
                 format(
                     "./%s/errors.py",
-                    SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(
+                    SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
                         context.settings().getService().getNamespace())))
             .build();
     writer.openBlock(

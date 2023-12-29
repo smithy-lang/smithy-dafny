@@ -32,7 +32,7 @@ public class ConfigFileWriter implements CustomFileWriter {
         codegenContext.model().expectShape(localServiceTrait.getConfigId(), StructureShape.class);
 
     String moduleName =
-        SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(
+        SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
             codegenContext.settings().getService().getNamespace());
     codegenContext
         .writerDelegator()

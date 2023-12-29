@@ -10,7 +10,6 @@ import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.python.codegen.GenerationContext;
-import software.amazon.smithy.utils.CaseUtils;
 
 /**
  * Writes the plugin.py file. This file contains logic to load the Dafny plugin into the
@@ -23,7 +22,7 @@ public class PluginFileWriter implements CustomFileWriter {
   public void customizeFileForServiceShape(
       ServiceShape serviceShape, GenerationContext codegenContext) {
     String moduleName =
-        SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(
+        SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
             codegenContext.settings().getService().getNamespace());
     String clientName = SmithyNameResolver.clientForService(serviceShape);
     String implModulePrelude =

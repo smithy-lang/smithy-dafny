@@ -4,11 +4,10 @@
 package software.amazon.polymorph.smithypython.awssdk.shapevisitor.conversionwriters;
 
 import java.util.Map.Entry;
-
 import software.amazon.polymorph.smithypython.awssdk.nameresolver.AwsSdkNameResolver;
+import software.amazon.polymorph.smithypython.awssdk.shapevisitor.DafnyToAwsSdkShapeVisitor;
 import software.amazon.polymorph.smithypython.common.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
-import software.amazon.polymorph.smithypython.awssdk.shapevisitor.DafnyToAwsSdkShapeVisitor;
 import software.amazon.polymorph.smithypython.common.shapevisitor.conversionwriter.BaseConversionWriter;
 import software.amazon.smithy.codegen.core.WriterDelegator;
 import software.amazon.smithy.model.shapes.MemberShape;
@@ -20,7 +19,6 @@ import software.amazon.smithy.model.traits.EnumDefinition;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonWriter;
-import software.amazon.smithy.utils.CaseUtils;
 
 /** Writes the dafny_to_aws_sdk.py file via the BaseConversionWriter implementation. */
 public class DafnyToAwsSdkConversionFunctionWriter extends BaseConversionWriter {
@@ -28,12 +26,12 @@ public class DafnyToAwsSdkConversionFunctionWriter extends BaseConversionWriter 
   // Use a singleton to preserve generatedShapes through multiple generations
   static DafnyToAwsSdkConversionFunctionWriter singleton;
 
-  private DafnyToAwsSdkConversionFunctionWriter() {}
-
   // Instantiate singleton at class-load time
   static {
     singleton = new DafnyToAwsSdkConversionFunctionWriter();
   }
+
+  private DafnyToAwsSdkConversionFunctionWriter() {}
 
   /**
    * Delegate writing conversion methods for the provided shape and its member shapes
@@ -50,7 +48,7 @@ public class DafnyToAwsSdkConversionFunctionWriter extends BaseConversionWriter 
   protected void writeStructureShapeConverter(StructureShape structureShape) {
     WriterDelegator<PythonWriter> delegator = context.writerDelegator();
     String moduleName =
-        SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(
+        SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
             context.settings().getService().getNamespace());
     // Create a new writer.
     // The `writer` on this object points to the location in the code where this converter was
@@ -147,7 +145,7 @@ public class DafnyToAwsSdkConversionFunctionWriter extends BaseConversionWriter 
   public void writeUnionShapeConverter(UnionShape unionShape) {
     WriterDelegator<PythonWriter> delegator = context.writerDelegator();
     String moduleName =
-        SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(
+        SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
             context.settings().getService().getNamespace());
 
     // Write out common conversion function inside dafny_to_aws_sdk
@@ -230,7 +228,7 @@ public class DafnyToAwsSdkConversionFunctionWriter extends BaseConversionWriter 
   public void writeStringEnumShapeConverter(StringShape stringShapeWithEnumTrait) {
     WriterDelegator<PythonWriter> delegator = context.writerDelegator();
     String moduleName =
-        SmithyNameResolver.getPythonModuleNamespaceForSmithyNamespace(
+        SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
             context.settings().getService().getNamespace());
 
     // Write out common conversion function inside dafny_to_aws_sdk
