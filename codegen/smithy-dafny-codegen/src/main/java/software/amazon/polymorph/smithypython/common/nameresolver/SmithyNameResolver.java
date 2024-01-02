@@ -264,7 +264,7 @@ public class SmithyNameResolver {
       pythonModuleName = getPythonModuleNameForSmithyNamespace(smithyNamespace);
       namespace = smithyNamespace;
     }
-    return pythonModuleName + ".smithygenerated." + namespace;
+    return pythonModuleName + ".smithygenerated." + getServiceSmithygeneratedDirectoryNameForNamespace(namespace);
   }
 
   /**
