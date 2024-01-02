@@ -78,7 +78,7 @@ public final class DafnyPythonLocalServiceIntegration implements PythonIntegrati
     @Override
     public List<? extends CodeInterceptor<? extends CodeSection, PythonWriter>>
     interceptors(GenerationContext codegenContext) {
-        return List.of(new SendRequestInterceptor());
+        return List.of();
     }
 
     /**

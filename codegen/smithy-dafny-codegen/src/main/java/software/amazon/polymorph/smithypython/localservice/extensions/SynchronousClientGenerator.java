@@ -5,6 +5,7 @@ import static java.lang.String.format;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import software.amazon.polymorph.smithypython.common.Constants;
 import software.amazon.polymorph.smithypython.common.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.traits.LocalServiceTrait;
@@ -25,6 +26,9 @@ import software.amazon.smithy.python.codegen.sections.*;
  * `async`. To use generated clients, library consumers would need to wrap calls as async. However,
  * generated Dafny code is NOT thread safe, and MUST NOT be used in an async environment. To guard
  * users against this, make all user-exposed methods on the client synchronous.
+ * This class exists to provide a synchronous client interface; however, since it exists,
+ * we also remove some logic that is not used by Smithy-Dafny Python clients
+ * (primarily HTTP-request-wrapping logic for Smithy-Python clients).
  */
 public class SynchronousClientGenerator extends ClientGenerator {
 
@@ -227,39 +231,69 @@ public class SynchronousClientGenerator extends ClientGenerator {
           }
         });
   }
-    protected void generateOperationExecutor(PythonWriter writer) {
-        var transportRequest = context.applicationProtocol().requestType();
-        var transportResponse = context.applicationProtocol().responseType();
-        var errorSymbol = Symbol.builder()
-                .name("ServiceError")
-                .namespace(format("%s.errors", SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(context.settings().getService().getNamespace(), context)), ".")
-                .definitionFile(format("./%s/errors.py", SmithyNameResolver.getPythonModuleNameForSmithyNamespace(context.settings().getService().getNamespace())))
-                .build();
-        var pluginSymbol = Symbol.builder()
-                .name("Plugin")
-                .namespace(format("%s.config", SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(context.settings().getService().getNamespace(), context)), ".")
-                .definitionFile(format("./%s/config.py",  SmithyNameResolver.getPythonModuleNameForSmithyNamespace(context.settings().getService().getNamespace())))
-                .build();
 
-        var configSymbol = CodegenUtils.getConfigSymbol(context.settings());
-        // TODO-Python make import work automatically
-        writer.addImport(".config", configSymbol.getName());
+    /**
+     * Override Smithy-Python's generateOperationExecutor.
+     * This MUST be done because Smithy-Python does not let us intercept its SymbolProvider
+     * from within this function.
+     * We also remove code that will not be used by Smithy-Dafny Python clients,
+     * around HTTP request signing and authentication.
+     * @param writer
+     */
+  protected void generateOperationExecutor(PythonWriter writer) {
+    var transportRequest = context.applicationProtocol().requestType();
+    var transportResponse = context.applicationProtocol().responseType();
+    var errorSymbol =
+        Symbol.builder()
+            .name("ServiceError")
+            .namespace(
+                format(
+                    "%s.errors",
+                    SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
+                        context.settings().getService().getNamespace(), context)),
+                ".")
+            .definitionFile(
+                format(
+                    "./%s/errors.py",
+                    SmithyNameResolver.getPythonModuleNameForSmithyNamespace(
+                        context.settings().getService().getNamespace())))
+            .build();
+    var pluginSymbol =
+        Symbol.builder()
+            .name("Plugin")
+            .namespace(
+                format(
+                    "%s.config",
+                    SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
+                        context.settings().getService().getNamespace(), context)),
+                ".")
+            .definitionFile(
+                format(
+                    "./%s/config.py",
+                    SmithyNameResolver.getPythonModuleNameForSmithyNamespace(
+                        context.settings().getService().getNamespace())))
+            .build();
 
-        writer.addStdlibImport("typing", "Callable");
-        writer.addStdlibImport("typing", "Awaitable");
-        writer.addStdlibImport("typing", "cast");
-        writer.addStdlibImport("copy", "deepcopy");
-        writer.addStdlibImport("asyncio", "sleep");
+    var configSymbol = CodegenUtils.getConfigSymbol(context.settings());
+    // TODO-Python make import work automatically
+    writer.addImport(".config", configSymbol.getName());
 
-        writer.addDependency(SmithyPythonDependency.SMITHY_PYTHON);
-        writer.addImport("smithy_python.exceptions", "SmithyRetryException");
-        writer.addImport("smithy_python.interfaces.interceptor", "Interceptor");
-        writer.addImport("smithy_python.interfaces.interceptor", "InterceptorContext");
-        writer.addImport("smithy_python.interfaces.retries", "RetryErrorInfo");
-        writer.addImport("smithy_python.interfaces.retries", "RetryErrorType");
+    writer.addStdlibImport("typing", "Callable");
+    writer.addStdlibImport("typing", "Awaitable");
+    writer.addStdlibImport("typing", "cast");
+    writer.addStdlibImport("copy", "deepcopy");
+    writer.addStdlibImport("asyncio", "sleep");
 
-        writer.indent();
-        writer.write("""
+    writer.addDependency(SmithyPythonDependency.SMITHY_PYTHON);
+    writer.addImport("smithy_python.exceptions", "SmithyRetryException");
+    writer.addImport("smithy_python.interfaces.interceptor", "Interceptor");
+    writer.addImport("smithy_python.interfaces.interceptor", "InterceptorContext");
+    writer.addImport("smithy_python.interfaces.retries", "RetryErrorInfo");
+    writer.addImport("smithy_python.interfaces.retries", "RetryErrorType");
+
+    writer.indent();
+    writer.write(
+        """
                 async def _execute_operation(
                     self,
                     input: Input,
@@ -413,162 +447,38 @@ public class SynchronousClientGenerator extends ClientGenerator {
                     operation_name: str,
                 ) -> InterceptorContext[Input, Output, $2T, $3T | None]:
                     try:
-                        # assert config.interceptors is not None
                         # Step 7a: Invoke read_before_attempt
                         for interceptor in interceptors:
                             interceptor.read_before_attempt(context)
 
-                """, pluginSymbol, transportRequest, transportResponse, errorSymbol, configSymbol.getName());
+                """,
+        pluginSymbol,
+        transportRequest,
+        transportResponse,
+        errorSymbol,
+        configSymbol.getName());
 
-        boolean supportsAuth = !ServiceIndex.of(context.model()).getAuthSchemes(service).isEmpty();
-        writer.pushState(new ResolveIdentitySection());
-        if (context.applicationProtocol().isHttpProtocol() && supportsAuth) {
-            writer.pushState(new InitializeHttpAuthParametersSection());
-            writer.write("""
-                        # Step 7b: Invoke service_auth_scheme_resolver.resolve_auth_scheme
-                        auth_parameters: $1T = $1T(
-                            operation=operation_name,
-                            ${2C|}
-                        )
+    writer.pushState(new SendRequestSection());
+    writer.write(
+          """
+                  # Step 7m: Involve client Dafny impl
+                  if config.dafnyImplInterface.impl is None:
+                      raise Exception("No impl found on the operation config.")
+  
+                  context_with_response = cast(
+                      InterceptorContext[Input, None, $L, $L], context
+                  )
+  
+                  context_with_response._transport_response = config.dafnyImplInterface.handle_request(
+                      input=context_with_response.transport_request
+                  )
+          """,
+          Constants.DAFNY_PROTOCOL_REQUEST,
+          Constants.DAFNY_PROTOCOL_RESPONSE);
+    writer.popState();
 
-                """, CodegenUtils.getHttpAuthParamsSymbol(context.settings()),
-                    writer.consumer(this::initializeHttpAuthParameters));
-            writer.popState();
-
-            writer.addDependency(SmithyPythonDependency.SMITHY_PYTHON);
-            writer.addImport("smithy_python.interfaces.identity", "Identity");
-            writer.addImports("smithy_python.interfaces.auth", Set.of("HTTPSigner", "HTTPAuthOption"));
-            writer.addStdlibImport("typing", "Any");
-            writer.write("""
-                        auth_options = config.http_auth_scheme_resolver.resolve_auth_scheme(
-                            auth_parameters=auth_parameters
-                        )
-                        auth_option: HTTPAuthOption | None = None
-                        for option in auth_options:
-                            if option.scheme_id in config.http_auth_schemes:
-                                auth_option = option
-
-                        signer: HTTPSigner[Any, Any] | None = None
-                        identity: Identity | None = None
-
-                        if auth_option:
-                            auth_scheme = config.http_auth_schemes[auth_option.scheme_id]
-
-                            # Step 7c: Invoke auth_scheme.identity_resolver
-                            identity_resolver = auth_scheme.identity_resolver(config=config)
-
-                            # Step 7d: Invoke auth_scheme.signer
-                            signer = auth_scheme.signer
-
-                            # Step 7e: Invoke identity_resolver.get_identity
-                            identity = await identity_resolver.get_identity(
-                                identity_properties=auth_option.identity_properties
-                            )
-
-                """);
-        }
-        writer.popState();
-
-        writer.pushState(new ResolveEndpointSection());
-        if (context.applicationProtocol().isHttpProtocol()) {
-            writer.addDependency(SmithyPythonDependency.SMITHY_PYTHON);
-            // TODO: implement the endpoints 2.0 spec and remove the hard-coded handling of static params.
-            writer.addImport("smithy_python._private.http", "StaticEndpointParams");
-            writer.addImport("smithy_python._private", "URI");
-            writer.write("""
-                        # Step 7f: Invoke endpoint_resolver.resolve_endpoint
-                        if config.endpoint_resolver is None:
-                            raise $1T(
-                                "No endpoint_resolver found on the operation config."
-                            )
-                        if config.endpoint_uri is None:
-                            raise $1T(
-                                "No endpoint_uri found on the operation config."
-                            )
-
-                        endpoint = await config.endpoint_resolver.resolve_endpoint(
-                            StaticEndpointParams(uri=config.endpoint_uri)
-                        )
-                        if not endpoint.uri.path:
-                            path = ""
-                        elif endpoint.uri.path.endswith("/"):
-                            path = endpoint.uri.path[:-1]
-                        else:
-                            path = endpoint.uri.path
-                        if context.transport_request.destination.path:
-                            path += context.transport_request.destination.path
-                        context._transport_request.destination = URI(
-                            scheme=endpoint.uri.scheme,
-                            host=context.transport_request.destination.host + endpoint.uri.host,
-                            path=path,
-                            query=context.transport_request.destination.query,
-                        )
-                        context._transport_request.fields.extend(endpoint.headers)
-
-                """, errorSymbol);
-        }
-        writer.popState();
-
-        writer.write("""
-                        # Step 7g: Invoke modify_before_signing
-                        for interceptor in interceptors:
-                            context._transport_request = interceptor.modify_before_signing(context)
-
-                        # Step 7h: Invoke read_before_signing
-                        for interceptor in interceptors:
-                            interceptor.read_before_signing(context)
-
-                """);
-
-        writer.pushState(new SignRequestSection());
-        if (context.applicationProtocol().isHttpProtocol() && supportsAuth) {
-            writer.write("""
-                        # Step 7i: sign the request
-                        if auth_option and signer:
-                            context._transport_request = await signer.sign(
-                                http_request=context.transport_request,
-                                identity=identity,
-                                signing_properties=auth_option.signer_properties,
-                            )
-                """);
-        }
-        writer.popState();
-
-        writer.write("""
-                        # Step 7j: Invoke read_after_signing
-                        for interceptor in interceptors:
-                            interceptor.read_after_signing(context)
-
-                        # Step 7k: Invoke modify_before_transmit
-                        for interceptor in interceptors:
-                            context._transport_request = interceptor.modify_before_transmit(context)
-
-                        # Step 7l: Invoke read_before_transmit
-                        for interceptor in interceptors:
-                            interceptor.read_before_transmit(context)
-
-                """);
-
-        writer.pushState(new SendRequestSection());
-        if (context.applicationProtocol().isHttpProtocol()) {
-            writer.addDependency(SmithyPythonDependency.SMITHY_PYTHON);
-            writer.addImport("smithy_python.interfaces.http", "HTTPRequestConfiguration");
-            writer.write("""
-                        # Step 7m: Invoke http_client.send
-                        request_config = config.http_request_config or HTTPRequestConfiguration()
-                        context_with_response = cast(
-                            InterceptorContext[Input, None, $1T, $2T], context
-                        )
-                        context_with_response._transport_response = await config.http_client.send(
-                            request=context_with_response.transport_request,
-                            request_config=request_config,
-                        )
-
-                """, transportRequest, transportResponse);
-        }
-        writer.popState();
-
-        writer.write("""
+    writer.write(
+        """
                         # Step 7n: Invoke read_after_transmit
                         for interceptor in interceptors:
                             interceptor.read_after_transmit(context_with_response)
@@ -649,13 +559,6 @@ public class SynchronousClientGenerator extends ClientGenerator {
                         for interceptor in interceptors:
                             context._response = interceptor.modify_before_completion(context)
 
-                        # Step 10: Invoke trace_probe.dispatch_events
-                        try:
-                            pass
-                        except Exception as e:
-                            # log and ignore exceptions
-                            # config.logger.exception(f"Exception occurred while dispatching trace events: {e}")
-                            pass
                     except Exception as e:
                         if context.response is not None:
                             # config.logger.exception(f"Exception occurred while handling: {context.response}")
@@ -679,7 +582,9 @@ public class SynchronousClientGenerator extends ClientGenerator {
                     # We may want to add some aspects of this context to the output types so we can
                     # return it to the end-users.
                     return context.response
-                """, transportRequest, transportResponse);
-        writer.dedent();
-    }
+                """,
+        transportRequest,
+        transportResponse);
+    writer.dedent();
+  }
 }
