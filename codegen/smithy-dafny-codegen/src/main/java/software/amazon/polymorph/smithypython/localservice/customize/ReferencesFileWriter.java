@@ -161,7 +161,7 @@ public class ReferencesFileWriter implements CustomFileWriter {
             def __init__(self, _impl):
                 self._impl = _impl
 
-            $2{C|}
+            ${2C|}
         """,
         resourceOrServiceShape.getId().getName(),
         writer.consumer(
