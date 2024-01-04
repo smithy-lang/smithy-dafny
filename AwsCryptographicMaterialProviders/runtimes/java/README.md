@@ -1,9 +1,5 @@
 # AWS Cryptographic Material Providers Library
 
-📣 Note: This repository contains the source code and related files for all
-language implementations of the AWS Cryptographic Material Providers Library.
-See our [supported languages](#supported-languages) section for more information.
-
 The AWS Cryptographic Material Providers Library abstracts lower level cryptographic materials management of encryption and decryption materials.
 It uses cryptographic best practices to protect the data keys that protect your data.
 The data key is protected with a key encryption key called a _wrapping key_.
@@ -37,6 +33,70 @@ different runtimes.
 This library is written in Dafny, a formally verifiable programming language that can be compiled into
 different runtimes. This library is currently **ONLY** supported in Java and .NET
 
+### Required Prerequisites
+
+To use the AWS Material Providers Library in Java, you must have:
+
+- **A Java 8 or newer development environment**
+  If you do not have one,
+  go to [Java SE Downloads](https://www.oracle.com/technetwork/java/javase/downloads/index.html) on the Oracle website,
+  then download and install the Java SE Development Kit (JDK).
+  Java 8 or higher is required.
+
+  **Note:** If you use the Oracle JDK,
+  you must also download and install
+  the [Java Cryptography Extension (JCE) Unlimited Strength Jurisdiction Policy Files](http://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html).
+
+- **Declare a Dependency on AWS Material Providers Library in Java and it's dependencies**
+  This library requires the DynamoDB and KMS clients
+  from the AWS SDK for Java V2
+
+  - **Via Gradle Kotlin**
+    In a Gradle Java Project, add the following to the _dependencies_ section:
+
+  ```kotlin
+  implementation("software.amazon.cryptography:aws-cryptographic-material-providers:1.0.2")
+  implementation(platform("software.amazon.awssdk:bom:2.19.1"))
+  implementation("software.amazon.awssdk:dynamodb")
+  implementation("software.amazon.awssdk:kms")
+  ```
+
+  - **Via Apache Maven**
+    Add the following to your project's `pom.xml`.
+
+  ```xml
+  <project>
+  ...
+  <dependencyManagement>
+   <dependencies>
+      <dependency>
+        <groupId>software.amazon.awssdk</groupId>
+        <artifactId>bom</artifactId>
+        <version>2.19.1</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+   </dependencies>
+  </dependencyManagement>
+  <dependencies>
+    <dependency>
+      <groupId>software.amazon.awssdk</groupId>
+      <artifactId>dynamodb</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>software.amazon.awssdk</groupId>
+      <artifactId>kms</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>software.amazon.cryptography</groupId>
+      <artifactId>aws-cryptographic-material-providers</artifactId>
+      <version>1.0.2</version>
+    </dependency>
+  </dependencies>
+  ...
+  </project>
+  ```
+
 ### Optional Prerequisites
 
 #### AWS Integration
@@ -44,7 +104,6 @@ different runtimes. This library is currently **ONLY** supported in Java and .NE
 You don't need an Amazon Web Services (AWS) account to use the AWS Cryptographic Material Providers Library,
 but some APIs require an AWS account, an AWS KMS key, or an Amazon DynamoDB Table.
 If you are using the AWS Cryptographic Material Providers Library for Java you will need the AWS SDK for Java V2.
-If you are using the AWS Cryptographic Material Providers Library for .NET you will need the AWS SDK for .NET V3.
 
 **NOTE**: The `KmsAsyncClient` and `DynamoDBAsyncClient` are not supported, only the synchronous clients.
 
@@ -53,13 +112,6 @@ If you are using the AWS Cryptographic Material Providers Library for .NET you w
 - **To create a symmetric encryption KMS key in AWS KMS**, see [Creating Keys](https://docs.aws.amazon.com/kms/latest/developerguide/create-keys.html).
 
 - **To download and install the AWS SDK for Java 2.x**, see [Installing the AWS SDK for Java 2.x](https://docs.aws.amazon.com/sdk-for-java/v2/developer-guide/getting-started.html).
-- **To download and install the AWS SDK for .Net 3.x** see [Installing the AWS SDK for .Net v3](https://docs.aws.amazon.com/sdk-for-net/v3/developer-guide/welcome.html)
-
-## Supported Languages
-
-- Java
-- .NET
-- Dafny
 
 ## FAQ
 
