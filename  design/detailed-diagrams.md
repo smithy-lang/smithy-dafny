@@ -479,6 +479,10 @@ are not fully interoperable.
 This is why wrapping the needed external code
 inside a library exists.
 
+For this example we will again
+pull from the ESDK dependencies.
+The Cryptographic Primitives exposes primitive functions
+that are externs in each native runtime.
 
 ```mermaid
 ---
@@ -486,53 +490,63 @@ title: How Smithy Dafny wraps generic externs to Dafny
 ---
 graph LR
 
+subgraph Legend
+  direction LR
+  start1[ ] --->|Depends on| stop1[ ]
+  style start1 height:0px;
+  style stop1 height:0px;
+  start2[ ] ===>|Dafny translation to native code| stop2[ ]
+  style start2 height:0px;
+  style stop2 height:0px;
+  start3[ ] -..->|smithy-dafny codegen| stop3[ ]
+  style start3 height:0px;
+  style stop3 height:0px;
+  start4[ ] --->|Testing| stop4[ ]
+  style start4 height:0px;
+  style stop4 height:0px;
+end
+linkStyle 1 stroke:blue;
+linkStyle 3 stroke:red;
+
+
 subgraph Smithy
-  AModel["Model for A"]
+  PrimitiveModel["Model for Cryptographic Primitives"]
 end
 
 subgraph Dafny
-  subgraph A["Package for A"]
-    ATypes["Dafny Types for A"]
-    AInterface["Dafny Interface for A"]
-    AImplementation["Dafny implementation of A"]
+  direction LR
+  subgraph Primitives["Cryptographic Primitives"]
+    PrimitiveTypes["Dafny Types for Primitives"]
+    PrimitiveInterface["Dafny Interface for Primitives"]
+    PrimitiveImplementation["Dafny implementation of Primitives"]
 
-    AExtern1["Dafny Extern to NativeA"]
-    AExtern2["Dafny Extern to NativeA"]
-    AExtern3["Dafny Extern to NativeA"]
-    AExtern4["Dafny Extern to NativeA"]
+    Encrypt["Dafny Extern to Encrypt"]
+    Decrypt["Dafny Extern to Decrypt"]
 
-    AImplementation --> AInterface
-    ATypes --> AImplementation
+    PrimitiveImplementation --> PrimitiveInterface
+    PrimitiveTypes --> PrimitiveImplementation
 
-    AExtern4 --> AImplementation
-    AExtern1 --> AImplementation
-    AExtern2 --> AImplementation
-    AExtern3 --> AImplementation
+    Encrypt --> PrimitiveImplementation
+    Decrypt --> PrimitiveImplementation
 
-    ATypes --> AExtern1
-    ATypes --> AExtern2
-    ATypes --> AExtern3
-    ATypes --> AExtern4
+    PrimitiveTypes --> Encrypt
+    PrimitiveTypes --> Decrypt
 
-    ATypes --> AInterface
+    PrimitiveTypes --> PrimitiveInterface
 
-    AModel -.->|Polymorph| ATypes
-    AModel -.->|Polymorph| AInterface
+    PrimitiveModel -.-> PrimitiveTypes
+    PrimitiveModel -.-> PrimitiveInterface
   end
 
-  subgraph ATests["Tests for A"]
-    AUnitTests["Unit Tests for A"]
+  subgraph PrimitivesTests["Tests for Cryptographic Primitives"]
+    PrimitiveUnitTests["Unit Tests for Cryptographic Primitives"]
 
-    AExtern1Tests["Tests for Extern1"]
-    AExtern2Tests["Tests for Extern2"]
-    AExtern3Tests["Tests for Extern3"]
-    AExtern4Tests["Tests for Extern4"]
+    EncryptTests["Tests for Encrypt"]
+    DecryptTests["Tests for Decrypt"]
 
-    AUnitTests --> AImplementation
-    AExtern1Tests --> AExtern1
-    AExtern2Tests --> AExtern2
-    AExtern3Tests --> AExtern3
-    AExtern4Tests --> AExtern4
+    PrimitiveUnitTests --> PrimitiveImplementation
+    EncryptTests --> Encrypt
+    DecryptTests --> Decrypt
 
     NTest["
       There are no integration tests here.
@@ -550,40 +564,36 @@ subgraph Dafny
 end
 
 subgraph Net[".Net"]
-  subgraph NetA["A<sub>.net</sub>"]
-    NetAFromDafny
+  direction LR
+  subgraph NetPrimitives["Primitives<sub>.net</sub>"]
+    NetPrimitivesFromDafny
 
-    NetATypes
-    NetAInterface
-    NetATypeConversion["To/From Dafny"]
+    NetPrimitiveTypes
+    NetPrimitiveInterface
+    NetPrimitiveTypeConversion["To/From Dafny"]
 
-    NetAExtern1
-    NetAExtern2
-    NetAExtern3
-    NetAExtern4
+    NetEncrypt
+    NetDecrypt
 
-    NetATypeConversion --> NetAInterface
-    NetAFromDafny --> NetAInterface
-    NetATypes --> NetAInterface
-    NetATypes --> NetATypeConversion
+    NetPrimitiveTypeConversion --> NetPrimitiveInterface
+    NetPrimitivesFromDafny --> NetPrimitiveInterface
+    NetPrimitiveTypes --> NetPrimitiveInterface
+    NetPrimitiveTypes --> NetPrimitiveTypeConversion
 
-    AModel -.->|Polymorph| NetATypes
-    AModel -.->|Polymorph| NetAInterface
-    AModel -.->|Polymorph| NetATypeConversion
+    PrimitiveModel -.-> NetPrimitiveTypes
+    PrimitiveModel -.-> NetPrimitiveInterface
+    PrimitiveModel -.-> NetPrimitiveTypeConversion
 
-    A ==>|Dafny Compilation| NetAFromDafny
+    Primitives ==> NetPrimitivesFromDafny
+    linkStyle 23 stroke:blue;
 
-    NetAExtern1 --> NetAFromDafny
-    NetAExtern2 --> NetAFromDafny
-    NetAExtern3 --> NetAFromDafny
-    NetAExtern4 --> NetAFromDafny
+    NetEncrypt --> NetPrimitivesFromDafny
+    NetDecrypt --> NetPrimitivesFromDafny
 
-    NetAExtern1 --> AExtern1
-    NetAExtern2 --> AExtern2
-    NetAExtern3 --> AExtern3
-    NetAExtern4 --> AExtern4
+    NetEncrypt --> Encrypt
+    NetDecrypt --> Decrypt
 
-    NNetA["
+    NNetPrimitives["
       There is a native interface!
       It may be that customers
       would want to use this package.
@@ -594,19 +604,59 @@ subgraph Net[".Net"]
     "]
   end
 
-  NetATests
+  NetPrimitivesTests
 
-  ATests ==>|Dafny Compilation| NetATests
-  NetATests --> NetAFromDafny
-  NetATests --> NetAExtern1
-  NetATests --> NetAExtern2
-  NetATests --> NetAExtern3
-  NetATests --> NetAExtern4
+  PrimitivesTests ==> NetPrimitivesTests
+  linkStyle 28 stroke:blue;
+  NetPrimitivesTests --> NetPrimitivesFromDafny
+  NetPrimitivesTests --> NetEncrypt
+  NetPrimitivesTests --> NetDecrypt
+end
 
+subgraph Java["Java"]
+  direction LR
+  subgraph JavaPrimitives["Primitives<sub>Java</sub>"]
+    JavaPrimitivesFromDafny
+
+    JavaPrimitiveTypes
+    JavaPrimitiveInterface
+    JavaPrimitiveTypeConversion["To/From Dafny"]
+
+    JavaEncrypt
+    JavaDecrypt
+
+    JavaPrimitiveTypeConversion --> JavaPrimitiveInterface
+    JavaPrimitivesFromDafny --> JavaPrimitiveInterface
+    JavaPrimitiveTypes --> JavaPrimitiveInterface
+    JavaPrimitiveTypes --> JavaPrimitiveTypeConversion
+
+    PrimitiveModel -.-> JavaPrimitiveTypes
+    PrimitiveModel -.-> JavaPrimitiveInterface
+    PrimitiveModel -.-> JavaPrimitiveTypeConversion
+
+    Primitives ==> JavaPrimitivesFromDafny
+    linkStyle 39 stroke:blue;
+
+    JavaEncrypt --> JavaPrimitivesFromDafny
+    JavaDecrypt --> JavaPrimitivesFromDafny
+
+    JavaEncrypt --> Encrypt
+    JavaDecrypt --> Decrypt
+  end
+
+  JavaPrimitivesTests
+
+  PrimitivesTests ==> JavaPrimitivesTests
+  linkStyle 44 stroke:blue;
+  JavaPrimitivesTests --> JavaPrimitivesFromDafny
+  JavaPrimitivesTests --> JavaEncrypt
+  JavaPrimitivesTests --> JavaDecrypt
 end
 
 %% Formatting
-Smithy ~~~~~ Dafny
+Dafny ~~~ Net ~~~ Java
+Encrypt ~~~ Decrypt
+
 
 ```
 
