@@ -15,7 +15,10 @@ into a single program.
 This is illustrated in following diagram.
 The difficulty here is that when A and C
 try and exist in the same environment,
-then B symbols will be duplicated. 
+then B symbols will be duplicated.
+Because B is a Dafny library
+when it compiles it will produce
+the same symbols again.
 
 ```mermaid
 ---
@@ -66,9 +69,10 @@ Dafny ---> Js
 
 However organizing code required packages and dependencies.
 Looking at how the AWS Encryption SDK (ESDK)
-packages its dependencies
-we can see that having duplicate symbols
-for the `Crypto` library is problematic.
+packages its dependencies.
+This is a natural way for code to be organized.
+Having duplicate symbols
+for the `Crypto` library would be problematic.
 
 ```mermaid
 ---
@@ -167,6 +171,24 @@ title: How smithy-dafny packages a Dafny Implementation
 ---
 graph LR
 
+subgraph Legend
+  direction LR
+  start1[ ] --->|Depends on| stop1[ ]
+  style start1 height:0px;
+  style stop1 height:0px;
+  start2[ ] ===>|Dafny translation to native code| stop2[ ]
+  style start2 height:0px;
+  style stop2 height:0px;
+  start3[ ] -..->|smithy-dafny codegen| stop3[ ]
+  style start3 height:0px;
+  style stop3 height:0px;
+  start4[ ] --->|Testing| stop4[ ]
+  style start4 height:0px;
+  style stop4 height:0px;
+end
+linkStyle 1 stroke:blue;
+linkStyle 3 stroke:red;
+
 subgraph Smithy
   AModel["Model for A"]
 end
@@ -181,16 +203,16 @@ subgraph Dafny
     ATypes --> AInterface
     ATypes --> AImplementation
 
-    AModel -.->|CodeGen| ATypes
-    AModel -.->|CodeGen| AInterface
+    AModel -.-> ATypes
+    AModel -.-> AInterface
   end
 
   subgraph ATests["Tests for A"]
     AUnitTests["Unit Tests for A"]
     AIntegrationTests["Integration Tests for A"]
 
-    AUnitTests --> |Testing| AImplementation
-    AIntegrationTests -->|Testing| AInterface
+    AUnitTests -->  AImplementation
+    AIntegrationTests --> AInterface
   end
 end
 
@@ -205,17 +227,25 @@ subgraph Net[".Net"]
     NetAFromDafny --> NetAInterface
     NetATypes --> NetAInterface
     NetATypes --> NetATypeConversion
-    AModel -.->|CodeGen| NetATypes
-    AModel -.->|CodeGen| NetAInterface
-    AModel -.->|CodeGen| NetATypeConversion
-    A ==>|Dafny Compilation| NetAFromDafny
+    AModel -.-> NetATypes
+    AModel -.-> NetAInterface
+    AModel -.-> NetATypeConversion
+    A ==> NetAFromDafny
   end
 
   NetATests
 
-  ATests ==>|Dafny Compilation| NetATests
-  NetATests -->|Testing| NetAFromDafny
+  ATests ==> NetATests
+  NetATests --> NetAFromDafny
 end
+
+linkStyle 9 stroke:red;
+linkStyle 10 stroke:red;
+linkStyle 20 stroke:red;
+
+linkStyle 18 stroke:blue;
+linkStyle 19 stroke:blue;
+
 ```
 
 ### Dependencies
@@ -223,11 +253,33 @@ end
 This is a description of how Smithy Dafny
 handles dependencies.
 
+In this example there are 2 packages A and B.
+Both are smithy-dafny projects.
+B depends on A.
+
 ```mermaid
 ---
 title: How Smithy Dafny handles dependencies
 ---
 graph LR
+
+subgraph Legend
+  direction LR
+  start1[ ] --->|Depends on| stop1[ ]
+  style start1 height:0px;
+  style stop1 height:0px;
+  start2[ ] ===>|Dafny translation to native code| stop2[ ]
+  style start2 height:0px;
+  style stop2 height:0px;
+  start3[ ] -..->|smithy-dafny codegen| stop3[ ]
+  style start3 height:0px;
+  style stop3 height:0px;
+  start4[ ] --->|Testing| stop4[ ]
+  style start4 height:0px;
+  style stop4 height:0px;
+end
+linkStyle 1 stroke:blue;
+linkStyle 3 stroke:red;
 
 subgraph Smithy
   AModel["Model for A"]
@@ -246,14 +298,14 @@ subgraph Dafny
     ATypes --> AInterface
     ATypes --> AImplementation
 
-    AModel -.->|CodeGen| ATypes
-    AModel -.->|CodeGen| AInterface
-    BModel -.->|CodeGen| ATypes
+    AModel -.-> ATypes
+    AModel -.-> AInterface
+    BModel -.-> ATypes
   end
 
   B["Package for B"]
   B --> ATypes
-  BModel -.->|CodeGen| B
+  BModel -.-> B
 
 end
 
@@ -267,19 +319,22 @@ subgraph Net[".Net"]
     NetATypeConversion --> NetAInterface
     NetAFromDafny --> NetAInterface
     NetATypes --> NetAInterface
-    AModel -.->|CodeGen| NetATypes
-    AModel -.->|CodeGen| NetAInterface
-    AModel -.->|CodeGen| NetATypeConversion
-    A ==>|Dafny Compilation| NetAFromDafny
+    AModel -.-> NetATypes
+    AModel -.-> NetAInterface
+    AModel -.-> NetATypeConversion
+    A ==> NetAFromDafny
+
+    linkStyle 19 stroke:blue;
 
     ATypes ~~~ NetAInterface
   end
 
   NetB["B<sub>.net</sub>"]
-  B ==>|Dafny Compilation| NetB
+  B ==> NetB
+  linkStyle 21 stroke:blue;
 
   NetB --> NetAFromDafny
-  BModel -.->|CodeGen| NetB
+  BModel -.-> NetB
 
 end
 ```
@@ -292,6 +347,14 @@ application using a smithy model.
 This has been specialized
 to handle AWS services.
 
+An example would be how the AWS Encryption SDK
+uses the AWS KMS SDK.
+Since there does not exist a Dafny AWS SDK
+but there does exist native versions
+we can wrap the native versions in an extern.
+
+The example uses AWS KMS to help make things clear,
+but it could be any service.
 
 ```mermaid
 ---
@@ -299,16 +362,34 @@ title: How Smithy Dafny imports a native implementation of a Smithy model to Daf
 ---
 graph LR
 
+subgraph Legend
+  direction LR
+  start1[ ] --->|Depends on| stop1[ ]
+  style start1 height:0px;
+  style stop1 height:0px;
+  start2[ ] ===>|Dafny translation to native code| stop2[ ]
+  style start2 height:0px;
+  style stop2 height:0px;
+  start3[ ] -..->|smithy-dafny codegen| stop3[ ]
+  style start3 height:0px;
+  style stop3 height:0px;
+  start4[ ] --->|Testing| stop4[ ]
+  style start4 height:0px;
+  style stop4 height:0px;
+end
+linkStyle 1 stroke:blue;
+linkStyle 3 stroke:red;
+
 subgraph Smithy
-  AModel["Model for A"]
+  AModel["Model for KMS"]
 end
 
 subgraph Dafny
-  subgraph A["Package for A"]
-    ATypes["Dafny Types for A"]
-    AInterface["Dafny Interface for A"]
-    AExtern["Dafny Extern to NativeA"]
-    AImplementation["Dafny implementation of A"]
+  subgraph A["KMS<sub>Dafny</sub>"]
+    ATypes["Dafny Types for KMS"]
+    AInterface["Dafny Interface for KMS"]
+    AExtern["Dafny Extern construct Native KMS"]
+    AImplementation["Dafny implementation of KMS"]
 
     AImplementation --> AInterface
     ATypes --> AImplementation
@@ -316,12 +397,12 @@ subgraph Dafny
     ATypes --> AInterface
     ATypes --> AExtern
 
-    AModel -.->|CodeGen| ATypes
-    AModel -.->|CodeGen| AInterface
+    AModel -.-> ATypes
+    AModel -.-> AInterface
   end
 
-  subgraph ATests["Tests for A"]
-    AIntegrationTests["Integration Tests for A."]
+  subgraph ATests["Tests for KMS"]
+    AIntegrationTests["Integration Tests for KMS"]
     AIntegrationTests --> AInterface
 
     NTest["
@@ -341,24 +422,25 @@ subgraph Dafny
 end
 
 subgraph Net[".Net"]
-  subgraph NativeNetA["NativeA<sub>.net</sub>"]
-    NativeNetATypes
-    NativeNetAInterface
-    NativeNetAImplementation
+  subgraph NativeNetA["NativeKMS<sub>.net</sub>"]
+    NativeNetATypes[Native KMS SDK types]
+    NativeNetAInterface[Native KMS SDK interface]
+    NativeNetAImplementation[Native KMS SDK]
 
     NativeNetAImplementation --> NativeNetAInterface
     NativeNetATypes --> NativeNetAImplementation
     NativeNetATypes --> NativeNetAInterface
 
-    AModel -.->|CodeGen| NativeNetATypes
-    AModel -.->|CodeGen| NativeNetAInterface
+    AModel -.-> NativeNetATypes
+    AModel -.-> NativeNetAInterface
   end
 
-  subgraph NetA["A<sub>.net</sub>"]
-    NetAFromDafny
-    NetAExtern
+  subgraph NetA["KMS<sub>.net</sub>"]
+    NetAFromDafny[Translated Dafny ]
+    NetAExtern[Net Extern to return KMS SKD]
 
-    A ==>|Dafny Compilation| NetAFromDafny
+    A ==> NetAFromDafny
+    linkStyle 17 stroke:blue;
     NetAExtern --> NetAFromDafny
     NetAExtern --> AExtern
     NativeNetAInterface --> NetAExtern
@@ -377,7 +459,8 @@ subgraph Net[".Net"]
 
   NetATests
 
-  ATests ==>|Dafny Compilation| NetATests
+  ATests ==> NetATests
+  linkStyle 21 stroke:blue;
   NetATests --> NetAFromDafny
 end
 
@@ -542,6 +625,24 @@ title: How we verify Polymorph across runtimes
 ---
 graph TD
 
+subgraph Legend
+  direction LR
+  start1[ ] --->|Depends on| stop1[ ]
+  style start1 height:0px;
+  style stop1 height:0px;
+  start2[ ] ===>|Dafny translation to native code| stop2[ ]
+  style start2 height:0px;
+  style stop2 height:0px;
+  start3[ ] -..->|smithy-dafny codegen| stop3[ ]
+  style start3 height:0px;
+  style stop3 height:0px;
+  start4[ ] --->|Testing| stop4[ ]
+  style start4 height:0px;
+  style stop4 height:0px;
+end
+linkStyle 1 stroke:blue;
+linkStyle 3 stroke:red;
+
 subgraph Smithy
   Model["A model that uses Polymorph features under test."]
 end
@@ -555,6 +656,9 @@ NTest["
 
  This makes the Dafny side invariant for every runtime!
 "]
+
+Smithy ~~~ Legend
+Legend ~~~ NTest
 
 subgraph Dafny
   subgraph TestPackage
@@ -576,6 +680,8 @@ subgraph Dafny
 end
 
 subgraph Net[".Net"]
+  NetPolymorphTests
+
   subgraph NetTestPackage["TestPackage<sub>.net</sub>"]
     NetTestPackageInterface
     NetTestPackageTypes
@@ -583,12 +689,10 @@ subgraph Net[".Net"]
     NetTestPackageFromDafny
   end
 
-
   subgraph NetProxyForTest["ProxyForTest<sub>.net</sub>"]
     NetProxyForTestFromDafny
     NetProxyForTestExtern
   end
-  NetPolymorphTests
 end
 
 TestPackageImplementation --> TestPackageInterface
@@ -608,20 +712,19 @@ NetProxyForTestExtern --> NetProxyForTestFromDafny
 ProxyForTestExtern --> NetProxyForTestExtern
 NetTestPackageInterface --> NetProxyForTestExtern
 
-Model -.->|Polymorph| TestPackageInterface
-Model -.->|Polymorph| TestPackageTypes
-Model -.->|Polymorph| ProxyForTestTypes
-Model -.->|Polymorph| ProxyForTestInterface
-Model -.->|Polymorph| NetTestPackageTypes
-Model -.->|Polymorph| NetTestPackageInterface
-Model -.->|Polymorph| NetTestPackageTypeConversion
+Model -.-> TestPackageInterface
+Model -.-> TestPackageTypes
+Model -.-> ProxyForTestTypes
+Model -.-> ProxyForTestInterface
+Model -.-> NetTestPackageTypes
+Model -.-> NetTestPackageInterface
+Model -.-> NetTestPackageTypeConversion
 
-TestPackage ==>|Dafny Compilation| NetTestPackageFromDafny
-ProxyForTest ==>|Dafny Compilation| NetProxyForTestFromDafny
-PolymorphTests ==>|Dafny Compilation| NetTestPackageInterface
+TestPackage ==> NetTestPackageFromDafny
+ProxyForTest ==> NetProxyForTestFromDafny
+PolymorphTests ==> NetPolymorphTests
 
-linkStyle 23,24,25 stroke: red
-linkStyle 16,17,18,19,20,21,22 stroke: blue
+linkStyle 29,30,31 stroke: blue
 
 ```
 

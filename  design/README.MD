@@ -101,7 +101,7 @@ and takes care of type conversion back and forth.
 
 ```mermaid
 ---
-title: Library development
+title: Smithy Dafny Library
 ---
 flowchart RL
 subgraph Library[Native Library]
@@ -123,6 +123,11 @@ to call Dafny libraries with idiomatic types.
 
 `smithy-dafny` also supports wrapping existing AWS Services
 with existing implementations that have a native implementation.
+
+The problem we are trying to solve here is:
+I am writing code in Dafny
+and I want to call an AWS service,
+how do I do that?
 
 In this mode `smithy-dafny` will produce Dafny types and interfaces
 so that Dafny code can call the native implementation.
@@ -152,9 +157,9 @@ subgraph Library[Dafny Library]
     DafnyImplementation[Dafny implementation]
 end
 
-subgraph SDK
+subgraph WrappedSDK
     direction RL
-    SdkInterface[Dafny SDK Interface] --> ToNative[Convert input \nto native]
+    SdkInterface[Generated Dafny SDK Interface] --> ToNative[Convert input \nto native]
     ToNative --> NativeSDK[Native SDK implementation]
     NativeSDK --> ToDafny[Convert output \nto Dafny]
     ToDafny --> SdkInterface
@@ -172,10 +177,34 @@ to call native AWS SDKs.
 
 `smithy-dafny` can wrap an existing `smithy-dafny` library.
 This is useful for integration testing.
+
+When you consider the first two use cases
+it is clear that you need tests
+to verify that these features are correct.
+
+The first thought is be to write tests in each runtime.
+But this is very expensive.
+Also keeping track of all these tests across different runtimes is difficult.
+You don't want to have tests only in some runtimes but not others.
+
+If you write the tests in Dafny then you only need to write the test once.
+But if you natively write these tests in Dafny
+when you execute them
+they will only test the Dafny code.
+Because they will not exercise the type conversions.
+
+So we want to write the tests in Dafny so that they are interoperable
+but we need to exercise the native code.
+By wrapping the whole project
+we force an additional type  conversion.
+
 Writing tests in Dafny means that
 your testing is now also interoperable.
 A Dafny tests can check multiple runtimes.
-But a simple test would only check the Dafny interfaces
+But a simple test would only check the Dafny interfaces.
+
+For more details on how this works
+see the [polymorph development](#polymorph-development) section blow.
 
 This feature is used to test `smithy-dafny` on itself
 in the TestModels.
@@ -197,7 +226,7 @@ flowchart RL
 
 subgraph Wrapping[Wrapping Library]
     direction RL
-    WrappingInterface[Dafny SDK Interface] --> ToNativeW[Convert input \nto native]
+    WrappingInterface[Generated Dafny SDK Interface] --> ToNativeW[Convert input \nto native]
     ToDafnyW[Convert output \nto Dafny] --> WrappingInterface
 end
 
@@ -247,24 +276,26 @@ title: Generated Code
 flowchart LR
 
 subgraph Project
-    Shim
+    NativeInterface
     NativeTypes
     ToNative
     ToDafny
     DafnyTypes
+    DafnyInterface
 end
 
 subgraph Polymorph
-    Native
+    SmithyNative
 end
 
 Model --> Polymorph
-Polymorph --> Shim
-Native --> NativeTypes
+Polymorph --> NativeInterface
+SmithyNative --> NativeTypes
 Polymorph --> ToNative
 Polymorph --> ToDafny
 Model --> Dafny
 Dafny --> DafnyTypes
+Dafny --> DafnyInterface
 ```
 
 In this way the dual inputs and output
@@ -308,10 +339,11 @@ Then we don't need to write new tests for each runtime.
 This is where [wrapping a library](#wrapped-library) comes in.
 
 We want the test in Dafny and we want to test the conversions.
-by building a project we can control the implementation.
-By wrapping this library we can call the project from Dafny
+by building a project we can control the Dafny implementation.
+By wrapping this project we can call it from Dafny
 and pass through the type conversions.
 This sandwiches the conversions between two functions we control.
+Namely, the implementation and the test.
 Many of these are already written in the TestModels directory.
 
 For the simple types: string, number, et al
@@ -320,9 +352,9 @@ This is because it is possible that the conversion function
 do not produce rational input in the middle.
 This is an edge case, but it is easy enough to verify.
 
-Each simple type has endpoints that:
+Each simple type has smithy operations that:
 * returns back what is given.
-* takes will only succeed if pass a specific value.
+* only succeed if passed a specific value.
 * will only return a constant value
 
 We have one last subtlety to consider.
@@ -339,7 +371,7 @@ then all our tests would pass.
 But looking at the native string it would be drastically different.
 
 This is a degenerate example but should illustrate the point.
-At this time we do not have any such tests.
+At this time we do not have any such degenerate tests written.
 This is because maintaining such coverage across multiple runtime
 is exceedingly difficult.
 It might be that a specification of such tests in conjunction with duvet
@@ -397,6 +429,8 @@ runtime --> RuntimeTests[tests]
 runtime --> Generated
 runtime --> Implementation
 
+Generated -.- noteA[All smithy-dafny generated code goes here]
+Implementation -.- noteB[Dafny translated code and externs go here]
 ```
 
 Given the above directory structure,
