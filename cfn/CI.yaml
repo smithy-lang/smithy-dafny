@@ -9,7 +9,7 @@ Parameters:
   GitHubRepo:
     Type: String
     Description: GitHub Repo that invokes CI
-    Default: aws/aws-cryptographic-material-providers-library-java
+    Default: aws/aws-cryptographic-material-providers-library
 
 Resources:
   GitHubCIRole:
@@ -35,8 +35,7 @@ Resources:
                 "StringEquals": { "token.actions.githubusercontent.com:aud": "sts.amazonaws.com" },
                 "StringLike": {
                   "token.actions.githubusercontent.com:sub": [
-                    "repo:aws/aws-cryptographic-material-providers-library-java:*",
-                    "repo:aws/aws-cryptographic-material-providers-library-dafny:*"
+                    "repo:aws/aws-cryptographic-material-providers-library:*"
                   ]
                 }
               }
