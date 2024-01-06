@@ -21,8 +21,3 @@ phases:
       - python codebuild/net/retrieve_signed_assembly.py --target net6.0 --unique-id $Env:UNIQUE_ID --output net6.0
       - $sig = Get-AuthenticodeSignature -FilePath net6.0/$Env:FILE_NAME
       - $sig | Format-List -Property *
-      # Check signature on netstandard2.0 dll
-      - mkdir netstandard2.0
-      - python codebuild/net/retrieve_signed_assembly.py --target netstandard2.0 --unique-id $Env:UNIQUE_ID --output netstandard2.0
-      - $sig = Get-AuthenticodeSignature -FilePath netstandard2.0/$Env:FILE_NAME
-      - $sig | Format-List -Property *

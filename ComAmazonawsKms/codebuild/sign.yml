@@ -42,9 +42,7 @@ phases:
       - export BASE=../codebuild/net
       - python $BASE/upload_assembly.py --target net6.0 --unique-id $UNIQUE_ID
       - python $BASE/upload_assembly.py --target net48 --unique-id $UNIQUE_ID
-      - python $BASE/upload_assembly.py --target netstandard2.0 --unique-id $UNIQUE_ID
       ## Retrieve the signed assembly. We're not going to use it, but this
       ## ensures that the signing process is complete
       - python $BASE/retrieve_signed_assembly.py --target net6.0 --unique-id $UNIQUE_ID
       - python $BASE/retrieve_signed_assembly.py --target net48 --unique-id $UNIQUE_ID
-      - python $BASE/retrieve_signed_assembly.py --target netstandard2.0 --unique-id $UNIQUE_ID
