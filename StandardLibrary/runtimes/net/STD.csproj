@@ -5,7 +5,7 @@
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <IsPackable>true</IsPackable>
   
-    <Version>1.1.1</Version>
+    <Version>1.2.0</Version>
     
     <AssemblyName>AWS.Cryptography.Internal.StandardLibrary</AssemblyName>
     <PackageId>AWS.Cryptography.Internal.StandardLibrary</PackageId>
@@ -13,7 +13,7 @@
     <Description>The StandarLibrary is a library written to supply helpful Dafny functionality.</Description>
     <Authors>Amazon Web Services</Authors>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-    <RepositoryUrl>https://github.com/aws/aws-cryptographic-material-providers-library-net</RepositoryUrl>
+    <RepositoryUrl>https://github.com/aws/aws-cryptographic-material-providers-library</RepositoryUrl>
     <PackageIcon>icon.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageTags>AWS;Amazon;KMS;Encryption;Cryptography</PackageTags>

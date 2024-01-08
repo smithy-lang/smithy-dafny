@@ -18,7 +18,7 @@ var props = Properties().apply {
 var dafnyVersion = props.getProperty("dafnyVersion")
 
 group = "software.amazon.cryptography"
-version = "1.0.2"
+version = "1.2.0"
 description = "AWS Cryptographic Material Providers Library"
 
 java {
@@ -293,7 +293,7 @@ fun buildPom(mavenPublication: MavenPublication) {
         mavenPublication.pom {
             name.set("AWS Cryptographic Material Providers Library")
             description.set("The AWS Cryptographic Material Providers Library for Java")
-            url.set("https://github.com/aws/aws-cryptographic-material-providers-library-java")
+            url.set("https://github.com/aws/aws-cryptographic-material-providers-library")
             licenses {
                 license {
                     name.set("Apache License 2.0")
@@ -310,7 +310,7 @@ fun buildPom(mavenPublication: MavenPublication) {
                 }
             }
             scm {
-                url.set("https://github.com/aws/aws-cryptographic-material-providers-library-java.git")
+                url.set("https://github.com/aws/aws-cryptographic-material-providers-library.git")
             }
         }
     }

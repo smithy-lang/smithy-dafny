@@ -55,7 +55,7 @@ To use the AWS Material Providers Library in Java, you must have:
     In a Gradle Java Project, add the following to the _dependencies_ section:
 
   ```kotlin
-  implementation("software.amazon.cryptography:aws-cryptographic-material-providers:1.0.2")
+  implementation("software.amazon.cryptography:aws-cryptographic-material-providers:1.2.0")
   implementation(platform("software.amazon.awssdk:bom:2.19.1"))
   implementation("software.amazon.awssdk:dynamodb")
   implementation("software.amazon.awssdk:kms")
@@ -90,7 +90,7 @@ To use the AWS Material Providers Library in Java, you must have:
     <dependency>
       <groupId>software.amazon.cryptography</groupId>
       <artifactId>aws-cryptographic-material-providers</artifactId>
-      <version>1.0.2</version>
+      <version>1.2.0</version>
     </dependency>
   </dependencies>
   ...

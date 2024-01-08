@@ -5,7 +5,7 @@
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <IsPackable>true</IsPackable>
     
-    <Version>1.0.0</Version>
+    <Version>1.2.0</Version>
     
     <AssemblyName>AWS.Cryptography.Internal.AwsCryptographyPrimitives</AssemblyName>
     <PackageId>AWS.Cryptography.Internal.AwsCryptographyPrimitives</PackageId>
@@ -13,7 +13,7 @@
     <Description>AwsCryptographyPrimitives is a library written to invoke lower level cryptographic primitives and to convert between Dafny generated code and native .NET code.</Description>
     <Authors>Amazon Web Services</Authors>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-    <RepositoryUrl>https://github.com/aws/aws-cryptographic-material-providers-library-net</RepositoryUrl>
+    <RepositoryUrl>https://github.com/aws/aws-cryptographic-material-providers-library</RepositoryUrl>
     <PackageIcon>icon.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageTags>AWS;Amazon;KMS;Encryption;Cryptography</PackageTags>
