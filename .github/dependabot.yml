@@ -10,31 +10,31 @@ updates:
       interval: "daily"
   # STD NET
   - package-ecosystem: "nuget"
-    directory: "StandardLibrary/runtimes/net/STD.csproj"
+    directory: "StandardLibrary/runtimes/net"
     schedule:
       interval: "daily"
   # KMS NET
   - package-ecosystem: "nuget"
-    directory: "ComAmazonawsKms/runtimes/net/AWS-KMS.csproj"
+    directory: "ComAmazonawsKms/runtimes/net"
     schedule:
       interval: "daily"
   # DDB NET
   - package-ecosystem: "nuget"
-    directory: "ComAmazonawsDynamodb/runtimes/net/ComAmazonawsDynamodb.csproj"
+    directory: "ComAmazonawsDynamodb/runtimes/net"
     schedule:
       interval: "daily"
   # Crypto NET
   - package-ecosystem: "nuget"
-    directory: "AwsCryptographyPrimitives/runtimes/net/Crypto.csproj"
+    directory: "AwsCryptographyPrimitives/runtimes/net"
     schedule:
       interval: "daily"
   # MPL NET
   - package-ecosystem: "nuget"
-    directory: "AwsCryptographicMaterialProviders/runtimes/net/MPL.csproj"
+    directory: "AwsCryptographicMaterialProviders/runtimes/net"
     schedule:
       interval: "daily"
   # Test Vectors NET
   - package-ecosystem: "nuget"
-    directory: "TestVectorsAwsCryptographicMaterialProviders/runtimes/net/TestVectors.csproj"
+    directory: "TestVectorsAwsCryptographicMaterialProviders/runtimes/net"
     schedule:
       interval: "daily"
