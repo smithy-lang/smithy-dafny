@@ -32,11 +32,11 @@ phases:
       - export AWS_SECRET_ACCESS_KEY=$(echo "${TMP_ROLE}" | jq -r '.Credentials.SecretAccessKey')
       - export AWS_SESSION_TOKEN=$(echo "${TMP_ROLE}" | jq -r '.Credentials.SessionToken')
       - aws sts get-caller-identity
-      - make test_net
+      - make test_net FRAMEWORK=net6.0
 
       # run test vectors
       - cd ../TestVectorsAwsCryptographicMaterialProviders
       - sed -i.backup  "/\<ProjectReference Include=\"..\/..\/..\/AwsCryptographicMaterialProviders\/runtimes\/net\/MPL.csproj\" \/>/d" runtimes/net/TestVectors.csproj
       - dotnet add runtimes/net/TestVectors.csproj package AWS.Cryptography.MaterialProviders --version $VERSION
       - make transpile_net
-      - make test_net
+      - make test_net FRAMEWORK=net6.0

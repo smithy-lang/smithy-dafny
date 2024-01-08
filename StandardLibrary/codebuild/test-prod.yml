@@ -30,4 +30,4 @@ phases:
       # Since all frameworks and OS's are tested on commit, we mainly want to
       # run this as a smoke test and the confirm we can find the dependency,
       # rather than a comprehensive test suite.
-      - make test_net
+      - make test_net FRAMEWORK=net6.0

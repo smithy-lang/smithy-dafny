@@ -31,7 +31,7 @@ phases:
       ## Build Library from Source
       - cd StandardLibrary
       - make transpile_net
-      - make test_net
+      - make test_net FRAMEWORK=net6.0
 
       - dotnet build runtimes/net /p:Configuration=Release -nowarn:CS0162,CS0168
       - export ASSEMBLY_NAME="AWS.Cryptography.Internal.StandardLibrary.dll"

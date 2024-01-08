@@ -31,7 +31,7 @@ phases:
       - export AWS_SECRET_ACCESS_KEY=$(echo "${TMP_ROLE}" | jq -r '.Credentials.SecretAccessKey')
       - export AWS_SESSION_TOKEN=$(echo "${TMP_ROLE}" | jq -r '.Credentials.SessionToken')
       - aws sts get-caller-identity
-      - make test_net
+      - make test_net FRAMEWORK=net6.0
 
       ## Unset temp creds so that we get dropped back into the aws codebuild service role
       - unset AWS_ACCESS_KEY_ID; unset AWS_SECRET_ACCESS_KEY; unset AWS_SESSION_TOKEN;
