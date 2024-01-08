@@ -1,5 +1,27 @@
 # Changelog
 
+## 1.2.0 (2024-01-08)
+
+### Features
+
+    * add command line parser (#131)
+
+### Bug Fixes
+
+    * resolve awssdk:core dependency in TestVectors build.gradle.kts (#177)
+    * add more tests to ComputeSetToOrderedSequence (#111)
+    * Empty string defers to SDK default region (#127)
+    * update mpl .csproj to use project references (#134)
+    * newest polymorph for newest shims. Catch all exceptions. DDB only (#135)
+    * update README for repo rename update (#147)
+    * rerun latest polymorph. (#128)
+    * typo lead to two verification, no format (#130)
+    * Improve compatibility with Dafny 4.4 (#129)
+
+### Maintenance
+
+    * A variety of fixes to the libraries CI and testing
+
 ## 1.0.2 (2023-10-18)
 
 ### Bug Fixes
