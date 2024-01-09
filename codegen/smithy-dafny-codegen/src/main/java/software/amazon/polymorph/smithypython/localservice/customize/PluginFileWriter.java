@@ -24,7 +24,7 @@ public class PluginFileWriter implements CustomFileWriter {
     String moduleName =
         SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
             codegenContext.settings().getService().getNamespace());
-    String clientName = SmithyNameResolver.clientForService(serviceShape);
+    String clientName = SmithyNameResolver.clientNameForService(serviceShape);
     String implModulePrelude =
         DafnyNameResolver.getDafnyPythonIndexModuleNameForShape(serviceShape);
     final LocalServiceTrait localServiceTrait = serviceShape.expectTrait(LocalServiceTrait.class);

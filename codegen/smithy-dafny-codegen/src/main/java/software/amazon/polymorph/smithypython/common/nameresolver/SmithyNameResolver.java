@@ -82,7 +82,7 @@ public class SmithyNameResolver {
    * @param serviceShape
    * @return
    */
-  public static String clientForService(ServiceShape serviceShape) {
+  public static String clientNameForService(ServiceShape serviceShape) {
     if (serviceShape.hasTrait(LocalServiceTrait.class)) {
       return serviceShape.expectTrait(LocalServiceTrait.class).getSdkId() + "Client";
     } else {
