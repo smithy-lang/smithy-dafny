@@ -1,6 +1,5 @@
 [tool.poetry]
-name = "# TODO-Python: Depend on PyPi once Dafny publishes the Dafny runtime there
-python-dafny-runtime"
+name = "python-dafny-runtime"
 version = "0.1.0"
 description = ""
 authors = ["AWS <aws-arg-dafny@amazon.com>"]
