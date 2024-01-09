@@ -7,6 +7,7 @@ include ../../SharedMakefile.mk
 
 NAMESPACE=simple.types.boolean
 
+# TODO-Python-PYTHONPATH: Move into dfyproject.toml
 PYTHON_MODULE_NAME=simple_types_boolean
 
 PROJECT_SERVICES := \

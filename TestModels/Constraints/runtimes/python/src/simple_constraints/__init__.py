@@ -2,7 +2,8 @@
 
 # TODO-Python: Remove PYTHONPATH workaround, use fully-qualified module names via dfyproject.toml.
 # Import project dependencies.
-# This can be removed  (TODO-Python-PYTHONPATH: Remove)
+# TODO-Python-PYTHONPATH: Remove dependency imports to initialize PYTHONPATH with their modules
+
 import standard_library
 
 # Add internaldafny and smithygenerated code to PYTHONPATH (TODO-Python-PYTHONPATH: Remove)

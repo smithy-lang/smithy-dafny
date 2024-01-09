@@ -5,6 +5,7 @@ CORES=2
 
 include ../../SharedMakefile.mk
 
+# TODO-Python-PYTHONPATH: Move into dfyproject.toml
 PYTHON_MODULE_NAME=com_amazonaws_dynamodb
 
 PROJECT_SERVICES := \

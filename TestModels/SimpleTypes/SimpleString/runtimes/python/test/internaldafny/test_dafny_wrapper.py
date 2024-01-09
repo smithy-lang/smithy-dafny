@@ -6,7 +6,7 @@ pytest will find and execute the `test_dafny` method below,
 which will execute the `internaldafny_test_executor.py` file in the `dafny` directory.
 """
 
-# TODO-Python-PYTHONPATH: Remove
+# TODO-Python-PYTHONPATH: Remove all sys.path.append logic from this file
 import sys
 
 internaldafny_dir = '/'.join(__file__.split("/")[:-1])
@@ -19,7 +19,7 @@ sys.path.append(internaldafny_dir + "/generated")
 # These are only imported to populate the PYTHONPATH.
 # This can be removed once PYTHONPATH workaround is removed,
 # and all Dafny-generated imports are fully qualified.
-# TODO-Python-PYTHONPATH: Remove
+# TODO-Python-PYTHONPATH: Remove imports to initialize modules' PYTHONPATHs from this file
 import simple_types_smithystring
 import wrapped_simple_string
 

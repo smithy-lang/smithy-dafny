@@ -7,6 +7,7 @@ include ../SharedMakefile.mk
 
 NAMESPACE=simple.extendable.resources
 
+# TODO-Python-PYTHONPATH: Move into dfyproject.toml
 PYTHON_MODULE_NAME=simple_extendable_resources
 
 PROJECT_SERVICES := \

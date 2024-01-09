@@ -12,6 +12,7 @@ include = ["**/smithygenerated/**/*.py", "**/internaldafny/generated/*.py"]
 
 [tool.poetry.dependencies]
 python = "^3.11.0"
+# TODO-Python: Depend on PyPi once Dafny publishes the Dafny runtime there
 python-dafny-runtime = { path = "../../../../PythonDafnyRuntime", develop = false }
 
 [tool.poetry.group.test.dependencies]

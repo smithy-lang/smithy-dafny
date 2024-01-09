@@ -7,6 +7,7 @@ include ../../SharedMakefile.mk
 
 NAMESPACE=simple.types.smithyString
 
+# TODO-Python-PYTHONPATH: Move into dfyproject.toml
 PYTHON_MODULE_NAME=simple_types_smithystring
 
 PROJECT_SERVICES := \
