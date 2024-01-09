@@ -72,7 +72,6 @@ public class AwsSdkToDafnyConversionFunctionWriter extends BaseConversionWriter 
                 conversionWriter.openBlock(
                     "return $L(",
                     ")",
-                    // TODO-Python: Import error XX as DafnyXX?
                     structureShape.hasTrait(ErrorTrait.class)
                         ? DafnyNameResolver.getDafnyTypeForError(structureShape)
                         : DafnyNameResolver.getDafnyTypeForShape(structureShape),
@@ -132,7 +131,6 @@ public class AwsSdkToDafnyConversionFunctionWriter extends BaseConversionWriter 
                 conversionWriter.openBlock(
                     "return $L(",
                     ")",
-                    // TODO-Python: Import error XX as DafnyXX?
                     structureShape.hasTrait(ErrorTrait.class)
                         ? DafnyNameResolver.getDafnyTypeForError(structureShape)
                         : DafnyNameResolver.getDafnyTypeForShape(structureShape),
@@ -167,11 +165,15 @@ public class AwsSdkToDafnyConversionFunctionWriter extends BaseConversionWriter 
     //   as described below
     conversionWriter.writeInline("$L=", memberName);
 
+    // `message` members on Error shapes are actually accessed as `Message`
+    if ("message".equals(memberName)) {
+      memberName = "Message";
+    }
+
     // Error structure members are always required
     conversionWriter.write(
         "$L,",
         targetShape.accept(
-            // TODO-Python: I removed a AwsSdkErrorToDafnyErrorShapeVisitor... see if this causes issues
             new AwsSdkToDafnyShapeVisitor(
                 context,
                 dataSourceInsideConversionFunction + "[\"" + memberName + "\"]",

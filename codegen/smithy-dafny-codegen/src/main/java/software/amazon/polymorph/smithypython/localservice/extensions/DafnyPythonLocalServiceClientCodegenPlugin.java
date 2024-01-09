@@ -34,6 +34,8 @@ public final class DafnyPythonLocalServiceClientCodegenPlugin implements SmithyB
 
   public DafnyPythonLocalServiceClientCodegenPlugin(Map<String, String> smithyNamespaceToPythonModuleNameMap) {
     super();
+    System.out.println("smithyNamespaceToPythonModuleNameMap");
+    System.out.println(smithyNamespaceToPythonModuleNameMap.entrySet());
     SmithyNameResolver.setSmithyNamespaceToPythonModuleNameMap(smithyNamespaceToPythonModuleNameMap);
   }
 
@@ -71,15 +73,6 @@ public final class DafnyPythonLocalServiceClientCodegenPlugin implements SmithyB
         ShapeId referenceShapeId = shape.expectTrait(ReferenceTrait.class).getReferentId();
         if (model.expectShape(referenceShapeId).isResourceShape()) {
           transformedServiceShapeBuilder.addResource(referenceShapeId);
-        // TODO-Python: How to point codegen to reference services...
-        } else if (model.expectShape(referenceShapeId).isServiceShape()) {
-          // In theory: if there is another service shape, I shouldn't need to do anythign??
-          // since it MUST be a dependency service,
-          // which has a separate model and i can defer to its namespace...
-//          transformedServiceShapeBuilder.add
-//          transformedServiceShapeBuilder.
-//          System.out.println("serviceshape adding as resource " + referenceShapeId);
-//          transformedServiceShapeBuilder.addResource(referenceShapeId);
         }
       }
       return shape;

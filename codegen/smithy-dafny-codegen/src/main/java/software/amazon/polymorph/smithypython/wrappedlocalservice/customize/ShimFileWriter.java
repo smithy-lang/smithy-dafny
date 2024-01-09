@@ -72,7 +72,7 @@ public class ShimFileWriter implements CustomFileWriter {
                       serviceShape.getId().getNamespace(), codegenContext.settings()),
                   writer.consumer(
                       w -> generateSmithyErrorToDafnyErrorBlock(codegenContext, serviceShape, w)),
-                  SmithyNameResolver.shimForService(serviceShape),
+                  SmithyNameResolver.shimNameForService(serviceShape),
                   typesModulePrelude,
                   DafnyNameResolver.getDafnyClientInterfaceTypeForServiceShape(serviceShape),
                   writer.consumer(w -> generateOperationsBlock(codegenContext, serviceShape, w)));
@@ -145,7 +145,7 @@ public class ShimFileWriter implements CustomFileWriter {
 
           // Import the dependency service's `smithy_error_to_dafny_error` so this service
           //   can defer error conversion to the dependency
-          writer.addImport(
+          writer.addStdlibImport(
               SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
                       serviceDependencyShapeId.getNamespace(), codegenContext.settings())
                   + ".shim",

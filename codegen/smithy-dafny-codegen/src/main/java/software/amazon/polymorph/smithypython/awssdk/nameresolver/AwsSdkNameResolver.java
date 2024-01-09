@@ -25,18 +25,29 @@ public class AwsSdkNameResolver {
   }
 
   /**
-   * Returns the name of the Smithy-generated shim for the provided AWS SDK serviceShape. The
+   * Returns the type name of the client for the provided AWS SDK serviceShape. The
    * serviceShape SHOULD be an AWS SDK. This also standardizes some "legacy" service names.
    *
    * @param serviceShape
    * @return
    */
-  public static String shimForService(ServiceShape serviceShape) {
+  public static String clientNameForService(ServiceShape serviceShape) {
     return switch (serviceShape.getId().getName()) {
-      case "TrentService" -> "KMSClientShim";
-      case "DynamoDB_20120810" -> "DynamoDBClientShim";
+      case "TrentService" -> "KMSClient";
+      case "DynamoDB_20120810" -> "DynamoDBClient";
       default -> serviceShape.getId().getName();
     };
+  }
+
+  /**
+   * Returns the name of the Smithy-generated shim for the provided AWS SDK serviceShape. The
+   * serviceShape SHOULD be an AWS SDK.
+   *
+   * @param serviceShape
+   * @return
+   */
+  public static String shimNameForService(ServiceShape serviceShape) {
+    return clientNameForService(serviceShape) + "Shim";
   }
 
   /**

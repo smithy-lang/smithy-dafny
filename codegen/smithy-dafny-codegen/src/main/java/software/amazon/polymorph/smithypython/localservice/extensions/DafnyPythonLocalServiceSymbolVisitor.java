@@ -56,7 +56,7 @@ public class DafnyPythonLocalServiceSymbolVisitor extends SymbolVisitor {
           .definitionFile(getSymbolDefinitionFilePathForNamespaceAndFilename(serviceShape.getId().getNamespace(), filename))
           .build();
     } else {
-      // AWS SDK: Should just be a boto3 client. TODO-Python: Type this
+      // AWS SDK: Should just be a boto3 client.
       return createStdlibSymbol(serviceShape, "Any", "typing");
   }}
 

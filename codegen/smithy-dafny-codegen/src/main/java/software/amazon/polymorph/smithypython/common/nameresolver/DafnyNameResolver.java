@@ -222,12 +222,7 @@ public class DafnyNameResolver {
    * @return
    */
   public static String getDafnyClientInterfaceTypeForServiceShape(ServiceShape serviceShape) {
-    if ("DynamoDB_20120810".equals(serviceShape.getId().getName())) {
-      return "IDynamoDBClient";
-    } else if ("TrentService".equals(serviceShape.getId().getName())) {
-      return "IKMSClient";
-    }
-    return "I" + serviceShape.getId().getName() + "Client";
+    return "I" + AwsSdkNameResolver.clientNameForService(serviceShape);
   }
 
   /**
@@ -308,6 +303,13 @@ public class DafnyNameResolver {
    */
   public static String getDafnyTypeForError(ShapeId shapeId) {
     return "Error_" + shapeId.getName();
+  }
+
+  public static String escapeShapeName(String name) {
+    if ("none".equalsIgnoreCase(name)) {
+      return name + "_";
+    }
+    return name;
   }
 
   /**

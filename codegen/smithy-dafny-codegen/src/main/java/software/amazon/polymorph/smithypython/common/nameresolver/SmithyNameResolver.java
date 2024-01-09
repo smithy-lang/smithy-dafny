@@ -97,7 +97,7 @@ public class SmithyNameResolver {
    * @param serviceShape
    * @return
    */
-  public static String shimForService(ServiceShape serviceShape) {
+  public static String shimNameForService(ServiceShape serviceShape) {
     if (serviceShape.hasTrait(LocalServiceTrait.class)) {
       return serviceShape.expectTrait(LocalServiceTrait.class).getSdkId() + "Shim";
     } else {

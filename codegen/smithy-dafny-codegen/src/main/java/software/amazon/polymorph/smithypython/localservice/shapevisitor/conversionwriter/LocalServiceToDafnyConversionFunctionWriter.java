@@ -5,6 +5,7 @@ package software.amazon.polymorph.smithypython.localservice.shapevisitor.convers
 
 import java.util.Map.Entry;
 
+import software.amazon.polymorph.smithypython.awssdk.nameresolver.AwsSdkNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.Utils;
@@ -283,20 +284,15 @@ public class LocalServiceToDafnyConversionFunctionWriter extends BaseConversionW
       DafnyNameResolver.importDafnyTypeForServiceShape(conversionWriter, serviceShape);
 
       conversionWriter.write("""
-          import $L
-          client = $L.default__.$L(boto_client = $L)
+          import $1L
+          client = $1L.default__.$2L(boto_client = $3L)
           client.value.impl = input
           return client.value
           """,
           DafnyNameResolver.getDafnyPythonIndexModuleNameForShape(serviceShape),
-          DafnyNameResolver.getDafnyPythonIndexModuleNameForShape(serviceShape),
-          // TODO-Python: No
-          serviceShape.getId().getName().equals("TrentService")
-          ? "KMSClient"
-              : "DynamoDBClient",
-              dataSourceInsideConversionFunction
-
-              );
+          AwsSdkNameResolver.clientNameForService(serviceShape),
+          dataSourceInsideConversionFunction
+      );
     }
 
   }

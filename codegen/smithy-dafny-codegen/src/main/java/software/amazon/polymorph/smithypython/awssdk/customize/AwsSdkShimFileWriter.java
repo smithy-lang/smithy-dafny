@@ -68,7 +68,7 @@ public class AwsSdkShimFileWriter implements CustomFileWriter {
                   typesModulePrelude,
                   writer.consumer(
                       w -> generateAwsSdkErrorToDafnyErrorBlock(codegenContext, serviceShape, w)),
-                  AwsSdkNameResolver.shimForService(serviceShape),
+                  AwsSdkNameResolver.shimNameForService(serviceShape),
                   writer.consumer(w -> generateOperationsBlock(codegenContext, serviceShape, w)));
             });
   }
@@ -116,7 +116,7 @@ public class AwsSdkShimFileWriter implements CustomFileWriter {
                 "return %1$s"
                     .formatted(
                         errorShape.accept(
-                            new AwsSdkToDafnyShapeVisitor(codegenContext, "e.response", writer))));
+                            new AwsSdkToDafnyShapeVisitor(codegenContext, "e.response['Error']", writer))));
           });
       hasOpenedIfBlock = true;
     }

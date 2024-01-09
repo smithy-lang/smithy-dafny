@@ -275,7 +275,6 @@ public class SynchronousClientGenerator extends ClientGenerator {
             .build();
 
     var configSymbol = CodegenUtils.getConfigSymbol(context.settings());
-    // TODO-Python make import work automatically
     writer.addImport(".config", configSymbol.getName());
 
     writer.addStdlibImport("typing", "Callable");

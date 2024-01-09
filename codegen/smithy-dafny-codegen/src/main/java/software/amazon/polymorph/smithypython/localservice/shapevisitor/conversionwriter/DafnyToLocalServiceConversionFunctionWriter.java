@@ -300,7 +300,7 @@ public class DafnyToLocalServiceConversionFunctionWriter extends BaseConversionW
                   SmithyNameResolver.getSmithyGeneratedModelLocationForShape(unionShape.getId(), context),
                   SmithyNameResolver.getSmithyGeneratedTypeForUnion(unionShape, memberShape),
                   dataSourceInsideConversionFunction,
-                  memberShape.getMemberName()
+                  DafnyNameResolver.escapeShapeName(memberShape.getMemberName())
               );
               shouldOpenNewIfBlock = false;
 
