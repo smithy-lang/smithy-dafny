@@ -225,7 +225,7 @@ public class DafnyNameResolver {
     if (AwsSdkNameResolver.isAwsSdkShape(serviceShape)) {
       return "I" + AwsSdkNameResolver.clientNameForService(serviceShape);
     } else {
-      return "I" + SmithyNameResolver.clientNameForService(serviceShape);
+      return "I" + getDafnyClientTypeForServiceShape(serviceShape);
     }
   }
 
