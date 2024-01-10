@@ -4,13 +4,16 @@
 package software.amazon.polymorph.smithypython.localservice.extensions;
 
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
+import software.amazon.polymorph.traits.JavaDocTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.build.PluginContext;
 import software.amazon.smithy.build.SmithyBuildPlugin;
 import software.amazon.smithy.codegen.core.directed.CodegenDirector;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.ServiceShape;
+import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
+import software.amazon.smithy.model.traits.DocumentationTrait;
 import software.amazon.smithy.model.transform.ModelTransformer;
 import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonSettings;
@@ -59,9 +62,56 @@ public final class DafnyPythonLocalServiceClientCodegenPlugin implements SmithyB
 
     ServiceShape serviceShape = context.getModel().expectShape(settings.getService()).asServiceShape().get();
     Model transformedModel = transformServiceShapeToAddReferenceResources(context.getModel(), serviceShape);
+    transformedModel = transformServiceShapeToAddDocumentationTraits(transformedModel);
     runner.model(transformedModel);
 
     runner.run();
+  }
+
+  public static Model transformServiceShapeToAddDocumentationTraits(Model model) {
+    return ModelTransformer.create().mapShapes(model, shape -> {
+      if (shape.hasTrait(JavaDocTrait.class)) {
+        JavaDocTrait javaDocTrait = shape.getTrait(JavaDocTrait.class).get();
+        System.out.println("javadoc trait value: " + javaDocTrait.getValue());
+        DocumentationTrait documentationTrait = new DocumentationTrait(javaDocTrait.getValue());
+        // Wow, this is brutal, but there is no Shape.Builder interface to abstract this away here...
+
+
+        if (shape.isStructureShape()) {
+          return shape.asStructureShape().get().toBuilder()
+            .addTrait(documentationTrait)
+            .build();
+        } else if (shape.isStringShape()) {
+          return shape.asStringShape().get().toBuilder()
+                  .addTrait(documentationTrait)
+                  .build();
+        } else if (shape.isEnumShape()) {
+          return shape.asEnumShape().get().toBuilder()
+                  .addTrait(documentationTrait)
+                  .build();
+        } else if (shape.isBlobShape()) {
+          return shape.asBlobShape().get().toBuilder()
+                  .addTrait(documentationTrait)
+                  .build();
+        } else if (shape.isResourceShape()) {
+          return shape.asResourceShape().get().toBuilder()
+                  .addTrait(documentationTrait)
+                  .build();
+        } else if (shape.isServiceShape()) {
+          return shape.asServiceShape().get().toBuilder()
+                  .addTrait(documentationTrait)
+                  .build();
+        } else if (shape.isMemberShape()) {
+          return shape.asMemberShape().get().toBuilder()
+                  .addTrait(documentationTrait)
+                  .build();
+        } else {
+          return shape;
+        }
+      } else {
+        return shape;
+      }
+    });
   }
 
   public static Model transformServiceShapeToAddReferenceResources(Model model, ServiceShape serviceShape) {
