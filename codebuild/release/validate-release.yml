@@ -27,7 +27,7 @@ phases:
       - curl https://services.gradle.org/distributions/gradle-7.6-all.zip -L -o gradle.zip
       - unzip -qq gradle.zip && rm gradle.zip
       - export PATH="$PWD/gradle-7.6/bin:$PATH"
-      - cd aws-cryptographic-material-providers-library-java/
+      - cd aws-cryptographic-material-providers-library/
   pre_build:
     commands:
       # Get CI Creds to be able to call MPL TestVectors
