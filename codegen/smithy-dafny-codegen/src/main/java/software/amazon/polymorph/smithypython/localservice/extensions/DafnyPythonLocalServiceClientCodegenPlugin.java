@@ -10,6 +10,7 @@ import software.amazon.smithy.build.PluginContext;
 import software.amazon.smithy.build.SmithyBuildPlugin;
 import software.amazon.smithy.codegen.core.directed.CodegenDirector;
 import software.amazon.smithy.model.Model;
+import software.amazon.smithy.model.shapes.AbstractShapeBuilder;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
@@ -76,38 +77,31 @@ public final class DafnyPythonLocalServiceClientCodegenPlugin implements SmithyB
         DocumentationTrait documentationTrait = new DocumentationTrait(javaDocTrait.getValue());
         // Wow, this is brutal, but there is no Shape.Builder interface to abstract this away here...
 
-
+        AbstractShapeBuilder<?,?> builder;
         if (shape.isStructureShape()) {
-          return shape.asStructureShape().get().toBuilder()
-            .addTrait(documentationTrait)
-            .build();
+          builder = shape.asStructureShape().get().toBuilder();
         } else if (shape.isStringShape()) {
-          return shape.asStringShape().get().toBuilder()
-                  .addTrait(documentationTrait)
-                  .build();
-        } else if (shape.isEnumShape()) {
-          return shape.asEnumShape().get().toBuilder()
-                  .addTrait(documentationTrait)
-                  .build();
-        } else if (shape.isBlobShape()) {
-          return shape.asBlobShape().get().toBuilder()
-                  .addTrait(documentationTrait)
-                  .build();
-        } else if (shape.isResourceShape()) {
-          return shape.asResourceShape().get().toBuilder()
-                  .addTrait(documentationTrait)
-                  .build();
-        } else if (shape.isServiceShape()) {
-          return shape.asServiceShape().get().toBuilder()
-                  .addTrait(documentationTrait)
-                  .build();
+          builder = shape.asStringShape().get().toBuilder();
         } else if (shape.isMemberShape()) {
-          return shape.asMemberShape().get().toBuilder()
-                  .addTrait(documentationTrait)
-                  .build();
+          builder = shape.asMemberShape().get().toBuilder();
+        } else if (shape.isResourceShape()) {
+          builder = shape.asResourceShape().get().toBuilder();
+        } else if (shape.isServiceShape()) {
+          builder = shape.asServiceShape().get().toBuilder();
+        } else if (shape.isBlobShape()) {
+          builder = shape.asBlobShape().get().toBuilder();
+        } else if (shape.isEnumShape()) {
+          builder = shape.asEnumShape().get().toBuilder();
+        } else if (shape.isIntegerShape()) {
+          builder = shape.asIntegerShape().get().toBuilder();
+        } else if (shape.isOperationShape()) {
+          builder = shape.asOperationShape().get().toBuilder();
         } else {
-          return shape;
+          // Unfortunately, there is no "default" shape...
+          throw new IllegalArgumentException("Javadoc trait on unsupported shape: " + shape);
         }
+        builder.addTrait(documentationTrait);
+        return builder.build();
       } else {
         return shape;
       }
