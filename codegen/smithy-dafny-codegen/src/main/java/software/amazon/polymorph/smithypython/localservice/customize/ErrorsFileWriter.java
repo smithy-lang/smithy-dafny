@@ -243,6 +243,7 @@ public class ErrorsFileWriter implements CustomFileWriter {
 
     Shape serviceDependencyShape = context.model().expectShape(serviceDependencyShapeId);
     String code = serviceDependencyShapeId.getName();
+    String serviceDependencyShapeType = serviceDependencyShape.getType().toString();
     Symbol symbol = context.symbolProvider().toSymbol(serviceDependencyShape);
     var apiError =
         Symbol.builder()
@@ -266,7 +267,7 @@ public class ErrorsFileWriter implements CustomFileWriter {
         apiError,
         code,
         () -> {
-          writer.write("$L: Any", code);
+          writer.write("$L: $L", code, serviceDependencyShapeType);
         });
     writer.write("");
   }

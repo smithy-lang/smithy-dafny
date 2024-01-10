@@ -7,46 +7,44 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+
 import software.amazon.polymorph.smithypython.common.customize.CustomFileWriter;
-import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
+import software.amazon.polymorph.smithypython.common.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithypython.common.shapevisitor.ShapeVisitorResolver;
-import software.amazon.polymorph.smithypython.localservice.extensions.DafnyPythonLocalServiceStructureGenerator;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.polymorph.utils.ModelUtils;
-import software.amazon.smithy.codegen.core.TopologicalIndex;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ResourceShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
-import software.amazon.smithy.model.shapes.StructureShape;
-import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonWriter;
-import software.amazon.smithy.python.codegen.UnionGenerator;
 
 /** Extends the Smithy-Python-generated models.py file by adding Dafny plugin models. */
 public class ReferencesFileWriter implements CustomFileWriter {
+  private Set<ShapeId> generatedReferenceShapes = new HashSet<>();
+
   @Override
   public void customizeFileForServiceShape(
       ServiceShape serviceShape, GenerationContext codegenContext) {
-    String moduleName =
-        SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
-            codegenContext.settings().getService().getNamespace());
-    codegenContext
-        .writerDelegator()
-        .useFileWriter(
-            moduleName + "/references.py",
-            "",
-            writer -> {
-              writer.write(
-                  """
-             ${C|}
-              """,
-                  writer.consumer(
-                      w -> generateServiceOperationModelShapes(codegenContext, serviceShape, w)));
-            });
+//    String moduleName =
+//        SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
+//            codegenContext.settings().getService().getNamespace());
+//    codegenContext
+//        .writerDelegator()
+//        .useFileWriter(
+//            moduleName + "/references.py",
+//            "",
+//            writer -> {
+//              writer.write(
+//                  """
+//             ${C|}
+//              """,
+//                  writer.consumer(
+//                      w -> generateServiceOperationModelShapes(codegenContext, serviceShape, w)));
+//            });
   }
 
   /**
@@ -60,35 +58,39 @@ public class ReferencesFileWriter implements CustomFileWriter {
    */
   private void generateServiceOperationModelShapes(
       GenerationContext codegenContext, ServiceShape serviceShape, PythonWriter writer) {
+//
+//    // Parse operation input and output shapes to retrieve any reference shapes,
+//    //   which are shapes tagged with the `@aws.polymorph#reference` trait.
+//    Set<ShapeId> inputAndOutputShapeIds = new HashSet<>();
+//    for (ShapeId operationShapeId : serviceShape.getOperations()) {
+//      OperationShape operationShape =
+//          codegenContext.model().expectShape(operationShapeId, OperationShape.class);
+//      inputAndOutputShapeIds.add(operationShape.getInputShape());
+//      inputAndOutputShapeIds.add(operationShape.getOutputShape());
+//    }
+//    Set<MemberShape> referenceMemberShapes = new HashSet<>();
+//    referenceMemberShapes.addAll(
+//        ModelUtils.findAllDependentMemberReferenceShapes(
+//            inputAndOutputShapeIds, codegenContext.model()));
+//
+//    // Parse reference shapes to retrieve the underlying Resource or Service shape
+//    Set<Shape> referenceChildShape = new HashSet<>();
+//    for (MemberShape referenceMemberShape : referenceMemberShapes) {
+//      Shape referenceShape = codegenContext.model().expectShape(referenceMemberShape.getTarget());
+//      ReferenceTrait referenceTrait = referenceShape.expectTrait(ReferenceTrait.class);
+//      Shape resourceOrService = codegenContext.model().expectShape(referenceTrait.getReferentId());
+//      referenceChildShape.add(resourceOrService);
+//    }
+//
+//    // For each reference shape, generate an interface and an implementation shape
+//    for (Shape resourceOrServiceShape : referenceChildShape) {
+//
+//    }
+  }
 
-    // Parse operation input and output shapes to retrieve any reference shapes,
-    //   which are shapes tagged with the `@aws.polymorph#reference` trait.
-    Set<ShapeId> inputAndOutputShapeIds = new HashSet<>();
-    for (ShapeId operationShapeId : serviceShape.getOperations()) {
-      OperationShape operationShape =
-          codegenContext.model().expectShape(operationShapeId, OperationShape.class);
-      inputAndOutputShapeIds.add(operationShape.getInputShape());
-      inputAndOutputShapeIds.add(operationShape.getOutputShape());
-    }
-    Set<MemberShape> referenceMemberShapes = new HashSet<>();
-    referenceMemberShapes.addAll(
-        ModelUtils.findAllDependentMemberReferenceShapes(
-            inputAndOutputShapeIds, codegenContext.model()));
-
-    // Parse reference shapes to retrieve the underlying Resource or Service shape
-    Set<Shape> referenceChildShape = new HashSet<>();
-    for (MemberShape referenceMemberShape : referenceMemberShapes) {
-      Shape referenceShape = codegenContext.model().expectShape(referenceMemberShape.getTarget());
-      ReferenceTrait referenceTrait = referenceShape.expectTrait(ReferenceTrait.class);
-      Shape resourceOrService = codegenContext.model().expectShape(referenceTrait.getReferentId());
-      referenceChildShape.add(resourceOrService);
-    }
-
-    // For each reference shape, generate an interface and an implementation shape
-    for (Shape resourceOrServiceShape : referenceChildShape) {
-      generateResourceInterface(resourceOrServiceShape, codegenContext, writer);
-      generateResourceImplementation(resourceOrServiceShape, codegenContext, writer);
-    }
+  public void generateResourceInterfaceAndImplementation(Shape resourceOrServiceShape, GenerationContext codegenContext, PythonWriter writer) {
+    generateResourceInterface(resourceOrServiceShape, codegenContext, writer);
+    generateResourceImplementation(resourceOrServiceShape, codegenContext, writer);
   }
 
   public void generateResourceInterface(
@@ -149,21 +151,30 @@ public class ReferencesFileWriter implements CustomFileWriter {
       return;
     }
 
-    writer.addStdlibImport("typing", "Any");
+    String dafnyInterfaceTypeName;
+    if (resourceOrServiceShape.isResourceShape()) {
+      ResourceShape resourceShape = resourceOrServiceShape.asResourceShape().get();
+      dafnyInterfaceTypeName = DafnyNameResolver.getDafnyInterfaceTypeForResourceShape(resourceShape);
+    } else {
+      ServiceShape serviceShape = resourceOrServiceShape.asServiceShape().get();
+      dafnyInterfaceTypeName = DafnyNameResolver.getDafnyClientInterfaceTypeForServiceShape(serviceShape);
+    }
+
+    writer.addStdlibImport(DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(resourceOrServiceShape));
 
     // Write implementation for reference shape
     writer.write(
         """
         class $1L(I$1L):
-            # TODO-Python: typehint
-            _impl: Any
+            _impl: $2L
 
             def __init__(self, _impl):
                 self._impl = _impl
 
-            ${2C|}
+            ${3C|}
         """,
         resourceOrServiceShape.getId().getName(),
+        DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(resourceOrServiceShape) + "." + dafnyInterfaceTypeName,
         writer.consumer(
             w ->
                 generateSmithyOperationFunctionDefinitionForResourceOrService(

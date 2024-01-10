@@ -161,7 +161,7 @@ public class DirectedDafnyPythonLocalServiceCodegen extends DirectedPythonCodege
               "",
               writer -> {
                 new ReferencesFileWriter()
-                    .generateResourceInterface(directive.shape(), directive.context(), writer);
+                    .generateResourceInterfaceAndImplementation(directive.shape(), directive.context(), writer);
               });
     }
   }

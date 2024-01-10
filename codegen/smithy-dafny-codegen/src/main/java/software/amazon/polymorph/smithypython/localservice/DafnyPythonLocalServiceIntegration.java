@@ -130,22 +130,22 @@ public final class DafnyPythonLocalServiceIntegration implements PythonIntegrati
 
         customizeForNonServiceOperationShapes(nonServiceOperationShapes, codegenContext);
 
-        Set<Shape> referenceShapes = codegenContext.model()
-            .getStructureShapesWithTrait(ReferenceTrait.class)
-            .stream()
-            .map(structureShape -> structureShape.expectTrait(ReferenceTrait.class))
-            .map(ReferenceTrait::getReferentId)
-            .map(shapeId -> codegenContext.model().expectShape(shapeId))
-            .collect(Collectors.toSet());
-
-        String moduleName = SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(codegenContext.settings().getService().getNamespace());
-
-        codegenContext.writerDelegator().useFileWriter(moduleName + "/references.py", "", writer -> {
-            for (Shape referenceShape : referenceShapes) {
-                new ReferencesFileWriter().generateResourceInterface(referenceShape, codegenContext, writer);
-
-            }
-        });
+//        Set<Shape> referenceShapes = codegenContext.model()
+//            .getStructureShapesWithTrait(ReferenceTrait.class)
+//            .stream()
+//            .map(structureShape -> structureShape.expectTrait(ReferenceTrait.class))
+//            .map(ReferenceTrait::getReferentId)
+//            .map(shapeId -> codegenContext.model().expectShape(shapeId))
+//            .collect(Collectors.toSet());
+//
+//        String moduleName = SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(codegenContext.settings().getService().getNamespace());
+//
+//        codegenContext.writerDelegator().useFileWriter(moduleName + "/references.py", "", writer -> {
+//            for (Shape referenceShape : referenceShapes) {
+//                new ReferencesFileWriter().generateResourceInterfaceAndImplementation(referenceShape, codegenContext, writer);
+//
+//            }
+//        });
     }
 
     /**

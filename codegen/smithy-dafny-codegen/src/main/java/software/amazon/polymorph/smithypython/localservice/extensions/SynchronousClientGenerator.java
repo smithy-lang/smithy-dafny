@@ -183,7 +183,6 @@ public class SynchronousClientGenerator extends ClientGenerator {
         () -> {
           writer.writeDocs(
               () -> {
-                // TODO: Point to Polymorph Javadoc trait
                 var docs =
                     operation
                         .getTrait(DocumentationTrait.class)

@@ -11,9 +11,10 @@ import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameReso
 import software.amazon.polymorph.smithypython.common.shapevisitor.ShapeVisitorResolver;
 import software.amazon.polymorph.smithypython.localservice.shapevisitor.LocalServiceConfigToDafnyConfigShapeVisitor;
 import software.amazon.polymorph.traits.LocalServiceTrait;
-import software.amazon.smithy.model.shapes.MemberShape;
-import software.amazon.smithy.model.shapes.ServiceShape;
-import software.amazon.smithy.model.shapes.StructureShape;
+import software.amazon.smithy.codegen.core.Symbol;
+import software.amazon.smithy.model.shapes.*;
+import software.amazon.smithy.model.traits.DocumentationTrait;
+import software.amazon.smithy.model.traits.StringTrait;
 import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonWriter;
 import software.amazon.smithy.utils.CaseUtils;
@@ -49,10 +50,13 @@ public class ConfigFileWriter implements CustomFileWriter {
                   '''
                   Smithy-modelled localService Config shape for this localService.
                   '''
-                  # TODO-Python: Add types to Config members
                   ${C|}
 
-                  def __init__(self, ${C|}):
+                  def __init__(
+                      self,
+                      ${C|}
+                  ):
+                      ${C|}
                       super().__init__()
                       ${C|}
 
@@ -74,6 +78,8 @@ public class ConfigFileWriter implements CustomFileWriter {
                   writer.consumer(w -> generateConfigClassFields(configShape, codegenContext, w)),
                   writer.consumer(
                       w -> generateConfigConstructorParameters(configShape, codegenContext, w)),
+                  writer.consumer(
+                      w -> generateConfigConstructorDocumentation(configShape, codegenContext, w)),
                   writer.consumer(
                       w ->
                           generateConfigConstructorFieldAssignments(
@@ -106,10 +112,10 @@ public class ConfigFileWriter implements CustomFileWriter {
       String memberName = memberShapeEntry.getKey();
       // TODO-Python: Instead of `Any`, map the targetShape.getType() Smithy type to the Python type
       // Prototype code commented out...
-      //      MemberShape memberShape = memberShapeEntry.getValue();
-      //      final Shape targetShape = codegenContext.model().expectShape(memberShape.getTarget());
-      //      final ShapeType targetShapeType = targetShape.getType();
-      writer.write("$L: Any", CaseUtils.toSnakeCase(memberName));
+      MemberShape memberShape = memberShapeEntry.getValue();
+      final Shape targetShape = codegenContext.model().expectShape(memberShape.getTarget());
+      Symbol targetShapeSymbol = codegenContext.symbolProvider().toSymbol(targetShape);
+      writer.write("$L: $T", CaseUtils.toSnakeCase(memberShape.getMemberName()), targetShapeSymbol);
     }
   }
 
@@ -124,10 +130,38 @@ public class ConfigFileWriter implements CustomFileWriter {
   private void generateConfigConstructorParameters(
       StructureShape configShape, GenerationContext codegenContext, PythonWriter writer) {
     Map<String, MemberShape> memberShapeSet = configShape.getAllMembers();
-    for (String memberName : memberShapeSet.keySet()) {
+    for (MemberShape memberShape : memberShapeSet.values()) {
+      final Shape targetShape = codegenContext.model().expectShape(memberShape.getTarget());
+      Symbol targetShapeSymbol = codegenContext.symbolProvider().toSymbol(targetShape);
       // TODO-Python: Instead of `Any`, map the targetShape.getType Smithy type to the Python type
-      writer.writeInline("$L, ", CaseUtils.toSnakeCase(memberName));
+      writer.write("$L: $T,", CaseUtils.toSnakeCase(memberShape.getMemberName()), targetShapeSymbol);
     }
+  }
+
+  /**
+   * Generates constructor parameters for the localService's Config class. Called when writing
+   * parameters for the Config class' constructor (__init__ method).
+   *
+   * @param configShape
+   * @param codegenContext
+   * @param writer
+   */
+  private void generateConfigConstructorDocumentation(
+          StructureShape configShape, GenerationContext codegenContext, PythonWriter writer) {
+    Map<String, MemberShape> memberShapeSet = configShape.getAllMembers();
+      writer.writeDocs(() -> {
+        var constructorDocs = configShape.getTrait(DocumentationTrait.class)
+                .map(StringTrait::getValue)
+                .orElse(String.format("Constructor for %s.", configShape.getId().getName()));
+        writer.write(constructorDocs + "\n");
+      for (MemberShape memberShape : memberShapeSet.values()) {
+        memberShape.getMemberTrait(codegenContext.model(), DocumentationTrait.class).ifPresent(trait -> {
+          String memberName = codegenContext.symbolProvider().toMemberName(memberShape);
+          String memberDocs = writer.formatDocs(String.format(":param %s: %s", memberName, trait.getValue()));
+          writer.write(memberDocs);
+        });
+      }
+    });
   }
 
   /**

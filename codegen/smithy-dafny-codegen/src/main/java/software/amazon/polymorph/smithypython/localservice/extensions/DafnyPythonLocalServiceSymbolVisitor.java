@@ -2,7 +2,10 @@ package software.amazon.polymorph.smithypython.localservice.extensions;
 
 import static java.lang.String.format;
 
+import software.amazon.polymorph.smithypython.awssdk.nameresolver.AwsSdkNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
+import software.amazon.polymorph.traits.LocalServiceTrait;
+import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.codegen.core.*;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.*;
@@ -49,16 +52,64 @@ public class DafnyPythonLocalServiceSymbolVisitor extends SymbolVisitor {
   public Symbol serviceShape(ServiceShape serviceShape) {
     var name = getDefaultShapeName(serviceShape);
 
-    if (serviceShape.getId().equals(settings.getService())) {
+    if (serviceShape.hasTrait(LocalServiceTrait.class)) {
+      System.out.println("serviceshape is localservice " + serviceShape);
       String filename = "client";
-      return createSymbolBuilder(serviceShape, name,
-          getSymbolNamespacePathForNamespaceAndFilename(serviceShape.getId().getNamespace(), filename))
-          .definitionFile(getSymbolDefinitionFilePathForNamespaceAndFilename(serviceShape.getId().getNamespace(), filename))
-          .build();
-    } else {
+      Symbol a= createSymbolBuilder(serviceShape, name,
+              getSymbolNamespacePathForNamespaceAndFilename(serviceShape.getId().getNamespace(), filename))
+              .definitionFile(getSymbolDefinitionFilePathForNamespaceAndFilename(serviceShape.getId().getNamespace(), filename))
+              .build();
+      System.out.println(a);
+      return a;
+    } else if (AwsSdkNameResolver.isAwsSdkShape(serviceShape)) {
       // AWS SDK: Should just be a boto3 client.
-      return createStdlibSymbol(serviceShape, "Any", "typing");
-  }}
+      System.out.println("serviceshape is sdk " + serviceShape);
+      String filename = "shim";
+//      return createStdlibSymbol(serviceShape, "Any", "typing");
+      Symbol a= createSymbolBuilder(serviceShape, "Any",
+              "")
+              .definitionFile(getSymbolDefinitionFilePathForNamespaceAndFilename("typing", filename))
+              .build();
+//      System.out.println(a);
+      return a;
+//    return a;
+    } else {
+      throw new IllegalArgumentException("ServiceShape not supported: " + serviceShape);
+    }
+  }
+
+//  @Override
+//  public Symbol serviceShape(ServiceShape serviceShape) {
+//    var name = getDefaultShapeName(serviceShape);
+//    String filename = "client";
+//    return createStdlibSymbol(serviceShape, "Any", "typing");
+////
+////
+////    if (serviceShape.hasTrait(LocalServiceTrait.class)) {
+////      return createStdlibSymbol(serviceShape, "Any", "typing");
+//////      return createSymbolBuilder(serviceShape, name,
+//////          getSymbolNamespacePathForNamespaceAndFilename(serviceShape.getId().getNamespace(), filename))
+//////          .definitionFile(getSymbolDefinitionFilePathForNamespaceAndFilename(serviceShape.getId().getNamespace(), filename))
+//////          .build();
+////    } else if (AwsSdkNameResolver.isAwsSdkShape(serviceShape)) {
+////      // AWS SDK: Should just be a boto3 client.
+////      return createStdlibSymbol(serviceShape, "Any", "typing");
+////    } else {
+////      throw new IllegalArgumentException("ServiceShape not supported: " + serviceShape);
+////    }
+//  }
+
+  @Override
+  public Symbol resourceShape(ResourceShape resourceShape) {
+    return createStdlibSymbol(resourceShape, "Any", "typing");
+//    var name = getDefaultShapeName(resourceShape);
+//    String filename = "references";
+//
+//    return createSymbolBuilder(resourceShape, name,
+//            getSymbolNamespacePathForNamespaceAndFilename(resourceShape.getId().getNamespace(), filename))
+//            .definitionFile(getSymbolDefinitionFilePathForNamespaceAndFilename(resourceShape.getId().getNamespace(), filename))
+//            .build();
+  }
 
   @Override
   public Symbol structureShape(StructureShape shape) {
@@ -76,6 +127,20 @@ public class DafnyPythonLocalServiceSymbolVisitor extends SymbolVisitor {
         return createSymbolBuilder(shape, name, getSymbolNamespacePathForNamespaceAndFilename(shape.getId().getNamespace(), filename))
           .definitionFile(getSymbolDefinitionFilePathForNamespaceAndFilename(shape.getId().getNamespace(), filename))
           .build();
+    }
+
+    if (shape.hasTrait(ReferenceTrait.class)) {
+      ShapeId referentShapeId = shape.expectTrait(ReferenceTrait.class).getReferentId();
+      Shape referentShape = model.expectShape(referentShapeId);
+//      if (referentShape.isResourceShape()) {
+//        return resourceShape(referentShape.asResourceShape().get());
+//      }
+      if (referentShape.isServiceShape()) {
+        System.out.println("passing structure ref into serviceshape: " + referentShape.asServiceShape().get());
+        return serviceShape(referentShape.asServiceShape().get());
+      } else {
+//        throw new IllegalArgumentException("Referent shape is not of a supported type: " + shape);
+      }
     }
 
 
