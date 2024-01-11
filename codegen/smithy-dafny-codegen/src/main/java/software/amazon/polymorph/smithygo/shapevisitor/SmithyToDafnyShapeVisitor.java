@@ -7,6 +7,7 @@ import software.amazon.polymorph.smithygo.codegen.GenerationContext;
 import software.amazon.polymorph.smithygo.codegen.GoWriter;
 import software.amazon.polymorph.smithygo.codegen.knowledge.GoPointableIndex;
 import software.amazon.polymorph.smithygo.nameresolver.DafnyNameResolver;
+import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.codegen.core.Symbol;
@@ -38,6 +39,8 @@ import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.utils.CaseUtils;
 import software.amazon.smithy.utils.StringUtils;
+
+import static software.amazon.polymorph.smithygo.codegen.SymbolUtils.POINTABLE;
 
 public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
     private final GenerationContext context;
@@ -158,7 +161,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
             builder.append("%1$s%2$s".formatted(
                     targetShape.accept(
                             new SmithyToDafnyShapeVisitor(context, dataSource + "." + StringUtils.capitalize(memberName),
-                                                          writer, isConfigShape, memberShape.isOptional(), true
+                                                          writer, isConfigShape, memberShape.isOptional(), context.symbolProvider().toSymbol(memberShape).getProperty(POINTABLE, Boolean.class).orElse(false)
                                                           )), fieldSeparator
             ));
         }
@@ -321,11 +324,25 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
                 nilCheck = "if %s == nil {return %s}".formatted(dataSource, nilWrapIfRequired);
             }
 
+            if(shape.hasTrait(DafnyUtf8BytesTrait.class)) writer.addImport("unicode/utf8");
+
+            var underlyingType =  shape.hasTrait(DafnyUtf8BytesTrait.class) ? """
+                dafny.SeqOf(func () []interface{} {
+                utf8.ValidString(%s%s)
+                b := []byte(%s%s)
+                f := make([]interface{}, len(b))
+                for i, v := range b {
+                    f[i] = v
+                }
+                return f
+            }()...)
+            """.formatted(dereferenceIfRequired, dataSource, dereferenceIfRequired, dataSource) : "dafny.SeqOfChars([]dafny.Char(%s%s)...)".formatted(dereferenceIfRequired, dataSource);
+
             return """
                     func () %s {
                         %s
                         return %s
-                    }()""".formatted(returnType, nilCheck, someWrapIfRequired.formatted("dafny.SeqOfChars([]dafny.Char(%s%s)...)".formatted(dereferenceIfRequired, dataSource)));
+                    }()""".formatted(returnType, nilCheck, someWrapIfRequired.formatted(underlyingType));
         }
     }
 

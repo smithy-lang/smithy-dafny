@@ -2,7 +2,10 @@ package software.amazon.polymorph.smithygo.shapevisitor;
 
 import software.amazon.polymorph.smithygo.codegen.GenerationContext;
 import software.amazon.polymorph.smithygo.codegen.GoWriter;
+import software.amazon.polymorph.smithygo.codegen.SymbolVisitor;
+import software.amazon.polymorph.smithygo.codegen.knowledge.GoPointableIndex;
 import software.amazon.polymorph.smithygo.nameresolver.DafnyNameResolver;
+import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.model.shapes.BlobShape;
@@ -22,6 +25,8 @@ import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.utils.StringUtils;
+
+import static software.amazon.polymorph.smithygo.codegen.SymbolUtils.POINTABLE;
 
 public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
     private final GenerationContext context;
@@ -218,6 +223,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
 	}()""".formatted(context.symbolProvider().toSymbol(shape).getName(), context.symbolProvider().toSymbol(shape).getName(), dataSource, dataSource, DafnyNameResolver.getDafnyType(context.settings(), context.symbolProvider().toSymbol(shape)), DafnyNameResolver.getDafnyCompanionStructType(context.settings(), context.symbolProvider().toSymbol(shape)),
                   DafnyNameResolver.getDafnyType(context.settings(), context.symbolProvider().toSymbol(shape)));
         }
+        var underlyingType = shape.hasTrait(DafnyUtf8BytesTrait.class) ? "uint8" : "dafny.Char";
         return """
                 func() (*string) {
                     var s string
@@ -229,23 +235,28 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
                         if !ok {
                             return &[]string{s}[0]
                         } else {
-                            s = s + string(val.(dafny.Char))
+                            s = s + string(val.(%s))
                         }
                    }
-               }()""".formatted(dataSource, dataSource);
+               }()""".formatted(dataSource, dataSource, underlyingType);
     }
 
     @Override
     public String integerShape(IntegerShape shape) {
-        return ("""
-                func() *int32 {
-                    var b int32
-                    if %s == nil {
-                        return nil
-                    }
-                    b = %s.(int32)
-                    return &b
-                }()""").formatted(dataSource, dataSource);
+        var isPointable = this.context.symbolProvider().toSymbol(shape).getProperty(POINTABLE).orElse(false);
+        if ((boolean)isPointable) {
+            return ("""
+                    func() *int32 {
+                        var b int32
+                        if %s == nil {
+                            return nil
+                        }
+                        b = %s.(int32)
+                        return &b
+                    }()""").formatted(dataSource, dataSource);
+        } else {
+            return "%s.(int32)".formatted(dataSource);
+        }
     }
 
     @Override
