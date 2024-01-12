@@ -1,3 +1,5 @@
+# Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: Apache-2.0
 from standard_library.internaldafny.generated.UTF8 import *
 import standard_library.internaldafny.generated.UTF8
 import _dafny

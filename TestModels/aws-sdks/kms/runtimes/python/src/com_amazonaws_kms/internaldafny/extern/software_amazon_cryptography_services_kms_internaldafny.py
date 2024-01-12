@@ -1,3 +1,5 @@
+# Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: Apache-2.0
 import module_
 from Wrappers import Option_None, Option_Some
 from com_amazonaws_kms.smithygenerated.com_amazonaws_kms.shim import KMSClientShim

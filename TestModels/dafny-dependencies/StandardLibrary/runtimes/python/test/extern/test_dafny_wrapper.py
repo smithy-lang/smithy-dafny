@@ -1,3 +1,5 @@
+# Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: Apache-2.0
 """
 Wrapper file for executing Dafny tests from pytest.
 This allows us to import modules required by Dafny-generated tests

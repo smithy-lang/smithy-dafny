@@ -1,3 +1,5 @@
+# Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: Apache-2.0
 from simple_dafnyextern.internaldafny.generated.SimpleExternImpl import *
 import simple_dafnyextern_internaldafny_types
 import Wrappers
