@@ -10,13 +10,9 @@ import Wrappers
 
 @staticmethod
 def WrappedSimpleDependencies(config):
-    wrapped_config = dafny_config_to_smithy_config(config)
-    impl = SimpleDependencies(wrapped_config)
-    # TODO: Generate an alternate constructor for Smithy client that does not take in a config,
-    # but instead takes in an extern-supplied Dafny client
-    # and also converts its Config to the Smithy config
-    # SIM: https://sim.amazon.com/issues/CrypTool-5230
-    impl._config.dafnyImplInterface.impl = simple_dependencies_internaldafny.default__.SimpleDependencies(config).value
+    # Use an alternate internal-Dafny constructor to create the Dafny client, then pass that directly into the Smithy client
+    dafny_client = simple_dependencies_internaldafny.default__.SimpleDependencies(config).value
+    impl = SimpleDependencies(dafny_client=dafny_client)
     wrapped_client = SimpleDependenciesShim(impl)
     return Wrappers.Result_Success(wrapped_client)
 
