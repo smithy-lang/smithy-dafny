@@ -104,6 +104,7 @@ public class DafnyPythonLocalServiceSymbolVisitor extends SymbolVisitor {
                     + "/"
                     + DafnyLocalServiceCodegenConstants.LOCAL_SERVICE_CODEGEN_SYMBOLWRITER_DUMP_FILE_FILENAME
                     + ".py")
+            .putProperty("stdlib", true)
             .build();
   }
 

@@ -40,7 +40,7 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
   @Override
   public void run() {
     if (shape.hasTrait(PositionalTrait.class)) {
-      // TODO-Python: I don't think I need to render any part of positionals?
+      // Do not need to render shapes with positional trait
       return;
     }
     if (!shape.hasTrait(ErrorTrait.class)) {
@@ -55,7 +55,6 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
     writer.addStdlibImport("typing", "Dict");
     writer.addStdlibImport("typing", "Any");
     writer.addStdlibImport("typing", "Literal");
-    // TODO: Implement protocol-level customization of the error code
     var code = shape.getId().getName();
     var symbol = symbolProvider.toSymbol(shape);
     var apiError = Symbol.builder()
@@ -88,11 +87,15 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
 
       if (index.isMemberNullable(memberShape)) {
         writer.addStdlibImport("typing", "Optional");
-        String formatString = format("$L: Optional[$T]", symbolProvider.toSymbol(referentShape));
-        writer.write(formatString, memberName, symbolProvider.toSymbol(referentShape));
+        // Use forward reference for reference traits to avoid circular import
+        //   and do not import the symbol to avoid circular import
+        String formatString = "$L: Optional['$L']";
+        writer.write(formatString, memberName, symbolProvider.toSymbol(referentShape).getName());
       } else {
-        String formatString = format("$L: $T",  symbolProvider.toSymbol(referentShape));
-        writer.write(formatString, memberName, symbolProvider.toSymbol(referentShape));
+        // Use forward reference for reference traits to avoid circular import,
+        //   and do not import the symbol to avoid circular import
+        String formatString = "$L: '$L'";
+        writer.write(formatString, memberName, symbolProvider.toSymbol(referentShape).getName());
       }
     } else {
       super.writePropertyForMember(isError, memberShape);
@@ -106,9 +109,10 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
     if (target.hasTrait(ReferenceTrait.class)) {
       Shape referentShape = model.expectShape(target.expectTrait(ReferenceTrait.class).getReferentId());
       String memberName = symbolProvider.toMemberName(memberShape);
-
-      String formatString = "$L: $T,";
-      writer.write(formatString, memberName, symbolProvider.toSymbol(referentShape));
+      // Use forward reference for reference traits to avoid circular import
+      //   and do not import the symbol to avoid circular import
+      String formatString = "$L: '$L',";
+      writer.write(formatString, memberName, symbolProvider.toSymbol(referentShape).getName());
     } else {
       super.writeInitMethodParameterForRequiredMember(isError, memberShape);
     }
@@ -123,10 +127,23 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
       String memberName = symbolProvider.toMemberName(memberShape);
 
       writer.addStdlibImport("typing", "Optional");
-      String formatString = "$L: Optional[$T] = None,";
-      writer.write(formatString, memberName, symbolProvider.toSymbol(referentShape));
+      // Use forward reference for reference traits to avoid circular import
+      String formatString = "$L: Optional['$L'] = None,";
+      writer.write(formatString, memberName, symbolProvider.toSymbol(referentShape).getName());
     } else {
       super.writeInitMethodParameterForOptionalMember(isError, memberShape);
+    }
+  }
+
+  protected void writeFromDict(boolean isError) {
+    if (isError) {
+      super.writeFromDict(isError);
+    }
+  }
+
+  protected void writeAsDict(boolean isError) {
+    if (isError) {
+      super.writeAsDict(isError);
     }
   }
 }

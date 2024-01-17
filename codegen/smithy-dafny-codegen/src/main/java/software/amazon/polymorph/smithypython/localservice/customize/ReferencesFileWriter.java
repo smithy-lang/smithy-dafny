@@ -24,68 +24,9 @@ import software.amazon.smithy.python.codegen.PythonWriter;
 
 /** Extends the Smithy-Python-generated models.py file by adding Dafny plugin models. */
 public class ReferencesFileWriter implements CustomFileWriter {
-  private Set<ShapeId> generatedReferenceShapes = new HashSet<>();
-
   @Override
   public void customizeFileForServiceShape(
       ServiceShape serviceShape, GenerationContext codegenContext) {
-//    String moduleName =
-//        SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
-//            codegenContext.settings().getService().getNamespace());
-//    codegenContext
-//        .writerDelegator()
-//        .useFileWriter(
-//            moduleName + "/references.py",
-//            "",
-//            writer -> {
-//              writer.write(
-//                  """
-//             ${C|}
-//              """,
-//                  writer.consumer(
-//                      w -> generateServiceOperationModelShapes(codegenContext, serviceShape, w)));
-//            });
-  }
-
-  /**
-   * Generate service operation input and output shapes. Operations on the service are defined in
-   * client.py. This client will expect to take in the input shape types defined here, and will
-   * return the output shape types defined here.
-   *
-   * @param codegenContext
-   * @param serviceShape
-   * @param writer
-   */
-  private void generateServiceOperationModelShapes(
-      GenerationContext codegenContext, ServiceShape serviceShape, PythonWriter writer) {
-//
-//    // Parse operation input and output shapes to retrieve any reference shapes,
-//    //   which are shapes tagged with the `@aws.polymorph#reference` trait.
-//    Set<ShapeId> inputAndOutputShapeIds = new HashSet<>();
-//    for (ShapeId operationShapeId : serviceShape.getOperations()) {
-//      OperationShape operationShape =
-//          codegenContext.model().expectShape(operationShapeId, OperationShape.class);
-//      inputAndOutputShapeIds.add(operationShape.getInputShape());
-//      inputAndOutputShapeIds.add(operationShape.getOutputShape());
-//    }
-//    Set<MemberShape> referenceMemberShapes = new HashSet<>();
-//    referenceMemberShapes.addAll(
-//        ModelUtils.findAllDependentMemberReferenceShapes(
-//            inputAndOutputShapeIds, codegenContext.model()));
-//
-//    // Parse reference shapes to retrieve the underlying Resource or Service shape
-//    Set<Shape> referenceChildShape = new HashSet<>();
-//    for (MemberShape referenceMemberShape : referenceMemberShapes) {
-//      Shape referenceShape = codegenContext.model().expectShape(referenceMemberShape.getTarget());
-//      ReferenceTrait referenceTrait = referenceShape.expectTrait(ReferenceTrait.class);
-//      Shape resourceOrService = codegenContext.model().expectShape(referenceTrait.getReferentId());
-//      referenceChildShape.add(resourceOrService);
-//    }
-//
-//    // For each reference shape, generate an interface and an implementation shape
-//    for (Shape resourceOrServiceShape : referenceChildShape) {
-//
-//    }
   }
 
   public void generateResourceInterfaceAndImplementation(Shape resourceOrServiceShape, GenerationContext codegenContext, PythonWriter writer) {
