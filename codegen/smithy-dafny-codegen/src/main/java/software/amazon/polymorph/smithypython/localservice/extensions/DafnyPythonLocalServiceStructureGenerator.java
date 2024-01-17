@@ -90,12 +90,16 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
         // Use forward reference for reference traits to avoid circular import
         //   and do not import the symbol to avoid circular import
         String formatString = "$L: Optional['$L']";
-        writer.write(formatString, memberName, symbolProvider.toSymbol(referentShape).getName());
+        writer.write(formatString, memberName, symbolProvider.toSymbol(referentShape).getNamespace() + "." + symbolProvider.toSymbol(referentShape).getName());
+        writer.addStdlibImport(symbolProvider.toSymbol(referentShape).getNamespace());
+
       } else {
         // Use forward reference for reference traits to avoid circular import,
         //   and do not import the symbol to avoid circular import
         String formatString = "$L: '$L'";
-        writer.write(formatString, memberName, symbolProvider.toSymbol(referentShape).getName());
+        writer.write(formatString, memberName, symbolProvider.toSymbol(referentShape).getNamespace() + "." + symbolProvider.toSymbol(referentShape).getName());
+        writer.addStdlibImport(symbolProvider.toSymbol(referentShape).getNamespace());
+
       }
     } else {
       super.writePropertyForMember(isError, memberShape);
@@ -112,7 +116,8 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
       // Use forward reference for reference traits to avoid circular import
       //   and do not import the symbol to avoid circular import
       String formatString = "$L: '$L',";
-      writer.write(formatString, memberName, symbolProvider.toSymbol(referentShape).getName());
+      writer.write(formatString, memberName, symbolProvider.toSymbol(referentShape).getNamespace() + "." + symbolProvider.toSymbol(referentShape).getName());
+      writer.addStdlibImport(symbolProvider.toSymbol(referentShape).getNamespace());
     } else {
       super.writeInitMethodParameterForRequiredMember(isError, memberShape);
     }
@@ -129,18 +134,23 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
       writer.addStdlibImport("typing", "Optional");
       // Use forward reference for reference traits to avoid circular import
       String formatString = "$L: Optional['$L'] = None,";
-      writer.write(formatString, memberName, symbolProvider.toSymbol(referentShape).getName());
+      writer.write(formatString, memberName, symbolProvider.toSymbol(referentShape).getNamespace() + "." + symbolProvider.toSymbol(referentShape).getName());
+      writer.addStdlibImport(symbolProvider.toSymbol(referentShape).getNamespace());
     } else {
       super.writeInitMethodParameterForOptionalMember(isError, memberShape);
     }
   }
 
+  // Do not write `from_dict` methods on structures.
+  // This can introduce circular dependencies if a structure has a reference shape.
   protected void writeFromDict(boolean isError) {
     if (isError) {
       super.writeFromDict(isError);
     }
   }
 
+  // Do not write `from_dict` methods on structures.
+  // This can introduce circular dependencies if a structure has a reference shape.
   protected void writeAsDict(boolean isError) {
     if (isError) {
       super.writeAsDict(isError);
