@@ -5,7 +5,7 @@ package software.amazon.polymorph.smithypython.localservice.customize;
 
 import java.util.HashSet;
 import java.util.Set;
-import software.amazon.polymorph.smithypython.common.Constants;
+import software.amazon.polymorph.smithypython.localservice.DafnyLocalServiceCodegenConstants;
 import software.amazon.polymorph.smithypython.common.customize.CustomFileWriter;
 import software.amazon.polymorph.smithypython.common.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
@@ -66,11 +66,11 @@ public class DafnyProtocolFileWriter implements CustomFileWriter {
                   def __init__(self):
                       super().__init__(self)
               """,
-                  Constants.DAFNY_PROTOCOL_REQUEST,
+                  DafnyLocalServiceCodegenConstants.DAFNY_PROTOCOL_REQUEST,
                   writer.consumer(
                       w ->
                           generateDafnyOperationInputUnionValues(inputShapeIds, w, codegenContext)),
-                  Constants.DAFNY_PROTOCOL_RESPONSE);
+                  DafnyLocalServiceCodegenConstants.DAFNY_PROTOCOL_RESPONSE);
             });
   }
 

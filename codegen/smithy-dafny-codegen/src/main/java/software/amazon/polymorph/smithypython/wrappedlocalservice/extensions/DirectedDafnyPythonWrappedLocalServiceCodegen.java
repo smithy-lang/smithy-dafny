@@ -100,10 +100,10 @@ public class DirectedDafnyPythonWrappedLocalServiceCodegen
       LOGGER.info(
           format(
               "Attempting to remove %s.py",
-              WrappedCodegenConstants.WRAPPED_CODEGEN_SYMBOLWRITER_OUTPUT_FILENAME));
+              WrappedCodegenConstants.WRAPPED_CODEGEN_SYMBOLWRITER_DUMP_FILE_FILENAME));
       CodegenUtils.runCommand(
               format(
-                  "rm %s.py", WrappedCodegenConstants.WRAPPED_CODEGEN_SYMBOLWRITER_OUTPUT_FILENAME),
+                  "rm -f %s.py", WrappedCodegenConstants.WRAPPED_CODEGEN_SYMBOLWRITER_DUMP_FILE_FILENAME),
               generationPath)
           .strip();
     } catch (CodegenException e) {
@@ -111,7 +111,7 @@ public class DirectedDafnyPythonWrappedLocalServiceCodegen
       throw new RuntimeException(
           format(
               "Unable to remove %s.py",
-              WrappedCodegenConstants.WRAPPED_CODEGEN_SYMBOLWRITER_OUTPUT_FILENAME),
+              WrappedCodegenConstants.WRAPPED_CODEGEN_SYMBOLWRITER_DUMP_FILE_FILENAME),
           e);
     }
   }

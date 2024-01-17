@@ -116,7 +116,7 @@ public class AwsSdkShimFileWriter implements CustomFileWriter {
                 "return %1$s"
                     .formatted(
                         errorShape.accept(
-                            new AwsSdkToDafnyShapeVisitor(codegenContext, "e.response['Error']", writer))));
+                            new AwsSdkToDafnyShapeVisitor(codegenContext, "e.response", writer))));
           });
       hasOpenedIfBlock = true;
     }

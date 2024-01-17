@@ -3,7 +3,7 @@
 
 package software.amazon.polymorph.smithypython.localservice.customize;
 
-import software.amazon.polymorph.smithypython.common.Constants;
+import software.amazon.polymorph.smithypython.localservice.DafnyLocalServiceCodegenConstants;
 import software.amazon.polymorph.smithypython.common.customize.CustomFileWriter;
 import software.amazon.polymorph.smithypython.common.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
@@ -71,8 +71,8 @@ public class DafnyImplInterfaceFileWriter implements CustomFileWriter {
                 """,
                   implModulePrelude,
                   clientName,
-                  Constants.DAFNY_PROTOCOL_PYTHON_FILENAME,
-                  Constants.DAFNY_PROTOCOL_REQUEST,
+                  DafnyLocalServiceCodegenConstants.DAFNY_PROTOCOL_PYTHON_FILENAME,
+                  DafnyLocalServiceCodegenConstants.DAFNY_PROTOCOL_REQUEST,
                   "impl",
                   clientName,
                   writer.consumer(

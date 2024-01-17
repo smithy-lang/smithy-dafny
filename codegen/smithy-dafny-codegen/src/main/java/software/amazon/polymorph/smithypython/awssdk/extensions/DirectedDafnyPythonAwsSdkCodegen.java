@@ -94,10 +94,10 @@ public class DirectedDafnyPythonAwsSdkCodegen extends DirectedPythonCodegen {
       LOGGER.info(
           format(
               "Attempting to remove %s.py",
-              AwsSdkCodegenConstants.AWS_SDK_CODEGEN_SYMBOLWRITER_OUTPUT_FILENAME));
+              AwsSdkCodegenConstants.AWS_SDK_CODEGEN_SYMBOLWRITER_DUMP_FILE_FILENAME));
       CodegenUtils.runCommand(
               format(
-                  "rm %s.py", AwsSdkCodegenConstants.AWS_SDK_CODEGEN_SYMBOLWRITER_OUTPUT_FILENAME),
+                  "rm -f %s.py", AwsSdkCodegenConstants.AWS_SDK_CODEGEN_SYMBOLWRITER_DUMP_FILE_FILENAME),
               generationPath)
           .strip();
     } catch (CodegenException e) {
@@ -105,7 +105,7 @@ public class DirectedDafnyPythonAwsSdkCodegen extends DirectedPythonCodegen {
       throw new RuntimeException(
           format(
               "Unable to remove %s.py",
-              AwsSdkCodegenConstants.AWS_SDK_CODEGEN_SYMBOLWRITER_OUTPUT_FILENAME),
+              AwsSdkCodegenConstants.AWS_SDK_CODEGEN_SYMBOLWRITER_DUMP_FILE_FILENAME),
           e);
     }
   }

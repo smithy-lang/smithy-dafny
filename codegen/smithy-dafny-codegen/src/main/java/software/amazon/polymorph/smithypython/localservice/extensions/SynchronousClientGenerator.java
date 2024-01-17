@@ -3,16 +3,14 @@ package software.amazon.polymorph.smithypython.localservice.extensions;
 import static java.lang.String.format;
 
 import java.util.LinkedHashSet;
-import java.util.Set;
 
-import software.amazon.polymorph.smithypython.common.Constants;
+import software.amazon.polymorph.smithypython.localservice.DafnyLocalServiceCodegenConstants;
 import software.amazon.polymorph.smithypython.common.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolReference;
-import software.amazon.smithy.model.knowledge.ServiceIndex;
 import software.amazon.smithy.model.shapes.*;
 import software.amazon.smithy.model.traits.DocumentationTrait;
 import software.amazon.smithy.model.traits.StringTrait;
@@ -471,8 +469,8 @@ public class SynchronousClientGenerator extends ClientGenerator {
                       input=context_with_response.transport_request
                   )
           """,
-          Constants.DAFNY_PROTOCOL_REQUEST,
-          Constants.DAFNY_PROTOCOL_RESPONSE);
+          DafnyLocalServiceCodegenConstants.DAFNY_PROTOCOL_REQUEST,
+          DafnyLocalServiceCodegenConstants.DAFNY_PROTOCOL_RESPONSE);
     writer.popState();
 
     writer.write(

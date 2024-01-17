@@ -72,16 +72,25 @@ public class DafnyToLocalServiceConversionFunctionWriter extends BaseConversionW
             } else if (structureShape.hasTrait(PositionalTrait.class)) {
               writePositionalStructureShapeConverter(structureShape, conversionWriter, dataSourceInsideConversionFunction);
             } else {
-              writeNonReferenceStructureShapeConverter(structureShape, conversionWriter, dataSourceInsideConversionFunction);
+              writeTraitlessStructureShapeConverter(structureShape, conversionWriter, dataSourceInsideConversionFunction);
             }
           }
       );
     });
   }
 
-  private void writeNonReferenceStructureShapeConverter(StructureShape shape, PythonWriter conversionWriter,
-      String dataSourceInsideConversionFunction) {
-    SmithyNameResolver.importSmithyGeneratedTypeForShape(conversionWriter, shape, context);
+  private void writeTraitlessStructureShapeConverter(StructureShape shape, PythonWriter conversionWriter,
+                                                     String dataSourceInsideConversionFunction) {
+    // Only write top-level import for a shape in `.models` to avoid introducing a circular dependency
+    if (SmithyNameResolver.getSmithyGeneratedModuleFilenameForSmithyShape(shape, context)
+            .equals(".models")) {
+        SmithyNameResolver.importSmithyGeneratedTypeForShape(conversionWriter, shape, context);
+    } else {
+        conversionWriter.writeComment("Deferred import of %1$s to avoid circular dependency".formatted(
+                SmithyNameResolver.getSmithyGeneratedModuleFilenameForSmithyShape(shape, context)));
+        conversionWriter.write("import $L",
+            SmithyNameResolver.getSmithyGeneratedModelLocationForShape(shape, context));
+    }
     // Open Smithy structure shape
     // e.g.
     // smithy_structure_name(...

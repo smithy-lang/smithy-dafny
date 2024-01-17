@@ -46,6 +46,6 @@ public class DafnyPythonAwsSdkSymbolVisitor extends DafnyPythonLocalServiceSymbo
     // Ignore the filename! Wrapped codegen deletes this file.
     return format(
         "%s/%s.py",
-        directoryFilePath, AwsSdkCodegenConstants.AWS_SDK_CODEGEN_SYMBOLWRITER_OUTPUT_FILENAME);
+        directoryFilePath, AwsSdkCodegenConstants.AWS_SDK_CODEGEN_SYMBOLWRITER_DUMP_FILE_FILENAME);
   }
 }

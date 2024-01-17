@@ -44,6 +44,11 @@ public class AwsSdkToDafnyConversionFunctionWriter extends BaseConversionWriter 
   }
 
   protected void writeStructureShapeConverter(StructureShape structureShape) {
+  if (structureShape.hasTrait(ErrorTrait.class)) {
+      writeErrorStructureShapeConverter(structureShape);
+      return;
+  }
+
     WriterDelegator<PythonWriter> delegator = context.writerDelegator();
     String moduleName =
         SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
@@ -101,7 +106,6 @@ public class AwsSdkToDafnyConversionFunctionWriter extends BaseConversionWriter 
         });
   }
 
-  // TODO-Python: Unused. Remove?
   protected void writeErrorStructureShapeConverter(StructureShape structureShape) {
     WriterDelegator<PythonWriter> delegator = context.writerDelegator();
     String moduleName =
@@ -139,15 +143,31 @@ public class AwsSdkToDafnyConversionFunctionWriter extends BaseConversionWriter 
                           structureShape.getAllMembers().entrySet()) {
                         String memberName = memberShapeEntry.getKey();
                         MemberShape memberShape = memberShapeEntry.getValue();
+                        String memberShapeDataSource;
+                        if (shapeMemberIsOnResponseRoot(memberShape, structureShape)) {
+                            memberShapeDataSource = dataSourceInsideConversionFunction;
+                        } else {
+                            memberShapeDataSource = dataSourceInsideConversionFunction + "['Error']";
+                        }
                         writeErrorStructureShapeMemberConverter(
                             conversionWriter,
-                            dataSourceInsideConversionFunction,
+                            memberShapeDataSource,
                             memberName,
                             memberShape);
                       }
                     });
               });
         });
+  }
+
+  private boolean shapeMemberIsOnResponseRoot(MemberShape memberShape, StructureShape structureShape) {
+      // Case: TransactionCanceledException.CancellationReasons
+      if ("CancellationReasons".equals(memberShape.getMemberName())
+          && "TransactionCanceledException".equals(structureShape.getId().getName())
+          && "com.amazonaws.dynamodb".equals(structureShape.getId().getNamespace())) {
+          return true;
+      }
+      return false;
   }
 
   private void writeErrorStructureShapeMemberConverter(

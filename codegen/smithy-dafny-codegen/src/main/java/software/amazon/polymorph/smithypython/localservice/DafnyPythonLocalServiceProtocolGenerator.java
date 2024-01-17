@@ -9,7 +9,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
-import software.amazon.polymorph.smithypython.common.Constants;
+
 import software.amazon.polymorph.smithypython.common.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.Utils;
@@ -37,12 +37,12 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator implements Protoc
       new ApplicationProtocol(
           // Define the `dafny` ApplicationProtocol.
           // This protocol's request and response shapes are defined in DafnyProtocolFileWriter.
-          Constants.DAFNY_PYTHON_LOCAL_SERVICE_APPLICATION_PROTOCOL_NAME,
+          DafnyLocalServiceCodegenConstants.DAFNY_PYTHON_LOCAL_SERVICE_APPLICATION_PROTOCOL_NAME,
           SymbolReference.builder()
-              .symbol(createDafnyApplicationProtocolSymbol(Constants.DAFNY_PROTOCOL_REQUEST))
+              .symbol(createDafnyApplicationProtocolSymbol(DafnyLocalServiceCodegenConstants.DAFNY_PROTOCOL_REQUEST))
               .build(),
           SymbolReference.builder()
-              .symbol(createDafnyApplicationProtocolSymbol(Constants.DAFNY_PROTOCOL_RESPONSE))
+              .symbol(createDafnyApplicationProtocolSymbol(DafnyLocalServiceCodegenConstants.DAFNY_PROTOCOL_RESPONSE))
               .build());
 
   /**
@@ -53,7 +53,7 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator implements Protoc
    */
   private static Symbol createDafnyApplicationProtocolSymbol(String symbolName) {
     return Symbol.builder()
-        .namespace(Constants.DAFNY_PROTOCOL_PYTHON_FILENAME, ".")
+        .namespace(DafnyLocalServiceCodegenConstants.DAFNY_PROTOCOL_PYTHON_FILENAME, ".")
         .name(symbolName)
         .build();
   }
@@ -113,7 +113,7 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator implements Protoc
           serFunction.getNamespace(),
           writer -> {
             writer.addImport(
-                Constants.DAFNY_PROTOCOL_PYTHON_FILENAME, Constants.DAFNY_PROTOCOL_REQUEST);
+                DafnyLocalServiceCodegenConstants.DAFNY_PROTOCOL_PYTHON_FILENAME, DafnyLocalServiceCodegenConstants.DAFNY_PROTOCOL_REQUEST);
             writer.pushState(new RequestSerializerSection(operationShape));
 
             writer.write(
@@ -123,7 +123,7 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator implements Protoc
             """,
                 serFunction.getName(),
                 configSymbol,
-                Constants.DAFNY_PROTOCOL_REQUEST,
+                DafnyLocalServiceCodegenConstants.DAFNY_PROTOCOL_REQUEST,
                 writer.consumer(w -> generateRequestSerializer(context, operationShape, w)));
             writer.popState();
           });
@@ -237,7 +237,7 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator implements Protoc
           deserFunction.getNamespace(),
           writer -> {
             writer.addImport(
-                Constants.DAFNY_PROTOCOL_PYTHON_FILENAME, Constants.DAFNY_PROTOCOL_RESPONSE);
+                DafnyLocalServiceCodegenConstants.DAFNY_PROTOCOL_PYTHON_FILENAME, DafnyLocalServiceCodegenConstants.DAFNY_PROTOCOL_RESPONSE);
 
             writer.pushState(new RequestDeserializerSection(operationShape));
 
@@ -247,7 +247,7 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator implements Protoc
               ${C|}
             """,
                 deserFunction.getName(),
-                Constants.DAFNY_PROTOCOL_RESPONSE,
+                DafnyLocalServiceCodegenConstants.DAFNY_PROTOCOL_RESPONSE,
                 configSymbol,
                 writer.consumer(
                     w -> generateOperationResponseDeserializer(context, operationShape)));

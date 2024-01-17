@@ -44,6 +44,6 @@ public class DafnyPythonWrappedLocalServiceSymbolVisitor
     }
 
     // Ignore the filename! Wrapped codegen deletes this file.
-    return format("%s/%s.py", directoryFilePath, WrappedCodegenConstants.WRAPPED_CODEGEN_SYMBOLWRITER_OUTPUT_FILENAME);
+    return format("%s/%s.py", directoryFilePath, WrappedCodegenConstants.WRAPPED_CODEGEN_SYMBOLWRITER_DUMP_FILE_FILENAME);
   }
 }

@@ -4,6 +4,7 @@ import static java.lang.String.format;
 
 import java.util.Set;
 
+import org.assertj.core.util.Strings;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
