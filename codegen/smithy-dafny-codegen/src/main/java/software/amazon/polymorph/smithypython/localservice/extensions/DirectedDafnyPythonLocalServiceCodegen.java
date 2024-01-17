@@ -288,8 +288,8 @@ public class DirectedDafnyPythonLocalServiceCodegen extends DirectedPythonCodege
   }
 
     /**
-     * Call `DirectedPythonCodegen.customizeAfterIntegrations`, then remove `models.py` and
-     * `errors.py`. The CodegenDirector will invoke this method after shape generation.
+     * Call `DirectedPythonCodegen.customizeAfterIntegrations`, then remove `localservice_codegen_todelete.py`.
+     * The CodegenDirector will invoke this method after shape generation.
      *
      * @param directive Directive to perform.
      */
@@ -338,89 +338,10 @@ public class DirectedDafnyPythonLocalServiceCodegen extends DirectedPythonCodege
         }
     }
 
-//    @Override
-//    public void customizeAfterIntegrations(CustomizeDirective<GenerationContext, PythonSettings> directive) {
-//
-//        Pattern versionPattern = Pattern.compile("Python \\d\\.(?<minor>\\d+)\\.(?<patch>\\d+)");
-//        FileManifest fileManifest = directive.fileManifest();
-//
-//        SetupGenerator.generateSetup(directive.settings(), directive.context());
-//
-//        for (Map.Entry<String, PythonWriter> entry : directive.context().writerDelegator().getWriters().entrySet()) {
-//            String filename = entry.getKey();
-//            PythonWriter writer = entry.getValue();
-//
-//            if (!filename.isEmpty()) {
-//                fileManifest.writeFile(filename, writer.toString());
-//            } else {
-//                System.out.println("empty");
-//            }
-//        }
-////
-////        directive.context().writerDelegator().getWriters().clear();
-////
-//////        Map<String, PythonWriter> updatedWriters = directive.context().writerDelegator().getWriters();
-////        updatedWriters.remove("");
-////        Map<String, PythonWriter> updatedWriters = new HashMap<>();
-////        for (Map.Entry<String, PythonWriter> entry : directive.context().writerDelegator().getWriters().entrySet()) {
-////            String filename = entry.getKey();
-////            PythonWriter writer = entry.getValue();
-////
-////            writer.
-////
-////            if (!filename.isEmpty()) {
-////                updatedWriters.put(filename, writer);
-////            }
-////        }
-////
-////
-////        PythonDelegator delegator = new PythonDelegator(
-////                directive.fileManifest(),
-////                directive.symbolProvider(),
-////                directive.context().settings()
-////        );
-////
-//
-//
-//
-//
-//        String output;
-//        try {
-//            LOGGER.info("Attempting to discover python version");
-//            output = CodegenUtils.runCommand("python3 --version", fileManifest.getBaseDir()).strip();
-//        } catch (CodegenException e) {
-//            LOGGER.warning("Unable to find python on the path. Skipping formatting and type checking.");
-//            return;
-//        }
-//        var matcher = versionPattern.matcher(output);
-//        if (!matcher.find()) {
-//            LOGGER.warning("Unable to parse python version string. Skipping formatting and type checking.");
-//        }
-//        int minorVersion = Integer.parseInt(matcher.group("minor"));
-//        if (minorVersion < 11) {
-//            LOGGER.warning(format("""
-//                    Found incompatible python version 3.%s.%s, expected 3.11.0 or greater. \
-//                    Skipping formatting and type checking.""",
-//                    matcher.group("minor"), matcher.group("patch")));
-//            return;
-//        }
-//        LOGGER.info("Verifying python files");
-//        for (var file : fileManifest.getFiles()) {
-//            var fileName = file.getFileName();
-//            if (fileName == null || !fileName.endsWith(".py")) {
-//                continue;
-//            }
-//            CodegenUtils.runCommand("python3 " + file, fileManifest.getBaseDir());
-//        }
-//        formatCode(fileManifest);
-//        runMypy(fileManifest);
-//
-//  }
-
-    /**
-     * Override Smithy-Python's generateService to generate a synchronous client.
-     * @param directive Directive to perform.
-     */
+  /**
+   * Override Smithy-Python's generateService to generate a synchronous client.
+   * @param directive Directive to perform.
+   */
   @Override
   public void generateService(
       GenerateServiceDirective<GenerationContext, PythonSettings> directive) {
