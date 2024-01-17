@@ -59,18 +59,21 @@ public class DafnyPythonLocalServiceSymbolVisitor extends SymbolVisitor {
     if (serviceShape.hasTrait(LocalServiceTrait.class)) {
       String name = getDefaultShapeName(serviceShape);
       String filename = "client";
-      return createSymbolBuilder(serviceShape, name,
-              getSymbolNamespacePathForNamespaceAndFilename(serviceShape.getId().getNamespace(), filename))
+      String definitionFile = serviceShape.getId().equals(settings.getService())
+              ? getSymbolDefinitionFilePathForNamespaceAndFilename(serviceShape.getId().getNamespace(), filename)
               // Smithy and Smithy-Python will always attempt to write a referenced symbol.
               // There is no way to disable writing referenced symbols, even for externally-defined symbols.
               // We don't want to write a LocalService symbol, since it is either in this project's `client.py`,
               //   or is already written in another project's `client.py`.
-              // As a workaround, dump it to a file that will be deleted after codegen.
+              // As a workaround, dump dependency localService symbols to a file that will be deleted after codegen.
               // Typehints will reference the `namespace` and `serviceShape` name and not this file.
-              .definitionFile(generationPath
-                      + "/"
-                      + DafnyLocalServiceCodegenConstants.LOCAL_SERVICE_CODEGEN_SYMBOLWRITER_DUMP_FILE_FILENAME
-                      + ".py")
+              : generationPath
+                  + "/"
+                  + DafnyLocalServiceCodegenConstants.LOCAL_SERVICE_CODEGEN_SYMBOLWRITER_DUMP_FILE_FILENAME
+                  + ".py";
+      return createSymbolBuilder(serviceShape, name,
+              getSymbolNamespacePathForNamespaceAndFilename(serviceShape.getId().getNamespace(), filename))
+              .definitionFile(definitionFile)
               .build();
     } else if (AwsSdkNameResolver.isAwsSdkShape(serviceShape)) {
       return createSymbolBuilder(serviceShape, "BaseClient", "botocore.client")
