@@ -3,7 +3,6 @@
 
 package software.amazon.polymorph.smithypython.localservice.customize;
 
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -11,9 +10,6 @@ import java.util.Set;
 import software.amazon.polymorph.smithypython.common.customize.CustomFileWriter;
 import software.amazon.polymorph.smithypython.common.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithypython.common.shapevisitor.ShapeVisitorResolver;
-import software.amazon.polymorph.traits.ReferenceTrait;
-import software.amazon.polymorph.utils.ModelUtils;
-import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ResourceShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
@@ -113,12 +109,18 @@ public class ReferencesFileWriter implements CustomFileWriter {
                 self._impl = _impl
 
             ${3C|}
+            
+            ${4C|}
         """,
         resourceOrServiceShape.getId().getName(),
         DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(resourceOrServiceShape) + "." + dafnyInterfaceTypeName,
         writer.consumer(
             w ->
-                generateSmithyOperationFunctionDefinitionForResourceOrService(
+                generateSmithyOperationFunctionDefinitionForResource(
+                    context, resourceOrServiceShape, w)),
+        writer.consumer(
+            w ->
+                generateDictConvertersForResource(
                     context, resourceOrServiceShape, w)));
   }
 
@@ -248,7 +250,7 @@ public class ReferencesFileWriter implements CustomFileWriter {
    * @param resourceOrService
    * @param writer
    */
-  private void generateSmithyOperationFunctionDefinitionForResourceOrService(
+  private void generateSmithyOperationFunctionDefinitionForResource(
       GenerationContext codegenContext, Shape resourceOrService, PythonWriter writer) {
     Set<ShapeId> operationShapeIds;
     if (resourceOrService.asServiceShape().isPresent()) {
@@ -298,5 +300,27 @@ public class ReferencesFileWriter implements CustomFileWriter {
           input,
           output);
     }
+  }
+
+  private void generateDictConvertersForResource(
+          GenerationContext codegenContext, Shape resourceOrService, PythonWriter writer) {
+
+    writer.addStdlibImport("typing", "Dict");
+    writer.addStdlibImport("typing", "Any");
+
+    writer.write("@staticmethod");
+    writer.openBlock("def from_dict(d: Dict[str, Any]) -> '$L':",
+            "",
+            resourceOrService.getId().getName(),
+            () -> {
+                writer.write("return $L(d['_impl'])", resourceOrService.getId().getName());
+            });
+
+    writer.openBlock("def as_dict(self) -> Dict[str, Any]:",
+            "",
+            () -> {
+              writer.write("return {'_impl': self._impl}");
+            });
+
   }
 }
