@@ -176,10 +176,10 @@ public class DirectedDafnyPythonLocalServiceCodegen extends DirectedPythonCodege
     }
   }
 
-  @Override
   /**
    * Creates __init__.py files where not already present.
    */
+  @Override
   protected void generateInits(CustomizeDirective<GenerationContext, PythonSettings> directive) {
       System.out.println("inits" + directive.context().writerDelegator().getWriters().keySet());
       var directories = directive.context().writerDelegator().getWriters().keySet().stream()
