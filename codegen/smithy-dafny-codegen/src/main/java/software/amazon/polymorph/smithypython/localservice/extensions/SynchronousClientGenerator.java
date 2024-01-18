@@ -9,6 +9,7 @@ import software.amazon.polymorph.smithypython.common.nameresolver.DafnyNameResol
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.traits.PositionalTrait;
+import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolReference;
 import software.amazon.smithy.model.shapes.*;
@@ -34,6 +35,10 @@ public class SynchronousClientGenerator extends ClientGenerator {
     super(context, service);
   }
 
+    /**
+     * Override Smithy-Python's `generateService` to
+     * @param writer
+     */
   @Override
   protected void generateService(PythonWriter writer) {
     var serviceSymbol = context.symbolProvider().toSymbol(service);
@@ -152,32 +157,73 @@ public class SynchronousClientGenerator extends ClientGenerator {
 
     var operationInputShape =
         context.model().expectShape(operation.getInputShape()).asStructureShape().get();
-    Symbol interceptorInputSymbol;
-    if (operationInputShape.hasTrait(PositionalTrait.class)) {
-      final MemberShape onlyMember = PositionalTrait.onlyMember(operationInputShape);
-      final Shape targetShape = context.model().expectShape(onlyMember.getTarget());
-      interceptorInputSymbol = context.symbolProvider().toSymbol(targetShape);
-    } else {
-      interceptorInputSymbol = context.symbolProvider().toSymbol(operationInputShape);
-    }
 
-    var operationOutputShape =
+    // "visible" in the sense that this the actual input/output shape considering the @positional trait
+    Shape visibleOperationInputShape;
+    Symbol interceptorInputSymbol;
+
+      if (operationInputShape.hasTrait(PositionalTrait.class)) {
+          final MemberShape onlyMember = PositionalTrait.onlyMember(operationInputShape);
+          visibleOperationInputShape = context.model().expectShape(onlyMember.getTarget());
+      } else {
+          visibleOperationInputShape = operationInputShape;
+      }
+
+
+      interceptorInputSymbol = context.symbolProvider().toSymbol(visibleOperationInputShape);
+
+
+          var operationOutputShape =
         context.model().expectShape(operation.getOutputShape()).asStructureShape().get();
-    Symbol interceptorOutputSymbol;
-    if (operationOutputShape.hasTrait(PositionalTrait.class)) {
-      final MemberShape onlyMember = PositionalTrait.onlyMember(operationOutputShape);
-      final Shape targetShape = context.model().expectShape(onlyMember.getTarget());
-      interceptorOutputSymbol = context.symbolProvider().toSymbol(targetShape);
-    } else {
-      interceptorOutputSymbol = context.symbolProvider().toSymbol(operationOutputShape);
-    }
+      // "visible" in the sense that this the actual input/output shape considering the @positional trait
+      Shape visibleOperationOutputShape;
+      Symbol interceptorOutputSymbol;
+
+      if (operationOutputShape.hasTrait(PositionalTrait.class)) {
+          final MemberShape onlyMember = PositionalTrait.onlyMember(operationOutputShape);
+          visibleOperationOutputShape = context.model().expectShape(onlyMember.getTarget());
+      } else {
+          visibleOperationOutputShape = operationOutputShape;
+      }
+
+
+      interceptorOutputSymbol = context.symbolProvider().toSymbol(visibleOperationOutputShape);
+//
+
+//    Symbol interceptorOutputSymbol;
+//    if (operationOutputShape.hasTrait(PositionalTrait.class)) {
+//      final MemberShape onlyMember = PositionalTrait.onlyMember(operationOutputShape);
+//      final Shape targetShape = context.model().expectShape(onlyMember.getTarget());
+//      interceptorOutputSymbol = context.symbolProvider().toSymbol(targetShape);
+//    } else {
+//      interceptorOutputSymbol = context.symbolProvider().toSymbol(operationOutputShape);
+//    }
+
+      if (visibleOperationInputShape.hasTrait(ReferenceTrait.class)) {
+          writer.addStdlibImport(interceptorInputSymbol.getNamespace());
+      }
+      if (visibleOperationOutputShape.hasTrait(ReferenceTrait.class)) {
+          writer.addStdlibImport(interceptorOutputSymbol.getNamespace());
+      }
 
     writer.openBlock(
-        "def $L(self, input: $T) -> $T:",
+        "def $L(self, input: %1$s) -> %2$s:".formatted(
+                visibleOperationInputShape.hasTrait(ReferenceTrait.class)
+                    ? "'$L'"
+                    : "$T",
+                visibleOperationOutputShape.hasTrait(ReferenceTrait.class)
+                        ? "'$L'"
+                        : "$T"
+
+        ),
         "",
         operationSymbol.getName(),
-        interceptorInputSymbol,
-        interceptorOutputSymbol,
+        visibleOperationInputShape.hasTrait(ReferenceTrait.class)
+                ? interceptorInputSymbol.getNamespace() + "." + interceptorInputSymbol.getName()
+                : interceptorInputSymbol,
+        visibleOperationOutputShape.hasTrait(ReferenceTrait.class)
+        ? interceptorOutputSymbol.getNamespace() + "." + interceptorOutputSymbol.getName()
+        : interceptorOutputSymbol,
         () -> {
           writer.writeDocs(
               () -> {

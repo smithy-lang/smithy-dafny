@@ -23,6 +23,7 @@ public class ReferencesFileWriter implements CustomFileWriter {
   @Override
   public void customizeFileForServiceShape(
       ServiceShape serviceShape, GenerationContext codegenContext) {
+    // Legacy stub
   }
 
   public void generateResourceInterfaceAndImplementation(Shape resourceOrServiceShape, GenerationContext codegenContext, PythonWriter writer) {
@@ -121,7 +122,7 @@ public class ReferencesFileWriter implements CustomFileWriter {
         writer.consumer(
             w ->
                 generateDictConvertersForResource(
-                    context, resourceOrServiceShape, w)));
+                    resourceOrServiceShape, w)));
   }
 
   /**
@@ -302,8 +303,16 @@ public class ReferencesFileWriter implements CustomFileWriter {
     }
   }
 
+  /**
+   * Writes `as_dict` and `from_dict` methods on the reference shape.
+   *   These convert the shape to/from a dictionary and help with compatability across
+   *   other shapes' as/from dict conversions.
+   * @param codegenContext
+   * @param resourceOrService
+   * @param writer
+   */
   private void generateDictConvertersForResource(
-          GenerationContext codegenContext, Shape resourceOrService, PythonWriter writer) {
+          Shape resourceOrService, PythonWriter writer) {
 
     writer.addStdlibImport("typing", "Dict");
     writer.addStdlibImport("typing", "Any");

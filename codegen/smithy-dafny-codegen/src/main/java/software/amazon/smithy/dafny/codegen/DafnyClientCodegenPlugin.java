@@ -3,7 +3,7 @@
 
 package software.amazon.smithy.dafny.codegen;
 
-import org.slf4j.Logger;
+import org.slf4j`; .Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.polymorph.CodegenEngine;
 import software.amazon.polymorph.CodegenEngine.TargetLanguage;

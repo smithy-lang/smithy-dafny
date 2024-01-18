@@ -6,6 +6,7 @@ package software.amazon.polymorph.smithypython.localservice.extensions;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.traits.JavaDocTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
+import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.smithy.build.PluginContext;
 import software.amazon.smithy.build.SmithyBuildPlugin;
 import software.amazon.smithy.codegen.core.directed.CodegenDirector;
@@ -66,6 +67,12 @@ public final class DafnyPythonLocalServiceClientCodegenPlugin implements SmithyB
     runner.run();
   }
 
+  /**
+   * Perform all transformations on the model before running localService codegen.
+   * @param model
+   * @param serviceShape
+   * @return
+   */
   public static Model transformModelForLocalService(Model model, ServiceShape serviceShape) {
     Model transformedModel = model;
     transformedModel = transformJavadocTraitsToDocumentationTraits(transformedModel);
@@ -86,62 +93,7 @@ public final class DafnyPythonLocalServiceClientCodegenPlugin implements SmithyB
         JavaDocTrait javaDocTrait = shape.getTrait(JavaDocTrait.class).get();
         DocumentationTrait documentationTrait = new DocumentationTrait(javaDocTrait.getValue());
 
-        // This is painful, but there is nothing like `shape.getUnderlyingShapeType`...
-        // instead, check every possible shape for its builder...
-        AbstractShapeBuilder<?,?> builder;
-        if (shape.isBlobShape()) {
-          builder = shape.asBlobShape().get().toBuilder();
-        } else if (shape.isBooleanShape()) {
-          builder = shape.asBooleanShape().get().toBuilder();
-        } else if (shape.isDocumentShape()) {
-          builder = shape.asDocumentShape().get().toBuilder();
-        } else if (shape.isStringShape()) {
-          builder = shape.asStringShape().get().toBuilder();
-        } else if (shape.isTimestampShape()) {
-          builder = shape.asTimestampShape().get().toBuilder();
-        } else if (shape.isByteShape()) {
-          builder = shape.asByteShape().get().toBuilder();
-        } else if (shape.isIntegerShape()) {
-          builder = shape.asIntegerShape().get().toBuilder();
-        } else if (shape.isFloatShape()) {
-          builder = shape.asFloatShape().get().toBuilder();
-        } else if (shape.isBigIntegerShape()) {
-          builder = shape.asBigIntegerShape().get().toBuilder();
-        } else if (shape.isShortShape()) {
-          builder = shape.asShortShape().get().toBuilder();
-        } else if (shape.isLongShape()) {
-          builder = shape.asLongShape().get().toBuilder();
-        } else if (shape.isDoubleShape()) {
-          builder = shape.asDoubleShape().get().toBuilder();
-        } else if (shape.isBigDecimalShape()) {
-          builder = shape.asBigDecimalShape().get().toBuilder();
-        } else if (shape.isListShape()) {
-          builder = shape.asListShape().get().toBuilder();
-        } else if (shape.isSetShape()) {
-          builder = shape.asSetShape().get().toBuilder();
-        } else if (shape.isMapShape()) {
-          builder = shape.asMapShape().get().toBuilder();
-        } else if (shape.isStructureShape()) {
-          builder = shape.asStructureShape().get().toBuilder();
-        } else if (shape.isUnionShape()) {
-          builder = shape.asUnionShape().get().toBuilder();
-        } else if (shape.isServiceShape()) {
-          builder = shape.asServiceShape().get().toBuilder();
-        } else if (shape.isOperationShape()) {
-          builder = shape.asOperationShape().get().toBuilder();
-        } else if (shape.isResourceShape()) {
-          builder = shape.asResourceShape().get().toBuilder();
-        } else if (shape.isMemberShape()) {
-          builder = shape.asMemberShape().get().toBuilder();
-        } else if (shape.isEnumShape()) {
-          builder = shape.asEnumShape().get().toBuilder();
-        } else if (shape.isIntEnumShape()) {
-          builder = shape.asIntEnumShape().get().toBuilder();
-        } else {
-          // Unfortunately, there is no "default" shape...
-          // The above should cover all shapes; if not, new shapes need to be added above.
-          throw new IllegalArgumentException("Unable to process @javadoc trait on unsupported shape type: " + shape);
-        }
+        AbstractShapeBuilder<?,?> builder = ModelUtils.getBuilderForShape(shape);
         builder.addTrait(documentationTrait);
         return builder.build();
       } else {

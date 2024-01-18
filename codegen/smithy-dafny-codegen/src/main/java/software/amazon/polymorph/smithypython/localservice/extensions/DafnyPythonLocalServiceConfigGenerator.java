@@ -11,8 +11,7 @@ import software.amazon.smithy.python.codegen.*;
 import static java.lang.String.format;
 
 /**
- * Override Smithy-Python's ConfigGenerator
- * to support namespaces in other modules.
+ * Override Smithy-Python's ConfigGenerator to support namespaces in other modules.
  */
 public class DafnyPythonLocalServiceConfigGenerator extends ConfigGenerator {
 
@@ -46,54 +45,10 @@ public class DafnyPythonLocalServiceConfigGenerator extends ConfigGenerator {
         });
     }
 
+    // Write `Any`. Typehints here introduce a circular dependency in case of reference shapes.
     protected void writeInterceptorsType(PythonWriter writer) {
-        var symbolProvider = context.symbolProvider();
-        var operationShapes = TopDownIndex.of(context.model())
-                .getContainedOperations(settings.getService());
-
-        writer.addStdlibImport("typing", "Union");
-        writer.addDependency(SmithyPythonDependency.SMITHY_PYTHON);
-        writer.addImport("smithy_python.interfaces.interceptor", "Interceptor", "Interceptor");
-
-        writer.writeInline("_ServiceInterceptor = Union[");
-        if (operationShapes.isEmpty()) {
-            writer.writeInline("None]");
-        } else {
-            var iter = operationShapes.iterator();
-            while (iter.hasNext()) {
-                var operation = iter.next();
-
-                var operationInputShape = context.model().expectShape(operation.getInputShape()).asStructureShape().get();
-                Symbol interceptorInputSymbol;
-                if (operationInputShape.hasTrait(PositionalTrait.class)) {
-                    final MemberShape onlyMember = PositionalTrait.onlyMember(operationInputShape);
-                    final Shape targetShape = context.model().expectShape(onlyMember.getTarget());
-                    interceptorInputSymbol = symbolProvider.toSymbol(targetShape);
-                } else {
-                    interceptorInputSymbol = symbolProvider.toSymbol(operationInputShape);
-                }
-
-                // TODO-Python: Handle positionals inside MY symbolProvider
-                var operationOutputShape = context.model().expectShape(operation.getOutputShape()).asStructureShape().get();
-                Symbol interceptorOutputSymbol;
-                if (operationOutputShape.hasTrait(PositionalTrait.class)) {
-                    final MemberShape onlyMember = PositionalTrait.onlyMember(operationOutputShape);
-                    final Shape targetShape = context.model().expectShape(onlyMember.getTarget());
-                    interceptorOutputSymbol = symbolProvider.toSymbol(targetShape);
-                } else {
-                    interceptorOutputSymbol = symbolProvider.toSymbol(operationOutputShape);
-                }
-
-                writer.addStdlibImport("typing", "Any");
-                writer.writeInline("Interceptor[$T, $T, Any, Any]", interceptorInputSymbol, interceptorOutputSymbol);
-                if (iter.hasNext()) {
-                    writer.writeInline(", ");
-                } else {
-                    writer.writeInline("]");
-                }
-            }
-        }
-        writer.write("");
+        writer.addStdlibImport("typing", "Any");
+        writer.write("_ServiceInterceptor = Any");
     }
 
 }
