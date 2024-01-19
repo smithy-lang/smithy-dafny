@@ -259,27 +259,16 @@ public class CodegenEngine {
     }
 
     private void generatePython() {
+        if (moduleName.isEmpty()) {
+            throw new IllegalArgumentException("Python codegen requires a module name");
+        }
+
         ObjectNode.Builder pythonSettingsBuilder = ObjectNode.builder()
             .withMember("service", serviceShape.getId().toString())
-
-            // TODO-Python: `module` SHOULD be configured within the `smithy-build.json` file;
-            // possibly at `dafny-client-codegen.targetLanguages.python.moduleVersion`.
-            // This is Smithy-Python specific configuration.
-            // This dictates the name of the generated Python package.
-            // TODO: This depends on Dafny extending the `dafny-client-codegen.targetLanguages` key
-            // to support storing language-specific configuration.
-            // For now, assume `module` is a slight transformation of the model namespace.
             .withMember("module", moduleName.get())
 
-            // TODO-Python: `moduleVersion` SHOULD be configured within the `smithy-build.json` file;
-            // possibly at `dafny-client-codegen.targetLanguages.python.moduleVersion`.
-            // This is Smithy-Python specific configuration.
-            // This dictates the version of the smithygenerated code, but this is unused;
-            //   Polymorph wraps the smithygenerated code in a module with an independent
-            //   module version.
-            // TODO: This depends on Dafny extending the `dafny-client-codegen.targetLanguages` key
-            // to support storing language-specific configuration.
-            // For now, hardcode this to 0.0.1.
+            // Smithy-Python requires some string to be present here, but this is unused.
+            // Any references to this version are deleted as part of code generation.
             .withMember("moduleVersion", "0.0.1");
 
         final PluginContext pluginContext = PluginContext.builder()
