@@ -21,16 +21,4 @@ public interface CustomFileWriter {
    */
   default void customizeFileForServiceShape(
       ServiceShape serviceShape, GenerationContext codegenContext) {}
-
-  /**
-   * Given the provided shapeIds, write code specific to the file targeted by the CustomFileWriter.
-   * The shapeIds MUST NOT be attached to a ServiceShape that was passed in a call to
-   * `customizeFileForServiceShape`. This function will generate code for shapes that are NOT
-   * attached to a localService.
-   *
-   * @param shapeIds
-   * @param codegenContext
-   */
-  default void customizeFileForNonServiceShapes(
-      Set<ShapeId> shapeIds, GenerationContext codegenContext) {}
 }
