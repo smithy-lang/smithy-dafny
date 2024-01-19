@@ -117,7 +117,7 @@ public class CodegenCli {
             .build())
           .addOption(Option.builder("mn")
             .longOpt("module-name")
-            .desc("if generating python code, the name of the python module")
+            .desc("if generating for a language that uses modules (go, python), the name of the module")
             .hasArg()
             .build())
           .addOption(Option.builder()
@@ -205,34 +205,17 @@ public class CodegenCli {
               .stream(commandLine.getOptionValues('d'))
               .map(Path::of)
               .toArray(Path[]::new);
-//
-//            System.out.println("1");
-//            System.out.println(commandLine.hasOption("dependency-module-name"));
-//            System.out.println(commandLine.getOptionValue("dependency-module-name"));
-//            System.out.println(commandLine.getOptionValue("dependency-module-name").split("=")[0]);
-//            System.out.println(commandLine.getOptionValue("dependency-module-name").split("=")[1]);
 
-
-            final Map<String, String> dependencyNamespacesToModuleNamesMapDebug =
-                commandLine.hasOption("dependency-module-name")
-                        ? Arrays.stream(commandLine.getOptionValues("dependency-module-name"))
-                        .peek(System.out::println)
-                        .map(s -> s.split("="))
-                        .peek(System.out::println)
-                        .collect(Collectors.toMap(i -> i[0], i -> i[1]))
-
-                        : new HashMap<>();
-
-            System.out.println("2");
+            // Maps a Smithy namespace to its module name
+            // ex. `aws.cryptography.materialproviders` -> `aws_cryptographic_materialproviders`
+            // These values are provided via the command line right now,
+            //   but should eventually be sourced from doo files
             final Map<String, String> dependencyNamespacesToModuleNamesMap =
                     commandLine.hasOption("dependency-module-name")
                     ? Arrays.stream(commandLine.getOptionValues("dmn"))
                         .map(s -> s.split("="))
                         .collect(Collectors.toMap(i -> i[0], i -> i[1]))
                     : new HashMap<>();
-
-//            System.out.println("cli");
-//            System.out.println(dependencyNamespacesToModuleNamesMap);
 
             final String namespace = commandLine.getOptionValue('n');
             final Optional<String> moduleName = Optional.ofNullable(commandLine.getOptionValue("module-name"));
