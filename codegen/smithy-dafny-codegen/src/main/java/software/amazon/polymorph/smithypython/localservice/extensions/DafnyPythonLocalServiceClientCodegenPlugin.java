@@ -32,7 +32,10 @@ import java.util.Map;
  *     runner.createDedicatedInputsAndOutputs();
  * These methods transform the model in ways that the model does not align with
  *   the generated Dafny code.
- * This also transforms the model to bridge the gap between Polymorph-flavored Smithy and standard Smithy.
+ * This also transforms the model to bridge the gap between Polymorph-flavored Smithy and standard Smithy
+ *   by mapping {@link JavaDocTrait}s to {@link DocumentationTrait}s
+ *   and by adding {@link software.amazon.smithy.model.shapes.ResourceShape}s from {@link ReferenceTrait}s
+ *   to the service shape so they can be discovered by Smithy plugins.
  */
 @SmithyUnstableApi
 public final class DafnyPythonLocalServiceClientCodegenPlugin implements SmithyBuildPlugin {
@@ -83,7 +86,7 @@ public final class DafnyPythonLocalServiceClientCodegenPlugin implements SmithyB
   /**
    * For each object with a Polymorph {@link JavaDocTrait} containing documentation,
    * add a new Smithy {@link DocumentationTrait} with that documentation.
-   * Smithy-Python will generate pydocs for DocumentationTraits.
+   * Smithy plugins will generate docs for DocumentationTraits.
    * @param model
    * @return
    */
@@ -103,9 +106,11 @@ public final class DafnyPythonLocalServiceClientCodegenPlugin implements SmithyB
   }
 
   /**
-   * Smithy-Python requires that resource shapes are attached to a ServiceShape.
-   * Smithy-Python also does not understand Polymorph's {@link ReferenceTrait}.
-   * This parses Polymorph's ReferenceTrait to attach any referenced resources to the {@param serviceShape}.
+   * Smithy plugins require that resource shapes are attached to a ServiceShape.
+   * Smithy plugins also do not understand Polymorph's {@link ReferenceTrait} and will not
+   * discover the linked shape.
+   * This parses Polymorph's ReferenceTrait to attach any referenced resources to the {@param serviceShape}
+   * so the Smithy plugin's shape discovery can find the shape.
    * @param model
    * @param serviceShape
    * @return

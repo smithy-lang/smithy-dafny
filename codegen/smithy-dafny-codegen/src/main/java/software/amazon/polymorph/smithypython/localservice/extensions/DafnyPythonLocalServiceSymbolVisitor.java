@@ -51,6 +51,12 @@ public class DafnyPythonLocalServiceSymbolVisitor extends SymbolVisitor {
     return format("./%s/%s.py", directoryFilePath, filename);
   }
 
+  /**
+   * Override Smithy-Python's serviceShape to only generate shapes for this namespace's localService
+   *  and to properly typehint boto3 clients.
+   * @param serviceShape
+   * @return
+   */
   @Override
   public Symbol serviceShape(ServiceShape serviceShape) {
     String generationPath =
@@ -102,6 +108,11 @@ public class DafnyPythonLocalServiceSymbolVisitor extends SymbolVisitor {
     }
   }
 
+  /**
+   * Override Smithy-Python's resourceShape to handle resource shapes.
+   * @param resourceShape
+   * @return
+   */
   @Override
   public Symbol resourceShape(ResourceShape resourceShape) {
     var name = getDefaultShapeName(resourceShape);
@@ -134,6 +145,11 @@ public class DafnyPythonLocalServiceSymbolVisitor extends SymbolVisitor {
         .build();
   }
 
+  /**
+   * Override Smithy-Python to handle other namespaces and Polymorph custom traits.
+   * @param shape
+   * @return
+   */
   @Override
   public Symbol structureShape(StructureShape shape) {
     String name = getDefaultShapeName(shape);
@@ -186,6 +202,11 @@ public class DafnyPythonLocalServiceSymbolVisitor extends SymbolVisitor {
         .build();
   }
 
+  /**
+   * Override Smithy-Python to handle other namespaces
+   * @param target
+   * @return
+   */
   @Override
   protected boolean targetRequiresDictHelpers(Shape target) {
     // Do not generate dict helpers for a shape in another namespace
@@ -201,6 +222,11 @@ public class DafnyPythonLocalServiceSymbolVisitor extends SymbolVisitor {
     }
   }
 
+  /**
+   * Override Smithy-Python to handle other namespaces
+   * @param target
+   * @return
+   */
   @Override
   public Symbol memberShape(MemberShape shape) {
     var container = model.expectShape(shape.getContainer());
@@ -225,6 +251,11 @@ public class DafnyPythonLocalServiceSymbolVisitor extends SymbolVisitor {
     return toSymbol(targetShape);
   }
 
+  /**
+   * Override Smithy-Python to handle other namespaces
+   * @param target
+   * @return
+   */
   @Override
   public Symbol enumShape(EnumShape shape) {
     var builder = createSymbolBuilder(shape, "str");
@@ -250,6 +281,11 @@ public class DafnyPythonLocalServiceSymbolVisitor extends SymbolVisitor {
     return builder.build();
   }
 
+  /**
+   * Override Smithy-Python to handle other namespaces
+   * @param target
+   * @return
+   */
   @Override
   public Symbol intEnumShape(IntEnumShape shape) {
     var builder = createSymbolBuilder(shape, "int");
@@ -271,6 +307,11 @@ public class DafnyPythonLocalServiceSymbolVisitor extends SymbolVisitor {
     return builder.build();
   }
 
+  /**
+   * Override Smithy-Python to handle other namespaces
+   * @param target
+   * @return
+   */
   @Override
   public Symbol unionShape(UnionShape shape) {
     String name = getDefaultShapeName(shape);
@@ -300,6 +341,11 @@ public class DafnyPythonLocalServiceSymbolVisitor extends SymbolVisitor {
         .build();
   }
 
+  /**
+   * Override Smithy-Python to handle other namespaces
+   * @param shape
+   * @return
+   */
   @Override
   protected Symbol createAsDictFunctionSymbol(Shape shape) {
     String filename = "models";
@@ -314,6 +360,11 @@ public class DafnyPythonLocalServiceSymbolVisitor extends SymbolVisitor {
         .build();
   }
 
+  /**
+   * Override Smithy-Python to handle other namespaces
+   * @param shape
+   * @return
+   */
   @Override
   protected Symbol createFromDictFunctionSymbol(Shape shape) {
     String filename = "models";

@@ -38,7 +38,7 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
   @Override
   public void run() {
     if (shape.hasTrait(PositionalTrait.class)) {
-      // Do not need to render shapes with positional trait
+      // Do not need to render shapes with positional trait, their linked shapes are rendered
       return;
     }
     if (!shape.hasTrait(ErrorTrait.class)) {
@@ -48,6 +48,9 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
     }
   }
 
+  /**
+   * Override Smithy-Python renderError to use the correct namespace.
+   */
   @Override
   protected void renderError() {
     writer.addStdlibImport("typing", "Dict");
@@ -112,12 +115,16 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
           model.expectShape(listMemberShape.expectTrait(ReferenceTrait.class).getReferentId());
       Symbol targetSymbol = symbolProvider.toSymbol(referentShape);
 
+      // Use forward reference for reference traits to avoid circular import
+      //   and do not import the symbol to avoid circular import
       String formatString = "$L: list['$L']";
       writer.write(
           formatString, memberName, targetSymbol.getNamespace() + "." + targetSymbol.getName());
       return;
     }
 
+    // We currently don't have any map shapes that have values with reference traits;
+    // once we do, this needs to be filled in
     if (target.isMapShape()
         && model
             .expectShape(target.asMapShape().get().getValue().getTarget())
@@ -193,6 +200,8 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
       return;
     }
 
+    // We currently don't have any map shapes that have values with reference traits;
+    // once we do, this needs to be filled in
     if (target.isMapShape()
         && model
             .expectShape(target.asMapShape().get().getValue().getTarget())
