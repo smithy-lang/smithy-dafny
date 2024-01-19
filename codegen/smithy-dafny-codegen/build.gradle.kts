@@ -38,7 +38,6 @@ dependencies {
 
     // Smithy-Python
     implementation(project(":smithy-python-codegen"))
-//    implementation("software.amazon.smithy.python:smithy-python-codegen:0.1.0")
 
     // Used for parsing-based tests
     testImplementation("org.antlr:antlr4:4.9.2")

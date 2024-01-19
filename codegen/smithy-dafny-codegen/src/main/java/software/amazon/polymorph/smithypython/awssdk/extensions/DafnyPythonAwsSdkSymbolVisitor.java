@@ -43,7 +43,6 @@ public class DafnyPythonAwsSdkSymbolVisitor extends DafnyPythonLocalServiceSymbo
           SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(namespace);
     }
 
-    // Ignore the filename! Wrapped codegen deletes this file.
     return format(
         "%s/%s.py",
         directoryFilePath, AwsSdkCodegenConstants.AWS_SDK_CODEGEN_SYMBOLWRITER_DUMP_FILE_FILENAME);

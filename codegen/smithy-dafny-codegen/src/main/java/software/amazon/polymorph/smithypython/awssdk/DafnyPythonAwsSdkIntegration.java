@@ -46,7 +46,8 @@ public final class DafnyPythonAwsSdkIntegration implements PythonIntegration {
 
   /**
    * Creates the Dafny ApplicationProtocol object. Smithy-Python requests this object as part of the
-   * ProtocolGenerator implementation.
+   * ProtocolGenerator implementation. This uses the {@link
+   * software.amazon.polymorph.traits.DafnyAwsSdkProtocolTrait}.
    *
    * @return Returns the created application protocol.
    */
@@ -57,7 +58,7 @@ public final class DafnyPythonAwsSdkIntegration implements PythonIntegration {
         new DafnyPythonAwsSdkProtocolGenerator() {
           // Setting a Polymorph-specific protocol allows any services that
           //  have this protocol trait to be generated using this PythonIntegration.
-          // See the DafnyAwsSdkProtocolTrait class in this directory.
+          // See DafnyAwsSdkProtocolTrait class.
           @Override
           public ShapeId getProtocol() {
             return ShapeId.fromParts("aws.polymorph", "awsSdk");

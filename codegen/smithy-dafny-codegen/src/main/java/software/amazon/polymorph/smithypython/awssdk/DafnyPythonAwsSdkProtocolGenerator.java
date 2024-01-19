@@ -16,8 +16,8 @@ public abstract class DafnyPythonAwsSdkProtocolGenerator implements ProtocolGene
       new ApplicationProtocol(
           // Define the `dafny-python-aws-sdk-protocol` ApplicationProtocol.
           // ApplicationProtocol is distinct from the Protocols used in ProtocolGenerators.
-          // We define an ApplicationProtocol that will be used by all Dafny-Python AWS SDK
-          // protocols.
+          // We define an ApplicationProtocol that will be used by all AWS SDK shims for
+          // Smithy-plugin-integrated code generators.
           // The ApplicationProtocol is used within our code to determine which code should be
           // generated.
           // The `null`s reflect that this ApplicationProtocol does not have request
