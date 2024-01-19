@@ -16,6 +16,7 @@ import software.amazon.polymorph.smithypython.common.nameresolver.Utils;
 import software.amazon.polymorph.smithypython.common.shapevisitor.ShapeVisitorResolver;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.traits.PositionalTrait;
+import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolReference;
 import software.amazon.smithy.codegen.core.WriterDelegator;
@@ -35,8 +36,7 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator implements Protoc
 
   public static ApplicationProtocol DAFNY_PYTHON_LOCAL_SERVICE_APPLICATION_PROTOCOL =
       new ApplicationProtocol(
-          // Define the `dafny` ApplicationProtocol.
-          // This protocol's request and response shapes are defined in DafnyProtocolFileWriter.
+          // Dafny localService ApplicationProtocol for Smithy clients.
           DafnyLocalServiceCodegenConstants.DAFNY_PYTHON_LOCAL_SERVICE_APPLICATION_PROTOCOL_NAME,
           SymbolReference.builder()
               .symbol(createDafnyApplicationProtocolSymbol(DafnyLocalServiceCodegenConstants.DAFNY_PROTOCOL_REQUEST))
@@ -105,7 +105,6 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator implements Protoc
       OperationShape operationShape =
           context.model().expectShape(operationShapeId).asOperationShape().get();
       Symbol serFunction = getSerializationFunction(context, operationShape);
-      Shape input = context.model().expectShape(operationShape.getInputShape());
 
       // Write out the serialization operation
       delegator.useFileWriter(
@@ -131,8 +130,7 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator implements Protoc
   }
 
   /**
-   * Generates the symbol for a serializer function for shapes of a service that is not
-   * protocol-specific.
+   * Generates the symbol for a serializer function for shapes of a service.
    *
    * @param context The code generation context.
    * @param shapeId The shape the serializer function is being generated for.
@@ -171,21 +169,19 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator implements Protoc
 
     writer.addDependency(SmithyPythonDependency.SMITHY_PYTHON);
     // Import the Dafny type being converted to
-    if (context.model().expectShape(operation.getInputShape()).isStructureShape()
-        && context
-            .model()
-            .expectShape(operation.getInputShape())
+    Shape targetShape = context.model().expectShape(operation.getInputShape());
+    if (targetShape.isStructureShape()
+        && targetShape
             .asStructureShape()
             .get()
             .hasTrait(PositionalTrait.class)) {
-      // TODO: Typing positionals, and somehow typing the base classes
-      // Blob, boolean...
+      ShapeId positionalShapeId = ModelUtils.getPositionalStructureMember(targetShape.asStructureShape().get()).orElseThrow();
+      DafnyNameResolver.importDafnyTypeForShape(writer, positionalShapeId, context);
     } else {
       DafnyNameResolver.importDafnyTypeForShape(writer, operation.getInputShape(), context);
     }
 
     // Determine conversion code from Smithy to Dafny
-    Shape targetShape = context.model().expectShape(operation.getInputShape());
     String input =
         targetShape.accept(
             ShapeVisitorResolver.getToDafnyShapeVisitorForShape(
