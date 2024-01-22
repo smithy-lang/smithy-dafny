@@ -31,7 +31,7 @@ Resources:
       RoleName: !Sub "GitHub-CI-${ProjectName}-Role-${AWS::Region}"
       Description: "Allow the Danfy repositories read access to CI Bot creds through GitHub OIDC"
       ManagedPolicyArns:
-        - !GetAtt GetCIBotCredsPolicy.Arn
+        - !GetAtt GetCIBotCredsPolicy
       AssumeRolePolicyDocument: !Sub |
         {
           "Version": "2012-10-17",   
