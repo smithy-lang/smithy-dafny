@@ -31,7 +31,7 @@ Resources:
       RoleName: !Sub "GitHub-CI-${ProjectName}-Role-${AWS::Region}"
       Description: "Allow the Danfy repositories read access to CI Bot creds through GitHub OIDC"
       ManagedPolicyArns:
-        - !GetAtt GetCIBotCredsPolicy
+        - !Ref GetCIBotCredsPolicy
       AssumeRolePolicyDocument: !Sub |
         {
           "Version": "2012-10-17",   
@@ -46,7 +46,7 @@ Resources:
                   "token.actions.githubusercontent.com:sub": [
                     "repo:aws/aws-cryptographic-material-providers-library:*",
                     "repo:aws/aws-database-encryption-sdk-dynamodb:*",
-                    "repo:aws/aws-encryption-sdk-dafny:*",
+                    "repo:aws/aws-encryption-sdk-dafny:*"
                   ]
                 }
               }
