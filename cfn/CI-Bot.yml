@@ -1,0 +1,62 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "IAM Managed Policies/Role for CI Bot credentials in GitHub"
+
+Parameters:
+  ProjectName:
+    Type: String
+    Description: A prefix that will be applied to any names
+    Default: CI-Bot-Credential-Access
+
+Resources:
+  GetCIBotCredsPolicy:
+    Type: "AWS::IAM::ManagedPolicy"
+    Properties:
+      Description: "Allow Read access to GitHub CI Bot credentials Secret"
+      ManagedPolicyName: !Sub "CryptoTools-SecretsManager-${ProjectName}"
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - secretsmanager:ListSecrets
+            Resource: "*"
+          - Effect: Allow
+            Action:
+              - secretsmanager:GetSecretValue
+            Resource: "arn:aws:secretsmanager:us-west-2:587316601012:secret:Github/aws-crypto-tools-ci-bot-AGUB3U"
+
+  GitHubCIRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      RoleName: !Sub "GitHub-CI-${ProjectName}-Role-${AWS::Region}"
+      Description: "Access DDB, KMS, Resources for CI from GitHub, and Prod CodeBuild"
+      ManagedPolicyArns:
+        - !GetAtt GetCIBotCredsPolicy.Arn
+      AssumeRolePolicyDocument: !Sub |
+        {
+          "Version": "2012-10-17",   
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": { "Federated": "arn:aws:iam::${AWS::AccountId}:oidc-provider/token.actions.githubusercontent.com" },
+              "Action": "sts:AssumeRoleWithWebIdentity",
+              "Condition": {
+                "StringEquals": { "token.actions.githubusercontent.com:aud": "sts.amazonaws.com" },
+                "StringLike": {
+                  "token.actions.githubusercontent.com:sub": [
+                    "repo:aws/aws-cryptographic-material-providers-library:*",
+                    "repo:aws/aws-database-encryption-sdk-dynamodb:*",
+                    "repo:aws/aws-encryption-sdk-dafny:*",
+                  ]
+                }
+              }
+            },
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": "*"
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        }
