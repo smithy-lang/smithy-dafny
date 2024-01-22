@@ -29,7 +29,7 @@ Resources:
     Type: "AWS::IAM::Role"
     Properties:
       RoleName: !Sub "GitHub-CI-${ProjectName}-Role-${AWS::Region}"
-      Description: "Access DDB, KMS, Resources for CI from GitHub, and Prod CodeBuild"
+      Description: "Allow the Danfy repositories read access to CI Bot creds through GitHub OIDC"
       ManagedPolicyArns:
         - !GetAtt GetCIBotCredsPolicy.Arn
       AssumeRolePolicyDocument: !Sub |
