@@ -7,7 +7,9 @@ import java.util.Set;
 import software.amazon.polymorph.smithypython.awssdk.nameresolver.AwsSdkNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.smithypython.localservice.DafnyLocalServiceCodegenConstants;
+import software.amazon.polymorph.smithypython.localservice.customize.ReferencesFileWriter;
 import software.amazon.polymorph.traits.LocalServiceTrait;
+import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.codegen.core.*;
 import software.amazon.smithy.model.Model;
@@ -132,19 +134,33 @@ public class DafnyPythonLocalServiceSymbolVisitor extends SymbolVisitor {
     // As a workaround, dump dependency reference symbols to a file that will be deleted after
     // codegen.
     // Typehints will reference the `namespace` and `resourceShape` name and not this file.
-    return createSymbolBuilder(
-            resourceShape,
-            name,
-            getSymbolNamespacePathForNamespaceAndFilename(
-                resourceShape.getId().getNamespace(), filename))
-        .definitionFile(
-            generationPath
-                + "/"
-                + DafnyLocalServiceCodegenConstants
-                    .LOCAL_SERVICE_CODEGEN_SYMBOLWRITER_DUMP_FILE_FILENAME
-                + ".py")
-        .putProperty("stdlib", true)
-        .build();
+      return createSymbolBuilder(
+          resourceShape,
+          name,
+          getSymbolNamespacePathForNamespaceAndFilename(
+              resourceShape.getId().getNamespace(), filename))
+      .definitionFile(
+          generationPath
+              + "/"
+              + DafnyLocalServiceCodegenConstants
+                  .LOCAL_SERVICE_CODEGEN_SYMBOLWRITER_DUMP_FILE_FILENAME
+              + ".py")
+      .putProperty("stdlib", true)
+      .build();
+
+//    return createSymbolBuilder(
+//            resourceShape,
+//            name,
+//            getSymbolNamespacePathForNamespaceAndFilename(
+//                resourceShape.getId().getNamespace(), filename))
+//        .definitionFile(
+//            generationPath
+//                + "/"
+//                + DafnyLocalServiceCodegenConstants
+//                    .LOCAL_SERVICE_CODEGEN_SYMBOLWRITER_DUMP_FILE_FILENAME
+//                + ".py")
+//        .putProperty("stdlib", true)
+//        .build();
   }
 
   /**
@@ -178,6 +194,43 @@ public class DafnyPythonLocalServiceSymbolVisitor extends SymbolVisitor {
               getSymbolDefinitionFilePathForNamespaceAndFilename(
                   shape.getId().getNamespace(), filename))
           .build();
+    }
+
+    if (shape.hasTrait(PositionalTrait.class)) {
+      String filename = "models";
+      String generationPath =
+              SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
+                      settings.getService().getNamespace());
+      MemberShape memberShape = PositionalTrait.onlyMember(shape);
+      ShapeId targetShapeId = memberShape.getTarget();
+      Shape targetShape = model.expectShape(targetShapeId);
+      String targetShapeName = getDefaultShapeName(targetShape);
+      if (targetShape.hasTrait(ReferenceTrait.class)) {
+        return structureShape(targetShape.asStructureShape().get());
+      }
+      return createSymbolBuilder(
+              targetShape,
+              targetShapeName,
+              getSymbolNamespacePathForNamespaceAndFilename(
+                      targetShapeId.getNamespace(), filename))
+              .definitionFile(
+                      generationPath
+                              + "/"
+                              + DafnyLocalServiceCodegenConstants
+                              .LOCAL_SERVICE_CODEGEN_SYMBOLWRITER_DUMP_FILE_FILENAME
+                              + ".py")
+              .putProperty("stdlib", true)
+              .build();
+//      return memberShape(memberShape);
+//      Shape referentShape = model.expectShape(referentShapeId);
+//      if (referentShape.isResourceShape()) {
+//        return resourceShape(referentShape.asResourceShape().get());
+//      }
+//      if (referentShape.isServiceShape()) {
+//        return serviceShape(referentShape.asServiceShape().get());
+//      } else {
+//        throw new IllegalArgumentException("Referent shape is not of a supported type: " + shape);
+//      }
     }
 
     if (shape.hasTrait(ReferenceTrait.class)) {

@@ -9,9 +9,12 @@ import software.amazon.polymorph.smithypython.common.customize.CustomFileWriter;
 import software.amazon.polymorph.smithypython.common.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.smithypython.common.shapevisitor.ShapeVisitorResolver;
+import software.amazon.polymorph.smithypython.localservice.extensions.DafnyPythonLocalServiceStructureGenerator;
 import software.amazon.polymorph.smithypython.localservice.shapevisitor.LocalServiceToDafnyShapeVisitor;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.smithy.codegen.core.Symbol;
+import software.amazon.smithy.codegen.core.TopologicalIndex;
+import software.amazon.smithy.model.knowledge.NullableIndex;
 import software.amazon.smithy.model.shapes.*;
 import software.amazon.smithy.model.traits.DocumentationTrait;
 import software.amazon.smithy.model.traits.StringTrait;
@@ -41,6 +44,7 @@ public class ConfigFileWriter implements CustomFileWriter {
             moduleName + "/config.py",
             "",
             writer -> {
+
               DafnyNameResolver.importDafnyTypeForShape(
                   writer, configShape.getId(), codegenContext);
 
@@ -108,14 +112,18 @@ public class ConfigFileWriter implements CustomFileWriter {
   private void generateConfigClassFields(
       StructureShape configShape, GenerationContext codegenContext, PythonWriter writer) {
     Map<String, MemberShape> memberShapeSet = configShape.getAllMembers();
+    NullableIndex index = NullableIndex.of(codegenContext.model());
     for (Entry<String, MemberShape> memberShapeEntry : memberShapeSet.entrySet()) {
       String memberName = memberShapeEntry.getKey();
-      // TODO-Python: Instead of `Any`, map the targetShape.getType() Smithy type to the Python type
-      // Prototype code commented out...
       MemberShape memberShape = memberShapeEntry.getValue();
       final Shape targetShape = codegenContext.model().expectShape(memberShape.getTarget());
       Symbol targetShapeSymbol = codegenContext.symbolProvider().toSymbol(targetShape);
-      writer.write("$L: $T", CaseUtils.toSnakeCase(memberShape.getMemberName()), targetShapeSymbol);
+      if (index.isMemberNullable(memberShape)) {
+        writer.addStdlibImport("typing", "Optional");
+        writer.write("$L: Optional[$T]", CaseUtils.toSnakeCase(memberShape.getMemberName()), targetShapeSymbol);
+      } else {
+        writer.write("$L: $T", CaseUtils.toSnakeCase(memberShape.getMemberName()), targetShapeSymbol);
+      }
     }
   }
 
@@ -130,11 +138,16 @@ public class ConfigFileWriter implements CustomFileWriter {
   private void generateConfigConstructorParameters(
       StructureShape configShape, GenerationContext codegenContext, PythonWriter writer) {
     Map<String, MemberShape> memberShapeSet = configShape.getAllMembers();
+    NullableIndex index = NullableIndex.of(codegenContext.model());
     for (MemberShape memberShape : memberShapeSet.values()) {
       final Shape targetShape = codegenContext.model().expectShape(memberShape.getTarget());
       Symbol targetShapeSymbol = codegenContext.symbolProvider().toSymbol(targetShape);
-      // TODO-Python: Instead of `Any`, map the targetShape.getType Smithy type to the Python type
-      writer.write("$L: $T,", CaseUtils.toSnakeCase(memberShape.getMemberName()), targetShapeSymbol);
+      if (index.isMemberNullable(memberShape)) {
+        writer.addStdlibImport("typing", "Optional");
+        writer.write("$L: Optional[$T] = None,", CaseUtils.toSnakeCase(memberShape.getMemberName()), targetShapeSymbol);
+      } else {
+        writer.write("$L: $T,", CaseUtils.toSnakeCase(memberShape.getMemberName()), targetShapeSymbol);
+      }
     }
   }
 

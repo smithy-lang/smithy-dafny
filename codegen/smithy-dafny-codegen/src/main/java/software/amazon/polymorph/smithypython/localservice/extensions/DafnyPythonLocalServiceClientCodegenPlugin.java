@@ -134,9 +134,9 @@ public final class DafnyPythonLocalServiceClientCodegenPlugin implements SmithyB
     ServiceShape.Builder transformedServiceShapeBuilder = serviceShape.toBuilder();
     ModelTransformer.create().mapShapes(model, shape -> {
       if (shape.hasTrait(ReferenceTrait.class)) {
-
         ShapeId referenceShapeId = shape.expectTrait(ReferenceTrait.class).getReferentId();
         if (model.expectShape(referenceShapeId).isResourceShape()) {
+          System.out.println("adding " + referenceShapeId);
           transformedServiceShapeBuilder.addResource(referenceShapeId);
         }
       }
