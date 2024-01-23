@@ -171,7 +171,6 @@ protected void generateResourceImplementation(
 
         OperationShape operationShape =
                 codegenContext.model().expectShape(operationShapeId, OperationShape.class);
-        Symbol operationSymbol = codegenContext.symbolProvider().toSymbol(operationShape);
 
     Shape targetShapeInput = codegenContext.model().expectShape(operationShape.getInputShape());
     SmithyNameResolver.importSmithyGeneratedTypeForShape(writer, targetShapeInput, codegenContext);
@@ -185,7 +184,7 @@ protected void generateResourceImplementation(
 
         writer.openBlock("def $L(self, input: '$L') -> '$L':",
               "",
-              operationSymbol.getName(),
+              operationShapeId.getName(),
               inputSymbol,
               outputSymbol,
               () -> {
@@ -242,7 +241,7 @@ protected void generateResourceImplementation(
         writer.openBlock(
           "def $L(self, input: '$L') -> '$L':",
           "",
-          operationSymbol.getName(),
+        operationShapeId.getName(),
           inputSymbol,
           outputSymbol,
               () -> {
