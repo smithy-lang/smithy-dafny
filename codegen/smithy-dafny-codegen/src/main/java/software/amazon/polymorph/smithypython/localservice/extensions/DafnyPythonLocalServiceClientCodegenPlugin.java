@@ -144,7 +144,7 @@ public final class DafnyPythonLocalServiceClientCodegenPlugin implements SmithyB
     });
 
     return ModelTransformer.create().mapShapes(model, shape -> {
-      if (shape.equals(serviceShape)) {
+      if (shape.getId().equals(serviceShape.getId())) {
         return transformedServiceShapeBuilder.build();
       } else {
         return shape;
