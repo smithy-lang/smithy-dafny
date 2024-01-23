@@ -4,7 +4,7 @@
 include "../src/Index.dfy"
 
 module
-  {:extern "simple.extendable.resources.internaldafny.nativeresourcefactory"}
+  {:extern "simple_extendable_resources_internaldafny_nativeresourcefactory"}
   NativeResourceFactory
 {
   import Types = SimpleExtendableResourcesTypes

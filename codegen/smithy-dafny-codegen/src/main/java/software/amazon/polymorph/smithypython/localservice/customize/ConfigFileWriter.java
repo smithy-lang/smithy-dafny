@@ -9,7 +9,6 @@ import software.amazon.polymorph.smithypython.common.customize.CustomFileWriter;
 import software.amazon.polymorph.smithypython.common.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.smithypython.common.shapevisitor.ShapeVisitorResolver;
-import software.amazon.polymorph.smithypython.localservice.shapevisitor.LocalServiceConfigToDafnyConfigShapeVisitor;
 import software.amazon.polymorph.smithypython.localservice.shapevisitor.LocalServiceToDafnyShapeVisitor;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.smithy.codegen.core.Symbol;

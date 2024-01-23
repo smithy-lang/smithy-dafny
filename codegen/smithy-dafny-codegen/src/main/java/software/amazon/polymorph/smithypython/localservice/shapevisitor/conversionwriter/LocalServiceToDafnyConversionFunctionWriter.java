@@ -11,7 +11,7 @@ import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameReso
 import software.amazon.polymorph.smithypython.common.nameresolver.Utils;
 import software.amazon.polymorph.smithypython.common.shapevisitor.conversionwriter.BaseConversionWriter;
 import software.amazon.polymorph.smithypython.common.shapevisitor.ShapeVisitorResolver;
-import software.amazon.polymorph.smithypython.localservice.shapevisitor.LocalServiceConfigToDafnyConfigShapeVisitor;
+import software.amazon.polymorph.smithypython.localservice.shapevisitor.LocalServiceToDafnyShapeVisitor;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
@@ -155,11 +155,11 @@ public class LocalServiceToDafnyConversionFunctionWriter extends BaseConversionW
 
     }
 
-    // If this is a localService config shape, defer conversion to the config ShapeVisitor
+    // If this is a localService config shape, defer conversion to the config ShapeVisitor TODO remove this
     else if (SmithyNameResolver.getLocalServiceConfigShapes(context).contains(targetShape.getId())) {
       conversionWriter.write("$L,",
           targetShape.accept(
-              new LocalServiceConfigToDafnyConfigShapeVisitor(
+              new LocalServiceToDafnyShapeVisitor(
                   context,
                   dataSourceInsideConversionFunction + "." + CaseUtils.toSnakeCase(memberName),
                   // Pass the `conversionWriter` as our source writer;

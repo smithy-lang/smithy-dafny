@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 include "../Model/SimpleDependenciesTypesWrapped.dfy"
 
-module {:extern "simple.dependencies.internaldafny.wrapped"} WrappedSimpleDependenciesService refines WrappedAbstractSimpleDependenciesService {
+module {:extern "simple_dependencies_internaldafny_wrapped"} WrappedSimpleDependenciesService refines WrappedAbstractSimpleDependenciesService {
     import WrappedService = SimpleDependencies
     function method WrappedDefaultSimpleDependenciesConfig(): SimpleDependenciesConfig {
         SimpleDependenciesConfig(
