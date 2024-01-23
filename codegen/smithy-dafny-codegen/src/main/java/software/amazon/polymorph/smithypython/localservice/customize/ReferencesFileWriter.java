@@ -13,6 +13,7 @@ import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ResourceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
+import software.amazon.smithy.model.traits.DocumentationTrait;
 import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonWriter;
 
@@ -56,6 +57,7 @@ public class ReferencesFileWriter implements CustomFileWriter {
         """
 
             class I$L(metaclass=abc.ABCMeta):
+                ${C|}
                 @classmethod
                 def __subclasshook__(cls, subclass):
                     return (
@@ -65,6 +67,8 @@ public class ReferencesFileWriter implements CustomFileWriter {
                 ${C|}
             """,
         resourceShape.getId().getName(),
+        writer.consumer(
+                w -> writeDocsForResourceOrInterfaceClass(writer, resourceShape, context)),
         writer.consumer(
             w -> generateInterfaceSubclasshookExpressionForResource(context, resourceShape, w)),
         writer.consumer(
@@ -93,6 +97,7 @@ public class ReferencesFileWriter implements CustomFileWriter {
     writer.write(
         """
         class $1L(I$1L):
+            ${5C|}
             _impl: $2L
 
             def __init__(self, _impl):
@@ -108,7 +113,10 @@ public class ReferencesFileWriter implements CustomFileWriter {
             + dafnyInterfaceTypeName,
         writer.consumer(
             w -> generateSmithyOperationFunctionDefinitionForResource(context, resourceShape, w)),
-        writer.consumer(w -> generateDictConvertersForResource(resourceShape, w)));
+        writer.consumer(w -> generateDictConvertersForResource(resourceShape, w)),
+        writer.consumer(
+                w -> writeDocsForResourceOrInterfaceClass(writer, resourceShape, context))
+    );
   }
 
   /**
@@ -153,13 +161,15 @@ public class ReferencesFileWriter implements CustomFileWriter {
     Set<ShapeId> operationShapeIds = resourceShape.getOperations();
 
     for (ShapeId operationShapeId : operationShapeIds) {
-      writer.write(
-          """
-          @abc.abstractmethod
-          def $L(self, native_input):
-              raise NotImplementedError
-          """,
-          operationShapeId.getName());
+      writer.write("@abc.abstractmethod");
+
+      writer.openBlock("def $L(self, native_input):",
+              "",
+              operationShapeId.getName(),
+              () -> {
+                writeDocsForResourceOrInterfaceOperation(writer, codegenContext.model().expectShape(operationShapeId).asOperationShape().get(), codegenContext);
+                writer.write("raise NotImplementedError");
+              });
     }
   }
 
@@ -197,17 +207,87 @@ public class ReferencesFileWriter implements CustomFileWriter {
               ShapeVisitorResolver.getToNativeShapeVisitorForShape(
                   targetShape, codegenContext, "dafny_output", writer));
 
-      writer.write(
-          """
-          def $L(self, native_input):
-              dafny_output = self._impl.$L($L)
-              return $L
-          """,
+      writer.openBlock(
+          "def $L(self, native_input: $L) -> $L:",
+          "",
           operationShapeId.getName(),
-          operationShapeId.getName(),
-          input,
-          output);
+          codegenContext.symbolProvider().toSymbol(targetShapeInput),
+          codegenContext.symbolProvider().toSymbol(targetShape),
+              () -> {
+            writeDocsForResourceOrInterfaceOperation(writer, operationShape, codegenContext);
+
+            writer.write("dafny_output = self._impl.$L($L)", operationShapeId.getName(), input);
+            writer.write("return $L", output);
+          });
+
+//
+//      writer.write(
+//          """
+//          def $L(self, native_input):
+//              dafny_output = self._impl.$L($L)
+//              return $L
+//          """,
+//          operationShapeId.getName(),
+//          operationShapeId.getName(),
+//          input,
+//          output);
     }
+  }
+
+  private void writeDocsForResourceOrInterfaceClass(PythonWriter writer, ResourceShape resourceShape,
+                                                        GenerationContext context) {
+
+    if (resourceShape.getTrait(DocumentationTrait.class).isPresent()) {
+      writer.writeDocs(
+              () -> {
+                resourceShape
+                        .getTrait(DocumentationTrait.class)
+                        .ifPresent(
+                                trait -> {
+                                  writer.write(writer.formatDocs(trait.getValue()));
+                                });
+              });
+    }
+  }
+
+  private void writeDocsForResourceOrInterfaceOperation(PythonWriter writer, OperationShape operationShape,
+                                                        GenerationContext context) {
+
+    Shape inputShape = context.model().expectShape(operationShape.getInputShape());
+    Shape outputShape = context.model().expectShape(operationShape.getOutputShape());
+
+    if (operationShape.getTrait(DocumentationTrait.class).isPresent()
+              || inputShape.getTrait(DocumentationTrait.class).isPresent()
+              || outputShape.getTrait(DocumentationTrait.class).isPresent()) {
+        writer.writeDocs(
+                () -> {
+                  operationShape
+                          .getTrait(DocumentationTrait.class)
+                          .ifPresent(
+                                  trait -> {
+                                    writer.write(writer.formatDocs(trait.getValue()));
+                                  });
+                  inputShape
+                          .getTrait(DocumentationTrait.class)
+                          .ifPresent(
+                                  trait -> {
+                                    String memberDocs =
+                                            writer.formatDocs(
+                                                    String.format(":param native_input: %s", trait.getValue()));
+                                    writer.write(memberDocs);
+                                  });
+                  outputShape
+                          .getTrait(DocumentationTrait.class)
+                          .ifPresent(
+                                  trait -> {
+                                    String memberDocs =
+                                            writer.formatDocs(
+                                                    String.format(":returns: %s", trait.getValue()));
+                                    writer.write(memberDocs);
+                                  });
+                });
+      }
+
   }
 
   /**

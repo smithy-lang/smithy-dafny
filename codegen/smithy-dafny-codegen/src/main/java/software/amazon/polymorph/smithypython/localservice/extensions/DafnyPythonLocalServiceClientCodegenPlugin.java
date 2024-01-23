@@ -99,6 +99,20 @@ public final class DafnyPythonLocalServiceClientCodegenPlugin implements SmithyB
         AbstractShapeBuilder<?,?> builder = ModelUtils.getBuilderForShape(shape);
         builder.addTrait(documentationTrait);
         return builder.build();
+      // We sometimes write out long strings of slashes to mark a "break" in our smithy files
+      // However, Smithy plugins interpret strings starting with `//` as a comment
+      //   that becomes a DocumentationTrait!
+      // This leads to poor UX on some pydocs. Remove any DocumentationTraits consisting solely of `/`s.
+      } else if (shape.hasTrait(DocumentationTrait.class)) {
+        DocumentationTrait documentationTrait = shape.getTrait(DocumentationTrait.class).get();
+        String documentation = documentationTrait.getValue();
+        if (documentation.matches("/+")) {
+          AbstractShapeBuilder<?,?> builder = ModelUtils.getBuilderForShape(shape);
+          builder.removeTrait(DocumentationTrait.ID);
+          return builder.build();
+        } else {
+          return shape;
+        }
       } else {
         return shape;
       }
