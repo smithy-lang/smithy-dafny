@@ -57,11 +57,11 @@ public class LocalServiceToDafnyConversionFunctionWriter extends BaseConversionW
 
   protected void writeStructureShapeConverter(StructureShape structureShape) {
     // Defer localService config to the localService config converter
-    if (SmithyNameResolver.getLocalServiceConfigShapes(context).contains(structureShape.getId())) {
-      LocalServiceConfigToDafnyConversionFunctionWriter.writeConverterForShapeAndMembers(structureShape,
-          context, writer);
-      return;
-    }
+//    if (SmithyNameResolver.getLocalServiceConfigShapes(context).contains(structureShape.getId())) {
+//      LocalServiceConfigToDafnyConversionFunctionWriter.writeConverterForShapeAndMembers(structureShape,
+//          context, writer);
+//      return;
+//    }
 
     WriterDelegator<PythonWriter> delegator = context.writerDelegator();
     String moduleName = SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(context.settings().getService().getNamespace());
@@ -128,7 +128,7 @@ public class LocalServiceToDafnyConversionFunctionWriter extends BaseConversionW
     if (context.model().expectShape(memberShape.getTarget()).hasTrait(ReferenceTrait.class)) {
       if (memberShape.isOptional()) {
         conversionWriter.write(
-                "((Option_Some($1L)) if ($1L is not None) else (Option_None())),",
+                "((Option_Some($1L)) if (($2L is not None) and ($1L is not None)) else (Option_None())),",
                 targetShape.accept(
                         ShapeVisitorResolver.getToDafnyShapeVisitorForShape(targetShape,
                                 context,
@@ -136,7 +136,8 @@ public class LocalServiceToDafnyConversionFunctionWriter extends BaseConversionW
                                 conversionWriter,
                                 "smithy_to_dafny"
                         )
-                )
+                ),
+                dataSourceInsideConversionFunction + "." + CaseUtils.toSnakeCase(memberName)
         );
       } else {
         conversionWriter.write(
@@ -334,6 +335,7 @@ public class LocalServiceToDafnyConversionFunctionWriter extends BaseConversionW
             // First union value opens a new `if` block; others do not need to and write `elif`
             boolean shouldOpenNewIfBlock = true;
             for (MemberShape memberShape : unionShape.getAllMembers().values()) {
+              Shape targetShape = context.model().expectShape(memberShape.getTarget());
               // Write out conversion:
               // ex. if ExampleUnion can take on either of (IntegerValue, StringValue), write:
               // if isinstance(input, ExampleUnion.IntegerValue):
@@ -342,16 +344,25 @@ public class LocalServiceToDafnyConversionFunctionWriter extends BaseConversionW
               //   example_union_union_value = DafnyExampleUnionIntegerValue(input.member.value)
               conversionWriter.write("""
                         $L isinstance($L, $L.$L):
-                            $L_union_value = $L($L.$L)""",
+                            $L_union_value = $L($L)""",
                   // If we need a new `if` block, open one; otherwise, expand on existing one with `elif`
                   shouldOpenNewIfBlock ? "if" : "elif",
                   dataSourceInsideConversionFunction,
                   SmithyNameResolver.getSmithyGeneratedModelLocationForShape(unionShape.getId(), context),
-                  SmithyNameResolver.getSmithyGeneratedTypeForUnion(unionShape, memberShape),
+                  SmithyNameResolver.getSmithyGeneratedTypeForUnion(unionShape, memberShape, context),
                   unionShape.getId().getName(),
                   DafnyNameResolver.getDafnyTypeForUnion(unionShape, memberShape),
-                  dataSourceInsideConversionFunction,
-                  "value"
+                  targetShape.accept(
+                          ShapeVisitorResolver.getToDafnyShapeVisitorForShape(targetShape,
+                                  context,
+                                  dataSourceInsideConversionFunction + ".value",
+                                  conversionWriter,
+                                  "smithy_to_dafny"
+                          )
+                  )
+//                  DafnyNameResolver.getDafnyTypeForUnion(unionShape, memberShape),
+//                  dataSourceInsideConversionFunction,
+//                  "value"
               );
               shouldOpenNewIfBlock = false;
 

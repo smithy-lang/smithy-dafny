@@ -10,6 +10,7 @@ import software.amazon.polymorph.smithypython.common.nameresolver.DafnyNameResol
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.smithypython.common.shapevisitor.ShapeVisitorResolver;
 import software.amazon.polymorph.smithypython.localservice.shapevisitor.LocalServiceConfigToDafnyConfigShapeVisitor;
+import software.amazon.polymorph.smithypython.localservice.shapevisitor.LocalServiceToDafnyShapeVisitor;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.model.shapes.*;
@@ -214,8 +215,7 @@ public class ConfigFileWriter implements CustomFileWriter {
     //
     String output =
         configShape.accept(
-            new LocalServiceConfigToDafnyConfigShapeVisitor(
-                codegenContext, "smithy_config", writer));
+            new LocalServiceToDafnyShapeVisitor(codegenContext, "smithy_config", writer));
     writer.write("return " + output);
   }
 }

@@ -8,9 +8,12 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import software.amazon.awssdk.utils.StringUtils;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.codegen.core.CodegenContext;
+import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
@@ -225,8 +228,8 @@ public class SmithyNameResolver {
    * @return
    */
   public static String getSmithyGeneratedTypeForUnion(
-      UnionShape unionShape, MemberShape memberShape) {
-    return unionShape.getId().getName() + memberShape.getMemberName();
+      UnionShape unionShape, MemberShape memberShape, GenerationContext context) {
+    return unionShape.getId().getName() + StringUtils.capitalize(memberShape.getMemberName());
   }
 
   /**

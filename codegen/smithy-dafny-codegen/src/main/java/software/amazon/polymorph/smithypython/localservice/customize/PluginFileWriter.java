@@ -24,7 +24,6 @@ public class PluginFileWriter implements CustomFileWriter {
     String moduleName =
         SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
             codegenContext.settings().getService().getNamespace());
-    String clientName = SmithyNameResolver.clientNameForService(serviceShape);
     String implModulePrelude =
         DafnyNameResolver.getDafnyPythonIndexModuleNameForShape(serviceShape);
     final LocalServiceTrait localServiceTrait = serviceShape.expectTrait(LocalServiceTrait.class);
@@ -51,9 +50,8 @@ public class PluginFileWriter implements CustomFileWriter {
               '''
               config.dafnyImplInterface = DafnyImplInterface()
               if isinstance(config, $L):
-                  from $L import $L
-                  config.dafnyImplInterface.impl = $L()
-                  config.dafnyImplInterface.impl.ctor__(smithy_config_to_dafny_config(config))
+                  from $L import default__
+                  config.dafnyImplInterface.impl = default__.$L(smithy_config_to_dafny_config(config)).value
               config.retry_strategy = NoRetriesStrategy()
 
           class ZeroRetryDelayToken:
@@ -78,8 +76,7 @@ public class PluginFileWriter implements CustomFileWriter {
                   configShape.getId().getName(),
                   configShape.getId().getName(),
                   implModulePrelude,
-                  clientName,
-                  clientName);
+                  localServiceTrait.getSdkId());
             });
   }
 }

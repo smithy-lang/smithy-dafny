@@ -99,7 +99,7 @@ public class DafnyToLocalServiceConversionFunctionWriter extends BaseConversionW
         ")",
         SmithyNameResolver.getSmithyGeneratedModelLocationForShape(
             shape.getId(), context
-        ) + "." + shape.getId().getName(),
+        ) + "." + context.symbolProvider().toSymbol(shape).getName(),
         () -> {
 
           // Recursively dispatch a new ShapeVisitor for each member of the structure
@@ -124,7 +124,7 @@ public class DafnyToLocalServiceConversionFunctionWriter extends BaseConversionW
     // Optional: `member_name=ShapeVisitor(input.MemberName.UnwrapOr(None))`
     // Required: `member_name=ShapeVisitor(input.MemberName)`
     if (context.model().expectShape(memberShape.getTarget()).hasTrait(ReferenceTrait.class)) {
-      conversionWriter.write("$L,",
+      conversionWriter.write("($1L) if ($2L is not None) else None,",
           targetShape.accept(
               ShapeVisitorResolver.getToNativeShapeVisitorForShape(targetShape,
                   context,
@@ -133,7 +133,9 @@ public class DafnyToLocalServiceConversionFunctionWriter extends BaseConversionW
                   conversionWriter,
                   "dafny_to_smithy"
               )
-          )
+          ),
+          dataSourceInsideConversionFunction + "." + memberName
+                  + (memberShape.isOptional() ? ".UnwrapOr(None)" : "")
       );
     }
 
@@ -307,7 +309,7 @@ public class DafnyToLocalServiceConversionFunctionWriter extends BaseConversionW
                   DafnyNameResolver.getDafnyTypeForUnion(unionShape, memberShape),
                   unionShape.getId().getName(),
                   SmithyNameResolver.getSmithyGeneratedModelLocationForShape(unionShape.getId(), context),
-                  SmithyNameResolver.getSmithyGeneratedTypeForUnion(unionShape, memberShape),
+                  SmithyNameResolver.getSmithyGeneratedTypeForUnion(unionShape, memberShape, context),
                   dataSourceInsideConversionFunction,
                   DafnyNameResolver.escapeShapeName(memberShape.getMemberName())
               );

@@ -75,29 +75,29 @@ public class LocalServiceConfigToDafnyConfigShapeVisitor extends LocalServiceToD
    */
   @Override
   public String structureShape(StructureShape structureShape) {
-    if (!SmithyNameResolver.getLocalServiceConfigShapes(context).contains(structureShape.getId())) {
-      throw new IllegalArgumentException(
-          "structureShape provided to LocalServiceConfigToDafnyConfigShapeVisitor is not a localService"
-              + "config shape: " + structureShape.getId());
-    }
-
-    // ONLY write converters if the shape under generation is in the current namespace (or Unit shape)
-    if (structureShape.getId().getNamespace().equals(context.settings().getService().getNamespace())) {
+//    if (!SmithyNameResolver.getLocalServiceConfigShapes(context).contains(structureShape.getId())) {
+//      throw new IllegalArgumentException(
+//          "structureShape provided to LocalServiceConfigToDafnyConfigShapeVisitor is not a localService"
+//              + "config shape: " + structureShape.getId());
+//    }
+//
+//    // ONLY write converters if the shape under generation is in the current namespace (or Unit shape)
+//    if (structureShape.getId().getNamespace().equals(context.settings().getService().getNamespace())) {
       LocalServiceConfigToDafnyConversionFunctionWriter.writeConverterForShapeAndMembers(structureShape,
         context, writer);
-    }
-
-    // Import the converter from where the ShapeVisitor was called
+//    }
+//
+//    // Import the converter from where the ShapeVisitor was called
     String pythonModuleName = SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
         structureShape.getId().getNamespace(),
         context
     );
     writer.addStdlibImport(pythonModuleName + ".smithy_to_dafny");
 
-    // Return a reference to the generated conversion method
-    // ex. for shape example.namespace.ExampleShape
-    // returns
-    // `example_namespace.smithygenerated.smithy_to_dafny.SmithyToDafny_example_namespace_ExampleShape(input)`
+//    // Return a reference to the generated conversion method
+//    // ex. for shape example.namespace.ExampleShape
+//    // returns
+//    // `example_namespace.smithygenerated.smithy_to_dafny.SmithyToDafny_example_namespace_ExampleShape(input)`
     return "%1$s.smithy_to_dafny.%2$s(%3$s)".formatted(
         pythonModuleName,
         SmithyNameResolver.getSmithyToDafnyFunctionNameForShape(structureShape, context),

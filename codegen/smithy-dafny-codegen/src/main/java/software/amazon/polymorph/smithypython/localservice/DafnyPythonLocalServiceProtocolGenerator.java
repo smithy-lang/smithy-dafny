@@ -170,16 +170,16 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator implements Protoc
     writer.addDependency(SmithyPythonDependency.SMITHY_PYTHON);
     // Import the Dafny type being converted to
     Shape targetShape = context.model().expectShape(operation.getInputShape());
-    if (targetShape.isStructureShape()
-        && targetShape
-            .asStructureShape()
-            .get()
-            .hasTrait(PositionalTrait.class)) {
-      ShapeId positionalShapeId = ModelUtils.getPositionalStructureMember(targetShape.asStructureShape().get()).orElseThrow();
-      DafnyNameResolver.importDafnyTypeForShape(writer, positionalShapeId, context);
-    } else {
-      DafnyNameResolver.importDafnyTypeForShape(writer, operation.getInputShape(), context);
-    }
+//    if (targetShape.isStructureShape()
+//        && targetShape
+//            .asStructureShape()
+//            .get()
+//            .hasTrait(PositionalTrait.class)) {
+//      ShapeId positionalShapeId = ModelUtils.getPositionalStructureMember(targetShape.asStructureShape().get()).orElseThrow();
+//      DafnyNameResolver.importDafnyTypeForShape(writer, positionalShapeId, context);
+//    } else {
+//      DafnyNameResolver.importDafnyTypeForShape(writer, operation.getInputShape(), context);
+//    }
 
     // Determine conversion code from Smithy to Dafny
     String input =
