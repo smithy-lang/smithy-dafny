@@ -1,5 +1,8 @@
 // Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
+import java.io.File
+import java.io.FileInputStream
+import java.util.Properties
 import java.net.URI
 import javax.annotation.Nullable
 
