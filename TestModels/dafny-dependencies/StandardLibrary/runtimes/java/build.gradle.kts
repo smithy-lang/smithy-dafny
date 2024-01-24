@@ -8,6 +8,11 @@ plugins {
     `maven-publish`
 }
 
+var props = Properties().apply {
+    load(FileInputStream(File(rootProject.rootDir, "../../project.properties")))
+}
+var dafnyVersion = props.getProperty("dafnyVersion")
+
 group = "software.amazon.cryptography"
 version = "1.0-SNAPSHOT"
 description = "StandardLibrary"
