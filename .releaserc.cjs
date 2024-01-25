@@ -12,7 +12,7 @@
   This file requires a `--branches` option to function.
   This is to facilitate point releases if needed.
 
-  `npx semantic-release --branches main` 
+  `npx semantic-release --branches main`
 */
 
 // This project has several runtimes
@@ -26,24 +26,25 @@ const Runtimes = {
   },
   net: {
     "AwsCryptographicMaterialProviders/runtimes/net/MPL.csproj": {
-      dependencies: [
-        "AWS.Cryptography.Internal.StandardLibrary",
-        "AWS.Cryptography.Internal.ComAmazonawsKms",
-        "AWS.Cryptography.Internal.ComAmazonawsDynamodb",
-        "AWS.Cryptography.Internal.AwsCryptographyPrimitives",
-      ],
+      dependencies: [],
+      assemblyInfo:
+        "AwsCryptographicMaterialProviders/runtimes/net/AssemblyInfo.cs",
     },
     "ComAmazonawsKms/runtimes/net/AWS-KMS.csproj": {
-      dependencies: ["AWS.Cryptography.Internal.StandardLibrary"],
+      dependencies: [],
+      assemblyInfo: "ComAmazonawsKms/runtimes/net/AssemblyInfo.cs",
     },
     "ComAmazonawsDynamodb/runtimes/net/ComAmazonawsDynamodb.csproj": {
-      dependencies: ["AWS.Cryptography.Internal.StandardLibrary"],
+      dependencies: [],
+      assemblyInfo: "ComAmazonawsDynamodb/runtimes/net/AssemblyInfo.cs",
     },
     "AwsCryptographyPrimitives/runtimes/net/Crypto.csproj": {
-      dependencies: ["AWS.Cryptography.Internal.StandardLibrary"],
+      dependencies: [],
+      assemblyInfo: "AwsCryptographyPrimitives/runtimes/net/AssemblyInfo.cs",
     },
     "StandardLibrary/runtimes/net/STD.csproj": {
       dependencies: [],
+      assemblyInfo: "StandardLibrary/runtimes/net/AssemblyInfo.cs",
     },
   },
 };
@@ -52,9 +53,9 @@ const Runtimes = {
  * @type {import('semantic-release').GlobalConfig}
  */
 module.exports = {
-  // branches: "main",
+  //branches: ["main"],
   repositoryUrl:
-    "git@github.com:aws/aws-cryptographic-material-providers-library-dafny.git",
+    "git@github.com:aws/aws-cryptographic-material-providers-library.git",
   plugins: [
     // Check the commits since the last release
     "@semantic-release/commit-analyzer",
@@ -106,17 +107,15 @@ module.exports = {
             countMatches: true,
           },
 
-          // Now update the Dotnet project dependencies
-          ...Object.entries(Runtimes.net).flatMap(([file, { dependencies }]) =>
-            dependencies.map((dependency) => ({
-              files: [file],
-              from: `<PackageReference Include=\"${dependency}\" Version=\".*\" />`,
-              to:
-                `<PackageReference Include=\"${dependency}\"` +
-                ' Version="${nextRelease.version}" />',
-              results: [CheckResults(file)],
+          // Update the AssmeblyInfo.cs file of the DotNet projects
+          ...Object.entries(Runtimes.net).flatMap(
+            ([file, { assemblyInfo }]) => ({
+              files: assemblyInfo,
+              from: "assembly: AssemblyVersion(.*)",
+              to: 'assembly: AssemblyVersion("${nextRelease.version}")]',
+              results: [CheckResults(assemblyInfo)],
               countMatches: true,
-            })),
+            }),
           ),
         ],
       },
@@ -128,6 +127,7 @@ module.exports = {
         assets: [
           "CHANGELOG.md",
           ...Object.values(Runtimes).flatMap((r) => Object.keys(r)),
+          ...Object.values(Runtimes.net).flatMap((r) => r.assemblyInfo),
         ],
         message:
           "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}",

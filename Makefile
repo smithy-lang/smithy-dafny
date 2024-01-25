@@ -47,6 +47,12 @@ polymorph_code_gen:
 setup_semantic_release:
 	npm i --no-save semantic-release @semantic-release/changelog semantic-release-replace-plugin @semantic-release/git
 
+run_semantic_release:
+	npx semantic-release --no-ci
+
+dry_run_semantic_release:
+	npx semantic-release --dry-run
+
 duvet: | duvet_extract duvet_report
 
 duvet_extract:
@@ -63,5 +69,6 @@ duvet_report:
 		--source-pattern "AwsCryptographicMaterialProviders/dafny/**/test/**/*.dfy" \
 		--source-pattern "AwsCryptographicMaterialProviders/dafny/**/Model/**/*.smithy" \
 		--source-pattern "AwsCryptographicMaterialProviders/compliance_exceptions/**/*.txt" \
+		--source-pattern "TestVectorsAwsCryptographicMaterialProviders/compliance_exceptions/**/*.txt" \
 		--source-pattern "(# //=,# //#).github/workflows/duvet.yaml" \
 		--html specification_compliance_report.html
