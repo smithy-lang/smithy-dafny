@@ -16,8 +16,7 @@ boto3 = "^1.28.38"
 # TODO: Depend on PyPi once Smithy-Python publishes their Python package there
 smithy-python = { path = "../../../../../submodules/smithy-python/python-packages/smithy-python", develop = false}
 standard-library = {path = "../../../../dafny-dependencies/StandardLibrary/runtimes/python", develop = false}
-# TODO-Python: Depend on PyPi once Dafny publishes the Dafny runtime there
-python-dafny-runtime = { path = "../../../../PythonDafnyRuntime", develop = false}
+DafnyRuntimePython = "^4.4.0"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^7.4.0"
