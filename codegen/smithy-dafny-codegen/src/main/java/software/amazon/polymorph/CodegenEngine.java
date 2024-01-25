@@ -127,6 +127,8 @@ public class CodegenEngine {
             // Drop the pre-release suffix, if any.
             // This means with the current Dafny pre-release naming convention,
             // we'll grab the most recent full release of a Dafny runtime.
+            // This mapping may need to change in the future.
+            // Ideally this would be handled by the Dafny CLI itself.
             String dafnyVersionString = new DafnyVersion(
                     dafnyVersion.getMajor(), dafnyVersion.getMinor(), dafnyVersion.getPatch()
             ).unparse();
