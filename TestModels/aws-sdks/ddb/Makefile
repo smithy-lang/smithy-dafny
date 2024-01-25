@@ -5,6 +5,9 @@ CORES=2
 
 include ../../SharedMakefile.mk
 
+# TODO-Python-PYTHONPATH: Move into dfyproject.toml
+PYTHON_MODULE_NAME=com_amazonaws_dynamodb
+
 PROJECT_SERVICES := \
 	ComAmazonawsDynamodb \
 
@@ -25,6 +28,7 @@ _polymorph_wrapped: ;
 _polymorph_wrapped_dafny: ;
 _polymorph_wrapped_net: ;
 _polymorph_wrapped_java: ;
+_polymorph_wrapped_python: ;
 
 format_net:
 	pushd runtimes/net && dotnet format && popd

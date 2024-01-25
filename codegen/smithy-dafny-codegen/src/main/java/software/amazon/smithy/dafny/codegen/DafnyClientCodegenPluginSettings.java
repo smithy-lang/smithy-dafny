@@ -95,6 +95,7 @@ class DafnyClientCodegenPluginSettings {
                         foundUnknownTargetLanguage.set(true);
                         yield Stream.empty();
                     }
+                    case "PYTHON" -> Stream.of(CodegenEngine.TargetLanguage.PYTHON);
                     default -> {
                         LOGGER.error("Unknown target language: {}", strNode.getValue());
                         foundUnknownTargetLanguage.set(true);

@@ -5,6 +5,9 @@ CORES=2
 
 include ../SharedMakefile.mk
 
+# TODO-Python-PYTHONPATH: Move into dfyproject.toml
+PYTHON_MODULE_NAME=simple_constructor
+
 PROJECT_SERVICES := \
 	SimpleConstructor
 
@@ -13,6 +16,7 @@ SERVICE_NAMESPACE_SimpleConstructor=simple.constructor
 SERVICE_DEPS_SimpleConstructor :=
 
 SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
+
 
 # This project has no dependencies
 # DEPENDENT-MODELS:=

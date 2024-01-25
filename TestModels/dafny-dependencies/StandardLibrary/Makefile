@@ -6,6 +6,8 @@ CORES=2
 include ../../SharedMakefile.mk
 
 MAX_RESOURCE_COUNT=500000000
+# TODO-Python-PYTHONPATH: Move into dfyproject.toml
+PYTHON_MODULE_NAME=standard_library
 LIBRARIES :=
 
 # define standard colors
@@ -28,6 +30,9 @@ polymorph_net :
 polymorph_java :
 	echo "Skipping polymorph_java for StandardLibrary"
 
+polymorph_python :
+	echo "Skipping polymorph_python for StandardLibrary"
+
 # Override SharedMakefile's transpile_net to not transpile
 # StandardLibrary as a dependency
 transpile_net: | transpile_implementation_net transpile_test_net
@@ -35,6 +40,25 @@ transpile_net: | transpile_implementation_net transpile_test_net
 # Override SharedMakefile's transpile_java to not transpile
 # StandardLibrary as a dependency
 transpile_java: | transpile_implementation_java transpile_test_java
+
+# Override SharedMakefile's transpile_python to not transpile
+# StandardLibrary as a dependency
+transpile_python: | transpile_implementation_python transpile_test_python
+
+# Hacky workaround until Dafny supports per-language extern names.
+# Replaces `.`s with `_`s in strings like `{:extern ".*"}`.
+# This is flawed logic and should be removed, but is a reasonable band-aid for now.
+# TODO: Once Dafny supports per-language extern names, remove and replace with Pythonic extern names.
+# This may require new Smithy-Dafny logic to generate Pythonic extern names.
+_python_underscore_extern_names:
+	find src -regex ".*\.dfy" -type f -exec sed -i $(SED_PARAMETER) '/module {:extern \".*\"/s/\./_/g' {} \;
+	echo "Skipping Model modification for StandardLibrary"
+	find test -regex ".*\.dfy" -type f -exec sed -i $(SED_PARAMETER) '/module {:extern \".*\"/s/\./_/g' {} \;
+
+_python_revert_underscore_extern_names:
+	find src -regex ".*\.dfy" -type f -exec sed -i $(SED_PARAMETER) '/module {:extern \".*\"/s/_/\./g' {} \;
+	echo "Skipping Model modification for StandardLibrary"
+	find test -regex ".*\.dfy" -type f -exec sed -i $(SED_PARAMETER) '/module {:extern \".*\"/s/_/\./g' {} \;
 
 transpile_dependencies:
 	echo "Skipping transpile_dependencies for StandardLibrary"
@@ -54,6 +78,16 @@ transpile_implementation:
 		-functionSyntax:3 \
 		-useRuntimeLib \
 		-out $(OUT) \
+		./src/Index.dfy
+
+build_implementation:
+	dafny build \
+		-t:$(TARGET) \
+		./src/Index.dfy \
+		-o $(OUT) \
+		--quantifier-syntax:3 \
+		--function-syntax:3 \
+		--optimize-erasable-datatype-wrapper:false \
 		./src/Index.dfy
 
 # Override SharedMakefile's build_java to not install

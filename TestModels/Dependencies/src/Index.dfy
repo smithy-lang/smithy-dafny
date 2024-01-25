@@ -3,7 +3,7 @@
 include "../Model/SimpleDependenciesTypes.dfy"
 include "SimpleDependenciesImpl.dfy"
 
-module {:extern "simple.dependencies.internaldafny" } SimpleDependencies refines AbstractSimpleDependenciesService {
+module {:extern "simple_dependencies_internaldafny" } SimpleDependencies refines AbstractSimpleDependenciesService {
   import Operations = SimpleDependenciesImpl
   import SimpleResourcesTypes
   import SimpleConstraints

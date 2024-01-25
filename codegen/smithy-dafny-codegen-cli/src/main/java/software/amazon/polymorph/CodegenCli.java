@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Arrays;
+import java.util.stream.Collectors;
 
 public class CodegenCli {
     private static final Logger LOGGER = LoggerFactory.getLogger(CodegenCli.class);
@@ -67,10 +68,12 @@ public class CodegenCli {
         cliArguments.outputDafnyDir.ifPresent(path -> outputDirs.put(TargetLanguage.DAFNY, path));
         cliArguments.outputJavaDir.ifPresent(path -> outputDirs.put(TargetLanguage.JAVA, path));
         cliArguments.outputDotnetDir.ifPresent(path -> outputDirs.put(TargetLanguage.DOTNET, path));
+        cliArguments.outputPythonDir.ifPresent(path -> outputDirs.put(TargetLanguage.PYTHON, path));
 
         final CodegenEngine.Builder engineBuilder = new CodegenEngine.Builder()
                 .withServiceModel(serviceModel)
                 .withDependentModelPaths(cliArguments.dependentModelPaths)
+                .withDependencyModuleNames(cliArguments.dependencyModuleNames)
                 .withNamespace(cliArguments.namespace)
                 .withTargetLangOutputDirs(outputDirs)
                 .withAwsSdkStyle(cliArguments.awsSdkStyle)
@@ -78,6 +81,7 @@ public class CodegenCli {
                 .withDafnyVersion(cliArguments.dafnyVersion);
         cliArguments.javaAwsSdkVersion.ifPresent(engineBuilder::withJavaAwsSdkVersion);
         cliArguments.includeDafnyFile.ifPresent(engineBuilder::withIncludeDafnyFile);
+        cliArguments.moduleName.ifPresent(engineBuilder::withModuleName);
         final CodegenEngine engine = engineBuilder.build();
         engine.run();
     }
@@ -100,11 +104,21 @@ public class CodegenCli {
             .hasArg()
             .required()
             .build())
+          .addOption(Option.builder("dmn")
+            .longOpt("dependency-module-name")
+            .desc("directory for dependent model file[s] (.smithy format)")
+            .hasArg()
+            .build())
           .addOption(Option.builder("n")
             .longOpt("namespace")
             .desc("smithy namespace to generate code for, such as 'com.foo'")
             .hasArg()
             .required()
+            .build())
+          .addOption(Option.builder("mn")
+            .longOpt("module-name")
+            .desc("if generating for a language that uses modules (go, python), the name of the module")
+            .hasArg()
             .build())
           .addOption(Option.builder()
             .longOpt("output-dotnet")
@@ -114,6 +128,11 @@ public class CodegenCli {
           .addOption(Option.builder()
             .longOpt("output-java")
             .desc("<optional> output directory for generated Java files")
+            .hasArg()
+            .build())
+          .addOption(Option.builder()
+            .longOpt("output-python")
+            .desc("<optional> output directory for generated Python files")
             .hasArg()
             .build())
           .addOption(Option.builder()
@@ -154,9 +173,12 @@ public class CodegenCli {
     private record CliArguments(
             Path modelPath,
             Path[] dependentModelPaths,
+            Map<String, String> dependencyModuleNames,
             String namespace,
+            Optional<String> moduleName,
             Optional<Path> outputDotnetDir,
             Optional<Path> outputJavaDir,
+            Optional<Path> outputPythonDir,
             Optional<Path> outputDafnyDir,
             Optional<AwsSdkVersion> javaAwsSdkVersion,
             DafnyVersion dafnyVersion,
@@ -184,7 +206,19 @@ public class CodegenCli {
               .map(Path::of)
               .toArray(Path[]::new);
 
+            // Maps a Smithy namespace to its module name
+            // ex. `aws.cryptography.materialproviders` -> `aws_cryptographic_materialproviders`
+            // These values are provided via the command line right now,
+            //   but should eventually be sourced from doo files
+            final Map<String, String> dependencyNamespacesToModuleNamesMap =
+                    commandLine.hasOption("dependency-module-name")
+                    ? Arrays.stream(commandLine.getOptionValues("dmn"))
+                        .map(s -> s.split("="))
+                        .collect(Collectors.toMap(i -> i[0], i -> i[1]))
+                    : new HashMap<>();
+
             final String namespace = commandLine.getOptionValue('n');
+            final Optional<String> moduleName = Optional.ofNullable(commandLine.getOptionValue("module-name"));
 
             Optional<Path> outputDafnyDir = Optional.ofNullable(commandLine.getOptionValue("output-dafny"))
                     .map(Paths::get);
@@ -198,6 +232,8 @@ public class CodegenCli {
                     .map(Paths::get);
             final Optional<Path> outputDotnetDir = Optional.ofNullable(commandLine.getOptionValue("output-dotnet"))
                     .map(Paths::get);
+            final Optional<Path> outputPythonDir = Optional.ofNullable(commandLine.getOptionValue("output-python"))
+                .map(Paths::get);
 
             boolean localServiceTest = commandLine.hasOption("local-service-test");
             final boolean awsSdkStyle = commandLine.hasOption("aws-sdk");
@@ -232,9 +268,9 @@ public class CodegenCli {
             }
 
             return Optional.of(new CliArguments(
-                    modelPath, dependentModelPaths, namespace,
-                    outputDotnetDir, outputJavaDir, outputDafnyDir,
-                    javaAwsSdkVersion, dafnyVersion, includeDafnyFile, awsSdkStyle,
+                    modelPath, dependentModelPaths, dependencyNamespacesToModuleNamesMap,
+                    namespace, moduleName,  outputDotnetDir, outputJavaDir, outputPythonDir,
+                    outputDafnyDir, javaAwsSdkVersion, dafnyVersion, includeDafnyFile, awsSdkStyle,
                     localServiceTest
             ));
         }

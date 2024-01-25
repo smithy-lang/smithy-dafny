@@ -4,7 +4,7 @@
 include "../src/Index.dfy"
 
 module TestDDBv2 {
-    import DDB = Com.Amazonaws.Dynamodb
+    import DDB = Com_Amazonaws_Dynamodb
     import opened StandardLibrary.UInt
     import opened Wrappers
     

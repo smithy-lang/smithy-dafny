@@ -7,6 +7,9 @@ include ../SharedMakefile.mk
 
 NAMESPACE=simple.refinement
 
+# TODO-Python-PYTHONPATH: Move into dfyproject.toml
+PYTHON_MODULE_NAME=simple_refinement
+
 PROJECT_SERVICES := \
 	SimpleRefinement
 

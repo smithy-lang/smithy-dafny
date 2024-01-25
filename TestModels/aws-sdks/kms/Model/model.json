@@ -997,7 +997,7 @@
             }
         },
         "com.amazonaws.kms#DateType": {
-            "type": "timestamp"
+            "type": "integer"
         },
         "com.amazonaws.kms#Decrypt": {
             "type": "operation",

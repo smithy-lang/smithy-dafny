@@ -7,6 +7,9 @@ include ../SharedMakefile.mk
 
 NAMESPACE=simple.union
 
+# TODO-Python-PYTHONPATH: Move into dfyproject.toml
+PYTHON_MODULE_NAME=simple_union
+
 PROJECT_SERVICES := \
 	SimpleUnion
 

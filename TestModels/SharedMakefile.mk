@@ -41,6 +41,14 @@ else
 	COMPILE_SUFFIX_OPTION :=
 endif
 
+# On macOS, sed requires an extra parameter of ""
+OS := $(shell uname)
+ifeq ($(OS), Darwin)
+  SED_PARAMETER := ""
+else
+  SED_PARAMETER :=
+endif
+
 STANDARD_LIBRARY_PATH := $(PROJECT_ROOT)/dafny-dependencies/StandardLibrary
 CODEGEN_CLI_ROOT := $(PROJECT_ROOT)/../codegen/smithy-dafny-codegen-cli
 GRADLEW := $(PROJECT_ROOT)/../codegen/gradlew
@@ -209,9 +217,12 @@ _polymorph:
 	$(OUTPUT_DAFNY) \
 	$(OUTPUT_DOTNET) \
 	$(OUTPUT_JAVA) \
+    $(OUTPUT_PYTHON) \
+    $(MODULE_NAME) \
 	--model $(if $(DIR_STRUCTURE_V2),$(LIBRARY_ROOT)/dafny/$(SERVICE)/Model,$(LIBRARY_ROOT)/Model) \
 	--dependent-model $(PROJECT_ROOT)/$(SMITHY_DEPS) \
 	$(patsubst %, --dependent-model $(PROJECT_ROOT)/%/Model, $($(service_deps_var))) \
+	$(DEPENDENCY_MODULE_NAMES) \
 	--namespace $($(namespace_var)) \
 	$(AWS_SDK_CMD)";
 
@@ -223,9 +234,12 @@ _polymorph_wrapped:
 	$(OUTPUT_DAFNY_WRAPPED) \
 	$(OUTPUT_DOTNET_WRAPPED) \
 	$(OUTPUT_JAVA_WRAPPED) \
+	$(OUTPUT_PYTHON_WRAPPED) \
+    $(MODULE_NAME) \
 	--model $(if $(DIR_STRUCTURE_V2),$(LIBRARY_ROOT)/dafny/$(SERVICE)/Model,$(LIBRARY_ROOT)/Model) \
 	--dependent-model $(PROJECT_ROOT)/$(SMITHY_DEPS) \
 	$(patsubst %, --dependent-model $(PROJECT_ROOT)/%/Model, $($(service_deps_var))) \
+	$(DEPENDENCY_MODULE_NAMES) \
 	--namespace $($(namespace_var)) \
 	$(OUTPUT_LOCAL_SERVICE) \
 	$(AWS_SDK_CMD)";
@@ -323,6 +337,47 @@ _polymorph_java: _polymorph_wrapped
 _polymorph_java: POLYMORPH_LANGUAGE_TARGET=java
 _polymorph_java: _polymorph_dependencies
 
+.PHONY: polymorph_python
+polymorph_python:
+	for service in $(PROJECT_SERVICES) ; do \
+		export service_deps_var=SERVICE_DEPS_$${service} ; \
+		export namespace_var=SERVICE_NAMESPACE_$${service} ; \
+		export SERVICE=$${service} ; \
+		$(MAKE) _polymorph_python || exit 1; \
+	done;
+	rm -rf runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated
+	mkdir -p runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated
+	cp -r runtimes/python/smithygenerated/* runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated
+	rm runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated/README.md
+	rm runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated/pyproject.toml
+	rm -rf runtimes/python/smithygenerated
+
+_polymorph_python: OUTPUT_PYTHON=--output-python $(LIBRARY_ROOT)/runtimes/python/smithygenerated
+_polymorph_python: MODULE_NAME=--module-name $(PYTHON_MODULE_NAME)
+# Python codegen MUST know dependencies' module names...
+# This greps each service dependency's Makefile for two strings:
+# 1. "SERVICE_NAMESPACE_$(dependency)"
+# 2. "PYTHON_MODULE_NAME"
+# , then assembles them together as
+# "SERVICE_NAMESPACE_$(dependency)"="PYTHON_MODULE_NAME"
+# , creating a map from a service namespace to its wrapping module name.
+# We plan to move this information into Dafny project files.
+# This is unfortunately one long line that breaks when I split it up...
+_polymorph_python: DEPENDENCY_MODULE_NAMES=$(foreach dependency, \
+		$($(service_deps_var)), \
+		--dependency-module-name=$(shell cat $(if $(DIR_STRUCTURE_V2),$(PROJECT_ROOT)/$(dependency)/../../Makefile,$(PROJECT_ROOT)/$(dependency)/Makefile) | grep ^SERVICE_NAMESPACE_$(if $(DIR_STRUCTURE_V2),$(shell echo $(dependency) | cut -d "/" -f 3),$(shell echo $($(dependency)))) | cut -d "=" -f 2)=$(shell cat $(if $(DIR_STRUCTURE_V2),$(PROJECT_ROOT)/$(dependency)/../../Makefile,$(PROJECT_ROOT)/$(dependency)/Makefile) | grep ^PYTHON_MODULE_NAME | cut -d "=" -f 2)\
+	)
+_polymorph_python: _polymorph
+# TODO-Python: Right now, wrapped code generation requires an isolated directory,
+#   as it runs `rm models.py` and `rm errors.py` after generating.
+# Work is planned to not do this by writing a SymbolVisitor specific to wrapped localService generation.
+# This will resolve some of the weirdness in this section.
+_polymorph_python: OUTPUT_PYTHON_WRAPPED=--output-python $(LIBRARY_ROOT)/runtimes/python/smithygenerated
+_polymorph_python: OUTPUT_LOCAL_SERVICE=--local-service-test
+_polymorph_python: _polymorph_wrapped
+_polymorph_python: POLYMORPH_LANGUAGE_TARGET=python
+_polymorph_python: _polymorph_dependencies
+
 ########################## .NET targets
 
 transpile_net: | transpile_implementation_net transpile_test_net transpile_dependencies_net
@@ -399,6 +454,121 @@ mvn_local_deploy:
 test_java:
 	gradle -p runtimes/java runTests
 
+########################## Python targets
+
+transpile_python: _python_underscore_dependency_extern_names
+transpile_python: _python_underscore_extern_names
+transpile_python: transpile_implementation_python
+transpile_python: transpile_test_python
+transpile_python: transpile_dependencies_python
+transpile_python: _python_revert_underscore_extern_names
+transpile_python: _python_revert_underscore_dependency_extern_names
+transpile_python: _mv_internaldafny_python
+transpile_python: _remove_src_module_python
+transpile_python: _rename_test_main_python
+
+transpile_implementation_python: TARGET=py
+transpile_implementation_python: OUT=runtimes/python/dafny_src
+transpile_implementation_python: COMPILE_SUFFIX_OPTION=
+transpile_implementation_python: SRC_INDEX=$(PYTHON_SRC_INDEX)
+transpile_implementation_python: _transpile_implementation_all
+transpile_implementation_python: transpile_dependencies_python
+transpile_implementation_python: transpile_src_python
+transpile_implementation_python: transpile_test_python
+transpile_implementation_python: _mv_internaldafny_python
+transpile_implementation_python: _remove_src_module_python
+
+transpile_src_python: TARGET=py
+transpile_src_python: OUT=runtimes/python/dafny_src
+transpile_src_python: COMPILE_SUFFIX_OPTION=
+transpile_src_python: SRC_INDEX=$(PYTHON_SRC_INDEX)
+transpile_src_python: _transpile_implementation_all
+
+transpile_test_python: TARGET=py
+transpile_test_python: OUT=runtimes/python/__main__
+transpile_test_python: COMPILE_SUFFIX_OPTION=
+transpile_test_python: SRC_INDEX=$(PYTHON_SRC_INDEX)
+transpile_test_python: TEST_INDEX=$(PYTHON_TEST_INDEX)
+transpile_test_python: _transpile_test_all
+
+# Hacky workaround until Dafny supports per-language extern names.
+# Replaces `.`s with `_`s in strings like `{:extern ".*"}`.
+# This is flawed logic and should be removed, but is a reasonable band-aid for now.
+# TODO-Python BLOCKING: Once Dafny supports per-language extern names, remove and replace with Pythonic extern names.
+# This is tracked in https://github.com/dafny-lang/dafny/issues/4322.
+# This may require new Smithy-Dafny logic to generate Pythonic extern names.
+_python_underscore_extern_names:
+	find $(if ${DIR_STRUCTURE_V2},dafny/**/src,src)  -regex ".*\.dfy" -type f -exec sed -i $(SED_PARAMETER) '/.*{:extern \".*\".*/s/\./_/g' {} \;
+	find $(if ${DIR_STRUCTURE_V2},dafny/**/Model,Model) -regex ".*\.dfy" -type f -exec sed -i $(SED_PARAMETER) '/.*{:extern \".*\.*"/s/\./_/g' {} \;
+	find $(if ${DIR_STRUCTURE_V2},dafny/**/test,test) -regex ".*\.dfy" -type f -exec sed -i $(SED_PARAMETER) '/.*{:extern \".*\".*/s/\./_/g' {} \;
+
+_python_underscore_dependency_extern_names:
+	$(MAKE) -C $(STANDARD_LIBRARY_PATH) _python_underscore_extern_names
+	@$(foreach dependency, \
+		$(PROJECT_DEPENDENCIES), \
+		$(MAKE) -C $(PROJECT_ROOT)/$(dependency) _python_underscore_extern_names; \
+	)
+
+_python_revert_underscore_extern_names:
+	find $(if ${DIR_STRUCTURE_V2},dafny/**/src,src) -regex ".*\.dfy" -type f -exec sed -i $(SED_PARAMETER) '/.*{:extern \".*\".*/s/_/\./g' {} \;
+	find $(if ${DIR_STRUCTURE_V2},dafny/**/Model,Model)  -regex ".*\.dfy" -type f -exec sed -i $(SED_PARAMETER) '/.*{:extern \".*\".*/s/_/\./g' {} \; 2>/dev/null
+	find $(if ${DIR_STRUCTURE_V2},dafny/**/test,test) -regex ".*\.dfy" -type f -exec sed -i $(SED_PARAMETER) '/.*{:extern \".*\".*/s/_/\./g' {} \;
+
+_python_revert_underscore_dependency_extern_names:
+	$(MAKE) -C $(STANDARD_LIBRARY_PATH) _python_revert_underscore_extern_names
+	@$(foreach dependency, \
+		$(PROJECT_DEPENDENCIES), \
+		$(MAKE) -C $(PROJECT_ROOT)/$(dependency) _python_revert_underscore_extern_names; \
+	)
+# Move Dafny-generated code into its expected location in the Python module
+_mv_internaldafny_python:
+	# Remove any previously generated Dafny code in src/, then copy in newly-generated code
+	rm -rf runtimes/python/src/$(PYTHON_MODULE_NAME)/internaldafny/generated/
+	mkdir -p runtimes/python/src/$(PYTHON_MODULE_NAME)/internaldafny/generated/
+	mv runtimes/python/dafny_src-py/*.py runtimes/python/src/$(PYTHON_MODULE_NAME)/internaldafny/generated
+	rm -rf runtimes/python/dafny_src-py
+	# Remove any previously generated Dafny code in test/, then copy in newly-generated code
+	rm -rf runtimes/python/test/internaldafny/generated
+	mkdir -p runtimes/python/test/internaldafny/generated
+	mv runtimes/python/__main__-py/*.py runtimes/python/test/internaldafny/generated
+	rm -rf runtimes/python/__main__-py
+
+# Versions of Dafny as of ~9/28 seem to ALWAYS write output to __main__.py,
+#   regardless of the OUT parameter...?
+# We should figure out what happened and get a workaround
+# For now, always write OUT to __main__, then manually rename the primary file...
+# TODO-Python BLOCKING: Resolve this before releasing libraries
+# Note the name internaldafny_test_executor is specifically chosen
+# so as to not be picked up by pytest,
+# which finds test_*.py or *_test.py files.
+# This is neither, and will not be picked up by pytest.
+# This file SHOULD not be run from a context that has not imported the wrapping shim,
+#   otherwise the tests will fail.
+# We write an extern which WILL be picked up by pytest.
+# This extern will import the wrapping shim, then import this `internaldafny_test_executor` to run the tests.
+_rename_test_main_python:
+	mv runtimes/python/test/internaldafny/generated/__main__.py runtimes/python/test/internaldafny/generated/internaldafny_test_executor.py
+
+_remove_src_module_python:
+	# Remove the src/ `module_.py` file.
+	# There is a race condition between the src/ and test/ installation of this file.
+	# The file that is installed least recently is overwritten by the file installed most recently.
+	# The test/ file contains code to execute tests. The src/ file is largely empty.
+	# If the src/ file is installed most recently, tests will fail to run.
+	# By removing the src/ file, we ensure the test/ file is always the installed file.
+	rm runtimes/python/src/$(PYTHON_MODULE_NAME)/internaldafny/generated/module_.py
+
+transpile_dependencies_python: LANG=python
+transpile_dependencies_python: transpile_dependencies
+
+test_python:
+	rm -rf runtimes/python/.tox
+	tox -c runtimes/python --verbose
+
+########################## Clean targets (for all languages)
+
+clean: _clean
+
 _clean:
 	rm -f $(LIBRARY_ROOT)/Model/*Types.dfy $(LIBRARY_ROOT)/Model/*TypesWrapped.dfy
 	rm -f $(LIBRARY_ROOT)/runtimes/net/ImplementationFromDafny.cs
@@ -406,5 +576,9 @@ _clean:
 	rm -rf $(LIBRARY_ROOT)/TestResults
 	rm -rf $(LIBRARY_ROOT)/runtimes/net/Generated $(LIBRARY_ROOT)/runtimes/net/bin $(LIBRARY_ROOT)/runtimes/net/obj
 	rm -rf $(LIBRARY_ROOT)/runtimes/net/tests/bin $(LIBRARY_ROOT)/runtimes/net/tests/obj
-
-clean: _clean
+	rm -rf $(LIBRARY_ROOT)/runtimes/python/src/**/internaldafny/generated
+	rm -rf $(LIBRARY_ROOT)/runtimes/python/src/**/smithygenerated
+	rm -rf $(LIBRARY_ROOT)/runtimes/python/test/internaldafny/generated
+	rm -rf $(LIBRARY_ROOT)/runtimes/python/.tox
+	rm -rf $(LIBRARY_ROOT)/runtimes/python/poetry.lock
+	rm -rf $(LIBRARY_ROOT)/runtimes/python/build

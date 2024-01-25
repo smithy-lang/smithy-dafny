@@ -1,14 +1,14 @@
 # Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-# Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
-# SPDX-License-Identifier: Apache-2.0
-
 CORES=2
 
 include ../../SharedMakefile.mk
 
 NAMESPACE=simple.types.boolean
+
+# TODO-Python-PYTHONPATH: Move into dfyproject.toml
+PYTHON_MODULE_NAME=simple_types_boolean
 
 PROJECT_SERVICES := \
 	SimpleBoolean

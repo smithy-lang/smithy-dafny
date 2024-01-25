@@ -4,11 +4,12 @@
 include "../src/Index.dfy"
 
 module
-  {:extern "simple.extendable.resources.internaldafny.nativeresourcefactory"}
+  {:extern "simple_extendable_resources_internaldafny_nativeresourcefactory"}
   NativeResourceFactory
 {
   import Types = SimpleExtendableResourcesTypes
   
-  method {:extern "DafnyFactory"} DafnyFactory() returns (output: Types.IExtendableResource)
+  method {:extern "DafnyFactory"} DafnyFactory()
+    returns (output: Types.IExtendableResource)
     ensures output.ValidState() && fresh(output.History) && fresh(output.Modifies)  
 }

@@ -1,0 +1,3 @@
+[submodule "submodules/smithy-python"]
+	path = submodules/smithy-python
+	url = git@github.com:lucasmcdonald3/smithy-python.git

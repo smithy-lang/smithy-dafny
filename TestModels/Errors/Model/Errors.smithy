@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 namespace simple.errors
 
+use aws.polymorph#localService
+
 @aws.polymorph#localService(
   sdkId: "SimpleErrors",
   config: SimpleErrorsConfig,
