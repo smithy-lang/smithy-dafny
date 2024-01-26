@@ -206,6 +206,7 @@ _polymorph:
 	cd $(CODEGEN_CLI_ROOT); \
 	$(GRADLEW) run --args="\
 	$(DAFNY_VERSION_OPTION) \
+	--properties-file $(LIBRARY_ROOT)/project.properties \
 	$(OUTPUT_DAFNY) \
 	$(OUTPUT_DOTNET) \
 	$(OUTPUT_JAVA) \
@@ -220,6 +221,7 @@ _polymorph_wrapped:
 	cd $(CODEGEN_CLI_ROOT); \
 	$(GRADLEW) run --args="\
 	$(DAFNY_VERSION_OPTION) \
+	--properties-file $(LIBRARY_ROOT)/project.properties \
 	$(OUTPUT_DAFNY_WRAPPED) \
 	$(OUTPUT_DOTNET_WRAPPED) \
 	$(OUTPUT_JAVA_WRAPPED) \
@@ -266,6 +268,7 @@ _polymorph_code_gen: _polymorph_dependencies
 # Generates dafny code for all namespaces in this project
 .PHONY: polymorph_dafny
 polymorph_dafny:
+	$(MAKE) -C $(STANDARD_LIBRARY_PATH) polymorph_dafny
 	for service in $(PROJECT_SERVICES) ; do \
 		export service_deps_var=SERVICE_DEPS_$${service} ; \
 		export namespace_var=SERVICE_NAMESPACE_$${service} ; \

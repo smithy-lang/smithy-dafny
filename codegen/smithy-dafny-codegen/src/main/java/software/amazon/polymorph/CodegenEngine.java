@@ -30,6 +30,7 @@ import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.utils.IoUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -44,6 +45,7 @@ public class CodegenEngine {
     private final String namespace;
     private final Map<TargetLanguage, Path> targetLangOutputDirs;
     private final DafnyVersion dafnyVersion;
+    private final Optional<Path> propertiesFile;
     // refactor this to only be required if generating Java
     private final AwsSdkVersion javaAwsSdkVersion;
     private final Optional<Path> includeDafnyFile;
@@ -66,6 +68,7 @@ public class CodegenEngine {
             final String namespace,
             final Map<TargetLanguage, Path> targetLangOutputDirs,
             final DafnyVersion dafnyVersion,
+            final Optional<Path> propertiesFile,
             final AwsSdkVersion javaAwsSdkVersion,
             final Optional<Path> includeDafnyFile,
             final boolean awsSdkStyle,
@@ -77,6 +80,7 @@ public class CodegenEngine {
         this.namespace = namespace;
         this.targetLangOutputDirs = targetLangOutputDirs;
         this.dafnyVersion = dafnyVersion;
+        this.propertiesFile = propertiesFile;
         this.javaAwsSdkVersion = javaAwsSdkVersion;
         this.includeDafnyFile = includeDafnyFile;
         this.awsSdkStyle = awsSdkStyle;
@@ -117,6 +121,24 @@ public class CodegenEngine {
                         .formatted(lang.name()));
             }
         }
+
+        propertiesFile.ifPresent(this::generateProjectPropertiesFile);
+    }
+
+    private void generateProjectPropertiesFile(final Path outputPath) {
+        final String propertiesTemplate = IoUtils.readUtf8Resource(
+                this.getClass(), "/templates/project.properties.template");
+        // Drop the pre-release suffix, if any.
+        // This means with the current Dafny pre-release naming convention,
+        // we'll grab the most recent full release of a Dafny runtime.
+        // This mapping may need to change in the future.
+        // Ideally this would be handled by the Dafny CLI itself.
+        String dafnyVersionString = new DafnyVersion(
+                dafnyVersion.getMajor(), dafnyVersion.getMinor(), dafnyVersion.getPatch()
+        ).unparse();
+        final String propertiesText = propertiesTemplate
+                .replace("%DAFNY_VERSION%", dafnyVersionString);
+        IOUtils.writeToFile(propertiesText, outputPath.toFile());
     }
 
     private void generateDafny(final Path outputDir) {
@@ -251,6 +273,7 @@ public class CodegenEngine {
         private String namespace;
         private Map<TargetLanguage, Path> targetLangOutputDirs;
         private DafnyVersion dafnyVersion = new DafnyVersion(4, 1, 0);
+        private Path propertiesFile;
         private AwsSdkVersion javaAwsSdkVersion = AwsSdkVersion.V2;
         private Path includeDafnyFile;
         private boolean awsSdkStyle = false;
@@ -300,6 +323,18 @@ public class CodegenEngine {
          */
         public Builder withDafnyVersion(final DafnyVersion dafnyVersion) {
             this.dafnyVersion = dafnyVersion;
+            return this;
+        }
+
+        /**
+         * Sets the path to generate a project.properties file at.
+         * This will contain a dafnyVersion property that can be used to
+         * select the correct version of the Dafny runtime in target language
+         * project configurations, amonst other potential uses.
+         * The properties file may contain other metadata in the future.
+         */
+        public Builder withPropertiesFile(final Path propertiesFile) {
+            this.propertiesFile = propertiesFile;
             return this;
         }
 
@@ -359,6 +394,8 @@ public class CodegenEngine {
             final Map<TargetLanguage, Path> targetLangOutputDirs = ImmutableMap.copyOf(targetLangOutputDirsRaw);
 
             final DafnyVersion dafnyVersion = Objects.requireNonNull(this.dafnyVersion);
+            final Optional<Path> propertiesFile = Optional.ofNullable(this.propertiesFile)
+                    .map(path -> path.toAbsolutePath().normalize());
             final AwsSdkVersion javaAwsSdkVersion = Objects.requireNonNull(this.javaAwsSdkVersion);
 
             if (targetLangOutputDirs.containsKey(TargetLanguage.DAFNY)
@@ -379,6 +416,7 @@ public class CodegenEngine {
                     this.namespace,
                     targetLangOutputDirs,
                     dafnyVersion,
+                    propertiesFile,
                     javaAwsSdkVersion,
                     includeDafnyFile,
                     this.awsSdkStyle,
