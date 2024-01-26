@@ -122,26 +122,23 @@ public class CodegenEngine {
             }
         }
 
-        if (propertiesFile.isPresent()) {
-            File propertiesFileAsFile = propertiesFile.get().toFile();
-            if (propertiesFileAsFile.exists()) {
-                throw new IllegalStateException("project.properties file already exists: " + propertiesFileAsFile);
-            }
+        propertiesFile.ifPresent(this::generateProjectPropertiesFile);
+    }
 
-            final String propertiesTemplate = IoUtils.readUtf8Resource(
-                    this.getClass(), "/templates/project.properties.template");
-            // Drop the pre-release suffix, if any.
-            // This means with the current Dafny pre-release naming convention,
-            // we'll grab the most recent full release of a Dafny runtime.
-            // This mapping may need to change in the future.
-            // Ideally this would be handled by the Dafny CLI itself.
-            String dafnyVersionString = new DafnyVersion(
-                    dafnyVersion.getMajor(), dafnyVersion.getMinor(), dafnyVersion.getPatch()
-            ).unparse();
-            final String propertiesText = propertiesTemplate
-                    .replace("%DAFNY_VERSION%", dafnyVersionString);
-            IOUtils.writeToFile(propertiesText, propertiesFileAsFile);
-        }
+    private void generateProjectPropertiesFile(final Path outputPath) {
+        final String propertiesTemplate = IoUtils.readUtf8Resource(
+                this.getClass(), "/templates/project.properties.template");
+        // Drop the pre-release suffix, if any.
+        // This means with the current Dafny pre-release naming convention,
+        // we'll grab the most recent full release of a Dafny runtime.
+        // This mapping may need to change in the future.
+        // Ideally this would be handled by the Dafny CLI itself.
+        String dafnyVersionString = new DafnyVersion(
+                dafnyVersion.getMajor(), dafnyVersion.getMinor(), dafnyVersion.getPatch()
+        ).unparse();
+        final String propertiesText = propertiesTemplate
+                .replace("%DAFNY_VERSION%", dafnyVersionString);
+        IOUtils.writeToFile(propertiesText, outputPath.toFile());
     }
 
     private void generateDafny(final Path outputDir) {
