@@ -23,7 +23,7 @@ include "../../libraries/src/Wrappers.dfy"
 // See also DafnyApiCodegen.generateResultOfClientHelperFunctions(),
 // which solves the same problem by emitting similar helper methods for each client type.
 //
-module StandardLibrary.Interop {
+module StandardLibraryInterop {
 
   import opened Wrappers
 
