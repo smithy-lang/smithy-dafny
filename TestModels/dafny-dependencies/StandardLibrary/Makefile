@@ -19,8 +19,17 @@ else
 	RESET        := ""
 endif
 
+# Overriding this target just to generate the project.properties file
 polymorph_dafny :
-	echo "Skipping polymorph_dafny for StandardLibrary"
+	@: $(if ${CODEGEN_CLI_ROOT},,$(error You must pass the path CODEGEN_CLI_ROOT: CODEGEN_CLI_ROOT=/path/to/smithy-dafny/codegen/smithy-dafny-codegen-cli));
+	cd $(CODEGEN_CLI_ROOT); \
+	$(GRADLEW) run --args="\
+	$(DAFNY_VERSION_OPTION) \
+	--properties-file $(STANDARD_LIBRARY_PATH)/project.properties \
+	--model $(STANDARD_LIBRARY_PATH)/Model \
+	--namespace aws.polymorph \
+	--dependent-model $(STANDARD_LIBRARY_PATH)/../Model \
+	";
 
 polymorph_net :
 	echo "Skipping polymorph_net for StandardLibrary"

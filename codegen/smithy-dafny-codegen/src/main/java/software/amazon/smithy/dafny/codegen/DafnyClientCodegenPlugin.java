@@ -40,6 +40,7 @@ public final class DafnyClientCodegenPlugin implements SmithyBuildPlugin {
             final Path dir = Paths.get("runtimes", lang.name().toLowerCase(), "Generated");
             outputDirs.put(lang, manifest.resolvePath(dir));
         });
+        final Path propertiesFile = manifest.resolvePath(Paths.get("project.properties"));
 
         // TODO remove when Java is properly supported
         if (settings.targetLanguages.contains(TargetLanguage.JAVA)) {
@@ -50,6 +51,8 @@ public final class DafnyClientCodegenPlugin implements SmithyBuildPlugin {
                 .withServiceModel(model)
                 // TODO generate code based on service closure, not namespace
                 .withNamespace(settings.serviceId.getNamespace())
+                .withDafnyVersion(settings.dafnyVersion)
+                .withPropertiesFile(propertiesFile)
                 .withTargetLangOutputDirs(outputDirs)
                 .withAwsSdkStyle(true)  // this plugin only generates AWS SDK-style code
                 .withIncludeDafnyFile(settings.includeDafnyFile)
