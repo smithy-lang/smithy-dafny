@@ -30,6 +30,7 @@ import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.utils.IoUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -122,6 +123,11 @@ public class CodegenEngine {
         }
 
         if (propertiesFile.isPresent()) {
+            File propertiesFileAsFile = propertiesFile.get().toFile();
+            if (propertiesFileAsFile.exists()) {
+                throw new IllegalStateException("project.properties file already exists: " + propertiesFileAsFile);
+            }
+
             final String propertiesTemplate = IoUtils.readUtf8Resource(
                     this.getClass(), "/templates/project.properties.template");
             // Drop the pre-release suffix, if any.
@@ -134,7 +140,7 @@ public class CodegenEngine {
             ).unparse();
             final String propertiesText = propertiesTemplate
                     .replace("%DAFNY_VERSION%", dafnyVersionString);
-            IOUtils.writeToFile(propertiesText, propertiesFile.get().toFile());
+            IOUtils.writeToFile(propertiesText, propertiesFileAsFile);
         }
     }
 
@@ -324,10 +330,11 @@ public class CodegenEngine {
         }
 
         /**
-         * Sets the Dafny version for which generated code should be compatible.
-         * This is used to ensure both Dafny source compatibility
-         * and compatibility with the Dafny compiler and runtime internals,
-         * which shim code generation currently depends on.
+         * Sets the path to generate a project.properties file at.
+         * This will contain a dafnyVersion property that can be used to
+         * select the correct version of the Dafny runtime in target language
+         * project configurations, amonst other potential uses.
+         * The properties file may contain other metadata in the future.
          */
         public Builder withPropertiesFile(final Path propertiesFile) {
             this.propertiesFile = propertiesFile;
