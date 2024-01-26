@@ -122,7 +122,7 @@ module Sorting {
    * Sorting routines
    */
 
-  method {:vcs_split_on_every_assert} SelectionSort<Data>(a: array<Data>, below: (Data, Data) -> bool)
+  method {:vcs_split_on_every_assert} SelectionSort<Data(!new)>(a: array<Data>, below: (Data, Data) -> bool)
     requires StandardLibrary.Transitive(below)
     requires Connected(below)
     modifies a
