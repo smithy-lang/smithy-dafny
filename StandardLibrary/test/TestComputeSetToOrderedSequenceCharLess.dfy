@@ -92,9 +92,25 @@ module TestComputeSetToOrderedSequenceCharLess {
     var output := ComputeSetToOrderedSequence(a, CharLess);
     var output2 := ComputeSetToOrderedSequence2(a, CharLess);
     var expected := ["&", "Љ", "ᝀ", "𐀂", "𐐷", "🂡", "｡"];
-    // This is the pure logographic order
+    // This is the pure logographic order,
     // however this function is used in the DB-ESDK
-    // to canonicalized sets and needs to remain the same.
+    // to canonicalize sets, and needs to remain the same.
+    // The expected ordering for strings is "UTF-16 Binary Order",
+    // where characters are converted to their UTF-16 big endian representations
+    // and compared starting at the first bytes
+    // (or, UTF-16 little endian and compared starting at their last bytes).
+    // 
+    // More detail on expected ordering in the spec:
+    //= specification/dynamodb-encryption-client/string-ordering#utf-16-binary-order
+    //# When ordering strings, these strings MUST be compared according to their UTF-16 encoding,
+    //# lexicographically per UTF-16 code unit.
+    //# UTF-16 code units for high or low surrogates MUST be compared individually,
+    //# and the Unicode scalar value represented by a surrogate pair MUST NOT be compared.
+    // 
+    // ComputeSetToOrderedSequence may be passed `char`s that cannot be encoded in UTF-16,
+    // ex. uint8 `1`.
+    // Any `char`s that cannot be UTF encoded should be compared without encoding.
+    // 
     // This order is kept here so that it is clear that this order is incorrect in this case
     // var expected := ["&", "Љ", "ᝀ", "｡", "𐀂", "𐐷", "🂡"];
     expect output == expected;
