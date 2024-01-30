@@ -11,6 +11,9 @@ on:
         required: true
         type: string
 
+permissions:
+  issues: write
+
 jobs:
   # manual-ci-verification:
   #   uses: ./.github/workflows/test_models_dafny_verification.yml
