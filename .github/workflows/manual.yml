@@ -24,3 +24,16 @@ jobs:
     uses: ./.github/workflows/test_models_net_tests.yml
     with:
       dafny: ${{ inputs.dafny }}
+
+  # TODO: Temporary to test mechanism intended only for nightly_dafny.yml
+  cut-issue-on-failure:
+    runs-on: ubuntu-20.04
+    needs: [manual-ci-verification, manual-ci-java, manual-ci-net]
+    if: ${{ always() && contains(needs.*.result, 'failure') }}
+    steps:
+      - name: Create release blocker on dafny-lang/dafny
+        run: |
+          gh issue create \
+            --title "(TEST ISSUE PLEASE IGNORE) Dafny nightly regression from ${{ github.workflow_ref }}" \
+            --label "severity: release-blocker" \
+            --body "See ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
