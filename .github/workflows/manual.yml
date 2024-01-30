@@ -30,6 +30,8 @@ jobs:
     runs-on: ubuntu-20.04
     needs: [manual-ci-verification, manual-ci-java, manual-ci-net]
     if: ${{ always() && contains(needs.*.result, 'failure') }}
+    env:
+      GH_TOKEN: ${{ github.token }}
     steps:
       - name: Create release blocker on dafny-lang/dafny
         run: |

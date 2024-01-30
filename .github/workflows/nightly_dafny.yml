@@ -32,6 +32,8 @@ jobs:
     runs-on: ubuntu-20.04
     needs: [dafny-nightly-verification, dafny-nightly-java, dafny-nightly-net]
     if: ${{ always() && contains(needs.*.result, 'failure') }}
+    env:
+      GH_TOKEN: ${{ github.token }}
     steps:
       - name: Create release blocker on dafny-lang/dafny
         run: |
