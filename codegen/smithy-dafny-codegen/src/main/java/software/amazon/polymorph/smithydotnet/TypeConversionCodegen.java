@@ -234,7 +234,14 @@ public class TypeConversionCodegen {
 
     public TypeConverter generateBlobConverter(final BlobShape blobShape) {
         final TokenTree fromDafnyBody = Token.of("return new System.IO.MemoryStream(value.Elements);");
-        final TokenTree toDafnyBody = Token.of("return Dafny.Sequence<byte>.FromArray(value.ToArray());");
+        // enforce that MemoryStreams are backed by an array
+        final TokenTree toDafnyBody = Token.of("""
+                if (value.ToArray().Length == 0 && value.Length > 0)
+                {
+                    throw new System.ArgumentException("Fatal Error: MemoryStream instance not backed by an array!");
+                }
+                return Dafny.Sequence<byte>.FromArray(value.ToArray());
+                """);
         return buildConverterFromMethodBodies(blobShape, fromDafnyBody, toDafnyBody);
     }
 
