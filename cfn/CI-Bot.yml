@@ -50,13 +50,6 @@ Resources:
                   ]
                 }
               }
-            },
-            {
-              "Effect": "Allow",
-              "Principal": {
-                "AWS": "*"
-              },
-              "Action": "sts:AssumeRole"
             }
           ]
         }
