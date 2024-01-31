@@ -23,6 +23,10 @@ public class KeyDescription {
 
   private final HierarchyKeyring Hierarchy;
 
+  private final MultiKeyring Multi;
+
+  private final RequiredEncryptionContextCMM RequiredEncryptionContext;
+
   protected KeyDescription(BuilderImpl builder) {
     this.Kms = builder.Kms();
     this.KmsMrk = builder.KmsMrk();
@@ -32,6 +36,8 @@ public class KeyDescription {
     this.Static = builder.Static();
     this.KmsRsa = builder.KmsRsa();
     this.Hierarchy = builder.Hierarchy();
+    this.Multi = builder.Multi();
+    this.RequiredEncryptionContext = builder.RequiredEncryptionContext();
   }
 
   public KMSInfo Kms() {
@@ -64,6 +70,14 @@ public class KeyDescription {
 
   public HierarchyKeyring Hierarchy() {
     return this.Hierarchy;
+  }
+
+  public MultiKeyring Multi() {
+    return this.Multi;
+  }
+
+  public RequiredEncryptionContextCMM RequiredEncryptionContext() {
+    return this.RequiredEncryptionContext;
   }
 
   public Builder toBuilder() {
@@ -107,6 +121,16 @@ public class KeyDescription {
 
     HierarchyKeyring Hierarchy();
 
+    Builder Multi(MultiKeyring Multi);
+
+    MultiKeyring Multi();
+
+    Builder RequiredEncryptionContext(
+      RequiredEncryptionContextCMM RequiredEncryptionContext
+    );
+
+    RequiredEncryptionContextCMM RequiredEncryptionContext();
+
     KeyDescription build();
   }
 
@@ -128,6 +152,10 @@ public class KeyDescription {
 
     protected HierarchyKeyring Hierarchy;
 
+    protected MultiKeyring Multi;
+
+    protected RequiredEncryptionContextCMM RequiredEncryptionContext;
+
     protected BuilderImpl() {}
 
     protected BuilderImpl(KeyDescription model) {
@@ -139,6 +167,8 @@ public class KeyDescription {
       this.Static = model.Static();
       this.KmsRsa = model.KmsRsa();
       this.Hierarchy = model.Hierarchy();
+      this.Multi = model.Multi();
+      this.RequiredEncryptionContext = model.RequiredEncryptionContext();
     }
 
     public Builder Kms(KMSInfo Kms) {
@@ -213,6 +243,26 @@ public class KeyDescription {
       return this.Hierarchy;
     }
 
+    public Builder Multi(MultiKeyring Multi) {
+      this.Multi = Multi;
+      return this;
+    }
+
+    public MultiKeyring Multi() {
+      return this.Multi;
+    }
+
+    public Builder RequiredEncryptionContext(
+      RequiredEncryptionContextCMM RequiredEncryptionContext
+    ) {
+      this.RequiredEncryptionContext = RequiredEncryptionContext;
+      return this;
+    }
+
+    public RequiredEncryptionContextCMM RequiredEncryptionContext() {
+      return this.RequiredEncryptionContext;
+    }
+
     public KeyDescription build() {
       if (!onlyOneNonNull()) {
         throw new IllegalArgumentException(
@@ -232,6 +282,8 @@ public class KeyDescription {
         this.Static,
         this.KmsRsa,
         this.Hierarchy,
+        this.Multi,
+        this.RequiredEncryptionContext,
       };
       boolean haveOneNonNull = false;
       for (Object o : allValues) {

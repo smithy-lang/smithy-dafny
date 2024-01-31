@@ -16,14 +16,14 @@ module {:extern "software.amazon.cryptography.materialproviderstestvectorkeys.in
 
   function method DefaultKeyVectorsConfig() : KeyVectorsConfig {
     KeyVectorsConfig(
-      keyManifiestPath := ""
+      keyManifestPath := ""
     )
   }
 
   method KeyVectors(config: KeyVectorsConfig)
     returns (res: Result<KeyVectorsClient, Error>)
   {
-    var keysManifestBv :- expect FileIO.ReadBytesFromFile(config.keyManifiestPath);
+    var keysManifestBv :- expect FileIO.ReadBytesFromFile(config.keyManifestPath);
     var keysManifestBytes := BvToBytes(keysManifestBv);
     var keysManifestJSON :- API.Deserialize(keysManifestBytes)
     .MapFailure((e: Errors.DeserializationError)  => KeyVectorException(
@@ -41,7 +41,10 @@ module {:extern "software.amazon.cryptography.materialproviderstestvectorkeys.in
                     message := e
                   ));
 
-    var config := Operations.Config( keys := keys );
+    var config := Operations.Config(
+      keys := keys,
+      keysJson := keysManifestJSON
+    );
     var client := new KeyVectorsClient(config);
 
     res := Success(client);

@@ -15,6 +15,8 @@ namespace AWS.Cryptography.MaterialProvidersTestVectorKeys
     private AWS.Cryptography.MaterialProvidersTestVectorKeys.StaticKeyring _static;
     private AWS.Cryptography.MaterialProvidersTestVectorKeys.KmsRsaKeyring _kmsRsa;
     private AWS.Cryptography.MaterialProvidersTestVectorKeys.HierarchyKeyring _hierarchy;
+    private AWS.Cryptography.MaterialProvidersTestVectorKeys.MultiKeyring _multi;
+    private AWS.Cryptography.MaterialProvidersTestVectorKeys.RequiredEncryptionContextCMM _requiredEncryptionContext;
     public AWS.Cryptography.MaterialProvidersTestVectorKeys.KMSInfo Kms
     {
       get { return this._kms; }
@@ -87,6 +89,24 @@ namespace AWS.Cryptography.MaterialProvidersTestVectorKeys
     {
       return this._hierarchy != null;
     }
+    public AWS.Cryptography.MaterialProvidersTestVectorKeys.MultiKeyring Multi
+    {
+      get { return this._multi; }
+      set { this._multi = value; }
+    }
+    public bool IsSetMulti()
+    {
+      return this._multi != null;
+    }
+    public AWS.Cryptography.MaterialProvidersTestVectorKeys.RequiredEncryptionContextCMM RequiredEncryptionContext
+    {
+      get { return this._requiredEncryptionContext; }
+      set { this._requiredEncryptionContext = value; }
+    }
+    public bool IsSetRequiredEncryptionContext()
+    {
+      return this._requiredEncryptionContext != null;
+    }
     public void Validate()
     {
       var numberOfPropertiesSet = Convert.ToUInt16(IsSetKms()) +
@@ -96,7 +116,9 @@ namespace AWS.Cryptography.MaterialProvidersTestVectorKeys
       Convert.ToUInt16(IsSetAES()) +
       Convert.ToUInt16(IsSetStatic()) +
       Convert.ToUInt16(IsSetKmsRsa()) +
-      Convert.ToUInt16(IsSetHierarchy());
+      Convert.ToUInt16(IsSetHierarchy()) +
+      Convert.ToUInt16(IsSetMulti()) +
+      Convert.ToUInt16(IsSetRequiredEncryptionContext());
       if (numberOfPropertiesSet == 0) throw new System.ArgumentException("No union value set");
 
       if (numberOfPropertiesSet > 1) throw new System.ArgumentException("Multiple union values set");

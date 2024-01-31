@@ -7,19 +7,19 @@ namespace AWS.Cryptography.MaterialProvidersTestVectorKeys
 {
   public class KeyVectorsConfig
   {
-    private string _keyManifiestPath;
-    public string KeyManifiestPath
+    private string _keyManifestPath;
+    public string KeyManifestPath
     {
-      get { return this._keyManifiestPath; }
-      set { this._keyManifiestPath = value; }
+      get { return this._keyManifestPath; }
+      set { this._keyManifestPath = value; }
     }
-    public bool IsSetKeyManifiestPath()
+    public bool IsSetKeyManifestPath()
     {
-      return this._keyManifiestPath != null;
+      return this._keyManifestPath != null;
     }
     public void Validate()
     {
-      if (!IsSetKeyManifiestPath()) throw new System.ArgumentException("Missing value for required property 'KeyManifiestPath'");
+      if (!IsSetKeyManifestPath()) throw new System.ArgumentException("Missing value for required property 'KeyManifestPath'");
 
     }
   }

@@ -11,7 +11,8 @@ service KeyVectors {
   resources: [],
   operations: [
     CreateTestVectorKeyring,
-    CreateWappedTestVectorKeyring,
+    CreateWrappedTestVectorKeyring,
+    CreateWrappedTestVectorCmm,
     GetKeyDescription,
     SerializeKeyDescription,
   ]
@@ -19,7 +20,7 @@ service KeyVectors {
 
 structure KeyVectorsConfig {
   @required
-  keyManifiestPath: String
+  keyManifestPath: String
 }
 
 operation CreateTestVectorKeyring {
@@ -27,9 +28,39 @@ operation CreateTestVectorKeyring {
   output: aws.cryptography.materialProviders#CreateKeyringOutput,
 }
 
-operation CreateWappedTestVectorKeyring {
+operation CreateWrappedTestVectorKeyring {
   input: TestVectorKeyringInput,
   output: aws.cryptography.materialProviders#CreateKeyringOutput,
+}
+
+operation CreateWrappedTestVectorCmm {
+  input: TestVectorCmmInput,
+  output: CreateWrappedTestVectorCmmOutput,
+}
+
+structure TestVectorCmmInput {
+  @required
+  keyDescription: KeyDescription,
+  @required
+  forOperation: CmmOperation,
+}
+
+@enum([
+  {
+    name: "ENCRYPT",
+    value: "ENCRYPT",
+  },
+  {
+    name: "DECRYPT",
+    value: "DECRYPT",
+  },
+])
+string CmmOperation
+
+@aws.polymorph#positional
+structure CreateWrappedTestVectorCmmOutput {
+  @required
+  cmm: aws.cryptography.materialProviders#CryptographicMaterialsManagerReference,
 }
 
 @readonly
@@ -62,10 +93,9 @@ structure SerializeKeyDescriptionOutput {
   json: Blob
 }
 
-
 structure TestVectorKeyringInput {
   @required
-  keyDescription: KeyDescription
+  keyDescription: KeyDescription,
 }
 
 union KeyDescription {
@@ -77,6 +107,8 @@ union KeyDescription {
   Static: StaticKeyring,
   KmsRsa: KmsRsaKeyring,
   Hierarchy: HierarchyKeyring,
+  Multi: MultiKeyring,
+  RequiredEncryptionContext: RequiredEncryptionContextCMM,
 }
 
 structure KMSInfo {
@@ -125,6 +157,22 @@ structure HierarchyKeyring {
   keyId: String,
 }
 
+structure MultiKeyring {
+  generator: KeyDescription,
+  @required
+  childKeyrings: KeyDescriptionList,
+}
+
+list KeyDescriptionList {
+  member: KeyDescription
+}
+
+structure RequiredEncryptionContextCMM {
+  @required
+  underlying: KeyDescription,
+  @required
+  requiredEncryptionContextKeys: aws.cryptography.materialProviders#EncryptionContextKeys
+}
 
 @error("client")
 structure KeyVectorException {

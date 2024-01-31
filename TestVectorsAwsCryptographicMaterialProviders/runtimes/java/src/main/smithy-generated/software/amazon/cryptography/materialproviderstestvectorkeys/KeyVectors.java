@@ -6,6 +6,8 @@ package software.amazon.cryptography.materialproviderstestvectorkeys;
 import Wrappers_Compile.Result;
 import java.lang.IllegalArgumentException;
 import java.util.Objects;
+import software.amazon.cryptography.materialproviders.CryptographicMaterialsManager;
+import software.amazon.cryptography.materialproviders.ICryptographicMaterialsManager;
 import software.amazon.cryptography.materialproviders.IKeyring;
 import software.amazon.cryptography.materialproviders.Keyring;
 import software.amazon.cryptography.materialproviderstestvectorkeys.internaldafny.KeyVectorsClient;
@@ -17,6 +19,7 @@ import software.amazon.cryptography.materialproviderstestvectorkeys.model.GetKey
 import software.amazon.cryptography.materialproviderstestvectorkeys.model.KeyVectorsConfig;
 import software.amazon.cryptography.materialproviderstestvectorkeys.model.SerializeKeyDescriptionInput;
 import software.amazon.cryptography.materialproviderstestvectorkeys.model.SerializeKeyDescriptionOutput;
+import software.amazon.cryptography.materialproviderstestvectorkeys.model.TestVectorCmmInput;
 import software.amazon.cryptography.materialproviderstestvectorkeys.model.TestVectorKeyringInput;
 
 public class KeyVectors {
@@ -58,16 +61,31 @@ public class KeyVectors {
     return Keyring.wrap(result.dtor_value());
   }
 
+  public ICryptographicMaterialsManager CreateWrappedTestVectorCmm(
+    TestVectorCmmInput input
+  ) {
+    software.amazon.cryptography.materialproviderstestvectorkeys.internaldafny.types.TestVectorCmmInput dafnyValue =
+      ToDafny.TestVectorCmmInput(input);
+    Result<
+      software.amazon.cryptography.materialproviders.internaldafny.types.ICryptographicMaterialsManager,
+      Error
+    > result = this._impl.CreateWrappedTestVectorCmm(dafnyValue);
+    if (result.is_Failure()) {
+      throw ToNative.Error(result.dtor_error());
+    }
+    return CryptographicMaterialsManager.wrap(result.dtor_value());
+  }
+
   /**
    * @return Outputs for creating a Keyring.
    */
-  public IKeyring CreateWappedTestVectorKeyring(TestVectorKeyringInput input) {
+  public IKeyring CreateWrappedTestVectorKeyring(TestVectorKeyringInput input) {
     software.amazon.cryptography.materialproviderstestvectorkeys.internaldafny.types.TestVectorKeyringInput dafnyValue =
       ToDafny.TestVectorKeyringInput(input);
     Result<
       software.amazon.cryptography.materialproviders.internaldafny.types.IKeyring,
       Error
-    > result = this._impl.CreateWappedTestVectorKeyring(dafnyValue);
+    > result = this._impl.CreateWrappedTestVectorKeyring(dafnyValue);
     if (result.is_Failure()) {
       throw ToNative.Error(result.dtor_error());
     }

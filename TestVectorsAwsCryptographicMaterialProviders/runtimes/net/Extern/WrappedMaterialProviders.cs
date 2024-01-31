@@ -24,10 +24,5 @@ namespace software.amazon.cryptography.materialproviders.internaldafny.wrapped
         >
         .create_Success(wrappedClient);
     }
-
-    static void Main(string[] args)
-    {
-      WrappedMaterialProvidersMain_Compile.__default.CheckKeyrings();
-    }
   }
 }

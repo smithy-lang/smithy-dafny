@@ -11,23 +11,44 @@ module TestWrappedMaterialProvidersMain {
   import WrappedMaterialProvidersMain
   import TestManifests
   import CompleteVectors
+  import opened MplManifestOptions
 
-  // method {:test} TestCheckKeyrings() {
-  //   WrappedMaterialProvidersMain.CheckKeyrings();
-  // }
-
-  // This MUST go before the test vectors
-  method {:test} ASDF() {
-    CompleteVectors.WriteStuff();
+  // This MUST go before TestEncryptManifest
+  method {:test} TestGenerateEncryptManifest() {
+    var result := CompleteVectors.WriteStuff(
+      EncryptManifest(
+        encryptManifestOutput := "dafny/TestVectorsAwsCryptographicMaterialProviders/test/"
+      ));
+    if result.Failure? {
+      print result.error;
+    }
+    expect result.Success?;
   }
 
-  method {:test} TestVectors() {
-    WrappedMaterialProvidersMain.EncryptTestVectors();
-
-    TestManifests.StartEncrypt(
-      "dafny/TestVectorsAwsCryptographicMaterialProviders/test/test.json",
-      "dafny/TestVectorsAwsCryptographicMaterialProviders/test/keys.json"
+  // This MUST go before TestDecryptManifest
+  method {:test} TestEncryptManifest() {
+    var result := TestManifests.StartEncrypt(
+      Encrypt(
+        manifestPath := "dafny/TestVectorsAwsCryptographicMaterialProviders/test/",
+        decryptManifestOutput := "dafny/TestVectorsAwsCryptographicMaterialProviders/"
+      )
     );
+    if result.Failure? {
+      print result.error;
+    }
+    expect result.Success?;
+  }
+
+  method {:test} TestDecryptManifest() {
+    var result := TestManifests.StartDecrypt(
+      Decrypt(
+        manifestPath := "dafny/TestVectorsAwsCryptographicMaterialProviders/"
+      )
+    );
+    if result.Failure? {
+      print result;
+    }
+    expect result.Success?;
   }
 
 }

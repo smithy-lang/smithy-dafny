@@ -31,6 +31,20 @@
       "requiredEncryptionContextKeys": [],
       "plaintextDataKey": "AQEBAQEBAQEBAQEBAQEBAQ=="
     },
+    "static-cashable-plaintext-data-key": {
+      "type": "static-material",
+      "algorithmSuiteId": "0478",
+      "encryptionContext": {},
+      "encryptedDataKeys": [
+        {
+          "keyProviderId": "static-material-keyring",
+          "keyProviderInfo": "c3RhdGljLXBsYWludGV4dA==",
+          "ciphertext": "AQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQE="
+        }
+      ],
+      "requiredEncryptionContextKeys": [],
+      "plaintextDataKey": "AQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQE="
+    },
     "static-branch-key-1": {
       "type": "static-branch-key",
       "encrypt": true,
