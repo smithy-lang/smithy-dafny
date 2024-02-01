@@ -155,6 +155,16 @@ module {:extern "UTF8"} UTF8 {
         false
   }
 
+  lemma ValidUTF8SeqCases(s: seq<uint8>)
+    requires ValidUTF8Seq(s)
+    ensures
+      || 0 == |s|
+      || (1 <= |s| && Uses1Byte(s))
+      || (2 <= |s| && Uses2Bytes(s))
+      || (3 <= |s| && Uses3Bytes(s))
+      || (4 <= |s| && Uses4Bytes(s))
+  {}
+
   lemma ValidUTF8Embed(a: seq<uint8>, b: seq<uint8>, c: seq<uint8>, lo: nat, hi: nat)
     requires lo <= hi <= |b|
     ensures ValidUTF8Range(b, lo, hi) == ValidUTF8Range(a + b + c, |a| + lo, |a| + hi)
@@ -200,6 +210,9 @@ module {:extern "UTF8"} UTF8 {
         lo := lo + 3;
       } else if 4 <= |r| && Uses4Bytes(r) {
         lo := lo + 4;
+      } else {
+        ValidUTF8SeqCases(r);
+        assert false;
       }
     }
     calc {

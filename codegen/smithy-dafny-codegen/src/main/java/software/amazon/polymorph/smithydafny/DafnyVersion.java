@@ -80,6 +80,22 @@ public class DafnyVersion implements Comparable<DafnyVersion> {
         return value;
     }
 
+    public int getMajor() {
+        return major;
+    }
+
+    public int getMinor() {
+        return minor;
+    }
+
+    public int getPatch() {
+        return patch;
+    }
+
+    public String getSuffix() {
+        return suffix;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -118,6 +134,20 @@ public class DafnyVersion implements Comparable<DafnyVersion> {
         }
 
         return SUFFIX_COMPARATOR.compare(this.suffix, other.suffix);
+    }
+
+    public String unparse() {
+        StringBuilder builder = new StringBuilder();
+        builder.append(major);
+        builder.append('.');
+        builder.append(minor);
+        builder.append('.');
+        builder.append(patch);
+        if (suffix != null) {
+            builder.append('-');
+            builder.append(suffix);
+        }
+        return builder.toString();
     }
 
     @Override
