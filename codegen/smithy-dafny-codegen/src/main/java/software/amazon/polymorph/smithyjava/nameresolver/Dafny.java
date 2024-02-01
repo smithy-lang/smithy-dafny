@@ -98,7 +98,7 @@ public class Dafny extends NameResolver {
     }
 
     //  Dafnys greater than or equal to this will need Type Descriptors for constructing datatypes  
-    private static final DafnyVersion NEEDS_TYPE_DESCRIPTORS_WHEN_CONSTRUCTING_DATATYPES = new DafnyVersion(4, 2, 0);
+    private static final DafnyVersion NEEDS_TYPE_DESCRIPTORS_WHEN_CONSTRUCTING_DATATYPES = new DafnyVersion(4, 3, 0);
 
     /**
      * @return Whether the given Dafny version requires type descriptor values when instantiating datatype constructors.
