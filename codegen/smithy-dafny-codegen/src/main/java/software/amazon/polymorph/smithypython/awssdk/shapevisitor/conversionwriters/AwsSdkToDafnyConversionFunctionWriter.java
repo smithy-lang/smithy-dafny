@@ -314,7 +314,7 @@ public class AwsSdkToDafnyConversionFunctionWriter extends BaseConversionWriter 
                 conversionWriter.write(
                     """
                                         else:
-                                            raise ValueError("No recognized union value in union type: " + $L)
+                                            raise ValueError("No recognized union value in union type: " + str($L))
                                         """,
                     dataSourceInsideConversionFunction);
 

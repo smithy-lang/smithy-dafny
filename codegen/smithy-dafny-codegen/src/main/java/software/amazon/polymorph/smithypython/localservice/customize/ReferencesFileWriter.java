@@ -16,6 +16,7 @@ import software.amazon.smithy.model.shapes.*;
 import software.amazon.smithy.model.traits.DocumentationTrait;
 import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonWriter;
+import software.amazon.smithy.utils.CaseUtils;
 
 /**
  * Writes references ({@link ResourceShape}s with a {@link
@@ -71,6 +72,10 @@ public class ReferencesFileWriter implements CustomFileWriter {
                     )
 
                 ${C|}
+                
+                ${C|}
+                
+                
             """,
         resourceShape.getId().getName(),
         writer.consumer(
@@ -80,7 +85,10 @@ public class ReferencesFileWriter implements CustomFileWriter {
         writer.consumer(
             w ->
                 generateInterfaceOperationFunctionDefinitionForResource(
-                    context, resourceShape, w)));
+                    context, resourceShape, w)),
+        writer.consumer(
+                w -> generateNativeWrapperFunctionDefinitionForResource(context, resourceShape, w))
+    );
 
     writer.addStdlibImport("typing", "Any");
   }
@@ -121,7 +129,7 @@ protected void generateResourceImplementation(
             w -> generateSmithyOperationFunctionDefinitionForResource(context, resourceShape, w)),
         writer.consumer(w -> generateDictConvertersForResource(resourceShape, w)),
         writer.consumer(
-                w -> writeDocsForResourceOrInterfaceClass(writer, resourceShape, context))
+                w -> writeDocsForResourceOrInterfaceClass(w, resourceShape, context))
     );
   }
 
@@ -184,7 +192,7 @@ protected void generateResourceImplementation(
 
         writer.openBlock("def $L(self, input: '$L') -> '$L':",
               "",
-              operationShapeId.getName(),
+              CaseUtils.toSnakeCase(operationShapeId.getName()),
               inputSymbol,
               outputSymbol,
               () -> {
@@ -196,6 +204,113 @@ protected void generateResourceImplementation(
         writer.addStdlibImport(outputSymbol.getNamespace());
     }
   }
+
+    /**
+     * Generates abstract methods for all operations on the provided resource. This is called from a
+     * resource interface to generate its abstract methods.
+     *
+     * @param codegenContext
+     * @param resourceShape
+     * @param writer
+     */
+    private void generateNativeWrapperFunctionDefinitionForResource(
+            GenerationContext codegenContext, ResourceShape resourceShape, PythonWriter writer) {
+        Set<ShapeId> operationShapeIds = resourceShape.getOperations();
+
+        for (ShapeId operationShapeId : operationShapeIds) {
+            OperationShape operationShape =
+                    codegenContext.model().expectShape(operationShapeId, OperationShape.class);
+
+            Shape targetShapeInput = codegenContext.model().expectShape(operationShape.getInputShape());
+            SmithyNameResolver.importSmithyGeneratedTypeForShape(writer, targetShapeInput, codegenContext);
+            Symbol inputSymbol = codegenContext.symbolProvider().toSymbol(targetShapeInput);
+
+            String dafnyInput = DafnyNameResolver.getDafnyTypeForShape(targetShapeInput);
+            DafnyNameResolver.importDafnyTypeForShape(writer, targetShapeInput.getId(), codegenContext);
+
+
+            Shape targetShapeOutput = codegenContext.model().expectShape(operationShape.getOutputShape());
+            SmithyNameResolver.importSmithyGeneratedTypeForShape(writer, targetShapeOutput, codegenContext);
+            Symbol outputSymbol = codegenContext.symbolProvider().toSymbol(targetShapeOutput);
+
+            String dafnyOutput = DafnyNameResolver.getDafnyTypeForShape(targetShapeOutput);
+            DafnyNameResolver.importDafnyTypeForShape(writer, targetShapeOutput.getId(), codegenContext);
+
+            ServiceShape serviceShape = codegenContext.model().expectShape(codegenContext.settings().getService()).asServiceShape().get();
+            // Services don't specify a "default" error.
+            // Pick the first one off its list of errors.
+            // Crypto Tools only specifies one error per service, so this works perfectly, but may not extend well.
+            // This may need to be updated.
+            String defaultWrappingError =
+                    !serviceShape.getErrors().isEmpty()
+                    ? DafnyNameResolver.getDafnyTypeForError(serviceShape.getErrors().get(0))
+                    : "Error";
+
+            writer.addStdlibImport(
+                    DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(serviceShape),
+                    defaultWrappingError
+            );
+
+            writer.openBlock("def $L(self, dafny_input: '$L') -> '$L':",
+                    "",
+                    operationShapeId.getName(),
+                    dafnyInput,
+                    dafnyOutput,
+                    () -> {
+                        writer.write(
+                                /*
+                        native_input = aws_cryptographic_materialproviders.smithygenerated.aws_cryptography_materialproviders.dafny_to_smithy.DafnyToSmithy_aws_cryptography_materialproviders_GetBranchKeyIdInput(
+                            dafny_input
+                        )
+                        try:
+                            native_output = self.get_branch_key_id(native_input)
+                            dafny_output = aws_cryptographic_materialproviders.smithygenerated.aws_cryptography_materialproviders.smithy_to_dafny.SmithyToDafny_aws_cryptography_materialproviders_GetBranchKeyIdOutput(
+                                native_output
+                            )
+                            return Wrappers.Result_Success(dafny_output)
+                        except Exception as e:
+                            error = software_amazon_cryptography_materialproviders_internaldafny_types.Error_AwsCryptographicMaterialProvidersException(
+                                message=str(e)
+                            )
+                            return Wrappers.Result_Failure(error)
+                                 */
+                        """
+                        '''
+                        Do not use.
+                        This method allows custom implementations of this interface to interact with generated code.
+                        '''
+                        native_input = $L(
+                            dafny_input
+                        )
+                        try:
+                            native_output = self.$L(native_input)
+                            dafny_output = $L(
+                                native_output
+                            )
+                            return Wrappers.Result_Success(dafny_output)
+                        except Exception as e:
+                            error = $L(
+                                message=str(e)
+                            )
+                            return Wrappers.Result_Failure(error)
+                        """,
+                    SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
+                            targetShapeInput.getId().getNamespace(),
+                            codegenContext
+                        ) + ".dafny_to_smithy." +
+                        SmithyNameResolver.getDafnyToSmithyFunctionNameForShape(targetShapeInput, codegenContext),
+                        CaseUtils.toSnakeCase(operationShapeId.getName()),
+                        SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
+                                targetShapeOutput.getId().getNamespace(),
+                                codegenContext
+                        ) + ".smithy_to_dafny." +
+                        SmithyNameResolver.getSmithyToDafnyFunctionNameForShape(targetShapeOutput, codegenContext),
+                        defaultWrappingError
+                        );
+                        writer.addStdlibImport("Wrappers");
+                    });
+        }
+    }
 
   /**
    * Generates methods for all operations on the provided resource. The generated method takes in a
@@ -233,7 +348,7 @@ protected void generateResourceImplementation(
       String output =
           targetShapeOutput.accept(
               ShapeVisitorResolver.getToNativeShapeVisitorForShape(
-                  targetShapeOutput, codegenContext, "dafny_output", writer));
+                  targetShapeOutput, codegenContext, "dafny_output.value", writer));
 
         Symbol outputSymbol = codegenContext.symbolProvider().toSymbol(targetShapeOutput);
 
@@ -241,14 +356,40 @@ protected void generateResourceImplementation(
         writer.openBlock(
           "def $L(self, input: '$L') -> '$L':",
           "",
-        operationShapeId.getName(),
+        CaseUtils.toSnakeCase(operationShapeId.getName()),
           inputSymbol,
           outputSymbol,
               () -> {
             writeDocsForResourceOrInterfaceOperation(writer, operationShape, codegenContext);
 
             writer.write("dafny_output = self._impl.$L($L)", operationShapeId.getName(), input);
-            writer.write("return $L", output);
+            writer.openBlock("if dafny_output.IsFailure():",
+                    "",
+                    () -> {
+                        writer.addStdlibImport("asyncio");
+                        writer.addStdlibImport(
+                                // `from dependency.smithygenerated.deserialize`
+                                SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
+                                        targetShapeOutput.getId().getNamespace(), codegenContext)
+                                        + ".deserialize",
+                                // `import _deserialize_error`
+                                "_deserialize_error",
+                                // `as dependency_deserialize_error`
+                                SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
+                                        targetShapeOutput.getId().getNamespace())
+                                        + "_deserialize_error");
+                        writer.write("raise asyncio.run($L(dafny_output.error))",
+                                SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
+                                        targetShapeOutput.getId().getNamespace())
+                                        + "_deserialize_error"
+                                );
+                    }
+            );
+          writer.openBlock("else:",
+                  "",
+                  () -> writer.write("return $L",
+                          output)
+          );
           });
         writer.addStdlibImport(inputSymbol.getNamespace());
         writer.addStdlibImport(outputSymbol.getNamespace());

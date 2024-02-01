@@ -3,6 +3,7 @@
 
 package software.amazon.polymorph.smithypython.localservice.shapevisitor.conversionwriter;
 
+import java.util.List;
 import java.util.Map.Entry;
 
 import software.amazon.polymorph.smithypython.awssdk.nameresolver.AwsSdkNameResolver;
@@ -23,6 +24,8 @@ import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.UnionShape;
+import software.amazon.smithy.model.traits.EnumDefinition;
+import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonWriter;
 import software.amazon.smithy.utils.CaseUtils;
@@ -300,9 +303,21 @@ public class LocalServiceToDafnyConversionFunctionWriter extends BaseConversionW
 
   protected void writeResourceShapeConverter(ResourceShape resourceShape,
       PythonWriter conversionWriter, String dataSourceInsideConversionFunction) {
-    // Smithy resource shapes ALWAYS store the underlying Dafny resource in `_impl`.
-    conversionWriter.write("return $L._impl",
-        dataSourceInsideConversionFunction);
+
+      conversionWriter.openBlock("if hasattr($L, '_impl'):",
+              "",
+              dataSourceInsideConversionFunction,
+              () -> {
+                  conversionWriter.write("return $L._impl",
+                          dataSourceInsideConversionFunction);
+              });
+
+      conversionWriter.openBlock("else:",
+              "",
+              () -> {
+                  conversionWriter.write("return $L",
+                          dataSourceInsideConversionFunction);
+              });
   }
 
   /**
@@ -373,7 +388,7 @@ public class LocalServiceToDafnyConversionFunctionWriter extends BaseConversionW
             // Write case to handle if union member does not match any of the above cases
             conversionWriter.write("""
                       else:
-                          raise ValueError("No recognized union value in union type: " + $L)
+                          raise ValueError("No recognized union value in union type: " + str($L))
                       """,
                 dataSourceInsideConversionFunction
             );
@@ -386,7 +401,52 @@ public class LocalServiceToDafnyConversionFunctionWriter extends BaseConversionW
   }
 
   protected void writeStringEnumShapeConverter(StringShape stringShapeWithEnumTrait) {
+      WriterDelegator<PythonWriter> delegator = context.writerDelegator();
+      String moduleName = SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(context.settings().getService().getNamespace());
 
+      delegator.useFileWriter(moduleName + "/smithy_to_dafny.py", "", conversionWriter -> {
+          // Within the conversion function, the dataSource becomes the function's input
+          // This hardcodes the input parameter name for a conversion function to always be "input"
+          String dataSourceInsideConversionFunction = "input";
+
+          conversionWriter.openBlock(
+                  "def $L($L):",
+                  "",
+                  SmithyNameResolver.getSmithyToDafnyFunctionNameForShape(stringShapeWithEnumTrait, context),
+                  dataSourceInsideConversionFunction,
+                  () -> {
+
+                      // First enum value opens a new `if` block; others do not need to and write `elif`
+                      boolean shouldOpenNewIfBlock = true;
+                      for (EnumDefinition enumDefinition :
+                              stringShapeWithEnumTrait.getTrait(EnumTrait.class).get().getValues()) {
+                          String name = enumDefinition.getName().isPresent()
+                                  ? enumDefinition.getName().get()
+                                  : enumDefinition.getValue();
+                          String value = enumDefinition.getValue();
+                          conversionWriter.openBlock("$L $L == '$L':",
+                                  "",
+                                  shouldOpenNewIfBlock ? "if" : "elif",
+                                  dataSourceInsideConversionFunction,
+                                  value,
+                                  () -> {
+                                      conversionWriter.write("return $L()",
+                                              DafnyNameResolver.getDafnyTypeForStringShapeWithEnumTrait(stringShapeWithEnumTrait, name));
+                                      DafnyNameResolver.importDafnyTypeForStringShapeWithEnumTrait(conversionWriter, stringShapeWithEnumTrait, name);
+                                  }
+                          );
+                          shouldOpenNewIfBlock = false;
+                      }
+                      conversionWriter.openBlock("else:",
+                              "",
+                              () -> {
+                                  conversionWriter.write("raise ValueError(f'No recognized enum value in enum type: {$L=}')",
+                                          dataSourceInsideConversionFunction);
+                              }
+                      );
+                  }
+          );
+      });
   }
 
 }

@@ -92,6 +92,8 @@ public abstract class BaseConversionWriter {
         writeUnionShapeConverter(toGenerate.asUnionShape().get());
       } else if (toGenerate.isStringShape() && toGenerate.hasTrait(EnumTrait.class)) {
         writeStringEnumShapeConverter(toGenerate.asStringShape().get());
+      } else {
+        throw new IllegalArgumentException("Unsupported shape passed to ConversionWriter: " + toGenerate);
       }
       generating = false;
     }

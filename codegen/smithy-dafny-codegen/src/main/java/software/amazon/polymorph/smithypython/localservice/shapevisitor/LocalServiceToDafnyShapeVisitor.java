@@ -8,6 +8,7 @@ import software.amazon.polymorph.smithypython.common.nameresolver.Utils;
 import software.amazon.polymorph.smithypython.common.shapevisitor.ShapeVisitorResolver;
 import software.amazon.polymorph.smithypython.localservice.shapevisitor.conversionwriter.DafnyToLocalServiceConversionFunctionWriter;
 import software.amazon.polymorph.smithypython.localservice.shapevisitor.conversionwriter.LocalServiceToDafnyConversionFunctionWriter;
+import software.amazon.polymorph.traits.DafnyUtf8BytesTrait;
 import software.amazon.smithy.codegen.core.CodegenException;
 import software.amazon.smithy.model.shapes.BigDecimalShape;
 import software.amazon.smithy.model.shapes.BigIntegerShape;
@@ -186,9 +187,38 @@ public class LocalServiceToDafnyShapeVisitor extends ShapeVisitor.Default<String
 
     @Override
     public String stringShape(StringShape shape) {
+      writer.addStdlibImport("_dafny", "Seq");
+      if (shape.hasTrait(DafnyUtf8BytesTrait.class)) {
+        return "Seq(list(ord(c) for c in %1$s))".formatted(dataSource);
+        // Smithy has deprecated EnumTrait, but Polymorph still uses it to mark enums
+      }
       // Smithy has deprecated EnumTrait, but Polymorph still uses it to mark enums
       if (shape.hasTrait(EnumTrait.class)) {
-        return dataSource;
+        // ONLY write converters if the shape under generation is in the current namespace
+        if (shape.getId().getNamespace().equals(context.settings().getService().getNamespace())) {
+          LocalServiceToDafnyConversionFunctionWriter.writeConverterForShapeAndMembers(shape,
+                  context, writer);
+          DafnyToLocalServiceConversionFunctionWriter.writeConverterForShapeAndMembers(shape,
+                  context, writer);
+        }
+
+        // Import the smithy_to_dafny converter from where the ShapeVisitor was called
+        String pythonModuleSmithygeneratedPath =
+                SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
+                        shape.getId().getNamespace(),
+                        context
+                );
+        writer.addStdlibImport(pythonModuleSmithygeneratedPath + ".smithy_to_dafny");
+
+        // Return a reference to the generated conversion method
+        // ex. for shape example.namespace.ExampleShape
+        // returns
+        // `example_namespace.smithygenerated.smithy_to_dafny.SmithyToDafny_example_namespace_ExampleShape(input)`
+        return "%1$s.smithy_to_dafny.%2$s(%3$s)".formatted(
+                pythonModuleSmithygeneratedPath,
+                SmithyNameResolver.getSmithyToDafnyFunctionNameForShape(shape, context),
+                dataSource
+        );
       }
       writer.addStdlibImport("_dafny", "Seq");
       return "Seq(" + dataSource + ")";

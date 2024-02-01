@@ -7,6 +7,7 @@ import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameReso
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
+import software.amazon.smithy.utils.CaseUtils;
 
 /**
  * Contains utility functions that map Smithy shapes to useful strings used in Smithy-Python
@@ -48,6 +49,17 @@ public class AwsSdkNameResolver {
    */
   public static String shimNameForService(ServiceShape serviceShape) {
     return clientNameForService(serviceShape) + "Shim";
+  }
+
+  /**
+   * Returns the name of the error type that wraps AWS SDK errors.
+   * Customers may see this error type, so it should be reasonably informative.
+   *
+   * @param serviceShape
+   * @return
+   */
+  public static String dependencyErrorNameForService(ServiceShape serviceShape) {
+    return CaseUtils.toPascalCase(serviceShape.getId().getNamespace().replace(".", "_"));
   }
 
   /**

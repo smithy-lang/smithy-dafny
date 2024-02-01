@@ -313,7 +313,7 @@ public class DafnyNameResolver {
     if ("none".equalsIgnoreCase(name)) {
       return name + "_";
     }
-    return name;
+    return name.replace("_", "__");
   }
 
   /**

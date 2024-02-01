@@ -280,8 +280,7 @@ public class SmithyNameResolver {
    */
   public static String getDafnyToSmithyFunctionNameForShape(
       Shape shape, GenerationContext context) {
-    return "DafnyToSmithy_"
-        + SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
+    return SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
             shape.getId().getNamespace())
         + "_"
         + shape.getId().getName();
@@ -297,8 +296,7 @@ public class SmithyNameResolver {
    */
   public static String getSmithyToDafnyFunctionNameForShape(
       Shape shape, GenerationContext context) {
-    return "SmithyToDafny_"
-        + SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
+    return SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
             shape.getId().getNamespace())
         + "_"
         + shape.getId().getName();

@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import software.amazon.polymorph.smithypython.awssdk.nameresolver.AwsSdkNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.Utils;
@@ -372,6 +373,11 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator implements Protoc
                 generateErrorResponseDeserializerSectionForLocalServiceDependencyErrors(
                     context, serviceShape, writer);
 
+                  // Write delegators to dependency AWS services' `sdk_error_to_dafny_error` for dependency
+                  // services
+                  generateErrorResponseDeserializerSectionForAwsSdkDependencyErrors(
+                          context, serviceShape, writer);
+
                 // Generate handler for unmatched Dafny Error.
                 // Since we don't know anything about this Dafny Error object,
                 //   just pass the Dafny Error object into the Smithy object.
@@ -413,9 +419,10 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator implements Protoc
       writer.write(
           """
             elif error.is_$L:
-              return $L(message=error.message)""",
+              return $L(message=_dafny.string_of(error.message))""",
           errorId.getName(),
           errorId.getName());
+      writer.addStdlibImport("_dafny");
       writer.popState();
     }
   }
@@ -469,6 +476,59 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator implements Protoc
       }
     }
   }
+
+    private void generateErrorResponseDeserializerSectionForAwsSdkDependencyErrors(
+            GenerationContext context, ServiceShape serviceShape, PythonWriter writer) {
+
+        // Generate converters for dependency services that defer to their `_deserialize_error`
+        Optional<LocalServiceTrait> maybeLocalServiceTrait =
+                serviceShape.getTrait(LocalServiceTrait.class);
+        if (maybeLocalServiceTrait.isPresent()) {
+            LocalServiceTrait localServiceTrait = maybeLocalServiceTrait.get();
+            if (localServiceTrait.getDependencies() == null
+                    || localServiceTrait.getDependencies().isEmpty()) {
+                return;
+            }
+            Set<ShapeId> serviceDependencyShapeIds =
+                    localServiceTrait.getDependencies().stream()
+                            .filter(
+                                    shapeId -> AwsSdkNameResolver.isAwsSdkShape(shapeId))
+                            .collect(Collectors.toSet());
+
+            for (ShapeId serviceDependencyShapeId : serviceDependencyShapeIds) {
+                String code = AwsSdkNameResolver.dependencyErrorNameForService(
+                        context.model().expectShape(serviceDependencyShapeId).asServiceShape().get()
+                );
+                writer.addImport(".errors", code);
+
+                // Import dependency `_deserialize_error` function so this service can defer to it:
+                // `from dependency.smithygenerated.deserialize import _deserialize_error as
+                // dependency_deserialize_error`
+                writer.addImport(
+                        // `from dependency.smithygenerated.deserialize`
+                        SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
+                                serviceDependencyShapeId.getNamespace(), context)
+                                + ".shim",
+                        // `import _deserialize_error`
+                        "sdk_error_to_dafny_error",
+                        // `as dependency_deserialize_error`
+                        SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
+                                serviceDependencyShapeId.getNamespace())
+                                + "_sdk_error_to_dafny_error");
+                // Generate deserializer for dependency that defers to its `_deserialize_error`
+                writer.write(
+                        """
+                        elif error.is_$L:
+                            return $L($L(error.$L.obj))""",
+                        code,
+                        code,
+                        SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
+                                serviceDependencyShapeId.getNamespace())
+                                + "_sdk_error_to_dafny_error",
+                        code);
+            }
+        }
+    }
 
   /**
    * A section that controls writing out the entire serialization function.

@@ -20,6 +20,8 @@ import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.UnionShape;
+import software.amazon.smithy.model.traits.EnumDefinition;
+import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonWriter;
 import software.amazon.smithy.utils.CaseUtils;
@@ -227,17 +229,26 @@ public class DafnyToLocalServiceConversionFunctionWriter extends BaseConversionW
   private void writeResourceShapeConverter(ResourceShape resourceShape, PythonWriter conversionWriter,
       String dataSourceInsideConversionFunction) {
 
-    // Import resource at runtime to avoid circular dependency
-    conversionWriter.write("from $L import $L",
-        SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
-            resourceShape.getId().getNamespace(), context
-        ) + ".references",
-        resourceShape.getId().getName()
-    );
+    conversionWriter.openBlock("if hasattr($L, '_native_impl'):",
+            "",
+            dataSourceInsideConversionFunction,
+            () -> conversionWriter.write("return $L._native_impl", dataSourceInsideConversionFunction));
 
-    conversionWriter.write("return $L(_impl=$L)",
-        resourceShape.getId().getName(),
-        dataSourceInsideConversionFunction);
+      conversionWriter.openBlock("else:",
+              "",
+              () -> {
+                  // Import resource at runtime to avoid circular dependency
+                  conversionWriter.write("from $L import $L",
+                          SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
+                                  resourceShape.getId().getNamespace(), context
+                          ) + ".references",
+                          resourceShape.getId().getName()
+                  );
+
+                  conversionWriter.write("return $L(_impl=$L)",
+                          resourceShape.getId().getName(),
+                          dataSourceInsideConversionFunction);
+              });
   }
 
   private void writeServiceShapeConverter(ServiceShape serviceShape, PythonWriter conversionWriter,
@@ -299,10 +310,11 @@ public class DafnyToLocalServiceConversionFunctionWriter extends BaseConversionW
             // elif isinstance(input, ExampleUnion_StringValue):
             //   ExampleUnion_union_value = ExampleUnionStringValue(input.StringValue)
             for (MemberShape memberShape : unionShape.getAllMembers().values()) {
+              Shape targetShape = context.model().expectShape(memberShape.getTarget());
               conversionWriter.write(
                   """
                   $L isinstance($L, $L):
-                      $L_union_value = $L.$L($L.$L)""",
+                      $L_union_value = $L.$L($L)""",
                   // If we need a new `if` block, open one; otherwise, expand on existing one with `elif`
                   shouldOpenNewIfBlock ? "if" : "elif",
                   dataSourceInsideConversionFunction,
@@ -310,8 +322,16 @@ public class DafnyToLocalServiceConversionFunctionWriter extends BaseConversionW
                   unionShape.getId().getName(),
                   SmithyNameResolver.getSmithyGeneratedModelLocationForShape(unionShape.getId(), context),
                   SmithyNameResolver.getSmithyGeneratedTypeForUnion(unionShape, memberShape, context),
-                  dataSourceInsideConversionFunction,
-                  DafnyNameResolver.escapeShapeName(memberShape.getMemberName())
+                  targetShape.accept(
+                          ShapeVisitorResolver.getToNativeShapeVisitorForShape(targetShape,
+                                  context,
+                                  dataSourceInsideConversionFunction + "." + DafnyNameResolver.escapeShapeName(memberShape.getMemberName()),
+                                  conversionWriter,
+                                  "dafny_to_smithy"
+                          )
+                  )
+//                  dataSourceInsideConversionFunction,
+//                  DafnyNameResolver.escapeShapeName(memberShape.getMemberName())
               );
               shouldOpenNewIfBlock = false;
 
@@ -322,7 +342,7 @@ public class DafnyToLocalServiceConversionFunctionWriter extends BaseConversionW
             // Write case to handle if union member does not match any of the above cases
             conversionWriter.write("""
                   else:
-                      raise ValueError("No recognized union value in union type: " + $L)
+                      raise ValueError("No recognized union value in union type: " + str($L))
                   """,
                 dataSourceInsideConversionFunction
             );
@@ -340,8 +360,58 @@ public class DafnyToLocalServiceConversionFunctionWriter extends BaseConversionW
     });
   }
 
-  protected void writeStringEnumShapeConverter(StringShape stringShapeWithEnumTrait) {
+    protected void writeStringEnumShapeConverter(StringShape stringShapeWithEnumTrait) {
+        WriterDelegator<PythonWriter> delegator = context.writerDelegator();
+        String moduleName = SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(context.settings().getService().getNamespace());
 
-  }
+        delegator.useFileWriter(moduleName + "/dafny_to_smithy.py", "", conversionWriter -> {
+            // Within the conversion function, the dataSource becomes the function's input
+            // This hardcodes the input parameter name for a conversion function to always be "input"
+            String dataSourceInsideConversionFunction = "input";
+
+            conversionWriter.openBlock(
+                    "def $L($L):",
+                    "",
+                    SmithyNameResolver.getDafnyToSmithyFunctionNameForShape(stringShapeWithEnumTrait, context),
+                    dataSourceInsideConversionFunction,
+                    () -> {
+                        EnumTrait enumTrait = stringShapeWithEnumTrait.getTrait(EnumTrait.class).get();
+
+                        // First enum value opens a new `if` block; others do not need to and write `elif`
+                        boolean shouldOpenNewIfBlock = true;
+                        for (EnumDefinition enumDefinition :
+                                stringShapeWithEnumTrait.getTrait(EnumTrait.class).get().getValues()) {
+                            String name = enumDefinition.getName().isPresent()
+                                    ? enumDefinition.getName().get()
+                                    : enumDefinition.getValue();
+                            String value = enumDefinition.getValue();
+                            conversionWriter.write(
+                                    """
+                                $L isinstance($L, $L):
+                                    return '$L'
+                                """,
+                                    // If we need a new `if` block, open one; otherwise, expand on existing one
+                                    // with `elif`
+                                    shouldOpenNewIfBlock ? "if" : "elif",
+                                    dataSourceInsideConversionFunction,
+                                    DafnyNameResolver.getDafnyTypeForStringShapeWithEnumTrait(
+                                            stringShapeWithEnumTrait, name),
+                                    value);
+                            shouldOpenNewIfBlock = false;
+
+                            DafnyNameResolver.importDafnyTypeForStringShapeWithEnumTrait(
+                                    conversionWriter, stringShapeWithEnumTrait, name);
+                        }
+                        conversionWriter.openBlock("else:",
+                                "",
+                                () -> {
+                                    conversionWriter.write("raise ValueError(f'No recognized enum value in enum type: {$L=}')",
+                                            dataSourceInsideConversionFunction);
+                                }
+                        );
+                    }
+            );
+        });
+    }
 
 }

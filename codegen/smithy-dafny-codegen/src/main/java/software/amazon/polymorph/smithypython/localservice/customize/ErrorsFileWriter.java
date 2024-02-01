@@ -7,7 +7,10 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
+
+import software.amazon.polymorph.smithypython.awssdk.nameresolver.AwsSdkNameResolver;
 import software.amazon.polymorph.smithypython.common.customize.CustomFileWriter;
+import software.amazon.polymorph.smithypython.common.nameresolver.DafnyNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.smithy.codegen.core.Symbol;
@@ -242,8 +245,15 @@ public class ErrorsFileWriter implements CustomFileWriter {
     writer.addStdlibImport("typing", "Literal");
 
     Shape serviceDependencyShape = context.model().expectShape(serviceDependencyShapeId);
-    String code = serviceDependencyShapeId.getName();
-    Symbol symbol = context.symbolProvider().toSymbol(serviceDependencyShape);
+    String code;
+    if (serviceDependencyShape.hasTrait(LocalServiceTrait.class)) {
+        code = serviceDependencyShapeId.getName();
+    } else if (AwsSdkNameResolver.isAwsSdkShape(serviceDependencyShape)) {
+        code = AwsSdkNameResolver.dependencyErrorNameForService(serviceDependencyShape.asServiceShape().get());
+    } else {
+        throw new IllegalArgumentException("Dependency MUST be a local service or AWS SDK shape: " + serviceDependencyShape);
+    }
+
     var apiError =
         Symbol.builder()
             .name("ApiError")
