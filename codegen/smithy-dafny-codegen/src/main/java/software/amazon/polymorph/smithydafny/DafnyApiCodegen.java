@@ -1888,7 +1888,8 @@ public class DafnyApiCodegen {
                 ),
             // Yes, Error is hard coded
             // this can work because we need to be able Errors from other modules...
-            "returns (res: Result<%s, Error>)\n".formatted(dafnyClientTrait)
+                "returns (res: Result<%sClient, Error>)\n"
+                        .formatted(localServiceTrait.getSdkId())
         ).lineSeparated();
 
         // Add `requires` clauses
@@ -2032,7 +2033,7 @@ public class DafnyApiCodegen {
         final TokenTree factory = TokenTree
           .of(
             "method {:extern} %sClient()".formatted(serviceTrait.getSdkId()),
-            "returns (res: Result<%s, Error>)".formatted(dafnyClientTrait),
+            "returns (res: Result<%s, Error>)".formatted(nameResolver.traitForServiceClient(serviceShape)),
             "ensures res.Success? ==> ",
             "&& fresh(res.value)",
             "&& fresh(res.value.%s)".formatted(nameResolver.mutableStateFunctionName()),
