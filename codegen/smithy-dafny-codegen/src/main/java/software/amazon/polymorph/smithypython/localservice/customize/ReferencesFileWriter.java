@@ -29,7 +29,11 @@ public class ReferencesFileWriter implements CustomFileWriter {
 
     public void generateResourceInterfaceAndImplementation(
       ResourceShape resourceShape, GenerationContext codegenContext, PythonWriter writer) {
-        if (!generatedResourceShapes.contains(resourceShape.getId())) {
+        if (!generatedResourceShapes.contains(resourceShape.getId())
+        && resourceShape
+                .getId()
+                .getNamespace()
+                .equals(codegenContext.settings().getService().getNamespace())) {
             generatedResourceShapes.add(resourceShape.getId());
             generateResourceInterface(resourceShape, codegenContext, writer);
             generateResourceImplementation(resourceShape, codegenContext, writer);

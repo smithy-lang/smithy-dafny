@@ -13,7 +13,7 @@ module PythonLanguageSpecificLogicImpl replaces LanguageSpecificLogicImpl  {
             && output.value.language == "Python"
             && output.value.runtime != ""
     {
-        var runtimeInfo :- expect GetRuntimeInformationNetExternMethod(config);
+        var runtimeInfo :- expect GetRuntimeInformationPythonExternMethod(config);
         var getRuntimeInformationOutput := GetRuntimeInformationOutput(
             language := "Python",
             runtime := runtimeInfo
@@ -26,7 +26,7 @@ module PythonLanguageSpecificLogicImpl replaces LanguageSpecificLogicImpl  {
     //   the interface for this method on the Smithy model.
     // Instead, we define the `AllRuntimesMethod` which IS a Smithy operation
     //   and call this method from there.
-    method {:extern "GetPythonRuntimeVersion" } GetRuntimeInformationNetExternMethod(config: InternalConfig)
+    method {:extern "GetPythonRuntimeVersion" } GetRuntimeInformationPythonExternMethod(config: InternalConfig)
         returns (output: Result<string, Error>)
         ensures output.Success? ==> output.value != ""
 }

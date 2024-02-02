@@ -373,7 +373,7 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator implements Protoc
                 generateErrorResponseDeserializerSectionForLocalServiceDependencyErrors(
                     context, serviceShape, writer);
 
-                  // Write delegators to dependency AWS services' `sdk_error_to_dafny_error` for dependency
+                  // Write delegators to dependency AWS services' `_sdk_error_to_dafny_error` for dependency
                   // services
                   generateErrorResponseDeserializerSectionForAwsSdkDependencyErrors(
                           context, serviceShape, writer);
@@ -510,7 +510,7 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator implements Protoc
                                 serviceDependencyShapeId.getNamespace(), context)
                                 + ".shim",
                         // `import _deserialize_error`
-                        "sdk_error_to_dafny_error",
+                        "_sdk_error_to_dafny_error",
                         // `as dependency_deserialize_error`
                         SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
                                 serviceDependencyShapeId.getNamespace())

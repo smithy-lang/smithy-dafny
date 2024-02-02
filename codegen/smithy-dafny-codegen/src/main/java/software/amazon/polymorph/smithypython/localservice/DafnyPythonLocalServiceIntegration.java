@@ -137,16 +137,24 @@ public final class DafnyPythonLocalServiceIntegration implements PythonIntegrati
 
         String moduleName = SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(codegenContext.settings().getService().getNamespace());
 
-        codegenContext.writerDelegator().useFileWriter(moduleName + "/references.py", "", writer -> {
-            for (Shape referenceShape : referenceShapes) {
-                if (referenceShape.isResourceShape()) {
+    // Only open a writer if there are reference shapes; otherwise this will write an empty file.
+    if (!referenceShapes.isEmpty()) {
+      codegenContext
+          .writerDelegator()
+          .useFileWriter(
+              moduleName + "/references.py",
+              "",
+              writer -> {
+                for (Shape referenceShape : referenceShapes) {
+                  if (referenceShape.isResourceShape()) {
                     ResourceShape resourceShape = referenceShape.asResourceShape().get();
-                    new ReferencesFileWriter().generateResourceInterfaceAndImplementation(resourceShape, codegenContext, writer);
+                    new ReferencesFileWriter()
+                        .generateResourceInterfaceAndImplementation(
+                            resourceShape, codegenContext, writer);
+                  }
                 }
-
-
-            }
-        });
+              });
+        }
     }
 
 //    /**

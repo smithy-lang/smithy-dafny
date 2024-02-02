@@ -198,6 +198,8 @@ public class ErrorsFileWriter implements CustomFileWriter {
             });
   }
 
+
+
   // This is lifted from Smithy-Python.
   // Smithy-Python has no concept of dependencies or other namespaces.
   // This allows errors in other namespaces to be rendered correctly.
@@ -244,15 +246,8 @@ public class ErrorsFileWriter implements CustomFileWriter {
     writer.addStdlibImport("typing", "Any");
     writer.addStdlibImport("typing", "Literal");
 
-    Shape serviceDependencyShape = context.model().expectShape(serviceDependencyShapeId);
-    String code;
-    if (serviceDependencyShape.hasTrait(LocalServiceTrait.class)) {
-        code = serviceDependencyShapeId.getName();
-    } else if (AwsSdkNameResolver.isAwsSdkShape(serviceDependencyShape)) {
-        code = AwsSdkNameResolver.dependencyErrorNameForService(serviceDependencyShape.asServiceShape().get());
-    } else {
-        throw new IllegalArgumentException("Dependency MUST be a local service or AWS SDK shape: " + serviceDependencyShape);
-    }
+    ServiceShape serviceDependencyShape = context.model().expectShape(serviceDependencyShapeId).asServiceShape().get();
+    String code = SmithyNameResolver.getSmithyGeneratedTypeForServiceError(serviceDependencyShape);
 
     var apiError =
         Symbol.builder()

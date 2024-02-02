@@ -50,7 +50,7 @@ public class AwsSdkShimFileWriter implements CustomFileWriter {
           from botocore.exceptions import ClientError
           import $L
 
-          def sdk_error_to_dafny_error(e: ClientError):
+          def _sdk_error_to_dafny_error(e: ClientError):
               '''
               Converts the provided native Smithy-modelled error
               into the corresponding Dafny error.
@@ -74,7 +74,7 @@ public class AwsSdkShimFileWriter implements CustomFileWriter {
   }
 
   /**
-   * Generate the method body for the `sdk_error_to_dafny_error` method. This writes out a block to
+   * Generate the method body for the `_sdk_error_to_dafny_error` method. This writes out a block to
    * convert a boto3 ClientError modelled in JSON into a Dafny-modelled error
    *
    * @param codegenContext
@@ -211,7 +211,7 @@ public class AwsSdkShimFileWriter implements CustomFileWriter {
               try:
                   boto_response_dict = self._impl.$L(**boto_request_dict)
               except ClientError as e:
-                  return Wrappers.Result_Failure(sdk_error_to_dafny_error(e))
+                  return Wrappers.Result_Failure(_sdk_error_to_dafny_error(e))
               """,
                 input,
                 codegenContext.symbolProvider().toSymbol(operationShape).getName());

@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import software.amazon.awssdk.utils.StringUtils;
+import software.amazon.polymorph.smithypython.awssdk.nameresolver.AwsSdkNameResolver;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.codegen.core.CodegenContext;
@@ -75,6 +76,9 @@ public class SmithyNameResolver {
   }
 
   public static String getPythonModuleNameForSmithyNamespace(String smithyNamespace) {
+    if (!smithyNamespaceToPythonModuleNameMap.containsKey(smithyNamespace)) {
+      throw new IllegalArgumentException("Python module name not found for Smithy namespace: " + smithyNamespace);
+    }
     return smithyNamespaceToPythonModuleNameMap.get(smithyNamespace);
   }
 
@@ -233,6 +237,28 @@ public class SmithyNameResolver {
   }
 
   /**
+   * Returns the name of the Smithy-generated type for a service's error.
+   * This error shape wraps errors from this service if this service is used as a dependency.
+   *
+   * @param serviceShape
+   * @return
+   */
+  public static String getSmithyGeneratedTypeForServiceError(
+          ServiceShape serviceShape) {
+    System.out.println("getSmithyGeneratedTypeForServiceError " + serviceShape.getId());
+    if (serviceShape.hasTrait(LocalServiceTrait.class)) {
+      return serviceShape.getId().getName();
+    } else if (AwsSdkNameResolver.isAwsSdkShape(serviceShape)) {
+      System.out.println("getSmithyGeneratedTypeForServiceError YES " + serviceShape.getId());
+      String a = AwsSdkNameResolver.dependencyErrorNameForService(serviceShape);
+      System.out.println("a " + a);
+      return a;
+    } else {
+      throw new IllegalArgumentException("Dependency MUST be a local service or AWS SDK shape: " + serviceShape);
+    }
+  }
+
+  /**
    * Given the namespace of a Smithy shape, returns a Pythonic access path to the namespace that can
    * be used to import shapes from its `smithygenerated` namespace.
    *
@@ -275,6 +301,9 @@ public class SmithyNameResolver {
    * corresponding Smithy-modelled type. This function will be defined in the `dafny_to_smithy.py`
    * file. ex. example.namespace.ExampleShape -> "DafnyToSmithy_example_namespace_ExampleShape"
    *
+   * This is the same as getSmithyToDafnyFunctionNameForShape below. These used to be different.
+   * There may be some value in preserving these separately if we want to make them different again in the future.
+   *
    * @param shape
    * @return
    */
@@ -290,6 +319,9 @@ public class SmithyNameResolver {
    * Returns the name of the function that converts the provided shape's Smithy-modelled type to the
    * corresponding Dafny-modelled type. This function will be defined in the `smithy_to_dafny.py`
    * file. ex. example.namespace.ExampleShape -> "SmithyToDafny_example_namespace_ExampleShape"
+   *
+   * This is the same as getDafnyToSmithyFunctionNameForShape above. These used to be different.
+   * There may be some value in preserving these separately if we want to make them different again in the future.
    *
    * @param shape
    * @return
