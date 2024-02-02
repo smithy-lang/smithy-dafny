@@ -14,9 +14,9 @@ module {:extern "software.amazon.cryptography.services.dynamodb.internaldafny.ty
 
   type ArchivalReason = string
   datatype ArchivalSummary = | ArchivalSummary (
-    nameonly ArchivalDateTime: Option<string> ,
-    nameonly ArchivalReason: Option<ArchivalReason> ,
-    nameonly ArchivalBackupArn: Option<BackupArn>
+    nameonly ArchivalDateTime: Option<string> := Option.None ,
+    nameonly ArchivalReason: Option<ArchivalReason> := Option.None ,
+    nameonly ArchivalBackupArn: Option<BackupArn> := Option.None
   )
   datatype AttributeAction =
     | ADD
@@ -50,12 +50,12 @@ module {:extern "software.amazon.cryptography.services.dynamodb.internaldafny.ty
     | BOOL(BOOL: BooleanAttributeValue)
   type AttributeValueList = seq<AttributeValue>
   datatype AttributeValueUpdate = | AttributeValueUpdate (
-    nameonly Value: Option<AttributeValue> ,
-    nameonly Action: Option<AttributeAction>
+    nameonly Value: Option<AttributeValue> := Option.None ,
+    nameonly Action: Option<AttributeAction> := Option.None
   )
   datatype AutoScalingPolicyDescription = | AutoScalingPolicyDescription (
-    nameonly PolicyName: Option<AutoScalingPolicyName> ,
-    nameonly TargetTrackingScalingPolicyConfiguration: Option<AutoScalingTargetTrackingScalingPolicyConfigurationDescription>
+    nameonly PolicyName: Option<AutoScalingPolicyName> := Option.None ,
+    nameonly TargetTrackingScalingPolicyConfiguration: Option<AutoScalingTargetTrackingScalingPolicyConfigurationDescription> := Option.None
   )
   type AutoScalingPolicyDescriptionList = seq<AutoScalingPolicyDescription>
   type AutoScalingPolicyName = x: string | IsValid_AutoScalingPolicyName(x) witness *
@@ -63,7 +63,7 @@ module {:extern "software.amazon.cryptography.services.dynamodb.internaldafny.ty
     ( 1 <= |x| <= 256 )
   }
   datatype AutoScalingPolicyUpdate = | AutoScalingPolicyUpdate (
-    nameonly PolicyName: Option<AutoScalingPolicyName> ,
+    nameonly PolicyName: Option<AutoScalingPolicyName> := Option.None ,
     nameonly TargetTrackingScalingPolicyConfiguration: AutoScalingTargetTrackingScalingPolicyConfigurationUpdate
   )
   type AutoScalingRoleArn = x: string | IsValid_AutoScalingRoleArn(x) witness *
@@ -71,29 +71,29 @@ module {:extern "software.amazon.cryptography.services.dynamodb.internaldafny.ty
     ( 1 <= |x| <= 1600 )
   }
   datatype AutoScalingSettingsDescription = | AutoScalingSettingsDescription (
-    nameonly MinimumUnits: Option<PositiveLongObject> ,
-    nameonly MaximumUnits: Option<PositiveLongObject> ,
-    nameonly AutoScalingDisabled: Option<BooleanObject> ,
-    nameonly AutoScalingRoleArn: Option<String> ,
-    nameonly ScalingPolicies: Option<AutoScalingPolicyDescriptionList>
+    nameonly MinimumUnits: Option<PositiveLongObject> := Option.None ,
+    nameonly MaximumUnits: Option<PositiveLongObject> := Option.None ,
+    nameonly AutoScalingDisabled: Option<BooleanObject> := Option.None ,
+    nameonly AutoScalingRoleArn: Option<String> := Option.None ,
+    nameonly ScalingPolicies: Option<AutoScalingPolicyDescriptionList> := Option.None
   )
   datatype AutoScalingSettingsUpdate = | AutoScalingSettingsUpdate (
-    nameonly MinimumUnits: Option<PositiveLongObject> ,
-    nameonly MaximumUnits: Option<PositiveLongObject> ,
-    nameonly AutoScalingDisabled: Option<BooleanObject> ,
-    nameonly AutoScalingRoleArn: Option<AutoScalingRoleArn> ,
-    nameonly ScalingPolicyUpdate: Option<AutoScalingPolicyUpdate>
+    nameonly MinimumUnits: Option<PositiveLongObject> := Option.None ,
+    nameonly MaximumUnits: Option<PositiveLongObject> := Option.None ,
+    nameonly AutoScalingDisabled: Option<BooleanObject> := Option.None ,
+    nameonly AutoScalingRoleArn: Option<AutoScalingRoleArn> := Option.None ,
+    nameonly ScalingPolicyUpdate: Option<AutoScalingPolicyUpdate> := Option.None
   )
   datatype AutoScalingTargetTrackingScalingPolicyConfigurationDescription = | AutoScalingTargetTrackingScalingPolicyConfigurationDescription (
-    nameonly DisableScaleIn: Option<BooleanObject> ,
-    nameonly ScaleInCooldown: Option<IntegerObject> ,
-    nameonly ScaleOutCooldown: Option<IntegerObject> ,
+    nameonly DisableScaleIn: Option<BooleanObject> := Option.None ,
+    nameonly ScaleInCooldown: Option<IntegerObject> := Option.None ,
+    nameonly ScaleOutCooldown: Option<IntegerObject> := Option.None ,
     nameonly TargetValue: Double
   )
   datatype AutoScalingTargetTrackingScalingPolicyConfigurationUpdate = | AutoScalingTargetTrackingScalingPolicyConfigurationUpdate (
-    nameonly DisableScaleIn: Option<BooleanObject> ,
-    nameonly ScaleInCooldown: Option<IntegerObject> ,
-    nameonly ScaleOutCooldown: Option<IntegerObject> ,
+    nameonly DisableScaleIn: Option<BooleanObject> := Option.None ,
+    nameonly ScaleInCooldown: Option<IntegerObject> := Option.None ,
+    nameonly ScaleOutCooldown: Option<IntegerObject> := Option.None ,
     nameonly TargetValue: Double
   )
   type Backfilling = bool
@@ -102,18 +102,18 @@ module {:extern "software.amazon.cryptography.services.dynamodb.internaldafny.ty
     ( 37 <= |x| <= 1024 )
   }
   datatype BackupDescription = | BackupDescription (
-    nameonly BackupDetails: Option<BackupDetails> ,
-    nameonly SourceTableDetails: Option<SourceTableDetails> ,
-    nameonly SourceTableFeatureDetails: Option<SourceTableFeatureDetails>
+    nameonly BackupDetails: Option<BackupDetails> := Option.None ,
+    nameonly SourceTableDetails: Option<SourceTableDetails> := Option.None ,
+    nameonly SourceTableFeatureDetails: Option<SourceTableFeatureDetails> := Option.None
   )
   datatype BackupDetails = | BackupDetails (
     nameonly BackupArn: BackupArn ,
     nameonly BackupName: BackupName ,
-    nameonly BackupSizeBytes: Option<BackupSizeBytes> ,
+    nameonly BackupSizeBytes: Option<BackupSizeBytes> := Option.None ,
     nameonly BackupStatus: BackupStatus ,
     nameonly BackupType: BackupType ,
     nameonly BackupCreationDateTime: string ,
-    nameonly BackupExpiryDateTime: Option<string>
+    nameonly BackupExpiryDateTime: Option<string> := Option.None
   )
   type BackupName = x: string | IsValid_BackupName(x) witness *
   predicate method IsValid_BackupName(x: string) {
@@ -133,16 +133,16 @@ module {:extern "software.amazon.cryptography.services.dynamodb.internaldafny.ty
     | AVAILABLE
   type BackupSummaries = seq<BackupSummary>
   datatype BackupSummary = | BackupSummary (
-    nameonly TableName: Option<TableName> ,
-    nameonly TableId: Option<TableId> ,
-    nameonly TableArn: Option<TableArn> ,
-    nameonly BackupArn: Option<BackupArn> ,
-    nameonly BackupName: Option<BackupName> ,
-    nameonly BackupCreationDateTime: Option<string> ,
-    nameonly BackupExpiryDateTime: Option<string> ,
-    nameonly BackupStatus: Option<BackupStatus> ,
-    nameonly BackupType: Option<BackupType> ,
-    nameonly BackupSizeBytes: Option<BackupSizeBytes>
+    nameonly TableName: Option<TableName> := Option.None ,
+    nameonly TableId: Option<TableId> := Option.None ,
+    nameonly TableArn: Option<TableArn> := Option.None ,
+    nameonly BackupArn: Option<BackupArn> := Option.None ,
+    nameonly BackupName: Option<BackupName> := Option.None ,
+    nameonly BackupCreationDateTime: Option<string> := Option.None ,
+    nameonly BackupExpiryDateTime: Option<string> := Option.None ,
+    nameonly BackupStatus: Option<BackupStatus> := Option.None ,
+    nameonly BackupType: Option<BackupType> := Option.None ,
+    nameonly BackupSizeBytes: Option<BackupSizeBytes> := Option.None
   )
   datatype BackupType =
     | USER
@@ -155,20 +155,20 @@ module {:extern "software.amazon.cryptography.services.dynamodb.internaldafny.ty
     | ALL
   datatype BatchExecuteStatementInput = | BatchExecuteStatementInput (
     nameonly Statements: PartiQLBatchRequest ,
-    nameonly ReturnConsumedCapacity: Option<ReturnConsumedCapacity>
+    nameonly ReturnConsumedCapacity: Option<ReturnConsumedCapacity> := Option.None
   )
   datatype BatchExecuteStatementOutput = | BatchExecuteStatementOutput (
-    nameonly Responses: Option<PartiQLBatchResponse> ,
-    nameonly ConsumedCapacity: Option<ConsumedCapacityMultiple>
+    nameonly Responses: Option<PartiQLBatchResponse> := Option.None ,
+    nameonly ConsumedCapacity: Option<ConsumedCapacityMultiple> := Option.None
   )
   datatype BatchGetItemInput = | BatchGetItemInput (
     nameonly RequestItems: BatchGetRequestMap ,
-    nameonly ReturnConsumedCapacity: Option<ReturnConsumedCapacity>
+    nameonly ReturnConsumedCapacity: Option<ReturnConsumedCapacity> := Option.None
   )
   datatype BatchGetItemOutput = | BatchGetItemOutput (
-    nameonly Responses: Option<BatchGetResponseMap> ,
-    nameonly UnprocessedKeys: Option<BatchGetRequestMap> ,
-    nameonly ConsumedCapacity: Option<ConsumedCapacityMultiple>
+    nameonly Responses: Option<BatchGetResponseMap> := Option.None ,
+    nameonly UnprocessedKeys: Option<BatchGetRequestMap> := Option.None ,
+    nameonly ConsumedCapacity: Option<ConsumedCapacityMultiple> := Option.None
   )
   type BatchGetRequestMap = x: map<TableName, KeysAndAttributes> | IsValid_BatchGetRequestMap(x) witness *
   predicate method IsValid_BatchGetRequestMap(x: map<TableName, KeysAndAttributes>) {
@@ -176,8 +176,8 @@ module {:extern "software.amazon.cryptography.services.dynamodb.internaldafny.ty
   }
   type BatchGetResponseMap = map<TableName, ItemList>
   datatype BatchStatementError = | BatchStatementError (
-    nameonly Code: Option<BatchStatementErrorCodeEnum> ,
-    nameonly Message: Option<String>
+    nameonly Code: Option<BatchStatementErrorCodeEnum> := Option.None ,
+    nameonly Message: Option<String> := Option.None
   )
   datatype BatchStatementErrorCodeEnum =
     | ConditionalCheckFailed
@@ -193,23 +193,23 @@ module {:extern "software.amazon.cryptography.services.dynamodb.internaldafny.ty
     | DuplicateItem
   datatype BatchStatementRequest = | BatchStatementRequest (
     nameonly Statement: PartiQLStatement ,
-    nameonly Parameters: Option<PreparedStatementParameters> ,
-    nameonly ConsistentRead: Option<ConsistentRead>
+    nameonly Parameters: Option<PreparedStatementParameters> := Option.None ,
+    nameonly ConsistentRead: Option<ConsistentRead> := Option.None
   )
   datatype BatchStatementResponse = | BatchStatementResponse (
-    nameonly Error: Option<BatchStatementError> ,
-    nameonly TableName: Option<TableName> ,
-    nameonly Item: Option<AttributeMap>
+    nameonly Error: Option<BatchStatementError> := Option.None ,
+    nameonly TableName: Option<TableName> := Option.None ,
+    nameonly Item: Option<AttributeMap> := Option.None
   )
   datatype BatchWriteItemInput = | BatchWriteItemInput (
     nameonly RequestItems: BatchWriteItemRequestMap ,
-    nameonly ReturnConsumedCapacity: Option<ReturnConsumedCapacity> ,
-    nameonly ReturnItemCollectionMetrics: Option<ReturnItemCollectionMetrics>
+    nameonly ReturnConsumedCapacity: Option<ReturnConsumedCapacity> := Option.None ,
+    nameonly ReturnItemCollectionMetrics: Option<ReturnItemCollectionMetrics> := Option.None
   )
   datatype BatchWriteItemOutput = | BatchWriteItemOutput (
-    nameonly UnprocessedItems: Option<BatchWriteItemRequestMap> ,
-    nameonly ItemCollectionMetrics: Option<ItemCollectionMetricsPerTable> ,
-    nameonly ConsumedCapacity: Option<ConsumedCapacityMultiple>
+    nameonly UnprocessedItems: Option<BatchWriteItemRequestMap> := Option.None ,
+    nameonly ItemCollectionMetrics: Option<ItemCollectionMetricsPerTable> := Option.None ,
+    nameonly ConsumedCapacity: Option<ConsumedCapacityMultiple> := Option.None
   )
   type BatchWriteItemRequestMap = x: map<TableName, WriteRequests> | IsValid_BatchWriteItemRequestMap(x) witness *
   predicate method IsValid_BatchWriteItemRequestMap(x: map<TableName, WriteRequests>) {
@@ -223,26 +223,26 @@ module {:extern "software.amazon.cryptography.services.dynamodb.internaldafny.ty
     | PROVISIONED
     | PAY_PER_REQUEST
   datatype BillingModeSummary = | BillingModeSummary (
-    nameonly BillingMode: Option<BillingMode> ,
-    nameonly LastUpdateToPayPerRequestDateTime: Option<string>
+    nameonly BillingMode: Option<BillingMode> := Option.None ,
+    nameonly LastUpdateToPayPerRequestDateTime: Option<string> := Option.None
   )
   type BinaryAttributeValue = seq<uint8>
   type BinarySetAttributeValue = seq<BinaryAttributeValue>
   type BooleanAttributeValue = bool
   type BooleanObject = bool
   datatype CancellationReason = | CancellationReason (
-    nameonly Item: Option<AttributeMap> ,
-    nameonly Code: Option<Code> ,
-    nameonly Message: Option<ErrorMessage>
+    nameonly Item: Option<AttributeMap> := Option.None ,
+    nameonly Code: Option<Code> := Option.None ,
+    nameonly Message: Option<ErrorMessage> := Option.None
   )
   type CancellationReasonList = x: seq<CancellationReason> | IsValid_CancellationReasonList(x) witness *
   predicate method IsValid_CancellationReasonList(x: seq<CancellationReason>) {
     ( 1 <= |x| <= 25 )
   }
   datatype Capacity = | Capacity (
-    nameonly ReadCapacityUnits: Option<ConsumedCapacityUnits> ,
-    nameonly WriteCapacityUnits: Option<ConsumedCapacityUnits> ,
-    nameonly CapacityUnits: Option<ConsumedCapacityUnits>
+    nameonly ReadCapacityUnits: Option<ConsumedCapacityUnits> := Option.None ,
+    nameonly WriteCapacityUnits: Option<ConsumedCapacityUnits> := Option.None ,
+    nameonly CapacityUnits: Option<ConsumedCapacityUnits> := Option.None
   )
   type ClientRequestToken = x: string | IsValid_ClientRequestToken(x) witness *
   predicate method IsValid_ClientRequestToken(x: string) {
@@ -269,7 +269,7 @@ module {:extern "software.amazon.cryptography.services.dynamodb.internaldafny.ty
     | NOT_CONTAINS
     | BEGINS_WITH
   datatype Condition = | Condition (
-    nameonly AttributeValueList: Option<AttributeValueList> ,
+    nameonly AttributeValueList: Option<AttributeValueList> := Option.None ,
     nameonly ComparisonOperator: ComparisonOperator
   )
   datatype ConditionalOperator =
@@ -279,20 +279,20 @@ module {:extern "software.amazon.cryptography.services.dynamodb.internaldafny.ty
     nameonly Key: Key ,
     nameonly TableName: TableName ,
     nameonly ConditionExpression: ConditionExpression ,
-    nameonly ExpressionAttributeNames: Option<ExpressionAttributeNameMap> ,
-    nameonly ExpressionAttributeValues: Option<ExpressionAttributeValueMap> ,
-    nameonly ReturnValuesOnConditionCheckFailure: Option<ReturnValuesOnConditionCheckFailure>
+    nameonly ExpressionAttributeNames: Option<ExpressionAttributeNameMap> := Option.None ,
+    nameonly ExpressionAttributeValues: Option<ExpressionAttributeValueMap> := Option.None ,
+    nameonly ReturnValuesOnConditionCheckFailure: Option<ReturnValuesOnConditionCheckFailure> := Option.None
   )
   type ConditionExpression = string
   type ConsistentRead = bool
   datatype ConsumedCapacity = | ConsumedCapacity (
-    nameonly TableName: Option<TableName> ,
-    nameonly CapacityUnits: Option<ConsumedCapacityUnits> ,
-    nameonly ReadCapacityUnits: Option<ConsumedCapacityUnits> ,
-    nameonly WriteCapacityUnits: Option<ConsumedCapacityUnits> ,
-    nameonly Table: Option<Capacity> ,
-    nameonly LocalSecondaryIndexes: Option<SecondaryIndexesCapacityMap> ,
-    nameonly GlobalSecondaryIndexes: Option<SecondaryIndexesCapacityMap>
+    nameonly TableName: Option<TableName> := Option.None ,
+    nameonly CapacityUnits: Option<ConsumedCapacityUnits> := Option.None ,
+    nameonly ReadCapacityUnits: Option<ConsumedCapacityUnits> := Option.None ,
+    nameonly WriteCapacityUnits: Option<ConsumedCapacityUnits> := Option.None ,
+    nameonly Table: Option<Capacity> := Option.None ,
+    nameonly LocalSecondaryIndexes: Option<SecondaryIndexesCapacityMap> := Option.None ,
+    nameonly GlobalSecondaryIndexes: Option<SecondaryIndexesCapacityMap> := Option.None
   )
   type ConsumedCapacityMultiple = seq<ConsumedCapacity>
   type ConsumedCapacityUnits = x: seq<uint8> | IsValid_ConsumedCapacityUnits(x) witness *
@@ -301,7 +301,7 @@ module {:extern "software.amazon.cryptography.services.dynamodb.internaldafny.ty
   }
   datatype ContinuousBackupsDescription = | ContinuousBackupsDescription (
     nameonly ContinuousBackupsStatus: ContinuousBackupsStatus ,
-    nameonly PointInTimeRecoveryDescription: Option<PointInTimeRecoveryDescription>
+    nameonly PointInTimeRecoveryDescription: Option<PointInTimeRecoveryDescription> := Option.None
   )
   datatype ContinuousBackupsStatus =
     | ENABLED
@@ -319,55 +319,55 @@ module {:extern "software.amazon.cryptography.services.dynamodb.internaldafny.ty
     | FAILED
   type ContributorInsightsSummaries = seq<ContributorInsightsSummary>
   datatype ContributorInsightsSummary = | ContributorInsightsSummary (
-    nameonly TableName: Option<TableName> ,
-    nameonly IndexName: Option<IndexName> ,
-    nameonly ContributorInsightsStatus: Option<ContributorInsightsStatus>
+    nameonly TableName: Option<TableName> := Option.None ,
+    nameonly IndexName: Option<IndexName> := Option.None ,
+    nameonly ContributorInsightsStatus: Option<ContributorInsightsStatus> := Option.None
   )
   datatype CreateBackupInput = | CreateBackupInput (
     nameonly TableName: TableName ,
     nameonly BackupName: BackupName
   )
   datatype CreateBackupOutput = | CreateBackupOutput (
-    nameonly BackupDetails: Option<BackupDetails>
+    nameonly BackupDetails: Option<BackupDetails> := Option.None
   )
   datatype CreateGlobalSecondaryIndexAction = | CreateGlobalSecondaryIndexAction (
     nameonly IndexName: IndexName ,
     nameonly KeySchema: KeySchema ,
     nameonly Projection: Projection ,
-    nameonly ProvisionedThroughput: Option<ProvisionedThroughput>
+    nameonly ProvisionedThroughput: Option<ProvisionedThroughput> := Option.None
   )
   datatype CreateGlobalTableInput = | CreateGlobalTableInput (
     nameonly GlobalTableName: TableName ,
     nameonly ReplicationGroup: ReplicaList
   )
   datatype CreateGlobalTableOutput = | CreateGlobalTableOutput (
-    nameonly GlobalTableDescription: Option<GlobalTableDescription>
+    nameonly GlobalTableDescription: Option<GlobalTableDescription> := Option.None
   )
   datatype CreateReplicaAction = | CreateReplicaAction (
     nameonly RegionName: RegionName
   )
   datatype CreateReplicationGroupMemberAction = | CreateReplicationGroupMemberAction (
     nameonly RegionName: RegionName ,
-    nameonly KMSMasterKeyId: Option<KMSMasterKeyId> ,
-    nameonly ProvisionedThroughputOverride: Option<ProvisionedThroughputOverride> ,
-    nameonly GlobalSecondaryIndexes: Option<ReplicaGlobalSecondaryIndexList> ,
-    nameonly TableClassOverride: Option<TableClass>
+    nameonly KMSMasterKeyId: Option<KMSMasterKeyId> := Option.None ,
+    nameonly ProvisionedThroughputOverride: Option<ProvisionedThroughputOverride> := Option.None ,
+    nameonly GlobalSecondaryIndexes: Option<ReplicaGlobalSecondaryIndexList> := Option.None ,
+    nameonly TableClassOverride: Option<TableClass> := Option.None
   )
   datatype CreateTableInput = | CreateTableInput (
     nameonly AttributeDefinitions: AttributeDefinitions ,
     nameonly TableName: TableName ,
     nameonly KeySchema: KeySchema ,
-    nameonly LocalSecondaryIndexes: Option<LocalSecondaryIndexList> ,
-    nameonly GlobalSecondaryIndexes: Option<GlobalSecondaryIndexList> ,
-    nameonly BillingMode: Option<BillingMode> ,
-    nameonly ProvisionedThroughput: Option<ProvisionedThroughput> ,
-    nameonly StreamSpecification: Option<StreamSpecification> ,
-    nameonly SSESpecification: Option<SSESpecification> ,
-    nameonly Tags: Option<TagList> ,
-    nameonly TableClass: Option<TableClass>
+    nameonly LocalSecondaryIndexes: Option<LocalSecondaryIndexList> := Option.None ,
+    nameonly GlobalSecondaryIndexes: Option<GlobalSecondaryIndexList> := Option.None ,
+    nameonly BillingMode: Option<BillingMode> := Option.None ,
+    nameonly ProvisionedThroughput: Option<ProvisionedThroughput> := Option.None ,
+    nameonly StreamSpecification: Option<StreamSpecification> := Option.None ,
+    nameonly SSESpecification: Option<SSESpecification> := Option.None ,
+    nameonly Tags: Option<TagList> := Option.None ,
+    nameonly TableClass: Option<TableClass> := Option.None
   )
   datatype CreateTableOutput = | CreateTableOutput (
-    nameonly TableDescription: Option<TableDescription>
+    nameonly TableDescription: Option<TableDescription> := Option.None
   )
   type CsvDelimiter = x: string | IsValid_CsvDelimiter(x) witness *
   predicate method IsValid_CsvDelimiter(x: string) {
@@ -382,22 +382,22 @@ module {:extern "software.amazon.cryptography.services.dynamodb.internaldafny.ty
     ( 1 <= |x| <= 255 )
   }
   datatype CsvOptions = | CsvOptions (
-    nameonly Delimiter: Option<CsvDelimiter> ,
-    nameonly HeaderList: Option<CsvHeaderList>
+    nameonly Delimiter: Option<CsvDelimiter> := Option.None ,
+    nameonly HeaderList: Option<CsvHeaderList> := Option.None
   )
   datatype Delete = | Delete (
     nameonly Key: Key ,
     nameonly TableName: TableName ,
-    nameonly ConditionExpression: Option<ConditionExpression> ,
-    nameonly ExpressionAttributeNames: Option<ExpressionAttributeNameMap> ,
-    nameonly ExpressionAttributeValues: Option<ExpressionAttributeValueMap> ,
-    nameonly ReturnValuesOnConditionCheckFailure: Option<ReturnValuesOnConditionCheckFailure>
+    nameonly ConditionExpression: Option<ConditionExpression> := Option.None ,
+    nameonly ExpressionAttributeNames: Option<ExpressionAttributeNameMap> := Option.None ,
+    nameonly ExpressionAttributeValues: Option<ExpressionAttributeValueMap> := Option.None ,
+    nameonly ReturnValuesOnConditionCheckFailure: Option<ReturnValuesOnConditionCheckFailure> := Option.None
   )
   datatype DeleteBackupInput = | DeleteBackupInput (
     nameonly BackupArn: BackupArn
   )
   datatype DeleteBackupOutput = | DeleteBackupOutput (
-    nameonly BackupDescription: Option<BackupDescription>
+    nameonly BackupDescription: Option<BackupDescription> := Option.None
   )
   datatype DeleteGlobalSecondaryIndexAction = | DeleteGlobalSecondaryIndexAction (
     nameonly IndexName: IndexName
@@ -405,19 +405,19 @@ module {:extern "software.amazon.cryptography.services.dynamodb.internaldafny.ty
   datatype DeleteItemInput = | DeleteItemInput (
     nameonly TableName: TableName ,
     nameonly Key: Key ,
-    nameonly Expected: Option<ExpectedAttributeMap> ,
-    nameonly ConditionalOperator: Option<ConditionalOperator> ,
-    nameonly ReturnValues: Option<ReturnValue> ,
-    nameonly ReturnConsumedCapacity: Option<ReturnConsumedCapacity> ,
-    nameonly ReturnItemCollectionMetrics: Option<ReturnItemCollectionMetrics> ,
-    nameonly ConditionExpression: Option<ConditionExpression> ,
-    nameonly ExpressionAttributeNames: Option<ExpressionAttributeNameMap> ,
-    nameonly ExpressionAttributeValues: Option<ExpressionAttributeValueMap>
+    nameonly Expected: Option<ExpectedAttributeMap> := Option.None ,
+    nameonly ConditionalOperator: Option<ConditionalOperator> := Option.None ,
+    nameonly ReturnValues: Option<ReturnValue> := Option.None ,
+    nameonly ReturnConsumedCapacity: Option<ReturnConsumedCapacity> := Option.None ,
+    nameonly ReturnItemCollectionMetrics: Option<ReturnItemCollectionMetrics> := Option.None ,
+    nameonly ConditionExpression: Option<ConditionExpression> := Option.None ,
+    nameonly ExpressionAttributeNames: Option<ExpressionAttributeNameMap> := Option.None ,
+    nameonly ExpressionAttributeValues: Option<ExpressionAttributeValueMap> := Option.None
   )
   datatype DeleteItemOutput = | DeleteItemOutput (
-    nameonly Attributes: Option<AttributeMap> ,
-    nameonly ConsumedCapacity: Option<ConsumedCapacity> ,
-    nameonly ItemCollectionMetrics: Option<ItemCollectionMetrics>
+    nameonly Attributes: Option<AttributeMap> := Option.None ,
+    nameonly ConsumedCapacity: Option<ConsumedCapacity> := Option.None ,
+    nameonly ItemCollectionMetrics: Option<ItemCollectionMetrics> := Option.None
   )
   datatype DeleteReplicaAction = | DeleteReplicaAction (
     nameonly RegionName: RegionName
@@ -432,31 +432,31 @@ module {:extern "software.amazon.cryptography.services.dynamodb.internaldafny.ty
     nameonly TableName: TableName
   )
   datatype DeleteTableOutput = | DeleteTableOutput (
-    nameonly TableDescription: Option<TableDescription>
+    nameonly TableDescription: Option<TableDescription> := Option.None
   )
   datatype DescribeBackupInput = | DescribeBackupInput (
     nameonly BackupArn: BackupArn
   )
   datatype DescribeBackupOutput = | DescribeBackupOutput (
-    nameonly BackupDescription: Option<BackupDescription>
+    nameonly BackupDescription: Option<BackupDescription> := Option.None
   )
   datatype DescribeContinuousBackupsInput = | DescribeContinuousBackupsInput (
     nameonly TableName: TableName
   )
   datatype DescribeContinuousBackupsOutput = | DescribeContinuousBackupsOutput (
-    nameonly ContinuousBackupsDescription: Option<ContinuousBackupsDescription>
+    nameonly ContinuousBackupsDescription: Option<ContinuousBackupsDescription> := Option.None
   )
   datatype DescribeContributorInsightsInput = | DescribeContributorInsightsInput (
     nameonly TableName: TableName ,
-    nameonly IndexName: Option<IndexName>
+    nameonly IndexName: Option<IndexName> := Option.None
   )
   datatype DescribeContributorInsightsOutput = | DescribeContributorInsightsOutput (
-    nameonly TableName: Option<TableName> ,
-    nameonly IndexName: Option<IndexName> ,
-    nameonly ContributorInsightsRuleList: Option<ContributorInsightsRuleList> ,
-    nameonly ContributorInsightsStatus: Option<ContributorInsightsStatus> ,
-    nameonly LastUpdateDateTime: Option<string> ,
-    nameonly FailureException: Option<FailureException>
+    nameonly TableName: Option<TableName> := Option.None ,
+    nameonly IndexName: Option<IndexName> := Option.None ,
+    nameonly ContributorInsightsRuleList: Option<ContributorInsightsRuleList> := Option.None ,
+    nameonly ContributorInsightsStatus: Option<ContributorInsightsStatus> := Option.None ,
+    nameonly LastUpdateDateTime: Option<string> := Option.None ,
+    nameonly FailureException: Option<FailureException> := Option.None
   )
   datatype DescribeEndpointsRequest = | DescribeEndpointsRequest (
 
@@ -468,20 +468,20 @@ module {:extern "software.amazon.cryptography.services.dynamodb.internaldafny.ty
     nameonly ExportArn: ExportArn
   )
   datatype DescribeExportOutput = | DescribeExportOutput (
-    nameonly ExportDescription: Option<ExportDescription>
+    nameonly ExportDescription: Option<ExportDescription> := Option.None
   )
   datatype DescribeGlobalTableInput = | DescribeGlobalTableInput (
     nameonly GlobalTableName: TableName
   )
   datatype DescribeGlobalTableOutput = | DescribeGlobalTableOutput (
-    nameonly GlobalTableDescription: Option<GlobalTableDescription>
+    nameonly GlobalTableDescription: Option<GlobalTableDescription> := Option.None
   )
   datatype DescribeGlobalTableSettingsInput = | DescribeGlobalTableSettingsInput (
     nameonly GlobalTableName: TableName
   )
   datatype DescribeGlobalTableSettingsOutput = | DescribeGlobalTableSettingsOutput (
-    nameonly GlobalTableName: Option<TableName> ,
-    nameonly ReplicaSettings: Option<ReplicaSettingsDescriptionList>
+    nameonly GlobalTableName: Option<TableName> := Option.None ,
+    nameonly ReplicaSettings: Option<ReplicaSettingsDescriptionList> := Option.None
   )
   datatype DescribeImportInput = | DescribeImportInput (
     nameonly ImportArn: ImportArn
@@ -493,35 +493,35 @@ module {:extern "software.amazon.cryptography.services.dynamodb.internaldafny.ty
     nameonly TableName: TableName
   )
   datatype DescribeKinesisStreamingDestinationOutput = | DescribeKinesisStreamingDestinationOutput (
-    nameonly TableName: Option<TableName> ,
-    nameonly KinesisDataStreamDestinations: Option<KinesisDataStreamDestinations>
+    nameonly TableName: Option<TableName> := Option.None ,
+    nameonly KinesisDataStreamDestinations: Option<KinesisDataStreamDestinations> := Option.None
   )
   datatype DescribeLimitsInput = | DescribeLimitsInput (
 
                                  )
   datatype DescribeLimitsOutput = | DescribeLimitsOutput (
-    nameonly AccountMaxReadCapacityUnits: Option<PositiveLongObject> ,
-    nameonly AccountMaxWriteCapacityUnits: Option<PositiveLongObject> ,
-    nameonly TableMaxReadCapacityUnits: Option<PositiveLongObject> ,
-    nameonly TableMaxWriteCapacityUnits: Option<PositiveLongObject>
+    nameonly AccountMaxReadCapacityUnits: Option<PositiveLongObject> := Option.None ,
+    nameonly AccountMaxWriteCapacityUnits: Option<PositiveLongObject> := Option.None ,
+    nameonly TableMaxReadCapacityUnits: Option<PositiveLongObject> := Option.None ,
+    nameonly TableMaxWriteCapacityUnits: Option<PositiveLongObject> := Option.None
   )
   datatype DescribeTableInput = | DescribeTableInput (
     nameonly TableName: TableName
   )
   datatype DescribeTableOutput = | DescribeTableOutput (
-    nameonly Table: Option<TableDescription>
+    nameonly Table: Option<TableDescription> := Option.None
   )
   datatype DescribeTableReplicaAutoScalingInput = | DescribeTableReplicaAutoScalingInput (
     nameonly TableName: TableName
   )
   datatype DescribeTableReplicaAutoScalingOutput = | DescribeTableReplicaAutoScalingOutput (
-    nameonly TableAutoScalingDescription: Option<TableAutoScalingDescription>
+    nameonly TableAutoScalingDescription: Option<TableAutoScalingDescription> := Option.None
   )
   datatype DescribeTimeToLiveInput = | DescribeTimeToLiveInput (
     nameonly TableName: TableName
   )
   datatype DescribeTimeToLiveOutput = | DescribeTimeToLiveOutput (
-    nameonly TimeToLiveDescription: Option<TimeToLiveDescription>
+    nameonly TimeToLiveDescription: Option<TimeToLiveDescription> := Option.None
   )
   datatype DestinationStatus =
     | ENABLING
@@ -534,9 +534,9 @@ module {:extern "software.amazon.cryptography.services.dynamodb.internaldafny.ty
     nameonly StreamArn: StreamArn
   )
   datatype DisableKinesisStreamingDestinationOutput = | DisableKinesisStreamingDestinationOutput (
-    nameonly TableName: Option<TableName> ,
-    nameonly StreamArn: Option<StreamArn> ,
-    nameonly DestinationStatus: Option<DestinationStatus>
+    nameonly TableName: Option<TableName> := Option.None ,
+    nameonly StreamArn: Option<StreamArn> := Option.None ,
+    nameonly DestinationStatus: Option<DestinationStatus> := Option.None
   )
   type Double = x: seq<uint8> | IsValid_Double(x) witness *
   predicate method IsValid_Double(x: seq<uint8>) {
@@ -1480,9 +1480,9 @@ module {:extern "software.amazon.cryptography.services.dynamodb.internaldafny.ty
     nameonly StreamArn: StreamArn
   )
   datatype EnableKinesisStreamingDestinationOutput = | EnableKinesisStreamingDestinationOutput (
-    nameonly TableName: Option<TableName> ,
-    nameonly StreamArn: Option<StreamArn> ,
-    nameonly DestinationStatus: Option<DestinationStatus>
+    nameonly TableName: Option<TableName> := Option.None ,
+    nameonly StreamArn: Option<StreamArn> := Option.None ,
+    nameonly DestinationStatus: Option<DestinationStatus> := Option.None
   )
   datatype Endpoint = | Endpoint (
     nameonly Address: String ,
@@ -1498,58 +1498,58 @@ module {:extern "software.amazon.cryptography.services.dynamodb.internaldafny.ty
   type ExceptionName = string
   datatype ExecuteStatementInput = | ExecuteStatementInput (
     nameonly Statement: PartiQLStatement ,
-    nameonly Parameters: Option<PreparedStatementParameters> ,
-    nameonly ConsistentRead: Option<ConsistentRead> ,
-    nameonly NextToken: Option<PartiQLNextToken> ,
-    nameonly ReturnConsumedCapacity: Option<ReturnConsumedCapacity> ,
-    nameonly Limit: Option<PositiveIntegerObject>
+    nameonly Parameters: Option<PreparedStatementParameters> := Option.None ,
+    nameonly ConsistentRead: Option<ConsistentRead> := Option.None ,
+    nameonly NextToken: Option<PartiQLNextToken> := Option.None ,
+    nameonly ReturnConsumedCapacity: Option<ReturnConsumedCapacity> := Option.None ,
+    nameonly Limit: Option<PositiveIntegerObject> := Option.None
   )
   datatype ExecuteStatementOutput = | ExecuteStatementOutput (
-    nameonly Items: Option<ItemList> ,
-    nameonly NextToken: Option<PartiQLNextToken> ,
-    nameonly ConsumedCapacity: Option<ConsumedCapacity> ,
-    nameonly LastEvaluatedKey: Option<Key>
+    nameonly Items: Option<ItemList> := Option.None ,
+    nameonly NextToken: Option<PartiQLNextToken> := Option.None ,
+    nameonly ConsumedCapacity: Option<ConsumedCapacity> := Option.None ,
+    nameonly LastEvaluatedKey: Option<Key> := Option.None
   )
   datatype ExecuteTransactionInput = | ExecuteTransactionInput (
     nameonly TransactStatements: ParameterizedStatements ,
-    nameonly ClientRequestToken: Option<ClientRequestToken> ,
-    nameonly ReturnConsumedCapacity: Option<ReturnConsumedCapacity>
+    nameonly ClientRequestToken: Option<ClientRequestToken> := Option.None ,
+    nameonly ReturnConsumedCapacity: Option<ReturnConsumedCapacity> := Option.None
   )
   datatype ExecuteTransactionOutput = | ExecuteTransactionOutput (
-    nameonly Responses: Option<ItemResponseList> ,
-    nameonly ConsumedCapacity: Option<ConsumedCapacityMultiple>
+    nameonly Responses: Option<ItemResponseList> := Option.None ,
+    nameonly ConsumedCapacity: Option<ConsumedCapacityMultiple> := Option.None
   )
   type ExpectedAttributeMap = map<AttributeName, ExpectedAttributeValue>
   datatype ExpectedAttributeValue = | ExpectedAttributeValue (
-    nameonly Value: Option<AttributeValue> ,
-    nameonly Exists: Option<BooleanObject> ,
-    nameonly ComparisonOperator: Option<ComparisonOperator> ,
-    nameonly AttributeValueList: Option<AttributeValueList>
+    nameonly Value: Option<AttributeValue> := Option.None ,
+    nameonly Exists: Option<BooleanObject> := Option.None ,
+    nameonly ComparisonOperator: Option<ComparisonOperator> := Option.None ,
+    nameonly AttributeValueList: Option<AttributeValueList> := Option.None
   )
   type ExportArn = x: string | IsValid_ExportArn(x) witness *
   predicate method IsValid_ExportArn(x: string) {
     ( 37 <= |x| <= 1024 )
   }
   datatype ExportDescription = | ExportDescription (
-    nameonly ExportArn: Option<ExportArn> ,
-    nameonly ExportStatus: Option<ExportStatus> ,
-    nameonly StartTime: Option<string> ,
-    nameonly EndTime: Option<string> ,
-    nameonly ExportManifest: Option<ExportManifest> ,
-    nameonly TableArn: Option<TableArn> ,
-    nameonly TableId: Option<TableId> ,
-    nameonly ExportTime: Option<string> ,
-    nameonly ClientToken: Option<ClientToken> ,
-    nameonly S3Bucket: Option<S3Bucket> ,
-    nameonly S3BucketOwner: Option<S3BucketOwner> ,
-    nameonly S3Prefix: Option<S3Prefix> ,
-    nameonly S3SseAlgorithm: Option<S3SseAlgorithm> ,
-    nameonly S3SseKmsKeyId: Option<S3SseKmsKeyId> ,
-    nameonly FailureCode: Option<FailureCode> ,
-    nameonly FailureMessage: Option<FailureMessage> ,
-    nameonly ExportFormat: Option<ExportFormat> ,
-    nameonly BilledSizeBytes: Option<BilledSizeBytes> ,
-    nameonly ItemCount: Option<ItemCount>
+    nameonly ExportArn: Option<ExportArn> := Option.None ,
+    nameonly ExportStatus: Option<ExportStatus> := Option.None ,
+    nameonly StartTime: Option<string> := Option.None ,
+    nameonly EndTime: Option<string> := Option.None ,
+    nameonly ExportManifest: Option<ExportManifest> := Option.None ,
+    nameonly TableArn: Option<TableArn> := Option.None ,
+    nameonly TableId: Option<TableId> := Option.None ,
+    nameonly ExportTime: Option<string> := Option.None ,
+    nameonly ClientToken: Option<ClientToken> := Option.None ,
+    nameonly S3Bucket: Option<S3Bucket> := Option.None ,
+    nameonly S3BucketOwner: Option<S3BucketOwner> := Option.None ,
+    nameonly S3Prefix: Option<S3Prefix> := Option.None ,
+    nameonly S3SseAlgorithm: Option<S3SseAlgorithm> := Option.None ,
+    nameonly S3SseKmsKeyId: Option<S3SseKmsKeyId> := Option.None ,
+    nameonly FailureCode: Option<FailureCode> := Option.None ,
+    nameonly FailureMessage: Option<FailureMessage> := Option.None ,
+    nameonly ExportFormat: Option<ExportFormat> := Option.None ,
+    nameonly BilledSizeBytes: Option<BilledSizeBytes> := Option.None ,
+    nameonly ItemCount: Option<ItemCount> := Option.None
   )
   datatype ExportFormat =
     | DYNAMODB_JSON
@@ -1562,22 +1562,22 @@ module {:extern "software.amazon.cryptography.services.dynamodb.internaldafny.ty
     | FAILED
   type ExportSummaries = seq<ExportSummary>
   datatype ExportSummary = | ExportSummary (
-    nameonly ExportArn: Option<ExportArn> ,
-    nameonly ExportStatus: Option<ExportStatus>
+    nameonly ExportArn: Option<ExportArn> := Option.None ,
+    nameonly ExportStatus: Option<ExportStatus> := Option.None
   )
   datatype ExportTableToPointInTimeInput = | ExportTableToPointInTimeInput (
     nameonly TableArn: TableArn ,
-    nameonly ExportTime: Option<string> ,
-    nameonly ClientToken: Option<ClientToken> ,
+    nameonly ExportTime: Option<string> := Option.None ,
+    nameonly ClientToken: Option<ClientToken> := Option.None ,
     nameonly S3Bucket: S3Bucket ,
-    nameonly S3BucketOwner: Option<S3BucketOwner> ,
-    nameonly S3Prefix: Option<S3Prefix> ,
-    nameonly S3SseAlgorithm: Option<S3SseAlgorithm> ,
-    nameonly S3SseKmsKeyId: Option<S3SseKmsKeyId> ,
-    nameonly ExportFormat: Option<ExportFormat>
+    nameonly S3BucketOwner: Option<S3BucketOwner> := Option.None ,
+    nameonly S3Prefix: Option<S3Prefix> := Option.None ,
+    nameonly S3SseAlgorithm: Option<S3SseAlgorithm> := Option.None ,
+    nameonly S3SseKmsKeyId: Option<S3SseKmsKeyId> := Option.None ,
+    nameonly ExportFormat: Option<ExportFormat> := Option.None
   )
   datatype ExportTableToPointInTimeOutput = | ExportTableToPointInTimeOutput (
-    nameonly ExportDescription: Option<ExportDescription>
+    nameonly ExportDescription: Option<ExportDescription> := Option.None
   )
   type ExpressionAttributeNameMap = map<ExpressionAttributeNameVariable, AttributeName>
   type ExpressionAttributeNameVariable = string
@@ -1585,86 +1585,86 @@ module {:extern "software.amazon.cryptography.services.dynamodb.internaldafny.ty
   type ExpressionAttributeValueVariable = string
   type FailureCode = string
   datatype FailureException = | FailureException (
-    nameonly ExceptionName: Option<ExceptionName> ,
-    nameonly ExceptionDescription: Option<ExceptionDescription>
+    nameonly ExceptionName: Option<ExceptionName> := Option.None ,
+    nameonly ExceptionDescription: Option<ExceptionDescription> := Option.None
   )
   type FailureMessage = string
   type FilterConditionMap = map<AttributeName, Condition>
   datatype Get = | Get (
     nameonly Key: Key ,
     nameonly TableName: TableName ,
-    nameonly ProjectionExpression: Option<ProjectionExpression> ,
-    nameonly ExpressionAttributeNames: Option<ExpressionAttributeNameMap>
+    nameonly ProjectionExpression: Option<ProjectionExpression> := Option.None ,
+    nameonly ExpressionAttributeNames: Option<ExpressionAttributeNameMap> := Option.None
   )
   datatype GetItemInput = | GetItemInput (
     nameonly TableName: TableName ,
     nameonly Key: Key ,
-    nameonly AttributesToGet: Option<AttributeNameList> ,
-    nameonly ConsistentRead: Option<ConsistentRead> ,
-    nameonly ReturnConsumedCapacity: Option<ReturnConsumedCapacity> ,
-    nameonly ProjectionExpression: Option<ProjectionExpression> ,
-    nameonly ExpressionAttributeNames: Option<ExpressionAttributeNameMap>
+    nameonly AttributesToGet: Option<AttributeNameList> := Option.None ,
+    nameonly ConsistentRead: Option<ConsistentRead> := Option.None ,
+    nameonly ReturnConsumedCapacity: Option<ReturnConsumedCapacity> := Option.None ,
+    nameonly ProjectionExpression: Option<ProjectionExpression> := Option.None ,
+    nameonly ExpressionAttributeNames: Option<ExpressionAttributeNameMap> := Option.None
   )
   datatype GetItemOutput = | GetItemOutput (
-    nameonly Item: Option<AttributeMap> ,
-    nameonly ConsumedCapacity: Option<ConsumedCapacity>
+    nameonly Item: Option<AttributeMap> := Option.None ,
+    nameonly ConsumedCapacity: Option<ConsumedCapacity> := Option.None
   )
   datatype GlobalSecondaryIndex = | GlobalSecondaryIndex (
     nameonly IndexName: IndexName ,
     nameonly KeySchema: KeySchema ,
     nameonly Projection: Projection ,
-    nameonly ProvisionedThroughput: Option<ProvisionedThroughput>
+    nameonly ProvisionedThroughput: Option<ProvisionedThroughput> := Option.None
   )
   datatype GlobalSecondaryIndexAutoScalingUpdate = | GlobalSecondaryIndexAutoScalingUpdate (
-    nameonly IndexName: Option<IndexName> ,
-    nameonly ProvisionedWriteCapacityAutoScalingUpdate: Option<AutoScalingSettingsUpdate>
+    nameonly IndexName: Option<IndexName> := Option.None ,
+    nameonly ProvisionedWriteCapacityAutoScalingUpdate: Option<AutoScalingSettingsUpdate> := Option.None
   )
   type GlobalSecondaryIndexAutoScalingUpdateList = x: seq<GlobalSecondaryIndexAutoScalingUpdate> | IsValid_GlobalSecondaryIndexAutoScalingUpdateList(x) witness *
   predicate method IsValid_GlobalSecondaryIndexAutoScalingUpdateList(x: seq<GlobalSecondaryIndexAutoScalingUpdate>) {
     ( 1 <= |x|  )
   }
   datatype GlobalSecondaryIndexDescription = | GlobalSecondaryIndexDescription (
-    nameonly IndexName: Option<IndexName> ,
-    nameonly KeySchema: Option<KeySchema> ,
-    nameonly Projection: Option<Projection> ,
-    nameonly IndexStatus: Option<IndexStatus> ,
-    nameonly Backfilling: Option<Backfilling> ,
-    nameonly ProvisionedThroughput: Option<ProvisionedThroughputDescription> ,
-    nameonly IndexSizeBytes: Option<Long> ,
-    nameonly ItemCount: Option<Long> ,
-    nameonly IndexArn: Option<String>
+    nameonly IndexName: Option<IndexName> := Option.None ,
+    nameonly KeySchema: Option<KeySchema> := Option.None ,
+    nameonly Projection: Option<Projection> := Option.None ,
+    nameonly IndexStatus: Option<IndexStatus> := Option.None ,
+    nameonly Backfilling: Option<Backfilling> := Option.None ,
+    nameonly ProvisionedThroughput: Option<ProvisionedThroughputDescription> := Option.None ,
+    nameonly IndexSizeBytes: Option<Long> := Option.None ,
+    nameonly ItemCount: Option<Long> := Option.None ,
+    nameonly IndexArn: Option<String> := Option.None
   )
   type GlobalSecondaryIndexDescriptionList = seq<GlobalSecondaryIndexDescription>
   type GlobalSecondaryIndexes = seq<GlobalSecondaryIndexInfo>
   datatype GlobalSecondaryIndexInfo = | GlobalSecondaryIndexInfo (
-    nameonly IndexName: Option<IndexName> ,
-    nameonly KeySchema: Option<KeySchema> ,
-    nameonly Projection: Option<Projection> ,
-    nameonly ProvisionedThroughput: Option<ProvisionedThroughput>
+    nameonly IndexName: Option<IndexName> := Option.None ,
+    nameonly KeySchema: Option<KeySchema> := Option.None ,
+    nameonly Projection: Option<Projection> := Option.None ,
+    nameonly ProvisionedThroughput: Option<ProvisionedThroughput> := Option.None
   )
   type GlobalSecondaryIndexList = seq<GlobalSecondaryIndex>
   datatype GlobalSecondaryIndexUpdate = | GlobalSecondaryIndexUpdate (
-    nameonly Update: Option<UpdateGlobalSecondaryIndexAction> ,
-    nameonly Create: Option<CreateGlobalSecondaryIndexAction> ,
-    nameonly Delete: Option<DeleteGlobalSecondaryIndexAction>
+    nameonly Update: Option<UpdateGlobalSecondaryIndexAction> := Option.None ,
+    nameonly Create: Option<CreateGlobalSecondaryIndexAction> := Option.None ,
+    nameonly Delete: Option<DeleteGlobalSecondaryIndexAction> := Option.None
   )
   type GlobalSecondaryIndexUpdateList = seq<GlobalSecondaryIndexUpdate>
   datatype GlobalTable = | GlobalTable (
-    nameonly GlobalTableName: Option<TableName> ,
-    nameonly ReplicationGroup: Option<ReplicaList>
+    nameonly GlobalTableName: Option<TableName> := Option.None ,
+    nameonly ReplicationGroup: Option<ReplicaList> := Option.None
   )
   type GlobalTableArnString = string
   datatype GlobalTableDescription = | GlobalTableDescription (
-    nameonly ReplicationGroup: Option<ReplicaDescriptionList> ,
-    nameonly GlobalTableArn: Option<GlobalTableArnString> ,
-    nameonly CreationDateTime: Option<string> ,
-    nameonly GlobalTableStatus: Option<GlobalTableStatus> ,
-    nameonly GlobalTableName: Option<TableName>
+    nameonly ReplicationGroup: Option<ReplicaDescriptionList> := Option.None ,
+    nameonly GlobalTableArn: Option<GlobalTableArnString> := Option.None ,
+    nameonly CreationDateTime: Option<string> := Option.None ,
+    nameonly GlobalTableStatus: Option<GlobalTableStatus> := Option.None ,
+    nameonly GlobalTableName: Option<TableName> := Option.None
   )
   datatype GlobalTableGlobalSecondaryIndexSettingsUpdate = | GlobalTableGlobalSecondaryIndexSettingsUpdate (
     nameonly IndexName: IndexName ,
-    nameonly ProvisionedWriteCapacityUnits: Option<PositiveLongObject> ,
-    nameonly ProvisionedWriteCapacityAutoScalingSettingsUpdate: Option<AutoScalingSettingsUpdate>
+    nameonly ProvisionedWriteCapacityUnits: Option<PositiveLongObject> := Option.None ,
+    nameonly ProvisionedWriteCapacityAutoScalingSettingsUpdate: Option<AutoScalingSettingsUpdate> := Option.None
   )
   type GlobalTableGlobalSecondaryIndexSettingsUpdateList = x: seq<GlobalTableGlobalSecondaryIndexSettingsUpdate> | IsValid_GlobalTableGlobalSecondaryIndexSettingsUpdateList(x) witness *
   predicate method IsValid_GlobalTableGlobalSecondaryIndexSettingsUpdateList(x: seq<GlobalTableGlobalSecondaryIndexSettingsUpdate>) {
@@ -1695,43 +1695,43 @@ module {:extern "software.amazon.cryptography.services.dynamodb.internaldafny.ty
     | CANCELLED
     | FAILED
   datatype ImportSummary = | ImportSummary (
-    nameonly ImportArn: Option<ImportArn> ,
-    nameonly ImportStatus: Option<ImportStatus> ,
-    nameonly TableArn: Option<TableArn> ,
-    nameonly S3BucketSource: Option<S3BucketSource> ,
-    nameonly CloudWatchLogGroupArn: Option<CloudWatchLogGroupArn> ,
-    nameonly InputFormat: Option<InputFormat> ,
-    nameonly StartTime: Option<string> ,
-    nameonly EndTime: Option<string>
+    nameonly ImportArn: Option<ImportArn> := Option.None ,
+    nameonly ImportStatus: Option<ImportStatus> := Option.None ,
+    nameonly TableArn: Option<TableArn> := Option.None ,
+    nameonly S3BucketSource: Option<S3BucketSource> := Option.None ,
+    nameonly CloudWatchLogGroupArn: Option<CloudWatchLogGroupArn> := Option.None ,
+    nameonly InputFormat: Option<InputFormat> := Option.None ,
+    nameonly StartTime: Option<string> := Option.None ,
+    nameonly EndTime: Option<string> := Option.None
   )
   type ImportSummaryList = seq<ImportSummary>
   datatype ImportTableDescription = | ImportTableDescription (
-    nameonly ImportArn: Option<ImportArn> ,
-    nameonly ImportStatus: Option<ImportStatus> ,
-    nameonly TableArn: Option<TableArn> ,
-    nameonly TableId: Option<TableId> ,
-    nameonly ClientToken: Option<ClientToken> ,
-    nameonly S3BucketSource: Option<S3BucketSource> ,
-    nameonly ErrorCount: Option<ErrorCount> ,
-    nameonly CloudWatchLogGroupArn: Option<CloudWatchLogGroupArn> ,
-    nameonly InputFormat: Option<InputFormat> ,
-    nameonly InputFormatOptions: Option<InputFormatOptions> ,
-    nameonly InputCompressionType: Option<InputCompressionType> ,
-    nameonly TableCreationParameters: Option<TableCreationParameters> ,
-    nameonly StartTime: Option<string> ,
-    nameonly EndTime: Option<string> ,
-    nameonly ProcessedSizeBytes: Option<Long> ,
-    nameonly ProcessedItemCount: Option<ProcessedItemCount> ,
-    nameonly ImportedItemCount: Option<ImportedItemCount> ,
-    nameonly FailureCode: Option<FailureCode> ,
-    nameonly FailureMessage: Option<FailureMessage>
+    nameonly ImportArn: Option<ImportArn> := Option.None ,
+    nameonly ImportStatus: Option<ImportStatus> := Option.None ,
+    nameonly TableArn: Option<TableArn> := Option.None ,
+    nameonly TableId: Option<TableId> := Option.None ,
+    nameonly ClientToken: Option<ClientToken> := Option.None ,
+    nameonly S3BucketSource: Option<S3BucketSource> := Option.None ,
+    nameonly ErrorCount: Option<ErrorCount> := Option.None ,
+    nameonly CloudWatchLogGroupArn: Option<CloudWatchLogGroupArn> := Option.None ,
+    nameonly InputFormat: Option<InputFormat> := Option.None ,
+    nameonly InputFormatOptions: Option<InputFormatOptions> := Option.None ,
+    nameonly InputCompressionType: Option<InputCompressionType> := Option.None ,
+    nameonly TableCreationParameters: Option<TableCreationParameters> := Option.None ,
+    nameonly StartTime: Option<string> := Option.None ,
+    nameonly EndTime: Option<string> := Option.None ,
+    nameonly ProcessedSizeBytes: Option<Long> := Option.None ,
+    nameonly ProcessedItemCount: Option<ProcessedItemCount> := Option.None ,
+    nameonly ImportedItemCount: Option<ImportedItemCount> := Option.None ,
+    nameonly FailureCode: Option<FailureCode> := Option.None ,
+    nameonly FailureMessage: Option<FailureMessage> := Option.None
   )
   datatype ImportTableInput = | ImportTableInput (
-    nameonly ClientToken: Option<ClientToken> ,
+    nameonly ClientToken: Option<ClientToken> := Option.None ,
     nameonly S3BucketSource: S3BucketSource ,
     nameonly InputFormat: InputFormat ,
-    nameonly InputFormatOptions: Option<InputFormatOptions> ,
-    nameonly InputCompressionType: Option<InputCompressionType> ,
+    nameonly InputFormatOptions: Option<InputFormatOptions> := Option.None ,
+    nameonly InputCompressionType: Option<InputCompressionType> := Option.None ,
     nameonly TableCreationParameters: TableCreationParameters
   )
   datatype ImportTableOutput = | ImportTableOutput (
@@ -1755,14 +1755,14 @@ module {:extern "software.amazon.cryptography.services.dynamodb.internaldafny.ty
     | ION
     | CSV
   datatype InputFormatOptions = | InputFormatOptions (
-    nameonly Csv: Option<CsvOptions>
+    nameonly Csv: Option<CsvOptions> := Option.None
   )
   type Integer = int32
   type IntegerObject = int32
   type ItemCollectionKeyAttributeMap = map<AttributeName, AttributeValue>
   datatype ItemCollectionMetrics = | ItemCollectionMetrics (
-    nameonly ItemCollectionKey: Option<ItemCollectionKeyAttributeMap> ,
-    nameonly SizeEstimateRangeGB: Option<ItemCollectionSizeEstimateRange>
+    nameonly ItemCollectionKey: Option<ItemCollectionKeyAttributeMap> := Option.None ,
+    nameonly SizeEstimateRangeGB: Option<ItemCollectionSizeEstimateRange> := Option.None
   )
   type ItemCollectionMetricsMultiple = seq<ItemCollectionMetrics>
   type ItemCollectionMetricsPerTable = map<TableName, ItemCollectionMetricsMultiple>
@@ -1777,7 +1777,7 @@ module {:extern "software.amazon.cryptography.services.dynamodb.internaldafny.ty
   }
   type ItemList = seq<AttributeMap>
   datatype ItemResponse = | ItemResponse (
-    nameonly Item: Option<AttributeMap>
+    nameonly Item: Option<AttributeMap> := Option.None
   )
   type ItemResponseList = x: seq<ItemResponse> | IsValid_ItemResponseList(x) witness *
   predicate method IsValid_ItemResponseList(x: seq<ItemResponse>) {
@@ -1792,10 +1792,10 @@ module {:extern "software.amazon.cryptography.services.dynamodb.internaldafny.ty
   }
   datatype KeysAndAttributes = | KeysAndAttributes (
     nameonly Keys: KeyList ,
-    nameonly AttributesToGet: Option<AttributeNameList> ,
-    nameonly ConsistentRead: Option<ConsistentRead> ,
-    nameonly ProjectionExpression: Option<ProjectionExpression> ,
-    nameonly ExpressionAttributeNames: Option<ExpressionAttributeNameMap>
+    nameonly AttributesToGet: Option<AttributeNameList> := Option.None ,
+    nameonly ConsistentRead: Option<ConsistentRead> := Option.None ,
+    nameonly ProjectionExpression: Option<ProjectionExpression> := Option.None ,
+    nameonly ExpressionAttributeNames: Option<ExpressionAttributeNameMap> := Option.None
   )
   type KeySchema = x: seq<KeySchemaElement> | IsValid_KeySchema(x) witness *
   predicate method IsValid_KeySchema(x: seq<KeySchemaElement>) {
@@ -1813,9 +1813,9 @@ module {:extern "software.amazon.cryptography.services.dynamodb.internaldafny.ty
     | HASH
     | RANGE
   datatype KinesisDataStreamDestination = | KinesisDataStreamDestination (
-    nameonly StreamArn: Option<StreamArn> ,
-    nameonly DestinationStatus: Option<DestinationStatus> ,
-    nameonly DestinationStatusDescription: Option<String>
+    nameonly StreamArn: Option<StreamArn> := Option.None ,
+    nameonly DestinationStatus: Option<DestinationStatus> := Option.None ,
+    nameonly DestinationStatusDescription: Option<String> := Option.None
   )
   type KinesisDataStreamDestinations = seq<KinesisDataStreamDestination>
   datatype KinesisStreamingDestinationInput = | KinesisStreamingDestinationInput (
@@ -1823,92 +1823,92 @@ module {:extern "software.amazon.cryptography.services.dynamodb.internaldafny.ty
     nameonly StreamArn: StreamArn
   )
   datatype KinesisStreamingDestinationOutput = | KinesisStreamingDestinationOutput (
-    nameonly TableName: Option<TableName> ,
-    nameonly StreamArn: Option<StreamArn> ,
-    nameonly DestinationStatus: Option<DestinationStatus>
+    nameonly TableName: Option<TableName> := Option.None ,
+    nameonly StreamArn: Option<StreamArn> := Option.None ,
+    nameonly DestinationStatus: Option<DestinationStatus> := Option.None
   )
   type KMSMasterKeyArn = string
   type KMSMasterKeyId = string
   type ListAttributeValue = seq<AttributeValue>
   datatype ListBackupsInput = | ListBackupsInput (
-    nameonly TableName: Option<TableName> ,
-    nameonly Limit: Option<BackupsInputLimit> ,
-    nameonly TimeRangeLowerBound: Option<string> ,
-    nameonly TimeRangeUpperBound: Option<string> ,
-    nameonly ExclusiveStartBackupArn: Option<BackupArn> ,
-    nameonly BackupType: Option<BackupTypeFilter>
+    nameonly TableName: Option<TableName> := Option.None ,
+    nameonly Limit: Option<BackupsInputLimit> := Option.None ,
+    nameonly TimeRangeLowerBound: Option<string> := Option.None ,
+    nameonly TimeRangeUpperBound: Option<string> := Option.None ,
+    nameonly ExclusiveStartBackupArn: Option<BackupArn> := Option.None ,
+    nameonly BackupType: Option<BackupTypeFilter> := Option.None
   )
   datatype ListBackupsOutput = | ListBackupsOutput (
-    nameonly BackupSummaries: Option<BackupSummaries> ,
-    nameonly LastEvaluatedBackupArn: Option<BackupArn>
+    nameonly BackupSummaries: Option<BackupSummaries> := Option.None ,
+    nameonly LastEvaluatedBackupArn: Option<BackupArn> := Option.None
   )
   datatype ListContributorInsightsInput = | ListContributorInsightsInput (
-    nameonly TableName: Option<TableName> ,
-    nameonly NextToken: Option<NextTokenString> ,
-    nameonly MaxResults: Option<ListContributorInsightsLimit>
+    nameonly TableName: Option<TableName> := Option.None ,
+    nameonly NextToken: Option<NextTokenString> := Option.None ,
+    nameonly MaxResults: Option<ListContributorInsightsLimit> := Option.None
   )
   type ListContributorInsightsLimit = x: int32 | IsValid_ListContributorInsightsLimit(x) witness *
   predicate method IsValid_ListContributorInsightsLimit(x: int32) {
     (  x <= 100 )
   }
   datatype ListContributorInsightsOutput = | ListContributorInsightsOutput (
-    nameonly ContributorInsightsSummaries: Option<ContributorInsightsSummaries> ,
-    nameonly NextToken: Option<NextTokenString>
+    nameonly ContributorInsightsSummaries: Option<ContributorInsightsSummaries> := Option.None ,
+    nameonly NextToken: Option<NextTokenString> := Option.None
   )
   datatype ListExportsInput = | ListExportsInput (
-    nameonly TableArn: Option<TableArn> ,
-    nameonly MaxResults: Option<ListExportsMaxLimit> ,
-    nameonly NextToken: Option<ExportNextToken>
+    nameonly TableArn: Option<TableArn> := Option.None ,
+    nameonly MaxResults: Option<ListExportsMaxLimit> := Option.None ,
+    nameonly NextToken: Option<ExportNextToken> := Option.None
   )
   type ListExportsMaxLimit = x: int32 | IsValid_ListExportsMaxLimit(x) witness *
   predicate method IsValid_ListExportsMaxLimit(x: int32) {
     ( 1 <= x <= 25 )
   }
   datatype ListExportsOutput = | ListExportsOutput (
-    nameonly ExportSummaries: Option<ExportSummaries> ,
-    nameonly NextToken: Option<ExportNextToken>
+    nameonly ExportSummaries: Option<ExportSummaries> := Option.None ,
+    nameonly NextToken: Option<ExportNextToken> := Option.None
   )
   datatype ListGlobalTablesInput = | ListGlobalTablesInput (
-    nameonly ExclusiveStartGlobalTableName: Option<TableName> ,
-    nameonly Limit: Option<PositiveIntegerObject> ,
-    nameonly RegionName: Option<RegionName>
+    nameonly ExclusiveStartGlobalTableName: Option<TableName> := Option.None ,
+    nameonly Limit: Option<PositiveIntegerObject> := Option.None ,
+    nameonly RegionName: Option<RegionName> := Option.None
   )
   datatype ListGlobalTablesOutput = | ListGlobalTablesOutput (
-    nameonly GlobalTables: Option<GlobalTableList> ,
-    nameonly LastEvaluatedGlobalTableName: Option<TableName>
+    nameonly GlobalTables: Option<GlobalTableList> := Option.None ,
+    nameonly LastEvaluatedGlobalTableName: Option<TableName> := Option.None
   )
   datatype ListImportsInput = | ListImportsInput (
-    nameonly TableArn: Option<TableArn> ,
-    nameonly PageSize: Option<ListImportsMaxLimit> ,
-    nameonly NextToken: Option<ImportNextToken>
+    nameonly TableArn: Option<TableArn> := Option.None ,
+    nameonly PageSize: Option<ListImportsMaxLimit> := Option.None ,
+    nameonly NextToken: Option<ImportNextToken> := Option.None
   )
   type ListImportsMaxLimit = x: int32 | IsValid_ListImportsMaxLimit(x) witness *
   predicate method IsValid_ListImportsMaxLimit(x: int32) {
     ( 1 <= x <= 25 )
   }
   datatype ListImportsOutput = | ListImportsOutput (
-    nameonly ImportSummaryList: Option<ImportSummaryList> ,
-    nameonly NextToken: Option<ImportNextToken>
+    nameonly ImportSummaryList: Option<ImportSummaryList> := Option.None ,
+    nameonly NextToken: Option<ImportNextToken> := Option.None
   )
   datatype ListTablesInput = | ListTablesInput (
-    nameonly ExclusiveStartTableName: Option<TableName> ,
-    nameonly Limit: Option<ListTablesInputLimit>
+    nameonly ExclusiveStartTableName: Option<TableName> := Option.None ,
+    nameonly Limit: Option<ListTablesInputLimit> := Option.None
   )
   type ListTablesInputLimit = x: int32 | IsValid_ListTablesInputLimit(x) witness *
   predicate method IsValid_ListTablesInputLimit(x: int32) {
     ( 1 <= x <= 100 )
   }
   datatype ListTablesOutput = | ListTablesOutput (
-    nameonly TableNames: Option<TableNameList> ,
-    nameonly LastEvaluatedTableName: Option<TableName>
+    nameonly TableNames: Option<TableNameList> := Option.None ,
+    nameonly LastEvaluatedTableName: Option<TableName> := Option.None
   )
   datatype ListTagsOfResourceInput = | ListTagsOfResourceInput (
     nameonly ResourceArn: ResourceArnString ,
-    nameonly NextToken: Option<NextTokenString>
+    nameonly NextToken: Option<NextTokenString> := Option.None
   )
   datatype ListTagsOfResourceOutput = | ListTagsOfResourceOutput (
-    nameonly Tags: Option<TagList> ,
-    nameonly NextToken: Option<NextTokenString>
+    nameonly Tags: Option<TagList> := Option.None ,
+    nameonly NextToken: Option<NextTokenString> := Option.None
   )
   datatype LocalSecondaryIndex = | LocalSecondaryIndex (
     nameonly IndexName: IndexName ,
@@ -1916,19 +1916,19 @@ module {:extern "software.amazon.cryptography.services.dynamodb.internaldafny.ty
     nameonly Projection: Projection
   )
   datatype LocalSecondaryIndexDescription = | LocalSecondaryIndexDescription (
-    nameonly IndexName: Option<IndexName> ,
-    nameonly KeySchema: Option<KeySchema> ,
-    nameonly Projection: Option<Projection> ,
-    nameonly IndexSizeBytes: Option<Long> ,
-    nameonly ItemCount: Option<Long> ,
-    nameonly IndexArn: Option<String>
+    nameonly IndexName: Option<IndexName> := Option.None ,
+    nameonly KeySchema: Option<KeySchema> := Option.None ,
+    nameonly Projection: Option<Projection> := Option.None ,
+    nameonly IndexSizeBytes: Option<Long> := Option.None ,
+    nameonly ItemCount: Option<Long> := Option.None ,
+    nameonly IndexArn: Option<String> := Option.None
   )
   type LocalSecondaryIndexDescriptionList = seq<LocalSecondaryIndexDescription>
   type LocalSecondaryIndexes = seq<LocalSecondaryIndexInfo>
   datatype LocalSecondaryIndexInfo = | LocalSecondaryIndexInfo (
-    nameonly IndexName: Option<IndexName> ,
-    nameonly KeySchema: Option<KeySchema> ,
-    nameonly Projection: Option<Projection>
+    nameonly IndexName: Option<IndexName> := Option.None ,
+    nameonly KeySchema: Option<KeySchema> := Option.None ,
+    nameonly Projection: Option<Projection> := Option.None
   )
   type LocalSecondaryIndexList = seq<LocalSecondaryIndex>
   type Long = int64
@@ -1951,7 +1951,7 @@ module {:extern "software.amazon.cryptography.services.dynamodb.internaldafny.ty
   type NumberSetAttributeValue = seq<NumberAttributeValue>
   datatype ParameterizedStatement = | ParameterizedStatement (
     nameonly Statement: PartiQLStatement ,
-    nameonly Parameters: Option<PreparedStatementParameters>
+    nameonly Parameters: Option<PreparedStatementParameters> := Option.None
   )
   type ParameterizedStatements = x: seq<ParameterizedStatement> | IsValid_ParameterizedStatements(x) witness *
   predicate method IsValid_ParameterizedStatements(x: seq<ParameterizedStatement>) {
@@ -1971,9 +1971,9 @@ module {:extern "software.amazon.cryptography.services.dynamodb.internaldafny.ty
     ( 1 <= |x| <= 8192 )
   }
   datatype PointInTimeRecoveryDescription = | PointInTimeRecoveryDescription (
-    nameonly PointInTimeRecoveryStatus: Option<PointInTimeRecoveryStatus> ,
-    nameonly EarliestRestorableDateTime: Option<string> ,
-    nameonly LatestRestorableDateTime: Option<string>
+    nameonly PointInTimeRecoveryStatus: Option<PointInTimeRecoveryStatus> := Option.None ,
+    nameonly EarliestRestorableDateTime: Option<string> := Option.None ,
+    nameonly LatestRestorableDateTime: Option<string> := Option.None
   )
   datatype PointInTimeRecoverySpecification = | PointInTimeRecoverySpecification (
     nameonly PointInTimeRecoveryEnabled: BooleanObject
@@ -1998,8 +1998,8 @@ module {:extern "software.amazon.cryptography.services.dynamodb.internaldafny.ty
     ( 0 <= x  )
   }
   datatype Projection = | Projection (
-    nameonly ProjectionType: Option<ProjectionType> ,
-    nameonly NonKeyAttributes: Option<NonKeyAttributeNameList>
+    nameonly ProjectionType: Option<ProjectionType> := Option.None ,
+    nameonly NonKeyAttributes: Option<NonKeyAttributeNameList> := Option.None
   )
   type ProjectionExpression = string
   datatype ProjectionType =
@@ -2011,122 +2011,122 @@ module {:extern "software.amazon.cryptography.services.dynamodb.internaldafny.ty
     nameonly WriteCapacityUnits: PositiveLongObject
   )
   datatype ProvisionedThroughputDescription = | ProvisionedThroughputDescription (
-    nameonly LastIncreaseDateTime: Option<string> ,
-    nameonly LastDecreaseDateTime: Option<string> ,
-    nameonly NumberOfDecreasesToday: Option<PositiveLongObject> ,
-    nameonly ReadCapacityUnits: Option<NonNegativeLongObject> ,
-    nameonly WriteCapacityUnits: Option<NonNegativeLongObject>
+    nameonly LastIncreaseDateTime: Option<string> := Option.None ,
+    nameonly LastDecreaseDateTime: Option<string> := Option.None ,
+    nameonly NumberOfDecreasesToday: Option<PositiveLongObject> := Option.None ,
+    nameonly ReadCapacityUnits: Option<NonNegativeLongObject> := Option.None ,
+    nameonly WriteCapacityUnits: Option<NonNegativeLongObject> := Option.None
   )
   datatype ProvisionedThroughputOverride = | ProvisionedThroughputOverride (
-    nameonly ReadCapacityUnits: Option<PositiveLongObject>
+    nameonly ReadCapacityUnits: Option<PositiveLongObject> := Option.None
   )
   datatype Put = | Put (
     nameonly Item: PutItemInputAttributeMap ,
     nameonly TableName: TableName ,
-    nameonly ConditionExpression: Option<ConditionExpression> ,
-    nameonly ExpressionAttributeNames: Option<ExpressionAttributeNameMap> ,
-    nameonly ExpressionAttributeValues: Option<ExpressionAttributeValueMap> ,
-    nameonly ReturnValuesOnConditionCheckFailure: Option<ReturnValuesOnConditionCheckFailure>
+    nameonly ConditionExpression: Option<ConditionExpression> := Option.None ,
+    nameonly ExpressionAttributeNames: Option<ExpressionAttributeNameMap> := Option.None ,
+    nameonly ExpressionAttributeValues: Option<ExpressionAttributeValueMap> := Option.None ,
+    nameonly ReturnValuesOnConditionCheckFailure: Option<ReturnValuesOnConditionCheckFailure> := Option.None
   )
   datatype PutItemInput = | PutItemInput (
     nameonly TableName: TableName ,
     nameonly Item: PutItemInputAttributeMap ,
-    nameonly Expected: Option<ExpectedAttributeMap> ,
-    nameonly ReturnValues: Option<ReturnValue> ,
-    nameonly ReturnConsumedCapacity: Option<ReturnConsumedCapacity> ,
-    nameonly ReturnItemCollectionMetrics: Option<ReturnItemCollectionMetrics> ,
-    nameonly ConditionalOperator: Option<ConditionalOperator> ,
-    nameonly ConditionExpression: Option<ConditionExpression> ,
-    nameonly ExpressionAttributeNames: Option<ExpressionAttributeNameMap> ,
-    nameonly ExpressionAttributeValues: Option<ExpressionAttributeValueMap>
+    nameonly Expected: Option<ExpectedAttributeMap> := Option.None ,
+    nameonly ReturnValues: Option<ReturnValue> := Option.None ,
+    nameonly ReturnConsumedCapacity: Option<ReturnConsumedCapacity> := Option.None ,
+    nameonly ReturnItemCollectionMetrics: Option<ReturnItemCollectionMetrics> := Option.None ,
+    nameonly ConditionalOperator: Option<ConditionalOperator> := Option.None ,
+    nameonly ConditionExpression: Option<ConditionExpression> := Option.None ,
+    nameonly ExpressionAttributeNames: Option<ExpressionAttributeNameMap> := Option.None ,
+    nameonly ExpressionAttributeValues: Option<ExpressionAttributeValueMap> := Option.None
   )
   type PutItemInputAttributeMap = map<AttributeName, AttributeValue>
   datatype PutItemOutput = | PutItemOutput (
-    nameonly Attributes: Option<AttributeMap> ,
-    nameonly ConsumedCapacity: Option<ConsumedCapacity> ,
-    nameonly ItemCollectionMetrics: Option<ItemCollectionMetrics>
+    nameonly Attributes: Option<AttributeMap> := Option.None ,
+    nameonly ConsumedCapacity: Option<ConsumedCapacity> := Option.None ,
+    nameonly ItemCollectionMetrics: Option<ItemCollectionMetrics> := Option.None
   )
   datatype PutRequest = | PutRequest (
     nameonly Item: PutItemInputAttributeMap
   )
   datatype QueryInput = | QueryInput (
     nameonly TableName: TableName ,
-    nameonly IndexName: Option<IndexName> ,
-    nameonly Select: Option<Select> ,
-    nameonly AttributesToGet: Option<AttributeNameList> ,
-    nameonly Limit: Option<PositiveIntegerObject> ,
-    nameonly ConsistentRead: Option<ConsistentRead> ,
-    nameonly KeyConditions: Option<KeyConditions> ,
-    nameonly QueryFilter: Option<FilterConditionMap> ,
-    nameonly ConditionalOperator: Option<ConditionalOperator> ,
-    nameonly ScanIndexForward: Option<BooleanObject> ,
-    nameonly ExclusiveStartKey: Option<Key> ,
-    nameonly ReturnConsumedCapacity: Option<ReturnConsumedCapacity> ,
-    nameonly ProjectionExpression: Option<ProjectionExpression> ,
-    nameonly FilterExpression: Option<ConditionExpression> ,
-    nameonly KeyConditionExpression: Option<KeyExpression> ,
-    nameonly ExpressionAttributeNames: Option<ExpressionAttributeNameMap> ,
-    nameonly ExpressionAttributeValues: Option<ExpressionAttributeValueMap>
+    nameonly IndexName: Option<IndexName> := Option.None ,
+    nameonly Select: Option<Select> := Option.None ,
+    nameonly AttributesToGet: Option<AttributeNameList> := Option.None ,
+    nameonly Limit: Option<PositiveIntegerObject> := Option.None ,
+    nameonly ConsistentRead: Option<ConsistentRead> := Option.None ,
+    nameonly KeyConditions: Option<KeyConditions> := Option.None ,
+    nameonly QueryFilter: Option<FilterConditionMap> := Option.None ,
+    nameonly ConditionalOperator: Option<ConditionalOperator> := Option.None ,
+    nameonly ScanIndexForward: Option<BooleanObject> := Option.None ,
+    nameonly ExclusiveStartKey: Option<Key> := Option.None ,
+    nameonly ReturnConsumedCapacity: Option<ReturnConsumedCapacity> := Option.None ,
+    nameonly ProjectionExpression: Option<ProjectionExpression> := Option.None ,
+    nameonly FilterExpression: Option<ConditionExpression> := Option.None ,
+    nameonly KeyConditionExpression: Option<KeyExpression> := Option.None ,
+    nameonly ExpressionAttributeNames: Option<ExpressionAttributeNameMap> := Option.None ,
+    nameonly ExpressionAttributeValues: Option<ExpressionAttributeValueMap> := Option.None
   )
   datatype QueryOutput = | QueryOutput (
-    nameonly Items: Option<ItemList> ,
-    nameonly Count: Option<Integer> ,
-    nameonly ScannedCount: Option<Integer> ,
-    nameonly LastEvaluatedKey: Option<Key> ,
-    nameonly ConsumedCapacity: Option<ConsumedCapacity>
+    nameonly Items: Option<ItemList> := Option.None ,
+    nameonly Count: Option<Integer> := Option.None ,
+    nameonly ScannedCount: Option<Integer> := Option.None ,
+    nameonly LastEvaluatedKey: Option<Key> := Option.None ,
+    nameonly ConsumedCapacity: Option<ConsumedCapacity> := Option.None
   )
   type RegionName = string
   datatype Replica = | Replica (
-    nameonly RegionName: Option<RegionName>
+    nameonly RegionName: Option<RegionName> := Option.None
   )
   datatype ReplicaAutoScalingDescription = | ReplicaAutoScalingDescription (
-    nameonly RegionName: Option<RegionName> ,
-    nameonly GlobalSecondaryIndexes: Option<ReplicaGlobalSecondaryIndexAutoScalingDescriptionList> ,
-    nameonly ReplicaProvisionedReadCapacityAutoScalingSettings: Option<AutoScalingSettingsDescription> ,
-    nameonly ReplicaProvisionedWriteCapacityAutoScalingSettings: Option<AutoScalingSettingsDescription> ,
-    nameonly ReplicaStatus: Option<ReplicaStatus>
+    nameonly RegionName: Option<RegionName> := Option.None ,
+    nameonly GlobalSecondaryIndexes: Option<ReplicaGlobalSecondaryIndexAutoScalingDescriptionList> := Option.None ,
+    nameonly ReplicaProvisionedReadCapacityAutoScalingSettings: Option<AutoScalingSettingsDescription> := Option.None ,
+    nameonly ReplicaProvisionedWriteCapacityAutoScalingSettings: Option<AutoScalingSettingsDescription> := Option.None ,
+    nameonly ReplicaStatus: Option<ReplicaStatus> := Option.None
   )
   type ReplicaAutoScalingDescriptionList = seq<ReplicaAutoScalingDescription>
   datatype ReplicaAutoScalingUpdate = | ReplicaAutoScalingUpdate (
     nameonly RegionName: RegionName ,
-    nameonly ReplicaGlobalSecondaryIndexUpdates: Option<ReplicaGlobalSecondaryIndexAutoScalingUpdateList> ,
-    nameonly ReplicaProvisionedReadCapacityAutoScalingUpdate: Option<AutoScalingSettingsUpdate>
+    nameonly ReplicaGlobalSecondaryIndexUpdates: Option<ReplicaGlobalSecondaryIndexAutoScalingUpdateList> := Option.None ,
+    nameonly ReplicaProvisionedReadCapacityAutoScalingUpdate: Option<AutoScalingSettingsUpdate> := Option.None
   )
   type ReplicaAutoScalingUpdateList = x: seq<ReplicaAutoScalingUpdate> | IsValid_ReplicaAutoScalingUpdateList(x) witness *
   predicate method IsValid_ReplicaAutoScalingUpdateList(x: seq<ReplicaAutoScalingUpdate>) {
     ( 1 <= |x|  )
   }
   datatype ReplicaDescription = | ReplicaDescription (
-    nameonly RegionName: Option<RegionName> ,
-    nameonly ReplicaStatus: Option<ReplicaStatus> ,
-    nameonly ReplicaStatusDescription: Option<ReplicaStatusDescription> ,
-    nameonly ReplicaStatusPercentProgress: Option<ReplicaStatusPercentProgress> ,
-    nameonly KMSMasterKeyId: Option<KMSMasterKeyId> ,
-    nameonly ProvisionedThroughputOverride: Option<ProvisionedThroughputOverride> ,
-    nameonly GlobalSecondaryIndexes: Option<ReplicaGlobalSecondaryIndexDescriptionList> ,
-    nameonly ReplicaInaccessibleDateTime: Option<string> ,
-    nameonly ReplicaTableClassSummary: Option<TableClassSummary>
+    nameonly RegionName: Option<RegionName> := Option.None ,
+    nameonly ReplicaStatus: Option<ReplicaStatus> := Option.None ,
+    nameonly ReplicaStatusDescription: Option<ReplicaStatusDescription> := Option.None ,
+    nameonly ReplicaStatusPercentProgress: Option<ReplicaStatusPercentProgress> := Option.None ,
+    nameonly KMSMasterKeyId: Option<KMSMasterKeyId> := Option.None ,
+    nameonly ProvisionedThroughputOverride: Option<ProvisionedThroughputOverride> := Option.None ,
+    nameonly GlobalSecondaryIndexes: Option<ReplicaGlobalSecondaryIndexDescriptionList> := Option.None ,
+    nameonly ReplicaInaccessibleDateTime: Option<string> := Option.None ,
+    nameonly ReplicaTableClassSummary: Option<TableClassSummary> := Option.None
   )
   type ReplicaDescriptionList = seq<ReplicaDescription>
   datatype ReplicaGlobalSecondaryIndex = | ReplicaGlobalSecondaryIndex (
     nameonly IndexName: IndexName ,
-    nameonly ProvisionedThroughputOverride: Option<ProvisionedThroughputOverride>
+    nameonly ProvisionedThroughputOverride: Option<ProvisionedThroughputOverride> := Option.None
   )
   datatype ReplicaGlobalSecondaryIndexAutoScalingDescription = | ReplicaGlobalSecondaryIndexAutoScalingDescription (
-    nameonly IndexName: Option<IndexName> ,
-    nameonly IndexStatus: Option<IndexStatus> ,
-    nameonly ProvisionedReadCapacityAutoScalingSettings: Option<AutoScalingSettingsDescription> ,
-    nameonly ProvisionedWriteCapacityAutoScalingSettings: Option<AutoScalingSettingsDescription>
+    nameonly IndexName: Option<IndexName> := Option.None ,
+    nameonly IndexStatus: Option<IndexStatus> := Option.None ,
+    nameonly ProvisionedReadCapacityAutoScalingSettings: Option<AutoScalingSettingsDescription> := Option.None ,
+    nameonly ProvisionedWriteCapacityAutoScalingSettings: Option<AutoScalingSettingsDescription> := Option.None
   )
   type ReplicaGlobalSecondaryIndexAutoScalingDescriptionList = seq<ReplicaGlobalSecondaryIndexAutoScalingDescription>
   datatype ReplicaGlobalSecondaryIndexAutoScalingUpdate = | ReplicaGlobalSecondaryIndexAutoScalingUpdate (
-    nameonly IndexName: Option<IndexName> ,
-    nameonly ProvisionedReadCapacityAutoScalingUpdate: Option<AutoScalingSettingsUpdate>
+    nameonly IndexName: Option<IndexName> := Option.None ,
+    nameonly ProvisionedReadCapacityAutoScalingUpdate: Option<AutoScalingSettingsUpdate> := Option.None
   )
   type ReplicaGlobalSecondaryIndexAutoScalingUpdateList = seq<ReplicaGlobalSecondaryIndexAutoScalingUpdate>
   datatype ReplicaGlobalSecondaryIndexDescription = | ReplicaGlobalSecondaryIndexDescription (
-    nameonly IndexName: Option<IndexName> ,
-    nameonly ProvisionedThroughputOverride: Option<ProvisionedThroughputOverride>
+    nameonly IndexName: Option<IndexName> := Option.None ,
+    nameonly ProvisionedThroughputOverride: Option<ProvisionedThroughputOverride> := Option.None
   )
   type ReplicaGlobalSecondaryIndexDescriptionList = seq<ReplicaGlobalSecondaryIndexDescription>
   type ReplicaGlobalSecondaryIndexList = x: seq<ReplicaGlobalSecondaryIndex> | IsValid_ReplicaGlobalSecondaryIndexList(x) witness *
@@ -2135,17 +2135,17 @@ module {:extern "software.amazon.cryptography.services.dynamodb.internaldafny.ty
   }
   datatype ReplicaGlobalSecondaryIndexSettingsDescription = | ReplicaGlobalSecondaryIndexSettingsDescription (
     nameonly IndexName: IndexName ,
-    nameonly IndexStatus: Option<IndexStatus> ,
-    nameonly ProvisionedReadCapacityUnits: Option<PositiveLongObject> ,
-    nameonly ProvisionedReadCapacityAutoScalingSettings: Option<AutoScalingSettingsDescription> ,
-    nameonly ProvisionedWriteCapacityUnits: Option<PositiveLongObject> ,
-    nameonly ProvisionedWriteCapacityAutoScalingSettings: Option<AutoScalingSettingsDescription>
+    nameonly IndexStatus: Option<IndexStatus> := Option.None ,
+    nameonly ProvisionedReadCapacityUnits: Option<PositiveLongObject> := Option.None ,
+    nameonly ProvisionedReadCapacityAutoScalingSettings: Option<AutoScalingSettingsDescription> := Option.None ,
+    nameonly ProvisionedWriteCapacityUnits: Option<PositiveLongObject> := Option.None ,
+    nameonly ProvisionedWriteCapacityAutoScalingSettings: Option<AutoScalingSettingsDescription> := Option.None
   )
   type ReplicaGlobalSecondaryIndexSettingsDescriptionList = seq<ReplicaGlobalSecondaryIndexSettingsDescription>
   datatype ReplicaGlobalSecondaryIndexSettingsUpdate = | ReplicaGlobalSecondaryIndexSettingsUpdate (
     nameonly IndexName: IndexName ,
-    nameonly ProvisionedReadCapacityUnits: Option<PositiveLongObject> ,
-    nameonly ProvisionedReadCapacityAutoScalingSettingsUpdate: Option<AutoScalingSettingsUpdate>
+    nameonly ProvisionedReadCapacityUnits: Option<PositiveLongObject> := Option.None ,
+    nameonly ProvisionedReadCapacityAutoScalingSettingsUpdate: Option<AutoScalingSettingsUpdate> := Option.None
   )
   type ReplicaGlobalSecondaryIndexSettingsUpdateList = x: seq<ReplicaGlobalSecondaryIndexSettingsUpdate> | IsValid_ReplicaGlobalSecondaryIndexSettingsUpdateList(x) witness *
   predicate method IsValid_ReplicaGlobalSecondaryIndexSettingsUpdateList(x: seq<ReplicaGlobalSecondaryIndexSettingsUpdate>) {
@@ -2154,22 +2154,22 @@ module {:extern "software.amazon.cryptography.services.dynamodb.internaldafny.ty
   type ReplicaList = seq<Replica>
   datatype ReplicaSettingsDescription = | ReplicaSettingsDescription (
     nameonly RegionName: RegionName ,
-    nameonly ReplicaStatus: Option<ReplicaStatus> ,
-    nameonly ReplicaBillingModeSummary: Option<BillingModeSummary> ,
-    nameonly ReplicaProvisionedReadCapacityUnits: Option<NonNegativeLongObject> ,
-    nameonly ReplicaProvisionedReadCapacityAutoScalingSettings: Option<AutoScalingSettingsDescription> ,
-    nameonly ReplicaProvisionedWriteCapacityUnits: Option<NonNegativeLongObject> ,
-    nameonly ReplicaProvisionedWriteCapacityAutoScalingSettings: Option<AutoScalingSettingsDescription> ,
-    nameonly ReplicaGlobalSecondaryIndexSettings: Option<ReplicaGlobalSecondaryIndexSettingsDescriptionList> ,
-    nameonly ReplicaTableClassSummary: Option<TableClassSummary>
+    nameonly ReplicaStatus: Option<ReplicaStatus> := Option.None ,
+    nameonly ReplicaBillingModeSummary: Option<BillingModeSummary> := Option.None ,
+    nameonly ReplicaProvisionedReadCapacityUnits: Option<NonNegativeLongObject> := Option.None ,
+    nameonly ReplicaProvisionedReadCapacityAutoScalingSettings: Option<AutoScalingSettingsDescription> := Option.None ,
+    nameonly ReplicaProvisionedWriteCapacityUnits: Option<NonNegativeLongObject> := Option.None ,
+    nameonly ReplicaProvisionedWriteCapacityAutoScalingSettings: Option<AutoScalingSettingsDescription> := Option.None ,
+    nameonly ReplicaGlobalSecondaryIndexSettings: Option<ReplicaGlobalSecondaryIndexSettingsDescriptionList> := Option.None ,
+    nameonly ReplicaTableClassSummary: Option<TableClassSummary> := Option.None
   )
   type ReplicaSettingsDescriptionList = seq<ReplicaSettingsDescription>
   datatype ReplicaSettingsUpdate = | ReplicaSettingsUpdate (
     nameonly RegionName: RegionName ,
-    nameonly ReplicaProvisionedReadCapacityUnits: Option<PositiveLongObject> ,
-    nameonly ReplicaProvisionedReadCapacityAutoScalingSettingsUpdate: Option<AutoScalingSettingsUpdate> ,
-    nameonly ReplicaGlobalSecondaryIndexSettingsUpdate: Option<ReplicaGlobalSecondaryIndexSettingsUpdateList> ,
-    nameonly ReplicaTableClass: Option<TableClass>
+    nameonly ReplicaProvisionedReadCapacityUnits: Option<PositiveLongObject> := Option.None ,
+    nameonly ReplicaProvisionedReadCapacityAutoScalingSettingsUpdate: Option<AutoScalingSettingsUpdate> := Option.None ,
+    nameonly ReplicaGlobalSecondaryIndexSettingsUpdate: Option<ReplicaGlobalSecondaryIndexSettingsUpdateList> := Option.None ,
+    nameonly ReplicaTableClass: Option<TableClass> := Option.None
   )
   type ReplicaSettingsUpdateList = x: seq<ReplicaSettingsUpdate> | IsValid_ReplicaSettingsUpdateList(x) witness *
   predicate method IsValid_ReplicaSettingsUpdateList(x: seq<ReplicaSettingsUpdate>) {
@@ -2186,17 +2186,17 @@ module {:extern "software.amazon.cryptography.services.dynamodb.internaldafny.ty
   type ReplicaStatusDescription = string
   type ReplicaStatusPercentProgress = string
   datatype ReplicationGroupUpdate = | ReplicationGroupUpdate (
-    nameonly Create: Option<CreateReplicationGroupMemberAction> ,
-    nameonly Update: Option<UpdateReplicationGroupMemberAction> ,
-    nameonly Delete: Option<DeleteReplicationGroupMemberAction>
+    nameonly Create: Option<CreateReplicationGroupMemberAction> := Option.None ,
+    nameonly Update: Option<UpdateReplicationGroupMemberAction> := Option.None ,
+    nameonly Delete: Option<DeleteReplicationGroupMemberAction> := Option.None
   )
   type ReplicationGroupUpdateList = x: seq<ReplicationGroupUpdate> | IsValid_ReplicationGroupUpdateList(x) witness *
   predicate method IsValid_ReplicationGroupUpdateList(x: seq<ReplicationGroupUpdate>) {
     ( 1 <= |x|  )
   }
   datatype ReplicaUpdate = | ReplicaUpdate (
-    nameonly Create: Option<CreateReplicaAction> ,
-    nameonly Delete: Option<DeleteReplicaAction>
+    nameonly Create: Option<CreateReplicaAction> := Option.None ,
+    nameonly Delete: Option<DeleteReplicaAction> := Option.None
   )
   type ReplicaUpdateList = seq<ReplicaUpdate>
   type ResourceArnString = x: string | IsValid_ResourceArnString(x) witness *
@@ -2205,37 +2205,37 @@ module {:extern "software.amazon.cryptography.services.dynamodb.internaldafny.ty
   }
   type RestoreInProgress = bool
   datatype RestoreSummary = | RestoreSummary (
-    nameonly SourceBackupArn: Option<BackupArn> ,
-    nameonly SourceTableArn: Option<TableArn> ,
+    nameonly SourceBackupArn: Option<BackupArn> := Option.None ,
+    nameonly SourceTableArn: Option<TableArn> := Option.None ,
     nameonly RestoreDateTime: string ,
     nameonly RestoreInProgress: RestoreInProgress
   )
   datatype RestoreTableFromBackupInput = | RestoreTableFromBackupInput (
     nameonly TargetTableName: TableName ,
     nameonly BackupArn: BackupArn ,
-    nameonly BillingModeOverride: Option<BillingMode> ,
-    nameonly GlobalSecondaryIndexOverride: Option<GlobalSecondaryIndexList> ,
-    nameonly LocalSecondaryIndexOverride: Option<LocalSecondaryIndexList> ,
-    nameonly ProvisionedThroughputOverride: Option<ProvisionedThroughput> ,
-    nameonly SSESpecificationOverride: Option<SSESpecification>
+    nameonly BillingModeOverride: Option<BillingMode> := Option.None ,
+    nameonly GlobalSecondaryIndexOverride: Option<GlobalSecondaryIndexList> := Option.None ,
+    nameonly LocalSecondaryIndexOverride: Option<LocalSecondaryIndexList> := Option.None ,
+    nameonly ProvisionedThroughputOverride: Option<ProvisionedThroughput> := Option.None ,
+    nameonly SSESpecificationOverride: Option<SSESpecification> := Option.None
   )
   datatype RestoreTableFromBackupOutput = | RestoreTableFromBackupOutput (
-    nameonly TableDescription: Option<TableDescription>
+    nameonly TableDescription: Option<TableDescription> := Option.None
   )
   datatype RestoreTableToPointInTimeInput = | RestoreTableToPointInTimeInput (
-    nameonly SourceTableArn: Option<TableArn> ,
-    nameonly SourceTableName: Option<TableName> ,
+    nameonly SourceTableArn: Option<TableArn> := Option.None ,
+    nameonly SourceTableName: Option<TableName> := Option.None ,
     nameonly TargetTableName: TableName ,
-    nameonly UseLatestRestorableTime: Option<BooleanObject> ,
-    nameonly RestoreDateTime: Option<string> ,
-    nameonly BillingModeOverride: Option<BillingMode> ,
-    nameonly GlobalSecondaryIndexOverride: Option<GlobalSecondaryIndexList> ,
-    nameonly LocalSecondaryIndexOverride: Option<LocalSecondaryIndexList> ,
-    nameonly ProvisionedThroughputOverride: Option<ProvisionedThroughput> ,
-    nameonly SSESpecificationOverride: Option<SSESpecification>
+    nameonly UseLatestRestorableTime: Option<BooleanObject> := Option.None ,
+    nameonly RestoreDateTime: Option<string> := Option.None ,
+    nameonly BillingModeOverride: Option<BillingMode> := Option.None ,
+    nameonly GlobalSecondaryIndexOverride: Option<GlobalSecondaryIndexList> := Option.None ,
+    nameonly LocalSecondaryIndexOverride: Option<LocalSecondaryIndexList> := Option.None ,
+    nameonly ProvisionedThroughputOverride: Option<ProvisionedThroughput> := Option.None ,
+    nameonly SSESpecificationOverride: Option<SSESpecification> := Option.None
   )
   datatype RestoreTableToPointInTimeOutput = | RestoreTableToPointInTimeOutput (
-    nameonly TableDescription: Option<TableDescription>
+    nameonly TableDescription: Option<TableDescription> := Option.None
   )
   datatype ReturnConsumedCapacity =
     | INDEXES
@@ -2259,9 +2259,9 @@ module {:extern "software.amazon.cryptography.services.dynamodb.internaldafny.ty
   }
   type S3BucketOwner = string
   datatype S3BucketSource = | S3BucketSource (
-    nameonly S3BucketOwner: Option<S3BucketOwner> ,
+    nameonly S3BucketOwner: Option<S3BucketOwner> := Option.None ,
     nameonly S3Bucket: S3Bucket ,
-    nameonly S3KeyPrefix: Option<S3Prefix>
+    nameonly S3KeyPrefix: Option<S3Prefix> := Option.None
   )
   type S3Prefix = x: string | IsValid_S3Prefix(x) witness *
   predicate method IsValid_S3Prefix(x: string) {
@@ -2280,28 +2280,28 @@ module {:extern "software.amazon.cryptography.services.dynamodb.internaldafny.ty
     | B
   datatype ScanInput = | ScanInput (
     nameonly TableName: TableName ,
-    nameonly IndexName: Option<IndexName> ,
-    nameonly AttributesToGet: Option<AttributeNameList> ,
-    nameonly Limit: Option<PositiveIntegerObject> ,
-    nameonly Select: Option<Select> ,
-    nameonly ScanFilter: Option<FilterConditionMap> ,
-    nameonly ConditionalOperator: Option<ConditionalOperator> ,
-    nameonly ExclusiveStartKey: Option<Key> ,
-    nameonly ReturnConsumedCapacity: Option<ReturnConsumedCapacity> ,
-    nameonly TotalSegments: Option<ScanTotalSegments> ,
-    nameonly Segment: Option<ScanSegment> ,
-    nameonly ProjectionExpression: Option<ProjectionExpression> ,
-    nameonly FilterExpression: Option<ConditionExpression> ,
-    nameonly ExpressionAttributeNames: Option<ExpressionAttributeNameMap> ,
-    nameonly ExpressionAttributeValues: Option<ExpressionAttributeValueMap> ,
-    nameonly ConsistentRead: Option<ConsistentRead>
+    nameonly IndexName: Option<IndexName> := Option.None ,
+    nameonly AttributesToGet: Option<AttributeNameList> := Option.None ,
+    nameonly Limit: Option<PositiveIntegerObject> := Option.None ,
+    nameonly Select: Option<Select> := Option.None ,
+    nameonly ScanFilter: Option<FilterConditionMap> := Option.None ,
+    nameonly ConditionalOperator: Option<ConditionalOperator> := Option.None ,
+    nameonly ExclusiveStartKey: Option<Key> := Option.None ,
+    nameonly ReturnConsumedCapacity: Option<ReturnConsumedCapacity> := Option.None ,
+    nameonly TotalSegments: Option<ScanTotalSegments> := Option.None ,
+    nameonly Segment: Option<ScanSegment> := Option.None ,
+    nameonly ProjectionExpression: Option<ProjectionExpression> := Option.None ,
+    nameonly FilterExpression: Option<ConditionExpression> := Option.None ,
+    nameonly ExpressionAttributeNames: Option<ExpressionAttributeNameMap> := Option.None ,
+    nameonly ExpressionAttributeValues: Option<ExpressionAttributeValueMap> := Option.None ,
+    nameonly ConsistentRead: Option<ConsistentRead> := Option.None
   )
   datatype ScanOutput = | ScanOutput (
-    nameonly Items: Option<ItemList> ,
-    nameonly Count: Option<Integer> ,
-    nameonly ScannedCount: Option<Integer> ,
-    nameonly LastEvaluatedKey: Option<Key> ,
-    nameonly ConsumedCapacity: Option<ConsumedCapacity>
+    nameonly Items: Option<ItemList> := Option.None ,
+    nameonly Count: Option<Integer> := Option.None ,
+    nameonly ScannedCount: Option<Integer> := Option.None ,
+    nameonly LastEvaluatedKey: Option<Key> := Option.None ,
+    nameonly ConsumedCapacity: Option<ConsumedCapacity> := Option.None
   )
   type ScanSegment = x: int32 | IsValid_ScanSegment(x) witness *
   predicate method IsValid_ScanSegment(x: int32) {
@@ -2320,32 +2320,32 @@ module {:extern "software.amazon.cryptography.services.dynamodb.internaldafny.ty
   datatype SourceTableDetails = | SourceTableDetails (
     nameonly TableName: TableName ,
     nameonly TableId: TableId ,
-    nameonly TableArn: Option<TableArn> ,
-    nameonly TableSizeBytes: Option<Long> ,
+    nameonly TableArn: Option<TableArn> := Option.None ,
+    nameonly TableSizeBytes: Option<Long> := Option.None ,
     nameonly KeySchema: KeySchema ,
     nameonly TableCreationDateTime: string ,
     nameonly ProvisionedThroughput: ProvisionedThroughput ,
-    nameonly ItemCount: Option<ItemCount> ,
-    nameonly BillingMode: Option<BillingMode>
+    nameonly ItemCount: Option<ItemCount> := Option.None ,
+    nameonly BillingMode: Option<BillingMode> := Option.None
   )
   datatype SourceTableFeatureDetails = | SourceTableFeatureDetails (
-    nameonly LocalSecondaryIndexes: Option<LocalSecondaryIndexes> ,
-    nameonly GlobalSecondaryIndexes: Option<GlobalSecondaryIndexes> ,
-    nameonly StreamDescription: Option<StreamSpecification> ,
-    nameonly TimeToLiveDescription: Option<TimeToLiveDescription> ,
-    nameonly SSEDescription: Option<SSEDescription>
+    nameonly LocalSecondaryIndexes: Option<LocalSecondaryIndexes> := Option.None ,
+    nameonly GlobalSecondaryIndexes: Option<GlobalSecondaryIndexes> := Option.None ,
+    nameonly StreamDescription: Option<StreamSpecification> := Option.None ,
+    nameonly TimeToLiveDescription: Option<TimeToLiveDescription> := Option.None ,
+    nameonly SSEDescription: Option<SSEDescription> := Option.None
   )
   datatype SSEDescription = | SSEDescription (
-    nameonly Status: Option<SSEStatus> ,
-    nameonly SSEType: Option<SSEType> ,
-    nameonly KMSMasterKeyArn: Option<KMSMasterKeyArn> ,
-    nameonly InaccessibleEncryptionDateTime: Option<string>
+    nameonly Status: Option<SSEStatus> := Option.None ,
+    nameonly SSEType: Option<SSEType> := Option.None ,
+    nameonly KMSMasterKeyArn: Option<KMSMasterKeyArn> := Option.None ,
+    nameonly InaccessibleEncryptionDateTime: Option<string> := Option.None
   )
   type SSEEnabled = bool
   datatype SSESpecification = | SSESpecification (
-    nameonly Enabled: Option<SSEEnabled> ,
-    nameonly SSEType: Option<SSEType> ,
-    nameonly KMSMasterKeyId: Option<KMSMasterKeyId>
+    nameonly Enabled: Option<SSEEnabled> := Option.None ,
+    nameonly SSEType: Option<SSEType> := Option.None ,
+    nameonly KMSMasterKeyId: Option<KMSMasterKeyId> := Option.None
   )
   datatype SSEStatus =
     | ENABLING
@@ -2363,7 +2363,7 @@ module {:extern "software.amazon.cryptography.services.dynamodb.internaldafny.ty
   type StreamEnabled = bool
   datatype StreamSpecification = | StreamSpecification (
     nameonly StreamEnabled: StreamEnabled ,
-    nameonly StreamViewType: Option<StreamViewType>
+    nameonly StreamViewType: Option<StreamViewType> := Option.None
   )
   datatype StreamViewType =
     | NEW_IMAGE
@@ -2375,49 +2375,49 @@ module {:extern "software.amazon.cryptography.services.dynamodb.internaldafny.ty
   type StringSetAttributeValue = seq<StringAttributeValue>
   type TableArn = string
   datatype TableAutoScalingDescription = | TableAutoScalingDescription (
-    nameonly TableName: Option<TableName> ,
-    nameonly TableStatus: Option<TableStatus> ,
-    nameonly Replicas: Option<ReplicaAutoScalingDescriptionList>
+    nameonly TableName: Option<TableName> := Option.None ,
+    nameonly TableStatus: Option<TableStatus> := Option.None ,
+    nameonly Replicas: Option<ReplicaAutoScalingDescriptionList> := Option.None
   )
   datatype TableClass =
     | STANDARD
     | STANDARD_INFREQUENT_ACCESS
   datatype TableClassSummary = | TableClassSummary (
-    nameonly TableClass: Option<TableClass> ,
-    nameonly LastUpdateDateTime: Option<string>
+    nameonly TableClass: Option<TableClass> := Option.None ,
+    nameonly LastUpdateDateTime: Option<string> := Option.None
   )
   datatype TableCreationParameters = | TableCreationParameters (
     nameonly TableName: TableName ,
     nameonly AttributeDefinitions: AttributeDefinitions ,
     nameonly KeySchema: KeySchema ,
-    nameonly BillingMode: Option<BillingMode> ,
-    nameonly ProvisionedThroughput: Option<ProvisionedThroughput> ,
-    nameonly SSESpecification: Option<SSESpecification> ,
-    nameonly GlobalSecondaryIndexes: Option<GlobalSecondaryIndexList>
+    nameonly BillingMode: Option<BillingMode> := Option.None ,
+    nameonly ProvisionedThroughput: Option<ProvisionedThroughput> := Option.None ,
+    nameonly SSESpecification: Option<SSESpecification> := Option.None ,
+    nameonly GlobalSecondaryIndexes: Option<GlobalSecondaryIndexList> := Option.None
   )
   datatype TableDescription = | TableDescription (
-    nameonly AttributeDefinitions: Option<AttributeDefinitions> ,
-    nameonly TableName: Option<TableName> ,
-    nameonly KeySchema: Option<KeySchema> ,
-    nameonly TableStatus: Option<TableStatus> ,
-    nameonly CreationDateTime: Option<string> ,
-    nameonly ProvisionedThroughput: Option<ProvisionedThroughputDescription> ,
-    nameonly TableSizeBytes: Option<Long> ,
-    nameonly ItemCount: Option<Long> ,
-    nameonly TableArn: Option<String> ,
-    nameonly TableId: Option<TableId> ,
-    nameonly BillingModeSummary: Option<BillingModeSummary> ,
-    nameonly LocalSecondaryIndexes: Option<LocalSecondaryIndexDescriptionList> ,
-    nameonly GlobalSecondaryIndexes: Option<GlobalSecondaryIndexDescriptionList> ,
-    nameonly StreamSpecification: Option<StreamSpecification> ,
-    nameonly LatestStreamLabel: Option<String> ,
-    nameonly LatestStreamArn: Option<StreamArn> ,
-    nameonly GlobalTableVersion: Option<String> ,
-    nameonly Replicas: Option<ReplicaDescriptionList> ,
-    nameonly RestoreSummary: Option<RestoreSummary> ,
-    nameonly SSEDescription: Option<SSEDescription> ,
-    nameonly ArchivalSummary: Option<ArchivalSummary> ,
-    nameonly TableClassSummary: Option<TableClassSummary>
+    nameonly AttributeDefinitions: Option<AttributeDefinitions> := Option.None ,
+    nameonly TableName: Option<TableName> := Option.None ,
+    nameonly KeySchema: Option<KeySchema> := Option.None ,
+    nameonly TableStatus: Option<TableStatus> := Option.None ,
+    nameonly CreationDateTime: Option<string> := Option.None ,
+    nameonly ProvisionedThroughput: Option<ProvisionedThroughputDescription> := Option.None ,
+    nameonly TableSizeBytes: Option<Long> := Option.None ,
+    nameonly ItemCount: Option<Long> := Option.None ,
+    nameonly TableArn: Option<String> := Option.None ,
+    nameonly TableId: Option<TableId> := Option.None ,
+    nameonly BillingModeSummary: Option<BillingModeSummary> := Option.None ,
+    nameonly LocalSecondaryIndexes: Option<LocalSecondaryIndexDescriptionList> := Option.None ,
+    nameonly GlobalSecondaryIndexes: Option<GlobalSecondaryIndexDescriptionList> := Option.None ,
+    nameonly StreamSpecification: Option<StreamSpecification> := Option.None ,
+    nameonly LatestStreamLabel: Option<String> := Option.None ,
+    nameonly LatestStreamArn: Option<StreamArn> := Option.None ,
+    nameonly GlobalTableVersion: Option<String> := Option.None ,
+    nameonly Replicas: Option<ReplicaDescriptionList> := Option.None ,
+    nameonly RestoreSummary: Option<RestoreSummary> := Option.None ,
+    nameonly SSEDescription: Option<SSEDescription> := Option.None ,
+    nameonly ArchivalSummary: Option<ArchivalSummary> := Option.None ,
+    nameonly TableClassSummary: Option<TableClassSummary> := Option.None
   )
   type TableId = string
   type TableName = x: string | IsValid_TableName(x) witness *
@@ -2456,8 +2456,8 @@ module {:extern "software.amazon.cryptography.services.dynamodb.internaldafny.ty
     ( 1 <= |x| <= 255 )
   }
   datatype TimeToLiveDescription = | TimeToLiveDescription (
-    nameonly TimeToLiveStatus: Option<TimeToLiveStatus> ,
-    nameonly AttributeName: Option<TimeToLiveAttributeName>
+    nameonly TimeToLiveStatus: Option<TimeToLiveStatus> := Option.None ,
+    nameonly AttributeName: Option<TimeToLiveAttributeName> := Option.None
   )
   type TimeToLiveEnabled = bool
   datatype TimeToLiveSpecification = | TimeToLiveSpecification (
@@ -2478,17 +2478,17 @@ module {:extern "software.amazon.cryptography.services.dynamodb.internaldafny.ty
   }
   datatype TransactGetItemsInput = | TransactGetItemsInput (
     nameonly TransactItems: TransactGetItemList ,
-    nameonly ReturnConsumedCapacity: Option<ReturnConsumedCapacity>
+    nameonly ReturnConsumedCapacity: Option<ReturnConsumedCapacity> := Option.None
   )
   datatype TransactGetItemsOutput = | TransactGetItemsOutput (
-    nameonly ConsumedCapacity: Option<ConsumedCapacityMultiple> ,
-    nameonly Responses: Option<ItemResponseList>
+    nameonly ConsumedCapacity: Option<ConsumedCapacityMultiple> := Option.None ,
+    nameonly Responses: Option<ItemResponseList> := Option.None
   )
   datatype TransactWriteItem = | TransactWriteItem (
-    nameonly ConditionCheck: Option<ConditionCheck> ,
-    nameonly Put: Option<Put> ,
-    nameonly Delete: Option<Delete> ,
-    nameonly Update: Option<Update>
+    nameonly ConditionCheck: Option<ConditionCheck> := Option.None ,
+    nameonly Put: Option<Put> := Option.None ,
+    nameonly Delete: Option<Delete> := Option.None ,
+    nameonly Update: Option<Update> := Option.None
   )
   type TransactWriteItemList = x: seq<TransactWriteItem> | IsValid_TransactWriteItemList(x) witness *
   predicate method IsValid_TransactWriteItemList(x: seq<TransactWriteItem>) {
@@ -2496,13 +2496,13 @@ module {:extern "software.amazon.cryptography.services.dynamodb.internaldafny.ty
   }
   datatype TransactWriteItemsInput = | TransactWriteItemsInput (
     nameonly TransactItems: TransactWriteItemList ,
-    nameonly ReturnConsumedCapacity: Option<ReturnConsumedCapacity> ,
-    nameonly ReturnItemCollectionMetrics: Option<ReturnItemCollectionMetrics> ,
-    nameonly ClientRequestToken: Option<ClientRequestToken>
+    nameonly ReturnConsumedCapacity: Option<ReturnConsumedCapacity> := Option.None ,
+    nameonly ReturnItemCollectionMetrics: Option<ReturnItemCollectionMetrics> := Option.None ,
+    nameonly ClientRequestToken: Option<ClientRequestToken> := Option.None
   )
   datatype TransactWriteItemsOutput = | TransactWriteItemsOutput (
-    nameonly ConsumedCapacity: Option<ConsumedCapacityMultiple> ,
-    nameonly ItemCollectionMetrics: Option<ItemCollectionMetricsPerTable>
+    nameonly ConsumedCapacity: Option<ConsumedCapacityMultiple> := Option.None ,
+    nameonly ItemCollectionMetrics: Option<ItemCollectionMetricsPerTable> := Option.None
   )
   datatype UntagResourceInput = | UntagResourceInput (
     nameonly ResourceArn: ResourceArnString ,
@@ -2512,27 +2512,27 @@ module {:extern "software.amazon.cryptography.services.dynamodb.internaldafny.ty
     nameonly Key: Key ,
     nameonly UpdateExpression: UpdateExpression ,
     nameonly TableName: TableName ,
-    nameonly ConditionExpression: Option<ConditionExpression> ,
-    nameonly ExpressionAttributeNames: Option<ExpressionAttributeNameMap> ,
-    nameonly ExpressionAttributeValues: Option<ExpressionAttributeValueMap> ,
-    nameonly ReturnValuesOnConditionCheckFailure: Option<ReturnValuesOnConditionCheckFailure>
+    nameonly ConditionExpression: Option<ConditionExpression> := Option.None ,
+    nameonly ExpressionAttributeNames: Option<ExpressionAttributeNameMap> := Option.None ,
+    nameonly ExpressionAttributeValues: Option<ExpressionAttributeValueMap> := Option.None ,
+    nameonly ReturnValuesOnConditionCheckFailure: Option<ReturnValuesOnConditionCheckFailure> := Option.None
   )
   datatype UpdateContinuousBackupsInput = | UpdateContinuousBackupsInput (
     nameonly TableName: TableName ,
     nameonly PointInTimeRecoverySpecification: PointInTimeRecoverySpecification
   )
   datatype UpdateContinuousBackupsOutput = | UpdateContinuousBackupsOutput (
-    nameonly ContinuousBackupsDescription: Option<ContinuousBackupsDescription>
+    nameonly ContinuousBackupsDescription: Option<ContinuousBackupsDescription> := Option.None
   )
   datatype UpdateContributorInsightsInput = | UpdateContributorInsightsInput (
     nameonly TableName: TableName ,
-    nameonly IndexName: Option<IndexName> ,
+    nameonly IndexName: Option<IndexName> := Option.None ,
     nameonly ContributorInsightsAction: ContributorInsightsAction
   )
   datatype UpdateContributorInsightsOutput = | UpdateContributorInsightsOutput (
-    nameonly TableName: Option<TableName> ,
-    nameonly IndexName: Option<IndexName> ,
-    nameonly ContributorInsightsStatus: Option<ContributorInsightsStatus>
+    nameonly TableName: Option<TableName> := Option.None ,
+    nameonly IndexName: Option<IndexName> := Option.None ,
+    nameonly ContributorInsightsStatus: Option<ContributorInsightsStatus> := Option.None
   )
   type UpdateExpression = string
   datatype UpdateGlobalSecondaryIndexAction = | UpdateGlobalSecondaryIndexAction (
@@ -2544,79 +2544,79 @@ module {:extern "software.amazon.cryptography.services.dynamodb.internaldafny.ty
     nameonly ReplicaUpdates: ReplicaUpdateList
   )
   datatype UpdateGlobalTableOutput = | UpdateGlobalTableOutput (
-    nameonly GlobalTableDescription: Option<GlobalTableDescription>
+    nameonly GlobalTableDescription: Option<GlobalTableDescription> := Option.None
   )
   datatype UpdateGlobalTableSettingsInput = | UpdateGlobalTableSettingsInput (
     nameonly GlobalTableName: TableName ,
-    nameonly GlobalTableBillingMode: Option<BillingMode> ,
-    nameonly GlobalTableProvisionedWriteCapacityUnits: Option<PositiveLongObject> ,
-    nameonly GlobalTableProvisionedWriteCapacityAutoScalingSettingsUpdate: Option<AutoScalingSettingsUpdate> ,
-    nameonly GlobalTableGlobalSecondaryIndexSettingsUpdate: Option<GlobalTableGlobalSecondaryIndexSettingsUpdateList> ,
-    nameonly ReplicaSettingsUpdate: Option<ReplicaSettingsUpdateList>
+    nameonly GlobalTableBillingMode: Option<BillingMode> := Option.None ,
+    nameonly GlobalTableProvisionedWriteCapacityUnits: Option<PositiveLongObject> := Option.None ,
+    nameonly GlobalTableProvisionedWriteCapacityAutoScalingSettingsUpdate: Option<AutoScalingSettingsUpdate> := Option.None ,
+    nameonly GlobalTableGlobalSecondaryIndexSettingsUpdate: Option<GlobalTableGlobalSecondaryIndexSettingsUpdateList> := Option.None ,
+    nameonly ReplicaSettingsUpdate: Option<ReplicaSettingsUpdateList> := Option.None
   )
   datatype UpdateGlobalTableSettingsOutput = | UpdateGlobalTableSettingsOutput (
-    nameonly GlobalTableName: Option<TableName> ,
-    nameonly ReplicaSettings: Option<ReplicaSettingsDescriptionList>
+    nameonly GlobalTableName: Option<TableName> := Option.None ,
+    nameonly ReplicaSettings: Option<ReplicaSettingsDescriptionList> := Option.None
   )
   datatype UpdateItemInput = | UpdateItemInput (
     nameonly TableName: TableName ,
     nameonly Key: Key ,
-    nameonly AttributeUpdates: Option<AttributeUpdates> ,
-    nameonly Expected: Option<ExpectedAttributeMap> ,
-    nameonly ConditionalOperator: Option<ConditionalOperator> ,
-    nameonly ReturnValues: Option<ReturnValue> ,
-    nameonly ReturnConsumedCapacity: Option<ReturnConsumedCapacity> ,
-    nameonly ReturnItemCollectionMetrics: Option<ReturnItemCollectionMetrics> ,
-    nameonly UpdateExpression: Option<UpdateExpression> ,
-    nameonly ConditionExpression: Option<ConditionExpression> ,
-    nameonly ExpressionAttributeNames: Option<ExpressionAttributeNameMap> ,
-    nameonly ExpressionAttributeValues: Option<ExpressionAttributeValueMap>
+    nameonly AttributeUpdates: Option<AttributeUpdates> := Option.None ,
+    nameonly Expected: Option<ExpectedAttributeMap> := Option.None ,
+    nameonly ConditionalOperator: Option<ConditionalOperator> := Option.None ,
+    nameonly ReturnValues: Option<ReturnValue> := Option.None ,
+    nameonly ReturnConsumedCapacity: Option<ReturnConsumedCapacity> := Option.None ,
+    nameonly ReturnItemCollectionMetrics: Option<ReturnItemCollectionMetrics> := Option.None ,
+    nameonly UpdateExpression: Option<UpdateExpression> := Option.None ,
+    nameonly ConditionExpression: Option<ConditionExpression> := Option.None ,
+    nameonly ExpressionAttributeNames: Option<ExpressionAttributeNameMap> := Option.None ,
+    nameonly ExpressionAttributeValues: Option<ExpressionAttributeValueMap> := Option.None
   )
   datatype UpdateItemOutput = | UpdateItemOutput (
-    nameonly Attributes: Option<AttributeMap> ,
-    nameonly ConsumedCapacity: Option<ConsumedCapacity> ,
-    nameonly ItemCollectionMetrics: Option<ItemCollectionMetrics>
+    nameonly Attributes: Option<AttributeMap> := Option.None ,
+    nameonly ConsumedCapacity: Option<ConsumedCapacity> := Option.None ,
+    nameonly ItemCollectionMetrics: Option<ItemCollectionMetrics> := Option.None
   )
   datatype UpdateReplicationGroupMemberAction = | UpdateReplicationGroupMemberAction (
     nameonly RegionName: RegionName ,
-    nameonly KMSMasterKeyId: Option<KMSMasterKeyId> ,
-    nameonly ProvisionedThroughputOverride: Option<ProvisionedThroughputOverride> ,
-    nameonly GlobalSecondaryIndexes: Option<ReplicaGlobalSecondaryIndexList> ,
-    nameonly TableClassOverride: Option<TableClass>
+    nameonly KMSMasterKeyId: Option<KMSMasterKeyId> := Option.None ,
+    nameonly ProvisionedThroughputOverride: Option<ProvisionedThroughputOverride> := Option.None ,
+    nameonly GlobalSecondaryIndexes: Option<ReplicaGlobalSecondaryIndexList> := Option.None ,
+    nameonly TableClassOverride: Option<TableClass> := Option.None
   )
   datatype UpdateTableInput = | UpdateTableInput (
-    nameonly AttributeDefinitions: Option<AttributeDefinitions> ,
+    nameonly AttributeDefinitions: Option<AttributeDefinitions> := Option.None ,
     nameonly TableName: TableName ,
-    nameonly BillingMode: Option<BillingMode> ,
-    nameonly ProvisionedThroughput: Option<ProvisionedThroughput> ,
-    nameonly GlobalSecondaryIndexUpdates: Option<GlobalSecondaryIndexUpdateList> ,
-    nameonly StreamSpecification: Option<StreamSpecification> ,
-    nameonly SSESpecification: Option<SSESpecification> ,
-    nameonly ReplicaUpdates: Option<ReplicationGroupUpdateList> ,
-    nameonly TableClass: Option<TableClass>
+    nameonly BillingMode: Option<BillingMode> := Option.None ,
+    nameonly ProvisionedThroughput: Option<ProvisionedThroughput> := Option.None ,
+    nameonly GlobalSecondaryIndexUpdates: Option<GlobalSecondaryIndexUpdateList> := Option.None ,
+    nameonly StreamSpecification: Option<StreamSpecification> := Option.None ,
+    nameonly SSESpecification: Option<SSESpecification> := Option.None ,
+    nameonly ReplicaUpdates: Option<ReplicationGroupUpdateList> := Option.None ,
+    nameonly TableClass: Option<TableClass> := Option.None
   )
   datatype UpdateTableOutput = | UpdateTableOutput (
-    nameonly TableDescription: Option<TableDescription>
+    nameonly TableDescription: Option<TableDescription> := Option.None
   )
   datatype UpdateTableReplicaAutoScalingInput = | UpdateTableReplicaAutoScalingInput (
-    nameonly GlobalSecondaryIndexUpdates: Option<GlobalSecondaryIndexAutoScalingUpdateList> ,
+    nameonly GlobalSecondaryIndexUpdates: Option<GlobalSecondaryIndexAutoScalingUpdateList> := Option.None ,
     nameonly TableName: TableName ,
-    nameonly ProvisionedWriteCapacityAutoScalingUpdate: Option<AutoScalingSettingsUpdate> ,
-    nameonly ReplicaUpdates: Option<ReplicaAutoScalingUpdateList>
+    nameonly ProvisionedWriteCapacityAutoScalingUpdate: Option<AutoScalingSettingsUpdate> := Option.None ,
+    nameonly ReplicaUpdates: Option<ReplicaAutoScalingUpdateList> := Option.None
   )
   datatype UpdateTableReplicaAutoScalingOutput = | UpdateTableReplicaAutoScalingOutput (
-    nameonly TableAutoScalingDescription: Option<TableAutoScalingDescription>
+    nameonly TableAutoScalingDescription: Option<TableAutoScalingDescription> := Option.None
   )
   datatype UpdateTimeToLiveInput = | UpdateTimeToLiveInput (
     nameonly TableName: TableName ,
     nameonly TimeToLiveSpecification: TimeToLiveSpecification
   )
   datatype UpdateTimeToLiveOutput = | UpdateTimeToLiveOutput (
-    nameonly TimeToLiveSpecification: Option<TimeToLiveSpecification>
+    nameonly TimeToLiveSpecification: Option<TimeToLiveSpecification> := Option.None
   )
   datatype WriteRequest = | WriteRequest (
-    nameonly PutRequest: Option<PutRequest> ,
-    nameonly DeleteRequest: Option<DeleteRequest>
+    nameonly PutRequest: Option<PutRequest> := Option.None ,
+    nameonly DeleteRequest: Option<DeleteRequest> := Option.None
   )
   type WriteRequests = x: seq<WriteRequest> | IsValid_WriteRequests(x) witness *
   predicate method IsValid_WriteRequests(x: seq<WriteRequest>) {
@@ -2625,101 +2625,101 @@ module {:extern "software.amazon.cryptography.services.dynamodb.internaldafny.ty
   datatype Error =
       // Local Error structures are listed here
     | BackupInUseException (
-        nameonly message: Option<ErrorMessage>
+        nameonly message: Option<ErrorMessage> := Option.None
       )
     | BackupNotFoundException (
-        nameonly message: Option<ErrorMessage>
+        nameonly message: Option<ErrorMessage> := Option.None
       )
     | ConditionalCheckFailedException (
-        nameonly message: Option<ErrorMessage>
+        nameonly message: Option<ErrorMessage> := Option.None
       )
     | ContinuousBackupsUnavailableException (
-        nameonly message: Option<ErrorMessage>
+        nameonly message: Option<ErrorMessage> := Option.None
       )
     | DuplicateItemException (
-        nameonly message: Option<ErrorMessage>
+        nameonly message: Option<ErrorMessage> := Option.None
       )
     | ExportConflictException (
-        nameonly message: Option<ErrorMessage>
+        nameonly message: Option<ErrorMessage> := Option.None
       )
     | ExportNotFoundException (
-        nameonly message: Option<ErrorMessage>
+        nameonly message: Option<ErrorMessage> := Option.None
       )
     | GlobalTableAlreadyExistsException (
-        nameonly message: Option<ErrorMessage>
+        nameonly message: Option<ErrorMessage> := Option.None
       )
     | GlobalTableNotFoundException (
-        nameonly message: Option<ErrorMessage>
+        nameonly message: Option<ErrorMessage> := Option.None
       )
     | IdempotentParameterMismatchException (
-        nameonly Message: Option<ErrorMessage>
+        nameonly Message: Option<ErrorMessage> := Option.None
       )
     | ImportConflictException (
-        nameonly message: Option<ErrorMessage>
+        nameonly message: Option<ErrorMessage> := Option.None
       )
     | ImportNotFoundException (
-        nameonly message: Option<ErrorMessage>
+        nameonly message: Option<ErrorMessage> := Option.None
       )
     | IndexNotFoundException (
-        nameonly message: Option<ErrorMessage>
+        nameonly message: Option<ErrorMessage> := Option.None
       )
     | InternalServerError (
-        nameonly message: Option<ErrorMessage>
+        nameonly message: Option<ErrorMessage> := Option.None
       )
     | InvalidEndpointException (
-        nameonly Message: Option<String>
+        nameonly Message: Option<String> := Option.None
       )
     | InvalidExportTimeException (
-        nameonly message: Option<ErrorMessage>
+        nameonly message: Option<ErrorMessage> := Option.None
       )
     | InvalidRestoreTimeException (
-        nameonly message: Option<ErrorMessage>
+        nameonly message: Option<ErrorMessage> := Option.None
       )
     | ItemCollectionSizeLimitExceededException (
-        nameonly message: Option<ErrorMessage>
+        nameonly message: Option<ErrorMessage> := Option.None
       )
     | LimitExceededException (
-        nameonly message: Option<ErrorMessage>
+        nameonly message: Option<ErrorMessage> := Option.None
       )
     | PointInTimeRecoveryUnavailableException (
-        nameonly message: Option<ErrorMessage>
+        nameonly message: Option<ErrorMessage> := Option.None
       )
     | ProvisionedThroughputExceededException (
-        nameonly message: Option<ErrorMessage>
+        nameonly message: Option<ErrorMessage> := Option.None
       )
     | ReplicaAlreadyExistsException (
-        nameonly message: Option<ErrorMessage>
+        nameonly message: Option<ErrorMessage> := Option.None
       )
     | ReplicaNotFoundException (
-        nameonly message: Option<ErrorMessage>
+        nameonly message: Option<ErrorMessage> := Option.None
       )
     | RequestLimitExceeded (
-        nameonly message: Option<ErrorMessage>
+        nameonly message: Option<ErrorMessage> := Option.None
       )
     | ResourceInUseException (
-        nameonly message: Option<ErrorMessage>
+        nameonly message: Option<ErrorMessage> := Option.None
       )
     | ResourceNotFoundException (
-        nameonly message: Option<ErrorMessage>
+        nameonly message: Option<ErrorMessage> := Option.None
       )
     | TableAlreadyExistsException (
-        nameonly message: Option<ErrorMessage>
+        nameonly message: Option<ErrorMessage> := Option.None
       )
     | TableInUseException (
-        nameonly message: Option<ErrorMessage>
+        nameonly message: Option<ErrorMessage> := Option.None
       )
     | TableNotFoundException (
-        nameonly message: Option<ErrorMessage>
+        nameonly message: Option<ErrorMessage> := Option.None
       )
     | TransactionCanceledException (
-        nameonly Message: Option<ErrorMessage> ,
-        nameonly CancellationReasons: Option<CancellationReasonList>
+        nameonly Message: Option<ErrorMessage> := Option.None ,
+        nameonly CancellationReasons: Option<CancellationReasonList> := Option.None
       )
     | TransactionConflictException (
-        nameonly message: Option<ErrorMessage>
+        nameonly message: Option<ErrorMessage> := Option.None
       )
     | TransactionInProgressException (
-        nameonly Message: Option<ErrorMessage>
+        nameonly Message: Option<ErrorMessage> := Option.None
       )
       // Any dependent models are listed here
 
@@ -2742,6 +2742,13 @@ abstract module AbstractComAmazonawsDynamodbService {
               && fresh(res.value.Modifies)
               && fresh(res.value.History)
               && res.value.ValidState()
+  // Helper function for the benefit of native code to create a Success(client) without referring to Dafny internals
+  function method CreateSuccessOfClient(client: IDynamoDBClient): Result<IDynamoDBClient, Error> {
+    Success(client)
+  } // Helper function for the benefit of native code to create a Failure(error) without referring to Dafny internals
+  function method CreateFailureOfError(error: Error): Result<IDynamoDBClient, Error> {
+    Failure(error)
+  }
 }
 abstract module AbstractComAmazonawsDynamodbOperations {
   import opened Wrappers

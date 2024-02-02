@@ -75,9 +75,10 @@ module IntermediateKeyWrapping {
 
   {
     var maybeCrypto := Primitives.AtomicPrimitives();
-    var cryptoPrimitives :- maybeCrypto
+    var cryptoPrimitivesX : Crypto.IAwsCryptographicPrimitivesClient :- maybeCrypto
     .MapFailure(e => Types.AwsCryptographyPrimitives(e));
-
+    assert cryptoPrimitivesX is Primitives.AtomicPrimitivesClient;
+    var cryptoPrimitives := cryptoPrimitivesX as Primitives.AtomicPrimitivesClient;
     // Deserialize the Intermediate-Wrapped material
     var deserializedWrapped :- DeserializeIntermediateWrappedMaterial(wrappedMaterial, algorithmSuite);
     var DeserializedIntermediateWrappedMaterial(encryptedPdk, providerWrappedIkm) := deserializedWrapped;
@@ -168,8 +169,12 @@ module IntermediateKeyWrapping {
            (AlgorithmSuites.GetEncryptKeyLength(algorithmSuite) + AlgorithmSuites.GetEncryptTagLength(algorithmSuite)) as nat
   {
     var maybeCrypto := Primitives.AtomicPrimitives();
-    var cryptoPrimitives :- maybeCrypto
+    var cryptoPrimitivesX : Crypto.IAwsCryptographicPrimitivesClient :- maybeCrypto
     .MapFailure(e => Types.AwsCryptographyPrimitives(e));
+
+    assert cryptoPrimitivesX is Primitives.AtomicPrimitivesClient;
+    var cryptoPrimitives := cryptoPrimitivesX as Primitives.AtomicPrimitivesClient;
+
 
     // Use the provider to get the intermediate key material, and wrapped intermediate key material
     var generateAndWrapOutput :- generateAndWrap.Invoke(

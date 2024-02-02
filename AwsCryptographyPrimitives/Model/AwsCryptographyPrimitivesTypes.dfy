@@ -43,7 +43,7 @@ module {:extern "software.amazon.cryptography.primitives.internaldafny.types" } 
   datatype AesKdfCtrInput = | AesKdfCtrInput (
     nameonly ikm: seq<uint8> ,
     nameonly expectedLength: PositiveInteger ,
-    nameonly nonce: Option<seq<uint8>>
+    nameonly nonce: Option<seq<uint8>> := Option.None
   )
   class IAwsCryptographicPrimitivesClientCallHistory {
     ghost constructor() {
@@ -405,12 +405,12 @@ module {:extern "software.amazon.cryptography.primitives.internaldafny.types" } 
   )
   datatype HkdfExtractInput = | HkdfExtractInput (
     nameonly digestAlgorithm: DigestAlgorithm ,
-    nameonly salt: Option<seq<uint8>> ,
+    nameonly salt: Option<seq<uint8>> := Option.None ,
     nameonly ikm: seq<uint8>
   )
   datatype HkdfInput = | HkdfInput (
     nameonly digestAlgorithm: DigestAlgorithm ,
-    nameonly salt: Option<seq<uint8>> ,
+    nameonly salt: Option<seq<uint8>> := Option.None ,
     nameonly ikm: seq<uint8> ,
     nameonly info: seq<uint8> ,
     nameonly expectedLength: PositiveInteger
@@ -424,8 +424,8 @@ module {:extern "software.amazon.cryptography.primitives.internaldafny.types" } 
     nameonly digestAlgorithm: DigestAlgorithm ,
     nameonly ikm: seq<uint8> ,
     nameonly expectedLength: PositiveInteger ,
-    nameonly purpose: Option<seq<uint8>> ,
-    nameonly nonce: Option<seq<uint8>>
+    nameonly purpose: Option<seq<uint8>> := Option.None ,
+    nameonly nonce: Option<seq<uint8>> := Option.None
   )
   type PositiveInteger = x: int32 | IsValid_PositiveInteger(x) witness *
   predicate method IsValid_PositiveInteger(x: int32) {
@@ -519,13 +519,20 @@ abstract module AbstractAwsCryptographyPrimitivesService
   import Operations : AbstractAwsCryptographyPrimitivesOperations
   function method DefaultCryptoConfig(): CryptoConfig
   method AtomicPrimitives(config: CryptoConfig := DefaultCryptoConfig())
-    returns (res: Result<AtomicPrimitivesClient, Error>)
+    returns (res: Result<IAwsCryptographicPrimitivesClient, Error>)
     ensures res.Success? ==>
               && fresh(res.value)
               && fresh(res.value.Modifies)
               && fresh(res.value.History)
               && res.value.ValidState()
 
+  // Helper function for the benefit of native code to create a Success(client) without referring to Dafny internals
+  function method CreateSuccessOfClient(client: IAwsCryptographicPrimitivesClient): Result<IAwsCryptographicPrimitivesClient, Error> {
+    Success(client)
+  } // Helper function for the benefit of native code to create a Failure(error) without referring to Dafny internals
+  function method CreateFailureOfError(error: Error): Result<IAwsCryptographicPrimitivesClient, Error> {
+    Failure(error)
+  }
   class AtomicPrimitivesClient extends IAwsCryptographicPrimitivesClient
   {
     constructor(config: Operations.InternalConfig)

@@ -165,6 +165,8 @@ public class Shim implements IKMSClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (KmsException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -192,6 +194,8 @@ public class Shim implements IKMSClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (KmsException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -218,6 +222,8 @@ public class Shim implements IKMSClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (KmsException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -249,6 +255,8 @@ public class Shim implements IKMSClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (KmsException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -281,6 +289,8 @@ public class Shim implements IKMSClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (KmsException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -315,6 +325,8 @@ public class Shim implements IKMSClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (KmsException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -349,6 +361,8 @@ public class Shim implements IKMSClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (KmsException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -369,6 +383,8 @@ public class Shim implements IKMSClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (KmsException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -394,6 +410,8 @@ public class Shim implements IKMSClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (KmsException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -420,6 +438,8 @@ public class Shim implements IKMSClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (KmsException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -443,6 +463,8 @@ public class Shim implements IKMSClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (KmsException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -467,6 +489,8 @@ public class Shim implements IKMSClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (KmsException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -489,6 +513,8 @@ public class Shim implements IKMSClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (KmsException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -517,6 +543,8 @@ public class Shim implements IKMSClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (KmsException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -541,6 +569,8 @@ public class Shim implements IKMSClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (KmsException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -565,6 +595,8 @@ public class Shim implements IKMSClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (KmsException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -593,6 +625,8 @@ public class Shim implements IKMSClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (KmsException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -623,6 +657,8 @@ public class Shim implements IKMSClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (KmsException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -657,6 +693,8 @@ public class Shim implements IKMSClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (KmsException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -692,6 +730,8 @@ public class Shim implements IKMSClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (KmsException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -730,6 +770,8 @@ public class Shim implements IKMSClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (KmsException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -766,6 +808,8 @@ public class Shim implements IKMSClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (KmsException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -792,6 +836,8 @@ public class Shim implements IKMSClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (KmsException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -818,6 +864,8 @@ public class Shim implements IKMSClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (KmsException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -847,6 +895,8 @@ public class Shim implements IKMSClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (KmsException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -876,6 +926,8 @@ public class Shim implements IKMSClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (KmsException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -912,6 +964,8 @@ public class Shim implements IKMSClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (KmsException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -949,6 +1003,8 @@ public class Shim implements IKMSClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (KmsException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -975,6 +1031,8 @@ public class Shim implements IKMSClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (KmsException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -1003,6 +1061,8 @@ public class Shim implements IKMSClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (KmsException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -1031,6 +1091,8 @@ public class Shim implements IKMSClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (KmsException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -1057,6 +1119,8 @@ public class Shim implements IKMSClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (KmsException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -1085,6 +1149,8 @@ public class Shim implements IKMSClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (KmsException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -1119,6 +1185,8 @@ public class Shim implements IKMSClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (KmsException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -1155,6 +1223,8 @@ public class Shim implements IKMSClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (KmsException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -1181,6 +1251,8 @@ public class Shim implements IKMSClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (KmsException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -1205,6 +1277,8 @@ public class Shim implements IKMSClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (KmsException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -1232,6 +1306,8 @@ public class Shim implements IKMSClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (KmsException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -1262,6 +1338,8 @@ public class Shim implements IKMSClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (KmsException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -1286,6 +1364,8 @@ public class Shim implements IKMSClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (KmsException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -1308,6 +1388,8 @@ public class Shim implements IKMSClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (KmsException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -1330,6 +1412,8 @@ public class Shim implements IKMSClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (KmsException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -1363,6 +1447,8 @@ public class Shim implements IKMSClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (KmsException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -1387,6 +1473,8 @@ public class Shim implements IKMSClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (KmsException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -1413,6 +1501,8 @@ public class Shim implements IKMSClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (KmsException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 
@@ -1445,6 +1535,8 @@ public class Shim implements IKMSClient {
       return Result.create_Failure(ToDafny.Error(ex));
     } catch (KmsException ex) {
       return Result.create_Failure(ToDafny.Error(ex));
+    } catch (Exception ex) {
+      return Result.create_Failure(Error.create_Opaque(ex.toString()));
     }
   }
 }

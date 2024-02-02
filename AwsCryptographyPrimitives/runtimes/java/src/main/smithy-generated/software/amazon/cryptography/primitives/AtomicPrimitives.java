@@ -10,7 +10,6 @@ import java.lang.Byte;
 import java.lang.IllegalArgumentException;
 import java.nio.ByteBuffer;
 import java.util.Objects;
-import software.amazon.cryptography.primitives.internaldafny.AtomicPrimitivesClient;
 import software.amazon.cryptography.primitives.internaldafny.__default;
 import software.amazon.cryptography.primitives.internaldafny.types.Error;
 import software.amazon.cryptography.primitives.internaldafny.types.IAwsCryptographicPrimitivesClient;
@@ -45,9 +44,8 @@ public class AtomicPrimitives {
     CryptoConfig input = builder.CryptoConfig();
     software.amazon.cryptography.primitives.internaldafny.types.CryptoConfig dafnyValue =
       ToDafny.CryptoConfig(input);
-    Result<AtomicPrimitivesClient, Error> result = __default.AtomicPrimitives(
-      dafnyValue
-    );
+    Result<IAwsCryptographicPrimitivesClient, Error> result =
+      __default.AtomicPrimitives(dafnyValue);
     if (result.is_Failure()) {
       throw ToNative.Error(result.dtor_error());
     }

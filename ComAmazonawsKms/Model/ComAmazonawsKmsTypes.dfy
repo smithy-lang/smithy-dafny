@@ -18,11 +18,11 @@ module {:extern "software.amazon.cryptography.services.kms.internaldafny.types" 
     | RSAES_OAEP_SHA_256
   type AliasList = seq<AliasListEntry>
   datatype AliasListEntry = | AliasListEntry (
-    nameonly AliasName: Option<AliasNameType> ,
-    nameonly AliasArn: Option<ArnType> ,
-    nameonly TargetKeyId: Option<KeyIdType> ,
-    nameonly CreationDate: Option<string> ,
-    nameonly LastUpdatedDate: Option<string>
+    nameonly AliasName: Option<AliasNameType> := Option.None ,
+    nameonly AliasArn: Option<ArnType> := Option.None ,
+    nameonly TargetKeyId: Option<KeyIdType> := Option.None ,
+    nameonly CreationDate: Option<string> := Option.None ,
+    nameonly LastUpdatedDate: Option<string> := Option.None
   )
   type AliasNameType = x: string | IsValid_AliasNameType(x) witness *
   predicate method IsValid_AliasNameType(x: string) {
@@ -38,7 +38,7 @@ module {:extern "software.amazon.cryptography.services.kms.internaldafny.types" 
     nameonly KeyId: KeyIdType
   )
   datatype CancelKeyDeletionResponse = | CancelKeyDeletionResponse (
-    nameonly KeyId: Option<KeyIdType>
+    nameonly KeyId: Option<KeyIdType> := Option.None
   )
   type CiphertextType = x: seq<uint8> | IsValid_CiphertextType(x) witness *
   predicate method IsValid_CiphertextType(x: seq<uint8>) {
@@ -81,35 +81,35 @@ module {:extern "software.amazon.cryptography.services.kms.internaldafny.types" 
     nameonly KeyStorePassword: KeyStorePasswordType
   )
   datatype CreateCustomKeyStoreResponse = | CreateCustomKeyStoreResponse (
-    nameonly CustomKeyStoreId: Option<CustomKeyStoreIdType>
+    nameonly CustomKeyStoreId: Option<CustomKeyStoreIdType> := Option.None
   )
   datatype CreateGrantRequest = | CreateGrantRequest (
     nameonly KeyId: KeyIdType ,
     nameonly GranteePrincipal: PrincipalIdType ,
-    nameonly RetiringPrincipal: Option<PrincipalIdType> ,
+    nameonly RetiringPrincipal: Option<PrincipalIdType> := Option.None ,
     nameonly Operations: GrantOperationList ,
-    nameonly Constraints: Option<GrantConstraints> ,
-    nameonly GrantTokens: Option<GrantTokenList> ,
-    nameonly Name: Option<GrantNameType>
+    nameonly Constraints: Option<GrantConstraints> := Option.None ,
+    nameonly GrantTokens: Option<GrantTokenList> := Option.None ,
+    nameonly Name: Option<GrantNameType> := Option.None
   )
   datatype CreateGrantResponse = | CreateGrantResponse (
-    nameonly GrantToken: Option<GrantTokenType> ,
-    nameonly GrantId: Option<GrantIdType>
+    nameonly GrantToken: Option<GrantTokenType> := Option.None ,
+    nameonly GrantId: Option<GrantIdType> := Option.None
   )
   datatype CreateKeyRequest = | CreateKeyRequest (
-    nameonly Policy: Option<PolicyType> ,
-    nameonly Description: Option<DescriptionType> ,
-    nameonly KeyUsage: Option<KeyUsageType> ,
-    nameonly CustomerMasterKeySpec: Option<CustomerMasterKeySpec> ,
-    nameonly KeySpec: Option<KeySpec> ,
-    nameonly Origin: Option<OriginType> ,
-    nameonly CustomKeyStoreId: Option<CustomKeyStoreIdType> ,
-    nameonly BypassPolicyLockoutSafetyCheck: Option<BooleanType> ,
-    nameonly Tags: Option<TagList> ,
-    nameonly MultiRegion: Option<NullableBooleanType>
+    nameonly Policy: Option<PolicyType> := Option.None ,
+    nameonly Description: Option<DescriptionType> := Option.None ,
+    nameonly KeyUsage: Option<KeyUsageType> := Option.None ,
+    nameonly CustomerMasterKeySpec: Option<CustomerMasterKeySpec> := Option.None ,
+    nameonly KeySpec: Option<KeySpec> := Option.None ,
+    nameonly Origin: Option<OriginType> := Option.None ,
+    nameonly CustomKeyStoreId: Option<CustomKeyStoreIdType> := Option.None ,
+    nameonly BypassPolicyLockoutSafetyCheck: Option<BooleanType> := Option.None ,
+    nameonly Tags: Option<TagList> := Option.None ,
+    nameonly MultiRegion: Option<NullableBooleanType> := Option.None
   )
   datatype CreateKeyResponse = | CreateKeyResponse (
-    nameonly KeyMetadata: Option<KeyMetadata>
+    nameonly KeyMetadata: Option<KeyMetadata> := Option.None
   )
   datatype CustomerMasterKeySpec =
     | RSA_2048
@@ -130,13 +130,13 @@ module {:extern "software.amazon.cryptography.services.kms.internaldafny.types" 
   }
   type CustomKeyStoresList = seq<CustomKeyStoresListEntry>
   datatype CustomKeyStoresListEntry = | CustomKeyStoresListEntry (
-    nameonly CustomKeyStoreId: Option<CustomKeyStoreIdType> ,
-    nameonly CustomKeyStoreName: Option<CustomKeyStoreNameType> ,
-    nameonly CloudHsmClusterId: Option<CloudHsmClusterIdType> ,
-    nameonly TrustAnchorCertificate: Option<TrustAnchorCertificateType> ,
-    nameonly ConnectionState: Option<ConnectionStateType> ,
-    nameonly ConnectionErrorCode: Option<ConnectionErrorCodeType> ,
-    nameonly CreationDate: Option<string>
+    nameonly CustomKeyStoreId: Option<CustomKeyStoreIdType> := Option.None ,
+    nameonly CustomKeyStoreName: Option<CustomKeyStoreNameType> := Option.None ,
+    nameonly CloudHsmClusterId: Option<CloudHsmClusterIdType> := Option.None ,
+    nameonly TrustAnchorCertificate: Option<TrustAnchorCertificateType> := Option.None ,
+    nameonly ConnectionState: Option<ConnectionStateType> := Option.None ,
+    nameonly ConnectionErrorCode: Option<ConnectionErrorCodeType> := Option.None ,
+    nameonly CreationDate: Option<string> := Option.None
   )
   datatype DataKeyPairSpec =
     | RSA_2048
@@ -151,15 +151,15 @@ module {:extern "software.amazon.cryptography.services.kms.internaldafny.types" 
     | AES_128
   datatype DecryptRequest = | DecryptRequest (
     nameonly CiphertextBlob: CiphertextType ,
-    nameonly EncryptionContext: Option<EncryptionContextType> ,
-    nameonly GrantTokens: Option<GrantTokenList> ,
-    nameonly KeyId: Option<KeyIdType> ,
-    nameonly EncryptionAlgorithm: Option<EncryptionAlgorithmSpec>
+    nameonly EncryptionContext: Option<EncryptionContextType> := Option.None ,
+    nameonly GrantTokens: Option<GrantTokenList> := Option.None ,
+    nameonly KeyId: Option<KeyIdType> := Option.None ,
+    nameonly EncryptionAlgorithm: Option<EncryptionAlgorithmSpec> := Option.None
   )
   datatype DecryptResponse = | DecryptResponse (
-    nameonly KeyId: Option<KeyIdType> ,
-    nameonly Plaintext: Option<PlaintextType> ,
-    nameonly EncryptionAlgorithm: Option<EncryptionAlgorithmSpec>
+    nameonly KeyId: Option<KeyIdType> := Option.None ,
+    nameonly Plaintext: Option<PlaintextType> := Option.None ,
+    nameonly EncryptionAlgorithm: Option<EncryptionAlgorithmSpec> := Option.None
   )
   datatype DeleteAliasRequest = | DeleteAliasRequest (
     nameonly AliasName: AliasNameType
@@ -174,22 +174,22 @@ module {:extern "software.amazon.cryptography.services.kms.internaldafny.types" 
     nameonly KeyId: KeyIdType
   )
   datatype DescribeCustomKeyStoresRequest = | DescribeCustomKeyStoresRequest (
-    nameonly CustomKeyStoreId: Option<CustomKeyStoreIdType> ,
-    nameonly CustomKeyStoreName: Option<CustomKeyStoreNameType> ,
-    nameonly Limit: Option<LimitType> ,
-    nameonly Marker: Option<MarkerType>
+    nameonly CustomKeyStoreId: Option<CustomKeyStoreIdType> := Option.None ,
+    nameonly CustomKeyStoreName: Option<CustomKeyStoreNameType> := Option.None ,
+    nameonly Limit: Option<LimitType> := Option.None ,
+    nameonly Marker: Option<MarkerType> := Option.None
   )
   datatype DescribeCustomKeyStoresResponse = | DescribeCustomKeyStoresResponse (
-    nameonly CustomKeyStores: Option<CustomKeyStoresList> ,
-    nameonly NextMarker: Option<MarkerType> ,
-    nameonly Truncated: Option<BooleanType>
+    nameonly CustomKeyStores: Option<CustomKeyStoresList> := Option.None ,
+    nameonly NextMarker: Option<MarkerType> := Option.None ,
+    nameonly Truncated: Option<BooleanType> := Option.None
   )
   datatype DescribeKeyRequest = | DescribeKeyRequest (
     nameonly KeyId: KeyIdType ,
-    nameonly GrantTokens: Option<GrantTokenList>
+    nameonly GrantTokens: Option<GrantTokenList> := Option.None
   )
   datatype DescribeKeyResponse = | DescribeKeyResponse (
-    nameonly KeyMetadata: Option<KeyMetadata>
+    nameonly KeyMetadata: Option<KeyMetadata> := Option.None
   )
   type DescriptionType = x: string | IsValid_DescriptionType(x) witness *
   predicate method IsValid_DescriptionType(x: string) {
@@ -224,86 +224,86 @@ module {:extern "software.amazon.cryptography.services.kms.internaldafny.types" 
   datatype EncryptRequest = | EncryptRequest (
     nameonly KeyId: KeyIdType ,
     nameonly Plaintext: PlaintextType ,
-    nameonly EncryptionContext: Option<EncryptionContextType> ,
-    nameonly GrantTokens: Option<GrantTokenList> ,
-    nameonly EncryptionAlgorithm: Option<EncryptionAlgorithmSpec>
+    nameonly EncryptionContext: Option<EncryptionContextType> := Option.None ,
+    nameonly GrantTokens: Option<GrantTokenList> := Option.None ,
+    nameonly EncryptionAlgorithm: Option<EncryptionAlgorithmSpec> := Option.None
   )
   datatype EncryptResponse = | EncryptResponse (
-    nameonly CiphertextBlob: Option<CiphertextType> ,
-    nameonly KeyId: Option<KeyIdType> ,
-    nameonly EncryptionAlgorithm: Option<EncryptionAlgorithmSpec>
+    nameonly CiphertextBlob: Option<CiphertextType> := Option.None ,
+    nameonly KeyId: Option<KeyIdType> := Option.None ,
+    nameonly EncryptionAlgorithm: Option<EncryptionAlgorithmSpec> := Option.None
   )
   type ErrorMessageType = string
   datatype ExpirationModelType =
     | KEY_MATERIAL_EXPIRES
     | KEY_MATERIAL_DOES_NOT_EXPIRE
   datatype GenerateDataKeyPairRequest = | GenerateDataKeyPairRequest (
-    nameonly EncryptionContext: Option<EncryptionContextType> ,
+    nameonly EncryptionContext: Option<EncryptionContextType> := Option.None ,
     nameonly KeyId: KeyIdType ,
     nameonly KeyPairSpec: DataKeyPairSpec ,
-    nameonly GrantTokens: Option<GrantTokenList>
+    nameonly GrantTokens: Option<GrantTokenList> := Option.None
   )
   datatype GenerateDataKeyPairResponse = | GenerateDataKeyPairResponse (
-    nameonly PrivateKeyCiphertextBlob: Option<CiphertextType> ,
-    nameonly PrivateKeyPlaintext: Option<PlaintextType> ,
-    nameonly PublicKey: Option<PublicKeyType> ,
-    nameonly KeyId: Option<KeyIdType> ,
-    nameonly KeyPairSpec: Option<DataKeyPairSpec>
+    nameonly PrivateKeyCiphertextBlob: Option<CiphertextType> := Option.None ,
+    nameonly PrivateKeyPlaintext: Option<PlaintextType> := Option.None ,
+    nameonly PublicKey: Option<PublicKeyType> := Option.None ,
+    nameonly KeyId: Option<KeyIdType> := Option.None ,
+    nameonly KeyPairSpec: Option<DataKeyPairSpec> := Option.None
   )
   datatype GenerateDataKeyPairWithoutPlaintextRequest = | GenerateDataKeyPairWithoutPlaintextRequest (
-    nameonly EncryptionContext: Option<EncryptionContextType> ,
+    nameonly EncryptionContext: Option<EncryptionContextType> := Option.None ,
     nameonly KeyId: KeyIdType ,
     nameonly KeyPairSpec: DataKeyPairSpec ,
-    nameonly GrantTokens: Option<GrantTokenList>
+    nameonly GrantTokens: Option<GrantTokenList> := Option.None
   )
   datatype GenerateDataKeyPairWithoutPlaintextResponse = | GenerateDataKeyPairWithoutPlaintextResponse (
-    nameonly PrivateKeyCiphertextBlob: Option<CiphertextType> ,
-    nameonly PublicKey: Option<PublicKeyType> ,
-    nameonly KeyId: Option<KeyIdType> ,
-    nameonly KeyPairSpec: Option<DataKeyPairSpec>
+    nameonly PrivateKeyCiphertextBlob: Option<CiphertextType> := Option.None ,
+    nameonly PublicKey: Option<PublicKeyType> := Option.None ,
+    nameonly KeyId: Option<KeyIdType> := Option.None ,
+    nameonly KeyPairSpec: Option<DataKeyPairSpec> := Option.None
   )
   datatype GenerateDataKeyRequest = | GenerateDataKeyRequest (
     nameonly KeyId: KeyIdType ,
-    nameonly EncryptionContext: Option<EncryptionContextType> ,
-    nameonly NumberOfBytes: Option<NumberOfBytesType> ,
-    nameonly KeySpec: Option<DataKeySpec> ,
-    nameonly GrantTokens: Option<GrantTokenList>
+    nameonly EncryptionContext: Option<EncryptionContextType> := Option.None ,
+    nameonly NumberOfBytes: Option<NumberOfBytesType> := Option.None ,
+    nameonly KeySpec: Option<DataKeySpec> := Option.None ,
+    nameonly GrantTokens: Option<GrantTokenList> := Option.None
   )
   datatype GenerateDataKeyResponse = | GenerateDataKeyResponse (
-    nameonly CiphertextBlob: Option<CiphertextType> ,
-    nameonly Plaintext: Option<PlaintextType> ,
-    nameonly KeyId: Option<KeyIdType>
+    nameonly CiphertextBlob: Option<CiphertextType> := Option.None ,
+    nameonly Plaintext: Option<PlaintextType> := Option.None ,
+    nameonly KeyId: Option<KeyIdType> := Option.None
   )
   datatype GenerateDataKeyWithoutPlaintextRequest = | GenerateDataKeyWithoutPlaintextRequest (
     nameonly KeyId: KeyIdType ,
-    nameonly EncryptionContext: Option<EncryptionContextType> ,
-    nameonly KeySpec: Option<DataKeySpec> ,
-    nameonly NumberOfBytes: Option<NumberOfBytesType> ,
-    nameonly GrantTokens: Option<GrantTokenList>
+    nameonly EncryptionContext: Option<EncryptionContextType> := Option.None ,
+    nameonly KeySpec: Option<DataKeySpec> := Option.None ,
+    nameonly NumberOfBytes: Option<NumberOfBytesType> := Option.None ,
+    nameonly GrantTokens: Option<GrantTokenList> := Option.None
   )
   datatype GenerateDataKeyWithoutPlaintextResponse = | GenerateDataKeyWithoutPlaintextResponse (
-    nameonly CiphertextBlob: Option<CiphertextType> ,
-    nameonly KeyId: Option<KeyIdType>
+    nameonly CiphertextBlob: Option<CiphertextType> := Option.None ,
+    nameonly KeyId: Option<KeyIdType> := Option.None
   )
   datatype GenerateRandomRequest = | GenerateRandomRequest (
-    nameonly NumberOfBytes: Option<NumberOfBytesType> ,
-    nameonly CustomKeyStoreId: Option<CustomKeyStoreIdType>
+    nameonly NumberOfBytes: Option<NumberOfBytesType> := Option.None ,
+    nameonly CustomKeyStoreId: Option<CustomKeyStoreIdType> := Option.None
   )
   datatype GenerateRandomResponse = | GenerateRandomResponse (
-    nameonly Plaintext: Option<PlaintextType>
+    nameonly Plaintext: Option<PlaintextType> := Option.None
   )
   datatype GetKeyPolicyRequest = | GetKeyPolicyRequest (
     nameonly KeyId: KeyIdType ,
     nameonly PolicyName: PolicyNameType
   )
   datatype GetKeyPolicyResponse = | GetKeyPolicyResponse (
-    nameonly Policy: Option<PolicyType>
+    nameonly Policy: Option<PolicyType> := Option.None
   )
   datatype GetKeyRotationStatusRequest = | GetKeyRotationStatusRequest (
     nameonly KeyId: KeyIdType
   )
   datatype GetKeyRotationStatusResponse = | GetKeyRotationStatusResponse (
-    nameonly KeyRotationEnabled: Option<BooleanType>
+    nameonly KeyRotationEnabled: Option<BooleanType> := Option.None
   )
   datatype GetParametersForImportRequest = | GetParametersForImportRequest (
     nameonly KeyId: KeyIdType ,
@@ -311,27 +311,27 @@ module {:extern "software.amazon.cryptography.services.kms.internaldafny.types" 
     nameonly WrappingKeySpec: WrappingKeySpec
   )
   datatype GetParametersForImportResponse = | GetParametersForImportResponse (
-    nameonly KeyId: Option<KeyIdType> ,
-    nameonly ImportToken: Option<CiphertextType> ,
-    nameonly PublicKey: Option<PlaintextType> ,
-    nameonly ParametersValidTo: Option<string>
+    nameonly KeyId: Option<KeyIdType> := Option.None ,
+    nameonly ImportToken: Option<CiphertextType> := Option.None ,
+    nameonly PublicKey: Option<PlaintextType> := Option.None ,
+    nameonly ParametersValidTo: Option<string> := Option.None
   )
   datatype GetPublicKeyRequest = | GetPublicKeyRequest (
     nameonly KeyId: KeyIdType ,
-    nameonly GrantTokens: Option<GrantTokenList>
+    nameonly GrantTokens: Option<GrantTokenList> := Option.None
   )
   datatype GetPublicKeyResponse = | GetPublicKeyResponse (
-    nameonly KeyId: Option<KeyIdType> ,
-    nameonly PublicKey: Option<PublicKeyType> ,
-    nameonly CustomerMasterKeySpec: Option<CustomerMasterKeySpec> ,
-    nameonly KeySpec: Option<KeySpec> ,
-    nameonly KeyUsage: Option<KeyUsageType> ,
-    nameonly EncryptionAlgorithms: Option<EncryptionAlgorithmSpecList> ,
-    nameonly SigningAlgorithms: Option<SigningAlgorithmSpecList>
+    nameonly KeyId: Option<KeyIdType> := Option.None ,
+    nameonly PublicKey: Option<PublicKeyType> := Option.None ,
+    nameonly CustomerMasterKeySpec: Option<CustomerMasterKeySpec> := Option.None ,
+    nameonly KeySpec: Option<KeySpec> := Option.None ,
+    nameonly KeyUsage: Option<KeyUsageType> := Option.None ,
+    nameonly EncryptionAlgorithms: Option<EncryptionAlgorithmSpecList> := Option.None ,
+    nameonly SigningAlgorithms: Option<SigningAlgorithmSpecList> := Option.None
   )
   datatype GrantConstraints = | GrantConstraints (
-    nameonly EncryptionContextSubset: Option<EncryptionContextType> ,
-    nameonly EncryptionContextEquals: Option<EncryptionContextType>
+    nameonly EncryptionContextSubset: Option<EncryptionContextType> := Option.None ,
+    nameonly EncryptionContextEquals: Option<EncryptionContextType> := Option.None
   )
   type GrantIdType = x: string | IsValid_GrantIdType(x) witness *
   predicate method IsValid_GrantIdType(x: string) {
@@ -339,15 +339,15 @@ module {:extern "software.amazon.cryptography.services.kms.internaldafny.types" 
   }
   type GrantList = seq<GrantListEntry>
   datatype GrantListEntry = | GrantListEntry (
-    nameonly KeyId: Option<KeyIdType> ,
-    nameonly GrantId: Option<GrantIdType> ,
-    nameonly Name: Option<GrantNameType> ,
-    nameonly CreationDate: Option<string> ,
-    nameonly GranteePrincipal: Option<PrincipalIdType> ,
-    nameonly RetiringPrincipal: Option<PrincipalIdType> ,
-    nameonly IssuingAccount: Option<PrincipalIdType> ,
-    nameonly Operations: Option<GrantOperationList> ,
-    nameonly Constraints: Option<GrantConstraints>
+    nameonly KeyId: Option<KeyIdType> := Option.None ,
+    nameonly GrantId: Option<GrantIdType> := Option.None ,
+    nameonly Name: Option<GrantNameType> := Option.None ,
+    nameonly CreationDate: Option<string> := Option.None ,
+    nameonly GranteePrincipal: Option<PrincipalIdType> := Option.None ,
+    nameonly RetiringPrincipal: Option<PrincipalIdType> := Option.None ,
+    nameonly IssuingAccount: Option<PrincipalIdType> := Option.None ,
+    nameonly Operations: Option<GrantOperationList> := Option.None ,
+    nameonly Constraints: Option<GrantConstraints> := Option.None
   )
   type GrantNameType = x: string | IsValid_GrantNameType(x) witness *
   predicate method IsValid_GrantNameType(x: string) {
@@ -381,8 +381,8 @@ module {:extern "software.amazon.cryptography.services.kms.internaldafny.types" 
     nameonly KeyId: KeyIdType ,
     nameonly ImportToken: CiphertextType ,
     nameonly EncryptedKeyMaterial: CiphertextType ,
-    nameonly ValidTo: Option<string> ,
-    nameonly ExpirationModel: Option<ExpirationModelType>
+    nameonly ValidTo: Option<string> := Option.None ,
+    nameonly ExpirationModel: Option<ExpirationModelType> := Option.None
   )
   datatype ImportKeyMaterialResponse = | ImportKeyMaterialResponse (
 
@@ -393,35 +393,35 @@ module {:extern "software.amazon.cryptography.services.kms.internaldafny.types" 
   }
   type KeyList = seq<KeyListEntry>
   datatype KeyListEntry = | KeyListEntry (
-    nameonly KeyId: Option<KeyIdType> ,
-    nameonly KeyArn: Option<ArnType>
+    nameonly KeyId: Option<KeyIdType> := Option.None ,
+    nameonly KeyArn: Option<ArnType> := Option.None
   )
   datatype KeyManagerType =
     | AWS
     | CUSTOMER
   datatype KeyMetadata = | KeyMetadata (
-    nameonly AWSAccountId: Option<AWSAccountIdType> ,
+    nameonly AWSAccountId: Option<AWSAccountIdType> := Option.None ,
     nameonly KeyId: KeyIdType ,
-    nameonly Arn: Option<ArnType> ,
-    nameonly CreationDate: Option<string> ,
-    nameonly Enabled: Option<BooleanType> ,
-    nameonly Description: Option<DescriptionType> ,
-    nameonly KeyUsage: Option<KeyUsageType> ,
-    nameonly KeyState: Option<KeyState> ,
-    nameonly DeletionDate: Option<string> ,
-    nameonly ValidTo: Option<string> ,
-    nameonly Origin: Option<OriginType> ,
-    nameonly CustomKeyStoreId: Option<CustomKeyStoreIdType> ,
-    nameonly CloudHsmClusterId: Option<CloudHsmClusterIdType> ,
-    nameonly ExpirationModel: Option<ExpirationModelType> ,
-    nameonly KeyManager: Option<KeyManagerType> ,
-    nameonly CustomerMasterKeySpec: Option<CustomerMasterKeySpec> ,
-    nameonly KeySpec: Option<KeySpec> ,
-    nameonly EncryptionAlgorithms: Option<EncryptionAlgorithmSpecList> ,
-    nameonly SigningAlgorithms: Option<SigningAlgorithmSpecList> ,
-    nameonly MultiRegion: Option<NullableBooleanType> ,
-    nameonly MultiRegionConfiguration: Option<MultiRegionConfiguration> ,
-    nameonly PendingDeletionWindowInDays: Option<PendingWindowInDaysType>
+    nameonly Arn: Option<ArnType> := Option.None ,
+    nameonly CreationDate: Option<string> := Option.None ,
+    nameonly Enabled: Option<BooleanType> := Option.None ,
+    nameonly Description: Option<DescriptionType> := Option.None ,
+    nameonly KeyUsage: Option<KeyUsageType> := Option.None ,
+    nameonly KeyState: Option<KeyState> := Option.None ,
+    nameonly DeletionDate: Option<string> := Option.None ,
+    nameonly ValidTo: Option<string> := Option.None ,
+    nameonly Origin: Option<OriginType> := Option.None ,
+    nameonly CustomKeyStoreId: Option<CustomKeyStoreIdType> := Option.None ,
+    nameonly CloudHsmClusterId: Option<CloudHsmClusterIdType> := Option.None ,
+    nameonly ExpirationModel: Option<ExpirationModelType> := Option.None ,
+    nameonly KeyManager: Option<KeyManagerType> := Option.None ,
+    nameonly CustomerMasterKeySpec: Option<CustomerMasterKeySpec> := Option.None ,
+    nameonly KeySpec: Option<KeySpec> := Option.None ,
+    nameonly EncryptionAlgorithms: Option<EncryptionAlgorithmSpecList> := Option.None ,
+    nameonly SigningAlgorithms: Option<SigningAlgorithmSpecList> := Option.None ,
+    nameonly MultiRegion: Option<NullableBooleanType> := Option.None ,
+    nameonly MultiRegionConfiguration: Option<MultiRegionConfiguration> := Option.None ,
+    nameonly PendingDeletionWindowInDays: Option<PendingWindowInDaysType> := Option.None
   )
   datatype KeySpec =
     | RSA_2048
@@ -453,54 +453,54 @@ module {:extern "software.amazon.cryptography.services.kms.internaldafny.types" 
     ( 1 <= x <= 1000 )
   }
   datatype ListAliasesRequest = | ListAliasesRequest (
-    nameonly KeyId: Option<KeyIdType> ,
-    nameonly Limit: Option<LimitType> ,
-    nameonly Marker: Option<MarkerType>
+    nameonly KeyId: Option<KeyIdType> := Option.None ,
+    nameonly Limit: Option<LimitType> := Option.None ,
+    nameonly Marker: Option<MarkerType> := Option.None
   )
   datatype ListAliasesResponse = | ListAliasesResponse (
-    nameonly Aliases: Option<AliasList> ,
-    nameonly NextMarker: Option<MarkerType> ,
-    nameonly Truncated: Option<BooleanType>
+    nameonly Aliases: Option<AliasList> := Option.None ,
+    nameonly NextMarker: Option<MarkerType> := Option.None ,
+    nameonly Truncated: Option<BooleanType> := Option.None
   )
   datatype ListGrantsRequest = | ListGrantsRequest (
-    nameonly Limit: Option<LimitType> ,
-    nameonly Marker: Option<MarkerType> ,
+    nameonly Limit: Option<LimitType> := Option.None ,
+    nameonly Marker: Option<MarkerType> := Option.None ,
     nameonly KeyId: KeyIdType ,
-    nameonly GrantId: Option<GrantIdType> ,
-    nameonly GranteePrincipal: Option<PrincipalIdType>
+    nameonly GrantId: Option<GrantIdType> := Option.None ,
+    nameonly GranteePrincipal: Option<PrincipalIdType> := Option.None
   )
   datatype ListGrantsResponse = | ListGrantsResponse (
-    nameonly Grants: Option<GrantList> ,
-    nameonly NextMarker: Option<MarkerType> ,
-    nameonly Truncated: Option<BooleanType>
+    nameonly Grants: Option<GrantList> := Option.None ,
+    nameonly NextMarker: Option<MarkerType> := Option.None ,
+    nameonly Truncated: Option<BooleanType> := Option.None
   )
   datatype ListKeyPoliciesRequest = | ListKeyPoliciesRequest (
     nameonly KeyId: KeyIdType ,
-    nameonly Limit: Option<LimitType> ,
-    nameonly Marker: Option<MarkerType>
+    nameonly Limit: Option<LimitType> := Option.None ,
+    nameonly Marker: Option<MarkerType> := Option.None
   )
   datatype ListKeyPoliciesResponse = | ListKeyPoliciesResponse (
-    nameonly PolicyNames: Option<PolicyNameList> ,
-    nameonly NextMarker: Option<MarkerType> ,
-    nameonly Truncated: Option<BooleanType>
+    nameonly PolicyNames: Option<PolicyNameList> := Option.None ,
+    nameonly NextMarker: Option<MarkerType> := Option.None ,
+    nameonly Truncated: Option<BooleanType> := Option.None
   )
   datatype ListKeysRequest = | ListKeysRequest (
-    nameonly Limit: Option<LimitType> ,
-    nameonly Marker: Option<MarkerType>
+    nameonly Limit: Option<LimitType> := Option.None ,
+    nameonly Marker: Option<MarkerType> := Option.None
   )
   datatype ListResourceTagsRequest = | ListResourceTagsRequest (
     nameonly KeyId: KeyIdType ,
-    nameonly Limit: Option<LimitType> ,
-    nameonly Marker: Option<MarkerType>
+    nameonly Limit: Option<LimitType> := Option.None ,
+    nameonly Marker: Option<MarkerType> := Option.None
   )
   datatype ListResourceTagsResponse = | ListResourceTagsResponse (
-    nameonly Tags: Option<TagList> ,
-    nameonly NextMarker: Option<MarkerType> ,
-    nameonly Truncated: Option<BooleanType>
+    nameonly Tags: Option<TagList> := Option.None ,
+    nameonly NextMarker: Option<MarkerType> := Option.None ,
+    nameonly Truncated: Option<BooleanType> := Option.None
   )
   datatype ListRetirableGrantsRequest = | ListRetirableGrantsRequest (
-    nameonly Limit: Option<LimitType> ,
-    nameonly Marker: Option<MarkerType> ,
+    nameonly Limit: Option<LimitType> := Option.None ,
+    nameonly Marker: Option<MarkerType> := Option.None ,
     nameonly RetiringPrincipal: PrincipalIdType
   )
   type MarkerType = x: string | IsValid_MarkerType(x) witness *
@@ -511,13 +511,13 @@ module {:extern "software.amazon.cryptography.services.kms.internaldafny.types" 
     | RAW
     | DIGEST
   datatype MultiRegionConfiguration = | MultiRegionConfiguration (
-    nameonly MultiRegionKeyType: Option<MultiRegionKeyType> ,
-    nameonly PrimaryKey: Option<MultiRegionKey> ,
-    nameonly ReplicaKeys: Option<MultiRegionKeyList>
+    nameonly MultiRegionKeyType: Option<MultiRegionKeyType> := Option.None ,
+    nameonly PrimaryKey: Option<MultiRegionKey> := Option.None ,
+    nameonly ReplicaKeys: Option<MultiRegionKeyList> := Option.None
   )
   datatype MultiRegionKey = | MultiRegionKey (
-    nameonly Arn: Option<ArnType> ,
-    nameonly Region: Option<RegionType>
+    nameonly Arn: Option<ArnType> := Option.None ,
+    nameonly Region: Option<RegionType> := Option.None
   )
   type MultiRegionKeyList = seq<MultiRegionKey>
   datatype MultiRegionKeyType =
@@ -561,24 +561,24 @@ module {:extern "software.amazon.cryptography.services.kms.internaldafny.types" 
     nameonly KeyId: KeyIdType ,
     nameonly PolicyName: PolicyNameType ,
     nameonly Policy: PolicyType ,
-    nameonly BypassPolicyLockoutSafetyCheck: Option<BooleanType>
+    nameonly BypassPolicyLockoutSafetyCheck: Option<BooleanType> := Option.None
   )
   datatype ReEncryptRequest = | ReEncryptRequest (
     nameonly CiphertextBlob: CiphertextType ,
-    nameonly SourceEncryptionContext: Option<EncryptionContextType> ,
-    nameonly SourceKeyId: Option<KeyIdType> ,
+    nameonly SourceEncryptionContext: Option<EncryptionContextType> := Option.None ,
+    nameonly SourceKeyId: Option<KeyIdType> := Option.None ,
     nameonly DestinationKeyId: KeyIdType ,
-    nameonly DestinationEncryptionContext: Option<EncryptionContextType> ,
-    nameonly SourceEncryptionAlgorithm: Option<EncryptionAlgorithmSpec> ,
-    nameonly DestinationEncryptionAlgorithm: Option<EncryptionAlgorithmSpec> ,
-    nameonly GrantTokens: Option<GrantTokenList>
+    nameonly DestinationEncryptionContext: Option<EncryptionContextType> := Option.None ,
+    nameonly SourceEncryptionAlgorithm: Option<EncryptionAlgorithmSpec> := Option.None ,
+    nameonly DestinationEncryptionAlgorithm: Option<EncryptionAlgorithmSpec> := Option.None ,
+    nameonly GrantTokens: Option<GrantTokenList> := Option.None
   )
   datatype ReEncryptResponse = | ReEncryptResponse (
-    nameonly CiphertextBlob: Option<CiphertextType> ,
-    nameonly SourceKeyId: Option<KeyIdType> ,
-    nameonly KeyId: Option<KeyIdType> ,
-    nameonly SourceEncryptionAlgorithm: Option<EncryptionAlgorithmSpec> ,
-    nameonly DestinationEncryptionAlgorithm: Option<EncryptionAlgorithmSpec>
+    nameonly CiphertextBlob: Option<CiphertextType> := Option.None ,
+    nameonly SourceKeyId: Option<KeyIdType> := Option.None ,
+    nameonly KeyId: Option<KeyIdType> := Option.None ,
+    nameonly SourceEncryptionAlgorithm: Option<EncryptionAlgorithmSpec> := Option.None ,
+    nameonly DestinationEncryptionAlgorithm: Option<EncryptionAlgorithmSpec> := Option.None
   )
   type RegionType = x: string | IsValid_RegionType(x) witness *
   predicate method IsValid_RegionType(x: string) {
@@ -587,20 +587,20 @@ module {:extern "software.amazon.cryptography.services.kms.internaldafny.types" 
   datatype ReplicateKeyRequest = | ReplicateKeyRequest (
     nameonly KeyId: KeyIdType ,
     nameonly ReplicaRegion: RegionType ,
-    nameonly Policy: Option<PolicyType> ,
-    nameonly BypassPolicyLockoutSafetyCheck: Option<BooleanType> ,
-    nameonly Description: Option<DescriptionType> ,
-    nameonly Tags: Option<TagList>
+    nameonly Policy: Option<PolicyType> := Option.None ,
+    nameonly BypassPolicyLockoutSafetyCheck: Option<BooleanType> := Option.None ,
+    nameonly Description: Option<DescriptionType> := Option.None ,
+    nameonly Tags: Option<TagList> := Option.None
   )
   datatype ReplicateKeyResponse = | ReplicateKeyResponse (
-    nameonly ReplicaKeyMetadata: Option<KeyMetadata> ,
-    nameonly ReplicaPolicy: Option<PolicyType> ,
-    nameonly ReplicaTags: Option<TagList>
+    nameonly ReplicaKeyMetadata: Option<KeyMetadata> := Option.None ,
+    nameonly ReplicaPolicy: Option<PolicyType> := Option.None ,
+    nameonly ReplicaTags: Option<TagList> := Option.None
   )
   datatype RetireGrantRequest = | RetireGrantRequest (
-    nameonly GrantToken: Option<GrantTokenType> ,
-    nameonly KeyId: Option<KeyIdType> ,
-    nameonly GrantId: Option<GrantIdType>
+    nameonly GrantToken: Option<GrantTokenType> := Option.None ,
+    nameonly KeyId: Option<KeyIdType> := Option.None ,
+    nameonly GrantId: Option<GrantIdType> := Option.None
   )
   datatype RevokeGrantRequest = | RevokeGrantRequest (
     nameonly KeyId: KeyIdType ,
@@ -608,13 +608,13 @@ module {:extern "software.amazon.cryptography.services.kms.internaldafny.types" 
   )
   datatype ScheduleKeyDeletionRequest = | ScheduleKeyDeletionRequest (
     nameonly KeyId: KeyIdType ,
-    nameonly PendingWindowInDays: Option<PendingWindowInDaysType>
+    nameonly PendingWindowInDays: Option<PendingWindowInDaysType> := Option.None
   )
   datatype ScheduleKeyDeletionResponse = | ScheduleKeyDeletionResponse (
-    nameonly KeyId: Option<KeyIdType> ,
-    nameonly DeletionDate: Option<string> ,
-    nameonly KeyState: Option<KeyState> ,
-    nameonly PendingWindowInDays: Option<PendingWindowInDaysType>
+    nameonly KeyId: Option<KeyIdType> := Option.None ,
+    nameonly DeletionDate: Option<string> := Option.None ,
+    nameonly KeyState: Option<KeyState> := Option.None ,
+    nameonly PendingWindowInDays: Option<PendingWindowInDaysType> := Option.None
   )
   datatype SigningAlgorithmSpec =
     | RSASSA_PSS_SHA_256
@@ -630,14 +630,14 @@ module {:extern "software.amazon.cryptography.services.kms.internaldafny.types" 
   datatype SignRequest = | SignRequest (
     nameonly KeyId: KeyIdType ,
     nameonly Message: PlaintextType ,
-    nameonly MessageType: Option<MessageType> ,
-    nameonly GrantTokens: Option<GrantTokenList> ,
+    nameonly MessageType: Option<MessageType> := Option.None ,
+    nameonly GrantTokens: Option<GrantTokenList> := Option.None ,
     nameonly SigningAlgorithm: SigningAlgorithmSpec
   )
   datatype SignResponse = | SignResponse (
-    nameonly KeyId: Option<KeyIdType> ,
-    nameonly Signature: Option<CiphertextType> ,
-    nameonly SigningAlgorithm: Option<SigningAlgorithmSpec>
+    nameonly KeyId: Option<KeyIdType> := Option.None ,
+    nameonly Signature: Option<CiphertextType> := Option.None ,
+    nameonly SigningAlgorithm: Option<SigningAlgorithmSpec> := Option.None
   )
   datatype Tag = | Tag (
     nameonly TagKey: TagKeyType ,
@@ -1485,9 +1485,9 @@ module {:extern "software.amazon.cryptography.services.kms.internaldafny.types" 
   )
   datatype UpdateCustomKeyStoreRequest = | UpdateCustomKeyStoreRequest (
     nameonly CustomKeyStoreId: CustomKeyStoreIdType ,
-    nameonly NewCustomKeyStoreName: Option<CustomKeyStoreNameType> ,
-    nameonly KeyStorePassword: Option<KeyStorePasswordType> ,
-    nameonly CloudHsmClusterId: Option<CloudHsmClusterIdType>
+    nameonly NewCustomKeyStoreName: Option<CustomKeyStoreNameType> := Option.None ,
+    nameonly KeyStorePassword: Option<KeyStorePasswordType> := Option.None ,
+    nameonly CloudHsmClusterId: Option<CloudHsmClusterIdType> := Option.None
   )
   datatype UpdateCustomKeyStoreResponse = | UpdateCustomKeyStoreResponse (
 
@@ -1503,118 +1503,118 @@ module {:extern "software.amazon.cryptography.services.kms.internaldafny.types" 
   datatype VerifyRequest = | VerifyRequest (
     nameonly KeyId: KeyIdType ,
     nameonly Message: PlaintextType ,
-    nameonly MessageType: Option<MessageType> ,
+    nameonly MessageType: Option<MessageType> := Option.None ,
     nameonly Signature: CiphertextType ,
     nameonly SigningAlgorithm: SigningAlgorithmSpec ,
-    nameonly GrantTokens: Option<GrantTokenList>
+    nameonly GrantTokens: Option<GrantTokenList> := Option.None
   )
   datatype VerifyResponse = | VerifyResponse (
-    nameonly KeyId: Option<KeyIdType> ,
-    nameonly SignatureValid: Option<BooleanType> ,
-    nameonly SigningAlgorithm: Option<SigningAlgorithmSpec>
+    nameonly KeyId: Option<KeyIdType> := Option.None ,
+    nameonly SignatureValid: Option<BooleanType> := Option.None ,
+    nameonly SigningAlgorithm: Option<SigningAlgorithmSpec> := Option.None
   )
   datatype WrappingKeySpec =
     | RSA_2048
   datatype Error =
       // Local Error structures are listed here
     | AlreadyExistsException (
-        nameonly message: Option<ErrorMessageType>
+        nameonly message: Option<ErrorMessageType> := Option.None
       )
     | CloudHsmClusterInUseException (
-        nameonly message: Option<ErrorMessageType>
+        nameonly message: Option<ErrorMessageType> := Option.None
       )
     | CloudHsmClusterInvalidConfigurationException (
-        nameonly message: Option<ErrorMessageType>
+        nameonly message: Option<ErrorMessageType> := Option.None
       )
     | CloudHsmClusterNotActiveException (
-        nameonly message: Option<ErrorMessageType>
+        nameonly message: Option<ErrorMessageType> := Option.None
       )
     | CloudHsmClusterNotFoundException (
-        nameonly message: Option<ErrorMessageType>
+        nameonly message: Option<ErrorMessageType> := Option.None
       )
     | CloudHsmClusterNotRelatedException (
-        nameonly message: Option<ErrorMessageType>
+        nameonly message: Option<ErrorMessageType> := Option.None
       )
     | CustomKeyStoreHasCMKsException (
-        nameonly message: Option<ErrorMessageType>
+        nameonly message: Option<ErrorMessageType> := Option.None
       )
     | CustomKeyStoreInvalidStateException (
-        nameonly message: Option<ErrorMessageType>
+        nameonly message: Option<ErrorMessageType> := Option.None
       )
     | CustomKeyStoreNameInUseException (
-        nameonly message: Option<ErrorMessageType>
+        nameonly message: Option<ErrorMessageType> := Option.None
       )
     | CustomKeyStoreNotFoundException (
-        nameonly message: Option<ErrorMessageType>
+        nameonly message: Option<ErrorMessageType> := Option.None
       )
     | DependencyTimeoutException (
-        nameonly message: Option<ErrorMessageType>
+        nameonly message: Option<ErrorMessageType> := Option.None
       )
     | DisabledException (
-        nameonly message: Option<ErrorMessageType>
+        nameonly message: Option<ErrorMessageType> := Option.None
       )
     | ExpiredImportTokenException (
-        nameonly message: Option<ErrorMessageType>
+        nameonly message: Option<ErrorMessageType> := Option.None
       )
     | IncorrectKeyException (
-        nameonly message: Option<ErrorMessageType>
+        nameonly message: Option<ErrorMessageType> := Option.None
       )
     | IncorrectKeyMaterialException (
-        nameonly message: Option<ErrorMessageType>
+        nameonly message: Option<ErrorMessageType> := Option.None
       )
     | IncorrectTrustAnchorException (
-        nameonly message: Option<ErrorMessageType>
+        nameonly message: Option<ErrorMessageType> := Option.None
       )
     | InvalidAliasNameException (
-        nameonly message: Option<ErrorMessageType>
+        nameonly message: Option<ErrorMessageType> := Option.None
       )
     | InvalidArnException (
-        nameonly message: Option<ErrorMessageType>
+        nameonly message: Option<ErrorMessageType> := Option.None
       )
     | InvalidCiphertextException (
-        nameonly message: Option<ErrorMessageType>
+        nameonly message: Option<ErrorMessageType> := Option.None
       )
     | InvalidGrantIdException (
-        nameonly message: Option<ErrorMessageType>
+        nameonly message: Option<ErrorMessageType> := Option.None
       )
     | InvalidGrantTokenException (
-        nameonly message: Option<ErrorMessageType>
+        nameonly message: Option<ErrorMessageType> := Option.None
       )
     | InvalidImportTokenException (
-        nameonly message: Option<ErrorMessageType>
+        nameonly message: Option<ErrorMessageType> := Option.None
       )
     | InvalidKeyUsageException (
-        nameonly message: Option<ErrorMessageType>
+        nameonly message: Option<ErrorMessageType> := Option.None
       )
     | InvalidMarkerException (
-        nameonly message: Option<ErrorMessageType>
+        nameonly message: Option<ErrorMessageType> := Option.None
       )
     | KeyUnavailableException (
-        nameonly message: Option<ErrorMessageType>
+        nameonly message: Option<ErrorMessageType> := Option.None
       )
     | KMSInternalException (
-        nameonly message: Option<ErrorMessageType>
+        nameonly message: Option<ErrorMessageType> := Option.None
       )
     | KMSInvalidSignatureException (
-        nameonly message: Option<ErrorMessageType>
+        nameonly message: Option<ErrorMessageType> := Option.None
       )
     | KMSInvalidStateException (
-        nameonly message: Option<ErrorMessageType>
+        nameonly message: Option<ErrorMessageType> := Option.None
       )
     | LimitExceededException (
-        nameonly message: Option<ErrorMessageType>
+        nameonly message: Option<ErrorMessageType> := Option.None
       )
     | MalformedPolicyDocumentException (
-        nameonly message: Option<ErrorMessageType>
+        nameonly message: Option<ErrorMessageType> := Option.None
       )
     | NotFoundException (
-        nameonly message: Option<ErrorMessageType>
+        nameonly message: Option<ErrorMessageType> := Option.None
       )
     | TagException (
-        nameonly message: Option<ErrorMessageType>
+        nameonly message: Option<ErrorMessageType> := Option.None
       )
     | UnsupportedOperationException (
-        nameonly message: Option<ErrorMessageType>
+        nameonly message: Option<ErrorMessageType> := Option.None
       )
       // Any dependent models are listed here
 
@@ -1637,6 +1637,13 @@ abstract module AbstractComAmazonawsKmsService {
               && fresh(res.value.Modifies)
               && fresh(res.value.History)
               && res.value.ValidState()
+  // Helper function for the benefit of native code to create a Success(client) without referring to Dafny internals
+  function method CreateSuccessOfClient(client: IKMSClient): Result<IKMSClient, Error> {
+    Success(client)
+  } // Helper function for the benefit of native code to create a Failure(error) without referring to Dafny internals
+  function method CreateFailureOfError(error: Error): Result<IKMSClient, Error> {
+    Failure(error)
+  }
 }
 abstract module AbstractComAmazonawsKmsOperations {
   import opened Wrappers

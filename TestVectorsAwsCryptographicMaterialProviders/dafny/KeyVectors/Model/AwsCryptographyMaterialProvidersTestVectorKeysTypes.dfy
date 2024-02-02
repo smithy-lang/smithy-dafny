@@ -166,14 +166,14 @@ module {:extern "software.amazon.cryptography.materialproviderstestvectorkeys.in
   datatype KmsMrkAwareDiscovery = | KmsMrkAwareDiscovery (
     nameonly keyId: string ,
     nameonly defaultMrkRegion: string ,
-    nameonly awsKmsDiscoveryFilter: Option<AwsCryptographyMaterialProvidersTypes.DiscoveryFilter>
+    nameonly awsKmsDiscoveryFilter: Option<AwsCryptographyMaterialProvidersTypes.DiscoveryFilter> := Option.None
   )
   datatype KmsRsaKeyring = | KmsRsaKeyring (
     nameonly keyId: string ,
     nameonly encryptionAlgorithm: ComAmazonawsKmsTypes.EncryptionAlgorithmSpec
   )
   datatype MultiKeyring = | MultiKeyring (
-    nameonly generator: Option<KeyDescription> ,
+    nameonly generator: Option<KeyDescription> := Option.None ,
     nameonly childKeyrings: KeyDescriptionList
   )
   datatype RawAES = | RawAES (
@@ -250,13 +250,20 @@ abstract module AbstractAwsCryptographyMaterialProvidersTestVectorKeysService
   import Operations : AbstractAwsCryptographyMaterialProvidersTestVectorKeysOperations
   function method DefaultKeyVectorsConfig(): KeyVectorsConfig
   method KeyVectors(config: KeyVectorsConfig := DefaultKeyVectorsConfig())
-    returns (res: Result<KeyVectorsClient, Error>)
+    returns (res: Result<IKeyVectorsClient, Error>)
     ensures res.Success? ==>
               && fresh(res.value)
               && fresh(res.value.Modifies)
               && fresh(res.value.History)
               && res.value.ValidState()
 
+  // Helper function for the benefit of native code to create a Success(client) without referring to Dafny internals
+  function method CreateSuccessOfClient(client: IKeyVectorsClient): Result<IKeyVectorsClient, Error> {
+    Success(client)
+  } // Helper function for the benefit of native code to create a Failure(error) without referring to Dafny internals
+  function method CreateFailureOfError(error: Error): Result<IKeyVectorsClient, Error> {
+    Failure(error)
+  }
   class KeyVectorsClient extends IKeyVectorsClient
   {
     constructor(config: Operations.InternalConfig)

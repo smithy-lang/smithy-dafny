@@ -693,14 +693,16 @@ module AwsKmsHierarchicalKeyring {
       // We need to create a new client here so that we can reason about the state of the client
       // down the line. This is ok because the only state tracked is the client's history.
       var maybeCrypto := Primitives.AtomicPrimitives();
-      var crypto :- maybeCrypto
+      var cryptoPrimitivesX : Crypto.IAwsCryptographicPrimitivesClient :- maybeCrypto
       .MapFailure(e => Types.AwsCryptographyPrimitives(e));
+      assert cryptoPrimitivesX is Primitives.AtomicPrimitivesClient;
+      var cryptoPrimitives := cryptoPrimitivesX as Primitives.AtomicPrimitivesClient;
 
       var kmsHierarchyUnwrap := new KmsHierarchyUnwrapKeyMaterial(
         branchKey,
         branchKeyIdUtf8,
         branchKeyVersionAsBytes,
-        crypto
+        cryptoPrimitives
       );
 
       var unwrapOutputRes := EdkWrapping.UnwrapEdkMaterial(

@@ -186,13 +186,13 @@ module {:options "-functionSyntax:4"} TestManifests {
   datatype ManifestData =
     | DecryptManifest(
         version: nat,
-        keys: KeyVectors.KeyVectorsClient,
+        keys: KeyVectorsTypes.IKeyVectorsClient,
         client: Values.JSON,
         jsonTests: seq<(string, Values.JSON)>
       )
     | EncryptManifest(
         version: nat,
-        keys: KeyVectors.KeyVectorsClient,
+        keys: KeyVectorsTypes.IKeyVectorsClient,
         jsonTests: seq<(string, Values.JSON)>
       )
 
