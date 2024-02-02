@@ -25,7 +25,7 @@ module {:extern "simple.dependencies.internaldafny" } SimpleDependencies refines
   }
 
   method SimpleDependencies(config: SimpleDependenciesConfig)
-    returns (res: Result<ISimpleDependenciesClient, Error>)
+    returns (res: Result<SimpleDependenciesClient, Error>)
   {
     expect config.simpleResourcesConfig.Some?;
     expect config.specialString.Some?;

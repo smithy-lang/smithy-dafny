@@ -10,7 +10,7 @@ module {:extern "simple.types.smithystring.internaldafny" } SimpleString refines
     }
 
     method SimpleString(config: SimpleStringConfig)
-    returns (res: Result<ISimpleTypesStringClient, Error>) {
+    returns (res: Result<SimpleStringClient, Error>) {
         var client := new SimpleStringClient(Operations.Config);
         return Success(client);
     }
