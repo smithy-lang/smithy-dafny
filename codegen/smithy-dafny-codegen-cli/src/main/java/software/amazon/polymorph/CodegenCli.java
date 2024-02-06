@@ -248,7 +248,8 @@ public class CodegenCli {
                 includeDafnyFile = Optional.of(Paths.get(commandLine.getOptionValue("include-dafny")));
             }
 
-            Optional<Path> patchFilesDir = Optional.of(Paths.get(commandLine.getOptionValue("patch-files-dir")));
+            Optional<Path> patchFilesDir = Optional.ofNullable(commandLine.getOptionValue("patch-files-dir"))
+                    .map(Paths::get);
 
             return Optional.of(new CliArguments(
                     modelPath, dependentModelPaths, namespace,
