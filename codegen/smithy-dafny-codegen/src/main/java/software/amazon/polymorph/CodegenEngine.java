@@ -5,6 +5,7 @@ package software.amazon.polymorph;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Streams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.polymorph.smithydafny.DafnyApiCodegen;
@@ -34,13 +35,13 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 public class CodegenEngine {
     private static final Logger LOGGER = LoggerFactory.getLogger(CodegenEngine.class);
@@ -236,7 +237,17 @@ public class CodegenEngine {
         }
 
         LOGGER.info("Formatting .NET code in {}", outputDir);
-        runCommand(outputDir, "dotnet", "format", outputDir.toString() + "/*.csproj");
+        // Locate all *.csproj files in the directory
+        try {
+            Stream<String> args = Streams.concat(
+                    Stream.of("dotnet", "format"),
+                    Files.list(outputDir)
+                         .filter(path -> path.endsWith(".csproj"))
+                         .map(Path::toString));
+            runCommand(outputDir, args.toArray(String[]::new));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
         applyPatchFiles(TargetLanguage.DOTNET, outputDir);
     }
