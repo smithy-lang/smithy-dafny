@@ -39,6 +39,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class CodegenEngine {
     private static final Logger LOGGER = LoggerFactory.getLogger(CodegenEngine.class);
@@ -278,6 +280,8 @@ public class CodegenEngine {
         LOGGER.info(".NET project files generated in {}", outputDir);
     }
 
+    private static final Pattern PATCH_FILE_PATTERN = Pattern.compile("dafny-(.*).patch");
+
     private void applyPatchFiles(TargetLanguage targetLanguage, Path outputDir) {
         if (!patchFilesDir.isPresent()) {
             return;
@@ -314,8 +318,9 @@ public class CodegenEngine {
 
     private DafnyVersion getDafnyVersionForPatchFile(Path file) {
         String fileName = file.getFileName().toString();
-        if (fileName.startsWith("dafny-")) {
-            String versionString = fileName.substring("dafny-".length());
+        Matcher matcher = PATCH_FILE_PATTERN.matcher(fileName);
+        if (matcher.matches()) {
+            String versionString = matcher.group(1);
             return DafnyVersion.parse(versionString);
         } else {
             throw new IllegalArgumentException("Patch files must be of the form dafny-<version>.patch: " + file);
