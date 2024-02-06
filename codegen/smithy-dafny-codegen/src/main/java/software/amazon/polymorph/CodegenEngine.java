@@ -297,8 +297,9 @@ public class CodegenEngine {
                     .map(file -> Pair.of(getDafnyVersionForPatchFile(file), file))
                     .sorted(Collections.reverseOrder(Map.Entry.comparingByKey()))
                     .toList();
-            for (Pair<DafnyVersion, Path> patchFile : sortedPatchFiles) {
-                if (dafnyVersion.compareTo(patchFile.getKey()) > 0) {
+            for (Pair<DafnyVersion, Path> patchFilePair : sortedPatchFiles) {
+                if (dafnyVersion.compareTo(patchFilePair.getKey()) > 0) {
+                    Path patchFile = patchFilePair.getValue();
                     StringBuilder output = new StringBuilder();
                     int exitCode = IoUtils.runCommand(
                             List.of("git", "apply", patchFile.toString()),
