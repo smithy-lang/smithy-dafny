@@ -22,18 +22,20 @@ import software.amazon.polymorph.smithyjava.generator.awssdk.v1.JavaAwsSdkV1;
 import software.amazon.polymorph.smithyjava.generator.awssdk.v2.JavaAwsSdkV2;
 import software.amazon.polymorph.smithyjava.generator.library.JavaLibrary;
 import software.amazon.polymorph.smithyjava.generator.library.TestJavaLibrary;
-import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.polymorph.utils.IOUtils;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.smithy.aws.traits.ServiceTrait;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.utils.IoUtils;
+import software.amazon.smithy.utils.Pair;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -52,6 +54,7 @@ public class CodegenEngine {
     private final boolean awsSdkStyle;
     private final boolean localServiceTest;
     private final boolean generateProjectFiles;
+    private final Optional<Path> patchFilesDir;
 
     // To be initialized in constructor
     private final Model model;
@@ -73,7 +76,8 @@ public class CodegenEngine {
             final Optional<Path> includeDafnyFile,
             final boolean awsSdkStyle,
             final boolean localServiceTest,
-            final boolean generateProjectFiles
+            final boolean generateProjectFiles,
+            final Optional<Path> patchFilesDir
     ) {
         // To be provided to constructor
         this.dependentModelPaths = dependentModelPaths;
@@ -86,6 +90,7 @@ public class CodegenEngine {
         this.awsSdkStyle = awsSdkStyle;
         this.localServiceTest = localServiceTest;
         this.generateProjectFiles = generateProjectFiles;
+        this.patchFilesDir = patchFilesDir;
 
         this.model = this.awsSdkStyle
                 // TODO: move this into a DirectedCodegen.customizeBeforeShapeGeneration implementation
@@ -98,7 +103,7 @@ public class CodegenEngine {
     /**
      * Executes code generation for the configured language(s).
      * This method is designed to be internally stateless
-     * and idempotent with respect with respect to the file system.
+     * and idempotent with respect to the file system.
      */
     public void run() {
         try {
@@ -161,6 +166,8 @@ public class CodegenEngine {
             IOUtils.writeTokenTreesIntoDir(dafnyApiCodegen.generate(), outputDir);
             LOGGER.info("Dafny code generated in {}", outputDir);
         }
+
+        applyPatchFiles(TargetLanguage.DAFNY, outputDir);
     }
 
     private void generateJava(final Path outputDir) {
@@ -174,6 +181,8 @@ public class CodegenEngine {
         } else {
             javaLocalService(outputDir);
         }
+
+        applyPatchFiles(TargetLanguage.JAVA, outputDir);
     }
 
     private void javaLocalService(final Path outputDir) {
@@ -211,6 +220,8 @@ public class CodegenEngine {
         } else {
             netLocalService(outputDir);
         }
+
+        applyPatchFiles(TargetLanguage.DOTNET, outputDir);
     }
 
     private void netLocalService(final Path outputDir) {
@@ -267,6 +278,50 @@ public class CodegenEngine {
         LOGGER.info(".NET project files generated in {}", outputDir);
     }
 
+    private void applyPatchFiles(TargetLanguage targetLanguage, Path outputDir) {
+        if (!patchFilesDir.isPresent()) {
+            return;
+        }
+
+        Path languageDir = patchFilesDir.get().resolve(targetLanguage.getSymbol());
+        if (!Files.exists(languageDir)) {
+            return;
+        }
+
+        try {
+            List<Pair<DafnyVersion, Path>> sortedPatchFiles = Files.list(languageDir)
+                    .map(file -> Pair.of(getDafnyVersionForPatchFile(file), file))
+                    .sorted(Collections.reverseOrder(Map.Entry.comparingByKey()))
+                    .toList();
+            for (Pair<DafnyVersion, Path> patchFile : sortedPatchFiles) {
+                if (dafnyVersion.compareTo(patchFile.getKey()) > 0) {
+                    StringBuilder output = new StringBuilder();
+                    int exitCode = IoUtils.runCommand(
+                            List.of("git", "apply", patchFile.toString()),
+                            outputDir,
+                            output,
+                            Collections.emptyMap());
+                    if (exitCode != 0) {
+                        throw new RuntimeException("Applying patch " + patchFile + " failed:\n" + output);
+                    }
+                    return;
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private DafnyVersion getDafnyVersionForPatchFile(Path file) {
+        String fileName = file.getFileName().toString();
+        if (fileName.startsWith("dafny-")) {
+            String versionString = fileName.substring("dafny-".length());
+            return DafnyVersion.parse(versionString);
+        } else {
+            throw new IllegalArgumentException("Patch files must be of the form dafny-<version>.patch: " + file);
+        }
+    }
+
     public static class Builder {
         private Model serviceModel;
         private Path[] dependentModelPaths;
@@ -279,6 +334,7 @@ public class CodegenEngine {
         private boolean awsSdkStyle = false;
         private boolean localServiceTest = false;
         private boolean generateProjectFiles = false;
+        private Path patchFilesDir;
 
         public Builder() {}
 
@@ -380,6 +436,14 @@ public class CodegenEngine {
             return this;
         }
 
+        /**
+         * TODO
+         */
+        public Builder withPatchFilesDir(final Path patchFilesDir) {
+            this.patchFilesDir = patchFilesDir;
+            return this;
+        }
+
         public CodegenEngine build() {
             final Model serviceModel = Objects.requireNonNull(this.serviceModel);
             final Path[] dependentModelPaths = this.dependentModelPaths == null
@@ -410,6 +474,9 @@ public class CodegenEngine {
                         "Cannot generate AWS SDK style code, and test a local service, at the same time");
             }
 
+            final Optional<Path> patchFilesDir = Optional.ofNullable(this.patchFilesDir)
+                    .map(path -> path.toAbsolutePath().normalize());
+
             return new CodegenEngine(
                     serviceModel,
                     dependentModelPaths,
@@ -421,14 +488,27 @@ public class CodegenEngine {
                     includeDafnyFile,
                     this.awsSdkStyle,
                     this.localServiceTest,
-                    this.generateProjectFiles
+                    this.generateProjectFiles,
+                    patchFilesDir
             );
         }
     }
 
     public enum TargetLanguage {
-        DAFNY,
-        JAVA,
-        DOTNET,
+        DAFNY("dafny"),
+        JAVA("java"),
+        DOTNET("net"),
+        ;
+
+        private final String symbol;
+
+
+        TargetLanguage(String symbol) {
+            this.symbol = symbol;
+        }
+
+        public String getSymbol() {
+            return symbol;
+        }
     }
 }

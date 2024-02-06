@@ -79,6 +79,7 @@ public class CodegenCli {
         cliArguments.propertiesFile.ifPresent(engineBuilder::withPropertiesFile);
         cliArguments.javaAwsSdkVersion.ifPresent(engineBuilder::withJavaAwsSdkVersion);
         cliArguments.includeDafnyFile.ifPresent(engineBuilder::withIncludeDafnyFile);
+        cliArguments.patchFilesDir.ifPresent(engineBuilder::withPatchFilesDir);
         final CodegenEngine engine = engineBuilder.build();
         engine.run();
     }
@@ -150,6 +151,11 @@ public class CodegenCli {
             .longOpt("include-dafny")
             .desc("<optional> files to be include in the generated Dafny")
             .hasArg()
+            .build())
+          .addOption(Option.builder()
+            .longOpt("patch-files-dir")
+            .desc("<optional> patch files to apply to generated code")
+            .hasArg()
             .build());
     }
 
@@ -169,7 +175,8 @@ public class CodegenCli {
             Optional<Path> propertiesFile,
             Optional<Path> includeDafnyFile,
             boolean awsSdkStyle,
-            boolean localServiceTest
+            boolean localServiceTest,
+            Optional<Path> patchFilesDir
     ) {
         /**
          * @param args arguments to parse
@@ -241,11 +248,13 @@ public class CodegenCli {
                 includeDafnyFile = Optional.of(Paths.get(commandLine.getOptionValue("include-dafny")));
             }
 
+            Optional<Path> patchFilesDir = Optional.of(Paths.get(commandLine.getOptionValue("patch-files-dir")));
+
             return Optional.of(new CliArguments(
                     modelPath, dependentModelPaths, namespace,
                     outputDotnetDir, outputJavaDir, outputDafnyDir,
                     javaAwsSdkVersion, dafnyVersion, propertiesFile, includeDafnyFile, awsSdkStyle,
-                    localServiceTest
+                    localServiceTest, patchFilesDir
             ));
         }
     }
