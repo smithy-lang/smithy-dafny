@@ -313,7 +313,7 @@ public class CodegenEngine {
                     .sorted(Collections.reverseOrder(Map.Entry.comparingByKey()))
                     .toList();
             for (Pair<DafnyVersion, Path> patchFilePair : sortedPatchFiles) {
-                if (dafnyVersion.compareTo(patchFilePair.getKey()) > 0) {
+                if (dafnyVersion.compareTo(patchFilePair.getKey()) >= 0) {
                     Path patchFile = patchFilePair.getValue();
                     runCommand(outputDir, "git", "apply", patchFile.toString());
                     return;
