@@ -184,6 +184,9 @@ public class CodegenEngine {
             javaLocalService(outputDir);
         }
 
+        runCommand(outputDir,
+                "npx", "prettier", "--plugin=prettier-plugin-java", outputDir.toString(), "--write");
+
         applyPatchFiles(TargetLanguage.JAVA, outputDir);
     }
 
@@ -222,6 +225,8 @@ public class CodegenEngine {
         } else {
             netLocalService(outputDir);
         }
+
+        runCommand(outputDir, "dotnet", "format", outputDir.toString() + "/*.csproj");
 
         applyPatchFiles(TargetLanguage.DOTNET, outputDir);
     }
@@ -300,20 +305,25 @@ public class CodegenEngine {
             for (Pair<DafnyVersion, Path> patchFilePair : sortedPatchFiles) {
                 if (dafnyVersion.compareTo(patchFilePair.getKey()) > 0) {
                     Path patchFile = patchFilePair.getValue();
-                    StringBuilder output = new StringBuilder();
-                    int exitCode = IoUtils.runCommand(
-                            List.of("git", "apply", patchFile.toString()),
-                            outputDir,
-                            output,
-                            Collections.emptyMap());
-                    if (exitCode != 0) {
-                        throw new RuntimeException("Applying patch " + patchFile + " failed:\n" + output);
-                    }
+                    runCommand(outputDir, "git", "apply", patchFile.toString());
                     return;
                 }
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    private void runCommand(Path workingDir, String ... args) {
+        List<String> argsList = List.of(args);
+        StringBuilder output = new StringBuilder();
+        int exitCode = IoUtils.runCommand(
+                argsList,
+                workingDir,
+                output,
+                Collections.emptyMap());
+        if (exitCode != 0) {
+            throw new RuntimeException("Command failed: " + argsList + "\n" + output);
         }
     }
 
