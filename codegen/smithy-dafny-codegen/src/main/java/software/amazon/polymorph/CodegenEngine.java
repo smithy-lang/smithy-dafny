@@ -169,6 +169,14 @@ public class CodegenEngine {
             LOGGER.info("Dafny code generated in {}", outputDir);
         }
 
+        LOGGER.info("Formatting Dafny code in {}", outputDir);
+        runCommand(outputDir,
+                "dafny", "format",
+                "--function-syntax:3",
+                "--quantifier-syntax:3",
+                "--unicode-char:false",
+                ".");
+
         applyPatchFiles(TargetLanguage.DAFNY, outputDir);
     }
 
@@ -184,6 +192,7 @@ public class CodegenEngine {
             javaLocalService(outputDir);
         }
 
+        LOGGER.info("Formatting Java code in {}", outputDir);
         runCommand(outputDir,
                 "npx", "prettier", "--plugin=prettier-plugin-java", outputDir.toString(), "--write");
 
@@ -226,6 +235,7 @@ public class CodegenEngine {
             netLocalService(outputDir);
         }
 
+        LOGGER.info("Formatting .NET code in {}", outputDir);
         runCommand(outputDir, "dotnet", "format", outputDir.toString() + "/*.csproj");
 
         applyPatchFiles(TargetLanguage.DOTNET, outputDir);
