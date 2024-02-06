@@ -315,6 +315,7 @@ public class CodegenEngine {
             for (Pair<DafnyVersion, Path> patchFilePair : sortedPatchFiles) {
                 if (dafnyVersion.compareTo(patchFilePair.getKey()) >= 0) {
                     Path patchFile = patchFilePair.getValue();
+                    LOGGER.info("Applying patch file {}", patchFile);
                     runCommand(outputDir, "git", "apply", patchFile.toString());
                     return;
                 }
