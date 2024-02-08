@@ -40,6 +40,7 @@ public class CodegenCli {
             cliArgumentsOptional = CliArguments.parse(args);
         } catch (ParseException e) {
             LOGGER.error("Command-line arguments could not be parsed", e);
+            System.exit(1);
         }
         if (cliArgumentsOptional.isEmpty()) {
             printHelpMessage();
