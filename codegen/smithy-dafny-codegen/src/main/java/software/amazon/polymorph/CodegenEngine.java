@@ -236,15 +236,15 @@ public class CodegenEngine {
             netLocalService(outputDir);
         }
 
-        LOGGER.info("Formatting .NET code in {}", outputDir);
-        // Locate all *.csproj files in the directory
         // TODO-HACK: Need to look in the parent directory of "runtimes/net"
         Path projectRoot = outputDir.getParent();
+        LOGGER.info("Formatting .NET code in {}", projectRoot);
+        // Locate all *.csproj files in the directory
         try {
             Stream<String> args = Streams.concat(
                     Stream.of("dotnet", "format"),
                     Files.list(projectRoot)
-                         .filter(path -> path.endsWith(".csproj"))
+                         .filter(path -> path.toFile().getName().endsWith(".csproj"))
                          .map(Path::toString));
             runCommand(projectRoot, args.toArray(String[]::new));
         } catch (IOException e) {
