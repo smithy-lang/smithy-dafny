@@ -179,6 +179,8 @@ public class CodegenEngine {
                 ".");
 
         applyPatchFiles(TargetLanguage.DAFNY, outputDir);
+
+        throw new RuntimeException("KABOOM!");
     }
 
     private void generateJava(final Path outputDir) {
@@ -251,6 +253,8 @@ public class CodegenEngine {
         }
 
         applyPatchFiles(TargetLanguage.DOTNET, outputDir);
+
+        throw new RuntimeException("KABOOM!");
     }
 
     private void netLocalService(final Path outputDir) {
