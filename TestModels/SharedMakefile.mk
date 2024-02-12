@@ -243,11 +243,11 @@ _polymorph_dependencies:
 # Generates all target runtime code for all namespaces in this project.
 .PHONY: polymorph_code_gen
 polymorph_code_gen:
-	for service in $(PROJECT_SERVICES) ; do \
+	set -e; for service in $(PROJECT_SERVICES) ; do \
 		export service_deps_var=SERVICE_DEPS_$${service} ; \
 		export namespace_var=SERVICE_NAMESPACE_$${service} ; \
 		export SERVICE=$${service} ; \
-		$(MAKE) _polymorph_code_gen || exit 1; \
+		$(MAKE) _polymorph_code_gen ; \
 	done
 
 _polymorph_code_gen: OUTPUT_DAFNY=\
@@ -271,11 +271,11 @@ _polymorph_code_gen: _polymorph_dependencies
 .PHONY: polymorph_dafny
 polymorph_dafny:
 	$(MAKE) -C $(STANDARD_LIBRARY_PATH) polymorph_dafny
-	for service in $(PROJECT_SERVICES) ; do \
+	set -e; for service in $(PROJECT_SERVICES) ; do \
 		export service_deps_var=SERVICE_DEPS_$${service} ; \
 		export namespace_var=SERVICE_NAMESPACE_$${service} ; \
 		export SERVICE=$${service} ; \
-		$(MAKE) _polymorph_dafny || exit 1; \
+		$(MAKE) _polymorph_dafny ; \
 	done
 
 _polymorph_dafny: POLYMORPH_LANGUAGE_TARGET=dafny
@@ -293,11 +293,11 @@ _polymorph_dafny: _polymorph_wrapped
 # Generates dotnet code for all namespaces in this project
 .PHONY: polymorph_net
 polymorph_net:
-	for service in $(PROJECT_SERVICES) ; do \
+	set -e; for service in $(PROJECT_SERVICES) ; do \
 		export service_deps_var=SERVICE_DEPS_$${service} ; \
 		export namespace_var=SERVICE_NAMESPACE_$${service} ; \
 		export SERVICE=$${service} ; \
-		$(MAKE) _polymorph_net || exit 1; \
+		$(MAKE) _polymorph_net ; \
 	done
 
 _polymorph_net: OUTPUT_DOTNET=\
@@ -313,11 +313,11 @@ _polymorph_net: _polymorph_dependencies
 # Generates java code for all namespaces in this project
 .PHONY: polymorph_java
 polymorph_java:
-	for service in $(PROJECT_SERVICES) ; do \
+	set -e; for service in $(PROJECT_SERVICES) ; do \
 		export service_deps_var=SERVICE_DEPS_$${service} ; \
 		export namespace_var=SERVICE_NAMESPACE_$${service} ; \
 		export SERVICE=$${service} ; \
-		$(MAKE) _polymorph_java || exit 1; \
+		$(MAKE) _polymorph_java ; \
 	done
 
 _polymorph_java: OUTPUT_JAVA=--output-java $(LIBRARY_ROOT)/runtimes/java/src/main/smithy-generated
