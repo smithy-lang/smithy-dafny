@@ -328,6 +328,10 @@ _polymorph_java: _polymorph_wrapped
 _polymorph_java: POLYMORPH_LANGUAGE_TARGET=java
 _polymorph_java: _polymorph_dependencies
 
+# Dependency for generating Java code
+setup_prettier:
+	npm i --no-save prettier prettier-plugin-java
+
 ########################## .NET targets
 
 transpile_net: | transpile_implementation_net transpile_test_net transpile_dependencies_net

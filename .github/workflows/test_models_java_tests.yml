@@ -93,6 +93,11 @@ jobs:
           distribution: 'corretto'
           java-version: '17'
 
+      - name: Setup dependencies
+        working-directory: ./${{ matrix.library }}
+        run: |
+          make setup_prettier
+  
       - name: Generate Polymorph Dafny and Java code
         shell: bash
         working-directory: ./${{ matrix.library }}
