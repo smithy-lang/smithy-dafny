@@ -206,6 +206,7 @@ _polymorph:
 	cd $(CODEGEN_CLI_ROOT); \
 	$(GRADLEW) run --args="\
 	$(DAFNY_VERSION_OPTION) \
+	--library-root $(LIBRARY_ROOT) \
 	--properties-file $(LIBRARY_ROOT)/project.properties \
 	$(OUTPUT_DAFNY) \
 	$(OUTPUT_DOTNET) \
@@ -221,6 +222,7 @@ _polymorph_wrapped:
 	cd $(CODEGEN_CLI_ROOT); \
 	$(GRADLEW) run --args="\
 	$(DAFNY_VERSION_OPTION) \
+	--library-root $(LIBRARY_ROOT) \
 	--properties-file $(LIBRARY_ROOT)/project.properties \
 	$(OUTPUT_DAFNY_WRAPPED) \
 	$(OUTPUT_DOTNET_WRAPPED) \

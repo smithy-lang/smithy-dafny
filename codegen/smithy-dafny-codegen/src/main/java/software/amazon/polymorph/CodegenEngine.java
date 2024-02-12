@@ -46,6 +46,7 @@ import java.util.stream.Stream;
 public class CodegenEngine {
     private static final Logger LOGGER = LoggerFactory.getLogger(CodegenEngine.class);
 
+    private final Path libraryRoot;
     private final Path[] dependentModelPaths;
     private final String namespace;
     private final Map<TargetLanguage, Path> targetLangOutputDirs;
@@ -57,7 +58,6 @@ public class CodegenEngine {
     private final boolean awsSdkStyle;
     private final boolean localServiceTest;
     private final boolean generateProjectFiles;
-    private final Optional<Path> patchFilesDir;
 
     // To be initialized in constructor
     private final Model model;
@@ -80,7 +80,7 @@ public class CodegenEngine {
             final boolean awsSdkStyle,
             final boolean localServiceTest,
             final boolean generateProjectFiles,
-            final Optional<Path> patchFilesDir
+            final Path libraryRoot
     ) {
         // To be provided to constructor
         this.dependentModelPaths = dependentModelPaths;
@@ -93,7 +93,7 @@ public class CodegenEngine {
         this.awsSdkStyle = awsSdkStyle;
         this.localServiceTest = localServiceTest;
         this.generateProjectFiles = generateProjectFiles;
-        this.patchFilesDir = patchFilesDir;
+        this.libraryRoot = libraryRoot;
 
         this.model = this.awsSdkStyle
                 // TODO: move this into a DirectedCodegen.customizeBeforeShapeGeneration implementation
@@ -236,17 +236,16 @@ public class CodegenEngine {
             netLocalService(outputDir);
         }
 
-        // TODO-HACK: Need to look in the parent directory of "runtimes/net"
-        Path projectRoot = outputDir.getParent();
-        LOGGER.info("Formatting .NET code in {}", projectRoot);
+        Path dotnetRoot = libraryRoot.resolve("runtimes").resolve("net");
+        LOGGER.info("Formatting .NET code in {}", dotnetRoot);
         // Locate all *.csproj files in the directory
         try {
             Stream<String> args = Streams.concat(
                     Stream.of("dotnet", "format"),
-                    Files.list(projectRoot)
+                    Files.list(dotnetRoot)
                          .filter(path -> path.toFile().getName().endsWith(".csproj"))
                          .map(Path::toString));
-            runCommand(projectRoot, args.toArray(String[]::new));
+            runCommand(dotnetRoot, args.toArray(String[]::new));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -311,11 +310,8 @@ public class CodegenEngine {
     private static final Pattern PATCH_FILE_PATTERN = Pattern.compile("dafny-(.*).patch");
 
     private void applyPatchFiles(TargetLanguage targetLanguage, Path outputDir) {
-        if (!patchFilesDir.isPresent()) {
-            return;
-        }
-
-        Path languageDir = patchFilesDir.get().resolve(targetLanguage.getSymbol());
+        Path patchFilesDir = libraryRoot.resolve("codegen-patches");
+        Path languageDir = patchFilesDir.resolve(targetLanguage.getSymbol());
         if (!Files.exists(languageDir)) {
             return;
         }
@@ -374,7 +370,7 @@ public class CodegenEngine {
         private boolean awsSdkStyle = false;
         private boolean localServiceTest = false;
         private boolean generateProjectFiles = false;
-        private Path patchFilesDir;
+        private Path libraryRoot;
 
         public Builder() {}
 
@@ -479,8 +475,8 @@ public class CodegenEngine {
         /**
          * TODO
          */
-        public Builder withPatchFilesDir(final Path patchFilesDir) {
-            this.patchFilesDir = patchFilesDir;
+        public Builder withLibraryRoot(final Path libraryRoot) {
+            this.libraryRoot = libraryRoot;
             return this;
         }
 
@@ -514,8 +510,7 @@ public class CodegenEngine {
                         "Cannot generate AWS SDK style code, and test a local service, at the same time");
             }
 
-            final Optional<Path> patchFilesDir = Optional.ofNullable(this.patchFilesDir)
-                    .map(path -> path.toAbsolutePath().normalize());
+            final Path libraryRoot = this.libraryRoot.toAbsolutePath().normalize();
 
             return new CodegenEngine(
                     serviceModel,
@@ -529,7 +524,7 @@ public class CodegenEngine {
                     this.awsSdkStyle,
                     this.localServiceTest,
                     this.generateProjectFiles,
-                    patchFilesDir
+                    libraryRoot
             );
         }
     }
