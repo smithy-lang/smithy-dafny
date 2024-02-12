@@ -278,6 +278,8 @@ polymorph_dafny:
 		$(MAKE) _polymorph_dafny || exit 1; \
 	done
 
+_polymorph_dafny: POLYMORPH_LANGUAGE_TARGET=dafny
+_polymorph_dafny: _polymorph_dependencies
 _polymorph_dafny: OUTPUT_DAFNY=\
     --output-dafny $(if $(DIR_STRUCTURE_V2), $(LIBRARY_ROOT)/dafny/$(SERVICE)/Model, $(LIBRARY_ROOT)/Model) \
 	--include-dafny $(STANDARD_LIBRARY_PATH)/src/Index.dfy
@@ -287,8 +289,6 @@ _polymorph_dafny: OUTPUT_DAFNY_WRAPPED=\
     --include-dafny $(STANDARD_LIBRARY_PATH)/src/Index.dfy
 _polymorph_dafny: OUTPUT_LOCAL_SERVICE=--local-service-test
 _polymorph_dafny: _polymorph_wrapped
-_polymorph_dafny: POLYMORPH_LANGUAGE_TARGET=dafny
-_polymorph_dafny: _polymorph_dependencies
 
 # Generates dotnet code for all namespaces in this project
 .PHONY: polymorph_net
