@@ -38,14 +38,14 @@ jobs:
           git config --global core.longpaths true
       # KMS and MPL tests need to use credentials which can call KMS
       - name: Configure AWS Credentials for Tests
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v4
         if: matrix.library == 'ComAmazonawsKms' || matrix.library == 'ComAmazonawsDynamodb' || matrix.library == 'AwsCryptographicMaterialProviders' || matrix.library == 'TestVectorsAwsCryptographicMaterialProviders'
         with:
           aws-region: us-west-2
           role-to-assume: arn:aws:iam::370957321024:role/GitHub-CI-MPL-Dafny-Role-us-west-2
           role-session-name: JavaTests
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       # The specification submodule is private so we don't have access, but we don't need
       # it to verify the Dafny code. Instead we manually pull the submodule we DO need.
       - run: git submodule update --init libraries
@@ -81,19 +81,19 @@ jobs:
           java-version: 11
 
       - name: Clean for next Java
-        uses: gradle/gradle-build-action@v2
+        uses: gradle/gradle-build-action@v3
         with:
           arguments: clean
           build-root-directory: ./${{ matrix.library }}/runtimes/java
 
       - name: Compile Java 11
-        uses: gradle/gradle-build-action@v2
+        uses: gradle/gradle-build-action@v3
         with:
           arguments: build
           build-root-directory: ./${{ matrix.library }}/runtimes/java
 
       - name: Test Java 11
-        uses: gradle/gradle-build-action@v2
+        uses: gradle/gradle-build-action@v3
         with:
           arguments: runTests
           build-root-directory: ./${{ matrix.library }}/runtimes/java
@@ -105,19 +105,19 @@ jobs:
           java-version: 16
 
       - name: Clean for next Java
-        uses: gradle/gradle-build-action@v2
+        uses: gradle/gradle-build-action@v3
         with:
           arguments: clean
           build-root-directory: ./${{ matrix.library }}/runtimes/java
 
       - name: Compile Java 16
-        uses: gradle/gradle-build-action@v2
+        uses: gradle/gradle-build-action@v3
         with:
           arguments: build
           build-root-directory: ./${{ matrix.library }}/runtimes/java
 
       - name: Test Java 16
-        uses: gradle/gradle-build-action@v2
+        uses: gradle/gradle-build-action@v3
         with:
           arguments: runTests
           build-root-directory: ./${{ matrix.library }}/runtimes/java
@@ -129,19 +129,19 @@ jobs:
           java-version: 17
 
       - name: Clean for next Java
-        uses: gradle/gradle-build-action@v2
+        uses: gradle/gradle-build-action@v3
         with:
           arguments: clean
           build-root-directory: ./${{ matrix.library }}/runtimes/java
 
       - name: Compile Java 17
-        uses: gradle/gradle-build-action@v2
+        uses: gradle/gradle-build-action@v3
         with:
           arguments: build
           build-root-directory: ./${{ matrix.library }}/runtimes/java
 
       - name: Test Java 17
-        uses: gradle/gradle-build-action@v2
+        uses: gradle/gradle-build-action@v3
         with:
           arguments: runTests
           build-root-directory: ./${{ matrix.library }}/runtimes/java

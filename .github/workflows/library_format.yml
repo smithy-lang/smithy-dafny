@@ -34,7 +34,7 @@ jobs:
         run: |
           git config --global core.longpaths true
 
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       # The specification submodule is private so we don't have access, but we don't need
       # it to verify the Dafny code. Instead we manually pull the submodule we DO need.
       - run: git submodule update --init libraries
@@ -68,7 +68,7 @@ jobs:
       - name: Support longpaths
         run: |
           git config --global core.longpaths true
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Check format of Java, yaml, and md
         shell: bash
         run: |
