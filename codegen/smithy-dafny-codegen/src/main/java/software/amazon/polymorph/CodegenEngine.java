@@ -242,7 +242,7 @@ public class CodegenEngine {
         try {
             Stream<String> args = Streams.concat(
                     Stream.of("dotnet", "format"),
-                    Files.list(dotnetRoot)
+                    Files.walk(dotnetRoot)
                          .filter(path -> path.toFile().getName().endsWith(".csproj"))
                          .map(Path::toString));
             runCommand(dotnetRoot, args.toArray(String[]::new));
