@@ -64,7 +64,7 @@ jobs:
       - name: Run Semantic Release in dry run mode
         if: ${{inputs.dry-run == 'n'}}
         env:
-          GH_TOKEN: ${{env.GITHUB_AWS_CRYPTO_TOOLS_CI_BOT_ESDK_RELEASE_TOKEN}}
+          GITHUB_TOKEN: ${{env.GITHUB_AWS_CRYPTO_TOOLS_CI_BOT_ESDK_RELEASE_TOKEN}}
         run: |
           make dry_run_semantic_release
 
@@ -72,6 +72,6 @@ jobs:
       - name: Run Semantic Release
         if: ${{inputs.dry-run == 'y'}}
         env:
-          GH_TOKEN: ${{env.GITHUB_AWS_CRYPTO_TOOLS_CI_BOT_ESDK_RELEASE_TOKEN}}
+          GITHUB_TOKEN: ${{env.GITHUB_AWS_CRYPTO_TOOLS_CI_BOT_ESDK_RELEASE_TOKEN}}
         run: |
           make run_semantic_release
