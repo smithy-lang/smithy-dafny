@@ -37,7 +37,7 @@ public final class DafnyClientCodegenPlugin implements SmithyBuildPlugin {
         final Map<TargetLanguage, Path> outputDirs = new HashMap<>();
         outputDirs.put(TargetLanguage.DAFNY, manifest.resolvePath(Paths.get("Model")));
         settings.targetLanguages.forEach(lang -> {
-            final Path dir = Paths.get("runtimes", lang.getSymbol(), "Generated");
+            final Path dir = Paths.get("runtimes", lang.name().toLowerCase(), "Generated");
             outputDirs.put(lang, manifest.resolvePath(dir));
         });
         final Path propertiesFile = manifest.resolvePath(Paths.get("project.properties"));
