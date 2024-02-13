@@ -46,6 +46,9 @@ import java.util.stream.Stream;
 public class CodegenEngine {
     private static final Logger LOGGER = LoggerFactory.getLogger(CodegenEngine.class);
 
+    // Used to distinguish different conventions between the CLI
+    // and the Smithy build plugin, such as where .NET project files live.
+    private final boolean fromSmithyBuildPlugin;
     private final Path libraryRoot;
     private final Path[] dependentModelPaths;
     private final String namespace;
@@ -69,6 +72,7 @@ public class CodegenEngine {
      * are mutually compatible, etc.
      */
     private CodegenEngine(
+            final boolean fromSmithyBuildPlugin,
             final Model serviceModel,
             final Path[] dependentModelPaths,
             final String namespace,
@@ -83,6 +87,7 @@ public class CodegenEngine {
             final Path libraryRoot
     ) {
         // To be provided to constructor
+        this.fromSmithyBuildPlugin = fromSmithyBuildPlugin;
         this.dependentModelPaths = dependentModelPaths;
         this.namespace = namespace;
         this.targetLangOutputDirs = targetLangOutputDirs;
@@ -236,7 +241,10 @@ public class CodegenEngine {
             netLocalService(outputDir);
         }
 
-        Path dotnetRoot = libraryRoot.resolve("runtimes").resolve("net");
+
+        Path dotnetRoot = fromSmithyBuildPlugin
+                ? libraryRoot.resolve("runtimes").resolve("dotnet").resolve("Generated")
+                : libraryRoot.resolve("runtimes").resolve("net");
         LOGGER.info("Formatting .NET code in {}", dotnetRoot);
         // Locate all *.csproj files in the directory
         try {
@@ -311,7 +319,7 @@ public class CodegenEngine {
 
     private void applyPatchFiles(TargetLanguage targetLanguage, Path outputDir) {
         Path patchFilesDir = libraryRoot.resolve("codegen-patches");
-        Path languageDir = patchFilesDir.resolve(targetLanguage.getSymbol());
+        Path languageDir = patchFilesDir.resolve(targetLanguage.name().toLowerCase());
         if (!Files.exists(languageDir)) {
             return;
         }
@@ -359,6 +367,7 @@ public class CodegenEngine {
     }
 
     public static class Builder {
+        private boolean fromSmithyBuildPlugin = false;
         private Model serviceModel;
         private Path[] dependentModelPaths;
         private String namespace;
@@ -473,10 +482,22 @@ public class CodegenEngine {
         }
 
         /**
-         * TODO
+         * Sets the root directory of the library being built.
+         * Used to locate any patch files (under ./codegen-patches)
+         * and things like target language project roots.
          */
         public Builder withLibraryRoot(final Path libraryRoot) {
             this.libraryRoot = libraryRoot;
+            return this;
+        }
+
+        /**
+         * Indicates whether the engine is being used from the polymorph CLI
+         * or the Smithy build plugin.
+         * Needed because the two use cases have different library layout conventions.
+         */
+        public Builder withFromSmithyBuildPlugin(final boolean fromSmithyBuildPlugin) {
+            this.fromSmithyBuildPlugin = fromSmithyBuildPlugin;
             return this;
         }
 
@@ -513,6 +534,7 @@ public class CodegenEngine {
             final Path libraryRoot = this.libraryRoot.toAbsolutePath().normalize();
 
             return new CodegenEngine(
+                    fromSmithyBuildPlugin,
                     serviceModel,
                     dependentModelPaths,
                     this.namespace,
@@ -530,20 +552,8 @@ public class CodegenEngine {
     }
 
     public enum TargetLanguage {
-        DAFNY("dafny"),
-        JAVA("java"),
-        DOTNET("net"),
-        ;
-
-        private final String symbol;
-
-
-        TargetLanguage(String symbol) {
-            this.symbol = symbol;
-        }
-
-        public String getSymbol() {
-            return symbol;
-        }
+        DAFNY,
+        JAVA,
+        DOTNET,
     }
 }

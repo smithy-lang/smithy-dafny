@@ -70,6 +70,7 @@ public class CodegenCli {
         cliArguments.outputDotnetDir.ifPresent(path -> outputDirs.put(TargetLanguage.DOTNET, path));
 
         final CodegenEngine.Builder engineBuilder = new CodegenEngine.Builder()
+                .withFromSmithyBuildPlugin(false)
                 .withLibraryRoot(cliArguments.libraryRoot)
                 .withServiceModel(serviceModel)
                 .withDependentModelPaths(cliArguments.dependentModelPaths)
