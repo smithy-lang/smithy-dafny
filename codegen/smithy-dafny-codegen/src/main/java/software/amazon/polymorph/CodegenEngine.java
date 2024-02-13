@@ -236,15 +236,16 @@ public class CodegenEngine {
             netLocalService(outputDir);
         }
 
-        LOGGER.info("Formatting .NET code in {}", libraryRoot);
+        Path dotnetRoot = libraryRoot.resolve("runtimes").resolve("net");
+        LOGGER.info("Formatting .NET code in {}", dotnetRoot);
         // Locate all *.csproj files in the directory
         try {
             Stream<String> args = Streams.concat(
                     Stream.of("dotnet", "format"),
-                    Files.walk(libraryRoot)
+                    Files.walk(dotnetRoot)
                          .filter(path -> path.toFile().getName().endsWith(".csproj"))
                          .map(Path::toString));
-            runCommand(libraryRoot, args.toArray(String[]::new));
+            runCommand(dotnetRoot, args.toArray(String[]::new));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
