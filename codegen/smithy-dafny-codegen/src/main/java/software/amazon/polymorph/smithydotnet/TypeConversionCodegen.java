@@ -1007,7 +1007,7 @@ public class TypeConversionCodegen {
             }
 
             if (dependentNamespaces.size() > 0) {
-                TreeSet<TokenTree> cases = new TreeSet<>();
+                List<TokenTree> cases = new ArrayList<>();
                 for (String dependentNamespace : dependentNamespaces) {
 
                     TokenTree toAppend = TokenTree.of(
