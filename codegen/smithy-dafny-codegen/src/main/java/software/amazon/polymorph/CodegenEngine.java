@@ -158,6 +158,14 @@ public class CodegenEngine {
     }
 
     private void generateDafny(final Path outputDir) {
+        LOGGER.info("Formatting Dafny code in {}", outputDir);
+        runCommand(outputDir,
+                "dafny", "format",
+                "--function-syntax:3",
+                "--quantifier-syntax:3",
+                "--unicode-char:false",
+                ".");
+
         // Validated by builder, but check again
         assert this.includeDafnyFile.isPresent();
         final DafnyApiCodegen dafnyApiCodegen = new DafnyApiCodegen(
@@ -184,14 +192,6 @@ public class CodegenEngine {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
-        LOGGER.info("Formatting Dafny code in {}", outputDir);
-        runCommand(outputDir,
-                "dafny", "format",
-                "--function-syntax:3",
-                "--quantifier-syntax:3",
-                "--unicode-char:false",
-                ".");
 
         applyPatchFiles(TargetLanguage.DAFNY, outputDir);
     }
