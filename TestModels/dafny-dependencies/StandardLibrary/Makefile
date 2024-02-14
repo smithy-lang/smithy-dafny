@@ -58,7 +58,7 @@ transpile_implementation:
 		-spillTargetCode:3 \
 		-compile:0 \
 		-optimizeErasableDatatypeWrapper:0 \
-		$(COMPILE_SUFFIX_OPTION) \
+		-compileSuffix:1 \
 		-quantifierSyntax:3 \
 		-unicodeChar:0 \
 		-functionSyntax:3 \
