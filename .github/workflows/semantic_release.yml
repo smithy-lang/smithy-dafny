@@ -18,7 +18,7 @@ jobs:
     runs-on: macos-latest
     permissions:
       id-token: write
-      contents: read
+      contents: write
     steps:
       - name: Support longpaths on Git checkout
         run: |
@@ -63,15 +63,11 @@ jobs:
       # Run semantic release in dry run mode if input matches
       - name: Run Semantic Release in dry run mode
         if: ${{inputs.dry-run == 'n'}}
-        env:
-          GITHUB_TOKEN: ${{env.GITHUB_AWS_CRYPTO_TOOLS_CI_BOT_ESDK_RELEASE_TOKEN}}
         run: |
           make dry_run_semantic_release
 
       # Run semantic release if input matches
       - name: Run Semantic Release
         if: ${{inputs.dry-run == 'y'}}
-        env:
-          GITHUB_TOKEN: ${{env.GITHUB_AWS_CRYPTO_TOOLS_CI_BOT_ESDK_RELEASE_TOKEN}}
         run: |
           make run_semantic_release
