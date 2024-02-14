@@ -991,8 +991,9 @@ public class TypeConversionCodegen {
         if (serviceShape.hasTrait(LocalServiceTrait.class)) {
             final LocalServiceTrait localServiceTrait = serviceShape.expectTrait(LocalServiceTrait.class);
 
-            Set<String> dependentNamespaces = ModelUtils.findAllDependentNamespaces(
-                new HashSet<ShapeId>(Collections.singleton(localServiceTrait.getConfigId())), model);
+            TreeSet<String> dependentNamespaces = new TreeSet<>(
+                    ModelUtils.findAllDependentNamespaces(
+                            new HashSet<>(Collections.singleton(localServiceTrait.getConfigId())), model));
 
             if (localServiceTrait.getDependencies() != null) {
                 localServiceTrait.getDependencies().stream()
@@ -1006,7 +1007,7 @@ public class TypeConversionCodegen {
             }
 
             if (dependentNamespaces.size() > 0) {
-                Set<TokenTree> cases = new HashSet<>();
+                TreeSet<TokenTree> cases = new TreeSet<>();
                 for (String dependentNamespace : dependentNamespaces) {
 
                     TokenTree toAppend = TokenTree.of(
