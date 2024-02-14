@@ -31,7 +31,10 @@ import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.utils.IoUtils;
 import software.amazon.smithy.utils.Pair;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
@@ -173,6 +176,13 @@ public class CodegenEngine {
         } else {
             IOUtils.writeTokenTreesIntoDir(dafnyApiCodegen.generate(), outputDir);
             LOGGER.info("Dafny code generated in {}", outputDir);
+        }
+
+        try {
+            InputStream badFile = new FileInputStream(outputDir.resolve("ComAmazonawsKmsTypes.dfy").toFile());
+            software.amazon.awssdk.utils.IoUtils.copy(badFile, System.out);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
 
         LOGGER.info("Formatting Dafny code in {}", outputDir);
