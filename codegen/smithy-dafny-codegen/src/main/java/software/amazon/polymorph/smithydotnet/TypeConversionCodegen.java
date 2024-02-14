@@ -1007,10 +1007,8 @@ public class TypeConversionCodegen {
             }
 
             if (dependentNamespaces.size() > 0) {
-                List<TokenTree> cases = new ArrayList<>();
-                for (String dependentNamespace : dependentNamespaces) {
-
-                    TokenTree toAppend = TokenTree.of(
+                Stream<TokenTree> cases = dependentNamespaces.stream().map(dependentNamespace ->
+                    TokenTree.of(
                         """
                         case %1$s.Error_%3$s dafnyVal:
                           return %2$s.TypeConversion.FromDafny_CommonError(
@@ -1021,11 +1019,9 @@ public class TypeConversionCodegen {
                             DotNetNameResolver.convertToCSharpNamespaceWithSegmentMapper(dependentNamespace, DotNetNameResolver::capitalizeNamespaceSegment),
                             DafnyNameResolver.dafnyBaseModuleName(dependentNamespace)
                         )
-                    );
-
-                    cases.add(toAppend);
-                }
-                dependencyErrorCasesFromDafny = TokenTree.of(cases.stream()).lineSeparated();
+                    )
+                );
+                dependencyErrorCasesFromDafny = TokenTree.of(cases).lineSeparated();
             }
         }
 

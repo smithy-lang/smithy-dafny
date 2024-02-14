@@ -328,7 +328,7 @@ _polymorph_java: _polymorph_wrapped
 _polymorph_java: POLYMORPH_LANGUAGE_TARGET=java
 _polymorph_java: _polymorph_dependencies
 
-# Dependency for generating Java code
+# Dependency for formatting generating Java code
 setup_prettier:
 	npm i --no-save prettier prettier-plugin-java
 
