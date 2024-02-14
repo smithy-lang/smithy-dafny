@@ -6,7 +6,7 @@ package software.amazon.polymorph.utils;
 import java.util.stream.Stream;
 
 public class Token extends TokenTree {
-    public static final Token NEWLINE = Token.of("\r\n");
+    public static final Token NEWLINE = Token.of(System.lineSeparator());
 
     private final CharSequence chars;
 
