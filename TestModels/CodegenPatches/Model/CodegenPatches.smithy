@@ -12,9 +12,15 @@ service CodegenPatches {
   operations: [
     GetString,
   ],
+  errors: [
+    CodegenPatchesError
+  ]
 }
 
 structure CodegenPatchesConfig {}
+
+@error("client")
+structure CodegenPatchesError {}
 
 operation GetString {
   input: GetStringInput,
