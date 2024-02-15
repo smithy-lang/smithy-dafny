@@ -20,7 +20,10 @@ service CodegenPatches {
 structure CodegenPatchesConfig {}
 
 @error("client")
-structure CodegenPatchesError {}
+structure CodegenPatchesError {
+  @required
+  message: String
+}
 
 operation GetString {
   input: GetStringInput,
