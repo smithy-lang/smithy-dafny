@@ -164,7 +164,7 @@ abstract module AbstractSimpleCodegenpatchesService
         defaultedInput := input.(value := Some("default"));
       }
       output := Operations.GetString(config, defaultedInput);
-      History.GetString := History.GetString + [DafnyCallEvent(defaultedInput, output)];
+      History.GetString := History.GetString + [DafnyCallEvent(input, output)];
       // END MANUAL EDIT
     }
 
@@ -179,6 +179,11 @@ abstract module AbstractSimpleCodegenpatchesOperations {
   predicate ValidInternalConfig?(config: InternalConfig)
   function ModifiesInternalConfig(config: InternalConfig): set<object>
   predicate GetStringEnsuresPublicly(input: GetStringInput , output: Result<GetStringOutput, Error>)
+  // BEGIN MANUAL EDIT
+  {
+    true
+  }
+  // END MANUAL EDIT
   // The private method to be refined by the library developer
 
 
