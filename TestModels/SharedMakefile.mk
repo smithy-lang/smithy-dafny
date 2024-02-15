@@ -195,6 +195,7 @@ _polymorph:
 	$(GRADLEW) run --args="\
 	$(DAFNY_VERSION_OPTION) \
 	--library-root $(LIBRARY_ROOT) \
+	$(UPDATE_PATCH_FILES_OPTION) \
 	--properties-file $(LIBRARY_ROOT)/project.properties \
 	$(OUTPUT_DAFNY) \
 	$(OUTPUT_DOTNET) \
