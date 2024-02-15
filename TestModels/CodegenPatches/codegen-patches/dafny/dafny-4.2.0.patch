@@ -1,4 +1,5 @@
 diff --git b/TestModels/CodegenPatches/Model/SimpleCodegenpatchesTypes.dfy a/TestModels/CodegenPatches/Model/SimpleCodegenpatchesTypes.dfy
+index 78cb9bf9..91bae887 100644
 --- b/TestModels/CodegenPatches/Model/SimpleCodegenpatchesTypes.dfy
 +++ a/TestModels/CodegenPatches/Model/SimpleCodegenpatchesTypes.dfy
 @@ -158,8 +158,14 @@ abstract module AbstractSimpleCodegenpatchesService
