@@ -17,11 +17,11 @@ module CodegenPatchesImplTest {
       modifies client.Modifies
       ensures client.ValidState()
     {
-      var s: string := "wassup?";
-      var convertedStringInput: GetStringInput := CodegenPatches.Types.GetStringInput(value := Some(s));
+      var convertedStringInput: GetStringInput := CodegenPatches.Types.GetStringInput();
 
       var ret := client.GetString(convertedStringInput);
 
       expect ret.Success?;
+      expect ret.value.value == Some("default");
     }
 }
