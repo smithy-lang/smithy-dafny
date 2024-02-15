@@ -351,7 +351,7 @@ public class CodegenEngine {
                 if (!patchContent.isBlank()) {
                     IOUtils.writeToFile(patchContent, patchFile.toFile());
                 }
-            } else {
+            } else if (Files.exists(patchFilesDir)) {
                 List<Pair<DafnyVersion, Path>> sortedPatchFiles = Files.list(patchFilesDir)
                         .map(file -> Pair.of(getDafnyVersionForPatchFile(file), file))
                         .sorted(Collections.reverseOrder(Map.Entry.comparingByKey()))
