@@ -55,6 +55,7 @@ public class CodegenEngine {
     private final Map<TargetLanguage, Path> targetLangOutputDirs;
     private final DafnyVersion dafnyVersion;
     private final Optional<Path> propertiesFile;
+    private final boolean updatePatchFiles;
     // refactor this to only be required if generating Java
     private final AwsSdkVersion javaAwsSdkVersion;
     private final Optional<Path> includeDafnyFile;
@@ -84,7 +85,8 @@ public class CodegenEngine {
             final boolean awsSdkStyle,
             final boolean localServiceTest,
             final boolean generateProjectFiles,
-            final Path libraryRoot
+            final Path libraryRoot,
+            final boolean updatePatchFiles
     ) {
         // To be provided to constructor
         this.fromSmithyBuildPlugin = fromSmithyBuildPlugin;
@@ -99,6 +101,7 @@ public class CodegenEngine {
         this.localServiceTest = localServiceTest;
         this.generateProjectFiles = generateProjectFiles;
         this.libraryRoot = libraryRoot;
+        this.updatePatchFiles = updatePatchFiles;
 
         this.model = this.awsSdkStyle
                 // TODO: move this into a DirectedCodegen.customizeBeforeShapeGeneration implementation
@@ -155,54 +158,54 @@ public class CodegenEngine {
     }
 
     private void generateDafny(final Path outputDir) {
-        // Validated by builder, but check again
-        assert this.includeDafnyFile.isPresent();
-        final DafnyApiCodegen dafnyApiCodegen = new DafnyApiCodegen(
-                model,
-                serviceShape,
-                outputDir,
-                this.includeDafnyFile.get(),
-                this.dependentModelPaths,
-                this.awsSdkStyle);
+        withPatching(TargetLanguage.DAFNY, outputDir, () -> {
+            // Validated by builder, but check again
+            assert this.includeDafnyFile.isPresent();
+            final DafnyApiCodegen dafnyApiCodegen = new DafnyApiCodegen(
+                    model,
+                    serviceShape,
+                    outputDir,
+                    this.includeDafnyFile.get(),
+                    this.dependentModelPaths,
+                    this.awsSdkStyle);
 
-        if (this.localServiceTest) {
-            IOUtils.writeTokenTreesIntoDir(
-                    dafnyApiCodegen.generateWrappedAbstractServiceModule(outputDir),
-                    outputDir);
-            LOGGER.info("Dafny that tests a local service generated in {}", outputDir);
-        } else {
-            IOUtils.writeTokenTreesIntoDir(dafnyApiCodegen.generate(), outputDir);
-            LOGGER.info("Dafny code generated in {}", outputDir);
-        }
+            if (this.localServiceTest) {
+                IOUtils.writeTokenTreesIntoDir(
+                        dafnyApiCodegen.generateWrappedAbstractServiceModule(outputDir),
+                        outputDir);
+                LOGGER.info("Dafny that tests a local service generated in {}", outputDir);
+            } else {
+                IOUtils.writeTokenTreesIntoDir(dafnyApiCodegen.generate(), outputDir);
+                LOGGER.info("Dafny code generated in {}", outputDir);
+            }
 
-        LOGGER.info("Formatting Dafny code in {}", outputDir);
-        runCommand(outputDir,
-                "dafny", "format",
-                "--function-syntax:3",
-                "--quantifier-syntax:3",
-                "--unicode-char:false",
-                ".");
-
-        applyPatchFiles(TargetLanguage.DAFNY, outputDir);
+            LOGGER.info("Formatting Dafny code in {}", outputDir);
+            runCommand(outputDir,
+                    "dafny", "format",
+                    "--function-syntax:3",
+                    "--quantifier-syntax:3",
+                    "--unicode-char:false",
+                    ".");
+        });
     }
 
     private void generateJava(final Path outputDir) {
-        if (this.awsSdkStyle) {
-            switch (this.javaAwsSdkVersion) {
-                case V1 -> javaAwsSdkV1(outputDir);
-                case V2 -> javaAwsSdkV2(outputDir);
+        withPatching(TargetLanguage.JAVA, outputDir, () -> {
+            if (this.awsSdkStyle) {
+                switch (this.javaAwsSdkVersion) {
+                    case V1 -> javaAwsSdkV1(outputDir);
+                    case V2 -> javaAwsSdkV2(outputDir);
+                }
+            } else if (this.localServiceTest) {
+                javaWrappedLocalService(outputDir);
+            } else {
+                javaLocalService(outputDir);
             }
-        } else if (this.localServiceTest) {
-            javaWrappedLocalService(outputDir);
-        } else {
-            javaLocalService(outputDir);
-        }
 
-        LOGGER.info("Formatting Java code in {}", outputDir);
-        runCommand(outputDir,
-                "npx", "prettier", "--plugin=prettier-plugin-java", outputDir.toString(), "--write");
-
-        applyPatchFiles(TargetLanguage.JAVA, outputDir);
+            LOGGER.info("Formatting Java code in {}", outputDir);
+            runCommand(outputDir,
+                    "npx", "prettier", "--plugin=prettier-plugin-java", outputDir.toString(), "--write");
+        });
     }
 
     private void javaLocalService(final Path outputDir) {
@@ -230,35 +233,35 @@ public class CodegenEngine {
     }
 
     private void generateDotnet(final Path outputDir) {
-        if (this.awsSdkStyle) {
-            netAwsSdk(outputDir);
-            if (this.generateProjectFiles) {
-                netAwsSdkProjectFiles(outputDir);
+        withPatching(TargetLanguage.DOTNET, outputDir, () -> {
+            if (this.awsSdkStyle) {
+                netAwsSdk(outputDir);
+                if (this.generateProjectFiles) {
+                    netAwsSdkProjectFiles(outputDir);
+                }
+            } else if (this.localServiceTest) {
+                netWrappedLocalService(outputDir);
+            } else {
+                netLocalService(outputDir);
             }
-        } else if (this.localServiceTest) {
-            netWrappedLocalService(outputDir);
-        } else {
-            netLocalService(outputDir);
-        }
 
 
-        Path dotnetRoot = fromSmithyBuildPlugin
-                ? libraryRoot.resolve("runtimes").resolve("dotnet").resolve("Generated")
-                : libraryRoot.resolve("runtimes").resolve("net");
-        LOGGER.info("Formatting .NET code in {}", dotnetRoot);
-        // Locate all *.csproj files in the directory
-        try {
-            Stream<String> args = Streams.concat(
-                    Stream.of("dotnet", "format"),
-                    Files.list(dotnetRoot)
-                         .filter(path -> path.toFile().getName().endsWith(".csproj"))
-                         .map(Path::toString));
-            runCommand(dotnetRoot, args.toArray(String[]::new));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        applyPatchFiles(TargetLanguage.DOTNET, outputDir);
+            Path dotnetRoot = fromSmithyBuildPlugin
+                    ? libraryRoot.resolve("runtimes").resolve("dotnet").resolve("Generated")
+                    : libraryRoot.resolve("runtimes").resolve("net");
+            LOGGER.info("Formatting .NET code in {}", dotnetRoot);
+            // Locate all *.csproj files in the directory
+            try {
+                Stream<String> args = Streams.concat(
+                        Stream.of("dotnet", "format"),
+                        Files.list(dotnetRoot)
+                                .filter(path -> path.toFile().getName().endsWith(".csproj"))
+                                .map(Path::toString));
+                runCommand(dotnetRoot, args.toArray(String[]::new));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 
     private void netLocalService(final Path outputDir) {
@@ -317,42 +320,20 @@ public class CodegenEngine {
 
     private static final Pattern PATCH_FILE_PATTERN = Pattern.compile("dafny-(.*).patch");
 
-    private void applyPatchFiles(TargetLanguage targetLanguage, Path outputDir) {
-        Path patchFilesDir = libraryRoot.resolve("codegen-patches");
-        Path languageDir = patchFilesDir.resolve(targetLanguage.name().toLowerCase());
-        if (!Files.exists(languageDir)) {
-            return;
-        }
+    private void withPatching(TargetLanguage targetLanguage, Path outputDir, Runnable runnable) {
+        runnable.run();
 
-        try {
-            List<Pair<DafnyVersion, Path>> sortedPatchFiles = Files.list(languageDir)
-                    .map(file -> Pair.of(getDafnyVersionForPatchFile(file), file))
-                    .sorted(Collections.reverseOrder(Map.Entry.comparingByKey()))
-                    .toList();
-            for (Pair<DafnyVersion, Path> patchFilePair : sortedPatchFiles) {
-                if (dafnyVersion.compareTo(patchFilePair.getKey()) >= 0) {
-                    Path patchFile = patchFilePair.getValue();
-                    LOGGER.info("Applying patch file {}", patchFile);
-                    runCommand(outputDir, "git", "apply", patchFile.toString());
-                    return;
-                }
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        if (updatePatchFiles) {
+            updatePatchFile(targetLanguage, outputDir);
+        } else {
+            applyPatchFiles(targetLanguage, outputDir);
         }
     }
 
-    private void runCommand(Path workingDir, String ... args) {
-        List<String> argsList = List.of(args);
-        StringBuilder output = new StringBuilder();
-        int exitCode = IoUtils.runCommand(
-                argsList,
-                workingDir,
-                output,
-                Collections.emptyMap());
-        if (exitCode != 0) {
-            throw new RuntimeException("Command failed: " + argsList + "\n" + output);
-        }
+    private Path patchDirForLanguage(TargetLanguage targetLanguage) {
+        return libraryRoot
+                .resolve("codegen-patches")
+                .resolve(targetLanguage.name().toLowerCase());
     }
 
     private DafnyVersion getDafnyVersionForPatchFile(Path file) {
@@ -364,6 +345,71 @@ public class CodegenEngine {
         } else {
             throw new IllegalArgumentException("Patch files must be of the form dafny-<version>.patch: " + file);
         }
+    }
+
+    private void updatePatchFile(TargetLanguage targetLanguage, Path outputDir) {
+        Path patchFilesDir = patchDirForLanguage(targetLanguage);
+        try {
+            Files.createDirectories(patchFilesDir);
+            Path patchFile = patchFilesDir.resolve("dafny-%s.patch".formatted(dafnyVersion.unparse()));
+            Path outputDirRelative = libraryRoot.relativize(outputDir);
+            // Need to ignore the exit code because diff will return 1 if there is a diff
+            String patchContent = runCommandIgnoringExitCode(libraryRoot, "git", "diff", "-R", outputDirRelative.toString());
+            if (!patchContent.isBlank()) {
+                IOUtils.writeToFile(patchContent, patchFile.toFile());
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void applyPatchFiles(TargetLanguage targetLanguage, Path outputDir) {
+        Path patchFilesDir = patchDirForLanguage(targetLanguage);
+        if (!Files.exists(patchFilesDir)) {
+            return;
+        }
+
+        try {
+            List<Pair<DafnyVersion, Path>> sortedPatchFiles = Files.list(patchFilesDir)
+                    .map(file -> Pair.of(getDafnyVersionForPatchFile(file), file))
+                    .sorted(Collections.reverseOrder(Map.Entry.comparingByKey()))
+                    .toList();
+            for (Pair<DafnyVersion, Path> patchFilePair : sortedPatchFiles) {
+                if (dafnyVersion.compareTo(patchFilePair.getKey()) >= 0) {
+                    Path patchFile = patchFilePair.getValue();
+                    LOGGER.info("Applying patch file {}", patchFile);
+                    runCommand(libraryRoot, "git", "apply", patchFile.toString());
+                    return;
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private String runCommand(Path workingDir, String ... args) {
+        List<String> argsList = List.of(args);
+        StringBuilder output = new StringBuilder();
+        int exitCode = IoUtils.runCommand(
+                argsList,
+                workingDir,
+                output,
+                Collections.emptyMap());
+        if (exitCode != 0) {
+            throw new RuntimeException("Command failed: " + argsList + "\n" + output);
+        }
+        return output.toString();
+    }
+
+    private String runCommandIgnoringExitCode(Path workingDir, String ... args) {
+        List<String> argsList = List.of(args);
+        StringBuilder output = new StringBuilder();
+        IoUtils.runCommand(
+                argsList,
+                workingDir,
+                output,
+                Collections.emptyMap());
+        return output.toString();
     }
 
     public static class Builder {
@@ -380,6 +426,7 @@ public class CodegenEngine {
         private boolean localServiceTest = false;
         private boolean generateProjectFiles = false;
         private Path libraryRoot;
+        private boolean updatePatchFiles = false;
 
         public Builder() {}
 
@@ -501,6 +548,15 @@ public class CodegenEngine {
             return this;
         }
 
+        /**
+         * If true, updates the relevant patch files in (library-root)/codegen-patches
+         * to change the generated code into the state of the code before generation.
+         */
+        public Builder withUpdatePatchFiles(final boolean updatePatchFiles) {
+            this.updatePatchFiles = updatePatchFiles;
+            return this;
+        }
+
         public CodegenEngine build() {
             final Model serviceModel = Objects.requireNonNull(this.serviceModel);
             final Path[] dependentModelPaths = this.dependentModelPaths == null
@@ -546,7 +602,8 @@ public class CodegenEngine {
                     this.awsSdkStyle,
                     this.localServiceTest,
                     this.generateProjectFiles,
-                    libraryRoot
+                    libraryRoot,
+                    updatePatchFiles
             );
         }
     }

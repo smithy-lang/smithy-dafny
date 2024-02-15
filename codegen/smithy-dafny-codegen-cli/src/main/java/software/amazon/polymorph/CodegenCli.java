@@ -78,7 +78,8 @@ public class CodegenCli {
                 .withTargetLangOutputDirs(outputDirs)
                 .withAwsSdkStyle(cliArguments.awsSdkStyle)
                 .withLocalServiceTest(cliArguments.localServiceTest)
-                .withDafnyVersion(cliArguments.dafnyVersion);
+                .withDafnyVersion(cliArguments.dafnyVersion)
+                .withUpdatePatchFiles(cliArguments.updatePatchFiles);
         cliArguments.propertiesFile.ifPresent(engineBuilder::withPropertiesFile);
         cliArguments.javaAwsSdkVersion.ifPresent(engineBuilder::withJavaAwsSdkVersion);
         cliArguments.includeDafnyFile.ifPresent(engineBuilder::withIncludeDafnyFile);
@@ -161,9 +162,8 @@ public class CodegenCli {
             .hasArg()
             .build())
           .addOption(Option.builder()
-            .longOpt("patch-files-dir")
-            .desc("<optional> patch files to apply to generated code")
-            .hasArg()
+            .longOpt("update-patch-files")
+            .desc("<optional> update patch files in <library-root>/codegen-patches instead of applying them")
             .build());
     }
 
@@ -184,7 +184,8 @@ public class CodegenCli {
             Optional<Path> propertiesFile,
             Optional<Path> includeDafnyFile,
             boolean awsSdkStyle,
-            boolean localServiceTest
+            boolean localServiceTest,
+            boolean updatePatchFiles
     ) {
         /**
          * @param args arguments to parse
@@ -258,11 +259,13 @@ public class CodegenCli {
                 includeDafnyFile = Optional.of(Paths.get(commandLine.getOptionValue("include-dafny")));
             }
 
+            final boolean updatePatchFiles = commandLine.hasOption("update-patch-files");
+
             return Optional.of(new CliArguments(
                     libraryRoot, modelPath, dependentModelPaths, namespace,
                     outputDotnetDir, outputJavaDir, outputDafnyDir,
                     javaAwsSdkVersion, dafnyVersion, propertiesFile, includeDafnyFile, awsSdkStyle,
-                    localServiceTest
+                    localServiceTest, updatePatchFiles
             ));
         }
     }
