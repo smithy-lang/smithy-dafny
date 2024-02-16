@@ -189,9 +189,7 @@ public class CodegenEngine {
                 "--unicode-char:false",
                 ".");
 
-        if (!this.localServiceTest) {
-            handlePatching(TargetLanguage.DAFNY, outputDir);
-        }
+        handlePatching(TargetLanguage.DAFNY, outputDir);
     }
 
     private void generateJava(final Path outputDir) {
