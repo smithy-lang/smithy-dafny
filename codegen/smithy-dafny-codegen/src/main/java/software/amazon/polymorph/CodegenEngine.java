@@ -534,7 +534,7 @@ public class CodegenEngine {
          * to change the generated code into the state of the code before generation.
          */
         public Builder withPatchFilesDir(final Path patchFilesDir) {
-            this.updatePatchFiles = updatePatchFiles;
+            this.patchFilesDir = patchFilesDir;
             return this;
         }
 
