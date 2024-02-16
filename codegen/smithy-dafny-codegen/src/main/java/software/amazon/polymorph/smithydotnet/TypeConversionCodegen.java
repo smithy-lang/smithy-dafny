@@ -991,8 +991,9 @@ public class TypeConversionCodegen {
         if (serviceShape.hasTrait(LocalServiceTrait.class)) {
             final LocalServiceTrait localServiceTrait = serviceShape.expectTrait(LocalServiceTrait.class);
 
-            Set<String> dependentNamespaces = ModelUtils.findAllDependentNamespaces(
-                new HashSet<ShapeId>(Collections.singleton(localServiceTrait.getConfigId())), model);
+            TreeSet<String> dependentNamespaces = new TreeSet<>(
+                    ModelUtils.findAllDependentNamespaces(
+                            new HashSet<>(Collections.singleton(localServiceTrait.getConfigId())), model));
 
             if (localServiceTrait.getDependencies() != null) {
                 localServiceTrait.getDependencies().stream()
@@ -1006,10 +1007,8 @@ public class TypeConversionCodegen {
             }
 
             if (dependentNamespaces.size() > 0) {
-                Set<TokenTree> cases = new HashSet<>();
-                for (String dependentNamespace : dependentNamespaces) {
-
-                    TokenTree toAppend = TokenTree.of(
+                Stream<TokenTree> cases = dependentNamespaces.stream().map(dependentNamespace ->
+                    TokenTree.of(
                         """
                         case %1$s.Error_%3$s dafnyVal:
                           return %2$s.TypeConversion.FromDafny_CommonError(
@@ -1020,11 +1019,9 @@ public class TypeConversionCodegen {
                             DotNetNameResolver.convertToCSharpNamespaceWithSegmentMapper(dependentNamespace, DotNetNameResolver::capitalizeNamespaceSegment),
                             DafnyNameResolver.dafnyBaseModuleName(dependentNamespace)
                         )
-                    );
-
-                    cases.add(toAppend);
-                }
-                dependencyErrorCasesFromDafny = TokenTree.of(cases.stream()).lineSeparated();
+                    )
+                );
+                dependencyErrorCasesFromDafny = TokenTree.of(cases).lineSeparated();
             }
         }
 
