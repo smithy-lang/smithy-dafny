@@ -310,6 +310,20 @@ public class ModelUtils {
         return outList;
     }
 
+
+    // return a summary of a list, just the first and last elements.
+    public static List<ShapeId> GetSummary(List<ShapeId> list)
+    {
+	if (list.size() <= 2) {
+	    return list;
+	} else {
+	    List<ShapeId> result = new ArrayList<>();
+	    result.add(list.get(0));
+	    result.add(list.get(list.size()-1));
+	    return result;
+	}
+    }
+    
     /**
      * For every ShapeId in {@code initialShapes},
      * with the given {@code model},
@@ -326,12 +340,16 @@ public class ModelUtils {
             .map(Collections::singletonList)
             .collect(Collectors.toSet());
         Set<List<ShapeId>> pathsToShapes = new LinkedHashSet<>(new LinkedHashSet<>());
+        Set<List<ShapeId>> pathsSummary = new LinkedHashSet<>(new LinkedHashSet<>());
 
         // Breadth-first search via getDependencyShapeIds
         final Queue<List<ShapeId>> toTraverse = new LinkedList<>(initialShapeIdsAsPaths);
         while (!toTraverse.isEmpty()) {
             final List<ShapeId> currentShapeIdWithPath = toTraverse.remove();
-            if (pathsToShapes.add(currentShapeIdWithPath)) {
+
+	    // to avoid cycles, only keep the first list with a given first and last element
+	    List<ShapeId> summary = GetSummary(currentShapeIdWithPath);
+            if (pathsSummary.add(summary) && pathsToShapes.add(currentShapeIdWithPath)) {
                 final Shape currentShape = model.expectShape(currentShapeIdWithPath.get(
                     currentShapeIdWithPath.size()-1));
                 final List<List<ShapeId>> dependencyShapeIdsWithPaths = getDependencyShapeIds(currentShape).map(

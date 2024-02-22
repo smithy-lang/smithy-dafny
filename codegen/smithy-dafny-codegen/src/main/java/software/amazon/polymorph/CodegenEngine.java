@@ -182,7 +182,6 @@ public class CodegenEngine {
         runCommand(outputDir,
                 "dafny", "format",
                 "--function-syntax:3",
-                "--quantifier-syntax:3",
                 "--unicode-char:false",
                 ".");
 
