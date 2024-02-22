@@ -55,7 +55,7 @@ public class CodegenEngine {
     private final Map<TargetLanguage, Path> targetLangOutputDirs;
     private final DafnyVersion dafnyVersion;
     private final Optional<Path> propertiesFile;
-    private final Path patchFilesDir;
+    private final Optional<Path> patchFilesDir;
     private final boolean updatePatchFiles;
     // refactor this to only be required if generating Java
     private final AwsSdkVersion javaAwsSdkVersion;
@@ -87,7 +87,7 @@ public class CodegenEngine {
             final boolean localServiceTest,
             final boolean generateProjectFiles,
             final Path libraryRoot,
-            final Path patchFilesDir,
+            final Optional<Path> patchFilesDir,
             final boolean updatePatchFiles
     ) {
         // To be provided to constructor
@@ -335,7 +335,11 @@ public class CodegenEngine {
     }
 
     private void handlePatching(TargetLanguage targetLanguage, Path outputDir) {
-        Path patchFilesForLanguage = patchFilesDir.resolve(targetLanguage.name().toLowerCase());
+        if (!patchFilesDir.isPresent()) {
+            return;
+        }
+
+        Path patchFilesForLanguage = patchFilesDir.get().resolve(targetLanguage.name().toLowerCase());
         try {
             if (updatePatchFiles) {
                 Files.createDirectories(patchFilesForLanguage);
@@ -530,7 +534,7 @@ public class CodegenEngine {
         }
 
         /**
-         * The location of patch files. Defaults to (library-root)/codegen-patches.
+         * The location of patch files.
          */
         public Builder withPatchFilesDir(final Path patchFilesDir) {
             this.patchFilesDir = patchFilesDir;
@@ -578,8 +582,12 @@ public class CodegenEngine {
 
             final Path libraryRoot = this.libraryRoot.toAbsolutePath().normalize();
 
-            final Path patchFilesDir = this.patchFilesDir != null
-                    ? this.patchFilesDir : libraryRoot.resolve("codegen-patches");
+            final Optional<Path> patchFilesDir = Optional.ofNullable(this.patchFilesDir)
+                    .map(path -> path.toAbsolutePath().normalize());
+            if (updatePatchFiles && patchFilesDir.isEmpty()) {
+                throw new IllegalStateException(
+                        "Cannot update patch files without specifying a patch files directory");
+            }
 
             return new CodegenEngine(
                     fromSmithyBuildPlugin,
