@@ -530,8 +530,7 @@ public class CodegenEngine {
         }
 
         /**
-         * If true, updates the relevant patch files in (library-root)/codegen-patches
-         * to change the generated code into the state of the code before generation.
+         * The location of patch files. Defaults to (library-root)/codegen-patches.
          */
         public Builder withPatchFilesDir(final Path patchFilesDir) {
             this.patchFilesDir = patchFilesDir;
