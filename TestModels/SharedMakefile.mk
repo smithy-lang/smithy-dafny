@@ -50,7 +50,6 @@ verify:
 		-vcsCores:$(Z3_PROCESSES) \
 		-compile:0 \
 		-definiteAssignment:3 \
-		-quantifierSyntax:3 \
 		-unicodeChar:0 \
 		-functionSyntax:3 \
 		-verificationLogger:csv \
@@ -61,7 +60,6 @@ verify:
 format:
 	dafny format \
 		--function-syntax 3 \
-		--quantifier-syntax 3 \
 		--unicode-char false \
 		`find . -name '*.dfy'`
 
@@ -69,7 +67,6 @@ format-check:
 	dafny format \
 		--check \
 		--function-syntax 3 \
-		--quantifier-syntax 3 \
 		--unicode-char false \
 		`find . -name '*.dfy'`
 
@@ -121,7 +118,6 @@ transpile_implementation:
         -compile:0 \
         -optimizeErasableDatatypeWrapper:0 \
         -compileSuffix:1 \
-        -quantifierSyntax:3 \
         -unicodeChar:0 \
         -functionSyntax:3 \
         -useRuntimeLib \
@@ -162,7 +158,6 @@ transpile_test:
 		-compile:0 \
 		-optimizeErasableDatatypeWrapper:0 \
 		-compileSuffix:1 \
-		-quantifierSyntax:3 \
 		-unicodeChar:0 \
 		-functionSyntax:3 \
 		-useRuntimeLib \

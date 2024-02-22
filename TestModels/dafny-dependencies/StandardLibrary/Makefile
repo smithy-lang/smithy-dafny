@@ -59,7 +59,6 @@ transpile_implementation:
 		-compile:0 \
 		-optimizeErasableDatatypeWrapper:0 \
 		-compileSuffix:1 \
-		-quantifierSyntax:3 \
 		-unicodeChar:0 \
 		-functionSyntax:3 \
 		-useRuntimeLib \
