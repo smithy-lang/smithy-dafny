@@ -1,5 +1,5 @@
 # This workflow performs MPL Java release
-name: Library Java tests
+name: MPL-Release-Java
 
 on:
   workflow_call:
