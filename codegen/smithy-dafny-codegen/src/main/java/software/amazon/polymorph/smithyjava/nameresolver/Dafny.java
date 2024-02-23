@@ -62,7 +62,8 @@ public class Dafny extends NameResolver {
                 Map.entry(ShapeType.INTEGER, CodeBlock.of("$T.INT", Constants.DAFNY_TYPE_DESCRIPTOR_CLASS_NAME)),
                 Map.entry(ShapeType.LONG, CodeBlock.of("$T.LONG", Constants.DAFNY_TYPE_DESCRIPTOR_CLASS_NAME)),
                 Map.entry(ShapeType.TIMESTAMP, CodeBlock.of("$T._typeDescriptor($T.CHAR)", Constants.DAFNY_SEQUENCE_CLASS_NAME, Constants.DAFNY_TYPE_DESCRIPTOR_CLASS_NAME)),
-                Map.entry(ShapeType.BIG_INTEGER, CodeBlock.of("$T.BIG_INTEGER", Constants.DAFNY_TYPE_DESCRIPTOR_CLASS_NAME))
+                Map.entry(ShapeType.BIG_INTEGER, CodeBlock.of("$T.BIG_INTEGER", Constants.DAFNY_TYPE_DESCRIPTOR_CLASS_NAME)),
+                Map.entry(ShapeType.DOUBLE, CodeBlock.of("$T.BIG_INTEGER", Constants.DAFNY_TYPE_DESCRIPTOR_CLASS_NAME))
         );
     }
 
@@ -378,6 +379,7 @@ public class Dafny extends NameResolver {
         }
         if (shape.getType().isShapeType(ShapeType.STRUCTURE)
                 || shape.getType().isShapeType(ShapeType.UNION)
+                || shape.getType().isShapeType(ShapeType.DOUBLE)
                 || shape.hasTrait(EnumTrait.class)) {
             return CodeBlock.of("$L()",
                     new MethodReference(classForNotErrorNotUnitShape(shape), "_typeDescriptor").asNormalReference());
