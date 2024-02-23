@@ -335,7 +335,7 @@ public class CodegenEngine {
     }
 
     private void handlePatching(TargetLanguage targetLanguage, Path outputDir) {
-        if (!patchFilesDir.isPresent()) {
+        if (patchFilesDir.isEmpty()) {
             return;
         }
 
