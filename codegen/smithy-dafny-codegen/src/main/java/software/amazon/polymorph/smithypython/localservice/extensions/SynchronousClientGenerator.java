@@ -467,9 +467,6 @@ public class SynchronousClientGenerator extends ClientGenerator {
                                 retry_strategy.record_success(token=retry_token)
                                 break
                     except Exception as e:
-                        if context.response is not None:
-                            # config.logger.exception(f"Exception occurred while handling: {context.response}")
-                            pass
                         context._response = e
 
                     # At this point, the context's request will have been definitively set, and
@@ -548,9 +545,6 @@ public class SynchronousClientGenerator extends ClientGenerator {
                         for interceptor in interceptors:
                             interceptor.read_after_deserialization(context_with_output)
                     except Exception as e:
-                        if context.response is not None:
-                            # config.logger.exception(f"Exception occurred while handling: {context.response}")
-                            pass
                         context._response = e
 
                     # At this point, the context's request and transport_request have definitively been set,
@@ -574,9 +568,6 @@ public class SynchronousClientGenerator extends ClientGenerator {
                                 context
                             )
                     except Exception as e:
-                        if context.response is not None:
-                            # config.logger.exception(f"Exception occurred while handling: {context.response}")
-                            pass
                         context._response = e
 
                     # Step 7t: Invoke read_after_attempt
@@ -584,9 +575,6 @@ public class SynchronousClientGenerator extends ClientGenerator {
                         try:
                             interceptor.read_after_attempt(context)
                         except Exception as e:
-                            if context.response is not None:
-                                # config.logger.exception(f"Exception occurred while handling: {context.response}")
-                                pass
                             context._response = e
 
                     return context
@@ -602,9 +590,6 @@ public class SynchronousClientGenerator extends ClientGenerator {
                             context._response = interceptor.modify_before_completion(context)
 
                     except Exception as e:
-                        if context.response is not None:
-                            # config.logger.exception(f"Exception occurred while handling: {context.response}")
-                            pass
                         context._response = e
 
                     # Step 11: Invoke read_after_execution
@@ -612,9 +597,6 @@ public class SynchronousClientGenerator extends ClientGenerator {
                         try:
                             interceptor.read_after_execution(context)
                         except Exception as e:
-                            if context.response is not None:
-                                # config.logger.exception(f"Exception occurred while handling: {context.response}")
-                                pass
                             context._response = e
 
                     # Step 12: Return / throw

@@ -194,7 +194,7 @@ protected void generateResourceImplementation(
         Symbol outputSymbol = codegenContext.symbolProvider().toSymbol(targetShapeOutput);
 
 
-        writer.openBlock("def $L(self, input: '$L') -> '$L':",
+        writer.openBlock("def $L(self, param: '$L') -> '$L':",
               "",
               CaseUtils.toSnakeCase(operationShapeId.getName()),
               inputSymbol,
@@ -279,10 +279,10 @@ protected void generateResourceImplementation(
                             return Wrappers.Result_Failure(error)
                                  */
                         """
-                        '''
+                        ""\"
                         Do not use.
                         This method allows custom implementations of this interface to interact with generated code.
-                        '''
+                        ""\"
                         native_input = $L(
                             dafny_input
                         )
@@ -342,7 +342,7 @@ protected void generateResourceImplementation(
       String input =
           targetShapeInput.accept(
               ShapeVisitorResolver.getToDafnyShapeVisitorForShape(
-                  targetShapeInput, codegenContext, "input", writer));
+                  targetShapeInput, codegenContext, "param", writer));
         Symbol inputSymbol = codegenContext.symbolProvider().toSymbol(targetShapeInput);
 
       Shape targetShapeOutput = codegenContext.model().expectShape(operationShape.getOutputShape());
@@ -358,7 +358,7 @@ protected void generateResourceImplementation(
 
 
         writer.openBlock(
-          "def $L(self, input: '$L') -> '$L':",
+          "def $L(self, param: '$L') -> '$L':",
           "",
         CaseUtils.toSnakeCase(operationShapeId.getName()),
           inputSymbol,
@@ -439,7 +439,7 @@ protected void generateResourceImplementation(
                                   trait -> {
                                     String memberDocs =
                                             writer.formatDocs(
-                                                    String.format(":param input: %s", trait.getValue()));
+                                                    String.format(":param param: %s", trait.getValue()));
                                     writer.write(memberDocs);
                                   });
                   outputShape

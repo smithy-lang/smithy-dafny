@@ -54,12 +54,12 @@ public class ShimFileWriter implements CustomFileWriter {
           import Wrappers
           import $L
           import $L.client as client_impl
-          
+
           def _smithy_error_to_dafny_error(e: ServiceError):
-                 '''
-                 Converts the provided native Smithy-modelled error
+                 ""\"
+                 Converts the provided native Smithy-modeled error
                  into the corresponding Dafny error.
-                 '''
+                 ""\"
                  ${C|}
 
           class $L($L.$L):
@@ -76,9 +76,8 @@ public class ShimFileWriter implements CustomFileWriter {
                   SmithyNameResolver.shimNameForService(serviceShape),
                   typesModulePrelude,
                   DafnyNameResolver.getDafnyClientInterfaceTypeForServiceShape(serviceShape),
-                  writer.consumer(w -> generateOperationsBlock(codegenContext, serviceShape, w))
-              );
-        });
+                  writer.consumer(w -> generateOperationsBlock(codegenContext, serviceShape, w)));
+            });
   }
 
   /**

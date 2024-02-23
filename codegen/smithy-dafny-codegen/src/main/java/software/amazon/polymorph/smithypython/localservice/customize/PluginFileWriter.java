@@ -44,10 +44,10 @@ public class PluginFileWriter implements CustomFileWriter {
           from .dafnyImplInterface import DafnyImplInterface
 
           def set_config_impl(config: Config):
-              '''
+              ""\"
               Set the Dafny-compiled implementation in the Smithy-Python client Config
               and load our custom NoRetriesStrategy.
-              '''
+              ""\"
               config.dafnyImplInterface = DafnyImplInterface()
               if isinstance(config, $L):
                   from $L import default__
@@ -55,17 +55,17 @@ public class PluginFileWriter implements CustomFileWriter {
               config.retry_strategy = NoRetriesStrategy()
 
           class ZeroRetryDelayToken:
-              '''
+              ""\"
               Placeholder class required by Smithy-Python client implementation.
               Do not wait to retry.
-              '''
+              ""\"
               retry_delay = 0
 
           class NoRetriesStrategy(RetryStrategy):
-              '''
+              ""\"
               Placeholder class required by Smithy-Python client implementation.
               Do not retry calling Dafny code.
-              '''
+              ""\"
               def acquire_initial_retry_token(self):
                   return ZeroRetryDelayToken()
 

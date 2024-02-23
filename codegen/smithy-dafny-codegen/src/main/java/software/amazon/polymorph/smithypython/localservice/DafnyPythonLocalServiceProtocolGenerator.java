@@ -308,7 +308,7 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator implements Protoc
             writer.write(
                 """
           if input.IsFailure():
-            return await _deserialize_error(input.error)
+              return await _deserialize_error(input.error)
           return $L
           """,
                 output);
@@ -360,9 +360,9 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator implements Protoc
                 writer.write(
                     """
                 if error.is_Opaque:
-                  return OpaqueError(obj=error.obj)
+                    return OpaqueError(obj=error.obj)
                 elif error.is_CollectionOfErrors:
-                  return CollectionOfErrors(message=error.message, list=error.list)""");
+                    return CollectionOfErrors(message=error.message, list=error.list)""");
 
                 // Write converters for errors modelled on this local service
                 generateErrorResponseDeserializerSectionForLocalServiceErrors(

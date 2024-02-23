@@ -51,10 +51,10 @@ public class AwsSdkShimFileWriter implements CustomFileWriter {
           import $L
 
           def _sdk_error_to_dafny_error(e: ClientError):
-              '''
+              ""\"
               Converts the provided native Smithy-modelled error
               into the corresponding Dafny error.
-              '''
+              ""\"
               ${C|}
 
           class $L:

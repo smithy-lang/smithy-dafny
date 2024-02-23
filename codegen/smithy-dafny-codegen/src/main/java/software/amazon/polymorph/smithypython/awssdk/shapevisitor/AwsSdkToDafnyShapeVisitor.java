@@ -93,7 +93,7 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
     // Return a reference to the generated conversion method
     // ex. for shape example.namespace.ExampleShape
     // returns
-    // `example_namespace.smithygenerated.aws_sdk_to_dafny.AwsSdkToDafny_example_namespace_ExampleShape(input)`
+    // `example_namespace.smithygenerated.aws_sdk_to_dafny.example_namespace_ExampleShape(input)`
     return "%1$s.aws_sdk_to_dafny.%2$s(%3$s)"
         .formatted(
             pythonModuleName,
@@ -262,7 +262,7 @@ public class AwsSdkToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
     // Return a reference to the generated conversion method
     // ex. for shape example.namespace.ExampleShape
     // returns
-    // `example_namespace.smithygenerated.aws_sdk_to_dafny.AwsSdkToDafny_example_namespace_ExampleShape(input)`
+    // `example_namespace.smithygenerated.aws_sdk_to_dafny.example_namespace_ExampleShape(input)`
     return "%1$s.aws_sdk_to_dafny.%2$s(%3$s)"
         .formatted(
             pythonModuleName,

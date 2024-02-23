@@ -51,9 +51,9 @@ public class ConfigFileWriter implements CustomFileWriter {
               writer.write(
                   """
               class $L(Config):
-                  '''
+                  ""\"
                   Smithy-modelled localService Config shape for this localService.
-                  '''
+                  ""\"
                   ${C|}
 
                   def __init__(
@@ -65,17 +65,17 @@ public class ConfigFileWriter implements CustomFileWriter {
                       ${C|}
 
               def dafny_config_to_smithy_config(dafny_config) -> $L:
-                  '''
+                  ""\"
                   Converts the provided Dafny shape for this localService's config
                   into the corresponding Smithy-modelled shape.
-                  '''
+                  ""\"
                   ${C|}
 
               def smithy_config_to_dafny_config(smithy_config) -> $L:
-                  '''
+                  ""\"
                   Converts the provided Smithy-modelled shape for this localService's config
                   into the corresponding Dafny shape.
-                  '''
+                  ""\"
                   ${C|}
               """,
                   configShape.getId().getName(),

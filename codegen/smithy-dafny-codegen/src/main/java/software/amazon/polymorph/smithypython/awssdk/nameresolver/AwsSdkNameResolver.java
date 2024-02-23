@@ -84,14 +84,13 @@ public class AwsSdkNameResolver {
   /**
    * Returns the name of the function that converts the provided shape's Dafny-modelled type to the
    * corresponding AWS SDK-modelled type. This function will be defined in the `dafny_to_aws_sdk.py`
-   * file. ex. example.namespace.ExampleShape -> "DafnyToAwsSdk_example_namespace_ExampleShape"
+   * file. ex. example.namespace.ExampleShape -> "example_namespace_ExampleShape"
    *
    * @param shape
    * @return
    */
   public static String getDafnyToAwsSdkFunctionNameForShape(Shape shape) {
-    return "DafnyToAwsSdk_"
-        + SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
+    return SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
             shape.getId().getNamespace())
         + "_"
         + shape.getId().getName();
@@ -101,14 +100,13 @@ public class AwsSdkNameResolver {
    * Returns the name of the function that converts the provided shape's AWS SDK-modelled type to
    * the corresponding Dafny-modelled type. This function will be defined in the
    * `aws_sdk_to_dafny.py` file. ex. example.namespace.ExampleShape ->
-   * "AwsSdkToDafny_example_namespace_ExampleShape"
+   * "example_namespace_ExampleShape"
    *
    * @param shape
    * @return
    */
   public static String getAwsSdkToDafnyFunctionNameForShape(Shape shape) {
-    return "AwsSdkToDafny_"
-        + SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
+    return SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
             shape.getId().getNamespace())
         + "_"
         + shape.getId().getName();
