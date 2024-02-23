@@ -48,6 +48,8 @@ public final class DafnyClientCodegenPlugin implements SmithyBuildPlugin {
         }
 
         final CodegenEngine codegenEngine = new CodegenEngine.Builder()
+                .withFromSmithyBuildPlugin(true)
+                .withLibraryRoot(manifest.getBaseDir())
                 .withServiceModel(model)
                 // TODO generate code based on service closure, not namespace
                 .withNamespace(settings.serviceId.getNamespace())
