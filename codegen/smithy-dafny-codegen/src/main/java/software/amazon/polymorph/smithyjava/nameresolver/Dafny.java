@@ -376,6 +376,10 @@ public class Dafny extends NameResolver {
             CodeBlock valueTypeDescriptor = typeDescriptor(shape.asMapShape().get().getValue().getTarget());
             return CodeBlock.of("$T._typeDescriptor($L, $L)", Constants.DAFNY_MAP_CLASS_NAME, keyTypeDescriptor, valueTypeDescriptor);
         }
+        if (shape.getType().isShapeType(ShapeType.STRUCTURE)) {
+            return CodeBlock.of("$L()",
+                    new MethodReference(classForNotErrorNotUnitShape(shape), "_typeDescriptor").asNormalReference());
+        }
         throw new IllegalArgumentException("Don't know how to create a type descriptor for this shape: %s".formatted(shape));
     }
 
