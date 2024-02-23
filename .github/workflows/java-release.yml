@@ -1,0 +1,38 @@
+# This workflow performs MPL Java release
+name: Library Java tests
+
+on:
+  workflow_call:
+    inputs:
+      dafny:
+        description: "The Dafny version to run"
+        required: true
+        type: string
+
+jobs:
+  releaseJava:
+    strategy:
+      matrix:
+        library: [AwsCryptographicMaterialProviders]
+    runs-on: codebuild-AWS-MPL-Release-ubuntu-5.0-large
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Support longpaths on Git checkout
+        run: |
+          git config --global core.longpaths true
+
+      - uses: actions/checkout@v3
+      # We only pull in the submodules we need to build the library
+      - run: git submodule update --init libraries
+
+      - name: Test
+        run: |
+          echo "Hello from CodeBuild Runner"
+
+      # Use AWS Secrets Manger GHA to retrieve CI Bot Creds
+      # - name: Get CI Bot Creds Secret
+      #   uses: aws-actions/aws-secretsmanager-get-secrets@v2
+      #   with:
+      #     secret-ids: arn:aws:secretsmanager:us-west-2:587316601012:secret:Github/aws-crypto-tools-ci-bot-AGUB3U
