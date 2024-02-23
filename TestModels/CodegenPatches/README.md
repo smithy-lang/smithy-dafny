@@ -16,7 +16,7 @@ The easiest way to create these patches is the following workflow
 2. Apply the necessary manual edits (preferrably with marker comments to make them stand out better).
 3. Commit the generated code to git.
 4. Regenerate the code, passing the `--update-patch-files` option to the polymorph CLI.
-   With this repository's `SharedMakefile.mk`, you can define `UPDATE_PATCH_FILES_OPTION="--update-patch-files"`.
+   With this repository's `SharedMakefile.mk`, you can define `POLYMORPH_OPTIONS="--update-patch-files"`.
    This will extract the necessary patch to modify the generated code to match what's checked in.
 
 ## Build
