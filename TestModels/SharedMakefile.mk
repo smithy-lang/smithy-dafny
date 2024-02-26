@@ -190,7 +190,7 @@ _polymorph:
 	$(GRADLEW) run --args="\
 	$(DAFNY_VERSION_OPTION) \
 	--library-root $(LIBRARY_ROOT) \
-	$(UPDATE_PATCH_FILES_OPTION) \
+	--patch-files-dir $(if $(DIR_STRUCTURE_V2),$(LIBRARY_ROOT)/codegen-patches/$(SERVICE),$(LIBRARY_ROOT)/codegen-patches) \
 	--properties-file $(LIBRARY_ROOT)/project.properties \
 	$(OUTPUT_DAFNY) \
 	$(OUTPUT_DOTNET) \
@@ -199,7 +199,8 @@ _polymorph:
 	--dependent-model $(PROJECT_ROOT)/$(SMITHY_DEPS) \
 	$(patsubst %, --dependent-model $(PROJECT_ROOT)/%/Model, $($(service_deps_var))) \
 	--namespace $($(namespace_var)) \
-	$(AWS_SDK_CMD)";
+	$(AWS_SDK_CMD) \
+	$(POLYMORPH_OPTIONS)";
 
 _polymorph_wrapped:
 	@: $(if ${CODEGEN_CLI_ROOT},,$(error You must pass the path CODEGEN_CLI_ROOT: CODEGEN_CLI_ROOT=/path/to/smithy-dafny/codegen/smithy-dafny-codegen-cli));
@@ -216,7 +217,8 @@ _polymorph_wrapped:
 	$(patsubst %, --dependent-model $(PROJECT_ROOT)/%/Model, $($(service_deps_var))) \
 	--namespace $($(namespace_var)) \
 	$(OUTPUT_LOCAL_SERVICE) \
-	$(AWS_SDK_CMD)";
+	$(AWS_SDK_CMD) \
+	$(POLYMORPH_OPTIONS)";
 
 _polymorph_dependencies:
 	@$(foreach dependency, \
