@@ -63,7 +63,6 @@ public class Dafny extends NameResolver {
                 Map.entry(ShapeType.LONG, CodeBlock.of("$T.LONG", Constants.DAFNY_TYPE_DESCRIPTOR_CLASS_NAME)),
                 Map.entry(ShapeType.TIMESTAMP, CodeBlock.of("$T._typeDescriptor($T.CHAR)", Constants.DAFNY_SEQUENCE_CLASS_NAME, Constants.DAFNY_TYPE_DESCRIPTOR_CLASS_NAME)),
                 Map.entry(ShapeType.BIG_INTEGER, CodeBlock.of("$T.BIG_INTEGER", Constants.DAFNY_TYPE_DESCRIPTOR_CLASS_NAME))
-//                Map.entry(ShapeType.DOUBLE, CodeBlock.of("$T.BIG_INTEGER", Constants.DAFNY_TYPE_DESCRIPTOR_CLASS_NAME))
         );
     }
 
@@ -377,14 +376,14 @@ public class Dafny extends NameResolver {
             CodeBlock valueTypeDescriptor = typeDescriptor(shape.asMapShape().get().getValue().getTarget());
             return CodeBlock.of("$T._typeDescriptor($L, $L)", Constants.DAFNY_MAP_CLASS_NAME, keyTypeDescriptor, valueTypeDescriptor);
         }
-//        if (shape.getType().isShapeType(ShapeType.STRUCTURE)
-//                || shape.getType().isShapeType(ShapeType.UNION)
-//                || shape.getType().isShapeType(ShapeType.DOUBLE)
-//                || shape.hasTrait(EnumTrait.class)) {
+        if (shape.getType().isShapeType(ShapeType.STRUCTURE)
+                || shape.getType().isShapeType(ShapeType.UNION)
+                || shape.getType().isShapeType(ShapeType.DOUBLE)
+                || shape.hasTrait(EnumTrait.class)) {
             return CodeBlock.of("$L()",
                     new MethodReference(classForNotErrorNotUnitShape(shape), "_typeDescriptor").asNormalReference());
-//        }
-//        throw new IllegalArgumentException("Don't know how to create a type descriptor for this shape: %s".formatted(shape));
+        }
+        throw new IllegalArgumentException("Don't know how to create a type descriptor for this shape: %s".formatted(shape));
     }
 
     /*
