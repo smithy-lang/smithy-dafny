@@ -25,6 +25,7 @@ polymorph_dafny :
 	cd $(CODEGEN_CLI_ROOT); \
 	$(GRADLEW) run --args="\
 	$(DAFNY_VERSION_OPTION) \
+	--library-root $(LIBRARY_ROOT) \
 	--properties-file $(STANDARD_LIBRARY_PATH)/project.properties \
 	--model $(STANDARD_LIBRARY_PATH)/Model \
 	--namespace aws.polymorph \
@@ -58,7 +59,6 @@ transpile_implementation:
 		-compile:0 \
 		-optimizeErasableDatatypeWrapper:0 \
 		-compileSuffix:1 \
-		-quantifierSyntax:3 \
 		-unicodeChar:0 \
 		-functionSyntax:3 \
 		-useRuntimeLib \
