@@ -1743,7 +1743,7 @@ public class DafnyApiCodegen {
                             //   a condition on the existing comprehension, starting with `&&`
                             // i.e. var setVar := set t | t in otherVar.Values && t.thisOptionalStructure.Some?
                             modifiesClause = modifiesClause.append(TokenTree.of(
-                                "| %1$s.Some? \n ".formatted(accessPathToCurrentShape)
+                                "&& %1$s.Some? \n ".formatted(accessPathToCurrentShape)
                             ));
                         } else {
                             // If not using set comprehension, the `.Some` check on an optional structure is added as
@@ -1767,10 +1767,10 @@ public class DafnyApiCodegen {
                     // Union members must always be checked for presence; i.e. are always "optional"
                     if (setComprehensionVar != null) {
                         // If using set comprehension, the destructor on a union member is added as
-                        //   a condition on the existing comprehension, starting with `&&`
+                        //   a condition on the existing comprehension, starting with `|`
                         // e.g. `&& fooUnion.barUnionMember? ...`
                         modifiesClause = modifiesClause.append(TokenTree.of(
-                            "&& %1$s? \n ".formatted(accessPathToCurrentShape)
+                            "| %1$s? \n ".formatted(accessPathToCurrentShape)
                         ));
                     } else {
                         // If not using set comprehension, the destructor on a union member is added as
