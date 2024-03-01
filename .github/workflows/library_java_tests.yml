@@ -8,10 +8,16 @@ on:
         description: "The Dafny version to run"
         required: true
         type: string
+      regenerate-code:
+        description: "Regenerate code using smithy-dafny"
+        required: false
+        default: false
+        type: boolean
 
 jobs:
   testJava:
     strategy:
+      fail-fast: false
       matrix:
         library:
           [
@@ -32,6 +38,9 @@ jobs:
     permissions:
       id-token: write
       contents: read
+    defaults:
+      run:
+        shell: bash
     steps:
       - name: Support longpaths on Git checkout
         run: |
@@ -47,13 +56,22 @@ jobs:
 
       - uses: actions/checkout@v4
       # The specification submodule is private so we don't have access, but we don't need
-      # it to verify the Dafny code. Instead we manually pull the submodule we DO need.
+      # it to verify the Dafny code. Instead we manually pull the submodules we DO need.
       - run: git submodule update --init libraries
+      - run: git submodule update --init smithy-dafny
 
       - name: Setup Dafny
-        uses: dafny-lang/setup-dafny-action@v1.6.1
+        uses: dafny-lang/setup-dafny-action@v1.7.0
         with:
           dafny-version: ${{ inputs.dafny }}
+
+      - name: Regenerate code using smithy-dafny if necessary
+        if: ${{ inputs.regenerate-code }}
+        uses: ./.github/actions/polymorph_codegen
+        with:
+          dafny: ${{ env.DAFNY_VERSION }}
+          library: ${{ matrix.library }}
+          diff-generated-code: false
 
       - name: Setup Java 8
         uses: actions/setup-java@v3
@@ -62,7 +80,6 @@ jobs:
           java-version: 8
 
       - name: Build ${{ matrix.library }} implementation
-        shell: bash
         working-directory: ./${{ matrix.library }}
         run: |
           # This works because `node` is installed by default on GHA runners

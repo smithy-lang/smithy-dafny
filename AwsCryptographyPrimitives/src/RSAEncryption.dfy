@@ -58,4 +58,25 @@ module {:extern "RSAEncryption"} RSAEncryption {
     returns (res: Result<seq<uint8>, Types.Error>)
     requires |publicKey| > 0
     requires |plaintextData| > 0
+
+  // The next four functions are for the benefit of the extern implementation to call,
+  // avoiding direct references to generic datatype constructors
+  // since their calling pattern is different between different versions of Dafny
+  // (i.e. after 4.2, explicit type descriptors are required).
+
+  function method CreateGetRSAKeyModulusLengthExternSuccess(output: uint32): Result<uint32, Types.Error> {
+    Success(output)
+  }
+
+  function method CreateGetRSAKeyModulusLengthExternFailure(error: Types.Error): Result<uint32, Types.Error> {
+    Failure(error)
+  }
+
+  function method CreateBytesSuccess(bytes: seq<uint8>): Result<seq<uint8>, Types.Error> {
+    Success(bytes)
+  }
+
+  function method CreateBytesFailure(error: Types.Error): Result<seq<uint8>, Types.Error> {
+    Failure(error)
+  }
 }

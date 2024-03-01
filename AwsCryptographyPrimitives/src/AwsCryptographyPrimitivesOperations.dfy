@@ -10,6 +10,7 @@ include "AESEncryption.dfy"
 include "Digest.dfy"
 include "RSAEncryption.dfy"
 include "Signature.dfy"
+include "AesKdfCtr.dfy"
 
 module AwsCryptographyPrimitivesOperations refines AbstractAwsCryptographyPrimitivesOperations {
   import Random

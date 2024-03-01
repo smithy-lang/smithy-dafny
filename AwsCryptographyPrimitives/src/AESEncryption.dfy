@@ -122,4 +122,24 @@ module {:extern "AESEncryption"} AESEncryption {
     return Success(value);
   }
 
+  // The next four functions are for the benefit of the extern implementation to call,
+  // avoiding direct references to generic datatype constructors
+  // since their calling pattern is different between different versions of Dafny
+  // (i.e. after 4.2, explicit type descriptors are required).
+
+  function method CreateAESEncryptExternSuccess(output: Types.AESEncryptOutput): Result<Types.AESEncryptOutput, Types.OpaqueError> {
+    Success(output)
+  }
+
+  function method CreateAESEncryptExternFailure(error: Types.OpaqueError): Result<Types.AESEncryptOutput, Types.OpaqueError> {
+    Failure(error)
+  }
+
+  function method CreateAESDecryptExternSuccess(bytes: seq<uint8>): Result<seq<uint8>, Types.OpaqueError> {
+    Success(bytes)
+  }
+
+  function method CreateAESDecryptExternFailure(error: Types.OpaqueError): Result<seq<uint8>, Types.OpaqueError> {
+    Failure(error)
+  }
 }

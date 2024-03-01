@@ -1,0 +1,193 @@
+diff --git b/ComAmazonawsDynamodb/runtimes/java/src/main/smithy-generated/software/amazon/cryptography/services/dynamodb/internaldafny/ToDafny.java a/ComAmazonawsDynamodb/runtimes/java/src/main/smithy-generated/software/amazon/cryptography/services/dynamodb/internaldafny/ToDafny.java
+index 04e0401..c2f8787 100644
+--- b/ComAmazonawsDynamodb/runtimes/java/src/main/smithy-generated/software/amazon/cryptography/services/dynamodb/internaldafny/ToDafny.java
++++ a/ComAmazonawsDynamodb/runtimes/java/src/main/smithy-generated/software/amazon/cryptography/services/dynamodb/internaldafny/ToDafny.java
+@@ -10489,16 +10489,9 @@ public class ToDafny {
+   }
+ 
+   public static Error Error(DynamoDbException nativeValue) {
+-    Option<DafnySequence<? extends Character>> message;
+-    message =
+-      Objects.nonNull(nativeValue.getMessage())
+-        ? Option.create_Some(
+-          software.amazon.smithy.dafny.conversion.ToDafny.Simple.CharacterSequence(
+-            nativeValue.getMessage()
+-          )
+-        )
+-        : Option.create_None();
+-    return new Error_Opaque(message);
++    // BEGIN MANUAL EDIT
++    return new Error_Opaque(nativeValue);
++    // END MANUAL EDIT
+   }
+ 
+   public static IDynamoDBClient DynamoDB_20120810(DynamoDbClient nativeValue) {
+diff --git b/ComAmazonawsDynamodb/runtimes/java/src/main/smithy-generated/software/amazon/cryptography/services/dynamodb/internaldafny/ToNative.java a/ComAmazonawsDynamodb/runtimes/java/src/main/smithy-generated/software/amazon/cryptography/services/dynamodb/internaldafny/ToNative.java
+index e3fa41d..80bf84d 100644
+--- b/ComAmazonawsDynamodb/runtimes/java/src/main/smithy-generated/software/amazon/cryptography/services/dynamodb/internaldafny/ToNative.java
++++ a/ComAmazonawsDynamodb/runtimes/java/src/main/smithy-generated/software/amazon/cryptography/services/dynamodb/internaldafny/ToNative.java
+@@ -109,6 +109,9 @@ import software.amazon.awssdk.services.dynamodb.model.DestinationStatus;
+ import software.amazon.awssdk.services.dynamodb.model.DisableKinesisStreamingDestinationRequest;
+ import software.amazon.awssdk.services.dynamodb.model.DisableKinesisStreamingDestinationResponse;
+ import software.amazon.awssdk.services.dynamodb.model.DuplicateItemException;
++// BEGIN MANUAL EDIT
++import software.amazon.awssdk.services.dynamodb.model.DynamoDbException;
++// END MANUAL EDIT
+ import software.amazon.awssdk.services.dynamodb.model.EnableKinesisStreamingDestinationRequest;
+ import software.amazon.awssdk.services.dynamodb.model.EnableKinesisStreamingDestinationResponse;
+ import software.amazon.awssdk.services.dynamodb.model.Endpoint;
+@@ -349,6 +352,9 @@ import software.amazon.cryptography.services.dynamodb.internaldafny.types.Error_
+ import software.amazon.cryptography.services.dynamodb.internaldafny.types.Error_InvalidRestoreTimeException;
+ import software.amazon.cryptography.services.dynamodb.internaldafny.types.Error_ItemCollectionSizeLimitExceededException;
+ import software.amazon.cryptography.services.dynamodb.internaldafny.types.Error_LimitExceededException;
++// BEGIN MANUAL EDIT
++import software.amazon.cryptography.services.dynamodb.internaldafny.types.Error_Opaque;
++// END MANUAL EDIT
+ import software.amazon.cryptography.services.dynamodb.internaldafny.types.Error_PointInTimeRecoveryUnavailableException;
+ import software.amazon.cryptography.services.dynamodb.internaldafny.types.Error_ProvisionedThroughputExceededException;
+ import software.amazon.cryptography.services.dynamodb.internaldafny.types.Error_ReplicaAlreadyExistsException;
+@@ -422,6 +428,19 @@ import software.amazon.cryptography.services.dynamodb.internaldafny.types.Update
+ 
+ public class ToNative {
+ 
++  // BEGIN MANUAL EDIT
++  public static RuntimeException Error(Error_Opaque dafnyValue) {
++    if (dafnyValue.dtor_obj() instanceof DynamoDbException) {
++      return (DynamoDbException) dafnyValue.dtor_obj();
++    }
++    // Because we only ever put `DynamoDbException` into `Error_Opaque`,
++    // recieving any other type here indicates a bug with the codegen.
++    // Bubble up some error to indicate this failure state.
++    return new IllegalStateException("Unknown error recieved from DynamoDb.");
++  }
++
++  // END MANUAL EDIT
++
+   public static ArchivalSummary ArchivalSummary(
+     software.amazon.cryptography.services.dynamodb.internaldafny.types.ArchivalSummary dafnyValue
+   ) {
+@@ -8035,6 +8054,124 @@ public class ToNative {
+     return builder.build();
+   }
+ 
++  // BEGIN MANUAL EDIT
++  public static RuntimeException Error(
++    software.amazon.cryptography.services.dynamodb.internaldafny.types.Error dafnyValue
++  ) {
++    if (dafnyValue.is_BackupInUseException()) {
++      return ToNative.Error((Error_BackupInUseException) dafnyValue);
++    }
++    if (dafnyValue.is_BackupNotFoundException()) {
++      return ToNative.Error((Error_BackupNotFoundException) dafnyValue);
++    }
++    if (dafnyValue.is_ConditionalCheckFailedException()) {
++      return ToNative.Error((Error_ConditionalCheckFailedException) dafnyValue);
++    }
++    if (dafnyValue.is_ContinuousBackupsUnavailableException()) {
++      return ToNative.Error(
++        (Error_ContinuousBackupsUnavailableException) dafnyValue
++      );
++    }
++    if (dafnyValue.is_DuplicateItemException()) {
++      return ToNative.Error((Error_DuplicateItemException) dafnyValue);
++    }
++    if (dafnyValue.is_ExportConflictException()) {
++      return ToNative.Error((Error_ExportConflictException) dafnyValue);
++    }
++    if (dafnyValue.is_ExportNotFoundException()) {
++      return ToNative.Error((Error_ExportNotFoundException) dafnyValue);
++    }
++    if (dafnyValue.is_GlobalTableAlreadyExistsException()) {
++      return ToNative.Error(
++        (Error_GlobalTableAlreadyExistsException) dafnyValue
++      );
++    }
++    if (dafnyValue.is_GlobalTableNotFoundException()) {
++      return ToNative.Error((Error_GlobalTableNotFoundException) dafnyValue);
++    }
++    if (dafnyValue.is_IdempotentParameterMismatchException()) {
++      return ToNative.Error(
++        (Error_IdempotentParameterMismatchException) dafnyValue
++      );
++    }
++    if (dafnyValue.is_ImportConflictException()) {
++      return ToNative.Error((Error_ImportConflictException) dafnyValue);
++    }
++    if (dafnyValue.is_ImportNotFoundException()) {
++      return ToNative.Error((Error_ImportNotFoundException) dafnyValue);
++    }
++    if (dafnyValue.is_IndexNotFoundException()) {
++      return ToNative.Error((Error_IndexNotFoundException) dafnyValue);
++    }
++    if (dafnyValue.is_InternalServerError()) {
++      return ToNative.Error((Error_InternalServerError) dafnyValue);
++    }
++    if (dafnyValue.is_InvalidExportTimeException()) {
++      return ToNative.Error((Error_InvalidExportTimeException) dafnyValue);
++    }
++    if (dafnyValue.is_InvalidRestoreTimeException()) {
++      return ToNative.Error((Error_InvalidRestoreTimeException) dafnyValue);
++    }
++    if (dafnyValue.is_ItemCollectionSizeLimitExceededException()) {
++      return ToNative.Error(
++        (Error_ItemCollectionSizeLimitExceededException) dafnyValue
++      );
++    }
++    if (dafnyValue.is_LimitExceededException()) {
++      return ToNative.Error((Error_LimitExceededException) dafnyValue);
++    }
++    if (dafnyValue.is_PointInTimeRecoveryUnavailableException()) {
++      return ToNative.Error(
++        (Error_PointInTimeRecoveryUnavailableException) dafnyValue
++      );
++    }
++    if (dafnyValue.is_ProvisionedThroughputExceededException()) {
++      return ToNative.Error(
++        (Error_ProvisionedThroughputExceededException) dafnyValue
++      );
++    }
++    if (dafnyValue.is_ReplicaAlreadyExistsException()) {
++      return ToNative.Error((Error_ReplicaAlreadyExistsException) dafnyValue);
++    }
++    if (dafnyValue.is_ReplicaNotFoundException()) {
++      return ToNative.Error((Error_ReplicaNotFoundException) dafnyValue);
++    }
++    if (dafnyValue.is_RequestLimitExceeded()) {
++      return ToNative.Error((Error_RequestLimitExceeded) dafnyValue);
++    }
++    if (dafnyValue.is_ResourceInUseException()) {
++      return ToNative.Error((Error_ResourceInUseException) dafnyValue);
++    }
++    if (dafnyValue.is_ResourceNotFoundException()) {
++      return ToNative.Error((Error_ResourceNotFoundException) dafnyValue);
++    }
++    if (dafnyValue.is_TableAlreadyExistsException()) {
++      return ToNative.Error((Error_TableAlreadyExistsException) dafnyValue);
++    }
++    if (dafnyValue.is_TableInUseException()) {
++      return ToNative.Error((Error_TableInUseException) dafnyValue);
++    }
++    if (dafnyValue.is_TableNotFoundException()) {
++      return ToNative.Error((Error_TableNotFoundException) dafnyValue);
++    }
++    if (dafnyValue.is_TransactionCanceledException()) {
++      return ToNative.Error((Error_TransactionCanceledException) dafnyValue);
++    }
++    if (dafnyValue.is_TransactionConflictException()) {
++      return ToNative.Error((Error_TransactionConflictException) dafnyValue);
++    }
++    if (dafnyValue.is_TransactionInProgressException()) {
++      return ToNative.Error((Error_TransactionInProgressException) dafnyValue);
++    }
++    if (dafnyValue.is_Opaque()) {
++      return ToNative.Error((Error_Opaque) dafnyValue);
++    }
++    // TODO This should indicate a codegen bug
++    return new IllegalStateException("Unknown error recieved from DynamoDb.");
++  }
++
++  // END MANUAL EDIT
++
+   public static DynamoDbClient DynamoDB_20120810(IDynamoDBClient dafnyValue) {
+     return ((Shim) dafnyValue).impl();
+   }

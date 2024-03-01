@@ -8,26 +8,25 @@ import Wrappers_Compile.Result;
 import dafny.Array;
 import dafny.DafnySequence;
 import java.nio.ByteBuffer;
-import java.util.UUID;
 
-public class __default {
+public class __default extends UUID._ExternBase___default {
 
   public static Result<
     DafnySequence<? extends Byte>,
     DafnySequence<? extends Character>
   > ToByteArray(final DafnySequence<? extends Character> s) {
     try {
-      UUID fromString = UUID.fromString(String(s));
+      java.util.UUID fromString = java.util.UUID.fromString(String(s));
       ByteBuffer byteBuffer = ByteBuffer.wrap(new byte[16]);
       // In Java the UUID construction stores the 8 most significant bytes
       // and the 8 least significant bytes that add up to 16 byte UUID.
       byteBuffer.putLong(fromString.getMostSignificantBits());
       byteBuffer.putLong(fromString.getLeastSignificantBits());
-      return Result.create_Success(
+      return CreateBytesSuccess(
         (DafnySequence<? extends Byte>) ByteSequence(byteBuffer)
       );
     } catch (Exception e) {
-      return Result.create_Failure(
+      return CreateBytesFailure(
         (DafnySequence<? extends Character>) CharacterSequence(
           "Could not convert UUID to byte array."
         )
@@ -49,14 +48,14 @@ public class __default {
       // 8 + 8 = 16 that make up the 16 bytes of the UUID construction.
       long high = byteBuffer.getLong();
       long low = byteBuffer.getLong();
-      UUID fromByte = new UUID(high, low);
-      return Result.create_Success(
+      java.util.UUID fromByte = new java.util.UUID(high, low);
+      return CreateStringSuccess(
         (DafnySequence<? extends Character>) CharacterSequence(
           fromByte.toString()
         )
       );
     } catch (Exception e) {
-      return Result.create_Failure(
+      return CreateStringFailure(
         (DafnySequence<? extends Character>) CharacterSequence(
           "Could not convert byte array to UUID."
         )
@@ -69,12 +68,12 @@ public class __default {
     DafnySequence<? extends Character>
   > GenerateUUID() {
     try {
-      UUID uuid = UUID.randomUUID();
-      return Result.create_Success(
+      java.util.UUID uuid = java.util.UUID.randomUUID();
+      return CreateStringSuccess(
         (DafnySequence<? extends Character>) CharacterSequence(uuid.toString())
       );
     } catch (Exception e) {
-      return Result.create_Failure(
+      return CreateStringFailure(
         (DafnySequence<? extends Character>) CharacterSequence(
           "Could not generate a UUID."
         )

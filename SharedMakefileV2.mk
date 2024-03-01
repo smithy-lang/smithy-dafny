@@ -61,6 +61,10 @@ SMITHY_MODEL_ROOT := $(LIBRARY_ROOT)/Model
 # for now we know this will work across the three environmnets we test in (windows, macos, ubuntu)
 COMPILE_SUFFIX_OPTION := -compileSuffix:1
 
+# The path to the smithy-dafny code generation CLI.
+# Defaults to the copy in the smithy-dafny submodule but can be overridden.
+CODEGEN_CLI_ROOT := $(PROJECT_ROOT)/smithy-dafny/codegen/smithy-dafny-codegen-cli
+
 ########################## Dafny targets
 
 # Proof of correctness for the math below
@@ -227,11 +231,12 @@ transpile_dependencies:
 # a single target can decide what parts it wants to build.
 
 _polymorph:
-	@: $(if ${CODEGEN_CLI_ROOT},,$(error You must pass the path CODEGEN_CLI_ROOT: CODEGEN_CLI_ROOT=/[path]/[to]/smithy-dafny/codegen/smithy-dafny-codegen-cli));
 	@: $(if ${DAFNY_VERSION},,$(error You must pass the value DAFNY_VERSION : DAFNY_VERSION=4.1));
 	cd $(CODEGEN_CLI_ROOT); \
 	./../gradlew run --args="\
 	--dafny-version $(DAFNY_VERSION) \
+	--library-root $(LIBRARY_ROOT) \
+	--patch-files-dir $(if $(DIR_STRUCTURE_V2),$(LIBRARY_ROOT)/codegen-patches/$(SERVICE),$(LIBRARY_ROOT)/codegen-patches) \
 	$(OUTPUT_DAFNY) \
 	$(INPUT_DAFNY) \
 	$(OUTPUT_JAVA) \
@@ -242,20 +247,29 @@ _polymorph:
 	--namespace $($(namespace_var)) \
 	$(AWS_SDK_CMD) \
 	$(OUTPUT_LOCAL_SERVICE_$(SERVICE)) \
+	$(POLYMORPH_OPTIONS) \
 	";
+
+_polymorph_dependencies:
+	@$(foreach dependency, \
+		$(PROJECT_DEPENDENCIES), \
+		$(MAKE) -C $(PROJECT_ROOT)/$(dependency) polymorph_$(POLYMORPH_LANGUAGE_TARGET); \
+	)
 
 # Generates all target runtime code for all namespaces in this project.
 .PHONY: polymorph_code_gen
+polymorph_code_gen: POLYMORPH_LANGUAGE_TARGET=code_gen
+polymorph_code_gen: _polymorph_dependencies
 polymorph_code_gen:
-	for service in $(PROJECT_SERVICES) ; do \
+	set -e; for service in $(PROJECT_SERVICES) ; do \
 		export service_deps_var=SERVICE_DEPS_$${service} ; \
 		export namespace_var=SERVICE_NAMESPACE_$${service} ; \
 		export SERVICE=$${service} ; \
-		$(MAKE) _polymorph_code_gen || exit 1; \
+		$(MAKE) _polymorph_code_gen ; \
 	done
 
 _polymorph_code_gen: OUTPUT_DAFNY=\
-    --output-dafny $(if $(DIR_STRUCTURE_V2), $(LIBRARY_ROOT)/dafny/$(SERVICE)/Model, $(LIBRARY_ROOT)/Model)
+	--output-dafny $(if $(DIR_STRUCTURE_V2), $(LIBRARY_ROOT)/dafny/$(SERVICE)/Model, $(LIBRARY_ROOT)/Model)
 _polymorph_code_gen: INPUT_DAFNY=\
 	--include-dafny $(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy
 _polymorph_code_gen: OUTPUT_DOTNET=\
@@ -263,30 +277,37 @@ _polymorph_code_gen: OUTPUT_DOTNET=\
 _polymorph_code_gen: OUTPUT_JAVA=--output-java $(LIBRARY_ROOT)/runtimes/java/src/main/smithy-generated
 _polymorph_code_gen: _polymorph
 
+check_polymorph_diff:
+	git diff --exit-code $(LIBRARY_ROOT) || (echo "ERROR: polymorph-generated code does not match the committed code - see above for diff. Either commit the changes or regenerate with 'POLYMORPH_OPTIONS=--update-patch-files'." && exit 1)
+
 # Generates dafny code for all namespaces in this project
 .PHONY: polymorph_dafny
+polymorph_dafny: POLYMORPH_LANGUAGE_TARGET=dafny
+polymorph_dafny: _polymorph_dependencies
 polymorph_dafny:
-	for service in $(PROJECT_SERVICES) ; do \
+	set -e; for service in $(PROJECT_SERVICES) ; do \
 		export service_deps_var=SERVICE_DEPS_$${service} ; \
 		export namespace_var=SERVICE_NAMESPACE_$${service} ; \
 		export SERVICE=$${service} ; \
-		$(MAKE) _polymorph_dafny || exit 1; \
+		$(MAKE) _polymorph_dafny ; \
 	done
 
 _polymorph_dafny: OUTPUT_DAFNY=\
-    --output-dafny $(if $(DIR_STRUCTURE_V2), $(LIBRARY_ROOT)/dafny/$(SERVICE)/Model, $(LIBRARY_ROOT)/Model)
+	--output-dafny $(if $(DIR_STRUCTURE_V2), $(LIBRARY_ROOT)/dafny/$(SERVICE)/Model, $(LIBRARY_ROOT)/Model)
 _polymorph_dafny: INPUT_DAFNY=\
 	--include-dafny $(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy
 _polymorph_dafny: _polymorph
 
 # Generates dotnet code for all namespaces in this project
 .PHONY: polymorph_dotnet
+polymorph_dotnet: POLYMORPH_LANGUAGE_TARGET=dotnet
+polymorph_dotnet: _polymorph_dependencies
 polymorph_dotnet:
-	for service in $(PROJECT_SERVICES) ; do \
+	set -e; for service in $(PROJECT_SERVICES) ; do \
 		export service_deps_var=SERVICE_DEPS_$${service} ; \
 		export namespace_var=SERVICE_NAMESPACE_$${service} ; \
 		export SERVICE=$${service} ; \
-		$(MAKE) _polymorph_dotnet || exit 1; \
+		$(MAKE) _polymorph_dotnet ; \
 	done
 
 _polymorph_dotnet: OUTPUT_DOTNET=\
@@ -295,12 +316,14 @@ _polymorph_dotnet: _polymorph
 
 # Generates java code for all namespaces in this project
 .PHONY: polymorph_java
+polymorph_java: POLYMORPH_LANGUAGE_TARGET=java
+polymorph_java: _polymorph_dependencies
 polymorph_java:
-	for service in $(PROJECT_SERVICES) ; do \
+	set -e; for service in $(PROJECT_SERVICES) ; do \
 		export service_deps_var=SERVICE_DEPS_$${service} ; \
 		export namespace_var=SERVICE_NAMESPACE_$${service} ; \
 		export SERVICE=$${service} ; \
-		$(MAKE) _polymorph_java || exit 1; \
+		$(MAKE) _polymorph_java ; \
 	done
 
 _polymorph_java: OUTPUT_JAVA=--output-java $(LIBRARY_ROOT)/runtimes/java/src/main/smithy-generated

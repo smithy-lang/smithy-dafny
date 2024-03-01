@@ -218,8 +218,8 @@ module {:options "-functionSyntax:4"} KeyDescription {
          // SYMMETRIC_DEFAULT is not supported because RSA is asymmetric only
        ]
 
-  type KeyDescriptionVersion = v: nat | KeyDescriptionVersion?(v)  witness 1
-  predicate KeyDescriptionVersion?(v: nat)
+  type KeyDescriptionVersion = v: int | KeyDescriptionVersion?(v)  witness 1
+  predicate KeyDescriptionVersion?(v: int)
   {
     || v == 1
     || v == 2

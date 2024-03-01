@@ -56,8 +56,20 @@ module {:options "-functionSyntax:4"} {:extern "HMAC"} HMAC {
       ensures this.GetKey() == old(this.GetKey())
       ensures this.HashSignature(old(this.GetInputSoFar()), s)
 
-    predicate {:axiom} HashSignature(message: seq<uint8>, s: seq<uint8>)
+    ghost predicate {:axiom} HashSignature(message: seq<uint8>, s: seq<uint8>)
 
+    // The next two functions are for the benefit of the extern implementation to call,
+    // avoiding direct references to generic datatype constructors
+    // since their calling pattern is different between different versions of Dafny
+    // (i.e. after 4.2, explicit type descriptors are required).
+
+    static function CreateHMacSuccess(hmac: HMac): Result<HMac, Types.Error> {
+      Success(hmac)
+    }
+
+    static function CreateHMacFailure(error: Types.Error): Result<HMac, Types.Error> {
+      Failure(error)
+    }
   }
 
   // HMAC Digest is safe to make a Dafny function
@@ -66,4 +78,16 @@ module {:options "-functionSyntax:4"} {:extern "HMAC"} HMAC {
     : ( output: Result<seq<uint8>, Types.Error> )
     ensures output.Success? ==> |output.value| == HashDigest.Length(input.digestAlgorithm)
 
+  // The next two functions are for the benefit of the extern implementation to call,
+  // avoiding direct references to generic datatype constructors
+  // since their calling pattern is different between different versions of Dafny
+  // (i.e. after 4.2, explicit type descriptors are required).
+
+  function CreateDigestSuccess(bytes: seq<uint8>): Result<seq<uint8>, Types.Error> {
+    Success(bytes)
+  }
+
+  function CreateDigestFailure(error: Types.Error): Result<seq<uint8>, Types.Error> {
+    Failure(error)
+  }
 }

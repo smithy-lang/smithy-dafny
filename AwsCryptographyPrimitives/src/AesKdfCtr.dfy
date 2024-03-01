@@ -59,4 +59,17 @@ module {:extern "AesKdfCtr"} AesKdfCtr {
     requires |nonce| == 16
     requires |key| == 32
     ensures res.Success? ==> |res.value| == length as nat
+
+  // The next two functions are for the benefit of the extern implementation to call,
+  // avoiding direct references to generic datatype constructors
+  // since their calling pattern is different between different versions of Dafny
+  // (i.e. after 4.2, explicit type descriptors are required).
+
+  function method CreateStreamSuccess(bytes: seq<uint8>): Result<seq<uint8>, Types.Error> {
+    Success(bytes)
+  }
+
+  function method CreateStreamFailure(error: Types.Error): Result<seq<uint8>, Types.Error> {
+    Failure(error)
+  }
 }

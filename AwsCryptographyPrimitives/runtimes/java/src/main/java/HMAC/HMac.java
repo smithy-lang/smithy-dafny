@@ -20,7 +20,7 @@ public class HMac extends _ExternBase_HMac {
   public static Result<HMAC.HMac, Error> Build(DigestAlgorithm digest) {
     try {
       final HMac output = new HMac(digest);
-      return Result.create_Success(output);
+      return CreateHMacSuccess(output);
     } catch (NoSuchAlgorithmException ex) {
       final Error err = ToDafny.Error(
         AwsCryptographicPrimitivesError
@@ -29,7 +29,7 @@ public class HMac extends _ExternBase_HMac {
           .cause(ex)
           .build()
       );
-      return Result.create_Failure(err);
+      return CreateHMacFailure(err);
     }
   }
 

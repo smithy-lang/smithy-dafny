@@ -10,7 +10,6 @@ import java.lang.Byte;
 import java.lang.IllegalArgumentException;
 import java.nio.ByteBuffer;
 import java.util.Objects;
-import software.amazon.cryptography.materialproviders.internaldafny.MaterialProvidersClient;
 import software.amazon.cryptography.materialproviders.internaldafny.__default;
 import software.amazon.cryptography.materialproviders.internaldafny.types.Error;
 import software.amazon.cryptography.materialproviders.internaldafny.types.IAwsCryptographicMaterialProvidersClient;
@@ -50,10 +49,8 @@ public class MaterialProviders {
     MaterialProvidersConfig input = builder.MaterialProvidersConfig();
     software.amazon.cryptography.materialproviders.internaldafny.types.MaterialProvidersConfig dafnyValue =
       ToDafny.MaterialProvidersConfig(input);
-    //BEGIN MANUAL FIX
     Result<IAwsCryptographicMaterialProvidersClient, Error> result =
       __default.MaterialProviders(dafnyValue);
-    //END MANUAL FIX
     if (result.is_Failure()) {
       throw ToNative.Error(result.dtor_error());
     }

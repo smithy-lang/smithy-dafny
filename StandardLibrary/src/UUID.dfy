@@ -21,4 +21,25 @@ module {:extern "UUID"} UUID {
   // because functions MUST NOT mutate the heap.
   method {:extern "GenerateUUID"} GenerateUUID() returns (res: Result<string, string>)
     ensures res.Success? ==> 0 < |res.value|
+
+  // The next four functions are for the benefit of the extern implementation to call,
+  // avoiding direct references to generic datatype constructors
+  // since their calling pattern is different between different versions of Dafny
+  // (i.e. after 4.2, explicit type descriptors are required).
+
+  function method CreateBytesSuccess(bytes: seq<uint8>): Result<seq<uint8>, string> {
+    Success(bytes)
+  }
+
+  function method CreateBytesFailure(error: string): Result<seq<uint8>, string> {
+    Failure(error)
+  }
+
+  function method CreateStringSuccess(s: string): Result<string, string> {
+    Success(s)
+  }
+
+  function method CreateStringFailure(error: string): Result<string, string> {
+    Failure(error)
+  }
 }

@@ -8,9 +8,16 @@ on:
         description: "The Dafny version to run"
         required: true
         type: string
+      regenerate-code:
+        description: "Regenerate code using smithy-dafny"
+        required: false
+        default: false
+        type: boolean
+
 jobs:
   verification:
     strategy:
+      fail-fast: false
       matrix:
         library:
           [
@@ -23,6 +30,9 @@ jobs:
           ]
         os: [macos-latest-large]
     runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
     env:
       DOTNET_CLI_TELEMETRY_OPTOUT: 1
       DOTNET_NOLOGO: 1
@@ -33,11 +43,12 @@ jobs:
 
       - uses: actions/checkout@v4
       # The specification submodule is private so we don't have access, but we don't need
-      # it to verify the Dafny code. Instead we manually pull the submodule we DO need.
+      # it to verify the Dafny code. Instead we manually pull the submodules we DO need.
       - run: git submodule update --init libraries
+      - run: git submodule update --init smithy-dafny
 
       - name: Setup Dafny
-        uses: dafny-lang/setup-dafny-action@v1.6.1
+        uses: dafny-lang/setup-dafny-action@v1.7.0
         with:
           dafny-version: ${{ inputs.dafny }}
 
@@ -48,8 +59,15 @@ jobs:
         with:
           dotnet-version: "6.0.x"
 
+      - name: Regenerate code using smithy-dafny if necessary
+        if: ${{ inputs.regenerate-code }}
+        uses: ./.github/actions/polymorph_codegen
+        with:
+          dafny: ${{ env.DAFNY_VERSION }}
+          library: ${{ matrix.library }}
+          diff-generated-code: false
+
       - name: Verify ${{ matrix.library }} Dafny code
-        shell: bash
         working-directory: ./${{ matrix.library }}
         run: |
           # This works because `node` is installed by default on GHA runners
@@ -58,7 +76,6 @@ jobs:
 
       - name: Check solver resource use
         if: success() || failure()
-        shell: bash
         working-directory: ./${{ matrix.library }}
         run: |
           make dafny-reportgenerator

@@ -6,6 +6,7 @@ import static Signature.ECDSA.TWO;
 import static java.math.BigInteger.ONE;
 import static java.math.BigInteger.ZERO;
 
+import Dafny.Aws.Cryptography.Primitives.Types.InternalResult;
 import Wrappers_Compile.Result;
 import dafny.Array;
 import dafny.DafnySequence;
@@ -107,7 +108,7 @@ class PublicKeyUtils {
     return paddedResult;
   }
 
-  static Result<ECPublicKey, Error> decodePublicKey(
+  static InternalResult<ECPublicKey, Error> decodePublicKey(
     SignatureAlgorithm algorithm,
     DafnySequence<? extends Byte> dtor_verificationKey
   ) {
@@ -132,7 +133,7 @@ class PublicKeyUtils {
           .getInstance(ECDSA.ELLIPTIC_CURVE_ALGORITHM)
           .generatePublic(publicKeySpec);
     } catch (ECDecodingException ex) {
-      return Result.create_Failure(
+      return InternalResult.failure(
         ToDafny.Error(
           AwsCryptographicPrimitivesError
             .builder()
@@ -151,13 +152,13 @@ class PublicKeyUtils {
       | InvalidKeySpecException
       | InvalidParameterSpecException e
     ) {
-      return Result.create_Failure(
+      return InternalResult.failure(
         ToDafny.Error(
           OpaqueError.builder().obj(e).message(e.getMessage()).cause(e).build()
         )
       );
     }
-    return Result.create_Success(publicKey);
+    return InternalResult.success(publicKey);
   }
 
   /**

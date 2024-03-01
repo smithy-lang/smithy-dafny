@@ -6,6 +6,7 @@ package software.amazon.cryptography.services.kms.internaldafny;
 import static software.amazon.smithy.dafny.conversion.ToDafny.Simple.CharacterSequence;
 import static software.amazon.smithy.dafny.conversion.ToNative.Simple.String;
 
+import StandardLibraryInterop_Compile.WrappersInterop;
 import Wrappers_Compile.Option;
 import Wrappers_Compile.Result;
 import dafny.DafnySequence;
@@ -40,12 +41,12 @@ public class __default
         )
         .build();
       final IKMSClient shim = new Shim(client, region);
-      return Result.create_Success(shim);
+      return CreateSuccessOfClient(shim);
     } catch (Exception e) {
       Error dafny_error = Error.create_KMSInternalException(
-        Option.create_Some(CharacterSequence(e.getMessage()))
+        WrappersInterop.CreateStringSome(CharacterSequence(e.getMessage()))
       );
-      return Result.create_Failure(dafny_error);
+      return CreateFailureOfError(dafny_error);
     }
   }
 
@@ -76,12 +77,12 @@ public class __default
         )
         .build();
       final IKMSClient shim = new Shim(client, regionString);
-      return Result.create_Success(shim);
+      return CreateSuccessOfClient(shim);
     } catch (Exception e) {
       Error dafny_error = Error.create_KMSInternalException(
-        Option.create_Some(CharacterSequence(e.getMessage()))
+        WrappersInterop.CreateStringSome(CharacterSequence(e.getMessage()))
       );
-      return Result.create_Failure(dafny_error);
+      return CreateFailureOfError(dafny_error);
     }
   }
 
@@ -98,14 +99,14 @@ public class __default
     // have no way to determine what region it is
     // configured with.
     if (shim.region() == null) {
-      return Option.create_None();
+      return WrappersInterop.CreateBooleanNone();
     }
 
     // Otherwise we kept record of the region
     // when we created the client.
     String shimRegion = shim.region();
     String regionStr = String(region);
-    return Option.create_Some(regionStr.equals(shimRegion));
+    return WrappersInterop.CreateBooleanSome(regionStr.equals(shimRegion));
   }
 
   private static String UserAgentSuffix() {

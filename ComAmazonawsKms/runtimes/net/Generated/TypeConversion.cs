@@ -3933,7 +3933,12 @@ namespace Com.Amazonaws.Kms
         }
         public static Dafny.ISequence<byte> ToDafny_N3_com__N9_amazonaws__N3_kms__S14_CiphertextType(System.IO.MemoryStream value)
         {
+            if (value.ToArray().Length == 0 && value.Length > 0)
+            {
+                throw new System.ArgumentException("Fatal Error: MemoryStream instance not backed by an array!");
+            }
             return Dafny.Sequence<byte>.FromArray(value.ToArray());
+
         }
         public static System.Collections.Generic.Dictionary<string, string> FromDafny_N3_com__N9_amazonaws__N3_kms__S21_EncryptionContextType(Dafny.IMap<Dafny.ISequence<char>, Dafny.ISequence<char>> value)
         {
@@ -3951,7 +3956,12 @@ namespace Com.Amazonaws.Kms
         }
         public static Dafny.ISequence<byte> ToDafny_N3_com__N9_amazonaws__N3_kms__S13_PlaintextType(System.IO.MemoryStream value)
         {
+            if (value.ToArray().Length == 0 && value.Length > 0)
+            {
+                throw new System.ArgumentException("Fatal Error: MemoryStream instance not backed by an array!");
+            }
             return Dafny.Sequence<byte>.FromArray(value.ToArray());
+
         }
         public static int FromDafny_N3_com__N9_amazonaws__N3_kms__S9_LimitType(int value)
         {
@@ -3983,7 +3993,12 @@ namespace Com.Amazonaws.Kms
         }
         public static Dafny.ISequence<byte> ToDafny_N3_com__N9_amazonaws__N3_kms__S13_PublicKeyType(System.IO.MemoryStream value)
         {
+            if (value.ToArray().Length == 0 && value.Length > 0)
+            {
+                throw new System.ArgumentException("Fatal Error: MemoryStream instance not backed by an array!");
+            }
             return Dafny.Sequence<byte>.FromArray(value.ToArray());
+
         }
         public static int FromDafny_N3_com__N9_amazonaws__N3_kms__S17_NumberOfBytesType(int value)
         {

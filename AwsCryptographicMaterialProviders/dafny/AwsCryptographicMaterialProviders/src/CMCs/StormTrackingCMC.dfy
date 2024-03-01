@@ -71,6 +71,18 @@ module {:options "/functionSyntax:4" } {:extern "software.amazon.cryptography.in
       modifies Modifies - {History}
       decreases Modifies - {History}
       ensures ValidState()
+  }
 
+  // The next two functions are for the benefit of the extern implementation to call,
+  // avoiding direct references to generic datatype constructors
+  // since their calling pattern is different between different versions of Dafny
+  // (i.e. after 4.2, explicit type descriptors are required).
+
+  function CreateGetCacheEntrySuccess(output: Types.GetCacheEntryOutput): Result<Types.GetCacheEntryOutput, Types.Error> {
+    Success(output)
+  }
+
+  function CreateGetCacheEntryFailure(error: Types.Error): Result<Types.GetCacheEntryOutput, Types.Error> {
+    Failure(error)
   }
 }

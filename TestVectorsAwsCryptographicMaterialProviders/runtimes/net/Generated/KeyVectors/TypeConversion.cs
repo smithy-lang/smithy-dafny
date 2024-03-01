@@ -409,7 +409,12 @@ namespace AWS.Cryptography.MaterialProvidersTestVectorKeys
     }
     public static Dafny.ISequence<byte> ToDafny_N6_smithy__N3_api__S4_Blob(System.IO.MemoryStream value)
     {
+      if (value.ToArray().Length == 0 && value.Length > 0)
+      {
+        throw new System.ArgumentException("Fatal Error: MemoryStream instance not backed by an array!");
+      }
       return Dafny.Sequence<byte>.FromArray(value.ToArray());
+
     }
     public static AWS.Cryptography.MaterialProvidersTestVectorKeys.KMSInfo FromDafny_N3_aws__N12_cryptography__N31_materialProvidersTestVectorKeys__S7_KMSInfo(software.amazon.cryptography.materialproviderstestvectorkeys.internaldafny.types._IKMSInfo value)
     {

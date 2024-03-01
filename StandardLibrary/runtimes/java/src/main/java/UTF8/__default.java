@@ -38,7 +38,7 @@ public class __default extends UTF8._ExternBase___default {
       // outBuffer's capacity can be much higher than the limit.
       // By taking just the limit, we ensure we do not include
       // any allocated but un-filled space.
-      return Result.create_Success(
+      return CreateEncodeSuccess(
         (DafnySequence<? extends Byte>) ByteSequence(
           outBuffer,
           0,
@@ -46,7 +46,7 @@ public class __default extends UTF8._ExternBase___default {
         )
       );
     } catch (CharacterCodingException ex) {
-      return Result.create_Failure(
+      return CreateEncodeFailure(
         (DafnySequence<? extends Character>) CharacterSequence(
           "Could not encode input to Dafny Bytes."
         )
@@ -68,13 +68,13 @@ public class __default extends UTF8._ExternBase___default {
     try {
       CharBuffer outBuffer = coder.decode(inBuffer);
       outBuffer.position(0);
-      return Result.create_Success(
+      return CreateDecodeSuccess(
         (DafnySequence<? extends Character>) CharacterSequence(
           outBuffer.toString()
         )
       );
     } catch (CharacterCodingException ex) {
-      return Result.create_Failure(
+      return CreateDecodeFailure(
         (DafnySequence<? extends Character>) CharacterSequence(
           "Could not encode input to Dafny Bytes."
         )

@@ -43,7 +43,7 @@ import software.amazon.cryptography.primitives.internaldafny.types.Error;
 import software.amazon.cryptography.primitives.internaldafny.types.RSAPaddingMode;
 import software.amazon.cryptography.primitives.model.OpaqueError;
 
-public class RSA {
+public class RSA extends _ExternBase___default {
 
   private static int RSA_KEY_LEN_MAX = 4096;
   private static int RSA_PUBLIC_EXPONENT = 65537;
@@ -88,9 +88,11 @@ public class RSA {
     try {
       byte[] pemBytes = (byte[]) Array.unwrap(dtor_publicKey.toArray());
       RSAKeyParameters keyParams = ParsePublicRsaPemBytes(pemBytes);
-      return Result.create_Success(keyParams.getModulus().bitLength());
+      return CreateGetRSAKeyModulusLengthExternSuccess(
+        keyParams.getModulus().bitLength()
+      );
     } catch (Exception e) {
-      return Result.create_Failure(
+      return CreateGetRSAKeyModulusLengthExternFailure(
         ToDafny.Error(
           OpaqueError.builder().obj(e).message(e.getMessage()).cause(e).build()
         )
@@ -199,13 +201,13 @@ public class RSA {
       AsymmetricBlockCipher engine = GetEngineForPadding(dtor_padding);
       engine.init(false, keyParameter);
 
-      return Result.create_Success(
+      return CreateBytesSuccess(
         DafnySequence.fromBytes(
           engine.processBlock(ciphertext, 0, ciphertext.length)
         )
       );
     } catch (Exception e) {
-      return Result.create_Failure(
+      return CreateBytesFailure(
         ToDafny.Error(
           OpaqueError.builder().obj(e).message(e.getMessage()).cause(e).build()
         )
@@ -225,7 +227,7 @@ public class RSA {
       AsymmetricBlockCipher engine = GetEngineForPadding(dtor_padding);
       engine.init(true, publicKeyParam);
 
-      return Result.create_Success(
+      return CreateBytesSuccess(
         DafnySequence.fromBytes(
           engine.processBlock(
             (byte[]) Array.unwrap(dtor_plaintext.toArray()),
@@ -235,7 +237,7 @@ public class RSA {
         )
       );
     } catch (Exception e) {
-      return Result.create_Failure(
+      return CreateBytesFailure(
         ToDafny.Error(
           OpaqueError.builder().obj(e).message(e.getMessage()).cause(e).build()
         )

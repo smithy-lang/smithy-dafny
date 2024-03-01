@@ -20,4 +20,17 @@ module {:extern "Time"} Time {
   // Returns a timestamp for the current time in ISO8601 format in UTC
   // to microsecond precision (e.g. “YYYY-MM-DDTHH:mm:ss.ssssssZ“)
   function method {:extern "GetCurrentTimeStamp"} GetCurrentTimeStamp(): (res: Result<string, string>)
+
+  // The next two functions are for the benefit of the extern implementation to call,
+  // avoiding direct references to generic datatype constructors
+  // since their calling pattern is different between different versions of Dafny
+  // (i.e. after 4.2, explicit type descriptors are required).
+
+  function method CreateGetCurrentTimeStampSuccess(value: string): Result<string, string> {
+    Success(value)
+  }
+
+  function method CreateGetCurrentTimeStampFailure(error: string): Result<string, string> {
+    Failure(error)
+  }
 }

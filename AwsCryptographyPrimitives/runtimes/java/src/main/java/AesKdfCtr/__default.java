@@ -11,7 +11,7 @@ import javax.crypto.spec.SecretKeySpec;
 import software.amazon.cryptography.primitives.ToDafny;
 import software.amazon.cryptography.primitives.model.OpaqueError;
 
-public class __default {
+public class __default extends _ExternBase___default {
 
   public static Wrappers_Compile.Result<
     dafny.DafnySequence<? extends Byte>,
@@ -30,9 +30,9 @@ public class __default {
       IvParameterSpec ivSpec = new IvParameterSpec(nonceBytes);
       cipher.init(Cipher.ENCRYPT_MODE, secretKey, ivSpec);
       byte[] ciphertext = cipher.doFinal(plaintext);
-      return Result.create_Success(DafnySequence.fromBytes(ciphertext));
+      return CreateStreamSuccess(DafnySequence.fromBytes(ciphertext));
     } catch (GeneralSecurityException e) {
-      return Result.create_Failure(
+      return CreateStreamFailure(
         ToDafny.Error(OpaqueError.builder().obj(e).build())
       );
     }

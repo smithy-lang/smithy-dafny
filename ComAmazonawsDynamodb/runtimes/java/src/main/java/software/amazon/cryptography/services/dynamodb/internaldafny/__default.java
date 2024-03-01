@@ -5,6 +5,7 @@ package software.amazon.cryptography.services.dynamodb.internaldafny;
 import static software.amazon.smithy.dafny.conversion.ToDafny.Simple.CharacterSequence;
 import static software.amazon.smithy.dafny.conversion.ToNative.Simple.String;
 
+import StandardLibraryInterop_Compile.WrappersInterop;
 import Wrappers_Compile.Option;
 import Wrappers_Compile.Result;
 import dafny.DafnySequence;
@@ -26,12 +27,12 @@ public class __default
         .build();
 
       IDynamoDBClient shim = new Shim(ddbClient, region.toString());
-      return Result.create_Success(shim);
+      return CreateSuccessOfClient(shim);
     } catch (Exception e) {
       Error dafny_error = Error.create_InternalServerError(
-        Option.create_Some(CharacterSequence(e.getMessage()))
+        WrappersInterop.CreateStringSome(CharacterSequence(e.getMessage()))
       );
-      return Result.create_Failure(dafny_error);
+      return CreateFailureOfError(dafny_error);
     }
   }
 
@@ -48,12 +49,12 @@ public class __default
         .build();
 
       IDynamoDBClient shim = new Shim(ddbClient, regionString);
-      return Result.create_Success(shim);
+      return CreateSuccessOfClient(shim);
     } catch (Exception e) {
       Error dafny_error = Error.create_InternalServerError(
-        Option.create_Some(CharacterSequence(e.getMessage()))
+        WrappersInterop.CreateStringSome(CharacterSequence(e.getMessage()))
       );
-      return Result.create_Failure(dafny_error);
+      return CreateFailureOfError(dafny_error);
     }
   }
 }

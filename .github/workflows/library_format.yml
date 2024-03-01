@@ -26,6 +26,9 @@ jobs:
           ]
         os: [ubuntu-latest]
     runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
     env:
       DOTNET_CLI_TELEMETRY_OPTOUT: 1
       DOTNET_NOLOGO: 1
@@ -40,12 +43,11 @@ jobs:
       - run: git submodule update --init libraries
 
       - name: Setup Dafny
-        uses: dafny-lang/setup-dafny-action@v1.6.1
+        uses: dafny-lang/setup-dafny-action@v1.7.0
         with:
           dafny-version: ${{ inputs.dafny }}
 
       - name: Check format of ${{ matrix.library }} Dafny code
-        shell: bash
         working-directory: ./${{ matrix.library }}
         run: |
           # This works because `node` is installed by default on GHA runners
@@ -53,7 +55,6 @@ jobs:
           make format_dafny-check
 
       - name: Check format of ${{ matrix.library }} Net code
-        shell: bash
         working-directory: ./${{ matrix.library }}
         run: |
           # This works because `node` is installed by default on GHA runners

@@ -4,6 +4,7 @@ import static Signature.ECDSA.SEC_P256;
 import static Signature.ECDSA.SEC_P384;
 import static Signature.ECDSA.SEC_PRIME_FIELD_PREFIX;
 
+import Dafny.Aws.Cryptography.Primitives.Types.InternalResult;
 import Wrappers_Compile.Result;
 import java.security.AlgorithmParameters;
 import java.security.NoSuchAlgorithmException;
@@ -47,7 +48,7 @@ public enum SignatureAlgorithm {
     this.expectedSignatureLength = expectedSignatureLength;
   }
 
-  static Result<SignatureAlgorithm, Error> signatureAlgorithm(
+  static InternalResult<SignatureAlgorithm, Error> signatureAlgorithm(
     ECDSASignatureAlgorithm dtor_signatureAlgorithm
   ) {
     final SignatureAlgorithm signatureAlgorithm;
@@ -63,7 +64,7 @@ public enum SignatureAlgorithm {
     } else if (dtor_signatureAlgorithm.is_ECDSA__P384()) {
       signatureAlgorithm = P384;
     } else {
-      return Result.create_Failure(
+      return InternalResult.failure(
         ToDafny.Error(
           AwsCryptographicPrimitivesError
             .builder()
@@ -77,7 +78,7 @@ public enum SignatureAlgorithm {
         )
       );
     }
-    return Result.create_Success(signatureAlgorithm);
+    return InternalResult.success(signatureAlgorithm);
   }
 
   static ECParameterSpec ecParameterSpec(SignatureAlgorithm algorithm)

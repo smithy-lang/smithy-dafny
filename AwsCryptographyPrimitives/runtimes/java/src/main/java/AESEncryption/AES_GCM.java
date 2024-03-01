@@ -16,7 +16,7 @@ import software.amazon.cryptography.primitives.internaldafny.types.AES__GCM;
 import software.amazon.cryptography.primitives.internaldafny.types.Error;
 import software.amazon.cryptography.primitives.model.OpaqueError;
 
-public class AES_GCM {
+public class AES_GCM extends _ExternBase___default {
 
   public static Result<AESEncryptOutput, Error> AESEncryptExtern(
     AES__GCM encAlg,
@@ -52,9 +52,9 @@ public class AES_GCM {
         DafnySequence.fromBytes(cipherOutput),
         encAlg
       );
-      return Result.create_Success(aesEncryptOutput);
+      return CreateAESEncryptExternSuccess(aesEncryptOutput);
     } catch (GeneralSecurityException e) {
-      return Result.create_Failure(
+      return CreateAESEncryptExternFailure(
         ToDafny.Error(OpaqueError.builder().obj(e).build())
       );
     }
@@ -109,9 +109,11 @@ public class AES_GCM {
         cipher_.updateAAD(aadBytes);
       }
       byte[] cipherOutput = cipher_.doFinal(ciphertextAndTag);
-      return Result.create_Success(DafnySequence.fromBytes(cipherOutput));
+      return CreateAESDecryptExternSuccess(
+        DafnySequence.fromBytes(cipherOutput)
+      );
     } catch (GeneralSecurityException e) {
-      return Result.create_Failure(
+      return CreateAESDecryptExternFailure(
         ToDafny.Error(OpaqueError.builder().obj(e).build())
       );
     }

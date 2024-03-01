@@ -4,3 +4,6 @@
 [submodule "aws-encryption-sdk-specification"]
 	path = aws-encryption-sdk-specification
 	url = https://github.com/awslabs/aws-encryption-sdk-specification.git
+[submodule "smithy-dafny"]
+	path = smithy-dafny
+	url = https://robin-aws@github.com/smithy-lang/smithy-dafny.git

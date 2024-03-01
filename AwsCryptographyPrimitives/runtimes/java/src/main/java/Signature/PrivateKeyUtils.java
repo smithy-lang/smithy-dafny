@@ -1,5 +1,6 @@
 package Signature;
 
+import Dafny.Aws.Cryptography.Primitives.Types.InternalResult;
 import Wrappers_Compile.Result;
 import dafny.Array;
 import dafny.DafnySequence;
@@ -33,7 +34,7 @@ class PrivateKeyUtils {
     return privateKey.getS().toByteArray();
   }
 
-  static Result<ECPrivateKey, Error> decodePrivateKey(
+  static InternalResult<ECPrivateKey, Error> decodePrivateKey(
     SignatureAlgorithm algorithm,
     DafnySequence<? extends Byte> dtor_signingKey
   ) {
@@ -64,12 +65,12 @@ class PrivateKeyUtils {
     ) {
       // The private key will always be generated in this runtime (Java);
       // these exceptions SHOULD BE impossible.
-      return Result.create_Failure(
+      return InternalResult.failure(
         ToDafny.Error(
           OpaqueError.builder().obj(e).message(e.getMessage()).cause(e).build()
         )
       );
     }
-    return Result.create_Success(privateKey);
+    return InternalResult.success(privateKey);
   }
 }

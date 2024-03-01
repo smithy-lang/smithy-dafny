@@ -2,6 +2,7 @@ package Signature;
 
 import static Signature.SignatureAlgorithm.signatureAlgorithm;
 
+import Dafny.Aws.Cryptography.Primitives.Types.InternalResult;
 import Digest_Compile.ExternDigest;
 import Random_Compile.ExternRandom;
 import Wrappers_Compile.Result;
@@ -25,7 +26,7 @@ import software.amazon.cryptography.primitives.internaldafny.types.Error;
 import software.amazon.cryptography.primitives.model.AwsCryptographicPrimitivesError;
 import software.amazon.cryptography.primitives.model.OpaqueError;
 
-public class ECDSA {
+public class ECDSA extends _ExternBase___default {
 
   static final String ELLIPTIC_CURVE_ALGORITHM = "EC";
   /* Standards for Efficient Cryptography over a prime field */
@@ -40,13 +41,13 @@ public class ECDSA {
   public static Result<SignatureKeyPair, Error> ExternKeyGen(
     ECDSASignatureAlgorithm dtor_signatureAlgorithm
   ) {
-    final Result<SignatureAlgorithm, Error> maybeSignatureAlgorithm =
+    final InternalResult<SignatureAlgorithm, Error> maybeSignatureAlgorithm =
       signatureAlgorithm(dtor_signatureAlgorithm);
-    if (maybeSignatureAlgorithm.is_Failure()) {
-      return Result.create_Failure(maybeSignatureAlgorithm.dtor_error());
+    if (maybeSignatureAlgorithm.isFailure()) {
+      return CreateExternKeyGenFailure(maybeSignatureAlgorithm.error());
     }
     final ECGenParameterSpec genParameterSpec = new ECGenParameterSpec(
-      maybeSignatureAlgorithm.dtor_value().curve
+      maybeSignatureAlgorithm.value().curve
     );
     final SecureRandom secureRandom = ExternRandom.getSecureRandom();
     final KeyPairGenerator keyGen;
@@ -54,7 +55,7 @@ public class ECDSA {
       keyGen = KeyPairGenerator.getInstance(ELLIPTIC_CURVE_ALGORITHM);
       keyGen.initialize(genParameterSpec, secureRandom);
     } catch (GeneralSecurityException e) {
-      return Result.create_Failure(
+      return CreateExternKeyGenFailure(
         ToDafny.Error(
           OpaqueError.builder().obj(e).message(e.getMessage()).cause(e).build()
         )
@@ -75,7 +76,7 @@ public class ECDSA {
       (ECPrivateKey) keyPair.getPrivate()
     );
 
-    return Result.create_Success(
+    return CreateExternKeyGenSuccess(
       SignatureKeyPair.create(
         DafnySequence.fromBytes(verificationKey),
         DafnySequence.fromBytes(signingKey)
@@ -88,18 +89,18 @@ public class ECDSA {
     DafnySequence<? extends Byte> dtor_signingKey,
     DafnySequence<? extends Byte> dtor_message
   ) {
-    final Result<SignatureAlgorithm, Error> maybeSignatureAlgorithm =
+    final InternalResult<SignatureAlgorithm, Error> maybeSignatureAlgorithm =
       signatureAlgorithm(dtor_signatureAlgorithm);
-    if (maybeSignatureAlgorithm.is_Failure()) {
-      return Result.create_Failure(maybeSignatureAlgorithm.dtor_error());
+    if (maybeSignatureAlgorithm.isFailure()) {
+      return CreateSignFailure(maybeSignatureAlgorithm.error());
     }
-    SignatureAlgorithm algorithm = maybeSignatureAlgorithm.dtor_value();
+    SignatureAlgorithm algorithm = maybeSignatureAlgorithm.value();
 
     final Signature signatureCipher;
     try {
       signatureCipher = Signature.getInstance(algorithm.rawSignatureAlgorithm);
     } catch (NoSuchAlgorithmException ex) {
-      return Result.create_Failure(
+      return CreateSignFailure(
         ToDafny.Error(
           AwsCryptographicPrimitivesError
             .builder()
@@ -115,27 +116,27 @@ public class ECDSA {
       );
     }
 
-    Result<ECPrivateKey, Error> maybePrivateKey =
+    InternalResult<ECPrivateKey, Error> maybePrivateKey =
       PrivateKeyUtils.decodePrivateKey(algorithm, dtor_signingKey);
-    if (maybePrivateKey.is_Failure()) {
-      return Result.create_Failure(maybePrivateKey.dtor_error());
+    if (maybePrivateKey.isFailure()) {
+      return CreateSignFailure(maybePrivateKey.error());
     }
-    final ECPrivateKey privateKey = maybePrivateKey.dtor_value();
+    final ECPrivateKey privateKey = maybePrivateKey.value();
 
-    final Result<byte[], Error> maybeDigest =
+    final InternalResult<byte[], Error> maybeDigest =
       ExternDigest.__default.internalDigest(
         algorithm.messageDigestAlgorithm,
         dtor_message
       );
-    if (maybeDigest.is_Failure()) {
-      return Result.create_Failure(maybeDigest.dtor_error());
+    if (maybeDigest.isFailure()) {
+      return CreateSignFailure(maybeDigest.error());
     }
-    final byte[] digest = maybeDigest.dtor_value();
+    final byte[] digest = maybeDigest.value();
 
     try {
       signatureCipher.initSign(privateKey, ExternRandom.getSecureRandom());
     } catch (InvalidKeyException ex) {
-      return Result.create_Failure(
+      return CreateSignFailure(
         ToDafny.Error(
           AwsCryptographicPrimitivesError
             .builder()
@@ -164,13 +165,13 @@ public class ECDSA {
           algorithm.expectedSignatureLength
         );
     } catch (SignatureException e) {
-      return Result.create_Failure(
+      return CreateSignFailure(
         ToDafny.Error(
           OpaqueError.builder().obj(e).message(e.getMessage()).cause(e).build()
         )
       );
     }
-    return Result.create_Success(DafnySequence.fromBytes(signatureBytes));
+    return CreateSignSuccess(DafnySequence.fromBytes(signatureBytes));
   }
 
   public static Result<Boolean, Error> Verify(
@@ -179,27 +180,25 @@ public class ECDSA {
     DafnySequence<? extends Byte> dtor_message,
     DafnySequence<? extends Byte> dtor_signature
   ) {
-    final Result<SignatureAlgorithm, Error> maybeSignatureAlgorithm =
+    final InternalResult<SignatureAlgorithm, Error> maybeSignatureAlgorithm =
       signatureAlgorithm(dtor_signatureAlgorithm);
-    if (maybeSignatureAlgorithm.is_Failure()) {
-      return Result.create_Failure(maybeSignatureAlgorithm.dtor_error());
+    if (maybeSignatureAlgorithm.isFailure()) {
+      return CreateVerifyFailure(maybeSignatureAlgorithm.error());
     }
-    final SignatureAlgorithm algorithm = maybeSignatureAlgorithm.dtor_value();
+    final SignatureAlgorithm algorithm = maybeSignatureAlgorithm.value();
 
-    Result<ECPublicKey, Error> maybePublicKey = PublicKeyUtils.decodePublicKey(
-      algorithm,
-      dtor_verificationKey
-    );
-    if (maybePublicKey.is_Failure()) {
-      return Result.create_Failure(maybePublicKey.dtor_error());
+    InternalResult<ECPublicKey, Error> maybePublicKey =
+      PublicKeyUtils.decodePublicKey(algorithm, dtor_verificationKey);
+    if (maybePublicKey.isFailure()) {
+      return CreateVerifyFailure(maybePublicKey.error());
     }
-    final ECPublicKey publicKey = maybePublicKey.dtor_value();
+    final ECPublicKey publicKey = maybePublicKey.value();
 
     final Signature signatureCipher;
     try {
       signatureCipher = Signature.getInstance(algorithm.rawSignatureAlgorithm);
     } catch (NoSuchAlgorithmException ex) {
-      return Result.create_Failure(
+      return CreateVerifyFailure(
         ToDafny.Error(
           AwsCryptographicPrimitivesError
             .builder()
@@ -218,7 +217,7 @@ public class ECDSA {
     try {
       signatureCipher.initVerify(publicKey);
     } catch (InvalidKeyException ex) {
-      return Result.create_Failure(
+      return CreateVerifyFailure(
         ToDafny.Error(
           AwsCryptographicPrimitivesError
             .builder()
@@ -237,15 +236,15 @@ public class ECDSA {
       );
     }
 
-    final Result<byte[], Error> maybeDigest =
+    final InternalResult<byte[], Error> maybeDigest =
       ExternDigest.__default.internalDigest(
         algorithm.messageDigestAlgorithm,
         dtor_message
       );
-    if (maybeDigest.is_Failure()) {
-      return Result.create_Failure(maybeDigest.dtor_error());
+    if (maybeDigest.isFailure()) {
+      return CreateVerifyFailure(maybeDigest.error());
     }
-    final byte[] digest = maybeDigest.dtor_value();
+    final byte[] digest = maybeDigest.value();
 
     try {
       signatureCipher.update(digest);
@@ -274,7 +273,7 @@ public class ECDSA {
       );
       success = signatureCipher.verify(signatureAsBytes);
     } catch (SignatureException ex) {
-      return Result.create_Failure(
+      return CreateVerifyFailure(
         ToDafny.Error(
           AwsCryptographicPrimitivesError
             .builder()
@@ -293,6 +292,6 @@ public class ECDSA {
       );
     }
 
-    return Result.create_Success(success);
+    return CreateVerifySuccess(success);
   }
 }

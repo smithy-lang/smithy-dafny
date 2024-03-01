@@ -10,6 +10,11 @@ on:
         description: "The Dafny version to use"
         required: true
         type: string
+      regenerate-code:
+        description: "Regenerate code using smithy-dafny"
+        required: false
+        default: true
+        type: boolean
 
 jobs:
   manual-ci-format:
@@ -20,11 +25,14 @@ jobs:
     uses: ./.github/workflows/library_dafny_verification.yml
     with:
       dafny: ${{ inputs.dafny }}
+      regenerate-code: ${{ inputs.regenerate-code }}
   manual-ci-java:
     uses: ./.github/workflows/library_java_tests.yml
     with:
       dafny: ${{ inputs.dafny }}
+      regenerate-code: ${{ inputs.regenerate-code }}
   manual-ci-net:
     uses: ./.github/workflows/library_net_tests.yml
     with:
       dafny: ${{ inputs.dafny }}
+      regenerate-code: ${{ inputs.regenerate-code }}

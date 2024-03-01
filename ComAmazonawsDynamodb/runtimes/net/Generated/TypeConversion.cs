@@ -5274,7 +5274,12 @@ namespace Com.Amazonaws.Dynamodb
         }
         public static Dafny.ISequence<byte> ToDafny_N3_com__N9_amazonaws__N8_dynamodb__S20_BinaryAttributeValue(System.IO.MemoryStream value)
         {
+            if (value.ToArray().Length == 0 && value.Length > 0)
+            {
+                throw new System.ArgumentException("Fatal Error: MemoryStream instance not backed by an array!");
+            }
             return Dafny.Sequence<byte>.FromArray(value.ToArray());
+
         }
         public static System.Collections.Generic.List<string> FromDafny_N3_com__N9_amazonaws__N8_dynamodb__S23_StringSetAttributeValue(Dafny.ISequence<Dafny.ISequence<char>> value)
         {

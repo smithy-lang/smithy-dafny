@@ -12,6 +12,11 @@ jobs:
     uses: ./.github/workflows/library_format.yml
     with:
       dafny: ${{needs.getVersion.outputs.version}}
+  pr-ci-codegen:
+    needs: getVersion
+    uses: ./.github/workflows/library_codegen.yml
+    with:
+      dafny: ${{needs.getVersion.outputs.version}}
   pr-ci-verification:
     needs: getVersion
     uses: ./.github/workflows/library_dafny_verification.yml
