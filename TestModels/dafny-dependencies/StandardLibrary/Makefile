@@ -23,7 +23,7 @@ polymorph_dafny :
 	@: $(if ${CODEGEN_CLI_ROOT},,$(error You must pass the path CODEGEN_CLI_ROOT: CODEGEN_CLI_ROOT=/path/to/smithy-dafny/codegen/smithy-dafny-codegen-cli));
 	cd $(CODEGEN_CLI_ROOT); \
 	$(GRADLEW) run --args="\
-	$(DAFNY_VERSION_OPTION) \
+	--dafny-version $(DAFNY_VERSION) \
 	--library-root $(LIBRARY_ROOT) \
 	--properties-file $(PROJECT_ROOT)/$(STD_LIBRARY)/project.properties \
 	--model $(PROJECT_ROOT)/$(STD_LIBRARY)/Model \

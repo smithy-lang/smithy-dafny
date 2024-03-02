@@ -250,13 +250,12 @@ transpile_dependencies:
 # StandardLibrary is filtered out from dependent-model patsubst list;
 #   Its model is contained in $(LIBRARY_ROOT)/model, not $(LIBRARY_ROOT)/../StandardLibrary/Model.
 _polymorph:
-	@: $(if ${CODEGEN_CLI_ROOT},,$(error You must pass the path CODEGEN_CLI_ROOT: CODEGEN_CLI_ROOT=/path/to/smithy-dafny/codegen/smithy-dafny-codegen-cli));
 	cd $(CODEGEN_CLI_ROOT); \
 	$(GRADLEW) run --args="\
 	--dafny-version $(DAFNY_VERSION) \
 	--library-root $(LIBRARY_ROOT) \
 	--patch-files-dir $(if $(DIR_STRUCTURE_V2),$(LIBRARY_ROOT)/codegen-patches/$(SERVICE),$(LIBRARY_ROOT)/codegen-patches) \
-	--properties-file $(LIBRARY_ROOT)/project.properties \	
+	--properties-file $(LIBRARY_ROOT)/project.properties \
 	$(INPUT_DAFNY) \
 	$(OUTPUT_DAFNY) \
 	$(OUTPUT_JAVA) \
@@ -267,13 +266,14 @@ _polymorph:
 	$(patsubst %, --dependent-model $(PROJECT_ROOT)/%/Model, $($(service_deps_var))) \
 	--namespace $($(namespace_var)) \
 	$(AWS_SDK_CMD) \
-	$(POLYMORPH_OPTIONS)";
+	$(POLYMORPH_OPTIONS) \
+	";
 
 _polymorph_wrapped:
 	@: $(if ${CODEGEN_CLI_ROOT},,$(error You must pass the path CODEGEN_CLI_ROOT: CODEGEN_CLI_ROOT=/path/to/smithy-dafny/codegen/smithy-dafny-codegen-cli));
 	cd $(CODEGEN_CLI_ROOT); \
 	$(GRADLEW) run --args="\
-	$(DAFNY_VERSION_OPTION) \
+	--dafny-version $(DAFNY_VERSION) \
 	--library-root $(LIBRARY_ROOT) \
 	--properties-file $(LIBRARY_ROOT)/project.properties \
 	$(OUTPUT_DAFNY_WRAPPED) \
@@ -339,9 +339,9 @@ polymorph_dafny:
 	done
 
 _polymorph_dafny: OUTPUT_DAFNY=\
-    --output-dafny $(if $(DIR_STRUCTURE_V2), $(LIBRARY_ROOT)/dafny/$(SERVICE)/Model, $(LIBRARY_ROOT)/Model)
+		--output-dafny $(if $(DIR_STRUCTURE_V2), $(LIBRARY_ROOT)/dafny/$(SERVICE)/Model, $(LIBRARY_ROOT)/Model)
 _polymorph_dafny: INPUT_DAFNY=\
-		 --include-dafny $(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy
+		--include-dafny $(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy
 _polymorph_dafny: _polymorph
 _polymorph_dafny: OUTPUT_DAFNY_WRAPPED=\
     --output-dafny $(if $(DIR_STRUCTURE_V2), $(LIBRARY_ROOT)/dafny/$(SERVICE)/Model, $(LIBRARY_ROOT)/Model) \
