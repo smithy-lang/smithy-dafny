@@ -27,10 +27,7 @@
 # STD_LIBRARY -- path from this file to the StandardLibrary Dafny project.
 # SMITHY_DEPS -- path from this file to smithy dependencies, such as custom traits.
 
-# This evaluates to the local path _of this file_.
-# This means that these are the project roots
-# that are shared by all libraries in this repo.
-# TODO: This needs to be set per consumer instead now
+MAX_RESOURCE_COUNT := 10000000
 
 # This evaluates to the path of the current working directory.
 # i.e. The specific library under consideration.
@@ -50,8 +47,6 @@ SMITHY_MODEL_ROOT := $(LIBRARY_ROOT)/Model
 
 CODEGEN_CLI_ROOT := $(SMITHY_DAFNY_ROOT)/codegen/smithy-dafny-codegen-cli
 GRADLEW := $(SMITHY_DAFNY_ROOT)/codegen/gradlew
-
-
 
 ########################## Dafny targets
 
