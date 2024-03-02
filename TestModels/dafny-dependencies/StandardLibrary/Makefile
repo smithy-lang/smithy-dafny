@@ -31,8 +31,8 @@ polymorph_dafny :
 	--dependent-model $(PROJECT_ROOT)/$(STD_LIBRARY)/../Model \
 	";
 
-polymorph_net :
-	echo "Skipping polymorph_net for StandardLibrary"
+polymorph_dotnet :
+	echo "Skipping polymorph_dotnet for StandardLibrary"
 
 polymorph_java :
 	echo "Skipping polymorph_java for StandardLibrary"

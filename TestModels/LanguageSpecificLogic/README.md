@@ -37,7 +37,7 @@ Developers can also add language-specific tests inside the replacing module.
 ### .NET
 1. Generate the Wrappers using `polymorph`
 ```
-make polymorph_dafny polymorph_net
+make polymorph_dafny polymorph_dotnet
 ```
 
 2. Transpile the tests (and implementation) to the target runtime.
