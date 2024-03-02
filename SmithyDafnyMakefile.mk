@@ -182,7 +182,7 @@ transpile_implementation:
         -functionSyntax:3 \
         -useRuntimeLib \
         -out $(OUT) \
-        -library:$(PROJECT_ROOT)/dafny-dependencies/StandardLibrary/src/Index.dfy \
+        -library:$(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy \
         $(TRANSPILE_DEPENDENCIES)
 
 # If the project under transpilation uses `replaceable` modules,
@@ -222,7 +222,7 @@ transpile_test:
 		-functionSyntax:3 \
 		-useRuntimeLib \
 		-out $(OUT) \
-		-library:$(PROJECT_ROOT)/dafny-dependencies/StandardLibrary/src/Index.dfy \
+		-library:$(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy \
 		$(TRANSPILE_DEPENDENCIES) \
 
 transpile_dependencies:
