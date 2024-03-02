@@ -3,7 +3,7 @@
 
 CORES=2
 
-include ../../SharedMakefile.mk
+include ../../../SharedMakefile.mk
 
 NAMESPACE=simple.types.smithyEnum
 
@@ -18,4 +18,4 @@ SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 
 # This project has no dependencies 
 # DEPENDENT-MODELS:= 
-# LIBRARIES :=
+

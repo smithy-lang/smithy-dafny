@@ -3,7 +3,7 @@
 
 CORES=2
 
-include ../SharedMakefile.mk
+include ../../SharedMakefile.mk
 
 PROJECT_SERVICES := \
 	SimpleAggregateReferences
@@ -14,7 +14,7 @@ SERVICE_DEPS_SimpleAggregateReferences :=
 
 SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 
-OUTPUT_DAFNY=--output-dafny $(LIBRARY_ROOT)/Model --include-dafny $(STANDARD_LIBRARY_PATH)/src/Index.dfy
+OUTPUT_DAFNY=--output-dafny $(LIBRARY_ROOT)/Model --include-dafny $(STD_LIBRARY)/src/Index.dfy
 
 # Override wrapped target, since wrapping isn't supported for this module
 _polymorph_wrapped :
@@ -22,4 +22,4 @@ _polymorph_wrapped :
 
 # This project has no dependencies 
 # DEPENDENT-MODELS:= 
-# LIBRARIES :=
+

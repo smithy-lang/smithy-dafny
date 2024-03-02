@@ -3,10 +3,9 @@
 
 CORES=2
 
-include ../../SharedMakefile.mk
+include ../../../SharedMakefile.mk
 
 MAX_RESOURCE_COUNT=500000000
-LIBRARIES :=
 
 # define standard colors
 ifneq (,$(findstring xterm,${TERM}))
@@ -26,10 +25,10 @@ polymorph_dafny :
 	$(GRADLEW) run --args="\
 	$(DAFNY_VERSION_OPTION) \
 	--library-root $(LIBRARY_ROOT) \
-	--properties-file $(STANDARD_LIBRARY_PATH)/project.properties \
-	--model $(STANDARD_LIBRARY_PATH)/Model \
+	--properties-file $(STD_LIBRARY)/project.properties \
+	--model $(STD_LIBRARY)/Model \
 	--namespace aws.polymorph \
-	--dependent-model $(STANDARD_LIBRARY_PATH)/../Model \
+	--dependent-model $(STD_LIBRARY)/../Model \
 	";
 
 polymorph_net :

@@ -3,7 +3,7 @@
 
 CORES=2
 
-include ../SharedMakefile.mk
+include ../../SharedMakefile.mk
 
 PROJECT_SERVICES := \
 	SimpleErrors

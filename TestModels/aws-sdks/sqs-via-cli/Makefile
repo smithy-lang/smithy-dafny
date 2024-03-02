@@ -3,7 +3,7 @@
 
 CORES=2
 
-include ../../SharedMakefile.mk
+include ../../../SharedMakefile.mk
 
 NAMESPACE=com.amazonaws.sqs
 
@@ -20,7 +20,7 @@ AWS_SDK_CMD=--aws-sdk
 
 # This project has no dependencies
 # DEPENDENT-MODELS:=
-# LIBRARIES :=
+
 
 # There is no wrapped target for aws-sdk types
 _polymorph_wrapped: ;

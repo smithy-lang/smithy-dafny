@@ -3,7 +3,7 @@
 
 CORES=2
 
-include ../SharedMakefile.mk
+include ../../SharedMakefile.mk
 
 PROJECT_SERVICES := \
 	LanguageSpecificLogic
@@ -20,4 +20,4 @@ NET_TEST_INDEX=test/replaces/net
 
 # This project has no dependencies 
 # DEPENDENT-MODELS:= 
-# LIBRARIES :=
+

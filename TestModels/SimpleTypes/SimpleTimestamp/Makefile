@@ -3,10 +3,10 @@
 
 CORES=2
 
-include ../../SharedMakefile.mk
+include ../../../SharedMakefile.mk
 
 NAMESPACE=simple.types.timestamp
 
 # This project has no dependencies 
 # DEPENDENT-MODELS:= 
-# LIBRARIES :=
+
