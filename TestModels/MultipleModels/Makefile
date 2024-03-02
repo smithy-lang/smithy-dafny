@@ -3,7 +3,7 @@
 
 CORES=2
 
-include ../../SharedMakefile.mk
+include ../SharedMakefile.mk
 
 # DIR_STRUCTURE_V2 is used to signal multiple subprojects/models in one project
 DIR_STRUCTURE_V2=V2

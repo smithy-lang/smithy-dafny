@@ -3,7 +3,7 @@
 
 CORES=2
 
-include ../../../SharedMakefile.mk
+include ../../SharedMakefile.mk
 
 MAX_RESOURCE_COUNT=500000000
 
@@ -25,10 +25,10 @@ polymorph_dafny :
 	$(GRADLEW) run --args="\
 	$(DAFNY_VERSION_OPTION) \
 	--library-root $(LIBRARY_ROOT) \
-	--properties-file $(STD_LIBRARY)/project.properties \
-	--model $(STD_LIBRARY)/Model \
+	--properties-file $(PROJECT_ROOT)/$(STD_LIBRARY)/project.properties \
+	--model $(PROJECT_ROOT)/$(STD_LIBRARY)/Model \
 	--namespace aws.polymorph \
-	--dependent-model $(STD_LIBRARY)/../Model \
+	--dependent-model $(PROJECT_ROOT)/$(STD_LIBRARY)/../Model \
 	";
 
 polymorph_net :

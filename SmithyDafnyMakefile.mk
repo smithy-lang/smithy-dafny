@@ -30,7 +30,8 @@
 # This evaluates to the local path _of this file_.
 # This means that these are the project roots
 # that are shared by all libraries in this repo.
-PROJECT_ROOT := $(abspath $(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
+# TODO: This needs to be set per consumer instead now
+
 # This evaluates to the path of the current working directory.
 # i.e. The specific library under consideration.
 LIBRARY_ROOT := $(PWD)
@@ -47,16 +48,10 @@ LIBRARY_ROOT := $(PWD)
 # but still build everything in their local library directory.
 SMITHY_MODEL_ROOT := $(LIBRARY_ROOT)/Model
 
-# TODO: Move to smithy-dafny shared makefile
-STD_LIBRARY := $(PROJECT_ROOT)/dafny-dependencies/StandardLibrary
-# TODO: Move to smithy-dafny shared makefile
-CODEGEN_CLI_ROOT := $(PROJECT_ROOT)/../codegen/smithy-dafny-codegen-cli
-# TODO: Move to smithy-dafny shared makefile OR use runtimes/java/gradlew as appropriate
-GRADLEW := $(PROJECT_ROOT)/../codegen/gradlew
-# TODO: Move to smithy-dafny shared makefile
-# The path to the smithy-dafny code generation CLI.
-# Defaults to the copy in the smithy-dafny submodule but can be overridden.
-CODEGEN_CLI_ROOT := $(PROJECT_ROOT)/smithy-dafny/codegen/smithy-dafny-codegen-cli
+CODEGEN_CLI_ROOT := $(SMITHY_DAFNY_ROOT)/codegen/smithy-dafny-codegen-cli
+GRADLEW := $(SMITHY_DAFNY_ROOT)/codegen/gradlew
+
+
 
 ########################## Dafny targets
 
@@ -140,7 +135,7 @@ format-check:
 dafny-reportgenerator:
 	dafny-reportgenerator \
 		summarize-csv-results \
-		--max-resource-count 10000000 \
+		--max-resource-count $(MAX_RESOURCE_COUNT) \
 		TestResults/*.csv
 
 clean-dafny-report:
@@ -236,7 +231,7 @@ transpile_test:
 		$(TRANSPILE_DEPENDENCIES) \
 
 transpile_dependencies:
-	$(MAKE) -C $(STD_LIBRARY) transpile_implementation_$(LANG)
+	$(MAKE) -C $(PROJECT_ROOT)/$(STD_LIBRARY) transpile_implementation_$(LANG)
 	@$(foreach dependency, \
 		$(PROJECT_DEPENDENCIES), \
 		$(MAKE) -C $(PROJECT_ROOT)/$(dependency) transpile_implementation_$(LANG); \
@@ -320,7 +315,7 @@ _polymorph_code_gen: OUTPUT_JAVA=--output-java $(LIBRARY_ROOT)/runtimes/java/src
 _polymorph_code_gen: _polymorph
 _polymorph_code_gen: OUTPUT_DAFNY_WRAPPED=\
     --output-dafny $(if $(DIR_STRUCTURE_V2), $(LIBRARY_ROOT)/dafny/$(SERVICE)/Model, $(LIBRARY_ROOT)/Model) \
-	--include-dafny $(STD_LIBRARY)/src/Index.dfy
+		--include-dafny $(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy
 _polymorph_code_gen: OUTPUT_DOTNET_WRAPPED=\
     $(if $(DIR_STRUCTURE_V2), --output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/Wrapped/$(SERVICE)/, --output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/Wrapped)
 _polymorph_code_gen: OUTPUT_LOCAL_SERVICE=--local-service-test
@@ -335,7 +330,7 @@ check_polymorph_diff:
 polymorph_dafny: POLYMORPH_LANGUAGE_TARGET=dafny
 polymorph_dafny: _polymorph_dependencies
 polymorph_dafny:
-	$(MAKE) -C $(STD_LIBRARY) polymorph_dafny
+	$(MAKE) -C $(PROJECT_ROOT)/$(STD_LIBRARY) polymorph_dafny
 	set -e; for service in $(PROJECT_SERVICES) ; do \
 		export service_deps_var=SERVICE_DEPS_$${service} ; \
 		export namespace_var=SERVICE_NAMESPACE_$${service} ; \
@@ -350,7 +345,7 @@ _polymorph_dafny: INPUT_DAFNY=\
 _polymorph_dafny: _polymorph
 _polymorph_dafny: OUTPUT_DAFNY_WRAPPED=\
     --output-dafny $(if $(DIR_STRUCTURE_V2), $(LIBRARY_ROOT)/dafny/$(SERVICE)/Model, $(LIBRARY_ROOT)/Model) \
-    --include-dafny $(STD_LIBRARY)/src/Index.dfy
+    --include-dafny $(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy
 _polymorph_dafny: OUTPUT_LOCAL_SERVICE=--local-service-test
 _polymorph_dafny: _polymorph_wrapped
 
@@ -471,7 +466,7 @@ transpile_dependencies_java: LANG=java
 transpile_dependencies_java: transpile_dependencies
 
 mvn_local_deploy_dependencies:
-	$(MAKE) -C $(STD_LIBRARY) mvn_local_deploy
+	$(MAKE) -C $(PROJECT_ROOT)/$(STD_LIBRARY) mvn_local_deploy
 	$(patsubst %, $(MAKE) -C $(PROJECT_ROOT)/% mvn_local_deploy;, $(PROJECT_DEPENDENCIES))
 
 # The Java MUST all exist already through the transpile step.
