@@ -260,6 +260,7 @@ _polymorph:
 	--dependent-model $(PROJECT_ROOT)/$(SMITHY_DEPS) \
 	$(patsubst %, --dependent-model $(PROJECT_ROOT)/%/Model, $($(service_deps_var))) \
 	--namespace $($(namespace_var)) \
+	$(OUTPUT_LOCAL_SERVICE) \
 	$(AWS_SDK_CMD) \
 	$(POLYMORPH_OPTIONS) \
 	";
@@ -278,7 +279,7 @@ _polymorph_wrapped:
 	--dependent-model $(PROJECT_ROOT)/$(SMITHY_DEPS) \
 	$(patsubst %, --dependent-model $(PROJECT_ROOT)/%/Model, $($(service_deps_var))) \
 	--namespace $($(namespace_var)) \
-	$(OUTPUT_LOCAL_SERVICE) \
+	--local-service-test \
 	$(AWS_SDK_CMD) \
 	$(POLYMORPH_OPTIONS)";
 
@@ -308,14 +309,6 @@ _polymorph_code_gen: OUTPUT_DOTNET=\
     $(if $(DIR_STRUCTURE_V2), --output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/$(SERVICE)/, --output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/)
 _polymorph_code_gen: OUTPUT_JAVA=--output-java $(LIBRARY_ROOT)/runtimes/java/src/main/smithy-generated
 _polymorph_code_gen: _polymorph
-_polymorph_code_gen: OUTPUT_DAFNY_WRAPPED=\
-    --output-dafny $(if $(DIR_STRUCTURE_V2), $(LIBRARY_ROOT)/dafny/$(SERVICE)/Model, $(LIBRARY_ROOT)/Model) \
-		--include-dafny $(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy
-_polymorph_code_gen: OUTPUT_DOTNET_WRAPPED=\
-    $(if $(DIR_STRUCTURE_V2), --output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/Wrapped/$(SERVICE)/, --output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/Wrapped)
-_polymorph_code_gen: OUTPUT_LOCAL_SERVICE=--local-service-test
-_polymorph_code_gen: _polymorph_wrapped
-
 
 check_polymorph_diff:
 	git diff --exit-code $(LIBRARY_ROOT) || (echo "ERROR: polymorph-generated code does not match the committed code - see above for diff. Either commit the changes or regenerate with 'POLYMORPH_OPTIONS=--update-patch-files'." && exit 1)
@@ -338,11 +331,6 @@ _polymorph_dafny: OUTPUT_DAFNY=\
 _polymorph_dafny: INPUT_DAFNY=\
 		--include-dafny $(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy
 _polymorph_dafny: _polymorph
-_polymorph_dafny: OUTPUT_DAFNY_WRAPPED=\
-    --output-dafny $(if $(DIR_STRUCTURE_V2), $(LIBRARY_ROOT)/dafny/$(SERVICE)/Model, $(LIBRARY_ROOT)/Model) \
-    --include-dafny $(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy
-_polymorph_dafny: OUTPUT_LOCAL_SERVICE=--local-service-test
-_polymorph_dafny: _polymorph_wrapped
 
 # Generates dotnet code for all namespaces in this project
 .PHONY: polymorph_dotnet
@@ -359,10 +347,6 @@ polymorph_dotnet:
 _polymorph_dotnet: OUTPUT_DOTNET=\
     $(if $(DIR_STRUCTURE_V2), --output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/$(SERVICE)/, --output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/)
 _polymorph_dotnet: _polymorph
-_polymorph_dotnet: OUTPUT_DOTNET_WRAPPED=\
-    $(if $(DIR_STRUCTURE_V2), --output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/Wrapped/$(SERVICE)/, --output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/Wrapped)
-_polymorph_dotnet: OUTPUT_LOCAL_SERVICE=--local-service-test
-_polymorph_dotnet: _polymorph_wrapped
 
 # Generates java code for all namespaces in this project
 .PHONY: polymorph_java
@@ -378,9 +362,6 @@ polymorph_java:
 
 _polymorph_java: OUTPUT_JAVA=--output-java $(LIBRARY_ROOT)/runtimes/java/src/main/smithy-generated
 _polymorph_java: _polymorph
-_polymorph_java: OUTPUT_JAVA_WRAPPED=--output-java $(LIBRARY_ROOT)/runtimes/java/src/main/smithy-generated
-_polymorph_java: OUTPUT_LOCAL_SERVICE=--local-service-test
-_polymorph_java: _polymorph_wrapped
 
 # Dependency for formatting generating Java code
 setup_prettier:
