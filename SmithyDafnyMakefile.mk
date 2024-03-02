@@ -318,7 +318,6 @@ check_polymorph_diff:
 polymorph_dafny: POLYMORPH_LANGUAGE_TARGET=dafny
 polymorph_dafny: _polymorph_dependencies
 polymorph_dafny:
-	$(MAKE) -C $(PROJECT_ROOT)/$(STD_LIBRARY) polymorph_dafny
 	set -e; for service in $(PROJECT_SERVICES) ; do \
 		export service_deps_var=SERVICE_DEPS_$${service} ; \
 		export namespace_var=SERVICE_NAMESPACE_$${service} ; \

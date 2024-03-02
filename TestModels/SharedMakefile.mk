@@ -9,7 +9,7 @@ PROJECT_ROOT := $(abspath $(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
 SMITHY_DAFNY_ROOT := $(PROJECT_ROOT)/..
 STD_LIBRARY := dafny-dependencies/StandardLibrary
 
-include $(PROJECT_ROOT)/../SmithyDafnyMakefile.mk
+include $(SMITHY_DAFNY_ROOT)/SmithyDafnyMakefile.mk
 
 # Override all the _polymorph_<LANG> targets to also build local service tests with _polymorph_wrapped,
 # since all TestModels need to do that in place rather than in separate libraries.
@@ -28,6 +28,19 @@ _polymorph_code_gen: OUTPUT_DAFNY_WRAPPED=\
 _polymorph_code_gen: OUTPUT_DOTNET_WRAPPED=\
     $(if $(DIR_STRUCTURE_V2), --output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/Wrapped/$(SERVICE)/, --output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/Wrapped)
 _polymorph_code_gen: _polymorph_wrapped
+
+# Override this to make polymorph_dafny on the standard library,
+# which generated the project.properties file.
+polymorph_dafny: POLYMORPH_LANGUAGE_TARGET=dafny
+polymorph_dafny: _polymorph_dependencies
+polymorph_dafny:
+	$(MAKE) -C $(PROJECT_ROOT)/$(STD_LIBRARY) polymorph_dafny
+	set -e; for service in $(PROJECT_SERVICES) ; do \
+		export service_deps_var=SERVICE_DEPS_$${service} ; \
+		export namespace_var=SERVICE_NAMESPACE_$${service} ; \
+		export SERVICE=$${service} ; \
+		$(MAKE) _polymorph_dafny ; \
+	done
 
 _polymorph_dafny: OUTPUT_DAFNY=\
 		--output-dafny $(if $(DIR_STRUCTURE_V2), $(LIBRARY_ROOT)/dafny/$(SERVICE)/Model, $(LIBRARY_ROOT)/Model)
