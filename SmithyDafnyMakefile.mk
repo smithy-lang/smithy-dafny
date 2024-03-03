@@ -225,12 +225,11 @@ transpile_test:
 		-library:$(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy \
 		$(TRANSPILE_DEPENDENCIES) \
 
+# If we are not the StandardLibrary, transpile the StandardLibrary.
+# Transpile all other dependencies
 transpile_dependencies:
-	$(MAKE) -C $(PROJECT_ROOT)/$(STD_LIBRARY) transpile_implementation_$(LANG)
-	@$(foreach dependency, \
-		$(PROJECT_DEPENDENCIES), \
-		$(MAKE) -C $(PROJECT_ROOT)/$(dependency) transpile_implementation_$(LANG); \
-	)
+	$(if $(strip $(STD_LIBRARY)), $(MAKE) -C $(PROJECT_ROOT)/$(STD_LIBRARY) transpile_implementation_$(LANG), )
+	$(patsubst %, $(MAKE) -C $(PROJECT_ROOT)/% transpile_implementation_$(LANG);, $(PROJECT_DEPENDENCIES))
 
 ########################## Code-Gen targets
 
