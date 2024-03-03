@@ -120,7 +120,7 @@ format_dafny:
 		--unicode-char false \
 		`find . -name '*.dfy'`
 
-format-check:
+format_dafny-check:
 	dafny format \
 		--check \
 		--function-syntax 3 \
