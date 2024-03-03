@@ -439,8 +439,10 @@ _mv_test_java:
 transpile_dependencies_java: LANG=java
 transpile_dependencies_java: transpile_dependencies
 
+# If we are not StandardLibrary, locally deploy the StandardLibrary.
+# Locally deploy all other dependencies 
 mvn_local_deploy_dependencies:
-	$(MAKE) -C $(PROJECT_ROOT)/$(STD_LIBRARY) mvn_local_deploy
+	$(if $(strip $(STD_LIBRARY)), $(MAKE) -C $(PROJECT_ROOT)/$(STD_LIBRARY) mvn_local_deploy, )
 	$(patsubst %, $(MAKE) -C $(PROJECT_ROOT)/% mvn_local_deploy;, $(PROJECT_DEPENDENCIES))
 
 # The Java MUST all exist already through the transpile step.
