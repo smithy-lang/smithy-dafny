@@ -413,7 +413,7 @@ format_net-check:
 ########################## Java targets
 
 build_java: transpile_java mvn_local_deploy_dependencies
-	gradle -p runtimes/java build
+	./runtimes/java/gradlew -p runtimes/java build
 
 transpile_java: | transpile_implementation_java transpile_test_java transpile_dependencies_java
 
@@ -447,10 +447,10 @@ mvn_local_deploy_dependencies:
 
 # The Java MUST all exist already through the transpile step.
 mvn_local_deploy:
-	gradle -p runtimes/java publishToMavenLocal
+	./runtimes/java/gradlew -p runtimes/java publishToMavenLocal
 
 test_java:
-	gradle -p runtimes/java runTests
+	./runtimes/java/gradlew -p runtimes/java runTests
 
 _clean:
 	rm -f $(LIBRARY_ROOT)/Model/*Types.dfy $(LIBRARY_ROOT)/Model/*TypesWrapped.dfy
