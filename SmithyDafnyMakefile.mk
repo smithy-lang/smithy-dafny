@@ -26,6 +26,8 @@
 # AWS_SDK_CMD -- the `--aws-sdk` command to generate AWS SDK style interfaces.
 # STD_LIBRARY -- path from this file to the StandardLibrary Dafny project.
 # SMITHY_DEPS -- path from this file to smithy dependencies, such as custom traits.
+# GRADLEW -- the gradlew to use when building Java runtimes.
+#   defaults to $(SMITHY_DAFNY_ROOT)/codegen/gradlew
 
 MAX_RESOURCE_COUNT := 10000000
 
@@ -245,7 +247,7 @@ transpile_dependencies:
 #   Its model is contained in $(LIBRARY_ROOT)/model, not $(LIBRARY_ROOT)/../StandardLibrary/Model.
 _polymorph:
 	cd $(CODEGEN_CLI_ROOT); \
-	$(GRADLEW) run --args="\
+	./../gradlew run --args="\
 	--dafny-version $(DAFNY_VERSION) \
 	--library-root $(LIBRARY_ROOT) \
 	--patch-files-dir $(if $(DIR_STRUCTURE_V2),$(LIBRARY_ROOT)/codegen-patches/$(SERVICE),$(LIBRARY_ROOT)/codegen-patches) \
@@ -267,7 +269,7 @@ _polymorph:
 _polymorph_wrapped:
 	@: $(if ${CODEGEN_CLI_ROOT},,$(error You must pass the path CODEGEN_CLI_ROOT: CODEGEN_CLI_ROOT=/path/to/smithy-dafny/codegen/smithy-dafny-codegen-cli));
 	cd $(CODEGEN_CLI_ROOT); \
-	$(GRADLEW) run --args="\
+	./../gradlew run --args="\
 	--dafny-version $(DAFNY_VERSION) \
 	--library-root $(LIBRARY_ROOT) \
 	--properties-file $(LIBRARY_ROOT)/project.properties \
@@ -413,7 +415,7 @@ format_net-check:
 ########################## Java targets
 
 build_java: transpile_java mvn_local_deploy_dependencies
-	./runtimes/java/gradlew -p runtimes/java build
+	$(GRADLEW) -p runtimes/java build
 
 transpile_java: | transpile_implementation_java transpile_test_java transpile_dependencies_java
 
@@ -447,10 +449,10 @@ mvn_local_deploy_dependencies:
 
 # The Java MUST all exist already through the transpile step.
 mvn_local_deploy:
-	./runtimes/java/gradlew -p runtimes/java publishMavenLocalPublicationToMavenLocal
+	$(GRADLEW) -p runtimes/java publishMavenLocalPublicationToMavenLocal
 
 test_java:
-	./runtimes/java/gradlew -p runtimes/java runTests
+	$(GRADLEW) -p runtimes/java runTests
 
 _clean:
 	rm -f $(LIBRARY_ROOT)/Model/*Types.dfy $(LIBRARY_ROOT)/Model/*TypesWrapped.dfy
