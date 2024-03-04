@@ -41,6 +41,7 @@ public class CodegenCli {
             cliArgumentsOptional = CliArguments.parse(args);
         } catch (ParseException e) {
             LOGGER.error("Command-line arguments could not be parsed", e);
+            System.exit(1);
         }
         if (cliArgumentsOptional.isEmpty()) {
             printHelpMessage();
@@ -71,6 +72,8 @@ public class CodegenCli {
         cliArguments.outputPythonDir.ifPresent(path -> outputDirs.put(TargetLanguage.PYTHON, path));
 
         final CodegenEngine.Builder engineBuilder = new CodegenEngine.Builder()
+                .withFromSmithyBuildPlugin(false)
+                .withLibraryRoot(cliArguments.libraryRoot)
                 .withServiceModel(serviceModel)
                 .withDependentModelPaths(cliArguments.dependentModelPaths)
                 .withDependencyModuleNames(cliArguments.dependencyModuleNames)
@@ -78,10 +81,13 @@ public class CodegenCli {
                 .withTargetLangOutputDirs(outputDirs)
                 .withAwsSdkStyle(cliArguments.awsSdkStyle)
                 .withLocalServiceTest(cliArguments.localServiceTest)
-                .withDafnyVersion(cliArguments.dafnyVersion);
+                .withDafnyVersion(cliArguments.dafnyVersion)
+                .withUpdatePatchFiles(cliArguments.updatePatchFiles);
+        cliArguments.propertiesFile.ifPresent(engineBuilder::withPropertiesFile);
         cliArguments.javaAwsSdkVersion.ifPresent(engineBuilder::withJavaAwsSdkVersion);
         cliArguments.includeDafnyFile.ifPresent(engineBuilder::withIncludeDafnyFile);
         cliArguments.moduleName.ifPresent(engineBuilder::withModuleName);
+        cliArguments.patchFilesDir.ifPresent(engineBuilder::withPatchFilesDir);
         final CodegenEngine engine = engineBuilder.build();
         engine.run();
     }
@@ -91,6 +97,12 @@ public class CodegenCli {
           .addOption(Option.builder("h")
             .longOpt("help")
             .desc("print help message")
+            .build())
+          .addOption(Option.builder("r")
+            .longOpt("library-root")
+            .desc("root directory of the library")
+            .hasArg()
+            .required()
             .build())
           .addOption(Option.builder("m")
             .longOpt("model")
@@ -146,6 +158,11 @@ public class CodegenCli {
             .hasArg()
             .build())
           .addOption(Option.builder()
+            .longOpt("properties-file")
+            .desc("Path to generate the project.properties file at")
+            .hasArg()
+            .build())
+          .addOption(Option.builder()
             .longOpt("aws-sdk")
             .desc("<optional> generate AWS SDK-style API and shims")
             .build())
@@ -163,6 +180,15 @@ public class CodegenCli {
             .longOpt("include-dafny")
             .desc("<optional> files to be include in the generated Dafny")
             .hasArg()
+            .build())
+          .addOption(Option.builder()
+            .longOpt("patch-files-dir")
+            .desc("<optional> location of patch files. Defaults to <library-root>/codegen-patches")
+            .hasArg()
+            .build())
+          .addOption(Option.builder()
+            .longOpt("update-patch-files")
+            .desc("<optional> update patch files in <patch-files-dir> instead of applying them")
             .build());
     }
 
@@ -171,6 +197,7 @@ public class CodegenCli {
     }
 
     private record CliArguments(
+            Path libraryRoot,
             Path modelPath,
             Path[] dependentModelPaths,
             Map<String, String> dependencyModuleNames,
@@ -182,9 +209,12 @@ public class CodegenCli {
             Optional<Path> outputDafnyDir,
             Optional<AwsSdkVersion> javaAwsSdkVersion,
             DafnyVersion dafnyVersion,
+            Optional<Path> propertiesFile,
             Optional<Path> includeDafnyFile,
             boolean awsSdkStyle,
-            boolean localServiceTest
+            boolean localServiceTest,
+            Optional<Path> patchFilesDir,
+            boolean updatePatchFiles
     ) {
         /**
          * @param args arguments to parse
@@ -198,6 +228,8 @@ public class CodegenCli {
                 printHelpMessage();
                 return Optional.empty();
             }
+
+            Path libraryRoot = Paths.get(commandLine.getOptionValue("library-root"));
 
             final Path modelPath = Path.of(commandLine.getOptionValue('m'));
 
@@ -262,16 +294,23 @@ public class CodegenCli {
                 throw ex;
             }
 
+            Optional<Path> propertiesFile = Optional.ofNullable(commandLine.getOptionValue("properties-file"))
+                    .map(Paths::get);
+
             Optional<Path> includeDafnyFile = Optional.empty();
             if (outputDafnyDir.isPresent()) {
                 includeDafnyFile = Optional.of(Paths.get(commandLine.getOptionValue("include-dafny")));
             }
 
+            Optional<Path> patchFilesDir = Optional.ofNullable(commandLine.getOptionValue("patch-files-dir"))
+                    .map(Paths::get);
+            final boolean updatePatchFiles = commandLine.hasOption("update-patch-files");
+
             return Optional.of(new CliArguments(
-                    modelPath, dependentModelPaths, dependencyNamespacesToModuleNamesMap,
-                    namespace, moduleName,  outputDotnetDir, outputJavaDir, outputPythonDir,
-                    outputDafnyDir, javaAwsSdkVersion, dafnyVersion, includeDafnyFile, awsSdkStyle,
-                    localServiceTest
+                    libraryRoot, modelPath, dependentModelPaths, dependencyNamespacesToModuleNamesMap, namespace,
+                    moduleName, outputDotnetDir, outputJavaDir, outputPythonDir, outputDafnyDir,
+                    javaAwsSdkVersion, dafnyVersion, propertiesFile, includeDafnyFile, awsSdkStyle,
+                    localServiceTest, patchFilesDir, updatePatchFiles
             ));
         }
     }

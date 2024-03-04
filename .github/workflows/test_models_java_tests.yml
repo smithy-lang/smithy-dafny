@@ -16,14 +16,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        dafny-version: [
-          4.1.0,
-          4.3.0
-        ]
         library: [
           TestModels/dafny-dependencies/StandardLibrary, # This stores current Polymorph dependencies that all TestModels depend on
           # TestModels/Aggregate,
           # TestModels/AggregateReferences,
+          TestModels/CodegenPatches,
           TestModels/Constraints,
           # TestModels/Constructor,
           # TestModels/Dependencies,
@@ -99,6 +96,11 @@ jobs:
           distribution: 'corretto'
           java-version: '17'
 
+      - name: Setup dependencies
+        working-directory: ./${{ matrix.library }}
+        run: |
+          make setup_prettier
+  
       - name: Generate Polymorph Dafny and Java code
         shell: bash
         working-directory: ./${{ matrix.library }}

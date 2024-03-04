@@ -310,6 +310,7 @@ public class ModelUtils {
         return outList;
     }
 
+
     /**
      * For every ShapeId in {@code initialShapes},
      * with the given {@code model},
@@ -326,12 +327,16 @@ public class ModelUtils {
             .map(Collections::singletonList)
             .collect(Collectors.toSet());
         Set<List<ShapeId>> pathsToShapes = new LinkedHashSet<>(new LinkedHashSet<>());
+        Set<ShapeId> visited = new HashSet<>();
 
         // Breadth-first search via getDependencyShapeIds
         final Queue<List<ShapeId>> toTraverse = new LinkedList<>(initialShapeIdsAsPaths);
         while (!toTraverse.isEmpty()) {
             final List<ShapeId> currentShapeIdWithPath = toTraverse.remove();
-            if (pathsToShapes.add(currentShapeIdWithPath)) {
+
+            // to avoid cycles, only keep the first list with a given last element
+            ShapeId last = currentShapeIdWithPath.get(currentShapeIdWithPath.size()-1);
+            if (visited.add(last) && pathsToShapes.add(currentShapeIdWithPath)) {
                 final Shape currentShape = model.expectShape(currentShapeIdWithPath.get(
                     currentShapeIdWithPath.size()-1));
                 final List<List<ShapeId>> dependencyShapeIdsWithPaths = getDependencyShapeIds(currentShape).map(

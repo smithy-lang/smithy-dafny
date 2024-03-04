@@ -1,0 +1,32 @@
+diff --git b/TestModels/CodegenPatches/Model/SimpleCodegenpatchesTypes.dfy a/TestModels/CodegenPatches/Model/SimpleCodegenpatchesTypes.dfy
+index 78cb9bf9..491091be 100644
+--- b/TestModels/CodegenPatches/Model/SimpleCodegenpatchesTypes.dfy
++++ a/TestModels/CodegenPatches/Model/SimpleCodegenpatchesTypes.dfy
+@@ -158,8 +158,14 @@ abstract module AbstractSimpleCodegenpatchesService
+       ensures GetStringEnsuresPublicly(input, output)
+       ensures History.GetString == old(History.GetString) + [DafnyCallEvent(input, output)]
+     {
+-      output := Operations.GetString(config, input);
++      // BEGIN MANUAL EDIT
++      var defaultedInput := input;
++      if input.value.None? {
++        defaultedInput := input.(value := Some("default"));
++      }
++      output := Operations.GetString(config, defaultedInput);
+       History.GetString := History.GetString + [DafnyCallEvent(input, output)];
++      // END MANUAL EDIT
+     }
+ 
+   }
+@@ -173,6 +179,11 @@ abstract module AbstractSimpleCodegenpatchesOperations {
+   predicate ValidInternalConfig?(config: InternalConfig)
+   function ModifiesInternalConfig(config: InternalConfig): set<object>
+   predicate GetStringEnsuresPublicly(input: GetStringInput , output: Result<GetStringOutput, Error>)
++  // BEGIN MANUAL EDIT
++  {
++    true
++  }
++  // END MANUAL EDIT
+   // The private method to be refined by the library developer
+ 
+ 

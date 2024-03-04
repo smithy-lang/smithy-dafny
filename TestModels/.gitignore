@@ -16,6 +16,7 @@
 # Polymorph Generated Dafny
 **/Model/*Types.dfy
 **/Model/*TypesWrapped.dfy
+**/project.properties
 
 # Polymorph Generated .NET
 **/runtimes/net/Generated/*.cs

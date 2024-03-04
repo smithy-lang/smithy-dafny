@@ -5,6 +5,7 @@ package software.amazon.polymorph;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Streams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.polymorph.smithydafny.DafnyApiCodegen;
@@ -34,24 +35,37 @@ import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.node.ObjectNode;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.utils.IoUtils;
+import software.amazon.smithy.utils.Pair;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 public class CodegenEngine {
     private static final Logger LOGGER = LoggerFactory.getLogger(CodegenEngine.class);
 
+    // Used to distinguish different conventions between the CLI
+    // and the Smithy build plugin, such as where .NET project files live.
+    private final boolean fromSmithyBuildPlugin;
+    private final Path libraryRoot;
     private final Path[] dependentModelPaths;
     private final Map<String, String> dependencyModuleNames;
     private final String namespace;
     private final Optional<String> moduleName;
     private final Map<TargetLanguage, Path> targetLangOutputDirs;
     private final DafnyVersion dafnyVersion;
+    private final Optional<Path> propertiesFile;
+    private final Optional<Path> patchFilesDir;
+    private final boolean updatePatchFiles;
     // refactor this to only be required if generating Java
     private final AwsSdkVersion javaAwsSdkVersion;
     private final Optional<Path> includeDafnyFile;
@@ -69,6 +83,7 @@ public class CodegenEngine {
      * are mutually compatible, etc.
      */
     private CodegenEngine(
+            final boolean fromSmithyBuildPlugin,
             final Model serviceModel,
             final Path[] dependentModelPaths,
             final Map<String, String> dependencyModuleNames,
@@ -76,24 +91,33 @@ public class CodegenEngine {
             final Optional<String> moduleName,
             final Map<TargetLanguage, Path> targetLangOutputDirs,
             final DafnyVersion dafnyVersion,
+            final Optional<Path> propertiesFile,
             final AwsSdkVersion javaAwsSdkVersion,
             final Optional<Path> includeDafnyFile,
             final boolean awsSdkStyle,
             final boolean localServiceTest,
-            final boolean generateProjectFiles
+            final boolean generateProjectFiles,
+            final Path libraryRoot,
+            final Optional<Path> patchFilesDir,
+            final boolean updatePatchFiles
     ) {
         // To be provided to constructor
+        this.fromSmithyBuildPlugin = fromSmithyBuildPlugin;
         this.dependentModelPaths = dependentModelPaths;
         this.dependencyModuleNames = dependencyModuleNames;
         this.namespace = namespace;
         this.moduleName = moduleName;
         this.targetLangOutputDirs = targetLangOutputDirs;
         this.dafnyVersion = dafnyVersion;
+        this.propertiesFile = propertiesFile;
         this.javaAwsSdkVersion = javaAwsSdkVersion;
         this.includeDafnyFile = includeDafnyFile;
         this.awsSdkStyle = awsSdkStyle;
         this.localServiceTest = localServiceTest;
         this.generateProjectFiles = generateProjectFiles;
+        this.libraryRoot = libraryRoot;
+        this.patchFilesDir = patchFilesDir;
+        this.updatePatchFiles = updatePatchFiles;
 
         this.model = this.awsSdkStyle
                 // TODO: move this into a DirectedCodegen.customizeBeforeShapeGeneration implementation
@@ -106,7 +130,7 @@ public class CodegenEngine {
     /**
      * Executes code generation for the configured language(s).
      * This method is designed to be internally stateless
-     * and idempotent with respect with respect to the file system.
+     * and idempotent with respect to the file system.
      */
     public void run() {
         try {
@@ -130,6 +154,24 @@ public class CodegenEngine {
                         .formatted(lang.name()));
             }
         }
+
+        propertiesFile.ifPresent(this::generateProjectPropertiesFile);
+    }
+
+    private void generateProjectPropertiesFile(final Path outputPath) {
+        final String propertiesTemplate = IoUtils.readUtf8Resource(
+                this.getClass(), "/templates/project.properties.template");
+        // Drop the pre-release suffix, if any.
+        // This means with the current Dafny pre-release naming convention,
+        // we'll grab the most recent full release of a Dafny runtime.
+        // This mapping may need to change in the future.
+        // Ideally this would be handled by the Dafny CLI itself.
+        String dafnyVersionString = new DafnyVersion(
+                dafnyVersion.getMajor(), dafnyVersion.getMinor(), dafnyVersion.getPatch()
+        ).unparse();
+        final String propertiesText = propertiesTemplate
+                .replace("%DAFNY_VERSION%", dafnyVersionString);
+        IOUtils.writeToFile(propertiesText, outputPath.toFile());
     }
 
     private void generateDafny(final Path outputDir) {
@@ -152,6 +194,15 @@ public class CodegenEngine {
             IOUtils.writeTokenTreesIntoDir(dafnyApiCodegen.generate(), outputDir);
             LOGGER.info("Dafny code generated in {}", outputDir);
         }
+
+        LOGGER.info("Formatting Dafny code in {}", outputDir);
+        runCommand(outputDir,
+                "dafny", "format",
+                "--function-syntax:3",
+                "--unicode-char:false",
+                ".");
+
+        handlePatching(TargetLanguage.DAFNY, outputDir);
     }
 
     private void generateJava(final Path outputDir) {
@@ -165,6 +216,12 @@ public class CodegenEngine {
         } else {
             javaLocalService(outputDir);
         }
+
+        LOGGER.info("Formatting Java code in {}", outputDir);
+        runCommand(outputDir,
+                "npx", "prettier", "--plugin=prettier-plugin-java", outputDir.toString(), "--write");
+
+        handlePatching(TargetLanguage.JAVA, outputDir);
     }
 
     private void javaLocalService(final Path outputDir) {
@@ -202,6 +259,25 @@ public class CodegenEngine {
         } else {
             netLocalService(outputDir);
         }
+
+
+        Path dotnetRoot = fromSmithyBuildPlugin
+                ? libraryRoot.resolve("runtimes").resolve("dotnet").resolve("Generated")
+                : libraryRoot.resolve("runtimes").resolve("net");
+        LOGGER.info("Formatting .NET code in {}", dotnetRoot);
+        // Locate all *.csproj files in the directory
+        try {
+            Stream<String> args = Streams.concat(
+                    Stream.of("dotnet", "format"),
+                    Files.list(dotnetRoot)
+                            .filter(path -> path.toFile().getName().endsWith(".csproj"))
+                            .map(Path::toString));
+            runCommand(dotnetRoot, args.toArray(String[]::new));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        handlePatching(TargetLanguage.DOTNET, outputDir);
     }
 
     private void netLocalService(final Path outputDir) {
@@ -295,7 +371,83 @@ public class CodegenEngine {
         }
     }
 
+    private static final Pattern PATCH_FILE_PATTERN = Pattern.compile("dafny-(.*).patch");
+
+    private DafnyVersion getDafnyVersionForPatchFile(Path file) {
+        String fileName = file.getFileName().toString();
+        Matcher matcher = PATCH_FILE_PATTERN.matcher(fileName);
+        if (matcher.matches()) {
+            String versionString = matcher.group(1);
+            return DafnyVersion.parse(versionString);
+        } else {
+            throw new IllegalArgumentException("Patch files must be of the form dafny-<version>.patch: " + file);
+        }
+    }
+
+    private void handlePatching(TargetLanguage targetLanguage, Path outputDir) {
+        if (patchFilesDir.isEmpty()) {
+            return;
+        }
+
+        Path patchFilesForLanguage = patchFilesDir.get().resolve(targetLanguage.name().toLowerCase());
+        try {
+            if (updatePatchFiles) {
+                Files.createDirectories(patchFilesForLanguage);
+                Path patchFile = patchFilesForLanguage.resolve("dafny-%s.patch".formatted(dafnyVersion.unparse()));
+                Path outputDirRelative = libraryRoot.relativize(outputDir);
+                // Need to ignore the exit code because diff will return 1 if there is a diff
+                String patchContent = runCommandIgnoringExitCode(libraryRoot, "git", "diff", "-R", outputDirRelative.toString());
+                if (!patchContent.isBlank()) {
+                    IOUtils.writeToFile(patchContent, patchFile.toFile());
+                }
+            }
+
+            if (Files.exists(patchFilesForLanguage)) {
+                List<Pair<DafnyVersion, Path>> sortedPatchFiles = Files.list(patchFilesForLanguage)
+                        .map(file -> Pair.of(getDafnyVersionForPatchFile(file), file))
+                        .sorted(Collections.reverseOrder(Map.Entry.comparingByKey()))
+                        .toList();
+                for (Pair<DafnyVersion, Path> patchFilePair : sortedPatchFiles) {
+                    if (dafnyVersion.compareTo(patchFilePair.getKey()) >= 0) {
+                        Path patchFile = patchFilePair.getValue();
+                        LOGGER.info("Applying patch file {}", patchFile);
+                        runCommand(libraryRoot, "git", "apply", patchFile.toString());
+                        return;
+                    }
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private String runCommand(Path workingDir, String ... args) {
+        List<String> argsList = List.of(args);
+        StringBuilder output = new StringBuilder();
+        int exitCode = IoUtils.runCommand(
+                argsList,
+                workingDir,
+                output,
+                Collections.emptyMap());
+        if (exitCode != 0) {
+            throw new RuntimeException("Command failed: " + argsList + "\n" + output);
+        }
+        return output.toString();
+    }
+
+    private String runCommandIgnoringExitCode(Path workingDir, String ... args) {
+        List<String> argsList = List.of(args);
+        StringBuilder output = new StringBuilder();
+        IoUtils.runCommand(
+                argsList,
+                workingDir,
+                output,
+                Collections.emptyMap());
+        return output.toString();
+    }
+
     public static class Builder {
+        private boolean fromSmithyBuildPlugin = false;
         private Model serviceModel;
         private Path[] dependentModelPaths;
         private Map<String, String> dependencyModuleNames;
@@ -303,11 +455,15 @@ public class CodegenEngine {
         private String moduleName;
         private Map<TargetLanguage, Path> targetLangOutputDirs;
         private DafnyVersion dafnyVersion = new DafnyVersion(4, 1, 0);
+        private Path propertiesFile;
         private AwsSdkVersion javaAwsSdkVersion = AwsSdkVersion.V2;
         private Path includeDafnyFile;
         private boolean awsSdkStyle = false;
         private boolean localServiceTest = false;
         private boolean generateProjectFiles = false;
+        private Path libraryRoot;
+        private Path patchFilesDir;
+        private boolean updatePatchFiles = false;
 
         public Builder() {}
 
@@ -372,6 +528,18 @@ public class CodegenEngine {
         }
 
         /**
+         * Sets the path to generate a project.properties file at.
+         * This will contain a dafnyVersion property that can be used to
+         * select the correct version of the Dafny runtime in target language
+         * project configurations, amonst other potential uses.
+         * The properties file may contain other metadata in the future.
+         */
+        public Builder withPropertiesFile(final Path propertiesFile) {
+            this.propertiesFile = propertiesFile;
+            return this;
+        }
+
+        /**
          * Sets the version of the AWS SDK for Java for which generated code should be compatible.
          * This has no effect unless the engine is configured to generate Java code.
          */
@@ -413,6 +581,43 @@ public class CodegenEngine {
             return this;
         }
 
+        /**
+         * Sets the root directory of the library being built.
+         * Used to locate any patch files (under ./codegen-patches)
+         * and things like target language project roots.
+         */
+        public Builder withLibraryRoot(final Path libraryRoot) {
+            this.libraryRoot = libraryRoot;
+            return this;
+        }
+
+        /**
+         * Indicates whether the engine is being used from the polymorph CLI
+         * or the Smithy build plugin.
+         * Needed because the two use cases have different library layout conventions.
+         */
+        public Builder withFromSmithyBuildPlugin(final boolean fromSmithyBuildPlugin) {
+            this.fromSmithyBuildPlugin = fromSmithyBuildPlugin;
+            return this;
+        }
+
+        /**
+         * The location of patch files.
+         */
+        public Builder withPatchFilesDir(final Path patchFilesDir) {
+            this.patchFilesDir = patchFilesDir;
+            return this;
+        }
+
+        /**
+         * If true, updates the relevant patch files in (library-root)/codegen-patches
+         * to change the generated code into the state of the code before generation.
+         */
+        public Builder withUpdatePatchFiles(final boolean updatePatchFiles) {
+            this.updatePatchFiles = updatePatchFiles;
+            return this;
+        }
+
         public CodegenEngine build() {
             final Model serviceModel = Objects.requireNonNull(this.serviceModel);
             final Path[] dependentModelPaths = this.dependentModelPaths == null
@@ -432,6 +637,8 @@ public class CodegenEngine {
             final Map<TargetLanguage, Path> targetLangOutputDirs = ImmutableMap.copyOf(targetLangOutputDirsRaw);
 
             final DafnyVersion dafnyVersion = Objects.requireNonNull(this.dafnyVersion);
+            final Optional<Path> propertiesFile = Optional.ofNullable(this.propertiesFile)
+                    .map(path -> path.toAbsolutePath().normalize());
             final AwsSdkVersion javaAwsSdkVersion = Objects.requireNonNull(this.javaAwsSdkVersion);
 
             if (targetLangOutputDirs.containsKey(TargetLanguage.DAFNY)
@@ -446,7 +653,17 @@ public class CodegenEngine {
                         "Cannot generate AWS SDK style code, and test a local service, at the same time");
             }
 
+            final Path libraryRoot = this.libraryRoot.toAbsolutePath().normalize();
+
+            final Optional<Path> patchFilesDir = Optional.ofNullable(this.patchFilesDir)
+                    .map(path -> path.toAbsolutePath().normalize());
+            if (updatePatchFiles && patchFilesDir.isEmpty()) {
+                throw new IllegalStateException(
+                        "Cannot update patch files without specifying a patch files directory");
+            }
+
             return new CodegenEngine(
+                    fromSmithyBuildPlugin,
                     serviceModel,
                     dependentModelPaths,
                     dependencyModuleNames,
@@ -454,11 +671,15 @@ public class CodegenEngine {
                     moduleName,
                     targetLangOutputDirs,
                     dafnyVersion,
+                    propertiesFile,
                     javaAwsSdkVersion,
                     includeDafnyFile,
                     this.awsSdkStyle,
                     this.localServiceTest,
-                    this.generateProjectFiles
+                    this.generateProjectFiles,
+                    libraryRoot,
+                    patchFilesDir,
+                    updatePatchFiles
             );
         }
     }
