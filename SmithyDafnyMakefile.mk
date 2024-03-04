@@ -259,7 +259,7 @@ _polymorph:
 	--dependent-model $(PROJECT_ROOT)/$(SMITHY_DEPS) \
 	$(patsubst %, --dependent-model $(PROJECT_ROOT)/%/Model, $($(service_deps_var))) \
 	--namespace $($(namespace_var)) \
-	$(OUTPUT_LOCAL_SERVICE) \
+	$(OUTPUT_LOCAL_SERVICE_$(SERVICE)) \
 	$(AWS_SDK_CMD) \
 	$(POLYMORPH_OPTIONS) \
 	";
