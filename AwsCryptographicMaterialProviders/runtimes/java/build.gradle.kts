@@ -74,7 +74,7 @@ dependencies {
     implementation("software.amazon.smithy.dafny:conversion:0.1")
 
     // sdk dependencies
-    implementation(platform("software.amazon.awssdk:bom:2.19.1"))
+    implementation(platform("software.amazon.awssdk:bom:2.25.1"))
     implementation("software.amazon.awssdk:dynamodb")
     implementation("software.amazon.awssdk:kms")
 
