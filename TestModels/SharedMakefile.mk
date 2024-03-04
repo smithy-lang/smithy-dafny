@@ -1,37 +1,54 @@
 # Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-# These make targets that are shared
-# between all the Dafny projects
-# in this repo.
+# These are make targets that can be shared between all projects
+# that use a common layout.
 # They will only function if executed inside a project directory.
+# See https://github.com/smithy-lang/smithy-dafny/tree/main-1.x/TestModels
+# for examples.
 
-# There are serveral variables that are used here.
+# There are several variables that are used here.
 # The expectation is to define these variables
 # inside each project.
 
 # Variables:
 # MAX_RESOURCE_COUNT -- The Dafny report generator max resource count.
 # 	This is is per project because the verification variability can differ.
-# LIBRARIES -- List of dependencies for the project.
-# 	It should be the list of top leve directory names
-# SMITHY_NAMESPACE -- The smithy namespace to use for code generation. 
-# AWS_SDK_CMD -- the `--aws-sdk` command to generate AWS SDK style interfaces
+# PROJECT_DEPENDENCIES -- List of dependencies for the project.
+# 	It should be the list of top level directory names
+# PROJECT_SERVICES -- List of names of each local service in the project
+# SERVICE_NAMESPACE_<service> -- for each service in PROJECT_SERVICES,
+#   the list of dependencies for that smithy namespace. It should be a list
+#   of Model directories
+# SERVICE_DEPS_<service> -- for each service in PROJECT_SERVICES,
+#   the list of dependencies for that smithy namespace. It should be a list
+#   of Model directories
+# AWS_SDK_CMD -- the `--aws-sdk` command to generate AWS SDK style interfaces.
+# STD_LIBRARY -- path from this file to the StandardLibrary Dafny project.
+# SMITHY_DEPS -- path from this file to smithy dependencies, such as custom traits.
+# GRADLEW -- the gradlew to use when building Java runtimes.
+#   defaults to $(SMITHY_DAFNY_ROOT)/codegen/gradlew
 
-# This evaluates to the local path _of this file_.
-# This means that these are the project roots
-# that are shared by all libraries in this repo.
-PROJECT_ROOT := $(abspath $(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
-# This relative path is for include files between libraries.
-# If an absolut path is used, this path will not be portable.
-PROJECT_RELATIVE_ROOT := $(dir $(lastword $(MAKEFILE_LIST)))
+MAX_RESOURCE_COUNT := 10000000
+
 # This evaluates to the path of the current working directory.
 # i.e. The specific library under consideration.
-LIBRARY_ROOT = $(PWD)
+LIBRARY_ROOT := $(PWD)
+# Smithy Dafny code gen needs to know
+# where the smithy model is.
+# This is generally in the same directory as the library.
+# However in the case of a wrapped library,
+# such as the test vectors
+# the implementation MAY be in a different library
+# than the model.
+# By having two related variables
+# test vector projects can point to
+# the specific model they need
+# but still build everything in their local library directory.
+SMITHY_MODEL_ROOT := $(LIBRARY_ROOT)/Model
 
-STANDARD_LIBRARY_PATH := $(PROJECT_ROOT)/dafny-dependencies/StandardLibrary
-CODEGEN_CLI_ROOT := $(PROJECT_ROOT)/../codegen/smithy-dafny-codegen-cli
-GRADLEW := $(PROJECT_ROOT)/../codegen/gradlew
+CODEGEN_CLI_ROOT := $(SMITHY_DAFNY_ROOT)/codegen/smithy-dafny-codegen-cli
+GRADLEW := $(SMITHY_DAFNY_ROOT)/codegen/gradlew
 
 ########################## Dafny targets
 
@@ -41,6 +58,18 @@ GRADLEW := $(PROJECT_ROOT)/../codegen/gradlew
 # Error: modules 'A' and 'B' both have CompileName 'same.extern.name'
 # We need to come up with some way to verify files per-language.
 # Rewrite this as part of Java implementation of LanguageSpecificLogic TestModel.
+
+# Proof of correctness for the math below
+#  function Z3_PROCESSES(cpus:nat): nat
+#  { if cpus >= 3 then 2 else 1 }
+
+#  function DAFNY_PROCESSES(cpus: nat): nat
+#   requires 0 < cpus // 0 cpus would do no work!
+#  { (cpus - 1 )/Z3_PROCESSES(cpus) }
+
+#  lemma Correct(cpus:nat)
+#    ensures DAFNY_PROCESSES(cpus) * Z3_PROCESSES(cpus) <= cpus
+#  {}
 
 # Verify the entire project
 verify:Z3_PROCESSES=$(shell echo $$(( $(CORES) >= 3 ? 2 : 1 )))
@@ -53,17 +82,47 @@ verify:
 		-unicodeChar:0 \
 		-functionSyntax:3 \
 		-verificationLogger:csv \
-		-timeLimit:300 \
+		-timeLimit:100 \
 		-trace \
 		%
 
-format:
+# Verify single file FILE with text logger.
+# This is useful for debugging resource count usage within a file.
+# Use PROC to further scope the verification
+verify_single:
+	dafny \
+		-vcsCores:$(CORES) \
+		-compile:0 \
+		-definiteAssignment:3 \
+		-unicodeChar:0 \
+		-functionSyntax:3 \
+		-verificationLogger:text \
+		-timeLimit:100 \
+		-trace \
+		$(if ${PROC},-proc:*$(PROC)*,) \
+		$(FILE)
+
+#Verify only a specific namespace at env var $(SERVICE)
+verify_service:
+	@: $(if ${SERVICE},,$(error You must pass the SERVICE to generate for));
+	dafny \
+		-vcsCores:$(CORES) \
+		-compile:0 \
+		-definiteAssignment:3 \
+		-unicodeChar:0 \
+		-functionSyntax:3 \
+		-verificationLogger:csv \
+		-timeLimit:100 \
+		-trace \
+		`find ./dafny/$(SERVICE) -name '*.dfy'` \
+
+format_dafny:
 	dafny format \
 		--function-syntax 3 \
 		--unicode-char false \
 		`find . -name '*.dfy'`
 
-format-check:
+format_dafny-check:
 	dafny format \
 		--check \
 		--function-syntax 3 \
@@ -73,8 +132,11 @@ format-check:
 dafny-reportgenerator:
 	dafny-reportgenerator \
 		summarize-csv-results \
-		--max-resource-count 10000000 \
+		--max-resource-count $(MAX_RESOURCE_COUNT) \
 		TestResults/*.csv
+
+clean-dafny-report:
+	rm TestResults/*.csv
 
 # Dafny helper targets
 
@@ -85,7 +147,7 @@ _transpile_implementation_all: TRANSPILE_DEPENDENCIES=$(patsubst %, -library:$(P
 _transpile_implementation_all: transpile_implementation
 
 # The `$(OUT)` and $(TARGET) variables are problematic.
-# Idealy they are different for every target call.
+# Ideally they are different for every target call.
 # However the way make evaluates variables
 # having a target specific variable is hard.
 # This all comes up because a project
@@ -93,7 +155,7 @@ _transpile_implementation_all: transpile_implementation
 # This is worked around for now,
 # by the fact that the `TARGET`
 # for all these transpile calls will be the same.
-# For `OUT` this is solved by makeing the paths realative.
+# For `OUT` this is solved by making the paths relative.
 # So that the runtime is express once
 # and can be the same for all such runtimes.
 # Since such targets are all shared,
@@ -122,7 +184,7 @@ transpile_implementation:
         -functionSyntax:3 \
         -useRuntimeLib \
         -out $(OUT) \
-        -library:$(PROJECT_ROOT)/dafny-dependencies/StandardLibrary/src/Index.dfy \
+        $(if $(strip $(STD_LIBRARY)) , -library:$(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy, ) \
         $(TRANSPILE_DEPENDENCIES)
 
 # If the project under transpilation uses `replaceable` modules,
@@ -162,15 +224,14 @@ transpile_test:
 		-functionSyntax:3 \
 		-useRuntimeLib \
 		-out $(OUT) \
-		-library:$(PROJECT_ROOT)/dafny-dependencies/StandardLibrary/src/Index.dfy \
+		$(if $(strip $(STD_LIBRARY)) , -library:$(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy, ) \
 		$(TRANSPILE_DEPENDENCIES) \
 
+# If we are not the StandardLibrary, transpile the StandardLibrary.
+# Transpile all other dependencies
 transpile_dependencies:
-	$(MAKE) -C $(STANDARD_LIBRARY_PATH) transpile_implementation_$(LANG)
-	@$(foreach dependency, \
-		$(PROJECT_DEPENDENCIES), \
-		$(MAKE) -C $(PROJECT_ROOT)/$(dependency) transpile_implementation_$(LANG); \
-	)
+	$(if $(strip $(STD_LIBRARY)), $(MAKE) -C $(PROJECT_ROOT)/$(STD_LIBRARY) transpile_implementation_$(LANG), )
+	$(patsubst %, $(MAKE) -C $(PROJECT_ROOT)/% transpile_implementation_$(LANG);, $(PROJECT_DEPENDENCIES))
 
 ########################## Code-Gen targets
 
@@ -185,28 +246,31 @@ transpile_dependencies:
 # StandardLibrary is filtered out from dependent-model patsubst list;
 #   Its model is contained in $(LIBRARY_ROOT)/model, not $(LIBRARY_ROOT)/../StandardLibrary/Model.
 _polymorph:
-	@: $(if ${CODEGEN_CLI_ROOT},,$(error You must pass the path CODEGEN_CLI_ROOT: CODEGEN_CLI_ROOT=/path/to/smithy-dafny/codegen/smithy-dafny-codegen-cli));
 	cd $(CODEGEN_CLI_ROOT); \
-	$(GRADLEW) run --args="\
-	$(DAFNY_VERSION_OPTION) \
+	./../gradlew run --args="\
+	--dafny-version $(DAFNY_VERSION) \
 	--library-root $(LIBRARY_ROOT) \
 	--patch-files-dir $(if $(DIR_STRUCTURE_V2),$(LIBRARY_ROOT)/codegen-patches/$(SERVICE),$(LIBRARY_ROOT)/codegen-patches) \
 	--properties-file $(LIBRARY_ROOT)/project.properties \
+	$(INPUT_DAFNY) \
 	$(OUTPUT_DAFNY) \
+	$(OUTPUT_JAVA) \
 	$(OUTPUT_DOTNET) \
 	$(OUTPUT_JAVA) \
-	--model $(if $(DIR_STRUCTURE_V2),$(LIBRARY_ROOT)/dafny/$(SERVICE)/Model,$(LIBRARY_ROOT)/Model) \
+	--model $(if $(DIR_STRUCTURE_V2), $(LIBRARY_ROOT)/dafny/$(SERVICE)/Model, $(SMITHY_MODEL_ROOT)) \
 	--dependent-model $(PROJECT_ROOT)/$(SMITHY_DEPS) \
 	$(patsubst %, --dependent-model $(PROJECT_ROOT)/%/Model, $($(service_deps_var))) \
 	--namespace $($(namespace_var)) \
+	$(OUTPUT_LOCAL_SERVICE_$(SERVICE)) \
 	$(AWS_SDK_CMD) \
-	$(POLYMORPH_OPTIONS)";
+	$(POLYMORPH_OPTIONS) \
+	";
 
 _polymorph_wrapped:
 	@: $(if ${CODEGEN_CLI_ROOT},,$(error You must pass the path CODEGEN_CLI_ROOT: CODEGEN_CLI_ROOT=/path/to/smithy-dafny/codegen/smithy-dafny-codegen-cli));
 	cd $(CODEGEN_CLI_ROOT); \
-	$(GRADLEW) run --args="\
-	$(DAFNY_VERSION_OPTION) \
+	./../gradlew run --args="\
+	--dafny-version $(DAFNY_VERSION) \
 	--library-root $(LIBRARY_ROOT) \
 	--properties-file $(LIBRARY_ROOT)/project.properties \
 	$(OUTPUT_DAFNY_WRAPPED) \
@@ -216,7 +280,7 @@ _polymorph_wrapped:
 	--dependent-model $(PROJECT_ROOT)/$(SMITHY_DEPS) \
 	$(patsubst %, --dependent-model $(PROJECT_ROOT)/%/Model, $($(service_deps_var))) \
 	--namespace $($(namespace_var)) \
-	$(OUTPUT_LOCAL_SERVICE) \
+	--local-service-test \
 	$(AWS_SDK_CMD) \
 	$(POLYMORPH_OPTIONS)";
 
@@ -228,6 +292,8 @@ _polymorph_dependencies:
 
 # Generates all target runtime code for all namespaces in this project.
 .PHONY: polymorph_code_gen
+polymorph_code_gen: POLYMORPH_LANGUAGE_TARGET=code_gen
+polymorph_code_gen: _polymorph_dependencies
 polymorph_code_gen:
 	set -e; for service in $(PROJECT_SERVICES) ; do \
 		export service_deps_var=SERVICE_DEPS_$${service} ; \
@@ -237,26 +303,22 @@ polymorph_code_gen:
 	done
 
 _polymorph_code_gen: OUTPUT_DAFNY=\
-    --output-dafny $(if $(DIR_STRUCTURE_V2), $(LIBRARY_ROOT)/dafny/$(SERVICE)/Model, $(LIBRARY_ROOT)/Model) \
-	--include-dafny $(STANDARD_LIBRARY_PATH)/src/Index.dfy
+    --output-dafny $(if $(DIR_STRUCTURE_V2), $(LIBRARY_ROOT)/dafny/$(SERVICE)/Model, $(LIBRARY_ROOT)/Model)
+_polymorph_code_gen: INPUT_DAFNY=\
+		--include-dafny $(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy
 _polymorph_code_gen: OUTPUT_DOTNET=\
     $(if $(DIR_STRUCTURE_V2), --output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/$(SERVICE)/, --output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/)
 _polymorph_code_gen: OUTPUT_JAVA=--output-java $(LIBRARY_ROOT)/runtimes/java/src/main/smithy-generated
 _polymorph_code_gen: _polymorph
-_polymorph_code_gen: OUTPUT_DAFNY_WRAPPED=\
-    --output-dafny $(if $(DIR_STRUCTURE_V2), $(LIBRARY_ROOT)/dafny/$(SERVICE)/Model, $(LIBRARY_ROOT)/Model) \
-	--include-dafny $(STANDARD_LIBRARY_PATH)/src/Index.dfy
-_polymorph_code_gen: OUTPUT_DOTNET_WRAPPED=\
-    $(if $(DIR_STRUCTURE_V2), --output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/Wrapped/$(SERVICE)/, --output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/Wrapped)
-_polymorph_code_gen: OUTPUT_LOCAL_SERVICE=--local-service-test
-_polymorph_code_gen: _polymorph_wrapped
-_polymorph_code_gen: POLYMORPH_LANGUAGE_TARGET=code_gen
-_polymorph_code_gen: _polymorph_dependencies
+
+check_polymorph_diff:
+	git diff --exit-code $(LIBRARY_ROOT) || (echo "ERROR: polymorph-generated code does not match the committed code - see above for diff. Either commit the changes or regenerate with 'POLYMORPH_OPTIONS=--update-patch-files'." && exit 1)
 
 # Generates dafny code for all namespaces in this project
 .PHONY: polymorph_dafny
+polymorph_dafny: POLYMORPH_LANGUAGE_TARGET=dafny
+polymorph_dafny: _polymorph_dependencies
 polymorph_dafny:
-	$(MAKE) -C $(STANDARD_LIBRARY_PATH) polymorph_dafny
 	set -e; for service in $(PROJECT_SERVICES) ; do \
 		export service_deps_var=SERVICE_DEPS_$${service} ; \
 		export namespace_var=SERVICE_NAMESPACE_$${service} ; \
@@ -264,40 +326,32 @@ polymorph_dafny:
 		$(MAKE) _polymorph_dafny ; \
 	done
 
-_polymorph_dafny: POLYMORPH_LANGUAGE_TARGET=dafny
-_polymorph_dafny: _polymorph_dependencies
 _polymorph_dafny: OUTPUT_DAFNY=\
-    --output-dafny $(if $(DIR_STRUCTURE_V2), $(LIBRARY_ROOT)/dafny/$(SERVICE)/Model, $(LIBRARY_ROOT)/Model) \
-	--include-dafny $(STANDARD_LIBRARY_PATH)/src/Index.dfy
+		--output-dafny $(if $(DIR_STRUCTURE_V2), $(LIBRARY_ROOT)/dafny/$(SERVICE)/Model, $(LIBRARY_ROOT)/Model)
+_polymorph_dafny: INPUT_DAFNY=\
+		--include-dafny $(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy
 _polymorph_dafny: _polymorph
-_polymorph_dafny: OUTPUT_DAFNY_WRAPPED=\
-    --output-dafny $(if $(DIR_STRUCTURE_V2), $(LIBRARY_ROOT)/dafny/$(SERVICE)/Model, $(LIBRARY_ROOT)/Model) \
-    --include-dafny $(STANDARD_LIBRARY_PATH)/src/Index.dfy
-_polymorph_dafny: OUTPUT_LOCAL_SERVICE=--local-service-test
-_polymorph_dafny: _polymorph_wrapped
 
 # Generates dotnet code for all namespaces in this project
-.PHONY: polymorph_net
-polymorph_net:
+.PHONY: polymorph_dotnet
+polymorph_dotnet: POLYMORPH_LANGUAGE_TARGET=dotnet
+polymorph_dotnet: _polymorph_dependencies
+polymorph_dotnet:
 	set -e; for service in $(PROJECT_SERVICES) ; do \
 		export service_deps_var=SERVICE_DEPS_$${service} ; \
 		export namespace_var=SERVICE_NAMESPACE_$${service} ; \
 		export SERVICE=$${service} ; \
-		$(MAKE) _polymorph_net ; \
+		$(MAKE) _polymorph_dotnet ; \
 	done
 
-_polymorph_net: OUTPUT_DOTNET=\
+_polymorph_dotnet: OUTPUT_DOTNET=\
     $(if $(DIR_STRUCTURE_V2), --output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/$(SERVICE)/, --output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/)
-_polymorph_net: _polymorph
-_polymorph_net: OUTPUT_DOTNET_WRAPPED=\
-    $(if $(DIR_STRUCTURE_V2), --output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/Wrapped/$(SERVICE)/, --output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/Wrapped)
-_polymorph_net: OUTPUT_LOCAL_SERVICE=--local-service-test
-_polymorph_net: _polymorph_wrapped
-_polymorph_net: POLYMORPH_LANGUAGE_TARGET=net
-_polymorph_net: _polymorph_dependencies
+_polymorph_dotnet: _polymorph
 
 # Generates java code for all namespaces in this project
 .PHONY: polymorph_java
+polymorph_java: POLYMORPH_LANGUAGE_TARGET=java
+polymorph_java: _polymorph_dependencies
 polymorph_java:
 	set -e; for service in $(PROJECT_SERVICES) ; do \
 		export service_deps_var=SERVICE_DEPS_$${service} ; \
@@ -308,15 +362,10 @@ polymorph_java:
 
 _polymorph_java: OUTPUT_JAVA=--output-java $(LIBRARY_ROOT)/runtimes/java/src/main/smithy-generated
 _polymorph_java: _polymorph
-_polymorph_java: OUTPUT_JAVA_WRAPPED=--output-java $(LIBRARY_ROOT)/runtimes/java/src/main/smithy-generated
-_polymorph_java: OUTPUT_LOCAL_SERVICE=--local-service-test
-_polymorph_java: _polymorph_wrapped
-_polymorph_java: POLYMORPH_LANGUAGE_TARGET=java
-_polymorph_java: _polymorph_dependencies
 
 # Dependency for formatting generating Java code
 setup_prettier:
-	npm i --no-save prettier prettier-plugin-java
+	npm i --no-save prettier@3 prettier-plugin-java@2.5
 
 ########################## .NET targets
 
@@ -336,28 +385,37 @@ transpile_test_net: _transpile_test_all
 transpile_dependencies_net: LANG=net
 transpile_dependencies_net: transpile_dependencies
 
+test_net: FRAMEWORK=net6.0
 test_net:
 	dotnet run \
 		--project runtimes/net/tests/ \
-		--framework net6.0
+		--framework $(FRAMEWORK)
 
+test_net_mac_intel: FRAMEWORK=net6.0
 test_net_mac_intel:
 	DYLD_LIBRARY_PATH="/usr/local/opt/openssl@1.1/lib" dotnet run \
 		--project runtimes/net/tests/ \
-		--framework net6.0
+		--framework $(FRAMEWORK)
 
+test_net_mac_brew: FRAMEWORK=net6.0
 test_net_mac_brew:
-	DYLD_LIBRARY_PATH="$(brew --prefix)/opt/openssl@1.1/lib" dotnet run \
+	DYLD_LIBRARY_PATH="$(shell brew --prefix)/opt/openssl@1.1/lib/" dotnet run \
 		--project runtimes/net/tests/ \
-		--framework net6.0
+		--framework $(FRAMEWORK)
 
 setup_net:
 	dotnet restore runtimes/net/
 
+format_net:
+	dotnet format runtimes/net/*.csproj
+
+format_net-check:
+	dotnet format runtimes/net/*.csproj --verify-no-changes
+
 ########################## Java targets
 
 build_java: transpile_java mvn_local_deploy_dependencies
-	gradle -p runtimes/java build
+	$(GRADLEW) -p runtimes/java build
 
 transpile_java: | transpile_implementation_java transpile_test_java transpile_dependencies_java
 
@@ -383,16 +441,18 @@ _mv_test_java:
 transpile_dependencies_java: LANG=java
 transpile_dependencies_java: transpile_dependencies
 
+# If we are not StandardLibrary, locally deploy the StandardLibrary.
+# Locally deploy all other dependencies 
 mvn_local_deploy_dependencies:
-	$(MAKE) -C $(STANDARD_LIBRARY_PATH) mvn_local_deploy
-	$(patsubst %, $(MAKE) -C $(PROJECT_ROOT)/% mvn_local_deploy;, $(LIBRARIES))
+	$(if $(strip $(STD_LIBRARY)), $(MAKE) -C $(PROJECT_ROOT)/$(STD_LIBRARY) mvn_local_deploy, )
+	$(patsubst %, $(MAKE) -C $(PROJECT_ROOT)/% mvn_local_deploy;, $(PROJECT_DEPENDENCIES))
 
 # The Java MUST all exist already through the transpile step.
 mvn_local_deploy:
-	gradle -p runtimes/java publishToMavenLocal
+	$(GRADLEW) -p runtimes/java publishMavenLocalPublicationToMavenLocal
 
 test_java:
-	gradle -p runtimes/java runTests
+	$(GRADLEW) -p runtimes/java runTests
 
 _clean:
 	rm -f $(LIBRARY_ROOT)/Model/*Types.dfy $(LIBRARY_ROOT)/Model/*TypesWrapped.dfy
@@ -403,3 +463,55 @@ _clean:
 	rm -rf $(LIBRARY_ROOT)/runtimes/net/tests/bin $(LIBRARY_ROOT)/runtimes/net/tests/obj
 
 clean: _clean
+
+########################## local testing targets
+
+# These targets are added as a convenience for local development.
+# If you experience weird behavior using these targets,
+# fall back to the regular `build` or `test` targets.
+# These targets MUST only be used for local testing,
+# and MUST NOT be used in CI.
+
+# Targets to transpile single local service for convenience.
+# Specify the local service to build by passing a SERVICE env var.
+# Note that this does not generate identical files as `transpile_implementation_java`
+
+local_transpile_impl_java_single: TARGET=java
+local_transpile_impl_java_single: OUT=runtimes/java/ImplementationFromDafny
+local_transpile_impl_java_single: local_transpile_impl_single
+	cp -R runtimes/java/ImplementationFromDafny-java/* runtimes/java/src/main/dafny-generated
+	rm -rf runtimes/java/ImplementationFromDafny-java/
+
+local_transpile_impl_net_single: TARGET=cs
+local_transpile_impl_net_single: OUT=runtimes/net/ImplementationFromDafny
+local_transpile_impl_net_single: local_transpile_impl_single
+
+local_transpile_impl_single: deps_var=SERVICE_DEPS_$(SERVICE)
+local_transpile_impl_single: TRANSPILE_TARGETS=./dafny/$(SERVICE)/src/$(FILE)
+local_transpile_impl_single: TRANSPILE_DEPENDENCIES= \
+		$(patsubst %, -library:$(PROJECT_ROOT)/%/src/Index.dfy, $($(deps_var))) \
+		$(patsubst %, -library:$(PROJECT_ROOT)/%, $(PROJECT_INDEX)) \
+		-library:$(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy
+local_transpile_impl_single: transpile_implementation
+
+# Targets to transpile single local service for convenience.
+# Specify the local service to build by passing a SERVICE env var.
+# Note that this does not generate identical files as `transpile_test_java`,
+# and will clobber tests generated by other services.
+
+local_transpile_test_java_single: TARGET=java
+local_transpile_test_java_single: OUT=runtimes/java/TestsFromDafny
+local_transpile_test_java_single: local_transpile_test_single
+	cp -R runtimes/java/TestsFromDafny-java/* runtimes/java/src/test/dafny-generated
+	rm -rf runtimes/java/TestsFromDafny-java
+
+local_transpile_test_net_single: TARGET=cs
+local_transpile_test_net_single: OUT=runtimes/net/tests/TestsFromDafny
+local_transpile_test_net_single: local_transpile_test_single
+
+local_transpile_test_single: TRANSPILE_TARGETS=./dafny/$(SERVICE)/test/$(FILE)
+local_transpile_test_single: TRANSPILE_DEPENDENCIES= \
+		$(patsubst %, -library:dafny/%/src/Index.dfy, $(PROJECT_SERVICES)) \
+		$(patsubst %, -library:$(PROJECT_ROOT)/%, $(PROJECT_INDEX)) \
+		-library:$(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy
+local_transpile_test_single: transpile_test
