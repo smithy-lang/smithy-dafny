@@ -447,7 +447,7 @@ mvn_local_deploy_dependencies:
 
 # The Java MUST all exist already through the transpile step.
 mvn_local_deploy:
-	./runtimes/java/gradlew -p runtimes/java publishToMavenLocal
+	./runtimes/java/gradlew -p runtimes/java publishMavenLocalPublicationToMavenLocal
 
 test_java:
 	./runtimes/java/gradlew -p runtimes/java runTests
