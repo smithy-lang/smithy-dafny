@@ -459,10 +459,10 @@ mvn_local_deploy:
 
 # The Java MUST all exsist if we want to publish to CodeArtifact
 mvn_ca_deploy:
-	./runtimes/java/gradlew -p runtimes/java publishMavenPublicationToPublishToCodeArtifactCIRepository
+	$(GRADLEW) -p runtimes/java publishMavenPublicationToPublishToCodeArtifactCIRepository
 
 mvn_staging_deploy:
-	./runtimes/java/gradlew -p runtimes/java publishMavenPublicationToPublishToCodeArtifactStagingRepository
+	$(GRADLEW) -p runtimes/java publishMavenPublicationToPublishToCodeArtifactStagingRepository
 
 test_java:
 	$(GRADLEW) -p runtimes/java runTests
