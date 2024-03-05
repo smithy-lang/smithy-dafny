@@ -169,23 +169,29 @@ _transpile_implementation_all: transpile_implementation
 # If this variable is not provided, assume the project does not have `replaceable` modules,
 #   and look for `Index.dfy` in the `src/` directory.
 transpile_implementation: SRC_INDEX_TRANSPILE=$(if $(SRC_INDEX),$(SRC_INDEX),src)
+# At this time it is *significatly* faster
+# to give Dafny a single file
+# that includes everything
+# than it is to pass each file to the CLI.
+# ~2m vs ~10s for our large projects.
+# Also the expectation is that verification happens in the `verify` target
 # `find` looks for `Index.dfy` files in either V1 or V2-styled project directories (single vs. multiple model files).
 transpile_implementation:
 	find ./dafny/**/$(SRC_INDEX_TRANSPILE)/ ./$(SRC_INDEX_TRANSPILE)/ -name 'Index.dfy' | sed -e 's/^/include "/' -e 's/$$/"/' | dafny \
-        -stdin \
-        -noVerify \
-        -vcsCores:$(CORES) \
-        -compileTarget:$(TARGET) \
-        -spillTargetCode:3 \
-        -compile:0 \
-        -optimizeErasableDatatypeWrapper:0 \
-        -compileSuffix:1 \
-        -unicodeChar:0 \
-        -functionSyntax:3 \
-        -useRuntimeLib \
-        -out $(OUT) \
-        $(if $(strip $(STD_LIBRARY)) , -library:$(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy, ) \
-        $(TRANSPILE_DEPENDENCIES)
+		-stdin \
+		-noVerify \
+		-vcsCores:$(CORES) \
+		-compileTarget:$(TARGET) \
+		-spillTargetCode:3 \
+		-compile:0 \
+		-optimizeErasableDatatypeWrapper:0 \
+		-compileSuffix:1 \
+		-unicodeChar:0 \
+		-functionSyntax:3 \
+		-useRuntimeLib \
+		-out $(OUT) \
+		$(if $(strip $(STD_LIBRARY)) , -library:$(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy, ) \
+		$(TRANSPILE_DEPENDENCIES)
 
 # If the project under transpilation uses `replaceable` modules,
 #   it MUST define a SRC_INDEX variable per language.
@@ -450,6 +456,13 @@ mvn_local_deploy_dependencies:
 # The Java MUST all exist already through the transpile step.
 mvn_local_deploy:
 	$(GRADLEW) -p runtimes/java publishMavenLocalPublicationToMavenLocal
+
+# The Java MUST all exsist if we want to publish to CodeArtifact
+mvn_ca_deploy:
+	./runtimes/java/gradlew -p runtimes/java publishMavenPublicationToPublishToCodeArtifactCIRepository
+
+mvn_staging_deploy:
+	./runtimes/java/gradlew -p runtimes/java publishMavenPublicationToPublishToCodeArtifactStagingRepository
 
 test_java:
 	$(GRADLEW) -p runtimes/java runTests
