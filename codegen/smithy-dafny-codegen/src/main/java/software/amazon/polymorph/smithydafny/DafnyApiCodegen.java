@@ -1743,7 +1743,7 @@ public class DafnyApiCodegen {
                             //   a condition on the existing comprehension, starting with `&&`
                             // i.e. var setVar := set t | t in otherVar.Values && t.thisOptionalStructure.Some?
                             modifiesClause = modifiesClause.append(TokenTree.of(
-                                "| %1$s.Some? \n ".formatted(accessPathToCurrentShape)
+                                "&& %1$s.Some? \n ".formatted(accessPathToCurrentShape)
                             ));
                         } else {
                             // If not using set comprehension, the `.Some` check on an optional structure is added as
@@ -1805,13 +1805,13 @@ public class DafnyApiCodegen {
                         // If not using set comprehension, we now need to.
                         if (currentShapeType == ShapeType.LIST) {
                             modifiesClause = modifiesClause.append(TokenTree.of(
-                                "set tmps%1$s <- set t%1$s <- %2$s\n ".formatted(
+                                "set tmps%1$s <- set t%1$s <- %2$s | true\n ".formatted(
                                     intermediateTempVariableCounter,
                                     accessPathToCurrentShape)
                             ));
                         } else if (currentShapeType == ShapeType.MAP) {
                             modifiesClause = modifiesClause.append(TokenTree.of(
-                                "set tmps%1$s <- set t%1$s <- %2$s.Values\n ".formatted(
+                                "set tmps%1$s <- set t%1$s <- %2$s.Values | true\n ".formatted(
                                     intermediateTempVariableCounter,
                                     accessPathToCurrentShape)
                             ));
