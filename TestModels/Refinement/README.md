@@ -6,7 +6,7 @@ This project test the smithy behavior trait [readonly](https://smithy.io/1.0/spe
 ### .NET
 1. Generate the Wrappers using `polymorph`
 ```
-make polymorph_dafny polymorph_net
+make polymorph_dafny polymorph_dotnet
 ```
 
 2. Transpile the tests (and implementation) to the target runtime.

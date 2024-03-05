@@ -22,7 +22,7 @@ polymorph_dafny :
 	--namespace simple.types.enumv2"; \
 
 # Note: This build target fails. This project does not support code generation for Smithy 2.0 models.
-polymorph_net :
+polymorph_dotnet :
 	cd ../../../codegen/smithy-dafny-codegen-cli;\
 	./gradlew run --args="\
 	--output-dafny \
