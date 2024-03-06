@@ -598,7 +598,7 @@ public class DotNetNameResolver {
         return "%s.%s%s".formatted(
                 DafnyNameResolverHelpers.dafnyExternNamespaceForShapeId(shapeId),
                 typePrefix,
-                shapeId.getName());
+                dafnyCompilesExtra_(shapeId));
     }
 
     private String dafnyTypeForString(final StringShape stringShape) {
