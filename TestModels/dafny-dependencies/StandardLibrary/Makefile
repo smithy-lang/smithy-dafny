@@ -6,7 +6,6 @@ CORES=2
 include ../../SharedMakefile.mk
 
 MAX_RESOURCE_COUNT=500000000
-LIBRARIES :=
 
 # define standard colors
 ifneq (,$(findstring xterm,${TERM}))
@@ -21,19 +20,18 @@ endif
 
 # Overriding this target just to generate the project.properties file
 polymorph_dafny :
-	@: $(if ${CODEGEN_CLI_ROOT},,$(error You must pass the path CODEGEN_CLI_ROOT: CODEGEN_CLI_ROOT=/path/to/smithy-dafny/codegen/smithy-dafny-codegen-cli));
 	cd $(CODEGEN_CLI_ROOT); \
 	$(GRADLEW) run --args="\
-	$(DAFNY_VERSION_OPTION) \
+	--dafny-version $(DAFNY_VERSION) \
 	--library-root $(LIBRARY_ROOT) \
-	--properties-file $(STANDARD_LIBRARY_PATH)/project.properties \
-	--model $(STANDARD_LIBRARY_PATH)/Model \
+	--properties-file $(PROJECT_ROOT)/$(STD_LIBRARY)/project.properties \
+	--model $(PROJECT_ROOT)/$(STD_LIBRARY)/Model \
 	--namespace aws.polymorph \
-	--dependent-model $(STANDARD_LIBRARY_PATH)/../Model \
+	--dependent-model $(PROJECT_ROOT)/$(STD_LIBRARY)/../Model \
 	";
 
-polymorph_net :
-	echo "Skipping polymorph_net for StandardLibrary"
+polymorph_dotnet :
+	echo "Skipping polymorph_dotnet for StandardLibrary"
 
 polymorph_java :
 	echo "Skipping polymorph_java for StandardLibrary"

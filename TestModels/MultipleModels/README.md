@@ -53,7 +53,7 @@ as the two model files in this project have a dependency structure.
 1. Generate the Wrappers using `polymorph`
 ```
 make polymorph_dafny DAFNY_VERSION_OPTION="--dafny-version A.B.C" \
-&& make polymorph_net DAFNY_VERSION_OPTION="--dafny-version A.B.C" \
+&& make polymorph_dotnet DAFNY_VERSION_OPTION="--dafny-version A.B.C" \
 && make polymorph_java DAFNY_VERSION_OPTION="--dafny-version A.B.C"
 ```
 
