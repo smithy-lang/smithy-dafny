@@ -14,6 +14,9 @@
 # Variables:
 # MAX_RESOURCE_COUNT -- The Dafny report generator max resource count.
 # 	This is is per project because the verification variability can differ.
+# VERIFY_TIMEOUT -- The Dafny verification timeout in seconds.
+# 	This is only a guard against builds taking way too long to fail.
+#   The resource count limit above is much more important for fighting brittle verification.
 # PROJECT_DEPENDENCIES -- List of dependencies for the project.
 # 	It should be the list of top level directory names
 # PROJECT_SERVICES -- List of names of each local service in the project
@@ -82,7 +85,7 @@ verify:
 		-unicodeChar:0 \
 		-functionSyntax:3 \
 		-verificationLogger:csv \
-		-timeLimit:100 \
+		-timeLimit:$(VERIFY_TIMEOUT) \
 		-trace \
 		%
 
@@ -97,7 +100,7 @@ verify_single:
 		-unicodeChar:0 \
 		-functionSyntax:3 \
 		-verificationLogger:text \
-		-timeLimit:100 \
+		-timeLimit:$(VERIFY_TIMEOUT) \
 		-trace \
 		$(if ${PROC},-proc:*$(PROC)*,) \
 		$(FILE)
@@ -112,7 +115,7 @@ verify_service:
 		-unicodeChar:0 \
 		-functionSyntax:3 \
 		-verificationLogger:csv \
-		-timeLimit:100 \
+		-timeLimit:$(VERIFY_TIMEOUT) \
 		-trace \
 		`find ./dafny/$(SERVICE) -name '*.dfy'` \
 
