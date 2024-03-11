@@ -33,6 +33,7 @@
 #   defaults to $(SMITHY_DAFNY_ROOT)/codegen/gradlew
 
 MAX_RESOURCE_COUNT := 10000000
+VERIFY_TIMEOUT := 100
 
 # This evaluates to the path of the current working directory.
 # i.e. The specific library under consideration.
