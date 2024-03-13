@@ -219,7 +219,7 @@ mod r#_Wrappers_Compile {
        where  {
       ::std::rc::Rc::new(super::r#_Wrappers_Compile::Result::<_U, R>::Failure {error: ((self).error()) })
     }
-    pub fn MapFailure<_NewR: Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static>(self: &::std::rc::Rc<Self>, reWrap: &::dafny_runtime::FunctionWrapper<::std::ops::Fn(&R) -> _NewR + 'static>) -> ::std::rc::Rc<super::r#_Wrappers_Compile::Result<T, _NewR>>
+    pub fn MapFailure<_NewR: Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static>(self: &::std::rc::Rc<Self>, reWrap: &::dafny_runtime::FunctionWrapper<dyn ::std::ops::Fn(&R) -> _NewR + 'static>) -> ::std::rc::Rc<super::r#_Wrappers_Compile::Result<T, _NewR>>
        where  {
       let mut _source4: ::std::rc::Rc<super::r#_Wrappers_Compile::Result<T, R>> = (self).clone();
       if matches!(&_source4.as_ref(), super::r#_Wrappers_Compile::Result::Success{ .. }) {
@@ -322,6 +322,7 @@ mod r#_Wrappers_Compile {
   }
 }
 mod r#_StandardLibrary_Compile_dUInt_Compile {
+  use dafny_runtime::ToPrimitive;
   pub struct _default {}
   impl _default {
     pub fn new() -> Self {
@@ -331,67 +332,67 @@ mod r#_StandardLibrary_Compile_dUInt_Compile {
       a.clone() < b.clone()
     }
     pub fn HasUint16Len<_T: Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static>(s: &::dafny_runtime::Sequence<_T>) -> bool
-       where  {
-      s.cardinality() < (&(super::r#_StandardLibrary_Compile_dUInt_Compile::_default)::UINT16_LIMIT())
+       where  {          
+      s.cardinality() < (&(<(super::r#_StandardLibrary_Compile_dUInt_Compile::_default)>::UINT16_LIMIT))
     }
     pub fn HasUint32Len<_T: Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static>(s: &::dafny_runtime::Sequence<_T>) -> bool
        where  {
-      s.cardinality() < (&(super::r#_StandardLibrary_Compile_dUInt_Compile::_default)::UINT32_LIMIT())
+      s.cardinality() < (&(<(super::r#_StandardLibrary_Compile_dUInt_Compile::_default)>::UINT32_LIMIT))
     }
     pub fn HasUint64Len<_T: Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static>(s: &::dafny_runtime::Sequence<_T>) -> bool
        where  {
-      s.cardinality() < (&(super::r#_StandardLibrary_Compile_dUInt_Compile::_default)::UINT64_LIMIT())
+      s.cardinality() < (&(<(super::r#_StandardLibrary_Compile_dUInt_Compile::_default)>::UINT64_LIMIT))
     }
     pub fn UInt16ToSeq(x: &u16) -> ::dafny_runtime::Sequence<u8> {
-      let mut b0: u8 = num::ToPrimitive::to_u8(x.clone() / (/*optimized*/256)).unwrap();
-      let mut b1: u8 = num::ToPrimitive::to_u8(x.clone() % (/*optimized*/256)).unwrap();
+      let mut b0: u8 = ToPrimitive::to_u8(x.clone() / (/*optimized*/256)).unwrap();
+      let mut b1: u8 = ToPrimitive::to_u8(x.clone() % (/*optimized*/256)).unwrap();
       ::dafny_runtime::seq![b0.clone(), b1.clone()]
     }
     pub fn SeqToUInt16(s: &::dafny_runtime::Sequence<u8>) -> u16 {
-      let mut x0: u16 = (num::ToPrimitive::to_u16(s.get(&::dafny_runtime::DafnyInt::from(0))).unwrap()) * (/*optimized*/256);
-      x0.clone() + (num::ToPrimitive::to_u16(s.get(&::dafny_runtime::DafnyInt::from(1))).unwrap())
+      let mut x0: u16 = (ToPrimitive::to_u16(s.get(&::dafny_runtime::DafnyInt::from(0))).unwrap()) * (/*optimized*/256);
+      x0.clone() + (ToPrimitive::to_u16(s.get(&::dafny_runtime::DafnyInt::from(1))).unwrap())
     }
     pub fn UInt32ToSeq(x: &u32) -> ::dafny_runtime::Sequence<u8> {
-      let mut b0: u8 = num::ToPrimitive::to_u8(x.clone() / (/*optimized*/16777216)).unwrap();
-      let mut x0: u32 = x.clone() - (num::ToPrimitive::to_u32(b0.clone()).unwrap()) * (/*optimized*/16777216);
-      let mut b1: u8 = num::ToPrimitive::to_u8(x0.clone() / (/*optimized*/65536)).unwrap();
-      let mut x1: u32 = x0.clone() - (num::ToPrimitive::to_u32(b1.clone()).unwrap()) * (/*optimized*/65536);
-      let mut b2: u8 = num::ToPrimitive::to_u8(x1.clone() / (/*optimized*/256)).unwrap();
-      let mut b3: u8 = num::ToPrimitive::to_u8(x1.clone() % (/*optimized*/256)).unwrap();
+      let mut b0: u8 = ToPrimitive::to_u8(x.clone() / (/*optimized*/16777216)).unwrap();
+      let mut x0: u32 = x.clone() - (ToPrimitive::to_u32(b0.clone()).unwrap()) * (/*optimized*/16777216);
+      let mut b1: u8 = ToPrimitive::to_u8(x0.clone() / (/*optimized*/65536)).unwrap();
+      let mut x1: u32 = x0.clone() - (ToPrimitive::to_u32(b1.clone()).unwrap()) * (/*optimized*/65536);
+      let mut b2: u8 = ToPrimitive::to_u8(x1.clone() / (/*optimized*/256)).unwrap();
+      let mut b3: u8 = ToPrimitive::to_u8(x1.clone() % (/*optimized*/256)).unwrap();
       ::dafny_runtime::seq![b0.clone(), b1.clone(), b2.clone(), b3.clone()]
     }
     pub fn SeqToUInt32(s: &::dafny_runtime::Sequence<u8>) -> u32 {
-      let mut x0: u32 = (num::ToPrimitive::to_u32(s.get(&::dafny_runtime::DafnyInt::from(0))).unwrap()) * (/*optimized*/16777216);
-      let mut x1: u32 = x0.clone() + (num::ToPrimitive::to_u32(s.get(&::dafny_runtime::DafnyInt::from(1))).unwrap()) * (/*optimized*/65536);
-      let mut x2: u32 = x1.clone() + (num::ToPrimitive::to_u32(s.get(&::dafny_runtime::DafnyInt::from(2))).unwrap()) * (/*optimized*/256);
-      x2.clone() + (num::ToPrimitive::to_u32(s.get(&::dafny_runtime::DafnyInt::from(3))).unwrap())
+      let mut x0: u32 = (ToPrimitive::to_u32(s.get(&::dafny_runtime::DafnyInt::from(0))).unwrap()) * (/*optimized*/16777216);
+      let mut x1: u32 = x0.clone() + (ToPrimitive::to_u32(s.get(&::dafny_runtime::DafnyInt::from(1))).unwrap()) * (/*optimized*/65536);
+      let mut x2: u32 = x1.clone() + (ToPrimitive::to_u32(s.get(&::dafny_runtime::DafnyInt::from(2))).unwrap()) * (/*optimized*/256);
+      x2.clone() + (ToPrimitive::to_u32(s.get(&::dafny_runtime::DafnyInt::from(3))).unwrap())
     }
     pub fn UInt64ToSeq(x: &u64) -> ::dafny_runtime::Sequence<u8> {
-      let mut b0: u8 = num::ToPrimitive::to_u8(x.clone() / (/*optimized*/72057594037927936)).unwrap();
-      let mut x0: u64 = x.clone() - (num::ToPrimitive::to_u64(b0.clone()).unwrap()) * (/*optimized*/72057594037927936);
-      let mut b1: u8 = num::ToPrimitive::to_u8(x0.clone() / (/*optimized*/281474976710656)).unwrap();
-      let mut x1: u64 = x0.clone() - (num::ToPrimitive::to_u64(b1.clone()).unwrap()) * (/*optimized*/281474976710656);
-      let mut b2: u8 = num::ToPrimitive::to_u8(x1.clone() / (/*optimized*/1099511627776)).unwrap();
-      let mut x2: u64 = x1.clone() - (num::ToPrimitive::to_u64(b2.clone()).unwrap()) * (/*optimized*/1099511627776);
-      let mut b3: u8 = num::ToPrimitive::to_u8(x2.clone() / (/*optimized*/4294967296)).unwrap();
-      let mut x3: u64 = x2.clone() - (num::ToPrimitive::to_u64(b3.clone()).unwrap()) * (/*optimized*/4294967296);
-      let mut b4: u8 = num::ToPrimitive::to_u8(x3.clone() / (/*optimized*/16777216)).unwrap();
-      let mut x4: u64 = x3.clone() - (num::ToPrimitive::to_u64(b4.clone()).unwrap()) * (/*optimized*/16777216);
-      let mut b5: u8 = num::ToPrimitive::to_u8(x4.clone() / (/*optimized*/65536)).unwrap();
-      let mut x5: u64 = x4.clone() - (num::ToPrimitive::to_u64(b5.clone()).unwrap()) * (/*optimized*/65536);
-      let mut b6: u8 = num::ToPrimitive::to_u8(x5.clone() / (/*optimized*/256)).unwrap();
-      let mut b7: u8 = num::ToPrimitive::to_u8(x5.clone() % (/*optimized*/256)).unwrap();
+      let mut b0: u8 = ToPrimitive::to_u8(x.clone() / (/*optimized*/72057594037927936)).unwrap();
+      let mut x0: u64 = x.clone() - (ToPrimitive::to_u64(b0.clone()).unwrap()) * (/*optimized*/72057594037927936);
+      let mut b1: u8 = ToPrimitive::to_u8(x0.clone() / (/*optimized*/281474976710656)).unwrap();
+      let mut x1: u64 = x0.clone() - (ToPrimitive::to_u64(b1.clone()).unwrap()) * (/*optimized*/281474976710656);
+      let mut b2: u8 = ToPrimitive::to_u8(x1.clone() / (/*optimized*/1099511627776)).unwrap();
+      let mut x2: u64 = x1.clone() - (ToPrimitive::to_u64(b2.clone()).unwrap()) * (/*optimized*/1099511627776);
+      let mut b3: u8 = ToPrimitive::to_u8(x2.clone() / (/*optimized*/4294967296)).unwrap();
+      let mut x3: u64 = x2.clone() - (ToPrimitive::to_u64(b3.clone()).unwrap()) * (/*optimized*/4294967296);
+      let mut b4: u8 = ToPrimitive::to_u8(x3.clone() / (/*optimized*/16777216)).unwrap();
+      let mut x4: u64 = x3.clone() - (ToPrimitive::to_u64(b4.clone()).unwrap()) * (/*optimized*/16777216);
+      let mut b5: u8 = ToPrimitive::to_u8(x4.clone() / (/*optimized*/65536)).unwrap();
+      let mut x5: u64 = x4.clone() - (ToPrimitive::to_u64(b5.clone()).unwrap()) * (/*optimized*/65536);
+      let mut b6: u8 = ToPrimitive::to_u8(x5.clone() / (/*optimized*/256)).unwrap();
+      let mut b7: u8 = ToPrimitive::to_u8(x5.clone() % (/*optimized*/256)).unwrap();
       ::dafny_runtime::seq![b0.clone(), b1.clone(), b2.clone(), b3.clone(), b4.clone(), b5.clone(), b6.clone(), b7.clone()]
     }
     pub fn SeqToUInt64(s: &::dafny_runtime::Sequence<u8>) -> u64 {
-      let mut x0: u64 = (num::ToPrimitive::to_u64(s.get(&::dafny_runtime::DafnyInt::from(0))).unwrap()) * (/*optimized*/72057594037927936);
-      let mut x1: u64 = x0.clone() + (num::ToPrimitive::to_u64(s.get(&::dafny_runtime::DafnyInt::from(1))).unwrap()) * (/*optimized*/281474976710656);
-      let mut x2: u64 = x1.clone() + (num::ToPrimitive::to_u64(s.get(&::dafny_runtime::DafnyInt::from(2))).unwrap()) * (/*optimized*/1099511627776);
-      let mut x3: u64 = x2.clone() + (num::ToPrimitive::to_u64(s.get(&::dafny_runtime::DafnyInt::from(3))).unwrap()) * (/*optimized*/4294967296);
-      let mut x4: u64 = x3.clone() + (num::ToPrimitive::to_u64(s.get(&::dafny_runtime::DafnyInt::from(4))).unwrap()) * (/*optimized*/16777216);
-      let mut x5: u64 = x4.clone() + (num::ToPrimitive::to_u64(s.get(&::dafny_runtime::DafnyInt::from(5))).unwrap()) * (/*optimized*/65536);
-      let mut x6: u64 = x5.clone() + (num::ToPrimitive::to_u64(s.get(&::dafny_runtime::DafnyInt::from(6))).unwrap()) * (/*optimized*/256);
-      let mut x: u64 = x6.clone() + (num::ToPrimitive::to_u64(s.get(&::dafny_runtime::DafnyInt::from(7))).unwrap());
+      let mut x0: u64 = (ToPrimitive::to_u64(s.get(&::dafny_runtime::DafnyInt::from(0))).unwrap()) * (/*optimized*/72057594037927936);
+      let mut x1: u64 = x0.clone() + (ToPrimitive::to_u64(s.get(&::dafny_runtime::DafnyInt::from(1))).unwrap()) * (/*optimized*/281474976710656);
+      let mut x2: u64 = x1.clone() + (ToPrimitive::to_u64(s.get(&::dafny_runtime::DafnyInt::from(2))).unwrap()) * (/*optimized*/1099511627776);
+      let mut x3: u64 = x2.clone() + (ToPrimitive::to_u64(s.get(&::dafny_runtime::DafnyInt::from(3))).unwrap()) * (/*optimized*/4294967296);
+      let mut x4: u64 = x3.clone() + (ToPrimitive::to_u64(s.get(&::dafny_runtime::DafnyInt::from(4))).unwrap()) * (/*optimized*/16777216);
+      let mut x5: u64 = x4.clone() + (ToPrimitive::to_u64(s.get(&::dafny_runtime::DafnyInt::from(5))).unwrap()) * (/*optimized*/65536);
+      let mut x6: u64 = x5.clone() + (ToPrimitive::to_u64(s.get(&::dafny_runtime::DafnyInt::from(6))).unwrap()) * (/*optimized*/256);
+      let mut x: u64 = x6.clone() + (ToPrimitive::to_u64(s.get(&::dafny_runtime::DafnyInt::from(7))).unwrap());
       x.clone()
     }
     pub fn UINT16_LIMIT() -> ::dafny_runtime::DafnyInt {
@@ -621,6 +622,8 @@ mod r#_StandardLibrary_Compile {
   
 }
 mod r#_UTF8_Compile {
+  use dafny_runtime::ToPrimitive;
+  use dafny_runtime::BigInt;
   pub struct _default {}
   impl _default {
     pub fn new() -> Self {
@@ -654,7 +657,7 @@ mod r#_UTF8_Compile {
         if s.cardinality() == ::dafny_runtime::DafnyInt::from(0) {
           return _accumulator.concat(&(::dafny_runtime::seq![] as ::dafny_runtime::Sequence<u8>));
         } else {
-          let mut x: ::dafny_runtime::Sequence<u8> = ::dafny_runtime::seq![num::ToPrimitive::to_u8(::dafny_runtime::DafnyInt{data: ::BigInt::from(s.get(&::dafny_runtime::DafnyInt::from(0)) as u32)}).unwrap()];
+          let mut x: ::dafny_runtime::Sequence<u8> = ::dafny_runtime::seq![ToPrimitive::to_u8(::dafny_runtime::DafnyInt{data: BigInt::from(s.get(&::dafny_runtime::DafnyInt::from(0)) as u32)}).unwrap()];
           _accumulator = _accumulator.concat(&x);
           let mut _in0: ::dafny_runtime::Sequence<::dafny_runtime::DafnyChar> = s.drop(&::dafny_runtime::DafnyInt::from(1));
           s = _in0.clone();
@@ -683,7 +686,7 @@ mod r#_UTF8_Compile {
           return true;
         } else {
           let mut r: ::dafny_runtime::Sequence<u8> = a.slice(&lo, &hi);
-          if (super::r#_UTF8_Compile::_default)::Uses1Byte(&r) {
+          if <(super::r#_UTF8_Compile::_default)>::Uses1Byte {
             let mut _in1: ::dafny_runtime::Sequence<u8> = a.clone();
             let mut _in2: ::dafny_runtime::DafnyInt = lo.clone() + ::dafny_runtime::DafnyInt::from(1);
             let mut _in3: super::_System::nat = hi.clone();
@@ -692,7 +695,7 @@ mod r#_UTF8_Compile {
             hi = _in3.clone();
             continue 'TAIL_CALL_START;
           } else {
-            if ::dafny_runtime::DafnyInt::from(2) <= r.cardinality() && (super::r#_UTF8_Compile::_default)::Uses2Bytes(&r) {
+            if ::dafny_runtime::DafnyInt::from(2) <= r.cardinality() && <(super::r#_UTF8_Compile::_default)>::Uses2Bytes {
               let mut _in4: ::dafny_runtime::Sequence<u8> = a.clone();
               let mut _in5: ::dafny_runtime::DafnyInt = lo.clone() + ::dafny_runtime::DafnyInt::from(2);
               let mut _in6: super::_System::nat = hi.clone();
@@ -701,7 +704,7 @@ mod r#_UTF8_Compile {
               hi = _in6.clone();
               continue 'TAIL_CALL_START;
             } else {
-              if ::dafny_runtime::DafnyInt::from(3) <= r.cardinality() && (super::r#_UTF8_Compile::_default)::Uses3Bytes(&r) {
+              if ::dafny_runtime::DafnyInt::from(3) <= r.cardinality() && <(super::r#_UTF8_Compile::_default)>::Uses3Bytes {
                 let mut _in7: ::dafny_runtime::Sequence<u8> = a.clone();
                 let mut _in8: ::dafny_runtime::DafnyInt = lo.clone() + ::dafny_runtime::DafnyInt::from(3);
                 let mut _in9: super::_System::nat = hi.clone();
@@ -710,7 +713,7 @@ mod r#_UTF8_Compile {
                 hi = _in9.clone();
                 continue 'TAIL_CALL_START;
               } else {
-                if ::dafny_runtime::DafnyInt::from(4) <= r.cardinality() && (super::r#_UTF8_Compile::_default)::Uses4Bytes(&r) {
+                if ::dafny_runtime::DafnyInt::from(4) <= r.cardinality() && <(super::r#_UTF8_Compile::_default)>::Uses4Bytes {
                   let mut _in10: ::dafny_runtime::Sequence<u8> = a.clone();
                   let mut _in11: ::dafny_runtime::DafnyInt = lo.clone() + ::dafny_runtime::DafnyInt::from(4);
                   let mut _in12: super::_System::nat = hi.clone();
@@ -728,7 +731,7 @@ mod r#_UTF8_Compile {
       }
     }
     pub fn ValidUTF8Seq(s: &::dafny_runtime::Sequence<u8>) -> bool {
-      (super::r#_UTF8_Compile::_default)::ValidUTF8Range(s, &::dafny_runtime::DafnyInt::from(0), &s.cardinality())
+      <(super::r#_UTF8_Compile::_default)>::ValidUTF8Range(s, &::dafny_runtime::DafnyInt::from(0), &s.cardinality())
     }
   }
   impl ::std::default::Default for _default {
