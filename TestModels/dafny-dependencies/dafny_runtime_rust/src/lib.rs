@@ -1,16 +1,19 @@
 #[cfg(test)]
 mod tests;
-use std::{any::Any, borrow::Borrow, cell::{RefCell, UnsafeCell}, cmp::Ordering, collections::{HashMap, HashSet}, fmt::{Debug, Display, Formatter}, hash::{Hash, Hasher}, ops::{Add, Deref, Div, Mul, Neg, Rem, Sub}, rc::Rc};
-use num::{bigint::ParseBigIntError, Integer, Num, One, Signed, ToPrimitive};
-
+use std::{any::Any, borrow::Borrow, cell::{RefCell, UnsafeCell}, cmp::Ordering, collections::{HashMap, HashSet}, fmt::{write, Debug, Display, Formatter}, hash::{Hash, Hasher}, mem, ops::{Add, Deref, Div, Mul, Neg, Rem, Sub}, rc::Rc};
+use as_any::Downcast;
+use num::{bigint::ParseBigIntError, Integer, Num, One, Signed};
 pub use once_cell::unsync::Lazy;
+pub use mem::MaybeUninit;
 
 pub use num::bigint::BigInt;
 pub use num::rational::BigRational;
 pub use num::FromPrimitive;
+pub use num::ToPrimitive;
 pub use num::NumCast;
 pub use num::Zero;
 pub use itertools;
+pub use std::convert::Into;
 
 // An atomic box is just a RefCell in Rust
 pub type SizeT = usize;
@@ -39,6 +42,12 @@ pub mod dafny_runtime_conversions {
     pub type DafnySet<T> = crate::Set<T>;
     pub type DafnyMultiset<T> = crate::Multiset<T>;
     pub type DafnyBool = bool;
+    pub type DafnyChar = crate::DafnyChar;
+    pub type DafnyCharUTF16 = crate::DafnyCharUTF16;
+    pub type DafnyClass<T> = *mut T;
+    pub type DafnyArray<T> = *mut [T];
+    pub type DafnyArray2<T> = *mut [DafnyArray<T>];
+    pub type DafnyArray3<T> = *mut [DafnyArray2<T>];
 
     use num::BigInt;
     use num::ToPrimitive;
@@ -47,6 +56,20 @@ pub mod dafny_runtime_conversions {
     use std::collections::HashSet;
     use std::rc::Rc;
     use std::hash::Hash;
+
+    // Conversion to and from Dafny classes
+    pub unsafe fn dafny_class_to_struct<T: Clone>(ptr: DafnyClass<T>) -> T {
+        ptr.as_ref().unwrap().clone()
+    }
+    pub unsafe fn dafny_class_to_boxed_struct<T: Clone>(ptr: DafnyClass<T>) -> Box<T> {
+        Box::from_raw(ptr)
+    }
+    pub fn struct_to_dafny_class<T>(t: T) -> DafnyClass<T> {
+        boxed_struct_to_dafny_class(Box::new(t))
+    }
+    pub fn boxed_struct_to_dafny_class<T>(t: Box<T>) -> DafnyClass<T> {
+        Box::into_raw(t)
+    }
 
     pub fn dafny_int_to_bigint(i: &DafnyInt) -> BigInt {
         i.data.as_ref().clone()
@@ -175,6 +198,78 @@ pub struct DafnyInt {
     data: Rc<BigInt>
 }
 
+impl DafnyInt {
+    fn new(data: Rc<BigInt>) -> DafnyInt {
+        DafnyInt{data}
+    }
+}
+
+impl AsRef<BigInt> for DafnyInt {
+    fn as_ref(&self) -> &BigInt {
+        &self.data
+    }
+}
+
+// truncate_u(x, u64)
+// = <DafnyInt as ToPrimitive>::to_u128(&x).unwrap() as u64;
+#[macro_export]
+macro_rules! truncate {
+    ($x:expr, $t:ty) => {
+        <$crate::DafnyInt as $crate::Into<$t>>::into($x)
+    }
+}
+
+impl Into<u8> for DafnyInt {
+    fn into(self) -> u8 {
+        self.data.to_u8().unwrap()
+    }
+}
+impl Into<u16> for DafnyInt {
+    fn into(self) -> u16 {
+        self.data.to_u16().unwrap()
+    }
+}
+impl Into<u32> for DafnyInt {
+    fn into(self) -> u32 {
+        self.data.to_u32().unwrap()
+    }
+}
+impl Into<u64> for DafnyInt {
+    fn into(self) -> u64 {
+        self.data.to_u64().unwrap()
+    }
+}
+impl Into<u128> for DafnyInt {
+    fn into(self) -> u128 {
+        self.data.to_u128().unwrap()
+    }
+}
+impl Into<i8> for DafnyInt {
+    fn into(self) -> i8 {
+        self.data.to_i8().unwrap()
+    }
+}
+impl Into<i16> for DafnyInt {
+    fn into(self) -> i16 {
+        self.data.to_i16().unwrap()
+    }
+}
+impl Into<i32> for DafnyInt {
+    fn into(self) -> i32 {
+        self.data.to_i32().unwrap()
+    }
+}
+impl Into<i64> for DafnyInt {
+    fn into(self) -> i64 {
+        self.data.to_i64().unwrap()
+    }
+}
+impl Into<i128> for DafnyInt {
+    fn into(self) -> i128 {
+        self.data.to_i128().unwrap()
+    }
+}
+
 impl ToPrimitive for DafnyInt {
     fn to_i64(&self) -> Option<i64> {
         self.data.to_i64()
@@ -183,6 +278,15 @@ impl ToPrimitive for DafnyInt {
     fn to_u64(&self) -> Option<u64> {
         self.data.to_u64()
     }
+
+    // Override of functions
+    fn to_u128(&self) -> Option<u128> {
+        self.data.to_u128()
+    }
+
+    fn to_i128(&self) -> Option<i128> {
+        self.data.to_i128()
+    }
 }
 
 impl DafnyType for DafnyInt {}
@@ -190,7 +294,7 @@ impl DafnyTypeEq for DafnyInt {}
 
 impl Default for DafnyInt {
     fn default() -> Self {
-        DafnyInt{data: Rc::new(BigInt::zero())}
+        DafnyInt::new(Rc::new(BigInt::zero()))
     }
 }
 
@@ -474,6 +578,7 @@ where T: DafnyType {
                 let mut cache = boxed.borrow_mut();
                 let mutable_left: *mut Sequence<T> = left.get();
                 let mutable_right: *mut Sequence<T> = right.get();
+                // safety: Once the array is computed, left and right won't ever be read again.
                 unsafe { *mutable_left = seq!() };
                 unsafe { *mutable_right = seq!() };
                 *cache = Some(result.clone());
@@ -501,6 +606,7 @@ where T: DafnyType {
                     }
                     return;
                 }
+                // safety: When a concat is initialized, the left and right are well defined
                 Sequence::<T>::append_recursive(array, unsafe { &mut *left.get() });
                 Sequence::<T>::append_recursive(array, unsafe { &mut *right.get() });
               }
@@ -878,6 +984,14 @@ impl <K, V> Debug for Map<K, V>
 pub struct Set<V: DafnyTypeEq>
 {
     data: Rc<HashSet<V>>
+}
+
+impl <T> Default for Set<T>
+  where T: DafnyTypeEq
+{
+    fn default() -> Self {
+        Self::new_empty()
+    }
 }
 
 impl <V> PartialEq<Set<V>> for Set<V>
@@ -1356,26 +1470,13 @@ impl <V: DafnyTypeEq> Hash for Multiset<V> {
     }
 }
 
-// Generic function to allocate and return a raw pointer immediately
-#[inline]
-pub fn allocate<T: ?Sized>(value: Box<T>) -> *const T {
-    Box::into_raw(value)
-}
-
-// Generic function to safely deallocate a raw pointer
-#[inline]
-pub fn deallocate<T : ?Sized>(pointer: *const T) {
-    unsafe {
-        // Takes ownership of the reference,
-        // so that it's deallocated at the end of the method
-        let _ = Box::from_raw(pointer as *mut T);
-    }
-}
 // Define the AsAny trait
 pub trait AsAny {
   fn as_any(&self) -> &dyn Any;
+  fn as_any_mut(&mut self) -> &mut dyn Any;
 }
 pub fn is_instance_of<C: ?Sized + AsAny, U: 'static>(theobject: *const C) -> bool {
+    // safety: Dafny won't call this function unless it can guarantee the object is still allocated
     unsafe { &*theobject }.as_any().downcast_ref::<U>().is_some()
 }
 trait DafnyUpdowncast<U: ?Sized> {
@@ -1396,7 +1497,8 @@ trait DafnyUpdowncast<U: ?Sized> {
 impl <T: ?Sized + AsAny, U: 'static> DafnyUpdowncast<*const U> for *const T
 {
     fn updowncast(&self) -> *const U {
-        unsafe { &**self }.as_any().downcast_ref::<U>().unwrap()
+     // safety: Dafny won't call this function unless it can guarantee the object is still allocated
+     unsafe { &**self }.as_any().downcast_ref::<U>().unwrap()
     }
 
     fn is_instance_of(&self) -> bool {
@@ -1609,6 +1711,8 @@ impl DafnyPrint for () {
 
 #[derive(Clone)]
 pub struct DafnyCharUTF16(pub u16);
+pub type DafnyStringUTF16 = Sequence<DafnyCharUTF16>;
+
 impl DafnyType for DafnyCharUTF16 {}
 impl DafnyTypeEq for DafnyCharUTF16 {}
 
@@ -1666,6 +1770,7 @@ impl PartialOrd<DafnyCharUTF16> for DafnyCharUTF16 {
 
 #[derive(Clone)]
 pub struct DafnyChar(pub char);
+pub type DafnyString = Sequence<DafnyChar>;
 
 impl DafnyType for DafnyChar {}
 impl DafnyTypeEq for DafnyChar {}
@@ -1864,7 +1969,7 @@ pub fn char_lt(left: char, right: char) -> bool {
     left_code < right_code
 }
 
-pub fn string_of(s: &str) -> Sequence<DafnyChar> {
+pub fn string_of(s: &str) -> DafnyString {
     s.chars().map(|v| DafnyChar(v)).collect::<Sequence<DafnyChar>>()
 }
 
@@ -1984,3 +2089,266 @@ macro_rules! int {
     }
 }
 
+//////////
+// Arrays
+//////////
+
+// An Dafny array is a zero-cost abstraction over a pointer on a native array
+
+// array![1, 2, 3] create a Dafny array
+#[macro_export]
+macro_rules! array {
+    ($($x:expr), *) => {
+        array::from_native(Box::new([$($x), *]))
+    }
+}
+pub mod array {
+    use std::{
+        boxed::Box,
+        rc::Rc,
+        vec::Vec,
+    };
+    use num::ToPrimitive;
+    use super::DafnyInt;
+    #[inline]
+    pub fn from_native<T>(v: Box<[T]>) -> *mut [T] {
+        Box::into_raw(v)
+    }
+    #[inline]
+    pub fn from_vec<T>(v: Vec<T>) -> *mut [T] {
+        from_native(v.into_boxed_slice())
+    }
+    pub fn initialize_usize<T>(n: usize, initializer: Rc<dyn Fn(usize) -> T>) -> *mut [T] {
+        let mut v = Vec::with_capacity(n);
+        for i in 0..n {
+            v.push(initializer(i));
+        }
+        from_vec(v)
+    }
+    pub fn initialize<T>(n: &DafnyInt, initializer: Rc<dyn Fn(&DafnyInt) -> T>) -> *mut [T] {
+        let n_usize = n.to_usize().unwrap();
+        let mut v = Vec::with_capacity(n_usize);
+        for i in 0..n_usize {
+            v.push(initializer(&int!(i)));
+        }
+        from_vec(v)
+    }
+    
+    #[inline]
+    pub fn length_usize<T>(this: *mut [T]) -> usize {
+      // safety: Dafny won't call this function unless it can guarantee the array is still allocated
+      unsafe{&*this}.len()
+    }
+    #[inline]
+    pub fn length<T>(this: *mut [T]) -> DafnyInt {
+        int!(length_usize(this))
+    }
+    #[inline]
+    pub fn get_usize<T: Clone>(this: *mut [T], i: usize) -> T {
+        // safety: Dafny won't call this function unless it can guarantee the array is still allocated
+        (unsafe{&*this} as &[T])[i].clone()
+    }
+    #[inline]
+    pub fn get<T: Clone>(this: *mut [T], i: &DafnyInt) -> T {
+        get_usize(this, i.to_usize().unwrap())
+    }
+    #[inline]
+    pub fn update_usize<T>(this: *mut [T], i: usize, val: T) {
+        // safety: Dafny won't call this function unless it can guarantee the array is still allocated
+        (unsafe{&mut *this} as &mut [T])[i] = val;
+    }
+    #[inline]
+    pub fn update<T>(this: *mut [T], i: &DafnyInt, val: T) {
+        update_usize(this, i.to_usize().unwrap(), val);
+    }
+}
+
+
+///////////////////
+// Class helpers //
+///////////////////
+pub fn allocate<T>() -> *mut T {
+    let mut this: Box<MaybeUninit<T>> = Box::new(MaybeUninit::uninit());
+    let this_ptr = this.as_mut() as *mut MaybeUninit<T> as *mut T;
+    Box::into_raw(this); // Make sure this is not dropped
+    this_ptr
+}
+// Generic function to safely deallocate a raw pointer
+#[inline]
+pub fn deallocate<T : ?Sized>(pointer: *const T) {
+    // safety: Dafny won't call this function unless it can guarantee the array is still allocated
+    unsafe {
+        // Takes ownership of the reference,
+        // so that it's deallocated at the end of the method
+        let _ = Box::from_raw(pointer as *mut T);
+    }
+}
+
+impl <T: ?Sized> DafnyPrint for *mut T {
+    fn fmt_print(&self, f: &mut Formatter<'_>, _in_seq: bool) -> std::fmt::Result {
+        write!(f, "object")
+    }
+}
+
+impl <T: ?Sized> DafnyType for *mut T {}
+
+impl <T: ?Sized> DafnyTypeEq for *mut T {}
+
+// When initializing an uninitialized field for the first time,
+// we ensure we don't drop the previous content
+// This is problematic if the same field is overwritten multiple times
+/// In that case, prefer to use update_uninit
+#[macro_export]
+macro_rules! update_field_nodrop {
+    ($ptr:expr, $field:ident, $value:expr) => {
+        $crate::update_nodrop!((*$ptr).$field, $value)
+    }
+}
+
+// When initializing an uninitialized field for the first time,
+// we ensure we don't drop the previous content
+#[macro_export]
+macro_rules! update_nodrop {
+    ($ptr:expr, $value:expr) => {
+        // safety: Dafny won't call this function unless it can guarantee the value at the address was not
+        // yet initialized, so that not dropping it won't create a memory leak
+        unsafe { ::std::ptr::addr_of_mut!($ptr).write($value) }
+    }
+}
+
+// Given a class or array pointer, transforms it to a mutable reference
+#[macro_export]
+macro_rules! modify {
+    ($ptr:expr) => {
+        // safety: Dafny will only obtain a mutable borrowed address of a pointer if it can ensure the object
+        // is still allocated
+        (unsafe { &mut *$ptr })
+    }
+}
+
+// Given a class or array pointer, transforms it to a read-only reference
+#[macro_export]
+macro_rules! read {
+    ($ptr:expr) => {
+        // safety: Dafny will only obtain a borrowed address of a pointer if it can ensure the object
+        // is still allocated
+        (unsafe { &*$ptr })
+    }
+}
+
+// uninit!(Rc<i32>)
+// == unsafe { transmute::<MaybeUninit::<Rc<i32>>, Rc<i32>>(MaybeUninit::<Rc<i32>>::uninit()) };
+#[macro_export]
+macro_rules! var_uninit {
+    ($tpe:ty) => {
+        // safety: Dafny will ensure that for every uninitialized memory, it will write to it with update_nodrop!
+        unsafe { $crate::MaybeUninit::<$tpe>::uninit().assume_init() }
+    }
+}
+//  assign_maybe_uninit!(t, t_assigned, value)
+/*  let computed_value = value;
+    if t_assigned {
+        t = computed_value;
+    } else {
+        update_nodrop!(t, computed_value);
+        t_assigned = true;
+    } */
+#[macro_export]
+macro_rules! update_uninit {
+    ($t:expr, $t_assigned:expr, $value:expr) => {
+        {
+            let computed_value = $value;
+            if $t_assigned {
+                $t = computed_value;
+            } else {
+                $crate::update_nodrop!($t, computed_value);
+                $t_assigned = true;
+            }
+        }
+    }
+}
+
+// If the field is guaranteed to be assigned only once, update_field_nodrop is sufficient
+#[macro_export]
+macro_rules! update_field_uninit {
+    ($t:expr, $field:ident, $field_assigned:expr, $value:expr) => {
+        {
+            let computed_value = $value;
+            if $field_assigned {
+                $crate::modify!($t).$field = computed_value;
+            } else {
+                $crate::update_field_nodrop!($t, $field, computed_value);
+                $field_assigned = true;
+            }
+        }
+    }
+}
+
+// Don't run the destructor, i.e. on a value that was surely never initialized
+#[macro_export]
+macro_rules! forget {
+    ($t:expr) => {
+        ::std::mem::forget($t)
+    }
+}
+
+// Don't run the destructor, on a value that was possibly never initialized
+#[macro_export]
+macro_rules! forget_uninit {
+    ($t:expr, $field_assigned:expr) => {
+        if !$field_assigned {
+            $crate::forget!($t);
+        }
+    }
+}
+
+/////////////////
+// Method helpers
+/////////////////
+
+
+// A MaybePlacebo is a value that is either a placebo or a real value.
+// It is a wrapper around a MaybeUninit<T> value, but knowing whether the value is a placebo or not.
+// That way, when it is dropped, the underlying value is only dropped if it is not a placebo.
+pub struct MaybePlacebo<T>(Option<T>);
+impl <T: Clone> MaybePlacebo<T> {
+    #[inline]
+    pub fn read(&self) -> T {
+        // safety: Dafny will guarantee we will never read a placebo value
+        unsafe {self.0.clone().unwrap_unchecked()}
+    }
+}
+
+impl <T> MaybePlacebo<T> {
+    #[inline]
+    pub fn new() -> Self {
+        MaybePlacebo(None)
+    }
+    #[inline]
+    pub fn from(v: T) -> Self {
+        MaybePlacebo(Some(v))
+    }
+}
+
+#[macro_export]
+macro_rules! tuple_extract_index {
+    ($x:expr, $i:expr) => {
+        $x.$i
+    }
+}
+
+// A macro that maps tuple (a, b, c...) to produce (MaybePlacebo::from(a), MaybePlacebo::from(b), MaybePlacebo::from(c))
+// maybe_placebos_from!(expr, 0, 1, 2, 3)
+// = let x = expr;
+//   (MaybePlacebo::from(x.0), MaybePlacebo::from(x.1), MaybePlacebo::from(x.2), MaybePlacebo::from(x.3))
+#[macro_export]
+macro_rules! maybe_placebos_from {
+    ($x:expr, $($i:tt), *) => {
+        {
+            let x = $x;
+            (
+                $( $crate::MaybePlacebo::from(x.$i), )*
+            )
+        }
+    }
+}
