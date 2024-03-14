@@ -331,15 +331,15 @@ mod r#_StandardLibrary_Compile_dUInt_Compile {
     pub fn UInt8Less(a: &u8, b: &u8) -> bool {
       a.clone() < b.clone()
     }
-    pub fn HasUint16Len<_T: Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static>(s: &::dafny_runtime::Sequence<_T>) -> bool
+    pub fn HasUint16Len<_T: Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static + dafny_runtime::DafnyType>(s: &::dafny_runtime::Sequence<_T>) -> bool
        where  {          
       s.cardinality() < (&(<(super::r#_StandardLibrary_Compile_dUInt_Compile::_default)>::UINT16_LIMIT))
     }
-    pub fn HasUint32Len<_T: Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static>(s: &::dafny_runtime::Sequence<_T>) -> bool
+    pub fn HasUint32Len<_T: Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static + dafny_runtime::DafnyType>(s: &::dafny_runtime::Sequence<_T>) -> bool
        where  {
       s.cardinality() < (&(<(super::r#_StandardLibrary_Compile_dUInt_Compile::_default)>::UINT32_LIMIT))
     }
-    pub fn HasUint64Len<_T: Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static>(s: &::dafny_runtime::Sequence<_T>) -> bool
+    pub fn HasUint64Len<_T: Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static + dafny_runtime::DafnyType>(s: &::dafny_runtime::Sequence<_T>) -> bool
        where  {
       s.cardinality() < (&(<(super::r#_StandardLibrary_Compile_dUInt_Compile::_default)>::UINT64_LIMIT))
     }
@@ -562,18 +562,18 @@ mod r#_StandardLibrary_Compile_dUInt_Compile {
   }
   #[derive(Clone, PartialEq)]
   #[repr(transparent)]
-  pub struct seq16<T>(pub ::dafny_runtime::Sequence<T>);
-  impl <T: Clone + ::dafny_runtime::DafnyPrint + 'static>::std::default::Default for seq16<T> {
+  pub struct seq16<T: dafny_runtime::DafnyType>(pub ::dafny_runtime::Sequence<T>);
+  impl <T: Clone + ::dafny_runtime::DafnyPrint + 'static + dafny_runtime::DafnyType>::std::default::Default for seq16<T> {
     fn default() -> Self {
       seq16(::std::default::Default::default())
     }
   }
-  impl <T: Clone + ::dafny_runtime::DafnyPrint + 'static>::dafny_runtime::DafnyPrint for seq16<T> {
+  impl <T: Clone + ::dafny_runtime::DafnyPrint + 'static + dafny_runtime::DafnyType>::dafny_runtime::DafnyPrint for seq16<T> {
     fn fmt_print(&self, _formatter: &mut ::std::fmt::Formatter, in_seq: bool) -> ::std::fmt::Result {
       ::dafny_runtime::DafnyPrint::fmt_print(&self.0, _formatter, in_seq)
     }
   }
-  impl <T: Clone + ::dafny_runtime::DafnyPrint + 'static>::std::ops::Deref for seq16<T> {
+  impl <T: Clone + ::dafny_runtime::DafnyPrint + 'static + dafny_runtime::DafnyType>::std::ops::Deref for seq16<T> {
     type Target = ::dafny_runtime::Sequence<T>;
     fn deref(&self) -> &Self::Target {
       &self.0
@@ -581,18 +581,18 @@ mod r#_StandardLibrary_Compile_dUInt_Compile {
   }
   #[derive(Clone, PartialEq)]
   #[repr(transparent)]
-  pub struct seq32<T>(pub ::dafny_runtime::Sequence<T>);
-  impl <T: Clone + ::dafny_runtime::DafnyPrint + 'static>::std::default::Default for seq32<T> {
+  pub struct seq32<T: dafny_runtime::DafnyType>(pub ::dafny_runtime::Sequence<T>);
+  impl <T: Clone + ::dafny_runtime::DafnyPrint + 'static + dafny_runtime::DafnyType>::std::default::Default for seq32<T> {
     fn default() -> Self {
       seq32(::std::default::Default::default())
     }
   }
-  impl <T: Clone + ::dafny_runtime::DafnyPrint + 'static>::dafny_runtime::DafnyPrint for seq32<T> {
+  impl <T: Clone + ::dafny_runtime::DafnyPrint + 'static + dafny_runtime::DafnyType>::dafny_runtime::DafnyPrint for seq32<T> {
     fn fmt_print(&self, _formatter: &mut ::std::fmt::Formatter, in_seq: bool) -> ::std::fmt::Result {
       ::dafny_runtime::DafnyPrint::fmt_print(&self.0, _formatter, in_seq)
     }
   }
-  impl <T: Clone + ::dafny_runtime::DafnyPrint + 'static>::std::ops::Deref for seq32<T> {
+  impl <T: Clone + ::dafny_runtime::DafnyPrint + 'static + dafny_runtime::DafnyType>::std::ops::Deref for seq32<T> {
     type Target = ::dafny_runtime::Sequence<T>;
     fn deref(&self) -> &Self::Target {
       &self.0
@@ -600,18 +600,18 @@ mod r#_StandardLibrary_Compile_dUInt_Compile {
   }
   #[derive(Clone, PartialEq)]
   #[repr(transparent)]
-  pub struct seq64<T>(pub ::dafny_runtime::Sequence<T>);
-  impl <T: Clone + ::dafny_runtime::DafnyPrint + 'static>::std::default::Default for seq64<T> {
+  pub struct seq64<T: dafny_runtime::DafnyType>(pub ::dafny_runtime::Sequence<T>);
+  impl <T: Clone + ::dafny_runtime::DafnyPrint + 'static + dafny_runtime::DafnyType>::std::default::Default for seq64<T> {
     fn default() -> Self {
       seq64(::std::default::Default::default())
     }
   }
-  impl <T: Clone + ::dafny_runtime::DafnyPrint + 'static>::dafny_runtime::DafnyPrint for seq64<T> {
+  impl <T: Clone + ::dafny_runtime::DafnyPrint + 'static + dafny_runtime::DafnyType>::dafny_runtime::DafnyPrint for seq64<T> {
     fn fmt_print(&self, _formatter: &mut ::std::fmt::Formatter, in_seq: bool) -> ::std::fmt::Result {
       ::dafny_runtime::DafnyPrint::fmt_print(&self.0, _formatter, in_seq)
     }
   }
-  impl <T: Clone + ::dafny_runtime::DafnyPrint + 'static>::std::ops::Deref for seq64<T> {
+  impl <T: Clone + ::dafny_runtime::DafnyPrint + 'static + dafny_runtime::DafnyType>::std::ops::Deref for seq64<T> {
     type Target = ::dafny_runtime::Sequence<T>;
     fn deref(&self) -> &Self::Target {
       &self.0
