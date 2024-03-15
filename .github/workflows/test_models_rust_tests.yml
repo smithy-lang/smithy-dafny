@@ -11,9 +11,6 @@ on:
 
 jobs:
   testRust:
-    # Don't run the nightly build on forks
-    # Also the Rust backend didn't exist yet in Dafny 4.2
-    if: (github.event_name != 'schedule' || github.repository_owner == 'smithy-lang') && (${{ inputs.dafny }} != '4.2.0')
     strategy:
       fail-fast: false
       matrix:
