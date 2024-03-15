@@ -44,6 +44,37 @@ transpile_net: | transpile_implementation_net transpile_test_net
 # StandardLibrary as a dependency
 transpile_java: | transpile_implementation_java transpile_test_java
 
+########################## Rust targets
+
+transpile_rust: | _transpile_implementation_just_uint_rust _mv_implementation_rust
+
+_transpile_implementation_just_uint_rust:
+	find ./src -name 'UInt.dfy' | sed -e 's/^/include "/' -e 's/$$/"/' | dafny \
+		-stdin \
+		-noVerify \
+		-vcsCores:$(CORES) \
+		-compileTarget:rs \
+		-spillTargetCode:3 \
+		-compile:0 \
+		-optimizeErasableDatatypeWrapper:0 \
+		-compileSuffix:1 \
+		-unicodeChar:0 \
+		-functionSyntax:3 \
+		-useRuntimeLib \
+		-out runtimes/rust/ImplementationFromDafny \
+
+_mv_implementation_rust:
+	rm -rf runtimes/rust/src
+	mkdir -p runtimes/rust/src
+	mv runtimes/rust/ImplementationFromDafny-rust/src/ImplementationFromDafny.rs runtimes/rust/src/lib.rs
+	rm -rf runtimes/rust/ImplementationFromDafny-rust
+
+build_rust: transpile_rust
+	cd runtimes/rust; \
+	cargo build
+
+##########################
+
 transpile_dependencies:
 	echo "Skipping transpile_dependencies for StandardLibrary"
 
