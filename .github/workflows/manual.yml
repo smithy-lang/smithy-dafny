@@ -41,5 +41,5 @@ jobs:
           gh issue create \
             --repo "dafny-lang/dafny" \
             --title "(TEST ISSUE PLEASE IGNORE) Dafny nightly regression from ${{ github.workflow_ref }}" \
-            --label "severity: release-blocker" \
+            --label "release-blocker" \
             --body "See ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
