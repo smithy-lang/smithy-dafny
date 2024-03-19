@@ -1,5 +1,5 @@
-# This workflow performs tests in Java.
-name: Library Java tests
+# This workflow performs tests in Rust.
+name: Library Rust tests
 
 on:
   workflow_call:
@@ -10,7 +10,7 @@ on:
         type: string
 
 jobs:
-  testJava:
+  testRust:
     strategy:
       fail-fast: false
       matrix:
@@ -18,18 +18,18 @@ jobs:
           TestModels/dafny-dependencies/StandardLibrary, # This stores current Polymorph dependencies that all TestModels depend on
           # TestModels/Aggregate,
           # TestModels/AggregateReferences,
-          TestModels/CodegenPatches,
-          TestModels/Constraints,
+          # TestModels/CodegenPatches,
+          # TestModels/Constraints,
           # TestModels/Constructor,
           # TestModels/Dependencies,
-          TestModels/Errors,
-          TestModels/Extendable,
+          # TestModels/Errors,
+          # TestModels/Extendable,
           # TestModels/Extern,
           # TestModels/LanguageSpecificLogic,
-          TestModels/LocalService,
-          TestModels/MultipleModels,
+          # TestModels/LocalService,
+          # TestModels/MultipleModels,
           # TestModels/Refinement,
-          TestModels/Resource,
+          # TestModels/Resource,
           # TestModels/SimpleTypes/BigDecimal,
           # TestModels/SimpleTypes/BigInteger,
           # TestModels/SimpleTypes/SimpleBlob,
@@ -45,8 +45,8 @@ jobs:
           # TestModels/SimpleTypes/SimpleString,
           # TestModels/SimpleTypes/SimpleTimestamp,
           # TestModels/Union,
-          TestModels/aws-sdks/ddb,
-          TestModels/aws-sdks/kms,
+          # TestModels/aws-sdks/ddb,
+          # TestModels/aws-sdks/kms,
         ]
     runs-on: "ubuntu-latest"
     permissions:
@@ -74,42 +74,19 @@ jobs:
         with:
           dafny-version: ${{ inputs.dafny }}
 
-      - name: Setup Java 
-        uses: actions/setup-java@v3
+      - name: Set up Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
-          distribution: 'corretto'
-          java-version: 17
+          toolchain: '1.74.1'
 
-      - name: Setup smithy-dafny-conversion
-        uses: gradle/gradle-build-action@v2
-        with:
-          arguments: publishToMavenLocal
-          build-root-directory: smithy-dafny-conversion
-
-      - name: Setup Java 17 for codegen
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'corretto'
-          java-version: '17'
-
-      - name: Setup dependencies
-        working-directory: ./${{ matrix.library }}
-        run: |
-          make setup_prettier
-  
-      - name: Generate Polymorph Dafny and Java code
-        shell: bash
-        working-directory: ./${{ matrix.library }}
-        # Use $DAFNY_VERSION from setup-dafny-action to handle nightlies correctly
-        run: |
-          make polymorph_dafny DAFNY_VERSION_OPTION="--dafny-version $DAFNY_VERSION"
-          make polymorph_java DAFNY_VERSION_OPTION="--dafny-version $DAFNY_VERSION"
-
-      - name: Setup Java 8 for running tests
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'corretto'
-          java-version: '8'
+      # TODO - not implemented yet, and not relevant for the only library we're testing so far (StandardLibrary)
+      # - name: Generate Polymorph Dafny and Rust code
+      #   shell: bash
+      #   working-directory: ./${{ matrix.library }}
+      #   # Use $DAFNY_VERSION from setup-dafny-action to handle nightlies correctly
+      #   run: |
+      #     make polymorph_dafny DAFNY_VERSION_OPTION="--dafny-version $DAFNY_VERSION"
+      #     make polymorph_rust DAFNY_VERSION_OPTION="--dafny-version $DAFNY_VERSION"
 
       - name: Compile ${{ matrix.library }} implementation
         shell: bash
@@ -117,10 +94,11 @@ jobs:
         run: |
           # This works because `node` is installed by default on GHA runners
           CORES=$(node -e 'console.log(os.cpus().length)')
-          make build_java CORES=$CORES
+          make build_rust CORES=$CORES
 
-      - name: Test ${{ matrix.library }}
-        working-directory: ./${{ matrix.library }}
-        shell: bash
-        run: |
-          make test_java
+      # TODO - not implemented yet, and no test files work yet in the only library we're testing so far (StandardLibrary)
+      # - name: Test ${{ matrix.library }}
+      #   working-directory: ./${{ matrix.library }}
+      #   shell: bash
+      #   run: |
+      #     make test_rust
