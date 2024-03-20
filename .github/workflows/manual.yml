@@ -41,6 +41,7 @@ jobs:
           gh issue create \
             --repo "dafny-lang/dafny" \
             --title "(TEST ISSUE PLEASE IGNORE) Dafny nightly regression from ${{ github.repository }}" \
-            --label "release-blocker" \
-            --label "autocut" \
-            --body "Failure in ${{ github.workflow_ref }}.\n\nSee ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            --label "release-blocker,autocut" \
+            --body "Failure in ${{ github.workflow_ref }}. \
+            \
+            See ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
