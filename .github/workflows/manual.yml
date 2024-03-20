@@ -34,12 +34,13 @@ jobs:
     # needs: [manual-ci-verification, manual-ci-java, manual-ci-net]
     # if: ${{ always() && contains(needs.*.result, 'failure') }}
     env:
-      GH_TOKEN: ${{ secrets.ROBINS_PAT_FOR_EXPERIMENTS }}
+      GH_TOKEN: ${{ secrets.CI_TOKEN }}
     steps:
       - name: Create release blocker on dafny-lang/dafny
         run: |
           gh issue create \
             --repo "dafny-lang/dafny" \
-            --title "(TEST ISSUE PLEASE IGNORE) Dafny nightly regression from ${{ github.workflow_ref }}" \
+            --title "(TEST ISSUE PLEASE IGNORE) Dafny nightly regression from ${{ github.repository }}" \
             --label "release-blocker" \
-            --body "See ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            --label "autocut" \
+            --body "Failure in ${{ github.workflow_ref }}.\n\nSee ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
