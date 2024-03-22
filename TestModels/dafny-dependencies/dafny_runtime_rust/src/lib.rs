@@ -475,6 +475,19 @@ impl <'a> From<&'a [u8]> for DafnyInt {
         DafnyInt::parse_bytes(number, 10)
     }
 }
+// Now the same but for &[u8, N] for any kind of such references
+impl <'a, const N: usize> From<&'a [u8; N]> for DafnyInt {
+    fn from(number: &[u8; N]) -> Self {
+        DafnyInt::parse_bytes(number, 10)
+    }
+}
+
+impl <T: DafnyType> Default for Sequence<T> {
+    fn default() -> Self {
+        Sequence::from_array_owned(vec![])
+    }
+}
+
 
 // **************
 // Immutable sequences
@@ -1179,6 +1192,10 @@ impl <V: DafnyTypeEq> Set<V>
 
     pub fn as_dafny_multiset(&self) -> Multiset<V> {
         Multiset::from_set(self)
+    }
+
+    pub fn iter(&self) -> std::collections::hash_set::Iter<'_, V> {
+        self.data.iter()
     }
 }
 
@@ -1974,6 +1991,11 @@ pub fn string_of(s: &str) -> DafnyString {
 }
 
 
+pub fn string_utf16_of(s: &str) -> DafnyStringUTF16 {
+    Sequence::from_array_owned(s.encode_utf16().map(|v| DafnyCharUTF16(v)).collect())
+}
+
+
 macro_rules! impl_tuple_print {
     ($($items:ident)*) => {
         impl <$($items,)*> DafnyPrint for ($($items,)*)
@@ -2193,6 +2215,58 @@ impl <T: ?Sized> DafnyPrint for *mut T {
 impl <T: ?Sized> DafnyType for *mut T {}
 
 impl <T: ?Sized> DafnyTypeEq for *mut T {}
+
+// BoundedPools with methods such as forall, exists, iter.
+
+pub trait Forall<T> {
+    fn forall(&self, f: Rc<dyn Fn(&T) -> bool>) -> bool;
+}
+
+pub struct Range(pub DafnyInt, pub DafnyInt);
+
+impl Range {
+    pub fn new(start: &DafnyInt, end: &DafnyInt) -> Range {
+        Range(start.clone(), end.clone())
+    }
+}
+
+impl Forall<DafnyInt> for Range {
+    fn forall(&self, f: Rc<dyn Fn(&DafnyInt) -> bool>) -> bool {
+        let mut i: DafnyInt = self.0.clone();
+        while i < self.1.clone() {
+            if !f(&i) {
+                return false;
+            }
+            i = i + int!(1);
+        }
+        true
+    }
+}
+
+impl <V: DafnyTypeEq> Forall<V> for Sequence<V> {
+    fn forall(&self, f: Rc<dyn Fn(&V) -> bool>) -> bool {
+        let a = self.to_array();
+        let col = a.iter();
+        for v in col {
+            if !f(v) {
+                return false;
+            }
+        }
+        true
+    }
+}
+
+impl <V: DafnyTypeEq> Forall<V> for Set<V> {
+    fn forall(&self, f: Rc<dyn Fn(&V) -> bool>) -> bool {
+        let col = self.data.iter();
+        for v in col {
+            if !f(v) {
+                return false;
+            }
+        }
+        true
+    }
+}
 
 // When initializing an uninitialized field for the first time,
 // we ensure we don't drop the previous content
