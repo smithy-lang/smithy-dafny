@@ -156,7 +156,8 @@ public class CodegenEngine {
                 dafnyVersion.getMajor(), dafnyVersion.getMinor(), dafnyVersion.getPatch()
         ).unparse();
         final String propertiesText = propertiesTemplate
-                .replace("%DAFNY_VERSION%", dafnyVersionString);
+                .replace("%DAFNY_VERSION%", dafnyVersionString)
+                .replace("%DAFNY_RUNTIME_JAVA_VERSION%", dafnyVersionString);
         IOUtils.writeToFile(propertiesText, outputPath.toFile());
     }
 

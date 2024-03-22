@@ -1,3 +1,4 @@
 # This file stores the top level dafny version information.
 # All elements of the project need to agree on this version.
 dafnyVersion=%DAFNY_VERSION%
+dafnyRuntimeJavaVersion=%DAFNY_RUNTIME_JAVA_VERSION%
