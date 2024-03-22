@@ -23,7 +23,7 @@ Anything which is to be re-used across all projects will go inside the `TestMode
 1. ```cd <YOUR_PROJECT_DIRECTORY>```
 1. Create the `README.md`, `Makefile`, and `Model` directory.
 1. Write your `*.smithy` model in the `Model` directory.
-1. Use your `Makefile` recipe to execute polymorph the generate the appropriate stubbing for the runtime target.
+1. Use your `Makefile` recipe to execute polymorph to generate the appropriate stubbing for the runtime target.
 1. Implement the `dafny` code, build, execute, and test.
 
 ## Makefile targets
