@@ -1,7 +1,7 @@
 # TestModels
  This package contains various groups of models which is used to form a Test Bed for Dafny-Polymorph-Native layer.
  The idea is that we want an invariant test bed with `Write Once, Test Anywhere`
- with the `Anyhwere` part targeting different runtimes that dafny supports.
+ with the `Anyhwere` part targeting different runtimes that Dafny supports.
  This will give us confidence in our test cases across runtimes,
  without writing native tests (and bugs) for each of those runtimes.
 
@@ -23,7 +23,7 @@ Anything which is to be re-used across all projects will go inside the `TestMode
 1. ```cd <YOUR_PROJECT_DIRECTORY>```
 1. Create the `README.md`, `Makefile`, and `Model` directory.
 1. Write your `*.smithy` model in the `Model` directory.
-1. Use your `Makefile` recipe to execute polymorh the generate the appropriate stubbing for the runtime target.
+1. Use your `Makefile` recipe to execute polymorph the generate the appropriate stubbing for the runtime target.
 1. Implement the `dafny` code, build, execute, and test.
 
 ## Makefile targets
@@ -36,7 +36,7 @@ All Dafny produced by Dafny-Polymorph MUST be verified.
 This ensures the health of the Dafny code produced.
 As well as the Dafny implemented in individual projects.
 
-* `polymorph-dafny` -- run polymorph on the project with the `--output-dafny` to generate the Dafny shell
+* `polymorph_dafny` -- run polymorph on the project with the `--output-dafny` to generate the Dafny shell
 * `verify` -- recursively gather up `*.dfy` in the project, both the generated and implemented code
 * `dafny-reportgenerator` -- runs the reportgenerator to ensure [verification stability](http://dafny.org/dafny/DafnyRef/DafnyRef#2565-debugging-unstable-verification)
 
