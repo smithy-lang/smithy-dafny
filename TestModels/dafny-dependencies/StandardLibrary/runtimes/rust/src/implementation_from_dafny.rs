@@ -722,7 +722,7 @@ mod r#_StandardLibrary_Compile {
                         })}))
           }, i)
     }
-    pub fn FindIndex<_T: Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + ::dafny_runtime::DafnyTypeEq + 'static>(s: &::dafny_runtime::Sequence<_T>, f: &::dafny_runtime::FunctionWrapper<Rc<dyn ::std::ops::Fn(&_T) -> bool + 'static>>, i: &super::_System::nat) -> ::std::rc::Rc<super::r#_Wrappers_Compile::Option<super::_System::nat>>
+    pub fn FindIndex<_T: Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + ::dafny_runtime::DafnyTypeEq + 'static>(s: &::dafny_runtime::Sequence<_T>, f: &::dafny_runtime::FunctionWrapper<::std::rc::Rc<dyn ::std::ops::Fn(&_T) -> bool + 'static>>, i: &super::_System::nat) -> ::std::rc::Rc<super::r#_Wrappers_Compile::Option<super::_System::nat>>
        where  {
       let mut s = s.clone();
       let mut f = f.clone();
@@ -761,8 +761,8 @@ mod r#_StandardLibrary_Compile {
             _accumulator = _accumulator.concat(&::dafny_runtime::seq![s.get(&::dafny_runtime::int!(0))]);
             let mut _in7: ::dafny_runtime::Sequence<_T> = s.drop(&::dafny_runtime::int!(1));
             let mut _in8: ::dafny_runtime::FunctionWrapper<::std::rc::Rc<dyn ::std::ops::Fn(&_T) -> bool + 'static>> = f.clone();
-            *s = _in7.clone();
-            *f = _in8.clone();
+            s = _in7.clone();
+            f = _in8.clone();
             continue 'TAIL_CALL_START;
           } else {
             let mut _in9: ::dafny_runtime::Sequence<_T> = s.drop(&::dafny_runtime::int!(1));
@@ -795,9 +795,8 @@ mod r#_StandardLibrary_Compile {
         ::dafny_runtime::integer_range(::dafny_runtime::Zero::zero(), n.clone()).map(|i| _initializer.0(&i)).collect::<::dafny_runtime::Sequence<_>>()
         }
     }
-    pub fn SeqToArray<_T: Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + ::dafny_runtime::DafnyTypeEq + 'static>(s: &::dafny_runtime::Sequence<_T>) -> ::std::rc::Rc<::std::cell::RefCell<::std::vec::Vec<_T>>>
+    pub fn SeqToArray<_T: Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + ::dafny_runtime::DafnyTypeEq + 'static>(s: &::dafny_runtime::Sequence<_T>) -> *mut [_T]
        where  {
-      let mut a = ::dafny_runtime::MaybePlacebo::<::std::rc::Rc<::std::cell::RefCell<::std::vec::Vec<_T>>>>::new();
       let mut _init0: ::dafny_runtime::FunctionWrapper<::std::rc::Rc<dyn ::std::ops::Fn(&::dafny_runtime::DafnyInt) -> _T + 'static>> = {
           let s: ::dafny_runtime::Sequence<_T> = s.clone();
           ::dafny_runtime::FunctionWrapper::<::std::rc::Rc<dyn ::std::ops::Fn(&::dafny_runtime::DafnyInt) -> _T>>({
@@ -806,23 +805,18 @@ mod r#_StandardLibrary_Compile {
                             s.get(i)
                             })})
           };
-      let mut _nw0: ::std::rc::Rc<::std::cell::RefCell<::std::vec::Vec<_T>>> = ::std::rc::Rc::new(::std::cell::RefCell::new(vec![<_T as ::std::default::Default>::default(); <usize as ::dafny_runtime::NumCast>::from(s.cardinality()).unwrap()]));
-      {
-        {
-          let __idx0 = <usize as ::dafny_runtime::NumCast>::from(r#__i0_0.clone()).unwrap();
-          &_nw0.borrow_mut()[__idx0] = ((&_init0).0(&r#__i0_0));
-          }
-      };
-      a = ::dafny_runtime::MaybePlacebo::from(_nw0.clone());
-      return a.read();
+      ::dafny_runtime::array::initialize(&s.cardinality(), _init0.0)
     }
     pub fn LexicographicLessOrEqual<_T: Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + ::dafny_runtime::DafnyTypeEq + 'static>(a: &::dafny_runtime::Sequence<_T>, b: &::dafny_runtime::Sequence<_T>, less: &::dafny_runtime::FunctionWrapper<::std::rc::Rc<dyn ::std::ops::Fn(&_T, &_T) -> bool + 'static>>) -> bool
        where  {
-      return;
+      Self::LexicographicLessOrEqualAux(a, b, less, &::dafny_runtime::int!(0))
     }
     pub fn LexicographicLessOrEqualAux<_T: Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + ::dafny_runtime::DafnyTypeEq + 'static>(a: &::dafny_runtime::Sequence<_T>, b: &::dafny_runtime::Sequence<_T>, less: &::dafny_runtime::FunctionWrapper<::std::rc::Rc<dyn ::std::ops::Fn(&_T, &_T) -> bool + 'static>>, lengthOfCommonPrefix: &super::_System::nat) -> bool
        where  {
-      lengthOfCommonPrefix.clone() <= b.cardinality() && TODO/*<b>Unsupported: <i>QuantifierExpr</i></b>.clone() && (lengthOfCommonPrefix.clone() == a.cardinality() || lengthOfCommonPrefix.clone()*/ < b.cardinality() && (((less).0(&a.get(lengthOfCommonPrefix), &b.get(lengthOfCommonPrefix))))
+      lengthOfCommonPrefix.clone() <= b.cardinality() && ::dafny_runtime::Forall::forall(&::dafny_runtime::Range(::dafny_runtime::int!(0), lengthOfCommonPrefix.clone()), {
+        let a = a.clone();
+        let b = b.clone();
+        ::std::rc::Rc::new(move |i| a.get(i) == b.get(i))}) && (lengthOfCommonPrefix.clone() == a.cardinality() || lengthOfCommonPrefix.clone() < b.cardinality() && (((less).0(&a.get(lengthOfCommonPrefix), &b.get(lengthOfCommonPrefix)))))
     }
     pub fn SetToOrderedSequence<_T: Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + ::dafny_runtime::DafnyTypeEq + 'static>(s: &::dafny_runtime::Set<::dafny_runtime::Sequence<_T>>, less: &::dafny_runtime::FunctionWrapper<::std::rc::Rc<dyn ::std::ops::Fn(&_T, &_T) -> bool + 'static>>) -> ::dafny_runtime::Sequence<::dafny_runtime::Sequence<_T>>
        where  {
@@ -837,7 +831,7 @@ mod r#_StandardLibrary_Compile {
           return ((&(::dafny_runtime::FunctionWrapper::<::std::rc::Rc<dyn ::std::ops::Fn(&::dafny_runtime::DafnyInt) -> ::dafny_runtime::Sequence<::dafny_runtime::Sequence<_T>>>>({
                             let s = s.clone();
                             let less = less.clone();
-                            ::std::rc::Rc::new(move |r#__let_dummy_0: &&::dafny_runtime::DafnyInt| -> ::dafny_runtime::Sequence<::dafny_runtime::Sequence<_T>> {
+                            ::std::rc::Rc::new(move |r#__let_dummy_0: &::dafny_runtime::DafnyInt| -> ::dafny_runtime::Sequence<::dafny_runtime::Sequence<_T>> {
                                     let mut a = ::dafny_runtime::MaybePlacebo::<::dafny_runtime::Sequence<_T>>::new();
                                       'label_goto__ASSIGN_SUCH_THAT_0: loop {
                                             for r#__assign_such_that_0 in (&s).iter() {
@@ -856,7 +850,12 @@ mod r#_StandardLibrary_Compile {
     }
     pub fn IsMinimum<_T: Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + ::dafny_runtime::DafnyTypeEq + 'static>(a: &::dafny_runtime::Sequence<_T>, s: &::dafny_runtime::Set<::dafny_runtime::Sequence<_T>>, less: &::dafny_runtime::FunctionWrapper<::std::rc::Rc<dyn ::std::ops::Fn(&_T, &_T) -> bool + 'static>>) -> bool
        where  {
-      s.contains(a) && TODO/*<b>Unsupported: <i>QuantifierExpr</i></b>.clone()*/
+      s.contains(a) && 
+      ::dafny_runtime::Forall::forall(s, {
+        let a = a.clone();
+        let less = less.clone();
+        ::std::rc::Rc::new(move |z| Self::LexicographicLessOrEqual(&a, z, &less))
+      })
     }
   }
   impl ::std::default::Default for _default {
@@ -875,7 +874,7 @@ mod r#_StandardLibrary_Compile {
     }
   }
 }
-mod UTF8;
+//mod UTF8;
 mod r#_StandardLibraryInterop_Compile {
   pub struct WrappersInterop {}
   impl WrappersInterop {
