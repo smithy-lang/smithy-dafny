@@ -45,7 +45,7 @@ As well as the Dafny implemented in individual projects.
 Each runtime needs its own set of targets.
 This example is written assuming that the runtime you are targeting is .NET.
 
-* `polymorph_net` -- run polymorph on the project with `--output-dafny` and `--output-dotnet` to generate the code
+* `polymorph_dotnet` -- run polymorph on the project with `--output-dafny` and `--output-dotnet` to generate the code
 * `transpile_net` -- run `dafny` to produce the native code. Remember to output both the implementation and tests.
 * `setup_net` -- run any required setup. For example downloading dependencies
 * `test_net` -- run the tests

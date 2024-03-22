@@ -16,7 +16,6 @@ SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 
 # This project has no dependencies 
 # DEPENDENT-MODELS:= 
-# LIBRARIES :=
 
 clean: _clean
 	rm -rf $(LIBRARY_ROOT)/runtimes/java/src/main/dafny-generated
