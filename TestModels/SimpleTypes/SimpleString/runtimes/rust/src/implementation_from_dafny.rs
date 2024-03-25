@@ -1203,13 +1203,13 @@ mod r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes {
     }
     impl ::dafny_runtime::DafnyTypeEq for SimpleStringConfig {}
 
-    struct ISimpleTypesStringClientCallHistory {
+    pub struct ISimpleTypesStringClientCallHistory {
     }
     impl ISimpleTypesStringClientCallHistory {
       fn ctor(this: *mut ISimpleTypesStringClientCallHistory) {
       }
     }
-    trait ISimpleTypesStringClient {
+    pub trait ISimpleTypesStringClient {
       fn GetString(self: &Self, input: &::std::rc::Rc<super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringInput>) -> ::std::rc::Rc<super::r#_Wrappers_Compile::Result<::std::rc::Rc<super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringOutput>, ::std::rc::Rc<super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::Error>>>;
       fn GetStringSingleValue(self: &Self, input: &::std::rc::Rc<super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringInput>) -> ::std::rc::Rc<super::r#_Wrappers_Compile::Result<::std::rc::Rc<super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringOutput>, ::std::rc::Rc<super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::Error>>>;
       fn GetStringUTF8(self: &Self, input: &::std::rc::Rc<super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringInput>) -> ::std::rc::Rc<super::r#_Wrappers_Compile::Result<::std::rc::Rc<super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringOutput>, ::std::rc::Rc<super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::Error>>>;
@@ -1385,7 +1385,59 @@ mod r#_SimpleStringImpl_Compile {
     }
   }
 }
+// SimpleString
 mod r#_simple_dtypes_dsmithystring_dinternaldafny {
+  pub struct _default {}
+  impl _default {
+    pub fn new() -> Self {
+      _default {}
+    }
+    fn DefaultSimpleStringConfig() -> super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::SimpleStringConfig {
+      super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::SimpleStringConfig::SimpleStringConfig{}
+    }
+    /*method SimpleString(config: SimpleStringConfig)
+    returns (res: Result<ISimpleTypesStringClient, Error>) {
+        var client := new SimpleStringClient(Operations.Config);
+        return Success(client);
+    } */
+    fn SimpleString(config: &::std::rc::Rc<super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::SimpleStringConfig>)
+      -> ::std::rc::Rc<super::r#_Wrappers_Compile::Result<*mut dyn super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::ISimpleTypesStringClient, ::std::rc::Rc<super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::Error>>> {
+      let client: *mut SimpleStringClient = ::dafny_runtime::allocate::<SimpleStringClient>();
+      SimpleStringClient::_ctor(client, config);
+      let v = client as *mut dyn super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::ISimpleTypesStringClient;
+      // build a success
+      ::std::rc::Rc::new(super::r#_Wrappers_Compile::Result::<X, Y>::Success{
+          value: v
+      })
+    }
+  }
+  pub type X = *mut dyn super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::ISimpleTypesStringClient;
+  pub type Y = ::std::rc::Rc<super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::Error>;
+  
+  struct SimpleStringClient {
+    r#_i_config: ::std::rc::Rc<super::r#_SimpleStringImpl_Compile::Config>
+  }
+  impl SimpleStringClient {
+    fn _ctor(this: *mut SimpleStringClient, config: &::std::rc::Rc<super::r#_SimpleStringImpl_Compile::Config>) {
+      let mut _i_set_config = false;
+      ::dafny_runtime::update_field_uninit!(this, r#_i_config, _i_set_config, config.clone());
+    }
+    fn config(&self) -> ::std::rc::Rc<super::r#_SimpleStringImpl_Compile::Config> {
+      self.r#_i_config.clone()
+    }
+  }
+  impl super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::ISimpleTypesStringClient for SimpleStringClient {
+    fn GetString(self: &Self, input: &::std::rc::Rc<super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringInput>) -> ::std::rc::Rc<super::r#_Wrappers_Compile::Result<::std::rc::Rc<super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringOutput>, ::std::rc::Rc<super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::Error>>> {
+      super::r#_SimpleStringImpl_Compile::_default::GetString(&self.config(), input)
+    }
+    fn GetStringSingleValue(self: &Self, input: &::std::rc::Rc<super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringInput>) -> ::std::rc::Rc<super::r#_Wrappers_Compile::Result<::std::rc::Rc<super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringOutput>, ::std::rc::Rc<super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::Error>>> {
+      super::r#_SimpleStringImpl_Compile::_default::GetStringSingleValue(&self.config(), input)
+    }
+    fn GetStringUTF8(self: &Self, input: &::std::rc::Rc<super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringInput>) -> ::std::rc::Rc<super::r#_Wrappers_Compile::Result<::std::rc::Rc<super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringOutput>, ::std::rc::Rc<super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::Error>>> {
+      super::r#_SimpleStringImpl_Compile::_default::GetStringUTF8(&self.config(), input)
+    }
+  }
+  ::dafny_runtime::UpcastTo!(SimpleStringClient, ISimpleTypesStringClient);
 
 }
 mod r#_StandardLibraryInterop_Compile {

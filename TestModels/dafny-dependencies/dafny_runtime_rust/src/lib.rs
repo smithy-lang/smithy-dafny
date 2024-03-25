@@ -1,7 +1,6 @@
 #[cfg(test)]
 mod tests;
-use std::{any::Any, borrow::Borrow, cell::{RefCell, UnsafeCell}, cmp::Ordering, collections::{HashMap, HashSet}, fmt::{write, Debug, Display, Formatter}, hash::{Hash, Hasher}, mem, ops::{Add, Deref, Div, Mul, Neg, Rem, Sub}, rc::Rc};
-use as_any::Downcast;
+use std::{any::Any, borrow::Borrow, cell::{RefCell, UnsafeCell}, cmp::Ordering, collections::{HashMap, HashSet}, fmt::{Debug, Display, Formatter}, hash::{Hash, Hasher}, mem, ops::{Add, Deref, Div, Mul, Neg, Rem, Sub}, rc::Rc};
 use num::{bigint::ParseBigIntError, Integer, Num, One, Signed};
 pub use once_cell::unsync::Lazy;
 pub use mem::MaybeUninit;
@@ -475,19 +474,13 @@ impl <'a> From<&'a [u8]> for DafnyInt {
         DafnyInt::parse_bytes(number, 10)
     }
 }
+
 // Now the same but for &[u8, N] for any kind of such references
 impl <'a, const N: usize> From<&'a [u8; N]> for DafnyInt {
     fn from(number: &[u8; N]) -> Self {
         DafnyInt::parse_bytes(number, 10)
     }
 }
-
-impl <T: DafnyType> Default for Sequence<T> {
-    fn default() -> Self {
-        Sequence::from_array_owned(vec![])
-    }
-}
-
 
 // **************
 // Immutable sequences
@@ -639,7 +632,7 @@ where T: DafnyType {
     pub fn cardinality(&self) -> DafnyInt {
         DafnyInt::from_usize(self.cardinality_usize())
     }
-    pub fn select(&self, index: SizeT) -> T {
+    pub fn get_usize(&self, index: SizeT) -> T {
         let array = self.to_array();
         array[index].clone()
     }
@@ -672,7 +665,13 @@ where T: DafnyType {
     }
 
     pub fn get(&self, index: &DafnyInt) -> T {
-        self.select(index.data.to_usize().unwrap())
+        self.get_usize(index.data.to_usize().unwrap())
+    }
+}
+
+impl <T: DafnyType> Default for Sequence<T> {
+    fn default() -> Self {
+        Sequence::from_array_owned(vec![])
     }
 }
 
@@ -705,7 +704,7 @@ impl <T> PartialEq<Sequence<T>> for Sequence<T>
         }
         let mut i: usize = 0;
         for value in values.iter() {
-            if value != &other.select(i) {
+            if value != &other.get_usize(i) {
                 return false;
             }
             i += 1;
@@ -723,7 +722,7 @@ impl <T: DafnyTypeEq> PartialOrd for Sequence<T> {
             },
             Ordering::Less => {
                 for i in 0..self.cardinality_usize() {
-                    if self.select(i) != other.select(i) {
+                    if self.get_usize(i) != other.get_usize(i) {
                         return None;
                     }
                 }
@@ -731,7 +730,7 @@ impl <T: DafnyTypeEq> PartialOrd for Sequence<T> {
             },
             Ordering::Greater => {
                 for i in 0..other.cardinality_usize() {
-                    if self.select(i) != other.select(i) {
+                    if self.get_usize(i) != other.get_usize(i) {
                         return None;
                     }
                 }
@@ -1080,10 +1079,6 @@ impl <V: DafnyTypeEq> Set<V> {
             data: Rc::new(hashset)
         }
     }
-}
-
-impl <V: DafnyTypeEq> Set<V>
-{
     pub fn cardinality_usize(&self) -> usize {
         self.data.len()
     }
@@ -1196,6 +1191,10 @@ impl <V: DafnyTypeEq> Set<V>
 
     pub fn iter(&self) -> std::collections::hash_set::Iter<'_, V> {
         self.data.iter()
+    }
+
+    pub fn peek(&self) -> V {
+        self.data.iter().next().unwrap().clone()
     }
 }
 
@@ -1404,6 +1403,10 @@ impl <V: DafnyTypeEq> Multiset<V>
     pub fn as_dafny_multiset(&self) -> Multiset<V> {
         self.clone()
     }
+
+    pub fn peek(&self) -> V {
+        self.data.iter().next().unwrap().0.clone()
+    }
 }
 
 impl <V: DafnyTypeEq> DafnyType for Multiset<V> {}
@@ -1491,6 +1494,14 @@ impl <V: DafnyTypeEq> Hash for Multiset<V> {
 pub trait AsAny {
   fn as_any(&self) -> &dyn Any;
   fn as_any_mut(&mut self) -> &mut dyn Any;
+}
+impl AsAny for dyn Any {
+  fn as_any(&self) -> &dyn Any {
+    self
+  }
+  fn as_any_mut(&mut self) -> &mut dyn Any {
+    self
+  }
 }
 pub fn is_instance_of<C: ?Sized + AsAny, U: 'static>(theobject: *const C) -> bool {
     // safety: Dafny won't call this function unless it can guarantee the object is still allocated
@@ -1990,7 +2001,6 @@ pub fn string_of(s: &str) -> DafnyString {
     s.chars().map(|v| DafnyChar(v)).collect::<Sequence<DafnyChar>>()
 }
 
-
 pub fn string_utf16_of(s: &str) -> DafnyStringUTF16 {
     Sequence::from_array_owned(s.encode_utf16().map(|v| DafnyCharUTF16(v)).collect())
 }
@@ -2216,10 +2226,11 @@ impl <T: ?Sized> DafnyType for *mut T {}
 
 impl <T: ?Sized> DafnyTypeEq for *mut T {}
 
+
 // BoundedPools with methods such as forall, exists, iter.
 
-pub trait Forall<T> {
-    fn forall(&self, f: Rc<dyn Fn(&T) -> bool>) -> bool;
+trait Forall<T> {
+    fn forall(&self, f: &Rc<dyn Fn(&T) -> bool>) -> bool;
 }
 
 pub struct Range(pub DafnyInt, pub DafnyInt);
@@ -2231,7 +2242,7 @@ impl Range {
 }
 
 impl Forall<DafnyInt> for Range {
-    fn forall(&self, f: Rc<dyn Fn(&DafnyInt) -> bool>) -> bool {
+    fn forall(&self, f: &Rc<dyn Fn(&DafnyInt) -> bool>) -> bool {
         let mut i: DafnyInt = self.0.clone();
         while i < self.1.clone() {
             if !f(&i) {
@@ -2244,7 +2255,7 @@ impl Forall<DafnyInt> for Range {
 }
 
 impl <V: DafnyTypeEq> Forall<V> for Sequence<V> {
-    fn forall(&self, f: Rc<dyn Fn(&V) -> bool>) -> bool {
+    fn forall(&self, f: &Rc<dyn Fn(&V) -> bool>) -> bool {
         let a = self.to_array();
         let col = a.iter();
         for v in col {
@@ -2257,7 +2268,7 @@ impl <V: DafnyTypeEq> Forall<V> for Sequence<V> {
 }
 
 impl <V: DafnyTypeEq> Forall<V> for Set<V> {
-    fn forall(&self, f: Rc<dyn Fn(&V) -> bool>) -> bool {
+    fn forall(&self, f: &Rc<dyn Fn(&V) -> bool>) -> bool {
         let col = self.data.iter();
         for v in col {
             if !f(v) {
@@ -2267,6 +2278,36 @@ impl <V: DafnyTypeEq> Forall<V> for Set<V> {
         true
     }
 }
+
+
+// Any Dafny trait must require classes extending it to have a method "as_any_mut"
+// that can convert the reference from that trait to a reference of Any
+
+// cast is meant to be used on references only, to downcast a trait reference to a class reference
+#[macro_export]
+macro_rules! cast {
+    ($raw:expr, $id:ty) => {
+        $crate::modify!($raw).as_any_mut().downcast_mut::<$id>().unwrap() as *mut $id
+    }
+}
+
+// 'is' is meant to be used on references only, to check if a trait reference is a class reference
+#[macro_export]
+macro_rules! is {
+    ($raw:expr, $id:ty) => {
+        $crate::modify!($raw).as_any_mut().downcast_mut::<$id>().is_some()
+    }
+}
+
+// cast_any is meant to be used on references only, to convert any references (classes or traits)*
+// to an Any reference trait
+#[macro_export]
+macro_rules! cast_any {
+    ($raw:expr) => {
+        $crate::modify!($raw).as_any_mut()
+    }
+}
+
 
 // When initializing an uninitialized field for the first time,
 // we ensure we don't drop the previous content
@@ -2358,6 +2399,20 @@ macro_rules! update_field_uninit {
     }
 }
 
+// Macro to call at the end of the first new; constructor when not every field is guaranteed to be assigned.
+#[macro_export]
+macro_rules! update_field_if_uninit {
+    ($t:expr, $field:ident, $field_assigned:expr, $value:expr) => {
+        {
+            let computed_value = $value;
+            if !$field_assigned {
+                $crate::update_field_nodrop!($t, $field, computed_value);
+                $field_assigned = true;
+            }
+        }
+    }
+}
+
 // Don't run the destructor, i.e. on a value that was surely never initialized
 #[macro_export]
 macro_rules! forget {
@@ -2426,3 +2481,96 @@ macro_rules! maybe_placebos_from {
         }
     }
 }
+
+////////////////
+// Coercion
+////////////////
+
+pub trait UpcastTo<U> {
+    fn upcast_to(&self) -> U;
+}
+
+#[macro_export]
+macro_rules! UpcastTo {
+    ($from:ty, $to:ty) => {
+        impl UpcastTo<*mut $to> for *mut $from {
+            fn upcast_to(&self) -> *mut $to {
+                (*self) as *mut $to
+            }
+        }
+    };
+}
+
+// UpcastTo for pointers
+impl <T: 'static> UpcastTo<*mut dyn Any> for *mut T {
+    fn upcast_to(&self) -> *mut dyn Any {
+        (*self) as *mut dyn Any
+    }
+}
+
+// UpcastTo for sets
+impl <V, U>
+  UpcastTo<Set<V>> for Set<U>
+  where V: DafnyTypeEq,
+        U: DafnyTypeEq + UpcastTo<V>
+{
+    fn upcast_to(&self) -> Set<V> {
+        // We need to upcast individual elements
+        let mut new_set: HashSet<V> = HashSet::<V>::default();
+        for value in self.data.iter() {
+            new_set.insert(value.upcast_to());
+        }
+        Set::from_hashset_owned(new_set)
+    }
+}
+
+// UpcastTo for sequences
+impl <V, U>
+  UpcastTo<Sequence<V>> for Sequence<U>
+  where V: DafnyTypeEq,
+        U: DafnyTypeEq + UpcastTo<V>
+{
+    fn upcast_to(&self) -> Sequence<V> {
+        // We need to upcast individual elements
+        let mut new_seq: Vec<V> = Vec::<V>::default();
+        for value in self.to_array().iter() {
+            new_seq.push(value.upcast_to());
+        }
+        Sequence::from_array_owned(new_seq)
+    }
+}
+
+// Upcast for multisets
+impl <V, U>
+  UpcastTo<Multiset<V>> for Multiset<U>
+  where V: DafnyTypeEq,
+        U: DafnyTypeEq + UpcastTo<V>
+{
+    fn upcast_to(&self) -> Multiset<V> {
+        // We need to upcast individual elements
+        let mut new_multiset: HashMap<V, DafnyInt> = HashMap::<V, DafnyInt>::default();
+        for (value, count) in self.data.iter() {
+            new_multiset.insert(value.upcast_to(), count.clone());
+        }
+        Multiset::from_hashmap_owned(new_multiset)
+    }
+}
+
+// Upcast for Maps
+impl <K, U, V> UpcastTo<Map<K, V>> for Map<K, U>
+  where K: DafnyTypeEq,
+        U: DafnyTypeEq + UpcastTo<V>,
+        V: DafnyTypeEq
+{
+    fn upcast_to(&self) -> Map<K, V> {
+        // We need to upcast individual elements
+        let mut new_map: HashMap<K, V> = HashMap::<K, V>::default();
+        for (key, value) in self.data.iter() {
+            new_map.insert(key.clone(), value.upcast_to());
+        }
+        Map::from_hashmap_owned(new_map)
+    }
+}
+
+
+
