@@ -1,6 +1,6 @@
 #![allow(warnings, unconditional_panic)]
 #![allow(nonstandard_style)]
-extern crate dafny_runtime;
+pub extern crate dafny_runtime;
 mod _System {
   pub type nat = ::dafny_runtime::DafnyInt;
   #[derive(PartialEq, Clone)]
@@ -207,7 +207,7 @@ pub mod r#_Wrappers_Compile {
     }
   }
   impl <T: ::dafny_runtime::DafnyTypeEq + 'static> ::dafny_runtime::DafnyTypeEq for Option<T> {}
-  #[derive(PartialEq, Clone)]
+  #[derive(PartialEq, Clone, Debug)]
   pub enum Result<T, R> {
     Success { value: T },
     Failure { error: R },
@@ -315,6 +315,7 @@ pub mod r#_Wrappers_Compile {
       self
     }
   }
+  impl <T: ::dafny_runtime::DafnyType + 'static, R: ::dafny_runtime::DafnyType + 'static> ::dafny_runtime::DafnyType for Result<T, R> {}
   #[derive(PartialEq, Clone)]
   pub enum Outcome<E> {
     Pass {},
@@ -1027,7 +1028,7 @@ pub mod r#_UTF8_Compile {
   }
   pub type ValidUTF8Bytes = ::dafny_runtime::Sequence<u8>;
 }
-mod r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes {
+pub mod r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes {
   /* datatype DafnyCallEvent<I, O> = DafnyCallEvent(input: I, output: O) */
     #[derive(Clone)]
     pub struct DafnyCallEvent<I: ::dafny_runtime::DafnyType, O: ::dafny_runtime::DafnyType> {
@@ -1386,13 +1387,13 @@ mod r#_SimpleStringImpl_Compile {
   }
 }
 // SimpleString
-mod r#_simple_dtypes_dsmithystring_dinternaldafny {
+pub mod r#_simple_dtypes_dsmithystring_dinternaldafny {
   pub struct _default {}
   impl _default {
     pub fn new() -> Self {
       _default {}
     }
-    fn DefaultSimpleStringConfig() -> super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::SimpleStringConfig {
+    pub fn DefaultSimpleStringConfig() -> super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::SimpleStringConfig {
       super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::SimpleStringConfig::SimpleStringConfig{}
     }
     /*method SimpleString(config: SimpleStringConfig)
@@ -1400,7 +1401,7 @@ mod r#_simple_dtypes_dsmithystring_dinternaldafny {
         var client := new SimpleStringClient(Operations.Config);
         return Success(client);
     } */
-    fn SimpleString(config: &::std::rc::Rc<super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::SimpleStringConfig>)
+    pub fn SimpleString(config: &::std::rc::Rc<super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::SimpleStringConfig>)
       -> ::std::rc::Rc<super::r#_Wrappers_Compile::Result<*mut dyn super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::ISimpleTypesStringClient, ::std::rc::Rc<super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::Error>>> {
       let client: *mut SimpleStringClient = ::dafny_runtime::allocate::<SimpleStringClient>();
       SimpleStringClient::_ctor(client, &::std::rc::Rc::new(super::r#_SimpleStringImpl_Compile::Config::Config{}));

@@ -2226,6 +2226,8 @@ impl <T: ?Sized> DafnyType for *mut T {}
 
 impl <T: ?Sized> DafnyTypeEq for *mut T {}
 
+impl <T: DafnyType> DafnyType for Rc<T> {}
+impl <T: DafnyTypeEq> DafnyTypeEq for Rc<T> {}
 
 // BoundedPools with methods such as forall, exists, iter.
 
