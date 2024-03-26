@@ -2229,7 +2229,7 @@ impl <T: ?Sized> DafnyTypeEq for *mut T {}
 
 // BoundedPools with methods such as forall, exists, iter.
 
-trait Forall<T> {
+pub trait Forall<T> {
     fn forall(&self, f: &Rc<dyn Fn(&T) -> bool>) -> bool;
 }
 
@@ -2493,9 +2493,9 @@ pub trait UpcastTo<U> {
 #[macro_export]
 macro_rules! UpcastTo {
     ($from:ty, $to:ty) => {
-        impl UpcastTo<*mut $to> for *mut $from {
+        impl $crate::UpcastTo<*mut $to> for &mut $from {
             fn upcast_to(&self) -> *mut $to {
-                (*self) as *mut $to
+                (*self) as *const $to as *mut $to
             }
         }
     };
@@ -2504,7 +2504,7 @@ macro_rules! UpcastTo {
 // UpcastTo for pointers
 impl <T: 'static> UpcastTo<*mut dyn Any> for *mut T {
     fn upcast_to(&self) -> *mut dyn Any {
-        (*self) as *mut dyn Any
+        (*self) as *const dyn Any as *mut dyn Any
     }
 }
 

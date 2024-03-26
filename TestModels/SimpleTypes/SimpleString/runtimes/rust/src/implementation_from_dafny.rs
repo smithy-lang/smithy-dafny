@@ -832,7 +832,7 @@ mod r#_StandardLibrary_Compile {
     }
     pub fn LexicographicLessOrEqualAux<_T: Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + ::dafny_runtime::DafnyTypeEq + 'static>(a: &::dafny_runtime::Sequence<_T>, b: &::dafny_runtime::Sequence<_T>, less: &::dafny_runtime::FunctionWrapper<::std::rc::Rc<dyn ::std::ops::Fn(&_T, &_T) -> bool + 'static>>, lengthOfCommonPrefix: &super::_System::nat) -> bool
        where  {
-      lengthOfCommonPrefix.clone() <= b.cardinality() && ::dafny_runtime::Forall::forall(&::dafny_runtime::Range(::dafny_runtime::int!(0), lengthOfCommonPrefix.clone()), {
+      lengthOfCommonPrefix.clone() <= b.cardinality() && ::dafny_runtime::Forall::forall(&::dafny_runtime::Range(::dafny_runtime::int!(0), lengthOfCommonPrefix.clone()), &{
         let a = a.clone();
         let b = b.clone();
         ::std::rc::Rc::new(move |i| a.get(i) == b.get(i))}) && (lengthOfCommonPrefix.clone() == a.cardinality() || lengthOfCommonPrefix.clone() < b.cardinality() && (((less).0(&a.get(lengthOfCommonPrefix), &b.get(lengthOfCommonPrefix)))))
@@ -870,7 +870,7 @@ mod r#_StandardLibrary_Compile {
     pub fn IsMinimum<_T: Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + ::dafny_runtime::DafnyTypeEq + 'static>(a: &::dafny_runtime::Sequence<_T>, s: &::dafny_runtime::Set<::dafny_runtime::Sequence<_T>>, less: &::dafny_runtime::FunctionWrapper<::std::rc::Rc<dyn ::std::ops::Fn(&_T, &_T) -> bool + 'static>>) -> bool
        where  {
       s.contains(a) && 
-      ::dafny_runtime::Forall::forall(s, {
+      ::dafny_runtime::Forall::forall(s, &{
         let a = a.clone();
         let less = less.clone();
         ::std::rc::Rc::new(move |z| Self::LexicographicLessOrEqual(&a, z, &less))
@@ -1403,20 +1403,19 @@ mod r#_simple_dtypes_dsmithystring_dinternaldafny {
     fn SimpleString(config: &::std::rc::Rc<super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::SimpleStringConfig>)
       -> ::std::rc::Rc<super::r#_Wrappers_Compile::Result<*mut dyn super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::ISimpleTypesStringClient, ::std::rc::Rc<super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::Error>>> {
       let client: *mut SimpleStringClient = ::dafny_runtime::allocate::<SimpleStringClient>();
-      SimpleStringClient::_ctor(client, config);
+      SimpleStringClient::_ctor(client, &::std::rc::Rc::new(super::r#_SimpleStringImpl_Compile::Config::Config{}));
       let v = client as *mut dyn super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::ISimpleTypesStringClient;
       // build a success
-      ::std::rc::Rc::new(super::r#_Wrappers_Compile::Result::<X, Y>::Success{
+      ::std::rc::Rc::new(super::r#_Wrappers_Compile::Result::<*mut dyn super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::ISimpleTypesStringClient, ::std::rc::Rc<super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::Error>>::Success{
           value: v
       })
     }
   }
-  pub type X = *mut dyn super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::ISimpleTypesStringClient;
-  pub type Y = ::std::rc::Rc<super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::Error>;
   
   struct SimpleStringClient {
     r#_i_config: ::std::rc::Rc<super::r#_SimpleStringImpl_Compile::Config>
   }
+
   impl SimpleStringClient {
     fn _ctor(this: *mut SimpleStringClient, config: &::std::rc::Rc<super::r#_SimpleStringImpl_Compile::Config>) {
       let mut _i_set_config = false;
@@ -1437,7 +1436,7 @@ mod r#_simple_dtypes_dsmithystring_dinternaldafny {
       super::r#_SimpleStringImpl_Compile::_default::GetStringUTF8(&self.config(), input)
     }
   }
-  ::dafny_runtime::UpcastTo!(SimpleStringClient, ISimpleTypesStringClient);
+  ::dafny_runtime::UpcastTo!(SimpleStringClient, dyn super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::ISimpleTypesStringClient);
 
 }
 mod r#_StandardLibraryInterop_Compile {
