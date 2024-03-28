@@ -11,36 +11,16 @@ on:
         required: true
         type: string
 
-permissions:
-  issues: write
-
 jobs:
-  # manual-ci-verification:
-  #   uses: ./.github/workflows/test_models_dafny_verification.yml
-  #   with:
-  #     dafny: ${{ inputs.dafny }}
-  # manual-ci-java:
-  #   uses: ./.github/workflows/test_models_java_tests.yml
-  #   with:
-  #     dafny: ${{ inputs.dafny }}
-  # manual-ci-net:
-  #   uses: ./.github/workflows/test_models_net_tests.yml
-  #   with:
-  #     dafny: ${{ inputs.dafny }}
-
-  # TODO: Temporary to test mechanism intended only for nightly_dafny.yml
-  cut-issue-on-failure:
-    runs-on: ubuntu-20.04
-    # needs: [manual-ci-verification, manual-ci-java, manual-ci-net]
-    # if: ${{ always() && contains(needs.*.result, 'failure') }}
-    env:
-      GH_TOKEN: ${{ secrets.CI_TOKEN }}
-    steps:
-      - name: Create release blocker on dafny-lang/dafny
-        run: |
-          gh issue create \
-            --repo "dafny-lang/dafny" \
-            --title "(TEST ISSUE PLEASE IGNORE) Dafny nightly regression from ${{ github.repository }}" \
-            --label "autocut" \
-            --body "Failure in ${{ github.workflow_ref }}. \
-            See ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+  manual-ci-verification:
+    uses: ./.github/workflows/test_models_dafny_verification.yml
+    with:
+      dafny: ${{ inputs.dafny }}
+  manual-ci-java:
+    uses: ./.github/workflows/test_models_java_tests.yml
+    with:
+      dafny: ${{ inputs.dafny }}
+  manual-ci-net:
+    uses: ./.github/workflows/test_models_net_tests.yml
+    with:
+      dafny: ${{ inputs.dafny }}
