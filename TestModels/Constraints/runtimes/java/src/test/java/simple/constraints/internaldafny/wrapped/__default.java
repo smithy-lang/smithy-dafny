@@ -6,9 +6,9 @@ import simple.constraints.SimpleConstraints;
 import simple.constraints.ToNative;
 import simple.constraints.wrapped.TestSimpleConstraints;
 
-import simple.constraints.internaldafny.types.ISimpleConstraintsClient;
-import simple.constraints.internaldafny.types.SimpleConstraintsConfig;
-import simple.constraints.internaldafny.types.Error;
+import simple_constraints_internaldafny_types.ISimpleConstraintsClient;
+import simple_constraints_internaldafny_types.SimpleConstraintsConfig;
+import simple_constraints_internaldafny_types.Error;
 import Wrappers_Compile.Result;
 
 public class __default extends _ExternBase___default {

@@ -195,8 +195,146 @@ public class ErrorsFileWriter implements CustomFileWriter {
                          for a in attributes
                      )
               """);
+
+              // Write error serializer function
+              // "serializer" smithy-to-dafny
+              writer.write(
+                  """
+               def _smithy_error_to_dafny_error(e: ServiceError):
+                   ""\"
+                   Converts the provided native Smithy-modeled error
+                   into the corresponding Dafny error.
+                   ""\"
+                   ${C|}
+                    """,
+                      writer.consumer(
+                              w -> generateSmithyErrorToDafnyErrorBlock(codegenContext, serviceShape, w)));
             });
   }
+
+    /**
+     * Generate the method body for the `_smithy_error_to_dafny_error` method.
+     *
+     * @param codegenContext
+     * @param serviceShape
+     * @param writer
+     */
+    private void generateSmithyErrorToDafnyErrorBlock(
+            GenerationContext codegenContext, ServiceShape serviceShape, PythonWriter writer) {
+
+        // Write modelled error converters for this service
+        TreeSet<ShapeId> errorShapeSet =
+                new TreeSet<ShapeId>(
+                        codegenContext.model().getStructureShapesWithTrait(ErrorTrait.class).stream()
+                                .filter(
+                                        structureShape ->
+                                                structureShape
+                                                        .getId()
+                                                        .getNamespace()
+                                                        .equals(codegenContext.settings().getService().getNamespace()))
+                                .map(Shape::getId)
+                                .collect(Collectors.toSet()));
+        for (ShapeId errorShapeId : errorShapeSet) {
+            SmithyNameResolver.importSmithyGeneratedTypeForShape(writer, errorShapeId, codegenContext);
+            writer.addStdlibImport(DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(errorShapeId));
+            writer.write(
+                    """
+                        if isinstance(e, $L.$L):
+                            return $L.$L(message=e.message)
+                        """,
+                    SmithyNameResolver.getSmithyGeneratedModelLocationForShape(errorShapeId, codegenContext),
+                    errorShapeId.getName(),
+                    DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(errorShapeId),
+                    DafnyNameResolver.getDafnyTypeForError(errorShapeId));
+        }
+
+        // Write out wrapping errors for dependencies.
+        // This service will generate a dependency-specific error for each dependency.
+        // This dependency-specific error generated for only this service, and not for the dependency
+        // service;
+        //   this error type will wrap any dependency service's error for processing by this service.
+        // The Dafny type for this error contains one member: the dependency's name.
+        // ex. Dafny type for MyDependency: `Error_MyDependency(Error...) = { MyDependency: ... }`
+        // This member's value can take on any of the error types modelled in the dependency.
+        // Polymorph will generate a similar error structure in the primary service's errors.py file.
+        // ex. Smithy type for MyDependency: `MyDependency(ApiError...) = { MyDependency: ... }`
+        Optional<LocalServiceTrait> maybeLocalServiceTrait =
+                serviceShape.getTrait(LocalServiceTrait.class);
+        if (maybeLocalServiceTrait.isPresent()) {
+            LocalServiceTrait localServiceTrait = maybeLocalServiceTrait.get();
+            Set<ShapeId> serviceDependencyShapeIds = localServiceTrait.getDependencies();
+
+            if (serviceDependencyShapeIds != null) {
+                for (ShapeId serviceDependencyShapeId : serviceDependencyShapeIds) {
+
+                    ServiceShape dependencyServiceShape = codegenContext
+                            .model()
+                            .expectShape(serviceDependencyShapeId)
+                            .asServiceShape()
+                            .get();
+
+                    String nativeToDafnyErrorName;
+                    String conversionFilename;
+                    if (dependencyServiceShape.hasTrait(LocalServiceTrait.class)) {
+                        nativeToDafnyErrorName = "_smithy_error_to_dafny_error";
+                    } else if (AwsSdkNameResolver.isAwsSdkShape(dependencyServiceShape)) {
+                        nativeToDafnyErrorName = "_sdk_error_to_dafny_error";
+                    } else {
+                        throw new IllegalArgumentException("Provided serviceShape is neither localService nor AWS SDK shape: " + dependencyServiceShape);
+                    }
+
+                    // Import the dependency service's `_smithy_error_to_dafny_error` so this service
+                    //   can defer error conversion to the dependency
+                    writer.addStdlibImport(
+                            SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
+                                    serviceDependencyShapeId.getNamespace(), codegenContext.settings())
+                                    + ".shim",
+                            nativeToDafnyErrorName,
+                            SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
+                                    serviceDependencyShapeId.getNamespace())
+                                    + nativeToDafnyErrorName);
+
+                    // Import this service's error that wraps the dependency service's errors
+                    ServiceShape serviceDependencyShape = codegenContext.model().expectShape(serviceDependencyShapeId).asServiceShape().get();
+                    String dependencyErrorName = SmithyNameResolver.getSmithyGeneratedTypeForServiceError(serviceDependencyShape);
+                    System.out.println("importing " + dependencyErrorName);
+                    writer.addImport(".errors", dependencyErrorName);
+                    // Generate conversion method that says:
+                    // "If this is a dependency-specific error, defer to the dependency's
+                    // `_smithy_error_to_dafny_error`"
+                    // if isinstance(e, MyDependency):
+                    //   return
+                    // MyService.Error_MyDependency(MyDependency_smithy_error_to_dafny_error(e.message))
+                    writer.write(
+                            """
+                                if isinstance(e, $L):
+                                    return $L.Error_$L($L(e.message))
+                                """,
+                            dependencyErrorName,
+                            DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(serviceShape),
+                            dependencyErrorName,
+                            SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
+                                    serviceDependencyShapeId.getNamespace())
+                                    + nativeToDafnyErrorName);
+                }
+            }
+        }
+
+        // Add service-specific CollectionOfErrors
+        writer.write(
+                """
+                    if isinstance(e, CollectionOfErrors):
+                        return $L.Error_CollectionOfErrors(message=e.message, list=e.list)
+                    """,
+                DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(serviceShape.getId()));
+        // Add service-specific OpaqueError
+        writer.write(
+                """
+                    if isinstance(e, OpaqueError):
+                        return $L.Error_Opaque(obj=e.obj)
+                    """,
+                DafnyNameResolver.getDafnyPythonTypesModuleNameForShape(serviceShape.getId()));
+    }
 
 
 

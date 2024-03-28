@@ -1,7 +1,7 @@
-# Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
-# SPDX-License-Identifier: Apache-2.0
-from standard_library.internaldafny.generated.UTF8 import *
 import standard_library.internaldafny.generated.UTF8
+
+
+from standard_library.internaldafny.generated.UTF8 import *
 import _dafny
 import struct
 
@@ -21,6 +21,7 @@ class default__(standard_library.internaldafny.generated.UTF8.default__):
 
   @staticmethod
   def Encode(s):
+    print(f"{s.Elements=}")
     try:
       return Wrappers.Result_Success(_dafny.Seq(
           default__._strict_tostring(s).encode('utf-8')
@@ -51,12 +52,19 @@ class default__(standard_library.internaldafny.generated.UTF8.default__):
     :param s:
     :return:
     '''
-    return b''.join(ord(c).to_bytes(2, 'little') for c in dafny_ascii_string).decode("utf-16-le", errors = 'strict')
+    return b''.join([c.to_bytes(2, 'little') if isinstance(c, int) else ord(c).to_bytes(2, 'little') for c in dafny_ascii_string]).decode("utf-16-le", errors = 'strict')
 
   @staticmethod
   def Decode(s):
     try:
       utf8_str = bytes(s).decode('utf-8')
+      # out = []
+      # for a in s:
+      #   out.append(a.to_bytes(2, "little"))
+      # out2 = []
+      # for a in out:
+      #   out2.append(a.decode("utf-8"))
+      # utf8_str = ''.join(out2)
       unicode_escaped_utf8_str = default__._reverse_strict_tostring(utf8_str)
       return Wrappers.Result_Success(unicode_escaped_utf8_str)
     # Catch both UnicodeEncodeError and UnicodeDecodeError.

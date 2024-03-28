@@ -152,11 +152,7 @@ public class DirectedDafnyPythonLocalServiceCodegen extends DirectedPythonCodege
   @Override
   public void generateResource(
       GenerateResourceDirective<GenerationContext, PythonSettings> directive) {
-    if (directive
-        .shape()
-        .getId()
-        .getNamespace()
-        .equals(directive.context().settings().getService().getNamespace())) {
+    if (ReferencesFileWriter.shouldGenerateResourceForShape(directive.shape(), directive.context())) {
       String moduleName =
           SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
               directive.context().settings().getService().getNamespace());

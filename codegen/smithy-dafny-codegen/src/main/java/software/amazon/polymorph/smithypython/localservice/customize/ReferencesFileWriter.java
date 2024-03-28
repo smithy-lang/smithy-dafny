@@ -27,13 +27,21 @@ public class ReferencesFileWriter implements CustomFileWriter {
 
     private static Set<ShapeId> generatedResourceShapes = new HashSet<>();
 
-    public void generateResourceInterfaceAndImplementation(
-      ResourceShape resourceShape, GenerationContext codegenContext, PythonWriter writer) {
-        if (!generatedResourceShapes.contains(resourceShape.getId())
-        && resourceShape
+    public static boolean hasGeneratedResourceForShape(ShapeId shapeId) {
+        return generatedResourceShapes.contains(shapeId);
+    }
+
+    public static boolean shouldGenerateResourceForShape(ResourceShape resourceShape, GenerationContext codegenContext) {
+        return !hasGeneratedResourceForShape(resourceShape.getId())
+                && resourceShape
                 .getId()
                 .getNamespace()
-                .equals(codegenContext.settings().getService().getNamespace())) {
+                .equals(codegenContext.settings().getService().getNamespace());
+    }
+
+    public void generateResourceInterfaceAndImplementation(
+      ResourceShape resourceShape, GenerationContext codegenContext, PythonWriter writer) {
+        if (shouldGenerateResourceForShape(resourceShape, codegenContext)) {
             generatedResourceShapes.add(resourceShape.getId());
             generateResourceInterface(resourceShape, codegenContext, writer);
             generateResourceImplementation(resourceShape, codegenContext, writer);

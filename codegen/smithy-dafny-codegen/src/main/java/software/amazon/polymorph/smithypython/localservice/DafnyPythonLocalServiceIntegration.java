@@ -139,21 +139,28 @@ public final class DafnyPythonLocalServiceIntegration implements PythonIntegrati
 
     // Only open a writer if there are reference shapes; otherwise this will write an empty file.
     if (!referenceShapes.isEmpty()) {
-      codegenContext
-          .writerDelegator()
-          .useFileWriter(
-              moduleName + "/references.py",
-              "",
-              writer -> {
-                for (Shape referenceShape : referenceShapes) {
-                  if (referenceShape.isResourceShape()) {
-                    ResourceShape resourceShape = referenceShape.asResourceShape().get();
-                    new ReferencesFileWriter()
-                        .generateResourceInterfaceAndImplementation(
-                            resourceShape, codegenContext, writer);
-                  }
+
+        for (Shape referenceShape : referenceShapes) {
+            if (referenceShape.isResourceShape()) {
+                ResourceShape resourceShape = referenceShape.asResourceShape().get();
+
+                if (ReferencesFileWriter.shouldGenerateResourceForShape(resourceShape, codegenContext)) {
+                    codegenContext
+                            .writerDelegator()
+                            .useFileWriter(
+                                    moduleName + "/references.py",
+                                    "",
+                                    writer -> {
+                                        new ReferencesFileWriter()
+                                                .generateResourceInterfaceAndImplementation(
+                                                        resourceShape, codegenContext, writer);
+                                    });
                 }
-              });
+
+
+
+            }
+            }
         }
     }
 

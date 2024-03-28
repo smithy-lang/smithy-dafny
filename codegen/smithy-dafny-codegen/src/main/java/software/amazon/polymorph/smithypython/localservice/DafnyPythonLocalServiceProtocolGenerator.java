@@ -28,6 +28,7 @@ import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonWriter;
 import software.amazon.smithy.python.codegen.SmithyPythonDependency;
 import software.amazon.smithy.python.codegen.integration.ProtocolGenerator;
+import software.amazon.smithy.utils.CaseUtils;
 import software.amazon.smithy.utils.CodeSection;
 import software.amazon.smithy.utils.SmithyUnstableApi;
 
@@ -353,6 +354,7 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator implements Protoc
           writer.addImport(".errors", "ServiceError");
           writer.addImport(".errors", "OpaqueError");
           writer.addImport(".errors", "CollectionOfErrors");
+          writer.addStdlibImport("_dafny");
           writer.openBlock(
               "async def _deserialize_error(error: Error) -> ServiceError:",
               "",
@@ -362,7 +364,10 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator implements Protoc
                 if error.is_Opaque:
                     return OpaqueError(obj=error.obj)
                 elif error.is_CollectionOfErrors:
-                    return CollectionOfErrors(message=error.message, list=error.list)""");
+                    return CollectionOfErrors(
+                        message=_dafny.string_of(error.message),
+                        list=[await _deserialize_error(dafny_e) for dafny_e in error.list],
+                    )""");
 
                 // Write converters for errors modelled on this local service
                 generateErrorResponseDeserializerSectionForLocalServiceErrors(
@@ -462,17 +467,22 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator implements Protoc
             SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
                     serviceDependencyShapeId.getNamespace())
                 + "_deserialize_error");
-        // Generate deserializer for dependency that defers to its `_deserialize_error`
-        writer.write(
+    // Generate deserializer for dependency that defers to its `_deserialize_error`
+          // TODO: Refactor, this is not specific to AWS SDKs
+      String serviceDependencyErrorName = AwsSdkNameResolver.dependencyErrorNameForService(
+          context.model().expectShape(serviceDependencyShapeId).asServiceShape().get()
+      );
+
+      writer.write(
             """
             elif error.is_$L:
                 return $L(await $L(error.$L))""",
-            serviceDependencyShapeId.getName(),
-            serviceDependencyShapeId.getName(),
+                serviceDependencyErrorName,
+              serviceDependencyShapeId.getName(),
             SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
                     serviceDependencyShapeId.getNamespace())
                 + "_deserialize_error",
-            serviceDependencyShapeId.getName());
+                serviceDependencyErrorName);
       }
     }
   }
@@ -516,16 +526,24 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator implements Protoc
                                 serviceDependencyShapeId.getNamespace())
                                 + "_sdk_error_to_dafny_error");
                 // Generate deserializer for dependency that defers to its `_deserialize_error`
+//                writer.write(
+//                        """
+//                        elif error.is_$L:
+//                            return $L($L(error.$L.obj))""",
+//                        code,
+//                        code,
+//                        SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
+//                                serviceDependencyShapeId.getNamespace())
+//                                + "_sdk_error_to_dafny_error",
+//                        code);
                 writer.write(
                         """
                         elif error.is_$L:
-                            return $L($L(error.$L.obj))""",
+                            return $L(message=_dafny.string_of(error.$L.message))""",
                         code,
                         code,
-                        SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
-                                serviceDependencyShapeId.getNamespace())
-                                + "_sdk_error_to_dafny_error",
                         code);
+                writer.addStdlibImport("_dafny");
             }
         }
     }

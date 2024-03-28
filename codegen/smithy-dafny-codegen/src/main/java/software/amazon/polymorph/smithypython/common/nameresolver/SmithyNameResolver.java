@@ -245,14 +245,10 @@ public class SmithyNameResolver {
    */
   public static String getSmithyGeneratedTypeForServiceError(
           ServiceShape serviceShape) {
-    System.out.println("getSmithyGeneratedTypeForServiceError " + serviceShape.getId());
     if (serviceShape.hasTrait(LocalServiceTrait.class)) {
       return serviceShape.getId().getName();
     } else if (AwsSdkNameResolver.isAwsSdkShape(serviceShape)) {
-      System.out.println("getSmithyGeneratedTypeForServiceError YES " + serviceShape.getId());
-      String a = AwsSdkNameResolver.dependencyErrorNameForService(serviceShape);
-      System.out.println("a " + a);
-      return a;
+      return AwsSdkNameResolver.dependencyErrorNameForService(serviceShape);
     } else {
       throw new IllegalArgumentException("Dependency MUST be a local service or AWS SDK shape: " + serviceShape);
     }

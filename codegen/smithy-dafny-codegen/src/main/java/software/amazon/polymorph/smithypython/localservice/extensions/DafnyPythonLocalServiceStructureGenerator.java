@@ -3,9 +3,12 @@ package software.amazon.polymorph.smithypython.localservice.extensions;
 import static java.lang.String.format;
 
 import java.util.Set;
+
+import org.checkerframework.checker.units.qual.Length;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
+import software.amazon.polymorph.utils.ConstrainTraitUtils;
 import software.amazon.smithy.codegen.core.Symbol;
 import software.amazon.smithy.codegen.core.SymbolProvider;
 import software.amazon.smithy.model.Model;
@@ -14,6 +17,8 @@ import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.ErrorTrait;
+import software.amazon.smithy.model.traits.LengthTrait;
+import software.amazon.smithy.model.traits.RangeTrait;
 import software.amazon.smithy.python.codegen.PythonSettings;
 import software.amazon.smithy.python.codegen.PythonWriter;
 import software.amazon.smithy.python.codegen.StructureGenerator;
@@ -372,4 +377,99 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
         });
     writer.write("");
   }
+
+    protected void writeInitMethodAssignerForRequiredMember(MemberShape member, String memberName) {
+        // Smithy-Dafny: Check traits
+        // LengthTrait, RangeTrait
+        Shape targetShape = model.expectShape(member.getTarget());
+        if (targetShape.hasTrait(RangeTrait.class)) {
+            RangeTrait rangeTrait = targetShape.getTrait(RangeTrait.class).get();
+            if (rangeTrait.getMin().isPresent()) {
+                writeRangeTraitMinCheckForMember(member, memberName, rangeTrait);
+            }
+            if (rangeTrait.getMax().isPresent()) {
+                writeRangeTraitMaxCheckForMember(member, memberName, rangeTrait);
+            }
+        }
+
+        if (targetShape.hasTrait(LengthTrait.class)) {
+            LengthTrait lengthTrait = targetShape.getTrait(LengthTrait.class).get();
+            if (lengthTrait.getMin().isPresent()) {
+                writeLengthTraitMinCheckForMember(member, memberName, lengthTrait);
+            }
+            if (lengthTrait.getMax().isPresent()) {
+                writeLengthTraitMaxCheckForMember(member, memberName, lengthTrait);
+            }
+        }
+        writer.write("self.$1L = $1L", memberName);
+    }
+
+    protected void writeInitMethodAssignerForOptionalMember(MemberShape member, String memberName) {
+        writer.write("self.$1L = $1L if $1L is not None else $2L",
+                memberName, getDefaultValue(writer, member));
+    }
+
+    protected void writeLengthTraitMinCheckForMember(MemberShape member, String memberName, LengthTrait lengthTrait) {
+        String min = ConstrainTraitUtils.LengthTraitUtils.min(lengthTrait);
+        writer.openBlock("if ($1L is not None) and (len($1L) < $2L):",
+                "",
+                memberName,
+                min,
+                () -> {
+                    writer.write("""
+                    raise ValueError("The size of $1L must be greater than or equal to $2L")
+                    """,
+                            memberName,
+                            min
+                    );
+                });
+    }
+
+    protected void writeLengthTraitMaxCheckForMember(MemberShape member, String memberName, LengthTrait lengthTrait) {
+        String max = ConstrainTraitUtils.LengthTraitUtils.max(lengthTrait);
+        writer.openBlock("if ($1L is not None) and (len($1L) > $2L):",
+                "",
+                memberName,
+                max,
+                () -> {
+                    writer.write("""
+                    raise ValueError("The size of $1L must be less than or equal to $2L")
+                    """,
+                            memberName,
+                            max
+                    );
+                });
+    }
+
+    protected void writeRangeTraitMinCheckForMember(MemberShape member, String memberName, RangeTrait rangeTrait) {
+        String min = ConstrainTraitUtils.RangeTraitUtils.minAsShapeType(model.expectShape(member.getTarget()), rangeTrait);
+        writer.openBlock("if ($1L is not None) and ($1L < $2L):",
+                "",
+                memberName,
+                min,
+                () -> {
+                    writer.write("""
+                    raise ValueError("$1L must be less than or equal to $2L")
+                    """,
+                            memberName,
+                            min
+                    );
+                });
+    }
+
+    protected void writeRangeTraitMaxCheckForMember(MemberShape member, String memberName, RangeTrait rangeTrait) {
+        String max = ConstrainTraitUtils.RangeTraitUtils.maxAsShapeType(model.expectShape(member.getTarget()), rangeTrait);
+        writer.openBlock("if ($1L is not None) and ($1L > $2L):",
+                "",
+                memberName,
+                max,
+                () -> {
+                    writer.write("""
+                    raise ValueError("$1L must be greater than or equal to $2L")
+                    """,
+                            memberName,
+                            max
+                    );
+                });
+    }
 }

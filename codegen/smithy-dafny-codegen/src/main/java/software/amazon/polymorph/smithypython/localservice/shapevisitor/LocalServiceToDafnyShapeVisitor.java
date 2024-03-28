@@ -189,7 +189,9 @@ public class LocalServiceToDafnyShapeVisitor extends ShapeVisitor.Default<String
     public String stringShape(StringShape shape) {
       writer.addStdlibImport("_dafny", "Seq");
       if (shape.hasTrait(DafnyUtf8BytesTrait.class)) {
-        return "Seq(list(ord(c) for c in %1$s))".formatted(dataSource);
+        writer.addStdlibImport("UTF8");
+        return "UTF8.default__.Encode(Seq(%1$s)).value".formatted(dataSource);
+//        return "Seq(list(ord(c) for c in %1$s))".formatted(dataSource);
         // Smithy has deprecated EnumTrait, but Polymorph still uses it to mark enums
       }
       // Smithy has deprecated EnumTrait, but Polymorph still uses it to mark enums
