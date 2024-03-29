@@ -1,0 +1,32 @@
+diff --git b/AwsCryptographyPrimitives/Model/AwsCryptographyPrimitivesTypes.dfy a/AwsCryptographyPrimitives/Model/AwsCryptographyPrimitivesTypes.dfy
+index acd5a346..6bd1c1e2 100644
+--- b/AwsCryptographyPrimitives/Model/AwsCryptographyPrimitivesTypes.dfy
++++ a/AwsCryptographyPrimitives/Model/AwsCryptographyPrimitivesTypes.dfy
+@@ -519,7 +519,9 @@ abstract module AbstractAwsCryptographyPrimitivesService
+   import Operations : AbstractAwsCryptographyPrimitivesOperations
+   function method DefaultCryptoConfig(): CryptoConfig
+   method AtomicPrimitives(config: CryptoConfig := DefaultCryptoConfig())
+-    returns (res: Result<IAwsCryptographicPrimitivesClient, Error>)
++    // BEGIN MANUAL FIX
++    returns (res: Result<AtomicPrimitivesClient, Error>)
++    // END MANUAL FIX
+     ensures res.Success? ==>
+               && fresh(res.value)
+               && fresh(res.value.Modifies)
+@@ -527,10 +529,14 @@ abstract module AbstractAwsCryptographyPrimitivesService
+               && res.value.ValidState()
+ 
+   // Helper function for the benefit of native code to create a Success(client) without referring to Dafny internals
+-  function method CreateSuccessOfClient(client: IAwsCryptographicPrimitivesClient): Result<IAwsCryptographicPrimitivesClient, Error> {
++  // BEGIN MANUAL FIX
++  function method CreateSuccessOfClient(client: AtomicPrimitivesClient): Result<AtomicPrimitivesClient, Error> {
++    // END MANUAL FIX
+     Success(client)
+   } // Helper function for the benefit of native code to create a Failure(error) without referring to Dafny internals
+-  function method CreateFailureOfError(error: Error): Result<IAwsCryptographicPrimitivesClient, Error> {
++  // BEGIN MANUAL FIX
++  function method CreateFailureOfError(error: Error): Result<AtomicPrimitivesClient, Error> {
++    // END MANUAL FIX
+     Failure(error)
+   }
+   class AtomicPrimitivesClient extends IAwsCryptographicPrimitivesClient

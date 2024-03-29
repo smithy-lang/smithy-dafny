@@ -32,7 +32,7 @@ module {:extern "software.amazon.cryptography.keystore.internaldafny"}
   }
 
   method KeyStore(config: KeyStoreConfig)
-    returns (res: Result<IKeyStoreClient, Error>)
+    returns (res: Result<KeyStoreClient, Error>)
     ensures res.Success? ==>
               && res.value is KeyStoreClient
               && var rconfig := (res.value as KeyStoreClient).config;
@@ -123,7 +123,7 @@ module {:extern "software.amazon.cryptography.keystore.internaldafny"}
       ddbClient := ddbClient
       )
     );
-    return Success(client as IKeyStoreClient);
+    return Success(client);
   }
 
   class KeyStoreClient... {

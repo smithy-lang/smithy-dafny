@@ -1,0 +1,25 @@
+diff --git b/AwsCryptographicMaterialProviders/runtimes/java/src/main/smithy-generated/software/amazon/cryptography/materialproviders/MaterialProviders.java a/AwsCryptographicMaterialProviders/runtimes/java/src/main/smithy-generated/software/amazon/cryptography/materialproviders/MaterialProviders.java
+index ac695b97..290bcfc0 100644
+--- b/AwsCryptographicMaterialProviders/runtimes/java/src/main/smithy-generated/software/amazon/cryptography/materialproviders/MaterialProviders.java
++++ a/AwsCryptographicMaterialProviders/runtimes/java/src/main/smithy-generated/software/amazon/cryptography/materialproviders/MaterialProviders.java
+@@ -10,6 +10,9 @@ import java.lang.Byte;
+ import java.lang.IllegalArgumentException;
+ import java.nio.ByteBuffer;
+ import java.util.Objects;
++//BEGIN MANUAL FIX
++import software.amazon.cryptography.materialproviders.internaldafny.MaterialProvidersClient;
++//END MANUAL FIX
+ import software.amazon.cryptography.materialproviders.internaldafny.__default;
+ import software.amazon.cryptography.materialproviders.internaldafny.types.Error;
+ import software.amazon.cryptography.materialproviders.internaldafny.types.IAwsCryptographicMaterialProvidersClient;
+@@ -49,7 +52,9 @@ public class MaterialProviders {
+     MaterialProvidersConfig input = builder.MaterialProvidersConfig();
+     software.amazon.cryptography.materialproviders.internaldafny.types.MaterialProvidersConfig dafnyValue =
+       ToDafny.MaterialProvidersConfig(input);
+-    Result<IAwsCryptographicMaterialProvidersClient, Error> result =
++    //BEGIN MANUAL FIX
++    Result<MaterialProvidersClient, Error> result =
++      //END MANUAL FIX
+       __default.MaterialProviders(dafnyValue);
+     if (result.is_Failure()) {
+       throw ToNative.Error(result.dtor_error());

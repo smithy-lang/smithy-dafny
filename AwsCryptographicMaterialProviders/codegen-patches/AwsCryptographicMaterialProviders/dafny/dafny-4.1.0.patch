@@ -1,0 +1,32 @@
+diff --git b/AwsCryptographicMaterialProviders/dafny/AwsCryptographicMaterialProviders/Model/AwsCryptographyMaterialProvidersTypes.dfy a/AwsCryptographicMaterialProviders/dafny/AwsCryptographicMaterialProviders/Model/AwsCryptographyMaterialProvidersTypes.dfy
+index 7fc594a1..7a5be522 100644
+--- b/AwsCryptographicMaterialProviders/dafny/AwsCryptographicMaterialProviders/Model/AwsCryptographyMaterialProvidersTypes.dfy
++++ a/AwsCryptographicMaterialProviders/dafny/AwsCryptographicMaterialProviders/Model/AwsCryptographyMaterialProvidersTypes.dfy
+@@ -1529,7 +1529,9 @@ abstract module AbstractAwsCryptographyMaterialProvidersService
+   import Operations : AbstractAwsCryptographyMaterialProvidersOperations
+   function method DefaultMaterialProvidersConfig(): MaterialProvidersConfig
+   method MaterialProviders(config: MaterialProvidersConfig := DefaultMaterialProvidersConfig())
+-    returns (res: Result<IAwsCryptographicMaterialProvidersClient, Error>)
++    // BEGIN MANUAL FIX
++    returns (res: Result<MaterialProvidersClient, Error>)
++    // END MANUAL FIX
+     ensures res.Success? ==>
+               && fresh(res.value)
+               && fresh(res.value.Modifies)
+@@ -1537,10 +1539,14 @@ abstract module AbstractAwsCryptographyMaterialProvidersService
+               && res.value.ValidState()
+ 
+   // Helper function for the benefit of native code to create a Success(client) without referring to Dafny internals
+-  function method CreateSuccessOfClient(client: IAwsCryptographicMaterialProvidersClient): Result<IAwsCryptographicMaterialProvidersClient, Error> {
++  // BEGIN MANUAL FIX
++  function method CreateSuccessOfClient(client: MaterialProvidersClient): Result<MaterialProvidersClient, Error> {
++    // END MANUAL FIX
+     Success(client)
+   } // Helper function for the benefit of native code to create a Failure(error) without referring to Dafny internals
+-  function method CreateFailureOfError(error: Error): Result<IAwsCryptographicMaterialProvidersClient, Error> {
++  // BEGIN MANUAL FIX
++  function method CreateFailureOfError(error: Error): Result<MaterialProvidersClient, Error> {
++    // END MANUAL FIX
+     Failure(error)
+   }
+   class MaterialProvidersClient extends IAwsCryptographicMaterialProvidersClient

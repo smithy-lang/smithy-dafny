@@ -18,7 +18,7 @@ module
   }
 
   method MaterialProviders(config: MaterialProvidersConfig)
-    returns (res: Result<IAwsCryptographicMaterialProvidersClient, Error>)
+    returns (res: Result<MaterialProvidersClient, Error>)
     ensures res.Success? ==>
               && res.value is MaterialProvidersClient
   {
@@ -29,7 +29,7 @@ module
     var cryptoPrimitives := cryptoPrimitivesX as Primitives.AtomicPrimitivesClient;
 
     var client := new MaterialProvidersClient(Operations.Config( crypto := cryptoPrimitives ));
-    return Success(client as IAwsCryptographicMaterialProvidersClient);
+    return Success(client);
   }
 
   class MaterialProvidersClient... {

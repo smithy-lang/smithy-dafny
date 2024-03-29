@@ -12,12 +12,16 @@ module {:extern "software.amazon.cryptography.primitives.internaldafny" } Aws.Cr
   }
 
   method AtomicPrimitives(config: CryptoConfig)
-    returns (res: Result<IAwsCryptographicPrimitivesClient, Error>)
+    // BEGIN MANUAL FIX
+    returns (res: Result<AtomicPrimitivesClient, Error>)
+    // END MANUAL FIX
     ensures res.Success? ==>
               && res.value is AtomicPrimitivesClient
   {
     var client := new AtomicPrimitivesClient(Operations.Config);
-    return Success(client as IAwsCryptographicPrimitivesClient);
+    // BEGIN MANUAL FIX
+    return Success(client);
+    // END MANUAL FIX
   }
 
   class AtomicPrimitivesClient... {
