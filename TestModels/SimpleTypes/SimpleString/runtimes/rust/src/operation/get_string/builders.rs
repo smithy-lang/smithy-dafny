@@ -10,10 +10,7 @@ impl GetStringInputBuilder {
         client: &crate::Client,
     ) -> ::std::result::Result<
         crate::operation::get_string::GetStringOutput,
-        ::aws_smithy_runtime_api::client::result::SdkError<
-            crate::operation::get_string::GetStringError,
-            ::aws_smithy_runtime_api::client::orchestrator::HttpResponse,
-        >,
+        crate::operation::get_string::GetStringError
     > {
         let mut fluent_builder = client.get_string();
         fluent_builder.inner = self;
@@ -65,10 +62,7 @@ impl GetStringFluentBuilder {
         self,
     ) -> ::std::result::Result<
         crate::operation::get_string::GetStringOutput,
-        ::aws_smithy_runtime_api::client::result::SdkError<
-            crate::operation::get_string::GetStringError,
-            ::aws_smithy_runtime_api::client::orchestrator::HttpResponse,
-        >,
+        crate::operation::get_string::GetStringError
     > {
         let input = self
             .inner
