@@ -7,6 +7,7 @@ name = "SimpleString"
 version = "0.1.0"
 dependencies = [
  "dafny_runtime",
+ "dafny_standard_library",
 ]
 
 [[package]]
@@ -30,6 +31,13 @@ dependencies = [
  "num",
  "once_cell",
  "paste",
+]
+
+[[package]]
+name = "dafny_standard_library"
+version = "0.1.0"
+dependencies = [
+ "dafny_runtime",
 ]
 
 [[package]]

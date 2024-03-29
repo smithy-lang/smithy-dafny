@@ -1,7 +1,7 @@
 #![allow(warnings, unconditional_panic)]
 #![allow(nonstandard_style)]
 extern crate dafny_runtime;
-mod _System {
+pub mod _System {
   pub trait object {}
   pub type nat = ::dafny_runtime::DafnyInt;
   #[derive(PartialEq, Clone)]
@@ -86,7 +86,7 @@ pub mod r#_Wrappers_Compile {
     pub fn _allocated() -> *mut Self {
       ::dafny_runtime::allocate::<Self>()
     }
-    pub fn Need<_E: Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + ::dafny_runtime::DafnyTypeEq + 'static>(condition: bool, error: &_E) -> ::std::rc::Rc<super::r#_Wrappers_Compile::Outcome<_E>>
+    pub fn Need<_E: ::dafny_runtime::DafnyType + ::std::default::Default + 'static>(condition: bool, error: &_E) -> ::std::rc::Rc<super::r#_Wrappers_Compile::Outcome<_E>>
        where  {
       if condition {
         ::std::rc::Rc::new(super::r#_Wrappers_Compile::Outcome::<_E>::Pass {})
@@ -118,7 +118,7 @@ pub mod r#_Wrappers_Compile {
     Some { value: T },
     _PhantomVariant(::std::marker::PhantomData::<T>)
   }
-  impl <T: Clone + ::dafny_runtime::DafnyPrint + ::dafny_runtime::DafnyTypeEq + 'static>Option<T> {
+  impl <T: ::dafny_runtime::DafnyTypeEq + 'static>Option<T> {
     pub fn ToResult(self: &::std::rc::Rc<Self>) -> ::std::rc::Rc<super::r#_Wrappers_Compile::Result<T, ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>>> {
       let mut _source0: ::std::rc::Rc<super::r#_Wrappers_Compile::Option<T>> = self.clone();
       if matches!((&_source0).as_ref(), super::r#_Wrappers_Compile::Option::None{ .. }) {
@@ -126,7 +126,7 @@ pub mod r#_Wrappers_Compile {
             error: ::dafny_runtime::string_utf16_of("Option is None")
           })
       } else {
-        let mut r#___mcc_h0: T = (&_source0).value().clone();
+        let mut r#___mcc_h0: T = _source0.value().clone();
         let mut v: T = r#___mcc_h0.clone();
         ::std::rc::Rc::new(super::r#_Wrappers_Compile::Result::<T, ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>>::Success {
             value: v.clone()
@@ -138,7 +138,7 @@ pub mod r#_Wrappers_Compile {
       if matches!((&_source1).as_ref(), super::r#_Wrappers_Compile::Option::None{ .. }) {
         default.clone()
       } else {
-        let mut r#___mcc_h0: T = (&_source1).value().clone();
+        let mut r#___mcc_h0: T = _source1.value().clone();
         let mut v: T = r#___mcc_h0.clone();
         v.clone()
       }
@@ -146,7 +146,7 @@ pub mod r#_Wrappers_Compile {
     pub fn IsFailure(self: &::std::rc::Rc<Self>) -> bool {
       matches!(self.as_ref(), super::r#_Wrappers_Compile::Option::None{ .. })
     }
-    pub fn PropagateFailure<_U: Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + ::dafny_runtime::DafnyTypeEq + 'static>(self: &::std::rc::Rc<Self>) -> ::std::rc::Rc<super::r#_Wrappers_Compile::Option<_U>>
+    pub fn PropagateFailure<_U: ::dafny_runtime::DafnyType + ::std::default::Default + 'static>(self: &::std::rc::Rc<Self>) -> ::std::rc::Rc<super::r#_Wrappers_Compile::Option<_U>>
        where  {
       ::std::rc::Rc::new(super::r#_Wrappers_Compile::Option::<_U>::None {})
     }
@@ -161,7 +161,7 @@ pub mod r#_Wrappers_Compile {
       }
     }
   }
-  impl <T: Clone + ::dafny_runtime::DafnyPrint + ::dafny_runtime::DafnyTypeEq + 'static>::dafny_runtime::DafnyPrint for Option<T> {
+  impl <T: ::dafny_runtime::DafnyType + 'static>::dafny_runtime::DafnyPrint for Option<T> {
     fn fmt_print(&self, _formatter: &mut ::std::fmt::Formatter, _in_seq: bool) -> std::fmt::Result {
       match self {
         Option::None { } => {
@@ -188,23 +188,43 @@ pub mod r#_Wrappers_Compile {
       self
     }
   }
-  #[derive(PartialEq, Clone)]
+  impl <T: ::dafny_runtime::DafnyTypeEq + 'static> core::fmt::Debug for Option<T> {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+      ::dafny_runtime::DafnyPrint::fmt_print(self, f, true)
+    }
+  }
+  impl <T: ::dafny_runtime::DafnyTypeEq + 'static> ::dafny_runtime::DafnyType for Option<T> {}
+  impl <T: ::dafny_runtime::DafnyTypeEq> Eq for Option<T> {}
+  impl <T: ::dafny_runtime::DafnyTypeEq> std::hash::Hash for Option<T> {
+    fn hash<H: ::std::hash::Hasher>(&self, state: &mut H) {
+      match self {
+        Option::None { } => {
+        },
+        Option::Some { value, } => {
+          value.hash(state);
+        },
+        Option::_PhantomVariant(..) => {panic!()}
+      }
+    }
+  }
+  impl <T: ::dafny_runtime::DafnyTypeEq + 'static> ::dafny_runtime::DafnyTypeEq for Option<T> {}
+  #[derive(PartialEq, Clone, Debug)]
   pub enum Result<T, R> {
     Success { value: T },
     Failure { error: R },
     _PhantomVariant(::std::marker::PhantomData::<T>, ::std::marker::PhantomData::<R>)
   }
-  impl <T: Clone + ::dafny_runtime::DafnyPrint + ::dafny_runtime::DafnyTypeEq + 'static, R: Clone + ::dafny_runtime::DafnyPrint + ::dafny_runtime::DafnyTypeEq + 'static>Result<T, R> {
+  impl <T: ::dafny_runtime::DafnyType + 'static, R: ::dafny_runtime::DafnyType + 'static>Result<T, R> {
     pub fn ToOption(self: &::std::rc::Rc<Self>) -> ::std::rc::Rc<super::r#_Wrappers_Compile::Option<T>> {
       let mut _source2: ::std::rc::Rc<super::r#_Wrappers_Compile::Result<T, R>> = self.clone();
       if matches!((&_source2).as_ref(), super::r#_Wrappers_Compile::Result::Success{ .. }) {
-        let mut r#___mcc_h0: T = (&_source2).value().clone();
+        let mut r#___mcc_h0: T = _source2.value().clone();
         let mut s: T = r#___mcc_h0.clone();
         ::std::rc::Rc::new(super::r#_Wrappers_Compile::Option::<T>::Some {
             value: s.clone()
           })
       } else {
-        let mut r#___mcc_h1: R = (&_source2).error().clone();
+        let mut r#___mcc_h1: R = _source2.error().clone();
         let mut e: R = r#___mcc_h1.clone();
         ::std::rc::Rc::new(super::r#_Wrappers_Compile::Option::<T>::None {})
       }
@@ -212,11 +232,11 @@ pub mod r#_Wrappers_Compile {
     pub fn UnwrapOr(self: &::std::rc::Rc<Self>, default: &T) -> T {
       let mut _source3: ::std::rc::Rc<super::r#_Wrappers_Compile::Result<T, R>> = self.clone();
       if matches!((&_source3).as_ref(), super::r#_Wrappers_Compile::Result::Success{ .. }) {
-        let mut r#___mcc_h0: T = (&_source3).value().clone();
+        let mut r#___mcc_h0: T = _source3.value().clone();
         let mut s: T = r#___mcc_h0.clone();
         s.clone()
       } else {
-        let mut r#___mcc_h1: R = (&_source3).error().clone();
+        let mut r#___mcc_h1: R = _source3.error().clone();
         let mut e: R = r#___mcc_h1.clone();
         default.clone()
       }
@@ -224,23 +244,23 @@ pub mod r#_Wrappers_Compile {
     pub fn IsFailure(self: &::std::rc::Rc<Self>) -> bool {
       matches!(self.as_ref(), super::r#_Wrappers_Compile::Result::Failure{ .. })
     }
-    pub fn PropagateFailure<_U: Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + ::dafny_runtime::DafnyTypeEq + 'static>(self: &::std::rc::Rc<Self>) -> ::std::rc::Rc<super::r#_Wrappers_Compile::Result<_U, R>>
+    pub fn PropagateFailure<_U: ::dafny_runtime::DafnyType + ::std::default::Default + 'static>(self: &::std::rc::Rc<Self>) -> ::std::rc::Rc<super::r#_Wrappers_Compile::Result<_U, R>>
        where  {
       ::std::rc::Rc::new(super::r#_Wrappers_Compile::Result::<_U, R>::Failure {
           error: self.error().clone()
         })
     }
-    pub fn MapFailure<_NewR: Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + ::dafny_runtime::DafnyTypeEq + 'static>(self: &::std::rc::Rc<Self>, reWrap: &::dafny_runtime::FunctionWrapper<::std::rc::Rc<dyn ::std::ops::Fn(&R) -> _NewR + 'static>>) -> ::std::rc::Rc<super::r#_Wrappers_Compile::Result<T, _NewR>>
+    pub fn MapFailure<_NewR: ::dafny_runtime::DafnyType + ::std::default::Default + 'static>(self: &::std::rc::Rc<Self>, reWrap: &::dafny_runtime::FunctionWrapper<::std::rc::Rc<dyn ::std::ops::Fn(&R) -> _NewR + 'static>>) -> ::std::rc::Rc<super::r#_Wrappers_Compile::Result<T, _NewR>>
        where  {
       let mut _source4: ::std::rc::Rc<super::r#_Wrappers_Compile::Result<T, R>> = self.clone();
       if matches!((&_source4).as_ref(), super::r#_Wrappers_Compile::Result::Success{ .. }) {
-        let mut r#___mcc_h0: T = (&_source4).value().clone();
+        let mut r#___mcc_h0: T = _source4.value().clone();
         let mut s: T = r#___mcc_h0.clone();
         ::std::rc::Rc::new(super::r#_Wrappers_Compile::Result::<T, _NewR>::Success {
             value: s.clone()
           })
       } else {
-        let mut r#___mcc_h1: R = (&_source4).error().clone();
+        let mut r#___mcc_h1: R = _source4.error().clone();
         let mut e: R = r#___mcc_h1.clone();
         ::std::rc::Rc::new(super::r#_Wrappers_Compile::Result::<T, _NewR>::Failure {
             error: ((reWrap).0(&e))
@@ -265,7 +285,7 @@ pub mod r#_Wrappers_Compile {
       }
     }
   }
-  impl <T: Clone + ::dafny_runtime::DafnyPrint + ::dafny_runtime::DafnyTypeEq + 'static, R: Clone + ::dafny_runtime::DafnyPrint + ::dafny_runtime::DafnyTypeEq + 'static>::dafny_runtime::DafnyPrint for Result<T, R> {
+  impl <T: ::dafny_runtime::DafnyType + 'static, R: ::dafny_runtime::DafnyType + 'static>::dafny_runtime::DafnyPrint for Result<T, R> {
     fn fmt_print(&self, _formatter: &mut ::std::fmt::Formatter, _in_seq: bool) -> std::fmt::Result {
       match self {
         Result::Success { value, } => {
@@ -296,17 +316,18 @@ pub mod r#_Wrappers_Compile {
       self
     }
   }
+  impl <T: ::dafny_runtime::DafnyType + 'static, R: ::dafny_runtime::DafnyType + 'static> ::dafny_runtime::DafnyType for Result<T, R> {}
   #[derive(PartialEq, Clone)]
   pub enum Outcome<E> {
     Pass {},
     Fail { error: E },
     _PhantomVariant(::std::marker::PhantomData::<E>)
   }
-  impl <E: Clone + ::dafny_runtime::DafnyPrint + ::dafny_runtime::DafnyTypeEq + 'static>Outcome<E> {
+  impl <E: ::dafny_runtime::DafnyType + 'static>Outcome<E> {
     pub fn IsFailure(self: &::std::rc::Rc<Self>) -> bool {
       matches!(self.as_ref(), super::r#_Wrappers_Compile::Outcome::Fail{ .. })
     }
-    pub fn PropagateFailure<_U: Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + ::dafny_runtime::DafnyTypeEq + 'static>(self: &::std::rc::Rc<Self>) -> ::std::rc::Rc<super::r#_Wrappers_Compile::Result<_U, E>>
+    pub fn PropagateFailure<_U: ::dafny_runtime::DafnyType + ::std::default::Default + 'static>(self: &::std::rc::Rc<Self>) -> ::std::rc::Rc<super::r#_Wrappers_Compile::Result<_U, E>>
        where  {
       ::std::rc::Rc::new(super::r#_Wrappers_Compile::Result::<_U, E>::Failure {
           error: self.error().clone()
@@ -320,7 +341,7 @@ pub mod r#_Wrappers_Compile {
       }
     }
   }
-  impl <E: Clone + ::dafny_runtime::DafnyPrint + ::dafny_runtime::DafnyTypeEq + 'static>::dafny_runtime::DafnyPrint for Outcome<E> {
+  impl <E: ::dafny_runtime::DafnyType + 'static>::dafny_runtime::DafnyPrint for Outcome<E> {
     fn fmt_print(&self, _formatter: &mut ::std::fmt::Formatter, _in_seq: bool) -> std::fmt::Result {
       match self {
         Outcome::Pass { } => {
@@ -348,7 +369,7 @@ pub mod r#_Wrappers_Compile {
     }
   }
 }
-mod r#_StandardLibrary_Compile_dUInt_Compile {
+pub mod r#_StandardLibrary_Compile_dUInt_Compile {
   pub struct _default {}
   impl _default {
     pub fn new() -> Self {
@@ -646,7 +667,7 @@ mod r#_StandardLibrary_Compile_dUInt_Compile {
     }
   }
 }
-mod r#_StandardLibrary_Compile {
+pub mod r#_StandardLibrary_Compile {
   pub struct _default {}
   impl _default {
     pub fn new() -> Self {
