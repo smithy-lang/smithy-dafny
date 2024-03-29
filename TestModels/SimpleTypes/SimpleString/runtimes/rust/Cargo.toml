@@ -1,5 +1,5 @@
 [package]
-name = "SimpleString"
+name = "simple_string"
 version = "0.1.0"
 edition = "2021"
 
@@ -7,3 +7,10 @@ edition = "2021"
 
 [dependencies]
 dafny_runtime = { path = "../../../../dafny-dependencies/dafny_runtime_rust"}
+[dependencies.aws-smithy-runtime]
+path = "/Users/salkeldr/Documents/GitHub/smithy-rs/rust-runtime/aws-smithy-runtime"
+features = ["client"]
+[dependencies.aws-smithy-runtime-api]
+path = "/Users/salkeldr/Documents/GitHub/smithy-rs/rust-runtime/aws-smithy-runtime-api"
+features = ["client"
+]
