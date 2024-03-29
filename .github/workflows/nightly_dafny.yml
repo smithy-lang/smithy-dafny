@@ -32,3 +32,18 @@ jobs:
     uses: ./.github/workflows/test_models_rust_tests.yml
     with:
       dafny: 'nightly-latest'
+
+  cut-issue-on-failure:
+    runs-on: ubuntu-latest
+    needs: [dafny-nightly-verification, dafny-nightly-java, dafny-nightly-net, dafny-nightly-rust]
+    if: ${{ always() && contains(needs.*.result, 'failure') }}
+    env:
+      GH_TOKEN: ${{ secrets.CI_TOKEN }}
+    steps:
+      - name: Create release blocker on dafny-lang/dafny
+        run: |
+          gh issue create \
+            --repo "dafny-lang/dafny" \
+            --title "[PRERELEASE REGRESSION] Dafny prerelease regression from ${{ github.repository }}" \
+            --body "Failure in ${{ github.workflow_ref }}. \
+            See ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
