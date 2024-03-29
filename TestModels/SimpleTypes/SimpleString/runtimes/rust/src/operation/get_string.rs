@@ -8,68 +8,21 @@ impl GetString {
     pub fn new() -> Self {
         Self
     }
-    pub(crate) async fn orchestrate(
-        runtime_plugins: &::aws_smithy_runtime_api::client::runtime_plugin::RuntimePlugins,
+    pub(crate) async fn send(
+        handle: &crate::client::Handle,
         input: crate::operation::get_string::GetStringInput,
     ) -> ::std::result::Result<
         crate::operation::get_string::GetStringOutput,
         ::aws_smithy_runtime_api::client::result::SdkError<
-            crate::operation::get_string::OperationError,
+            crate::operation::get_string::GetStringError,
             ::aws_smithy_runtime_api::client::orchestrator::HttpResponse,
         >,
     > {
-        let map_err = |err: ::aws_smithy_runtime_api::client::result::SdkError<
-            ::aws_smithy_runtime_api::client::interceptors::context::Error,
-            ::aws_smithy_runtime_api::client::orchestrator::HttpResponse,
-        >| {
-            err.map_service_error(|err| err.downcast::<crate::operation::get_string::OperationError>().expect("correct error type"))
-        };
-        let context = Self::orchestrate_with_stop_point(runtime_plugins, input, ::aws_smithy_runtime::client::orchestrator::StopPoint::None)
-            .await
-            .map_err(map_err)?;
-        let output = context.finalize().map_err(map_err)?;
-        ::std::result::Result::Ok(
-            output
-                .downcast::<crate::operation::get_string::GetStringOutput>()
-                .expect("correct output type"),
-        )
-    }
-
-    pub(crate) async fn orchestrate_with_stop_point(
-        runtime_plugins: &::aws_smithy_runtime_api::client::runtime_plugin::RuntimePlugins,
-        input: crate::operation::get_string::GetStringInput,
-        stop_point: ::aws_smithy_runtime::client::orchestrator::StopPoint,
-    ) -> ::std::result::Result<
-        ::aws_smithy_runtime_api::client::interceptors::context::InterceptorContext,
-        ::aws_smithy_runtime_api::client::result::SdkError<
-            ::aws_smithy_runtime_api::client::interceptors::context::Error,
-            ::aws_smithy_runtime_api::client::orchestrator::HttpResponse,
-        >,
-    > {
-        let input = ::aws_smithy_runtime_api::client::interceptors::context::Input::erase(input);
-        ::aws_smithy_runtime::client::orchestrator::invoke_with_stop_point("SimpleService", "Operation", input, runtime_plugins, stop_point).await
-    }
-
-    pub(crate) fn operation_runtime_plugins(
-        client_runtime_plugins: ::aws_smithy_runtime_api::client::runtime_plugin::RuntimePlugins,
-        client_config: &crate::config::Config,
-        config_override: ::std::option::Option<crate::config::Builder>,
-    ) -> ::aws_smithy_runtime_api::client::runtime_plugin::RuntimePlugins {
-        let mut runtime_plugins = client_runtime_plugins.with_operation_plugin(Self::new());
-        runtime_plugins = runtime_plugins.with_client_plugin(crate::auth_plugin::DefaultAuthOptionsPlugin::new(vec![
-            ::aws_smithy_runtime::client::auth::no_auth::NO_AUTH_SCHEME_ID,
-        ]));
-        if let ::std::option::Option::Some(config_override) = config_override {
-            for plugin in config_override.runtime_plugins.iter().cloned() {
-                runtime_plugins = runtime_plugins.with_operation_plugin(plugin);
-            }
-            runtime_plugins = runtime_plugins.with_operation_plugin(crate::config::ConfigOverrideRuntimePlugin::new(
-                config_override,
-                client_config.config.clone(),
-                &client_config.runtime_components,
-            ));
+        let inner_input = crate::conversions::get_string::_get_string_input::to_dafny(input);
+        let inner_result = handle.inner.GetString(&::std::rc::Rc::new(inner_input));
+        match inner_result {
+            crate::implementation_from_dafny::_Wrappers_Compile::__default::Success { value } => Ok(crate::conversions::get_string::_get_string_output::from_dafny(value))
         }
-        runtime_plugins
     }
 }
 
@@ -161,13 +114,13 @@ impl ::aws_smithy_runtime_api::client::result::CreateUnhandledError for GetStrin
     }
 }
 
-pub use crate::operation::get_string::_operation_output::GetStringOutput;
+pub use crate::operation::get_string::_get_string_output::GetStringOutput;
 
-pub use crate::operation::get_string::_operation_input::GetStringInput;
+pub use crate::operation::get_string::_get_string_input::GetStringInput;
 
-mod _operation_input;
+mod _get_string_input;
 
-mod _operation_output;
+mod _get_string_output;
 
 /// Builders
 pub mod builders;

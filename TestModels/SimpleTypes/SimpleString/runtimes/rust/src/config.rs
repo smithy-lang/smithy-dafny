@@ -121,3 +121,5 @@ impl Builder {
         }
     }
 }
+
+pub use ::aws_smithy_runtime_api::client::behavior_version::BehaviorVersion;

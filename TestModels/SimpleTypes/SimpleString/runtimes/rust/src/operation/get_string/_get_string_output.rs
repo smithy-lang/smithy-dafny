@@ -8,13 +8,13 @@ pub struct GetStringOutput {
 }
 impl GetStringOutput {
     #[allow(missing_docs)] // documentation missing in model
-    pub fn message(&self) -> ::std::option::Option<&str> {
+    pub fn value(&self) -> ::std::option::Option<&str> {
         self.value.as_deref()
     }
 }
 impl GetStringOutput {
     /// Creates a new builder-style object to manufacture [`GetStringOutput`](crate::operation::operation::GetStringOutput).
-    pub fn builder() -> crate::operation::operation::builders::GetStringOutputBuilder {
+    pub fn builder() -> crate::operation::get_string::builders::GetStringOutputBuilder {
         crate::operation::get_string::builders::GetStringOutputBuilder::default()
     }
 }
@@ -23,7 +23,7 @@ impl GetStringOutput {
 #[non_exhaustive]
 #[derive(::std::clone::Clone, ::std::cmp::PartialEq, ::std::default::Default, ::std::fmt::Debug)]
 pub struct GetStringOutputBuilder {
-    pub(crate) message: ::std::option::Option<::std::string::String>,
+    pub(crate) value: ::std::option::Option<::std::string::String>,
 }
 impl GetStringOutputBuilder {
     #[allow(missing_docs)] // documentation missing in model
@@ -41,7 +41,7 @@ impl GetStringOutputBuilder {
         &self.value
     }
     /// Consumes the builder and constructs a [`GetStringOutput`](crate::operation::operation::GetStringOutput).
-    pub fn build(self) -> ::std::result::Result<crate::operation::operation::GetStringOutput, ::aws_smithy_types::error::operation::BuildError> {
-        ::std::result::Result::Ok(crate::operation::operation::GetStringOutput { value: self.value })
+    pub fn build(self) -> ::std::result::Result<crate::operation::get_string::GetStringOutput, ::aws_smithy_types::error::operation::BuildError> {
+        ::std::result::Result::Ok(crate::operation::get_string::GetStringOutput { value: self.value })
     }
 }

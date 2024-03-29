@@ -14,8 +14,8 @@ impl GetStringInput {
 }
 impl GetStringInput {
     /// Creates a new builder-style object to manufacture [`GetStringInput`](crate::operation::operation::GetStringInput).
-    pub fn builder() -> crate::operation::operation::builders::GetStringInputBuilder {
-        crate::operation::operation::builders::GetStringInputBuilder::default()
+    pub fn builder() -> crate::operation::get_string::builders::GetStringInputBuilder {
+        crate::operation::get_string::builders::GetStringInputBuilder::default()
     }
 }
 
@@ -23,7 +23,7 @@ impl GetStringInput {
 #[non_exhaustive]
 #[derive(::std::clone::Clone, ::std::cmp::PartialEq, ::std::default::Default, ::std::fmt::Debug)]
 pub struct GetStringInputBuilder {
-    pub(crate) message: ::std::option::Option<::std::string::String>,
+    pub(crate) value: ::std::option::Option<::std::string::String>,
 }
 impl GetStringInputBuilder {
     #[allow(missing_docs)] // documentation missing in model
@@ -41,7 +41,7 @@ impl GetStringInputBuilder {
         &self.value
     }
     /// Consumes the builder and constructs a [`GetStringInput`](crate::operation::operation::GetStringInput).
-    pub fn build(self) -> ::std::result::Result<crate::operation::operation::GetStringInput, ::aws_smithy_types::error::operation::BuildError> {
-        ::std::result::Result::Ok(crate::operation::operation::GetStringInput { value: self.value })
+    pub fn build(self) -> ::std::result::Result<crate::operation::get_string::GetStringInput, ::aws_smithy_types::error::operation::BuildError> {
+        ::std::result::Result::Ok(crate::operation::get_string::GetStringInput { value: self.value })
     }
 }

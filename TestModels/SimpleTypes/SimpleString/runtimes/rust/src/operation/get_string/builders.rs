@@ -74,12 +74,7 @@ impl GetStringFluentBuilder {
             .inner
             .build()
             .map_err(::aws_smithy_runtime_api::client::result::SdkError::construction_failure)?;
-        let runtime_plugins = crate::operation::get_string::Operation::operation_runtime_plugins(
-            self.handle.runtime_plugins.clone(),
-            &self.handle.conf,
-            self.config_override,
-        );
-        crate::operation::get_string::Operation::orchestrate(&runtime_plugins, input).await
+        crate::operation::get_string::GetString::send(&self.handle, input).await
     }
 
     pub(crate) fn config_override(mut self, config_override: impl Into<crate::config::Builder>) -> Self {
@@ -92,17 +87,17 @@ impl GetStringFluentBuilder {
         self
     }
     #[allow(missing_docs)] // documentation missing in model
-    pub fn message(mut self, input: impl ::std::convert::Into<::std::string::String>) -> Self {
-        self.inner = self.inner.message(input.into());
+    pub fn value(mut self, input: impl ::std::convert::Into<::std::string::String>) -> Self {
+        self.inner = self.inner.value(input.into());
         self
     }
     #[allow(missing_docs)] // documentation missing in model
-    pub fn set_message(mut self, input: ::std::option::Option<::std::string::String>) -> Self {
-        self.inner = self.inner.set_message(input);
+    pub fn set_value(mut self, input: ::std::option::Option<::std::string::String>) -> Self {
+        self.inner = self.inner.set_value(input);
         self
     }
     #[allow(missing_docs)] // documentation missing in model
-    pub fn get_message(&self) -> &::std::option::Option<::std::string::String> {
-        self.inner.get_message()
+    pub fn get_value(&self) -> &::std::option::Option<::std::string::String> {
+        self.inner.get_value()
     }
 }
