@@ -1,5 +1,5 @@
 
-pub fn to_dafny(value: crate::operation::get_string::GetStringOutput) -> crate::implementation_from_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringOutput {
+pub fn to_dafny(value: &crate::operation::get_string::GetStringOutput) -> crate::implementation_from_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringOutput {
   let dafny_value = 
     match value.value {
       Some(s) => crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { value: dafny_runtime::string_utf16_of(&s) },
@@ -10,7 +10,7 @@ pub fn to_dafny(value: crate::operation::get_string::GetStringOutput) -> crate::
   })
 }
 
-pub fn from_dafny(value: crate::implementation_from_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringOutput) -> crate::operation::get_string::GetStringOutput {
+pub fn from_dafny(value: &crate::implementation_from_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringOutput) -> crate::operation::get_string::GetStringOutput {
   let dafny_value = 
     match value.value {
       crate::implementation_from_dafny::_Wrappers_Compile::Option::Some(s) => Some(dafny_runtime::string_utf16_of(&s)),

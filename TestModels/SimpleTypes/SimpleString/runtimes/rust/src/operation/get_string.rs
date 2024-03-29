@@ -13,15 +13,16 @@ impl GetString {
         input: crate::operation::get_string::GetStringInput,
     ) -> ::std::result::Result<
         crate::operation::get_string::GetStringOutput,
-        ::aws_smithy_runtime_api::client::result::SdkError<
-            crate::operation::get_string::GetStringError,
-            ::aws_smithy_runtime_api::client::orchestrator::HttpResponse,
-        >,
+        crate::operation::get_string::GetStringError
     > {
         let inner_input = crate::conversions::get_string::_get_string_input::to_dafny(input);
         let inner_result = handle.inner.GetString(&::std::rc::Rc::new(inner_input));
-        match inner_result {
-            crate::implementation_from_dafny::_Wrappers_Compile::__default::Success { value } => Ok(crate::conversions::get_string::_get_string_output::from_dafny(value))
+        match &*inner_result {
+            crate::implementation_from_dafny::r#_Wrappers_Compile::Result::Success { value } => 
+                Ok(crate::conversions::get_string::_get_string_output::from_dafny(&value)),
+            crate::implementation_from_dafny::r#_Wrappers_Compile::Result::Failure { error } =>
+                Err(crate::conversions::get_string::from_dafny_error(&error)),
+            crate::implementation_from_dafny::r#_Wrappers_Compile::Result::_PhantomVariant(_, _) => panic!("Unreachable")
         }
     }
 }
@@ -113,6 +114,8 @@ impl ::aws_smithy_runtime_api::client::result::CreateUnhandledError for GetStrin
         })
     }
 }
+
+use core::panic;
 
 pub use crate::operation::get_string::_get_string_output::GetStringOutput;
 
