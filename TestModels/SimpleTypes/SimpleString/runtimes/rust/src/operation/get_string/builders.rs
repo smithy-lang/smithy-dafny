@@ -55,7 +55,10 @@ impl GetStringFluentBuilder {
         let input = self
             .inner
             .build()
-            .map_err(::aws_smithy_runtime_api::client::result::SdkError::construction_failure)?;
+            // Using unhandled since GetString doesn't declare any validation,
+            // and smithy-rs seems to not generate a ValidationError case unless there is
+            // (but isn't that a backwards compatibility problem for output structures?)
+            .map_err(crate::operation::get_string::GetStringError::unhandled)?;
         crate::operation::get_string::GetString::send(&self.handle, input).await
     }
 
