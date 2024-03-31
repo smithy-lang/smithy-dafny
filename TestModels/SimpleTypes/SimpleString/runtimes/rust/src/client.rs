@@ -24,7 +24,7 @@ impl Client {
             crate::implementation_from_dafny::_simple_dtypes_dsmithystring_dinternaldafny::_default::SimpleString(&inner_config);
         let handle = Handle {
             conf: conf.clone(),
-            inner: inner
+            inner: ::std::sync::Arc::new(inner)
         };
         Self {
             handle: ::std::sync::Arc::new(handle),
