@@ -5,7 +5,7 @@ use std::sync::Arc;
 #[derive(Debug)]
 pub(crate) struct Handle {
     pub(crate) conf: crate::Config,
-    pub(crate) inner: Arc<dyn crate::implementation_from_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::ISimpleTypesStringClient + Sync + Send>
+    pub(crate) inner: *mut dyn crate::implementation_from_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::ISimpleTypesStringClient
 }
 
 #[derive(::std::clone::Clone, ::std::fmt::Debug)]
@@ -22,9 +22,13 @@ impl Client {
             crate::implementation_from_dafny::_simple_dtypes_dsmithystring_dinternaldafny::_default::DefaultSimpleStringConfig());
         let inner =
             crate::implementation_from_dafny::_simple_dtypes_dsmithystring_dinternaldafny::_default::SimpleString(&inner_config);
+        if matches!((&inner).as_ref(), crate::implementation_from_dafny::_Wrappers_Compile::Result::Failure { .. }) {
+            // TODO: display error
+            panic!("Invalid client configuration");
+        }
         let handle = Handle {
             conf: conf.clone(),
-            inner: ::std::sync::Arc::new(inner)
+            inner: inner.Extract()
         };
         Self {
             handle: ::std::sync::Arc::new(handle),

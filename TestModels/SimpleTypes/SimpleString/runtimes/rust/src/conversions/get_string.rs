@@ -10,12 +10,10 @@ pub fn to_dafny_error(value: crate::operation::get_string::GetStringError) -> ::
 
 pub fn from_dafny_error(dafny_value: ::std::rc::Rc<crate::implementation_from_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::Error>) -> crate::operation::get_string::GetStringError {
   // TODO: Losing information here, but we have to figure out how to wrap an arbitrary Dafny value as std::error::Error
-  match *dafny_value {
-    crate::implementation_from_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::Error::CollectionOfErrors { list, message } => {
-      let error_message = dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(&message);
-      crate::operation::get_string::GetStringError::generic(::aws_smithy_types::error::metadata::ErrorMetadata::builder().message(error_message).build())
-    },
-    crate::implementation_from_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::Error::Opaque { obj } => 
+  if matches!(&dafny_value.as_ref(), crate::implementation_from_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::Error::CollectionOfErrors { .. }) {
+    let error_message = "TODO: can't get message yet";
+    crate::operation::get_string::GetStringError::generic(::aws_smithy_types::error::metadata::ErrorMetadata::builder().message(error_message).build())
+  } else {
     crate::operation::get_string::GetStringError::generic(::aws_smithy_types::error::metadata::ErrorMetadata::builder().message("Opaque error").build())
   }
 }

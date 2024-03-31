@@ -16,7 +16,7 @@ impl GetString {
         crate::operation::get_string::GetStringError
     > {
         let inner_input = crate::conversions::get_string::_get_string_input::to_dafny(input);
-        let inner_result = handle.inner.GetString(&inner_input);
+        let inner_result = unsafe { (*handle.inner).GetString(&inner_input) };
         match &*inner_result {
             crate::implementation_from_dafny::r#_Wrappers_Compile::Result::Success { value } => 
                 Ok(crate::conversions::get_string::_get_string_output::from_dafny(value)),
