@@ -71,8 +71,8 @@ public class LocalServiceToDafnyConversionFunctionWriter extends BaseConversionW
 
     delegator.useFileWriter(moduleName + "/smithy_to_dafny.py", "", conversionWriter -> {
       // Within the conversion function, the dataSource becomes the function's input
-      // This hardcodes the input parameter name for a conversion function to always be "input"
-      String dataSourceInsideConversionFunction = "input";
+      // This hardcodes the input parameter name for a conversion function to always be "native_input"
+      String dataSourceInsideConversionFunction = "native_input";
 
       conversionWriter.openBlock(
           "def $L($L):",
@@ -334,8 +334,8 @@ public class LocalServiceToDafnyConversionFunctionWriter extends BaseConversionW
     delegator.useFileWriter(moduleName + "/smithy_to_dafny.py", "", conversionWriter -> {
 
       // Within the conversion function, the dataSource becomes the function's input
-      // This hardcodes the input parameter name for a conversion function to always be "input"
-      String dataSourceInsideConversionFunction = "input";
+      // This hardcodes the input parameter name for a conversion function to always be "native_input"
+      String dataSourceInsideConversionFunction = "native_input";
 
       // ex. shape: simple.union.ExampleUnion
       // Writes `def SmithyToDafny_simple_union_ExampleUnion(input):`
@@ -406,8 +406,8 @@ public class LocalServiceToDafnyConversionFunctionWriter extends BaseConversionW
 
       delegator.useFileWriter(moduleName + "/smithy_to_dafny.py", "", conversionWriter -> {
           // Within the conversion function, the dataSource becomes the function's input
-          // This hardcodes the input parameter name for a conversion function to always be "input"
-          String dataSourceInsideConversionFunction = "input";
+          // This hardcodes the input parameter name for a conversion function to always be "native_input"
+          String dataSourceInsideConversionFunction = "native_input";
 
           conversionWriter.openBlock(
                   "def $L($L):",

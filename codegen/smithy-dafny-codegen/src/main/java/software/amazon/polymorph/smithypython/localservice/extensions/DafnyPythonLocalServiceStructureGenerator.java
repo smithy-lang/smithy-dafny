@@ -19,6 +19,7 @@ import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.LengthTrait;
 import software.amazon.smithy.model.traits.RangeTrait;
+import software.amazon.smithy.model.traits.SensitiveTrait;
 import software.amazon.smithy.python.codegen.PythonSettings;
 import software.amazon.smithy.python.codegen.PythonWriter;
 import software.amazon.smithy.python.codegen.StructureGenerator;
@@ -96,6 +97,29 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
         });
     writer.write("");
   }
+
+    @Override
+    protected void writeReprMembers(boolean isError) {
+        var iter = shape.members().iterator();
+        while (iter.hasNext()) {
+            var member = iter.next();
+            var memberName = symbolProvider.toMemberName(member);
+            var trailingComma = iter.hasNext() ? ", " : "";
+            if (member.hasTrait(SensitiveTrait.class)) {
+                // Sensitive members must not be printed
+                // see: https://smithy.io/2.0/spec/documentation-traits.html#smithy-api-sensitive-trait
+                writer.write("""
+                    if self.$1L is not None:
+                        result += f"$1L=...$2L"
+                    """, memberName, trailingComma);
+            } else {
+                writer.write("""
+                    if self.$1L is not None:
+                        result += f"$1L={repr(self.$1L)}$2L"
+                    """, memberName, trailingComma);
+            }
+        }
+    }
 
   /**
    * Override Smithy-Python writePropertyForMember to handle importing reference modules to avoid
