@@ -62,7 +62,6 @@ else
   SED_PARAMETER :=
 endif
 
-
 ########################## Dafny targets
 
 # TODO: This target will not work for projects that use `replaceable` 
@@ -182,6 +181,12 @@ _transpile_implementation_all: transpile_implementation
 # If this variable is not provided, assume the project does not have `replaceable` modules,
 #   and look for `Index.dfy` in the `src/` directory.
 transpile_implementation: SRC_INDEX_TRANSPILE=$(if $(SRC_INDEX),$(SRC_INDEX),src)
+transpile_implementation:
+    ifeq ($(TARGET), py)
+        COMPILE_SUFFIX_OPTION := -compileSuffix:0
+    else
+        COMPILE_SUFFIX_OPTION := -compileSuffix:1
+    endif
 # At this time it is *significatly* faster
 # to give Dafny a single file
 # that includes everything
@@ -198,7 +203,7 @@ transpile_implementation:
 		-spillTargetCode:3 \
 		-compile:0 \
 		-optimizeErasableDatatypeWrapper:0 \
-		-compileSuffix:0 \
+		$(COMPILE_SUFFIX_OPTION) \
 		-unicodeChar:0 \
 		-functionSyntax:3 \
 		-useRuntimeLib \
@@ -229,6 +234,12 @@ _transpile_test_all: transpile_test
 
 # `find` looks for tests in either V1 or V2-styled project directories (single vs. multiple model files).
 transpile_test:
+    ifeq ($(TARGET), py)
+        COMPILE_SUFFIX_OPTION := -compileSuffix:0
+    else
+        COMPILE_SUFFIX_OPTION := -compileSuffix:1
+    endif
+transpile_test:
 	find ./dafny/**/$(TEST_INDEX_TRANSPILE) ./$(TEST_INDEX_TRANSPILE) -name "*.dfy" -name '*.dfy' | sed -e 's/^/include "/' -e 's/$$/"/' | dafny \
 		-stdin \
 		-noVerify \
@@ -238,7 +249,7 @@ transpile_test:
 		-runAllTests:1 \
 		-compile:0 \
 		-optimizeErasableDatatypeWrapper:0 \
-		-compileSuffix:0 \
+		$(COMPILE_SUFFIX_OPTION) \
 		-unicodeChar:0 \
 		-functionSyntax:3 \
 		-useRuntimeLib \

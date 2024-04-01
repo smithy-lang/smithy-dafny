@@ -114,7 +114,7 @@ jobs:
         working-directory: ./${{ matrix.library }}
         run: |
           make polymorph_dafny DAFNY_VERSION_OPTION="--dafny-version $DAFNY_VERSION"
-          make polymorph_net DAFNY_VERSION_OPTION="--dafny-version $DAFNY_VERSION"
+          make polymorph_dotnet DAFNY_VERSION_OPTION="--dafny-version $DAFNY_VERSION"
 
       - name: Compile ${{ matrix.library }} implementation
         shell: bash

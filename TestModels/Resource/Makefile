@@ -21,7 +21,7 @@ SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 
 # This project has no dependencies 
 # DEPENDENT-MODELS:= 
-# LIBRARIES :=
+
 
 format_net:
 	pushd runtimes/net && dotnet format && popd

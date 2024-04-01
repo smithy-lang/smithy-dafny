@@ -17,7 +17,7 @@ make polymorph_dafny
 ### .NET
 1. Generate the Wrappers using `polymorph`
 ```
-make polymorph_net
+make polymorph_dotnet
 ```
 
 2. Transpile the tests (and implementation) to the target runtime.

@@ -13,6 +13,10 @@
 **/runtimes/python/src/**/internaldafny/generated/*.py
 **/runtimes/python/test/internaldafny/generated/*.py
 
+# Dafny Generated Rust
+**/runtimes/rust
+**/runtimes/rust
+
 # Polymorph Generated Dafny
 **/Model/*Types.dfy
 **/Model/*TypesWrapped.dfy
