@@ -64,7 +64,6 @@ _polymorph_dotnet: OUTPUT_DOTNET_WRAPPED=\
     $(if $(DIR_STRUCTURE_V2), --output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/Wrapped/$(SERVICE)/, --output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/Wrapped)
 _polymorph_dotnet: _polymorph_wrapped
 
-<<<<<<< HEAD
 _polymorph_python: OUTPUT_PYTHON=--output-python $(LIBRARY_ROOT)/runtimes/python/smithygenerated
 _polymorph_python: MODULE_NAME=--module-name $(PYTHON_MODULE_NAME)
 # Python codegen MUST know dependencies' module names...
@@ -85,6 +84,3 @@ _polymorph_python: OUTPUT_PYTHON_WRAPPED=--output-python $(LIBRARY_ROOT)/runtime
 _polymorph_python: _polymorph_wrapped
 _polymorph_python: POLYMORPH_LANGUAGE_TARGET=python
 _polymorph_python: _polymorph_dependencies
-=======
-
->>>>>>> main-1.x
