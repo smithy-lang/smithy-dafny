@@ -106,7 +106,7 @@ public final class DafnyPythonLocalServiceClientCodegenPlugin implements SmithyB
       } else if (shape.hasTrait(DocumentationTrait.class)) {
         DocumentationTrait documentationTrait = shape.getTrait(DocumentationTrait.class).get();
         String documentation = documentationTrait.getValue();
-        if (documentation.matches("/+")) {
+        if (documentation.matches("/+\n+")) {
           AbstractShapeBuilder<?,?> builder = ModelUtils.getBuilderForShape(shape);
           builder.removeTrait(DocumentationTrait.ID);
           return builder.build();
