@@ -59,13 +59,13 @@ public final class DafnyPythonLocalServiceClientCodegenPlugin implements SmithyB
     runner.settings(settings);
     runner.directedCodegen(new DirectedDafnyPythonLocalServiceCodegen());
     runner.fileManifest(context.getFileManifest());
-    runner.service(settings.getService());
-    runner.model(context.getModel());
     runner.integrationClass(PythonIntegration.class);
 
     ServiceShape serviceShape = context.getModel().expectShape(settings.getService()).asServiceShape().get();
     Model transformedModel = transformModelForLocalService(context.getModel(), serviceShape);
+
     runner.model(transformedModel);
+    runner.service(settings.getService());
 
     runner.run();
   }
