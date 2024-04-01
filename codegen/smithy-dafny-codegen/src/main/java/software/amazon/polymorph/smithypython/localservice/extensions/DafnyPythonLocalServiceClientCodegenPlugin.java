@@ -110,6 +110,7 @@ public final class DafnyPythonLocalServiceClientCodegenPlugin implements SmithyB
           System.out.println("shape: " + shape.getId());
           System.out.println("documentation: " + documentation);
           System.out.println(documentation.length());
+          System.out.println(documentation.trim().matches("/+"));
         }
 
         if (documentation.trim().matches("/+")) {
