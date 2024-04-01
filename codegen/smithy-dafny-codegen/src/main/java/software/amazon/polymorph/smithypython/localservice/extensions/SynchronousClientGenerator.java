@@ -323,7 +323,6 @@ public class SynchronousClientGenerator extends ClientGenerator {
     writer.addStdlibImport("typing", "Callable");
     writer.addStdlibImport("typing", "Awaitable");
     writer.addStdlibImport("typing", "cast");
-    writer.addStdlibImport("copy", "deepcopy");
     writer.addStdlibImport("asyncio", "sleep");
 
     writer.addDependency(SmithyPythonDependency.SMITHY_PYTHON);

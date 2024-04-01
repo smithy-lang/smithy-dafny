@@ -409,6 +409,20 @@ polymorph_python:
 	done
 
 _polymorph_python: OUTPUT_PYTHON=--output-python $(LIBRARY_ROOT)/runtimes/python/smithygenerated
+_polymorph_python: MODULE_NAME=--module-name $(PYTHON_MODULE_NAME)
+# Python codegen MUST know dependencies' module names...
+# This greps each service dependency's Makefile for two strings:
+# 1. "SERVICE_NAMESPACE_$(dependency)"
+# 2. "PYTHON_MODULE_NAME"
+# , then assembles them together as
+# "SERVICE_NAMESPACE_$(dependency)"="PYTHON_MODULE_NAME"
+# , creating a map from a service namespace to its wrapping module name.
+# We plan to move this information into Dafny project files.
+# This is unfortunately one long line that breaks when I split it up...
+_polymorph_python: DEPENDENCY_MODULE_NAMES=$(foreach dependency, \
+		$($(service_deps_var)), \
+		--dependency-module-name=$(shell cat $(if $(DIR_STRUCTURE_V2),$(PROJECT_ROOT)/$(dependency)/../../Makefile,$(PROJECT_ROOT)/$(dependency)/Makefile) | grep ^SERVICE_NAMESPACE_$(if $(DIR_STRUCTURE_V2),$(shell echo $(dependency) | cut -d "/" -f 3),$(shell echo $($(dependency)))) | cut -d "=" -f 2)=$(shell cat $(if $(DIR_STRUCTURE_V2),$(PROJECT_ROOT)/$(dependency)/../../Makefile,$(PROJECT_ROOT)/$(dependency)/Makefile) | grep ^PYTHON_MODULE_NAME | cut -d "=" -f 2)\
+	)
 _polymorph_python: _polymorph
 
 # Dependency for formatting generating Java code
