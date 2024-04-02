@@ -43,7 +43,7 @@ impl Client {
 
 mod get_string;
 
-// mod get_string_single_value;
+mod get_string_single_value;
 
-// mod get_string_utf8;
+mod get_string_utf8;
 

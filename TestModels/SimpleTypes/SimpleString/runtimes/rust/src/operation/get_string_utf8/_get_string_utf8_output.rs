@@ -8,14 +8,14 @@ pub struct GetStringUTF8Output {
 }
 impl GetStringUTF8Output {
     #[allow(missing_docs)] // documentation missing in model
-    pub fn message(&self) -> ::std::option::Option<&str> {
+    pub fn value(&self) -> ::std::option::Option<&str> {
         self.value.as_deref()
     }
 }
 impl GetStringUTF8Output {
     /// Creates a new builder-style object to manufacture [`GetStringUTF8Output`](crate::operation::operation::GetStringUTF8Output).
-    pub fn builder() -> crate::operation::operation::builders::GetStringUTF8OutputBuilder {
-        crate::operation::operation::builders::GetStringUTF8OutputBuilder::default()
+    pub fn builder() -> crate::operation::get_string_utf8::builders::GetStringUTF8OutputBuilder {
+        crate::operation::get_string_utf8::builders::GetStringUTF8OutputBuilder::default()
     }
 }
 
@@ -23,7 +23,7 @@ impl GetStringUTF8Output {
 #[non_exhaustive]
 #[derive(::std::clone::Clone, ::std::cmp::PartialEq, ::std::default::Default, ::std::fmt::Debug)]
 pub struct GetStringUTF8OutputBuilder {
-    pub(crate) message: ::std::option::Option<::std::string::String>,
+    pub(crate) value: ::std::option::Option<::std::string::String>,
 }
 impl GetStringUTF8OutputBuilder {
     #[allow(missing_docs)] // documentation missing in model
@@ -41,7 +41,7 @@ impl GetStringUTF8OutputBuilder {
         &self.value
     }
     /// Consumes the builder and constructs a [`GetStringUTF8Output`](crate::operation::operation::GetStringUTF8Output).
-    pub fn build(self) -> ::std::result::Result<crate::operation::operation::GetStringUTF8Output, ::aws_smithy_types::error::operation::BuildError> {
-        ::std::result::Result::Ok(crate::operation::operation::GetStringUTF8Output { value: self.value })
+    pub fn build(self) -> ::std::result::Result<crate::operation::get_string_utf8::GetStringUTF8Output, ::aws_smithy_types::error::operation::BuildError> {
+        ::std::result::Result::Ok(crate::operation::get_string_utf8::GetStringUTF8Output { value: self.value })
     }
 }

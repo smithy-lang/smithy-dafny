@@ -8,14 +8,14 @@ pub struct GetStringSingleValueOutput {
 }
 impl GetStringSingleValueOutput {
     #[allow(missing_docs)] // documentation missing in model
-    pub fn message(&self) -> ::std::option::Option<&str> {
+    pub fn value(&self) -> ::std::option::Option<&str> {
         self.value.as_deref()
     }
 }
 impl GetStringSingleValueOutput {
     /// Creates a new builder-style object to manufacture [`GetStringSingleValueOutput`](crate::operation::operation::GetStringSingleValueOutput).
-    pub fn builder() -> crate::operation::operation::builders::GetStringSingleValueOutputBuilder {
-        crate::operation::operation::builders::GetStringSingleValueOutputBuilder::default()
+    pub fn builder() -> crate::operation::get_string_single_value::builders::GetStringSingleValueOutputBuilder {
+        crate::operation::get_string_single_value::builders::GetStringSingleValueOutputBuilder::default()
     }
 }
 
@@ -23,7 +23,7 @@ impl GetStringSingleValueOutput {
 #[non_exhaustive]
 #[derive(::std::clone::Clone, ::std::cmp::PartialEq, ::std::default::Default, ::std::fmt::Debug)]
 pub struct GetStringSingleValueOutputBuilder {
-    pub(crate) message: ::std::option::Option<::std::string::String>,
+    pub(crate) value: ::std::option::Option<::std::string::String>,
 }
 impl GetStringSingleValueOutputBuilder {
     #[allow(missing_docs)] // documentation missing in model
@@ -41,7 +41,7 @@ impl GetStringSingleValueOutputBuilder {
         &self.value
     }
     /// Consumes the builder and constructs a [`GetStringSingleValueOutput`](crate::operation::operation::GetStringSingleValueOutput).
-    pub fn build(self) -> ::std::result::Result<crate::operation::operation::GetStringSingleValueOutput, ::aws_smithy_types::error::operation::BuildError> {
-        ::std::result::Result::Ok(crate::operation::operation::GetStringSingleValueOutput { value: self.value })
+    pub fn build(self) -> ::std::result::Result<crate::operation::get_string_single_value::GetStringSingleValueOutput, ::aws_smithy_types::error::operation::BuildError> {
+        ::std::result::Result::Ok(crate::operation::get_string_single_value::GetStringSingleValueOutput { value: self.value })
     }
 }

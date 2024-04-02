@@ -8,14 +8,14 @@ pub struct GetStringSingleValueInput {
 }
 impl GetStringSingleValueInput {
     #[allow(missing_docs)] // documentation missing in model
-    pub fn message(&self) -> ::std::option::Option<&str> {
+    pub fn value(&self) -> ::std::option::Option<&str> {
         self.value.as_deref()
     }
 }
 impl GetStringSingleValueInput {
     /// Creates a new builder-style object to manufacture [`GetStringSingleValueInput`](crate::operation::operation::GetStringSingleValueInput).
-    pub fn builder() -> crate::operation::operation::builders::GetStringSingleValueInputBuilder {
-        crate::operation::operation::builders::GetStringSingleValueInputBuilder::default()
+    pub fn builder() -> crate::operation::get_string_single_value::builders::GetStringSingleValueInputBuilder {
+        crate::operation::get_string_single_value::builders::GetStringSingleValueInputBuilder::default()
     }
 }
 
@@ -23,7 +23,7 @@ impl GetStringSingleValueInput {
 #[non_exhaustive]
 #[derive(::std::clone::Clone, ::std::cmp::PartialEq, ::std::default::Default, ::std::fmt::Debug)]
 pub struct GetStringSingleValueInputBuilder {
-    pub(crate) message: ::std::option::Option<::std::string::String>,
+    pub(crate) value: ::std::option::Option<::std::string::String>,
 }
 impl GetStringSingleValueInputBuilder {
     #[allow(missing_docs)] // documentation missing in model
@@ -41,7 +41,7 @@ impl GetStringSingleValueInputBuilder {
         &self.value
     }
     /// Consumes the builder and constructs a [`GetStringSingleValueInput`](crate::operation::operation::GetStringSingleValueInput).
-    pub fn build(self) -> ::std::result::Result<crate::operation::operation::GetStringSingleValueInput, ::aws_smithy_types::error::operation::BuildError> {
-        ::std::result::Result::Ok(crate::operation::operation::GetStringSingleValueInput { value: self.value })
+    pub fn build(self) -> ::std::result::Result<crate::operation::get_string_single_value::GetStringSingleValueInput, ::aws_smithy_types::error::operation::BuildError> {
+        ::std::result::Result::Ok(crate::operation::get_string_single_value::GetStringSingleValueInput { value: self.value })
     }
 }

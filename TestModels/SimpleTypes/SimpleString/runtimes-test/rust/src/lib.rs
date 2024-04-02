@@ -29,7 +29,7 @@ mod SimpleStringImplTest {
 
   #[tokio::test]
   async fn test_get_string_single_value() {
-    let result = client().get_string().value("TEST_SIMPLE_STRING_VALUE").send().await;
+    let result = client().get_string_single_value().value("TEST_SIMPLE_STRING_SINGLE_VALUE").send().await;
     let output = result.unwrap();
     let value = output.value().unwrap();
     assert_eq!(value, "TEST_SIMPLE_STRING_SINGLE_VALUE");
@@ -46,7 +46,7 @@ mod SimpleStringImplTest {
   #[tokio::test]
   async fn test_get_string_utf8() {
     let utf8EncodedString = "\u{0905}\u{0928}\u{093e}\u{0930}";
-    let result = client().get_string().value(utf8EncodedString).send().await;
+    let result = client().get_string_utf8().value(utf8EncodedString).send().await;
     let output = result.unwrap();
     let value = output.value().unwrap();
     assert_eq!(value, utf8EncodedString);
