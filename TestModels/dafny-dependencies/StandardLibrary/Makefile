@@ -44,6 +44,53 @@ transpile_net: | transpile_implementation_net transpile_test_net
 # StandardLibrary as a dependency
 transpile_java: | transpile_implementation_java transpile_test_java
 
+########################## Rust targets
+
+# Starting to add makefile targets for Rust, but only in this library for now
+# since Rust support in Dafny is not yet complete.
+# But we want to lock down what IS working to ensure we don't have regressions
+# and gradually expand the scope of what we're testing.
+
+# TODO:
+#  1. Only building UInt.dfy to start because other files use unsupported features
+#     (e.g. the variance specifiers in Option<+T>).
+#     This scope should be expanded over time.
+#  2. Using -compile:1 instead of -compile:0 because the Rust backend incorrectly
+#     only outputs the runtime source when compiling the target program.
+#     See https://github.com/dafny-lang/dafny/issues/5203.
+#  3. Unlike other backends, the Rust backend emits full Rust projects,
+#     including Cargo.toml.
+#     This runs contrary to the smithy-dafny philosophy
+#     of translating code into predefined projects
+#     and combining it with smithy-generated and hand-written code.
+#     We'll need some Dafny-side design discussion to support both use cases.
+
+transpile_rust: | _transpile_implementation_just_uint_rust _mv_implementation_rust
+
+_transpile_implementation_just_uint_rust:
+	find ./src -name 'UInt.dfy' | sed -e 's/^/include "/' -e 's/$$/"/' | dafny \
+		-stdin \
+		-noVerify \
+		-vcsCores:$(CORES) \
+		-compileTarget:rs \
+		-spillTargetCode:3 \
+		-compile:1 \
+		-optimizeErasableDatatypeWrapper:0 \
+		-compileSuffix:1 \
+		-unicodeChar:0 \
+		-functionSyntax:3 \
+		-out ImplementationFromDafny \
+
+_mv_implementation_rust:
+	rm -rf runtimes/rust
+	mv ImplementationFromDafny-rust runtimes/rust
+
+build_rust: transpile_rust
+	cd runtimes/rust; \
+	cargo build
+
+##########################
+
 transpile_dependencies:
 	echo "Skipping transpile_dependencies for StandardLibrary"
 
