@@ -2,6 +2,7 @@
 
 use std::any::Any;
 
+#[allow(dead_code)]
 pub fn to_dafny_error(value: crate::operation::get_string_utf8::GetStringUTF8Error) -> ::std::rc::Rc<crate::implementation_from_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::Error> {
   match value {
     crate::operation::get_string_utf8::GetStringUTF8Error::Unhandled(unhandled) => 
@@ -9,6 +10,7 @@ pub fn to_dafny_error(value: crate::operation::get_string_utf8::GetStringUTF8Err
   }
 }
 
+#[allow(dead_code)]
 pub fn from_dafny_error(dafny_value: ::std::rc::Rc<crate::implementation_from_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::Error>) -> crate::operation::get_string_utf8::GetStringUTF8Error {
   // TODO: Losing information here, but we have to figure out how to wrap an arbitrary Dafny value as std::error::Error
   if matches!(&dafny_value.as_ref(), crate::implementation_from_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::Error::CollectionOfErrors { .. }) {
