@@ -16,3 +16,7 @@ path = "/Users/salkeldr/Documents/GitHub/smithy-rs/rust-runtime/aws-smithy-runti
 features = ["client"]
 [dependencies.aws-smithy-types]
 path = "/Users/salkeldr/Documents/GitHub/smithy-rs/rust-runtime/aws-smithy-types"
+
+[dev-dependencies.tokio]
+version = "1.26.0"
+features = ["full"]

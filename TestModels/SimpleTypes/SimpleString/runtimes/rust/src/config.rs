@@ -46,24 +46,24 @@ impl Builder {
     ///
     /// Set the behavior major version to `latest`. This is equivalent to enabling the `behavior-version-latest` cargo feature.
     /// ```no_run
-    /// use simple::config::BehaviorVersion;
+    /// use simple_string::config::BehaviorVersion;
     ///
-    /// let config = simple::Config::builder()
+    /// let config = simple_string::Config::builder()
     ///     .behavior_version(BehaviorVersion::latest())
     ///     // ...
     ///     .build();
-    /// let client = simple::Client::from_conf(config);
+    /// let client = simple_string::Client::from_conf(config);
     /// ```
     ///
     /// Customizing behavior major version:
     /// ```no_run
-    /// use simple::config::BehaviorVersion;
+    /// use simple_string::config::BehaviorVersion;
     ///
-    /// let config = simple::Config::builder()
+    /// let config = simple_string::Config::builder()
     ///     .behavior_version(BehaviorVersion::v2023_11_09())
     ///     // ...
     ///     .build();
-    /// let client = simple::Client::from_conf(config);
+    /// let client = simple_string::Client::from_conf(config);
     /// ```
 
     pub fn behavior_version(mut self, behavior_version: crate::config::BehaviorVersion) -> Self {
@@ -81,24 +81,24 @@ impl Builder {
     ///
     /// Set the behavior major version to `latest`. This is equivalent to enabling the `behavior-version-latest` cargo feature.
     /// ```no_run
-    /// use simple::config::BehaviorVersion;
+    /// use simple_string::config::BehaviorVersion;
     ///
-    /// let config = simple::Config::builder()
+    /// let config = simple_string::Config::builder()
     ///     .behavior_version(BehaviorVersion::latest())
     ///     // ...
     ///     .build();
-    /// let client = simple::Client::from_conf(config);
+    /// let client = simple_string::Client::from_conf(config);
     /// ```
     ///
     /// Customizing behavior major version:
     /// ```no_run
-    /// use simple::config::BehaviorVersion;
+    /// use simple_string::config::BehaviorVersion;
     ///
-    /// let config = simple::Config::builder()
+    /// let config = simple_string::Config::builder()
     ///     .behavior_version(BehaviorVersion::v2023_11_09())
     ///     // ...
     ///     .build();
-    /// let client = simple::Client::from_conf(config);
+    /// let client = simple_string::Client::from_conf(config);
     /// ```
 
     pub fn set_behavior_version(&mut self, behavior_version: Option<crate::config::BehaviorVersion>) -> &mut Self {
