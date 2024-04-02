@@ -186,7 +186,7 @@ pub mod r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes {
       fn ctor(this: *mut ISimpleTypesStringClientCallHistory) {
       }
     }
-    pub trait ISimpleTypesStringClient: ::core::fmt::Debug {
+    pub trait ISimpleTypesStringClient {
       fn GetString(self: &Self, input: &::std::rc::Rc<super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringInput>) -> ::std::rc::Rc<super::r#_Wrappers_Compile::Result<::std::rc::Rc<super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringOutput>, ::std::rc::Rc<super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::Error>>>;
       fn GetStringSingleValue(self: &Self, input: &::std::rc::Rc<super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringInput>) -> ::std::rc::Rc<super::r#_Wrappers_Compile::Result<::std::rc::Rc<super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringOutput>, ::std::rc::Rc<super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::Error>>>;
       fn GetStringUTF8(self: &Self, input: &::std::rc::Rc<super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringInput>) -> ::std::rc::Rc<super::r#_Wrappers_Compile::Result<::std::rc::Rc<super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringOutput>, ::std::rc::Rc<super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::Error>>>;
@@ -414,18 +414,6 @@ pub mod r#_simple_dtypes_dsmithystring_dinternaldafny {
     }
   }
   ::dafny_runtime::UpcastTo!(SimpleStringClient, dyn super::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::ISimpleTypesStringClient);
-
-  impl ::dafny_runtime::DafnyPrint for SimpleStringClient
-  {
-    fn fmt_print(&self, f: &mut ::core::fmt::Formatter<'_>, _in_seq: bool) -> std::fmt::Result {
-      write!(f, "<SimpleStringClient>")
-    }
-  }
-  impl core::fmt::Debug for SimpleStringClient {
-    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-      ::dafny_runtime::DafnyPrint::fmt_print(self, f, false)
-    }
-  }
 }
 mod r#_StandardLibraryInterop_Compile {
   pub struct WrappersInterop {}
