@@ -42,7 +42,7 @@ jobs:
           # TestModels/SimpleTypes/SimpleInteger,
           # TestModels/SimpleTypes/SimpleLong,
           # TestModels/SimpleTypes/SimpleShort,
-          # TestModels/SimpleTypes/SimpleString,
+          TestModels/SimpleTypes/SimpleString,
           # TestModels/SimpleTypes/SimpleTimestamp,
           # TestModels/Union,
           # TestModels/aws-sdks/ddb,
@@ -79,7 +79,7 @@ jobs:
         with:
           toolchain: '1.74.1'
 
-      # TODO - not implemented yet, and not relevant for the only library we're testing so far (StandardLibrary)
+      # TODO - not implemented yet
       # - name: Generate Polymorph Dafny and Rust code
       #   shell: bash
       #   working-directory: ./${{ matrix.library }}
@@ -96,9 +96,8 @@ jobs:
           CORES=$(node -e 'console.log(os.cpus().length)')
           make build_rust CORES=$CORES
 
-      # TODO - not implemented yet, and no test files work yet in the only library we're testing so far (StandardLibrary)
-      # - name: Test ${{ matrix.library }}
-      #   working-directory: ./${{ matrix.library }}
-      #   shell: bash
-      #   run: |
-      #     make test_rust
+      - name: Test ${{ matrix.library }}
+        working-directory: ./${{ matrix.library }}
+        shell: bash
+        run: |
+          make test_rust

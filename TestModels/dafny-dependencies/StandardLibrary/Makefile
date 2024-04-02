@@ -85,9 +85,16 @@ _mv_implementation_rust:
 	rm -rf runtimes/rust
 	mv ImplementationFromDafny-rust runtimes/rust
 
-build_rust: transpile_rust
+# TODO: We have manually written code in runtimes/rust,
+# which calling transpile_rust would overwrite
+
+build_rust:
 	cd runtimes/rust; \
 	cargo build
+
+test_rust:
+	cd runtimes/rust; \
+	cargo test
 
 ##########################
 
