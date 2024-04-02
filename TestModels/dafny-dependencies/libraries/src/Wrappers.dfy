@@ -7,7 +7,7 @@
 
 module Wrappers {
   
-  datatype Option<T> = None | Some(value: T) {
+  datatype Option<+T> = None | Some(value: T) {
     function method ToResult(): Result<T, string> {
       match this
       case Some(v) => Success(v)
@@ -37,7 +37,7 @@ module Wrappers {
     }
   }
 
-  datatype Result<T, R> = | Success(value: T) | Failure(error: R) {
+  datatype Result<+T, +R> = | Success(value: T) | Failure(error: R) {
     function method ToOption(): Option<T> 
     {
       match this
