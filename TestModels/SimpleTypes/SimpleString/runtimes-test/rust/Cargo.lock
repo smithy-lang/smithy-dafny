@@ -519,6 +519,7 @@ version = "0.1.0"
 dependencies = [
  "aws-smithy-runtime",
  "aws-smithy-runtime-api",
+ "aws-smithy-types",
  "dafny_runtime",
 ]
 
