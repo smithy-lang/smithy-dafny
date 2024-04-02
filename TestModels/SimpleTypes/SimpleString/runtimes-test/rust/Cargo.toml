@@ -7,6 +7,6 @@ edition = "2021"
 
 [dependencies]
 simple_string = { path = "../../runtimes/rust"}
-tokio = "*"
-tokio-test = "*"
-tokio-macros = "*"
+[dependencies.tokio]
+version = "1.26.0"
+features = ["full"]
