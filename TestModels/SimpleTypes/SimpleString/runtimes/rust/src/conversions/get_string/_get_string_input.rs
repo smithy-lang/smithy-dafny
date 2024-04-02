@@ -16,9 +16,9 @@ pub fn to_dafny(value: crate::operation::get_string::GetStringInput) -> ::std::r
 #[allow(dead_code)]
 pub fn from_dafny(dafny_value: ::std::rc::Rc<crate::implementation_from_dafny::r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes::GetStringInput>) -> crate::operation::get_string::GetStringInput {
   let value = 
-    if matches!((&dafny_value.value()).as_ref(), crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { .. }) {
+    if matches!(dafny_value.value().as_ref(), crate::implementation_from_dafny::_Wrappers_Compile::Option::Some { .. }) {
       Some(dafny_runtime::dafny_runtime_conversions::unicode_chars_false::dafny_string_to_string(&dafny_value.value().Extract()))
-    } else if matches!((&dafny_value.value()).as_ref(), crate::implementation_from_dafny::_Wrappers_Compile::Option::None { .. }) {
+    } else if matches!(dafny_value.value().as_ref(), crate::implementation_from_dafny::_Wrappers_Compile::Option::None { .. }) {
       None
     } else {
       panic!("Unreachable")
