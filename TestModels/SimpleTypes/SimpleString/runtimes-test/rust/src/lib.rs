@@ -1,8 +1,6 @@
-#![allow(warnings, unconditional_panic)]
-#![allow(nonstandard_style)]
 extern crate simple_string;
 
-mod SimpleStringImplTest {
+mod simple_string_impl_test {
   use simple_string::*;
   /*
   method{:test} GetString(){
