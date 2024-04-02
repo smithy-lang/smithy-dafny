@@ -46,7 +46,7 @@ transpile_java: | transpile_implementation_java transpile_test_java
 
 ########################## Rust targets
 
-# Starting to add makefile targets for Rust, but only in this library for now
+# Starting to add makefile targets for Rust, but only in individial libraries for now
 # since Rust support in Dafny is not yet complete.
 # But we want to lock down what IS working to ensure we don't have regressions
 # and gradually expand the scope of what we're testing.
