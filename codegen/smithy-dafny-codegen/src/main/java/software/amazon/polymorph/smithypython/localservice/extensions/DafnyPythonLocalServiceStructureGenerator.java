@@ -473,7 +473,7 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
                 min,
                 () -> {
                     writer.write("""
-                    raise ValueError("$1L must be less than or equal to $2L")
+                    raise ValueError("$1L must be greater than or equal to $2L")
                     """,
                             memberName,
                             min
@@ -489,7 +489,7 @@ public class DafnyPythonLocalServiceStructureGenerator extends StructureGenerato
                 max,
                 () -> {
                     writer.write("""
-                    raise ValueError("$1L must be greater than or equal to $2L")
+                    raise ValueError("$1L must be less than or equal to $2L")
                     """,
                             memberName,
                             max
