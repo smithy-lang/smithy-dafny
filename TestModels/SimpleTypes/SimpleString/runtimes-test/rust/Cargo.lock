@@ -190,6 +190,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "dafny_standard_library"
+version = "0.1.0"
+dependencies = [
+ "dafny_runtime",
+]
+
+[[package]]
 name = "deranged"
 version = "0.3.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -612,6 +619,7 @@ dependencies = [
  "aws-smithy-runtime-api",
  "aws-smithy-types",
  "dafny_runtime",
+ "dafny_standard_library",
 ]
 
 [[package]]

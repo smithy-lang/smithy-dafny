@@ -2232,7 +2232,7 @@ impl <T: DafnyTypeEq> DafnyTypeEq for Rc<T> {}
 // BoundedPools with methods such as forall, exists, iter.
 
 pub trait Forall<T> {
-    fn forall(&self, f: &Rc<dyn Fn(&T) -> bool>) -> bool;
+    fn forall(&self, f: Rc<dyn Fn(&T) -> bool>) -> bool;
 }
 
 pub struct Range(pub DafnyInt, pub DafnyInt);
@@ -2244,7 +2244,7 @@ impl Range {
 }
 
 impl Forall<DafnyInt> for Range {
-    fn forall(&self, f: &Rc<dyn Fn(&DafnyInt) -> bool>) -> bool {
+    fn forall(&self, f: Rc<dyn Fn(&DafnyInt) -> bool>) -> bool {
         let mut i: DafnyInt = self.0.clone();
         while i < self.1.clone() {
             if !f(&i) {
@@ -2257,7 +2257,7 @@ impl Forall<DafnyInt> for Range {
 }
 
 impl <V: DafnyTypeEq> Forall<V> for Sequence<V> {
-    fn forall(&self, f: &Rc<dyn Fn(&V) -> bool>) -> bool {
+    fn forall(&self, f: Rc<dyn Fn(&V) -> bool>) -> bool {
         let a = self.to_array();
         let col = a.iter();
         for v in col {
@@ -2270,7 +2270,7 @@ impl <V: DafnyTypeEq> Forall<V> for Sequence<V> {
 }
 
 impl <V: DafnyTypeEq> Forall<V> for Set<V> {
-    fn forall(&self, f: &Rc<dyn Fn(&V) -> bool>) -> bool {
+    fn forall(&self, f: Rc<dyn Fn(&V) -> bool>) -> bool {
         let col = self.data.iter();
         for v in col {
             if !f(v) {
