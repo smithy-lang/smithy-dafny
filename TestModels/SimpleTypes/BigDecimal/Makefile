@@ -9,4 +9,4 @@ NAMESPACE=simple.types.bigDecimal
 
 # This project has no dependencies 
 # DEPENDENT-MODELS:= 
-# LIBRARIES :=
+

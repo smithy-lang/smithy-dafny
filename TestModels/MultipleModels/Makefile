@@ -9,8 +9,8 @@ include ../SharedMakefile.mk
 DIR_STRUCTURE_V2=V2
 
 PROJECT_SERVICES := \
-	PrimaryProject \
 	DependencyProject \
+	PrimaryProject \
 
 SERVICE_NAMESPACE_PrimaryProject=simple.multiplemodels.primaryproject
 SERVICE_NAMESPACE_DependencyProject=simple.multiplemodels.dependencyproject
@@ -27,4 +27,3 @@ SERVICE_DEPS_PrimaryProject := \
 SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 
 # DEPENDENT-MODELS:=
-# LIBRARIES :=

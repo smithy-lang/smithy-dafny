@@ -22,7 +22,7 @@ polymorph_dafny :
 	--namespace simple.types.enumv2"; \
 
 # Note: This build target fails. This project does not support code generation for Smithy 2.0 models.
-polymorph_net :
+polymorph_dotnet :
 	cd ../../../codegen/smithy-dafny-codegen-cli;\
 	./gradlew run --args="\
 	--output-dafny \
@@ -67,7 +67,7 @@ transpile_implementation_net:
 		-runAllTests:1 \
 		-compile:0 \
 		-optimizeErasableDatatypeWrapper:0 \
-		$(COMPILE_SUFFIX_OPTION) \
+		-compileSuffix:1 \
 		-useRuntimeLib \
 		-out runtimes/net/ImplementationFromDafny \
 		./src/Index.dfy \
@@ -82,7 +82,7 @@ transpile_test_net:
 		-runAllTests:1 \
 		-compile:0 \
 		-optimizeErasableDatatypeWrapper:0 \
-		$(COMPILE_SUFFIX_OPTION) \
+		-compileSuffix:1 \
 		-useRuntimeLib \
 		-out runtimes/net/tests/TestsFromDafny \
 		`find ./test -name '*.dfy'` \

@@ -10,7 +10,7 @@ jobs:
     steps:
     - name: Populate Dafny versions list
       id: populate-dafny-versions-list
-      run: echo "dafny-versions-list=['4.1.0', '4.2.0', '4.4.0']" >> $GITHUB_OUTPUT
+      run: echo "dafny-versions-list=['4.2.0', '4.4.0']" >> $GITHUB_OUTPUT
     outputs:
       dafny-version-list: ${{ steps.populate-dafny-versions-list.outputs.dafny-versions-list }}
         
@@ -39,5 +39,17 @@ jobs:
       matrix:
         dafny-version: ${{ fromJson(needs.pr-populate-dafny-versions.outputs.dafny-version-list) }}
     uses: ./.github/workflows/test_models_net_tests.yml
+    with:
+      dafny: ${{ matrix.dafny-version }}
+  pr-ci-rust:
+    needs: pr-populate-dafny-versions
+    strategy:
+      fail-fast: false
+      matrix:
+        dafny-version: ${{ fromJson(needs.pr-populate-dafny-versions.outputs.dafny-version-list) }}
+        # The Rust backend didn't exist yet in Dafny 4.2
+        exclude:
+          - dafny-version: 4.2.0
+    uses: ./.github/workflows/test_models_rust_tests.yml
     with:
       dafny: ${{ matrix.dafny-version }}
