@@ -60,8 +60,8 @@ public class DafnyToAwsSdkConversionFunctionWriter extends BaseConversionWriter 
         conversionWriter -> {
 
           // Within the conversion function, the dataSource becomes the function's input
-          // This hardcodes the input parameter name for a conversion function to always be "input"
-          String dataSourceInsideConversionFunction = "input";
+          // This hardcodes the input parameter name for a conversion function to always be "dafny_input"
+          String dataSourceInsideConversionFunction = "dafny_input";
 
           conversionWriter.openBlock(
               "def $L($L):",
@@ -155,7 +155,7 @@ public class DafnyToAwsSdkConversionFunctionWriter extends BaseConversionWriter 
         conversionWriter -> {
 
           // Within the conversion function, the dataSource becomes the function's input
-          String dataSourceInsideConversionFunction = "input";
+          String dataSourceInsideConversionFunction = "dafny_input";
 
           // ex. shape: simple.union.ExampleUnion
           // Writes `def DafnyToSmithy_simple_union_ExampleUnion(input):`
@@ -238,7 +238,7 @@ public class DafnyToAwsSdkConversionFunctionWriter extends BaseConversionWriter 
         conversionWriter -> {
 
           // Within the conversion function, the dataSource becomes the function's input
-          String dataSourceInsideConversionFunction = "input";
+          String dataSourceInsideConversionFunction = "dafny_input";
 
           // ex. shape: simple.union.ExampleUnion
           // Writes `def DafnyToSmithy_simple_union_ExampleUnion(input):`

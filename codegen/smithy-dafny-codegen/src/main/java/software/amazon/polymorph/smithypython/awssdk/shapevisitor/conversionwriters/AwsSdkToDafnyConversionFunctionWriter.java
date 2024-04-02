@@ -59,7 +59,7 @@ public class AwsSdkToDafnyConversionFunctionWriter extends BaseConversionWriter 
         "",
         conversionWriter -> {
           // Within the conversion function, the dataSource becomes the function's input
-          // This hardcodes the input parameter neme for a conversion function to always be "input"
+          // This hardcodes the input parameter neme for a conversion function to always be "native_input"
 
           DafnyNameResolver.importDafnyTypeForShape(
               conversionWriter, structureShape.getId(), context);
@@ -68,12 +68,12 @@ public class AwsSdkToDafnyConversionFunctionWriter extends BaseConversionWriter 
               "def $L($L):",
               "",
               AwsSdkNameResolver.getAwsSdkToDafnyFunctionNameForShape(structureShape),
-              "input",
+              "native_input",
               () -> {
                 // Open Dafny structure shape
                 // e.g.
                 // DafnyStructureName(...
-                String dataSourceInsideConversionFunction = "input";
+                String dataSourceInsideConversionFunction = "native_input";
                 conversionWriter.openBlock(
                     "return $L(",
                     ")",
@@ -117,8 +117,8 @@ public class AwsSdkToDafnyConversionFunctionWriter extends BaseConversionWriter 
         "",
         conversionWriter -> {
           // Within the conversion function, the dataSource becomes the function's input
-          // This hardcodes the input parameter name for a conversion function to always be "input"
-          String dataSourceInsideConversionFunction = "input";
+          // This hardcodes the input parameter name for a conversion function to always be "native_input"
+          String dataSourceInsideConversionFunction = "native_input";
 
           DafnyNameResolver.importDafnyTypeForShape(
               conversionWriter, structureShape.getId(), context);
@@ -262,8 +262,8 @@ public class AwsSdkToDafnyConversionFunctionWriter extends BaseConversionWriter 
         conversionWriter -> {
 
           // Within the conversion function, the dataSource becomes the function's input
-          // This hardcodes the input parameter name for a conversion function to always be "input"
-          String dataSourceInsideConversionFunction = "input";
+          // This hardcodes the input parameter name for a conversion function to always be "native_input"
+          String dataSourceInsideConversionFunction = "native_input";
 
           // ex. shape: simple.union.ExampleUnion
           // Writes `def SmithyToDafny_simple_union_ExampleUnion(input):`
@@ -342,7 +342,7 @@ public class AwsSdkToDafnyConversionFunctionWriter extends BaseConversionWriter 
         conversionWriter -> {
 
           // Within the conversion function, the dataSource becomes the function's input
-          String dataSourceInsideConversionFunction = "input";
+          String dataSourceInsideConversionFunction = "native_input";
 
           // ex. shape: simple.union.ExampleUnion
           // Writes `def DafnyToSmithy_simple_union_ExampleUnion(input):`
