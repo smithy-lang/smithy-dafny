@@ -266,7 +266,7 @@ public class DafnyToLocalServiceConversionFunctionWriter extends BaseConversionW
       conversionWriter.write("return $L(config=None, dafny_client=$L)",
           serviceShape.getId().getName(), dataSourceInsideConversionFunction);
     } else {
-      conversionWriter.write("return input._impl");
+      conversionWriter.write("return dafny_input._impl");
     }
 
   }
