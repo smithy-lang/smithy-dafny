@@ -255,7 +255,8 @@ public class LocalServiceToDafnyConversionFunctionWriter extends BaseConversionW
       PythonWriter conversionWriter, String dataSourceInsideConversionFunction) {
 
     if (serviceShape.hasTrait(LocalServiceTrait.class)) {
-      conversionWriter.write("return input._config.dafnyImplInterface.impl");
+      conversionWriter.write("return $L._config.dafnyImplInterface.impl"
+              , dataSourceInsideConversionFunction);
 
 //      DafnyNameResolver.importDafnyTypeForServiceShape(conversionWriter, serviceShape);
 //
@@ -290,7 +291,7 @@ public class LocalServiceToDafnyConversionFunctionWriter extends BaseConversionW
       conversionWriter.write("""
           import $1L
           client = $1L.default__.$2L(boto_client = $3L)
-          client.value.impl = input
+          client.value.impl = $3L
           return client.value
           """,
           DafnyNameResolver.getDafnyPythonIndexModuleNameForShape(serviceShape),
