@@ -540,7 +540,7 @@ transpile_python: transpile_dependencies_python
 transpile_python: _python_revert_underscore_extern_names
 transpile_python: _python_revert_underscore_dependency_extern_names
 transpile_python: _mv_internaldafny_python
-transpile_python: _remove_src_module_python
+# transpile_python: _remove_src_module_python
 transpile_python: _rename_test_main_python
 
 transpile_implementation_python: TARGET=py
