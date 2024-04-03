@@ -2,14 +2,13 @@
 #![allow(nonstandard_style)]
 extern crate dafny_runtime;
 pub mod _System {
-  pub trait object {}
   pub type nat = ::dafny_runtime::DafnyInt;
   #[derive(PartialEq, Clone)]
-  pub enum Tuple2<T0, T1> {
+  pub enum Tuple2<T0: ::dafny_runtime::DafnyType, T1: ::dafny_runtime::DafnyType> {
     _T2 { _0: T0, _1: T1 },
-    _PhantomVariant(::std::marker::PhantomData::<T0>, ::std::marker::PhantomData::<T1>)
+    _PhantomVariant(::std::marker::PhantomData<T0>, ::std::marker::PhantomData<T1>)
   }
-  impl <T0: Clone + ::dafny_runtime::DafnyPrint + ::dafny_runtime::DafnyTypeEq + 'static, T1: Clone + ::dafny_runtime::DafnyPrint + ::dafny_runtime::DafnyTypeEq + 'static>Tuple2<T0, T1> {
+  impl <T0: ::dafny_runtime::DafnyType, T1: ::dafny_runtime::DafnyType>Tuple2<T0, T1> {
     pub fn _0(&self) -> &T0 {
       match self {
         Tuple2::_T2 { _0, _1, } => _0,
@@ -23,7 +22,12 @@ pub mod _System {
       }
     }
   }
-  impl <T0: Clone + ::dafny_runtime::DafnyPrint + ::dafny_runtime::DafnyTypeEq + 'static, T1: Clone + ::dafny_runtime::DafnyPrint + ::dafny_runtime::DafnyTypeEq + 'static>::dafny_runtime::DafnyPrint for Tuple2<T0, T1> {
+  impl <T0: ::dafny_runtime::DafnyType, T1: ::dafny_runtime::DafnyType>::std::fmt::Debug for Tuple2<T0, T1> {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> std::fmt::Result {
+      ::dafny_runtime::DafnyPrint::fmt_print(self, f, true)
+    }
+  }
+  impl <T0: ::dafny_runtime::DafnyType, T1: ::dafny_runtime::DafnyType>::dafny_runtime::DafnyPrint for Tuple2<T0, T1> {
     fn fmt_print(&self, _formatter: &mut ::std::fmt::Formatter, _in_seq: bool) -> std::fmt::Result {
       match self {
         Tuple2::_T2 { _0, _1, } => {
@@ -38,7 +42,19 @@ pub mod _System {
       }
     }
   }
-  impl <T0: ::std::default::Default, T1: ::std::default::Default>::std::default::Default for Tuple2<T0, T1> {
+  impl <T0: ::dafny_runtime::DafnyType + Eq, T1: ::dafny_runtime::DafnyType + Eq>Eq for Tuple2<T0, T1> {}
+  impl <T0: ::dafny_runtime::DafnyType + ::std::hash::Hash, T1: ::dafny_runtime::DafnyType + ::std::hash::Hash>::std::hash::Hash for Tuple2<T0, T1> {
+    fn hash<_H: ::std::hash::Hasher>(&self, _state: &mut _H) {
+      match self {
+        Tuple2::_T2 { _0, _1, } => {
+          _0.hash(_state);
+          _1.hash(_state)
+        },
+        Tuple2::_PhantomVariant(..) => {panic!()}
+      }
+    }
+  }
+  impl <T0: ::dafny_runtime::DafnyType + ::std::default::Default, T1: ::dafny_runtime::DafnyType + ::std::default::Default>::std::default::Default for Tuple2<T0, T1> {
     fn default() -> Tuple2<T0, T1> {
       Tuple2::_T2 {
         _0: ::std::default::Default::default(),
@@ -46,7 +62,7 @@ pub mod _System {
       }
     }
   }
-  impl <T0: ::std::default::Default, T1: ::std::default::Default>::std::convert::AsRef<Tuple2<T0, T1>> for &Tuple2<T0, T1> {
+  impl <T0: ::dafny_runtime::DafnyType + ::std::default::Default, T1: ::dafny_runtime::DafnyType + ::std::default::Default>::std::convert::AsRef<Tuple2<T0, T1>> for &Tuple2<T0, T1> {
     fn as_ref(&self) -> Self {
       self
     }
@@ -56,12 +72,27 @@ pub mod _System {
     _T0 {}
   }
   impl Tuple0 {}
+  impl ::std::fmt::Debug for Tuple0 {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> std::fmt::Result {
+      ::dafny_runtime::DafnyPrint::fmt_print(self, f, true)
+    }
+  }
   impl ::dafny_runtime::DafnyPrint for Tuple0 {
     fn fmt_print(&self, _formatter: &mut ::std::fmt::Formatter, _in_seq: bool) -> std::fmt::Result {
       match self {
         Tuple0::_T0 { } => {
           write!(_formatter, "_System.Tuple0._T0")?;
           Ok(())
+        }
+      }
+    }
+  }
+  impl Eq for Tuple0 {}
+  impl ::std::hash::Hash for Tuple0 {
+    fn hash<_H: ::std::hash::Hasher>(&self, _state: &mut _H) {
+      match self {
+        Tuple0::_T0 { } => {
+          
         }
       }
     }
@@ -86,8 +117,7 @@ pub mod r#_Wrappers_Compile {
     pub fn _allocated() -> *mut Self {
       ::dafny_runtime::allocate::<Self>()
     }
-    pub fn Need<_E: ::dafny_runtime::DafnyType + ::std::default::Default + 'static>(condition: bool, error: &_E) -> ::std::rc::Rc<super::r#_Wrappers_Compile::Outcome<_E>>
-       where  {
+    pub fn Need<_E: ::dafny_runtime::DafnyType>(condition: bool, error: &_E) -> ::std::rc::Rc<super::r#_Wrappers_Compile::Outcome<_E>> {
       if condition {
         ::std::rc::Rc::new(super::r#_Wrappers_Compile::Outcome::<_E>::Pass {})
       } else {
@@ -113,12 +143,12 @@ pub mod r#_Wrappers_Compile {
     }
   }
   #[derive(PartialEq, Clone)]
-  pub enum Option<T> {
+  pub enum Option<T: ::dafny_runtime::DafnyType> {
     None {},
     Some { value: T },
-    _PhantomVariant(::std::marker::PhantomData::<T>)
+    _PhantomVariant(::std::marker::PhantomData<T>)
   }
-  impl <T: ::dafny_runtime::DafnyTypeEq + 'static>Option<T> {
+  impl <T: ::dafny_runtime::DafnyType>Option<T> {
     pub fn ToResult(self: &::std::rc::Rc<Self>) -> ::std::rc::Rc<super::r#_Wrappers_Compile::Result<T, ::dafny_runtime::Sequence<::dafny_runtime::DafnyCharUTF16>>> {
       let mut _source0: ::std::rc::Rc<super::r#_Wrappers_Compile::Option<T>> = self.clone();
       if matches!((&_source0).as_ref(), super::r#_Wrappers_Compile::Option::None{ .. }) {
@@ -146,8 +176,7 @@ pub mod r#_Wrappers_Compile {
     pub fn IsFailure(self: &::std::rc::Rc<Self>) -> bool {
       matches!(self.as_ref(), super::r#_Wrappers_Compile::Option::None{ .. })
     }
-    pub fn PropagateFailure<_U: ::dafny_runtime::DafnyType + ::std::default::Default + 'static>(self: &::std::rc::Rc<Self>) -> ::std::rc::Rc<super::r#_Wrappers_Compile::Option<_U>>
-       where  {
+    pub fn PropagateFailure<_U: ::dafny_runtime::DafnyType>(self: &::std::rc::Rc<Self>) -> ::std::rc::Rc<super::r#_Wrappers_Compile::Option<_U>> {
       ::std::rc::Rc::new(super::r#_Wrappers_Compile::Option::<_U>::None {})
     }
     pub fn Extract(self: &::std::rc::Rc<Self>) -> T {
@@ -161,7 +190,12 @@ pub mod r#_Wrappers_Compile {
       }
     }
   }
-  impl <T: ::dafny_runtime::DafnyType + 'static>::dafny_runtime::DafnyPrint for Option<T> {
+  impl <T: ::dafny_runtime::DafnyType>::std::fmt::Debug for Option<T> {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> std::fmt::Result {
+      ::dafny_runtime::DafnyPrint::fmt_print(self, f, true)
+    }
+  }
+  impl <T: ::dafny_runtime::DafnyType>::dafny_runtime::DafnyPrint for Option<T> {
     fn fmt_print(&self, _formatter: &mut ::std::fmt::Formatter, _in_seq: bool) -> std::fmt::Result {
       match self {
         Option::None { } => {
@@ -178,43 +212,37 @@ pub mod r#_Wrappers_Compile {
       }
     }
   }
-  impl <T: ::std::default::Default>::std::default::Default for Option<T> {
-    fn default() -> Option<T> {
-      Option::None {}
-    }
-  }
-  impl <T: ::std::default::Default>::std::convert::AsRef<Option<T>> for &Option<T> {
-    fn as_ref(&self) -> Self {
-      self
-    }
-  }
-  impl <T: ::dafny_runtime::DafnyTypeEq + 'static> core::fmt::Debug for Option<T> {
-    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-      ::dafny_runtime::DafnyPrint::fmt_print(self, f, true)
-    }
-  }
-  impl <T: ::dafny_runtime::DafnyTypeEq + 'static> ::dafny_runtime::DafnyType for Option<T> {}
-  impl <T: ::dafny_runtime::DafnyTypeEq> Eq for Option<T> {}
-  impl <T: ::dafny_runtime::DafnyTypeEq> std::hash::Hash for Option<T> {
-    fn hash<H: ::std::hash::Hasher>(&self, state: &mut H) {
+  impl <T: ::dafny_runtime::DafnyType + Eq>Eq for Option<T> {}
+  impl <T: ::dafny_runtime::DafnyType + ::std::hash::Hash>::std::hash::Hash for Option<T> {
+    fn hash<_H: ::std::hash::Hasher>(&self, _state: &mut _H) {
       match self {
         Option::None { } => {
+          
         },
         Option::Some { value, } => {
-          value.hash(state);
+          value.hash(_state)
         },
         Option::_PhantomVariant(..) => {panic!()}
       }
     }
   }
-  impl <T: ::dafny_runtime::DafnyTypeEq + 'static> ::dafny_runtime::DafnyTypeEq for Option<T> {}
-  #[derive(PartialEq, Clone, Debug)]
-  pub enum Result<T, R> {
+  impl <T: ::dafny_runtime::DafnyType + ::std::default::Default>::std::default::Default for Option<T> {
+    fn default() -> Option<T> {
+      Option::None {}
+    }
+  }
+  impl <T: ::dafny_runtime::DafnyType + ::std::default::Default>::std::convert::AsRef<Option<T>> for &Option<T> {
+    fn as_ref(&self) -> Self {
+      self
+    }
+  }
+  #[derive(PartialEq, Clone)]
+  pub enum Result<T: ::dafny_runtime::DafnyType, R: ::dafny_runtime::DafnyType> {
     Success { value: T },
     Failure { error: R },
-    _PhantomVariant(::std::marker::PhantomData::<T>, ::std::marker::PhantomData::<R>)
+    _PhantomVariant(::std::marker::PhantomData<T>, ::std::marker::PhantomData<R>)
   }
-  impl <T: ::dafny_runtime::DafnyType + 'static, R: ::dafny_runtime::DafnyType + 'static>Result<T, R> {
+  impl <T: ::dafny_runtime::DafnyType, R: ::dafny_runtime::DafnyType>Result<T, R> {
     pub fn ToOption(self: &::std::rc::Rc<Self>) -> ::std::rc::Rc<super::r#_Wrappers_Compile::Option<T>> {
       let mut _source2: ::std::rc::Rc<super::r#_Wrappers_Compile::Result<T, R>> = self.clone();
       if matches!((&_source2).as_ref(), super::r#_Wrappers_Compile::Result::Success{ .. }) {
@@ -244,14 +272,12 @@ pub mod r#_Wrappers_Compile {
     pub fn IsFailure(self: &::std::rc::Rc<Self>) -> bool {
       matches!(self.as_ref(), super::r#_Wrappers_Compile::Result::Failure{ .. })
     }
-    pub fn PropagateFailure<_U: ::dafny_runtime::DafnyType + ::std::default::Default + 'static>(self: &::std::rc::Rc<Self>) -> ::std::rc::Rc<super::r#_Wrappers_Compile::Result<_U, R>>
-       where  {
+    pub fn PropagateFailure<_U: ::dafny_runtime::DafnyType>(self: &::std::rc::Rc<Self>) -> ::std::rc::Rc<super::r#_Wrappers_Compile::Result<_U, R>> {
       ::std::rc::Rc::new(super::r#_Wrappers_Compile::Result::<_U, R>::Failure {
           error: self.error().clone()
         })
     }
-    pub fn MapFailure<_NewR: ::dafny_runtime::DafnyType + ::std::default::Default + 'static>(self: &::std::rc::Rc<Self>, reWrap: &::dafny_runtime::FunctionWrapper<::std::rc::Rc<dyn ::std::ops::Fn(&R) -> _NewR + 'static>>) -> ::std::rc::Rc<super::r#_Wrappers_Compile::Result<T, _NewR>>
-       where  {
+    pub fn MapFailure<_NewR: ::dafny_runtime::DafnyType>(self: &::std::rc::Rc<Self>, reWrap: &::std::rc::Rc<dyn ::std::ops::Fn(&R) -> _NewR>) -> ::std::rc::Rc<super::r#_Wrappers_Compile::Result<T, _NewR>> {
       let mut _source4: ::std::rc::Rc<super::r#_Wrappers_Compile::Result<T, R>> = self.clone();
       if matches!((&_source4).as_ref(), super::r#_Wrappers_Compile::Result::Success{ .. }) {
         let mut r#___mcc_h0: T = _source4.value().clone();
@@ -263,7 +289,7 @@ pub mod r#_Wrappers_Compile {
         let mut r#___mcc_h1: R = _source4.error().clone();
         let mut e: R = r#___mcc_h1.clone();
         ::std::rc::Rc::new(super::r#_Wrappers_Compile::Result::<T, _NewR>::Failure {
-            error: ((reWrap).0(&e))
+            error: reWrap(&e)
           })
       }
     }
@@ -285,7 +311,12 @@ pub mod r#_Wrappers_Compile {
       }
     }
   }
-  impl <T: ::dafny_runtime::DafnyType + 'static, R: ::dafny_runtime::DafnyType + 'static>::dafny_runtime::DafnyPrint for Result<T, R> {
+  impl <T: ::dafny_runtime::DafnyType, R: ::dafny_runtime::DafnyType>::std::fmt::Debug for Result<T, R> {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> std::fmt::Result {
+      ::dafny_runtime::DafnyPrint::fmt_print(self, f, true)
+    }
+  }
+  impl <T: ::dafny_runtime::DafnyType, R: ::dafny_runtime::DafnyType>::dafny_runtime::DafnyPrint for Result<T, R> {
     fn fmt_print(&self, _formatter: &mut ::std::fmt::Formatter, _in_seq: bool) -> std::fmt::Result {
       match self {
         Result::Success { value, } => {
@@ -304,31 +335,43 @@ pub mod r#_Wrappers_Compile {
       }
     }
   }
-  impl <T: ::std::default::Default, R: ::std::default::Default>::std::default::Default for Result<T, R> {
+  impl <T: ::dafny_runtime::DafnyType + Eq, R: ::dafny_runtime::DafnyType + Eq>Eq for Result<T, R> {}
+  impl <T: ::dafny_runtime::DafnyType + ::std::hash::Hash, R: ::dafny_runtime::DafnyType + ::std::hash::Hash>::std::hash::Hash for Result<T, R> {
+    fn hash<_H: ::std::hash::Hasher>(&self, _state: &mut _H) {
+      match self {
+        Result::Success { value, } => {
+          value.hash(_state)
+        },
+        Result::Failure { error, } => {
+          error.hash(_state)
+        },
+        Result::_PhantomVariant(..) => {panic!()}
+      }
+    }
+  }
+  impl <T: ::dafny_runtime::DafnyType + ::std::default::Default, R: ::dafny_runtime::DafnyType + ::std::default::Default>::std::default::Default for Result<T, R> {
     fn default() -> Result<T, R> {
       Result::Success {
         value: ::std::default::Default::default()
       }
     }
   }
-  impl <T: ::std::default::Default, R: ::std::default::Default>::std::convert::AsRef<Result<T, R>> for &Result<T, R> {
+  impl <T: ::dafny_runtime::DafnyType + ::std::default::Default, R: ::dafny_runtime::DafnyType + ::std::default::Default>::std::convert::AsRef<Result<T, R>> for &Result<T, R> {
     fn as_ref(&self) -> Self {
       self
     }
   }
-  impl <T: ::dafny_runtime::DafnyType + 'static, R: ::dafny_runtime::DafnyType + 'static> ::dafny_runtime::DafnyType for Result<T, R> {}
   #[derive(PartialEq, Clone)]
-  pub enum Outcome<E> {
+  pub enum Outcome<E: ::dafny_runtime::DafnyType> {
     Pass {},
     Fail { error: E },
-    _PhantomVariant(::std::marker::PhantomData::<E>)
+    _PhantomVariant(::std::marker::PhantomData<E>)
   }
-  impl <E: ::dafny_runtime::DafnyType + 'static>Outcome<E> {
+  impl <E: ::dafny_runtime::DafnyType>Outcome<E> {
     pub fn IsFailure(self: &::std::rc::Rc<Self>) -> bool {
       matches!(self.as_ref(), super::r#_Wrappers_Compile::Outcome::Fail{ .. })
     }
-    pub fn PropagateFailure<_U: ::dafny_runtime::DafnyType + ::std::default::Default + 'static>(self: &::std::rc::Rc<Self>) -> ::std::rc::Rc<super::r#_Wrappers_Compile::Result<_U, E>>
-       where  {
+    pub fn PropagateFailure<_U: ::dafny_runtime::DafnyType>(self: &::std::rc::Rc<Self>) -> ::std::rc::Rc<super::r#_Wrappers_Compile::Result<_U, E>> {
       ::std::rc::Rc::new(super::r#_Wrappers_Compile::Result::<_U, E>::Failure {
           error: self.error().clone()
         })
@@ -341,7 +384,12 @@ pub mod r#_Wrappers_Compile {
       }
     }
   }
-  impl <E: ::dafny_runtime::DafnyType + 'static>::dafny_runtime::DafnyPrint for Outcome<E> {
+  impl <E: ::dafny_runtime::DafnyType>::std::fmt::Debug for Outcome<E> {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> std::fmt::Result {
+      ::dafny_runtime::DafnyPrint::fmt_print(self, f, true)
+    }
+  }
+  impl <E: ::dafny_runtime::DafnyType>::dafny_runtime::DafnyPrint for Outcome<E> {
     fn fmt_print(&self, _formatter: &mut ::std::fmt::Formatter, _in_seq: bool) -> std::fmt::Result {
       match self {
         Outcome::Pass { } => {
@@ -358,12 +406,26 @@ pub mod r#_Wrappers_Compile {
       }
     }
   }
-  impl <E: ::std::default::Default>::std::default::Default for Outcome<E> {
+  impl <E: ::dafny_runtime::DafnyType + Eq>Eq for Outcome<E> {}
+  impl <E: ::dafny_runtime::DafnyType + ::std::hash::Hash>::std::hash::Hash for Outcome<E> {
+    fn hash<_H: ::std::hash::Hasher>(&self, _state: &mut _H) {
+      match self {
+        Outcome::Pass { } => {
+          
+        },
+        Outcome::Fail { error, } => {
+          error.hash(_state)
+        },
+        Outcome::_PhantomVariant(..) => {panic!()}
+      }
+    }
+  }
+  impl <E: ::dafny_runtime::DafnyType + ::std::default::Default>::std::default::Default for Outcome<E> {
     fn default() -> Outcome<E> {
       Outcome::Pass {}
     }
   }
-  impl <E: ::std::default::Default>::std::convert::AsRef<Outcome<E>> for &Outcome<E> {
+  impl <E: ::dafny_runtime::DafnyType + ::std::default::Default>::std::convert::AsRef<Outcome<E>> for &Outcome<E> {
     fn as_ref(&self) -> Self {
       self
     }
@@ -381,16 +443,13 @@ pub mod r#_StandardLibrary_Compile_dUInt_Compile {
     pub fn UInt8Less(a: u8, b: u8) -> bool {
       a < b
     }
-    pub fn HasUint16Len<_T: Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + ::dafny_runtime::DafnyTypeEq + 'static>(s: &::dafny_runtime::Sequence<_T>) -> bool
-       where  {
+    pub fn HasUint16Len<_T: ::dafny_runtime::DafnyType>(s: &::dafny_runtime::Sequence<_T>) -> bool {
       s.cardinality() < super::r#_StandardLibrary_Compile_dUInt_Compile::_default::UINT16_LIMIT()
     }
-    pub fn HasUint32Len<_T: Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + ::dafny_runtime::DafnyTypeEq + 'static>(s: &::dafny_runtime::Sequence<_T>) -> bool
-       where  {
+    pub fn HasUint32Len<_T: ::dafny_runtime::DafnyType>(s: &::dafny_runtime::Sequence<_T>) -> bool {
       s.cardinality() < super::r#_StandardLibrary_Compile_dUInt_Compile::_default::UINT32_LIMIT()
     }
-    pub fn HasUint64Len<_T: Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + ::dafny_runtime::DafnyTypeEq + 'static>(s: &::dafny_runtime::Sequence<_T>) -> bool
-       where  {
+    pub fn HasUint64Len<_T: ::dafny_runtime::DafnyType>(s: &::dafny_runtime::Sequence<_T>) -> bool {
       s.cardinality() < super::r#_StandardLibrary_Compile_dUInt_Compile::_default::UINT64_LIMIT()
     }
     pub fn UInt16ToSeq(x: u16) -> ::dafny_runtime::Sequence<u8> {
@@ -609,63 +668,9 @@ pub mod r#_StandardLibrary_Compile_dUInt_Compile {
       &self.0
     }
   }
-  #[derive(Clone, PartialEq)]
-  #[repr(transparent)]
-  pub struct seq16<T: ::dafny_runtime::DafnyTypeEq>(pub ::dafny_runtime::Sequence<T>);
-  impl <T: Clone + ::dafny_runtime::DafnyPrint + ::dafny_runtime::DafnyTypeEq + 'static>::std::default::Default for seq16<T> {
-    fn default() -> Self {
-      seq16(::std::default::Default::default())
-    }
-  }
-  impl <T: Clone + ::dafny_runtime::DafnyPrint + ::dafny_runtime::DafnyTypeEq + 'static>::dafny_runtime::DafnyPrint for seq16<T> {
-    fn fmt_print(&self, _formatter: &mut ::std::fmt::Formatter, in_seq: bool) -> ::std::fmt::Result {
-      ::dafny_runtime::DafnyPrint::fmt_print(&self.0, _formatter, in_seq)
-    }
-  }
-  impl <T: Clone + ::dafny_runtime::DafnyPrint + ::dafny_runtime::DafnyTypeEq + 'static>::std::ops::Deref for seq16<T> {
-    type Target = ::dafny_runtime::Sequence<T>;
-    fn deref(&self) -> &Self::Target {
-      &self.0
-    }
-  }
-  #[derive(Clone, PartialEq)]
-  #[repr(transparent)]
-  pub struct seq32<T: ::dafny_runtime::DafnyTypeEq>(pub ::dafny_runtime::Sequence<T>);
-  impl <T: Clone + ::dafny_runtime::DafnyPrint + ::dafny_runtime::DafnyTypeEq + 'static>::std::default::Default for seq32<T> {
-    fn default() -> Self {
-      seq32(::std::default::Default::default())
-    }
-  }
-  impl <T: Clone + ::dafny_runtime::DafnyPrint + ::dafny_runtime::DafnyTypeEq + 'static>::dafny_runtime::DafnyPrint for seq32<T> {
-    fn fmt_print(&self, _formatter: &mut ::std::fmt::Formatter, in_seq: bool) -> ::std::fmt::Result {
-      ::dafny_runtime::DafnyPrint::fmt_print(&self.0, _formatter, in_seq)
-    }
-  }
-  impl <T: Clone + ::dafny_runtime::DafnyPrint + ::dafny_runtime::DafnyTypeEq + 'static>::std::ops::Deref for seq32<T> {
-    type Target = ::dafny_runtime::Sequence<T>;
-    fn deref(&self) -> &Self::Target {
-      &self.0
-    }
-  }
-  #[derive(Clone, PartialEq)]
-  #[repr(transparent)]
-  pub struct seq64<T: ::dafny_runtime::DafnyTypeEq>(pub ::dafny_runtime::Sequence<T>);
-  impl <T: Clone + ::dafny_runtime::DafnyPrint + ::dafny_runtime::DafnyTypeEq + 'static>::std::default::Default for seq64<T> {
-    fn default() -> Self {
-      seq64(::std::default::Default::default())
-    }
-  }
-  impl <T: Clone + ::dafny_runtime::DafnyPrint + ::dafny_runtime::DafnyTypeEq + 'static>::dafny_runtime::DafnyPrint for seq64<T> {
-    fn fmt_print(&self, _formatter: &mut ::std::fmt::Formatter, in_seq: bool) -> ::std::fmt::Result {
-      ::dafny_runtime::DafnyPrint::fmt_print(&self.0, _formatter, in_seq)
-    }
-  }
-  impl <T: Clone + ::dafny_runtime::DafnyPrint + ::dafny_runtime::DafnyTypeEq + 'static>::std::ops::Deref for seq64<T> {
-    type Target = ::dafny_runtime::Sequence<T>;
-    fn deref(&self) -> &Self::Target {
-      &self.0
-    }
-  }
+  pub type seq16<T: ::dafny_runtime::DafnyType> = ::dafny_runtime::Sequence<T>;
+  pub type seq32<T: ::dafny_runtime::DafnyType> = ::dafny_runtime::Sequence<T>;
+  pub type seq64<T: ::dafny_runtime::DafnyType> = ::dafny_runtime::Sequence<T>;
 }
 pub mod r#_StandardLibrary_Compile {
   pub struct _default {}
@@ -676,8 +681,7 @@ pub mod r#_StandardLibrary_Compile {
     pub fn _allocated() -> *mut Self {
       ::dafny_runtime::allocate::<Self>()
     }
-    pub fn Join<_T: Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + ::dafny_runtime::DafnyTypeEq + 'static>(ss: &::dafny_runtime::Sequence<::dafny_runtime::Sequence<_T>>, joiner: &::dafny_runtime::Sequence<_T>) -> ::dafny_runtime::Sequence<_T>
-       where  {
+    pub fn Join<_T: ::dafny_runtime::DafnyType>(ss: &::dafny_runtime::Sequence<::dafny_runtime::Sequence<_T>>, joiner: &::dafny_runtime::Sequence<_T>) -> ::dafny_runtime::Sequence<_T> {
       let mut _accumulator: ::dafny_runtime::Sequence<_T> = ::dafny_runtime::seq![] as ::dafny_runtime::Sequence<_T>;
       let mut ss = ss.clone();
       let mut joiner = joiner.clone();
@@ -695,8 +699,7 @@ pub mod r#_StandardLibrary_Compile {
         }
       }
     }
-    pub fn Split<_T: Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + ::dafny_runtime::DafnyTypeEq + 'static>(s: &::dafny_runtime::Sequence<_T>, delim: &_T) -> ::dafny_runtime::Sequence<::dafny_runtime::Sequence<_T>>
-       {
+    pub fn Split<_T: ::dafny_runtime::DafnyTypeEq>(s: &::dafny_runtime::Sequence<_T>, delim: &_T) -> ::dafny_runtime::Sequence<::dafny_runtime::Sequence<_T>> {
       let mut _accumulator: ::dafny_runtime::Sequence<::dafny_runtime::Sequence<_T>> = ::dafny_runtime::seq![] as ::dafny_runtime::Sequence<::dafny_runtime::Sequence<_T>>;
       let mut s = s.clone();
       let mut delim = delim.clone();
@@ -704,8 +707,8 @@ pub mod r#_StandardLibrary_Compile {
       'TAIL_CALL_START: loop {
         let mut i: ::std::rc::Rc<super::r#_Wrappers_Compile::Option<super::_System::nat>> = super::r#_StandardLibrary_Compile::_default::FindIndexMatching::<_T>(&s, &delim, &::dafny_runtime::int!(0));
         if matches!((&i).as_ref(), super::r#_Wrappers_Compile::Option::Some{ .. }) {
-          _accumulator = _accumulator.concat(&::dafny_runtime::seq![s.take((&i).value())]);
-          let mut _in2: ::dafny_runtime::Sequence<_T> = s.drop(&((&i).value().clone() + ::dafny_runtime::int!(1)));
+          _accumulator = _accumulator.concat(&::dafny_runtime::seq![s.take(i.value())]);
+          let mut _in2: ::dafny_runtime::Sequence<_T> = s.drop(&(i.value().clone() + ::dafny_runtime::int!(1)));
           let mut _in3: _T = delim.clone();
           s = _in2.clone();
           delim = _in3.clone();
@@ -715,13 +718,11 @@ pub mod r#_StandardLibrary_Compile {
         }
       }
     }
-    pub fn SplitOnce<_T: Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + ::dafny_runtime::DafnyTypeEq + 'static>(s: &::dafny_runtime::Sequence<_T>, delim: &_T) -> (::dafny_runtime::Sequence<_T>, ::dafny_runtime::Sequence<_T>)
-       where  {
+    pub fn SplitOnce<_T: ::dafny_runtime::DafnyTypeEq>(s: &::dafny_runtime::Sequence<_T>, delim: &_T) -> (::dafny_runtime::Sequence<_T>, ::dafny_runtime::Sequence<_T>) {
       let mut i: ::std::rc::Rc<super::r#_Wrappers_Compile::Option<super::_System::nat>> = super::r#_StandardLibrary_Compile::_default::FindIndexMatching::<_T>(s, delim, &::dafny_runtime::int!(0));
-      (s.take((&i).value()), s.drop(&((&i).value().clone() + ::dafny_runtime::int!(1))),)
+      (s.take(i.value()), s.drop(&(i.value().clone() + ::dafny_runtime::int!(1))),)
     }
-    pub fn r#_SplitOnce_q<_T: Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + ::dafny_runtime::DafnyTypeEq + 'static>(s: &::dafny_runtime::Sequence<_T>, delim: &_T) -> ::std::rc::Rc<super::r#_Wrappers_Compile::Option<(::dafny_runtime::Sequence<_T>, ::dafny_runtime::Sequence<_T>)>>
-       where  {
+    pub fn r#_SplitOnce_q<_T: ::dafny_runtime::DafnyTypeEq>(s: &::dafny_runtime::Sequence<_T>, delim: &_T) -> ::std::rc::Rc<super::r#_Wrappers_Compile::Option<(::dafny_runtime::Sequence<_T>, ::dafny_runtime::Sequence<_T>)>> {
       let mut valueOrError0: ::std::rc::Rc<super::r#_Wrappers_Compile::Option<super::_System::nat>> = super::r#_StandardLibrary_Compile::_default::FindIndexMatching::<_T>(s, delim, &::dafny_runtime::int!(0));
       if valueOrError0.IsFailure() {
         (valueOrError0.PropagateFailure::<(::dafny_runtime::Sequence<_T>, ::dafny_runtime::Sequence<_T>)>()/* <i>Coercion from ::std::rc::Rc<super::r#_Wrappers_Compile::Option<_U>> to ::std::rc::Rc<super::r#_Wrappers_Compile::Option<(::dafny_runtime::Sequence<_T>, ::dafny_runtime::Sequence<_T>)>></i> not yet implemented */)
@@ -732,19 +733,18 @@ pub mod r#_StandardLibrary_Compile {
           })
       }
     }
-    pub fn FindIndexMatching<_T: Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + ::dafny_runtime::DafnyTypeEq + 'static>(s: &::dafny_runtime::Sequence<_T>, c: &_T, i: &super::_System::nat) -> ::std::rc::Rc<super::r#_Wrappers_Compile::Option<super::_System::nat>>
-       where  {
+    pub fn FindIndexMatching<_T: ::dafny_runtime::DafnyTypeEq>(s: &::dafny_runtime::Sequence<_T>, c: &_T, i: &super::_System::nat) -> ::std::rc::Rc<super::r#_Wrappers_Compile::Option<super::_System::nat>> {
       super::r#_StandardLibrary_Compile::_default::FindIndex::<_T>(s, {
           let c: _T = c.clone();
-          &(::dafny_runtime::FunctionWrapper::<::std::rc::Rc<dyn ::std::ops::Fn(&_T) -> bool>>({
-                      let c = c.clone();
-                      ::std::rc::Rc::new(move |x: &_T| -> bool {
-                        x.clone() == c.clone()
-                        })}))
+          &({
+                  let mut c = c.clone();
+                  ::std::rc::Rc::new(move |x: &_T| -> bool {
+                          x.clone() == c.clone()
+                        })
+                })
           }, i)
     }
-    pub fn FindIndex<_T: Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + ::dafny_runtime::DafnyTypeEq + 'static>(s: &::dafny_runtime::Sequence<_T>, f: &::dafny_runtime::FunctionWrapper<::std::rc::Rc<dyn ::std::ops::Fn(&_T) -> bool + 'static>>, i: &super::_System::nat) -> ::std::rc::Rc<super::r#_Wrappers_Compile::Option<super::_System::nat>>
-       where  {
+    pub fn FindIndex<_T: ::dafny_runtime::DafnyType>(s: &::dafny_runtime::Sequence<_T>, f: &::std::rc::Rc<dyn ::std::ops::Fn(&_T) -> bool>, i: &super::_System::nat) -> ::std::rc::Rc<super::r#_Wrappers_Compile::Option<super::_System::nat>> {
       let mut s = s.clone();
       let mut f = f.clone();
       let mut i = i.clone();
@@ -752,13 +752,13 @@ pub mod r#_StandardLibrary_Compile {
         if i.clone() == s.cardinality() {
           return ::std::rc::Rc::new(super::r#_Wrappers_Compile::Option::<super::_System::nat>::None {});
         } else {
-          if ((f).0(&s.get(&i))) {
+          if (&f)(&s.get(&i)) {
             return ::std::rc::Rc::new(super::r#_Wrappers_Compile::Option::<super::_System::nat>::Some {
                   value: i.clone()
                 });
           } else {
             let mut _in4: ::dafny_runtime::Sequence<_T> = s.clone();
-            let mut _in5: ::dafny_runtime::FunctionWrapper<::std::rc::Rc<dyn ::std::ops::Fn(&_T) -> bool + 'static>> = f.clone();
+            let mut _in5: ::std::rc::Rc<dyn ::std::ops::Fn(&_T) -> bool> = f.clone();
             let mut _in6: ::dafny_runtime::DafnyInt = i.clone() + ::dafny_runtime::int!(1);
             s = _in4.clone();
             f = _in5.clone();
@@ -768,8 +768,7 @@ pub mod r#_StandardLibrary_Compile {
         }
       }
     }
-    pub fn Filter<_T: Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + ::dafny_runtime::DafnyTypeEq + 'static>(s: &::dafny_runtime::Sequence<_T>, f: &::dafny_runtime::FunctionWrapper<::std::rc::Rc<dyn ::std::ops::Fn(&_T) -> bool + 'static>>) -> ::dafny_runtime::Sequence<_T>
-       where  {
+    pub fn Filter<_T: ::dafny_runtime::DafnyType>(s: &::dafny_runtime::Sequence<_T>, f: &::std::rc::Rc<dyn ::std::ops::Fn(&_T) -> bool>) -> ::dafny_runtime::Sequence<_T> {
       let mut _accumulator: ::dafny_runtime::Sequence<_T> = ::dafny_runtime::seq![] as ::dafny_runtime::Sequence<_T>;
       let mut s = s.clone();
       let mut f = f.clone();
@@ -778,16 +777,16 @@ pub mod r#_StandardLibrary_Compile {
         if s.cardinality() == ::dafny_runtime::int!(0) {
           return _accumulator.concat(&(::dafny_runtime::seq![] as ::dafny_runtime::Sequence<_T>));
         } else {
-          if ((f).0(&s.get(&::dafny_runtime::int!(0)))) {
+          if (&f)(&s.get(&::dafny_runtime::int!(0))) {
             _accumulator = _accumulator.concat(&::dafny_runtime::seq![s.get(&::dafny_runtime::int!(0))]);
             let mut _in7: ::dafny_runtime::Sequence<_T> = s.drop(&::dafny_runtime::int!(1));
-            let mut _in8: ::dafny_runtime::FunctionWrapper<::std::rc::Rc<dyn ::std::ops::Fn(&_T) -> bool + 'static>> = f.clone();
+            let mut _in8: ::std::rc::Rc<dyn ::std::ops::Fn(&_T) -> bool> = f.clone();
             s = _in7.clone();
             f = _in8.clone();
             continue 'TAIL_CALL_START;
           } else {
             let mut _in9: ::dafny_runtime::Sequence<_T> = s.drop(&::dafny_runtime::int!(1));
-            let mut _in10: ::dafny_runtime::FunctionWrapper<::std::rc::Rc<dyn ::std::ops::Fn(&_T) -> bool + 'static>> = f.clone();
+            let mut _in10: ::std::rc::Rc<dyn ::std::ops::Fn(&_T) -> bool> = f.clone();
             s = _in9.clone();
             f = _in10.clone();
             continue 'TAIL_CALL_START;
@@ -802,45 +801,41 @@ pub mod r#_StandardLibrary_Compile {
         b.clone()
       }
     }
-    pub fn Fill<_T: Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + ::dafny_runtime::DafnyTypeEq + 'static>(value: &_T, n: &super::_System::nat) -> ::dafny_runtime::Sequence<_T>
-       where  {
+    pub fn Fill<_T: ::dafny_runtime::DafnyType>(value: &_T, n: &super::_System::nat) -> ::dafny_runtime::Sequence<_T> {
       {
         let _initializer = {
               let value: _T = value.clone();
-              ::dafny_runtime::FunctionWrapper::<::std::rc::Rc<dyn ::std::ops::Fn(&::dafny_runtime::DafnyInt) -> _T>>({
-                            let value = value.clone();
-                            ::std::rc::Rc::new(move |_v0: &::dafny_runtime::DafnyInt| -> _T {
-                                        value.clone()
-                                        })})
+              {
+                      let mut value = value.clone();
+                      ::std::rc::Rc::new(move |_v0: &::dafny_runtime::DafnyInt| -> _T {
+                                  value.clone()
+                                })
+                    }
               };
-        ::dafny_runtime::integer_range(::dafny_runtime::Zero::zero(), n.clone()).map(|i| _initializer.0(&i)).collect::<::dafny_runtime::Sequence<_>>()
+        ::dafny_runtime::integer_range(::dafny_runtime::Zero::zero(), n.clone()).map(|i| _initializer(&i)).collect::<::dafny_runtime::Sequence<_>>()
         }
     }
-    pub fn SeqToArray<_T: Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + ::dafny_runtime::DafnyTypeEq + 'static>(s: &::dafny_runtime::Sequence<_T>) -> *mut [_T]
-       where  {
-      let mut _init0: ::dafny_runtime::FunctionWrapper<::std::rc::Rc<dyn ::std::ops::Fn(&::dafny_runtime::DafnyInt) -> _T + 'static>> = {
+    pub fn SeqToArray<_T: ::dafny_runtime::DafnyType>(s: &::dafny_runtime::Sequence<_T>) -> *mut [_T] {
+      let mut _init0: ::std::rc::Rc<dyn ::std::ops::Fn(&::dafny_runtime::DafnyInt) -> _T> = {
           let s: ::dafny_runtime::Sequence<_T> = s.clone();
-          ::dafny_runtime::FunctionWrapper::<::std::rc::Rc<dyn ::std::ops::Fn(&::dafny_runtime::DafnyInt) -> _T>>({
+          ({
                     let s = s.clone();
                     ::std::rc::Rc::new(move |i: &::dafny_runtime::DafnyInt| -> _T {
                             s.get(i)
                             })})
           };
-      ::dafny_runtime::array::initialize(&s.cardinality(), _init0.0)
+      ::dafny_runtime::array::initialize(&s.cardinality(), _init0)
     }
-    pub fn LexicographicLessOrEqual<_T: Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + ::dafny_runtime::DafnyTypeEq + 'static>(a: &::dafny_runtime::Sequence<_T>, b: &::dafny_runtime::Sequence<_T>, less: &::dafny_runtime::FunctionWrapper<::std::rc::Rc<dyn ::std::ops::Fn(&_T, &_T) -> bool + 'static>>) -> bool
-       where  {
+    pub fn LexicographicLessOrEqual<_T: ::dafny_runtime::DafnyTypeEq>(a: &::dafny_runtime::Sequence<_T>, b: &::dafny_runtime::Sequence<_T>, less: &::std::rc::Rc<dyn ::std::ops::Fn(&_T, &_T) -> bool>) -> bool {
       Self::LexicographicLessOrEqualAux(a, b, less, &::dafny_runtime::int!(0))
     }
-    pub fn LexicographicLessOrEqualAux<_T: Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + ::dafny_runtime::DafnyTypeEq + 'static>(a: &::dafny_runtime::Sequence<_T>, b: &::dafny_runtime::Sequence<_T>, less: &::dafny_runtime::FunctionWrapper<::std::rc::Rc<dyn ::std::ops::Fn(&_T, &_T) -> bool + 'static>>, lengthOfCommonPrefix: &super::_System::nat) -> bool
-       where  {
+    pub fn LexicographicLessOrEqualAux<_T: ::dafny_runtime::DafnyTypeEq>(a: &::dafny_runtime::Sequence<_T>, b: &::dafny_runtime::Sequence<_T>, less: &::std::rc::Rc<dyn ::std::ops::Fn(&_T, &_T) -> bool>, lengthOfCommonPrefix: &super::_System::nat) -> bool {
       lengthOfCommonPrefix.clone() <= b.cardinality() && ::dafny_runtime::Forall::forall(&::dafny_runtime::Range(::dafny_runtime::int!(0), lengthOfCommonPrefix.clone()), {
         let a = a.clone();
         let b = b.clone();
-        ::std::rc::Rc::new(move |i| a.get(i) == b.get(i))}) && (lengthOfCommonPrefix.clone() == a.cardinality() || lengthOfCommonPrefix.clone() < b.cardinality() && (((less).0(&a.get(lengthOfCommonPrefix), &b.get(lengthOfCommonPrefix)))))
+        ::std::rc::Rc::new(move |i| a.get(i) == b.get(i))}) && (lengthOfCommonPrefix.clone() == a.cardinality() || lengthOfCommonPrefix.clone() < b.cardinality() && ((less(&a.get(lengthOfCommonPrefix), &b.get(lengthOfCommonPrefix)))))
     }
-    pub fn SetToOrderedSequence<_T: Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + ::dafny_runtime::DafnyTypeEq + 'static>(s: &::dafny_runtime::Set<::dafny_runtime::Sequence<_T>>, less: &::dafny_runtime::FunctionWrapper<::std::rc::Rc<dyn ::std::ops::Fn(&_T, &_T) -> bool + 'static>>) -> ::dafny_runtime::Sequence<::dafny_runtime::Sequence<_T>>
-       where  {
+    pub fn SetToOrderedSequence<_T: ::dafny_runtime::DafnyTypeEq>(s: &::dafny_runtime::Set<::dafny_runtime::Sequence<_T>>, less: &::std::rc::Rc<dyn ::std::ops::Fn(&_T, &_T) -> bool>) -> ::dafny_runtime::Sequence<::dafny_runtime::Sequence<_T>> {
       let mut _accumulator: ::dafny_runtime::Sequence<::dafny_runtime::Sequence<_T>> = ::dafny_runtime::seq![] as ::dafny_runtime::Sequence<::dafny_runtime::Sequence<_T>>;
       let mut s = s.clone();
       let mut less = less.clone();
@@ -849,28 +844,28 @@ pub mod r#_StandardLibrary_Compile {
         if s.clone() == ::dafny_runtime::set!{} {
           return _accumulator.concat(&(::dafny_runtime::seq![] as ::dafny_runtime::Sequence<::dafny_runtime::Sequence<_T>>));
         } else {
-          return ((&(::dafny_runtime::FunctionWrapper::<::std::rc::Rc<dyn ::std::ops::Fn(&::dafny_runtime::DafnyInt) -> ::dafny_runtime::Sequence<::dafny_runtime::Sequence<_T>>>>({
-                            let s = s.clone();
-                            let less = less.clone();
-                            ::std::rc::Rc::new(move |r#__let_dummy_0: &::dafny_runtime::DafnyInt| -> ::dafny_runtime::Sequence<::dafny_runtime::Sequence<_T>> {
-                                    let mut a = ::dafny_runtime::MaybePlacebo::<::dafny_runtime::Sequence<_T>>::new();
-                                      'label_goto__ASSIGN_SUCH_THAT_0: loop {
-                                            for r#__assign_such_that_0 in (&s).iter() {
-                                                  a = ::dafny_runtime::MaybePlacebo::from(r#__assign_such_that_0.clone());
-                                                  if s.contains(&a.read()) && super::r#_StandardLibrary_Compile::_default::IsMinimum::<_T>(&a.read(), &s, &less) {
-                                                        break 'label_goto__ASSIGN_SUCH_THAT_0;
-                                                      }
-                                                };
-                                            panic!("Halt");
-                                            break;
-                                          };
-                                      ::dafny_runtime::seq![a.read()].concat(&super::r#_StandardLibrary_Compile::_default::SetToOrderedSequence::<_T>(&s.subtract(&::dafny_runtime::set!{a.read()}), &less))
-                                    })}))).0(&::dafny_runtime::int!(0)));
+          return (&({
+              let mut s = s.clone();
+              let mut less = less.clone();
+              ::std::rc::Rc::new(move |r#__let_dummy_0: &::dafny_runtime::DafnyInt| -> ::dafny_runtime::Sequence<::dafny_runtime::Sequence<_T>> {
+                  let mut a = ::dafny_runtime::MaybePlacebo::<::dafny_runtime::Sequence<_T>>::new();
+                  'label_goto__ASSIGN_SUCH_THAT_0: loop {
+                    for r#__assign_such_that_0 in (&s).iter() {
+                      a = ::dafny_runtime::MaybePlacebo::from(r#__assign_such_that_0.clone());
+                      if s.contains(&a.read()) && super::r#_StandardLibrary_Compile::_default::IsMinimum::<_T>(&a.read(), &s, &less) {
+                        break 'label_goto__ASSIGN_SUCH_THAT_0;
+                      }
+                    };
+                    panic!("Halt");
+                    break;
+                  };
+                  ::dafny_runtime::seq![a.read()].concat(&super::r#_StandardLibrary_Compile::_default::SetToOrderedSequence::<_T>(&s.subtract(&::dafny_runtime::set!{a.read()}), &less))
+                })
+            }))(&::dafny_runtime::int!(0));
         }
       }
     }
-    pub fn IsMinimum<_T: Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + ::dafny_runtime::DafnyTypeEq + 'static>(a: &::dafny_runtime::Sequence<_T>, s: &::dafny_runtime::Set<::dafny_runtime::Sequence<_T>>, less: &::dafny_runtime::FunctionWrapper<::std::rc::Rc<dyn ::std::ops::Fn(&_T, &_T) -> bool + 'static>>) -> bool
-       where  {
+    pub fn IsMinimum<_T: ::dafny_runtime::DafnyTypeEq>(a: &::dafny_runtime::Sequence<_T>, s: &::dafny_runtime::Set<::dafny_runtime::Sequence<_T>>, less: &::std::rc::Rc<dyn ::std::ops::Fn(&_T, &_T) -> bool>) -> bool {
       s.contains(a) && 
       ::dafny_runtime::Forall::forall(s, {
         let a = a.clone();
@@ -1029,7 +1024,7 @@ pub mod r#_UTF8_Compile {
   }
   pub type ValidUTF8Bytes = ::dafny_runtime::Sequence<u8>;
 }
-mod r#_StandardLibraryInterop_Compile {
+pub mod r#_StandardLibraryInterop_Compile {
   pub struct WrappersInterop {}
   impl WrappersInterop {
     pub fn new() -> Self {
@@ -1071,6 +1066,6 @@ mod r#_StandardLibraryInterop_Compile {
     }
   }
 }
-mod _module {
+pub mod _module {
   
 }
