@@ -288,7 +288,7 @@ public class ErrorsFileWriter implements CustomFileWriter {
                     writer.addStdlibImport(
                             SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
                                     serviceDependencyShapeId.getNamespace(), codegenContext.settings())
-                                    + ".shim",
+                                    + ".errors",
                             nativeToDafnyErrorName,
                             SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
                                     serviceDependencyShapeId.getNamespace())
