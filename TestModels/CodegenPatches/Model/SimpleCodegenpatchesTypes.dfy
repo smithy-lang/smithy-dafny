@@ -114,7 +114,7 @@ abstract module AbstractSimpleCodegenpatchesService
   import Operations : AbstractSimpleCodegenpatchesOperations
   function method DefaultCodegenPatchesConfig(): CodegenPatchesConfig
   method CodegenPatches(config: CodegenPatchesConfig := DefaultCodegenPatchesConfig())
-    returns (res: Result<ICodegenPatchesClient, Error>)
+    returns (res: Result<CodegenPatchesClient, Error>)
     ensures res.Success? ==>
               && fresh(res.value)
               && fresh(res.value.Modifies)
@@ -179,7 +179,7 @@ abstract module AbstractSimpleCodegenpatchesOperations {
   predicate ValidInternalConfig?(config: InternalConfig)
   function ModifiesInternalConfig(config: InternalConfig): set<object>
   predicate GetStringEnsuresPublicly(input: GetStringInput , output: Result<GetStringOutput, Error>)
-  // BEGIN MANUAL EDIT
+    // BEGIN MANUAL EDIT
   {
     true
   }
