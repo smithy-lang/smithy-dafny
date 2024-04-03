@@ -17,21 +17,18 @@ pub use std::convert::Into;
 // An atomic box is just a RefCell in Rust
 pub type SizeT = usize;
 
-// Dafny types must be clonable in constant time
-pub trait DafnyType: Clone + DafnyPrint + Debug {}
+pub trait DafnyType: Clone + DafnyPrint + 'static {}
+
+impl <T> DafnyType for T where T: Clone + DafnyPrint + 'static {}
 pub trait DafnyTypeEq: DafnyType + Hash + Eq {}
 
-/******************************************************************************
- * Sequences
- ******************************************************************************/
+impl <T> DafnyTypeEq for T where T: DafnyType + Hash + Eq {}
 
-// Three elements
-// ArraySequence(var isString: bool, nodeCount: SizeT, immutable_array)
-// ConcatSequence(var isString: bool, nodeCount: SizeT, left: Sequence, right: Sequence)
-// LazySequence(length: BigInteger, box: RefCell<Rc<Sequence<T>>>)
-// We use the named version using {...}, and use snake_case format
+// Dafny's type (0) compiles to NontrivialDefault to prevent subset types from being considered as Default if their witness is nonzero
+pub trait NontrivialDefault {
+    fn nontrivial_default() -> Self;
+}
 
-// The T must be either a *const T (allocated) OR a Reference Counting (immutable)
 pub mod dafny_runtime_conversions {
     use crate::DafnyType;
     use crate::DafnyTypeEq;
@@ -288,12 +285,15 @@ impl ToPrimitive for DafnyInt {
     }
 }
 
-impl DafnyType for DafnyInt {}
-impl DafnyTypeEq for DafnyInt {}
-
 impl Default for DafnyInt {
     fn default() -> Self {
         DafnyInt::new(Rc::new(BigInt::zero()))
+    }
+}
+
+impl NontrivialDefault for DafnyInt {
+    fn nontrivial_default() -> Self {
+        Self::default()
     }
 }
 
@@ -315,7 +315,7 @@ impl DafnyPrint for DafnyInt {
     }
 }
 
-impl Debug for DafnyInt {
+impl ::std::fmt::Debug for DafnyInt {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.data)
     }
@@ -486,8 +486,6 @@ impl <'a, const N: usize> From<&'a [u8; N]> for DafnyInt {
 // Immutable sequences
 // **************
 
-impl <T: DafnyType> DafnyType for Sequence<T> {}
-impl <T: DafnyTypeEq> DafnyTypeEq for Sequence<T> {}
 impl <T: DafnyTypeEq> Eq for Sequence<T> {}
 
 impl <T: DafnyType> Add<&Sequence<T>> for &Sequence<T>
@@ -674,6 +672,11 @@ impl <T: DafnyType> Default for Sequence<T> {
         Sequence::from_array_owned(vec![])
     }
 }
+impl <T: DafnyType> NontrivialDefault for Sequence<T> {
+    fn nontrivial_default() -> Self {
+        Self::default()
+    }
+}
 
 impl <T: DafnyTypeEq> Sequence<T> {
     pub fn as_dafny_multiset(&self) -> Multiset<T> {
@@ -779,6 +782,22 @@ pub struct Map<K, V>
     data: Rc<HashMap<K, V>>
 }
 
+impl <K: DafnyTypeEq, V: DafnyTypeEq> Default for Map<K, V>
+{
+    fn default() -> Self {
+        Map {
+            data: Rc::new(HashMap::new())
+        }
+    }
+}
+
+impl <K: DafnyTypeEq, V: DafnyTypeEq> NontrivialDefault for Map<K, V>
+{
+    fn nontrivial_default() -> Self {
+        Self::default()
+    }
+}
+
 impl <K: DafnyTypeEq, V: DafnyTypeEq> Hash for Map<K, V>
 {
     fn hash<H: Hasher>(&self, state: &mut H) {
@@ -801,12 +820,6 @@ impl <K, V> PartialEq<Map<K, V>> for Map<K, V>
         return true;
     }
 }
-
-impl <K: DafnyType, V: DafnyType> DafnyType for (K, V) {}
-impl <K: DafnyTypeEq, V: DafnyTypeEq> DafnyTypeEq for (K, V) {}
-
-impl <K: DafnyTypeEq, V: DafnyTypeEq> DafnyType for Map<K, V> {}
-impl <K: DafnyTypeEq, V: DafnyTypeEq> DafnyTypeEq for Map<K, V> {}
 
 impl <K: DafnyTypeEq, V: DafnyTypeEq> Eq for Map<K, V> {
 }
@@ -1003,6 +1016,11 @@ impl <T> Default for Set<T>
 {
     fn default() -> Self {
         Self::new_empty()
+    }
+}
+impl <T: DafnyTypeEq> NontrivialDefault for Set<T> {
+    fn nontrivial_default() -> Self {
+        Self::default()
     }
 }
 
@@ -1409,8 +1427,20 @@ impl <V: DafnyTypeEq> Multiset<V>
     }
 }
 
-impl <V: DafnyTypeEq> DafnyType for Multiset<V> {}
-impl <V: DafnyTypeEq> DafnyTypeEq for Multiset<V> {}
+
+
+impl <T> Default for Multiset<T>
+  where T: DafnyTypeEq
+{
+    fn default() -> Self {
+        Self::new_empty()
+    }
+}
+impl <T: DafnyTypeEq> NontrivialDefault for Multiset<T> {
+    fn nontrivial_default() -> Self {
+        Self::default()
+    }
+}
 
 impl <V: DafnyTypeEq> PartialOrd<Multiset<V>> for Multiset<V> {
     fn partial_cmp(&self, other: &Multiset<V>) -> Option<Ordering> {
@@ -1640,6 +1670,29 @@ impl <A: DafnyPrint> DafnyPrint for LazyFieldWrapper<A> {
     }
 }
 
+// Convert the DafnyPrint above into a macro so that we can create it for functions of any input arity
+macro_rules! dafny_print_function {
+    ($($n:tt)*) => {
+        impl <B, $($n),*> DafnyPrint for Rc<dyn Fn($($n),*) -> B> {
+            fn fmt_print(&self, f: &mut Formatter<'_>, _in_seq: bool) -> std::fmt::Result {
+                write!(f, "<function>")
+            }
+        }
+    }
+}
+// Now create a loop like impl_tuple_print_loop so that we can create functions up to size 32
+macro_rules! dafny_print_function_loop {
+    ($first:ident $($rest:ident)*) => {
+        dafny_print_function_loop! { $($rest)* }
+        dafny_print_function! { $first $($rest)* }
+    };
+    () => {
+    }
+}
+// Emit functions till 32 parameters
+dafny_print_function_loop! { A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12 A13 A14 A15 A16
+    A17 A18 A19 A20 A21 A22 A23 A24 A25 A26 A27 A28 A29 A30 A31 A32 }
+
 pub struct FunctionWrapper<A: ?Sized>(pub A);
 impl <A> DafnyPrint for FunctionWrapper<A> {
     fn fmt_print(&self, f: &mut Formatter<'_>, _in_seq: bool) -> std::fmt::Result {
@@ -1699,13 +1752,10 @@ macro_rules! impl_print_display {
                 std::fmt::Display::fmt(&self, f)
             }
         }
-        impl DafnyType for $name {}
-        impl DafnyTypeEq for $name {}
     };
 }
 
 impl_print_display! { String }
-impl_print_display! { &str }
 impl_print_display! { bool }
 impl_print_display! { u8 }
 impl_print_display! { u16 }
@@ -1740,10 +1790,6 @@ impl DafnyPrint for () {
 #[derive(Clone)]
 pub struct DafnyCharUTF16(pub u16);
 pub type DafnyStringUTF16 = Sequence<DafnyCharUTF16>;
-
-impl DafnyType for DafnyCharUTF16 {}
-impl DafnyTypeEq for DafnyCharUTF16 {}
-
 
 impl DafnyPrint for DafnyCharUTF16 {
     #[inline]
@@ -1799,9 +1845,6 @@ impl PartialOrd<DafnyCharUTF16> for DafnyCharUTF16 {
 #[derive(Clone)]
 pub struct DafnyChar(pub char);
 pub type DafnyString = Sequence<DafnyChar>;
-
-impl DafnyType for DafnyChar {}
-impl DafnyTypeEq for DafnyChar {}
 
 impl DafnyPrint for DafnyChar {
     #[inline]
@@ -2222,16 +2265,18 @@ impl <T: ?Sized> DafnyPrint for *mut T {
     }
 }
 
-impl <T: ?Sized> DafnyType for *mut T {}
-
-impl <T: ?Sized> DafnyTypeEq for *mut T {}
-
-impl <T: DafnyType> DafnyType for Rc<T> {}
-impl <T: DafnyTypeEq> DafnyTypeEq for Rc<T> {}
+impl <T> NontrivialDefault for *mut T {
+    fn nontrivial_default() -> Self {
+        0 as *mut T
+    }
+}
 
 // BoundedPools with methods such as forall, exists, iter.
 
 pub trait Forall<T> {
+    // Takes ownership of the function because otherwise it's hard to
+    // generate code to create a function and borrow it immediately
+    // without assigning it to a variable first
     fn forall(&self, f: Rc<dyn Fn(&T) -> bool>) -> bool;
 }
 
@@ -2353,38 +2398,6 @@ macro_rules! read {
     }
 }
 
-// uninit!(Rc<i32>)
-// == unsafe { transmute::<MaybeUninit::<Rc<i32>>, Rc<i32>>(MaybeUninit::<Rc<i32>>::uninit()) };
-#[macro_export]
-macro_rules! var_uninit {
-    ($tpe:ty) => {
-        // safety: Dafny will ensure that for every uninitialized memory, it will write to it with update_nodrop!
-        unsafe { $crate::MaybeUninit::<$tpe>::uninit().assume_init() }
-    }
-}
-//  assign_maybe_uninit!(t, t_assigned, value)
-/*  let computed_value = value;
-    if t_assigned {
-        t = computed_value;
-    } else {
-        update_nodrop!(t, computed_value);
-        t_assigned = true;
-    } */
-#[macro_export]
-macro_rules! update_uninit {
-    ($t:expr, $t_assigned:expr, $value:expr) => {
-        {
-            let computed_value = $value;
-            if $t_assigned {
-                $t = computed_value;
-            } else {
-                $crate::update_nodrop!($t, computed_value);
-                $t_assigned = true;
-            }
-        }
-    }
-}
-
 // If the field is guaranteed to be assigned only once, update_field_nodrop is sufficient
 #[macro_export]
 macro_rules! update_field_uninit {
@@ -2411,24 +2424,6 @@ macro_rules! update_field_if_uninit {
                 $crate::update_field_nodrop!($t, $field, computed_value);
                 $field_assigned = true;
             }
-        }
-    }
-}
-
-// Don't run the destructor, i.e. on a value that was surely never initialized
-#[macro_export]
-macro_rules! forget {
-    ($t:expr) => {
-        ::std::mem::forget($t)
-    }
-}
-
-// Don't run the destructor, on a value that was possibly never initialized
-#[macro_export]
-macro_rules! forget_uninit {
-    ($t:expr, $field_assigned:expr) => {
-        if !$field_assigned {
-            $crate::forget!($t);
         }
     }
 }
