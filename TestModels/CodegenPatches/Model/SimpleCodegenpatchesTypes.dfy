@@ -121,11 +121,17 @@ abstract module AbstractSimpleCodegenpatchesService
               && fresh(res.value.History)
               && res.value.ValidState()
 
-  // Helper function for the benefit of native code to create a Success(client) without referring to Dafny internals
-  function method CreateSuccessOfClient(client: ICodegenPatchesClient): Result<ICodegenPatchesClient, Error> {
+  // Helper functions for the benefit of native code to create a Success(client) without referring to Dafny internals
+  function method CreateSuccessOfClientClass(client: ICodegenPatchesClient): Result<ICodegenPatchesClient, Error> {
     Success(client)
-  } // Helper function for the benefit of native code to create a Failure(error) without referring to Dafny internals
-  function method CreateFailureOfError(error: Error): Result<ICodegenPatchesClient, Error> {
+  }
+  function method CreateSuccessOfClientTrait(client: CodegenPatchesClient): Result<CodegenPatchesClient, Error> {
+    Success(client)
+  } // Helper functions for the benefit of native code to create a Failure(error) without referring to Dafny internals
+  function method CreateFailureOfErrorForClientClass(error: Error): Result<ICodegenPatchesClient, Error> {
+    Failure(error)
+  }
+  function method CreateFailureOfErrorForClientTrait(error: Error): Result<CodegenPatchesClient, Error> {
     Failure(error)
   }
   class CodegenPatchesClient extends ICodegenPatchesClient
