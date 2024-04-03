@@ -288,7 +288,9 @@ public class ErrorsFileWriter implements CustomFileWriter {
                     writer.addStdlibImport(
                             SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
                                     serviceDependencyShapeId.getNamespace(), codegenContext.settings())
-                                    + ".errors",
+                                    + (AwsSdkNameResolver.isAwsSdkShape(serviceDependencyShapeId)
+                                    ? ".shim"
+                                    : ".errors"),
                             nativeToDafnyErrorName,
                             SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
                                     serviceDependencyShapeId.getNamespace())
