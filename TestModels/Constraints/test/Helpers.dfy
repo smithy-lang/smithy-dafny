@@ -71,7 +71,7 @@ module Helpers {
       var overrideLessThanTen : bool := "lessThanTen" in overrideToInvalidInput;
       var myLessThanTen: int;
       if (overrideLessThanTen) {
-        myLessThanTen := 27;
+        myLessThanTen := InvalidLessThanTenInput();
       } else {
         myLessThanTen := 3; 
       }
