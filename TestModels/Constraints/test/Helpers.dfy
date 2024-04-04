@@ -68,6 +68,14 @@ module Helpers {
         myBlob := [0, 1, 0, 1]; 
       }
 
+      var overrideLessThanTen : bool := "lessThanTen" in overrideToInvalidInput;
+      var myLessThanTen: int;
+      if (overrideLessThanTen) {
+        myLessThanTen := 27;
+      } else {
+        myLessThanTen := 3; 
+      }
+
       // TODO: Write more overrides to invalid inputs below...
 
       var nonEmptyBlob := [0, 1, 0, 1]; 
@@ -81,7 +89,7 @@ module Helpers {
       var alphabetic := "alphabetic";
       var oneToTen := 3;
       var greaterThanOne := 2;
-      var lessThanTen := 3;
+      var lessThanTen := myLessThanTen;
       var myUniqueList := ["one", "two"];
       var myComplexUniqueList := [ ComplexListElement(value := Some("one"), blob := Some([1, 1])),
                                    ComplexListElement(value := Some("two"), blob := Some([2, 2]))
