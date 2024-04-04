@@ -11,9 +11,20 @@ module SimpleConstraintsImplTest {
     import opened SimpleConstraintsTypes
     import opened Wrappers
     
-    method{:test} TestConstraints(){
+    method {:test} TestConstraints() {
         var client :- expect SimpleConstraints.SimpleConstraints();
         TestGetConstraintWithValidInputs(client);
+    }
+
+    method {:test} TestGetConstraintWithInvalidMyString(client: ISimpleConstraintsClient)
+      requires client.ValidState()
+      modifies client.Modifies
+      ensures client.ValidState()
+    {
+      var input := GetConstraintsInputTemplate(overrideToInvalidInput := {"myString"});
+      var ret := client.GetConstraints(input := input);
+      print ret,"\n";
+      expect ret.Failure?;
     }
 
     method TestGetConstraintWithValidInputs(client: ISimpleConstraintsClient)

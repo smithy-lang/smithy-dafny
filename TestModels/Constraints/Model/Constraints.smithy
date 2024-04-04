@@ -24,7 +24,7 @@ operation GetConstraints {
 
 // These constraints will result
 // a predicate that will define
-// validitaty for a sub set type.
+// validity for a sub set type.
 // The predicate can be tested.
 
 @length(min: 1, max: 10)
