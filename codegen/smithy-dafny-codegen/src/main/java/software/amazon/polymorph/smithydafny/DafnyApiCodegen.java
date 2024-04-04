@@ -2020,7 +2020,6 @@ public class DafnyApiCodegen {
         if (!serviceShape.hasTrait(ServiceTrait.class)) throw new IllegalStateException("MUST be an AWS Service API");
         final ServiceTrait serviceTrait = serviceShape.expectTrait(ServiceTrait.class);
         final String sdkId = serviceTrait.getSdkId();
-        final String dafnyClientClass = "%sClient".formatted(serviceTrait.getSdkId());
         final String dafnyClientTrait = nameResolver.traitForServiceClient(serviceShape);
 
         final String configTypeName = "%sClientConfigType".formatted(sdkId);
@@ -2035,7 +2034,7 @@ public class DafnyApiCodegen {
         final TokenTree factory = TokenTree
           .of(
             "method {:extern} %sClient()".formatted(serviceTrait.getSdkId()),
-            "returns (res: Result<%s, Error>)".formatted(dafnyClientClass),
+            "returns (res: Result<%s, Error>)".formatted(dafnyClientTrait),
             "ensures res.Success? ==> ",
             "&& fresh(res.value)",
             "&& fresh(res.value.%s)".formatted(nameResolver.mutableStateFunctionName()),
@@ -2048,7 +2047,7 @@ public class DafnyApiCodegen {
             configType,
             defaultConfig,
             factory,
-            generateResultOfClientHelperFunctions(dafnyClientClass, dafnyClientTrait)
+            generateResultOfClientHelperFunctions(dafnyClientTrait, null)
           )
           .lineSeparated();
     }
@@ -2059,28 +2058,28 @@ public class DafnyApiCodegen {
      *
      * See also TestModels/dafny-dependencies/StandardLibrary/src/WrappersInterop.dfy.
      */
-    private static TokenTree generateResultOfClientHelperFunctions(String dafnyClientClass, String dafnyClientTrait) {
-        final TokenTree createSuccessOfClientMethods = TokenTree
+    private static TokenTree generateResultOfClientHelperFunctions(String dafnyClientTrait, String dafnyClientClass) {
+        final TokenTree methods = TokenTree
           .of(
             "// Helper functions for the benefit of native code to create a Success(client) without referring to Dafny internals",
-            "function method CreateSuccessOfClientClass(client: %s): Result<%s, Error> {".formatted(dafnyClientClass, dafnyClientClass),
-            "  Success(client)",
-            "}",
             "function method CreateSuccessOfClientTrait(client: %s): Result<%s, Error> {".formatted(dafnyClientTrait, dafnyClientTrait),
             "  Success(client)",
-            "}"
-          ).lineSeparated();
-        final TokenTree createFailureOfErrorMethods = TokenTree
-          .of(
-            "// Helper functions for the benefit of native code to create a Failure(error) without referring to Dafny internals",
-            "function method CreateFailureOfErrorForClientClass(error: Error): Result<%s, Error> {".formatted(dafnyClientClass),
-            "  Failure(error)",
             "}",
             "function method CreateFailureOfErrorForClientTrait(error: Error): Result<%s, Error> {".formatted(dafnyClientTrait),
             "  Failure(error)",
             "}"
           ).lineSeparated();
-        return TokenTree.of(createSuccessOfClientMethods, createFailureOfErrorMethods);
+        if (dafnyClientClass != null) {
+            methods = methods.append(TokenTree.of(
+                    "function method CreateSuccessOfClientClass(client: %s): Result<%s, Error> {".formatted(dafnyClientClass, dafnyClientClass),
+                    "  Success(client)",
+                    "}",
+                    "function method CreateFailureOfErrorForClientClass(error: Error): Result<%s, Error> {".formatted(dafnyClientClass),
+                    "  Failure(error)",
+                    "}"
+            )).lineSeparated();
+        }
+        return methods;
     }
 
     private static TokenTree generateLengthConstraint(final LengthTrait lengthTrait) {
