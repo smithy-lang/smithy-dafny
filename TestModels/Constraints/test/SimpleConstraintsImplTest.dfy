@@ -34,7 +34,7 @@ module SimpleConstraintsImplTest {
       modifies client.Modifies
       ensures client.ValidState()
     {
-      var input := GetConstraintsInputTemplate(overrideToInvalidInput := {"myString"});
+      var input := Helpers.GetConstraintsInputTemplate(overrideToInvalidInput := {"myString"});
       var ret := client.GetConstraints(input := input);
       // ret.Failure? in java (good)
       // ret.Success? in dotnet (bad, but we're working on it)
