@@ -21,7 +21,7 @@ impl Client {
             crate::implementation_from_dafny::_simple_dtypes_dsmithystring_dinternaldafny::_default::DefaultSimpleStringConfig());
         let inner =
             crate::implementation_from_dafny::_simple_dtypes_dsmithystring_dinternaldafny::_default::SimpleString(&inner_config);
-        if matches!((&inner).as_ref(), crate::implementation_from_dafny::_Wrappers_Compile::Result::Failure { .. }) {
+        if matches!(inner.as_ref(), crate::implementation_from_dafny::_Wrappers_Compile::Result::Failure { .. }) {
             // TODO: display error
             panic!("Invalid client configuration");
         }
@@ -37,6 +37,14 @@ impl Client {
     /// Returns the client's configuration.
     pub fn config(&self) -> &crate::Config {
         &self.handle.conf
+    }
+}
+
+impl Drop for Handle {
+    fn drop(&mut self) {
+        // Use from_raw to ensure the Dafny values we created by calling SimpleString
+        // are deallocated.
+        let managed_inner = unsafe { Box::from_raw(self.inner) };
     }
 }
 

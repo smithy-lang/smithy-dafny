@@ -16,13 +16,11 @@ impl GetStringUTF8 {
         crate::operation::get_string_utf8::GetStringUTF8Error
     > {
         let inner_input = crate::conversions::get_string_utf8::_get_string_utf8_input::to_dafny(input);
-        let inner_result = unsafe { (*handle.inner).GetStringUTF8(&inner_input) };
-        match &*inner_result {
-            crate::implementation_from_dafny::r#_Wrappers_Compile::Result::Success { value } => 
-                Ok(crate::conversions::get_string_utf8::_get_string_utf8_output::from_dafny(value)),
-            crate::implementation_from_dafny::r#_Wrappers_Compile::Result::Failure { error } =>
-                Err(crate::conversions::get_string_utf8::from_dafny_error(error.clone())), // TODO: Why is clone necessary here but not for from_dafny
-            crate::implementation_from_dafny::r#_Wrappers_Compile::Result::_PhantomVariant(_, _) => panic!("Unreachable")
+        let inner_result = crate::implementation_from_dafny::dafny_runtime::read!(handle.inner).GetStringUTF8(&inner_input);
+        if !matches!(inner_result.as_ref(), crate::implementation_from_dafny::r#_Wrappers_Compile::Result::Success{ .. }) {
+            Ok(crate::conversions::get_string_utf8::_get_string_utf8_output::from_dafny(inner_result.value().clone()))
+        } else {
+            Err(crate::conversions::get_string_utf8::from_dafny_error(inner_result.error().clone()))
         }
     }
 }

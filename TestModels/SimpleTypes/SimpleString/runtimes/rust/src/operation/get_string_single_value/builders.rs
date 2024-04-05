@@ -39,13 +39,6 @@ impl GetStringSingleValueFluentBuilder {
         &self.inner
     }
     /// Sends the request and returns the response.
-    ///
-    /// If an error occurs, an `SdkError` will be returned with additional details that
-    /// can be matched against.
-    ///
-    /// By default, any retryable failures will be retried twice. Retry behavior
-    /// is configurable with the [RetryConfig](aws_smithy_types::retry::RetryConfig), which can be
-    /// set when configuring the client.
     pub async fn send(
         self,
     ) -> ::std::result::Result<
@@ -55,9 +48,11 @@ impl GetStringSingleValueFluentBuilder {
         let input = self
             .inner
             .build()
-            // Using unhandled since GetStringSingleValue doesn't declare any validation,
+            // Using unhandled since GetString doesn't declare any validation,
             // and smithy-rs seems to not generate a ValidationError case unless there is
             // (but isn't that a backwards compatibility problem for output structures?)
+            // Vanilla smithy-rs uses SdkError::construction_failure,
+            // but we aren't using SdkError.
             .map_err(crate::operation::get_string_single_value::GetStringSingleValueError::unhandled)?;
         crate::operation::get_string_single_value::GetStringSingleValue::send(&self.handle, input).await
     }
