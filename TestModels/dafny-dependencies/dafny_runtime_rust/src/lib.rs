@@ -17,9 +17,9 @@ pub use std::convert::Into;
 // An atomic box is just a RefCell in Rust
 pub type SizeT = usize;
 
-pub trait DafnyType: Clone + DafnyPrint + 'static {}
+pub trait DafnyType: Clone + DafnyPrint + Debug + 'static {}
 
-impl <T> DafnyType for T where T: Clone + DafnyPrint + 'static {}
+impl <T> DafnyType for T where T: Clone + DafnyPrint + Debug + 'static {}
 pub trait DafnyTypeEq: DafnyType + Hash + Eq {}
 
 impl <T> DafnyTypeEq for T where T: DafnyType + Hash + Eq {}

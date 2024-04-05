@@ -17,7 +17,7 @@ impl GetString {
     > {
         let inner_input = crate::conversions::get_string::_get_string_input::to_dafny(input);
         let inner_result = crate::implementation_from_dafny::dafny_runtime::read!(handle.inner).GetString(&inner_input);
-        if !matches!(inner_result.as_ref(), crate::implementation_from_dafny::r#_Wrappers_Compile::Result::Success{ .. }) {
+        if matches!(inner_result.as_ref(), crate::implementation_from_dafny::r#_Wrappers_Compile::Result::Success{ .. }) {
             Ok(crate::conversions::get_string::_get_string_output::from_dafny(inner_result.value().clone()))
         } else {
             Err(crate::conversions::get_string::from_dafny_error(inner_result.error().clone()))
