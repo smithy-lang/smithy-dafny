@@ -27,8 +27,6 @@ pub mod r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes {
         write!(f, ")")
       }
     }
-    impl <I: ::dafny_runtime::DafnyType, O: ::dafny_runtime::DafnyType>
-      ::dafny_runtime::DafnyType for DafnyCallEvent<I, O> {}
     impl <I: ::dafny_runtime::DafnyTypeEq, O: ::dafny_runtime::DafnyTypeEq>
       PartialEq<DafnyCallEvent<I, O>> for DafnyCallEvent<I, O> {
         fn eq(&self, other: &DafnyCallEvent<I, O>) -> bool {
@@ -42,8 +40,6 @@ pub mod r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes {
         self.output.hash(state);
       }
     }
-    impl <I: ::dafny_runtime::DafnyTypeEq, O: ::dafny_runtime::DafnyTypeEq>
-    ::dafny_runtime::DafnyTypeEq for DafnyCallEvent<I, O> {}
 
     /*
      datatype GetStringInput = | GetStringInput (
@@ -80,7 +76,6 @@ pub mod r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes {
         write!(f, ")")
       }
     }
-    impl ::dafny_runtime::DafnyType for GetStringInput {}
     impl PartialEq<GetStringInput> for GetStringInput {
         fn eq(&self, other: &GetStringInput) -> bool {
           self.value() == other.value()
@@ -92,7 +87,6 @@ pub mod r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes {
         self.value().hash(state);
       }
     }
-    impl ::dafny_runtime::DafnyTypeEq for GetStringInput {}
     
     /*
     datatype GetStringOutput = | GetStringOutput (
@@ -130,7 +124,6 @@ pub mod r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes {
         write!(f, ")")
       }
     }
-    impl ::dafny_runtime::DafnyType for GetStringOutput {}
     impl PartialEq<GetStringOutput> for GetStringOutput {
         fn eq(&self, other: &GetStringOutput) -> bool {
           self.value() == other.value()
@@ -142,7 +135,6 @@ pub mod r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes {
         self.value().hash(state);
       }
     }
-    impl ::dafny_runtime::DafnyTypeEq for GetStringOutput {}
 
     
     /*
@@ -167,7 +159,6 @@ pub mod r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes {
         write!(f, "simple.types.smithystring.internaldafny.types.SimpleStringConfig()")
       }
     }
-    impl ::dafny_runtime::DafnyType for SimpleStringConfig {}
     impl PartialEq<SimpleStringConfig> for SimpleStringConfig {
         fn eq(&self, other: &SimpleStringConfig) -> bool {
           true
@@ -178,7 +169,6 @@ pub mod r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes {
       fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
       }
     }
-    impl ::dafny_runtime::DafnyTypeEq for SimpleStringConfig {}
 
     pub struct ISimpleTypesStringClientCallHistory {
     }
@@ -227,7 +217,6 @@ pub mod r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes {
         }
       }
     }
-    impl ::dafny_runtime::DafnyType for Error {}
     impl PartialEq<Error> for Error {
         fn eq(&self, other: &Error) -> bool {
           match self {
@@ -254,7 +243,6 @@ pub mod r#_simple_dtypes_dsmithystring_dinternaldafny_dtypes {
         }
       }
     }
-    impl ::dafny_runtime::DafnyTypeEq for Error {}
 
     pub type OpaqueError = Error;
 
