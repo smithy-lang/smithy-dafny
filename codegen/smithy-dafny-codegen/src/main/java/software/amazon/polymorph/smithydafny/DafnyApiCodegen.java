@@ -2069,17 +2069,18 @@ public class DafnyApiCodegen {
             "  Failure(error)",
             "}"
           ).lineSeparated();
-        if (dafnyClientClass != null) {
-            methods = methods.append(TokenTree.of(
+        if (dafnyClientClass == null) {
+            return methods;
+        } else {
+            return methods.append(TokenTree.of(
                     "function method CreateSuccessOfClientClass(client: %s): Result<%s, Error> {".formatted(dafnyClientClass, dafnyClientClass),
                     "  Success(client)",
                     "}",
                     "function method CreateFailureOfErrorForClientClass(error: Error): Result<%s, Error> {".formatted(dafnyClientClass),
                     "  Failure(error)",
                     "}"
-            )).lineSeparated();
+            ).lineSeparated());
         }
-        return methods;
     }
 
     private static TokenTree generateLengthConstraint(final LengthTrait lengthTrait) {
