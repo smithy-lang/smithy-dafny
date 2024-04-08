@@ -19,6 +19,10 @@ make transpile_net
 make test_net
 ```
 
+### Rust
+
+See [./runtimes/rust/README.md](./runtimes/rust/README.md)
+
 ## Development
 1. To add another target runtime support, edit the `Makefile` and add the appropriate recipe to generate the `polymorph` wrappers, and dafny transpilation.
 2. Provide any glue code between dafny and target runtime if required.
