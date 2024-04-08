@@ -2073,6 +2073,7 @@ public class DafnyApiCodegen {
             return methods;
         } else {
             return methods.append(TokenTree.of(
+                    "",
                     "function method CreateSuccessOfClientClass(client: %s): Result<%s, Error> {".formatted(dafnyClientClass, dafnyClientClass),
                     "  Success(client)",
                     "}",
