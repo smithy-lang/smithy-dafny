@@ -27,11 +27,11 @@ public class __default extends software.amazon.cryptography.services.kms.interna
             String region = regionProvider.getRegion().toString();
             KmsClient client = builder.build();
             IKMSClient shim = new Shim(client, region);
-            return CreateSuccessOfClient(shim);
+            return CreateSuccessOfClientTrait(shim);
         } catch (Exception e) {
             Error dafny_error = Error.create_KMSInternalException(
                     WrappersInterop.CreateStringSome(CharacterSequence(e.getMessage())));
-            return CreateFailureOfError(dafny_error);
+            return CreateFailureOfErrorForClientTrait(dafny_error);
         }
     }
 
@@ -40,11 +40,11 @@ public class __default extends software.amazon.cryptography.services.kms.interna
             KmsClientBuilder builder = KmsClient.builder();
             KmsClient client = builder.region(Region.of(region)).build();
             IKMSClient shim = new Shim(client, region);
-            return CreateSuccessOfClient(shim);
+            return CreateSuccessOfClientTrait(shim);
         } catch (Exception e) {
             Error dafny_error = Error.create_KMSInternalException(
                     WrappersInterop.CreateStringSome(CharacterSequence(e.getMessage())));
-            return CreateFailureOfError(dafny_error);
+            return CreateFailureOfErrorForClientTrait(dafny_error);
         }
     }
 

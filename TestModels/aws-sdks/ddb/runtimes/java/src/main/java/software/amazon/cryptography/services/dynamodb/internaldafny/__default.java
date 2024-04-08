@@ -26,11 +26,11 @@ public class __default extends software.amazon.cryptography.services.dynamodb.in
                     .build();
 
             IDynamoDBClient shim = new Shim(ddbClient, region.toString());
-            return CreateSuccessOfClient(shim);
+            return CreateSuccessOfClientTrait(shim);
         } catch (Exception e) {
             Error dafny_error = Error.create_InternalServerError(
                     WrappersInterop.CreateStringSome(CharacterSequence(e.getMessage())));
-            return CreateFailureOfError(dafny_error);
+            return CreateFailureOfErrorForClientTrait(dafny_error);
         }
     }
 }
