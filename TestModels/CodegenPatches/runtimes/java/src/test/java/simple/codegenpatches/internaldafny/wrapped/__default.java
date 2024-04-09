@@ -16,6 +16,6 @@ public class __default extends _ExternBase___default {
         simple.codegenpatches.model.CodegenPatchesConfig wrappedConfig = ToNative.CodegenPatchesConfig(config);
         simple.codegenpatches.CodegenPatches impl = CodegenPatches.builder().CodegenPatchesConfig(wrappedConfig).build();
         TestCodegenPatches wrappedClient = TestCodegenPatches.builder().impl(impl).build();
-        return simple.codegenpatches.internaldafny.__default.CreateSuccessOfClientTrait(wrappedClient);
+        return simple.codegenpatches.internaldafny.__default.CreateSuccessOfClient(wrappedClient);
     }
 }

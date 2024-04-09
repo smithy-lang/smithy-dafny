@@ -16,6 +16,6 @@ public class __default extends _ExternBase___default {
         simple.multiplemodels.primaryproject.model.PrimaryProjectConfig wrappedConfig = ToNative.PrimaryProjectConfig(config);
         simple.multiplemodels.primaryproject.PrimaryProject impl = PrimaryProject.builder().PrimaryProjectConfig(wrappedConfig).build();
         TestPrimaryProject wrappedClient = TestPrimaryProject.builder().impl(impl).build();
-        return simple.multiplemodels.primaryproject.internaldafny.__default.CreateSuccessOfClientTrait(wrappedClient);
+        return simple.multiplemodels.primaryproject.internaldafny.__default.CreateSuccessOfClient(wrappedClient);
     }
 }
