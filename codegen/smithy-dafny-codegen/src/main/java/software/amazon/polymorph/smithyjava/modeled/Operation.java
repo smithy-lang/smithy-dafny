@@ -53,10 +53,10 @@ public class Operation {
             final ResolvedShapeId outputResolved = signature.resolvedOutput();
             MethodSpec.Builder method = signature.method();
             final String operationName = operationShape.toShapeId().getName();
-            // Convert Input
-            method.addStatement(declareNativeInputAndCovert(inputResolved, subject));
             // Try native implementation
             method.beginControlFlow("try");
+            // Convert Input
+            method.addStatement(declareNativeInputAndCovert(inputResolved, subject));
             CodeBlock successTypeDescriptor;
             if (outputResolved.resolvedId().equals(SMITHY_API_UNIT)) {
                 // if operation is void
