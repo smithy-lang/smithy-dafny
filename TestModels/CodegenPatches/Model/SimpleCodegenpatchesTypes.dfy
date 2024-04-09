@@ -114,17 +114,17 @@ abstract module AbstractSimpleCodegenpatchesService
   import Operations : AbstractSimpleCodegenpatchesOperations
   function method DefaultCodegenPatchesConfig(): CodegenPatchesConfig
   method CodegenPatches(config: CodegenPatchesConfig := DefaultCodegenPatchesConfig())
-    returns (res: Result<ICodegenPatchesClient, Error>)
+    returns (res: Result<CodegenPatchesClient, Error>)
     ensures res.Success? ==>
               && fresh(res.value)
               && fresh(res.value.Modifies)
               && fresh(res.value.History)
               && res.value.ValidState()
 
-  // Helper function for the benefit of native code to create a Success(client) without referring to Dafny internals
+  // Helper functions for the benefit of native code to create a Success(client) without referring to Dafny internals
   function method CreateSuccessOfClient(client: ICodegenPatchesClient): Result<ICodegenPatchesClient, Error> {
     Success(client)
-  } // Helper function for the benefit of native code to create a Failure(error) without referring to Dafny internals
+  }
   function method CreateFailureOfError(error: Error): Result<ICodegenPatchesClient, Error> {
     Failure(error)
   }
@@ -179,7 +179,7 @@ abstract module AbstractSimpleCodegenpatchesOperations {
   predicate ValidInternalConfig?(config: InternalConfig)
   function ModifiesInternalConfig(config: InternalConfig): set<object>
   predicate GetStringEnsuresPublicly(input: GetStringInput , output: Result<GetStringOutput, Error>)
-  // BEGIN MANUAL EDIT
+    // BEGIN MANUAL EDIT
   {
     true
   }

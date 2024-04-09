@@ -1863,6 +1863,7 @@ public class DafnyApiCodegen {
     public TokenTree generateAbstractLocalService(ServiceShape serviceShape)  {
         if (!serviceShape.hasTrait(LocalServiceTrait.class)) throw new IllegalStateException("MUST be an LocalService");
         final LocalServiceTrait localServiceTrait = serviceShape.expectTrait(LocalServiceTrait.class);
+        final String dafnyClientClass = "%sClient".formatted(localServiceTrait.getSdkId());
         final String dafnyClientTrait = nameResolver.traitForServiceClient(serviceShape);
 
         final String configTypeName = nameResolver.baseTypeForShape(localServiceTrait.getConfigId());
@@ -1888,7 +1889,8 @@ public class DafnyApiCodegen {
                 ),
             // Yes, Error is hard coded
             // this can work because we need to be able Errors from other modules...
-            "returns (res: Result<%s, Error>)\n".formatted(dafnyClientTrait)
+                "returns (res: Result<%s, Error>)\n"
+                        .formatted(dafnyClientClass)
         ).lineSeparated();
 
         // Add `requires` clauses
@@ -2057,21 +2059,16 @@ public class DafnyApiCodegen {
      * See also TestModels/dafny-dependencies/StandardLibrary/src/WrappersInterop.dfy.
      */
     private static TokenTree generateResultOfClientHelperFunctions(String dafnyClientTrait) {
-        final TokenTree createSuccessOfClient = TokenTree
+        return TokenTree
           .of(
-            "// Helper function for the benefit of native code to create a Success(client) without referring to Dafny internals",
+            "// Helper functions for the benefit of native code to create a Success(client) without referring to Dafny internals",
             "function method CreateSuccessOfClient(client: %s): Result<%s, Error> {".formatted(dafnyClientTrait, dafnyClientTrait),
             "  Success(client)",
-            "}"
-          ).lineSeparated();
-        final TokenTree createFailureOfError = TokenTree
-          .of(
-            "// Helper function for the benefit of native code to create a Failure(error) without referring to Dafny internals",
+            "}",
             "function method CreateFailureOfError(error: Error): Result<%s, Error> {".formatted(dafnyClientTrait),
             "  Failure(error)",
             "}"
           ).lineSeparated();
-        return TokenTree.of(createSuccessOfClient, createFailureOfError);
     }
 
     private static TokenTree generateLengthConstraint(final LengthTrait lengthTrait) {
