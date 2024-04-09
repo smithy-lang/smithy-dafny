@@ -1637,10 +1637,10 @@ abstract module AbstractComAmazonawsKmsService {
               && fresh(res.value.Modifies)
               && fresh(res.value.History)
               && res.value.ValidState()
-  // Helper function for the benefit of native code to create a Success(client) without referring to Dafny internals
+  // Helper functions for the benefit of native code to create a Success(client) without referring to Dafny internals
   function method CreateSuccessOfClient(client: IKMSClient): Result<IKMSClient, Error> {
     Success(client)
-  } // Helper function for the benefit of native code to create a Failure(error) without referring to Dafny internals
+  }
   function method CreateFailureOfError(error: Error): Result<IKMSClient, Error> {
     Failure(error)
   }

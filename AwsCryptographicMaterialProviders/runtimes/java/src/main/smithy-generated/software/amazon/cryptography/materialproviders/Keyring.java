@@ -97,8 +97,8 @@ public final class Keyring implements IKeyring {
     > OnDecrypt(
       software.amazon.cryptography.materialproviders.internaldafny.types.OnDecryptInput dafnyInput
     ) {
-      OnDecryptInput nativeInput = ToNative.OnDecryptInput(dafnyInput);
       try {
+        OnDecryptInput nativeInput = ToNative.OnDecryptInput(dafnyInput);
         OnDecryptOutput nativeOutput = this._impl.OnDecrypt(nativeInput);
         software.amazon.cryptography.materialproviders.internaldafny.types.OnDecryptOutput dafnyOutput =
           ToDafny.OnDecryptOutput(nativeOutput);
@@ -123,8 +123,8 @@ public final class Keyring implements IKeyring {
     > OnEncrypt(
       software.amazon.cryptography.materialproviders.internaldafny.types.OnEncryptInput dafnyInput
     ) {
-      OnEncryptInput nativeInput = ToNative.OnEncryptInput(dafnyInput);
       try {
+        OnEncryptInput nativeInput = ToNative.OnEncryptInput(dafnyInput);
         OnEncryptOutput nativeOutput = this._impl.OnEncrypt(nativeInput);
         software.amazon.cryptography.materialproviders.internaldafny.types.OnEncryptOutput dafnyOutput =
           ToDafny.OnEncryptOutput(nativeOutput);

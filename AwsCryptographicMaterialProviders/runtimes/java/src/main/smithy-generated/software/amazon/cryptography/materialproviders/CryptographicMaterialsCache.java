@@ -116,10 +116,10 @@ public final class CryptographicMaterialsCache
     public Result<Tuple0, Error> DeleteCacheEntry(
       software.amazon.cryptography.materialproviders.internaldafny.types.DeleteCacheEntryInput dafnyInput
     ) {
-      DeleteCacheEntryInput nativeInput = ToNative.DeleteCacheEntryInput(
-        dafnyInput
-      );
       try {
+        DeleteCacheEntryInput nativeInput = ToNative.DeleteCacheEntryInput(
+          dafnyInput
+        );
         this._impl.DeleteCacheEntry(nativeInput);
         return Result.create_Success(Tuple0.create());
       } catch (RuntimeException ex) {
@@ -139,8 +139,10 @@ public final class CryptographicMaterialsCache
     > GetCacheEntry(
       software.amazon.cryptography.materialproviders.internaldafny.types.GetCacheEntryInput dafnyInput
     ) {
-      GetCacheEntryInput nativeInput = ToNative.GetCacheEntryInput(dafnyInput);
       try {
+        GetCacheEntryInput nativeInput = ToNative.GetCacheEntryInput(
+          dafnyInput
+        );
         GetCacheEntryOutput nativeOutput =
           this._impl.GetCacheEntry(nativeInput);
         software.amazon.cryptography.materialproviders.internaldafny.types.GetCacheEntryOutput dafnyOutput =
@@ -163,8 +165,10 @@ public final class CryptographicMaterialsCache
     public Result<Tuple0, Error> PutCacheEntry(
       software.amazon.cryptography.materialproviders.internaldafny.types.PutCacheEntryInput dafnyInput
     ) {
-      PutCacheEntryInput nativeInput = ToNative.PutCacheEntryInput(dafnyInput);
       try {
+        PutCacheEntryInput nativeInput = ToNative.PutCacheEntryInput(
+          dafnyInput
+        );
         this._impl.PutCacheEntry(nativeInput);
         return Result.create_Success(Tuple0.create());
       } catch (RuntimeException ex) {
@@ -181,10 +185,9 @@ public final class CryptographicMaterialsCache
     public Result<Tuple0, Error> UpdateUsageMetadata(
       software.amazon.cryptography.materialproviders.internaldafny.types.UpdateUsageMetadataInput dafnyInput
     ) {
-      UpdateUsageMetadataInput nativeInput = ToNative.UpdateUsageMetadataInput(
-        dafnyInput
-      );
       try {
+        UpdateUsageMetadataInput nativeInput =
+          ToNative.UpdateUsageMetadataInput(dafnyInput);
         this._impl.UpdateUsageMetadata(nativeInput);
         return Result.create_Success(Tuple0.create());
       } catch (RuntimeException ex) {

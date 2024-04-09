@@ -91,10 +91,10 @@ public final class BranchKeyIdSupplier implements IBranchKeyIdSupplier {
     > GetBranchKeyId(
       software.amazon.cryptography.materialproviders.internaldafny.types.GetBranchKeyIdInput dafnyInput
     ) {
-      GetBranchKeyIdInput nativeInput = ToNative.GetBranchKeyIdInput(
-        dafnyInput
-      );
       try {
+        GetBranchKeyIdInput nativeInput = ToNative.GetBranchKeyIdInput(
+          dafnyInput
+        );
         GetBranchKeyIdOutput nativeOutput =
           this._impl.GetBranchKeyId(nativeInput);
         software.amazon.cryptography.materialproviders.internaldafny.types.GetBranchKeyIdOutput dafnyOutput =

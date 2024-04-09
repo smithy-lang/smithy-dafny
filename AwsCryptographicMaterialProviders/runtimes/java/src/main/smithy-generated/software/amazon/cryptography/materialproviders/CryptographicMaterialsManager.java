@@ -105,10 +105,10 @@ public final class CryptographicMaterialsManager
     > DecryptMaterials(
       software.amazon.cryptography.materialproviders.internaldafny.types.DecryptMaterialsInput dafnyInput
     ) {
-      DecryptMaterialsInput nativeInput = ToNative.DecryptMaterialsInput(
-        dafnyInput
-      );
       try {
+        DecryptMaterialsInput nativeInput = ToNative.DecryptMaterialsInput(
+          dafnyInput
+        );
         DecryptMaterialsOutput nativeOutput =
           this._impl.DecryptMaterials(nativeInput);
         software.amazon.cryptography.materialproviders.internaldafny.types.DecryptMaterialsOutput dafnyOutput =
@@ -134,9 +134,9 @@ public final class CryptographicMaterialsManager
     > GetEncryptionMaterials(
       software.amazon.cryptography.materialproviders.internaldafny.types.GetEncryptionMaterialsInput dafnyInput
     ) {
-      GetEncryptionMaterialsInput nativeInput =
-        ToNative.GetEncryptionMaterialsInput(dafnyInput);
       try {
+        GetEncryptionMaterialsInput nativeInput =
+          ToNative.GetEncryptionMaterialsInput(dafnyInput);
         GetEncryptionMaterialsOutput nativeOutput =
           this._impl.GetEncryptionMaterials(nativeInput);
         software.amazon.cryptography.materialproviders.internaldafny.types.GetEncryptionMaterialsOutput dafnyOutput =

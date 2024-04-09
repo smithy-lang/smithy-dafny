@@ -89,8 +89,8 @@ public final class ClientSupplier implements IClientSupplier {
     public Result<IKMSClient, Error> GetClient(
       software.amazon.cryptography.materialproviders.internaldafny.types.GetClientInput dafnyInput
     ) {
-      GetClientInput nativeInput = ToNative.GetClientInput(dafnyInput);
       try {
+        GetClientInput nativeInput = ToNative.GetClientInput(dafnyInput);
         KmsClient nativeOutput = this._impl.GetClient(nativeInput);
         IKMSClient dafnyOutput = new Shim(nativeOutput, null);
         return Result.create_Success(dafnyOutput);

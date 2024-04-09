@@ -285,9 +285,7 @@ abstract module AbstractAwsCryptographyKeyStoreService
   import Operations : AbstractAwsCryptographyKeyStoreOperations
   function method DefaultKeyStoreConfig(): KeyStoreConfig
   method KeyStore(config: KeyStoreConfig := DefaultKeyStoreConfig())
-    // BEGIN MANUAL FIX
     returns (res: Result<KeyStoreClient, Error>)
-    // END MANUAL FIX
     requires config.ddbClient.Some? ==>
                config.ddbClient.value.ValidState()
     requires config.kmsClient.Some? ==>
@@ -315,15 +313,11 @@ abstract module AbstractAwsCryptographyKeyStoreService
     ensures config.kmsClient.Some? ==>
               config.kmsClient.value.ValidState()
 
-  // Helper function for the benefit of native code to create a Success(client) without referring to Dafny internals
-  // BEGIN MANUAL FIX
-  function method CreateSuccessOfClient(client: KeyStoreClient): Result<KeyStoreClient, Error> {
-    // END MANUAL FIX
+  // Helper functions for the benefit of native code to create a Success(client) without referring to Dafny internals
+  function method CreateSuccessOfClient(client: IKeyStoreClient): Result<IKeyStoreClient, Error> {
     Success(client)
-  } // Helper function for the benefit of native code to create a Failure(error) without referring to Dafny internals
-  // BEGIN MANUAL FIX
-  function method CreateFailureOfError(error: Error): Result<KeyStoreClient, Error> {
-    // END MANUAL FIX
+  }
+  function method CreateFailureOfError(error: Error): Result<IKeyStoreClient, Error> {
     Failure(error)
   }
   class KeyStoreClient extends IKeyStoreClient
