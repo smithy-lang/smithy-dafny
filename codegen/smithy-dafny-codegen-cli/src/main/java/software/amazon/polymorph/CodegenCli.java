@@ -68,6 +68,7 @@ public class CodegenCli {
         cliArguments.outputDafnyDir.ifPresent(path -> outputDirs.put(TargetLanguage.DAFNY, path));
         cliArguments.outputJavaDir.ifPresent(path -> outputDirs.put(TargetLanguage.JAVA, path));
         cliArguments.outputDotnetDir.ifPresent(path -> outputDirs.put(TargetLanguage.DOTNET, path));
+        cliArguments.outputRustDir.ifPresent(path -> outputDirs.put(TargetLanguage.RUST, path));
 
         final CodegenEngine.Builder engineBuilder = new CodegenEngine.Builder()
                 .withFromSmithyBuildPlugin(false)
@@ -129,6 +130,11 @@ public class CodegenCli {
             .hasArg()
             .build())
           .addOption(Option.builder()
+            .longOpt("output-rust")
+            .desc("<optional> output directory for generated Rust files")
+            .hasArg()
+            .build())
+          .addOption(Option.builder()
             .longOpt("java-aws-sdk-version")
             .desc("<optional> AWS SDK for Java version to use: v1, or v2 (default)")
             .hasArg()
@@ -184,6 +190,7 @@ public class CodegenCli {
             String namespace,
             Optional<Path> outputDotnetDir,
             Optional<Path> outputJavaDir,
+            Optional<Path> outputRustDir,
             Optional<Path> outputDafnyDir,
             Optional<AwsSdkVersion> javaAwsSdkVersion,
             DafnyVersion dafnyVersion,
@@ -230,6 +237,8 @@ public class CodegenCli {
                     .map(Paths::get);
             final Optional<Path> outputDotnetDir = Optional.ofNullable(commandLine.getOptionValue("output-dotnet"))
                     .map(Paths::get);
+            final Optional<Path> outputRustDir = Optional.ofNullable(commandLine.getOptionValue("output-rust"))
+                    .map(Paths::get);
 
             boolean localServiceTest = commandLine.hasOption("local-service-test");
             final boolean awsSdkStyle = commandLine.hasOption("aws-sdk");
@@ -272,7 +281,7 @@ public class CodegenCli {
 
             return Optional.of(new CliArguments(
                     libraryRoot, modelPath, dependentModelPaths, namespace,
-                    outputDotnetDir, outputJavaDir, outputDafnyDir,
+                    outputDotnetDir, outputJavaDir, outputRustDir, outputDafnyDir,
                     javaAwsSdkVersion, dafnyVersion, propertiesFile, includeDafnyFile, awsSdkStyle,
                     localServiceTest, patchFilesDir, updatePatchFiles
             ));

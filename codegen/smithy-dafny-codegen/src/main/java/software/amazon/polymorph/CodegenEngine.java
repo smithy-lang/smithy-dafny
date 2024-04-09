@@ -136,6 +136,7 @@ public class CodegenEngine {
                 case DAFNY -> generateDafny(outputDir);
                 case JAVA -> generateJava(outputDir);
                 case DOTNET -> generateDotnet(outputDir);
+                case RUST -> generateRust(outputDir);
                 default -> throw new UnsupportedOperationException("Cannot generate code for target language %s"
                         .formatted(lang.name()));
             }
@@ -318,6 +319,12 @@ public class CodegenEngine {
         // TODO generate Makefile
 
         LOGGER.info(".NET project files generated in {}", outputDir);
+    }
+
+    private void generateRust(final Path outputDir) {
+        LOGGER.warn("Rust code generation is incomplete and may not function correctly!", outputDir);
+
+        // ...so incomplete it's starting out as a no-op and relying on 100% "patching" :)
     }
 
     private static final Pattern PATCH_FILE_PATTERN = Pattern.compile("dafny-(.*).patch");
@@ -612,5 +619,6 @@ public class CodegenEngine {
         DAFNY,
         JAVA,
         DOTNET,
+        RUST
     }
 }

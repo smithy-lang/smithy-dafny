@@ -180,6 +180,9 @@ transpile_implementation: SRC_INDEX_TRANSPILE=$(if $(SRC_INDEX),$(SRC_INDEX),src
 # ~2m vs ~10s for our large projects.
 # Also the expectation is that verification happens in the `verify` target
 # `find` looks for `Index.dfy` files in either V1 or V2-styled project directories (single vs. multiple model files).
+# Using -compile:1 instead of -compile:0 for Rust because the Rust backend incorrectly
+# only outputs the runtime source when compiling the target program.
+# See https://github.com/dafny-lang/dafny/issues/5203.
 transpile_implementation:
 	find ./dafny/**/$(SRC_INDEX_TRANSPILE)/ ./$(SRC_INDEX_TRANSPILE)/ -name 'Index.dfy' | sed -e 's/^/include "/' -e 's/$$/"/' | dafny \
 		-stdin \
@@ -187,7 +190,7 @@ transpile_implementation:
 		-vcsCores:$(CORES) \
 		-compileTarget:$(TARGET) \
 		-spillTargetCode:3 \
-		-compile:0 \
+		-compile:$(if ($(findstring rs, $(TARGET))),1,0) \
 		-optimizeErasableDatatypeWrapper:0 \
 		-compileSuffix:1 \
 		-unicodeChar:0 \
@@ -227,7 +230,7 @@ transpile_test:
 		-compileTarget:$(TARGET) \
 		-spillTargetCode:3 \
 		-runAllTests:1 \
-		-compile:0 \
+		-compile:$(if ($(findstring rs, $(TARGET))),1,0) \
 		-optimizeErasableDatatypeWrapper:0 \
 		-compileSuffix:1 \
 		-unicodeChar:0 \
@@ -266,7 +269,7 @@ _polymorph:
 	$(OUTPUT_DAFNY) \
 	$(OUTPUT_JAVA) \
 	$(OUTPUT_DOTNET) \
-	$(OUTPUT_JAVA) \
+	$(OUTPUT_RUST) \
 	--model $(if $(DIR_STRUCTURE_V2), $(LIBRARY_ROOT)/dafny/$(SERVICE)/Model, $(SMITHY_MODEL_ROOT)) \
 	--dependent-model $(PROJECT_ROOT)/$(SMITHY_DEPS) \
 	$(patsubst %, --dependent-model $(PROJECT_ROOT)/%/Model, $($(service_deps_var))) \
@@ -301,6 +304,7 @@ _polymorph_dependencies:
 	)
 
 # Generates all target runtime code for all namespaces in this project.
+# Not including Rust until is it more fully implemented.
 .PHONY: polymorph_code_gen
 polymorph_code_gen: POLYMORPH_LANGUAGE_TARGET=code_gen
 polymorph_code_gen: _polymorph_dependencies
@@ -376,6 +380,21 @@ _polymorph_java: _polymorph
 # Dependency for formatting generating Java code
 setup_prettier:
 	npm i --no-save prettier@3 prettier-plugin-java@2.5
+
+# Generates rust code for all namespaces in this project
+.PHONY: polymorph_rust
+polymorph_rust: POLYMORPH_LANGUAGE_TARGET=rust
+polymorph_rust: _polymorph_dependencies
+polymorph_rust:
+	set -e; for service in $(PROJECT_SERVICES) ; do \
+		export service_deps_var=SERVICE_DEPS_$${service} ; \
+		export namespace_var=SERVICE_NAMESPACE_$${service} ; \
+		export SERVICE=$${service} ; \
+		$(MAKE) _polymorph_rust ; \
+	done
+
+_polymorph_rust: OUTPUT_RUST=--output-rust $(LIBRARY_ROOT)/runtimes/rust
+_polymorph_rust: _polymorph
 
 ########################## .NET targets
 
@@ -470,6 +489,51 @@ mvn_staging_deploy:
 
 test_java:
 	$(GRADLEW) -p runtimes/java runTests
+
+########################## Rust targets
+
+transpile_rust: | transpile_implementation_rust transpile_test_rust transpile_dependencies_rust
+
+transpile_implementation_rust: TARGET=rs
+transpile_implementation_rust: OUT=ImplementationFromDafny
+transpile_implementation_rust: SRC_INDEX=$(RUST_SRC_INDEX)
+transpile_implementation_rust: _transpile_implementation_all _mv_implementation_rust
+
+transpile_test_rust: TARGET=rs
+transpile_test_rust: OUT=TestsFromDafny
+transpile_test_rust: SRC_INDEX=$(RUST_SRC_INDEX)
+transpile_test_rust: TEST_INDEX=$(RUST_TEST_INDEX)
+transpile_test_rust: _transpile_test_all _mv_test_rust
+
+transpile_dependencies_rust: LANG=rs
+transpile_dependencies_rust: transpile_dependencies
+
+# Unlike other backends, the Rust backend emits full Rust projects,
+# including Cargo.toml.
+# This runs contrary to the current smithy-dafny philosophy
+# of translating code into predefined projects
+# and combining it with smithy-generated and hand-written code.
+# We'll need some Dafny-side design discussion to support both use cases.
+#
+# We currently let the source produce the Cargo.toml file as well,
+# and assume the tests can just be added under /tests without needing extra dependencies.
+
+_mv_implementation_rust:
+	rm -rf runtimes/rust
+	mv ImplementationFromDafny-rust runtimes/rust
+_mv_test_rust:
+	rm -rf runtimes/rust/tests
+	mv TestsFromDafny-rust/src runtimes/rust/tests
+
+build_rust:
+	cd runtimes/rust; \
+	cargo build
+
+test_rust:
+	cd runtimes/rust; \
+	cargo test
+
+########################## Cleanup targets
 
 _clean:
 	rm -f $(LIBRARY_ROOT)/Model/*Types.dfy $(LIBRARY_ROOT)/Model/*TypesWrapped.dfy
