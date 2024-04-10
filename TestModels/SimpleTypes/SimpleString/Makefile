@@ -18,3 +18,5 @@ SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 
 # This project has no dependencies 
 # DEPENDENT-MODELS:= 
+
+RUST_SRC_INDEX=src_for_rust

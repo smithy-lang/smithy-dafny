@@ -325,6 +325,7 @@ public class CodegenEngine {
         LOGGER.warn("Rust code generation is incomplete and may not function correctly!", outputDir);
 
         // ...so incomplete it's starting out as a no-op and relying on 100% "patching" :)
+        handlePatching(TargetLanguage.RUST, outputDir);
     }
 
     private static final Pattern PATCH_FILE_PATTERN = Pattern.compile("dafny-(.*).patch");
