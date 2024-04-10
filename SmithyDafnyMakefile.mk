@@ -495,12 +495,12 @@ test_java:
 transpile_rust: | transpile_implementation_rust transpile_test_rust transpile_dependencies_rust
 
 transpile_implementation_rust: TARGET=rs
-transpile_implementation_rust: OUT=ImplementationFromDafny
+transpile_implementation_rust: OUT=implementation_from_dafny
 transpile_implementation_rust: SRC_INDEX=$(RUST_SRC_INDEX)
 transpile_implementation_rust: _transpile_implementation_all _mv_implementation_rust
 
 transpile_test_rust: TARGET=rs
-transpile_test_rust: OUT=TestsFromDafny
+transpile_test_rust: OUT=tests_from_dafny
 transpile_test_rust: SRC_INDEX=$(RUST_SRC_INDEX)
 transpile_test_rust: TEST_INDEX=$(RUST_TEST_INDEX)
 transpile_test_rust: _transpile_test_all _mv_test_rust
@@ -520,10 +520,17 @@ transpile_dependencies_rust: transpile_dependencies
 
 _mv_implementation_rust:
 	rm -rf runtimes/rust
-	mv ImplementationFromDafny-rust runtimes/rust
+	mv implementation_from_dafny-rust runtimes/rust
 _mv_test_rust:
 	rm -rf runtimes/rust/tests
-	mv TestsFromDafny-rust/src runtimes/rust/tests
+	mv tests_from_dafny-rust/src runtimes/rust/tests
+
+# Since Dafny Rust code generation is incomplete,
+# we follow smithy-dafny's lead in maintaining patch files
+# to fill in the gap with what we expect the code generation to produce.
+
+_apply_transpile_patch_rust:
+	git apply tran
 
 build_rust:
 	cd runtimes/rust; \
