@@ -497,13 +497,13 @@ transpile_rust: | transpile_implementation_rust transpile_test_rust transpile_de
 transpile_implementation_rust: TARGET=rs
 transpile_implementation_rust: OUT=implementation_from_dafny
 transpile_implementation_rust: SRC_INDEX=$(RUST_SRC_INDEX)
-transpile_implementation_rust: _transpile_implementation_all _mv_implementation_rust
+transpile_implementation_rust: _transpile_implementation_all _mv_implementation_rust _apply_implementation_patch_rust
 
 transpile_test_rust: TARGET=rs
 transpile_test_rust: OUT=tests_from_dafny
 transpile_test_rust: SRC_INDEX=$(RUST_SRC_INDEX)
 transpile_test_rust: TEST_INDEX=$(RUST_TEST_INDEX)
-transpile_test_rust: _transpile_test_all _mv_test_rust
+transpile_test_rust: _transpile_test_all _mv_test_rust _apply_test_patch_rust
 
 transpile_dependencies_rust: LANG=rs
 transpile_dependencies_rust: transpile_dependencies
@@ -529,8 +529,10 @@ _mv_test_rust:
 # we follow smithy-dafny's lead in maintaining patch files
 # to fill in the gap with what we expect the code generation to produce.
 
-_apply_transpile_patch_rust:
-  git apply transpilation-patches/rust/dafny.patch
+_apply_implementation_patch_rust:
+	git apply --allow-empty transpilation-patches/rust/src.patch
+_apply_test_patch_rust:
+	git apply --allow-empty transpilation-patches/rust/tests.patch
 	
 build_rust:
 	cd runtimes/rust; \
