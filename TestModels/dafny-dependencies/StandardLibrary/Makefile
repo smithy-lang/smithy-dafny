@@ -69,7 +69,7 @@ transpile_implementation:
 		-vcsCores:$(CORES) \
 		-compileTarget:$(TARGET) \
 		-spillTargetCode:3 \
-		-compile:$(if ($(findstring rs, $(TARGET))),1,0) \
+		-compile:$(if $(findstring rs, $(TARGET)),1,0) \
 		-optimizeErasableDatatypeWrapper:0 \
 		-compileSuffix:1 \
 		-unicodeChar:0 \
