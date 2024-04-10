@@ -180,9 +180,6 @@ transpile_implementation: SRC_INDEX_TRANSPILE=$(if $(SRC_INDEX),$(SRC_INDEX),src
 # ~2m vs ~10s for our large projects.
 # Also the expectation is that verification happens in the `verify` target
 # `find` looks for `Index.dfy` files in either V1 or V2-styled project directories (single vs. multiple model files).
-# Using -compile:1 instead of -compile:0 for Rust because the Rust backend incorrectly
-# only outputs the runtime source when compiling the target program.
-# See https://github.com/dafny-lang/dafny/issues/5203.
 transpile_implementation:
 	find ./dafny/**/$(SRC_INDEX_TRANSPILE)/ ./$(SRC_INDEX_TRANSPILE)/ -name 'Index.dfy' | sed -e 's/^/include "/' -e 's/$$/"/' | dafny \
 		-stdin \
@@ -190,7 +187,7 @@ transpile_implementation:
 		-vcsCores:$(CORES) \
 		-compileTarget:$(TARGET) \
 		-spillTargetCode:3 \
-		-compile:$(if $(findstring rs, $(TARGET)),1,0) \
+		-compile:0 \
 		-optimizeErasableDatatypeWrapper:0 \
 		-compileSuffix:1 \
 		-unicodeChar:0 \
@@ -230,7 +227,7 @@ transpile_test:
 		-compileTarget:$(TARGET) \
 		-spillTargetCode:3 \
 		-runAllTests:1 \
-		-compile:$(if $(findstring rs, $(TARGET)),1,0) \
+		-compile:0 \
 		-optimizeErasableDatatypeWrapper:0 \
 		-compileSuffix:1 \
 		-unicodeChar:0 \
@@ -500,13 +497,13 @@ transpile_rust: | transpile_implementation_rust transpile_dependencies_rust
 transpile_implementation_rust: TARGET=rs
 transpile_implementation_rust: OUT=implementation_from_dafny
 transpile_implementation_rust: SRC_INDEX=$(RUST_SRC_INDEX)
-transpile_implementation_rust: _transpile_implementation_all _mv_implementation_rust _apply_implementation_patch_rust
+transpile_implementation_rust: _transpile_implementation_all _mv_implementation_rust #_apply_implementation_patch_rust
 
 transpile_test_rust: TARGET=rs
 transpile_test_rust: OUT=tests_from_dafny
 transpile_test_rust: SRC_INDEX=$(RUST_SRC_INDEX)
 transpile_test_rust: TEST_INDEX=$(RUST_TEST_INDEX)
-transpile_test_rust: _transpile_test_all _mv_test_rust _apply_test_patch_rust
+transpile_test_rust: _transpile_test_all _mv_test_rust #_apply_test_patch_rust
 
 transpile_dependencies_rust: LANG=rust
 transpile_dependencies_rust: transpile_dependencies
