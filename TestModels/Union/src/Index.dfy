@@ -10,7 +10,7 @@ module {:extern "simple.union.internaldafny" } SimpleUnion refines AbstractSimpl
     }
 
     method SimpleUnion(config: SimpleUnionConfig)
-      returns (res: Result<ISimpleUnionClient, Error>)
+      returns (res: Result<SimpleUnionClient, Error>)
     {
         var client := new SimpleUnionClient(Operations.Config);
         return Success(client);

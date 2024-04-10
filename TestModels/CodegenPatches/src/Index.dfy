@@ -10,7 +10,7 @@ module {:extern "simple.codegenpatches.internaldafny" } CodegenPatches refines A
   }
 
   method CodegenPatches(config: CodegenPatchesConfig)
-    returns (res: Result<ICodegenPatchesClient, Error>)
+    returns (res: Result<CodegenPatchesClient, Error>)
   {
     var client := new CodegenPatchesClient(Operations.Config);
     return Success(client);

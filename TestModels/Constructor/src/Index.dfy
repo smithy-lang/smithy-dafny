@@ -16,7 +16,7 @@ module {:extern "simple.constructor.internaldafny" } SimpleConstructor refines A
     }
 
     method SimpleConstructor(config: SimpleConstructorConfig)
-        returns (res: Result<ISimpleConstructorClient, Error>)
+        returns (res: Result<SimpleConstructorClient, Error>)
     {
         var configToAssign := Operations.Config(
             blobValue := config.blobValue.UnwrapOr([0]),
