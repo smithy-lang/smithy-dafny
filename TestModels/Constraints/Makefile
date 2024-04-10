@@ -17,8 +17,10 @@ SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 # This project has no dependencies 
 # DEPENDENT-MODELS:= 
 
+# First, export DAFNY_VERSION=4.2
+# Three separate items, because 'make polymorph_code_gen' doesn't quite work
 polymorph:
 	npm i --no-save prettier@3 prettier-plugin-java@2.5
-	make polymorph_dafny DAFNY_VERSION="4.2"
-	make polymorph_java DAFNY_VERSION="4.2"
-	make polymorph_dotnet DAFNY_VERSION="4.2"
+	make polymorph_dafny
+	make polymorph_java
+	make polymorph_dotnet

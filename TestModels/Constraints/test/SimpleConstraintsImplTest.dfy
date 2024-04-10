@@ -37,7 +37,7 @@ module SimpleConstraintsImplTest {
       input := input.(MyString := Some(Helpers.ForceMyString("this string is too long")));
       var ret := client.GetConstraints(input := input);
       // This client is NOT wrapped
-      // Therefore, it does not constraint testing
+      // Therefore, it does not do any constraint testing
       expect ret.Success?;
     }
 }
