@@ -190,7 +190,7 @@ transpile_implementation:
 		-vcsCores:$(CORES) \
 		-compileTarget:$(TARGET) \
 		-spillTargetCode:3 \
-		-compile:$(if ($(findstring rs, $(TARGET))),1,0) \
+		-compile:$(if $(findstring rs, $(TARGET)),1,0) \
 		-optimizeErasableDatatypeWrapper:0 \
 		-compileSuffix:1 \
 		-unicodeChar:0 \
@@ -230,7 +230,7 @@ transpile_test:
 		-compileTarget:$(TARGET) \
 		-spillTargetCode:3 \
 		-runAllTests:1 \
-		-compile:$(if ($(findstring rs, $(TARGET))),1,0) \
+		-compile:$(if $(findstring rs, $(TARGET)),1,0) \
 		-optimizeErasableDatatypeWrapper:0 \
 		-compileSuffix:1 \
 		-unicodeChar:0 \
