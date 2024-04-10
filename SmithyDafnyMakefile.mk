@@ -530,8 +530,8 @@ _mv_test_rust:
 # to fill in the gap with what we expect the code generation to produce.
 
 _apply_transpile_patch_rust:
-	git apply tran
-
+  git apply transpilation-patches/rust/dafny.patch
+	
 build_rust:
 	cd runtimes/rust; \
 	cargo build
