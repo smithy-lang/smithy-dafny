@@ -1,9 +1,17 @@
 diff --git b/TestModels/dafny-dependencies/StandardLibrary/runtimes/rust/Cargo.lock a/TestModels/dafny-dependencies/StandardLibrary/runtimes/rust/Cargo.lock
-index a04bde5c..0b3c6129 100644
+index a59bdb1a..0b3c6129 100644
 --- b/TestModels/dafny-dependencies/StandardLibrary/runtimes/rust/Cargo.lock
 +++ a/TestModels/dafny-dependencies/StandardLibrary/runtimes/rust/Cargo.lock
-@@ -10,9 +10,9 @@ checksum = "5b8a30a44e99a1c83ccb2a6298c563c888952a1c9134953db26876528f84c93a"
+@@ -2,16 +2,23 @@
+ # It is not intended for manual editing.
+ version = 3
  
++[[package]]
++name = "as-any"
++version = "0.3.1"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "5b8a30a44e99a1c83ccb2a6298c563c888952a1c9134953db26876528f84c93a"
++
  [[package]]
  name = "autocfg"
 -version = "1.2.0"
@@ -14,7 +22,13 @@ index a04bde5c..0b3c6129 100644
  
  [[package]]
  name = "dafny_runtime"
-@@ -26,18 +26,18 @@ dependencies = [
+ version = "0.1.0"
+ dependencies = [
++ "as-any",
+  "itertools",
+  "num",
+  "once_cell",
+@@ -19,18 +26,18 @@ dependencies = [
  ]
  
  [[package]]
@@ -132,77 +146,60 @@ index 00000000..1b9158e9
 +}
 \ No newline at end of file
 diff --git b/TestModels/dafny-dependencies/StandardLibrary/runtimes/rust/src/implementation_from_dafny.rs a/TestModels/dafny-dependencies/StandardLibrary/runtimes/rust/src/implementation_from_dafny.rs
-index de0cf56a..a67da67c 100644
+index d2318ad3..a67da67c 100644
 --- b/TestModels/dafny-dependencies/StandardLibrary/runtimes/rust/src/implementation_from_dafny.rs
 +++ a/TestModels/dafny-dependencies/StandardLibrary/runtimes/rust/src/implementation_from_dafny.rs
-@@ -1,38 +1,14 @@
+@@ -1,497 +1,1071 @@
  #![allow(warnings, unconditional_panic)]
- #![allow(nonstandard_style)]
++#![allow(nonstandard_style)]
  extern crate dafny_runtime;
--mod _System {
--  #[derive(Clone, PartialEq)]
--  #[repr(transparent)]
--  pub struct nat(pub ::dafny_runtime::BigInt);
--  impl ::dafny_runtime::DafnyErasable for nat {
--    type Erased = ::dafny_runtime::BigInt;
--  }
--  impl ::dafny_runtime::DafnyUnerasable<::dafny_runtime::BigInt> for nat {}
--  impl ::dafny_runtime::DafnyUnerasable<nat> for nat {}
--  impl ::std::default::Default for nat {
--    fn default() -> Self {
--      nat(::std::default::Default::default())
--    }
--  }
--  impl ::dafny_runtime::DafnyPrint for nat {
--    fn fmt_print(&self, _formatter: &mut ::std::fmt::Formatter, in_seq: bool) -> ::std::fmt::Result {
--      ::dafny_runtime::DafnyPrint::fmt_print(&self.0, _formatter, in_seq)
--    }
--  }
--  impl ::std::ops::Deref for nat {
--    type Target = ::dafny_runtime::BigInt;
--    fn deref(&self) -> &Self::Target {
--      &self.0
--    }
--  }
--  #[derive(PartialEq)]
--  pub enum Tuple2<T0,T1> {
+-mod r#_System {
+-#[derive(Clone, PartialEq)]
+-#[repr(transparent)]
+-pub struct r#nat(pub ::dafny_runtime::BigInt);
+-impl  ::dafny_runtime::DafnyErasable for r#nat {
+-type Erased = ::dafny_runtime::BigInt;
 +pub mod _System {
 +  pub type nat = ::dafny_runtime::DafnyInt;
 +  #[derive(PartialEq, Clone)]
 +  pub enum Tuple2<T0: ::dafny_runtime::DafnyType, T1: ::dafny_runtime::DafnyType> {
-     _T2 { _0: T0, _1: T1 },
--    _PhantomVariant(::std::marker::PhantomData::<T0>, ::std::marker::PhantomData::<T1>)
++    _T2 { _0: T0, _1: T1 },
 +    _PhantomVariant(::std::marker::PhantomData<T0>, ::std::marker::PhantomData<T1>)
-   }
--  impl <T0: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<T0> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static,T1: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<T1> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static>Tuple2<T0,T1>
--     where <T0 as ::dafny_runtime::DafnyErasable>::Erased: ::std::cmp::PartialEq, <T1 as ::dafny_runtime::DafnyErasable>::Erased: ::std::cmp::PartialEq,  {
++  }
 +  impl <T0: ::dafny_runtime::DafnyType, T1: ::dafny_runtime::DafnyType>Tuple2<T0, T1> {
-     pub fn _0(&self) -> &T0 {
-       match self {
-         Tuple2::_T2 { _0, _1, } => _0,
-@@ -46,11 +22,12 @@ mod _System {
-       }
-     }
-   }
--  impl <T0: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<T0> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static,T1: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<T1> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static>::dafny_runtime::DafnyErasable for Tuple2<T0,T1> {
--    type Erased = Tuple2<T0::Erased, T1::Erased, >;
++    pub fn _0(&self) -> &T0 {
++      match self {
++        Tuple2::_T2 { _0, _1, } => _0,
++        Tuple2::_PhantomVariant(..) => panic!()
++      }
++    }
++    pub fn _1(&self) -> &T1 {
++      match self {
++        Tuple2::_T2 { _0, _1, } => _1,
++        Tuple2::_PhantomVariant(..) => panic!()
++      }
++    }
++  }
 +  impl <T0: ::dafny_runtime::DafnyType, T1: ::dafny_runtime::DafnyType>::std::fmt::Debug for Tuple2<T0, T1> {
 +    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> std::fmt::Result {
 +      ::dafny_runtime::DafnyPrint::fmt_print(self, f, true)
 +    }
-   }
--  impl <T0__Erased, T0: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<T0> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + ::dafny_runtime::DafnyUnerasable<T0__Erased> + 'static,T1__Erased, T1: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<T1> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + ::dafny_runtime::DafnyUnerasable<T1__Erased> + 'static>::dafny_runtime::DafnyUnerasable<Tuple2<T0__Erased, T1__Erased, >> for Tuple2<T0,T1> {}
--  impl <T0: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<T0> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static,T1: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<T1> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static>::dafny_runtime::DafnyPrint for Tuple2<T0,T1> {
++  }
 +  impl <T0: ::dafny_runtime::DafnyType, T1: ::dafny_runtime::DafnyType>::dafny_runtime::DafnyPrint for Tuple2<T0, T1> {
-     fn fmt_print(&self, _formatter: &mut ::std::fmt::Formatter, _in_seq: bool) -> std::fmt::Result {
-       match self {
-         Tuple2::_T2 { _0, _1, } => {
-@@ -65,23 +42,41 @@ mod _System {
-       }
-     }
-   }
--  impl <T0: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<T0> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static,T1: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<T1> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static>::std::default::Default for Tuple2<T0,T1> {
--    fn default() -> Self {
++    fn fmt_print(&self, _formatter: &mut ::std::fmt::Formatter, _in_seq: bool) -> std::fmt::Result {
++      match self {
++        Tuple2::_T2 { _0, _1, } => {
++          write!(_formatter, "_System.Tuple2._T2(")?;
++          ::dafny_runtime::DafnyPrint::fmt_print(_0, _formatter, false)?;
++          write!(_formatter, ", ")?;
++          ::dafny_runtime::DafnyPrint::fmt_print(_1, _formatter, false)?;
++          write!(_formatter, ")")?;
++          Ok(())
++        },
++        Tuple2::_PhantomVariant(..) => {panic!()}
++      }
++    }
++  }
 +  impl <T0: ::dafny_runtime::DafnyType + Eq, T1: ::dafny_runtime::DafnyType + Eq>Eq for Tuple2<T0, T1> {}
 +  impl <T0: ::dafny_runtime::DafnyType + ::std::hash::Hash, T1: ::dafny_runtime::DafnyType + ::std::hash::Hash>::std::hash::Hash for Tuple2<T0, T1> {
 +    fn hash<_H: ::std::hash::Hasher>(&self, _state: &mut _H) {
@@ -217,38 +214,37 @@ index de0cf56a..a67da67c 100644
 +  }
 +  impl <T0: ::dafny_runtime::DafnyType + ::std::default::Default, T1: ::dafny_runtime::DafnyType + ::std::default::Default>::std::default::Default for Tuple2<T0, T1> {
 +    fn default() -> Tuple2<T0, T1> {
-       Tuple2::_T2 {
-         _0: ::std::default::Default::default(),
-         _1: ::std::default::Default::default()
-       }
-     }
-   }
--  #[derive(PartialEq)]
++      Tuple2::_T2 {
++        _0: ::std::default::Default::default(),
++        _1: ::std::default::Default::default()
++      }
++    }
++  }
 +  impl <T0: ::dafny_runtime::DafnyType + ::std::default::Default, T1: ::dafny_runtime::DafnyType + ::std::default::Default>::std::convert::AsRef<Tuple2<T0, T1>> for &Tuple2<T0, T1> {
 +    fn as_ref(&self) -> Self {
 +      self
 +    }
 +  }
 +  #[derive(PartialEq, Clone)]
-   pub enum Tuple0 {
-     _T0 {}
-   }
-   impl Tuple0 {}
--  impl ::dafny_runtime::DafnyErasable for Tuple0 {
--    type Erased = Tuple0;
++  pub enum Tuple0 {
++    _T0 {}
++  }
++  impl Tuple0 {}
 +  impl ::std::fmt::Debug for Tuple0 {
 +    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> std::fmt::Result {
 +      ::dafny_runtime::DafnyPrint::fmt_print(self, f, true)
 +    }
-   }
--  impl ::dafny_runtime::DafnyUnerasable<Tuple0> for Tuple0 {}
-   impl ::dafny_runtime::DafnyPrint for Tuple0 {
-     fn fmt_print(&self, _formatter: &mut ::std::fmt::Formatter, _in_seq: bool) -> std::fmt::Result {
-       match self {
-@@ -92,99 +87,44 @@ mod _System {
-       }
-     }
-   }
++  }
++  impl ::dafny_runtime::DafnyPrint for Tuple0 {
++    fn fmt_print(&self, _formatter: &mut ::std::fmt::Formatter, _in_seq: bool) -> std::fmt::Result {
++      match self {
++        Tuple0::_T0 { } => {
++          write!(_formatter, "_System.Tuple0._T0")?;
++          Ok(())
++        }
++      }
++    }
++  }
 +  impl Eq for Tuple0 {}
 +  impl ::std::hash::Hash for Tuple0 {
 +    fn hash<_H: ::std::hash::Hasher>(&self, _state: &mut _H) {
@@ -259,106 +255,23 @@ index de0cf56a..a67da67c 100644
 +      }
 +    }
 +  }
-   impl ::std::default::Default for Tuple0 {
--    fn default() -> Self {
++  impl ::std::default::Default for Tuple0 {
 +    fn default() -> Tuple0 {
-       Tuple0::_T0 {}
-     }
-   }
++      Tuple0::_T0 {}
++    }
++  }
 +  impl ::std::convert::AsRef<Tuple0> for &Tuple0 {
 +    fn as_ref(&self) -> Self {
 +      self
 +    }
 +  }
- }
--mod r#_StandardLibrary_Compile_dUInt_Compile {
++}
 +pub mod r#_Wrappers_Compile {
-   pub struct _default {}
-   impl _default {
-     pub fn new() -> Self {
-       _default {}
-     }
--    pub fn UInt8Less(a:  &super::r#_StandardLibrary_Compile_dUInt_Compile::uint8, b:  &super::r#_StandardLibrary_Compile_dUInt_Compile::uint8) -> bool {
--      ::dafny_runtime::DafnyUnerasable::<_>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned((::dafny_runtime::DafnyErasable::erase_owned(a.clone()) < ::dafny_runtime::DafnyErasable::erase_owned(b.clone()))))
--    }
--    pub fn HasUint16Len<_T: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<_T> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static>(s:  &::std::vec::Vec<_T>) -> bool
--       where <_T as ::dafny_runtime::DafnyErasable>::Erased: ::std::cmp::PartialEq {
--      ::dafny_runtime::DafnyUnerasable::<_>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned((::dafny_runtime::BigInt::from((::dafny_runtime::DafnyErasable::erase(s)).len()) < ::dafny_runtime::DafnyErasable::erase_owned(super::r#_StandardLibrary_Compile_dUInt_Compile::_default::UINT16_LIMIT()))))
--    }
--    pub fn HasUint32Len<_T: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<_T> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static>(s:  &::std::vec::Vec<_T>) -> bool
--       where <_T as ::dafny_runtime::DafnyErasable>::Erased: ::std::cmp::PartialEq {
--      ::dafny_runtime::DafnyUnerasable::<_>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned((::dafny_runtime::BigInt::from((::dafny_runtime::DafnyErasable::erase(s)).len()) < ::dafny_runtime::DafnyErasable::erase_owned(super::r#_StandardLibrary_Compile_dUInt_Compile::_default::UINT32_LIMIT()))))
--    }
--    pub fn HasUint64Len<_T: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<_T> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static>(s:  &::std::vec::Vec<_T>) -> bool
--       where <_T as ::dafny_runtime::DafnyErasable>::Erased: ::std::cmp::PartialEq {
--      ::dafny_runtime::DafnyUnerasable::<_>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned((::dafny_runtime::BigInt::from((::dafny_runtime::DafnyErasable::erase(s)).len()) < ::dafny_runtime::DafnyErasable::erase_owned(super::r#_StandardLibrary_Compile_dUInt_Compile::_default::UINT64_LIMIT()))))
--    }
--    pub fn UInt16ToSeq(x:  &super::r#_StandardLibrary_Compile_dUInt_Compile::uint16) -> ::std::vec::Vec<super::r#_StandardLibrary_Compile_dUInt_Compile::uint8> {
--      let mut r#__0_b0: super::r#_StandardLibrary_Compile_dUInt_Compile::uint8 = <super::r#_StandardLibrary_Compile_dUInt_Compile::uint8 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned(<super::r#_StandardLibrary_Compile_dUInt_Compile::uint8 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned((::dafny_runtime::DafnyErasable::erase_owned(x.clone())) / (::dafny_runtime::DafnyErasable::erase_owned(<super::r#_StandardLibrary_Compile_dUInt_Compile::uint16 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::BigInt::parse_bytes(b"256", 10).unwrap())))))));
--      let mut r#__1_b1: super::r#_StandardLibrary_Compile_dUInt_Compile::uint8 = <super::r#_StandardLibrary_Compile_dUInt_Compile::uint8 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned(<super::r#_StandardLibrary_Compile_dUInt_Compile::uint8 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned((::dafny_runtime::DafnyErasable::erase_owned(x.clone())) % (::dafny_runtime::DafnyErasable::erase_owned(<super::r#_StandardLibrary_Compile_dUInt_Compile::uint16 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::BigInt::parse_bytes(b"256", 10).unwrap())))))));
--      ::dafny_runtime::DafnyUnerasable::<_>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned((vec![(&r#__0_b0).clone(), (&r#__1_b1).clone()] as Vec<super::r#_StandardLibrary_Compile_dUInt_Compile::uint8>)))
--    }
--    pub fn SeqToUInt16(s:  &::std::vec::Vec<super::r#_StandardLibrary_Compile_dUInt_Compile::uint8>) -> super::r#_StandardLibrary_Compile_dUInt_Compile::uint16 {
--      let mut r#__2_x0: super::r#_StandardLibrary_Compile_dUInt_Compile::uint16 = <super::r#_StandardLibrary_Compile_dUInt_Compile::uint16 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned((::dafny_runtime::DafnyErasable::erase_owned(<super::r#_StandardLibrary_Compile_dUInt_Compile::uint16 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned(((s)[<usize as ::dafny_runtime::NumCast>::from(::dafny_runtime::DafnyErasable::erase_owned(::dafny_runtime::BigInt::parse_bytes(b"0", 10).unwrap())).unwrap()]).clone()))) * ::dafny_runtime::DafnyErasable::erase_owned(<super::r#_StandardLibrary_Compile_dUInt_Compile::uint16 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::BigInt::parse_bytes(b"256", 10).unwrap()))));
--      ::dafny_runtime::DafnyUnerasable::<_>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned((::dafny_runtime::DafnyErasable::erase_owned((&r#__2_x0).clone()) + ::dafny_runtime::DafnyErasable::erase_owned(<super::r#_StandardLibrary_Compile_dUInt_Compile::uint16 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned(((s)[<usize as ::dafny_runtime::NumCast>::from(::dafny_runtime::DafnyErasable::erase_owned(::dafny_runtime::BigInt::parse_bytes(b"1", 10).unwrap())).unwrap()]).clone()))))))
--    }
--    pub fn UInt32ToSeq(x:  &super::r#_StandardLibrary_Compile_dUInt_Compile::uint32) -> ::std::vec::Vec<super::r#_StandardLibrary_Compile_dUInt_Compile::uint8> {
--      let mut r#__3_b0: super::r#_StandardLibrary_Compile_dUInt_Compile::uint8 = <super::r#_StandardLibrary_Compile_dUInt_Compile::uint8 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned(<super::r#_StandardLibrary_Compile_dUInt_Compile::uint8 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned((::dafny_runtime::DafnyErasable::erase_owned(x.clone())) / (::dafny_runtime::DafnyErasable::erase_owned(<super::r#_StandardLibrary_Compile_dUInt_Compile::uint32 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::BigInt::parse_bytes(b"16777216", 10).unwrap())))))));
--      let mut r#__4_x0: super::r#_StandardLibrary_Compile_dUInt_Compile::uint32 = <super::r#_StandardLibrary_Compile_dUInt_Compile::uint32 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned((::dafny_runtime::DafnyErasable::erase_owned(x.clone()) - (::dafny_runtime::DafnyErasable::erase_owned(<super::r#_StandardLibrary_Compile_dUInt_Compile::uint32 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned((&r#__3_b0).clone()))) * ::dafny_runtime::DafnyErasable::erase_owned(<super::r#_StandardLibrary_Compile_dUInt_Compile::uint32 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::BigInt::parse_bytes(b"16777216", 10).unwrap())))));
--      let mut r#__5_b1: super::r#_StandardLibrary_Compile_dUInt_Compile::uint8 = <super::r#_StandardLibrary_Compile_dUInt_Compile::uint8 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned(<super::r#_StandardLibrary_Compile_dUInt_Compile::uint8 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned((::dafny_runtime::DafnyErasable::erase_owned((&r#__4_x0).clone())) / (::dafny_runtime::DafnyErasable::erase_owned(<super::r#_StandardLibrary_Compile_dUInt_Compile::uint32 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::BigInt::parse_bytes(b"65536", 10).unwrap())))))));
--      let mut r#__6_x1: super::r#_StandardLibrary_Compile_dUInt_Compile::uint32 = <super::r#_StandardLibrary_Compile_dUInt_Compile::uint32 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned((::dafny_runtime::DafnyErasable::erase_owned((&r#__4_x0).clone()) - (::dafny_runtime::DafnyErasable::erase_owned(<super::r#_StandardLibrary_Compile_dUInt_Compile::uint32 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned((&r#__5_b1).clone()))) * ::dafny_runtime::DafnyErasable::erase_owned(<super::r#_StandardLibrary_Compile_dUInt_Compile::uint32 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::BigInt::parse_bytes(b"65536", 10).unwrap())))));
--      let mut r#__7_b2: super::r#_StandardLibrary_Compile_dUInt_Compile::uint8 = <super::r#_StandardLibrary_Compile_dUInt_Compile::uint8 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned(<super::r#_StandardLibrary_Compile_dUInt_Compile::uint8 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned((::dafny_runtime::DafnyErasable::erase_owned((&r#__6_x1).clone())) / (::dafny_runtime::DafnyErasable::erase_owned(<super::r#_StandardLibrary_Compile_dUInt_Compile::uint32 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::BigInt::parse_bytes(b"256", 10).unwrap())))))));
--      let mut r#__8_b3: super::r#_StandardLibrary_Compile_dUInt_Compile::uint8 = <super::r#_StandardLibrary_Compile_dUInt_Compile::uint8 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned(<super::r#_StandardLibrary_Compile_dUInt_Compile::uint8 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned((::dafny_runtime::DafnyErasable::erase_owned((&r#__6_x1).clone())) % (::dafny_runtime::DafnyErasable::erase_owned(<super::r#_StandardLibrary_Compile_dUInt_Compile::uint32 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::BigInt::parse_bytes(b"256", 10).unwrap())))))));
--      ::dafny_runtime::DafnyUnerasable::<_>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned((vec![(&r#__3_b0).clone(), (&r#__5_b1).clone(), (&r#__7_b2).clone(), (&r#__8_b3).clone()] as Vec<super::r#_StandardLibrary_Compile_dUInt_Compile::uint8>)))
--    }
--    pub fn SeqToUInt32(s:  &::std::vec::Vec<super::r#_StandardLibrary_Compile_dUInt_Compile::uint8>) -> super::r#_StandardLibrary_Compile_dUInt_Compile::uint32 {
--      let mut r#__9_x0: super::r#_StandardLibrary_Compile_dUInt_Compile::uint32 = <super::r#_StandardLibrary_Compile_dUInt_Compile::uint32 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned((::dafny_runtime::DafnyErasable::erase_owned(<super::r#_StandardLibrary_Compile_dUInt_Compile::uint32 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned(((s)[<usize as ::dafny_runtime::NumCast>::from(::dafny_runtime::DafnyErasable::erase_owned(::dafny_runtime::BigInt::parse_bytes(b"0", 10).unwrap())).unwrap()]).clone()))) * ::dafny_runtime::DafnyErasable::erase_owned(<super::r#_StandardLibrary_Compile_dUInt_Compile::uint32 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::BigInt::parse_bytes(b"16777216", 10).unwrap()))));
--      let mut r#__10_x1: super::r#_StandardLibrary_Compile_dUInt_Compile::uint32 = <super::r#_StandardLibrary_Compile_dUInt_Compile::uint32 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned((::dafny_runtime::DafnyErasable::erase_owned((&r#__9_x0).clone()) + (::dafny_runtime::DafnyErasable::erase_owned(<super::r#_StandardLibrary_Compile_dUInt_Compile::uint32 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned(((s)[<usize as ::dafny_runtime::NumCast>::from(::dafny_runtime::DafnyErasable::erase_owned(::dafny_runtime::BigInt::parse_bytes(b"1", 10).unwrap())).unwrap()]).clone()))) * ::dafny_runtime::DafnyErasable::erase_owned(<super::r#_StandardLibrary_Compile_dUInt_Compile::uint32 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::BigInt::parse_bytes(b"65536", 10).unwrap())))));
--      let mut r#__11_x2: super::r#_StandardLibrary_Compile_dUInt_Compile::uint32 = <super::r#_StandardLibrary_Compile_dUInt_Compile::uint32 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned((::dafny_runtime::DafnyErasable::erase_owned((&r#__10_x1).clone()) + (::dafny_runtime::DafnyErasable::erase_owned(<super::r#_StandardLibrary_Compile_dUInt_Compile::uint32 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned(((s)[<usize as ::dafny_runtime::NumCast>::from(::dafny_runtime::DafnyErasable::erase_owned(::dafny_runtime::BigInt::parse_bytes(b"2", 10).unwrap())).unwrap()]).clone()))) * ::dafny_runtime::DafnyErasable::erase_owned(<super::r#_StandardLibrary_Compile_dUInt_Compile::uint32 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::BigInt::parse_bytes(b"256", 10).unwrap())))));
--      ::dafny_runtime::DafnyUnerasable::<_>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned((::dafny_runtime::DafnyErasable::erase_owned((&r#__11_x2).clone()) + ::dafny_runtime::DafnyErasable::erase_owned(<super::r#_StandardLibrary_Compile_dUInt_Compile::uint32 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned(((s)[<usize as ::dafny_runtime::NumCast>::from(::dafny_runtime::DafnyErasable::erase_owned(::dafny_runtime::BigInt::parse_bytes(b"3", 10).unwrap())).unwrap()]).clone()))))))
--    }
--    pub fn UInt64ToSeq(x:  &super::r#_StandardLibrary_Compile_dUInt_Compile::uint64) -> ::std::vec::Vec<super::r#_StandardLibrary_Compile_dUInt_Compile::uint8> {
--      let mut r#__12_b0: super::r#_StandardLibrary_Compile_dUInt_Compile::uint8 = <super::r#_StandardLibrary_Compile_dUInt_Compile::uint8 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned(<super::r#_StandardLibrary_Compile_dUInt_Compile::uint8 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned((::dafny_runtime::DafnyErasable::erase_owned(x.clone())) / (::dafny_runtime::DafnyErasable::erase_owned(<super::r#_StandardLibrary_Compile_dUInt_Compile::uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::BigInt::parse_bytes(b"72057594037927936", 10).unwrap())))))));
--      let mut r#__13_x0: super::r#_StandardLibrary_Compile_dUInt_Compile::uint64 = <super::r#_StandardLibrary_Compile_dUInt_Compile::uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned((::dafny_runtime::DafnyErasable::erase_owned(x.clone()) - (::dafny_runtime::DafnyErasable::erase_owned(<super::r#_StandardLibrary_Compile_dUInt_Compile::uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned((&r#__12_b0).clone()))) * ::dafny_runtime::DafnyErasable::erase_owned(<super::r#_StandardLibrary_Compile_dUInt_Compile::uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::BigInt::parse_bytes(b"72057594037927936", 10).unwrap())))));
--      let mut r#__14_b1: super::r#_StandardLibrary_Compile_dUInt_Compile::uint8 = <super::r#_StandardLibrary_Compile_dUInt_Compile::uint8 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned(<super::r#_StandardLibrary_Compile_dUInt_Compile::uint8 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned((::dafny_runtime::DafnyErasable::erase_owned((&r#__13_x0).clone())) / (::dafny_runtime::DafnyErasable::erase_owned(<super::r#_StandardLibrary_Compile_dUInt_Compile::uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::BigInt::parse_bytes(b"281474976710656", 10).unwrap())))))));
--      let mut r#__15_x1: super::r#_StandardLibrary_Compile_dUInt_Compile::uint64 = <super::r#_StandardLibrary_Compile_dUInt_Compile::uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned((::dafny_runtime::DafnyErasable::erase_owned((&r#__13_x0).clone()) - (::dafny_runtime::DafnyErasable::erase_owned(<super::r#_StandardLibrary_Compile_dUInt_Compile::uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned((&r#__14_b1).clone()))) * ::dafny_runtime::DafnyErasable::erase_owned(<super::r#_StandardLibrary_Compile_dUInt_Compile::uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::BigInt::parse_bytes(b"281474976710656", 10).unwrap())))));
--      let mut r#__16_b2: super::r#_StandardLibrary_Compile_dUInt_Compile::uint8 = <super::r#_StandardLibrary_Compile_dUInt_Compile::uint8 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned(<super::r#_StandardLibrary_Compile_dUInt_Compile::uint8 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned((::dafny_runtime::DafnyErasable::erase_owned((&r#__15_x1).clone())) / (::dafny_runtime::DafnyErasable::erase_owned(<super::r#_StandardLibrary_Compile_dUInt_Compile::uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::BigInt::parse_bytes(b"1099511627776", 10).unwrap())))))));
--      let mut r#__17_x2: super::r#_StandardLibrary_Compile_dUInt_Compile::uint64 = <super::r#_StandardLibrary_Compile_dUInt_Compile::uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned((::dafny_runtime::DafnyErasable::erase_owned((&r#__15_x1).clone()) - (::dafny_runtime::DafnyErasable::erase_owned(<super::r#_StandardLibrary_Compile_dUInt_Compile::uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned((&r#__16_b2).clone()))) * ::dafny_runtime::DafnyErasable::erase_owned(<super::r#_StandardLibrary_Compile_dUInt_Compile::uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::BigInt::parse_bytes(b"1099511627776", 10).unwrap())))));
--      let mut r#__18_b3: super::r#_StandardLibrary_Compile_dUInt_Compile::uint8 = <super::r#_StandardLibrary_Compile_dUInt_Compile::uint8 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned(<super::r#_StandardLibrary_Compile_dUInt_Compile::uint8 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned((::dafny_runtime::DafnyErasable::erase_owned((&r#__17_x2).clone())) / (::dafny_runtime::DafnyErasable::erase_owned(<super::r#_StandardLibrary_Compile_dUInt_Compile::uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::BigInt::parse_bytes(b"4294967296", 10).unwrap())))))));
--      let mut r#__19_x3: super::r#_StandardLibrary_Compile_dUInt_Compile::uint64 = <super::r#_StandardLibrary_Compile_dUInt_Compile::uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned((::dafny_runtime::DafnyErasable::erase_owned((&r#__17_x2).clone()) - (::dafny_runtime::DafnyErasable::erase_owned(<super::r#_StandardLibrary_Compile_dUInt_Compile::uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned((&r#__18_b3).clone()))) * ::dafny_runtime::DafnyErasable::erase_owned(<super::r#_StandardLibrary_Compile_dUInt_Compile::uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::BigInt::parse_bytes(b"4294967296", 10).unwrap())))));
--      let mut r#__20_b4: super::r#_StandardLibrary_Compile_dUInt_Compile::uint8 = <super::r#_StandardLibrary_Compile_dUInt_Compile::uint8 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned(<super::r#_StandardLibrary_Compile_dUInt_Compile::uint8 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned((::dafny_runtime::DafnyErasable::erase_owned((&r#__19_x3).clone())) / (::dafny_runtime::DafnyErasable::erase_owned(<super::r#_StandardLibrary_Compile_dUInt_Compile::uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::BigInt::parse_bytes(b"16777216", 10).unwrap())))))));
--      let mut r#__21_x4: super::r#_StandardLibrary_Compile_dUInt_Compile::uint64 = <super::r#_StandardLibrary_Compile_dUInt_Compile::uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned((::dafny_runtime::DafnyErasable::erase_owned((&r#__19_x3).clone()) - (::dafny_runtime::DafnyErasable::erase_owned(<super::r#_StandardLibrary_Compile_dUInt_Compile::uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned((&r#__20_b4).clone()))) * ::dafny_runtime::DafnyErasable::erase_owned(<super::r#_StandardLibrary_Compile_dUInt_Compile::uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::BigInt::parse_bytes(b"16777216", 10).unwrap())))));
--      let mut r#__22_b5: super::r#_StandardLibrary_Compile_dUInt_Compile::uint8 = <super::r#_StandardLibrary_Compile_dUInt_Compile::uint8 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned(<super::r#_StandardLibrary_Compile_dUInt_Compile::uint8 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned((::dafny_runtime::DafnyErasable::erase_owned((&r#__21_x4).clone())) / (::dafny_runtime::DafnyErasable::erase_owned(<super::r#_StandardLibrary_Compile_dUInt_Compile::uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::BigInt::parse_bytes(b"65536", 10).unwrap())))))));
--      let mut r#__23_x5: super::r#_StandardLibrary_Compile_dUInt_Compile::uint64 = <super::r#_StandardLibrary_Compile_dUInt_Compile::uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned((::dafny_runtime::DafnyErasable::erase_owned((&r#__21_x4).clone()) - (::dafny_runtime::DafnyErasable::erase_owned(<super::r#_StandardLibrary_Compile_dUInt_Compile::uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned((&r#__22_b5).clone()))) * ::dafny_runtime::DafnyErasable::erase_owned(<super::r#_StandardLibrary_Compile_dUInt_Compile::uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::BigInt::parse_bytes(b"65536", 10).unwrap())))));
--      let mut r#__24_b6: super::r#_StandardLibrary_Compile_dUInt_Compile::uint8 = <super::r#_StandardLibrary_Compile_dUInt_Compile::uint8 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned(<super::r#_StandardLibrary_Compile_dUInt_Compile::uint8 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned((::dafny_runtime::DafnyErasable::erase_owned((&r#__23_x5).clone())) / (::dafny_runtime::DafnyErasable::erase_owned(<super::r#_StandardLibrary_Compile_dUInt_Compile::uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::BigInt::parse_bytes(b"256", 10).unwrap())))))));
--      let mut r#__25_b7: super::r#_StandardLibrary_Compile_dUInt_Compile::uint8 = <super::r#_StandardLibrary_Compile_dUInt_Compile::uint8 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned(<super::r#_StandardLibrary_Compile_dUInt_Compile::uint8 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned((::dafny_runtime::DafnyErasable::erase_owned((&r#__23_x5).clone())) % (::dafny_runtime::DafnyErasable::erase_owned(<super::r#_StandardLibrary_Compile_dUInt_Compile::uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::BigInt::parse_bytes(b"256", 10).unwrap())))))));
--      ::dafny_runtime::DafnyUnerasable::<_>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned((vec![(&r#__12_b0).clone(), (&r#__14_b1).clone(), (&r#__16_b2).clone(), (&r#__18_b3).clone(), (&r#__20_b4).clone(), (&r#__22_b5).clone(), (&r#__24_b6).clone(), (&r#__25_b7).clone()] as Vec<super::r#_StandardLibrary_Compile_dUInt_Compile::uint8>)))
--    }
--    pub fn SeqToUInt64(s:  &::std::vec::Vec<super::r#_StandardLibrary_Compile_dUInt_Compile::uint8>) -> super::r#_StandardLibrary_Compile_dUInt_Compile::uint64 {
--      let mut r#__26_x0: super::r#_StandardLibrary_Compile_dUInt_Compile::uint64 = <super::r#_StandardLibrary_Compile_dUInt_Compile::uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned((::dafny_runtime::DafnyErasable::erase_owned(<super::r#_StandardLibrary_Compile_dUInt_Compile::uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned(((s)[<usize as ::dafny_runtime::NumCast>::from(::dafny_runtime::DafnyErasable::erase_owned(::dafny_runtime::BigInt::parse_bytes(b"0", 10).unwrap())).unwrap()]).clone()))) * ::dafny_runtime::DafnyErasable::erase_owned(<super::r#_StandardLibrary_Compile_dUInt_Compile::uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::BigInt::parse_bytes(b"72057594037927936", 10).unwrap()))));
--      let mut r#__27_x1: super::r#_StandardLibrary_Compile_dUInt_Compile::uint64 = <super::r#_StandardLibrary_Compile_dUInt_Compile::uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned((::dafny_runtime::DafnyErasable::erase_owned((&r#__26_x0).clone()) + (::dafny_runtime::DafnyErasable::erase_owned(<super::r#_StandardLibrary_Compile_dUInt_Compile::uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned(((s)[<usize as ::dafny_runtime::NumCast>::from(::dafny_runtime::DafnyErasable::erase_owned(::dafny_runtime::BigInt::parse_bytes(b"1", 10).unwrap())).unwrap()]).clone()))) * ::dafny_runtime::DafnyErasable::erase_owned(<super::r#_StandardLibrary_Compile_dUInt_Compile::uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::BigInt::parse_bytes(b"281474976710656", 10).unwrap())))));
--      let mut r#__28_x2: super::r#_StandardLibrary_Compile_dUInt_Compile::uint64 = <super::r#_StandardLibrary_Compile_dUInt_Compile::uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned((::dafny_runtime::DafnyErasable::erase_owned((&r#__27_x1).clone()) + (::dafny_runtime::DafnyErasable::erase_owned(<super::r#_StandardLibrary_Compile_dUInt_Compile::uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned(((s)[<usize as ::dafny_runtime::NumCast>::from(::dafny_runtime::DafnyErasable::erase_owned(::dafny_runtime::BigInt::parse_bytes(b"2", 10).unwrap())).unwrap()]).clone()))) * ::dafny_runtime::DafnyErasable::erase_owned(<super::r#_StandardLibrary_Compile_dUInt_Compile::uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::BigInt::parse_bytes(b"1099511627776", 10).unwrap())))));
--      let mut r#__29_x3: super::r#_StandardLibrary_Compile_dUInt_Compile::uint64 = <super::r#_StandardLibrary_Compile_dUInt_Compile::uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned((::dafny_runtime::DafnyErasable::erase_owned((&r#__28_x2).clone()) + (::dafny_runtime::DafnyErasable::erase_owned(<super::r#_StandardLibrary_Compile_dUInt_Compile::uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned(((s)[<usize as ::dafny_runtime::NumCast>::from(::dafny_runtime::DafnyErasable::erase_owned(::dafny_runtime::BigInt::parse_bytes(b"3", 10).unwrap())).unwrap()]).clone()))) * ::dafny_runtime::DafnyErasable::erase_owned(<super::r#_StandardLibrary_Compile_dUInt_Compile::uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::BigInt::parse_bytes(b"4294967296", 10).unwrap())))));
--      let mut r#__30_x4: super::r#_StandardLibrary_Compile_dUInt_Compile::uint64 = <super::r#_StandardLibrary_Compile_dUInt_Compile::uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned((::dafny_runtime::DafnyErasable::erase_owned((&r#__29_x3).clone()) + (::dafny_runtime::DafnyErasable::erase_owned(<super::r#_StandardLibrary_Compile_dUInt_Compile::uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned(((s)[<usize as ::dafny_runtime::NumCast>::from(::dafny_runtime::DafnyErasable::erase_owned(::dafny_runtime::BigInt::parse_bytes(b"4", 10).unwrap())).unwrap()]).clone()))) * ::dafny_runtime::DafnyErasable::erase_owned(<super::r#_StandardLibrary_Compile_dUInt_Compile::uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::BigInt::parse_bytes(b"16777216", 10).unwrap())))));
--      let mut r#__31_x5: super::r#_StandardLibrary_Compile_dUInt_Compile::uint64 = <super::r#_StandardLibrary_Compile_dUInt_Compile::uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned((::dafny_runtime::DafnyErasable::erase_owned((&r#__30_x4).clone()) + (::dafny_runtime::DafnyErasable::erase_owned(<super::r#_StandardLibrary_Compile_dUInt_Compile::uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned(((s)[<usize as ::dafny_runtime::NumCast>::from(::dafny_runtime::DafnyErasable::erase_owned(::dafny_runtime::BigInt::parse_bytes(b"5", 10).unwrap())).unwrap()]).clone()))) * ::dafny_runtime::DafnyErasable::erase_owned(<super::r#_StandardLibrary_Compile_dUInt_Compile::uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::BigInt::parse_bytes(b"65536", 10).unwrap())))));
--      let mut r#__32_x6: super::r#_StandardLibrary_Compile_dUInt_Compile::uint64 = <super::r#_StandardLibrary_Compile_dUInt_Compile::uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned((::dafny_runtime::DafnyErasable::erase_owned((&r#__31_x5).clone()) + (::dafny_runtime::DafnyErasable::erase_owned(<super::r#_StandardLibrary_Compile_dUInt_Compile::uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned(((s)[<usize as ::dafny_runtime::NumCast>::from(::dafny_runtime::DafnyErasable::erase_owned(::dafny_runtime::BigInt::parse_bytes(b"6", 10).unwrap())).unwrap()]).clone()))) * ::dafny_runtime::DafnyErasable::erase_owned(<super::r#_StandardLibrary_Compile_dUInt_Compile::uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::BigInt::parse_bytes(b"256", 10).unwrap())))));
--      let mut r#__33_x: super::r#_StandardLibrary_Compile_dUInt_Compile::uint64 = <super::r#_StandardLibrary_Compile_dUInt_Compile::uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned((::dafny_runtime::DafnyErasable::erase_owned((&r#__32_x6).clone()) + ::dafny_runtime::DafnyErasable::erase_owned(<super::r#_StandardLibrary_Compile_dUInt_Compile::uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned(((s)[<usize as ::dafny_runtime::NumCast>::from(::dafny_runtime::DafnyErasable::erase_owned(::dafny_runtime::BigInt::parse_bytes(b"7", 10).unwrap())).unwrap()]).clone())))));
--      ::dafny_runtime::DafnyUnerasable::<_>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned((&r#__33_x).clone()))
--    }
--    pub fn UINT16_LIMIT() -> ::dafny_runtime::BigInt {
--      ::dafny_runtime::DafnyUnerasable::<_>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned(::dafny_runtime::BigInt::parse_bytes(b"65536", 10).unwrap()))
--    }
--    pub fn UINT32_LIMIT() -> ::dafny_runtime::BigInt {
--      ::dafny_runtime::DafnyUnerasable::<_>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned(::dafny_runtime::BigInt::parse_bytes(b"4294967296", 10).unwrap()))
--    }
--    pub fn UINT64_LIMIT() -> ::dafny_runtime::BigInt {
--      ::dafny_runtime::DafnyUnerasable::<_>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned(::dafny_runtime::BigInt::parse_bytes(b"18446744073709551616", 10).unwrap()))
--    }
--    pub fn INT32_MAX_LIMIT() -> ::dafny_runtime::BigInt {
--      ::dafny_runtime::DafnyUnerasable::<_>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned(::dafny_runtime::BigInt::parse_bytes(b"2147483648", 10).unwrap()))
--    }
--    pub fn INT64_MAX_LIMIT() -> ::dafny_runtime::BigInt {
--      ::dafny_runtime::DafnyUnerasable::<_>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned(::dafny_runtime::BigInt::parse_bytes(b"9223372036854775808", 10).unwrap()))
++  pub struct _default {}
++  impl _default {
++    pub fn new() -> Self {
++      _default {}
++    }
 +    pub fn _allocated() -> *mut Self {
 +      ::dafny_runtime::allocate::<Self>()
 +    }
@@ -370,24 +283,23 @@ index de0cf56a..a67da67c 100644
 +            error: error.clone()
 +          })
 +      }
-     }
-   }
-   impl ::std::default::Default for _default {
-@@ -194,7 +134,7 @@ mod r#_StandardLibrary_Compile_dUInt_Compile {
-   }
-   impl ::dafny_runtime::DafnyPrint for _default {
-     fn fmt_print(&self, _formatter: &mut ::std::fmt::Formatter, _in_seq: bool) -> std::fmt::Result {
--      write!(_formatter, "StandardLibrary_Compile.UInt_Compile.__default")
++    }
++  }
++  impl ::std::default::Default for _default {
++    fn default() -> Self {
++      _default::new()
++    }
++  }
++  impl ::dafny_runtime::DafnyPrint for _default {
++    fn fmt_print(&self, _formatter: &mut ::std::fmt::Formatter, _in_seq: bool) -> std::fmt::Result {
 +      write!(_formatter, "Wrappers_Compile.__default")
-     }
-   }
-   impl ::std::cmp::PartialEq for _default {
-@@ -202,18 +142,402 @@ mod r#_StandardLibrary_Compile_dUInt_Compile {
-       ::std::ptr::eq(self, other)
-     }
-   }
--  impl ::dafny_runtime::DafnyErasable for _default {
--    type Erased = _default;
++    }
++  }
++  impl ::std::cmp::PartialEq for _default {
++    fn eq(&self, other: &Self) -> bool {
++      ::std::ptr::eq(self, other)
++    }
++  }
 +  #[derive(PartialEq, Clone)]
 +  pub enum Option<T: ::dafny_runtime::DafnyType> {
 +    None {},
@@ -780,177 +692,140 @@ index de0cf56a..a67da67c 100644
 +    fn eq(&self, other: &Self) -> bool {
 +      ::std::ptr::eq(self, other)
 +    }
-   }
--  impl ::dafny_runtime::DafnyUnerasable<_default> for _default {}
-   #[derive(Clone, PartialEq)]
-   #[repr(transparent)]
--  pub struct uint8(pub ::dafny_runtime::BigInt);
--  impl ::dafny_runtime::DafnyErasable for uint8 {
--    type Erased = ::dafny_runtime::BigInt;
--  }
--  impl ::dafny_runtime::DafnyUnerasable<::dafny_runtime::BigInt> for uint8 {}
--  impl ::dafny_runtime::DafnyUnerasable<uint8> for uint8 {}
++  }
++  #[derive(Clone, PartialEq)]
++  #[repr(transparent)]
 +  pub struct uint8(pub u8);
-   impl ::std::default::Default for uint8 {
-     fn default() -> Self {
-       uint8(::std::default::Default::default())
-@@ -225,19 +549,14 @@ mod r#_StandardLibrary_Compile_dUInt_Compile {
-     }
-   }
-   impl ::std::ops::Deref for uint8 {
--    type Target = ::dafny_runtime::BigInt;
++  impl ::std::default::Default for uint8 {
++    fn default() -> Self {
++      uint8(::std::default::Default::default())
++    }
++  }
++  impl ::dafny_runtime::DafnyPrint for uint8 {
++    fn fmt_print(&self, _formatter: &mut ::std::fmt::Formatter, in_seq: bool) -> ::std::fmt::Result {
++      ::dafny_runtime::DafnyPrint::fmt_print(&self.0, _formatter, in_seq)
++    }
++  }
++  impl ::std::ops::Deref for uint8 {
 +    type Target = u8;
-     fn deref(&self) -> &Self::Target {
-       &self.0
-     }
-   }
-   #[derive(Clone, PartialEq)]
-   #[repr(transparent)]
--  pub struct uint16(pub ::dafny_runtime::BigInt);
--  impl ::dafny_runtime::DafnyErasable for uint16 {
--    type Erased = ::dafny_runtime::BigInt;
--  }
--  impl ::dafny_runtime::DafnyUnerasable<::dafny_runtime::BigInt> for uint16 {}
--  impl ::dafny_runtime::DafnyUnerasable<uint16> for uint16 {}
++    fn deref(&self) -> &Self::Target {
++      &self.0
++    }
++  }
++  #[derive(Clone, PartialEq)]
++  #[repr(transparent)]
 +  pub struct uint16(pub u16);
-   impl ::std::default::Default for uint16 {
-     fn default() -> Self {
-       uint16(::std::default::Default::default())
-@@ -249,19 +568,14 @@ mod r#_StandardLibrary_Compile_dUInt_Compile {
-     }
-   }
-   impl ::std::ops::Deref for uint16 {
--    type Target = ::dafny_runtime::BigInt;
++  impl ::std::default::Default for uint16 {
++    fn default() -> Self {
++      uint16(::std::default::Default::default())
++    }
++  }
++  impl ::dafny_runtime::DafnyPrint for uint16 {
++    fn fmt_print(&self, _formatter: &mut ::std::fmt::Formatter, in_seq: bool) -> ::std::fmt::Result {
++      ::dafny_runtime::DafnyPrint::fmt_print(&self.0, _formatter, in_seq)
++    }
++  }
++  impl ::std::ops::Deref for uint16 {
 +    type Target = u16;
-     fn deref(&self) -> &Self::Target {
-       &self.0
-     }
-   }
-   #[derive(Clone, PartialEq)]
-   #[repr(transparent)]
--  pub struct uint32(pub ::dafny_runtime::BigInt);
--  impl ::dafny_runtime::DafnyErasable for uint32 {
--    type Erased = ::dafny_runtime::BigInt;
--  }
--  impl ::dafny_runtime::DafnyUnerasable<::dafny_runtime::BigInt> for uint32 {}
--  impl ::dafny_runtime::DafnyUnerasable<uint32> for uint32 {}
++    fn deref(&self) -> &Self::Target {
++      &self.0
++    }
++  }
++  #[derive(Clone, PartialEq)]
++  #[repr(transparent)]
 +  pub struct uint32(pub u32);
-   impl ::std::default::Default for uint32 {
-     fn default() -> Self {
-       uint32(::std::default::Default::default())
-@@ -273,19 +587,14 @@ mod r#_StandardLibrary_Compile_dUInt_Compile {
-     }
-   }
-   impl ::std::ops::Deref for uint32 {
--    type Target = ::dafny_runtime::BigInt;
++  impl ::std::default::Default for uint32 {
++    fn default() -> Self {
++      uint32(::std::default::Default::default())
++    }
++  }
++  impl ::dafny_runtime::DafnyPrint for uint32 {
++    fn fmt_print(&self, _formatter: &mut ::std::fmt::Formatter, in_seq: bool) -> ::std::fmt::Result {
++      ::dafny_runtime::DafnyPrint::fmt_print(&self.0, _formatter, in_seq)
++    }
++  }
++  impl ::std::ops::Deref for uint32 {
 +    type Target = u32;
-     fn deref(&self) -> &Self::Target {
-       &self.0
-     }
-   }
-   #[derive(Clone, PartialEq)]
-   #[repr(transparent)]
--  pub struct uint64(pub ::dafny_runtime::BigInt);
--  impl ::dafny_runtime::DafnyErasable for uint64 {
--    type Erased = ::dafny_runtime::BigInt;
--  }
--  impl ::dafny_runtime::DafnyUnerasable<::dafny_runtime::BigInt> for uint64 {}
--  impl ::dafny_runtime::DafnyUnerasable<uint64> for uint64 {}
++    fn deref(&self) -> &Self::Target {
++      &self.0
++    }
++  }
++  #[derive(Clone, PartialEq)]
++  #[repr(transparent)]
 +  pub struct uint64(pub u64);
-   impl ::std::default::Default for uint64 {
-     fn default() -> Self {
-       uint64(::std::default::Default::default())
-@@ -297,19 +606,14 @@ mod r#_StandardLibrary_Compile_dUInt_Compile {
-     }
-   }
-   impl ::std::ops::Deref for uint64 {
--    type Target = ::dafny_runtime::BigInt;
++  impl ::std::default::Default for uint64 {
++    fn default() -> Self {
++      uint64(::std::default::Default::default())
++    }
++  }
++  impl ::dafny_runtime::DafnyPrint for uint64 {
++    fn fmt_print(&self, _formatter: &mut ::std::fmt::Formatter, in_seq: bool) -> ::std::fmt::Result {
++      ::dafny_runtime::DafnyPrint::fmt_print(&self.0, _formatter, in_seq)
++    }
++  }
++  impl ::std::ops::Deref for uint64 {
 +    type Target = u64;
-     fn deref(&self) -> &Self::Target {
-       &self.0
-     }
-   }
-   #[derive(Clone, PartialEq)]
-   #[repr(transparent)]
--  pub struct int32(pub ::dafny_runtime::BigInt);
--  impl ::dafny_runtime::DafnyErasable for int32 {
--    type Erased = ::dafny_runtime::BigInt;
--  }
--  impl ::dafny_runtime::DafnyUnerasable<::dafny_runtime::BigInt> for int32 {}
--  impl ::dafny_runtime::DafnyUnerasable<int32> for int32 {}
++    fn deref(&self) -> &Self::Target {
++      &self.0
++    }
++  }
++  #[derive(Clone, PartialEq)]
++  #[repr(transparent)]
 +  pub struct int32(pub i32);
-   impl ::std::default::Default for int32 {
-     fn default() -> Self {
-       int32(::std::default::Default::default())
-@@ -321,19 +625,14 @@ mod r#_StandardLibrary_Compile_dUInt_Compile {
-     }
-   }
-   impl ::std::ops::Deref for int32 {
--    type Target = ::dafny_runtime::BigInt;
++  impl ::std::default::Default for int32 {
++    fn default() -> Self {
++      int32(::std::default::Default::default())
++    }
++  }
++  impl ::dafny_runtime::DafnyPrint for int32 {
++    fn fmt_print(&self, _formatter: &mut ::std::fmt::Formatter, in_seq: bool) -> ::std::fmt::Result {
++      ::dafny_runtime::DafnyPrint::fmt_print(&self.0, _formatter, in_seq)
++    }
++  }
++  impl ::std::ops::Deref for int32 {
 +    type Target = i32;
-     fn deref(&self) -> &Self::Target {
-       &self.0
-     }
-   }
-   #[derive(Clone, PartialEq)]
-   #[repr(transparent)]
--  pub struct int64(pub ::dafny_runtime::BigInt);
--  impl ::dafny_runtime::DafnyErasable for int64 {
--    type Erased = ::dafny_runtime::BigInt;
--  }
--  impl ::dafny_runtime::DafnyUnerasable<::dafny_runtime::BigInt> for int64 {}
--  impl ::dafny_runtime::DafnyUnerasable<int64> for int64 {}
++    fn deref(&self) -> &Self::Target {
++      &self.0
++    }
++  }
++  #[derive(Clone, PartialEq)]
++  #[repr(transparent)]
 +  pub struct int64(pub i64);
-   impl ::std::default::Default for int64 {
-     fn default() -> Self {
-       int64(::std::default::Default::default())
-@@ -345,23 +644,17 @@ mod r#_StandardLibrary_Compile_dUInt_Compile {
-     }
-   }
-   impl ::std::ops::Deref for int64 {
--    type Target = ::dafny_runtime::BigInt;
++  impl ::std::default::Default for int64 {
++    fn default() -> Self {
++      int64(::std::default::Default::default())
++    }
++  }
++  impl ::dafny_runtime::DafnyPrint for int64 {
++    fn fmt_print(&self, _formatter: &mut ::std::fmt::Formatter, in_seq: bool) -> ::std::fmt::Result {
++      ::dafny_runtime::DafnyPrint::fmt_print(&self.0, _formatter, in_seq)
++    }
++  }
++  impl ::std::ops::Deref for int64 {
 +    type Target = i64;
-     fn deref(&self) -> &Self::Target {
-       &self.0
-     }
-   }
-   #[derive(Clone, PartialEq)]
-   #[repr(transparent)]
--  pub struct posInt64(pub ::dafny_runtime::BigInt);
--  impl ::dafny_runtime::DafnyErasable for posInt64 {
--    type Erased = ::dafny_runtime::BigInt;
--  }
--  impl ::dafny_runtime::DafnyUnerasable<::dafny_runtime::BigInt> for posInt64 {}
--  impl ::dafny_runtime::DafnyUnerasable<posInt64> for posInt64 {}
++    fn deref(&self) -> &Self::Target {
++      &self.0
++    }
++  }
++  #[derive(Clone, PartialEq)]
++  #[repr(transparent)]
 +  pub struct posInt64(pub u64);
-   impl ::std::default::Default for posInt64 {
-     fn default() -> Self {
--      posInt64(::dafny_runtime::BigInt::parse_bytes(b"1", 10).unwrap())
--      
++  impl ::std::default::Default for posInt64 {
++    fn default() -> Self {
 +      posInt64(1)
-     }
-   }
-   impl ::dafny_runtime::DafnyPrint for posInt64 {
-@@ -370,90 +663,409 @@ mod r#_StandardLibrary_Compile_dUInt_Compile {
-     }
-   }
-   impl ::std::ops::Deref for posInt64 {
--    type Target = ::dafny_runtime::BigInt;
++    }
++  }
++  impl ::dafny_runtime::DafnyPrint for posInt64 {
++    fn fmt_print(&self, _formatter: &mut ::std::fmt::Formatter, in_seq: bool) -> ::std::fmt::Result {
++      ::dafny_runtime::DafnyPrint::fmt_print(&self.0, _formatter, in_seq)
++    }
++  }
++  impl ::std::ops::Deref for posInt64 {
 +    type Target = u64;
-     fn deref(&self) -> &Self::Target {
-       &self.0
-     }
-   }
--  #[derive(Clone, PartialEq)]
--  #[repr(transparent)]
--  pub struct seq16<T>(pub ::std::vec::Vec<T>);
--  impl <T: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<T> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static>::dafny_runtime::DafnyErasable for seq16<T> {
--    type Erased = ::std::vec::Vec<T>;
--  }
--  impl <T: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<T> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static>::dafny_runtime::DafnyUnerasable<::std::vec::Vec<T>> for seq16<T> {}
--  impl <T: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<T> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static>::dafny_runtime::DafnyUnerasable<seq16<T>> for seq16<T> {}
--  impl <T: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<T> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static>::std::default::Default for seq16<T>
--     where <T as ::dafny_runtime::DafnyErasable>::Erased: ::std::cmp::PartialEq,  {
++    fn deref(&self) -> &Self::Target {
++      &self.0
++    }
++  }
 +  pub type seq16<T: ::dafny_runtime::DafnyType> = ::dafny_runtime::Sequence<T>;
 +  pub type seq32<T: ::dafny_runtime::DafnyType> = ::dafny_runtime::Sequence<T>;
 +  pub type seq64<T: ::dafny_runtime::DafnyType> = ::dafny_runtime::Sequence<T>;
@@ -1158,40 +1033,508 @@ index de0cf56a..a67da67c 100644
 +    }
 +  }
 +  impl ::std::default::Default for _default {
-     fn default() -> Self {
--      seq16(::std::default::Default::default())
++    fn default() -> Self {
 +      _default::new()
-     }
-   }
--  impl <T: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<T> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static>::dafny_runtime::DafnyPrint for seq16<T> {
--    fn fmt_print(&self, _formatter: &mut ::std::fmt::Formatter, in_seq: bool) -> ::std::fmt::Result {
--      ::dafny_runtime::DafnyPrint::fmt_print(&self.0, _formatter, in_seq)
++    }
++  }
 +  impl ::dafny_runtime::DafnyPrint for _default {
 +    fn fmt_print(&self, _formatter: &mut ::std::fmt::Formatter, _in_seq: bool) -> std::fmt::Result {
 +      write!(_formatter, "StandardLibrary_Compile.__default")
-     }
-   }
--  impl <T: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<T> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static>::std::ops::Deref for seq16<T> {
--    type Target = ::std::vec::Vec<T>;
--    fn deref(&self) -> &Self::Target {
--      &self.0
++    }
++  }
 +  impl ::std::cmp::PartialEq for _default {
 +    fn eq(&self, other: &Self) -> bool {
 +      ::std::ptr::eq(self, other)
-     }
-   }
--  #[derive(Clone, PartialEq)]
--  #[repr(transparent)]
--  pub struct seq32<T>(pub ::std::vec::Vec<T>);
--  impl <T: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<T> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static>::dafny_runtime::DafnyErasable for seq32<T> {
--    type Erased = ::std::vec::Vec<T>;
--  }
--  impl <T: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<T> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static>::dafny_runtime::DafnyUnerasable<::std::vec::Vec<T>> for seq32<T> {}
--  impl <T: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<T> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static>::dafny_runtime::DafnyUnerasable<seq32<T>> for seq32<T> {}
--  impl <T: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<T> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static>::std::default::Default for seq32<T>
--     where <T as ::dafny_runtime::DafnyErasable>::Erased: ::std::cmp::PartialEq,  {
-+}
-+
++    }
++  }
+ }
+-impl  ::dafny_runtime::DafnyUnerasable<::dafny_runtime::BigInt> for r#nat {}
+-impl  ::dafny_runtime::DafnyUnerasable<r#nat> for r#nat {}
+-impl  ::std::default::Default for r#nat {
+-fn default() -> Self {
+-r#nat(::std::default::Default::default())
+-}
+-}
+-impl  ::dafny_runtime::DafnyPrint for r#nat {
+-fn fmt_print(&self, __fmt_print_formatter: &mut ::std::fmt::Formatter, in_seq: bool) -> ::std::fmt::Result {
+-::dafny_runtime::DafnyPrint::fmt_print(&self.0, __fmt_print_formatter, in_seq)
+-}
+-}
+-impl  ::std::ops::Deref for r#nat {
+-type Target = ::dafny_runtime::BigInt;
+-fn deref(&self) -> &Self::Target {
+-&self.0
+-}
+-}
+-
+-#[derive(PartialEq)]
+-pub enum r#Tuple2<r#T0, r#T1, > {
+-r#___hMake2 { r#_0: r#T0, r#_1: r#T1, },
+-_PhantomVariant(::std::marker::PhantomData::<r#T0>, ::std::marker::PhantomData::<r#T1>)
+-}
+-impl <r#T0: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<r#T0> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static, r#T1: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<r#T1> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static, > r#Tuple2<r#T0, r#T1, > where <r#T0 as ::dafny_runtime::DafnyErasable>::Erased: ::std::cmp::PartialEq, <r#T1 as ::dafny_runtime::DafnyErasable>::Erased: ::std::cmp::PartialEq,  {
+-pub fn r#_0(&self) -> &r#T0 {
+-match self {
+-r#Tuple2::r#___hMake2 { r#_0, r#_1, } => r#_0,
+-r#Tuple2::_PhantomVariant(..) => panic!(),
+-}
+-}
+-pub fn r#_1(&self) -> &r#T1 {
+-match self {
+-r#Tuple2::r#___hMake2 { r#_0, r#_1, } => r#_1,
+-r#Tuple2::_PhantomVariant(..) => panic!(),
+-}
+-}
+-
+-}
+-impl <r#T0: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<r#T0> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static, r#T1: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<r#T1> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static, > ::dafny_runtime::DafnyErasable for r#Tuple2<r#T0, r#T1, > {
+-type Erased = r#Tuple2<r#T0::Erased, r#T1::Erased, >;
+-}
+-impl <r#T0__Erased, r#T0: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<r#T0> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + ::dafny_runtime::DafnyUnerasable<r#T0__Erased> + 'static, r#T1__Erased, r#T1: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<r#T1> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + ::dafny_runtime::DafnyUnerasable<r#T1__Erased> + 'static, > ::dafny_runtime::DafnyUnerasable<r#Tuple2<r#T0__Erased, r#T1__Erased, >> for r#Tuple2<r#T0, r#T1, > {}
+-
+-impl <r#T0: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<r#T0> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static, r#T1: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<r#T1> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static, > ::dafny_runtime::DafnyPrint for r#Tuple2<r#T0, r#T1, > {
+-fn fmt_print(&self, __fmt_print_formatter: &mut ::std::fmt::Formatter, _in_seq: bool) -> std::fmt::Result {
+-match self {
+-r#Tuple2::r#___hMake2 { r#_0, r#_1, } => {
+-write!(__fmt_print_formatter, "_System.Tuple2.___hMake2(")?;
+-::dafny_runtime::DafnyPrint::fmt_print(r#_0, __fmt_print_formatter, false)?;
+-write!(__fmt_print_formatter, ", ")?;
+-::dafny_runtime::DafnyPrint::fmt_print(r#_1, __fmt_print_formatter, false)?;
+-write!(__fmt_print_formatter, ")")?;
+-Ok(())
+-}
+-r#Tuple2::_PhantomVariant(..) => {panic!()
+-}
+-}
+-}
+-}
+-
+-impl <r#T0: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<r#T0> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static, r#T1: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<r#T1> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static, > ::std::default::Default for r#Tuple2<r#T0, r#T1, > {
+-fn default() -> Self {
+-r#Tuple2::r#___hMake2 {
+-r#_0: ::std::default::Default::default(),
+-r#_1: ::std::default::Default::default(),
+-}
+-}
+-}
+-
+-#[derive(PartialEq)]
+-pub enum r#Tuple0 {
+-r#___hMake0 { },
+-
+-}
+-impl  r#Tuple0 {
+-
+-}
+-impl  ::dafny_runtime::DafnyErasable for r#Tuple0 {
+-type Erased = r#Tuple0;
+-}
+-impl  ::dafny_runtime::DafnyUnerasable<r#Tuple0> for r#Tuple0 {}
+-
+-impl  ::dafny_runtime::DafnyPrint for r#Tuple0 {
+-fn fmt_print(&self, __fmt_print_formatter: &mut ::std::fmt::Formatter, _in_seq: bool) -> std::fmt::Result {
+-match self {
+-r#Tuple0::r#___hMake0 { } => {
+-write!(__fmt_print_formatter, "_System.Tuple0.___hMake0")?;
+-Ok(())
+-}
+-}
+-}
+-}
+-
+-impl  ::std::default::Default for r#Tuple0 {
+-fn default() -> Self {
+-r#Tuple0::r#___hMake0 {
+-}
+-}
+-}
+-
+-}
+-mod r#StandardLibrary_Compile_UInt_Compile {
+-pub struct r#__default {
+-
+-}
+-impl  r#__default {
+-pub fn new() -> Self {
+-r#__default {
+-
+-}
+-}
+-pub fn r#UInt8Less(r#a: &super::r#StandardLibrary_Compile_UInt_Compile::r#uint8, r#b: &super::r#StandardLibrary_Compile_UInt_Compile::r#uint8) -> bool {
+-::dafny_runtime::DafnyUnerasable::<_>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned((::dafny_runtime::DafnyErasable::erase_owned(r#a.clone()) < ::dafny_runtime::DafnyErasable::erase_owned(r#b.clone()))))
+-}
+-
+-pub fn r#HasUint16Len<r#__T: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<r#__T> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static>(r#s: &::std::vec::Vec<r#__T>) -> bool where <r#__T as ::dafny_runtime::DafnyErasable>::Erased: ::std::cmp::PartialEq {
+-::dafny_runtime::DafnyUnerasable::<_>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned((::dafny_runtime::BigInt::from((::dafny_runtime::DafnyErasable::erase(r#s)).len()) < ::dafny_runtime::DafnyErasable::erase_owned(super::r#StandardLibrary_Compile_UInt_Compile::r#__default::r#UINT16__LIMIT()))))
+-}
+-
+-pub fn r#HasUint32Len<r#__T: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<r#__T> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static>(r#s: &::std::vec::Vec<r#__T>) -> bool where <r#__T as ::dafny_runtime::DafnyErasable>::Erased: ::std::cmp::PartialEq {
+-::dafny_runtime::DafnyUnerasable::<_>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned((::dafny_runtime::BigInt::from((::dafny_runtime::DafnyErasable::erase(r#s)).len()) < ::dafny_runtime::DafnyErasable::erase_owned(super::r#StandardLibrary_Compile_UInt_Compile::r#__default::r#UINT32__LIMIT()))))
+-}
+-
+-pub fn r#HasUint64Len<r#__T: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<r#__T> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static>(r#s: &::std::vec::Vec<r#__T>) -> bool where <r#__T as ::dafny_runtime::DafnyErasable>::Erased: ::std::cmp::PartialEq {
+-::dafny_runtime::DafnyUnerasable::<_>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned((::dafny_runtime::BigInt::from((::dafny_runtime::DafnyErasable::erase(r#s)).len()) < ::dafny_runtime::DafnyErasable::erase_owned(super::r#StandardLibrary_Compile_UInt_Compile::r#__default::r#UINT64__LIMIT()))))
+-}
+-
+-pub fn r#UInt16ToSeq(r#x: &super::r#StandardLibrary_Compile_UInt_Compile::r#uint16) -> ::std::vec::Vec<super::r#StandardLibrary_Compile_UInt_Compile::r#uint8> {
+-let mut r#_0_b0: super::r#StandardLibrary_Compile_UInt_Compile::r#uint8 = <super::r#StandardLibrary_Compile_UInt_Compile::r#uint8 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned(<super::r#StandardLibrary_Compile_UInt_Compile::r#uint8 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned((::dafny_runtime::DafnyErasable::erase_owned(r#x.clone())) / (::dafny_runtime::DafnyErasable::erase_owned(<super::r#StandardLibrary_Compile_UInt_Compile::r#uint16 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::BigInt::parse_bytes(b"256", 10).unwrap())))))));
+-let mut r#_1_b1: super::r#StandardLibrary_Compile_UInt_Compile::r#uint8 = <super::r#StandardLibrary_Compile_UInt_Compile::r#uint8 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned(<super::r#StandardLibrary_Compile_UInt_Compile::r#uint8 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned((::dafny_runtime::DafnyErasable::erase_owned(r#x.clone())) % (::dafny_runtime::DafnyErasable::erase_owned(<super::r#StandardLibrary_Compile_UInt_Compile::r#uint16 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::BigInt::parse_bytes(b"256", 10).unwrap())))))));
+-::dafny_runtime::DafnyUnerasable::<_>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned((vec![(&r#_0_b0).clone(), (&r#_1_b1).clone()] as Vec<super::r#StandardLibrary_Compile_UInt_Compile::r#uint8>)))
+-}
+-
+-pub fn r#SeqToUInt16(r#s: &::std::vec::Vec<super::r#StandardLibrary_Compile_UInt_Compile::r#uint8>) -> super::r#StandardLibrary_Compile_UInt_Compile::r#uint16 {
+-let mut r#_2_x0: super::r#StandardLibrary_Compile_UInt_Compile::r#uint16 = <super::r#StandardLibrary_Compile_UInt_Compile::r#uint16 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned((::dafny_runtime::DafnyErasable::erase_owned(<super::r#StandardLibrary_Compile_UInt_Compile::r#uint16 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned(((r#s)[<usize as ::dafny_runtime::NumCast>::from(::dafny_runtime::DafnyErasable::erase_owned(::dafny_runtime::BigInt::parse_bytes(b"0", 10).unwrap())).unwrap()]).clone()))) * ::dafny_runtime::DafnyErasable::erase_owned(<super::r#StandardLibrary_Compile_UInt_Compile::r#uint16 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::BigInt::parse_bytes(b"256", 10).unwrap()))));
+-::dafny_runtime::DafnyUnerasable::<_>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned((::dafny_runtime::DafnyErasable::erase_owned((&r#_2_x0).clone()) + ::dafny_runtime::DafnyErasable::erase_owned(<super::r#StandardLibrary_Compile_UInt_Compile::r#uint16 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned(((r#s)[<usize as ::dafny_runtime::NumCast>::from(::dafny_runtime::DafnyErasable::erase_owned(::dafny_runtime::BigInt::parse_bytes(b"1", 10).unwrap())).unwrap()]).clone()))))))
+-}
+-
+-pub fn r#UInt32ToSeq(r#x: &super::r#StandardLibrary_Compile_UInt_Compile::r#uint32) -> ::std::vec::Vec<super::r#StandardLibrary_Compile_UInt_Compile::r#uint8> {
+-let mut r#_3_b0: super::r#StandardLibrary_Compile_UInt_Compile::r#uint8 = <super::r#StandardLibrary_Compile_UInt_Compile::r#uint8 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned(<super::r#StandardLibrary_Compile_UInt_Compile::r#uint8 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned((::dafny_runtime::DafnyErasable::erase_owned(r#x.clone())) / (::dafny_runtime::DafnyErasable::erase_owned(<super::r#StandardLibrary_Compile_UInt_Compile::r#uint32 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::BigInt::parse_bytes(b"16777216", 10).unwrap())))))));
+-let mut r#_4_x0: super::r#StandardLibrary_Compile_UInt_Compile::r#uint32 = <super::r#StandardLibrary_Compile_UInt_Compile::r#uint32 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned((::dafny_runtime::DafnyErasable::erase_owned(r#x.clone()) - (::dafny_runtime::DafnyErasable::erase_owned(<super::r#StandardLibrary_Compile_UInt_Compile::r#uint32 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned((&r#_3_b0).clone()))) * ::dafny_runtime::DafnyErasable::erase_owned(<super::r#StandardLibrary_Compile_UInt_Compile::r#uint32 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::BigInt::parse_bytes(b"16777216", 10).unwrap())))));
+-let mut r#_5_b1: super::r#StandardLibrary_Compile_UInt_Compile::r#uint8 = <super::r#StandardLibrary_Compile_UInt_Compile::r#uint8 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned(<super::r#StandardLibrary_Compile_UInt_Compile::r#uint8 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned((::dafny_runtime::DafnyErasable::erase_owned((&r#_4_x0).clone())) / (::dafny_runtime::DafnyErasable::erase_owned(<super::r#StandardLibrary_Compile_UInt_Compile::r#uint32 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::BigInt::parse_bytes(b"65536", 10).unwrap())))))));
+-let mut r#_6_x1: super::r#StandardLibrary_Compile_UInt_Compile::r#uint32 = <super::r#StandardLibrary_Compile_UInt_Compile::r#uint32 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned((::dafny_runtime::DafnyErasable::erase_owned((&r#_4_x0).clone()) - (::dafny_runtime::DafnyErasable::erase_owned(<super::r#StandardLibrary_Compile_UInt_Compile::r#uint32 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned((&r#_5_b1).clone()))) * ::dafny_runtime::DafnyErasable::erase_owned(<super::r#StandardLibrary_Compile_UInt_Compile::r#uint32 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::BigInt::parse_bytes(b"65536", 10).unwrap())))));
+-let mut r#_7_b2: super::r#StandardLibrary_Compile_UInt_Compile::r#uint8 = <super::r#StandardLibrary_Compile_UInt_Compile::r#uint8 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned(<super::r#StandardLibrary_Compile_UInt_Compile::r#uint8 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned((::dafny_runtime::DafnyErasable::erase_owned((&r#_6_x1).clone())) / (::dafny_runtime::DafnyErasable::erase_owned(<super::r#StandardLibrary_Compile_UInt_Compile::r#uint32 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::BigInt::parse_bytes(b"256", 10).unwrap())))))));
+-let mut r#_8_b3: super::r#StandardLibrary_Compile_UInt_Compile::r#uint8 = <super::r#StandardLibrary_Compile_UInt_Compile::r#uint8 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned(<super::r#StandardLibrary_Compile_UInt_Compile::r#uint8 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned((::dafny_runtime::DafnyErasable::erase_owned((&r#_6_x1).clone())) % (::dafny_runtime::DafnyErasable::erase_owned(<super::r#StandardLibrary_Compile_UInt_Compile::r#uint32 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::BigInt::parse_bytes(b"256", 10).unwrap())))))));
+-::dafny_runtime::DafnyUnerasable::<_>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned((vec![(&r#_3_b0).clone(), (&r#_5_b1).clone(), (&r#_7_b2).clone(), (&r#_8_b3).clone()] as Vec<super::r#StandardLibrary_Compile_UInt_Compile::r#uint8>)))
+-}
+-
+-pub fn r#SeqToUInt32(r#s: &::std::vec::Vec<super::r#StandardLibrary_Compile_UInt_Compile::r#uint8>) -> super::r#StandardLibrary_Compile_UInt_Compile::r#uint32 {
+-let mut r#_9_x0: super::r#StandardLibrary_Compile_UInt_Compile::r#uint32 = <super::r#StandardLibrary_Compile_UInt_Compile::r#uint32 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned((::dafny_runtime::DafnyErasable::erase_owned(<super::r#StandardLibrary_Compile_UInt_Compile::r#uint32 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned(((r#s)[<usize as ::dafny_runtime::NumCast>::from(::dafny_runtime::DafnyErasable::erase_owned(::dafny_runtime::BigInt::parse_bytes(b"0", 10).unwrap())).unwrap()]).clone()))) * ::dafny_runtime::DafnyErasable::erase_owned(<super::r#StandardLibrary_Compile_UInt_Compile::r#uint32 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::BigInt::parse_bytes(b"16777216", 10).unwrap()))));
+-let mut r#_10_x1: super::r#StandardLibrary_Compile_UInt_Compile::r#uint32 = <super::r#StandardLibrary_Compile_UInt_Compile::r#uint32 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned((::dafny_runtime::DafnyErasable::erase_owned((&r#_9_x0).clone()) + (::dafny_runtime::DafnyErasable::erase_owned(<super::r#StandardLibrary_Compile_UInt_Compile::r#uint32 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned(((r#s)[<usize as ::dafny_runtime::NumCast>::from(::dafny_runtime::DafnyErasable::erase_owned(::dafny_runtime::BigInt::parse_bytes(b"1", 10).unwrap())).unwrap()]).clone()))) * ::dafny_runtime::DafnyErasable::erase_owned(<super::r#StandardLibrary_Compile_UInt_Compile::r#uint32 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::BigInt::parse_bytes(b"65536", 10).unwrap())))));
+-let mut r#_11_x2: super::r#StandardLibrary_Compile_UInt_Compile::r#uint32 = <super::r#StandardLibrary_Compile_UInt_Compile::r#uint32 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned((::dafny_runtime::DafnyErasable::erase_owned((&r#_10_x1).clone()) + (::dafny_runtime::DafnyErasable::erase_owned(<super::r#StandardLibrary_Compile_UInt_Compile::r#uint32 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned(((r#s)[<usize as ::dafny_runtime::NumCast>::from(::dafny_runtime::DafnyErasable::erase_owned(::dafny_runtime::BigInt::parse_bytes(b"2", 10).unwrap())).unwrap()]).clone()))) * ::dafny_runtime::DafnyErasable::erase_owned(<super::r#StandardLibrary_Compile_UInt_Compile::r#uint32 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::BigInt::parse_bytes(b"256", 10).unwrap())))));
+-::dafny_runtime::DafnyUnerasable::<_>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned((::dafny_runtime::DafnyErasable::erase_owned((&r#_11_x2).clone()) + ::dafny_runtime::DafnyErasable::erase_owned(<super::r#StandardLibrary_Compile_UInt_Compile::r#uint32 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned(((r#s)[<usize as ::dafny_runtime::NumCast>::from(::dafny_runtime::DafnyErasable::erase_owned(::dafny_runtime::BigInt::parse_bytes(b"3", 10).unwrap())).unwrap()]).clone()))))))
+-}
+-
+-pub fn r#UInt64ToSeq(r#x: &super::r#StandardLibrary_Compile_UInt_Compile::r#uint64) -> ::std::vec::Vec<super::r#StandardLibrary_Compile_UInt_Compile::r#uint8> {
+-let mut r#_12_b0: super::r#StandardLibrary_Compile_UInt_Compile::r#uint8 = <super::r#StandardLibrary_Compile_UInt_Compile::r#uint8 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned(<super::r#StandardLibrary_Compile_UInt_Compile::r#uint8 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned((::dafny_runtime::DafnyErasable::erase_owned(r#x.clone())) / (::dafny_runtime::DafnyErasable::erase_owned(<super::r#StandardLibrary_Compile_UInt_Compile::r#uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::BigInt::parse_bytes(b"72057594037927936", 10).unwrap())))))));
+-let mut r#_13_x0: super::r#StandardLibrary_Compile_UInt_Compile::r#uint64 = <super::r#StandardLibrary_Compile_UInt_Compile::r#uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned((::dafny_runtime::DafnyErasable::erase_owned(r#x.clone()) - (::dafny_runtime::DafnyErasable::erase_owned(<super::r#StandardLibrary_Compile_UInt_Compile::r#uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned((&r#_12_b0).clone()))) * ::dafny_runtime::DafnyErasable::erase_owned(<super::r#StandardLibrary_Compile_UInt_Compile::r#uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::BigInt::parse_bytes(b"72057594037927936", 10).unwrap())))));
+-let mut r#_14_b1: super::r#StandardLibrary_Compile_UInt_Compile::r#uint8 = <super::r#StandardLibrary_Compile_UInt_Compile::r#uint8 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned(<super::r#StandardLibrary_Compile_UInt_Compile::r#uint8 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned((::dafny_runtime::DafnyErasable::erase_owned((&r#_13_x0).clone())) / (::dafny_runtime::DafnyErasable::erase_owned(<super::r#StandardLibrary_Compile_UInt_Compile::r#uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::BigInt::parse_bytes(b"281474976710656", 10).unwrap())))))));
+-let mut r#_15_x1: super::r#StandardLibrary_Compile_UInt_Compile::r#uint64 = <super::r#StandardLibrary_Compile_UInt_Compile::r#uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned((::dafny_runtime::DafnyErasable::erase_owned((&r#_13_x0).clone()) - (::dafny_runtime::DafnyErasable::erase_owned(<super::r#StandardLibrary_Compile_UInt_Compile::r#uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned((&r#_14_b1).clone()))) * ::dafny_runtime::DafnyErasable::erase_owned(<super::r#StandardLibrary_Compile_UInt_Compile::r#uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::BigInt::parse_bytes(b"281474976710656", 10).unwrap())))));
+-let mut r#_16_b2: super::r#StandardLibrary_Compile_UInt_Compile::r#uint8 = <super::r#StandardLibrary_Compile_UInt_Compile::r#uint8 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned(<super::r#StandardLibrary_Compile_UInt_Compile::r#uint8 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned((::dafny_runtime::DafnyErasable::erase_owned((&r#_15_x1).clone())) / (::dafny_runtime::DafnyErasable::erase_owned(<super::r#StandardLibrary_Compile_UInt_Compile::r#uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::BigInt::parse_bytes(b"1099511627776", 10).unwrap())))))));
+-let mut r#_17_x2: super::r#StandardLibrary_Compile_UInt_Compile::r#uint64 = <super::r#StandardLibrary_Compile_UInt_Compile::r#uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned((::dafny_runtime::DafnyErasable::erase_owned((&r#_15_x1).clone()) - (::dafny_runtime::DafnyErasable::erase_owned(<super::r#StandardLibrary_Compile_UInt_Compile::r#uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned((&r#_16_b2).clone()))) * ::dafny_runtime::DafnyErasable::erase_owned(<super::r#StandardLibrary_Compile_UInt_Compile::r#uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::BigInt::parse_bytes(b"1099511627776", 10).unwrap())))));
+-let mut r#_18_b3: super::r#StandardLibrary_Compile_UInt_Compile::r#uint8 = <super::r#StandardLibrary_Compile_UInt_Compile::r#uint8 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned(<super::r#StandardLibrary_Compile_UInt_Compile::r#uint8 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned((::dafny_runtime::DafnyErasable::erase_owned((&r#_17_x2).clone())) / (::dafny_runtime::DafnyErasable::erase_owned(<super::r#StandardLibrary_Compile_UInt_Compile::r#uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::BigInt::parse_bytes(b"4294967296", 10).unwrap())))))));
+-let mut r#_19_x3: super::r#StandardLibrary_Compile_UInt_Compile::r#uint64 = <super::r#StandardLibrary_Compile_UInt_Compile::r#uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned((::dafny_runtime::DafnyErasable::erase_owned((&r#_17_x2).clone()) - (::dafny_runtime::DafnyErasable::erase_owned(<super::r#StandardLibrary_Compile_UInt_Compile::r#uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned((&r#_18_b3).clone()))) * ::dafny_runtime::DafnyErasable::erase_owned(<super::r#StandardLibrary_Compile_UInt_Compile::r#uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::BigInt::parse_bytes(b"4294967296", 10).unwrap())))));
+-let mut r#_20_b4: super::r#StandardLibrary_Compile_UInt_Compile::r#uint8 = <super::r#StandardLibrary_Compile_UInt_Compile::r#uint8 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned(<super::r#StandardLibrary_Compile_UInt_Compile::r#uint8 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned((::dafny_runtime::DafnyErasable::erase_owned((&r#_19_x3).clone())) / (::dafny_runtime::DafnyErasable::erase_owned(<super::r#StandardLibrary_Compile_UInt_Compile::r#uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::BigInt::parse_bytes(b"16777216", 10).unwrap())))))));
+-let mut r#_21_x4: super::r#StandardLibrary_Compile_UInt_Compile::r#uint64 = <super::r#StandardLibrary_Compile_UInt_Compile::r#uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned((::dafny_runtime::DafnyErasable::erase_owned((&r#_19_x3).clone()) - (::dafny_runtime::DafnyErasable::erase_owned(<super::r#StandardLibrary_Compile_UInt_Compile::r#uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned((&r#_20_b4).clone()))) * ::dafny_runtime::DafnyErasable::erase_owned(<super::r#StandardLibrary_Compile_UInt_Compile::r#uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::BigInt::parse_bytes(b"16777216", 10).unwrap())))));
+-let mut r#_22_b5: super::r#StandardLibrary_Compile_UInt_Compile::r#uint8 = <super::r#StandardLibrary_Compile_UInt_Compile::r#uint8 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned(<super::r#StandardLibrary_Compile_UInt_Compile::r#uint8 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned((::dafny_runtime::DafnyErasable::erase_owned((&r#_21_x4).clone())) / (::dafny_runtime::DafnyErasable::erase_owned(<super::r#StandardLibrary_Compile_UInt_Compile::r#uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::BigInt::parse_bytes(b"65536", 10).unwrap())))))));
+-let mut r#_23_x5: super::r#StandardLibrary_Compile_UInt_Compile::r#uint64 = <super::r#StandardLibrary_Compile_UInt_Compile::r#uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned((::dafny_runtime::DafnyErasable::erase_owned((&r#_21_x4).clone()) - (::dafny_runtime::DafnyErasable::erase_owned(<super::r#StandardLibrary_Compile_UInt_Compile::r#uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned((&r#_22_b5).clone()))) * ::dafny_runtime::DafnyErasable::erase_owned(<super::r#StandardLibrary_Compile_UInt_Compile::r#uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::BigInt::parse_bytes(b"65536", 10).unwrap())))));
+-let mut r#_24_b6: super::r#StandardLibrary_Compile_UInt_Compile::r#uint8 = <super::r#StandardLibrary_Compile_UInt_Compile::r#uint8 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned(<super::r#StandardLibrary_Compile_UInt_Compile::r#uint8 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned((::dafny_runtime::DafnyErasable::erase_owned((&r#_23_x5).clone())) / (::dafny_runtime::DafnyErasable::erase_owned(<super::r#StandardLibrary_Compile_UInt_Compile::r#uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::BigInt::parse_bytes(b"256", 10).unwrap())))))));
+-let mut r#_25_b7: super::r#StandardLibrary_Compile_UInt_Compile::r#uint8 = <super::r#StandardLibrary_Compile_UInt_Compile::r#uint8 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned(<super::r#StandardLibrary_Compile_UInt_Compile::r#uint8 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned((::dafny_runtime::DafnyErasable::erase_owned((&r#_23_x5).clone())) % (::dafny_runtime::DafnyErasable::erase_owned(<super::r#StandardLibrary_Compile_UInt_Compile::r#uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::BigInt::parse_bytes(b"256", 10).unwrap())))))));
+-::dafny_runtime::DafnyUnerasable::<_>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned((vec![(&r#_12_b0).clone(), (&r#_14_b1).clone(), (&r#_16_b2).clone(), (&r#_18_b3).clone(), (&r#_20_b4).clone(), (&r#_22_b5).clone(), (&r#_24_b6).clone(), (&r#_25_b7).clone()] as Vec<super::r#StandardLibrary_Compile_UInt_Compile::r#uint8>)))
+-}
+-
+-pub fn r#SeqToUInt64(r#s: &::std::vec::Vec<super::r#StandardLibrary_Compile_UInt_Compile::r#uint8>) -> super::r#StandardLibrary_Compile_UInt_Compile::r#uint64 {
+-let mut r#_26_x0: super::r#StandardLibrary_Compile_UInt_Compile::r#uint64 = <super::r#StandardLibrary_Compile_UInt_Compile::r#uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned((::dafny_runtime::DafnyErasable::erase_owned(<super::r#StandardLibrary_Compile_UInt_Compile::r#uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned(((r#s)[<usize as ::dafny_runtime::NumCast>::from(::dafny_runtime::DafnyErasable::erase_owned(::dafny_runtime::BigInt::parse_bytes(b"0", 10).unwrap())).unwrap()]).clone()))) * ::dafny_runtime::DafnyErasable::erase_owned(<super::r#StandardLibrary_Compile_UInt_Compile::r#uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::BigInt::parse_bytes(b"72057594037927936", 10).unwrap()))));
+-let mut r#_27_x1: super::r#StandardLibrary_Compile_UInt_Compile::r#uint64 = <super::r#StandardLibrary_Compile_UInt_Compile::r#uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned((::dafny_runtime::DafnyErasable::erase_owned((&r#_26_x0).clone()) + (::dafny_runtime::DafnyErasable::erase_owned(<super::r#StandardLibrary_Compile_UInt_Compile::r#uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned(((r#s)[<usize as ::dafny_runtime::NumCast>::from(::dafny_runtime::DafnyErasable::erase_owned(::dafny_runtime::BigInt::parse_bytes(b"1", 10).unwrap())).unwrap()]).clone()))) * ::dafny_runtime::DafnyErasable::erase_owned(<super::r#StandardLibrary_Compile_UInt_Compile::r#uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::BigInt::parse_bytes(b"281474976710656", 10).unwrap())))));
+-let mut r#_28_x2: super::r#StandardLibrary_Compile_UInt_Compile::r#uint64 = <super::r#StandardLibrary_Compile_UInt_Compile::r#uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned((::dafny_runtime::DafnyErasable::erase_owned((&r#_27_x1).clone()) + (::dafny_runtime::DafnyErasable::erase_owned(<super::r#StandardLibrary_Compile_UInt_Compile::r#uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned(((r#s)[<usize as ::dafny_runtime::NumCast>::from(::dafny_runtime::DafnyErasable::erase_owned(::dafny_runtime::BigInt::parse_bytes(b"2", 10).unwrap())).unwrap()]).clone()))) * ::dafny_runtime::DafnyErasable::erase_owned(<super::r#StandardLibrary_Compile_UInt_Compile::r#uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::BigInt::parse_bytes(b"1099511627776", 10).unwrap())))));
+-let mut r#_29_x3: super::r#StandardLibrary_Compile_UInt_Compile::r#uint64 = <super::r#StandardLibrary_Compile_UInt_Compile::r#uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned((::dafny_runtime::DafnyErasable::erase_owned((&r#_28_x2).clone()) + (::dafny_runtime::DafnyErasable::erase_owned(<super::r#StandardLibrary_Compile_UInt_Compile::r#uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned(((r#s)[<usize as ::dafny_runtime::NumCast>::from(::dafny_runtime::DafnyErasable::erase_owned(::dafny_runtime::BigInt::parse_bytes(b"3", 10).unwrap())).unwrap()]).clone()))) * ::dafny_runtime::DafnyErasable::erase_owned(<super::r#StandardLibrary_Compile_UInt_Compile::r#uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::BigInt::parse_bytes(b"4294967296", 10).unwrap())))));
+-let mut r#_30_x4: super::r#StandardLibrary_Compile_UInt_Compile::r#uint64 = <super::r#StandardLibrary_Compile_UInt_Compile::r#uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned((::dafny_runtime::DafnyErasable::erase_owned((&r#_29_x3).clone()) + (::dafny_runtime::DafnyErasable::erase_owned(<super::r#StandardLibrary_Compile_UInt_Compile::r#uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned(((r#s)[<usize as ::dafny_runtime::NumCast>::from(::dafny_runtime::DafnyErasable::erase_owned(::dafny_runtime::BigInt::parse_bytes(b"4", 10).unwrap())).unwrap()]).clone()))) * ::dafny_runtime::DafnyErasable::erase_owned(<super::r#StandardLibrary_Compile_UInt_Compile::r#uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::BigInt::parse_bytes(b"16777216", 10).unwrap())))));
+-let mut r#_31_x5: super::r#StandardLibrary_Compile_UInt_Compile::r#uint64 = <super::r#StandardLibrary_Compile_UInt_Compile::r#uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned((::dafny_runtime::DafnyErasable::erase_owned((&r#_30_x4).clone()) + (::dafny_runtime::DafnyErasable::erase_owned(<super::r#StandardLibrary_Compile_UInt_Compile::r#uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned(((r#s)[<usize as ::dafny_runtime::NumCast>::from(::dafny_runtime::DafnyErasable::erase_owned(::dafny_runtime::BigInt::parse_bytes(b"5", 10).unwrap())).unwrap()]).clone()))) * ::dafny_runtime::DafnyErasable::erase_owned(<super::r#StandardLibrary_Compile_UInt_Compile::r#uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::BigInt::parse_bytes(b"65536", 10).unwrap())))));
+-let mut r#_32_x6: super::r#StandardLibrary_Compile_UInt_Compile::r#uint64 = <super::r#StandardLibrary_Compile_UInt_Compile::r#uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned((::dafny_runtime::DafnyErasable::erase_owned((&r#_31_x5).clone()) + (::dafny_runtime::DafnyErasable::erase_owned(<super::r#StandardLibrary_Compile_UInt_Compile::r#uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned(((r#s)[<usize as ::dafny_runtime::NumCast>::from(::dafny_runtime::DafnyErasable::erase_owned(::dafny_runtime::BigInt::parse_bytes(b"6", 10).unwrap())).unwrap()]).clone()))) * ::dafny_runtime::DafnyErasable::erase_owned(<super::r#StandardLibrary_Compile_UInt_Compile::r#uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::BigInt::parse_bytes(b"256", 10).unwrap())))));
+-let mut r#_33_x: super::r#StandardLibrary_Compile_UInt_Compile::r#uint64 = <super::r#StandardLibrary_Compile_UInt_Compile::r#uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned((::dafny_runtime::DafnyErasable::erase_owned((&r#_32_x6).clone()) + ::dafny_runtime::DafnyErasable::erase_owned(<super::r#StandardLibrary_Compile_UInt_Compile::r#uint64 as ::dafny_runtime::DafnyUnerasable<_>>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned(((r#s)[<usize as ::dafny_runtime::NumCast>::from(::dafny_runtime::DafnyErasable::erase_owned(::dafny_runtime::BigInt::parse_bytes(b"7", 10).unwrap())).unwrap()]).clone())))));
+-::dafny_runtime::DafnyUnerasable::<_>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned((&r#_33_x).clone()))
+-}
+-
+-pub fn r#UINT16__LIMIT() -> ::dafny_runtime::BigInt {
+-::dafny_runtime::DafnyUnerasable::<_>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned(::dafny_runtime::BigInt::parse_bytes(b"65536", 10).unwrap()))
+-}
+-
+-pub fn r#UINT32__LIMIT() -> ::dafny_runtime::BigInt {
+-::dafny_runtime::DafnyUnerasable::<_>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned(::dafny_runtime::BigInt::parse_bytes(b"4294967296", 10).unwrap()))
+-}
+-
+-pub fn r#UINT64__LIMIT() -> ::dafny_runtime::BigInt {
+-::dafny_runtime::DafnyUnerasable::<_>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned(::dafny_runtime::BigInt::parse_bytes(b"18446744073709551616", 10).unwrap()))
+-}
+-
+-pub fn r#INT32__MAX__LIMIT() -> ::dafny_runtime::BigInt {
+-::dafny_runtime::DafnyUnerasable::<_>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned(::dafny_runtime::BigInt::parse_bytes(b"2147483648", 10).unwrap()))
+-}
+-
+-pub fn r#INT64__MAX__LIMIT() -> ::dafny_runtime::BigInt {
+-::dafny_runtime::DafnyUnerasable::<_>::unerase_owned(::dafny_runtime::DafnyErasable::erase_owned(::dafny_runtime::BigInt::parse_bytes(b"9223372036854775808", 10).unwrap()))
+-}
+-
+-
+-}
+-impl  ::std::default::Default for r#__default {
+-fn default() -> Self {
+-r#__default::new()
+-}
+-}
+-
+-impl  ::dafny_runtime::DafnyPrint for r#__default {
+-fn fmt_print(&self, __fmt_print_formatter: &mut ::std::fmt::Formatter, _in_seq: bool) -> std::fmt::Result {
+-write!(__fmt_print_formatter, "StandardLibrary_Compile.UInt_Compile.__default")
+-}
+-}
+-
+-impl  ::std::cmp::PartialEq for r#__default {
+-fn eq(&self, other: &Self) -> bool {
+-::std::ptr::eq(self, other)
+-}
+-}
+-
+-impl  ::dafny_runtime::DafnyErasable for r#__default {
+-type Erased = r#__default;
+-}
+-impl  ::dafny_runtime::DafnyUnerasable<r#__default> for r#__default {}
+-
+-#[derive(Clone, PartialEq)]
+-#[repr(transparent)]
+-pub struct r#uint8(pub ::dafny_runtime::BigInt);
+-impl  ::dafny_runtime::DafnyErasable for r#uint8 {
+-type Erased = ::dafny_runtime::BigInt;
+-}
+-impl  ::dafny_runtime::DafnyUnerasable<::dafny_runtime::BigInt> for r#uint8 {}
+-impl  ::dafny_runtime::DafnyUnerasable<r#uint8> for r#uint8 {}
+-impl  ::std::default::Default for r#uint8 {
+-fn default() -> Self {
+-r#uint8(::std::default::Default::default())
+-}
+-}
+-impl  ::dafny_runtime::DafnyPrint for r#uint8 {
+-fn fmt_print(&self, __fmt_print_formatter: &mut ::std::fmt::Formatter, in_seq: bool) -> ::std::fmt::Result {
+-::dafny_runtime::DafnyPrint::fmt_print(&self.0, __fmt_print_formatter, in_seq)
+-}
+-}
+-impl  ::std::ops::Deref for r#uint8 {
+-type Target = ::dafny_runtime::BigInt;
+-fn deref(&self) -> &Self::Target {
+-&self.0
+-}
+-}
+-
+-#[derive(Clone, PartialEq)]
+-#[repr(transparent)]
+-pub struct r#uint16(pub ::dafny_runtime::BigInt);
+-impl  ::dafny_runtime::DafnyErasable for r#uint16 {
+-type Erased = ::dafny_runtime::BigInt;
+-}
+-impl  ::dafny_runtime::DafnyUnerasable<::dafny_runtime::BigInt> for r#uint16 {}
+-impl  ::dafny_runtime::DafnyUnerasable<r#uint16> for r#uint16 {}
+-impl  ::std::default::Default for r#uint16 {
+-fn default() -> Self {
+-r#uint16(::std::default::Default::default())
+-}
+-}
+-impl  ::dafny_runtime::DafnyPrint for r#uint16 {
+-fn fmt_print(&self, __fmt_print_formatter: &mut ::std::fmt::Formatter, in_seq: bool) -> ::std::fmt::Result {
+-::dafny_runtime::DafnyPrint::fmt_print(&self.0, __fmt_print_formatter, in_seq)
+-}
+-}
+-impl  ::std::ops::Deref for r#uint16 {
+-type Target = ::dafny_runtime::BigInt;
+-fn deref(&self) -> &Self::Target {
+-&self.0
+-}
+-}
+-
+-#[derive(Clone, PartialEq)]
+-#[repr(transparent)]
+-pub struct r#uint32(pub ::dafny_runtime::BigInt);
+-impl  ::dafny_runtime::DafnyErasable for r#uint32 {
+-type Erased = ::dafny_runtime::BigInt;
+-}
+-impl  ::dafny_runtime::DafnyUnerasable<::dafny_runtime::BigInt> for r#uint32 {}
+-impl  ::dafny_runtime::DafnyUnerasable<r#uint32> for r#uint32 {}
+-impl  ::std::default::Default for r#uint32 {
+-fn default() -> Self {
+-r#uint32(::std::default::Default::default())
+-}
+-}
+-impl  ::dafny_runtime::DafnyPrint for r#uint32 {
+-fn fmt_print(&self, __fmt_print_formatter: &mut ::std::fmt::Formatter, in_seq: bool) -> ::std::fmt::Result {
+-::dafny_runtime::DafnyPrint::fmt_print(&self.0, __fmt_print_formatter, in_seq)
+-}
+-}
+-impl  ::std::ops::Deref for r#uint32 {
+-type Target = ::dafny_runtime::BigInt;
+-fn deref(&self) -> &Self::Target {
+-&self.0
+-}
+-}
+-
+-#[derive(Clone, PartialEq)]
+-#[repr(transparent)]
+-pub struct r#uint64(pub ::dafny_runtime::BigInt);
+-impl  ::dafny_runtime::DafnyErasable for r#uint64 {
+-type Erased = ::dafny_runtime::BigInt;
+-}
+-impl  ::dafny_runtime::DafnyUnerasable<::dafny_runtime::BigInt> for r#uint64 {}
+-impl  ::dafny_runtime::DafnyUnerasable<r#uint64> for r#uint64 {}
+-impl  ::std::default::Default for r#uint64 {
+-fn default() -> Self {
+-r#uint64(::std::default::Default::default())
+-}
+-}
+-impl  ::dafny_runtime::DafnyPrint for r#uint64 {
+-fn fmt_print(&self, __fmt_print_formatter: &mut ::std::fmt::Formatter, in_seq: bool) -> ::std::fmt::Result {
+-::dafny_runtime::DafnyPrint::fmt_print(&self.0, __fmt_print_formatter, in_seq)
+-}
+-}
+-impl  ::std::ops::Deref for r#uint64 {
+-type Target = ::dafny_runtime::BigInt;
+-fn deref(&self) -> &Self::Target {
+-&self.0
+-}
+-}
+-
+-#[derive(Clone, PartialEq)]
+-#[repr(transparent)]
+-pub struct r#int32(pub ::dafny_runtime::BigInt);
+-impl  ::dafny_runtime::DafnyErasable for r#int32 {
+-type Erased = ::dafny_runtime::BigInt;
+-}
+-impl  ::dafny_runtime::DafnyUnerasable<::dafny_runtime::BigInt> for r#int32 {}
+-impl  ::dafny_runtime::DafnyUnerasable<r#int32> for r#int32 {}
+-impl  ::std::default::Default for r#int32 {
+-fn default() -> Self {
+-r#int32(::std::default::Default::default())
+-}
+-}
+-impl  ::dafny_runtime::DafnyPrint for r#int32 {
+-fn fmt_print(&self, __fmt_print_formatter: &mut ::std::fmt::Formatter, in_seq: bool) -> ::std::fmt::Result {
+-::dafny_runtime::DafnyPrint::fmt_print(&self.0, __fmt_print_formatter, in_seq)
+-}
+-}
+-impl  ::std::ops::Deref for r#int32 {
+-type Target = ::dafny_runtime::BigInt;
+-fn deref(&self) -> &Self::Target {
+-&self.0
+-}
+-}
+-
+-#[derive(Clone, PartialEq)]
+-#[repr(transparent)]
+-pub struct r#int64(pub ::dafny_runtime::BigInt);
+-impl  ::dafny_runtime::DafnyErasable for r#int64 {
+-type Erased = ::dafny_runtime::BigInt;
+-}
+-impl  ::dafny_runtime::DafnyUnerasable<::dafny_runtime::BigInt> for r#int64 {}
+-impl  ::dafny_runtime::DafnyUnerasable<r#int64> for r#int64 {}
+-impl  ::std::default::Default for r#int64 {
+-fn default() -> Self {
+-r#int64(::std::default::Default::default())
+-}
+-}
+-impl  ::dafny_runtime::DafnyPrint for r#int64 {
+-fn fmt_print(&self, __fmt_print_formatter: &mut ::std::fmt::Formatter, in_seq: bool) -> ::std::fmt::Result {
+-::dafny_runtime::DafnyPrint::fmt_print(&self.0, __fmt_print_formatter, in_seq)
+-}
+-}
+-impl  ::std::ops::Deref for r#int64 {
+-type Target = ::dafny_runtime::BigInt;
+-fn deref(&self) -> &Self::Target {
+-&self.0
+-}
+-}
+-
+-#[derive(Clone, PartialEq)]
+-#[repr(transparent)]
+-pub struct r#posInt64(pub ::dafny_runtime::BigInt);
+-impl  ::dafny_runtime::DafnyErasable for r#posInt64 {
+-type Erased = ::dafny_runtime::BigInt;
+-}
+-impl  ::dafny_runtime::DafnyUnerasable<::dafny_runtime::BigInt> for r#posInt64 {}
+-impl  ::dafny_runtime::DafnyUnerasable<r#posInt64> for r#posInt64 {}
+-impl  ::std::default::Default for r#posInt64 {
+-fn default() -> Self {
+-r#posInt64(::dafny_runtime::BigInt::parse_bytes(b"1", 10).unwrap())
+-}
+-}
+-impl  ::dafny_runtime::DafnyPrint for r#posInt64 {
+-fn fmt_print(&self, __fmt_print_formatter: &mut ::std::fmt::Formatter, in_seq: bool) -> ::std::fmt::Result {
+-::dafny_runtime::DafnyPrint::fmt_print(&self.0, __fmt_print_formatter, in_seq)
+-}
+-}
+-impl  ::std::ops::Deref for r#posInt64 {
+-type Target = ::dafny_runtime::BigInt;
+-fn deref(&self) -> &Self::Target {
+-&self.0
+-}
+-}
+-
+-#[derive(Clone, PartialEq)]
+-#[repr(transparent)]
+-pub struct r#seq16<r#T, >(pub ::std::vec::Vec<r#T>);
+-impl <r#T: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<r#T> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static, > ::dafny_runtime::DafnyErasable for r#seq16<r#T, > {
+-type Erased = ::std::vec::Vec<r#T>;
+-}
+-impl <r#T: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<r#T> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static, > ::dafny_runtime::DafnyUnerasable<::std::vec::Vec<r#T>> for r#seq16<r#T, > {}
+-impl <r#T: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<r#T> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static, > ::dafny_runtime::DafnyUnerasable<r#seq16<r#T, >> for r#seq16<r#T, > {}
+-impl <r#T: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<r#T> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static, > ::std::default::Default for r#seq16<r#T, > where <r#T as ::dafny_runtime::DafnyErasable>::Erased: ::std::cmp::PartialEq,  {
+-fn default() -> Self {
+-r#seq16(::std::default::Default::default())
+-}
+-}
+-impl <r#T: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<r#T> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static, > ::dafny_runtime::DafnyPrint for r#seq16<r#T, > {
+-fn fmt_print(&self, __fmt_print_formatter: &mut ::std::fmt::Formatter, in_seq: bool) -> ::std::fmt::Result {
+-::dafny_runtime::DafnyPrint::fmt_print(&self.0, __fmt_print_formatter, in_seq)
+-}
+-}
+-impl <r#T: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<r#T> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static, > ::std::ops::Deref for r#seq16<r#T, > {
+-type Target = ::std::vec::Vec<r#T>;
+-fn deref(&self) -> &Self::Target {
+-&self.0
+-}
+-}
+-
+-#[derive(Clone, PartialEq)]
+-#[repr(transparent)]
+-pub struct r#seq32<r#T, >(pub ::std::vec::Vec<r#T>);
+-impl <r#T: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<r#T> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static, > ::dafny_runtime::DafnyErasable for r#seq32<r#T, > {
+-type Erased = ::std::vec::Vec<r#T>;
+-}
+-impl <r#T: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<r#T> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static, > ::dafny_runtime::DafnyUnerasable<::std::vec::Vec<r#T>> for r#seq32<r#T, > {}
+-impl <r#T: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<r#T> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static, > ::dafny_runtime::DafnyUnerasable<r#seq32<r#T, >> for r#seq32<r#T, > {}
+-impl <r#T: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<r#T> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static, > ::std::default::Default for r#seq32<r#T, > where <r#T as ::dafny_runtime::DafnyErasable>::Erased: ::std::cmp::PartialEq,  {
+-fn default() -> Self {
+-r#seq32(::std::default::Default::default())
+-}
+-}
+-impl <r#T: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<r#T> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static, > ::dafny_runtime::DafnyPrint for r#seq32<r#T, > {
+-fn fmt_print(&self, __fmt_print_formatter: &mut ::std::fmt::Formatter, in_seq: bool) -> ::std::fmt::Result {
+-::dafny_runtime::DafnyPrint::fmt_print(&self.0, __fmt_print_formatter, in_seq)
+-}
+-}
+-impl <r#T: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<r#T> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static, > ::std::ops::Deref for r#seq32<r#T, > {
+-type Target = ::std::vec::Vec<r#T>;
+-fn deref(&self) -> &Self::Target {
+-&self.0
+-}
+-}
+-
+-#[derive(Clone, PartialEq)]
+-#[repr(transparent)]
+-pub struct r#seq64<r#T, >(pub ::std::vec::Vec<r#T>);
+-impl <r#T: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<r#T> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static, > ::dafny_runtime::DafnyErasable for r#seq64<r#T, > {
+-type Erased = ::std::vec::Vec<r#T>;
+-}
+-impl <r#T: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<r#T> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static, > ::dafny_runtime::DafnyUnerasable<::std::vec::Vec<r#T>> for r#seq64<r#T, > {}
+-impl <r#T: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<r#T> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static, > ::dafny_runtime::DafnyUnerasable<r#seq64<r#T, >> for r#seq64<r#T, > {}
+-impl <r#T: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<r#T> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static, > ::std::default::Default for r#seq64<r#T, > where <r#T as ::dafny_runtime::DafnyErasable>::Erased: ::std::cmp::PartialEq,  {
+-fn default() -> Self {
+-r#seq64(::std::default::Default::default())
+-}
+-}
+-impl <r#T: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<r#T> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static, > ::dafny_runtime::DafnyPrint for r#seq64<r#T, > {
+-fn fmt_print(&self, __fmt_print_formatter: &mut ::std::fmt::Formatter, in_seq: bool) -> ::std::fmt::Result {
+-::dafny_runtime::DafnyPrint::fmt_print(&self.0, __fmt_print_formatter, in_seq)
+-}
+-}
+-impl <r#T: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<r#T> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static, > ::std::ops::Deref for r#seq64<r#T, > {
+-type Target = ::std::vec::Vec<r#T>;
+-fn deref(&self) -> &Self::Target {
+-&self.0
+-}
+-}
+-
+-}
+-mod r#StandardLibrary_Compile {
+-
+-}
+-mod r#_module {
+ 
 +pub mod r#_UTF8_Compile {
 +  use dafny_runtime::dafny_runtime_conversions;
 +  use dafny_runtime::ToPrimitive;
@@ -1309,38 +1652,20 @@ index de0cf56a..a67da67c 100644
 +    }
 +  }
 +  impl ::std::default::Default for _default {
-     fn default() -> Self {
--      seq32(::std::default::Default::default())
++    fn default() -> Self {
 +      _default::new()
-     }
-   }
--  impl <T: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<T> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static>::dafny_runtime::DafnyPrint for seq32<T> {
--    fn fmt_print(&self, _formatter: &mut ::std::fmt::Formatter, in_seq: bool) -> ::std::fmt::Result {
--      ::dafny_runtime::DafnyPrint::fmt_print(&self.0, _formatter, in_seq)
++    }
++  }
 +  impl ::dafny_runtime::DafnyPrint for _default {
 +    fn fmt_print(&self, _formatter: &mut ::std::fmt::Formatter, _in_seq: bool) -> std::fmt::Result {
 +      write!(_formatter, "UTF8_Compile.__default")
-     }
-   }
--  impl <T: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<T> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static>::std::ops::Deref for seq32<T> {
--    type Target = ::std::vec::Vec<T>;
--    fn deref(&self) -> &Self::Target {
--      &self.0
++    }
++  }
 +  impl ::std::cmp::PartialEq for _default {
 +    fn eq(&self, other: &Self) -> bool {
 +      ::std::ptr::eq(self, other)
-     }
-   }
--  #[derive(Clone, PartialEq)]
--  #[repr(transparent)]
--  pub struct seq64<T>(pub ::std::vec::Vec<T>);
--  impl <T: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<T> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static>::dafny_runtime::DafnyErasable for seq64<T> {
--    type Erased = ::std::vec::Vec<T>;
--  }
--  impl <T: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<T> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static>::dafny_runtime::DafnyUnerasable<::std::vec::Vec<T>> for seq64<T> {}
--  impl <T: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<T> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static>::dafny_runtime::DafnyUnerasable<seq64<T>> for seq64<T> {}
--  impl <T: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<T> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static>::std::default::Default for seq64<T>
--     where <T as ::dafny_runtime::DafnyErasable>::Erased: ::std::cmp::PartialEq,  {
++    }
++  }
 +  pub type ValidUTF8Bytes = ::dafny_runtime::Sequence<u8>;
 +}
 +pub mod r#_StandardLibraryInterop_Compile {
@@ -1370,35 +1695,23 @@ index de0cf56a..a67da67c 100644
 +    }
 +  }
 +  impl ::std::default::Default for WrappersInterop {
-     fn default() -> Self {
--      seq64(::std::default::Default::default())
++    fn default() -> Self {
 +      WrappersInterop::new()
-     }
-   }
--  impl <T: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<T> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static>::dafny_runtime::DafnyPrint for seq64<T> {
--    fn fmt_print(&self, _formatter: &mut ::std::fmt::Formatter, in_seq: bool) -> ::std::fmt::Result {
--      ::dafny_runtime::DafnyPrint::fmt_print(&self.0, _formatter, in_seq)
++    }
++  }
 +  impl ::dafny_runtime::DafnyPrint for WrappersInterop {
 +    fn fmt_print(&self, _formatter: &mut ::std::fmt::Formatter, _in_seq: bool) -> std::fmt::Result {
 +      write!(_formatter, "StandardLibraryInterop_Compile.WrappersInterop")
-     }
-   }
--  impl <T: ::dafny_runtime::DafnyErasable + ::dafny_runtime::DafnyUnerasable<T> + Clone + ::dafny_runtime::DafnyPrint + ::std::default::Default + 'static>::std::ops::Deref for seq64<T> {
--    type Target = ::std::vec::Vec<T>;
--    fn deref(&self) -> &Self::Target {
--      &self.0
++    }
++  }
 +  impl ::std::cmp::PartialEq for WrappersInterop {
 +    fn eq(&self, other: &Self) -> bool {
 +      ::std::ptr::eq(self, other)
-     }
-   }
- }
--mod r#_StandardLibrary_Compile {
--  
--}
--mod _module {
++    }
++  }
++}
 +pub mod _module {
-   
++  
  }
 \ No newline at end of file
 diff --git b/TestModels/dafny-dependencies/StandardLibrary/runtimes/rust/src/lib.rs a/TestModels/dafny-dependencies/StandardLibrary/runtimes/rust/src/lib.rs
