@@ -492,7 +492,10 @@ test_java:
 
 ########################## Rust targets
 
-transpile_rust: | transpile_implementation_rust transpile_test_rust transpile_dependencies_rust
+# TODO: Dafny test transpilation needs manual patching to work too,
+# which isn't a high priority at this stage,
+# so don't include transpile_test_rust for now.
+transpile_rust: | transpile_implementation_rust transpile_dependencies_rust
 
 transpile_implementation_rust: TARGET=rs
 transpile_implementation_rust: OUT=implementation_from_dafny

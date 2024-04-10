@@ -49,7 +49,7 @@ transpile_java: | transpile_implementation_java transpile_test_java
 
 # Override SharedMakefile's transpile_java to not transpile
 # StandardLibrary as a dependency
-transpile_rust: | transpile_implementation_rust transpile_test_rust
+transpile_rust: | transpile_implementation_rust
 
 # Only building UInt.dfy in Rust to start because other files use unsupported features
 # (e.g. the variance specifiers in Option<+T>).
