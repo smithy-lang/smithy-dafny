@@ -18,7 +18,7 @@ module
   method SimpleLocalService(
     config: SimpleLocalServiceConfig
   ) returns (
-    res: Result<ISimpleLocalServiceClient, Error>
+    res: Result<SimpleLocalServiceClient, Error>
   )
   {
     var client := new SimpleLocalServiceClient(Operations.Config);

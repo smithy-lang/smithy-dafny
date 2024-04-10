@@ -12,7 +12,7 @@ module {:extern "simple.types.smithydouble.internaldafny" } SimpleDouble refines
  }
 
  method SimpleDouble(config: SimpleDoubleConfig)
- returns (res: Result<ISimpleTypesDoubleClient, Error>) {
+ returns (res: Result<SimpleDoubleClient, Error>) {
     var client := new SimpleDoubleClient(Operations.Config);
     return Success(client);
  }
