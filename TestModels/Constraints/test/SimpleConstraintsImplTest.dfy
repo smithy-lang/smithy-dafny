@@ -9,12 +9,11 @@ module SimpleConstraintsImplTest {
     import SimpleConstraints
     import StandardLibrary.UInt
 
-    import WrappedSimpleConstraintsService
     import opened SimpleConstraintsTypes
     import opened Wrappers
     
     method{:test} TestConstraints(){
-        var client :- expect WrappedSimpleConstraintsService.WrappedSimpleConstraints();
+        var client :- expect SimpleConstraints.SimpleConstraints();
         TestGetConstraintWithValidInputs(client);
         TestGetConstraintWithInvalidMyString(client);
     }
@@ -24,7 +23,7 @@ module SimpleConstraintsImplTest {
       modifies client.Modifies
       ensures client.ValidState()
     {
-      var input := Helpers.GetConstraintsInputTemplate();
+      var input := Helpers.GetValidInput();
       var ret := client.GetConstraints(input := input);
       expect ret.Success?;
     }
@@ -34,10 +33,11 @@ module SimpleConstraintsImplTest {
       modifies client.Modifies
       ensures client.ValidState()
     {
-      var input := Helpers.GetConstraintsInputTemplate(overrideToInvalidInput := {"myString"});
+      var input := Helpers.GetValidInput();
+      input := input.(MyString := Some(Helpers.ForceMyString("this string is too long")));
       var ret := client.GetConstraints(input := input);
-      // ret.Failure? in java (good)
-      // ret.Success? in dotnet (bad, but we're working on it)
-      // importantly -- doesn't raise an exception either way
-     }
+      // This client is NOT wrapped
+      // Therefore, it does not constraint testing
+      expect ret.Success?;
+    }
 }
