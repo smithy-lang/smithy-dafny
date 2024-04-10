@@ -508,7 +508,7 @@ transpile_test_rust: SRC_INDEX=$(RUST_SRC_INDEX)
 transpile_test_rust: TEST_INDEX=$(RUST_TEST_INDEX)
 transpile_test_rust: _transpile_test_all _mv_test_rust _apply_test_patch_rust
 
-transpile_dependencies_rust: LANG=rs
+transpile_dependencies_rust: LANG=rust
 transpile_dependencies_rust: transpile_dependencies
 
 # Unlike other backends, the Rust backend emits full Rust projects,
