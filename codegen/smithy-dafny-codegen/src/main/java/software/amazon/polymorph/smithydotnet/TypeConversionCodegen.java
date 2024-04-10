@@ -29,6 +29,8 @@ import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.*;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
+import software.amazon.smithy.model.traits.LengthTrait;
+import software.amazon.smithy.model.traits.RangeTrait;
 import software.amazon.smithy.utils.StringUtils;
 
 import static software.amazon.polymorph.smithydotnet.DotNetNameResolver.TYPE_CONVERSION_CLASS_NAME;
@@ -36,9 +38,6 @@ import static software.amazon.polymorph.smithydotnet.DotNetNameResolver.typeConv
 import static software.amazon.polymorph.smithydotnet.TypeConversionDirection.FROM_DAFNY;
 import static software.amazon.polymorph.smithydotnet.TypeConversionDirection.TO_DAFNY;
 
-import software.amazon.smithy.model.traits.LengthTrait;
-import software.amazon.smithy.model.traits.RangeTrait;
-import software.amazon.smithy.model.traits.RequiredTrait;
 
 /**
  * Generates a {@code TypeConversion} class that includes all {@link TypeConverter}s needed for the operations in the
@@ -220,10 +219,6 @@ public class TypeConversionCodegen {
      */
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     private TypeConverter generateConverter(final Shape shape) {
-        // System.err.println("generateConverter");
-        // System.err.println(shape);
-        // System.err.println(shape.members());
-
         return switch (shape.getType()) {
             case BLOB -> generateBlobConverter(shape.asBlobShape().get());
             case BOOLEAN -> generateBooleanConverter(shape.asBooleanShape().get());
