@@ -746,7 +746,11 @@ public class TypeConversionCodegen {
             .prepend(TokenTree.of(concreteVar, convertedVar).lineSeparated())
             .append(throwInvalidUnionState);
 
-        final TokenTree toDafnyBody = TokenTree.of(TokenTree.of("value.Validate();"),
+        String validate = "value.Validate();";
+        if (AwsSdkNameResolverHelpers.isInAwsSdkNamespace(unionShape.getId())) {
+            validate = "";
+        }
+        final TokenTree toDafnyBody = TokenTree.of(TokenTree.of(validate),
                 TokenTree.of(defNames.stream().map(memberShape -> {
                     final String propertyName = nameResolver.classPropertyForStructureMember(memberShape);
                     final String propertyType = nameResolver.classPropertyTypeForStructureMember(memberShape);
