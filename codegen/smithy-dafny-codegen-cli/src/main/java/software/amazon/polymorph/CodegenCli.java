@@ -100,6 +100,7 @@ public class CodegenCli {
         cliArguments.propertiesFile.ifPresent(engineBuilder::withPropertiesFile);
         cliArguments.javaAwsSdkVersion.ifPresent(engineBuilder::withJavaAwsSdkVersion);
         cliArguments.includeDafnyFile.ifPresent(engineBuilder::withIncludeDafnyFile);
+        cliArguments.patchFilesDir.ifPresent(engineBuilder::withPatchFilesDir);
         final CodegenEngine engine = engineBuilder.build();
         engine.run();
     }
@@ -184,8 +185,13 @@ public class CodegenCli {
             .hasArg()
             .build())
           .addOption(Option.builder()
+            .longOpt("patch-files-dir")
+            .desc("<optional> location of patch files. Defaults to <library-root>/codegen-patches")
+            .hasArg()
+            .build())
+          .addOption(Option.builder()
             .longOpt("update-patch-files")
-            .desc("<optional> update patch files in <library-root>/codegen-patches instead of applying them")
+            .desc("<optional> update patch files in <patch-files-dir> instead of applying them")
             .build());
     }
 
@@ -208,6 +214,7 @@ public class CodegenCli {
             Optional<Path> includeDafnyFile,
             boolean awsSdkStyle,
             boolean localServiceTest,
+            Optional<Path> patchFilesDir,
             boolean updatePatchFiles
     ) {
         /**
@@ -284,13 +291,15 @@ public class CodegenCli {
                 includeDafnyFile = Optional.of(Paths.get(commandLine.getOptionValue("include-dafny")));
             }
 
+            Optional<Path> patchFilesDir = Optional.ofNullable(commandLine.getOptionValue("patch-files-dir"))
+                    .map(Paths::get);
             final boolean updatePatchFiles = commandLine.hasOption("update-patch-files");
 
             return Optional.of(new CliArguments(
                     libraryRoot, modelPath, dependentModelPaths, namespace,
                     outputDotnetDir, outputJavaDir, outputDafnyDir, outputGoDir,
                     javaAwsSdkVersion, dafnyVersion, propertiesFile, includeDafnyFile, awsSdkStyle,
-                    localServiceTest, updatePatchFiles
+                    localServiceTest, patchFilesDir, updatePatchFiles
             ));
         }
     }

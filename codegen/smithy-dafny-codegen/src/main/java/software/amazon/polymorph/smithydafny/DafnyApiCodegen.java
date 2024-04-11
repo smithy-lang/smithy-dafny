@@ -1743,7 +1743,7 @@ public class DafnyApiCodegen {
                             //   a condition on the existing comprehension, starting with `&&`
                             // i.e. var setVar := set t | t in otherVar.Values && t.thisOptionalStructure.Some?
                             modifiesClause = modifiesClause.append(TokenTree.of(
-                                "| %1$s.Some? \n ".formatted(accessPathToCurrentShape)
+                                "&& %1$s.Some? \n ".formatted(accessPathToCurrentShape)
                             ));
                         } else {
                             // If not using set comprehension, the `.Some` check on an optional structure is added as
@@ -1770,7 +1770,7 @@ public class DafnyApiCodegen {
                         //   a condition on the existing comprehension, starting with `&&`
                         // e.g. `&& fooUnion.barUnionMember? ...`
                         modifiesClause = modifiesClause.append(TokenTree.of(
-                            "| %1$s? \n ".formatted(accessPathToCurrentShape)
+                            "&& %1$s? \n ".formatted(accessPathToCurrentShape)
                         ));
                     } else {
                         // If not using set comprehension, the destructor on a union member is added as
@@ -1805,13 +1805,13 @@ public class DafnyApiCodegen {
                         // If not using set comprehension, we now need to.
                         if (currentShapeType == ShapeType.LIST) {
                             modifiesClause = modifiesClause.append(TokenTree.of(
-                                "set tmps%1$s <- set t%1$s <- %2$s\n ".formatted(
+                                "set tmps%1$s <- set t%1$s <- %2$s | true\n ".formatted(
                                     intermediateTempVariableCounter,
                                     accessPathToCurrentShape)
                             ));
                         } else if (currentShapeType == ShapeType.MAP) {
                             modifiesClause = modifiesClause.append(TokenTree.of(
-                                "set tmps%1$s <- set t%1$s <- %2$s.Values\n ".formatted(
+                                "set tmps%1$s <- set t%1$s <- %2$s.Values | true\n ".formatted(
                                     intermediateTempVariableCounter,
                                     accessPathToCurrentShape)
                             ));
@@ -1863,6 +1863,7 @@ public class DafnyApiCodegen {
     public TokenTree generateAbstractLocalService(ServiceShape serviceShape)  {
         if (!serviceShape.hasTrait(LocalServiceTrait.class)) throw new IllegalStateException("MUST be an LocalService");
         final LocalServiceTrait localServiceTrait = serviceShape.expectTrait(LocalServiceTrait.class);
+        final String dafnyClientClass = "%sClient".formatted(localServiceTrait.getSdkId());
         final String dafnyClientTrait = nameResolver.traitForServiceClient(serviceShape);
 
         final String configTypeName = nameResolver.baseTypeForShape(localServiceTrait.getConfigId());
@@ -1888,7 +1889,8 @@ public class DafnyApiCodegen {
                 ),
             // Yes, Error is hard coded
             // this can work because we need to be able Errors from other modules...
-            "returns (res: Result<%s, Error>)\n".formatted(dafnyClientTrait)
+                "returns (res: Result<%s, Error>)\n"
+                        .formatted(dafnyClientClass)
         ).lineSeparated();
 
         // Add `requires` clauses
@@ -2057,21 +2059,16 @@ public class DafnyApiCodegen {
      * See also TestModels/dafny-dependencies/StandardLibrary/src/WrappersInterop.dfy.
      */
     private static TokenTree generateResultOfClientHelperFunctions(String dafnyClientTrait) {
-        final TokenTree createSuccessOfClient = TokenTree
+        return TokenTree
           .of(
-            "// Helper function for the benefit of native code to create a Success(client) without referring to Dafny internals",
+            "// Helper functions for the benefit of native code to create a Success(client) without referring to Dafny internals",
             "function method CreateSuccessOfClient(client: %s): Result<%s, Error> {".formatted(dafnyClientTrait, dafnyClientTrait),
             "  Success(client)",
-            "}"
-          ).lineSeparated();
-        final TokenTree createFailureOfError = TokenTree
-          .of(
-            "// Helper function for the benefit of native code to create a Failure(error) without referring to Dafny internals",
+            "}",
             "function method CreateFailureOfError(error: Error): Result<%s, Error> {".formatted(dafnyClientTrait),
             "  Failure(error)",
             "}"
           ).lineSeparated();
-        return TokenTree.of(createSuccessOfClient, createFailureOfError);
     }
 
     private static TokenTree generateLengthConstraint(final LengthTrait lengthTrait) {

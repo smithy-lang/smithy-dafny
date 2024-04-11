@@ -1,0 +1,104 @@
+# This workflow performs tests in Rust.
+name: Library Rust tests
+
+on:
+  workflow_call:
+    inputs:
+      dafny:
+        description: 'The Dafny version to run'
+        required: true
+        type: string
+
+jobs:
+  testRust:
+    strategy:
+      fail-fast: false
+      matrix:
+        library: [
+          TestModels/dafny-dependencies/StandardLibrary, # This stores current Polymorph dependencies that all TestModels depend on
+          # TestModels/Aggregate,
+          # TestModels/AggregateReferences,
+          # TestModels/CodegenPatches,
+          # TestModels/Constraints,
+          # TestModels/Constructor,
+          # TestModels/Dependencies,
+          # TestModels/Errors,
+          # TestModels/Extendable,
+          # TestModels/Extern,
+          # TestModels/LanguageSpecificLogic,
+          # TestModels/LocalService,
+          # TestModels/MultipleModels,
+          # TestModels/Refinement,
+          # TestModels/Resource,
+          # TestModels/SimpleTypes/BigDecimal,
+          # TestModels/SimpleTypes/BigInteger,
+          # TestModels/SimpleTypes/SimpleBlob,
+          # TestModels/SimpleTypes/SimpleBoolean,
+          # TestModels/SimpleTypes/SimpleByte,
+          # TestModels/SimpleTypes/SimpleDouble,
+          # TestModels/SimpleTypes/SimpleEnum,
+          # TestModels/SimpleTypes/SimpleEnumV2,
+          # TestModels/SimpleTypes/SimpleFloat,
+          # TestModels/SimpleTypes/SimpleInteger,
+          # TestModels/SimpleTypes/SimpleLong,
+          # TestModels/SimpleTypes/SimpleShort,
+          TestModels/SimpleTypes/SimpleString,
+          # TestModels/SimpleTypes/SimpleTimestamp,
+          # TestModels/Union,
+          # TestModels/aws-sdks/ddb,
+          # TestModels/aws-sdks/kms,
+        ]
+    runs-on: "ubuntu-latest"
+    permissions:
+      id-token: write
+      contents: read
+    env:
+      DOTNET_CLI_TELEMETRY_OPTOUT: 1
+      DOTNET_NOLOGO: 1
+    steps:
+      - name: Support longpaths on Git checkout
+        run: |
+          git config --global core.longpaths true
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-region: us-west-2
+          role-to-assume: arn:aws:iam::370957321024:role/GitHub-CI-PolymorphTestModels-Role-us-west-2
+          role-session-name: JavaTests
+
+      - uses: actions/checkout@v3
+
+      - name: Setup Dafny
+        uses: dafny-lang/setup-dafny-action@v1.7.0
+        with:
+          dafny-version: ${{ inputs.dafny }}
+
+      - name: Set up Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: '1.74.1'
+          rustflags: ''
+
+      # TODO - not implemented yet
+      # - name: Generate Polymorph Dafny and Rust code
+      #   shell: bash
+      #   working-directory: ./${{ matrix.library }}
+      #   # Use $DAFNY_VERSION from setup-dafny-action to handle nightlies correctly
+      #   run: |
+      #     make polymorph_dafny DAFNY_VERSION_OPTION="--dafny-version $DAFNY_VERSION"
+      #     make polymorph_rust DAFNY_VERSION_OPTION="--dafny-version $DAFNY_VERSION"
+
+      - name: Compile ${{ matrix.library }} implementation
+        shell: bash
+        working-directory: ./${{ matrix.library }}
+        run: |
+          # This works because `node` is installed by default on GHA runners
+          CORES=$(node -e 'console.log(os.cpus().length)')
+          make build_rust CORES=$CORES
+
+      - name: Test ${{ matrix.library }}
+        working-directory: ./${{ matrix.library }}
+        shell: bash
+        run: |
+          make test_rust

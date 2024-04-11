@@ -10,7 +10,7 @@ module {:extern "simple.multiplemodels.dependencyproject.internaldafny" } Simple
     }
 
     method DependencyProject(config: DependencyProjectConfig)
-    returns (res: Result<IDependencyProjectClient, Error>) {
+    returns (res: Result<DependencyProjectClient, Error>) {
         var client := new DependencyProjectClient(Operations.Config);
         return Success(client);
     }

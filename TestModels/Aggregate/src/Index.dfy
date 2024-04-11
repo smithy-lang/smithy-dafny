@@ -10,7 +10,7 @@ module {:extern "simple.aggregate.internaldafny"} SimpleAggregate refines Abstra
     }
 
     method SimpleAggregate(config: SimpleAggregateConfig)
-    returns (res: Result<ISimpleAggregateClient, Error>) {
+    returns (res: Result<SimpleAggregateClient, Error>) {
         var client := new SimpleAggregateClient(Operations.Config);
         return Success(client);
     }

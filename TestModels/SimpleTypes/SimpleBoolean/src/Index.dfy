@@ -10,7 +10,7 @@ module {:extern "simple.types.boolean.internaldafny" } SimpleBoolean refines Abs
  }
 
  method SimpleBoolean(config: SimpleBooleanConfig)
- returns (res: Result<ISimpleTypesBooleanClient, Error>) {
+ returns (res: Result<SimpleBooleanClient, Error>) {
     var client := new SimpleBooleanClient(Operations.Config);
     return Success(client);
  }

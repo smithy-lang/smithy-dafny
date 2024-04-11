@@ -60,6 +60,7 @@ public class CodegenEngine {
     private final Map<TargetLanguage, Path> targetLangOutputDirs;
     private final DafnyVersion dafnyVersion;
     private final Optional<Path> propertiesFile;
+    private final Optional<Path> patchFilesDir;
     private final boolean updatePatchFiles;
     // refactor this to only be required if generating Java
     private final AwsSdkVersion javaAwsSdkVersion;
@@ -93,6 +94,7 @@ public class CodegenEngine {
             final boolean generateProjectFiles,
             final PluginContext pluginContext,
             final Path libraryRoot,
+            final Optional<Path> patchFilesDir,
             final boolean updatePatchFiles
     ) {
         // To be provided to constructor
@@ -109,6 +111,7 @@ public class CodegenEngine {
         this.generateProjectFiles = generateProjectFiles;
         this.pluginContext = pluginContext;
         this.libraryRoot = libraryRoot;
+        this.patchFilesDir = patchFilesDir;
         this.updatePatchFiles = updatePatchFiles;
 
         this.model = this.awsSdkStyle
@@ -194,9 +197,7 @@ public class CodegenEngine {
                 "--unicode-char:false",
                 ".");
 
-        if (!this.localServiceTest) {
-            handlePatching(TargetLanguage.DAFNY, outputDir);
-        }
+        handlePatching(TargetLanguage.DAFNY, outputDir);
     }
 
     private void generateJava(final Path outputDir) {
@@ -330,12 +331,6 @@ public class CodegenEngine {
 
     private static final Pattern PATCH_FILE_PATTERN = Pattern.compile("dafny-(.*).patch");
 
-    private Path patchDirForLanguage(TargetLanguage targetLanguage) {
-        return libraryRoot
-                .resolve("codegen-patches")
-                .resolve(targetLanguage.name().toLowerCase());
-    }
-
     private DafnyVersion getDafnyVersionForPatchFile(Path file) {
         String fileName = file.getFileName().toString();
         Matcher matcher = PATCH_FILE_PATTERN.matcher(fileName);
@@ -348,11 +343,15 @@ public class CodegenEngine {
     }
 
     private void handlePatching(TargetLanguage targetLanguage, Path outputDir) {
-        Path patchFilesDir = patchDirForLanguage(targetLanguage);
+        if (patchFilesDir.isEmpty()) {
+            return;
+        }
+
+        Path patchFilesForLanguage = patchFilesDir.get().resolve(targetLanguage.name().toLowerCase());
         try {
             if (updatePatchFiles) {
-                Files.createDirectories(patchFilesDir);
-                Path patchFile = patchFilesDir.resolve("dafny-%s.patch".formatted(dafnyVersion.unparse()));
+                Files.createDirectories(patchFilesForLanguage);
+                Path patchFile = patchFilesForLanguage.resolve("dafny-%s.patch".formatted(dafnyVersion.unparse()));
                 Path outputDirRelative = libraryRoot.relativize(outputDir);
                 // Need to ignore the exit code because diff will return 1 if there is a diff
                 String patchContent = runCommandIgnoringExitCode(libraryRoot, "git", "diff", "-R", outputDirRelative.toString());
@@ -361,8 +360,8 @@ public class CodegenEngine {
                 }
             }
 
-            if (Files.exists(patchFilesDir)) {
-                List<Pair<DafnyVersion, Path>> sortedPatchFiles = Files.list(patchFilesDir)
+            if (Files.exists(patchFilesForLanguage)) {
+                List<Pair<DafnyVersion, Path>> sortedPatchFiles = Files.list(patchFilesForLanguage)
                         .map(file -> Pair.of(getDafnyVersionForPatchFile(file), file))
                         .sorted(Collections.reverseOrder(Map.Entry.comparingByKey()))
                         .toList();
@@ -420,6 +419,7 @@ public class CodegenEngine {
         private boolean localServiceTest = false;
         private boolean generateProjectFiles = false;
         private Path libraryRoot;
+        private Path patchFilesDir;
         private boolean updatePatchFiles = false;
 
         public Builder() {}
@@ -548,6 +548,14 @@ public class CodegenEngine {
         }
 
         /**
+         * The location of patch files.
+         */
+        public Builder withPatchFilesDir(final Path patchFilesDir) {
+            this.patchFilesDir = patchFilesDir;
+            return this;
+        }
+
+        /**
          * If true, updates the relevant patch files in (library-root)/codegen-patches
          * to change the generated code into the state of the code before generation.
          */
@@ -588,6 +596,13 @@ public class CodegenEngine {
 
             final Path libraryRoot = this.libraryRoot.toAbsolutePath().normalize();
 
+            final Optional<Path> patchFilesDir = Optional.ofNullable(this.patchFilesDir)
+                    .map(path -> path.toAbsolutePath().normalize());
+            if (updatePatchFiles && patchFilesDir.isEmpty()) {
+                throw new IllegalStateException(
+                        "Cannot update patch files without specifying a patch files directory");
+            }
+
             return new CodegenEngine(
                     fromSmithyBuildPlugin,
                     serviceModel,
@@ -603,6 +618,7 @@ public class CodegenEngine {
                     this.generateProjectFiles,
                     this.pluginContext,
                     libraryRoot,
+                    patchFilesDir,
                     updatePatchFiles
             );
         }
