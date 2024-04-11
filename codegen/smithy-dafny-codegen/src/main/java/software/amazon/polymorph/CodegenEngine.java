@@ -132,6 +132,12 @@ public class CodegenEngine {
 
         for (final TargetLanguage lang : targetLangOutputDirs.keySet()) {
             final Path outputDir = targetLangOutputDirs.get(lang).toAbsolutePath().normalize();
+
+            // Clear out all contents first to make sure if we didn't generate it,
+            // it doesn't show up.
+            software.amazon.smithy.utils.IoUtils.rmdir(outputDir);
+            outputDir.toFile().mkdirs();
+
             switch (lang) {
                 case DAFNY -> generateDafny(outputDir);
                 case JAVA -> generateJava(outputDir);
@@ -140,6 +146,8 @@ public class CodegenEngine {
                 default -> throw new UnsupportedOperationException("Cannot generate code for target language %s"
                         .formatted(lang.name()));
             }
+
+            handlePatching(lang, outputDir);
         }
 
         propertiesFile.ifPresent(this::generateProjectPropertiesFile);
@@ -188,8 +196,6 @@ public class CodegenEngine {
                 "--function-syntax:3",
                 "--unicode-char:false",
                 ".");
-
-        handlePatching(TargetLanguage.DAFNY, outputDir);
     }
 
     private void generateJava(final Path outputDir) {
@@ -207,8 +213,6 @@ public class CodegenEngine {
         LOGGER.info("Formatting Java code in {}", outputDir);
         runCommand(outputDir,
                 "npx", "prettier", "--plugin=prettier-plugin-java", outputDir.toString(), "--write");
-
-        handlePatching(TargetLanguage.JAVA, outputDir);
     }
 
     private void javaLocalService(final Path outputDir) {
@@ -263,8 +267,6 @@ public class CodegenEngine {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
-        handlePatching(TargetLanguage.DOTNET, outputDir);
     }
 
     private void netLocalService(final Path outputDir) {
@@ -325,7 +327,6 @@ public class CodegenEngine {
         LOGGER.warn("Rust code generation is incomplete and may not function correctly!", outputDir);
 
         // ...so incomplete it's starting out as a no-op and relying on 100% "patching" :)
-        handlePatching(TargetLanguage.RUST, outputDir);
     }
 
     private static final Pattern PATCH_FILE_PATTERN = Pattern.compile("dafny-(.*).patch");
