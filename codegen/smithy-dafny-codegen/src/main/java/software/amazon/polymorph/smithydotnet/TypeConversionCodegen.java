@@ -558,8 +558,12 @@ public class TypeConversionCodegen {
                 constructorArgs.parenthesized(),
                 Token.of(';')
         );
+        String validate = "value.Validate();";
+        if (AwsSdkNameResolverHelpers.isInAwsSdkNamespace(structureShape.getId())) {
+            validate = "";
+        }
         final TokenTree toDafnyBody = TokenTree.of(
-                TokenTree.of("value.Validate();"),
+                TokenTree.of(validate),
                 isSetTernaries,
                 constructor
         ).lineSeparated();
@@ -742,9 +746,8 @@ public class TypeConversionCodegen {
             .prepend(TokenTree.of(concreteVar, convertedVar).lineSeparated())
             .append(throwInvalidUnionState);
 
-        final TokenTree toDafnyBody = TokenTree
-                .of("value.Validate();" +
-                    defNames.stream().map(memberShape -> {
+        final TokenTree toDafnyBody = TokenTree.of(TokenTree.of("value.Validate();"),
+                TokenTree.of(defNames.stream().map(memberShape -> {
                     final String propertyName = nameResolver.classPropertyForStructureMember(memberShape);
                     final String propertyType = nameResolver.classPropertyTypeForStructureMember(memberShape);
                     final String dafnyMemberName = nameResolver.unionMemberName(memberShape);
@@ -813,7 +816,7 @@ public class TypeConversionCodegen {
                                         .lineSeparated()
                                         .braced());
                     }
-                }))
+                })))
                 .append(throwInvalidUnionState);
 
         return buildConverterFromMethodBodies(unionShape, fromDafnyBody, toDafnyBody);
