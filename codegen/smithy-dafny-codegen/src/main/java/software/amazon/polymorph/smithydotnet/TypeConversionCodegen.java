@@ -559,6 +559,7 @@ public class TypeConversionCodegen {
                 Token.of(';')
         );
         final TokenTree toDafnyBody = TokenTree.of(
+                TokenTree.of("value.Validate();"),
                 isSetTernaries,
                 constructor
         ).lineSeparated();
@@ -742,7 +743,8 @@ public class TypeConversionCodegen {
             .append(throwInvalidUnionState);
 
         final TokenTree toDafnyBody = TokenTree
-                .of(defNames.stream().map(memberShape -> {
+                .of("value.Validate();" +
+                    defNames.stream().map(memberShape -> {
                     final String propertyName = nameResolver.classPropertyForStructureMember(memberShape);
                     final String propertyType = nameResolver.classPropertyTypeForStructureMember(memberShape);
                     final String dafnyMemberName = nameResolver.unionMemberName(memberShape);
