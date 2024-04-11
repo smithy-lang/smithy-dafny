@@ -508,16 +508,6 @@ transpile_test_rust: _transpile_test_all _mv_test_rust _apply_test_patch_rust
 transpile_dependencies_rust: LANG=rust
 transpile_dependencies_rust: transpile_dependencies
 
-# Unlike other backends, the Rust backend emits full Rust projects,
-# including Cargo.toml.
-# This runs contrary to the current smithy-dafny philosophy
-# of translating code into predefined projects
-# and combining it with smithy-generated and hand-written code.
-# We'll need some Dafny-side design discussion to support both use cases.
-#
-# We currently let the source produce the Cargo.toml file as well,
-# and assume the tests can just be added under /tests without needing extra dependencies.
-
 _mv_implementation_rust:
 	rm -rf runtimes/rust
 	mv implementation_from_dafny-rust runtimes/rust
