@@ -45,6 +45,7 @@ public class CodegenCli {
             cliArgumentsOptional = CliArguments.parse(args);
         } catch (ParseException e) {
             LOGGER.error("Command-line arguments could not be parsed", e);
+            System.exit(1);
         }
         if (cliArgumentsOptional.isEmpty()) {
             printHelpMessage();
@@ -85,6 +86,8 @@ public class CodegenCli {
                                                          .build();
 
         final CodegenEngine.Builder engineBuilder = new CodegenEngine.Builder()
+                .withFromSmithyBuildPlugin(false)
+                .withLibraryRoot(cliArguments.libraryRoot)
                 .withServiceModel(serviceModel)
                 .withDependentModelPaths(cliArguments.dependentModelPaths)
                 .withNamespace(cliArguments.namespace)
@@ -92,7 +95,8 @@ public class CodegenCli {
                 .withAwsSdkStyle(cliArguments.awsSdkStyle)
                 .withLocalServiceTest(cliArguments.localServiceTest)
                 .withDafnyVersion(cliArguments.dafnyVersion)
-                .withPluginContext(pluginContext);
+                .withPluginContext(pluginContext)
+                .withUpdatePatchFiles(cliArguments.updatePatchFiles);
         cliArguments.propertiesFile.ifPresent(engineBuilder::withPropertiesFile);
         cliArguments.javaAwsSdkVersion.ifPresent(engineBuilder::withJavaAwsSdkVersion);
         cliArguments.includeDafnyFile.ifPresent(engineBuilder::withIncludeDafnyFile);
@@ -105,6 +109,12 @@ public class CodegenCli {
           .addOption(Option.builder("h")
             .longOpt("help")
             .desc("print help message")
+            .build())
+          .addOption(Option.builder("r")
+            .longOpt("library-root")
+            .desc("root directory of the library")
+            .hasArg()
+            .required()
             .build())
           .addOption(Option.builder("m")
             .longOpt("model")
@@ -172,6 +182,10 @@ public class CodegenCli {
             .longOpt("include-dafny")
             .desc("<optional> files to be include in the generated Dafny")
             .hasArg()
+            .build())
+          .addOption(Option.builder()
+            .longOpt("update-patch-files")
+            .desc("<optional> update patch files in <library-root>/codegen-patches instead of applying them")
             .build());
     }
 
@@ -180,6 +194,7 @@ public class CodegenCli {
     }
 
     private record CliArguments(
+            Path libraryRoot,
             Path modelPath,
             Path[] dependentModelPaths,
             String namespace,
@@ -192,7 +207,8 @@ public class CodegenCli {
             Optional<Path> propertiesFile,
             Optional<Path> includeDafnyFile,
             boolean awsSdkStyle,
-            boolean localServiceTest
+            boolean localServiceTest,
+            boolean updatePatchFiles
     ) {
         /**
          * @param args arguments to parse
@@ -206,6 +222,8 @@ public class CodegenCli {
                 printHelpMessage();
                 return Optional.empty();
             }
+
+            Path libraryRoot = Paths.get(commandLine.getOptionValue("library-root"));
 
             final Path modelPath = Path.of(commandLine.getOptionValue('m'));
 
@@ -266,11 +284,13 @@ public class CodegenCli {
                 includeDafnyFile = Optional.of(Paths.get(commandLine.getOptionValue("include-dafny")));
             }
 
+            final boolean updatePatchFiles = commandLine.hasOption("update-patch-files");
+
             return Optional.of(new CliArguments(
-                    modelPath, dependentModelPaths, namespace,
-                    outputDotnetDir, outputJavaDir, outputDafnyDir,outputGoDir,
+                    libraryRoot, modelPath, dependentModelPaths, namespace,
+                    outputDotnetDir, outputJavaDir, outputDafnyDir, outputGoDir,
                     javaAwsSdkVersion, dafnyVersion, propertiesFile, includeDafnyFile, awsSdkStyle,
-                    localServiceTest
+                    localServiceTest, updatePatchFiles
             ));
         }
     }

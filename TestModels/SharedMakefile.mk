@@ -28,19 +28,6 @@ PROJECT_RELATIVE_ROOT := $(dir $(lastword $(MAKEFILE_LIST)))
 # This evaluates to the path of the current working directory.
 # i.e. The specific library under consideration.
 LIBRARY_ROOT = $(PWD)
-
-# Later versions of Dafny no longer default to adding "_Compile"
-# to the names of modules when translating.
-# Our target language code still assumes it does,
-# so IF the /compileSuffix option is available in our verion of Dafny
-# we need to provide it.
-COMPILE_SUFFIX_OPTION_CHECK_EXIT_CODE := $(shell dafny /help | grep -q /compileSuffix; echo $$?)
-ifeq ($(COMPILE_SUFFIX_OPTION_CHECK_EXIT_CODE), 0)
-	COMPILE_SUFFIX_OPTION := -compileSuffix:0
-else
-	COMPILE_SUFFIX_OPTION :=
-endif
-
 STANDARD_LIBRARY_PATH := $(PROJECT_ROOT)/dafny-dependencies/StandardLibrary
 CODEGEN_CLI_ROOT := $(PROJECT_ROOT)/../codegen/smithy-dafny-codegen-cli
 GRADLEW := $(PROJECT_ROOT)/../codegen/gradlew
@@ -62,7 +49,6 @@ verify:
 		-vcsCores:$(Z3_PROCESSES) \
 		-compile:0 \
 		-definiteAssignment:3 \
-		-quantifierSyntax:3 \
 		-unicodeChar:0 \
 		-functionSyntax:3 \
 		-verificationLogger:csv \
@@ -73,7 +59,6 @@ verify:
 format:
 	dafny format \
 		--function-syntax 3 \
-		--quantifier-syntax 3 \
 		--unicode-char false \
 		`find . -name '*.dfy'`
 
@@ -81,7 +66,6 @@ format-check:
 	dafny format \
 		--check \
 		--function-syntax 3 \
-		--quantifier-syntax 3 \
 		--unicode-char false \
 		`find . -name '*.dfy'`
 
@@ -132,8 +116,7 @@ transpile_implementation:
         -spillTargetCode:3 \
         -compile:0 \
         -optimizeErasableDatatypeWrapper:0 \
-        $(COMPILE_SUFFIX_OPTION) \
-        -quantifierSyntax:3 \
+        -compileSuffix:1 \
         -unicodeChar:0 \
         -functionSyntax:3 \
         -useRuntimeLib \
@@ -173,8 +156,7 @@ transpile_test:
 		-runAllTests:1 \
 		-compile:0 \
 		-optimizeErasableDatatypeWrapper:0 \
-		$(COMPILE_SUFFIX_OPTION) \
-		-quantifierSyntax:3 \
+		-compileSuffix:1 \
 		-unicodeChar:0 \
 		-functionSyntax:3 \
 		-out $(OUT) \
@@ -205,6 +187,8 @@ _polymorph:
 	cd $(CODEGEN_CLI_ROOT); \
 	$(GRADLEW) run --args="\
 	$(DAFNY_VERSION_OPTION) \
+	--library-root $(LIBRARY_ROOT) \
+	$(UPDATE_PATCH_FILES_OPTION) \
 	--properties-file $(LIBRARY_ROOT)/project.properties \
 	$(OUTPUT_DAFNY) \
 	$(OUTPUT_DOTNET) \
@@ -221,6 +205,7 @@ _polymorph_wrapped:
 	cd $(CODEGEN_CLI_ROOT); \
 	$(GRADLEW) run --args="\
 	$(DAFNY_VERSION_OPTION) \
+	--library-root $(LIBRARY_ROOT) \
 	--properties-file $(LIBRARY_ROOT)/project.properties \
 	$(OUTPUT_DAFNY_WRAPPED) \
 	$(OUTPUT_DOTNET_WRAPPED) \
@@ -241,11 +226,11 @@ _polymorph_dependencies:
 # Generates all target runtime code for all namespaces in this project.
 .PHONY: polymorph_code_gen
 polymorph_code_gen:
-	for service in $(PROJECT_SERVICES) ; do \
+	set -e; for service in $(PROJECT_SERVICES) ; do \
 		export service_deps_var=SERVICE_DEPS_$${service} ; \
 		export namespace_var=SERVICE_NAMESPACE_$${service} ; \
 		export SERVICE=$${service} ; \
-		$(MAKE) _polymorph_code_gen || exit 1; \
+		$(MAKE) _polymorph_code_gen ; \
 	done
 
 _polymorph_code_gen: OUTPUT_DAFNY=\
@@ -269,13 +254,15 @@ _polymorph_code_gen: _polymorph_dependencies
 .PHONY: polymorph_dafny
 polymorph_dafny:
 	$(MAKE) -C $(STANDARD_LIBRARY_PATH) polymorph_dafny
-	for service in $(PROJECT_SERVICES) ; do \
+	set -e; for service in $(PROJECT_SERVICES) ; do \
 		export service_deps_var=SERVICE_DEPS_$${service} ; \
 		export namespace_var=SERVICE_NAMESPACE_$${service} ; \
 		export SERVICE=$${service} ; \
-		$(MAKE) _polymorph_dafny || exit 1; \
+		$(MAKE) _polymorph_dafny ; \
 	done
 
+_polymorph_dafny: POLYMORPH_LANGUAGE_TARGET=dafny
+_polymorph_dafny: _polymorph_dependencies
 _polymorph_dafny: OUTPUT_DAFNY=\
     --output-dafny $(if $(DIR_STRUCTURE_V2), $(LIBRARY_ROOT)/dafny/$(SERVICE)/Model, $(LIBRARY_ROOT)/Model) \
 	--include-dafny $(STANDARD_LIBRARY_PATH)/src/Index.dfy
@@ -285,17 +272,15 @@ _polymorph_dafny: OUTPUT_DAFNY_WRAPPED=\
     --include-dafny $(STANDARD_LIBRARY_PATH)/src/Index.dfy
 _polymorph_dafny: OUTPUT_LOCAL_SERVICE=--local-service-test
 _polymorph_dafny: _polymorph_wrapped
-_polymorph_dafny: POLYMORPH_LANGUAGE_TARGET=dafny
-_polymorph_dafny: _polymorph_dependencies
 
 # Generates dotnet code for all namespaces in this project
 .PHONY: polymorph_net
 polymorph_net:
-	for service in $(PROJECT_SERVICES) ; do \
+	set -e; for service in $(PROJECT_SERVICES) ; do \
 		export service_deps_var=SERVICE_DEPS_$${service} ; \
 		export namespace_var=SERVICE_NAMESPACE_$${service} ; \
 		export SERVICE=$${service} ; \
-		$(MAKE) _polymorph_net || exit 1; \
+		$(MAKE) _polymorph_net ; \
 	done
 
 _polymorph_net: OUTPUT_DOTNET=\
@@ -311,11 +296,11 @@ _polymorph_net: _polymorph_dependencies
 # Generates java code for all namespaces in this project
 .PHONY: polymorph_java
 polymorph_java:
-	for service in $(PROJECT_SERVICES) ; do \
+	set -e; for service in $(PROJECT_SERVICES) ; do \
 		export service_deps_var=SERVICE_DEPS_$${service} ; \
 		export namespace_var=SERVICE_NAMESPACE_$${service} ; \
 		export SERVICE=$${service} ; \
-		$(MAKE) _polymorph_java || exit 1; \
+		$(MAKE) _polymorph_java ; \
 	done
 
 _polymorph_java: OUTPUT_JAVA=--output-java $(LIBRARY_ROOT)/runtimes/java/src/main/smithy-generated
@@ -325,6 +310,10 @@ _polymorph_java: OUTPUT_LOCAL_SERVICE=--local-service-test
 _polymorph_java: _polymorph_wrapped
 _polymorph_java: POLYMORPH_LANGUAGE_TARGET=java
 _polymorph_java: _polymorph_dependencies
+
+# Dependency for formatting generating Java code
+setup_prettier:
+	npm i --no-save prettier prettier-plugin-java
 
 ########################## .NET targets
 

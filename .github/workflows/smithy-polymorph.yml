@@ -15,7 +15,16 @@ jobs:
         with:
           distribution: 'corretto'
           java-version: '17'
-
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'corretto'
+          java-version: '17'
+      - name: Setup Dafny
+        uses: dafny-lang/setup-dafny-action@v1.7.0
+        with:
+          # Matching the hard-coded version for the "2023" edition for now
+          dafny-version: 4.1.0
+  
       - name: Execute smithy-dafny-codegen-cli tests
         uses: gradle/gradle-build-action@v2
         with:
