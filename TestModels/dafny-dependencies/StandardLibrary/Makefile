@@ -36,8 +36,21 @@ polymorph_dotnet :
 polymorph_java :
 	echo "Skipping polymorph_java for StandardLibrary"
 
-polymorph_rust :
-	echo "Skipping polymorph_rust for StandardLibrary"
+# Using this target for the side-effect of maintaining patches,
+# Since Dafny Rust code generation is incomplete and also needs to be patched.
+# That only works if you run transpile_rust first.
+polymorph_rust : transpile_rust
+	cd $(CODEGEN_CLI_ROOT); \
+	$(GRADLEW) run --args="\
+	--dafny-version $(DAFNY_VERSION) \
+	--library-root $(LIBRARY_ROOT) \
+	--patch-files-dir $(if $(DIR_STRUCTURE_V2),$(LIBRARY_ROOT)/codegen-patches/$(SERVICE),$(LIBRARY_ROOT)/codegen-patches) \
+	--output-rust $(LIBRARY_ROOT)/runtimes/rust \
+	--model $(PROJECT_ROOT)/$(STD_LIBRARY)/Model \
+	--namespace aws.polymorph \
+	--dependent-model $(PROJECT_ROOT)/$(STD_LIBRARY)/../Model \
+	$(POLYMORPH_OPTIONS) \
+	";
 
 # Override SharedMakefile's transpile_net to not transpile
 # StandardLibrary as a dependency
