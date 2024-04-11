@@ -391,7 +391,7 @@ polymorph_rust:
 	done
 
 _polymorph_rust: OUTPUT_RUST=--output-rust $(LIBRARY_ROOT)/runtimes/rust
-_polymorph_rust: transpile_net _polymorph
+_polymorph_rust: transpile_rust _polymorph
 
 ########################## .NET targets
 
