@@ -133,14 +133,6 @@ public class CodegenEngine {
         for (final TargetLanguage lang : targetLangOutputDirs.keySet()) {
             final Path outputDir = targetLangOutputDirs.get(lang).toAbsolutePath().normalize();
 
-            // Clear out all contents first to make sure if we didn't intend to generate it,
-            // it doesn't show up as generated code.
-            // We can't do this for Dafny because we like to generate into the Smithy Model directory :P
-            if (lang != TargetLanguage.DAFNY) {
-                software.amazon.smithy.utils.IoUtils.rmdir(outputDir);
-                outputDir.toFile().mkdirs();
-            }
-
             switch (lang) {
                 case DAFNY -> generateDafny(outputDir);
                 case JAVA -> generateJava(outputDir);
@@ -330,6 +322,14 @@ public class CodegenEngine {
         LOGGER.warn("Rust code generation is incomplete and may not function correctly!", outputDir);
 
         // ...so incomplete it's starting out as a no-op and relying on 100% "patching" :)
+
+        // Clear out all contents first to make sure if we didn't intend to generate it,
+        // it doesn't show up as generated code. This ensures patching has the right baseline.
+        // It would be great to do this for all languages,
+        // but we're not currently precise enough and do multiple passes
+        // to generate code for things like wrapped services.
+        software.amazon.smithy.utils.IoUtils.rmdir(outputDir);
+        outputDir.toFile().mkdirs();
     }
 
     private static final Pattern PATCH_FILE_PATTERN = Pattern.compile("dafny-(.*).patch");
