@@ -11,16 +11,19 @@ For more details, please see `TestModels/aws-sdks/sqs/README.md`.
 ### .NET
 
 1. Generate the Wrappers using `polymorph`
+
 ```
 make polymorph_dafny polymorph_dotnet
 ```
 
 2. Transpile the tests (and implementation) to the target runtime.
+
 ```
 make transpile_net
 ```
 
 3. Generate the executable in the .NET and execute the tests
+
 ```
 make test_net
 ```

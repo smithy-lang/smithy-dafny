@@ -69,6 +69,7 @@ $./gradlew run --args="\
 You can also look at the [ServiceCodegenSmokeTest](./src/test/java/software/amazon/polymorph/smithydotnet/ServiceCodegenSmokeTest.java) as a reference for how to use the library. It reads and generates code for the [test model](./src/test/resources/model.smithy), then prints the generated code to stdout.
 
 ## Arguments
+
 By default, nothing is generated.  
 Language generation is enabled by the language's `output` argument.  
 This argument also determines the directory code will be written.
@@ -76,6 +77,7 @@ This argument also determines the directory code will be written.
 ## Useful Debugging expressions:
 
 To print a `List<ParseToken>`:
+
 ```
 <listVariable>.stream().map(ParseToken::text).collect(Collectors.joining(" "))
 ```

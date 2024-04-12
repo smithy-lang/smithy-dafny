@@ -1,6 +1,6 @@
 name: smithy-dafny-conversion workflows
 
-on: 
+on:
   pull_request:
   push:
     branches:
@@ -13,8 +13,8 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-java@v3
         with:
-          distribution: 'corretto'
-          java-version: '8'
+          distribution: "corretto"
+          java-version: "8"
 
       - name: Setup Dafny
         uses: dafny-lang/setup-dafny-action@v1.6.1
