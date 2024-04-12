@@ -6,6 +6,7 @@ on:
 
 jobs:
   check-java:
+    steps:
       - name: Check format of Java, md and yaml
         shell: bash
         run: |
