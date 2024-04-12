@@ -7,7 +7,7 @@ This project implements the Smithy 2.0 type [enum](https://smithy.io/2.0/spec/si
 1. Generate the Wrappers using `polymorph`
 ```
 make polymorph_dafny
-make polymorph_net
+make polymorph_dotnet
 ```
 
 2. Transpile the tests (and implementation) to the target runtime.

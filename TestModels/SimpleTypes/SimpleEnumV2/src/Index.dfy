@@ -1,6 +1,8 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 include "SimpleEnumImpl.dfy"
 
-module {:extern "Dafny.Simple.Types.EnumV2" } SimpleEnumV2 refines AbstractSimpleTypesEnumV2Service {
+module {:extern "simple.types.enumv2.internaldafny" } SimpleEnumV2 refines AbstractSimpleTypesEnumV2Service {
     import Operations = SimpleEnumV2Impl
 
  function method DefaultSimpleEnumV2Config(): SimpleEnumV2Config {
