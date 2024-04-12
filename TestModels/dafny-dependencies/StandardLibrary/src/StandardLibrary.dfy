@@ -52,7 +52,7 @@ module StandardLibrary {
     Some((s[..i], s[(i + 1)..]))
   }
 
-  lemma WillSplitOnDelim<T>(s: seq<T>, delim: T, prefix: seq<T>)
+  lemma {:vcs_split_on_every_assert} WillSplitOnDelim<T>(s: seq<T>, delim: T, prefix: seq<T>)
     requires |prefix| < |s|
     requires forall i :: 0 <= i < |prefix| ==> prefix[i] == s[i]
     requires delim !in prefix && s[|prefix|] == delim
@@ -244,7 +244,7 @@ module StandardLibrary {
     assert LexicographicLessOrEqualAux(a, a, less, |a|);
   }
 
-  lemma LexIsAntisymmetric<T>(a: seq<T>, b: seq<T>, less: (T, T) -> bool)
+  lemma LexIsAntisymmetric<T(!new)>(a: seq<T>, b: seq<T>, less: (T, T) -> bool)
     requires Trich: Trichotomous(less)
     requires LexicographicLessOrEqual(a, b, less)
     requires LexicographicLessOrEqual(b, a, less)
@@ -287,7 +287,7 @@ module StandardLibrary {
     }
   }
 
-  lemma LexIsTransitive<T>(a: seq<T>, b: seq<T>, c: seq<T>, less: (T, T) -> bool)
+  lemma LexIsTransitive<T(!new)>(a: seq<T>, b: seq<T>, c: seq<T>, less: (T, T) -> bool)
     requires Transitive(less)
     requires LexicographicLessOrEqual(a, b, less)
     requires LexicographicLessOrEqual(b, c, less)
@@ -299,7 +299,7 @@ module StandardLibrary {
     assert LexicographicLessOrEqualAux(a, c, less, k);
   }
 
-  lemma LexIsTotal<T>(a: seq<T>, b: seq<T>, less: (T, T) -> bool)
+  lemma LexIsTotal<T(!new)>(a: seq<T>, b: seq<T>, less: (T, T) -> bool)
     requires Trich: Trichotomous(less)
     ensures LexicographicLessOrEqual(a, b, less) || LexicographicLessOrEqual(b, a, less)
   {
@@ -375,7 +375,7 @@ module StandardLibrary {
     forall z :: z in s ==> LexicographicLessOrEqual(a, z, less)
   }
 
-  lemma ThereIsAMinimum<T>(s: set<seq<T>>, less: (T, T) -> bool)
+  lemma ThereIsAMinimum<T(!new)>(s: set<seq<T>>, less: (T, T) -> bool)
     requires s != {}
     requires Trichotomous(less) && Transitive(less)
     ensures exists a :: IsMinimum(a, s, less)
@@ -383,7 +383,7 @@ module StandardLibrary {
     var a := FindMinimum(s, less);
   }
 
-  lemma MinimumIsUnique<T>(a: seq<T>, b: seq<T>, s: set<seq<T>>, less: (T, T) -> bool)
+  lemma MinimumIsUnique<T(!new)>(a: seq<T>, b: seq<T>, s: set<seq<T>>, less: (T, T) -> bool)
     requires IsMinimum(a, s, less) && IsMinimum(b, s, less)
     requires Trichotomous(less)
     ensures a == b
@@ -391,7 +391,7 @@ module StandardLibrary {
     LexIsAntisymmetric(a, b, less);
   }
 
-  lemma FindMinimum<T>(s: set<seq<T>>, less: (T, T) -> bool) returns (a: seq<T>)
+  lemma FindMinimum<T(!new)>(s: set<seq<T>>, less: (T, T) -> bool) returns (a: seq<T>)
     requires s != {}
     requires Trichotomous(less) && Transitive(less)
     ensures IsMinimum(a, s, less)

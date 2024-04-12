@@ -9,4 +9,3 @@ NAMESPACE=simple.types.short
 
 # This project has no dependencies 
 # DEPENDENT-MODELS:= 
-# LIBRARIES :=

@@ -1,3 +1,5 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 package software.amazon.smithy.dafny.conversion;
 
 import java.math.BigDecimal;
@@ -193,7 +195,7 @@ public class ToNative {
         ) {
             // From the Smithy Docs:
             // "Implementations SHOULD use insertion ordered sets"
-            // https://awslabs.github.io/smithy/1.0/spec/core/model.html#set
+            // https://smithy.io/1.0/spec/core/model.html#set
             // Thus, we use a LinkedHashSet
             Set<R> returnSet = new LinkedHashSet<>(dafnyValues.size(), 1);
             dafnyValues.Elements().forEach(value ->

@@ -1,3 +1,5 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 package software.amazon.polymorph.smithyjava.generator;
 
 import com.squareup.javapoet.ClassName;
@@ -192,13 +194,13 @@ public abstract class ToDafny extends Generator {
                     isNullCheck,
                     inputVar);
         }
+        CodeBlock typeDescriptor = subject.dafnyNameResolver.typeDescriptor(memberShape.getTarget());
         return CodeBlock.of(
-                "$L = $L ?\n$T.create_Some($L)\n: $T.create_None()",
+                "$L = $L ?\n$L\n: $L",
                 outputVar,
                 isSetCheck,
-                ClassName.get("Wrappers_Compile", "Option"),
-                memberConversion,
-                ClassName.get("Wrappers_Compile", "Option")
+                subject.dafnyNameResolver.createSome(typeDescriptor, memberConversion),
+                subject.dafnyNameResolver.createNone(typeDescriptor)
         );
     }
 

@@ -1,3 +1,5 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 import java.net.URI
 import javax.annotation.Nullable
 
@@ -75,7 +77,7 @@ publishing {
                 pom {
                     name.set("Smithy :: Dafny :: Conversion")
                     description.set("Convert Native Java Types to Dafny Runtime Types and vice versa")
-                    url.set("https://github.com/awslabs/smithy")
+                    url.set("https://github.com/smithy-lang/smithy")
                     licenses {
                         license {
                             name.set("Apache License 2.0")
@@ -93,7 +95,7 @@ publishing {
                         }
                     }
                     scm {
-                        url.set("https://github.com/awslabs/smithy.git")
+                        url.set("https://github.com/smithy-lang/smithy.git")
                     }
                 }
             }

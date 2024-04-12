@@ -9,9 +9,14 @@
 **/runtimes/java/src/main/dafny-generated/
 **/runtimes/java/src/test/dafny-generated/
 
+# Dafny Generated Rust
+**/runtimes/rust
+**/runtimes/rust
+
 # Polymorph Generated Dafny
 **/Model/*Types.dfy
 **/Model/*TypesWrapped.dfy
+**/project.properties
 
 # Polymorph Generated .NET
 **/runtimes/net/Generated/*.cs

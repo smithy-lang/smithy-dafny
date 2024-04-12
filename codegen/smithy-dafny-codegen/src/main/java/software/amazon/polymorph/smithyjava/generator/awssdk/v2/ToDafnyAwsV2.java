@@ -1,3 +1,5 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 package software.amazon.polymorph.smithyjava.generator.awssdk.v2;
 
 import com.squareup.javapoet.AnnotationSpec;
@@ -518,16 +520,18 @@ public class ToDafnyAwsV2 extends ToDafny {
         );
         // This is memberAssignment from above,
         // but with calls to dafnyNameResolver replaced with their expected response.
+        CodeBlock stringTypeDescriptor = Dafny.TYPE_DESCRIPTOR_BY_SHAPE_TYPE.get(ShapeType.STRING);
         CodeBlock memberAssignment = CodeBlock.of(
-                "$L = $T.nonNull($L) ?\n$T.create_Some($T.$L($L))\n: $T.create_None()",
+                "$L = $T.nonNull($L) ?\n$L\n: $L",
                 "message",
                 ClassName.get(Objects.class),
                 "nativeValue.getMessage()",
-                ClassName.get("Wrappers_Compile", "Option"),
-                COMMON_TO_DAFNY_SIMPLE,
-                SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(ShapeType.STRING).methodName(),
-                "nativeValue.getMessage()",
-                ClassName.get("Wrappers_Compile", "Option")
+                subject.dafnyNameResolver.createSome(stringTypeDescriptor,
+                        CodeBlock.of("$T.$L($L)",
+                                COMMON_TO_DAFNY_SIMPLE,
+                                SIMPLE_CONVERSION_METHOD_FROM_SHAPE_TYPE.get(ShapeType.STRING).methodName(),
+                                "nativeValue.getMessage()")),
+                subject.dafnyNameResolver.createNone(stringTypeDescriptor)
         );
         return MethodSpec.methodBuilder("Error")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)

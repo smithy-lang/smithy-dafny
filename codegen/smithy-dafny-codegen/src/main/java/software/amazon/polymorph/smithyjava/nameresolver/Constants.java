@@ -1,3 +1,5 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 package software.amazon.polymorph.smithyjava.nameresolver;
 
 import com.squareup.javapoet.ClassName;
@@ -9,6 +11,7 @@ import software.amazon.smithy.model.shapes.ShapeType;
 
 public class Constants {
     public static final ShapeId SMITHY_API_UNIT = ShapeId.fromParts("smithy.api", "Unit");
+    public static final ClassName DAFNY_OPTION_CLASS_NAME = ClassName.get("Wrappers_Compile", "Option");
     public static final ClassName DAFNY_RESULT_CLASS_NAME = ClassName.get("Wrappers_Compile", "Result");
     public static final ClassName DAFNY_TUPLE0_CLASS_NAME = ClassName.get("dafny", "Tuple0");
     public static final ClassName DAFNY_TYPE_DESCRIPTOR_CLASS_NAME = ClassName.get("dafny", "TypeDescriptor");

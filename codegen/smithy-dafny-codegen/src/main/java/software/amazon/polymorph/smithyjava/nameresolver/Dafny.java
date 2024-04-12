@@ -1,3 +1,5 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 package software.amazon.polymorph.smithyjava.nameresolver;
 
 import com.squareup.javapoet.ClassName;
@@ -17,6 +19,7 @@ import java.util.Objects;
 import javax.annotation.Nullable;
 
 import software.amazon.polymorph.smithydafny.DafnyNameResolver;
+import software.amazon.polymorph.smithydafny.DafnyVersion;
 import software.amazon.polymorph.smithyjava.MethodReference;
 import software.amazon.polymorph.smithyjava.generator.CodegenSubject;
 import software.amazon.polymorph.smithyjava.generator.Generator;
@@ -47,7 +50,7 @@ import static software.amazon.smithy.utils.StringUtils.capitalize;
 public class Dafny extends NameResolver {
     @SuppressWarnings("unused")
     private static final Logger LOGGER = LoggerFactory.getLogger(Dafny.class);
-    protected static final Map<ShapeType, CodeBlock> TYPE_DESCRIPTOR_BY_SHAPE_TYPE;
+    public static final Map<ShapeType, CodeBlock> TYPE_DESCRIPTOR_BY_SHAPE_TYPE;
     static {
         TYPE_DESCRIPTOR_BY_SHAPE_TYPE = Map.ofEntries(
                 Map.entry(ShapeType.STRING, CodeBlock.of("$T._typeDescriptor($T.CHAR)", Constants.DAFNY_SEQUENCE_CLASS_NAME, Constants.DAFNY_TYPE_DESCRIPTOR_CLASS_NAME)),
@@ -63,17 +66,21 @@ public class Dafny extends NameResolver {
         );
     }
 
+    private final DafnyVersion dafnyVersion;
+
     public Dafny(
             final String packageName,
             final Model model,
             final ServiceShape serviceShape,
-            CodegenSubject.AwsSdkVersion awsSdkVersion) {
+            final CodegenSubject.AwsSdkVersion awsSdkVersion,
+            final DafnyVersion dafnyVersion) {
         super(
                 packageName,
                 serviceShape,
                 model,
                 modelPackageNameForServiceShape(serviceShape),
                 awsSdkVersion);
+        this.dafnyVersion = dafnyVersion;
     }
 
     /**
@@ -88,6 +95,98 @@ public class Dafny extends NameResolver {
             return "create";
         }
         return "create_" + DafnyNameResolverHelpers.dafnyCompilesExtra_(name);
+    }
+
+    //  Dafnys greater than or equal to this will need Type Descriptors for constructing datatypes  
+    private static final DafnyVersion NEEDS_TYPE_DESCRIPTORS_WHEN_CONSTRUCTING_DATATYPES = new DafnyVersion(4, 3, 0);
+
+    /**
+     * @return Whether the given Dafny version requires type descriptor values when instantiating datatype constructors.
+     */
+    public static boolean datatypeConstructorsNeedTypeDescriptors(DafnyVersion dafnyVersion) {
+        return dafnyVersion.compareTo(NEEDS_TYPE_DESCRIPTORS_WHEN_CONSTRUCTING_DATATYPES) >= 0;
+    }
+
+    private boolean datatypeConstructorsNeedTypeDescriptors() {
+        return datatypeConstructorsNeedTypeDescriptors(dafnyVersion);
+    }
+
+    /**
+     * Code to create an instance of the None constructor of Wrappers.Option<T>.
+     * @param typeDescriptor the code to create a TypeDescriptor for the type T,
+     *                       which is needed if datatypeConstructorsNeedTypeDescriptors()
+     */
+    public CodeBlock createNone(CodeBlock typeDescriptor) {
+        if (datatypeConstructorsNeedTypeDescriptors()) {
+            return CodeBlock.of(
+                    "$T.create_None($L)",
+                    ClassName.get("Wrappers_Compile", "Option"),
+                    typeDescriptor);
+        } else {
+            return CodeBlock.of(
+                    "$T.create_None()",
+                    ClassName.get("Wrappers_Compile", "Option"));
+        }
+    }
+
+    /**
+     * Code to create an instance of the Some(value: T) constructor of Wrappers.Option<T>.
+     * @param typeDescriptor the code to create a TypeDescriptor for the type T,
+     *                       which is needed if datatypeConstructorsNeedTypeDescriptors()
+     */
+    public CodeBlock createSome(CodeBlock typeDescriptor, CodeBlock value) {
+        if (datatypeConstructorsNeedTypeDescriptors()) {
+            return CodeBlock.of(
+                    "$T.create_Some($L, $L)",
+                    Constants.DAFNY_OPTION_CLASS_NAME,
+                    typeDescriptor,
+                    value);
+        } else {
+            return CodeBlock.of(
+                    "$T.create_Some($L)",
+                    Constants.DAFNY_OPTION_CLASS_NAME,
+                    value);
+        }
+    }
+
+    /**
+     * Code to create an instance of the Success(value: T) constructor of Wrappers.Result<T, Error>.
+     * @param valueTypeDescriptor the code to create a TypeDescriptor for the type T,
+     *                       which is needed if datatypeConstructorsNeedTypeDescriptors()
+     */
+    public CodeBlock createSuccess(CodeBlock valueTypeDescriptor, CodeBlock value) {
+        if (datatypeConstructorsNeedTypeDescriptors()) {
+            return CodeBlock.of(
+                    "$T.create_Success($L, Error._typeDescriptor(), $L)",
+                    Constants.DAFNY_RESULT_CLASS_NAME,
+                    valueTypeDescriptor,
+                    value);
+        } else {
+            return CodeBlock.of(
+                    "$T.create_Success($L)",
+                    Constants.DAFNY_RESULT_CLASS_NAME,
+                    value);
+        }
+    }
+
+    /**
+     * Code to create an instance of the Failure(error: Error) constructor of Wrappers.Result<T, Error>.
+     * @param valueTypeDescriptor the code to create a TypeDescriptor for the type T,
+     *                            which is needed if datatypeConstructorsNeedTypeDescriptors()
+     */
+    public CodeBlock createFailure(CodeBlock valueTypeDescriptor, CodeBlock error) {
+        if (datatypeConstructorsNeedTypeDescriptors()) {
+            return CodeBlock.of(
+                    "$T.create_Failure($L, Error._typeDescriptor(), $L)",
+                    Constants.DAFNY_RESULT_CLASS_NAME,
+                    valueTypeDescriptor,
+                    error);
+        } else {
+            return CodeBlock.of(
+                    "$T.create_Failure($L)",
+                    Constants.DAFNY_RESULT_CLASS_NAME,
+                    error);
+        }
     }
 
     public static String datatypeConstructorIs(String name) {
@@ -141,6 +240,13 @@ public class Dafny extends NameResolver {
                 Constants.DAFNY_RESULT_CLASS_NAME,
                 success,
                 failure
+        );
+    }
+
+    public static TypeName asDafnyOption(TypeName value) {
+        return ParameterizedTypeName.get(
+                Constants.DAFNY_OPTION_CLASS_NAME,
+                value
         );
     }
 
@@ -237,7 +343,7 @@ public class Dafny extends NameResolver {
             return CodeBlock.of("$L()",
                     new MethodReference(abstractClassForError(), "_typeDescriptor").asNormalReference());
         }
-        if (shape.hasTrait(ReferenceTrait.class)) {
+        if (shape.hasTrait(ReferenceTrait.class) || shape.isServiceShape() || shape.isResourceShape()) {
             // It is safe to use typeForShape here, as ReferenceTrait will always turn into a Resource or Service
             TypeName interfaceClassName = typeForShape(shapeId);
             return  CodeBlock.of("$T.reference($T.class)", Constants.DAFNY_TYPE_DESCRIPTOR_CLASS_NAME, interfaceClassName);
@@ -257,8 +363,27 @@ public class Dafny extends NameResolver {
                 return CodeBlock.of("$L", typeDescriptor);
             }
         }
-        return CodeBlock.of("$L()",
-                new MethodReference(classForNotErrorNotUnitShape(shape), "_typeDescriptor").asNormalReference());
+        if (shape.getType().isShapeType(ShapeType.LIST)) {
+            CodeBlock elementTypeDescriptor = typeDescriptor(shape.asListShape().get().getMember().getTarget());
+            return CodeBlock.of("$T._typeDescriptor($L)", Constants.DAFNY_SEQUENCE_CLASS_NAME, elementTypeDescriptor);
+        }
+        if (shape.getType().isShapeType(ShapeType.SET)) {
+            CodeBlock elementTypeDescriptor = typeDescriptor(shape.asSetShape().get().getMember().getTarget());
+            return CodeBlock.of("$T._typeDescriptor($L)", Constants.DAFNY_SET_CLASS_NAME, elementTypeDescriptor);
+        }
+        if (shape.getType().isShapeType(ShapeType.MAP)) {
+            CodeBlock keyTypeDescriptor = typeDescriptor(shape.asMapShape().get().getKey().getTarget());
+            CodeBlock valueTypeDescriptor = typeDescriptor(shape.asMapShape().get().getValue().getTarget());
+            return CodeBlock.of("$T._typeDescriptor($L, $L)", Constants.DAFNY_MAP_CLASS_NAME, keyTypeDescriptor, valueTypeDescriptor);
+        }
+        if (shape.getType().isShapeType(ShapeType.STRUCTURE)
+                || shape.getType().isShapeType(ShapeType.UNION)
+                || shape.getType().isShapeType(ShapeType.DOUBLE)
+                || shape.hasTrait(EnumTrait.class)) {
+            return CodeBlock.of("$L()",
+                    new MethodReference(classForNotErrorNotUnitShape(shape), "_typeDescriptor").asNormalReference());
+        }
+        throw new IllegalArgumentException("Don't know how to create a type descriptor for this shape: %s".formatted(shape));
     }
 
     /*
@@ -302,7 +427,7 @@ public class Dafny extends NameResolver {
         return typeForCharacterSequence();
     }
 
-    TypeName typeForCharacterSequence() {
+   TypeName typeForCharacterSequence() {
         return ParameterizedTypeName.get(
                 Constants.DAFNY_SEQUENCE_CLASS_NAME,
                 WildcardTypeName.subtypeOf(Character.class)

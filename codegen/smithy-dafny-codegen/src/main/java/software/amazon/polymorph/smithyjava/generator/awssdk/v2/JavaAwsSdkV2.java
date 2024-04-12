@@ -1,3 +1,5 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 package software.amazon.polymorph.smithyjava.generator.awssdk.v2;
 
 import com.squareup.javapoet.ClassName;
@@ -6,6 +8,7 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
+import software.amazon.polymorph.smithydafny.DafnyVersion;
 import software.amazon.polymorph.smithyjava.MethodReference;
 import software.amazon.polymorph.smithyjava.generator.CodegenSubject;
 import software.amazon.polymorph.utils.TokenTree;
@@ -45,8 +48,8 @@ public class JavaAwsSdkV2 extends CodegenSubject {
         this.packageName = dafnyNameResolver.packageName();
     }
 
-    public static JavaAwsSdkV2 createJavaAwsSdkV2(ServiceShape serviceShape, Model model) {
-        final AwsSdkDafnyV2 dafnyNameResolver = new AwsSdkDafnyV2(serviceShape, model);
+    public static JavaAwsSdkV2 createJavaAwsSdkV2(ServiceShape serviceShape, Model model, DafnyVersion dafnyVersion) {
+        final AwsSdkDafnyV2 dafnyNameResolver = new AwsSdkDafnyV2(serviceShape, model, dafnyVersion);
         final AwsSdkNativeV2 nativeNameResolver = new AwsSdkNativeV2(serviceShape, model);
         return new JavaAwsSdkV2(serviceShape, model, dafnyNameResolver, nativeNameResolver);
     }

@@ -1,3 +1,5 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 include "../src/Index.dfy"
 include "../../Constraints/test/Helpers.dfy"
 
@@ -91,7 +93,7 @@ module SimpleDependenciesImplTest {
       modifies client.Modifies
       ensures client.ValidState()
     {
-      var resourceDataInput := SimpleConstraintsTestHelpers.GetConstraintsInputTemplate();
+      var resourceDataInput := SimpleConstraintsTestHelpers.GetValidInput();
       var res :- expect client.UseLocalConstraintsService(resourceDataInput);
       expect res.MyString.Some?;
       expect res.MyString.value == "bw1and10";

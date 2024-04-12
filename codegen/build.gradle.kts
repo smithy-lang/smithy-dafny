@@ -138,7 +138,7 @@ subprojects {
                         pom {
                             name.set(subproject.extra["displayName"].toString())
                             description.set(subproject.description)
-                            url.set("https://github.com/awslabs/smithy")
+                            url.set("https://github.com/smithy-lang/smithy")
                             licenses {
                                 license {
                                     name.set("Apache License 2.0")
@@ -156,7 +156,7 @@ subprojects {
                                 }
                             }
                             scm {
-                                url.set("https://github.com/awslabs/smithy.git")
+                                url.set("https://github.com/smithy-lang/smithy.git")
                             }
                         }
                     }

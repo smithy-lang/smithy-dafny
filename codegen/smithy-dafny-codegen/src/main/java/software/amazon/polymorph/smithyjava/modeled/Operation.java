@@ -1,3 +1,5 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 package software.amazon.polymorph.smithyjava.modeled;
 
 import com.squareup.javapoet.ClassName;
@@ -51,31 +53,40 @@ public class Operation {
             final ResolvedShapeId outputResolved = signature.resolvedOutput();
             MethodSpec.Builder method = signature.method();
             final String operationName = operationShape.toShapeId().getName();
-            // Convert Input
-            method.addStatement(declareNativeInputAndCovert(inputResolved, subject));
             // Try native implementation
             method.beginControlFlow("try");
+            // Convert Input
+            method.addStatement(declareNativeInputAndCovert(inputResolved, subject));
+            CodeBlock successTypeDescriptor;
             if (outputResolved.resolvedId().equals(SMITHY_API_UNIT)) {
                 // if operation is void
+                successTypeDescriptor = CodeBlock.of("dafny.Tuple0._typeDescriptor()");
                 method
                         .addStatement(invoke(operationName))
-                        .addStatement("return $T.create_Success($T.create())",
-                                DAFNY_RESULT_CLASS_NAME, DAFNY_TUPLE0_CLASS_NAME);
+                        .addStatement("return $L",
+                                subject.dafnyNameResolver.createSuccess(
+                                        successTypeDescriptor,
+                                        CodeBlock.of("$T.create()", DAFNY_TUPLE0_CLASS_NAME)));
             } else {
                 // operation is not void
+                successTypeDescriptor = subject.dafnyNameResolver.typeDescriptor(outputResolved.resolvedId());
                 TypeName nativeOutputType = preferNativeInterface(outputResolved, subject);
                 method
                         .addStatement(declareNativeOutputAndInvoke(operationName, nativeOutputType))
                         .addStatement(declareDafnyOutputAndConvert(outputResolved, subject))
-                        .addStatement("return $T.create_Success($L)",
-                                DAFNY_RESULT_CLASS_NAME, DAFNY_OUTPUT);
+                        .addStatement("return $L",
+                                subject.dafnyNameResolver.createSuccess(
+                                        successTypeDescriptor,
+                                        CodeBlock.of(DAFNY_OUTPUT)));
             }
             // catch Errors in this Namespace
             method
                     .nextControlFlow("catch ($T ex)",
                             ClassName.get(RuntimeException.class))
-                    .addStatement("return $T.create_Failure($T.Error(ex))",
-                            DAFNY_RESULT_CLASS_NAME, shimLibrary.toDafnyClassName)
+                    .addStatement("return $L",
+                            subject.dafnyNameResolver.createFailure(
+                                    successTypeDescriptor,
+                                    CodeBlock.of("$T.Error(ex)", shimLibrary.toDafnyClassName)))
                     .endControlFlow();
             return method.build();
         }

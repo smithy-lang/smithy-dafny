@@ -1,3 +1,5 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 package software.amazon.polymorph.smithyjava.generator.awssdk.v2;
 
 import com.squareup.javapoet.CodeBlock;
@@ -8,9 +10,15 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import software.amazon.polymorph.smithydafny.DafnyVersion;
+import software.amazon.polymorph.smithyjava.ForEachDafnyTest;
 import software.amazon.polymorph.smithyjava.MethodReference;
 import software.amazon.polymorph.smithyjava.ModelConstants;
 import software.amazon.polymorph.smithyjava.generator.awssdk.TestSetupUtils;
@@ -33,7 +41,7 @@ import static software.amazon.polymorph.smithyjava.generator.awssdk.v2.ToNativeC
 import static software.amazon.polymorph.util.Tokenizer.tokenizeAndAssertEqual;
 
 @SuppressWarnings("OptionalGetWithoutIsPresent")
-public class ToNativeTest {
+public class ToNativeTest extends ForEachDafnyTest {
     // Why two underTests?
     // As we refactor ToNativeAwsV2 and abstract ToNative,
     // we are going to bump into permission issues in unit tests
@@ -47,6 +55,7 @@ public class ToNativeTest {
     protected ToNativeAwsV2 underTest;
     protected ToNativeTestImpl underTestAbstract;
     protected Model model;
+    protected final DafnyVersion dafnyVersion;
 
     class ToNativeTestImpl extends ToNativeAwsV2 {
 
@@ -91,11 +100,11 @@ public class ToNativeTest {
         }
     }
 
-    @Before
-    public void setup() {
+    public ToNativeTest(DafnyVersion dafnyVersion) {
+        this.dafnyVersion = dafnyVersion;
         model = TestSetupUtils.setupTwoLocalModel(ModelConstants.KMS_KITCHEN, ModelConstants.OTHER_NAMESPACE);
-        underTest  = new ToNativeAwsV2(TestSetupUtils.setupAwsSdkV2(model, "kms"));
-        underTestAbstract  = new ToNativeTestImpl(TestSetupUtils.setupAwsSdkV2(model, "kms"));
+        underTest  = new ToNativeAwsV2(TestSetupUtils.setupAwsSdkV2(model, "kms", dafnyVersion));
+        underTestAbstract  = new ToNativeTestImpl(TestSetupUtils.setupAwsSdkV2(model, "kms", dafnyVersion));
     }
 
     @Test
@@ -229,7 +238,7 @@ public class ToNativeTest {
     @Test
     public void generate() {
         Model model = TestSetupUtils.setupLocalModel(ModelConstants.KMS_A_STRING_OPERATION);
-        ToNativeAwsV2 underTest = new ToNativeAwsV2(TestSetupUtils.setupAwsSdkV2(model, "kms"));
+        ToNativeAwsV2 underTest = new ToNativeAwsV2(TestSetupUtils.setupAwsSdkV2(model, "kms", dafnyVersion));
         final Map<Path, TokenTree> actual = underTest.generate();
         final Path expectedPath = Path.of("software/amazon/cryptography/services/kms/internaldafny/ToNative.java");
         Path[] temp = new Path[1];

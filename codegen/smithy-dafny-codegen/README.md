@@ -70,14 +70,11 @@ are as follows:
    Note the exact version of the `software.amazon.smithy` dependencies MAY NOT need to be 
    `1.28.1` exactly, but MUST be consistent.
 
-3. Clone the GitHub repository for [smithy-dafny](https://github.com/awslabs/smithy-dafny)
-   somewhere nearby, being sure to initialize submodules.
-   If this repository is still private, reach out to aws-arg-dafny@amazon.com
-   for access.
+3. Make a copy of the `TestModels/dafny-dependencies/StandardLibrary` directory
+   for the generated code to refer to.
       
-   This is necessary because it contains reusable Dafny code that
-   the generated client will depend on, but is not yet independently distributed for
-   shared use.
+   This is necessary because the runtime library code the generated code will depend on
+   is not yet available as a shared Dafny library.
 
 4. Create a `smithy-build.json` file with the following contents,
    substituting "smithy.example#ExampleService" with the name of the service
@@ -89,10 +86,11 @@ are as follows:
         "version": "1.0",
         "plugins": {
             "dafny-client-codegen": {
-                "edition": "2023",
+                "edition": "2023.10",
                 "service": "smithy.example#ExampleService",
                 "targetLanguages": ["dotnet"],
-                "includeDafnyPath": "[relative]/[path]/[to]/smithy-dafny/TestModels/dafny-dependencies/StandardLibrary/src/Index.dfy"
+                "dafnyVersion": "4.3.0",
+                "includeDafnyFile": "[relative]/[path]/[to]/StandardLibrary/src/Index.dfy"
             }
         }
     }
@@ -111,30 +109,25 @@ are as follows:
 7. Run `gradle build` (alternatively, you can use a
    [Gradle wrapper](https://docs.gradle.org/current/userguide/gradle_wrapper.html)).
 
-8. The generated client can be found in `build/smithyprojections/foo-client/source/dafny-client-codegen`.
+8. The generated client can be found under the `build/smithyprojections`,
+   the exact path depending on the name of the service.
+   For example, `build/smithyprojections/example-client/source/dafny-client-codegen`.
 
 See [the Smithy documentation](https://smithy.io/2.0/guides/building-models/gradle-plugin.html)
 for more information on building Smithy projects with Gradle.
-
-Note there are some caveats related to building the generated client code:
-
-1. If you specified Java as a target language,
-   the result will depend on the [dafny-java-conversion](https://github.com/awslabs/smithy-dafny/tree/main-1.x/dafny-java-conversion)
-   library, which is also not yet published.
-   The easiest workaround is to first run the `publishToLocalMaven` gradle task on a copy of the source for that library.
 
 ## Using projections
 
 This plugin does not yet handle all Smithy features, especially since
 at the time of writing this, Dafny itself does not have a strongly
-idiomatic representation for concepts such as Timestamps.
+idiomatic representation for some concepts.
 Fortunately, the Smithy Gradle plugin provides several
 ["transforms"](https://smithy.io/2.0/guides/building-models/build-config.html#transforms)
 that can be used to filter a service model
 to remove unsupported shapes.
 
 The following example removes all operations that transitively refer
-to some of the shape types that this plugin does not yet support:
+to one of the shape types that this plugin does not yet support:
 
 ```json
 {
@@ -145,7 +138,7 @@ to some of the shape types that this plugin does not yet support:
                 {
                     "name": "excludeShapesBySelector",
                     "args": {
-                        "selector": "operation :test(~> timestamp, double, float, resource)"
+                        "selector": "operation :test(~> document)"
                     }
                 }
             ],

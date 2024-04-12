@@ -7,7 +7,7 @@ This project implements strings attached with the Smithy trait [@enum](https://s
 1. Generate the Wrappers using `polymorph`
 ```
 make polymorph_dafny
-make polymorph_net
+make polymorph_dotnet
 ```
 
 2. Transpile the tests (and implementation) to the target runtime.

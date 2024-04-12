@@ -5,8 +5,22 @@ CORES=2
 
 include ../SharedMakefile.mk
 
-NAMESPACE=simple.constraints
+PROJECT_SERVICES := \
+	SimpleConstraints
+
+SERVICE_NAMESPACE_SimpleConstraints=simple.constraints
+
+SERVICE_DEPS_SimpleConstraints :=
+
+SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
 
 # This project has no dependencies 
 # DEPENDENT-MODELS:= 
-# LIBRARIES :=
+
+# First, export DAFNY_VERSION=4.2
+# Three separate items, because 'make polymorph_code_gen' doesn't quite work
+polymorph:
+	npm i --no-save prettier@3 prettier-plugin-java@2.5
+	make polymorph_dafny
+	make polymorph_java
+	make polymorph_dotnet

@@ -62,7 +62,7 @@ public class DotNetNameResolver {
      * Returns the C# namespace containing the C# implementation/interface for the given shape ID.
      */
     public String namespaceForShapeId(final ShapeId shapeId) {
-        // TODO remove special AWS SDK special-case when https://github.com/awslabs/polymorph/issues/7 is resolved
+        // TODO remove special AWS SDK special-case when https://github.com/smithy-lang/smithy-dafny/issues/7 is resolved
         final Function<String, String> segmentMapper = AwsSdkNameResolverHelpers.isInAwsSdkNamespace(shapeId)
                 ? StringUtils::capitalize
                 : DotNetNameResolver::capitalizeNamespaceSegment;
@@ -392,7 +392,12 @@ public class DotNetNameResolver {
             // therefore it MAY have specific naming requirements.
             // These requirements SHOULD be handled in the `AwsSdkDotNetNameResolver`.
             final ServiceShape awsSdkService = AwsSdkNameResolverHelpers.getAwsServiceShape(model, shapeId);
-            return new AwsSdkDotNetNameResolver(model, awsSdkService).baseTypeSwitch(shape);
+            String value = new AwsSdkDotNetNameResolver(model, awsSdkService).baseTypeSwitch(shape);
+            if (value.equals("Com.Amazonaws.Dynamodb.AttributeValue")) {
+                return "Amazon.DynamoDBv2.Model.AttributeValue";
+            } else {
+                return value;
+            }
         }
     }
 
@@ -451,6 +456,13 @@ public class DotNetNameResolver {
      */
     public String isSetMethodForStructureMember(final MemberShape memberShape) {
         return "IsSet%s".formatted(classPropertyForStructureMember(memberShape));
+    }
+
+    /**
+     * Returns the name of the given member shape's IsSet member
+     */
+    public String isSetMemberForStructureMember(final MemberShape memberShape) {
+        return "Is%sSet".formatted(classPropertyForStructureMember(memberShape));
     }
 
     /**

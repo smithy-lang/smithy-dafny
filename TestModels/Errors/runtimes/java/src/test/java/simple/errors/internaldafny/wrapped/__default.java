@@ -1,3 +1,5 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 package simple.errors.internaldafny.wrapped;
 
 import simple.errors.SimpleErrors;
@@ -14,6 +16,6 @@ public class __default extends _ExternBase___default {
         simple.errors.model.SimpleErrorsConfig wrappedConfig = ToNative.SimpleErrorsConfig(config);
         simple.errors.SimpleErrors impl = SimpleErrors.builder().SimpleErrorsConfig(wrappedConfig).build();
         TestSimpleErrors wrappedClient = TestSimpleErrors.builder().impl(impl).build();
-        return Result.create_Success(wrappedClient);
+        return simple.errors.internaldafny.__default.CreateSuccessOfClient(wrappedClient);
     }
 }

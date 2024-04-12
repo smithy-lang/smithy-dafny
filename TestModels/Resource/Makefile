@@ -7,9 +7,18 @@ include ../SharedMakefile.mk
 
 NAMESPACE=simple.resources
 
+PROJECT_SERVICES := \
+	SimpleResources
+
+SERVICE_NAMESPACE_SimpleResources=simple.resources
+
+SERVICE_DEPS_SimpleResources :=
+
+SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
+
 # This project has no dependencies 
 # DEPENDENT-MODELS:= 
-# LIBRARIES :=
+
 
 format_net:
 	pushd runtimes/net && dotnet format && popd

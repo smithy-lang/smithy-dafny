@@ -1,3 +1,5 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 package software.amazon.polymorph.smithyjava.generator.awssdk.v2;
 
 import static software.amazon.polymorph.smithyjava.generator.ToDafnyConstants.MEMBER_ASSIGNMENT_OPTIONAL;
@@ -102,6 +104,18 @@ public class ToDafnyAwsV2Constants {
               message = java.util.Objects.nonNull(nativeValue.getMessage()) ?
                     Wrappers_Compile.Option.create_Some(software.amazon.smithy.dafny.conversion.ToDafny.Simple.CharacterSequence(nativeValue.getMessage()))
                   : Wrappers_Compile.Option.create_None();
+              return new software.amazon.cryptography.services.kms.internaldafny.types.Error_Opaque(message);
+            }
+            """;
+
+    protected static String GENERATE_CONVERT_OPAQUE_ERROR_WITH_TYPE_DESCRIPTORS = """
+            public static software.amazon.cryptography.services.kms.internaldafny.types.Error Error(
+                    software.amazon.awssdk.services.kms.model.KmsException nativeValue
+            ) {
+              Wrappers_Compile.Option<dafny.DafnySequence<? extends java.lang.Character>> message;
+              message = java.util.Objects.nonNull(nativeValue.getMessage()) ?
+                    Wrappers_Compile.Option.create_Some(dafny.DafnySequence._typeDescriptor(dafny.TypeDescriptor.CHAR), software.amazon.smithy.dafny.conversion.ToDafny.Simple.CharacterSequence(nativeValue.getMessage()))
+                  : Wrappers_Compile.Option.create_None(dafny.DafnySequence._typeDescriptor(dafny.TypeDescriptor.CHAR));
               return new software.amazon.cryptography.services.kms.internaldafny.types.Error_Opaque(message);
             }
             """;

@@ -23,6 +23,7 @@ import software.amazon.polymorph.util.Tokenizer.ParseToken;
 import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.loader.ModelAssembler;
+import software.amazon.smithy.model.shapes.BlobShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
@@ -39,7 +40,7 @@ import static software.amazon.polymorph.util.Tokenizer.tokenizeAndAssertEqual;
 
 public class TypeConversionCodegenTest {
     // TODO: Apply TypeConversionCodegen refactor to tests
-    // https://github.com/awslabs/polymorph/issues/29
+    // https://github.com/smithy-lang/smithy-dafny/issues/29
     private static TypeConversionCodegen setupCodegen(final BiConsumer<ServiceShape.Builder, ModelAssembler> updater) {
         final Model model = TestModel.setupModel(updater);
         final ServiceShape serviceShape = model.expectShape(SERVICE_SHAPE_ID, ServiceShape.class);
@@ -171,31 +172,35 @@ public class TypeConversionCodegenTest {
         assertEquals(expectedShapeIds, actualShapeIds);
     }
 
-//    @Test
-//    public void testGenerateBlobConverter() {
-//        final ShapeId shapeId = ShapeId.from("smithy.api#Blob");
-//        final TypeConversionCodegen codegen = setupCodegen((_builder, _modelAssembler) -> {});
-//        final TypeConverter converter = codegen.generateBlobConverter(BlobShape.builder().id(shapeId).build());
-//        assertEquals(shapeId, converter.shapeId());
-//
-//        final String actualFromDafny = converter.fromDafny().toString();
-//        final String fromDafnyConverterName = DotNetNameResolver.typeConverterForShape(shapeId, FROM_DAFNY);
-//        final String expectedFromDafny = """
-//                public static System.IO.MemoryStream %s(Dafny.ISequence<byte> value) {
-//                    return new System.IO.MemoryStream(value.Elements);
-//                }
-//                """.formatted(fromDafnyConverterName);
-//        tokenizeAndAssertEqual(expectedFromDafny, actualFromDafny);
-//
-//        final String actualToDafny = converter.toDafny().toString();
-//        final String toDafnyConverterName = DotNetNameResolver.typeConverterForShape(shapeId, TO_DAFNY);
-//        final String expectedToDafny = """
-//                public static Dafny.ISequence<byte> %s(System.IO.MemoryStream value) {
-//                    return Dafny.Sequence<byte>.FromArray(value.ToArray());
-//                }
-//                """.formatted(toDafnyConverterName);
-//        tokenizeAndAssertEqual(expectedToDafny, actualToDafny);
-//    }
+    @Test
+    public void testGenerateBlobConverter() {
+        final ShapeId shapeId = ShapeId.from("smithy.api#Blob");
+        final TypeConversionCodegen codegen = setupCodegen((_builder, _modelAssembler) -> {});
+        final TypeConverter converter = codegen.generateBlobConverter(BlobShape.builder().id(shapeId).build());
+        assertEquals(shapeId, converter.shapeId());
+
+        final String actualFromDafny = converter.fromDafny().toString();
+        final String fromDafnyConverterName = DotNetNameResolver.typeConverterForShape(shapeId, FROM_DAFNY);
+        final String expectedFromDafny = """
+                public static System.IO.MemoryStream %s(Dafny.ISequence<byte> value) {
+                    return new System.IO.MemoryStream(value.Elements);
+                }
+                """.formatted(fromDafnyConverterName);
+        tokenizeAndAssertEqual(expectedFromDafny, actualFromDafny);
+
+        final String actualToDafny = converter.toDafny().toString();
+        final String toDafnyConverterName = DotNetNameResolver.typeConverterForShape(shapeId, TO_DAFNY);
+        final String expectedToDafny = """
+                public static Dafny.ISequence<byte> %s(System.IO.MemoryStream value) {
+                    if (value.ToArray().Length == 0 && value.Length > 0)
+                    {
+                        throw new System.ArgumentException("Fatal Error: MemoryStream instance not backed by an array!");
+                    }
+                    return Dafny.Sequence<byte>.FromArray(value.ToArray());
+                }
+                """.formatted(toDafnyConverterName);
+        tokenizeAndAssertEqual(expectedToDafny, actualToDafny);
+    }
 
 //    @Test
 //    public void testGenerateBooleanConverter() {

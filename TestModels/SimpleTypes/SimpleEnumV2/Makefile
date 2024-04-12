@@ -7,6 +7,14 @@ include ../../SharedMakefile.mk
 
 NAMESPACE=simple.types.enumV2
 
-# This project has no dependencies 
-# DEPENDENT-MODELS:= 
-# LIBRARIES :=
+PROJECT_SERVICES := \
+        SimpleTypesEnumV2
+
+SERVICE_NAMESPACE_SimpleTypesEnumV2=simple.types.enumV2
+
+SERVICE_DEPS_SimpleTypesEnumV2 :=
+
+SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
+
+# This project has no dependencies
+# DEPENDENT-MODELS:=

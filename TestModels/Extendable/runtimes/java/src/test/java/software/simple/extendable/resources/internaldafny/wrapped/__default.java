@@ -1,3 +1,5 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 package simple.extendable.resources.internaldafny.wrapped;
 
 import simple.extendable.resources.SimpleExtendableResources;
@@ -20,7 +22,7 @@ public class __default extends _ExternBase___default {
         simple.extendable.resources.model.SimpleExtendableResourcesConfig wrappedConfig = ToNative.SimpleExtendableResourcesConfig(config);
         simple.extendable.resources.SimpleExtendableResources impl = SimpleExtendableResources.builder().SimpleExtendableResourcesConfig(wrappedConfig).build();
         TestSimpleExtendableResources wrappedClient = TestSimpleExtendableResources.builder().impl(impl).build();
-        return Result.create_Success(wrappedClient);
+        return simple.extendable.resources.internaldafny.__default.CreateSuccessOfClient(wrappedClient);
     }
 
     /**

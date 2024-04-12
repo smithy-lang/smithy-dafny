@@ -1,3 +1,5 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 package software.amazon.polymorph.smithyjava.generator.awssdk.v2;
 
 import com.squareup.javapoet.MethodSpec;
@@ -8,8 +10,11 @@ import org.junit.Test;
 import java.nio.file.Path;
 import java.util.Map;
 
+import software.amazon.polymorph.smithydafny.DafnyVersion;
+import software.amazon.polymorph.smithyjava.ForEachDafnyTest;
 import software.amazon.polymorph.smithyjava.ModelConstants;
 import software.amazon.polymorph.smithyjava.generator.awssdk.TestSetupUtils;
+import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.polymorph.utils.TokenTree;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.ShapeId;
@@ -19,14 +24,15 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 import static software.amazon.polymorph.util.Tokenizer.tokenizeAndAssertEqual;
 
-public class ToDafnyAwsV2Test {
-    protected ToDafnyAwsV2 underTest;
-    protected Model model;
+public class ToDafnyAwsV2Test extends ForEachDafnyTest {
+    protected final ToDafnyAwsV2 underTest;
+    protected final Model model;
+    protected final DafnyVersion dafnyVersion;
 
-    @Before
-    public void setup() {
+    public ToDafnyAwsV2Test(DafnyVersion dafnyVersion) {
+        this.dafnyVersion = dafnyVersion;
         model = TestSetupUtils.setupTwoLocalModel(ModelConstants.KMS_KITCHEN, ModelConstants.OTHER_NAMESPACE);
-        underTest = new ToDafnyAwsV2(TestSetupUtils.setupAwsSdkV2(model, "kms"));
+        underTest = new ToDafnyAwsV2(TestSetupUtils.setupAwsSdkV2(model, "kms", dafnyVersion));
     }
 
     @Test
@@ -72,13 +78,16 @@ public class ToDafnyAwsV2Test {
 
     @Test
     public void generateConvertOpaqueError() {
-        tokenizeAndAssertEqual(ToDafnyAwsV2Constants.GENERATE_CONVERT_OPAQUE_ERROR, underTest.generateConvertOpaqueError().toString());
+        final String expected = Dafny.datatypeConstructorsNeedTypeDescriptors(dafnyVersion) ?
+                ToDafnyAwsV2Constants.GENERATE_CONVERT_OPAQUE_ERROR_WITH_TYPE_DESCRIPTORS
+                : ToDafnyAwsV2Constants.GENERATE_CONVERT_OPAQUE_ERROR;
+        tokenizeAndAssertEqual(expected, underTest.generateConvertOpaqueError().toString());
     }
 
     @Test
     public void generate() {
         Model localModel = TestSetupUtils.setupLocalModel(ModelConstants.KMS_A_STRING_OPERATION);
-        ToDafnyAwsV2 localUnderTest = new ToDafnyAwsV2(TestSetupUtils.setupAwsSdkV2(localModel, "kms"));
+        ToDafnyAwsV2 localUnderTest = new ToDafnyAwsV2(TestSetupUtils.setupAwsSdkV2(localModel, "kms", dafnyVersion));
         final Map<Path, TokenTree> actual = localUnderTest.generate();
         final Path expectedPath = Path.of("software/amazon/cryptography/services/kms/internaldafny/ToDafny.java");
         Path[] temp = new Path[1];

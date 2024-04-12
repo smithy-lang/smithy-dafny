@@ -1,0 +1,30 @@
+# This workflow invokes other workflows with the requested Dafny build.
+# It is primarily meant for manual compatibility testing,
+# such as trying out what the next pending nightly build will do ahead of time.
+name: Manual CI
+
+on:
+  workflow_dispatch:
+    inputs:
+      dafny:
+        description: 'The Dafny version to use'
+        required: true
+        type: string
+
+jobs:
+  manual-ci-verification:
+    uses: ./.github/workflows/test_models_dafny_verification.yml
+    with:
+      dafny: ${{ inputs.dafny }}
+  manual-ci-java:
+    uses: ./.github/workflows/test_models_java_tests.yml
+    with:
+      dafny: ${{ inputs.dafny }}
+  manual-ci-net:
+    uses: ./.github/workflows/test_models_net_tests.yml
+    with:
+      dafny: ${{ inputs.dafny }}
+  manual-ci-rust:
+    uses: ./.github/workflows/test_models_rust_tests.yml
+    with:
+      dafny: ${{ inputs.dafny }}

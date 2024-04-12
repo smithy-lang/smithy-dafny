@@ -7,9 +7,18 @@ include ../../SharedMakefile.mk
 
 NAMESPACE=simple.types.smithyDouble
 
+PROJECT_SERVICES := \
+	SimpleDouble
+
+SERVICE_NAMESPACE_SimpleDouble=simple.types.smithyDouble
+
+SERVICE_DEPS_SimpleDouble :=
+
+SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
+
 # This project has no dependencies 
 # DEPENDENT-MODELS:= 
-# LIBRARIES :=
+
 transpile_net_dependencies:
 
 format_net:

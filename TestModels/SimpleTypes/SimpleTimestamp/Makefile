@@ -9,4 +9,4 @@ NAMESPACE=simple.types.timestamp
 
 # This project has no dependencies 
 # DEPENDENT-MODELS:= 
-# LIBRARIES :=
+

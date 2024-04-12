@@ -1,3 +1,5 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 package software.amazon.polymorph.smithyjava.nameresolver;
 
 import com.squareup.javapoet.CodeBlock;
@@ -6,6 +8,10 @@ import com.squareup.javapoet.TypeName;
 import org.junit.Before;
 import org.junit.Test;
 
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import software.amazon.polymorph.smithydafny.DafnyVersion;
+import software.amazon.polymorph.smithyjava.ForEachDafnyTest;
 import software.amazon.polymorph.smithyjava.ModelConstants;
 import software.amazon.polymorph.smithyjava.generator.CodegenSubject;
 import software.amazon.polymorph.smithyjava.generator.awssdk.TestSetupUtils;
@@ -17,15 +23,17 @@ import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.StructureShape;
 
+import java.util.Arrays;
+import java.util.Collection;
+
 import static org.junit.Assert.assertEquals;
 import static software.amazon.polymorph.util.Tokenizer.tokenizeAndAssertEqual;
 
-public class DafnyTest {
+public class DafnyTest extends ForEachDafnyTest {
     Dafny underTest;
     protected Model model;
 
-    @Before
-    public void setup() {
+    public DafnyTest(DafnyVersion dafnyVersion) {
         String rawModel = """
                 namespace smithy.example
                 service Example {}
@@ -38,7 +46,7 @@ public class DafnyTest {
                 (builder, modelAssembler) -> modelAssembler
                         .addUnparsedModel("test.smithy", rawModel));
         ServiceShape serviceShape = ModelUtils.serviceFromNamespace(model, "smithy.example");
-        underTest = new Dafny("Dafny.Smithy.Example", model, serviceShape, CodegenSubject.AwsSdkVersion.V2);
+        underTest = new Dafny("Dafny.Smithy.Example", model, serviceShape, CodegenSubject.AwsSdkVersion.V2, dafnyVersion);
     }
 
     @Test

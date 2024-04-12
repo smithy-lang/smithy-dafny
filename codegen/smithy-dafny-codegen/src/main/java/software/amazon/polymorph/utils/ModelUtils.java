@@ -33,7 +33,7 @@ public class ModelUtils {
     // Require title-case alphanumeric names, so we don't need to check for keyword conflicts.
     //
     // The spec recommends a similar stricter definition for consistency (uppercase instead of title-case):
-    // https://awslabs.github.io/smithy/1.0/spec/core/constraint-traits.html?highlight=enum#enum-trait
+    // https://smithy.io/1.0/spec/core/constraint-traits.html?highlight=enum#enum-trait
     private static final Pattern ENUM_NAME_PATTERN = Pattern.compile("^[A-Z]+[A-Za-z_0-9]*$");
 
     /**
@@ -310,6 +310,7 @@ public class ModelUtils {
         return outList;
     }
 
+
     /**
      * For every ShapeId in {@code initialShapes},
      * with the given {@code model},
@@ -326,12 +327,16 @@ public class ModelUtils {
             .map(Collections::singletonList)
             .collect(Collectors.toSet());
         Set<List<ShapeId>> pathsToShapes = new LinkedHashSet<>(new LinkedHashSet<>());
+        Set<ShapeId> visited = new HashSet<>();
 
         // Breadth-first search via getDependencyShapeIds
         final Queue<List<ShapeId>> toTraverse = new LinkedList<>(initialShapeIdsAsPaths);
         while (!toTraverse.isEmpty()) {
             final List<ShapeId> currentShapeIdWithPath = toTraverse.remove();
-            if (pathsToShapes.add(currentShapeIdWithPath)) {
+
+            // to avoid cycles, only keep the first list with a given last element
+            ShapeId last = currentShapeIdWithPath.get(currentShapeIdWithPath.size()-1);
+            if (visited.add(last) && pathsToShapes.add(currentShapeIdWithPath)) {
                 final Shape currentShape = model.expectShape(currentShapeIdWithPath.get(
                     currentShapeIdWithPath.size()-1));
                 final List<List<ShapeId>> dependencyShapeIdsWithPaths = getDependencyShapeIds(currentShape).map(

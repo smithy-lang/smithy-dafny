@@ -2,44 +2,32 @@
 name: Library Java tests
 
 on:
-  pull_request:
-  push:
-    branches:
-      - main-1.x
-  workflow_dispatch:
-    # Manual trigger for this workflow, either the normal version
-    # or the nightly build that uses the latest Dafny prerelease
-    # (accordingly to the "nightly" parameter).
+  workflow_call:
     inputs:
-      nightly:
-        description: 'Run the nightly build'
-        required: false
-        type: boolean
-  schedule:
-    # Nightly build against Dafny's nightly prereleases,
-    # for early warning of verification issues or regressions.
-    # Timing chosen to be adequately after Dafny's own nightly build,
-    # but this might need to be tweaked:
-    # https://github.com/dafny-lang/dafny/blob/master/.github/workflows/deep-tests.yml#L16
-    - cron: "30 16 * * *"
+      dafny:
+        description: 'The Dafny version to run'
+        required: true
+        type: string
 
 jobs:
   testJava:
-    # Don't run the nightly build on forks
-    if: github.event_name != 'schedule' || github.repository_owner == 'awslabs'
     strategy:
+      fail-fast: false
       matrix:
         library: [
           TestModels/dafny-dependencies/StandardLibrary, # This stores current Polymorph dependencies that all TestModels depend on
           # TestModels/Aggregate,
           # TestModels/AggregateReferences,
+          TestModels/CodegenPatches,
           TestModels/Constraints,
           # TestModels/Constructor,
           # TestModels/Dependencies,
           TestModels/Errors,
           TestModels/Extendable,
           # TestModels/Extern,
+          # TestModels/LanguageSpecificLogic,
           TestModels/LocalService,
+          TestModels/MultipleModels,
           # TestModels/Refinement,
           TestModels/Resource,
           # TestModels/SimpleTypes/BigDecimal,
@@ -82,10 +70,9 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Setup Dafny
-        uses: dafny-lang/setup-dafny-action@v1.6.1
+        uses: dafny-lang/setup-dafny-action@v1.7.0
         with:
-          # A && B || C is the closest thing to an if .. then ... else ... or ?: expression the GitHub Actions syntax supports.
-          dafny-version: ${{ (github.event_name == 'schedule' || inputs.nightly) && 'nightly-latest' || '4.1.0' }}
+          dafny-version: ${{ inputs.dafny }}
 
       - name: Setup Java 
         uses: actions/setup-java@v3
@@ -105,12 +92,18 @@ jobs:
           distribution: 'corretto'
           java-version: '17'
 
+      - name: Setup dependencies
+        working-directory: ./${{ matrix.library }}
+        run: |
+          make setup_prettier
+  
       - name: Generate Polymorph Dafny and Java code
         shell: bash
         working-directory: ./${{ matrix.library }}
+        # Use $DAFNY_VERSION from setup-dafny-action to handle nightlies correctly
         run: |
-          make polymorph_dafny
-          make polymorph_java
+          make polymorph_dafny DAFNY_VERSION_OPTION="--dafny-version $DAFNY_VERSION"
+          make polymorph_java DAFNY_VERSION_OPTION="--dafny-version $DAFNY_VERSION"
 
       - name: Setup Java 8 for running tests
         uses: actions/setup-java@v3

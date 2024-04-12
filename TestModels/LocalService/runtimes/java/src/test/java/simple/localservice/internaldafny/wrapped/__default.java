@@ -1,3 +1,5 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 package simple.localservice.internaldafny.wrapped;
 
 import simple.localservice.SimpleLocalService;
@@ -16,7 +18,7 @@ public class __default extends _ExternBase___default {
         simple.localservice.SimpleLocalService impl = SimpleLocalService.builder().SimpleLocalServiceConfig(wrappedConfig).build();
         TestToNativeAndToDafnyLocalService(impl);
         TestSimpleLocalService wrappedClient = TestSimpleLocalService.builder().impl(impl).build();
-        return Result.create_Success(wrappedClient);
+        return simple.localservice.internaldafny.__default.CreateSuccessOfClient(wrappedClient);
     }
 
     // TODO: Determine how to replace this test with Dafny Source Code

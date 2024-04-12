@@ -1,3 +1,8 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
+import java.io.File
+import java.io.FileInputStream
+import java.util.Properties
 import java.net.URI
 import javax.annotation.Nullable
 import org.gradle.api.tasks.wrapper.Wrapper
@@ -6,6 +11,11 @@ plugins {
     `java-library`
     `maven-publish`
 }
+
+var props = Properties().apply {
+    load(FileInputStream(File(rootProject.rootDir, "../../project.properties")))
+}
+var dafnyVersion = props.getProperty("dafnyVersion")
 
 group = "software.amazon.cryptography"
 version = "1.0-SNAPSHOT"
@@ -53,7 +63,7 @@ repositories {
 }
 
 dependencies {
-    implementation("org.dafny:DafnyRuntime:4.1.0")
+    implementation("org.dafny:DafnyRuntime:${dafnyVersion}")
     implementation("software.amazon.smithy.dafny:conversion:0.1")
     implementation("software.amazon.cryptography:StandardLibrary:1.0-SNAPSHOT")
     /*implementation("com.amazonaws:aws-java-sdk-kms:1.12.417")*/

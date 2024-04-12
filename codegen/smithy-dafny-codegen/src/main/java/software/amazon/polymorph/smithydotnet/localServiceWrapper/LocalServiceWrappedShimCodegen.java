@@ -123,7 +123,7 @@ public class LocalServiceWrappedShimCodegen {
                 .orElse("return %s.create_Success(%s);".formatted(
                         dafnyOutputType, nameResolver.dafnyValueForUnit())));
 
-        final TokenTree tryBody = TokenTree.of(assignWrappedResponse, callImpl, returnResponse).lineSeparated();
+        final TokenTree tryBody = TokenTree.of(unWrappedRequest, assignWrappedResponse, callImpl, returnResponse).lineSeparated();
         final TokenTree tryBlock = Token.of("try").append(tryBody.braced());
 
         final String baseExceptionForService = nameResolver.qualifiedClassForBaseServiceException();
@@ -137,7 +137,7 @@ public class LocalServiceWrappedShimCodegen {
                         CONVERT_ERROR_METHOD));
 
         final TokenTree methodSignature = generateOperationShimSignature(operationShape);
-        final TokenTree methodBody = TokenTree.of(unWrappedRequest, tryBlock, catchBlock);
+        final TokenTree methodBody = TokenTree.of(tryBlock, catchBlock);
         return methodSignature.append(methodBody.braced());
     }
 

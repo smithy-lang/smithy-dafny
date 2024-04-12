@@ -9,4 +9,4 @@ NAMESPACE=simple.types.byte
 
 # This project has no dependencies 
 # DEPENDENT-MODELS:= 
-# LIBRARIES :=
+

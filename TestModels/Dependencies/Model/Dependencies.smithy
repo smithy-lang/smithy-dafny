@@ -1,9 +1,12 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 namespace simple.dependencies
 
 use simple.resources#SimpleResources
 use simple.constraints#SimpleConstraints
 use simple.extendable.resources#SimpleExtendableResources
-use simple.errors#SimpleErrors
+// TODO: Uncomment out as part of https://sim.amazon.com/issues/CrypTool-5231
+//use simple.errors#SimpleErrors
 
 @aws.polymorph#localService(
   sdkId: "SimpleDependencies",
@@ -12,7 +15,8 @@ use simple.errors#SimpleErrors
     SimpleResources,
     SimpleConstraints,
     SimpleExtendableResources,
-    SimpleErrors
+    // TODO: Uncomment out as part of https://sim.amazon.com/issues/CrypTool-5231
+    // SimpleErrors
   ]
 )
 service SimpleDependencies {

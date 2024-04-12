@@ -7,9 +7,18 @@ include ../SharedMakefile.mk
 
 NAMESPACE=simple.localService
 
+PROJECT_SERVICES := \
+	SimpleLocalService
+
+SERVICE_NAMESPACE_SimpleLocalService=simple.localService
+
+SERVICE_DEPS_SimpleLocalService :=
+
+SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
+
 # This project has no dependencies 
 # DEPENDENT-MODELS:= 
-# LIBRARIES :=
+
 
 clean:
 	rm -f $(LIBRARY_ROOT)/Model/*Types.dfy $(LIBRARY_ROOT)/Model/*TypesWrapped.dfy

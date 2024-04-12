@@ -1,3 +1,5 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 package software.amazon.polymorph.smithyjava.generator.library;
 
 import com.google.common.collect.Streams;
@@ -15,6 +17,7 @@ import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import software.amazon.polymorph.smithydafny.DafnyVersion;
 import software.amazon.polymorph.smithyjava.NamespaceHelper;
 import software.amazon.polymorph.smithyjava.generator.CodegenSubject;
 import software.amazon.polymorph.smithyjava.generator.Generator;
@@ -62,8 +65,8 @@ public class JavaLibrary extends CodegenSubject {
     public final ToDafnyLibrary toDafnyLibrary;
     public final ToNativeLibrary toNativeLibrary;
 
-    public JavaLibrary(Model model, ServiceShape serviceShape, AwsSdkVersion sdkVersion) {
-        super(model, serviceShape, initDafny(model, serviceShape, sdkVersion), initNative(model, serviceShape, sdkVersion), sdkVersion);
+    public JavaLibrary(Model model, ServiceShape serviceShape, AwsSdkVersion sdkVersion, DafnyVersion dafnyVersion) {
+        super(model, serviceShape, initDafny(model, serviceShape, sdkVersion, dafnyVersion), initNative(model, serviceShape, sdkVersion), sdkVersion);
         packageName = NamespaceHelper.standardize(serviceShape.getId().getNamespace());
         modelPackageName = packageName + ".model";
         try {
@@ -78,9 +81,9 @@ public class JavaLibrary extends CodegenSubject {
         toNativeLibrary = new ToNativeLibrary(this);
     }
 
-    static Dafny initDafny(Model model, ServiceShape serviceShape, AwsSdkVersion awsSdkVersion) {
+    static Dafny initDafny(Model model, ServiceShape serviceShape, AwsSdkVersion awsSdkVersion, DafnyVersion dafnyVersion) {
         String packageName = DafnyNameResolverHelpers.packageNameForNamespace(serviceShape.getId().getNamespace());
-        return new Dafny(packageName, model, serviceShape, awsSdkVersion);
+        return new Dafny(packageName, model, serviceShape, awsSdkVersion, dafnyVersion);
     }
 
     static Native initNative(Model model, ServiceShape serviceShape, AwsSdkVersion awsSdkVersion) {

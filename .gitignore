@@ -4,3 +4,6 @@
 /.smithy.lsp.log
 
 */**/.idea
+/codegen/smithy-dafny-codegen/bin
+/codegen/smithy-dafny-codegen-cli/bin
+/smithy-dafny-conversion/bin

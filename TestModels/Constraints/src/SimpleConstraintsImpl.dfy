@@ -1,3 +1,5 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 include "../Model/SimpleConstraintsTypes.dfy"
 
 module SimpleConstraintsImpl refines AbstractSimpleConstraintsOperations  {
@@ -26,12 +28,12 @@ module SimpleConstraintsImpl refines AbstractSimpleConstraintsOperations  {
       MyMap := input.MyMap,
       NonEmptyMap := input.NonEmptyMap,
       MapLessThanOrEqualToTen := input.MapLessThanOrEqualToTen,
-      Alphabetic := input.Alphabetic,
+      // Alphabetic := input.Alphabetic,
       OneToTen := input.OneToTen,
       GreaterThanOne := input.GreaterThanOne,
       LessThanTen := input.LessThanTen,
-      MyUniqueList := input.MyUniqueList,
-      MyComplexUniqueList := input.MyComplexUniqueList,
+      // MyUniqueList := input.MyUniqueList,
+      // MyComplexUniqueList := input.MyComplexUniqueList,
       MyUtf8Bytes := input.MyUtf8Bytes,
       MyListOfUtf8Bytes := input.MyListOfUtf8Bytes
     );

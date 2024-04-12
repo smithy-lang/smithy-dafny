@@ -1,0 +1,49 @@
+# This workflow invokes other workflows with the nightly Dafny build
+name: Dafny Nightly
+
+on:
+  schedule:
+    # Nightly build against Dafny's nightly prereleases,
+    # for early warning of verification issues or regressions.
+    # Timing chosen to be adequately after Dafny's own nightly build,
+    # but this might need to be tweaked:
+    # https://github.com/dafny-lang/dafny/blob/master/.github/workflows/deep-tests.yml#L16
+    - cron: "30 16 * * *"
+
+jobs:
+  dafny-nightly-verification:
+    # Don't run the cron builds on forks
+    if: github.event_name != 'schedule' || github.repository_owner == 'smithy-lang'
+    uses: ./.github/workflows/test_models_dafny_verification.yml
+    with:
+      dafny: 'nightly-latest'
+  dafny-nightly-java:
+    if: github.event_name != 'schedule' || github.repository_owner == 'smithy-lang'
+    uses: ./.github/workflows/test_models_java_tests.yml
+    with:
+      dafny: 'nightly-latest'
+  dafny-nightly-net:
+    if: github.event_name != 'schedule' || github.repository_owner == 'smithy-lang'
+    uses: ./.github/workflows/test_models_net_tests.yml
+    with:
+      dafny: 'nightly-latest'
+  dafny-nightly-rust:
+    if: github.event_name != 'schedule' || github.repository_owner == 'smithy-lang'
+    uses: ./.github/workflows/test_models_rust_tests.yml
+    with:
+      dafny: 'nightly-latest'
+
+  cut-issue-on-failure:
+    runs-on: ubuntu-latest
+    needs: [dafny-nightly-verification, dafny-nightly-java, dafny-nightly-net, dafny-nightly-rust]
+    if: ${{ always() && contains(needs.*.result, 'failure') }}
+    env:
+      GH_TOKEN: ${{ secrets.CI_TOKEN }}
+    steps:
+      - name: Create release blocker on dafny-lang/dafny
+        run: |
+          gh issue create \
+            --repo "dafny-lang/dafny" \
+            --title "[PRERELEASE REGRESSION] Dafny prerelease regression from ${{ github.repository }}" \
+            --body "Failure in ${{ github.workflow_ref }}. \
+            See ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"

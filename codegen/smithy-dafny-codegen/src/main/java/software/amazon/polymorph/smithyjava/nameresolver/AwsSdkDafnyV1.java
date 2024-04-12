@@ -1,7 +1,10 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 package software.amazon.polymorph.smithyjava.nameresolver;
 
 import com.squareup.javapoet.ClassName;
 
+import software.amazon.polymorph.smithydafny.DafnyVersion;
 import software.amazon.polymorph.smithyjava.generator.CodegenSubject;
 import software.amazon.polymorph.utils.AwsSdkNameResolverHelpers;
 import software.amazon.polymorph.utils.DafnyNameResolverHelpers;
@@ -16,8 +19,8 @@ import static software.amazon.polymorph.smithydafny.DafnyNameResolver.traitNameF
 
 public class AwsSdkDafnyV1 extends Dafny {
 
-    public AwsSdkDafnyV1(ServiceShape serviceShape, Model model) {
-        super(packageNameForServiceShape(serviceShape), model, serviceShape, CodegenSubject.AwsSdkVersion.V1);
+    public AwsSdkDafnyV1(ServiceShape serviceShape, Model model, DafnyVersion dafnyVersion) {
+        super(packageNameForServiceShape(serviceShape), model, serviceShape, CodegenSubject.AwsSdkVersion.V1, dafnyVersion);
     }
 
     @Override

@@ -1,3 +1,5 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 package simple.constraints.internaldafny.wrapped;
 
 import simple.constraints.SimpleConstraints;
@@ -14,6 +16,6 @@ public class __default extends _ExternBase___default {
         simple.constraints.model.SimpleConstraintsConfig wrappedConfig = ToNative.SimpleConstraintsConfig(config);
         simple.constraints.SimpleConstraints impl = SimpleConstraints.builder().SimpleConstraintsConfig(wrappedConfig).build();
         TestSimpleConstraints wrappedClient = TestSimpleConstraints.builder().impl(impl).build();
-        return Result.create_Success(wrappedClient);
+        return simple.constraints.internaldafny.__default.CreateSuccessOfClient(wrappedClient);
     }
 }

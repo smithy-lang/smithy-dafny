@@ -7,6 +7,15 @@ include ../SharedMakefile.mk
 
 NAMESPACE=simple.refinement
 
+PROJECT_SERVICES := \
+	SimpleRefinement
+
+SERVICE_NAMESPACE_SimpleRefinement=simple.refinement
+
+SERVICE_DEPS_SimpleRefinement :=
+
+SMITHY_DEPS=dafny-dependencies/Model/traits.smithy
+
 # This project has no dependencies 
 # DEPENDENT-MODELS:= 
-# LIBRARIES :=
+

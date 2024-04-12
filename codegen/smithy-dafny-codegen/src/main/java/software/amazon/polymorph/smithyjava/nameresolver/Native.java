@@ -1,3 +1,5 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 package software.amazon.polymorph.smithyjava.nameresolver;
 
 import com.squareup.javapoet.ClassName;
@@ -137,7 +139,7 @@ public class Native extends NameResolver{
                  * "Boolean, byte, short, integer, long, float, and double shapes
                  * are only considered boxed if they are marked with the box trait.
                  * All other shapes are always considered boxed."
-                 * https://awslabs.github.io/smithy/1.0/spec/core/type-refinement-traits.html#box-trait
+                 * https://smithy.io/1.0/spec/core/type-refinement-traits.html#box-trait
                  * While Smithy Models SHOULD use Smithy Prelude shapes to avoid this confusion,
                  * they do not have to.
                  * Hence, the need to check if these shapes have the box trait
