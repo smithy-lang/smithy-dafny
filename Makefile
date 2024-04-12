@@ -1,3 +1,6 @@
+# Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: Apache-2.0
+
 format_java_misc: setup_prettier
 	npx prettier --plugin=prettier-plugin-java . --write
 
