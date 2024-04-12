@@ -8,6 +8,11 @@ jobs:
   check-java:
     runs-on: ubuntu-latest
     steps:
+      - name: Support longpaths
+        run: |
+          git config --global core.longpaths true
+
+      - uses: actions/checkout@v4
       - name: Check format of Java, md and yaml
         shell: bash
         run: |
