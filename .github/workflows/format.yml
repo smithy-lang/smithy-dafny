@@ -1,0 +1,19 @@
+# This workflow runs for every pull request
+name: Java Format Check
+
+on:
+  pull_request:
+
+jobs:
+  check-java:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Support longpaths
+        run: |
+          git config --global core.longpaths true
+
+      - uses: actions/checkout@v4
+      - name: Check format of Java, md and yaml
+        shell: bash
+        run: |
+          make format_java_misc-check

@@ -2,18 +2,18 @@
 // SPDX-License-Identifier: Apache-2.0
 package software.amazon.polymorph.smithyjava.generator.awssdk.v1;
 
-import software.amazon.polymorph.utils.TokenTree;
-import software.amazon.smithy.model.Model;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 
-public class ToDafnyAwsV1Test {
-    protected ToDafnyAwsV1 underTest;
-    protected Model model;
+import software.amazon.polymorph.utils.TokenTree;
+import software.amazon.smithy.model.Model;
 
-   /* @Before
+public class ToDafnyAwsV1Test {
+
+  protected ToDafnyAwsV1 underTest;
+  protected Model model;
+  /* @Before
     public void setup() {
         model = TestSetupUtils.setupTwoLocalModel(ModelConstants.KMS_KITCHEN, ModelConstants.OTHER_NAMESPACE);
         underTest  = new ToDafnyAwsV1(TestSetupUtils.setupAwsSdkV1(model, "kms"));

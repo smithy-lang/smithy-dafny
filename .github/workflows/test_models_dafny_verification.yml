@@ -5,7 +5,7 @@ on:
   workflow_call:
     inputs:
       dafny:
-        description: 'The Dafny version to run'
+        description: "The Dafny version to run"
         required: true
         type: string
 
@@ -14,44 +14,44 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        dafny-version: 
+        dafny-version:
           - ${{ inputs.dafny }}
         library: [
-          TestModels/dafny-dependencies/StandardLibrary, # This stores current Polymorph dependencies that all TestModels depend on
-          TestModels/Aggregate,
-          TestModels/AggregateReferences,
-          TestModels/CodegenPatches,
-          TestModels/Constraints,
-          TestModels/Constructor,
-          TestModels/Dependencies,
-          TestModels/Errors,
-          TestModels/Extendable,
-          TestModels/Extern,
-          # TestModels/LanguageSpecificLogic, # requires >4.4.0
-          TestModels/LocalService,
-          TestModels/MultipleModels,
-          TestModels/Refinement,
-          TestModels/Resource,
-          # TestModels/SimpleTypes/BigDecimal,
-          # TestModels/SimpleTypes/BigInteger,
-          TestModels/SimpleTypes/SimpleBlob,
-          TestModels/SimpleTypes/SimpleBoolean,
-          # TestModels/SimpleTypes/SimpleByte,
-          TestModels/SimpleTypes/SimpleDouble,          
-          TestModels/SimpleTypes/SimpleEnum,
-          # TestModels/SimpleTypes/SimpleEnumV2,
-          # TestModels/SimpleTypes/SimpleFloat,
-          TestModels/SimpleTypes/SimpleInteger,
-          TestModels/SimpleTypes/SimpleLong,
-          # TestModels/SimpleTypes/SimpleShort,
-          TestModels/SimpleTypes/SimpleString,
-          # TestModels/SimpleTypes/SimpleTimestamp,
-          TestModels/Union,
-          TestModels/aws-sdks/ddb,
-          TestModels/aws-sdks/kms,
-          TestModels/aws-sdks/sqs-via-cli,
-        ]
-        os: [ ubuntu-latest ]
+            TestModels/dafny-dependencies/StandardLibrary, # This stores current Polymorph dependencies that all TestModels depend on
+            TestModels/Aggregate,
+            TestModels/AggregateReferences,
+            TestModels/CodegenPatches,
+            TestModels/Constraints,
+            TestModels/Constructor,
+            TestModels/Dependencies,
+            TestModels/Errors,
+            TestModels/Extendable,
+            TestModels/Extern,
+            # TestModels/LanguageSpecificLogic, # requires >4.4.0
+            TestModels/LocalService,
+            TestModels/MultipleModels,
+            TestModels/Refinement,
+            TestModels/Resource,
+            # TestModels/SimpleTypes/BigDecimal,
+            # TestModels/SimpleTypes/BigInteger,
+            TestModels/SimpleTypes/SimpleBlob,
+            TestModels/SimpleTypes/SimpleBoolean,
+            # TestModels/SimpleTypes/SimpleByte,
+            TestModels/SimpleTypes/SimpleDouble,
+            TestModels/SimpleTypes/SimpleEnum,
+            # TestModels/SimpleTypes/SimpleEnumV2,
+            # TestModels/SimpleTypes/SimpleFloat,
+            TestModels/SimpleTypes/SimpleInteger,
+            TestModels/SimpleTypes/SimpleLong,
+            # TestModels/SimpleTypes/SimpleShort,
+            TestModels/SimpleTypes/SimpleString,
+            # TestModels/SimpleTypes/SimpleTimestamp,
+            TestModels/Union,
+            TestModels/aws-sdks/ddb,
+            TestModels/aws-sdks/kms,
+            TestModels/aws-sdks/sqs-via-cli,
+          ]
+        os: [ubuntu-latest]
         include:
           # One-offs until TestModels migrate to 4.4.0
           - library: TestModels/LanguageSpecificLogic

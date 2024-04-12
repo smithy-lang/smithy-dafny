@@ -233,8 +233,7 @@ public class ServiceCodegen {
 
   @VisibleForTesting
   boolean shouldGenerateStructure(final StructureShape structureShape) {
-    return // Traits are structures, but aren't needed outside Smithy
-    (
+    return ( // Traits are structures, but aren't needed outside Smithy
       !structureShape.hasTrait(TraitDefinition.class) &&
       // References are transparent in C#, so we don't need to generate a class for them
       !structureShape.hasTrait(ReferenceTrait.class) &&

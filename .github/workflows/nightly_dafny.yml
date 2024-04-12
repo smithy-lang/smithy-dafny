@@ -16,26 +16,32 @@ jobs:
     if: github.event_name != 'schedule' || github.repository_owner == 'smithy-lang'
     uses: ./.github/workflows/test_models_dafny_verification.yml
     with:
-      dafny: 'nightly-latest'
+      dafny: "nightly-latest"
   dafny-nightly-java:
     if: github.event_name != 'schedule' || github.repository_owner == 'smithy-lang'
     uses: ./.github/workflows/test_models_java_tests.yml
     with:
-      dafny: 'nightly-latest'
+      dafny: "nightly-latest"
   dafny-nightly-net:
     if: github.event_name != 'schedule' || github.repository_owner == 'smithy-lang'
     uses: ./.github/workflows/test_models_net_tests.yml
     with:
-      dafny: 'nightly-latest'
+      dafny: "nightly-latest"
   dafny-nightly-rust:
     if: github.event_name != 'schedule' || github.repository_owner == 'smithy-lang'
     uses: ./.github/workflows/test_models_rust_tests.yml
     with:
-      dafny: 'nightly-latest'
+      dafny: "nightly-latest"
 
   cut-issue-on-failure:
     runs-on: ubuntu-latest
-    needs: [dafny-nightly-verification, dafny-nightly-java, dafny-nightly-net, dafny-nightly-rust]
+    needs:
+      [
+        dafny-nightly-verification,
+        dafny-nightly-java,
+        dafny-nightly-net,
+        dafny-nightly-rust,
+      ]
     if: ${{ always() && contains(needs.*.result, 'failure') }}
     env:
       GH_TOKEN: ${{ secrets.CI_TOKEN }}

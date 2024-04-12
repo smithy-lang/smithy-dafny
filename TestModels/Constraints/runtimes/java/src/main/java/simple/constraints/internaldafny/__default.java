@@ -2,5 +2,4 @@
 // SPDX-License-Identifier: Apache-2.0
 package simple.constraints.internaldafny;
 
-public class __default extends _ExternBase___default{
-}
+public class __default extends _ExternBase___default {}

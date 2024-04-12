@@ -3,6 +3,7 @@
 
 package software.amazon.polymorph.traits;
 
+import java.util.Optional;
 import software.amazon.smithy.model.node.Node;
 import software.amazon.smithy.model.node.ObjectNode;
 import software.amazon.smithy.model.node.StringNode;
@@ -17,88 +18,96 @@ import software.amazon.smithy.model.traits.TraitDefinition;
 import software.amazon.smithy.utils.SmithyBuilder;
 import software.amazon.smithy.utils.ToSmithyBuilder;
 
-import java.util.Optional;
-
 /**
  * A trait indicating the structure that should be used as the client configuration object when generating the client
  * code for a service structure.
  */
-public class ClientConfigTrait extends AbstractTrait implements ToSmithyBuilder<ClientConfigTrait> {
-    public static final ShapeId ID = ShapeId.from("aws.polymorph#clientConfig");
+public class ClientConfigTrait
+  extends AbstractTrait
+  implements ToSmithyBuilder<ClientConfigTrait> {
 
-    private final ShapeId clientConfigId;
+  public static final ShapeId ID = ShapeId.from("aws.polymorph#clientConfig");
 
-    private static final String CONFIG = "config";
+  private final ShapeId clientConfigId;
 
-    private ClientConfigTrait(Builder builder) {
-        super(ID, builder.getSourceLocation());
-        this.clientConfigId = builder.clientConfigId;
-    }
+  private static final String CONFIG = "config";
 
-    public static final class Provider extends AbstractTrait.Provider {
-        public Provider() {
-            super(ID);
-        }
+  private ClientConfigTrait(Builder builder) {
+    super(ID, builder.getSourceLocation());
+    this.clientConfigId = builder.clientConfigId;
+  }
 
-        @Override
-        public Trait createTrait(ShapeId target, Node value) {
-            ObjectNode objectNode = value.expectObjectNode();
-            Optional<ShapeId> configIdOptional = objectNode.getStringMember(CONFIG).map(StringNode::expectShapeId);
-            ShapeId configId = configIdOptional.orElseThrow(() -> new IllegalStateException("Must specify a config"));
+  public static final class Provider extends AbstractTrait.Provider {
 
-            return builder()
-                    .clientConfigId(configId)
-                    .build();
-        }
-    }
-
-    public static Builder builder() {
-        return new Builder();
-    }
-
-    public ShapeId getClientConfigId() {
-        return this.clientConfigId;
+    public Provider() {
+      super(ID);
     }
 
     @Override
-    protected Node createNode() {
-        return Node.objectNodeBuilder()
-                .sourceLocation(getSourceLocation())
-                .withMember(CONFIG, this.clientConfigId.toString())
-                .build();
+    public Trait createTrait(ShapeId target, Node value) {
+      ObjectNode objectNode = value.expectObjectNode();
+      Optional<ShapeId> configIdOptional = objectNode
+        .getStringMember(CONFIG)
+        .map(StringNode::expectShapeId);
+      ShapeId configId = configIdOptional.orElseThrow(() ->
+        new IllegalStateException("Must specify a config")
+      );
+
+      return builder().clientConfigId(configId).build();
     }
+  }
+
+  public static Builder builder() {
+    return new Builder();
+  }
+
+  public ShapeId getClientConfigId() {
+    return this.clientConfigId;
+  }
+
+  @Override
+  protected Node createNode() {
+    return Node
+      .objectNodeBuilder()
+      .sourceLocation(getSourceLocation())
+      .withMember(CONFIG, this.clientConfigId.toString())
+      .build();
+  }
+
+  @Override
+  public SmithyBuilder<ClientConfigTrait> toBuilder() {
+    return builder().sourceLocation(getSourceLocation());
+  }
+
+  /** Builder for {@link ClientConfigTrait}. */
+  public static final class Builder
+    extends AbstractTraitBuilder<ClientConfigTrait, Builder> {
+
+    private ShapeId clientConfigId;
+
+    private Builder() {}
 
     @Override
-    public SmithyBuilder<ClientConfigTrait> toBuilder() {
-        return builder()
-                .sourceLocation(getSourceLocation());
+    public ClientConfigTrait build() {
+      return new ClientConfigTrait(this);
     }
 
-    /** Builder for {@link ClientConfigTrait}. */
-    public static final class Builder extends AbstractTraitBuilder<ClientConfigTrait, Builder> {
-        private ShapeId clientConfigId;
-
-        private Builder() {}
-
-        @Override
-        public ClientConfigTrait build() {
-            return new ClientConfigTrait(this);
-        }
-
-        public Builder clientConfigId(ShapeId clientConfigId) {
-            this.clientConfigId = clientConfigId;
-            return this;
-        }
+    public Builder clientConfigId(ShapeId clientConfigId) {
+      this.clientConfigId = clientConfigId;
+      return this;
     }
+  }
 
-    public static Shape getDefinition() {
-        final Trait clientConfigTraitDefinition = TraitDefinition.builder()
-                .selector(Selector.parse("service"))
-                .build();
-        return StructureShape.builder()
-                .id(ClientConfigTrait.ID)
-                .addTrait(clientConfigTraitDefinition)
-                .addMember(CONFIG, ShapeId.from("smithy.api#String"))
-                .build();
-    }
+  public static Shape getDefinition() {
+    final Trait clientConfigTraitDefinition = TraitDefinition
+      .builder()
+      .selector(Selector.parse("service"))
+      .build();
+    return StructureShape
+      .builder()
+      .id(ClientConfigTrait.ID)
+      .addTrait(clientConfigTraitDefinition)
+      .addMember(CONFIG, ShapeId.from("smithy.api#String"))
+      .build();
+  }
 }
