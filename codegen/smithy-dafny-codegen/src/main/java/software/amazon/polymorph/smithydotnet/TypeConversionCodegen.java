@@ -10,6 +10,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.math.BigDecimal;
 
 import javax.annotation.Nonnull;
 
@@ -28,12 +29,15 @@ import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.*;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
+import software.amazon.smithy.model.traits.LengthTrait;
+import software.amazon.smithy.model.traits.RangeTrait;
 import software.amazon.smithy.utils.StringUtils;
 
 import static software.amazon.polymorph.smithydotnet.DotNetNameResolver.TYPE_CONVERSION_CLASS_NAME;
 import static software.amazon.polymorph.smithydotnet.DotNetNameResolver.typeConverterForShape;
 import static software.amazon.polymorph.smithydotnet.TypeConversionDirection.FROM_DAFNY;
 import static software.amazon.polymorph.smithydotnet.TypeConversionDirection.TO_DAFNY;
+
 
 /**
  * Generates a {@code TypeConversion} class that includes all {@link TypeConverter}s needed for the operations in the
@@ -235,11 +239,15 @@ public class TypeConversionCodegen {
     public TypeConverter generateBlobConverter(final BlobShape blobShape) {
         final TokenTree fromDafnyBody = Token.of("return new System.IO.MemoryStream(value.Elements);");
         // enforce that MemoryStreams are backed by an array
+        final String constraints = generateListConstraints(blobShape, "value.ToArray()", "Length", "Blob");
         final TokenTree toDafnyBody = Token.of("""
                 if (value.ToArray().Length == 0 && value.Length > 0)
                 {
                     throw new System.ArgumentException("Fatal Error: MemoryStream instance not backed by an array!");
                 }
+                """
+                + constraints +
+                """
                 return Dafny.Sequence<byte>.FromArray(value.ToArray());
                 """);
         return buildConverterFromMethodBodies(blobShape, fromDafnyBody, toDafnyBody);
@@ -251,6 +259,100 @@ public class TypeConversionCodegen {
         return buildConverterFromMethodBodies(booleanShape, fromDafnyBody, toDafnyBody);
     }
 
+    public String generateStringConstraints(final Shape shape, final String value) {
+        String result = "";
+        final ShapeId id = shape.getId();
+        String theType = id.getName();
+
+        if (shape.hasTrait(LengthTrait.class)) {
+            LengthTrait len = shape.getMemberTrait(model, LengthTrait.class).get();
+            Optional<Long> min = len.getMin();
+            if (min.isPresent()) {
+                result += """
+                if (%s.Length < %d) {
+                    throw new System.ArgumentException(
+                        String.Format(\"Type %s has a minimum length of %d but was given the value '{0}' which has length {1}.\", %s, %s.Length));
+                }
+                """
+                .formatted(value, min.get(), theType, min.get(), value, value);
+            }
+            Optional<Long> max = len.getMax();
+            if (max.isPresent()) {
+                result += """
+                if (%s.Length > %d) {
+                    throw new System.ArgumentException(
+                        String.Format(\"Type %s has a maximum length of %d but was given the value '{0}' which has length {1}.\", %s, %s.Length));
+                }
+                """
+                .formatted(value, max.get(), theType, max.get(), value, value);
+            }
+        }
+        return result;
+    }
+
+    public String generateListConstraints(final Shape shape, final String value, final String sizeTag, final String subType) {
+        String result = "";
+        final ShapeId id = shape.getId();
+        String theType = id.getName();
+
+        if (shape.hasTrait(LengthTrait.class)) {
+            LengthTrait len = shape.getMemberTrait(model, LengthTrait.class).get();
+            Optional<Long> min = len.getMin();
+            if (min.isPresent()) {
+                result += """
+                if (%s.%s < %d) {
+                    throw new System.ArgumentException(
+                        String.Format(\"%s type %s has a minimum length of %d but was given a value with length {0}.\", %s.%s));
+                }
+                """
+                .formatted(value, sizeTag, min.get(), subType, theType, min.get(), value, sizeTag);
+            }
+            Optional<Long> max = len.getMax();
+            if (max.isPresent()) {
+                result += """
+                if (%s.%s > %d) {
+                    throw new System.ArgumentException(
+                        String.Format(\"%s type %s has a maximum length of %d but was given a value with length {0}.\", %s.%s));
+                }
+                """
+                .formatted(value, sizeTag, max.get(), subType, theType, max.get(), value, sizeTag);
+            }
+        }
+        return result;
+    }
+
+    public String generateNumberConstraints(final Shape shape, final String value) {
+        String result = "";
+        final ShapeId id = shape.getId();
+        String theType = id.getName();
+
+        if (shape.hasTrait(RangeTrait.class)) {
+            RangeTrait len = shape.getMemberTrait(model, RangeTrait.class).get();
+            Optional<BigDecimal> min = len.getMin();
+            if (min.isPresent()) {
+                result += """
+                if (%s < %s) {
+                    throw new System.ArgumentException(
+                        String.Format(\"Type %s has a minimum of %s but was given the value {0}.\", %s));
+                }
+                """
+                .formatted(value, min.get().toString(), theType, min.get().toString(), value);
+            }
+            Optional<BigDecimal> max = len.getMax();
+            if (max.isPresent()) {
+                result += """
+                if (%s > %s) {
+                    throw new System.ArgumentException(
+                        String.Format(\"Type %s has a maximum of %s but was given the value {0}.\", %s));
+                }
+                """
+                .formatted(value, max.get().toString(), theType, max.get().toString(), value);
+            }
+        }
+        return result;
+    }
+
+
     public TypeConverter generateStringConverter(final StringShape stringShape) {
         if (stringShape.hasTrait(EnumTrait.class)) {
             return generateEnumConverter(stringShape, stringShape.expectTrait(EnumTrait.class));
@@ -260,20 +362,23 @@ public class TypeConversionCodegen {
             return generateUtf8BytesConverter(stringShape);
         }
 
+        final String constraints = generateStringConstraints(stringShape, "value");
         final TokenTree fromDafnyBody = Token.of("return new string(value.Elements);");
-        final TokenTree toDafnyBody = Token.of("return Dafny.Sequence<char>.FromString(value);");
+        final TokenTree toDafnyBody = Token.of(constraints + "return Dafny.Sequence<char>.FromString(value);");
         return buildConverterFromMethodBodies(stringShape, fromDafnyBody, toDafnyBody);
     }
 
     public TypeConverter generateIntegerConverter(final IntegerShape integerShape) {
+        final String constraints = generateNumberConstraints(integerShape, "value");
         final TokenTree fromDafnyBody = Token.of("return value;");
-        final TokenTree toDafnyBody = Token.of("return value;");
+        final TokenTree toDafnyBody = Token.of(constraints + "return value;");
         return buildConverterFromMethodBodies(integerShape, fromDafnyBody, toDafnyBody);
     }
 
     public TypeConverter generateLongConverter(final LongShape longShape) {
+        final String constraints = generateNumberConstraints(longShape, "value");
         final TokenTree fromDafnyBody = Token.of("return value;");
-        final TokenTree toDafnyBody = Token.of("return value;");
+        final TokenTree toDafnyBody = Token.of(constraints + "return value;");
         return buildConverterFromMethodBodies(longShape, fromDafnyBody, toDafnyBody);
     }
 
@@ -311,6 +416,7 @@ public class TypeConversionCodegen {
 
         final String memberToDafnyConverterName = typeConverterForShape(memberShape.getId(), TO_DAFNY);
         final String memberFromDafnyConverterName = typeConverterForShape(memberShape.getId(), FROM_DAFNY);
+        final String constraints = generateListConstraints(listShape, "value", "Count", "List");
 
         final boolean convertMemberEnumToString = enumListAndMapMembersAreStringsInCSharp()
             && model.expectShape(memberShape.getTarget()).hasTrait(EnumTrait.class);
@@ -327,7 +433,7 @@ public class TypeConversionCodegen {
                         memberFromDafnyConverterName,
                         fromDafnyEnumConversion));
 
-        final TokenTree toDafnyBody = Token.of(
+        final TokenTree toDafnyBody = Token.of(constraints +
                 "return Dafny.Sequence<%s>.FromArray(value%s.Select(%s).ToArray());".formatted(
                         memberDafnyType,
                         toDafnyEnumConversion,
@@ -341,6 +447,7 @@ public class TypeConversionCodegen {
         final MemberShape valueShape = mapShape.getValue();
         final String keyDafnyType = nameResolver.dafnyTypeForShape(keyShape.getId());
         final String valueDafnyType = nameResolver.dafnyTypeForShape(valueShape.getId());
+        final String constraints = generateListConstraints(mapShape, "value", "Count", "Map");
 
         final String keyToDafnyConverterName = typeConverterForShape(keyShape.getId(), TO_DAFNY);
         final String keyFromDafnyConverterName = typeConverterForShape(keyShape.getId(), FROM_DAFNY);
@@ -355,7 +462,7 @@ public class TypeConversionCodegen {
                 && model.expectShape(valueShape.getTarget()).hasTrait(EnumTrait.class);
         final String fromDafnyValueEnumConversion = convertValueEnumToString ? ".Value" : "";
 
-        final TokenTree fromDafnyBody = Token.of(
+        final TokenTree fromDafnyBody = Token.of(constraints + 
                 "return value.ItemEnumerable.ToDictionary(pair => %s(pair.Car)%s, pair => %s(pair.Cdr)%s);"
                         .formatted(keyFromDafnyConverterName, fromDafnyKeyEnumConversion,
                                    valueFromDafnyConverterName, fromDafnyValueEnumConversion));
@@ -451,7 +558,12 @@ public class TypeConversionCodegen {
                 constructorArgs.parenthesized(),
                 Token.of(';')
         );
+        String validate = "value.Validate();";
+        if (AwsSdkNameResolverHelpers.isInAwsSdkNamespace(structureShape.getId())) {
+            validate = "";
+        }
         final TokenTree toDafnyBody = TokenTree.of(
+                TokenTree.of(validate),
                 isSetTernaries,
                 constructor
         ).lineSeparated();
@@ -634,8 +746,12 @@ public class TypeConversionCodegen {
             .prepend(TokenTree.of(concreteVar, convertedVar).lineSeparated())
             .append(throwInvalidUnionState);
 
-        final TokenTree toDafnyBody = TokenTree
-                .of(defNames.stream().map(memberShape -> {
+        String validate = "value.Validate();";
+        if (AwsSdkNameResolverHelpers.isInAwsSdkNamespace(unionShape.getId())) {
+            validate = "";
+        }
+        final TokenTree toDafnyBody = TokenTree.of(TokenTree.of(validate),
+                TokenTree.of(defNames.stream().map(memberShape -> {
                     final String propertyName = nameResolver.classPropertyForStructureMember(memberShape);
                     final String propertyType = nameResolver.classPropertyTypeForStructureMember(memberShape);
                     final String dafnyMemberName = nameResolver.unionMemberName(memberShape);
@@ -704,7 +820,7 @@ public class TypeConversionCodegen {
                                         .lineSeparated()
                                         .braced());
                     }
-                }))
+                })))
                 .append(throwInvalidUnionState);
 
         return buildConverterFromMethodBodies(unionShape, fromDafnyBody, toDafnyBody);
@@ -893,10 +1009,11 @@ public class TypeConversionCodegen {
      * @see DafnyUtf8BytesTrait
      */
     private TypeConverter generateUtf8BytesConverter(final StringShape stringShape) {
+        final String constraints = generateListConstraints(stringShape, "value", "Length", "Utf8Bytes");
         final TokenTree fromDafnyBody = Token.of("""
                 System.Text.UTF8Encoding utf8 = new System.Text.UTF8Encoding(false, true);
                 return utf8.GetString(value.Elements);""");
-        final TokenTree toDafnyBody = Token.of("""
+        final TokenTree toDafnyBody = Token.of(constraints + """
                 System.Text.UTF8Encoding utf8 = new System.Text.UTF8Encoding(false, true);
                 return Dafny.Sequence<byte>.FromArray(utf8.GetBytes(value));""");
         return buildConverterFromMethodBodies(stringShape, fromDafnyBody, toDafnyBody);
