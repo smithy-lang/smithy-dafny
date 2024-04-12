@@ -110,31 +110,31 @@ module WrappedSimpleConstraintsTest {
     ensures client.ValidState()
   {
     var input := GetValidInput();
-    input := input.(TenToTen := Some(ForceTenToTen(1000)));
+    input := input.(myTenToTen := Some(ForceTenToTen(1000)));
     var ret := client.GetConstraints(input := input);
     expect ret.Failure?;
 
-    input := input.(TenToTen := Some(ForceTenToTen(-1000)));
+    input := input.(myTenToTen := Some(ForceTenToTen(-1000)));
     ret := client.GetConstraints(input := input);
     expect ret.Failure?;
 
-    input := input.(TenToTen := Some(ForceTenToTen(-11)));
+    input := input.(myTenToTen := Some(ForceTenToTen(-11)));
     ret := client.GetConstraints(input := input);
     expect ret.Failure?;
 
-    input := input.(TenToTen := Some(ForceTenToTen(-10)));
+    input := input.(myTenToTen := Some(ForceTenToTen(-10)));
     ret := client.GetConstraints(input := input);
     expect ret.Success?;
 
-    input := input.(TenToTen := Some(ForceTenToTen(0)));
+    input := input.(myTenToTen := Some(ForceTenToTen(0)));
     ret := client.GetConstraints(input := input);
     expect ret.Success?;
 
-    input := input.(TenToTen := Some(ForceTenToTen(10)));
+    input := input.(myTenToTen := Some(ForceTenToTen(10)));
     ret := client.GetConstraints(input := input);
     expect ret.Success?;
 
-    input := input.(TenToTen := Some(ForceTenToTen(11)));
+    input := input.(myTenToTen := Some(ForceTenToTen(11)));
     ret := client.GetConstraints(input := input);
     expect ret.Failure?;
   }
