@@ -509,10 +509,12 @@ transpile_dependencies_rust: LANG=rust
 transpile_dependencies_rust: transpile_dependencies
 
 _mv_implementation_rust:
-	rm -rf runtimes/rust/dafny_impl
-	mv implementation_from_dafny-rust runtimes/rust/dafny_impl
+	rm -rf runtimes/rust/dafny_impl/src
+	mkdir -p runtimes/rust/dafny_impl/src
+	mv implementation_from_dafny-rust/src/implementation_from_dafny.rs runtimes/rust/dafny_impl/src/implementation_from_dafny.rs
 _mv_test_rust:
 	rm -rf runtimes/rust/dafny_impl/tests
+	mkdir -p runtimes/rust/dafny_impl/tests
 	mv tests_from_dafny-rust/src/tests_from_dafny.rs runtimes/rust/dafny_impl/tests/tests_from_dafny.rs
 
 build_rust:
