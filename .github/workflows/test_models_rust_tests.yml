@@ -80,22 +80,27 @@ jobs:
           toolchain: "1.74.1"
           rustflags: ""
 
-      # TODO - not implemented yet
-      # - name: Generate Polymorph Dafny and Rust code
-      #   shell: bash
-      #   working-directory: ./${{ matrix.library }}
-      #   # Use $DAFNY_VERSION from setup-dafny-action to handle nightlies correctly
-      #   run: |
-      #     make polymorph_dafny DAFNY_VERSION_OPTION="--dafny-version $DAFNY_VERSION"
-      #     make polymorph_rust DAFNY_VERSION_OPTION="--dafny-version $DAFNY_VERSION"
+      - name: Generate Polymorph Dafny
+        working-directory: ./${{ matrix.library }}
+        # Use $DAFNY_VERSION from setup-dafny-action to handle nightlies correctly
+        run: |
+          make polymorph_dafny DAFNY_VERSION_OPTION="--dafny-version $DAFNY_VERSION"
 
-      - name: Compile ${{ matrix.library }} implementation
+      - name: Transpile ${{ matrix.library }} implementation
         shell: bash
         working-directory: ./${{ matrix.library }}
         run: |
           # This works because `node` is installed by default on GHA runners
           CORES=$(node -e 'console.log(os.cpus().length)')
-          make build_rust CORES=$CORES
+          make transpile_rust CORES=$CORES
+
+      # Doing polymorph_rust after transpile_rust
+      # so that the former can patch the output of the latter as well.
+      - name: Generate Polymorph Rust code
+        shell: bash
+        working-directory: ./${{ matrix.library }}
+        run: |
+          make polymorph_rust DAFNY_VERSION_OPTION="--dafny-version $DAFNY_VERSION"
 
       - name: Test ${{ matrix.library }}
         working-directory: ./${{ matrix.library }}

@@ -77,6 +77,9 @@ public class CodegenCli {
     cliArguments.outputDotnetDir.ifPresent(path ->
       outputDirs.put(TargetLanguage.DOTNET, path)
     );
+    cliArguments.outputRustDir.ifPresent(path ->
+      outputDirs.put(TargetLanguage.RUST, path)
+    );
 
     final CodegenEngine.Builder engineBuilder = new CodegenEngine.Builder()
       .withFromSmithyBuildPlugin(false)
@@ -155,6 +158,14 @@ public class CodegenCli {
           .builder()
           .longOpt("output-java")
           .desc("<optional> output directory for generated Java files")
+          .hasArg()
+          .build()
+      )
+      .addOption(
+        Option
+          .builder()
+          .longOpt("output-rust")
+          .desc("<optional> output directory for generated Rust files")
           .hasArg()
           .build()
       )
@@ -247,6 +258,7 @@ public class CodegenCli {
     String namespace,
     Optional<Path> outputDotnetDir,
     Optional<Path> outputJavaDir,
+    Optional<Path> outputRustDir,
     Optional<Path> outputDafnyDir,
     Optional<AwsSdkVersion> javaAwsSdkVersion,
     DafnyVersion dafnyVersion,
@@ -298,6 +310,9 @@ public class CodegenCli {
         .map(Paths::get);
       final Optional<Path> outputDotnetDir = Optional
         .ofNullable(commandLine.getOptionValue("output-dotnet"))
+        .map(Paths::get);
+      final Optional<Path> outputRustDir = Optional
+        .ofNullable(commandLine.getOptionValue("output-rust"))
         .map(Paths::get);
 
       boolean localServiceTest = commandLine.hasOption("local-service-test");
@@ -355,6 +370,7 @@ public class CodegenCli {
           namespace,
           outputDotnetDir,
           outputJavaDir,
+          outputRustDir,
           outputDafnyDir,
           javaAwsSdkVersion,
           dafnyVersion,
