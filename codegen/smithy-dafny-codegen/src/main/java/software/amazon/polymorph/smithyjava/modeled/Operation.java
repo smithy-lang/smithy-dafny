@@ -122,8 +122,7 @@ public class Operation {
         subject.model
       );
       final String operationName = append_k
-        ? // See JavaDoc on operation_K below
-        shape.toShapeId().getName() + "_k"
+        ? shape.toShapeId().getName() + "_k" // See JavaDoc on operation_K below
         : shape.toShapeId().getName();
       final MethodSpec.Builder method = MethodSpec
         .methodBuilder(operationName)

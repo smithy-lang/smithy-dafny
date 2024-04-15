@@ -1152,8 +1152,7 @@ public class DafnyApiCodegen {
   private Boolean OnlyReferenceStructures(MemberShape member) {
     final Shape target = model.expectShape(member.getTarget());
 
-    return // If the member is a reference type
-    (
+    return ( // If the member is a reference type
       ((target.getType() == ShapeType.STRUCTURE) &&
         target.hasTrait(ReferenceTrait.class)) ||
       // If the member is a LIST of a reference type
