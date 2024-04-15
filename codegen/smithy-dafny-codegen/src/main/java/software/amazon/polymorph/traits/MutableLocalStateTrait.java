@@ -22,61 +22,68 @@ import software.amazon.smithy.utils.ToSmithyBuilder;
  * Polymorph needs to be able to integrate these mutations
  * with the History DafnyCallEvents.
  */
-public class MutableLocalStateTrait extends AbstractTrait implements ToSmithyBuilder<MutableLocalStateTrait> {
-    public static final ShapeId ID = ShapeId.from("aws.polymorph#mutableLocalState");
+public class MutableLocalStateTrait
+  extends AbstractTrait
+  implements ToSmithyBuilder<MutableLocalStateTrait> {
 
-    private MutableLocalStateTrait(MutableLocalStateTrait.Builder builder) {
-        super(ID, builder.getSourceLocation());
-    }
+  public static final ShapeId ID = ShapeId.from(
+    "aws.polymorph#mutableLocalState"
+  );
 
-    public static final class Provider extends AbstractTrait.Provider {
-        public Provider() {
-            super(ID);
-        }
+  private MutableLocalStateTrait(MutableLocalStateTrait.Builder builder) {
+    super(ID, builder.getSourceLocation());
+  }
 
-        @Override
-        public Trait createTrait(ShapeId target, Node value) {
-            return builder().build();
-        }
-    }
+  public static final class Provider extends AbstractTrait.Provider {
 
-    public static MutableLocalStateTrait.Builder builder() {
-        return new MutableLocalStateTrait.Builder();
+    public Provider() {
+      super(ID);
     }
 
     @Override
-    protected Node createNode() {
-        return Node.objectNodeBuilder()
-                .sourceLocation(getSourceLocation())
-                .build();
+    public Trait createTrait(ShapeId target, Node value) {
+      return builder().build();
     }
+  }
+
+  public static MutableLocalStateTrait.Builder builder() {
+    return new MutableLocalStateTrait.Builder();
+  }
+
+  @Override
+  protected Node createNode() {
+    return Node.objectNodeBuilder().sourceLocation(getSourceLocation()).build();
+  }
+
+  @Override
+  public SmithyBuilder<MutableLocalStateTrait> toBuilder() {
+    return builder().sourceLocation(getSourceLocation());
+  }
+
+  /** Builder for {@link MutableLocalStateTrait}. */
+  public static final class Builder
+    extends AbstractTraitBuilder<
+      MutableLocalStateTrait,
+      MutableLocalStateTrait.Builder
+    > {
+
+    private Builder() {}
 
     @Override
-    public SmithyBuilder<MutableLocalStateTrait> toBuilder() {
-        return builder()
-                .sourceLocation(getSourceLocation());
+    public MutableLocalStateTrait build() {
+      return new MutableLocalStateTrait(this);
     }
+  }
 
-    /** Builder for {@link MutableLocalStateTrait}. */
-    public static final class Builder extends AbstractTraitBuilder<MutableLocalStateTrait, MutableLocalStateTrait.Builder> {
-
-        private Builder() {}
-
-        @Override
-        public MutableLocalStateTrait build() {
-            return new MutableLocalStateTrait(this);
-        }
-    }
-
-    public static Shape getDefinition() {
-        final Trait mutableLocalStateDefinition = TraitDefinition.builder()
-                .selector(Selector.parse("resource"))
-                .build();
-        return StructureShape.builder()
-                .id(MutableLocalStateTrait.ID)
-                .addTrait(mutableLocalStateDefinition)
-                .build();
-    }
-
-
+  public static Shape getDefinition() {
+    final Trait mutableLocalStateDefinition = TraitDefinition
+      .builder()
+      .selector(Selector.parse("resource"))
+      .build();
+    return StructureShape
+      .builder()
+      .id(MutableLocalStateTrait.ID)
+      .addTrait(mutableLocalStateDefinition)
+      .build();
+  }
 }

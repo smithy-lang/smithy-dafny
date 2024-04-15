@@ -2,4 +2,5 @@
 // SPDX-License-Identifier: Apache-2.0
 package software.amazon.cryptography.services.dynamodb.internaldafny.types;
 
-public class __default extends software.amazon.cryptography.services.dynamodb.internaldafny.types._ExternBase___default {}
+public class __default
+  extends software.amazon.cryptography.services.dynamodb.internaldafny.types._ExternBase___default {}

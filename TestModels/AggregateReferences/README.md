@@ -18,18 +18,23 @@ as the unique code generation for this module is only Dafny code.
 It would be good to add runtime tests, but this is a lower priority.
 
 ## Build
+
 ### Dafny
+
 1. Generate the Abstract Dafny code
+
 ```
 make polymorph_dafny
 ```
 
 2. Validate the manually written Dafny Code
+
 ```
 make verify
 ```
 
 ## Development
+
 1. To add target runtime support,
    edit the `Makefile` and add the appropriate recipe to
    generate the `polymorph` wrappers, and Dafny transpilation.

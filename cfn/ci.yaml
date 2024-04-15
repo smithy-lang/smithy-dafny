@@ -49,7 +49,7 @@ Resources:
       Description: "Allow Read, Write, and Delete of Items in Test Table"
       ManagedPolicyName: !Sub "${ProjectName}-DDB-ReadWriteDelete-${AWS::Region}"
       PolicyDocument:
-        Version: '2012-10-17'
+        Version: "2012-10-17"
         Statement:
           - Effect: Allow
             Action:
@@ -71,7 +71,7 @@ Resources:
     Properties:
       ManagedPolicyName: !Sub "${ProjectName}-KMS-${AWS::Region}"
       PolicyDocument:
-        Version: '2012-10-17'
+        Version: "2012-10-17"
         Statement:
           - Effect: Allow
             Action:
@@ -87,7 +87,7 @@ Resources:
     Properties:
       ManagedPolicyName: !Sub "${ProjectName}-SQS-${AWS::Region}"
       PolicyDocument:
-        Version: '2012-10-17'
+        Version: "2012-10-17"
         Statement:
           - Effect: Allow
             Action:
@@ -96,7 +96,7 @@ Resources:
               - !Sub "arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:*"
 
   GitHubCIRole:
-    Type: 'AWS::IAM::Role'
+    Type: "AWS::IAM::Role"
     Properties:
       RoleName: !Sub "GitHub-CI-${ProjectName}-Role-${AWS::Region}"
       Description: "Access DDB, KMS, & CA Resources for CI from GitHub"
