@@ -70,6 +70,17 @@ transpile_rust: | transpile_implementation_rust
 RUST_SRC_INDEX=src_for_rust
 RUST_TEST_INDEX=test_for_rust
 
+_mv_implementation_rust:
+	rm -rf runtimes/rust/src
+	mkdir -p runtimes/rust/src
+	mv implementation_from_dafny-rust/src/implementation_from_dafny.rs runtimes/rust/src/implementation_from_dafny.rs
+	rm -rf implementation_from_dafny-rust
+_mv_test_rust:
+	rm -rf runtimes/rust/dafny_impl/tests
+	mkdir -p runtimes/rust/dafny_impl/tests
+	mv tests_from_dafny-rust/src/tests_from_dafny.rs runtimes/rust/tests/tests_from_dafny.rs
+	rm -rf tests_from_dafny-rust
+
 transpile_dependencies:
 	echo "Skipping transpile_dependencies for StandardLibrary"
 

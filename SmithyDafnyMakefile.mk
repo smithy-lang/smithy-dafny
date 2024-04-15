@@ -512,10 +512,12 @@ _mv_implementation_rust:
 	rm -rf runtimes/rust/dafny_impl/src
 	mkdir -p runtimes/rust/dafny_impl/src
 	mv implementation_from_dafny-rust/src/implementation_from_dafny.rs runtimes/rust/dafny_impl/src/implementation_from_dafny.rs
+	rm -rf implementation_from_dafny-rust
 _mv_test_rust:
 	rm -rf runtimes/rust/dafny_impl/tests
 	mkdir -p runtimes/rust/dafny_impl/tests
 	mv tests_from_dafny-rust/src/tests_from_dafny.rs runtimes/rust/dafny_impl/tests/tests_from_dafny.rs
+	rm -rf tests_from_dafny-rust
 
 build_rust:
 	cd runtimes/rust; \
