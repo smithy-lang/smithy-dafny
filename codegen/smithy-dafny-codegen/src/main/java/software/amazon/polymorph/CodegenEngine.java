@@ -396,8 +396,7 @@ public class CodegenEngine {
 
   private void generateRust(final Path outputDir) {
     LOGGER.warn(
-      "Rust code generation is incomplete and may not function correctly!",
-      outputDir
+      "Rust code generation is incomplete and may not function correctly!"
     );
 
     // ...so incomplete it's starting out as a no-op and relying on 100% "patching" :)
