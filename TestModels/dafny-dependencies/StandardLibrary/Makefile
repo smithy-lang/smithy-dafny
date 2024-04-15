@@ -39,7 +39,7 @@ polymorph_java :
 # Using this target for the side-effect of maintaining patches,
 # Since Dafny Rust code generation is incomplete and also needs to be patched.
 # That only works if you run transpile_rust first.
-polymorph_rust : transpile_rust
+polymorph_rust :
 	cd $(CODEGEN_CLI_ROOT); \
 	$(GRADLEW) run --args="\
 	--dafny-version $(DAFNY_VERSION) \
@@ -51,6 +51,9 @@ polymorph_rust : transpile_rust
 	--dependent-model $(PROJECT_ROOT)/$(STD_LIBRARY)/../Model \
 	$(POLYMORPH_OPTIONS) \
 	";
+
+_polymorph_dependencies: 
+	echo "Skipping _polymorph_dependencies for StandardLibrary"
 
 # Override SharedMakefile's transpile_net to not transpile
 # StandardLibrary as a dependency
@@ -64,12 +67,11 @@ transpile_java: | transpile_implementation_java transpile_test_java
 # StandardLibrary as a dependency
 transpile_rust: | transpile_implementation_rust
 
-# Only building UInt.dfy in Rust to start because other files use unsupported features
-# (e.g. the variance specifiers in Option<+T>).
-# This scope should be expanded over time.
 RUST_SRC_INDEX=src_for_rust
 RUST_TEST_INDEX=test_for_rust
 
+# Override the targets to relocate translated Rust code directly into the main crate,
+# instead of the dafny_impl sub-crate.
 _mv_implementation_rust:
 	rm -rf runtimes/rust/src
 	mkdir -p runtimes/rust/src
