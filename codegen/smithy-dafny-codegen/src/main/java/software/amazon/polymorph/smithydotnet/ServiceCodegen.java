@@ -38,6 +38,7 @@ import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.LengthTrait;
 import software.amazon.smithy.model.traits.RangeTrait;
 import software.amazon.smithy.model.traits.TraitDefinition;
+import software.amazon.smithy.utils.StringUtils;
 
 /**
  * Codegen for a service's API skeleton (service interface and structures).
@@ -689,6 +690,16 @@ public class ServiceCodegen {
     };
   }
 
+  public String capitalizeSegment(final String segment) {
+    int index = segment.indexOf('_');
+    if (index < 0) {
+      return nameResolver.capitalizeNamespaceSegment(segment);
+    } else {
+      System.err.println(StringUtils.capitalize(segment));
+      return StringUtils.capitalize(segment);
+    }
+  }
+
   /**
    * Generates a validation method for structures. Note that not all Smithy constraint traits are supported.
    * <p>
@@ -736,9 +747,7 @@ public class ServiceCodegen {
       if (AwsSdkNameResolverHelpers.isInAwsSdkNamespace(shape.getId())) {
         continue;
       }
-      String memberName = nameResolver.capitalizeNamespaceSegment(
-        shape.getMemberName()
-      );
+      String memberName = capitalizeSegment(shape.getMemberName());
       constraintChecks +=
       getConstraints(shape, structureShape.getId().getName(), memberName);
     }
