@@ -380,6 +380,9 @@ setup_prettier:
 	npm i --no-save prettier@3 prettier-plugin-java@2.5
 
 # Generates rust code for all namespaces in this project
+# Note that we rely on the patching feature of polymorph
+# to also patch the results of transpile_rust,
+# so we assume that is run first!
 .PHONY: polymorph_rust
 polymorph_rust: POLYMORPH_LANGUAGE_TARGET=rust
 polymorph_rust: _polymorph_dependencies
