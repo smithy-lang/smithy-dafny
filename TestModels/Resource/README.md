@@ -1,8 +1,8 @@
 # Resource
 
-This project tests [smithy-dafny's](../../codegen/smithy-dafny-codegen-cli) support 
-for the smithy shape 
-[resource](https://smithy.io/1.0/spec/core/model.html#resource) 
+This project tests [smithy-dafny's](../../codegen/smithy-dafny-codegen-cli) support
+for the smithy shape
+[resource](https://smithy.io/1.0/spec/core/model.html#resource)
 and the associated operations in `dafny` and `.NET`.
 
 ## What is under test?
@@ -19,8 +19,8 @@ Users than implement a Dafny class that extends this trait.
 The smithy-dafny expectation is that the behavior of this class
 will be entirely defined in the Dafny implementation.
 
-(Even if this expectation is not true, any Native logic 
-would be referenced via a Dafny extern, 
+(Even if this expectation is not true, any Native logic
+would be referenced via a Dafny extern,
 and still only exposed via the Dafny implementation).
 
 As such, the Non-Dafny generated classes are merely wrappers
@@ -29,38 +29,46 @@ providing input validation, conversion of the input or output,
 and protecting the Dafny implementation from unknown exceptions
 that would violate Dafny's Formal Verification assumptions.
 
-
 ## Build
+
 ### Dafny
+
 1. Generate the Abstract Dafny code
+
 ```
 make polymorph_dafny
 ```
 
 2. Validate the manually written Dafny Code
+
 ```
 make verify
 ```
 
 ### .NET
+
 1. Generate the Wrappers using `polymorph`
+
 ```
 make polymorph_dotnet
 ```
 
 2. Transpile the tests (and implementation) to the target runtime.
+
 ```
 make transpile_net
 ```
 
 3. Generate the executable in the .NET and execute the tests
+
 ```
 make setup_net format_net test_net
 ```
 
 ## Development
+
 1. To add another target runtime support,
-   edit the `Makefile` and add the appropriate recipe to 
+   edit the `Makefile` and add the appropriate recipe to
    generate the `polymorph` wrappers, and Dafny transpilation.
 2. Provide any glue code between dafny and target runtime if required.
 3. Build, execute, and test in the target runtime.
