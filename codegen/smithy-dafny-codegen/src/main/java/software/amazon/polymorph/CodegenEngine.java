@@ -409,6 +409,8 @@ public class CodegenEngine {
     Path outputSrcDir = outputDir.resolve("src");
     software.amazon.smithy.utils.IoUtils.rmdir(outputSrcDir);
     outputSrcDir.toFile().mkdirs();
+
+    handlePatching(TargetLanguage.RUST, outputDir);
   }
 
   private static final Pattern PATCH_FILE_PATTERN = Pattern.compile(
