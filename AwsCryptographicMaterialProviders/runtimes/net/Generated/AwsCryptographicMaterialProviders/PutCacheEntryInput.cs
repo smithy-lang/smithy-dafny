@@ -73,7 +73,22 @@ namespace AWS.Cryptography.MaterialProviders
       if (!IsSetMaterials()) throw new System.ArgumentException("Missing value for required property 'Materials'");
       if (!IsSetCreationTime()) throw new System.ArgumentException("Missing value for required property 'CreationTime'");
       if (!IsSetExpiryTime()) throw new System.ArgumentException("Missing value for required property 'ExpiryTime'");
-
+      if (IsSetMessagesUsed())
+      {
+        if (MessagesUsed < 0)
+        {
+          throw new System.ArgumentException(
+              String.Format("Member MessagesUsed of structure PutCacheEntryInput has type PositiveInteger which has a minimum of 0 but was given the value {0}.", MessagesUsed));
+        }
+      }
+      if (IsSetBytesUsed())
+      {
+        if (BytesUsed < 0)
+        {
+          throw new System.ArgumentException(
+              String.Format("Member BytesUsed of structure PutCacheEntryInput has type PositiveInteger which has a minimum of 0 but was given the value {0}.", BytesUsed));
+        }
+      }
     }
   }
 }

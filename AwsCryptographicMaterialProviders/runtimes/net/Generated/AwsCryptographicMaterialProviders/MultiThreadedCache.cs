@@ -30,7 +30,14 @@ namespace AWS.Cryptography.MaterialProviders
     public void Validate()
     {
       if (!IsSetEntryCapacity()) throw new System.ArgumentException("Missing value for required property 'EntryCapacity'");
-
+      if (IsSetEntryPruningTailSize())
+      {
+        if (EntryPruningTailSize < 1)
+        {
+          throw new System.ArgumentException(
+              String.Format("Member EntryPruningTailSize of structure MultiThreadedCache has type CountingNumber which has a minimum of 1 but was given the value {0}.", EntryPruningTailSize));
+        }
+      }
     }
   }
 }

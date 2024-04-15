@@ -85,7 +85,14 @@ namespace AWS.Cryptography.MaterialProviders
       if (!IsSetFanOut()) throw new System.ArgumentException("Missing value for required property 'FanOut'");
       if (!IsSetInFlightTTL()) throw new System.ArgumentException("Missing value for required property 'InFlightTTL'");
       if (!IsSetSleepMilli()) throw new System.ArgumentException("Missing value for required property 'SleepMilli'");
-
+      if (IsSetEntryPruningTailSize())
+      {
+        if (EntryPruningTailSize < 1)
+        {
+          throw new System.ArgumentException(
+              String.Format("Member EntryPruningTailSize of structure StormTrackingCache has type CountingNumber which has a minimum of 1 but was given the value {0}.", EntryPruningTailSize));
+        }
+      }
     }
   }
 }
