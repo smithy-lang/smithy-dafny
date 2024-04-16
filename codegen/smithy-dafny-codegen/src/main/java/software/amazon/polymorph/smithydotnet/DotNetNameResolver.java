@@ -138,7 +138,7 @@ public class DotNetNameResolver {
   // A "word" is either a nonempty sequence of digits,
   // or a nonempty sequence of letters of which only the first may be uppercase.
   private static final Pattern NAMESPACE_SEGMENT_WORD = Pattern.compile(
-    "\\d+|\\p{Alpha}\\p{Lower}*"
+    "\\d+_*|\\p{Alpha}\\p{Lower}*_*"
   );
 
   private static final Set<String> KNOWN_ACRONYMS = Set.of(

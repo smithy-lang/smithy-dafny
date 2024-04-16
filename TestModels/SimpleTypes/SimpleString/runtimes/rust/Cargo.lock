@@ -622,7 +622,16 @@ dependencies = [
  "aws-smithy-types",
  "dafny_runtime",
  "dafny_standard_library",
+ "simple_string_dafny",
  "tokio",
+]
+
+[[package]]
+name = "simple_string_dafny"
+version = "0.1.0"
+dependencies = [
+ "dafny_runtime",
+ "dafny_standard_library",
 ]
 
 [[package]]

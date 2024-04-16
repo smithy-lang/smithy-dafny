@@ -412,9 +412,6 @@ public class DotNetNameResolverTest {
       IllegalArgumentException.class,
       () -> DotNetNameResolver.capitalizeNamespaceSegment("sausage-case")
     );
-    Assert.assertThrows(
-      IllegalArgumentException.class,
-      () -> DotNetNameResolver.capitalizeNamespaceSegment("snake_Case")
-    );
+    // snake_Case is valid for smithy
   }
 }
