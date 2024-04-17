@@ -3,6 +3,7 @@
 
 package software.amazon.polymorph.smithypython.awssdk.nameresolver;
 
+import com.google.common.base.CaseFormat;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
@@ -59,6 +60,10 @@ public class AwsSdkNameResolver {
    * @return
    */
   public static String dependencyErrorNameForService(ServiceShape serviceShape) {
+    if (serviceShape.getId().getNamespace().toLowerCase().contains("keystore")) {
+      System.out.println(CaseUtils.toPascalCase(serviceShape.getId().getNamespace().replace(".", "_")));
+      System.out.println(CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, serviceShape.getId().getNamespace()));
+    }
     return CaseUtils.toPascalCase(serviceShape.getId().getNamespace().replace(".", "_"));
   }
 
