@@ -1285,8 +1285,8 @@ public class TypeConversionCodegen {
 
   public TypeConverter generateEnumConverter(final EnumShape enumShape) {
     return generateEnumConverter(
-            enumShape,
-            enumShape.expectTrait(SyntheticEnumTrait.class)
+      enumShape,
+      enumShape.expectTrait(SyntheticEnumTrait.class)
     );
   }
 
@@ -1361,11 +1361,7 @@ public class TypeConversionCodegen {
       .lineSeparated()
       .append(throwInvalidEnumValue);
 
-    return buildConverterFromMethodBodies(
-      shape,
-      fromDafnyBody,
-      toDafnyBody
-    );
+    return buildConverterFromMethodBodies(shape, fromDafnyBody, toDafnyBody);
   }
 
   /**

@@ -4,6 +4,7 @@
 package software.amazon.polymorph.smithydotnet;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Streams;
 import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -13,8 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
-
-import com.google.common.collect.Streams;
 import software.amazon.polymorph.smithydotnet.nativeWrapper.NativeWrapperCodegen;
 import software.amazon.polymorph.traits.ExtendableTrait;
 import software.amazon.polymorph.traits.PositionalTrait;
@@ -941,10 +940,10 @@ public class ServiceCodegen {
 
   private EnumTrait getAndValidateEnumTrait(final Shape shape) {
     final EnumTrait enumTrait = shape
-            .getTrait(EnumTrait.class)
-            .orElseThrow(() ->
-                    new IllegalStateException("EnumTrait absent on provided shape")
-            );
+      .getTrait(EnumTrait.class)
+      .orElseThrow(() ->
+        new IllegalStateException("EnumTrait absent on provided shape")
+      );
     if (enumTrait.hasNames() && hasInvalidEnumNames(enumTrait)) {
       throw new IllegalStateException(
         "Enum definition names must be uppercase alphanumeric and begin with a letter"
