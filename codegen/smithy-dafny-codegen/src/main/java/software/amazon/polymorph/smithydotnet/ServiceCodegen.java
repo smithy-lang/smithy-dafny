@@ -4,7 +4,7 @@
 package software.amazon.polymorph.smithydotnet;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.Streams;
+import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -13,10 +13,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
+
+import com.google.common.collect.Streams;
 import software.amazon.polymorph.smithydotnet.nativeWrapper.NativeWrapperCodegen;
 import software.amazon.polymorph.traits.ExtendableTrait;
 import software.amazon.polymorph.traits.PositionalTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
+import software.amazon.polymorph.utils.AwsSdkNameResolverHelpers;
 import software.amazon.polymorph.utils.ModelUtils;
 import software.amazon.polymorph.utils.Token;
 import software.amazon.polymorph.utils.TokenTree;
@@ -34,6 +37,8 @@ import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumDefinition;
 import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
+import software.amazon.smithy.model.traits.LengthTrait;
+import software.amazon.smithy.model.traits.RangeTrait;
 import software.amazon.smithy.model.traits.TraitDefinition;
 
 /**
@@ -464,6 +469,230 @@ public class ServiceCodegen {
     return TokenTree.of("public bool", methodName, "()").append(body.braced());
   }
 
+  public String generateNumberConstraints(
+    final Shape shape,
+    final String parentName,
+    final String value
+  ) {
+    String result = "";
+    final ShapeId id = shape.getId();
+    String theType = id.getName();
+
+    if (shape.hasTrait(RangeTrait.class)) {
+      RangeTrait len = shape.getMemberTrait(model, RangeTrait.class).get();
+      Optional<BigDecimal> min = len.getMin();
+      if (min.isPresent()) {
+        result +=
+        """
+        if (%s < %s) {
+            throw new System.ArgumentException(
+                String.Format(\"Member %s of structure %s has type %s which has a minimum of %s but was given the value {0}.\", %s));
+        }
+        """.formatted(
+            value,
+            min.get().toString(),
+            value,
+            parentName,
+            theType,
+            min.get().toString(),
+            value
+          );
+      }
+      Optional<BigDecimal> max = len.getMax();
+      if (max.isPresent()) {
+        result +=
+        """
+        if (%s > %s) {
+            throw new System.ArgumentException(
+                String.Format(\"Member %s of structure %s has type %s which has a maximum of %s but was given the value {0}.\", %s));
+        }
+        """.formatted(
+            value,
+            max.get().toString(),
+            value,
+            parentName,
+            theType,
+            max.get().toString(),
+            value
+          );
+      }
+    }
+    return result;
+  }
+
+  public String generateListConstraints(
+    final Shape shape,
+    final String parentName,
+    final String value,
+    final String sizeTag,
+    final String subType
+  ) {
+    String result = "";
+    final ShapeId id = shape.getId();
+    String theType = id.getName();
+
+    if (shape.hasTrait(LengthTrait.class)) {
+      LengthTrait len = shape.getMemberTrait(model, LengthTrait.class).get();
+      Optional<Long> min = len.getMin();
+      if (min.isPresent()) {
+        result +=
+        """
+        if (%s.%s < %d) {
+            throw new System.ArgumentException(
+                String.Format(\"Member %s of structure %s has %s type %s which has a minimum length of %d but was given a value with length {0}.\", %s.%s));
+        }
+        """.formatted(
+            value,
+            sizeTag,
+            min.get(),
+            value,
+            parentName,
+            subType,
+            theType,
+            min.get(),
+            value,
+            sizeTag
+          );
+      }
+      Optional<Long> max = len.getMax();
+      if (max.isPresent()) {
+        result +=
+        """
+        if (%s.%s > %d) {
+            throw new System.ArgumentException(
+                String.Format(\"Member %s of structure %s has %s type %s which has a maximum length of %d but was given a value with length {0}.\", %s.%s));
+        }
+        """.formatted(
+            value,
+            sizeTag,
+            max.get(),
+            value,
+            parentName,
+            subType,
+            theType,
+            max.get(),
+            value,
+            sizeTag
+          );
+      }
+    }
+    return result;
+  }
+
+  public String generateStringConstraints(
+    final Shape shape,
+    final String parentName,
+    final String value
+  ) {
+    String result = "";
+    final ShapeId id = shape.getId();
+    String theType = id.getName();
+
+    if (shape.hasTrait(LengthTrait.class)) {
+      LengthTrait len = shape.getMemberTrait(model, LengthTrait.class).get();
+      Optional<Long> min = len.getMin();
+      if (min.isPresent()) {
+        result +=
+        """
+        if (%s.Length < %d) {
+            throw new System.ArgumentException(
+                String.Format(\"Member %s of structure %s has type %s which has a minimum length of %d but was given the value '{0}' which has length {1}.\", %s, %s.Length));
+        }
+        """.formatted(
+            value,
+            min.get(),
+            value,
+            parentName,
+            theType,
+            min.get(),
+            value,
+            value
+          );
+      }
+      Optional<Long> max = len.getMax();
+      if (max.isPresent()) {
+        result +=
+        """
+        if (%s.Length > %d) {
+            throw new System.ArgumentException(
+                String.Format(\"Member %s of structure %s has type %s which has a maximum length of %d but was given the value '{0}' which has length {1}.\", %s, %s.Length));
+        }
+        """.formatted(
+            value,
+            max.get(),
+            value,
+            parentName,
+            theType,
+            max.get(),
+            value,
+            value
+          );
+      }
+    }
+    return result;
+  }
+
+  public String generateMemberConstraints(
+    final MemberShape shape,
+    final String parentName,
+    final String memberName
+  ) {
+    if (!nameResolver.memberShapeIsOptional(shape)) {
+      return "";
+    }
+    ShapeId targetId = shape.getTarget();
+    if (AwsSdkNameResolverHelpers.isInAwsSdkNamespace(targetId)) {
+      return "";
+    }
+    final Shape targetShape = model.expectShape(targetId);
+    String inner = getConstraints(targetShape, parentName, memberName);
+    if (inner.isEmpty()) {
+      return "";
+    }
+    return "if (IsSet%s()) {%s}".formatted(memberName, inner);
+  }
+
+  private String getConstraints(
+    final Shape shape,
+    final String parentName,
+    final String memberName
+  ) {
+    return switch (shape.getType()) {
+      case BLOB -> generateListConstraints(
+        shape,
+        parentName,
+        memberName,
+        "Length",
+        "Blob"
+      );
+      case STRING -> generateStringConstraints(shape, parentName, memberName);
+      case INTEGER -> generateNumberConstraints(shape, parentName, memberName);
+      case LONG -> generateNumberConstraints(shape, parentName, memberName);
+      case LIST -> generateListConstraints(
+        shape,
+        parentName,
+        memberName,
+        "Count",
+        "List"
+      );
+      case MAP -> generateListConstraints(
+        shape,
+        parentName,
+        memberName,
+        "Count",
+        "Map"
+      );
+      //     case STRUCTURE -> generateStructureConstraints(shape.asStructureShape().get());
+      case MEMBER -> generateMemberConstraints(
+        shape.asMemberShape().get(),
+        parentName,
+        memberName
+      );
+      //     case UNION -> generateUnionConstraints(shape.asUnionShape().get());
+      default -> "";
+    };
+  }
+
   /**
    * Generates a validation method for structures. Note that not all Smithy constraint traits are supported.
    * <p>
@@ -483,26 +712,44 @@ public class ServiceCodegen {
     final StructureShape structureShape
   ) {
     final Token signature = Token.of("public void Validate()");
-    final TokenTree checks = TokenTree
-      .of(
-        ModelUtils
-          .streamStructureMembers(structureShape)
-          .filter(MemberShape::isRequired)
-          .map(memberShape -> {
-            final String isSetMethod =
-              nameResolver.isSetMethodForStructureMember(memberShape);
-            final String propertyName =
-              nameResolver.classPropertyForStructureMember(memberShape);
-            return Token.of(
-              """
-              if (!%s()) throw new System.ArgumentException("Missing value for required property '%s'");
-              """.formatted(isSetMethod, propertyName)
-            );
-          })
-      )
-      .braced();
+    final TokenTree requiredChecks = TokenTree.of(
+      ModelUtils
+        .streamStructureMembers(structureShape)
+        .filter(MemberShape::isRequired)
+        .map(memberShape -> {
+          final String isSetMethod = nameResolver.isSetMethodForStructureMember(
+            memberShape
+          );
+          final String propertyName =
+            nameResolver.classPropertyForStructureMember(memberShape);
+          return Token.of(
+            """
+            if (!%s()) throw new System.ArgumentException("Missing value for required property '%s'");
+            """.formatted(isSetMethod, propertyName)
+          );
+        })
+    );
 
-    return TokenTree.of(signature, checks);
+    String constraintChecks = "";
+    for (String entry : structureShape.getMemberNames()) {
+      Optional<MemberShape> opShape = structureShape.getMember(entry);
+      if (!opShape.isPresent()) {
+        continue;
+      }
+      MemberShape shape = opShape.get();
+      if (AwsSdkNameResolverHelpers.isInAwsSdkNamespace(shape.getId())) {
+        continue;
+      }
+      String memberName = nameResolver.capitalizeNamespaceSegment(
+        shape.getMemberName()
+      );
+      constraintChecks +=
+      getConstraints(shape, structureShape.getId().getName(), memberName);
+    }
+    final TokenTree body = TokenTree
+      .of(requiredChecks, TokenTree.of(constraintChecks))
+      .braced();
+    return TokenTree.of(signature, body);
   }
 
   private TokenTree generateUnionValidateMethod(final UnionShape unionShape) {
@@ -694,10 +941,10 @@ public class ServiceCodegen {
 
   private EnumTrait getAndValidateEnumTrait(final Shape shape) {
     final EnumTrait enumTrait = shape
-      .getTrait(EnumTrait.class)
-      .orElseThrow(() ->
-        new IllegalStateException("EnumTrait absent on provided shape")
-      );
+            .getTrait(EnumTrait.class)
+            .orElseThrow(() ->
+                    new IllegalStateException("EnumTrait absent on provided shape")
+            );
     if (enumTrait.hasNames() && hasInvalidEnumNames(enumTrait)) {
       throw new IllegalStateException(
         "Enum definition names must be uppercase alphanumeric and begin with a letter"
