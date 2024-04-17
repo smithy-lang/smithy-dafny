@@ -38,6 +38,7 @@ module Helpers {
       MapLessThanOrEqualToTen := Some(map["0" := "1", "2" := "3"]),
       // Alphabetic := Some("alphabetic"),
       OneToTen := Some(3),
+      myTenToTen := Some(3),
       GreaterThanOne := Some(3),
       LessThanTen := Some(3),
       // MyUniqueList := Some(["one", "two"]),
