@@ -1,3 +1,5 @@
+// Copyright Amazon.com Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 include "../Model/SimpleTypesEnumV2TypesWrapped.dfy"
 
 module {:extern "simple.types.enumv2.internaldafny.wrapped"} WrappedSimpleTypesEnumV2Service refines WrappedAbstractSimpleTypesEnumV2Service {
