@@ -79,16 +79,10 @@ GRADLEW := $(SMITHY_DAFNY_ROOT)/codegen/gradlew
 verify:Z3_PROCESSES=$(shell echo $$(( $(CORES) >= 3 ? 2 : 1 )))
 verify:DAFNY_PROCESSES=$(shell echo $$(( ($(CORES) - 1 ) / ($(CORES) >= 3 ? 2 : 1))))
 verify:
-	find . -name '*.dfy' | xargs -n 1 -P $(DAFNY_PROCESSES) -I % dafny \
-		-vcsCores:$(Z3_PROCESSES) \
-		-compile:0 \
-		-definiteAssignment:3 \
-		-unicodeChar:0 \
-		-functionSyntax:3 \
-		-verificationLogger:csv \
-		-timeLimit:$(VERIFY_TIMEOUT) \
-		-trace \
-		%
+	@find . -name '*.dfy' | xargs -n 1 -P $(DAFNY_PROCESSES) -I % \
+		$(SMITHY_DAFNY_ROOT)/run-dafny.sh $(Z3_PROCESSES) $(VERIFY_TIMEOUT) % ;\
+	EXIT_CODE=$$?;\
+	echo "Overall verification has exit code $$EXIT_CODE"
 
 # Verify single file FILE with text logger.
 # This is useful for debugging resource count usage within a file.
