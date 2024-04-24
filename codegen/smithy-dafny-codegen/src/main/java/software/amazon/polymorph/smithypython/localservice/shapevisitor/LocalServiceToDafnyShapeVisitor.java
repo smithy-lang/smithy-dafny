@@ -268,7 +268,31 @@ public class LocalServiceToDafnyShapeVisitor extends ShapeVisitor.Default<String
 
     @Override
     public String enumShape(EnumShape shape) {
-      return dataSource;
+// ONLY write converters if the shape under generation is in the current namespace
+      if (shape.getId().getNamespace().equals(context.settings().getService().getNamespace())) {
+        LocalServiceToDafnyConversionFunctionWriter.writeConverterForShapeAndMembers(shape,
+                context, writer);
+        DafnyToLocalServiceConversionFunctionWriter.writeConverterForShapeAndMembers(shape,
+                context, writer);
+      }
+
+      // Import the smithy_to_dafny converter from where the ShapeVisitor was called
+      String pythonModuleSmithygeneratedPath =
+              SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
+                      shape.getId().getNamespace(),
+                      context
+              );
+      writer.addStdlibImport(pythonModuleSmithygeneratedPath + ".smithy_to_dafny");
+
+      // Return a reference to the generated conversion method
+      // ex. for shape example.namespace.ExampleShape
+      // returns
+      // `example_namespace.smithygenerated.smithy_to_dafny.SmithyToDafny_example_namespace_ExampleShape(input)`
+      return "%1$s.smithy_to_dafny.%2$s(%3$s)".formatted(
+              pythonModuleSmithygeneratedPath,
+              SmithyNameResolver.getSmithyToDafnyFunctionNameForShape(shape, context),
+              dataSource
+      );
     }
 
     @Override
