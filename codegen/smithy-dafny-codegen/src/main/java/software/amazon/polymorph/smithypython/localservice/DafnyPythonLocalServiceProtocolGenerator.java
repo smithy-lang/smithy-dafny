@@ -498,7 +498,7 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator implements Protoc
             SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
                     serviceDependencyShapeId.getNamespace())
                 + "_deserialize_error",
-                DafnyNameResolver.getDafnyTypeForError(serviceDependencyError);
+                DafnyNameResolver.getDafnyTypeForError(serviceDependencyError),
                 serviceDependencyErrorName);
       }
     }
