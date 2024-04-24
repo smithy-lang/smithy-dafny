@@ -12,9 +12,11 @@ import software.amazon.smithy.build.SmithyBuildPlugin;
 import software.amazon.smithy.codegen.core.directed.CodegenDirector;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.AbstractShapeBuilder;
+import software.amazon.smithy.model.shapes.EnumShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.traits.DocumentationTrait;
+import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.transform.ModelTransformer;
 import software.amazon.smithy.python.codegen.GenerationContext;
 import software.amazon.smithy.python.codegen.PythonSettings;
@@ -80,6 +82,7 @@ public final class DafnyPythonLocalServiceClientCodegenPlugin implements SmithyB
     Model transformedModel = model;
     transformedModel = transformJavadocTraitsToDocumentationTraits(transformedModel);
     transformedModel = transformServiceShapeToAddReferenceResources(transformedModel, serviceShape);
+    transformedModel = transformStringEnumShapesToEnumShapes(transformedModel, serviceShape);
     return transformedModel;
   }
 
@@ -106,12 +109,6 @@ public final class DafnyPythonLocalServiceClientCodegenPlugin implements SmithyB
       } else if (shape.hasTrait(DocumentationTrait.class)) {
         DocumentationTrait documentationTrait = shape.getTrait(DocumentationTrait.class).get();
         String documentation = documentationTrait.getValue();
-        if (documentation.length() < 20) {
-          System.out.println("shape: " + shape.getId());
-          System.out.println("documentation: " + documentation);
-          System.out.println(documentation.length());
-          System.out.println(documentation.trim().matches("/+"));
-        }
 
         if (documentation.trim().matches("/+")) {
           AbstractShapeBuilder<?,?> builder = ModelUtils.getBuilderForShape(shape);
@@ -153,6 +150,20 @@ public final class DafnyPythonLocalServiceClientCodegenPlugin implements SmithyB
     return ModelTransformer.create().mapShapes(model, shape -> {
       if (shape.getId().equals(serviceShape.getId())) {
         return transformedServiceShapeBuilder.build();
+      } else {
+        return shape;
+      }
+    });
+  }
+
+  public static Model transformStringEnumShapesToEnumShapes(
+      Model model, ServiceShape serviceShape) {
+
+    return ModelTransformer.create().mapShapes(model, shape -> {
+      if (shape.hasTrait(EnumTrait.class)) {
+        EnumShape asEnum = EnumShape.fromStringShape(shape.asStringShape().get()).get();
+        System.out.println(asEnum);
+        return asEnum;
       } else {
         return shape;
       }

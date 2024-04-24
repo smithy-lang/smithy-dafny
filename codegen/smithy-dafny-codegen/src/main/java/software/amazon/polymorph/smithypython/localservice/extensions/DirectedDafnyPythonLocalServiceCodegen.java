@@ -144,6 +144,7 @@ public class DirectedDafnyPythonLocalServiceCodegen extends DirectedPythonCodege
         });
   }
 
+
   /**
    * Override Smithy-Python's generateResource to actually generate resources.
    *
@@ -234,6 +235,23 @@ public class DirectedDafnyPythonLocalServiceCodegen extends DirectedPythonCodege
               });
     }
   }
+
+    @Override
+    public void generateEnumShape(GenerateEnumDirective<GenerationContext, PythonSettings> directive) {
+        if (!directive.shape().isEnumShape()) {
+            return;
+        }
+        System.out.println("generate " + directive.shape().asEnumShape().get());
+        directive.context().writerDelegator().useShapeWriter(directive.shape(), writer -> {
+            EnumGenerator generator = new EnumGenerator(
+                    directive.model(),
+                    directive.symbolProvider(),
+                    writer,
+                    directive.shape().asEnumShape().get()
+            );
+            generator.run();
+        });
+    }
 
   /**
    * Override Smithy-Python's generateUnion to not write a symbol in a different namespace.

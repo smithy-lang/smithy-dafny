@@ -28,13 +28,13 @@ import software.amazon.smithy.model.traits.EnumValueTrait;
 /**
  * Renders enums.
  */
-final class EnumGenerator implements Runnable {
+public final class EnumGenerator implements Runnable {
     private final Model model;
     private final SymbolProvider symbolProvider;
     private final PythonWriter writer;
     private final EnumShape shape;
 
-    EnumGenerator(Model model, SymbolProvider symbolProvider, PythonWriter writer, EnumShape enumShape) {
+    public EnumGenerator(Model model, SymbolProvider symbolProvider, PythonWriter writer, EnumShape enumShape) {
         this.model = model;
         this.symbolProvider = symbolProvider;
         this.writer = writer;

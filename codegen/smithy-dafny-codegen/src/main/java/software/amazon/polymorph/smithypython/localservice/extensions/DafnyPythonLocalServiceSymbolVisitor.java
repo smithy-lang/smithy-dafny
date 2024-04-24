@@ -3,6 +3,7 @@ package software.amazon.polymorph.smithypython.localservice.extensions;
 import static java.lang.String.format;
 
 import java.util.Locale;
+import java.util.Optional;
 import java.util.Set;
 import software.amazon.polymorph.smithypython.awssdk.nameresolver.AwsSdkNameResolver;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
@@ -14,11 +15,15 @@ import software.amazon.polymorph.traits.ReferenceTrait;
 import software.amazon.smithy.codegen.core.*;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.*;
+import software.amazon.smithy.model.traits.EnumTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
+import software.amazon.smithy.model.traits.MediaTypeTrait;
 import software.amazon.smithy.python.codegen.CodegenUtils;
 import software.amazon.smithy.python.codegen.PythonSettings;
+import software.amazon.smithy.python.codegen.SmithyPythonDependency;
 import software.amazon.smithy.python.codegen.SymbolVisitor;
 import software.amazon.smithy.utils.CaseUtils;
+import software.amazon.smithy.utils.MediaType;
 import software.amazon.smithy.utils.StringUtils;
 
 /**
@@ -360,6 +365,18 @@ public class DafnyPythonLocalServiceSymbolVisitor extends SymbolVisitor {
     // Like string enums, int enums are plain ints when used as members.
     builder.putProperty("enumSymbol", escaper.escapeSymbol(shape, enumSymbol));
     return builder.build();
+  }
+
+  @Override
+  public Symbol stringShape(StringShape shape) {
+    if (shape.hasTrait(EnumTrait.class)) {
+      EnumShape asEnum = EnumShape.fromStringShape(shape).get();
+      System.out.println(asEnum);
+      System.out.println(asEnum.getEnumValues());
+      return enumShape(asEnum);
+    } else {
+      return super.stringShape(shape);
+    }
   }
 
   /**
