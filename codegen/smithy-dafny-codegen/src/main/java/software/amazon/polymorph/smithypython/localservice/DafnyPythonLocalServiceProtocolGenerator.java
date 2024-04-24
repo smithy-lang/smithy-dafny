@@ -5,6 +5,7 @@ package software.amazon.polymorph.smithypython.localservice;
 
 import static java.lang.String.format;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
@@ -473,15 +474,31 @@ public abstract class DafnyPythonLocalServiceProtocolGenerator implements Protoc
           context.model().expectShape(serviceDependencyShapeId).asServiceShape().get()
       );
 
+      // Import this service's Dafny error
+      ServiceShape dependencyServiceShape = context
+              .model()
+              .expectShape(serviceDependencyShapeId)
+              .asServiceShape()
+              .get();
+      List<ShapeId> serviceDependencyErrors = dependencyServiceShape.getErrors();
+      if (serviceDependencyErrors.size() > 1) {
+          throw new IllegalArgumentException("Only 1 service-modelled error per service supported at this time");
+      }
+
+      ShapeId serviceDependencyError = serviceDependencyErrors.get(0);
+
+      DafnyNameResolver.importDafnyTypeForError(writer, serviceDependencyError, context);
+
       writer.write(
             """
             elif error.is_$L:
-                return $L(await $L(error.$L))""",
+                return $L(await $L($L(message=error.$L)))""",
                 serviceDependencyErrorName,
               serviceDependencyShapeId.getName(),
             SmithyNameResolver.getServiceSmithygeneratedDirectoryNameForNamespace(
                     serviceDependencyShapeId.getNamespace())
                 + "_deserialize_error",
+                DafnyNameResolver.getDafnyTypeForError(serviceDependencyError);
                 serviceDependencyErrorName);
       }
     }
