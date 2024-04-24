@@ -197,6 +197,21 @@ transpile_implementation:
 		$(if $(strip $(STD_LIBRARY)) , -library:$(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy, ) \
 		$(TRANSPILE_DEPENDENCIES)
 
+transpile_implementation_new: SRC_INDEX_TRANSPILE=$(if $(SRC_INDEX),$(SRC_INDEX),src)
+transpile_implementation_new:
+	find ./$(SRC_INDEX_TRANSPILE)/ -name 'Index.dfy' | sed -e 's/^/include "/' -e 's/$$/"/' | /Users/scchatur/workspace/DafnyLang/dafny/scripts/Dafny \
+		translate go \
+		--stdin \
+		--module-name $(GO_MODULE_NAME) \
+		--no-verify \
+		--cores:$(CORES) \
+		--optimize-erasable-datatype-wrapper:false \
+		--unicode-char:true \
+		--function-syntax:3 \
+		--allow-warnings \
+		--output $(OUT) \
+		$(TRANSPILE_DEPENDENCIES)
+
 # If the project under transpilation uses `replaceable` modules,
 #   it MUST define a SRC_INDEX variable per language.
 # The purpose and usage of this is described in the `transpile_implementation` comments.
@@ -237,6 +252,21 @@ transpile_test:
 		$(if $(strip $(STD_LIBRARY)) , -library:$(PROJECT_ROOT)/$(STD_LIBRARY)/src/Index.dfy, ) \
 		$(TRANSPILE_DEPENDENCIES) \
 
+transpile_test_new:
+	find ./dafny/**/$(TEST_INDEX_TRANSPILE) ./$(TEST_INDEX_TRANSPILE) -name "*.dfy" -name '*.dfy' | sed -e 's/^/include "/' -e 's/$$/"/' | /Users/scchatur/workspace/DafnyLang/dafny/scripts/Dafny \
+		translate go \
+		--stdin \
+		--no-verify \
+		--module-name $(GO_MODULE_NAME) \
+		--cores:$(CORES) \
+		--include-test-runner \
+		--optimize-erasable-datatype-wrapper:false \
+		--unicode-char:true \
+		--function-syntax:3 \
+		--allow-warnings \
+		--output $(OUT) \
+		$(TRANSPILE_DEPENDENCIES) \
+
 # If we are not the StandardLibrary, transpile the StandardLibrary.
 # Transpile all other dependencies
 transpile_dependencies:
@@ -267,6 +297,7 @@ _polymorph:
 	$(OUTPUT_JAVA) \
 	$(OUTPUT_DOTNET) \
 	$(OUTPUT_JAVA) \
+	$(OUTPUT_GO) \
 	--model $(if $(DIR_STRUCTURE_V2), $(LIBRARY_ROOT)/dafny/$(SERVICE)/Model, $(SMITHY_MODEL_ROOT)) \
 	--dependent-model $(PROJECT_ROOT)/$(SMITHY_DEPS) \
 	$(patsubst %, --dependent-model $(PROJECT_ROOT)/%/Model, $($(service_deps_var))) \
@@ -286,6 +317,7 @@ _polymorph_wrapped:
 	$(OUTPUT_DAFNY_WRAPPED) \
 	$(OUTPUT_DOTNET_WRAPPED) \
 	$(OUTPUT_JAVA_WRAPPED) \
+	$(OUTPUT_GO_WRAPPED) \
 	--model $(if $(DIR_STRUCTURE_V2),$(LIBRARY_ROOT)/dafny/$(SERVICE)/Model,$(LIBRARY_ROOT)/Model) \
 	--dependent-model $(PROJECT_ROOT)/$(SMITHY_DEPS) \
 	$(patsubst %, --dependent-model $(PROJECT_ROOT)/%/Model, $($(service_deps_var))) \
@@ -319,6 +351,7 @@ _polymorph_code_gen: INPUT_DAFNY=\
 _polymorph_code_gen: OUTPUT_DOTNET=\
     $(if $(DIR_STRUCTURE_V2), --output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/$(SERVICE)/, --output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/)
 _polymorph_code_gen: OUTPUT_JAVA=--output-java $(LIBRARY_ROOT)/runtimes/java/src/main/smithy-generated
+_polymorph_code_gen: OUTPUT_GO=--output-go $(LIBRARY_ROOT)/runtimes/go/
 _polymorph_code_gen: _polymorph
 
 check_polymorph_diff:
@@ -376,6 +409,20 @@ _polymorph_java: _polymorph
 # Dependency for formatting generating Java code
 setup_prettier:
 	npm i --no-save prettier@3 prettier-plugin-java@2.5
+
+.PHONY: polymorph_go
+polymorph_go: POLYMORPH_LANGUAGE_TARGET=go
+polymorph_go: _polymorph_dependencies
+polymorph_go:
+	set -e; for service in $(PROJECT_SERVICES) ; do \
+		export service_deps_var=SERVICE_DEPS_$${service} ; \
+		export namespace_var=SERVICE_NAMESPACE_$${service} ; \
+		export SERVICE=$${service} ; \
+		$(MAKE) _polymorph_go ; \
+	done
+
+_polymorph_go: OUTPUT_GO=--output-go $(LIBRARY_ROOT)/runtimes/go/
+_polymorph_go: _polymorph
 
 ########################## .NET targets
 
@@ -480,6 +527,29 @@ _clean:
 	rm -rf $(LIBRARY_ROOT)/runtimes/net/tests/bin $(LIBRARY_ROOT)/runtimes/net/tests/obj
 
 clean: _clean
+
+transpile_go: clean_go transpile_implementation_go transpile_test_go transpile_dependencies_go migrate_go
+
+transpile_implementation_go: TARGET=go
+transpile_implementation_go: GO_MODULE_NAME="github.com/ShubhamChaturvedi7/SimpleBoolean"
+transpile_implementation_go: OUT=runtimes/go/ImplementationFromDafny
+transpile_implementation_go: transpile_implementation_new
+
+transpile_test_go: TARGET=go
+transpile_test_go: GO_MODULE_NAME="github.com/ShubhamChaturvedi7/SimpleBoolean"
+transpile_test_go: OUT=runtimes/go/TestsFromDafny
+transpile_test_go: transpile_test_new
+
+transpile_dependencies_go: LANG=go
+transpile_dependencies_go: transpile_dependencies
+
+clean_go:
+	rm -rf $(LIBRARY_ROOT)/runtimes/go/ImplementationFromDafny-go
+	rm -rf $(LIBRARY_ROOT)/runtimes/go/TestsFromDafny-go
+
+migrate_go:
+	cd $(LIBRARY_ROOT)/runtimes/go
+	./run_go_tooling_migrations.sh
 
 ########################## local testing targets
 
