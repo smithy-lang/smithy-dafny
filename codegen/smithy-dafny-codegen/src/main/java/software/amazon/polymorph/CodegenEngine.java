@@ -55,6 +55,7 @@ public class CodegenEngine {
   private final Path[] dependentModelPaths;
   private final String namespace;
   private final Map<TargetLanguage, Path> targetLangOutputDirs;
+  private final Map<TargetLanguage, Path> targetLangTestOutputDirs;
   private final DafnyVersion dafnyVersion;
   private final Optional<Path> propertiesFile;
   private final Optional<Path> patchFilesDir;
@@ -81,6 +82,7 @@ public class CodegenEngine {
     final Path[] dependentModelPaths,
     final String namespace,
     final Map<TargetLanguage, Path> targetLangOutputDirs,
+    final Map<TargetLanguage, Path> targetLangTestOutputDirs,
     final DafnyVersion dafnyVersion,
     final Optional<Path> propertiesFile,
     final AwsSdkVersion javaAwsSdkVersion,
@@ -97,6 +99,7 @@ public class CodegenEngine {
     this.dependentModelPaths = dependentModelPaths;
     this.namespace = namespace;
     this.targetLangOutputDirs = targetLangOutputDirs;
+    this.targetLangTestOutputDirs = targetLangTestOutputDirs;
     this.dafnyVersion = dafnyVersion;
     this.propertiesFile = propertiesFile;
     this.javaAwsSdkVersion = javaAwsSdkVersion;
@@ -507,6 +510,7 @@ public class CodegenEngine {
     private Path[] dependentModelPaths;
     private String namespace;
     private Map<TargetLanguage, Path> targetLangOutputDirs;
+    private Map<TargetLanguage, Path> targetLangTestOutputDirs;
     private DafnyVersion dafnyVersion = new DafnyVersion(4, 1, 0);
     private Path propertiesFile;
     private AwsSdkVersion javaAwsSdkVersion = AwsSdkVersion.V2;
@@ -552,6 +556,17 @@ public class CodegenEngine {
       final Map<TargetLanguage, Path> targetLangOutputDirs
     ) {
       this.targetLangOutputDirs = targetLangOutputDirs;
+      return this;
+    }
+
+    /**
+     * Sets the target language(s) for which to generate testing code,
+     * along with the directory(-ies) into which to output each language's generated testing code.
+     */
+    public Builder withTargetLangTestOutputDirs(
+            final Map<TargetLanguage, Path> targetLangTestOutputDirs
+    ) {
+      this.targetLangTestOutputDirs = targetLangTestOutputDirs;
       return this;
     }
 
@@ -680,6 +695,14 @@ public class CodegenEngine {
       final Map<TargetLanguage, Path> targetLangOutputDirs =
         ImmutableMap.copyOf(targetLangOutputDirsRaw);
 
+      final Map<TargetLanguage, Path> targetLangTestOutputDirsRaw =
+              Objects.requireNonNull(this.targetLangOutputDirs);
+      targetLangTestOutputDirsRaw.replaceAll((_lang, path) ->
+              path.toAbsolutePath().normalize()
+      );
+      final Map<TargetLanguage, Path> targetLangTestOutputDirs =
+              ImmutableMap.copyOf(targetLangTestOutputDirsRaw);
+
       final DafnyVersion dafnyVersion = Objects.requireNonNull(
         this.dafnyVersion
       );
@@ -725,6 +748,7 @@ public class CodegenEngine {
         dependentModelPaths,
         this.namespace,
         targetLangOutputDirs,
+        targetLangTestOutputDirs,
         dafnyVersion,
         propertiesFile,
         javaAwsSdkVersion,

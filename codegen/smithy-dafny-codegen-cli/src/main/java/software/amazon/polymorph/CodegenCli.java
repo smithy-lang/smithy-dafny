@@ -81,6 +81,11 @@ public class CodegenCli {
       outputDirs.put(TargetLanguage.RUST, path)
     );
 
+    final Map<TargetLanguage, Path> testOutputDirs = new HashMap<>();
+    cliArguments.testOutputJavaDir.ifPresent(path ->
+            outputDirs.put(TargetLanguage.JAVA, path)
+    );
+
     final CodegenEngine.Builder engineBuilder = new CodegenEngine.Builder()
       .withFromSmithyBuildPlugin(false)
       .withLibraryRoot(cliArguments.libraryRoot)
@@ -88,6 +93,7 @@ public class CodegenCli {
       .withDependentModelPaths(cliArguments.dependentModelPaths)
       .withNamespace(cliArguments.namespace)
       .withTargetLangOutputDirs(outputDirs)
+      .withTargetLangTestOutputDirs(testOutputDirs)
       .withAwsSdkStyle(cliArguments.awsSdkStyle)
       .withLocalServiceTest(cliArguments.localServiceTest)
       .withDafnyVersion(cliArguments.dafnyVersion)
@@ -258,6 +264,7 @@ public class CodegenCli {
     String namespace,
     Optional<Path> outputDotnetDir,
     Optional<Path> outputJavaDir,
+    Optional<Path> testOutputJavaDir,
     Optional<Path> outputRustDir,
     Optional<Path> outputDafnyDir,
     Optional<AwsSdkVersion> javaAwsSdkVersion,
@@ -308,6 +315,9 @@ public class CodegenCli {
       final Optional<Path> outputJavaDir = Optional
         .ofNullable(commandLine.getOptionValue("output-java"))
         .map(Paths::get);
+      final Optional<Path> testOutputJavaDir = Optional
+              .ofNullable(commandLine.getOptionValue("output-java-test"))
+              .map(Paths::get);
       final Optional<Path> outputDotnetDir = Optional
         .ofNullable(commandLine.getOptionValue("output-dotnet"))
         .map(Paths::get);
@@ -370,6 +380,7 @@ public class CodegenCli {
           namespace,
           outputDotnetDir,
           outputJavaDir,
+          testOutputJavaDir,
           outputRustDir,
           outputDafnyDir,
           javaAwsSdkVersion,
