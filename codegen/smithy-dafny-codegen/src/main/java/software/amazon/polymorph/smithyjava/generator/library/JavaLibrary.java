@@ -35,6 +35,7 @@ import software.amazon.smithy.model.node.ExpectationNotMetException;
 import software.amazon.smithy.model.shapes.ListShape;
 import software.amazon.smithy.model.shapes.MapShape;
 import software.amazon.smithy.model.shapes.MemberShape;
+import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ResourceShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.SetShape;
@@ -288,26 +289,23 @@ public class JavaLibrary extends CodegenSubject {
       .toList();
   }
 
-  public CodeBlock wrapWithShim(ShapeId referentId, CodeBlock referentVariable)
-    throws ExpectationNotMetException {
+  public CodeBlock wrapWithShim(ShapeId referentId, CodeBlock referentVariable) throws ExpectationNotMetException {
     final Shape targetShape = model.expectShape(referentId);
     final ClassName rtnClassName;
     if (targetShape.isResourceShape()) {
-      //noinspection OptionalGetWithoutIsPresent
-      ResourceShape rShape = targetShape.asResourceShape().get();
-      rtnClassName = nativeNameResolver.classNameForResource(rShape);
-      return CodeBlock.of(
-        "$T.$L($L)",
-        rtnClassName,
-        WRAP_METHOD_NAME,
-        referentVariable
-      );
+        //noinspection OptionalGetWithoutIsPresent
+        ResourceShape rShape = targetShape.asResourceShape().get();
+        rtnClassName = nativeNameResolver.classNameForResource(rShape);
+        return CodeBlock.of("$T.$L($L)",
+                rtnClassName, WRAP_METHOD_NAME, referentVariable);
     } else {
-      // It MUST be a service, as reference traits ONLY reference Resources & Services
-      //noinspection OptionalGetWithoutIsPresent
-      ServiceShape sShape = targetShape.asServiceShape().get();
-      rtnClassName = nativeNameResolver.classNameForService(sShape);
+        // It MUST be a service, as reference traits ONLY reference Resources & Services
+        //noinspection OptionalGetWithoutIsPresent
+        ServiceShape sShape = targetShape.asServiceShape().get();
+        rtnClassName = nativeNameResolver.classNameForService(sShape);
     }
-    return CodeBlock.of("new $T($L)", rtnClassName, referentVariable);
+    return CodeBlock.of("new $T($L)",
+            rtnClassName,
+            referentVariable);
   }
 }

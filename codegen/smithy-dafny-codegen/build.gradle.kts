@@ -25,6 +25,7 @@ dependencies {
     implementation("software.amazon.smithy:smithy-aws-traits:$smithyVersion")
     implementation("software.amazon.smithy:smithy-rules-engine:$smithyVersion")
     implementation("software.amazon.smithy:smithy-waiters:$smithyVersion")
+    implementation("software.amazon.smithy:smithy-smoke-test-traits:$smithyVersion")
 
     implementation("com.google.guava:guava:30.1-jre")
     implementation("org.slf4j:slf4j-api:1.7.32")
