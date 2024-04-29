@@ -223,7 +223,26 @@ public class DafnyToAwsSdkShapeVisitor extends ShapeVisitor.Default<String> {
 
   @Override
   public String enumShape(EnumShape shape) {
-    return dataSource;
+    DafnyToAwsSdkConversionFunctionWriter.writeConverterForShapeAndMembers(
+            shape, context, writer);
+    AwsSdkToDafnyConversionFunctionWriter.writeConverterForShapeAndMembers(
+            shape, context, writer);
+
+    // Import the dafny_to_aws_sdk converter from where the ShapeVisitor was called
+    String pythonModuleSmithygeneratedPath =
+            SmithyNameResolver.getPythonModuleSmithygeneratedPathForSmithyNamespace(
+                    shape.getId().getNamespace(), context);
+    writer.addStdlibImport(pythonModuleSmithygeneratedPath + ".dafny_to_aws_sdk");
+
+    // Return a reference to the generated conversion method
+    // ex. for shape example.namespace.ExampleShape
+    // returns
+    // `example_namespace.smithygenerated.dafny_to_aws_sdk.example_namespace_ExampleShape(input)`
+    return "%1$s.dafny_to_aws_sdk.%2$s(%3$s)"
+            .formatted(
+                    pythonModuleSmithygeneratedPath,
+                    AwsSdkNameResolver.getDafnyToAwsSdkFunctionNameForShape(shape),
+                    dataSource);
   }
 
   @Override
