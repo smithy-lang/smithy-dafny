@@ -242,7 +242,7 @@ public abstract class ToNative extends Generator {
     return builder.build();
   }
 
-  protected MethodSpec modeledEnum(StringShape shape) {
+  protected MethodSpec modeledEnum(Shape shape) {
     final ClassName returnType = subject.nativeNameResolver.classForEnum(shape);
     MethodSpec.Builder method = modeledEnumCommon(shape, returnType);
     // No Enum value matched, throw an Exception
@@ -257,7 +257,7 @@ public abstract class ToNative extends Generator {
 
   /** @return MethodSpec.Builder with an If-Return for every known enum value.*/
   protected final MethodSpec.Builder modeledEnumCommon(
-    StringShape shape,
+    Shape shape,
     ClassName returnType
   ) {
     final ShapeId shapeId = shape.getId();

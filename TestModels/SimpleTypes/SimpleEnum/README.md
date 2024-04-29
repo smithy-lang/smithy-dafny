@@ -1,6 +1,6 @@
 # SimpleEnum
 
-This project implements the smithy type [enum](https://smithy.io/2.0/spec/simple-types.html#blob) and the associated operations in `dafny`. This is then transpiled to a target runtime, and each tests are executed - either as CI actions or manually.
+This project implements strings attached with the Smithy trait [@enum](https://smithy.io/2.0/spec/constraint-traits.html#enum-trait) and the associated operations in `dafny`. This is then transpiled to a target runtime, and each tests are executed - either as CI actions or manually.
 
 ## Build
 
@@ -9,6 +9,7 @@ This project implements the smithy type [enum](https://smithy.io/2.0/spec/simple
 1. Generate the Wrappers using `polymorph`
 
 ```
+make polymorph_dafny
 make polymorph_dotnet
 ```
 

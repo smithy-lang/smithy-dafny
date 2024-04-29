@@ -4,6 +4,7 @@ package software.amazon.polymorph.smithyjava.generator.library;
 
 import static software.amazon.polymorph.smithyjava.generator.library.shims.ResourceShim.WRAP_METHOD_NAME;
 
+import com.google.common.collect.Streams;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import java.nio.file.Path;
@@ -12,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.polymorph.smithydafny.DafnyVersion;
@@ -44,6 +46,7 @@ import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.model.traits.EnumTrait;
+import software.amazon.smithy.model.traits.EnumValueTrait;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.TraitDefinition;
 
@@ -238,9 +241,14 @@ public class JavaLibrary extends CodegenSubject {
       .toList();
   }
 
-  public List<StringShape> getEnumsInServiceNamespace() {
-    return this.model.getStringShapesWithTrait(EnumTrait.class)
-      .stream()
+  public List<Shape> getEnumsInServiceNamespace() {
+    final Stream<Shape> enumShapes = Streams.concat(
+      // @enum string
+      this.model.getStringShapesWithTrait(EnumTrait.class).stream(),
+      // Smithy 2.0 enum shapes
+      this.model.getEnumShapes().stream()
+    );
+    return enumShapes
       .filter(shape ->
         ModelUtils.isInServiceNamespace(shape.getId(), this.serviceShape)
       )

@@ -279,7 +279,7 @@ public abstract class ToDafny extends Generator {
   }
 
   @SuppressWarnings("OptionalGetWithoutIsPresent")
-  protected MethodSpec modeledEnum(StringShape shape) {
+  protected MethodSpec modeledEnum(Shape shape) {
     final ShapeId shapeId = shape.getId();
     String methodName = capitalize(shapeId.getName());
     final EnumTrait enumTrait = shape
