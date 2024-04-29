@@ -248,6 +248,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
 
     @Override
     public String booleanShape(BooleanShape shape) {
+        writer.addImport("dafny");
         String nilWrapIfRequired = "nil";
         String someWrapIfRequired = "%s%s";
         String returnType = "interface {}";
@@ -348,6 +349,7 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
 
     @Override
     public String integerShape(IntegerShape shape) {
+        writer.addImport("dafny");
         String nilWrapIfRequired = "nil";
         String someWrapIfRequired = "%s%s";
         String returnType = "interface {}";
@@ -387,6 +389,8 @@ public class SmithyToDafnyShapeVisitor extends ShapeVisitor.Default<String> {
         if (isPointerType) {
             nilCheck = "if %s == nil {return %s}".formatted(dataSource, nilWrapIfRequired);
         }
+
+        writer.addImport("dafny");
 
         return """
                     func () %s {

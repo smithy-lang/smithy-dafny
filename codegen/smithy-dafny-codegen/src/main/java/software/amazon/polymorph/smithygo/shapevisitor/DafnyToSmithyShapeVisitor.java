@@ -124,6 +124,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
     // TODO: smithy-dafny-conversion library
     @Override
     public String listShape(ListShape shape) {
+        writer.addImport("dafny");
         StringBuilder builder = new StringBuilder();
 
         MemberShape memberShape = shape.getMember();
@@ -153,6 +154,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
 
     @Override
     public String mapShape(MapShape shape) {
+        writer.addImport("dafny");
         StringBuilder builder = new StringBuilder();
 
         MemberShape keyMemberShape = shape.getKey();
@@ -186,6 +188,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
 
     @Override
     public String booleanShape(BooleanShape shape) {
+        writer.addImport("dafny");
         return """
                 func() *bool {
                     var b bool
@@ -243,6 +246,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
 
     @Override
     public String integerShape(IntegerShape shape) {
+        writer.addImport("dafny");
         var isPointable = this.context.symbolProvider().toSymbol(shape).getProperty(POINTABLE).orElse(false);
         if ((boolean)isPointable) {
             return ("""
@@ -261,6 +265,7 @@ public class DafnyToSmithyShapeVisitor extends ShapeVisitor.Default<String> {
 
     @Override
     public String longShape(LongShape shape) {
+        writer.addImport("dafny");
         return ("""
                 func() *int64 {
                     var b int64
