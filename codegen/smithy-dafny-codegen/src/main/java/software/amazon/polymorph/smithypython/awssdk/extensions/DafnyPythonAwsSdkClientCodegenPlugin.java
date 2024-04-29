@@ -3,6 +3,7 @@
 
 package software.amazon.polymorph.smithypython.awssdk.extensions;
 
+import software.amazon.polymorph.smithypython.localservice.extensions.DafnyPythonLocalServiceClientCodegenPlugin;
 import software.amazon.polymorph.traits.DafnyAwsSdkProtocolTrait;
 import software.amazon.polymorph.smithypython.common.nameresolver.SmithyNameResolver;
 import software.amazon.polymorph.traits.LocalServiceTrait;
@@ -79,5 +80,12 @@ public final class DafnyPythonAwsSdkClientCodegenPlugin implements SmithyBuildPl
     runner.model(addAwsSdkProtocolTrait(context.getModel(), serviceShape));
 
     runner.run();
+  }
+
+  public static Model transformModelForAwsSdkService(Model model, ServiceShape serviceShape) {
+    Model transformedModel = model;
+    transformedModel = addAwsSdkProtocolTrait(transformedModel, serviceShape);
+    transformedModel = DafnyPythonLocalServiceClientCodegenPlugin.transformStringEnumShapesToEnumShapes(transformedModel, serviceShape);
+    return transformedModel;
   }
 }
