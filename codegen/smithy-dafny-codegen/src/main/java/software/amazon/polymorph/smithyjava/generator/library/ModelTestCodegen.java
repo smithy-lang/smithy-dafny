@@ -31,8 +31,7 @@ public class ModelTestCodegen extends Generator {
     @Override
     public Set<JavaFile> javaFiles() {
         LinkedHashSet<JavaFile> rtn = new LinkedHashSet<>();
-        subject.getOperationsInServiceNamespace().stream()
-                .filter(operationShape -> operationShape.hasTrait(SmokeTestsTrait.class))
+        subject.model.getOperationShapesWithTrait(SmokeTestsTrait.class).stream()
                 .map(this::smokeTestsClass)
                 .forEachOrdered(c -> JavaFile.builder(subject.modelPackageName, c).build());
         return rtn;
