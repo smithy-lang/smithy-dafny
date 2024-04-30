@@ -3,160 +3,193 @@
 include "../src/Index.dfy"
 
 module Helpers {
-    import SimpleConstraints
-    import StandardLibrary.UInt
-    import opened SimpleConstraintsTypes
-    import opened Wrappers
+  import SimpleConstraints
+  import opened StandardLibrary.UInt
+  import opened SimpleConstraintsTypes
+  import opened Wrappers
 
-    // UTF-8 encoded "aws-kms"
-    const PROVIDER_ID: UTF8.ValidUTF8Bytes :=
-      var s := [0x61, 0x77, 0x73, 0x2D, 0x6B, 0x6D, 0x73];
-      assert UTF8.ValidUTF8Range(s, 0, 7);
-      s
+  // UTF-8 encoded "aws-kms"
+  const PROVIDER_ID: UTF8.ValidUTF8Bytes :=
+    var s := [0x61, 0x77, 0x73, 0x2D, 0x6B, 0x6D, 0x73];
+    assert UTF8.ValidUTF8Range(s, 0, 7);
+    s
 
-    // Example for overriding GetConstraintInputTemplate with an invalid input
-    // 
-    // method TestGetConstraintWithInvalidMyString(client: ISimpleConstraintsClient)
-    //   requires client.ValidState()
-    //   modifies client.Modifies
-    //   ensures client.ValidState()
-    // {
-    //   var input := GetConstraintsInputTemplate(overrideToInvalidInput := {"myString"});
-    //   var ret := client.GetConstraints(input := input);
-    // }
 
-    // TODO: Add invalid inputs after writing Dotnet constraint codegen
-    // https://issues.amazon.com/issues/CrypTool-5087
-      
-    // This returns a GetConstraintsInput object. 
-    // By default with no parameters, this will return a valid GetConstraintsInput object.
-    //   ("valid": Expected to pass Dafny predicate checks and runtime constraint validations.)
-    // TODO: Passing in the name of a variable will override that variable to an invalid variable.
-    //    ex. GetConstraintsInputTemplate("lessThanTen") could set "lessThanTen" equal to 14.
-    method GetConstraintsInputTemplate(overrideToInvalidInput: set<string> := {})
-      returns (output: GetConstraintsInput)
-    {
-      var overrideMyString: bool := "myString" in overrideToInvalidInput;
-      var myString: MyString;
-      if (overrideMyString) {
-        myString := InvalidMyStringInput();
-      } else {
-        myString := "bw1and10";
-      }
+  // This returns a valid GetConstraintsInput object.
+  function method GetValidInput() : GetConstraintsInput
+  {
+    // var myComplexUniqueList :=
+    //   [ ComplexListElement(value := Some("one"), blob := Some([1, 1])),
+    //     ComplexListElement(value := Some("two"), blob := Some([2, 2]))
+    //   ];
 
-      var overrideNonEmptyString: bool := "nonEmptyString" in overrideToInvalidInput;
-      var nonEmptyString: NonEmptyString;
-      if (overrideNonEmptyString) {
-        nonEmptyString := InvalidNonEmptyStringInput();
-      } else {
-        nonEmptyString := "atleast1";
-      }
+    GetConstraintsInput(
+      MyString := Some("bw1and10"),
+      NonEmptyString := Some("atleast1"),
+      StringLessThanOrEqualToTen := Some("leq10"),
+      MyBlob := Some([0, 1, 0, 1]),
+      NonEmptyBlob := Some( [0, 1, 0, 1]),
+      BlobLessThanOrEqualToTen := Some([0, 1, 0, 1]),
+      MyList := Some(["00", "11"]),
+      NonEmptyList := Some(["00", "11"]),
+      ListLessThanOrEqualToTen := Some(["00", "11"]),
+      MyMap := Some(map["0" := "1", "2" := "3"]),
+      NonEmptyMap := Some(map["0" := "1", "2" := "3"]),
+      MapLessThanOrEqualToTen := Some(map["0" := "1", "2" := "3"]),
+      // Alphabetic := Some("alphabetic"),
+      OneToTen := Some(3),
+      myTenToTen := Some(3),
+      GreaterThanOne := Some(3),
+      LessThanTen := Some(3),
+      // MyUniqueList := Some(["one", "two"]),
+      // MyComplexUniqueList := Some(myComplexUniqueList),
+      MyUtf8Bytes := Some(PROVIDER_ID),
+      MyListOfUtf8Bytes := Some([PROVIDER_ID, PROVIDER_ID])
+    )
+  }
 
-      var overrideStringLessThanOrEqualToTen: bool := "overrideStringLessThanOrEqualToTen" in overrideToInvalidInput;
-      var stringLessThanOrEqualToTen: StringLessThanOrEqualToTen;
-      if (overrideStringLessThanOrEqualToTen) {
-        stringLessThanOrEqualToTen := InvalidStringLessThanOrEqualToTen();
-      } else {
-        stringLessThanOrEqualToTen := "leq10";
-      }
+  predicate method ValidInt32(x : int)
+  {
+    -0x8000_0000 <= x < 0x8000_0000
+  }
 
-      var overrideMyBlob: bool := "myBlob" in overrideToInvalidInput;
-      var myBlob: MyBlob;
-      if (overrideMyBlob) {
-        myBlob := InvalidMyBlob();
-      } else {
-        myBlob := [0, 1, 0, 1]; 
-      }
+  predicate method ValidInt64(x : int)
+  {
+    -0x8000_0000_0000_0000 <= x < 0x8000_0000_0000_0000
+  }
 
-      // TODO: Write more overrides to invalid inputs below...
+  function method ForceUtf8Bytes(value : seq<uint8>) : Utf8Bytes
+  {
+    assume {:axiom} UTF8.ValidUTF8Seq(value);
+    assume {:axiom} IsValid_Utf8Bytes(value);
+    var myUtf8Bytes: Utf8Bytes := value;
+    myUtf8Bytes
+  }
+  
+  function method ForceListOfUtf8Bytes(value : seq<Utf8Bytes>) : ListOfUtf8Bytes
+  {
+    assume {:axiom} IsValid_ListOfUtf8Bytes(value);
+    var myListOfUtf8Bytes: ListOfUtf8Bytes := value;
+    myListOfUtf8Bytes
+  }
 
-      var nonEmptyBlob := [0, 1, 0, 1]; 
-      var BlobLessThanOrEqualToTen := [0, 1, 0, 1]; 
-      var myList := ["00", "11"];
-      var nonEmptyList := ["00", "11"];
-      var listLessThanOrEqualToTen := ["00", "11"];
-      var myMap := map["0" := "1", "2" := "3"];
-      var nonEmptyMap := map["0" := "1", "2" := "3"];
-      var mapLessThanOrEqualToTen := map["0" := "1", "2" := "3"];
-      var alphabetic := "alphabetic";
-      var oneToTen := 3;
-      var greaterThanOne := 2;
-      var lessThanTen := 3;
-      var myUniqueList := ["one", "two"];
-      var myComplexUniqueList := [ ComplexListElement(value := Some("one"), blob := Some([1, 1])),
-                                   ComplexListElement(value := Some("two"), blob := Some([2, 2]))
-                                 ];
+  function method ForceLessThanTen(value : int) : LessThanTen
+  {
+    assume {:axiom} ValidInt32(value);
+    var v32 := value as int32;
+    assume {:axiom} IsValid_LessThanTen(v32);
+    var myLessThanTen: LessThanTen := v32;
+    myLessThanTen
+  }
 
-      var input := GetConstraintsInput(
-        MyString := Some(myString),
-        NonEmptyString := Some(nonEmptyString),
-        StringLessThanOrEqualToTen := Some(stringLessThanOrEqualToTen),
-        MyBlob := Some(myBlob),
-        NonEmptyBlob := Some(nonEmptyBlob),
-        BlobLessThanOrEqualToTen := Some(BlobLessThanOrEqualToTen),
-        MyList := Some(myList),
-        NonEmptyList := Some(nonEmptyList),
-        ListLessThanOrEqualToTen := Some(listLessThanOrEqualToTen),
-        MyMap := Some(myMap),
-        NonEmptyMap := Some(nonEmptyMap),
-        MapLessThanOrEqualToTen := Some(mapLessThanOrEqualToTen),
-        Alphabetic := Some(alphabetic),
-        OneToTen := Some(oneToTen),
-        GreaterThanOne := Some(greaterThanOne),
-        LessThanTen := Some(lessThanTen),
-        MyUniqueList := Some(myUniqueList),
-        MyComplexUniqueList := Some(myComplexUniqueList),
-        MyUtf8Bytes := Some(PROVIDER_ID),
-        MyListOfUtf8Bytes := Some([PROVIDER_ID, PROVIDER_ID])
-      );
+  function method ForceOneToTen(value : int) : OneToTen
+  {
+    assume {:axiom} ValidInt32(value);
+    var v32 := value as int32;
+    assume {:axiom} IsValid_OneToTen(v32);
+    var myOneToTen: OneToTen := v32;
+    myOneToTen
+  }
 
-      return input;
-    }
+  function method ForceTenToTen(value : int) : TenToTen
+  {
+    assume {:axiom} ValidInt64(value);
+    var v64 := value as int64;
+    assume {:axiom} IsValid_TenToTen(v64);
+    var myTenToTen: TenToTen := v64;
+    myTenToTen
+  }
 
-    method InvalidLessThanTenInput()
-      returns (invalid: LessThanTen)
-    {
-      var invalidLessThanTenInput := 12;
-      assume {:axiom} IsValid_LessThanTen(invalidLessThanTenInput);
-      var invalidLessThanTen: LessThanTen := invalidLessThanTenInput;
-      return invalidLessThanTen;
-    }
+  function method ForceMyString(value : string) : MyString
+  {
+    assume {:axiom} IsValid_MyString(value);
+    var myMyString: MyString := value;
+    myMyString
+  }
 
-    method InvalidMyStringInput()
-      returns (invalid: MyString)
-    {
-      var invalidMyStringInput := "thisislongerthan10characters";
-      assume {:axiom} IsValid_MyString(invalidMyStringInput);
-      var invalidMyString: MyString := invalidMyStringInput;
-      return invalidMyString;
-    }
+  function method ForceNonEmptyString(value : string) : NonEmptyString
+  {
+    assume {:axiom} IsValid_NonEmptyString(value);
+    var myNonEmptyString: NonEmptyString := value;
+    myNonEmptyString
+  }
 
-    method InvalidNonEmptyStringInput()
-      returns (invalid: NonEmptyString)
-    {
-      var invalidNonEmptyStringInput := "";
-      assume {:axiom} IsValid_NonEmptyString(invalidNonEmptyStringInput);
-      var invalidNonEmptyString: NonEmptyString := invalidNonEmptyStringInput;
-      return invalidNonEmptyString;
-    }
+  function method ForceStringLessThanOrEqualToTen(value : string) : StringLessThanOrEqualToTen
+  {
+    assume {:axiom} IsValid_StringLessThanOrEqualToTen(value);
+    var myStringLessThanOrEqualToTen: StringLessThanOrEqualToTen := value;
+    myStringLessThanOrEqualToTen
+  }
 
-    method InvalidStringLessThanOrEqualToTen()
-      returns (invalid: StringLessThanOrEqualToTen)
-    {
-      var invalidStringLessThanOrEqualToTenInput := "";
-      assume {:axiom} IsValid_StringLessThanOrEqualToTen(invalidStringLessThanOrEqualToTenInput);
-      var invalidStringLessThanOrEqualToTen: StringLessThanOrEqualToTen := invalidStringLessThanOrEqualToTenInput;
-      return invalidStringLessThanOrEqualToTen;
-    }
+  function method ForceMyBlob(value : seq<uint8>) : MyBlob
+  {
+    assume {:axiom} IsValid_MyBlob(value);
+    var myMyBlob: MyBlob := value;
+    myMyBlob
+  }
 
-    method InvalidMyBlob()
-      returns (invalid: MyBlob)
-    {
-      var invalidMyBlobInput := []; // Invalid because |x| < 1; predicate requires 1 <= |x| <= 10
-      assume {:axiom} IsValid_MyBlob(invalidMyBlobInput);
-      var invalidMyBlob: MyBlob := invalidMyBlobInput;
-      return invalidMyBlob;
-    }
+  function method ForceNonEmptyBlob(value : seq<uint8>) : NonEmptyBlob
+  {
+    assume {:axiom} IsValid_NonEmptyBlob(value);
+    var myNonEmptyBlob: NonEmptyBlob := value;
+    myNonEmptyBlob
+  }
 
-    // TODO: Write more invalid input generators...
+  function method ForceBlobLessThanOrEqualToTen(value : seq<uint8>) : BlobLessThanOrEqualToTen
+  {
+    assume {:axiom} IsValid_BlobLessThanOrEqualToTen(value);
+    var myBlobLessThanOrEqualToTen: BlobLessThanOrEqualToTen := value;
+    myBlobLessThanOrEqualToTen
+  }
+
+  function method ForceMyList(value : seq<string> ) : MyList
+  {
+    assume {:axiom} IsValid_MyList(value);
+    var myMyList: MyList := value;
+    myMyList
+  }
+
+  function method ForceNonEmptyList(value : seq<string> ) : NonEmptyList
+  {
+    assume {:axiom} IsValid_NonEmptyList(value);
+    var myNonEmptyList: NonEmptyList := value;
+    myNonEmptyList
+  }
+
+  function method ForceListLessThanOrEqualToTen(value : seq<string> ) : ListLessThanOrEqualToTen
+  {
+    assume {:axiom} IsValid_ListLessThanOrEqualToTen(value);
+    var myListLessThanOrEqualToTen: ListLessThanOrEqualToTen := value;
+    myListLessThanOrEqualToTen
+  }
+
+  function method ForceMyMap(value : map<string, string>) : MyMap
+  {
+    assume {:axiom} IsValid_MyMap(value);
+    var myMyMap: MyMap := value;
+    myMyMap
+  }
+
+  function method ForceNonEmptyMap(value : map<string, string>) : NonEmptyMap
+  {
+    assume {:axiom} IsValid_NonEmptyMap(value);
+    var myNonEmptyMap: NonEmptyMap := value;
+    myNonEmptyMap
+  }
+
+  function method ForceMapLessThanOrEqualToTen(value : map<string, string>) : MapLessThanOrEqualToTen
+  {
+    assume {:axiom} IsValid_MapLessThanOrEqualToTen(value);
+    var myMapLessThanOrEqualToTen: MapLessThanOrEqualToTen := value;
+    myMapLessThanOrEqualToTen
+  }
+
+  function method ForceGreaterThanOne(value : int) : GreaterThanOne
+  {
+    assume {:axiom} ValidInt32(value);
+    var v32 := value as int32;
+    assume {:axiom} IsValid_GreaterThanOne(v32);
+    var myGreaterThanOne: GreaterThanOne := v32;
+    myGreaterThanOne
+  }
 }

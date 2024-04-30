@@ -14,8 +14,8 @@
 **/runtimes/python/test/internaldafny/generated/*.py
 
 # Dafny Generated Rust
-**/runtimes/rust
-**/runtimes/rust
+# (Rust code generation is incomplete so we're patching and checking in for now)
+#**/runtimes/rust
 
 # Polymorph Generated Dafny
 **/Model/*Types.dfy

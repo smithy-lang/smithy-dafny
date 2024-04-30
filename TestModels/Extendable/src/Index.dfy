@@ -20,7 +20,7 @@ module
     // so the implementation MUST have it.
     config: SimpleExtendableResourcesConfig
   ) returns (
-    res: Result<ISimpleExtendableResourcesClient, Error>
+    res: Result<SimpleExtendableResourcesClient, Error>
   )
   {
     var internalConfig := Operations.Config();

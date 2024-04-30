@@ -23,9 +23,9 @@ will contain Dafny source code, Java source code,
 and a dependency on a Java artifact such as `software.amazon.awssdk:sqs`.
 
 This support is provided as a `dafny-client-codegen` Smithy build plugin
-with a similar API to the other 
+with a similar API to the other
 [Smithy code generators](https://smithy.io/2.0/implementations.html#client-code-generators),
-configured by entries in a `smithy-build.json` file. 
+configured by entries in a `smithy-build.json` file.
 See the [`codegen/smithy-dafny-codegen`](codegen/smithy-dafny-codegen) directory for
 further details and examples.
 
@@ -47,9 +47,9 @@ We refer to this idea of producing multiple versions of a library with idiomatic
 Polymorphing is particularly useful for client-side libraries,
 as such libraries can make use of generated Dafny AWS SDK clients to build on top of various AWS services.
 
-This use case is currently only implemented in the `smithy-dafny-codegen-cli` tool, 
+This use case is currently only implemented in the `smithy-dafny-codegen-cli` tool,
 which is not yet published anywhere outside of this repository.
-We'd like to provide this functionality as another Smithy build plugin in the future, 
+We'd like to provide this functionality as another Smithy build plugin in the future,
 likely named something like `dafny-library-codegen`.
 If you're interested in this use case we'd love to hear from you -
 feel free to [cut us an issue](https://github.com/smithy-lang/smithy-dafny/issues/new)!
@@ -65,7 +65,7 @@ or the related AWS traits specifications.
 Even for those that are supported, the implementation does not necessarily follow all of the recommendations
 in those specifications.
 
-For example, [constraint traits](https://smithy.io/2.0/spec/constraint-traits.html) are intended to 
+For example, [constraint traits](https://smithy.io/2.0/spec/constraint-traits.html) are intended to
 be [validated in the service rather than in clients](https://smithy.io/2.0/guides/building-codegen/mapping-shapes-to-languages.html?highlight=client%20side%20validation#should-clients-enforce-constraint-traits).
 The above code generators, however, map these constraints to explicit Dafny specifications
 that are therefore statically checked by the Dafny verifier.
@@ -76,7 +76,7 @@ However, it also means that future service changes that should be backwards-comp
 
 ### Runtime libraries
 
-Like other Smithy-based code generators, these tools will emit references to 
+Like other Smithy-based code generators, these tools will emit references to
 [common runtime library code](https://smithy.io/2.0/guides/building-codegen/overview-and-concepts.html#runtime-libraries).
 However, at the time of writing this the Dafny ecosystem does not yet have mature package management features
 to support distributing and maintaining such libraries.

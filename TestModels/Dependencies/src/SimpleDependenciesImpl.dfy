@@ -85,7 +85,7 @@ module SimpleDependenciesImpl refines AbstractSimpleDependenciesOperations {
 
     var simpleResourcesConfig := config.simpleResourcesConfig;
 
-    var client: SimpleResourcesTypes.ISimpleResourcesClient :- expect SimpleResources.SimpleResources(
+    var client: SimpleResources.SimpleResourcesClient :- expect SimpleResources.SimpleResources(
       simpleResourcesConfig
     );
 

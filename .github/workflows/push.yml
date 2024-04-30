@@ -4,18 +4,18 @@ name: Push CI
 on:
   push:
     branches:
-      - main-1.x    
+      - main-1.x
 
 jobs:
   pr-populate-dafny-versions:
     runs-on: ubuntu-latest
     steps:
-    - name: Populate Dafny versions list
-      id: populate-dafny-versions-list
-      run: echo "dafny-versions-list=['4.2.0', '4.4.0']" >> $GITHUB_OUTPUT
+      - name: Populate Dafny versions list
+        id: populate-dafny-versions-list
+        run: echo "dafny-versions-list=['4.2.0', '4.4.0']" >> $GITHUB_OUTPUT
     outputs:
       dafny-version-list: ${{ steps.populate-dafny-versions-list.outputs.dafny-versions-list }}
-        
+
   push-ci-verification:
     needs: pr-populate-dafny-versions
     strategy:

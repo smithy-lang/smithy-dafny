@@ -286,9 +286,9 @@ _polymorph:
 	$(OUTPUT_DAFNY) \
 	$(OUTPUT_JAVA) \
 	$(OUTPUT_DOTNET) \
-	$(OUTPUT_JAVA) \
 	$(OUTPUT_PYTHON) \
 	$(MODULE_NAME) \
+	$(OUTPUT_RUST) \
 	--model $(if $(DIR_STRUCTURE_V2), $(LIBRARY_ROOT)/dafny/$(SERVICE)/Model, $(SMITHY_MODEL_ROOT)) \
 	--dependent-model $(PROJECT_ROOT)/$(SMITHY_DEPS) \
 	$(patsubst %, --dependent-model $(PROJECT_ROOT)/%/Model, $($(service_deps_var))) \
@@ -318,12 +318,14 @@ _polymorph_wrapped:
 	$(POLYMORPH_OPTIONS)";
 
 _polymorph_dependencies:
+	$(if $(strip $(STD_LIBRARY)), $(MAKE) -C $(PROJECT_ROOT)/$(STD_LIBRARY) polymorph_$(POLYMORPH_LANGUAGE_TARGET) LIBRARY_ROOT=$(PROJECT_ROOT)/$(STD_LIBRARY), )
 	@$(foreach dependency, \
 		$(PROJECT_DEPENDENCIES), \
 		$(MAKE) -C $(PROJECT_ROOT)/$(dependency) polymorph_$(POLYMORPH_LANGUAGE_TARGET); \
 	)
 
 # Generates all target runtime code for all namespaces in this project.
+# Not including Rust until is it more fully implemented.
 .PHONY: polymorph_code_gen
 polymorph_code_gen: POLYMORPH_LANGUAGE_TARGET=code_gen
 polymorph_code_gen: _polymorph_dependencies
@@ -426,6 +428,24 @@ _polymorph_python: _polymorph
 setup_prettier:
 	npm i --no-save prettier@3 prettier-plugin-java@2.5
 
+# Generates rust code for all namespaces in this project
+# Note that we rely on the patching feature of polymorph
+# to also patch the results of transpile_rust,
+# so we assume that is run first!
+.PHONY: polymorph_rust
+polymorph_rust: POLYMORPH_LANGUAGE_TARGET=rust
+polymorph_rust: _polymorph_dependencies
+polymorph_rust:
+	set -e; for service in $(PROJECT_SERVICES) ; do \
+		export service_deps_var=SERVICE_DEPS_$${service} ; \
+		export namespace_var=SERVICE_NAMESPACE_$${service} ; \
+		export SERVICE=$${service} ; \
+		$(MAKE) _polymorph_rust ; \
+	done
+
+_polymorph_rust: OUTPUT_RUST=--output-rust $(LIBRARY_ROOT)/runtimes/rust
+_polymorph_rust: _polymorph
+
 ########################## .NET targets
 
 transpile_net: | transpile_implementation_net transpile_test_net transpile_dependencies_net
@@ -519,6 +539,48 @@ mvn_staging_deploy:
 
 test_java:
 	$(GRADLEW) -p runtimes/java runTests
+
+########################## Rust targets
+
+# TODO: Dafny test transpilation needs manual patching to work too,
+# which isn't a high priority at this stage,
+# so don't include transpile_test_rust for now.
+transpile_rust: | transpile_implementation_rust transpile_dependencies_rust
+
+transpile_implementation_rust: TARGET=rs
+transpile_implementation_rust: OUT=implementation_from_dafny
+transpile_implementation_rust: SRC_INDEX=$(RUST_SRC_INDEX)
+transpile_implementation_rust: _transpile_implementation_all _mv_implementation_rust
+
+transpile_test_rust: TARGET=rs
+transpile_test_rust: OUT=tests_from_dafny
+transpile_test_rust: SRC_INDEX=$(RUST_SRC_INDEX)
+transpile_test_rust: TEST_INDEX=$(RUST_TEST_INDEX)
+transpile_test_rust: _transpile_test_all _mv_test_rust
+
+transpile_dependencies_rust: LANG=rust
+transpile_dependencies_rust: transpile_dependencies
+
+_mv_implementation_rust:
+	rm -rf runtimes/rust/dafny_impl/src
+	mkdir -p runtimes/rust/dafny_impl/src
+	mv implementation_from_dafny-rust/src/implementation_from_dafny.rs runtimes/rust/dafny_impl/src/implementation_from_dafny.rs
+	rm -rf implementation_from_dafny-rust
+_mv_test_rust:
+	rm -rf runtimes/rust/dafny_impl/tests
+	mkdir -p runtimes/rust/dafny_impl/tests
+	mv tests_from_dafny-rust/src/tests_from_dafny.rs runtimes/rust/dafny_impl/tests/tests_from_dafny.rs
+	rm -rf tests_from_dafny-rust
+
+build_rust:
+	cd runtimes/rust; \
+	cargo build
+
+test_rust:
+	cd runtimes/rust; \
+	cargo test
+
+########################## Cleanup targets
 
 _clean:
 	rm -f $(LIBRARY_ROOT)/Model/*Types.dfy $(LIBRARY_ROOT)/Model/*TypesWrapped.dfy

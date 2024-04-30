@@ -6,32 +6,33 @@ package software.amazon.polymorph.utils;
 import java.util.stream.Stream;
 
 public class Token extends TokenTree {
-    public static final Token NEWLINE = Token.of("\n");
 
-    private final CharSequence chars;
+  public static final Token NEWLINE = Token.of("\n");
 
-    public Token(final CharSequence chars) {
-        this.chars = chars;
-    }
+  private final CharSequence chars;
 
-    public static Token of(char singleChar) {
-        return new Token(String.valueOf(singleChar));
-    }
+  public Token(final CharSequence chars) {
+    this.chars = chars;
+  }
 
-    public static Token of(final CharSequence chars) {
-        return new Token(chars);
-    }
+  public static Token of(char singleChar) {
+    return new Token(String.valueOf(singleChar));
+  }
 
-    protected Stream<TokenTree> streamChildren() {
-        return Stream.of(this);
-    }
+  public static Token of(final CharSequence chars) {
+    return new Token(chars);
+  }
 
-    public Boolean isEmpty() {
-        return "" == chars || null == chars;
-    }
+  protected Stream<TokenTree> streamChildren() {
+    return Stream.of(this);
+  }
 
-    @Override
-    public String toString() {
-        return chars == null ? "" : chars.toString();
-    }
+  public Boolean isEmpty() {
+    return "" == chars || null == chars;
+  }
+
+  @Override
+  public String toString() {
+    return chars == null ? "" : chars.toString();
+  }
 }
