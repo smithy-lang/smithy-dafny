@@ -140,7 +140,6 @@ public final class DafnyPythonLocalServiceClientCodegenPlugin implements SmithyB
       if (shape.hasTrait(ReferenceTrait.class)) {
         ShapeId referenceShapeId = shape.expectTrait(ReferenceTrait.class).getReferentId();
         if (model.expectShape(referenceShapeId).isResourceShape()) {
-          System.out.println("adding " + referenceShapeId);
           transformedServiceShapeBuilder.addResource(referenceShapeId);
         }
       }
@@ -162,7 +161,6 @@ public final class DafnyPythonLocalServiceClientCodegenPlugin implements SmithyB
     return ModelTransformer.create().mapShapes(model, shape -> {
       if (shape.hasTrait(EnumTrait.class)) {
         EnumShape asEnum = EnumShape.fromStringShape(shape.asStringShape().get()).get();
-        System.out.println(asEnum);
         return asEnum;
       } else {
         return shape;

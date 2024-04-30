@@ -506,6 +506,7 @@ public class CodegenEngine {
   }
 
   private void generatePython() {
+
     if (moduleName.isEmpty()) {
       throw new IllegalArgumentException("Python codegen requires a module name");
     }

@@ -64,7 +64,7 @@ _polymorph_dotnet: OUTPUT_DOTNET_WRAPPED=\
     $(if $(DIR_STRUCTURE_V2), --output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/Wrapped/$(SERVICE)/, --output-dotnet $(LIBRARY_ROOT)/runtimes/net/Generated/Wrapped)
 _polymorph_dotnet: _polymorph_wrapped
 
-_polymorph_python: OUTPUT_PYTHON=--output-python $(LIBRARY_ROOT)/runtimes/python/smithygenerated
+_polymorph_python: OUTPUT_PYTHON=--output-python $(LIBRARY_ROOT)/runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated
 _polymorph_python: MODULE_NAME=--module-name $(PYTHON_MODULE_NAME)
 # Python codegen MUST know dependencies' module names...
 # This greps each service dependency's Makefile for two strings:
@@ -73,14 +73,12 @@ _polymorph_python: MODULE_NAME=--module-name $(PYTHON_MODULE_NAME)
 # , then assembles them together as
 # "SERVICE_NAMESPACE_$(dependency)"="PYTHON_MODULE_NAME"
 # , creating a map from a service namespace to its wrapping module name.
-# We plan to move this information into Dafny project files.
-# This is unfortunately one long line that breaks when I split it up...
-_polymorph_python: DEPENDENCY_MODULE_NAMES=$(foreach dependency, \
-		$($(service_deps_var)), \
-		--dependency-module-name=$(shell cat $(if $(DIR_STRUCTURE_V2),$(PROJECT_ROOT)/$(dependency)/../../Makefile,$(PROJECT_ROOT)/$(dependency)/Makefile) | grep ^SERVICE_NAMESPACE_$(if $(DIR_STRUCTURE_V2),$(shell echo $(dependency) | cut -d "/" -f 3),$(shell echo $($(dependency)))) | cut -d "=" -f 2)=$(shell cat $(if $(DIR_STRUCTURE_V2),$(PROJECT_ROOT)/$(dependency)/../../Makefile,$(PROJECT_ROOT)/$(dependency)/Makefile) | grep ^PYTHON_MODULE_NAME | cut -d "=" -f 2)\
-	)
+# _polymorph_python: DEPENDENCY_MODULE_NAMES=$(foreach dependency, \
+# 		$($(service_deps_var)), \
+# 		--dependency-module-name=$(shell cat $(if $(DIR_STRUCTURE_V2),$(PROJECT_ROOT)/$(dependency)/../../Makefile,$(PROJECT_ROOT)/$(dependency)/Makefile) | grep ^SERVICE_NAMESPACE_$(if $(DIR_STRUCTURE_V2),$(shell echo $(dependency) | cut -d "/" -f 3),$(shell echo $($(dependency)))) | cut -d "=" -f 2)=$(shell cat $(if $(DIR_STRUCTURE_V2),$(PROJECT_ROOT)/$(dependency)/../../Makefile,$(PROJECT_ROOT)/$(dependency)/Makefile) | grep ^PYTHON_MODULE_NAME | cut -d "=" -f 2)\
+# 	)
 _polymorph_python: _polymorph
-_polymorph_python: OUTPUT_PYTHON_WRAPPED=--output-python $(LIBRARY_ROOT)/runtimes/python/smithygenerated
+_polymorph_python: OUTPUT_PYTHON_WRAPPED=--output-python $(LIBRARY_ROOT)/runtimes/python/src/$(PYTHON_MODULE_NAME)/smithygenerated
 _polymorph_python: _polymorph_wrapped
 _polymorph_python: POLYMORPH_LANGUAGE_TARGET=python
 _polymorph_python: _polymorph_dependencies

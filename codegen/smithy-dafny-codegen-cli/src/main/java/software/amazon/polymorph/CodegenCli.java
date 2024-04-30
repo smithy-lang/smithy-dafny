@@ -88,12 +88,16 @@ public class CodegenCli {
     cliArguments.outputRustDir.ifPresent(path ->
       outputDirs.put(TargetLanguage.RUST, path)
     );
+    cliArguments.outputPythonDir.ifPresent(path ->
+      outputDirs.put(TargetLanguage.PYTHON, path)
+    );
 
     final CodegenEngine.Builder engineBuilder = new CodegenEngine.Builder()
       .withFromSmithyBuildPlugin(false)
       .withLibraryRoot(cliArguments.libraryRoot)
       .withServiceModel(serviceModel)
       .withDependentModelPaths(cliArguments.dependentModelPaths)
+      .withDependencyModuleNames(cliArguments.dependencyModuleNames)
       .withNamespace(cliArguments.namespace)
       .withTargetLangOutputDirs(outputDirs)
       .withAwsSdkStyle(cliArguments.awsSdkStyle)
@@ -107,6 +111,7 @@ public class CodegenCli {
     cliArguments.includeDafnyFile.ifPresent(
       engineBuilder::withIncludeDafnyFile
     );
+    cliArguments.moduleName.ifPresent(engineBuilder::withModuleName);
     cliArguments.patchFilesDir.ifPresent(engineBuilder::withPatchFilesDir);
     final CodegenEngine engine = engineBuilder.build();
     engine.run();
@@ -287,7 +292,9 @@ public class CodegenCli {
     Path libraryRoot,
     Path modelPath,
     Path[] dependentModelPaths,
+    Map<String, String> dependencyModuleNames,
     String namespace,
+    Optional<String> moduleName,
     Optional<Path> outputDotnetDir,
     Optional<Path> outputJavaDir,
     Optional<Path> outputRustDir,
@@ -324,7 +331,20 @@ public class CodegenCli {
         .map(Path::of)
         .toArray(Path[]::new);
 
+      // Maps a Smithy namespace to its module name
+      // ex. `aws.cryptography.materialproviders` -> `aws_cryptographic_materialproviders`
+      // These values are provided via the command line right now,
+      //   but should eventually be sourced from doo files
+      final Map<String, String> dependencyNamespacesToModuleNamesMap =
+              commandLine.hasOption("dependency-module-name")
+                      ? Arrays.stream(commandLine.getOptionValues("dmn"))
+                      .map(s -> s.split("="))
+                      .collect(Collectors.toMap(i -> i[0], i -> i[1]))
+                      : new HashMap<>();
+
       final String namespace = commandLine.getOptionValue('n');
+
+      final Optional<String> moduleName = Optional.ofNullable(commandLine.getOptionValue("module-name"));
 
       Optional<Path> outputDafnyDir = Optional
         .ofNullable(commandLine.getOptionValue("output-dafny"))
@@ -403,7 +423,9 @@ public class CodegenCli {
           libraryRoot,
           modelPath,
           dependentModelPaths,
+          dependencyNamespacesToModuleNamesMap,
           namespace,
+          moduleName,
           outputDotnetDir,
           outputJavaDir,
           outputRustDir,

@@ -371,8 +371,6 @@ public class DafnyPythonLocalServiceSymbolVisitor extends SymbolVisitor {
   public Symbol stringShape(StringShape shape) {
     if (shape.hasTrait(EnumTrait.class)) {
       EnumShape asEnum = EnumShape.fromStringShape(shape).get();
-      System.out.println(asEnum);
-      System.out.println(asEnum.getEnumValues());
       return enumShape(asEnum);
     } else {
       return super.stringShape(shape);

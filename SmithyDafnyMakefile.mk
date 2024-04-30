@@ -309,9 +309,12 @@ _polymorph_wrapped:
 	$(OUTPUT_DAFNY_WRAPPED) \
 	$(OUTPUT_DOTNET_WRAPPED) \
 	$(OUTPUT_JAVA_WRAPPED) \
+	$(OUTPUT_PYTHON_WRAPPED) \
+	$(MODULE_NAME) \
 	--model $(if $(DIR_STRUCTURE_V2),$(LIBRARY_ROOT)/dafny/$(SERVICE)/Model,$(LIBRARY_ROOT)/Model) \
 	--dependent-model $(PROJECT_ROOT)/$(SMITHY_DEPS) \
 	$(patsubst %, --dependent-model $(PROJECT_ROOT)/%/Model, $($(service_deps_var))) \
+	$(DEPENDENCY_MODULE_NAMES) \
 	--namespace $($(namespace_var)) \
 	--local-service-test \
 	$(AWS_SDK_CMD) \

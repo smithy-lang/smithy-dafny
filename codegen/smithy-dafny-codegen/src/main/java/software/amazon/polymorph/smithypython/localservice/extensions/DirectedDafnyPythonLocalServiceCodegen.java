@@ -247,7 +247,7 @@ public class DirectedDafnyPythonLocalServiceCodegen extends DirectedPythonCodege
       if (!directive.shape().isEnumShape()) {
         return;
       }
-      System.out.println("generate " + directive.shape().asEnumShape().get());
+
       directive
           .context()
           .writerDelegator()

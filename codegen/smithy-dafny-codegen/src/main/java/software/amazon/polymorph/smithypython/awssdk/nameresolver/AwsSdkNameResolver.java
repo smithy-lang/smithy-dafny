@@ -61,12 +61,6 @@ public class AwsSdkNameResolver {
    * @return
    */
   public static String dependencyErrorNameForService(ServiceShape serviceShape) {
-    DafnyNameResolver.dafnyBaseModuleName(serviceShape.getId().getNamespace());
-    if (serviceShape.getId().getNamespace().toLowerCase().contains("keystore")) {
-      System.out.println(CaseUtils.toPascalCase(serviceShape.getId().getNamespace().replace(".", "_")));
-      System.out.println(CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, serviceShape.getId().getNamespace()));
-      System.out.println(CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, serviceShape.getId().getNamespace().replace(".", "_")));
-    }
     return DafnyNameResolver.dafnyBaseModuleName(serviceShape.getId().getNamespace());
   }
 

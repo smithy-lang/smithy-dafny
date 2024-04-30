@@ -50,7 +50,6 @@ public class ReferencesFileWriter implements CustomFileWriter {
 
   protected void generateResourceInterface(
       ResourceShape resourceShape, GenerationContext context, PythonWriter writer) {
-   System.out.println("Processing resource " + resourceShape);
     // Only generate resources in the service namespace
     if (!resourceShape
         .getId()

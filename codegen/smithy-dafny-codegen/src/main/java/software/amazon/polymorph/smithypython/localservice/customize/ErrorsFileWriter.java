@@ -300,7 +300,6 @@ public class ErrorsFileWriter implements CustomFileWriter {
                     // Import this service's error that wraps the dependency service's errors
                     ServiceShape serviceDependencyShape = codegenContext.model().expectShape(serviceDependencyShapeId).asServiceShape().get();
                     String dependencyErrorName = SmithyNameResolver.getSmithyGeneratedTypeForServiceError(serviceDependencyShape);
-                    System.out.println("importing " + dependencyErrorName);
 //                    writer.addImport(".errors", dependencyErrorName);
                     // Generate conversion method that says:
                     // "If this is a dependency-specific error, defer to the dependency's
