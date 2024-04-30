@@ -146,11 +146,27 @@ public class CodegenCli {
       )
       .addOption(
         Option
+          .builder("dmn")
+          .longOpt("dependency-module-name")
+          .desc("directory for dependent model file[s] (.smithy format)")
+          .hasArg()
+          .build()
+      )
+      .addOption(
+        Option
           .builder("n")
           .longOpt("namespace")
           .desc("smithy namespace to generate code for, such as 'com.foo'")
           .hasArg()
           .required()
+          .build()
+      )
+      .addOption(
+        Option
+          .builder("mn")
+          .longOpt("module-name")
+          .desc("if generating for a language that uses modules (go, python), the name of the module")
+          .hasArg()
           .build()
       )
       .addOption(
@@ -174,6 +190,14 @@ public class CodegenCli {
           .builder()
           .longOpt("output-rust")
           .desc("<optional> output directory for generated Rust files")
+          .hasArg()
+          .build()
+      )
+      .addOption(
+        Option
+          .builder()
+          .longOpt("output-python")
+          .desc("<optional> output directory for generated Python files")
           .hasArg()
           .build()
       )

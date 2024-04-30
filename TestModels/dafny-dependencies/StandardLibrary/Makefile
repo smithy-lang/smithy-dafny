@@ -92,7 +92,6 @@ _python_revert_underscore_extern_names:
 # Override SharedMakefile's transpile_java to not transpile
 # StandardLibrary as a dependency
 transpile_rust: | transpile_implementation_rust
->>>>>>> main-1.x
 
 RUST_SRC_INDEX=src_for_rust
 RUST_TEST_INDEX=test_for_rust
