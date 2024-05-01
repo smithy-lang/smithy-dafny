@@ -2,12 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 package software.amazon.polymorph.smithyjava.generator.awssdk.v1;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
+
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
-
 import java.util.Set;
-
 import software.amazon.polymorph.smithyjava.MethodReference;
 import software.amazon.polymorph.smithyjava.nameresolver.Dafny;
 import software.amazon.polymorph.utils.TokenTree;
@@ -18,70 +20,73 @@ import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.SetShape;
 import software.amazon.smithy.model.shapes.Shape;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThrows;
-
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 public class ToNativeTest {
-    // Why two underTests?
-    // As we refactor ToNativeAwsV1 and abstract ToNative,
-    // we are going to bump into permission issues in unit tests
-    // for protected methods.
-    // ToNativeTestImpl exposes the abstract classes protected methods
-    // to this test class,
-    // b/c ToNativeTestImpl is defined INSIDE the test class.
-    // But we still need to test the yet to be refactored logic.
-    // TODO: Clean up this test class by creating test class for ToNativeAwsV1
-    // and moving AwsV1 specific tests there.
-    protected ToNativeAwsV1 underTest;
-    protected ToNativeTestImpl underTestAbstract;
-    protected Model model;
 
-    class ToNativeTestImpl extends ToNativeAwsV1 {
+  // Why two underTests?
+  // As we refactor ToNativeAwsV1 and abstract ToNative,
+  // we are going to bump into permission issues in unit tests
+  // for protected methods.
+  // ToNativeTestImpl exposes the abstract classes protected methods
+  // to this test class,
+  // b/c ToNativeTestImpl is defined INSIDE the test class.
+  // But we still need to test the yet to be refactored logic.
+  // TODO: Clean up this test class by creating test class for ToNativeAwsV1
+  // and moving AwsV1 specific tests there.
+  protected ToNativeAwsV1 underTest;
+  protected ToNativeTestImpl underTestAbstract;
+  protected Model model;
 
-        public ToNativeTestImpl(JavaAwsSdkV1 awsSdk) {
-            super(awsSdk);
-        }
+  class ToNativeTestImpl extends ToNativeAwsV1 {
 
-        @Override
-        public Set<JavaFile> javaFiles() {
-            return null;
-        }
-
-        @Override
-        // This allows the test class to call the otherwise protected method.
-        protected MethodSpec modeledList(ListShape shape) {
-            return super.modeledList(shape);
-        }
-
-        @Override
-        // This allows the test class to call the otherwise protected method.
-        protected MethodSpec modeledSet(SetShape shape) {
-            return super.modeledSet(shape);
-        }
-
-        @Override
-        // This allows the test class to call the otherwise protected method.
-        protected MethodSpec modeledMap(MapShape shape) { return super.modeledMap(shape);}
-
-        @Override
-        // This allows the test class to call the otherwise protected method.
-        protected MethodReference conversionMethodReference(Shape shape) {
-            if (shape.isMemberShape()) {
-                return conversionMethodReference(model.expectShape(shape.asMemberShape().get().getTarget()));
-            }
-            return super.conversionMethodReference(shape);
-        }
-
-        @Override
-        // This allows the test class to call the otherwise protected method.
-        protected CodeBlock setWithConversionCall(MemberShape member, CodeBlock getMember) {
-            return super.setWithConversionCall(member, getMember);
-        }
+    public ToNativeTestImpl(JavaAwsSdkV1 awsSdk) {
+      super(awsSdk);
     }
 
-    /*@Before
+    @Override
+    public Set<JavaFile> javaFiles() {
+      return null;
+    }
+
+    @Override
+    // This allows the test class to call the otherwise protected method.
+    protected MethodSpec modeledList(ListShape shape) {
+      return super.modeledList(shape);
+    }
+
+    @Override
+    // This allows the test class to call the otherwise protected method.
+    protected MethodSpec modeledSet(SetShape shape) {
+      return super.modeledSet(shape);
+    }
+
+    @Override
+    // This allows the test class to call the otherwise protected method.
+    protected MethodSpec modeledMap(MapShape shape) {
+      return super.modeledMap(shape);
+    }
+
+    @Override
+    // This allows the test class to call the otherwise protected method.
+    protected MethodReference conversionMethodReference(Shape shape) {
+      if (shape.isMemberShape()) {
+        return conversionMethodReference(
+          model.expectShape(shape.asMemberShape().get().getTarget())
+        );
+      }
+      return super.conversionMethodReference(shape);
+    }
+
+    @Override
+    // This allows the test class to call the otherwise protected method.
+    protected CodeBlock setWithConversionCall(
+      MemberShape member,
+      CodeBlock getMember
+    ) {
+      return super.setWithConversionCall(member, getMember);
+    }
+  }
+  /*@Before
     public void setup() {
         model = TestSetupUtils.setupTwoLocalModel(ModelConstants.KMS_KITCHEN, ModelConstants.OTHER_NAMESPACE);
         underTest  = new ToNativeAwsV1(TestSetupUtils.setupAwsSdkV1(model, "kms"));

@@ -54,8 +54,19 @@ module {:extern "UTF8"} UTF8 {
     Failure(error)
   }
   
-  predicate method IsASCIIString(s: string) {
+  predicate IsASCIIString(s: string)
+  {
     forall i :: 0 <= i < |s| ==> s[i] as int < 128
+  } by method {
+    for i := 0 to |s|
+      invariant forall j | 0 <= j < i :: s[j] as int < 128
+    {
+      if !(s[i] as int < 128) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
   // Encode ASCII as UTF8 in a function, to allow use in ensures clause

@@ -10,7 +10,7 @@ module {:extern "simple.multiplemodels.primaryproject.internaldafny" } SimpleMul
     }
 
     method PrimaryProject(config: PrimaryProjectConfig)
-    returns (res: Result<IPrimaryProjectClient, Error>) {
+    returns (res: Result<PrimaryProjectClient, Error>) {
         var client := new PrimaryProjectClient(Operations.Config);
         return Success(client);
     }

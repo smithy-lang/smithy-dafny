@@ -30,6 +30,7 @@ Smithy-Dafny-generated projects are expected to be able to handle any number of 
 
 If a single Smithy-Dafny project (ex. MyProject)
 has multiple subprojects (ex. SubProjects A, B, and C), then:
+
 1. Each subproject MUST have ONLY ONE single service shape under generation; and
 2. The subprojects, their Smithy model(s), and their Dafny code MUST be laid out in this structure.
 3. The project's Makefile MUST set the `DIR_STRUCTURE_V2` variable to a non-empty value.
@@ -49,8 +50,11 @@ This TestModel requires the "Dependencies" TestModel as a prerequisite,
 as the two model files in this project have a dependency structure.
 
 ## Build
+
 ### .NET
+
 1. Generate the Wrappers using `polymorph`
+
 ```
 make polymorph_dafny DAFNY_VERSION_OPTION="--dafny-version A.B.C" \
 && make polymorph_dotnet DAFNY_VERSION_OPTION="--dafny-version A.B.C" \
@@ -58,16 +62,19 @@ make polymorph_dafny DAFNY_VERSION_OPTION="--dafny-version A.B.C" \
 ```
 
 2. Transpile the tests (and implementation) to the target runtime.
+
 ```
 make transpile_net && make transpile_java
 ```
 
 3. Generate the executable in the .NET and execute the tests
+
 ```
 make test_net && make test_java
 ```
 
 ## Development
+
 1. To add another target runtime support, edit the `Makefile` and add the appropriate recipe to generate the `polymorph` wrappers, and dafny transpilation.
 2. Provide any glue code between dafny and target runtime if required.
 3. Build, execute, and test in the target runtime.

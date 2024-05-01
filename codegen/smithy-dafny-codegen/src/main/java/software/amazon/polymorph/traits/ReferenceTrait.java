@@ -3,6 +3,7 @@
 
 package software.amazon.polymorph.traits;
 
+import java.util.Optional;
 import software.amazon.smithy.model.node.Node;
 import software.amazon.smithy.model.node.ObjectNode;
 import software.amazon.smithy.model.node.StringNode;
@@ -17,132 +18,150 @@ import software.amazon.smithy.model.traits.TraitDefinition;
 import software.amazon.smithy.utils.SmithyBuilder;
 import software.amazon.smithy.utils.ToSmithyBuilder;
 
-import java.util.Optional;
-
 /**
  * A trait representing a reference to either a service or resource, which we call the referent. A process holding such
  * a reference can invoke operations on the referent.
  */
-public class ReferenceTrait extends AbstractTrait implements ToSmithyBuilder<ReferenceTrait> {
-    public static final ShapeId ID = ShapeId.from("aws.polymorph#reference");
+public class ReferenceTrait
+  extends AbstractTrait
+  implements ToSmithyBuilder<ReferenceTrait> {
 
-    private static final String SERVICE = "service";
-    private static final String RESOURCE = "resource";
+  public static final ShapeId ID = ShapeId.from("aws.polymorph#reference");
 
-    private final ReferentType referentType;
-    private final ShapeId referentId;
+  private static final String SERVICE = "service";
+  private static final String RESOURCE = "resource";
 
-    private ReferenceTrait(Builder builder) {
-        super(ID, builder.getSourceLocation());
-        this.referentType = builder.referentType;
-        this.referentId = builder.referentId;
-    }
+  private final ReferentType referentType;
+  private final ShapeId referentId;
 
-    public static final class Provider extends AbstractTrait.Provider {
-        public Provider() {
-            super(ID);
-        }
+  private ReferenceTrait(Builder builder) {
+    super(ID, builder.getSourceLocation());
+    this.referentType = builder.referentType;
+    this.referentId = builder.referentId;
+  }
 
-        @Override
-        public Trait createTrait(ShapeId target, Node value) {
-            ObjectNode objectNode = value.expectObjectNode();
-            Optional<ShapeId> serviceId = objectNode.getStringMember(SERVICE).map(StringNode::expectShapeId);
-            Optional<ShapeId> resourceId = objectNode.getStringMember(RESOURCE).map(StringNode::expectShapeId);
-            if (serviceId.isPresent() == resourceId.isPresent()) {
-                throw new IllegalStateException("Must specify either service or resource, but not both");
-            }
-            ReferentType referentType = serviceId.isPresent() ? ReferentType.SERVICE : ReferentType.RESOURCE;
-            ShapeId referentId = serviceId.orElseGet(resourceId::get);
+  public static final class Provider extends AbstractTrait.Provider {
 
-            return builder()
-                    .referentType(referentType)
-                    .referentId(referentId)
-                    .build();
-        }
-    }
-
-    public static Builder builder() {
-        return new Builder();
-    }
-
-    public ReferentType getReferentType() {
-        return referentType;
-    }
-
-    public boolean isService() { return referentType == ReferentType.SERVICE; }
-
-    public ShapeId getReferentId() {
-        return referentId;
-    }
-
-    public enum ReferentType {
-        SERVICE, RESOURCE;
-
-        @Override
-        public String toString() {
-            return switch (this) {
-                case SERVICE -> ReferenceTrait.SERVICE;
-                case RESOURCE -> ReferenceTrait.RESOURCE;
-            };
-        }
-
-        public static ReferentType fromString(String referentTypeStr) {
-            return switch (referentTypeStr) {
-                case ReferenceTrait.SERVICE -> SERVICE;
-                case ReferenceTrait.RESOURCE -> RESOURCE;
-                default -> throw new UnsupportedOperationException();
-            };
-        }
+    public Provider() {
+      super(ID);
     }
 
     @Override
-    protected Node createNode() {
-        return Node.objectNodeBuilder()
-                .sourceLocation(getSourceLocation())
-                .withMember(this.referentType.toString(), this.referentId.toString())
-                .build();
+    public Trait createTrait(ShapeId target, Node value) {
+      ObjectNode objectNode = value.expectObjectNode();
+      Optional<ShapeId> serviceId = objectNode
+        .getStringMember(SERVICE)
+        .map(StringNode::expectShapeId);
+      Optional<ShapeId> resourceId = objectNode
+        .getStringMember(RESOURCE)
+        .map(StringNode::expectShapeId);
+      if (serviceId.isPresent() == resourceId.isPresent()) {
+        throw new IllegalStateException(
+          "Must specify either service or resource, but not both"
+        );
+      }
+      ReferentType referentType = serviceId.isPresent()
+        ? ReferentType.SERVICE
+        : ReferentType.RESOURCE;
+      ShapeId referentId = serviceId.orElseGet(resourceId::get);
+
+      return builder()
+        .referentType(referentType)
+        .referentId(referentId)
+        .build();
     }
+  }
+
+  public static Builder builder() {
+    return new Builder();
+  }
+
+  public ReferentType getReferentType() {
+    return referentType;
+  }
+
+  public boolean isService() {
+    return referentType == ReferentType.SERVICE;
+  }
+
+  public ShapeId getReferentId() {
+    return referentId;
+  }
+
+  public enum ReferentType {
+    SERVICE,
+    RESOURCE;
 
     @Override
-    public SmithyBuilder<ReferenceTrait> toBuilder() {
-        return builder()
-                .sourceLocation(getSourceLocation())
-                .referentType(this.getReferentType())
-                .referentId(this.getReferentId());
+    public String toString() {
+      return switch (this) {
+        case SERVICE -> ReferenceTrait.SERVICE;
+        case RESOURCE -> ReferenceTrait.RESOURCE;
+      };
     }
 
-    /** Builder for {@link ReferenceTrait}. */
-    public static final class Builder extends AbstractTraitBuilder<ReferenceTrait, Builder> {
-        private ReferentType referentType;
-        private ShapeId referentId;
+    public static ReferentType fromString(String referentTypeStr) {
+      return switch (referentTypeStr) {
+        case ReferenceTrait.SERVICE -> SERVICE;
+        case ReferenceTrait.RESOURCE -> RESOURCE;
+        default -> throw new UnsupportedOperationException();
+      };
+    }
+  }
 
-        private Builder() {}
+  @Override
+  protected Node createNode() {
+    return Node
+      .objectNodeBuilder()
+      .sourceLocation(getSourceLocation())
+      .withMember(this.referentType.toString(), this.referentId.toString())
+      .build();
+  }
 
-        @Override
-        public ReferenceTrait build() {
-            return new ReferenceTrait(this);
-        }
+  @Override
+  public SmithyBuilder<ReferenceTrait> toBuilder() {
+    return builder()
+      .sourceLocation(getSourceLocation())
+      .referentType(this.getReferentType())
+      .referentId(this.getReferentId());
+  }
 
-        public Builder referentType(ReferentType referentType) {
-            this.referentType = referentType;
-            return this;
-        }
+  /** Builder for {@link ReferenceTrait}. */
+  public static final class Builder
+    extends AbstractTraitBuilder<ReferenceTrait, Builder> {
 
-        public Builder referentId(ShapeId referentId) {
-            this.referentId = referentId;
-            return this;
-        }
+    private ReferentType referentType;
+    private ShapeId referentId;
+
+    private Builder() {}
+
+    @Override
+    public ReferenceTrait build() {
+      return new ReferenceTrait(this);
     }
 
-    public static Shape getDefinition() {
-        final Trait referenceTraitDefinition = TraitDefinition.builder()
-                .selector(Selector.parse("structure"))
-                .build();
-        return StructureShape.builder()
-                .id(ReferenceTrait.ID)
-                .addTrait(referenceTraitDefinition)
-                .addMember("service", ShapeId.from("smithy.api#String"))
-                .addMember("resource", ShapeId.from("smithy.api#String"))
-                .build();
+    public Builder referentType(ReferentType referentType) {
+      this.referentType = referentType;
+      return this;
     }
+
+    public Builder referentId(ShapeId referentId) {
+      this.referentId = referentId;
+      return this;
+    }
+  }
+
+  public static Shape getDefinition() {
+    final Trait referenceTraitDefinition = TraitDefinition
+      .builder()
+      .selector(Selector.parse("structure"))
+      .build();
+    return StructureShape
+      .builder()
+      .id(ReferenceTrait.ID)
+      .addTrait(referenceTraitDefinition)
+      .addMember("service", ShapeId.from("smithy.api#String"))
+      .addMember("resource", ShapeId.from("smithy.api#String"))
+      .build();
+  }
 }

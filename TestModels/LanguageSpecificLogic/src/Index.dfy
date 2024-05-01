@@ -10,7 +10,7 @@ module {:extern "language.specific.logic.internaldafny"} LanguageSpecificLogic r
     }
 
     method LanguageSpecificLogic(config: LanguageSpecificLogicConfig)
-        returns (res: Result<ILanguageSpecificLogicClient, Error>)
+        returns (res: Result<LanguageSpecificLogicClient, Error>)
     {
         var client := new LanguageSpecificLogicClient(Operations.Config);
         return Success(client);
