@@ -7,6 +7,9 @@ include ../../SharedMakefile.mk
 
 NAMESPACE=simple.types.enumV2
 
+# TODO-Python-PYTHONPATH: Move into dfyproject.toml
+PYTHON_MODULE_NAME=simple_types_smithyenumv2
+
 PROJECT_SERVICES := \
         SimpleTypesEnumV2
 
