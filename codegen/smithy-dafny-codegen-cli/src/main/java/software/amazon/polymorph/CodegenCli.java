@@ -83,7 +83,7 @@ public class CodegenCli {
 
     final Map<TargetLanguage, Path> testOutputDirs = new HashMap<>();
     cliArguments.testOutputJavaDir.ifPresent(path ->
-            outputDirs.put(TargetLanguage.JAVA, path)
+            testOutputDirs.put(TargetLanguage.JAVA, path)
     );
 
     final CodegenEngine.Builder engineBuilder = new CodegenEngine.Builder()
