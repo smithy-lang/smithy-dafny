@@ -15,6 +15,15 @@ service SimpleConstraints {
 
 structure SimpleConstraintsConfig {}
 
+@smithy.test#smokeTests([
+  {
+    id: "GetConstraintsSuccess"
+    params: {OneToTen: 5}
+    expect: {
+        success: {}
+    }
+  }
+])
 operation GetConstraints {
   input: GetConstraintsInput,
   output: GetConstraintsOutput,

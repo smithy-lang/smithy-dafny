@@ -132,6 +132,9 @@ public class CodegenEngine {
       for (final Path dir : this.targetLangOutputDirs.values()) {
         Files.createDirectories(dir);
       }
+      for (final Path dir : this.targetLangTestOutputDirs.values()) {
+        Files.createDirectories(dir);
+      }
     } catch (IOException e) {
       e.printStackTrace();
       System.exit(1);
@@ -142,9 +145,12 @@ public class CodegenEngine {
         .get(lang)
         .toAbsolutePath()
         .normalize();
+      final Path testOutputDir = Optional.ofNullable(targetLangTestOutputDirs.get(lang))
+              .map(p -> p.toAbsolutePath().normalize())
+              .orElse(null);
       switch (lang) {
         case DAFNY -> generateDafny(outputDir);
-        case JAVA -> generateJava(outputDir);
+        case JAVA -> generateJava(outputDir, testOutputDir);
         case DOTNET -> generateDotnet(outputDir);
         case RUST -> generateRust(outputDir);
         default -> throw new UnsupportedOperationException(
@@ -218,7 +224,7 @@ public class CodegenEngine {
     handlePatching(TargetLanguage.DAFNY, outputDir);
   }
 
-  private void generateJava(final Path outputDir) {
+  private void generateJava(final Path outputDir, final Path testOutputDir) {
     if (this.awsSdkStyle) {
       switch (this.javaAwsSdkVersion) {
         case V1 -> javaAwsSdkV1(outputDir);
@@ -227,7 +233,7 @@ public class CodegenEngine {
     } else if (this.localServiceTest) {
       javaWrappedLocalService(outputDir);
     } else {
-      javaLocalService(outputDir);
+      javaLocalService(outputDir, testOutputDir);
     }
 
     LOGGER.info("Formatting Java code in {}", outputDir);
@@ -243,12 +249,28 @@ public class CodegenEngine {
     handlePatching(TargetLanguage.JAVA, outputDir);
   }
 
-  private void javaLocalService(final Path outputDir) {
+  private void javaLocalService(final Path outputDir, final Path testOutputDir) {
     final JavaLibrary javaLibrary = new JavaLibrary(
       this.model,
       this.serviceShape,
       this.javaAwsSdkVersion,
       this.dafnyVersion
+    );
+    IOUtils.writeTokenTreesIntoDir(javaLibrary.generate(), outputDir);
+    LOGGER.info("Java code generated in {}", outputDir);
+
+    if (testOutputDir != null) {
+      IOUtils.writeTokenTreesIntoDir(javaLibrary.generateTests(), testOutputDir);
+      LOGGER.info("Java test code generated in {}", testOutputDir);
+    }
+  }
+
+  private void javaLocalService(final Path outputDir) {
+    final JavaLibrary javaLibrary = new JavaLibrary(
+            this.model,
+            this.serviceShape,
+            this.javaAwsSdkVersion,
+            this.dafnyVersion
     );
     IOUtils.writeTokenTreesIntoDir(javaLibrary.generate(), outputDir);
     LOGGER.info("Java code generated in {}", outputDir);
@@ -696,7 +718,7 @@ public class CodegenEngine {
         ImmutableMap.copyOf(targetLangOutputDirsRaw);
 
       final Map<TargetLanguage, Path> targetLangTestOutputDirsRaw =
-              Objects.requireNonNull(this.targetLangOutputDirs);
+              Objects.requireNonNull(this.targetLangTestOutputDirs);
       targetLangTestOutputDirsRaw.replaceAll((_lang, path) ->
               path.toAbsolutePath().normalize()
       );

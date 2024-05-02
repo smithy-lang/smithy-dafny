@@ -194,6 +194,13 @@ public class JavaLibrary extends CodegenSubject {
     return rtn;
   }
 
+  public Map<Path, TokenTree> generateTests() {
+    Map<Path, TokenTree> rtn = new LinkedHashMap<>();
+    ModelTestCodegen serviceTestCodegen = new ModelTestCodegen(this);
+    rtn.putAll(serviceTestCodegen.generate());
+    return rtn;
+  }
+
   public List<StructureShape> getErrorsInServiceNamespace() {
     return this.model.getStructureShapes()
       .stream()

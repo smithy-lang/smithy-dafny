@@ -2,12 +2,15 @@ package software.amazon.polymorph.smithyjava.generator.library;
 
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import software.amazon.polymorph.smithyjava.generator.Generator;
 import software.amazon.polymorph.smithyjava.modeled.ModeledUnion;
 import software.amazon.polymorph.smithyjava.unmodeled.CollectionOfErrors;
 import software.amazon.polymorph.smithyjava.unmodeled.OpaqueError;
+import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.smithy.model.shapes.OperationShape;
+import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.UnionShape;
 import software.amazon.smithy.smoketests.traits.SmokeTestCase;
 import software.amazon.smithy.smoketests.traits.SmokeTestsTrait;
@@ -33,22 +36,56 @@ public class ModelTestCodegen extends Generator {
         LinkedHashSet<JavaFile> rtn = new LinkedHashSet<>();
         subject.model.getOperationShapesWithTrait(SmokeTestsTrait.class).stream()
                 .map(this::smokeTestsClass)
-                .forEachOrdered(c -> JavaFile.builder(subject.modelPackageName, c).build());
+                .forEachOrdered(rtn::add);
         return rtn;
     }
 
-    private TypeSpec smokeTestsClass(OperationShape shape) {
+    private JavaFile smokeTestsClass(OperationShape shape) {
         TypeSpec.Builder spec = TypeSpec
                 .classBuilder(shape.getId().getName() + "SmokeTests")
                 .addModifiers(PUBLIC, FINAL);
         SmokeTestsTrait smokeTests = shape.expectTrait(SmokeTestsTrait.class);
         smokeTests.getTestCases().stream()
-                .map(this::smokeTest)
+                .map(testCase -> smokeTest(shape, testCase))
                 .forEachOrdered(spec::addMethod);
-        return spec.build();
+        TypeSpec classType = spec.build();
+        return JavaFile.builder(subject.modelPackageName, classType).build();
     }
 
-    private MethodSpec smokeTest(SmokeTestCase testCase) {
-        return null;
+    private MethodSpec smokeTest(final OperationShape operationShape, SmokeTestCase testCase) {
+
+        // TODO: escape all names properly
+        final String methodName = testCase.getId();
+        MethodSpec.Builder method = MethodSpec
+                .methodBuilder(methodName)
+                .addAnnotation(Constants.JUPITER_TEST)
+                .addModifiers(PUBLIC)
+                .returns(TypeName.VOID);
+
+        final TypeName clientType = subject.nativeNameResolver.typeForShape(subject.serviceShape.toShapeId());
+        final String operationName = operationShape.toShapeId().getName();
+        final ShapeId configShapeId = subject.serviceShape.expectTrait(LocalServiceTrait.class).getConfigId();
+        final TypeName configType = subject.nativeNameResolver.typeForShape(configShapeId);
+
+        // SimpleConstraintsConfig config = SimpleConstraintsConfig.builder().build();
+        // SimpleConstraints client = SimpleConstraints.builder()
+        //         .SimpleConstraintsConfig(config)
+        //         .build();
+        method.addStatement("$T config = $T.builder().build()", configType, configType);
+        method.addStatement("$T client = $T.builder().$L(config).build()", clientType, clientType, configShapeId.getName());
+
+        // GetConstraintsInput input = GetConstraintsInput.builder()
+        //                .build();
+        // TODO: populate input
+        final TypeName inputType = subject.nativeNameResolver.typeForShape(operationShape.getInput().get());
+        method.addStatement("$T input = $T.builder().build()", inputType, inputType);
+
+        // client.GetConstraints(input);
+        // TODO: or assertThrows(...)
+        method.addStatement("client.$L(input)", operationName);
+
+        return method.build();
     }
+
+
 }
