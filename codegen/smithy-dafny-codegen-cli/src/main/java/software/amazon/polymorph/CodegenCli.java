@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Arrays;
+import java.util.stream.Stream;
 
 public class CodegenCli {
     private static final Logger LOGGER = LoggerFactory.getLogger(CodegenCli.class);
@@ -42,6 +43,7 @@ public class CodegenCli {
         }
         Optional<CliArguments> cliArgumentsOptional = Optional.empty();
         try {
+            System.out.println(Arrays.toString(args));
             cliArgumentsOptional = CliArguments.parse(args);
         } catch (ParseException e) {
             LOGGER.error("Command-line arguments could not be parsed", e);

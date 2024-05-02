@@ -4,21 +4,17 @@
 package software.amazon.polymorph.smithygo;
 
 import software.amazon.polymorph.smithygo.codegen.GenerationContext;
+import software.amazon.polymorph.smithygo.codegen.GoDelegator;
 import software.amazon.polymorph.smithygo.codegen.GoWriter;
-import software.amazon.polymorph.smithygo.codegen.ImportDeclarations;
 import software.amazon.polymorph.smithygo.codegen.SmithyGoDependency;
 import software.amazon.polymorph.smithygo.codegen.StructureGenerator;
 import software.amazon.polymorph.smithygo.nameresolver.DafnyNameResolver;
-import software.amazon.polymorph.smithygo.shapevisitor.DafnyToSmithyShapeVisitor;
-import software.amazon.polymorph.smithygo.shapevisitor.SmithyToDafnyShapeVisitor;
-import software.amazon.polymorph.smithyjava.generator.library.shims.NativeWrapper;
 import software.amazon.polymorph.traits.ExtendableTrait;
 import software.amazon.polymorph.traits.LocalServiceTrait;
 import software.amazon.polymorph.traits.ReferenceTrait;
-import software.amazon.polymorph.utils.ModelUtils;
-import software.amazon.smithy.codegen.core.TopologicalIndex;
+import software.amazon.smithy.codegen.core.SymbolProvider;
+import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.TopDownIndex;
-import software.amazon.smithy.model.shapes.EntityShape;
 import software.amazon.smithy.model.shapes.OperationShape;
 import software.amazon.smithy.model.shapes.ResourceShape;
 import software.amazon.smithy.model.shapes.ServiceShape;
@@ -30,7 +26,6 @@ import software.amazon.smithy.model.traits.UnitTypeTrait;
 
 import java.util.Collection;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 
@@ -38,16 +33,22 @@ public class LocalServiceGenerator implements Runnable {
     private final GenerationContext context;
     private final ServiceShape service;
     private final TopDownIndex topDownIndex;
+    private final GoDelegator writerDelegator;
+    private final Model model;
+    private final SymbolProvider symbolProvider;
 
     public LocalServiceGenerator(GenerationContext context, ServiceShape service) {
         this.context = context;
         this.service = service;
-        topDownIndex = TopDownIndex.of(context.model());
+        model = context.model();
+        topDownIndex = TopDownIndex.of(model);
+        writerDelegator = context.writerDelegator();
+        symbolProvider = context.symbolProvider();
     }
 
     @Override
     public void run() {
-        context.writerDelegator().useShapeWriter(service, this::generateService);
+        writerDelegator.useShapeWriter(service, this::generateService);
     }
 
     private void generateService(GoWriter writer) {
@@ -63,20 +64,21 @@ public class LocalServiceGenerator implements Runnable {
     void generateClient(GoWriter writer) {
         // Generate each operation for the service. We do this here instead of via the operation visitor method to
         // limit it to the operations bound to the service.
-        var symbolProvider = context.symbolProvider();
-        var model = context.model();
-        var serviceSymbol = context.symbolProvider().toSymbol(service);
-        final LocalServiceTrait serviceTrait = service.expectTrait(LocalServiceTrait.class);
-        var configSymbol = symbolProvider.toSymbol(model.expectShape(serviceTrait.getConfigId()));
-        context.writerDelegator().useFileWriter("types/types.go", writer1 -> {
-            new StructureGenerator(model, symbolProvider, writer1, model.expectShape(serviceTrait.getConfigId()).asStructureShape().get()).run();
+        final var serviceSymbol = symbolProvider.toSymbol(service);
+        final var serviceTrait = service.expectTrait(LocalServiceTrait.class);
+        final var configSymbol = symbolProvider.toSymbol(model.expectShape(serviceTrait.getConfigId()));
+
+        writerDelegator.useFileWriter("types/types.go", writer1 -> {
+            new StructureGenerator(model, symbolProvider, writer1,
+                                   model.expectShape(serviceTrait.getConfigId()).asStructureShape().get()).run();
         });
 
         writer.addImport(DafnyNameResolver.dafnyTypesNamespace(context.settings()));
         writer.addImport(DafnyNameResolver.dafnyNamespace(context.settings()));
         writer.addImport("types");
         writer.addImport("context");
-        var dafnyClient = DafnyNameResolver.getDafnyClient(context.settings(), serviceTrait.getSdkId());
+
+        final var dafnyClient = DafnyNameResolver.getDafnyClient(context.settings(), serviceTrait.getSdkId());
         writer.write("""
                              type $T struct {
                                  dafnyClient *$L
@@ -93,14 +95,19 @@ public class LocalServiceGenerator implements Runnable {
                                  return client, nil
                              }
                              """,
-                     serviceSymbol, dafnyClient, configSymbol, serviceSymbol, DafnyNameResolver.getInputToDafnyMethodName(context, serviceTrait.getConfigId()), DafnyNameResolver.createDafnyClient(context.settings(), serviceTrait.getSdkId()), dafnyClient, serviceSymbol);
+                     serviceSymbol, dafnyClient, configSymbol, serviceSymbol,
+                     DafnyNameResolver.getInputToDafnyMethodName(context, serviceTrait.getConfigId()),
+                     DafnyNameResolver.createDafnyClient(context.settings(), serviceTrait.getSdkId()),
+                     dafnyClient, serviceSymbol);
 
         service.getOperations().forEach(operation -> {
-            var operationShape = model.expectShape(operation, OperationShape.class);
-            final Shape inputShape = model.expectShape(operationShape.getInputShape());
-            final Shape outputShape = model.expectShape(operationShape.getOutputShape());
-            final String inputType = inputShape.hasTrait(UnitTypeTrait.class) ? "" : ", params types.%s".formatted(inputShape.toShapeId().getName());
-            final String outputType = outputShape.hasTrait(UnitTypeTrait.class) ? "" : "*types.%s,".formatted(outputShape.toShapeId().getName());
+            final var operationShape = model.expectShape(operation, OperationShape.class);
+            final var inputShape = model.expectShape(operationShape.getInputShape());
+            final var outputShape = model.expectShape(operationShape.getOutputShape());
+            final var inputType = inputShape.hasTrait(UnitTypeTrait.class) ? ""
+                                                                           : ", params types.%s".formatted(inputShape.toShapeId().getName());
+            final var outputType = outputShape.hasTrait(UnitTypeTrait.class) ? ""
+                                                                             : "*types.%s,".formatted(outputShape.toShapeId().getName());
 
             String baseClientCall;
             if (inputShape.hasTrait(UnitTypeTrait.class)) {
@@ -149,8 +156,7 @@ public class LocalServiceGenerator implements Runnable {
                          baseClientCall,
                          DafnyNameResolver.dafnyTypesNamespace(context.settings()),
                          writer.consumer(w -> {
-                             for (var errorShape :
-                                     model.getShapesWithTrait(ErrorTrait.class)) {
+                             for (var errorShape : model.getShapesWithTrait(ErrorTrait.class)) {
                                  w.write("""
                                                                         if err.Is_$L() {
                                                                         $L $L_Output_FromDafny(err)
@@ -159,23 +165,24 @@ public class LocalServiceGenerator implements Runnable {
                              }
                          }), returnError, returnError, returnResponse
             );
-            //ModelUtils.findAllDependentMemberReferenceShapes(operationShape.all)
         });
     }
 
     void generateShim() {
-        var symbolProvider = context.symbolProvider();
-        var model = context.model();
-        var namespace = "%swrapped".formatted(DafnyNameResolver.dafnyNamespace(context.settings()));
-        context.writerDelegator().useFileWriter("shim.go", namespace, writer -> {
+        final var namespace = "%swrapped".formatted(DafnyNameResolver.dafnyNamespace(context.settings()));
+
+        writerDelegator.useFileWriter("shim.go", namespace, writer -> {
+
             writer.addImport(DafnyNameResolver.dafnyTypesNamespace(context.settings()));
             writer.addImport("Wrappers");
             writer.addImport("context");
             writer.addImport("types");
             writer.addImport(DafnyNameResolver.serviceNamespace(service));
+
             if (service.hasTrait(LocalServiceTrait.class)) {
-                final LocalServiceTrait serviceTrait = service.expectTrait(LocalServiceTrait.class);
-                var configSymbol = symbolProvider.toSymbol(model.expectShape(serviceTrait.getConfigId()));
+                final var serviceTrait = service.expectTrait(LocalServiceTrait.class);
+                final var configSymbol = symbolProvider.toSymbol(model.expectShape(serviceTrait.getConfigId()));
+
                 writer.write("""
                                      type Shim struct {
                                          $L
@@ -185,6 +192,7 @@ public class LocalServiceGenerator implements Runnable {
                              DafnyNameResolver.getDafnyInterfaceClient(context.settings(), serviceTrait.getSdkId()),
                              DafnyNameResolver.serviceNamespace(service)
                 );
+
                 writer.write("""
                                                        
                                      func Wrapped$L(inputConfig $L) Wrappers.Result {
@@ -205,15 +213,19 @@ public class LocalServiceGenerator implements Runnable {
 
 
             service.getOperations().forEach(operation -> {
-                var operationShape = model.expectShape(operation, OperationShape.class);
-                final Shape inputShape = model.expectShape(operationShape.getInputShape());
-                final Shape outputShape = model.expectShape(operationShape.getOutputShape());
-                final String inputType = inputShape.hasTrait(UnitTypeTrait.class) ? "" : "input %s".formatted(DafnyNameResolver.getDafnyType(context.settings(), symbolProvider.toSymbol(inputShape)));
-                final String outputType = outputShape.hasTrait(UnitTypeTrait.class) ? "" : "*types.%s,".formatted(outputShape.toShapeId().getName());
+                final var operationShape = model.expectShape(operation, OperationShape.class);
+                final var inputShape = model.expectShape(operationShape.getInputShape());
+                final var outputShape = model.expectShape(operationShape.getOutputShape());
+                final var inputType = inputShape.hasTrait(UnitTypeTrait.class) ? ""
+                                                                               : "input %s".formatted(DafnyNameResolver.getDafnyType(context.settings(), symbolProvider.toSymbol(inputShape)));
 
-                final String typeConversion = inputShape.hasTrait(UnitTypeTrait.class) ? "" : "var native_request = %s.%s(input)".formatted(DafnyNameResolver.serviceNamespace(service),
-                                                                                                                                      DafnyNameResolver.getInputFromDafnyMethodName(context, operationShape));
-                final String clientCall =  "shim.client.%s(context.Background() %s)".formatted(operationShape.getId().getName(), inputShape.hasTrait(UnitTypeTrait.class) ? "" : ", native_request");
+                final var typeConversion = inputShape.hasTrait(UnitTypeTrait.class) ? ""
+                                                                                    : "var native_request = %s.%s(input)".formatted(DafnyNameResolver.serviceNamespace(service),
+                                                                                                                                    DafnyNameResolver.getInputFromDafnyMethodName(context, operationShape));
+
+                final var clientCall = "shim.client.%s(context.Background() %s)".formatted(operationShape.getId().getName(),
+                                                                                           inputShape.hasTrait(UnitTypeTrait.class) ? "" : ", native_request");
+
                 String clientResponse, returnResponse;
                 if (outputShape.hasTrait(UnitTypeTrait.class)) {
                     clientResponse = "var native_error";
@@ -224,6 +236,7 @@ public class LocalServiceGenerator implements Runnable {
                     returnResponse = "%s.%s(*native_response)".formatted(DafnyNameResolver.serviceNamespace(service),
                                                                          DafnyNameResolver.getOutputToDafnyMethodName(context, operationShape));
                 }
+
                 writer.write("""
                                        func (shim *Shim) $L($L) Wrappers.Result {
                                            $L
@@ -242,56 +255,58 @@ public class LocalServiceGenerator implements Runnable {
                                      """,
                              operationShape.getId().getName(),
                              inputType, typeConversion, clientResponse, clientCall,
-                             writer.consumer(w -> c(w)),
+                             writer.consumer(this::shimErrors),
                              DafnyNameResolver.serviceNamespace(service),
                              DafnyNameResolver.serviceNamespace(service),
                              returnResponse
-                             );
+                );
             });
         });
     }
 
-    void c(GoWriter writer) {
-        for (Shape error:
-             context.model().getShapesWithTrait(ErrorTrait.class)) {
+    void shimErrors(GoWriter writer) {
+        for (final var error : model.getShapesWithTrait(ErrorTrait.class)) {
             writer.write("""
                                  case types.$L:
                                       return Wrappers.Companion_Result_.Create_Failure_($L.$L_Input_ToDafny(native_error.(types.$L)))
                                            
                                                 
-                                 """, context.symbolProvider().toSymbol(error).getName(), DafnyNameResolver.serviceNamespace(context.settings().getService(context.model())), context.symbolProvider().toSymbol(error).getName(), context.symbolProvider().toSymbol(error).getName());
+                                 """,
+                         symbolProvider.toSymbol(error).getName(), DafnyNameResolver.serviceNamespace(context.settings().getService(model)),
+                         symbolProvider.toSymbol(error).getName(), symbolProvider.toSymbol(error).getName());
         }
     }
 
-    void d(GoWriter writer) {
-        for (Shape error:
-                context.model().getShapesWithTrait(ErrorTrait.class)) {
+    void resourceErros(GoWriter writer) {
+        for (final var error : model.getShapesWithTrait(ErrorTrait.class)) {
             writer.write("""
                                  case types.$L:
                                       return Wrappers.Companion_Result_.Create_Failure_($L_Input_ToDafny(native_error.(types.$L)))
                                            
                                                 
-                                 """, context.symbolProvider().toSymbol(error).getName(), context.symbolProvider().toSymbol(error).getName(), context.symbolProvider().toSymbol(error).getName());
+                                 """,
+                         symbolProvider.toSymbol(error).getName(), symbolProvider.toSymbol(error).getName(),
+                         symbolProvider.toSymbol(error).getName());
         }
     }
 
     void generateUnmodelledErrors(GenerationContext context) {
-        context.writerDelegator().useFileWriter("types/unmodelled_errors.go", "types", writer -> {
+        writerDelegator.useFileWriter("types/unmodelled_errors.go", "types", writer -> {
             writer.addUseImports(SmithyGoDependency.FMT);
             writer.write("""
                                  type CollectionOfErrors struct {
                                      ListOfErrors []error
                                      Message string
                                  }
-                                 
+                                                                  
                                  func (e CollectionOfErrors) Error() string {
                                  	return fmt.Sprintf("message: %s\\n err %v", e.Message, e.ListOfErrors)
                                  }
-                                 
+                                                                  
                                  type OpaqueError struct {
                                     ErrObject interface{}
                                  }
-                                 
+                                                                  
                                  func (e OpaqueError) Error() string {
                                     return fmt.Sprintf("message: %v", e.ErrObject )
                                  }
@@ -300,36 +315,37 @@ public class LocalServiceGenerator implements Runnable {
     }
 
     void generateUnboundedStructures(GenerationContext context) {
-        var b = TopDownIndex.of(context.model());
-        Set<ShapeId> serviceOperationShapes = context.model().getServiceShapes().stream()
-                                                     .map(b::getContainedOperations)
-                                                     .flatMap(Collection::stream)
-                                                     .map(OperationShape::toShapeId)
+        final var serviceOperationShapes = model.getServiceShapes().stream()
+                                                  .map(topDownIndex::getContainedOperations)
+                                                  .flatMap(Collection::stream)
+                                                  .map(OperationShape::toShapeId)
+                                                  .collect(Collectors.toSet());
+        final var nonServiceOperationShapes = model.getOperationShapes()
+                                                     .stream()
+                                                     .map(Shape::getId)
+                                                     .filter(operationShapeId -> operationShapeId.getNamespace()
+                                                                                                 .equals(service.getId().getNamespace()))
                                                      .collect(Collectors.toSet());
-        Set<ShapeId> nonServiceOperationShapes = context.model().getOperationShapes()
-                                                        .stream()
-                                                        .map(Shape::getId)
-                                                        .filter(operationShapeId -> operationShapeId.getNamespace()
-                                                                                                    .equals(service.getId().getNamespace()))
-                                                        .collect(Collectors.toSet());
         nonServiceOperationShapes.removeAll(serviceOperationShapes);
-        for (ShapeId operationShapeId : nonServiceOperationShapes) {
-            OperationShape operationShape = context.model().expectShape(operationShapeId, OperationShape.class);
-            StructureShape inputShape = context.model().expectShape(operationShape.getInputShape(), StructureShape.class);
-            context.writerDelegator().useShapeWriter(inputShape, w -> new StructureGenerator(context.model(), context.symbolProvider(), w, inputShape).run());
-            StructureShape outputShape = context.model().expectShape(operationShape.getOutputShape(), StructureShape.class);
-            context.writerDelegator().useShapeWriter(outputShape, w -> new StructureGenerator(context.model(), context.symbolProvider(), w, outputShape).run());
+        for (final var operationShapeId : nonServiceOperationShapes) {
+            OperationShape operationShape = model.expectShape(operationShapeId, OperationShape.class);
+            StructureShape inputShape = model.expectShape(operationShape.getInputShape(), StructureShape.class);
+            writerDelegator.useShapeWriter(inputShape, w -> new StructureGenerator(model, symbolProvider, w, inputShape).run());
+            StructureShape outputShape = model.expectShape(operationShape.getOutputShape(), StructureShape.class);
+            writerDelegator.useShapeWriter(outputShape, w -> new StructureGenerator(model, symbolProvider, w, outputShape).run());
         }
     }
 
     void generateReferencedResources(GenerationContext context) {
-        var refResources = context.model().getShapesWithTrait(ReferenceTrait.class);
-        var model = context.model();
-        var symbolProvider = context.symbolProvider();
-        for (var refResource : refResources) {
+        var refResources = model.getShapesWithTrait(ReferenceTrait.class);
+        for (final var refResource : refResources) {
             if (!refResource.expectTrait(ReferenceTrait.class).isService()) {
-                var resource = refResource.expectTrait(ReferenceTrait.class).getReferentId();
-                context.writerDelegator().useFileWriter("types/types.go", writer -> {
+                final var resource = refResource.expectTrait(ReferenceTrait.class).getReferentId();
+
+                if (!service.toShapeId().getNamespace().equals(resource.getNamespace())) {
+                    continue;
+                }
+                writerDelegator.useFileWriter("types/types.go", writer -> {
                     writer.write("""
                                          type I$L interface {
                                          ${C|}
@@ -348,7 +364,7 @@ public class LocalServiceGenerator implements Runnable {
                     generateNativeResourceWrapper(context, model.expectShape(resource, ResourceShape.class));
                 }
 
-                context.writerDelegator().useFileWriter(resource.getName() + ".go", DafnyNameResolver.serviceNamespace(service), writer -> {
+                writerDelegator.useFileWriter(resource.getName() + ".go", DafnyNameResolver.serviceNamespace(service), writer -> {
                     writer.addImport("types");
                     writer.addImport(DafnyNameResolver.dafnyTypesNamespace(context.settings()));
                     writer.write("""
@@ -358,13 +374,13 @@ public class LocalServiceGenerator implements Runnable {
                                          """.formatted(resource.getName(), DafnyNameResolver.dafnyTypesNamespace(context.settings()), resource.getName()));
 
                     model.expectShape(resource, ResourceShape.class).getOperations().forEach(operation -> {
-                        var operationShape = model.expectShape(operation, OperationShape.class);
-                        final Shape inputShape = model.expectShape(operationShape.getInputShape());
+                        final var operationShape = model.expectShape(operation, OperationShape.class);
+                        final var inputShape = model.expectShape(operationShape.getInputShape());
 
 
-                        final Shape outputShape = model.expectShape(operationShape.getOutputShape());
-                        final String inputType = inputShape.hasTrait(UnitTypeTrait.class) ? "" : "params types.%s".formatted(inputShape.toShapeId().getName());
-                        final String outputType = outputShape.hasTrait(UnitTypeTrait.class) ? "" : "*types.%s".formatted(outputShape.toShapeId().getName());
+                        final var outputShape = model.expectShape(operationShape.getOutputShape());
+                        final var inputType = inputShape.hasTrait(UnitTypeTrait.class) ? "" : "params types.%s".formatted(inputShape.toShapeId().getName());
+                        final var outputType = outputShape.hasTrait(UnitTypeTrait.class) ? "" : "*types.%s".formatted(outputShape.toShapeId().getName());
 
                         String baseClientCall;
                         if (inputShape.hasTrait(UnitTypeTrait.class)) {
@@ -425,14 +441,14 @@ public class LocalServiceGenerator implements Runnable {
                         );
                     });
                 });
+            } else {
+                //Generate Service
             }
         }
     }
 
     void generateNativeResourceWrapper(GenerationContext context, ResourceShape resourceShape) {
-        var model = context.model();
-        var symbolProvider = context.symbolProvider();
-        context.writerDelegator().useFileWriter("NativeWrapper.go", DafnyNameResolver.serviceNamespace(service), writer -> {
+        writerDelegator.useFileWriter("NativeWrapper.go", DafnyNameResolver.serviceNamespace(service), writer -> {
             writer.addImport("types");
             writer.addImport("Wrappers");
             writer.addImport(DafnyNameResolver.dafnyTypesNamespace(context.settings()));
@@ -462,14 +478,14 @@ public class LocalServiceGenerator implements Runnable {
                                  """, resourceShape.getId().getName(), resourceShape.getId().getName(), DafnyNameResolver.dafnyTypesNamespace(context.settings()), resourceShape.getId().getName(), resourceShape.getId().getName());
 
             resourceShape.getOperations().forEach(operation -> {
-                var operationShape = model.expectShape(operation, OperationShape.class);
-                final Shape inputShape = model.expectShape(operationShape.getInputShape());
-                final Shape outputShape = model.expectShape(operationShape.getOutputShape());
-                final String inputType = inputShape.hasTrait(UnitTypeTrait.class) ? "" : "input %s".formatted(DafnyNameResolver.getDafnyType(context.settings(), symbolProvider.toSymbol(inputShape)));
-                final String outputType = outputShape.hasTrait(UnitTypeTrait.class) ? "" : "*types.%s,".formatted(outputShape.toShapeId().getName());
+                final var operationShape = model.expectShape(operation, OperationShape.class);
+                final var inputShape = model.expectShape(operationShape.getInputShape());
+                final var outputShape = model.expectShape(operationShape.getOutputShape());
+                final var inputType = inputShape.hasTrait(UnitTypeTrait.class) ? "" : "input %s".formatted(DafnyNameResolver.getDafnyType(context.settings(), symbolProvider.toSymbol(inputShape)));
+                final var outputType = outputShape.hasTrait(UnitTypeTrait.class) ? "" : "*types.%s,".formatted(outputShape.toShapeId().getName());
 
-                final String typeConversion = inputShape.hasTrait(UnitTypeTrait.class) ? "" : "var native_request = %s(input)".formatted(DafnyNameResolver.getInputFromDafnyMethodName(context, operationShape));
-                final String clientCall = "this.Impl.%s(%s)".formatted(operationShape.getId().getName(), inputShape.hasTrait(UnitTypeTrait.class) ? "" : "native_request");
+                final var typeConversion = inputShape.hasTrait(UnitTypeTrait.class) ? "" : "var native_request = %s(input)".formatted(DafnyNameResolver.getInputFromDafnyMethodName(context, operationShape));
+                final var clientCall = "this.Impl.%s(%s)".formatted(operationShape.getId().getName(), inputShape.hasTrait(UnitTypeTrait.class) ? "" : "native_request");
                 String clientResponse, returnResponse;
                 if (outputShape.hasTrait(UnitTypeTrait.class)) {
                     clientResponse = "var native_error";
@@ -498,7 +514,7 @@ public class LocalServiceGenerator implements Runnable {
                                      """,
                              operationShape.getId().getName(),
                              inputType, typeConversion, clientResponse, clientCall,
-                             writer.consumer(w -> d(w)),
+                             writer.consumer(w -> resourceErros(w)),
                              returnResponse
                 );
             });

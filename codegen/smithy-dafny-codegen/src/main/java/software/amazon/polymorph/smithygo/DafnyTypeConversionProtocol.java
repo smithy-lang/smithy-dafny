@@ -19,9 +19,6 @@ import software.amazon.smithy.model.shapes.StructureShape;
 import software.amazon.smithy.model.traits.ErrorTrait;
 import software.amazon.smithy.model.traits.UnitTypeTrait;
 
-import java.util.Collections;
-import java.util.Set;
-
 import static software.amazon.polymorph.smithygo.nameresolver.Constants.BLANK;
 import static software.amazon.polymorph.smithygo.nameresolver.Constants.DOT;
 import static software.amazon.polymorph.smithygo.nameresolver.DafnyNameResolver.getInputFromDafnyMethodName;
@@ -50,10 +47,12 @@ public class DafnyTypeConversionProtocol implements ProtocolGenerator {
         final var symbolProvider = context.symbolProvider();
         final var writerDelegator = context.writerDelegator();
         final var topDownIndex = TopDownIndex.of(model);
+
         serviceShape.getOperations().forEach(eachOperation -> {
-            var operation = model.expectShape(eachOperation, OperationShape.class);
+            final var operation = model.expectShape(eachOperation, OperationShape.class);
             final var inputToDafnyMethodName = getInputToDafnyMethodName(context, operation);
             final var input = model.expectShape(operation.getInputShape());
+
             if (!input.hasTrait(UnitTypeTrait.class)) {
                 final var inputSymbol = symbolProvider.toSymbol(input);
                 writerDelegator.useFileWriter(TO_DAFNY, context.settings().getModuleName().replace(DOT, BLANK).toLowerCase(), writer -> {
@@ -82,12 +81,14 @@ public class DafnyTypeConversionProtocol implements ProtocolGenerator {
                 });
             }
         });
-        var refResources = context.model().getShapesWithTrait(ReferenceTrait.class);
+
+        final var refResources = context.model().getShapesWithTrait(ReferenceTrait.class);
         for (var refResource : refResources) {
-            var resource = refResource.expectTrait(ReferenceTrait.class).getReferentId();
+            final var resource = refResource.expectTrait(ReferenceTrait.class).getReferentId();
+
             if (!refResource.expectTrait(ReferenceTrait.class).isService()) {
                 model.expectShape(resource, ResourceShape.class).getOperations().forEach(eachOperation -> {
-                    var operation = model.expectShape(eachOperation, OperationShape.class);
+                    final var operation = model.expectShape(eachOperation, OperationShape.class);
                     final var inputToDafnyMethodName = getInputToDafnyMethodName(context, operation);
                     final var input = model.expectShape(operation.getInputShape());
                     if (!input.hasTrait(UnitTypeTrait.class)) {
@@ -146,7 +147,7 @@ public class DafnyTypeConversionProtocol implements ProtocolGenerator {
                     writer.write("""
                                          func $L(dafnyInput $L)($T) {
                                              ${C|}
-                                         }""", inputFromDafnyMethodName, DafnyNameResolver.getDafnyType(context.settings(), inputSymbol),
+                                         }""", inputFromDafnyMethodName, inputSymbol.getNamespace(),
                                  inputSymbol,
                                  writer.consumer(w -> generateRequestDeserializer(context, operation, context.writerDelegator())));
                 });
@@ -172,11 +173,12 @@ public class DafnyTypeConversionProtocol implements ProtocolGenerator {
 
         var refResources = context.model().getShapesWithTrait(ReferenceTrait.class);
         for (var refResource : refResources) {
-            var resource = refResource.expectTrait(ReferenceTrait.class).getReferentId();
+            final var resource = refResource.expectTrait(ReferenceTrait.class).getReferentId();
+
             if (!refResource.expectTrait(ReferenceTrait.class).isService()) {
 
                 context.model().expectShape(resource, ResourceShape.class).getOperations().forEach(eachOperation -> {
-                    var operation = context.model().expectShape(eachOperation, OperationShape.class);
+                    final var operation = context.model().expectShape(eachOperation, OperationShape.class);
                     final var inputFromDafnyMethodName = getInputFromDafnyMethodName(context, operation);
                     final var input = context.model().expectShape(operation.getInputShape());
                     if (!input.hasTrait(UnitTypeTrait.class)) {
@@ -310,8 +312,8 @@ public class DafnyTypeConversionProtocol implements ProtocolGenerator {
 
     private void generateConfigSerializer(final GenerationContext context) {
         final var service = context.settings().getService(context.model());
-        final LocalServiceTrait localServiceTrait = service.expectTrait(LocalServiceTrait.class);
-        final StructureShape configShape = context.model().expectShape(localServiceTrait.getConfigId(), StructureShape.class);
+        final var localServiceTrait = service.expectTrait(LocalServiceTrait.class);
+        final var configShape = context.model().expectShape(localServiceTrait.getConfigId(), StructureShape.class);
 
         context.writerDelegator().useFileWriter(TO_DAFNY, writer -> {
             writer.write("""
@@ -337,7 +339,7 @@ public class DafnyTypeConversionProtocol implements ProtocolGenerator {
 
         final var errorShapes = context.model().getShapesWithTrait(ErrorTrait.class);
 
-        for (var errorShape :
+        for (final var errorShape :
                 errorShapes) {
 
             context.writerDelegator().useFileWriter(TO_DAFNY, writer -> {
@@ -391,8 +393,8 @@ func OpaqueError_Input_ToDafny(nativeInput types.OpaqueError)($L.Error) {
 
     private void generateConfigDeserializer(final GenerationContext context) {
         final var service = context.settings().getService(context.model());
-        final LocalServiceTrait localServiceTrait = service.expectTrait(LocalServiceTrait.class);
-        final StructureShape configShape = context.model().expectShape(localServiceTrait.getConfigId(), StructureShape.class);
+        final var localServiceTrait = service.expectTrait(LocalServiceTrait.class);
+        final var configShape = context.model().expectShape(localServiceTrait.getConfigId(), StructureShape.class);
 
         context.writerDelegator().useFileWriter(FROM_DAFNY, writer -> {
             writer.write("""
@@ -417,7 +419,7 @@ func OpaqueError_Input_ToDafny(nativeInput types.OpaqueError)($L.Error) {
     private void generateErrorDeserializer(final GenerationContext context) {
 
         final var errorShapes = context.model().getShapesWithTrait(ErrorTrait.class);
-        for (var errorShape :
+        for (final var errorShape :
                 errorShapes) {
             context.writerDelegator().useFileWriter(FROM_DAFNY, writer -> {
                 writer.write("""
