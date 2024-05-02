@@ -4,8 +4,12 @@
 include "../Model/ComAmazonawsS3Types.dfy"
 
 module {:extern "software.amazon.cryptography.services.s3.internaldafny"} Com.Amazonaws.S3 refines AbstractComAmazonawsS3Service {
-    function method DefaultS3ClientConfigType{} : S3ClientConfigType {
+    function method DefaultS3ClientConfigType() : S3ClientConfigType {
         S3ClientConfigType
     }
 
+    function method {:extern "RegionMatch"} RegionMatch(
+      client: IS3Client,
+      region: string
+    ): Option<bool>
 }
