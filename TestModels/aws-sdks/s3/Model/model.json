@@ -21274,7 +21274,7 @@
                 "smithy.api#documentation": "<p>A message that indicates the request is complete and no more messages will be sent. You\n         should not assume that the request is complete until the client receives an\n            <code>EndEvent</code>.</p>"
             }
         },
-        "com.amazonaws.s3#Error": {
+        "com.amazonaws.s3#ErrorShape": {
             "type": "structure",
             "members": {
                 "Key": {
@@ -21330,7 +21330,7 @@
         "com.amazonaws.s3#Errors": {
             "type": "list",
             "member": {
-                "target": "com.amazonaws.s3#Error"
+                "target": "com.amazonaws.s3#ErrorShape"
             }
         },
         "com.amazonaws.s3#Event": {
