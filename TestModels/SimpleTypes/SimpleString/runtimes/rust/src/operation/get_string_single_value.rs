@@ -13,14 +13,25 @@ impl GetStringSingleValue {
         input: crate::operation::get_string_single_value::GetStringSingleValueInput,
     ) -> ::std::result::Result<
         crate::operation::get_string_single_value::GetStringSingleValueOutput,
-        crate::operation::get_string_single_value::GetStringSingleValueError
+        crate::operation::get_string_single_value::GetStringSingleValueError,
     > {
-        let inner_input = crate::conversions::get_string_single_value::_get_string_single_value_input::to_dafny(input);
-        let inner_result = ::simple_string_dafny::dafny_runtime::read!(handle.inner).GetStringUTF8(&inner_input);
-        if matches!(inner_result.as_ref(), ::simple_string_dafny::r#_Wrappers_Compile::Result::Success{ .. }) {
+        let inner_input =
+            crate::conversions::get_string_single_value::_get_string_single_value_input::to_dafny(
+                input,
+            );
+        let inner_result =
+            ::simple_string_dafny::dafny_runtime::read!(handle.inner).GetStringUTF8(&inner_input);
+        if matches!(
+            inner_result.as_ref(),
+            ::simple_string_dafny::r#_Wrappers_Compile::Result::Success { .. }
+        ) {
             Ok(crate::conversions::get_string_single_value::_get_string_single_value_output::from_dafny(inner_result.value().clone()))
         } else {
-            Err(crate::conversions::get_string_single_value::from_dafny_error(inner_result.error().clone()))
+            Err(
+                crate::conversions::get_string_single_value::from_dafny_error(
+                    inner_result.error().clone(),
+                ),
+            )
         }
     }
 }
@@ -30,18 +41,24 @@ impl GetStringSingleValue {
 #[derive(::std::fmt::Debug)]
 pub enum GetStringSingleValueError {
     /// An unexpected error occurred (e.g., invalid JSON returned by the service or an unknown error code).
-    #[deprecated(note = "Matching `Unhandled` directly is not forwards compatible. Instead, match using a \
+    #[deprecated(
+        note = "Matching `Unhandled` directly is not forwards compatible. Instead, match using a \
     variable wildcard pattern and check `.code()`:
      \
     &nbsp;&nbsp;&nbsp;`err if err.code() == Some(\"SpecificExceptionCode\") => { /* handle the error */ }`
      \
-    See [`ProvideErrorMetadata`](#impl-ProvideErrorMetadata-for-GetStringSingleValueError) for what information is available for the error.")]
+    See [`ProvideErrorMetadata`](#impl-ProvideErrorMetadata-for-GetStringSingleValueError) for what information is available for the error."
+    )]
     Unhandled(crate::error::sealed_unhandled::Unhandled),
 }
 impl GetStringSingleValueError {
     /// Creates the `GetStringSingleValueError::Unhandled` variant from any error type.
     pub fn unhandled(
-        err: impl ::std::convert::Into<::std::boxed::Box<dyn ::std::error::Error + ::std::marker::Send + ::std::marker::Sync + 'static>>,
+        err: impl ::std::convert::Into<
+            ::std::boxed::Box<
+                dyn ::std::error::Error + ::std::marker::Send + ::std::marker::Sync + 'static,
+            >,
+        >,
     ) -> Self {
         Self::Unhandled(crate::error::sealed_unhandled::Unhandled {
             source: err.into(),
@@ -77,7 +94,9 @@ impl ::std::fmt::Display for GetStringSingleValueError {
     fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
         match self {
             Self::Unhandled(_inner) => {
-                if let ::std::option::Option::Some(code) = ::aws_smithy_types::error::metadata::ProvideErrorMetadata::code(self) {
+                if let ::std::option::Option::Some(code) =
+                    ::aws_smithy_types::error::metadata::ProvideErrorMetadata::code(self)
+                {
                     write!(f, "unhandled error ({code})")
                 } else {
                     f.write_str("unhandled error")
@@ -103,7 +122,9 @@ impl ::aws_smithy_types::error::metadata::ProvideErrorMetadata for GetStringSing
 }
 impl ::aws_smithy_runtime_api::client::result::CreateUnhandledError for GetStringSingleValueError {
     fn create_unhandled_error(
-        source: ::std::boxed::Box<dyn ::std::error::Error + ::std::marker::Send + ::std::marker::Sync + 'static>,
+        source: ::std::boxed::Box<
+            dyn ::std::error::Error + ::std::marker::Send + ::std::marker::Sync + 'static,
+        >,
         meta: ::std::option::Option<::aws_smithy_types::error::ErrorMetadata>,
     ) -> Self {
         Self::Unhandled(crate::error::sealed_unhandled::Unhandled {
@@ -112,8 +133,6 @@ impl ::aws_smithy_runtime_api::client::result::CreateUnhandledError for GetStrin
         })
     }
 }
-
-use core::panic;
 
 pub use crate::operation::get_string_single_value::_get_string_single_value_output::GetStringSingleValueOutput;
 
