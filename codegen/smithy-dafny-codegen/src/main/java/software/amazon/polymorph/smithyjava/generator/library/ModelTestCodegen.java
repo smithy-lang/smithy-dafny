@@ -39,7 +39,7 @@ public class ModelTestCodegen extends Generator {
 
     private TypeSpec smokeTestsClass(OperationShape shape) {
         TypeSpec.Builder spec = TypeSpec
-                .classBuilder(thisClassName)
+                .classBuilder(shape.getId().getName() + "SmokeTests")
                 .addModifiers(PUBLIC, FINAL);
         SmokeTestsTrait smokeTests = shape.expectTrait(SmokeTestsTrait.class);
         smokeTests.getTestCases().stream()
@@ -49,6 +49,6 @@ public class ModelTestCodegen extends Generator {
     }
 
     private MethodSpec smokeTest(SmokeTestCase testCase) {
-
+        return null;
     }
 }

@@ -32,6 +32,7 @@ java {
     sourceSets["test"].java {
         srcDir("src/test/java")
         srcDir("src/test/dafny-generated")
+        srcDir("src/test/smithy-generated")
     }
 }
 
@@ -44,6 +45,8 @@ dependencies {
     implementation("org.dafny:DafnyRuntime:${dafnyVersion}")
     implementation("software.amazon.smithy.dafny:conversion:0.1")
     implementation("software.amazon.cryptography:StandardLibrary:1.0-SNAPSHOT")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.7.1")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 publishing {
@@ -64,4 +67,8 @@ tasks {
         mainClass.set("TestsFromDafny")
         classpath = sourceSets["test"].runtimeClasspath
     }
+}
+
+tasks.named<Test>("test") {
+    useJUnitPlatform()
 }

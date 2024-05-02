@@ -493,6 +493,7 @@ mvn_staging_deploy:
 
 test_java:
 	$(GRADLEW) -p runtimes/java runTests
+	$(GRADLEW) -p runtimes/java test
 
 ########################## Rust targets
 

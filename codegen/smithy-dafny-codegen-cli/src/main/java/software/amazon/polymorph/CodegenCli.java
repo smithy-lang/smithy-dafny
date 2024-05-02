@@ -170,6 +170,14 @@ public class CodegenCli {
       .addOption(
         Option
           .builder()
+          .longOpt("output-java-test")
+          .desc("<optional> output directory for generated Java test files")
+          .hasArg()
+          .build()
+      )
+      .addOption(
+        Option
+          .builder()
           .longOpt("output-rust")
           .desc("<optional> output directory for generated Rust files")
           .hasArg()

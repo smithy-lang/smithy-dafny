@@ -21,7 +21,7 @@ import static software.amazon.polymorph.smithyjava.nameresolver.Constants.SMITHY
 public class ModeledSmokeTests {
 
     public static JavaFile javaFile(String packageName, OperationShape operationShape, JavaLibrary subject) {
-
+        return null;
     }
 
     public static MethodSpec operationTest(
@@ -29,70 +29,23 @@ public class ModeledSmokeTests {
             final SmokeTestCase testCase,
             JavaLibrary subject
     ) {
-        final MethodSignature signature = methodSignature(testCase);
-        MethodSpec.Builder method = signature.method();
+        MethodSpec.Builder method = methodSignature(testCase);
         final String operationName = operationShape.toShapeId().getName();
         // Try native implementation
         method.beginControlFlow("try");
-        // Convert Input
-        method.addStatement(declareNativeInputAndCovert(inputResolved, subject));
-        CodeBlock successTypeDescriptor;
-        if (outputResolved.resolvedId().equals(SMITHY_API_UNIT)) {
-            // if operation is void
-            successTypeDescriptor = CodeBlock.of("dafny.Tuple0._typeDescriptor()");
-            method
-                    .addStatement(invoke(operationName))
-                    .addStatement(
-                            "return $L",
-                            subject.dafnyNameResolver.createSuccess(
-                                    successTypeDescriptor,
-                                    CodeBlock.of("$T.create()", DAFNY_TUPLE0_CLASS_NAME)
-                            )
-                    );
-        } else {
-            // operation is not void
-            successTypeDescriptor =
-                    subject.dafnyNameResolver.typeDescriptor(outputResolved.resolvedId());
-            TypeName nativeOutputType = preferNativeInterface(
-                    outputResolved,
-                    subject
-            );
-            method
-                    .addStatement(
-                            declareNativeOutputAndInvoke(operationName, nativeOutputType)
-                    )
-                    .addStatement(declareDafnyOutputAndConvert(outputResolved, subject))
-                    .addStatement(
-                            "return $L",
-                            subject.dafnyNameResolver.createSuccess(
-                                    successTypeDescriptor,
-                                    CodeBlock.of(DAFNY_OUTPUT)
-                            )
-                    );
-        }
-        // catch Errors in this Namespace
-        method
-                .nextControlFlow("catch ($T ex)", ClassName.get(RuntimeException.class))
-                .addStatement(
-                        "return $L",
-                        subject.dafnyNameResolver.createFailure(
-                                successTypeDescriptor,
-                                CodeBlock.of("$T.Error(ex)", shimLibrary.toDafnyClassName)
-                        )
-                )
-                .endControlFlow();
+
+
         return method.build();
     }
 
-    public static MethodSignature methodSignature(
+    public static MethodSpec.Builder methodSignature(
             final SmokeTestCase testCase
     ) {
         // TODO: escape
         final String methodName = testCase.getId();
-        final MethodSpec.Builder method = MethodSpec
+        return MethodSpec
                 .methodBuilder(methodName)
                 .addModifiers(PUBLIC)
                 .returns(TypeName.VOID);
-        return new MethodSignature(method, inputResolved, outputResolved);
     }
 }

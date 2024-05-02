@@ -10,8 +10,9 @@ import software.amazon.smithy.model.shapes.Shape;
 public class ModeledNode {
 
     public CodeBlock modeledNode(JavaLibrary subject, Shape shape, String variableName, ObjectNode node) {
-        CodeBlock code = new CodeBlock();
-        TypeName typeName = subject.nativeNameResolver.typeForShape(shape.toShapeId());
-        ToNative.createNativeBuilder();
+//        CodeBlock code = new CodeBlock();
+//        TypeName typeName = subject.nativeNameResolver.typeForShape(shape.toShapeId());
+//        ToNative.createNativeBuilder();
+        return null;
     }
 }
