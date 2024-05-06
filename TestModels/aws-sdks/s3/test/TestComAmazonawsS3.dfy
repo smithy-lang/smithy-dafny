@@ -5,8 +5,9 @@ include "../src/Index.dfy"
 
 module TestComAmazonawsS3 {
     import Com.Amazonaws.S3
+    import opened Wrappers
 
-    const testBucket := "smithy-dafny-s3-test-bucket";
+    const testBucket := "smithy-dafny-s3-test-bucket"
     const testObjectKey := "test-model-object-key"
 
     method {:test} BasicRoundTripTests() {
@@ -14,7 +15,7 @@ module TestComAmazonawsS3 {
             input := S3.Types.PutObjectRequest(
                 Bucket := testBucket,
                 Key := testObjectKey,
-                Body := [ 97, 115, 100, 102 ]
+                Body := Wrappers.Some([ 97, 115, 100, 102 ])
                 // might need to pass Wrappers.None for extra params?
             )
         );
@@ -25,12 +26,15 @@ module TestComAmazonawsS3 {
         nameonly input: S3.Types.PutObjectRequest
     )
     {
-        var client := expect S3.S3Client();
+        var client :- expect S3.S3Client();
 
-        var ret := client.Decrypt(input);
+        var ret := client.PutObject(input);
 
         expect(ret.Success?);
 
-        // TODO: unpack ret.value into PutObjectResponse
+        // TODO: Add the 13 other formal parameters...fuckin hell
+        var PutObjectOutput(ObjectEtag) := ret.value;
+
+        expect ObjectEtag.Some?;
     }
 }
