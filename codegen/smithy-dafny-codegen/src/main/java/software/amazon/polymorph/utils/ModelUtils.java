@@ -33,8 +33,11 @@ public class ModelUtils {
   //
   // The spec recommends a similar stricter definition for consistency (uppercase instead of title-case):
   // https://smithy.io/1.0/spec/core/constraint-traits.html?highlight=enum#enum-trait
+  // TODO: There are models "in the wild" which fail to validate (namely S3's BucketCannedACL).
+  //       for now, I am loosening the validation, but I question the value of validating external
+  //       models, particularly with respect to the Robustness Principle.
   private static final Pattern ENUM_NAME_PATTERN = Pattern.compile(
-    "^[A-Z]+[A-Za-z_0-9]*$"
+    "^[A-Za-z_0-9]*$"
   );
 
   /**

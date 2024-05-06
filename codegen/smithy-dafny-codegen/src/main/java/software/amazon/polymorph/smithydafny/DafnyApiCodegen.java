@@ -24,6 +24,7 @@ import software.amazon.smithy.aws.traits.*;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.shapes.*;
 import software.amazon.smithy.model.traits.*;
+import software.amazon.smithy.model.traits.synthetic.SyntheticEnumTrait;
 
 public class DafnyApiCodegen {
 
@@ -346,10 +347,13 @@ public class DafnyApiCodegen {
         .stream()
         .map(enumDefinition -> enumDefinition.getName().get())
         .peek(name -> {
-          if (!ModelUtils.isValidEnumDefinitionName(name)) {
+          if (stringShape.hasTrait(EnumTrait.class) && !ModelUtils.isValidEnumDefinitionName(name)) {
             throw new UnsupportedOperationException(
               "Invalid enum definition name: %s".formatted(name)
             );
+          }
+          else if (stringShape.hasTrait(SyntheticEnumTrait.class)) {
+            LOGGER.info("Skipping enumV2 definition name validation for: %s".formatted(name));
           }
         })
         .map(name -> TokenTree.of("\n\t|", name))
