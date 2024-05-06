@@ -18,7 +18,10 @@ structure SimpleConstraintsConfig {}
 @smithy.test#smokeTests([
   {
     id: "GetConstraintsSuccess"
-    params: {OneToTen: 5}
+    params: {
+      OneToTen: 5,
+      GreaterThanOne: 2
+    }
     expect: {
         success: {}
     }

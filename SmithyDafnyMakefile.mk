@@ -375,7 +375,7 @@ polymorph_java:
 	done
 
 _polymorph_java: OUTPUT_JAVA=--output-java $(LIBRARY_ROOT)/runtimes/java/src/main/smithy-generated
-_polymorph_java: OUTPUT_JAVA_TEST=--output-java-test $(LIBRARY_ROOT)/runtimes/java/test/main/smithy-generated
+_polymorph_java: OUTPUT_JAVA_TEST=--output-java-test $(LIBRARY_ROOT)/runtimes/java/src/test/smithy-generated
 _polymorph_java: _polymorph
 
 # Dependency for formatting generating Java code
@@ -493,7 +493,7 @@ mvn_staging_deploy:
 
 test_java:
 	$(GRADLEW) -p runtimes/java runTests
-	$(GRADLEW) -p runtimes/java test
+	$(GRADLEW) -p runtimes/java test --info
 
 ########################## Rust targets
 
